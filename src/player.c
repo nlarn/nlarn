@@ -1131,7 +1131,6 @@ int player_spell_cast(player *p)
     /* charge mana */
     player_mp_lose(p, spell_level(spell));
 
-
     switch (spell_type(spell))
     {
         /* spells that cause an effect on the player */
@@ -1155,7 +1154,8 @@ int player_spell_cast(player *p)
         /* spells that cause an effect on a monster */
     case SC_POINT:
 
-        pos = display_get_position(p, "Select a monster.");
+        g_snprintf(buffer, 60, "Select a target for %s.", spell_name(spell));
+        pos = display_get_position(p, buffer);
         monster = level_get_monster_at(p->level, pos);
 
         if (!monster)
@@ -1178,7 +1178,7 @@ int player_spell_cast(player *p)
                 player_exp_gain(p, monster_get_exp(monster));
                 level_monster_die(p->level, monster, NULL);
             }
-            break;
+            break; /* SP_DRY */
 
             /* drain life */
         case SP_DRL:
@@ -1192,7 +1192,7 @@ int player_spell_cast(player *p)
 
             player_hp_lose(p, amount, PD_SPELL, SP_DRL);
 
-            break;
+            break; /* SP_DRL */
 
             /* finger of death */
         case SP_FGR:
@@ -1219,7 +1219,7 @@ int player_spell_cast(player *p)
                 log_add_entry(p->log, "It didn't work.");
             }
 
-            break;
+            break; /* SP_FGR */
 
             /* phantasmal forces */
         case SP_PHA:
@@ -1232,9 +1232,11 @@ int player_spell_cast(player *p)
 
             /* teleport */
         case SP_TEL:
+
             log_add_entry(p->log, "The %s disappears.", monster_get_name(monster));
             monster->pos = level_find_space(p->level, LE_MONSTER);
-            break;
+
+            break; /* SP_TEL */
 
         default:
             /* spell has an effect, add that to the monster */
@@ -1331,9 +1333,11 @@ int player_spell_cast(player *p)
             break;
         }
 
+        break;
+
     case SC_NONE:
     case SC_MAX:
-        log_add_entry(p->log, "internal Error in %s:%s.", __FILE__, __LINE__);
+        log_add_entry(p->log, "internal Error in %s:%d.", __FILE__, __LINE__);
         break;
     }
 

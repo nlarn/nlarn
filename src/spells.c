@@ -385,7 +385,7 @@ const spell_data spells[SP_MAX] =
         SP_TEL,
         "tel",
         "teleport away",
-        SC_OTHER,
+        SC_POINT,
         ET_NONE,
         "moves a particular monster around in the dungeon",
         NULL,

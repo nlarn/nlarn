@@ -272,8 +272,8 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_INVULNERABILITY,
-        250,
-        0,
+        200,
+        10,
         NULL,
         NULL,
         NULL,
