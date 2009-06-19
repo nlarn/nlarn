@@ -1299,5 +1299,5 @@ static gboolean level_validate_position(level *l, position pos, level_element_t 
 
     } /* switch */
 
-    return false;
+    return FALSE;
 }
