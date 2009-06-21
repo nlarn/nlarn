@@ -18,7 +18,6 @@
 
 #include "nlarn.h"
 
-static size_t item_get_size(int item_type);
 static void item_typename_pluralize(item *it, char *description, int length);
 static char *item_name_count(char *name, int singular, int definite, int length, int count);
 static char *item_desc_get(item *it, int known);
@@ -39,7 +38,7 @@ const item_type_data item_data[IT_MAX] =
     { IT_WEAPON,    "weapon",    "",        '(', "%s",           "%s",                1, 0, 0, },
 };
 
-const item_material_data item_material[IM_MAX] =
+const item_material_data item_materials[IM_MAX] =
 {
     /* type           name           adjective */
     { IM_NONE,        "",            "",          },
@@ -60,74 +59,90 @@ const item_material_data item_material[IM_MAX] =
     { IM_GEMSTONE,    "gemstone",    "gemstone",  }, /* ? */
 };
 
-item *item_create_from_object(item_t item_type, void *object)
-{
-    item *nitem;
+/* static vars */
 
-    assert(item_type > IT_NONE && item_type < IT_MAX && object != NULL);
+static int weapon_created[WT_MAX] = { 1, 0 };
 
-    nitem = (item *)g_malloc(sizeof(item));
+/* the potion of cure dianthroritis is a unique item */
+static int cure_dianthr_created = FALSE;
 
-    nitem->type = item_type;
-    nitem->item = object;
-    nitem->count = 1;
 
-    return(nitem);
-}
+/* functions */
 
 item *item_new(item_t item_type, int item_id, int item_bonus)
 {
     item *nitem;
-    gpointer object = NULL;
+    effect *eff = NULL;
 
     assert(item_type > IT_NONE && item_type < IT_MAX);
 
-    nitem = g_malloc(sizeof(item));
+    /* has to be zeroed or memcmp will fail */
+    nitem = g_malloc0(sizeof(item));
 
     nitem->type = item_type;
+    nitem->id = item_id;
+    nitem->bonus = item_bonus;
     nitem->count = 1;
 
+    /* special item type specific attributes */
     switch (item_type)
     {
-    case IT_ARMOUR:
-        object = armour_new(item_id, item_bonus);
-        break;
-
-    case IT_BOOK:
-        object = book_new(item_id);
-        break;
-
     case IT_CONTAINER:
-        object = container_new(item_id);
-        break;
-
-    case IT_FOOD:
-        object = food_new(item_id);
+        nitem->content = inv_new();
         break;
 
     case IT_GEM:
-        object = gem_new(item_id, item_bonus);
+            /* ensure minimal size */
+        if (nitem->bonus == 0)
+            nitem->bonus = rand_1n(20);
         break;
 
     case IT_GOLD:
-        object = NULL;
         nitem->count = item_id;
         break;
 
     case IT_POTION:
-        object = potion_new(item_id);
+        /* prevent that the unique potion can be created twice */
+        if ((item_id == PO_CURE_DIANTHR) && cure_dianthr_created)
+        {
+            nitem->id = rand_1n(PO_SEE_INVISIBLE);
+        }
+        else if (item_id == PO_CURE_DIANTHR)
+        {
+            cure_dianthr_created = TRUE;
+        }
         break;
 
     case IT_RING:
-        object = ring_new(item_id, item_bonus);
-        break;
+        if (ring_effect_type(nitem))
+        {
+            eff = effect_new(ring_effect_type(nitem), 0);
+            /* this effect is permanent */
+            eff->turns = 0;
 
-    case IT_SCROLL:
-        object = scroll_new(item_id);
+            if (item_bonus)
+                eff->amount += item_bonus;
+
+            /* ring of extra regeneration is better than the average */
+            if (item_id == RT_EXTRA_REGEN)
+            {
+                eff->amount *= 5;
+            }
+        }
         break;
 
     case IT_WEAPON:
-        object = weapon_new(item_id, item_bonus);
+        while (weapon_is_unique(nitem) && weapon_created[nitem->id])
+        {
+            /* create another random weapon instead */
+            nitem->id = rand_1n(WT_MAX - 1);
+        }
+
+        if (weapon_is_unique(nitem))
+        {
+            /* mark unique weapon as created */
+            weapon_created[nitem->id] = TRUE;
+        }
         break;
 
     default:
@@ -135,7 +150,12 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         break;
     }
 
-    nitem->item = object;
+    /* add effect to item if one has been created */
+    if (eff)
+    {
+        nitem->effect = eff;
+        eff->item = nitem;
+    }
 
     return nitem;
 }
@@ -152,12 +172,9 @@ item *item_clone(item *original)
     nitem->type = original->type;
     nitem->count = original->count;
 
-    /* clone content */
-    nitem->item = g_malloc(item_get_size(original->type));
-
-    memcpy(nitem->item,
-           original->item,
-           item_get_size(original->type));
+    memcpy(nitem,
+           original,
+           sizeof(item));
 
     return nitem;
 }
@@ -260,51 +277,15 @@ void item_destroy(item *it)
 {
     assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    if (it->item != NULL)
-    {
-        switch (it->type)
-        {
-        case IT_ARMOUR:
-            armour_destroy((armour *)it->item);
-            break;
+	if (it->effect != NULL)
+	{
+		effect_destroy(it->effect);
+	}
 
-        case IT_BOOK:
-            book_destroy((book *)it->item);
-            break;
-
-        case IT_CONTAINER:
-            container_destroy((container *)it->item);
-            break;
-
-        case IT_FOOD:
-            food_destroy((food *)it->item);
-			break;
-
-        case IT_GEM:
-            gem_destroy((gem *)it->item);
-            break;
-
-        case IT_POTION:
-            potion_destroy((potion *)it->item);
-            break;
-
-        case IT_RING:
-            ring_destroy((ring *)it->item);
-            break;
-
-        case IT_SCROLL:
-            scroll_destroy((magic_scroll *)it->item);
-            break;
-
-        case IT_WEAPON:
-            weapon_destroy((weapon *)it->item);
-            break;
-
-        default:
-            if (it->item != NULL)
-                g_free(it->item);
-        }
-    }
+	if (it->content != NULL)
+	{
+	    inv_destroy(it->content);
+	}
 
     g_free(it);
 }
@@ -318,11 +299,15 @@ void item_destroy(item *it)
 int item_compare(item *a, item *b)
 {
     if (a->type != b->type)
+    {
         return FALSE;
+    }
     else if (a->type == IT_GOLD)
+    {
         return TRUE;
+    }
 
-    return(memcmp(a->item, b->item, item_get_size(a->type)) == 0);
+    return(memcmp(a, b, sizeof(item)) == 0);
 }
 
 int item_sort(gconstpointer a, gconstpointer b)
@@ -358,7 +343,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         snprintf(desc, 60, "%s", item_desc_get(it, known));
         snprintf(str, str_len, "%s %+d",
                  item_name_count(desc, singular, definite, 60, it->count),
-                 ((armour *)it->item)->ac_bonus);
+                 it->bonus);
 
         break;
 
@@ -369,11 +354,14 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         if (known)
             snprintf(desc, 60, "%s", item_data[it->type].desc_known);
         else
-            if ((it->type == IT_SCROLL)
-                    && ((magic_scroll *)it->item)->type == ST_BLANK)
+            if ((it->type == IT_SCROLL) && (it->id == ST_BLANK))
+            {
                 snprintf(desc, 60, "unlabeled scroll");
+            }
             else
+            {
                 snprintf(desc, 60, "%s", item_data[it->type].desc_unknown);
+            }
 
         if ((it->count > 1) && !singular)
             item_typename_pluralize(it, desc, 60);
@@ -411,14 +399,14 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     case IT_GEM:
         snprintf(desc, 60, "%s", item_desc_get(it, known));
         snprintf(str, str_len, "%d carats %s",
-                 gem_get_size((gem *)it->item),
+                 gem_size(it),
                  desc);
 
         item_name_count(str, singular, definite, str_len, it->count);
         break;
 
     case IT_WEAPON:
-        if (weapon_is_uniqe((weapon *)it->item))
+        if (weapon_is_unique(it))
             snprintf(str, str_len, "the %s",
                      item_desc_get(it, known));
         else
@@ -426,7 +414,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
             snprintf(desc, 60, "%s", item_desc_get(it, known));
             item_name_count(desc, singular, definite, 60, it->count);
             snprintf(str, str_len, "%s %+d",
-                     desc, ((weapon *)it->item)->wc_bonus);
+                     desc, it->bonus);
         }
         break;
 
@@ -438,12 +426,67 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     return(str);
 }
 
+item_material_t item_material(item *it)
+{
+    item_material_t material;
+
+    assert (it != NULL);
+
+    switch (it->type)
+    {
+        case IT_ARMOUR:
+            material = armour_material(it);
+            break;
+
+        case IT_BOOK:
+            material = IM_PAPER;
+
+        case IT_CONTAINER:
+            /* TODO: container material */
+            material = IM_WOOD;
+            break;
+
+        case IT_FOOD:
+            material = IM_NONE;
+            break;
+
+        case IT_GEM:
+            material = IM_GEMSTONE;
+            break;
+
+        case IT_GOLD:
+            material = IM_GOLD;
+            break;
+
+        case IT_POTION:
+            material = IM_GLASS;
+            break;
+
+        case IT_RING:
+            material = ring_material(it->id);
+            break;
+
+        case IT_SCROLL:
+            material = IM_PAPER;
+            break;
+
+        case IT_WEAPON:
+            material =  weapon_material(it);
+            break;
+
+        default:
+            material = IM_NONE;
+    }
+
+    return material;
+}
+
 /**
  * Calculate the weight of an given object
  * @param an item
  * @return weight in grams
  */
-int item_get_weight(item *it)
+int item_weight(item *it)
 {
     assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -451,7 +494,7 @@ int item_get_weight(item *it)
     switch (it->type)
     {
     case IT_ARMOUR:
-        return armour_get_weight((armour *)it->item);
+        return armour_weight(it);
         break;
 
     case IT_BOOK:
@@ -472,7 +515,7 @@ int item_get_weight(item *it)
         break;
 
     case IT_CONTAINER:
-        return container_get_weight((container *)it->item);
+        return container_weight(it) + inv_weight(it->content);
         break;
 
     case IT_FOOD:
@@ -488,16 +531,163 @@ int item_get_weight(item *it)
         break;
 
     case IT_GEM:
-        return gem_get_weight((gem *)it->item);
+        return gem_weight(it);
         break;
 
     case IT_WEAPON:
-        return weapon_get_weight((weapon *)it->item);
+        return weapon_weight(it);
         break;
 
     default:
         return 0;
         break;
+    }
+}
+
+/**
+ * return the distinct effect cause by an item or NULL
+ * @param an item
+ * @return NULL or effect
+ */
+effect *item_effect(item *it)
+{
+    assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    switch (it->type)
+    {
+    case IT_ARMOUR:
+        return NULL;
+        break;
+
+    case IT_RING:
+        return ring_effect(it);
+        break;
+
+    case IT_WEAPON:
+        return NULL;
+        break;
+
+    default:
+        return NULL;
+        break;
+    }
+}
+
+int item_bless(item *it)
+{
+    if (it->blessed)
+        return FALSE;
+
+    it->blessed = 1;
+    it->cursed = 0;
+
+    return TRUE;
+}
+
+int item_curse(item *it)
+{
+    if (it->cursed)
+        return FALSE;
+
+    it->blessed = 0;
+    it->cursed = 1;
+
+    return TRUE;
+}
+
+int item_enchant(item *it)
+{
+	assert(it != NULL);
+
+    it->bonus++;
+
+    if (it->effect)
+    {
+        it->effect->amount++;
+    }
+
+	return it->bonus;
+}
+
+int item_disenchant(item *it)
+{
+	assert(it != NULL);
+
+    it->bonus--;
+
+    if (it->effect)
+    {
+        it->effect->amount--;
+    }
+
+	return it->bonus;
+}
+
+int item_rust(item *it)
+{
+    assert(it != NULL);
+
+    if ((item_material(it) == IM_IRON) || (item_material(it) == IM_STEEL))
+    {
+        if (it->rusty == 2)
+        {
+            /* it's been very rusty already -> destroy */
+            return PI_DESTROYED;
+        }
+        else
+        {
+            it->rusty++;
+            return PI_ENFORCED;
+        }
+    }
+    else
+    {
+        /* item cannot rust. */
+        return PI_NONE;
+    }
+}
+
+int item_corrode(item *it)
+{
+    assert(it != NULL);
+
+    if (item_material(it) == IM_IRON)
+    {
+        if (it->corroded == 2)
+        {
+            return PI_DESTROYED;
+        }
+        else
+        {
+            it->corroded++;
+            return PI_ENFORCED;
+        }
+    }
+    else
+    {
+        return PI_NONE;
+    }
+}
+
+int item_burn(item *it)
+{
+    assert(it != NULL);
+
+    if (item_material(it) <= IM_BONE)
+    {
+        if (it->burnt == 2)
+        {
+            return PI_DESTROYED;
+        }
+        else
+        {
+            it->burnt++;
+            return PI_ENFORCED;
+        }
+    }
+    else
+    {
+        return PI_NONE;
     }
 }
 
@@ -555,7 +745,7 @@ item *inv_find_object(inventory *inv, void *object)
     for (pos = 1; pos <= inv->len; pos++)
     {
         i = inv_get(inv, pos - 1);
-        if (i->item == object)
+        if (i == object)
         {
             return i;
         }
@@ -565,56 +755,20 @@ item *inv_find_object(inventory *inv, void *object)
     return NULL;
 }
 
-static size_t item_get_size(int item_type)
+int inv_weight(inventory *inv)
 {
+    int sum = 0;
+    int pos;
 
-    assert(item_type > IT_NONE && item_type < IT_MAX);
+    assert(inv != NULL);
 
-    switch (item_type)
+    /* add contents weight */
+    for (pos = 1; pos <= inv_length(inv); pos++)
     {
-    case IT_ARMOUR:
-        return sizeof(armour);
-        break;
-
-    case IT_BOOK:
-        return sizeof(book);
-        break;
-
-    case IT_CONTAINER:
-        return sizeof(container);
-        break;
-
-    case IT_FOOD:
-        return sizeof(food);
-        break;
-
-    case IT_GEM:
-        return sizeof(gem);
-        break;
-
-    case IT_GOLD:
-        return 0;
-        break;
-
-    case IT_POTION:
-        return sizeof(potion);
-        break;
-
-    case IT_RING:
-        return sizeof(ring);
-        break;
-
-    case IT_SCROLL:
-        return sizeof(magic_scroll);
-        break;
-
-    case IT_WEAPON:
-        return sizeof(weapon);
-        break;
-
-    default:
-        return 0;
+        sum += item_weight(inv_get(inv, pos - 1));
     }
+
+    return sum;
 }
 
 static void item_typename_pluralize(item *it, char *description, int length)
@@ -689,52 +843,52 @@ static char *item_desc_get(item *it, int known)
     switch (it->type)
     {
     case IT_ARMOUR:
-        return armour_get_name((armour *)it->item);
+        return armour_name(it);
         break;
 
     case IT_BOOK:
         if (known)
-            return book_get_name((book *)it->item);
+            return book_get_name(it);
         else
-            return book_get_desc((book *)it->item);
+            return book_get_desc(it->id);
         break;
 
     case IT_CONTAINER:
-        return container_get_name((container *)it->item);
+        return container_name(it);
         break;
 
     case IT_FOOD:
-        return food_get_name((food *)it->item);
+        return food_name(it);
         break;
 
     case IT_POTION:
         if (known)
-            return potion_get_name((potion *)it->item);
+            return potion_name(it);
         else
-            return potion_get_desc((potion *)it->item);
+            return potion_desc(it->id);
         break;
 
     case IT_RING:
         if (known)
-            return ring_get_name((ring *)it->item);
+            return ring_name(it);
         else
-            return item_material_adjective(ring_get_material((ring *)it->item));
+            return item_material_adjective(item_material(it));
         break;
 
     case IT_SCROLL:
         if (known)
-            return scroll_get_name((magic_scroll *)it->item);
+            return scroll_name(it);
         else
-            return scroll_get_desc((magic_scroll *)it->item);
+            return scroll_desc(it->id);
         break;
 
     case IT_GEM:
         /* TODO: handle known / unknown */
-        return gem_get_name((gem *)it->item);
+        return gem_name(it);
         break;
 
     case IT_WEAPON:
-        return weapon_get_name((weapon *)it->item);
+        return weapon_name(it);
         break;
 
     default:

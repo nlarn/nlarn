@@ -19,6 +19,8 @@
 #ifndef __ITEM_H_
 #define __ITEM_H_
 
+#include "effects.h"
+
 typedef enum item_types {
     IT_NONE,
     IT_ARMOUR,          /* armour, defined in armour.h */
@@ -83,10 +85,21 @@ enum blessedness_types {
 	BT_BLESSED
 };
 
+typedef GPtrArray inventory;
+
 typedef struct item {
-	item_t type;					/* element type */
-	int count;						/* for stackable items */
-	void *item;						/* pointer to item storage */
+    item_t type;            /* element type */
+    int id;                 /* item id, type specific */
+    int bonus;
+    int count;              /* for stackable items */
+    effect *effect;         /* storage for effect */
+    inventory *content;     /* for containers */
+    unsigned
+        blessed: 1,
+        cursed: 1,
+        corroded: 2,        /* 0: no; 1: yes; 2: very */
+        burnt: 2,           /* 0: no; 1: yes; 2: very */
+        rusty: 2;           /* 0: no; 1: yes; 2: very */
 } item;
 
 typedef struct item_type_data {
@@ -102,26 +115,34 @@ typedef struct item_type_data {
 		stackable: 1;
 } item_type_data;
 
-typedef GPtrArray inventory;
-
 /* function definitions */
 
 item *item_clone(item *original);
 item *item_split(item *original, int count);
 item *item_new(item_t item_type, int item_id, int item_bonus);
-item *item_create_from_object(item_t item_type, void *object);
 item *item_create_random(item_t item_type);
 item *item_create_by_level(item_t item_type, int num_level);
 void item_destroy(item *it);
 
 int item_compare(item *a, item *b);
-int item_sort(gconstpointer a, gconstpointer b) ;
+int item_sort(gconstpointer a, gconstpointer b);
 char *item_describe(item *it, int known, int singular, int definite, char *str, int str_len);
-int item_get_weight(item *it);
+item_material_t item_material(item *it);
+int item_weight(item *it);
+effect *item_effect(item *it);
+
+int item_bless(item *it);
+int item_curse(item *it);
+
+int item_enchant(item *it);
+int item_disenchant(item *it);
+int item_rust(item *it);
+int item_corrode(item *it);
+int item_burn(item *it);
 
 /* external vars */
 extern const item_type_data item_data[IT_MAX];
-extern const item_material_data item_material[IM_MAX];
+extern const item_material_data item_materials[IM_MAX];
 
 /* item macros */
 #define item_get_image(type)          item_data[(type)].image
@@ -130,15 +151,18 @@ extern const item_material_data item_material[IM_MAX];
 #define item_is_equippable(type)      item_data[(type)].equippable
 #define item_is_usable(type)          item_data[(type)].usable
 #define item_is_stackable(type)       item_data[(type)].stackable
-#define item_material_name(type)      item_material[(type)].name
-#define item_material_adjective(type) item_material[(type)].adjective
+#define item_material_name(type)      item_materials[(type)].name
+#define item_material_adjective(type) item_materials[(type)].adjective
 
 /* inventory functions */
 
 inventory *inv_new();
+void inv_destroy(inventory *inv);
+
 int inv_add(inventory *inv, item *item_new);
 item *inv_find_object(inventory *inv, void *object);
-void inv_destroy(inventory *inv);
+int inv_weight(inventory *inv);
+
 #define inv_del(inv, pos)          (g_ptr_array_remove_index_fast((inv), (pos)))
 #define inv_del_element(inv, item) (g_ptr_array_remove((inv), (item)))
 #define inv_length(inv)            (((inv) == NULL) ? 0 : (inv)->len)

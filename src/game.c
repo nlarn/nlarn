@@ -491,18 +491,18 @@ static void game_monster_attack_player(monster *m, player *p)
                 /* FIXME: pick random armour type */
                 if (p->eq_suit != NULL)
                 {
-                    pi = armour_rust(p->eq_suit);
+                    pi = item_rust(p->eq_suit);
                     if (pi == PI_ENFORCED)
                     {
                         log_add_entry(p->log, "Your %s is dulled by the %s.",
-                                      armour_get_name(p->eq_suit),
+                                      armour_name(p->eq_suit),
                                       monster_get_name(m));
                     }
                     else if (pi == PI_DESTROYED)
                     {
                         /* armour has been destroyed */
                         log_add_entry(p->log, "Your %s disintegrates!",
-                                      armour_get_name(p->eq_suit));
+                                      armour_name(p->eq_suit));
 
                         it = inv_find_object(p->inventory, p->eq_suit);
 

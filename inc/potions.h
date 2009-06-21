@@ -26,11 +26,6 @@ typedef struct potion_data {
     int price;
 } potion_data;
 
-typedef struct potion {
-    int	type;
-    /* currently nothing else */
-} potion;
-
 enum potion_objects {
 	PO_NONE,
 	PO_WATER,
@@ -63,12 +58,16 @@ enum potion_objects {
 /* function declarations */
 
 void potion_desc_shuffle();
-potion *potion_new(int potion_id);
-void potion_destroy(potion *p);
+char *potion_desc(int potion_id);
 
-inline char *potion_get_name(potion *p);
-inline char *potion_get_desc(potion *p);
-inline int potion_get_effect(potion *p);
-inline int potion_get_price(potion *p);
+/* external vars */
+
+extern const potion_data potions[PO_MAX];
+
+/* macros */
+
+#define potion_name(potion)   (potions[(potion)->id].name)
+#define potion_effect(potion) (potions[(potion)->id].effect_type)
+#define potion_price(potion)  (potions[(potion)->id].price)
 
 #endif

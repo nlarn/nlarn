@@ -156,6 +156,9 @@ player *player_new(void *game)
 
 void player_destroy(player *p)
 {
+    int i;
+    effect *eff;
+
     assert (p != NULL);
 
     /* release spells */
@@ -166,9 +169,15 @@ void player_destroy(player *p)
     g_ptr_array_free(p->known_spells, TRUE);
 
     /* release effects */
-    while (p->effects->len > 0)
-        effect_destroy(g_ptr_array_remove_index_fast(p->effects,
-                       (p->effects)->len - 1));
+    for (i = 1; i <= p->effects->len; i++)
+    {
+        eff = g_ptr_array_index(p->effects, i - 1);
+
+        if (!eff->item)
+        {
+            effect_destroy(eff);
+        }
+    }
 
     g_ptr_array_free(p->effects, TRUE);
 
@@ -470,7 +479,7 @@ int player_attack(player *p, monster *m)
     int damage;
     int roll;           /* the dice */
     effect *e;
-    weapon *w;			/* shortcut to player's weapon */
+    item *w;			/* shortcut to player's weapon */
     int pi;				/* impact of perishing */
 
     w = (p->eq_weapon == NULL) ? NULL : p->eq_weapon;
@@ -483,7 +492,7 @@ int player_attack(player *p, monster *m)
 
     if (w != NULL)
         /* player wields weapon */
-        prop += (weapon_get_wc(w) / 4);
+        prop += (weapon_wc(w) / 4);
 
     roll = rand_1n(20);
     if ((roll < prop) || (roll == 1))
@@ -507,7 +516,7 @@ int player_attack(player *p, monster *m)
                     || m->type == MT_GELATINOUSCUBE)
            )
         {
-            pi = weapon_rust(w);
+            pi = item_rust(w);
             if (pi == PI_ENFORCED)
             {
                 log_add_entry(p->log, "Your weapon is dulled by the %s.", monster_get_name(m));
@@ -515,13 +524,13 @@ int player_attack(player *p, monster *m)
             else if (pi == PI_DESTROYED)
             {
                 /* weapon has been destroyed */
-                log_add_entry(p->log, "Your %s disintegrates!", weapon_get_name(w));
+                log_add_entry(p->log, "Your %s disintegrates!", weapon_name(w));
 
                 /* delete the weapon from the inventory */
                 inv_del_element(p->inventory, inv_find_object(p->inventory, w));
 
                 /* destroy it and remove any reference to it */
-                weapon_destroy(w);
+                item_destroy(w);
                 p->eq_weapon = w = NULL;
             }
         }
@@ -1513,9 +1522,8 @@ int player_inv_display(player *p)
 /* level is needed to make function signature match display_inventory requirements */
 int player_item_equip(player *p, item *it)
 {
-    armour **aslot = NULL;  /* pointer to chosen armour slot */
-    ring   **rslot = NULL;  /* pointer to chosen ring slot */
-    int time = 0;           /* time the desired action takes */
+    item **islot = NULL;  /* pointer to chosen item slot */
+    int time = 0;         /* time the desired action takes */
     char description[61];
 
     assert(p != NULL && it != NULL);
@@ -1526,36 +1534,36 @@ int player_item_equip(player *p, item *it)
     switch (it->type)
     {
     case IT_ARMOUR:
-        switch (armour_get_category((armour *)it->item))
+        switch (armour_category(it))
         {
         case AC_BOOTS:
-            aslot = &(p->eq_boots);
+            islot = &(p->eq_boots);
             time = 3;
             break;
 
         case AC_CLOAK:
-            aslot = &(p->eq_cloak);
+            islot = &(p->eq_cloak);
             time = 2;
             break;
 
         case AC_GLOVES:
-            aslot = &(p->eq_gloves);
+            islot = &(p->eq_gloves);
             time = 3;
             break;
 
         case AC_HELMET:
-            aslot = &(p->eq_helmet);
+            islot = &(p->eq_helmet);
             time = 2;
             break;
 
         case AC_SHIELD:
-            aslot = &(p->eq_shield);
+            islot = &(p->eq_shield);
             time = 2;
             break;
 
         case AC_SUIT:
-            aslot = &(p->eq_suit);
-            time = ((armour *)it->item)->type + 1;
+            islot = &(p->eq_suit);
+            time = it->id + 1;
             break;
 
         case AC_NONE:
@@ -1564,7 +1572,7 @@ int player_item_equip(player *p, item *it)
             break;
         }
 
-        if (*aslot == NULL)
+        if (*islot == NULL)
         {
             log_add_entry(p->log, "You are now wearing %s.",
                           item_describe(it,
@@ -1572,17 +1580,17 @@ int player_item_equip(player *p, item *it)
                                         TRUE, FALSE,
                                         description, 60));
 
-            *aslot = (armour *)it->item;
+            *islot = it;
         }
         break;
 
     case IT_RING:
         if (p->eq_ring_l == NULL)
-            rslot = &(p->eq_ring_l);
+            islot = &(p->eq_ring_l);
         else if (p->eq_ring_r == NULL)
-            rslot = &(p->eq_ring_r);
+            islot = &(p->eq_ring_r);
 
-        if (rslot != NULL)
+        if (islot != NULL)
         {
             log_add_entry(p->log, "You put %s on.",
                           item_describe(it,
@@ -1590,11 +1598,12 @@ int player_item_equip(player *p, item *it)
                                         TRUE, TRUE,
                                         description, 60));
 
-            *rslot = (ring *)it->item;
-            player_effect_add(p,  ((ring *)it->item)->effect);
+            *islot = it;
 
-            if (ring_is_observable((ring *)it->item))
+            if (ring_is_observable(it))
+            {
                 player_item_identify(p, it);
+            }
 
             time = 2;
         }
@@ -1603,7 +1612,7 @@ int player_item_equip(player *p, item *it)
     case IT_WEAPON:
         if (p->eq_weapon == NULL)
         {
-            p->eq_weapon = (weapon *)it->item;
+            p->eq_weapon = it;
             log_add_entry(p->log, "You now wield %s.",
                           item_describe(it,
                                         player_item_identified(p, it),
@@ -1619,16 +1628,22 @@ int player_item_equip(player *p, item *it)
         break;
     }
 
+    if (it->effect)
+    {
+        player_effect_add(p, it->effect);
+    }
+
     return time;
 }
 
 int player_item_unequip(player *p, item *it)
 {
     int equipment_type;
-    armour **aslot = NULL;  /* handle to armour slot */
-    ring   **rslot = NULL;  /* handel to ring slot */
-    int time = 0;           /* time elapsed */
-    char desc[61];          /* item description */
+    item **aslot = NULL;  /* handle to armour slot */
+    item **rslot = NULL;  /* handle to ring slot */
+
+    int time = 0;         /* time elapsed */
+    char desc[61];        /* item description */
 
     assert(p != NULL && it != NULL);
 
@@ -1729,31 +1744,31 @@ int player_item_is_equipped(player *p, item *it)
     if (!item_is_equippable(it->type))
         return PE_NONE;
 
-    if (it->item == p->eq_boots)
+    if (it == p->eq_boots)
         return PE_BOOTS;
 
-    if (it->item == p->eq_cloak)
+    if (it == p->eq_cloak)
         return PE_CLOAK;
 
-    if (it->item == p->eq_gloves)
+    if (it == p->eq_gloves)
         return PE_GLOVES;
 
-    if (it->item == p->eq_helmet)
+    if (it == p->eq_helmet)
         return PE_HELMET;
 
-    if (it->item == p->eq_ring_l)
+    if (it == p->eq_ring_l)
         return PE_RING_L;
 
-    if (it->item == p->eq_ring_r)
+    if (it == p->eq_ring_r)
         return PE_RING_R;
 
-    if (it->item == p->eq_shield)
+    if (it == p->eq_shield)
         return PE_SHIELD;
 
-    if (it->item == p->eq_suit)
+    if (it == p->eq_suit)
         return PE_SUIT;
 
-    if (it->item == p->eq_weapon)
+    if (it == p->eq_weapon)
         return PE_WEAPON;
 
     return PE_NONE;
@@ -1771,39 +1786,39 @@ int player_item_is_equippable(player *p, item *it)
 
     /* armour */
     if ((it->type == IT_ARMOUR)
-            && (armour_get_category((armour *)it->item) == AC_BOOTS)
+            && (armour_category(it) == AC_BOOTS)
             && (p->eq_boots != NULL))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_get_category((armour *)it->item) == AC_CLOAK)
+            && (armour_category(it) == AC_CLOAK)
             && (p->eq_cloak != NULL))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_get_category((armour *)it->item) == AC_GLOVES)
+            && (armour_category(it) == AC_GLOVES)
             && (p->eq_gloves != NULL))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_get_category((armour *)it->item) == AC_HELMET)
+            && (armour_category(it) == AC_HELMET)
             && (p->eq_helmet != NULL))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_get_category((armour *)it->item) == AC_SHIELD)
+            && (armour_category(it) == AC_SHIELD)
             && (p->eq_shield != NULL))
         return FALSE;
 
     /* shield / two-handed weapon combination */
     if (it->type == IT_ARMOUR
-            && (armour_get_category((armour *)it->item) == AC_SHIELD)
+            && (armour_category(it) == AC_SHIELD)
             && (p->eq_weapon != NULL)
             && weapon_is_twohanded(p->eq_weapon))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_get_category((armour *)it->item) == AC_SUIT)
+            && (armour_category(it) == AC_SUIT)
             && (p->eq_suit != NULL))
         return FALSE;
 
@@ -1820,20 +1835,20 @@ int player_item_is_equippable(player *p, item *it)
 
     /* twohanded weapon / shield combinations */
     if ((it->type == IT_WEAPON)
-            && weapon_is_twohanded((weapon *)it->item)
+            && weapon_is_twohanded(it)
             && (p->eq_shield != NULL))
         return FALSE;
 
     return TRUE;
 }
 
-inline int player_item_is_usable(player *p, item *it)
+int player_item_is_usable(player *p, item *it)
 {
     assert(p != NULL && it != NULL);
     return item_is_usable(it->type);
 }
 
-inline int player_item_is_dropable(player *p, item *it)
+int player_item_is_dropable(player *p, item *it)
 {
     assert(p != NULL && it != NULL);
     return !player_item_is_equipped(p, it);
@@ -1846,19 +1861,19 @@ int player_item_identified(player *p, item *it)
     switch (it->type)
     {
     case IT_BOOK:
-        return p->identified_books[((book *)it->item)->type];
+        return p->identified_books[it->id];
         break;
 
     case IT_POTION:
-        return p->identified_potions[((potion *)it->item)->type];
+        return p->identified_potions[it->id];
         break;
 
     case IT_RING:
-        return p->identified_rings[((ring *)it->item)->type];
+        return p->identified_rings[it->id];
         break;
 
     case IT_SCROLL:
-        return p->identified_scrolls[((magic_scroll *)it->item)->type];
+        return p->identified_scrolls[it->id];
         break;
 
     default:
@@ -1873,19 +1888,19 @@ void player_item_identify(player *p, item *it)
     switch (it->type)
     {
     case IT_BOOK:
-        p->identified_books[((book *)it->item)->type] = TRUE;
+        p->identified_books[it->id] = TRUE;
         break;
 
     case IT_POTION:
-        p->identified_potions[((potion *)it->item)->type] = TRUE;
+        p->identified_potions[it->id] = TRUE;
         break;
 
     case IT_RING:
-        p->identified_rings[((ring *)it->item)->type] = TRUE;
+        p->identified_rings[it->id] = TRUE;
         break;
 
     case IT_SCROLL:
-        p->identified_scrolls[((magic_scroll *)it->item)->type] = TRUE;
+        p->identified_scrolls[it->id] = TRUE;
         break;
 
     default:
@@ -1916,7 +1931,7 @@ int player_item_use(player *p, item *it)
                                     TRUE, TRUE,
                                     description, 60));
 
-        switch (player_spell_learn(p, ((book *)it->item)->type))
+        switch (player_spell_learn(p, it->id))
         {
         case 0:
             log_add_entry(p->log, "You cannot understand the content of this book.");
@@ -1927,7 +1942,7 @@ int player_item_use(player *p, item *it)
             /* learnt spell */
             log_add_entry(p->log,
                           "You master the spell \"%s\".",
-                          book_get_name((book *)it->item));
+                          book_get_name(it));
 
             break;
 
@@ -1935,7 +1950,7 @@ int player_item_use(player *p, item *it)
             /* improved knowledge of spell */
             log_add_entry(p->log,
                           "You improved your knowledge of the spell %s.",
-                          book_get_name((book *)it->item));
+                          book_get_name(it));
             break;
         }
 
@@ -1946,7 +1961,7 @@ int player_item_use(player *p, item *it)
             p->intelligence++;
         }
 
-        time = 2 + spell_level_by_id(((book *)it->item)->type);
+        time = 2 + spell_level_by_id(it->id);
 
         break;
 
@@ -1965,10 +1980,10 @@ int player_item_use(player *p, item *it)
                                     TRUE, FALSE,
                                     description, 60));
 
-        if (((food *)it->item)->type == FT_FORTUNE_COOKIE)
+        if (it->id == FT_FORTUNE_COOKIE)
             log_add_entry(p->log,
                           "It has a piece of paper inside. It reads: \"%s\"",
-                          food_get_fortune((food *)it->item, game_fortunes(p->game)));
+                          food_get_fortune(game_fortunes(p->game)));
 
         item_used_up = TRUE;
         time = 2;
@@ -1987,7 +2002,7 @@ int player_item_use(player *p, item *it)
 
         item_used_up = TRUE;
 
-        switch (((potion *)it->item)->type)
+        switch (it->id)
         {
         case PO_OBJ_DETECT:
             log_add_entry(p->log, "You sense the presence of objects.");
@@ -2009,12 +2024,12 @@ int player_item_use(player *p, item *it)
             break;
 
         default:
-            if (potion_get_effect((potion *)it->item) > ET_NONE)
+            if (potion_effect(it) > ET_NONE)
             {
-                eff = effect_new(potion_get_effect((potion *)it->item), game_turn(p->game));
+                eff = effect_new(potion_effect(it), game_turn(p->game));
 
                 /* silly potion of giant strength */
-                if (((potion *)it->item)->type == PO_GIANT_STR)
+                if (it->id == PO_GIANT_STR)
                 {
                     eff->turns = divert(250, 20);
                     eff->amount = 10;
@@ -2047,7 +2062,7 @@ int player_item_use(player *p, item *it)
                                     TRUE, FALSE,
                                     description, 60));
 
-        switch (((magic_scroll *)it->item)->type)
+        switch (it->id)
         {
         case ST_ENCH_ARMOUR:
             item_identified = player_magic_enchant_armour(p);
@@ -2118,7 +2133,7 @@ int player_item_use(player *p, item *it)
             break;
 
         default:
-            eff = effect_new(scroll_get_effect((magic_scroll *)it->item),
+            eff = effect_new(scroll_effect(it),
                              game_turn(p->game));
 
             player_effect_add(p, eff);
@@ -2428,23 +2443,22 @@ int player_get_ac(player *p)
     assert(p != NULL);
 
     if (p->eq_boots != NULL)
-        ac += armour_get_ac(p->eq_boots);
+        ac += armour_ac(p->eq_boots);
 
     if (p->eq_cloak != NULL)
-        ac += armour_get_ac(p->eq_cloak);
+        ac += armour_ac(p->eq_cloak);
 
     if (p->eq_gloves != NULL)
-        ac += armour_get_ac(p->eq_gloves);
+        ac += armour_ac(p->eq_gloves);
 
     if (p->eq_helmet != NULL)
-        ac += armour_get_ac(p->eq_helmet);
+        ac += armour_ac(p->eq_helmet);
 
     if (p->eq_shield != NULL)
-        ac += armour_get_ac(p->eq_shield);
+        ac += armour_ac(p->eq_shield);
 
     if (p->eq_suit != NULL)
-        ac += armour_get_ac(p->eq_suit);
-
+        ac += armour_ac(p->eq_suit);
 
     ac += player_effect(p, ET_PROTECTION);
     ac += player_effect(p, ET_DIVINE_PROTECTION);
@@ -2459,7 +2473,7 @@ int player_get_wc(player *p)
     assert(p != NULL);
 
     if (p->eq_weapon != NULL)
-        wc += weapon_get_wc(p->eq_weapon);
+        wc += weapon_wc(p->eq_weapon);
 
     wc += player_effect(p, ET_INC_DAMAGE);
     wc -= player_effect(p, ET_DEC_DAMAGE);
@@ -2588,10 +2602,10 @@ int player_set_gold(player *p, int amount)
     return i->count;
 }
 
-inline const char *player_get_lvl_desc(player *p)
+char *player_get_lvl_desc(player *p)
 {
     assert(p != NULL);
-    return player_lvl_desc[p->lvl];
+    return (char *)player_lvl_desc[p->lvl];
 }
 
 /**
@@ -2982,9 +2996,9 @@ static int player_magic_enchant_armour(player *p)
     {
         log_add_entry(p->log,
                       "Your %s glows for a moment.",
-                      armour_get_name(p->eq_suit));
+                      armour_name(p->eq_suit));
 
-        p->eq_suit->ac_bonus += 1;
+        item_enchant(p->eq_suit);
 
         return TRUE;
     }
@@ -3003,9 +3017,10 @@ static int player_magic_enchant_weapon(player *p)
     {
         log_add_entry(p->log,
                       "Your %s glisters for a moment.",
-                      weapon_get_name(p->eq_weapon));
+                      weapon_name(p->eq_weapon));
 
-        p->eq_weapon->wc_bonus += 1;
+        item_enchant(p->eq_weapon);
+
         return TRUE;
     }
     else
@@ -3029,7 +3044,7 @@ static int player_magic_gem_perfection(player *p)
         if (it->type == IT_GEM)
         {
             /* double gem value */
-            ((gem *)it->item)->carat <<= 1;
+            it->bonus <<= 1;
             count++;
         }
     }

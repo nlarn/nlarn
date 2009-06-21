@@ -18,52 +18,19 @@
 
 #include "nlarn.h"
 
-static const food_data foods[FT_MAX] =
+const food_data foods[FT_MAX] =
 {
     /* id                name              weight*/
     { FT_NONE,           "",               0,   },
     { FT_FORTUNE_COOKIE, "fortune cookie", 2,   },
 };
 
-food *food_new(int food_type)
-{
-    food *nfood;
-
-    assert(food_type > FT_NONE && food_type < FT_MAX);
-
-    nfood = g_malloc0(sizeof(food));
-    nfood->type = food_type;
-
-    return nfood;
-}
-
-void food_destroy(food *f)
-{
-    assert(f != NULL);
-
-	g_free(f);
-}
-
-inline char *food_get_name(food *f)
-{
-    assert(f != NULL && f->type > FT_NONE && f->type < FT_MAX);
-    return foods[f->type].name;
-}
-
-inline int food_get_weight(food *f)
-{
-    assert(f != NULL && f->type > FT_NONE && f->type < FT_MAX);
-    return foods[f->type].weight;
-}
-
 /* function to return a random fortune from the fortune file  */
-char *food_get_fortune(food *f, char *fortune_file)
+char *food_get_fortune(char *fortune_file)
 {
 
     /* array of pointers to fortunes */
     static GPtrArray *fortunes = NULL;
-
-    assert(f != NULL && f->type == FT_FORTUNE_COOKIE);
 
     if (!fortunes) {
 

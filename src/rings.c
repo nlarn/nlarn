@@ -1,4 +1,3 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 /*
  * rings.c
  * Copyright (C) Joachim de Groot 2009 <jdegroot@web.de>
@@ -19,7 +18,7 @@
 
 #include "nlarn.h"
 
-static const ring_data rings[RT_MAX] =
+const ring_data rings[RT_MAX] =
 {
     /* type            name                  effect           price ob */
     { RT_NONE,         "",                   ET_NONE,            0, 0, },
@@ -35,8 +34,7 @@ static const ring_data rings[RT_MAX] =
 
 static int ring_material_mapping[RT_MAX - 1] = { 0 };
 
-/* mean: some materials appear more than once */
-static const int ring_material[RT_MAX - 1] =
+static const int ring_materials[RT_MAX - 1] =
 {
     IM_GOLD,
     IM_SILVER,
@@ -53,93 +51,8 @@ void ring_material_shuffle()
     shuffle(ring_material_mapping, RT_MAX - 1, 0);
 }
 
-ring *ring_new(int ring_type, int bonus)
+item_material_t ring_material(int ring_id)
 {
-    ring *nring;
-
-    assert(ring_type > RT_NONE && ring_type < RT_MAX);
-
-	/* has to be zeroed or memcmp will fail */
-    nring = g_malloc0(sizeof(ring));
-    assert(nring != NULL);
-
-    nring->type = ring_type;
-    nring->bonus = bonus;
-
-    if (ring_get_effect(nring))
-    {
-    	nring->effect = effect_new(ring_get_effect(nring), 0);
-    	/* this effect is permanent */
-    	nring->effect->turns = 0;
-
-    	if (bonus)
-            nring->effect->amount += bonus;
-
-    	/* ring of extra regeneration is better than the average */
-    	if (ring_get_effect(nring) == RT_EXTRA_REGEN)
-            nring->effect->amount *= 5;
-    }
-
-    return nring;
-}
-
-void ring_destroy(ring *r)
-{
-    assert (r != NULL);
-	if (r->effect != NULL)
-		effect_destroy(r->effect);
-
-    g_free(r);
-}
-
-inline char *ring_get_name(ring *r)
-{
-    assert(r != NULL && r->type > RT_NONE && r->type < RT_MAX);
-    return rings[r->type].name;
-}
-
-inline int ring_get_effect(ring *r)
-{
-    assert(r != NULL && r->type > RT_NONE && r->type < RT_MAX);
-    return rings[r->type].effect_type;
-}
-
-inline item_material_t ring_get_material(ring *r)
-{
-    assert(r != NULL && r->type > RT_NONE && r->type < RT_MAX);
-    return ring_material[ring_material_mapping[r->type - 1]];
-}
-
-inline int ring_get_price(ring *r)
-{
-    assert(r != NULL && r->type > RT_NONE && r->type < RT_MAX);
-    return rings[r->type].price;
-}
-
-inline int ring_is_observable(ring *r)
-{
-    assert(r != NULL && r->type > RT_NONE && r->type < RT_MAX);
-    return rings[r->type].observable;
-}
-
-int ring_bless(ring *r)
-{
-    if (r->blessed)
-        return FALSE;
-
-    r->blessed = 1;
-    r->cursed = 0;
-
-    return TRUE;
-}
-
-int ring_curse(ring *r)
-{
-    if (r->cursed)
-        return FALSE;
-
-    r->blessed = 0;
-    r->cursed = 1;
-
-    return TRUE;
+    assert(ring_id > RT_NONE && ring_id < RT_MAX);
+    return ring_materials[ring_material_mapping[ring_id - 1]];
 }

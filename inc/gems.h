@@ -1,4 +1,3 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 /*
  * gems.h
  * Copyright (C) Joachim de Groot 2009 <jdegroot@web.de>
@@ -40,22 +39,17 @@ typedef struct gem_data
 	int price;          /* price per carat in the shops */
 } gem_data;
 
-typedef struct gem
-{
-    int type;
-    int carat;          /* base price modifier */
-} gem;
+/* external vars */
 
-/* function declarations */
+extern const gem_data gems[GT_MAX];
 
-gem *gem_new(int gem_type, int carat);
-void gem_destroy(gem *g);
+/* macros */
 
-inline char *gem_get_name(gem *g);
-inline int gem_get_material(gem *g);
-inline int gem_get_colour(gem *g);
-inline int gem_get_weight(gem *g);
-inline int gem_get_price(gem *g);
-inline int gem_get_size(gem *g);
+#define gem_name(gem)     (gems[(gem)->id].name)
+#define gem_material(gem) (gems[(gem)->id].material)
+#define gem_colour(gem)   (gems[(gem)->id].colour)
+#define gem_weight(gem)   ((gem)->bonus / 1000)
+#define gem_price(gem)    ((gem)->bonus * gems[(gem)->id].price)
+#define gem_size(gem)     ((gem)->bonus)
 
 #endif

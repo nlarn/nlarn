@@ -235,8 +235,7 @@ int building_home(player *p)
     for (i = 1; i <= inv_length(p->inventory); i++)
     {
         it = inv_get(p->inventory, i - 1);
-        if ((it->type == IT_POTION)
-                && (((potion *)it->item)->type == PO_CURE_DIANTHR))
+        if ((it->type == IT_POTION) && (it->id == PO_CURE_DIANTHR))
         {
             has_potion = TRUE;
             break;

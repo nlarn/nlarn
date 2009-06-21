@@ -26,10 +26,6 @@ typedef struct magic_scroll_data {
 	int price;
 } magic_scroll_data;
 
-typedef struct magic_scroll {	/* name scroll conflicts with curses function */
-	int	type;
-} magic_scroll;
-
 enum scroll_types {
 	ST_NONE,
 	ST_ENCH_ARMOUR,
@@ -62,12 +58,16 @@ enum scroll_types {
 /* function declarations */
 
 void scroll_desc_shuffle();
-magic_scroll *scroll_new(int scroll_type);
-void scroll_destroy(magic_scroll *s);
+char *scroll_desc(int scroll_id);
 
-inline char *scroll_get_name(magic_scroll *s);
-inline char *scroll_get_desc(magic_scroll *s);
-inline int scroll_get_effect(magic_scroll *s);
-inline int scroll_get_price(magic_scroll *s);
+/* external vars */
+
+extern const magic_scroll_data scrolls[ST_MAX];
+
+/* macros */
+
+#define scroll_name(scroll)   (scrolls[(scroll)->id].name)
+#define scroll_effect(scroll) (scrolls[(scroll)->id].effect_type)
+#define scroll_price(scroll)  (scrolls[(scroll)->id].price)
 
 #endif

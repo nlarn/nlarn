@@ -706,7 +706,6 @@ static void level_fill_with_objects(level *l)
     int i,j;                    /* loop vars */
     int count;
     item *tmp_item = NULL;      /* for item creation */
-    container *tmp_container;   /* treasure chests */
 
     for (i = 0; i <= rand_0n(3); i++)
         level_add_item(l, item_create_by_level(IT_BOOK, l->nlevel));
@@ -716,16 +715,14 @@ static void level_fill_with_objects(level *l)
     for (i = 1; i <= ((l->nlevel == 1) ? 1 : rand_0n(2)); i++)
     {
         /* random container */
-        tmp_container = container_new(rand_1n(CT_MAX));
+        tmp_item = item_new(IT_CONTAINER, rand_1n(CT_MAX), 0);
 
         for (j = 0; j < rand_0n(5); j++)
         {
-            tmp_item = item_create_random(rand_1n(IT_MAX));
-            inv_add(tmp_container->content, tmp_item);
+            inv_add(tmp_item->content, item_create_random(rand_1n(IT_MAX)));
         }
 
         /* add the container to the level */
-        tmp_item = item_create_from_object(IT_CONTAINER, tmp_container);
         level_add_item(l, tmp_item);
     }
 

@@ -1,4 +1,3 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 /*
  * weapons.h
  * Copyright (C) Joachim de Groot 2009 <jdegroot@web.de>
@@ -32,16 +31,6 @@ typedef struct weapon_data {
 		unique: 1;		/* unique */
 } weapon_data;
 
-typedef struct weapon {
-	int	type;
-	int wc_bonus;		/* improvement caused by enchant_weapon */
-	unsigned
-		blessedness: 	2,	/* 0: cursed; 1: uncursed; 2: blessed */
-		corroded:		2,	/* 0: no; 1: yes; 2: very */
-		burnt:			2,	/* 0: no; 1: yes; 2: very */
-		rusty:			2;	/* 0: no; 1: yes; 2: very */
-} weapon;
-
 enum weapon_type {
 	WT_NONE,
 	WT_DAGGER,
@@ -61,27 +50,18 @@ enum weapon_type {
 
 /* function definitions */
 
-weapon *weapon_new(int weapon_type, int bonus);
-void weapon_destroy(weapon *w);
+/* external vars */
 
-inline char *weapon_get_name(weapon *w);
-inline int weapon_get_wc(weapon *w);
-inline int weapon_get_material(weapon *w);
-inline int weapon_get_weight(weapon *w);
-inline int weapon_get_price(weapon *w);
-inline gboolean weapon_is_twohanded(weapon *w);
-inline gboolean weapon_is_uniqe(weapon *w);
+extern const weapon_data weapons[WT_MAX];
 
-int weapon_bless(weapon *w);
-int weapon_curse(weapon *w);
+/* macros */
 
-int weapon_enchant(weapon *w);
-int weapon_disenchant(weapon *w);
-
-int weapon_rust(weapon *w);
-int weapon_corrode(weapon *w);
-int weapon_burn(weapon *w);
-
-int weapon_throw(weapon *w);
+#define weapon_name(weapon)         (weapons[(weapon)->id].name)
+#define weapon_wc(weapon)           (weapons[(weapon)->id].wc + (weapon)->bonus)
+#define weapon_material(weapon)     (weapons[(weapon)->id].material)
+#define weapon_weight(weapon)       (weapons[(weapon)->id].weight)
+#define weapon_price(weapon)        (weapons[(weapon)->id].price)
+#define weapon_is_twohanded(weapon) (weapons[(weapon)->id].twohanded)
+#define weapon_is_unique(weapon)    (weapons[(weapon)->id].unique)
 
 #endif

@@ -19,7 +19,7 @@
 #include "nlarn.h"
 
 /* TODO: sanitize price */
-static const magic_scroll_data scrolls[ST_MAX] =
+const magic_scroll_data scrolls[ST_MAX] =
 {
     /* ID                   name                  effect               price */
     { ST_NONE,              "",                   ET_NONE,                 0 },
@@ -51,7 +51,7 @@ static const magic_scroll_data scrolls[ST_MAX] =
 
 static int scroll_desc_mapping[ST_MAX - 1] = { 0 };
 
-static const char *scroll_desc[ST_MAX - 1] =
+static const char *_scroll_desc[ST_MAX - 1] =
 {
     "Ssyliir Wyleeum",
     "Etzak Biqolix",
@@ -84,45 +84,8 @@ void scroll_desc_shuffle()
     shuffle(scroll_desc_mapping, ST_MAX - 1, 1);
 }
 
-magic_scroll *scroll_new(int scroll_type)
+char *scroll_desc(int scroll_id)
 {
-    magic_scroll *nscroll;
-
-    nscroll = g_malloc(sizeof(magic_scroll));
-    assert(nscroll != NULL);
-
-    nscroll->type = scroll_type;
-
-    return(nscroll);
-}
-
-void scroll_destroy(magic_scroll *s)
-{
-	assert(s != NULL);
-
-	g_free(s);
-}
-
-inline char *scroll_get_name(magic_scroll *s)
-{
-    assert(s != NULL && s->type > ST_NONE && s->type < ST_MAX);
-    return scrolls[s->type].name;
-}
-
-inline char *scroll_get_desc(magic_scroll *s)
-{
-    assert(s != NULL && s->type > ST_NONE && s->type < ST_MAX);
-    return (char *)scroll_desc[scroll_desc_mapping[s->type - 1]];
-}
-
-inline int scroll_get_effect(magic_scroll *s)
-{
-    assert(s != NULL && s->type > ST_NONE && s->type < ST_MAX);
-    return scrolls[s->type].effect_type;
-}
-
-inline int scroll_get_price(magic_scroll *s)
-{
-    assert(s != NULL && s->type > ST_NONE && s->type < ST_MAX);
-    return scrolls[s->type].price;
+    assert(scroll_id > ST_NONE && scroll_id < ST_MAX);
+    return (char *)_scroll_desc[scroll_desc_mapping[scroll_id - 1]];
 }

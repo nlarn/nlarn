@@ -59,37 +59,18 @@ typedef struct armour_data {
 		unique: 		1;	/* unique */
 } armour_data;
 
-typedef struct armour {
-	int type;
-	int ac_bonus;
-	unsigned
-		blessedness: 	2,	/* 0: cursed; 1: uncursed; 2: blessed */
-		corroded:		2,	/* 0: no; 1: yes; 2: very */
-		burnt:			2,	/* 0: no; 1: yes; 2: very */
-		rusty:			2;	/* 0: no; 1: yes; 2: very */
-} armour;
+/* external vars */
 
-/* function definitions */
+extern const armour_data armours[AT_MAX];
 
-armour *armour_new(int armour_id, int bonus);
-void armour_destroy(armour *a);
+/* macros */
 
-inline char *armour_get_name(armour *a);
-inline int armour_get_ac(armour *a);
-inline armour_cat armour_get_category(armour *a);
-inline int armour_get_material(armour *a);
-inline int armour_get_weight(armour *a);
-inline int armour_get_price(armour *a);
-inline gboolean armour_is_uniqe(armour *a);
-
-int armour_bless(armour *a);
-int armour_curse(armour *a);
-
-int armour_enchant(armour *a);
-int armour_disenchant(armour *a);
-
-int armour_rust(armour *a);
-int armour_corrode(armour *a);
-int armour_burn(armour *a);
+#define armour_name(armour)     (armours[(armour)->id].name)
+#define armour_ac(armour)       (armours[(armour)->id].ac + (armour)->bonus)
+#define armour_category(armour) (armours[(armour)->id].category)
+#define armour_material(armour) (armours[(armour)->id].material)
+#define armour_weight(armour)   (armours[(armour)->id].weight)
+#define armour_price(armour)    (armours[(armour)->id].price)
+#define armour_uniqe(armour)    (armours[(armour)->id].unique)
 
 #endif

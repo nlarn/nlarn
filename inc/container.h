@@ -1,4 +1,3 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 /*
  * container.h
  * Copyright (C) Joachim de Groot 2009 <jdegroot@web.de>
@@ -20,6 +19,8 @@
 #ifndef __CONTAINER_H_
 #define __CONTAINER_H_
 
+#include "items.h"
+
 enum container_types {
     CT_NONE,
     CT_BAG,
@@ -33,19 +34,16 @@ typedef struct container_data {
     int id;
     char *name;
     int weight;
+    item_material_t material;
 } container_data;
 
-typedef struct container {
-    int type;
-    inventory *content;
-} container;
+/* external vars */
 
-/* function definitions */
+extern const container_data containers[CT_MAX];
 
-container *container_new(int container_type);
-void container_destroy(container *c);
+/* macros */
 
-inline char *container_get_name(container *c);
-inline int container_get_weight(container *c);
+#define container_name(container)   (containers[(container)->id].name)
+#define container_weight(container) (containers[(container)->id].weight)
 
 #endif

@@ -123,13 +123,18 @@ typedef struct effect_data
     char *msg_stop_monster;
 } effect_data;
 
+/* forward declaration to avoid circular dependencies */
+struct item;
+
 typedef struct effect
 {
     int	type;               /* type of effect */
     time_t start;           /* game time the effect began */
     int	turns;              /* number of turns this effect remains */
     int amount;             /* power of effect, if applicable */
+    struct item *item;      /* item which causes the effect (if caused by item) */
 } effect;
+
 
 /* function declarations */
 

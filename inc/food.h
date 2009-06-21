@@ -26,10 +26,6 @@ enum food_types
     FT_MAX
 };
 
-typedef struct food {
-	int type;
-} food;
-
 typedef struct food_data {
     int id;
     char *name;
@@ -38,10 +34,15 @@ typedef struct food_data {
 
 /* function declarations */
 
-food *food_new(int food_type);
-void food_destroy(food *f);
+char *food_get_fortune(char *fortune_file);
 
-inline char *food_get_name(food *f);
-inline int food_get_weight(food *f);
-char *food_get_fortune(food *f, char *fortune_file);
+/* external vars */
+
+extern const food_data foods[FT_MAX];
+
+/* macros */
+
+#define food_name(food)   (foods[(food)->id].name)
+#define food_weight(food) (foods[(food)->id].weight)
+
 #endif

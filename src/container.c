@@ -1,4 +1,3 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 /*
  * container.c
  * Copyright (C) Joachim de Groot 2009 <jdegroot@web.de>
@@ -19,54 +18,11 @@
 
 #include "nlarn.h"
 
-static const container_data containers[CT_MAX] =
+const container_data containers[CT_MAX] =
 {
-    { CT_NONE,   "",          0, },
-    { CT_BAG,    "bag",     375, },
-    { CT_CASKET, "casket", 3900, },
-    { CT_CHEST,  "chest", 13500, },
-    { CT_CRATE,  "crate", 65000, },
+    { CT_NONE,   "",          0, IM_NONE,  },
+    { CT_BAG,    "bag",     375, IM_CLOTH, },
+    { CT_CASKET, "casket", 3900, IM_WOOD,  },
+    { CT_CHEST,  "chest", 13500, IM_WOOD,  },
+    { CT_CRATE,  "crate", 65000, IM_WOOD,  },
 };
-
-container *container_new(int container_type) {
-    container *ncontainer;
-
-    assert(container_type > CT_NONE && container_type < CT_MAX);
-
-    ncontainer = g_malloc0(sizeof(container));
-
-    ncontainer->type = container_type;
-    ncontainer->content = inv_new();
-
-    return ncontainer;
-}
-
-void container_destroy(container *c)
-{
-    assert(c != NULL);
-
-    inv_destroy(c->content);
-    g_free(c);
-}
-
-inline char *container_get_name(container *c)
-{
-    assert(c != NULL && c->type > CT_NONE && c->type < CT_MAX);
-    return containers[c->type].name;
-}
-
-inline int container_get_weight(container *c)
-{
-    int sum = 0;
-    int pos;
-
-    assert(c != NULL && c->type > CT_NONE && c->type < CT_MAX);
-
-    sum += containers[c->type].weight;
-
-    /* add contents weight */
-    for (pos = 1; pos <= inv_length(c->content); pos++)
-        sum += item_get_weight(inv_get(c->content, pos - 1));
-
-    return sum;
-}

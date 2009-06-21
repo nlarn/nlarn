@@ -1,4 +1,3 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 /*
  * rings.h
  * Copyright (C) Joachim de Groot 2009 <jdegroot@web.de>
@@ -19,6 +18,8 @@
 
 #ifndef __RINGS_H_
 #define __RINGS_H_
+
+#include "effects.h"
 
 enum ring_types
 {
@@ -44,30 +45,21 @@ typedef struct ring_data
         observable: 1;  /* can be identified by using */
 } ring_data;
 
-typedef struct ring
-{
-    int type;
-    int bonus;
-    effect *effect;				/* storage for effect */
-    unsigned
-        blessed: 1,
-        cursed: 1;
-} ring;
-
 /* function definitions */
 
 void ring_material_shuffle();
-ring *ring_new(int ring_type, int bonus);
-void ring_destroy(ring *r);
+item_material_t ring_material(int ring_id);
 
-inline char *ring_get_name(ring *r);
-inline char *ring_get_desc(ring *r);
-inline int ring_get_effect(ring *r);
-inline item_material_t ring_get_material(ring *r);
-inline int ring_get_price(ring *r);
-inline int ring_is_observable(ring *r);
+/* external vars */
 
-int ring_bless(ring *r);
-int ring_curse(ring *r);
+extern const ring_data rings[RT_MAX];
+
+/* macros */
+
+#define ring_name(item)          (rings[(item)->id].name)
+#define ring_effect(item)        ((item)->effect)
+#define ring_effect_type(item)   (rings[(item)->id].effect_type)
+#define ring_price(item)         (rings[(item)->id].price)
+#define ring_is_observable(item) (rings[(item)->id].observable)
 
 #endif

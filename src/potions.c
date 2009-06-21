@@ -18,7 +18,7 @@
 
 #include "nlarn.h"
 
-static const potion_data potions[PO_MAX] =
+const potion_data potions[PO_MAX] =
 {
     /* id               name                  effect            price */
     { PO_NONE,          "",                   ET_NONE,              0 },
@@ -50,7 +50,7 @@ static const potion_data potions[PO_MAX] =
 
 static int potion_desc_mapping[PO_MAX - 1] = { 0 };
 
-static const char *potion_desc[PO_MAX - 1] =
+static const char *_potion_desc[PO_MAX - 1] =
 {
     "clear",
     "bubbly",
@@ -83,52 +83,9 @@ void potion_desc_shuffle()
     shuffle(potion_desc_mapping, PO_MAX - 1, 1);
 }
 
-potion *potion_new(int potion_id)
+char *potion_desc(int potion_id)
 {
-    potion *npotion;
-    /* the potion of cure dianthroritis is a unique item */
-    static int cure_dianthr_created = FALSE;
-
     assert(potion_id > PO_NONE && potion_id < PO_MAX);
-
-    /* FIXME: the potion should be handled completely different */
-    if (potion_id == PO_CURE_DIANTHR && cure_dianthr_created)
-        return potion_new(rand_1n(PO_SEE_INVISIBLE));
-    else if (potion_id == PO_CURE_DIANTHR)
-        cure_dianthr_created = TRUE;
-
-    npotion = g_malloc(sizeof(potion));
-    npotion->type = potion_id;
-
-    return npotion;
+    return (char *)_potion_desc[potion_desc_mapping[potion_id - 1]];
 }
 
-void potion_destroy(potion *p)
-{
-    assert(p != NULL && p->type > PO_NONE && p->type < PO_MAX);
-    g_free(p);
-}
-
-inline char *potion_get_name(potion *p)
-{
-    assert(p != NULL && p->type > PO_NONE && p->type < PO_MAX);
-    return potions[p->type].name;
-}
-
-inline char *potion_get_desc(potion *p)
-{
-    assert(p != NULL && p->type > PO_NONE && p->type < PO_MAX);
-    return (char *)potion_desc[potion_desc_mapping[p->type - 1]];
-}
-
-inline int potion_get_effect(potion *p)
-{
-    assert(p != NULL && p->type > PO_NONE && p->type < PO_MAX);
-    return potions[p->type].effect_type;
-}
-
-inline int potion_get_price(potion *p)
-{
-    assert(p != NULL && p->type > PO_NONE && p->type < PO_MAX);
-    return potions[p->type].price;
-}

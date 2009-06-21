@@ -90,19 +90,19 @@ typedef struct player {
     GPtrArray *effects; /* temporary effects from potions, spells, ... */
 
     /* pointers to elements of items which are currently equipped */
-    weapon *eq_weapon;
+    item *eq_weapon;
 
     /* armour types */
-    armour *eq_boots;
-    armour *eq_cloak;
-    armour *eq_gloves;
-    armour *eq_helmet;
-    armour *eq_shield;
-    armour *eq_suit;
+    item *eq_boots;
+    item *eq_cloak;
+    item *eq_gloves;
+    item *eq_helmet;
+    item *eq_shield;
+    item *eq_suit;
 
     /* rings */
-    ring *eq_ring_l;
-    ring *eq_ring_r;
+    item *eq_ring_l;
+    item *eq_ring_r;
     /* enough items for now */
 
     /* items identified */
@@ -214,8 +214,8 @@ int player_item_equip(player *p, item *it);
 int player_item_unequip(player *p, item *it);
 int player_item_is_equipped(player *p, item *it);
 int player_item_is_equippable(player *p, item *it);
-inline int player_item_is_usable(player *p, item *it);
-inline int player_item_is_dropable(player *p, item *it);
+int player_item_is_usable(player *p, item *it);
+int player_item_is_dropable(player *p, item *it);
 int player_item_identified(player *p, item *it);
 void player_item_identify(player *p, item *it);
 int player_item_use(player *p, item *it);
@@ -238,7 +238,7 @@ int player_get_cha(player *p);
 int player_get_gold(player *p);
 int player_set_gold(player *p, int amount);
 
-inline const char *player_get_lvl_desc(player *p);
+char *player_get_lvl_desc(player *p);
 
 /* macros */
 

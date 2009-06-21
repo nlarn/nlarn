@@ -711,8 +711,8 @@ void book_destroy(book *b)
     g_free(b);
 }
 
-char *book_get_desc(book *b)
+char *book_get_desc(int book_id)
 {
-    assert(b != NULL && b->type > SP_NONE && b->type < SP_MAX);
-    return (char *)book_desc[book_desc_mapping[b->type - 1]];
+    assert(book_id > SP_NONE && book_id < SP_MAX);
+    return (char *)book_desc[book_desc_mapping[book_id - 1]];
 }
