@@ -1109,7 +1109,9 @@ int player_spell_cast(player *p)
     spell *spell;
     effect *eff;
     position pos;
-    monster *monster;
+    monster *monster = NULL;
+    GPtrArray *mlist = NULL;
+    int i;
     int amount = 0;
 
     spell = display_spell_select("Select a spell to cast", p, NULL);
@@ -1236,7 +1238,13 @@ int player_spell_cast(player *p)
 
             /* polymorph */
         case SP_PLY:
-            /* TODO: implement */
+            do
+            {
+                monster->type = rand_1n(MT_MAX);
+            }
+            while (monster_is_genocided(monster->type));
+            monster->hp = monster_get_hp_max(monster);
+
             break;
 
             /* teleport */
@@ -1249,7 +1257,6 @@ int player_spell_cast(player *p)
 
         default:
             /* spell has an effect, add that to the monster */
-
             assert(spell_effect(spell) != ET_NONE);
 
             eff = effect_new(spell_effect(spell), game_turn(p->game));
@@ -1277,8 +1284,35 @@ int player_spell_cast(player *p)
 
     case SC_SQUARE: /* effect occurs in a square */
 
+        /* TODO: damage player */
+        /* TODO: disallow wall squares */
+
         g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(spell));
         pos = display_get_position(p, buffer);
+
+        mlist = level_get_monsters_in(p->level, rect_new_sized(pos, 2));
+
+        for (i = 1; i <= mlist->len; i++)
+        {
+            monster = g_ptr_array_index(mlist, i - 1);
+
+            log_add_entry(p->log,
+                          spell_msg_succ(spell),
+                          monster_get_name(monster));
+
+            if (spell->id == SP_FLO)
+                amount = 32 + p->lvl;
+            else if (spell->id == SP_MFI)
+                amount = rand_m_n(35, 45) + p->lvl;
+
+            if (monster_hp_lose(monster, amount))
+            {
+                level_monster_die(p->level, monster, p->log);
+            }
+        }
+
+        g_ptr_array_free(mlist, TRUE);
+
 
         break; /* SC_SQUARE */
 

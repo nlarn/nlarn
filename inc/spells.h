@@ -138,8 +138,8 @@ void book_destroy(book *b);
 
 char *book_get_desc(int book_id);
 
-#define book_get_name(book)   (spells[(book)->type].name)
+#define book_get_name(book)   (spells[(book)->id].name)
 #define book_get_weight(book) (1) /* FIXME: return real weight */
-#define book_get_price(book)  (spells[(book)->type].price)
+#define book_get_price(book)  (spells[(book)->id].price)
 
 #endif
