@@ -27,8 +27,8 @@ typedef enum spell_type
     SC_PLAYER, /* affects the player */
     SC_POINT,  /* affects a single monster */
     SC_RAY,    /* creates a ray */
-    SC_SQUARE, /* effect occurs in a square */
-    SC_CIRCLE, /* effect occurs in a circle */
+    SC_FLOOD,  /* effect pours like water */
+    SC_BLAST,  /* effect occurs like an explosion */
     SC_OTHER,  /* unclassified */
     SC_MAX
 } spell_t;

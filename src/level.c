@@ -470,6 +470,42 @@ void level_path_destroy(level_path *path)
     g_free(path);
 }
 
+area *level_get_obstacles(level *l, position center, int radius)
+{
+    area *narea;
+    position pos;
+    int x, y;
+
+    assert(l != NULL);
+
+    if (!pos_valid(pos))
+    {
+        return NULL;
+    }
+
+    narea = area_new(center.x - radius,
+                     center.y - radius,
+                     radius * 2,
+                     radius * 2);
+
+    for (pos.y = center.y - radius, y = 0;
+            pos.y <= center.y + radius;
+            pos.y++, y++)
+    {
+        for (pos.x = center.x - radius, x = 0;
+                pos.x <= center.x + radius;
+                pos.x++, x++)
+        {
+            if (!level_pos_passable(l,pos))
+            {
+                area_point_set(narea, x, y);
+            }
+        }
+    }
+
+    return narea;
+}
+
 monster *level_get_monster_at(level *l, position pos)
 {
     int i = 1;

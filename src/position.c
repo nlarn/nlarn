@@ -172,16 +172,22 @@ area *area_new(int start_x, int start_y, int size_x, int size_y)
     return area;
 }
 
-/** Midpoint circle algorithm
+/**
+ * Draw a circle
+ * Midpoint circle algorithm
  * from http://en.wikipedia.org/wiki/Midpoint_circle_algorithm
  *
  * @param center point of the circle
  * @param radius of the circle
+ * @param how shall the cirle be filled
+ * @param an area which contains the obstacles.
+ *        Must match the new area in size. NULL for FILL_SOLID.
+ *        Will be freed in this function.
  * @return a new area.
  */
-area *area_new_circle(position center, int radius)
+area *area_new_circle(position center, int radius, fill_t filling, area *obstacles)
 {
-    area *area;
+    area *area, *narea;
 
     int f = 1 - radius;
     int ddF_x = 1;
@@ -236,25 +242,52 @@ area *area_new_circle(position center, int radius)
      *
      * do not need to fill the first and last row
      */
-    for (y = 1; y < area->size_y - 1; y++)
+
+    switch (filling)
     {
-        fill = 0;
-
-        for (x = 0; x < area->size_x; x++)
+    case FILL_SOLID:
+        for (y = 1; y < area->size_y - 1; y++)
         {
-            /* there are double dots at the beginning and the end of the square */
-            if (area_point_get(area, x, y) && (!area_point_get(area, x + 1, y)))
-            {
-                fill++;
-                continue;
-            }
+            fill = 0;
 
-            if (fill == 1)
+            for (x = 0; x < area->size_x; x++)
             {
-                area_point_set(area, x, y);
-            }
+                /* there are double dots at the beginning and the end of the square */
+                if (area_point_get(area, x, y) && (!area_point_get(area, x + 1, y)))
+                {
+                    fill = !fill;
+                    continue;
+                }
 
+                if (fill)
+                {
+                    area_point_set(area, x, y);
+                }
+            }
         }
+        break; /* FILL_SOLID */
+
+    case FILL_FLOOD:
+        for (y = 0; y < area->size_y; y++)
+        {
+            for (x = 0; x < area->size_x; x++)
+            {
+
+            }
+        }
+        break; /* FILL_FLOOD */
+
+    case FILL_BLAST:
+        break; /* FILL_BLAST */
+
+    default:
+        /* do nothing */
+        break;
+    }
+
+    if (obstacles)
+    {
+        area_destroy(obstacles);
     }
 
     return area;

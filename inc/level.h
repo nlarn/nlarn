@@ -84,10 +84,12 @@ typedef enum level_element_type {
 } level_element_t;
 
 typedef struct level_tile {
-    level_tile_t type;
-    level_stationary_t stationary;  /* if something special is here */
-    inventory *ilist;               /* items located on this tile */
-    trap_t trap;                    /* trap located on this tile */
+    unsigned
+        type: 8,
+        stationary: 8,  /* if something special is here */
+        trap: 8,        /* trap located on this tile */
+        timer: 8;       /* countdown to when the type will become LT_FLOOR again */
+    inventory *ilist;   /* items located on this tile */
 } level_tile;
 
 typedef struct level_tile_data {
@@ -151,6 +153,8 @@ int *level_get_surrounding(level *l, position pos, level_stationary_t type);
 int level_pos_is_visible(level *l, position source, position target);
 level_path *level_find_path(level *l, position start, position goal);
 void level_path_destroy(level_path *path);
+
+area *level_get_obstacles(level *l, position pos, int radius);
 
 monster *level_get_monster_at(level *l, position pos);
 int level_is_monster_at(level *l, position pos);

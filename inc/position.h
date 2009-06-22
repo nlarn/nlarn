@@ -19,6 +19,15 @@
 #ifndef __POSITION_H_
 #define __POSITION_H_
 
+typedef enum fill_type
+{
+    FILL_NONE,
+    FILL_SOLID, /* every */
+    FILL_FLOOD, /* pour like water */
+    FILL_BLAST, /* like fov */
+    FILL_MAX
+} fill_t;
+
 typedef struct position
 {
     guint32
@@ -52,7 +61,7 @@ rectangle rect_new_sized(position center, int size);
 int pos_in_rect(position pos, rectangle rect);
 
 area *area_new(int start_x, int start_y, int size_x, int size_y);
-area *area_new_circle(position center, int radius);
+area *area_new_circle(position center, int radius, fill_t filling, area *obstacles);
 void area_destroy(area *area);
 
 #define pos_distance(first, second) (abs((first).x - (second).x) \

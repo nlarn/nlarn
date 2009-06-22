@@ -1282,7 +1282,7 @@ int player_spell_cast(player *p)
 
         break; /* SC_RAY */
 
-    case SC_SQUARE: /* effect occurs in a square */
+    case SC_FLOOD: /* effect pours like water */
 
         /* TODO: damage player */
         /* TODO: disallow wall squares */
@@ -1314,14 +1314,14 @@ int player_spell_cast(player *p)
         g_ptr_array_free(mlist, TRUE);
 
 
-        break; /* SC_SQUARE */
+        break; /* SC_FLOOD */
 
-    case SC_CIRCLE: /* effect occurs in a circle */
+    case SC_BLAST: /* effect occurs like an explosion */
 
         g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(spell));
         pos = display_get_position(p, buffer);
 
-        break; /* SC_CIRCLE */
+        break; /* SC_BLAST */
 
     case SC_OTHER:  /* unclassified */
 
@@ -2742,7 +2742,10 @@ void player_update_fov(player *p, int radius)
     {
         int x, y;
 
-        enlight = area_new_circle(p->pos, player_effect(p, ET_ENLIGHTENMENT));
+        enlight = area_new_circle(p->pos,
+                                  player_effect(p, ET_ENLIGHTENMENT),
+                                  FILL_SOLID,
+                                  NULL);
 
         /* set visible field according to returned area */
         for (y = 0; y <  enlight->size_y; y++)
