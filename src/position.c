@@ -173,21 +173,16 @@ area *area_new(int start_x, int start_y, int size_x, int size_y)
 }
 
 /**
- * Draw a circle
- * Midpoint circle algorithm
+ * Draw a circle: Midpoint circle algorithm
  * from http://en.wikipedia.org/wiki/Midpoint_circle_algorithm
  *
  * @param center point of the circle
  * @param radius of the circle
- * @param how shall the cirle be filled
- * @param an area which contains the obstacles.
- *        Must match the new area in size. NULL for FILL_SOLID.
- *        Will be freed in this function.
  * @return a new area.
  */
-area *area_new_circle(position center, int radius, fill_t filling, area *obstacles)
+area *area_new_circle(position center, int radius)
 {
-    area *area, *narea;
+    area *area;
 
     int f = 1 - radius;
     int ddF_x = 1;
@@ -196,6 +191,11 @@ area *area_new_circle(position center, int radius, fill_t filling, area *obstacl
     int y = radius;
 
     int fill;
+
+    if (!pos_valid(center))
+    {
+        return NULL;
+    }
 
     area = area_new(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
 
@@ -243,54 +243,60 @@ area *area_new_circle(position center, int radius, fill_t filling, area *obstacl
      * do not need to fill the first and last row
      */
 
-    switch (filling)
+    for (y = 1; y < area->size_y - 1; y++)
     {
-    case FILL_SOLID:
-        for (y = 1; y < area->size_y - 1; y++)
+        fill = 0;
+
+        for (x = 0; x < area->size_x; x++)
         {
-            fill = 0;
-
-            for (x = 0; x < area->size_x; x++)
+            /* there are double dots at the beginning and the end of the square */
+            if (area_point_get(area, x, y) && (!area_point_get(area, x + 1, y)))
             {
-                /* there are double dots at the beginning and the end of the square */
-                if (area_point_get(area, x, y) && (!area_point_get(area, x + 1, y)))
-                {
-                    fill = !fill;
-                    continue;
-                }
+                fill = !fill;
+                continue;
+            }
 
-                if (fill)
-                {
-                    area_point_set(area, x, y);
-                }
+            if (fill)
+            {
+                area_point_set(area, x, y);
             }
         }
-        break; /* FILL_SOLID */
-
-    case FILL_FLOOD:
-        for (y = 0; y < area->size_y; y++)
-        {
-            for (x = 0; x < area->size_x; x++)
-            {
-
-            }
-        }
-        break; /* FILL_FLOOD */
-
-    case FILL_BLAST:
-        break; /* FILL_BLAST */
-
-    default:
-        /* do nothing */
-        break;
-    }
-
-    if (obstacles)
-    {
-        area_destroy(obstacles);
     }
 
     return area;
+}
+
+area *area_new_circle_flooded(position center, int radius, area *obstacles)
+{
+    area *narea, *circle;
+    int x, y;
+
+    assert (circle != NULL && obstacles != NULL);
+
+    if (!pos_valid(center))
+    {
+        return NULL;
+    }
+
+    narea = area_new(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
+    circle = area_new_circle(center, radius);
+
+    /* fill narea with */
+    for (y = 0; y < narea->size_y; y++)
+    {
+        for (x = 0; x < narea->size_x; x++)
+        {
+            if ( area_point_get(circle, x, y) && !area_point_get(obstacles, x, y) )
+            {
+                area_point_set(narea, x, y);
+            }
+        }
+    }
+
+    area_destroy(circle);
+    area_destroy(obstacles);
+
+    return narea;
 }
 
 void area_destroy(area *area)

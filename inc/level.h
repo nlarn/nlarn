@@ -40,7 +40,10 @@ typedef enum level_tile_type {
     LT_GRASS,
     LT_FLOOR,
     LT_WATER,
+    LT_DEEPWATER,
     LT_LAVA,
+    LT_FIRE,
+    LT_CLOUD, /* gas cloud */
     LT_WALL,
     LT_MAX				/* ~ level tile type count */
 } level_tile_t;
@@ -154,13 +157,16 @@ int level_pos_is_visible(level *l, position source, position target);
 level_path *level_find_path(level *l, position start, position goal);
 void level_path_destroy(level_path *path);
 
-area *level_get_obstacles(level *l, position pos, int radius);
+area *level_get_obstacles(level *l, position center, int radius);
+void level_set_tiletype(level *l, area *area, level_tile_t type, guint8 duration);
 
 monster *level_get_monster_at(level *l, position pos);
 int level_is_monster_at(level *l, position pos);
 GPtrArray *level_get_monsters_in(level *l, rectangle area);
 int level_fill_with_live(level *l);
 void level_monster_die(level *l, monster *m, message_log *log);
+
+void level_expire_timer(level *l, guint8 count);
 
 /* external vars */
 
@@ -183,6 +189,7 @@ extern const level_stationary_data level_stationaries[LS_MAX];
 #define level_tile_at(l,pos)       (pos_valid(pos) ? &((l)->map[(pos).y][(pos).x]) : NULL)
 #define level_ilist_at(l,pos)      ((l)->map[(pos).y][(pos).x].ilist)
 #define level_tiletype_at(l,pos)   ((l)->map[(pos).y][(pos).x].type)
+#define level_timer_at(l,pos)      ((l)->map[(pos).y][(pos).x].timer)
 #define level_trap_at(l,pos)       ((l)->map[(pos).y][(pos).x].trap)
 #define level_stationary_at(l,pos) ((l)->map[(pos).y][(pos).x].stationary)
 

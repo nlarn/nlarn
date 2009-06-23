@@ -1110,9 +1110,11 @@ int player_spell_cast(player *p)
     effect *eff;
     position pos;
     monster *monster = NULL;
-    GPtrArray *mlist = NULL;
-    int i;
+
     int amount = 0;
+    int radius = 0;
+    level_tile_t type = LT_NONE;
+    area *range = NULL;
 
     spell = display_spell_select("Select a spell to cast", p, NULL);
 
@@ -1284,35 +1286,40 @@ int player_spell_cast(player *p)
 
     case SC_FLOOD: /* effect pours like water */
 
-        /* TODO: damage player */
-        /* TODO: disallow wall squares */
-
         g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(spell));
         pos = display_get_position(p, buffer);
 
-        mlist = level_get_monsters_in(p->level, rect_new_sized(pos, 2));
-
-        for (i = 1; i <= mlist->len; i++)
+        if (pos_valid(pos))
         {
-            monster = g_ptr_array_index(mlist, i - 1);
-
-            log_add_entry(p->log,
-                          spell_msg_succ(spell),
-                          monster_get_name(monster));
-
-            if (spell->id == SP_FLO)
-                amount = 32 + p->lvl;
-            else if (spell->id == SP_MFI)
-                amount = rand_m_n(35, 45) + p->lvl;
-
-            if (monster_hp_lose(monster, amount))
+            switch (spell->id)
             {
-                level_monster_die(p->level, monster, p->log);
+            case SP_CLD:
+                radius = 3;
+                type = LT_CLOUD;
+                amount = 15 + p->lvl;
+                break;
+
+            case SP_FLO:
+                radius = 4;
+                type = LT_WATER;
+                amount = 25 + p->lvl;
+                break;
+
+            case SP_MFI:
+                radius = 5;
+                type = LT_FIRE;
+                amount = 10 + p->lvl;
+                break;
             }
+
+            range = area_new_circle_flooded(pos, radius,
+                                            level_get_obstacles(p->level, pos, radius));
+
+            level_set_tiletype(p->level, range, type, amount);
+            area_destroy(range);
         }
 
-        g_ptr_array_free(mlist, TRUE);
-
+        amount = (spell->id == SP_MFI ? 15 : 25) + p->lvl;
 
         break; /* SC_FLOOD */
 
@@ -2742,10 +2749,7 @@ void player_update_fov(player *p, int radius)
     {
         int x, y;
 
-        enlight = area_new_circle(p->pos,
-                                  player_effect(p, ET_ENLIGHTENMENT),
-                                  FILL_SOLID,
-                                  NULL);
+        enlight = area_new_circle(p->pos, player_effect(p, ET_ENLIGHTENMENT));
 
         /* set visible field according to returned area */
         for (y = 0; y <  enlight->size_y; y++)

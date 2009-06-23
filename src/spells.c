@@ -397,7 +397,7 @@ const spell_data spells[SP_MAX] =
         SP_MFI,
         "mfi",
         "magic fire",
-        SC_BLAST,
+        SC_FLOOD,
         ET_NONE,
         "this causes a curtain of fire to appear all around you",
         "The %s cringes from the flame.",

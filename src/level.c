@@ -39,13 +39,16 @@ static gboolean level_validate_position(level *l, position pos, level_element_t 
 
 const level_tile_data level_tiles[LT_MAX] =
 {
-    /* type     img  color     pa tr */
-    { LT_NONE,  ' ', DC_NONE,  0, 0 },
-    { LT_GRASS, '"', DC_GREEN, 1, 1 },
-    { LT_FLOOR, ' ', DC_NONE,  1, 1 },
-    { LT_WATER, '~', DC_BLUE,  0, 1 },
-    { LT_LAVA,  '~', DC_RED,   0, 1 },
-    { LT_WALL,  '#', DC_WHITE, 0, 0 },
+    /* type         img  color     pa tr */
+    { LT_NONE,      ' ', DC_NONE,  0, 0 },
+    { LT_GRASS,     '"', DC_GREEN, 1, 1 },
+    { LT_FLOOR,     ' ', DC_NONE,  1, 1 },
+    { LT_WATER,     '~', DC_BLUE,  1, 1 },
+    { LT_DEEPWATER, '~', DC_BLUE,  0, 1 },
+    { LT_LAVA,      '~', DC_RED,   0, 1 },
+    { LT_FIRE,      '*', DC_RED,   1, 1 },
+    { LT_CLOUD,     '*', DC_WHITE, 1, 1 },
+    { LT_WALL,      '#', DC_WHITE, 0, 0 },
 };
 
 const level_stationary_data level_stationaries[LS_MAX] =
@@ -478,7 +481,7 @@ area *level_get_obstacles(level *l, position center, int radius)
 
     assert(l != NULL);
 
-    if (!pos_valid(pos))
+    if (!pos_valid(center))
     {
         return NULL;
     }
@@ -504,6 +507,30 @@ area *level_get_obstacles(level *l, position center, int radius)
     }
 
     return narea;
+}
+
+void level_set_tiletype(level *l, area *area, level_tile_t type, guint8 duration)
+{
+    position pos;
+    int x, y;
+
+    assert (l != NULL && area != NULL);
+
+    for (pos.y = area->start_y, y = 0;
+            pos.y < area->start_y + area->size_y;
+            pos.y++, y++)
+    {
+        for (pos.x = area->start_x, x = 0;
+                pos.x < area->start_x + area->size_x;
+                pos.x++, x++)
+        {
+            if (area_point_get(area, x, y))
+            {
+                level_tiletype_at(l, pos) = type;
+                level_timer_at(l ,pos) = duration;
+            }
+        }
+    }
 }
 
 monster *level_get_monster_at(level *l, position pos)
@@ -623,6 +650,28 @@ void level_monster_die(level *l, monster *m, message_log *log)
 
     g_ptr_array_remove_fast(l->mlist, m);
     monster_destroy(m);
+}
+
+void level_expire_timer(level *l, guint8 count)
+{
+    position pos;
+
+    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
+    {
+        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
+        {
+            if (level_timer_at(l, pos))
+            {
+                level_timer_at(l, pos) -= min(level_timer_at(l, pos), count);
+
+                if (level_timer_at(l, pos) == 0)
+                {
+                    /* temporary effect has expired */
+                    level_tiletype_at(l, pos) = LT_FLOOR;
+                }
+            }
+        }
+    }
 }
 
 static void level_fill_with_stationary(level *l)
