@@ -159,7 +159,7 @@ void player_destroy(player *p)
     int i;
     effect *eff;
 
-    assert (p != NULL);
+    assert(p != NULL);
 
     /* release spells */
     while ((p->known_spells)->len > 0)
@@ -669,15 +669,15 @@ int player_level_enter(player *p, level *l)
     }
 
     /* position player */
-    if ( (l->nlevel == 0) && (p->level == NULL) )
+    if ((l->nlevel == 0) && (p->level == NULL))
         /* GAME STARTS */
         pos = level_find_stationary(l, LS_HOME);
 
-    else if ( (p->level->nlevel == 0) && (l->nlevel == (LEVEL_MAX - 1) ) )
+    else if ((p->level->nlevel == 0) && (l->nlevel == (LEVEL_MAX - 1)))
         /* took the elevator up */
         pos = level_find_stationary(l, LS_ELEVATORUP);
 
-    else if ( (p->level->nlevel == (LEVEL_MAX - 1)) && (l->nlevel == 0) )
+    else if ((p->level->nlevel == (LEVEL_MAX - 1)) && (l->nlevel == 0))
         /* took the elevator down */
         pos = level_find_stationary(l, LS_ELEVATORDOWN);
 
@@ -747,7 +747,7 @@ int player_level_leave(player *p)
 int player_teleport(player *p)
 {
     int nlevel;
-    assert (p != NULL);
+    assert(p != NULL);
 
     if (p->level->nlevel == 0)
         nlevel = 0;
@@ -1017,7 +1017,7 @@ int player_hp_gain(player *p, int count)
 
 void player_hp_lose(player *p, int count, player_cod cause_type, int cause)
 {
-    assert (p != NULL);
+    assert(p != NULL);
     p->hp -= count;
 
     if (p->hp < 1)
@@ -1036,7 +1036,7 @@ int player_hp_max_gain(player *p, int count)
 
 int player_hp_max_lose(player *p, int count)
 {
-    assert (p != NULL);
+    assert(p != NULL);
 
     p->hp_max -= count;
 
@@ -1083,7 +1083,7 @@ int player_mp_max_gain(player *p, int count)
 
 int player_mp_max_lose(player *p, int count)
 {
-    assert (p != NULL);
+    assert(p != NULL);
 
     p->mp_max -= count;
 
@@ -1168,7 +1168,7 @@ int player_spell_cast(player *p)
     case SC_POINT:
 
         g_snprintf(buffer, 60, "Select a target for %s.", spell_name(spell));
-        pos = display_get_position(p, buffer);
+        pos = display_get_position(p, buffer, FALSE);
         monster = level_get_monster_at(p->level, pos);
 
         if (!monster)
@@ -1280,14 +1280,14 @@ int player_spell_cast(player *p)
     case SC_RAY:    /* creates a ray */
 
         g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(spell));
-        pos = display_get_position(p, buffer);
+        pos = display_get_position(p, buffer, TRUE);
 
         break; /* SC_RAY */
 
     case SC_FLOOD: /* effect pours like water */
 
         g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(spell));
-        pos = display_get_position(p, buffer);
+        pos = display_get_position(p, buffer, TRUE);
 
         if (pos_valid(pos))
         {
@@ -1315,6 +1315,7 @@ int player_spell_cast(player *p)
             range = area_new_circle_flooded(pos, radius,
                                             level_get_obstacles(p->level, pos, radius));
 
+
             level_set_tiletype(p->level, range, type, amount);
             area_destroy(range);
         }
@@ -1326,7 +1327,7 @@ int player_spell_cast(player *p)
     case SC_BLAST: /* effect occurs like an explosion */
 
         g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(spell));
-        pos = display_get_position(p, buffer);
+        pos = display_get_position(p, buffer, TRUE);
 
         break; /* SC_BLAST */
 
@@ -2741,7 +2742,7 @@ void player_update_fov(player *p, int radius)
     /* reset FOV */
     memset(&(p->fov), 0, LEVEL_SIZE * sizeof(int));
 
-    /* if player has enlightenment, use a circular area around the player
+    /* if player is enlightened, use a circular area around the player
      * otherwise fov algorithm
      */
 
@@ -2774,7 +2775,9 @@ void player_update_fov(player *p, int radius)
             player_calculate_octant(p, 1, 1.0, 0.0, radius,
                                     mult[0][octant], mult[1][octant],
                                     mult[2][octant], mult[3][octant]);
+
         }
+        p->fov[p->pos.y][p->pos.x] = TRUE;
     }
 
     /* update visible fields in player's memory */
@@ -2801,8 +2804,9 @@ void player_update_fov(player *p, int radius)
     }
 }
 
-static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy
-                                   )
+static void player_calculate_octant(player *p, int row, float start,
+                                    float end, int radius, int xx,
+                                    int xy, int yx, int yy)
 {
     int radius_squared;
     int j;
@@ -2986,7 +2990,7 @@ static void player_magic_create_sphere(player *p)
 
     assert(p != NULL);
 
-    pos = display_get_position(p, "Where do you want to place the sphere?");
+    pos = display_get_position(p, "Where do you want to place the sphere?", TRUE);
 
     if (pos_valid(pos))
     {
@@ -3010,7 +3014,7 @@ static void player_magic_detect_item(player *p, int treasure)
 
     for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
         for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
-            if ((inv = level_ilist_at(p->level, pos) ))
+            if ((inv = level_ilist_at(p->level, pos)))
                 for (i = 0; i <  inv_length(inv); i++)
                 {
                     it = inv_get(inv, i);
@@ -3133,7 +3137,13 @@ static void player_magic_make_wall(player *p)
 {
     position pos;
 
-    pos = display_get_position(p, "Select a position where you want to place a wall.");
+    pos = display_get_position(p, "Select a position where you want to place a wall.", TRUE);
+
+    if (pos_identical(pos, p->pos))
+    {
+        log_add_entry(p->log, "You are actually standing there.");
+        return;
+    }
 
     if (level_tiletype_at(p->level, pos) != LT_WALL)
     {
@@ -3227,7 +3237,7 @@ static void player_magic_vaporize_rock(player *p)
     monster *m = NULL;
     char *desc = NULL;
 
-    pos = display_get_position(p, "What do you want to vaporize?");
+    pos = display_get_position(p, "What do you want to vaporize?", FALSE);
 
     if (level_tiletype_at(p->level, pos) == LT_WALL)
     {

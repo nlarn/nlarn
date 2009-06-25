@@ -162,7 +162,7 @@ int display_paint_screen(player *p)
 
             }
             else /* i.e. !wizardmode */
-            /* draw players fov & memory */
+                /* draw players fov & memory */
             {
                 /* draw items */
                 if (player_memory_of(p, pos).item)
@@ -1333,7 +1333,7 @@ direction display_get_direction(char *title, int *available)
     return dir;
 }
 
-position display_get_position(player *p, char *message)
+position display_get_position(player *p, char *message, int passable)
 {
     int RUN  = TRUE;
     int direction = GD_NONE;
@@ -1443,6 +1443,10 @@ position display_get_position(player *p, char *message)
 
         if (pos_valid(npos) && player_pos_visible(p, npos))
         {
+            if (passable && !level_pos_passable(p->level, npos))
+                /* a passable position has been requested and this one isn't */
+                continue;
+
             /* new position is within bounds and visible */
             pos = npos;
 

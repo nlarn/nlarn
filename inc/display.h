@@ -58,7 +58,7 @@ void display_player(player *p);
 int display_get_count(char *caption, int value);
 int display_get_yesno(char *question, char *yes, char *no);
 direction display_get_direction(char *title, int *available);
-position display_get_position(player *p, char *message);
+position display_get_position(player *p, char *message, int passable);
 
 void display_show_history(message_log *log, char *title);
 char display_show_message(char *title, char *message);

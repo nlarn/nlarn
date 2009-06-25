@@ -488,8 +488,8 @@ area *level_get_obstacles(level *l, position center, int radius)
 
     narea = area_new(center.x - radius,
                      center.y - radius,
-                     radius * 2,
-                     radius * 2);
+                     radius * 2 + 1,
+                     radius * 2 + 1);
 
     for (pos.y = center.y - radius, y = 0;
             pos.y <= center.y + radius;

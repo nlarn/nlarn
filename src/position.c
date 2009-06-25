@@ -197,7 +197,10 @@ area *area_new_circle(position center, int radius)
         return NULL;
     }
 
-    area = area_new(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
+    area = area_new(center.x - radius,
+                          center.y - radius,
+                          2 * radius + 1,
+                          2 * radius + 1);
 
     /* reposition center to relative values */
     center.x = radius;
@@ -271,22 +274,26 @@ area *area_new_circle_flooded(position center, int radius, area *obstacles)
     area *narea, *circle;
     int x, y;
 
-    assert (circle != NULL && obstacles != NULL);
+    assert(obstacles != NULL);
 
     if (!pos_valid(center))
     {
         return NULL;
     }
 
-    narea = area_new(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
+    narea = area_new(center.x - radius,
+                     center.y - radius,
+                     2 * radius + 1,
+                     2 * radius + 1);
+
     circle = area_new_circle(center, radius);
 
-    /* fill narea with */
+    /* fill narea */
     for (y = 0; y < narea->size_y; y++)
     {
         for (x = 0; x < narea->size_x; x++)
         {
-            if ( area_point_get(circle, x, y) && !area_point_get(obstacles, x, y) )
+            if (area_point_get(circle, x, y) && !area_point_get(obstacles, x, y))
             {
                 area_point_set(narea, x, y);
             }
