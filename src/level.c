@@ -1268,6 +1268,15 @@ static int level_path_cost(level *l, level_path_element* element, position targe
     if (level_is_monster_at(l, element->pos))
         element->h_score += 10;
 
+    /* penalize fields covered with water, fire or cloud */
+    if ((level_tiletype_at(l, element->pos) == LT_FIRE)
+            || (level_tiletype_at(l, element->pos) == LT_WATER)
+            || (level_tiletype_at(l, element->pos) == LT_CLOUD))
+    {
+        element->h_score += 50;
+    }
+
+
     return element->g_score + element->h_score;
 }
 

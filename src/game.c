@@ -222,6 +222,9 @@ static void game_move_monsters(game *g)
     /* distance between player and m_npos_tmp */
     int dist;
 
+    /* damage a floor effect causes */
+    int damage;
+
     /* path to player */
     level_path *path = NULL;
 
@@ -241,8 +244,6 @@ static void game_move_monsters(game *g)
         /* increment count of turns since when player was last seen */
         if (m->lastseen)
             m->lastseen++;
-
-        m_npos = m->pos;
 
         /* determine if the monster can see the player */
         if (player_effect(g->p, ET_INVISIBILITY) && !monster_has_infravision(m))
@@ -277,10 +278,38 @@ static void game_move_monsters(game *g)
             continue;
         }
 
+        /* deal damage caused by floor effects */
+        switch (level_tiletype_at(g->p->level, m->pos))
+        {
+            case LT_CLOUD:
+                damage = 5 + rand_0n(2);
+                break;
+
+            case LT_FIRE:
+                damage = 7 + rand_0n(2);
+                break;
+
+            case LT_WATER:
+                damage = 6;
+                break;
+
+            default:
+                damage = 0;
+
+        }
+
+        if (damage && monster_hp_lose(m, damage))
+        {
+            level_monster_die(g->p->level, m, g->p->log);
+            continue;
+        }
+
+
         /* do nothing if monster is held or sleeping */
         if (monster_effect(m, ET_HOLD_MONSTER)
                 || monster_effect(m, ET_SLEEP))
             continue;
+
 
         /* update monsters action */
         if (monster_update_action(m) && m->p_visible)
@@ -307,7 +336,10 @@ static void game_move_monsters(game *g)
 
         }
 
+
         /* determine monster's next move */
+        m_npos = m->pos;
+
         switch (m->action)
         {
         case MA_FLEE:

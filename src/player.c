@@ -1315,7 +1315,6 @@ int player_spell_cast(player *p)
             range = area_new_circle_flooded(pos, radius,
                                             level_get_obstacles(p->level, pos, radius));
 
-
             level_set_tiletype(p->level, range, type, amount);
             area_destroy(range);
         }
