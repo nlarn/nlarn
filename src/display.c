@@ -1358,8 +1358,8 @@ position display_get_position(player *p, char *message, int passable)
         switch (getch())
         {
         case 27: /* ESC */
-            pos.x = G_MAXUINT16;
-            pos.y = G_MAXUINT16;
+            pos.x = G_MAXINT16;
+            pos.y = G_MAXINT16;
             /* fall through desired */
 
         case 10: /* LF */
@@ -1451,8 +1451,8 @@ position display_get_position(player *p, char *message, int passable)
             pos = npos;
 
             /* make npos invalid */
-            npos.x = G_MAXUINT16;
-            npos.y = G_MAXUINT16;
+            npos.x = G_MAXINT16;
+            npos.y = G_MAXINT16;
         }
 
     }

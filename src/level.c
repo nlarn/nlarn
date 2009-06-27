@@ -236,8 +236,8 @@ position level_find_space_in(level *l, rectangle where, level_element_t element)
 
     if (iteration == max_iterations)
     {
-        pos.x = G_MAXUINT16;
-        pos.y = G_MAXUINT16;
+        pos.x = G_MAXINT16;
+        pos.y = G_MAXINT16;
     }
 
     return pos;
@@ -255,7 +255,7 @@ position level_find_stationary(level *l, level_stationary_t stationary)
                 return pos;
 
     /* if we reach this point, the stationary is not on the map */
-    return pos_new(G_MAXUINT16, G_MAXUINT16);
+    return pos_new(G_MAXINT16, G_MAXINT16);
 }
 
 int *level_get_surrounding(level *l, position pos, level_stationary_t type)
@@ -293,7 +293,7 @@ position level_find_stationary_in(level *l, level_stationary_t stationary, recta
                 return pos;
 
     /* if we reach this point, the stationary is not on the map */
-    return pos_new(G_MAXUINT16, G_MAXUINT16);
+    return pos_new(G_MAXINT16, G_MAXINT16);
 }
 
 /**
@@ -499,7 +499,7 @@ area *level_get_obstacles(level *l, position center, int radius)
                 pos.x <= center.x + radius;
                 pos.x++, x++)
         {
-            if (!level_pos_passable(l,pos))
+            if (!pos_valid(pos) || !level_pos_passable(l,pos))
             {
                 area_point_set(narea, x, y);
             }

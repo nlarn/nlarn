@@ -21,26 +21,26 @@
 
 typedef struct position
 {
-    guint32
+    gint32
         x: 16,
         y: 16;
 } position;
 
 typedef struct rectangle
 {
-    guint32
-        x1: 8,
-        y1: 8,
-        x2: 8,
-        y2: 8;
+    gint64
+        x1: 16,
+        y1: 16,
+        x2: 16,
+        y2: 16;
 } rectangle;
 
 typedef struct area
 {
-    int start_x;
-    int start_y;
-    int size_x;
-    int size_y;
+    gint16 start_x;
+    gint16 start_y;
+    gint16 size_x;
+    gint16 size_y;
     int **area;
 } area;
 
@@ -63,10 +63,10 @@ void area_destroy(area *area);
 
 #define pos_valid(pos) (((pos).x >= 0) \
                         && ((pos).x < LEVEL_MAX_X) \
-                        && ((pos).x != G_MAXUINT16) \
+                        && ((pos).x != G_MAXINT16) \
                         && ((pos).y >= 0) \
                         && ((pos).y < LEVEL_MAX_Y) \
-                        && ((pos).y != G_MAXUINT16))
+                        && ((pos).y != G_MAXINT16))
 
 #define area_size(area)         ((area)->size_x * (area)->size_y)
 

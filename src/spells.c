@@ -252,7 +252,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_CKL,
         "ckl",
-        "cloud kill",
+        "killing cloud",
         SC_FLOOD,
         ET_NONE,
         "creates a fog of poisonous gas which kills all that is within it",

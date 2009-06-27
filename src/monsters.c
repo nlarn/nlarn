@@ -144,12 +144,12 @@ monster *monster_new(int monster_type)
     }
 
     /* position outside map */
-    nmonster->pos = pos_new(G_MAXUINT16, G_MAXUINT16);
+    nmonster->pos = pos_new(G_MAXINT16, G_MAXINT16);
 
     /* initialize AI */
     nmonster->action = MA_WANDER;
     nmonster->lastseen = -1;
-    nmonster->player_pos = pos_new(G_MAXUINT16, G_MAXUINT16);
+    nmonster->player_pos = pos_new(G_MAXINT16, G_MAXINT16);
 
     return nmonster;
 }

@@ -646,8 +646,6 @@ int player_level_enter(player *p, level *l)
                   game_difficulty(p->game),
                   game_mazefile(p->game));
 
-        l->visited = TRUE;
-
         if (p->stats.deepest_level < l->nlevel)
         {
             p->stats.deepest_level = l->nlevel;
@@ -655,17 +653,31 @@ int player_level_enter(player *p, level *l)
     }
     else
     {
+        log_disable(p->log);
+
+        /* expire timed effects */
+        /* count might be negative if time has been modified (time warp) */
+        count = abs(game_turn(p->game) - l->visited);
+        level_expire_timer(l, min(count, G_MAXUINT8));
+
         /* purge genocided monsters */
         for (count = 1; count <= l->mlist->len; count++)
         {
             monst = g_ptr_array_index(l->mlist, count - 1);
             if (monster_is_genocided(monst->type))
-                monster_destroy(g_ptr_array_remove_index_fast(l->mlist, count - 1));
+            {
+                g_ptr_array_remove_index_fast(l->mlist, count - 1);
+                monster_destroy(monst);
+            }
         }
+
+        log_enable(p->log);
 
         /* add some new monsters */
         if (l->nlevel > 0)
+        {
             level_fill_with_live(l);
+        }
     }
 
     /* position player */
@@ -738,8 +750,10 @@ int player_level_enter(player *p, level *l)
 
 int player_level_leave(player *p)
 {
-    /* not needed right now. perhaps a good place for writing checkpoints to disk */
     assert(p != NULL);
+
+    /* store the last turn player has been on this level */
+    p->level->visited = game_turn(p->game);
 
     return TRUE;
 }
@@ -1293,7 +1307,7 @@ int player_spell_cast(player *p)
         {
             switch (spell->id)
             {
-            case SP_CLD:
+            case SP_CKL:
                 radius = 3;
                 type = LT_CLOUD;
                 amount = 15 + p->lvl;
@@ -1318,8 +1332,10 @@ int player_spell_cast(player *p)
             level_set_tiletype(p->level, range, type, amount);
             area_destroy(range);
         }
-
-        amount = (spell->id == SP_MFI ? 15 : 25) + p->lvl;
+        else
+        {
+            log_add_entry(p->log, "Trust me, you don't.");
+        }
 
         break; /* SC_FLOOD */
 

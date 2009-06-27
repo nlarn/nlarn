@@ -22,8 +22,8 @@ position pos_new(int x, int y)
 {
     position pos;
 
-    assert((x >= 0 && x <= LEVEL_MAX_X) || x == G_MAXUINT16);
-    assert((y >= 0 && y <= LEVEL_MAX_Y) || y == G_MAXUINT16);
+    assert((x >= 0 && x <= LEVEL_MAX_X) || x == G_MAXINT16);
+    assert((y >= 0 && y <= LEVEL_MAX_Y) || y == G_MAXINT16);
 
     pos.x = x;
     pos.y = y;
@@ -44,7 +44,7 @@ position pos_move(position pos, int direction)
         if (pos.x > 0)
             npos = pos_new(pos.x - 1, pos.y);
         else
-            npos = pos_new(G_MAXUINT16, G_MAXUINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16);
 
         break;
 
@@ -52,7 +52,7 @@ position pos_move(position pos, int direction)
         if ((pos.x > 0) && (pos.y > 0))
             npos = pos_new(pos.x - 1, pos.y - 1);
         else
-            npos = pos_new(G_MAXUINT16, G_MAXUINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16);
 
         break;
 
@@ -60,7 +60,7 @@ position pos_move(position pos, int direction)
         if (pos.y > 0)
             npos = pos_new(pos.x, pos.y - 1);
         else
-            npos = pos_new(G_MAXUINT16, G_MAXUINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16);
 
         break;
 
@@ -68,7 +68,7 @@ position pos_move(position pos, int direction)
         if ((pos.x < LEVEL_MAX_X - 1) && (pos.y > 0))
             npos = pos_new(pos.x + 1, pos.y - 1);
         else
-            npos = pos_new(G_MAXUINT16, G_MAXUINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16);
 
         break;
 
@@ -76,7 +76,7 @@ position pos_move(position pos, int direction)
         if (pos.x < LEVEL_MAX_X - 1)
             npos = pos_new(pos.x + 1, pos.y);
         else
-            npos = pos_new(G_MAXUINT16, G_MAXUINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16);
 
         break;
 
@@ -84,7 +84,7 @@ position pos_move(position pos, int direction)
         if ((pos.x < LEVEL_MAX_X - 1) && (pos.y < LEVEL_MAX_Y - 1))
             npos = pos_new(pos.x + 1, pos.y + 1);
         else
-            npos = pos_new(G_MAXUINT16, G_MAXUINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16);
 
         break;
 
@@ -92,7 +92,7 @@ position pos_move(position pos, int direction)
         if (pos.y < LEVEL_MAX_Y - 1)
             npos = pos_new(pos.x, pos.y + 1);
         else
-            npos = pos_new(G_MAXUINT16, G_MAXUINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16);
 
         break;
 
@@ -100,7 +100,7 @@ position pos_move(position pos, int direction)
         if ((pos.x > 0) && (pos.y < LEVEL_MAX_Y - 1))
             npos = pos_new(pos.x - 1, pos.y + 1);
         else
-            npos = pos_new(G_MAXUINT16, G_MAXUINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16);
 
         break;
     }

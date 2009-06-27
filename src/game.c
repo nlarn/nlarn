@@ -167,14 +167,10 @@ void game_spin_the_wheel(game *g, int times)
 {
     int turn, monster_nr;
     monster *m;
-    int lvl_no = 0;
 
     assert(g != NULL && times > 0);
 
-    for (lvl_no = 0; lvl_no < LEVEL_MAX; lvl_no++)
-    {
-        level_expire_timer(g->levels[lvl_no], times);
-    }
+    level_expire_timer(g->p->level, times);
 
     for (turn = 0; turn < times; turn++)
     {
