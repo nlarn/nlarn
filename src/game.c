@@ -167,6 +167,7 @@ void game_spin_the_wheel(game *g, int times)
 {
     int turn, monster_nr;
     monster *m;
+    int damage;
 
     assert(g != NULL && times > 0);
 
@@ -176,6 +177,13 @@ void game_spin_the_wheel(game *g, int times)
     {
         player_regenerate(g->p);
         player_effects_expire(g->p, 1);
+
+        /* deal damage cause by level tiles to player */
+        if ((damage = level_tile_damage(g->p->level, g->p->pos)))
+        {
+            player_hp_lose(g->p, damage, PD_LEVEL,
+                           level_tiletype_at(g->p->level, g->p->pos));
+        }
 
         game_move_monsters(g);
         game_move_spheres(g);
@@ -217,9 +225,6 @@ static void game_move_monsters(game *g)
 
     /* distance between player and m_npos_tmp */
     int dist;
-
-    /* damage a floor effect causes */
-    int damage;
 
     /* path to player */
     level_path *path = NULL;
@@ -275,26 +280,7 @@ static void game_move_monsters(game *g)
         }
 
         /* deal damage caused by floor effects */
-        switch (level_tiletype_at(g->p->level, m->pos))
-        {
-            case LT_CLOUD:
-                damage = 5 + rand_0n(2);
-                break;
-
-            case LT_FIRE:
-                damage = 7 + rand_0n(2);
-                break;
-
-            case LT_WATER:
-                damage = 6;
-                break;
-
-            default:
-                damage = 0;
-
-        }
-
-        if (damage && monster_hp_lose(m, damage))
+        if (monster_hp_lose(m, level_tile_damage(g->p->level, m->pos)))
         {
             level_monster_die(g->p->level, m, g->p->log);
             continue;
@@ -329,7 +315,6 @@ static void game_move_monsters(game *g)
                               "The %s turns to flee!",
                               monster_get_name(m));
             }
-
         }
 
 

@@ -87,6 +87,8 @@ static const long player_lvl_exp[] =
     250000000, 260000000, 270000000, 280000000, 290000000, 300000000                           /* 96-101*/
 };
 
+static int player_level_leave(player *p);
+
 static int player_trigger_trap(player *p, trap_t trap);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 
@@ -265,7 +267,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     assert(p != NULL);
 
     /* check for life protection */
-    if ((ef = player_effect_get(p, ET_LIFE_PROTECTION)))
+    if ((cause_type != PD_QUIT) && (ef = player_effect_get(p, ET_LIFE_PROTECTION)))
     {
         log_add_entry(p->log, "You feel wiiieeeeerrrrrd all over!");
 
@@ -279,6 +281,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         }
 
         p->hp = p->hp_max;
+
         return;
     }
 
@@ -358,6 +361,10 @@ void player_die(player *p, player_cod cause_type, int cause)
 
     case PD_TRAP:
         g_snprintf(tmp, 100, " by a %s.", trap_description(cause));
+        break;
+
+    case PD_LEVEL:
+        g_snprintf(tmp, 100, " by %s.", lt_get_desc(cause));
         break;
 
     case PD_SPELL:
@@ -640,6 +647,11 @@ int player_level_enter(player *p, level *l)
 
     assert(p != NULL && l != NULL);
 
+    if (p->level)
+    {
+        player_level_leave(p);
+    }
+
     if (!(l->visited))
     {
         level_new(l,
@@ -748,16 +760,6 @@ int player_level_enter(player *p, level *l)
     return TRUE;
 }
 
-int player_level_leave(player *p)
-{
-    assert(p != NULL);
-
-    /* store the last turn player has been on this level */
-    p->level->visited = game_turn(p->game);
-
-    return TRUE;
-}
-
 int player_teleport(player *p)
 {
     int nlevel;
@@ -772,7 +774,6 @@ int player_teleport(player *p)
 
     if (nlevel != p->level->nlevel)
     {
-        player_level_leave(p);
         player_level_enter(p, ((game *)p->game)->levels[nlevel]);
 
         p->pos = level_find_space(p->level, LE_MONSTER);
@@ -1310,7 +1311,7 @@ int player_spell_cast(player *p)
             case SP_CKL:
                 radius = 3;
                 type = LT_CLOUD;
-                amount = 15 + p->lvl;
+                amount = 10 + p->lvl;
                 break;
 
             case SP_FLO:
@@ -1320,9 +1321,9 @@ int player_spell_cast(player *p)
                 break;
 
             case SP_MFI:
-                radius = 5;
+                radius = 4;
                 type = LT_FIRE;
-                amount = 10 + p->lvl;
+                amount = 15 + p->lvl;
                 break;
             }
 
@@ -2665,6 +2666,16 @@ char *player_get_lvl_desc(player *p)
     return (char *)player_lvl_desc[p->lvl];
 }
 
+static int player_level_leave(player *p)
+{
+    assert(p != NULL);
+
+    /* store the last turn player has been on this level */
+    p->level->visited = game_turn(p->game);
+
+    return TRUE;
+}
+
 /**
  * Player stepped on a trap
  *
@@ -2696,7 +2707,6 @@ static int player_trigger_trap(player *p, trap_t trap)
         switch (trap)
         {
         case TT_TRAPDOOR:
-            player_level_leave(p);
             time += player_level_enter(p, ((game *)p->game)->levels[p->level->nlevel + 1]);
             /* fall through to TT_TELEPORT to find a new space */
 

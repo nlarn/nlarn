@@ -39,16 +39,16 @@ static gboolean level_validate_position(level *l, position pos, level_element_t 
 
 const level_tile_data level_tiles[LT_MAX] =
 {
-    /* type         img  color     pa tr */
-    { LT_NONE,      ' ', DC_NONE,  0, 0 },
-    { LT_GRASS,     '"', DC_GREEN, 1, 1 },
-    { LT_FLOOR,     ' ', DC_NONE,  1, 1 },
-    { LT_WATER,     '~', DC_BLUE,  1, 1 },
-    { LT_DEEPWATER, '~', DC_BLUE,  0, 1 },
-    { LT_LAVA,      '~', DC_RED,   0, 1 },
-    { LT_FIRE,      '*', DC_RED,   1, 1 },
-    { LT_CLOUD,     '*', DC_WHITE, 1, 1 },
-    { LT_WALL,      '#', DC_WHITE, 0, 0 },
+    /* type         img  color     desc          pa tr */
+    { LT_NONE,      ' ', DC_NONE,  NULL,         0, 0 },
+    { LT_GRASS,     '"', DC_GREEN, "grass",      1, 1 },
+    { LT_FLOOR,     ' ', DC_NONE,  "floor",      1, 1 },
+    { LT_WATER,     '~', DC_BLUE,  "water",      1, 1 },
+    { LT_DEEPWATER, '~', DC_BLUE,  "deep water", 0, 1 },
+    { LT_LAVA,      '~', DC_RED,   "lava",       0, 1 },
+    { LT_FIRE,      '*', DC_RED,   "fire",       1, 1 },
+    { LT_CLOUD,     '*', DC_WHITE, "toxic gas",  1, 1 },
+    { LT_WALL,      '#', DC_WHITE, "wall",       0, 0 },
 };
 
 const level_stationary_data level_stationaries[LS_MAX] =
@@ -531,6 +531,32 @@ void level_set_tiletype(level *l, area *area, level_tile_t type, guint8 duration
             }
         }
     }
+}
+
+int level_tile_damage(level *l, position pos)
+{
+    int damage;
+
+    switch (level_tiletype_at(l, pos))
+    {
+        case LT_CLOUD:
+            damage = 3 + rand_0n(2);
+            break;
+
+        case LT_FIRE:
+            damage = 5 + rand_0n(2);
+            break;
+
+        case LT_WATER:
+            damage = 4 + rand_0n(2);
+            break;
+
+        default:
+            damage = 0;
+
+    }
+
+    return damage;
 }
 
 monster *level_get_monster_at(level *l, position pos)

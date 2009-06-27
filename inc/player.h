@@ -152,6 +152,7 @@ typedef enum player_cod {
     PD_MONSTER,
     PD_SPHERE,
     PD_TRAP,
+    PD_LEVEL, /* damaged by level effects */
     PD_SPELL, /* damaged by own spell */
     PD_TOO_LATE, /* returned with potion too late */
     PD_WON, /* won the game */
@@ -172,7 +173,6 @@ int player_attack(player *p, monster *m);
 int player_position(player *p, position target);
 void player_update_fov(player *p, int radius);
 int player_level_enter(player *p, level *l);
-int player_level_leave(player *p);
 int player_teleport(player *p);
 
 int player_examine(player *p, position pos);

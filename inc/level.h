@@ -99,6 +99,7 @@ typedef struct level_tile_data {
 	level_tile_t tile;
 	char image;
 	short colour;
+	char *description;
 	unsigned
         passable: 1,        /* can be passed */
         transparent: 1;     /* see-through */
@@ -160,6 +161,8 @@ void level_path_destroy(level_path *path);
 area *level_get_obstacles(level *l, position center, int radius);
 void level_set_tiletype(level *l, area *area, level_tile_t type, guint8 duration);
 
+int level_tile_damage(level *l, position pos);
+
 monster *level_get_monster_at(level *l, position pos);
 int level_is_monster_at(level *l, position pos);
 GPtrArray *level_get_monsters_in(level *l, rectangle area);
@@ -177,6 +180,7 @@ extern const level_stationary_data level_stationaries[LS_MAX];
 
 #define lt_get_image(tile)      (level_tiles[(tile)].image)
 #define lt_get_colour(tile)     (level_tiles[(tile)].colour)
+#define lt_get_desc(tile)       (level_tiles[(tile)].description)
 #define lt_is_passable(tile)    (level_tiles[(tile)].passable)
 #define lt_is_transparent(tile) (level_tiles[(tile)].transparent)
 

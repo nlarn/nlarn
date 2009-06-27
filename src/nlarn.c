@@ -466,9 +466,7 @@ int main(int argc, char *argv[])
         /* if told to switch level, do so */
         if (nlevel != NULL)
         {
-            player_level_leave(g->p);
             moves_count = player_level_enter(g->p, nlevel);
-
             nlevel = NULL;
         }
 
