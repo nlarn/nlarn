@@ -53,7 +53,7 @@ const spell_data spells[SP_MAX] =
         ET_NONE,
         "Creates and hurls a magic missile equivalent to a + 1 magic arrow",
         "Your missiles hit the %s.",
-        NULL,
+        "Your missile bounces off the %s.",
         1,
         0
     },
@@ -77,7 +77,7 @@ const spell_data spells[SP_MAX] =
         ET_SLEEP,
         "causes some monsters to go to sleep",
         NULL,
-        NULL,
+        "The %s doesn't sleep.",
         1,
         0
     },
@@ -89,7 +89,7 @@ const spell_data spells[SP_MAX] =
         ET_CHARM_MONSTER,
         "some monsters may be awed at your magnificence",
         NULL,
-        NULL,
+        "The %s isn't afraid of you.",
         1,
         0
     },
@@ -101,7 +101,7 @@ const spell_data spells[SP_MAX] =
         ET_NONE,
         "causes your hands to emit a screeching sound toward what they point",
         "The sound damages the %s.",
-        NULL,
+        "The %s can't hear the noise.",
         1,
         0
     },
@@ -208,8 +208,8 @@ const spell_data spells[SP_MAX] =
         SC_RAY,
         ET_NONE,
         "sends forth a cone of cold which freezes what it touches",
-        "Your cone of cold strikes the %s.",
-        NULL,
+        "The cone of cold strikes the %s.",
+        "The %s loves the cold!",
         3,
         0
     },
@@ -221,7 +221,7 @@ const spell_data spells[SP_MAX] =
         ET_NONE,
         "you can find out what this does for yourself",
         NULL,
-        NULL,
+        "The %s resists.",
         3,
         0
     },
@@ -257,7 +257,7 @@ const spell_data spells[SP_MAX] =
         ET_NONE,
         "creates a fog of poisonous gas which kills all that is within it",
         "The %s gasps for air.",
-        NULL,
+        "The %s loves the water!",
         3,
         0
     },
@@ -281,7 +281,7 @@ const spell_data spells[SP_MAX] =
         ET_NONE,
         "dries up water in the immediate vicinity",
         "The %s shrivels up.",
-        NULL,
+        "The %s isn't affected.",
         4,
         0
     },
@@ -293,7 +293,7 @@ const spell_data spells[SP_MAX] =
         ET_NONE,
         "you finger will emit a lightning bolt when this spell is cast",
         "A lightning bolt hits the %s.",
-        NULL,
+        "The %s loves fire and lightning!",
         4,
         0
     },
@@ -341,7 +341,7 @@ const spell_data spells[SP_MAX] =
         ET_NONE,
         "this is a holy spell and calls upon your god to back you up",
         "The %s's heart stopped.",
-        NULL,
+        "The %s isn't affected.",
         4,
         0
     },
@@ -491,105 +491,6 @@ const spell_data spells[SP_MAX] =
     },
 };
 
-char *spelmes[] =
-{
-    "",
-    /*  1 */    "the web had no effect on the %s",
-    /*  2 */    "the %s changed shape to avoid the web",
-    /*  3 */    "the %s isn't afraid of you",
-    /*  4 */    "the %s isn't affected",
-    /*  5 */    "the %s can see you with his infravision",
-    /*  6 */    "the %s vaporizes your missile",
-    /*  7 */    "your missile bounces off the %s",
-    /*  8 */    "the %s doesn't sleep",
-    /*  9 */    "the %s resists",
-    /* 10 */    "the %s can't hear the noise",
-    /* 11 */    "the %s's tail cuts it free of the web",
-    /* 12 */    "the %s burns through the web",
-    /* 13 */    "your missiles pass right through the %s",
-    /* 14 */    "the %s sees through your illusions",
-    /* 15 */    "the %s loves the cold!",
-    /* 16 */	"the %s loves the water!",
-    /* 17 */	"the demon is terrified of the %s!",
-    /* 18 */	"the %s loves fire and lightning!"
-};
-
-
-int spelweird[MT_MAX+8][SP_MAX] =
-{
-    /*                      p m d s c s    w s e h c c p i    b c p c h c v    d l d g f f    s h s t m    s g s w a p */
-    /*                      r l e l h s    e t n e b r h n    a l l a a k p    r i r l l g    c l t e f    p e u t l e */
-    /*                      o e x e m p    b r l l l e a v    l d y n s l r    y t l o o r    a d p l i    h n m w t r */
-    /*            bat */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*          gnome */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,5,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*      hobgoblin */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*         jackal */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*         kobold */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,5,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*            orc */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   4,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*          snake */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*giant centipede */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*         jaculi */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*     troglodyte */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*      giant ant */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*   floating eye */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*     leprechaun */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*          nymph */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*         quasit */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*   rust monster */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   4,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*         zombie */ {  0,0,0,8,0,4,   0,0,0,0,0,0,0,0,   0,0,0,0,0,4,0,   4,0,0,0,0,4,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*   assassin bug */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*        bugbear */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,5,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*     hell hound */ {  0,6,0,0,0,0,   12,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*     ice lizard */ {  0,0,0,0,0,0,   11,0,0,0,0,0,0,0,  0,15,0,0,0,0,0,  0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*        centaur */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*          troll */ {  0,7,0,0,0,0,   0,0,0,0,0,0,0,5,   0,0,0,0,0,0,0,   4,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*           yeti */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,15,0,0,0,0,0,  0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*   white dragon */ {  0,0,0,0,0,0,   0,0,0,0,0,0,14,0,  0,15,0,0,0,0,0,  4,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*            elf */ {  0,0,0,0,0,0,   0,0,0,0,0,0,14,5,  0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*gelatinous cube */ {  0,0,0,0,0,0,   2,0,0,0,0,0,0,0,   0,0,0,0,0,4,0,   0,0,0,0,0,4,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*      metamorph */ {  0,13,0,0,0,0,  2,0,0,0,0,0,0,0,   0,0,0,0,0,4,0,   4,0,0,0,0,4,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*         vortex */ {  0,13,0,0,0,10, 1,0,0,0,0,0,0,0,   0,0,0,0,0,4,0,   4,0,0,0,4,4,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*         ziller */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*   violet fungi */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*         wraith */ {  0,0,0,8,0,4,   0,0,0,0,0,0,0,0,   0,0,0,0,0,4,0,   4,0,0,0,0,4,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*      forvalaka */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,5,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*      lama nobe */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*        osequip */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*          rothe */ {  0,7,0,0,0,0,   0,0,0,0,0,0,0,5,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*           xorn */ {  0,7,0,0,0,0,   0,0,0,0,0,0,0,5,   0,0,0,0,0,0,0,   4,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*        vampire */ {  0,0,0,8,0,4,   0,0,0,0,0,0,0,0,   0,0,0,0,0,4,0,   0,0,0,0,0,4,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*invisible staker*/ {  0,0,0,0,0,0,   1,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*    poltergeist */ {  0,13,0,8,0,4,  1,0,0,0,0,0,0,0,   0,4,0,0,0,4,0,   4,0,0,0,4,4,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /* disenchantress */ {  0,0,0,8,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*shambling mound */ {  0,0,0,0,0,10,  0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*    yellow mold */ {  0,0,0,8,0,0,   1,0,0,0,0,0,4,0,   0,0,0,0,0,4,0,   0,0,0,0,0,4,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*     umber hulk */ {  0,7,0,0,0,0,   0,0,0,0,0,0,0,5,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*     gnome king */ {  0,7,0,0,3,0,   0,0,0,0,0,0,0,5,   0,0,9,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*          mimic */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*     water lord */ {  0,13,0,8,3,4,  1,0,0,0,0,0,0,0,   0,0,9,0,0,4,0,   0,0,0,0,16,4,  0,0,0,0,0,   0,0,0,0,0,0 },
-    /*  bronze dragon */ {  0,7,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*   green dragon */ {  0,7,0,0,0,0,   11,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*    purple worm */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*          xvart */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*    spirit naga */ {  0,13,0,8,3,4,  1,0,0,0,0,0,0,5,   0,4,9,0,0,4,0,   4,0,0,0,4,4,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*  silver dragon */ {  0,6,0,9,0,0,   12,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*platinum dragon */ {  0,7,0,9,0,0,   11,0,0,0,0,0,14,0, 0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*   green urchin */ {  0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-    /*     red dragon */ {  0,6,0,0,0,0,   12,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,   0,0,0,0,0,0,   0,0,0,0,0,   0,0,0,0,0,0 },
-
-    /*                      p m d s c s    w s e h c c p i    b c p c h c v    d l d g f f    s h s t m    s g s w a p */
-    /*                      r l e l h s    e t n e b r h n    a l l a a k p    r i r l l g    c l t e f    p e u t l e */
-    /*                      o e x e m p    b r l l l e a v    l d y n s l r    y t l o o r    a d p l i    h n m w t r */
-    /*     demon lord */ {  0,7,0,4,3,0,   1,0,0,0,0,0,14,5,  0,0,4,0,0,4,0,   4,0,0,0,4,4,   0,0,0,0,0,   9,0,0,0,0,0 },
-    /*     demon lord */ {  0,7,0,4,3,0,   1,0,0,0,0,0,14,5,  0,0,4,0,0,4,0,   4,0,0,0,4,4,   0,0,0,0,0,   9,0,0,0,0,0 },
-    /*     demon lord */ {  0,7,0,4,3,0,   1,0,0,0,0,0,14,5,  0,0,4,0,0,4,0,   4,0,0,0,4,4,   0,0,0,0,0,   9,0,0,0,0,0 },
-    /*     demon lord */ {  0,7,0,4,3,0,   1,0,0,0,0,0,14,5,  0,0,4,0,0,4,0,   4,0,0,0,4,4,   0,0,0,0,0,   9,0,0,0,0,0 },
-    /*     demon lord */ {  0,7,0,4,3,0,   1,0,0,0,0,0,14,5,  0,0,4,0,0,4,0,   4,0,0,0,4,4,   0,0,0,0,0,   9,0,0,0,0,0 },
-    /*     demon lord */ {  0,7,0,4,3,0,   1,0,0,0,0,0,14,5,  0,0,4,0,0,4,0,   4,0,0,0,4,4,   0,0,0,0,0,   9,0,0,0,0,0 },
-    /*     demon lord */ {  0,7,0,4,3,0,   1,0,0,0,0,0,14,5,  0,0,4,0,0,4,0,   4,0,0,0,4,4,   0,0,0,0,0,   9,0,0,0,0,0 },
-    /*   demon prince */ {  0,7,0,4,3,9,   1,0,0,0,0,0,14,5,  0,0,4,0,0,4,0,   4,0,0,0,4,4,   4,0,0,0,4,   9,0,0,0,0,0 }
-};
-
 static int book_desc_mapping[SP_MAX - 1] = { 0 };
 
 static const char *book_desc[SP_MAX - 1] =
@@ -671,44 +572,6 @@ int spell_sort(gconstpointer a, gconstpointer b)
 void book_desc_shuffle()
 {
     shuffle(book_desc_mapping, SP_MAX - 1, 0);
-}
-
-book *book_new(int spell_id)
-{
-    book *nbook;
-    int blessedness_status;
-
-    assert(spell_id > SP_NONE && spell_id < SP_MAX);
-
-	/* has to be zeroed or memcmp will fail */
-    nbook = g_malloc0(sizeof(book));
-
-    nbook->type = spell_id;
-
-    blessedness_status = rand_1n(100);
-    if (blessedness_status <= 10)
-        nbook->blessedness = BT_CURSED;
-    else if (blessedness_status >= 90)
-        nbook->blessedness = BT_BLESSED;
-    else
-        nbook->blessedness = BT_UNCURSED;
-
-    return nbook;
-}
-
-book *book_new_by_level(int level)
-{
-    int spell_id;
-    /* TODO: do some random wizardry here */
-    spell_id = rand_m_n(SP_NONE + 1, SP_MAX -1);
-
-    return(book_new(spell_id));
-}
-
-void book_destroy(book *b)
-{
-    assert(b != NULL);
-    g_free(b);
 }
 
 char *book_get_desc(int book_id)

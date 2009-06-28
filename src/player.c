@@ -108,7 +108,7 @@ static int player_magic_spell_extension(player *p);
 static void player_magic_timewarp(player *p);
 static void player_magic_vaporize_rock(player *p);
 
-player *player_new(void *game)
+player *player_new(struct game *game)
 {
     player *p;
     item *it;
@@ -371,6 +371,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_snprintf(tmp, 100, " %s with the spell \"%s\".",
                    p->sex ? "himself" : "herself",
                    spell_name_by_id(cause));
+        break;
 
     default:
         /* no further description */
@@ -397,7 +398,7 @@ void player_die(player *p, player_cod cause_type, int cause)
             display_show_message(title, text);
 
         display_shutdown();
-        game_destroy((game *)p->game);
+        game_destroy(p->game);
         exit(EXIT_SUCCESS);
     }
 }
@@ -596,10 +597,7 @@ int player_attack(player *p, monster *m)
         if (m->hp < 1)
         {
             /* killed the monster */
-            player_exp_gain(p, monster_get_exp(m));
-            p->stats.monsters_killed += 1;
-
-            level_monster_die(p->level, m, p->log);
+            player_monster_kill(p, m);
         }
     }
     else
@@ -774,7 +772,7 @@ int player_teleport(player *p)
 
     if (nlevel != p->level->nlevel)
     {
-        player_level_enter(p, ((game *)p->game)->levels[nlevel]);
+        player_level_enter(p, p->game->levels[nlevel]);
 
         p->pos = level_find_space(p->level, LE_MONSTER);
 
@@ -782,6 +780,14 @@ int player_teleport(player *p)
     }
 
     return FALSE;
+}
+
+void player_monster_kill(player *p, monster *m)
+{
+    player_exp_gain(p, monster_get_exp(m));
+    p->stats.monsters_killed[m->type] += 1;
+
+    level_monster_die(p->level, m, p->log);
 }
 
 int player_examine(player *p, position pos)
@@ -1126,6 +1132,9 @@ int player_spell_cast(player *p)
     position pos;
     monster *monster = NULL;
 
+    GPtrArray *mlist;
+    int i;
+
     int amount = 0;
     int radius = 0;
     level_tile_t type = LT_NONE;
@@ -1203,8 +1212,7 @@ int player_spell_cast(player *p)
                               spell_msg_succ(spell),
                               monster_get_name(monster));
 
-                player_exp_gain(p, monster_get_exp(monster));
-                level_monster_die(p->level, monster, NULL);
+                player_monster_kill(p, monster);
             }
             break; /* SP_DRY */
 
@@ -1213,10 +1221,7 @@ int player_spell_cast(player *p)
             amount = min(p->hp - 1, p->hp_max / 2);
 
             if (monster_hp_lose(monster, amount))
-            {
-                player_exp_gain(p, monster_get_exp(monster));
-                level_monster_die(p->level, monster, p->log);
-            }
+                player_monster_kill(p, monster);
 
             player_hp_lose(p, amount, PD_SPELL, SP_DRL);
 
@@ -1237,8 +1242,7 @@ int player_spell_cast(player *p)
                                   spell_msg_succ(spell),
                                   monster_get_name(monster));
 
-                    player_exp_gain(p, monster_get_exp(monster));
-                    level_monster_die(p->level, monster, NULL);
+                    player_monster_kill(p, monster);
 
                 }
             }
@@ -1266,7 +1270,6 @@ int player_spell_cast(player *p)
 
             /* teleport */
         case SP_TEL:
-
             log_add_entry(p->log, "The %s disappears.", monster_get_name(monster));
             monster->pos = level_find_space(p->level, LE_MONSTER);
 
@@ -1344,6 +1347,36 @@ int player_spell_cast(player *p)
 
         g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(spell));
         pos = display_get_position(p, buffer, TRUE);
+
+        /* currently only fireball */
+        amount = 25 + p->lvl + rand_0n(25 + p->lvl);
+
+        mlist = level_get_monsters_in(p->level, rect_new_sized(pos, 1));
+
+        for (i = 1; i <= mlist->len; i++)
+        {
+            monster = g_ptr_array_index(mlist, i - 1);
+
+            log_add_entry(p->log,
+                          spell_msg_succ(spell),
+                          monster_get_name(monster));
+
+            if (monster_hp_lose(monster, amount))
+            {
+                player_monster_kill(p, monster);
+            }
+        }
+
+        if (pos_in_rect(p->pos, rect_new_sized(pos, 1)))
+        {
+            /* player has been hit by the blast as well */
+            log_add_entry(p->log, "The fireball hits you.");
+
+            player_hp_lose(p, amount - player_effect(p, ET_FIRE_RESISTANCE),
+                           PD_SPELL, SP_BAL);
+        }
+
+        g_ptr_array_free(mlist, FALSE);
 
         break; /* SC_BLAST */
 
@@ -2707,7 +2740,7 @@ static int player_trigger_trap(player *p, trap_t trap)
         switch (trap)
         {
         case TT_TRAPDOOR:
-            time += player_level_enter(p, ((game *)p->game)->levels[p->level->nlevel + 1]);
+            time += player_level_enter(p, (p->game)->levels[p->level->nlevel + 1]);
             /* fall through to TT_TELEPORT to find a new space */
 
         case TT_TELEPORT:
@@ -2937,8 +2970,7 @@ static int player_magic_annihilate(player *p)
 
         if (m->type < MT_DEMONLORD_II)
         {
-            experience += monster_get_exp(m);
-            level_monster_die(p->level, m, p->log);
+            player_monster_kill(p, m);
         }
         else
         {
@@ -3237,13 +3269,13 @@ static void player_magic_timewarp(player *p)
     if (i == 0)
         i = 1;
 
-    if (i > ((game *)p->game)->gtime)
-        i = ((game *)p->game)->gtime;
+    if (i > p->game->gtime)
+        i = p->game->gtime;
 
-    ((game *)p->game)->gtime += (100 * i);
+    (p->game)->gtime += (100 * i);
 
-    if (((game *)p->game)->gtime < 0)
-        ((game *)p->game)->gtime = 0;
+    if (p->game->gtime < 0)
+        p->game->gtime = 0;
 
     log_add_entry(p->log,
                   "You go %sward in time by %d mobul%s.",
@@ -3274,7 +3306,9 @@ static void player_magic_vaporize_rock(player *p)
     {
         /* xorns take damage from vpr */
         if (monster_hp_lose(m, divert(200, 10)))
-            level_monster_die(p->level, m, p->log);
+        {
+            player_monster_kill(p, m);
+        }
     }
 
     switch (level_stationary_at(p->level, pos))

@@ -31,10 +31,13 @@
 /* number of courses available in school */
 #define SCHOOL_COURSE_COUNT 8
 
+/* forward declaration */
+struct game;
+
 typedef struct player_stats {
     int moves_made;
     int deepest_level;
-    int monsters_killed;
+    int monsters_killed[MT_MAX];
     int spells_cast;
     int potions_quaffed;
     int scrolls_read;
@@ -113,7 +116,7 @@ typedef struct player {
 
     position pos; /* player's position */
     level *level; /* current dungeon level */
-    void *game; /* pointer to game the player is in */
+    struct game *game; /* pointer to game the player is in */
     player_stats stats; /* statistics */
     message_log *log; /* game message log */
 
@@ -163,7 +166,7 @@ typedef enum player_cod {
 
 /* function declarations */
 
-player *player_new(void *game);
+player *player_new(struct game *game);
 void player_destroy(player *p);
 
 int player_regenerate(player *p);
@@ -174,6 +177,7 @@ int player_position(player *p, position target);
 void player_update_fov(player *p, int radius);
 int player_level_enter(player *p, level *l);
 int player_teleport(player *p);
+void player_monster_kill(player *p, monster *m);
 
 int player_examine(player *p, position pos);
 int player_pickup(player *p);

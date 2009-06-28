@@ -96,11 +96,6 @@ enum spell_ids {
 	SP_MAX		/* last known spell */
 };
 
-typedef struct book {
-	int type;       /* id of spell described within */
-	unsigned blessedness: 2;
-} book;
-
 /* external vars */
 
 extern const spell_data spells[SP_MAX];
@@ -132,10 +127,6 @@ int spell_sort(gconstpointer a, gconstpointer b);
 /* *** BOOKS *** */
 
 void book_desc_shuffle();
-book *book_new(int spell_id);
-book *book_new_by_level(int level);
-void book_destroy(book *b);
-
 char *book_get_desc(int book_id);
 
 #define book_get_name(book)   (spells[(book)->id].name)
