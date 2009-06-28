@@ -539,20 +539,20 @@ int level_tile_damage(level *l, position pos)
 
     switch (level_tiletype_at(l, pos))
     {
-        case LT_CLOUD:
-            damage = 3 + rand_0n(2);
-            break;
+    case LT_CLOUD:
+        damage = 3 + rand_0n(2);
+        break;
 
-        case LT_FIRE:
-            damage = 5 + rand_0n(2);
-            break;
+    case LT_FIRE:
+        damage = 5 + rand_0n(2);
+        break;
 
-        case LT_WATER:
-            damage = 4 + rand_0n(2);
-            break;
+    case LT_WATER:
+        damage = 4 + rand_0n(2);
+        break;
 
-        default:
-            damage = 0;
+    default:
+        damage = 0;
 
     }
 
@@ -676,6 +676,23 @@ void level_monster_die(level *l, monster *m, message_log *log)
 
     g_ptr_array_remove_fast(l->mlist, m);
     monster_destroy(m);
+}
+
+void level_monsters_genocide(level *l)
+{
+    int count;
+    monster *monst;
+
+    /* purge genocided monsters */
+    for (count = 1; count <= l->mlist->len; count++)
+    {
+        monst = g_ptr_array_index(l->mlist, count - 1);
+        if (monster_is_genocided(monst->type))
+        {
+            g_ptr_array_remove_index_fast(l->mlist, count - 1);
+            monster_destroy(monst);
+        }
+    }
 }
 
 void level_expire_timer(level *l, guint8 count)

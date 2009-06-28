@@ -100,6 +100,7 @@ static void player_magic_detect_item(player *p, int treasure);
 static int player_magic_enchant_armour(player *p);
 static int player_magic_enchant_weapon(player *p);
 static int player_magic_gem_perfection(player *p);
+static void player_magic_genocide_monster(player *p);
 static int player_magic_heal_monster(player *p);
 static void player_magic_identify(player *p);
 static void player_magic_make_wall(player *p);
@@ -640,7 +641,6 @@ int player_position(player *p, position target)
 int player_level_enter(player *p, level *l)
 {
     int count;
-    monster *monst;
     position pos;
 
     assert(p != NULL && l != NULL);
@@ -670,16 +670,7 @@ int player_level_enter(player *p, level *l)
         count = abs(game_turn(p->game) - l->visited);
         level_expire_timer(l, min(count, G_MAXUINT8));
 
-        /* purge genocided monsters */
-        for (count = 1; count <= l->mlist->len; count++)
-        {
-            monst = g_ptr_array_index(l->mlist, count - 1);
-            if (monster_is_genocided(monst->type))
-            {
-                g_ptr_array_remove_index_fast(l->mlist, count - 1);
-                monster_destroy(monst);
-            }
-        }
+        level_monsters_genocide(l);
 
         log_enable(p->log);
 
@@ -1419,7 +1410,7 @@ int player_spell_cast(player *p)
 
             /* genocide */
         case SP_GEN:
-            /* TODO: implement */
+            player_magic_genocide_monster(p);
             break;
 
             /* summon daemon */
@@ -2959,14 +2950,14 @@ static int player_magic_annihilate(player *p)
     int i;
     int experience = 0;
 
-    GPtrArray *monsters;
+    GPtrArray *mlist;
     monster *m;
 
-    monsters = level_get_monsters_in(p->level, rect_new_sized(p->pos, 1));
+    mlist = level_get_monsters_in(p->level, rect_new_sized(p->pos, 1));
 
-    for (i = 1; i <= monsters->len; i++)
+    for (i = 1; i <= mlist->len; i++)
     {
-        m = g_ptr_array_index(monsters, i - 1);
+        m = g_ptr_array_index(mlist, i - 1);
 
         if (m->type < MT_DEMONLORD_II)
         {
@@ -2989,7 +2980,7 @@ static int player_magic_annihilate(player *p)
         log_add_entry(p->log, "You hear loud screams of agony!");
     }
 
-    g_ptr_array_free(monsters, FALSE);
+    g_ptr_array_free(mlist, FALSE);
 
     return experience;
 }
@@ -3152,6 +3143,39 @@ static int player_magic_gem_perfection(player *p)
     }
 
     return count;
+}
+
+static void player_magic_genocide_monster(player *p)
+{
+    char in;
+    int id;
+
+    assert(p != NULL);
+
+    log_add_entry(p->log, "Whih monster do you want to genocide (type letter)?");
+    display_paint_screen(p);
+
+    in = getch();
+
+    for (id = 1; id < MT_MAX; id++)
+    {
+        if (monster_get_image_by_type(id) == in)
+        {
+            if (!monster_is_genocided(id))
+            {
+                monster_genocide(id);
+                log_add_entry(p->log,
+                              "Wiped out all %ss",
+                              monster_get_name_by_type(id));
+
+                level_monsters_genocide(p->level);
+            }
+
+            return;
+        }
+    }
+
+    log_add_entry(p->log, "No such monster.");
 }
 
 static int player_magic_heal_monster(player *p)

@@ -18,7 +18,7 @@
 
 #include "nlarn.h"
 
-static const monster_data monsters[MT_MAX] =
+const monster_data monsters[MT_MAX] =
 {
     /* ID                 NAME                  LV   AC DAM INT    GO  HP      EXP IMG he no ha sl fa  fl sp un in iv */
     { MT_NONE,            "",                    0,  0,  0,  0,    0,   0,      0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -363,127 +363,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
     return TRUE;
 }
 
-inline char *monster_get_name(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].name;
-}
-
-inline char *monster_get_name_by_type(monster_t type)
-{
-    assert(type > MT_NONE && type < MT_MAX);
-    return monsters[type].name;
-}
-
-inline int monster_get_level(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].level;
-}
-
-inline int monster_get_ac(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].ac;
-}
-
-inline int monster_get_dam(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].dam;
-}
-
-inline int monster_get_int(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].intelligence;
-}
-
-inline int monster_get_gold(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].gold;
-}
-
-inline int monster_get_hp_max(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].hp_max;
-}
-
-inline int monster_get_exp(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].exp;
-}
-
-inline char monster_get_image(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].image;
-}
-
-inline int monster_has_head(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].head;
-}
-
-inline int monster_is_beheadable(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return !monsters[m->type].nobehead;
-}
-
-inline int monster_has_hands(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].hands;
-}
-
-inline int monster_is_slow(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].slow;
-}
-
-inline int monster_is_fast(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].fast;
-}
-
-inline int monster_can_fly(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].fly;
-}
-
-inline int monster_is_spirit(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].spirit;
-}
-
-inline int monster_is_undead(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].undead;
-}
-
-inline int monster_is_invisible(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].invisible;
-}
-
-inline int monster_has_infravision(monster *m)
-{
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-    return monsters[m->type].infravision;
-}
-
-inline int monster_genocide(int monster_id)
+int monster_genocide(int monster_id)
 {
     assert(monster_id > MT_NONE && monster_id < MT_MAX);
 
@@ -491,7 +371,7 @@ inline int monster_genocide(int monster_id)
     return monster_genocided[monster_id];
 }
 
-inline int monster_is_genocided(int monster_id)
+int monster_is_genocided(int monster_id)
 {
     assert(monster_id > MT_NONE && monster_id < MT_MAX);
     return monster_genocided[monster_id];

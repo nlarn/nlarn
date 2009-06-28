@@ -152,6 +152,9 @@ typedef struct monster {
 	GPtrArray *effects;
 } monster;
 
+/* external vars */
+
+extern const monster_data monsters[MT_MAX];
 
 /* function definitions */
 
@@ -165,30 +168,32 @@ void monster_pickup_items(monster *m, inventory *floor, message_log *log);
 gboolean monster_update_action(monster *m);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
 
-inline char *monster_get_name(monster *m);
-inline char *monster_get_name_by_type(monster_t type);
-inline int monster_get_level(monster *m);
-inline int monster_get_ac(monster *m);
-inline int monster_get_dam(monster *m);
-inline int monster_get_int(monster *m);
-inline int monster_get_gold(monster *m);
-inline int monster_get_hp_max(monster *m);
-inline int monster_get_exp(monster *m);
-inline char monster_get_image(monster *m);
 
-inline int monster_has_head(monster *m);
-inline int monster_is_beheadable(monster *m);
-inline int monster_has_hands(monster *m);
-inline int monster_is_slow(monster *m);
-inline int monster_is_fast(monster *m);
-inline int monster_can_fly(monster *m);
-inline int monster_is_spirit(monster *m);
-inline int monster_is_undead(monster *m);
-inline int monster_is_invisible(monster *m);
-inline int monster_has_infravision(monster *m);
+#define monster_get_name(monster)        (monsters[(monster)->type].name)
+#define monster_get_level(monster)       (monsters[(monster)->type].level)
+#define monster_get_ac(monster)          (monsters[(monster)->type].ac)
+#define monster_get_dam(monster)         (monsters[(monster)->type].dam)
+#define monster_get_int(monster)         (monsters[(monster)->type].intelligence)
+#define monster_get_gold(monster)        (monsters[(monster)->type].gold)
+#define monster_get_hp_max(monster)      (monsters[(monster)->type].hp_max)
+#define monster_get_exp(monster)         (monsters[(monster)->type].exp)
+#define monster_get_image(monster)       (monsters[(monster)->type].image)
+#define monster_has_head(monster)        (monsters[(monster)->type].head)
+#define monster_is_beheadable(monster)   (!monsters[(monster)->type].nobehead)
+#define monster_has_hands(monster)       (monsters[(monster)->type].hands)
+#define monster_is_slow(monster)         (monsters[(monster)->type].slow)
+#define monster_is_fast(monster)         (monsters[(monster)->type].fast)
+#define monster_can_fly(monster)         (monsters[(monster)->type].fly)
+#define monster_is_spirit(monster)       (monsters[(monster)->type].spirit)
+#define monster_is_undead(monster)       (monsters[(monster)->type].undead)
+#define monster_is_invisible(monster)    (monsters[(monster)->type].invisible)
+#define monster_has_infravision(monster) (monsters[(monster)->type].infravision)
 
-inline int monster_genocide(int monster_id);
-inline int monster_is_genocided(int monster_id);
+#define monster_get_name_by_type(type)  (monsters[(type)].name)
+#define monster_get_image_by_type(type) (monsters[(type)].image)
+
+int monster_genocide(int monster_id);
+int monster_is_genocided(int monster_id);
 
 /* dealing with temporary effects */
 #define monster_effect_add(monster, effect) effect_add((monster)->effects, (effect))

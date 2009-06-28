@@ -168,6 +168,7 @@ int level_is_monster_at(level *l, position pos);
 GPtrArray *level_get_monsters_in(level *l, rectangle area);
 int level_fill_with_live(level *l);
 void level_monster_die(level *l, monster *m, message_log *log);
+void level_monsters_genocide(level *l);
 
 void level_expire_timer(level *l, guint8 count);
 
