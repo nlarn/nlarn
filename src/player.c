@@ -92,6 +92,7 @@ static int player_level_leave(player *p);
 static int player_trigger_trap(player *p, trap_t trap);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 
+static void player_magic_alter_reality(player *p);
 static int player_magic_annihilate(player *p);
 static void player_magic_create_artefact(player *p);
 static int player_magic_create_monster(player *p);
@@ -186,6 +187,11 @@ void player_destroy(player *p)
 
     inv_destroy(p->inventory);
     log_delete(p->log);
+
+    if (p->name)
+    {
+        g_free(p->name);
+    }
 
     g_free(p);
 }
@@ -1420,7 +1426,7 @@ int player_spell_cast(player *p)
 
             /* alter realitiy */
         case SP_ALT:
-            /* TODO: implement */
+            player_magic_alter_reality(p);
             break;
         }
 
@@ -2943,6 +2949,34 @@ static void player_calculate_octant(player *p, int row, float start,
             break;
         }
     }
+}
+
+static void player_magic_alter_reality(player *p)
+{
+    level *nlevel, *olevel;
+
+    olevel = p->level;
+
+    /* create new level */
+    nlevel = g_malloc0(sizeof (level));
+    nlevel->nlevel = olevel->nlevel;
+
+    level_new(nlevel,
+              game_difficulty(p->game),
+              game_mazefile(p->game));
+
+    /* make new level active */
+    p->game->levels[p->level->nlevel] = nlevel;
+    p->level = nlevel;
+
+    /* reposition player (if needed) */
+    if (!level_pos_passable(nlevel, p->pos))
+    {
+        p->pos = level_find_space(nlevel, LE_MONSTER);
+    }
+
+    /* destroy old level */
+    level_destroy(olevel);
 }
 
 static int player_magic_annihilate(player *p)
