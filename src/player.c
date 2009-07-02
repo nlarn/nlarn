@@ -1257,10 +1257,6 @@ int player_spell_cast(player *p)
 
             break; /* SP_FGR */
 
-            /* phantasmal forces */
-        case SP_PHA:
-            break;
-
             /* polymorph */
         case SP_PLY:
             do
@@ -1283,7 +1279,13 @@ int player_spell_cast(player *p)
             /* spell has an effect, add that to the monster */
             assert(spell_effect(spell) != ET_NONE);
 
+            if (spell_msg_succ(spell))
+                log_add_entry(p->log, spell_msg_succ(spell),
+                              monster_get_name(monster));
+
             eff = effect_new(spell_effect(spell), game_turn(p->game));
+            if (!eff->amount) eff->amount = p->intelligence;
+
             monster_effect_add(monster, eff);
 
             /* show message if monster is visible */
