@@ -402,7 +402,12 @@ void player_die(player *p, player_cod cause_type, int cause)
     else
     {
         if (cause_type != PD_QUIT)
+        {
+            /* redraw screen to make sure player can see the cause of his death */
+            display_paint_screen(p);
+
             display_show_message(title, text);
+        }
 
         display_shutdown();
         game_destroy(p->game);
@@ -751,6 +756,9 @@ int player_level_enter(player *p, level *l)
     /* TODO: move monsters from previous level to this level if
        they were standing next to the stairs (if INT > something)
     */
+
+    /* recalculate FOV to make ensure correct display after entering a level */
+    player_update_fov(p, (player_effect(p, ET_BLINDNESS) ? 0 : 6 + player_effect(p, ET_AWARENESS)));
 
     return TRUE;
 }
@@ -1189,7 +1197,7 @@ int player_spell_cast(player *p)
     case SC_POINT:
 
         g_snprintf(buffer, 60, "Select a target for %s.", spell_name(spell));
-        pos = display_get_position(p, buffer, FALSE);
+        pos = display_get_position(p, buffer, FALSE, FALSE);
         monster = level_get_monster_at(p->level, pos);
 
         if (!monster)
@@ -1240,7 +1248,6 @@ int player_spell_cast(player *p)
                                   monster_get_name(monster));
 
                     player_monster_kill(p, monster);
-
                 }
             }
             else
@@ -1295,14 +1302,45 @@ int player_spell_cast(player *p)
     case SC_RAY:    /* creates a ray */
 
         g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(spell));
-        pos = display_get_position(p, buffer, TRUE);
+        pos = display_get_position(p, buffer, TRUE, TRUE);
+
+        if (pos_valid(pos) && (monster = level_get_monster_at(p->level, pos)))
+        {
+            switch (spell->id)
+            {
+                case SP_MLE:
+                    amount = rand_1n(((p->lvl + 1) << 1)) + p->lvl + 3;
+                    break;
+
+                case SP_SSP:
+                    amount = rand_1n(10) + 15 + p->lvl;
+                    break;
+
+                case SP_CLD:
+                    amount = rand_1n(25) + 20 + p->lvl;
+                    break;
+
+                case SP_LIT:
+                    amount = rand_1n(25) + 20 + (p->lvl << 1);
+                    break;
+            }
+
+            log_add_entry(p->log, spell_msg_succ(spell), monster_get_name(monster));
+
+            if (monster_hp_lose(monster, amount))
+                player_monster_kill(p, monster);
+        }
+        else
+        {
+            log_add_entry(p->log, "Aborted.");
+        }
 
         break; /* SC_RAY */
 
     case SC_FLOOD: /* effect pours like water */
 
         g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(spell));
-        pos = display_get_position(p, buffer, TRUE);
+        pos = display_get_position(p, buffer, FALSE, TRUE);
 
         if (pos_valid(pos))
         {
@@ -1343,7 +1381,7 @@ int player_spell_cast(player *p)
     case SC_BLAST: /* effect occurs like an explosion */
 
         g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(spell));
-        pos = display_get_position(p, buffer, TRUE);
+        pos = display_get_position(p, buffer, FALSE, TRUE);
 
         /* currently only fireball */
         amount = 25 + p->lvl + rand_0n(25 + p->lvl);
@@ -3072,7 +3110,7 @@ static void player_magic_create_sphere(player *p)
 
     assert(p != NULL);
 
-    pos = display_get_position(p, "Where do you want to place the sphere?", TRUE);
+    pos = display_get_position(p, "Where do you want to place the sphere?", FALSE, TRUE);
 
     if (pos_valid(pos))
     {
@@ -3252,7 +3290,7 @@ static void player_magic_make_wall(player *p)
 {
     position pos;
 
-    pos = display_get_position(p, "Select a position where you want to place a wall.", TRUE);
+    pos = display_get_position(p, "Select a position where you want to place a wall.", FALSE, TRUE);
 
     if (pos_identical(pos, p->pos))
     {
@@ -3352,7 +3390,7 @@ static void player_magic_vaporize_rock(player *p)
     monster *m = NULL;
     char *desc = NULL;
 
-    pos = display_get_position(p, "What do you want to vaporize?", FALSE);
+    pos = display_get_position(p, "What do you want to vaporize?", FALSE, FALSE);
 
     if (level_tiletype_at(p->level, pos) == LT_WALL)
     {

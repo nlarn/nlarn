@@ -198,9 +198,9 @@ area *area_new_circle(position center, int radius)
     }
 
     area = area_new(center.x - radius,
-                          center.y - radius,
-                          2 * radius + 1,
-                          2 * radius + 1);
+                    center.y - radius,
+                    2 * radius + 1,
+                    2 * radius + 1);
 
     /* reposition center to relative values */
     center.x = radius;
@@ -301,6 +301,110 @@ area *area_new_circle_flooded(position center, int radius, area *obstacles)
     }
 
     area_destroy(circle);
+    area_destroy(obstacles);
+
+    return narea;
+}
+
+area *area_new_ray(position source, position target, area *obstacles)
+{
+    area *narea;
+    int delta_x, delta_y;
+    int offset_x, offset_y;
+    int x, y;
+    signed int ix, iy;
+    int error;
+
+    narea = area_new(min(source.x, target.x),
+                     min(source.y, target.y),
+                     abs(target.x - source.x) + 1,
+                     abs(target.y - source.y) + 1);
+
+    /* offset = offset to level map */
+    offset_x = narea->start_x;
+    offset_y = narea->start_y;
+
+    /* reposition source and target to get a position inside narea */
+    source.x -= offset_x;
+    source.y -= offset_y;
+    target.x -= offset_x;
+    target.y -= offset_y;
+
+    /* offset = relative offset for obstacle lookup */
+    offset_x -= obstacles->start_x;
+    offset_y -= obstacles->start_y;
+
+    x = source.x;
+    y = source.y;
+
+    delta_x = abs(target.x - source.x) << 1;
+    delta_y = abs(target.y - source.y) << 1;
+
+    /* if x1 == x2 or y1 == y2, then it does not matter what we set here */
+    ix = target.x > source.x ? 1 : -1;
+    iy = target.y > source.y ? 1 : -1;
+
+    if (delta_x >= delta_y)
+    {
+        /* error may go below zero */
+        error = delta_y - (delta_x >> 1);
+
+        while (x != target.x)
+        {
+            if (error >= 0)
+            {
+                if (error || (ix > 0))
+                {
+                    y += iy;
+                    error -= delta_x;
+                }
+            }
+
+            x += ix;
+            error += delta_y;
+
+            if (area_point_get(obstacles, x + offset_x, y + offset_y))
+            {
+                /* stop painting ray */
+                break;
+            }
+            else
+            {
+                area_point_set(narea, x, y);
+            }
+        }
+    }
+    else
+    {
+        /* error may go below zero */
+        int error = delta_x - (delta_y >> 1);
+
+        while (y != target.y)
+        {
+            if (error >= 0)
+            {
+                if (error || (iy > 0))
+                {
+                    x += ix;
+                    error -= delta_y;
+                }
+            }
+
+            y += iy;
+            error += delta_x;
+
+            if (area_point_get(obstacles, x + offset_x, y + offset_y))
+            {
+                /* stop painting ray */
+                break;
+            }
+            else
+            {
+                area_point_set(narea, x, y);
+            }
+        }
+    }
+
     area_destroy(obstacles);
 
     return narea;

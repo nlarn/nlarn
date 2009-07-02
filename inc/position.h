@@ -54,6 +54,7 @@ int pos_in_rect(position pos, rectangle rect);
 area *area_new(int start_x, int start_y, int size_x, int size_y);
 area *area_new_circle(position center, int radius);
 area *area_new_circle_flooded(position center, int radius, area *obstacles);
+area *area_new_ray(position source, position target, area *obstacles);
 void area_destroy(area *area);
 
 #define pos_distance(first, second) (abs((first).x - (second).x) \

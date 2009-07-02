@@ -65,16 +65,11 @@ int main(int argc, char *argv[])
     display_show_message("Welcome to the game of NLarn!", file_content);
     g_free(file_content);
 
+    display_paint_screen(g->p);
+
     /* main event loop */
     do
     {
-        /* recalculate FOV */
-        visrange = (player_effect(g->p, ET_BLINDNESS) ? 0 : 6 + player_effect(g->p, ET_AWARENESS));
-        player_update_fov(g->p, visrange);
-
-        /* repaint screen */
-        display_paint_screen(g->p);
-
         /* get key and analyze it */
         switch (getch())
         {
@@ -478,6 +473,13 @@ int main(int argc, char *argv[])
             g->p->stats.moves_made += moves_count;
             moves_count = 0;
         }
+
+        /* recalculate FOV */
+        visrange = (player_effect(g->p, ET_BLINDNESS) ? 0 : 6 + player_effect(g->p, ET_AWARENESS));
+        player_update_fov(g->p, visrange);
+
+        /* repaint screen */
+        display_paint_screen(g->p);
 
     }
     while (TRUE); /* main event loop */

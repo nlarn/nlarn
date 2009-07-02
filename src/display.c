@@ -1333,11 +1333,17 @@ direction display_get_direction(char *title, int *available)
     return dir;
 }
 
-position display_get_position(player *p, char *message, int passable)
+position display_get_position(player *p, char *message, int draw_line, int passable)
 {
     int RUN  = TRUE;
     int direction = GD_NONE;
     position pos, npos;
+
+    /* variables for ray painting */
+    area *ray;
+    int distance = 0;
+    int x, y;
+    monster *target;
 
     /* start at player's position */
     pos = p->pos;
@@ -1351,6 +1357,67 @@ position display_get_position(player *p, char *message, int passable)
 
     do
     {
+        distance = max(abs(pos.x - p->pos.x),
+                       abs(pos.y - p->pos.y));
+
+        /* redraw screen to erase old rays */
+        if (draw_line) display_paint_screen(p);
+
+        /* draw a line between source and target if told to */
+        if (draw_line && distance)
+        {
+            target = level_get_monster_at(p->level, pos);
+
+            display_paint_screen(p);
+
+            if (target)
+            {
+                attron(COLOR_PAIR(DC_RED) | A_BOLD);
+            }
+            else
+            {
+                attron(COLOR_PAIR(DC_CYAN) | A_BOLD);
+            }
+
+            ray = area_new_ray(p->pos,
+                               pos,
+                               level_get_obstacles(p->level,
+                                                   p->pos,
+                                                   distance));
+
+            for (y = 0; y < ray->size_y; y++)
+            {
+                for (x = 0; x < ray->size_x; x++)
+                {
+                    if (area_point_get(ray, x, y))
+                    {
+                        if (target
+                                && (target->pos.x == ray->start_x + x)
+                                && (target->pos.y == ray->start_y + y))
+                        {
+                            mvaddch(ray->start_y + y, ray->start_x + x, monster_get_image(target));
+                        }
+                        else
+                        {
+                            mvaddch(ray->start_y + y, ray->start_x + x, '*');
+                        }
+
+                    }
+                }
+            }
+
+            if (target)
+            {
+                attroff(COLOR_PAIR(DC_RED) | A_BOLD);
+            }
+            else
+            {
+                attroff(COLOR_PAIR(DC_CYAN) | A_BOLD);
+            }
+
+            area_destroy(ray);
+        }
+
         /* position cursor */
         move(pos.y, pos.x);
 
