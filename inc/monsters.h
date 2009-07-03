@@ -166,6 +166,7 @@ gboolean monster_hp_lose(monster *m, int amount);
 void monster_drop_items(monster *m, inventory *floor);
 void monster_pickup_items(monster *m, inventory *floor, message_log *log);
 gboolean monster_update_action(monster *m);
+void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
 
 

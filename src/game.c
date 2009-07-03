@@ -244,28 +244,36 @@ static void game_move_monsters(game *g)
 
         /* increment count of turns since when player was last seen */
         if (m->lastseen)
+        {
             m->lastseen++;
+        }
 
         /* determine if the monster can see the player */
         if (player_effect(g->p, ET_INVISIBILITY) && !monster_has_infravision(m))
+        {
             m->p_visible = FALSE;
-
+        }
         else if (monster_effect(m, ET_BLINDNESS))
+        {
+            /* monster is blinded */
             m->p_visible = FALSE;
-
-        /* player is stealther than monster is smart */
+        }
         else if (player_effect(g->p, ET_STEALTH) > monster_get_int(m))
+        {
+            /* player is stealther than monster is smart */
             m->p_visible = FALSE;
-
+        }
         else
+        {
+            /* determine if player's position is visible from monster's position */
             m->p_visible = level_pos_is_visible(l, m->pos, p_pos);
+        }
 
 
-        /* update monster's knowledge of player's position */
         if (m->p_visible)
         {
-            m->player_pos = p_pos;
-            m->lastseen = 1;
+            /* update monster's knowledge of player's position */
+            monster_update_player_pos(m, p_pos);
         }
 
         /*
@@ -287,14 +295,8 @@ static void game_move_monsters(game *g)
         }
 
 
-        /* do nothing if monster is held or sleeping */
-        if (monster_effect(m, ET_HOLD_MONSTER)
-                || monster_effect(m, ET_SLEEP))
-            continue;
-
-
         /* update monsters action */
-        if (monster_update_action(m) && m->p_visible)
+        if (monster_update_action(m) && m->m_visible)
         {
             /* the monster has chosen a new action and the player
                can see the new action, so let's describe it */
@@ -369,33 +371,37 @@ static void game_move_monsters(game *g)
             if (tries == GD_MAX)
                 m_npos = m->pos;
 
+            if (pos_identical(p_pos, m_npos))
+            {
+                /* bump into invisible player */
+                monster_update_player_pos(m, p_pos);
+                m_npos = m->pos;
+            }
+
             break; /* end MA_WANDER */
 
         case MA_ATTACK:
-            path = level_find_path(g->p->level, m->pos, p_pos);
-
-            if (path && !g_queue_is_empty(path->path))
+            if (pos_adjacent(m->pos, m->player_pos))
             {
-                el = g_queue_pop_head(path->path);
+                /* monster is standing next to player */
+                game_monster_attack_player(m, g->p);
+            }
+            else
+            {
+                path = level_find_path(g->p->level, m->pos, m->player_pos);
 
-                if ((el->pos.x == p_pos.x) && (el->pos.y == p_pos.y))
+                if (path && !g_queue_is_empty(path->path))
                 {
-                    /* monster is standing next to player */
-                    game_monster_attack_player(m, g->p);
-                }
-                else
-                {
+                    el = g_queue_pop_head(path->path);
                     m_npos = el->pos;
                 }
 
+                /* cleanup */
+                if (path)
+                {
+                    level_path_destroy(path);
+                }
             }
-
-            /* cleanup */
-            if (path)
-            {
-                level_path_destroy(path);
-            }
-
             break; /* end MA_ATTACK */
 
         case MA_NONE:
@@ -405,13 +411,12 @@ static void game_move_monsters(game *g)
         }
 
 
+        /* can the player see the new position? */
+        m->m_visible = player_pos_visible(g->p, m_npos);
+
         /* *** if new position has been found - move the monster *** */
-        if ((m_npos.x != m->pos.x) || (m->pos.y != m_npos.y))
+        if (!pos_identical(m_npos, m->pos))
         {
-
-            /* can the player see the new position? */
-            m->m_visible = level_pos_is_visible(l, m_npos, p_pos);
-
             /* check for door */
             if ((level_stationary_at(l,m_npos) == LS_CLOSEDDOOR)
                     && monster_has_hands(m)
@@ -438,7 +443,9 @@ static void game_move_monsters(game *g)
 
                 /* check for traps */
                 if (level_trap_at(l, m->pos))
+                {
                     m = game_monster_trigger_trap(g, m, level_trap_at(l, m->pos));
+                }
 
             } /* end new position */
         } /* end monster repositioning */
@@ -446,10 +453,7 @@ static void game_move_monsters(game *g)
         /* monster survived to this point */
         if (m)
         {
-            monster_pickup_items(m,
-                                 level_ilist_at(l, m->pos),
-                                 g->p->log);
-
+            monster_pickup_items(m, level_ilist_at(l, m->pos), g->p->log);
         }
 
     } /* foreach monster */
@@ -469,6 +473,18 @@ static void game_monster_attack_player(monster *m, player *p)
 
     if (player_effect(p, ET_UNDEAD_PROTECTION) && monster_is_undead(m))
         return;
+
+    /* the player is invisible and the monster bashes into thin air */
+    if (!pos_identical(m->player_pos, p->pos))
+    {
+        if (!level_is_monster_at(p->level, p->pos) && m->m_visible)
+        {
+            log_add_entry(p->log, "The %s bashes into thin air.", monster_get_name(m));
+        }
+
+        m->lastseen = 0;
+        return;
+    }
 
     if (player_effect(p, ET_INVISIBILITY) && chance(65))
     {

@@ -62,6 +62,13 @@ void area_destroy(area *area);
 
 #define pos_identical(pos1,pos2) (((pos1).x == (pos2).x) && ((pos1).y == (pos2).y))
 
+#define pos_adjacent(first, second) (((abs((first).x - (second).x) == 0) \
+                                       && (abs((first).y - (second).y) == 1)) \
+                                     || ((abs((first).x - (second).x) == 1) \
+                                       && (abs((first).y - (second).y) == 0)) \
+                                     || ((abs((first).x - (second).x) == 1) \
+                                       && (abs((first).y - (second).y) == 1)))
+
 #define pos_valid(pos) (((pos).x >= 0) \
                         && ((pos).x < LEVEL_MAX_X) \
                         && ((pos).x != G_MAXINT16) \

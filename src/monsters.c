@@ -280,42 +280,42 @@ gboolean monster_update_action(monster *m)
     gboolean smart;
 
     /* FIXME: should include difficulty here */
-    time   = 25 + monster_get_int(m);;
+    time   = monster_get_int(m) + 25;
     low_hp = (m->hp < (monster_get_hp_max(m) / 4 ));
     smart  = (monster_get_int(m) > 4);
 
-    /* stationary monsters */
     if (m->type == MT_MIMIC)
+    {
+        /* stationary monsters */
         naction = MA_REMAIN;
-
-    /* low HP or very scared => FLEE player */
+    }
+    else if (monster_effect(m, ET_HOLD_MONSTER)
+             || monster_effect(m, ET_SLEEP))
+    {
+        /* no action if monster is held or sleeping */
+        naction = MA_REMAIN;
+    }
     else if ((low_hp && smart)
              || (monster_effect(m, ET_SCARE_MONSTER) > monster_get_int(m)))
     {
+        /* low HP or very scared => FLEE player */
         naction = MA_FLEE;
     }
-    /* after having spotted the player, agressive monster will follow
-       the player for a certain amount of time turns, afterwards loose
-       interest. More peaceful monsters will do something else. */
     else if (m->lastseen
              && (m->lastseen < time)
              && !monster_effect(m, ET_CHARM_MONSTER))
     {
+        /* after having spotted the player, agressive monster will follow
+           the player for a certain amount of time turns, afterwards loose
+           interest. More peaceful monsters will do something else. */
         /* TODO: need to test for agressiveness */
         naction = MA_ATTACK;
     }
-
-    /* no action if monster is held or sleeping */
-    else if (monster_effect(m, ET_HOLD_MONSTER)
-             || monster_effect(m, ET_SLEEP))
-    {
-        naction = MA_REMAIN;
-    }
-
-    /* if no action could be found, return to original behaviour */
     else
+    {
+        /* if no action could be found, return to original behaviour */
         naction = MA_WANDER;
-
+    }
 
     if (naction != m->action)
     {
@@ -324,6 +324,14 @@ gboolean monster_update_action(monster *m)
     }
 
     return FALSE;
+}
+
+void monster_update_player_pos(monster *m, position ppos)
+{
+    assert (m != NULL);
+
+    m->player_pos = ppos;
+    m->lastseen = 1;
 }
 
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log)

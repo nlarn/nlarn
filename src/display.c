@@ -204,7 +204,8 @@ int display_paint_screen(player *p)
 
         if (game_wizardmode(p->game)
                 || player_effect(p, ET_DETECT_MONSTER)
-                || player_pos_visible(p, monst->pos))
+                || (player_pos_visible(p, monst->pos)
+                && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))))
         {
             attron(COLOR_PAIR(DC_RED));
             mvaddch(monst->pos.y, monst->pos.x, monster_get_image(monst));

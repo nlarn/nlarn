@@ -521,10 +521,8 @@ int player_attack(player *p, monster *m)
         log_add_entry(p->log, "You hit the %s.", monster_get_name(m));
 
         damage = player_get_str(p)
-                 + player_effect(p, ET_INC_DAMAGE)
                  + player_get_wc(p)
                  - 12
-                 - player_effect(p, ET_DEC_DAMAGE)
                  - game_difficulty(p->game);
 
         damage = rand_1n(damage);
@@ -547,7 +545,7 @@ int player_attack(player *p, monster *m)
                 log_add_entry(p->log, "Your %s disintegrates!", weapon_name(w));
 
                 /* delete the weapon from the inventory */
-                inv_del_element(p->inventory, inv_find_object(p->inventory, w));
+                inv_del_element(p->inventory, w);
 
                 /* destroy it and remove any reference to it */
                 item_destroy(w);
@@ -557,10 +555,9 @@ int player_attack(player *p, monster *m)
 
         /* FIXME: make sure hitting monst breaks stealth condition */
 
-        if (monster_effect(m, ET_HOLD_MONSTER))
+        if ((e = monster_effect_get(m, ET_HOLD_MONSTER)))
         {
             /* hitting a monster breaks hold monster spell */
-            e = monster_effect_get(m, ET_HOLD_MONSTER);
             monster_effect_del(m, e);
         }
 
@@ -605,6 +602,15 @@ int player_attack(player *p, monster *m)
                               monster_get_name(m));
             }
         }
+
+        /* if the player is invisible and the monster does not have infravision,
+           remember the position where the attack came from
+         */
+        if (player_effect(p, ET_INVISIBILITY) && !monster_has_infravision(m))
+        {
+            monster_update_player_pos(m, p->pos);
+        }
+
 
         if (m->hp < 1)
         {
@@ -1286,15 +1292,18 @@ int player_spell_cast(player *p)
             eff = effect_new(spell_effect(spell), game_turn(p->game));
             if (!eff->amount) eff->amount = p->intelligence;
 
-            monster_effect_add(monster, eff);
-
             /* show message if monster is visible */
-            if (monster->m_visible && effect_get_msg_m_start(eff))
+            if (monster->m_visible
+                    && effect_get_msg_m_start(eff)
+                    && !monster_effect(monster, eff->type))
             {
                 log_add_entry(p->log,
                               effect_get_msg_m_start(eff),
                               monster_get_name(monster));
             }
+
+            /* has to come in the end as eff might be destroyed */
+            monster_effect_add(monster, eff);
 
             break;
 
@@ -1310,21 +1319,21 @@ int player_spell_cast(player *p)
         {
             switch (spell->id)
             {
-                case SP_MLE:
-                    amount = rand_1n(((p->lvl + 1) << 1)) + p->lvl + 3;
-                    break;
+            case SP_MLE:
+                amount = rand_1n(((p->lvl + 1) << 1)) + p->lvl + 3;
+                break;
 
-                case SP_SSP:
-                    amount = rand_1n(10) + 15 + p->lvl;
-                    break;
+            case SP_SSP:
+                amount = rand_1n(10) + 15 + p->lvl;
+                break;
 
-                case SP_CLD:
-                    amount = rand_1n(25) + 20 + p->lvl;
-                    break;
+            case SP_CLD:
+                amount = rand_1n(25) + 20 + p->lvl;
+                break;
 
-                case SP_LIT:
-                    amount = rand_1n(25) + 20 + (p->lvl << 1);
-                    break;
+            case SP_LIT:
+                amount = rand_1n(25) + 20 + (p->lvl << 1);
+                break;
             }
 
             log_add_entry(p->log, spell_msg_succ(spell), monster_get_name(monster));
