@@ -242,12 +242,6 @@ static void game_move_monsters(game *g)
     {
         m = g_ptr_array_index(l->mlist, monster_nr - 1);
 
-        /* increment count of turns since when player was last seen */
-        if (m->lastseen)
-        {
-            m->lastseen++;
-        }
-
         /* determine if the monster can see the player */
         if (player_effect(g->p, ET_INVISIBILITY) && !monster_has_infravision(m))
         {
@@ -371,17 +365,10 @@ static void game_move_monsters(game *g)
             if (tries == GD_MAX)
                 m_npos = m->pos;
 
-            if (pos_identical(p_pos, m_npos))
-            {
-                /* bump into invisible player */
-                monster_update_player_pos(m, p_pos);
-                m_npos = m->pos;
-            }
-
             break; /* end MA_WANDER */
 
         case MA_ATTACK:
-            if (pos_adjacent(m->pos, m->player_pos))
+            if (pos_adjacent(m->pos, m->player_pos) && (m->lastseen > 0) && (m->lastseen < 3))
             {
                 /* monster is standing next to player */
                 game_monster_attack_player(m, g->p);
@@ -417,6 +404,15 @@ static void game_move_monsters(game *g)
         /* *** if new position has been found - move the monster *** */
         if (!pos_identical(m_npos, m->pos))
         {
+            if (pos_identical(p_pos, m_npos))
+            {
+                /* bump into invisible player */
+                monster_update_player_pos(m, p_pos);
+                m_npos = m->pos;
+
+                log_add_entry(g->p->log, "The %s bumped into you.", monster_get_name(m));
+            }
+
             /* check for door */
             if ((level_stationary_at(l,m_npos) == LS_CLOSEDDOOR)
                     && monster_has_hands(m)
@@ -445,16 +441,16 @@ static void game_move_monsters(game *g)
                 if (level_trap_at(l, m->pos))
                 {
                     m = game_monster_trigger_trap(g, m, level_trap_at(l, m->pos));
+                    if (m == NULL) continue; /* trap killed the monster */
                 }
 
             } /* end new position */
         } /* end monster repositioning */
 
-        /* monster survived to this point */
-        if (m)
-        {
-            monster_pickup_items(m, level_ilist_at(l, m->pos), g->p->log);
-        }
+        monster_pickup_items(m, level_ilist_at(l, m->pos), g->p->log);
+
+        /* increment count of turns since when player was last seen */
+        if (m->lastseen) m->lastseen++;
 
     } /* foreach monster */
 }
@@ -483,10 +479,13 @@ static void game_monster_attack_player(monster *m, player *p)
         }
 
         m->lastseen = 0;
+
         return;
     }
 
-    if (player_effect(p, ET_INVISIBILITY) && chance(65))
+    if (player_effect(p, ET_INVISIBILITY)
+            && !monster_has_infravision(m)
+            && chance(65))
     {
         log_add_entry(p->log,
                       "The %s misses wildly.",

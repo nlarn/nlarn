@@ -301,9 +301,7 @@ gboolean monster_update_action(monster *m)
         /* low HP or very scared => FLEE player */
         naction = MA_FLEE;
     }
-    else if (m->lastseen
-             && (m->lastseen < time)
-             && !monster_effect(m, ET_CHARM_MONSTER))
+    else if (m->lastseen && (m->lastseen < time))
     {
         /* after having spotted the player, agressive monster will follow
            the player for a certain amount of time turns, afterwards loose

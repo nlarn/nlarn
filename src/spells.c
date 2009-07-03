@@ -85,11 +85,11 @@ const spell_data spells[SP_MAX] =
         SP_CHM,
         "chm",
         "charm monster",
-        SC_POINT,
+        SC_PLAYER,
         ET_CHARM_MONSTER,
         "some monsters may be awed at your magnificence",
         NULL,
-        "The %s isn't afraid of you.",
+        NULL,
         1,
         0
     },
