@@ -142,10 +142,6 @@ player *player_new(struct game *game)
     inv_add(p->inventory, it);
     player_item_equip(p, it);
 
-    /* some funds */
-    it = item_new(IT_GOLD, rand_m_n(50,100), 0);
-    inv_add(p->inventory, it);
-
     /* start a new diary */
     p->log = log_new();
 
@@ -262,8 +258,7 @@ int player_regenerate(player *p)
  */
 void player_die(player *p, player_cod cause_type, int cause)
 {
-    char text[2001] = "";
-    char tmp[101] = "";
+    GString *text;
 
     char *message = NULL;
     char *desc = NULL;
@@ -274,7 +269,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     assert(p != NULL);
 
     /* check for life protection */
-    if ((cause_type != PD_QUIT) && (ef = player_effect_get(p, ET_LIFE_PROTECTION)))
+    if ((cause_type < PD_TOO_LATE) && (ef = player_effect_get(p, ET_LIFE_PROTECTION)))
     {
         log_add_entry(p->log, "You feel wiiieeeeerrrrrd all over!");
 
@@ -285,6 +280,12 @@ void player_die(player *p, player_cod cause_type, int cause)
         else
         {
             player_effect_del(p, ef);
+        }
+
+        if (cause_type == PD_LASTLEVEL)
+        {
+            /* revert effects of drain level */
+            player_lvl_gain(p, 1);
         }
 
         p->hp = p->hp_max;
@@ -315,7 +316,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     case PD_LOST:
         message = "You didn't manage to save your daughter.";
         desc = "could not find the potion in time";
-        title = "You lost your daughter and the game.";
+        title = "You lost";
         break;
 
     case PD_QUIT:
@@ -332,87 +333,114 @@ void player_die(player *p, player_cod cause_type, int cause)
 
     log_add_entry(p->log, message);
 
+    text = g_string_new_len(NULL, 200);
+
+    g_string_append_printf(text, "%s (%c), %s on level %d",
+                           p->name, p->sex ? 'm' : 'f',
+                           desc, p->level->nlevel);
+
     if (p->stats.deepest_level > p->level->nlevel)
     {
-        g_snprintf(tmp, 100, " (max. %d)", p->stats.deepest_level);
-        g_strlcat(text, tmp, 2000);
+        g_string_append_printf(text, " (max. %d)", p->stats.deepest_level);
     }
-
-    g_snprintf(text, 2000,
-               "%s (%c), %s on level %d%s",
-               p->name,
-               p->sex ? 'm' : 'f',
-               desc,
-               p->level->nlevel,
-               tmp);
 
     switch (cause_type)
     {
     case PD_EFFECT:
-        g_snprintf(tmp, 100, " EFFECT");
+        /* TODO: effect description */
+        g_string_append(text, " EFFECT");
         break;
 
     case PD_LASTLEVEL:
-        g_snprintf(tmp, 100, ". %s has left %s body.",
-                   p->sex ? "He" : "She",
-                   p->sex ? "his" : "her");
+        g_string_append_printf(text,". %s has left %s body.",
+                               p->sex ? "He" : "She",
+                               p->sex ? "his" : "her");
         break;
 
     case PD_MONSTER:
-        g_snprintf(tmp, 100, " by a %s.", monster_get_name_by_type(cause));
+        g_string_append_printf(text, " by a %s.", monster_get_name_by_type(cause));
         break;
 
     case PD_SPHERE:
-        g_snprintf(tmp, 100, " by a sphere of destruction.");
+        g_string_append(text, " by a sphere of destruction.");
         break;
 
     case PD_TRAP:
-        g_snprintf(tmp, 100, " by a %s.", trap_description(cause));
+        g_string_append_printf(text, " by a %s.", trap_description(cause));
         break;
 
     case PD_LEVEL:
-        g_snprintf(tmp, 100, " by %s.", lt_get_desc(cause));
+        g_string_append_printf(text, " by %s.", lt_get_desc(cause));
         break;
 
     case PD_SPELL:
-        g_snprintf(tmp, 100, " %s with the spell \"%s\".",
-                   p->sex ? "himself" : "herself",
-                   spell_name_by_id(cause));
+        g_string_append_printf(text, " %s with the spell \"%s\".",
+                               p->sex ? "himself" : "herself",
+                               spell_name_by_id(cause));
         break;
 
     default:
         /* no further description */
-        g_snprintf(tmp, 100, ".");
+        g_string_append(text, ".");
         break;
     }
 
-    g_strlcat(text, tmp, 2000);
+    g_string_append_printf(text, " %s has scored %ld points.",
+                           p->sex ? "He" : "She",
+                           player_calc_score(p, (cause_type == PD_WON)));
 
     /* resume game if wizard mode is enabled */
     if (game_wizardmode(p->game) && (cause_type != PD_QUIT))
     {
-        log_add_entry(p->log, text);
+        log_add_entry(p->log, text->str);
         log_add_entry(p->log, "WIZARD MODE. You stay alive.");
-        p->hp = p->hp_max;
 
+        g_string_free(text, TRUE);
+
+        p->hp = p->hp_max;
         /* return to level 1 if last level has been lost */
-        if (p->lvl < 1)
-            player_lvl_gain(p, 1);
+        if (p->lvl < 1) player_lvl_gain(p, 1);
     }
     else
     {
-        if (cause_type != PD_QUIT)
-        {
-            /* redraw screen to make sure player can see the cause of his death */
-            display_paint_screen(p);
+        /* redraw screen to make sure player can see the cause of his death */
+        display_paint_screen(p);
+        display_show_message(title, text->str);
 
-            display_show_message(title, text);
-        }
+        g_string_free(text, TRUE);
 
         display_shutdown();
         game_destroy(p->game);
         exit(EXIT_SUCCESS);
     }
+}
+
+gint64 player_calc_score(player *p, int won)
+{
+    gint64 score = 0;
+    int i;
+
+    assert (p != NULL);
+
+    /* money */
+    score = player_get_gold(p) + p->bank_account - p->outstanding_taxes;
+
+    /* value of equipment */
+    for (i = 1; i <= inv_length(p->inventory); i++)
+    {
+        score += item_price(inv_get(p->inventory, i - 1));
+    }
+
+    /* experience */
+    score += p->experience;
+
+    /* give points for remaining time if game has been won */
+    if (won)
+    {
+        score += game_remaining_turns(p->game);
+    }
+
+    return score;
 }
 
 int player_move(player *p, int direction)

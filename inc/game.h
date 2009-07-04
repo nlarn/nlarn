@@ -68,17 +68,19 @@ void game_spin_the_wheel(game *g, int times);
 
 /* macros */
 
-#define game_difficulty(g) (((game *)(g))->difficulty)
-#define game_wizardmode(g) (((game *)(g))->wizard)
-#define game_turn(g) (((game *)(g))->gtime)
+#define game_difficulty(g) ((g)->difficulty)
+#define game_wizardmode(g) ((g)->wizard)
 
-#define game_dir(g) (((game *)(g))->basedir)
-#define game_lib(g) (((game *)(g))->libdir)
+#define game_turn(g)            ((g)->gtime)
+#define game_remaining_turns(g) (TIMELIMIT - (g)->gtime)
 
-#define game_mesgfile(g) (((game *)(g))->mesgfile)
-#define game_helpfile(g) (((game *)(g))->helpfile)
-#define game_mazefile(g) (((game *)(g))->mazefile)
-#define game_fortunes(g) (((game *)(g))->fortunes)
+#define game_dir(g) ((g)->basedir)
+#define game_lib(g) ((g)->libdir)
+
+#define game_mesgfile(g) ((g)->mesgfile)
+#define game_helpfile(g) ((g)->helpfile)
+#define game_mazefile(g) ((g)->mazefile)
+#define game_fortunes(g) ((g)->fortunes)
 
 /* gtime <> mobuls conversion */
 #define gtime2mobuls(gtime) ((int)(gtime) / 100)

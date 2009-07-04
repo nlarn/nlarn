@@ -440,6 +440,7 @@ item_material_t item_material(item *it)
 
         case IT_BOOK:
             material = IM_PAPER;
+            break;
 
         case IT_CONTAINER:
             material = container_material(it);
@@ -494,6 +495,7 @@ int item_price(item *it)
 
         case IT_BOOK:
             price = book_price(it);
+            break;
 
         case IT_CONTAINER:
             price = container_price(it);
@@ -509,7 +511,7 @@ int item_price(item *it)
             break;
 
         case IT_GOLD:
-            price = it->count;
+            price = 0;
             break;
 
         case IT_POTION:
@@ -557,6 +559,8 @@ int item_price(item *it)
 
     /* quarter price if very rusty */
     if (it->rusty == 1) price /= 4;
+
+    if (price < 0) price = 0;
 
     return price;
 }

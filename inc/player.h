@@ -157,6 +157,7 @@ typedef enum player_cod {
     PD_TRAP,
     PD_LEVEL, /* damaged by level effects */
     PD_SPELL, /* damaged by own spell */
+    /* *** causes above this line can be stopped by live protection *** */
     PD_TOO_LATE, /* returned with potion too late */
     PD_WON, /* won the game */
     PD_LOST, /* daughter has died, potion not found */
@@ -171,6 +172,7 @@ void player_destroy(player *p);
 
 int player_regenerate(player *p);
 void player_die(player *p, player_cod cause_type, int cause);
+gint64 player_calc_score(player *p, int won);
 int player_move(player *p, int direction);
 int player_attack(player *p, monster *m);
 int player_position(player *p, position target);
