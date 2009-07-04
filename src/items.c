@@ -442,8 +442,7 @@ item_material_t item_material(item *it)
             material = IM_PAPER;
 
         case IT_CONTAINER:
-            /* TODO: container material */
-            material = IM_WOOD;
+            material = container_material(it);
             break;
 
         case IT_FOOD:
@@ -479,6 +478,87 @@ item_material_t item_material(item *it)
     }
 
     return material;
+}
+
+int item_price(item *it)
+{
+    int price;
+
+    assert (it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    switch (it->type)
+    {
+        case IT_ARMOUR:
+            price = armour_price(it);
+            break;
+
+        case IT_BOOK:
+            price = book_price(it);
+
+        case IT_CONTAINER:
+            price = container_price(it);
+            break;
+
+        case IT_FOOD:
+            /* TODO: food price */
+            price = 0;
+            break;
+
+        case IT_GEM:
+            price = gem_price(it);
+            break;
+
+        case IT_GOLD:
+            price = it->count;
+            break;
+
+        case IT_POTION:
+            price = potion_price(it);
+            break;
+
+        case IT_RING:
+            price = ring_price(it);
+            break;
+
+        case IT_SCROLL:
+            price = scroll_price(it);
+            break;
+
+        case IT_WEAPON:
+            price =  weapon_price(it);
+            break;
+
+        default:
+            price = 0;
+    }
+
+    /* modify base prices by item's attributes */
+
+    /* double price if blessed */
+    if (it->blessed) price <<=1;
+
+    /* half price if cursed */
+    if (it->cursed) price >>=1;
+
+    /* half price if corroded */
+    if (it->corroded == 1) price >>=1;
+
+    /* quarter price if very corroded */
+    if (it->corroded == 1) price /= 4;
+
+    /* half price if burnt */
+    if (it->burnt == 1) price >>=1;
+
+    /* quarter price if very burnt */
+    if (it->burnt == 1) price /= 4;
+
+    /* half price if rusty */
+    if (it->rusty == 1) price >>=1;
+
+    /* quarter price if very rusty */
+    if (it->rusty == 1) price /= 4;
+
+    return price;
 }
 
 /**
@@ -735,26 +815,6 @@ void inv_destroy(inventory *inv)
     inv = NULL;
 }
 
-item *inv_find_object(inventory *inv, void *object)
-{
-    item *i;
-    int pos;
-
-    assert(inv != NULL && object != NULL);
-
-    for (pos = 1; pos <= inv->len; pos++)
-    {
-        i = inv_get(inv, pos - 1);
-        if (i == object)
-        {
-            return i;
-        }
-    }
-
-    /* not found.. */
-    return NULL;
-}
-
 int inv_weight(inventory *inv)
 {
     int sum = 0;
@@ -848,9 +908,9 @@ static char *item_desc_get(item *it, int known)
 
     case IT_BOOK:
         if (known)
-            return book_get_name(it);
+            return book_name(it);
         else
-            return book_get_desc(it->id);
+            return book_desc(it->id);
         break;
 
     case IT_CONTAINER:

@@ -128,6 +128,7 @@ int item_compare(item *a, item *b);
 int item_sort(gconstpointer a, gconstpointer b);
 char *item_describe(item *it, int known, int singular, int definite, char *str, int str_len);
 item_material_t item_material(item *it);
+int item_price(item *it);
 int item_weight(item *it);
 effect *item_effect(item *it);
 
@@ -160,7 +161,6 @@ inventory *inv_new();
 void inv_destroy(inventory *inv);
 
 int inv_add(inventory *inv, item *item_new);
-item *inv_find_object(inventory *inv, void *object);
 int inv_weight(inventory *inv);
 
 #define inv_del(inv, pos)          (g_ptr_array_remove_index_fast((inv), (pos)))

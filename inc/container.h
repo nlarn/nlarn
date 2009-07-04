@@ -35,6 +35,7 @@ typedef struct container_data {
     char *name;
     int weight;
     item_material_t material;
+    int price;
 } container_data;
 
 /* external vars */
@@ -43,7 +44,9 @@ extern const container_data containers[CT_MAX];
 
 /* macros */
 
-#define container_name(container)   (containers[(container)->id].name)
-#define container_weight(container) (containers[(container)->id].weight)
+#define container_name(container)     (containers[(container)->id].name)
+#define container_weight(container)   (containers[(container)->id].weight)
+#define container_material(container) (containers[(container)->id].material)
+#define container_price(container)    (containers[(container)->id].price)
 
 #endif

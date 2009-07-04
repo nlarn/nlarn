@@ -541,7 +541,7 @@ static void game_monster_attack_player(monster *m, player *p)
                         log_add_entry(p->log, "Your %s disintegrates!",
                                       armour_name(p->eq_suit));
 
-                        it = inv_find_object(p->inventory, p->eq_suit);
+                        it = p->eq_suit;
 
                         log_disable(p->log);
                         player_item_unequip(p, it);

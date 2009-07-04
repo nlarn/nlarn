@@ -493,7 +493,7 @@ const spell_data spells[SP_MAX] =
 
 static int book_desc_mapping[SP_MAX - 1] = { 0 };
 
-static const char *book_desc[SP_MAX - 1] =
+static const char *book_descriptions[SP_MAX - 1] =
 {
     "parchment-bound",
     "thick",
@@ -574,8 +574,8 @@ void book_desc_shuffle()
     shuffle(book_desc_mapping, SP_MAX - 1, 0);
 }
 
-char *book_get_desc(int book_id)
+char *book_desc(int book_id)
 {
     assert(book_id > SP_NONE && book_id < SP_MAX);
-    return (char *)book_desc[book_desc_mapping[book_id - 1]];
+    return (char *)book_descriptions[book_desc_mapping[book_id - 1]];
 }

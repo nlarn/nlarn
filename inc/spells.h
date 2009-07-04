@@ -127,10 +127,10 @@ int spell_sort(gconstpointer a, gconstpointer b);
 /* *** BOOKS *** */
 
 void book_desc_shuffle();
-char *book_get_desc(int book_id);
+char *book_desc(int book_id);
 
-#define book_get_name(book)   (spells[(book)->id].name)
-#define book_get_weight(book) (1) /* FIXME: return real weight */
-#define book_get_price(book)  (spells[(book)->id].price)
+#define book_name(book)   (spells[(book)->id].name)
+#define book_weight(book) (1) /* FIXME: return real weight */
+#define book_price(book)  (spells[(book)->id].price)
 
 #endif

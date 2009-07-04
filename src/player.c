@@ -2079,7 +2079,7 @@ int player_item_use(player *p, item *it)
             /* learnt spell */
             log_add_entry(p->log,
                           "You master the spell \"%s\".",
-                          book_get_name(it));
+                          book_name(it));
 
             break;
 
@@ -2087,7 +2087,7 @@ int player_item_use(player *p, item *it)
             /* improved knowledge of spell */
             log_add_entry(p->log,
                           "You improved your knowledge of the spell %s.",
-                          book_get_name(it));
+                          book_name(it));
             break;
         }
 
