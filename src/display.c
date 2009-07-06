@@ -373,13 +373,10 @@ inline int display_draw()
 void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callbacks)
 {
     WINDOW *iwin = NULL;
-    int width, height;
+    int width, height, maxvis;
     int startx, starty;
     int len;
     gboolean redraw = FALSE;
-
-    /* can display a maximum of 18 rows */
-    const int maxvis = 18;
 
     /* window caption assembled from callback descriptions */
     char *caption, *tmp;
@@ -414,11 +411,12 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
     /* main loop */
     do
     {
-        height = min(inv_length(inv) + 2, maxvis + 2);
+        height = min((display_rows - 3), inv_length(inv) + 2);
+        maxvis = min(inv_length(inv), height - 2);
 
         width = 50;
         starty = (display_rows - height) / 2; /* calculation for centered */
-        startx = (display_cols - width) / 2; /* placement of the window */
+        startx = (min(LEVEL_MAX_X, display_cols) - width) / 2; /* placement of the window */
 
         /* fix marked item */
         if (curr > inv_length(inv))
@@ -698,13 +696,13 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
     /* sort spell list  */
     g_ptr_array_sort(p->known_spells, &spell_sort);
 
-    /* set height according to message line count */
+    /* set height according to spell count */
     height = min((display_rows - 3), (p->known_spells->len + 2));
     maxvis = min(p->known_spells->len, height - 2);
 
     width = 44;
     starty = (display_rows - height) / 2;
-    startx = (display_cols - width) / 2;
+    startx = (min(LEVEL_MAX_X, display_cols) - width) / 2;
 
     swin = display_window_new(startx, starty, width, height, title, "");
 
@@ -899,7 +897,7 @@ int display_get_count(char *caption, int value)
     height = 3;
 
     starty = (display_rows - height) / 2;
-    startx = (display_cols - width) / 2;
+    startx = (min(LEVEL_MAX_X, display_cols) - width) / 2;
 
     mwin = display_window_new(startx, starty, width, height, "", "");
 
@@ -1084,7 +1082,7 @@ int display_get_yesno(char *question, char *yes, char *no)
                 text_width + 2 /* borders */ + (2 * padding));
 
     /* set startx and starty to something that makes sense */
-    startx = (display_cols / 2) - (width / 2);
+    startx = (min(LEVEL_MAX_X, display_cols) / 2) - (width / 2);
     starty = (display_rows / 2) - 4;
 
     ywin = display_window_new(startx, starty, width, text->len + 4, NULL, NULL);
@@ -1211,7 +1209,7 @@ direction display_get_direction(char *title, int *available)
     width = max(9, strlen(title) + 4);
 
     /* set startx and starty to something that makes sense */
-    startx = (display_cols / 2) - (width / 2);
+    startx = (min(LEVEL_MAX_X, display_cols) / 2) - (width / 2);
     starty = (display_rows / 2) - 4;
 
     dwin = display_window_new(startx, starty, width, 9, title, NULL);

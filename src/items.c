@@ -298,6 +298,8 @@ void item_destroy(item *it)
  */
 int item_compare(item *a, item *b)
 {
+    int tmp_count, result;
+
     if (a->type != b->type)
     {
         return FALSE;
@@ -307,7 +309,15 @@ int item_compare(item *a, item *b)
         return TRUE;
     }
 
-    return(memcmp(a, b, sizeof(item)) == 0);
+    /* as count can be different for equal items, save count of b */
+    tmp_count = b->count;
+    b->count = a->count;
+
+    result = (memcmp(a, b, sizeof(item)) == 0);
+
+    b->count = tmp_count;
+
+    return result;
 }
 
 int item_sort(gconstpointer a, gconstpointer b)
