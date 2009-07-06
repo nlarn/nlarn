@@ -243,7 +243,11 @@ static void game_move_monsters(game *g)
         m = g_ptr_array_index(l->mlist, monster_nr - 1);
 
         /* determine if the monster can see the player */
-        if (player_effect(g->p, ET_INVISIBILITY) && !monster_has_infravision(m))
+        if (pos_distance(m->pos, p_pos) > 7)
+        {
+            m->p_visible = FALSE;
+        }
+        else if (player_effect(g->p, ET_INVISIBILITY) && !monster_has_infravision(m))
         {
             m->p_visible = FALSE;
         }
@@ -368,7 +372,7 @@ static void game_move_monsters(game *g)
             break; /* end MA_WANDER */
 
         case MA_ATTACK:
-            if (pos_adjacent(m->pos, m->player_pos) && (m->lastseen > 0) && (m->lastseen < 3))
+            if (pos_adjacent(m->pos, m->player_pos) && (m->lastseen == 1))
             {
                 /* monster is standing next to player */
                 game_monster_attack_player(m, g->p);
@@ -381,6 +385,11 @@ static void game_move_monsters(game *g)
                 {
                     el = g_queue_pop_head(path->path);
                     m_npos = el->pos;
+                }
+                else
+                {
+                    /* no path found. stop following player */
+                    m->lastseen = 0;
                 }
 
                 /* cleanup */
@@ -478,7 +487,7 @@ static void game_monster_attack_player(monster *m, player *p)
             log_add_entry(p->log, "The %s bashes into thin air.", monster_get_name(m));
         }
 
-        m->lastseen = 0;
+        m->lastseen++;
 
         return;
     }
