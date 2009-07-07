@@ -92,7 +92,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         break;
 
     case IT_GEM:
-            /* ensure minimal size */
+        /* ensure minimal size */
         if (nitem->bonus == 0)
             nitem->bonus = rand_1n(20);
         break;
@@ -271,15 +271,15 @@ void item_destroy(item *it)
 {
     assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-	if (it->effect != NULL)
-	{
-		effect_destroy(it->effect);
-	}
+    if (it->effect != NULL)
+    {
+        effect_destroy(it->effect);
+    }
 
-	if (it->content != NULL)
-	{
-	    inv_destroy(it->content);
-	}
+    if (it->content != NULL)
+    {
+        inv_destroy(it->content);
+    }
 
     g_free(it);
 }
@@ -438,49 +438,49 @@ item_material_t item_material(item *it)
 
     switch (it->type)
     {
-        case IT_ARMOUR:
-            material = armour_material(it);
-            break;
+    case IT_ARMOUR:
+        material = armour_material(it);
+        break;
 
-        case IT_BOOK:
-            material = IM_PAPER;
-            break;
+    case IT_BOOK:
+        material = IM_PAPER;
+        break;
 
-        case IT_CONTAINER:
-            material = container_material(it);
-            break;
+    case IT_CONTAINER:
+        material = container_material(it);
+        break;
 
-        case IT_FOOD:
-            /* TODO: food material */
-            material = IM_NONE;
-            break;
+    case IT_FOOD:
+        /* TODO: food material */
+        material = IM_NONE;
+        break;
 
-        case IT_GEM:
-            material = IM_GEMSTONE;
-            break;
+    case IT_GEM:
+        material = IM_GEMSTONE;
+        break;
 
-        case IT_GOLD:
-            material = IM_GOLD;
-            break;
+    case IT_GOLD:
+        material = IM_GOLD;
+        break;
 
-        case IT_POTION:
-            material = IM_GLASS;
-            break;
+    case IT_POTION:
+        material = IM_GLASS;
+        break;
 
-        case IT_RING:
-            material = ring_material(it->id);
-            break;
+    case IT_RING:
+        material = ring_material(it->id);
+        break;
 
-        case IT_SCROLL:
-            material = IM_PAPER;
-            break;
+    case IT_SCROLL:
+        material = IM_PAPER;
+        break;
 
-        case IT_WEAPON:
-            material =  weapon_material(it);
-            break;
+    case IT_WEAPON:
+        material =  weapon_material(it);
+        break;
 
-        default:
-            material = IM_NONE;
+    default:
+        material = IM_NONE;
     }
 
     return material;
@@ -494,48 +494,48 @@ int item_price(item *it)
 
     switch (it->type)
     {
-        case IT_ARMOUR:
-            price = armour_price(it);
-            break;
+    case IT_ARMOUR:
+        price = armour_price(it);
+        break;
 
-        case IT_BOOK:
-            price = book_price(it);
-            break;
+    case IT_BOOK:
+        price = book_price(it);
+        break;
 
-        case IT_CONTAINER:
-            price = container_price(it);
-            break;
+    case IT_CONTAINER:
+        price = container_price(it);
+        break;
 
-        case IT_FOOD:
-            price = food_price(it);
-            break;
+    case IT_FOOD:
+        price = food_price(it);
+        break;
 
-        case IT_GEM:
-            price = gem_price(it);
-            break;
+    case IT_GEM:
+        price = gem_price(it);
+        break;
 
-        case IT_GOLD:
-            price = 0;
-            break;
+    case IT_GOLD:
+        price = 0;
+        break;
 
-        case IT_POTION:
-            price = potion_price(it);
-            break;
+    case IT_POTION:
+        price = potion_price(it);
+        break;
 
-        case IT_RING:
-            price = ring_price(it);
-            break;
+    case IT_RING:
+        price = ring_price(it);
+        break;
 
-        case IT_SCROLL:
-            price = scroll_price(it);
-            break;
+    case IT_SCROLL:
+        price = scroll_price(it);
+        break;
 
-        case IT_WEAPON:
-            price =  weapon_price(it);
-            break;
+    case IT_WEAPON:
+        price =  weapon_price(it);
+        break;
 
-        default:
-            price = 0;
+    default:
+        price = 0;
     }
 
     /* modify base prices by item's attributes */
@@ -684,7 +684,7 @@ int item_curse(item *it)
 
 int item_enchant(item *it)
 {
-	assert(it != NULL);
+    assert(it != NULL);
 
     it->bonus++;
 
@@ -693,12 +693,12 @@ int item_enchant(item *it)
         it->effect->amount++;
     }
 
-	return it->bonus;
+    return it->bonus;
 }
 
 int item_disenchant(item *it)
 {
-	assert(it != NULL);
+    assert(it != NULL);
 
     it->bonus--;
 
@@ -707,7 +707,7 @@ int item_disenchant(item *it)
         it->effect->amount--;
     }
 
-	return it->bonus;
+    return it->bonus;
 }
 
 int item_rust(item *it)
@@ -860,6 +860,87 @@ int inv_weight(inventory *inv)
     }
 
     return sum;
+}
+
+int inv_item_count(inventory *inv, item_t type, int id)
+{
+    int count = 0;
+    int pos;
+    item *i;
+
+    for (pos = 1; pos <= inv_length(inv); pos++)
+    {
+        i = inv_get(inv, pos - 1);
+        if (id)
+        {
+            if (i->type == type && i->id == id)
+                count++;
+        }
+        else if (i->type == type)
+            count++;
+    }
+
+    return count;
+}
+
+int inv_length_filtered(inventory *inv, int (*filter)(item *))
+{
+    int count = 0;
+    int pos;
+    item *i;
+
+    /* return the inventory length if no filter has been set */
+    if (!filter)
+    {
+        return inv_length(inv);
+    }
+
+    for (pos = 1; pos <= inv_length(inv); pos++)
+    {
+        i = inv_get(inv, pos - 1);
+
+        if (filter(i))
+        {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+item *inv_get_filtered(inventory *inv, int pos, int (*filter)(item *))
+{
+    int num;
+    int curr = 0;
+    item *i;
+
+    /* return the inventory length if no filter has been set */
+    if (!filter)
+    {
+        return inv_get(inv, pos);
+    }
+
+    for (num = 1; num <= inv_length(inv); num++)
+    {
+        i = inv_get(inv, num - 1);
+
+        if (filter(i))
+        {
+            /* filter matches */
+            if (curr == pos)
+            {
+                /* this is the requested item */
+                return i;
+            }
+            else
+            {
+                curr++;
+            }
+        }
+    }
+
+    /* not found */
+    return NULL;
 }
 
 static void item_typename_pluralize(item *it, char *description, int length)

@@ -23,7 +23,8 @@
 #include "items.h"
 #include "player.h"
 
-enum display_colours {
+enum display_colours
+{
     DC_NONE,
     DC_WHITE,
     DC_RED,
@@ -36,12 +37,13 @@ enum display_colours {
     DC_MAX
 };
 
-typedef struct display_inv_callback {
-	char *description;
-	char key;
-	int (*function)(player *, item *);
-	int (*checkfun)(player *, item *);
-	gboolean active;
+typedef struct display_inv_callback
+{
+    char *description;
+    char key;
+    int (*function)(player *, item *);
+    int (*checkfun)(player *, item *);
+    gboolean active;
 } display_inv_callback;
 
 /* function declarations */
@@ -51,9 +53,12 @@ void display_shutdown();
 int display_paint_screen(player *p);
 inline int display_draw();
 
-void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callbacks, int show_price);
+void display_inventory(char *title, player *p, inventory *inv,
+                       GPtrArray *callbacks, int show_price,
+                       int (*filter)(item *));
+void display_inv_callbacks_clean(GPtrArray *callbacks);
+
 spell *display_spell_select(char *title, player *p, GPtrArray *callbacks);
-void display_player(player *p);
 
 int display_get_count(char *caption, int value);
 int display_get_yesno(char *question, char *yes, char *no);

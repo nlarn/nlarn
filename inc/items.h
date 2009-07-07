@@ -163,10 +163,14 @@ void inv_destroy(inventory *inv);
 int inv_add(inventory *inv, item *item_new);
 int inv_clean(inventory *inv);
 int inv_weight(inventory *inv);
+int inv_item_count(inventory *inv, item_t type, int id);
+
+int inv_length_filtered(inventory *inv, int (*filter)(item *));
+item *inv_get_filtered(inventory *inv, int pos, int (*filter)(item *));
 
 #define inv_del(inv, pos)          (g_ptr_array_remove_index_fast((inv), (pos)))
 #define inv_del_element(inv, item) (g_ptr_array_remove((inv), (item)))
 #define inv_length(inv)            (((inv) == NULL) ? 0 : (inv)->len)
-#define inv_get(inv, pos)          ((item *)g_ptr_array_index((inv), (pos)))
+#define inv_get(inv, pos)          (g_ptr_array_index((inv), (pos)))
 
 #endif

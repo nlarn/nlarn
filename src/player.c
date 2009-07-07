@@ -940,7 +940,7 @@ int player_pickup(player *p)
         callback->active = FALSE;
         g_ptr_array_add(callbacks, callback);
 
-        display_inventory("On the floor", p, *inv, callbacks, FALSE);
+        display_inventory("On the floor", p, *inv, callbacks, FALSE, NULL);
 
         /* clean up callbacks */
         for (cb = 1; cb <= callbacks->len; cb++)
@@ -1677,7 +1677,7 @@ int player_inv_display(player *p)
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
-    display_inventory("Inventory", p, p->inventory, callbacks, FALSE);
+    display_inventory("Inventory", p, p->inventory, callbacks, FALSE, NULL);
 
     /* clean up */
     for (cb = 1; cb <= callbacks->len; cb++)

@@ -29,12 +29,17 @@ static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
                                       "law, we cannot serve you at this time." \
                                       "\n\nSo Sorry.";
 
+static int building_bank_gem_filter(item *it);
+
 int building_bank(player *p)
 {
     int turns = 2;
     char cmd;
     int amount = 0;
     int mobuls, i;
+
+    GPtrArray *callbacks = NULL;
+    display_inv_callback *callback;
 
     GString *text;
 
@@ -96,11 +101,24 @@ int building_bank(player *p)
     if (p->bank_account > 0)
         g_string_append(text, "w)ithdraw ");
 
-    /* TODO: check if player has any gems */
-    g_string_append(text, "s)ell a gem");
+    /* if player has gems, enable selling them */
+    if (inv_item_count(p->inventory, IT_GEM, GT_NONE))
+    {
+        g_string_append(text, "s)ell a gem");
+
+        /* define callback functions */
+        callbacks = g_ptr_array_new();
+
+        callback = g_malloc(sizeof(display_inv_callback));
+        callback->description = "(s)ell";
+        callback->key = 's';
+        callback->function = &player_item_sell;
+        callback->checkfun = &player_item_is_sellable;
+        callback->active = FALSE;
+        g_ptr_array_add(callbacks, callback);
+    }
 
     cmd = display_show_message((char *)msg_title, text->str);
-
     g_string_free(text, TRUE);
 
     switch (cmd)
@@ -140,14 +158,24 @@ int building_bank(player *p)
         break;
 
     case 's': /* sell gem */
-        /* TODO: implement selling gems */
-        log_add_entry(p->log, "Selling of gems is not implemented yet.");
+        if (!inv_item_count(p->inventory, IT_GEM, GT_NONE))
+            break;
+
+        display_paint_screen(p);
+        display_inventory("Sell gems", p, p->inventory, callbacks, TRUE,
+                          &building_bank_gem_filter);
 
         break;
 
     default:
         /* do nothing */
         break;
+    }
+
+    if (callbacks)
+    {
+        /* clean up */
+        display_inv_callbacks_clean(callbacks);
     }
 
     return turns;
@@ -160,7 +188,6 @@ int building_dndstore(player *p)
     item_t it = IT_NONE;
     GPtrArray *callbacks;
     display_inv_callback *callback;
-    int cb;
 
     const char title[] = "DND store";
 
@@ -209,13 +236,10 @@ int building_dndstore(player *p)
     display_show_message((char *)title, (char *)msg_welcome);
     display_paint_screen(p);
 
-    display_inventory((char *)title, p, store_stock, callbacks, TRUE);
+    display_inventory((char *)title, p, store_stock, callbacks, TRUE, NULL);
 
     /* clean up */
-    for (cb = 1; cb <= callbacks->len; cb++)
-        g_free(g_ptr_array_index(callbacks, cb - 1));
-
-    g_ptr_array_free(callbacks, TRUE);
+    display_inv_callbacks_clean(callbacks);
 
     return turns;
 }
@@ -223,9 +247,6 @@ int building_dndstore(player *p)
 int building_home(player *p)
 {
     int turns = 2;
-    int has_potion = FALSE;
-    item *it;
-    int i;
     GString *text;
 
     const char msg_home[] = "Welcome home, %s.\n\nLatest word from the doctor " \
@@ -255,17 +276,8 @@ int building_home(player *p)
     assert(p != NULL);
 
     /* look for potion in player's inventory */
-    for (i = 1; i <= inv_length(p->inventory); i++)
-    {
-        it = inv_get(p->inventory, i - 1);
-        if ((it->type == IT_POTION) && (it->id == PO_CURE_DIANTHR))
-        {
-            has_potion = TRUE;
-            break;
-        }
-    }
 
-    if (has_potion)
+    if (inv_item_count(p->inventory, IT_POTION, PO_CURE_DIANTHR))
     {
         /* carrying the potion */
         text = g_string_new(msg_found);
@@ -520,7 +532,6 @@ int building_tradepost(player *p)
     int turns = 2;
     GPtrArray *callbacks;
     display_inv_callback *callback;
-    int cb;
 
     const char title[] = "Trade Post";
 
@@ -580,13 +591,17 @@ int building_tradepost(player *p)
     display_show_message((char *)title, (char *)msg_welcome);
     display_paint_screen(p);
 
-    display_inventory((char *)title, p, p->inventory, callbacks, TRUE);
+    display_inventory((char *)title, p, p->inventory, callbacks, TRUE, NULL);
 
     /* clean up */
-    for (cb = 1; cb <= callbacks->len; cb++)
-        g_free(g_ptr_array_index(callbacks, cb - 1));
-
-    g_ptr_array_free(callbacks, TRUE);
+    display_inv_callbacks_clean(callbacks);
 
     return turns;
+}
+
+static int building_bank_gem_filter(item *it)
+{
+    assert (it != NULL);
+
+    return (it->type == IT_GEM);
 }

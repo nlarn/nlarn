@@ -369,13 +369,18 @@ inline int display_draw()
  * @param player
  * @param inventory to display
  * @param a GPtrArray of display_inv_callbacks
+ * @param display prices
+ * @param a filter function: will be called for every item
+ *
  */
-void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callbacks, int show_price)
+void display_inventory(char *title, player *p, inventory *inv,
+                       GPtrArray *callbacks, int show_price,
+                       int (*filter)(item *))
 {
     WINDOW *iwin = NULL;
     int width, height, maxvis;
     int startx, starty;
-    int len;
+    int len_orig, len_curr;
     gboolean redraw = FALSE;
 
     /* window caption assembled from callback descriptions */
@@ -406,7 +411,7 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
     g_ptr_array_sort(inv, &item_sort);
 
     /* store inventory length */
-    len = inv_length(inv);
+    len_orig = len_curr = inv_length_filtered(inv, filter);
 
     if (show_price)
     {
@@ -420,15 +425,15 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
     /* main loop */
     do
     {
-        height = min((display_rows - 3), inv_length(inv) + 2);
-        maxvis = min(inv_length(inv), height - 2);
+        height = min((display_rows - 3), len_curr + 2);
+        maxvis = min(len_curr, height - 2);
 
         starty = (display_rows - height) / 2; /* calculation for centered */
         startx = (min(LEVEL_MAX_X, display_cols) - width) / 2; /* placement of the window */
 
         /* fix marked item */
-        if (curr > inv_length(inv))
-            curr = inv_length(inv);
+        if (curr > len_curr)
+            curr = len_curr;
 
         /* rebuild image */
         if (iwin != NULL)
@@ -443,19 +448,19 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
                 redraw = FALSE;
 
                 /* inventory length is smaller than before */
-                if (len > inv_length(inv))
+                if (len_orig > len_curr)
                 {
                     /* if on the last page, reduce offset */
-                    if ((offset > 0) && ((offset + maxvis) > inv_length(inv)))
+                    if ((offset > 0) && ((offset + maxvis) > len_curr))
                         offset--;
 
                     /* remember current length */
-                    len = inv_length(inv);
+                    len_orig = len_curr;
                 }
             }
         }
 
-        it = inv_get(inv, curr + offset - 1);
+        it = inv_get_filtered(inv, curr + offset - 1, filter);
 
         /* assemble window caption */
         for (caption = NULL, cb_nr = 1; cb_nr <= callbacks->len; cb_nr++)
@@ -493,9 +498,9 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
             g_free(caption);
         }
 
-        for (pos = 1; pos <= min(inv_length(inv), maxvis); pos++)
+        for (pos = 1; pos <= min(len_curr, maxvis); pos++)
         {
-            it = inv_get(inv, (pos - 1) + offset);
+            it = inv_get_filtered(inv, (pos - 1) + offset, filter);
 
             if ((curr == pos) && player_item_is_equipped(p, it))
                 wattron(iwin, COLOR_PAIR(13));
@@ -552,7 +557,7 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
             wattroff(iwin, COLOR_PAIR(11));
         }
 
-        if ((offset + maxvis) < inv_length(inv))
+        if ((offset + maxvis) < len_curr)
         {
             wattron(iwin, COLOR_PAIR(9));
             mvwprintw(iwin, height - 1, width - 5, " v ");
@@ -609,7 +614,7 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
 #ifdef KEY_C2
         case KEY_C2:
 #endif
-            if ((curr + offset) < inv_length(inv))
+            if ((curr + offset) < len_curr)
             {
                 if (curr == maxvis)
                     offset++;
@@ -631,10 +636,10 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
             {
                 offset = offset + maxvis;
 
-                if ((offset + curr) > inv_length(inv))
+                if ((offset + curr) > len_curr)
                 {
-                    curr = min(len, maxvis);
-                    offset = inv_length(inv) - curr;
+                    curr = min(len_curr, maxvis);
+                    offset = len_curr - curr;
                 }
             }
             break;
@@ -643,14 +648,14 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
         case KEY_END:
         case KEY_C1:
 
-            if (inv_length(inv) > maxvis)
+            if (len_curr > maxvis)
             {
                 curr = maxvis;
-                offset = inv_length(inv) - maxvis;
+                offset = len_curr - maxvis;
             }
             else
             {
-                curr = inv_length(inv);
+                curr = len_curr;
             }
 
             break;
@@ -666,7 +671,7 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
                     time = 0;
 
                     /* trigger callback */
-                    time = cb->function(p, inv_get(inv, curr + offset - 1));
+                    time = cb->function(p, inv_get_filtered(inv, curr + offset - 1, filter));
 
                     if (time) game_spin_the_wheel(p->game, time);
 
@@ -678,16 +683,25 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
             }
         };
 
-        /* fake ESC to close window if no items are left */
-        if (!inv_length(inv))
-        {
-            key = 27;
-        }
+        len_curr = inv_length_filtered(inv, filter);
+
     }
-    while (key != 27); /* ESC */
+    while ((key != 27) && (len_curr > 0)); /* ESC pressed or empty inventory*/
 
     delwin(iwin);
     clear();
+}
+
+void display_inv_callbacks_clean(GPtrArray *callbacks)
+{
+    if (!callbacks) return;
+
+    while (callbacks->len > 0)
+    {
+        g_free(g_ptr_array_remove_index_fast(callbacks, callbacks->len - 1));
+    }
+
+    g_ptr_array_free(callbacks, TRUE);
 }
 
 spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
@@ -949,7 +963,6 @@ int display_get_count(char *caption, int value)
 
     do
     {
-
         mvwprintw(mwin, 1, len + 3, "%-6s", ivalue);
         wmove(mwin, 1, len + 3 + ipos);
 
