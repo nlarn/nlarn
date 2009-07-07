@@ -21,18 +21,16 @@
 
 typedef struct position
 {
-    gint32
-        x: 16,
-        y: 16;
+    gint16 x;
+    gint16 y;
 } position;
 
 typedef struct rectangle
 {
-    gint64
-        x1: 16,
-        y1: 16,
-        x2: 16,
-        y2: 16;
+    gint16 x1;
+    gint16 y1;
+    gint16 x2;
+    gint16 y2;
 } rectangle;
 
 typedef struct area

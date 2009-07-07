@@ -62,7 +62,10 @@ void sphere_move(sphere *s, level *l)
 
     /* sphere has reached end of life */
     if (s->lifetime == 0)
-        return sphere_remove(s, l);
+    {
+        sphere_remove(s, l);
+        return;
+    }
 
 
     /* try to move sphere into its direction */
@@ -115,7 +118,9 @@ void sphere_move(sphere *s, level *l)
                               monster_get_name(m));
             }
 
-            return sphere_remove(s, l);
+            sphere_remove(s, l);
+
+            return;
         }
 
         /* disenchantress cancels sphere */
@@ -128,7 +133,9 @@ void sphere_move(sphere *s, level *l)
                               monster_get_name(m));
             }
 
-            return sphere_remove(s, l);
+            sphere_remove(s, l);
+
+            return;
         }
 
         /* kill monster */
@@ -142,7 +149,9 @@ void sphere_move(sphere *s, level *l)
                       "Two spheres of annihilation collide! " \
                       "You hear a great earth shaking blast!");
 
-        return sphere_remove(s, l);
+        sphere_remove(s, l);
+
+        return;
     }
 
 }
@@ -177,7 +186,9 @@ static void sphere_hit_owner(sphere *s, level *l)
         log_add_entry(s->owner->log,
                       "As the cancellation takes effect, you hear a great earth shaking blast!");
 
-        return sphere_remove(s, l);
+        sphere_remove(s, l);
+
+        return;
     }
     else
     {

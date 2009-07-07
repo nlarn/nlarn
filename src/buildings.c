@@ -30,6 +30,7 @@ static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
                                       "\n\nSo Sorry.";
 
 static int building_bank_gem_filter(item *it);
+static int building_tradepost_gold_filter(item *it);
 
 int building_bank(player *p)
 {
@@ -591,7 +592,7 @@ int building_tradepost(player *p)
     display_show_message((char *)title, (char *)msg_welcome);
     display_paint_screen(p);
 
-    display_inventory((char *)title, p, p->inventory, callbacks, TRUE, NULL);
+    display_inventory((char *)title, p, p->inventory, callbacks, TRUE, &building_tradepost_gold_filter);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);
@@ -604,4 +605,11 @@ static int building_bank_gem_filter(item *it)
     assert (it != NULL);
 
     return (it->type == IT_GEM);
+}
+
+static int building_tradepost_gold_filter(item *it)
+{
+    assert (it != NULL);
+
+    return (it->type != IT_GOLD);
 }

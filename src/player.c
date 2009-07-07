@@ -385,7 +385,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         break;
     }
 
-    g_string_append_printf(text, " %s has scored %ld points.",
+    g_string_append_printf(text, " %s has scored %" G_GINT64_FORMAT " points.",
                            p->sex ? "He" : "She",
                            player_calc_score(p, (cause_type == PD_WON)));
 
@@ -2526,16 +2526,25 @@ int player_item_sell(player *p, item *it)
 
     item_describe(it, player_item_identified(p, it), FALSE, FALSE, name, 40);
 
-    if (!player_item_is_damaged(p, it))
+    price = item_price(it);
+
+    /* modify price if player sells stuff at the trading post */
+    if (level_stationary_at(p->level, p->pos) == LS_TRADEPOST)
     {
-        /* good items: 20% of value */
-        price = item_price(it) / 5;
+        if (!player_item_is_damaged(p, it))
+        {
+            /* good items: 20% of value */
+            price /= 5;
+        }
+        else
+        {
+            /* damaged items: 10% of value */
+            price /= 10;
+        }
     }
-    else
-    {
-        /* damaged items: 10% of value */
-        price = item_price(it) / 10;
-    }
+
+    if (price < 1)
+        price = 1;
 
     g_snprintf(question, 80, "Do you want to sell %s for %d gold?",
                name,
