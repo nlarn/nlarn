@@ -20,9 +20,9 @@
 
 const food_data foods[FT_MAX] =
 {
-    /* id                name              weight*/
-    { FT_NONE,           "",               0,   },
-    { FT_FORTUNE_COOKIE, "fortune cookie", 2,   },
+    /* id                name              wt pr*/
+    { FT_NONE,           "",                0, 0, },
+    { FT_FORTUNE_COOKIE, "fortune cookie", 10, 2, },
 };
 
 /* function to return a random fortune from the fortune file  */

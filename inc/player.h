@@ -222,11 +222,20 @@ int player_item_is_equipped(player *p, item *it);
 int player_item_is_equippable(player *p, item *it);
 int player_item_is_usable(player *p, item *it);
 int player_item_is_dropable(player *p, item *it);
+int player_item_is_damaged(player *p, item *it);
+int player_item_is_affordable(player *p, item *it);
+int player_item_is_sellable(player *p, item *it);
+int player_item_is_identifiable(player *p, item *it);
 int player_item_identified(player *p, item *it);
 void player_item_identify(player *p, item *it);
 int player_item_use(player *p, item *it);
 int player_item_drop(player *p, item *it);
 int player_item_pickup(player *p, item *it);
+int player_item_buy(player *p, item *it);
+int player_item_sell(player *p, item *it);
+int player_item_shop_identify(player *p, item *it);
+int player_item_shop_repair(player *p, item *it);
+
 
 /* query values */
 int player_get_ac(player *p);

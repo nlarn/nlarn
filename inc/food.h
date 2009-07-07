@@ -30,6 +30,7 @@ typedef struct food_data {
     int id;
     char *name;
     int weight;
+    int price;
 } food_data;
 
 /* function declarations */
@@ -44,5 +45,6 @@ extern const food_data foods[FT_MAX];
 
 #define food_name(food)   (foods[(food)->id].name)
 #define food_weight(food) (foods[(food)->id].weight)
+#define food_price(food)  (foods[(food)->id].price)
 
 #endif

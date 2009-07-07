@@ -940,7 +940,7 @@ int player_pickup(player *p)
         callback->active = FALSE;
         g_ptr_array_add(callbacks, callback);
 
-        display_inventory("On the floor", p, *inv, callbacks);
+        display_inventory("On the floor", p, *inv, callbacks, FALSE);
 
         /* clean up callbacks */
         for (cb = 1; cb <= callbacks->len; cb++)
@@ -1505,6 +1505,10 @@ int player_spell_cast(player *p)
         case SP_ALT:
             player_magic_alter_reality(p);
             break;
+
+        case SP_PER:
+            /* TODO: implement */
+            break;
         }
 
         break;
@@ -1673,7 +1677,7 @@ int player_inv_display(player *p)
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
-    display_inventory("Inventory", p, p->inventory, callbacks);
+    display_inventory("Inventory", p, p->inventory, callbacks, FALSE);
 
     /* clean up */
     for (cb = 1; cb <= callbacks->len; cb++)
@@ -2017,6 +2021,36 @@ int player_item_is_dropable(player *p, item *it)
 {
     assert(p != NULL && it != NULL);
     return !player_item_is_equipped(p, it);
+}
+
+int player_item_is_damaged(player *p, item *it)
+{
+    assert(p != NULL && it != NULL);
+
+    if (it->corroded) return TRUE;
+    if (it->burnt) return TRUE;
+    if (it->rusty) return TRUE;
+
+    return FALSE;
+}
+
+int player_item_is_affordable(player *p, item *it)
+{
+    assert(p != NULL && it != NULL);
+
+    return (item_price(it) <= player_get_gold(p));
+}
+
+int player_item_is_sellable(player *p, item *it)
+{
+    assert(p != NULL && it != NULL);
+
+    return (!player_item_is_equipped(p, it));
+}
+
+int player_item_is_identifiable(player *p, item *it)
+{
+    return (!player_item_identified(p, it));
 }
 
 int player_item_identified(player *p, item *it)
@@ -2410,6 +2444,195 @@ int player_item_pickup(player *p, item *it)
 
     /* one turn to pick item up, one to stuff it into the pack */
     return 2;
+}
+
+int player_item_buy(player *p, item *it)
+{
+    int price;
+    int count;
+    int player_gold;
+    char text[81];
+    char name[41];
+
+    item *it_clone;
+
+    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    player_gold = player_get_gold(p);
+    price = item_price(it);
+
+    if (it->count > 1)
+    {
+        item_describe(it, player_item_identified(p, it), FALSE, FALSE, name, 40);
+        g_snprintf(text, 80, "How many %s do you want to buy?", name);
+
+        /* get count */
+        count = display_get_count(text, it->count);
+        price *= count;
+
+        if (player_gold < price)
+        {
+            display_paint_screen(p);
+
+            it_clone = item_clone(it);
+            it_clone->count = count;
+
+            item_describe(it, player_item_identified(p, it), FALSE, TRUE, name, 40);
+            g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
+                       price, name);
+
+            item_destroy(it_clone);
+
+            display_show_message(NULL, text);
+
+            return FALSE;
+        }
+    }
+    else
+    {
+        item_describe(it, player_item_identified(p, it), TRUE, TRUE, name, 40);
+        g_snprintf(text, 80, "Do you want to buy %s for %d gold?",
+                   name, price);
+
+        if (!display_get_yesno(text, NULL, NULL))
+        {
+            return FALSE;
+        }
+    }
+
+    player_set_gold(p, player_gold - price);
+
+    if ((it->count > 1) && (count < it->count))
+    {
+        /* split the item */
+        inv_add(p->inventory, item_split(it, count));
+    }
+    else
+    {
+        inv_add(p->inventory, item_clone(it));
+        it->count = 0;
+    }
+
+    return TRUE;
+}
+
+int player_item_sell(player *p, item *it)
+{
+    int price;
+    char question[81];
+    char name[41];
+
+    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    item_describe(it, player_item_identified(p, it), FALSE, FALSE, name, 40);
+
+    if (!player_item_is_damaged(p, it))
+    {
+        /* good items: 20% of value */
+        price = item_price(it) / 5;
+    }
+    else
+    {
+        /* damaged items: 10% of value */
+        price = item_price(it) / 10;
+    }
+
+    g_snprintf(question, 80, "Do you want to sell %s for %d gold?",
+               name,
+               price);
+
+    if (display_get_yesno(question, NULL, NULL))
+    {
+        inv_del_element(p->inventory, it);
+        player_set_gold(p, player_get_gold(p) + price);
+
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+int player_item_shop_identify(player *p, item *it)
+{
+    int player_gold;
+    int price;
+    char name[41];
+    char message[81];
+
+    const char title[] = "Identify item";
+
+    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    player_gold = player_get_gold(p);
+    price = 50 << game_difficulty(p->game);
+
+    item_describe(it, player_item_identified(p, it), TRUE, TRUE, name, 40);
+
+    if (price <= player_gold)
+    {
+        g_snprintf(message, 80, "Pay %d gold to identify the %s?", price, name);
+
+        if (display_get_yesno(message, NULL, NULL))
+        {
+            player_item_identify(p, it);
+            player_set_gold(p, player_gold - price);
+
+            return TRUE;
+        }
+    }
+    else
+    {
+        g_snprintf(message, 80, "Identifying the %s costs %d gold.", name, price);
+        display_show_message((char *)title, message);
+    }
+
+    return FALSE;
+}
+
+int player_item_shop_repair(player *p, item *it)
+{
+    int damages = 0;
+    int player_gold;
+    int price;
+    char name[41];
+    char message[81];
+
+    const char title[] = "Repair item";
+
+    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    /* determine how much the item is damaged */
+    damages += it->burnt;
+    damages += it->corroded;
+    damages += it->rusty;
+
+    player_gold = player_get_gold(p);
+    price = (50 << game_difficulty(p->game)) * damages;
+
+    item_describe(it, player_item_identified(p, it), TRUE, TRUE, name, 40);
+
+    if (price <= player_gold)
+    {
+        g_snprintf(message, 80, "Pay %d gold to repair the %s?", price, name);
+
+        if (display_get_yesno(message, NULL, NULL))
+        {
+            it->burnt = 0;
+            it->corroded = 0;
+            it->rusty = 0;
+
+            player_set_gold(p, player_gold - price);
+
+            return TRUE;
+        }
+    }
+    else
+    {
+        g_snprintf(message, 80, "Repairing the %s costs %d gold.", name, price);
+        display_show_message((char *)title, message);
+    }
+
+    return FALSE;
 }
 
 int player_effect(player *p, int effect_type)

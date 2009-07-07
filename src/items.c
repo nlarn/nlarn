@@ -168,13 +168,7 @@ item *item_clone(item *original)
 
     /* clone item */
     nitem = g_malloc0(sizeof(item));
-
-    nitem->type = original->type;
-    nitem->count = original->count;
-
-    memcpy(nitem,
-           original,
-           sizeof(item));
+    memcpy(nitem, original, sizeof(item));
 
     return nitem;
 }
@@ -457,6 +451,7 @@ item_material_t item_material(item *it)
             break;
 
         case IT_FOOD:
+            /* TODO: food material */
             material = IM_NONE;
             break;
 
@@ -512,8 +507,7 @@ int item_price(item *it)
             break;
 
         case IT_FOOD:
-            /* TODO: food price */
-            price = 0;
+            price = food_price(it);
             break;
 
         case IT_GEM:
@@ -613,8 +607,7 @@ int item_weight(item *it)
         break;
 
     case IT_FOOD:
-        /* the fortune cookie is light */
-        return 10;
+        return food_weight(it);
         break;
 
     case IT_GOLD:
@@ -829,6 +822,30 @@ void inv_destroy(inventory *inv)
     inv = NULL;
 }
 
+/**
+ * clean unused items from an inventory
+ *
+ */
+int inv_clean(inventory *inv)
+{
+    item *it;
+    int pos;
+    int count = 0;
+
+    assert(inv != NULL);
+
+    for (pos = 1; pos <= inv_length(inv); pos++)
+    {
+        it = g_ptr_array_index(inv, pos - 1);
+        if (it->count == 0)
+        {
+            g_ptr_array_remove_index(inv, pos - 1);
+        }
+    }
+
+    return count;
+}
+
 int inv_weight(inventory *inv)
 {
     int sum = 0;
@@ -957,7 +974,6 @@ static char *item_desc_get(item *it, int known)
         break;
 
     case IT_GEM:
-        /* TODO: handle known / unknown */
         return gem_name(it);
         break;
 

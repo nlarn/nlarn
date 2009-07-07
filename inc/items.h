@@ -161,6 +161,7 @@ inventory *inv_new();
 void inv_destroy(inventory *inv);
 
 int inv_add(inventory *inv, item *item_new);
+int inv_clean(inventory *inv);
 int inv_weight(inventory *inv);
 
 #define inv_del(inv, pos)          (g_ptr_array_remove_index_fast((inv), (pos)))

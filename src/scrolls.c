@@ -18,7 +18,6 @@
 
 #include "nlarn.h"
 
-/* TODO: sanitize price */
 const magic_scroll_data scrolls[ST_MAX] =
 {
     /* ID                   name                  effect               price */

@@ -51,7 +51,7 @@ void display_shutdown();
 int display_paint_screen(player *p);
 inline int display_draw();
 
-void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callbacks);
+void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callbacks, int show_price);
 spell *display_spell_select(char *title, player *p, GPtrArray *callbacks);
 void display_player(player *p);
 

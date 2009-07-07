@@ -158,6 +158,9 @@ int building_dndstore(player *p)
     int turns = 2;
     int i;
     item_t it = IT_NONE;
+    GPtrArray *callbacks;
+    display_inv_callback *callback;
+    int cb;
 
     const char title[] = "DND store";
 
@@ -174,9 +177,9 @@ int building_dndstore(player *p)
     {
         store_stock = inv_new();
 
-        for (i = 1; i < 40; i++)
+        for (i = 0; i < 50; i++)
         {
-            while (it == IT_NONE || it == IT_GOLD || it == IT_GEM)
+            while (it == IT_NONE || it == IT_GOLD || it == IT_GEM || it == IT_CONTAINER)
                 it = rand_1n(IT_MAX);
 
             inv_add(store_stock, item_create_random(it));
@@ -192,7 +195,27 @@ int building_dndstore(player *p)
         return turns;
     }
 
+    /* define callback functions */
+    callbacks = g_ptr_array_new();
+
+    callback = g_malloc(sizeof(display_inv_callback));
+    callback->description = "(b)uy";
+    callback->key = 'b';
+    callback->function = &player_item_buy;
+    callback->checkfun = &player_item_is_affordable;
+    callback->active = FALSE;
+    g_ptr_array_add(callbacks, callback);
+
     display_show_message((char *)title, (char *)msg_welcome);
+    display_paint_screen(p);
+
+    display_inventory((char *)title, p, store_stock, callbacks, TRUE);
+
+    /* clean up */
+    for (cb = 1; cb <= callbacks->len; cb++)
+        g_free(g_ptr_array_index(callbacks, cb - 1));
+
+    g_ptr_array_free(callbacks, TRUE);
 
     return turns;
 }
@@ -495,6 +518,9 @@ int building_school(player *p)
 int building_tradepost(player *p)
 {
     int turns = 2;
+    GPtrArray *callbacks;
+    display_inv_callback *callback;
+    int cb;
 
     const char title[] = "Trade Post";
 
@@ -516,7 +542,51 @@ int building_tradepost(player *p)
         return turns;
     }
 
+    /* define callback functions */
+    callbacks = g_ptr_array_new();
+
+    callback = g_malloc(sizeof(display_inv_callback));
+    callback->description = "(s)ell";
+    callback->key = 's';
+    callback->function = &player_item_sell;
+    callback->checkfun = &player_item_is_sellable;
+    callback->active = FALSE;
+    g_ptr_array_add(callbacks, callback);
+
+    callback = g_malloc(sizeof(display_inv_callback));
+    callback->description = "(i)dentify";
+    callback->key = 'i';
+    callback->function = &player_item_shop_identify;
+    callback->checkfun = &player_item_is_identifiable;
+    callback->active = FALSE;
+    g_ptr_array_add(callbacks, callback);
+
+    callback = g_malloc(sizeof(display_inv_callback));
+    callback->description = "(r)epair";
+    callback->key = 'r';
+    callback->function = &player_item_shop_repair;
+    callback->checkfun = &player_item_is_damaged;
+    callback->active = FALSE;
+    g_ptr_array_add(callbacks, callback);
+
+    callback = g_malloc(sizeof(display_inv_callback));
+    callback->description = "(u)nequip";
+    callback->key = 'u';
+    callback->function = &player_item_unequip;
+    callback->checkfun = &player_item_is_equipped;
+    callback->active = FALSE;
+    g_ptr_array_add(callbacks, callback);
+
     display_show_message((char *)title, (char *)msg_welcome);
+    display_paint_screen(p);
+
+    display_inventory((char *)title, p, p->inventory, callbacks, TRUE);
+
+    /* clean up */
+    for (cb = 1; cb <= callbacks->len; cb++)
+        g_free(g_ptr_array_index(callbacks, cb - 1));
+
+    g_ptr_array_free(callbacks, TRUE);
 
     return turns;
 }

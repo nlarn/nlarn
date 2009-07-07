@@ -18,7 +18,6 @@
 
 #include "nlarn.h"
 
-/* TODO: sanitize prices */
 const weapon_data weapons[WT_MAX] =
 {
     /* ID               name                         wc  material    we     pr tw un */
@@ -32,8 +31,8 @@ const weapon_data weapons[WT_MAX] =
     { WT_SWORDSLASHING, "sword of slashing",         30, IM_IRON,  2200,  6000, 0, 0 },
     /* unique weapons */
     { WT_LANCEOFDEATH,  "lance of death",            20, IM_WOOD,  2900, 16500, 1, 1 },
-    { WT_VORPALBLADE,   "Vorpal blade",              22, IM_STEEL, 1600,     0, 0, 1 },
-    { WT_SLAYER,        "Slayer",                    30, IM_STEEL, 1800,     0, 0, 1 },
+    { WT_VORPALBLADE,   "Vorpal blade",              22, IM_STEEL, 1600,  3800, 0, 1 },
+    { WT_SLAYER,        "Slayer",                    30, IM_STEEL, 1800,  5000, 0, 1 },
     { WT_SUNSWORD,      "Sunsword",                  32, IM_STEEL, 1800,  5000, 0, 1 },
     { WT_BESSMAN,       "Bessman's flailing hammer", 35, IM_STEEL, 5800, 10000, 1, 1 },
 };

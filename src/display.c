@@ -205,7 +205,7 @@ int display_paint_screen(player *p)
         if (game_wizardmode(p->game)
                 || player_effect(p, ET_DETECT_MONSTER)
                 || (player_pos_visible(p, monst->pos)
-                && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))))
+                    && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))))
         {
             attron(COLOR_PAIR(DC_RED));
             mvaddch(monst->pos.y, monst->pos.x, monster_get_image(monst));
@@ -370,7 +370,7 @@ inline int display_draw()
  * @param inventory to display
  * @param a GPtrArray of display_inv_callbacks
  */
-void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callbacks)
+void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callbacks, int show_price)
 {
     WINDOW *iwin = NULL;
     int width, height, maxvis;
@@ -408,13 +408,21 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
     /* store inventory length */
     len = inv_length(inv);
 
+    if (show_price)
+    {
+        width = 56;
+    }
+    else
+    {
+        width = 50;
+    }
+
     /* main loop */
     do
     {
         height = min((display_rows - 3), inv_length(inv) + 2);
         maxvis = min(inv_length(inv), height - 2);
 
-        width = 50;
         starty = (display_rows - height) / 2; /* calculation for centered */
         startx = (min(LEVEL_MAX_X, display_cols) - width) / 2; /* placement of the window */
 
@@ -478,9 +486,10 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
             }
         }
 
+        iwin = display_window_new(startx, starty, width, height, title, caption);
+
         if (caption)
         {
-            iwin = display_window_new(startx, starty, width, height, title, caption);
             g_free(caption);
         }
 
@@ -497,13 +506,27 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
             else
                 wattron(iwin, COLOR_PAIR(9));
 
-            mvwprintw(iwin, pos, 1, " %2d %41s %c ",
-                      pos + offset,
-                      item_describe(it,
-                                    player_item_identified(p, it),
-                                    FALSE, FALSE,
-                                    item_desc, 80),
-                      player_item_is_equipped(p, it) ? '*' : ' ');
+            if (show_price)
+            {
+                mvwprintw(iwin, pos, 1, " %2d %41s %5d %c ",
+                          pos + offset,
+                          item_describe(it,
+                                        player_item_identified(p, it),
+                                        FALSE, FALSE,
+                                        item_desc, 80),
+                          item_price(it),
+                          player_item_is_equipped(p, it) ? '*' : ' ');
+            }
+            else
+            {
+                mvwprintw(iwin, pos, 1, " %2d %41s %c ",
+                          pos + offset,
+                          item_describe(it,
+                                        player_item_identified(p, it),
+                                        FALSE, FALSE,
+                                        item_desc, 80),
+                          player_item_is_equipped(p, it) ? '*' : ' ');
+            }
 
             if ((curr == pos) && player_item_is_equipped(p, it))
                 wattroff(iwin, COLOR_PAIR(13));
@@ -645,10 +668,12 @@ void display_inventory(char *title, player *p, inventory *inv, GPtrArray *callba
                     /* trigger callback */
                     time = cb->function(p, inv_get(inv, curr + offset - 1));
 
-                    if (time)
-                        game_spin_the_wheel(p->game, time);
+                    if (time) game_spin_the_wheel(p->game, time);
 
                     redraw = TRUE;
+
+                    /* remove unused items */
+                    inv_clean(inv);
                 }
             }
         };
@@ -898,6 +923,10 @@ int display_get_count(char *caption, int value)
 
     starty = (display_rows - height) / 2;
     startx = (min(LEVEL_MAX_X, display_cols) - width) / 2;
+
+    /* FIXME: need line wrap here.. */
+    if (startx <= 0)
+        startx = (display_cols - width) / 2;
 
     mwin = display_window_new(startx, starty, width, height, "", "");
 

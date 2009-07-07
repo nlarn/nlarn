@@ -18,7 +18,6 @@
 
 #include "nlarn.h"
 
-/* TODO: add prices */
 const spell_data spells[SP_MAX] =
 {
     {
@@ -43,7 +42,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         1,
-        0
+        260
     },
     {
         SP_MLE,
@@ -55,7 +54,7 @@ const spell_data spells[SP_MAX] =
         "Your missiles hit the %s.",
         "Your missile bounces off the %s.",
         1,
-        0
+        320
     },
     {
         SP_DEX,
@@ -67,7 +66,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         1,
-        0
+        260
     },
     {
         SP_SLE,
@@ -79,7 +78,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         "The %s doesn't sleep.",
         1,
-        0
+        260
     },
     {
         SP_CHM,
@@ -91,7 +90,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         1,
-        0
+        260
     },
     {
         SP_SSP,
@@ -103,7 +102,7 @@ const spell_data spells[SP_MAX] =
         "The sound damages the %s.",
         "The %s can't hear the noise.",
         1,
-        0
+        300
     },
     {
         SP_STR,
@@ -115,7 +114,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         2,
-        0
+        460
     },
     {
         SP_ENL,
@@ -127,7 +126,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         2,
-        0
+        460
     },
     {
         SP_HEL,
@@ -139,7 +138,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         2,
-        0
+        400
     },
     {
         SP_CBL,
@@ -151,7 +150,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         2,
-        0
+        400
     },
     {
         SP_CRE,
@@ -163,7 +162,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         2,
-        0
+        400
     },
     {
         SP_PHA,
@@ -175,7 +174,7 @@ const spell_data spells[SP_MAX] =
         "The %s believed!",
         "The %s didn't believe the illusions!",
         2,
-        0
+        600
     },
     {
         SP_INV,
@@ -187,7 +186,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         2,
-        0
+        600
     },
     {
         SP_BAL,
@@ -199,7 +198,7 @@ const spell_data spells[SP_MAX] =
         "The fireball hits the %s.",
         NULL,
         3,
-        0
+        1200
     },
     {
         SP_CLD,
@@ -211,7 +210,7 @@ const spell_data spells[SP_MAX] =
         "The cone of cold strikes the %s.",
         "The %s loves the cold!",
         3,
-        0
+        1200
     },
     {
         SP_PLY,
@@ -223,7 +222,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         "The %s resists.",
         3,
-        0
+        950
     },
     {
         SP_CAN,
@@ -235,7 +234,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         3,
-        0
+        950
     },
     {
         SP_HAS,
@@ -247,7 +246,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         3,
-        0
+        950
     },
     {
         SP_CKL,
@@ -259,7 +258,7 @@ const spell_data spells[SP_MAX] =
         "The %s gasps for air.",
         "The %s loves the water!",
         3,
-        0
+        1200
     },
     {
         SP_VPR,
@@ -271,7 +270,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         3,
-        0
+        950
     },
     {
         SP_DRY,
@@ -283,7 +282,7 @@ const spell_data spells[SP_MAX] =
         "The %s shrivels up.",
         "The %s isn't affected.",
         4,
-        0
+        1600
     },
     {
         SP_LIT,
@@ -295,7 +294,7 @@ const spell_data spells[SP_MAX] =
         "A lightning bolt hits the %s.",
         "The %s loves fire and lightning!",
         4,
-        0
+        1600
     },
     {
         SP_DRL,
@@ -307,7 +306,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         4,
-        0
+        1400
     },
     {
         SP_GLO,
@@ -319,7 +318,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         4,
-        0
+        1400
     },
     {
         SP_FLO,
@@ -331,7 +330,7 @@ const spell_data spells[SP_MAX] =
         "The %s struggles for air in your flood!",
         NULL,
         4,
-        0
+        1600
     },
     {
         SP_FGR,
@@ -343,7 +342,7 @@ const spell_data spells[SP_MAX] =
         "The %s's heart stopped.",
         "The %s isn't affected.",
         4,
-        0
+        1600
     },
     {
         SP_SCA,
@@ -355,7 +354,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         5,
-        0
+        2000
     },
     {
         SP_HLD,
@@ -367,7 +366,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         5,
-        0
+        2000
     },
     {
         SP_STP,
@@ -379,7 +378,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         5,
-        0
+        2500
     },
     {
         SP_TEL,
@@ -391,7 +390,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         5,
-        0
+        2000
     },
     {
         SP_MFI,
@@ -403,7 +402,7 @@ const spell_data spells[SP_MAX] =
         "The %s cringes from the flame.",
         NULL,
         5,
-        0
+        2500
     },
     {
         SP_MKW,
@@ -415,7 +414,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         6,
-        0
+        3000
     },
     {
         SP_SPH,
@@ -427,7 +426,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         6,
-        0
+        3500
     },
     {
         SP_GEN,
@@ -439,7 +438,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         6,
-        0
+        3800
     },
     {
         SP_SUM,
@@ -451,7 +450,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         6,
-        0
+        3500
     },
     {
         SP_WTW,
@@ -463,7 +462,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         6,
-        0
+        3800
     },
     {
         SP_ALT,
@@ -475,7 +474,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         "Polinneaus won't let you mess with his dungeon!",
         6,
-        0
+        3800
     },
     {
         SP_PER,
@@ -487,7 +486,7 @@ const spell_data spells[SP_MAX] =
         NULL,
         NULL,
         6,
-        0
+        3800
     },
 };
 

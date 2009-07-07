@@ -18,15 +18,14 @@
 
 #include "nlarn.h"
 
-/* TODO: sanitize prices */
 const armour_data armours[AT_MAX] =
 {
     /* id            name                      ac  category     material       we   pr  un */
     { AT_NONE,       "",                        0, AC_NONE,     IM_NONE,        0,    0, 0 },
-    { AT_SHIELD,     "shield",                  2, AC_SHIELD,   IM_WOOD,     3500,  150, 0 },
+    { AT_SHIELD,     "shield",                  2, AC_SHIELD,   IM_WOOD,     3500,   15, 0 },
     { AT_LEATHER,    "leather armour",          2, AC_SUIT,     IM_LEATHER,  4000,    2, 0 },
     { AT_SLEATHER,   "studded leather armour",  3, AC_SUIT,     IM_LEATHER,  7500,   10, 0 },
-    { AT_RIGNMAIL,   "ring mail",               5, AC_SUIT,     IM_IRON,    10000,   40, 0 },
+    { AT_RINGMAIL,   "ring mail",               5, AC_SUIT,     IM_IRON,    10000,   40, 0 },
     { AT_CHAINMAIL,  "chain mail",              6, AC_SUIT,     IM_IRON,    11500,   85, 0 },
     { AT_SPLINTMAIL, "splint mail",             7, AC_SUIT,     IM_IRON,    13000,  220, 0 },
     { AT_PLATEMAIL,  "plate mail",              9, AC_SUIT,     IM_IRON,    17500,  400, 0 },
