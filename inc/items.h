@@ -89,12 +89,12 @@ typedef GPtrArray inventory;
 
 typedef struct item {
     item_t type;            /* element type */
-    int id;                 /* item id, type specific */
-    int bonus;
-    int count;              /* for stackable items */
+    guint32 id;             /* item id, type specific */
+    gint32 bonus;
+    guint32 count;          /* for stackable items */
     effect *effect;         /* storage for effect */
     inventory *content;     /* for containers */
-    unsigned
+    guint32
         blessed: 1,
         cursed: 1,
         corroded: 2,        /* 0: no; 1: yes; 2: very */

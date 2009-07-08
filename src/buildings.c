@@ -321,7 +321,7 @@ int building_home(player *p)
         g_string_printf(text,
                         msg_home,
                         p->name,
-                        gtime2mobuls(game_remaining_turns(p->game) + 99),
+                        gtime2mobuls(game_remaining_turns(p->game)),
                         p->name);
 
         display_show_message("Your home", text->str);

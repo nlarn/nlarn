@@ -23,16 +23,16 @@
 
 /* game messaging */
 typedef struct message_log_entry {
-	time_t ltime;		/* real time of log entry */
-	int	gtime;			/* game time of log entry */
+	time_t ltime;       /* real time of log entry */
+	guint32 gtime;      /* game time of log entry */
 	char *message;
 } message_log_entry;
 
 typedef struct message_log {
-	int length;                         /* number of entries */
-	int gtime;                          /* current game time */
-	int active;                         /* flag to disable logging onto this log */
-	GString *buffer;                    /* space to assemble a turn's messages */
+	guint32 length;     /* number of entries */
+	guint32 gtime;      /* current game time */
+	gint32 active;      /* flag to disable logging onto this log */
+	GString *buffer;    /* space to assemble a turn's messages */
 	message_log_entry **entries;
 } message_log;
 

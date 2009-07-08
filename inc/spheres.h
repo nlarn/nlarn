@@ -22,9 +22,9 @@
 #include "level.h"
 
 typedef struct sphere {
-    position pos;		/* location of the sphere */
-    int dir;			/* direction sphere is going in */
-    int lifetime;		/* duration of the sphere */
+    position pos;       /* location of the sphere */
+    guint32 dir;        /* direction sphere is going in */
+    guint32 lifetime;   /* duration of the sphere */
     player *owner;      /* pointer to player who created the sphere */
 } sphere;
 

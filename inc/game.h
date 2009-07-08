@@ -24,39 +24,41 @@
 #include "player.h"
 
 /* the world as we know it */
-typedef struct game {
-		player *p;					/* the player */
-		level *levels[LEVEL_MAX];	/* the dungeon */
-		time_t time_start;			/* start time */
-		time_t gtime;				/* game time */
-        gint difficulty;  /* game difficulty */
+typedef struct game
+{
+    player *p;                  /* the player */
+    level *levels[LEVEL_MAX];   /* the dungeon */
+    guint64 time_start;         /* start time */
+    guint32 gtime;              /* turn count */
+    guint8 difficulty;          /* game difficulty */
 
-        gchar *basedir;
-        gchar *libdir;
-        gchar *mesgfile;
-        gchar *helpfile;
-        gchar *mazefile;
-        gchar *fortunes;
+    gchar *basedir;
+    gchar *libdir;
+    gchar *mesgfile;
+    gchar *helpfile;
+    gchar *mazefile;
+    gchar *fortunes;
 
-        /* flags */
-        unsigned
-            wizard: 1; /* wizard mode */
+    /* flags */
+    guint32
+        wizard: 1; /* wizard mode */
 } game;
 
 /* direction of movement */
 /* ordered by number keys */
-typedef enum direction {
-	GD_NONE,
-	GD_SW,
-	GD_SOUTH,
-	GD_SE,
-	GD_WEST,
-	GD_CURR, /* special case: current position */
-	GD_EAST,
-	GD_NW,
-	GD_NORTH,
-	GD_NE,
-	GD_MAX
+typedef enum direction
+{
+    GD_NONE,
+    GD_SW,
+    GD_SOUTH,
+    GD_SE,
+    GD_WEST,
+    GD_CURR, /* special case: current position */
+    GD_EAST,
+    GD_NW,
+    GD_NORTH,
+    GD_NE,
+    GD_MAX
 } direction;
 
 int game_save(game *g, char *filename);
@@ -83,7 +85,7 @@ void game_spin_the_wheel(game *g, int times);
 #define game_fortunes(g) ((g)->fortunes)
 
 /* gtime <> mobuls conversion */
-#define gtime2mobuls(gtime) ((int)(gtime) / 100)
+#define gtime2mobuls(gtime)  ((abs((int)(gtime)) + 99) / 100)
 #define mobuls2gtime(mobuls) ((int)(mobuls) * 100)
 
 #endif

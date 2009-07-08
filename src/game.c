@@ -110,7 +110,7 @@ game *game_new(int argc, char *argv[])
     }
 
     g->p->sex = !female;
-    g->p->auto_pickup = auto_pickup;
+    g->p->settings.auto_pickup = auto_pickup;
 
     /* allocate space for levels */
     for (i = 0; i < LEVEL_MAX; i++)
@@ -120,7 +120,7 @@ game *game_new(int argc, char *argv[])
     }
 
     /* game time handling */
-    g->gtime = 0;
+    g->gtime = 1;
     g->time_start = time(NULL);
 
     /* welcome message */

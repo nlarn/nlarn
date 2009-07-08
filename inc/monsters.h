@@ -133,20 +133,20 @@ typedef enum monster_t {
 /* monster  */
 typedef struct monster {
 	monster_t type;
-    int hp;
+    gint32 hp;
 	position pos;
 	monster_action_t action;    /* current action */
 
 	/* number of turns since when player was last seen; 0 = never */
-	int lastseen;
+	guint32 lastseen;
 
 	/* last known position of player */
 	position player_pos;
 
 	/* LOS between player -> monster */
-	int m_visible;
+	gboolean m_visible;
 	/* LOS between monster -> player */
-	int p_visible;
+	gboolean p_visible;
 
 	inventory *inventory;
 	GPtrArray *effects;

@@ -149,9 +149,9 @@ int main(int argc, char *argv[])
                 break;
 
             case '@':
-                g->p->auto_pickup = !(g->p->auto_pickup);
+                g->p->settings.auto_pickup = !(g->p->settings.auto_pickup);
                 log_add_entry(g->p->log, "Auto-pickup is %s.",
-                              g->p->auto_pickup ? "on" : "off");
+                              g->p->settings.auto_pickup ? "on" : "off");
                 break;
 
                 /* sit and wait */

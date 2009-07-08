@@ -479,7 +479,7 @@ int player_move(player *p, int direction)
     } /* end trap */
 
 
-    if (p->auto_pickup
+    if (p->settings.auto_pickup
             && (target_t->ilist && inv_length(target_t->ilist)))
     {
         /* pick up all items on floor */
@@ -497,26 +497,6 @@ int player_move(player *p, int direction)
             target_t->ilist = NULL;
         }
     } /* auto-pickup */
-
-    /* FIXME: complete this
-    create a new function which calculates player's speed
-    if (p->burdened)
-    {
-    	times++;
-    }
-    */
-
-    /*
-    if (player_effect(p, ET_SPEED))
-    {
-        times--;
-    }
-
-    if (player_effect(p, ET_BLINDNESS))
-    {
-        times++;
-    }
-    */
 
     return times;
 }
@@ -767,7 +747,7 @@ int player_level_enter(player *p, level *l)
     if (l->nlevel == 0)
     {
         /* do not log this at the start of the game */
-        if (p->log->gtime > 0)
+        if (p->log->gtime > 1)
             log_add_entry(p->log, "You return to town.");
     }
     else if (l->nlevel == 1 && p->level->nlevel == 0)
@@ -2388,7 +2368,7 @@ int player_item_drop(player *p, item *it)
 
     if (it->count > 1)
     {
-        snprintf(desc, 60, "Drop how many %s?", item_get_name_pl(it->type));
+        g_snprintf(desc, 60, "Drop how many %s?", item_get_name_pl(it->type));
 
         count = display_get_count(desc, it->count);
 
@@ -2421,7 +2401,7 @@ int player_item_pickup(player *p, item *it)
 
     if (it->count > 1 && it->type != IT_GOLD)
     {
-        snprintf(desc, 60, "Pick up how many %s?", item_get_name_pl(it->type));
+        g_snprintf(desc, 60, "Pick up how many %s?", item_get_name_pl(it->type));
 
         count = display_get_count(desc, it->count);
 
@@ -3156,7 +3136,7 @@ void player_update_fov(player *p, int radius)
 
                 if (level_ilist_at(p->level, pos))
                 {
-                    it = inv_get(level_ilist_at(p->level, pos), 0);
+                    it = inv_get(level_ilist_at(p->level, pos), inv_length(level_ilist_at(p->level, pos)) - 1);
                     player_memory_of(p,pos).item = it->type;
                 }
                 else
@@ -3629,29 +3609,33 @@ static int player_magic_spell_extension(player *p)
 
 static void player_magic_timewarp(player *p)
 {
-    int i;
+    /* number of mobuls */
+    gint32 mobuls = 0;
+    gint32 turns;
 
-    i = (rand_1n(1000) - 850) / 100;
+    turns = (rand_1n(1000) - 850);
 
-    if (i == 0)
-        i = 1;
+    if (turns == 0)
+        turns = 1;
 
-    if (i > p->game->gtime)
-        i = p->game->gtime;
+    if ((gint32)(game_turn(p->game) + turns) < 0)
+    {
+        log_add_entry(p->log, "%d turns. Being corrected!", turns);
+        turns = 1 - game_turn(p->game);
+    }
 
-    (p->game)->gtime += (100 * i);
-
-    if (p->game->gtime < 0)
-        p->game->gtime = 0;
+    mobuls = gtime2mobuls(turns);
+    game_turn(p->game) += turns;
 
     log_add_entry(p->log,
                   "You go %sward in time by %d mobul%s.",
-                  (i < 0) ? "back" : "for",
-                  abs(i),
-                  (abs(i) == 1) ? "" : "s");
+                  (mobuls < 0) ? "back" : "for",
+                  abs(mobuls),
+                  (abs(mobuls) == 1) ? "" : "s");
 
     /* adjust effects for time warping */
-    player_effects_expire(p, (i * 100));
+    /* FIXME: have a close look at this when improving game time management */
+    player_effects_expire(p, turns);
 }
 
 

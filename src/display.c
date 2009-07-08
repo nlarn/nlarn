@@ -953,7 +953,7 @@ int display_get_count(char *caption, int value)
     curs_set(1);
 
     /* prepare string to edit */
-    snprintf(ivalue, 7, "%d", value);
+    g_snprintf(ivalue, 7, "%d", value);
     /* set boundary at end of array */
     ivalue[6] = '\0';
 

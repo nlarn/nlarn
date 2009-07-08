@@ -324,7 +324,7 @@ int item_sort(gconstpointer a, gconstpointer b)
     {
         /* both items are of identical type. compare their names. */
         /* FIXME: need identified / unidentified status here */
-        order = strcasecmp(item_desc_get(item_a, TRUE), item_desc_get(item_b, TRUE));
+        order = g_ascii_strcasecmp(item_desc_get(item_a, TRUE), item_desc_get(item_b, TRUE));
     }
     else if (item_a->type < item_b->type)
         order = -1;
@@ -344,8 +344,8 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     switch (it->type)
     {
     case IT_ARMOUR:
-        snprintf(desc, 60, "%s", item_desc_get(it, known));
-        snprintf(str, str_len, "%s %+d",
+        g_snprintf(desc, 60, "%s", item_desc_get(it, known));
+        g_snprintf(str, str_len, "%s %+d",
                  item_name_count(desc, singular, definite, 60, it->count),
                  it->bonus);
 
@@ -356,22 +356,22 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     case IT_RING:
     case IT_SCROLL:
         if (known)
-            snprintf(desc, 60, "%s", item_data[it->type].desc_known);
+            g_snprintf(desc, 60, "%s", item_data[it->type].desc_known);
         else
             if ((it->type == IT_SCROLL) && (it->id == ST_BLANK))
             {
-                snprintf(desc, 60, "unlabeled scroll");
+                g_snprintf(desc, 60, "unlabeled scroll");
             }
             else
             {
-                snprintf(desc, 60, "%s", item_data[it->type].desc_unknown);
+                g_snprintf(desc, 60, "%s", item_data[it->type].desc_unknown);
             }
 
         if ((it->count > 1) && !singular)
             item_typename_pluralize(it, desc, 60);
 
         temp = g_strdup(desc);
-        snprintf(desc, 60, temp, item_desc_get(it, known));
+        g_snprintf(desc, 60, temp, item_desc_get(it, known));
         g_free(temp);
 
         item_name_count(desc, singular, definite, 60, it->count);
@@ -380,29 +380,29 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         break;
 
     case IT_CONTAINER:
-        snprintf(desc, 60, "%s", item_desc_get(it, known));
+        g_snprintf(desc, 60, "%s", item_desc_get(it, known));
         item_name_count(desc, singular, definite, 60, it->count);
-        snprintf(str, str_len, "%s", desc);
+        g_snprintf(str, str_len, "%s", desc);
         break;
 
     case IT_FOOD:
-        snprintf(desc, 60, "%s", item_desc_get(it, known));
+        g_snprintf(desc, 60, "%s", item_desc_get(it, known));
         item_name_count(desc, singular, definite, 60, it->count);
 
         if ((it->count > 1) && !singular)
-            snprintf(str, str_len, "%ss", desc);
+            g_snprintf(str, str_len, "%ss", desc);
         else
-            snprintf(str, str_len, "%s", desc);
+            g_snprintf(str, str_len, "%s", desc);
 
         break;
 
     case IT_GOLD:
-        snprintf(str, str_len, "%d gold pieces", it->count);
+        g_snprintf(str, str_len, "%d gold pieces", it->count);
         break;
 
     case IT_GEM:
-        snprintf(desc, 60, "%s", item_desc_get(it, known));
-        snprintf(str, str_len, "%d carats %s",
+        g_snprintf(desc, 60, "%s", item_desc_get(it, known));
+        g_snprintf(str, str_len, "%d carats %s",
                  gem_size(it),
                  desc);
 
@@ -411,13 +411,13 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 
     case IT_WEAPON:
         if (weapon_is_unique(it))
-            snprintf(str, str_len, "the %s",
+            g_snprintf(str, str_len, "the %s",
                      item_desc_get(it, known));
         else
         {
-            snprintf(desc, 60, "%s", item_desc_get(it, known));
+            g_snprintf(desc, 60, "%s", item_desc_get(it, known));
             item_name_count(desc, singular, definite, 60, it->count);
-            snprintf(str, str_len, "%s %+d",
+            g_snprintf(str, str_len, "%s %+d",
                      desc, it->bonus);
         }
         break;
@@ -953,7 +953,7 @@ static void item_typename_pluralize(item *it, char *description, int length)
                            item_data[it->type].name_sg,
                            item_data[it->type].name_pl);
 
-    snprintf(description, length, "%s", replaced);
+    g_snprintf(description, length, "%s", replaced);
 }
 
 static char *item_name_count(char *name, int singular, int definite, int length, int count)
@@ -976,17 +976,17 @@ static char *item_name_count(char *name, int singular, int definite, int length,
     {
         if (definite)
         {
-            snprintf(name, length, "the %s", incoming);
+            g_snprintf(name, length, "the %s", incoming);
         }
         else
         {
             if (strchr(vowels, incoming[0]))
             {
-                snprintf(name, length, "an %s", incoming);
+                g_snprintf(name, length, "an %s", incoming);
             }
             else
             {
-                snprintf(name, length, "a %s", incoming);
+                g_snprintf(name, length, "a %s", incoming);
             }
         }
 
@@ -996,11 +996,11 @@ static char *item_name_count(char *name, int singular, int definite, int length,
     }
     else if ((count > 1) && (count <= 20 ))
     {
-        snprintf(name, length, "%s %s", item_count_desc[count - 2], incoming);
+        g_snprintf(name, length, "%s %s", item_count_desc[count - 2], incoming);
     }
     else
     {
-        snprintf(name, length, "%d %s", count, incoming);
+        g_snprintf(name, length, "%d %s", count, incoming);
     }
 
     g_free(incoming);

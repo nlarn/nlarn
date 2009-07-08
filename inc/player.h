@@ -34,58 +34,68 @@
 /* forward declaration */
 struct game;
 
-typedef struct player_stats {
-    int moves_made;
-    int deepest_level;
-    int monsters_killed[MT_MAX];
-    int spells_cast;
-    int potions_quaffed;
-    int scrolls_read;
-    int books_read;
-    int gold_collected;
-    int gold_spent;
-    int times_prayed;
-    int max_level;
-    int max_xp;
+typedef struct player_stats
+{
+    guint32 moves_made;
+    guint32 deepest_level;
+    guint32 monsters_killed[MT_MAX];
+    guint32 spells_cast;
+    guint32 potions_quaffed;
+    guint32 scrolls_read;
+    guint32 books_read;
+    guint32 gold_collected;
+    guint32 gold_spent;
+    guint32 times_prayed;
+    guint32 max_level;
+    guint32 max_xp;
 } player_stats;
 
-struct _player_tile_memory {
+typedef struct _player_settings
+{
+    guint32
+auto_pickup:
+    1; /* automatically pick up items */
+} player_settings;
+
+
+struct _player_tile_memory
+{
     level_tile_t type;
     level_stationary_t stationary;
-    /* type of item located here */
-    item_t item;
+    item_t item; /* type of item located here */
     trap_t trap;
 };
 
 typedef struct _player_tile_memory player_tile_memory;
 
-typedef struct player {
+typedef struct player
+{
     char *name;
-    int sex; /* 0 female, 1 male */
+    guint8 sex; /* 0 female, 1 male */
 
-    int strength;
-    int intelligence;
-    int wisdom;
-    int constitution;
-    int dexterity;
-    int charisma;
+    guint32 strength;
+    guint32 intelligence;
+    guint32 wisdom;
+    guint32 constitution;
+    guint32 dexterity;
+    guint32 charisma;
 
-    int hp; /* current hp */
-    int hp_max; /* max hp */
-    int mp;
-    int mp_max;
-    int regen_counter; /* regeneration counter */
+    gint32 hp; /* current hp */
+    guint32 hp_max; /* max hp */
+    gint32 mp;
+    guint32 mp_max;
+    guint32 regen_counter; /* regeneration counter */
 
-    int fire_resistance;
-    int cold_resistance;
-    int magic_resistance;
+    gint32 fire_resistance;
+    gint32 cold_resistance;
+    gint32 magic_resistance;
 
-    int bank_account; /* There is nothing quite as wonderful as money */
-    int outstanding_taxes;
-    int interest_lasttime; /* last time interest has been calculated */
+    guint32 bank_account; /* There is nothing quite as wonderful as money */
+    guint32 outstanding_taxes;
+    guint32 interest_lasttime; /* last time interest has been calculated */
 
-    int experience; /* experience points */
-    int lvl; /* current experience level */
+    guint32 experience; /* experience points */
+    guint32 lvl; /* current experience level */
 
     /* other stuff */
     GPtrArray *known_spells;
@@ -109,10 +119,10 @@ typedef struct player {
     /* enough items for now */
 
     /* items identified */
-    int identified_books[SP_MAX];
-    int identified_potions[PO_MAX];
-    int identified_rings[RT_MAX];
-    int identified_scrolls[ST_MAX];
+    guint8 identified_books[SP_MAX];
+    guint8 identified_potions[PO_MAX];
+    guint8 identified_rings[RT_MAX];
+    guint8 identified_scrolls[ST_MAX];
 
     position pos; /* player's position */
     level *level; /* current dungeon level */
@@ -127,13 +137,13 @@ typedef struct player {
     player_tile_memory memory[LEVEL_MAX][LEVEL_MAX_Y][LEVEL_MAX_X];
 
     /* courses available in school */
-    int school_courses_taken[SCHOOL_COURSE_COUNT];
+    guint8 school_courses_taken[SCHOOL_COURSE_COUNT];
 
-    /* automatically pick up items */
-    int auto_pickup;
+    player_settings settings; /* game configuration */
 } player;
 
-typedef enum player_equipment_t {
+typedef enum player_equipment_t
+{
     PE_NONE,
     PE_BOOTS,
     PE_CLOAK,
@@ -148,7 +158,8 @@ typedef enum player_equipment_t {
 } player_equipment_t;
 
 /* various causes of death */
-typedef enum player_cod {
+typedef enum player_cod
+{
     PD_NONE,
     PD_EFFECT,
     PD_LASTLEVEL, /* lost a level at level 1 */

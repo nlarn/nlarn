@@ -35,7 +35,8 @@
 #define LEVEL_VMAX  3						/* max # of levels in the temple of the luran */
 #define LEVEL_MAX (LEVEL_DMAX + LEVEL_VMAX)	/* total number of levels */
 
-typedef enum level_tile_type {
+typedef enum level_tile_type
+{
     LT_NONE,
     LT_GRASS,
     LT_FLOOR,
@@ -48,7 +49,8 @@ typedef enum level_tile_type {
     LT_MAX				/* ~ level tile type count */
 } level_tile_t;
 
-typedef enum level_stationary_type {
+typedef enum level_stationary_type
+{
     LS_NONE,
     LS_ALTAR,
     LS_THRONE,			/* throne with gems and king */
@@ -76,49 +78,57 @@ typedef enum level_stationary_type {
     LS_MAX
 } level_stationary_t;
 
-typedef enum level_element_type {
-	LE_NONE,
-	LE_GROUND,
-	LE_STATIONARY,
-	LE_TRAP,
-	LE_ITEM,
-	LE_MONSTER,
-	LE_MAX
+typedef enum level_element_type
+{
+    LE_NONE,
+    LE_GROUND,
+    LE_STATIONARY,
+    LE_TRAP,
+    LE_ITEM,
+    LE_MONSTER,
+    LE_MAX
 } level_element_t;
 
-typedef struct level_tile {
-    unsigned
-        type: 8,
-        stationary: 8,  /* if something special is here */
-        trap: 8,        /* trap located on this tile */
-        timer: 8;       /* countdown to when the type will become LT_FLOOR again */
-    inventory *ilist;   /* items located on this tile */
+typedef struct level_tile
+{
+    level_tile_t type;
+    level_stationary_t stationary; /* if something special is here */
+    trap_t trap; /* trap located on this tile */
+    guint32 timer; /* countdown to when the type will become LT_FLOOR again */
+    inventory *ilist; /* items located on this tile */
 } level_tile;
 
-typedef struct level_tile_data {
-	level_tile_t tile;
-	char image;
-	short colour;
-	char *description;
-	unsigned
-        passable: 1,        /* can be passed */
-        transparent: 1;     /* see-through */
+typedef struct level_tile_data
+{
+    level_tile_t tile;
+    char image;
+    short colour;
+    char *description;
+    unsigned
+passable:
+    1,        /* can be passed */
+transparent:
+    1;     /* see-through */
 } level_tile_data;
 
-typedef struct level_stationary_data {
-	level_stationary_t stationary;
-	char image;
-	short colour;
-	char *description;
-	unsigned
-        passable: 1,        /* can be passed */
-        transparent: 1;     /* see-through */
+typedef struct level_stationary_data
+{
+    level_stationary_t stationary;
+    char image;
+    short colour;
+    char *description;
+    unsigned
+passable:
+    1,        /* can be passed */
+transparent:
+    1;     /* see-through */
 } level_stationary_data;
 
-typedef struct level {
-    int nlevel;                                 /* level number */
+typedef struct level
+{
+    guint32 nlevel;                             /* level number */
     level_tile map[LEVEL_MAX_Y][LEVEL_MAX_X];   /* "live" map */
-    int visited;                                /* already been on this level? */
+    guint32 visited;                            /* last time player has been on this level */
     GPtrArray *mlist;                           /* monsters on this level */
     GPtrArray *slist;                           /* spheres of annihilation on this level */
 } level;
@@ -127,14 +137,14 @@ typedef struct level {
 typedef struct level_path_element
 {
     position pos;
-    int g_score;
-    int h_score;
+    guint32 g_score;
+    guint32 h_score;
     struct level_path_element* parent;
 } level_path_element;
 
 typedef struct level_path
 {
-	GQueue *path;
+    GQueue *path;
     GPtrArray *closed;
     GPtrArray *open;
     position start;

@@ -47,10 +47,10 @@ typedef struct spell_data {
 } spell_data;
 
 typedef struct spell {
-	int id;         /* reference to spell_data */
-	int learnt;     /* game time learnt */
-	int knowledge;  /* quality of knowledge */
-	int used;       /* usage counter */
+	guint32 id;         /* reference to spell_data */
+	guint32 learnt;     /* game time learnt */
+	guint32 knowledge;  /* quality of knowledge */
+	guint32 used;       /* usage counter */
 } spell;
 
 enum spell_ids {
