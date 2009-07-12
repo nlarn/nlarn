@@ -2111,6 +2111,8 @@ int player_item_use(player *p, item *it)
     int time = 0; /* number of turns this action took */
     effect *eff;
 
+    const char cantread[] = "As you are blind you can't read %s.";
+
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     switch (it->type)
@@ -2118,6 +2120,15 @@ int player_item_use(player *p, item *it)
 
         /* read book */
     case IT_BOOK:
+        if (player_effect(p, ET_BLINDNESS))
+        {
+            log_add_entry(p->log, (char *)cantread,
+                          item_describe(it,
+                                        player_item_identified(p, it),
+                                        TRUE, TRUE,
+                                        description, 60));
+            return time;
+        }
         log_add_entry(p->log,
                       "You read %s.",
                       item_describe(it,
@@ -2245,6 +2256,15 @@ int player_item_use(player *p, item *it)
 
         /* read scroll */
     case IT_SCROLL:
+        if (player_effect(p, ET_BLINDNESS))
+        {
+            log_add_entry(p->log, (char *)cantread,
+                          item_describe(it,
+                                        player_item_identified(p, it),
+                                        TRUE, TRUE,
+                                        description, 60));
+            return time;
+        }
 
         item_used_up = TRUE;
 

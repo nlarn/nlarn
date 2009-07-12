@@ -144,7 +144,7 @@ const spell_data spells[SP_MAX] =
         SP_CBL,
         "cbl",
         "cure blindness",
-        SC_PLAYER,
+        SC_OTHER,
         ET_NONE,
         "restores sight to one so unfortunate as to be blinded",
         NULL,
