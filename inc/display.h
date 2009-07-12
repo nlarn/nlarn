@@ -51,7 +51,7 @@ typedef struct display_inv_callback
 int display_init();
 void display_shutdown();
 int display_paint_screen(player *p);
-inline int display_draw();
+int display_draw();
 
 void display_inventory(char *title, player *p, inventory *inv,
                        GPtrArray *callbacks, int show_price,

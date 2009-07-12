@@ -357,7 +357,7 @@ void display_shutdown()
     endwin();
 }
 
-inline int display_draw()
+int display_draw()
 {
     return refresh();
 }
@@ -938,7 +938,6 @@ int display_get_count(char *caption, int value)
     starty = (display_rows - height) / 2;
     startx = (min(LEVEL_MAX_X, display_cols) - width) / 2;
 
-    /* FIXME: need line wrap here.. */
     if (startx <= 0)
         startx = (display_cols - width) / 2;
 

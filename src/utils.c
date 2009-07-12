@@ -18,7 +18,7 @@
 
 #include "nlarn.h"
 
-inline int divert(int value, int percent)
+int divert(int value, int percent)
 {
     int lower, upper;
 
@@ -216,7 +216,8 @@ GPtrArray *text_wrap(char *str, int width, int indent)
         if (indent && text->len == 1)
             width -= indent;
 
-        if (indent && text->len > 0) {
+        if (indent && text->len > 0)
+        {
             tmp = g_strconcat(spaces, line, NULL);
             g_free(line);
             line = tmp;
@@ -263,3 +264,15 @@ void text_destroy(GPtrArray *text)
 
     g_ptr_array_free(text, TRUE);
 }
+
+int str_starts_with_vowel(char *str)
+{
+    const char vowels[] = "aeioAEIO";
+
+    assert (str != NULL);
+
+    if (strchr(vowels, str[0])) return TRUE;
+    else return FALSE;
+}
+
+

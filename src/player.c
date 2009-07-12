@@ -259,6 +259,7 @@ int player_regenerate(player *p)
 void player_die(player *p, player_cod cause_type, int cause)
 {
     GString *text;
+    GList *scores;
 
     char *message = NULL;
     char *desc = NULL;
@@ -344,11 +345,17 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_string_append_printf(text, " (max. %d)", p->stats.deepest_level);
     }
 
+    if (cause_type < PD_TOO_LATE)
+    {
+        g_string_append_printf(text, " with %d and a maximum of %d hp",
+                               p->hp, p->hp_max);
+    }
+
     switch (cause_type)
     {
     case PD_EFFECT:
-        /* TODO: effect description */
-        g_string_append(text, " EFFECT");
+        /* currently only poison can lead to death */
+        g_string_append(text, " by poison.");
         break;
 
     case PD_LASTLEVEL:
@@ -358,7 +365,11 @@ void player_die(player *p, player_cod cause_type, int cause)
         break;
 
     case PD_MONSTER:
-        g_string_append_printf(text, " by a %s.", monster_get_name_by_type(cause));
+        /* TODO: regard monster's invisibility */
+        /* TODO: while sleeping / doing sth. */
+        g_string_append_printf(text, " by a%s %s.",
+                               a_an(monster_get_name_by_type(cause)),
+                               monster_get_name_by_type(cause));
         break;
 
     case PD_SPHERE:
@@ -400,19 +411,27 @@ void player_die(player *p, player_cod cause_type, int cause)
         p->hp = p->hp_max;
         /* return to level 1 if last level has been lost */
         if (p->lvl < 1) player_lvl_gain(p, 1);
-    }
-    else
-    {
-        /* redraw screen to make sure player can see the cause of his death */
-        display_paint_screen(p);
-        display_show_message(title, text->str);
 
-        g_string_free(text, TRUE);
-
-        display_shutdown();
-        game_destroy(p->game);
-        exit(EXIT_SUCCESS);
+        /* return to the game */
+        return;
     }
+
+    /* redraw screen to make sure player can see the cause of his death */
+    display_paint_screen(p);
+    display_show_message(title, text->str);
+
+    g_string_free(text, TRUE);
+
+    scores = game_score_add(p->game, game_score(p->game, cause_type, cause));
+
+
+
+    game_scores_destroy(scores);
+
+    display_shutdown();
+    game_destroy(p->game);
+
+    exit(EXIT_SUCCESS);
 }
 
 gint64 player_calc_score(player *p, int won)
@@ -766,10 +785,6 @@ int player_level_enter(player *p, level *l)
     /* give player knowledge of level 0 (town) */
     if (l->nlevel == 0)
         player_magic_mapping(p);
-
-    /* TODO: move monsters from previous level to this level if
-       they were standing next to the stairs (if INT > something)
-    */
 
     /* recalculate FOV to make ensure correct display after entering a level */
     player_update_fov(p, (player_effect(p, ET_BLINDNESS) ? 0 : 6 + player_effect(p, ET_AWARENESS)));
@@ -1453,7 +1468,7 @@ int player_spell_cast(player *p)
 
             /* time stop */
         case SP_STP:
-            /* TODO: implement */
+            /* TODO: implement (ticket 39) */
             break;
 
             /* vaporize rock */
@@ -1478,7 +1493,7 @@ int player_spell_cast(player *p)
 
             /* summon daemon */
         case SP_SUM:
-            /* TODO: implement */
+            /* TODO: implement (ticket 55) */
             break;
 
             /* alter realitiy */
@@ -1487,7 +1502,7 @@ int player_spell_cast(player *p)
             break;
 
         case SP_PER:
-            /* TODO: implement */
+            /* TODO: implement (ticket 69) */
             break;
         }
 
@@ -2145,7 +2160,6 @@ int player_item_use(player *p, item *it)
         break;
 
 
-        /* TODO: implement containers */
     case IT_CONTAINER:
         break;
 
@@ -2299,7 +2313,7 @@ int player_item_use(player *p, item *it)
             break;
 
         case ST_REMOVE_CURSE:
-            /* TODO: implement with ticket #2 */
+            /* TODO: implement (ticket 2) */
             log_add_entry(p->log, "You have the feeling that someone tried to help you.");
             break;
 
@@ -3134,7 +3148,8 @@ void player_update_fov(player *p, int radius)
                 player_memory_of(p,pos).type = level_tiletype_at(p->level, pos);
                 player_memory_of(p,pos).stationary = level_stationary_at(p->level, pos);
 
-                if (level_ilist_at(p->level, pos))
+                if (level_ilist_at(p->level, pos)
+                        && inv_length(level_ilist_at(p->level, pos)))
                 {
                     it = inv_get(level_ilist_at(p->level, pos), inv_length(level_ilist_at(p->level, pos)) - 1);
                     player_memory_of(p,pos).item = it->type;

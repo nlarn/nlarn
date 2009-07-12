@@ -23,10 +23,15 @@ static void game_monster_attack_player(monster *m, player *p);
 static monster *game_monster_trigger_trap(game *g, monster *m, trap_t trap);
 static void game_move_spheres(game *g);
 
+static GList *game_scores_load(game *g);
+static void game_scores_save(game *g, GList *scores);
+static int game_score_compare(const void *scr_a, const void *scr_b);
+
 static const char *mesgfile = "nlarn.msg";
 static const char *helpfile = "nlarn.hlp";
 static const char *mazefile = "maze";
 static const char *fortunes = "fortune";
+static const char *highscores = "highscores";
 
 int game_save(game *g, char *filename)
 {
@@ -91,6 +96,7 @@ game *game_new(int argc, char *argv[])
     g->helpfile = g_build_filename(g->libdir, helpfile, NULL);
     g->mazefile = g_build_filename(g->libdir, mazefile, NULL);
     g->fortunes = g_build_filename(g->libdir, fortunes, NULL);
+    g->highscores = g_build_filename(g->libdir, highscores, NULL);
 
     /* set game parameters */
     game_difficulty(g) = difficulty;
@@ -156,11 +162,87 @@ int game_destroy(game *g)
     g_free(g->helpfile);
     g_free(g->mazefile);
     g_free(g->fortunes);
+    g_free(g->highscores);
 
     player_destroy(g->p);
     g_free(g);
 
     return EXIT_SUCCESS;
+}
+
+void game_scores_destroy(GList *gs)
+{
+    GList *iterator;
+    game_score_t *score;
+
+    for (iterator = gs; iterator; iterator = iterator->next)
+    {
+        score = iterator->data;
+        g_free(score->player_name);
+
+        g_free(score);
+    }
+
+    g_list_free(gs);
+}
+
+game_score_t *game_score(game *g, player_cod cod, int cause)
+{
+    game_score_t *score;
+
+    score = g_malloc0(sizeof(game_score_t));
+
+    score->player_name = g_strdup(g->p->name);
+    score->sex = g->p->sex;
+    score->score = player_calc_score(g->p, (cod == PD_WON) ? TRUE : FALSE);
+    score->moves = game_turn(g);
+    score->cod = cod;
+    score->cause = cause;
+    score->hp = g->p->hp;
+    score->hp_max = g->p->hp_max;
+    score->level = g->p->level->nlevel;
+    score->level_max = g->p->hp;
+    score->dlevel = g->p->hp;
+    score->dlevel_max = g->p->hp;
+    score->difficulty = game_difficulty(g);
+    score->time_start = g->time_start;
+    score->time_end = time(0);
+
+    return score;
+}
+
+GList *game_score_add(game *g, game_score_t *score)
+{
+    GList *gs, *el;
+    game_score_t *oscore;
+
+    assert (g != NULL && score != NULL);
+
+    gs = game_scores_load(g);
+
+    /* add new score */
+    gs = g_list_append(gs, score);
+
+    /* sort scoreboard entries */
+    gs = g_list_sort(gs,  (GCompareFunc)game_score_compare);
+
+    /* only interested in the last 100 scores */
+    while (g_list_length(gs) > 100)
+    {
+        el = g_list_last(gs);
+
+        oscore = el->data;
+
+        g_free(oscore->player_name);
+        g_free(oscore);
+
+        gs = g_list_delete_link(gs, el);
+    }
+
+    /* save new scoreboard */
+    game_scores_save(g, gs);
+
+    return gs;
 }
 
 void game_spin_the_wheel(game *g, int times)
@@ -534,7 +616,6 @@ static void game_monster_attack_player(monster *m, player *p)
             switch (m->type)
             {
             case MT_RUST_MONSTER:
-                /* FIXME: pick random armour type */
                 if (p->eq_suit != NULL)
                 {
                     pi = item_rust(p->eq_suit);
@@ -613,7 +694,6 @@ static void game_monster_attack_player(monster *m, player *p)
 
             case MT_LEPRECHAUN:
                 /* FIXME: if player has a device of no theft abort this */
-                /* FIXME: stolen gold should go to the leprechaun's inventory */
                 if (player_get_gold(p))
                 {
                     if (player_get_gold(p) > 32767)
@@ -625,7 +705,6 @@ static void game_monster_attack_player(monster *m, player *p)
                         player_set_gold(p, 0);
 
                     message = "The %s picks your pocket. Your purse feels lighter";
-                    /* TODO: add gold to leprechaun's inventory */
                 }
                 else
                 {
@@ -676,7 +755,6 @@ static void game_monster_attack_player(monster *m, player *p)
                 break;
 
             case MT_NYMPH:
-                /* FIXME: if player has a device of no theft abort this */
                 if (inv_length(p->inventory))
                 {
                     it = inv_get(p->inventory, rand_1n(inv_length(p->inventory)));
@@ -831,4 +909,101 @@ static void game_move_spheres(game *g)
         s = g_ptr_array_index(l->slist, sphere_nr - 1);
         sphere_move(s, l);
     }
+}
+
+static GList *game_scores_load(game *g)
+{
+    GList *gs = NULL;
+
+    game_score_t *nscore;
+    gint32 nlen;
+    FILE *sb = NULL;
+
+    /* open score file */
+    sb = fopen(game_highscores(g), "r");
+
+    if (sb == NULL)
+    {
+        return gs;
+    }
+
+    /* FIXME: error handling */
+
+    while (!feof(sb) && !ferror(sb))
+    {
+        /* read length of player's name */
+        fread(&nlen, sizeof(guint32), 1, sb);
+
+        if (feof(sb))
+            break;
+
+        nscore = g_malloc(sizeof(game_score_t));
+
+        /* alloc space for name */
+        nscore->player_name = g_malloc(nlen + 1);
+
+        /* read player's name */
+        fread(nscore->player_name, sizeof(char), nlen, sb);
+
+        /* null terminate player's name */
+        nscore->player_name[nlen] = '\0';
+
+        /* read the rest of the record */
+        fread(&(nscore->sex), sizeof(game_score_t) - sizeof(char *), 1, sb);
+
+        /* add record to array */
+        gs = g_list_append(gs, nscore);
+    }
+
+    fclose(sb);
+
+    return gs;
+}
+
+static void game_scores_save(game *g, GList *gs)
+{
+    int slen = 0;
+    GList *iterator;
+    game_score_t *score;
+
+    FILE *sb = NULL;
+
+    sb = fopen(game_highscores(g), "w+");
+
+    if (sb == NULL)
+    {
+        /* do something! */
+        return;
+    }
+
+    for (iterator = gs; iterator; iterator = iterator->next)
+    {
+        score = iterator->data;
+
+        /* write length of player's name to file */
+        slen = strlen(score->player_name);
+        fwrite(&slen, sizeof(guint32), 1, sb);
+
+        /* write player's name to file */
+        fwrite(score->player_name, sizeof(char), slen, sb);
+
+        /* write remaining records to file */
+        fwrite(&(score->sex), sizeof(game_score_t) - sizeof(char *), 1, sb);
+    }
+
+    fclose(sb);
+}
+
+static int game_score_compare(const void *scr_a, const void *scr_b)
+{
+    game_score_t *a = (game_score_t *)scr_a;
+    game_score_t *b = (game_score_t *)scr_b;
+
+    if (a->score > b->score)
+        return -1;
+
+    if (b->score > a->score)
+        return 1;
+
+    return 0;
 }

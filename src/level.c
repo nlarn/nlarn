@@ -878,7 +878,6 @@ static void level_fill_with_objects(level *l)
         level_add_item(l, item_create_by_level(IT_SCROLL, l->nlevel));
 
     /* RINGS */
-    /* FIXME: make this more elegant */
     if (chance(6))	/* ring of regeneration */
         level_add_item(l, item_new(IT_RING, RT_REGENERATION, rand_0n(3)));
 
@@ -1121,7 +1120,6 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                 {
                     break;
                 }
-                /* FIXME: add eye of larn here */
                 monst = monster_new(MT_DEMONLORD_I + rand_0n(7));
                 break;
 
@@ -1170,9 +1168,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
 }
 
 /*
-    function to make a treasure room on a level
-    FIXME: level 10's treasure room has the eye in it and demon lords
-    FIXME: level V3 has potion of cure dianthroritis and demon prince
+ * function to make a treasure room on a level
  */
 static void level_add_treasure_room(level *l, int difficulty)
 {

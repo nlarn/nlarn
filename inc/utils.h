@@ -71,4 +71,10 @@ GPtrArray *text_wrap(char *str, int width, int indent);
 GPtrArray *text_append(GPtrArray *first, GPtrArray *second);
 void text_destroy(GPtrArray *text);
 
+/* misc. text functions */
+
+int str_starts_with_vowel(char *str);
+#define a_an(str) (str_starts_with_vowel((str)) ? "n" : "")
+#define plural(i) (((i) > 1) ? "s" : "")
+
 #endif

@@ -351,7 +351,6 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        /* FIXME: make a generic speedup from this */
         ET_HASTE_MONSTER,
         250,
         0,

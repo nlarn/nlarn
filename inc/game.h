@@ -38,6 +38,7 @@ typedef struct game
     gchar *helpfile;
     gchar *mazefile;
     gchar *fortunes;
+    gchar *highscores;
 
     /* flags */
     guint32
@@ -61,10 +62,36 @@ typedef enum direction
     GD_MAX
 } direction;
 
-int game_save(game *g, char *filename);
-game *game_load(char *filename);
+typedef struct _game_score
+{
+    char *player_name;
+    gint8 sex;
+    gint64 score;
+    guint32 moves;
+    player_cod cod;
+    gint32 cause;
+    gint32 hp;
+    guint32 hp_max;
+    gint32 level;
+    gint32 level_max;
+    gint32 dlevel;
+    gint32 dlevel_max;
+    gint32 difficulty;
+    guint64 time_start;
+    guint64 time_end;
+} game_score_t;
+
+/* function declarations */
+
 game *game_new(int argc, char *argv[]);
 int game_destroy(game *g);
+
+int game_save(game *g, char *filename);
+game *game_load(char *filename);
+
+void game_scores_destroy(GList *gs);
+game_score_t *game_score(game *g, player_cod cod, int cause);
+GList *game_score_add(game *g, game_score_t *score);
 
 void game_spin_the_wheel(game *g, int times);
 
@@ -83,6 +110,7 @@ void game_spin_the_wheel(game *g, int times);
 #define game_helpfile(g) ((g)->helpfile)
 #define game_mazefile(g) ((g)->mazefile)
 #define game_fortunes(g) ((g)->fortunes)
+#define game_highscores(g) ((g)->highscores)
 
 /* gtime <> mobuls conversion */
 #define gtime2mobuls(gtime)  ((abs((int)(gtime)) + 99) / 100)

@@ -189,7 +189,6 @@ item *item_split(item *original, int count)
 
 item *item_create_random(item_t item_type)
 {
-    /* FIXME: use propabilities for each object type */
     int item_id = 0;
     int item_bonus = 0;
     int min_id = 0, max_id = 0;
@@ -263,7 +262,7 @@ item *item_create_random(item_t item_type)
 
 item *item_create_by_level(item_t item_type, int num_level)
 {
-    /* FIXME: really implement this */
+    /* FIXME: implement (ticket 64) */
     return(item_create_random(item_type));
 }
 
@@ -578,7 +577,6 @@ int item_weight(item *it)
 {
     assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    /* FIXME: correct weight */
     switch (it->type)
     {
     case IT_ARMOUR:
@@ -611,7 +609,7 @@ int item_weight(item *it)
         break;
 
     case IT_GOLD:
-        /* FIXME: is this too heavy? is this too light?
+        /* Is this too heavy? is this too light?
            It should give the player a reason to use the bank.
          */
         return it->count * 4;
@@ -964,7 +962,6 @@ static char *item_name_count(char *name, int singular, int definite, int length,
                                       "fivteen", "sixteen", "seventeen", "eighteen",
                                       "nineteen", "twenty"
                                     };
-    const char vowels[] = "aeioAEIO";
     char *incoming;
 
     assert(name != NULL && length > 0 && count > 0);
@@ -980,14 +977,7 @@ static char *item_name_count(char *name, int singular, int definite, int length,
         }
         else
         {
-            if (strchr(vowels, incoming[0]))
-            {
-                g_snprintf(name, length, "an %s", incoming);
-            }
-            else
-            {
-                g_snprintf(name, length, "a %s", incoming);
-            }
+            g_snprintf(name, length, "a%s %s", a_an(incoming), incoming);
         }
 
         g_free(incoming);
