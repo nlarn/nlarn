@@ -1,4 +1,3 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
 /*
  * nlarn.h
  * Copyright (C) Joachim de Groot 2009 <jdegroot@web.de>

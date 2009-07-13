@@ -110,6 +110,8 @@ static int player_magic_spell_extension(player *p);
 static void player_magic_timewarp(player *p);
 static void player_magic_vaporize_rock(player *p);
 
+static char *player_death_description(game_score_t *score, int verbose);
+
 player *player_new(struct game *game)
 {
     player *p;
@@ -259,11 +261,13 @@ int player_regenerate(player *p)
 void player_die(player *p, player_cod cause_type, int cause)
 {
     GString *text;
-    GList *scores;
+    game_score_t *score, *cscore;
+    GList *scores, *iterator;
 
     char *message = NULL;
-    char *desc = NULL;
     char *title = NULL;
+
+    int count, num;
 
     effect *ef;
 
@@ -298,115 +302,41 @@ void player_die(player *p, player_cod cause_type, int cause)
     {
     case PD_LASTLEVEL:
         message = "You fade to gray...";
-        desc = "passed away";
         title = "In Memoriam";
         break;
 
     case PD_TOO_LATE:
         message = "You returned home too late!";
-        desc = "returned home with the potion too late";
         title = "The End";
         break;
 
     case PD_WON:
         message = "You saved your daughter!";
-        desc = "returned home in time with the cure";
         title = "Congratulations! You won!";
         break;
 
     case PD_LOST:
         message = "You didn't manage to save your daughter.";
-        desc = "could not find the potion in time";
         title = "You lost";
         break;
 
     case PD_QUIT:
         message = "You quit.";
-        desc = "quit the game";
         title = "The End";
         break;
 
     default:
         message = "You die...";
-        desc = "killed";
         title = "R. I. P.";
     }
 
     log_add_entry(p->log, message);
 
-    text = g_string_new_len(NULL, 200);
-
-    g_string_append_printf(text, "%s (%c), %s on level %d",
-                           p->name, p->sex ? 'm' : 'f',
-                           desc, p->level->nlevel);
-
-    if (p->stats.deepest_level > p->level->nlevel)
-    {
-        g_string_append_printf(text, " (max. %d)", p->stats.deepest_level);
-    }
-
-    if (cause_type < PD_TOO_LATE)
-    {
-        g_string_append_printf(text, " with %d and a maximum of %d hp",
-                               p->hp, p->hp_max);
-    }
-
-    switch (cause_type)
-    {
-    case PD_EFFECT:
-        /* currently only poison can lead to death */
-        g_string_append(text, " by poison.");
-        break;
-
-    case PD_LASTLEVEL:
-        g_string_append_printf(text,". %s has left %s body.",
-                               p->sex ? "He" : "She",
-                               p->sex ? "his" : "her");
-        break;
-
-    case PD_MONSTER:
-        /* TODO: regard monster's invisibility */
-        /* TODO: while sleeping / doing sth. */
-        g_string_append_printf(text, " by a%s %s.",
-                               a_an(monster_get_name_by_type(cause)),
-                               monster_get_name_by_type(cause));
-        break;
-
-    case PD_SPHERE:
-        g_string_append(text, " by a sphere of destruction.");
-        break;
-
-    case PD_TRAP:
-        g_string_append_printf(text, " by a %s.", trap_description(cause));
-        break;
-
-    case PD_LEVEL:
-        g_string_append_printf(text, " by %s.", lt_get_desc(cause));
-        break;
-
-    case PD_SPELL:
-        g_string_append_printf(text, " %s with the spell \"%s\".",
-                               p->sex ? "himself" : "herself",
-                               spell_name_by_id(cause));
-        break;
-
-    default:
-        /* no further description */
-        g_string_append(text, ".");
-        break;
-    }
-
-    g_string_append_printf(text, " %s has scored %" G_GINT64_FORMAT " points.",
-                           p->sex ? "He" : "She",
-                           player_calc_score(p, (cause_type == PD_WON)));
 
     /* resume game if wizard mode is enabled */
     if (game_wizardmode(p->game) && (cause_type != PD_QUIT))
     {
-        log_add_entry(p->log, text->str);
         log_add_entry(p->log, "WIZARD MODE. You stay alive.");
-
-        g_string_free(text, TRUE);
 
         p->hp = p->hp_max;
         /* return to level 1 if last level has been lost */
@@ -418,13 +348,49 @@ void player_die(player *p, player_cod cause_type, int cause)
 
     /* redraw screen to make sure player can see the cause of his death */
     display_paint_screen(p);
+
+    score = game_score(p->game, cause_type, cause);
+    scores = game_score_add(p->game, score);
+
+    text = g_string_new(player_death_description(score, TRUE));
+
+    /* assemble surrounding scores list */
+    g_string_append(text, "\n\n");
+
+    /* get position of current score in list */
+    iterator = g_list_find(scores, score);
+
+    /* jump up three entries */
+    count = 1;
+    while (count < 4)
+    {
+        if (iterator->prev == NULL)
+        {
+            break;
+        }
+
+        iterator = iterator->prev;
+        count++;
+    }
+
+    /* determine position of first element of iterator */
+    num = g_list_position(scores, iterator);
+
+    /* display up to 7 entries */
+    for (count = 1; iterator && (count < 8);
+            iterator = iterator->next, count++)
+    {
+        cscore = (game_score_t *)iterator->data;
+        g_string_append_printf(text, "%s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d hp]\n",
+                               (cscore == score) ? "*" : " ", num + count,
+                               cscore->score,
+                               player_death_description(cscore, FALSE),
+                               score->dlevel, cscore->hp);
+    }
+
+
     display_show_message(title, text->str);
-
     g_string_free(text, TRUE);
-
-    scores = game_score_add(p->game, game_score(p->game, cause_type, cause));
-
-
 
     game_scores_destroy(scores);
 
@@ -3750,6 +3716,112 @@ static void player_magic_vaporize_rock(player *p)
         m->pos = pos;
         g_ptr_array_add(p->level->mlist, m);
     }
+}
 
+static char *player_death_description(game_score_t *score, int verbose)
+{
+    char *desc;
+    GString *text;
 
+    assert(score != NULL);
+
+    switch (score->cod)
+    {
+    case PD_LASTLEVEL:
+        desc = "passed away";
+        break;
+
+    case PD_TOO_LATE:
+        desc = "returned with the potion too late";
+        break;
+
+    case PD_WON:
+        desc = "returned in time with the cure";
+        break;
+
+    case PD_LOST:
+        desc = "could not find the potion in time";
+        break;
+
+    case PD_QUIT:
+        desc = "quit the game";
+        break;
+
+    default:
+        desc = "killed";
+    }
+
+    text = g_string_new_len(NULL, 200);
+
+    g_string_append_printf(text, "%s (%c), %s",
+                           score->player_name, score->sex ? 'm' : 'f', desc);
+
+    if (verbose)
+    {
+        g_string_append_printf(text, " on level %d", score->dlevel);
+
+        if (score->dlevel_max > score->dlevel)
+        {
+            g_string_append_printf(text, " (max. %d)", score->dlevel_max);
+        }
+
+        if (score->cod < PD_TOO_LATE)
+        {
+            g_string_append_printf(text, " with %d and a maximum of %d hp",
+                                   score->hp, score->hp_max);
+        }
+    }
+
+    switch (score->cod)
+    {
+    case PD_EFFECT:
+        /* currently only poison can lead to death */
+        g_string_append(text, " by poison.");
+        break;
+
+    case PD_LASTLEVEL:
+        g_string_append_printf(text,". %s left %s body.",
+                               score->sex ? "He" : "She",
+                               score->sex ? "his" : "her");
+        break;
+
+    case PD_MONSTER:
+        /* TODO: regard monster's invisibility */
+        /* TODO: while sleeping / doing sth. */
+        g_string_append_printf(text, " by a%s %s.",
+                               a_an(monster_get_name_by_type(score->cause)),
+                               monster_get_name_by_type(score->cause));
+        break;
+
+    case PD_SPHERE:
+        g_string_append(text, " by a sphere of destruction.");
+        break;
+
+    case PD_TRAP:
+        g_string_append_printf(text, " by a %s.", trap_description(score->cause));
+        break;
+
+    case PD_LEVEL:
+        g_string_append_printf(text, " by %s.", lt_get_desc(score->cause));
+        break;
+
+    case PD_SPELL:
+        g_string_append_printf(text, " %s with the spell \"%s\".",
+                               score->sex ? "himself" : "herself",
+                               spell_name_by_id(score->cause));
+        break;
+
+    default:
+        /* no further description */
+        g_string_append(text, ".");
+        break;
+    }
+
+    if (verbose)
+    {
+        g_string_append_printf(text, " %s has scored %" G_GINT64_FORMAT " points.",
+                               score->sex ? "He" : "She", score->score);
+    }
+
+    return g_string_free(text, FALSE);
 }

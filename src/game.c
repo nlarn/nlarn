@@ -201,9 +201,9 @@ game_score_t *game_score(game *g, player_cod cod, int cause)
     score->hp = g->p->hp;
     score->hp_max = g->p->hp_max;
     score->level = g->p->level->nlevel;
-    score->level_max = g->p->hp;
-    score->dlevel = g->p->hp;
-    score->dlevel_max = g->p->hp;
+    score->level_max = g->p->stats.max_level;
+    score->dlevel = g->p->level->nlevel;
+    score->dlevel_max = g->p->stats.deepest_level;
     score->difficulty = game_difficulty(g);
     score->time_start = g->time_start;
     score->time_end = time(0);
@@ -226,8 +226,8 @@ GList *game_score_add(game *g, game_score_t *score)
     /* sort scoreboard entries */
     gs = g_list_sort(gs,  (GCompareFunc)game_score_compare);
 
-    /* only interested in the last 100 scores */
-    while (g_list_length(gs) > 100)
+    /* only interested in the last 99 scores */
+    while (g_list_length(gs) > 99)
     {
         el = g_list_last(gs);
 

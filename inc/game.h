@@ -77,8 +77,8 @@ typedef struct _game_score
     gint32 dlevel;
     gint32 dlevel_max;
     gint32 difficulty;
-    guint64 time_start;
-    guint64 time_end;
+    gint64 time_start;
+    gint64 time_end;
 } game_score_t;
 
 /* function declarations */
