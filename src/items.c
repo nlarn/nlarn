@@ -313,17 +313,18 @@ int item_compare(item *a, item *b)
     return result;
 }
 
-int item_sort(gconstpointer a, gconstpointer b)
+int item_sort(gconstpointer a, gconstpointer b, gpointer data)
 {
     gint order;
     item *item_a = *((item**)a);
     item *item_b = *((item**)b);
+    player *p = (player *)data;
 
     if (item_a->type == item_b->type)
     {
         /* both items are of identical type. compare their names. */
-        /* FIXME: need identified / unidentified status here */
-        order = g_ascii_strcasecmp(item_desc_get(item_a, TRUE), item_desc_get(item_b, TRUE));
+        order = g_ascii_strcasecmp(item_desc_get(item_a, player_item_identified(p, item_a)),
+                                   item_desc_get(item_b, player_item_identified(p, item_b)));
     }
     else if (item_a->type < item_b->type)
         order = -1;
@@ -345,8 +346,8 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     case IT_ARMOUR:
         g_snprintf(desc, 60, "%s", item_desc_get(it, known));
         g_snprintf(str, str_len, "%s %+d",
-                 item_name_count(desc, singular, definite, 60, it->count),
-                 it->bonus);
+                   item_name_count(desc, singular, definite, 60, it->count),
+                   it->bonus);
 
         break;
 
@@ -402,8 +403,8 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     case IT_GEM:
         g_snprintf(desc, 60, "%s", item_desc_get(it, known));
         g_snprintf(str, str_len, "%d carats %s",
-                 gem_size(it),
-                 desc);
+                   gem_size(it),
+                   desc);
 
         item_name_count(str, singular, definite, str_len, it->count);
         break;
@@ -411,13 +412,13 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     case IT_WEAPON:
         if (weapon_is_unique(it))
             g_snprintf(str, str_len, "the %s",
-                     item_desc_get(it, known));
+                       item_desc_get(it, known));
         else
         {
             g_snprintf(desc, 60, "%s", item_desc_get(it, known));
             item_name_count(desc, singular, definite, 60, it->count);
             g_snprintf(str, str_len, "%s %+d",
-                     desc, it->bonus);
+                       desc, it->bonus);
         }
         break;
 

@@ -125,7 +125,7 @@ item *item_create_by_level(item_t item_type, int num_level);
 void item_destroy(item *it);
 
 int item_compare(item *a, item *b);
-int item_sort(gconstpointer a, gconstpointer b);
+int item_sort(gconstpointer a, gconstpointer b, gpointer data);
 char *item_describe(item *it, int known, int singular, int definite, char *str, int str_len);
 item_material_t item_material(item *it);
 int item_price(item *it);

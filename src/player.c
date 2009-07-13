@@ -2206,7 +2206,7 @@ int player_item_use(player *p, item *it)
                 }
 
                 /* this has to precede p_e_add as eff might be destroyed */
-                if (!effect_get_msg_m_start(eff))
+                if (!effect_get_msg_start(eff))
                 {
                     item_identified = FALSE;
                 }

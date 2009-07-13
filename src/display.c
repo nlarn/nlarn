@@ -408,7 +408,7 @@ void display_inventory(char *title, player *p, inventory *inv,
     assert(p != NULL && callbacks != NULL);
 
     /* sort inventory by item type */
-    g_ptr_array_sort(inv, &item_sort);
+    g_ptr_array_sort_with_data(inv, (GCompareDataFunc)item_sort, (gpointer)p);
 
     /* store inventory length */
     len_orig = len_curr = inv_length_filtered(inv, filter);
