@@ -130,7 +130,8 @@ game *game_new(int argc, char *argv[])
     g->time_start = time(NULL);
 
     /* welcome message */
-    log_add_entry(g->p->log, "Welcome to NLarn %d.%d.%d!", MAJOR_VERSION, MINOR_VERSION, PATCH_LEVEL);
+    log_add_entry(g->p->log, "Welcome to NLarn %d.%d.%d!",
+                  VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 
     log_set_time(g->p->log, g->gtime);
 

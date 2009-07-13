@@ -53,9 +53,9 @@
 #include "weapons.h"
 
 
-#define MAJOR_VERSION 0	/* this is the present version # of the program */
-#define MINOR_VERSION 2
-#define PATCH_LEVEL   0
+#define VERSION_MAJOR 0 /* this is the present version # of the program */
+#define VERSION_MINOR 3
+#define VERSION_PATCH 0
 
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 #define TAXRATE 1/20    /* tax rate for the LRS */
