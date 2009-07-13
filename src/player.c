@@ -2429,7 +2429,7 @@ int player_item_pickup(player *p, item *it)
 int player_item_buy(player *p, item *it)
 {
     int price;
-    int count;
+    int count = 0;
     int player_gold;
     char text[81];
     char name[41];
@@ -2499,6 +2499,7 @@ int player_item_buy(player *p, item *it)
 int player_item_sell(player *p, item *it)
 {
     int price;
+    int count = 0;
     char question[81];
     char name[41];
 
@@ -2526,19 +2527,40 @@ int player_item_sell(player *p, item *it)
     if (price < 1)
         price = 1;
 
-    g_snprintf(question, 80, "Do you want to sell %s for %d gold?",
-               name,
-               price);
-
-    if (display_get_yesno(question, NULL, NULL))
+    if (it->count > 1)
     {
-        inv_del_element(p->inventory, it);
-        player_set_gold(p, player_get_gold(p) + price);
+        item_describe(it, player_item_identified(p, it), FALSE, FALSE, name, 40);
+        g_snprintf(question, 80, "How many %s do you want to sell for %d gold?",
+                   name, price);
 
-        return TRUE;
+        /* get count */
+        count = display_get_count(question, it->count);
+        price *= count;
+    }
+    else
+    {
+        item_describe(it, player_item_identified(p, it), TRUE, TRUE, name, 40);
+        g_snprintf(question, 80, "Do you want to sell %s for %d gold?",
+                   name, price);
+
+        if (!display_get_yesno(question, NULL, NULL))
+        {
+            return FALSE;
+        }
     }
 
-    return FALSE;
+    player_set_gold(p, player_get_gold(p) + price);
+
+    if ((it->count > 1) && (count < it->count))
+    {
+        it->count -= count;
+    }
+    else
+    {
+        inv_del_element(p->inventory, it);
+    }
+
+    return TRUE;
 }
 
 int player_item_shop_identify(player *p, item *it)
@@ -3159,7 +3181,7 @@ static void player_calculate_octant(player *p, int row, float start,
     int X, Y;
     int blocked;
     float l_slope, r_slope;
-    float new_start;
+    float new_start = 0;
 
     if (start < end)
         return;

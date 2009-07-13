@@ -513,7 +513,7 @@ void display_inventory(char *title, player *p, inventory *inv,
 
             if (show_price)
             {
-                mvwprintw(iwin, pos, 1, " %2d %41s %5d %c ",
+                mvwprintw(iwin, pos, 1, " %2d %40s %5dgp %c",
                           pos + offset,
                           item_describe(it,
                                         player_item_identified(p, it),
@@ -1072,7 +1072,7 @@ int display_get_count(char *caption, int value)
     clear();
 
     if (key == 27)
-        return value;
+        return 0;
 
     return atoi(ivalue);
 }
@@ -1386,7 +1386,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
     monster *target;
 
     /* start at player's position */
-    pos = p->pos;
+    pos = npos = p->pos;
 
     /* display message */
     log_add_entry(p->log, message);
