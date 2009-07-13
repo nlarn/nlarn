@@ -2,21 +2,22 @@
 #
 # make NLarn distribution package
 #
-# For Windows this depends on MSYS and Info-ZIP
+# For Windows this depends on MSYS and 7-Zip
 # 
-
-FILES="nlarn lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg"
 
 ARCH=$(uname -m)
 
 if [ "$OS" = "Windows_NT" ]
 then
 	OS=win32
-	SUFFIX="zip"
+	SUFFIX="exe"
+	EXE="nlarn.exe pdcurses.dll libglib-2.0-0.dll"
 else
 	OS=$(uname -s)
 	SUFFIX="tar.gz"
+	EXE="nlarn"
 fi
+FILES="lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg"
 
 VERSION_MAJOR=$(grep VERSION_MAJOR inc/nlarn.h | cut -f 3 -d" ")
 VERSION_MINOR=$(grep VERSION_MINOR inc/nlarn.h | cut -f 3 -d" ")
@@ -31,7 +32,6 @@ then
   premake4 gmake
 fi
 
-make clean
 make verbose=yes 
 
 # Quit on errors
@@ -40,8 +40,9 @@ then
 	exit
 fi
 
-mkdir "$DIRNAME"
-cp $FILES "$DIRNAME"
+mkdir -p "$DIRNAME"/lib
+cp $EXE "$DIRNAME"
+cp $FILES "$DIRNAME"/lib
 
 rm -f "$PACKAGE"
 
@@ -49,6 +50,6 @@ if [ "$OS" != "win32" ]
 then
 	tar cfvz "$PACKAGE" "$DIRNAME"
 else
-	zip -r "$PACKAGE" "$DIRNAME"
+	7z a -r -sfx7z.sfx "$PACKAGE" "$DIRNAME"
 fi
 rm -rf "$DIRNAME"
