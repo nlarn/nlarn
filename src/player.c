@@ -1716,6 +1716,8 @@ int player_item_equip(player *p, item *it)
 
         if (*islot == NULL)
         {
+            it->bonus_known = TRUE;
+
             log_add_entry(p->log, "You are now wearing %s.",
                           item_describe(it,
                                         player_item_identified(p, it),
@@ -1745,6 +1747,7 @@ int player_item_equip(player *p, item *it)
             if (ring_is_observable(it))
             {
                 player_item_identify(p, it);
+                it->bonus_known = TRUE;
             }
 
             time = 2;
@@ -1762,6 +1765,17 @@ int player_item_equip(player *p, item *it)
                                         description, 60));
 
             time = 2 + weapon_is_twohanded(p->eq_weapon);
+
+            if (it->cursed)
+            {
+                log_add_entry(p->log, "The %s welds itself into your hand.",
+                              item_describe(it,
+                                            player_item_identified(p, it),
+                                            TRUE, TRUE,
+                                            description, 60));
+
+                it->curse_known = TRUE;
+            }
         }
         break;
 
@@ -1838,13 +1852,24 @@ int player_item_unequip(player *p, item *it)
     case PE_WEAPON:
         if (p->eq_weapon != NULL)
         {
-            log_add_entry(p->log, "You you put away %s.",
-                          item_describe(it, player_item_identified(p, it),
-                                        TRUE, TRUE,
-                                        desc, 60));
+            if (!p->eq_weapon->cursed)
+            {
+                log_add_entry(p->log, "You you put away %s.",
+                              item_describe(it, player_item_identified(p, it),
+                                            TRUE, TRUE,
+                                            desc, 60));
 
-            time = 2 + weapon_is_twohanded(p->eq_weapon);
-            p->eq_weapon = NULL;
+                time = 2 + weapon_is_twohanded(p->eq_weapon);
+                p->eq_weapon = NULL;
+            }
+            else
+            {
+                log_add_entry(p->log, "You can't put away the %s. " \
+                              "It's welded into your hands.",
+                              item_describe(it, player_item_identified(p, it),
+                                            TRUE, TRUE,
+                                            desc, 60));
+            }
         }
         break;
     }
@@ -1852,23 +1877,49 @@ int player_item_unequip(player *p, item *it)
     /* take off armour */
     if ((aslot != NULL) && (*aslot != NULL))
     {
-        log_add_entry(p->log, "You finish taking off %s.",
-                      item_describe(it, player_item_identified(p, it),
-                                    TRUE, TRUE,
-                                    desc, 60));
-        *aslot = NULL;
+        if (!it->cursed)
+        {
+            log_add_entry(p->log, "You finish taking off %s.",
+                          item_describe(it, player_item_identified(p, it),
+                                        TRUE, TRUE,
+                                        desc, 60));
+            *aslot = NULL;
+        }
+        else
+        {
+            log_add_entry(p->log, "You can't take of the %s.%s",
+                          item_describe(it, player_item_identified(p, it),
+                                        TRUE, TRUE,
+                                        desc, 60),
+                          it->curse_known ? "" : " It appears to be cursed.");
+            it->curse_known = TRUE;
+        }
     }
 
     if ((rslot != NULL) && (*rslot != NULL))
     {
-        log_add_entry(p->log, "You remove %s.",
-                      item_describe(it, player_item_identified(p, it),
-                                    TRUE, TRUE,
-                                    desc, 60));
+        if (!it->cursed)
+        {
+            log_add_entry(p->log, "You remove %s.",
+                          item_describe(it, player_item_identified(p, it),
+                                        TRUE, TRUE,
+                                        desc, 60));
 
-        player_effect_del(p, (*rslot)->effect);
-        *rslot = NULL;
-        time = 2;
+            player_effect_del(p, (*rslot)->effect);
+            *rslot = NULL;
+            time = 2;
+        }
+        else
+        {
+            log_add_entry(p->log, "You can not remove the %s.%s",
+                          item_describe(it, player_item_identified(p, it),
+                                        TRUE, TRUE,
+                                        desc, 60),
+                          it->curse_known ? "" : " It appears to be cursed.");
+
+            it->curse_known = TRUE;
+
+        }
     }
 
     return time;
@@ -2144,6 +2195,14 @@ void player_item_identify(player *p, item *it)
         /* NOP */
         break;
     }
+
+    if (it->cursed)
+        it->curse_known = TRUE;
+
+    if (it->blessed)
+        it->blessed_known = TRUE;
+
+    it->bonus_known = TRUE;
 }
 
 int player_item_use(player *p, item *it)
@@ -3632,9 +3691,23 @@ static void player_magic_identify(player *p)
      */
 
     int i;
+    item *it;
 
     for (i = 1; i <= p->inventory->len; i++)
-        player_item_identify(p, inv_get(p->inventory, i - 1));
+    {
+        it = inv_get(p->inventory, i - 1);
+        player_item_identify(p, it);
+
+        /* reveal blessing / curse */
+        if (it->blessed)
+            it->blessed_known = TRUE;
+
+        if (it->cursed)
+            it->curse_known = TRUE;
+
+        /* reveal bonus */
+        it->bonus_known  = TRUE;
+    }
 }
 
 static void player_magic_make_wall(player *p)
