@@ -430,12 +430,17 @@ gint64 player_calc_score(player *p, int won)
 
 int player_move(player *p, int direction)
 {
-    int times = 1;          /* how many time ticks it took */
+    int times = 1;         /* how many time ticks it took */
     position target_p;     /* coordinates of target */
-    level_tile *target_t;   /* shortcut for target map tile */
-    monster *target_m;      /* monster on target tile (if any) */
+    level_tile *target_t;  /* shortcut for target map tile */
+    monster *target_m;     /* monster on target tile (if any) */
 
     assert(p != NULL && direction > GD_NONE && direction < GD_MAX);
+
+    /* confusion: random movement */
+    if (player_effect(p, ET_CONFUSION)) {
+        direction = rand_1n(GD_MAX - 1);
+    }
 
     target_p = pos_move(p->pos, direction);
 
@@ -1139,6 +1144,12 @@ int player_spell_cast(player *p)
     int radius = 0;
     level_tile_t type = LT_NONE;
     area *range = NULL;
+
+    if (player_effect(p, ET_CONFUSION))
+    {
+        log_add_entry(p->log, "You can't aim your magic!");
+        return turns;
+    }
 
     spell = display_spell_select("Select a spell to cast", p, NULL);
 

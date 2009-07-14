@@ -61,7 +61,16 @@ int main(int argc, char *argv[])
     display_init();
     display_draw();
 
-    g_file_get_contents(game_mesgfile(g), &file_content, NULL, NULL);
+    /* check if mesgfile exists */
+    if (!g_file_get_contents(game_mesgfile(g), &file_content, NULL, NULL))
+    {
+        display_shutdown();
+        game_destroy(g);
+
+        fprintf(stderr, "Error: Cannot find message file.\n");
+        exit(EXIT_FAILURE);
+    }
+
     display_show_message("Welcome to the game of NLarn!", file_content);
     g_free(file_content);
 
@@ -162,11 +171,19 @@ int main(int argc, char *argv[])
             break;
 
             /* help */
-        case KEY_F(1) :
-                    case '?':
-                            g_file_get_contents(game_helpfile(g), &file_content, NULL, NULL);
-            display_show_message("Help for The Caverns of NLarn", file_content);
-            g_free(file_content);
+        case KEY_F(1):
+        case '?':
+            if (g_file_get_contents(game_helpfile(g), &file_content, NULL, NULL))
+            {
+                display_show_message("Help for The Caverns of NLarn", file_content);
+                g_free(file_content);
+            }
+            else
+            {
+                display_show_message("Help for The Caverns of NLarn",
+                                     "Help file not found.");
+            }
+
             break;
 
             /* cast a spell */
@@ -177,7 +194,7 @@ int main(int argc, char *argv[])
             /* go down stairs */
         case '>':
             switch (level_stationary_at(g->p->level, g->p->pos))
-    {
+            {
             case LS_STAIRSDOWN:
                 nlevel = g->levels[g->p->level->nlevel + 1];
                 break;
@@ -293,10 +310,17 @@ int main(int argc, char *argv[])
                 dir = GD_NONE;
             }
 
+            /* select random direction if player is confused */
+            if (player_effect(g->p, ET_CONFUSION))
+            {
+                dir = rand_0n(GD_MAX - 1);
+            }
+
             if (dir)
             {
                 pos = pos_move(g->p->pos, dir);
-                if (pos_valid(pos))
+                if (pos_valid(pos)
+                    && (level_stationary_at(g->p->level, pos) == LS_OPENDOOR))
                 {
 
                     /* check if player is standing in the door */
@@ -329,6 +353,11 @@ int main(int argc, char *argv[])
                     log_add_entry(g->p->log, "You close the door.");
                     moves_count = 1;
                 }
+                else
+                {
+                    log_add_entry(g->p->log, "Huh?");
+                }
+
             }
             else
             {
@@ -364,14 +393,25 @@ int main(int argc, char *argv[])
                 dir = GD_NONE;
             }
 
+            /* select random direction if player is confused */
+            if (player_effect(g->p, ET_CONFUSION))
+            {
+                dir = rand_0n(GD_MAX - 1);
+            }
+
             if (dir)
             {
                 pos = pos_move(g->p->pos, dir);
-                if (pos_valid(pos))
+                if (pos_valid(pos)
+                    && (level_stationary_at(g->p->level, pos) == LS_CLOSEDDOOR))
                 {
                     g->p->level->map[pos.y][pos.x].stationary = LS_OPENDOOR;
                     log_add_entry(g->p->log, "You open the door.");
                     moves_count = 1;
+                }
+                else
+                {
+                    log_add_entry(g->p->log, "Huh?");
                 }
             }
             else
@@ -400,9 +440,9 @@ int main(int argc, char *argv[])
             break;
 
         case KEY_F(12) :
-                    case 'Q':
-                            if (display_get_yesno("Are you sure you want to quit?", NULL, NULL))
-                                player_die(g->p, PD_QUIT, 0);
+        case 'Q':
+            if (display_get_yesno("Are you sure you want to quit?", NULL, NULL))
+                player_die(g->p, PD_QUIT, 0);
             break;
 
         case 12: /* ^L */
@@ -417,7 +457,7 @@ int main(int argc, char *argv[])
 
         case 23: /* ^W */
             if (!game_wizardmode(g))
-    {
+            {
                 if (display_get_yesno("Are you sure you want to switch to Wizard mode?\n" \
                                       "You will not be able to switch back to normal " \
                                       "gameplay and your score will not be counted.", NULL, NULL))
@@ -453,7 +493,6 @@ int main(int argc, char *argv[])
         case 521: /* ^down */
             if (game_wizardmode(g))
                 player_lvl_lose(g->p, 1);
-
 
             break;
         }
