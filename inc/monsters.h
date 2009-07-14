@@ -25,6 +25,11 @@
 #include "position.h"
 #include "traps.h"
 
+/* forward declarations */
+
+struct player;
+struct level;
+
 /* local monster definition for data storage */
 /* TODO: monster size, spell casting ability, resistances */
 typedef struct monster_data {
@@ -165,6 +170,8 @@ void monster_destroy(monster *m);
 gboolean monster_hp_lose(monster *m, int amount);
 void monster_drop_items(monster *m, inventory *floor);
 void monster_pickup_items(monster *m, inventory *floor, message_log *log);
+void monster_player_attack(monster *m, struct player *p);
+monster *monster_trigger_trap(monster *m, struct level *l, struct player *p);
 gboolean monster_update_action(monster *m);
 void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);

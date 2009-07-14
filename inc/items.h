@@ -33,7 +33,8 @@ typedef enum item_types {
     IT_RING,            /* ring, defined in rings.h */
     IT_SCROLL,          /* magic_scroll, defined in scrolls.h */
     IT_WEAPON,          /* weapon, defined in weapons.h */
-    IT_MAX              /* ~ item type count */
+    IT_MAX,             /* ~ item type count */
+    IT_ALL,             /* for special uses: all item types */
 } item_t;
 
 /* inspired by Nethack's objclass.h */

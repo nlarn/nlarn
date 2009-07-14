@@ -92,6 +92,9 @@ const monster_data monsters[MT_MAX] =
 
 static int monster_genocided[MT_MAX] = { 1, 0 };
 
+static int monster_player_special_attack(monster *m, struct player *p);
+static char *monster_player_rob(monster *m, struct player *p, item_t item_type);
+
 monster *monster_new(int monster_type)
 {
     monster *nmonster;
@@ -266,6 +269,168 @@ void monster_pickup_items(monster *m, inventory *floor, message_log *log)
     }
 }
 
+void monster_player_attack(monster *m, player *p)
+{
+    int dam;
+
+    if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_is_spirit(m))
+        return;
+
+    if (player_effect(p, ET_UNDEAD_PROTECTION) && monster_is_undead(m))
+        return;
+
+    /* if monster has accomplished a special attack do nothing */
+    if (monster_player_special_attack(m, p))
+        return;
+
+    /* the player is invisible and the monster bashes into thin air */
+    if (!pos_identical(m->player_pos, p->pos))
+    {
+        if (!level_is_monster_at(p->level, p->pos) && m->m_visible)
+        {
+            log_add_entry(p->log, "The %s bashes into thin air.",
+                          monster_get_name(m));
+        }
+
+        m->lastseen++;
+
+        return;
+    }
+
+    if (player_effect(p, ET_INVISIBILITY)
+            && !monster_has_infravision(m)
+            && chance(65))
+    {
+        log_add_entry(p->log,
+                      "The %s misses wildly.",
+                      monster_get_name(m));
+        return;
+    }
+
+    if (player_effect(p, ET_CHARM_MONSTER)
+            && (rand_m_n(5, 30) * monster_get_level(m)
+                - player_get_cha(p) < 30))
+    {
+        log_add_entry(p->log,
+                      "The %s is awestruck at your magnificence!",
+                      monster_get_name(m));
+        return;
+    }
+
+    dam = monster_get_dam(m);
+    if (dam > 1)
+    {
+        dam += rand_1n(dam);
+        dam += monster_get_level(m);
+        dam += game_difficulty(p->game);
+    }
+
+    if ((dam > player_get_ac(p)) || (rand_1n(20) == 1))
+    {
+        dam -= player_get_ac(p);
+
+        if (dam > 0)
+        {
+            player_hp_lose(p, dam, PD_MONSTER, m->type);
+            log_add_entry(p->log,
+                          "The %s hits you.",
+                          monster_get_name(m));
+        }
+        else
+        {
+            log_add_entry(p->log,
+                          "The %s hit you but your armour protects you.",
+                          monster_get_name(m));
+        }
+    }
+    else
+    {
+        log_add_entry(p->log, "The %s missed.", monster_get_name(m));
+    }
+}
+
+monster *monster_trigger_trap(monster *m, struct level *l, struct player *p)
+{
+    /* original position of the monster */
+    position pos;
+
+    /* the trap */
+    trap_t trap;
+
+    /* effect monster might have gained during the move */
+    effect *eff = NULL;
+
+    trap = level_trap_at(l, m->pos);
+
+    /* return if the monster has not triggered the trap */
+    if (!chance(trap_chance(trap)))
+    {
+        return m;
+    }
+
+    /* flying monsters are only affected by sleeping gas traps */
+    if (monster_can_fly(m) && (trap != TT_SLEEPGAS))
+    {
+        return m;
+    }
+
+    pos = m->pos;
+
+    /* monster triggered the trap */
+    switch (trap)
+    {
+    case TT_TRAPDOOR:
+        /* just remove the monster */
+        g_ptr_array_remove_fast(l->mlist, m);
+
+        break;
+
+    case TT_TELEPORT:
+        m->pos = level_find_space(l, LE_MONSTER);
+
+        break;
+
+    default:
+        /* if there is an effect on the trap add it to the
+         * monster's list of effects. */
+        if (trap_effect(trap))
+        {
+            eff = effect_new(trap_effect(trap), game_turn(p->game));
+            monster_effect_add(m, eff);
+        }
+
+    } /* switch (trap) */
+
+    if (m->m_visible)
+    {
+        log_add_entry(p->log,
+                      trap_m_message(trap),
+                      monster_get_name(m));
+
+        if (eff)
+            log_add_entry(p->log,
+                          effect_get_msg_m_start(eff),
+                          monster_get_name(m));
+
+        /* set player's knowlege of trap */
+        player_memory_of(p, pos).trap = trap;
+    }
+
+    /* has the monster survived the trap? */
+    if (trap_damage(trap) && monster_hp_lose(m, rand_1n(trap_damage(trap))))
+    {
+        level_monster_die(l, m, p->log);
+        m = NULL;
+    }
+
+    /* destroy the monster if it has left the level */
+    if (trap == TT_TRAPDOOR)
+        monster_destroy(m);
+
+    return m;
+}
+
+
 /**
  * Determine a monster's action.
  *
@@ -412,4 +577,252 @@ void monster_effect_expire(monster *m, message_log *log)
             i++;
         }
     }
+}
+
+int monster_player_special_attack(monster *m, struct player *p)
+{
+    int spc_dam = 0; /* damage from special attack */
+    char *message = NULL; /* message for special attack */
+    position pos; /* new position for teleport away */
+    item *it; /* destroyed / robbed item */
+    int pi; /* impact of perishing */
+    effect *ef;
+
+    /* flag to indicate if a special attack has been accomplished */
+    gboolean sp_att = TRUE;
+
+    /* special attacks */
+    switch (m->type)
+    {
+    case MT_RUST_MONSTER:
+        if (p->eq_suit != NULL)
+        {
+            pi = item_rust(p->eq_suit);
+            if (pi == PI_ENFORCED)
+            {
+                log_add_entry(p->log, "Your %s is dulled by the %s.",
+                              armour_name(p->eq_suit),
+                              monster_get_name(m));
+            }
+            else if (pi == PI_DESTROYED)
+            {
+                /* armour has been destroyed */
+                log_add_entry(p->log, "Your %s disintegrates!",
+                              armour_name(p->eq_suit));
+
+                it = p->eq_suit;
+
+                log_disable(p->log);
+                player_item_unequip(p, it);
+                log_enable(p->log);
+
+                inv_del_element(p->inventory, it);
+            }
+        }
+        break;
+
+    case MT_HELLHOUND:
+    case MT_RED_DRAGON:
+    case MT_BRONCE_DRAGON:
+    case MT_SILVER_DRAGON:
+        spc_dam = ((m->type == MT_HELLHOUND) ? rand_m_n(8, 23) : rand_m_n(20, 45))
+                  - player_get_ac(p)
+                  - player_effect(p, ET_FIRE_RESISTANCE);
+
+        if (spc_dam > 0)
+            message = "The %s breathes fire at you!";
+        else
+            message = "The %s's flame doesn't phase you.";
+
+        break;
+
+    case MT_CENTIPEDE:
+    case MT_GIANT_ANT:
+        if (player_get_str(p) > 3)
+        {
+            ef = effect_new(ET_DEC_STR, game_turn(p->game));
+
+            /* this nasty effect goes away after some turns */
+            ef->turns = 50;
+
+            player_effect_add(p, ef);
+        }
+
+        message = "The %s stung you!";
+
+        break;
+
+    case MT_WHITE_DRAGON:
+        spc_dam = rand_1n(15)
+                  + 18
+                  - player_get_ac(p)
+                  - player_effect(p, ET_COLD_RESISTANCE);
+
+        if (spc_dam > 0)
+            message = "The %s blasts you with his cold breath.";
+        else
+            message = "The %s's breath doesn't seem so cold.";
+
+        break;
+
+    case MT_VAMPIRE:
+    case MT_WRAITH:
+        message = "The %s drains you of your life energy!";
+        player_lvl_lose(p, 1);
+        break;
+
+    case MT_WATER_LORD:
+        message = "The %s got you with a gusher!";
+        spc_dam = rand_1n(15)
+                  + 25
+                  - player_get_ac(p);
+        break;
+
+    case MT_LEPRECHAUN:
+        /* if player has a device of no theft abort this */
+        if (!player_effect(p, ET_NOTHEFT))
+            message = monster_player_rob(m, p, IT_GOLD);
+
+        /* teleport away */
+        pos = level_find_space(p->level, LE_MONSTER);
+        m->pos = pos;
+
+        break;
+
+    case MT_DISENCHANTRESS:
+        /* destroy random item */
+        it = inv_get(p->inventory, rand_1n(inv_length(p->inventory)));
+        if (it->type != IT_SCROLL && it->type != IT_POTION)
+        {
+            message = "The %s hits you - you feel a sense of loss.";
+            if (player_item_is_equipped(p, it))
+                player_item_unequip(p, it);
+
+            inv_del_element(p->inventory, it);
+            item_destroy(it);
+        }
+        break;
+
+    case MT_ICE_LIZARD:
+    case MT_GREEN_DRAGON:
+        message = "The %s hit you with his barbed tail.";
+        spc_dam = rand_1n(25)
+                  - player_get_ac(p);
+
+        break;
+
+    case MT_UMBER_HULK:
+        ef = effect_new(ET_CONFUSION, game_turn(p->game));
+        player_effect_add(p, ef);
+        break;
+
+    case MT_SPIRIT_NAGA:
+        /* FIXME: random effect */
+        break;
+
+    case MT_PLATINUM_DRAGON:
+        message = "The %s flattens you with his psionics!";
+        spc_dam = rand_1n(15)
+                  + 30
+                  - player_get_ac(p);
+        break;
+
+    case MT_NYMPH:
+        if (!player_effect(p, ET_NOTHEFT))
+            message = monster_player_rob(m, p, IT_ALL);
+
+        /* teleport away */
+        pos = level_find_space(p->level, LE_MONSTER);
+        m->pos = pos;
+
+        break;
+
+    case MT_BUGBEAR:
+    case MT_OSEQUIP:
+        spc_dam = ((m->type == MT_BUGBEAR)
+                   ? rand_m_n(5, 15)
+                   : rand_m_n(10, 25))
+                  - player_get_ac(p);
+
+        message = "The %s bit you!";
+        spc_dam = rand_1n(15) + 10 - player_get_ac(p);
+        break;
+
+    default:
+        sp_att = FALSE;
+        break;
+    } /* special attacks */
+
+    if (spc_dam > 0)
+    {
+        player_hp_lose(p, spc_dam, PD_MONSTER, m->type);
+    }
+
+    if (message != NULL)
+    {
+        log_add_entry(p->log, message, monster_get_name(m));
+    }
+
+    return sp_att;
+}
+
+char *monster_player_rob(monster *m, struct player *p, item_t item_type)
+{
+    char *message = NULL;
+    int player_gold = 0;
+    item *it = NULL;
+
+    assert (m != NULL && p != NULL);
+
+    /* Leprechaun robs only gold */
+    if (item_type == IT_GOLD)
+    {
+        if ((player_gold = player_get_gold(p)))
+        {
+            if (player_gold > 32767)
+            {
+                it = item_new(IT_GOLD, player_gold >> 1, 0);
+                player_set_gold(p, player_gold >> 1);
+            }
+            else
+            {
+                it = item_new(IT_GOLD, rand_1n(1 + (player_gold >> 1)), 0);
+                player_set_gold(p, player_gold - it->count);
+            }
+
+            if (player_get_gold(p) < 0)
+                player_set_gold(p, 0);
+
+            message = "The %s picks your pocket. Your purse feels lighter";
+        }
+    }
+    else if (item_type == IT_ALL) /* must be the nymph */
+    {
+        if (inv_length(p->inventory))
+        {
+            it = inv_get(p->inventory, rand_0n(inv_length(p->inventory) - 1));
+
+            if (player_item_is_equipped(p, it))
+            {
+                log_disable(p->log);
+                player_item_unequip(p, it);
+                log_enable(p->log);
+            }
+
+            inv_del_element(p->inventory, it);
+            message = "The %s picks your pocket.";
+        }
+    }
+
+    /* if item / gold has been stolen, add it to the monster's inv */
+    if (it)
+    {
+        inv_add(m->inventory, it);
+    }
+    else
+    {
+        message = "The %s couldn't find anything to steal";
+    }
+
+    return message;
 }

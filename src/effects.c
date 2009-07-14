@@ -525,7 +525,7 @@ static const effect_data effects[ET_MAX] =
         1,
         1,
         "You feel weaker.",
-        NULL,
+        "You regain your strength.",
         NULL,
         NULL,
     },
