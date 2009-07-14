@@ -711,6 +711,7 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
     int startx, starty;
     int maxvis;
     int pos;
+    int key; /* keyboard input */
     int RUN = TRUE;
 
     /* currently displayed spell; return value */
@@ -722,9 +723,10 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
     /* currently selected item */
     int curr = 1;
 
+    /* buffer for spell code type ahead */
+    char *code_buf = g_malloc0(sizeof(char) * 4);
 
     assert(p != NULL);
-
 
     if (!p->known_spells || !p->known_spells->len)
     {
@@ -768,7 +770,6 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
                 wattroff(swin, COLOR_PAIR(10));
             else
                 wattroff(swin, COLOR_PAIR(9));
-
         }
 
         /* display up / down markers */
@@ -798,9 +799,23 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
             wattroff(swin, COLOR_PAIR(11));
         }
 
+        /* display typeahead keys */
+        if (strlen(code_buf))
+        {
+            wattron(swin, COLOR_PAIR(9));
+            mvwprintw(swin, height - 1, 3, " %s ", code_buf);
+            wattroff(swin, COLOR_PAIR(9));
+        }
+        else
+        {
+            wattron(swin, COLOR_PAIR(11));
+            mvwhline(swin, height - 1, 3, ACS_HLINE, 5);
+            wattroff(swin, COLOR_PAIR(11));
+        }
+
         wrefresh(swin);
 
-        switch (getch())
+        switch ((key = getch()))
         {
         case '7':
         case KEY_HOME:
@@ -876,7 +891,7 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
             }
             break;
 
-        case 27:
+        case 27: /* ESC */
             RUN = FALSE;
             sp = NULL;
 
@@ -889,9 +904,74 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
             RUN = FALSE;
             sp = g_ptr_array_index(p->known_spells, curr + offset - 1);
             break;
+
+        case 127: /* backspace */
+            if (strlen(code_buf))
+            {
+                code_buf[strlen(code_buf) - 1] = '\0';
+            }
+            else
+            {
+                if (!beep())
+                    flash();
+            }
+            break;
+
+        default:
+            /* add key to spell code buffer */
+            if ((key >= 'a') && (key <= 'z'))
+            {
+                if (strlen(code_buf) < 3)
+                {
+                    code_buf[strlen(code_buf)] = key;
+                    /* search for match */
+
+                    for (pos = 1; pos <= p->known_spells->len; pos++)
+                    {
+                        sp = g_ptr_array_index(p->known_spells, pos - 1);
+
+                        if (g_str_has_prefix(spell_code(sp), code_buf))
+                        {
+                            /* match found - reposition selection */
+                            if (pos > maxvis)
+                            {
+                                offset = pos - maxvis;
+                                curr = pos - offset;
+                            }
+                            else
+                            {
+                                offset = 0;
+                                curr = pos;
+                            }
+
+                            break;
+                        }
+                    }
+
+                    /* if no match has been found remove key from buffer */
+                    sp = g_ptr_array_index(p->known_spells, curr + offset - 1);
+                    if (!g_str_has_prefix(spell_code(sp), code_buf))
+                    {
+                        code_buf[strlen(code_buf) - 1] = '\0';
+
+                        if (!beep())
+                            flash();
+                    }
+
+                }
+                else
+                {
+                    if (!beep())
+                        flash();
+                }
+            }
+
+            break;
         }
     }
     while (RUN);
+
+    g_free(code_buf);
 
     delwin(swin);
     clear();
