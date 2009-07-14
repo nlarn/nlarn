@@ -439,6 +439,12 @@ int main(int argc, char *argv[])
                           __DATE__);
             break;
 
+        case '\\':
+            file_content = player_item_identified_list(g->p);
+            display_show_message("Identified items", file_content);
+            g_free(file_content);
+            break;
+
         case KEY_F(12) :
         case 'Q':
             if (display_get_yesno("Are you sure you want to quit?", NULL, NULL))

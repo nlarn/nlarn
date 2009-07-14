@@ -238,6 +238,7 @@ int player_item_is_affordable(player *p, item *it);
 int player_item_is_sellable(player *p, item *it);
 int player_item_is_identifiable(player *p, item *it);
 int player_item_identified(player *p, item *it);
+char *player_item_identified_list(player *p);
 void player_item_identify(player *p, item *it);
 int player_item_use(player *p, item *it);
 int player_item_drop(player *p, item *it);

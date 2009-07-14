@@ -109,6 +109,7 @@ typedef struct item_type_data {
 	char image;
 	char *desc_known;
 	char *desc_unknown;
+	int max_id;
 	unsigned
 		equippable: 1,
 		usable: 1,
@@ -149,6 +150,7 @@ extern const item_material_data item_materials[IM_MAX];
 #define item_get_image(type)          item_data[(type)].image
 #define item_get_name_sg(type)        item_data[(type)].name_sg
 #define item_get_name_pl(type)        item_data[(type)].name_pl
+#define item_get_max_id(type)         item_data[(type)].max_id
 #define item_is_equippable(type)      item_data[(type)].equippable
 #define item_is_usable(type)          item_data[(type)].usable
 #define item_is_stackable(type)       item_data[(type)].stackable

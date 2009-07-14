@@ -438,7 +438,8 @@ int player_move(player *p, int direction)
     assert(p != NULL && direction > GD_NONE && direction < GD_MAX);
 
     /* confusion: random movement */
-    if (player_effect(p, ET_CONFUSION)) {
+    if (player_effect(p, ET_CONFUSION))
+    {
         direction = rand_1n(GD_MAX - 1);
     }
 
@@ -2050,6 +2051,71 @@ int player_item_identified(player *p, item *it)
     default:
         return TRUE;
     }
+}
+
+char *player_item_identified_list(player *p)
+{
+    GString *list, *sublist;
+    char buf_unidentified[81], buf_identified[81];
+    item *it; /* fake pretend item */
+    char *heading;
+
+    int type, id, count;
+
+    item_t type_ids[] =
+    {
+        IT_BOOK,
+        IT_POTION,
+        IT_RING,
+        IT_SCROLL,
+    };
+
+    assert (p != NULL);
+
+    list = g_string_new(NULL);
+    it = item_new(IT_BOOK, 1, 0);
+
+    for (type = 0; type < 4; type++)
+    {
+        count = 0;
+        sublist = g_string_new(NULL);
+
+        /* item category header */
+        heading = g_strdup(item_get_name_pl(type_ids[type]));
+        heading[0] = g_ascii_toupper(heading[0]);
+
+        /* no linefeed before first category */
+        g_string_append_printf(sublist, (type == 0) ? "%s\n" : "\n%s\n",
+                               heading);
+
+        g_free(heading);
+
+        it->type = type_ids[type];
+
+        for (id = 1; id < item_get_max_id(type_ids[type]); id++)
+        {
+            it->id = id;
+            if (player_item_identified(p, it))
+            {
+
+                item_describe(it, FALSE, TRUE, FALSE, buf_unidentified, 80);
+                item_describe(it, TRUE, TRUE, FALSE, buf_identified, 80);
+                g_string_append_printf(sublist, " %33s - %s \n",
+                                       buf_unidentified, buf_identified);
+                count++;
+            }
+        }
+
+        if (count)
+        {
+            g_string_append(list, sublist->str);
+        }
+
+        g_string_free(sublist, TRUE);
+    }
+    item_destroy(it);
+
+    return g_string_free(list, FALSE);
 }
 
 void player_item_identify(player *p, item *it)
