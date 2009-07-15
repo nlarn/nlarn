@@ -161,6 +161,7 @@ position level_find_space(level *l, level_element_t element);
 position level_find_space_in(level *l, rectangle where, level_element_t element);
 position level_find_stationary(level *l, level_stationary_t stationary);
 position level_find_stationary_in(level *l, level_stationary_t stationary, rectangle area);
+gboolean level_validate_position(level *l, position pos, level_element_t element);
 
 int *level_get_surrounding(level *l, position pos, level_stationary_t type);
 

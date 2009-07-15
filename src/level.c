@@ -35,7 +35,7 @@ static level_path_element *level_path_element_in_list(level_path_element* el, GP
 static level_path_element *level_path_find_best(level *l, level_path *path);
 static GPtrArray *level_path_get_neighbours(level *l, position pos);
 
-static gboolean level_validate_position(level *l, position pos, level_element_t element);
+
 
 const level_tile_data level_tiles[LT_MAX] =
 {
@@ -205,20 +205,17 @@ position level_find_space(level *l, level_element_t element)
 
 position level_find_space_in(level *l, rectangle where, level_element_t element)
 {
-    position pos;
-    int iteration = 0;
-    int max_iterations;
+    position pos, pos_orig;
 
-    pos.x = rand_m_n(where.x1, where.x2);
-    pos.y = rand_m_n(where.y1, where.y2);
+    assert (l != NULL && element > LE_NONE && element < LE_MAX);
 
-    max_iterations = (where.x2 - where.x1) * (where.y2 - where.y1);
+    pos_orig.x = pos.x = rand_m_n(where.x1, where.x2);
+    pos_orig.y = pos.y = rand_m_n(where.y1, where.y2);
 
-    while (!level_validate_position(l, pos, element)
-            && (iteration < max_iterations))
+    do
     {
-        pos.x += rand_m_n(-1, 1);
-        pos.y += rand_m_n(-1, 1);
+        pos.x += 1;
+        pos.y += 1;
 
         if (pos.x > where.x2)
             pos.x = where.x1;
@@ -231,32 +228,18 @@ position level_find_space_in(level *l, rectangle where, level_element_t element)
 
         if (pos.y < where.y1)
             pos.y = where.y2;
-
-        iteration++;
     }
+    while (!level_validate_position(l, pos, element)
+            && !pos_identical(pos, pos_orig));
 
-    if (iteration == max_iterations)
+
+    if (pos_identical(pos, pos_orig))
     {
         pos.x = G_MAXINT16;
         pos.y = G_MAXINT16;
     }
 
     return pos;
-}
-
-position level_find_stationary(level *l, level_stationary_t stationary)
-{
-    position pos;
-
-    assert(l != NULL);
-
-    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
-        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
-            if (level_stationary_at(l,pos) == stationary)
-                return pos;
-
-    /* if we reach this point, the stationary is not on the map */
-    return pos_new(G_MAXINT16, G_MAXINT16);
 }
 
 int *level_get_surrounding(level *l, position pos, level_stationary_t type)
@@ -295,6 +278,81 @@ position level_find_stationary_in(level *l, level_stationary_t stationary, recta
 
     /* if we reach this point, the stationary is not on the map */
     return pos_new(G_MAXINT16, G_MAXINT16);
+}
+
+position level_find_stationary(level *l, level_stationary_t stationary)
+{
+    position pos;
+
+    assert(l != NULL);
+
+    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
+        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
+            if (level_stationary_at(l,pos) == stationary)
+                return pos;
+
+    /* if we reach this point, the stationary is not on the map */
+    return pos_new(G_MAXINT16, G_MAXINT16);
+}
+
+gboolean level_validate_position(level *l, position pos, level_element_t element)
+{
+    level_tile *tile;
+
+    assert(l != NULL && element > LT_NONE && element < LE_MAX);
+
+    /* if the position is invalid it is invalid for the level as well */
+    if (!pos_valid(pos))
+    {
+        return FALSE;
+    }
+
+    /* make shortcut */
+    tile = level_tile_at(l, pos);
+
+    switch (element)
+    {
+
+    case LE_GROUND:
+        /* why should we need this case? */
+        return TRUE;
+        break;
+
+    case LE_STATIONARY:
+        if (lt_is_passable(tile->type) && (tile->stationary == LS_NONE) )
+        {
+            /* FIXME: don't want two stationaries next to each other */
+            /* FIXME: don't want stationaries next to the wall */
+            return TRUE;
+        }
+        break;
+
+    case LE_TRAP:
+        if (lt_is_passable(tile->type)
+                && (tile->stationary == LS_NONE)
+                && (tile->trap == TT_NONE) )
+            return TRUE;
+        break;
+
+    case LE_ITEM:
+        /* we can stack like mad, so we only need to check if there is an open space */
+        if (lt_is_passable(tile->type) && (tile->stationary == LS_NONE))
+            return TRUE;
+        break;
+
+    case LE_MONSTER:
+        if (lt_is_passable(tile->type) && !level_is_monster_at(l, pos))
+            return TRUE;
+        break;
+
+    case LE_NONE:
+    case LE_MAX:
+        return FALSE;
+        break;
+
+    } /* switch */
+
+    return FALSE;
 }
 
 /**
@@ -1318,58 +1376,4 @@ static GPtrArray *level_path_get_neighbours(level *l, position pos)
     }
 
     return neighbours;
-}
-
-static gboolean level_validate_position(level *l, position pos, level_element_t element)
-{
-    level_tile *tile;
-
-    /* make shortcut */
-    tile = level_tile_at(l, pos);
-
-    switch (element)
-    {
-
-    case LE_GROUND:
-        /* why should we need this case? */
-        return TRUE;
-        break;
-
-    case LE_STATIONARY:
-        if (lt_is_passable(tile->type) && (tile->stationary == LS_NONE) )
-        {
-            /* FIXME: don't want two stationaries next to each other */
-            /* FIXME: don't want stationaries next to the wall */
-            return TRUE;
-        }
-        break;
-
-    case LE_TRAP:
-        if (lt_is_passable(tile->type)
-                && (tile->stationary == LS_NONE)
-                && (tile->trap == TT_NONE) )
-            return TRUE;
-        break;
-
-    case LE_ITEM:
-        /* we can stack like mad, so we only need to check if there is an open space */
-        if (lt_is_passable(tile->type) && (tile->stationary == LS_NONE))
-            return TRUE;
-        break;
-
-    case LE_MONSTER:
-        if (lt_is_passable(tile->type)
-                && (tile->stationary == LS_NONE)
-                && !level_is_monster_at(l, pos))
-            return TRUE;
-        break;
-
-    case LE_NONE:
-    case LE_MAX:
-        return FALSE;
-        break;
-
-    } /* switch */
-
-    return FALSE;
 }

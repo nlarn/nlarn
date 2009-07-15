@@ -110,7 +110,14 @@ monster *monster_new(int monster_type, struct level *l)
 
     /* put monster into level */
     nmonster->level = l;
-    monster_move(nmonster, level_find_space(l, LE_MONSTER));
+
+    if (!monster_move(nmonster, level_find_space(l, LE_MONSTER)))
+    {
+        /* no free space could be found for the monstert -> abort */
+        g_free(nmonster);
+        return NULL;
+    }
+
     g_ptr_array_add(l->mlist, nmonster);
 
     nmonster->effects = g_ptr_array_new();
@@ -210,11 +217,17 @@ void monster_destroy(monster *m)
     g_free(m);
 }
 
-void monster_move(monster *m, position target)
+int monster_move(monster *m, position target)
 {
-    assert(m != NULL && pos_valid(target));
+    assert(m != NULL);
 
-    m->pos = target;
+    if (level_validate_position(m->level, target, LE_MONSTER))
+    {
+        m->pos = target;
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 /**
@@ -792,6 +805,7 @@ int monster_player_special_attack(monster *m, struct player *p)
 
         /* teleport away */
         monster_move(m, level_find_space(p->level, LE_MONSTER));
+
 
         break;
 

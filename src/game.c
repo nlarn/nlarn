@@ -457,6 +457,15 @@ static void game_move_monsters(game *g)
             {
                 /* monster is standing next to player */
                 monster_player_attack(m, g->p);
+
+                /* monster's position might have changed (teleport) */
+                if (!pos_identical(m_npos, m->pos))
+                {
+                    m_npos = m->pos;
+                    log_add_entry(g->p->log, "The %s vanishes.",
+                                  monster_get_name(m));
+                }
+
             }
             else
             {
