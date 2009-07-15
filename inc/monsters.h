@@ -153,6 +153,9 @@ typedef struct monster {
 	/* LOS between monster -> player */
 	gboolean p_visible;
 
+	/* level monster is on */
+	struct level *level;
+
 	inventory *inventory;
 	GPtrArray *effects;
 } monster;
@@ -163,18 +166,23 @@ extern const monster_data monsters[MT_MAX];
 
 /* function definitions */
 
-monster *monster_new(int monster_type);
-monster *monster_new_by_level(int level);
+monster *monster_new(int monster_type, struct level *l);
+monster *monster_new_by_level(struct level *l);
 void monster_destroy(monster *m);
 
+void monster_move(monster *m, position target);
 gboolean monster_hp_lose(monster *m, int amount);
 void monster_drop_items(monster *m, inventory *floor);
-void monster_pickup_items(monster *m, inventory *floor, message_log *log);
+void monster_pickup_items(monster *m, message_log *log);
 void monster_player_attack(monster *m, struct player *p);
-monster *monster_trigger_trap(monster *m, struct level *l, struct player *p);
+monster *monster_trigger_trap(monster *m, struct player *p);
+void monster_die(monster *m, message_log *log);
+
 gboolean monster_update_action(monster *m);
 void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
+
+void monsters_genocide(struct level *l);
 
 
 #define monster_get_name(monster)        (monsters[(monster)->type].name)

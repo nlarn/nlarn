@@ -211,5 +211,5 @@ static void sphere_kill_monster(sphere *s, level *l, monster *m)
         }
     }
 
-    level_monster_die(l, m, NULL);
+    monster_die(m, NULL);
 }

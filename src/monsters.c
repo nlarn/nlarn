@@ -95,18 +95,24 @@ static int monster_genocided[MT_MAX] = { 1, 0 };
 static int monster_player_special_attack(monster *m, struct player *p);
 static char *monster_player_rob(monster *m, struct player *p, item_t item_type);
 
-monster *monster_new(int monster_type)
+monster *monster_new(int monster_type, struct level *l)
 {
     monster *nmonster;
     int iid, icount;    /* item id, item count */
 
-    assert(monster_type > MT_NONE && monster_type < MT_MAX);
+    assert(monster_type > MT_NONE && monster_type < MT_MAX && l != NULL);
 
     /* make room for monster */
     nmonster = g_malloc0(sizeof(monster));
 
     nmonster->type = monster_type;
     nmonster->hp = divert(monsters[monster_type].hp_max, 10);
+
+    /* put monster into level */
+    nmonster->level = l;
+    monster_move(nmonster, level_find_space(l, LE_MONSTER));
+    g_ptr_array_add(l->mlist, nmonster);
+
     nmonster->effects = g_ptr_array_new();
     nmonster->inventory = inv_new();
 
@@ -146,9 +152,6 @@ monster *monster_new(int monster_type)
         break;
     }
 
-    /* position outside map */
-    nmonster->pos = pos_new(G_MAXINT16, G_MAXINT16);
-
     /* initialize AI */
     nmonster->action = MA_WANDER;
     nmonster->lastseen = -1;
@@ -157,32 +160,34 @@ monster *monster_new(int monster_type)
     return nmonster;
 }
 
-monster *monster_new_by_level(int level)
+monster *monster_new_by_level(struct level *l)
 {
     const int monster_level[] = { 5, 11, 17, 22, 27, 33, 39, 42, 46, 50, 53, 56, MT_MAX - 1 };
     int monster_id = 0;
     int monster_id_min;
     int monster_id_max;
 
-    assert(level > 0 && level < LEVEL_MAX);
+    assert(l != NULL);
 
-    if (level < 5)
+    if (l->nlevel < 5)
     {
         monster_id_min = 1;
-        monster_id_max = monster_level[level - 1];
+        monster_id_max = monster_level[l->nlevel - 1];
     }
     else
     {
-        monster_id_min = monster_level[level - 4] + 1;
-        monster_id_max = monster_level[level - 1];
+        monster_id_min = monster_level[l->nlevel - 4] + 1;
+        monster_id_max = monster_level[l->nlevel - 1];
     }
 
-    while (monster_genocided[monster_id] || (monster_id <= MT_NONE) || (monster_id >= MT_MAX))
+    while (monster_genocided[monster_id]
+            || (monster_id <= MT_NONE)
+            || (monster_id >= MT_MAX))
     {
         monster_id = rand_m_n(monster_id_min, monster_id_max);
     }
 
-    return monster_new(monster_id);
+    return monster_new(monster_id, l);
 }
 
 void monster_destroy(monster *m)
@@ -195,11 +200,21 @@ void monster_destroy(monster *m)
 
     g_ptr_array_free(m->effects, TRUE);
 
+    /* remove monster from level */
+    g_ptr_array_remove_fast(m->level->mlist, m);
+
     /* free inventory */
     if (m->inventory)
         inv_destroy(m->inventory);
 
     g_free(m);
+}
+
+void monster_move(monster *m, position target)
+{
+    assert(m != NULL && pos_valid(target));
+
+    m->pos = target;
 }
 
 /**
@@ -236,14 +251,15 @@ void monster_drop_items(monster *m, inventory *floor)
     }
 }
 
-void monster_pickup_items(monster *m, inventory *floor, message_log *log)
+void monster_pickup_items(monster *m, message_log *log)
 {
     int i;
     item *it;
+    inventory *floor;
 
     assert(m != NULL && log != NULL);
 
-    if (!floor)
+    if (!(floor = level_ilist_at(m->level, m->pos)))
         return;
 
     for (i = 1; i <= inv_length(floor); i++)
@@ -349,10 +365,10 @@ void monster_player_attack(monster *m, player *p)
     }
 }
 
-monster *monster_trigger_trap(monster *m, struct level *l, struct player *p)
+monster *monster_trigger_trap(monster *m, struct player *p)
 {
     /* original position of the monster */
-    position pos;
+    position pos_orig;
 
     /* the trap */
     trap_t trap;
@@ -360,7 +376,9 @@ monster *monster_trigger_trap(monster *m, struct level *l, struct player *p)
     /* effect monster might have gained during the move */
     effect *eff = NULL;
 
-    trap = level_trap_at(l, m->pos);
+    assert (m != NULL && p != NULL);
+
+    trap = level_trap_at(m->level, m->pos);
 
     /* return if the monster has not triggered the trap */
     if (!chance(trap_chance(trap)))
@@ -374,19 +392,18 @@ monster *monster_trigger_trap(monster *m, struct level *l, struct player *p)
         return m;
     }
 
-    pos = m->pos;
+    pos_orig = m->pos;
 
     /* monster triggered the trap */
     switch (trap)
     {
     case TT_TRAPDOOR:
         /* just remove the monster */
-        g_ptr_array_remove_fast(l->mlist, m);
-
+        /* done below */
         break;
 
     case TT_TELEPORT:
-        m->pos = level_find_space(l, LE_MONSTER);
+        monster_move(m, level_find_space(m->level, LE_MONSTER));
 
         break;
 
@@ -413,13 +430,13 @@ monster *monster_trigger_trap(monster *m, struct level *l, struct player *p)
                           monster_get_name(m));
 
         /* set player's knowlege of trap */
-        player_memory_of(p, pos).trap = trap;
+        player_memory_of(p, pos_orig).trap = trap;
     }
 
     /* has the monster survived the trap? */
     if (trap_damage(trap) && monster_hp_lose(m, rand_1n(trap_damage(trap))))
     {
-        level_monster_die(l, m, p->log);
+        monster_die(m, p->log);
         m = NULL;
     }
 
@@ -430,6 +447,50 @@ monster *monster_trigger_trap(monster *m, struct level *l, struct player *p)
     return m;
 }
 
+
+void monster_die(monster *m, message_log *log)
+{
+    assert(m != NULL);
+
+    /*
+     * if the player can see the monster and we have been supplied with a log
+     * describe the event
+     */
+    if (m->m_visible && log)
+    {
+        log_add_entry(log,
+                      "The %s died!",
+                      monster_get_name(m));
+    }
+
+    /* drop stuff the monster carries */
+    if (m->inventory->len)
+    {
+        if (level_ilist_at(m->level, m->pos) == NULL)
+            level_ilist_at(m->level, m->pos) = inv_new();
+
+        monster_drop_items(m, level_ilist_at(m->level, m->pos));
+    }
+
+    monster_destroy(m);
+}
+
+void monsters_genocide(level *l)
+{
+    int count;
+    monster *monst;
+
+    /* purge genocided monsters */
+    for (count = 1; count <= l->mlist->len; count++)
+    {
+        monst = g_ptr_array_index(l->mlist, count - 1);
+        if (monster_is_genocided(monst->type))
+        {
+            g_ptr_array_remove_index_fast(l->mlist, count - 1);
+            monster_destroy(monst);
+        }
+    }
+}
 
 /**
  * Determine a monster's action.
@@ -583,7 +644,6 @@ int monster_player_special_attack(monster *m, struct player *p)
 {
     int spc_dam = 0; /* damage from special attack */
     char *message = NULL; /* message for special attack */
-    position pos; /* new position for teleport away */
     item *it; /* destroyed / robbed item */
     int pi; /* impact of perishing */
     effect *ef;
@@ -684,8 +744,7 @@ int monster_player_special_attack(monster *m, struct player *p)
             message = monster_player_rob(m, p, IT_GOLD);
 
         /* teleport away */
-        pos = level_find_space(p->level, LE_MONSTER);
-        m->pos = pos;
+        monster_move(m, level_find_space(p->level, LE_MONSTER));
 
         break;
 
@@ -732,8 +791,7 @@ int monster_player_special_attack(monster *m, struct player *p)
             message = monster_player_rob(m, p, IT_ALL);
 
         /* teleport away */
-        pos = level_find_space(p->level, LE_MONSTER);
-        m->pos = pos;
+        monster_move(m, level_find_space(p->level, LE_MONSTER));
 
         break;
 

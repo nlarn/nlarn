@@ -362,14 +362,14 @@ static void game_move_monsters(game *g)
          */
         if (!monster_regenerate(m, game_turn(g), game_difficulty(g), g->p->log))
         {
-            level_monster_die(g->p->level, m, g->p->log);
+            monster_die(m, g->p->log);
             continue;
         }
 
         /* deal damage caused by floor effects */
         if (monster_hp_lose(m, level_tile_damage(g->p->level, m->pos)))
         {
-            level_monster_die(g->p->level, m, g->p->log);
+            monster_die(m, g->p->log);
             continue;
         }
 
@@ -525,19 +525,19 @@ static void game_move_monsters(game *g)
                      && ls_is_passable(level_stationary_at(l, m_npos))
                     )
             {
-                m->pos = m_npos;
+                monster_move(m, m_npos);
 
                 /* check for traps */
                 if (level_trap_at(l, m->pos))
                 {
-                    m = monster_trigger_trap(m, l, g->p);
+                    m = monster_trigger_trap(m, g->p);
                     if (m == NULL) continue; /* trap killed the monster */
                 }
 
             } /* end new position */
         } /* end monster repositioning */
 
-        monster_pickup_items(m, level_ilist_at(l, m->pos), g->p->log);
+        monster_pickup_items(m, g->p->log);
 
         /* increment count of turns since when player was last seen */
         if (m->lastseen) m->lastseen++;

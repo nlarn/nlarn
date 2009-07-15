@@ -686,7 +686,7 @@ int player_level_enter(player *p, level *l)
         count = abs(game_turn(p->game) - l->visited);
         level_expire_timer(l, min(count, G_MAXUINT8));
 
-        level_monsters_genocide(l);
+        monsters_genocide(l);
 
         log_enable(p->log);
 
@@ -793,7 +793,7 @@ void player_monster_kill(player *p, monster *m)
     player_exp_gain(p, monster_get_exp(m));
     p->stats.monsters_killed[m->type] += 1;
 
-    level_monster_die(p->level, m, p->log);
+    monster_die(m, p->log);
 }
 
 int player_examine(player *p, position pos)
@@ -3500,10 +3500,8 @@ static int player_magic_create_monster(player *p)
 
     if (pos_valid(pos))
     {
-        m = monster_new_by_level(p->level->nlevel);
-
-        m->pos = pos;
-        g_ptr_array_add(p->level->mlist, m);
+        m = monster_new_by_level(p->level);
+        monster_move(m, pos);
 
         return TRUE;
     }
@@ -3650,7 +3648,7 @@ static void player_magic_genocide_monster(player *p)
                               "Wiped out all %ss",
                               monster_get_name_by_type(id));
 
-                level_monsters_genocide(p->level);
+                monsters_genocide(p->level);
             }
 
             return;
@@ -3838,12 +3836,12 @@ static void player_magic_vaporize_rock(player *p)
     switch (level_stationary_at(p->level, pos))
     {
     case LS_ALTAR:
-        m = monster_new(MT_DAEMON_PRINCE);
+        m = monster_new(MT_DAEMON_PRINCE, p->level);
         desc = "altar";
         break;
 
     case LS_FOUNTAIN:
-        m = monster_new(MT_WATER_LORD);
+        m = monster_new(MT_WATER_LORD, p->level);
         desc = "fountain";
         break;
 
@@ -3862,7 +3860,7 @@ static void player_magic_vaporize_rock(player *p)
 
     case LS_THRONE:
     case LS_THRONE2:
-        m = monster_new(MT_GNOME_KING);
+        m = monster_new(MT_GNOME_KING, p->level);
         desc = "throne";
         break;
 
@@ -3882,11 +3880,10 @@ static void player_magic_vaporize_rock(player *p)
         level_stationary_at(p->level, pos) = LS_NONE;
     }
 
-    /* created a monster */
+    /* created a monster - position it correctly */
     if (m)
     {
-        m->pos = pos;
-        g_ptr_array_add(p->level->mlist, m);
+        monster_move(m, pos);
     }
 }
 

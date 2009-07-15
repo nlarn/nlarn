@@ -108,6 +108,10 @@ void level_new(level *l, int difficulty, char *mazefile)
         /* generate random map */
         level_make_maze(l);
 
+        /* home town is safe */
+        if (l->nlevel > 0)
+            level_fill_with_live(l);
+
         /* add treasure room */
         if (l->nlevel > 1
                 && (l->nlevel == (LEVEL_DMAX - 1)
@@ -123,10 +127,7 @@ void level_new(level *l, int difficulty, char *mazefile)
 
     if (l->nlevel > 0)
     {
-        /* home town is safe */
-        level_fill_with_live(l);
-
-        /* and not filled with crap */
+        /* home town is not filled with crap */
         level_fill_with_objects(l);
 
         /* and not trapped */
@@ -537,6 +538,8 @@ int level_tile_damage(level *l, position pos)
 {
     int damage;
 
+    assert (l != NULL && pos_valid(pos));
+
     switch (level_tiletype_at(l, pos))
     {
     case LT_CLOUD:
@@ -619,8 +622,6 @@ int level_fill_with_live(level *l)
 {
     int new_monster_count;
     int i;
-    monster *monst;
-    position pos;
 
     assert(l != NULL);
 
@@ -640,59 +641,10 @@ int level_fill_with_live(level *l)
 
     for (i = 0; i <= new_monster_count; i++)
     {
-        monst = monster_new_by_level(l->nlevel);
-        pos = level_find_space(l, LE_MONSTER);
-
-        monst->pos = pos;
-        g_ptr_array_add(l->mlist, monst);
+        monster_new_by_level(l);
     }
 
     return(new_monster_count);
-}
-
-void level_monster_die(level *l, monster *m, message_log *log)
-{
-    assert(l != NULL && m != NULL);
-
-    /*
-     * if the player can see the monster and we have been supplied with a log
-     * describe the event
-     */
-    if (m->m_visible && log)
-    {
-        log_add_entry(log,
-                      "The %s died!",
-                      monster_get_name(m));
-    }
-
-    /* drop stuff the monster carries */
-    if (m->inventory->len)
-    {
-        if (level_ilist_at(l, m->pos) == NULL)
-            level_ilist_at(l, m->pos) = inv_new();
-
-        monster_drop_items(m, level_ilist_at(l, m->pos));
-    }
-
-    g_ptr_array_remove_fast(l->mlist, m);
-    monster_destroy(m);
-}
-
-void level_monsters_genocide(level *l)
-{
-    int count;
-    monster *monst;
-
-    /* purge genocided monsters */
-    for (count = 1; count <= l->mlist->len; count++)
-    {
-        monst = g_ptr_array_index(l->mlist, count - 1);
-        if (monster_is_genocided(monst->type))
-        {
-            g_ptr_array_remove_index_fast(l->mlist, count - 1);
-            monster_destroy(monst);
-        }
-    }
 }
 
 void level_expire_timer(level *l, guint8 count)
@@ -915,7 +867,7 @@ static int level_fill_with_traps(level *l)
 /* subroutine to make the caverns for a given level. only walls are made. */
 static void level_make_maze(level *l)
 {
-    int x, y;
+    position pos;
     int mx, mxl, mxh;
     int my, myl, myh;
     int nrooms;
@@ -949,27 +901,25 @@ static void level_make_maze(level *l)
                 mx = rand_1n(60)+3;
                 mxl = mx - rand_1n(2);
                 mxh = mx + rand_1n(2);
-                nmonst = monster_new_by_level(l->nlevel);
+                nmonst = monster_new_by_level(l);
             }
 
-            for (y = myl ; y < myh ; y++)
+            for (pos.y = myl ; pos.y < myh ; pos.y++)
             {
-                for (x = mxl ; x < mxh ; x++)
+                for (pos.x = mxl ; pos.x < mxh ; pos.x++)
                 {
-                    l->map[y][x].type = LT_FLOOR;
+                    level_tiletype_at(l, pos) = LT_FLOOR;
 
                     if (nmonst != NULL)
                     {
-                        tmonst = monster_new(nmonst->type);
-                        tmonst->pos.x = x;
-                        tmonst->pos.y = y;
+                        tmonst = monster_new(nmonst->type, l);
+                        monster_move(tmonst, pos);
 
-                        g_ptr_array_add(l->mlist, tmonst);
+                        monster_destroy(nmonst);
+                        nmonst = NULL;
                     }
                 }
             }
-            g_free(nmonst);
-            nmonst = NULL;
         }
     }
 }
@@ -1120,7 +1070,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                 {
                     break;
                 }
-                monst = monster_new(MT_DEMONLORD_I + rand_0n(7));
+                monst = monster_new(MT_DEMONLORD_I + rand_0n(7), l);
                 break;
 
             case '!':	/* potion of cure dianthroritis */
@@ -1128,11 +1078,11 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                     break;
 
                 itm = item_new(IT_POTION, PO_CURE_DIANTHR, 0);
-                monst = monster_new(MT_DAEMON_PRINCE);
+                monst = monster_new(MT_DAEMON_PRINCE, l);
                 break;
 
             case '.':	/* random monster */
-                monst = monster_new_by_level(l->nlevel);
+                monst = monster_new_by_level(l);
                 break;
 
             case '-':
@@ -1142,12 +1092,6 @@ static int level_load_from_file(level *l, char *mazefile, int which)
 
             level_tiletype_at(l,pos) = lt;
             level_stationary_at(l,pos) = ls;
-
-            if (monst != NULL)
-            {
-                monst->pos = pos;
-                g_ptr_array_add(l->mlist, monst);
-            }
 
             if (itm != NULL)
             {
@@ -1210,10 +1154,8 @@ static void level_add_treasure_room(level *l, int difficulty)
                 inv_add(level_ilist_at(l, pos), itm);
 
                 /* create a monster */
-                monst = monster_new_by_level(l->nlevel + difficulty);
-                monst->pos = pos;
-
-                g_ptr_array_add(l->mlist, monst);
+                monst = monster_new_by_level(l);
+                monster_move(monst, pos);
             }
 
             /* now clear out interior */
