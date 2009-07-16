@@ -111,7 +111,7 @@ monster *monster_new(int monster_type, struct level *l)
     /* put monster into level */
     nmonster->level = l;
 
-    if (!monster_move(nmonster, level_find_space(l, LE_MONSTER)))
+    if (!monster_position(nmonster, level_find_space(l, LE_MONSTER)))
     {
         /* no free space could be found for the monstert -> abort */
         g_free(nmonster);
@@ -217,7 +217,7 @@ void monster_destroy(monster *m)
     g_free(m);
 }
 
-int monster_move(monster *m, position target)
+int monster_position(monster *m, position target)
 {
     assert(m != NULL);
 
@@ -416,7 +416,7 @@ monster *monster_trigger_trap(monster *m, struct player *p)
         break;
 
     case TT_TELEPORT:
-        monster_move(m, level_find_space(m->level, LE_MONSTER));
+        monster_position(m, level_find_space(m->level, LE_MONSTER));
 
         break;
 
@@ -722,7 +722,6 @@ int monster_player_special_attack(monster *m, struct player *p)
         }
 
         message = "The %s stung you!";
-
         break;
 
     case MT_WHITE_DRAGON:
@@ -735,7 +734,6 @@ int monster_player_special_attack(monster *m, struct player *p)
             message = "The %s blasts you with his cold breath.";
         else
             message = "The %s's breath doesn't seem so cold.";
-
         break;
 
     case MT_VAMPIRE:
@@ -757,8 +755,7 @@ int monster_player_special_attack(monster *m, struct player *p)
             message = monster_player_rob(m, p, IT_GOLD);
 
         /* teleport away */
-        monster_move(m, level_find_space(p->level, LE_MONSTER));
-
+        monster_position(m, level_find_space(p->level, LE_MONSTER));
         break;
 
     case MT_DISENCHANTRESS:
@@ -780,7 +777,6 @@ int monster_player_special_attack(monster *m, struct player *p)
         message = "The %s hit you with his barbed tail.";
         spc_dam = rand_1n(25)
                   - player_get_ac(p);
-
         break;
 
     case MT_UMBER_HULK:
@@ -804,9 +800,7 @@ int monster_player_special_attack(monster *m, struct player *p)
             message = monster_player_rob(m, p, IT_ALL);
 
         /* teleport away */
-        monster_move(m, level_find_space(p->level, LE_MONSTER));
-
-
+        monster_position(m, level_find_space(p->level, LE_MONSTER));
         break;
 
     case MT_BUGBEAR:

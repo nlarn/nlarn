@@ -91,12 +91,6 @@ static int player_level_leave(player *p);
 
 static int player_trigger_trap(player *p, trap_t trap);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
-static void player_magic_alter_reality(player *p);
-static int player_magic_create_monster(player *p);
-static void player_magic_create_sphere(player *p);
-static void player_magic_genocide_monster(player *p);
-static void player_magic_make_wall(player *p);
-static void player_magic_vaporize_rock(player *p);
 
 static char *player_death_description(game_score_t *score, int verbose);
 
@@ -621,11 +615,16 @@ int player_attack(player *p, monster *m)
 
 int player_position(player *p, position target)
 {
+    monster *m;
     assert(p != NULL);
 
     if (pos_valid(target) && level_pos_passable(p->level, target))
     {
         p->pos = target;
+        if ((m = level_get_monster_at(p->level, target)))
+        {
+            monster_position(m, level_find_space(p->level, LE_MONSTER));
+        }
         return TRUE;
     }
     else
@@ -755,30 +754,6 @@ int player_level_enter(player *p, level *l)
     player_update_fov(p, (player_effect(p, ET_BLINDNESS) ? 0 : 6 + player_effect(p, ET_AWARENESS)));
 
     return TRUE;
-}
-
-int player_teleport(player *p)
-{
-    int nlevel;
-    assert(p != NULL);
-
-    if (p->level->nlevel == 0)
-        nlevel = 0;
-    else if (p->level->nlevel < LEVEL_DMAX)
-        nlevel = rand_0n(LEVEL_DMAX);
-    else
-        nlevel = rand_m_n(LEVEL_DMAX, LEVEL_MAX);
-
-    if (nlevel != p->level->nlevel)
-    {
-        player_level_enter(p, p->game->levels[nlevel]);
-
-        p->pos = level_find_space(p->level, LE_MONSTER);
-
-        return TRUE;
-    }
-
-    return FALSE;
 }
 
 void player_monster_kill(player *p, monster *m)
@@ -1434,7 +1409,7 @@ int player_spell_cast(player *p)
 
             /* create monster */
         case SP_CRE:
-            player_magic_create_monster(p);
+            spell_create_monster(p);
             break;
 
             /* time stop */
@@ -1444,22 +1419,22 @@ int player_spell_cast(player *p)
 
             /* vaporize rock */
         case SP_VPR:
-            player_magic_vaporize_rock(p);
+            spell_vaporize_rock(p);
             break;
 
             /* make wall */
         case SP_MKW:
-            player_magic_make_wall(p);
+            spell_make_wall(p);
             break;
 
             /* sphere of annihilation */
         case SP_SPH:
-            player_magic_create_sphere(p);
+            spell_create_sphere(p);
             break;
 
             /* genocide */
         case SP_GEN:
-            player_magic_genocide_monster(p);
+            spell_genocide_monster(p);
             break;
 
             /* summon daemon */
@@ -1469,7 +1444,7 @@ int player_spell_cast(player *p)
 
             /* alter realitiy */
         case SP_ALT:
-            player_magic_alter_reality(p);
+            spell_alter_reality(p);
             break;
 
         case SP_PER:
@@ -2371,7 +2346,7 @@ int player_item_use(player *p, item *it)
                 break;
 
             case ST_CREATE_MONSTER:
-                item_identified = player_magic_create_monster(p);
+                item_identified = spell_create_monster(p);
                 break;
 
             case ST_CREATE_ARTIFACT:
@@ -2383,7 +2358,7 @@ int player_item_use(player *p, item *it)
                 break;
 
             case ST_TELEPORT:
-                item_identified = player_teleport(p);
+                item_identified = scroll_teleport(p, it);
                 break;
 
             case ST_HEAL_MONSTER:
@@ -2416,7 +2391,7 @@ int player_item_use(player *p, item *it)
                 break;
 
             case ST_PULVERIZATION:
-                player_magic_vaporize_rock(p);
+                spell_vaporize_rock(p);
                 break;
 
             default:
@@ -3368,237 +3343,6 @@ static void player_calculate_octant(player *p, int row, float start,
         {
             break;
         }
-    }
-}
-
-static void player_magic_alter_reality(player *p)
-{
-    level *nlevel, *olevel;
-
-    olevel = p->level;
-
-    /* create new level */
-    nlevel = g_malloc0(sizeof (level));
-    nlevel->nlevel = olevel->nlevel;
-
-    level_new(nlevel,
-              game_difficulty(p->game),
-              game_mazefile(p->game));
-
-    /* make new level active */
-    p->game->levels[p->level->nlevel] = nlevel;
-    p->level = nlevel;
-
-    /* reposition player (if needed) */
-    if (!level_pos_passable(nlevel, p->pos))
-    {
-        p->pos = level_find_space(nlevel, LE_MONSTER);
-    }
-
-    /* destroy old level */
-    level_destroy(olevel);
-}
-
-static int player_magic_create_monster(player *p)
-{
-    monster *m;
-
-    position pos;
-
-    /* this spell doesn't work in town */
-    if (p->level->nlevel == 0)
-    {
-        log_add_entry(p->log, "Nothing happens.");
-        return FALSE;
-    }
-
-    /* try to find a space for the monster near the player */
-    pos = level_find_space_in(p->level,
-                              rect_new_sized(p->pos, 2),
-                              LE_MONSTER);
-
-    if (pos_valid(pos))
-    {
-        m = monster_new_by_level(p->level);
-        monster_move(m, pos);
-
-        return TRUE;
-    }
-    else
-    {
-        log_add_entry(p->log, "You feel failure.");
-        return FALSE;
-    }
-}
-
-static void player_magic_create_sphere(player *p)
-{
-    position pos;
-
-    assert(p != NULL);
-
-    pos = display_get_position(p, "Where do you want to place the sphere?",
-                               FALSE, TRUE);
-
-    if (pos_valid(pos))
-    {
-        g_ptr_array_add(p->level->slist, sphere_new(pos, p, p->lvl * 10));
-    }
-    else
-    {
-        log_add_entry(p->log, "Huh?");
-    }
-}
-
-static void player_magic_genocide_monster(player *p)
-{
-    char in;
-    int id;
-
-    assert(p != NULL);
-
-    log_add_entry(p->log, "Whih monster do you want to genocide (type letter)?");
-    display_paint_screen(p);
-
-    in = getch();
-
-    for (id = 1; id < MT_MAX; id++)
-    {
-        if (monster_get_image_by_type(id) == in)
-        {
-            if (!monster_is_genocided(id))
-            {
-                monster_genocide(id);
-                log_add_entry(p->log,
-                              "Wiped out all %ss",
-                              monster_get_name_by_type(id));
-
-                monsters_genocide(p->level);
-            }
-
-            return;
-        }
-    }
-
-    log_add_entry(p->log, "No such monster.");
-}
-
-static void player_magic_make_wall(player *p)
-{
-    position pos;
-
-    pos = display_get_position(p, "Select a position where you want to place a wall.", FALSE, TRUE);
-
-    if (pos_identical(pos, p->pos))
-    {
-        log_add_entry(p->log, "You are actually standing there.");
-        return;
-    }
-    else if (!pos_valid(pos))
-    {
-        log_add_entry(p->log, "No wall today.");
-        return;
-    }
-
-    if (level_tiletype_at(p->level, pos) != LT_WALL)
-    {
-        level_tiletype_at(p->level, pos) = LT_WALL;
-
-        /* destroy all items at that position */
-        if (level_ilist_at(p->level, pos))
-        {
-            inv_destroy(level_ilist_at(p->level, pos));
-            level_ilist_at(p->level, pos) = NULL;
-        }
-
-        log_add_entry(p->log, "You have created a wall.");
-    }
-    else
-    {
-        log_add_entry(p->log, "There was a wall already..");
-    }
-}
-
-static void player_magic_vaporize_rock(player *p)
-{
-    position pos;
-    monster *m = NULL;
-    char *desc = NULL;
-
-    pos = display_get_position(p, "What do you want to vaporize?", FALSE, FALSE);
-
-    if (!pos_valid(pos))
-    {
-        log_add_entry(p->log, "So you chose not to vaprize anything.");
-        return;
-    }
-
-    if (level_tiletype_at(p->level, pos) == LT_WALL)
-    {
-        level_tiletype_at(p->level, pos) = LT_FLOOR;
-        return;
-    }
-
-    if ((m = level_get_monster_at(p->level, pos)) && (m->type == MT_XORN))
-    {
-        /* xorns take damage from vpr */
-        if (monster_hp_lose(m, divert(200, 10)))
-        {
-            player_monster_kill(p, m);
-        }
-    }
-
-    switch (level_stationary_at(p->level, pos))
-    {
-    case LS_ALTAR:
-        m = monster_new(MT_DAEMON_PRINCE, p->level);
-        desc = "altar";
-        break;
-
-    case LS_FOUNTAIN:
-        m = monster_new(MT_WATER_LORD, p->level);
-        desc = "fountain";
-        break;
-
-    case LS_STATUE:
-        if (game_difficulty(p->game) < 3)
-        {
-            if (!level_ilist_at(p->level, pos))
-                level_ilist_at(p->level, pos) = inv_new();
-
-            inv_add(level_ilist_at(p->level, pos),
-                    item_new(IT_BOOK, rand_1n(SP_MAX - 1), 0));
-        }
-
-        desc = "statue";
-        break;
-
-    case LS_THRONE:
-    case LS_THRONE2:
-        m = monster_new(MT_GNOME_KING, p->level);
-        desc = "throne";
-        break;
-
-    case LS_DEADFOUNTAIN:
-    case LS_DEADTHRONE:
-        level_stationary_at(p->level, pos) = LS_NONE;
-        break;
-
-    default:
-        log_add_entry(p->log, "Somehow that did not work.");
-        /* NOP */
-    }
-
-    if (desc)
-    {
-        log_add_entry(p->log, "You destroy the %s.", desc);
-        level_stationary_at(p->level, pos) = LS_NONE;
-    }
-
-    /* created a monster - position it correctly */
-    if (m)
-    {
-        monster_move(m, pos);
     }
 }
 

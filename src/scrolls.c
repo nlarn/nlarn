@@ -387,6 +387,30 @@ int scroll_spell_extension(player *p, item *scroll)
     return FALSE;
 }
 
+int scroll_teleport(player *p, item *scroll)
+{
+    int nlevel;
+    assert(p != NULL);
+
+    if (p->level->nlevel == 0)
+        nlevel = 0;
+    else if (p->level->nlevel < LEVEL_DMAX)
+        nlevel = rand_0n(LEVEL_DMAX);
+    else
+        nlevel = rand_m_n(LEVEL_DMAX, LEVEL_MAX);
+
+    if (nlevel != p->level->nlevel)
+    {
+        player_level_enter(p, p->game->levels[nlevel]);
+
+        p->pos = level_find_space(p->level, LE_MONSTER);
+
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 int scroll_timewarp(player *p, item *scroll)
 {
     /* number of mobuls */

@@ -106,6 +106,13 @@ spell *spell_new(int id);
 void spell_destroy(spell *s);
 int spell_sort(gconstpointer a, gconstpointer b);
 
+void spell_alter_reality(struct player *p);
+int spell_create_monster(struct player *p);
+void spell_create_sphere(struct player *p);
+void spell_genocide_monster(struct player *p);
+void spell_make_wall(struct player *p);
+void spell_vaporize_rock(struct player *p);
+
 #define spell_code(spell)     (spells[(spell)->id].code)
 #define spell_name(spell)     (spells[(spell)->id].name)
 #define spell_type(spell)     (spells[(spell)->id].type)

@@ -971,7 +971,7 @@ static void level_make_maze(level *l)
                     if (nmonst != NULL)
                     {
                         tmonst = monster_new(nmonst->type, l);
-                        monster_move(tmonst, pos);
+                        monster_position(tmonst, pos);
 
                         monster_destroy(nmonst);
                         nmonst = NULL;
@@ -1213,7 +1213,7 @@ static void level_add_treasure_room(level *l, int difficulty)
 
                 /* create a monster */
                 monst = monster_new_by_level(l);
-                monster_move(monst, pos);
+                monster_position(monst, pos);
             }
 
             /* now clear out interior */

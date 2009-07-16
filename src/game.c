@@ -534,7 +534,7 @@ static void game_move_monsters(game *g)
                      && ls_is_passable(level_stationary_at(l, m_npos))
                     )
             {
-                monster_move(m, m_npos);
+                monster_position(m, m_npos);
 
                 /* check for traps */
                 if (level_trap_at(l, m->pos))

@@ -170,7 +170,7 @@ monster *monster_new(int monster_type, struct level *l);
 monster *monster_new_by_level(struct level *l);
 void monster_destroy(monster *m);
 
-int monster_move(monster *m, position target);
+int monster_position(monster *m, position target);
 gboolean monster_hp_lose(monster *m, int amount);
 void monster_drop_items(monster *m, inventory *floor);
 void monster_pickup_items(monster *m, message_log *log);

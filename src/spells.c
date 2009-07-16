@@ -568,6 +568,237 @@ int spell_sort(gconstpointer a, gconstpointer b)
     return order;
 }
 
+void spell_alter_reality(player *p)
+{
+    level *nlevel, *olevel;
+
+    olevel = p->level;
+
+    /* create new level */
+    nlevel = g_malloc0(sizeof (level));
+    nlevel->nlevel = olevel->nlevel;
+
+    level_new(nlevel,
+              game_difficulty(p->game),
+              game_mazefile(p->game));
+
+    /* make new level active */
+    p->game->levels[p->level->nlevel] = nlevel;
+    p->level = nlevel;
+
+    /* reposition player (if needed) */
+    if (!level_pos_passable(nlevel, p->pos))
+    {
+        p->pos = level_find_space(nlevel, LE_MONSTER);
+    }
+
+    /* destroy old level */
+    level_destroy(olevel);
+}
+
+int spell_create_monster(player *p)
+{
+    monster *m;
+
+    position pos;
+
+    /* this spell doesn't work in town */
+    if (p->level->nlevel == 0)
+    {
+        log_add_entry(p->log, "Nothing happens.");
+        return FALSE;
+    }
+
+    /* try to find a space for the monster near the player */
+    pos = level_find_space_in(p->level,
+                              rect_new_sized(p->pos, 2),
+                              LE_MONSTER);
+
+    if (pos_valid(pos))
+    {
+        m = monster_new_by_level(p->level);
+        monster_position(m, pos);
+
+        return TRUE;
+    }
+    else
+    {
+        log_add_entry(p->log, "You feel failure.");
+        return FALSE;
+    }
+}
+
+void spell_create_sphere(player *p)
+{
+    position pos;
+
+    assert(p != NULL);
+
+    pos = display_get_position(p, "Where do you want to place the sphere?",
+                               FALSE, TRUE);
+
+    if (pos_valid(pos))
+    {
+        g_ptr_array_add(p->level->slist, sphere_new(pos, p, p->lvl * 10));
+    }
+    else
+    {
+        log_add_entry(p->log, "Huh?");
+    }
+}
+
+void spell_genocide_monster(player *p)
+{
+    char in;
+    int id;
+
+    assert(p != NULL);
+
+    log_add_entry(p->log, "Whih monster do you want to genocide (type letter)?");
+    display_paint_screen(p);
+
+    in = getch();
+
+    for (id = 1; id < MT_MAX; id++)
+    {
+        if (monster_get_image_by_type(id) == in)
+        {
+            if (!monster_is_genocided(id))
+            {
+                monster_genocide(id);
+                log_add_entry(p->log,
+                              "Wiped out all %ss",
+                              monster_get_name_by_type(id));
+
+                monsters_genocide(p->level);
+            }
+
+            return;
+        }
+    }
+
+    log_add_entry(p->log, "No such monster.");
+}
+
+void spell_make_wall(player *p)
+{
+    position pos;
+
+    pos = display_get_position(p, "Select a position where you want to place a wall.", FALSE, TRUE);
+
+    if (pos_identical(pos, p->pos))
+    {
+        log_add_entry(p->log, "You are actually standing there.");
+        return;
+    }
+    else if (!pos_valid(pos))
+    {
+        log_add_entry(p->log, "No wall today.");
+        return;
+    }
+
+    if (level_tiletype_at(p->level, pos) != LT_WALL)
+    {
+        level_tiletype_at(p->level, pos) = LT_WALL;
+
+        /* destroy all items at that position */
+        if (level_ilist_at(p->level, pos))
+        {
+            inv_destroy(level_ilist_at(p->level, pos));
+            level_ilist_at(p->level, pos) = NULL;
+        }
+
+        log_add_entry(p->log, "You have created a wall.");
+    }
+    else
+    {
+        log_add_entry(p->log, "There was a wall already..");
+    }
+}
+
+void spell_vaporize_rock(player *p)
+{
+    position pos;
+    monster *m = NULL;
+    char *desc = NULL;
+
+    pos = display_get_position(p, "What do you want to vaporize?", FALSE, FALSE);
+
+    if (!pos_valid(pos))
+    {
+        log_add_entry(p->log, "So you chose not to vaprize anything.");
+        return;
+    }
+
+    if (level_tiletype_at(p->level, pos) == LT_WALL)
+    {
+        level_tiletype_at(p->level, pos) = LT_FLOOR;
+        return;
+    }
+
+    if ((m = level_get_monster_at(p->level, pos)) && (m->type == MT_XORN))
+    {
+        /* xorns take damage from vpr */
+        if (monster_hp_lose(m, divert(200, 10)))
+        {
+            player_monster_kill(p, m);
+        }
+    }
+
+    switch (level_stationary_at(p->level, pos))
+    {
+    case LS_ALTAR:
+        m = monster_new(MT_DAEMON_PRINCE, p->level);
+        desc = "altar";
+        break;
+
+    case LS_FOUNTAIN:
+        m = monster_new(MT_WATER_LORD, p->level);
+        desc = "fountain";
+        break;
+
+    case LS_STATUE:
+        if (game_difficulty(p->game) < 3)
+        {
+            if (!level_ilist_at(p->level, pos))
+                level_ilist_at(p->level, pos) = inv_new();
+
+            inv_add(level_ilist_at(p->level, pos),
+                    item_new(IT_BOOK, rand_1n(SP_MAX - 1), 0));
+        }
+
+        desc = "statue";
+        break;
+
+    case LS_THRONE:
+    case LS_THRONE2:
+        m = monster_new(MT_GNOME_KING, p->level);
+        desc = "throne";
+        break;
+
+    case LS_DEADFOUNTAIN:
+    case LS_DEADTHRONE:
+        level_stationary_at(p->level, pos) = LS_NONE;
+        break;
+
+    default:
+        log_add_entry(p->log, "Somehow that did not work.");
+        /* NOP */
+    }
+
+    if (desc)
+    {
+        log_add_entry(p->log, "You destroy the %s.", desc);
+        level_stationary_at(p->level, pos) = LS_NONE;
+    }
+
+    /* created a monster - position it correctly */
+    if (m)
+    {
+        monster_position(m, pos);
+    }
+}
+
 void book_desc_shuffle()
 {
     shuffle(book_desc_mapping, SP_MAX - 1, 0);

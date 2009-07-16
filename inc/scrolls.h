@@ -79,6 +79,7 @@ int scroll_identify(struct player *p, item *scroll);
 int scroll_mapping(struct player *p, item *scroll);
 int scroll_remove_curse(struct player *p, item *scroll);
 int scroll_spell_extension(struct player *p, item *scroll);
+int scroll_teleport(struct player *p, item *scroll);
 int scroll_timewarp(struct player *p, item *scroll);
 /* external vars */
 
