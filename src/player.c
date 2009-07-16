@@ -335,53 +335,57 @@ void player_die(player *p, player_cod cause_type, int cause)
         return;
     }
 
-    /* redraw screen to make sure player can see the cause of his death */
-    display_paint_screen(p);
-
-    score = game_score(p->game, cause_type, cause);
-    scores = game_score_add(p->game, score);
-
-    text = g_string_new(player_death_description(score, TRUE));
-
-    /* assemble surrounding scores list */
-    g_string_append(text, "\n\n");
-
-    /* get position of current score in list */
-    iterator = g_list_find(scores, score);
-
-    /* jump up three entries */
-    count = 1;
-    while (count < 4)
+    /* do not show scores when in wizardmode */
+    if (!game_wizardmode(p->game))
     {
-        if (iterator->prev == NULL)
+        /* redraw screen to make sure player can see the cause of his death */
+        display_paint_screen(p);
+
+        score = game_score(p->game, cause_type, cause);
+        scores = game_score_add(p->game, score);
+
+        text = g_string_new(player_death_description(score, TRUE));
+
+        /* assemble surrounding scores list */
+        g_string_append(text, "\n\n");
+
+        /* get position of current score in list */
+        iterator = g_list_find(scores, score);
+
+        /* jump up three entries */
+        count = 1;
+        while (count < 4)
         {
-            break;
+            if (iterator->prev == NULL)
+            {
+                break;
+            }
+
+            iterator = iterator->prev;
+            count++;
         }
 
-        iterator = iterator->prev;
-        count++;
+        /* determine position of first element of iterator */
+        num = g_list_position(scores, iterator);
+
+        /* display up to 7 entries */
+        for (count = 1; iterator && (count < 8);
+                iterator = iterator->next, count++)
+        {
+            cscore = (game_score_t *)iterator->data;
+            g_string_append_printf(text, "%s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d hp]\n",
+                                   (cscore == score) ? "*" : " ", num + count,
+                                   cscore->score,
+                                   player_death_description(cscore, FALSE),
+                                   score->dlevel, cscore->hp);
+        }
+
+
+        display_show_message(title, text->str);
+        g_string_free(text, TRUE);
+
+        game_scores_destroy(scores);
     }
-
-    /* determine position of first element of iterator */
-    num = g_list_position(scores, iterator);
-
-    /* display up to 7 entries */
-    for (count = 1; iterator && (count < 8);
-            iterator = iterator->next, count++)
-    {
-        cscore = (game_score_t *)iterator->data;
-        g_string_append_printf(text, "%s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d hp]\n",
-                               (cscore == score) ? "*" : " ", num + count,
-                               cscore->score,
-                               player_death_description(cscore, FALSE),
-                               score->dlevel, cscore->hp);
-    }
-
-
-    display_show_message(title, text->str);
-    g_string_free(text, TRUE);
-
-    game_scores_destroy(scores);
 
     display_shutdown();
     game_destroy(p->game);
