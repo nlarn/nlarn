@@ -168,6 +168,7 @@ typedef enum player_cod
     PD_TRAP,
     PD_LEVEL, /* damaged by level effects */
     PD_SPELL, /* damaged by own spell */
+    PD_CURSE, /* damaged by a cursed item */
     /* *** causes above this line can be stopped by live protection *** */
     PD_TOO_LATE, /* returned with potion too late */
     PD_WON, /* won the game */

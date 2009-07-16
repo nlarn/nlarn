@@ -49,14 +49,14 @@ typedef struct message_log {
 
 /* function definitions */
 
-inline int divert(int value, int percent);
+int divert(int value, int percent);
 
 void shuffle(int array[], int length, int skip);
 char *str_replace(char *string, char *orig, char *replace);
 
 /* message log handling */
 message_log *log_new();
-int log_add_entry(message_log *log, char *fmt,... );
+int log_add_entry(message_log *log, char *fmt, ...);
 void log_set_time(message_log *log, int gtime);
 void log_delete(message_log *log);
 message_log_entry *log_get_entry(message_log *log, int id);

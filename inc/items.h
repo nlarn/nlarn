@@ -133,6 +133,8 @@ effect *item_effect(item *it);
 
 int item_bless(item *it);
 int item_curse(item *it);
+int item_remove_blessing(item *it);
+int item_remove_curse(item *it);
 
 int item_enchant(item *it);
 int item_disenchant(item *it);

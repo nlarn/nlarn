@@ -91,23 +91,11 @@ static int player_level_leave(player *p);
 
 static int player_trigger_trap(player *p, trap_t trap);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
-
 static void player_magic_alter_reality(player *p);
-static int player_magic_annihilate(player *p);
-static void player_magic_create_artefact(player *p);
 static int player_magic_create_monster(player *p);
 static void player_magic_create_sphere(player *p);
-static void player_magic_detect_item(player *p, int treasure);
-static int player_magic_enchant_armour(player *p);
-static int player_magic_enchant_weapon(player *p);
-static int player_magic_gem_perfection(player *p);
 static void player_magic_genocide_monster(player *p);
-static int player_magic_heal_monster(player *p);
-static void player_magic_identify(player *p);
 static void player_magic_make_wall(player *p);
-static void player_magic_mapping(player *p);
-static int player_magic_spell_extension(player *p);
-static void player_magic_timewarp(player *p);
 static void player_magic_vaporize_rock(player *p);
 
 static char *player_death_description(game_score_t *score, int verbose);
@@ -141,6 +129,7 @@ player *player_new(struct game *game)
     player_item_equip(p, it);
 
     it = item_new(IT_WEAPON, WT_DAGGER, 0);
+    it->bonus_known = TRUE;
     inv_add(p->inventory, it);
     player_item_equip(p, it);
 
@@ -756,7 +745,7 @@ int player_level_enter(player *p, level *l)
 
     /* give player knowledge of level 0 (town) */
     if (l->nlevel == 0)
-        player_magic_mapping(p);
+        scroll_mapping(p, NULL);
 
     /* recalculate FOV to make ensure correct display after entering a level */
     player_update_fov(p, (player_effect(p, ET_BLINDNESS) ? 0 : 6 + player_effect(p, ET_AWARENESS)));
@@ -2208,66 +2197,70 @@ void player_item_identify(player *p, item *it)
 int player_item_use(player *p, item *it)
 {
     char description[61];
-    int item_used_up = FALSE;
+    int item_used_up = TRUE;
     int item_identified = TRUE;
+    int damage = 0; /* damage take by cursed items */
     int time = 0; /* number of turns this action took */
-    effect *eff;
-
-    const char cantread[] = "As you are blind you can't read %s.";
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    if (player_effect(p, ET_BLINDNESS) && (it->type == IT_BOOK || it->type == IT_SCROLL))
+    {
+        log_add_entry(p->log, "As you are blind you can't read %s.",
+                      item_describe(it, player_item_identified(p, it),
+                                    TRUE, TRUE, description, 60));
+        return time;
+    }
 
     switch (it->type)
     {
 
         /* read book */
     case IT_BOOK:
-        if (player_effect(p, ET_BLINDNESS))
+        item_describe(it, player_item_identified(p, it),
+                      TRUE, TRUE, description, 60);
+
+        log_add_entry(p->log, "You read %s.", description);
+
+        /* cursed spellbooks have nasty effects */
+        if (it->cursed)
         {
-            log_add_entry(p->log, (char *)cantread,
-                          item_describe(it,
-                                        player_item_identified(p, it),
-                                        TRUE, TRUE,
-                                        description, 60));
-            return time;
+            log_add_entry(p->log, "There was something wrong with this book!");
+            player_mp_lose(p, rand_0n(p->mp));
         }
-        log_add_entry(p->log,
-                      "You read %s.",
-                      item_describe(it,
-                                    player_item_identified(p, it),
-                                    TRUE, TRUE,
-                                    description, 60));
-
-        switch (player_spell_learn(p, it->id))
+        else
         {
-        case 0:
-            log_add_entry(p->log, "You cannot understand the content of this book.");
-            item_identified = FALSE;
-            break;
+            item_used_up = FALSE;
+            switch (player_spell_learn(p, it->id))
+            {
+            case 0:
+                log_add_entry(p->log, "You cannot understand the content of this book.");
+                item_identified = FALSE;
+                break;
 
-        case 1:
-            /* learnt spell */
-            log_add_entry(p->log,
-                          "You master the spell \"%s\".",
-                          book_name(it));
+            case 1:
+                /* learnt spell */
+                log_add_entry(p->log,
+                              "You master the spell \"%s\".",
+                              book_name(it));
 
-            break;
+                break;
 
-        default:
-            /* improved knowledge of spell */
-            log_add_entry(p->log,
-                          "You improved your knowledge of the spell %s.",
-                          book_name(it));
-            break;
+            default:
+                /* improved knowledge of spell */
+                log_add_entry(p->log,
+                              "You improved your knowledge of the spell %s.",
+                              book_name(it));
+                break;
+            }
+
+            /* five percent chance to increase intelligence */
+            if (chance(5))
+            {
+                log_add_entry(p->log, "Reading makes you ingenious.");
+                p->intelligence++;
+            }
         }
-
-        /* five percent chance to increase intelligence */
-        if (chance(5))
-        {
-            log_add_entry(p->log, "Reading makes you ingenious.");
-            p->intelligence++;
-        }
-
         time = 2 + spell_level_by_id(it->id);
 
         break;
@@ -2279,19 +2272,18 @@ int player_item_use(player *p, item *it)
 
         /* eat food */
     case IT_FOOD:
-        log_add_entry(p->log,
-                      "You eat %s.",
-                      item_describe(it,
-                                    player_item_identified(p, it),
-                                    TRUE, FALSE,
-                                    description, 60));
+        item_describe(it, player_item_identified(p, it),
+                      TRUE, FALSE, description, 60);
+
+        log_add_entry(p->log, "You eat %s.", description);
 
         if (it->id == FT_FORTUNE_COOKIE)
+        {
             log_add_entry(p->log,
                           "It has a piece of paper inside. It reads: \"%s\"",
                           food_get_fortune(game_fortunes(p->game)));
+        }
 
-        item_used_up = TRUE;
         time = 2;
 
         break;
@@ -2299,177 +2291,153 @@ int player_item_use(player *p, item *it)
 
         /* drink potion */
     case IT_POTION:
-        log_add_entry(p->log,
-                      "You drink %s.",
-                      item_describe(it,
-                                    player_item_identified(p, it),
-                                    TRUE, FALSE,
-                                    description, 60));
+        item_describe(it, player_item_identified(p, it),
+                      TRUE, FALSE, description, 60);
 
-        item_used_up = TRUE;
+        log_add_entry(p->log, "You drink %s.", description);
 
-        switch (it->id)
+        if (it->cursed)
         {
-        case PO_OBJ_DETECT:
-            log_add_entry(p->log, "You sense the presence of objects.");
-            player_magic_detect_item(p, FALSE);
-            break;
-
-        case PO_TRE_DETECT:
-            log_add_entry(p->log, "You sense the presence of treasure.");
-            player_magic_detect_item(p, TRUE);
-            break;
-
-        case PO_WATER:
-            log_add_entry(p->log, "This tastes like water..");
-            break;
-
-        case PO_CURE_DIANTHR:
-            log_add_entry(p->log, "You really want to keep the potion for your daughter.");
-            item_used_up = FALSE;
-            break;
-
-        default:
-            if (potion_effect(it) > ET_NONE)
+            log_add_entry(p->log, "The Potion is foul!");
+            if ((damage = rand_0n(p->hp)))
             {
-                eff = effect_new(potion_effect(it), game_turn(p->game));
-
-                /* silly potion of giant strength */
-                if (it->id == PO_GIANT_STR)
-                {
-                    eff->turns = divert(250, 20);
-                    eff->amount = 10;
-                }
-
-                /* this has to precede p_e_add as eff might be destroyed */
-                if (!effect_get_msg_start(eff))
-                {
-                    item_identified = FALSE;
-                }
-
-                player_effect_add(p, eff);
+                log_add_entry(p->log, "You vomit blood!");
+                player_hp_lose(p, it->type, PD_CURSE, damage);
             }
-            break;
         }
+        else
+        {
 
+            switch (it->id)
+            {
+            case PO_OBJ_DETECT:
+            case PO_TRE_DETECT:
+                item_identified = potion_detect_item(p, it);
+                break;
+
+            case PO_WATER:
+                log_add_entry(p->log, "This tastes like water..");
+                break;
+
+            case PO_CURE_DIANTHR:
+                log_add_entry(p->log, "You really want to keep the potion for your daughter.");
+                item_used_up = FALSE;
+                break;
+
+            default:
+                item_identified = potion_with_effect(p, it);
+                break;
+            }
+        }
         time = 2;
         break;
 
 
         /* read scroll */
     case IT_SCROLL:
-        if (player_effect(p, ET_BLINDNESS))
+        item_describe(it, player_item_identified(p, it),
+                      TRUE, FALSE, description, 60);
+
+        log_add_entry(p->log, "You read %s.", description);
+
+        if (it->cursed)
         {
-            log_add_entry(p->log, (char *)cantread,
-                          item_describe(it,
-                                        player_item_identified(p, it),
-                                        TRUE, TRUE,
-                                        description, 60));
-            return time;
+            log_add_entry(p->log, "The Scroll explodes!");
+            if ((damage = rand_0n(p->hp)))
+            {
+                log_add_entry(p->log, "You are hurt by the explosion!");
+                player_hp_lose(p, damage, PD_CURSE, it->type);
+            }
         }
-
-        item_used_up = TRUE;
-
-        log_add_entry(p->log,
-                      "You read %s.",
-                      item_describe(it,
-                                    player_item_identified(p, it),
-                                    TRUE, FALSE,
-                                    description, 60));
-
-        switch (it->id)
+        else
         {
-        case ST_ENCH_ARMOUR:
-            item_identified = player_magic_enchant_armour(p);
-            break;
-
-        case ST_ENCH_WEAPON:
-            item_identified = player_magic_enchant_weapon(p);
-            break;
-
-        case ST_BLANK:
-            item_used_up = FALSE;
-            log_add_entry(p->log, "This scroll is blank.");
-            break;
-
-        case ST_CREATE_MONSTER:
-            item_identified = player_magic_create_monster(p);
-            break;
-
-        case ST_CREATE_ARTIFACT:
-            player_magic_create_artefact(p);
-            break;
-
-        case ST_TIMEWARP:
-            player_magic_timewarp(p);
-            break;
-
-        case ST_TELEPORT:
-            if (!player_teleport(p))
+            switch (it->id)
             {
-                log_add_entry(p->log, "Nothing happened.");
-                item_identified = FALSE;
+            case ST_ENCH_ARMOUR:
+                item_identified = scroll_enchant_armour(p, it);
+                break;
+
+            case ST_ENCH_WEAPON:
+                item_identified = scroll_enchant_weapon(p, it);
+                break;
+
+            case ST_BLANK:
+                item_used_up = FALSE;
+                log_add_entry(p->log, "This scroll is blank.");
+                break;
+
+            case ST_CREATE_MONSTER:
+                item_identified = player_magic_create_monster(p);
+                break;
+
+            case ST_CREATE_ARTIFACT:
+                item_identified = scroll_create_artefact(p, it);
+                break;
+
+            case ST_TIMEWARP:
+                item_identified = scroll_timewarp(p, it);
+                break;
+
+            case ST_TELEPORT:
+                item_identified = player_teleport(p);
+                break;
+
+            case ST_HEAL_MONSTER:
+                item_identified = scroll_heal_monster(p, it);
+                break;
+
+            case ST_MAPPING:
+                log_add_entry(p->log, "There is a map on the scroll!");
+                item_identified = scroll_mapping(p, it);
+                break;
+
+            case ST_GEM_PERFECTION:
+                item_identified = scroll_gem_perfection(p, it);
+                break;
+
+            case ST_SPELL_EXTENSION:
+                item_identified = scroll_spell_extension(p, it);
+                break;
+
+            case ST_IDENTIFY:
+                item_identified = scroll_identify(p, it);
+                break;
+
+            case ST_REMOVE_CURSE:
+                item_identified = scroll_remove_curse(p, it);
+                break;
+
+            case ST_ANNIHILATION:
+                item_identified = scroll_annihilate(p, it);
+                break;
+
+            case ST_PULVERIZATION:
+                player_magic_vaporize_rock(p);
+                break;
+
+            default:
+                item_identified = scroll_with_effect(p, it);
+                break;
             }
-            break;
 
-        case ST_HEAL_MONSTER:
-            item_identified = player_magic_heal_monster(p);
-            break;
-
-        case ST_MAPPING:
-            log_add_entry(p->log, "There is a map on the scroll!");
-            player_magic_mapping(p);
-            break;
-
-        case ST_GEM_PERFECTION:
-            item_identified = player_magic_gem_perfection(p);
-            break;
-
-        case ST_SPELL_EXTENSION:
-            item_identified = player_magic_spell_extension(p);
-            break;
-
-            /* identify entire inventory */
-        case ST_IDENTIFY:
-            player_magic_identify(p);
-            break;
-
-        case ST_REMOVE_CURSE:
-            /* TODO: implement (ticket 2) */
-            log_add_entry(p->log, "You have the feeling that someone tried to help you.");
-            break;
-
-        case ST_ANNIHILATION:
-            item_identified = player_magic_annihilate(p);
-            break;
-
-        case ST_PULVERIZATION:
-            player_magic_vaporize_rock(p);
-            break;
-
-        default:
-            eff = effect_new(scroll_effect(it),
-                             game_turn(p->game));
-
-            player_effect_add(p, eff);
-
-            if (!effect_get_msg_start(eff))
+            if (!item_identified)
             {
-                item_identified = FALSE;
+                log_add_entry(p->log, "Nothing happens.");
             }
-            break;
         }
 
         time = 2;
         break;
 
     default:
+        item_describe(it, player_item_identified(p, it),
+                      TRUE, FALSE, description, 40);
+
         log_add_entry(p->log,
                       "I have absolutely no idea how to use %s.",
-                      item_describe(it,
-                                    player_item_identified(p, it),
-                                    TRUE, FALSE,
-                                    description, 40));
+                      description);
+
+        item_used_up = FALSE;
     }
 
     if (item_identified)
@@ -3427,59 +3395,6 @@ static void player_magic_alter_reality(player *p)
     level_destroy(olevel);
 }
 
-static int player_magic_annihilate(player *p)
-{
-    int i;
-    int experience = 0;
-
-    GPtrArray *mlist;
-    monster *m;
-
-    mlist = level_get_monsters_in(p->level, rect_new_sized(p->pos, 1));
-
-    for (i = 1; i <= mlist->len; i++)
-    {
-        m = g_ptr_array_index(mlist, i - 1);
-
-        if (m->type < MT_DEMONLORD_II)
-        {
-            player_monster_kill(p, m);
-        }
-        else
-        {
-            log_add_entry(p->log,
-                          "The %s barely escapes being annihilated.",
-                          monster_get_name(m));
-
-            /* lose half hit points*/
-            m->hp >>=2 +1;
-        }
-    }
-
-    if (experience)
-    {
-        player_exp_gain(p, experience);
-        log_add_entry(p->log, "You hear loud screams of agony!");
-    }
-
-    g_ptr_array_free(mlist, FALSE);
-
-    return experience;
-}
-
-static void player_magic_create_artefact(player *p)
-{
-    /* FIXME: this is not what it should be */
-    if (!level_ilist_at(p->level, p->pos))
-    {
-        level_ilist_at(p->level, p->pos) = inv_new();
-    }
-
-    inv_add(level_ilist_at(p->level, p->pos),
-            item_create_by_level(rand_1n(IT_MAX),
-                                 p->level->nlevel));
-}
-
 static int player_magic_create_monster(player *p)
 {
     monster *m;
@@ -3518,111 +3433,17 @@ static void player_magic_create_sphere(player *p)
 
     assert(p != NULL);
 
-    pos = display_get_position(p, "Where do you want to place the sphere?", FALSE, TRUE);
+    pos = display_get_position(p, "Where do you want to place the sphere?",
+                               FALSE, TRUE);
 
     if (pos_valid(pos))
     {
-        g_ptr_array_add(p->level->slist,
-                        sphere_new(pos, p, p->lvl * 10));
+        g_ptr_array_add(p->level->slist, sphere_new(pos, p, p->lvl * 10));
     }
     else
     {
         log_add_entry(p->log, "Huh?");
     }
-}
-
-static void player_magic_detect_item(player *p, int treasure)
-{
-    position pos;
-    int i;
-    inventory *inv;
-    item *it;
-
-    assert(p != NULL);
-
-    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
-        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
-            if ((inv = level_ilist_at(p->level, pos)))
-                for (i = 0; i <  inv_length(inv); i++)
-                {
-                    it = inv_get(inv, i);
-
-                    if (treasure)
-                    {
-                        if ((it->type == IT_GOLD) || (it->type == IT_GEM))
-                            player_memory_of(p, pos).item = it->type;
-                    }
-
-                    else
-                    {
-                        if ((it->type != IT_GOLD) && (it->type != IT_GEM))
-                            player_memory_of(p, pos).item = it->type;
-                    }
-                }
-}
-
-static int player_magic_enchant_armour(player *p)
-{
-    assert(p != NULL);
-
-    if (p->eq_suit)
-    {
-        log_add_entry(p->log,
-                      "Your %s glows for a moment.",
-                      armour_name(p->eq_suit));
-
-        item_enchant(p->eq_suit);
-
-        return TRUE;
-    }
-    else
-    {
-        log_add_entry(p->log, "Nothing happens.");
-        return FALSE;
-    }
-}
-
-static int player_magic_enchant_weapon(player *p)
-{
-    assert(p != NULL);
-
-    if (p->eq_weapon)
-    {
-        log_add_entry(p->log,
-                      "Your %s glisters for a moment.",
-                      weapon_name(p->eq_weapon));
-
-        item_enchant(p->eq_weapon);
-
-        return TRUE;
-    }
-    else
-    {
-        log_add_entry(p->log, "Nothing happens.");
-        return FALSE;
-    }
-}
-
-static int player_magic_gem_perfection(player *p)
-{
-    int count = 0;
-    int i;
-
-    item *it;
-
-    /* FIXME: too simple. should give the ability to choose a single gem instead */
-    for (i = 1; i <= inv_length(p->inventory); i++)
-    {
-        it = inv_get(p->inventory, i - 1);
-        if (it->type == IT_GEM)
-        {
-            /* double gem value */
-            it->bonus <<= 1;
-            count++;
-        }
-    }
-
-    return count;
 }
 
 static void player_magic_genocide_monster(player *p)
@@ -3658,56 +3479,6 @@ static void player_magic_genocide_monster(player *p)
     log_add_entry(p->log, "No such monster.");
 }
 
-static int player_magic_heal_monster(player *p)
-{
-    int i;
-    int count = 0;
-    monster *m;
-
-    for (i = 1; i <= p->level->mlist->len; i++)
-    {
-        m = g_ptr_array_index(p->level->mlist, i - 1);
-
-        if (m->hp < monster_get_hp_max(m))
-        {
-            m->hp = monster_get_hp_max(m);
-            count++;
-        }
-    }
-
-    if (count)
-        log_add_entry(p->log, "You feel uneasy.");
-
-    return count;
-}
-
-static void player_magic_identify(player *p)
-{
-    /*
-     * FIXME: too simple and too powerful.
-     * should give the ability to choose a single item instead
-     */
-
-    int i;
-    item *it;
-
-    for (i = 1; i <= p->inventory->len; i++)
-    {
-        it = inv_get(p->inventory, i - 1);
-        player_item_identify(p, it);
-
-        /* reveal blessing / curse */
-        if (it->blessed)
-            it->blessed_known = TRUE;
-
-        if (it->cursed)
-            it->curse_known = TRUE;
-
-        /* reveal bonus */
-        it->bonus_known  = TRUE;
-    }
-}
-
 static void player_magic_make_wall(player *p)
 {
     position pos;
@@ -3717,6 +3488,11 @@ static void player_magic_make_wall(player *p)
     if (pos_identical(pos, p->pos))
     {
         log_add_entry(p->log, "You are actually standing there.");
+        return;
+    }
+    else if (!pos_valid(pos))
+    {
+        log_add_entry(p->log, "No wall today.");
         return;
     }
 
@@ -3739,77 +3515,6 @@ static void player_magic_make_wall(player *p)
     }
 }
 
-static void player_magic_mapping(player *p)
-{
-    position pos;
-
-    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
-    {
-        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
-        {
-            player_memory_of(p, pos).type = level_tiletype_at(p->level, pos);
-            player_memory_of(p, pos).stationary = level_stationary_at(p->level, pos);
-        }
-    }
-}
-
-static int player_magic_spell_extension(player *p)
-{
-    int i;
-    spell *sp;
-
-    for (i = 1; i <= p->known_spells->len; i++)
-    {
-        sp = g_ptr_array_index(p->known_spells, i - 1);
-
-        /* double spell knowledge */
-        sp->knowledge <<=1;
-    }
-
-    /* give a message if any spell has been extended */
-    if (i > 0)
-    {
-        log_add_entry(p->log, "You feel your magic skills improve.");
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
-    }
-}
-
-static void player_magic_timewarp(player *p)
-{
-    /* number of mobuls */
-    gint32 mobuls = 0;
-    gint32 turns;
-
-    turns = (rand_1n(1000) - 850);
-
-    if (turns == 0)
-        turns = 1;
-
-    if ((gint32)(game_turn(p->game) + turns) < 0)
-    {
-        log_add_entry(p->log, "%d turns. Being corrected!", turns);
-        turns = 1 - game_turn(p->game);
-    }
-
-    mobuls = gtime2mobuls(turns);
-    game_turn(p->game) += turns;
-
-    log_add_entry(p->log,
-                  "You go %sward in time by %d mobul%s.",
-                  (mobuls < 0) ? "back" : "for",
-                  abs(mobuls),
-                  (abs(mobuls) == 1) ? "" : "s");
-
-    /* adjust effects for time warping */
-    /* FIXME: have a close look at this when improving game time management */
-    player_effects_expire(p, turns);
-}
-
-
 static void player_magic_vaporize_rock(player *p)
 {
     position pos;
@@ -3817,6 +3522,12 @@ static void player_magic_vaporize_rock(player *p)
     char *desc = NULL;
 
     pos = display_get_position(p, "What do you want to vaporize?", FALSE, FALSE);
+
+    if (!pos_valid(pos))
+    {
+        log_add_entry(p->log, "So you chose not to vaprize anything.");
+        return;
+    }
 
     if (level_tiletype_at(p->level, pos) == LT_WALL)
     {
@@ -3978,6 +3689,11 @@ static char *player_death_description(game_score_t *score, int verbose)
         g_string_append_printf(text, " %s with the spell \"%s\".",
                                score->sex ? "himself" : "herself",
                                spell_name_by_id(score->cause));
+        break;
+
+    case PD_CURSE:
+        g_string_append_printf(text, " by a cursed %s.",
+                               item_get_name_sg(score->cause));
         break;
 
     default:

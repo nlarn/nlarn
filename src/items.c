@@ -194,6 +194,7 @@ item *item_create_random(item_t item_type)
     int item_id = 0;
     int item_bonus = 0;
     int min_id = 1, max_id = 0;
+    int want_curse = TRUE; /* if the item has a chance to be cursed / blessed */
 
     assert(item_type > IT_NONE && item_type < IT_MAX);
 
@@ -208,12 +209,19 @@ item *item_create_random(item_t item_type)
 
     case IT_CONTAINER:
         max_id = CT_CHEST; /* only bags and caskets */
+        want_curse = FALSE;
+        break;
+
+    case IT_FOOD:
+    case IT_GEM:
+        want_curse = FALSE;
         break;
 
     case IT_GOLD:
         /* ID is amount in case of gold */
         min_id = 50;
         max_id = 250;
+        want_curse = FALSE;
         break;
 
     case IT_POTION:
@@ -237,7 +245,7 @@ item *item_create_random(item_t item_type)
     it = item_new(item_type, item_id, item_bonus);
 
     /* maybe the item is blessed or cursed */
-    if (chance(25))
+    if (want_curse && chance(25))
     {
         if (chance(50))
         {
@@ -329,23 +337,36 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data)
 char *item_describe(item *it, int known, int singular, int definite, char *str, int str_len)
 {
     char desc[61] = "";
-    char *temp;
+    char *temp = NULL;
     char *add_info = NULL;
 
     assert((it != NULL) && (it->type > IT_NONE) && (it->type < IT_MAX));
 
     if (it->blessed && it->blessed_known)
+    {
         add_info = "blessed";
+    }
     else if (it->cursed && it->curse_known)
+    {
         add_info = "cursed";
+    }
 
     switch (it->type)
     {
     case IT_ARMOUR:
         g_snprintf(desc, 60, "%s", item_desc_get(it, known));
-        g_snprintf(str, str_len, "%s %+d",
-                   item_name_count(desc, add_info, singular, definite, 60,
-                                   it->count), it->bonus);
+        if (it->bonus_known)
+        {
+            g_snprintf(str, str_len, "%s %+d",
+                       item_name_count(desc, add_info, singular, definite, 60,
+                                       it->count), it->bonus);
+        }
+        else
+        {
+            g_snprintf(str, str_len, "%s",
+                       item_name_count(desc, add_info, singular, definite, 60,
+                                       it->count));
+        }
 
         break;
 
@@ -354,8 +375,11 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     case IT_RING:
     case IT_SCROLL:
         if (known)
+        {
             g_snprintf(desc, 60, "%s", item_data[it->type].desc_known);
+        }
         else
+        {
             if ((it->type == IT_SCROLL) && (it->id == ST_BLANK))
             {
                 g_snprintf(desc, 60, "unlabeled scroll");
@@ -364,9 +388,12 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
             {
                 g_snprintf(desc, 60, "%s", item_data[it->type].desc_unknown);
             }
+        }
 
         if ((it->count > 1) && !singular)
+        {
             item_typename_pluralize(it, desc, 60);
+        }
 
         temp = g_strdup(desc);
         g_snprintf(desc, 60, temp, item_desc_get(it, known));
@@ -388,9 +415,13 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         item_name_count(desc, add_info, singular, definite, 60, it->count);
 
         if ((it->count > 1) && !singular)
+        {
             g_snprintf(str, str_len, "%ss", desc);
+        }
         else
+        {
             g_snprintf(str, str_len, "%s", desc);
+        }
 
         break;
 
@@ -401,22 +432,29 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     case IT_GEM:
         g_snprintf(desc, 60, "%s", item_desc_get(it, known));
         g_snprintf(str, str_len, "%d carats %s",
-                   gem_size(it),
-                   desc);
+                   gem_size(it), desc);
 
         item_name_count(str, add_info, singular, definite, str_len, it->count);
         break;
 
     case IT_WEAPON:
         if (weapon_is_unique(it))
-            g_snprintf(str, str_len, "the %s",
-                       item_desc_get(it, known));
+        {
+            g_snprintf(str, str_len, "the %s", item_desc_get(it, known));
+        }
         else
         {
             g_snprintf(desc, 60, "%s", item_desc_get(it, known));
-            item_name_count(desc, add_info, singular, definite, 60, it->count);
-            g_snprintf(str, str_len, "%s %+d",
-                       desc, it->bonus);
+            if (it->bonus_known)
+            {
+                item_name_count(desc, add_info, singular, definite, 60, it->count);
+                g_snprintf(str, str_len, "%s %+d", desc, it->bonus);
+            }
+            else
+            {
+                item_name_count(desc, add_info, singular, definite, 60, it->count);
+                g_snprintf(str, str_len, "%s", desc);
+            }
         }
         break;
 
@@ -689,6 +727,7 @@ int item_remove_blessing(item *it)
         return FALSE;
 
     it->blessed = FALSE;
+    it->blessed_known = FALSE;
 
     return TRUE;
 }
@@ -701,6 +740,7 @@ int item_remove_curse(item *it)
         return FALSE;
 
     it->cursed = FALSE;
+    it->curse_known = FALSE;
 
     return TRUE;
 }

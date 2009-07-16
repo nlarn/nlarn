@@ -89,3 +89,94 @@ char *potion_desc(int potion_id)
     return (char *)_potion_desc[potion_desc_mapping[potion_id - 1]];
 }
 
+int potion_with_effect(struct player *p, item *potion)
+{
+    int identified = TRUE;
+    effect *eff;
+
+    assert(p != NULL && potion != NULL);
+
+    if (potion_effect(potion) > ET_NONE)
+    {
+        eff = effect_new(potion_effect(potion), game_turn(p->game));
+
+        /* silly potion of giant strength */
+        if (potion->id == PO_GIANT_STR)
+        {
+            eff->turns = divert(250, 20);
+            eff->amount = 10;
+        }
+
+        /* this has to precede p_e_add as eff might be destroyed */
+        if (!effect_get_msg_start(eff))
+        {
+            identified = FALSE;
+        }
+
+        player_effect_add(p, eff);
+    }
+
+    return identified;
+}
+
+int potion_detect_item(player *p, item *potion)
+{
+    position pos;
+    int i;
+    int count = 0; /* count detected items */
+    inventory *inv;
+    item *it;
+
+    assert(p != NULL && potion != NULL);
+
+    if (potion->id == PO_TRE_DETECT)
+    {
+        log_add_entry(p->log, "You sense the presence of treasure.");
+    }
+    else
+    {
+        log_add_entry(p->log, "You sense the presence of objects.");
+    }
+
+    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
+    {
+        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
+        {
+            if ((inv = level_ilist_at(p->level, pos)))
+            {
+                for (i = 0; i <  inv_length(inv); i++)
+                {
+                    it = inv_get(inv, i);
+
+                    if (potion->id == PO_TRE_DETECT)
+                    {
+                        if ((it->type == IT_GOLD) || (it->type == IT_GEM))
+                        {
+                            player_memory_of(p, pos).item = it->type;
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        if ((it->type != IT_GOLD) && (it->type != IT_GEM))
+                        {
+                            player_memory_of(p, pos).item = it->type;
+                            count++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (count && (potion->id == PO_TRE_DETECT))
+    {
+        log_add_entry(p->log, "You sense the presence of treasure.");
+    }
+    else if (count && (potion->id == PO_OBJ_DETECT))
+    {
+        log_add_entry(p->log, "You sense the presence of objects.");
+    }
+
+    return count;
+}

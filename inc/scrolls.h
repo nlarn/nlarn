@@ -19,6 +19,14 @@
 #ifndef __SCROLLS_H_
 #define __SCROLLS_H_
 
+#include "items.h"
+
+/* forward declaration */
+
+struct player;
+
+/* type definitions */
+
 typedef struct magic_scroll_data {
 	int	id;
 	char *name;
@@ -60,6 +68,18 @@ enum scroll_types {
 void scroll_desc_shuffle();
 char *scroll_desc(int scroll_id);
 
+int scroll_with_effect(struct player *p, item *scroll);
+int scroll_annihilate(struct player *p, item *scroll);
+int scroll_create_artefact(struct player *p, item *scroll);
+int scroll_enchant_armour(struct player *p, item *scroll);
+int scroll_enchant_weapon(struct player *p, item *scroll);
+int scroll_gem_perfection(struct player *p, item *scroll);
+int scroll_heal_monster(struct player *p, item *scroll);
+int scroll_identify(struct player *p, item *scroll);
+int scroll_mapping(struct player *p, item *scroll);
+int scroll_remove_curse(struct player *p, item *scroll);
+int scroll_spell_extension(struct player *p, item *scroll);
+int scroll_timewarp(struct player *p, item *scroll);
 /* external vars */
 
 extern const magic_scroll_data scrolls[ST_MAX];
