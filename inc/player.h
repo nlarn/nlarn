@@ -169,6 +169,7 @@ typedef enum player_cod
     PD_LEVEL, /* damaged by level effects */
     PD_SPELL, /* damaged by own spell */
     PD_CURSE, /* damaged by a cursed item */
+    PD_STATIONARY, /* killed by stationary item */
     /* *** causes above this line can be stopped by live protection *** */
     PD_TOO_LATE, /* returned with potion too late */
     PD_WON, /* won the game */
@@ -211,6 +212,7 @@ int player_mp_lose(player *p, int count);
 int player_mp_max_gain(player *p, int count);
 int player_mp_max_lose(player *p, int count);
 
+/* spell functions */
 int player_spell_cast(player *p);
 int player_spell_learn(player *p, int spell_type);
 int player_spell_forget(player *p, int spell_type);
@@ -248,6 +250,17 @@ int player_item_sell(player *p, item *it);
 int player_item_shop_identify(player *p, item *it);
 int player_item_shop_repair(player *p, item *it);
 
+/* deal with stationaries */
+int player_altar_desecrate(player *p);
+int player_altar_pray(player *p);
+int player_door_close(player *p);
+int player_door_open(player *p);
+int player_fountain_drink(player *p);
+int player_fountain_wash(player *p);
+int player_stairs_down(player *p);
+int player_stairs_up(player *p);
+int player_throne_pillage(player *p);
+int player_throne_sit(player *p);
 
 /* query values */
 int player_get_ac(player *p);

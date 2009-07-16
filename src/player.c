@@ -1567,6 +1567,196 @@ int player_spell_known(player *p, int spell_type)
     return FALSE;
 }
 
+void player_effect_add(player *p, effect *e)
+{
+
+    assert(p != NULL && e != NULL);
+
+    if (effect_get_msg_start(e))
+        log_add_entry(p->log, "%s", effect_get_msg_start(e));
+
+    /* one-time effects are handled here */
+    if (e->turns == 1)
+    {
+        switch (e->type)
+        {
+        case ET_INC_CHA:
+            p->charisma += e->amount;
+            break;
+
+        case ET_INC_CON:
+            p->constitution += e->amount;
+            break;
+
+        case ET_INC_DEX:
+            p->dexterity += e->amount;
+            break;
+
+        case ET_INC_INT:
+            p->intelligence += e->amount;
+            break;
+
+        case ET_INC_STR:
+            p->strength += e->amount;
+            break;
+
+        case ET_INC_WIS:
+            p->wisdom += e->amount;
+            break;
+
+        case ET_INC_RND:
+            player_effect_add(p, effect_new(rand_m_n(ET_INC_CHA, ET_INC_WIS), game_turn(p->game)));
+            break;
+
+        case ET_INC_HP_MAX:
+            p->hp_max += ((player_get_hp_max(p) / 100) * e->amount);
+            break;
+
+        case ET_INC_MP_MAX:
+            p->mp_max += ((player_get_mp_max(p) / 100) * e->amount);
+            break;
+
+        case ET_INC_LEVEL:
+            player_lvl_gain(p, e->amount);
+            break;
+
+        case ET_INC_EXP:
+            /* looks like a reasonable amount */
+            player_exp_gain(p, rand_1n(player_lvl_exp[p->lvl] - player_lvl_exp[p->lvl - 1]));
+            break;
+
+        case ET_FIRE_RESISTANCE:
+            p->fire_resistance += e->amount;
+            break;
+
+        case ET_COLD_RESISTANCE:
+            p->cold_resistance += e->amount;
+            break;
+
+        case ET_MAGIC_RESISTANCE:
+            p->magic_resistance += e->amount;
+            break;
+
+        case ET_INC_HP:
+            player_hp_gain(p, (int)(((float)p->hp_max / 100) * e->amount));
+            break;
+
+        case ET_MAX_HP:
+            player_hp_gain(p, player_get_hp_max(p));
+            break;
+
+        case ET_INC_MP:
+            player_mp_gain(p, (int)(((float)p->mp_max / 100) * e->amount));
+            break;
+
+        case ET_MAX_MP:
+            player_mp_gain(p, player_get_mp_max(p));
+            break;
+
+        case ET_DEC_CHA:
+            p->charisma -= e->amount;
+            break;
+
+        case ET_DEC_CON:
+            p->constitution -= e->amount;
+            break;
+
+        case ET_DEC_DEX:
+            p->dexterity -= e->amount;
+            break;
+
+        case ET_DEC_INT:
+            p->intelligence -= e->amount;
+            break;
+
+        case ET_DEC_STR:
+            p->strength -= e->amount;
+            break;
+
+        case ET_DEC_WIS:
+            p->wisdom -= e->amount;
+            break;
+
+        case ET_DEC_RND:
+            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CHA, ET_DEC_WIS), game_turn(p->game)));
+            break;
+
+        case ET_DEC_HP_MAX:
+            p->hp_max -= ((player_get_hp_max(p) / 100) * e->amount);
+            break;
+
+        case ET_DEC_MP_MAX:
+            p->mp_max -= ((player_get_mp_max(p) / 100) * e->amount);
+            break;
+
+        case ET_DEC_LEVEL:
+            player_lvl_lose(p, e->amount);
+            break;
+
+        case ET_DEC_EXP:
+            /* looks like a reasonable amount */
+            player_exp_lose(p, rand_1n(player_lvl_exp[p->lvl] - player_lvl_exp[p->lvl - 1]));
+            break;
+        }
+        effect_destroy(e);
+    }
+    else if (e->type == ET_SLEEP)
+    {
+        game_spin_the_wheel(p->game, e->turns);
+        effect_destroy(e);
+    }
+    else
+    {
+        effect_add(p->effects, e);
+    }
+}
+
+int player_effect_del(player *p, effect *e)
+{
+    assert(p != NULL && e != NULL && e->type > ET_NONE && e->type < ET_MAX);
+
+    if (effect_get_msg_stop(e))
+        log_add_entry(p->log, "%s", effect_get_msg_stop(e));
+
+    return effect_del(p->effects, e);
+}
+
+effect *player_effect_get(player *p, int effect_id)
+{
+    assert(p != NULL && effect_id > ET_NONE && effect_id < ET_MAX);
+    return effect_get(p->effects, effect_id);
+}
+
+int player_effect(player *p, int effect_type)
+{
+    assert(p != NULL && effect_type > ET_NONE && effect_type < ET_MAX);
+    return effect_query(p->effects, effect_type);
+}
+
+void player_effects_expire(player *p, int turns)
+{
+    int i = 1;
+    effect *e;
+
+    assert(p != NULL);
+
+    while (i <= p->effects->len)
+    {
+        e = g_ptr_array_index(p->effects, i - 1);
+
+        if (effect_expire(e, turns) == -1)
+        {
+            /* effect has expired */
+            player_effect_del(p, e);
+            effect_destroy(e);
+        }
+        else
+        {
+            i ++;
+        }
+    }
+}
+
 int player_inv_display(player *p)
 {
     GPtrArray *callbacks;
@@ -2729,194 +2919,590 @@ int player_item_shop_repair(player *p, item *it)
     return FALSE;
 }
 
-int player_effect(player *p, int effect_type)
+int player_altar_desecrate(player *p)
 {
-    assert(p != NULL && effect_type > ET_NONE && effect_type < ET_MAX);
-    return effect_query(p->effects, effect_type);
-}
+    effect *e = NULL;
+    monster *m = NULL;
 
-void player_effect_add(player *p, effect *e)
-{
+    assert (p != NULL);
 
-    assert(p != NULL && e != NULL);
-
-    if (effect_get_msg_start(e))
-        log_add_entry(p->log, "%s", effect_get_msg_start(e));
-
-    /* one-time effects are handled here */
-    if (e->turns == 1)
+    if (level_stationary_at(p->level, p->pos) != LS_ALTAR)
     {
-        switch (e->type)
-        {
-        case ET_INC_CHA:
-            p->charisma += e->amount;
-            break;
-
-        case ET_INC_CON:
-            p->constitution += e->amount;
-            break;
-
-        case ET_INC_DEX:
-            p->dexterity += e->amount;
-            break;
-
-        case ET_INC_INT:
-            p->intelligence += e->amount;
-            break;
-
-        case ET_INC_STR:
-            p->strength += e->amount;
-            break;
-
-        case ET_INC_WIS:
-            p->wisdom += e->amount;
-            break;
-
-        case ET_INC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_INC_CHA, ET_INC_WIS), game_turn(p->game)));
-            break;
-
-        case ET_INC_HP_MAX:
-            p->hp_max += ((player_get_hp_max(p) / 100) * e->amount);
-            break;
-
-        case ET_INC_MP_MAX:
-            p->mp_max += ((player_get_mp_max(p) / 100) * e->amount);
-            break;
-
-        case ET_INC_LEVEL:
-            player_lvl_gain(p, e->amount);
-            break;
-
-        case ET_INC_EXP:
-            /* looks like a reasonable amount */
-            player_exp_gain(p, rand_1n(player_lvl_exp[p->lvl] - player_lvl_exp[p->lvl - 1]));
-            break;
-
-        case ET_FIRE_RESISTANCE:
-            p->fire_resistance += e->amount;
-            break;
-
-        case ET_COLD_RESISTANCE:
-            p->cold_resistance += e->amount;
-            break;
-
-        case ET_MAGIC_RESISTANCE:
-            p->magic_resistance += e->amount;
-            break;
-
-        case ET_INC_HP:
-            player_hp_gain(p, (int)(((float)p->hp_max / 100) * e->amount));
-            break;
-
-        case ET_MAX_HP:
-            player_hp_gain(p, player_get_hp_max(p));
-            break;
-
-        case ET_INC_MP:
-            player_mp_gain(p, (int)(((float)p->mp_max / 100) * e->amount));
-            break;
-
-        case ET_MAX_MP:
-            player_mp_gain(p, player_get_mp_max(p));
-            break;
-
-        case ET_DEC_CHA:
-            p->charisma -= e->amount;
-            break;
-
-        case ET_DEC_CON:
-            p->constitution -= e->amount;
-            break;
-
-        case ET_DEC_DEX:
-            p->dexterity -= e->amount;
-            break;
-
-        case ET_DEC_INT:
-            p->intelligence -= e->amount;
-            break;
-
-        case ET_DEC_STR:
-            p->strength -= e->amount;
-            break;
-
-        case ET_DEC_WIS:
-            p->wisdom -= e->amount;
-            break;
-
-        case ET_DEC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CHA, ET_DEC_WIS), game_turn(p->game)));
-            break;
-
-        case ET_DEC_HP_MAX:
-            p->hp_max -= ((player_get_hp_max(p) / 100) * e->amount);
-            break;
-
-        case ET_DEC_MP_MAX:
-            p->mp_max -= ((player_get_mp_max(p) / 100) * e->amount);
-            break;
-
-        case ET_DEC_LEVEL:
-            player_lvl_lose(p, e->amount);
-            break;
-
-        case ET_DEC_EXP:
-            /* looks like a reasonable amount */
-            player_exp_lose(p, rand_1n(player_lvl_exp[p->lvl] - player_lvl_exp[p->lvl - 1]));
-            break;
-        }
-        effect_destroy(e);
+        log_add_entry(p->log, "Which altar are you talking about?");
+        return FALSE;
     }
-    else if (e->type == ET_SLEEP)
+
+    if (chance(60))
     {
-        game_spin_the_wheel(p->game, e->turns);
-        effect_destroy(e);
+        /* create a monster - should be very dangerous */
+        m = monster_new(MT_RED_DRAGON, p->level);
+
+        /* try to find a space for the monster near the altar */
+        monster_position(m, level_find_space_in(p->level,
+                                                rect_new_sized(p->pos, 1),
+                                                LE_MONSTER));
+
+        e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(p->game));
+        e->turns = 2500;
+        player_effect_add(p, e);
+    }
+    else if (chance(30))
+    {
+        /* destroy altar */
+        log_add_entry(p->log, "The altar crumbles into a pile of dust before your eyes.");
+        level_stationary_at(p->level, p->pos) = LS_NONE;
     }
     else
     {
-        effect_add(p->effects, e);
+        log_add_entry(p->log, "Nothing happens.");
     }
+
+    return TRUE;
 }
 
-int player_effect_del(player *p, effect *e)
+int player_altar_pray(player *p)
 {
-    assert(p != NULL && e != NULL && e->type > ET_NONE && e->type < ET_MAX);
+    int donation = 0;
+    int player_gold, tithe;
+    effect *e = NULL;
+    monster *m = NULL;
 
-    if (effect_get_msg_stop(e))
-        log_add_entry(p->log, "%s", effect_get_msg_stop(e));
+    assert (p != NULL);
 
-    return effect_del(p->effects, e);
-}
-
-effect *player_effect_get(player *p, int effect_id)
-{
-    assert(p != NULL && effect_id > ET_NONE && effect_id < ET_MAX);
-    return effect_get(p->effects, effect_id);
-}
-
-void player_effects_expire(player *p, int turns)
-{
-    int i = 1;
-    effect *e;
-
-    assert(p != NULL);
-
-    while (i <= p->effects->len)
+    if (level_stationary_at(p->level, p->pos) != LS_ALTAR)
     {
-        e = g_ptr_array_index(p->effects, i - 1);
+        log_add_entry(p->log, "Which altar are you talking about?");
+        return FALSE;
+    }
 
-        if (effect_expire(e, turns) == -1)
+    player_gold = player_get_gold(p);
+    donation = display_get_count("How much do you donate?", player_gold);
+
+    if (donation == 0)
+    {
+        if (chance(75))
         {
-            /* effect has expired */
-            player_effect_del(p, e);
-            effect_destroy(e);
+            log_add_entry(p->log, "Nothing happens.");
+        }
+        else if (chance(4) && p->eq_suit)
+        {
+            /* enchant armour */
+            /* FIXME: Pick random armour */
+            log_add_entry(p->log, "You feel your armour vibrate for a moment.");
+            item_enchant(p->eq_suit);
+        }
+        else if (chance(4) && p->eq_weapon)
+        {
+            /* enchant weapon */
+            log_add_entry(p->log, "You feel your weapon vibrate for a moment.");
+            item_enchant(p->eq_weapon);
         }
         else
         {
-            i ++;
+            m = monster_new_by_level(p->level);
+            monster_position(m, level_find_space_in(p->level,
+                                                    rect_new_sized(p->pos, 1),
+                                                    LE_MONSTER));
         }
     }
+    else if (player_gold >= donation)
+    {
+        tithe = player_gold / 10 ;
+        player_set_gold(p, player_gold - donation);
+
+        /* if player gave less than 10% of players gold, make a monster */
+        if (donation < tithe || donation < rand_0n(50))
+        {
+            /* create a monster, it should be very dangerous */
+            m = monster_new_by_level(p->level);
+            monster_position(m, level_find_space_in(p->level,
+                                                    rect_new_sized(p->pos, 1),
+                                                    LE_MONSTER));
+
+            e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(p->game));
+            e->turns = 200;
+            player_effect_add(p, e);
+
+            return 1;
+        }
+
+        if (chance(50))
+        {
+            log_add_entry(p->log, "You have been heard!");
+
+            e = effect_new(ET_PROTECTION, game_turn(p->game));
+            e->turns = 500;
+            player_effect_add(p, e);
+        }
+
+        if (chance(4) && p->eq_suit)
+        {
+            /* FIXME: Pick random armour */
+            /* enchant weapon */
+            log_add_entry(p->log, "You feel your armour vibrate for a moment.");
+            item_enchant(p->eq_suit);
+        }
+
+        if (chance(4) && p->eq_weapon)
+        {
+            /* enchant weapon */
+            log_add_entry(p->log, "You feel your weapon vibrate for a moment.");
+            item_enchant(p->eq_weapon);
+        }
+
+        log_add_entry(p->log, "Thank You.");
+    }
+
+    return 1;
+}
+
+int player_door_close(player *p)
+{
+    /* position used to interact with stationaries */
+    position pos;
+
+    /* possible directions of actions */
+    int *dirs;
+
+    /* direction of action */
+    int dir = GD_NONE;
+
+    /* a counter and another one */
+    int count, num;
+
+    /* a monster */
+    monster *m;
+
+    dirs = level_get_surrounding(p->level, p->pos, LS_OPENDOOR);
+
+    for (count = 0, num = 1; num < GD_MAX; num++)
+    {
+        if (dirs[num])
+        {
+            count++;
+            dir = num;
+        }
+    }
+
+    if (count > 1)
+    {
+        dir = display_get_direction("Close which door?", dirs);
+        g_free(dirs);
+    }
+    /* dir has been set in the for loop above if count == 1 */
+    else if (count == 0)
+    {
+        dir = GD_NONE;
+    }
+
+    /* select random direction if player is confused */
+    if (player_effect(p, ET_CONFUSION))
+    {
+        dir = rand_0n(GD_MAX - 1);
+    }
+
+    if (dir)
+    {
+        pos = pos_move(p->pos, dir);
+        if (pos_valid(pos) && (level_stationary_at(p->level, pos) == LS_OPENDOOR))
+        {
+
+            /* check if player is standing in the door */
+            if (pos_identical(pos, p->pos))
+            {
+                log_add_entry(p->log, "Please step out of the doorway.");
+                return 0;
+            }
+
+            /* check for monster in the doorway */
+            m = level_get_monster_at(p->level, pos);
+
+            if (m)
+            {
+                log_add_entry(p->log,
+                              "You cannot close the door. The %s is in the way.",
+                              monster_get_name(m));
+                return 0;
+            }
+
+            /* check for items in the doorway */
+            if (level_ilist_at(p->level, pos))
+            {
+                log_add_entry(p->log,
+                              "You cannot close the door. There is something in the way.");
+                return 0;
+            }
+
+            level_stationary_at(p->level, pos) = LS_CLOSEDDOOR;
+            log_add_entry(p->log, "You close the door.");
+        }
+        else
+        {
+            log_add_entry(p->log, "Huh?");
+            return 0;
+        }
+    }
+    else
+    {
+        log_add_entry(p->log, "Which door are you talking about?");
+        return 0;
+    }
+
+    return 1;
+}
+
+int player_door_open(player *p)
+{
+    /* position used to interact with stationaries */
+    position pos;
+
+    /* possible directions of actions */
+    int *dirs;
+
+    /* direction of action */
+    int dir = GD_NONE;
+
+    /* a counter and another one */
+    int count, num;
+
+    dirs = level_get_surrounding(p->level, p->pos, LS_CLOSEDDOOR);
+
+    for (count = 0, num = 1; num < GD_MAX; num++)
+    {
+        if (dirs[num])
+        {
+            count++;
+            dir = num;
+        }
+    }
+
+    if (count > 1)
+    {
+        dir = display_get_direction("Open which door?", dirs);
+        g_free(dirs);
+    }
+    /* dir has been set in the for loop above if count == 1 */
+    else if (count == 0)
+    {
+        dir = GD_NONE;
+    }
+
+    /* select random direction if player is confused */
+    if (player_effect(p, ET_CONFUSION))
+    {
+        dir = rand_0n(GD_MAX - 1);
+    }
+
+    if (dir)
+    {
+        pos = pos_move(p->pos, dir);
+
+        if (pos_valid(pos) && (level_stationary_at(p->level, pos) == LS_CLOSEDDOOR))
+        {
+            level_stationary_at(p->level, pos) = LS_OPENDOOR;
+            log_add_entry(p->log, "You open the door.");
+        }
+        else
+        {
+            log_add_entry(p->log, "Huh?");
+            return 0;
+        }
+    }
+    else
+    {
+        log_add_entry(p->log, "Which door are you talking about?");
+        return 0;
+    }
+
+    return 1;
+}
+
+int player_fountain_drink(player *p)
+{
+    effect *e = NULL;
+
+    assert (p != NULL);
+
+    if (level_stationary_at(p->level, p->pos) == LS_DEADFOUNTAIN)
+    {
+        log_add_entry(p->log, "This fountain is dried up.");
+        return 0;
+    }
+
+    if (level_stationary_at(p->level, p->pos) != LS_FOUNTAIN)
+    {
+        log_add_entry(p->log, "Which fountain are you talking about?");
+        return 0;
+    }
+
+    if (chance(7))
+    {
+        e = effect_new(ET_DEC_DAMAGE, game_turn(p->game));
+        e->turns = 200 + rand_0n(200);
+        player_effect_add(p, e);
+
+        log_add_entry(p->log, "You feel a sickness coming on.");
+    }
+    else if (chance(13))
+    {
+        /* see invisible */
+        e = effect_new(ET_INFRAVISION, game_turn(p->game));
+        player_effect_add(p, e);
+    }
+    else if (chance(45))
+    {
+        log_add_entry(p->log, "Nothing seems to have happened.");
+    }
+    else if (chance(33))
+    {
+        /* change char levels upward */
+        player_lvl_gain(p, 1);
+    }
+    else
+    {
+        /* change char levels downward */
+        player_lvl_lose(p, 1);
+    }
+
+    if (chance(25))
+    {
+        log_add_entry(p->log, "The fountains bubbling slowly quiets.");
+        level_stationary_at(p->level, p->pos) = LS_DEADFOUNTAIN;
+    }
+
+    return 1;
+}
+
+int player_fountain_wash(player *p)
+{
+    int damage = 0;
+    monster *m;
+
+    assert (p != NULL);
+
+    if (level_stationary_at(p->level, p->pos) == LS_DEADFOUNTAIN)
+    {
+        log_add_entry(p->log, "This fountain is dry.");
+        return 0;
+    }
+
+    if (level_stationary_at(p->level, p->pos) != LS_FOUNTAIN)
+    {
+        log_add_entry(p->log, "Which fountain are you talking about?");
+        return 0;
+    }
+
+    if (chance(10))
+    {
+        damage = rand_1n((p->level->nlevel << 2) + 2);
+        log_add_entry(p->log, "Oh no! The water was foul!");
+
+        player_hp_lose(p, damage, PD_STATIONARY, LS_FOUNTAIN);
+    }
+    else if (chance(30))
+    {
+        log_add_entry(p->log, "You got the dirt off!");
+    }
+    else if (chance(30))
+    {
+        log_add_entry(p->log, "This water seems to be hard water! " \
+                      "The dirt didn't come off!");
+    }
+    else if (chance(35))
+    {
+        /* make water lord */
+        m = monster_new(MT_WATER_LORD, p->level);
+
+        /* try to find a space for the monster near the player */
+        monster_position(m, level_find_space_in(p->level,
+                                                rect_new_sized(p->pos, 1),
+                                                LE_MONSTER));
+    }
+    else
+    {
+        log_add_entry(p->log, "Nothing seems to have happened.");
+    }
+
+    return 1;
+}
+
+int player_stairs_down(player *p)
+{
+    level *nlevel = NULL;
+
+    switch (level_stationary_at(p->level, p->pos))
+    {
+    case LS_STAIRSDOWN:
+        nlevel = p->game->levels[p->level->nlevel + 1];
+        break;
+
+    case LS_ELEVATORDOWN:
+        /* first vulcano level */
+        nlevel = p->game->levels[LEVEL_MAX - 1];
+        break;
+
+    case LS_ENTRANCE:
+        if (p->level->nlevel == 0)
+            nlevel = p->game->levels[1];
+        else
+            log_add_entry(p->log, "Climb up to return to town.");
+        break;
+
+    default:
+        log_add_entry(p->log, "I see no stairway down here.");
+    }
+
+    /* if told to switch level, do so */
+    if (nlevel != NULL)
+    {
+        return player_level_enter(p, nlevel);
+    }
+
+    return 0;
+}
+
+int player_stairs_up(player *p)
+{
+    level *nlevel = NULL;
+
+    switch (level_stationary_at(p->level, p->pos))
+    {
+    case LS_STAIRSUP:
+        nlevel = p->game->levels[p->level->nlevel - 1];
+        break;
+
+    case LS_ELEVATORUP:
+        /* return to town */
+        nlevel = p->game->levels[0];
+        break;
+
+    case LS_ENTRANCE:
+        if (p->level->nlevel == 1)
+            nlevel = p->game->levels[0];
+        else
+            log_add_entry(p->log, "Climb down to enter the dungeon.");
+
+        break;
+    default:
+        log_add_entry(p->log, "I see no stairway up here.");
+    }
+
+    /* if told to switch level, do so */
+    if (nlevel != NULL)
+    {
+        return player_level_enter(p, nlevel);
+    }
+
+    return 0;
+}
+
+int player_throne_pillage(player *p)
+{
+    int i;
+    int count = 0; /* gems created */
+    monster *m = NULL;
+
+    assert (p != NULL);
+
+    if (level_stationary_at(p->level, p->pos) == LS_DEADTHRONE)
+    {
+        log_add_entry(p->log, "There are no gems left on this throne.");
+        return 0;
+    }
+
+    if ((level_stationary_at(p->level, p->pos) != LS_THRONE)
+            && (level_stationary_at(p->level, p->pos) != LS_THRONE2))
+    {
+        log_add_entry(p->log, "Which throne are you talking about?");
+        return 0;
+    }
+
+
+    if (chance(25))
+    {
+        if (!level_ilist_at(p->level, p->pos))
+        {
+            level_ilist_at(p->level, p->pos) = inv_new();
+        }
+
+        for (i = 0; i < rand_1n(4); i++)
+        {
+            /* gems pop off the throne */
+            inv_add(level_ilist_at(p->level, p->pos),
+                    item_create_random(IT_GEM));
+
+            count++;
+        }
+
+        log_add_entry(p->log, "You manage to pry off %s gem%s.",
+                      count > 1 ? "some" : "a", plural(count));
+
+        level_stationary_at(p->level, p->pos) = LS_DEADTHRONE;
+    }
+    else if (chance(40) && (level_stationary_at(p->level, p->pos) == LS_THRONE))
+    {
+        /* make gnome king */
+        m = monster_new(MT_GNOME_KING, p->level);
+
+        /* try to find a space for the monster near the player */
+        monster_position(m, level_find_space_in(p->level,
+                                                rect_new_sized(p->pos, 1),
+                                                LE_MONSTER));
+
+        /* next time there will be no gnome king */
+        level_stationary_at(p->level, p->pos) = LS_THRONE2;
+    }
+    else
+    {
+        log_add_entry(p->log, "Nothing happens.");
+    }
+
+    return 1 + count;
+}
+
+int player_throne_sit(player *p)
+{
+    monster *m = NULL;
+
+    assert (p != NULL);
+
+    if (level_stationary_at(p->level, p->pos) == LS_DEADTHRONE)
+    {
+        log_add_entry(p->log, "The throne feels cold and uneasy.");
+        return 1;
+    }
+
+    if ((level_stationary_at(p->level, p->pos) != LS_THRONE)
+            && (level_stationary_at(p->level, p->pos) != LS_THRONE2))
+    {
+        log_add_entry(p->log, "Which throne are you talking about?");
+        return 0;
+    }
+
+    if (chance(30) && (level_stationary_at(p->level, p->pos) == LS_THRONE))
+    {
+        /* make a gnome king */
+        m = monster_new(MT_GNOME_KING, p->level);
+
+        /* try to find a space for the monster near the player */
+        monster_position(m, level_find_space_in(p->level,
+                                                rect_new_sized(p->pos, 1),
+                                                LE_MONSTER));
+
+        /* next time there will be no gnome king */
+        level_stationary_at(p->level, p->pos) = LS_THRONE2;
+    }
+    else if (chance(35))
+    {
+        log_add_entry(p->log, "Zaaaappp! You've been teleported!");
+        p->pos = level_find_space(p->level, LE_MONSTER);
+    }
+    else
+    {
+        log_add_entry(p->log, "Nothing happens.");
+    }
+
+    return 1;
 }
 
 int player_get_ac(player *p)
