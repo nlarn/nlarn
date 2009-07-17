@@ -171,6 +171,7 @@ typedef enum player_cod
     PD_CURSE, /* damaged by a cursed item */
     PD_STATIONARY, /* killed by stationary item */
     /* *** causes above this line can be stopped by live protection *** */
+    PD_STUCK, /* stuck in a wall */
     PD_TOO_LATE, /* returned with potion too late */
     PD_WON, /* won the game */
     PD_LOST, /* daughter has died, potion not found */
@@ -188,7 +189,6 @@ void player_die(player *p, player_cod cause_type, int cause);
 gint64 player_calc_score(player *p, int won);
 int player_move(player *p, int direction);
 int player_attack(player *p, monster *m);
-int player_position(player *p, position target);
 void player_update_fov(player *p, int radius);
 int player_level_enter(player *p, level *l);
 void player_monster_kill(player *p, monster *m, char *message);

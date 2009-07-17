@@ -583,6 +583,11 @@ void spell_type_player(spell *s, struct player *p)
         e->turns = 100;
     }
 
+    if (e->type == ET_WALL_WALK)
+    {
+        e->turns = 6 + rand_1n(10);
+    }
+
     player_effect_add(p, e);
 }
 

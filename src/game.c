@@ -259,6 +259,13 @@ void game_spin_the_wheel(game *g, int times)
         player_regenerate(g->p);
         player_effects_expire(g->p, 1);
 
+        /* check if player is stuck inside a wall without walk through wall */
+        if ((level_tiletype_at(g->p->level, g->p->pos) == LT_WALL)
+                && !player_effect(g->p, ET_WALL_WALK))
+        {
+            player_die(g->p, PD_STUCK, 0);
+        }
+
         /* deal damage cause by level tiles to player */
         if ((damage = level_tile_damage(g->p->level, g->p->pos)))
         {

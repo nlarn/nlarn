@@ -257,7 +257,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     assert(p != NULL);
 
     /* check for life protection */
-    if ((cause_type < PD_TOO_LATE) && (ef = player_effect_get(p, ET_LIFE_PROTECTION)))
+    if ((cause_type < PD_STUCK) && (ef = player_effect_get(p, ET_LIFE_PROTECTION)))
     {
         log_add_entry(p->log, "You feel wiiieeeeerrrrrd all over!");
 
@@ -286,6 +286,11 @@ void player_die(player *p, player_cod cause_type, int cause)
     case PD_LASTLEVEL:
         message = "You fade to gray...";
         title = "In Memoriam";
+        break;
+
+    case PD_STUCK:
+        message = "You are trapped in solid rock.";
+        title = "Ouch!";
         break;
 
     case PD_TOO_LATE:
@@ -440,8 +445,13 @@ int player_move(player *p, int direction)
     /* impassable */
     if (!level_pos_passable(p->level, target_p))
     {
-        /* FIXME: implement walk through walls (Ticket 74) */
-        return FALSE;
+        /* if it is not a wall, it is definitely not passable */
+        if (!(target_t->type == LT_WALL))
+            return FALSE;
+
+        /* return if player cannot walk through walls */
+        if (!player_effect(p, ET_WALL_WALK))
+            return FALSE;
     }
 
     /* attack - no movement */
@@ -449,7 +459,7 @@ int player_move(player *p, int direction)
         return player_attack(p, target_m);
 
     /* reposition player */
-    player_position(p, target_p);
+    p->pos = target_p;
 
     /* trigger the trap */
     if (target_t->trap)
@@ -515,8 +525,8 @@ int player_attack(player *p, monster *m)
 
         /* weapon damage due to rust */
         if ((w != NULL) && (m->type == MT_RUST_MONSTER
-                    || m->type == MT_DISENCHANTRESS
-                    || m->type == MT_GELATINOUSCUBE)
+                            || m->type == MT_DISENCHANTRESS
+                            || m->type == MT_GELATINOUSCUBE)
            )
         {
             pi = item_rust(w);
@@ -555,7 +565,7 @@ int player_attack(player *p, monster *m)
                 && monster_is_beheadable(m))
         {
             log_add_entry(p->log, "You behead the %s with your Vorpal Blade!",
-            monster_get_name(m));
+                          monster_get_name(m));
 
             damage = m->hp;
         }
@@ -609,26 +619,6 @@ int player_attack(player *p, monster *m)
     }
 
     return 1; /* i.e. turns used */
-}
-
-int player_position(player *p, position target)
-{
-    monster *m;
-    assert(p != NULL);
-
-    if (pos_valid(target) && level_pos_passable(p->level, target))
-    {
-        p->pos = target;
-        if ((m = level_get_monster_at(p->level, target)))
-        {
-            monster_position(m, level_find_space(p->level, LE_MONSTER));
-        }
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
-    }
 }
 
 /**
@@ -3701,6 +3691,10 @@ static char *player_death_description(game_score_t *score, int verbose)
     {
     case PD_LASTLEVEL:
         desc = "passed away";
+        break;
+
+    case PD_STUCK:
+        desc = "got stuck in solid rock";
         break;
 
     case PD_TOO_LATE:
