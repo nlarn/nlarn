@@ -185,45 +185,15 @@ int main(int argc, char *argv[])
             moves_count = player_stairs_up(g->p);
             break;
 
+            /* enter a building */
         case 'e':
-            switch (level_stationary_at(g->p->level, g->p->pos))
-            {
-            case LS_BANK:
-            case LS_BANK2:
-                moves_count = building_bank(g->p);
-                break;
-
-            case LS_DNDSTORE:
-                moves_count = building_dndstore(g->p);
-                break;
-
-            case LS_HOME:
-                moves_count = building_home(g->p);
-                break;
-
-            case LS_LRS:
-                moves_count = building_lrs(g->p);
-                break;
-
-            case LS_SCHOOL:
-                moves_count = building_school(g->p);
-                break;
-
-            case LS_TRADEPOST:
-                moves_count = building_tradepost(g->p);
-                break;
-
-            default:
-                log_add_entry(g->p->log, "I seen no building here.");
-
-            }
-
+            moves_count = player_building_enter(g->p);
             break;
 
+            /* display inventory */
         case 'i':
             player_inv_display(g->p);
             break;
-
 
             /* desecrate altar */
         case 'A':

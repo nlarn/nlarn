@@ -106,9 +106,16 @@ spell *spell_new(int id);
 void spell_destroy(spell *s);
 int spell_sort(gconstpointer a, gconstpointer b);
 
+void spell_type_player(spell *s, struct player *p);
+void spell_type_point(spell *s, struct player *p);
+void spell_type_ray(spell *s, struct player *p);
+void spell_type_flood(spell *s, struct player *p);
+void spell_type_blast(spell *s, struct player *p);
+
 void spell_alter_reality(struct player *p);
 int spell_create_monster(struct player *p);
 void spell_create_sphere(struct player *p);
+void spell_cure_blindness(struct player *p);
 void spell_genocide_monster(struct player *p);
 void spell_make_wall(struct player *p);
 void spell_vaporize_rock(struct player *p);

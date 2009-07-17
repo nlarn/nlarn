@@ -170,13 +170,14 @@ monster *monster_new(int monster_type, struct level *l);
 monster *monster_new_by_level(struct level *l);
 void monster_destroy(monster *m);
 
+void monster_move(monster *m, struct player *p);
 int monster_position(monster *m, position target);
 gboolean monster_hp_lose(monster *m, int amount);
 void monster_drop_items(monster *m, inventory *floor);
-void monster_pickup_items(monster *m, message_log *log);
+void monster_pickup_items(monster *m, struct player *p);
 void monster_player_attack(monster *m, struct player *p);
-monster *monster_trigger_trap(monster *m, struct player *p);
-void monster_die(monster *m, message_log *log);
+gboolean monster_trigger_trap(monster *m, struct player *p);
+void monster_die(monster *m, struct player *p, char *message);
 
 gboolean monster_update_action(monster *m);
 void monster_update_player_pos(monster *m, position ppos);

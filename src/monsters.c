@@ -217,6 +217,249 @@ void monster_destroy(monster *m)
     g_free(m);
 }
 
+void monster_move(monster *m, struct player *p)
+{
+    /* monster's new position / temporary position */
+    position m_npos, m_npos_tmp;
+
+    /* number of tries to find m_npos */
+    int tries;
+
+    /* distance between player and m_npos_tmp */
+    int dist;
+
+    /* path to player */
+    level_path *path = NULL;
+
+    level_path_element *el = NULL;
+
+
+    /* determine if the monster can see the player */
+    if (pos_distance(m->pos, p->pos) > 7)
+    {
+        m->p_visible = FALSE;
+    }
+    else if (player_effect(p, ET_INVISIBILITY) && !monster_has_infravision(m))
+    {
+        m->p_visible = FALSE;
+    }
+    else if (monster_effect(m, ET_BLINDNESS))
+    {
+        /* monster is blinded */
+        m->p_visible = FALSE;
+    }
+    else if (player_effect(p, ET_STEALTH) > monster_get_int(m))
+    {
+        /* player is stealther than monster is smart */
+        m->p_visible = FALSE;
+    }
+    else
+    {
+        /* determine if player's position is visible from monster's position */
+        m->p_visible = level_pos_is_visible(m->level, m->pos, p->pos);
+    }
+
+    if (m->p_visible)
+    {
+        /* update monster's knowledge of player's position */
+        monster_update_player_pos(m, p->pos);
+    }
+
+    /*
+     * regenerate / inflict poison upon monster.
+     * as monster might be killed during the process we need
+     * to exit the loop in this case
+     */
+    if (!monster_regenerate(m, game_turn(p->game), game_difficulty(p->game), p->log))
+    {
+        monster_die(m, p, NULL);
+        return;
+    }
+
+    /* deal damage caused by floor effects */
+    if (monster_hp_lose(m, level_tile_damage(m->level, m->pos)))
+    {
+        /* FIXME: special messages for death by floor effects */
+        monster_die(m, p, NULL);
+        return;
+    }
+
+    /* update monsters action */
+    if (monster_update_action(m) && m->m_visible)
+    {
+        /* the monster has chosen a new action and the player
+           can see the new action, so let's describe it */
+
+        if (m->action == MA_ATTACK)
+        {
+            /* TODO: certain monster types will make a sound when attacking the player */
+            /*
+            log_add_entry(p->log,
+                          "The %s has spotted you and heads towards you!",
+                          monster_get_name(m));
+             */
+        }
+        else if (m->action == MA_FLEE)
+        {
+            log_add_entry(p->log, "The %s turns to flee!", monster_get_name(m));
+        }
+    }
+
+    /* determine monster's next move */
+    m_npos = m->pos;
+
+    switch (m->action)
+    {
+    case MA_FLEE:
+        dist = 0;
+
+        for (tries = 1; tries < GD_MAX; tries++)
+        {
+            /* try all fields surrounding the monster if the
+             * distance between monster & player is greater */
+            if (tries == GD_CURR)
+                continue;
+
+            m_npos_tmp = pos_move(m->pos, tries);
+
+            if (pos_valid(m_npos_tmp)
+                    && lt_is_passable(level_tiletype_at(m->level,m_npos_tmp))
+                    && !level_is_monster_at(m->level, m_npos_tmp)
+                    && (pos_distance(p->pos, m_npos_tmp) > dist))
+            {
+                /* distance is bigger than current distance */
+                m_npos = m_npos_tmp;
+                dist = pos_distance(m->player_pos, m_npos_tmp);
+            }
+        }
+
+        break; /* end MA_FLEE */
+
+    case MA_REMAIN:
+        /* Sgt. Stan Still - do nothing */
+        break;
+
+    case MA_WANDER:
+        tries = 0;
+
+        do
+        {
+            m_npos = pos_move(m->pos, rand_1n(GD_MAX));
+            tries++;
+        }
+        while ((!pos_valid(m_npos)
+                || !lt_is_passable(level_tiletype_at(m->level,m_npos))
+                || level_is_monster_at(m->level, m_npos))
+                && (tries < GD_MAX));
+
+        /* new position has not been found, reset to current position */
+        if (tries == GD_MAX)
+            m_npos = m->pos;
+
+        break; /* end MA_WANDER */
+
+    case MA_ATTACK:
+        if (pos_adjacent(m->pos, m->player_pos) && (m->lastseen == 1))
+        {
+            /* monster is standing next to player */
+            monster_player_attack(m, p);
+
+            /* monster's position might have changed (teleport) */
+            if (!pos_identical(m_npos, m->pos))
+            {
+                m_npos = m->pos;
+                log_add_entry(p->log, "The %s vanishes.", monster_get_name(m));
+            }
+        }
+        else
+        {
+            path = level_find_path(m->level, m->pos, m->player_pos);
+
+            if (path && !g_queue_is_empty(path->path))
+            {
+                el = g_queue_pop_head(path->path);
+                m_npos = el->pos;
+            }
+            else
+            {
+                /* no path found. stop following player */
+                m->lastseen = 0;
+            }
+
+            /* cleanup */
+            if (path)
+            {
+                level_path_destroy(path);
+            }
+        }
+        break; /* end MA_ATTACK */
+
+    case MA_NONE:
+    case MA_MAX:
+        /* possibly a bug */
+        break;
+    }
+
+    /* can the player see the new position? */
+    m->m_visible = player_pos_visible(p, m_npos);
+
+    /* *** if new position has been found - move the monster *** */
+    if (!pos_identical(m_npos, m->pos))
+    {
+        /* vampires won't step onto mirrors */
+        if ((m->type == MT_VAMPIRE)
+                && (level_stationary_at(m->level, m_npos) == LS_MIRROR))
+        {
+            /* FIXME: should try to move around it */
+            m_npos = m->pos;
+        }
+
+        if (pos_identical(p->pos, m_npos))
+        {
+            /* bump into invisible player */
+            monster_update_player_pos(m, p->pos);
+            m_npos = m->pos;
+
+            log_add_entry(p->log, "The %s bumped into you.", monster_get_name(m));
+        }
+
+        /* check for door */
+        if ((level_stationary_at(m->level, m_npos) == LS_CLOSEDDOOR)
+                && monster_has_hands(m)
+                && monster_get_int(m) > 3) /* lock out zombies */
+        {
+            /* open the door */
+            level_stationary_at(m->level, m_npos) = LS_OPENDOOR;
+
+            /* notify the player if the door is visible */
+            if (m->m_visible)
+            {
+                log_add_entry(p->log, "The %s opens the door.", monster_get_name(m));
+            }
+        }
+
+        /* move towards player; check for monsters */
+        else if (!level_is_monster_at(m->level, m_npos)
+                 && ls_is_passable(level_stationary_at(m->level, m_npos)))
+        {
+            monster_position(m, m_npos);
+
+            /* check for traps */
+            if (level_trap_at(m->level, m->pos))
+            {
+                if (monster_trigger_trap(m, p))
+                    return; /* trap killed the monster */
+            }
+
+        } /* end new position */
+    } /* end monster repositioning */
+
+    monster_pickup_items(m, p);
+
+    /* increment count of turns since when player was last seen */
+    if (m->lastseen) m->lastseen++;
+}
+
 int monster_position(monster *m, position target)
 {
     assert(m != NULL);
@@ -264,13 +507,13 @@ void monster_drop_items(monster *m, inventory *floor)
     }
 }
 
-void monster_pickup_items(monster *m, message_log *log)
+void monster_pickup_items(monster *m, struct player *p)
 {
     int i;
     item *it;
     inventory *floor;
 
-    assert(m != NULL && log != NULL);
+    assert(m != NULL && p != NULL);
 
     if (!(floor = level_ilist_at(m->level, m->pos)))
         return;
@@ -284,9 +527,7 @@ void monster_pickup_items(monster *m, message_log *log)
         {
             if (m->m_visible)
             {
-                log_add_entry(log,
-                              "The %s picks up %s %s.",
-                              monster_get_name(m),
+                log_add_entry(p->log, "The %s picks up %s %s.", monster_get_name(m),
                               (it->count == 1) ? "a" : "some",
                               (it->count == 1) ? item_get_name_sg(it->type) : item_get_name_pl(it->type));
             }
@@ -294,7 +535,6 @@ void monster_pickup_items(monster *m, message_log *log)
             inv_del_element(floor, it);
             inv_add(m->inventory, it);
         }
-
     }
 }
 
@@ -330,8 +570,7 @@ void monster_player_attack(monster *m, player *p)
             && !monster_has_infravision(m)
             && chance(65))
     {
-        log_add_entry(p->log,
-                      "The %s misses wildly.",
+        log_add_entry(p->log, "The %s misses wildly.",
                       monster_get_name(m));
         return;
     }
@@ -340,8 +579,7 @@ void monster_player_attack(monster *m, player *p)
             && (rand_m_n(5, 30) * monster_get_level(m)
                 - player_get_cha(p) < 30))
     {
-        log_add_entry(p->log,
-                      "The %s is awestruck at your magnificence!",
+        log_add_entry(p->log, "The %s is awestruck at your magnificence!",
                       monster_get_name(m));
         return;
     }
@@ -361,14 +599,12 @@ void monster_player_attack(monster *m, player *p)
         if (dam > 0)
         {
             player_hp_lose(p, dam, PD_MONSTER, m->type);
-            log_add_entry(p->log,
-                          "The %s hits you.",
+            log_add_entry(p->log, "The %s hits you.",
                           monster_get_name(m));
         }
         else
         {
-            log_add_entry(p->log,
-                          "The %s hit you but your armour protects you.",
+            log_add_entry(p->log, "The %s hit you but your armour protects you.",
                           monster_get_name(m));
         }
     }
@@ -378,7 +614,7 @@ void monster_player_attack(monster *m, player *p)
     }
 }
 
-monster *monster_trigger_trap(monster *m, struct player *p)
+gboolean monster_trigger_trap(monster *m, struct player *p)
 {
     /* original position of the monster */
     position pos_orig;
@@ -396,13 +632,13 @@ monster *monster_trigger_trap(monster *m, struct player *p)
     /* return if the monster has not triggered the trap */
     if (!chance(trap_chance(trap)))
     {
-        return m;
+        return FALSE;
     }
 
     /* flying monsters are only affected by sleeping gas traps */
     if (monster_can_fly(m) && (trap != TT_SLEEPGAS))
     {
-        return m;
+        return FALSE;
     }
 
     pos_orig = m->pos;
@@ -411,8 +647,7 @@ monster *monster_trigger_trap(monster *m, struct player *p)
     switch (trap)
     {
     case TT_TRAPDOOR:
-        /* just remove the monster */
-        /* done below */
+        /* just remove the monster - done below */
         break;
 
     case TT_TELEPORT:
@@ -433,47 +668,52 @@ monster *monster_trigger_trap(monster *m, struct player *p)
 
     if (m->m_visible)
     {
-        log_add_entry(p->log,
-                      trap_m_message(trap),
-                      monster_get_name(m));
+        log_add_entry(p->log, trap_m_message(trap), monster_get_name(m));
 
         if (eff)
-            log_add_entry(p->log,
-                          effect_get_msg_m_start(eff),
+        {
+            log_add_entry(p->log, effect_get_msg_m_start(eff),
                           monster_get_name(m));
+        }
 
         /* set player's knowlege of trap */
         player_memory_of(p, pos_orig).trap = trap;
     }
 
-    /* has the monster survived the trap? */
-    if (trap_damage(trap) && monster_hp_lose(m, rand_1n(trap_damage(trap))))
+    /* inflict damage caused ba the trap */
+    if (trap_damage(trap))
     {
-        monster_die(m, p->log);
-        m = NULL;
+        if (monster_hp_lose(m, rand_1n(trap_damage(trap))))
+        {
+            monster_die(m, p, NULL);
+            return TRUE;
+        }
+    }
+    else if (trap == TT_TRAPDOOR)
+    {
+        /* destroy the monster if it has left the level */
+        /* FIXME: move monster to the next level (ticket 68) */
+        monster_destroy(m);
+        return TRUE;
     }
 
-    /* destroy the monster if it has left the level */
-    if (trap == TT_TRAPDOOR)
-        monster_destroy(m);
-
-    return m;
+    return FALSE;
 }
 
 
-void monster_die(monster *m, message_log *log)
+void monster_die(monster *m, struct player *p, char *message)
 {
     assert(m != NULL);
 
-    /*
-     * if the player can see the monster and we have been supplied with a log
-     * describe the event
-     */
-    if (m->m_visible && log)
+    if (!message)
     {
-        log_add_entry(log,
-                      "The %s died!",
-                      monster_get_name(m));
+        message = "The %s died!";
+    }
+
+    /* if the player can see the monster describe the event */
+    if (m->m_visible && p)
+    {
+        log_add_entry(p->log, message, monster_get_name(m));
     }
 
     /* drop stuff the monster carries */
@@ -640,8 +880,7 @@ void monster_effect_expire(monster *m, message_log *log)
 
             /* log info */
             if (m->m_visible && effect_get_msg_m_stop(e))
-                log_add_entry(log,
-                              effect_get_msg_m_stop(e),
+                log_add_entry(log, effect_get_msg_m_stop(e),
                               monster_get_name(m));
 
             g_free(e);
@@ -674,8 +913,7 @@ int monster_player_special_attack(monster *m, struct player *p)
             if (pi == PI_ENFORCED)
             {
                 log_add_entry(p->log, "Your %s is dulled by the %s.",
-                              armour_name(p->eq_suit),
-                              monster_get_name(m));
+                              armour_name(p->eq_suit), monster_get_name(m));
             }
             else if (pi == PI_DESTROYED)
             {

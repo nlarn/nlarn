@@ -568,6 +568,310 @@ int spell_sort(gconstpointer a, gconstpointer b)
     return order;
 }
 
+void spell_type_player(spell *s, struct player *p)
+{
+    effect *e = NULL;
+
+    assert(s != NULL && p != NULL && (spell_type(s) == SC_PLAYER));
+
+    e = effect_new(spell_effect(s), game_turn(p->game));
+
+    /* make effects that are permanent by default non-permanent */
+    /* unless it is the spell of healing, which does work this way */
+    if ((e->turns == 1) && (e->type != ET_INC_HP))
+    {
+        e->turns = 100;
+    }
+
+    player_effect_add(p, e);
+}
+
+void spell_type_point(spell *s, struct player *p)
+{
+    monster *monster = NULL;
+    position pos;
+    effect *e;
+    char buffer[61];
+    int amount = 0;
+
+    assert(s != NULL && p != NULL && (spell_type(s) == SC_POINT));
+
+    g_snprintf(buffer, 60, "Select a target for %s.", spell_name(s));
+
+    pos = display_get_position(p, buffer, FALSE, FALSE);
+
+    /* player pressed ESC */
+    if (!pos_valid(pos))
+    {
+        log_add_entry(p->log, "Aborted.");
+        return;
+    }
+
+    monster = level_get_monster_at(p->level, pos);
+
+    if (!monster)
+    {
+        log_add_entry(p->log, "Which monster are you talking about?");
+        return;
+    }
+
+    switch (s->id)
+    {
+        /* dehydration */
+    case SP_DRY:
+        if (monster_hp_lose(monster, 100 + p->lvl))
+        {
+            player_monster_kill(p, monster, spell_msg_succ(s));
+        }
+        break; /* SP_DRY */
+
+        /* drain life */
+    case SP_DRL:
+        amount = min(p->hp - 1, p->hp_max / 2);
+
+        if (monster_hp_lose(monster, amount))
+        {
+            player_monster_kill(p, monster, NULL);
+        }
+
+        player_hp_lose(p, amount, PD_SPELL, SP_DRL);
+
+        break; /* SP_DRL */
+
+        /* finger of death */
+    case SP_FGR:
+        if (chance(1))
+        {
+            player_die(p, PD_SPELL, SP_FGR);
+        }
+
+        if (player_get_wis(p) > rand_m_n(10,20))
+        {
+            if (monster_hp_lose(monster, 2000))
+            {
+                player_monster_kill(p, monster, spell_msg_succ(s));
+            }
+        }
+        else
+        {
+            log_add_entry(p->log, "It didn't work.");
+        }
+
+        break; /* SP_FGR */
+
+        /* polymorph */
+    case SP_PLY:
+        do
+        {
+            monster->type = rand_1n(MT_MAX - 1);
+        }
+        while (monster_is_genocided(monster->type));
+
+        monster->hp = monster_get_hp_max(monster);
+
+        break;
+
+        /* teleport */
+    case SP_TEL:
+        log_add_entry(p->log, "The %s disappears.",
+                      monster_get_name(monster));
+
+        monster->pos = level_find_space(p->level, LE_MONSTER);
+
+        break; /* SP_TEL */
+
+    default:
+        /* spell has an effect, add that to the monster */
+        assert(spell_effect(s) != ET_NONE);
+
+        if (spell_msg_succ(s))
+        {
+            log_add_entry(p->log, spell_msg_succ(s),
+                          monster_get_name(monster));
+        }
+
+        e = effect_new(spell_effect(s), game_turn(p->game));
+
+        if (!e->amount)
+        {
+            e->amount = p->intelligence;
+        }
+
+        /* show message if monster is visible */
+        if (monster->m_visible && effect_get_msg_m_start(e)
+                && !monster_effect(monster, e->type))
+        {
+            log_add_entry(p->log, effect_get_msg_m_start(e),
+                          monster_get_name(monster));
+        }
+
+        /* has to come in the end as e might be destroyed */
+        monster_effect_add(monster, e);
+
+        break;
+    }
+}
+
+void spell_type_ray(spell *s, struct player *p)
+{
+    monster *monster = NULL;
+    position pos;
+    char buffer[61];
+    int amount = 0;
+
+    assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
+
+    g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(s));
+    pos = display_get_position(p, buffer, TRUE, TRUE);
+
+    /* player pressed ESC */
+    if (!pos_valid(pos))
+    {
+        log_add_entry(p->log, "Aborted.");
+        return;
+    }
+
+    if (!(monster = level_get_monster_at(p->level, pos)))
+    {
+        log_add_entry(p->log, "Which monster are you talking about?");
+        return;
+    }
+
+    switch (s->id)
+    {
+    case SP_MLE:
+        amount = rand_1n(((p->lvl + 1) << 1)) + p->lvl + 3;
+        break;
+
+    case SP_SSP:
+        amount = rand_1n(10) + 15 + p->lvl;
+        break;
+
+    case SP_CLD:
+        amount = rand_1n(25) + 20 + p->lvl;
+        break;
+
+    case SP_LIT:
+        amount = rand_1n(25) + 20 + (p->lvl << 1);
+        break;
+    }
+
+    if (level_stationary_at(p->level, pos) == LS_MIRROR)
+    {
+        log_add_entry(p->log, "The mirror reflects your spell! The %s hits you!",
+                      spell_name(s));
+
+        player_hp_lose(p, amount, PD_SPELL, s->id);
+    }
+
+    log_add_entry(p->log, spell_msg_succ(s), monster_get_name(monster));
+
+    if (monster_hp_lose(monster, amount))
+    {
+        player_monster_kill(p, monster, NULL);
+    }
+}
+
+void spell_type_flood(spell *s, struct player *p)
+{
+    position pos;
+    area *range = NULL;
+    level_tile_t type = LT_NONE;
+    int radius = 0;
+    int amount = 0;
+    char buffer[81];
+
+    assert(s != NULL && p != NULL && (spell_type(s) == SC_FLOOD));
+
+    g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(s));
+    pos = display_get_position(p, buffer, FALSE, TRUE);
+
+    /* player pressed ESC */
+    if (!pos_valid(pos))
+    {
+        log_add_entry(p->log, "Aborted.");
+        return;
+    }
+
+    switch (s->id)
+    {
+    case SP_CKL:
+        radius = 3;
+        type = LT_CLOUD;
+        amount = 10 + p->lvl;
+        break;
+
+    case SP_FLO:
+        radius = 4;
+        type = LT_WATER;
+        amount = 25 + p->lvl;
+        break;
+
+    case SP_MFI:
+        radius = 4;
+        type = LT_FIRE;
+        amount = 15 + p->lvl;
+        break;
+    }
+
+    range = area_new_circle_flooded(pos, radius,
+                                    level_get_obstacles(p->level, pos, radius));
+
+    level_set_tiletype(p->level, range, type, amount);
+    area_destroy(range);
+}
+
+void spell_type_blast(spell *s, struct player *p)
+{
+    GPtrArray *mlist;
+    monster *monster = NULL;
+    position pos;
+    int amount = 0;
+    char buffer[61];
+    int i;
+
+    assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
+
+    g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(s));
+    pos = display_get_position(p, buffer, FALSE, TRUE);
+
+    /* player pressed ESC */
+    if (!pos_valid(pos))
+    {
+        log_add_entry(p->log, "Aborted.");
+        return;
+    }
+
+    /* currently only fireball */
+    amount = 25 + p->lvl + rand_0n(25 + p->lvl);
+
+    mlist = level_get_monsters_in(p->level, rect_new_sized(pos, 1));
+
+    for (i = 1; i <= mlist->len; i++)
+    {
+        monster = g_ptr_array_index(mlist, i - 1);
+
+        log_add_entry(p->log, spell_msg_succ(s),
+                      monster_get_name(monster));
+
+        if (monster_hp_lose(monster, amount))
+        {
+            player_monster_kill(p, monster, NULL);
+        }
+    }
+
+    if (pos_in_rect(p->pos, rect_new_sized(pos, 1)))
+    {
+        /* player has been hit by the blast as well */
+        log_add_entry(p->log, "The fireball hits you.");
+
+        player_hp_lose(p, amount - player_effect(p, ET_FIRE_RESISTANCE),
+                       PD_SPELL, SP_BAL);
+    }
+
+    g_ptr_array_free(mlist, FALSE);
+}
+
 void spell_alter_reality(player *p)
 {
     level *nlevel, *olevel;
@@ -644,6 +948,22 @@ void spell_create_sphere(player *p)
     else
     {
         log_add_entry(p->log, "Huh?");
+    }
+}
+
+void spell_cure_blindness(struct player *p)
+{
+    effect *eff = NULL;
+
+    assert(p != NULL);
+
+    if ((eff = player_effect_get(p, ET_BLINDNESS)))
+    {
+        player_effect_del(p, eff);
+    }
+    else
+    {
+        log_add_entry(p->log, "You weren't even blinded!");
     }
 }
 
@@ -741,7 +1061,7 @@ void spell_vaporize_rock(player *p)
         /* xorns take damage from vpr */
         if (monster_hp_lose(m, divert(200, 10)))
         {
-            player_monster_kill(p, m);
+            player_monster_kill(p, m, NULL);
         }
     }
 

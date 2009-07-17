@@ -191,7 +191,7 @@ int player_attack(player *p, monster *m);
 int player_position(player *p, position target);
 void player_update_fov(player *p, int radius);
 int player_level_enter(player *p, level *l);
-void player_monster_kill(player *p, monster *m);
+void player_monster_kill(player *p, monster *m, char *message);
 
 int player_examine(player *p, position pos);
 int player_pickup(player *p);
@@ -253,6 +253,7 @@ int player_item_shop_repair(player *p, item *it);
 /* deal with stationaries */
 int player_altar_desecrate(player *p);
 int player_altar_pray(player *p);
+int player_building_enter(player *p);
 int player_door_close(player *p);
 int player_door_open(player *p);
 int player_fountain_drink(player *p);

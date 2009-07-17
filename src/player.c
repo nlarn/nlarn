@@ -315,7 +315,6 @@ void player_die(player *p, player_cod cause_type, int cause)
 
     log_add_entry(p->log, message);
 
-
     /* resume game if wizard mode is enabled */
     if (game_wizardmode(p->game) && (cause_type != PD_QUIT))
     {
@@ -374,7 +373,6 @@ void player_die(player *p, player_cod cause_type, int cause)
                                    score->dlevel, cscore->hp);
         }
 
-
         display_show_message(title, text->str);
         g_string_free(text, TRUE);
 
@@ -409,7 +407,7 @@ gint64 player_calc_score(player *p, int won)
     /* give points for remaining time if game has been won */
     if (won)
     {
-        score += game_remaining_turns(p->game);
+        score += game_remaining_turns(p->game) * (game_difficulty(p->game) + 1);
     }
 
     return score;
@@ -441,7 +439,10 @@ int player_move(player *p, int direction)
 
     /* impassable */
     if (!level_pos_passable(p->level, target_p))
+    {
+        /* FIXME: implement walk through walls (Ticket 74) */
         return FALSE;
+    }
 
     /* attack - no movement */
     if ((target_m = level_get_monster_at(p->level, target_p)))
@@ -455,7 +456,6 @@ int player_move(player *p, int direction)
     {
         times += player_trigger_trap(p, target_t->trap);
     } /* end trap */
-
 
     if (p->settings.auto_pickup
             && (target_t->ilist && inv_length(target_t->ilist)))
@@ -514,8 +514,7 @@ int player_attack(player *p, monster *m)
         damage = rand_1n(damage);
 
         /* weapon damage due to rust */
-        if ((w != NULL)
-                && (m->type == MT_RUST_MONSTER
+        if ((w != NULL) && (m->type == MT_RUST_MONSTER
                     || m->type == MT_DISENCHANTRESS
                     || m->type == MT_GELATINOUSCUBE)
            )
@@ -550,13 +549,14 @@ int player_attack(player *p, monster *m)
         /* FIXME: if a dragon and orb(s) of dragon slaying: damage *= 3	 */
 
         /* Deal with Vorpal Blade */
-        if ((w != NULL)
-                && (w->type == WT_VORPALBLADE)
+        if ((w != NULL) && (w->type == WT_VORPALBLADE)
                 && chance(5)
                 && monster_has_head(m)
                 && monster_is_beheadable(m))
         {
-            log_add_entry(p->log, "You behead the %s with your Vorpal Blade!", monster_get_name(m));
+            log_add_entry(p->log, "You behead the %s with your Vorpal Blade!",
+            monster_get_name(m));
+
             damage = m->hp;
         }
 
@@ -571,8 +571,7 @@ int player_attack(player *p, monster *m)
         /* inflict damage */
         m->hp -= damage;
 
-        if ((w != NULL)
-                && (m->type >= MT_DEMONLORD_I)
+        if ((w != NULL) && (m->type >= MT_DEMONLORD_I)
                 && (w->type == WT_LANCEOFDEATH)
                 && (m->hp > 0))
         {
@@ -597,11 +596,10 @@ int player_attack(player *p, monster *m)
             monster_update_player_pos(m, p->pos);
         }
 
-
         if (m->hp < 1)
         {
             /* killed the monster */
-            player_monster_kill(p, m);
+            player_monster_kill(p, m, NULL);
         }
     }
     else
@@ -660,9 +658,7 @@ int player_level_enter(player *p, level *l)
 
     if (!(l->visited))
     {
-        level_new(l,
-                  game_difficulty(p->game),
-                  game_mazefile(p->game));
+        level_new(l, game_difficulty(p->game), game_mazefile(p->game));
 
         if (p->stats.deepest_level < l->nlevel)
         {
@@ -719,7 +715,7 @@ int player_level_enter(player *p, level *l)
             pos = level_find_stationary(l, LS_STAIRSUP);
     }
 
-    if (!pos_valid(pos))
+    while (!pos_valid(pos))
     {
         /* been teleported here or something like that, need a random spot */
         pos = level_find_space(l, LE_MONSTER);
@@ -751,17 +747,18 @@ int player_level_enter(player *p, level *l)
         scroll_mapping(p, NULL);
 
     /* recalculate FOV to make ensure correct display after entering a level */
+    /* FIXME: this gives crappy results when level is entered via trapdoor or teleport */
     player_update_fov(p, (player_effect(p, ET_BLINDNESS) ? 0 : 6 + player_effect(p, ET_AWARENESS)));
 
     return TRUE;
 }
 
-void player_monster_kill(player *p, monster *m)
+void player_monster_kill(player *p, monster *m, char *message)
 {
     player_exp_gain(p, monster_get_exp(m));
     p->stats.monsters_killed[m->type] += 1;
 
-    monster_die(m, p->log);
+    monster_die(m, p, message);
 }
 
 int player_examine(player *p, position pos)
@@ -800,10 +797,8 @@ int player_examine(player *p, position pos)
             for (i = 1; i <= inv_length(tile->ilist); i++)
             {
                 it = inv_get(tile->ilist, i - 1);
-                item_describe(it,
-                              player_item_identified(p, it),
-                              FALSE, FALSE,
-                              item_desc, 80);
+                item_describe(it, player_item_identified(p, it),
+                              FALSE, FALSE, item_desc, 80);
 
                 if (i > 1)
                 {
@@ -834,7 +829,6 @@ int player_pickup(player *p)
 
     GPtrArray *callbacks;
     display_inv_callback *callback;
-    int cb;
 
     assert(p != NULL);
 
@@ -851,12 +845,9 @@ int player_pickup(player *p)
 
         it = inv_del(*inv, 0);
 
-        log_add_entry(p->log,
-                      "You pick up %s.",
-                      item_describe(it,
-                                    player_item_identified(p, it),
-                                    FALSE, FALSE,
-                                    item_desc, 80));
+        log_add_entry(p->log, "You pick up %s.",
+                      item_describe(it, player_item_identified(p, it),
+                                    FALSE, FALSE, item_desc, 80));
 
         inv_add(p->inventory, it);
 
@@ -878,10 +869,7 @@ int player_pickup(player *p)
         display_inventory("On the floor", p, *inv, callbacks, FALSE, NULL);
 
         /* clean up callbacks */
-        for (cb = 1; cb <= callbacks->len; cb++)
-            g_free(g_ptr_array_index(callbacks, cb - 1));
-
-        g_ptr_array_free(callbacks, TRUE);
+        display_inv_callbacks_clean(callbacks);
 
         time = 0;
     }
@@ -1099,20 +1087,8 @@ int player_mp_max_lose(player *p, int count)
 int player_spell_cast(player *p)
 {
     int turns = 0;
-    char buffer[61];
 
     spell *spell;
-    effect *eff;
-    position pos;
-    monster *monster = NULL;
-
-    GPtrArray *mlist;
-    int i;
-
-    int amount = 0;
-    int radius = 0;
-    level_tile_t type = LT_NONE;
-    area *range = NULL;
 
     if (player_effect(p, ET_CONFUSION))
     {
@@ -1131,16 +1107,13 @@ int player_spell_cast(player *p)
     /* insufficient mana */
     if (p->mp < spell_level(spell))
     {
-        log_add_entry(p->log,
-                      "You lack the power to cast %s.",
+        log_add_entry(p->log, "You lack the power to cast %s.",
                       spell_name(spell));
 
         return turns;
     }
 
-    log_add_entry(p->log,
-                  "You cast %s.",
-                  spell_name(spell));
+    log_add_entry(p->log, "You cast %s.", spell_name(spell));
 
     /* time usage */
     turns = 1;
@@ -1152,248 +1125,28 @@ int player_spell_cast(player *p)
     {
         /* spells that cause an effect on the player */
     case SC_PLAYER:
-
-        assert(spell_effect(spell) > ET_NONE);
-
-        eff = effect_new(spell_effect(spell), game_turn(p->game));
-
-        /* make effects that are permanent by default non-permanent */
-        /* unless it is the spell of healing, which does work this way */
-        if ((eff->turns == 1) && (eff->type != ET_INC_HP))
-        {
-            eff->turns = 100;
-        }
-
-        player_effect_add(p, eff);
-
-        break; /* SC_PLAYER */
+        spell_type_player(spell, p);
+        break;
 
         /* spells that cause an effect on a monster */
     case SC_POINT:
-
-        g_snprintf(buffer, 60, "Select a target for %s.", spell_name(spell));
-        pos = display_get_position(p, buffer, FALSE, FALSE);
-        monster = level_get_monster_at(p->level, pos);
-
-        if (!monster)
-        {
-            log_add_entry(p->log, "Which monster are you talking about?");
-            break;
-        }
-
-        switch (spell->id)
-        {
-
-            /* dehydration */
-        case SP_DRY:
-            if (monster_hp_lose(monster, 100 + p->lvl))
-            {
-                log_add_entry(p->log,
-                              spell_msg_succ(spell),
-                              monster_get_name(monster));
-
-                player_monster_kill(p, monster);
-            }
-            break; /* SP_DRY */
-
-            /* drain life */
-        case SP_DRL:
-            amount = min(p->hp - 1, p->hp_max / 2);
-
-            if (monster_hp_lose(monster, amount))
-                player_monster_kill(p, monster);
-
-            player_hp_lose(p, amount, PD_SPELL, SP_DRL);
-
-            break; /* SP_DRL */
-
-            /* finger of death */
-        case SP_FGR:
-            if (chance(1))
-            {
-                player_die(p, PD_SPELL, SP_FGR);
-            }
-
-            if (player_get_wis(p) > rand_m_n(10,20))
-            {
-                if (monster_hp_lose(monster, 2000))
-                {
-                    log_add_entry(p->log,
-                                  spell_msg_succ(spell),
-                                  monster_get_name(monster));
-
-                    player_monster_kill(p, monster);
-                }
-            }
-            else
-            {
-                log_add_entry(p->log, "It didn't work.");
-            }
-
-            break; /* SP_FGR */
-
-            /* polymorph */
-        case SP_PLY:
-            do
-            {
-                monster->type = rand_1n(MT_MAX);
-            }
-            while (monster_is_genocided(monster->type));
-            monster->hp = monster_get_hp_max(monster);
-
-            break;
-
-            /* teleport */
-        case SP_TEL:
-            log_add_entry(p->log, "The %s disappears.", monster_get_name(monster));
-            monster->pos = level_find_space(p->level, LE_MONSTER);
-
-            break; /* SP_TEL */
-
-        default:
-            /* spell has an effect, add that to the monster */
-            assert(spell_effect(spell) != ET_NONE);
-
-            if (spell_msg_succ(spell))
-                log_add_entry(p->log, spell_msg_succ(spell),
-                              monster_get_name(monster));
-
-            eff = effect_new(spell_effect(spell), game_turn(p->game));
-            if (!eff->amount) eff->amount = p->intelligence;
-
-            /* show message if monster is visible */
-            if (monster->m_visible
-                    && effect_get_msg_m_start(eff)
-                    && !monster_effect(monster, eff->type))
-            {
-                log_add_entry(p->log,
-                              effect_get_msg_m_start(eff),
-                              monster_get_name(monster));
-            }
-
-            /* has to come in the end as eff might be destroyed */
-            monster_effect_add(monster, eff);
-
-            break;
-
-        } /* SC_POINT */
-
+        spell_type_point(spell, p);
         break;
-    case SC_RAY:    /* creates a ray */
 
-        g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(spell));
-        pos = display_get_position(p, buffer, TRUE, TRUE);
+        /* creates a ray */
+    case SC_RAY:
+        spell_type_ray(spell, p);
+        break;
 
-        if (pos_valid(pos) && (monster = level_get_monster_at(p->level, pos)))
-        {
-            switch (spell->id)
-            {
-            case SP_MLE:
-                amount = rand_1n(((p->lvl + 1) << 1)) + p->lvl + 3;
-                break;
+        /* effect pours like water */
+    case SC_FLOOD:
+        spell_type_flood(spell, p);
+        break;
 
-            case SP_SSP:
-                amount = rand_1n(10) + 15 + p->lvl;
-                break;
-
-            case SP_CLD:
-                amount = rand_1n(25) + 20 + p->lvl;
-                break;
-
-            case SP_LIT:
-                amount = rand_1n(25) + 20 + (p->lvl << 1);
-                break;
-            }
-
-            log_add_entry(p->log, spell_msg_succ(spell), monster_get_name(monster));
-
-            if (monster_hp_lose(monster, amount))
-                player_monster_kill(p, monster);
-        }
-        else
-        {
-            log_add_entry(p->log, "Aborted.");
-        }
-
-        break; /* SC_RAY */
-
-    case SC_FLOOD: /* effect pours like water */
-
-        g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(spell));
-        pos = display_get_position(p, buffer, FALSE, TRUE);
-
-        if (pos_valid(pos))
-        {
-            switch (spell->id)
-            {
-            case SP_CKL:
-                radius = 3;
-                type = LT_CLOUD;
-                amount = 10 + p->lvl;
-                break;
-
-            case SP_FLO:
-                radius = 4;
-                type = LT_WATER;
-                amount = 25 + p->lvl;
-                break;
-
-            case SP_MFI:
-                radius = 4;
-                type = LT_FIRE;
-                amount = 15 + p->lvl;
-                break;
-            }
-
-            range = area_new_circle_flooded(pos, radius,
-                                            level_get_obstacles(p->level, pos, radius));
-
-            level_set_tiletype(p->level, range, type, amount);
-            area_destroy(range);
-        }
-        else
-        {
-            log_add_entry(p->log, "Trust me, you don't.");
-        }
-
-        break; /* SC_FLOOD */
-
-    case SC_BLAST: /* effect occurs like an explosion */
-
-        g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(spell));
-        pos = display_get_position(p, buffer, FALSE, TRUE);
-
-        /* currently only fireball */
-        amount = 25 + p->lvl + rand_0n(25 + p->lvl);
-
-        mlist = level_get_monsters_in(p->level, rect_new_sized(pos, 1));
-
-        for (i = 1; i <= mlist->len; i++)
-        {
-            monster = g_ptr_array_index(mlist, i - 1);
-
-            log_add_entry(p->log,
-                          spell_msg_succ(spell),
-                          monster_get_name(monster));
-
-            if (monster_hp_lose(monster, amount))
-            {
-                player_monster_kill(p, monster);
-            }
-        }
-
-        if (pos_in_rect(p->pos, rect_new_sized(pos, 1)))
-        {
-            /* player has been hit by the blast as well */
-            log_add_entry(p->log, "The fireball hits you.");
-
-            player_hp_lose(p, amount - player_effect(p, ET_FIRE_RESISTANCE),
-                           PD_SPELL, SP_BAL);
-        }
-
-        g_ptr_array_free(mlist, FALSE);
-
-        break; /* SC_BLAST */
+        /* effect occurs like an explosion */
+    case SC_BLAST:
+        spell_type_blast(spell, p);
+        break;
 
     case SC_OTHER:  /* unclassified */
 
@@ -1401,10 +1154,7 @@ int player_spell_cast(player *p)
         {
             /* cure blindness */
         case SP_CBL:
-            if ((eff = player_effect_get(p, ET_BLINDNESS)))
-                player_effect_del(p, eff);
-            else
-                log_add_entry(p->log, "You weren't even blinded!");
+            spell_cure_blindness(p);
             break;
 
             /* create monster */
@@ -1480,8 +1230,7 @@ int player_spell_learn(player *p, int spell_type)
     if (!player_spell_known(p, spell_type))
     {
         s = spell_new(spell_type);
-        /* FIXME: this is very dowdy */
-        s->learnt = p->log->gtime;
+        s->learnt = game_turn(p->game);
 
         /* TODO: add a check for intelligence */
         if (spell_level(s) > p->lvl)
@@ -1569,7 +1318,6 @@ int player_spell_known(player *p, int spell_type)
 
 void player_effect_add(player *p, effect *e)
 {
-
     assert(p != NULL && e != NULL);
 
     if (effect_get_msg_start(e))
@@ -1716,7 +1464,7 @@ int player_effect_del(player *p, effect *e)
     assert(p != NULL && e != NULL && e->type > ET_NONE && e->type < ET_MAX);
 
     if (effect_get_msg_stop(e))
-        log_add_entry(p->log, "%s", effect_get_msg_stop(e));
+        log_add_entry(p->log, effect_get_msg_stop(e));
 
     return effect_del(p->effects, e);
 }
@@ -1761,9 +1509,8 @@ int player_inv_display(player *p)
 {
     GPtrArray *callbacks;
     display_inv_callback *callback;
-    int cb;
 
-    assert(p!= NULL);
+    assert(p != NULL);
 
     if (inv_length(p->inventory) == 0)
     {
@@ -1811,10 +1558,7 @@ int player_inv_display(player *p)
     display_inventory("Inventory", p, p->inventory, callbacks, FALSE, NULL);
 
     /* clean up */
-    for (cb = 1; cb <= callbacks->len; cb++)
-        g_free(g_ptr_array_index(callbacks, cb - 1));
-
-    g_ptr_array_free(callbacks, TRUE);
+    display_inv_callbacks_clean(callbacks);
 
     return TRUE;
 }
@@ -1877,10 +1621,8 @@ int player_item_equip(player *p, item *it)
             it->bonus_known = TRUE;
 
             log_add_entry(p->log, "You are now wearing %s.",
-                          item_describe(it,
-                                        player_item_identified(p, it),
-                                        TRUE, FALSE,
-                                        description, 60));
+                          item_describe(it, player_item_identified(p, it),
+                                        TRUE, FALSE, description, 60));
 
             *islot = it;
         }
@@ -1895,10 +1637,8 @@ int player_item_equip(player *p, item *it)
         if (islot != NULL)
         {
             log_add_entry(p->log, "You put %s on.",
-                          item_describe(it,
-                                        player_item_identified(p, it),
-                                        TRUE, TRUE,
-                                        description, 60));
+                          item_describe(it, player_item_identified(p, it),
+                                        TRUE, TRUE, description, 60));
 
             *islot = it;
 
@@ -1917,20 +1657,16 @@ int player_item_equip(player *p, item *it)
         {
             p->eq_weapon = it;
             log_add_entry(p->log, "You now wield %s.",
-                          item_describe(it,
-                                        player_item_identified(p, it),
-                                        TRUE, TRUE,
-                                        description, 60));
+                          item_describe(it, player_item_identified(p, it),
+                                        TRUE, TRUE, description, 60));
 
             time = 2 + weapon_is_twohanded(p->eq_weapon);
 
             if (it->cursed)
             {
                 log_add_entry(p->log, "The %s welds itself into your hand.",
-                              item_describe(it,
-                                            player_item_identified(p, it),
-                                            TRUE, TRUE,
-                                            description, 60));
+                              item_describe(it, player_item_identified(p, it),
+                                            TRUE, TRUE, description, 60));
 
                 it->curse_known = TRUE;
             }
@@ -2014,8 +1750,7 @@ int player_item_unequip(player *p, item *it)
             {
                 log_add_entry(p->log, "You you put away %s.",
                               item_describe(it, player_item_identified(p, it),
-                                            TRUE, TRUE,
-                                            desc, 60));
+                                            TRUE, TRUE, desc, 60));
 
                 time = 2 + weapon_is_twohanded(p->eq_weapon);
                 p->eq_weapon = NULL;
@@ -2025,8 +1760,7 @@ int player_item_unequip(player *p, item *it)
                 log_add_entry(p->log, "You can't put away the %s. " \
                               "It's welded into your hands.",
                               item_describe(it, player_item_identified(p, it),
-                                            TRUE, TRUE,
-                                            desc, 60));
+                                            TRUE, TRUE, desc, 60));
             }
         }
         break;
@@ -2039,16 +1773,14 @@ int player_item_unequip(player *p, item *it)
         {
             log_add_entry(p->log, "You finish taking off %s.",
                           item_describe(it, player_item_identified(p, it),
-                                        TRUE, TRUE,
-                                        desc, 60));
+                                        TRUE, TRUE, desc, 60));
             *aslot = NULL;
         }
         else
         {
             log_add_entry(p->log, "You can't take of the %s.%s",
                           item_describe(it, player_item_identified(p, it),
-                                        TRUE, TRUE,
-                                        desc, 60),
+                                        TRUE, TRUE, desc, 60),
                           it->curse_known ? "" : " It appears to be cursed.");
             it->curse_known = TRUE;
         }
@@ -2060,8 +1792,7 @@ int player_item_unequip(player *p, item *it)
         {
             log_add_entry(p->log, "You remove %s.",
                           item_describe(it, player_item_identified(p, it),
-                                        TRUE, TRUE,
-                                        desc, 60));
+                                        TRUE, TRUE, desc, 60));
 
             player_effect_del(p, (*rslot)->effect);
             *rslot = NULL;
@@ -2071,12 +1802,10 @@ int player_item_unequip(player *p, item *it)
         {
             log_add_entry(p->log, "You can not remove the %s.%s",
                           item_describe(it, player_item_identified(p, it),
-                                        TRUE, TRUE,
-                                        desc, 60),
+                                        TRUE, TRUE, desc, 60),
                           it->curse_known ? "" : " It appears to be cursed.");
 
             it->curse_known = TRUE;
-
         }
     }
 
@@ -2409,8 +2138,7 @@ int player_item_use(player *p, item *it)
 
             case 1:
                 /* learnt spell */
-                log_add_entry(p->log,
-                              "You master the spell \"%s\".",
+                log_add_entry(p->log, "You master the spell \"%s\".",
                               book_name(it));
 
                 break;
@@ -2655,12 +2383,9 @@ int player_item_drop(player *p, item *it)
         level_ilist_at(p->level, p->pos) = inv_new();
 
     inv_add(level_ilist_at(p->level, p->pos), it);
-    log_add_entry(p->log,
-                  "You drop %s.",
-                  item_describe(it,
-                                player_item_identified(p, it),
-                                FALSE, FALSE,
-                                desc, 60));
+    log_add_entry(p->log, "You drop %s.",
+                  item_describe(it, player_item_identified(p, it),
+                                FALSE, FALSE, desc, 60));
 
     return TRUE;
 }
@@ -2684,12 +2409,9 @@ int player_item_pickup(player *p, item *it)
 
     inv_del_element(level_ilist_at(p->level, p->pos), it);
 
-    log_add_entry(p->log,
-                  "You pick up %s.",
-                  item_describe(it,
-                                player_item_identified(p, it),
-                                FALSE, FALSE,
-                                desc, 60));
+    log_add_entry(p->log, "You pick up %s.",
+                  item_describe(it, player_item_identified(p, it),
+                                FALSE, FALSE, desc, 60));
 
     /* this has to come after the logging as it can be freed at this point
        ->stackable item */
@@ -3056,6 +2778,44 @@ int player_altar_pray(player *p)
     return 1;
 }
 
+int player_building_enter(player *p)
+{
+    int moves_count = 0;
+
+    switch (level_stationary_at(p->level, p->pos))
+    {
+    case LS_BANK:
+    case LS_BANK2:
+        moves_count = building_bank(p);
+        break;
+
+    case LS_DNDSTORE:
+        moves_count = building_dndstore(p);
+        break;
+
+    case LS_HOME:
+        moves_count = building_home(p);
+        break;
+
+    case LS_LRS:
+        moves_count = building_lrs(p);
+        break;
+
+    case LS_SCHOOL:
+        moves_count = building_school(p);
+        break;
+
+    case LS_TRADEPOST:
+        moves_count = building_tradepost(p);
+        break;
+
+    default:
+        log_add_entry(p->log, "I seen no building here.");
+    }
+
+    return moves_count;
+}
+
 int player_door_close(player *p)
 {
     /* position used to interact with stationaries */
@@ -3417,7 +3177,6 @@ int player_throne_pillage(player *p)
         return 0;
     }
 
-
     if (chance(25))
     {
         if (!level_ilist_at(p->level, p->pos))
@@ -3726,8 +3485,10 @@ static int player_trigger_trap(player *p, trap_t trap)
 
         default:
             if (trap_damage(trap))
+            {
                 player_hp_lose(p, rand_1n(trap_damage(trap)) + p->level->nlevel,
                                PD_TRAP, trap);
+            }
 
             /* if there is an effect on the trap add it to player's effects. */
             if (trap_effect(trap) && chance(trap_effect_chance(trap)))
@@ -3740,15 +3501,12 @@ static int player_trigger_trap(player *p, trap_t trap)
 
                 player_effect_add(p, effect_new(trap_effect(trap), game_turn(p->game)));
             }
-
         }
 
     }
     else if (player_memory_of(p, p->pos).trap == trap)
     {
-        log_add_entry(p->log,
-                      "You evade the %s.",
-                      trap_description(trap));
+        log_add_entry(p->log, "You evade the %s.", trap_description(trap));
     }
 
     return time;
@@ -4028,6 +3786,11 @@ static char *player_death_description(game_score_t *score, int verbose)
     case PD_CURSE:
         g_string_append_printf(text, " by a cursed %s.",
                                item_get_name_sg(score->cause));
+        break;
+
+    case PD_STATIONARY:
+        /* currently only the fountain can cause death */
+        g_string_append(text, " by toxic water from a fountain.");
         break;
 
     default:

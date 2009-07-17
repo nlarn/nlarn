@@ -125,7 +125,7 @@ int scroll_annihilate(struct player *p, item *scroll)
         if (m->type < MT_DEMONLORD_II)
         {
             experience = monster_get_exp(m);
-            player_monster_kill(p, m);
+            player_monster_kill(p, m, NULL);
         }
         else
         {
