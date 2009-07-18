@@ -185,7 +185,7 @@ int building_bank(player *p)
 int building_dndstore(player *p)
 {
     int turns = 2;
-    int i;
+    int id, loop, count;
     item_t it = IT_NONE;
     GPtrArray *callbacks;
     display_inv_callback *callback;
@@ -205,14 +205,29 @@ int building_dndstore(player *p)
     {
         store_stock = inv_new();
 
-        for (i = 0; i < 50; i++)
+        for (it = 1; it < IT_MAX; it++)
         {
-            while (it == IT_NONE || it == IT_GOLD || it == IT_GEM || it == IT_CONTAINER)
-                it = rand_1n(IT_MAX);
+            if (it == IT_GOLD || it == IT_GEM || it == IT_CONTAINER)
+            {
+                continue;
+            }
 
-            inv_add(store_stock, item_create_random(it));
+            if (item_is_stackable(it))
+            {
+                count = 3;
+            }
+            else
+            {
+                count = 1;
+            }
 
-            it = IT_NONE;
+            for (loop = 0; loop < count; loop++)
+            {
+                for (id = 1; id < item_get_max_id(it); id++)
+                {
+                    inv_add(store_stock, item_new(it, id, 0));
+                }
+            }
         }
     }
 
