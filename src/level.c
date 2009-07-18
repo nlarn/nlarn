@@ -79,6 +79,24 @@ const level_stationary_data level_stationaries[LS_MAX] =
     { LS_BANK2,         'B',  DC_WHITE,   "This is a branch office of the bank of Larn.", 1, 0, },
 };
 
+const char *level_names[LEVEL_MAX] =
+{
+    "Town",
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D7",
+    "D8",
+    "D9",
+    "D10",
+    "V1",
+    "V2",
+    "V3"
+};
+
 void level_new(level *l, int difficulty, char *mazefile)
 {
     int ret;

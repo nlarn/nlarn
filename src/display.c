@@ -269,11 +269,11 @@ int display_paint_screen(player *p)
     mvprintw(13, LEVEL_MAX_X + 3, "$%-7d", player_get_gold(p));
     clrtoeol();
 
-    mvprintw(15, LEVEL_MAX_X + 3, "Levl: %2d", p->level->nlevel);
-    clrtoeol();
     mvprintw(16, LEVEL_MAX_X + 3, "t %-7d", p->log->gtime);
     clrtoeol();
 
+    mvprintw(18, LEVEL_MAX_X + 2, "Lvl: %s", level_name(p->level));
+    clrtoeol();
 
     /* *** MESSAGES *** */
     /* number of lines which can be displayed */

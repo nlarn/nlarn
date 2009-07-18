@@ -185,6 +185,7 @@ void level_expire_timer(level *l, guint8 count);
 
 extern const level_tile_data level_tiles[LT_MAX];
 extern const level_stationary_data level_stationaries[LS_MAX];
+extern const char *level_names[LEVEL_MAX];
 
 /* Macros */
 
@@ -206,6 +207,8 @@ extern const level_stationary_data level_stationaries[LS_MAX];
 #define level_timer_at(l,pos)      ((l)->map[(pos).y][(pos).x].timer)
 #define level_trap_at(l,pos)       ((l)->map[(pos).y][(pos).x].trap)
 #define level_stationary_at(l,pos) ((l)->map[(pos).y][(pos).x].stationary)
+
+#define level_name(l) (level_names[(l)->nlevel])
 
 #define level_pos_transparent(l,pos) (lt_is_transparent((l)->map[(pos).y][(pos).x].type) \
                                         && ls_is_transparent((l)->map[(pos).y][(pos).x].stationary))
