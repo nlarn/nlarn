@@ -185,8 +185,6 @@ int building_bank(player *p)
 int building_dndstore(player *p)
 {
     int turns = 2;
-    int id, loop, count;
-    item_t it = IT_NONE;
     GPtrArray *callbacks;
     display_inv_callback *callback;
 
@@ -199,37 +197,6 @@ int building_dndstore(player *p)
                                "break 'em, you pay for 'em.";
 
     assert(p != NULL);
-
-    /* generate stock if nothing is present */
-    if (!store_stock)
-    {
-        store_stock = inv_new();
-
-        for (it = 1; it < IT_MAX; it++)
-        {
-            if (it == IT_GOLD || it == IT_GEM || it == IT_CONTAINER)
-            {
-                continue;
-            }
-
-            if (item_is_stackable(it))
-            {
-                count = 3;
-            }
-            else
-            {
-                count = 1;
-            }
-
-            for (loop = 0; loop < count; loop++)
-            {
-                for (id = 1; id < item_get_max_id(it); id++)
-                {
-                    inv_add(store_stock, item_new(it, id, 0));
-                }
-            }
-        }
-    }
 
     /* no business if player has outstanding taxes */
     if (p->outstanding_taxes)
@@ -258,6 +225,61 @@ int building_dndstore(player *p)
     display_inv_callbacks_clean(callbacks);
 
     return turns;
+}
+
+void building_dndstore_init()
+{
+    int id, loop, count;
+    item_t it = IT_NONE;
+
+    /* do nothing if the store has already been initialized */
+    if (store_stock)
+        return;
+
+    /* generate stock if nothing is present */
+    store_stock = inv_new();
+
+    for (it = 1; it < IT_MAX; it++)
+    {
+        if (it == IT_GOLD || it == IT_GEM || it == IT_CONTAINER)
+        {
+            continue;
+        }
+
+        if (item_is_stackable(it) && it != IT_BOOK)
+        {
+            count = 3;
+        }
+        else
+        {
+            count = 1;
+        }
+
+        for (loop = 0; loop < count; loop++)
+        {
+            for (id = 1; id < item_get_max_id(it); id++)
+            {
+                /* dont want to offer this one in the store */
+                if (it == IT_POTION && id == PO_CURE_DIANTHR)
+                    continue;
+
+                inv_add(store_stock, item_new(it, id, 0));
+            }
+        }
+    }
+
+}
+
+void building_dndstore_item_add(item *i)
+{
+    assert (i != NULL);
+    inv_add(store_stock, i);
+}
+
+void building_dndstore_item_del(item *i)
+{
+    assert (i != NULL);
+    inv_del_element(store_stock, i);
 }
 
 int building_home(player *p)

@@ -139,6 +139,9 @@ game *game_new(int argc, char *argv[])
     ring_material_shuffle();
     scroll_desc_shuffle();
 
+    /* fill store with goods */
+    building_dndstore_init();
+
     return g;
 }
 
@@ -252,7 +255,7 @@ void game_spin_the_wheel(game *g, int times)
 
     assert(g != NULL && times > 0);
 
-    level_expire_timer(g->p->level, times);
+    level_timer(g->p->level, times, g->p);
 
     for (turn = 0; turn < times; turn++)
     {

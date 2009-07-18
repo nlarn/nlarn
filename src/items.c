@@ -323,8 +323,8 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data)
     if (item_a->type == item_b->type)
     {
         /* both items are of identical type. compare their names. */
-        order = g_ascii_strcasecmp(item_desc_get(item_a, player_item_identified(p, item_a)),
-                                   item_desc_get(item_b, player_item_identified(p, item_b)));
+        order = g_ascii_strcasecmp(item_desc_get(item_a, player_item_known(p, item_a)),
+                                   item_desc_get(item_b, player_item_known(p, item_b)));
     }
     else if (item_a->type < item_b->type)
         order = -1;

@@ -20,7 +20,7 @@
 
 static void level_fill_with_stationary(level *l);
 static void level_fill_with_objects(level *l);
-static int level_fill_with_traps(level *l);
+static void level_fill_with_traps(level *l);
 
 static int level_load_from_file(level *l, char *mazefile, int which);
 static void level_make_maze(level *l);
@@ -35,20 +35,19 @@ static level_path_element *level_path_element_in_list(level_path_element* el, GP
 static level_path_element *level_path_find_best(level *l, level_path *path);
 static GPtrArray *level_path_get_neighbours(level *l, position pos);
 
-
-
 const level_tile_data level_tiles[LT_MAX] =
 {
-    /* type         img  color     desc          pa tr */
-    { LT_NONE,      ' ', DC_NONE,  NULL,         0, 0 },
-    { LT_GRASS,     '"', DC_GREEN, "grass",      1, 1 },
-    { LT_FLOOR,     ' ', DC_NONE,  "floor",      1, 1 },
-    { LT_WATER,     '~', DC_BLUE,  "water",      1, 1 },
-    { LT_DEEPWATER, '~', DC_BLUE,  "deep water", 0, 1 },
-    { LT_LAVA,      '~', DC_RED,   "lava",       0, 1 },
-    { LT_FIRE,      '*', DC_RED,   "fire",       1, 1 },
-    { LT_CLOUD,     '*', DC_WHITE, "toxic gas",  1, 1 },
-    { LT_WALL,      '#', DC_WHITE, "wall",       0, 0 },
+    /* type         img  color      desc          pa tr */
+    { LT_NONE,      ' ', DC_NONE,   NULL,         0, 0 },
+    { LT_GRASS,     '"', DC_GREEN,  "grass",      1, 1 },
+    { LT_DIRT,      ',', DC_YELLOW, "dirt",       1, 1 },
+    { LT_FLOOR,     ' ', DC_NONE,   "floor",      1, 1 },
+    { LT_WATER,     '~', DC_BLUE,   "water",      1, 1 },
+    { LT_DEEPWATER, '~', DC_BLUE,   "deep water", 0, 1 },
+    { LT_LAVA,      '~', DC_RED,    "lava",       0, 1 },
+    { LT_FIRE,      '*', DC_RED,    "fire",       1, 1 },
+    { LT_CLOUD,     '*', DC_WHITE,  "toxic gas",  1, 1 },
+    { LT_WALL,      '#', DC_WHITE,  "wall",       0, 0 },
 };
 
 const level_stationary_data level_stationaries[LS_MAX] =
@@ -74,10 +73,13 @@ const level_stationary_data level_stationaries[LS_MAX] =
     { LS_DNDSTORE,      'D',  DC_WHITE,   "There is a DND store here.",                   1, 0, },
     { LS_TRADEPOST,     'T',  DC_WHITE,   "You have found the Larn trading Post.",        1, 0, },
     { LS_LRS,           'L',  DC_WHITE,   "There is an LRS office here.",                 1, 0, },
-    { LS_SCHOOL,        'S',  DC_WHITE,   "This is  the College of Larn.",                1, 0, },
+    { LS_SCHOOL,        'S',  DC_WHITE,   "This is the College of Larn.",                 1, 0, },
     { LS_BANK,          'B',  DC_WHITE,   "This is the bank of Larn.",                    1, 0, },
     { LS_BANK2,         'B',  DC_WHITE,   "This is a branch office of the bank of Larn.", 1, 0, },
 };
+
+/* keep track which levels have been used before */
+static int level_used[23] = { 1, 0 };
 
 const char *level_names[LEVEL_MAX] =
 {
@@ -99,7 +101,7 @@ const char *level_names[LEVEL_MAX] =
 
 void level_new(level *l, int difficulty, char *mazefile)
 {
-    int ret;
+    gboolean level_loaded = FALSE;
     int x, y;
 
     assert(l != NULL);
@@ -117,11 +119,10 @@ void level_new(level *l, int difficulty, char *mazefile)
     if (((l->nlevel > 1) && chance(25)) || l->nlevel == LEVEL_DMAX - 1 || l->nlevel == LEVEL_MAX - 1)
     {
         /* read maze from data file */
-        ret = level_load_from_file(l, mazefile, -1);
-        /* FIXME: proper error handling */
-        assert(ret == TRUE);
+        level_loaded = level_load_from_file(l, mazefile, -1);
     }
-    else
+
+    if (!level_loaded)
     {
         /* generate random map */
         level_make_maze(l);
@@ -153,25 +154,34 @@ void level_new(level *l, int difficulty, char *mazefile)
     }
 }
 
-void level_dump(level *l)
+char *level_dump(level *l)
 {
     position pos;
+    GString *map;
+
+    map = g_string_new_len(NULL, LEVEL_SIZE);
 
     for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
         {
-            if (level_stationary_at(l, pos) == LS_NONE)
+            if (level_trap_at(l, pos))
             {
-                printf("%c", lt_get_image(level_tiletype_at(l, pos)));
+                g_string_append_c(map, '^');
+            }
+            else if (level_stationary_at(l, pos))
+            {
+                g_string_append_c(map, ls_get_image(level_stationary_at(l, pos)));
             }
             else
             {
-                printf("%c", ls_get_image(level_stationary_at(l, pos)));
+                g_string_append_c(map, lt_get_image(level_tiletype_at(l, pos)));
             }
         }
-        printf("\n");
+        g_string_append_c(map, '\n');
     }
+
+    return g_string_free(map, FALSE);
 }
 
 void level_destroy(level *l)
@@ -249,7 +259,6 @@ position level_find_space_in(level *l, rectangle where, level_element_t element)
     }
     while (!level_validate_position(l, pos, element)
             && !pos_identical(pos, pos_orig));
-
 
     if (pos_identical(pos, pos_orig))
     {
@@ -354,12 +363,12 @@ gboolean level_validate_position(level *l, position pos, level_element_t element
 
     case LE_ITEM:
         /* we can stack like mad, so we only need to check if there is an open space */
-        if (lt_is_passable(tile->type) && (tile->stationary == LS_NONE))
+        if (level_pos_passable(l, pos) && (tile->stationary == LS_NONE))
             return TRUE;
         break;
 
     case LE_MONSTER:
-        if (lt_is_passable(tile->type) && !level_is_monster_at(l, pos))
+        if (level_pos_passable(l, pos) && !level_is_monster_at(l, pos))
             return TRUE;
         break;
 
@@ -601,8 +610,10 @@ void level_set_tiletype(level *l, area *area, level_tile_t type, guint8 duration
                 pos.x < area->start_x + area->size_x;
                 pos.x++, x++)
         {
+            /* if the position is marked in area set the tile to type */
             if (area_point_get(area, x, y))
             {
+                level_basetype_at(l, pos) = level_tiletype_at(l, pos);
                 level_tiletype_at(l, pos) = type;
                 level_timer_at(l ,pos) = duration;
             }
@@ -684,7 +695,9 @@ GPtrArray *level_get_monsters_in(level *l, rectangle area)
         m = (monster *)g_ptr_array_index(l->mlist, el - 1);
 
         if (pos_in_rect(m->pos, area))
+        {
             g_ptr_array_add(monsters, m);
+        }
     }
 
     return monsters;
@@ -703,16 +716,13 @@ int level_fill_with_live(level *l)
 
     new_monster_count = rand_m_n(2, 14) + (l->nlevel >> 1);
 
-    if (l->mlist->len > new_monster_count)
-    {
-        /* there are some monsters on the level, add only a few */
-        new_monster_count -= l->mlist->len;
+    /* if there are some monsters on the level, add only a few */
+    new_monster_count -= l->mlist->len;
 
-        if (new_monster_count < 0)
-        {
-            /* sanity check */
-            new_monster_count = 1;
-        }
+    if (new_monster_count < 0)
+    {
+        /* sanity check */
+        new_monster_count = 1;
     }
 
     for (i = 0; i <= new_monster_count; i++)
@@ -723,9 +733,14 @@ int level_fill_with_live(level *l)
     return(new_monster_count);
 }
 
-void level_expire_timer(level *l, guint8 count)
+void level_timer(level *l, guint8 count, struct player *p)
 {
     position pos;
+    item *it;
+    int num;
+    int impact;
+    char *impact_desc;
+    char item_desc[61];
 
     for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
     {
@@ -735,21 +750,83 @@ void level_expire_timer(level *l, guint8 count)
             {
                 level_timer_at(l, pos) -= min(level_timer_at(l, pos), count);
 
+                /* affect items */
+                if (level_ilist_at(l, pos))
+                {
+                    for (num = 1; num <= inv_length(level_ilist_at(l, pos)); num++)
+                    {
+                        it = inv_get(level_ilist_at(l, pos), num - 1);
+
+                        switch (level_tiletype_at(l, pos))
+                        {
+                        case LT_FIRE:
+                            impact = item_burn(it);
+                            impact_desc = "burn";
+                            break;
+
+                        case LT_CLOUD:
+                            impact = item_corrode(it);
+                            impact_desc = "corrode";
+                            break;
+
+                        case LT_WATER:
+                            impact = item_rust(it);
+                            impact_desc = "rust";
+                            break;
+                        default:
+                            impact = PI_NONE;
+                            break;
+                        }
+
+                        /* notifiy player of impact if the item is visible */
+                        if (p && impact && level_pos_is_visible(l, p->pos, pos))
+                        {
+                            item_describe(it, player_item_known(p, it),
+                                          (it->count == 1), TRUE, item_desc, 60);
+
+                            if (impact < PI_DESTROYED)
+                            {
+                                log_add_entry(p->log, "The %s %s%s.", item_desc,
+                                              impact_desc, (it->count == 1) ? "s" : "");
+                            }
+                            else
+                            {
+                                log_add_entry(p->log, "The %s %s destroyed.", item_desc,
+                                              (it->count == 1) ? "is" : "are");
+                            }
+                        }
+
+                        if (impact == PI_DESTROYED)
+                        {
+                            inv_del_element(level_ilist_at(l, pos), it);
+                            item_destroy(it);
+                        }
+                    } /* foreach item */
+                } /* if leve_ilist_at */
+
+                /* reset tile type if temporary effect has expired */
                 if (level_timer_at(l, pos) == 0)
                 {
-                    /* temporary effect has expired */
-                    level_tiletype_at(l, pos) = LT_FLOOR;
+                    if ((level_tiletype_at(l, pos) == LT_FIRE)
+                            && (level_basetype_at(l, pos) == LT_GRASS))
+                    {
+                        level_tiletype_at(l, pos) = LT_DIRT;
+                        level_basetype_at(l, pos) = LT_DIRT;
+                    }
+                    else
+                    {
+                        level_tiletype_at(l, pos) = level_basetype_at(l, pos);
+                    }
                 }
-            }
-        }
-    }
+            } /* if level_timer_at */
+        } /* for pos.x */
+    } /* for pos.y */
 }
 
 static void level_fill_with_stationary(level *l)
 {
     position pos;
     int i;						/* loop var */
-    int count;					/* random item amount */
 
     if (l->nlevel == 0)
     {
@@ -797,7 +874,7 @@ static void level_fill_with_stationary(level *l)
         level_stationary_at(l,pos) = LS_ELEVATORUP;
     }
 
-    /*  make the fixed objects in the maze STAIRS */
+    /*  make the fixed objects in the maze: STAIRS */
     if ((l->nlevel > 0) && (l->nlevel != LEVEL_DMAX - 1) && (l->nlevel != LEVEL_MAX - 1))
     {
         pos = level_find_space(l, LE_STATIONARY);
@@ -811,39 +888,36 @@ static void level_fill_with_stationary(level *l)
     }
 
     /* make the random objects in the maze */
+    /* 33 percent chance for an altar */
     if (chance(33))
     {
         pos = level_find_space(l, LE_STATIONARY);
         level_stationary_at(l,pos) = LS_ALTAR;
     }
 
-    /* 0 .. 3  LS_STATUE */
-    count = rand_0n(3);
-    for (i = 0; i < count; i++)
+    /* up to three statues */
+    for (i = 0; i < rand_0n(3); i++)
     {
         pos = level_find_space(l, LE_STATIONARY);
         level_stationary_at(l,pos) = LS_STATUE;
     }
 
-    /* 0 .. 3  LS_FOUNTAIN */
-    count = rand_0n(3);
-    for (i = 0; i < count; i++)
+    /* up to three fountains */
+    for (i = 0; i < rand_0n(3); i++)
     {
         pos = level_find_space(l, LE_STATIONARY);
         level_stationary_at(l,pos) = LS_FOUNTAIN;
     }
 
-    /* 0 .. 2  LS_THRONE */
-    count = rand_0n(2);
-    for (i = 0; i < count; i++)
+    /* up to two thrones */
+    for (i = 0; i < rand_0n(2); i++)
     {
         pos = level_find_space(l, LE_STATIONARY);
         level_stationary_at(l,pos) = LS_THRONE;
     }
 
-    /* 0 .. 2  LS_MIRROR */
-    count = rand_0n(2);
-    for (i = 0; i < count; i++)
+    /* up to two  mirrors */
+    for (i = 0; i < rand_0n(2); i++)
     {
         pos = level_find_space(l, LE_STATIONARY);
         level_stationary_at(l,pos) = LS_MIRROR;
@@ -860,50 +934,63 @@ static void level_fill_with_stationary(level *l)
 static void level_fill_with_objects(level *l)
 {
     int i,j;                    /* loop vars */
-    int count;
-    item *tmp_item = NULL;      /* for item creation */
+    item_t it;
+    item *container = NULL;
 
+    /* up to three books */
     for (i = 0; i <= rand_0n(3); i++)
-        level_add_item(l, item_create_by_level(IT_BOOK, l->nlevel));
-
-    /* CHESTS */
-    /* exactly one chest on level 1. random count on others */
-    for (i = 1; i <= ((l->nlevel == 1) ? 1 : rand_0n(2)); i++)
     {
-        /* random container */
-        tmp_item = item_new(IT_CONTAINER, rand_1n(CT_MAX), 0);
+        level_add_item(l, item_create_by_level(IT_BOOK, l->nlevel));
+    }
 
+    /* up to two containers */
+    for (i = 1; i <= rand_0n(2); i++)
+    {
+        /* random container type */
+        container = item_new(IT_CONTAINER, rand_1n(CT_MAX), 0);
+
+        /* up to 5 items inside the container */
         for (j = 0; j < rand_0n(5); j++)
         {
-            inv_add(tmp_item->content, item_create_random(rand_1n(IT_MAX)));
+            /* prevent containers inside the container */
+            do
+            {
+                it = rand_1n(IT_MAX - 1);
+            }
+            while (it == IT_CONTAINER);
+
+            inv_add(container->content, item_create_random(it));
         }
 
         /* add the container to the level */
-        level_add_item(l, tmp_item);
+        level_add_item(l, container);
     }
 
-    /* make GOLD */
+    /* up to 10 piles of gold */
     for (i = 0; i < rand_0n(10); i++)
     {
-        /* There is nothing like a newly minted pound.  */
-        count = rand_m_n(10, (l->nlevel + 1) * 15);
-        level_add_item(l, item_new(IT_GOLD, count, 0));
+        /* There is nothing like a newly minted pound. */
+        level_add_item(l, item_new(IT_GOLD, rand_m_n(10, (l->nlevel + 1) * 15), 0));
     }
 
-    /* GEMS */
-    for (i=0; i < rand_0n(3); i++)
-        level_add_item(l,
-                       item_new(IT_GEM,
-                                rand_1n(GT_MAX),
-                                rand_0n(6 * (l->nlevel + 1))));
-
-    /* POTIONS */
-    for (i = 0; i < rand_0n(4); i++)
-        level_add_item(l, item_create_by_level(IT_POTION, l->nlevel));
-
-    /* SCROLLS */
+    /* up to three gems */
     for (i = 0; i < rand_0n(3); i++)
+    {
+        level_add_item(l, item_new(IT_GEM, rand_1n(GT_MAX),
+                                   rand_0n(6 * (l->nlevel + 1))));
+    }
+
+    /* up to four potions */
+    for (i = 0; i < rand_0n(4); i++)
+    {
+        level_add_item(l, item_create_by_level(IT_POTION, l->nlevel));
+    }
+
+    /* up to three scrolls */
+    for (i = 0; i < rand_0n(3); i++)
+    {
         level_add_item(l, item_create_by_level(IT_SCROLL, l->nlevel));
+    }
 
     /* RINGS */
     if (chance(6))	/* ring of regeneration */
@@ -919,25 +1006,22 @@ static void level_fill_with_objects(level *l)
         level_add_item(l, item_new(IT_RING, RT_REGENERATION, 0));
 } /* level_fill_with_objects */
 
-static int level_fill_with_traps(level *l)
+static void level_fill_with_traps(level *l)
 {
     int count;
     position pos;
-    int want_trapdoor = FALSE;
+    int trapdoor = FALSE;
 
     assert(l != NULL);
 
     /* Trapdoor cannot be placed in the last dungeon level and the last vulcano level */
-    want_trapdoor = ((l->nlevel != LEVEL_DMAX - 1) && (l->nlevel != LEVEL_MAX - 1));
+    trapdoor = ((l->nlevel != LEVEL_DMAX - 1) && (l->nlevel != LEVEL_MAX - 1));
 
-    for (count = 0; count < rand_0n((want_trapdoor ? 8 : 6)); count++)
+    for (count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
     {
         pos = level_find_space(l, LE_TRAP);
-        l->map[pos.y][pos.x].trap = rand_m_n(TT_NONE + 1,
-                                             (want_trapdoor ? TT_TRAPDOOR : TT_TRAPDOOR - 1));
+        level_trap_at(l, pos) = rand_m_n(TT_NONE + 1, (trapdoor ? TT_TRAPDOOR : TT_TRAPDOOR - 1));
     }
-
-    return count;
 } /* level_fill_with_traps */
 
 /* subroutine to make the caverns for a given level. only walls are made. */
@@ -985,6 +1069,7 @@ static void level_make_maze(level *l)
                 for (pos.x = mxl ; pos.x < mxh ; pos.x++)
                 {
                     level_tiletype_at(l, pos) = LT_FLOOR;
+                    level_basetype_at(l, pos) = LT_FLOOR;
 
                     if (nmonst != NULL)
                     {
@@ -1080,19 +1165,19 @@ static void level_make_maze_eat(level *l, int x, int y)
  */
 static int level_load_from_file(level *l, char *mazefile, int which)
 {
-    position pos;      /* current position on map */
-    int lt, ls;			/* selected tile and static object type */
+    position pos;       /* current position on map */
+    int lt, ls;         /* selected tile and static object type */
     int level_num = 0;  /* number of selected level */
-    monster *monst;		/* placeholder for monster */
-    void *itm;			/* placeholder for objects */
-
-    /* keep track which levels have been used before */
-    static int used[23] = { 1, 0 };
+    monster *monst;     /* placeholder for monster */
+    void *itm;          /* placeholder for objects */
+    item_t it;          /* item type for random objects */
 
     FILE *levelfile;
 
-    levelfile = fopen(mazefile, "r");
-    assert(levelfile != NULL);
+    if (!(levelfile = fopen(mazefile, "r")))
+    {
+        return FALSE;
+    }
 
     if (feof(levelfile))
     {
@@ -1111,11 +1196,11 @@ static int level_load_from_file(level *l, char *mazefile, int which)
     }
     else
     {
-        while (used[level_num])
+        while (level_used[level_num])
         {
             level_num = rand_0n(23);
         }
-        used[level_num] = TRUE;
+        level_used[level_num] = TRUE;
     }
 
     /* advance to desired maze */
@@ -1146,6 +1231,8 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                 {
                     break;
                 }
+                /* FIXME: add the eye of larn here */
+
                 monst = monster_new(MT_DEMONLORD_I + rand_0n(7), l);
                 break;
 
@@ -1162,16 +1249,23 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                 break;
 
             case '-':
-                itm = item_create_random(rand_1n(IT_MAX - 1));
+                do
+                {
+                    it = rand_1n(IT_MAX - 1);
+                }
+                while (it == IT_CONTAINER);
+
+                itm = item_create_random(it);
                 break;
             };
 
-            level_tiletype_at(l,pos) = lt;
+            level_tiletype_at(l, pos) = lt;
+            level_basetype_at(l, pos) = lt;
             level_stationary_at(l,pos) = ls;
 
             if (itm != NULL)
             {
-                if (level_ilist_at(l, pos) == NULL)
+                if (!level_ilist_at(l, pos))
                 {
                     level_ilist_at(l, pos) = inv_new();
                 }
@@ -1179,7 +1273,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                 inv_add(level_ilist_at(l, pos), itm);
             }
         }
-        (void)fgetc(levelfile); /* eat eol */
+        (void)fgetc(levelfile); /* eat EOL */
     }
 
     fclose(levelfile);
@@ -1213,12 +1307,14 @@ static void level_add_treasure_room(level *l, int difficulty)
             if ( (pos.y == y1) || (pos.y == y2) || (pos.x == x1) || (pos.x == x2) )
             {
                 /* if we are on the border of a room, make wall */
-                level_tiletype_at(l,pos) = LT_WALL;
+                level_tiletype_at(l, pos) = LT_WALL;
+                level_basetype_at(l, pos) = LT_WALL;
             }
             else
             {
                 /* clear out space */
-                level_tiletype_at(l,pos) = LT_FLOOR;
+                level_tiletype_at(l, pos) = LT_FLOOR;
+                level_basetype_at(l, pos) = LT_FLOOR;
 
                 /* create loot */
                 if (level_ilist_at(l, pos) == NULL)
@@ -1260,7 +1356,7 @@ static void level_add_treasure_room(level *l, int difficulty)
     switch (rand_1n(2))
     {
     case 1: /* horizontal */
-        pos.x = rand_m_n(x1, x1);
+        pos.x = rand_m_n(x1, x2);
         pos.y = rand_0n(1) ? y1 : y2;
         break;
 
@@ -1270,8 +1366,9 @@ static void level_add_treasure_room(level *l, int difficulty)
         break;
     };
 
-    level_stationary_at(l,pos) = LS_CLOSEDDOOR;
-    level_tiletype_at(l,pos) = LT_FLOOR;
+    level_stationary_at(l, pos) = LS_CLOSEDDOOR;
+    level_tiletype_at(l, pos) = LT_FLOOR;
+    level_basetype_at(l, pos) = LT_FLOOR;
 }
 
 /* subroutine to put an item onto an empty space */

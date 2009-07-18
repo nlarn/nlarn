@@ -250,6 +250,8 @@ void player_die(player *p, player_cod cause_type, int cause)
     char *message = NULL;
     char *title = NULL;
 
+    char *tmp;
+
     int count, num;
 
     effect *ef;
@@ -342,7 +344,9 @@ void player_die(player *p, player_cod cause_type, int cause)
         score = game_score(p->game, cause_type, cause);
         scores = game_score_add(p->game, score);
 
-        text = g_string_new(player_death_description(score, TRUE));
+        tmp = player_death_description(score, TRUE);
+        text = g_string_new(tmp);
+        g_free(tmp);
 
         /* assemble surrounding scores list */
         g_string_append(text, "\n\n");
@@ -377,6 +381,12 @@ void player_die(player *p, player_cod cause_type, int cause)
                                    player_death_description(cscore, FALSE),
                                    score->dlevel, cscore->hp);
         }
+
+        /* append map of current level */
+        g_string_append(text, "\n\nThis is the map of the current level:\n");
+        tmp = level_dump(p->level);
+        g_string_append(text, tmp);
+        g_free(tmp);
 
         display_show_message(title, text->str);
         g_string_free(text, TRUE);
@@ -659,10 +669,10 @@ int player_level_enter(player *p, level *l)
     {
         log_disable(p->log);
 
-        /* expire timed effects */
+        /* call level timer */
         /* count might be negative if time has been modified (time warp) */
         count = abs(game_turn(p->game) - l->visited);
-        level_expire_timer(l, min(count, G_MAXUINT8));
+        level_timer(l, min(count, G_MAXUINT8), NULL);
 
         monsters_genocide(l);
 
@@ -787,7 +797,7 @@ int player_examine(player *p, position pos)
             for (i = 1; i <= inv_length(tile->ilist); i++)
             {
                 it = inv_get(tile->ilist, i - 1);
-                item_describe(it, player_item_identified(p, it),
+                item_describe(it, player_item_known(p, it),
                               FALSE, FALSE, item_desc, 80);
 
                 if (i > 1)
@@ -836,7 +846,7 @@ int player_pickup(player *p)
         it = inv_del(*inv, 0);
 
         log_add_entry(p->log, "You pick up %s.",
-                      item_describe(it, player_item_identified(p, it),
+                      item_describe(it, player_item_known(p, it),
                                     FALSE, FALSE, item_desc, 80));
 
         inv_add(p->inventory, it);
@@ -1611,7 +1621,7 @@ int player_item_equip(player *p, item *it)
             it->bonus_known = TRUE;
 
             log_add_entry(p->log, "You are now wearing %s.",
-                          item_describe(it, player_item_identified(p, it),
+                          item_describe(it, player_item_known(p, it),
                                         TRUE, FALSE, description, 60));
 
             *islot = it;
@@ -1627,7 +1637,7 @@ int player_item_equip(player *p, item *it)
         if (islot != NULL)
         {
             log_add_entry(p->log, "You put %s on.",
-                          item_describe(it, player_item_identified(p, it),
+                          item_describe(it, player_item_known(p, it),
                                         TRUE, TRUE, description, 60));
 
             *islot = it;
@@ -1647,7 +1657,7 @@ int player_item_equip(player *p, item *it)
         {
             p->eq_weapon = it;
             log_add_entry(p->log, "You now wield %s.",
-                          item_describe(it, player_item_identified(p, it),
+                          item_describe(it, player_item_known(p, it),
                                         TRUE, TRUE, description, 60));
 
             time = 2 + weapon_is_twohanded(p->eq_weapon);
@@ -1655,7 +1665,7 @@ int player_item_equip(player *p, item *it)
             if (it->cursed)
             {
                 log_add_entry(p->log, "The %s welds itself into your hand.",
-                              item_describe(it, player_item_identified(p, it),
+                              item_describe(it, player_item_known(p, it),
                                             TRUE, TRUE, description, 60));
 
                 it->curse_known = TRUE;
@@ -1739,7 +1749,7 @@ int player_item_unequip(player *p, item *it)
             if (!p->eq_weapon->cursed)
             {
                 log_add_entry(p->log, "You you put away %s.",
-                              item_describe(it, player_item_identified(p, it),
+                              item_describe(it, player_item_known(p, it),
                                             TRUE, TRUE, desc, 60));
 
                 time = 2 + weapon_is_twohanded(p->eq_weapon);
@@ -1749,7 +1759,7 @@ int player_item_unequip(player *p, item *it)
             {
                 log_add_entry(p->log, "You can't put away the %s. " \
                               "It's welded into your hands.",
-                              item_describe(it, player_item_identified(p, it),
+                              item_describe(it, player_item_known(p, it),
                                             TRUE, TRUE, desc, 60));
             }
         }
@@ -1762,14 +1772,14 @@ int player_item_unequip(player *p, item *it)
         if (!it->cursed)
         {
             log_add_entry(p->log, "You finish taking off %s.",
-                          item_describe(it, player_item_identified(p, it),
+                          item_describe(it, player_item_known(p, it),
                                         TRUE, TRUE, desc, 60));
             *aslot = NULL;
         }
         else
         {
             log_add_entry(p->log, "You can't take of the %s.%s",
-                          item_describe(it, player_item_identified(p, it),
+                          item_describe(it, player_item_known(p, it),
                                         TRUE, TRUE, desc, 60),
                           it->curse_known ? "" : " It appears to be cursed.");
             it->curse_known = TRUE;
@@ -1781,7 +1791,7 @@ int player_item_unequip(player *p, item *it)
         if (!it->cursed)
         {
             log_add_entry(p->log, "You remove %s.",
-                          item_describe(it, player_item_identified(p, it),
+                          item_describe(it, player_item_known(p, it),
                                         TRUE, TRUE, desc, 60));
 
             player_effect_del(p, (*rslot)->effect);
@@ -1791,7 +1801,7 @@ int player_item_unequip(player *p, item *it)
         else
         {
             log_add_entry(p->log, "You can not remove the %s.%s",
-                          item_describe(it, player_item_identified(p, it),
+                          item_describe(it, player_item_known(p, it),
                                         TRUE, TRUE, desc, 60),
                           it->curse_known ? "" : " It appears to be cursed.");
 
@@ -1954,7 +1964,8 @@ int player_item_is_identifiable(player *p, item *it)
     return (!player_item_identified(p, it));
 }
 
-int player_item_identified(player *p, item *it)
+/* determine if item type is known */
+int player_item_known(player *p, item *it)
 {
     assert(p != NULL && it != NULL);
 
@@ -1979,6 +1990,27 @@ int player_item_identified(player *p, item *it)
     default:
         return TRUE;
     }
+}
+
+/* determine if a concrete item is fully identified */
+int player_item_identified(player *p, item *it)
+{
+    gboolean known = FALSE;
+
+    assert(p != NULL && it != NULL);
+
+    known = player_item_known(p, it);
+
+    if (it->cursed && !it->curse_known)
+        known = FALSE;
+
+    if (it->blessed && !it->blessed_known)
+        known = FALSE;
+
+    if (it->bonus_known)
+        known = FALSE;
+
+    return known;
 }
 
 char *player_item_identified_list(player *p)
@@ -2023,7 +2055,7 @@ char *player_item_identified_list(player *p)
         for (id = 1; id < item_get_max_id(type_ids[type]); id++)
         {
             it->id = id;
-            if (player_item_identified(p, it))
+            if (player_item_known(p, it))
             {
 
                 item_describe(it, FALSE, TRUE, FALSE, buf_unidentified, 80);
@@ -2095,7 +2127,7 @@ int player_item_use(player *p, item *it)
     if (player_effect(p, ET_BLINDNESS) && (it->type == IT_BOOK || it->type == IT_SCROLL))
     {
         log_add_entry(p->log, "As you are blind you can't read %s.",
-                      item_describe(it, player_item_identified(p, it),
+                      item_describe(it, player_item_known(p, it),
                                     TRUE, TRUE, description, 60));
         return time;
     }
@@ -2105,7 +2137,7 @@ int player_item_use(player *p, item *it)
 
         /* read book */
     case IT_BOOK:
-        item_describe(it, player_item_identified(p, it),
+        item_describe(it, player_item_known(p, it),
                       TRUE, TRUE, description, 60);
 
         log_add_entry(p->log, "You read %s.", description);
@@ -2113,7 +2145,9 @@ int player_item_use(player *p, item *it)
         /* cursed spellbooks have nasty effects */
         if (it->cursed)
         {
-            log_add_entry(p->log, "There was something wrong with this book!");
+            log_add_entry(p->log, "There was something wrong with this book! " \
+                          "It crumbles to dust.");
+
             player_mp_lose(p, rand_0n(p->mp));
         }
         else
@@ -2159,7 +2193,7 @@ int player_item_use(player *p, item *it)
 
         /* eat food */
     case IT_FOOD:
-        item_describe(it, player_item_identified(p, it),
+        item_describe(it, player_item_known(p, it),
                       TRUE, FALSE, description, 60);
 
         log_add_entry(p->log, "You eat %s.", description);
@@ -2178,7 +2212,7 @@ int player_item_use(player *p, item *it)
 
         /* drink potion */
     case IT_POTION:
-        item_describe(it, player_item_identified(p, it),
+        item_describe(it, player_item_known(p, it),
                       TRUE, FALSE, description, 60);
 
         log_add_entry(p->log, "You drink %s.", description);
@@ -2222,7 +2256,7 @@ int player_item_use(player *p, item *it)
 
         /* read scroll */
     case IT_SCROLL:
-        item_describe(it, player_item_identified(p, it),
+        item_describe(it, player_item_known(p, it),
                       TRUE, FALSE, description, 60);
 
         log_add_entry(p->log, "You read %s.", description);
@@ -2317,7 +2351,7 @@ int player_item_use(player *p, item *it)
         break;
 
     default:
-        item_describe(it, player_item_identified(p, it),
+        item_describe(it, player_item_known(p, it),
                       TRUE, FALSE, description, 40);
 
         log_add_entry(p->log,
@@ -2329,7 +2363,25 @@ int player_item_use(player *p, item *it)
 
     if (item_identified)
     {
-        player_item_identify(p, it);
+        /* identify the item type, not the entire item */
+        switch (it->type)
+        {
+        case IT_BOOK:
+            p->identified_books[it->id] = TRUE;
+            break;
+
+        case IT_POTION:
+            p->identified_potions[it->id] = TRUE;
+            break;
+
+        case IT_SCROLL:
+            p->identified_scrolls[it->id] = TRUE;
+            break;
+
+        default:
+            /* NOP */
+            break;
+        }
     }
 
     if (item_used_up)
@@ -2373,9 +2425,8 @@ int player_item_drop(player *p, item *it)
         level_ilist_at(p->level, p->pos) = inv_new();
 
     inv_add(level_ilist_at(p->level, p->pos), it);
-    log_add_entry(p->log, "You drop %s.",
-                  item_describe(it, player_item_identified(p, it),
-                                FALSE, FALSE, desc, 60));
+    log_add_entry(p->log, "You drop %s.", item_describe(it, player_item_known(p, it),
+                  FALSE, FALSE, desc, 60));
 
     return TRUE;
 }
@@ -2400,7 +2451,7 @@ int player_item_pickup(player *p, item *it)
     inv_del_element(level_ilist_at(p->level, p->pos), it);
 
     log_add_entry(p->log, "You pick up %s.",
-                  item_describe(it, player_item_identified(p, it),
+                  item_describe(it, player_item_known(p, it),
                                 FALSE, FALSE, desc, 60));
 
     /* this has to come after the logging as it can be freed at this point
@@ -2417,7 +2468,7 @@ int player_item_buy(player *p, item *it)
     int count = 0;
     int player_gold;
     char text[81];
-    char name[41];
+    char name[61];
 
     item *it_clone;
 
@@ -2428,11 +2479,23 @@ int player_item_buy(player *p, item *it)
 
     if (it->count > 1)
     {
-        item_describe(it, player_item_identified(p, it), FALSE, FALSE, name, 40);
+        item_describe(it, player_item_known(p, it), FALSE, FALSE, name, 40);
         g_snprintf(text, 80, "How many %s do you want to buy?", name);
 
         /* get count */
         count = display_get_count(text, it->count);
+
+        if (count > it->count)
+        {
+            log_add_entry(p->log, "Wouldn't it be nice if the store had %d of those?", count);
+            return FALSE;
+        }
+
+        if (count == 0)
+        {
+            return FALSE;
+        }
+
         price *= count;
 
         if (player_gold < price)
@@ -2442,7 +2505,7 @@ int player_item_buy(player *p, item *it)
             it_clone = item_clone(it);
             it_clone->count = count;
 
-            item_describe(it, player_item_identified(p, it), FALSE, TRUE, name, 40);
+            item_describe(it, player_item_known(p, it), FALSE, TRUE, name, 60);
             g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
                        price, name);
 
@@ -2455,7 +2518,8 @@ int player_item_buy(player *p, item *it)
     }
     else
     {
-        item_describe(it, player_item_identified(p, it), TRUE, TRUE, name, 40);
+        count = 1;
+        item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 60);
         g_snprintf(text, 80, "Do you want to buy %s for %d gold?",
                    name, price);
 
@@ -2467,6 +2531,16 @@ int player_item_buy(player *p, item *it)
 
     player_set_gold(p, player_gold - price);
 
+    /* log the event */
+    it_clone = item_clone(it);
+    it_clone->count = count;
+
+    item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
+    log_add_entry(p->log, "You buy %s.", name);
+
+    item_destroy(it_clone);
+
+    /* transfer the item */
     if ((it->count > 1) && (count < it->count))
     {
         /* split the item */
@@ -2474,8 +2548,8 @@ int player_item_buy(player *p, item *it)
     }
     else
     {
-        inv_add(p->inventory, item_clone(it));
-        it->count = 0;
+        inv_add(p->inventory, it);
+        building_dndstore_item_del(it);
     }
 
     return TRUE;
@@ -2486,11 +2560,13 @@ int player_item_sell(player *p, item *it)
     int price;
     int count = 0;
     char question[81];
-    char name[41];
+    char name[61];
+
+    item *it_clone;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    item_describe(it, player_item_identified(p, it), FALSE, FALSE, name, 40);
+    item_describe(it, player_item_known(p, it), FALSE, FALSE, name, 60);
 
     price = item_price(it);
 
@@ -2514,17 +2590,30 @@ int player_item_sell(player *p, item *it)
 
     if (it->count > 1)
     {
-        item_describe(it, player_item_identified(p, it), FALSE, FALSE, name, 40);
+        item_describe(it, player_item_known(p, it), FALSE, FALSE, name, 60);
         g_snprintf(question, 80, "How many %s do you want to sell for %d gold?",
                    name, price);
 
         /* get count */
         count = display_get_count(question, it->count);
+
+        if (count > it->count)
+        {
+            log_add_entry(p->log, "Wouldn't it be nice to have %d %of those?", count);
+            return FALSE;
+        }
+
+        if (count == 0)
+        {
+            return FALSE;
+        }
+
         price *= count;
     }
     else
     {
-        item_describe(it, player_item_identified(p, it), TRUE, TRUE, name, 40);
+        count = 1;
+        item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 40);
         g_snprintf(question, 80, "Do you want to sell %s for %d gold?",
                    name, price);
 
@@ -2536,13 +2625,22 @@ int player_item_sell(player *p, item *it)
 
     player_set_gold(p, player_get_gold(p) + price);
 
+    it_clone = item_clone(it);
+    it_clone->count = count;
+
+    item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
+    log_add_entry(p->log, "You sell %s.", name);
+
+    item_destroy(it_clone);
+
     if ((it->count > 1) && (count < it->count))
     {
-        it->count -= count;
+        building_dndstore_item_add(item_split(it, count));
     }
     else
     {
         inv_del_element(p->inventory, it);
+        building_dndstore_item_add(it);
     }
 
     return TRUE;
@@ -2562,7 +2660,7 @@ int player_item_shop_identify(player *p, item *it)
     player_gold = player_get_gold(p);
     price = 50 << game_difficulty(p->game);
 
-    item_describe(it, player_item_identified(p, it), TRUE, TRUE, name, 40);
+    item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 40);
 
     if (price <= player_gold)
     {
@@ -2605,7 +2703,7 @@ int player_item_shop_repair(player *p, item *it)
     player_gold = player_get_gold(p);
     price = (50 << game_difficulty(p->game)) * damages;
 
-    item_describe(it, player_item_identified(p, it), TRUE, TRUE, name, 40);
+    item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 40);
 
     if (price <= player_gold)
     {

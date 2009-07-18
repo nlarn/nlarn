@@ -39,6 +39,7 @@ typedef enum level_tile_type
 {
     LT_NONE,
     LT_GRASS,
+    LT_DIRT,
     LT_FLOOR,
     LT_WATER,
     LT_DEEPWATER,
@@ -91,11 +92,13 @@ typedef enum level_element_type
 
 typedef struct level_tile
 {
-    level_tile_t type;
-    level_stationary_t stationary; /* if something special is here */
-    trap_t trap; /* trap located on this tile */
-    guint32 timer; /* countdown to when the type will become LT_FLOOR again */
-    inventory *ilist; /* items located on this tile */
+    guint32
+        type:       8,
+        base_type:  8, /* if tile is covered with e.g. fire the original type is stored here */
+        stationary: 8, /* something special located on this tile */
+        trap:       8; /* trap located on this tile */
+    guint8 timer;      /* countdown to when the type will become LT_FLOOR again */
+    inventory *ilist;  /* items located on this tile */
 } level_tile;
 
 typedef struct level_tile_data
@@ -105,10 +108,8 @@ typedef struct level_tile_data
     short colour;
     char *description;
     unsigned
-passable:
-    1,        /* can be passed */
-transparent:
-    1;     /* see-through */
+        passable:    1,     /* can be passed */
+        transparent: 1;     /* see-through */
 } level_tile_data;
 
 typedef struct level_stationary_data
@@ -118,10 +119,8 @@ typedef struct level_stationary_data
     short colour;
     char *description;
     unsigned
-passable:
-    1,        /* can be passed */
-transparent:
-    1;     /* see-through */
+        passable:     1,   /* can be passed */
+        transparent:  1;   /* see-through */
 } level_stationary_data;
 
 typedef struct level
@@ -155,7 +154,7 @@ typedef struct level_path
 
 void level_new(level *l, int difficulty, char *mazefile);
 void level_destroy(level *l);
-void level_dump(level *l);
+char *level_dump(level *l);
 
 position level_find_space(level *l, level_element_t element);
 position level_find_space_in(level *l, rectangle where, level_element_t element);
@@ -179,7 +178,7 @@ int level_is_monster_at(level *l, position pos);
 GPtrArray *level_get_monsters_in(level *l, rectangle area);
 int level_fill_with_live(level *l);
 
-void level_expire_timer(level *l, guint8 count);
+void level_timer(level *l, guint8 count, struct player *p);
 
 /* external vars */
 
@@ -204,6 +203,7 @@ extern const char *level_names[LEVEL_MAX];
 #define level_tile_at(l,pos)       (pos_valid(pos) ? &((l)->map[(pos).y][(pos).x]) : NULL)
 #define level_ilist_at(l,pos)      ((l)->map[(pos).y][(pos).x].ilist)
 #define level_tiletype_at(l,pos)   ((l)->map[(pos).y][(pos).x].type)
+#define level_basetype_at(l,pos)   ((l)->map[(pos).y][(pos).x].base_type)
 #define level_timer_at(l,pos)      ((l)->map[(pos).y][(pos).x].timer)
 #define level_trap_at(l,pos)       ((l)->map[(pos).y][(pos).x].trap)
 #define level_stationary_at(l,pos) ((l)->map[(pos).y][(pos).x].stationary)

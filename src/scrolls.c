@@ -164,7 +164,7 @@ int scroll_create_artefact(player *p, item *scroll)
     it = item_create_by_level(rand_1n(IT_MAX), p->level->nlevel);
     inv_add(level_ilist_at(p->level, p->pos), it);
 
-    item_describe(it, player_item_identified(p, it), (it->count == 1),
+    item_describe(it, player_item_known(p, it), (it->count == 1),
                   FALSE, buf, 60);
 
     log_add_entry(p->log, "You find %s below your feet.", buf);
@@ -275,19 +275,21 @@ int scroll_identify(player *p, item *scroll)
     for (pos = 1; pos <= p->inventory->len; pos++)
     {
         it = inv_get(p->inventory, pos - 1);
-        player_item_identify(p, it);
-
-        /* reveal blessing / curse */
-        if (it->blessed)
-            it->blessed_known = TRUE;
-
-        if (it->cursed)
-            it->curse_known = TRUE;
-
-        /* reveal bonus */
-        it->bonus_known  = TRUE;
+        if (!player_item_identified(p, it))
+        {
+            player_item_identify(p, it);
+        }
 
         count++;
+    }
+
+    if (count)
+    {
+        log_add_entry(p->log, "You identify your possessions.");
+    }
+    else
+    {
+        log_add_entry(p->log, "Nothing happens.");
     }
 
     return count;
@@ -344,13 +346,13 @@ int scroll_remove_curse(player *p, item *scroll)
             if (item->count > 1)
             {
                 log_add_entry(p->log, "The %s glow in a white light.",
-                              item_describe(item, player_item_identified(p, item),
+                              item_describe(item, player_item_known(p, item),
                                             FALSE, TRUE, buf, 60));
             }
             else
             {
                 log_add_entry(p->log, "The %s glows in a white light.",
-                              item_describe(item, player_item_identified(p, item),
+                              item_describe(item, player_item_known(p, item),
                                             TRUE, TRUE, buf, 60));
             }
 

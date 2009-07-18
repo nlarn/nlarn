@@ -27,7 +27,7 @@ static int display_cols = 0;
 static GList *windows = NULL;
 
 static display_window *display_window_new(int x1, int y1, int width, int height, char *title, char *caption);
-static void display_window_destroy(display_window *dwin, gboolean clear);
+static void display_window_destroy(display_window *dwin, gboolean shall_clear);
 
 static int display_window_move(display_window *dwin, int key);
 static void display_window_update_caption(display_window *dwin);
@@ -529,10 +529,10 @@ void display_inventory(char *title, player *p, inventory *inv,
 
             if (show_price)
             {
-                mvwprintw(iwin->window, pos, 1, " %2d %40s %5dgp %c",
+                mvwprintw(iwin->window, pos, 1, "%3d %40s %5dgp %c",
                           pos + offset,
                           item_describe(it,
-                                        player_item_identified(p, it),
+                                        player_item_known(p, it),
                                         FALSE, FALSE,
                                         item_desc, 80),
                           item_price(it),
@@ -540,10 +540,10 @@ void display_inventory(char *title, player *p, inventory *inv,
             }
             else
             {
-                mvwprintw(iwin->window, pos, 1, " %2d %41s %c ",
+                mvwprintw(iwin->window, pos, 1, "%3d %41s %c ",
                           pos + offset,
                           item_describe(it,
-                                        player_item_identified(p, it),
+                                        player_item_known(p, it),
                                         FALSE, FALSE,
                                         item_desc, 80),
                           player_item_is_equipped(p, it) ? '*' : ' ');
@@ -1827,7 +1827,7 @@ static display_window *display_window_new(int x1, int y1, int width, int height,
     return dwin;
 }
 
-static void display_window_destroy(display_window *dwin, gboolean clear)
+static void display_window_destroy(display_window *dwin, gboolean shall_clear)
 {
     del_panel(dwin->panel);
     delwin(dwin->window);
@@ -1838,7 +1838,7 @@ static void display_window_destroy(display_window *dwin, gboolean clear)
     g_free(dwin);
 
     /* repaint screen */
-    if (clear)
+    if (shall_clear)
     {
         clear();
     }
@@ -1852,23 +1852,27 @@ static int display_window_move(display_window *dwin, int key)
 
     switch(key)
     {
-            /* shift+left */
-        case 393:
+            /* ^left */
+        case 541: /* NCurses - Linux */
+        case 443: /* PDCurses - Windows */
             if (dwin->x1 > 0) dwin->x1--;
             break;
 
-            /* shift+right */
-        case 402:
+            /* ^right */
+        case 556: /* NCurses - Linux */
+        case 444: /* PDCurses - Windows */
             if (dwin->x1 < (display_cols - dwin->width)) dwin->x1++;
             break;
 
-            /* shift+up */
-        case 337:
+            /* ^up */
+        case 562: /* NCurses - Linux */
+        case 480: /* PDCurses - Windows */
             if (dwin->y1 > 0) dwin->y1--;
             break;
 
-            /* shift+down */
-        case 336:
+            /* ^down */
+        case 521: /* NCurses - Linux */
+        case 481: /* PDCurses - Windows */
             if (dwin->y1 < (display_rows - dwin->height)) dwin->y1++;
             break;
 
@@ -1879,7 +1883,6 @@ static int display_window_move(display_window *dwin, int key)
     if (refresh)
     {
         move_panel(dwin->panel, dwin->y1, dwin->x1);
-        //refresh();
         update_panels();
         doupdate();
     }

@@ -43,7 +43,7 @@ solution "NLarn"
 		files { "inc/*.h", "src/*.c" }
 		includedirs { "inc" }
 
-		links { "glib-2.0", "panel" }
+		links { "glib-2.0" }
 
 		configuration "Debug"
 			defines { "DEBUG" }
@@ -58,7 +58,7 @@ solution "NLarn"
 
 		configuration "not windows"
 			includedirs { "/usr/include/ncurses" } 
-			links { "ncurses" }
+			links { "ncurses", "panel" }
 
 		configuration { "gmake" }
 			buildoptions { get_pkgconfig("--cflags glib-2.0") }

@@ -91,13 +91,13 @@ typedef struct item {
     inventory *content;     /* for containers */
     guint32
         blessed: 1,
-        blessed_known: 1,   /* player known that item is blessed */
         cursed: 1,
-        curse_known: 1,     /* player knows that item is cursed */
         corroded: 2,        /* 0: no; 1: yes; 2: very */
         burnt: 2,           /* 0: no; 1: yes; 2: very */
         rusty: 2,           /* 0: no; 1: yes; 2: very */
-        bonus_known: 1;     /* player knows the bonus */
+        blessed_known: 1,   /* player known that item is blessed */
+        bonus_known: 1,     /* player knows the bonus */
+        curse_known: 1;     /* player knows that item is cursed */
 } item;
 
 typedef struct item_type_data {

@@ -898,7 +898,7 @@ int monster_player_special_attack(monster *m, struct player *p)
     char *message = NULL; /* message for special attack */
     item *it; /* destroyed / robbed item */
     int pi; /* impact of perishing */
-    effect *ef;
+    effect *ef = NULL;
 
     /* flag to indicate if a special attack has been accomplished */
     gboolean sp_att = TRUE;
@@ -922,12 +922,10 @@ int monster_player_special_attack(monster *m, struct player *p)
                               armour_name(p->eq_suit));
 
                 it = p->eq_suit;
-
-                log_disable(p->log);
-                player_item_unequip(p, it);
-                log_enable(p->log);
+                p->eq_suit = NULL;
 
                 inv_del_element(p->inventory, it);
+                item_destroy(it);
             }
         }
         break;
@@ -955,16 +953,13 @@ int monster_player_special_attack(monster *m, struct player *p)
 
             /* this nasty effect goes away after some turns */
             ef->turns = 50;
-
-            player_effect_add(p, ef);
         }
 
         message = "The %s stung you!";
         break;
 
     case MT_WHITE_DRAGON:
-        spc_dam = rand_1n(15)
-                  + 18
+        spc_dam = rand_1n(15) + 18
                   - player_get_ac(p)
                   - player_effect(p, ET_COLD_RESISTANCE);
 
@@ -982,13 +977,11 @@ int monster_player_special_attack(monster *m, struct player *p)
 
     case MT_WATER_LORD:
         message = "The %s got you with a gusher!";
-        spc_dam = rand_1n(15)
-                  + 25
-                  - player_get_ac(p);
+        spc_dam = rand_1n(15) + 25 - player_get_ac(p);
         break;
 
     case MT_LEPRECHAUN:
-        /* if player has a device of no theft abort this */
+        /* if player has a device of no theft abort the theft */
         if (!player_effect(p, ET_NOTHEFT))
             message = monster_player_rob(m, p, IT_GOLD);
 
@@ -998,10 +991,17 @@ int monster_player_special_attack(monster *m, struct player *p)
 
     case MT_DISENCHANTRESS:
         /* destroy random item */
+        if (!inv_length(p->inventory))
+        {
+            /* empty inventory */
+            sp_att = FALSE;
+            break;
+        }
+
         it = inv_get(p->inventory, rand_1n(inv_length(p->inventory)));
         if (it->type != IT_SCROLL && it->type != IT_POTION)
         {
-            message = "The %s hits you - you feel a sense of loss.";
+            message = "The %s hits you. You feel a sense of loss.";
             if (player_item_is_equipped(p, it))
                 player_item_unequip(p, it);
 
@@ -1013,13 +1013,11 @@ int monster_player_special_attack(monster *m, struct player *p)
     case MT_ICE_LIZARD:
     case MT_GREEN_DRAGON:
         message = "The %s hit you with his barbed tail.";
-        spc_dam = rand_1n(25)
-                  - player_get_ac(p);
+        spc_dam = rand_1n(25) - player_get_ac(p);
         break;
 
     case MT_UMBER_HULK:
         ef = effect_new(ET_CONFUSION, game_turn(p->game));
-        player_effect_add(p, ef);
         break;
 
     case MT_SPIRIT_NAGA:
@@ -1028,9 +1026,7 @@ int monster_player_special_attack(monster *m, struct player *p)
 
     case MT_PLATINUM_DRAGON:
         message = "The %s flattens you with his psionics!";
-        spc_dam = rand_1n(15)
-                  + 30
-                  - player_get_ac(p);
+        spc_dam = rand_1n(15) + 30 - player_get_ac(p);
         break;
 
     case MT_NYMPH:
@@ -1065,6 +1061,12 @@ int monster_player_special_attack(monster *m, struct player *p)
     if (message != NULL)
     {
         log_add_entry(p->log, message, monster_get_name(m));
+    }
+
+    if (ef)
+    {
+        /* this has to come after the hit message or the meaning is unclear. */
+        player_effect_add(p, ef);
     }
 
     return sp_att;
