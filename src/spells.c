@@ -979,10 +979,10 @@ void spell_genocide_monster(player *p)
 
     assert(p != NULL);
 
-    log_add_entry(p->log, "Whih monster do you want to genocide (type letter)?");
+    log_add_entry(p->log, "Which monster do you want to genocide (type letter)?");
     display_paint_screen(p);
 
-    in = getch();
+    in = display_getch();
 
     for (id = 1; id < MT_MAX; id++)
     {

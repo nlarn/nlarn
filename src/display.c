@@ -17,11 +17,22 @@
  */
 
 #include "nlarn.h"
+#include <curses.h>
+#include <panel.h>
 
 static int display_rows = 0;
 static int display_cols = 0;
 
-static WINDOW *display_window_new(int x1, int y1, int width, int height, char *title, char *caption);
+/* linked list of opened windows */
+static GList *windows = NULL;
+
+static display_window *display_window_new(int x1, int y1, int width, int height, char *title, char *caption);
+static void display_window_destroy(display_window *dwin, gboolean clear);
+
+static int display_window_move(display_window *dwin, int key);
+static void display_window_update_caption(display_window *dwin);
+static void display_window_update_arrow_up(display_window *dwin, gboolean on);
+static void display_window_update_arrow_down(display_window *dwin, gboolean on);
 
 int display_init()
 {
@@ -359,7 +370,7 @@ void display_shutdown()
 
 int display_draw()
 {
-    return refresh();
+    return doupdate();
 }
 
 /**
@@ -377,14 +388,14 @@ void display_inventory(char *title, player *p, inventory *inv,
                        GPtrArray *callbacks, int show_price,
                        int (*filter)(item *))
 {
-    WINDOW *iwin = NULL;
+    display_window *iwin = NULL;
     int width, height, maxvis;
     int startx, starty;
     int len_orig, len_curr;
     gboolean redraw = FALSE;
 
-    /* window caption assembled from callback descriptions */
-    char *caption, *tmp;
+    /* temp var to assemble window caption from callback descriptions */
+    char *tmp;
 
     /* used for looping over callbacks */
     int cb_nr;
@@ -435,35 +446,40 @@ void display_inventory(char *title, player *p, inventory *inv,
         if (curr > len_curr)
             curr = len_curr;
 
-        /* rebuild image */
-        if (iwin != NULL)
+        /* rebuild image if needed */
+        if (iwin != NULL && redraw)
         {
-            delwin(iwin);
+            /* save strarting point */
+            startx = iwin->x1;
+            starty = iwin->y1;
 
-            /* repaint game screen only when needed */
-            if (redraw)
+            display_window_destroy(iwin, FALSE);
+            iwin = NULL;
+            redraw = FALSE;
+
+            display_paint_screen(p);
+
+            /* inventory length is smaller than before */
+            if (len_orig > len_curr)
             {
-                clear();
-                display_paint_screen(p);
-                redraw = FALSE;
+                /* if on the last page, reduce offset */
+                if ((offset > 0) && ((offset + maxvis) > len_curr))
+                    offset--;
 
-                /* inventory length is smaller than before */
-                if (len_orig > len_curr)
-                {
-                    /* if on the last page, reduce offset */
-                    if ((offset > 0) && ((offset + maxvis) > len_curr))
-                        offset--;
-
-                    /* remember current length */
-                    len_orig = len_curr;
-                }
+                /* remember current length */
+                len_orig = len_curr;
             }
+        }
+
+        if (!iwin)
+        {
+            iwin = display_window_new(startx, starty, width, height, title, NULL);
         }
 
         it = inv_get_filtered(inv, curr + offset - 1, filter);
 
         /* assemble window caption */
-        for (caption = NULL, cb_nr = 1; cb_nr <= callbacks->len; cb_nr++)
+        for (cb_nr = 1; cb_nr <= callbacks->len; cb_nr++)
         {
             cb = g_ptr_array_index(callbacks, cb_nr - 1);
 
@@ -473,15 +489,15 @@ void display_inventory(char *title, player *p, inventory *inv,
             {
                 cb->active = TRUE;
 
-                if (caption)
+                if (iwin->caption)
                 {
-                    tmp = g_strconcat(caption, " ", cb->description, NULL);
-                    g_free(caption);
-                    caption = tmp;
+                    tmp = g_strconcat(iwin->caption, " ", cb->description, NULL);
+                    g_free(iwin->caption);
+                    iwin->caption = tmp;
                 }
                 else
                 {
-                    caption = g_strdup(cb->description);
+                    iwin->caption = g_strdup(cb->description);
                 }
             }
             else
@@ -491,11 +507,11 @@ void display_inventory(char *title, player *p, inventory *inv,
             }
         }
 
-        iwin = display_window_new(startx, starty, width, height, title, caption);
-
-        if (caption)
+        if (iwin->caption)
         {
-            g_free(caption);
+            display_window_update_caption(iwin);
+            g_free(iwin->caption);
+            iwin->caption = NULL;
         }
 
         for (pos = 1; pos <= min(len_curr, maxvis); pos++)
@@ -503,17 +519,17 @@ void display_inventory(char *title, player *p, inventory *inv,
             it = inv_get_filtered(inv, (pos - 1) + offset, filter);
 
             if ((curr == pos) && player_item_is_equipped(p, it))
-                wattron(iwin, COLOR_PAIR(13));
+                wattron(iwin->window, COLOR_PAIR(13));
             else if (curr == pos)
-                wattron(iwin, COLOR_PAIR(10));
+                wattron(iwin->window, COLOR_PAIR(10));
             else if (player_item_is_equipped(p, it))
-                wattron(iwin, COLOR_PAIR(9) | A_BOLD);
+                wattron(iwin->window, COLOR_PAIR(9) | A_BOLD);
             else
-                wattron(iwin, COLOR_PAIR(9));
+                wattron(iwin->window, COLOR_PAIR(9));
 
             if (show_price)
             {
-                mvwprintw(iwin, pos, 1, " %2d %40s %5dgp %c",
+                mvwprintw(iwin->window, pos, 1, " %2d %40s %5dgp %c",
                           pos + offset,
                           item_describe(it,
                                         player_item_identified(p, it),
@@ -524,7 +540,7 @@ void display_inventory(char *title, player *p, inventory *inv,
             }
             else
             {
-                mvwprintw(iwin, pos, 1, " %2d %41s %c ",
+                mvwprintw(iwin->window, pos, 1, " %2d %41s %c ",
                           pos + offset,
                           item_describe(it,
                                         player_item_identified(p, it),
@@ -534,43 +550,21 @@ void display_inventory(char *title, player *p, inventory *inv,
             }
 
             if ((curr == pos) && player_item_is_equipped(p, it))
-                wattroff(iwin, COLOR_PAIR(13));
+                wattroff(iwin->window, COLOR_PAIR(13));
             else if (curr == pos)
-                wattroff(iwin, COLOR_PAIR(10));
+                wattroff(iwin->window, COLOR_PAIR(10));
             else if (player_item_is_equipped(p, it))
-                wattroff(iwin, COLOR_PAIR(9) | A_BOLD);
+                wattroff(iwin->window, COLOR_PAIR(9) | A_BOLD);
             else
-                wattroff(iwin, COLOR_PAIR(9));
+                wattroff(iwin->window, COLOR_PAIR(9));
 
         }
 
-        if (offset > 0)
-        {
-            wattron(iwin, COLOR_PAIR(9));
-            mvwprintw(iwin, 0, width - 5, " ^ ");
-            wattroff(iwin, COLOR_PAIR(9));
-        }
-        else
-        {
-            wattron(iwin, COLOR_PAIR(11));
-            mvwhline(iwin, 0, width - 5, ACS_HLINE, 3);
-            wattroff(iwin, COLOR_PAIR(11));
-        }
 
-        if ((offset + maxvis) < len_curr)
-        {
-            wattron(iwin, COLOR_PAIR(9));
-            mvwprintw(iwin, height - 1, width - 5, " v ");
-            wattroff(iwin, COLOR_PAIR(9));
-        }
-        else
-        {
-            wattron(iwin, COLOR_PAIR(11));
-            mvwhline(iwin, height - 1, width - 5, ACS_HLINE, 3);
-            wattroff(iwin, COLOR_PAIR(11));
-        }
+        display_window_update_arrow_up(iwin, offset > 0);
+        display_window_update_arrow_down(iwin, (offset + maxvis) < len_curr);
 
-        wrefresh(iwin);
+        wrefresh(iwin->window);
 
         switch (key = getch())
         {
@@ -661,6 +655,12 @@ void display_inventory(char *title, player *p, inventory *inv,
             break;
 
         default:
+            /* perhaps the window shall be moved */
+            if(display_window_move(iwin, key))
+            {
+                break;
+            }
+
             /* check callback function keys */
             for (cb_nr = 1; cb_nr <= callbacks->len; cb_nr++)
             {
@@ -681,6 +681,7 @@ void display_inventory(char *title, player *p, inventory *inv,
                     inv_clean(inv);
                 }
             }
+
         };
 
         len_curr = inv_length_filtered(inv, filter);
@@ -688,8 +689,7 @@ void display_inventory(char *title, player *p, inventory *inv,
     }
     while ((key != 27) && (len_curr > 0)); /* ESC pressed or empty inventory*/
 
-    delwin(iwin);
-    clear();
+    display_window_destroy(iwin, TRUE);
 }
 
 void display_inv_callbacks_clean(GPtrArray *callbacks)
@@ -706,7 +706,7 @@ void display_inv_callbacks_clean(GPtrArray *callbacks)
 
 spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
 {
-    WINDOW *swin;
+    display_window *swin;
     int width, height;
     int startx, starty;
     int maxvis;
@@ -745,7 +745,7 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
     starty = (display_rows - height) / 2;
     startx = (min(LEVEL_MAX_X, display_cols) - width) / 2;
 
-    swin = display_window_new(startx, starty, width, height, title, "");
+    swin = display_window_new(startx, starty, width, height, title, NULL);
 
     do
     {
@@ -755,65 +755,30 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
             sp = g_ptr_array_index(p->known_spells, pos + offset - 1);
 
             if (curr == pos)
-                wattron(swin, COLOR_PAIR(10));
+                wattron(swin->window, COLOR_PAIR(10));
             else
-                wattron(swin, COLOR_PAIR(9));
+                wattron(swin->window, COLOR_PAIR(9));
 
 
-            mvwprintw(swin, pos, 1, " %3s - %-23s (Lvl %d) %2d ",
+            mvwprintw(swin->window, pos, 1, " %3s - %-23s (Lvl %d) %2d ",
                       spell_code(sp),
                       spell_name(sp),
                       spell_level(sp),
                       sp->knowledge);
 
             if (curr == pos)
-                wattroff(swin, COLOR_PAIR(10));
+                wattroff(swin->window, COLOR_PAIR(10));
             else
-                wattroff(swin, COLOR_PAIR(9));
+                wattroff(swin->window, COLOR_PAIR(9));
         }
 
         /* display up / down markers */
-        if (offset > 0)
-        {
-            wattron(swin, COLOR_PAIR(9));
-            mvwprintw(swin, 0, width - 5, " ^ ");
-            wattroff(swin, COLOR_PAIR(9));
-        }
-        else
-        {
-            wattron(swin, COLOR_PAIR(11));
-            mvwhline(swin, 0, width - 5, ACS_HLINE, 3);
-            wattroff(swin, COLOR_PAIR(11));
-        }
-
-        if ((offset + maxvis) < p->known_spells->len)
-        {
-            wattron(swin, COLOR_PAIR(9));
-            mvwprintw(swin, height - 1, width - 5, " v ");
-            wattroff(swin, COLOR_PAIR(9));
-        }
-        else
-        {
-            wattron(swin, COLOR_PAIR(11));
-            mvwhline(swin, height - 1, width - 5, ACS_HLINE, 3);
-            wattroff(swin, COLOR_PAIR(11));
-        }
+        display_window_update_arrow_up(swin, (offset > 0));
+        display_window_update_arrow_down(swin, ((offset + maxvis) < p->known_spells->len));
 
         /* display typeahead keys */
-        if (strlen(code_buf))
-        {
-            wattron(swin, COLOR_PAIR(9));
-            mvwprintw(swin, height - 1, 3, " %s ", code_buf);
-            wattroff(swin, COLOR_PAIR(9));
-        }
-        else
-        {
-            wattron(swin, COLOR_PAIR(11));
-            mvwhline(swin, height - 1, 3, ACS_HLINE, 5);
-            wattroff(swin, COLOR_PAIR(11));
-        }
-
-        wrefresh(swin);
+        swin->caption = code_buf;
+        display_window_update_caption(swin);
 
         switch ((key = getch()))
         {
@@ -918,6 +883,11 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
             break;
 
         default:
+            /* check if the key is used for window placement */
+            if (display_window_move(swin, key))
+            {
+                break;
+            }
             /* add key to spell code buffer */
             if ((key >= 'a') && (key <= 'z'))
             {
@@ -973,8 +943,7 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
 
     g_free(code_buf);
 
-    delwin(swin);
-    clear();
+    display_window_destroy(swin, TRUE);
 
     return sp;
 }
@@ -986,7 +955,7 @@ void display_show_player(player *p)
 
 int display_get_count(char *caption, int value)
 {
-    WINDOW *mwin;
+    display_window *mwin;
     int height, width;
     int startx, starty;
 
@@ -1021,12 +990,12 @@ int display_get_count(char *caption, int value)
     if (startx <= 0)
         startx = (display_cols - width) / 2;
 
-    mwin = display_window_new(startx, starty, width, height, "", "");
+    mwin = display_window_new(startx, starty, width, height, NULL, NULL);
 
     /* fill the box background */
-    wattron(mwin, COLOR_PAIR(9));
-    mvwprintw(mwin, 1, 1, "%-*s", width - 2, caption);
-    wattroff(mwin, COLOR_PAIR(9));
+    wattron(mwin->window, COLOR_PAIR(9));
+    mvwprintw(mwin->window, 1, 1, "%-*s", width - 2, caption);
+    wattroff(mwin->window, COLOR_PAIR(9));
 
     /* make cursor visible */
     curs_set(1);
@@ -1038,16 +1007,20 @@ int display_get_count(char *caption, int value)
 
     ilen = strlen(ivalue);
 
-    wattron(mwin, COLOR_PAIR(13));
+    wattron(mwin->window, COLOR_PAIR(13));
 
     do
     {
-        mvwprintw(mwin, 1, len + 3, "%-6s", ivalue);
-        wmove(mwin, 1, len + 3 + ipos);
+        mvwprintw(mwin->window, 1, len + 3, "%-6s", ivalue);
+        wmove(mwin->window, 1, len + 3 + ipos);
 
-        wrefresh(mwin);
+        wrefresh(mwin->window);
 
-        key = wgetch(mwin);
+#ifdef PDCURSES
+        key = wgetch(mwin->window);
+#else
+        key = getch();
+#endif
 
         switch (key)
         {
@@ -1128,9 +1101,8 @@ int display_get_count(char *caption, int value)
                 {
 
                 }
-
             }
-            else
+            else if (!display_window_move(mwin, key))
             {
                 if (!beep())
                     flash();
@@ -1143,13 +1115,12 @@ int display_get_count(char *caption, int value)
     }
     while (cont);
 
-    wattroff(mwin, COLOR_PAIR(13));
+    wattroff(mwin->window, COLOR_PAIR(13));
 
     /* hide cursor */
     curs_set(0);
 
-    delwin(mwin);
-    clear();
+    display_window_destroy(mwin, TRUE);
 
     if (key == 27)
         return 0;
@@ -1159,7 +1130,7 @@ int display_get_count(char *caption, int value)
 
 int display_get_yesno(char *question, char *yes, char *no)
 {
-    WINDOW *ywin;
+    display_window *ywin;
 
     int startx, starty;
     int width, text_width;
@@ -1169,6 +1140,9 @@ int display_get_yesno(char *question, char *yes, char *no)
     int line;
 
     GPtrArray *text;
+
+    /* input key buffer */
+    int key;
 
     const int padding = 1;
     const int margin = 2;
@@ -1208,44 +1182,44 @@ int display_get_yesno(char *question, char *yes, char *no)
 
     ywin = display_window_new(startx, starty, width, text->len + 4, NULL, NULL);
 
-    wattron(ywin, COLOR_PAIR(9));
+    wattron(ywin->window, COLOR_PAIR(9));
 
     for (line = 0; line < text->len; line++)
-        mvwprintw(ywin,
+        mvwprintw(ywin->window,
                   line + 1,
                   1 + padding,
                   g_ptr_array_index(text, line));
 
-    wattroff(ywin, COLOR_PAIR(9));
+    wattroff(ywin->window, COLOR_PAIR(9));
 
     text_destroy(text);
 
     do
     {
         /* paint */
-        if (selection) wattron(ywin, COLOR_PAIR(13) | A_BOLD);
-        else           wattron(ywin, COLOR_PAIR(10));
+        if (selection) wattron(ywin->window, COLOR_PAIR(13) | A_BOLD);
+        else           wattron(ywin->window, COLOR_PAIR(10));
 
-        mvwprintw(ywin, line + 2, margin, "%*s%s%*s", padding, " ",
+        mvwprintw(ywin->window, line + 2, margin, "%*s%s%*s", padding, " ",
                   yes, padding, " ");
 
-        if (selection)  wattroff(ywin, COLOR_PAIR(13) | A_BOLD);
-        else            wattroff(ywin, COLOR_PAIR(10));
+        if (selection)  wattroff(ywin->window, COLOR_PAIR(13) | A_BOLD);
+        else            wattroff(ywin->window, COLOR_PAIR(10));
 
-        if (!selection) wattron(ywin, COLOR_PAIR(13) | A_BOLD);
-        else            wattron(ywin, COLOR_PAIR(10));
+        if (!selection) wattron(ywin->window, COLOR_PAIR(13) | A_BOLD);
+        else            wattron(ywin->window, COLOR_PAIR(10));
 
-        mvwprintw(ywin, line + 2,
+        mvwprintw(ywin->window, line + 2,
                   width - margin - strlen(no) - (2 * padding),
                   "%*s%s%*s", padding, " ", no, padding, " ");
 
-        if (!selection) wattroff(ywin, COLOR_PAIR(13) | A_BOLD);
-        else            wattroff(ywin, COLOR_PAIR(10));
+        if (!selection) wattroff(ywin->window, COLOR_PAIR(13) | A_BOLD);
+        else            wattroff(ywin->window, COLOR_PAIR(10));
 
-        wrefresh(ywin);
+        wrefresh(ywin->window);
 
         /* wait for input */
-        switch (getch())
+        switch ((key = getch()))
         {
         case 27: /* ESC */
             selection = FALSE;
@@ -1290,24 +1264,28 @@ int display_get_yesno(char *question, char *yes, char *no)
             selection = FALSE;
             RUN = FALSE;
             break;
+
+        default:
+            /* perhaps the window shall be moved */
+            display_window_move(ywin, key);
         }
     }
     while (RUN);
 
-    delwin(ywin);
-    clear();
+    display_window_destroy(ywin, TRUE);
 
     return selection;
 }
 
 direction display_get_direction(char *title, int *available)
 {
-    WINDOW *dwin;
+    display_window *dwin;
 
     int *dirs;
     int startx, starty;
     int width;
     int x, y;
+    int key; /* input key buffer */
     int RUN = TRUE;
 
     /* direction to return */
@@ -1336,22 +1314,22 @@ direction display_get_direction(char *title, int *available)
     dwin = display_window_new(startx, starty, width, 9, title, NULL);
 
 
-    wattron(dwin, COLOR_PAIR(9));
+    wattron(dwin->window, COLOR_PAIR(9));
 
-    mvwprintw(dwin, 3, 3, "\\|/");
-    mvwprintw(dwin, 4, 3, "- -");
-    mvwprintw(dwin, 5, 3, "/|\\");
+    mvwprintw(dwin->window, 3, 3, "\\|/");
+    mvwprintw(dwin->window, 4, 3, "- -");
+    mvwprintw(dwin->window, 5, 3, "/|\\");
 
-    wattroff(dwin, COLOR_PAIR(9));
+    wattroff(dwin->window, COLOR_PAIR(9));
 
 
-    wattron(dwin, COLOR_PAIR(12));
+    wattron(dwin->window, COLOR_PAIR(12));
 
     for (x = 0; x < 3; x++)
         for (y = 0; y < 3; y++)
         {
             if (dirs[(x + 1) + (y * 3)])
-                mvwprintw(dwin,
+                mvwprintw(dwin->window,
                           6 - (y * 2), /* start in the last row, move up, skip one */
                           (x * 2) + 2, /* start in the second col, skip one */
                           "%d",
@@ -1359,16 +1337,16 @@ direction display_get_direction(char *title, int *available)
 
         }
 
-    wattroff(dwin, COLOR_PAIR(12));
+    wattroff(dwin->window, COLOR_PAIR(12));
 
     if (!available)
         g_free(dirs);
 
-    wrefresh(dwin);
+    wrefresh(dwin->window);
 
     do
     {
-        switch (getch())
+        switch ((key = getch()))
         {
 
         case 'h':
@@ -1443,12 +1421,15 @@ direction display_get_direction(char *title, int *available)
         case 27:
             RUN = FALSE;
             break;
+
+        default:
+            /* perhaps the window shall be moved */
+            display_window_move(dwin, key);
         }
     }
     while ((dir == GD_NONE) && RUN);
 
-    delwin(dwin);
-    clear();
+    display_window_destroy(dwin, TRUE);
 
     return dir;
 }
@@ -1688,7 +1669,7 @@ char display_show_message(char *title, char *message)
 {
     int height, width;
     int startx, starty;
-    WINDOW *mwin;
+    display_window *mwin;
     int key;
 
     GPtrArray *text;
@@ -1709,48 +1690,26 @@ char display_show_message(char *title, char *message)
     starty = (display_rows - height) / 2;
     startx = (display_cols - width) / 2;
 
-    mwin = display_window_new(startx, starty, width, height, title, "");
+    mwin = display_window_new(startx, starty, width, height, title, NULL);
+
     maxvis = min(text->len, height - 2);
 
     do
     {
         for (pos = 1; pos <= maxvis; pos++)
         {
-            wattron(mwin, COLOR_PAIR(9));
-            mvwprintw(mwin, pos, 1, " %-*s ",
+            wattron(mwin->window, COLOR_PAIR(9));
+            mvwprintw(mwin->window, pos, 1, " %-*s ",
                       width - 4,
                       g_ptr_array_index(text, pos - 1 + offset));
 
-            wattroff(mwin, COLOR_PAIR(9));
+            wattroff(mwin->window, COLOR_PAIR(9));
         }
 
-        if (offset > 0)
-        {
-            wattron(mwin, COLOR_PAIR(9));
-            mvwprintw(mwin, 0, width - 5, " ^ ");
-            wattroff(mwin, COLOR_PAIR(9));
-        }
-        else
-        {
-            wattron(mwin, COLOR_PAIR(11));
-            mvwhline(mwin, 0, width - 5, ACS_HLINE, 3);
-            wattroff(mwin, COLOR_PAIR(11));
-        }
+        display_window_update_arrow_up(mwin, offset > 0);
+        display_window_update_arrow_down(mwin, (offset + maxvis) < text->len);
 
-        if ((offset + maxvis) < text->len)
-        {
-            wattron(mwin, COLOR_PAIR(9));
-            mvwprintw(mwin, height - 1, width - 5, " v ");
-            wattroff(mwin, COLOR_PAIR(9));
-        }
-        else
-        {
-            wattron(mwin, COLOR_PAIR(11));
-            mvwhline(mwin, height - 1, width - 5, ACS_HLINE, 3);
-            wattroff(mwin, COLOR_PAIR(11));
-        }
-
-        wrefresh(mwin);
+        wrefresh(mwin->window);
         key = getch();
 
         switch (key)
@@ -1792,56 +1751,190 @@ char display_show_message(char *title, char *message)
             break;
 
         default:
-            RUN = FALSE;
+            /* perhaps the window shall be moved */
+            if (!display_window_move(mwin, key))
+            {
+                /* some other key -> close window */
+                RUN = FALSE;
+            }
         }
     }
     while (RUN);
 
-    wattroff(mwin, COLOR_PAIR(9));
+    wattroff(mwin->window, COLOR_PAIR(9));
 
-    delwin(mwin);
-    clear();
+    display_window_destroy(mwin, TRUE);
+
     text_destroy(text);
 
     return key;
 }
 
-static WINDOW *display_window_new(int x1, int y1, int width, int height, char *title, char *caption)
+static display_window *display_window_new(int x1, int y1, int width, int height, char *title, char *caption)
 {
-    WINDOW *nwin;
     int i;
 
-    nwin = newwin(height, width, y1, x1);
+    display_window *dwin;
+
+    dwin = g_malloc0(sizeof(display_window));
+
+    dwin->x1 = x1;
+    dwin->y1 = y1;
+    dwin->width = width;
+    dwin->height = height;
+    dwin->title = title;
+    dwin->caption = caption;
+
+    dwin->window = newwin(dwin->height, dwin->width, dwin->y1, dwin->x1);
 
     /* fill window background */
-    wattron(nwin, COLOR_PAIR(9));
+    wattron(dwin->window, COLOR_PAIR(9));
 
     for (i = 1; i < height; i++)
-        mvwprintw(nwin, i, 1, "%*s", width - 2, "");
+        mvwprintw(dwin->window, i, 1, "%*s", width - 2, "");
 
-    wattroff(nwin, COLOR_PAIR(9));
+    wattroff(dwin->window, COLOR_PAIR(9));
 
 
     /* draw borders */
-    wattron(nwin, COLOR_PAIR(11));
+    wattron(dwin->window, COLOR_PAIR(11));
 
-    box(nwin, 0, 0);
+    box(dwin->window, 0, 0);
 
-    wattroff(nwin, COLOR_PAIR(11));
-
-    wattron(nwin, COLOR_PAIR(9) | A_BOLD);
+    wattroff(dwin->window, COLOR_PAIR(11));
 
     if (title && strlen(title))
     {
-        mvwprintw(nwin, 0, 1, " %s ", title);
+        wattron(dwin->window, COLOR_PAIR(9) | A_BOLD);
+        mvwprintw(dwin->window, 0, 1, " %s ", title);
+        wattroff(dwin->window, COLOR_PAIR(9) | A_BOLD);
     }
 
-    if (caption && strlen(caption))
+    if (caption)
     {
-        mvwprintw(nwin, height - 1, 1, " %s ", caption);
+        display_window_update_caption(dwin);
     }
 
-    wattroff(nwin, COLOR_PAIR(9) | A_BOLD);
+    /* create a panel for the window */
+    dwin->panel = new_panel(dwin->window);
 
-    return nwin;
+    /* refresh panels */
+    update_panels();
+
+    /* add window to the list of opened windows */
+    windows = g_list_append(windows, dwin);
+
+    return dwin;
+}
+
+static void display_window_destroy(display_window *dwin, gboolean clear)
+{
+    del_panel(dwin->panel);
+    delwin(dwin->window);
+
+    /* remove window from the list of windows */
+    windows = g_list_remove(windows, dwin);
+
+    g_free(dwin);
+
+    /* repaint screen */
+    if (clear)
+    {
+        clear();
+    }
+}
+
+static int display_window_move(display_window *dwin, int key)
+{
+    gboolean refresh = TRUE;
+
+    assert (dwin != NULL && key);
+
+    switch(key)
+    {
+            /* shift+left */
+        case 393:
+            if (dwin->x1 > 0) dwin->x1--;
+            break;
+
+            /* shift+right */
+        case 402:
+            if (dwin->x1 < (display_cols - dwin->width)) dwin->x1++;
+            break;
+
+            /* shift+up */
+        case 337:
+            if (dwin->y1 > 0) dwin->y1--;
+            break;
+
+            /* shift+down */
+        case 336:
+            if (dwin->y1 < (display_rows - dwin->height)) dwin->y1++;
+            break;
+
+        default:
+            refresh = FALSE;
+    }
+
+    if (refresh)
+    {
+        move_panel(dwin->panel, dwin->y1, dwin->x1);
+        //refresh();
+        update_panels();
+        doupdate();
+    }
+
+    return refresh;
+}
+
+static void display_window_update_caption(display_window *dwin)
+{
+    assert (dwin != NULL && dwin->window != NULL);
+
+    /* repaint line to overwrite previous captions */
+    wattron(dwin->window, COLOR_PAIR(11));
+    mvwhline(dwin->window, dwin->height - 1, 3, ACS_HLINE, dwin->width - 7);
+    wattroff(dwin->window, COLOR_PAIR(11));
+
+    /* print caption if caption is set */
+    if (strlen(dwin->caption))
+    {
+        wattron(dwin->window, COLOR_PAIR(9));
+        mvwprintw(dwin->window, dwin->height - 1, 3, " %s ", dwin->caption);
+        wattroff(dwin->window, COLOR_PAIR(9));
+    }
+
+    wrefresh(dwin->window);
+}
+
+static void display_window_update_arrow_up(display_window *dwin, gboolean on)
+{
+    if (on)
+    {
+        wattron(dwin->window, COLOR_PAIR(9));
+        mvwprintw(dwin->window, 0, dwin->width - 5, " ^ ");
+        wattroff(dwin->window, COLOR_PAIR(9));
+    }
+    else
+    {
+        wattron(dwin->window, COLOR_PAIR(11));
+        mvwhline(dwin->window, 0, dwin->width - 5, ACS_HLINE, 3);
+        wattroff(dwin->window, COLOR_PAIR(11));
+    }
+}
+
+static void display_window_update_arrow_down(display_window *dwin, gboolean on)
+{
+    if (on)
+    {
+        wattron(dwin->window, COLOR_PAIR(9));
+        mvwprintw(dwin->window, dwin->height - 1, dwin->width - 5, " v ");
+        wattroff(dwin->window, COLOR_PAIR(9));
+    }
+    else
+    {
+        wattron(dwin->window, COLOR_PAIR(11));
+        mvwhline(dwin->window, dwin->height - 1, dwin->width - 5, ACS_HLINE, 3);
+        wattroff(dwin->window, COLOR_PAIR(11));
+    }
 }

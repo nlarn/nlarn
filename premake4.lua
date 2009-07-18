@@ -43,7 +43,7 @@ solution "NLarn"
 		files { "inc/*.h", "src/*.c" }
 		includedirs { "inc" }
 
-		links { "glib-2.0" }
+		links { "glib-2.0", "panel" }
 
 		configuration "Debug"
 			defines { "DEBUG" }
@@ -57,6 +57,7 @@ solution "NLarn"
 			links { "pdcurses" }
 
 		configuration "not windows"
+			includedirs { "/usr/include/ncurses" } 
 			links { "ncurses" }
 
 		configuration { "gmake" }

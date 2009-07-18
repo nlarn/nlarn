@@ -19,6 +19,8 @@
 #ifndef __DISPLAY_H_
 #define __DISPLAY_H_
 
+#include <curses.h>
+#include <panel.h>
 #include "game.h"
 #include "items.h"
 #include "player.h"
@@ -46,12 +48,25 @@ typedef struct display_inv_callback
     gboolean active;
 } display_inv_callback;
 
+typedef struct display_window
+{
+    int x1;
+    int y1;
+    int width;
+    int height;
+    char *title;
+    char *caption;
+    WINDOW *window;
+    PANEL *panel;
+} display_window;
+
 /* function declarations */
 
 int display_init();
 void display_shutdown();
-int display_paint_screen(player *p);
 int display_draw();
+
+int display_paint_screen(player *p);
 
 void display_inventory(char *title, player *p, inventory *inv,
                        GPtrArray *callbacks, int show_price,
@@ -67,5 +82,8 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 
 void display_show_history(message_log *log, char *title);
 char display_show_message(char *title, char *message);
+
+#define display_getch getch
+
 
 #endif

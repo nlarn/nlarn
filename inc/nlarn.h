@@ -20,7 +20,6 @@
 #define __NULARN_H_
 
 #include <assert.h>
-#include <curses.h>
 #include <ctype.h>
 #include <glib.h>
 #include <stdarg.h>

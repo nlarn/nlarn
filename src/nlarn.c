@@ -17,6 +17,8 @@
  */
 
 #include "nlarn.h"
+/* needed for the key definitions */
+#include <curses.h>
 
 int main(int argc, char *argv[])
 {
@@ -64,7 +66,7 @@ int main(int argc, char *argv[])
     do
     {
         /* get key and analyze it */
-        switch (getch())
+        switch (display_getch())
         {
             /* *** MOVEMENT *** */
         case 'h':
