@@ -657,7 +657,7 @@ void display_inventory(char *title, player *p, inventory *inv,
 
         default:
             /* perhaps the window shall be moved */
-            if(display_window_move(iwin, key))
+            if (display_window_move(iwin, key))
             {
                 break;
             }
@@ -703,6 +703,75 @@ void display_inv_callbacks_clean(GPtrArray *callbacks)
     }
 
     g_ptr_array_free(callbacks, TRUE);
+}
+
+void display_config_autopickup(player *p)
+{
+    display_window *cwin;
+    int width, height;
+    int startx, starty;
+    int key; /* keyboard input */
+    int RUN = TRUE;
+
+    item_t it;
+
+    height = 6;
+    width = max(36 /* length of first label */, IT_MAX * 2 + 1);
+
+    starty = (display_rows - height) / 2;
+    startx = (min(LEVEL_MAX_X, display_cols) - width) / 2;
+
+    cwin = display_window_new(startx, starty, width, height, "Autopickup", NULL);
+
+    wattron(cwin->window, COLOR_PAIR(9));
+    mvwprintw(cwin->window, 1, 2, "Enabled types are shown inverted");
+    mvwprintw(cwin->window, 2, 7, "type symbol to toggle");
+    wattroff(cwin->window, COLOR_PAIR(9));
+
+    do
+    {
+        for (it = 1; it < IT_MAX; it++)
+        {
+            if (p->settings.auto_pickup[it])
+                wattron(cwin->window, COLOR_PAIR(10));
+            else
+                wattron(cwin->window, COLOR_PAIR(9));
+
+            mvwprintw(cwin->window, 4, 6 + it * 2, "%c", item_get_image(it));
+
+            if (p->settings.auto_pickup[it])
+                wattroff(cwin->window, COLOR_PAIR(10));
+            else
+                wattroff(cwin->window, COLOR_PAIR(9));
+        }
+
+        wrefresh(cwin->window);
+
+        switch (key = getch())
+        {
+        case 10:
+        case 13:
+        case 27:
+        case 32:
+            RUN = FALSE;
+
+        default:
+            if (!display_window_move(cwin, key))
+            {
+                for (it = 1; it < IT_MAX; it++)
+                {
+                    if (item_get_image(it) == key)
+                    {
+                        p->settings.auto_pickup[it] = !p->settings.auto_pickup[it];
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    while (RUN);
+
+    display_window_destroy(cwin, TRUE);
 }
 
 spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
@@ -1851,34 +1920,34 @@ static int display_window_move(display_window *dwin, int key)
 
     assert (dwin != NULL && key);
 
-    switch(key)
+    switch (key)
     {
-            /* ^left */
-        case 541: /* NCurses - Linux */
-        case 443: /* PDCurses - Windows */
-            if (dwin->x1 > 0) dwin->x1--;
-            break;
+        /* ^left */
+    case 541: /* NCurses - Linux */
+    case 443: /* PDCurses - Windows */
+        if (dwin->x1 > 0) dwin->x1--;
+        break;
 
-            /* ^right */
-        case 556: /* NCurses - Linux */
-        case 444: /* PDCurses - Windows */
-            if (dwin->x1 < (display_cols - dwin->width)) dwin->x1++;
-            break;
+        /* ^right */
+    case 556: /* NCurses - Linux */
+    case 444: /* PDCurses - Windows */
+        if (dwin->x1 < (display_cols - dwin->width)) dwin->x1++;
+        break;
 
-            /* ^up */
-        case 562: /* NCurses - Linux */
-        case 480: /* PDCurses - Windows */
-            if (dwin->y1 > 0) dwin->y1--;
-            break;
+        /* ^up */
+    case 562: /* NCurses - Linux */
+    case 480: /* PDCurses - Windows */
+        if (dwin->y1 > 0) dwin->y1--;
+        break;
 
-            /* ^down */
-        case 521: /* NCurses - Linux */
-        case 481: /* PDCurses - Windows */
-            if (dwin->y1 < (display_rows - dwin->height)) dwin->y1++;
-            break;
+        /* ^down */
+    case 521: /* NCurses - Linux */
+    case 481: /* PDCurses - Windows */
+        if (dwin->y1 < (display_rows - dwin->height)) dwin->y1++;
+        break;
 
-        default:
-            refresh = FALSE;
+    default:
+        refresh = FALSE;
     }
 
     if (refresh)

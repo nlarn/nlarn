@@ -71,7 +71,10 @@ int display_paint_screen(player *p);
 void display_inventory(char *title, player *p, inventory *inv,
                        GPtrArray *callbacks, int show_price,
                        int (*filter)(item *));
+
 void display_inv_callbacks_clean(GPtrArray *callbacks);
+
+void display_config_autopickup(player *p);
 
 spell *display_spell_select(char *title, player *p, GPtrArray *callbacks);
 

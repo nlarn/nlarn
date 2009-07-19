@@ -144,9 +144,8 @@ int main(int argc, char *argv[])
             break;
 
         case '@':
-            g->p->settings.auto_pickup = !(g->p->settings.auto_pickup);
-            log_add_entry(g->p->log, "Auto-pickup is %s.",
-                          g->p->settings.auto_pickup ? "on" : "off");
+            display_config_autopickup(g->p);
+            player_autopickup_show(g->p);
             break;
 
             /* sit and wait */

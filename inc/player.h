@@ -52,9 +52,7 @@ typedef struct player_stats
 
 typedef struct _player_settings
 {
-    guint32
-auto_pickup:
-    1; /* automatically pick up items */
+    gboolean auto_pickup[IT_MAX]; /* automatically pick up item of enabled types */
 } player_settings;
 
 
@@ -195,6 +193,9 @@ void player_monster_kill(player *p, monster *m, char *message);
 
 int player_examine(player *p, position pos);
 int player_pickup(player *p);
+
+void player_autopickup(player *p);
+void player_autopickup_show(player *p);
 
 void player_lvl_gain(player *p, int count);
 void player_lvl_lose(player *p, int count);

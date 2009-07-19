@@ -47,13 +47,14 @@ game *game_new(int argc, char *argv[])
 {
     game *g;
     int i;
+    item_t it;
 
     /* these will be filled by the command line parser */
     static gint difficulty = 0;
     static gboolean wizard = FALSE;
     static char *name = NULL;
     static gboolean female = FALSE; /* default: male */
-    static gboolean auto_pickup = FALSE;
+    static char *auto_pickup = NULL;
 
     /* objects needed to parse the command line */
     GError *error = NULL;
@@ -61,11 +62,11 @@ game *game_new(int argc, char *argv[])
 
     static GOptionEntry entries[] =
     {
-        { "difficulty", 'd', 0, G_OPTION_ARG_INT, &difficulty, "Set difficulty", NULL },
-        { "wizard", 'w', 0, G_OPTION_ARG_NONE, &wizard, "Enable wizard mode", NULL },
-        { "name", 'n', 0, G_OPTION_ARG_STRING, &name, "Set character's name", NULL },
-        { "female", 0, 0, G_OPTION_ARG_NONE, &female, "Make a female character (default: male)", NULL },
-        { "auto-pickup", 0, 0, G_OPTION_ARG_NONE, &auto_pickup, "Automatically pick up items", NULL },
+        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,  "Set difficulty",       NULL },
+        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &wizard,      "Enable wizard mode",   NULL },
+        { "name",        'n', 0, G_OPTION_ARG_STRING, &name,        "Set character's name", NULL },
+        { "female",        0, 0, G_OPTION_ARG_NONE,   &female,      "Make a female character (default: male)", NULL },
+        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &auto_pickup, "Item types to pick up automatically, e.g. '$*+'", NULL },
         { NULL }
     };
 
@@ -114,7 +115,21 @@ game *game_new(int argc, char *argv[])
     }
 
     g->p->sex = !female;
-    g->p->settings.auto_pickup = auto_pickup;
+
+    /* parse autopickup settings */
+    if (auto_pickup)
+    {
+        for (i = 0; i < strlen(auto_pickup); i++)
+        {
+            for (it = IT_NONE; it < IT_MAX; it++)
+            {
+                if (auto_pickup[i] == item_get_image(it))
+                {
+                    g->p->settings.auto_pickup[it] = TRUE;
+                }
+            }
+        }
+    }
 
     /* allocate space for levels */
     for (i = 0; i < LEVEL_MAX; i++)

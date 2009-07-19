@@ -484,24 +484,12 @@ int player_move(player *p, int direction)
         times += player_trigger_trap(p, target_t->trap);
     } /* end trap */
 
-    if (p->settings.auto_pickup
-            && (target_t->ilist && inv_length(target_t->ilist)))
+    /* auto-pickup */
+    if (level_ilist_at(p->level, p->pos))
     {
-        /* pick up all items on floor */
-        while (inv_length(target_t->ilist))
-        {
-            /* add time needed to pickup items to turn time */
-            times += player_item_pickup(p, inv_del(target_t->ilist,
-                                                   inv_length(target_t->ilist) - 1));
-        }
-
-        /* destroy unused inventory */
-        if (!target_t->ilist->len)
-        {
-            inv_destroy(target_t->ilist);
-            target_t->ilist = NULL;
-        }
-    } /* auto-pickup */
+        /* pick up desired items on floor */
+        player_autopickup(p);
+    }
 
     return times;
 }
@@ -852,12 +840,10 @@ int player_pickup(player *p)
         /* define callback functions */
         callbacks = g_ptr_array_new();
 
-        callback = g_malloc(sizeof(display_inv_callback));
+        callback = g_malloc0(sizeof(display_inv_callback));
         callback->description = "(g)et";
         callback->key = 'g';
         callback->function = &player_item_pickup;
-        callback->checkfun = NULL;
-        callback->active = FALSE;
         g_ptr_array_add(callbacks, callback);
 
         display_inventory("On the floor", p, *inv, callbacks, FALSE, NULL);
@@ -867,6 +853,64 @@ int player_pickup(player *p)
     }
 
     return time;
+}
+
+void player_autopickup(player *p)
+{
+    int pos;
+    item *i;
+
+    assert (p != NULL && level_ilist_at(p->level, p->pos));
+
+    /* do not pickup anything if already overloaded */
+    if (player_effect(p, ET_BURDENED) || player_effect(p, ET_OVERSTRAINED))
+        return;
+
+    for (pos = 1; pos <= inv_length(level_ilist_at(p->level, p->pos)); pos++)
+    {
+        i = inv_get(level_ilist_at(p->level, p->pos), pos - 1);
+
+        if (p->settings.auto_pickup[i->type])
+        {
+            player_item_pickup(p, i);
+        }
+    }
+}
+
+void player_autopickup_show(player *p)
+{
+    GString *msg;
+    int count = 0;
+    item_t it;
+
+    assert (p != NULL);
+
+    msg = g_string_new(NULL);
+
+    for (it = IT_NONE; it < IT_MAX; it++)
+    {
+        if (p->settings.auto_pickup[it])
+        {
+            if (count)
+                g_string_append(msg, ", ");
+
+            g_string_append(msg, item_get_name_pl(it));
+            count++;
+        }
+    }
+
+    if (!count)
+        g_string_append(msg, "Auto-pickup is not enabled.");
+    else
+    {
+        g_string_prepend(msg, "Auto-pickup is enabled for ");
+        g_string_append(msg, ".");
+    }
+
+
+    log_add_entry(p->log, msg->str);
+
+    g_string_free(msg, TRUE);
 }
 
 void player_lvl_gain(player *p, int count)
@@ -1507,37 +1551,33 @@ int player_inv_display(player *p)
     /* define callback functions */
     callbacks = g_ptr_array_new();
 
-    callback = g_malloc(sizeof(display_inv_callback));
+    callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(d)rop";
     callback->key = 'd';
     callback->function = &player_item_drop;
     callback->checkfun = &player_item_is_dropable;
-    callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
-    callback = g_malloc(sizeof(display_inv_callback));
+    callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(e)quip";
     callback->key = 'e';
     callback->function = &player_item_equip;
     callback->checkfun = &player_item_is_equippable;
-    callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
-    callback = g_malloc(sizeof(display_inv_callback));
+    callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(u)nequip";
     callback->key = 'u';
     callback->function = &player_item_unequip;
     callback->checkfun = &player_item_is_equipped;
-    callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
     /* unequip and use should never appear together */
-    callback = g_malloc(sizeof(display_inv_callback));
+    callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(u)se";
     callback->key = 'u';
     callback->function = &player_item_use;
     callback->checkfun = &player_item_is_usable;
-    callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
     display_inventory("Inventory", p, p->inventory, callbacks, FALSE, NULL);
@@ -2480,7 +2520,7 @@ int player_item_pickup(player *p, item *it)
         return 0;
     }
 
-    if (it->count > 1)
+    if ((it->count > 1) && (it->type != IT_GOLD))
     {
         g_snprintf(desc, 60, "Pick up how many %s?", item_get_name_pl(it->type));
 
