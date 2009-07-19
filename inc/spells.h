@@ -143,8 +143,9 @@ void spell_vaporize_rock(struct player *p);
 void book_desc_shuffle();
 char *book_desc(int book_id);
 
+int book_weight(item *book);
+
 #define book_name(book)   (spells[(book)->id].name)
-#define book_weight(book) (1) /* FIXME: return real weight */
 #define book_price(book)  (spells[(book)->id].price)
 
 #endif

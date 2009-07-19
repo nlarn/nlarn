@@ -104,9 +104,11 @@ enum effect_types
     ET_ITCHING,                 /* unable to wear armour */
     ET_CONFUSION,               /* random movement */
     ET_LAUGHTER,                /* FIXME: ??? */
-    ET_POISON,                  /* by potion */
+    ET_POISON,                  /* cause by potion or trap */
     ET_AMNESIA,                 /* potion of forgetfulness */
-    ET_SLOWNESS,                /* reduce speed */
+    ET_SLOWNESS,                /* reduced speed */
+    ET_BURDENED,                /* overloaded */
+    ET_OVERSTRAINED,            /* extremely overloaded */
 
     ET_MAX                      /* last effect known */
 };

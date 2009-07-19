@@ -192,6 +192,11 @@ int main(int argc, char *argv[])
             moves_count = player_building_enter(g->p);
             break;
 
+            /* display inventory weight */
+        case 'g':
+            player_inv_display_weight(g->p);
+            break;
+
             /* display inventory */
         case 'i':
             player_inv_display(g->p);

@@ -31,5 +31,5 @@ const armour_data armours[AT_MAX] =
     { AT_PLATEMAIL,  "plate mail",              9, AC_SUIT,     IM_IRON,    17500,  400, 0 },
     { AT_PLATE,      "plate armour",           10, AC_SUIT,     IM_IRON,    20000,  900, 0 },
     { AT_SPLATE,     "stainless plate armour", 12, AC_SUIT,     IM_STEEL,   20000, 2600, 0 },
-    { AT_ELVENCHAIN, "elven chain",            15, AC_SUIT,     IM_MITHRIL,  7500,    0, 0 },
+    { AT_ELVENCHAIN, "elven chain",            15, AC_SUIT,     IM_MITHRIL,  7500, 5000, 0 },
 };

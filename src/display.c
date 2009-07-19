@@ -507,9 +507,10 @@ void display_inventory(char *title, player *p, inventory *inv,
             }
         }
 
+        display_window_update_caption(iwin);
+
         if (iwin->caption)
         {
-            display_window_update_caption(iwin);
             g_free(iwin->caption);
             iwin->caption = NULL;
         }
@@ -1900,7 +1901,7 @@ static void display_window_update_caption(display_window *dwin)
     wattroff(dwin->window, COLOR_PAIR(11));
 
     /* print caption if caption is set */
-    if (strlen(dwin->caption))
+    if (dwin->caption && strlen(dwin->caption))
     {
         wattron(dwin->window, COLOR_PAIR(9));
         mvwprintw(dwin->window, dwin->height - 1, 3, " %s ", dwin->caption);
@@ -1912,6 +1913,8 @@ static void display_window_update_caption(display_window *dwin)
 
 static void display_window_update_arrow_up(display_window *dwin, gboolean on)
 {
+    assert (dwin != NULL && dwin->window != NULL);
+
     if (on)
     {
         wattron(dwin->window, COLOR_PAIR(9));
@@ -1928,6 +1931,8 @@ static void display_window_update_arrow_up(display_window *dwin, gboolean on)
 
 static void display_window_update_arrow_down(display_window *dwin, gboolean on)
 {
+    assert (dwin != NULL && dwin->window != NULL);
+
     if (on)
     {
         wattron(dwin->window, COLOR_PAIR(9));

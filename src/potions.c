@@ -129,15 +129,6 @@ int potion_detect_item(player *p, item *potion)
 
     assert(p != NULL && potion != NULL);
 
-    if (potion->id == PO_TRE_DETECT)
-    {
-        log_add_entry(p->log, "You sense the presence of treasure.");
-    }
-    else
-    {
-        log_add_entry(p->log, "You sense the presence of objects.");
-    }
-
     for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)

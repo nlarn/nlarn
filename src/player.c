@@ -437,6 +437,13 @@ int player_move(player *p, int direction)
 
     assert(p != NULL && direction > GD_NONE && direction < GD_MAX);
 
+    /* no movement if overloaded */
+    if (player_effect(p, ET_OVERSTRAINED))
+    {
+        log_add_entry(p->log, "You cannot move as long you are overstrained.");
+        return 0;
+    }
+
     /* confusion: random movement */
     if (player_effect(p, ET_CONFUSION))
     {
@@ -823,9 +830,7 @@ int player_examine(player *p, position pos)
 int player_pickup(player *p)
 {
     inventory **inv;
-    item *it;
-    char item_desc[81];
-    int time;
+    int time = 0;
 
     GPtrArray *callbacks;
     display_inv_callback *callback;
@@ -837,21 +842,10 @@ int player_pickup(player *p)
     if ((*inv == NULL) || (inv_length(*inv) == 0))
     {
         log_add_entry(p->log, "There is nothing here.");
-
-        time = 0;
     }
     else if (inv_length(*inv) == 1)
     {
-
-        it = inv_del(*inv, 0);
-
-        log_add_entry(p->log, "You pick up %s.",
-                      item_describe(it, player_item_known(p, it),
-                                    FALSE, FALSE, item_desc, 80));
-
-        inv_add(p->inventory, it);
-
-        time = 2;
+        return player_item_pickup(p, inv_get(*inv, 0));
     }
     else
     {
@@ -870,15 +864,6 @@ int player_pickup(player *p)
 
         /* clean up callbacks */
         display_inv_callbacks_clean(callbacks);
-
-        time = 0;
-    }
-
-    /* clean up floor - destroy unused inventory */
-    if ((*inv != NULL) && !(*inv)->len)
-    {
-        inv_destroy(*inv);
-        *inv = NULL;
     }
 
     return time;
@@ -1563,6 +1548,23 @@ int player_inv_display(player *p)
     return TRUE;
 }
 
+void player_inv_display_weight(player *p)
+{
+    float weight;
+    char *unit = "g";
+
+    assert (p != NULL);
+
+    weight = (float)inv_weight(p->inventory);
+    if (weight > 1000)
+    {
+        weight = weight / 1000;
+        unit = "kg";
+    }
+
+    log_add_entry(p->log, "The weight of your inventory is %g %s.", weight, unit);
+}
+
 /* level is needed to make function signature match display_inventory requirements */
 int player_item_equip(player *p, item *it)
 {
@@ -2007,7 +2009,7 @@ int player_item_identified(player *p, item *it)
     if (it->blessed && !it->blessed_known)
         known = FALSE;
 
-    if (it->bonus_known)
+    if (!it->bonus_known)
         known = FALSE;
 
     return known;
@@ -2404,6 +2406,9 @@ int player_item_drop(player *p, item *it)
     char desc[61];
     int count;
 
+    int pack_weight;
+    int can_carry;
+
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     if (player_item_is_equipped(p, it))
@@ -2414,6 +2419,9 @@ int player_item_drop(player *p, item *it)
         g_snprintf(desc, 60, "Drop how many %s?", item_get_name_pl(it->type));
 
         count = display_get_count(desc, it->count);
+
+        if (!count)
+            return 0;
 
         if (count < it->count)
             it = item_split(it, count);
@@ -2428,6 +2436,31 @@ int player_item_drop(player *p, item *it)
     log_add_entry(p->log, "You drop %s.", item_describe(it, player_item_known(p, it),
                   FALSE, FALSE, desc, 60));
 
+    /* check weight */
+    pack_weight = inv_weight(p->inventory);
+
+    /* player can carry 2kg per str */
+    can_carry = 2000 * player_get_str(p);
+
+    /* +30% until overstrained */
+    if (pack_weight < (int)((float)can_carry * 1.3) && (pack_weight > can_carry))
+    {
+        /* if already overstrained get rid of this */
+        if (player_effect(p, ET_OVERSTRAINED))
+            player_effect_del(p, player_effect_get(p, ET_OVERSTRAINED));
+
+        if (!player_effect(p, ET_BURDENED))
+            player_effect_add(p, effect_new(ET_BURDENED, game_turn(p->game)));
+    }
+    else if (pack_weight < can_carry)
+    {
+        if (player_effect(p, ET_OVERSTRAINED))
+            player_effect_del(p, player_effect_get(p, ET_OVERSTRAINED));
+
+        if (player_effect(p, ET_BURDENED))
+            player_effect_del(p, player_effect_get(p, ET_BURDENED));
+    }
+
     return TRUE;
 }
 
@@ -2436,19 +2469,38 @@ int player_item_pickup(player *p, item *it)
     char desc[61];
     int count;
 
+    int pack_weight;
+    int can_carry;
+
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    if (it->count > 1 && it->type != IT_GOLD)
+    if (player_effect(p, ET_OVERSTRAINED))
+    {
+        log_add_entry(p->log, "You are already overloaded!");
+        return 0;
+    }
+
+    if (it->count > 1)
     {
         g_snprintf(desc, 60, "Pick up how many %s?", item_get_name_pl(it->type));
 
         count = display_get_count(desc, it->count);
+
+        if (count == 0)
+            return 0;
 
         if (count < it->count)
             it = item_split(it, count);
     }
 
     inv_del_element(level_ilist_at(p->level, p->pos), it);
+
+    /* delete inventory if empty */
+    if (!inv_length(level_ilist_at(p->level, p->pos)))
+    {
+        inv_destroy(level_ilist_at(p->level, p->pos));
+        level_ilist_at(p->level, p->pos) = NULL;
+    }
 
     log_add_entry(p->log, "You pick up %s.",
                   item_describe(it, player_item_known(p, it),
@@ -2457,6 +2509,30 @@ int player_item_pickup(player *p, item *it)
     /* this has to come after the logging as it can be freed at this point
        ->stackable item */
     inv_add(p->inventory, it);
+
+
+    /* check weight */
+    pack_weight = inv_weight(p->inventory);
+
+    /* player can carry 2kg per str */
+    can_carry = 2000 * player_get_str(p);
+
+    /* +30% until overstrained */
+    if (pack_weight > (int)((float)can_carry * 1.3))
+    {
+        /* if already burdened get rid of this */
+        if (player_effect(p, ET_BURDENED))
+            player_effect_del(p, player_effect_get(p, ET_BURDENED));
+
+        if (!player_effect(p, ET_OVERSTRAINED))
+            player_effect_add(p, effect_new(ET_OVERSTRAINED, game_turn(p->game)));
+    }
+    else if (pack_weight > can_carry)
+    {
+        /* burdened */
+        if (!player_effect(p, ET_BURDENED))
+            player_effect_add(p, effect_new(ET_BURDENED, game_turn(p->game)));
+    }
 
     /* one turn to pick item up, one to stuff it into the pack */
     return 2;

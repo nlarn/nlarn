@@ -495,18 +495,18 @@ static int book_desc_mapping[SP_MAX - 1] = { 0 };
 static const char *book_descriptions[SP_MAX - 1] =
 {
     "parchment-bound",
-    "thick",
+    "thick", /* 1 */
     "dusty",
     "leather-bound",
-    "heavy",
+    "heavy", /* 4 */
     "ancient",
     "buckram",
     "gilded",
     "embossed",
     "old",
-    "thin",
-    "light",
-    "large",
+    "thin", /* 10 */
+    "light", /* 11 */
+    "large", /* 12 */
     "vellum",
     "tan",
     "papyrus",
@@ -1133,4 +1133,26 @@ char *book_desc(int book_id)
 {
     assert(book_id > SP_NONE && book_id < SP_MAX);
     return (char *)book_descriptions[book_desc_mapping[book_id - 1]];
+}
+
+int book_weight(item *book)
+{
+    assert (book != NULL && book->type == IT_BOOK);
+
+    switch (book_desc_mapping[book->id - 1])
+    {
+        case 1: /* thick */
+        case 4: /* heavy */
+        case 12: /* large */
+            return 1200;
+            break;
+
+        case 10: /* thin */
+        case 11: /* light */
+            return 400;
+            break;
+
+        default:
+            return 800;
+    }
 }

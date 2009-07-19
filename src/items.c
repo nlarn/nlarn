@@ -621,8 +621,7 @@ int item_weight(item *it)
         break;
 
     case IT_BOOK:
-        /* heavy tome */
-        return 1500;
+        return book_weight(it);
         break;
 
     case IT_POTION:
@@ -647,8 +646,7 @@ int item_weight(item *it)
 
     case IT_GOLD:
         /* Is this too heavy? is this too light?
-           It should give the player a reason to use the bank.
-         */
+           It should give the player a reason to use the bank. */
         return it->count * 4;
         break;
 

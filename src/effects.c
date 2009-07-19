@@ -720,6 +720,26 @@ static const effect_data effects[ET_MAX] =
         "The %s seems to move much faster.",
     },
 
+    {
+        ET_BURDENED,
+        0,
+        0,
+        "You are burdened.",
+        "You are no longer burdened.",
+        NULL,
+        NULL,
+    },
+
+    {
+        ET_OVERSTRAINED,
+        0,
+        0,
+        "You are overloaded!",
+        "You are no longer overloaded.",
+        NULL,
+        NULL,
+    },
+
 };
 
 effect *effect_new(int type, time_t now)
