@@ -87,7 +87,7 @@ typedef struct item {
     guint32 id;             /* item id, type specific */
     gint32 bonus;
     guint32 count;          /* for stackable items */
-    effect *effect;         /* storage for effect */
+    GPtrArray *effects;     /* storage for effects */
     inventory *content;     /* for containers */
     guint32
         blessed: 1,
@@ -129,7 +129,9 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 item_material_t item_material(item *it);
 int item_price(item *it);
 int item_weight(item *it);
-effect *item_effect(item *it);
+
+void item_effect_add(item *i, effect *e);
+void item_effect_del(item *i, effect *e);
 
 int item_bless(item *it);
 int item_curse(item *it);

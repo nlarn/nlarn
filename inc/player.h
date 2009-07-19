@@ -221,7 +221,9 @@ int player_spell_known(player *p, int spell_type);
 
 /* dealing with temporary effects */
 void player_effect_add(player *p, effect *e);
+void player_effects_add(player *p, GPtrArray *effects);
 int player_effect_del(player *p, effect *e);
+void player_effects_del(player *p, GPtrArray *effects);
 effect *player_effect_get(player *p, int effect_id);
 int player_effect(player *p, int effect_type); /* check if a effect is set */
 void player_effects_expire(player *p, int turns);

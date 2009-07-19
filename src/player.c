@@ -1488,6 +1488,28 @@ void player_effect_add(player *p, effect *e)
     }
 }
 
+void player_effects_add(player *p, GPtrArray *effects)
+{
+    int pos;
+    effect *e;
+
+    assert (p != NULL);
+
+    /* if effects is NULL */
+    if (!effects) return;
+
+    for (pos = 1; pos <= effects->len; pos++)
+    {
+        e = g_ptr_array_index(effects, pos - 1);
+        g_ptr_array_add(p->effects, e);
+
+        if (effect_get_msg_start(e))
+        {
+            log_add_entry(p->log, effect_get_msg_start(e));
+        }
+    }
+}
+
 int player_effect_del(player *p, effect *e)
 {
     assert(p != NULL && e != NULL && e->type > ET_NONE && e->type < ET_MAX);
@@ -1496,6 +1518,28 @@ int player_effect_del(player *p, effect *e)
         log_add_entry(p->log, effect_get_msg_stop(e));
 
     return effect_del(p->effects, e);
+}
+
+void player_effects_del(player *p, GPtrArray *effects)
+{
+    int pos;
+    effect *e;
+
+    assert (p != NULL);
+
+    /* if effects is NULL */
+    if (!effects) return;
+
+    for (pos = 1; pos <= effects->len; pos++)
+    {
+        e = g_ptr_array_index(effects, pos - 1);
+        g_ptr_array_remove_fast(p->effects, e);
+
+        if (effect_get_msg_stop(e))
+        {
+            log_add_entry(p->log, effect_get_msg_stop(e));
+        }
+    }
 }
 
 effect *player_effect_get(player *p, int effect_id)
@@ -1720,10 +1764,7 @@ int player_item_equip(player *p, item *it)
         break;
     }
 
-    if (it->effect)
-    {
-        player_effect_add(p, it->effect);
-    }
+    player_effects_add(p, it->effects);
 
     return time;
 }
@@ -1795,6 +1836,8 @@ int player_item_unequip(player *p, item *it)
                                             TRUE, TRUE, desc, 60));
 
                 time = 2 + weapon_is_twohanded(p->eq_weapon);
+                player_effects_del(p, p->eq_weapon->effects);
+
                 p->eq_weapon = NULL;
             }
             else
@@ -1816,6 +1859,9 @@ int player_item_unequip(player *p, item *it)
             log_add_entry(p->log, "You finish taking off %s.",
                           item_describe(it, player_item_known(p, it),
                                         TRUE, TRUE, desc, 60));
+
+            player_effects_del(p, (*aslot)->effects);
+
             *aslot = NULL;
         }
         else
@@ -1824,6 +1870,7 @@ int player_item_unequip(player *p, item *it)
                           item_describe(it, player_item_known(p, it),
                                         TRUE, TRUE, desc, 60),
                           it->curse_known ? "" : " It appears to be cursed.");
+
             it->curse_known = TRUE;
         }
     }
@@ -1836,7 +1883,8 @@ int player_item_unequip(player *p, item *it)
                           item_describe(it, player_item_known(p, it),
                                         TRUE, TRUE, desc, 60));
 
-            player_effect_del(p, (*rslot)->effect);
+            player_effects_del(p, (*rslot)->effects);
+
             *rslot = NULL;
             time = 2;
         }

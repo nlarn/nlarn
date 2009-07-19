@@ -845,7 +845,6 @@ effect *effect_get(GPtrArray *a, int effect_type)
     return NULL;
 }
 
-
 int effect_query(GPtrArray *a, int effect_type)
 {
     int i;

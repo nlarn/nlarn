@@ -117,17 +117,19 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         if (ring_effect_type(nitem))
         {
             eff = effect_new(ring_effect_type(nitem), 0);
-            /* this effect is permanent */
-            eff->turns = 0;
 
             if (item_bonus)
+            {
                 eff->amount += item_bonus;
+            }
 
             /* ring of extra regeneration is better than the average */
             if (item_id == RT_EXTRA_REGEN)
             {
                 eff->amount *= 5;
             }
+
+            item_effect_add(nitem, eff);
         }
         break;
 
@@ -143,18 +145,27 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
             /* mark unique weapon as created */
             weapon_created[nitem->id] = TRUE;
         }
+
+        /* special effects for Bessman's Hammer */
+        if (nitem->id == WT_BESSMAN)
+        {
+            eff = effect_new(ET_INC_STR, 0);
+            eff->amount = 10;
+            item_effect_add(nitem, eff);
+
+            eff = effect_new(ET_INC_DEX, 0);
+            eff->amount = 10;
+            item_effect_add(nitem, eff);
+
+            eff = effect_new(ET_DEC_INT, 0);
+            eff->amount = 10;
+            item_effect_add(nitem, eff);
+        }
         break;
 
     default:
         /* nop */
         break;
-    }
-
-    /* add effect to item if one has been created */
-    if (eff)
-    {
-        nitem->effect = eff;
-        eff->item = nitem;
     }
 
     return nitem;
@@ -270,9 +281,15 @@ void item_destroy(item *it)
 {
     assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    if (it->effect != NULL)
+    if (it->effects)
     {
-        effect_destroy(it->effect);
+        while (it->effects->len)
+        {
+            effect_destroy(g_ptr_array_remove_index_fast(it->effects,
+                           it->effects->len - 1));
+        }
+
+        g_ptr_array_free(it->effects, TRUE);
     }
 
     if (it->content != NULL)
@@ -664,32 +681,41 @@ int item_weight(item *it)
     }
 }
 
-/**
- * return the distinct effect cause by an item or NULL
- * @param an item
- * @return NULL or effect
- */
-effect *item_effect(item *it)
+void item_effect_add(item *i, effect *e)
 {
-    assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    assert (i != NULL && e != NULL);
 
-    switch (it->type)
+    /* create list if not existant */
+    if (!i->effects)
     {
-    case IT_ARMOUR:
-        return NULL;
-        break;
+        i->effects = g_ptr_array_new();
+    }
 
-    case IT_RING:
-        return ring_effect(it);
-        break;
+    /* this effect is permanent */
+    e->turns = 0;
 
-    case IT_WEAPON:
-        return NULL;
-        break;
+    /* link item to effect */
+    e->item = i;
 
-    default:
-        return NULL;
-        break;
+    /* add effect to list */
+    effect_add(i->effects, e);
+}
+
+void item_effect_del(item *i, effect *e)
+{
+    assert (i != NULL && e != NULL);
+
+    /* del effect from list */
+    effect_del(i->effects, e);
+
+    /*destroy effect */
+    effect_destroy(e);
+
+    /* delete array if no effect is left */
+    if (!i->effects->len)
+    {
+        g_ptr_array_free(i->effects, TRUE);
+        i->effects = NULL;
     }
 }
 
@@ -745,13 +771,20 @@ int item_remove_curse(item *it)
 
 int item_enchant(item *it)
 {
+    int pos;
+    effect *e;
+
     assert(it != NULL);
 
     it->bonus++;
 
-    if (it->effect)
+    if (it->effects)
     {
-        it->effect->amount++;
+        for (pos = 1; pos <= it->effects->len; pos++)
+        {
+            e = g_ptr_array_index(it->effects, pos - 1);
+            e->amount++;
+        }
     }
 
     return it->bonus;
@@ -759,13 +792,20 @@ int item_enchant(item *it)
 
 int item_disenchant(item *it)
 {
+    int pos;
+    effect *e;
+
     assert(it != NULL);
 
     it->bonus--;
 
-    if (it->effect)
+    if (it->effects)
     {
-        it->effect->amount--;
+        for (pos = 1; pos <= it->effects->len; pos++)
+        {
+            e = g_ptr_array_index(it->effects, pos - 1);
+            e->amount--;
+        }
     }
 
     return it->bonus;
