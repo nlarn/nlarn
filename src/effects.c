@@ -351,16 +351,6 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_HASTE_MONSTER,
-        250,
-        0,
-        "You feel nervous.",
-        NULL,
-        NULL,
-        NULL,
-    },
-
-    {
         ET_INC_HP,
         1,
         20, /* percent */

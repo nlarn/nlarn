@@ -60,7 +60,6 @@ enum effect_types
     ET_SCARE_MONSTER,           /* monsters turn to flee */
     ET_CHARM_MONSTER,           /* make monsters peaceful */
     ET_AGGRAVATE_MONSTER,       /* aggravate monsters */
-    ET_HASTE_MONSTER,           /* speed up monsters */
 
     /* healing */
     ET_INC_HP,                  /* heal */

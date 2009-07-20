@@ -32,7 +32,7 @@ const magic_scroll_data scrolls[ST_MAX] =
     { ST_TIMEWARP,          "time warp",          ET_NONE,               500 },
     { ST_TELEPORT,          "teleportation",      ET_NONE,               200 },
     { ST_AWARENESS,         "expanded awareness", ET_AWARENESS,          250 },
-    { ST_HASTE_MONSTER,     "haste monsters",     ET_HASTE_MONSTER,       20 },
+    { ST_SPEED,             "speed",              ET_SPEED,              200 },
     { ST_HEAL_MONSTER,      "monster healing",    ET_NONE,                30 },
     { ST_SPIRIT_PROTECTION, "spirit protection",  ET_SPIRIT_PROTECTION,  340 },
     { ST_UNDEAD_PROTECTION, "undead protection",  ET_UNDEAD_PROTECTION,  340 },
