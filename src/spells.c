@@ -476,18 +476,6 @@ const spell_data spells[SP_MAX] =
         6,
         3800
     },
-    {
-        SP_PER,
-        "per",
-        "permanence",
-        SC_OTHER,
-        ET_NONE,
-        "makes a character spell permanent, i. e. protection, strength, etc.",
-        NULL,
-        NULL,
-        6,
-        3800
-    },
 };
 
 static int book_desc_mapping[SP_MAX - 1] = { 0 };
@@ -511,7 +499,6 @@ static const char *book_descriptions[SP_MAX - 1] =
     "tan",
     "papyrus",
     "linen",
-    "paper",
     "musty",
     "faded",
     "antique",

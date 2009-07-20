@@ -92,7 +92,6 @@ enum spell_ids {
 	SP_SUM,		/* summon daemon */
 	SP_WTW,		/* walk through walls */
 	SP_ALT,		/* alter reality */
-	SP_PER,		/* permanence */
 	SP_MAX		/* last known spell */
 };
 

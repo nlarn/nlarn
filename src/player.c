@@ -1251,10 +1251,6 @@ int player_spell_cast(player *p)
         case SP_ALT:
             spell_alter_reality(p);
             break;
-
-        case SP_PER:
-            /* TODO: implement (ticket 69) */
-            break;
         }
 
         break;
