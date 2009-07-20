@@ -23,7 +23,12 @@ VERSION_MAJOR=$(grep VERSION_MAJOR inc/nlarn.h | cut -f 3 -d" ")
 VERSION_MINOR=$(grep VERSION_MINOR inc/nlarn.h | cut -f 3 -d" ")
 VERSION_PATCH=$(grep VERSION_PATCH inc/nlarn.h | cut -f 3 -d" ")
 
-DIRNAME=nlarn-"$VERSION_MAJOR"."$VERSION_MINOR"."$VERSION_PATCH"
+DIRNAME=nlarn-"$VERSION_MAJOR"."$VERSION_MINOR"
+if [ "$VERSION_PATCH" -gt 0 ]
+then
+	DIRNAME=nlarn-"$DIRNAME"."$VERSION_PATCH"
+fi
+
 PACKAGE="$DIRNAME"_"$OS"."$ARCH"."$SUFFIX"
 
 # Regenerate Makefile if necessary

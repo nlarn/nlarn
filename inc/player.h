@@ -190,6 +190,7 @@ int player_attack(player *p, monster *m);
 void player_update_fov(player *p, int radius);
 int player_level_enter(player *p, level *l);
 void player_monster_kill(player *p, monster *m, char *message);
+item *player_random_armour(player *p);
 
 int player_examine(player *p, position pos);
 int player_pickup(player *p);

@@ -447,7 +447,7 @@ int player_move(player *p, int direction)
     /* confusion: random movement */
     if (player_effect(p, ET_CONFUSION))
     {
-        direction = rand_1n(GD_MAX - 1);
+        direction = rand_1n(GD_MAX);
     }
 
     target_p = pos_move(p->pos, direction);
@@ -515,7 +515,7 @@ int player_attack(player *p, monster *m)
         /* player wields weapon */
         prop += (weapon_wc(w) / 4);
 
-    roll = rand_1n(20);
+    roll = rand_1n(21);
     if ((roll < prop) || (roll == 1))
     {
         /* placed a hit */
@@ -526,7 +526,7 @@ int player_attack(player *p, monster *m)
                  - 12
                  - game_difficulty(p->game);
 
-        damage = rand_1n(damage);
+        damage = rand_1n(damage + 1);
 
         /* weapon damage due to rust */
         if ((w != NULL) && (m->type == MT_RUST_MONSTER
@@ -754,6 +754,33 @@ void player_monster_kill(player *p, monster *m, char *message)
     p->stats.monsters_killed[m->type] += 1;
 
     monster_die(m, p, message);
+}
+
+item *player_random_armour(player *p)
+{
+    GPtrArray *armours;
+    item *armour = NULL;
+
+    assert (p != NULL);
+
+    armours = g_ptr_array_new();
+
+    /* add each equipped piece of armour to the pool to choose from */
+    if (p->eq_boots)  g_ptr_array_add(armours, p->eq_boots);
+    if (p->eq_cloak)  g_ptr_array_add(armours, p->eq_cloak);
+    if (p->eq_gloves) g_ptr_array_add(armours, p->eq_gloves);
+    if (p->eq_helmet) g_ptr_array_add(armours, p->eq_helmet);
+    if (p->eq_shield) g_ptr_array_add(armours, p->eq_shield);
+    if (p->eq_suit)   g_ptr_array_add(armours, p->eq_suit);
+
+    if (armours->len > 0)
+    {
+        armour = g_ptr_array_index(armours, rand_0n(armours->len));
+    }
+
+    g_ptr_array_free(armours, TRUE);
+
+    return armour;
 }
 
 int player_examine(player *p, position pos)
@@ -2940,6 +2967,7 @@ int player_altar_pray(player *p)
     int player_gold, tithe;
     effect *e = NULL;
     monster *m = NULL;
+    item *armour = NULL;
 
     assert (p != NULL);
 
@@ -2958,17 +2986,20 @@ int player_altar_pray(player *p)
         {
             log_add_entry(p->log, "Nothing happens.");
         }
-        else if (chance(4) && p->eq_suit)
+        else if (chance(4) && (armour = player_random_armour(p)))
         {
             /* enchant armour */
-            /* FIXME: Pick random armour */
-            log_add_entry(p->log, "You feel your armour vibrate for a moment.");
-            item_enchant(p->eq_suit);
+            log_add_entry(p->log, "You feel your %s vibrate for a moment.",
+                          armour_name(armour));
+
+            item_enchant(armour);
         }
         else if (chance(4) && p->eq_weapon)
         {
             /* enchant weapon */
-            log_add_entry(p->log, "You feel your weapon vibrate for a moment.");
+            log_add_entry(p->log, "You feel your %s vibrate for a moment.",
+                          weapon_name(p->eq_weapon));
+
             item_enchant(p->eq_weapon);
         }
         else
@@ -3009,18 +3040,21 @@ int player_altar_pray(player *p)
             player_effect_add(p, e);
         }
 
-        if (chance(4) && p->eq_suit)
+        if (chance(4) && (armour = player_random_armour(p)))
         {
-            /* FIXME: Pick random armour */
             /* enchant weapon */
-            log_add_entry(p->log, "You feel your armour vibrate for a moment.");
-            item_enchant(p->eq_suit);
+            log_add_entry(p->log, "You feel your %s vibrate for a moment.",
+                          armour_name(armour));
+
+            item_enchant(armour);
         }
 
         if (chance(4) && p->eq_weapon)
         {
             /* enchant weapon */
-            log_add_entry(p->log, "You feel your weapon vibrate for a moment.");
+            log_add_entry(p->log, "You feel your %s vibrate for a moment.",
+                          weapon_name(p->eq_weapon));
+
             item_enchant(p->eq_weapon);
         }
 
@@ -3110,7 +3144,7 @@ int player_door_close(player *p)
     /* select random direction if player is confused */
     if (player_effect(p, ET_CONFUSION))
     {
-        dir = rand_0n(GD_MAX - 1);
+        dir = rand_0n(GD_MAX);
     }
 
     if (dir)
@@ -3202,7 +3236,7 @@ int player_door_open(player *p)
     /* select random direction if player is confused */
     if (player_effect(p, ET_CONFUSION))
     {
-        dir = rand_0n(GD_MAX - 1);
+        dir = rand_0n(GD_MAX);
     }
 
     if (dir)
@@ -3250,7 +3284,7 @@ int player_fountain_drink(player *p)
     if (chance(7))
     {
         e = effect_new(ET_DEC_DAMAGE, game_turn(p->game));
-        e->turns = 200 + rand_0n(200);
+        e->turns = 200 + rand_0n(20);
         player_effect_add(p, e);
 
         log_add_entry(p->log, "You feel a sickness coming on.");

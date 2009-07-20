@@ -592,7 +592,7 @@ void monster_player_attack(monster *m, player *p)
         dam += game_difficulty(p->game);
     }
 
-    if ((dam > player_get_ac(p)) || (rand_1n(20) == 1))
+    if ((dam > player_get_ac(p)) || (rand_1n(21) == 1))
     {
         dam -= player_get_ac(p);
 
@@ -909,20 +909,23 @@ int monster_player_special_attack(monster *m, struct player *p)
     case MT_RUST_MONSTER:
         if (p->eq_suit != NULL)
         {
-            pi = item_rust(p->eq_suit);
+            /* get a random piece of armour to damage */
+            it = player_random_armour(p);
+            pi = item_rust(it);
             if (pi == PI_ENFORCED)
             {
                 log_add_entry(p->log, "Your %s is dulled by the %s.",
-                              armour_name(p->eq_suit), monster_get_name(m));
+                              armour_name(it), monster_get_name(m));
             }
             else if (pi == PI_DESTROYED)
             {
                 /* armour has been destroyed */
                 log_add_entry(p->log, "Your %s disintegrates!",
-                              armour_name(p->eq_suit));
+                              armour_name(it));
 
-                it = p->eq_suit;
-                p->eq_suit = NULL;
+                log_disable(p->log);
+                player_item_unequip(p, it);
+                log_enable(p->log);
 
                 inv_del_element(p->inventory, it);
                 item_destroy(it);
@@ -998,7 +1001,7 @@ int monster_player_special_attack(monster *m, struct player *p)
             break;
         }
 
-        it = inv_get(p->inventory, rand_1n(inv_length(p->inventory)));
+        it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
         if (it->type != IT_SCROLL && it->type != IT_POTION)
         {
             message = "The %s hits you. You feel a sense of loss.";
@@ -1106,7 +1109,7 @@ char *monster_player_rob(monster *m, struct player *p, item_t item_type)
     {
         if (inv_length(p->inventory))
         {
-            it = inv_get(p->inventory, rand_0n(inv_length(p->inventory) - 1));
+            it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
 
             if (player_item_is_equipped(p, it))
             {
