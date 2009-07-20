@@ -257,12 +257,8 @@ void building_dndstore_init()
 
         for (loop = 0; loop < count; loop++)
         {
-            for (id = 1; id < item_get_max_id(it); id++)
+            for (id = 1; id < item_max_id(it); id++)
             {
-                /* dont want to offer this one in the store */
-                if (it == IT_POTION && id == PO_CURE_DIANTHR)
-                    continue;
-
                 inv_add(store_stock, item_new(it, id, 0));
             }
         }

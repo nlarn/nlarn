@@ -147,7 +147,7 @@ int display_paint_screen(player *p)
                                           level_ilist_at(p->level, pos)->len - 1);
 
                     attron(COLOR_PAIR(DC_BLUE));
-                    addch(item_get_image(it->type));
+                    addch(item_image(it->type));
                     attroff(COLOR_PAIR(DC_BLUE));
                 }
                 /* draw stationary stuff */
@@ -179,7 +179,7 @@ int display_paint_screen(player *p)
                 if (player_memory_of(p, pos).item)
                 {
                     attron(COLOR_PAIR(DC_BLUE));
-                    addch(item_get_image(player_memory_of(p, pos).item));
+                    addch(item_image(player_memory_of(p, pos).item));
                     attroff(COLOR_PAIR(DC_BLUE));
                 }
                 /* draw stationary stuff */
@@ -737,7 +737,7 @@ void display_config_autopickup(player *p)
             else
                 wattron(cwin->window, COLOR_PAIR(9));
 
-            mvwprintw(cwin->window, 4, 6 + it * 2, "%c", item_get_image(it));
+            mvwprintw(cwin->window, 4, 6 + it * 2, "%c", item_image(it));
 
             if (p->settings.auto_pickup[it])
                 wattroff(cwin->window, COLOR_PAIR(10));
@@ -760,7 +760,7 @@ void display_config_autopickup(player *p)
             {
                 for (it = 1; it < IT_MAX; it++)
                 {
-                    if (item_get_image(it) == key)
+                    if (item_image(it) == key)
                     {
                         p->settings.auto_pickup[it] = !p->settings.auto_pickup[it];
                         break;

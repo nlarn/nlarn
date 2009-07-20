@@ -946,7 +946,7 @@ static void level_fill_with_objects(level *l)
     /* up to three books */
     for (i = 0; i <= rand_0n(3); i++)
     {
-        level_add_item(l, item_create_by_level(IT_BOOK, l->nlevel));
+        level_add_item(l, item_new_by_level(IT_BOOK, l->nlevel));
     }
 
     /* up to two containers */
@@ -965,7 +965,7 @@ static void level_fill_with_objects(level *l)
             }
             while (it == IT_CONTAINER);
 
-            inv_add(container->content, item_create_random(it));
+            inv_add(container->content, item_new_by_level(it, l->nlevel));
         }
 
         /* add the container to the level */
@@ -989,13 +989,13 @@ static void level_fill_with_objects(level *l)
     /* up to four potions */
     for (i = 0; i < rand_0n(4); i++)
     {
-        level_add_item(l, item_create_by_level(IT_POTION, l->nlevel));
+        level_add_item(l, item_new_by_level(IT_POTION, l->nlevel));
     }
 
     /* up to three scrolls */
     for (i = 0; i < rand_0n(3); i++)
     {
-        level_add_item(l, item_create_by_level(IT_SCROLL, l->nlevel));
+        level_add_item(l, item_new_by_level(IT_SCROLL, l->nlevel));
     }
 
     /* RINGS */
@@ -1261,7 +1261,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                 }
                 while (it == IT_CONTAINER);
 
-                itm = item_create_random(it);
+                itm = item_new_by_level(it, l->nlevel);
                 break;
             };
 
@@ -1328,7 +1328,7 @@ static void level_add_treasure_room(level *l, int difficulty)
                     level_ilist_at(l, pos) = inv_new();
                 }
 
-                itm = item_create_random(IT_GOLD);
+                itm = item_new_random(IT_GOLD);
                 inv_add(level_ilist_at(l, pos), itm);
 
                 /* create a monster */

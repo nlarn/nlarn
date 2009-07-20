@@ -24,7 +24,6 @@
 enum ring_types
 {
     RT_NONE,
-    RT_EXTRA_REGEN,
     RT_REGENERATION,
     RT_PROTECTION,
     RT_ENERGY,
@@ -32,6 +31,7 @@ enum ring_types
     RT_STRENGTH,
     RT_CLEVERNESS,
     RT_INC_DAMAGE,
+    RT_EXTRA_REGEN,
     RT_MAX
 };
 

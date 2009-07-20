@@ -920,7 +920,7 @@ void player_autopickup_show(player *p)
             if (count)
                 g_string_append(msg, ", ");
 
-            g_string_append(msg, item_get_name_pl(it));
+            g_string_append(msg, item_name_pl(it));
             count++;
         }
     }
@@ -2157,7 +2157,7 @@ char *player_item_identified_list(player *p)
         sublist = g_string_new(NULL);
 
         /* item category header */
-        heading = g_strdup(item_get_name_pl(type_ids[type]));
+        heading = g_strdup(item_name_pl(type_ids[type]));
         heading[0] = g_ascii_toupper(heading[0]);
 
         /* no linefeed before first category */
@@ -2168,7 +2168,7 @@ char *player_item_identified_list(player *p)
 
         it->type = type_ids[type];
 
-        for (id = 1; id < item_get_max_id(type_ids[type]); id++)
+        for (id = 1; id < item_max_id(type_ids[type]); id++)
         {
             it->id = id;
             if (player_item_known(p, it))
@@ -2530,7 +2530,7 @@ int player_item_drop(player *p, item *it)
 
     if (it->count > 1)
     {
-        g_snprintf(desc, 60, "Drop how many %s?", item_get_name_pl(it->type));
+        g_snprintf(desc, 60, "Drop how many %s?", item_name_pl(it->type));
 
         count = display_get_count(desc, it->count);
 
@@ -2596,7 +2596,7 @@ int player_item_pickup(player *p, item *it)
 
     if ((it->count > 1) && (it->type != IT_GOLD))
     {
-        g_snprintf(desc, 60, "Pick up how many %s?", item_get_name_pl(it->type));
+        g_snprintf(desc, 60, "Pick up how many %s?", item_name_pl(it->type));
 
         count = display_get_count(desc, it->count);
 
@@ -3473,7 +3473,7 @@ int player_throne_pillage(player *p)
         {
             /* gems pop off the throne */
             inv_add(level_ilist_at(p->level, p->pos),
-                    item_create_random(IT_GEM));
+                    item_new_random(IT_GEM));
 
             count++;
         }
@@ -4077,7 +4077,7 @@ static char *player_death_description(game_score_t *score, int verbose)
 
     case PD_CURSE:
         g_string_append_printf(text, " by a cursed %s.",
-                               item_get_name_sg(score->cause));
+                               item_name_sg(score->cause));
         break;
 
     case PD_STATIONARY:

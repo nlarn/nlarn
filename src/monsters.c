@@ -98,7 +98,7 @@ static char *monster_player_rob(monster *m, struct player *p, item_t item_type);
 monster *monster_new(int monster_type, struct level *l)
 {
     monster *nmonster;
-    int iid, icount;    /* item id, item count */
+    int it, icount;    /* item type, item id, item count */
 
     assert(monster_type > MT_NONE && monster_type < MT_MAX && l != NULL);
 
@@ -135,16 +135,17 @@ monster *monster_new(int monster_type, struct level *l)
     {
     case MT_LEPRECHAUN:
         if (chance(25))
+        {
             inv_add(nmonster->inventory,
-                    item_new(IT_GEM, rand_m_n(GT_NONE + 1, GT_MAX -1), 0));
+                    item_new(IT_GEM, rand_1n(GT_MAX), 0));
+        }
         break;
 
     case MT_ORC:
     case MT_ELF:
     case MT_TROLL:
-        iid = rand_1n(WT_SWORDSLASHING);
         inv_add(nmonster->inventory,
-                item_new(IT_WEAPON, iid, 0));
+                item_new_by_level(IT_WEAPON, l->nlevel));
         break;
 
     case MT_NYMPH:
@@ -154,8 +155,13 @@ monster *monster_new(int monster_type, struct level *l)
     case MT_PLATINUM_DRAGON:
     case MT_RED_DRAGON:
     case MT_GNOME_KING:
-        inv_add(nmonster->inventory,
-                item_create_random(rand_m_n(IT_NONE + 1, IT_MAX -1)));
+        do
+        {
+            it = rand_1n(IT_MAX);
+        }
+        while (it == IT_CONTAINER);
+
+        inv_add(nmonster->inventory, item_new_random(it));
         break;
     }
 
@@ -529,7 +535,7 @@ void monster_pickup_items(monster *m, struct player *p)
             {
                 log_add_entry(p->log, "The %s picks up %s %s.", monster_get_name(m),
                               (it->count == 1) ? "a" : "some",
-                              (it->count == 1) ? item_get_name_sg(it->type) : item_get_name_pl(it->type));
+                              (it->count == 1) ? item_name_sg(it->type) : item_name_pl(it->type));
             }
 
             inv_del_element(floor, it);
@@ -1130,7 +1136,7 @@ char *monster_player_rob(monster *m, struct player *p, item_t item_type)
     }
     else
     {
-        message = "The %s couldn't find anything to steal";
+        message = "The %s couldn't find anything to steal.";
     }
 
     return message;

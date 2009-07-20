@@ -24,18 +24,18 @@ static char *item_desc_get(item *it, int known);
 
 const item_type_data item_data[IT_MAX] =
 {
-    /* item_t       name_sg      name_pl        IMG  desc_known      desc_unknown         max_id  eq us st */
-    { IT_NONE,      "",          "",            ' ', "",             "",                  0,      0, 0, 0, },
-    { IT_ARMOUR,    "armour",    "armour",      '[', "%s",           "%s",                AT_MAX, 1, 0, 0, },
-    { IT_BOOK,      "book",      "books",       '+', "book of %s",   "%s book",           SP_MAX, 0, 1, 1, },
-    { IT_CONTAINER, "container", "containers",  'C', "%s",           "%s",                CT_MAX, 0, 0, 0, },
-    { IT_FOOD,      "food",      "foods",       '%', "%s",           "%s",                FT_MAX, 0, 1, 1, },
-    { IT_GEM,       "gem",       "gems",        '*', "%s",           "%s gem",            GT_MAX, 0, 0, 1, },
-    { IT_GOLD,      "coin",      "coins",       '$', "%s",           "%s",                0,      0, 0, 1, },
-    { IT_POTION,    "potion",    "potions",     '!', "potion of %s", "%s potion",         PO_MAX, 0, 1, 1, },
-    { IT_RING,      "ring",      "rings",       '=', "ring of %s",   "%s ring",           RT_MAX, 1, 0, 0, },
-    { IT_SCROLL,    "scroll",    "scrolls",     '?', "scroll of %s", "scroll labeled %s", ST_MAX, 0, 1, 1, },
-    { IT_WEAPON,    "weapon",    "weapons",     '(', "%s",           "%s",                WT_MAX, 1, 0, 0, },
+    /* item_t       name_sg      name_pl        IMG  desc_known      desc_unknown         max_id           eq us st */
+    { IT_NONE,      "",          "",            ' ', "",             "",                  0,               0, 0, 0, },
+    { IT_ARMOUR,    "armour",    "armour",      '[', "%s",           "%s",                AT_MAX,          1, 0, 0, },
+    { IT_BOOK,      "book",      "books",       '+', "book of %s",   "%s book",           SP_MAX,          0, 1, 1, },
+    { IT_CONTAINER, "container", "containers",  'C', "%s",           "%s",                CT_MAX,          0, 0, 0, },
+    { IT_FOOD,      "food",      "foods",       '%', "%s",           "%s",                FT_MAX,          0, 1, 1, },
+    { IT_GEM,       "gem",       "gems",        '*', "%s",           "%s gem",            GT_MAX,          0, 0, 1, },
+    { IT_GOLD,      "coin",      "coins",       '$', "%s",           "%s",                0,               0, 0, 1, },
+    { IT_POTION,    "potion",    "potions",     '!', "potion of %s", "%s potion",         PO_CURE_DIANTHR, 0, 1, 1, },
+    { IT_RING,      "ring",      "rings",       '=', "ring of %s",   "%s ring",           RT_MAX,          1, 0, 0, },
+    { IT_SCROLL,    "scroll",    "scrolls",     '?', "scroll of %s", "scroll labeled %s", ST_MAX,          0, 1, 1, },
+    { IT_WEAPON,    "weapon",    "weapons",     '(', "%s",           "%s",                WT_MAX,          1, 0, 0, },
 };
 
 const item_material_data item_materials[IM_MAX] =
@@ -171,34 +171,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
     return nitem;
 }
 
-item *item_clone(item *original)
-{
-    item *nitem;
-
-    assert(original != NULL);
-
-    /* clone item */
-    nitem = g_malloc0(sizeof(item));
-    memcpy(nitem, original, sizeof(item));
-
-    return nitem;
-}
-
-item *item_split(item *original, int count)
-{
-    item *nitem;
-
-    assert(original != NULL && count < original->count);
-
-    nitem = item_clone(original);
-
-    nitem->count = count;
-    original->count -= count;
-
-    return nitem;
-}
-
-item *item_create_random(item_t item_type)
+item *item_new_random(item_t item_type)
 {
     item *it;
 
@@ -209,7 +182,7 @@ item *item_create_random(item_t item_type)
 
     assert(item_type > IT_NONE && item_type < IT_MAX);
 
-    max_id = item_get_max_id(item_type);
+    max_id = item_max_id(item_type);
 
     /* special settings for some item types */
     switch (item_type)
@@ -233,10 +206,6 @@ item *item_create_random(item_t item_type)
         min_id = 50;
         max_id = 250;
         want_curse = FALSE;
-        break;
-
-    case IT_POTION:
-        max_id = PO_CURE_DIANTHR;   /* prevent random potions of cure */
         break;
 
     case IT_RING:
@@ -271,10 +240,90 @@ item *item_create_random(item_t item_type)
     return it;
 }
 
-item *item_create_by_level(item_t item_type, int num_level)
+item *item_new_by_level(item_t item_type, int num_level)
 {
-    /* FIXME: implement (ticket 64) */
-    return(item_create_random(item_type));
+    item *nitem;
+    int id_min, id_max;
+    int item_bonus = 0;
+    float variance, id_base, divisor;
+
+    assert (item_type > IT_NONE && item_type < IT_MAX && num_level < LEVEL_MAX);
+
+    divisor = 1 / (float)(LEVEL_MAX - 1);
+
+    switch (item_type)
+    {
+    case IT_ARMOUR:
+    case IT_WEAPON:
+        item_bonus = rand_m_n(-3, 3);
+    case IT_BOOK:
+        variance = 0.2;
+        break;
+
+    case IT_RING:
+        item_bonus = rand_0n(3);
+        variance = 0.5;
+        break;
+
+    default:
+        /* no per-level randomnization */
+        return item_new_random(item_type);
+    }
+
+    id_base = item_max_id(item_type) * (num_level * divisor);
+    id_min = id_base - (item_max_id(item_type) * variance);
+    id_max = id_base + (item_max_id(item_type) * variance);
+
+    /* clean results */
+    if (id_min < 1) id_min = 1;
+    if (id_max < 1) id_max = 1;
+    if (id_max > item_max_id(item_type)) id_max = item_max_id(item_type);
+
+    /* create the item */
+    nitem = item_new(item_type, rand_m_n(id_min, id_max), item_bonus);
+
+    /* fine touch */
+    /* maybe the item is blessed or cursed */
+    if (chance(25))
+    {
+        if (chance(50))
+        {
+            item_bless(nitem);
+        }
+        else
+        {
+            item_curse(nitem);
+        }
+    }
+
+    return nitem;
+}
+
+item *item_clone(item *original)
+{
+    item *nitem;
+
+    assert(original != NULL);
+
+    /* clone item */
+    nitem = g_malloc0(sizeof(item));
+    memcpy(nitem, original, sizeof(item));
+
+    return nitem;
+}
+
+item *item_split(item *original, int count)
+{
+    item *nitem;
+
+    assert(original != NULL && count < original->count);
+
+    nitem = item_clone(original);
+
+    nitem->count = count;
+    original->count -= count;
+
+    return nitem;
 }
 
 void item_destroy(item *it)
@@ -778,7 +827,7 @@ int item_enchant(item *it)
 
     it->bonus++;
 
-    if (it->effects)
+    if ((it->type == IT_RING) && it->effects)
     {
         for (pos = 1; pos <= it->effects->len; pos++)
         {
@@ -799,7 +848,7 @@ int item_disenchant(item *it)
 
     it->bonus--;
 
-    if (it->effects)
+    if ((it->type == IT_RING) && it->effects)
     {
         for (pos = 1; pos <= it->effects->len; pos++)
         {

@@ -123,7 +123,7 @@ game *game_new(int argc, char *argv[])
         {
             for (it = IT_NONE; it < IT_MAX; it++)
             {
-                if (auto_pickup[i] == item_get_image(it))
+                if (auto_pickup[i] == item_image(it))
                 {
                     g->p->settings.auto_pickup[it] = TRUE;
                 }

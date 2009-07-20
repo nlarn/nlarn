@@ -116,11 +116,11 @@ typedef struct item_type_data {
 
 /* function definitions */
 
+item *item_new(item_t item_type, int item_id, int item_bonus);
+item *item_new_random(item_t item_type);
+item *item_new_by_level(item_t item_type, int num_level);
 item *item_clone(item *original);
 item *item_split(item *original, int count);
-item *item_new(item_t item_type, int item_id, int item_bonus);
-item *item_create_random(item_t item_type);
-item *item_create_by_level(item_t item_type, int num_level);
 void item_destroy(item *it);
 
 int item_compare(item *a, item *b);
@@ -149,10 +149,10 @@ extern const item_type_data item_data[IT_MAX];
 extern const item_material_data item_materials[IM_MAX];
 
 /* item macros */
-#define item_get_image(type)          item_data[(type)].image
-#define item_get_name_sg(type)        item_data[(type)].name_sg
-#define item_get_name_pl(type)        item_data[(type)].name_pl
-#define item_get_max_id(type)         item_data[(type)].max_id
+#define item_image(type)          item_data[(type)].image
+#define item_name_sg(type)        item_data[(type)].name_sg
+#define item_name_pl(type)        item_data[(type)].name_pl
+#define item_max_id(type)         item_data[(type)].max_id
 #define item_is_equippable(type)      item_data[(type)].equippable
 #define item_is_usable(type)          item_data[(type)].usable
 #define item_is_stackable(type)       item_data[(type)].stackable
