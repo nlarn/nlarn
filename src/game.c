@@ -270,7 +270,7 @@ void game_spin_the_wheel(game *g, int times)
 
     assert(g != NULL && times > 0);
 
-    level_timer(g->p->level, times, g->p);
+    level_timer(g->p->level, times);
 
     for (turn = 0; turn < times; turn++)
     {

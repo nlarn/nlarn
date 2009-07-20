@@ -368,6 +368,10 @@ gboolean level_validate_position(level *l, position pos, level_element_t element
         break;
 
     case LE_MONSTER:
+        /* not ok if player is standing on that tile */
+        if ((l->player) && pos_identical(pos, l->player->pos))
+            return FALSE;
+
         if (level_pos_passable(l, pos) && !level_is_monster_at(l, pos))
             return TRUE;
         break;
@@ -733,7 +737,7 @@ int level_fill_with_live(level *l)
     return(new_monster_count);
 }
 
-void level_timer(level *l, guint8 count, struct player *p)
+void level_timer(level *l, guint8 count)
 {
     position pos;
     item *it;
@@ -741,6 +745,8 @@ void level_timer(level *l, guint8 count, struct player *p)
     int impact;
     char *impact_desc;
     char item_desc[61];
+
+    assert (l != NULL);
 
     for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
     {
@@ -779,19 +785,19 @@ void level_timer(level *l, guint8 count, struct player *p)
                         }
 
                         /* notifiy player of impact if the item is visible */
-                        if (p && impact && level_pos_is_visible(l, p->pos, pos))
+                        if (l->player && impact && level_pos_is_visible(l, l->player->pos, pos))
                         {
-                            item_describe(it, player_item_known(p, it),
+                            item_describe(it, player_item_known(l->player, it),
                                           (it->count == 1), TRUE, item_desc, 60);
 
                             if (impact < PI_DESTROYED)
                             {
-                                log_add_entry(p->log, "The %s %s%s.", item_desc,
+                                log_add_entry(l->player->log, "The %s %s%s.", item_desc,
                                               impact_desc, (it->count == 1) ? "s" : "");
                             }
                             else
                             {
-                                log_add_entry(p->log, "The %s %s destroyed.", item_desc,
+                                log_add_entry(l->player->log, "The %s %s destroyed.", item_desc,
                                               (it->count == 1) ? "is" : "are");
                             }
                         }

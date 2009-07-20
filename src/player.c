@@ -662,16 +662,12 @@ int player_level_enter(player *p, level *l)
     }
     else
     {
-        log_disable(p->log);
-
         /* call level timer */
         /* count might be negative if time has been modified (time warp) */
         count = abs(game_turn(p->game) - l->visited);
-        level_timer(l, min(count, G_MAXUINT8), NULL);
+        level_timer(l, min(count, G_MAXUINT8));
 
         monsters_genocide(l);
-
-        log_enable(p->log);
 
         /* add some new monsters */
         if (l->nlevel > 0)
@@ -717,6 +713,9 @@ int player_level_enter(player *p, level *l)
     }
 
     p->pos = pos;
+
+    /* set link to player */
+    l->player = p;
 
     if (l->nlevel == 0)
     {
@@ -3727,6 +3726,9 @@ static int player_level_leave(player *p)
 
     /* store the last turn player has been on this level */
     p->level->visited = game_turn(p->game);
+
+    /* remove link to player */
+    p->level->player = NULL;
 
     return TRUE;
 }
