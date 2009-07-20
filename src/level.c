@@ -998,18 +998,12 @@ static void level_fill_with_objects(level *l)
         level_add_item(l, item_new_by_level(IT_SCROLL, l->nlevel));
     }
 
-    /* RINGS */
-    if (chance(6))	/* ring of regeneration */
-        level_add_item(l, item_new(IT_RING, RT_REGENERATION, rand_0n(3)));
+    /* up to two rings */
+    for (i = 0; i < rand_0n(3); i++)
+    {
+        level_add_item(l, item_new_by_level(IT_RING, l->nlevel));
+    }
 
-    if (chance(1))	/* ring of protection */
-        level_add_item(l, item_new(IT_RING, RT_PROTECTION, rand_0n(3)));
-
-    if (chance(1))	/* ring of strength */
-        level_add_item(l, item_new(IT_RING, RT_STRENGTH, rand_m_n(2, 4)));
-
-    if (chance(1))	/* ring of extra regen  */
-        level_add_item(l, item_new(IT_RING, RT_REGENERATION, 0));
 } /* level_fill_with_objects */
 
 static void level_fill_with_traps(level *l)
