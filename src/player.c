@@ -2924,7 +2924,7 @@ int player_altar_desecrate(player *p)
 
     if (level_stationary_at(p->level, p->pos) != LS_ALTAR)
     {
-        log_add_entry(p->log, "Which altar are you talking about?");
+        log_add_entry(p->log, "I see no altar to desecrate here.");
         return FALSE;
     }
 
@@ -2968,7 +2968,7 @@ int player_altar_pray(player *p)
 
     if (level_stationary_at(p->level, p->pos) != LS_ALTAR)
     {
-        log_add_entry(p->log, "Which altar are you talking about?");
+        log_add_entry(p->log, "I see no altar to pray at here.");
         return FALSE;
     }
 
@@ -3262,17 +3262,21 @@ int player_fountain_drink(player *p)
 {
     effect *e = NULL;
 
+    int fntchange = 0;
+    int amount = 0;
+    int et = ET_NONE;
+
     assert (p != NULL);
 
     if (level_stationary_at(p->level, p->pos) == LS_DEADFOUNTAIN)
     {
-        log_add_entry(p->log, "This fountain is dried up.");
+        log_add_entry(p->log, "There is no water to drink.");
         return 0;
     }
 
     if (level_stationary_at(p->level, p->pos) != LS_FOUNTAIN)
     {
-        log_add_entry(p->log, "Which fountain are you talking about?");
+        log_add_entry(p->log, "I see no fountain to drink from here.");
         return 0;
     }
 
@@ -3294,15 +3298,120 @@ int player_fountain_drink(player *p)
     {
         log_add_entry(p->log, "Nothing seems to have happened.");
     }
-    else if (chance(33))
+    else if (chance(15))
     {
-        /* change char levels upward */
-        player_lvl_gain(p, 1);
+        /* positive effect from list below */
+        fntchange = 1;
     }
     else
     {
-        /* change char levels downward */
-        player_lvl_lose(p, 1);
+        /* negative effect from list below */
+        fntchange = -1;
+    }
+
+    if (fntchange != 0)
+    {
+        switch (rand_1n(9))
+        {
+        case 1:
+            if (fntchange > 0)
+                et = ET_INC_STR;
+            else
+                et = ET_DEC_STR;
+            break;
+
+        case 2:
+            if (fntchange > 0)
+                et = ET_INC_INT;
+            else
+                et = ET_DEC_INT;
+            break;
+
+        case 3:
+            if (fntchange > 0)
+                et = ET_INC_WIS;
+            else
+                et = ET_DEC_WIS;
+            break;
+
+        case 4:
+            if (fntchange > 0)
+                et = ET_INC_CON;
+            else
+                et = ET_DEC_CON;
+            break;
+
+        case 5:
+            if (fntchange > 0)
+                et = ET_INC_DEX;
+            else
+                et = ET_DEC_DEX;
+            break;
+
+        case 6:
+            if (fntchange > 0)
+                et = ET_INC_CHA;
+            else
+                et = ET_DEC_CHA;
+            break;
+
+        case 7:
+            amount = rand_1n(p->level->nlevel + 1);
+            if (fntchange > 0)
+            {
+                log_add_entry(p->log, "You gain %d hit point", amount);
+                player_hp_gain(p, amount);
+            }
+            else
+            {
+                log_add_entry(p->log, "You lose %d hit point%s!",
+                              amount, plural(amount));
+
+                player_hp_lose(p, amount, PD_STATIONARY, LS_FOUNTAIN);
+            }
+
+            break;
+
+        case 8:
+            amount = rand_1n(p->level->nlevel + 1);
+            if (fntchange > 0)
+            {
+                log_add_entry(p->log, "You just gained %d mana point%s.",
+                              amount, plural(amount));
+
+                player_mp_gain(p, amount);
+            }
+            else
+            {
+                log_add_entry(p->log, "You just lost %d spell.",
+                              amount, plural(amount));
+
+                player_mp_lose(p, amount);
+            }
+            break;
+
+        case 9:
+            amount = 5 * rand_1n((p->level->nlevel + 1) * (p->level->nlevel + 1));
+
+            if (fntchange > 0)
+            {
+                log_add_entry(p->log, "You just gained experience.");
+                player_exp_gain(p, amount);
+            }
+            else
+            {
+                log_add_entry(p->log, "You just lost experience.");
+                player_exp_lose(p, amount);
+            }
+            break;
+        }
+
+        /* the rng stated that it wants the players attributes changed */
+        if (et)
+        {
+            e = effect_new(et, game_turn(p->game));
+            player_effect_add(p, e);
+        }
     }
 
     if (chance(25))
@@ -3323,13 +3432,13 @@ int player_fountain_wash(player *p)
 
     if (level_stationary_at(p->level, p->pos) == LS_DEADFOUNTAIN)
     {
-        log_add_entry(p->log, "This fountain is dry.");
+        log_add_entry(p->log, "There is no water to wash in.");
         return 0;
     }
 
     if (level_stationary_at(p->level, p->pos) != LS_FOUNTAIN)
     {
-        log_add_entry(p->log, "Which fountain are you talking about?");
+        log_add_entry(p->log, "I see no fountain to wash at here!");
         return 0;
     }
 
@@ -3454,7 +3563,7 @@ int player_throne_pillage(player *p)
     if ((level_stationary_at(p->level, p->pos) != LS_THRONE)
             && (level_stationary_at(p->level, p->pos) != LS_THRONE2))
     {
-        log_add_entry(p->log, "Which throne are you talking about?");
+        log_add_entry(p->log, "I see no throne here to remove gems from.");
         return 0;
     }
 
@@ -3506,16 +3615,11 @@ int player_throne_sit(player *p)
 
     assert (p != NULL);
 
-    if (level_stationary_at(p->level, p->pos) == LS_DEADTHRONE)
-    {
-        log_add_entry(p->log, "The throne feels cold and uneasy.");
-        return 1;
-    }
-
     if ((level_stationary_at(p->level, p->pos) != LS_THRONE)
-            && (level_stationary_at(p->level, p->pos) != LS_THRONE2))
+            && (level_stationary_at(p->level, p->pos) != LS_THRONE2)
+            && (level_stationary_at(p->level, p->pos) != LS_DEADTHRONE))
     {
-        log_add_entry(p->log, "Which throne are you talking about?");
+        log_add_entry(p->log, "I see no throne to sit on here.");
         return 0;
     }
 
