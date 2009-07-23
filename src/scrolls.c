@@ -124,14 +124,14 @@ int scroll_annihilate(struct player *p, item *scroll)
 
         if (m->type < MT_DEMONLORD_II)
         {
-            experience = monster_get_exp(m);
+            experience = monster_exp(m);
             player_monster_kill(p, m, NULL);
         }
         else
         {
             log_add_entry(p->log,
                           "The %s barely escapes being annihilated.",
-                          monster_get_name(m));
+                          monster_name(m));
 
             /* lose half hit points*/
             m->hp >>=2 +1;
@@ -244,9 +244,9 @@ int scroll_heal_monster(player *p, item *scroll)
     {
         m = g_ptr_array_index(p->level->mlist, i - 1);
 
-        if (m->hp < monster_get_hp_max(m))
+        if (m->hp < monster_hp_max(m))
         {
-            m->hp = monster_get_hp_max(m);
+            m->hp = monster_hp_max(m);
             count++;
         }
     }

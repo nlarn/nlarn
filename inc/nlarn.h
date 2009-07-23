@@ -32,6 +32,7 @@
 #include "utils.h"
 #include "armour.h"
 #include "container.h"
+#include "defines.h"
 #include "display.h"
 #include "effects.h"
 #include "food.h"

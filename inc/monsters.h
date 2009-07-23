@@ -19,6 +19,7 @@
 #ifndef __MONSTERS_H_
 #define __MONSTERS_H_
 
+#include "defines.h"
 #include "effects.h"
 #include "game.h"
 #include "items.h"
@@ -37,23 +38,23 @@ typedef struct monster_data {
     char *name;			/* monster's name */
     int level;
     int ac;
-    int dam;
     int intelligence;	/* used to choose movement */
     int gold;
     int hp_max;
     int exp;			/* xp granted to player */
     char image;
-	unsigned			/* various flags */
+    speed mspeed;
+    size msize;
+    unsigned			/* various flags */
 		head: 			1,	/* has a head */
 		nobehead:		1,	/* cannot be beheaded */
 		hands:			1,	/* has hands => can open doors */
-		slow:			1,	/* slow */
-		fast:           1,  /* faster than normal */
 		fly:			1,	/* can fly (not affected by pits and trapdoors) */
 		spirit:			1,  /* is a spirit */
 		undead:			1,  /* is undead */
 		invisible:      1,  /* is invisible */
 		infravision:	1;  /* can see invisible */
+    attack attack[2];
 } monster_data;
 
 typedef enum monster_action_type
@@ -68,7 +69,7 @@ typedef enum monster_action_type
 
 typedef enum monster_t {
     MT_NONE,
-    MT_BAT,
+    MT_GIANT_BAT,
     MT_GNOME,
     MT_HOBGOBLIN,
     MT_JACKAL,
@@ -76,7 +77,7 @@ typedef enum monster_t {
     MT_ORC,
     MT_SNAKE,
     MT_CENTIPEDE,
-    MT_JACULI,
+    MT_JACULUS,
     MT_TROGLODYTE,
     MT_GIANT_ANT,
     MT_FLOATING_EYE,
@@ -101,7 +102,7 @@ typedef enum monster_t {
     MT_WRAITH,
     MT_FORVALAKA,
     MT_LAMA_NOBE,
-    MT_OSEQUIP,
+    MT_OSQUIP,
     MT_ROTHE,
     MT_XORN,
     MT_VAMPIRE,
@@ -185,29 +186,27 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
 
 void monsters_genocide(struct level *l);
 
-
-#define monster_get_name(monster)        (monsters[(monster)->type].name)
-#define monster_get_level(monster)       (monsters[(monster)->type].level)
-#define monster_get_ac(monster)          (monsters[(monster)->type].ac)
-#define monster_get_dam(monster)         (monsters[(monster)->type].dam)
-#define monster_get_int(monster)         (monsters[(monster)->type].intelligence)
-#define monster_get_gold(monster)        (monsters[(monster)->type].gold)
-#define monster_get_hp_max(monster)      (monsters[(monster)->type].hp_max)
-#define monster_get_exp(monster)         (monsters[(monster)->type].exp)
-#define monster_get_image(monster)       (monsters[(monster)->type].image)
+#define monster_name(monster)        (monsters[(monster)->type].name)
+#define monster_level(monster)       (monsters[(monster)->type].level)
+#define monster_ac(monster)          (monsters[(monster)->type].ac)
+#define monster_int(monster)         (monsters[(monster)->type].intelligence)
+#define monster_gold(monster)        (monsters[(monster)->type].gold)
+#define monster_hp_max(monster)      (monsters[(monster)->type].hp_max)
+#define monster_exp(monster)         (monsters[(monster)->type].exp)
+#define monster_image(monster)       (monsters[(monster)->type].image)
+#define monster_speed(monster)       (monsters[(monster)->type].speed)
+#define monster_damage(monster)      (monsters[(monster)->type].attack[0].base)
 #define monster_has_head(monster)        (monsters[(monster)->type].head)
 #define monster_is_beheadable(monster)   (!monsters[(monster)->type].nobehead)
 #define monster_has_hands(monster)       (monsters[(monster)->type].hands)
-#define monster_is_slow(monster)         (monsters[(monster)->type].slow)
-#define monster_is_fast(monster)         (monsters[(monster)->type].fast)
 #define monster_can_fly(monster)         (monsters[(monster)->type].fly)
 #define monster_is_spirit(monster)       (monsters[(monster)->type].spirit)
 #define monster_is_undead(monster)       (monsters[(monster)->type].undead)
 #define monster_is_invisible(monster)    (monsters[(monster)->type].invisible)
 #define monster_has_infravision(monster) (monsters[(monster)->type].infravision)
 
-#define monster_get_name_by_type(type)  (monsters[(type)].name)
-#define monster_get_image_by_type(type) (monsters[(type)].image)
+#define monster_name_by_type(type)  (monsters[(type)].name)
+#define monster_image_by_type(type) (monsters[(type)].image)
 
 int monster_genocide(int monster_id);
 int monster_is_genocided(int monster_id);

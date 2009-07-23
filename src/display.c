@@ -219,7 +219,7 @@ int display_paint_screen(player *p)
                     && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))))
         {
             attron(COLOR_PAIR(DC_RED));
-            mvaddch(monst->pos.y, monst->pos.x, monster_get_image(monst));
+            mvaddch(monst->pos.y, monst->pos.x, monster_image(monst));
             attroff(COLOR_PAIR(DC_RED));
         }
 
@@ -1566,7 +1566,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
                                 && (target->pos.x == ray->start_x + x)
                                 && (target->pos.y == ray->start_y + y))
                         {
-                            mvaddch(ray->start_y + y, ray->start_x + x, monster_get_image(target));
+                            mvaddch(ray->start_y + y, ray->start_x + x, monster_image(target));
                         }
                         else
                         {

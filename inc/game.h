@@ -20,7 +20,6 @@
 #define __GAME_H_
 
 #include "level.h"
-#include "monsters.h"
 #include "player.h"
 
 /* the world as we know it */

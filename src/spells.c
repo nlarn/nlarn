@@ -659,14 +659,14 @@ void spell_type_point(spell *s, struct player *p)
         }
         while (monster_is_genocided(monster->type));
 
-        monster->hp = monster_get_hp_max(monster);
+        monster->hp = monster_hp_max(monster);
 
         break;
 
         /* teleport */
     case SP_TEL:
         log_add_entry(p->log, "The %s disappears.",
-                      monster_get_name(monster));
+                      monster_name(monster));
 
         monster->pos = level_find_space(p->level, LE_MONSTER);
 
@@ -679,7 +679,7 @@ void spell_type_point(spell *s, struct player *p)
         if (spell_msg_succ(s))
         {
             log_add_entry(p->log, spell_msg_succ(s),
-                          monster_get_name(monster));
+                          monster_name(monster));
         }
 
         e = effect_new(spell_effect(s), game_turn(p->game));
@@ -694,7 +694,7 @@ void spell_type_point(spell *s, struct player *p)
                 && !monster_effect(monster, e->type))
         {
             log_add_entry(p->log, effect_get_msg_m_start(e),
-                          monster_get_name(monster));
+                          monster_name(monster));
         }
 
         /* has to come in the end as e might be destroyed */
@@ -756,7 +756,7 @@ void spell_type_ray(spell *s, struct player *p)
         player_hp_lose(p, amount, PD_SPELL, s->id);
     }
 
-    log_add_entry(p->log, spell_msg_succ(s), monster_get_name(monster));
+    log_add_entry(p->log, spell_msg_succ(s), monster_name(monster));
 
     if (monster_hp_lose(monster, amount))
     {
@@ -844,7 +844,7 @@ void spell_type_blast(spell *s, struct player *p)
         monster = g_ptr_array_index(mlist, i - 1);
 
         log_add_entry(p->log, spell_msg_succ(s),
-                      monster_get_name(monster));
+                      monster_name(monster));
 
         if (monster_hp_lose(monster, amount))
         {
@@ -973,14 +973,14 @@ void spell_genocide_monster(player *p)
 
     for (id = 1; id < MT_MAX; id++)
     {
-        if (monster_get_image_by_type(id) == in)
+        if (monster_image_by_type(id) == in)
         {
             if (!monster_is_genocided(id))
             {
                 monster_genocide(id);
                 log_add_entry(p->log,
                               "Wiped out all %ss",
-                              monster_get_name_by_type(id));
+                              monster_name_by_type(id));
 
                 monsters_genocide(p->level);
             }

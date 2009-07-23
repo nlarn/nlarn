@@ -42,6 +42,7 @@ solution "NLarn"
 		language "C"
 		files { "inc/*.h", "src/*.c" }
 		includedirs { "inc" }
+		defines { "G_DISABLE_DEPRECATED" }
 
 		links { "glib-2.0" }
 

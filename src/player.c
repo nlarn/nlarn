@@ -507,7 +507,7 @@ int player_attack(player *p, monster *m)
 
     prop = p->lvl
            + player_get_dex(p)
-           + monster_get_ac(m)
+           + monster_ac(m)
            - 12
            - game_difficulty(p->game);
 
@@ -519,7 +519,7 @@ int player_attack(player *p, monster *m)
     if ((roll < prop) || (roll == 1))
     {
         /* placed a hit */
-        log_add_entry(p->log, "You hit the %s.", monster_get_name(m));
+        log_add_entry(p->log, "You hit the %s.", monster_name(m));
 
         damage = player_get_str(p)
                  + player_get_wc(p)
@@ -537,7 +537,7 @@ int player_attack(player *p, monster *m)
             pi = item_rust(w);
             if (pi == PI_ENFORCED)
             {
-                log_add_entry(p->log, "Your weapon is dulled by the %s.", monster_get_name(m));
+                log_add_entry(p->log, "Your weapon is dulled by the %s.", monster_name(m));
             }
             else if (pi == PI_DESTROYED)
             {
@@ -570,7 +570,7 @@ int player_attack(player *p, monster *m)
                 && monster_is_beheadable(m))
         {
             log_add_entry(p->log, "You behead the %s with your Vorpal Blade!",
-                          monster_get_name(m));
+                          monster_name(m));
 
             damage = m->hp;
         }
@@ -590,7 +590,7 @@ int player_attack(player *p, monster *m)
                 && (w->type == WT_LANCEOFDEATH)
                 && (m->hp > 0))
         {
-            log_add_entry(p->log, "Your lance of death tickles the %s!", monster_get_name(m));
+            log_add_entry(p->log, "Your lance of death tickles the %s!", monster_name(m));
         }
 
         if (m->type == MT_METAMORPH)
@@ -599,7 +599,7 @@ int player_attack(player *p, monster *m)
             {
                 m->type = MT_BRONCE_DRAGON + rand_0n(9);
                 log_add_entry(p->log, "The metamorph turns into a %s!",
-                              monster_get_name(m));
+                              monster_name(m));
             }
         }
 
@@ -620,7 +620,7 @@ int player_attack(player *p, monster *m)
     else
     {
         /* missed */
-        log_add_entry(p->log, "You miss the %s.", monster_get_name(m));
+        log_add_entry(p->log, "You miss the %s.", monster_name(m));
     }
 
     return 1; /* i.e. turns used */
@@ -749,7 +749,7 @@ int player_level_enter(player *p, level *l)
 
 void player_monster_kill(player *p, monster *m, char *message)
 {
-    player_exp_gain(p, monster_get_exp(m));
+    player_exp_gain(p, monster_exp(m));
     p->stats.monsters_killed[m->type] += 1;
 
     monster_die(m, p, message);
@@ -3162,7 +3162,7 @@ int player_door_close(player *p)
             {
                 log_add_entry(p->log,
                               "You cannot close the door. The %s is in the way.",
-                              monster_get_name(m));
+                              monster_name(m));
                 return 0;
             }
 
@@ -4153,8 +4153,8 @@ static char *player_death_description(game_score_t *score, int verbose)
         /* TODO: regard monster's invisibility */
         /* TODO: while sleeping / doing sth. */
         g_string_append_printf(text, " by a%s %s.",
-                               a_an(monster_get_name_by_type(score->cause)),
-                               monster_get_name_by_type(score->cause));
+                               a_an(monster_name_by_type(score->cause)),
+                               monster_name_by_type(score->cause));
         break;
 
     case PD_SPHERE:

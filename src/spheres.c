@@ -115,7 +115,7 @@ void sphere_move(sphere *s, level *l)
             {
                 log_add_entry(s->owner->log,
                               "The %s dispels the sphere!",
-                              monster_get_name(m));
+                              monster_name(m));
             }
 
             sphere_remove(s, l);
@@ -130,7 +130,7 @@ void sphere_move(sphere *s, level *l)
             {
                 log_add_entry(s->owner->log,
                               "The %s causes cancellation of the sphere!",
-                              monster_get_name(m));
+                              monster_name(m));
             }
 
             sphere_remove(s, l);
@@ -201,13 +201,13 @@ static void sphere_kill_monster(sphere *s, level *l, monster *m)
     /* if the owner is set, grant experience */
     if (s->owner)
     {
-        player_exp_gain(s->owner, monster_get_exp(m));
+        player_exp_gain(s->owner, monster_exp(m));
 
         if (m->m_visible)
         {
             log_add_entry(s->owner->log,
                           "The sphere of annihilation killed the %s.",
-                          monster_get_name(m));
+                          monster_name(m));
         }
     }
 

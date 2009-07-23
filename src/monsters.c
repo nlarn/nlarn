@@ -18,76 +18,665 @@
 
 #include "nlarn.h"
 
+#define EMPTY_ATTACK { ATT_NONE, DAM_NONE, 0, 0 }
+
 const monster_data monsters[MT_MAX] =
 {
-    /* ID                 NAME                  LV   AC DAM INT    GO  HP      EXP IMG he no ha sl fa  fl sp un in iv */
-    { MT_NONE,            "",                    0,  0,  0,  0,    0,   0,      0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_BAT,             "bat",                 1,  0,  1,  3,    0,   1,      1, 'B', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
-    { MT_GNOME,           "gnome",               1, 10,  1,  8,   30,   2,      2, 'G', 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 },
-    { MT_HOBGOBLIN,       "hobgoblin",           1, 14,  2,  5,   25,   3,      2, 'H', 1, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
-    { MT_JACKAL,          "jackal",              1, 17,  1,  4,    0,   1,      1, 'J', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_KOBOLD,          "kobold",              1, 20,  1,  7,   10,   1,      1, 'K', 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 },
-    { MT_ORC,             "orc",                 2, 12,  1,  9,   40,   4,      2, 'O', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_SNAKE,           "snake",               2, 15,  1,  3,    0,   3,      1, 'S', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_CENTIPEDE,       "giant centipede",     2, 14,  0,  2,    0,   1,      2, 'c', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_JACULI,          "jaculi",              2, 20,  1,  3,    0,   2,      1, 'j', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_TROGLODYTE,      "troglodyte",          2, 10,  2,  5,   80,   4,      3, 't', 1, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
-    { MT_GIANT_ANT,       "giant ant",           2,  8,  1,  3,    0,   5,      5, 'A', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_FLOATING_EYE,    "floating eye",        3,  8,  1,  3,    0,   5,      2, 'E', 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
-    { MT_LEPRECHAUN,      "leprechaun",          3,  3,  0,  6, 1500,  13,     45, 'L', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_NYMPH,           "nymph",               3,  3,  0,  9,    0,  18,     45, 'N', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_QUASIT,          "quasit",              3,  5,  3,  3,    0,  10,     15, 'Q', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_RUST_MONSTER,    "rust monster",        3,  4,  0,  3,    0,  18,     25, 'R', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_ZOMBIE,          "zombie",              3, 12,  2,  3,    0,   6,      7, 'Z', 1, 0, 1, 0, 0, 0, 0, 1, 0, 0 },
-    { MT_ASSASSIN_BUG,    "assassin bug",        4,  9,  3,  3,    0,  20,     15, 'a', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_BUGBEAR,         "bugbear",             4,  5,  4,  5,   40,  20,     35, 'b', 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 },
-    { MT_HELLHOUND,       "hell hound",          4,  5,  2,  6,    0,  16,     35, 'h', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_ICE_LIZARD,      "ice lizard",          4, 11,  2,  6,   50,  16,     25, 'i', 1, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
-    { MT_CENTAUR,         "centaur",             4,  6,  4, 10,   40,  24,     45, 'C', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    /* ID                 NAME                  LV   AC DAM  INT   GO   HP     EXP IMG he no ha sl fa  fl sp un in iv */
-    { MT_TROLL,           "troll",               5,  4,  5,  9,   80,  50,    300, 'T', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_YETI,            "yeti",                5,  6,  4,  5,   50,  35,    100, 'Y', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_ELF,             "elf",                 5,  8,  1, 15,   50,  22,     35, 'e', 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 },
-    { MT_GELATINOUSCUBE,  "gelatinous cube",     5,  9,  1,  3,    0,  22,     45, 'g', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_METAMORPH,       "metamorph",           6,  7,  3,  3,    0,  30,     40, 'm', 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 },
-    { MT_VORTEX,          "vortex",              6,  4,  3,  3,    0,  30,     55, 'v', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_ZILLER,          "ziller",              6, 15,  3,  3,    0,  30,     35, 'z', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_VIOLET_FUNGUS,   "violet fungi",        6, 12,  3,  3,    0,  38,    100, 'F', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_WRAITH,          "wraith",              6,  3,  1,  3,    0,  30,    325, 'w', 1, 0, 1, 0, 0, 1, 0, 1, 0, 0 },
-    { MT_FORVALAKA,       "forvalaka",           6,  2,  5,  7,    0,  50,    280, 'f', 1, 0, 0, 0, 1, 0, 0, 1, 0, 1 },
-    { MT_LAMA_NOBE,       "lama nobe",           7,  7,  3,  6,    0,  35,     80, 'l', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_OSEQUIP,         "osequip",             7,  4,  3,  4,    0,  35,    100, 'o', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_ROTHE,           "rothe",               7, 15,  5,  3,  100,  50,    250, 'r', 1, 0, 0, 0, 1, 0, 0, 0, 0, 1 },
-    { MT_XORN,            "xorn",                7,  0,  6, 13,    0,  60,    300, 'X', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-    { MT_VAMPIRE,         "vampire",             7,  3,  4, 17,    0,  50,   1000, 'v', 1, 0, 1, 0, 0, 1, 0, 1, 0, 0 },
-    { MT_STALKER,         "invisible stalker",   7,  3,  6,  5,    0,  50,    350, 'I', 1, 0, 0, 1, 0, 0, 0, 0, 1, 0 },
-    { MT_POLTERGEIST,     "poltergeist",         8,  1,  4,  5,    0,  50,    450, 'p', 0, 0, 0, 0, 0, 0, 1, 0, 1, 0 },
-    { MT_DISENCHANTRESS,  "disenchantress",      8,  3,  0,  5,    0,  50,    500, 'q', 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_SHAMBLINGMOUND,  "shambling mound",     8,  2,  5,  6,    0,  45,    400, 's', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_YELLOW_MOLD,     "yellow mold",         8, 12,  4,  3,    0,  35,    250, 'y', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_UMBER_HULK,      "umber hulk",          8,  3,  7, 14,    0,  65,    600, 'U', 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 },
-    /*  ID                NAME                  LV  AC  DAM INT   GO   HP     EXP IMG  he no ha sl fa  fl sp un in iv */
-    { MT_GNOME_KING,      "gnome king",          9, -1, 10, 18, 2000, 100,   3000, 'k', 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 },
-    { MT_MIMIC,           "mimic",               9,  5,  6,  8,    0,  55,     99, 'M', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_WATER_LORD,      "water lord",          9,-10, 15, 20,    0, 150,  15000, 'w', 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_PURPLE_WORM,     "purple worm",         9, -1, 11,  3,  100, 120,  15000, 'P', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_XVART,           "xvart",               9, -2, 12, 13,    0,  90,   1000, 'x', 1, 0, 1, 1, 0, 0, 0, 0, 0, 0 },
-    { MT_WHITE_DRAGON,    "white dragon",        5,  2,  4, 16,  500,  55,   1000, 'd', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_BRONCE_DRAGON,   "bronze dragon",       9,  2,  9, 16,  300,  80,   4000, 'D', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
-    { MT_GREEN_DRAGON,    "green dragon",        9,  3,  8, 15,  200,  70,   2500, 'D', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
-    { MT_SILVER_DRAGON,   "silver dragon",      10, -1, 12, 20,  700, 100,  10000, 'D', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
-    { MT_PLATINUM_DRAGON, "platinum dragon",    10, -5, 15, 22, 1000, 130,  24000, 'D', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
-    { MT_RED_DRAGON,      "red dragon",         10, -2, 13, 19,  800, 110,  14000, 'D', 1, 0, 0, 0, 0, 1, 0, 0, 0, 0 },
-    { MT_SPIRIT_NAGA,     "spirit naga",        10,-20, 12, 23,    0,  95,  20000, 'n', 1, 1, 0, 0, 0, 1, 1, 0, 0, 1 },
-    { MT_GREEN_URCHIN,    "green urchin",       10, -3, 12,  3,    0,  85,   5000, 'u', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { MT_DEMONLORD_I,     "type I demon lord",  12,-30, 18, 20,    0, 140,  50000, '&', 1, 1, 1, 0, 1, 1, 0, 0, 1, 1 },
-    { MT_DEMONLORD_II,    "type II demon lord", 13,-30, 18, 21,    0, 160,  75000, '&', 1, 1, 1, 0, 1, 1, 0, 0, 1, 1 },
-    { MT_DEMONLORD_III,   "type III demon lord",14,-30, 18, 22,    0, 180, 100000, '&', 1, 1, 1, 0, 1, 1, 0, 0, 1, 1 },
-    { MT_DEMONLORD_IV,    "type IV demon lord", 15,-35, 20, 23,    0, 200, 125000, '&', 1, 1, 1, 0, 1, 1, 0, 0, 1, 1 },
-    { MT_DEMONLORD_V,     "type V demon lord",  16,-40, 22, 24,    0, 220, 150000, '&', 1, 1, 1, 0, 1, 1, 0, 0, 1, 1 },
-    { MT_DEMONLORD_VI,    "type VI demon lord", 17,-45, 24, 25,    0, 240, 175000, '&', 1, 1, 1, 0, 1, 1, 0, 0, 1, 1 },
-    { MT_DEMONLORD_VII,   "type VII demon lord",18,-70, 27, 26,    0, 260, 200000, '&', 1, 1, 1, 0, 1, 1, 0, 0, 1, 1 },
-    { MT_DAEMON_PRINCE,   "demon prince",       25,-127, 30, 28,   0, 345, 300000, '&', 1, 1, 1, 0, 1, 1, 0, 0, 1, 1 }
+    /* ID                 NAME
+     * level ac damage intelligence gold hitpoints experience image
+     * head nobehead hands fly spirit undead invisible infravision */
+    {
+        MT_NONE, "",
+        0, 0, 0, 0, 0, 0, ' ',
+        SPEED_NONE, SIZE_NONE,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            EMPTY_ATTACK,
+            EMPTY_ATTACK,
+        }
+
+    },
+    {
+        MT_GIANT_BAT, "giant bat",
+        1, 0, 3, 0, 1, 1, 'B',
+        SPEED_NORMAL, SIZE_SMALL,
+        TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_GNOME, "gnome",
+        1, 10, 8, 30, 2, 2, 'G',
+        SPEED_NORMAL, SIZE_SMALL,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE,
+        {
+            { ATT_WEAPON, DAM_PHYSICAL, 1, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_HOBGOBLIN, "hobgoblin",
+        1, 14, 5, 25, 3, 2, 'H',
+        SPEED_SLOW, SIZE_SMALL,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_WEAPON, DAM_PHYSICAL, 2, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_JACKAL, "jackal",
+        1, 17, 4, 0, 1, 1, 'J',
+        SPEED_NORMAL, SIZE_SMALL,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_KOBOLD, "kobold",
+        1, 20, 7, 10, 1, 1, 'K',
+        SPEED_NORMAL, SIZE_SMALL,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE,
+        {
+            { ATT_WEAPON, DAM_PHYSICAL, 1, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_ORC, "orc",
+        2, 12, 9, 40, 4, 2, 'O',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_WEAPON, DAM_PHYSICAL, 1, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_SNAKE, "snake",
+        2, 15, 3, 0, 3, 1, 'S',
+        SPEED_NORMAL, SIZE_TINY,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
+            { ATT_BITE, DAM_POISON, 1, 0 },
+        }
+    },
+    {
+        MT_CENTIPEDE, "giant centipede",
+        2, 14, 2, 0, 1, 2, 'c',
+        SPEED_NORMAL, SIZE_TINY,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_BITE, DAM_DEC_STR, 0, 0 },
+            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
+        }
+    },
+    {
+        /* a winged, leaping snake */
+        MT_JACULUS, "jaculus",
+        2, 20, 3, 0, 2, 1, 'j',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_BITE, DAM_PHYSICAL, 2, 0 },
+            { ATT_CLAW, DAM_PHYSICAL, 2, 0 },
+        }
+    },
+    {
+        MT_TROGLODYTE, "troglodyte",
+        2, 10, 5, 80, 4, 3, 't',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_WEAPON, DAM_PHYSICAL, 2, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_GIANT_ANT, "giant ant",
+        2, 8, 3, 0, 5, 5, 'A',
+        SPEED_NORMAL, SIZE_SMALL,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 1, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_FLOATING_EYE, "floating eye",
+        3, 8, 3, 0, 5, 2, 'E',
+        SPEED_SLOW, SIZE_MEDIUM,
+        FALSE, FALSE, FALSE,TRUE , FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 1, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_LEPRECHAUN, "leprechaun",
+        3, 3, 6, 1500, 13, 45, 'L',
+        SPEED_NORMAL, SIZE_SMALL,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_STEAL_GOLD, 0, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_NYMPH, "nymph",
+        3, 3, 9, 0, 18, 45, 'N',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_STEAL_ITEM, 0, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_QUASIT, "quasit",
+        3, 5, 3, 0, 10, 15, 'Q',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 3, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_RUST_MONSTER, "rust monster",
+        3, 4, 3, 0, 18, 25, 'R',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_RUST, 0, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_ZOMBIE, "zombie",
+        3, 12, 3, 0, 6, 7, 'Z',
+        SPEED_SLOW, SIZE_MEDIUM,
+        TRUE, FALSE, TRUE ,FALSE, FALSE, TRUE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 2, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_ASSASSIN_BUG, "assassin bug",
+        4, 9, 3, 0, 20, 15, 'a',
+        SPEED_NORMAL, SIZE_TINY,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 3, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_BUGBEAR, "bugbear",
+        4, 5, 5, 40, 20, 35, 'b',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 4, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_HELLHOUND, "hell hound",
+        4, 5, 6, 0, 16, 35, 'h',
+        SPEED_FAST, SIZE_SMALL,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 2, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_ICE_LIZARD, "ice lizard",
+        4, 11, 6, 50, 16, 25, 'i',
+        SPEED_SLOW, SIZE_MEDIUM,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 2, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_CENTAUR, "centaur",
+        4, 6, 10, 40, 24, 45, 'C',
+        SPEED_NORMAL, SIZE_LARGE,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 4, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_TROLL, "troll",
+        5, 4, 9, 80, 50, 300, 'T',
+        SPEED_NORMAL, SIZE_LARGE,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 5, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_YETI, "yeti",
+        5, 6, 5, 50, 35, 100, 'Y',
+        SPEED_NORMAL, SIZE_LARGE,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 4, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_ELF, "elf",
+        5, 8, 15, 50, 22, 35, 'e',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 1, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_GELATINOUSCUBE, "gelatinous cube",
+        5, 9, 3, 0, 22, 45, 'g',
+        SPEED_SLOW, SIZE_SMALL,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 1, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_METAMORPH, "metamorph",
+        6, 7, 3, 0, 30, 40, 'm',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 3, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_VORTEX, "vortex",
+        6, 4, 3, 0, 30, 55, 'v',
+        SPEED_NORMAL, SIZE_TINY,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 3, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_ZILLER, "ziller",
+        6, 15, 3, 0, 30, 35, 'z',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 3, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_VIOLET_FUNGUS, "violet fungi",
+        6, 12, 3, 0, 38, 100, 'F',
+        SPEED_SLOW, SIZE_TINY,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 3, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_WRAITH, "wraith",
+        6, 3, 3, 0, 30, 325, 'w',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 1, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_FORVALAKA, "forvalaka",
+        6, 2, 7, 0, 50, 280, 'f',
+        SPEED_FAST, SIZE_MEDIUM,
+        TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 5, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_LAMA_NOBE, "lama nobe",
+        7, 7, 6, 0, 35, 80, 'l',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, FALSE,FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 3, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_OSQUIP, "osquip",
+        7, 4, 4, 0, 35, 100, 'o',
+        SPEED_NORMAL, SIZE_SMALL,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 3, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_ROTHE, "rothe",
+        7, 15,   3,  100,  50,    250, 'r',
+        SPEED_FAST, SIZE_LARGE,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 5, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_XORN, "xorn",
+        7, 0, 13, 0, 60, 300, 'X',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 6, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_VAMPIRE, "vampire",
+        7, 3, 17, 0, 50, 1000, 'v',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 4, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_STALKER, "invisible stalker",
+        7, 3, 5, 0, 50, 350, 'I',
+        SPEED_FAST, SIZE_MEDIUM,
+        TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 6, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_POLTERGEIST, "poltergeist",
+        8, 1, 5, 0, 50, 450, 'p',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 4, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_DISENCHANTRESS, "disenchantress",
+        8, 3, 5, 0, 50, 500, 'q',
+        SPEED_NORMAL, SIZE_MEDIUM,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 0, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_SHAMBLINGMOUND, "shambling mound",
+        8, 2, 6, 0, 45, 400, 's',
+        SPEED_NORMAL, SIZE_HUGE,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 5, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_YELLOW_MOLD, "yellow mold",
+        8, 12, 3, 0, 35, 250, 'y',
+        SPEED_SLOW, SIZE_SMALL,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 4, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_UMBER_HULK, "umber hulk",
+        8, 3, 14, 0, 65, 600, 'U',
+        SPEED_NORMAL, SIZE_HUGE,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 7, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_GNOME_KING, "gnome king",
+        9, -1, 18, 2000, 100,   3000, 'k',
+        SPEED_NORMAL, SIZE_SMALL,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 10, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_MIMIC, "mimic",
+        9, 5, 8, 0, 55, 99, 'M',
+        SPEED_NONE, SIZE_MEDIUM,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 6, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_WATER_LORD, "water lord",
+        9,-10, 20, 0, 150, 15000, 'w',
+        SPEED_NORMAL, SIZE_LARGE,
+        TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 15, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_PURPLE_WORM, "purple worm",
+        9, -1, 3, 100, 120, 15000, 'P',
+        SPEED_SLOW, SIZE_GARGANTUAN,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 11, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_XVART, "xvart",
+        9, -2, 13, 0, 90, 1000, 'x',
+        SPEED_SLOW, SIZE_SMALL,
+        TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 12, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_WHITE_DRAGON, "white dragon",
+        5, 2, 16,  500, 55, 1000, 'd',
+        SPEED_NORMAL, SIZE_HUGE,
+        TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 4, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_BRONCE_DRAGON, "bronze dragon",
+        9, 2, 16, 300, 80, 4000, 'D',
+        SPEED_NORMAL, SIZE_HUGE,
+        TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 9, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_GREEN_DRAGON, "green dragon",
+        9, 3, 15, 200, 70, 2500, 'D',
+        SPEED_NORMAL, SIZE_HUGE,
+        TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 8, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_SILVER_DRAGON, "silver dragon",
+        10, -1, 20, 700, 100, 10000, 'D',
+        SPEED_NORMAL, SIZE_HUGE,
+        TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 12, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_PLATINUM_DRAGON, "platinum dragon",
+        10, -5, 22, 1000, 130, 24000, 'D',
+        SPEED_NORMAL, SIZE_HUGE,
+        TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 15, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_RED_DRAGON, "red dragon",
+        10, -2, 19, 800, 110, 14000, 'D',
+        SPEED_NORMAL, SIZE_HUGE,
+        TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 13, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_SPIRIT_NAGA, "spirit naga",
+        10, -20, 23, 0, 95, 20000, 'n',
+        SPEED_NORMAL, SIZE_LARGE,
+        1, 1, FALSE, 1, 1, FALSE, FALSE, 1,
+        {
+            { ATT_NONE, DAM_NONE, 12, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_GREEN_URCHIN, "green urchin",
+        10, -3, 3, 0, 85, 5000, 'u',
+        SPEED_NORMAL, SIZE_SMALL,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        {
+            { ATT_NONE, DAM_NONE, 12, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_DEMONLORD_I, "type I demon lord",
+        12, -30, 20, 0, 140, 50000, '&',
+        SPEED_FAST, SIZE_MEDIUM,
+        TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 18, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_DEMONLORD_II, "type II demon lord",
+        13, -30, 21, 0, 160, 75000, '&',
+        SPEED_FAST, SIZE_MEDIUM,
+        TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 18, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_DEMONLORD_III, "type III demon lord",
+        14, -30,  22, 0, 180, 100000, '&',
+        SPEED_FAST, SIZE_MEDIUM,
+        TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 18, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_DEMONLORD_IV, "type IV demon lord",
+        15, -35, 23, 0, 200, 125000, '&',
+        SPEED_FAST, SIZE_MEDIUM,
+        TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 20, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_DEMONLORD_V, "type V demon lord",
+        16, -40, 24, 0, 220, 150000, '&',
+        SPEED_FAST, SIZE_MEDIUM,
+        TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 22, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_DEMONLORD_VI, "type VI demon lord",
+        17, -45, 25, 0, 240, 175000, '&',
+        SPEED_FAST, SIZE_LARGE,
+        TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 24, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_DEMONLORD_VII, "type VII demon lord",
+        18, -70, 26, 0, 260, 200000, '&',
+        SPEED_FAST, SIZE_HUGE,
+        TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 27, 0 },
+            EMPTY_ATTACK,
+        }
+    },
+    {
+        MT_DAEMON_PRINCE, "demon prince",
+        25, -127, 28, 0, 345, 300000, '&',
+        SPEED_FAST, SIZE_HUGE,
+        TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE,
+        {
+            { ATT_NONE, DAM_NONE, 30, 0 },
+            EMPTY_ATTACK,
+        }
+    }
 };
 
 static int monster_genocided[MT_MAX] = { 1, 0 };
@@ -124,10 +713,10 @@ monster *monster_new(int monster_type, struct level *l)
     nmonster->inventory = inv_new();
 
     /* fill monsters inventory */
-    if (monster_get_gold(nmonster) > 0)
+    if (monster_gold(nmonster) > 0)
     {
         /* add gold to monster's inventory, ramdomize the amount */
-        icount = max(divert(monster_get_gold(nmonster), 10), 1);
+        icount = max(divert(monster_gold(nmonster), 10), 1);
         inv_add(nmonster->inventory, item_new(IT_GOLD, icount, 0));
     }
 
@@ -254,7 +843,7 @@ void monster_move(monster *m, struct player *p)
         /* monster is blinded */
         m->p_visible = FALSE;
     }
-    else if (player_effect(p, ET_STEALTH) > monster_get_int(m))
+    else if (player_effect(p, ET_STEALTH) > monster_int(m))
     {
         /* player is stealther than monster is smart */
         m->p_visible = FALSE;
@@ -302,12 +891,12 @@ void monster_move(monster *m, struct player *p)
             /*
             log_add_entry(p->log,
                           "The %s has spotted you and heads towards you!",
-                          monster_get_name(m));
+                          monster_name(m));
              */
         }
         else if (m->action == MA_FLEE)
         {
-            log_add_entry(p->log, "The %s turns to flee!", monster_get_name(m));
+            log_add_entry(p->log, "The %s turns to flee!", monster_name(m));
         }
     }
 
@@ -374,7 +963,7 @@ void monster_move(monster *m, struct player *p)
             if (!pos_identical(m_npos, m->pos))
             {
                 m_npos = m->pos;
-                log_add_entry(p->log, "The %s vanishes.", monster_get_name(m));
+                log_add_entry(p->log, "The %s vanishes.", monster_name(m));
             }
         }
         else
@@ -426,13 +1015,13 @@ void monster_move(monster *m, struct player *p)
             monster_update_player_pos(m, p->pos);
             m_npos = m->pos;
 
-            log_add_entry(p->log, "The %s bumped into you.", monster_get_name(m));
+            log_add_entry(p->log, "The %s bumped into you.", monster_name(m));
         }
 
         /* check for door */
         if ((level_stationary_at(m->level, m_npos) == LS_CLOSEDDOOR)
                 && monster_has_hands(m)
-                && monster_get_int(m) > 3) /* lock out zombies */
+                && monster_int(m) > 3) /* lock out zombies */
         {
             /* open the door */
             level_stationary_at(m->level, m_npos) = LS_OPENDOOR;
@@ -440,7 +1029,7 @@ void monster_move(monster *m, struct player *p)
             /* notify the player if the door is visible */
             if (m->m_visible)
             {
-                log_add_entry(p->log, "The %s opens the door.", monster_get_name(m));
+                log_add_entry(p->log, "The %s opens the door.", monster_name(m));
             }
         }
 
@@ -533,7 +1122,7 @@ void monster_pickup_items(monster *m, struct player *p)
         {
             if (m->m_visible)
             {
-                log_add_entry(p->log, "The %s picks up %s %s.", monster_get_name(m),
+                log_add_entry(p->log, "The %s picks up %s %s.", monster_name(m),
                               (it->count == 1) ? "a" : "some",
                               (it->count == 1) ? item_name_sg(it->type) : item_name_pl(it->type));
             }
@@ -564,7 +1153,7 @@ void monster_player_attack(monster *m, player *p)
         if (!level_is_monster_at(p->level, p->pos) && m->m_visible)
         {
             log_add_entry(p->log, "The %s bashes into thin air.",
-                          monster_get_name(m));
+                          monster_name(m));
         }
 
         m->lastseen++;
@@ -577,24 +1166,24 @@ void monster_player_attack(monster *m, player *p)
             && chance(65))
     {
         log_add_entry(p->log, "The %s misses wildly.",
-                      monster_get_name(m));
+                      monster_name(m));
         return;
     }
 
     if (player_effect(p, ET_CHARM_MONSTER)
-            && (rand_m_n(5, 30) * monster_get_level(m)
+            && (rand_m_n(5, 30) * monster_level(m)
                 - player_get_cha(p) < 30))
     {
         log_add_entry(p->log, "The %s is awestruck at your magnificence!",
-                      monster_get_name(m));
+                      monster_name(m));
         return;
     }
 
-    dam = monster_get_dam(m);
+    dam = monster_damage(m);
     if (dam > 1)
     {
         dam += rand_1n(dam);
-        dam += monster_get_level(m);
+        dam += monster_level(m);
         dam += game_difficulty(p->game);
     }
 
@@ -606,17 +1195,17 @@ void monster_player_attack(monster *m, player *p)
         {
             player_hp_lose(p, dam, PD_MONSTER, m->type);
             log_add_entry(p->log, "The %s hits you.",
-                          monster_get_name(m));
+                          monster_name(m));
         }
         else
         {
             log_add_entry(p->log, "The %s hit you but your armour protects you.",
-                          monster_get_name(m));
+                          monster_name(m));
         }
     }
     else
     {
-        log_add_entry(p->log, "The %s missed.", monster_get_name(m));
+        log_add_entry(p->log, "The %s missed.", monster_name(m));
     }
 }
 
@@ -674,12 +1263,12 @@ gboolean monster_trigger_trap(monster *m, struct player *p)
 
     if (m->m_visible)
     {
-        log_add_entry(p->log, trap_m_message(trap), monster_get_name(m));
+        log_add_entry(p->log, trap_m_message(trap), monster_name(m));
 
         if (eff)
         {
             log_add_entry(p->log, effect_get_msg_m_start(eff),
-                          monster_get_name(m));
+                          monster_name(m));
         }
 
         /* set player's knowlege of trap */
@@ -719,7 +1308,7 @@ void monster_die(monster *m, struct player *p, char *message)
     /* if the player can see the monster describe the event */
     if (m->m_visible && p)
     {
-        log_add_entry(p->log, message, monster_get_name(m));
+        log_add_entry(p->log, message, monster_name(m));
     }
 
     /* drop stuff the monster carries */
@@ -765,9 +1354,9 @@ gboolean monster_update_action(monster *m)
     gboolean smart;
 
     /* FIXME: should include difficulty here */
-    time   = monster_get_int(m) + 25;
-    low_hp = (m->hp < (monster_get_hp_max(m) / 4 ));
-    smart  = (monster_get_int(m) > 4);
+    time   = monster_int(m) + 25;
+    low_hp = (m->hp < (monster_hp_max(m) / 4 ));
+    smart  = (monster_int(m) > 4);
 
     if (m->type == MT_MIMIC)
     {
@@ -781,7 +1370,7 @@ gboolean monster_update_action(monster *m)
         naction = MA_REMAIN;
     }
     else if ((low_hp && smart)
-             || (monster_effect(m, ET_SCARE_MONSTER) > monster_get_int(m)))
+             || (monster_effect(m, ET_SCARE_MONSTER) > monster_int(m)))
     {
         /* low HP or very scared => FLEE player */
         naction = MA_FLEE;
@@ -835,7 +1424,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
     {
         /* regenerate every (22- frequency) turns */
         if (gtime % (22 - frequency) == 0)
-            m->hp = min(monster_get_hp_max(m), m->hp++);
+            m->hp = min(monster_hp_max(m), m->hp++);
 
     }
 
@@ -887,7 +1476,7 @@ void monster_effect_expire(monster *m, message_log *log)
             /* log info */
             if (m->m_visible && effect_get_msg_m_stop(e))
                 log_add_entry(log, effect_get_msg_m_stop(e),
-                              monster_get_name(m));
+                              monster_name(m));
 
             g_free(e);
         }
@@ -921,7 +1510,7 @@ int monster_player_special_attack(monster *m, struct player *p)
             if (pi == PI_ENFORCED)
             {
                 log_add_entry(p->log, "Your %s is dulled by the %s.",
-                              armour_name(it), monster_get_name(m));
+                              armour_name(it), monster_name(m));
             }
             else if (pi == PI_DESTROYED)
             {
@@ -1047,7 +1636,7 @@ int monster_player_special_attack(monster *m, struct player *p)
         break;
 
     case MT_BUGBEAR:
-    case MT_OSEQUIP:
+    case MT_OSQUIP:
         spc_dam = ((m->type == MT_BUGBEAR)
                    ? rand_m_n(5, 15)
                    : rand_m_n(10, 25))
@@ -1069,7 +1658,7 @@ int monster_player_special_attack(monster *m, struct player *p)
 
     if (message != NULL)
     {
-        log_add_entry(p->log, message, monster_get_name(m));
+        log_add_entry(p->log, message, monster_name(m));
     }
 
     if (ef)
