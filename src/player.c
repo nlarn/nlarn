@@ -469,6 +469,14 @@ int player_move(player *p, int direction)
         if (!(target_t->type == LT_WALL))
             return FALSE;
 
+        /* bump into wall when blind */
+        if (player_effect(p, ET_BLINDNESS))
+        {
+            player_memory_of(p, target_p).type = level_tiletype_at(p->level, target_p);
+            log_add_entry(p->log, "Ouch!");
+            return times;
+        }
+
         /* return if player cannot walk through walls */
         if (!player_effect(p, ET_WALL_WALK))
             return FALSE;
