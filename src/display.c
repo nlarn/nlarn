@@ -105,6 +105,9 @@ int display_paint_screen(player *p)
     sphere *sphere;
     level *l;
 
+    /* curses attributes */
+    int attrs;
+
     /* needed to display messages */
     message_log_entry *le;
 
@@ -242,48 +245,162 @@ int display_paint_screen(player *p)
     move(LEVEL_MAX_Y + 1, 0);
     clrtoeol();
 
-    printw("%s, %s",
-           p->name,
-           player_get_lvl_desc(p));
+    /* player name and level */
+    printw("%s, %s", p->name, player_get_lvl_desc(p));
 
-    attron(COLOR_PAIR(DC_MAGENTA));
-    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X - 21, "%3d HP %-3d", p->hp, player_get_hp_max(p));
-    attroff(COLOR_PAIR(DC_MAGENTA));
+    /* current HPs */
+    if (p->hp <= (p->hp_max / 10)) /* 10% hp left */
+        attrs = (COLOR_PAIR(DC_RED) | A_BOLD);
+    else if (p->hp <= (p->hp_max / 4))  /* 25% hp left */
+        attrs = COLOR_PAIR(DC_RED);
+    else if (p->hp <= (p->hp_max / 2))  /* 50% hp left */
+        attrs = COLOR_PAIR(DC_GREEN);
+    else
+        attrs = (COLOR_PAIR(DC_GREEN) | A_BOLD);
 
-    attron(COLOR_PAIR(DC_CYAN));
-    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X - 10, "%3d MP %-3d", p->mp, player_get_mp_max(p));
-    attroff(COLOR_PAIR(DC_CYAN));
+    attron(attrs);
+    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X - 21, "%3d", p->hp, player_get_hp_max(p));
+    attroff(attrs);
+
+    /* max HPs */
+    attron(COLOR_PAIR(DC_GREEN) | A_BOLD);
+    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X - 18, "/%-3d HP", player_get_hp_max(p));
+    attroff(COLOR_PAIR(DC_GREEN) | A_BOLD);
+
+    /* current MPs */
+    if (p->mp <= (p->mp_max / 10)) /* 10% mp left */
+        attrs = (COLOR_PAIR(DC_MAGENTA) | A_BOLD);
+    else if (p->mp <= (p->mp_max / 4))  /* 25% mp left */
+        attrs = COLOR_PAIR(DC_MAGENTA);
+    else if (p->mp <= (p->mp_max / 2))  /* 50% mp left */
+        attrs = COLOR_PAIR(DC_CYAN);
+    else
+        attrs = (COLOR_PAIR(DC_CYAN) | A_BOLD);
+
+    attron(attrs);
+    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X - 10, "%3d", p->mp);
+    attroff(attrs);
+
+    /* max MPs */
+    attron(COLOR_PAIR(DC_CYAN) | A_BOLD);
+    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X - 7, "/%-3d MP", player_get_mp_max(p));
+    attroff(COLOR_PAIR(DC_CYAN) | A_BOLD);
+
+    /* game time */
+    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X + 1, "T %-6d", game_turn(p->game));
+
+    /* experience points / level */
+    attron(COLOR_PAIR(DC_BLUE) | A_BOLD);
+
+    mvprintw(LEVEL_MAX_Y + 2, LEVEL_MAX_X - 20, "XP %d/%-5d",
+             p->experience, p->lvl);
+
+    attroff(COLOR_PAIR(DC_BLUE) | A_BOLD);
+    clrtoeol();
+
+    /* dungeon level */
+    mvprintw(LEVEL_MAX_Y + 2, LEVEL_MAX_X + 1, "Lvl: %s",
+             level_name(p->level));
+ 
 
     /* *** RIGHT STATUS *** */
-    mvprintw(1, LEVEL_MAX_X + 3, "STR %2d", player_get_str(p));
-    clrtoeol();
-    mvprintw(2, LEVEL_MAX_X + 3, "DEX %2d", player_get_dex(p));
-    clrtoeol();
-    mvprintw(3, LEVEL_MAX_X + 3, "CON %2d", player_get_con(p));
-    clrtoeol();
-    mvprintw(4, LEVEL_MAX_X + 3, "INT %2d", player_get_int(p));
-    clrtoeol();
-    mvprintw(5, LEVEL_MAX_X + 3, "WIS %2d", player_get_wis(p));
-    clrtoeol();
-    mvprintw(6, LEVEL_MAX_X + 3, "CHA %2d", player_get_cha(p));
+    
+    /* strenght */
+    mvprintw(1, LEVEL_MAX_X + 3, "STR ");
+
+    if (player_get_str(p) > p->strength)
+        attrs = COLOR_PAIR(DC_YELLOW);
+    else if (player_get_str(p) < p->strength)
+        attrs = COLOR_PAIR(DC_RED);
+    else
+        attrs = COLOR_PAIR(DC_WHITE);
+
+    attron(attrs | A_BOLD);
+    printw("%2d", player_get_str(p));
+    attroff(attrs) | A_BOLD;
     clrtoeol();
 
+    /* dexterity */
+    mvprintw(2, LEVEL_MAX_X + 3, "DEX ");
+
+    if (player_get_dex(p) > p->dexterity)
+        attrs = COLOR_PAIR(DC_YELLOW);
+    else if (player_get_dex(p) < p->dexterity)
+        attrs = COLOR_PAIR(DC_RED);
+    else
+        attrs = COLOR_PAIR(DC_WHITE);
+
+    attron(attrs | A_BOLD);
+    printw("%2d", player_get_dex(p));
+    attroff(attrs) | A_BOLD;
+    clrtoeol();
+    
+    /* constitution */
+    mvprintw(3, LEVEL_MAX_X + 3, "CON ");
+
+    if (player_get_con(p) > p->constitution)
+        attrs = COLOR_PAIR(DC_YELLOW);
+    else if (player_get_con(p) < p->constitution)
+        attrs = COLOR_PAIR(DC_RED);
+    else
+        attrs = COLOR_PAIR(DC_WHITE);
+
+    attron(attrs | A_BOLD);
+    printw("%2d", player_get_con(p));
+    attroff(attrs) | A_BOLD;
+    clrtoeol();
+
+    /* intelligence */
+    mvprintw(4, LEVEL_MAX_X + 3, "INT ");
+
+    if (player_get_int(p) > p->intelligence)
+        attrs = COLOR_PAIR(DC_YELLOW);
+    else if (player_get_int(p) < p->intelligence)
+        attrs = COLOR_PAIR(DC_RED);
+    else
+        attrs = COLOR_PAIR(DC_WHITE);
+
+    attron(attrs | A_BOLD);
+    printw("%2d", player_get_int(p));
+    attroff(attrs) | A_BOLD;
+    clrtoeol();
+
+    /* wisdom */
+    mvprintw(5, LEVEL_MAX_X + 3, "WIS ");
+
+    if (player_get_wis(p) > p->wisdom)
+        attrs = COLOR_PAIR(DC_YELLOW);
+    else if (player_get_wis(p) < p->wisdom)
+        attrs = COLOR_PAIR(DC_RED);
+    else
+        attrs = COLOR_PAIR(DC_WHITE);
+
+    attron(attrs | A_BOLD);
+    printw("%2d", player_get_wis(p));
+    attroff(attrs) | A_BOLD;
+    clrtoeol();
+
+    /* charisma */
+    mvprintw(6, LEVEL_MAX_X + 3, "CHA ");
+
+    if (player_get_cha(p) > p->charisma)
+        attrs = COLOR_PAIR(DC_YELLOW);
+    else if (player_get_cha(p) < p->charisma)
+        attrs = COLOR_PAIR(DC_RED);
+    else
+        attrs = COLOR_PAIR(DC_WHITE);
+
+    attron(attrs | A_BOLD);
+    printw("%2d", player_get_cha(p));
+    attroff(attrs) | A_BOLD;
+    clrtoeol();
+
+    /* armour class */
     mvprintw(8, LEVEL_MAX_X + 3, "AC: %2d", player_get_ac(p));
     clrtoeol();
-    mvprintw(9, LEVEL_MAX_X + 3, "WC: %2d", player_get_wc(p));
-    clrtoeol();
 
-    mvprintw(11, LEVEL_MAX_X + 3, "XL: %d", p->lvl);
-    clrtoeol();
-    mvprintw(12, LEVEL_MAX_X + 3, "XP: %d", p->experience);
-    clrtoeol();
-    mvprintw(13, LEVEL_MAX_X + 3, "$%-7d", player_get_gold(p));
-    clrtoeol();
-
-    mvprintw(16, LEVEL_MAX_X + 3, "t %-7d", p->log->gtime);
-    clrtoeol();
-
-    mvprintw(18, LEVEL_MAX_X + 2, "Lvl: %s", level_name(p->level));
+    /* gold */
+    mvprintw(9, LEVEL_MAX_X + 3, "$%-7d", player_get_gold(p));
     clrtoeol();
 
     /* *** MESSAGES *** */
