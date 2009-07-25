@@ -133,7 +133,7 @@ typedef struct effect
     guint32 start;          /* game time the effect began */
     guint32 turns;          /* number of turns this effect remains */
     gint32 amount;          /* power of effect, if applicable */
-    struct item *item;      /* item which causes the effect (if caused by item) */
+    struct _item *item;     /* item which causes the effect (if caused by item) */
 } effect;
 
 

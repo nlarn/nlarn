@@ -1073,7 +1073,7 @@ void spell_vaporize_rock(player *p)
         if (game_difficulty(p->game) < 3)
         {
             if (!level_ilist_at(p->level, pos))
-                level_ilist_at(p->level, pos) = inv_new();
+                level_ilist_at(p->level, pos) = inv_new(NULL);
 
             inv_add(level_ilist_at(p->level, pos),
                     item_new(IT_BOOK, rand_1n(SP_MAX - 1), 0));

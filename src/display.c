@@ -143,11 +143,12 @@ int display_paint_screen(player *p)
             {
 
                 /* draw items */
-                if (level_ilist_at(p->level, pos) && (level_ilist_at(p->level, pos)->len > 0))
+                if (level_ilist_at(p->level, pos) && (inv_length(level_ilist_at(p->level, pos)) > 0))
                 {
 
+
                     it = (item *) inv_get(level_ilist_at(p->level, pos),
-                                          level_ilist_at(p->level, pos)->len - 1);
+                                          inv_length(level_ilist_at(p->level, pos)) - 1);
 
                     attron(COLOR_PAIR(DC_BLUE));
                     addch(item_image(it->type));
@@ -301,10 +302,10 @@ int display_paint_screen(player *p)
     /* dungeon level */
     mvprintw(LEVEL_MAX_Y + 2, LEVEL_MAX_X + 1, "Lvl: %s",
              level_name(p->level));
- 
+
 
     /* *** RIGHT STATUS *** */
-    
+
     /* strenght */
     mvprintw(1, LEVEL_MAX_X + 3, "STR ");
 
@@ -317,7 +318,7 @@ int display_paint_screen(player *p)
 
     attron(attrs | A_BOLD);
     printw("%2d", player_get_str(p));
-    attroff(attrs) | A_BOLD;
+    attroff(attrs | A_BOLD);
     clrtoeol();
 
     /* dexterity */
@@ -332,9 +333,9 @@ int display_paint_screen(player *p)
 
     attron(attrs | A_BOLD);
     printw("%2d", player_get_dex(p));
-    attroff(attrs) | A_BOLD;
+    attroff(attrs | A_BOLD);
     clrtoeol();
-    
+
     /* constitution */
     mvprintw(3, LEVEL_MAX_X + 3, "CON ");
 
@@ -347,7 +348,7 @@ int display_paint_screen(player *p)
 
     attron(attrs | A_BOLD);
     printw("%2d", player_get_con(p));
-    attroff(attrs) | A_BOLD;
+    attroff(attrs | A_BOLD);
     clrtoeol();
 
     /* intelligence */
@@ -362,7 +363,7 @@ int display_paint_screen(player *p)
 
     attron(attrs | A_BOLD);
     printw("%2d", player_get_int(p));
-    attroff(attrs) | A_BOLD;
+    attroff(attrs | A_BOLD);
     clrtoeol();
 
     /* wisdom */
@@ -377,7 +378,7 @@ int display_paint_screen(player *p)
 
     attron(attrs | A_BOLD);
     printw("%2d", player_get_wis(p));
-    attroff(attrs) | A_BOLD;
+    attroff(attrs | A_BOLD);
     clrtoeol();
 
     /* charisma */
@@ -392,7 +393,7 @@ int display_paint_screen(player *p)
 
     attron(attrs | A_BOLD);
     printw("%2d", player_get_cha(p));
-    attroff(attrs) | A_BOLD;
+    attroff(attrs | A_BOLD) ;
     clrtoeol();
 
     /* armour class */
@@ -402,6 +403,7 @@ int display_paint_screen(player *p)
     /* gold */
     mvprintw(9, LEVEL_MAX_X + 3, "$%-7d", player_get_gold(p));
     clrtoeol();
+
 
     /* *** MESSAGES *** */
     /* number of lines which can be displayed */
@@ -450,12 +452,15 @@ int display_paint_screen(player *p)
         clrtoeol();
 
         if ((p->log->gtime - 15) < ttime[i])
-            attron(A_BOLD);
+            attrs = COLOR_PAIR(DC_WHITE) | A_BOLD;
+        else
+            attrs = COLOR_PAIR(DC_WHITE);
+
+        attron(attrs);
 
         printw(g_ptr_array_index(text, i));
 
-        if ((p->log->gtime - 15) < ttime[i])
-            attroff(A_BOLD);
+        attroff(attrs);
     }
 
     text_destroy(text);
@@ -536,7 +541,7 @@ void display_inventory(char *title, player *p, inventory *inv,
     assert(p != NULL && callbacks != NULL);
 
     /* sort inventory by item type */
-    g_ptr_array_sort_with_data(inv, (GCompareDataFunc)item_sort, (gpointer)p);
+    inv_sort(inv, (GCompareDataFunc)item_sort, (gpointer)p);
 
     /* store inventory length */
     len_orig = len_curr = inv_length_filtered(inv, filter);

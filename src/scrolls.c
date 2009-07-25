@@ -158,7 +158,7 @@ int scroll_create_artefact(player *p, item *scroll)
     /* FIXME: this is not what it should be */
     if (!level_ilist_at(p->level, p->pos))
     {
-        level_ilist_at(p->level, p->pos) = inv_new();
+        level_ilist_at(p->level, p->pos) = inv_new(NULL);
     }
 
     it = item_new_by_level(rand_1n(IT_MAX), p->level->nlevel);
@@ -272,7 +272,7 @@ int scroll_identify(player *p, item *scroll)
 
     assert(p != NULL && scroll != NULL);
 
-    for (pos = 1; pos <= p->inventory->len; pos++)
+    for (pos = 1; pos <= inv_length(p->inventory); pos++)
     {
         it = inv_get(p->inventory, pos - 1);
         if (!player_item_identified(p, it))

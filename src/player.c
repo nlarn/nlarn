@@ -116,7 +116,10 @@ player *player_new(struct game *game)
 
     p->known_spells = g_ptr_array_new();
     p->effects = g_ptr_array_new();
-    p->inventory = inv_new();
+    p->inventory = inv_new(p);
+
+    inv_callbacks_set(p->inventory, &player_inv_pre_add, &player_inv_weight_recalc,
+                      NULL, &player_inv_weight_recalc);
 
     it = item_new(IT_ARMOUR, AT_LEATHER, 1);
     inv_add(p->inventory, it);
@@ -1654,10 +1657,11 @@ int player_inv_display(player *p)
     return TRUE;
 }
 
-void player_inv_display_weight(player *p)
+char *player_inv_weight(player *p)
 {
     float weight;
     char *unit = "g";
+    static char buf[21] = "";
 
     assert (p != NULL);
 
@@ -1668,7 +1672,109 @@ void player_inv_display_weight(player *p)
         unit = "kg";
     }
 
-    log_add_entry(p->log, "The weight of your inventory is %g %s.", weight, unit);
+    g_snprintf(buf, 20, "%g%s", weight, unit);
+
+    return buf;
+}
+
+int player_inv_pre_add(inventory *inv, item *item)
+{
+    player *p;
+    char buf[61];
+
+    int pack_weight;
+    float can_carry;
+
+    p = (player *)inv->owner;
+
+
+    if (player_effect(p, ET_OVERSTRAINED))
+    {
+        log_add_entry(p->log, "You are already overloaded!");
+        return FALSE;
+    }
+
+    /* calculate inventory weight */
+    pack_weight = inv_weight(inv);
+
+    /* player can carry 2kg per str */
+    can_carry = 2000 * (float)player_get_str(p);
+
+    /* check if item weight can be carried */
+    if ((pack_weight + item_weight(item)) > (int)(can_carry * 1.3))
+    {
+        /* get item description */
+        item_describe(item, player_item_identified(p, item), (item->count == 1), TRUE, buf, 60);
+        /* capitalize first letter */
+        buf[0] = g_ascii_toupper(buf[0]);
+
+        log_add_entry(p->log, "%s is too heavy for you.", buf);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+void player_inv_weight_recalc(inventory *inv, item *item)
+{
+    int pack_weight;
+    float can_carry;
+    effect *e = NULL;
+
+    player *p;
+
+    assert (inv != NULL);
+
+    /* make shortcut */
+    p = (player *)inv->owner;
+
+    /* calculate inventory weight */
+    pack_weight = inv_weight(inv);
+
+    /* player can carry 2kg per str */
+    can_carry = 2000 * (float)player_get_str(p);
+
+
+    if (pack_weight > (int)(can_carry * 1.3))
+    {
+        /* OVERSTRAINED - if burdened get rid of this */
+        if ((e = player_effect_get(p, ET_BURDENED)))
+        {
+            player_effect_del(p, e);
+        }
+
+        /* make overstrained */
+        if (!player_effect(p, ET_OVERSTRAINED))
+        {
+            player_effect_add(p, effect_new(ET_OVERSTRAINED, game_turn(p->game)));
+        }
+    }
+    else if (pack_weight < (int)(can_carry * 1.3) && (pack_weight > can_carry))
+    {
+        /* BURDENED - if overstrained get rid of this */
+        if ((e = player_effect_get(p, ET_OVERSTRAINED)))
+        {
+            player_effect_del(p, e);
+        }
+
+        if (!player_effect(p, ET_BURDENED))
+        {
+            player_effect_add(p, effect_new(ET_BURDENED, game_turn(p->game)));
+        }
+    }
+    else if (pack_weight < can_carry)
+    {
+        /* NOT burdened, NOT overstrained */
+        if ((e = player_effect_get(p, ET_OVERSTRAINED)))
+        {
+            player_effect_del(p, e);
+        }
+
+        if (player_effect(p, ET_BURDENED))
+        {
+            player_effect_del(p, player_effect_get(p, ET_BURDENED));
+        }
+    }
 }
 
 /* level is needed to make function signature match display_inventory requirements */
@@ -2230,7 +2336,7 @@ int player_item_use(player *p, item *it)
 {
     char description[61];
     int item_used_up = TRUE;
-    int item_identified = TRUE;
+    int item_identified = FALSE;
     int damage = 0; /* damage take by cursed items */
     int time = 0; /* number of turns this action took */
 
@@ -2269,7 +2375,6 @@ int player_item_use(player *p, item *it)
             {
             case 0:
                 log_add_entry(p->log, "You cannot understand the content of this book.");
-                item_identified = FALSE;
                 break;
 
             case 1:
@@ -2277,6 +2382,7 @@ int player_item_use(player *p, item *it)
                 log_add_entry(p->log, "You master the spell \"%s\".",
                               book_name(it));
 
+                item_identified = TRUE;
                 break;
 
             default:
@@ -2350,6 +2456,7 @@ int player_item_use(player *p, item *it)
 
             case PO_WATER:
                 log_add_entry(p->log, "This tastes like water..");
+                item_identified = TRUE;
                 break;
 
             case PO_CURE_DIANTHR:
@@ -2396,6 +2503,7 @@ int player_item_use(player *p, item *it)
 
             case ST_BLANK:
                 item_used_up = FALSE;
+                item_identified = TRUE;
                 log_add_entry(p->log, "This scroll is blank.");
                 break;
 
@@ -2446,6 +2554,7 @@ int player_item_use(player *p, item *it)
 
             case ST_PULVERIZATION:
                 spell_vaporize_rock(p);
+                item_identified = TRUE;
                 break;
 
             default:
@@ -2516,9 +2625,6 @@ int player_item_drop(player *p, item *it)
     char desc[61];
     int count;
 
-    int pack_weight;
-    int can_carry;
-
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     if (player_item_is_equipped(p, it))
@@ -2531,45 +2637,34 @@ int player_item_drop(player *p, item *it)
         count = display_get_count(desc, it->count);
 
         if (!count)
+        {
             return 0;
+        }
 
         if (count < it->count)
+        {
             it = item_split(it, count);
-    }
 
-    inv_del_element(p->inventory, it);
+            /* force a recalc of player's burden here as the callbacks do not fire */
+            player_inv_weight_recalc(p->inventory, NULL);
+        }
+    }
+    else
+    {
+        if (!inv_del_element(p->inventory, it))
+        {
+            /* if the callback failed, dropping has failed */
+            return FALSE;
+        }
+    }
 
     if (level_ilist_at(p->level, p->pos) == NULL)
-        level_ilist_at(p->level, p->pos) = inv_new();
+        level_ilist_at(p->level, p->pos) = inv_new(NULL);
 
     inv_add(level_ilist_at(p->level, p->pos), it);
-    log_add_entry(p->log, "You drop %s.", item_describe(it, player_item_known(p, it),
-                  FALSE, FALSE, desc, 60));
+    item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
 
-    /* check weight */
-    pack_weight = inv_weight(p->inventory);
-
-    /* player can carry 2kg per str */
-    can_carry = 2000 * player_get_str(p);
-
-    /* +30% until overstrained */
-    if (pack_weight < (int)((float)can_carry * 1.3) && (pack_weight > can_carry))
-    {
-        /* if already overstrained get rid of this */
-        if (player_effect(p, ET_OVERSTRAINED))
-            player_effect_del(p, player_effect_get(p, ET_OVERSTRAINED));
-
-        if (!player_effect(p, ET_BURDENED))
-            player_effect_add(p, effect_new(ET_BURDENED, game_turn(p->game)));
-    }
-    else if (pack_weight < can_carry)
-    {
-        if (player_effect(p, ET_OVERSTRAINED))
-            player_effect_del(p, player_effect_get(p, ET_OVERSTRAINED));
-
-        if (player_effect(p, ET_BURDENED))
-            player_effect_del(p, player_effect_get(p, ET_BURDENED));
-    }
+    log_add_entry(p->log, "You drop %s.", desc);
 
     return TRUE;
 }
@@ -2579,16 +2674,7 @@ int player_item_pickup(player *p, item *it)
     char desc[61];
     int count;
 
-    int pack_weight;
-    int can_carry;
-
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
-
-    if (player_effect(p, ET_OVERSTRAINED))
-    {
-        log_add_entry(p->log, "You are already overloaded!");
-        return 0;
-    }
 
     if ((it->count > 1) && (it->type != IT_GOLD))
     {
@@ -2597,10 +2683,29 @@ int player_item_pickup(player *p, item *it)
         count = display_get_count(desc, it->count);
 
         if (count == 0)
+        {
             return 0;
+        }
 
         if (count < it->count)
+        {
             it = item_split(it, count);
+        }
+    }
+
+    /* prepare item description for logging later.
+     * this has to come before adding the item as it can already be freed at
+     * this point (stackable items)
+     */
+    item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
+
+    if (inv_add(p->inventory, it))
+    {
+        log_add_entry(p->log, "You pick up %s.", desc);
+    }
+    else
+    {
+        return FALSE;
     }
 
     inv_del_element(level_ilist_at(p->level, p->pos), it);
@@ -2610,38 +2715,6 @@ int player_item_pickup(player *p, item *it)
     {
         inv_destroy(level_ilist_at(p->level, p->pos));
         level_ilist_at(p->level, p->pos) = NULL;
-    }
-
-    log_add_entry(p->log, "You pick up %s.",
-                  item_describe(it, player_item_known(p, it),
-                                FALSE, FALSE, desc, 60));
-
-    /* this has to come after the logging as it can be freed at this point
-       ->stackable item */
-    inv_add(p->inventory, it);
-
-
-    /* check weight */
-    pack_weight = inv_weight(p->inventory);
-
-    /* player can carry 2kg per str */
-    can_carry = 2000 * player_get_str(p);
-
-    /* +30% until overstrained */
-    if (pack_weight > (int)((float)can_carry * 1.3))
-    {
-        /* if already burdened get rid of this */
-        if (player_effect(p, ET_BURDENED))
-            player_effect_del(p, player_effect_get(p, ET_BURDENED));
-
-        if (!player_effect(p, ET_OVERSTRAINED))
-            player_effect_add(p, effect_new(ET_OVERSTRAINED, game_turn(p->game)));
-    }
-    else if (pack_weight > can_carry)
-    {
-        /* burdened */
-        if (!player_effect(p, ET_BURDENED))
-            player_effect_add(p, effect_new(ET_BURDENED, game_turn(p->game)));
     }
 
     /* one turn to pick item up, one to stuff it into the pack */
@@ -2656,6 +2729,7 @@ int player_item_buy(player *p, item *it)
     char text[81];
     char name[61];
 
+    /* copy of item needed to descibe and transfer original item */
     item *it_clone;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
@@ -2715,8 +2789,6 @@ int player_item_buy(player *p, item *it)
         }
     }
 
-    player_set_gold(p, player_gold - price);
-
     /* log the event */
     it_clone = item_clone(it);
     it_clone->count = count;
@@ -2724,20 +2796,30 @@ int player_item_buy(player *p, item *it)
     item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
     log_add_entry(p->log, "You buy %s.", name);
 
-    item_destroy(it_clone);
-
-    /* transfer the item */
-    if ((it->count > 1) && (count < it->count))
+    /* try to transfer the item */
+    if (inv_add(p->inventory, it_clone))
     {
-        /* split the item */
-        inv_add(p->inventory, item_split(it, count));
+        /* item has been added to player's inventory */
+        if (it->count > it_clone->count)
+        {
+            /* player purchased not all availible items */
+            it->count -= count;
+        }
+        else
+        {
+            building_dndstore_item_del(it);
+            item_destroy(it);
+        }
     }
     else
     {
-        inv_add(p->inventory, it);
-        building_dndstore_item_del(it);
+        /* item has not been added to player's inventory */
+        item_destroy(it_clone);
+        return FALSE;
     }
 
+    /* charge player for this purchase */
+    player_set_gold(p, player_gold - price);
     return TRUE;
 }
 
@@ -2785,7 +2867,7 @@ int player_item_sell(player *p, item *it)
 
         if (count > it->count)
         {
-            log_add_entry(p->log, "Wouldn't it be nice to have %d %of those?", count);
+            log_add_entry(p->log, "Wouldn't it be nice to have %d of those?", count);
             return FALSE;
         }
 
@@ -2825,8 +2907,14 @@ int player_item_sell(player *p, item *it)
     }
     else
     {
-        inv_del_element(p->inventory, it);
-        building_dndstore_item_add(it);
+        if (!inv_del_element(p->inventory, it))
+        {
+            return FALSE;
+        }
+        else
+        {
+            building_dndstore_item_add(it);
+        }
     }
 
     return TRUE;
@@ -3571,7 +3659,7 @@ int player_throne_pillage(player *p)
     {
         if (!level_ilist_at(p->level, p->pos))
         {
-            level_ilist_at(p->level, p->pos) = inv_new();
+            level_ilist_at(p->level, p->pos) = inv_new(NULL);
         }
 
         for (i = 0; i < rand_1n(4); i++)
@@ -3803,6 +3891,10 @@ int player_set_gold(player *p, int amount)
         if (i->type == IT_GOLD)
         {
             i->count = amount;
+
+            /* force recalculation of inventory weight */
+            player_inv_weight_recalc(p->inventory, NULL);
+
             return i->count;
         }
     }

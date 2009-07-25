@@ -237,7 +237,7 @@ void building_dndstore_init()
         return;
 
     /* generate stock if nothing is present */
-    store_stock = inv_new();
+    store_stock = inv_new(NULL);
 
     for (it = 1; it < IT_MAX; it++)
     {

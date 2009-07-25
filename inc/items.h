@@ -80,9 +80,23 @@ enum perish_impact {
 	PI_MAX
 };
 
-typedef GPtrArray inventory;
+struct _inventory;
+struct _item;
 
-typedef struct item {
+typedef gint (*inv_callback_bool) (struct _inventory *inv, struct _item  *item);
+typedef void (*inv_callback_void) (struct _inventory *inv, struct _item  *item);
+
+typedef struct _inventory
+{
+    inv_callback_bool pre_add;
+    inv_callback_void post_add;
+    inv_callback_bool pre_del;
+    inv_callback_void post_del;
+    gconstpointer owner;
+    GPtrArray *content;
+} inventory;
+
+typedef struct _item {
     item_t type;            /* element type */
     guint32 id;             /* item id, type specific */
     gint32 bonus;
@@ -161,20 +175,25 @@ extern const item_material_data item_materials[IM_MAX];
 
 /* inventory functions */
 
-inventory *inv_new();
+inventory *inv_new(gconstpointer owner);
 void inv_destroy(inventory *inv);
 
+void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
+                       inv_callback_void post_add, inv_callback_bool pre_del,
+                       inv_callback_void post_del);
+
 int inv_add(inventory *inv, item *item_new);
+item *inv_del(inventory *inv, int pos);
+int inv_del_element(inventory *inv, item *item);
 int inv_clean(inventory *inv);
+void inv_sort(inventory *inv,GCompareDataFunc compare_func, gpointer user_data);
 int inv_weight(inventory *inv);
 int inv_item_count(inventory *inv, item_t type, int id);
 
 int inv_length_filtered(inventory *inv, int (*filter)(item *));
 item *inv_get_filtered(inventory *inv, int pos, int (*filter)(item *));
 
-#define inv_del(inv, pos)          (g_ptr_array_remove_index_fast((inv), (pos)))
-#define inv_del_element(inv, item) (g_ptr_array_remove((inv), (item)))
-#define inv_length(inv)            (((inv) == NULL) ? 0 : (inv)->len)
-#define inv_get(inv, pos)          (g_ptr_array_index((inv), (pos)))
+#define inv_length(inv)            (((inv) == NULL) ? 0 : (inv)->content->len)
+#define inv_get(inv, pos)          (g_ptr_array_index((inv)->content, (pos)))
 
 #endif

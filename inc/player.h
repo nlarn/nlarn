@@ -231,7 +231,9 @@ void player_effects_expire(player *p, int turns);
 
 /* dealing with the inventory */
 int player_inv_display(player *p);
-void player_inv_display_weight(player *p);
+char *player_inv_weight(player *p);
+int player_inv_pre_add(inventory *inv, item *item);
+void player_inv_weight_recalc(inventory *inv, item *item);
 
 /* dealing with items */
 int player_item_equip(player *p, item *it);

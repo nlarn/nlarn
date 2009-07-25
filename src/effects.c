@@ -624,10 +624,10 @@ static const effect_data effects[ET_MAX] =
         ET_DIZZINESS,
         250,
         5,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
+        "You feel dizzy and weak!",
+        "You no longer feel dizzy.",
+        "The %s looks dizzy and weak.",
+        "The %s no longer looks dizzy.",
     },
 
     {

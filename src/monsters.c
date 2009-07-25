@@ -710,7 +710,7 @@ monster *monster_new(int monster_type, struct level *l)
     g_ptr_array_add(l->mlist, nmonster);
 
     nmonster->effects = g_ptr_array_new();
-    nmonster->inventory = inv_new();
+    nmonster->inventory = inv_new(nmonster);
 
     /* fill monsters inventory */
     if (monster_gold(nmonster) > 0)
@@ -1312,10 +1312,10 @@ void monster_die(monster *m, struct player *p, char *message)
     }
 
     /* drop stuff the monster carries */
-    if (m->inventory->len)
+    if (inv_length(m->inventory))
     {
         if (level_ilist_at(m->level, m->pos) == NULL)
-            level_ilist_at(m->level, m->pos) = inv_new();
+            level_ilist_at(m->level, m->pos) = inv_new(NULL);
 
         monster_drop_items(m, level_ilist_at(m->level, m->pos));
     }

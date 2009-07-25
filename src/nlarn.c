@@ -193,7 +193,8 @@ int main(int argc, char *argv[])
 
             /* display inventory weight */
         case 'g':
-            player_inv_display_weight(g->p);
+            log_add_entry(g->p->log, "The weight of your inventory is %s.",
+                          player_inv_weight(g->p));
             break;
 
             /* display inventory */

@@ -88,7 +88,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
     switch (item_type)
     {
     case IT_CONTAINER:
-        nitem->content = inv_new();
+        nitem->content = inv_new(NULL);
         break;
 
     case IT_GEM:
@@ -931,9 +931,42 @@ int item_burn(item *it)
     }
 }
 
-inventory *inv_new()
+inventory *inv_new(gconstpointer owner)
 {
-    return (inventory *)g_ptr_array_new();
+    inventory *ninv;
+
+    ninv = g_malloc0(sizeof(inventory));
+    ninv->content = g_ptr_array_new();
+
+    ninv->owner = owner;
+
+    return ninv;
+}
+
+
+void inv_destroy(inventory *inv)
+{
+    assert(inv != NULL);
+
+    while (inv_length(inv) > 0)
+    {
+        item_destroy(inv_del(inv, inv_length(inv) - 1));
+    }
+
+    g_ptr_array_free(inv->content, TRUE);
+    g_free(inv);
+}
+
+void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
+                       inv_callback_void post_add, inv_callback_bool pre_del,
+                       inv_callback_void post_del)
+{
+    assert (inv != NULL);
+
+    inv-> pre_add  = pre_add;
+    inv-> post_add = post_add;
+    inv-> pre_del  = pre_del;
+    inv-> post_del = post_del;
 }
 
 int inv_add(inventory *inv, item *new_item)
@@ -943,36 +976,85 @@ int inv_add(inventory *inv, item *new_item)
 
     assert(inv != NULL && item_new != NULL);
 
+    /* call pre_add callback */
+    if (inv->pre_add)
+    {
+        if (!inv->pre_add(inv, new_item)) return FALSE;
+    }
+
     if (item_is_stackable(new_item->type))
     {
-        for (pos = 1; pos <= inv->len; pos++)
+        for (pos = 1; pos <= inv_length(inv); pos++)
         {
-            i = (item *)g_ptr_array_index(inv, pos - 1);
+            i = (item *)inv_get(inv, pos - 1);
             if (item_compare(i, new_item))
             {
                 /* just increase item count and release the original */
                 i->count += new_item->count;
                 item_destroy(new_item);
 
-                return inv->len;
+                return inv_length(inv);
             }
         }
     }
 
-    g_ptr_array_add(inv, new_item);
+    g_ptr_array_add(inv->content, new_item);
 
-    return inv->len;
+    /* call post_add callback */
+    if (inv->post_add)
+    {
+        inv->post_add(inv, new_item);
+    }
+
+    return inv_length(inv);
 }
 
-void inv_destroy(inventory *inv)
+item *inv_del(inventory *inv, int pos)
 {
-    assert(inv != NULL);
+    item *item;
 
-    while (inv->len > 0)
-        item_destroy(g_ptr_array_remove_index_fast(inv, inv->len - 1));
+    assert(inv != NULL && inv->content != NULL && pos < inv_length(inv));
 
-    g_ptr_array_free(inv, TRUE);
-    inv = NULL;
+    item = inv_get(inv, pos);
+
+    if (inv->pre_del)
+    {
+        if (!inv->pre_del(inv, item))
+        {
+            return NULL;
+        }
+    }
+
+    g_ptr_array_remove_index_fast(inv->content, pos);
+
+    if (inv->post_del)
+    {
+        inv->post_del(inv, item);
+    }
+
+    return item;
+}
+
+int inv_del_element(inventory *inv, item *item)
+{
+    assert(inv != NULL && inv->content != NULL && item != NULL);
+
+    if (inv->pre_del)
+    {
+        if (!inv->pre_del(inv, item))
+        {
+            return FALSE;
+        }
+    }
+
+    g_ptr_array_remove((inv)->content, item);
+
+    if (inv->post_del)
+    {
+        inv->post_del(inv, item);
+    }
+
+    return TRUE;
 }
 
 /**
@@ -989,14 +1071,22 @@ int inv_clean(inventory *inv)
 
     for (pos = 1; pos <= inv_length(inv); pos++)
     {
-        it = g_ptr_array_index(inv, pos - 1);
+        it = inv_get(inv, pos - 1);
         if (it->count == 0)
         {
-            g_ptr_array_remove_index(inv, pos - 1);
+            /* use glib function to avoid callbacks */
+            g_ptr_array_remove_index(inv->content, pos - 1);
         }
     }
 
     return count;
+}
+
+void inv_sort(inventory *inv,GCompareDataFunc compare_func, gpointer user_data)
+{
+    assert(inv != NULL && inv->content != NULL);
+
+    g_ptr_array_sort_with_data(inv->content, compare_func, user_data);
 }
 
 int inv_weight(inventory *inv)
@@ -1027,10 +1117,14 @@ int inv_item_count(inventory *inv, item_t type, int id)
         if (id)
         {
             if (i->type == type && i->id == id)
+            {
                 count++;
+            }
         }
         else if (i->type == type)
+        {
             count++;
+        }
     }
 
     return count;

@@ -1267,7 +1267,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
             {
                 if (!level_ilist_at(l, pos))
                 {
-                    level_ilist_at(l, pos) = inv_new();
+                    level_ilist_at(l, pos) = inv_new(NULL);
                 }
 
                 inv_add(level_ilist_at(l, pos), itm);
@@ -1319,7 +1319,7 @@ static void level_add_treasure_room(level *l, int difficulty)
                 /* create loot */
                 if (level_ilist_at(l, pos) == NULL)
                 {
-                    level_ilist_at(l, pos) = inv_new();
+                    level_ilist_at(l, pos) = inv_new(NULL);
                 }
 
                 itm = item_new_random(IT_GOLD);
@@ -1381,7 +1381,7 @@ static void level_add_item(level *l, item *what)
     if (level_ilist_at(l, pos) == NULL)
     {
         /* initialize item list */
-        level_ilist_at(l, pos) = inv_new();
+        level_ilist_at(l, pos) = inv_new(NULL);
     }
 
     inv_add(level_ilist_at(l, pos), what);
