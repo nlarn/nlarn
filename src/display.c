@@ -404,6 +404,30 @@ int display_paint_screen(player *p)
     mvprintw(9, LEVEL_MAX_X + 3, "$%-7d", player_get_gold(p));
     clrtoeol();
 
+    /* display negative effects */
+    text = player_effect_text(p);
+
+    /* clear lines */
+    for (i = 0; i < 7; i++)
+    {
+        move(11 + i, LEVEL_MAX_X + 3);
+        clrtoeol();
+    }
+
+    if (text->len > 0)
+    {
+        attron( attrs = COLOR_PAIR(DC_CYAN) | A_BOLD);
+
+        for (i = 0; i < text->len; i++)
+        {
+            mvprintw(11 + i, LEVEL_MAX_X + 3, g_ptr_array_index(text, i));
+        }
+
+        attroff(attrs);
+    }
+
+    g_ptr_array_free(text, TRUE);
+    text = NULL; /* needed in this state below */
 
     /* *** MESSAGES *** */
     /* number of lines which can be displayed */

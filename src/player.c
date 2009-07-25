@@ -1603,6 +1603,23 @@ void player_effects_expire(player *p, int turns)
     }
 }
 
+GPtrArray *player_effect_text(player *p)
+{
+    GPtrArray *text;
+
+    text = g_ptr_array_new();
+
+    if (player_effect(p, ET_BLINDNESS))    g_ptr_array_add(text, "blind");
+    if (player_effect(p, ET_BURDENED))     g_ptr_array_add(text, "burdened");
+    if (player_effect(p, ET_CONFUSION))    g_ptr_array_add(text, "confused");
+    if (player_effect(p, ET_DIZZINESS))    g_ptr_array_add(text, "dizzy");
+    if (player_effect(p, ET_OVERSTRAINED)) g_ptr_array_add(text, "overload");
+    if (player_effect(p, ET_POISON))       g_ptr_array_add(text, "poisoned");
+    if (player_effect(p, ET_SLOWNESS))     g_ptr_array_add(text, "slow");
+
+    return text;
+}
+
 int player_inv_display(player *p)
 {
     GPtrArray *callbacks;
@@ -2623,7 +2640,7 @@ int player_item_use(player *p, item *it)
 int player_item_drop(player *p, item *it)
 {
     char desc[61];
-    int count;
+    int count = 0;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -2640,22 +2657,19 @@ int player_item_drop(player *p, item *it)
         {
             return 0;
         }
-
-        if (count < it->count)
-        {
-            it = item_split(it, count);
-
-            /* force a recalc of player's burden here as the callbacks do not fire */
-            player_inv_weight_recalc(p->inventory, NULL);
-        }
     }
-    else
+
+    if (count < it->count)
     {
-        if (!inv_del_element(p->inventory, it))
-        {
-            /* if the callback failed, dropping has failed */
-            return FALSE;
-        }
+        /* split the item if only a part of it is to be dropped */
+        it = item_split(it, count);
+        /* otherwise the entire quantity gets dropped */
+    }
+
+    if (!inv_del_element(p->inventory, it))
+    {
+        /* if the callback failed, dropping has failed */
+        return FALSE;
     }
 
     if (level_ilist_at(p->level, p->pos) == NULL)
