@@ -642,6 +642,9 @@ int item_price(item *it)
 
     /* modify base prices by item's attributes */
 
+    /* 20% price increase / decrease for every +/-1 bonus */
+    if (it->bonus != 0) price = price * (1 + (0.2 * it->bonus));
+
     /* double price if blessed */
     if (it->blessed) price <<=1;
 
@@ -652,19 +655,19 @@ int item_price(item *it)
     if (it->corroded == 1) price >>=1;
 
     /* quarter price if very corroded */
-    if (it->corroded == 1) price /= 4;
+    if (it->corroded == 2) price /= 4;
 
     /* half price if burnt */
     if (it->burnt == 1) price >>=1;
 
     /* quarter price if very burnt */
-    if (it->burnt == 1) price /= 4;
+    if (it->burnt == 2) price /= 4;
 
     /* half price if rusty */
     if (it->rusty == 1) price >>=1;
 
     /* quarter price if very rusty */
-    if (it->rusty == 1) price /= 4;
+    if (it->rusty == 2) price /= 4;
 
     if (price < 0) price = 0;
 
