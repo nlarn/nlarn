@@ -1231,7 +1231,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                 {
                     break;
                 }
-                /* FIXME: add the eye of larn here */
+                itm = item_new(IT_AMULET, AM_LARN, 0);
 
                 monst = monster_new(MT_DEMONLORD_I + rand_0n(7), l);
                 break;

@@ -23,6 +23,7 @@
 
 typedef enum item_types {
     IT_NONE,
+    IT_AMULET,          /* amulet, defined in amulets.h */
     IT_ARMOUR,          /* armour, defined in armour.h */
     IT_BOOK,            /* book, defined in spells.h */
     IT_CONTAINER,       /* container, defined in container.h */

@@ -239,7 +239,7 @@ void building_dndstore_init()
     /* generate stock if nothing is present */
     store_stock = inv_new(NULL);
 
-    for (it = 1; it < IT_MAX; it++)
+    for (it = IT_ARMOUR; it < IT_MAX; it++)
     {
         if (it == IT_GOLD || it == IT_GEM || it == IT_CONTAINER)
         {

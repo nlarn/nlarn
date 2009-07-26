@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include "utils.h"
+#include "amulets.h"
 #include "armour.h"
 #include "container.h"
 #include "defines.h"

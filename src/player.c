@@ -87,8 +87,6 @@ static const long player_lvl_exp[] =
     250000000, 260000000, 270000000, 280000000, 290000000, 300000000                           /* 96-101*/
 };
 
-static int player_level_leave(player *p);
-
 static int player_trigger_trap(player *p, trap_t trap);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 
@@ -493,12 +491,11 @@ int player_move(player *p, int direction)
     if (target_t->trap)
     {
         times += player_trigger_trap(p, target_t->trap);
-    } /* end trap */
+    }
 
     /* auto-pickup */
     if (level_ilist_at(p->level, p->pos))
     {
-        /* pick up desired items on floor */
         player_autopickup(p);
     }
 
@@ -542,8 +539,7 @@ int player_attack(player *p, monster *m)
         /* weapon damage due to rust */
         if ((w != NULL) && (m->type == MT_RUST_MONSTER
                             || m->type == MT_DISENCHANTRESS
-                            || m->type == MT_GELATINOUSCUBE)
-           )
+                            || m->type == MT_GELATINOUSCUBE))
         {
             pi = item_rust(w);
             if (pi == PI_ENFORCED)
@@ -572,7 +568,12 @@ int player_attack(player *p, monster *m)
             monster_effect_del(m, e);
         }
 
-        /* FIXME: if a dragon and orb(s) of dragon slaying: damage *= 3	 */
+        /* triple damage if hitting a dragon and wearing an amulet of dragon slaying */
+        if ((m->type >= MT_WHITE_DRAGON && m->type <= MT_RED_DRAGON)
+                && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
+        {
+            damage *= 3;
+        }
 
         /* Deal with Vorpal Blade */
         if ((w != NULL) && (w->type == WT_VORPALBLADE)
@@ -659,7 +660,11 @@ int player_level_enter(player *p, level *l)
 
     if (p->level)
     {
-        player_level_leave(p);
+        /* store the last turn player has been on this level */
+        p->level->visited = game_turn(p->game);
+
+        /* remove link to player */
+        p->level->player = NULL;
     }
 
     if (!(l->visited))
@@ -899,13 +904,9 @@ void player_autopickup(player *p)
 
     assert (p != NULL && level_ilist_at(p->level, p->pos));
 
-    /* do not pickup anything if already overloaded */
-    if (player_effect(p, ET_BURDENED) || player_effect(p, ET_OVERSTRAINED))
-        return;
-
-    for (pos = 1; pos <= inv_length(level_ilist_at(p->level, p->pos)); pos++)
+    for (pos = 0; pos < inv_length(level_ilist_at(p->level, p->pos)); pos++)
     {
-        i = inv_get(level_ilist_at(p->level, p->pos), pos - 1);
+        i = inv_get(level_ilist_at(p->level, p->pos), pos);
 
         if (p->settings.auto_pickup[i->type])
         {
@@ -1816,6 +1817,18 @@ int player_item_equip(player *p, item *it)
 
     switch (it->type)
     {
+    case IT_AMULET:
+        if (p->eq_amulet == NULL)
+        {
+            p->eq_amulet = it;
+
+            item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
+            log_add_entry(p->log, "You put %s on.", description);
+            p->identified_amulets[it->id] = TRUE;
+            time = 2;
+        }
+        break;
+
     case IT_ARMOUR:
         switch (armour_category(it))
         {
@@ -1859,9 +1872,8 @@ int player_item_equip(player *p, item *it)
         {
             it->bonus_known = TRUE;
 
-            log_add_entry(p->log, "You are now wearing %s.",
-                          item_describe(it, player_item_known(p, it),
-                                        TRUE, FALSE, description, 60));
+            item_describe(it, player_item_known(p, it), TRUE, FALSE, description, 60);
+            log_add_entry(p->log, "You are now wearing %s.", description);
 
             *islot = it;
         }
@@ -1875,15 +1887,14 @@ int player_item_equip(player *p, item *it)
 
         if (islot != NULL)
         {
-            log_add_entry(p->log, "You put %s on.",
-                          item_describe(it, player_item_known(p, it),
-                                        TRUE, TRUE, description, 60));
+            item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
+            log_add_entry(p->log, "You put %s on.", description);
 
             *islot = it;
 
             if (ring_is_observable(it))
             {
-                player_item_identify(p, it);
+                p->identified_rings[it->id] = TRUE;
                 it->bonus_known = TRUE;
             }
 
@@ -1894,19 +1905,18 @@ int player_item_equip(player *p, item *it)
     case IT_WEAPON:
         if (p->eq_weapon == NULL)
         {
+            item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
+
             p->eq_weapon = it;
-            log_add_entry(p->log, "You now wield %s.",
-                          item_describe(it, player_item_known(p, it),
-                                        TRUE, TRUE, description, 60));
+            log_add_entry(p->log, "You now wield %s.", description);
 
             time = 2 + weapon_is_twohanded(p->eq_weapon);
 
             if (it->cursed)
             {
-                log_add_entry(p->log, "The %s welds itself into your hand.",
-                              item_describe(it, player_item_known(p, it),
-                                            TRUE, TRUE, description, 60));
-
+                /* capitalize first letter */
+                description[0] = g_ascii_toupper(description[0]);
+                log_add_entry(p->log, "%s welds itself into your hand.", description);
                 it->curse_known = TRUE;
             }
         }
@@ -1925,8 +1935,8 @@ int player_item_equip(player *p, item *it)
 int player_item_unequip(player *p, item *it)
 {
     int equipment_type;
-    item **aslot = NULL;  /* handle to armour slot */
-    item **rslot = NULL;  /* handle to ring slot */
+    item **aslot = NULL;  /* pointer to armour slot */
+    item **rslot = NULL;  /* pointer to ring slot */
 
     int time = 0;         /* time elapsed */
     char desc[61];        /* item description */
@@ -1940,6 +1950,30 @@ int player_item_unequip(player *p, item *it)
 
     switch (equipment_type)
     {
+    case PE_AMULET:
+        if (p->eq_amulet != NULL)
+        {
+            item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
+
+            if (!it->cursed)
+            {
+                log_add_entry(p->log, "You remove %s.", desc);
+
+                player_effects_del(p, p->eq_amulet->effects);
+                p->eq_amulet = NULL;
+
+                time = 2;
+            }
+            else
+            {
+                log_add_entry(p->log, "You can not remove %s.%s", desc,
+                              it->curse_known ? "" : " It appears to be cursed.");
+
+                it->curse_known = TRUE;
+            }
+        }
+        break;
+
     case PE_BOOTS:
         aslot = &(p->eq_boots);
         time = 3;
@@ -1982,11 +2016,11 @@ int player_item_unequip(player *p, item *it)
     case PE_WEAPON:
         if (p->eq_weapon != NULL)
         {
+            item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
+
             if (!p->eq_weapon->cursed)
             {
-                log_add_entry(p->log, "You you put away %s.",
-                              item_describe(it, player_item_known(p, it),
-                                            TRUE, TRUE, desc, 60));
+                log_add_entry(p->log, "You you put away %s.", desc);
 
                 time = 2 + weapon_is_twohanded(p->eq_weapon);
                 player_effects_del(p, p->eq_weapon->effects);
@@ -1995,10 +2029,8 @@ int player_item_unequip(player *p, item *it)
             }
             else
             {
-                log_add_entry(p->log, "You can't put away the %s. " \
-                              "It's welded into your hands.",
-                              item_describe(it, player_item_known(p, it),
-                                            TRUE, TRUE, desc, 60));
+                log_add_entry(p->log, "You can't put away %s. " \
+                              "It's welded into your hands.", desc);
             }
         }
         break;
@@ -2007,11 +2039,11 @@ int player_item_unequip(player *p, item *it)
     /* take off armour */
     if ((aslot != NULL) && (*aslot != NULL))
     {
+        item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
+
         if (!it->cursed)
         {
-            log_add_entry(p->log, "You finish taking off %s.",
-                          item_describe(it, player_item_known(p, it),
-                                        TRUE, TRUE, desc, 60));
+            log_add_entry(p->log, "You finish taking off %s.", desc);
 
             player_effects_del(p, (*aslot)->effects);
 
@@ -2019,9 +2051,7 @@ int player_item_unequip(player *p, item *it)
         }
         else
         {
-            log_add_entry(p->log, "You can't take of the %s.%s",
-                          item_describe(it, player_item_known(p, it),
-                                        TRUE, TRUE, desc, 60),
+            log_add_entry(p->log, "You can't take of %s.%s", desc,
                           it->curse_known ? "" : " It appears to be cursed.");
 
             it->curse_known = TRUE;
@@ -2030,11 +2060,11 @@ int player_item_unequip(player *p, item *it)
 
     if ((rslot != NULL) && (*rslot != NULL))
     {
+        item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
+
         if (!it->cursed)
         {
-            log_add_entry(p->log, "You remove %s.",
-                          item_describe(it, player_item_known(p, it),
-                                        TRUE, TRUE, desc, 60));
+            log_add_entry(p->log, "You remove %s.", desc);
 
             player_effects_del(p, (*rslot)->effects);
 
@@ -2043,9 +2073,7 @@ int player_item_unequip(player *p, item *it)
         }
         else
         {
-            log_add_entry(p->log, "You can not remove the %s.%s",
-                          item_describe(it, player_item_known(p, it),
-                                        TRUE, TRUE, desc, 60),
+            log_add_entry(p->log, "You can not remove %s.%s", desc,
                           it->curse_known ? "" : " It appears to be cursed.");
 
             it->curse_known = TRUE;
@@ -2066,6 +2094,9 @@ int player_item_is_equipped(player *p, item *it)
 
     if (!item_is_equippable(it->type))
         return PE_NONE;
+
+    if (it == p->eq_amulet)
+        return PE_AMULET;
 
     if (it == p->eq_boots)
         return PE_BOOTS;
@@ -2107,59 +2138,58 @@ int player_item_is_equippable(player *p, item *it)
     if (player_item_is_equipped(p, it))
         return FALSE;
 
+    /* amulets */
+    if ((it->type == IT_AMULET) && (p->eq_amulet))
+        return FALSE;
+
     /* armour */
     if ((it->type == IT_ARMOUR)
             && (armour_category(it) == AC_BOOTS)
-            && (p->eq_boots != NULL))
+            && (p->eq_boots))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
             && (armour_category(it) == AC_CLOAK)
-            && (p->eq_cloak != NULL))
+            && (p->eq_cloak))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
             && (armour_category(it) == AC_GLOVES)
-            && (p->eq_gloves != NULL))
+            && (p->eq_gloves))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
             && (armour_category(it) == AC_HELMET)
-            && (p->eq_helmet != NULL))
+            && (p->eq_helmet))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
             && (armour_category(it) == AC_SHIELD)
-            && (p->eq_shield != NULL))
+            && (p->eq_shield))
         return FALSE;
 
     /* shield / two-handed weapon combination */
     if (it->type == IT_ARMOUR
             && (armour_category(it) == AC_SHIELD)
-            && (p->eq_weapon != NULL)
+            && (p->eq_weapon)
             && weapon_is_twohanded(p->eq_weapon))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
             && (armour_category(it) == AC_SUIT)
-            && (p->eq_suit != NULL))
+            && (p->eq_suit))
         return FALSE;
 
     /* rings */
-    if ((it->type == IT_RING)
-            && (p->eq_ring_l != NULL)
-            && (p->eq_ring_r != NULL))
+    if ((it->type == IT_RING) && (p->eq_ring_l) && (p->eq_ring_r))
         return FALSE;
 
     /* weapons */
-    if ((it->type == IT_WEAPON)
-            && (p->eq_weapon != NULL))
+    if ((it->type == IT_WEAPON) && (p->eq_weapon))
         return FALSE;
 
     /* twohanded weapon / shield combinations */
-    if ((it->type == IT_WEAPON)
-            && weapon_is_twohanded(it)
-            && (p->eq_shield != NULL))
+    if ((it->type == IT_WEAPON) && weapon_is_twohanded(it)&& (p->eq_shield))
         return FALSE;
 
     return TRUE;
@@ -2214,6 +2244,10 @@ int player_item_known(player *p, item *it)
 
     switch (it->type)
     {
+    case IT_AMULET:
+        return p->identified_amulets[it->id];
+        break;
+
     case IT_BOOK:
         return p->identified_books[it->id];
         break;
@@ -2667,7 +2701,7 @@ int player_item_drop(player *p, item *it)
         }
     }
 
-    if (count < it->count)
+    if (count && count < it->count)
     {
         /* split the item if only a part of it is to be dropped */
         it = item_split(it, count);
@@ -3932,19 +3966,6 @@ char *player_get_lvl_desc(player *p)
 {
     assert(p != NULL);
     return (char *)player_lvl_desc[p->lvl];
-}
-
-static int player_level_leave(player *p)
-{
-    assert(p != NULL);
-
-    /* store the last turn player has been on this level */
-    p->level->visited = game_turn(p->game);
-
-    /* remove link to player */
-    p->level->player = NULL;
-
-    return TRUE;
 }
 
 /**

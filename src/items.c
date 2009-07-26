@@ -26,6 +26,7 @@ const item_type_data item_data[IT_MAX] =
 {
     /* item_t       name_sg      name_pl        IMG  desc_known      desc_unknown         max_id           eq us st */
     { IT_NONE,      "",          "",            ' ', "",             "",                  0,               0, 0, 0, },
+    { IT_AMULET,    "amulet",    "amulets",     '"', "amulet of %s", "%s amulet",         AM_LARN,         1, 0, 0, },
     { IT_ARMOUR,    "armour",    "armour",      '[', "%s",           "%s",                AT_MAX,          1, 0, 0, },
     { IT_BOOK,      "book",      "books",       '+', "book of %s",   "%s book",           SP_MAX,          0, 1, 1, },
     { IT_CONTAINER, "container", "containers",  'C', "%s",           "%s",                CT_MAX,          0, 0, 0, },
@@ -61,6 +62,7 @@ const item_material_data item_materials[IM_MAX] =
 
 /* static vars */
 
+static int amulet_created[AM_MAX] = { 1, 0 };
 static int weapon_created[WT_MAX] = { 1, 0 };
 
 /* the potion of cure dianthroritis is a unique item */
@@ -73,6 +75,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
 {
     item *nitem;
     effect *eff = NULL;
+    int loops = 0;
 
     assert(item_type > IT_NONE && item_type < IT_MAX);
 
@@ -87,6 +90,37 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
     /* special item type specific attributes */
     switch (item_type)
     {
+    case IT_AMULET:
+        /* if the amulet has already been created try to create another one */
+        while (amulet_created[nitem->id] && (loops < item_max_id(IT_AMULET)))
+        {
+            nitem->id = rand_1n(item_max_id(IT_AMULET));
+            loops++;
+        }
+
+        if (loops == item_max_id(IT_AMULET))
+        {
+            /* every amulet has been created -> return a ring instead */
+            g_free(nitem);
+            return item_new(IT_RING, rand_1n(item_max_id(IT_RING)), item_bonus);
+        }
+
+        amulet_created[nitem->id] = TRUE;
+
+        if (amulet_effect_type(nitem))
+        {
+            eff = effect_new(amulet_effect_type(nitem), 0);
+
+            if (item_bonus)
+            {
+                eff->amount += item_bonus;
+            }
+
+            item_effect_add(nitem, eff);
+        }
+
+        break;
+
     case IT_CONTAINER:
         nitem->content = inv_new(NULL);
         break;
@@ -137,7 +171,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         while (weapon_is_unique(nitem) && weapon_created[nitem->id])
         {
             /* create another random weapon instead */
-            nitem->id = rand_1n(WT_MAX - 1);
+            nitem->id = rand_1n(WT_MAX);
         }
 
         if (weapon_is_unique(nitem))
@@ -436,40 +470,6 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 
         break;
 
-    case IT_BOOK:
-    case IT_POTION:
-    case IT_RING:
-    case IT_SCROLL:
-        if (known)
-        {
-            g_snprintf(desc, 60, "%s", item_data[it->type].desc_known);
-        }
-        else
-        {
-            if ((it->type == IT_SCROLL) && (it->id == ST_BLANK))
-            {
-                g_snprintf(desc, 60, "unlabeled scroll");
-            }
-            else
-            {
-                g_snprintf(desc, 60, "%s", item_data[it->type].desc_unknown);
-            }
-        }
-
-        if ((it->count > 1) && !singular)
-        {
-            item_typename_pluralize(it, desc, 60);
-        }
-
-        temp = g_strdup(desc);
-        g_snprintf(desc, 60, temp, item_desc_get(it, known));
-        g_free(temp);
-
-        item_name_count(desc, add_info, singular, definite, 60, it->count);
-
-        strncpy(str, desc, str_len);
-        break;
-
     case IT_CONTAINER:
         g_snprintf(desc, 60, "%s", item_desc_get(it, known));
         item_name_count(desc, add_info, singular, definite, 60, it->count);
@@ -506,7 +506,9 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     case IT_WEAPON:
         if (weapon_is_unique(it))
         {
-            g_snprintf(str, str_len, "the %s", item_desc_get(it, known));
+            g_snprintf(str, str_len, "%s%s",
+                       (it->id == WT_BESSMAN || it->id == WT_SLAYER) ? "" : "the ",
+                       item_desc_get(it, known));
         }
         else
         {
@@ -525,7 +527,34 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         break;
 
     default:
-        /* nop */
+        if (known)
+        {
+            g_snprintf(desc, 60, "%s", item_data[it->type].desc_known);
+        }
+        else
+        {
+            if ((it->type == IT_SCROLL) && (it->id == ST_BLANK))
+            {
+                g_snprintf(desc, 60, "unlabeled scroll");
+            }
+            else
+            {
+                g_snprintf(desc, 60, "%s", item_data[it->type].desc_unknown);
+            }
+        }
+
+        if ((it->count > 1) && !singular)
+        {
+            item_typename_pluralize(it, desc, 60);
+        }
+
+        temp = g_strdup(desc);
+        g_snprintf(desc, 60, temp, item_desc_get(it, known));
+        g_free(temp);
+
+        item_name_count(desc, add_info, singular, definite, 60, it->count);
+
+        strncpy(str, desc, str_len);
         break;
     }
 
@@ -540,6 +569,10 @@ item_material_t item_material(item *it)
 
     switch (it->type)
     {
+    case IT_AMULET:
+        material = amulet_material(it->id);
+        break;
+
     case IT_ARMOUR:
         material = armour_material(it);
         break;
@@ -685,6 +718,10 @@ int item_weight(item *it)
 
     switch (it->type)
     {
+    case IT_AMULET:
+        return 150;
+        break;
+
     case IT_ARMOUR:
         return armour_weight(it);
         break;
@@ -1267,6 +1304,13 @@ static char *item_desc_get(item *it, int known)
 
     switch (it->type)
     {
+    case IT_AMULET:
+        if (known)
+            return amulet_name(it);
+        else
+            return item_material_adjective(item_material(it));
+        break;
+
     case IT_ARMOUR:
         return armour_name(it);
         break;

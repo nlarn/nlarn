@@ -149,6 +149,7 @@ game *game_new(int argc, char *argv[])
     log_set_time(g->p->log, g->gtime);
 
     /* randomize unidentified item descriptions */
+    amulet_material_shuffle();
     book_desc_shuffle();
     potion_desc_shuffle();
     ring_material_shuffle();

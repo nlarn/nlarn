@@ -1137,12 +1137,6 @@ void monster_player_attack(monster *m, player *p)
 {
     int dam;
 
-    if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_is_spirit(m))
-        return;
-
-    if (player_effect(p, ET_UNDEAD_PROTECTION) && monster_is_undead(m))
-        return;
-
     /* if monster has accomplished a special attack do nothing */
     if (monster_player_special_attack(m, p))
         return;
@@ -1185,6 +1179,25 @@ void monster_player_attack(monster *m, player *p)
         dam += rand_1n(dam);
         dam += monster_level(m);
         dam += game_difficulty(p->game);
+    }
+
+    /* half damage if player is protected against spirits */
+    if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_is_spirit(m))
+        dam >>= 1;
+
+    /* half damage if player is protected against undead */
+    if (player_effect(p, ET_UNDEAD_PROTECTION) && monster_is_undead(m))
+        dam >>= 1;
+
+    /* amulet of power cancels demon attacks */
+    if ((m->type >= MT_DEMONLORD_I)
+            && (p->eq_amulet && p->eq_amulet->id == AM_POWER)
+            && chance(75))
+    {
+        log_add_entry(p->log, "Your amulet cancels the %s's attack.",
+                      monster_name(m));
+
+        return;
     }
 
     if ((dam > player_get_ac(p)) || (rand_1n(21) == 1))
@@ -1569,8 +1582,15 @@ int monster_player_special_attack(monster *m, struct player *p)
 
     case MT_VAMPIRE:
     case MT_WRAITH:
-        message = "The %s drains you of your life energy!";
-        player_lvl_lose(p, 1);
+        if (player_effect(p, ET_UNDEAD_PROTECTION))
+        {
+            sp_att = FALSE;
+        }
+        else
+        {
+            message = "The %s drains you of your life energy!";
+            player_lvl_lose(p, 1);
+        }
         break;
 
     case MT_WATER_LORD:
@@ -1581,10 +1601,14 @@ int monster_player_special_attack(monster *m, struct player *p)
     case MT_LEPRECHAUN:
         /* if player has a device of no theft abort the theft */
         if (!player_effect(p, ET_NOTHEFT))
+        {
             message = monster_player_rob(m, p, IT_GOLD);
 
-        /* teleport away */
-        monster_position(m, level_find_space(p->level, LE_MONSTER));
+            /* teleport away */
+            monster_position(m, level_find_space(p->level, LE_MONSTER));
+        }
+        else
+            sp_att = FALSE;
         break;
 
     case MT_DISENCHANTRESS:
@@ -1596,16 +1620,23 @@ int monster_player_special_attack(monster *m, struct player *p)
             break;
         }
 
+        /* the disenchantress can't destroy cursed items */
         it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
-        if (it->type != IT_SCROLL && it->type != IT_POTION)
+        if (!it->cursed && it->type != IT_SCROLL && it->type != IT_POTION)
         {
             message = "The %s hits you. You feel a sense of loss.";
             if (player_item_is_equipped(p, it))
+            {
+                log_disable(p->log);
                 player_item_unequip(p, it);
+                log_enable(p->log);
+            }
 
             inv_del_element(p->inventory, it);
             item_destroy(it);
         }
+        else
+            sp_att = FALSE;
         break;
 
     case MT_ICE_LIZARD:
@@ -1629,10 +1660,14 @@ int monster_player_special_attack(monster *m, struct player *p)
 
     case MT_NYMPH:
         if (!player_effect(p, ET_NOTHEFT))
+        {
             message = monster_player_rob(m, p, IT_ALL);
 
-        /* teleport away */
-        monster_position(m, level_find_space(p->level, LE_MONSTER));
+            /* teleport away */
+            monster_position(m, level_find_space(p->level, LE_MONSTER));
+        }
+        else
+            sp_att = FALSE;
         break;
 
     case MT_BUGBEAR:

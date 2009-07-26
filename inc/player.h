@@ -101,6 +101,7 @@ typedef struct player
     GPtrArray *effects; /* temporary effects from potions, spells, ... */
 
     /* pointers to elements of items which are currently equipped */
+    item *eq_amulet;
     item *eq_weapon;
 
     /* armour types */
@@ -117,6 +118,7 @@ typedef struct player
     /* enough items for now */
 
     /* items identified */
+    guint8 identified_amulets[AM_MAX];
     guint8 identified_books[SP_MAX];
     guint8 identified_potions[PO_MAX];
     guint8 identified_rings[RT_MAX];
@@ -143,6 +145,7 @@ typedef struct player
 typedef enum player_equipment_t
 {
     PE_NONE,
+    PE_AMULET,
     PE_BOOTS,
     PE_CLOAK,
     PE_GLOVES,
