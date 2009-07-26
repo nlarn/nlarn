@@ -283,6 +283,10 @@ item *item_new_by_level(item_t item_type, int num_level)
 
     assert (item_type > IT_NONE && item_type < IT_MAX && num_level < LEVEL_MAX);
 
+    /* no amulets above level 8 */
+    if ((item_type == IT_AMULET) && (num_level < 8))
+        item_type = IT_RING;
+
     divisor = 1 / (float)(LEVEL_MAX - 1);
 
     switch (item_type)

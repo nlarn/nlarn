@@ -20,15 +20,15 @@
 
 const amulet_data amulets[AM_MAX] =
 {
-    { AM_NONE,                NULL,               ET_NONE,              0, },
-    { AM_ENLIGHTENMENT,       "awareness",        ET_AWARENESS,         0, },
-    { AM_DRAGON_SLAYING,      "dragon slaying",   ET_NONE,              0, },
-    { AM_NEGATE_SPIRIT,       "negate spirit",    ET_SPIRIT_PROTECTION, 0, },
-    { AM_INVISIBILITY,        "invisibility",     ET_INVISIBILITY,      0, },
-    { AM_UNDEAD_CONTROL,      "undead control",   ET_UNDEAD_PROTECTION, 0, },
-    { AM_NOTHEFT,             "theft prevention", ET_NOTHEFT,           0, },
-    { AM_POWER,               "power",            ET_NONE,              0, },
-    { AM_LARN,                "larn",             ET_INFRAVISION,       0, },
+    { AM_NONE,                NULL,               ET_NONE,              0,    },
+    { AM_AWARENESS,           "awareness",        ET_AWARENESS,         360,  },
+    { AM_INVISIBILITY,        "invisibility",     ET_INVISIBILITY,      400,  },
+    { AM_UNDEAD_CONTROL,      "undead control",   ET_UNDEAD_PROTECTION, 5000, },
+    { AM_NEGATE_SPIRIT,       "negate spirit",    ET_SPIRIT_PROTECTION, 5500, },
+    { AM_NOTHEFT,             "theft prevention", ET_NOTHEFT,           6000, },
+    { AM_DRAGON_SLAYING,      "dragon slaying",   ET_NONE,              6500, },
+    { AM_POWER,               "power",            ET_NONE,              8000, },
+    { AM_LARN,                "larn",             ET_INFRAVISION,       9000, },
 };
 
 static int amulet_material_mapping[AM_MAX - 1] = { 0 };

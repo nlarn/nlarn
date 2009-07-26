@@ -982,7 +982,7 @@ static void level_fill_with_objects(level *l)
     /* up to three gems */
     for (i = 0; i < rand_0n(3); i++)
     {
-        level_add_item(l, item_new(IT_GEM, rand_1n(GT_MAX),
+        level_add_item(l, item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)),
                                    rand_0n(6 * (l->nlevel + 1))));
     }
 

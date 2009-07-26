@@ -911,6 +911,8 @@ void player_autopickup(player *p)
         if (p->settings.auto_pickup[i->type])
         {
             player_item_pickup(p, i);
+            /* go back one item as the following items lowered their number */
+            pos--;
         }
     }
 }
@@ -2240,7 +2242,7 @@ int player_item_is_identifiable(player *p, item *it)
 /* determine if item type is known */
 int player_item_known(player *p, item *it)
 {
-    assert(p != NULL && it != NULL);
+    assert(p != NULL && it != NULL && it->type < IT_MAX);
 
     switch (it->type)
     {
@@ -2301,6 +2303,7 @@ char *player_item_identified_list(player *p)
 
     item_t type_ids[] =
     {
+        IT_AMULET,
         IT_BOOK,
         IT_POTION,
         IT_RING,
@@ -2310,9 +2313,9 @@ char *player_item_identified_list(player *p)
     assert (p != NULL);
 
     list = g_string_new(NULL);
-    it = item_new(IT_BOOK, 1, 0);
+    it = item_new(type_ids[0], 1, 0);
 
-    for (type = 0; type < 4; type++)
+    for (type = 0; type < 5; type++)
     {
         count = 0;
         sublist = g_string_new(NULL);
@@ -2499,7 +2502,7 @@ int player_item_use(player *p, item *it)
             log_add_entry(p->log, "The Potion is foul!");
             if ((damage = rand_0n(p->hp)))
             {
-                log_add_entry(p->log, "You vomit blood!");
+                log_add_entry(p->log, "You spit gore!");
                 player_hp_lose(p, it->type, PD_CURSE, damage);
             }
         }
@@ -2728,7 +2731,7 @@ int player_item_drop(player *p, item *it)
 int player_item_pickup(player *p, item *it)
 {
     char desc[61];
-    int count;
+    int count = 0;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
