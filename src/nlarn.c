@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     g = game_new(argc, argv);
 
     /* put the player into the town */
-    player_level_enter(g->p, g->levels[0]);
+    player_level_enter(g->p, g->levels[0], FALSE);
 
     display_init();
     display_draw();
@@ -298,13 +298,13 @@ int main(int argc, char *argv[])
             /* *** DEBUGGING SUPPORT *** */
         case '+': /* dungeon level up */
             if (game_wizardmode(g) && (g->p->level->nlevel > 0))
-                moves_count = player_level_enter(g->p, g->levels[g->p->level->nlevel - 1]);
+                moves_count = player_level_enter(g->p, g->levels[g->p->level->nlevel - 1], FALSE);
 
             break;
 
         case '-': /* dungeon level down */
             if (game_wizardmode(g) && (g->p->level->nlevel < (LEVEL_MAX - 1)))
-                moves_count = player_level_enter(g->p, g->levels[g->p->level->nlevel + 1]);
+                moves_count = player_level_enter(g->p, g->levels[g->p->level->nlevel + 1], FALSE);
             break;
 
         case 562: /* ^up - gain experience level */

@@ -651,10 +651,11 @@ int player_attack(player *p, monster *m)
  * @param previous level
  * @return TRUE
  */
-int player_level_enter(player *p, level *l)
+int player_level_enter(player *p, level *l, gboolean teleported)
 {
     int count;
     position pos;
+    monster *m;
 
     assert(p != NULL && l != NULL);
 
@@ -692,43 +693,46 @@ int player_level_enter(player *p, level *l)
         }
     }
 
-    /* position player */
-    if ((l->nlevel == 0) && (p->level == NULL))
-        /* GAME STARTS */
+    /* been teleported here or something like that, need a random spot */
+    if (teleported)
+        pos = level_find_space(l, LE_MONSTER);
+
+    /* beginning of the game */
+    else if ((l->nlevel == 0) && (p->level == NULL))
         pos = level_find_stationary(l, LS_HOME);
 
+    /* took the elevator up */
     else if ((p->level->nlevel == 0) && (l->nlevel == (LEVEL_MAX - 1)))
-        /* took the elevator up */
         pos = level_find_stationary(l, LS_ELEVATORUP);
 
+    /* took the elevator down */
     else if ((p->level->nlevel == (LEVEL_MAX - 1)) && (l->nlevel == 0))
-        /* took the elevator down */
         pos = level_find_stationary(l, LS_ELEVATORDOWN);
 
+    /* climbing up */
     else if (p->level->nlevel > l->nlevel)
     {
-        /* climbing up */
         if (l->nlevel == 0)
             pos = level_find_stationary(l, LS_ENTRANCE);
         else
             pos = level_find_stationary(l, LS_STAIRSDOWN);
     }
+    /* climbing down */
     else if (l->nlevel > p->level->nlevel)
     {
-        /* climbing down */
         if (l->nlevel == 1)
             pos = level_find_stationary(l, LS_ENTRANCE);
         else
             pos = level_find_stationary(l, LS_STAIRSUP);
     }
 
-    while (!pos_valid(pos))
-    {
-        /* been teleported here or something like that, need a random spot */
-        pos = level_find_space(l, LE_MONSTER);
-    }
-
     p->pos = pos;
+
+    /* remove monster that might be at player's positon */
+    if ((m = level_get_monster_at(l, p->pos)))
+    {
+        m->pos = level_find_space(l, LE_MONSTER);
+    }
 
     /* set link to player */
     l->player = p;
@@ -1897,6 +1901,10 @@ int player_item_equip(player *p, item *it)
             if (ring_is_observable(it))
             {
                 p->identified_rings[it->id] = TRUE;
+            }
+
+            if (ring_bonus_is_obs(it))
+            {
                 it->bonus_known = TRUE;
             }
 
@@ -2286,7 +2294,8 @@ int player_item_identified(player *p, item *it)
     if (it->blessed && !it->blessed_known)
         known = FALSE;
 
-    if (!it->bonus_known)
+    if ((it->type == IT_ARMOUR || it->type == IT_RING || it->type == IT_WEAPON)
+            && !it->bonus_known)
         known = FALSE;
 
     return known;
@@ -2364,6 +2373,10 @@ void player_item_identify(player *p, item *it)
 
     switch (it->type)
     {
+    case IT_AMULET:
+        p->identified_amulets[it->id] = TRUE;
+        break;
+
     case IT_BOOK:
         p->identified_books[it->id] = TRUE;
         break;
@@ -3652,7 +3665,7 @@ int player_stairs_down(player *p)
     /* if told to switch level, do so */
     if (nlevel != NULL)
     {
-        return player_level_enter(p, nlevel);
+        return player_level_enter(p, nlevel, FALSE);
     }
 
     return 0;
@@ -3687,7 +3700,7 @@ int player_stairs_up(player *p)
     /* if told to switch level, do so */
     if (nlevel != NULL)
     {
-        return player_level_enter(p, nlevel);
+        return player_level_enter(p, nlevel, FALSE);
     }
 
     return 0;
@@ -4002,7 +4015,7 @@ static int player_trigger_trap(player *p, trap_t trap)
         switch (trap)
         {
         case TT_TRAPDOOR:
-            time += player_level_enter(p, (p->game)->levels[p->level->nlevel + 1]);
+            time += player_level_enter(p, (p->game)->levels[p->level->nlevel + 1], TRUE);
             /* fall through to TT_TELEPORT to find a new space */
 
         case TT_TELEPORT:

@@ -110,12 +110,6 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         if (amulet_effect_type(nitem))
         {
             eff = effect_new(amulet_effect_type(nitem), 0);
-
-            if (item_bonus)
-            {
-                eff->amount += item_bonus;
-            }
-
             item_effect_add(nitem, eff);
         }
 
@@ -458,7 +452,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     switch (it->type)
     {
     case IT_ARMOUR:
-        g_snprintf(desc, 60, "%s", item_desc_get(it, known));
+        g_snprintf(desc, 60, item_desc_get(it, known));
         if (it->bonus_known)
         {
             g_snprintf(str, str_len, "%s %+d",
@@ -467,21 +461,20 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         }
         else
         {
-            g_snprintf(str, str_len, "%s",
-                       item_name_count(desc, add_info, singular, definite, 60,
-                                       it->count));
+            g_snprintf(str, str_len, item_name_count(desc, add_info, singular,
+                       definite, 60, it->count));
         }
 
         break;
 
     case IT_CONTAINER:
-        g_snprintf(desc, 60, "%s", item_desc_get(it, known));
+        g_snprintf(desc, 60, item_desc_get(it, known));
         item_name_count(desc, add_info, singular, definite, 60, it->count);
-        g_snprintf(str, str_len, "%s", desc);
+        g_snprintf(str, str_len, desc);
         break;
 
     case IT_FOOD:
-        g_snprintf(desc, 60, "%s", item_desc_get(it, known));
+        g_snprintf(desc, 60, item_desc_get(it, known));
         item_name_count(desc, add_info, singular, definite, 60, it->count);
 
         if ((it->count > 1) && !singular)
@@ -490,7 +483,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         }
         else
         {
-            g_snprintf(str, str_len, "%s", desc);
+            g_snprintf(str, str_len, desc);
         }
 
         break;
@@ -500,7 +493,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         break;
 
     case IT_GEM:
-        g_snprintf(desc, 60, "%s", item_desc_get(it, known));
+        g_snprintf(desc, 60, item_desc_get(it, known));
         g_snprintf(str, str_len, "%d carats %s",
                    gem_size(it), desc);
 
@@ -516,7 +509,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         }
         else
         {
-            g_snprintf(desc, 60, "%s", item_desc_get(it, known));
+            g_snprintf(desc, 60, item_desc_get(it, known));
             if (it->bonus_known)
             {
                 item_name_count(desc, add_info, singular, definite, 60, it->count);
@@ -525,7 +518,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
             else
             {
                 item_name_count(desc, add_info, singular, definite, 60, it->count);
-                g_snprintf(str, str_len, "%s", desc);
+                g_snprintf(str, str_len, desc);
             }
         }
         break;
@@ -556,9 +549,18 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         g_snprintf(desc, 60, temp, item_desc_get(it, known));
         g_free(temp);
 
-        item_name_count(desc, add_info, singular, definite, 60, it->count);
+        /* display bonus if it is a ring */
+        if (it->bonus_known && it->type == IT_RING)
+        {
+            item_name_count(desc, add_info, singular, definite, 60, it->count);
+            g_snprintf(str, str_len, "%s %+d", desc, it->bonus);
+        }
+        else
+        {
+            item_name_count(desc, add_info, singular, definite, 60, it->count);
+            g_snprintf(str, str_len, desc);
+        }
 
-        strncpy(str, desc, str_len);
         break;
     }
 
@@ -633,6 +635,10 @@ int item_price(item *it)
 
     switch (it->type)
     {
+    case IT_AMULET:
+        price = amulet_price(it);
+        break;
+
     case IT_ARMOUR:
         price = armour_price(it);
         break;

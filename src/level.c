@@ -943,6 +943,12 @@ static void level_fill_with_objects(level *l)
     item_t it;
     item *container = NULL;
 
+    /* up to two pieces of armour */
+    for (i = 0; i < rand_0n(2); i++)
+    {
+        level_add_item(l, item_new_by_level(IT_ARMOUR, l->nlevel));
+    }
+
     /* up to three books */
     for (i = 0; i <= rand_0n(3); i++)
     {
@@ -1002,6 +1008,12 @@ static void level_fill_with_objects(level *l)
     for (i = 0; i < rand_0n(3); i++)
     {
         level_add_item(l, item_new_by_level(IT_RING, l->nlevel));
+    }
+
+    /* up to two weapons */
+    for (i = 0; i < rand_0n(2); i++)
+    {
+        level_add_item(l, item_new_by_level(IT_WEAPON, l->nlevel));
     }
 
 } /* level_fill_with_objects */

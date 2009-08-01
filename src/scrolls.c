@@ -403,10 +403,7 @@ int scroll_teleport(player *p, item *scroll)
 
     if (nlevel != p->level->nlevel)
     {
-        player_level_enter(p, p->game->levels[nlevel]);
-
-        p->pos = level_find_space(p->level, LE_MONSTER);
-
+        player_level_enter(p, p->game->levels[nlevel], TRUE);
         return TRUE;
     }
 

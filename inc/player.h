@@ -191,7 +191,7 @@ gint64 player_calc_score(player *p, int won);
 int player_move(player *p, int direction);
 int player_attack(player *p, monster *m);
 void player_update_fov(player *p, int radius);
-int player_level_enter(player *p, level *l);
+int player_level_enter(player *p, level *l, gboolean teleported);
 void player_monster_kill(player *p, monster *m, char *message);
 item *player_random_armour(player *p);
 

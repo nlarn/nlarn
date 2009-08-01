@@ -36,6 +36,13 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on);
 
 int display_init()
 {
+    /* taken from Angband 3.1.1 */
+    /* overwrite bit is false, so users on real (serial) terminals can override
+       this; terminal emulators drop an entire sequence into the input buffer at
+       once, and I/O-buffering makes the packet very unlikely to be split even
+       over networks */
+    setenv("ESCDELAY", "0", 0);
+
     /* Start curses mode */
     initscr();
 

@@ -42,7 +42,8 @@ typedef struct ring_data
     int	effect_type; 	/* effect causes by this ring */
     int price;
     unsigned
-        observable: 1;  /* can be identified by using */
+        observable: 1,  /* can be identified by using */
+        bonus_obs: 1;   /* can determine bonus by using */
 } ring_data;
 
 /* function definitions */
@@ -60,5 +61,6 @@ extern const ring_data rings[RT_MAX];
 #define ring_effect_type(item)   (rings[(item)->id].effect_type)
 #define ring_price(item)         (rings[(item)->id].price)
 #define ring_is_observable(item) (rings[(item)->id].observable)
+#define ring_bonus_is_obs(item)  (rings[(item)->id].bonus_obs)
 
 #endif
