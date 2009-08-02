@@ -109,7 +109,7 @@ int scroll_with_effect(struct player *p, item *scroll)
 int scroll_annihilate(struct player *p, item *scroll)
 {
     int i;
-    int experience = 0;
+    int count = 0;
 
     GPtrArray *mlist;
     monster *m;
@@ -122,10 +122,18 @@ int scroll_annihilate(struct player *p, item *scroll)
     {
         m = g_ptr_array_index(mlist, i - 1);
 
+        /* FIXME: remove this special case here and give a good resistance to
+         * the demon lords */
         if (m->type < MT_DEMONLORD_II)
         {
-            experience = monster_exp(m);
-            player_monster_kill(p, m, NULL);
+            m = monster_damage_take(m, damage_new(DAM_MAGICAL, 2000, p));
+
+            /* check if the monster has been killed */
+            if (!m)
+            {
+                count++;
+                i--;
+            }
         }
         else
         {
@@ -138,14 +146,14 @@ int scroll_annihilate(struct player *p, item *scroll)
         }
     }
 
-    if (experience)
+    if (count)
     {
         log_add_entry(p->log, "You hear loud screams of agony!");
     }
 
     g_ptr_array_free(mlist, FALSE);
 
-    return experience;
+    return count;
 }
 
 int scroll_create_artefact(player *p, item *scroll)

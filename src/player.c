@@ -227,7 +227,9 @@ int player_regenerate(player *p)
     {
         if ((game_turn(p->game) - e->start) % (22 - frequency) == 0)
         {
-            player_hp_lose(p, e->amount, PD_EFFECT, e->type);
+            damage *dam = damage_new(DAM_POISON, e->amount, NULL);
+
+            player_damage_take(p, dam, PD_EFFECT, e->type);
         }
     }
 
@@ -505,43 +507,39 @@ int player_move(player *p, int direction)
 int player_attack(player *p, monster *m)
 {
     int prop;
-    int damage;
+    int amount;
+    damage *dam;
     int roll;           /* the dice */
     effect *e;
-    item *w;			/* shortcut to player's weapon */
-    int pi;				/* impact of perishing */
-
-    w = (p->eq_weapon == NULL) ? NULL : p->eq_weapon;
 
     prop = p->lvl
            + player_get_dex(p)
-           + monster_ac(m)
+           + (p->eq_weapon ? (weapon_wc(p->eq_weapon) / 4) : 0)
+           + monster_ac(m) /* FIXME: I don't want those pointless D&D rules */
            - 12
            - game_difficulty(p->game);
 
-    if (w != NULL)
-        /* player wields weapon */
-        prop += (weapon_wc(w) / 4);
-
     roll = rand_1n(21);
-    if ((roll < prop) || (roll == 1))
+    if ((roll <= prop) || (roll == 1))
     {
         /* placed a hit */
         log_add_entry(p->log, "You hit the %s.", monster_name(m));
 
-        damage = player_get_str(p)
+        amount = player_get_str(p)
                  + player_get_wc(p)
                  - 12
                  - game_difficulty(p->game);
 
-        damage = rand_1n(damage + 1);
+        dam = damage_new(DAM_PHYSICAL, rand_1n(amount + 1), p);
 
-        /* weapon damage due to rust */
-        if ((w != NULL) && (m->type == MT_RUST_MONSTER
-                            || m->type == MT_DISENCHANTRESS
-                            || m->type == MT_GELATINOUSCUBE))
+        /* weapon damage due to rust when hitting certain monsters */
+        if (p->eq_weapon && (m->type == MT_RUST_MONSTER
+                             || m->type == MT_DISENCHANTRESS
+                             || m->type == MT_GELATINOUSCUBE))
         {
-            pi = item_rust(w);
+            /* impact of perishing */
+            int pi = item_rust(p->eq_weapon);
+
             if (pi == PI_ENFORCED)
             {
                 log_add_entry(p->log, "Your weapon is dulled by the %s.", monster_name(m));
@@ -549,22 +547,26 @@ int player_attack(player *p, monster *m)
             else if (pi == PI_DESTROYED)
             {
                 /* weapon has been destroyed */
-                log_add_entry(p->log, "Your %s disintegrates!", weapon_name(w));
+                log_add_entry(p->log, "Your %s disintegrates!", weapon_name(p->eq_weapon));
 
                 /* delete the weapon from the inventory */
-                inv_del_element(p->inventory, w);
+                inv_del_element(p->inventory, p->eq_weapon);
 
-                /* destroy it and remove any reference to it */
-                item_destroy(w);
-                p->eq_weapon = w = NULL;
+                /* destroy it and remove the reference to it */
+                item_destroy(p->eq_weapon);
+                p->eq_weapon = NULL;
             }
         }
 
-        /* FIXME: make sure hitting monst breaks stealth condition */
+        /* hitting a monster breaks stealth condition */
+        if ((e = player_effect_get(p, ET_STEALTH)))
+        {
+            player_effect_del(p, e);
+        }
 
+        /* hitting a monster breaks hold monster spell */
         if ((e = monster_effect_get(m, ET_HOLD_MONSTER)))
         {
-            /* hitting a monster breaks hold monster spell */
             monster_effect_del(m, e);
         }
 
@@ -572,11 +574,13 @@ int player_attack(player *p, monster *m)
         if ((m->type >= MT_WHITE_DRAGON && m->type <= MT_RED_DRAGON)
                 && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
         {
-            damage *= 3;
+            dam->amount *= 3;
         }
 
-        /* Deal with Vorpal Blade */
-        if ((w != NULL) && (w->type == WT_VORPALBLADE)
+
+        /* *** SPECIAL WEAPONS */
+        /* Vorpal Blade */
+        if (p->eq_weapon && (p->eq_weapon->type == WT_VORPALBLADE)
                 && chance(5)
                 && monster_has_head(m)
                 && monster_is_beheadable(m))
@@ -584,35 +588,29 @@ int player_attack(player *p, monster *m)
             log_add_entry(p->log, "You behead the %s with your Vorpal Blade!",
                           monster_name(m));
 
-            damage = m->hp;
+            dam->amount = m->hp + monster_ac(m);
         }
 
-        if ((m->type >= MT_DEMONLORD_I) && (w != NULL))
+        /* Lance of Death / Slayer */
+        if ((m->type >= MT_DEMONLORD_I) && p->eq_weapon)
         {
-            if (w->type == WT_LANCEOFDEATH)
-                damage = 300;
-            if (w->type == WT_SLAYER)
-                damage = 10000;
+            if (p->eq_weapon->type == WT_LANCEOFDEATH)
+                dam->amount = 300;
+            if (p->eq_weapon->type == WT_SLAYER)
+                dam->amount = 10000;
         }
 
         /* inflict damage */
-        m->hp -= damage;
-
-        if ((w != NULL) && (m->type >= MT_DEMONLORD_I)
-                && (w->type == WT_LANCEOFDEATH)
-                && (m->hp > 0))
+        if (!(m = monster_damage_take(m, dam)))
         {
-            log_add_entry(p->log, "Your lance of death tickles the %s!", monster_name(m));
+            /* killed the monster */
+            return 1;
         }
 
-        if (m->type == MT_METAMORPH)
+        /* Lance of Death has not killed */
+        if (p->eq_weapon && (p->eq_weapon->type == WT_LANCEOFDEATH))
         {
-            if ((m->hp < 25) && (m->hp > 0))
-            {
-                m->type = MT_BRONCE_DRAGON + rand_0n(9);
-                log_add_entry(p->log, "The metamorph turns into a %s!",
-                              monster_name(m));
-            }
+            log_add_entry(p->log, "Your lance of death tickles the %s!", monster_name(m));
         }
 
         /* if the player is invisible and the monster does not have infravision,
@@ -621,12 +619,6 @@ int player_attack(player *p, monster *m)
         if (player_effect(p, ET_INVISIBILITY) && !monster_has_infravision(m))
         {
             monster_update_player_pos(m, p->pos);
-        }
-
-        if (m->hp < 1)
-        {
-            /* killed the monster */
-            player_monster_kill(p, m, NULL);
         }
     }
     else
@@ -765,14 +757,6 @@ int player_level_enter(player *p, level *l, gboolean teleported)
     player_update_fov(p, (player_effect(p, ET_BLINDNESS) ? 0 : 6 + player_effect(p, ET_AWARENESS)));
 
     return TRUE;
-}
-
-void player_monster_kill(player *p, monster *m, char *message)
-{
-    player_exp_gain(p, monster_exp(m));
-    p->stats.monsters_killed[m->type] += 1;
-
-    monster_die(m, p, message);
 }
 
 item *player_random_armour(player *p)
@@ -1071,13 +1055,125 @@ int player_hp_gain(player *p, int count)
     return p->hp;
 }
 
-void player_hp_lose(player *p, int count, player_cod cause_type, int cause)
+void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause)
 {
-    assert(p != NULL);
-    p->hp -= count;
+    monster *m = NULL;
+
+    const damage_msg damage_msgs[] =
+    {
+        { NULL, NULL, },
+        { "Ouch!", "Your armour protects you.", }, /* DAM_PHYSICAL */
+        { "", "You resist.", }, /* DAM_MAGICAL */
+        { "You suffer burns.", "The flames don't phase you.", }, /* DAM_FIRE */
+        { "You suffer from frostbite.", "It doesn't seem so cold.", }, /* DAM_COLD */
+        { NULL, NULL, }, /* DAM_ACID */
+        { "The got you with a gusher!", "The water doesn't affect you.", }, /* DAM_WATER */
+        { NULL, NULL, }, /* DAM_ELECTRICITY */
+        /* effect start messages are covered by player_effect_add
+         * only need to notify if the player resisted */
+        { NULL, "You resist the poison.", }, /* DAM_POISON */
+        { NULL, "You are not blinded.", }, /* DAM_BLINDNESS */
+        { NULL, "You are not confused.", }, /* DAM_CONFUSION */
+        { NULL, "", }, /* DAM_PARALYSIS */
+        { NULL, "", }, /* DAM_STUN */
+        { NULL, "", }, /* DAM_DEC_STR */
+        { NULL, "", }, /* DAM_DEC_DEX */
+        { "Your life energy is drained.", "You are not affected.", }, /* DAM_DRAIN_LIFE */
+    };
+
+    assert(p != NULL && dam != NULL);
+
+    if (dam->originator)
+        m = (monster *)dam->originator;
+
+    /* check resistances */
+    switch (dam->type)
+    {
+    case DAM_PHYSICAL:
+        dam->amount -= player_get_ac(p);
+        break;
+
+    case DAM_FIRE:
+        dam->amount -= player_effect(p, ET_FIRE_RESISTANCE);
+        break;
+
+    case DAM_COLD:
+        dam->amount -= player_effect(p, ET_COLD_RESISTANCE);
+
+    default:
+        /* well, well */
+        break;
+    }
+
+    /* prevent adding to HP if damage went below zero due to resistances */
+    dam->amount = max(0, dam->amount);
+
+    if (dam->amount)
+    {
+        /* taken damage */
+        p->hp -= dam->amount;
+
+        /* notify player */
+        if (damage_msgs[dam->type].msg_affected)
+        {
+            log_add_entry(p->log, damage_msgs[dam->type].msg_affected);
+        }
+
+        /* add effects */
+        switch (dam->type)
+        {
+        case DAM_POISON:
+            player_effect_add(p, effect_new(ET_POISON, game_turn(p->game)));
+            break;
+
+        case DAM_BLINDNESS:
+            player_effect_add(p, effect_new(ET_BLINDNESS, game_turn(p->game)));
+            break;
+
+        case DAM_CONFUSION:
+            player_effect_add(p, effect_new(ET_CONFUSION, game_turn(p->game)));
+            break;
+
+        case DAM_PARALYSIS: /* TODO: implement */
+            /* player_effect_add(p, effect_new(ET_PARALYSIS, game_turn(p->game))); */
+            break;
+
+        case DAM_STUN: /* TODO: implement */
+            /* player_effect_add(p, effect_new(ET_POISON, game_turn(p->game))); */
+            break;
+
+        case DAM_DEC_STR:
+            player_effect_add(p, effect_new(ET_DEC_STR, game_turn(p->game)));
+            break;
+
+        case DAM_DEC_DEX:
+            player_effect_add(p, effect_new(ET_DEC_DEX, game_turn(p->game)));
+            break;
+
+        case DAM_DRAIN_LIFE:
+            player_lvl_lose(p, 1);
+            break;
+
+        default:
+            /* pfffft. */
+            break;
+        }
+    }
+    else
+    {
+        /* unaffected */
+        /* notifiy player */
+        if (damage_msgs[dam->type].msg_unaffected)
+            log_add_entry(p->log, damage_msgs[dam->type].msg_unaffected);
+    }
+
+    g_free(dam);
 
     if (p->hp < 1)
+    {
         player_die(p, cause_type, cause);
+    }
+
 }
 
 int player_hp_max_gain(player *p, int count)
@@ -2412,7 +2508,6 @@ int player_item_use(player *p, item *it)
     char description[61];
     int item_used_up = TRUE;
     int item_identified = FALSE;
-    int damage = 0; /* damage take by cursed items */
     int time = 0; /* number of turns this action took */
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
@@ -2512,12 +2607,12 @@ int player_item_use(player *p, item *it)
 
         if (it->cursed)
         {
+            damage *dam = damage_new(DAM_POISON, rand_1n(p->hp), NULL);
+
             log_add_entry(p->log, "The Potion is foul!");
-            if ((damage = rand_0n(p->hp)))
-            {
-                log_add_entry(p->log, "You spit gore!");
-                player_hp_lose(p, it->type, PD_CURSE, damage);
-            }
+
+            log_add_entry(p->log, "You spit gore!");
+            player_damage_take(p, dam, PD_CURSE, it->type);
         }
         else
         {
@@ -2557,12 +2652,12 @@ int player_item_use(player *p, item *it)
 
         if (it->cursed)
         {
+            damage *dam = damage_new(DAM_FIRE, rand_1n(p->hp), NULL);
+
             log_add_entry(p->log, "The Scroll explodes!");
-            if ((damage = rand_0n(p->hp)))
-            {
-                log_add_entry(p->log, "You are hurt by the explosion!");
-                player_hp_lose(p, damage, PD_CURSE, it->type);
-            }
+
+            log_add_entry(p->log, "You are hurt by the explosion!");
+            player_damage_take(p, dam, PD_CURSE, it->type);
         }
         else
         {
@@ -3527,7 +3622,8 @@ int player_fountain_drink(player *p)
                 log_add_entry(p->log, "You lose %d hit point%s!",
                               amount, plural(amount));
 
-                player_hp_lose(p, amount, PD_STATIONARY, LS_FOUNTAIN);
+                damage *dam = damage_new(DAM_POISON, amount, NULL);
+                player_damage_take(p, dam, PD_STATIONARY, LS_FOUNTAIN);
             }
 
             break;
@@ -3585,7 +3681,6 @@ int player_fountain_drink(player *p)
 
 int player_fountain_wash(player *p)
 {
-    int damage = 0;
     monster *m;
 
     assert (p != NULL);
@@ -3604,10 +3699,12 @@ int player_fountain_wash(player *p)
 
     if (chance(10))
     {
-        damage = rand_1n((p->level->nlevel << 2) + 2);
         log_add_entry(p->log, "Oh no! The water was foul!");
 
-        player_hp_lose(p, damage, PD_STATIONARY, LS_FOUNTAIN);
+        damage *dam = damage_new(DAM_POISON,
+                                 rand_1n((p->level->nlevel << 2) + 2), NULL);
+
+        player_damage_take(p, dam, PD_STATIONARY, LS_FOUNTAIN);
     }
     else if (chance(30))
     {
@@ -4025,8 +4122,11 @@ static int player_trigger_trap(player *p, trap_t trap)
         default:
             if (trap_damage(trap))
             {
-                player_hp_lose(p, rand_1n(trap_damage(trap)) + p->level->nlevel,
-                               PD_TRAP, trap);
+                damage *dam = damage_new(DAM_PHYSICAL,
+                                         rand_1n(trap_damage(trap)) + p->level->nlevel,
+                                         NULL);
+
+                player_damage_take(p, dam, PD_TRAP, trap);
             }
 
             /* if there is an effect on the trap add it to player's effects. */

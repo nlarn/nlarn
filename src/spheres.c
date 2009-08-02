@@ -211,5 +211,5 @@ static void sphere_kill_monster(sphere *s, level *l, monster *m)
         }
     }
 
-    monster_die(m, NULL, NULL);
+    monster_damage_take(m, damage_new(DAM_MAGICAL, 2000, NULL));
 }

@@ -275,4 +275,13 @@ int str_starts_with_vowel(char *str)
     else return FALSE;
 }
 
+damage *damage_new(damage_t type, int amount, gpointer originator)
+{
+    damage *dam = g_malloc0(sizeof(damage));
 
+    dam->type = type;
+    dam->amount = amount;
+    dam->originator = originator;
+
+    return dam;
+}

@@ -21,460 +21,308 @@
 const spell_data spells[SP_MAX] =
 {
     {
-        SP_NONE,
-        NULL,
-        NULL,
-        SC_NONE,
-        ET_NONE,
+        SP_NONE, NULL, NULL,
+        SC_NONE, DAM_NONE, ET_NONE,
         NULL,
         NULL,
         NULL,
-        0,
-        0
+        0, 0
     },
     {
-        SP_PRO,
-        "pro",
-        "protection",
-        SC_PLAYER,
-        ET_PROTECTION,
+        SP_PRO, "pro","protection",
+        SC_PLAYER, DAM_NONE, ET_PROTECTION,
         "Generates a protection field",
         NULL,
         NULL,
-        1,
-        260
+        1, 260
     },
     {
-        SP_MLE,
-        "mle",
-        "magic missile",
-        SC_RAY,
-        ET_NONE,
+        SP_MLE, "mle", "magic missile",
+        SC_RAY, DAM_MAGICAL, ET_NONE,
         "Creates and hurls a magic missile equivalent to a + 1 magic arrow",
         "Your missiles hit the %s.",
         "Your missile bounces off the %s.",
-        1,
-        320
+        1, 320
     },
     {
-        SP_DEX,
-        "dex",
-        "dexterity",
-        SC_PLAYER,
-        ET_INC_DEX,
+        SP_DEX, "dex", "dexterity",
+        SC_PLAYER, DAM_NONE, ET_INC_DEX,
         "Improves the casters dexterity",
         NULL,
         NULL,
-        1,
-        260
+        1, 260
     },
     {
-        SP_SLE,
-        "sle",
-        "sleep",
-        SC_POINT,
-        ET_SLEEP,
+        SP_SLE, "sle", "sleep",
+        SC_POINT, DAM_NONE, ET_SLEEP,
         "causes some monsters to go to sleep",
         NULL,
         "The %s doesn't sleep.",
-        1,
-        260
+        1, 260
     },
     {
-        SP_CHM,
-        "chm",
-        "charm monster",
-        SC_PLAYER,
-        ET_CHARM_MONSTER,
+        SP_CHM, "chm", "charm monster",
+        SC_PLAYER, DAM_NONE, ET_CHARM_MONSTER,
         "some monsters may be awed at your magnificence",
         NULL,
         NULL,
-        1,
-        260
+        1, 260
     },
     {
-        SP_SSP,
-        "ssp",
-        "sonic spear",
-        SC_RAY,
-        ET_NONE,
+        SP_SSP, "ssp", "sonic spear",
+        SC_RAY, DAM_PHYSICAL, ET_NONE,
         "causes your hands to emit a screeching sound toward what they point",
         "The sound damages the %s.",
         "The %s can't hear the noise.",
-        1,
-        300
+        1, 300
     },
     {
-        SP_STR,
-        "str",
-        "strength",
-        SC_PLAYER,
-        ET_INC_STR,
+        SP_STR, "str", "strength",
+        SC_PLAYER, DAM_NONE, ET_INC_STR,
         "Increase the casters strength for a short term",
         NULL,
         NULL,
-        2,
-        460
+        2, 460
     },
     {
-        SP_ENL,
-        "enl",
-        "enlightenment",
-        SC_PLAYER,
-        ET_ENLIGHTENMENT,
+        SP_ENL, "enl", "enlightenment",
+        SC_PLAYER, DAM_NONE, ET_ENLIGHTENMENT,
         "the caster becomes aware of things around him",
         NULL,
         NULL,
-        2,
-        460
+        2, 460
     },
     {
-        SP_HEL,
-        "hel",
-        "healing",
-        SC_PLAYER,
-        ET_INC_HP,
+        SP_HEL, "hel", "healing",
+        SC_PLAYER, DAM_NONE, ET_INC_HP,
         "restores some hp to the caster",
         NULL,
         NULL,
-        2,
-        400
+        2, 400
     },
     {
-        SP_CBL,
-        "cbl",
-        "cure blindness",
-        SC_OTHER,
-        ET_NONE,
+        SP_CBL, "cbl", "cure blindness",
+        SC_OTHER, DAM_NONE, ET_NONE,
         "restores sight to one so unfortunate as to be blinded",
         NULL,
         NULL,
-        2,
-        400
+        2, 400
     },
     {
-        SP_CRE,
-        "cre",
-        "create monster",
-        SC_OTHER,
-        ET_NONE,
+        SP_CRE, "cre", "create monster",
+        SC_OTHER, DAM_NONE, ET_NONE,
         "creates a monster near the caster appropriate for the location",
         NULL,
         NULL,
-        2,
-        400
+        2, 400
     },
     {
-        SP_PHA,
-        "pha",
-        "phantasmal forces",
-        SC_POINT,
-        ET_SCARE_MONSTER,
+        SP_PHA, "pha", "phantasmal forces",
+        SC_POINT, DAM_NONE, ET_SCARE_MONSTER,
         "creates illusions, and if believed, monsters flee",
         "The %s believed!",
         "The %s didn't believe the illusions!",
-        2,
-        600
+        2, 600
     },
     {
-        SP_INV,
-        "inv",
-        "invisibility",
-        SC_PLAYER,
-        ET_INVISIBILITY,
+        SP_INV, "inv", "invisibility",
+        SC_PLAYER, DAM_NONE, ET_INVISIBILITY,
         "the caster becomes invisible",
         NULL,
         NULL,
-        2,
-        600
+        2, 600
     },
     {
-        SP_BAL,
-        "bal",
-        "fireball",
-        SC_BLAST,
-        ET_NONE,
+        SP_BAL, "bal", "fireball",
+        SC_BLAST, DAM_FIRE, ET_NONE,
         "makes a ball of fire that burns on what it hits",
         "The fireball hits the %s.",
         NULL,
-        3,
-        1200
+        3, 1200
     },
     {
-        SP_CLD,
-        "cld",
-        "cone of cold",
-        SC_RAY,
-        ET_NONE,
+        SP_CLD, "cld", "cone of cold",
+        SC_RAY, DAM_COLD, ET_NONE,
         "sends forth a cone of cold which freezes what it touches",
         "The cone of cold strikes the %s.",
         "The %s loves the cold!",
-        3,
-        1200
+        3, 1200
     },
     {
-        SP_PLY,
-        "ply",
-        "polymorph",
-        SC_POINT,
-        ET_NONE,
+        SP_PLY, "ply", "polymorph",
+        SC_POINT, DAM_NONE, ET_NONE,
         "you can find out what this does for yourself",
         NULL,
         "The %s resists.",
-        3,
-        950
+        3, 950
     },
     {
-        SP_CAN,
-        "can",
-        "cancellation",
-        SC_PLAYER,
-        ET_CANCELLATION,
+        SP_CAN, "can", "cancellation",
+        SC_PLAYER, DAM_NONE, ET_CANCELLATION,
         "negates the ability of a monster to use his special abilities",
         NULL,
         NULL,
-        3,
-        950
+        3, 950
     },
     {
-        SP_HAS,
-        "has",
-        "haste self",
-        SC_PLAYER,
-        ET_SPEED,
+        SP_HAS, "has", "haste self",
+        SC_PLAYER, DAM_NONE, ET_SPEED,
         "speeds up the casters movements",
         NULL,
         NULL,
-        3,
-        950
+        3, 950
     },
     {
-        SP_CKL,
-        "ckl",
-        "killing cloud",
-        SC_FLOOD,
-        ET_NONE,
+        SP_CKL, "ckl", "killing cloud",
+        SC_FLOOD, DAM_ACID, ET_NONE,
         "creates a fog of poisonous gas which kills all that is within it",
         "The %s gasps for air.",
         "The %s loves the water!",
-        3,
-        1200
+        3, 1200
     },
     {
-        SP_VPR,
-        "vpr",
-        "vaporize rock",
-        SC_OTHER,
-        ET_NONE,
+        SP_VPR, "vpr", "vaporize rock",
+        SC_OTHER, DAM_NONE, ET_NONE,
         "this changes rock to air",
         NULL,
         NULL,
-        3,
-        950
+        3, 950
     },
     {
-        SP_DRY,
-        "dry",
-        "dehydration",
-        SC_POINT,
-        ET_NONE,
+        SP_DRY, "dry", "dehydration",
+        SC_POINT, DAM_PHYSICAL, ET_NONE,
         "dries up water in the immediate vicinity",
         "The %s shrivels up.",
         "The %s isn't affected.",
-        4,
-        1600
+        4, 1600
     },
     {
-        SP_LIT,
-        "lit",
-        "lightning",
-        SC_RAY,
-        ET_NONE,
+        SP_LIT, "lit", "lightning",
+        SC_RAY, DAM_ELECTRICITY, ET_NONE,
         "you finger will emit a lightning bolt when this spell is cast",
         "A lightning bolt hits the %s.",
         "The %s loves fire and lightning!",
-        4,
-        1600
+        4, 1600
     },
     {
-        SP_DRL,
-        "drl",
-        "drain life",
-        SC_POINT,
-        ET_NONE,
+        SP_DRL, "drl", "drain life",
+        SC_POINT, DAM_PHYSICAL, ET_NONE,
         "subtracts hit points from both you and a monster",
         NULL,
         NULL,
-        4,
-        1400
+        4, 1400
     },
     {
-        SP_GLO,
-        "glo",
-        "invulnerability",
-        SC_PLAYER,
-        ET_INVULNERABILITY,
+        SP_GLO, "glo", "invulnerability",
+        SC_PLAYER, DAM_NONE, ET_INVULNERABILITY,
         "this globe helps to protect the player from physical attack",
         NULL,
         NULL,
-        4,
-        1400
+        4, 1400
     },
     {
-        SP_FLO,
-        "flo",
-        "flood",
-        SC_FLOOD,
-        ET_NONE,
+        SP_FLO, "flo", "flood",
+        SC_FLOOD, DAM_WATER, ET_NONE,
         "this creates an avalanche of H2O to flood the immediate chamber",
         "The %s struggles for air in your flood!",
         NULL,
-        4,
-        1600
+        4, 1600
     },
     {
-        SP_FGR,
-        "fgr",
-        "finger of death",
-        SC_POINT,
-        ET_NONE,
+        SP_FGR, "fgr", "finger of death",
+        SC_POINT, DAM_PHYSICAL, ET_NONE,
         "this is a holy spell and calls upon your god to back you up",
         "The %s's heart stopped.",
         "The %s isn't affected.",
-        4,
-        1600
+        4, 1600
     },
     {
-        SP_SCA,
-        "sca",
-        "scare monster",
-        SC_POINT,
-        ET_SCARE_MONSTER,
+        SP_SCA, "sca", "scare monster",
+        SC_POINT, DAM_NONE, ET_SCARE_MONSTER,
         "terrifies the monster so that hopefully he wont hit the magic user",
         NULL,
         NULL,
-        5,
-        2000
+        5, 2000
     },
     {
-        SP_HLD,
-        "hld",
-        "hold monster",
-        SC_POINT,
-        ET_HOLD_MONSTER,
+        SP_HLD, "hld", "hold monster",
+        SC_POINT, DAM_NONE, ET_HOLD_MONSTER,
         "the monster is frozen in his tracks if this is successful",
         NULL,
         NULL,
-        5,
-        2000
+        5, 2000
     },
     {
-        SP_STP,
-        "stp",
-        "time stop",
-        SC_OTHER,
-        ET_TIMESTOP,
+        SP_STP, "stp", "time stop",
+        SC_OTHER, DAM_NONE, ET_TIMESTOP,
         "all movement in the caverns ceases for a limited duration",
         NULL,
         NULL,
-        5,
-        2500
+        5, 2500
     },
     {
-        SP_TEL,
-        "tel",
-        "teleport away",
-        SC_POINT,
-        ET_NONE,
+        SP_TEL, "tel", "teleport away",
+        SC_POINT, DAM_NONE, ET_NONE,
         "moves a particular monster around in the dungeon",
         NULL,
         NULL,
-        5,
-        2000
+        5, 2000
     },
     {
-        SP_MFI,
-        "mfi",
-        "magic fire",
-        SC_FLOOD,
-        ET_NONE,
+        SP_MFI, "mfi", "magic fire",
+        SC_FLOOD, DAM_FIRE, ET_NONE,
         "this causes a curtain of fire to appear all around you",
         "The %s cringes from the flame.",
         NULL,
-        5,
-        2500
+        5, 2500
     },
     {
-        SP_MKW,
-        "mkw",
-        "make wall",
-        SC_OTHER,
-        ET_NONE,
+        SP_MKW, "mkw", "make wall",
+        SC_OTHER, DAM_NONE, ET_NONE,
         "Makes a wall in the specified place",
         NULL,
         NULL,
-        6,
-        3000
+        6, 3000
     },
     {
-        SP_SPH,
-        "sph",
-        "sphere of annihilation",
-        SC_OTHER,
-        ET_NONE,
+        SP_SPH, "sph", "sphere of annihilation",
+        SC_OTHER, DAM_NONE, ET_NONE,
         "anything caught in this sphere is instantly killed.",
         NULL,
         NULL,
-        6,
-        3500
+        6, 3500
     },
     {
-        SP_GEN,
-        "gen",
-        "genocide",
-        SC_OTHER,
-        ET_NONE,
+        SP_GEN,  "gen", "genocide",
+        SC_OTHER, DAM_NONE, ET_NONE,
         "eliminates a species of monster from the game -- use sparingly",
         NULL,
         NULL,
-        6,
-        3800
+        6, 3800
     },
     {
-        SP_SUM,
-        "sum",
-        "summon demon",
-        SC_OTHER,
-        ET_NONE,
+        SP_SUM, "sum", "summon demon",
+        SC_OTHER, DAM_NONE, ET_NONE,
         "summons a demon who hopefully helps you out",
         NULL,
         NULL,
-        6,
-        3500
+        6, 3500
     },
     {
-        SP_WTW,
-        "wtw",
-        "walk through walls",
-        SC_PLAYER,
-        ET_WALL_WALK,
+        SP_WTW, "wtw", "walk through walls",
+        SC_PLAYER, DAM_NONE, ET_WALL_WALK,
         "allows the caster to walk through walls for a short period of time",
         NULL,
         NULL,
-        6,
-        3800
+        6, 3800
     },
     {
-        SP_ALT,
-        "alt",
-        "alter reality",
-        SC_OTHER,
-        ET_NONE,
+        SP_ALT, "alt", "alter reality",
+        SC_OTHER, DAM_NONE, ET_NONE,
         "god only knows what this will do",
         NULL,
         "Polinneaus won't let you mess with his dungeon!",
-        6,
-        3800
+        6, 3800
     },
 };
 
@@ -611,22 +459,15 @@ void spell_type_point(spell *s, struct player *p)
     {
         /* dehydration */
     case SP_DRY:
-        if (monster_hp_lose(monster, 100 + p->lvl))
-        {
-            player_monster_kill(p, monster, spell_msg_succ(s));
-        }
+        monster_damage_take(monster, damage_new(DAM_MAGICAL, 100 + p->lvl, p));
         break; /* SP_DRY */
 
         /* drain life */
     case SP_DRL:
         amount = min(p->hp - 1, p->hp_max / 2);
 
-        if (monster_hp_lose(monster, amount))
-        {
-            player_monster_kill(p, monster, NULL);
-        }
-
-        player_hp_lose(p, amount, PD_SPELL, SP_DRL);
+        monster_damage_take(monster, damage_new(DAM_MAGICAL, amount, p));
+        player_damage_take(p, damage_new(DAM_MAGICAL, amount, NULL), PD_SPELL, SP_DRL);
 
         break; /* SP_DRL */
 
@@ -639,10 +480,7 @@ void spell_type_point(spell *s, struct player *p)
 
         if (player_get_wis(p) > rand_m_n(10,20))
         {
-            if (monster_hp_lose(monster, 2000))
-            {
-                player_monster_kill(p, monster, spell_msg_succ(s));
-            }
+            monster_damage_take(monster, damage_new(DAM_MAGICAL, 2000, p));
         }
         else
         {
@@ -753,15 +591,13 @@ void spell_type_ray(spell *s, struct player *p)
         log_add_entry(p->log, "The mirror reflects your spell! The %s hits you!",
                       spell_name(s));
 
-        player_hp_lose(p, amount, PD_SPELL, s->id);
+        player_damage_take(p, damage_new(spell_damage(s), amount, NULL), PD_SPELL, s->id);
     }
 
     log_add_entry(p->log, spell_msg_succ(s), monster_name(monster));
 
-    if (monster_hp_lose(monster, amount))
-    {
-        player_monster_kill(p, monster, NULL);
-    }
+    /* FIXME: get all monsters in the ray and affect them all */
+    monster_damage_take(monster, damage_new(spell_damage(s), amount, p));
 }
 
 void spell_type_flood(spell *s, struct player *p)
@@ -818,9 +654,9 @@ void spell_type_blast(spell *s, struct player *p)
     GPtrArray *mlist;
     monster *monster = NULL;
     position pos;
-    int amount = 0;
     char buffer[61];
-    int i;
+    int amount, i;
+    damage *dam;
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
 
@@ -839,17 +675,13 @@ void spell_type_blast(spell *s, struct player *p)
 
     mlist = level_get_monsters_in(p->level, rect_new_sized(pos, 1));
 
-    for (i = 1; i <= mlist->len; i++)
+    for (i = 0; i < mlist->len; i++)
     {
-        monster = g_ptr_array_index(mlist, i - 1);
+        monster = g_ptr_array_index(mlist, i);
+        dam = damage_new(DAM_FIRE, amount, p);
 
-        log_add_entry(p->log, spell_msg_succ(s),
-                      monster_name(monster));
-
-        if (monster_hp_lose(monster, amount))
-        {
-            player_monster_kill(p, monster, NULL);
-        }
+        if (!(monster = monster_damage_take(monster, dam)))
+            i--; /* monster has been killed, others follow up */
     }
 
     if (pos_in_rect(p->pos, rect_new_sized(pos, 1)))
@@ -857,8 +689,8 @@ void spell_type_blast(spell *s, struct player *p)
         /* player has been hit by the blast as well */
         log_add_entry(p->log, "The fireball hits you.");
 
-        player_hp_lose(p, amount - player_effect(p, ET_FIRE_RESISTANCE),
-                       PD_SPELL, SP_BAL);
+        dam = damage_new(DAM_FIRE, amount, NULL);
+        player_damage_take(p, dam, PD_SPELL, SP_BAL);
     }
 
     g_ptr_array_free(mlist, FALSE);
@@ -1051,10 +883,7 @@ void spell_vaporize_rock(player *p)
     if ((m = level_get_monster_at(p->level, pos)) && (m->type == MT_XORN))
     {
         /* xorns take damage from vpr */
-        if (monster_hp_lose(m, divert(200, 10)))
-        {
-            player_monster_kill(p, m, NULL);
-        }
+        monster_damage_take(m, damage_new(DAM_PHYSICAL, divert(200, 10), p));
     }
 
     switch (level_stationary_at(p->level, pos))

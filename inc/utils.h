@@ -20,6 +20,7 @@
 #define __UTILS_H_
 
 #include <time.h>
+#include "defines.h"
 
 /* game messaging */
 typedef struct message_log_entry {
@@ -76,5 +77,11 @@ void text_destroy(GPtrArray *text);
 int str_starts_with_vowel(char *str);
 #define a_an(str) (str_starts_with_vowel((str)) ? "n" : "")
 #define plural(i) (((i) > 1) ? "s" : "")
+
+
+/* regarding stuff defined in defines.h */
+
+damage *damage_new(damage_t type, int amount, gpointer originator);
+#define damage_free(dam)    g_free((dam))
 
 #endif

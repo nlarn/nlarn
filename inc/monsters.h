@@ -32,9 +32,10 @@ struct player;
 struct level;
 
 /* local monster definition for data storage */
-/* TODO: monster size, spell casting ability, resistances */
-typedef struct monster_data {
-	int type;
+/* TODO: spell casting ability, resistances */
+typedef struct monster_data
+{
+    int type;
     char *name;			/* monster's name */
     int level;
     int ac;
@@ -44,30 +45,23 @@ typedef struct monster_data {
     int exp;			/* xp granted to player */
     char image;
     speed mspeed;
-    size msize;
-    unsigned			/* various flags */
-		head: 			1,	/* has a head */
-		nobehead:		1,	/* cannot be beheaded */
-		hands:			1,	/* has hands => can open doors */
-		fly:			1,	/* can fly (not affected by pits and trapdoors) */
-		spirit:			1,  /* is a spirit */
-		undead:			1,  /* is undead */
-		invisible:      1,  /* is invisible */
-		infravision:	1;  /* can see invisible */
-    attack attack[2];
+    esize msize;
+    guint32 flags;
+    attack attacks[2];
 } monster_data;
 
 typedef enum monster_action_type
 {
-	MA_NONE,
-	MA_FLEE,
-	MA_REMAIN,
-	MA_WANDER,
-	MA_ATTACK,
-	MA_MAX
+    MA_NONE,
+    MA_FLEE,
+    MA_REMAIN,
+    MA_WANDER,
+    MA_ATTACK,
+    MA_MAX
 } monster_action_t;
 
-typedef enum monster_t {
+typedef enum monster_t
+{
     MT_NONE,
     MT_GIANT_BAT,
     MT_GNOME,
@@ -136,29 +130,44 @@ typedef enum monster_t {
     MT_MAX				/* maximum # monsters in the dungeon */
 } monster_t;
 
+enum monster_flags
+{
+    MF_NONE         = 0,
+    MF_HEAD         = 1,        /* has a head */
+    MF_NOBEHEAD     = 1 << 1,   /* cannot be beheaded */
+    MF_HANDS        = 1 << 2,	/* has hands => can open doors */
+    MF_FLY          = 1 << 3,   /* can fly (not affected by pits and trapdoors) */
+    MF_SPIRIT       = 1 << 4,   /* is a spirit */
+    MF_UNDEAD       = 1 << 5,   /* is undead */
+    MF_INVISIBLE    = 1 << 6,   /* is invisible */
+    MF_INFRAVISION  = 1 << 7,   /* can see invisible */
+    MF_REGENERATE   = 1 << 8,   /* does regenerate */
+};
+
 /* monster  */
-typedef struct monster {
-	monster_t type;
+typedef struct monster
+{
+    monster_t type;
     gint32 hp;
-	position pos;
-	monster_action_t action;    /* current action */
+    position pos;
+    monster_action_t action;    /* current action */
 
-	/* number of turns since when player was last seen; 0 = never */
-	guint32 lastseen;
+    /* number of turns since when player was last seen; 0 = never */
+    guint32 lastseen;
 
-	/* last known position of player */
-	position player_pos;
+    /* last known position of player */
+    position player_pos;
 
-	/* LOS between player -> monster */
-	gboolean m_visible;
-	/* LOS between monster -> player */
-	gboolean p_visible;
+    /* LOS between player -> monster */
+    gboolean m_visible;
+    /* LOS between monster -> player */
+    gboolean p_visible;
 
-	/* level monster is on */
-	struct level *level;
+    /* level monster is on */
+    struct level *level;
 
-	inventory *inventory;
-	GPtrArray *effects;
+    inventory *inventory;
+    GPtrArray *effects;
 } monster;
 
 /* external vars */
@@ -173,12 +182,14 @@ void monster_destroy(monster *m);
 
 void monster_move(monster *m, struct player *p);
 int monster_position(monster *m, position target);
-gboolean monster_hp_lose(monster *m, int amount);
-void monster_drop_items(monster *m, inventory *floor);
-void monster_pickup_items(monster *m, struct player *p);
+monster *monster_trap_trigger(monster *m, struct player *p);
+
+void monster_items_drop(monster *m, inventory *floor);
+void monster_items_pickup(monster *m, struct player *p);
+
+int monster_attacks_count(monster *m);
 void monster_player_attack(monster *m, struct player *p);
-gboolean monster_trigger_trap(monster *m, struct player *p);
-void monster_die(monster *m, struct player *p, char *message);
+monster *monster_damage_take(monster *m, damage *dam);
 
 gboolean monster_update_action(monster *m);
 void monster_update_player_pos(monster *m, position ppos);
@@ -195,15 +206,18 @@ void monsters_genocide(struct level *l);
 #define monster_exp(monster)         (monsters[(monster)->type].exp)
 #define monster_image(monster)       (monsters[(monster)->type].image)
 #define monster_speed(monster)       (monsters[(monster)->type].speed)
-#define monster_damage(monster)      (monsters[(monster)->type].attack[0].base)
-#define monster_has_head(monster)        (monsters[(monster)->type].head)
-#define monster_is_beheadable(monster)   (!monsters[(monster)->type].nobehead)
-#define monster_has_hands(monster)       (monsters[(monster)->type].hands)
-#define monster_can_fly(monster)         (monsters[(monster)->type].fly)
-#define monster_is_spirit(monster)       (monsters[(monster)->type].spirit)
-#define monster_is_undead(monster)       (monsters[(monster)->type].undead)
-#define monster_is_invisible(monster)    (monsters[(monster)->type].invisible)
-#define monster_has_infravision(monster) (monsters[(monster)->type].infravision)
+#define monster_damage(monster)      (monsters[(monster)->type].attacks[0].base)
+
+/* flags */
+#define monster_has_head(monster)        (monsters[(monster)->type].flags & MF_HEAD)
+#define monster_is_beheadable(monster)   (!monsters[(monster)->type].flags & MF_NOBEHEAD)
+#define monster_has_hands(monster)       (monsters[(monster)->type].flags & MF_HANDS)
+#define monster_can_fly(monster)         (monsters[(monster)->type].flags & MF_FLY)
+#define monster_is_spirit(monster)       (monsters[(monster)->type].flags & MF_SPIRIT)
+#define monster_is_undead(monster)       (monsters[(monster)->type].flags & MF_UNDEAD)
+#define monster_is_invisible(monster)    (monsters[(monster)->type].flags & MF_INVISIBLE)
+#define monster_has_infravision(monster) (monsters[(monster)->type].flags & MF_INFRAVISION)
+#define monster_can_regenerate(monster)  (monsters[(monster)->type].flags & MF_REGENERATE)
 
 #define monster_name_by_type(type)  (monsters[(type)].name)
 #define monster_image_by_type(type) (monsters[(type)].image)

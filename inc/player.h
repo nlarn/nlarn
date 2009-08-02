@@ -192,7 +192,6 @@ int player_move(player *p, int direction);
 int player_attack(player *p, monster *m);
 void player_update_fov(player *p, int radius);
 int player_level_enter(player *p, level *l, gboolean teleported);
-void player_monster_kill(player *p, monster *m, char *message);
 item *player_random_armour(player *p);
 
 int player_examine(player *p, position pos);
@@ -208,7 +207,7 @@ void player_exp_gain(player *p, int count);
 void player_exp_lose(player *p, int count);
 
 int player_hp_gain(player *p, int count);
-void player_hp_lose(player *p, int count, player_cod cause_type, int cause);
+void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause);
 int player_hp_max_gain(player *p, int count);
 int player_hp_max_lose(player *p, int count);
 

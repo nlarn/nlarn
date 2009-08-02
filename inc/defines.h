@@ -28,31 +28,31 @@ typedef enum _speed
     SPEED_MAX
 } speed;
 
-typedef enum _size
+typedef enum _esize
 {
-    SIZE_NONE,
-    SIZE_TINY,
-    SIZE_SMALL,
-    SIZE_MEDIUM,
-    SIZE_LARGE,
-    SIZE_HUGE,
-    SIZE_GARGANTUAN,
-    SIZE_MAX
-} size;
+    ESIZE_NONE,
+    ESIZE_TINY,
+    ESIZE_SMALL,
+    ESIZE_MEDIUM,
+    ESIZE_LARGE,
+    ESIZE_HUGE,
+    ESIZE_GARGANTUAN,
+    ESIZE_MAX
+} esize;
 
 typedef enum _attack_types
 {
     ATT_NONE,
     ATT_WEAPON,
-    ATT_MAGIC, /* e.g. psionics */
-    ATT_CLAW, /* some dragons */
-    ATT_BITE, /* bugbear, osequip, snake */
-    ATT_STING, /* ant, centipede */
-    ATT_SLAM, /* shambling mound */
-    ATT_KICK,  /* centaur? */
-    ATT_TOUCH, /* vampire, wraith */
+    ATT_MAGIC,  /* e.g. psionics */
+    ATT_CLAW,   /* some dragons */
+    ATT_BITE,   /* bugbear, osequip, snake */
+    ATT_STING,  /* ant, centipede */
+    ATT_SLAM,   /* shambling mound */
+    ATT_KICK,   /* centaur? */
+    ATT_TOUCH,  /* vampire, wraith */
     ATT_BREATH, /* dragons, hellhound */
-    ATT_GAZE, /* floating eye */
+    ATT_GAZE,   /* floating eye */
     ATT_MAX
 } attack_t;
 
@@ -60,28 +60,32 @@ typedef enum _damage_types
 {
     DAM_NONE,
     DAM_PHYSICAL,
+    DAM_MAGICAL,        /* e.g. magic missile */
 
     /* elements */
     DAM_FIRE,
     DAM_COLD,
     DAM_ACID,
     DAM_WATER,
+    DAM_ELECTRICITY,
 
     /* effects */
-    DAM_POISON,
+    DAM_POISON,         /* traps, snake */
     DAM_BLINDNESS,
-    DAM_CONFUSION,
-    DAM_STUN, /* yellow mold */
-    DAM_DEC_STR, /* weaken: ant, centipede */
-    DAM_DEC_DEX, /* quasit */
+    DAM_CONFUSION,      /* umber hulk */
+    DAM_PARALYSIS,      /* floating eye */
+    DAM_STUN,           /* yellow mold */
+    DAM_DEC_STR,        /* ant, centipede */
+    DAM_DEC_DEX,        /* quasit */
+    DAM_DRAIN_LIFE,     /* vampire, wraith */
 
     /* inventory manipulation */
-    DAM_STEAL_GOLD,
-    DAM_STEAL_ITEM,
-    DAM_DRAIN_LIFE,
-    DAM_RUST,
-    DAM_REM_ENCH,
-    DAM_MAX
+    DAM_STEAL_GOLD,     /* leprechaun */
+    DAM_STEAL_ITEM,     /* nymph */
+    DAM_RUST,           /* rust monster, gelatious cube */
+    DAM_REM_ENCH,       /* disenchantress */
+    DAM_MAX,
+    DAM_RANDOM          /* random damage: spirit naga */
 } damage_t;
 
 typedef struct _attack
@@ -96,6 +100,13 @@ typedef struct _damage
 {
     damage_t type;
     int amount;
+    gpointer originator; /* pointer to player / monster that caused the damage */
 } damage;
+
+typedef struct _damage_msg
+{
+    char *msg_affected;
+    char *msg_unaffected;
+} damage_msg;
 
 #endif

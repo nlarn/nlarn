@@ -176,7 +176,7 @@ void level_path_destroy(level_path *path);
 area *level_get_obstacles(level *l, position center, int radius);
 void level_set_tiletype(level *l, area *area, level_tile_t type, guint8 duration);
 
-int level_tile_damage(level *l, position pos);
+damage *level_tile_damage(level *l, position pos);
 
 monster *level_get_monster_at(level *l, position pos);
 int level_is_monster_at(level *l, position pos);

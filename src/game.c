@@ -267,7 +267,7 @@ void game_spin_the_wheel(game *g, int times)
 {
     int turn, monster_nr;
     monster *m;
-    int damage;
+    damage *dam;
 
     assert(g != NULL && times > 0);
 
@@ -286,9 +286,9 @@ void game_spin_the_wheel(game *g, int times)
         }
 
         /* deal damage cause by level tiles to player */
-        if ((damage = level_tile_damage(g->p->level, g->p->pos)))
+        if ((dam = level_tile_damage(g->p->level, g->p->pos)))
         {
-            player_hp_lose(g->p, damage, PD_LEVEL,
+            player_damage_take(g->p, dam, PD_LEVEL,
                            level_tiletype_at(g->p->level, g->p->pos));
         }
 

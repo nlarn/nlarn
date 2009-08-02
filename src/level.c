@@ -625,32 +625,27 @@ void level_set_tiletype(level *l, area *area, level_tile_t type, guint8 duration
     }
 }
 
-int level_tile_damage(level *l, position pos)
+damage *level_tile_damage(level *l, position pos)
 {
-    int damage;
-
     assert (l != NULL && pos_valid(pos));
 
     switch (level_tiletype_at(l, pos))
     {
     case LT_CLOUD:
-        damage = 3 + rand_0n(2);
+        return damage_new(DAM_ACID, 3 + rand_0n(2), NULL);
         break;
 
     case LT_FIRE:
-        damage = 5 + rand_0n(2);
+        return damage_new(DAM_FIRE, 5 + rand_0n(2), NULL);
         break;
 
     case LT_WATER:
-        damage = 4 + rand_0n(2);
+        return damage_new(DAM_WATER, 4 + rand_0n(2), NULL);
         break;
 
     default:
-        damage = 0;
-
+        return NULL;
     }
-
-    return damage;
 }
 
 monster *level_get_monster_at(level *l, position pos)
