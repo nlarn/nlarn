@@ -74,12 +74,12 @@ typedef enum _damage_types
     DAM_BLINDNESS,
     DAM_CONFUSION,      /* umber hulk */
     DAM_PARALYSIS,      /* floating eye */
-    DAM_STUN,           /* yellow mold */
     DAM_DEC_STR,        /* ant, centipede */
     DAM_DEC_DEX,        /* quasit */
     DAM_DRAIN_LIFE,     /* vampire, wraith */
 
     /* inventory manipulation */
+    /* these damage types are handled by the monster, not the player */
     DAM_STEAL_GOLD,     /* leprechaun */
     DAM_STEAL_ITEM,     /* nymph */
     DAM_RUST,           /* rust monster, gelatious cube */

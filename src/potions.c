@@ -40,7 +40,7 @@ const potion_data potions[PO_MAX] =
     { PO_CONFUSION,     "confusion",          ET_CONFUSION,        35 },
     { PO_HEROISM,       "heroism",            ET_HEROISM,         520 },
     { PO_GIANT_STR,     "giant strength",     ET_INC_STR,         200 }, /* value is only temporary */
-    { PO_FIRE_RES,      "fire resistance",    ET_FIRE_RESISTANCE, 220 },
+    { PO_FIRE_RES,      "fire resistance",    ET_RESIST_FIRE,     220 },
     { PO_TRE_DETECT,    "treasure finding",   ET_NONE,             80 },
     { PO_MAX_HP,        "instant healing",    ET_MAX_HP,          370 },
     { PO_POISON,        "poison",             ET_POISON,           50 },

@@ -160,11 +160,15 @@ typedef struct monster
 
     /* LOS between player -> monster */
     gboolean m_visible;
+
     /* LOS between monster -> player */
     gboolean p_visible;
 
     /* level monster is on */
     struct level *level;
+
+    /* attacks already tried */
+    int attacks_tried[2];
 
     inventory *inventory;
     GPtrArray *effects;
@@ -210,7 +214,7 @@ void monsters_genocide(struct level *l);
 
 /* flags */
 #define monster_has_head(monster)        (monsters[(monster)->type].flags & MF_HEAD)
-#define monster_is_beheadable(monster)   (!monsters[(monster)->type].flags & MF_NOBEHEAD)
+#define monster_is_beheadable(monster)   (!(monsters[(monster)->type].flags & MF_NOBEHEAD))
 #define monster_has_hands(monster)       (monsters[(monster)->type].flags & MF_HANDS)
 #define monster_can_fly(monster)         (monsters[(monster)->type].flags & MF_FLY)
 #define monster_is_spirit(monster)       (monsters[(monster)->type].flags & MF_SPIRIT)

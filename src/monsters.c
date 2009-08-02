@@ -27,7 +27,7 @@ const char *monster_attack_verb[ATT_MAX] =
     "points at",    /* ATT_MAGIC */
     "claws",        /* ATT_CLAW */
     "bites",        /* ATT_BITE */
-    "stung",       /* ATT_STING */
+    "stung",        /* ATT_STING */
     "slams",        /* ATT_SLAM */
     "kicks",        /* ATT_KICK */
     "touches",      /* ATT_TOUCH */
@@ -38,8 +38,7 @@ const char *monster_attack_verb[ATT_MAX] =
 const monster_data monsters[MT_MAX] =
 {
     /* ID NAME
-     * level ac intelligence gold hitpoints experience image
-     * head nobehead hands fly spirit undead invisible infravision */
+     * level ac intelligence gold hitpoints experience image */
     {
         MT_NONE, "",
         0, 0, 0, 0, 0, 0, ' ',
@@ -158,7 +157,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD,
         {
-            { ATT_BITE, DAM_DEC_STR, 1, 0 },
+            { ATT_BITE, DAM_DEC_STR, 2, 0 },
             { ATT_BITE, DAM_PHYSICAL, 1, 0 },
         }
     },
@@ -195,11 +194,11 @@ const monster_data monsters[MT_MAX] =
     {
         MT_QUASIT, "quasit",
         3, 5, 3, 0, 10, 15, 'Q',
-        SPEED_NORMAL, ESIZE_MEDIUM,
+        SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS,
         {
             { ATT_CLAW, DAM_DEC_DEX, 1, 0 },
-            { ATT_CLAW, DAM_PHYSICAL, 3, 0 },
+            { ATT_BITE, DAM_PHYSICAL, 3, 0 },
         }
     },
     {
@@ -341,7 +340,7 @@ const monster_data monsters[MT_MAX] =
             EMPTY_ATTACK,
         }
     },
-    {
+    { /* FIXME: I don't want no silly mushrooms */
         MT_VIOLET_FUNGUS, "violet fungi",
         6, 12, 3, 0, 38, 100, 'F',
         SPEED_SLOW, ESIZE_MEDIUM,
@@ -417,7 +416,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_FLY | MF_UNDEAD | MF_INFRAVISION | MF_REGENERATE,
         {
-            { ATT_TOUCH, DAM_DRAIN_LIFE, 0, 0 },
+            { ATT_TOUCH, DAM_DRAIN_LIFE, 1, 0 },
             { ATT_WEAPON, DAM_PHYSICAL, 4, 0 },
         }
     },
@@ -461,13 +460,13 @@ const monster_data monsters[MT_MAX] =
             EMPTY_ATTACK,
         }
     },
-    {
+    { /* FIXME: replace this beast! */
         MT_YELLOW_MOLD, "yellow mold",
         8, 12, 3, 0, 35, 250, 'y',
         SPEED_NONE, ESIZE_SMALL,
         MF_NONE,
         {
-            { ATT_NONE, DAM_STUN, 4, 0 },
+            { ATT_TOUCH, DAM_PHYSICAL, 4, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -597,7 +596,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_LARGE,
         MF_HEAD | MF_NOBEHEAD | MF_FLY | MF_SPIRIT | MF_INFRAVISION,
         {
-            { ATT_MAGIC, DAM_RANDOM, 0, 0 },
+            { ATT_MAGIC, DAM_RANDOM, 1, 0 },
             { ATT_BITE, DAM_PHYSICAL, 12, 0 },
         }
     },
@@ -615,7 +614,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_I, "type I demon lord",
         12, -30, 20, 0, 140, 50000, '&',
         SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HEAD | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
         {
             { ATT_CLAW, DAM_PHYSICAL, 18, 0 },
             { ATT_BITE, DAM_PHYSICAL, 18, 0 },
@@ -625,7 +624,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_II, "type II demon lord",
         13, -30, 21, 0, 160, 75000, '&',
         SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HEAD | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
         {
             { ATT_CLAW, DAM_PHYSICAL, 18, 0 },
             { ATT_BITE, DAM_PHYSICAL, 18, 0 },
@@ -635,7 +634,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_III, "type III demon lord",
         14, -30,  22, 0, 180, 100000, '&',
         SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HEAD | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
         {
             { ATT_CLAW, DAM_PHYSICAL, 18, 0 },
             { ATT_BITE, DAM_PHYSICAL, 18, 0 },
@@ -645,7 +644,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_IV, "type IV demon lord",
         15, -35, 23, 0, 200, 125000, '&',
         SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HEAD | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
         {
             { ATT_CLAW, DAM_PHYSICAL, 20, 0 },
             { ATT_BITE, DAM_PHYSICAL, 20, 0 },
@@ -655,7 +654,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_V, "type V demon lord",
         16, -40, 24, 0, 220, 150000, '&',
         SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HEAD | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
         {
             { ATT_CLAW, DAM_PHYSICAL, 22, 0 },
             { ATT_BITE, DAM_PHYSICAL, 22, 0 },
@@ -665,7 +664,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_VI, "type VI demon lord",
         17, -45, 25, 0, 240, 175000, '&',
         SPEED_FAST, ESIZE_LARGE,
-        MF_HEAD | MF_NOBEHEAD | MF_HEAD | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
         {
             { ATT_CLAW, DAM_PHYSICAL, 24, 0 },
             { ATT_BITE, DAM_PHYSICAL, 24, 0 },
@@ -675,7 +674,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_VII, "type VII demon lord",
         18, -70, 26, 0, 260, 200000, '&',
         SPEED_FAST, ESIZE_HUGE,
-        MF_HEAD | MF_NOBEHEAD | MF_HEAD | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
         {
             { ATT_CLAW, DAM_PHYSICAL, 27, 0 },
             { ATT_BITE, DAM_PHYSICAL, 27, 0 },
@@ -685,7 +684,7 @@ const monster_data monsters[MT_MAX] =
         MT_DAEMON_PRINCE, "demon prince",
         25, -127, 28, 0, 345, 300000, '&',
         SPEED_FAST, ESIZE_HUGE,
-        MF_HEAD | MF_NOBEHEAD | MF_HEAD | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
         {
             { ATT_CLAW, DAM_PHYSICAL, 30, 0 },
             { ATT_BITE, DAM_PHYSICAL, 30, 0 },
@@ -696,7 +695,7 @@ const monster_data monsters[MT_MAX] =
 static int monster_genocided[MT_MAX] = { 1, 0 };
 
 static void monster_die(monster *m, damage *dam);
-static char *monster_player_rob(monster *m, struct player *p, item_t item_type);
+static void monster_player_rob(monster *m, struct player *p, item_t item_type);
 
 monster *monster_new(int monster_type, struct level *l)
 {
@@ -1241,7 +1240,6 @@ int monster_attacks_count(monster *m)
 
 void monster_player_attack(monster *m, player *p)
 {
-    char *message = NULL;
     damage *dam;
     const attack *att;
     item *it;
@@ -1282,10 +1280,10 @@ void monster_player_attack(monster *m, player *p)
     if (monster_attacks_count(m) > 1)
     {
         /* choose the attack which offers more damage */
+
         /* TODO: if player is resistant to this attack and monster knows that,
          *  choose the other attack type
-         */
-        /* FIXME: this has to work for more than two attack types */
+         * FIXME: this has to work for more than two attack types */
         if (monsters[m->type].attacks[0].base > monsters[m->type].attacks[1].base)
             att = &monsters[m->type].attacks[0];
         else
@@ -1315,8 +1313,8 @@ void monster_player_attack(monster *m, player *p)
         /* if player has a device of no theft abort the theft */
         if (!player_effect(p, ET_NOTHEFT))
         {
-            message = monster_player_rob(m, p, (dam->type == DAM_STEAL_GOLD)
-                                         ? IT_GOLD : IT_ALL);
+            monster_player_rob(m, p, (dam->type == DAM_STEAL_GOLD)
+                               ? IT_GOLD : IT_ALL);
 
             /* teleport away */
             /* FIXME: message */
@@ -1364,7 +1362,11 @@ void monster_player_attack(monster *m, player *p)
         it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
         if (!it->cursed && it->type != IT_SCROLL && it->type != IT_POTION)
         {
-            message = "The %s hits you. You feel a sense of loss.";
+
+            /* log the attack */
+            log_add_entry(p->log, "The %s hits you. You feel a sense of loss.",
+                          monster_name(m));
+
             if (player_item_is_equipped(p, it))
             {
                 log_disable(p->log);
@@ -1378,34 +1380,10 @@ void monster_player_attack(monster *m, player *p)
         break;
 
     default:
-        /* assemble raw message with the appropriate verb for the attack */
-        message = g_strjoin(NULL, "The %s ", monster_attack_verb[att->type], " you.", NULL);
+        /* log the attack */
+        log_add_entry(p->log, "The %s %s you.", monster_name(m),
+                      monster_attack_verb[att->type]);
         break;
-    }
-
-    /* half damage if player is protected against spirits */
-    /* FIXME: this belongs into player_damage_take */
-    if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_is_spirit(m))
-        dam->amount >>= 1;
-
-    /* half damage if player is protected against undead */
-    /* FIXME: this belongs into player_damage_take */
-    if (player_effect(p, ET_UNDEAD_PROTECTION) && monster_is_undead(m))
-        dam->amount >>= 1;
-
-    /* log the attack */
-    log_add_entry(p->log, message, monster_name(m));
-
-    /* amulet of power cancels demon attacks */
-    /* FIXME: this belongs into player_damage_take */
-    if ((m->type >= MT_DEMONLORD_I)
-            && (p->eq_amulet && p->eq_amulet->id == AM_POWER)
-            && chance(75))
-    {
-        log_add_entry(p->log, "Your amulet cancels the %s's attack.",
-                      monster_name(m));
-
-        return;
     }
 
     player_damage_take(p, dam, PD_MONSTER, m->type);
@@ -1689,9 +1667,8 @@ static void monster_die(monster *m, damage *dam)
     monster_destroy(m);
 }
 
-static char *monster_player_rob(monster *m, struct player *p, item_t item_type)
+static void monster_player_rob(monster *m, struct player *p, item_t item_type)
 {
-    char *message = NULL;
     int player_gold = 0;
     item *it = NULL;
 
@@ -1716,7 +1693,8 @@ static char *monster_player_rob(monster *m, struct player *p, item_t item_type)
             if (player_get_gold(p) < 0)
                 player_set_gold(p, 0);
 
-            message = "The %s picks your pocket. Your purse feels lighter";
+            log_add_entry(p->log, "The %s picks your pocket. " \
+                          "Your purse feels lighter", monster_name(m));
         }
     }
     else if (item_type == IT_ALL) /* must be the nymph */
@@ -1733,7 +1711,7 @@ static char *monster_player_rob(monster *m, struct player *p, item_t item_type)
             }
 
             inv_del_element(p->inventory, it);
-            message = "The %s picks your pocket.";
+            log_add_entry(p->log, "The %s picks your pocket.", monster_name(m));
         }
     }
 
@@ -1744,8 +1722,7 @@ static char *monster_player_rob(monster *m, struct player *p, item_t item_type)
     }
     else
     {
-        message = "The %s couldn't find anything to steal.";
+        log_add_entry(p->log, "The %s couldn't find anything to steal.",
+                      monster_name(m));
     }
-
-    return message;
 }

@@ -84,10 +84,6 @@ typedef struct player
     guint32 mp_max;
     guint32 regen_counter; /* regeneration counter */
 
-    gint32 fire_resistance;
-    gint32 cold_resistance;
-    gint32 magic_resistance;
-
     guint32 bank_account; /* There is nothing quite as wonderful as money */
     guint32 outstanding_taxes;
     guint32 interest_lasttime; /* last time interest has been calculated */

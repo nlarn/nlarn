@@ -40,9 +40,9 @@ enum effect_types
     ET_INC_MP_REGEN,            /* increased mp regeneration */
     ET_INC_LEVEL,               /* gain level */
     ET_INC_EXP,                 /* gain experience */
-    ET_FIRE_RESISTANCE,         /* resist fire */
-    ET_COLD_RESISTANCE,         /* resist cold */
-    ET_MAGIC_RESISTANCE,        /* resist magic */
+    ET_RESIST_FIRE,             /* resist fire */
+    ET_RESIST_COLD,             /* resist cold */
+    ET_RESIST_MAGIC,            /* resist magic */
     ET_PROTECTION,              /* adds to AC  */
 
     /* ability improvements */
@@ -102,6 +102,7 @@ enum effect_types
     ET_CLUMSINESS,              /* unable to wield weapon */
     ET_ITCHING,                 /* unable to wear armour */
     ET_CONFUSION,               /* random movement */
+    ET_PARALYSIS,               /* loss of ability to move */
     ET_LAUGHTER,                /* FIXME: ??? */
     ET_POISON,                  /* cause by potion or trap */
     ET_AMNESIA,                 /* potion of forgetfulness */

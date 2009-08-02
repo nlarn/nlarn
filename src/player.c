@@ -447,6 +447,13 @@ int player_move(player *p, int direction)
         return 0;
     }
 
+    /* no movement if paralyzed */
+    if (player_effect(p, ET_PARALYSIS))
+    {
+        log_add_entry(p->log, "You can not move!");
+        return 0;
+    }
+
     /* confusion: random movement */
     if (player_effect(p, ET_CONFUSION))
     {
@@ -1058,6 +1065,7 @@ int player_hp_gain(player *p, int count)
 void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause)
 {
     monster *m = NULL;
+    effect *e = NULL;
 
     const damage_msg damage_msgs[] =
     {
@@ -1084,7 +1092,34 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     assert(p != NULL && dam != NULL);
 
     if (dam->originator)
+    {
         m = (monster *)dam->originator;
+
+        /* half damage if player is protected against spirits */
+        if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_is_spirit(m))
+        {
+            if (dam->type == DAM_PHYSICAL)
+            {
+                /* half physical damage */
+                dam->amount >>= 1;
+            }
+            else
+            {
+                /* cancel special attacks */
+                dam->amount = 0;
+            }
+        }
+
+        /* amulet of power cancels demon attacks */
+        if ((m->type >= MT_DEMONLORD_I) && chance(75)
+                && (p->eq_amulet && p->eq_amulet->id == AM_POWER))
+        {
+            log_add_entry(p->log, "Your amulet cancels the %s's attack.",
+                          monster_name(m));
+
+            return;
+        }
+    }
 
     /* check resistances */
     switch (dam->type)
@@ -1093,12 +1128,49 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         dam->amount -= player_get_ac(p);
         break;
 
+    case DAM_MAGICAL:
+        dam->amount -= player_effect(p, ET_RESIST_MAGIC);
+        break;
+
     case DAM_FIRE:
-        dam->amount -= player_effect(p, ET_FIRE_RESISTANCE);
+        dam->amount -= player_effect(p, ET_RESIST_FIRE);
         break;
 
     case DAM_COLD:
-        dam->amount -= player_effect(p, ET_COLD_RESISTANCE);
+        dam->amount -= player_effect(p, ET_RESIST_COLD);
+        break;
+
+    case DAM_ACID:
+        break;
+
+    case DAM_WATER:
+        break;
+
+    case DAM_ELECTRICITY:
+        break;
+
+    case DAM_POISON:
+        break;
+
+    case DAM_BLINDNESS:
+        break;
+
+    case DAM_CONFUSION:
+        break;
+
+    case DAM_PARALYSIS:
+        break;
+
+    case DAM_DEC_STR:
+        break;
+
+    case DAM_DEC_DEX:
+        break;
+
+    case DAM_DRAIN_LIFE:
+        if (player_effect(p, ET_UNDEAD_PROTECTION))
+            dam->amount = 0;
+        break;
 
     default:
         /* well, well */
@@ -1123,30 +1195,35 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         switch (dam->type)
         {
         case DAM_POISON:
-            player_effect_add(p, effect_new(ET_POISON, game_turn(p->game)));
+            e = effect_new(ET_POISON, game_turn(p->game));
+            e->amount = dam->amount;
+            player_effect_add(p, e);
             break;
 
         case DAM_BLINDNESS:
-            player_effect_add(p, effect_new(ET_BLINDNESS, game_turn(p->game)));
+            e = effect_new(ET_BLINDNESS, game_turn(p->game));
+            player_effect_add(p, e);
             break;
 
         case DAM_CONFUSION:
-            player_effect_add(p, effect_new(ET_CONFUSION, game_turn(p->game)));
+            e = effect_new(ET_CONFUSION, game_turn(p->game));
+            player_effect_add(p, e);
             break;
 
-        case DAM_PARALYSIS: /* TODO: implement */
-            /* player_effect_add(p, effect_new(ET_PARALYSIS, game_turn(p->game))); */
-            break;
-
-        case DAM_STUN: /* TODO: implement */
-            /* player_effect_add(p, effect_new(ET_POISON, game_turn(p->game))); */
+        case DAM_PARALYSIS:
+            e = effect_new(ET_PARALYSIS, game_turn(p->game));
+            player_effect_add(p, e);
             break;
 
         case DAM_DEC_STR:
-            player_effect_add(p, effect_new(ET_DEC_STR, game_turn(p->game)));
+            e = effect_new(ET_DEC_STR, game_turn(p->game));
+            e->turns = dam->amount * 50;
+            player_effect_add(p, e);
             break;
 
         case DAM_DEC_DEX:
+            e = effect_new(ET_DEC_DEX, game_turn(p->game));
+            e->turns = dam->amount * 50;
             player_effect_add(p, effect_new(ET_DEC_DEX, game_turn(p->game)));
             break;
 
@@ -1161,8 +1238,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     }
     else
     {
-        /* unaffected */
-        /* notifiy player */
+        /* not affected - notifiy player */
         if (damage_msgs[dam->type].msg_unaffected)
             log_add_entry(p->log, damage_msgs[dam->type].msg_unaffected);
     }
@@ -1536,18 +1612,6 @@ void player_effect_add(player *p, effect *e)
         case ET_INC_EXP:
             /* looks like a reasonable amount */
             player_exp_gain(p, rand_1n(player_lvl_exp[p->lvl] - player_lvl_exp[p->lvl - 1]));
-            break;
-
-        case ET_FIRE_RESISTANCE:
-            p->fire_resistance += e->amount;
-            break;
-
-        case ET_COLD_RESISTANCE:
-            p->cold_resistance += e->amount;
-            break;
-
-        case ET_MAGIC_RESISTANCE:
-            p->magic_resistance += e->amount;
             break;
 
         case ET_INC_HP:
