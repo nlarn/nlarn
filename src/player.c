@@ -3384,6 +3384,9 @@ int player_altar_pray(player *p)
             e = effect_new(ET_PROTECTION, game_turn(p->game));
             e->turns = 500;
             player_effect_add(p, e);
+
+            e = effect_new(ET_UNDEAD_PROTECTION, game_turn(p->game));
+            player_effect_add(p, e);
         }
 
         if (chance(4) && (armour = player_random_armour(p)))

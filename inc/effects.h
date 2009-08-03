@@ -68,7 +68,6 @@ enum effect_types
     ET_MAX_MP,                  /* full mana restore */
 
     ET_CANCELLATION,            /* cancels spheres */
-    ET_DIVINE_PROTECTION,       /* adds to AC, repels undead, caused by praying */
     ET_UNDEAD_PROTECTION,       /* protection against undead */
     ET_SPIRIT_PROTECTION,       /* protection against spirits */
 

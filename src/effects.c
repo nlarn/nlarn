@@ -258,11 +258,6 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_DIVINE_PROTECTION, 250, 0,
-        NULL, NULL, NULL, NULL,
-    },
-
-    {
         ET_UNDEAD_PROTECTION, 400, 0,
         "You feel safe in the dark.",
         NULL, NULL, NULL,
