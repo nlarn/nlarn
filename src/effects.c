@@ -403,14 +403,14 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_CLUMSINESS, 25, 0,
+        ET_CLUMSINESS, 200, 0,
         "You are unable to hold your weapon.",
         "You now feel less awkward.",
         NULL, NULL,
     },
 
     {
-        ET_ITCHING, 25, 0,
+        ET_ITCHING, 100, 0,
         "The hysteria of itching forces you to remove your armour!",
         "You feel the irritation subside.",
         NULL, NULL,
@@ -429,11 +429,6 @@ static const effect_data effects[ET_MAX] =
         "You are paralyzed.",
         "You can move again.",
         NULL, NULL,
-    },
-
-    {
-        ET_LAUGHTER, 25, 0,
-        NULL, NULL, NULL, NULL,
     },
 
     {

@@ -233,6 +233,38 @@ int player_regenerate(player *p)
         }
     }
 
+    /* handle clumsiness */
+    if ((e = player_effect_get(p, ET_CLUMSINESS)))
+    {
+        if (chance(33) && p->eq_weapon)
+        {
+            item *it = p->eq_weapon;
+
+            log_disable(p->log);
+            player_item_unequip(p, it);
+            log_enable(p->log);
+
+            log_add_entry(p->log, effect_get_msg_start(e));
+            player_item_drop(p, it);
+        }
+    }
+
+    /* handle itching */
+    if ((e = player_effect_get(p, ET_ITCHING)))
+    {
+        item *it;
+
+        if (chance(50) && (it = player_random_armour(p)))
+        {
+            log_disable(p->log);
+            player_item_unequip(p, it);
+            log_enable(p->log);
+
+            log_add_entry(p->log, effect_get_msg_start(e));
+            player_item_drop(p, it);
+        }
+    }
+
     return TRUE;
 }
 
@@ -3772,7 +3804,12 @@ int player_fountain_wash(player *p)
     }
     else if (chance(30))
     {
-        log_add_entry(p->log, "You got the dirt off!");
+        effect *e = NULL;
+        if ((e = player_effect_get(p, ET_ITCHING)))
+        {
+            log_add_entry(p->log, "You got the dirt off!");
+            player_effect_del(p, e);
+        }
     }
     else if (chance(30))
     {
