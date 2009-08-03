@@ -35,7 +35,7 @@ const potion_data potions[PO_MAX] =
     { PO_DIZZINESS,     "dizziness",          ET_DIZZINESS,        30 },
     { PO_OBJ_DETECT,    "object detection",   ET_NONE,             50 },
     { PO_MON_DETECT,    "monster detection",  ET_DETECT_MONSTER,   80 },
-    { PO_AMNESIA,       "forgetfulness",      ET_DEC_LEVEL,        30 }, /* FIXME: wrong effect? */
+    { PO_AMNESIA,       "forgetfulness",      ET_NONE,             30 },
     { PO_BLINDNESS,     "blindness",          ET_BLINDNESS,        40 },
     { PO_CONFUSION,     "confusion",          ET_CONFUSION,        35 },
     { PO_HEROISM,       "heroism",            ET_HEROISM,         520 },
@@ -117,6 +117,26 @@ int potion_with_effect(struct player *p, item *potion)
     }
 
     return identified;
+}
+
+int potion_amnesia(player *p, item *potion)
+{
+    position pos;
+
+    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
+    {
+        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
+        {
+            player_memory_of(p, pos).type = LT_NONE;
+            player_memory_of(p, pos).stationary = LS_NONE;
+            player_memory_of(p, pos).item = LT_NONE;
+            player_memory_of(p, pos).trap = LT_NONE;
+        }
+    }
+
+    log_add_entry(p->log, "You stagger for a moment...");
+
+    return TRUE;
 }
 
 int potion_detect_item(player *p, item *potion)

@@ -69,6 +69,7 @@ void potion_desc_shuffle();
 char *potion_desc(int potion_id);
 
 int potion_with_effect(struct player *p, item *potion);
+int potion_amnesia(struct player *p, item *potion);
 int potion_detect_item(struct player *p, item *potion);
 
 /* external vars */

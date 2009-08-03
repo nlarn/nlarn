@@ -2715,6 +2715,10 @@ int player_item_use(player *p, item *it)
 
             switch (it->id)
             {
+            case PO_AMNESIA:
+                item_identified = potion_amnesia(p, it);
+                break;
+
             case PO_OBJ_DETECT:
             case PO_TRE_DETECT:
                 item_identified = potion_detect_item(p, it);
@@ -4034,7 +4038,6 @@ int player_get_ac(player *p)
         ac += armour_ac(p->eq_suit);
 
     ac += player_effect(p, ET_PROTECTION);
-    ac += player_effect(p, ET_DIVINE_PROTECTION);
     ac += player_effect(p, ET_INVULNERABILITY);
 
     return ac;
