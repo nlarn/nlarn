@@ -1060,7 +1060,7 @@ void monster_move(monster *m, struct player *p)
             /* check for traps */
             if (level_trap_at(m->level, m->pos))
             {
-                if (monster_trap_trigger(m, p))
+                if (!monster_trap_trigger(m, p))
                     return; /* trap killed the monster */
             }
 
@@ -1124,7 +1124,6 @@ monster *monster_trap_trigger(monster *m, struct player *p)
 
     case TT_TELEPORT:
         monster_position(m, level_find_space(m->level, LE_MONSTER));
-
         break;
 
     default:

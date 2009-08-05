@@ -1116,13 +1116,15 @@ int inv_clean(inventory *inv)
 
     assert(inv != NULL);
 
-    for (pos = 1; pos <= inv_length(inv); pos++)
+    for (pos = 0; pos < inv_length(inv); pos++)
     {
-        it = inv_get(inv, pos - 1);
+        it = inv_get(inv, pos);
         if (it->count == 0)
         {
             /* use glib function to avoid callbacks */
-            g_ptr_array_remove_index(inv->content, pos - 1);
+            g_ptr_array_remove_index(inv->content, pos);
+            /* reduce pos as inventory length is reduced */
+            pos--;
         }
     }
 

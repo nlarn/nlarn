@@ -23,17 +23,14 @@ const spell_data spells[SP_MAX] =
     {
         SP_NONE, NULL, NULL,
         SC_NONE, DAM_NONE, ET_NONE,
-        NULL,
-        NULL,
-        NULL,
+        NULL, NULL, NULL,
         0, 0
     },
     {
         SP_PRO, "pro","protection",
         SC_PLAYER, DAM_NONE, ET_PROTECTION,
         "Generates a protection field",
-        NULL,
-        NULL,
+        NULL, NULL,
         1, 260
     },
     {
@@ -48,8 +45,7 @@ const spell_data spells[SP_MAX] =
         SP_DEX, "dex", "dexterity",
         SC_PLAYER, DAM_NONE, ET_INC_DEX,
         "Improves the casters dexterity",
-        NULL,
-        NULL,
+        NULL, NULL,
         1, 260
     },
     {
@@ -64,8 +60,7 @@ const spell_data spells[SP_MAX] =
         SP_CHM, "chm", "charm monster",
         SC_PLAYER, DAM_NONE, ET_CHARM_MONSTER,
         "some monsters may be awed at your magnificence",
-        NULL,
-        NULL,
+        NULL, NULL,
         1, 260
     },
     {
@@ -80,40 +75,35 @@ const spell_data spells[SP_MAX] =
         SP_STR, "str", "strength",
         SC_PLAYER, DAM_NONE, ET_INC_STR,
         "Increase the casters strength for a short term",
-        NULL,
-        NULL,
+        NULL, NULL,
         2, 460
     },
     {
-        SP_ENL, "enl", "enlightenment",
-        SC_PLAYER, DAM_NONE, ET_ENLIGHTENMENT,
-        "the caster becomes aware of things around him",
-        NULL,
-        NULL,
+        SP_CPO, "cpo", "cure poison",
+        SC_OTHER, DAM_NONE, ET_NONE,
+        "the caster is cured from poison",
+        NULL, NULL,
         2, 460
     },
     {
         SP_HEL, "hel", "healing",
         SC_PLAYER, DAM_NONE, ET_INC_HP,
         "restores some hp to the caster",
-        NULL,
-        NULL,
+        NULL, NULL,
         2, 400
     },
     {
         SP_CBL, "cbl", "cure blindness",
         SC_OTHER, DAM_NONE, ET_NONE,
         "restores sight to one so unfortunate as to be blinded",
-        NULL,
-        NULL,
+        NULL, NULL,
         2, 400
     },
     {
         SP_CRE, "cre", "create monster",
         SC_OTHER, DAM_NONE, ET_NONE,
         "creates a monster near the caster appropriate for the location",
-        NULL,
-        NULL,
+        NULL, NULL,
         2, 400
     },
     {
@@ -128,8 +118,7 @@ const spell_data spells[SP_MAX] =
         SP_INV, "inv", "invisibility",
         SC_PLAYER, DAM_NONE, ET_INVISIBILITY,
         "the caster becomes invisible",
-        NULL,
-        NULL,
+        NULL, NULL,
         2, 600
     },
     {
@@ -160,16 +149,14 @@ const spell_data spells[SP_MAX] =
         SP_CAN, "can", "cancellation",
         SC_PLAYER, DAM_NONE, ET_CANCELLATION,
         "negates the ability of a monster to use his special abilities",
-        NULL,
-        NULL,
+        NULL, NULL,
         3, 950
     },
     {
         SP_HAS, "has", "haste self",
         SC_PLAYER, DAM_NONE, ET_SPEED,
         "speeds up the casters movements",
-        NULL,
-        NULL,
+        NULL, NULL,
         3, 950
     },
     {
@@ -184,8 +171,7 @@ const spell_data spells[SP_MAX] =
         SP_VPR, "vpr", "vaporize rock",
         SC_OTHER, DAM_NONE, ET_NONE,
         "this changes rock to air",
-        NULL,
-        NULL,
+        NULL, NULL,
         3, 950
     },
     {
@@ -208,16 +194,14 @@ const spell_data spells[SP_MAX] =
         SP_DRL, "drl", "drain life",
         SC_POINT, DAM_PHYSICAL, ET_NONE,
         "subtracts hit points from both you and a monster",
-        NULL,
-        NULL,
+        NULL, NULL,
         4, 1400
     },
     {
         SP_GLO, "glo", "invulnerability",
         SC_PLAYER, DAM_NONE, ET_INVULNERABILITY,
         "this globe helps to protect the player from physical attack",
-        NULL,
-        NULL,
+        NULL, NULL,
         4, 1400
     },
     {
@@ -240,32 +224,28 @@ const spell_data spells[SP_MAX] =
         SP_SCA, "sca", "scare monster",
         SC_POINT, DAM_NONE, ET_SCARE_MONSTER,
         "terrifies the monster so that hopefully he wont hit the magic user",
-        NULL,
-        NULL,
+        NULL, NULL,
         5, 2000
     },
     {
         SP_HLD, "hld", "hold monster",
         SC_POINT, DAM_NONE, ET_HOLD_MONSTER,
         "the monster is frozen in his tracks if this is successful",
-        NULL,
-        NULL,
+        NULL, NULL,
         5, 2000
     },
     {
         SP_STP, "stp", "time stop",
         SC_OTHER, DAM_NONE, ET_TIMESTOP,
         "all movement in the caverns ceases for a limited duration",
-        NULL,
-        NULL,
+        NULL, NULL,
         5, 2500
     },
     {
         SP_TEL, "tel", "teleport away",
         SC_POINT, DAM_NONE, ET_NONE,
         "moves a particular monster around in the dungeon",
-        NULL,
-        NULL,
+        NULL, NULL,
         5, 2000
     },
     {
@@ -280,40 +260,35 @@ const spell_data spells[SP_MAX] =
         SP_MKW, "mkw", "make wall",
         SC_OTHER, DAM_NONE, ET_NONE,
         "Makes a wall in the specified place",
-        NULL,
-        NULL,
+        NULL, NULL,
         6, 3000
     },
     {
         SP_SPH, "sph", "sphere of annihilation",
         SC_OTHER, DAM_NONE, ET_NONE,
         "anything caught in this sphere is instantly killed.",
-        NULL,
-        NULL,
+        NULL, NULL,
         6, 3500
     },
     {
         SP_GEN,  "gen", "genocide",
         SC_OTHER, DAM_NONE, ET_NONE,
         "eliminates a species of monster from the game -- use sparingly",
-        NULL,
-        NULL,
+        NULL, NULL,
         6, 3800
     },
     {
         SP_SUM, "sum", "summon demon",
         SC_OTHER, DAM_NONE, ET_NONE,
         "summons a demon who hopefully helps you out",
-        NULL,
-        NULL,
+        NULL, NULL,
         6, 3500
     },
     {
         SP_WTW, "wtw", "walk through walls",
         SC_PLAYER, DAM_NONE, ET_WALL_WALK,
         "allows the caster to walk through walls for a short period of time",
-        NULL,
-        NULL,
+        NULL, NULL,
         6, 3800
     },
     {
@@ -772,6 +747,22 @@ void spell_create_sphere(player *p)
     else
     {
         log_add_entry(p->log, "Huh?");
+    }
+}
+
+void spell_cure_poison(struct player *p)
+{
+    effect *eff = NULL;
+
+    assert(p != NULL);
+
+    if ((eff = player_effect_get(p, ET_POISON)))
+    {
+        player_effect_del(p, eff);
+    }
+    else
+    {
+        log_add_entry(p->log, "You weren't even poisoned!");
     }
 }
 

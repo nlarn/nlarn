@@ -64,7 +64,7 @@ enum spell_ids {
 	SP_CHM,		/* charm monster */
 	SP_SSP,		/* sonic spear */
 	SP_STR,		/* strength */
-	SP_ENL,		/* enlightnement */
+	SP_CPO,		/* cure poison */
 	SP_HEL,		/* healing */
 	SP_CBL,		/* cure blindness */
 	SP_CRE,		/* create monster */
@@ -116,6 +116,7 @@ void spell_type_blast(spell *s, struct player *p);
 void spell_alter_reality(struct player *p);
 int spell_create_monster(struct player *p);
 void spell_create_sphere(struct player *p);
+void spell_cure_poison(struct player *p);
 void spell_cure_blindness(struct player *p);
 void spell_genocide_monster(struct player *p);
 void spell_make_wall(struct player *p);

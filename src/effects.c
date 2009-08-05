@@ -428,7 +428,7 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_POISON, 300, 1,
-        "You feel a sickness engulf you.",
+        NULL, /* message is shown in player_damage_take */
         "You feel cured.",
         "The %s looks poisoned.",
         "The %s looks cured.",

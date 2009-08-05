@@ -87,7 +87,7 @@ static const long player_lvl_exp[] =
     250000000, 260000000, 270000000, 280000000, 290000000, 300000000                           /* 96-101*/
 };
 
-static int player_trigger_trap(player *p, trap_t trap);
+static int player_trap_trigger(player *p, trap_t trap);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 
 static char *player_death_description(game_score_t *score, int verbose);
@@ -531,7 +531,7 @@ int player_move(player *p, int direction)
     /* trigger the trap */
     if (target_t->trap)
     {
-        times += player_trigger_trap(p, target_t->trap);
+        times += player_trap_trigger(p, target_t->trap);
     }
 
     /* auto-pickup */
@@ -899,6 +899,7 @@ int player_pickup(player *p)
     if ((*inv == NULL) || (inv_length(*inv) == 0))
     {
         log_add_entry(p->log, "There is nothing here.");
+        return 0;
     }
     else if (inv_length(*inv) == 1)
     {
@@ -919,6 +920,13 @@ int player_pickup(player *p)
 
         /* clean up callbacks */
         display_inv_callbacks_clean(callbacks);
+    }
+
+    /* delete inventory if empty */
+    if (!inv_length(level_ilist_at(p->level, p->pos)))
+    {
+        inv_destroy(level_ilist_at(p->level, p->pos));
+        level_ilist_at(p->level, p->pos) = NULL;
     }
 
     return time;
@@ -1111,11 +1119,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         { NULL, NULL, }, /* DAM_ELECTRICITY */
         /* effect start messages are covered by player_effect_add
          * only need to notify if the player resisted */
-        { NULL, "You resist the poison.", }, /* DAM_POISON */
+        { "You feel poison running through your veins.", "You resist the poison.", }, /* DAM_POISON */
         { NULL, "You are not blinded.", }, /* DAM_BLINDNESS */
         { NULL, "You are not confused.", }, /* DAM_CONFUSION */
         { NULL, "", }, /* DAM_PARALYSIS */
-        { NULL, "", }, /* DAM_STUN */
         { NULL, "", }, /* DAM_DEC_STR */
         { NULL, "", }, /* DAM_DEC_DEX */
         { "Your life energy is drained.", "You are not affected.", }, /* DAM_DRAIN_LIFE */
@@ -1214,37 +1221,45 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     if (dam->amount)
     {
-        /* taken damage */
-        p->hp -= dam->amount;
-
-        /* notify player */
-        if (damage_msgs[dam->type].msg_affected)
-        {
-            log_add_entry(p->log, damage_msgs[dam->type].msg_affected);
-        }
-
         /* add effects */
         switch (dam->type)
         {
         case DAM_POISON:
-            e = effect_new(ET_POISON, game_turn(p->game));
-            e->amount = dam->amount;
-            player_effect_add(p, e);
+            if (!(e = player_effect_get(p, ET_POISON)))
+            {
+                e = effect_new(ET_POISON, game_turn(p->game));
+                e->amount = dam->amount;
+                player_effect_add(p, e);
+            }
+            else
+            {
+                e->amount += dam->amount;
+            }
             break;
 
         case DAM_BLINDNESS:
-            e = effect_new(ET_BLINDNESS, game_turn(p->game));
-            player_effect_add(p, e);
+            /* it is not possible to become more blind */
+            if (!(e = player_effect_get(p, ET_BLINDNESS)))
+            {
+                e = effect_new(ET_BLINDNESS, game_turn(p->game));
+                player_effect_add(p, e);
+            }
             break;
 
         case DAM_CONFUSION:
-            e = effect_new(ET_CONFUSION, game_turn(p->game));
-            player_effect_add(p, e);
+            if (!(e = player_effect_get(p, ET_CONFUSION)))
+            {
+                e = effect_new(ET_CONFUSION, game_turn(p->game));
+                player_effect_add(p, e);
+            }
             break;
 
         case DAM_PARALYSIS:
-            e = effect_new(ET_PARALYSIS, game_turn(p->game));
-            player_effect_add(p, e);
+            if (!(e = player_effect_get(p, ET_PARALYSIS)))
+            {
+                e = effect_new(ET_PARALYSIS, game_turn(p->game));
+                player_effect_add(p, e);
+            }
             break;
 
         case DAM_DEC_STR:
@@ -1260,12 +1275,21 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             break;
 
         case DAM_DRAIN_LIFE:
-            player_lvl_lose(p, 1);
+            player_lvl_lose(p, dam->amount);
             break;
 
         default:
             /* pfffft. */
             break;
+        }
+
+        /* taken damage */
+        p->hp -= dam->amount;
+
+        /* notify player */
+        if (damage_msgs[dam->type].msg_affected)
+        {
+            log_add_entry(p->log, damage_msgs[dam->type].msg_affected);
         }
     }
     else
@@ -1429,6 +1453,11 @@ int player_spell_cast(player *p)
 
         switch (spell->id)
         {
+            /* cure poison */
+        case SP_CPO:
+            spell_cure_poison(p);
+            break;
+
             /* cure blindness */
         case SP_CBL:
             spell_cure_blindness(p);
@@ -2556,6 +2585,9 @@ char *player_item_identified_list(player *p)
     }
     item_destroy(it);
 
+    /* append trailing newline */
+    g_string_append_c(list, '\n');
+
     return g_string_free(list, FALSE);
 }
 
@@ -2976,13 +3008,6 @@ int player_item_pickup(player *p, item *it)
     }
 
     inv_del_element(level_ilist_at(p->level, p->pos), it);
-
-    /* delete inventory if empty */
-    if (!inv_length(level_ilist_at(p->level, p->pos)))
-    {
-        inv_destroy(level_ilist_at(p->level, p->pos));
-        level_ilist_at(p->level, p->pos) = NULL;
-    }
 
     /* one turn to pick item up, one to stuff it into the pack */
     return 2;
@@ -3640,11 +3665,10 @@ int player_fountain_drink(player *p)
 
     if (chance(7))
     {
-        e = effect_new(ET_DEC_DAMAGE, game_turn(p->game));
-        e->turns = 200 + rand_0n(20);
-        player_effect_add(p, e);
-
         log_add_entry(p->log, "You feel a sickness coming on.");
+
+        e = effect_new(ET_DEC_DAMAGE, game_turn(p->game));
+        player_effect_add(p, e);
     }
     else if (chance(13))
     {
@@ -3717,7 +3741,9 @@ int player_fountain_drink(player *p)
             amount = rand_1n(p->level->nlevel + 1);
             if (fntchange > 0)
             {
-                log_add_entry(p->log, "You gain %d hit point", amount);
+                log_add_entry(p->log, "You gain %d hit point%s",
+                              amount, plural(amount));
+
                 player_hp_gain(p, amount);
             }
             else
@@ -3725,7 +3751,7 @@ int player_fountain_drink(player *p)
                 log_add_entry(p->log, "You lose %d hit point%s!",
                               amount, plural(amount));
 
-                damage *dam = damage_new(DAM_POISON, amount, NULL);
+                damage *dam = damage_new(DAM_NONE, amount, NULL);
                 player_damage_take(p, dam, PD_STATIONARY, LS_FOUNTAIN);
             }
 
@@ -3742,7 +3768,7 @@ int player_fountain_drink(player *p)
             }
             else
             {
-                log_add_entry(p->log, "You just lost %d spell.",
+                log_add_entry(p->log, "You just lost %d mana point%s.",
                               amount, plural(amount));
 
                 player_mp_lose(p, amount);
@@ -4195,7 +4221,7 @@ char *player_get_lvl_desc(player *p)
  * @param the trap
  * @return time this move took
  */
-static int player_trigger_trap(player *p, trap_t trap)
+static int player_trap_trigger(player *p, trap_t trap)
 {
     /* additional time of turn, if any */
     int time = 0;
@@ -4206,7 +4232,7 @@ static int player_trigger_trap(player *p, trap_t trap)
     possibility = trap_chance(trap);
 
     if (player_memory_of(p, p->pos).trap == trap)
-        /* if player knows the trap a little chance remains */
+        /* if player knows the trap a 5% chance remains */
         possibility = 5;
 
     if (chance(possibility))
@@ -4220,7 +4246,7 @@ static int player_trigger_trap(player *p, trap_t trap)
         {
         case TT_TRAPDOOR:
             time += player_level_enter(p, (p->game)->levels[p->level->nlevel + 1], TRUE);
-            /* fall through to TT_TELEPORT to find a new space */
+            break;
 
         case TT_TELEPORT:
             p->pos = level_find_space(p->level, LE_MONSTER);

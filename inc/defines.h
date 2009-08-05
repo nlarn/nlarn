@@ -58,7 +58,7 @@ typedef enum _attack_types
 
 typedef enum _damage_types
 {
-    DAM_NONE,
+    DAM_NONE,           /* pass-through: just reduce HP */
     DAM_PHYSICAL,
     DAM_MAGICAL,        /* e.g. magic missile */
 
