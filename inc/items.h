@@ -135,14 +135,14 @@ item *item_new(item_t item_type, int item_id, int item_bonus);
 item *item_new_random(item_t item_type);
 item *item_new_by_level(item_t item_type, int num_level);
 item *item_clone(item *original);
-item *item_split(item *original, int count);
+item *item_split(item *original, guint32 count);
 void item_destroy(item *it);
 
 int item_compare(item *a, item *b);
 int item_sort(gconstpointer a, gconstpointer b, gpointer data);
 char *item_describe(item *it, int known, int singular, int definite, char *str, int str_len);
 item_material_t item_material(item *it);
-int item_price(item *it);
+guint item_price(item *it);
 int item_weight(item *it);
 
 void item_effect_add(item *i, effect *e);
@@ -184,17 +184,17 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
                        inv_callback_void post_del);
 
 int inv_add(inventory *inv, item *item_new);
-item *inv_del(inventory *inv, int pos);
+item *inv_del(inventory *inv, guint idx);
 int inv_del_element(inventory *inv, item *item);
-int inv_clean(inventory *inv);
+void inv_clean(inventory *inv);
 void inv_sort(inventory *inv,GCompareDataFunc compare_func, gpointer user_data);
 int inv_weight(inventory *inv);
-int inv_item_count(inventory *inv, item_t type, int id);
+int inv_item_count(inventory *inv, item_t type, guint32 id);
 
 int inv_length_filtered(inventory *inv, int (*filter)(item *));
-item *inv_get_filtered(inventory *inv, int pos, int (*filter)(item *));
+item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *));
 
 #define inv_length(inv)            (((inv) == NULL) ? 0 : (inv)->content->len)
-#define inv_get(inv, pos)          (g_ptr_array_index((inv)->content, (pos)))
+#define inv_get(inv, idx)          (g_ptr_array_index((inv)->content, (idx)))
 
 #endif

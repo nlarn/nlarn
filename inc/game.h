@@ -92,7 +92,7 @@ void game_scores_destroy(GList *gs);
 game_score_t *game_score(game *g, player_cod cod, int cause);
 GList *game_score_add(game *g, game_score_t *score);
 
-void game_spin_the_wheel(game *g, int times);
+void game_spin_the_wheel(game *g, guint times);
 
 /* macros */
 

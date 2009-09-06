@@ -150,7 +150,7 @@ int log_add_entry(message_log *log, char *fmt, ...)
     return TRUE;
 }
 
-message_log_entry *log_get_entry(message_log *log, int id)
+message_log_entry *log_get_entry(message_log *log, guint id)
 {
     assert(log != NULL && id > 0 && id <= log->length);
     return(log->entries[id - 1]);
@@ -176,7 +176,7 @@ void log_delete(message_log *log)
 GPtrArray *text_wrap(char *str, int width, int indent)
 {
     GPtrArray *text;
-    int pos = 0;        /* position in string */
+    size_t pos = 0;     /* position in string */
     int lp;             /* last position of whitespace */
     int len;            /* current line length */
     char *line, *tmp;   /* copy of line */

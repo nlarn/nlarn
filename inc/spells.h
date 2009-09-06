@@ -35,7 +35,7 @@ typedef enum spell_type
 } spell_t;
 
 typedef struct spell_data {
-	int id;
+	guint id;
 	char *code;
 	char *name;
 	spell_t type;

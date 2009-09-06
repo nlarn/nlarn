@@ -36,7 +36,7 @@ int building_bank(player *p)
 {
     int turns = 2;
     char cmd;
-    int amount = 0;
+    guint amount = 0;
     int mobuls, i;
 
     GPtrArray *callbacks = NULL;
@@ -417,7 +417,7 @@ int building_lrs(player *p)
 int building_school(player *p)
 {
     int turns = 2;
-    int price;
+    guint price;
 
     GString *text;
     int i;

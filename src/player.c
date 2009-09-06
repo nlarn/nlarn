@@ -142,7 +142,7 @@ player *player_new(struct game *game)
 
 void player_destroy(player *p)
 {
-    int i;
+    guint idx;
     effect *eff;
 
     assert(p != NULL);
@@ -155,9 +155,9 @@ void player_destroy(player *p)
     g_ptr_array_free(p->known_spells, TRUE);
 
     /* release effects */
-    for (i = 1; i <= p->effects->len; i++)
+    for (idx = 0; idx < p->effects->len; idx++)
     {
-        eff = g_ptr_array_index(p->effects, i - 1);
+        eff = g_ptr_array_index(p->effects, idx);
 
         if (!eff->item)
         {
@@ -438,7 +438,7 @@ void player_die(player *p, player_cod cause_type, int cause)
 gint64 player_calc_score(player *p, int won)
 {
     gint64 score = 0;
-    int i;
+    guint idx;
 
     assert (p != NULL);
 
@@ -446,9 +446,9 @@ gint64 player_calc_score(player *p, int won)
     score = player_get_gold(p) + p->bank_account - p->outstanding_taxes;
 
     /* value of equipment */
-    for (i = 1; i <= inv_length(p->inventory); i++)
+    for (idx = 0; idx < inv_length(p->inventory); idx++)
     {
-        score += item_price(inv_get(p->inventory, i - 1));
+        score += item_price(inv_get(p->inventory, idx));
     }
 
     /* experience */
@@ -701,7 +701,7 @@ int player_level_enter(player *p, level *l, gboolean teleported)
 
     if (!(l->visited))
     {
-        level_new(l, game_difficulty(p->game), game_mazefile(p->game));
+        level_new(l, game_mazefile(p->game));
 
         if (p->stats.deepest_level < l->nlevel)
         {
@@ -830,7 +830,7 @@ int player_examine(player *p, position pos)
     level_tile *tile;
     item *it;
     char item_desc[81];
-    int i;
+    guint idx;
     char *desc = NULL, *tmp;
 
     assert(p != NULL);
@@ -858,13 +858,13 @@ int player_examine(player *p, position pos)
         }
         else
         {
-            for (i = 1; i <= inv_length(tile->ilist); i++)
+            for (idx = 0; idx < inv_length(tile->ilist); idx++)
             {
-                it = inv_get(tile->ilist, i - 1);
+                it = inv_get(tile->ilist, idx);
                 item_describe(it, player_item_known(p, it),
                               FALSE, FALSE, item_desc, 80);
 
-                if (i > 1)
+                if (idx > 0)
                 {
                     tmp = g_strjoin(" and ", desc, item_desc, NULL);
                     g_free(desc);
@@ -876,6 +876,7 @@ int player_examine(player *p, position pos)
                     strcpy(desc, item_desc);
                 }
             }
+
             log_add_entry(p->log, "You see %s here.", desc);
             g_free(desc);
         }
@@ -934,20 +935,20 @@ int player_pickup(player *p)
 
 void player_autopickup(player *p)
 {
-    int pos;
+    guint idx;
     item *i;
 
     assert (p != NULL && level_ilist_at(p->level, p->pos));
 
-    for (pos = 0; pos < inv_length(level_ilist_at(p->level, p->pos)); pos++)
+    for (idx = 0; idx < inv_length(level_ilist_at(p->level, p->pos)); idx++)
     {
-        i = inv_get(level_ilist_at(p->level, p->pos), pos);
+        i = inv_get(level_ilist_at(p->level, p->pos), idx);
 
         if (p->settings.auto_pickup[i->type])
         {
             player_item_pickup(p, i);
             /* go back one item as the following items lowered their number */
-            pos--;
+            idx--;
         }
     }
 }
@@ -1009,14 +1010,14 @@ void player_lvl_gain(player *p, int count)
     {
         /* increase HP max */
         base = (p->constitution - game_difficulty(p->game)) >> 1;
-        if (p->lvl < (7 - game_difficulty(p->game)))
+        if (p->lvl < max(7 - game_difficulty(p->game), 0))
             base += p->constitution >> 2;
 
         player_hp_max_gain(p, rand_1n(3) + rand_0n(max(base, 1)));
 
         /* increase MP max */
         base = (p->intelligence - game_difficulty(p->game)) >> 1;
-        if (p->lvl < (7 - game_difficulty(p->game)))
+        if (p->lvl < max(7 - game_difficulty(p->game), 0))
             base += p->intelligence >> 2;
 
         player_mp_max_gain(p, rand_1n(3) + rand_0n(max(base, 1)));
@@ -1041,14 +1042,14 @@ void player_lvl_lose(player *p, int count)
     {
         /* decrease HP max */
         base = (p->constitution - game_difficulty(p->game)) >> 1;
-        if (p->lvl < (7 - game_difficulty(p->game)))
+        if (p->lvl < max(7 - game_difficulty(p->game), 0))
             base += p->constitution >> 2;
 
         player_hp_max_lose(p, rand_1n(3) + rand_0n(max(base, 1)));
 
         /* decrease MP max */
         base = (p->intelligence - game_difficulty(p->game)) >> 1;
-        if (p->lvl < (7 - game_difficulty(p->game)))
+        if (p->lvl < max(7 - game_difficulty(p->game), 0))
             base += p->intelligence >> 2;
 
         player_mp_max_lose(p, rand_1n(3) + rand_0n(max(base, 1)));
@@ -1327,7 +1328,7 @@ int player_hp_max_lose(player *p, int count)
     if (p->hp_max < 1)
         p->hp_max = 1;
 
-    if (p->hp > p->hp_max)
+    if (p->hp > (int)p->hp_max)
         p->hp = p->hp_max;
 
     return p->hp_max;
@@ -1374,7 +1375,7 @@ int player_mp_max_lose(player *p, int count)
     if (p->mp_max < 1)
         p->mp_max = 1;
 
-    if (p->mp > p->mp_max)
+    if (p->mp > (int)p->mp_max)
         p->mp = p->mp_max;
 
     return p->mp_max;
@@ -1397,7 +1398,7 @@ int player_spell_cast(player *p)
         return turns;
     }
 
-    spell = display_spell_select("Select a spell to cast", p, NULL);
+    spell = display_spell_select("Select a spell to cast", p);
 
     /* ESC pressed */
     if (!spell)
@@ -1522,10 +1523,10 @@ int player_spell_cast(player *p)
  * @param id of spell to learn
  * @return FALSE if learning the spell failed, otherwise level of knowledge
  */
-int player_spell_learn(player *p, int spell_type)
+int player_spell_learn(player *p, guint spell_type)
 {
     spell *s;
-    int i;
+    guint idx;
 
     assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
@@ -1535,7 +1536,7 @@ int player_spell_learn(player *p, int spell_type)
         s->learnt = game_turn(p->game);
 
         /* TODO: add a check for intelligence */
-        if (spell_level(s) > p->lvl)
+        if (spell_level(s) > (int)p->lvl)
         {
             /* spell is beyond the players scope */
             spell_destroy(s);
@@ -1548,10 +1549,10 @@ int player_spell_learn(player *p, int spell_type)
     else
     {
         /* spell already known, improve knowledge */
-        for (i = 1; i <= p->known_spells->len; i++)
+        for (idx = 0; idx < p->known_spells->len; idx++)
         {
             /* search spell */
-            s = g_ptr_array_index(p->known_spells, i - 1);
+            s = (spell *)g_ptr_array_index(p->known_spells, idx);
 
             if (s->id == spell_type)
             {
@@ -1573,19 +1574,19 @@ int player_spell_learn(player *p, int spell_type)
  * @param the id of the spell to forget
  * @return TRUE if the spell could be found and removed, othrwise FALSE
  */
-int player_spell_forget(player *p, int spell_type)
+int player_spell_forget(player *p, guint spell_type)
 {
     spell *s;
-    int i;
+    guint idx;
 
     assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
-    for (i = 1; i <= p->known_spells->len; i++);
+    for (idx = 0; idx < p->known_spells->len; idx++);
     {
-        s = g_ptr_array_index(p->known_spells, i - 1);
+        s = g_ptr_array_index(p->known_spells, idx);
         if (s->id == spell_type)
         {
-            g_ptr_array_remove_index_fast(p->known_spells, i);
+            g_ptr_array_remove_index_fast(p->known_spells, idx);
             return TRUE;
         }
     }
@@ -1599,16 +1600,16 @@ int player_spell_forget(player *p, int spell_type)
  * @param id of the spell in question
  * @return FALSE if unknown, otherwise level of knowledge of that spell
  */
-int player_spell_known(player *p, int spell_type)
+int player_spell_known(player *p, guint spell_type)
 {
     spell *s;
-    int i;
+    guint idx;
 
     assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
-    for (i = 1; i <= p->known_spells->len; i++)
+    for (idx = 1; idx < p->known_spells->len; idx++)
     {
-        s = g_ptr_array_index(p->known_spells, i - 1);
+        s = g_ptr_array_index(p->known_spells, idx);
         if (s->id == spell_type)
         {
             return s->knowledge;
@@ -1751,7 +1752,7 @@ void player_effect_add(player *p, effect *e)
 
 void player_effects_add(player *p, GPtrArray *effects)
 {
-    int pos;
+    guint idx;
     effect *e;
 
     assert (p != NULL);
@@ -1759,9 +1760,9 @@ void player_effects_add(player *p, GPtrArray *effects)
     /* if effects is NULL */
     if (!effects) return;
 
-    for (pos = 1; pos <= effects->len; pos++)
+    for (idx = 0; idx < effects->len; idx++)
     {
-        e = g_ptr_array_index(effects, pos - 1);
+        e = g_ptr_array_index(effects, idx);
         g_ptr_array_add(p->effects, e);
 
         if (effect_get_msg_start(e))
@@ -1783,7 +1784,7 @@ int player_effect_del(player *p, effect *e)
 
 void player_effects_del(player *p, GPtrArray *effects)
 {
-    int pos;
+    guint idx;
     effect *e;
 
     assert (p != NULL);
@@ -1791,9 +1792,9 @@ void player_effects_del(player *p, GPtrArray *effects)
     /* if effects is NULL */
     if (!effects) return;
 
-    for (pos = 1; pos <= effects->len; pos++)
+    for (idx = 0; idx < effects->len; idx++)
     {
-        e = g_ptr_array_index(effects, pos - 1);
+        e = g_ptr_array_index(effects, idx);
         g_ptr_array_remove_fast(p->effects, e);
 
         if (effect_get_msg_stop(e))
@@ -1817,14 +1818,14 @@ int player_effect(player *p, int effect_type)
 
 void player_effects_expire(player *p, int turns)
 {
-    int i = 1;
+    guint idx = 0;
     effect *e;
 
     assert(p != NULL);
 
-    while (i <= p->effects->len)
+    while (idx < p->effects->len)
     {
-        e = g_ptr_array_index(p->effects, i - 1);
+        e = g_ptr_array_index(p->effects, idx);
 
         if (effect_expire(e, turns) == -1)
         {
@@ -1834,7 +1835,7 @@ void player_effects_expire(player *p, int turns)
         }
         else
         {
-            i ++;
+            idx++;
         }
     }
 }
@@ -2925,7 +2926,7 @@ int player_item_use(player *p, item *it)
 int player_item_drop(player *p, item *it)
 {
     char desc[61];
-    int count = 0;
+    guint count = 0;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -2971,7 +2972,7 @@ int player_item_drop(player *p, item *it)
 int player_item_pickup(player *p, item *it)
 {
     char desc[61];
-    int count = 0;
+    guint count = 0;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -3016,7 +3017,7 @@ int player_item_pickup(player *p, item *it)
 int player_item_buy(player *p, item *it)
 {
     int price;
-    int count = 0;
+    guint count = 0;
     int player_gold;
     char text[81];
     char name[61];
@@ -3118,7 +3119,7 @@ int player_item_buy(player *p, item *it)
 int player_item_sell(player *p, item *it)
 {
     int price;
-    int count = 0;
+    guint count = 0;
     char question[81];
     char name[61];
 
@@ -4163,16 +4164,16 @@ int player_get_cha(player *p)
            - player_effect(p, ET_DIZZINESS);
 }
 
-int player_get_gold(player *p)
+guint player_get_gold(player *p)
 {
-    int pos;
+    guint idx;
     item *i;
 
     assert(p != NULL);
 
-    for (pos = 1; pos <= inv_length(p->inventory); pos++)
+    for (idx = 0; idx < inv_length(p->inventory); idx++)
     {
-        i = inv_get(p->inventory, pos - 1);
+        i = inv_get(p->inventory, idx);
         if (i->type == IT_GOLD)
             return i->count;
     }
@@ -4180,16 +4181,16 @@ int player_get_gold(player *p)
     return 0;
 }
 
-int player_set_gold(player *p, int amount)
+guint player_set_gold(player *p, guint amount)
 {
-    int pos;
+    guint idx;
     item *i;
 
     assert(p != NULL);
 
-    for (pos = 1; pos <= inv_length(p->inventory); pos++)
+    for (idx = 0; idx < inv_length(p->inventory); idx++)
     {
-        i = inv_get(p->inventory, pos - 1);
+        i = inv_get(p->inventory, idx);
         if (i->type == IT_GOLD)
         {
             i->count = amount;

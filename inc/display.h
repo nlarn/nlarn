@@ -50,10 +50,10 @@ typedef struct display_inv_callback
 
 typedef struct display_window
 {
-    int x1;
-    int y1;
-    int width;
-    int height;
+    guint x1;
+    guint y1;
+    guint width;
+    guint height;
     char *title;
     char *caption;
     WINDOW *window;
@@ -76,7 +76,7 @@ void display_inv_callbacks_clean(GPtrArray *callbacks);
 
 void display_config_autopickup(player *p);
 
-spell *display_spell_select(char *title, player *p, GPtrArray *callbacks);
+spell *display_spell_select(char *title, player *p);
 
 int display_get_count(char *caption, int value);
 int display_get_yesno(char *question, char *yes, char *no);

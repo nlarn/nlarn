@@ -123,6 +123,8 @@ int potion_amnesia(player *p, item *potion)
 {
     position pos;
 
+    assert (p != NULL && potion != NULL);
+
     for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
@@ -142,7 +144,7 @@ int potion_amnesia(player *p, item *potion)
 int potion_detect_item(player *p, item *potion)
 {
     position pos;
-    int i;
+    guint idx;
     int count = 0; /* count detected items */
     inventory *inv;
     item *it;
@@ -155,9 +157,9 @@ int potion_detect_item(player *p, item *potion)
         {
             if ((inv = level_ilist_at(p->level, pos)))
             {
-                for (i = 0; i <  inv_length(inv); i++)
+                for (idx = 0; idx <  inv_length(inv); idx++)
                 {
-                    it = inv_get(inv, i);
+                    it = inv_get(inv, idx);
 
                     if (potion->id == PO_TRE_DETECT)
                     {

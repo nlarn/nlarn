@@ -214,9 +214,9 @@ int player_mp_max_lose(player *p, int count);
 
 /* spell functions */
 int player_spell_cast(player *p);
-int player_spell_learn(player *p, int spell_type);
-int player_spell_forget(player *p, int spell_type);
-int player_spell_known(player *p, int spell_type);
+int player_spell_learn(player *p, guint spell_type);
+int player_spell_forget(player *p, guint spell_type);
+int player_spell_known(player *p, guint spell_type);
 
 /* dealing with temporary effects */
 void player_effect_add(player *p, effect *e);
@@ -283,8 +283,8 @@ int player_get_dex(player *p);
 int player_get_cha(player *p);
 
 /* deal with money */
-int player_get_gold(player *p);
-int player_set_gold(player *p, int amount);
+guint player_get_gold(player *p);
+guint player_set_gold(player *p, guint amount);
 
 char *player_get_lvl_desc(player *p);
 

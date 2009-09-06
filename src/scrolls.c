@@ -108,7 +108,7 @@ int scroll_with_effect(struct player *p, item *scroll)
 
 int scroll_annihilate(struct player *p, item *scroll)
 {
-    int i;
+    guint idx;
     int count = 0;
 
     GPtrArray *mlist;
@@ -118,9 +118,9 @@ int scroll_annihilate(struct player *p, item *scroll)
 
     mlist = level_get_monsters_in(p->level, rect_new_sized(p->pos, 1));
 
-    for (i = 1; i <= mlist->len; i++)
+    for (idx = 0; idx < mlist->len; idx++)
     {
-        m = g_ptr_array_index(mlist, i - 1);
+        m = g_ptr_array_index(mlist, idx);
 
         /* FIXME: remove this special case here and give a good resistance to
          * the demon lords */
@@ -132,7 +132,7 @@ int scroll_annihilate(struct player *p, item *scroll)
             if (!m)
             {
                 count++;
-                i--;
+                idx--;
             }
         }
         else
@@ -219,16 +219,16 @@ int scroll_enchant_weapon(player *p, item *scroll)
 int scroll_gem_perfection(player *p, item *scroll)
 {
     int count = 0;
-    int i;
+    guint idx;
 
     item *it;
 
     assert(p != NULL && scroll != NULL);
 
     /* FIXME: too simple. should give the ability to choose a single gem instead */
-    for (i = 1; i <= inv_length(p->inventory); i++)
+    for (idx = 0; idx < inv_length(p->inventory); idx++)
     {
-        it = inv_get(p->inventory, i - 1);
+        it = inv_get(p->inventory, idx);
         if (it->type == IT_GEM)
         {
             /* double gem value */
@@ -242,15 +242,15 @@ int scroll_gem_perfection(player *p, item *scroll)
 
 int scroll_heal_monster(player *p, item *scroll)
 {
-    int i;
+    guint idx;
     int count = 0;
     monster *m;
 
     assert(p != NULL && scroll != NULL);
 
-    for (i = 1; i <= p->level->mlist->len; i++)
+    for (idx = 0; idx < p->level->mlist->len; idx++)
     {
-        m = g_ptr_array_index(p->level->mlist, i - 1);
+        m = g_ptr_array_index(p->level->mlist, idx);
 
         if (m->hp < monster_hp_max(m))
         {
@@ -274,15 +274,15 @@ int scroll_identify(player *p, item *scroll)
      * should give the ability to choose a single item instead
      */
 
-    int pos;
+    guint idx;
     int count = 0; /* how many items have been identified */
     item *it;
 
     assert(p != NULL && scroll != NULL);
 
-    for (pos = 1; pos <= inv_length(p->inventory); pos++)
+    for (idx = 0; idx < inv_length(p->inventory); idx++)
     {
-        it = inv_get(p->inventory, pos - 1);
+        it = inv_get(p->inventory, idx);
         if (!player_item_identified(p, it))
         {
             player_item_identify(p, it);
@@ -307,7 +307,7 @@ int scroll_mapping(player *p, item *scroll)
 {
     position pos;
 
-    /* scroll can be null as I use this tp fake a known level */
+    /* scroll can be null as I use this to fake a known level */
     assert(p != NULL);
 
     for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
@@ -327,7 +327,7 @@ int scroll_remove_curse(player *p, item *scroll)
     int count_done = 0; /* how many curses have been removed */
     int count_avail = 0; /* how many curses can be removed */
 
-    int pos;
+    guint idx;
     item *item;
     char buf[61];
 
@@ -343,9 +343,9 @@ int scroll_remove_curse(player *p, item *scroll)
         count_avail = 1;
     }
 
-    for (pos = 1; (pos <= inv_length(p->inventory)) && (count_avail > 0); pos++)
+    for (idx = 0; (idx < inv_length(p->inventory)) && (count_avail > 0); idx++)
     {
-        item = inv_get(p->inventory, pos - 1);
+        item = inv_get(p->inventory, idx);
 
         if (item->cursed)
         {
@@ -374,14 +374,14 @@ int scroll_remove_curse(player *p, item *scroll)
 
 int scroll_spell_extension(player *p, item *scroll)
 {
-    int i;
+    guint idx;
     spell *sp;
 
     assert(p != NULL && scroll != NULL);
 
-    for (i = 1; i <= p->known_spells->len; i++)
+    for (idx = 0; idx < p->known_spells->len; idx++)
     {
-        sp = g_ptr_array_index(p->known_spells, i - 1);
+        sp = g_ptr_array_index(p->known_spells, idx);
 
         /* double spell knowledge */
         sp->knowledge <<=1;
@@ -399,7 +399,8 @@ int scroll_spell_extension(player *p, item *scroll)
 
 int scroll_teleport(player *p, item *scroll)
 {
-    int nlevel;
+    guint nlevel;
+
     assert(p != NULL);
 
     if (p->level->nlevel == 0)

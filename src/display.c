@@ -20,8 +20,8 @@
 #include <curses.h>
 #include <panel.h>
 
-static int display_rows = 0;
-static int display_cols = 0;
+static guint display_rows = 0;
+static guint display_cols = 0;
 
 /* linked list of opened windows */
 static GList *windows = NULL;
@@ -107,7 +107,7 @@ int display_init()
 
 int display_paint_screen(player *p)
 {
-    int x, y, i;
+    guint x, y, i;
     position pos;
     item *it;
     monster *monst;
@@ -124,7 +124,7 @@ int display_paint_screen(player *p)
     GPtrArray *text = NULL;
 
     /* storage for the game time of messages */
-    int *ttime = NULL;
+    guint *ttime = NULL;
 
     /* refresh screen dimensions */
     getmaxyx(stdscr, display_rows, display_cols);
@@ -259,11 +259,11 @@ int display_paint_screen(player *p)
     printw("%s, %s", p->name, player_get_lvl_desc(p));
 
     /* current HPs */
-    if (p->hp <= (p->hp_max / 10)) /* 10% hp left */
+    if (p->hp <= ((int)p->hp_max / 10)) /* 10% hp left */
         attrs = (COLOR_PAIR(DC_RED) | A_BOLD);
-    else if (p->hp <= (p->hp_max / 4))  /* 25% hp left */
+    else if (p->hp <= ((int)p->hp_max / 4))  /* 25% hp left */
         attrs = COLOR_PAIR(DC_RED);
-    else if (p->hp <= (p->hp_max / 2))  /* 50% hp left */
+    else if (p->hp <= ((int)p->hp_max / 2))  /* 50% hp left */
         attrs = COLOR_PAIR(DC_GREEN);
     else
         attrs = (COLOR_PAIR(DC_GREEN) | A_BOLD);
@@ -278,11 +278,11 @@ int display_paint_screen(player *p)
     attroff(COLOR_PAIR(DC_GREEN) | A_BOLD);
 
     /* current MPs */
-    if (p->mp <= (p->mp_max / 10)) /* 10% mp left */
+    if (p->mp <= ((int)p->mp_max / 10)) /* 10% mp left */
         attrs = (COLOR_PAIR(DC_MAGENTA) | A_BOLD);
-    else if (p->mp <= (p->mp_max / 4))  /* 25% mp left */
+    else if (p->mp <= ((int)p->mp_max / 4))  /* 25% mp left */
         attrs = COLOR_PAIR(DC_MAGENTA);
-    else if (p->mp <= (p->mp_max / 2))  /* 50% mp left */
+    else if (p->mp <= ((int)p->mp_max / 2))  /* 50% mp left */
         attrs = COLOR_PAIR(DC_CYAN);
     else
         attrs = (COLOR_PAIR(DC_CYAN) | A_BOLD);
@@ -318,9 +318,9 @@ int display_paint_screen(player *p)
     /* strenght */
     mvprintw(1, LEVEL_MAX_X + 3, "STR ");
 
-    if (player_get_str(p) > p->strength)
+    if (player_get_str(p) > (int)p->strength)
         attrs = COLOR_PAIR(DC_YELLOW);
-    else if (player_get_str(p) < p->strength)
+    else if (player_get_str(p) < (int)p->strength)
         attrs = COLOR_PAIR(DC_RED);
     else
         attrs = COLOR_PAIR(DC_WHITE);
@@ -333,9 +333,9 @@ int display_paint_screen(player *p)
     /* dexterity */
     mvprintw(2, LEVEL_MAX_X + 3, "DEX ");
 
-    if (player_get_dex(p) > p->dexterity)
+    if (player_get_dex(p) > (int)p->dexterity)
         attrs = COLOR_PAIR(DC_YELLOW);
-    else if (player_get_dex(p) < p->dexterity)
+    else if (player_get_dex(p) < (int)p->dexterity)
         attrs = COLOR_PAIR(DC_RED);
     else
         attrs = COLOR_PAIR(DC_WHITE);
@@ -348,9 +348,9 @@ int display_paint_screen(player *p)
     /* constitution */
     mvprintw(3, LEVEL_MAX_X + 3, "CON ");
 
-    if (player_get_con(p) > p->constitution)
+    if (player_get_con(p) > (int)p->constitution)
         attrs = COLOR_PAIR(DC_YELLOW);
-    else if (player_get_con(p) < p->constitution)
+    else if (player_get_con(p) < (int)p->constitution)
         attrs = COLOR_PAIR(DC_RED);
     else
         attrs = COLOR_PAIR(DC_WHITE);
@@ -363,9 +363,9 @@ int display_paint_screen(player *p)
     /* intelligence */
     mvprintw(4, LEVEL_MAX_X + 3, "INT ");
 
-    if (player_get_int(p) > p->intelligence)
+    if (player_get_int(p) > (int)p->intelligence)
         attrs = COLOR_PAIR(DC_YELLOW);
-    else if (player_get_int(p) < p->intelligence)
+    else if (player_get_int(p) < (int)p->intelligence)
         attrs = COLOR_PAIR(DC_RED);
     else
         attrs = COLOR_PAIR(DC_WHITE);
@@ -378,9 +378,9 @@ int display_paint_screen(player *p)
     /* wisdom */
     mvprintw(5, LEVEL_MAX_X + 3, "WIS ");
 
-    if (player_get_wis(p) > p->wisdom)
+    if (player_get_wis(p) > (int)p->wisdom)
         attrs = COLOR_PAIR(DC_YELLOW);
-    else if (player_get_wis(p) < p->wisdom)
+    else if (player_get_wis(p) < (int)p->wisdom)
         attrs = COLOR_PAIR(DC_RED);
     else
         attrs = COLOR_PAIR(DC_WHITE);
@@ -393,9 +393,9 @@ int display_paint_screen(player *p)
     /* charisma */
     mvprintw(6, LEVEL_MAX_X + 3, "CHA ");
 
-    if (player_get_cha(p) > p->charisma)
+    if (player_get_cha(p) > (int)p->charisma)
         attrs = COLOR_PAIR(DC_YELLOW);
-    else if (player_get_cha(p) < p->charisma)
+    else if (player_get_cha(p) < (int)p->charisma)
         attrs = COLOR_PAIR(DC_RED);
     else
         attrs = COLOR_PAIR(DC_WHITE);
@@ -443,7 +443,7 @@ int display_paint_screen(player *p)
     y = display_rows - 20;
 
     /* storage for game time of message */
-    ttime = g_new0(int, y);
+    ttime = g_new0(guint, y);
 
     /* hold original length of text */
     x = 1;
@@ -544,16 +544,16 @@ void display_inventory(char *title, player *p, inventory *inv,
                        int (*filter)(item *))
 {
     display_window *iwin = NULL;
-    int width, height, maxvis;
-    int startx, starty;
-    int len_orig, len_curr;
+    guint width, height, maxvis;
+    guint startx, starty;
+    guint len_orig, len_curr;
     gboolean redraw = FALSE;
 
     /* temp var to assemble window caption from callback descriptions */
     char *tmp;
 
     /* used for looping over callbacks */
-    int cb_nr;
+    guint cb_nr;
     display_inv_callback *cb;
     int key;
 
@@ -561,13 +561,13 @@ void display_inventory(char *title, player *p, inventory *inv,
     int time;
 
     /* offset to element position (when displaying more than maxvis items) */
-    int offset = 0;
+    guint offset = 0;
 
     /* currently selected item */
-    int curr = 1;
+    guint curr = 1;
 
     /* position in inventory (loop var) */
-    int pos;
+    guint pos;
     item *it;
     char item_desc[81];
 
@@ -634,9 +634,9 @@ void display_inventory(char *title, player *p, inventory *inv,
         it = inv_get_filtered(inv, curr + offset - 1, filter);
 
         /* assemble window caption */
-        for (cb_nr = 1; cb_nr <= callbacks->len; cb_nr++)
+        for (cb_nr = 0; cb_nr < callbacks->len; cb_nr++)
         {
-            cb = g_ptr_array_index(callbacks, cb_nr - 1);
+            cb = g_ptr_array_index(callbacks, cb_nr);
 
             /* check if callback is approriate for this item */
             /* if no checkfunktion is set, always display item */
@@ -929,13 +929,13 @@ void display_config_autopickup(player *p)
     display_window_destroy(cwin, TRUE);
 }
 
-spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
+spell *display_spell_select(char *title, player *p)
 {
     display_window *swin;
-    int width, height;
-    int startx, starty;
-    int maxvis;
-    int pos;
+    guint width, height;
+    guint startx, starty;
+    guint maxvis;
+    guint pos;
     int key; /* keyboard input */
     int RUN = TRUE;
 
@@ -946,7 +946,7 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
     int offset = 0;
 
     /* currently selected item */
-    int curr = 1;
+    guint curr = 1;
 
     /* buffer for spell code type ahead */
     char *code_buf = g_malloc0(sizeof(char) * 4);
@@ -1173,11 +1173,6 @@ spell *display_spell_select(char *title, player *p, GPtrArray *callbacks)
     return sp;
 }
 
-void display_show_player(player *p)
-{
-
-}
-
 int display_get_count(char *caption, int value)
 {
     display_window *mwin;
@@ -1357,20 +1352,20 @@ int display_get_yesno(char *question, char *yes, char *no)
 {
     display_window *ywin;
 
-    int startx, starty;
-    int width, text_width;
+    guint startx, starty;
+    guint width, text_width;
 
     int RUN = TRUE;
     int selection = FALSE;
-    int line;
+    guint line;
 
     GPtrArray *text;
 
     /* input key buffer */
     int key;
 
-    const int padding = 1;
-    const int margin = 2;
+    const guint padding = 1;
+    const guint margin = 2;
 
     /* default values */
     if (!yes)
@@ -1859,14 +1854,14 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 
 void display_show_history(message_log *log, char *title)
 {
-    int i;
+    guint idx;
     char *text = NULL;
     char *tmp = NULL;
     message_log_entry *le;
 
-    for (i = 1; i <= log_length(log); i++)
+    for (idx = 0; idx < log_length(log); idx++)
     {
-        le = log_get_entry(log, i);
+        le = log_get_entry(log, idx);
 
         if (!text)
         {
@@ -1892,15 +1887,15 @@ void display_show_history(message_log *log, char *title)
  */
 char display_show_message(char *title, char *message)
 {
-    int height, width;
-    int startx, starty;
+    guint height, width;
+    guint startx, starty;
     display_window *mwin;
     int key;
 
     GPtrArray *text;
-    int pos = 0;
-    int maxvis = 0;
-    int offset = 0;
+    guint idx;
+    guint maxvis = 0;
+    guint offset = 0;
 
     gboolean RUN = TRUE;
 
@@ -1921,12 +1916,12 @@ char display_show_message(char *title, char *message)
 
     do
     {
-        for (pos = 1; pos <= maxvis; pos++)
+        for (idx = 0; idx < maxvis; idx++)
         {
             wattron(mwin->window, COLOR_PAIR(9));
-            mvwprintw(mwin->window, pos, 1, " %-*s ",
+            mvwprintw(mwin->window, idx + 1, 1, " %-*s ",
                       width - 4,
-                      g_ptr_array_index(text, pos - 1 + offset));
+                      g_ptr_array_index(text, idx + offset));
 
             wattroff(mwin->window, COLOR_PAIR(9));
         }

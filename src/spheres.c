@@ -20,7 +20,7 @@
 
 static void sphere_remove(sphere *s, level *l);
 static void sphere_hit_owner(sphere *s, level *l);
-static void sphere_kill_monster(sphere *s, level *l, monster *m);
+static void sphere_kill_monster(sphere *s, monster *m);
 
 sphere *sphere_new(position pos, player *owner, int lifetime)
 {
@@ -139,7 +139,7 @@ void sphere_move(sphere *s, level *l)
         }
 
         /* kill monster */
-        sphere_kill_monster(s, l, m);
+        sphere_kill_monster(s, m);
     }
 
     /* check if another sphere is located at the same position */
@@ -158,12 +158,12 @@ void sphere_move(sphere *s, level *l)
 
 sphere *sphere_at(level *l, position pos)
 {
-    int i;
+    guint idx;
     sphere *s;
 
-    for (i = 1; i <= l->slist->len; i++)
+    for (idx = 1; idx < l->slist->len; idx++)
     {
-        s = g_ptr_array_index(l->slist, i - 1);
+        s = g_ptr_array_index(l->slist, idx);
 
         if (pos_identical(pos, s->pos))
             return s;
@@ -196,7 +196,7 @@ static void sphere_hit_owner(sphere *s, level *l)
     }
 }
 
-static void sphere_kill_monster(sphere *s, level *l, monster *m)
+static void sphere_kill_monster(sphere *s, monster *m)
 {
     /* if the owner is set, grant experience */
     if (s->owner)

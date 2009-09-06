@@ -187,7 +187,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS,
         {
-            { ATT_NONE, DAM_STEAL_ITEM, 0, 0 },
+            { ATT_TOUCH, DAM_STEAL_ITEM, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -218,7 +218,7 @@ const monster_data monsters[MT_MAX] =
         MF_HEAD | MF_HANDS | MF_UNDEAD,
         {
             { ATT_CLAW, DAM_PHYSICAL, 2, 0 },
-            EMPTY_ATTACK,
+            { ATT_BITE, DAM_PHYSICAL, 2, 0 },
         }
     },
     {
@@ -1183,7 +1183,7 @@ void monster_items_pickup(monster *m, struct player *p)
 {
     /* TODO: gelatious cube digests items, rust monster eats metal stuff */
 
-    int i;
+    guint idx;
     item *it;
     inventory *floor;
 
@@ -1192,9 +1192,9 @@ void monster_items_pickup(monster *m, struct player *p)
     if (!(floor = level_ilist_at(m->level, m->pos)))
         return;
 
-    for (i = 1; i <= inv_length(floor); i++)
+    for (idx = 0; idx < inv_length(floor); idx++)
     {
-        it = inv_get(floor, i - 1);
+        it = inv_get(floor, idx);
 
         if (m->type == MT_LEPRECHAUN
                 && ((it->type == IT_GEM) || (it->type == IT_GOLD)))
@@ -1348,6 +1348,7 @@ void monster_player_attack(monster *m, player *p)
             }
         }
         break;
+
     case DAM_REM_ENCH:
         /* destroy random item */
 
@@ -1361,7 +1362,6 @@ void monster_player_attack(monster *m, player *p)
         it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
         if (!it->cursed && it->type != IT_SCROLL && it->type != IT_POTION)
         {
-
             /* log the attack */
             log_add_entry(p->log, "The %s hits you. You feel a sense of loss.",
                           monster_name(m));
@@ -1472,17 +1472,19 @@ monster *monster_damage_take(monster *m, damage *dam)
 
 void monsters_genocide(level *l)
 {
-    int count;
+    guint idx;
     monster *monst;
 
     /* purge genocided monsters */
-    for (count = 1; count <= l->mlist->len; count++)
+    for (idx = 0; idx < l->mlist->len; idx++)
     {
-        monst = g_ptr_array_index(l->mlist, count - 1);
+        monst = g_ptr_array_index(l->mlist, idx);
+
         if (monster_is_genocided(monst->type))
         {
-            g_ptr_array_remove_index_fast(l->mlist, count - 1);
+            g_ptr_array_remove_index_fast(l->mlist, idx);
             monster_destroy(monst);
+            idx--;
         }
     }
 }
@@ -1496,7 +1498,7 @@ void monsters_genocide(level *l)
 gboolean monster_update_action(monster *m)
 {
     monster_action_t naction;   /* new action */
-    int time;
+    guint time;
     gboolean low_hp;
     gboolean smart;
 
@@ -1606,14 +1608,14 @@ int monster_is_genocided(int monster_id)
 
 void monster_effect_expire(monster *m, message_log *log)
 {
-    int i = 1;
+    guint idx = 0;
     effect *e;
 
     assert(m != NULL && log != NULL);
 
-    while (i <= m->effects->len)
+    while (idx < m->effects->len)
     {
-        e = g_ptr_array_index(m->effects, i - 1);
+        e = g_ptr_array_index(m->effects, idx);
 
         if (effect_expire(e, 1) == -1)
         {
@@ -1629,7 +1631,7 @@ void monster_effect_expire(monster *m, message_log *log)
         }
         else
         {
-            i++;
+            idx++;
         }
     }
 }
@@ -1668,7 +1670,7 @@ static void monster_die(monster *m, damage *dam)
 
 static void monster_player_rob(monster *m, struct player *p, item_t item_type)
 {
-    int player_gold = 0;
+    guint player_gold = 0;
     item *it = NULL;
 
     assert (m != NULL && p != NULL);
@@ -1688,9 +1690,6 @@ static void monster_player_rob(monster *m, struct player *p, item_t item_type)
                 it = item_new(IT_GOLD, rand_1n(1 + (player_gold >> 1)), 0);
                 player_set_gold(p, player_gold - it->count);
             }
-
-            if (player_get_gold(p) < 0)
-                player_set_gold(p, 0);
 
             log_add_entry(p->log, "The %s picks your pocket. " \
                           "Your purse feels lighter", monster_name(m));

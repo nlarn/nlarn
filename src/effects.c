@@ -552,13 +552,13 @@ int effect_del(GPtrArray *a, effect *e)
 
 effect *effect_get(GPtrArray *a, int effect_type)
 {
-    int pos;
+    guint idx;
     effect *e;
 
     assert(a != NULL && effect_type > ET_NONE && effect_type < ET_MAX);
-    for (pos = 1; pos <=a->len; pos++)
+    for (idx = 0; idx < a->len; idx++)
     {
-        e = g_ptr_array_index(a, pos - 1);
+        e = g_ptr_array_index(a, idx);
         if (e->type == effect_type)
             return e;
     }
@@ -568,15 +568,15 @@ effect *effect_get(GPtrArray *a, int effect_type)
 
 int effect_query(GPtrArray *a, int effect_type)
 {
-    int i;
+    guint idx;
     int value = 0;
     effect *e;
 
     assert(a != NULL && effect_type > ET_NONE && effect_type < ET_MAX);
 
-    for (i = 1; i <= a->len; i++)
+    for (idx = 0; idx < a->len; idx++)
     {
-        e = (effect *)g_ptr_array_index(a, i - 1);
+        e = (effect *)g_ptr_array_index(a, idx);
         if (e->type == effect_type)
         {
             if (e->amount)

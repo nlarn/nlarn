@@ -439,7 +439,7 @@ void spell_type_point(spell *s, struct player *p)
 
         /* drain life */
     case SP_DRL:
-        amount = min(p->hp - 1, p->hp_max / 2);
+        amount = min(p->hp - 1, (int)p->hp_max / 2);
 
         monster_damage_take(monster, damage_new(DAM_MAGICAL, amount, p));
         player_damage_take(p, damage_new(DAM_MAGICAL, amount, NULL), PD_SPELL, SP_DRL);
@@ -630,7 +630,8 @@ void spell_type_blast(spell *s, struct player *p)
     monster *monster = NULL;
     position pos;
     char buffer[61];
-    int amount, i;
+    int amount;
+    guint idx;
     damage *dam;
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
@@ -650,13 +651,13 @@ void spell_type_blast(spell *s, struct player *p)
 
     mlist = level_get_monsters_in(p->level, rect_new_sized(pos, 1));
 
-    for (i = 0; i < mlist->len; i++)
+    for (idx = 0; idx < mlist->len; idx++)
     {
-        monster = g_ptr_array_index(mlist, i);
+        monster = g_ptr_array_index(mlist, idx);
         dam = damage_new(DAM_FIRE, amount, p);
 
         if (!(monster = monster_damage_take(monster, dam)))
-            i--; /* monster has been killed, others follow up */
+            idx--; /* monster has been killed, others follow up */
     }
 
     if (pos_in_rect(p->pos, rect_new_sized(pos, 1)))
@@ -681,9 +682,7 @@ void spell_alter_reality(player *p)
     nlevel = g_malloc0(sizeof (level));
     nlevel->nlevel = olevel->nlevel;
 
-    level_new(nlevel,
-              game_difficulty(p->game),
-              game_mazefile(p->game));
+    level_new(nlevel, game_mazefile(p->game));
 
     /* make new level active */
     p->game->levels[p->level->nlevel] = nlevel;

@@ -344,7 +344,7 @@ item *item_clone(item *original)
     return nitem;
 }
 
-item *item_split(item *original, int count)
+item *item_split(item *original, guint32 count)
 {
     item *nitem;
 
@@ -627,9 +627,9 @@ item_material_t item_material(item *it)
     return material;
 }
 
-int item_price(item *it)
+guint item_price(item *it)
 {
-    int price;
+    guint price;
 
     assert (it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -711,8 +711,6 @@ int item_price(item *it)
 
     /* quarter price if very rusty */
     if (it->rusty == 2) price /= 4;
-
-    if (price < 0) price = 0;
 
     return price;
 }
@@ -870,7 +868,7 @@ int item_remove_curse(item *it)
 
 int item_enchant(item *it)
 {
-    int pos;
+    guint pos;
     effect *e;
 
     assert(it != NULL);
@@ -879,9 +877,9 @@ int item_enchant(item *it)
 
     if ((it->type == IT_RING) && it->effects)
     {
-        for (pos = 1; pos <= it->effects->len; pos++)
+        for (pos = 0; pos < it->effects->len; pos++)
         {
-            e = g_ptr_array_index(it->effects, pos - 1);
+            e = g_ptr_array_index(it->effects, pos);
             e->amount++;
         }
     }
@@ -891,7 +889,7 @@ int item_enchant(item *it)
 
 int item_disenchant(item *it)
 {
-    int pos;
+    guint pos;
     effect *e;
 
     assert(it != NULL);
@@ -900,9 +898,9 @@ int item_disenchant(item *it)
 
     if ((it->type == IT_RING) && it->effects)
     {
-        for (pos = 1; pos <= it->effects->len; pos++)
+        for (pos = 0; pos < it->effects->len; pos++)
         {
-            e = g_ptr_array_index(it->effects, pos - 1);
+            e = g_ptr_array_index(it->effects, pos);
             e->amount--;
         }
     }
@@ -1018,7 +1016,7 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
 
 int inv_add(inventory *inv, item *new_item)
 {
-    int pos;
+    guint pos;
     item *i;
 
     assert(inv != NULL && item_new != NULL);
@@ -1031,9 +1029,9 @@ int inv_add(inventory *inv, item *new_item)
 
     if (item_is_stackable(new_item->type))
     {
-        for (pos = 1; pos <= inv_length(inv); pos++)
+        for (pos = 0; pos < inv_length(inv); pos++)
         {
-            i = (item *)inv_get(inv, pos - 1);
+            i = (item *)inv_get(inv, pos);
             if (item_compare(i, new_item))
             {
                 /* just increase item count and release the original */
@@ -1056,13 +1054,13 @@ int inv_add(inventory *inv, item *new_item)
     return inv_length(inv);
 }
 
-item *inv_del(inventory *inv, int pos)
+item *inv_del(inventory *inv, guint idx)
 {
     item *item;
 
-    assert(inv != NULL && inv->content != NULL && pos < inv_length(inv));
+    assert(inv != NULL && inv->content != NULL && idx < inv_length(inv));
 
-    item = inv_get(inv, pos);
+    item = inv_get(inv, idx);
 
     if (inv->pre_del)
     {
@@ -1072,7 +1070,7 @@ item *inv_del(inventory *inv, int pos)
         }
     }
 
-    g_ptr_array_remove_index_fast(inv->content, pos);
+    g_ptr_array_remove_index_fast(inv->content, idx);
 
     if (inv->post_del)
     {
@@ -1108,11 +1106,10 @@ int inv_del_element(inventory *inv, item *item)
  * clean unused items from an inventory
  *
  */
-int inv_clean(inventory *inv)
+void inv_clean(inventory *inv)
 {
     item *it;
-    int pos;
-    int count = 0;
+    guint pos;
 
     assert(inv != NULL);
 
@@ -1128,7 +1125,6 @@ int inv_clean(inventory *inv)
         }
     }
 
-    return count;
 }
 
 void inv_sort(inventory *inv,GCompareDataFunc compare_func, gpointer user_data)
@@ -1141,28 +1137,28 @@ void inv_sort(inventory *inv,GCompareDataFunc compare_func, gpointer user_data)
 int inv_weight(inventory *inv)
 {
     int sum = 0;
-    int pos;
+    guint idx;
 
     assert(inv != NULL);
 
     /* add contents weight */
-    for (pos = 1; pos <= inv_length(inv); pos++)
+    for (idx = 0; idx < inv_length(inv); idx++)
     {
-        sum += item_weight(inv_get(inv, pos - 1));
+        sum += item_weight(inv_get(inv, idx));
     }
 
     return sum;
 }
 
-int inv_item_count(inventory *inv, item_t type, int id)
+int inv_item_count(inventory *inv, item_t type, guint32 id)
 {
     int count = 0;
-    int pos;
+    guint idx;
     item *i;
 
-    for (pos = 1; pos <= inv_length(inv); pos++)
+    for (idx = 0; idx < inv_length(inv); idx++)
     {
-        i = inv_get(inv, pos - 1);
+        i = inv_get(inv, idx);
         if (id)
         {
             if (i->type == type && i->id == id)
@@ -1182,7 +1178,7 @@ int inv_item_count(inventory *inv, item_t type, int id)
 int inv_length_filtered(inventory *inv, int (*filter)(item *))
 {
     int count = 0;
-    int pos;
+    guint pos;
     item *i;
 
     /* return the inventory length if no filter has been set */
@@ -1191,9 +1187,9 @@ int inv_length_filtered(inventory *inv, int (*filter)(item *))
         return inv_length(inv);
     }
 
-    for (pos = 1; pos <= inv_length(inv); pos++)
+    for (pos = 0; pos < inv_length(inv); pos++)
     {
-        i = inv_get(inv, pos - 1);
+        i = inv_get(inv, pos);
 
         if (filter(i))
         {
@@ -1204,26 +1200,26 @@ int inv_length_filtered(inventory *inv, int (*filter)(item *))
     return count;
 }
 
-item *inv_get_filtered(inventory *inv, int pos, int (*filter)(item *))
+item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *))
 {
-    int num;
-    int curr = 0;
+    guint num;
+    guint curr = 0;
     item *i;
 
     /* return the inventory length if no filter has been set */
     if (!filter)
     {
-        return inv_get(inv, pos);
+        return inv_get(inv, idx);
     }
 
-    for (num = 1; num <= inv_length(inv); num++)
+    for (num = 0; num < inv_length(inv); num++)
     {
-        i = inv_get(inv, num - 1);
+        i = inv_get(inv, num);
 
         if (filter(i))
         {
             /* filter matches */
-            if (curr == pos)
+            if (curr == idx)
             {
                 /* this is the requested item */
                 return i;

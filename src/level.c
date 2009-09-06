@@ -25,7 +25,7 @@ static void level_fill_with_traps(level *l);
 static int level_load_from_file(level *l, char *mazefile, int which);
 static void level_make_maze(level *l);
 static void level_make_maze_eat(level *l, int x, int y);
-static void level_add_treasure_room(level *l, int difficulty);
+static void level_add_treasure_room(level *l);
 static void level_add_item(level *l, item *what);
 
 static level_path *level_path_new(position start, position goal);
@@ -99,7 +99,7 @@ const char *level_names[LEVEL_MAX] =
     "V3"
 };
 
-void level_new(level *l, int difficulty, char *mazefile)
+void level_new(level *l, char *mazefile)
 {
     gboolean level_loaded = FALSE;
     int x, y;
@@ -137,7 +137,7 @@ void level_new(level *l, int difficulty, char *mazefile)
                     || l->nlevel == (LEVEL_MAX - 1)
                     || chance(15)))
         {
-            level_add_treasure_room(l, difficulty);
+            level_add_treasure_room(l);
         }
     }
 
@@ -186,15 +186,16 @@ char *level_dump(level *l)
 
 void level_destroy(level *l)
 {
-    int i, x, y;
+    guint idx;
+    int x, y;
 
     assert(l != NULL);
 
     /* free monster list */
     if (l->mlist != NULL)
     {
-        for (i = 1; i <= l->mlist->len; i++)
-            monster_destroy(g_ptr_array_index(l->mlist, i - 1));
+        for (idx = 0; idx < l->mlist->len; idx++)
+            monster_destroy(g_ptr_array_index(l->mlist, idx));
 
         g_ptr_array_free(l->mlist, TRUE);
     }
@@ -202,9 +203,9 @@ void level_destroy(level *l)
     /* free spheres list */
     if (l->slist != NULL)
     {
-        for (i = 1; i <= l->slist->len; i++)
+        for (idx = 0; idx < l->slist->len; idx++)
         {
-            sphere_destroy(g_ptr_array_index(l->slist, i - 1));
+            sphere_destroy(g_ptr_array_index(l->slist, idx));
         }
 
         g_ptr_array_free(l->slist, TRUE);
@@ -541,22 +542,24 @@ level_path *level_find_path(level *l, position start, position goal)
 
 void level_path_destroy(level_path *path)
 {
-    int index;
+    guint idx;
 
     assert(path != NULL);
 
     /* cleanup open list */
-    for (index = 1; index <= path->open->len; index++)
-        g_free(g_ptr_array_index(path->open, index - 1));
+    for (idx = 0; idx < path->open->len; idx++)
+    {
+        g_free(g_ptr_array_index(path->open, idx));
+    }
 
     g_ptr_array_free(path->open, TRUE);
 
-
-    for (index = 1; index <= path->closed->len; index++)
-        g_free(g_ptr_array_index(path->closed, index -1));
+    for (idx = 0; idx < path->closed->len; idx++)
+    {
+        g_free(g_ptr_array_index(path->closed, idx));
+    }
 
     g_ptr_array_free(path->closed, TRUE);
-
 
     g_queue_free(path->path);
 
@@ -650,20 +653,22 @@ damage *level_tile_damage(level *l, position pos)
 
 monster *level_get_monster_at(level *l, position pos)
 {
-    int i = 1;
+    guint idx = 0;
     monster *m, *match = NULL;
 
     assert(l != NULL);
 
-    while (i <= l->mlist->len)
+    while (idx < l->mlist->len)
     {
-        m = (monster *)g_ptr_array_index(l->mlist, i - 1);
+        m = (monster *)g_ptr_array_index(l->mlist, idx);
+
         if ((m->pos.x == pos.x) && (m->pos.y == pos.y))
         {
             match = m;
             break;	/* found it! */
         }
-        i++;
+
+        idx++;
     }
 
     return match;
@@ -683,15 +688,15 @@ GPtrArray *level_get_monsters_in(level *l, rectangle area)
 {
     GPtrArray *monsters;
     monster *m;
-    int el;
+    guint idx;
 
     assert(l != NULL);
 
     monsters = g_ptr_array_new();
 
-    for (el = 1; el <= l->mlist->len; el++)
+    for (idx = 0; idx < l->mlist->len; idx++)
     {
-        m = (monster *)g_ptr_array_index(l->mlist, el - 1);
+        m = (monster *)g_ptr_array_index(l->mlist, idx);
 
         if (pos_in_rect(m->pos, area))
         {
@@ -736,7 +741,7 @@ void level_timer(level *l, guint8 count)
 {
     position pos;
     item *it;
-    int num;
+    guint idx;
     int impact;
     char *impact_desc;
     char item_desc[61];
@@ -754,9 +759,9 @@ void level_timer(level *l, guint8 count)
                 /* affect items */
                 if (level_ilist_at(l, pos))
                 {
-                    for (num = 1; num <= inv_length(level_ilist_at(l, pos)); num++)
+                    for (idx = 0; idx < inv_length(level_ilist_at(l, pos)); idx++)
                     {
-                        it = inv_get(level_ilist_at(l, pos), num - 1);
+                        it = inv_get(level_ilist_at(l, pos), idx);
 
                         switch (level_tiletype_at(l, pos))
                         {
@@ -1291,7 +1296,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
 /*
  * function to make a treasure room on a level
  */
-static void level_add_treasure_room(level *l, int difficulty)
+static void level_add_treasure_room(level *l)
 {
     int x1, y1;         /* upper left corner of room */
     int x2, y2;         /* room dimensions */
@@ -1443,16 +1448,19 @@ static int level_path_cost(level *l, level_path_element* element, position targe
 
 static level_path_element *level_path_element_in_list(level_path_element* el, GPtrArray *list)
 {
-    int pos;
+    guint idx;
     level_path_element *li;
 
     assert(el != NULL && list != NULL);
 
-    for (pos = 1; pos <= list->len; pos++)
+    for (idx = 0; idx < list->len; idx++)
     {
-        li = g_ptr_array_index(list, pos - 1);
-        if ((li->pos.x == el->pos.x) && (li->pos.y == el->pos.y))
+        li = g_ptr_array_index(list, idx);
+
+        if (pos_identical(li->pos, el->pos))
+        {
             return li;
+        }
     }
 
     return NULL;
@@ -1461,13 +1469,16 @@ static level_path_element *level_path_element_in_list(level_path_element* el, GP
 static level_path_element *level_path_find_best(level *l, level_path *path)
 {
     level_path_element *el, *best = NULL;
-    int pos;
+    guint idx;
 
-    for (pos = 1; pos <= path->open->len; pos++)
+    for (idx = 0; idx < path->open->len; idx++)
     {
-        el = g_ptr_array_index(path->open, pos - 1);
+        el = g_ptr_array_index(path->open, idx);
+
         if (best == NULL || level_path_cost(l, el, path->goal) < level_path_cost(l, best, path->goal))
+        {
             best = el;
+        }
     }
 
     return best;

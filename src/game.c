@@ -33,6 +33,7 @@ static const char *highscores = "highscores";
 
 int game_save(game *g, char *filename)
 {
+    assert(g != NULL);
 
     return EXIT_SUCCESS;
 }
@@ -46,7 +47,7 @@ game *game_load(char *filename)
 game *game_new(int argc, char *argv[])
 {
     game *g;
-    int i;
+    size_t idx;
     item_t it;
 
     /* these will be filled by the command line parser */
@@ -78,7 +79,6 @@ game *game_new(int argc, char *argv[])
         g_print ("option parsing failed: %s\n", error->message);
         exit (EXIT_FAILURE);
     }
-
     g_option_context_free(context);
 
 
@@ -119,11 +119,11 @@ game *game_new(int argc, char *argv[])
     /* parse autopickup settings */
     if (auto_pickup)
     {
-        for (i = 0; i < strlen(auto_pickup); i++)
+        for (idx = 0; idx < strlen(auto_pickup); idx++)
         {
             for (it = IT_NONE; it < IT_MAX; it++)
             {
-                if (auto_pickup[i] == item_image(it))
+                if (auto_pickup[idx] == item_image(it))
                 {
                     g->p->settings.auto_pickup[it] = TRUE;
                 }
@@ -132,10 +132,10 @@ game *game_new(int argc, char *argv[])
     }
 
     /* allocate space for levels */
-    for (i = 0; i < LEVEL_MAX; i++)
+    for (idx = 0; idx < LEVEL_MAX; idx++)
     {
-        g->levels[i] = g_malloc0(sizeof (level));
-        g->levels[i]->nlevel = i;
+        g->levels[idx] = g_malloc0(sizeof(level));
+        g->levels[idx]->nlevel = idx;
     }
 
     /* game time handling */
@@ -263,9 +263,9 @@ GList *game_score_add(game *g, game_score_t *score)
     return gs;
 }
 
-void game_spin_the_wheel(game *g, int times)
+void game_spin_the_wheel(game *g, guint times)
 {
-    int turn, monster_nr;
+    guint turn, idx;
     monster *m;
     damage *dam;
 
@@ -296,16 +296,15 @@ void game_spin_the_wheel(game *g, int times)
         game_move_spheres(g);
 
         /* modify effects */
-        for (monster_nr = 1; monster_nr <= g->p->level->mlist->len; monster_nr++)
+        for (idx = 0; idx < g->p->level->mlist->len; idx++)
         {
-            m = g_ptr_array_index(g->p->level->mlist, monster_nr - 1);
+            m = g_ptr_array_index(g->p->level->mlist, idx);
             monster_effect_expire(m, g->p->log);
         }
 
         g->gtime++; /* count up the time  */
         log_set_time(g->p->log, g->gtime); /* adjust time for log entries */
     }
-
 }
 
 /**
@@ -319,16 +318,16 @@ static void game_move_monsters(game *g)
     level *l;
     /* handle to current monster */
     monster *m;
-    int monster_nr;
+    guint idx;
 
     assert(g != NULL);
 
     /* make shortcut */
     l = g->p->level;
 
-    for (monster_nr = 1; monster_nr <= l->mlist->len; monster_nr++)
+    for (idx = 0; idx < l->mlist->len; idx++)
     {
-        m = g_ptr_array_index(l->mlist, monster_nr - 1);
+        m = g_ptr_array_index(l->mlist, idx);
         monster_move(m, g->p);
     } /* foreach monster */
 }
@@ -337,16 +336,16 @@ static void game_move_spheres(game *g)
 {
     level *l;
     sphere *s;
-    int sphere_nr;
+    guint idx;
 
     assert(g != NULL);
 
     /* make shortcut */
     l = g->p->level;
 
-    for (sphere_nr = 1; sphere_nr <= l->slist->len; sphere_nr++)
+    for (idx = 0; idx < l->slist->len; idx++)
     {
-        s = g_ptr_array_index(l->slist, sphere_nr - 1);
+        s = g_ptr_array_index(l->slist, idx);
         sphere_move(s, l);
     }
 }
