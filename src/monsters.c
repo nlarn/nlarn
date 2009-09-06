@@ -743,7 +743,7 @@ monster *monster_new(int monster_type, struct level *l)
         if (chance(25))
         {
             inv_add(nmonster->inventory,
-                    item_new(IT_GEM, item_max_id(IT_GEM), 0));
+                    item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)), 0));
         }
         break;
 

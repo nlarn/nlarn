@@ -122,6 +122,9 @@ int building_bank(player *p)
     cmd = display_show_message((char *)msg_title, text->str);
     g_string_free(text, TRUE);
 
+    /* repaint screen (otherwise background would be black) */
+    display_paint_screen(p);
+
     switch (cmd)
     {
     case 'd': /* deposit */
@@ -162,7 +165,6 @@ int building_bank(player *p)
         if (!inv_item_count(p->inventory, IT_GEM, GT_NONE))
             break;
 
-        display_paint_screen(p);
         display_inventory("Sell gems", p, p->inventory, callbacks, TRUE,
                           &building_bank_gem_filter);
 

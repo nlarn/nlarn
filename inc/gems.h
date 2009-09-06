@@ -26,7 +26,6 @@ enum gem_types
     GT_RUBY,
     GT_EMERALD,
     GT_SAPPHIRE,
-/*  GT_EYE_OF_LARN, TODO: implement this */
     GT_MAX
 };
 

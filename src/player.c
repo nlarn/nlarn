@@ -1111,11 +1111,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     {
         { NULL, NULL, },
         { "Ouch!", "Your armour protects you.", }, /* DAM_PHYSICAL */
-        { "", "You resist.", }, /* DAM_MAGICAL */
+        { NULL, "You resist.", }, /* DAM_MAGICAL */
         { "You suffer burns.", "The flames don't phase you.", }, /* DAM_FIRE */
         { "You suffer from frostbite.", "It doesn't seem so cold.", }, /* DAM_COLD */
         { NULL, NULL, }, /* DAM_ACID */
-        { "The got you with a gusher!", "The water doesn't affect you.", }, /* DAM_WATER */
+        { "You experience near-drowning.", "The water doesn't affect you.", }, /* DAM_WATER */
         { NULL, NULL, }, /* DAM_ELECTRICITY */
         /* effect start messages are covered by player_effect_add
          * only need to notify if the player resisted */
@@ -1295,7 +1295,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     else
     {
         /* not affected - notifiy player */
-        if (damage_msgs[dam->type].msg_unaffected)
+        if ((dam->type <= DAM_DRAIN_LIFE) && damage_msgs[dam->type].msg_unaffected)
             log_add_entry(p->log, damage_msgs[dam->type].msg_unaffected);
     }
 
