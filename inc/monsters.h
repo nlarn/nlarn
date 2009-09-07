@@ -32,6 +32,9 @@ struct player;
 struct level;
 
 /* local monster definition for data storage */
+
+#define MONSTER_ATTACK_COUNT 2
+
 /* TODO: spell casting ability, resistances */
 typedef struct monster_data
 {
@@ -47,7 +50,7 @@ typedef struct monster_data
     speed mspeed;
     esize msize;
     guint32 flags;
-    attack attacks[2];
+    attack attacks[MONSTER_ATTACK_COUNT];
 } monster_data;
 
 typedef enum monster_action_type
@@ -167,8 +170,8 @@ typedef struct monster
     /* level monster is on */
     struct level *level;
 
-    /* attacks already tried */
-    int attacks_tried[2];
+    /* attacks already unsuccessfully tried */
+    int attacks_failed[MONSTER_ATTACK_COUNT];
 
     inventory *inventory;
     GPtrArray *effects;

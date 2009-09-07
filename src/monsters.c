@@ -116,8 +116,8 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_TINY,
         MF_HEAD,
         {
-            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
             { ATT_BITE, DAM_POISON, 1, 0 },
+            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
         }
     },
     {
@@ -694,8 +694,9 @@ const monster_data monsters[MT_MAX] =
 
 static int monster_genocided[MT_MAX] = { 1, 0 };
 
-static void monster_die(monster *m, damage *dam);
-static void monster_player_rob(monster *m, struct player *p, item_t item_type);
+static void monster_attack_disable(monster *m, const attack *att);
+static void monster_die(monster *m);
+static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
 
 monster *monster_new(int monster_type, struct level *l)
 {
@@ -1240,8 +1241,9 @@ int monster_attacks_count(monster *m)
 void monster_player_attack(monster *m, player *p)
 {
     damage *dam;
-    const attack *att;
+    const attack *att = NULL;
     item *it;
+    int idx;
 
     assert(m != NULL && p != NULL);
 
@@ -1276,22 +1278,15 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* choose attack type */
-    if (monster_attacks_count(m) > 1)
+    for (idx = 0; idx < monster_attacks_count(m); idx++)
     {
-        /* choose the attack which offers more damage */
+        /* if player is resistant to an attack choose next attack type. */
+        if (monsters[m->type].attacks[idx].type && !m->attacks_failed[idx])
+            att = &monsters[m->type].attacks[idx];
+    }
 
-        /* TODO: if player is resistant to this attack and monster knows that,
-         *  choose the other attack type
-         * FIXME: this has to work for more than two attack types */
-        if (monsters[m->type].attacks[0].base > monsters[m->type].attacks[1].base)
-            att = &monsters[m->type].attacks[0];
-        else
-            att = &monsters[m->type].attacks[1];
-    }
-    else
-    {
-        att = &monsters[m->type].attacks[0];
-    }
+    /* no attack has been found. return to calling function. */
+    if (!att) return;
 
     /* generate damage */
     dam = damage_new(att->damage, att->base + game_difficulty(p->game), m);
@@ -1309,15 +1304,16 @@ void monster_player_attack(monster *m, player *p)
     {
     case DAM_STEAL_GOLD:
     case DAM_STEAL_ITEM:
-        /* if player has a device of no theft abort the theft */
-        if (!player_effect(p, ET_NOTHEFT))
+        if (monster_player_rob(m, p, (dam->type == DAM_STEAL_GOLD)
+                               ? IT_GOLD : IT_ALL))
         {
-            monster_player_rob(m, p, (dam->type == DAM_STEAL_GOLD)
-                               ? IT_GOLD : IT_ALL);
-
             /* teleport away */
-            /* FIXME: message */
             monster_position(m, level_find_space(p->level, LE_MONSTER));
+        }
+        else
+        {
+            /* if robbery fails mark attack type as useless */
+            monster_attack_disable(m, att);
         }
         break;
 
@@ -1328,10 +1324,12 @@ void monster_player_attack(monster *m, player *p)
             int pi;
 
             pi = item_rust(it);
+            log_add_entry(p->log, "The %s %s you.", monster_name(m),
+                          monster_attack_verb[att->type]);
+
             if (pi == PI_ENFORCED)
             {
-                log_add_entry(p->log, "Your %s is dulled by the %s.",
-                              armour_name(it), monster_name(m));
+                log_add_entry(p->log, "Your %s is dulled.", armour_name(it));
             }
             else if (pi == PI_DESTROYED)
             {
@@ -1346,6 +1344,18 @@ void monster_player_attack(monster *m, player *p)
                 inv_del_element(p->inventory, it);
                 item_destroy(it);
             }
+            else
+            {
+                log_add_entry(p->log, "Your %s is not affected.", armour_name(it));
+
+                /* a failed attack causes frustration */
+                monster_attack_disable(m, att);
+            }
+        }
+        else
+        {
+            /* player is not wearing any armour - mark rust attack as useless */
+            monster_attack_disable(m, att);
         }
         break;
 
@@ -1382,10 +1392,10 @@ void monster_player_attack(monster *m, player *p)
         /* log the attack */
         log_add_entry(p->log, "The %s %s you.", monster_name(m),
                       monster_attack_verb[att->type]);
+
+        player_damage_take(p, dam, PD_MONSTER, m->type);
         break;
     }
-
-    player_damage_take(p, dam, PD_MONSTER, m->type);
 }
 
 /**
@@ -1461,7 +1471,7 @@ monster *monster_damage_take(monster *m, damage *dam)
             p->stats.monsters_killed[m->type] += 1;
         }
 
-        monster_die(m, dam);
+        monster_die(m);
         m = NULL;
     }
 
@@ -1501,11 +1511,24 @@ gboolean monster_update_action(monster *m)
     guint time;
     gboolean low_hp;
     gboolean smart;
+    gboolean all_attacks_failed = TRUE;
+
+    int idx;
 
     /* FIXME: should include difficulty here */
     time   = monster_int(m) + 25;
     low_hp = (m->hp < (monster_hp_max(m) / 4 ));
     smart  = (monster_int(m) > 4);
+
+    /* check if monster has an attack that is known to work */
+    for (idx = 0; idx < monster_attacks_count(m); idx++)
+    {
+        if (!m->attacks_failed[idx])
+        {
+            all_attacks_failed = FALSE;
+            break;
+        }
+    }
 
     if (m->type == MT_MIMIC)
     {
@@ -1519,7 +1542,8 @@ gboolean monster_update_action(monster *m)
         naction = MA_REMAIN;
     }
     else if ((low_hp && smart)
-             || (monster_effect(m, ET_SCARE_MONSTER) > monster_int(m)))
+             || (monster_effect(m, ET_SCARE_MONSTER) > monster_int(m))
+             || all_attacks_failed)
     {
         /* low HP or very scared => FLEE player */
         naction = MA_FLEE;
@@ -1636,7 +1660,18 @@ void monster_effect_expire(monster *m, message_log *log)
     }
 }
 
-static void monster_die(monster *m, damage *dam)
+static void monster_attack_disable(monster *m, const attack *att)
+{
+    int idx;
+
+    for (idx = 0; idx < MONSTER_ATTACK_COUNT; idx++)
+    {
+        if (monsters[m->type].attacks[idx].type == att->type)
+            m->attacks_failed[idx] = TRUE;
+    }
+}
+
+static void monster_die(monster *m)
 {
     char *message = NULL;
     struct player *p;
@@ -1668,12 +1703,16 @@ static void monster_die(monster *m, damage *dam)
     monster_destroy(m);
 }
 
-static void monster_player_rob(monster *m, struct player *p, item_t item_type)
+static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type)
 {
     guint player_gold = 0;
     item *it = NULL;
 
     assert (m != NULL && p != NULL);
+
+    /* if player has a device of no theft abort the theft */
+    if (player_effect(p, ET_NOTHEFT))
+        return FALSE;
 
     /* Leprechaun robs only gold */
     if (item_type == IT_GOLD)
@@ -1717,10 +1756,13 @@ static void monster_player_rob(monster *m, struct player *p, item_t item_type)
     if (it)
     {
         inv_add(m->inventory, it);
+        return TRUE;
     }
     else
     {
         log_add_entry(p->log, "The %s couldn't find anything to steal.",
                       monster_name(m));
+
+        return FALSE;
     }
 }
