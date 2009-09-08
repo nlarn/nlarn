@@ -462,7 +462,7 @@ int display_paint_screen(player *p)
     /* retrieve game log and reformat messages to window width */
     while (((text == NULL) || (text->len < y)) && (log_length(p->log) > i))
     {
-        le = log_get_entry(p->log, log_length(p->log) - i);
+        le = log_get_entry(p->log, log_length(p->log) - 1 - i);
 
         if (text == NULL)
             text = text_wrap(le->message, display_cols, 2);

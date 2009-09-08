@@ -152,8 +152,8 @@ int log_add_entry(message_log *log, char *fmt, ...)
 
 message_log_entry *log_get_entry(message_log *log, guint id)
 {
-    assert(log != NULL && id > 0 && id <= log->length);
-    return(log->entries[id - 1]);
+    assert(log != NULL && id < log->length);
+    return(log->entries[id]);
 }
 
 void log_delete(message_log *log)

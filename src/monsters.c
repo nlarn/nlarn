@@ -476,7 +476,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_SLOW, ESIZE_HUGE,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
-            { ATT_GAZE, DAM_CONFUSION, 7, 0 },
+            { ATT_GAZE, DAM_CONFUSION, 0, 0 },
             { ATT_CLAW, DAM_PHYSICAL, 7, 0 },
         }
     },
@@ -696,6 +696,8 @@ static int monster_genocided[MT_MAX] = { 1, 0 };
 
 static void monster_attack_disable(monster *m, const attack *att);
 static void monster_die(monster *m);
+static gboolean monster_item_disenchant(monster *m, struct player *p);
+static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
 
 monster *monster_new(int monster_type, struct level *l)
@@ -1242,7 +1244,6 @@ void monster_player_attack(monster *m, player *p)
 {
     damage *dam;
     const attack *att = NULL;
-    item *it;
     int idx;
 
     assert(m != NULL && p != NULL);
@@ -1282,7 +1283,10 @@ void monster_player_attack(monster *m, player *p)
     {
         /* if player is resistant to an attack choose next attack type. */
         if (monsters[m->type].attacks[idx].type && !m->attacks_failed[idx])
+        {
             att = &monsters[m->type].attacks[idx];
+            break;
+        }
     }
 
     /* no attack has been found. return to calling function. */
@@ -1318,74 +1322,19 @@ void monster_player_attack(monster *m, player *p)
         break;
 
     case DAM_RUST:
-        /* get a random piece of armour to damage */
-        if ((it = player_random_armour(p)))
+        log_add_entry(p->log, "The %s %s you.", monster_name(m),
+                      monster_attack_verb[att->type]);
+
+        if (!monster_item_rust(m, p))
         {
-            int pi;
-
-            pi = item_rust(it);
-            log_add_entry(p->log, "The %s %s you.", monster_name(m),
-                          monster_attack_verb[att->type]);
-
-            if (pi == PI_ENFORCED)
-            {
-                log_add_entry(p->log, "Your %s is dulled.", armour_name(it));
-            }
-            else if (pi == PI_DESTROYED)
-            {
-                /* armour has been destroyed */
-                log_add_entry(p->log, "Your %s disintegrates!",
-                              armour_name(it));
-
-                log_disable(p->log);
-                player_item_unequip(p, it);
-                log_enable(p->log);
-
-                inv_del_element(p->inventory, it);
-                item_destroy(it);
-            }
-            else
-            {
-                log_add_entry(p->log, "Your %s is not affected.", armour_name(it));
-
-                /* a failed attack causes frustration */
-                monster_attack_disable(m, att);
-            }
-        }
-        else
-        {
-            /* player is not wearing any armour - mark rust attack as useless */
+            /* a failed attack causes frustration */
             monster_attack_disable(m, att);
         }
         break;
 
     case DAM_REM_ENCH:
-        /* destroy random item */
-
-        if (!inv_length(p->inventory))
-        {
-            /* empty inventory */
-            break;
-        }
-
-        /* the disenchantress can't destroy cursed items */
-        it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
-        if (!it->cursed && it->type != IT_SCROLL && it->type != IT_POTION)
-        {
-            /* log the attack */
-            log_add_entry(p->log, "The %s hits you. You feel a sense of loss.",
-                          monster_name(m));
-
-            if (player_item_is_equipped(p, it))
-            {
-                log_disable(p->log);
-                player_item_unequip(p, it);
-                log_enable(p->log);
-            }
-
-            inv_del_element(p->inventory, it);
-            item_destroy(it);
-        }
+        if (!monster_item_disenchant(m, p))
+            monster_attack_disable(m, att);
         break;
 
     default:
@@ -1701,6 +1650,85 @@ static void monster_die(monster *m)
     }
 
     monster_destroy(m);
+}
+
+static gboolean monster_item_disenchant(monster *m, struct player *p)
+{
+    item *it;
+
+    assert (m != NULL && p != NULL);
+
+    /* disenchant random item */
+    if (!inv_length(p->inventory))
+    {
+        /* empty inventory */
+        return FALSE;
+    }
+
+    it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
+
+    /* log the attack */
+    log_add_entry(p->log, "The %s hits you. You feel a sense of loss.",
+                  monster_name(m));
+
+    if (it->type == IT_WEAPON
+            || it->type == IT_ARMOUR
+            || it->type == IT_RING
+            || it->type == IT_AMULET)
+    {
+        item_disenchant(it);
+    }
+    else
+    {
+        inv_del_element(p->inventory, it);
+        item_destroy(it);
+    }
+
+    return TRUE;
+}
+
+static gboolean monster_item_rust(monster *m, struct player *p)
+{
+    item *it;
+
+    assert(m != NULL && p != NULL);
+
+    /* get a random piece of armour to damage */
+    if ((it = player_random_armour(p)))
+    {
+        int pi;
+
+        pi = item_rust(it);
+
+        if (pi == PI_ENFORCED)
+        {
+            log_add_entry(p->log, "Your %s is dulled.", armour_name(it));
+            return TRUE;
+        }
+        else if (pi == PI_DESTROYED)
+        {
+            /* armour has been destroyed */
+            log_add_entry(p->log, "Your %s disintegrates!",
+                          armour_name(it));
+
+            log_disable(p->log);
+            player_item_unequip(p, it);
+            log_enable(p->log);
+
+            inv_del_element(p->inventory, it);
+            item_destroy(it);
+            return TRUE;
+        }
+        else
+        {
+            log_add_entry(p->log, "Your %s is not affected.", armour_name(it));
+            return FALSE;
+        }
+    }
+    else
+    {
+        return FALSE;
+    }
 }
 
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type)
