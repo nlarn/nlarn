@@ -521,8 +521,18 @@ int player_move(player *p, int direction)
             return FALSE;
     }
 
+    target_m = level_get_monster_at(p->level, target_p);
+
+    if (target_m && target_m->unknown)
+    {
+        /* reveal the mimic */
+        log_add_entry(p->log, "Wait! That is a %s!", monster_name(target_m));
+        target_m->unknown = FALSE;
+        return times;
+    }
+
     /* attack - no movement */
-    if ((target_m = level_get_monster_at(p->level, target_p)))
+    if (target_m)
         return player_attack(p, target_m);
 
     /* reposition player */
@@ -4293,7 +4303,9 @@ void player_update_fov(player *p, int radius)
 {
     int octant;
     position pos;
+
     item *it;
+    monster *m;
 
     area *enlight;
 
@@ -4353,6 +4365,8 @@ void player_update_fov(player *p, int radius)
         {
             if (player_pos_visible(p, pos))
             {
+                m = level_get_monster_at(p->level, pos);
+
                 player_memory_of(p,pos).type = level_tiletype_at(p->level, pos);
                 player_memory_of(p,pos).stationary = level_stationary_at(p->level, pos);
 
@@ -4361,6 +4375,11 @@ void player_update_fov(player *p, int radius)
                 {
                     it = inv_get(level_ilist_at(p->level, pos), inv_length(level_ilist_at(p->level, pos)) - 1);
                     player_memory_of(p,pos).item = it->type;
+                }
+                else if (m && m->type == MT_MIMIC && m->unknown)
+                {
+                    /* show the mimic as an item */
+                    player_memory_of(p,pos).item = m->item_type;
                 }
                 else
                 {

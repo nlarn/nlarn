@@ -759,8 +759,6 @@ monster *monster_new(int monster_type, struct level *l)
 
     case MT_NYMPH:
     case MT_TROGLODYTE:
-    case MT_ROTHE:
-    case MT_VIOLET_FUNGUS:
     case MT_PLATINUM_DRAGON:
     case MT_RED_DRAGON:
     case MT_GNOME_KING:
@@ -771,6 +769,13 @@ monster *monster_new(int monster_type, struct level *l)
         while (it == IT_CONTAINER);
 
         inv_add(nmonster->inventory, item_new_random(it));
+        break;
+
+    case MT_MIMIC:
+        /* determine how the mimic will be displayed */
+        nmonster->item_type = rand_1n(IT_MAX);
+        /* the mimic is not known to be a monster */
+        nmonster->unknown = TRUE;
         break;
     }
 
@@ -1479,7 +1484,7 @@ gboolean monster_update_action(monster *m)
         }
     }
 
-    if (m->type == MT_MIMIC)
+    if (m->type == MT_MIMIC && m->unknown)
     {
         /* stationary monsters */
         naction = MA_REMAIN;

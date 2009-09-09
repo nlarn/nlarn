@@ -150,7 +150,6 @@ int display_paint_screen(player *p)
             /* draw the truth */
             if (game_wizardmode(p->game))
             {
-
                 /* draw items */
                 if (level_ilist_at(p->level, pos) && (inv_length(level_ilist_at(p->level, pos)) > 0))
                 {
@@ -229,13 +228,13 @@ int display_paint_screen(player *p)
         if (game_wizardmode(p->game)
                 || player_effect(p, ET_DETECT_MONSTER)
                 || (player_pos_visible(p, monst->pos)
-                    && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))))
+                    && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))
+                    && !monst->unknown)) /* hide the mimic */
         {
             attron(COLOR_PAIR(DC_RED));
             mvaddch(monst->pos.y, monst->pos.x, monster_image(monst));
             attroff(COLOR_PAIR(DC_RED));
         }
-
     }
 
     /* draw spheres */

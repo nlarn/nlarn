@@ -161,20 +161,20 @@ typedef struct monster
     /* last known position of player */
     position player_pos;
 
-    /* LOS between player -> monster */
-    gboolean m_visible;
-
-    /* LOS between monster -> player */
-    gboolean p_visible;
-
     /* level monster is on */
     struct level *level;
 
     /* attacks already unsuccessfully tried */
-    int attacks_failed[MONSTER_ATTACK_COUNT];
+    gboolean attacks_failed[MONSTER_ATTACK_COUNT];
 
     inventory *inventory;
     GPtrArray *effects;
+
+    guint32
+        m_visible: 1,    /* LOS between player -> monster */
+        p_visible: 1,    /* LOS between monster -> player */
+        item_type: 8,    /* item type monster is displayed as */
+        unknown: 1;      /* monster is unknown */
 } monster;
 
 /* external vars */
