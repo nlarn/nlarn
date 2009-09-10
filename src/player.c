@@ -70,7 +70,7 @@ static const char *player_lvl_desc[] =
     table of experience needed to be a certain level of player
     FIXME: this is crap. Use a formula instead an get rid of this...
  */
-static const long player_lvl_exp[] =
+static const guint32 player_lvl_exp[] =
 {
     0,      /* there is no level 0 */
     0, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120,                                        /*  1-11 */
@@ -482,7 +482,13 @@ int player_move(player *p, int direction)
     /* no movement if paralyzed */
     if (player_effect(p, ET_PARALYSIS))
     {
-        log_add_entry(p->log, "You can not move!");
+        static int message_shown = 0;
+
+        if (message_shown < game_turn(p->game))
+        {
+            log_add_entry(p->log, "You can not move!");
+            message_shown = game_turn(p->game);
+        }
         return 0;
     }
 
@@ -1242,7 +1248,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
                 e->amount = dam->amount;
                 player_effect_add(p, e);
             }
-            else
+            else if (cause_type != PD_EFFECT)
             {
                 e->amount += dam->amount;
             }
@@ -1282,7 +1288,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         case DAM_DEC_DEX:
             e = effect_new(ET_DEC_DEX, game_turn(p->game));
             e->turns = dam->amount * 50;
-            player_effect_add(p, effect_new(ET_DEC_DEX, game_turn(p->game)));
+            player_effect_add(p, e);
             break;
 
         case DAM_DRAIN_LIFE:

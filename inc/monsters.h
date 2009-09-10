@@ -212,7 +212,7 @@ void monsters_genocide(struct level *l);
 #define monster_hp_max(monster)      (monsters[(monster)->type].hp_max)
 #define monster_exp(monster)         (monsters[(monster)->type].exp)
 #define monster_image(monster)       (monsters[(monster)->type].image)
-#define monster_speed(monster)       (monsters[(monster)->type].speed)
+#define monster_speed(monster)       (monsters[(monster)->type].mspeed)
 #define monster_damage(monster)      (monsters[(monster)->type].attacks[0].base)
 
 /* flags */

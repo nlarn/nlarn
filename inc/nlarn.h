@@ -55,7 +55,7 @@
 
 
 #define VERSION_MAJOR 0 /* this is the present version # of the program */
-#define VERSION_MINOR 3
+#define VERSION_MINOR 4
 #define VERSION_PATCH 0
 
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
