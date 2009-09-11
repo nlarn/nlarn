@@ -41,10 +41,11 @@ const level_tile_data level_tiles[LT_MAX] =
     { LT_NONE,      ' ', DC_NONE,   NULL,         0, 0 },
     { LT_GRASS,     '"', DC_GREEN,  "grass",      1, 1 },
     { LT_DIRT,      ',', DC_YELLOW, "dirt",       1, 1 },
+    { LT_TREE,      '&', DC_GREEN,  "tree",       0, 0 },
     { LT_FLOOR,     ' ', DC_NONE,   "floor",      1, 1 },
     { LT_WATER,     '~', DC_BLUE,   "water",      1, 1 },
     { LT_DEEPWATER, '~', DC_BLUE,   "deep water", 0, 1 },
-    { LT_LAVA,      '~', DC_RED,    "lava",       0, 1 },
+    { LT_LAVA,      '=', DC_RED,    "lava",       0, 1 },
     { LT_FIRE,      '*', DC_RED,    "fire",       1, 1 },
     { LT_CLOUD,     '*', DC_WHITE,  "toxic gas",  1, 1 },
     { LT_WALL,      '#', DC_WHITE,  "wall",       0, 0 },
@@ -106,24 +107,28 @@ void level_new(level *l, char *mazefile)
 
     assert(l != NULL);
 
-    /* clear map */
-    for (y = 0; y < LEVEL_MAX_Y; y++)
-        for (x = 0; x < LEVEL_MAX_X; x++)
-            l->map[y][x].type = (l->nlevel > 0) ? LT_WALL : LT_FLOOR;
-
     /* initialize monster and sphere list */
     l->mlist = g_ptr_array_new();
     l->slist = g_ptr_array_new();
 
     /* create map */
-    if (((l->nlevel > 1) && chance(25)) || l->nlevel == LEVEL_DMAX - 1 || l->nlevel == LEVEL_MAX - 1)
+    if ((l->nlevel == 0)
+            || (l->nlevel == LEVEL_DMAX - 1)
+            || (l->nlevel == LEVEL_MAX - 1)
+            || (l->nlevel > 1 && chance(25)))
     {
         /* read maze from data file */
-        level_loaded = level_load_from_file(l, mazefile, -1);
+        level_loaded = level_load_from_file(l, mazefile,
+                                            (l->nlevel == 0) ? 0 : -1);
     }
 
     if (!level_loaded)
     {
+        /* clear map */
+        for (y = 0; y < LEVEL_MAX_Y; y++)
+            for (x = 0; x < LEVEL_MAX_X; x++)
+                l->map[y][x].type = LT_WALL;
+
         /* generate random map */
         level_make_maze(l);
 
@@ -141,11 +146,11 @@ void level_new(level *l, char *mazefile)
         }
     }
 
-    /* add static content */
-    level_fill_with_stationary(l);
-
     if (l->nlevel > 0)
     {
+        /* add static content */
+        level_fill_with_stationary(l);
+
         /* home town is not filled with crap */
         level_fill_with_objects(l);
 
@@ -834,45 +839,6 @@ static void level_fill_with_stationary(level *l)
     position pos;
     int i;						/* loop var */
 
-    if (l->nlevel == 0)
-    {
-        /* fill home level */
-
-        /* entrance to dungeon */
-        pos = level_find_space(l, LE_STATIONARY);
-        level_stationary_at(l,pos) = LS_ENTRANCE;
-
-        /* the DND STORE */
-        pos = level_find_space(l, LE_STATIONARY);
-        level_stationary_at(l,pos) = LS_DNDSTORE;
-
-        /* college of Larn */
-        pos = level_find_space(l, LE_STATIONARY);
-        level_stationary_at(l,pos) = LS_SCHOOL;
-
-        /* 1st national bank of larn */
-        pos = level_find_space(l, LE_STATIONARY);
-        level_stationary_at(l,pos) = LS_BANK;
-
-        /* volcano shaft to temple */
-        pos = level_find_space(l, LE_STATIONARY);
-        level_stationary_at(l,pos) = LS_ELEVATORDOWN;
-
-        /* the players home & family */
-        pos = level_find_space(l, LE_STATIONARY);
-        level_stationary_at(l,pos) = LS_HOME;
-
-        /* the trading post */
-        pos = level_find_space(l, LE_STATIONARY);
-        level_stationary_at(l,pos) = LS_TRADEPOST;
-
-        /* the larn revenue service */
-        pos = level_find_space(l, LE_STATIONARY);
-        level_stationary_at(l,pos) = LS_LRS;
-
-        return;
-    }
-
     /* volcano shaft up from the temple */
     if (l->nlevel == LEVEL_MAX -1)
     {
@@ -1202,7 +1168,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
     /* FIXME: calculate how many levels are in the file  */
     /* roll the dice: which level? we can currently choose from a variety of 24 */
 
-    if (which >= 0 && which <= 23)
+    if (which >= 0 && which < 25)
     {
         level_num = which;
     }
@@ -1210,7 +1176,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
     {
         while (level_used[level_num])
         {
-            level_num = rand_0n(23);
+            level_num = rand_1n(25);
         }
         level_used[level_num] = TRUE;
     }
@@ -1230,15 +1196,68 @@ static int level_load_from_file(level *l, char *mazefile, int which)
 
             switch (fgetc(levelfile))
             {
+
+            case '"': /* grass */
+                lt = LT_GRASS;
+                break;
+
+            case ',': /* dirt */
+                lt = LT_DIRT;
+                break;
+
+            case '&': /* tree */
+                lt = LT_TREE;
+                break;
+
+            case '~': /* deep water */
+                lt = LT_DEEPWATER;
+                break;
+
+            case '=': /* lava */
+                lt = LT_LAVA;
+                break;
+
             case '#': /* wall */
                 lt =  LT_WALL;
                 break;
 
-            case 'D': /* door */
+            case '+': /* door */
                 ls = LS_CLOSEDDOOR;
                 break;
 
-            case '~': /* eye of larn */
+            case 'O': /* dungeon entrance */
+                ls = LS_ENTRANCE;
+                break;
+
+            case '^': /* elevator */
+                ls = LS_ELEVATORDOWN;
+                break;
+
+            case 'H': /* home */
+                ls = LS_HOME;
+                break;
+
+            case 'D': /* dnd store */
+                ls = LS_DNDSTORE;
+                break;
+
+            case 'T': /* trede post */
+                ls = LS_TRADEPOST;
+                break;
+
+            case 'L': /* LRS */
+                ls = LS_LRS;
+                break;
+
+            case 'S': /* school */
+                ls = LS_SCHOOL;
+                break;
+
+            case 'B': /*  */
+                ls = LS_BANK;
+                break;
+
+            case '*': /* eye of larn */
                 if (l->nlevel != LEVEL_DMAX - 1)
                 {
                     break;
@@ -1277,7 +1296,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
 
             if (itm != NULL)
             {
-                 inv_add(&level_ilist_at(l, pos), itm);
+                inv_add(&level_ilist_at(l, pos), itm);
             }
         }
         (void)fgetc(levelfile); /* eat EOL */

@@ -1856,6 +1856,7 @@ GPtrArray *player_effect_text(player *p)
     if (player_effect(p, ET_OVERSTRAINED)) g_ptr_array_add(text, "overload");
     if (player_effect(p, ET_POISON))       g_ptr_array_add(text, "poisoned");
     if (player_effect(p, ET_SLOWNESS))     g_ptr_array_add(text, "slow");
+    if (player_effect(p, ET_PARALYSIS))    g_ptr_array_add(text, "paralyzed");
 
     return text;
 }

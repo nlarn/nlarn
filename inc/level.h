@@ -44,6 +44,7 @@ typedef enum level_tile_type
     LT_NONE,
     LT_GRASS,
     LT_DIRT,
+    LT_TREE,
     LT_FLOOR,
     LT_WATER,
     LT_DEEPWATER,
