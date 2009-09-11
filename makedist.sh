@@ -12,6 +12,7 @@ then
 	OS=win32
 	SUFFIX="exe"
 	EXE="nlarn.exe pdcurses.dll libglib-2.0-0.dll"
+	export CC=gcc
 else
 	OS=$(uname -s)
 	SUFFIX="tar.gz"
@@ -47,6 +48,7 @@ fi
 
 mkdir -p "$DIRNAME"/lib
 cp $EXE "$DIRNAME"
+cp LICENSE "$DIRNAME"
 cp $FILES "$DIRNAME"/lib
 
 rm -f "$PACKAGE"
