@@ -231,21 +231,21 @@ int building_dndstore(player *p)
 
 void building_dndstore_init()
 {
-    int id, loop, count;
-    item_t it = IT_NONE;
+    int loop, count;
+    item_t type = IT_NONE;
 
     /* do nothing if the store has already been initialized */
     if (store_stock)
         return;
 
-    for (it = IT_ARMOUR; it < IT_MAX; it++)
+    for (type = IT_ARMOUR; type < IT_MAX; type++)
     {
-        if (it == IT_GOLD || it == IT_GEM || it == IT_CONTAINER)
+        if (type == IT_GOLD || type == IT_GEM || type == IT_CONTAINER)
         {
             continue;
         }
 
-        if (item_is_stackable(it) && it != IT_BOOK)
+        if (item_is_stackable(type) && (type != IT_BOOK))
         {
             count = 3;
         }
@@ -256,9 +256,21 @@ void building_dndstore_init()
 
         for (loop = 0; loop < count; loop++)
         {
-            for (id = 1; id < item_max_id(it); id++)
+            int id;
+
+            for (id = 1; id < item_max_id(type); id++)
             {
-                inv_add(&store_stock, item_new(it, id, 0));
+                item *it = item_new(type, id, 0);
+
+                /* do not generate unobtainable weapons */
+                if ((type == IT_WEAPON) && !weapon_is_obtainable(it))
+                {
+                    item_destroy(it);
+                }
+                else
+                {
+                    inv_add(&store_stock, it);
+                }
             }
         }
     }

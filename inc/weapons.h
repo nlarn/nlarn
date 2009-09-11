@@ -28,13 +28,21 @@ typedef struct weapon_data {
 	int price;			/* base price in the shops */
 	unsigned
 		twohanded: 1,	/* needs two hands */
-		unique: 1;		/* unique */
+		unique: 1,		/* unique */
+		obtainable: 1;  /* available in the shop */
 } weapon_data;
 
 enum weapon_type {
 	WT_NONE,
+	WT_ODAGGER,
 	WT_DAGGER,
+	WT_OSHORTSWORD,
+	WT_SHORTSWORD,
+	WT_ESHORTSWORD,
+	WT_OSPEAR,
 	WT_SPEAR,
+	WT_ESPEAR,
+	WT_MACE,
 	WT_FLAIL,
 	WT_BATTLEAXE,
 	WT_LONGSWORD,
@@ -56,12 +64,13 @@ extern const weapon_data weapons[WT_MAX];
 
 /* macros */
 
-#define weapon_name(weapon)         (weapons[(weapon)->id].name)
-#define weapon_wc(weapon)           (weapons[(weapon)->id].wc + (weapon)->bonus)
-#define weapon_material(weapon)     (weapons[(weapon)->id].material)
-#define weapon_weight(weapon)       (weapons[(weapon)->id].weight)
-#define weapon_price(weapon)        (weapons[(weapon)->id].price)
-#define weapon_is_twohanded(weapon) (weapons[(weapon)->id].twohanded)
-#define weapon_is_unique(weapon)    (weapons[(weapon)->id].unique)
+#define weapon_name(weapon)          (weapons[(weapon)->id].name)
+#define weapon_wc(weapon)            (weapons[(weapon)->id].wc + (weapon)->bonus)
+#define weapon_material(weapon)      (weapons[(weapon)->id].material)
+#define weapon_weight(weapon)        (weapons[(weapon)->id].weight)
+#define weapon_price(weapon)         (weapons[(weapon)->id].price)
+#define weapon_is_twohanded(weapon)  (weapons[(weapon)->id].twohanded)
+#define weapon_is_unique(weapon)     (weapons[(weapon)->id].unique)
+#define weapon_is_obtainable(weapon) (weapons[(weapon)->id].obtainable)
 
 #endif
