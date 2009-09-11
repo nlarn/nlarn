@@ -737,7 +737,7 @@ monster *monster_new(int monster_type, struct level *l)
     {
         /* add gold to monster's inventory, ramdomize the amount */
         icount = max(divert(monster_gold(nmonster), 10), 1);
-        inv_add(nmonster->inventory, item_new(IT_GOLD, icount, 0));
+        inv_add(&nmonster->inventory, item_new(IT_GOLD, icount, 0));
     }
 
     switch (monster_type)
@@ -745,7 +745,7 @@ monster *monster_new(int monster_type, struct level *l)
     case MT_LEPRECHAUN:
         if (chance(25))
         {
-            inv_add(nmonster->inventory,
+            inv_add(&nmonster->inventory,
                     item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)), 0));
         }
         break;
@@ -753,7 +753,7 @@ monster *monster_new(int monster_type, struct level *l)
     case MT_ORC:
     case MT_ELF:
     case MT_TROLL:
-        inv_add(nmonster->inventory,
+        inv_add(&nmonster->inventory,
                 item_new_by_level(IT_WEAPON, l->nlevel));
         break;
 
@@ -768,7 +768,7 @@ monster *monster_new(int monster_type, struct level *l)
         }
         while (it == IT_CONTAINER);
 
-        inv_add(nmonster->inventory, item_new_random(it));
+        inv_add(&nmonster->inventory, item_new_random(it));
         break;
 
     case MT_MIMIC:
@@ -1176,14 +1176,14 @@ monster *monster_trap_trigger(monster *m, struct player *p)
     return m;
 }
 
-void monster_items_drop(monster *m, inventory *floor)
+void monster_items_drop(monster *m, inventory **floor)
 {
     assert(m != NULL && floor != NULL);
 
     while (inv_length(m->inventory) > 0)
     {
         inv_add(floor, inv_get(m->inventory, 0));
-        inv_del(m->inventory, 0);
+        inv_del(&m->inventory, 0);
     }
 }
 
@@ -1214,16 +1214,9 @@ void monster_items_pickup(monster *m, struct player *p)
                               (it->count == 1) ? item_name_sg(it->type) : item_name_pl(it->type));
             }
 
-            inv_del_element(floor, it);
-            inv_add(m->inventory, it);
+            inv_del_element(&floor, it);
+            inv_add(&m->inventory, it);
         }
-    }
-
-    /* purge empty inventory */
-    if (floor && inv_length(floor) == 0)
-    {
-        inv_destroy(floor);
-        level_ilist_at(m->level, m->pos) = NULL;
     }
 }
 
@@ -1648,10 +1641,7 @@ static void monster_die(monster *m)
     /* drop stuff the monster carries */
     if (inv_length(m->inventory))
     {
-        if (level_ilist_at(m->level, m->pos) == NULL)
-            level_ilist_at(m->level, m->pos) = inv_new(NULL);
-
-        monster_items_drop(m, level_ilist_at(m->level, m->pos));
+        monster_items_drop(m, &level_ilist_at(m->level, m->pos));
     }
 
     monster_destroy(m);
@@ -1685,7 +1675,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
     }
     else
     {
-        inv_del_element(p->inventory, it);
+        inv_del_element(&p->inventory, it);
         item_destroy(it);
     }
 
@@ -1720,7 +1710,7 @@ static gboolean monster_item_rust(monster *m, struct player *p)
             player_item_unequip(p, it);
             log_enable(p->log);
 
-            inv_del_element(p->inventory, it);
+            inv_del_element(&p->inventory, it);
             item_destroy(it);
             return TRUE;
         }
@@ -1780,7 +1770,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                 log_enable(p->log);
             }
 
-            inv_del_element(p->inventory, it);
+            inv_del_element(&p->inventory, it);
             log_add_entry(p->log, "The %s picks your pocket.", monster_name(m));
         }
     }
@@ -1788,7 +1778,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     /* if item / gold has been stolen, add it to the monster's inv */
     if (it)
     {
-        inv_add(m->inventory, it);
+        inv_add(&m->inventory, it);
         return TRUE;
     }
     else

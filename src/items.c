@@ -115,10 +115,6 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
 
         break;
 
-    case IT_CONTAINER:
-        nitem->content = inv_new(NULL);
-        break;
-
     case IT_GEM:
         /* ensure minimal size */
         if (nitem->bonus == 0)
@@ -995,11 +991,15 @@ void inv_destroy(inventory *inv)
 
     while (inv_length(inv) > 0)
     {
-        item_destroy(inv_del(inv, inv_length(inv) - 1));
+        item_destroy(inv_del(&inv, inv_length(inv) - 1));
     }
 
-    g_ptr_array_free(inv->content, TRUE);
-    g_free(inv);
+    /* check if inventory has not yet been destroyed by inv_del */
+    if (inv != NULL)
+    {
+        g_ptr_array_free(inv->content, TRUE);
+        g_free(inv);
+    }
 }
 
 void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
@@ -1014,117 +1014,112 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
     inv-> post_del = post_del;
 }
 
-int inv_add(inventory *inv, item *new_item)
+int inv_add(inventory **inv, item *new_item)
 {
     guint pos;
     item *i;
 
     assert(inv != NULL && item_new != NULL);
 
-    /* call pre_add callback */
-    if (inv->pre_add)
+    /* create inventory if necessary */
+    if (!(*inv))
     {
-        if (!inv->pre_add(inv, new_item)) return FALSE;
+        *inv = inv_new(NULL);
+    }
+
+    /* call pre_add callback */
+    if ((*inv)->pre_add)
+    {
+        if (!(*inv)->pre_add(*inv, new_item)) return FALSE;
     }
 
     if (item_is_stackable(new_item->type))
     {
-        for (pos = 0; pos < inv_length(inv); pos++)
+        for (pos = 0; pos < inv_length(*inv); pos++)
         {
-            i = (item *)inv_get(inv, pos);
+            i = (item *)inv_get(*inv, pos);
             if (item_compare(i, new_item))
             {
                 /* just increase item count and release the original */
                 i->count += new_item->count;
                 item_destroy(new_item);
 
-                return inv_length(inv);
+                return inv_length(*inv);
             }
         }
     }
 
-    g_ptr_array_add(inv->content, new_item);
+    g_ptr_array_add((*inv)->content, new_item);
 
     /* call post_add callback */
-    if (inv->post_add)
+    if ((*inv)->post_add)
     {
-        inv->post_add(inv, new_item);
+        (*inv)->post_add(*inv, new_item);
     }
 
-    return inv_length(inv);
+    return inv_length(*inv);
 }
 
-item *inv_del(inventory *inv, guint idx)
+item *inv_del(inventory **inv, guint idx)
 {
     item *item;
 
-    assert(inv != NULL && inv->content != NULL && idx < inv_length(inv));
+    assert(*inv != NULL && (*inv)->content != NULL && idx < inv_length(*inv));
 
-    item = inv_get(inv, idx);
+    item = inv_get(*inv, idx);
 
-    if (inv->pre_del)
+    if ((*inv)->pre_del)
     {
-        if (!inv->pre_del(inv, item))
+        if (!(*inv)->pre_del(*inv, item))
         {
             return NULL;
         }
     }
 
-    g_ptr_array_remove_index_fast(inv->content, idx);
+    g_ptr_array_remove_index_fast((*inv)->content, idx);
 
-    if (inv->post_del)
+    if ((*inv)->post_del)
     {
-        inv->post_del(inv, item);
+        (*inv)->post_del(*inv, item);
+    }
+
+    /* destroy inventory if empty and not owned by anybody */
+    if (!inv_length(*inv) && !(*inv)->owner)
+    {
+        inv_destroy(*inv);
+        *inv = NULL;
     }
 
     return item;
 }
 
-int inv_del_element(inventory *inv, item *item)
+int inv_del_element(inventory **inv, item *item)
 {
-    assert(inv != NULL && inv->content != NULL && item != NULL);
+    assert(*inv != NULL && (*inv)->content != NULL && item != NULL);
 
-    if (inv->pre_del)
+    if ((*inv)->pre_del)
     {
-        if (!inv->pre_del(inv, item))
+        if (!(*inv)->pre_del(*inv, item))
         {
             return FALSE;
         }
     }
 
-    g_ptr_array_remove((inv)->content, item);
+    g_ptr_array_remove((*inv)->content, item);
 
-    if (inv->post_del)
+    if ((*inv)->post_del)
     {
-        inv->post_del(inv, item);
+        (*inv)->post_del(*inv, item);
+    }
+
+    /* destroy inventory if empty and not owned by anybody */
+    if (!inv_length(*inv) && !(*inv)->owner)
+    {
+        inv_destroy(*inv);
+        *inv = NULL;
     }
 
     return TRUE;
-}
-
-/**
- * clean unused items from an inventory
- *
- */
-void inv_clean(inventory *inv)
-{
-    item *it;
-    guint pos;
-
-    assert(inv != NULL);
-
-    for (pos = 0; pos < inv_length(inv); pos++)
-    {
-        it = inv_get(inv, pos);
-        if (it->count == 0)
-        {
-            /* use glib function to avoid callbacks */
-            g_ptr_array_remove_index(inv->content, pos);
-            /* reduce pos as inventory length is reduced */
-            pos--;
-        }
-    }
-
 }
 
 void inv_sort(inventory *inv,GCompareDataFunc compare_func, gpointer user_data)

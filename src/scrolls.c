@@ -163,14 +163,8 @@ int scroll_create_artefact(player *p, item *scroll)
 
     assert(p != NULL && scroll != NULL);
 
-    /* FIXME: this is not what it should be */
-    if (!level_ilist_at(p->level, p->pos))
-    {
-        level_ilist_at(p->level, p->pos) = inv_new(NULL);
-    }
-
     it = item_new_by_level(rand_1n(IT_MAX), p->level->nlevel);
-    inv_add(level_ilist_at(p->level, p->pos), it);
+    inv_add(&level_ilist_at(p->level, p->pos), it);
 
     item_describe(it, player_item_known(p, it), (it->count == 1),
                   FALSE, buf, 60);

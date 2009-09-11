@@ -238,9 +238,6 @@ void building_dndstore_init()
     if (store_stock)
         return;
 
-    /* generate stock if nothing is present */
-    store_stock = inv_new(NULL);
-
     for (it = IT_ARMOUR; it < IT_MAX; it++)
     {
         if (it == IT_GOLD || it == IT_GEM || it == IT_CONTAINER)
@@ -261,7 +258,7 @@ void building_dndstore_init()
         {
             for (id = 1; id < item_max_id(it); id++)
             {
-                inv_add(store_stock, item_new(it, id, 0));
+                inv_add(&store_stock, item_new(it, id, 0));
             }
         }
     }
@@ -271,13 +268,13 @@ void building_dndstore_init()
 void building_dndstore_item_add(item *i)
 {
     assert (i != NULL);
-    inv_add(store_stock, i);
+    inv_add(&store_stock, i);
 }
 
 void building_dndstore_item_del(item *i)
 {
     assert (i != NULL);
-    inv_del_element(store_stock, i);
+    inv_del_element(&store_stock, i);
 }
 
 int building_home(player *p)

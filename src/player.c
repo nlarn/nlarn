@@ -120,12 +120,12 @@ player *player_new(struct game *game)
                       NULL, &player_inv_weight_recalc);
 
     it = item_new(IT_ARMOUR, AT_LEATHER, 1);
-    inv_add(p->inventory, it);
+    inv_add(&p->inventory, it);
     player_item_equip(p, it);
 
     it = item_new(IT_WEAPON, WT_DAGGER, 0);
     it->bonus_known = TRUE;
-    inv_add(p->inventory, it);
+    inv_add(&p->inventory, it);
     player_item_equip(p, it);
 
     /* start a new diary */
@@ -599,7 +599,7 @@ int player_attack(player *p, monster *m)
                 log_add_entry(p->log, "Your %s disintegrates!", weapon_name(p->eq_weapon));
 
                 /* delete the weapon from the inventory */
-                inv_del_element(p->inventory, p->eq_weapon);
+                inv_del_element(&p->inventory, p->eq_weapon);
 
                 /* destroy it and remove the reference to it */
                 item_destroy(p->eq_weapon);
@@ -931,13 +931,6 @@ int player_pickup(player *p)
 
         /* clean up callbacks */
         display_inv_callbacks_clean(callbacks);
-    }
-
-    /* delete inventory if empty */
-    if (!inv_length(level_ilist_at(p->level, p->pos)))
-    {
-        inv_destroy(level_ilist_at(p->level, p->pos));
-        level_ilist_at(p->level, p->pos) = NULL;
     }
 
     return time;
@@ -2926,7 +2919,7 @@ int player_item_use(player *p, item *it)
         }
         else
         {
-            inv_del_element(p->inventory, it);
+            inv_del_element(&p->inventory, it);
         }
     }
 
@@ -2962,16 +2955,13 @@ int player_item_drop(player *p, item *it)
         /* otherwise the entire quantity gets dropped */
     }
 
-    if (!inv_del_element(p->inventory, it))
+    if (!inv_del_element(&p->inventory, it))
     {
         /* if the callback failed, dropping has failed */
         return FALSE;
     }
 
-    if (level_ilist_at(p->level, p->pos) == NULL)
-        level_ilist_at(p->level, p->pos) = inv_new(NULL);
-
-    inv_add(level_ilist_at(p->level, p->pos), it);
+    inv_add(&level_ilist_at(p->level, p->pos), it);
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
 
     log_add_entry(p->log, "You drop %s.", desc);
@@ -3009,7 +2999,7 @@ int player_item_pickup(player *p, item *it)
      */
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
 
-    if (inv_add(p->inventory, it))
+    if (inv_add(&p->inventory, it))
     {
         log_add_entry(p->log, "You pick up %s.", desc);
     }
@@ -3018,7 +3008,7 @@ int player_item_pickup(player *p, item *it)
         return FALSE;
     }
 
-    inv_del_element(level_ilist_at(p->level, p->pos), it);
+    inv_del_element(&level_ilist_at(p->level, p->pos), it);
 
     /* one turn to pick item up, one to stuff it into the pack */
     return 2;
@@ -3100,7 +3090,7 @@ int player_item_buy(player *p, item *it)
     log_add_entry(p->log, "You buy %s.", name);
 
     /* try to transfer the item */
-    if (inv_add(p->inventory, it_clone))
+    if (inv_add(&p->inventory, it_clone))
     {
         /* item has been added to player's inventory */
         if (it->count > it_clone->count)
@@ -3211,7 +3201,7 @@ int player_item_sell(player *p, item *it)
     }
     else
     {
-        if (!inv_del_element(p->inventory, it))
+        if (!inv_del_element(&p->inventory, it))
         {
             return FALSE;
         }
@@ -3969,15 +3959,10 @@ int player_throne_pillage(player *p)
 
     if (chance(25))
     {
-        if (!level_ilist_at(p->level, p->pos))
-        {
-            level_ilist_at(p->level, p->pos) = inv_new(NULL);
-        }
-
         for (i = 0; i < rand_1n(4); i++)
         {
             /* gems pop off the throne */
-            inv_add(level_ilist_at(p->level, p->pos),
+            inv_add(&level_ilist_at(p->level, p->pos),
                     item_new_random(IT_GEM));
 
             count++;
@@ -4201,18 +4186,25 @@ guint player_set_gold(player *p, guint amount)
         i = inv_get(p->inventory, idx);
         if (i->type == IT_GOLD)
         {
-            i->count = amount;
+            if (!amount)
+            {
+                inv_del_element(&p->inventory, i);
+            }
+            else
+            {
+                i->count = amount;
+            }
 
             /* force recalculation of inventory weight */
             player_inv_weight_recalc(p->inventory, NULL);
 
-            return i->count;
+            return !amount ? amount : i->count;
         }
     }
 
     /* no gold found -> generate new gold */
     i = item_new(IT_GOLD, amount, 0);
-    inv_add(p->inventory, i);
+    inv_add(&p->inventory, i);
 
     return i->count;
 }

@@ -833,9 +833,6 @@ void display_inventory(char *title, player *p, inventory *inv,
                     if (time) game_spin_the_wheel(p->game, time);
 
                     redraw = TRUE;
-
-                    /* remove unused items */
-                    inv_clean(inv);
                 }
             }
 

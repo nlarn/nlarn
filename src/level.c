@@ -804,7 +804,7 @@ void level_timer(level *l, guint8 count)
 
                         if (impact == PI_DESTROYED)
                         {
-                            inv_del_element(level_ilist_at(l, pos), it);
+                            inv_del_element(&level_ilist_at(l, pos), it);
                             item_destroy(it);
                         }
                     } /* foreach item */
@@ -971,7 +971,7 @@ static void level_fill_with_objects(level *l)
             }
             while (it == IT_CONTAINER);
 
-            inv_add(container->content, item_new_by_level(it, l->nlevel));
+            inv_add(&(container->content), item_new_by_level(it, l->nlevel));
         }
 
         /* add the container to the level */
@@ -1277,12 +1277,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
 
             if (itm != NULL)
             {
-                if (!level_ilist_at(l, pos))
-                {
-                    level_ilist_at(l, pos) = inv_new(NULL);
-                }
-
-                inv_add(level_ilist_at(l, pos), itm);
+                 inv_add(&level_ilist_at(l, pos), itm);
             }
         }
         (void)fgetc(levelfile); /* eat EOL */
@@ -1329,13 +1324,8 @@ static void level_add_treasure_room(level *l)
                 level_basetype_at(l, pos) = LT_FLOOR;
 
                 /* create loot */
-                if (level_ilist_at(l, pos) == NULL)
-                {
-                    level_ilist_at(l, pos) = inv_new(NULL);
-                }
-
                 itm = item_new_random(IT_GOLD);
-                inv_add(level_ilist_at(l, pos), itm);
+                inv_add(&level_ilist_at(l, pos), itm);
 
                 /* create a monster */
                 monst = monster_new_by_level(l);
@@ -1390,13 +1380,7 @@ static void level_add_item(level *l, item *what)
 
     pos = level_find_space(l, LE_ITEM);
 
-    if (level_ilist_at(l, pos) == NULL)
-    {
-        /* initialize item list */
-        level_ilist_at(l, pos) = inv_new(NULL);
-    }
-
-    inv_add(level_ilist_at(l, pos), what);
+    inv_add(&level_ilist_at(l, pos), what);
 }
 
 static level_path *level_path_new(position start, position goal)
