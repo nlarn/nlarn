@@ -482,13 +482,7 @@ int player_move(player *p, int direction)
     /* no movement if paralyzed */
     if (player_effect(p, ET_PARALYSIS))
     {
-        static int message_shown = 0;
-
-        if (message_shown < game_turn(p->game))
-        {
-            log_add_entry(p->log, "You can not move!");
-            message_shown = game_turn(p->game);
-        }
+        log_add_entry(p->log, "You can't move!");
         return 0;
     }
 
@@ -3200,13 +3194,14 @@ int player_item_sell(player *p, item *it)
         }
     }
 
-    player_set_gold(p, player_get_gold(p) + price);
+    p->bank_account += price;
 
     it_clone = item_clone(it);
     it_clone->count = count;
 
     item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
-    log_add_entry(p->log, "You sell %s.", name);
+    log_add_entry(p->log, "You sell %s. The %d gold %s been transferred to your bank account.",
+                  name, price, (price == 1) ? "has" : "have");
 
     item_destroy(it_clone);
 
@@ -3491,7 +3486,7 @@ int player_building_enter(player *p)
         break;
 
     default:
-        log_add_entry(p->log, "I seen no building here.");
+        log_add_entry(p->log, "There is nothing to enter here.");
     }
 
     return moves_count;
@@ -3905,9 +3900,6 @@ int player_stairs_down(player *p)
         else
             log_add_entry(p->log, "Climb up to return to town.");
         break;
-
-    default:
-        log_add_entry(p->log, "I see no stairway down here.");
     }
 
     /* if told to switch level, do so */

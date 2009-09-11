@@ -744,6 +744,7 @@ void display_inventory(char *title, player *p, inventory *inv,
 
             break;
 
+        case 'k':
         case '8':
         case KEY_UP:
 #ifdef KEY_A2
@@ -758,6 +759,7 @@ void display_inventory(char *title, player *p, inventory *inv,
 
             break;
 
+        case 'j':
         case '2':
         case KEY_DOWN:
 #ifdef KEY_C2
@@ -1022,6 +1024,7 @@ spell *display_spell_select(char *title, player *p)
                 offset = max(offset - maxvis, 0);
             break;
 
+        case 'k':
         case '8':
         case KEY_UP:
 #ifdef KEY_A2
@@ -1033,6 +1036,7 @@ spell *display_spell_select(char *title, player *p)
                 offset--;
             break;
 
+        case 'j':
         case '2':
         case KEY_DOWN:
 #ifdef KEY_C2
@@ -1933,6 +1937,8 @@ char display_show_message(char *title, char *message)
 
         switch (key)
         {
+        case 'k':
+        case '8':
         case KEY_UP:
 #ifdef KEY_A2
         case KEY_A2:
@@ -1951,6 +1957,8 @@ char display_show_message(char *title, char *message)
             offset = 0;
             break;
 
+        case 'j':
+        case '2':
         case KEY_DOWN:
 #ifdef KEY_C2
         case KEY_C2:

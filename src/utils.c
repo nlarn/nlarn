@@ -128,24 +128,53 @@ void log_set_time(message_log *log, int gtime)
         log->buffer = g_string_new("");
     }
 
+    /* cleanup previous message buffer */
+    if (log->lastmsg)
+    {
+        g_free(log->lastmsg);
+        log->lastmsg = NULL;
+    }
+
     log->gtime = gtime;
 }
 
 int log_add_entry(message_log *log, char *fmt, ...)
 {
     va_list argp;
+    gchar *msg;
 
     if (log == NULL || log->active == FALSE)
         return FALSE;
+
+    /* assemble message and append it to the buffer */
+    va_start(argp, fmt);
+    msg = g_strdup_vprintf(fmt, argp);
+    va_end(argp);
+
+    /* compare new message to previous messages to avoid duplicates */
+    if (log->lastmsg)
+    {
+        if (g_strcmp0(msg, log->lastmsg) == 0)
+        {
+            /* message is equal to previous message */
+            g_free(msg);
+            return FALSE;
+        }
+        else
+        {
+            /* msg is not equal to previous message */
+            g_free(log->lastmsg);
+            log->lastmsg = msg;
+        }
+    }
 
     /* if there is already text in the buffer, append a space first */
     if (log->buffer->len)
         g_string_append_c(log->buffer, ' ');
 
-    /* assemble message and append it to the buffer */
-    va_start(argp, fmt);
-    g_string_append_vprintf(log->buffer, fmt, argp);
-    va_end(argp);
+    g_string_append(log->buffer, msg);
+
+    log->lastmsg = g_strdup(msg);
 
     return TRUE;
 }

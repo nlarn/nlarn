@@ -176,19 +176,15 @@ int main(int argc, char *argv[])
             moves_count = player_spell_cast(g->p);
             break;
 
-            /* go down stairs */
+            /* go down stairs / enter a building */
         case '>':
-            moves_count = player_stairs_down(g->p);
+            if (!(moves_count = player_stairs_down(g->p)))
+                moves_count = player_building_enter(g->p);
             break;
 
             /* go up stairs */
         case '<':
             moves_count = player_stairs_up(g->p);
-            break;
-
-            /* enter a building */
-        case 'e':
-            moves_count = player_building_enter(g->p);
             break;
 
             /* display inventory weight */

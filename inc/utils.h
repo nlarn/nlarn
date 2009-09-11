@@ -34,6 +34,7 @@ typedef struct message_log {
 	guint32 gtime;      /* current game time */
 	gint32 active;      /* flag to disable logging onto this log */
 	GString *buffer;    /* space to assemble a turn's messages */
+	char *lastmsg;      /* copy of last message */
 	message_log_entry **entries;
 } message_log;
 

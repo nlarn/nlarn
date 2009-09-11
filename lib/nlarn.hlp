@@ -15,7 +15,6 @@ A  desecrate an altar
 c  cast a spell
 C  close a door
 D  drink at a fountain
-e  enter a building
 g  get present pack weight
 i  inventory your pockets
 I  list all items found
@@ -30,8 +29,8 @@ t  tidy up at a fountain
 v  print program version
 Z  teleport yourself
 
-<  climb up stairs or volcanic shaft
->  climb down stairs or volcanic shaft
+<  climb up stairs / volcanic shaft or enter a building
+>  climb down stairs / volcanic shaft
 ^  identify a trap
 ,  pick up item
 :  look at object you are standing on
