@@ -34,15 +34,22 @@ typedef enum armour_categories {
 
 enum armour_types {
 	AT_NONE,
-	AT_SHIELD,
+	AT_LGLOVES,
+	AT_LBOOTS,
+	AT_LHELMET,
 	AT_LEATHER,
+	AT_WSHIELD,
 	AT_SLEATHER,
 	AT_RINGMAIL,
+	AT_LSHIELD,
+	AT_CHAINHOOD,
 	AT_CHAINMAIL,
 	AT_SPLINTMAIL,
+	AT_PHELMET,
+	AT_PBOOTS,
 	AT_PLATEMAIL,
-	AT_PLATE,
-	AT_SPLATE,
+	AT_SSHIELD,
+	AT_SPLATEMAIL,
 	AT_ELVENCHAIN,
 	AT_MAX
 };
@@ -55,8 +62,6 @@ typedef struct armour_data {
 	int	material;       /* material type from item_materials */
 	int weight;         /* used to determine inventory weight and if item can be thrown */
 	int price;          /* base price in the shops */
-	unsigned
-		unique: 		1;	/* unique */
 } armour_data;
 
 /* external vars */

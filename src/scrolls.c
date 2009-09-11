@@ -176,15 +176,18 @@ int scroll_create_artefact(player *p, item *scroll)
 
 int scroll_enchant_armour(player *p, item *scroll)
 {
+    item *it;
+
     assert(p != NULL && scroll != NULL);
 
-    if (p->eq_suit)
+    /* get a random piece of armour to enchant */
+    if ((it = player_random_armour(p)))
     {
         log_add_entry(p->log,
                       "Your %s glows for a moment.",
-                      armour_name(p->eq_suit));
+                      armour_name(it));
 
-        item_enchant(p->eq_suit);
+        item_enchant(it);
 
         return TRUE;
     }
