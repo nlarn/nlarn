@@ -225,7 +225,7 @@ GPtrArray *text_wrap(char *str, int width, int indent)
     while (pos < strlen(str))
     {
         len = lp = 0;
-        while (len < width)
+        while (len <= width)
         {
             if ((str[pos + len] == '\0') || isspace(str[pos + len]))
             {

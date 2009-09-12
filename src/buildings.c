@@ -128,7 +128,9 @@ int building_bank(player *p)
     switch (cmd)
     {
     case 'd': /* deposit */
-        amount = display_get_count("Deposit how much?", player_get_gold(p));
+        amount = display_get_count("How many gold pieces do you wish to deposit?",
+                                   player_get_gold(p));
+
         if (amount && (amount <= player_get_gold(p)))
         {
             p->bank_account += amount;
@@ -145,7 +147,9 @@ int building_bank(player *p)
         break;
 
     case 'w': /* withdraw */
-        amount = display_get_count("Withdraw how much?", p->bank_account);
+        amount = display_get_count("How many gold pieces do you wish to withdraw?",
+                                   p->bank_account);
+
         if (amount && (amount <= p->bank_account))
         {
             player_set_gold(p, player_get_gold(p) + amount);

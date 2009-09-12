@@ -3121,7 +3121,7 @@ int player_item_sell(player *p, item *it)
 {
     int price;
     guint count = 0;
-    char question[81];
+    char question[121];
     char name[61];
 
     item *it_clone;
@@ -3152,8 +3152,8 @@ int player_item_sell(player *p, item *it)
 
     if (it->count > 1)
     {
-        item_describe(it, player_item_known(p, it), FALSE, FALSE, name, 60);
-        g_snprintf(question, 80, "How many %s do you want to sell for %d gold?",
+        item_describe(it, player_item_known(p, it), FALSE, TRUE, name, 60);
+        g_snprintf(question, 120, "How many %s do you want to sell for %d gold?",
                    name, price);
 
         /* get count */
@@ -3176,7 +3176,7 @@ int player_item_sell(player *p, item *it)
     {
         count = 1;
         item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 40);
-        g_snprintf(question, 80, "Do you want to sell %s for %d gold?",
+        g_snprintf(question, 120, "Do you want to sell %s for %d gold?",
                    name, price);
 
         if (!display_get_yesno(question, NULL, NULL))
@@ -3233,7 +3233,7 @@ int player_item_shop_identify(player *p, item *it)
 
     if (price <= player_gold)
     {
-        g_snprintf(message, 80, "Pay %d gold to identify the %s?", price, name);
+        g_snprintf(message, 80, "Pay %d gold to identify %s?", price, name);
 
         if (display_get_yesno(message, NULL, NULL))
         {
@@ -3245,7 +3245,7 @@ int player_item_shop_identify(player *p, item *it)
     }
     else
     {
-        g_snprintf(message, 80, "Identifying the %s costs %d gold.", name, price);
+        g_snprintf(message, 80, "Identifying %s costs %d gold.", name, price);
         display_show_message((char *)title, message);
     }
 

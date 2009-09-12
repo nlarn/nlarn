@@ -1283,10 +1283,17 @@ static char *item_name_count(char *name, char *add_info, int singular, int defin
     else if ((count > 1) && (count <= 20 ))
     {
         if (add_info)
-            g_snprintf(name, length, "%s %s %s", item_count_desc[count - 2],
-                       add_info, incoming);
+        {
+            if (definite)
+                g_snprintf(name, length, "%s %s", add_info, incoming);
+            else
+                g_snprintf(name, length, "%s %s %s", item_count_desc[count - 2],
+                           add_info, incoming);
+        }
         else
+        {
             g_snprintf(name, length, "%s %s", item_count_desc[count - 2], incoming);
+        }
     }
     else
     {

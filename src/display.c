@@ -1176,8 +1176,10 @@ spell *display_spell_select(char *title, player *p)
 int display_get_count(char *caption, int value)
 {
     display_window *mwin;
-    int height, width;
+    int height, width, basewidth;
     int startx, starty;
+
+    GPtrArray *text;
 
     int tmp;
 
@@ -1200,21 +1202,31 @@ int display_get_count(char *caption, int value)
     int cont = TRUE;
 
     /* 6: input field width; 5: 3 spaces between border, caption + input field, 2 border */
+    basewidth = 6 + 5;
     len = strlen(caption);
-    width = len + 6 + 5;
-    height = 3;
+
+    /* choose a sane dialog width */
+    width = min(basewidth + len, display_cols - 4);
+
+    text = text_wrap(caption, width - basewidth, 0);
+    height = 2 + text->len;
 
     starty = (display_rows - height) / 2;
-    startx = (min(LEVEL_MAX_X, display_cols) - width) / 2;
-
-    if (startx <= 0)
-        startx = (display_cols - width) / 2;
+    startx = (display_cols - width) / 2;
 
     mwin = display_window_new(startx, starty, width, height, NULL, NULL);
 
-    /* fill the box background */
     wattron(mwin->window, COLOR_PAIR(9));
-    mvwprintw(mwin->window, 1, 1, "%-*s", width - 2, caption);
+
+    int line;
+    for (line = 0; line < text->len; line++)
+    {
+        /* fill the box background */
+        mvwprintw(mwin->window, 1 + line, 1, "%-*s", width - 2, "");
+        /* print text */
+        mvwprintw(mwin->window, 1 + line, 2, g_ptr_array_index(text, line));
+    }
+
     wattroff(mwin->window, COLOR_PAIR(9));
 
     /* make cursor visible */
@@ -1231,8 +1243,9 @@ int display_get_count(char *caption, int value)
 
     do
     {
-        mvwprintw(mwin->window, 1, len + 3, "%-6s", ivalue);
-        wmove(mwin->window, 1, len + 3 + ipos);
+        mvwprintw(mwin->window,  mwin->height - 2, mwin->width - 8,
+                  "%-6s", ivalue);
+        wmove(mwin->window, mwin->height - 2, mwin->width - 8 + ipos);
 
         wrefresh(mwin->window);
 
@@ -1340,6 +1353,7 @@ int display_get_count(char *caption, int value)
     /* hide cursor */
     curs_set(0);
 
+    text_destroy(text);
     display_window_destroy(mwin, TRUE);
 
     if (key == 27)
@@ -1899,7 +1913,7 @@ char display_show_message(char *title, char *message)
 
     gboolean RUN = TRUE;
 
-    width = display_cols - 10;
+    width = display_cols - 8;
 
     /* wrap message according to width */
     text = text_wrap(message, width - 4, 0);
