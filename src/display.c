@@ -1183,9 +1183,6 @@ int display_get_count(char *caption, int value)
 
     int tmp;
 
-    /* caption length */
-    int len;
-
     /* user input */
     int key;
 
@@ -1203,10 +1200,9 @@ int display_get_count(char *caption, int value)
 
     /* 6: input field width; 5: 3 spaces between border, caption + input field, 2 border */
     basewidth = 6 + 5;
-    len = strlen(caption);
 
     /* choose a sane dialog width */
-    width = min(basewidth + len, display_cols - 4);
+    width = min(basewidth + strlen(caption), display_cols - 4);
 
     text = text_wrap(caption, width - basewidth, 0);
     height = 2 + text->len;
@@ -1218,7 +1214,7 @@ int display_get_count(char *caption, int value)
 
     wattron(mwin->window, COLOR_PAIR(9));
 
-    int line;
+    guint line;
     for (line = 0; line < text->len; line++)
     {
         /* fill the box background */
@@ -1360,6 +1356,145 @@ int display_get_count(char *caption, int value)
         return 0;
 
     return atoi(ivalue);
+}
+
+char *display_get_string(char *caption, char *value, size_t max_len)
+{
+    /* user input */
+    int key;
+
+    /* cursor position */
+    guint ipos = 0;
+
+    /* text to be edited */
+    GString *string = g_string_new(value);
+
+    /* continue editing the number */
+    int cont = TRUE;
+
+    /* 3 spaces between border, caption + input field, 2 border */
+    int basewidth = 5;
+
+    /* choose a sane dialog width */
+    guint maxwidth = display_cols - 4;
+    int width = min((basewidth + max (strlen(caption), max_len)), maxwidth);
+
+    if (width + max_len + 1 < maxwidth)
+        width = width + max_len + 1; /* input box fits on same line as caption */
+
+    GPtrArray *text = text_wrap(caption, width - basewidth, 0);
+
+    /* determine if the input box fits on the last line */
+    int box_start = 3 + strlen(g_ptr_array_index(text, text->len - 1));
+    if (box_start + max_len + 2 > maxwidth) box_start = 2;
+
+    int height = 2 + text->len; /* borders and text length */
+    if (box_start == 2) height += 1; /* grow the dialog if input box doesn't fit */
+
+    int starty = (display_rows - height) / 2;
+    int startx = (display_cols - width) / 2;
+
+    display_window *mwin = display_window_new(startx, starty, width, height, NULL, NULL);
+
+    wattron(mwin->window, COLOR_PAIR(9));
+
+    guint line;
+    for (line = 0; line < text->len; line++)
+    {
+        /* print text */
+        mvwprintw(mwin->window, 1 + line, 1, " %-*s ", width - 4,
+                  g_ptr_array_index(text, line));
+    }
+
+    wattroff(mwin->window, COLOR_PAIR(9));
+
+    /* make cursor visible */
+    curs_set(1);
+
+    wattron(mwin->window, COLOR_PAIR(13));
+
+    do
+    {
+        mvwprintw(mwin->window,  mwin->height - 2, box_start,
+                  "%-*s", max_len + 1, string->str);
+        wmove(mwin->window, mwin->height - 2, box_start + ipos);
+
+        wrefresh(mwin->window);
+
+#ifdef PDCURSES
+        key = wgetch(mwin->window);
+#else
+        key = getch();
+#endif
+
+        switch (key)
+        {
+        case KEY_LEFT:
+            if (ipos > 0)
+                ipos--;
+            break;
+
+        case KEY_RIGHT:
+            if (ipos < strlen(string->str))
+                ipos++;
+            break;
+
+        case KEY_BACKSPACE:
+            g_string_erase(string, ipos - 1, 1);
+            ipos--;
+            break;
+
+        case KEY_DC:
+            if (ipos < max_len)
+            {
+                g_string_erase(string, ipos, 1);
+            }
+            break;
+
+        case KEY_END:
+            ipos = strlen(string->str);
+            break;
+
+        case KEY_HOME:
+            ipos = 0;
+            break;
+
+        case 10: /* LF */
+        case 13: /* CR */
+        case 27: /* ESC */
+        case KEY_ENTER: /* keypad enter */
+            cont = FALSE;
+            break;
+
+        default:
+            if (display_window_move(mwin, key))
+                break;
+            if (strlen(string->str) < max_len)
+            {
+                g_string_insert_c(string, ipos, key);
+
+                if (ipos < max_len) ipos++;
+            }
+            break;
+        }
+    }
+    while (cont);
+
+    wattroff(mwin->window, COLOR_PAIR(13));
+
+    /* hide cursor */
+    curs_set(0);
+
+    text_destroy(text);
+    display_window_destroy(mwin, TRUE);
+
+    if (key == 27)
+    {
+        g_string_free(string, TRUE);
+        return NULL;
+    }
+
+    return g_string_free(string, FALSE);
 }
 
 int display_get_yesno(char *question, char *yes, char *no)

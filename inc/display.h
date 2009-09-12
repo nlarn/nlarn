@@ -79,6 +79,7 @@ void display_config_autopickup(player *p);
 spell *display_spell_select(char *title, player *p);
 
 int display_get_count(char *caption, int value);
+char *display_get_string(char *caption, char *value, size_t max_len);
 int display_get_yesno(char *question, char *yes, char *no);
 direction display_get_direction(char *title, int *available);
 position display_get_position(player *p, char *message, int draw_line, int passable);

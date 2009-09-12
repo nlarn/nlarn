@@ -783,33 +783,40 @@ void spell_cure_blindness(struct player *p)
 
 void spell_genocide_monster(player *p)
 {
-    char in;
+    char *in;
     int id;
 
     assert(p != NULL);
 
-    log_add_entry(p->log, "Which monster do you want to genocide (type letter)?");
     display_paint_screen(p);
+    in = display_get_string("Which monster do you want to genocide (type letter)?", NULL, 1);
 
-    in = display_getch();
+    if (!in)
+    {
+        log_add_entry(p->log, "You chose not to genocide any monster.");
+        return;
+    }
 
     for (id = 1; id < MT_MAX; id++)
     {
-        if (monster_image_by_type(id) == in)
+        if (monster_image_by_type(id) == in[0])
         {
             if (!monster_is_genocided(id))
             {
                 monster_genocide(id);
-                log_add_entry(p->log,
-                              "Wiped out all %ss",
+                log_add_entry(p->log, "Wiped out all %ss.",
                               monster_name_by_type(id));
 
                 monsters_genocide(p->level);
-            }
 
-            return;
+                g_free(in);
+
+                return;
+            }
         }
     }
+
+    g_free(in);
 
     log_add_entry(p->log, "No such monster.");
 }
@@ -944,18 +951,18 @@ int book_weight(item *book)
 
     switch (book_desc_mapping[book->id - 1])
     {
-        case 1: /* thick */
-        case 4: /* heavy */
-        case 12: /* large */
-            return 1200;
-            break;
+    case 1: /* thick */
+    case 4: /* heavy */
+    case 12: /* large */
+        return 1200;
+        break;
 
-        case 10: /* thin */
-        case 11: /* light */
-            return 400;
-            break;
+    case 10: /* thin */
+    case 11: /* light */
+        return 400;
+        break;
 
-        default:
-            return 800;
+    default:
+        return 800;
     }
 }
