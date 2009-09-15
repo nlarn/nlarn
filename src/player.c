@@ -424,8 +424,33 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_free(tmp);
 
         display_show_message(title, text->str);
-        g_string_free(text, TRUE);
 
+        /* repaint screen */
+        display_paint_screen(p);
+
+        if (display_get_yesno("Do you want to save a memorial " \
+                              "file for your character?", NULL, NULL))
+        {
+            char *filename, *proposal;
+            GError *error = NULL;
+
+            /* repaint screen onece again */
+            display_paint_screen(p);
+
+            proposal = g_strconcat(p->name, ".txt", NULL);
+            filename = display_get_string("Enter filename: ", proposal, 40);
+
+            if (!g_file_set_contents(filename, text->str, -1, &error))
+            {
+                display_show_message("Error", error->message);
+                g_error_free(error);
+            }
+
+            g_free(proposal);
+            g_free(filename);
+        }
+
+        g_string_free(text, TRUE);
         game_scores_destroy(scores);
     }
 

@@ -656,8 +656,7 @@ void spell_type_blast(spell *s, struct player *p)
         monster = g_ptr_array_index(mlist, idx);
         dam = damage_new(DAM_FIRE, amount, p);
 
-        if (!(monster = monster_damage_take(monster, dam)))
-            idx--; /* monster has been killed, others follow up */
+        monster_damage_take(monster, dam);
     }
 
     if (pos_in_rect(p->pos, rect_new_sized(pos, 1)))

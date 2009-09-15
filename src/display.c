@@ -1376,17 +1376,37 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     int basewidth = 5;
 
     /* choose a sane dialog width */
+    int width;
     guint maxwidth = display_cols - 4;
-    int width = min((basewidth + max (strlen(caption), max_len)), maxwidth);
 
-    if (width + max_len + 1 < maxwidth)
-        width = width + max_len + 1; /* input box fits on same line as caption */
+    /* prevent overly large input fields */
+    if (max_len + basewidth > maxwidth)
+    {
+        max_len = maxwidth - basewidth;
+    }
+
+    if (basewidth + strlen(caption) + max_len > maxwidth)
+    {
+        if (strlen(caption) + basewidth > maxwidth)
+        {
+            width = basewidth + max_len;
+        }
+        else
+        {
+            width = basewidth + max(strlen(caption), max_len);
+        }
+    }
+    else
+    {
+        /* input box fits on same line as caption */
+        width = basewidth + strlen(caption) + max_len + 1;
+    }
 
     GPtrArray *text = text_wrap(caption, width - basewidth, 0);
 
     /* determine if the input box fits on the last line */
     int box_start = 3 + strlen(g_ptr_array_index(text, text->len - 1));
-    if (box_start + max_len + 2 > maxwidth) box_start = 2;
+    if (box_start + max_len + 2 > width) box_start = 2;
 
     int height = 2 + text->len; /* borders and text length */
     if (box_start == 2) height += 1; /* grow the dialog if input box doesn't fit */
@@ -1440,8 +1460,11 @@ char *display_get_string(char *caption, char *value, size_t max_len)
             break;
 
         case KEY_BACKSPACE:
-            g_string_erase(string, ipos - 1, 1);
-            ipos--;
+            if (ipos > 0)
+            {
+                g_string_erase(string, ipos - 1, 1);
+                ipos--;
+            }
             break;
 
         case KEY_DC:
