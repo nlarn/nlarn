@@ -318,7 +318,7 @@ int building_home(player *p)
 
     const char msg_won[] = "The doctor is now administering the potion and, in " \
                            "a few moments, your daughter should be well on " \
-                           "her way to recovery.\n\n The potion is working! " \
+                           "her way to recovery.\n\nThe potion is working! " \
                            "The doctor thinks that your daughter will recover " \
                            "in a few days.\n\nCongratulations!";
 

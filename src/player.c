@@ -974,9 +974,13 @@ void player_autopickup(player *p)
 
         if (p->settings.auto_pickup[i->type])
         {
-            player_item_pickup(p, i);
-            /* go back one item as the following items lowered their number */
-            idx--;
+            /* try to pick up the item */
+            if (player_item_pickup(p, i))
+            {
+                /* item has been picked up */
+                /* go back one item as the following items lowered their number */
+                idx--;
+            }
         }
     }
 }
@@ -1635,7 +1639,7 @@ int player_spell_known(player *p, guint spell_type)
 
     assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
-    for (idx = 1; idx < p->known_spells->len; idx++)
+    for (idx = 0; idx < p->known_spells->len; idx++)
     {
         s = g_ptr_array_index(p->known_spells, idx);
         if (s->id == spell_type)
@@ -2615,10 +2619,17 @@ char *player_item_identified_list(player *p)
     }
     item_destroy(it);
 
-    /* append trailing newline */
-    g_string_append_c(list, '\n');
-
-    return g_string_free(list, FALSE);
+    if (list->len > 0)
+    {
+        /* append trailing newline */
+        g_string_append_c(list, '\n');
+        return g_string_free(list, FALSE);
+    }
+    else
+    {
+        g_string_free(list, TRUE);
+        return NULL;
+    }
 }
 
 void player_item_identify(player *p, item *it)

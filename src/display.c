@@ -147,14 +147,12 @@ int display_paint_screen(player *p)
         {
             if (player_pos_visible(p, pos)) attron(A_BOLD);
 
-            /* draw the truth */
             if (game_wizardmode(p->game))
             {
-                /* draw items */
-                if (level_ilist_at(p->level, pos) && (inv_length(level_ilist_at(p->level, pos)) > 0))
+                /* draw the truth */
+                if (inv_length(level_ilist_at(p->level, pos)) > 0)
                 {
-
-
+                    /* draw items */
                     it = (item *) inv_get(level_ilist_at(p->level, pos),
                                           inv_length(level_ilist_at(p->level, pos)) - 1);
 
@@ -162,9 +160,10 @@ int display_paint_screen(player *p)
                     addch(item_image(it->type));
                     attroff(COLOR_PAIR(DC_BLUE));
                 }
-                /* draw stationary stuff */
+
                 else if (level_stationary_at(p->level, pos))
                 {
+                    /* draw stationary stuff */
                     attron(COLOR_PAIR(ls_get_colour(level_stationary_at(p->level, pos))));
                     addch(ls_get_image(level_stationary_at(p->level, pos)));
                     attroff(COLOR_PAIR(ls_get_colour(level_stationary_at(p->level, pos))));
@@ -175,9 +174,10 @@ int display_paint_screen(player *p)
                     addch('^');
                     attroff(COLOR_PAIR(DC_MAGENTA));
                 }
-                /* draw tile */
+
                 else
                 {
+                    /* draw tile */
                     attron(COLOR_PAIR(lt_get_colour(level_tiletype_at(p->level, pos))));
                     addch(lt_get_image(level_tiletype_at(p->level, pos)));
                     attroff(COLOR_PAIR(lt_get_colour(level_tiletype_at(p->level, pos))));
@@ -237,9 +237,10 @@ int display_paint_screen(player *p)
         }
     }
 
-    /* draw spheres */
+
     for (i = 1; i <= l->slist->len; i++)
     {
+        /* draw spheres */
         sphere = g_ptr_array_index(l->slist, i - 1);
 
         if (game_wizardmode(p->game) || player_pos_visible(p, sphere->pos))
@@ -2118,7 +2119,10 @@ char display_show_message(char *title, char *message)
 
         case KEY_PPAGE:
         case KEY_A3:
-            offset = max(offset - maxvis + 1, 0);
+            if (offset > maxvis + 1)
+                offset -= maxvis;
+            else
+                offset = 0;
             break;
 
         case KEY_HOME:

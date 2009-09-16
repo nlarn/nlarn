@@ -161,7 +161,7 @@ sphere *sphere_at(level *l, position pos)
     guint idx;
     sphere *s;
 
-    for (idx = 1; idx < l->slist->len; idx++)
+    for (idx = 0; idx < l->slist->len; idx++)
     {
         s = g_ptr_array_index(l->slist, idx);
 

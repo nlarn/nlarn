@@ -252,9 +252,15 @@ int main(int argc, char *argv[])
             break;
 
         case '\\':
-            file_content = player_item_identified_list(g->p);
-            display_show_message("Identified items", file_content);
-            g_free(file_content);
+            if ((file_content = player_item_identified_list(g->p)))
+            {
+                display_show_message("Identified items", file_content);
+                g_free(file_content);
+            }
+            else
+            {
+                log_add_entry(g->p->log, "You have not discovered any item yet.");
+            }
             break;
 
         case KEY_F(12) :

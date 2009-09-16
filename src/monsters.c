@@ -1193,16 +1193,12 @@ void monster_items_pickup(monster *m, struct player *p)
 
     guint idx;
     item *it;
-    inventory *floor;
 
     assert(m != NULL && p != NULL);
 
-    if (!(floor = level_ilist_at(m->level, m->pos)))
-        return;
-
-    for (idx = 0; idx < inv_length(floor); idx++)
+    for (idx = 0; idx < inv_length(level_ilist_at(m->level, m->pos)); idx++)
     {
-        it = inv_get(floor, idx);
+        it = inv_get(level_ilist_at(m->level, m->pos), idx);
 
         if (m->type == MT_LEPRECHAUN
                 && ((it->type == IT_GEM) || (it->type == IT_GOLD)))
@@ -1214,8 +1210,12 @@ void monster_items_pickup(monster *m, struct player *p)
                               (it->count == 1) ? item_name_sg(it->type) : item_name_pl(it->type));
             }
 
-            inv_del_element(&floor, it);
+            inv_del_element(&level_ilist_at(m->level, m->pos), it);
             inv_add(&m->inventory, it);
+
+            /* item has been picked up */
+            /* go back one item as the following items lowered their number */
+            idx--;
         }
     }
 }
