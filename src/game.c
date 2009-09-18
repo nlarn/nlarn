@@ -57,10 +57,41 @@ game *game_new(int argc, char *argv[])
     static gboolean female = FALSE; /* default: male */
     static char *auto_pickup = NULL;
 
-    /* objects needed to parse the command line */
+    /* ini file handling */
+    GKeyFile *ini_file = g_key_file_new();
     GError *error = NULL;
-    GOptionContext *context;
 
+    g_key_file_load_from_file(ini_file, "nlarn.ini", G_KEY_FILE_NONE, &error);
+
+    if (!error)
+    {
+        /* ini file has been found, get values */
+        /* clear error after each attempt as values need not to be defined */
+        difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
+        g_clear_error(&error);
+
+        wizard = g_key_file_get_boolean(ini_file, "nlarn", "wizard", &error);
+        g_clear_error(&error);
+
+        name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
+        g_clear_error(&error);
+
+        female = g_key_file_get_boolean(ini_file, "nlarn", "female", &error);
+        g_clear_error(&error);
+
+        auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
+        g_clear_error(&error);
+    }
+    else
+    {
+        /* file not found. never mind but clean up the mess */
+        g_clear_error(&error);
+    }
+
+    /* cleanup */
+    g_key_file_free(ini_file);
+
+    /* parse the command line */
     static GOptionEntry entries[] =
     {
         { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,  "Set difficulty",       NULL },
@@ -71,7 +102,7 @@ game *game_new(int argc, char *argv[])
         { NULL }
     };
 
-    context = g_option_context_new(NULL);
+    GOptionContext *context = g_option_context_new(NULL);
     g_option_context_add_main_entries(context, entries, NULL);
 
     if (!g_option_context_parse(context, &argc, &argv, &error))
@@ -145,6 +176,9 @@ game *game_new(int argc, char *argv[])
     /* welcome message */
     log_add_entry(g->p->log, "Welcome to NLarn %d.%d.%d!",
                   VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+
+    if (wizard)
+        log_add_entry(g->p->log, "Wizard mode has been activated.");
 
     log_set_time(g->p->log, g->gtime);
 

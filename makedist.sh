@@ -18,7 +18,9 @@ else
 	SUFFIX="tar.gz"
 	EXE="nlarn"
 fi
-FILES="lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg"
+
+MAINFILES="$EXE nlarn.ini LICENSE"
+LIBFILES="lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg"
 
 VERSION_MAJOR=$(grep VERSION_MAJOR inc/nlarn.h | cut -f 3 -d" ")
 VERSION_MINOR=$(grep VERSION_MINOR inc/nlarn.h | cut -f 3 -d" ")
@@ -47,9 +49,8 @@ then
 fi
 
 mkdir -p "$DIRNAME"/lib
-cp $EXE "$DIRNAME"
-cp LICENSE "$DIRNAME"
-cp $FILES "$DIRNAME"/lib
+cp $MAINFILES "$DIRNAME"
+cp $LIBFILES "$DIRNAME"/lib
 
 rm -f "$PACKAGE"
 
