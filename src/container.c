@@ -16,7 +16,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include "container.h"
 
 /* TODO: prices */
 const container_data containers[CT_MAX] =

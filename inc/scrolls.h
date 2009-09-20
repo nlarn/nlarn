@@ -30,7 +30,7 @@ struct player;
 typedef struct magic_scroll_data {
 	int	id;
 	char *name;
-	int	effect_type; 	/* if this scroll causes an effect */
+	effect_type effect; /* if this scroll causes an effect */
 	int price;
 } magic_scroll_data;
 
@@ -88,7 +88,7 @@ extern const magic_scroll_data scrolls[ST_MAX];
 /* macros */
 
 #define scroll_name(scroll)   (scrolls[(scroll)->id].name)
-#define scroll_effect(scroll) (scrolls[(scroll)->id].effect_type)
+#define scroll_effect(scroll) (scrolls[(scroll)->id].effect)
 #define scroll_price(scroll)  (scrolls[(scroll)->id].price)
 
 #endif

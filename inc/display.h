@@ -21,6 +21,7 @@
 
 #include <curses.h>
 #include <panel.h>
+
 #include "game.h"
 #include "items.h"
 #include "player.h"

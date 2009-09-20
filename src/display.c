@@ -16,9 +16,14 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
 #include <curses.h>
 #include <panel.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "display.h"
+#include "spheres.h"
 
 static guint display_rows = 0;
 static guint display_cols = 0;
@@ -1831,7 +1836,7 @@ direction display_get_direction(char *title, int *available)
 position display_get_position(player *p, char *message, int draw_line, int passable)
 {
     int RUN  = TRUE;
-    int direction = GD_NONE;
+    direction dir = GD_NONE;
     position pos, npos;
 
     /* variables for ray painting */
@@ -1938,14 +1943,14 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 #ifdef KEY_B1
         case KEY_B1:
 #endif
-            direction = GD_WEST;
+            dir = GD_WEST;
             break;
 
         case 'y':
         case '7':
         case KEY_HOME:
         case KEY_A1:
-            direction = GD_NW;
+            dir = GD_NW;
             break;
 
         case 'l':
@@ -1954,14 +1959,14 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 #ifdef KEY_B3
         case KEY_B3:
 #endif
-            direction = GD_EAST;
+            dir = GD_EAST;
             break;
 
         case 'n':
         case '3':
         case KEY_NPAGE:
         case KEY_C3:
-            direction = GD_SE;
+            dir = GD_SE;
             break;
 
         case 'k':
@@ -1970,14 +1975,14 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 #ifdef KEY_A2
         case KEY_A2:
 #endif
-            direction = GD_NORTH;
+            dir = GD_NORTH;
             break;
 
         case 'u':
         case '9':
         case KEY_PPAGE:
         case KEY_A3:
-            direction = GD_NE;
+            dir = GD_NE;
             break;
 
         case 'j':
@@ -1986,21 +1991,21 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 #ifdef KEY_C2
         case KEY_C2:
 #endif
-            direction = GD_SOUTH;
+            dir = GD_SOUTH;
             break;
 
         case 'b':
         case '1':
         case KEY_END:
         case KEY_C1:
-            direction = GD_SW;
+            dir = GD_SW;
             break;
         }
 
-        if (direction)
+        if (dir)
         {
-            npos = pos_move(pos, direction);
-            direction = GD_NONE;
+            npos = pos_move(pos, dir);
+            dir = GD_NONE;
         }
 
         if (pos_valid(npos) && player_pos_visible(p, npos))

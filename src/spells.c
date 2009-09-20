@@ -16,7 +16,12 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+#include <string.h>
+
+#include "display.h"
+#include "spells.h"
+#include "spheres.h"
 
 const spell_data spells[SP_MAX] =
 {

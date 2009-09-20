@@ -19,7 +19,7 @@
 #ifndef __LEVEL_H_
 #define __LEVEL_H_
 
-#include "display.h"
+#include "items.h"
 #include "monsters.h"
 #include "position.h"
 #include "traps.h"

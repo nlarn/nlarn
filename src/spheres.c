@@ -16,7 +16,10 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+#include <string.h>
+
+#include "spheres.h"
 
 static void sphere_remove(sphere *s, level *l);
 static void sphere_hit_owner(sphere *s, level *l);
@@ -52,7 +55,7 @@ void sphere_move(sphere *s, level *l)
 {
     position npos;
     int tries = 0;
-    int direction;
+    direction dir;
     monster *m;
 
     assert(s != NULL && l != NULL);
@@ -69,30 +72,30 @@ void sphere_move(sphere *s, level *l)
 
 
     /* try to move sphere into its direction */
-    direction = s->dir;
-    npos = pos_move(s->pos, direction);
+    dir = s->dir;
+    npos = pos_move(s->pos, dir);
 
     /* if the new position does not work, try to find another one */
     while ((!pos_valid(npos)
             || !lt_is_passable(level_tiletype_at(l,npos)))
             && (tries < GD_MAX))
     {
-        direction++;
+        dir++;
 
-        if (direction == GD_CURR)
-            direction++;
+        if (dir == GD_CURR)
+            dir++;
 
-        if (direction == GD_MAX)
-            direction = 1;
+        if (dir == GD_MAX)
+            dir = 1;
 
-        npos = pos_move(s->pos, direction);
+        npos = pos_move(s->pos, dir);
         tries++;
     }
 
     /* new position has been found, save it and the direction */
     if (tries < GD_MAX)
     {
-        s->dir = direction;
+        s->dir = dir;
         s->pos = npos;
     }
     /* otherwise stand still */
@@ -107,7 +110,6 @@ void sphere_move(sphere *s, level *l)
     /* check if a monster is located at the sphere's position */
     if ((m = level_get_monster_at(l, s->pos)))
     {
-
         /* demons dispel spheres */
         if (m->type >= MT_DEMONLORD_I)
         {
@@ -153,7 +155,6 @@ void sphere_move(sphere *s, level *l)
 
         return;
     }
-
 }
 
 sphere *sphere_at(level *l, position pos)

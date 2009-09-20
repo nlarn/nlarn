@@ -16,7 +16,10 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+
+#include "effects.h"
+#include "utils.h"
 
 static const effect_data effects[ET_MAX] =
 {
@@ -463,7 +466,7 @@ static const effect_data effects[ET_MAX] =
 
 };
 
-effect *effect_new(int type, time_t now)
+effect *effect_new(effect_type type, time_t now)
 {
     effect *ne;
 
@@ -550,34 +553,35 @@ int effect_del(GPtrArray *a, effect *e)
     return g_ptr_array_remove_fast(a,e);
 }
 
-effect *effect_get(GPtrArray *a, int effect_type)
+effect *effect_get(GPtrArray *a, effect_type type)
 {
     guint idx;
     effect *e;
 
-    assert(a != NULL && effect_type > ET_NONE && effect_type < ET_MAX);
+    assert(a != NULL && type > ET_NONE && type < ET_MAX);
+
     for (idx = 0; idx < a->len; idx++)
     {
         e = g_ptr_array_index(a, idx);
-        if (e->type == effect_type)
+        if (e->type == type)
             return e;
     }
 
     return NULL;
 }
 
-int effect_query(GPtrArray *a, int effect_type)
+int effect_query(GPtrArray *a, effect_type type)
 {
     guint idx;
     int value = 0;
     effect *e;
 
-    assert(a != NULL && effect_type > ET_NONE && effect_type < ET_MAX);
+    assert(a != NULL && type > ET_NONE && type < ET_MAX);
 
     for (idx = 0; idx < a->len; idx++)
     {
         e = (effect *)g_ptr_array_index(a, idx);
-        if (e->type == effect_type)
+        if (e->type == type)
         {
             if (e->amount)
                 value += e->amount;

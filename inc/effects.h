@@ -19,7 +19,10 @@
 #ifndef __EFFECTS_H_
 #define __EFFECTS_H_
 
-enum effect_types
+#include <glib.h>
+#include <time.h>
+
+typedef enum _effect_type
 {
     ET_NONE,                    /* no short-term effect */
     /* POSITIVE EFFECTS */
@@ -109,12 +112,12 @@ enum effect_types
     ET_OVERSTRAINED,            /* extremely overloaded */
 
     ET_MAX                      /* last effect known */
-};
+} effect_type;
 
 typedef struct effect_data
 {
-    int	id;
-    int	duration;           /* duration of effect. 0 = permanent */
+    effect_type id;
+    int duration;           /* duration of effect. 0 = permanent */
     int value;              /* if modifier: amount of attribute modification */
     char *msg_start;        /* message displayed when effect starts */
     char *msg_stop;         /* message displayed when effect ends */
@@ -128,7 +131,7 @@ struct item;
 
 typedef struct effect
 {
-    int type;               /* type of effect */
+    effect_type type;       /* type of effect */
     guint32 start;          /* game time the effect began */
     guint32 turns;          /* number of turns this effect remains */
     gint32 amount;          /* power of effect, if applicable */
@@ -138,7 +141,7 @@ typedef struct effect
 
 /* function declarations */
 
-effect *effect_new(int type, time_t now);
+effect *effect_new(effect_type type, time_t now);
 void effect_destroy(effect *e);
 
 char *effect_get_msg_start(effect *e);
@@ -150,10 +153,10 @@ int effect_get_amount(effect *e);
 
 void effect_add(GPtrArray *a, effect *e);
 int effect_del(GPtrArray *a, effect *e);
-effect *effect_get(GPtrArray *a, int effect_type);
+effect *effect_get(GPtrArray *a, effect_type type);
 
 /* check if an effect is set */
-int effect_query(GPtrArray *a, int effect_type);
+int effect_query(GPtrArray *a, effect_type type);
 
 int effect_expire(effect *ae, int turns);
 

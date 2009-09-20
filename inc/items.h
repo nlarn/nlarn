@@ -19,6 +19,8 @@
 #ifndef __ITEM_H_
 #define __ITEM_H_
 
+#include <glib.h>
+
 #include "effects.h"
 
 typedef enum item_types {

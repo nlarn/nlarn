@@ -19,7 +19,8 @@
 #ifndef __BUILDINGS_H_
 #define __BUILDINGS_H_
 
-#include "player.h"
+/* number of courses available in school */
+#define SCHOOL_COURSE_COUNT 8
 
 typedef struct school_course {
     int course_time;
@@ -27,14 +28,16 @@ typedef struct school_course {
     char *message;
 } school_course;
 
-int building_bank(player *p);
-int building_dndstore(player *p);
+struct player;
+
+int building_bank(struct player *p);
+int building_dndstore(struct player *p);
 void building_dndstore_init();
 void building_dndstore_item_add(item *i);
 void building_dndstore_item_del(item *i);
-int building_home(player *p);
-int building_lrs(player *p);
-int building_school(player *p);
-int building_tradepost(player *p);
+int building_home(struct player *p);
+int building_lrs(struct player *p);
+int building_school(struct player *p);
+int building_tradepost(struct player *p);
 
 #endif

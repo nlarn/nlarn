@@ -1,5 +1,5 @@
 /*
- * main.c
+ * nlarn.c
  * Copyright (C) Joachim de Groot 2009 <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -16,9 +16,13 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
 /* needed for the key definitions */
 #include <curses.h>
+#include <stdlib.h>
+
+#include "display.h"
+#include "game.h"
+#include "nlarn.h"
 
 int main(int argc, char *argv[])
 {

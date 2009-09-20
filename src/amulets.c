@@ -16,7 +16,11 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+#include <glib.h>
+#include "amulets.h"
+#include "items.h"
+#include "utils.h"
 
 const amulet_data amulets[AM_MAX] =
 {

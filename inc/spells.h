@@ -21,6 +21,9 @@
 
 #include "defines.h"
 #include "effects.h"
+#include "items.h"
+#include "player.h"
+#include "utils.h"
 
 typedef enum spell_type
 {
@@ -40,7 +43,7 @@ typedef struct spell_data {
 	char *name;
 	spell_t type;
 	damage_t damage_type;
-	int effect_type;
+	effect_type effect;
 	char *description;
 	char *msg_success;
 	char *msg_fail;
@@ -126,7 +129,7 @@ void spell_vaporize_rock(struct player *p);
 #define spell_name(spell)     (spells[(spell)->id].name)
 #define spell_type(spell)     (spells[(spell)->id].type)
 #define spell_damage(spell)   (spells[(spell)->id].damage_type)
-#define spell_effect(spell)   (spells[(spell)->id].effect_type)
+#define spell_effect(spell)   (spells[(spell)->id].effect)
 #define spell_desc(spell)     (spells[(spell)->id].description)
 #define spell_msg_succ(spell) (spells[(spell)->id].msg_success)
 #define spell_msg_fail(spell) (spells[(spell)->id].msg_fail)
@@ -136,7 +139,7 @@ void spell_vaporize_rock(struct player *p);
 #define spell_name_by_id(id)     (spells[(id)].name)
 #define spell_type_by_id(id)     (spells[(id)].type)
 #define spell_damage_by_id(id)   (spells[(id)].damage_type)
-#define spell_effect_by_id(id)   (spells[(id)].effect_type)
+#define spell_effect_by_id(id)   (spells[(id)].effect)
 #define spell_desc_by_id(id)     (spells[(id)].description)
 #define spell_msg_succ_by_id(id) (spells[(id)].msg_success)
 #define spell_msg_fail_by_id(id) (spells[(id)].msg_fail)

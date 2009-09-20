@@ -16,7 +16,11 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+#include <stdlib.h>
+
+#include "level.h"
+#include "position.h"
 
 position pos_new(int x, int y)
 {
@@ -31,14 +35,14 @@ position pos_new(int x, int y)
     return pos;
 }
 
-position pos_move(position pos, int direction)
+position pos_move(position pos, direction dir)
 {
     /* return given position if direction is not implemented */
-    position npos = pos;
+    position npos;
 
-    assert(direction > GD_NONE && direction < GD_MAX);
+    assert(dir > GD_NONE && dir < GD_MAX);
 
-    switch (direction)
+    switch (dir)
     {
     case GD_WEST:
         if (pos.x > 0)
@@ -103,6 +107,10 @@ position pos_move(position pos, int direction)
             npos = pos_new(G_MAXINT16, G_MAXINT16);
 
         break;
+
+    default:
+        npos = pos;
+
     }
 
     return npos;

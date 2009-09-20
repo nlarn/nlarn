@@ -16,7 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include "effects.h"
+#include "traps.h"
 
 const trap_data traps[TT_MAX] = {
     {

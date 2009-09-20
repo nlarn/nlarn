@@ -16,7 +16,24 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+#include <string.h>
+
+#include "amulets.h"
+#include "armour.h"
+#include "container.h"
+#include "food.h"
+#include "gems.h"
+#include "items.h"
+#include "level.h"
+#include "player.h"
+#include "potions.h"
+#include "rings.h"
+#include "scrolls.h"
+#include "spells.h"
+#include "utils.h"
+#include "weapons.h"
+
 
 static void item_typename_pluralize(item *it, char *description, int length);
 static char *item_name_count(char *name, char *add_info, int singular, int definite, int length, int count);

@@ -16,7 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include "armour.h"
+#include "items.h"
 
 const armour_data armours[AT_MAX] =
 {

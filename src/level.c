@@ -16,7 +16,14 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+#include <stdlib.h>
+
+#include "container.h"
+#include "display.h"
+#include "level.h"
+#include "items.h"
+#include "spheres.h"
 
 static void level_fill_with_stationary(level *l);
 static void level_fill_with_objects(level *l);

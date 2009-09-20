@@ -16,7 +16,12 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <glib.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "food.h"
+#include "utils.h"
 
 const food_data foods[FT_MAX] =
 {

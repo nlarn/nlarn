@@ -16,7 +16,15 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
+#include <assert.h>
+
+#include "display.h"
+#include "gems.h"
+#include "items.h"
 #include "nlarn.h"
+#include "player.h"
+
 
 /* stock of the dnd store */
 /* TODO: make sure these items are freed on terminating the game */

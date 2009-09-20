@@ -22,6 +22,8 @@
 #include "level.h"
 #include "player.h"
 
+#define TIMELIMIT 30000 /* maximum number of moves before the game is called */
+
 /* the world as we know it */
 typedef struct game
 {
@@ -43,23 +45,6 @@ typedef struct game
     guint32
         wizard: 1; /* wizard mode */
 } game;
-
-/* direction of movement */
-/* ordered by number keys */
-typedef enum direction
-{
-    GD_NONE,
-    GD_SW,
-    GD_SOUTH,
-    GD_SE,
-    GD_WEST,
-    GD_CURR, /* special case: current position */
-    GD_EAST,
-    GD_NW,
-    GD_NORTH,
-    GD_NE,
-    GD_MAX
-} direction;
 
 typedef struct _game_score
 {

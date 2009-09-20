@@ -20,10 +20,11 @@
 #define __SPHERES_H_
 
 #include "level.h"
+#include "player.h"
 
 typedef struct sphere {
     position pos;       /* location of the sphere */
-    guint32 dir;        /* direction sphere is going in */
+    direction dir;      /* direction sphere is going in */
     guint32 lifetime;   /* duration of the sphere */
     player *owner;      /* pointer to player who created the sphere */
 } sphere;

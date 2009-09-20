@@ -16,7 +16,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include "display.h"
+#include "gems.h"
+#include "items.h"
 
 /* TODO: differenciated prices */
 const gem_data gems[GT_MAX] =

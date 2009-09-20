@@ -20,6 +20,7 @@
 #define __RINGS_H_
 
 #include "effects.h"
+#include "items.h"
 
 enum ring_types
 {
@@ -39,7 +40,7 @@ typedef struct ring_data
 {
     int id;
     char *name;
-    int	effect_type; 	/* effect causes by this ring */
+    effect_type effect; /* effect causes by this ring */
     int price;
     unsigned
         observable: 1,  /* can be identified by using */
@@ -58,7 +59,7 @@ extern const ring_data rings[RT_MAX];
 /* macros */
 
 #define ring_name(item)          (rings[(item)->id].name)
-#define ring_effect_type(item)   (rings[(item)->id].effect_type)
+#define ring_effect_type(item)   (rings[(item)->id].effect)
 #define ring_price(item)         (rings[(item)->id].price)
 #define ring_is_observable(item) (rings[(item)->id].observable)
 #define ring_bonus_is_obs(item)  (rings[(item)->id].bonus_obs)

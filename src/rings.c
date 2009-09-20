@@ -16,7 +16,10 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+
+#include "rings.h"
+#include "utils.h"
 
 const ring_data rings[RT_MAX] =
 {

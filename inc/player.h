@@ -19,17 +19,18 @@
 #ifndef __PLAYER_H_
 #define __PLAYER_H_
 
+#include "amulets.h"
 #include "armour.h"
+#include "buildings.h"
 #include "level.h"
+#include "monsters.h"
+#include "position.h"
 #include "potions.h"
 #include "rings.h"
 #include "scrolls.h"
 #include "spells.h"
 #include "utils.h"
 #include "weapons.h"
-
-/* number of courses available in school */
-#define SCHOOL_COURSE_COUNT 8
 
 /* forward declaration */
 struct game;
@@ -184,7 +185,7 @@ void player_destroy(player *p);
 int player_regenerate(player *p);
 void player_die(player *p, player_cod cause_type, int cause);
 gint64 player_calc_score(player *p, int won);
-int player_move(player *p, int direction);
+int player_move(player *p, direction dir);
 int player_attack(player *p, monster *m);
 void player_update_fov(player *p, int radius);
 int player_level_enter(player *p, level *l, gboolean teleported);

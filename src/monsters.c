@@ -16,7 +16,12 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+#include <stdlib.h>
+
+#include "game.h"
+#include "level.h"
+#include "monsters.h"
 
 #define EMPTY_ATTACK { ATT_NONE, DAM_NONE, 0, 0 }
 

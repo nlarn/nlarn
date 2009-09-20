@@ -16,7 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include "items.h"
+#include "weapons.h"
 
 const weapon_data weapons[WT_MAX] =
 {

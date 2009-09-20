@@ -16,49 +16,13 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __NULARN_H_
-#define __NULARN_H_
-
-#include <assert.h>
-#include <ctype.h>
-#include <glib.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-#include "utils.h"
-#include "amulets.h"
-#include "armour.h"
-#include "container.h"
-#include "defines.h"
-#include "display.h"
-#include "effects.h"
-#include "food.h"
-#include "game.h"
-#include "gems.h"
-#include "items.h"
-#include "level.h"
-#include "monsters.h"
-#include "player.h"
-#include "buildings.h"
-#include "position.h"
-#include "potions.h"
-#include "rings.h"
-#include "scrolls.h"
-#include "spells.h"
-#include "spheres.h"
-#include "traps.h"
-#include "weapons.h"
-
+#ifndef __NLARN_H_
+#define __NLARN_H_
 
 #define VERSION_MAJOR 0 /* this is the present version # of the program */
 #define VERSION_MINOR 4
 #define VERSION_PATCH 1
 
-#define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 #define TAXRATE 1/20    /* tax rate for the LRS */
 
 #endif

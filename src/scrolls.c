@@ -16,7 +16,12 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+#include <stdlib.h>
+
+#include "game.h"
+#include "scrolls.h"
+#include "utils.h"
 
 const magic_scroll_data scrolls[ST_MAX] =
 {

@@ -19,12 +19,15 @@
 #ifndef __MONSTERS_H_
 #define __MONSTERS_H_
 
+#include <glib.h>
+#include <time.h>
+
 #include "defines.h"
 #include "effects.h"
-#include "game.h"
 #include "items.h"
 #include "position.h"
 #include "traps.h"
+#include "utils.h"
 
 /* forward declarations */
 

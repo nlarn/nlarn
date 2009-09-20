@@ -16,7 +16,15 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+#include <glib.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "display.h"
+#include "food.h"
+#include "game.h"
+#include "player.h"
 
 static const char aa1[] = "mighty evil master";
 static const char aa2[] = "apprentice demi-god";
@@ -488,14 +496,14 @@ gint64 player_calc_score(player *p, int won)
     return score;
 }
 
-int player_move(player *p, int direction)
+int player_move(player *p, direction dir)
 {
     int times = 1;         /* how many time ticks it took */
     position target_p;     /* coordinates of target */
     level_tile *target_t;  /* shortcut for target map tile */
     monster *target_m;     /* monster on target tile (if any) */
 
-    assert(p != NULL && direction > GD_NONE && direction < GD_MAX);
+    assert(p != NULL && dir > GD_NONE && dir < GD_MAX);
 
     /* no movement if overloaded */
     if (player_effect(p, ET_OVERSTRAINED))
@@ -514,10 +522,10 @@ int player_move(player *p, int direction)
     /* confusion: random movement */
     if (player_effect(p, ET_CONFUSION))
     {
-        direction = rand_1n(GD_MAX);
+        dir = rand_1n(GD_MAX);
     }
 
-    target_p = pos_move(p->pos, direction);
+    target_p = pos_move(p->pos, dir);
 
     /* make a shortcut to the target tile */
     target_t = level_tile_at(p->level, target_p);
@@ -1660,8 +1668,7 @@ void player_effect_add(player *p, effect *e)
 
     /* one-time effects are handled here */
     if (e->turns == 1)
-    {
-        switch (e->type)
+    {        switch (e->type)
         {
         case ET_INC_CHA:
             p->charisma += e->amount;
@@ -1767,6 +1774,10 @@ void player_effect_add(player *p, effect *e)
         case ET_DEC_EXP:
             /* looks like a reasonable amount */
             player_exp_lose(p, rand_1n(player_lvl_exp[p->lvl] - player_lvl_exp[p->lvl - 1]));
+            break;
+
+        default:
+            /* nop */
             break;
         }
         effect_destroy(e);
@@ -3566,7 +3577,7 @@ int player_door_close(player *p)
     int *dirs;
 
     /* direction of action */
-    int dir = GD_NONE;
+    direction dir = GD_NONE;
 
     /* a counter and another one */
     int count, num;
@@ -3691,7 +3702,7 @@ int player_door_open(player *p)
     /* select random direction if player is confused */
     if (player_effect(p, ET_CONFUSION))
     {
-        dir = rand_0n(GD_MAX);
+        dir = rand_1n(GD_MAX);
     }
 
     if (dir)

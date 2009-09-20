@@ -16,7 +16,12 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include <assert.h>
+
+#include "game.h"
+#include "player.h"
+#include "potions.h"
+#include "utils.h"
 
 const potion_data potions[PO_MAX] =
 {

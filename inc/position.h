@@ -19,6 +19,10 @@
 #ifndef __POSITION_H_
 #define __POSITION_H_
 
+#include <glib.h>
+
+#include "defines.h"
+
 typedef struct position
 {
     gint16 x;
@@ -43,7 +47,7 @@ typedef struct area
 } area;
 
 position pos_new(int x, int y);
-position pos_move(position pos, int direction);
+position pos_move(position pos, direction dir);
 
 rectangle rect_new(int x1, int y1, int x2, int y2);
 rectangle rect_new_sized(position center, int size);
