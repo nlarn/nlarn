@@ -46,7 +46,7 @@ enum effect_types
     ET_PROTECTION,              /* adds to AC  */
 
     /* ability improvements */
-    ET_STEALTH,                 /* aggravate monsters */
+    ET_STEALTH,                 /* stealth */
     ET_AWARENESS,               /* expanded awareness */
     ET_SPEED,                   /* fast */
     ET_HEROISM,                 /* heroism: big bonus on all base attributes */

@@ -134,8 +134,8 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_STEALTH, 500, 0,
-        "You start to move stealthy.",
-        "You do no longer move stealthy.",
+        "You start to move stealthily.",
+        "You're not stealthy anymore.",
         NULL, NULL,
     },
 

@@ -3053,9 +3053,9 @@ int player_item_pickup(player *p, item *it)
 
 int player_item_buy(player *p, item *it)
 {
-    int price;
+    guint price;
     guint count = 0;
-    int player_gold;
+    guint player_gold;
     char text[81];
     char name[61];
 
@@ -3264,8 +3264,8 @@ int player_item_sell(player *p, item *it)
 
 int player_item_shop_identify(player *p, item *it)
 {
-    int player_gold;
-    int price;
+    guint player_gold;
+    guint price;
     char name_unknown[61];
     char name_known[61];
     char message[81];
@@ -3318,8 +3318,8 @@ int player_item_shop_identify(player *p, item *it)
 int player_item_shop_repair(player *p, item *it)
 {
     int damages = 0;
-    int player_gold;
-    int price;
+    guint player_gold;
+    guint price;
     char name[61];
     char message[81];
 

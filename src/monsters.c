@@ -856,6 +856,14 @@ void monster_move(monster *m, struct player *p)
     /* damage caused by level effects */
     damage *dam = NULL;
 
+    int monster_visrange = 7;
+
+    if (player_effect(p, ET_STEALTH))
+    {
+        /* if the player is stealthy monsters will only recognize him when
+           standing next to him */
+        monster_visrange = 1;
+    }
 
     /* determine if the monster can see the player */
     if (pos_distance(m->pos, p->pos) > 7)
@@ -869,11 +877,6 @@ void monster_move(monster *m, struct player *p)
     else if (monster_effect(m, ET_BLINDNESS))
     {
         /* monster is blinded */
-        m->p_visible = FALSE;
-    }
-    else if (player_effect(p, ET_STEALTH) > monster_int(m))
-    {
-        /* player is stealther than monster is smart */
         m->p_visible = FALSE;
     }
     else
