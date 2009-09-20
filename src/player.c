@@ -3088,7 +3088,7 @@ int player_item_buy(player *p, item *it)
 
         price *= count;
 
-        if (player_gold < price)
+        if ((p->bank_account < price) || (player_gold < price))
         {
             display_paint_screen(p);
 
@@ -3148,8 +3148,19 @@ int player_item_buy(player *p, item *it)
         return FALSE;
     }
 
+    log_add_entry(p->log, "Thank you for your purchase.");
+
     /* charge player for this purchase */
-    player_set_gold(p, player_gold - price);
+    if (p->bank_account > price)
+    {
+        p->bank_account -= price;
+        log_add_entry(p->log, "We have debited your bank account %d gold.",
+                      price);
+    }
+    else
+    {
+        player_set_gold(p, player_gold - price);
+    }
     return TRUE;
 }
 
@@ -3255,7 +3266,8 @@ int player_item_shop_identify(player *p, item *it)
 {
     int player_gold;
     int price;
-    char name[41];
+    char name_unknown[61];
+    char name_known[61];
     char message[81];
 
     const char title[] = "Identify item";
@@ -3265,23 +3277,38 @@ int player_item_shop_identify(player *p, item *it)
     player_gold = player_get_gold(p);
     price = 50 << game_difficulty(p->game);
 
-    item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 40);
+    item_describe(it, player_item_known(p, it), TRUE, TRUE, name_unknown, 60);
 
-    if (price <= player_gold)
+    if ((price <= p->bank_account) || (price <= player_gold))
     {
-        g_snprintf(message, 80, "Pay %d gold to identify %s?", price, name);
+        g_snprintf(message, 80, "Pay %d gold to identify %s?", price, name_unknown);
 
         if (display_get_yesno(message, NULL, NULL))
         {
             player_item_identify(p, it);
-            player_set_gold(p, player_gold - price);
+            /* upper case first letter */
+            name_unknown[0] = g_ascii_toupper(name_unknown[0]);
+            item_describe(it, player_item_known(p, it), TRUE, FALSE, name_known, 60);
+
+            log_add_entry(p->log, "%s is %s.", name_unknown, name_known);
+
+            if (price <= p->bank_account)
+            {
+                log_add_entry(p->log, "We have debited your bank account %d gold.",
+                              price);
+                p->bank_account -= price;
+            }
+            else
+            {
+                player_set_gold(p, player_gold - price);
+            }
 
             return TRUE;
         }
     }
     else
     {
-        g_snprintf(message, 80, "Identifying %s costs %d gold.", name, price);
+        g_snprintf(message, 80, "Identifying %s costs %d gold.", name_unknown, price);
         display_show_message((char *)title, message);
     }
 
@@ -3293,7 +3320,7 @@ int player_item_shop_repair(player *p, item *it)
     int damages = 0;
     int player_gold;
     int price;
-    char name[41];
+    char name[61];
     char message[81];
 
     const char title[] = "Repair item";
@@ -3308,11 +3335,11 @@ int player_item_shop_repair(player *p, item *it)
     player_gold = player_get_gold(p);
     price = (50 << game_difficulty(p->game)) * damages;
 
-    item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 40);
+    item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 60);
 
-    if (price <= player_gold)
+    if ((price <= p->bank_account) || (price <= player_gold))
     {
-        g_snprintf(message, 80, "Pay %d gold to repair the %s?", price, name);
+        g_snprintf(message, 80, "Pay %d gold to repair %s?", price, name);
 
         if (display_get_yesno(message, NULL, NULL))
         {
@@ -3320,7 +3347,18 @@ int player_item_shop_repair(player *p, item *it)
             it->corroded = 0;
             it->rusty = 0;
 
-            player_set_gold(p, player_gold - price);
+            log_add_entry(p->log, "Your %s has been repaired.", name);
+
+            if (price <= p->bank_account)
+            {
+                log_add_entry(p->log, "We have debited your bank account %d gold.",
+                              price);
+                p->bank_account -= price;
+            }
+            else
+            {
+                player_set_gold(p, player_gold - price);
+            }
 
             return TRUE;
         }
