@@ -10,7 +10,7 @@ ARCH=$(uname -m)
 if [ "$OS" = "Windows_NT" ]
 then
 	OS=win32
-	SUFFIX="exe"
+	SUFFIX="zip"
 	EXE="nlarn.exe pdcurses.dll libglib-2.0-0.dll"
 	export CC=gcc
 else
@@ -19,19 +19,20 @@ else
 	EXE="nlarn"
 fi
 
-MAINFILES="$EXE nlarn.ini LICENSE"
+MAINFILES="$EXE nlarn.ini-sample LICENSE"
 LIBFILES="lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg"
 
 VERSION_MAJOR=$(grep VERSION_MAJOR inc/nlarn.h | cut -f 3 -d" ")
 VERSION_MINOR=$(grep VERSION_MINOR inc/nlarn.h | cut -f 3 -d" ")
 VERSION_PATCH=$(grep VERSION_PATCH inc/nlarn.h | cut -f 3 -d" ")
 
-DIRNAME=nlarn-"$VERSION_MAJOR"."$VERSION_MINOR"
+VERSION="$VERSION_MAJOR"."$VERSION_MINOR"
 if [ "$VERSION_PATCH" -gt 0 ]
 then
-	DIRNAME="$DIRNAME"."$VERSION_PATCH"
+	VERSION="$VERSION"."$VERSION_PATCH"
 fi
 
+DIRNAME=nlarn-"$VERSION"
 PACKAGE="$DIRNAME"_"$OS"."$ARCH"."$SUFFIX"
 
 # Regenerate Makefile if necessary
@@ -45,6 +46,7 @@ make verbose=yes
 # Quit on errors
 if [ $? -gt 0 ]
 then
+	echo Build failed.
 	exit
 fi
 
@@ -54,10 +56,14 @@ cp $LIBFILES "$DIRNAME"/lib
 
 rm -f "$PACKAGE"
 
+# create archives for distribution
 if [ "$OS" != "win32" ]
 then
 	tar cfvz "$PACKAGE" "$DIRNAME"
 else
-	7z a -r -sfx7z.sfx "$PACKAGE" "$DIRNAME"
+	zip -r "$PACKAGE" "$DIRNAME"
+	# create windows installer (double slash to protect it from shell)
+	makensis //DVERSION="$VERSION" nlarn.nsi
 fi
+
 rm -rf "$DIRNAME"

@@ -16,11 +16,11 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- #include <assert.h>
- #include <glib.h>
- #include <stdio.h>
- #include <stdlib.h>
- #include <string.h>
+#include <assert.h>
+#include <glib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "game.h"
 #include "nlarn.h"
@@ -71,7 +71,12 @@ game *game_new(int argc, char *argv[])
     GKeyFile *ini_file = g_key_file_new();
     GError *error = NULL;
 
-    g_key_file_load_from_file(ini_file, "nlarn.ini", G_KEY_FILE_NONE, &error);
+    /* This is the best path for windows */
+    gchar *filename = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(),
+                                   "nlarn.ini", NULL);
+
+    g_key_file_load_from_file(ini_file, filename, G_KEY_FILE_NONE, &error);
+    g_free(filename);
 
     if (!error)
     {
@@ -333,7 +338,7 @@ void game_spin_the_wheel(game *g, guint times)
         if ((dam = level_tile_damage(g->p->level, g->p->pos)))
         {
             player_damage_take(g->p, dam, PD_LEVEL,
-                           level_tiletype_at(g->p->level, g->p->pos));
+                               level_tiletype_at(g->p->level, g->p->pos));
         }
 
         game_move_monsters(g);
