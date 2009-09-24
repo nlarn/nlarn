@@ -56,6 +56,8 @@ game *game_load(char *filename)
 
 game *game_new(int argc, char *argv[])
 {
+    const char *default_lib_dir = "/usr/share/games/nlarn";
+
     game *g;
     size_t idx;
     item_t it;
@@ -67,13 +69,26 @@ game *game_new(int argc, char *argv[])
     static gboolean female = FALSE; /* default: male */
     static char *auto_pickup = NULL;
 
+    /* one game, please */
+    g = g_malloc0(sizeof(game));
+
+    /* base directory for a local install */
+    g->basedir = g_path_get_dirname(argv[0]);
+
     /* ini file handling */
     GKeyFile *ini_file = g_key_file_new();
     GError *error = NULL;
 
-    /* This is the best path for windows */
+    /* This is the path used when the game is installed system wide */
     gchar *filename = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(),
                                    "nlarn.ini", NULL);
+
+    if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR))
+    {
+        /* ini file has not been found in user config directory */
+        g_free(filename);
+        filename = g_build_path(G_DIR_SEPARATOR_S, g->basedir, "nlarn.ini", NULL);
+    }
 
     g_key_file_load_from_file(ini_file, filename, G_KEY_FILE_NONE, &error);
     g_free(filename);
@@ -128,14 +143,18 @@ game *game_new(int argc, char *argv[])
     g_option_context_free(context);
 
 
-    /* one game, please */
-    g = g_malloc0(sizeof(game));
-
     /* determine paths and file names */
-    g->basedir = g_path_get_dirname(argv[0]);
-
-    /* TODO: check if files exist in this directory, otherwise try others */
-    g->libdir = g_build_path(G_DIR_SEPARATOR_S, g->basedir, "lib", NULL);
+    if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
+    {
+        /* system-wide data directory exists */
+        /* string has to be dup'd as it is feed in the end */
+        g->libdir = g_strdup((char *)default_lib_dir);
+    }
+    else
+    {
+        /* try to use installation directory */
+        g->libdir = g_build_path(G_DIR_SEPARATOR_S, g->basedir, "lib", NULL);
+    }
 
     g->mesgfile = g_build_filename(g->libdir, mesgfile, NULL);
     g->helpfile = g_build_filename(g->libdir, helpfile, NULL);

@@ -448,13 +448,18 @@ void player_die(player *p, player_cod cause_type, int cause)
             proposal = g_strconcat(p->name, ".txt", NULL);
             filename = display_get_string("Enter filename: ", proposal, 40);
 
-            if (!g_file_set_contents(filename, text->str, -1, &error))
+            if (filename != NULL)
             {
-                display_show_message("Error", error->message);
-                g_error_free(error);
+                /* file name has been provided. try to save file */
+                if (!g_file_set_contents(filename, text->str, -1, &error))
+                {
+                    display_show_message("Error", error->message);
+                    g_error_free(error);
+                }
+
+                g_free(proposal);
             }
 
-            g_free(proposal);
             g_free(filename);
         }
 
@@ -1668,7 +1673,8 @@ void player_effect_add(player *p, effect *e)
 
     /* one-time effects are handled here */
     if (e->turns == 1)
-    {        switch (e->type)
+    {
+        switch (e->type)
         {
         case ET_INC_CHA:
             p->charisma += e->amount;
