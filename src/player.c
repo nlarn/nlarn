@@ -2504,7 +2504,8 @@ int player_item_is_affordable(player *p, item *it)
 {
     assert(p != NULL && it != NULL);
 
-    return (item_price(it) <= player_get_gold(p));
+    return ((item_price(it) <= player_get_gold(p))
+            || (item_price(it) <= p->bank_account));
 }
 
 int player_item_is_sellable(player *p, item *it)

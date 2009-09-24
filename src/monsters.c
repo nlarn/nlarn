@@ -71,7 +71,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 1, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -81,7 +81,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_SLOW, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 2, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -101,7 +101,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 1, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -111,7 +111,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 3, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -152,7 +152,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 2, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -183,7 +183,7 @@ const monster_data monsters[MT_MAX] =
         MF_HEAD | MF_HANDS,
         {
             { ATT_TOUCH, DAM_STEAL_GOLD, 0, 0 },
-            { ATT_WEAPON, DAM_PHYSICAL, 1, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
         }
     },
     {
@@ -243,7 +243,7 @@ const monster_data monsters[MT_MAX] =
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
             { ATT_BITE, DAM_PHYSICAL, 5, 10 },
-            { ATT_WEAPON, DAM_PHYSICAL, 4, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
         }
     },
     {
@@ -272,8 +272,8 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_LARGE,
         MF_HEAD | MF_HANDS,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 4, 0 },
-            EMPTY_ATTACK,
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
+            { ATT_KICK, DAM_PHYSICAL, 6, 0 },
         }
     },
     {
@@ -283,7 +283,7 @@ const monster_data monsters[MT_MAX] =
         MF_HEAD | MF_HANDS | MF_REGENERATE,
         {
             { ATT_CLAW, DAM_PHYSICAL, 5, 0 },
-            EMPTY_ATTACK,
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
         }
     },
     {
@@ -302,7 +302,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 1, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -422,7 +422,7 @@ const monster_data monsters[MT_MAX] =
         MF_HEAD | MF_HANDS | MF_FLY | MF_UNDEAD | MF_INFRAVISION | MF_REGENERATE,
         {
             { ATT_TOUCH, DAM_DRAIN_LIFE, 1, 0 },
-            { ATT_WEAPON, DAM_PHYSICAL, 4, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
         }
     },
     {
@@ -441,7 +441,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_UNDEAD | MF_FLY | MF_INVISIBLE,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 4, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -491,7 +491,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 10, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -511,7 +511,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_LARGE,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 15, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -531,7 +531,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
-            { ATT_WEAPON, DAM_PHYSICAL, 12, 0 },
+            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -699,7 +699,11 @@ const monster_data monsters[MT_MAX] =
 
 static int monster_genocided[MT_MAX] = { 1, 0 };
 
+static gboolean monster_attack_available(monster *m, attack_t type);
+static const attack *monster_attack_get(monster *m, attack_t type);
 static void monster_attack_disable(monster *m, const attack *att);
+static item *monster_weapon_select(monster *m);
+static void monster_weapon_wield(monster *m, item *weapon);
 static void monster_die(monster *m);
 static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
@@ -708,7 +712,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
 monster *monster_new(int monster_type, struct level *l)
 {
     monster *nmonster;
-    int it, icount;    /* item type, item id, item count */
+    int it, icount;     /* item type, item id, item count */
 
     assert(monster_type > MT_NONE && monster_type < MT_MAX && l != NULL);
 
@@ -740,11 +744,12 @@ monster *monster_new(int monster_type, struct level *l)
     /* fill monsters inventory */
     if (monster_gold(nmonster) > 0)
     {
-        /* add gold to monster's inventory, ramdomize the amount */
+        /* add gold to monster's inventory, randomize the amount */
         icount = max(divert(monster_gold(nmonster), 10), 1);
         inv_add(&nmonster->inventory, item_new(IT_GOLD, icount, 0));
     }
 
+    /* add special items */
     switch (monster_type)
     {
     case MT_LEPRECHAUN:
@@ -755,18 +760,12 @@ monster *monster_new(int monster_type, struct level *l)
         }
         break;
 
-    case MT_ORC:
-    case MT_ELF:
-    case MT_TROLL:
-        inv_add(&nmonster->inventory,
-                item_new_by_level(IT_WEAPON, l->nlevel));
-        break;
-
-    case MT_NYMPH:
     case MT_TROGLODYTE:
+    case MT_NYMPH:
     case MT_PLATINUM_DRAGON:
     case MT_RED_DRAGON:
     case MT_GNOME_KING:
+        /* add something that is not a container */
         do
         {
             it = rand_1n(IT_MAX);
@@ -775,13 +774,70 @@ monster *monster_new(int monster_type, struct level *l)
 
         inv_add(&nmonster->inventory, item_new_random(it));
         break;
+    }
 
-    case MT_MIMIC:
+    /* generate a weapon if monster can use it */
+    if (monster_attack_available(nmonster, ATT_WEAPON))
+    {
+        int weapon_count = 3;
+        int weapons[3]; /* choice of weapon types */
+        item *weapon;
+
+        /* preset weapon types */
+        switch (monster_type)
+        {
+        case MT_HOBGOBLIN:
+        case MT_ORC:
+        case MT_TROLL:
+            weapons[0] = WT_ODAGGER;
+            weapons[1] = WT_OSHORTSWORD;
+            weapons[2] = WT_OSPEAR;
+            break;
+
+        case MT_ELF:
+            weapons[0] = WT_ESHORTSWORD;
+            weapons[1] = WT_ESPEAR;
+            weapon_count = 2;
+            break;
+
+        case MT_BUGBEAR:
+        case MT_CENTAUR:
+        case MT_POLTERGEIST:
+            weapons[0] = WT_MACE;
+            weapons[1] = WT_FLAIL;
+            weapons[2] = WT_BATTLEAXE;
+            break;
+
+        case MT_VAMPIRE:
+        case MT_GNOME_KING:
+        case MT_WATER_LORD:
+        case MT_XVART:
+            weapons[0] = WT_LONGSWORD;
+            weapons[1] = WT_2SWORD;
+            weapons[2] = WT_SWORDSLASHING;
+            break;
+
+        default:
+            weapons[0] = WT_DAGGER;
+            weapons[1] = WT_SPEAR;
+            weapons[2] = WT_SHORTSWORD;
+            break;
+        }
+
+        weapon = item_new(IT_WEAPON, weapons[rand_0n(weapon_count)], rand_m_n(-2,2));
+        inv_add(&nmonster->inventory, weapon);
+
+        /* wield the new weapon */
+        monster_weapon_wield(nmonster, weapon);
+    } /* finished initializing weapons */
+
+    /* initialize mimics */
+    if (monster_type == MT_MIMIC)
+    {
         /* determine how the mimic will be displayed */
         nmonster->item_type = rand_1n(IT_MAX);
         /* the mimic is not known to be a monster */
         nmonster->unknown = TRUE;
-        break;
     }
 
     /* initialize AI */
@@ -1198,9 +1254,12 @@ void monster_items_drop(monster *m, inventory **floor)
 void monster_items_pickup(monster *m, struct player *p)
 {
     /* TODO: gelatious cube digests items, rust monster eats metal stuff */
+    /* FIXME: time management */
 
+    gboolean pick_up = FALSE;
     guint idx;
     item *it;
+    char buf[61] = { 0 };
 
     assert(m != NULL && p != NULL);
 
@@ -1211,19 +1270,43 @@ void monster_items_pickup(monster *m, struct player *p)
         if (m->type == MT_LEPRECHAUN
                 && ((it->type == IT_GEM) || (it->type == IT_GOLD)))
         {
+            /* leprechauns collect treasures */
+            pick_up = TRUE;
+        }
+        else if (it->type == IT_WEAPON && monster_attack_available(m, ATT_WEAPON))
+        {
+            /* monster can attack with weapons, get the weapon */
+            pick_up = TRUE;
+        }
+
+        if (pick_up)
+        {
+            /* item has been picked up */
             if (m->m_visible)
             {
-                log_add_entry(p->log, "The %s picks up %s %s.", monster_name(m),
-                              (it->count == 1) ? "a" : "some",
-                              (it->count == 1) ? item_name_sg(it->type) : item_name_pl(it->type));
+                item_describe(it, player_item_identified(m->level->player, it),
+                              (it->count == 1), FALSE, buf, 60);
+                log_add_entry(p->log, "The %s picks up %s.", monster_name(m), buf);
             }
 
             inv_del_element(&level_ilist_at(m->level, m->pos), it);
             inv_add(&m->inventory, it);
 
-            /* item has been picked up */
             /* go back one item as the following items lowered their number */
             idx--;
+
+            if (it->type == IT_WEAPON)
+            {
+                /* find out if the new weapon is better than the old one */
+                item *best = monster_weapon_select(m);
+
+                if (it == best)
+                {
+                    monster_weapon_wield(m, best);
+                }
+            }
+
+            pick_up = FALSE;
         }
     }
 }
@@ -1235,7 +1318,7 @@ void monster_items_pickup(monster *m, struct player *p)
  * @return the number of attacks
  *
  */
-int monster_attacks_count(monster *m)
+int monster_attack_count(monster *m)
 {
     assert (m != NULL && m->type < MT_MAX);
 
@@ -1285,13 +1368,22 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* choose attack type */
-    for (idx = 0; idx < monster_attacks_count(m); idx++)
+    if (m->weapon != NULL && monster_attack_available(m, ATT_WEAPON))
     {
-        /* if player is resistant to an attack choose next attack type. */
-        if (monsters[m->type].attacks[idx].type && !m->attacks_failed[idx])
+        /* prefer weapon attack */
+        att = monster_attack_get(m, ATT_WEAPON);
+    }
+    else
+    {
+        /* choose an attack which is known to work */
+        for (idx = 0; idx < monster_attack_count(m); idx++)
         {
-            att = &monsters[m->type].attacks[idx];
-            break;
+            /* if player is resistant to an attack choose next attack type. */
+            if (monsters[m->type].attacks[idx].type && !m->attacks_failed[idx])
+            {
+                att = &monsters[m->type].attacks[idx];
+                break;
+            }
         }
     }
 
@@ -1304,6 +1396,11 @@ void monster_player_attack(monster *m, player *p)
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM)
         dam->type = rand_1n(DAM_MAX);
+
+    /* set damage for weapon attacks */
+    if (att->type == ATT_WEAPON)
+        dam->amount = rand_1n(weapon_wc(m->weapon)
+                              + game_difficulty(m->level->player->game)); /* yuck */
 
     /* add variable damage */
     if (att->rand)
@@ -1476,7 +1573,7 @@ gboolean monster_update_action(monster *m)
     smart  = (monster_int(m) > 4);
 
     /* check if monster has an attack that is known to work */
-    for (idx = 0; idx < monster_attacks_count(m); idx++)
+    for (idx = 0; idx < monster_attack_count(m); idx++)
     {
         if (!m->attacks_failed[idx])
         {
@@ -1615,6 +1712,36 @@ void monster_effect_expire(monster *m, message_log *log)
     }
 }
 
+static gboolean monster_attack_available(monster *m, attack_t type)
+{
+    int idx;
+
+    for (idx = 0; idx < MONSTER_ATTACK_COUNT; idx++)
+    {
+        if (monster_attack(m, idx).type == type)
+        {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static const attack *monster_attack_get(monster *m, attack_t type)
+{
+    int idx;
+
+    for (idx = 0; idx < MONSTER_ATTACK_COUNT; idx++)
+    {
+        if (monster_attack(m, idx).type == type)
+        {
+            return &monster_attack(m, idx);
+        }
+    }
+
+    return NULL;
+}
+
 static void monster_attack_disable(monster *m, const attack *att)
 {
     int idx;
@@ -1625,6 +1752,50 @@ static void monster_attack_disable(monster *m, const attack *att)
             m->attacks_failed[idx] = TRUE;
     }
 }
+
+static item *monster_weapon_select(monster *m)
+{
+    item *best = NULL, *curr = NULL;
+    int idx = 0;
+
+    for (idx = 0; idx < inv_length(m->inventory); idx++)
+    {
+        curr = inv_get(m->inventory, idx);
+
+        if (curr->type == IT_WEAPON)
+        {
+            if (best == NULL)
+            {
+                best = curr;
+            }
+            else if (weapon_wc(curr) > weapon_wc(best))
+            {
+                best = curr;
+            }
+        }
+    }
+
+    return best;
+}
+
+static void monster_weapon_wield(monster *m, item *weapon)
+{
+    char buf[61] = { 0 };
+
+    /* FIXME: time management */
+    m->weapon = weapon;
+
+    /* show message if monster is visible */
+    if (m->m_visible)
+    {
+        item_describe(weapon, player_item_identified(m->level->player, weapon),
+                      TRUE, FALSE, buf, 60);
+
+        log_add_entry(m->level->player->log, "The %s wields %s.",
+                      monster_name(m), buf);
+    }
+}
+
 
 static void monster_die(monster *m)
 {

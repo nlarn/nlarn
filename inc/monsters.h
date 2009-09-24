@@ -171,6 +171,7 @@ typedef struct monster
     gboolean attacks_failed[MONSTER_ATTACK_COUNT];
 
     inventory *inventory;
+    item *weapon;
     GPtrArray *effects;
 
     guint32
@@ -197,7 +198,7 @@ monster *monster_trap_trigger(monster *m, struct player *p);
 void monster_items_drop(monster *m, inventory **floor);
 void monster_items_pickup(monster *m, struct player *p);
 
-int monster_attacks_count(monster *m);
+int monster_attack_count(monster *m);
 void monster_player_attack(monster *m, struct player *p);
 monster *monster_damage_take(monster *m, damage *dam);
 
@@ -216,7 +217,7 @@ void monsters_genocide(struct level *l);
 #define monster_exp(monster)         (monsters[(monster)->type].exp)
 #define monster_image(monster)       (monsters[(monster)->type].image)
 #define monster_speed(monster)       (monsters[(monster)->type].mspeed)
-#define monster_damage(monster)      (monsters[(monster)->type].attacks[0].base)
+#define monster_attack(monster, idx) (monsters[(monster)->type].attacks[(idx)])
 
 /* flags */
 #define monster_has_head(monster)        (monsters[(monster)->type].flags & MF_HEAD)
