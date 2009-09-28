@@ -25,7 +25,6 @@
 #include "nlarn.h"
 #include "player.h"
 
-
 /* stock of the dnd store */
 /* TODO: make sure these items are freed on terminating the game */
 static inventory *store_stock = NULL;
@@ -37,8 +36,10 @@ static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
                                       "law, we cannot serve you at this time." \
                                       "\n\nSo Sorry.";
 
-static int building_bank_gem_filter(item *it);
-static int building_tradepost_gold_filter(item *it);
+static int building_dndstore_sell(player *p, item *it);
+static int building_tradepost_item_identify(player *p, item *it);
+static int building_tradepost_item_repair(player *p, item *it);
+static int building_tradepost_buy(player *p, item *it);
 
 int building_bank(player *p)
 {
@@ -121,7 +122,7 @@ int building_bank(player *p)
         callback = g_malloc(sizeof(display_inv_callback));
         callback->description = "(s)ell";
         callback->key = 's';
-        callback->function = &player_item_sell;
+        callback->function = &building_tradepost_buy;
         callback->checkfun = &player_item_is_sellable;
         callback->active = FALSE;
         g_ptr_array_add(callbacks, callback);
@@ -178,7 +179,7 @@ int building_bank(player *p)
             break;
 
         display_inventory("Sell gems", p, p->inventory, callbacks, TRUE,
-                          &building_bank_gem_filter);
+                          &inv_filter_gems);
 
         break;
 
@@ -225,7 +226,7 @@ int building_dndstore(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(b)uy";
     callback->key = 'b';
-    callback->function = &player_item_buy;
+    callback->function = &building_dndstore_sell;
     callback->checkfun = &player_item_is_affordable;
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
@@ -616,7 +617,7 @@ int building_tradepost(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(s)ell";
     callback->key = 's';
-    callback->function = &player_item_sell;
+    callback->function = &building_tradepost_buy;
     callback->checkfun = &player_item_is_sellable;
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
@@ -624,7 +625,7 @@ int building_tradepost(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(i)dentify";
     callback->key = 'i';
-    callback->function = &player_item_shop_identify;
+    callback->function = &building_tradepost_item_identify;
     callback->checkfun = &player_item_is_identifiable;
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
@@ -632,7 +633,7 @@ int building_tradepost(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(r)epair";
     callback->key = 'r';
-    callback->function = &player_item_shop_repair;
+    callback->function = &building_tradepost_item_repair;
     callback->checkfun = &player_item_is_damaged;
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
@@ -648,7 +649,7 @@ int building_tradepost(player *p)
     display_show_message((char *)title, (char *)msg_welcome);
     display_paint_screen(p);
 
-    display_inventory((char *)title, p, p->inventory, callbacks, TRUE, &building_tradepost_gold_filter);
+    display_inventory((char *)title, p, p->inventory, callbacks, TRUE, &inv_filter_not_gold);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);
@@ -656,16 +657,323 @@ int building_tradepost(player *p)
     return turns;
 }
 
-static int building_bank_gem_filter(item *it)
+static int building_dndstore_sell(player *p, item *it)
 {
-    assert (it != NULL);
+    guint price;
+    guint count = 0;
+    guint player_gold;
+    char text[81];
+    char name[61];
 
-    return (it->type == IT_GEM);
+    /* copy of item needed to descibe and transfer original item */
+    item *it_clone;
+
+    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    player_gold = player_get_gold(p);
+    price = item_price(it);
+
+    if (it->count > 1)
+    {
+        item_describe(it, player_item_known(p, it), FALSE, FALSE, name, 40);
+        g_snprintf(text, 80, "How many %s do you want to buy?", name);
+
+        /* get count */
+        count = display_get_count(text, it->count);
+
+        if (count > it->count)
+        {
+            log_add_entry(p->log, "Wouldn't it be nice if the store had %d of those?", count);
+            return FALSE;
+        }
+
+        if (count == 0)
+        {
+            return FALSE;
+        }
+
+        price *= count;
+
+        if ((p->bank_account < price) || (player_gold < price))
+        {
+            display_paint_screen(p);
+
+            it_clone = item_clone(it);
+            it_clone->count = count;
+
+            item_describe(it, player_item_known(p, it), FALSE, TRUE, name, 60);
+            g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
+                       price, name);
+
+            item_destroy(it_clone);
+
+            display_show_message(NULL, text);
+
+            return FALSE;
+        }
+    }
+    else
+    {
+        count = 1;
+        item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 60);
+        g_snprintf(text, 80, "Do you want to buy %s for %d gold?",
+                   name, price);
+
+        if (!display_get_yesno(text, NULL, NULL))
+        {
+            return FALSE;
+        }
+    }
+
+    /* log the event */
+    it_clone = item_clone(it);
+    it_clone->count = count;
+
+    item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
+    log_add_entry(p->log, "You buy %s.", name);
+
+    /* try to transfer the item */
+    if (inv_add(&p->inventory, it_clone))
+    {
+        /* item has been added to player's inventory */
+        if (it->count > it_clone->count)
+        {
+            /* player purchased not all availible items */
+            it->count -= count;
+        }
+        else
+        {
+            building_dndstore_item_del(it);
+            item_destroy(it);
+        }
+    }
+    else
+    {
+        /* item has not been added to player's inventory */
+        item_destroy(it_clone);
+        return FALSE;
+    }
+
+    log_add_entry(p->log, "Thank you for your purchase.");
+
+    /* charge player for this purchase */
+    if (p->bank_account > price)
+    {
+        p->bank_account -= price;
+        log_add_entry(p->log, "We have debited your bank account %d gold.",
+                      price);
+    }
+    else
+    {
+        player_set_gold(p, player_gold - price);
+    }
+    return TRUE;
 }
 
-static int building_tradepost_gold_filter(item *it)
+int building_tradepost_item_identify(player *p, item *it)
 {
-    assert (it != NULL);
+    guint player_gold;
+    guint price;
+    char name_unknown[61];
+    char name_known[61];
+    char message[81];
 
-    return (it->type != IT_GOLD);
+    const char title[] = "Identify item";
+
+    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    player_gold = player_get_gold(p);
+    price = 50 << game_difficulty(p->game);
+
+    item_describe(it, player_item_known(p, it), TRUE, TRUE, name_unknown, 60);
+
+    if ((price <= p->bank_account) || (price <= player_gold))
+    {
+        g_snprintf(message, 80, "Pay %d gold to identify %s?", price, name_unknown);
+
+        if (display_get_yesno(message, NULL, NULL))
+        {
+            player_item_identify(p, it);
+            /* upper case first letter */
+            name_unknown[0] = g_ascii_toupper(name_unknown[0]);
+            item_describe(it, player_item_known(p, it), TRUE, FALSE, name_known, 60);
+
+            log_add_entry(p->log, "%s is %s.", name_unknown, name_known);
+
+            if (price <= p->bank_account)
+            {
+                log_add_entry(p->log, "We have debited your bank account %d gold.",
+                              price);
+                p->bank_account -= price;
+            }
+            else
+            {
+                player_set_gold(p, player_gold - price);
+            }
+
+            return TRUE;
+        }
+    }
+    else
+    {
+        g_snprintf(message, 80, "Identifying %s costs %d gold.", name_unknown, price);
+        display_show_message((char *)title, message);
+    }
+
+    return FALSE;
+}
+
+static int building_tradepost_item_repair(player *p, item *it)
+{
+    int damages = 0;
+    guint player_gold;
+    guint price;
+    char name[61];
+    char message[81];
+
+    const char title[] = "Repair item";
+
+    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    /* determine how much the item is damaged */
+    damages += it->burnt;
+    damages += it->corroded;
+    damages += it->rusty;
+
+    player_gold = player_get_gold(p);
+    price = (50 << game_difficulty(p->game)) * damages;
+
+    item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 60);
+
+    if ((price <= p->bank_account) || (price <= player_gold))
+    {
+        g_snprintf(message, 80, "Pay %d gold to repair %s?", price, name);
+
+        if (display_get_yesno(message, NULL, NULL))
+        {
+            it->burnt = 0;
+            it->corroded = 0;
+            it->rusty = 0;
+
+            log_add_entry(p->log, "Your %s has been repaired.", name);
+
+            if (price <= p->bank_account)
+            {
+                log_add_entry(p->log, "We have debited your bank account %d gold.",
+                              price);
+                p->bank_account -= price;
+            }
+            else
+            {
+                player_set_gold(p, player_gold - price);
+            }
+
+            return TRUE;
+        }
+    }
+    else
+    {
+        g_snprintf(message, 80, "Repairing the %s costs %d gold.", name, price);
+        display_show_message((char *)title, message);
+    }
+
+    return FALSE;
+}
+
+static int building_tradepost_buy(player *p, item *it)
+{
+    int price;
+    guint count = 0;
+    char question[121];
+    char name[61];
+
+    item *it_clone;
+
+    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    item_describe(it, player_item_known(p, it), FALSE, FALSE, name, 60);
+
+    price = item_price(it);
+
+    /* modify price if player sells stuff at the trading post */
+    if (level_stationary_at(p->level, p->pos) == LS_TRADEPOST)
+    {
+        if (!player_item_is_damaged(p, it))
+        {
+            /* good items: 20% of value */
+            price /= 5;
+        }
+        else
+        {
+            /* damaged items: 10% of value */
+            price /= 10;
+        }
+    }
+
+    if (price < 1)
+        price = 1;
+
+    if (it->count > 1)
+    {
+        item_describe(it, player_item_known(p, it), FALSE, TRUE, name, 60);
+        g_snprintf(question, 120, "How many %s do you want to sell for %d gold?",
+                   name, price);
+
+        /* get count */
+        count = display_get_count(question, it->count);
+
+        if (count > it->count)
+        {
+            log_add_entry(p->log, "Wouldn't it be nice to have %d of those?", count);
+            return FALSE;
+        }
+
+        if (count == 0)
+        {
+            return FALSE;
+        }
+
+        price *= count;
+    }
+    else
+    {
+        count = 1;
+        item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 40);
+        g_snprintf(question, 120, "Do you want to sell %s for %d gold?",
+                   name, price);
+
+        if (!display_get_yesno(question, NULL, NULL))
+        {
+            return FALSE;
+        }
+    }
+
+    p->bank_account += price;
+
+    it_clone = item_clone(it);
+    it_clone->count = count;
+
+    item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
+    log_add_entry(p->log, "You sell %s. The %d gold %s been transferred to your bank account.",
+                  name, price, (price == 1) ? "has" : "have");
+
+    item_destroy(it_clone);
+
+    if ((it->count > 1) && (count < it->count))
+    {
+        building_dndstore_item_add(item_split(it, count));
+    }
+    else
+    {
+        if (!inv_del_element(&p->inventory, it))
+        {
+            return FALSE;
+        }
+        else
+        {
+            building_dndstore_item_add(it);
+        }
+    }
+
+    return TRUE;
 }

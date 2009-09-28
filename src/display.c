@@ -952,9 +952,6 @@ spell *display_spell_select(char *title, player *p)
     /* currently selected item */
     guint curr = 1;
 
-    /* buffer for spell code type ahead */
-    char *code_buf = g_malloc0(sizeof(char) * 4);
-
     assert(p != NULL);
 
     if (!p->known_spells || !p->known_spells->len)
@@ -962,6 +959,9 @@ spell *display_spell_select(char *title, player *p)
         log_add_entry(p->log, "You don't know any spells.");
         return NULL;
     }
+
+    /* buffer for spell code type ahead */
+    char *code_buf = g_malloc0(sizeof(char) * 4);
 
     /* sort spell list  */
     g_ptr_array_sort(p->known_spells, &spell_sort);

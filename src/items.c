@@ -1247,6 +1247,55 @@ item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *))
     return NULL;
 }
 
+int inv_filter_container(item *it)
+{
+    assert (it != NULL);
+
+    return (it->type == IT_CONTAINER);
+}
+
+int inv_filter_not_container(item *it)
+{
+    assert (it != NULL);
+
+    return (it->type != IT_CONTAINER);
+}
+
+int inv_filter_food(item *it)
+{
+    assert (it != NULL);
+
+    return (it->type == IT_FOOD);
+}
+
+int inv_filter_gems(item *it)
+{
+    assert (it != NULL);
+
+    return (it->type == IT_GEM);
+}
+
+int inv_filter_not_gold(item *it)
+{
+    assert (it != NULL);
+
+    return (it->type != IT_GOLD);
+}
+
+int inv_filter_potions(item *it)
+{
+    assert (it != NULL);
+
+    return (it->type == IT_POTION);
+}
+
+int inv_filter_readable_items(item *it)
+{
+    assert (it != NULL);
+
+    return (it->type == IT_GEM) || (it->type == IT_BOOK);
+}
+
 static void item_typename_pluralize(item *it, char *description, int length)
 {
     char *replaced;

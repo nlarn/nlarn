@@ -417,12 +417,18 @@ void player_die(player *p, player_cod cause_type, int cause)
         for (count = 1; iterator && (count < 8);
                 iterator = iterator->next, count++)
         {
+            gchar *desc;
+
             cscore = (game_score_t *)iterator->data;
+
+            desc = player_death_description(cscore, FALSE);
             g_string_append_printf(text, "%s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d hp]\n",
                                    (cscore == score) ? "*" : " ", num + count,
                                    cscore->score,
-                                   player_death_description(cscore, FALSE),
+                                   desc,
                                    score->dlevel, cscore->hp);
+
+            g_free(desc);
         }
 
         /* append map of current level */
@@ -3069,327 +3075,6 @@ int player_item_pickup(player *p, item *it)
     return 2;
 }
 
-int player_item_buy(player *p, item *it)
-{
-    guint price;
-    guint count = 0;
-    guint player_gold;
-    char text[81];
-    char name[61];
-
-    /* copy of item needed to descibe and transfer original item */
-    item *it_clone;
-
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
-
-    player_gold = player_get_gold(p);
-    price = item_price(it);
-
-    if (it->count > 1)
-    {
-        item_describe(it, player_item_known(p, it), FALSE, FALSE, name, 40);
-        g_snprintf(text, 80, "How many %s do you want to buy?", name);
-
-        /* get count */
-        count = display_get_count(text, it->count);
-
-        if (count > it->count)
-        {
-            log_add_entry(p->log, "Wouldn't it be nice if the store had %d of those?", count);
-            return FALSE;
-        }
-
-        if (count == 0)
-        {
-            return FALSE;
-        }
-
-        price *= count;
-
-        if ((p->bank_account < price) || (player_gold < price))
-        {
-            display_paint_screen(p);
-
-            it_clone = item_clone(it);
-            it_clone->count = count;
-
-            item_describe(it, player_item_known(p, it), FALSE, TRUE, name, 60);
-            g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
-                       price, name);
-
-            item_destroy(it_clone);
-
-            display_show_message(NULL, text);
-
-            return FALSE;
-        }
-    }
-    else
-    {
-        count = 1;
-        item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 60);
-        g_snprintf(text, 80, "Do you want to buy %s for %d gold?",
-                   name, price);
-
-        if (!display_get_yesno(text, NULL, NULL))
-        {
-            return FALSE;
-        }
-    }
-
-    /* log the event */
-    it_clone = item_clone(it);
-    it_clone->count = count;
-
-    item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
-    log_add_entry(p->log, "You buy %s.", name);
-
-    /* try to transfer the item */
-    if (inv_add(&p->inventory, it_clone))
-    {
-        /* item has been added to player's inventory */
-        if (it->count > it_clone->count)
-        {
-            /* player purchased not all availible items */
-            it->count -= count;
-        }
-        else
-        {
-            building_dndstore_item_del(it);
-            item_destroy(it);
-        }
-    }
-    else
-    {
-        /* item has not been added to player's inventory */
-        item_destroy(it_clone);
-        return FALSE;
-    }
-
-    log_add_entry(p->log, "Thank you for your purchase.");
-
-    /* charge player for this purchase */
-    if (p->bank_account > price)
-    {
-        p->bank_account -= price;
-        log_add_entry(p->log, "We have debited your bank account %d gold.",
-                      price);
-    }
-    else
-    {
-        player_set_gold(p, player_gold - price);
-    }
-    return TRUE;
-}
-
-int player_item_sell(player *p, item *it)
-{
-    int price;
-    guint count = 0;
-    char question[121];
-    char name[61];
-
-    item *it_clone;
-
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
-
-    item_describe(it, player_item_known(p, it), FALSE, FALSE, name, 60);
-
-    price = item_price(it);
-
-    /* modify price if player sells stuff at the trading post */
-    if (level_stationary_at(p->level, p->pos) == LS_TRADEPOST)
-    {
-        if (!player_item_is_damaged(p, it))
-        {
-            /* good items: 20% of value */
-            price /= 5;
-        }
-        else
-        {
-            /* damaged items: 10% of value */
-            price /= 10;
-        }
-    }
-
-    if (price < 1)
-        price = 1;
-
-    if (it->count > 1)
-    {
-        item_describe(it, player_item_known(p, it), FALSE, TRUE, name, 60);
-        g_snprintf(question, 120, "How many %s do you want to sell for %d gold?",
-                   name, price);
-
-        /* get count */
-        count = display_get_count(question, it->count);
-
-        if (count > it->count)
-        {
-            log_add_entry(p->log, "Wouldn't it be nice to have %d of those?", count);
-            return FALSE;
-        }
-
-        if (count == 0)
-        {
-            return FALSE;
-        }
-
-        price *= count;
-    }
-    else
-    {
-        count = 1;
-        item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 40);
-        g_snprintf(question, 120, "Do you want to sell %s for %d gold?",
-                   name, price);
-
-        if (!display_get_yesno(question, NULL, NULL))
-        {
-            return FALSE;
-        }
-    }
-
-    p->bank_account += price;
-
-    it_clone = item_clone(it);
-    it_clone->count = count;
-
-    item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
-    log_add_entry(p->log, "You sell %s. The %d gold %s been transferred to your bank account.",
-                  name, price, (price == 1) ? "has" : "have");
-
-    item_destroy(it_clone);
-
-    if ((it->count > 1) && (count < it->count))
-    {
-        building_dndstore_item_add(item_split(it, count));
-    }
-    else
-    {
-        if (!inv_del_element(&p->inventory, it))
-        {
-            return FALSE;
-        }
-        else
-        {
-            building_dndstore_item_add(it);
-        }
-    }
-
-    return TRUE;
-}
-
-int player_item_shop_identify(player *p, item *it)
-{
-    guint player_gold;
-    guint price;
-    char name_unknown[61];
-    char name_known[61];
-    char message[81];
-
-    const char title[] = "Identify item";
-
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
-
-    player_gold = player_get_gold(p);
-    price = 50 << game_difficulty(p->game);
-
-    item_describe(it, player_item_known(p, it), TRUE, TRUE, name_unknown, 60);
-
-    if ((price <= p->bank_account) || (price <= player_gold))
-    {
-        g_snprintf(message, 80, "Pay %d gold to identify %s?", price, name_unknown);
-
-        if (display_get_yesno(message, NULL, NULL))
-        {
-            player_item_identify(p, it);
-            /* upper case first letter */
-            name_unknown[0] = g_ascii_toupper(name_unknown[0]);
-            item_describe(it, player_item_known(p, it), TRUE, FALSE, name_known, 60);
-
-            log_add_entry(p->log, "%s is %s.", name_unknown, name_known);
-
-            if (price <= p->bank_account)
-            {
-                log_add_entry(p->log, "We have debited your bank account %d gold.",
-                              price);
-                p->bank_account -= price;
-            }
-            else
-            {
-                player_set_gold(p, player_gold - price);
-            }
-
-            return TRUE;
-        }
-    }
-    else
-    {
-        g_snprintf(message, 80, "Identifying %s costs %d gold.", name_unknown, price);
-        display_show_message((char *)title, message);
-    }
-
-    return FALSE;
-}
-
-int player_item_shop_repair(player *p, item *it)
-{
-    int damages = 0;
-    guint player_gold;
-    guint price;
-    char name[61];
-    char message[81];
-
-    const char title[] = "Repair item";
-
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
-
-    /* determine how much the item is damaged */
-    damages += it->burnt;
-    damages += it->corroded;
-    damages += it->rusty;
-
-    player_gold = player_get_gold(p);
-    price = (50 << game_difficulty(p->game)) * damages;
-
-    item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 60);
-
-    if ((price <= p->bank_account) || (price <= player_gold))
-    {
-        g_snprintf(message, 80, "Pay %d gold to repair %s?", price, name);
-
-        if (display_get_yesno(message, NULL, NULL))
-        {
-            it->burnt = 0;
-            it->corroded = 0;
-            it->rusty = 0;
-
-            log_add_entry(p->log, "Your %s has been repaired.", name);
-
-            if (price <= p->bank_account)
-            {
-                log_add_entry(p->log, "We have debited your bank account %d gold.",
-                              price);
-                p->bank_account -= price;
-            }
-            else
-            {
-                player_set_gold(p, player_gold - price);
-            }
-
-            return TRUE;
-        }
-    }
-    else
-    {
-        g_snprintf(message, 80, "Repairing the %s costs %d gold.", name, price);
-        display_show_message((char *)title, message);
-    }
-
-    return FALSE;
-}
-
 int player_altar_desecrate(player *p)
 {
     effect *e = NULL;
@@ -3606,13 +3291,14 @@ int player_door_close(player *p)
     if (count > 1)
     {
         dir = display_get_direction("Close which door?", dirs);
-        g_free(dirs);
     }
     /* dir has been set in the for loop above if count == 1 */
     else if (count == 0)
     {
         dir = GD_NONE;
     }
+
+    g_free(dirs);
 
     /* select random direction if player is confused */
     if (player_effect(p, ET_CONFUSION))
@@ -3698,13 +3384,14 @@ int player_door_open(player *p)
     if (count > 1)
     {
         dir = display_get_direction("Open which door?", dirs);
-        g_free(dirs);
     }
     /* dir has been set in the for loop above if count == 1 */
     else if (count == 0)
     {
         dir = GD_NONE;
     }
+
+    g_free(dirs);
 
     /* select random direction if player is confused */
     if (player_effect(p, ET_CONFUSION))

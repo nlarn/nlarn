@@ -172,14 +172,18 @@ int log_add_entry(message_log *log, char *fmt, ...)
             log->lastmsg = msg;
         }
     }
+    else
+    {
+        log->lastmsg = msg;
+    }
 
     /* if there is already text in the buffer, append a space first */
     if (log->buffer->len)
+    {
         g_string_append_c(log->buffer, ' ');
+    }
 
     g_string_append(log->buffer, msg);
-
-    log->lastmsg = g_strdup(msg);
 
     return TRUE;
 }
@@ -195,13 +199,18 @@ void log_delete(message_log *log)
     int i;
 
     assert(log != NULL);
-    for (i = log->length; i > 0; i--)
+    for (i = 0; i < log->length; i++)
     {
-        g_free(log->entries[i - 1]->message);
-        g_free(log->entries[i - 1]);
+        g_free(log->entries[i]->message);
+        g_free(log->entries[i]);
     }
 
     g_free(log->entries);
+
+    if (log->lastmsg != NULL)
+    {
+        g_free(log->lastmsg);
+    }
 
     g_string_free(log->buffer, TRUE);
     g_free(log);
