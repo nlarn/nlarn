@@ -1756,7 +1756,7 @@ static void monster_attack_disable(monster *m, const attack *att)
 static item *monster_weapon_select(monster *m)
 {
     item *best = NULL, *curr = NULL;
-    int idx = 0;
+    guint idx = 0;
 
     for (idx = 0; idx < inv_length(m->inventory); idx++)
     {
@@ -1886,7 +1886,7 @@ static gboolean monster_item_rust(monster *m, struct player *p)
                           armour_name(it));
 
             log_disable(p->log);
-            player_item_unequip(p, it);
+            player_item_unequip(p, NULL, it);
             log_enable(p->log);
 
             inv_del_element(&p->inventory, it);
@@ -1945,7 +1945,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
             if (player_item_is_equipped(p, it))
             {
                 log_disable(p->log);
-                player_item_unequip(p, it);
+                player_item_unequip(p, NULL, it);
                 log_enable(p->log);
             }
 

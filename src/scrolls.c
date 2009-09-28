@@ -287,7 +287,7 @@ int scroll_identify(player *p, item *scroll)
         it = inv_get(p->inventory, idx);
         if (!player_item_identified(p, it))
         {
-            player_item_identify(p, it);
+            player_item_identify(p, NULL, it);
         }
 
         count++;

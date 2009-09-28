@@ -834,7 +834,7 @@ void display_inventory(char *title, player *p, inventory *inv,
                     time = 0;
 
                     /* trigger callback */
-                    time = cb->function(p, inv_get_filtered(inv, curr + offset - 1, filter));
+                    time = cb->function(p, cb->inv, inv_get_filtered(inv, curr + offset - 1, filter));
 
                     if (time) game_spin_the_wheel(p->game, time);
 

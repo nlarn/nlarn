@@ -196,13 +196,13 @@ message_log_entry *log_get_entry(message_log *log, guint id)
 
 void log_delete(message_log *log)
 {
-    int i;
+    guint idx;
 
     assert(log != NULL);
-    for (i = 0; i < log->length; i++)
+    for (idx = 0; idx < log->length; idx++)
     {
-        g_free(log->entries[i]->message);
-        g_free(log->entries[i]);
+        g_free(log->entries[idx]->message);
+        g_free(log->entries[idx]);
     }
 
     g_free(log->entries);

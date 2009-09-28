@@ -36,10 +36,10 @@ static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
                                       "law, we cannot serve you at this time." \
                                       "\n\nSo Sorry.";
 
-static int building_dndstore_sell(player *p, item *it);
-static int building_tradepost_item_identify(player *p, item *it);
-static int building_tradepost_item_repair(player *p, item *it);
-static int building_tradepost_buy(player *p, item *it);
+static int building_item_sell(player *p, inventory **inv, item *it);
+static int building_item_identify(player *p, inventory **inv, item *it);
+static int building_item_repair(player *p, inventory **inv, item *it);
+static int building_item_buy(player *p, inventory **inv, item *it);
 
 int building_bank(player *p)
 {
@@ -122,7 +122,8 @@ int building_bank(player *p)
         callback = g_malloc(sizeof(display_inv_callback));
         callback->description = "(s)ell";
         callback->key = 's';
-        callback->function = &building_tradepost_buy;
+        callback->inv = &store_stock;
+        callback->function = &building_item_buy;
         callback->checkfun = &player_item_is_sellable;
         callback->active = FALSE;
         g_ptr_array_add(callbacks, callback);
@@ -226,7 +227,8 @@ int building_dndstore(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(b)uy";
     callback->key = 'b';
-    callback->function = &building_dndstore_sell;
+    callback->inv = &store_stock;
+    callback->function = &building_item_sell;
     callback->checkfun = &player_item_is_affordable;
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
@@ -288,18 +290,6 @@ void building_dndstore_init()
         }
     }
 
-}
-
-void building_dndstore_item_add(item *i)
-{
-    assert (i != NULL);
-    inv_add(&store_stock, i);
-}
-
-void building_dndstore_item_del(item *i)
-{
-    assert (i != NULL);
-    inv_del_element(&store_stock, i);
 }
 
 int building_home(player *p)
@@ -617,7 +607,8 @@ int building_tradepost(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(s)ell";
     callback->key = 's';
-    callback->function = &building_tradepost_buy;
+    callback->inv = &store_stock;
+    callback->function = &building_item_buy;
     callback->checkfun = &player_item_is_sellable;
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
@@ -625,7 +616,7 @@ int building_tradepost(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(i)dentify";
     callback->key = 'i';
-    callback->function = &building_tradepost_item_identify;
+    callback->function = &building_item_identify;
     callback->checkfun = &player_item_is_identifiable;
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
@@ -633,7 +624,7 @@ int building_tradepost(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(r)epair";
     callback->key = 'r';
-    callback->function = &building_tradepost_item_repair;
+    callback->function = &building_item_repair;
     callback->checkfun = &player_item_is_damaged;
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
@@ -657,7 +648,7 @@ int building_tradepost(player *p)
     return turns;
 }
 
-static int building_dndstore_sell(player *p, item *it)
+static int building_item_sell(player *p, inventory **inv, item *it)
 {
     guint price;
     guint count = 0;
@@ -743,7 +734,7 @@ static int building_dndstore_sell(player *p, item *it)
         }
         else
         {
-            building_dndstore_item_del(it);
+            inv_del_element(inv, it);
             item_destroy(it);
         }
     }
@@ -770,7 +761,7 @@ static int building_dndstore_sell(player *p, item *it)
     return TRUE;
 }
 
-int building_tradepost_item_identify(player *p, item *it)
+int building_item_identify(player *p, inventory **inv, item *it)
 {
     guint player_gold;
     guint price;
@@ -781,6 +772,9 @@ int building_tradepost_item_identify(player *p, item *it)
     const char title[] = "Identify item";
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    /* don't need that parameter */
+    inv = NULL;
 
     player_gold = player_get_gold(p);
     price = 50 << game_difficulty(p->game);
@@ -793,7 +787,7 @@ int building_tradepost_item_identify(player *p, item *it)
 
         if (display_get_yesno(message, NULL, NULL))
         {
-            player_item_identify(p, it);
+            player_item_identify(p, NULL, it);
             /* upper case first letter */
             name_unknown[0] = g_ascii_toupper(name_unknown[0]);
             item_describe(it, player_item_known(p, it), TRUE, FALSE, name_known, 60);
@@ -823,7 +817,7 @@ int building_tradepost_item_identify(player *p, item *it)
     return FALSE;
 }
 
-static int building_tradepost_item_repair(player *p, item *it)
+static int building_item_repair(player *p, inventory **inv, item *it)
 {
     int damages = 0;
     guint player_gold;
@@ -834,6 +828,9 @@ static int building_tradepost_item_repair(player *p, item *it)
     const char title[] = "Repair item";
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    /* don't need that parameter */
+    inv = NULL;
 
     /* determine how much the item is damaged */
     damages += it->burnt;
@@ -880,7 +877,7 @@ static int building_tradepost_item_repair(player *p, item *it)
     return FALSE;
 }
 
-static int building_tradepost_buy(player *p, item *it)
+static int building_item_buy(player *p, inventory **inv, item *it)
 {
     int price;
     guint count = 0;
@@ -961,7 +958,7 @@ static int building_tradepost_buy(player *p, item *it)
 
     if ((it->count > 1) && (count < it->count))
     {
-        building_dndstore_item_add(item_split(it, count));
+        inv_add(inv, item_split(it, count));
     }
     else
     {
@@ -971,7 +968,7 @@ static int building_tradepost_buy(player *p, item *it)
         }
         else
         {
-            building_dndstore_item_add(it);
+            inv_add(inv, it);
         }
     }
 

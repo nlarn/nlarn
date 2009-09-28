@@ -44,7 +44,8 @@ typedef struct display_inv_callback
 {
     char *description;
     char key;
-    int (*function)(player *, item *);
+    inventory **inv;
+    int (*function)(player *, inventory **, item *);
     int (*checkfun)(player *, item *);
     gboolean active;
 } display_inv_callback;

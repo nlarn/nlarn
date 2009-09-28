@@ -1151,7 +1151,10 @@ int inv_weight(inventory *inv)
     int sum = 0;
     guint idx;
 
-    assert(inv != NULL);
+    if (inv == NULL)
+    {
+        return 0;
+    }
 
     /* add contents weight */
     for (idx = 0; idx < inv_length(inv); idx++)
@@ -1192,6 +1195,12 @@ int inv_length_filtered(inventory *inv, int (*filter)(item *))
     int count = 0;
     guint pos;
     item *i;
+
+    if (inv == NULL)
+    {
+        /* check for non-existant inventories */
+        return 0;
+    }
 
     /* return the inventory length if no filter has been set */
     if (!filter)

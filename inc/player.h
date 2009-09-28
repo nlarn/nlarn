@@ -235,9 +235,14 @@ char *player_inv_weight(player *p);
 int player_inv_pre_add(inventory *inv, item *item);
 void player_inv_weight_recalc(inventory *inv, item *item);
 
+/* containers */
+int player_container_open(player *p, inventory **inv, item *container);
+int player_container_item_unpack(player *p, inventory **inv, item *element);
+
 /* dealing with items */
-int player_item_equip(player *p, item *it);
-int player_item_unequip(player *p, item *it);
+int player_item_equip(player *p, inventory **inv, item *it);
+int player_item_unequip(player *p, inventory **inv, item *it);
+int player_item_is_container(player *p, item *it);
 int player_item_is_equipped(player *p, item *it);
 int player_item_is_equippable(player *p, item *it);
 int player_item_is_usable(player *p, item *it);
@@ -249,10 +254,10 @@ int player_item_is_identifiable(player *p, item *it);
 int player_item_known(player *p, item *it);
 int player_item_identified(player *p, item *it);
 char *player_item_identified_list(player *p);
-void player_item_identify(player *p, item *it);
-int player_item_use(player *p, item *it);
-int player_item_drop(player *p, item *it);
-int player_item_pickup(player *p, item *it);
+void player_item_identify(player *p, inventory **inv, item *it);
+int player_item_use(player *p, inventory **inv, item *it);
+int player_item_drop(player *p, inventory **inv, item *it);
+int player_item_pickup(player *p, inventory **inv, item *it);
 
 /* deal with stationaries */
 int player_altar_desecrate(player *p);

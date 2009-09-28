@@ -129,12 +129,12 @@ player *player_new(struct game *game)
 
     it = item_new(IT_ARMOUR, AT_LEATHER, 1);
     inv_add(&p->inventory, it);
-    player_item_equip(p, it);
+    player_item_equip(p, NULL, it);
 
     it = item_new(IT_WEAPON, WT_DAGGER, 0);
     it->bonus_known = TRUE;
     inv_add(&p->inventory, it);
-    player_item_equip(p, it);
+    player_item_equip(p, NULL, it);
 
     /* start a new diary */
     p->log = log_new();
@@ -249,11 +249,11 @@ int player_regenerate(player *p)
             item *it = p->eq_weapon;
 
             log_disable(p->log);
-            player_item_unequip(p, it);
+            player_item_unequip(p, NULL, it);
             log_enable(p->log);
 
             log_add_entry(p->log, effect_get_msg_start(e));
-            player_item_drop(p, it);
+            player_item_drop(p, &p->inventory, it);
         }
     }
 
@@ -265,11 +265,11 @@ int player_regenerate(player *p)
         if (chance(50) && (it = player_random_armour(p)))
         {
             log_disable(p->log);
-            player_item_unequip(p, it);
+            player_item_unequip(p, NULL, it);
             log_enable(p->log);
 
             log_add_entry(p->log, effect_get_msg_start(e));
-            player_item_drop(p, it);
+            player_item_drop(p, &p->inventory, it);
         }
     }
 
@@ -958,7 +958,7 @@ int player_pickup(player *p)
     }
     else if (inv_length(*inv) == 1)
     {
-        return player_item_pickup(p, inv_get(*inv, 0));
+        return player_item_pickup(p, inv, inv_get(*inv, 0));
     }
     else
     {
@@ -968,6 +968,7 @@ int player_pickup(player *p)
         callback = g_malloc0(sizeof(display_inv_callback));
         callback->description = "(g)et";
         callback->key = 'g';
+        callback->inv = inv;
         callback->function = &player_item_pickup;
         g_ptr_array_add(callbacks, callback);
 
@@ -994,7 +995,7 @@ void player_autopickup(player *p)
         if (p->settings.auto_pickup[i->type])
         {
             /* try to pick up the item */
-            if (player_item_pickup(p, i))
+            if (player_item_pickup(p, &level_ilist_at(p->level, p->pos), i))
             {
                 /* item has been picked up */
                 /* go back one item as the following items lowered their number */
@@ -1933,6 +1934,7 @@ int player_inv_display(player *p)
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(d)rop";
     callback->key = 'd';
+    callback->inv = &p->inventory;
     callback->function = &player_item_drop;
     callback->checkfun = &player_item_is_dropable;
     g_ptr_array_add(callbacks, callback);
@@ -1942,6 +1944,13 @@ int player_inv_display(player *p)
     callback->key = 'e';
     callback->function = &player_item_equip;
     callback->checkfun = &player_item_is_equippable;
+    g_ptr_array_add(callbacks, callback);
+
+    callback = g_malloc0(sizeof(display_inv_callback));
+    callback->description = "(o)open";
+    callback->key = 'o';
+    callback->function = &player_container_open;
+    callback->checkfun = &player_item_is_container;
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
@@ -2038,6 +2047,9 @@ void player_inv_weight_recalc(inventory *inv, item *item)
     /* make shortcut */
     p = (player *)inv->owner;
 
+    /* don't need that parameter */
+    item = NULL;
+
     /* calculate inventory weight */
     pack_weight = inv_weight(inv);
 
@@ -2087,14 +2099,108 @@ void player_inv_weight_recalc(inventory *inv, item *item)
     }
 }
 
+int player_container_open(player *p, inventory **inv, item *container)
+{
+    gboolean container_on_floor = FALSE;
+    gchar container_desc[61] = { 0 };
+    GPtrArray *callbacks;
+    display_inv_callback *callback;
+
+    assert (p != NULL);
+
+    /* don't need that parameter */
+    inv = NULL;
+
+    if (container == NULL)
+    {
+        container_on_floor = TRUE;
+
+        /* no container has been passed - look for container on the floor */
+        int count = inv_length_filtered(level_ilist_at(p->level, p->pos),
+                                        &inv_filter_container);
+
+        if (count == 0)
+        {
+            log_add_entry(p->log, "I see no container here.");
+            return FALSE;
+        }
+        else if (count == 1)
+        {
+            container = inv_get_filtered(level_ilist_at(p->level, p->pos),
+                                         0, &inv_filter_container);
+        }
+        else
+        {
+            /* multiple containers */
+            log_add_entry(p->log, "I don't know which container I should open!");
+            return 2;
+        }
+    }
+
+    /* check for empty container */
+    if (inv_length(container->content) == 0)
+    {
+        item_describe(container, player_item_identified(p, container),
+                      TRUE, TRUE, container_desc, 60);
+
+        container_desc[0] = g_ascii_toupper(container_desc[0]);
+        log_add_entry(p->log, "%s is empty.", container_desc);
+
+        return 2;
+    }
+
+    /* Describe container */
+    item_describe(container, player_item_identified(p, container),
+                  TRUE, FALSE, container_desc, 60);
+
+    container_desc[0] = g_ascii_toupper(container_desc[0]);
+
+    /* prepare callback functions */
+    callbacks = g_ptr_array_new();
+
+    callback = g_malloc0(sizeof(display_inv_callback));
+    callback->description = "(T)ake out";
+    callback->key = 't';
+    callback->inv = &container->content;
+    callback->function = &player_container_item_unpack;
+    callback->active = TRUE;
+
+    g_ptr_array_add(callbacks, callback);
+
+    display_inventory(container_desc, p, container->content, callbacks, FALSE, NULL);
+
+    display_inv_callbacks_clean(callbacks);
+
+    return 2;
+}
+
+int player_container_item_unpack(player *p, inventory **inv, item *element)
+{
+    gchar desc[61] = { 0 };
+
+    assert(p != NULL && inv != NULL && element != NULL);
+
+    item_describe(element, player_item_known(p, element), (element->count == 1),
+                  FALSE, desc, 60);
+    log_add_entry(p->log, "You put %s into your pack.", desc);
+
+    inv_add(&p->inventory, element);
+    inv_del_element(inv, element);
+
+    return 2;
+}
+
 /* level is needed to make function signature match display_inventory requirements */
-int player_item_equip(player *p, item *it)
+int player_item_equip(player *p, inventory **inv, item *it)
 {
     item **islot = NULL;  /* pointer to chosen item slot */
     int time = 0;         /* time the desired action takes */
     char description[61];
 
     assert(p != NULL && it != NULL);
+
+    /* don't need that parameter */
+    inv = NULL;
 
     /* the idea behind the time values: one turn to take one item off,
        one turn to get the item out of the pack */
@@ -2220,7 +2326,7 @@ int player_item_equip(player *p, item *it)
     return time;
 }
 
-int player_item_unequip(player *p, item *it)
+int player_item_unequip(player *p, inventory **inv, item *it)
 {
     int equipment_type;
     item **aslot = NULL;  /* pointer to armour slot */
@@ -2230,6 +2336,9 @@ int player_item_unequip(player *p, item *it)
     char desc[61];        /* item description */
 
     assert(p != NULL && it != NULL);
+
+    /* don't need that parameter */
+    inv = NULL;
 
     equipment_type = player_item_is_equipped(p, it);
 
@@ -2369,6 +2478,14 @@ int player_item_unequip(player *p, item *it)
     }
 
     return time;
+}
+
+/* silly filter to get containers */
+int player_item_is_container(player *p, item *it)
+{
+    assert(p != NULL && it != NULL && it->type < IT_MAX);
+
+    return (it->type == IT_CONTAINER);
 }
 
 /**
@@ -2656,9 +2773,12 @@ char *player_item_identified_list(player *p)
     }
 }
 
-void player_item_identify(player *p, item *it)
+void player_item_identify(player *p, inventory **inv, item *it)
 {
     assert(p != NULL && it != NULL);
+
+    /* don't need that parameter */
+    inv = NULL;
 
     switch (it->type)
     {
@@ -2696,7 +2816,7 @@ void player_item_identify(player *p, item *it)
     it->bonus_known = TRUE;
 }
 
-int player_item_use(player *p, item *it)
+int player_item_use(player *p, inventory **inv, item *it)
 {
     char description[61];
     int item_used_up = TRUE;
@@ -2704,6 +2824,9 @@ int player_item_use(player *p, item *it)
     int time = 0; /* number of turns this action took */
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    /* don't need that parameter */
+    inv = NULL;
 
     if (player_effect(p, ET_BLINDNESS) && (it->type == IT_BOOK || it->type == IT_SCROLL))
     {
@@ -2987,7 +3110,7 @@ int player_item_use(player *p, item *it)
     return time;
 }
 
-int player_item_drop(player *p, item *it)
+int player_item_drop(player *p, inventory **inv, item *it)
 {
     char desc[61];
     guint count = 0;
@@ -3016,7 +3139,7 @@ int player_item_drop(player *p, item *it)
         /* otherwise the entire quantity gets dropped */
     }
 
-    if (!inv_del_element(&p->inventory, it))
+    if (!inv_del_element(inv, it))
     {
         /* if the callback failed, dropping has failed */
         return FALSE;
@@ -3030,7 +3153,7 @@ int player_item_drop(player *p, item *it)
     return TRUE;
 }
 
-int player_item_pickup(player *p, item *it)
+int player_item_pickup(player *p, inventory **inv, item *it)
 {
     char desc[61];
     guint count = 0;
@@ -3069,7 +3192,7 @@ int player_item_pickup(player *p, item *it)
         return FALSE;
     }
 
-    inv_del_element(&level_ilist_at(p->level, p->pos), it);
+    inv_del_element(inv, it);
 
     /* one turn to pick item up, one to stuff it into the pack */
     return 2;

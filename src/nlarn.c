@@ -217,9 +217,17 @@ int main(int argc, char *argv[])
             moves_count = player_fountain_drink(g->p);
             break;
 
-            /* open door */
+            /* open door / container */
         case 'O':
-            moves_count = player_door_open(g->p);
+            if (inv_length_filtered(level_ilist_at(g->p->level, g->p->pos),
+                                    &inv_filter_container) > 0)
+            {
+                player_container_open(g->p, NULL, NULL);
+            }
+            else
+            {
+                moves_count = player_door_open(g->p);
+            }
             break;
 
             /* pray at altar */
