@@ -1947,10 +1947,17 @@ int player_inv_display(player *p)
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(o)open";
+    callback->description = "(o)pen";
     callback->key = 'o';
     callback->function = &player_container_open;
     callback->checkfun = &player_item_is_container;
+    g_ptr_array_add(callbacks, callback);
+
+    callback = g_malloc0(sizeof(display_inv_callback));
+    callback->description = "(p)ut into sth.";
+    callback->key = 'p';
+    callback->function = &player_container_item_add;
+    callback->checkfun = &player_item_can_be_added_to_container;
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
@@ -2101,7 +2108,6 @@ void player_inv_weight_recalc(inventory *inv, item *item)
 
 int player_container_open(player *p, inventory **inv, item *container)
 {
-    gboolean container_on_floor = FALSE;
     gchar container_desc[61] = { 0 };
     GPtrArray *callbacks;
     display_inv_callback *callback;
@@ -2113,8 +2119,6 @@ int player_container_open(player *p, inventory **inv, item *container)
 
     if (container == NULL)
     {
-        container_on_floor = TRUE;
-
         /* no container has been passed - look for container on the floor */
         int count = inv_length_filtered(level_ilist_at(p->level, p->pos),
                                         &inv_filter_container);
@@ -2159,7 +2163,7 @@ int player_container_open(player *p, inventory **inv, item *container)
     callbacks = g_ptr_array_new();
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(T)ake out";
+    callback->description = "(t)ake out";
     callback->key = 't';
     callback->inv = &container->content;
     callback->function = &player_container_item_unpack;
@@ -2174,18 +2178,85 @@ int player_container_open(player *p, inventory **inv, item *container)
     return 2;
 }
 
+int player_container_item_add(player *p, inventory **inv, item *element)
+{
+    item *container = NULL;
+    gchar container_desc[61]  = { 0 };
+    gchar element_desc[61]  = { 0 };
+    guint pilen = 0; /* length of player's filtered inventory */
+    guint filen = 0; /* length of filtered floor inventory */
+
+    assert(p != NULL && element != NULL);
+
+    if (inv == NULL || (inv == &p->inventory))
+    {
+        pilen = inv_length_filtered(p->inventory, inv_filter_container);
+        filen = inv_length_filtered(level_ilist_at(p->level, p->pos),
+                                    inv_filter_container);
+
+        /* choose the container to add the item element to. */
+        if (pilen == 1)
+        {
+            /* only one container in inventory - take it */
+            container = inv_get_filtered(p->inventory, 0, inv_filter_container);
+        }
+        else if (pilen > 1)
+        {
+            /* multiple, choose container from player's inventory */
+            container = display_inventory("Choose a container", p,
+                                          p->inventory, NULL, FALSE,
+                                          inv_filter_container);
+        }
+        else if (filen == 1)
+        {
+            /* conly one container on the floor */
+            container = inv_get_filtered(level_ilist_at(p->level, p->pos),
+                                         0, inv_filter_container);
+        }
+        else if (filen > 1)
+        {
+            /* multiple, choose container from floor */
+            container = display_inventory("Choose a container", p,
+                                          level_ilist_at(p->level, p->pos),
+                                          NULL, FALSE, inv_filter_container);
+        }
+    }
+
+    if (container != NULL)
+    {
+        /* log the event */
+        item_describe(container, TRUE, TRUE, TRUE, container_desc, 60);
+        item_describe(element, player_item_identified(p, element),
+                      (element->count == 1), TRUE, element_desc, 60 );
+
+        log_add_entry(p->log, "You put %s into %s.", element_desc,
+                      container_desc);
+
+        inv_del_element(&p->inventory, element);
+        inv_add(&container->content, element);
+    }
+    else
+    {
+        log_add_entry(p->log, "Huh?");
+    }
+
+    return 2;
+}
+
 int player_container_item_unpack(player *p, inventory **inv, item *element)
 {
     gchar desc[61] = { 0 };
 
     assert(p != NULL && inv != NULL && element != NULL);
 
-    item_describe(element, player_item_known(p, element), (element->count == 1),
-                  FALSE, desc, 60);
-    log_add_entry(p->log, "You put %s into your pack.", desc);
+    if (inv_add(&p->inventory, element))
+    {
+        item_describe(element, player_item_known(p, element), (element->count == 1),
+                      FALSE, desc, 60);
+        log_add_entry(p->log, "You put %s into your pack.", desc);
 
-    inv_add(&p->inventory, element);
-    inv_del_element(inv, element);
+        inv_del_element(inv, element);
+    }
 
     return 2;
 }
@@ -2486,6 +2557,48 @@ int player_item_is_container(player *p, item *it)
     assert(p != NULL && it != NULL && it->type < IT_MAX);
 
     return (it->type == IT_CONTAINER);
+}
+
+/* silly filter to check if item can be put into a container */
+int player_item_can_be_added_to_container(player *p, item *it)
+{
+    guint idx;
+    item *i;
+
+    assert(p != NULL && it != NULL && it->type < IT_MAX);
+
+    if (it->type == IT_CONTAINER)
+    {
+        return FALSE;
+    }
+
+    if (player_item_is_equipped(p, it))
+    {
+        return FALSE;
+    }
+
+    /* check player's inventory for containers */
+    for (idx = 0; idx < inv_length(p->inventory); idx++)
+    {
+        i = inv_get(p->inventory, idx);
+        if (i->type == IT_CONTAINER)
+        {
+            return TRUE;
+        }
+    }
+
+    /* no match till now, check floor for containers */
+    for (idx = 0; idx < inv_length(level_ilist_at(p->level, p->pos)); idx++)
+    {
+        i = inv_get(level_ilist_at(p->level, p->pos), idx);
+        if (i->type == IT_CONTAINER)
+        {
+            return TRUE;
+        }
+    }
+
+    /* nope */
+    return FALSE;
 }
 
 /**

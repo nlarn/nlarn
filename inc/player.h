@@ -237,12 +237,14 @@ void player_inv_weight_recalc(inventory *inv, item *item);
 
 /* containers */
 int player_container_open(player *p, inventory **inv, item *container);
+int player_container_item_add(player *p, inventory **inv, item *element);
 int player_container_item_unpack(player *p, inventory **inv, item *element);
 
 /* dealing with items */
 int player_item_equip(player *p, inventory **inv, item *it);
 int player_item_unequip(player *p, inventory **inv, item *it);
 int player_item_is_container(player *p, item *it);
+int player_item_can_be_added_to_container(player *p, item *it);
 int player_item_is_equipped(player *p, item *it);
 int player_item_is_equippable(player *p, item *it);
 int player_item_is_usable(player *p, item *it);

@@ -544,15 +544,17 @@ int display_draw()
  * @param a filter function: will be called for every item
  *
  */
-void display_inventory(char *title, player *p, inventory *inv,
-                       GPtrArray *callbacks, int show_price,
-                       int (*filter)(item *))
+item *display_inventory(char *title, player *p, inventory *inv,
+                        GPtrArray *callbacks, int show_price,
+                        int (*filter)(item *))
 {
     display_window *iwin = NULL;
     guint width, height, maxvis;
     guint startx, starty;
     guint len_orig, len_curr;
     gboolean redraw = FALSE;
+
+    gboolean keep_running = TRUE;
 
     /* temp var to assemble window caption from callback descriptions */
     char *tmp;
@@ -576,7 +578,7 @@ void display_inventory(char *title, player *p, inventory *inv,
     item *it;
     char item_desc[81];
 
-    assert(p != NULL && callbacks != NULL);
+    assert(p != NULL && inv != NULL);
 
     /* sort inventory by item type */
     inv_sort(inv, (GCompareDataFunc)item_sort, (gpointer)p);
@@ -638,8 +640,8 @@ void display_inventory(char *title, player *p, inventory *inv,
 
         it = inv_get_filtered(inv, curr + offset - 1, filter);
 
-        /* assemble window caption */
-        for (cb_nr = 0; cb_nr < callbacks->len; cb_nr++)
+        /* assemble window caption (if callbacks have been defined) */
+        for (cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
         {
             cb = g_ptr_array_index(callbacks, cb_nr);
 
@@ -720,7 +722,6 @@ void display_inventory(char *title, player *p, inventory *inv,
                 wattroff(iwin->window, COLOR_PAIR(9));
 
         }
-
 
         display_window_update_arrow_up(iwin, offset > 0);
         display_window_update_arrow_down(iwin, (offset + maxvis) < len_curr);
@@ -817,6 +818,18 @@ void display_inventory(char *title, player *p, inventory *inv,
 
             break;
 
+        case 27:
+            keep_running = FALSE;
+            break;
+
+        case 10:
+        case 13:
+            if (callbacks == NULL)
+            {
+                /* if no callbacks have been defines enter selects item */
+                keep_running = FALSE;
+            }
+
         default:
             /* perhaps the window shall be moved */
             if (display_window_move(iwin, key))
@@ -824,8 +837,8 @@ void display_inventory(char *title, player *p, inventory *inv,
                 break;
             }
 
-            /* check callback function keys */
-            for (cb_nr = 1; cb_nr <= callbacks->len; cb_nr++)
+            /* check callback function keys (if defined) */
+            for (cb_nr = 1; callbacks != NULL && cb_nr <= callbacks->len; cb_nr++)
             {
                 cb = g_ptr_array_index(callbacks, cb_nr - 1);
 
@@ -847,9 +860,19 @@ void display_inventory(char *title, player *p, inventory *inv,
         len_curr = inv_length_filtered(inv, filter);
 
     }
-    while ((key != 27) && (len_curr > 0)); /* ESC pressed or empty inventory*/
+    while (keep_running && (len_curr > 0)); /* ESC pressed or empty inventory*/
 
     display_window_destroy(iwin, TRUE);
+
+    if ((callbacks == NULL) && (key != 27))
+    {
+        /* return selected item if no callbacks have been provided */
+        return inv_get_filtered(inv, offset + curr, filter);
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 void display_inv_callbacks_clean(GPtrArray *callbacks)
