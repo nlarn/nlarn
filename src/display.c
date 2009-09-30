@@ -621,15 +621,22 @@ item *display_inventory(char *title, player *p, inventory *inv,
 
             display_paint_screen(p);
 
-            /* inventory length is smaller than before */
+            /* check for inventory modifications */
             if (len_orig > len_curr)
             {
+                /* inventory length is smaller than before */
                 /* if on the last page, reduce offset */
                 if ((offset > 0) && ((offset + maxvis) > len_curr))
                     offset--;
 
                 /* remember current length */
                 len_orig = len_curr;
+            }
+            else if (len_curr > len_orig)
+            {
+                /* inventory has grown */
+                /* sort inventory by item type */
+                inv_sort(inv, (GCompareDataFunc)item_sort, (gpointer)p);
             }
         }
 
@@ -747,7 +754,7 @@ item *display_inventory(char *title, player *p, inventory *inv,
             if ((curr == maxvis) || offset == 0)
                 curr = 1;
             else
-                offset = max(offset - maxvis, 0);
+                offset = (offset > maxvis) ? (offset - maxvis) : 0;
 
             break;
 
@@ -867,7 +874,7 @@ item *display_inventory(char *title, player *p, inventory *inv,
     if ((callbacks == NULL) && (key != 27))
     {
         /* return selected item if no callbacks have been provided */
-        return inv_get_filtered(inv, offset + curr, filter);
+        return inv_get_filtered(inv, offset + curr - 1, filter);
     }
     else
     {
