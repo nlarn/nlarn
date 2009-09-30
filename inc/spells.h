@@ -58,7 +58,7 @@ typedef struct spell {
 	guint32 used;       /* usage counter */
 } spell;
 
-enum spell_ids {
+typedef enum spell_ids {
 	SP_NONE,
 	SP_PRO,		/* protection */
 	SP_MLE,		/* magic missile */
@@ -98,7 +98,7 @@ enum spell_ids {
 	SP_WTW,		/* walk through walls */
 	SP_ALT,		/* alter reality */
 	SP_MAX		/* last known spell */
-};
+} spell_id;
 
 /* external vars */
 

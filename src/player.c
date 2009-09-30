@@ -432,10 +432,28 @@ void player_die(player *p, player_cod cause_type, int cause)
         }
 
         /* append map of current level */
-        g_string_append(text, "\n\nThis is the map of the current level:\n");
+        g_string_append(text, "\n\nThis is the map of the current level:\n\n");
         tmp = level_dump(p->level);
         g_string_append(text, tmp);
         g_free(tmp);
+
+        /* list monsters killed */
+        guint mnum, body_count = 0;
+        g_string_append(text, "\n\nCreatures vanquished:\n\n");
+
+        for (mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
+        {
+            if (p->stats.monsters_killed[mnum] > 0)
+            {
+                g_string_append_printf(text, "%3d %s%s\n",
+                                       p->stats.monsters_killed[mnum],
+                                       monster_name_by_type(mnum),
+                                       (p->stats.monsters_killed[mnum] > 1) ? "s" : "");
+
+                body_count += p->stats.monsters_killed[mnum];
+            }
+        }
+        g_string_append_printf(text, "\n%3d total\n\n", body_count);
 
         display_show_message(title, text->str);
 
