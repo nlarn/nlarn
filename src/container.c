@@ -18,12 +18,11 @@
 
 #include "container.h"
 
-/* TODO: prices */
 const container_data containers[CT_MAX] =
 {
-    { CT_NONE,   "",          0, IM_NONE,  0, },
-    { CT_BAG,    "bag",     375, IM_CLOTH, 0, },
-    { CT_CASKET, "casket", 3900, IM_WOOD,  0, },
-    { CT_CHEST,  "chest", 13500, IM_WOOD,  0, },
-    { CT_CRATE,  "crate", 65000, IM_WOOD,  0, },
+    { CT_NONE,   "",          0, IM_NONE,   0, },
+    { CT_BAG,    "bag",     375, IM_CLOTH,  1, },
+    { CT_CASKET, "casket", 3900, IM_WOOD,   5, },
+    { CT_CHEST,  "chest", 13500, IM_WOOD,  10, },
+    { CT_CRATE,  "crate", 65000, IM_WOOD,  20, },
 };
