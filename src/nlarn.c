@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 
             /* cast a spell */
         case 'c':
-            moves_count = player_spell_cast(g->p);
+            moves_count = spell_cast(g->p);
             break;
 
             /* go down stairs / enter a building */

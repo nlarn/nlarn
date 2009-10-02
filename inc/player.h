@@ -213,12 +213,6 @@ int player_mp_lose(player *p, int count);
 int player_mp_max_gain(player *p, int count);
 int player_mp_max_lose(player *p, int count);
 
-/* spell functions */
-int player_spell_cast(player *p);
-int player_spell_learn(player *p, guint spell_type);
-int player_spell_forget(player *p, guint spell_type);
-int player_spell_known(player *p, guint spell_type);
-
 /* dealing with temporary effects */
 void player_effect_add(player *p, effect *e);
 void player_effects_add(player *p, GPtrArray *effects);

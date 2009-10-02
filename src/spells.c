@@ -383,7 +383,267 @@ int spell_sort(gconstpointer a, gconstpointer b)
     return order;
 }
 
-void spell_type_player(spell *s, struct player *p)
+/**
+ * Select a spell to cast and cast it
+ * @param the player
+ * @return number of turns elapsed
+ */
+int spell_cast(player *p)
+{
+    int turns = 0;
+    int mp_usage = 0;
+    gboolean well_done = FALSE;
+
+    spell *spell;
+
+    if (player_effect(p, ET_CONFUSION))
+    {
+        log_add_entry(p->log, "You can't aim your magic!");
+        return turns;
+    }
+
+    spell = display_spell_select("Select a spell to cast", p);
+
+    /* ESC pressed */
+    if (!spell)
+    {
+        return turns;
+    }
+
+    /* insufficient mana */
+    if (p->mp < spell_level(spell))
+    {
+        log_add_entry(p->log, "You lack the power to cast %s.",
+                      spell_name(spell));
+
+        return turns;
+    }
+
+    log_add_entry(p->log, "You cast %s.", spell_name(spell));
+
+    /* time usage */
+    turns = 1;
+
+    /* bad luck */
+    if (chance(5) || rand_1n(18) > player_get_int(p))
+    {
+        log_add_entry(p->log, "It didn't work!");
+        player_mp_lose(p, spell_level(spell));
+
+        return turns;
+    }
+
+    switch (spell_type(spell))
+    {
+        /* spells that cause an effect on the player */
+    case SC_PLAYER:
+        mp_usage = spell_type_player(spell, p);
+        break;
+
+        /* spells that cause an effect on a monster */
+    case SC_POINT:
+        mp_usage = spell_type_point(spell, p);
+        break;
+
+        /* creates a ray */
+    case SC_RAY:
+        mp_usage = spell_type_ray(spell, p);
+        break;
+
+        /* effect pours like water */
+    case SC_FLOOD:
+        mp_usage = spell_type_flood(spell, p);
+        break;
+
+        /* effect occurs like an explosion */
+    case SC_BLAST:
+        mp_usage = spell_type_blast(spell, p);
+        break;
+
+    case SC_OTHER:  /* unclassified */
+
+        switch (spell->id)
+        {
+            /* cure poison */
+        case SP_CPO:
+            well_done = spell_cure_poison(p);
+            break;
+
+            /* cure blindness */
+        case SP_CBL:
+            well_done = spell_cure_blindness(p);
+            break;
+
+            /* create monster */
+        case SP_CRE:
+            well_done = spell_create_monster(p);
+            break;
+
+            /* time stop */
+        case SP_STP:
+            /* TODO: implement (ticket 39) */
+            break;
+
+            /* vaporize rock */
+        case SP_VPR:
+            well_done = spell_vaporize_rock(p);
+            break;
+
+            /* make wall */
+        case SP_MKW:
+            well_done = spell_make_wall(p);
+            break;
+
+            /* sphere of annihilation */
+        case SP_SPH:
+            well_done = spell_create_sphere(p);
+            break;
+
+            /* genocide */
+        case SP_GEN:
+            well_done = spell_genocide_monster(p);
+            break;
+
+            /* summon daemon */
+        case SP_SUM:
+            /* TODO: implement (ticket 55) */
+            break;
+
+            /* alter realitiy */
+        case SP_ALT:
+            well_done = spell_alter_reality(p);
+            break;
+        }
+
+        /* spell has been casted successfully, set mp usage accordingly */
+        if (well_done)
+        {
+            mp_usage = spell_level(spell);
+        }
+
+        break;
+
+    case SC_NONE:
+    case SC_MAX:
+        log_add_entry(p->log, "internal Error in %s:%d.", __FILE__, __LINE__);
+        break;
+    }
+
+    if (mp_usage > 0)
+    {
+        /* charge mana */
+        player_mp_lose(p, mp_usage);
+        /* statistics */
+        p->stats.spells_cast++;
+    }
+
+    return turns;
+}
+
+/**
+ * Try to add a spell to the list of known spells
+ *
+ * @param the player
+ * @param id of spell to learn
+ * @return FALSE if learning the spell failed, otherwise level of knowledge
+ */
+int spell_learn(player *p, guint spell_type)
+{
+    spell *s;
+    guint idx;
+
+    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+
+    if (!spell_known(p, spell_type))
+    {
+        s = spell_new(spell_type);
+        s->learnt = game_turn(p->game);
+
+        /* TODO: add a check for intelligence */
+        if (spell_level(s) > (int)p->lvl)
+        {
+            /* spell is beyond the players scope */
+            spell_destroy(s);
+            return FALSE;
+        }
+
+        g_ptr_array_add(p->known_spells, s);
+        return s->knowledge;
+    }
+    else
+    {
+        /* spell already known, improve knowledge */
+        for (idx = 0; idx < p->known_spells->len; idx++)
+        {
+            /* search spell */
+            s = (spell *)g_ptr_array_index(p->known_spells, idx);
+
+            if (s->id == spell_type)
+            {
+                /* found it */
+                s->knowledge++;
+                return s->knowledge;
+            }
+        }
+    }
+
+    /* should not reach this point, but who knows.. */
+    return FALSE;
+}
+
+/**
+ * Remove a spell from the list of known spells
+ *
+ * @param the player
+ * @param the id of the spell to forget
+ * @return TRUE if the spell could be found and removed, othrwise FALSE
+ */
+int spell_forget(player *p, guint spell_type)
+{
+    spell *s;
+    guint idx;
+
+    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+
+    for (idx = 0; idx < p->known_spells->len; idx++);
+    {
+        s = g_ptr_array_index(p->known_spells, idx);
+        if (s->id == spell_type)
+        {
+            g_ptr_array_remove_index_fast(p->known_spells, idx);
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+/**
+ * Check if a spell is known to the player
+ * @param the player
+ * @param id of the spell in question
+ * @return FALSE if unknown, otherwise level of knowledge of that spell
+ */
+int spell_known(player *p, guint spell_type)
+{
+    spell *s;
+    guint idx;
+
+    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+
+    for (idx = 0; idx < p->known_spells->len; idx++)
+    {
+        s = g_ptr_array_index(p->known_spells, idx);
+        if (s->id == spell_type)
+        {
+            return s->knowledge;
+        }
+    }
+
+    return FALSE;
+}
+
+int spell_type_player(spell *s, struct player *p)
 {
     effect *e = NULL;
 
@@ -404,9 +664,11 @@ void spell_type_player(spell *s, struct player *p)
     }
 
     player_effect_add(p, e);
+
+    return (spell_level(s));
 }
 
-void spell_type_point(spell *s, struct player *p)
+int spell_type_point(spell *s, struct player *p)
 {
     monster *monster = NULL;
     position pos;
@@ -424,7 +686,7 @@ void spell_type_point(spell *s, struct player *p)
     if (!pos_valid(pos))
     {
         log_add_entry(p->log, "Aborted.");
-        return;
+        return FALSE;
     }
 
     monster = level_get_monster_at(p->level, pos);
@@ -432,7 +694,7 @@ void spell_type_point(spell *s, struct player *p)
     if (!monster)
     {
         log_add_entry(p->log, "Which monster are you talking about?");
-        return;
+        return FALSE;
     }
 
     switch (s->id)
@@ -520,9 +782,11 @@ void spell_type_point(spell *s, struct player *p)
 
         break;
     }
+
+    return spell_level(s);
 }
 
-void spell_type_ray(spell *s, struct player *p)
+int spell_type_ray(spell *s, struct player *p)
 {
     monster *monster = NULL;
     position pos;
@@ -538,13 +802,13 @@ void spell_type_ray(spell *s, struct player *p)
     if (!pos_valid(pos))
     {
         log_add_entry(p->log, "Aborted.");
-        return;
+        return FALSE;
     }
 
     if (!(monster = level_get_monster_at(p->level, pos)))
     {
         log_add_entry(p->log, "Which monster are you talking about?");
-        return;
+        return FALSE;
     }
 
     switch (s->id)
@@ -578,9 +842,11 @@ void spell_type_ray(spell *s, struct player *p)
 
     /* FIXME: get all monsters in the ray and affect them all */
     monster_damage_take(monster, damage_new(spell_damage(s), amount, p));
+
+    return spell_level(s);
 }
 
-void spell_type_flood(spell *s, struct player *p)
+int spell_type_flood(spell *s, struct player *p)
 {
     position pos;
     area *range = NULL;
@@ -598,7 +864,7 @@ void spell_type_flood(spell *s, struct player *p)
     if (!pos_valid(pos))
     {
         log_add_entry(p->log, "Aborted.");
-        return;
+        return FALSE;
     }
 
     switch (s->id)
@@ -627,9 +893,11 @@ void spell_type_flood(spell *s, struct player *p)
 
     level_set_tiletype(p->level, range, type, amount);
     area_destroy(range);
+
+    return spell_level(s);
 }
 
-void spell_type_blast(spell *s, struct player *p)
+int spell_type_blast(spell *s, struct player *p)
 {
     GPtrArray *mlist;
     monster *monster = NULL;
@@ -648,7 +916,7 @@ void spell_type_blast(spell *s, struct player *p)
     if (!pos_valid(pos))
     {
         log_add_entry(p->log, "Aborted.");
-        return;
+        return FALSE;
     }
 
     /* currently only fireball */
@@ -674,9 +942,11 @@ void spell_type_blast(spell *s, struct player *p)
     }
 
     g_ptr_array_free(mlist, FALSE);
+
+    return TRUE;
 }
 
-void spell_alter_reality(player *p)
+gboolean spell_alter_reality(player *p)
 {
     level *nlevel, *olevel;
 
@@ -700,9 +970,11 @@ void spell_alter_reality(player *p)
 
     /* destroy old level */
     level_destroy(olevel);
+
+    return TRUE;
 }
 
-int spell_create_monster(player *p)
+gboolean spell_create_monster(player *p)
 {
     monster *m;
 
@@ -734,7 +1006,7 @@ int spell_create_monster(player *p)
     }
 }
 
-void spell_create_sphere(player *p)
+gboolean spell_create_sphere(player *p)
 {
     position pos;
 
@@ -746,14 +1018,16 @@ void spell_create_sphere(player *p)
     if (pos_valid(pos))
     {
         g_ptr_array_add(p->level->slist, sphere_new(pos, p, p->lvl * 10));
+        return TRUE;
     }
     else
     {
         log_add_entry(p->log, "Huh?");
+        return FALSE;
     }
 }
 
-void spell_cure_poison(struct player *p)
+gboolean spell_cure_poison(struct player *p)
 {
     effect *eff = NULL;
 
@@ -762,14 +1036,16 @@ void spell_cure_poison(struct player *p)
     if ((eff = player_effect_get(p, ET_POISON)))
     {
         player_effect_del(p, eff);
+        return TRUE;
     }
     else
     {
         log_add_entry(p->log, "You weren't even poisoned!");
+        return FALSE;
     }
 }
 
-void spell_cure_blindness(struct player *p)
+gboolean spell_cure_blindness(struct player *p)
 {
     effect *eff = NULL;
 
@@ -778,14 +1054,16 @@ void spell_cure_blindness(struct player *p)
     if ((eff = player_effect_get(p, ET_BLINDNESS)))
     {
         player_effect_del(p, eff);
+        return TRUE;
     }
     else
     {
         log_add_entry(p->log, "You weren't even blinded!");
+        return FALSE;
     }
 }
 
-void spell_genocide_monster(player *p)
+gboolean spell_genocide_monster(player *p)
 {
     char *in;
     int id;
@@ -798,7 +1076,7 @@ void spell_genocide_monster(player *p)
     if (!in)
     {
         log_add_entry(p->log, "You chose not to genocide any monster.");
-        return;
+        return FALSE;
     }
 
     for (id = 1; id < MT_MAX; id++)
@@ -815,7 +1093,7 @@ void spell_genocide_monster(player *p)
 
                 g_free(in);
 
-                return;
+                return TRUE;
             }
         }
     }
@@ -823,9 +1101,10 @@ void spell_genocide_monster(player *p)
     g_free(in);
 
     log_add_entry(p->log, "No such monster.");
+    return FALSE;
 }
 
-void spell_make_wall(player *p)
+gboolean spell_make_wall(player *p)
 {
     position pos;
 
@@ -834,12 +1113,12 @@ void spell_make_wall(player *p)
     if (pos_identical(pos, p->pos))
     {
         log_add_entry(p->log, "You are actually standing there.");
-        return;
+        return FALSE;
     }
     else if (!pos_valid(pos))
     {
         log_add_entry(p->log, "No wall today.");
-        return;
+        return FALSE;
     }
 
     if (level_tiletype_at(p->level, pos) != LT_WALL)
@@ -854,14 +1133,17 @@ void spell_make_wall(player *p)
         }
 
         log_add_entry(p->log, "You have created a wall.");
+
+        return TRUE;
     }
     else
     {
         log_add_entry(p->log, "There was a wall already..");
+        return FALSE;
     }
 }
 
-void spell_vaporize_rock(player *p)
+gboolean spell_vaporize_rock(player *p)
 {
     position pos;
     monster *m = NULL;
@@ -872,13 +1154,12 @@ void spell_vaporize_rock(player *p)
     if (!pos_valid(pos))
     {
         log_add_entry(p->log, "So you chose not to vaprize anything.");
-        return;
+        return FALSE;
     }
 
     if (level_tiletype_at(p->level, pos) == LT_WALL)
     {
         level_tiletype_at(p->level, pos) = LT_FLOOR;
-        return;
     }
 
     if ((m = level_get_monster_at(p->level, pos)) && (m->type == MT_XORN))
@@ -936,6 +1217,8 @@ void spell_vaporize_rock(player *p)
     {
         monster_position(m, pos);
     }
+
+    return TRUE;
 }
 
 void book_desc_shuffle()

@@ -110,20 +110,25 @@ spell *spell_new(int id);
 void spell_destroy(spell *s);
 int spell_sort(gconstpointer a, gconstpointer b);
 
-void spell_type_player(spell *s, struct player *p);
-void spell_type_point(spell *s, struct player *p);
-void spell_type_ray(spell *s, struct player *p);
-void spell_type_flood(spell *s, struct player *p);
-void spell_type_blast(spell *s, struct player *p);
+int spell_cast(struct player *p);
+int spell_learn(struct player *p, guint spell_type);
+int spell_forget(struct player *p, guint spell_type);
+int spell_known(struct player *p, guint spell_type);
 
-void spell_alter_reality(struct player *p);
-int spell_create_monster(struct player *p);
-void spell_create_sphere(struct player *p);
-void spell_cure_poison(struct player *p);
-void spell_cure_blindness(struct player *p);
-void spell_genocide_monster(struct player *p);
-void spell_make_wall(struct player *p);
-void spell_vaporize_rock(struct player *p);
+int spell_type_player(spell *s, struct player *p);
+int spell_type_point(spell *s, struct player *p);
+int spell_type_ray(spell *s, struct player *p);
+int spell_type_flood(spell *s, struct player *p);
+int spell_type_blast(spell *s, struct player *p);
+
+gboolean spell_alter_reality(struct player *p);
+gboolean spell_create_monster(struct player *p);
+gboolean spell_create_sphere(struct player *p);
+gboolean spell_cure_poison(struct player *p);
+gboolean spell_cure_blindness(struct player *p);
+gboolean spell_genocide_monster(struct player *p);
+gboolean spell_make_wall(struct player *p);
+gboolean spell_vaporize_rock(struct player *p);
 
 #define spell_code(spell)     (spells[(spell)->id].code)
 #define spell_name(spell)     (spells[(spell)->id].name)

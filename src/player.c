@@ -366,7 +366,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     log_add_entry(p->log, message);
 
     /* resume game if wizard mode is enabled */
-    if (game_wizardmode(p->game) && (cause_type >= PD_TOO_LATE))
+    if (game_wizardmode(p->game) && (cause_type < PD_TOO_LATE))
     {
         log_add_entry(p->log, "WIZARD MODE. You stay alive.");
 
@@ -1459,244 +1459,6 @@ int player_mp_max_lose(player *p, int count)
         p->mp = p->mp_max;
 
     return p->mp_max;
-}
-
-/**
- * Select a spell to cast and cast it
- * @param the player
- * @return number of turns elapsed
- */
-int player_spell_cast(player *p)
-{
-    int turns = 0;
-
-    spell *spell;
-
-    if (player_effect(p, ET_CONFUSION))
-    {
-        log_add_entry(p->log, "You can't aim your magic!");
-        return turns;
-    }
-
-    spell = display_spell_select("Select a spell to cast", p);
-
-    /* ESC pressed */
-    if (!spell)
-    {
-        return turns;
-    }
-
-    /* insufficient mana */
-    if (p->mp < spell_level(spell))
-    {
-        log_add_entry(p->log, "You lack the power to cast %s.",
-                      spell_name(spell));
-
-        return turns;
-    }
-
-    log_add_entry(p->log, "You cast %s.", spell_name(spell));
-
-    /* time usage */
-    turns = 1;
-
-    /* charge mana */
-    player_mp_lose(p, spell_level(spell));
-
-    switch (spell_type(spell))
-    {
-        /* spells that cause an effect on the player */
-    case SC_PLAYER:
-        spell_type_player(spell, p);
-        break;
-
-        /* spells that cause an effect on a monster */
-    case SC_POINT:
-        spell_type_point(spell, p);
-        break;
-
-        /* creates a ray */
-    case SC_RAY:
-        spell_type_ray(spell, p);
-        break;
-
-        /* effect pours like water */
-    case SC_FLOOD:
-        spell_type_flood(spell, p);
-        break;
-
-        /* effect occurs like an explosion */
-    case SC_BLAST:
-        spell_type_blast(spell, p);
-        break;
-
-    case SC_OTHER:  /* unclassified */
-
-        switch (spell->id)
-        {
-            /* cure poison */
-        case SP_CPO:
-            spell_cure_poison(p);
-            break;
-
-            /* cure blindness */
-        case SP_CBL:
-            spell_cure_blindness(p);
-            break;
-
-            /* create monster */
-        case SP_CRE:
-            spell_create_monster(p);
-            break;
-
-            /* time stop */
-        case SP_STP:
-            /* TODO: implement (ticket 39) */
-            break;
-
-            /* vaporize rock */
-        case SP_VPR:
-            spell_vaporize_rock(p);
-            break;
-
-            /* make wall */
-        case SP_MKW:
-            spell_make_wall(p);
-            break;
-
-            /* sphere of annihilation */
-        case SP_SPH:
-            spell_create_sphere(p);
-            break;
-
-            /* genocide */
-        case SP_GEN:
-            spell_genocide_monster(p);
-            break;
-
-            /* summon daemon */
-        case SP_SUM:
-            /* TODO: implement (ticket 55) */
-            break;
-
-            /* alter realitiy */
-        case SP_ALT:
-            spell_alter_reality(p);
-            break;
-        }
-
-        break;
-
-    case SC_NONE:
-    case SC_MAX:
-        log_add_entry(p->log, "internal Error in %s:%d.", __FILE__, __LINE__);
-        break;
-    }
-
-    return turns;
-}
-
-/**
- * Try to add a spell to the list of known spells
- *
- * @param the player
- * @param id of spell to learn
- * @return FALSE if learning the spell failed, otherwise level of knowledge
- */
-int player_spell_learn(player *p, guint spell_type)
-{
-    spell *s;
-    guint idx;
-
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
-
-    if (!player_spell_known(p, spell_type))
-    {
-        s = spell_new(spell_type);
-        s->learnt = game_turn(p->game);
-
-        /* TODO: add a check for intelligence */
-        if (spell_level(s) > (int)p->lvl)
-        {
-            /* spell is beyond the players scope */
-            spell_destroy(s);
-            return FALSE;
-        }
-
-        g_ptr_array_add(p->known_spells, s);
-        return s->knowledge;
-    }
-    else
-    {
-        /* spell already known, improve knowledge */
-        for (idx = 0; idx < p->known_spells->len; idx++)
-        {
-            /* search spell */
-            s = (spell *)g_ptr_array_index(p->known_spells, idx);
-
-            if (s->id == spell_type)
-            {
-                /* found it */
-                s->knowledge++;
-                return s->knowledge;
-            }
-        }
-    }
-
-    /* should not reach this point, but who knows.. */
-    return FALSE;
-}
-
-/**
- * Remove a spell from the list of known spells
- *
- * @param the player
- * @param the id of the spell to forget
- * @return TRUE if the spell could be found and removed, othrwise FALSE
- */
-int player_spell_forget(player *p, guint spell_type)
-{
-    spell *s;
-    guint idx;
-
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
-
-    for (idx = 0; idx < p->known_spells->len; idx++);
-    {
-        s = g_ptr_array_index(p->known_spells, idx);
-        if (s->id == spell_type)
-        {
-            g_ptr_array_remove_index_fast(p->known_spells, idx);
-            return TRUE;
-        }
-    }
-
-    return FALSE;
-}
-
-/**
- * Check if a spell is known to the player
- * @param the player
- * @param id of the spell in question
- * @return FALSE if unknown, otherwise level of knowledge of that spell
- */
-int player_spell_known(player *p, guint spell_type)
-{
-    spell *s;
-    guint idx;
-
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
-
-    for (idx = 0; idx < p->known_spells->len; idx++)
-    {
-        s = g_ptr_array_index(p->known_spells, idx);
-        if (s->id == spell_type)
-        {
-            return s->knowledge;
-        }
-    }
-
-    return FALSE;
 }
 
 void player_effect_add(player *p, effect *e)
@@ -2998,11 +2760,11 @@ int player_item_use(player *p, inventory **inv, item *it)
         }
         else
         {
-            item_used_up = FALSE;
-            switch (player_spell_learn(p, it->id))
+            switch (spell_learn(p, it->id))
             {
             case 0:
                 log_add_entry(p->log, "You cannot understand the content of this book.");
+                item_used_up = FALSE;
                 break;
 
             case 1:
