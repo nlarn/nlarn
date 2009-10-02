@@ -366,7 +366,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     log_add_entry(p->log, message);
 
     /* resume game if wizard mode is enabled */
-    if (game_wizardmode(p->game) && (cause_type != PD_QUIT))
+    if (game_wizardmode(p->game) && (cause_type >= PD_TOO_LATE))
     {
         log_add_entry(p->log, "WIZARD MODE. You stay alive.");
 
@@ -644,9 +644,7 @@ int player_attack(player *p, monster *m)
         dam = damage_new(DAM_PHYSICAL, rand_1n(amount + 1), p);
 
         /* weapon damage due to rust when hitting certain monsters */
-        if (p->eq_weapon && (m->type == MT_RUST_MONSTER
-                             || m->type == MT_DISENCHANTRESS
-                             || m->type == MT_GELATINOUSCUBE))
+        if (p->eq_weapon && monster_is_metallivore(m))
         {
             /* impact of perishing */
             int pi = item_rust(p->eq_weapon);
@@ -689,27 +687,39 @@ int player_attack(player *p, monster *m)
         }
 
 
-        /* *** SPECIAL WEAPONS */
-        /* Vorpal Blade */
-        if (p->eq_weapon && (p->eq_weapon->type == WT_VORPALBLADE)
-                && chance(5)
-                && monster_has_head(m)
-                && monster_is_beheadable(m))
+        /* *** SPECIAL WEAPONS *** */
+        if (p->eq_weapon)
         {
-            log_add_entry(p->log, "You behead the %s with your Vorpal Blade!",
-                          monster_name(m));
+            /* Vorpal Blade */
+            if ((p->eq_weapon->id == WT_VORPALBLADE)
+                    && chance(5)
+                    && monster_has_head(m)
+                    && monster_is_beheadable(m))
+            {
+                log_add_entry(p->log, "You behead the %s with your Vorpal Blade!",
+                              monster_name(m));
 
-            dam->amount = m->hp + monster_ac(m);
+                dam->amount = m->hp + monster_ac(m);
+            }
+
+            /* Lance of Death */
+            if ((p->eq_weapon->id == WT_LANCEOFDEATH))
+            {
+                /* the lance is pretty deadly for non-demons */
+                if (m->type < MT_DEMONLORD_I)
+                    dam->amount = 10000;
+                else
+                    dam->amount = 300;
+            }
+
+            /* Slayer */
+            if (p->eq_weapon->id == WT_SLAYER)
+            {
+                if (m->type >= MT_DEMONLORD_I)
+                    dam->amount = 10000;
+            }
         }
 
-        /* Lance of Death / Slayer */
-        if ((m->type >= MT_DEMONLORD_I) && p->eq_weapon)
-        {
-            if (p->eq_weapon->type == WT_LANCEOFDEATH)
-                dam->amount = 300;
-            if (p->eq_weapon->type == WT_SLAYER)
-                dam->amount = 10000;
-        }
 
         /* inflict damage */
         if (!(m = monster_damage_take(m, dam)))
@@ -719,7 +729,7 @@ int player_attack(player *p, monster *m)
         }
 
         /* Lance of Death has not killed */
-        if (p->eq_weapon && (p->eq_weapon->type == WT_LANCEOFDEATH))
+        if (p->eq_weapon && (p->eq_weapon->id == WT_LANCEOFDEATH))
         {
             log_add_entry(p->log, "Your lance of death tickles the %s!", monster_name(m));
         }
@@ -1920,14 +1930,15 @@ GPtrArray *player_effect_text(player *p)
 
     text = g_ptr_array_new();
 
-    if (player_effect(p, ET_BLINDNESS))    g_ptr_array_add(text, "blind");
-    if (player_effect(p, ET_BURDENED))     g_ptr_array_add(text, "burdened");
-    if (player_effect(p, ET_CONFUSION))    g_ptr_array_add(text, "confused");
     if (player_effect(p, ET_DIZZINESS))    g_ptr_array_add(text, "dizzy");
-    if (player_effect(p, ET_OVERSTRAINED)) g_ptr_array_add(text, "overload");
+    if (player_effect(p, ET_SICKNESS))     g_ptr_array_add(text, "sick");
+    if (player_effect(p, ET_BLINDNESS))    g_ptr_array_add(text, "blind");
+    if (player_effect(p, ET_CONFUSION))    g_ptr_array_add(text, "confused");
+    if (player_effect(p, ET_PARALYSIS))    g_ptr_array_add(text, "paralyzed");
     if (player_effect(p, ET_POISON))       g_ptr_array_add(text, "poisoned");
     if (player_effect(p, ET_SLOWNESS))     g_ptr_array_add(text, "slow");
-    if (player_effect(p, ET_PARALYSIS))    g_ptr_array_add(text, "paralyzed");
+    if (player_effect(p, ET_BURDENED))     g_ptr_array_add(text, "burdened");
+    if (player_effect(p, ET_OVERSTRAINED)) g_ptr_array_add(text, "overload");
 
     return text;
 }
@@ -3701,9 +3712,7 @@ int player_fountain_drink(player *p)
 
     if (chance(7))
     {
-        log_add_entry(p->log, "You feel a sickness coming on.");
-
-        e = effect_new(ET_DEC_DAMAGE, game_turn(p->game));
+        e = effect_new(ET_SICKNESS, game_turn(p->game));
         player_effect_add(p, e);
     }
     else if (chance(13))
@@ -4106,7 +4115,7 @@ int player_get_wc(player *p)
         wc += weapon_wc(p->eq_weapon);
 
     wc += player_effect(p, ET_INC_DAMAGE);
-    wc -= player_effect(p, ET_DEC_DAMAGE);
+    wc -= player_effect(p, ET_SICKNESS);
 
     /* minimal damage */
     if (wc < 1)

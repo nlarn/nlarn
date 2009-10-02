@@ -148,6 +148,7 @@ enum monster_flags
     MF_INVISIBLE    = 1 << 6,   /* is invisible */
     MF_INFRAVISION  = 1 << 7,   /* can see invisible */
     MF_REGENERATE   = 1 << 8,   /* does regenerate */
+    MF_METALLIVORE  = 1 << 9,   /* eats metal */
 };
 
 /* monster  */
@@ -229,6 +230,7 @@ void monsters_genocide(struct level *l);
 #define monster_is_invisible(monster)    (monsters[(monster)->type].flags & MF_INVISIBLE)
 #define monster_has_infravision(monster) (monsters[(monster)->type].flags & MF_INFRAVISION)
 #define monster_can_regenerate(monster)  (monsters[(monster)->type].flags & MF_REGENERATE)
+#define monster_is_metallivore(monster)  (monsters[(monster)->type].flags & MF_METALLIVORE)
 
 #define monster_name_by_type(type)  (monsters[(type)].name)
 #define monster_image_by_type(type) (monsters[(type)].image)

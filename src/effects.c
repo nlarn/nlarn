@@ -180,7 +180,8 @@ static const effect_data effects[ET_MAX] =
     {
         ET_INFRAVISION, 250, 0,
         "You feel your vision sharpen.",
-        NULL, NULL, NULL,
+        "You feel your vision return to normal.",
+        NULL, NULL,
     },
 
     {
@@ -339,13 +340,6 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_DEC_DAMAGE, 250, 10,
-        "You can't focus.",
-        "You feel more focused.",
-        NULL, NULL,
-    },
-
-    {
         ET_DEC_HP_MAX, 1, 5, /* percent */
         NULL, NULL, NULL, NULL,
     },
@@ -393,9 +387,16 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
+        ET_SICKNESS, 250, 10,
+        "You feel a sickness coming on.",
+        "You now feel better.",
+        NULL, NULL,
+    },
+
+    {
         ET_BLINDNESS, 250, 0,
         "You can't see anything!",
-        "You feel your vision return to normal.",
+        "The blindness lifts.",
         "The %s seems to be blinded.",
         "Looks like the %s can see again.",
     },

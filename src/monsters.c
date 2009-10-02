@@ -210,7 +210,7 @@ const monster_data monsters[MT_MAX] =
         MT_RUST_MONSTER, "rust monster",
         3, 4, 3, 0, 18, 25, 'R',
         SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_HEAD,
+        MF_HEAD | MF_METALLIVORE,
         {
             { ATT_TOUCH, DAM_RUST, 1, 0 },
             { ATT_BITE, DAM_PHYSICAL, 3, 0 },
@@ -310,7 +310,7 @@ const monster_data monsters[MT_MAX] =
         MT_GELATINOUSCUBE, "gelatinous cube",
         5, 9, 3, 0, 22, 45, 'g',
         SPEED_SLOW, ESIZE_LARGE,
-        MF_NONE,
+        MF_METALLIVORE,
         {
             { ATT_SLAM, DAM_ACID, 1, 0 },
         }
@@ -449,7 +449,7 @@ const monster_data monsters[MT_MAX] =
         MT_DISENCHANTRESS, "disenchantress",
         8, 3, 5, 0, 50, 500, 'q',
         SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS,
+        MF_HEAD | MF_HANDS | MF_METALLIVORE,
         {
             { ATT_TOUCH, DAM_REM_ENCH, 0, 0 },
             EMPTY_ATTACK,

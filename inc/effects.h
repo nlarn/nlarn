@@ -90,7 +90,6 @@ typedef enum _effect_type
     ET_DEC_RND,                 /* reduce random attribute */
 
     /* secondary attributes modification */
-    ET_DEC_DAMAGE,              /* decreased damage */
     ET_DEC_HP_MAX,              /* decreased HP max */
     ET_DEC_MP_MAX,              /* decreased MP max */
     ET_DEC_HP_REGEN,            /* decreased hp regeneration */
@@ -100,6 +99,7 @@ typedef enum _effect_type
 
     ET_SLEEP,                   /* no move for a certain amount of time */
     ET_DIZZINESS,               /* decrease all primary attributes */
+    ET_SICKNESS,                /* decreased damage */
     ET_BLINDNESS,               /* remove the ability to see */
     ET_CLUMSINESS,              /* unable to wield weapon */
     ET_ITCHING,                 /* unable to wear armour */
