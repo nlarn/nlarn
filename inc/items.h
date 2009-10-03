@@ -136,7 +136,7 @@ typedef struct item_type_data {
 item *item_new(item_t item_type, int item_id, int item_bonus);
 item *item_new_random(item_t item_type);
 item *item_new_by_level(item_t item_type, int num_level);
-item *item_clone(item *original);
+item *item_copy(item *original);
 item *item_split(item *original, guint32 count);
 void item_destroy(item *it);
 

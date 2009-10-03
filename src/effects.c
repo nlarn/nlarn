@@ -17,6 +17,7 @@
  */
 
 #include <assert.h>
+#include <string.h>
 
 #include "effects.h"
 #include "utils.h"
@@ -478,6 +479,18 @@ effect *effect_new(effect_type type, time_t now)
     ne->start = now;
     ne->turns = (effects[type].duration <= 1) ? effects[type].duration : divert(effects[type].duration, 10);
     ne->amount = effects[type].value;
+
+    return ne;
+}
+
+effect *effect_copy(effect *e)
+{
+    effect *ne;
+
+    assert(e != NULL);
+
+    ne = g_malloc(sizeof(effect));
+    memcpy(ne, e, sizeof(effect));
 
     return ne;
 }

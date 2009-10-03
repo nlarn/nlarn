@@ -344,9 +344,10 @@ item *item_new_by_level(item_t item_type, int num_level)
     return nitem;
 }
 
-item *item_clone(item *original)
+item *item_copy(item *original)
 {
     item *nitem;
+    guint idx = 0;
 
     assert(original != NULL);
 
@@ -354,9 +355,20 @@ item *item_clone(item *original)
     nitem = g_malloc0(sizeof(item));
     memcpy(nitem, original, sizeof(item));
 
-    /* reset effects */
-    /* FIXME: should copy effects */
+    /* copy effects */
     nitem->effects = NULL;
+
+    if (original->effects != NULL)
+    {
+        for (idx = 0; idx < original->effects->len; idx++)
+        {
+            effect *e = g_ptr_array_index(original->effects, idx);
+            effect *ne = effect_copy(e);
+
+            ne->item = nitem;
+            item_effect_add(nitem, ne);
+        }
+    }
 
     /* reset inventory */
     nitem->content = NULL;
@@ -370,7 +382,7 @@ item *item_split(item *original, guint32 count)
 
     assert(original != NULL && count < original->count);
 
-    nitem = item_clone(original);
+    nitem = item_copy(original);
 
     nitem->count = count;
     original->count -= count;

@@ -142,6 +142,7 @@ typedef struct effect
 /* function declarations */
 
 effect *effect_new(effect_type type, time_t now);
+effect *effect_copy(effect *e);
 void effect_destroy(effect *e);
 
 char *effect_get_msg_start(effect *e);

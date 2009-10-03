@@ -725,7 +725,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
         {
             display_paint_screen(p);
 
-            it_clone = item_clone(it);
+            it_clone = item_copy(it);
             it_clone->count = count;
 
             item_describe(it, player_item_known(p, it), FALSE, TRUE, name, 60);
@@ -739,7 +739,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
             return FALSE;
         }
 
-        it_clone = item_clone(it);
+        it_clone = item_copy(it);
         it_clone->count = count;
     }
     else
@@ -951,7 +951,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
 
     p->bank_account += price;
 
-    item *it_clone = item_clone(it);
+    item *it_clone = item_copy(it);
     it_clone->count = count;
 
     item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
