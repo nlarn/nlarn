@@ -354,6 +354,13 @@ item *item_clone(item *original)
     nitem = g_malloc0(sizeof(item));
     memcpy(nitem, original, sizeof(item));
 
+    /* reset effects */
+    /* FIXME: should copy effects */
+    nitem->effects = NULL;
+
+    /* reset inventory */
+    nitem->content = NULL;
+
     return nitem;
 }
 

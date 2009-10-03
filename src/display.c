@@ -530,6 +530,19 @@ void display_shutdown()
 
 int display_draw()
 {
+    GList *win_ptr = g_list_first(windows);
+
+    /* mark stdscr for redraw */
+    refresh();
+
+    /* prepare windows for redraw */
+    if (win_ptr) do
+        {
+            display_window *win = (display_window *)win_ptr->data;
+            redrawwin(win->window);
+        }
+        while ((win_ptr = g_list_next(win_ptr)));
+
     return doupdate();
 }
 
@@ -982,6 +995,9 @@ spell *display_spell_select(char *title, player *p)
     /* currently selected item */
     guint curr = 1;
 
+    /* curses attributes */
+    int attrs;
+
     assert(p != NULL);
 
     if (!p->known_spells || !p->known_spells->len)
@@ -1013,11 +1029,10 @@ spell *display_spell_select(char *title, player *p)
         {
             sp = g_ptr_array_index(p->known_spells, pos + offset - 1);
 
-            if (curr == pos)
-                wattron(swin->window, COLOR_PAIR(10));
-            else
-                wattron(swin->window, COLOR_PAIR(9));
+            if (curr == pos) attrs = COLOR_PAIR(10);
+            else attrs = COLOR_PAIR(9);
 
+            wattron(swin->window, attrs);
 
             mvwprintw(swin->window, pos, 1, " %3s - %-23s (Lvl %d) %2d ",
                       spell_code(sp),
@@ -1025,10 +1040,7 @@ spell *display_spell_select(char *title, player *p)
                       spell_level(sp),
                       sp->knowledge);
 
-            if (curr == pos)
-                wattroff(swin->window, COLOR_PAIR(10));
-            else
-                wattroff(swin->window, COLOR_PAIR(9));
+            wattroff(swin->window, attrs);
         }
 
         /* display up / down markers */
@@ -1036,8 +1048,18 @@ spell *display_spell_select(char *title, player *p)
         display_window_update_arrow_down(swin, ((offset + maxvis) < p->known_spells->len));
 
         /* display typeahead keys */
-        swin->caption = code_buf;
+        gchar caption[39];
+        g_snprintf(caption, 38, "%s%s%s%s(?) description",
+                   (strlen(code_buf) ? "[" : ""),
+                   code_buf,
+                   (strlen(code_buf) ? "]" : ""),
+                   (strlen(code_buf) ? " " : ""));
+
+        swin->caption = caption;
         display_window_update_caption(swin);
+
+        /* store currently highlighted spell */
+        sp = g_ptr_array_index(p->known_spells, curr + offset - 1);
 
         switch ((key = getch()))
         {
@@ -1046,6 +1068,7 @@ spell *display_spell_select(char *title, player *p)
         case KEY_A1:
             curr = 1;
             offset = 0;
+            code_buf[0] = '\0';
             break;
 
         case '9':
@@ -1055,6 +1078,8 @@ spell *display_spell_select(char *title, player *p)
                 curr = 1;
             else
                 offset = max(offset - maxvis, 0);
+
+            code_buf[0] = '\0';
             break;
 
         case 'k':
@@ -1067,6 +1092,8 @@ spell *display_spell_select(char *title, player *p)
                 curr--;
             else if ((curr == 1) && (offset > 0))
                 offset--;
+
+            code_buf[0] = '\0';
             break;
 
         case 'j':
@@ -1082,6 +1109,8 @@ spell *display_spell_select(char *title, player *p)
                 else
                     curr++;
             }
+
+            code_buf[0] = '\0';
             break;
 
         case '3':
@@ -1101,6 +1130,8 @@ spell *display_spell_select(char *title, player *p)
                     offset = p->known_spells->len - curr;
                 }
             }
+
+            code_buf[0] = '\0';
             break;
 
         case '1':
@@ -1115,6 +1146,17 @@ spell *display_spell_select(char *title, player *p)
             {
                 curr = p->known_spells->len;
             }
+
+            code_buf[0] = '\0';
+            break;
+
+        case '?':
+        case KEY_F(1):
+            display_show_message(spell_name(sp), spell_desc(sp));
+
+            /* repaint everything after displaying the message */
+            display_paint_screen(p);
+            display_draw();
             break;
 
         case 27: /* ESC */
@@ -1128,10 +1170,10 @@ spell *display_spell_select(char *title, player *p)
         case KEY_ENTER:
         case 32: /* space bar */
             RUN = FALSE;
-            sp = g_ptr_array_index(p->known_spells, curr + offset - 1);
             break;
 
         case 127: /* backspace */
+        case 263:
             if (strlen(code_buf))
             {
                 code_buf[strlen(code_buf) - 1] = '\0';

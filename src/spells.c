@@ -34,14 +34,14 @@ const spell_data spells[SP_MAX] =
     {
         SP_PRO, "pro","protection",
         SC_PLAYER, DAM_NONE, ET_PROTECTION,
-        "Generates a protection field",
+        "Generates a protection field.",
         NULL, NULL,
         1, 260
     },
     {
         SP_MLE, "mle", "magic missile",
         SC_RAY, DAM_MAGICAL, ET_NONE,
-        "Creates and hurls a magic missile equivalent to a + 1 magic arrow",
+        "Creates and hurls a magic missile equivalent to a + 1 magic arrow.",
         "Your missiles hit the %s.",
         "Your missile bounces off the %s.",
         1, 320
@@ -49,14 +49,14 @@ const spell_data spells[SP_MAX] =
     {
         SP_DEX, "dex", "dexterity",
         SC_PLAYER, DAM_NONE, ET_INC_DEX,
-        "Improves the casters dexterity",
+        "Improves the casters dexterity.",
         NULL, NULL,
         1, 260
     },
     {
         SP_SLE, "sle", "sleep",
         SC_POINT, DAM_NONE, ET_SLEEP,
-        "causes some monsters to go to sleep",
+        "Causes some monsters to go to sleep.",
         NULL,
         "The %s doesn't sleep.",
         1, 260
@@ -64,14 +64,14 @@ const spell_data spells[SP_MAX] =
     {
         SP_CHM, "chm", "charm monster",
         SC_PLAYER, DAM_NONE, ET_CHARM_MONSTER,
-        "some monsters may be awed at your magnificence",
+        "Some monsters may be awed at your magnificence.",
         NULL, NULL,
         1, 260
     },
     {
         SP_SSP, "ssp", "sonic spear",
         SC_RAY, DAM_PHYSICAL, ET_NONE,
-        "causes your hands to emit a screeching sound toward what they point",
+        "Causes your hands to emit a screeching sound toward what they point.",
         "The sound damages the %s.",
         "The %s can't hear the noise.",
         1, 300
@@ -79,42 +79,42 @@ const spell_data spells[SP_MAX] =
     {
         SP_STR, "str", "strength",
         SC_PLAYER, DAM_NONE, ET_INC_STR,
-        "Increase the casters strength for a short term",
+        "Increase the casters strength for a short term.",
         NULL, NULL,
         2, 460
     },
     {
         SP_CPO, "cpo", "cure poison",
         SC_OTHER, DAM_NONE, ET_NONE,
-        "the caster is cured from poison",
+        "The caster is cured from poison.",
         NULL, NULL,
         2, 460
     },
     {
         SP_HEL, "hel", "healing",
         SC_PLAYER, DAM_NONE, ET_INC_HP,
-        "restores some hp to the caster",
+        "Restores some HP to the caster.",
         NULL, NULL,
         2, 400
     },
     {
         SP_CBL, "cbl", "cure blindness",
         SC_OTHER, DAM_NONE, ET_NONE,
-        "restores sight to one so unfortunate as to be blinded",
+        "Restores sight to one so unfortunate as to be blinded.",
         NULL, NULL,
         2, 400
     },
     {
         SP_CRE, "cre", "create monster",
         SC_OTHER, DAM_NONE, ET_NONE,
-        "creates a monster near the caster appropriate for the location",
+        "Creates a monster near the caster appropriate for the location.",
         NULL, NULL,
         2, 400
     },
     {
         SP_PHA, "pha", "phantasmal forces",
         SC_POINT, DAM_NONE, ET_SCARE_MONSTER,
-        "creates illusions, and if believed, monsters flee",
+        "Creates illusions, and if believed, monsters flee.",
         "The %s believed!",
         "The %s didn't believe the illusions!",
         2, 600
@@ -122,14 +122,14 @@ const spell_data spells[SP_MAX] =
     {
         SP_INV, "inv", "invisibility",
         SC_PLAYER, DAM_NONE, ET_INVISIBILITY,
-        "the caster becomes invisible",
+        "The caster becomes invisible.",
         NULL, NULL,
         2, 600
     },
     {
         SP_BAL, "bal", "fireball",
         SC_BLAST, DAM_FIRE, ET_NONE,
-        "makes a ball of fire that burns on what it hits",
+        "Makes a ball of fire that burns on what it hits.",
         "The fireball hits the %s.",
         NULL,
         3, 1200
@@ -137,7 +137,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_CLD, "cld", "cone of cold",
         SC_RAY, DAM_COLD, ET_NONE,
-        "sends forth a cone of cold which freezes what it touches",
+        "Sends forth a cone of cold which freezes what it touches.",
         "The cone of cold strikes the %s.",
         "The %s loves the cold!",
         3, 1200
@@ -145,7 +145,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_PLY, "ply", "polymorph",
         SC_POINT, DAM_NONE, ET_NONE,
-        "you can find out what this does for yourself",
+        "You can find out what this does for yourself.",
         NULL,
         "The %s resists.",
         3, 950
@@ -153,21 +153,21 @@ const spell_data spells[SP_MAX] =
     {
         SP_CAN, "can", "cancellation",
         SC_PLAYER, DAM_NONE, ET_CANCELLATION,
-        "negates the ability of a monster to use his special abilities",
+        "Negates the ability of a monster to use his special abilities.",
         NULL, NULL,
         3, 950
     },
     {
         SP_HAS, "has", "haste self",
         SC_PLAYER, DAM_NONE, ET_SPEED,
-        "speeds up the casters movements",
+        "Speeds up the casters movements.",
         NULL, NULL,
         3, 950
     },
     {
         SP_CKL, "ckl", "killing cloud",
         SC_FLOOD, DAM_ACID, ET_NONE,
-        "creates a fog of poisonous gas which kills all that is within it",
+        "Creates a fog of poisonous gas which kills all that is within it.",
         "The %s gasps for air.",
         "The %s loves the water!",
         3, 1200
@@ -175,14 +175,14 @@ const spell_data spells[SP_MAX] =
     {
         SP_VPR, "vpr", "vaporize rock",
         SC_OTHER, DAM_NONE, ET_NONE,
-        "this changes rock to air",
+        "This changes rock to air.",
         NULL, NULL,
         3, 950
     },
     {
         SP_DRY, "dry", "dehydration",
         SC_POINT, DAM_PHYSICAL, ET_NONE,
-        "dries up water in the immediate vicinity",
+        "Dries up water in the immediate vicinity.",
         "The %s shrivels up.",
         "The %s isn't affected.",
         4, 1600
@@ -190,7 +190,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_LIT, "lit", "lightning",
         SC_RAY, DAM_ELECTRICITY, ET_NONE,
-        "you finger will emit a lightning bolt when this spell is cast",
+        "You finger will emit a lightning bolt when this spell is cast.",
         "A lightning bolt hits the %s.",
         "The %s loves fire and lightning!",
         4, 1600
@@ -198,21 +198,21 @@ const spell_data spells[SP_MAX] =
     {
         SP_DRL, "drl", "drain life",
         SC_POINT, DAM_PHYSICAL, ET_NONE,
-        "subtracts hit points from both you and a monster",
+        "Subtracts hit points from both you and a monster.",
         NULL, NULL,
         4, 1400
     },
     {
         SP_GLO, "glo", "invulnerability",
         SC_PLAYER, DAM_NONE, ET_INVULNERABILITY,
-        "this globe helps to protect the player from physical attack",
+        "This globe helps to protect the player from physical attack.",
         NULL, NULL,
         4, 1400
     },
     {
         SP_FLO, "flo", "flood",
         SC_FLOOD, DAM_WATER, ET_NONE,
-        "this creates an avalanche of H2O to flood the immediate chamber",
+        "This creates an avalanche of H2O to flood the immediate chamber.",
         "The %s struggles for air in your flood!",
         NULL,
         4, 1600
@@ -220,7 +220,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_FGR, "fgr", "finger of death",
         SC_POINT, DAM_PHYSICAL, ET_NONE,
-        "this is a holy spell and calls upon your god to back you up",
+        "This is a holy spell and calls upon your god to back you up.",
         "The %s's heart stopped.",
         "The %s isn't affected.",
         4, 1600
@@ -228,35 +228,35 @@ const spell_data spells[SP_MAX] =
     {
         SP_SCA, "sca", "scare monster",
         SC_POINT, DAM_NONE, ET_SCARE_MONSTER,
-        "terrifies the monster so that hopefully he wont hit the magic user",
+        "Terrifies the monster so that hopefully he wont hit the magic user.",
         NULL, NULL,
         5, 2000
     },
     {
         SP_HLD, "hld", "hold monster",
         SC_POINT, DAM_NONE, ET_HOLD_MONSTER,
-        "the monster is frozen in his tracks if this is successful",
+        "The monster is frozen in his tracks if this is successful.",
         NULL, NULL,
         5, 2000
     },
     {
         SP_STP, "stp", "time stop",
         SC_OTHER, DAM_NONE, ET_TIMESTOP,
-        "all movement in the caverns ceases for a limited duration",
+        "All movement in the caverns ceases for a limited duration.",
         NULL, NULL,
         5, 2500
     },
     {
         SP_TEL, "tel", "teleport away",
         SC_POINT, DAM_NONE, ET_NONE,
-        "moves a particular monster around in the dungeon",
+        "Moves a particular monster around in the dungeon.",
         NULL, NULL,
         5, 2000
     },
     {
         SP_MFI, "mfi", "magic fire",
         SC_FLOOD, DAM_FIRE, ET_NONE,
-        "this causes a curtain of fire to appear all around you",
+        "This causes a curtain of fire to appear all around you.",
         "The %s cringes from the flame.",
         NULL,
         5, 2500
@@ -264,42 +264,42 @@ const spell_data spells[SP_MAX] =
     {
         SP_MKW, "mkw", "make wall",
         SC_OTHER, DAM_NONE, ET_NONE,
-        "Makes a wall in the specified place",
+        "Makes a wall in the specified place.",
         NULL, NULL,
         6, 3000
     },
     {
         SP_SPH, "sph", "sphere of annihilation",
         SC_OTHER, DAM_NONE, ET_NONE,
-        "anything caught in this sphere is instantly killed.",
+        "Anything caught in this sphere is instantly killed.",
         NULL, NULL,
         6, 3500
     },
     {
         SP_GEN,  "gen", "genocide",
         SC_OTHER, DAM_NONE, ET_NONE,
-        "eliminates a species of monster from the game -- use sparingly",
+        "Eliminates a species of monster from the caverns.",
         NULL, NULL,
         6, 3800
     },
     {
         SP_SUM, "sum", "summon demon",
         SC_OTHER, DAM_NONE, ET_NONE,
-        "summons a demon who hopefully helps you out",
+        "Summons a demon who hopefully helps you out.",
         NULL, NULL,
         6, 3500
     },
     {
         SP_WTW, "wtw", "walk through walls",
         SC_PLAYER, DAM_NONE, ET_WALL_WALK,
-        "allows the caster to walk through walls for a short period of time",
+        "Allows the caster to walk through walls for a short period of time.",
         NULL, NULL,
         6, 3800
     },
     {
         SP_ALT, "alt", "alter reality",
         SC_OTHER, DAM_NONE, ET_NONE,
-        "god only knows what this will do",
+        "God only knows what this will do.",
         NULL,
         "Polinneaus won't let you mess with his dungeon!",
         6, 3800
