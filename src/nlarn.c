@@ -20,6 +20,7 @@
 #include <curses.h>
 #include <stdlib.h>
 
+#include "container.h"
 #include "display.h"
 #include "game.h"
 #include "nlarn.h"
@@ -222,7 +223,7 @@ int main(int argc, char *argv[])
             if (inv_length_filtered(level_ilist_at(g->p->level, g->p->pos),
                                     &inv_filter_container) > 0)
             {
-                player_container_open(g->p, NULL, NULL);
+                container_open(g->p, NULL, NULL);
             }
             else
             {

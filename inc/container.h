@@ -42,6 +42,16 @@ typedef struct container_data {
 
 extern const container_data containers[CT_MAX];
 
+/* forward declarations */
+
+struct player;
+
+/* functions */
+
+int container_open(struct player *p, inventory **inv, item *container);
+int container_item_add(struct player *p, inventory **inv, item *element);
+int container_item_unpack(struct player *p, inventory **inv, item *element);
+
 /* macros */
 
 #define container_name(container)     (containers[(container)->id].name)
