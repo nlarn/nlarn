@@ -36,6 +36,9 @@ static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
                                       "law, we cannot serve you at this time." \
                                       "\n\nSo Sorry.";
 
+static int building_player_check(player *p, guint amount);
+static void building_player_charge(player *p, guint amount);
+
 static int building_item_sell(player *p, inventory **inv, item *it);
 static int building_item_identify(player *p, inventory **inv, item *it);
 static int building_item_repair(player *p, inventory **inv, item *it);
@@ -46,6 +49,7 @@ int building_bank(player *p)
     int turns = 2;
     char cmd;
     guint amount = 0;
+    guint interest = 0;
     int mobuls, i;
 
     GPtrArray *callbacks = NULL;
@@ -76,25 +80,31 @@ int building_bank(player *p)
     /* leave bank when taxes are unpayed */
     if (p->outstanding_taxes)
     {
-        g_string_append_printf(text,
-                               msg_frozen,
-                               p->outstanding_taxes);
-
+        g_string_append_printf(text, msg_frozen, p->outstanding_taxes);
         display_show_message((char *)msg_title, text->str);
-
         g_string_free(text, TRUE);
+
         return turns;
     }
 
     /* pay interest */
-    mobuls = gtime2mobuls(game_turn(p->game)) - gtime2mobuls(p->interest_lasttime);
+    mobuls = (game_turn(p->game) - p->interest_lasttime) / 100;
 
     if (p->bank_account && (mobuls > 0))
     {
+        /* store original account */
+        interest = p->bank_account;
+
         for (i = 1; i <= mobuls; i++)
             p->bank_account += p->bank_account / 250;
 
         p->interest_lasttime = game_turn(p->game);
+
+        /* calculate interest payed */
+        interest = p->bank_account - interest;
+
+        g_string_append_printf(text, "We have payed you an interest of %d " \
+                               "gold since your last visit.\n", interest);
     }
 
     g_string_append_printf(text,
@@ -162,9 +172,14 @@ int building_bank(player *p)
 
         if (amount && (amount <= p->bank_account))
         {
-            player_set_gold(p, player_get_gold(p) + amount);
-            p->bank_account -= amount;
-            log_add_entry(p->log, "You withdraw %d gp.", amount);
+            item *gold = item_new(IT_GOLD, amount, 0);
+
+            /* adding the gold might fail (too heavy) */
+            if (inv_add(&p->inventory, gold))
+            {
+                p->bank_account -= amount;
+                log_add_entry(p->log, "You withdraw %d gold.", amount);
+            }
         }
         else if (amount)
         {
@@ -365,9 +380,7 @@ int building_home(player *p)
     {
         /* casual visit, report remaining time */
         text = g_string_new(NULL);
-        g_string_printf(text,
-                        msg_home,
-                        p->name,
+        g_string_printf(text, msg_home, p->name,
                         gtime2mobuls(game_remaining_turns(p->game)),
                         p->name);
 
@@ -406,14 +419,14 @@ int building_lrs(player *p)
     g_string_free(text, TRUE);
 
     /* offer to pay taxes if player can afford to */
-    if (p->outstanding_taxes && (p->outstanding_taxes <= player_get_gold(p)))
+    if (p->outstanding_taxes && (building_player_check(p, p->outstanding_taxes)))
     {
         /* need to redraw screen first */
         display_paint_screen(p);
 
         if (display_get_yesno("Do you want to pay your taxes?", NULL, NULL))
         {
-            player_set_gold(p, player_get_gold(p) - p->outstanding_taxes);
+            building_player_charge(p, p->outstanding_taxes);
             p->outstanding_taxes = 0;
             log_add_entry(p->log, "You have payed your taxes.");
         }
@@ -432,7 +445,7 @@ int building_school(player *p)
     guint price;
 
     GString *text;
-    int i;
+    guint idx;
     char selection;
 
     const char msg_greet[] = "The College of Larn offers the exciting " \
@@ -464,15 +477,13 @@ int building_school(player *p)
 
     text = g_string_new(msg_greet);
 
-    for (i = 0; i < SCHOOL_COURSE_COUNT; i++)
+    for (idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
     {
-        if (!p->school_courses_taken[i])
+        if (!p->school_courses_taken[idx])
         {
-            g_string_append_printf(text,
-                                   "  %c) %-30s (%2d mobuls)\n",
-                                   i + 'a',
-                                   school_courses[i].description,
-                                   school_courses[i].course_time);
+            g_string_append_printf(text, "  %c) %-30s (%2d mobuls)\n",
+                                   idx + 'a', school_courses[idx].description,
+                                   school_courses[idx].course_time);
         }
         else
         {
@@ -491,10 +502,10 @@ int building_school(player *p)
             && ((selection) < SCHOOL_COURSE_COUNT)
             && !p->school_courses_taken[(int)selection])
     {
-        if (player_get_gold(p) < price)
+        if (!building_player_check(p, price))
         {
             log_add_entry(p->log,
-                          "You cannot afford the %d for the course.",
+                          "You cannot afford the %d gold for the course.",
                           price);
 
             return turns;
@@ -553,14 +564,13 @@ int building_school(player *p)
         case 7:
             p->intelligence++;
             break;
-
         }
 
         /* mark course as taken */
         p->school_courses_taken[(int)selection] = 1;
 
         /* charge */
-        player_set_gold(p, player_get_gold(p) - price);
+        building_player_charge(p, price);
 
         /* time usage */
         turns += mobuls2gtime(school_courses[(int)selection].course_time);
@@ -648,11 +658,38 @@ int building_tradepost(player *p)
     return turns;
 }
 
+static int building_player_check(player *p, guint amount)
+{
+    guint player_gold = player_get_gold(p);
+
+    if (player_gold >= amount)
+        return TRUE;
+
+    if (p->bank_account >= amount)
+        return TRUE;
+
+    return FALSE;
+}
+
+static void building_player_charge(player *p, guint amount)
+{
+    if (p->bank_account >= amount)
+    {
+        p->bank_account -= amount;
+        log_add_entry(p->log, "We have debited your bank account %d gold.",
+                      amount);
+    }
+    else
+    {
+        guint player_gold = player_get_gold(p);
+        player_set_gold(p, player_gold - amount);
+    }
+}
+
 static int building_item_sell(player *p, inventory **inv, item *it)
 {
     guint price;
     guint count = 0;
-    guint player_gold;
     char text[81];
     char name[61];
 
@@ -661,7 +698,6 @@ static int building_item_sell(player *p, inventory **inv, item *it)
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    player_gold = player_get_gold(p);
     price = item_price(it);
 
     if (it->count > 1)
@@ -685,7 +721,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
 
         price *= count;
 
-        if ((p->bank_account < price) || (player_gold < price))
+        if (!building_player_check(p, price))
         {
             display_paint_screen(p);
 
@@ -702,6 +738,9 @@ static int building_item_sell(player *p, inventory **inv, item *it)
 
             return FALSE;
         }
+
+        it_clone = item_clone(it);
+        it_clone->count = count;
     }
     else
     {
@@ -714,12 +753,11 @@ static int building_item_sell(player *p, inventory **inv, item *it)
         {
             return FALSE;
         }
+
+        it_clone = it;
     }
 
     /* log the event */
-    it_clone = item_clone(it);
-    it_clone->count = count;
-
     item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
     log_add_entry(p->log, "You buy %s.", name);
 
@@ -735,7 +773,6 @@ static int building_item_sell(player *p, inventory **inv, item *it)
         else
         {
             inv_del_element(inv, it);
-            item_destroy(it);
         }
     }
     else
@@ -748,22 +785,13 @@ static int building_item_sell(player *p, inventory **inv, item *it)
     log_add_entry(p->log, "Thank you for your purchase.");
 
     /* charge player for this purchase */
-    if (p->bank_account > price)
-    {
-        p->bank_account -= price;
-        log_add_entry(p->log, "We have debited your bank account %d gold.",
-                      price);
-    }
-    else
-    {
-        player_set_gold(p, player_gold - price);
-    }
+    building_player_charge(p, price);
+
     return TRUE;
 }
 
 int building_item_identify(player *p, inventory **inv, item *it)
 {
-    guint player_gold;
     guint price;
     char name_unknown[61];
     char name_known[61];
@@ -776,12 +804,11 @@ int building_item_identify(player *p, inventory **inv, item *it)
     /* don't need that parameter */
     inv = NULL;
 
-    player_gold = player_get_gold(p);
     price = 50 << game_difficulty(p->game);
 
     item_describe(it, player_item_known(p, it), TRUE, TRUE, name_unknown, 60);
 
-    if ((price <= p->bank_account) || (price <= player_gold))
+    if (building_player_check(p, price))
     {
         g_snprintf(message, 80, "Pay %d gold to identify %s?", price, name_unknown);
 
@@ -793,17 +820,7 @@ int building_item_identify(player *p, inventory **inv, item *it)
             item_describe(it, player_item_known(p, it), TRUE, FALSE, name_known, 60);
 
             log_add_entry(p->log, "%s is %s.", name_unknown, name_known);
-
-            if (price <= p->bank_account)
-            {
-                log_add_entry(p->log, "We have debited your bank account %d gold.",
-                              price);
-                p->bank_account -= price;
-            }
-            else
-            {
-                player_set_gold(p, player_gold - price);
-            }
+            building_player_charge(p, price);
 
             return TRUE;
         }
@@ -820,7 +837,6 @@ int building_item_identify(player *p, inventory **inv, item *it)
 static int building_item_repair(player *p, inventory **inv, item *it)
 {
     int damages = 0;
-    guint player_gold;
     guint price;
     char name[61];
     char message[81];
@@ -837,12 +853,11 @@ static int building_item_repair(player *p, inventory **inv, item *it)
     damages += it->corroded;
     damages += it->rusty;
 
-    player_gold = player_get_gold(p);
     price = (50 << game_difficulty(p->game)) * damages;
 
     item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 60);
 
-    if ((price <= p->bank_account) || (price <= player_gold))
+    if (building_player_check(p, price))
     {
         g_snprintf(message, 80, "Pay %d gold to repair %s?", price, name);
 
@@ -853,17 +868,7 @@ static int building_item_repair(player *p, inventory **inv, item *it)
             it->rusty = 0;
 
             log_add_entry(p->log, "Your %s has been repaired.", name);
-
-            if (price <= p->bank_account)
-            {
-                log_add_entry(p->log, "We have debited your bank account %d gold.",
-                              price);
-                p->bank_account -= price;
-            }
-            else
-            {
-                player_set_gold(p, player_gold - price);
-            }
+            building_player_charge(p, price);
 
             return TRUE;
         }
@@ -883,8 +888,6 @@ static int building_item_buy(player *p, inventory **inv, item *it)
     guint count = 0;
     char question[121];
     char name[61];
-
-    item *it_clone;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -922,6 +925,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
         if (count > it->count)
         {
             log_add_entry(p->log, "Wouldn't it be nice to have %d of those?", count);
+
             return FALSE;
         }
 
@@ -947,7 +951,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
 
     p->bank_account += price;
 
-    it_clone = item_clone(it);
+    item *it_clone = item_clone(it);
     it_clone->count = count;
 
     item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
