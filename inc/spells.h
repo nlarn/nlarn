@@ -23,7 +23,6 @@
 #include "effects.h"
 #include "items.h"
 #include "player.h"
-#include "utils.h"
 
 typedef enum spell_type
 {
@@ -152,7 +151,6 @@ gboolean spell_vaporize_rock(struct player *p);
 
 /* *** BOOKS *** */
 
-void book_desc_shuffle();
 char *book_desc(int book_id);
 
 int book_weight(item *book);

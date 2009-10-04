@@ -19,9 +19,9 @@
 #include <assert.h>
 
 #include "game.h"
+#include "nlarn.h"
 #include "player.h"
 #include "potions.h"
-#include "utils.h"
 
 const potion_data potions[PO_MAX] =
 {
@@ -53,8 +53,6 @@ const potion_data potions[PO_MAX] =
     { PO_CURE_DIANTHR,  "cure dianthroritis", ET_NONE,              0 },
 };
 
-static int potion_desc_mapping[PO_MAX - 1] = { 0 };
-
 static const char *_potion_desc[PO_MAX - 1] =
 {
     "clear",
@@ -83,15 +81,10 @@ static const char *_potion_desc[PO_MAX - 1] =
     "black",
 };
 
-void potion_desc_shuffle()
-{
-    shuffle(potion_desc_mapping, PO_MAX - 1, 1);
-}
-
 char *potion_desc(int potion_id)
 {
     assert(potion_id > PO_NONE && potion_id < PO_MAX);
-    return (char *)_potion_desc[potion_desc_mapping[potion_id - 1]];
+    return (char *)_potion_desc[nlarn->potion_desc_mapping[potion_id - 1]];
 }
 
 int potion_with_effect(struct player *p, item *potion)
@@ -103,7 +96,7 @@ int potion_with_effect(struct player *p, item *potion)
 
     if (potion_effect(potion) > ET_NONE)
     {
-        eff = effect_new(potion_effect(potion), game_turn(p->game));
+        eff = effect_new(potion_effect(potion), game_turn(nlarn));
 
         /* silly potion of giant strength */
         if (potion->id == PO_GIANT_STR)

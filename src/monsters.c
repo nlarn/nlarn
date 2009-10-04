@@ -22,6 +22,7 @@
 #include "game.h"
 #include "level.h"
 #include "monsters.h"
+#include "nlarn.h"
 
 #define EMPTY_ATTACK { ATT_NONE, DAM_NONE, 0, 0 }
 
@@ -697,8 +698,6 @@ const monster_data monsters[MT_MAX] =
     }
 };
 
-static int monster_genocided[MT_MAX] = { 1, 0 };
-
 static gboolean monster_attack_available(monster *m, attack_t type);
 static const attack *monster_attack_get(monster *m, attack_t type);
 static void monster_attack_disable(monster *m, const attack *att);
@@ -868,7 +867,7 @@ monster *monster_new_by_level(struct level *l)
         monster_id_max = monster_level[l->nlevel - 1];
     }
 
-    while (monster_genocided[monster_id]
+    while (nlarn->monster_genocided[monster_id]
             || (monster_id <= MT_NONE)
             || (monster_id >= MT_MAX))
     {
@@ -957,7 +956,7 @@ void monster_move(monster *m, struct player *p)
      * as monster might be killed during the process we need
      * to exit the loop in this case
      */
-    if (!monster_regenerate(m, game_turn(p->game), game_difficulty(p->game), p->log))
+    if (!monster_regenerate(m, game_turn(nlarn), game_difficulty(nlarn), p->log))
     {
         return;
     }
@@ -1203,7 +1202,7 @@ monster *monster_trap_trigger(monster *m, struct player *p)
          * monster's list of effects. */
         if (trap_effect(trap))
         {
-            eff = effect_new(trap_effect(trap), game_turn(p->game));
+            eff = effect_new(trap_effect(trap), game_turn(nlarn));
             monster_effect_add(m, eff);
         }
 
@@ -1391,7 +1390,7 @@ void monster_player_attack(monster *m, player *p)
     if (!att) return;
 
     /* generate damage */
-    dam = damage_new(att->damage, att->base + game_difficulty(p->game), m);
+    dam = damage_new(att->damage, att->base + game_difficulty(nlarn), m);
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM)
@@ -1400,7 +1399,7 @@ void monster_player_attack(monster *m, player *p)
     /* set damage for weapon attacks */
     if (att->type == ATT_WEAPON)
         dam->amount = rand_1n(weapon_wc(m->weapon)
-                              + game_difficulty(m->level->player->game)); /* yuck */
+                              + game_difficulty(nlarn));
 
     /* add variable damage */
     if (att->rand)
@@ -1672,14 +1671,14 @@ int monster_genocide(int monster_id)
 {
     assert(monster_id > MT_NONE && monster_id < MT_MAX);
 
-    monster_genocided[monster_id] = TRUE;
-    return monster_genocided[monster_id];
+    nlarn->monster_genocided[monster_id] = TRUE;
+    return nlarn->monster_genocided[monster_id];
 }
 
 int monster_is_genocided(int monster_id)
 {
     assert(monster_id > MT_NONE && monster_id < MT_MAX);
-    return monster_genocided[monster_id];
+    return nlarn->monster_genocided[monster_id];
 }
 
 void monster_effect_expire(monster *m, message_log *log)

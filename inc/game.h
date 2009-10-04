@@ -19,6 +19,7 @@
 #ifndef __GAME_H_
 #define __GAME_H_
 
+#include "items.h"
 #include "level.h"
 #include "player.h"
 
@@ -41,8 +42,24 @@ typedef struct game
     gchar *fortunes;
     gchar *highscores;
 
+    /* stock of the dnd store */
+    /* TODO: make sure these items are freed on terminating the game */
+    inventory *store_stock;
+
+    /* item / monster status */
+    int amulet_created[AM_MAX];
+    int weapon_created[WT_MAX];
+    int monster_genocided[MT_MAX];
+
+    int amulet_material_mapping[AM_MAX - 1];
+    int potion_desc_mapping[PO_MAX - 1];
+    int ring_material_mapping[RT_MAX - 1];
+    int scroll_desc_mapping[ST_MAX - 1];
+    int book_desc_mapping[SP_MAX - 1];
+
     /* flags */
     guint32
+        cure_dianthr_created: 1, /* the potion of cure dianthroritis is a unique item */
         wizard: 1; /* wizard mode */
 } game;
 

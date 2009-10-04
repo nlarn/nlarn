@@ -65,7 +65,6 @@ enum potion_objects {
 
 /* function declarations */
 
-void potion_desc_shuffle();
 char *potion_desc(int potion_id);
 
 int potion_with_effect(struct player *p, item *potion);

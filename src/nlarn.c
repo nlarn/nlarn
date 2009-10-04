@@ -25,10 +25,10 @@
 #include "game.h"
 #include "nlarn.h"
 
+game *nlarn = NULL;
+
 int main(int argc, char *argv[])
 {
-    game *g;
-
     /* count of moves used by last action */
     int moves_count = 0;
 
@@ -44,19 +44,19 @@ int main(int argc, char *argv[])
            "This is free software, and you are welcome to\n"
            "redistribute it under certain conditions.\n\n");
 
-    g = game_new(argc, argv);
+    nlarn = game_new(argc, argv);
 
     /* put the player into the town */
-    player_level_enter(g->p, g->levels[0], FALSE);
+    player_level_enter(nlarn->p, nlarn->levels[0], FALSE);
 
     display_init();
     display_draw();
 
     /* check if mesgfile exists */
-    if (!g_file_get_contents(game_mesgfile(g), &file_content, NULL, NULL))
+    if (!g_file_get_contents(game_mesgfile(nlarn), &file_content, NULL, NULL))
     {
         display_shutdown();
-        game_destroy(g);
+        game_destroy(nlarn);
 
         fprintf(stderr, "Error: Cannot find message file.\n");
         exit(EXIT_FAILURE);
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     display_show_message("Welcome to the game of NLarn!", file_content);
     g_free(file_content);
 
-    display_paint_screen(g->p);
+    display_paint_screen(nlarn->p);
 
     /* main event loop */
     do
@@ -80,14 +80,14 @@ int main(int argc, char *argv[])
 #ifdef KEY_B1
         case KEY_B1:
 #endif
-            moves_count = player_move(g->p, GD_WEST);
+            moves_count = player_move(nlarn->p, GD_WEST);
             break;
 
         case 'y':
         case '7':
         case KEY_HOME:
         case KEY_A1:
-            moves_count = player_move(g->p, GD_NW);
+            moves_count = player_move(nlarn->p, GD_NW);
             break;
 
         case 'l':
@@ -96,14 +96,14 @@ int main(int argc, char *argv[])
 #ifdef KEY_B3
         case KEY_B3:
 #endif
-            moves_count = player_move(g->p, GD_EAST);
+            moves_count = player_move(nlarn->p, GD_EAST);
             break;
 
         case 'n':
         case '3':
         case KEY_NPAGE:
         case KEY_C3:
-            moves_count = player_move(g->p, GD_SE);
+            moves_count = player_move(nlarn->p, GD_SE);
             break;
 
         case 'k':
@@ -112,14 +112,14 @@ int main(int argc, char *argv[])
 #ifdef KEY_A2
         case KEY_A2:
 #endif
-            moves_count = player_move(g->p, GD_NORTH);
+            moves_count = player_move(nlarn->p, GD_NORTH);
             break;
 
         case 'u':
         case '9':
         case KEY_PPAGE:
         case KEY_A3:
-            moves_count = player_move(g->p, GD_NE);
+            moves_count = player_move(nlarn->p, GD_NE);
             break;
 
         case 'j':
@@ -128,29 +128,29 @@ int main(int argc, char *argv[])
 #ifdef KEY_C2
         case KEY_C2:
 #endif
-            moves_count = player_move(g->p, GD_SOUTH);
+            moves_count = player_move(nlarn->p, GD_SOUTH);
             break;
 
         case 'b':
         case '1':
         case KEY_END:
         case KEY_C1:
-            moves_count = player_move(g->p, GD_SW);
+            moves_count = player_move(nlarn->p, GD_SW);
             break;
 
             /* look */
         case ':':
-            moves_count = player_examine(g->p, g->p->pos);
+            moves_count = player_examine(nlarn->p, nlarn->p->pos);
             break;
 
             /* pick up */
         case ',':
-            moves_count = player_pickup(g->p);
+            moves_count = player_pickup(nlarn->p);
             break;
 
         case '@':
-            display_config_autopickup(g->p);
-            player_autopickup_show(g->p);
+            display_config_autopickup(nlarn->p);
+            player_autopickup_show(nlarn->p);
             break;
 
             /* sit and wait */
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
             /* help */
         case KEY_F(1):
         case '?':
-            if (g_file_get_contents(game_helpfile(g), &file_content, NULL, NULL))
+            if (g_file_get_contents(game_helpfile(nlarn), &file_content, NULL, NULL))
             {
                 display_show_message("Help for The Caverns of NLarn", file_content);
                 g_free(file_content);
@@ -178,108 +178,108 @@ int main(int argc, char *argv[])
 
             /* cast a spell */
         case 'c':
-            moves_count = spell_cast(g->p);
+            moves_count = spell_cast(nlarn->p);
             break;
 
             /* go down stairs / enter a building */
         case '>':
-            if (!(moves_count = player_stairs_down(g->p)))
-                moves_count = player_building_enter(g->p);
+            if (!(moves_count = player_stairs_down(nlarn->p)))
+                moves_count = player_building_enter(nlarn->p);
             break;
 
             /* go up stairs */
         case '<':
-            moves_count = player_stairs_up(g->p);
+            moves_count = player_stairs_up(nlarn->p);
             break;
 
             /* display inventory weight */
         case 'g':
-            log_add_entry(g->p->log, "The weight of your inventory is %s.",
-                          player_inv_weight(g->p));
+            log_add_entry(nlarn->p->log, "The weight of your inventory is %s.",
+                          player_inv_weight(nlarn->p));
             break;
 
             /* display inventory */
         case 'i':
-            player_inv_display(g->p);
+            player_inv_display(nlarn->p);
             break;
 
             /* desecrate altar */
         case 'A':
-            moves_count = player_altar_desecrate(g->p);
+            moves_count = player_altar_desecrate(nlarn->p);
             break;
 
             /* close door */
         case 'C':
-            moves_count = player_door_close(g->p);
+            moves_count = player_door_close(nlarn->p);
             break;
 
             /* drink from fountain */
         case 'D':
-            moves_count = player_fountain_drink(g->p);
+            moves_count = player_fountain_drink(nlarn->p);
             break;
 
             /* open door / container */
         case 'O':
-            if (inv_length_filtered(level_ilist_at(g->p->level, g->p->pos),
+            if (inv_length_filtered(level_ilist_at(nlarn->p->level, nlarn->p->pos),
                                     &inv_filter_container) > 0)
             {
-                container_open(g->p, NULL, NULL);
+                container_open(nlarn->p, NULL, NULL);
             }
             else
             {
-                moves_count = player_door_open(g->p);
+                moves_count = player_door_open(nlarn->p);
             }
             break;
 
             /* pray at altar */
         case 'p':
-            moves_count = player_altar_pray(g->p);
+            moves_count = player_altar_pray(nlarn->p);
             break;
 
         case 'P':
-            if (g->p->outstanding_taxes)
-                log_add_entry(g->p->log, "You presently owe %d gp in taxes.",
-                              g->p->outstanding_taxes);
+            if (nlarn->p->outstanding_taxes)
+                log_add_entry(nlarn->p->log, "You presently owe %d gp in taxes.",
+                              nlarn->p->outstanding_taxes);
             else
-                log_add_entry(g->p->log, "You do not owe any taxes.");
+                log_add_entry(nlarn->p->log, "You do not owe any taxes.");
             break;
 
             /* remove gems from throne */
         case 'R':
-            moves_count = player_throne_pillage(g->p);
+            moves_count = player_throne_pillage(nlarn->p);
             break;
 
             /* sit on throne */
         case 'S':
-            moves_count = player_throne_sit(g->p);
+            moves_count = player_throne_sit(nlarn->p);
             break;
 
             /* tidy up at fountain */
         case 't':
-            moves_count = player_fountain_wash(g->p);
+            moves_count = player_fountain_wash(nlarn->p);
             break;
 
         case 'v':
-            log_add_entry(g->p->log, "NLarn version %d.%d.%d, built on %s.",
+            log_add_entry(nlarn->p->log, "NLarn version %d.%d.%d, built on %s.",
                           VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, __DATE__);
             break;
 
         case '\\':
-            if ((file_content = player_item_identified_list(g->p)))
+            if ((file_content = player_item_identified_list(nlarn->p)))
             {
                 display_show_message("Identified items", file_content);
                 g_free(file_content);
             }
             else
             {
-                log_add_entry(g->p->log, "You have not discovered any item yet.");
+                log_add_entry(nlarn->p->log, "You have not discovered any item yet.");
             }
             break;
 
         case KEY_F(12) :
         case 'Q':
             if (display_get_yesno("Are you sure you want to quit?", NULL, NULL))
-                player_die(g->p, PD_QUIT, 0);
+                player_die(nlarn->p, PD_QUIT, 0);
             break;
 
             /* redraw screen */
@@ -290,47 +290,47 @@ int main(int argc, char *argv[])
 
             /* message log browser */
         case 18: /* ^R */
-            display_show_history(g->p->log, "Message history");
+            display_show_history(nlarn->p->log, "Message history");
             break;
 
             /* enable wizard mode */
         case 23: /* ^W */
-            if (!game_wizardmode(g))
+            if (!game_wizardmode(nlarn))
             {
                 if (display_get_yesno("Are you sure you want to switch to Wizard mode?\n" \
                                       "You will not be able to switch back to normal " \
                                       "gameplay and your score will not be counted.", NULL, NULL))
-                    game_wizardmode(g) = TRUE;
-                log_add_entry(g->p->log, "Wizard mode has been activated.");
+                    game_wizardmode(nlarn) = TRUE;
+                log_add_entry(nlarn->p->log, "Wizard mode has been activated.");
             }
             else
             {
-                log_add_entry(g->p->log, "Wizard mode is already enabled.");
+                log_add_entry(nlarn->p->log, "Wizard mode is already enabled.");
             }
 
             break;
 
             /* *** DEBUGGING SUPPORT *** */
         case '+': /* dungeon level up */
-            if (game_wizardmode(g) && (g->p->level->nlevel > 0))
-                moves_count = player_level_enter(g->p, g->levels[g->p->level->nlevel - 1], TRUE);
+            if (game_wizardmode(nlarn) && (nlarn->p->level->nlevel > 0))
+                moves_count = player_level_enter(nlarn->p, nlarn->levels[nlarn->p->level->nlevel - 1], TRUE);
 
             break;
 
         case '-': /* dungeon level down */
-            if (game_wizardmode(g) && (g->p->level->nlevel < (LEVEL_MAX - 1)))
-                moves_count = player_level_enter(g->p, g->levels[g->p->level->nlevel + 1], TRUE);
+            if (game_wizardmode(nlarn) && (nlarn->p->level->nlevel < (LEVEL_MAX - 1)))
+                moves_count = player_level_enter(nlarn->p, nlarn->levels[nlarn->p->level->nlevel + 1], TRUE);
             break;
 
         case 562: /* ^up - gain experience level */
-            if (game_wizardmode(g))
-                player_lvl_gain(g->p, 1);
+            if (game_wizardmode(nlarn))
+                player_lvl_gain(nlarn->p, 1);
 
             break;
 
         case 521: /* ^down - lose experience level */
-            if (game_wizardmode(g))
-                player_lvl_lose(g->p, 1);
+            if (game_wizardmode(nlarn))
+                player_lvl_lose(nlarn->p, 1);
 
             break;
         }
@@ -338,18 +338,18 @@ int main(int argc, char *argv[])
         /* manipulate game time */
         if (moves_count)
         {
-            game_spin_the_wheel(g, moves_count);
+            game_spin_the_wheel(nlarn, moves_count);
 
-            g->p->stats.moves_made += moves_count;
+            nlarn->p->stats.moves_made += moves_count;
             moves_count = 0;
         }
 
         /* recalculate FOV */
-        visrange = (player_effect(g->p, ET_BLINDNESS) ? 0 : 6 + player_effect(g->p, ET_AWARENESS));
-        player_update_fov(g->p, visrange);
+        visrange = (player_effect(nlarn->p, ET_BLINDNESS) ? 0 : 6 + player_effect(nlarn->p, ET_AWARENESS));
+        player_update_fov(nlarn->p, visrange);
 
         /* repaint screen */
-        display_paint_screen(g->p);
+        display_paint_screen(nlarn->p);
     }
     while (TRUE); /* main event loop */
 }

@@ -123,7 +123,6 @@ typedef struct player
 
     position pos; /* player's position */
     level *level; /* current dungeon level */
-    struct game *game; /* pointer to game the player is in */
     player_stats stats; /* statistics */
     message_log *log; /* game message log */
 
@@ -179,7 +178,7 @@ typedef enum player_cod
 
 /* function declarations */
 
-player *player_new(struct game *game);
+player *player_new();
 void player_destroy(player *p);
 
 int player_regenerate(player *p);

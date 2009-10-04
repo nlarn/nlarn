@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "display.h"
+#include "nlarn.h"
 #include "spells.h"
 #include "spheres.h"
 
@@ -306,8 +307,6 @@ const spell_data spells[SP_MAX] =
     },
 };
 
-static int book_desc_mapping[SP_MAX - 1] = { 0 };
-
 static const char *book_descriptions[SP_MAX - 1] =
 {
     "parchment-bound",
@@ -557,7 +556,7 @@ int spell_learn(player *p, guint spell_type)
     if (!spell_known(p, spell_type))
     {
         s = spell_new(spell_type);
-        s->learnt = game_turn(p->game);
+        s->learnt = game_turn(nlarn);
 
         /* TODO: add a check for intelligence */
         if (spell_level(s) > (int)p->lvl)
@@ -649,7 +648,7 @@ int spell_type_player(spell *s, struct player *p)
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_PLAYER));
 
-    e = effect_new(spell_effect(s), game_turn(p->game));
+    e = effect_new(spell_effect(s), game_turn(nlarn));
 
     /* make effects that are permanent by default non-permanent */
     /* unless it is the spell of healing, which does work this way */
@@ -762,7 +761,7 @@ int spell_type_point(spell *s, struct player *p)
                           monster_name(monster));
         }
 
-        e = effect_new(spell_effect(s), game_turn(p->game));
+        e = effect_new(spell_effect(s), game_turn(nlarn));
 
         if (!e->amount)
         {
@@ -956,10 +955,10 @@ gboolean spell_alter_reality(player *p)
     nlevel = g_malloc0(sizeof (level));
     nlevel->nlevel = olevel->nlevel;
 
-    level_new(nlevel, game_mazefile(p->game));
+    level_new(nlevel, game_mazefile(nlarn));
 
     /* make new level active */
-    p->game->levels[p->level->nlevel] = nlevel;
+    nlarn->levels[p->level->nlevel] = nlevel;
     p->level = nlevel;
 
     /* reposition player (if needed) */
@@ -1181,7 +1180,7 @@ gboolean spell_vaporize_rock(player *p)
         break;
 
     case LS_STATUE:
-        if (game_difficulty(p->game) < 3)
+        if (game_difficulty(nlarn) < 3)
         {
             inv_add(&level_ilist_at(p->level, pos),
                     item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)), 0));
@@ -1221,22 +1220,18 @@ gboolean spell_vaporize_rock(player *p)
     return TRUE;
 }
 
-void book_desc_shuffle()
-{
-    shuffle(book_desc_mapping, SP_MAX - 1, 0);
-}
 
 char *book_desc(int book_id)
 {
     assert(book_id > SP_NONE && book_id < SP_MAX);
-    return (char *)book_descriptions[book_desc_mapping[book_id - 1]];
+    return (char *)book_descriptions[nlarn->book_desc_mapping[book_id - 1]];
 }
 
 int book_weight(item *book)
 {
     assert (book != NULL && book->type == IT_BOOK);
 
-    switch (book_desc_mapping[book->id - 1])
+    switch (nlarn->book_desc_mapping[book->id - 1])
     {
     case 1: /* thick */
     case 4: /* heavy */

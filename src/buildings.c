@@ -25,16 +25,14 @@
 #include "nlarn.h"
 #include "player.h"
 
-/* stock of the dnd store */
-/* TODO: make sure these items are freed on terminating the game */
-static inventory *store_stock = NULL;
-
 static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
                                       "us to not do business with tax evaders. " \
                                       "They have also told us that you owe back " \
                                       "taxes and, as we must comply with the " \
                                       "law, we cannot serve you at this time." \
                                       "\n\nSo Sorry.";
+
+static void building_dndstore_init();
 
 static int building_player_check(player *p, guint amount);
 static void building_player_charge(player *p, guint amount);
@@ -88,7 +86,7 @@ int building_bank(player *p)
     }
 
     /* pay interest */
-    mobuls = (game_turn(p->game) - p->interest_lasttime) / 100;
+    mobuls = (nlarn->gtime - p->interest_lasttime) / 100;
 
     if (p->bank_account && (mobuls > 0))
     {
@@ -98,7 +96,7 @@ int building_bank(player *p)
         for (i = 1; i <= mobuls; i++)
             p->bank_account += p->bank_account / 250;
 
-        p->interest_lasttime = game_turn(p->game);
+        p->interest_lasttime = game_turn(nlarn);
 
         /* calculate interest payed */
         interest = p->bank_account - interest;
@@ -132,7 +130,7 @@ int building_bank(player *p)
         callback = g_malloc(sizeof(display_inv_callback));
         callback->description = "(s)ell";
         callback->key = 's';
-        callback->inv = &store_stock;
+        callback->inv = &nlarn->store_stock;
         callback->function = &building_item_buy;
         callback->checkfun = &player_item_is_sellable;
         callback->active = FALSE;
@@ -229,6 +227,12 @@ int building_dndstore(player *p)
 
     assert(p != NULL);
 
+    if (!nlarn->store_stock)
+    {
+        /* fill store with goods */
+        building_dndstore_init();
+    }
+
     /* no business if player has outstanding taxes */
     if (p->outstanding_taxes)
     {
@@ -242,7 +246,7 @@ int building_dndstore(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(b)uy";
     callback->key = 'b';
-    callback->inv = &store_stock;
+    callback->inv = &nlarn->store_stock;
     callback->function = &building_item_sell;
     callback->checkfun = &player_item_is_affordable;
     callback->active = FALSE;
@@ -251,60 +255,12 @@ int building_dndstore(player *p)
     display_show_message((char *)title, (char *)msg_welcome);
     display_paint_screen(p);
 
-    display_inventory((char *)title, p, store_stock, callbacks, TRUE, NULL);
+    display_inventory((char *)title, p, nlarn->store_stock, callbacks, TRUE, NULL);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);
 
     return turns;
-}
-
-void building_dndstore_init()
-{
-    int loop, count;
-    item_t type = IT_NONE;
-
-    /* do nothing if the store has already been initialized */
-    if (store_stock)
-        return;
-
-    for (type = IT_ARMOUR; type < IT_MAX; type++)
-    {
-        if (type == IT_GOLD || type == IT_GEM || type == IT_CONTAINER)
-        {
-            continue;
-        }
-
-        if (item_is_stackable(type) && (type != IT_BOOK))
-        {
-            count = 3;
-        }
-        else
-        {
-            count = 1;
-        }
-
-        for (loop = 0; loop < count; loop++)
-        {
-            int id;
-
-            for (id = 1; id < item_max_id(type); id++)
-            {
-                item *it = item_new(type, id, 0);
-
-                /* do not generate unobtainable weapons */
-                if ((type == IT_WEAPON) && !weapon_is_obtainable(it))
-                {
-                    item_destroy(it);
-                }
-                else
-                {
-                    inv_add(&store_stock, it);
-                }
-            }
-        }
-    }
-
 }
 
 int building_home(player *p)
@@ -345,7 +301,7 @@ int building_home(player *p)
         /* carrying the potion */
         text = g_string_new(msg_found);
 
-        if (game_turn(p->game) < TIMELIMIT)
+        if (game_turn(nlarn) < TIMELIMIT)
         {
             /* won the game */
             g_string_append(text, msg_won);
@@ -366,7 +322,7 @@ int building_home(player *p)
             player_die(p, PD_TOO_LATE, 0);
         }
     }
-    else if (game_turn(p->game) > TIMELIMIT)
+    else if (game_turn(nlarn) > TIMELIMIT)
     {
         /* too late, no potion */
         text = g_string_new(msg_died);
@@ -381,7 +337,7 @@ int building_home(player *p)
         /* casual visit, report remaining time */
         text = g_string_new(NULL);
         g_string_printf(text, msg_home, p->name,
-                        gtime2mobuls(game_remaining_turns(p->game)),
+                        gtime2mobuls(game_remaining_turns(nlarn)),
                         p->name);
 
         display_show_message("Your home", text->str);
@@ -473,7 +429,7 @@ int building_school(player *p)
     assert(p != NULL);
 
     /* courses become more expensive with rising difficulty */
-    price = 250 + (game_difficulty(p->game) * 50);
+    price = 250 + (game_difficulty(nlarn) * 50);
 
     text = g_string_new(msg_greet);
 
@@ -617,7 +573,7 @@ int building_tradepost(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(s)ell";
     callback->key = 's';
-    callback->inv = &store_stock;
+    callback->inv = &nlarn->store_stock;
     callback->function = &building_item_buy;
     callback->checkfun = &player_item_is_sellable;
     callback->active = FALSE;
@@ -683,6 +639,49 @@ static void building_player_charge(player *p, guint amount)
     {
         guint player_gold = player_get_gold(p);
         player_set_gold(p, player_gold - amount);
+    }
+}
+
+static void building_dndstore_init()
+{
+    int loop, count;
+    item_t type = IT_NONE;
+
+    for (type = IT_ARMOUR; type < IT_MAX; type++)
+    {
+        if (type == IT_GOLD || type == IT_GEM || type == IT_CONTAINER)
+        {
+            continue;
+        }
+
+        if (item_is_stackable(type) && (type != IT_BOOK))
+        {
+            count = 3;
+        }
+        else
+        {
+            count = 1;
+        }
+
+        for (loop = 0; loop < count; loop++)
+        {
+            int id;
+
+            for (id = 1; id < item_max_id(type); id++)
+            {
+                item *it = item_new(type, id, 0);
+
+                /* do not generate unobtainable weapons */
+                if ((type == IT_WEAPON) && !weapon_is_obtainable(it))
+                {
+                    item_destroy(it);
+                }
+                else
+                {
+                    inv_add(&nlarn->store_stock, it);
+                }
+            }
+        }
     }
 }
 
@@ -804,7 +803,7 @@ int building_item_identify(player *p, inventory **inv, item *it)
     /* don't need that parameter */
     inv = NULL;
 
-    price = 50 << game_difficulty(p->game);
+    price = 50 << game_difficulty(nlarn);
 
     item_describe(it, player_item_known(p, it), TRUE, TRUE, name_unknown, 60);
 
@@ -853,7 +852,7 @@ static int building_item_repair(player *p, inventory **inv, item *it)
     damages += it->corroded;
     damages += it->rusty;
 
-    price = (50 << game_difficulty(p->game)) * damages;
+    price = (50 << game_difficulty(nlarn)) * damages;
 
     item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 60);
 

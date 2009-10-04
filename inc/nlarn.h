@@ -19,10 +19,15 @@
 #ifndef __NLARN_H_
 #define __NLARN_H_
 
+#include "game.h"
+
 #define VERSION_MAJOR 0 /* this is the present version # of the program */
 #define VERSION_MINOR 4
 #define VERSION_PATCH 1
 
 #define TAXRATE 1/20    /* tax rate for the LRS */
+
+/* the entire game */
+game *nlarn;
 
 #endif

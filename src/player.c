@@ -25,6 +25,7 @@
 #include "display.h"
 #include "food.h"
 #include "game.h"
+#include "nlarn.h"
 #include "player.h"
 
 static const char aa1[] = "mighty evil master";
@@ -101,7 +102,7 @@ static void player_calculate_octant(player *p, int row, float start, float end, 
 
 static char *player_death_description(game_score_t *score, int verbose);
 
-player *player_new(struct game *game)
+player *player_new()
 {
     player *p;
     item *it;
@@ -142,9 +143,6 @@ player *player_new(struct game *game)
 
     /* potion of cure dianthroritis is always known */
     p->identified_potions[PO_CURE_DIANTHR] = TRUE;
-
-    /* set pointer back to game */
-    p->game = game;
 
     return p;
 }
@@ -201,7 +199,7 @@ int player_regenerate(player *p)
     assert(p != NULL);
 
     /* modifier for frequency */
-    frequency = game_difficulty(p->game) << 3;
+    frequency = game_difficulty(nlarn) << 3;
 
     /* handle regeneration */
     if (p->regen_counter == 0)
@@ -234,7 +232,7 @@ int player_regenerate(player *p)
     /* handle poison */
     if ((e = player_effect_get(p, ET_POISON)))
     {
-        if ((game_turn(p->game) - e->start) % (22 - frequency) == 0)
+        if ((game_turn(nlarn) - e->start) % (22 - frequency) == 0)
         {
             damage *dam = damage_new(DAM_POISON, e->amount, NULL);
 
@@ -367,7 +365,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     log_add_entry(p->log, message);
 
     /* resume game if wizard mode is enabled */
-    if (game_wizardmode(p->game) && (cause_type < PD_TOO_LATE))
+    if (game_wizardmode(nlarn) && (cause_type < PD_TOO_LATE))
     {
         log_add_entry(p->log, "WIZARD MODE. You stay alive.");
 
@@ -380,13 +378,13 @@ void player_die(player *p, player_cod cause_type, int cause)
     }
 
     /* do not show scores when in wizardmode */
-    if (!game_wizardmode(p->game))
+    if (!game_wizardmode(nlarn))
     {
         /* redraw screen to make sure player can see the cause of his death */
         display_paint_screen(p);
 
-        score = game_score(p->game, cause_type, cause);
-        scores = game_score_add(p->game, score);
+        score = game_score(nlarn, cause_type, cause);
+        scores = game_score_add(nlarn, score);
 
         tmp = player_death_description(score, TRUE);
         text = g_string_new(tmp);
@@ -493,7 +491,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     }
 
     display_shutdown();
-    game_destroy(p->game);
+    game_destroy(nlarn);
 
     exit(EXIT_SUCCESS);
 }
@@ -520,7 +518,7 @@ gint64 player_calc_score(player *p, int won)
     /* give points for remaining time if game has been won */
     if (won)
     {
-        score += game_remaining_turns(p->game) * (game_difficulty(p->game) + 1);
+        score += game_remaining_turns(nlarn) * (game_difficulty(nlarn) + 1);
     }
 
     return score;
@@ -629,7 +627,7 @@ int player_attack(player *p, monster *m)
            + (p->eq_weapon ? (weapon_wc(p->eq_weapon) / 4) : 0)
            + monster_ac(m) /* FIXME: I don't want those pointless D&D rules */
            - 12
-           - game_difficulty(p->game);
+           - game_difficulty(nlarn);
 
     roll = rand_1n(21);
     if ((roll <= prop) || (roll == 1))
@@ -640,7 +638,7 @@ int player_attack(player *p, monster *m)
         amount = player_get_str(p)
                  + player_get_wc(p)
                  - 12
-                 - game_difficulty(p->game);
+                 - game_difficulty(nlarn);
 
         dam = damage_new(DAM_PHYSICAL, rand_1n(amount + 1), p);
 
@@ -776,7 +774,7 @@ int player_level_enter(player *p, level *l, gboolean teleported)
     if (p->level)
     {
         /* store the last turn player has been on this level */
-        p->level->visited = game_turn(p->game);
+        p->level->visited = game_turn(nlarn);
 
         /* remove link to player */
         p->level->player = NULL;
@@ -784,7 +782,7 @@ int player_level_enter(player *p, level *l, gboolean teleported)
 
     if (!(l->visited))
     {
-        level_new(l, game_mazefile(p->game));
+        level_new(l, game_mazefile(nlarn));
 
         if (p->stats.deepest_level < l->nlevel)
         {
@@ -795,7 +793,7 @@ int player_level_enter(player *p, level *l, gboolean teleported)
     {
         /* call level timer */
         /* count might be negative if time has been modified (time warp) */
-        count = abs(game_turn(p->game) - l->visited);
+        count = abs(game_turn(nlarn) - l->visited);
         level_timer(l, min(count, G_MAXUINT8));
 
         monsters_genocide(l);
@@ -1090,15 +1088,15 @@ void player_lvl_gain(player *p, int count)
     for (i = 0; i < count; i++)
     {
         /* increase HP max */
-        base = (p->constitution - game_difficulty(p->game)) >> 1;
-        if (p->lvl < max(7 - game_difficulty(p->game), 0))
+        base = (p->constitution - game_difficulty(nlarn)) >> 1;
+        if (p->lvl < max(7 - game_difficulty(nlarn), 0))
             base += p->constitution >> 2;
 
         player_hp_max_gain(p, rand_1n(3) + rand_0n(max(base, 1)));
 
         /* increase MP max */
-        base = (p->intelligence - game_difficulty(p->game)) >> 1;
-        if (p->lvl < max(7 - game_difficulty(p->game), 0))
+        base = (p->intelligence - game_difficulty(nlarn)) >> 1;
+        if (p->lvl < max(7 - game_difficulty(nlarn), 0))
             base += p->intelligence >> 2;
 
         player_mp_max_gain(p, rand_1n(3) + rand_0n(max(base, 1)));
@@ -1122,15 +1120,15 @@ void player_lvl_lose(player *p, int count)
     for (i = 0; i < count; i++)
     {
         /* decrease HP max */
-        base = (p->constitution - game_difficulty(p->game)) >> 1;
-        if (p->lvl < max(7 - game_difficulty(p->game), 0))
+        base = (p->constitution - game_difficulty(nlarn)) >> 1;
+        if (p->lvl < max(7 - game_difficulty(nlarn), 0))
             base += p->constitution >> 2;
 
         player_hp_max_lose(p, rand_1n(3) + rand_0n(max(base, 1)));
 
         /* decrease MP max */
-        base = (p->intelligence - game_difficulty(p->game)) >> 1;
-        if (p->lvl < max(7 - game_difficulty(p->game), 0))
+        base = (p->intelligence - game_difficulty(nlarn)) >> 1;
+        if (p->lvl < max(7 - game_difficulty(nlarn), 0))
             base += p->intelligence >> 2;
 
         player_mp_max_lose(p, rand_1n(3) + rand_0n(max(base, 1)));
@@ -1309,7 +1307,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         case DAM_POISON:
             if (!(e = player_effect_get(p, ET_POISON)))
             {
-                e = effect_new(ET_POISON, game_turn(p->game));
+                e = effect_new(ET_POISON, game_turn(nlarn));
                 e->amount = dam->amount;
                 player_effect_add(p, e);
             }
@@ -1323,7 +1321,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             /* it is not possible to become more blind */
             if (!(e = player_effect_get(p, ET_BLINDNESS)))
             {
-                e = effect_new(ET_BLINDNESS, game_turn(p->game));
+                e = effect_new(ET_BLINDNESS, game_turn(nlarn));
                 player_effect_add(p, e);
             }
             break;
@@ -1331,7 +1329,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         case DAM_CONFUSION:
             if (!(e = player_effect_get(p, ET_CONFUSION)))
             {
-                e = effect_new(ET_CONFUSION, game_turn(p->game));
+                e = effect_new(ET_CONFUSION, game_turn(nlarn));
                 player_effect_add(p, e);
             }
             break;
@@ -1339,19 +1337,19 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         case DAM_PARALYSIS:
             if (!(e = player_effect_get(p, ET_PARALYSIS)))
             {
-                e = effect_new(ET_PARALYSIS, game_turn(p->game));
+                e = effect_new(ET_PARALYSIS, game_turn(nlarn));
                 player_effect_add(p, e);
             }
             break;
 
         case DAM_DEC_STR:
-            e = effect_new(ET_DEC_STR, game_turn(p->game));
+            e = effect_new(ET_DEC_STR, game_turn(nlarn));
             e->turns = dam->amount * 50;
             player_effect_add(p, e);
             break;
 
         case DAM_DEC_DEX:
-            e = effect_new(ET_DEC_DEX, game_turn(p->game));
+            e = effect_new(ET_DEC_DEX, game_turn(nlarn));
             e->turns = dam->amount * 50;
             player_effect_add(p, e);
             break;
@@ -1499,7 +1497,7 @@ void player_effect_add(player *p, effect *e)
             break;
 
         case ET_INC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_INC_CHA, ET_INC_WIS), game_turn(p->game)));
+            player_effect_add(p, effect_new(rand_m_n(ET_INC_CHA, ET_INC_WIS), game_turn(nlarn)));
             break;
 
         case ET_INC_HP_MAX:
@@ -1560,7 +1558,7 @@ void player_effect_add(player *p, effect *e)
             break;
 
         case ET_DEC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CHA, ET_DEC_WIS), game_turn(p->game)));
+            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CHA, ET_DEC_WIS), game_turn(nlarn)));
             break;
 
         case ET_DEC_HP_MAX:
@@ -1588,7 +1586,7 @@ void player_effect_add(player *p, effect *e)
     }
     else if (e->type == ET_SLEEP)
     {
-        game_spin_the_wheel(p->game, e->turns);
+        game_spin_the_wheel(nlarn, e->turns);
         effect_destroy(e);
     }
     else
@@ -1867,7 +1865,7 @@ void player_inv_weight_recalc(inventory *inv, item *item)
         /* make overstrained */
         if (!player_effect(p, ET_OVERSTRAINED))
         {
-            player_effect_add(p, effect_new(ET_OVERSTRAINED, game_turn(p->game)));
+            player_effect_add(p, effect_new(ET_OVERSTRAINED, game_turn(nlarn)));
         }
     }
     else if (pack_weight < (int)(can_carry * 1.3) && (pack_weight > can_carry))
@@ -1880,7 +1878,7 @@ void player_inv_weight_recalc(inventory *inv, item *item)
 
         if (!player_effect(p, ET_BURDENED))
         {
-            player_effect_add(p, effect_new(ET_BURDENED, game_turn(p->game)));
+            player_effect_add(p, effect_new(ET_BURDENED, game_turn(nlarn)));
         }
     }
     else if (pack_weight < can_carry)
@@ -2656,7 +2654,7 @@ int player_item_use(player *p, inventory **inv, item *it)
         {
             log_add_entry(p->log,
                           "It has a piece of paper inside. It reads: \"%s\"",
-                          food_get_fortune(game_fortunes(p->game)));
+                          food_get_fortune(game_fortunes(nlarn)));
         }
 
         time = 2;
@@ -2971,7 +2969,7 @@ int player_altar_desecrate(player *p)
                                                 rect_new_sized(p->pos, 1),
                                                 LE_MONSTER));
 
-        e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(p->game));
+        e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(nlarn));
         e->turns = 2500;
         player_effect_add(p, e);
     }
@@ -3052,7 +3050,7 @@ int player_altar_pray(player *p)
                                                     rect_new_sized(p->pos, 1),
                                                     LE_MONSTER));
 
-            e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(p->game));
+            e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(nlarn));
             e->turns = 200;
             player_effect_add(p, e);
 
@@ -3063,11 +3061,11 @@ int player_altar_pray(player *p)
         {
             log_add_entry(p->log, "You have been heard!");
 
-            e = effect_new(ET_PROTECTION, game_turn(p->game));
+            e = effect_new(ET_PROTECTION, game_turn(nlarn));
             e->turns = 500;
             player_effect_add(p, e);
 
-            e = effect_new(ET_UNDEAD_PROTECTION, game_turn(p->game));
+            e = effect_new(ET_UNDEAD_PROTECTION, game_turn(nlarn));
             player_effect_add(p, e);
         }
 
@@ -3320,13 +3318,13 @@ int player_fountain_drink(player *p)
 
     if (chance(7))
     {
-        e = effect_new(ET_SICKNESS, game_turn(p->game));
+        e = effect_new(ET_SICKNESS, game_turn(nlarn));
         player_effect_add(p, e);
     }
     else if (chance(13))
     {
         /* see invisible */
-        e = effect_new(ET_INFRAVISION, game_turn(p->game));
+        e = effect_new(ET_INFRAVISION, game_turn(nlarn));
         player_effect_add(p, e);
     }
     else if (chance(45))
@@ -3447,7 +3445,7 @@ int player_fountain_drink(player *p)
         /* the rng stated that it wants the players attributes changed */
         if (et)
         {
-            e = effect_new(et, game_turn(p->game));
+            e = effect_new(et, game_turn(nlarn));
             player_effect_add(p, e);
         }
     }
@@ -3527,17 +3525,17 @@ int player_stairs_down(player *p)
     switch (level_stationary_at(p->level, p->pos))
     {
     case LS_STAIRSDOWN:
-        nlevel = p->game->levels[p->level->nlevel + 1];
+        nlevel = nlarn->levels[p->level->nlevel + 1];
         break;
 
     case LS_ELEVATORDOWN:
         /* first vulcano level */
-        nlevel = p->game->levels[LEVEL_MAX - 1];
+        nlevel = nlarn->levels[LEVEL_MAX - 1];
         break;
 
     case LS_ENTRANCE:
         if (p->level->nlevel == 0)
-            nlevel = p->game->levels[1];
+            nlevel = nlarn->levels[1];
         else
             log_add_entry(p->log, "Climb up to return to town.");
         break;
@@ -3559,17 +3557,17 @@ int player_stairs_up(player *p)
     switch (level_stationary_at(p->level, p->pos))
     {
     case LS_STAIRSUP:
-        nlevel = p->game->levels[p->level->nlevel - 1];
+        nlevel = nlarn->levels[p->level->nlevel - 1];
         break;
 
     case LS_ELEVATORUP:
         /* return to town */
-        nlevel = p->game->levels[0];
+        nlevel = nlarn->levels[0];
         break;
 
     case LS_ENTRANCE:
         if (p->level->nlevel == 1)
-            nlevel = p->game->levels[0];
+            nlevel = nlarn->levels[0];
         else
             log_add_entry(p->log, "Climb down to enter the dungeon.");
 
@@ -3897,7 +3895,7 @@ static int player_trap_trigger(player *p, trap_t trap)
         switch (trap)
         {
         case TT_TRAPDOOR:
-            time += player_level_enter(p, (p->game)->levels[p->level->nlevel + 1], TRUE);
+            time += player_level_enter(p, nlarn->levels[p->level->nlevel + 1], TRUE);
             break;
 
         case TT_TELEPORT:
@@ -3923,7 +3921,7 @@ static int player_trap_trigger(player *p, trap_t trap)
                     log_add_entry(p->log, trap_e_message(trap));
                 }
 
-                player_effect_add(p, effect_new(trap_effect(trap), game_turn(p->game)));
+                player_effect_add(p, effect_new(trap_effect(trap), game_turn(nlarn)));
             }
         }
 

@@ -20,8 +20,8 @@
 #include <stdlib.h>
 
 #include "game.h"
+#include "nlarn.h"
 #include "scrolls.h"
-#include "utils.h"
 
 const magic_scroll_data scrolls[ST_MAX] =
 {
@@ -53,8 +53,6 @@ const magic_scroll_data scrolls[ST_MAX] =
     { ST_LIFE_PROTECTION,   "life protection",    ET_LIFE_PROTECTION,   3000 },
 };
 
-static int scroll_desc_mapping[ST_MAX - 1] = { 0 };
-
 static const char *_scroll_desc[ST_MAX - 1] =
 {
     "Ssyliir Wyleeum",
@@ -83,15 +81,10 @@ static const char *_scroll_desc[ST_MAX - 1] =
     "Ixos Tzek Ajak",
 };
 
-void scroll_desc_shuffle()
-{
-    shuffle(scroll_desc_mapping, ST_MAX - 1, 1);
-}
-
 char *scroll_desc(int scroll_id)
 {
     assert(scroll_id > ST_NONE && scroll_id < ST_MAX);
-    return (char *)_scroll_desc[scroll_desc_mapping[scroll_id - 1]];
+    return (char *)_scroll_desc[nlarn->scroll_desc_mapping[scroll_id - 1]];
 }
 
 int scroll_with_effect(struct player *p, item *scroll)
@@ -100,7 +93,7 @@ int scroll_with_effect(struct player *p, item *scroll)
 
     assert(p != NULL && scroll != NULL);
 
-    eff = effect_new(scroll_effect(scroll), game_turn(p->game));
+    eff = effect_new(scroll_effect(scroll), game_turn(nlarn));
     player_effect_add(p, eff);
 
     if (!effect_get_msg_start(eff))
@@ -414,7 +407,7 @@ int scroll_teleport(player *p, item *scroll)
 
     if (nlevel != p->level->nlevel)
     {
-        player_level_enter(p, p->game->levels[nlevel], TRUE);
+        player_level_enter(p, nlarn->levels[nlevel], TRUE);
         return TRUE;
     }
 
@@ -434,9 +427,9 @@ int scroll_timewarp(player *p, item *scroll)
     if (turns == 0)
         turns = 1;
 
-    if ((gint32)(game_turn(p->game) + turns) < 0)
+    if ((gint32)(game_turn(nlarn) + turns) < 0)
     {
-        turns = 1 - game_turn(p->game);
+        turns = 1 - game_turn(nlarn);
     }
 
     mobuls = gtime2mobuls(turns);
@@ -447,7 +440,7 @@ int scroll_timewarp(player *p, item *scroll)
         return FALSE;
     }
 
-    game_turn(p->game) += turns;
+    game_turn(nlarn) += turns;
     log_add_entry(p->log,
                   "You go %sward in time by %d mobul%s.",
                   (mobuls < 0) ? "back" : "for",

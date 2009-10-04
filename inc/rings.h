@@ -49,7 +49,6 @@ typedef struct ring_data
 
 /* function definitions */
 
-void ring_material_shuffle();
 item_material_t ring_material(int ring_id);
 
 /* external vars */

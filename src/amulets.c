@@ -20,7 +20,7 @@
 #include <glib.h>
 #include "amulets.h"
 #include "items.h"
-#include "utils.h"
+#include "nlarn.h"
 
 const amulet_data amulets[AM_MAX] =
 {
@@ -35,8 +35,6 @@ const amulet_data amulets[AM_MAX] =
     { AM_LARN,                "larn",             ET_INFRAVISION,       9000, },
 };
 
-static int amulet_material_mapping[AM_MAX - 1] = { 0 };
-
 static const int amulet_materials[AM_MAX - 1] =
 {
     IM_GOLD,
@@ -49,14 +47,9 @@ static const int amulet_materials[AM_MAX - 1] =
     IM_BONE
 };
 
-void amulet_material_shuffle()
-{
-    shuffle(amulet_material_mapping, AM_MAX - 1, 0);
-}
-
 item_material_t amulet_material(int amulet_id)
 {
     assert(amulet_id > AM_NONE && amulet_id < AM_MAX);
-    return amulet_materials[amulet_material_mapping[amulet_id - 1]];
+    return amulet_materials[nlarn->amulet_material_mapping[amulet_id - 1]];
 }
 

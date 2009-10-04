@@ -31,6 +31,8 @@
 static void game_move_monsters(game *g);
 static void game_move_spheres(game *g);
 
+static void game_items_shuffle(game *g);
+
 static GList *game_scores_load(game *g);
 static void game_scores_save(game *g, GList *scores);
 static int game_score_compare(const void *scr_a, const void *scr_b);
@@ -217,14 +219,7 @@ game *game_new(int argc, char *argv[])
     log_set_time(g->p->log, g->gtime);
 
     /* randomize unidentified item descriptions */
-    amulet_material_shuffle();
-    book_desc_shuffle();
-    potion_desc_shuffle();
-    ring_material_shuffle();
-    scroll_desc_shuffle();
-
-    /* fill store with goods */
-    building_dndstore_init();
+    game_items_shuffle(g);
 
     return g;
 }
@@ -416,6 +411,15 @@ static void game_move_spheres(game *g)
         s = g_ptr_array_index(l->slist, idx);
         sphere_move(s, l);
     }
+}
+
+static void game_items_shuffle(game *g)
+{
+    shuffle(g->amulet_material_mapping, AM_MAX - 1, 0);
+    shuffle(g->potion_desc_mapping, PO_MAX - 1, 1);
+    shuffle(g->ring_material_mapping, RT_MAX - 1, 0);
+    shuffle(g->scroll_desc_mapping, ST_MAX - 1, 1);
+    shuffle(g->book_desc_mapping, SP_MAX - 1, 0);
 }
 
 static GList *game_scores_load(game *g)

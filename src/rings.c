@@ -18,8 +18,8 @@
 
 #include <assert.h>
 
+#include "nlarn.h"
 #include "rings.h"
-#include "utils.h"
 
 const ring_data rings[RT_MAX] =
 {
@@ -35,8 +35,6 @@ const ring_data rings[RT_MAX] =
     { RT_EXTRA_REGEN,  "extra regeneration", ET_INC_HP_REGEN, 1000, 1, 0, },
 };
 
-static int ring_material_mapping[RT_MAX - 1] = { 0 };
-
 static const int ring_materials[RT_MAX - 1] =
 {
     IM_GOLD,
@@ -49,13 +47,8 @@ static const int ring_materials[RT_MAX - 1] =
     IM_BONE
 };
 
-void ring_material_shuffle()
-{
-    shuffle(ring_material_mapping, RT_MAX - 1, 0);
-}
-
 item_material_t ring_material(int ring_id)
 {
     assert(ring_id > RT_NONE && ring_id < RT_MAX);
-    return ring_materials[ring_material_mapping[ring_id - 1]];
+    return ring_materials[nlarn->ring_material_mapping[ring_id - 1]];
 }

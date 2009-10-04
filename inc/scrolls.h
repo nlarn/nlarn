@@ -65,7 +65,6 @@ enum scroll_types {
 
 /* function declarations */
 
-void scroll_desc_shuffle();
 char *scroll_desc(int scroll_id);
 
 int scroll_with_effect(struct player *p, item *scroll);

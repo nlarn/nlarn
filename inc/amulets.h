@@ -49,7 +49,6 @@ extern const amulet_data amulets[AM_MAX];
 
 /* function declarations */
 
-void amulet_material_shuffle();
 item_material_t amulet_material(int amulet_id);
 
 /* macros */

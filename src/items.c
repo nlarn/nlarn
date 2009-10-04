@@ -26,6 +26,7 @@
 #include "gems.h"
 #include "items.h"
 #include "level.h"
+#include "nlarn.h"
 #include "player.h"
 #include "potions.h"
 #include "rings.h"
@@ -77,15 +78,6 @@ const item_material_data item_materials[IM_MAX] =
     { IM_GEMSTONE,    "gemstone",    "gemstone",  }, /* ? */
 };
 
-/* static vars */
-
-static int amulet_created[AM_MAX] = { 1, 0 };
-static int weapon_created[WT_MAX] = { 1, 0 };
-
-/* the potion of cure dianthroritis is a unique item */
-static int cure_dianthr_created = FALSE;
-
-
 /* functions */
 
 item *item_new(item_t item_type, int item_id, int item_bonus)
@@ -109,7 +101,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
     {
     case IT_AMULET:
         /* if the amulet has already been created try to create another one */
-        while (amulet_created[nitem->id] && (loops < item_max_id(IT_AMULET)))
+        while (nlarn->amulet_created[nitem->id] && (loops < item_max_id(IT_AMULET)))
         {
             nitem->id = rand_1n(item_max_id(IT_AMULET));
             loops++;
@@ -122,7 +114,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
             return item_new(IT_RING, rand_1n(item_max_id(IT_RING)), item_bonus);
         }
 
-        amulet_created[nitem->id] = TRUE;
+        nlarn->amulet_created[nitem->id] = TRUE;
 
         if (amulet_effect_type(nitem))
         {
@@ -144,13 +136,13 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
 
     case IT_POTION:
         /* prevent that the unique potion can be created twice */
-        if ((item_id == PO_CURE_DIANTHR) && cure_dianthr_created)
+        if ((item_id == PO_CURE_DIANTHR) && nlarn->cure_dianthr_created)
         {
             nitem->id = rand_1n(PO_SEE_INVISIBLE);
         }
         else if (item_id == PO_CURE_DIANTHR)
         {
-            cure_dianthr_created = TRUE;
+            nlarn->cure_dianthr_created = TRUE;
         }
         break;
 
@@ -175,7 +167,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         break;
 
     case IT_WEAPON:
-        while (weapon_is_unique(nitem) && weapon_created[nitem->id])
+        while (weapon_is_unique(nitem) && nlarn->weapon_created[nitem->id])
         {
             /* create another random weapon instead */
             nitem->id = rand_1n(WT_MAX);
@@ -184,7 +176,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         if (weapon_is_unique(nitem))
         {
             /* mark unique weapon as created */
-            weapon_created[nitem->id] = TRUE;
+            nlarn->weapon_created[nitem->id] = TRUE;
         }
 
         /* special effects for Bessman's Hammer */

@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "display.h"
+#include "nlarn.h"
 #include "spheres.h"
 
 static guint display_rows = 0;
@@ -152,7 +153,7 @@ int display_paint_screen(player *p)
         {
             if (player_pos_visible(p, pos)) attron(A_BOLD);
 
-            if (game_wizardmode(p->game))
+            if (game_wizardmode(nlarn))
             {
                 /* draw the truth */
                 if (inv_length(level_ilist_at(p->level, pos)) > 0)
@@ -230,7 +231,7 @@ int display_paint_screen(player *p)
     {
         monst = (monster *) g_ptr_array_index(l->mlist, i - 1);
 
-        if (game_wizardmode(p->game)
+        if (game_wizardmode(nlarn)
                 || player_effect(p, ET_DETECT_MONSTER)
                 || (player_pos_visible(p, monst->pos)
                     && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))
@@ -248,7 +249,7 @@ int display_paint_screen(player *p)
         /* draw spheres */
         sphere = g_ptr_array_index(l->slist, i - 1);
 
-        if (game_wizardmode(p->game) || player_pos_visible(p, sphere->pos))
+        if (game_wizardmode(nlarn) || player_pos_visible(p, sphere->pos))
         {
             attron(COLOR_PAIR(DC_MAGENTA));
             mvaddch(sphere->pos.y, sphere->pos.x, '0');
@@ -302,7 +303,7 @@ int display_paint_screen(player *p)
     attroff(COLOR_PAIR(DC_CYAN) | A_BOLD);
 
     /* game time */
-    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X + 1, "T %-6d", game_turn(p->game));
+    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X + 1, "T %-6d", game_turn(nlarn));
 
     /* experience points / level */
     attron(COLOR_PAIR(DC_BLUE) | A_BOLD);
@@ -461,7 +462,7 @@ int display_paint_screen(player *p)
     {
         text = text_wrap(log_buffer(p->log), display_cols, 2);
         for (x = 1; x <= min(text->len, y); x++)
-            ttime[x - 1] = game_turn(p->game);
+            ttime[x - 1] = game_turn(nlarn);
     }
 
     /* retrieve game log and reformat messages to window width */
@@ -869,7 +870,7 @@ item *display_inventory(char *title, player *p, inventory *inv,
                     /* trigger callback */
                     time = cb->function(p, cb->inv, inv_get_filtered(inv, curr + offset - 1, filter));
 
-                    if (time) game_spin_the_wheel(p->game, time);
+                    if (time) game_spin_the_wheel(nlarn, time);
 
                     redraw = TRUE;
                 }
