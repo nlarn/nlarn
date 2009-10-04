@@ -47,7 +47,7 @@ const level_tile_data level_tiles[LT_MAX] =
     /* type         img  color      desc          pa tr */
     { LT_NONE,      ' ', DC_NONE,   NULL,         0, 0 },
     { LT_GRASS,     '"', DC_GREEN,  "grass",      1, 1 },
-    { LT_DIRT,      ',', DC_YELLOW, "dirt",       1, 1 },
+    { LT_DIRT,      '.', DC_YELLOW, "dirt",       1, 1 },
     { LT_TREE,      '&', DC_GREEN,  "tree",       0, 0 },
     { LT_FLOOR,     ' ', DC_NONE,   "floor",      1, 1 },
     { LT_WATER,     '~', DC_BLUE,   "water",      1, 1 },
