@@ -42,6 +42,7 @@ struct player;
 typedef enum level_tile_type
 {
     LT_NONE,
+    LT_MOUNTAIN,
     LT_GRASS,
     LT_DIRT,
     LT_TREE,

@@ -46,6 +46,7 @@ const level_tile_data level_tiles[LT_MAX] =
 {
     /* type         img  color      desc           pa tr */
     { LT_NONE,      ' ', DC_NONE,   NULL,          0, 0 },
+    { LT_MOUNTAIN,  '^', DC_WHITE,  "a mountain",  0, 0 },
     { LT_GRASS,     '"', DC_GREEN,  "grass",       1, 1 },
     { LT_DIRT,      '.', DC_YELLOW, "dirt",        1, 1 },
     { LT_TREE,      '&', DC_GREEN,  "a tree",      0, 0 },
@@ -67,8 +68,8 @@ const level_stationary_data level_stationaries[LS_MAX] =
     { LS_DEADTHRONE,    '\\', DC_WHITE,   "There is a massive throne.",                   1, 1, },
     { LS_STAIRSDOWN,    '>',  DC_WHITE,   "There is a circular staircase here.",          1, 1, },
     { LS_STAIRSUP,      '<',  DC_WHITE,   "There is a circular staircase here.",          1, 1, },
-    { LS_ELEVATORDOWN,  '^',  DC_WHITE,   "There is a volcanic shaft leaning downward.",  1, 1, },
-    { LS_ELEVATORUP,    '^',  DC_WHITE,   "You behold the base of a volcanic shaft.",     1, 1, },
+    { LS_ELEVATORDOWN,  'I',  DC_RED,     "There is a volcanic shaft leaning downward.",  1, 1, },
+    { LS_ELEVATORUP,    'I',  DC_RED,     "You behold the base of a volcanic shaft.",     1, 1, },
     { LS_FOUNTAIN,      '{',  DC_BLUE,    "There is a bubbling fountain here.",           1, 1, },
     { LS_DEADFOUNTAIN,  '{',  DC_WHITE,   "There is a dead fountain here.",               1, 1, },
     { LS_STATUE,        '|',  DC_WHITE,   "This is a great marble statue.",               1, 1, },
@@ -1204,11 +1205,15 @@ static int level_load_from_file(level *l, char *mazefile, int which)
             switch (fgetc(levelfile))
             {
 
+            case '^': /* mountain */
+                lt = LT_MOUNTAIN;
+                break;
+
             case '"': /* grass */
                 lt = LT_GRASS;
                 break;
 
-            case ',': /* dirt */
+            case '.': /* dirt */
                 lt = LT_DIRT;
                 break;
 
@@ -1236,7 +1241,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                 ls = LS_ENTRANCE;
                 break;
 
-            case '^': /* elevator */
+            case 'I': /* elevator */
                 ls = LS_ELEVATORDOWN;
                 break;
 
@@ -1282,7 +1287,7 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                 monst = monster_new(MT_DAEMON_PRINCE, l);
                 break;
 
-            case '.':	/* random monster */
+            case 'M':	/* random monster */
                 monst = monster_new_by_level(l);
                 break;
 
