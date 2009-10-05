@@ -38,6 +38,9 @@ int main(int argc, char *argv[])
     /* visual range */
     int visrange;
 
+    /* position to examine */
+    position pos;
+
     printf("%s",
            "NLarn Copyright (C) 2009  Joachim de Groot\n\n"
            "This program comes with ABSOLUTELY NO WARRANTY.\n"
@@ -138,9 +141,22 @@ int main(int argc, char *argv[])
             moves_count = player_move(nlarn->p, GD_SW);
             break;
 
-            /* look */
+            /* look at current position */
         case ':':
             moves_count = player_examine(nlarn->p, nlarn->p->pos);
+            break;
+
+            /* look at different position */
+        case ';':
+            pos = display_get_position(nlarn->p,
+                                       "Choose a position to examine:",
+                                       FALSE, FALSE);
+
+            if (pos_valid(pos))
+                player_examine(nlarn->p, pos);
+            else
+                log_add_entry(nlarn->p->log, "Aborted.");
+
             break;
 
             /* pick up */

@@ -912,11 +912,30 @@ int player_examine(player *p, position pos)
     item *it;
     char item_desc[81];
     guint idx;
-    char *desc = NULL, *tmp;
+    char *desc = NULL, *tmp, *where;
 
     assert(p != NULL);
 
+    if (pos_identical(pos, p->pos))
+        where = "here";
+    else
+        where = "there";
+
     tile = level_tile_at(p->level, pos);
+
+    /* describe the level tile */
+    desc = g_strdup(lt_get_desc(tile->type));
+    desc[0] = g_ascii_toupper(desc[0]);
+
+    log_add_entry(p->log, "%s.", desc, where);
+    g_free(desc);
+
+    /* name monster */
+    monster *m = level_get_monster_at(p->level, pos);
+    if (m != NULL)
+    {
+        log_add_entry(p->log, "A%s %s.", a_an(monster_name(m)), monster_name(m));
+    }
 
     /* add message if target tile contains a stationary item */
     if (tile->stationary > LS_NONE)
@@ -927,7 +946,8 @@ int player_examine(player *p, position pos)
     /* add message if target tile contains a known trap */
     if (player_memory_of(p, pos).trap)
     {
-        log_add_entry(p->log, "There is a %s here.", trap_description(tile->trap));
+        log_add_entry(p->log, "There is a%s %s %s.", a_an(trap_description(tile->trap)),
+                      trap_description(tile->trap), where);
     }
 
     /* add message if target tile contains items */
@@ -935,7 +955,7 @@ int player_examine(player *p, position pos)
     {
         if (inv_length(tile->ilist) > 3)
         {
-            log_add_entry(p->log, "There are multiple items here.");
+            log_add_entry(p->log, "There are multiple items %s.", where);
         }
         else
         {
@@ -958,7 +978,7 @@ int player_examine(player *p, position pos)
                 }
             }
 
-            log_add_entry(p->log, "You see %s here.", desc);
+            log_add_entry(p->log, "You see %s %s.", desc, where);
             g_free(desc);
         }
     }

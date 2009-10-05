@@ -31,9 +31,9 @@ Z  teleport yourself
 
 <  climb up stairs / volcanic shaft or enter a building
 >  climb down stairs / volcanic shaft
-^  identify a trap
 ,  pick up item
-:  look at object you are standing on
+:  look at the location you are standing on
+;  look at another location
 .  rest one turn (alternate key: 5)
 /  identify objects in the game
 \  show list of identified objects
