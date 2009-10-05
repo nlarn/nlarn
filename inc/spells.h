@@ -122,7 +122,7 @@ int spell_type_blast(spell *s, struct player *p);
 
 gboolean spell_alter_reality(struct player *p);
 gboolean spell_create_monster(struct player *p);
-gboolean spell_create_sphere(struct player *p);
+gboolean spell_create_sphere(spell *s, struct player *p);
 gboolean spell_cure_poison(struct player *p);
 gboolean spell_cure_blindness(struct player *p);
 gboolean spell_genocide_monster(struct player *p);

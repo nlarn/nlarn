@@ -495,7 +495,7 @@ int spell_cast(player *p)
 
             /* sphere of annihilation */
         case SP_SPH:
-            well_done = spell_create_sphere(p);
+            well_done = spell_create_sphere(spell, p);
             break;
 
             /* genocide */
@@ -654,7 +654,12 @@ int spell_type_player(spell *s, struct player *p)
     /* unless it is the spell of healing, which does work this way */
     if ((e->turns == 1) && (e->type != ET_INC_HP))
     {
-        e->turns = 100;
+        e->turns = 100 * s->knowledge;
+    }
+
+    if (e->type == ET_INC_HP)
+    {
+        e->amount *= s->knowledge;
     }
 
     if (e->type == ET_WALL_WALK)
@@ -700,7 +705,8 @@ int spell_type_point(spell *s, struct player *p)
     {
         /* dehydration */
     case SP_DRY:
-        monster_damage_take(monster, damage_new(DAM_MAGICAL, 100 + p->lvl, p));
+        amount = (100 * s->knowledge) + p->lvl;
+        monster_damage_take(monster, damage_new(DAM_MAGICAL, amount, p));
         break; /* SP_DRY */
 
         /* drain life */
@@ -719,7 +725,7 @@ int spell_type_point(spell *s, struct player *p)
             player_die(p, PD_SPELL, SP_FGR);
         }
 
-        if (player_get_wis(p) > rand_m_n(10,20))
+        if ((player_get_wis(p) + s->knowledge) > rand_m_n(10,20))
         {
             monster_damage_take(monster, damage_new(DAM_MAGICAL, 2000, p));
         }
@@ -768,6 +774,8 @@ int spell_type_point(spell *s, struct player *p)
             e->amount = p->intelligence;
         }
 
+        e->amount *= s->knowledge;
+
         /* show message if monster is visible */
         if (monster->m_visible && effect_get_msg_m_start(e)
                 && !monster_effect(monster, e->type))
@@ -813,19 +821,19 @@ int spell_type_ray(spell *s, struct player *p)
     switch (s->id)
     {
     case SP_MLE:
-        amount = rand_1n(((p->lvl + 1) << 1)) + p->lvl + 3;
+        amount = rand_1n(((p->lvl + 1) << s->knowledge)) + p->lvl + 3;
         break;
 
     case SP_SSP:
-        amount = rand_1n(10) + 15 + p->lvl;
+        amount = rand_1n(10) + (15 * s->knowledge) + p->lvl;
         break;
 
     case SP_CLD:
-        amount = rand_1n(25) + 20 + p->lvl;
+        amount = rand_1n(25) + (20 * s->knowledge) + p->lvl;
         break;
 
     case SP_LIT:
-        amount = rand_1n(25) + 20 + (p->lvl << 1);
+        amount = rand_1n(25) + (20 * s->knowledge) + (p->lvl << 1);
         break;
     }
 
@@ -871,19 +879,19 @@ int spell_type_flood(spell *s, struct player *p)
     case SP_CKL:
         radius = 3;
         type = LT_CLOUD;
-        amount = 10 + p->lvl;
+        amount = (10 * s->knowledge) + p->lvl;
         break;
 
     case SP_FLO:
         radius = 4;
         type = LT_WATER;
-        amount = 25 + p->lvl;
+        amount = (25 * s->knowledge) + p->lvl;
         break;
 
     case SP_MFI:
         radius = 4;
         type = LT_FIRE;
-        amount = 15 + p->lvl;
+        amount = (15 * s->knowledge) + p->lvl;
         break;
     }
 
@@ -919,7 +927,7 @@ int spell_type_blast(spell *s, struct player *p)
     }
 
     /* currently only fireball */
-    amount = 25 + p->lvl + rand_0n(25 + p->lvl);
+    amount = (25 * s->knowledge) + p->lvl + rand_0n(25 + p->lvl);
 
     mlist = level_get_monsters_in(p->level, rect_new_sized(pos, 1));
 
@@ -973,7 +981,7 @@ gboolean spell_alter_reality(player *p)
     return TRUE;
 }
 
-gboolean spell_create_monster(player *p)
+gboolean spell_create_monster(struct player *p)
 {
     monster *m;
 
@@ -1005,9 +1013,10 @@ gboolean spell_create_monster(player *p)
     }
 }
 
-gboolean spell_create_sphere(player *p)
+gboolean spell_create_sphere(spell *s, struct player *p)
 {
     position pos;
+    sphere *sphere;
 
     assert(p != NULL);
 
@@ -1016,12 +1025,15 @@ gboolean spell_create_sphere(player *p)
 
     if (pos_valid(pos))
     {
-        g_ptr_array_add(p->level->slist, sphere_new(pos, p, p->lvl * 10));
+        sphere = sphere_new(pos, p, p->lvl * 10 * s->knowledge);
+        g_ptr_array_add(p->level->slist, sphere);
+
         return TRUE;
     }
     else
     {
         log_add_entry(p->log, "Huh?");
+
         return FALSE;
     }
 }
