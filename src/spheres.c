@@ -19,6 +19,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include "game.h"
+#include "nlarn.h"
 #include "spheres.h"
 
 static void sphere_remove(sphere *s, level *l);
@@ -42,12 +44,19 @@ sphere *sphere_new(position pos, player *owner, int lifetime)
 
     s->lifetime = lifetime;
 
+    /* register sphere */
+    game_sphere_register(nlarn, s);
+
     return s;
 }
 
 void sphere_destroy(sphere *s)
 {
     assert(s != NULL);
+
+    /* unregister sphere */
+    game_sphere_unregister(nlarn, s);
+
     g_free(s);
 }
 

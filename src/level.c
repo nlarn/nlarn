@@ -207,8 +207,11 @@ void level_destroy(level *l)
     /* free monster list */
     if (l->mlist != NULL)
     {
-        for (idx = 0; idx < l->mlist->len; idx++)
+        while (l->mlist->len > 0)
+        {
+            idx = l->mlist->len - 1;
             monster_destroy(g_ptr_array_index(l->mlist, idx));
+        }
 
         g_ptr_array_free(l->mlist, TRUE);
     }
@@ -216,8 +219,9 @@ void level_destroy(level *l)
     /* free spheres list */
     if (l->slist != NULL)
     {
-        for (idx = 0; idx < l->slist->len; idx++)
+        while (l->slist->len > 0)
         {
+            idx = l->slist->len - 1;
             sphere_destroy(g_ptr_array_index(l->slist, idx));
         }
 

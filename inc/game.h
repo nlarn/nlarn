@@ -22,6 +22,7 @@
 #include "items.h"
 #include "level.h"
 #include "player.h"
+#include "spheres.h"
 
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 
@@ -57,6 +58,15 @@ typedef struct game
     int scroll_desc_mapping[ST_MAX - 1];
     int book_desc_mapping[SP_MAX - 1];
 
+    /* every object of the types inventory, item and effect will be registered
+       in these hashed when created and unregistered when destroyed. */
+
+    GHashTable *inventories;
+    GHashTable *items;
+    GHashTable *effects;
+    GHashTable *monsters;
+    GHashTable *spheres;
+
     /* flags */
     guint32
         cure_dianthr_created: 1, /* the potion of cure dianthroritis is a unique item */
@@ -82,9 +92,22 @@ typedef struct _game_score
     gint64 time_end;
 } game_score_t;
 
+typedef struct _game_save_head
+{
+    guint32
+        version_major: 8,
+        version_minor: 8,
+        version_patch: 8;
+    gint32 inventory_offset;
+    gint32 item_offset;
+    gint32 effect_offset;
+    gint32 monster_offset;
+    gint32 spheres_offset;
+} game_save_head_t;
+
 /* function declarations */
 
-game *game_new(int argc, char *argv[]);
+void game_new(int argc, char *argv[]);
 int game_destroy(game *g);
 
 int game_save(game *g, char *filename);
@@ -95,6 +118,22 @@ game_score_t *game_score(game *g, player_cod cod, int cause);
 GList *game_score_add(game *g, game_score_t *score);
 
 void game_spin_the_wheel(game *g, guint times);
+
+/* functions to store game data */
+void game_inventory_register(game *g, inventory *inv);
+void game_inventory_unregister(game *g, inventory *inv);
+
+void game_item_register(game *g, item *it);
+void game_item_unregister(game *g, item *it);
+
+void game_effect_register(game *g, effect *e);
+void game_effect_unregister(game *g, effect *e);
+
+void game_monster_register(game *g, monster *m);
+void game_monster_unregister(game *g, monster *m);
+
+void game_sphere_register(game *g, sphere *s);
+void game_sphere_unregister(game *g, sphere *s);
 
 /* macros */
 

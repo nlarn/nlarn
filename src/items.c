@@ -201,6 +201,9 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         break;
     }
 
+    /* register item with game */
+    game_item_register(nlarn, nitem);
+
     return nitem;
 }
 
@@ -401,6 +404,9 @@ void item_destroy(item *it)
     {
         inv_destroy(it->content);
     }
+
+    /* unregister item */
+    game_item_unregister(nlarn, it);
 
     g_free(it);
 }
@@ -1009,9 +1015,11 @@ inventory *inv_new(gconstpointer owner)
 
     ninv->owner = owner;
 
+    /* register inventory with game */
+    game_inventory_register(nlarn, ninv);
+
     return ninv;
 }
-
 
 void inv_destroy(inventory *inv)
 {
@@ -1026,6 +1034,10 @@ void inv_destroy(inventory *inv)
     if (inv != NULL)
     {
         g_ptr_array_free(inv->content, TRUE);
+
+        /* unregister inventory */
+        game_inventory_unregister(nlarn, inv);
+
         g_free(inv);
     }
 }

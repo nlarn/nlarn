@@ -20,6 +20,8 @@
 #include <string.h>
 
 #include "effects.h"
+#include "game.h"
+#include "nlarn.h"
 #include "utils.h"
 
 static const effect_data effects[ET_MAX] =
@@ -480,6 +482,9 @@ effect *effect_new(effect_type type, time_t now)
     ne->turns = (effects[type].duration <= 1) ? effects[type].duration : divert(effects[type].duration, 10);
     ne->amount = effects[type].value;
 
+    /* register effect */
+    game_effect_register(nlarn, ne);
+
     return ne;
 }
 
@@ -498,6 +503,10 @@ effect *effect_copy(effect *e)
 void effect_destroy(effect *e)
 {
     assert(e != NULL);
+
+    /* unregister effect */
+    game_effect_unregister(nlarn, e);
+
     g_free(e);
 }
 

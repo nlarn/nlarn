@@ -844,6 +844,9 @@ monster *monster_new(int monster_type, struct level *l)
     nmonster->lastseen = -1;
     nmonster->player_pos = pos_new(G_MAXINT16, G_MAXINT16);
 
+    /* register monster with game */
+    game_monster_register(nlarn, nmonster);
+
     return nmonster;
 }
 
@@ -893,6 +896,9 @@ void monster_destroy(monster *m)
     /* free inventory */
     if (m->inventory)
         inv_destroy(m->inventory);
+
+    /* unregister monster */
+    game_monster_unregister(nlarn, m);
 
     g_free(m);
 }
@@ -1397,7 +1403,7 @@ void monster_player_attack(monster *m, player *p)
         dam->type = rand_1n(DAM_MAX);
 
     /* set damage for weapon attacks */
-    if (att->type == ATT_WEAPON)
+    if ((att->type == ATT_WEAPON) && (m->weapon != NULL))
         dam->amount = rand_1n(weapon_wc(m->weapon)
                               + game_difficulty(nlarn));
 
@@ -1702,7 +1708,7 @@ void monster_effect_expire(monster *m, message_log *log)
                 log_add_entry(log, effect_get_msg_m_stop(e),
                               monster_name(m));
 
-            g_free(e);
+            effect_destroy(e);
         }
         else
         {

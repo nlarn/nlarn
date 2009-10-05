@@ -17,10 +17,14 @@
  */
 
 #include <assert.h>
+#include <fcntl.h>
 #include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "game.h"
 #include "nlarn.h"
@@ -45,22 +49,49 @@ static const char *highscores = "highscores";
 
 int game_save(game *g, char *filename)
 {
-    assert(g != NULL);
+    int fd;
 
-    return EXIT_SUCCESS;
+    game_save_head_t *head = g_malloc0(sizeof(game_save_head_t));
+
+    assert(g != NULL && filename != NULL);
+
+    head->version_major = VERSION_MAJOR;
+    head->version_minor = VERSION_MINOR;
+    head->version_patch = VERSION_PATCH;
+
+    fd = creat(filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IRGRP);
+
+    if (fd == -1)
+    {
+        g_free(head);
+        return FALSE;
+    }
+
+    /* before starting to write jump ahead to leave space for the header */
+    lseek(fd, sizeof(game_save_head_t), SEEK_SET);
+
+    /* return to the beginning of the file */
+    lseek(fd, 0, SEEK_SET);
+    /* and write the file header */
+    write(fd, head, sizeof(game_save_head_t));
+
+    close(fd);
+    g_free(head);
+
+    return TRUE;
 }
 
 game *game_load(char *filename)
 {
+    assert(filename != NULL);
 
     return EXIT_SUCCESS;
 }
 
-game *game_new(int argc, char *argv[])
+void game_new(int argc, char *argv[])
 {
     const char *default_lib_dir = "/usr/share/games/nlarn";
 
-    game *g;
     size_t idx;
     item_t it;
 
@@ -72,10 +103,10 @@ game *game_new(int argc, char *argv[])
     static char *auto_pickup = NULL;
 
     /* one game, please */
-    g = g_malloc0(sizeof(game));
+    nlarn = g_malloc0(sizeof(game));
 
     /* base directory for a local install */
-    g->basedir = g_path_get_dirname(argv[0]);
+    nlarn->basedir = g_path_get_dirname(argv[0]);
 
     /* ini file handling */
     GKeyFile *ini_file = g_key_file_new();
@@ -89,7 +120,7 @@ game *game_new(int argc, char *argv[])
     {
         /* ini file has not been found in user config directory */
         g_free(filename);
-        filename = g_build_path(G_DIR_SEPARATOR_S, g->basedir, "nlarn.ini", NULL);
+        filename = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, "nlarn.ini", NULL);
     }
 
     g_key_file_load_from_file(ini_file, filename, G_KEY_FILE_NONE, &error);
@@ -150,38 +181,45 @@ game *game_new(int argc, char *argv[])
     {
         /* system-wide data directory exists */
         /* string has to be dup'd as it is feed in the end */
-        g->libdir = g_strdup((char *)default_lib_dir);
+        nlarn->libdir = g_strdup((char *)default_lib_dir);
     }
     else
     {
         /* try to use installation directory */
-        g->libdir = g_build_path(G_DIR_SEPARATOR_S, g->basedir, "lib", NULL);
+        nlarn->libdir = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, "lib", NULL);
     }
 
-    g->mesgfile = g_build_filename(g->libdir, mesgfile, NULL);
-    g->helpfile = g_build_filename(g->libdir, helpfile, NULL);
-    g->mazefile = g_build_filename(g->libdir, mazefile, NULL);
-    g->fortunes = g_build_filename(g->libdir, fortunes, NULL);
-    g->highscores = g_build_filename(g->libdir, highscores, NULL);
+    nlarn->mesgfile = g_build_filename(nlarn->libdir, mesgfile, NULL);
+    nlarn->helpfile = g_build_filename(nlarn->libdir, helpfile, NULL);
+    nlarn->mazefile = g_build_filename(nlarn->libdir, mazefile, NULL);
+    nlarn->fortunes = g_build_filename(nlarn->libdir, fortunes, NULL);
+    nlarn->highscores = g_build_filename(nlarn->libdir, highscores, NULL);
 
     /* set game parameters */
-    game_difficulty(g) = difficulty;
-    game_wizardmode(g) = wizard;
+    game_difficulty(nlarn) = difficulty;
+    game_wizardmode(nlarn) = wizard;
+
+    /* initialize object hashes (here as they will be needed by player_new) */
+    nlarn->inventories = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    nlarn->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    nlarn->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    nlarn->monsters = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    nlarn->spheres = g_hash_table_new(&g_direct_hash, &g_direct_equal);
 
     /* generate player */
-    g->p = player_new(g);
+    nlarn->p = player_new();
 
     if (name)
     {
-        g->p->name = name;
+        nlarn->p->name = name;
     }
     else
     {
         /* get full name from system */
-        g->p->name = (char *)g_get_real_name();
+        nlarn->p->name = (char *)g_get_real_name();
     }
 
-    g->p->sex = !female;
+    nlarn->p->sex = !female;
 
     /* parse autopickup settings */
     if (auto_pickup)
@@ -192,7 +230,7 @@ game *game_new(int argc, char *argv[])
             {
                 if (auto_pickup[idx] == item_image(it))
                 {
-                    g->p->settings.auto_pickup[it] = TRUE;
+                    nlarn->p->settings.auto_pickup[it] = TRUE;
                 }
             }
         }
@@ -201,27 +239,25 @@ game *game_new(int argc, char *argv[])
     /* allocate space for levels */
     for (idx = 0; idx < LEVEL_MAX; idx++)
     {
-        g->levels[idx] = g_malloc0(sizeof(level));
-        g->levels[idx]->nlevel = idx;
+        nlarn->levels[idx] = g_malloc0(sizeof(level));
+        nlarn->levels[idx]->nlevel = idx;
     }
 
     /* game time handling */
-    g->gtime = 1;
-    g->time_start = time(NULL);
+    nlarn->gtime = 1;
+    nlarn->time_start = time(NULL);
 
     /* welcome message */
-    log_add_entry(g->p->log, "Welcome to NLarn %d.%d.%d!",
+    log_add_entry(nlarn->p->log, "Welcome to NLarn %d.%d.%d!",
                   VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 
     if (wizard)
-        log_add_entry(g->p->log, "Wizard mode has been activated.");
+        log_add_entry(nlarn->p->log, "Wizard mode has been activated.");
 
-    log_set_time(g->p->log, g->gtime);
+    log_set_time(nlarn->p->log, nlarn->gtime);
 
     /* randomize unidentified item descriptions */
-    game_items_shuffle(g);
-
-    return g;
+    game_items_shuffle(nlarn);
 }
 
 int game_destroy(game *g)
@@ -246,6 +282,13 @@ int game_destroy(game *g)
     g_free(g->highscores);
 
     player_destroy(g->p);
+
+    g_hash_table_destroy(g->inventories);
+    g_hash_table_destroy(g->items);
+    g_hash_table_destroy(g->effects);
+    g_hash_table_destroy(g->monsters);
+    g_hash_table_destroy(g->spheres);
+
     g_free(g);
 
     return EXIT_SUCCESS;
@@ -328,8 +371,7 @@ GList *game_score_add(game *g, game_score_t *score)
 
 void game_spin_the_wheel(game *g, guint times)
 {
-    guint turn, idx;
-    monster *m;
+    guint turn;
     damage *dam;
 
     assert(g != NULL && times > 0);
@@ -358,16 +400,79 @@ void game_spin_the_wheel(game *g, guint times)
         game_move_monsters(g);
         game_move_spheres(g);
 
-        /* modify effects */
-        for (idx = 0; idx < g->p->level->mlist->len; idx++)
-        {
-            m = g_ptr_array_index(g->p->level->mlist, idx);
-            monster_effect_expire(m, g->p->log);
-        }
-
         g->gtime++; /* count up the time  */
         log_set_time(g->p->log, g->gtime); /* adjust time for log entries */
     }
+}
+
+void game_inventory_register(game *g, inventory *inv)
+{
+    assert (g != NULL && inv != NULL);
+
+    g_hash_table_insert(g->inventories, inv, inv);
+}
+
+void game_inventory_unregister(game *g, inventory *inv)
+{
+    assert (g != NULL && inv != NULL);
+
+    g_hash_table_remove(g->inventories, inv);
+}
+
+void game_item_register(game *g, item *it)
+{
+    assert (g != NULL && it != NULL);
+
+    g_hash_table_insert(g->items, it, it);
+}
+
+void game_item_unregister(game *g, item *it)
+{
+    assert (g != NULL && it != NULL);
+
+    g_hash_table_remove(g->items, it);
+}
+
+void game_effect_register(game *g, effect *e)
+{
+    assert (g != NULL && e != NULL);
+
+    g_hash_table_insert(g->effects, e, e);
+}
+
+void game_effect_unregister(game *g, effect *e)
+{
+    assert (g != NULL && e != NULL);
+
+    g_hash_table_remove(g->effects, e);
+}
+
+void game_monster_register(game *g, monster *m)
+{
+    assert (g != NULL && m != NULL);
+
+    g_hash_table_insert(g->monsters, m, m);
+}
+
+void game_monster_unregister(game *g, monster *m)
+{
+    assert (g != NULL && m != NULL);
+
+    g_hash_table_remove(g->monsters, m);
+}
+
+void game_sphere_register(game *g, sphere *s)
+{
+    assert (g != NULL && s != NULL);
+
+    g_hash_table_insert(g->spheres, s, s);
+}
+
+void game_sphere_unregister(game *g, sphere *s)
+{
+    assert (g != NULL && s != NULL);
+
+    g_hash_table_remove(g->spheres, s);
 }
 
 /**
@@ -391,6 +496,10 @@ static void game_move_monsters(game *g)
     for (idx = 0; idx < l->mlist->len; idx++)
     {
         m = g_ptr_array_index(l->mlist, idx);
+
+        /* modify effects */
+        monster_effect_expire(m, g->p->log);
+
         monster_move(m, g->p);
     } /* foreach monster */
 }

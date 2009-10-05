@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
            "This is free software, and you are welcome to\n"
            "redistribute it under certain conditions.\n\n");
 
-    nlarn = game_new(argc, argv);
+    game_new(argc, argv);
 
     /* put the player into the town */
     player_level_enter(nlarn->p, nlarn->levels[0], FALSE);
