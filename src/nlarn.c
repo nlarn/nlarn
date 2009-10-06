@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
 
             /* open door / container */
         case 'O':
-            if (inv_length_filtered(level_ilist_at(nlarn->p->level, nlarn->p->pos),
+            if (inv_length_filtered(*level_ilist_at(nlarn->p->level, nlarn->p->pos),
                                     &inv_filter_container) > 0)
             {
                 container_open(nlarn->p, NULL, NULL);

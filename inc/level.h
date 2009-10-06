@@ -178,6 +178,16 @@ void level_path_destroy(level_path *path);
 area *level_get_obstacles(level *l, position center, int radius);
 void level_set_tiletype(level *l, area *area, level_tile_t type, guint8 duration);
 
+level_tile *level_tile_at(level *l, position pos);
+inventory **level_ilist_at(level *l, position pos);
+level_tile_t level_tiletype_at(level *l, position pos);
+level_tile_t level_basetype_at(level *l, position pos);
+guint8 level_timer_at(level *l, position pos);
+trap_t level_trap_at(level *l, position pos);
+void level_trap_set(level *l, position pos, trap_t type);
+level_stationary_t level_stationary_at(level *l, position pos);
+void level_stationary_set(level *l, position pos, level_stationary_t type);
+
 damage *level_tile_damage(level *l, position pos);
 
 monster *level_get_monster_at(level *l, position pos);
@@ -206,14 +216,6 @@ extern const char *level_names[LEVEL_MAX];
 #define ls_get_desc(stationary)       (level_stationaries[(stationary)].description)
 #define ls_is_passable(stationary)    (level_stationaries[(stationary)].passable)
 #define ls_is_transparent(stationary) (level_stationaries[(stationary)].transparent)
-
-#define level_tile_at(l,pos)       (pos_valid(pos) ? &((l)->map[(pos).y][(pos).x]) : NULL)
-#define level_ilist_at(l,pos)      ((l)->map[(pos).y][(pos).x].ilist)
-#define level_tiletype_at(l,pos)   ((l)->map[(pos).y][(pos).x].type)
-#define level_basetype_at(l,pos)   ((l)->map[(pos).y][(pos).x].base_type)
-#define level_timer_at(l,pos)      ((l)->map[(pos).y][(pos).x].timer)
-#define level_trap_at(l,pos)       ((l)->map[(pos).y][(pos).x].trap)
-#define level_stationary_at(l,pos) ((l)->map[(pos).y][(pos).x].stationary)
 
 #define level_name(l) (level_names[(l)->nlevel])
 

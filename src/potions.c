@@ -153,7 +153,7 @@ int potion_detect_item(player *p, item *potion)
     {
         for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
         {
-            if ((inv = level_ilist_at(p->level, pos)))
+            if ((inv = *level_ilist_at(p->level, pos)))
             {
                 for (idx = 0; idx <  inv_length(inv); idx++)
                 {

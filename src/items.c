@@ -1027,19 +1027,15 @@ void inv_destroy(inventory *inv)
 
     while (inv_length(inv) > 0)
     {
-        item_destroy(inv_del(&inv, inv_length(inv) - 1));
+        item_destroy(g_ptr_array_remove_index(inv->content, inv_length(inv) - 1));
     }
 
-    /* check if inventory has not yet been destroyed by inv_del */
-    if (inv != NULL)
-    {
-        g_ptr_array_free(inv->content, TRUE);
+    g_ptr_array_free(inv->content, TRUE);
 
-        /* unregister inventory */
-        game_inventory_unregister(nlarn, inv);
+    /* unregister inventory */
+    game_inventory_unregister(nlarn, inv);
 
-        g_free(inv);
-    }
+    g_free(inv);
 }
 
 void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
@@ -1098,6 +1094,13 @@ int inv_add(inventory **inv, item *new_item)
     }
 
     return inv_length(*inv);
+}
+
+item *inv_get(inventory *inv, int idx)
+{
+    assert (inv != NULL && idx < inv->content->len);
+
+    return g_ptr_array_index(inv->content, idx);
 }
 
 item *inv_del(inventory **inv, guint idx)
@@ -1160,6 +1163,10 @@ int inv_del_element(inventory **inv, item *item)
     }
 
     return TRUE;
+}
+int inv_length(inventory *inv)
+{
+    return (inv == NULL) ? 0 : inv->content->len;
 }
 
 void inv_sort(inventory *inv,GCompareDataFunc compare_func, gpointer user_data)

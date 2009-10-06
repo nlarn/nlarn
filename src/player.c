@@ -996,7 +996,7 @@ int player_pickup(player *p)
 
     assert(p != NULL);
 
-    inv = &(level_ilist_at(p->level, p->pos));
+    inv = level_ilist_at(p->level, p->pos);
 
     if ((*inv == NULL) || (inv_length(*inv) == 0))
     {
@@ -1035,14 +1035,14 @@ void player_autopickup(player *p)
 
     assert (p != NULL && level_ilist_at(p->level, p->pos));
 
-    for (idx = 0; idx < inv_length(level_ilist_at(p->level, p->pos)); idx++)
+    for (idx = 0; idx < inv_length(*level_ilist_at(p->level, p->pos)); idx++)
     {
-        i = inv_get(level_ilist_at(p->level, p->pos), idx);
+        i = inv_get(*level_ilist_at(p->level, p->pos), idx);
 
         if (p->settings.auto_pickup[i->type])
         {
             /* try to pick up the item */
-            if (player_item_pickup(p, &level_ilist_at(p->level, p->pos), i))
+            if (player_item_pickup(p, level_ilist_at(p->level, p->pos), i))
             {
                 /* item has been picked up */
                 /* go back one item as the following items lowered their number */
@@ -2243,9 +2243,9 @@ int player_item_can_be_added_to_container(player *p, item *it)
     }
 
     /* no match till now, check floor for containers */
-    for (idx = 0; idx < inv_length(level_ilist_at(p->level, p->pos)); idx++)
+    for (idx = 0; idx < inv_length(*level_ilist_at(p->level, p->pos)); idx++)
     {
-        i = inv_get(level_ilist_at(p->level, p->pos), idx);
+        i = inv_get(*level_ilist_at(p->level, p->pos), idx);
         if (i->type == IT_CONTAINER)
         {
             return TRUE;
@@ -2913,7 +2913,7 @@ int player_item_drop(player *p, inventory **inv, item *it)
         return FALSE;
     }
 
-    inv_add(&level_ilist_at(p->level, p->pos), it);
+    inv_add(level_ilist_at(p->level, p->pos), it);
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
 
     log_add_entry(p->log, "You drop %s.", desc);
@@ -2997,7 +2997,7 @@ int player_altar_desecrate(player *p)
     {
         /* destroy altar */
         log_add_entry(p->log, "The altar crumbles into a pile of dust before your eyes.");
-        level_stationary_at(p->level, p->pos) = LS_NONE;
+        level_stationary_set(p->level, p->pos, LS_NONE);
     }
     else
     {
@@ -3222,14 +3222,14 @@ int player_door_close(player *p)
             }
 
             /* check for items in the doorway */
-            if (level_ilist_at(p->level, pos))
+            if (*level_ilist_at(p->level, pos))
             {
                 log_add_entry(p->log,
                               "You cannot close the door. There is something in the way.");
                 return 0;
             }
 
-            level_stationary_at(p->level, pos) = LS_CLOSEDDOOR;
+            level_stationary_set(p->level, pos, LS_CLOSEDDOOR);
             log_add_entry(p->log, "You close the door.");
         }
         else
@@ -3296,7 +3296,7 @@ int player_door_open(player *p)
 
         if (pos_valid(pos) && (level_stationary_at(p->level, pos) == LS_CLOSEDDOOR))
         {
-            level_stationary_at(p->level, pos) = LS_OPENDOOR;
+            level_stationary_set(p->level, pos, LS_OPENDOOR);
             log_add_entry(p->log, "You open the door.");
         }
         else
@@ -3473,7 +3473,7 @@ int player_fountain_drink(player *p)
     if (chance(25))
     {
         log_add_entry(p->log, "The fountains bubbling slowly quiets.");
-        level_stationary_at(p->level, p->pos) = LS_DEADFOUNTAIN;
+        level_stationary_set(p->level, p->pos, LS_DEADFOUNTAIN);
     }
 
     return 1;
@@ -3559,6 +3559,10 @@ int player_stairs_down(player *p)
         else
             log_add_entry(p->log, "Climb up to return to town.");
         break;
+
+    default:
+        return FALSE;
+        break;
     }
 
     /* if told to switch level, do so */
@@ -3631,7 +3635,7 @@ int player_throne_pillage(player *p)
         for (i = 0; i < rand_1n(4); i++)
         {
             /* gems pop off the throne */
-            inv_add(&level_ilist_at(p->level, p->pos),
+            inv_add(level_ilist_at(p->level, p->pos),
                     item_new_random(IT_GEM));
 
             count++;
@@ -3640,7 +3644,7 @@ int player_throne_pillage(player *p)
         log_add_entry(p->log, "You manage to pry off %s gem%s.",
                       count > 1 ? "some" : "a", plural(count));
 
-        level_stationary_at(p->level, p->pos) = LS_DEADTHRONE;
+        level_stationary_set(p->level, p->pos, LS_DEADTHRONE);
     }
     else if (chance(40) && (level_stationary_at(p->level, p->pos) == LS_THRONE))
     {
@@ -3653,7 +3657,7 @@ int player_throne_pillage(player *p)
                                                 LE_MONSTER));
 
         /* next time there will be no gnome king */
-        level_stationary_at(p->level, p->pos) = LS_THRONE2;
+        level_stationary_set(p->level, p->pos, LS_THRONE2);
     }
     else
     {
@@ -3688,7 +3692,7 @@ int player_throne_sit(player *p)
                                                 LE_MONSTER));
 
         /* next time there will be no gnome king */
-        level_stationary_at(p->level, p->pos) = LS_THRONE2;
+        level_stationary_set(p->level, p->pos, LS_THRONE2);
     }
     else if (chance(35))
     {
@@ -3979,6 +3983,9 @@ void player_update_fov(player *p, int radius)
     /* reset FOV */
     memset(&(p->fov), 0, LEVEL_SIZE * sizeof(int));
 
+    /* set level correctly */
+    pos.z = p->pos.z;
+
     /* if player is enlightened, use a circular area around the player
      * otherwise fov algorithm
      */
@@ -4030,9 +4037,11 @@ void player_update_fov(player *p, int radius)
                 player_memory_of(p,pos).stationary = level_stationary_at(p->level, pos);
 
                 if (level_ilist_at(p->level, pos)
-                        && inv_length(level_ilist_at(p->level, pos)))
+                        && inv_length(*level_ilist_at(p->level, pos)))
                 {
-                    it = inv_get(level_ilist_at(p->level, pos), inv_length(level_ilist_at(p->level, pos)) - 1);
+                    it = inv_get(*level_ilist_at(p->level, pos),
+                                 inv_length(*level_ilist_at(p->level, pos)) - 1);
+
                     player_memory_of(p,pos).item = it->type;
                 }
                 else if (m && m->type == MT_MIMIC && m->unknown)
@@ -4111,7 +4120,7 @@ static void player_calculate_octant(player *p, int row, float start,
 
                 if (blocked)
                     /* we're scanning a row of blocked squares */
-                    if (!level_pos_transparent(p->level, pos_new(X,Y)))
+                    if (!level_pos_transparent(p->level, pos_new(X,Y, p->pos.z)))
                     {
                         new_start = r_slope;
                         continue;
@@ -4123,7 +4132,7 @@ static void player_calculate_octant(player *p, int row, float start,
                     }
                 else
                 {
-                    if (!level_pos_transparent(p->level, pos_new(X,Y)) && (j < radius))
+                    if (!level_pos_transparent(p->level, pos_new(X, Y, p->pos.z)) && (j < radius))
                         /* This is a blocking square, start a child scan */
                         blocked = TRUE;
 

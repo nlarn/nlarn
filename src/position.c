@@ -22,15 +22,17 @@
 #include "level.h"
 #include "position.h"
 
-position pos_new(int x, int y)
+position pos_new(int x, int y, int z)
 {
     position pos;
 
     assert((x >= 0 && x <= LEVEL_MAX_X) || x == G_MAXINT16);
     assert((y >= 0 && y <= LEVEL_MAX_Y) || y == G_MAXINT16);
+    assert((z >= 0 && z <= LEVEL_MAX) || z == G_MAXINT16);
 
     pos.x = x;
     pos.y = y;
+    pos.z = z;
 
     return pos;
 }
@@ -46,65 +48,65 @@ position pos_move(position pos, direction dir)
     {
     case GD_WEST:
         if (pos.x > 0)
-            npos = pos_new(pos.x - 1, pos.y);
+            npos = pos_new(pos.x - 1, pos.y, pos.z);
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
         break;
 
     case GD_NW:
         if ((pos.x > 0) && (pos.y > 0))
-            npos = pos_new(pos.x - 1, pos.y - 1);
+            npos = pos_new(pos.x - 1, pos.y - 1, pos.z);
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
         break;
 
     case GD_NORTH:
         if (pos.y > 0)
-            npos = pos_new(pos.x, pos.y - 1);
+            npos = pos_new(pos.x, pos.y - 1, pos.z);
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
         break;
 
     case GD_NE:
         if ((pos.x < LEVEL_MAX_X - 1) && (pos.y > 0))
-            npos = pos_new(pos.x + 1, pos.y - 1);
+            npos = pos_new(pos.x + 1, pos.y - 1, pos.z);
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
         break;
 
     case GD_EAST:
         if (pos.x < LEVEL_MAX_X - 1)
-            npos = pos_new(pos.x + 1, pos.y);
+            npos = pos_new(pos.x + 1, pos.y, pos.z);
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
         break;
 
     case GD_SE:
         if ((pos.x < LEVEL_MAX_X - 1) && (pos.y < LEVEL_MAX_Y - 1))
-            npos = pos_new(pos.x + 1, pos.y + 1);
+            npos = pos_new(pos.x + 1, pos.y + 1, pos.z);
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
         break;
 
     case GD_SOUTH:
         if (pos.y < LEVEL_MAX_Y - 1)
-            npos = pos_new(pos.x, pos.y + 1);
+            npos = pos_new(pos.x, pos.y + 1, pos.z);
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
         break;
 
     case GD_SW:
         if ((pos.x > 0) && (pos.y < LEVEL_MAX_Y - 1))
-            npos = pos_new(pos.x - 1, pos.y + 1);
+            npos = pos_new(pos.x - 1, pos.y + 1, pos.z);
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16);
+            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
         break;
 
@@ -114,6 +116,42 @@ position pos_move(position pos, direction dir)
     }
 
     return npos;
+}
+
+gint pos_distance(position first, position second)
+{
+    if (first.z != second.z)
+        return INT_MAX;
+
+    return abs(first.x - second.x)+ abs(first.y - second.y);
+}
+
+int pos_identical(position pos1, position pos2)
+{
+    if (pos1.z != pos2.z)
+        return FALSE;
+
+    return ((pos1).x == (pos2).x) && ((pos1).y == (pos2).y);
+}
+
+int pos_adjacent(position first, position second)
+{
+    guint dist_x, dist_y;
+
+    if (first.z != second.z)
+        return FALSE;
+
+    dist_x = abs(first.x - second.x);
+    dist_y = abs(first.y - second.y);
+
+    return ((dist_x < 2) && (dist_y < 2));
+}
+
+int pos_valid(position pos)
+{
+    return (pos.x >= 0) && (pos.x < LEVEL_MAX_X)
+           && (pos.y >= 0) && (pos.y < LEVEL_MAX_Y)
+           && (pos.z >= 0) && (pos.z < LEVEL_MAX);
 }
 
 /**
@@ -323,10 +361,8 @@ area *area_new_ray(position source, position target, area *obstacles)
     signed int ix, iy;
     int error;
 
-    narea = area_new(min(source.x, target.x),
-                     min(source.y, target.y),
-                     abs(target.x - source.x) + 1,
-                     abs(target.y - source.y) + 1);
+    narea = area_new(min(source.x, target.x), min(source.y, target.y),
+                     abs(target.x - source.x) + 1, abs(target.y - source.y) + 1);
 
     /* offset = offset to level map */
     offset_x = narea->start_x;

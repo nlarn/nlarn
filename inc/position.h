@@ -23,13 +23,14 @@
 
 #include "defines.h"
 
-typedef struct position
+typedef struct _position
 {
     gint16 x;
     gint16 y;
+    gint16 z;
 } position;
 
-typedef struct rectangle
+typedef struct _rectangle
 {
     gint16 x1;
     gint16 y1;
@@ -46,8 +47,12 @@ typedef struct area
     int **area;
 } area;
 
-position pos_new(int x, int y);
+position pos_new(int x, int y, int z);
 position pos_move(position pos, direction dir);
+int pos_distance(position first, position second);
+int pos_identical(position pos1, position pos2);
+int pos_adjacent(position first, position second);
+int pos_valid(position pos);
 
 rectangle rect_new(int x1, int y1, int x2, int y2);
 rectangle rect_new_sized(position center, int size);
@@ -58,25 +63,6 @@ area *area_new_circle(position center, int radius);
 area *area_new_circle_flooded(position center, int radius, area *obstacles);
 area *area_new_ray(position source, position target, area *obstacles);
 void area_destroy(area *area);
-
-#define pos_distance(first, second) (abs((first).x - (second).x) \
-                                    + abs((first).y - (second).y))
-
-#define pos_identical(pos1,pos2) (((pos1).x == (pos2).x) && ((pos1).y == (pos2).y))
-
-#define pos_adjacent(first, second) (((abs((first).x - (second).x) == 0) \
-                                       && (abs((first).y - (second).y) == 1)) \
-                                     || ((abs((first).x - (second).x) == 1) \
-                                       && (abs((first).y - (second).y) == 0)) \
-                                     || ((abs((first).x - (second).x) == 1) \
-                                       && (abs((first).y - (second).y) == 1)))
-
-#define pos_valid(pos) (((pos).x >= 0) \
-                        && ((pos).x < LEVEL_MAX_X) \
-                        && ((pos).x != G_MAXINT16) \
-                        && ((pos).y >= 0) \
-                        && ((pos).y < LEVEL_MAX_Y) \
-                        && ((pos).y != G_MAXINT16))
 
 #define area_size(area)         ((area)->size_x * (area)->size_y)
 

@@ -156,11 +156,11 @@ int display_paint_screen(player *p)
             if (game_wizardmode(nlarn))
             {
                 /* draw the truth */
-                if (inv_length(level_ilist_at(p->level, pos)) > 0)
+                if (inv_length(*level_ilist_at(p->level, pos)) > 0)
                 {
                     /* draw items */
-                    it = (item *) inv_get(level_ilist_at(p->level, pos),
-                                          inv_length(level_ilist_at(p->level, pos)) - 1);
+                    it = (item *) inv_get(*level_ilist_at(p->level, pos),
+                                          inv_length(*level_ilist_at(p->level, pos)) - 1);
 
                     attron(COLOR_PAIR(DC_BLUE));
                     addch(item_image(it->type));
@@ -1153,7 +1153,7 @@ spell *display_spell_select(char *title, player *p)
 
         case '?':
         case KEY_F(1):
-            display_show_message(spell_name(sp), spell_desc(sp));
+                        display_show_message(spell_name(sp), spell_desc(sp));
 
             /* repaint everything after displaying the message */
             display_paint_screen(p);
@@ -1912,6 +1912,9 @@ position display_get_position(player *p, char *message, int draw_line, int passa
     direction dir = GD_NONE;
     position pos, npos;
 
+    /* curses attributes */
+    int attrs;
+
     /* variables for ray painting */
     area *ray;
     int distance = 0;
@@ -1944,18 +1947,14 @@ position display_get_position(player *p, char *message, int draw_line, int passa
             display_paint_screen(p);
 
             if (target)
-            {
-                attron(COLOR_PAIR(DC_RED) | A_BOLD);
-            }
+                attrs = COLOR_PAIR(DC_RED) | A_BOLD;
             else
-            {
-                attron(COLOR_PAIR(DC_CYAN) | A_BOLD);
-            }
+                attrs = COLOR_PAIR(DC_CYAN) | A_BOLD;
 
-            ray = area_new_ray(p->pos,
-                               pos,
-                               level_get_obstacles(p->level,
-                                                   p->pos,
+            attron(attrs);
+
+            ray = area_new_ray(p->pos, pos,
+                               level_get_obstacles(p->level, p->pos,
                                                    distance));
 
             for (y = 0; y < ray->size_y; y++)
@@ -1974,20 +1973,11 @@ position display_get_position(player *p, char *message, int draw_line, int passa
                         {
                             mvaddch(ray->start_y + y, ray->start_x + x, '*');
                         }
-
                     }
                 }
             }
 
-            if (target)
-            {
-                attroff(COLOR_PAIR(DC_RED) | A_BOLD);
-            }
-            else
-            {
-                attroff(COLOR_PAIR(DC_CYAN) | A_BOLD);
-            }
-
+            attroff(attrs);
             area_destroy(ray);
         }
 

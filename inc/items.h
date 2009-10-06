@@ -186,8 +186,10 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
                        inv_callback_void post_del);
 
 int inv_add(inventory **inv, item *item_new);
+item *inv_get(inventory *inv, int idx);
 item *inv_del(inventory **inv, guint idx);
 int inv_del_element(inventory **inv, item *item);
+int inv_length(inventory *inv);
 void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data);
 int inv_weight(inventory *inv);
 int inv_item_count(inventory *inv, item_t type, guint32 id);
@@ -202,8 +204,5 @@ int inv_filter_gems(item *it);
 int inv_filter_not_gold(item *it);
 int inv_filter_potions(item *it);
 int inv_filter_readable_items(item *it);
-
-#define inv_length(inv)            (((inv) == NULL) ? 0 : (inv)->content->len)
-#define inv_get(inv, idx)          (g_ptr_array_index((inv)->content, (idx)))
 
 #endif

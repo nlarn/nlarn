@@ -842,7 +842,7 @@ monster *monster_new(int monster_type, struct level *l)
     /* initialize AI */
     nmonster->action = MA_WANDER;
     nmonster->lastseen = -1;
-    nmonster->player_pos = pos_new(G_MAXINT16, G_MAXINT16);
+    nmonster->player_pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
     /* register monster with game */
     game_monster_register(nlarn, nmonster);
@@ -1119,7 +1119,7 @@ void monster_move(monster *m, struct player *p)
                 && monster_int(m) > 3) /* lock out zombies */
         {
             /* open the door */
-            level_stationary_at(m->level, m_npos) = LS_OPENDOOR;
+            level_stationary_set(m->level, m_npos, LS_OPENDOOR);
 
             /* notify the player if the door is visible */
             if (m->m_visible)
@@ -1268,9 +1268,9 @@ void monster_items_pickup(monster *m, struct player *p)
 
     assert(m != NULL && p != NULL);
 
-    for (idx = 0; idx < inv_length(level_ilist_at(m->level, m->pos)); idx++)
+    for (idx = 0; idx < inv_length(*level_ilist_at(m->level, m->pos)); idx++)
     {
-        it = inv_get(level_ilist_at(m->level, m->pos), idx);
+        it = inv_get(*level_ilist_at(m->level, m->pos), idx);
 
         if (m->type == MT_LEPRECHAUN
                 && ((it->type == IT_GEM) || (it->type == IT_GOLD)))
@@ -1294,7 +1294,7 @@ void monster_items_pickup(monster *m, struct player *p)
                 log_add_entry(p->log, "The %s picks up %s.", monster_name(m), buf);
             }
 
-            inv_del_element(&level_ilist_at(m->level, m->pos), it);
+            inv_del_element(level_ilist_at(m->level, m->pos), it);
             inv_add(&m->inventory, it);
 
             /* go back one item as the following items lowered their number */
@@ -1825,7 +1825,7 @@ static void monster_die(monster *m)
     /* drop stuff the monster carries */
     if (inv_length(m->inventory))
     {
-        monster_items_drop(m, &level_ilist_at(m->level, m->pos));
+        monster_items_drop(m, level_ilist_at(m->level, m->pos));
     }
 
     monster_destroy(m);

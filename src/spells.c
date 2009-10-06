@@ -1134,13 +1134,15 @@ gboolean spell_make_wall(player *p)
 
     if (level_tiletype_at(p->level, pos) != LT_WALL)
     {
-        level_tiletype_at(p->level, pos) = LT_WALL;
+        level_tile *tile = level_tile_at(p->level, pos);
+
+        tile->type = tile->base_type = LT_WALL;
 
         /* destroy all items at that position */
-        if (level_ilist_at(p->level, pos))
+        if (tile->ilist != NULL)
         {
-            inv_destroy(level_ilist_at(p->level, pos));
-            level_ilist_at(p->level, pos) = NULL;
+            inv_destroy(tile->ilist);
+            tile->ilist = NULL;
         }
 
         log_add_entry(p->log, "You have created a wall.");
@@ -1159,6 +1161,7 @@ gboolean spell_vaporize_rock(player *p)
     position pos;
     monster *m = NULL;
     char *desc = NULL;
+    level_tile *tile;
 
     pos = display_get_position(p, "What do you want to vaporize?", FALSE, FALSE);
 
@@ -1168,9 +1171,11 @@ gboolean spell_vaporize_rock(player *p)
         return FALSE;
     }
 
-    if (level_tiletype_at(p->level, pos) == LT_WALL)
+    tile = level_tile_at(p->level, pos);
+
+    if (tile->type == LT_WALL)
     {
-        level_tiletype_at(p->level, pos) = LT_FLOOR;
+        tile->type = LT_FLOOR;
     }
 
     if ((m = level_get_monster_at(p->level, pos)) && (m->type == MT_XORN))
@@ -1179,7 +1184,7 @@ gboolean spell_vaporize_rock(player *p)
         monster_damage_take(m, damage_new(DAM_PHYSICAL, divert(200, 10), p));
     }
 
-    switch (level_stationary_at(p->level, pos))
+    switch (tile->stationary)
     {
     case LS_ALTAR:
         m = monster_new(MT_DAEMON_PRINCE, p->level);
@@ -1194,7 +1199,7 @@ gboolean spell_vaporize_rock(player *p)
     case LS_STATUE:
         if (game_difficulty(nlarn) < 3)
         {
-            inv_add(&level_ilist_at(p->level, pos),
+            inv_add(&tile->ilist,
                     item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)), 0));
         }
 
@@ -1209,7 +1214,7 @@ gboolean spell_vaporize_rock(player *p)
 
     case LS_DEADFOUNTAIN:
     case LS_DEADTHRONE:
-        level_stationary_at(p->level, pos) = LS_NONE;
+        tile->stationary = LS_NONE;
         break;
 
     default:
@@ -1220,7 +1225,7 @@ gboolean spell_vaporize_rock(player *p)
     if (desc)
     {
         log_add_entry(p->log, "You destroy the %s.", desc);
-        level_stationary_at(p->level, pos) = LS_NONE;
+        tile->stationary = LS_NONE;
     }
 
     /* created a monster - position it correctly */
