@@ -159,7 +159,7 @@ typedef struct level_path
 
 /* function declarations */
 
-void level_new(level *l, char *mazefile);
+level *level_new(int nlevel, char *mazefile);
 void level_destroy(level *l);
 char *level_dump(level *l);
 

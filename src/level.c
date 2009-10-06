@@ -108,12 +108,13 @@ const char *level_names[LEVEL_MAX] =
     "V3"
 };
 
-void level_new(level *l, char *mazefile)
+level *level_new(int nlevel, char *mazefile)
 {
     gboolean level_loaded = FALSE;
     int x, y;
 
-    assert(l != NULL);
+    level *l = g_malloc0(sizeof(level));
+    l->nlevel = nlevel;
 
     /* initialize monster and sphere list */
     l->mlist = g_ptr_array_new();
@@ -165,6 +166,8 @@ void level_new(level *l, char *mazefile)
         /* and not trapped */
         level_fill_with_traps(l);
     }
+
+    return l;
 }
 
 char *level_dump(level *l)
@@ -173,6 +176,8 @@ char *level_dump(level *l)
     GString *map;
 
     map = g_string_new_len(NULL, LEVEL_SIZE);
+
+    pos.z = l->nlevel;
 
     for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
     {
@@ -821,7 +826,7 @@ int level_fill_with_live(level *l)
 
     for (i = 0; i <= new_monster_count; i++)
     {
-        monster_new_by_level(l);
+        monster_level_enter(monster_new_by_level(l->nlevel), l);
     }
 
     return(new_monster_count);
@@ -1097,7 +1102,8 @@ static void level_make_maze(level *l)
     int mx, mxl, mxh;
     int my, myl, myh;
     int nrooms;
-    monster *nmonst = NULL, *tmonst;
+    monster *m = NULL;
+    gboolean want_monster = FALSE;
 
     level_make_maze_eat(l, 1, 1);
 
@@ -1127,7 +1133,7 @@ static void level_make_maze(level *l)
                 mx = rand_1n(60)+3;
                 mxl = mx - rand_1n(2);
                 mxh = mx + rand_1n(2);
-                nmonst = monster_new_by_level(l);
+                want_monster = TRUE;
             }
 
             pos.z = l->nlevel;
@@ -1140,13 +1146,13 @@ static void level_make_maze(level *l)
                     tile->type = LT_FLOOR;
                     tile->base_type = LT_FLOOR;
 
-                    if (nmonst != NULL)
+                    if (want_monster == TRUE)
                     {
-                        tmonst = monster_new(nmonst->type, l);
-                        monster_position(tmonst, pos);
+                        m = monster_new_by_level(l->nlevel);
+                        monster_level_enter(m, l);
+                        monster_position(m, pos);
 
-                        monster_destroy(nmonst);
-                        nmonst = NULL;
+                        want_monster = FALSE;
                     }
                 }
             }
@@ -1362,7 +1368,8 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                 }
                 itm = item_new(IT_AMULET, AM_LARN, 0);
 
-                monst = monster_new(MT_DEMONLORD_I + rand_0n(7), l);
+                monst = monster_new(MT_DEMONLORD_I + rand_0n(7));
+                monster_level_enter(monst, l);
                 break;
 
             case '!':	/* potion of cure dianthroritis */
@@ -1370,11 +1377,12 @@ static int level_load_from_file(level *l, char *mazefile, int which)
                     break;
 
                 itm = item_new(IT_POTION, PO_CURE_DIANTHR, 0);
-                monst = monster_new(MT_DAEMON_PRINCE, l);
+                monst = monster_new(MT_DAEMON_PRINCE);
+                monster_level_enter(monst, l);
                 break;
 
             case 'M':	/* random monster */
-                monst = monster_new_by_level(l);
+                monster_level_enter(monster_new_by_level(l->nlevel), l);
                 break;
 
             case '-':
@@ -1446,7 +1454,8 @@ static void level_add_treasure_room(level *l)
                 inv_add(&tile->ilist, itm);
 
                 /* create a monster */
-                monst = monster_new_by_level(l);
+                monst = monster_new_by_level(l->nlevel);
+                monster_level_enter(monst, l);
                 monster_position(monst, pos);
             }
 

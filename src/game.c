@@ -239,8 +239,7 @@ void game_new(int argc, char *argv[])
     /* allocate space for levels */
     for (idx = 0; idx < LEVEL_MAX; idx++)
     {
-        nlarn->levels[idx] = g_malloc0(sizeof(level));
-        nlarn->levels[idx]->nlevel = idx;
+        nlarn->levels[idx] = level_new(idx, nlarn->mazefile);
     }
 
     /* game time handling */

@@ -708,12 +708,12 @@ static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
 
-monster *monster_new(int monster_type, struct level *l)
+monster *monster_new(int monster_type)
 {
     monster *nmonster;
     int it, icount;     /* item type, item id, item count */
 
-    assert(monster_type > MT_NONE && monster_type < MT_MAX && l != NULL);
+    assert(monster_type > MT_NONE && monster_type < MT_MAX);
 
     /* make room for monster */
     nmonster = g_malloc0(sizeof(monster));
@@ -724,18 +724,6 @@ monster *monster_new(int monster_type, struct level *l)
     /* prevent the living dead */
     if (nmonster->hp < 1)
         nmonster->hp = 1;
-
-    /* put monster into level */
-    nmonster->level = l;
-
-    if (!monster_position(nmonster, level_find_space(l, LE_MONSTER)))
-    {
-        /* no free space could be found for the monstert -> abort */
-        g_free(nmonster);
-        return NULL;
-    }
-
-    g_ptr_array_add(l->mlist, nmonster);
 
     nmonster->effects = g_ptr_array_new();
     nmonster->inventory = inv_new(nmonster);
@@ -850,24 +838,24 @@ monster *monster_new(int monster_type, struct level *l)
     return nmonster;
 }
 
-monster *monster_new_by_level(struct level *l)
+monster *monster_new_by_level(int nlevel)
 {
     const int monster_level[] = { 5, 11, 17, 22, 27, 33, 39, 42, 46, 50, 53, 56, MT_MAX - 1 };
     int monster_id = 0;
     int monster_id_min;
     int monster_id_max;
 
-    assert(l != NULL);
+    assert(nlevel > 0 && nlevel < LEVEL_MAX);
 
-    if (l->nlevel < 5)
+    if (nlevel < 5)
     {
         monster_id_min = 1;
-        monster_id_max = monster_level[l->nlevel - 1];
+        monster_id_max = monster_level[nlevel - 1];
     }
     else
     {
-        monster_id_min = monster_level[l->nlevel - 4] + 1;
-        monster_id_max = monster_level[l->nlevel - 1];
+        monster_id_min = monster_level[nlevel - 4] + 1;
+        monster_id_max = monster_level[nlevel - 1];
     }
 
     while (nlarn->monster_genocided[monster_id]
@@ -877,7 +865,7 @@ monster *monster_new_by_level(struct level *l)
         monster_id = rand_m_n(monster_id_min, monster_id_max);
     }
 
-    return monster_new(monster_id, l);
+    return monster_new(monster_id);
 }
 
 void monster_destroy(monster *m)
@@ -886,12 +874,15 @@ void monster_destroy(monster *m)
 
     /* free effects */
     while (m->effects->len > 0)
-        effect_destroy(g_ptr_array_remove_index_fast(m->effects, m->effects->len - 1));
+    {
+        effect *e = g_ptr_array_remove_index(m->effects, m->effects->len - 1);
+        effect_destroy(e);
+    }
 
     g_ptr_array_free(m->effects, TRUE);
 
     /* remove monster from level */
-    g_ptr_array_remove_fast(m->level->mlist, m);
+    g_ptr_array_remove_fast(nlarn->levels[m->pos.z]->mlist, m);
 
     /* free inventory */
     if (m->inventory)
@@ -901,6 +892,29 @@ void monster_destroy(monster *m)
     game_monster_unregister(nlarn, m);
 
     g_free(m);
+}
+
+void monster_level_enter(monster *m, struct level *l)
+{
+    assert (m != NULL && l != NULL);
+
+    /* remove monster from old level if it has been somewhere before */
+    if (m->level != NULL)
+    {
+        g_ptr_array_remove_fast(m->level->mlist, m);
+    }
+
+    /* put monster into level */
+    m->level = l;
+    m->pos.z = l->nlevel;
+
+    if (!monster_position(m, level_find_space(l, LE_MONSTER)))
+    {
+        /* no free space could be found for the monstert -> abort */
+        monster_destroy(m);
+    }
+
+    g_ptr_array_add(l->mlist, m);
 }
 
 void monster_move(monster *m, struct player *p)
@@ -1063,6 +1077,21 @@ void monster_move(monster *m, struct player *p)
         }
         else
         {
+            /* monster heads into the direction of the player. */
+
+            /* if the monster is on a different level than the player,
+               try to find the staircase to reach the player's level */
+            if (m->pos.z != m->player_pos.z)
+            {
+                level_stationary_t what;
+                if (m->pos.z > m->player_pos.z)
+                    what = LS_STAIRSUP;
+                else
+                    what = LS_STAIRSDOWN;
+
+                m->player_pos = level_find_stationary(m->level, what);
+            }
+
             path = level_find_path(m->level, m->pos, m->player_pos);
 
             if (path && !g_queue_is_empty(path->path))
@@ -1196,7 +1225,7 @@ monster *monster_trap_trigger(monster *m, struct player *p)
     switch (trap)
     {
     case TT_TRAPDOOR:
-        /* just remove the monster - done below */
+        monster_level_enter(m, nlarn->levels[m->pos.z + 1]);
         break;
 
     case TT_TELEPORT:
@@ -1233,13 +1262,6 @@ monster *monster_trap_trigger(monster *m, struct player *p)
     {
         damage *dam = damage_new(DAM_PHYSICAL, rand_1n(trap_damage(trap)), NULL);
         m = monster_damage_take(m, dam);
-    }
-    else if (trap == TT_TRAPDOOR)
-    {
-        /* destroy the monster if it has left the level */
-        /* FIXME: move monster to the next level (ticket 68) */
-        monster_destroy(m);
-        m = NULL;
     }
 
     return m;

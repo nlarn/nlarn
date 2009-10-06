@@ -963,7 +963,7 @@ gboolean spell_alter_reality(player *p)
     nlevel = g_malloc0(sizeof (level));
     nlevel->nlevel = olevel->nlevel;
 
-    level_new(nlevel, game_mazefile(nlarn));
+    level_new(p->level->nlevel, game_mazefile(nlarn));
 
     /* make new level active */
     nlarn->levels[p->level->nlevel] = nlevel;
@@ -1187,12 +1187,12 @@ gboolean spell_vaporize_rock(player *p)
     switch (tile->stationary)
     {
     case LS_ALTAR:
-        m = monster_new(MT_DAEMON_PRINCE, p->level);
+        m = monster_new(MT_DAEMON_PRINCE);
         desc = "altar";
         break;
 
     case LS_FOUNTAIN:
-        m = monster_new(MT_WATER_LORD, p->level);
+        m = monster_new(MT_WATER_LORD);
         desc = "fountain";
         break;
 
@@ -1208,7 +1208,7 @@ gboolean spell_vaporize_rock(player *p)
 
     case LS_THRONE:
     case LS_THRONE2:
-        m = monster_new(MT_GNOME_KING, p->level);
+        m = monster_new(MT_GNOME_KING);
         desc = "throne";
         break;
 
@@ -1231,6 +1231,7 @@ gboolean spell_vaporize_rock(player *p)
     /* created a monster - position it correctly */
     if (m)
     {
+        monster_level_enter(m, p->level);
         monster_position(m, pos);
     }
 

@@ -188,10 +188,11 @@ extern const monster_data monsters[MT_MAX];
 
 /* function definitions */
 
-monster *monster_new(int monster_type, struct level *l);
-monster *monster_new_by_level(struct level *l);
+monster *monster_new(int monster_type);
+monster *monster_new_by_level(int nlevel);
 void monster_destroy(monster *m);
 
+void monster_level_enter(monster *m, struct level *l);
 void monster_move(monster *m, struct player *p);
 int monster_position(monster *m, position target);
 monster *monster_trap_trigger(monster *m, struct player *p);

@@ -780,15 +780,12 @@ int player_level_enter(player *p, level *l, gboolean teleported)
         p->level->player = NULL;
     }
 
-    if (!(l->visited))
-    {
-        level_new(l, game_mazefile(nlarn));
 
-        if (p->stats.deepest_level < l->nlevel)
-        {
-            p->stats.deepest_level = l->nlevel;
-        }
+    if (p->stats.deepest_level < l->nlevel)
+    {
+        p->stats.deepest_level = l->nlevel;
     }
+
     else
     {
         /* call level timer */
@@ -2982,7 +2979,8 @@ int player_altar_desecrate(player *p)
     if (chance(60))
     {
         /* create a monster - should be very dangerous */
-        m = monster_new(MT_RED_DRAGON, p->level);
+        m = monster_new(MT_RED_DRAGON);
+        monster_level_enter(m, p->level);
 
         /* try to find a space for the monster near the altar */
         monster_position(m, level_find_space_in(p->level,
@@ -3523,7 +3521,8 @@ int player_fountain_wash(player *p)
     else if (chance(35))
     {
         /* make water lord */
-        m = monster_new(MT_WATER_LORD, p->level);
+        m = monster_new(MT_WATER_LORD);
+        monster_level_enter(m, p->level);
 
         /* try to find a space for the monster near the player */
         monster_position(m, level_find_space_in(p->level,
@@ -3649,7 +3648,8 @@ int player_throne_pillage(player *p)
     else if (chance(40) && (level_stationary_at(p->level, p->pos) == LS_THRONE))
     {
         /* make gnome king */
-        m = monster_new(MT_GNOME_KING, p->level);
+        m = monster_new(MT_GNOME_KING);
+        monster_level_enter(m, p->level);
 
         /* try to find a space for the monster near the player */
         monster_position(m, level_find_space_in(p->level,
@@ -3684,7 +3684,8 @@ int player_throne_sit(player *p)
     if (chance(30) && (level_stationary_at(p->level, p->pos) == LS_THRONE))
     {
         /* make a gnome king */
-        m = monster_new(MT_GNOME_KING, p->level);
+        m = monster_new(MT_GNOME_KING);
+        monster_level_enter(m, p->level);
 
         /* try to find a space for the monster near the player */
         monster_position(m, level_find_space_in(p->level,
