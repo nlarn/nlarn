@@ -35,10 +35,6 @@
 #define LEVEL_VMAX  3						/* max # of levels in the temple of the luran */
 #define LEVEL_MAX (LEVEL_DMAX + LEVEL_VMAX)	/* total number of levels */
 
-/* forward declaration */
-
-struct player;
-
 typedef enum level_tile_type
 {
     LT_NONE,
@@ -136,7 +132,6 @@ typedef struct level
     guint32 visited;                            /* last time player has been on this level */
     GPtrArray *mlist;                           /* monsters on this level */
     GPtrArray *slist;                           /* spheres of annihilation on this level */
-    struct player *player;                      /* a link to the player */
 } level;
 
 /* Structure for path elements */

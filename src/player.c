@@ -774,9 +774,6 @@ int player_level_enter(player *p, level *l, gboolean teleported)
     {
         /* store the last turn player has been on this level */
         p->level->visited = game_turn(nlarn);
-
-        /* remove link to player */
-        p->level->player = NULL;
     }
 
     if (p->stats.deepest_level < l->nlevel)
@@ -840,9 +837,6 @@ int player_level_enter(player *p, level *l, gboolean teleported)
     {
         m->pos = level_find_space(l, LE_MONSTER);
     }
-
-    /* set link to player */
-    l->player = p;
 
     if (l->nlevel == 0)
     {

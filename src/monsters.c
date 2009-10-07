@@ -1312,7 +1312,7 @@ void monster_items_pickup(monster *m, struct player *p)
             /* item has been picked up */
             if (m->m_visible)
             {
-                item_describe(it, player_item_identified(m->level->player, it),
+                item_describe(it, player_item_identified(nlarn->p, it),
                               (it->count == 1), FALSE, buf, 60);
                 log_add_entry(p->log, "The %s picks up %s.", monster_name(m), buf);
             }
@@ -1816,10 +1816,10 @@ static void monster_weapon_wield(monster *m, item *weapon)
     /* show message if monster is visible */
     if (m->m_visible)
     {
-        item_describe(weapon, player_item_identified(m->level->player, weapon),
+        item_describe(weapon, player_item_identified(nlarn->p, weapon),
                       TRUE, FALSE, buf, 60);
 
-        log_add_entry(m->level->player->log, "The %s wields %s.",
+        log_add_entry(nlarn->p->log, "The %s wields %s.",
                       monster_name(m), buf);
     }
 }
@@ -1828,7 +1828,6 @@ static void monster_weapon_wield(monster *m, item *weapon)
 static void monster_die(monster *m)
 {
     char *message = NULL;
-    struct player *p;
 
     assert(m != NULL);
 
@@ -1837,12 +1836,10 @@ static void monster_die(monster *m)
         message = "The %s died!";
     }
 
-    p = m->level->player;
-
     /* if the player can see the monster describe the event */
-    if (m->m_visible && p)
+    if (m->m_visible)
     {
-        log_add_entry(p->log, message, monster_name(m));
+        log_add_entry(nlarn->p->log, message, monster_name(m));
     }
 
     /* drop stuff the monster carries */

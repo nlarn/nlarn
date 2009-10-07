@@ -21,8 +21,9 @@
 
 #include "container.h"
 #include "display.h"
-#include "level.h"
 #include "items.h"
+#include "level.h"
+#include "nlarn.h"
 #include "spheres.h"
 
 static void level_fill_with_stationary(level *l);
@@ -399,7 +400,7 @@ gboolean level_validate_position(level *l, position pos, level_element_t element
 
     case LE_MONSTER:
         /* not ok if player is standing on that tile */
-        if ((l->player) && pos_identical(pos, l->player->pos))
+        if (pos_identical(pos, nlarn->p->pos))
             return FALSE;
 
         if (level_pos_passable(l, pos) && !level_is_monster_at(l, pos))
@@ -883,19 +884,19 @@ void level_timer(level *l, guint8 count)
                         }
 
                         /* notifiy player of impact if the item is visible */
-                        if (l->player && impact && level_pos_is_visible(l, l->player->pos, pos))
+                        if (impact && level_pos_is_visible(l, nlarn->p->pos, pos))
                         {
-                            item_describe(it, player_item_known(l->player, it),
+                            item_describe(it, player_item_known(nlarn->p, it),
                                           (it->count == 1), TRUE, item_desc, 60);
 
                             if (impact < PI_DESTROYED)
                             {
-                                log_add_entry(l->player->log, "The %s %s%s.", item_desc,
+                                log_add_entry(nlarn->p->log, "The %s %s%s.", item_desc,
                                               impact_desc, (it->count == 1) ? "s" : "");
                             }
                             else
                             {
-                                log_add_entry(l->player->log, "The %s %s destroyed.", item_desc,
+                                log_add_entry(nlarn->p->log, "The %s %s destroyed.", item_desc,
                                               (it->count == 1) ? "is" : "are");
                             }
                         }
