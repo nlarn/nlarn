@@ -123,9 +123,9 @@ int potion_amnesia(player *p, item *potion)
 
     assert (p != NULL && potion != NULL);
 
-    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
+    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
-        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
             player_memory_of(p, pos).type = LT_NONE;
             player_memory_of(p, pos).stationary = LS_NONE;
@@ -149,11 +149,11 @@ int potion_detect_item(player *p, item *potion)
 
     assert(p != NULL && potion != NULL);
 
-    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
+    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
-        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            if ((inv = *level_ilist_at(p->level, pos)))
+            if ((inv = *map_ilist_at(p->map, pos)))
             {
                 for (idx = 0; idx <  inv_length(inv); idx++)
                 {

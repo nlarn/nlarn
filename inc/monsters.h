@@ -32,7 +32,7 @@
 /* forward declarations */
 
 struct player;
-struct level;
+struct map;
 
 /* local monster definition for data storage */
 
@@ -166,7 +166,7 @@ typedef struct monster
     position player_pos;
 
     /* level monster is on */
-    struct level *level;
+    struct map *map;
 
     /* attacks already unsuccessfully tried */
     gboolean attacks_failed[MONSTER_ATTACK_COUNT];
@@ -192,9 +192,9 @@ monster *monster_new(int monster_type);
 monster *monster_new_by_level(int nlevel);
 void monster_destroy(monster *m);
 
-void monster_level_enter(monster *m, struct level *l);
+void monster_level_enter(monster *m, struct map *l);
 void monster_move(monster *m, struct player *p);
-int monster_position(monster *m, position target);
+int monster_position(monster *m, struct map *map, position target);
 monster *monster_trap_trigger(monster *m, struct player *p);
 
 void monster_items_drop(monster *m, inventory **floor);
@@ -208,7 +208,7 @@ gboolean monster_update_action(monster *m);
 void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
 
-void monsters_genocide(struct level *l);
+void monsters_genocide(struct map *l);
 
 #define monster_name(monster)        (monsters[(monster)->type].name)
 #define monster_level(monster)       (monsters[(monster)->type].level)
@@ -220,6 +220,7 @@ void monsters_genocide(struct level *l);
 #define monster_image(monster)       (monsters[(monster)->type].image)
 #define monster_speed(monster)       (monsters[(monster)->type].mspeed)
 #define monster_attack(monster, idx) (monsters[(monster)->type].attacks[(idx)])
+#define monster_map(monster)         (game_map(nlarn, (monster)->pos.z))
 
 /* flags */
 #define monster_has_head(monster)        (monsters[(monster)->type].flags & MF_HEAD)

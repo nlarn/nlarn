@@ -114,7 +114,7 @@ int scroll_annihilate(struct player *p, item *scroll)
 
     assert(p != NULL && scroll != NULL);
 
-    mlist = level_get_monsters_in(p->level, rect_new_sized(p->pos, 1));
+    mlist = map_get_monsters_in(p->map, rect_new_sized(p->pos, 1));
 
     for (idx = 0; idx < mlist->len; idx++)
     {
@@ -161,8 +161,8 @@ int scroll_create_artefact(player *p, item *scroll)
 
     assert(p != NULL && scroll != NULL);
 
-    it = item_new_by_level(rand_1n(IT_MAX), p->level->nlevel);
-    inv_add(level_ilist_at(p->level, p->pos), it);
+    it = item_new_by_level(rand_1n(IT_MAX), p->map->nlevel);
+    inv_add(map_ilist_at(p->map, p->pos), it);
 
     item_describe(it, player_item_known(p, it), (it->count == 1),
                   FALSE, buf, 60);
@@ -243,9 +243,9 @@ int scroll_heal_monster(player *p, item *scroll)
 
     assert(p != NULL && scroll != NULL);
 
-    for (idx = 0; idx < p->level->mlist->len; idx++)
+    for (idx = 0; idx < p->map->mlist->len; idx++)
     {
-        m = g_ptr_array_index(p->level->mlist, idx);
+        m = g_ptr_array_index(p->map->mlist, idx);
 
         if (m->hp < monster_hp_max(m))
         {
@@ -307,12 +307,12 @@ int scroll_mapping(player *p, item *scroll)
 
     pos.z = p->pos.z;
 
-    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
+    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
-        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            player_memory_of(p, pos).type = level_tiletype_at(p->level, pos);
-            player_memory_of(p, pos).stationary = level_stationary_at(p->level, pos);
+            player_memory_of(p, pos).type = map_tiletype_at(p->map, pos);
+            player_memory_of(p, pos).stationary = map_stationary_at(p->map, pos);
         }
     }
 
@@ -400,16 +400,16 @@ int scroll_teleport(player *p, item *scroll)
 
     assert(p != NULL);
 
-    if (p->level->nlevel == 0)
+    if (p->map->nlevel == 0)
         nlevel = 0;
-    else if (p->level->nlevel < LEVEL_DMAX)
-        nlevel = rand_0n(LEVEL_DMAX);
+    else if (p->map->nlevel < MAP_DMAX)
+        nlevel = rand_0n(MAP_DMAX);
     else
-        nlevel = rand_m_n(LEVEL_DMAX, LEVEL_MAX);
+        nlevel = rand_m_n(MAP_DMAX, MAP_MAX);
 
-    if (nlevel != p->level->nlevel)
+    if (nlevel != p->map->nlevel)
     {
-        player_level_enter(p, nlarn->levels[nlevel], TRUE);
+        player_level_enter(p, game_map(nlarn, nlevel), TRUE);
         return TRUE;
     }
 

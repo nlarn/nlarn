@@ -25,7 +25,7 @@
 #include "food.h"
 #include "gems.h"
 #include "items.h"
-#include "level.h"
+#include "map.h"
 #include "nlarn.h"
 #include "player.h"
 #include "potions.h"
@@ -283,13 +283,13 @@ item *item_new_by_level(item_t item_type, int num_level)
     int item_bonus = 0;
     float variance, id_base, divisor;
 
-    assert (item_type > IT_NONE && item_type < IT_MAX && num_level < LEVEL_MAX);
+    assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
 
-    /* no amulets above level 8 */
+    /* no amulets above map 8 */
     if ((item_type == IT_AMULET) && (num_level < 8))
         item_type = IT_RING;
 
-    divisor = 1 / (float)(LEVEL_MAX - 1);
+    divisor = 1 / (float)(MAP_MAX - 1);
 
     switch (item_type)
     {
@@ -306,7 +306,7 @@ item *item_new_by_level(item_t item_type, int num_level)
         break;
 
     default:
-        /* no per-level randomnization */
+        /* no per-map randomnization */
         return item_new_random(item_type);
     }
 

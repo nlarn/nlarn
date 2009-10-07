@@ -19,7 +19,7 @@
 #ifndef __SPHERES_H_
 #define __SPHERES_H_
 
-#include "level.h"
+#include "map.h"
 #include "player.h"
 
 typedef struct sphere {
@@ -33,7 +33,7 @@ typedef struct sphere {
 sphere *sphere_new(position pos, player *owner, int lifetime);
 void sphere_destroy(sphere *s);
 
-void sphere_move(sphere *s, level *l);
-sphere *sphere_at(level *l, position pos);
+void sphere_move(sphere *s, map *l);
+sphere *sphere_at(map *l, position pos);
 
 #endif

@@ -47,51 +47,6 @@ static const char *mazefile = "maze";
 static const char *fortunes = "fortune";
 static const char *highscores = "highscores";
 
-int game_save(game *g, char *filename)
-{
-    int fd;
-
-    game_save_head_t *head = g_malloc0(sizeof(game_save_head_t));
-
-    assert(g != NULL && filename != NULL);
-
-    head->version_major = VERSION_MAJOR;
-    head->version_minor = VERSION_MINOR;
-    head->version_patch = VERSION_PATCH;
-
-/* mingw does not define the latter */
-#ifdef S_IRGRP
-    fd = creat(filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-#else
-    fd = creat(filename, S_IRUSR | S_IWUSR);
-#endif
-    if (fd == -1)
-    {
-        g_free(head);
-        return FALSE;
-    }
-
-    /* before starting to write jump ahead to leave space for the header */
-    lseek(fd, sizeof(game_save_head_t), SEEK_SET);
-
-    /* return to the beginning of the file */
-    lseek(fd, 0, SEEK_SET);
-    /* and write the file header */
-    write(fd, head, sizeof(game_save_head_t));
-
-    close(fd);
-    g_free(head);
-
-    return TRUE;
-}
-
-game *game_load(char *filename)
-{
-    assert(filename != NULL);
-
-    return EXIT_SUCCESS;
-}
-
 void game_new(int argc, char *argv[])
 {
     const char *default_lib_dir = "/usr/share/games/nlarn";
@@ -241,9 +196,9 @@ void game_new(int argc, char *argv[])
     }
 
     /* allocate space for levels */
-    for (idx = 0; idx < LEVEL_MAX; idx++)
+    for (idx = 0; idx < MAP_MAX; idx++)
     {
-        nlarn->levels[idx] = level_new(idx, nlarn->mazefile);
+        nlarn->maps[idx] = map_new(idx, nlarn->mazefile);
     }
 
     /* game time handling */
@@ -270,9 +225,9 @@ int game_destroy(game *g)
     assert(g != NULL);
 
     /* everything must go */
-    for (i = 0; i < LEVEL_MAX; i++)
+    for (i = 0; i < MAP_MAX; i++)
     {
-        level_destroy(g->levels[i]);
+        map_destroy(g->maps[i]);
     }
 
     g_free(g->basedir);
@@ -297,20 +252,49 @@ int game_destroy(game *g)
     return EXIT_SUCCESS;
 }
 
-void game_scores_destroy(GList *gs)
+int game_save(game *g, char *filename)
 {
-    GList *iterator;
-    game_score_t *score;
+    int fd;
 
-    for (iterator = gs; iterator; iterator = iterator->next)
+    game_save_head_t *head = g_malloc0(sizeof(game_save_head_t));
+
+    assert(g != NULL && filename != NULL);
+
+    head->version_major = VERSION_MAJOR;
+    head->version_minor = VERSION_MINOR;
+    head->version_patch = VERSION_PATCH;
+
+/* mingw does not define the latter */
+#ifdef S_IRGRP
+    fd = creat(filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+#else
+    fd = creat(filename, S_IRUSR | S_IWUSR);
+#endif
+    if (fd == -1)
     {
-        score = iterator->data;
-        g_free(score->player_name);
-
-        g_free(score);
+        g_free(head);
+        return FALSE;
     }
 
-    g_list_free(gs);
+    /* before starting to write jump ahead to leave space for the header */
+    lseek(fd, sizeof(game_save_head_t), SEEK_SET);
+
+    /* return to the beginning of the file */
+    lseek(fd, 0, SEEK_SET);
+    /* and write the file header */
+    write(fd, head, sizeof(game_save_head_t));
+
+    close(fd);
+    g_free(head);
+
+    return TRUE;
+}
+
+game *game_load(char *filename)
+{
+    assert(filename != NULL);
+
+    return EXIT_SUCCESS;
 }
 
 game_score_t *game_score(game *g, player_cod cod, int cause)
@@ -327,9 +311,9 @@ game_score_t *game_score(game *g, player_cod cod, int cause)
     score->cause = cause;
     score->hp = g->p->hp;
     score->hp_max = g->p->hp_max;
-    score->level = g->p->level->nlevel;
+    score->level = g->p->lvl;
     score->level_max = g->p->stats.max_level;
-    score->dlevel = g->p->level->nlevel;
+    score->dlevel = g->p->map->nlevel;
     score->dlevel_max = g->p->stats.deepest_level;
     score->difficulty = game_difficulty(g);
     score->time_start = g->time_start;
@@ -372,6 +356,29 @@ GList *game_score_add(game *g, game_score_t *score)
     return gs;
 }
 
+void game_scores_destroy(GList *gs)
+{
+    GList *iterator;
+    game_score_t *score;
+
+    for (iterator = gs; iterator; iterator = iterator->next)
+    {
+        score = iterator->data;
+        g_free(score->player_name);
+
+        g_free(score);
+    }
+
+    g_list_free(gs);
+}
+
+map *game_map(game *g, guint nmap)
+{
+    assert (g != NULL && nmap >= 0 && nmap < MAP_MAX);
+
+    return g->maps[nmap];
+}
+
 void game_spin_the_wheel(game *g, guint times)
 {
     guint turn;
@@ -379,7 +386,7 @@ void game_spin_the_wheel(game *g, guint times)
 
     assert(g != NULL && times > 0);
 
-    level_timer(g->p->level, times);
+    map_timer(g->p->map, times);
 
     for (turn = 0; turn < times; turn++)
     {
@@ -387,17 +394,17 @@ void game_spin_the_wheel(game *g, guint times)
         player_effects_expire(g->p, 1);
 
         /* check if player is stuck inside a wall without walk through wall */
-        if ((level_tiletype_at(g->p->level, g->p->pos) == LT_WALL)
+        if ((map_tiletype_at(g->p->map, g->p->pos) == LT_WALL)
                 && !player_effect(g->p, ET_WALL_WALK))
         {
             player_die(g->p, PD_STUCK, 0);
         }
 
-        /* deal damage cause by level tiles to player */
-        if ((dam = level_tile_damage(g->p->level, g->p->pos)))
+        /* deal damage cause by map tiles to player */
+        if ((dam = map_tile_damage(g->p->map, g->p->pos)))
         {
             player_damage_take(g->p, dam, PD_LEVEL,
-                               level_tiletype_at(g->p->level, g->p->pos));
+                               map_tiletype_at(g->p->map, g->p->pos));
         }
 
         game_move_monsters(g);
@@ -479,14 +486,14 @@ void game_sphere_unregister(game *g, sphere *s)
 }
 
 /**
- *  move all monsters on player's current level
+ *  move all monsters on player's current map
  *
  *  @param the game
  *  @return Returns no value.
  */
 static void game_move_monsters(game *g)
 {
-    level *l;
+    map *l;
     /* handle to current monster */
     monster *m;
     guint idx;
@@ -494,7 +501,7 @@ static void game_move_monsters(game *g)
     assert(g != NULL);
 
     /* make shortcut */
-    l = g->p->level;
+    l = g->p->map;
 
     for (idx = 0; idx < l->mlist->len; idx++)
     {
@@ -509,14 +516,14 @@ static void game_move_monsters(game *g)
 
 static void game_move_spheres(game *g)
 {
-    level *l;
+    map *l;
     sphere *s;
     guint idx;
 
     assert(g != NULL);
 
     /* make shortcut */
-    l = g->p->level;
+    l = g->p->map;
 
     for (idx = 0; idx < l->slist->len; idx++)
     {

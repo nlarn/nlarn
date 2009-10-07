@@ -20,7 +20,7 @@
 #include <stdlib.h>
 
 #include "game.h"
-#include "level.h"
+#include "map.h"
 #include "monsters.h"
 #include "nlarn.h"
 
@@ -845,7 +845,7 @@ monster *monster_new_by_level(int nlevel)
     int monster_id_min;
     int monster_id_max;
 
-    assert(nlevel > 0 && nlevel < LEVEL_MAX);
+    assert(nlevel > 0 && nlevel < MAP_MAX);
 
     if (nlevel < 5)
     {
@@ -881,9 +881,9 @@ void monster_destroy(monster *m)
 
     g_ptr_array_free(m->effects, TRUE);
 
-    /* remove monster from level (if the level existst) */
-    if (nlarn->levels[m->pos.z] != NULL)
-        g_ptr_array_remove_fast(nlarn->levels[m->pos.z]->mlist, m);
+    /* remove monster from map (if the map existst) */
+    if (nlarn->maps[m->pos.z] != NULL)
+        g_ptr_array_remove_fast(nlarn->maps[m->pos.z]->mlist, m);
 
     /* free inventory */
     if (m->inventory)
@@ -895,21 +895,21 @@ void monster_destroy(monster *m)
     g_free(m);
 }
 
-void monster_level_enter(monster *m, struct level *l)
+void monster_level_enter(monster *m, struct map *l)
 {
     assert (m != NULL && l != NULL);
 
-    /* remove monster from old level if it has been somewhere before */
-    if (m->level != NULL)
+    /* remove monster from old map if it has been somewhere before */
+    if (m->map != NULL)
     {
-        g_ptr_array_remove_fast(m->level->mlist, m);
+        g_ptr_array_remove_fast(m->map->mlist, m);
     }
 
-    /* put monster into level */
-    m->level = l;
+    /* put monster into map */
+    m->map = l;
     m->pos.z = l->nlevel;
 
-    if (!monster_position(m, level_find_space(l, LE_MONSTER)))
+    if (!monster_position(m, l, map_find_space(l, LE_MONSTER)))
     {
         /* no free space could be found for the monstert -> abort */
         monster_destroy(m);
@@ -930,11 +930,11 @@ void monster_move(monster *m, struct player *p)
     int dist;
 
     /* path to player */
-    level_path *path = NULL;
+    map_path *path = NULL;
 
-    level_path_element *el = NULL;
+    map_path_element *el = NULL;
 
-    /* damage caused by level effects */
+    /* damage caused by map effects */
     damage *dam = NULL;
 
     int monster_visrange = 7;
@@ -963,7 +963,7 @@ void monster_move(monster *m, struct player *p)
     else
     {
         /* determine if player's position is visible from monster's position */
-        m->p_visible = level_pos_is_visible(m->level, m->pos, p->pos);
+        m->p_visible = map_pos_is_visible(m->map, m->pos, p->pos);
     }
 
     if (m->p_visible)
@@ -983,7 +983,7 @@ void monster_move(monster *m, struct player *p)
     }
 
     /* deal damage caused by floor effects */
-    if ((dam = level_tile_damage(m->level, m->pos)))
+    if ((dam = map_tile_damage(m->map, m->pos)))
     {
         if (!(m = monster_damage_take(m, dam)))
             return;
@@ -1028,8 +1028,8 @@ void monster_move(monster *m, struct player *p)
             m_npos_tmp = pos_move(m->pos, tries);
 
             if (pos_valid(m_npos_tmp)
-                    && lt_is_passable(level_tiletype_at(m->level,m_npos_tmp))
-                    && !level_is_monster_at(m->level, m_npos_tmp)
+                    && lt_is_passable(map_tiletype_at(m->map,m_npos_tmp))
+                    && !map_is_monster_at(m->map, m_npos_tmp)
                     && (pos_distance(p->pos, m_npos_tmp) > dist))
             {
                 /* distance is bigger than current distance */
@@ -1053,8 +1053,8 @@ void monster_move(monster *m, struct player *p)
             tries++;
         }
         while ((!pos_valid(m_npos)
-                || !lt_is_passable(level_tiletype_at(m->level,m_npos))
-                || level_is_monster_at(m->level, m_npos))
+                || !lt_is_passable(map_tiletype_at(m->map,m_npos))
+                || map_is_monster_at(m->map, m_npos))
                 && (tries < GD_MAX));
 
         /* new position has not been found, reset to current position */
@@ -1080,20 +1080,20 @@ void monster_move(monster *m, struct player *p)
         {
             /* monster heads into the direction of the player. */
 
-            /* if the monster is on a different level than the player,
-               try to find the staircase to reach the player's level */
+            /* if the monster is on a different map than the player,
+               try to find the staircase to reach the player's map */
             if (m->pos.z != m->player_pos.z)
             {
-                level_stationary_t what;
+                map_stationary_t what;
                 if (m->pos.z > m->player_pos.z)
                     what = LS_STAIRSUP;
                 else
                     what = LS_STAIRSDOWN;
 
-                m->player_pos = level_find_stationary(m->level, what);
+                m->player_pos = map_find_stationary(m->map, what);
             }
 
-            path = level_find_path(m->level, m->pos, m->player_pos);
+            path = map_find_path(m->map, m->pos, m->player_pos);
 
             if (path && !g_queue_is_empty(path->path))
             {
@@ -1109,7 +1109,7 @@ void monster_move(monster *m, struct player *p)
             /* cleanup */
             if (path)
             {
-                level_path_destroy(path);
+                map_path_destroy(path);
             }
         }
         break; /* end MA_ATTACK */
@@ -1128,7 +1128,7 @@ void monster_move(monster *m, struct player *p)
     {
         /* vampires won't step onto mirrors */
         if ((m->type == MT_VAMPIRE)
-                && (level_stationary_at(m->level, m_npos) == LS_MIRROR))
+                && (map_stationary_at(m->map, m_npos) == LS_MIRROR))
         {
             /* FIXME: should try to move around it */
             m_npos = m->pos;
@@ -1144,12 +1144,12 @@ void monster_move(monster *m, struct player *p)
         }
 
         /* check for door */
-        if ((level_stationary_at(m->level, m_npos) == LS_CLOSEDDOOR)
+        if ((map_stationary_at(m->map, m_npos) == LS_CLOSEDDOOR)
                 && monster_has_hands(m)
                 && monster_int(m) > 3) /* lock out zombies */
         {
             /* open the door */
-            level_stationary_set(m->level, m_npos, LS_OPENDOOR);
+            map_stationary_set(m->map, m_npos, LS_OPENDOOR);
 
             /* notify the player if the door is visible */
             if (m->m_visible)
@@ -1159,13 +1159,13 @@ void monster_move(monster *m, struct player *p)
         }
 
         /* move towards player; check for monsters */
-        else if (!level_is_monster_at(m->level, m_npos)
-                 && ls_is_passable(level_stationary_at(m->level, m_npos)))
+        else if (!map_is_monster_at(m->map, m_npos)
+                 && ls_is_passable(map_stationary_at(m->map, m_npos)))
         {
-            monster_position(m, m_npos);
+            monster_position(m, monster_map(m), m_npos);
 
             /* check for traps */
-            if (level_trap_at(m->level, m->pos))
+            if (map_trap_at(m->map, m->pos))
             {
                 if (!monster_trap_trigger(m, p))
                     return; /* trap killed the monster */
@@ -1180,11 +1180,11 @@ void monster_move(monster *m, struct player *p)
     if (m->lastseen) m->lastseen++;
 }
 
-int monster_position(monster *m, position target)
+int monster_position(monster *m, map *map, position target)
 {
-    assert(m != NULL);
+    assert(m != NULL && map != NULL);
 
-    if (level_validate_position(m->level, target, LE_MONSTER))
+    if (map_validate_position(map, target, LE_MONSTER))
     {
         m->pos = target;
         return TRUE;
@@ -1206,7 +1206,7 @@ monster *monster_trap_trigger(monster *m, struct player *p)
 
     assert (m != NULL && p != NULL);
 
-    trap = level_trap_at(m->level, m->pos);
+    trap = map_trap_at(m->map, m->pos);
 
     /* return if the monster has not triggered the trap */
     if (!chance(trap_chance(trap)))
@@ -1226,11 +1226,12 @@ monster *monster_trap_trigger(monster *m, struct player *p)
     switch (trap)
     {
     case TT_TRAPDOOR:
-        monster_level_enter(m, nlarn->levels[m->pos.z + 1]);
+        monster_level_enter(m, game_map(nlarn, m->pos.z + 1));
         break;
 
     case TT_TELEPORT:
-        monster_position(m, level_find_space(m->level, LE_MONSTER));
+        monster_position(m, monster_map(m),
+                         map_find_space(monster_map(m), LE_MONSTER));
         break;
 
     default:
@@ -1291,9 +1292,9 @@ void monster_items_pickup(monster *m, struct player *p)
 
     assert(m != NULL && p != NULL);
 
-    for (idx = 0; idx < inv_length(*level_ilist_at(m->level, m->pos)); idx++)
+    for (idx = 0; idx < inv_length(*map_ilist_at(m->map, m->pos)); idx++)
     {
-        it = inv_get(*level_ilist_at(m->level, m->pos), idx);
+        it = inv_get(*map_ilist_at(m->map, m->pos), idx);
 
         if (m->type == MT_LEPRECHAUN
                 && ((it->type == IT_GEM) || (it->type == IT_GOLD)))
@@ -1317,7 +1318,7 @@ void monster_items_pickup(monster *m, struct player *p)
                 log_add_entry(p->log, "The %s picks up %s.", monster_name(m), buf);
             }
 
-            inv_del_element(level_ilist_at(m->level, m->pos), it);
+            inv_del_element(map_ilist_at(m->map, m->pos), it);
             inv_add(&m->inventory, it);
 
             /* go back one item as the following items lowered their number */
@@ -1368,7 +1369,7 @@ void monster_player_attack(monster *m, player *p)
     /* the player is invisible and the monster bashes into thin air */
     if (!pos_identical(m->player_pos, p->pos))
     {
-        if (!level_is_monster_at(p->level, p->pos) && m->m_visible)
+        if (!map_is_monster_at(p->map, p->pos) && m->m_visible)
         {
             log_add_entry(p->log, "The %s bashes into thin air.",
                           monster_name(m));
@@ -1443,7 +1444,8 @@ void monster_player_attack(monster *m, player *p)
                                ? IT_GOLD : IT_ALL))
         {
             /* teleport away */
-            monster_position(m, level_find_space(p->level, LE_MONSTER));
+            monster_position(m, monster_map(m),
+                             map_find_space(monster_map(m), LE_MONSTER));
         }
         else
         {
@@ -1560,7 +1562,7 @@ monster *monster_damage_take(monster *m, damage *dam)
     return m;
 }
 
-void monsters_genocide(level *l)
+void monsters_genocide(map *l)
 {
     guint idx;
     monster *monst;
@@ -1845,7 +1847,7 @@ static void monster_die(monster *m)
     /* drop stuff the monster carries */
     if (inv_length(m->inventory))
     {
-        monster_items_drop(m, level_ilist_at(m->level, m->pos));
+        monster_items_drop(m, map_ilist_at(m->map, m->pos));
     }
 
     monster_destroy(m);

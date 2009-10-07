@@ -432,7 +432,7 @@ void player_die(player *p, player_cod cause_type, int cause)
 
         /* append map of current level */
         g_string_append(text, "\n\nThis is the map of the current level:\n\n");
-        tmp = level_dump(p->level);
+        tmp = map_dump(p->map);
         g_string_append(text, tmp);
         g_free(tmp);
 
@@ -528,7 +528,7 @@ int player_move(player *p, direction dir)
 {
     int times = 1;         /* how many time ticks it took */
     position target_p;     /* coordinates of target */
-    level_tile *target_t;  /* shortcut for target map tile */
+    map_tile *target_t;  /* shortcut for target map tile */
     monster *target_m;     /* monster on target tile (if any) */
 
     assert(p != NULL && dir > GD_NONE && dir < GD_MAX);
@@ -556,14 +556,14 @@ int player_move(player *p, direction dir)
     target_p = pos_move(p->pos, dir);
 
     /* make a shortcut to the target tile */
-    target_t = level_tile_at(p->level, target_p);
+    target_t = map_tile_at(p->map, target_p);
 
-    /* exceeded level limits */
+    /* exceeded map limits */
     if (!pos_valid(target_p))
         return FALSE;
 
     /* impassable */
-    if (!level_pos_passable(p->level, target_p))
+    if (!map_pos_passable(p->map, target_p))
     {
         /* if it is not a wall, it is definitely not passable */
         if (!(target_t->type == LT_WALL))
@@ -572,7 +572,7 @@ int player_move(player *p, direction dir)
         /* bump into wall when blind */
         if (player_effect(p, ET_BLINDNESS))
         {
-            player_memory_of(p, target_p).type = level_tiletype_at(p->level, target_p);
+            player_memory_of(p, target_p).type = map_tiletype_at(p->map, target_p);
             log_add_entry(p->log, "Ouch!");
             return times;
         }
@@ -582,7 +582,7 @@ int player_move(player *p, direction dir)
             return FALSE;
     }
 
-    target_m = level_get_monster_at(p->level, target_p);
+    target_m = map_get_monster_at(p->map, target_p);
 
     if (target_m && target_m->unknown)
     {
@@ -606,7 +606,7 @@ int player_move(player *p, direction dir)
     }
 
     /* auto-pickup */
-    if (level_ilist_at(p->level, p->pos))
+    if (map_ilist_at(p->map, p->pos))
     {
         player_autopickup(p);
     }
@@ -751,18 +751,18 @@ int player_attack(player *p, monster *m)
 }
 
 /**
- * function to enter a level.  This routine must be called anytime the
+ * function to enter a map.  This routine must be called anytime the
  * player changes levels.
  * Existing levels will get a few more monsters.
  *
- * Note that it is here we remove genocided monsters from the present level.
+ * Note that it is here we remove genocided monsters from the present map.
  *
- * @param player entering level
- * @param entered level
- * @param has to be TRUE if the player didn't enter the level regularly
+ * @param player entering map
+ * @param entered map
+ * @param has to be TRUE if the player didn't enter the map regularly
  * @return TRUE
  */
-int player_level_enter(player *p, level *l, gboolean teleported)
+int player_level_enter(player *p, map *l, gboolean teleported)
 {
     int count;
     position pos;
@@ -770,10 +770,10 @@ int player_level_enter(player *p, level *l, gboolean teleported)
 
     assert(p != NULL && l != NULL);
 
-    if (p->level)
+    if (p->map)
     {
-        /* store the last turn player has been on this level */
-        p->level->visited = game_turn(nlarn);
+        /* store the last turn player has been on this map */
+        p->map->visited = game_turn(nlarn);
     }
 
     if (p->stats.deepest_level < l->nlevel)
@@ -783,59 +783,59 @@ int player_level_enter(player *p, level *l, gboolean teleported)
 
     else
     {
-        /* call level timer */
+        /* call map timer */
         /* count might be negative if time has been modified (time warp) */
         count = abs(game_turn(nlarn) - l->visited);
-        level_timer(l, min(count, G_MAXUINT8));
+        map_timer(l, min(count, G_MAXUINT8));
 
         monsters_genocide(l);
 
         /* add some new monsters */
         if (l->nlevel > 0)
         {
-            level_fill_with_live(l);
+            map_fill_with_live(l);
         }
     }
 
     /* been teleported here or something like that, need a random spot */
     if (teleported)
-        pos = level_find_space(l, LE_MONSTER);
+        pos = map_find_space(l, LE_MONSTER);
 
     /* beginning of the game */
-    else if ((l->nlevel == 0) && (p->level == NULL))
-        pos = level_find_stationary(l, LS_HOME);
+    else if ((l->nlevel == 0) && (p->map == NULL))
+        pos = map_find_stationary(l, LS_HOME);
 
     /* took the elevator up */
-    else if ((p->level->nlevel == 0) && (l->nlevel == (LEVEL_MAX - 1)))
-        pos = level_find_stationary(l, LS_ELEVATORUP);
+    else if ((p->map->nlevel == 0) && (l->nlevel == (MAP_MAX - 1)))
+        pos = map_find_stationary(l, LS_ELEVATORUP);
 
     /* took the elevator down */
-    else if ((p->level->nlevel == (LEVEL_MAX - 1)) && (l->nlevel == 0))
-        pos = level_find_stationary(l, LS_ELEVATORDOWN);
+    else if ((p->map->nlevel == (MAP_MAX - 1)) && (l->nlevel == 0))
+        pos = map_find_stationary(l, LS_ELEVATORDOWN);
 
     /* climbing up */
-    else if (p->level->nlevel > l->nlevel)
+    else if (p->map->nlevel > l->nlevel)
     {
         if (l->nlevel == 0)
-            pos = level_find_stationary(l, LS_ENTRANCE);
+            pos = map_find_stationary(l, LS_ENTRANCE);
         else
-            pos = level_find_stationary(l, LS_STAIRSDOWN);
+            pos = map_find_stationary(l, LS_STAIRSDOWN);
     }
     /* climbing down */
-    else if (l->nlevel > p->level->nlevel)
+    else if (l->nlevel > p->map->nlevel)
     {
         if (l->nlevel == 1)
-            pos = level_find_stationary(l, LS_ENTRANCE);
+            pos = map_find_stationary(l, LS_ENTRANCE);
         else
-            pos = level_find_stationary(l, LS_STAIRSUP);
+            pos = map_find_stationary(l, LS_STAIRSUP);
     }
 
     p->pos = pos;
 
     /* remove monster that might be at player's positon */
-    if ((m = level_get_monster_at(l, p->pos)))
+    if ((m = map_get_monster_at(l, p->pos)))
     {
-        m->pos = level_find_space(l, LE_MONSTER);
+        m->pos = map_find_space(l, LE_MONSTER);
     }
 
     if (l->nlevel == 0)
@@ -844,18 +844,18 @@ int player_level_enter(player *p, level *l, gboolean teleported)
         if (p->log->gtime > 1)
             log_add_entry(p->log, "You return to town.");
     }
-    else if (l->nlevel == 1 && p->level->nlevel == 0)
+    else if (l->nlevel == 1 && p->map->nlevel == 0)
         log_add_entry(p->log, "You enter the caverns of Larn.");
 
-    else if (p->level->nlevel < l->nlevel)
+    else if (p->map->nlevel < l->nlevel)
         log_add_entry(p->log, "You descend to level %d.", l->nlevel);
 
     else
         log_add_entry(p->log, "You ascend to level %d.", l->nlevel);
 
 
-    /* move player to new level */
-    p->level = l;
+    /* move player to new map */
+    p->map = l;
 
     /* recalculate FOV to make ensure correct display after entering a level */
     /* FIXME: this gives crappy results when level is entered via trapdoor or teleport */
@@ -893,7 +893,7 @@ item *player_random_armour(player *p)
 
 int player_examine(player *p, position pos)
 {
-    level_tile *tile;
+    map_tile *tile;
     item *it;
     char item_desc[81];
     guint idx;
@@ -906,7 +906,7 @@ int player_examine(player *p, position pos)
     else
         where = "there";
 
-    tile = level_tile_at(p->level, pos);
+    tile = map_tile_at(p->map, pos);
 
     /* describe the level tile */
     desc = g_strdup(lt_get_desc(tile->type));
@@ -916,7 +916,7 @@ int player_examine(player *p, position pos)
     g_free(desc);
 
     /* name monster */
-    monster *m = level_get_monster_at(p->level, pos);
+    monster *m = map_get_monster_at(p->map, pos);
     if (m != NULL)
     {
         log_add_entry(p->log, "A%s %s.", a_an(monster_name(m)), monster_name(m));
@@ -981,7 +981,7 @@ int player_pickup(player *p)
 
     assert(p != NULL);
 
-    inv = level_ilist_at(p->level, p->pos);
+    inv = map_ilist_at(p->map, p->pos);
 
     if (inv_length(*inv) == 0)
     {
@@ -1018,16 +1018,16 @@ void player_autopickup(player *p)
     guint idx;
     item *i;
 
-    assert (p != NULL && level_ilist_at(p->level, p->pos));
+    assert (p != NULL && map_ilist_at(p->map, p->pos));
 
-    for (idx = 0; idx < inv_length(*level_ilist_at(p->level, p->pos)); idx++)
+    for (idx = 0; idx < inv_length(*map_ilist_at(p->map, p->pos)); idx++)
     {
-        i = inv_get(*level_ilist_at(p->level, p->pos), idx);
+        i = inv_get(*map_ilist_at(p->map, p->pos), idx);
 
         if (p->settings.auto_pickup[i->type])
         {
             /* try to pick up the item */
-            if (player_item_pickup(p, level_ilist_at(p->level, p->pos), i))
+            if (player_item_pickup(p, map_ilist_at(p->map, p->pos), i))
             {
                 /* item has been picked up */
                 /* go back one item as the following items lowered their number */
@@ -2228,9 +2228,9 @@ int player_item_can_be_added_to_container(player *p, item *it)
     }
 
     /* no match till now, check floor for containers */
-    for (idx = 0; idx < inv_length(*level_ilist_at(p->level, p->pos)); idx++)
+    for (idx = 0; idx < inv_length(*map_ilist_at(p->map, p->pos)); idx++)
     {
-        i = inv_get(*level_ilist_at(p->level, p->pos), idx);
+        i = inv_get(*map_ilist_at(p->map, p->pos), idx);
         if (i->type == IT_CONTAINER)
         {
             return TRUE;
@@ -2898,7 +2898,7 @@ int player_item_drop(player *p, inventory **inv, item *it)
         return FALSE;
     }
 
-    inv_add(level_ilist_at(p->level, p->pos), it);
+    inv_add(map_ilist_at(p->map, p->pos), it);
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
 
     log_add_entry(p->log, "You drop %s.", desc);
@@ -2958,7 +2958,7 @@ int player_altar_desecrate(player *p)
 
     assert (p != NULL);
 
-    if (level_stationary_at(p->level, p->pos) != LS_ALTAR)
+    if (map_stationary_at(p->map, p->pos) != LS_ALTAR)
     {
         log_add_entry(p->log, "I see no altar to desecrate here.");
         return FALSE;
@@ -2968,12 +2968,12 @@ int player_altar_desecrate(player *p)
     {
         /* create a monster - should be very dangerous */
         m = monster_new(MT_RED_DRAGON);
-        monster_level_enter(m, p->level);
+        monster_level_enter(m, p->map);
 
         /* try to find a space for the monster near the altar */
-        monster_position(m, level_find_space_in(p->level,
-                                                rect_new_sized(p->pos, 1),
-                                                LE_MONSTER));
+        monster_position(m, game_map(nlarn, p->pos.z),
+                         map_find_space_in(p->map,rect_new_sized(p->pos, 1),
+                                           LE_MONSTER));
 
         e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(nlarn));
         e->turns = 2500;
@@ -2983,7 +2983,7 @@ int player_altar_desecrate(player *p)
     {
         /* destroy altar */
         log_add_entry(p->log, "The altar crumbles into a pile of dust before your eyes.");
-        level_stationary_set(p->level, p->pos, LS_NONE);
+        map_stationary_set(p->map, p->pos, LS_NONE);
     }
     else
     {
@@ -3003,7 +3003,7 @@ int player_altar_pray(player *p)
 
     assert (p != NULL);
 
-    if (level_stationary_at(p->level, p->pos) != LS_ALTAR)
+    if (map_stationary_at(p->map, p->pos) != LS_ALTAR)
     {
         log_add_entry(p->log, "I see no altar to pray at here.");
         return FALSE;
@@ -3037,9 +3037,9 @@ int player_altar_pray(player *p)
         else
         {
             m = monster_new_by_level(p->pos.z);
-            monster_position(m, level_find_space_in(p->level,
-                                                    rect_new_sized(p->pos, 1),
-                                                    LE_MONSTER));
+            monster_position(m, game_map(nlarn, p->pos.z),
+                             map_find_space_in(p->map, rect_new_sized(p->pos, 1),
+                                               LE_MONSTER));
         }
     }
     else if (player_gold >= donation)
@@ -3052,9 +3052,9 @@ int player_altar_pray(player *p)
         {
             /* create a monster, it should be very dangerous */
             m = monster_new_by_level(p->pos.z);
-            monster_position(m, level_find_space_in(p->level,
-                                                    rect_new_sized(p->pos, 1),
-                                                    LE_MONSTER));
+            monster_position(m, game_map(nlarn, p->pos.z),
+                             map_find_space_in(p->map, rect_new_sized(p->pos, 1),
+                                               LE_MONSTER));
 
             e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(nlarn));
             e->turns = 200;
@@ -3103,7 +3103,7 @@ int player_building_enter(player *p)
 {
     int moves_count = 0;
 
-    switch (level_stationary_at(p->level, p->pos))
+    switch (map_stationary_at(p->map, p->pos))
     {
     case LS_BANK:
     case LS_BANK2:
@@ -3154,7 +3154,7 @@ int player_door_close(player *p)
     /* a monster */
     monster *m;
 
-    dirs = level_get_surrounding(p->level, p->pos, LS_OPENDOOR);
+    dirs = map_get_surrounding(p->map, p->pos, LS_OPENDOOR);
 
     for (count = 0, num = 1; num < GD_MAX; num++)
     {
@@ -3186,7 +3186,7 @@ int player_door_close(player *p)
     if (dir)
     {
         pos = pos_move(p->pos, dir);
-        if (pos_valid(pos) && (level_stationary_at(p->level, pos) == LS_OPENDOOR))
+        if (pos_valid(pos) && (map_stationary_at(p->map, pos) == LS_OPENDOOR))
         {
 
             /* check if player is standing in the door */
@@ -3197,7 +3197,7 @@ int player_door_close(player *p)
             }
 
             /* check for monster in the doorway */
-            m = level_get_monster_at(p->level, pos);
+            m = map_get_monster_at(p->map, pos);
 
             if (m)
             {
@@ -3208,14 +3208,14 @@ int player_door_close(player *p)
             }
 
             /* check for items in the doorway */
-            if (*level_ilist_at(p->level, pos))
+            if (*map_ilist_at(p->map, pos))
             {
                 log_add_entry(p->log,
                               "You cannot close the door. There is something in the way.");
                 return 0;
             }
 
-            level_stationary_set(p->level, pos, LS_CLOSEDDOOR);
+            map_stationary_set(p->map, pos, LS_CLOSEDDOOR);
             log_add_entry(p->log, "You close the door.");
         }
         else
@@ -3247,7 +3247,7 @@ int player_door_open(player *p)
     /* a counter and another one */
     int count, num;
 
-    dirs = level_get_surrounding(p->level, p->pos, LS_CLOSEDDOOR);
+    dirs = map_get_surrounding(p->map, p->pos, LS_CLOSEDDOOR);
 
     for (count = 0, num = 1; num < GD_MAX; num++)
     {
@@ -3280,9 +3280,9 @@ int player_door_open(player *p)
     {
         pos = pos_move(p->pos, dir);
 
-        if (pos_valid(pos) && (level_stationary_at(p->level, pos) == LS_CLOSEDDOOR))
+        if (pos_valid(pos) && (map_stationary_at(p->map, pos) == LS_CLOSEDDOOR))
         {
-            level_stationary_set(p->level, pos, LS_OPENDOOR);
+            map_stationary_set(p->map, pos, LS_OPENDOOR);
             log_add_entry(p->log, "You open the door.");
         }
         else
@@ -3310,13 +3310,13 @@ int player_fountain_drink(player *p)
 
     assert (p != NULL);
 
-    if (level_stationary_at(p->level, p->pos) == LS_DEADFOUNTAIN)
+    if (map_stationary_at(p->map, p->pos) == LS_DEADFOUNTAIN)
     {
         log_add_entry(p->log, "There is no water to drink.");
         return 0;
     }
 
-    if (level_stationary_at(p->level, p->pos) != LS_FOUNTAIN)
+    if (map_stationary_at(p->map, p->pos) != LS_FOUNTAIN)
     {
         log_add_entry(p->log, "I see no fountain to drink from here.");
         return 0;
@@ -3395,7 +3395,7 @@ int player_fountain_drink(player *p)
             break;
 
         case 7:
-            amount = rand_1n(p->level->nlevel + 1);
+            amount = rand_1n(p->map->nlevel + 1);
             if (fntchange > 0)
             {
                 log_add_entry(p->log, "You gain %d hit point%s",
@@ -3415,7 +3415,7 @@ int player_fountain_drink(player *p)
             break;
 
         case 8:
-            amount = rand_1n(p->level->nlevel + 1);
+            amount = rand_1n(p->map->nlevel + 1);
             if (fntchange > 0)
             {
                 log_add_entry(p->log, "You just gained %d mana point%s.",
@@ -3433,7 +3433,7 @@ int player_fountain_drink(player *p)
             break;
 
         case 9:
-            amount = 5 * rand_1n((p->level->nlevel + 1) * (p->level->nlevel + 1));
+            amount = 5 * rand_1n((p->map->nlevel + 1) * (p->map->nlevel + 1));
 
             if (fntchange > 0)
             {
@@ -3459,7 +3459,7 @@ int player_fountain_drink(player *p)
     if (chance(25))
     {
         log_add_entry(p->log, "The fountains bubbling slowly quiets.");
-        level_stationary_set(p->level, p->pos, LS_DEADFOUNTAIN);
+        map_stationary_set(p->map, p->pos, LS_DEADFOUNTAIN);
     }
 
     return 1;
@@ -3471,13 +3471,13 @@ int player_fountain_wash(player *p)
 
     assert (p != NULL);
 
-    if (level_stationary_at(p->level, p->pos) == LS_DEADFOUNTAIN)
+    if (map_stationary_at(p->map, p->pos) == LS_DEADFOUNTAIN)
     {
         log_add_entry(p->log, "There is no water to wash in.");
         return 0;
     }
 
-    if (level_stationary_at(p->level, p->pos) != LS_FOUNTAIN)
+    if (map_stationary_at(p->map, p->pos) != LS_FOUNTAIN)
     {
         log_add_entry(p->log, "I see no fountain to wash at here!");
         return 0;
@@ -3488,7 +3488,7 @@ int player_fountain_wash(player *p)
         log_add_entry(p->log, "Oh no! The water was foul!");
 
         damage *dam = damage_new(DAM_POISON,
-                                 rand_1n((p->level->nlevel << 2) + 2), NULL);
+                                 rand_1n((p->map->nlevel << 2) + 2), NULL);
 
         player_damage_take(p, dam, PD_STATIONARY, LS_FOUNTAIN);
     }
@@ -3510,12 +3510,13 @@ int player_fountain_wash(player *p)
     {
         /* make water lord */
         m = monster_new(MT_WATER_LORD);
-        monster_level_enter(m, p->level);
+        monster_level_enter(m, p->map);
 
         /* try to find a space for the monster near the player */
-        monster_position(m, level_find_space_in(p->level,
-                                                rect_new_sized(p->pos, 1),
-                                                LE_MONSTER));
+        monster_position(m, game_map(nlarn, p->pos.z),
+                         map_find_space_in(p->map,
+                                           rect_new_sized(p->pos, 1),
+                                           LE_MONSTER));
     }
     else
     {
@@ -3527,22 +3528,22 @@ int player_fountain_wash(player *p)
 
 int player_stairs_down(player *p)
 {
-    level *nlevel = NULL;
+    map *nlevel = NULL;
 
-    switch (level_stationary_at(p->level, p->pos))
+    switch (map_stationary_at(p->map, p->pos))
     {
     case LS_STAIRSDOWN:
-        nlevel = nlarn->levels[p->level->nlevel + 1];
+        nlevel = game_map(nlarn, p->pos.z + 1);;
         break;
 
     case LS_ELEVATORDOWN:
-        /* first vulcano level */
-        nlevel = nlarn->levels[LEVEL_MAX - 1];
+        /* first vulcano map */
+        nlevel = game_map(nlarn, MAP_MAX - 1);
         break;
 
     case LS_ENTRANCE:
-        if (p->level->nlevel == 0)
-            nlevel = nlarn->levels[1];
+        if (p->map->nlevel == 0)
+            nlevel = game_map(nlarn, 1);
         else
             log_add_entry(p->log, "Climb up to return to town.");
         break;
@@ -3563,22 +3564,22 @@ int player_stairs_down(player *p)
 
 int player_stairs_up(player *p)
 {
-    level *nlevel = NULL;
+    map *nlevel = NULL;
 
-    switch (level_stationary_at(p->level, p->pos))
+    switch (map_stationary_at(p->map, p->pos))
     {
     case LS_STAIRSUP:
-        nlevel = nlarn->levels[p->level->nlevel - 1];
+        nlevel = game_map(nlarn, p->pos.z - 1);
         break;
 
     case LS_ELEVATORUP:
         /* return to town */
-        nlevel = nlarn->levels[0];
+        nlevel = game_map(nlarn, 0);
         break;
 
     case LS_ENTRANCE:
-        if (p->level->nlevel == 1)
-            nlevel = nlarn->levels[0];
+        if (p->map->nlevel == 1)
+            nlevel = game_map(nlarn, 0);
         else
             log_add_entry(p->log, "Climb down to enter the dungeon.");
 
@@ -3604,14 +3605,14 @@ int player_throne_pillage(player *p)
 
     assert (p != NULL);
 
-    if (level_stationary_at(p->level, p->pos) == LS_DEADTHRONE)
+    if (map_stationary_at(p->map, p->pos) == LS_DEADTHRONE)
     {
         log_add_entry(p->log, "There are no gems left on this throne.");
         return 0;
     }
 
-    if ((level_stationary_at(p->level, p->pos) != LS_THRONE)
-            && (level_stationary_at(p->level, p->pos) != LS_THRONE2))
+    if ((map_stationary_at(p->map, p->pos) != LS_THRONE)
+            && (map_stationary_at(p->map, p->pos) != LS_THRONE2))
     {
         log_add_entry(p->log, "I see no throne here to remove gems from.");
         return 0;
@@ -3622,7 +3623,7 @@ int player_throne_pillage(player *p)
         for (i = 0; i < rand_1n(4); i++)
         {
             /* gems pop off the throne */
-            inv_add(level_ilist_at(p->level, p->pos),
+            inv_add(map_ilist_at(p->map, p->pos),
                     item_new_random(IT_GEM));
 
             count++;
@@ -3631,21 +3632,21 @@ int player_throne_pillage(player *p)
         log_add_entry(p->log, "You manage to pry off %s gem%s.",
                       count > 1 ? "some" : "a", plural(count));
 
-        level_stationary_set(p->level, p->pos, LS_DEADTHRONE);
+        map_stationary_set(p->map, p->pos, LS_DEADTHRONE);
     }
-    else if (chance(40) && (level_stationary_at(p->level, p->pos) == LS_THRONE))
+    else if (chance(40) && (map_stationary_at(p->map, p->pos) == LS_THRONE))
     {
         /* make gnome king */
         m = monster_new(MT_GNOME_KING);
-        monster_level_enter(m, p->level);
+        monster_level_enter(m, p->map);
 
         /* try to find a space for the monster near the player */
-        monster_position(m, level_find_space_in(p->level,
-                                                rect_new_sized(p->pos, 1),
-                                                LE_MONSTER));
+        monster_position(m, game_map(nlarn, p->pos.z),
+                         map_find_space_in(p->map, rect_new_sized(p->pos, 1),
+                                           LE_MONSTER));
 
         /* next time there will be no gnome king */
-        level_stationary_set(p->level, p->pos, LS_THRONE2);
+        map_stationary_set(p->map, p->pos, LS_THRONE2);
     }
     else
     {
@@ -3661,32 +3662,32 @@ int player_throne_sit(player *p)
 
     assert (p != NULL);
 
-    if ((level_stationary_at(p->level, p->pos) != LS_THRONE)
-            && (level_stationary_at(p->level, p->pos) != LS_THRONE2)
-            && (level_stationary_at(p->level, p->pos) != LS_DEADTHRONE))
+    if ((map_stationary_at(p->map, p->pos) != LS_THRONE)
+            && (map_stationary_at(p->map, p->pos) != LS_THRONE2)
+            && (map_stationary_at(p->map, p->pos) != LS_DEADTHRONE))
     {
         log_add_entry(p->log, "I see no throne to sit on here.");
         return 0;
     }
 
-    if (chance(30) && (level_stationary_at(p->level, p->pos) == LS_THRONE))
+    if (chance(30) && (map_stationary_at(p->map, p->pos) == LS_THRONE))
     {
         /* make a gnome king */
         m = monster_new(MT_GNOME_KING);
-        monster_level_enter(m, p->level);
+        monster_level_enter(m, p->map);
 
         /* try to find a space for the monster near the player */
-        monster_position(m, level_find_space_in(p->level,
-                                                rect_new_sized(p->pos, 1),
-                                                LE_MONSTER));
+        monster_position(m, game_map(nlarn, p->pos.z),
+                         map_find_space_in(p->map, rect_new_sized(p->pos, 1),
+                                           LE_MONSTER));
 
         /* next time there will be no gnome king */
-        level_stationary_set(p->level, p->pos, LS_THRONE2);
+        map_stationary_set(p->map, p->pos, LS_THRONE2);
     }
     else if (chance(35))
     {
         log_add_entry(p->log, "Zaaaappp! You've been teleported!");
-        p->pos = level_find_space(p->level, LE_MONSTER);
+        p->pos = map_find_space(p->map, LE_MONSTER);
     }
     else
     {
@@ -3908,18 +3909,18 @@ static int player_trap_trigger(player *p, trap_t trap)
         switch (trap)
         {
         case TT_TRAPDOOR:
-            time += player_level_enter(p, nlarn->levels[p->level->nlevel + 1], TRUE);
+            time += player_level_enter(p, game_map(nlarn, p->pos.z + 1), TRUE);
             break;
 
         case TT_TELEPORT:
-            p->pos = level_find_space(p->level, LE_MONSTER);
+            p->pos = map_find_space(p->map, LE_MONSTER);
             break;
 
         default:
             if (trap_damage(trap))
             {
                 damage *dam = damage_new(DAM_PHYSICAL,
-                                         rand_1n(trap_damage(trap)) + p->level->nlevel,
+                                         rand_1n(trap_damage(trap)) + p->map->nlevel,
                                          NULL);
 
                 player_damage_take(p, dam, PD_TRAP, trap);
@@ -3970,7 +3971,7 @@ void player_update_fov(player *p, int radius)
     };
 
     /* reset FOV */
-    memset(&(p->fov), 0, LEVEL_SIZE * sizeof(int));
+    memset(&(p->fov), 0, MAP_SIZE * sizeof(int));
 
     /* set level correctly */
     pos.z = p->pos.z;
@@ -4014,22 +4015,22 @@ void player_update_fov(player *p, int radius)
     }
 
     /* update visible fields in player's memory */
-    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
+    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
-        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
             if (player_pos_visible(p, pos))
             {
-                m = level_get_monster_at(p->level, pos);
+                m = map_get_monster_at(p->map, pos);
 
-                player_memory_of(p,pos).type = level_tiletype_at(p->level, pos);
-                player_memory_of(p,pos).stationary = level_stationary_at(p->level, pos);
+                player_memory_of(p,pos).type = map_tiletype_at(p->map, pos);
+                player_memory_of(p,pos).stationary = map_stationary_at(p->map, pos);
 
-                if (level_ilist_at(p->level, pos)
-                        && inv_length(*level_ilist_at(p->level, pos)))
+                if (map_ilist_at(p->map, pos)
+                        && inv_length(*map_ilist_at(p->map, pos)))
                 {
-                    it = inv_get(*level_ilist_at(p->level, pos),
-                                 inv_length(*level_ilist_at(p->level, pos)) - 1);
+                    it = inv_get(*map_ilist_at(p->map, pos),
+                                 inv_length(*map_ilist_at(p->map, pos)) - 1);
 
                     player_memory_of(p,pos).item = it->type;
                 }
@@ -4080,10 +4081,10 @@ static void player_calculate_octant(player *p, int row, float start,
             Y = p->pos.y + dx * yx + dy * yy;
 
             /* check if coordinated are within bounds */
-            if ((X < 0) || (X >= LEVEL_MAX_X))
+            if ((X < 0) || (X >= MAP_MAX_X))
                 continue;
 
-            if ((Y < 0) || (Y >= LEVEL_MAX_Y))
+            if ((Y < 0) || (Y >= MAP_MAX_Y))
                 continue;
 
             /* l_slope and r_slope store the slopes of the left and right
@@ -4109,7 +4110,7 @@ static void player_calculate_octant(player *p, int row, float start,
 
                 if (blocked)
                     /* we're scanning a row of blocked squares */
-                    if (!level_pos_transparent(p->level, pos_new(X,Y, p->pos.z)))
+                    if (!map_pos_transparent(p->map, pos_new(X,Y, p->pos.z)))
                     {
                         new_start = r_slope;
                         continue;
@@ -4121,7 +4122,7 @@ static void player_calculate_octant(player *p, int row, float start,
                     }
                 else
                 {
-                    if (!level_pos_transparent(p->level, pos_new(X, Y, p->pos.z)) && (j < radius))
+                    if (!map_pos_transparent(p->map, pos_new(X, Y, p->pos.z)) && (j < radius))
                         /* This is a blocking square, start a child scan */
                         blocked = TRUE;
 

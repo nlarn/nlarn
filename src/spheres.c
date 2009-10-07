@@ -23,8 +23,8 @@
 #include "nlarn.h"
 #include "spheres.h"
 
-static void sphere_remove(sphere *s, level *l);
-static void sphere_hit_owner(sphere *s, level *l);
+static void sphere_remove(sphere *s, map *l);
+static void sphere_hit_owner(sphere *s, map *l);
 static void sphere_kill_monster(sphere *s, monster *m);
 
 sphere *sphere_new(position pos, player *owner, int lifetime)
@@ -60,7 +60,7 @@ void sphere_destroy(sphere *s)
     g_free(s);
 }
 
-void sphere_move(sphere *s, level *l)
+void sphere_move(sphere *s, map *l)
 {
     position npos;
     int tries = 0;
@@ -86,7 +86,7 @@ void sphere_move(sphere *s, level *l)
 
     /* if the new position does not work, try to find another one */
     while ((!pos_valid(npos)
-            || !lt_is_passable(level_tiletype_at(l,npos)))
+            || !lt_is_passable(map_tiletype_at(l,npos)))
             && (tries < GD_MAX))
     {
         dir++;
@@ -117,7 +117,7 @@ void sphere_move(sphere *s, level *l)
     }
 
     /* check if a monster is located at the sphere's position */
-    if ((m = level_get_monster_at(l, s->pos)))
+    if ((m = map_get_monster_at(l, s->pos)))
     {
         /* demons dispel spheres */
         if (m->type >= MT_DEMONLORD_I)
@@ -166,7 +166,7 @@ void sphere_move(sphere *s, level *l)
     }
 }
 
-sphere *sphere_at(level *l, position pos)
+sphere *sphere_at(map *l, position pos)
 {
     guint idx;
     sphere *s;
@@ -182,13 +182,13 @@ sphere *sphere_at(level *l, position pos)
     return NULL;
 }
 
-static void sphere_remove(sphere *s, level *l)
+static void sphere_remove(sphere *s, map *l)
 {
     g_ptr_array_remove_fast(l->slist, s);
     sphere_destroy(s);
 }
 
-static void sphere_hit_owner(sphere *s, level *l)
+static void sphere_hit_owner(sphere *s, map *l)
 {
     /* cancellation protects from spheres */
     if (player_effect(s->owner, ET_CANCELLATION))

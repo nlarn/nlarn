@@ -20,7 +20,7 @@
 #define __GAME_H_
 
 #include "items.h"
-#include "level.h"
+#include "map.h"
 #include "player.h"
 #include "spheres.h"
 
@@ -30,7 +30,7 @@
 typedef struct game
 {
     player *p;                  /* the player */
-    level *levels[LEVEL_MAX];   /* the dungeon */
+    map *maps[MAP_MAX];         /* the dungeon */
     guint64 time_start;         /* start time */
     guint32 gtime;              /* turn count */
     guint8 difficulty;          /* game difficulty */
@@ -113,10 +113,11 @@ int game_destroy(game *g);
 int game_save(game *g, char *filename);
 game *game_load(char *filename);
 
-void game_scores_destroy(GList *gs);
 game_score_t *game_score(game *g, player_cod cod, int cause);
 GList *game_score_add(game *g, game_score_t *score);
+void game_scores_destroy(GList *gs);
 
+map *game_map(game *g, guint nmap);
 void game_spin_the_wheel(game *g, guint times);
 
 /* functions to store game data */

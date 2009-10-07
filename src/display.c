@@ -118,7 +118,7 @@ int display_paint_screen(player *p)
     item *it;
     monster *monst;
     sphere *sphere;
-    level *l;
+    map *l;
 
     /* curses attributes */
     int attrs;
@@ -136,45 +136,46 @@ int display_paint_screen(player *p)
     getmaxyx(stdscr, display_rows, display_cols);
 
     /* draw line around map */
-    mvhline(LEVEL_MAX_Y, 0, ACS_HLINE, LEVEL_MAX_X);
-    mvvline(0, LEVEL_MAX_X, ACS_VLINE, LEVEL_MAX_Y);
-    mvaddch(LEVEL_MAX_Y, LEVEL_MAX_X, ACS_LRCORNER);
+    mvhline(MAP_MAX_Y, 0, ACS_HLINE, MAP_MAX_X);
+    mvvline(0, MAP_MAX_X, ACS_VLINE, MAP_MAX_Y);
+    mvaddch(MAP_MAX_Y, MAP_MAX_X, ACS_LRCORNER);
 
     /* make shortcut */
-    l = p->level;
+    l = p->map;
 
     /* draw map */
-    for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
+    pos.z = p->pos.z;
+    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
         /* position cursor */
         move(pos.y, 0);
 
-        for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
             if (player_pos_visible(p, pos)) attron(A_BOLD);
 
             if (game_wizardmode(nlarn))
             {
                 /* draw the truth */
-                if (inv_length(*level_ilist_at(p->level, pos)) > 0)
+                if (inv_length(*map_ilist_at(p->map, pos)) > 0)
                 {
                     /* draw items */
-                    it = (item *) inv_get(*level_ilist_at(p->level, pos),
-                                          inv_length(*level_ilist_at(p->level, pos)) - 1);
+                    it = (item *) inv_get(*map_ilist_at(p->map, pos),
+                                          inv_length(*map_ilist_at(p->map, pos)) - 1);
 
                     attron(COLOR_PAIR(DC_BLUE));
                     addch(item_image(it->type));
                     attroff(COLOR_PAIR(DC_BLUE));
                 }
 
-                else if (level_stationary_at(p->level, pos))
+                else if (map_stationary_at(p->map, pos))
                 {
                     /* draw stationary stuff */
-                    attron(COLOR_PAIR(ls_get_colour(level_stationary_at(p->level, pos))));
-                    addch(ls_get_image(level_stationary_at(p->level, pos)));
-                    attroff(COLOR_PAIR(ls_get_colour(level_stationary_at(p->level, pos))));
+                    attron(COLOR_PAIR(ls_get_colour(map_stationary_at(p->map, pos))));
+                    addch(ls_get_image(map_stationary_at(p->map, pos)));
+                    attroff(COLOR_PAIR(ls_get_colour(map_stationary_at(p->map, pos))));
                 }
-                else if (level_trap_at(p->level, pos))
+                else if (map_trap_at(p->map, pos))
                 {
                     attron(COLOR_PAIR(DC_MAGENTA));
                     addch('^');
@@ -184,9 +185,9 @@ int display_paint_screen(player *p)
                 else
                 {
                     /* draw tile */
-                    attron(COLOR_PAIR(lt_get_colour(level_tiletype_at(p->level, pos))));
-                    addch(lt_get_image(level_tiletype_at(p->level, pos)));
-                    attroff(COLOR_PAIR(lt_get_colour(level_tiletype_at(p->level, pos))));
+                    attron(COLOR_PAIR(lt_get_colour(map_tiletype_at(p->map, pos))));
+                    addch(lt_get_image(map_tiletype_at(p->map, pos)));
+                    attroff(COLOR_PAIR(lt_get_colour(map_tiletype_at(p->map, pos))));
                 }
 
             }
@@ -258,7 +259,7 @@ int display_paint_screen(player *p)
     }
 
     /* *** status line *** */
-    move(LEVEL_MAX_Y + 1, 0);
+    move(MAP_MAX_Y + 1, 0);
     clrtoeol();
 
     /* player name and level */
@@ -275,12 +276,12 @@ int display_paint_screen(player *p)
         attrs = (COLOR_PAIR(DC_GREEN) | A_BOLD);
 
     attron(attrs);
-    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X - 21, "%3d", p->hp, player_get_hp_max(p));
+    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, "%3d", p->hp, player_get_hp_max(p));
     attroff(attrs);
 
     /* max HPs */
     attron(COLOR_PAIR(DC_GREEN) | A_BOLD);
-    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X - 18, "/%-3d HP", player_get_hp_max(p));
+    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 18, "/%-3d HP", player_get_hp_max(p));
     attroff(COLOR_PAIR(DC_GREEN) | A_BOLD);
 
     /* current MPs */
@@ -294,35 +295,35 @@ int display_paint_screen(player *p)
         attrs = (COLOR_PAIR(DC_CYAN) | A_BOLD);
 
     attron(attrs);
-    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X - 10, "%3d", p->mp);
+    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 10, "%3d", p->mp);
     attroff(attrs);
 
     /* max MPs */
     attron(COLOR_PAIR(DC_CYAN) | A_BOLD);
-    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X - 7, "/%-3d MP", player_get_mp_max(p));
+    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 7, "/%-3d MP", player_get_mp_max(p));
     attroff(COLOR_PAIR(DC_CYAN) | A_BOLD);
 
     /* game time */
-    mvprintw(LEVEL_MAX_Y + 1, LEVEL_MAX_X + 1, "T %-6d", game_turn(nlarn));
+    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X + 1, "T %-6d", game_turn(nlarn));
 
     /* experience points / level */
     attron(COLOR_PAIR(DC_BLUE) | A_BOLD);
 
-    mvprintw(LEVEL_MAX_Y + 2, LEVEL_MAX_X - 20, "XP %d/%-5d",
+    mvprintw(MAP_MAX_Y + 2, MAP_MAX_X - 20, "XP %d/%-5d",
              p->experience, p->lvl);
 
     attroff(COLOR_PAIR(DC_BLUE) | A_BOLD);
     clrtoeol();
 
-    /* dungeon level */
-    mvprintw(LEVEL_MAX_Y + 2, LEVEL_MAX_X + 1, "Lvl: %s",
-             level_name(p->level));
+    /* dungeon map */
+    mvprintw(MAP_MAX_Y + 2, MAP_MAX_X + 1, "Lvl: %s",
+             map_name(p->map));
 
 
     /* *** RIGHT STATUS *** */
 
     /* strenght */
-    mvprintw(1, LEVEL_MAX_X + 3, "STR ");
+    mvprintw(1, MAP_MAX_X + 3, "STR ");
 
     if (player_get_str(p) > (int)p->strength)
         attrs = COLOR_PAIR(DC_YELLOW);
@@ -337,7 +338,7 @@ int display_paint_screen(player *p)
     clrtoeol();
 
     /* dexterity */
-    mvprintw(2, LEVEL_MAX_X + 3, "DEX ");
+    mvprintw(2, MAP_MAX_X + 3, "DEX ");
 
     if (player_get_dex(p) > (int)p->dexterity)
         attrs = COLOR_PAIR(DC_YELLOW);
@@ -352,7 +353,7 @@ int display_paint_screen(player *p)
     clrtoeol();
 
     /* constitution */
-    mvprintw(3, LEVEL_MAX_X + 3, "CON ");
+    mvprintw(3, MAP_MAX_X + 3, "CON ");
 
     if (player_get_con(p) > (int)p->constitution)
         attrs = COLOR_PAIR(DC_YELLOW);
@@ -367,7 +368,7 @@ int display_paint_screen(player *p)
     clrtoeol();
 
     /* intelligence */
-    mvprintw(4, LEVEL_MAX_X + 3, "INT ");
+    mvprintw(4, MAP_MAX_X + 3, "INT ");
 
     if (player_get_int(p) > (int)p->intelligence)
         attrs = COLOR_PAIR(DC_YELLOW);
@@ -382,7 +383,7 @@ int display_paint_screen(player *p)
     clrtoeol();
 
     /* wisdom */
-    mvprintw(5, LEVEL_MAX_X + 3, "WIS ");
+    mvprintw(5, MAP_MAX_X + 3, "WIS ");
 
     if (player_get_wis(p) > (int)p->wisdom)
         attrs = COLOR_PAIR(DC_YELLOW);
@@ -397,7 +398,7 @@ int display_paint_screen(player *p)
     clrtoeol();
 
     /* charisma */
-    mvprintw(6, LEVEL_MAX_X + 3, "CHA ");
+    mvprintw(6, MAP_MAX_X + 3, "CHA ");
 
     if (player_get_cha(p) > (int)p->charisma)
         attrs = COLOR_PAIR(DC_YELLOW);
@@ -412,11 +413,11 @@ int display_paint_screen(player *p)
     clrtoeol();
 
     /* armour class */
-    mvprintw(8, LEVEL_MAX_X + 3, "AC: %2d", player_get_ac(p));
+    mvprintw(8, MAP_MAX_X + 3, "AC: %2d", player_get_ac(p));
     clrtoeol();
 
     /* gold */
-    mvprintw(9, LEVEL_MAX_X + 3, "$%-7d", player_get_gold(p));
+    mvprintw(9, MAP_MAX_X + 3, "$%-7d", player_get_gold(p));
     clrtoeol();
 
     /* display negative effects */
@@ -425,7 +426,7 @@ int display_paint_screen(player *p)
     /* clear lines */
     for (i = 0; i < 7; i++)
     {
-        move(11 + i, LEVEL_MAX_X + 3);
+        move(11 + i, MAP_MAX_X + 3);
         clrtoeol();
     }
 
@@ -435,7 +436,7 @@ int display_paint_screen(player *p)
 
         for (i = 0; i < text->len; i++)
         {
-            mvprintw(11 + i, LEVEL_MAX_X + 3, g_ptr_array_index(text, i));
+            mvprintw(11 + i, MAP_MAX_X + 3, g_ptr_array_index(text, i));
         }
 
         attroff(attrs);
@@ -616,7 +617,7 @@ item *display_inventory(char *title, player *p, inventory **inv,
         maxvis = min(len_curr, height - 2);
 
         starty = (display_rows - height) / 2; /* calculation for centered */
-        startx = (min(LEVEL_MAX_X, display_cols) - width) / 2; /* placement of the window */
+        startx = (min(MAP_MAX_X, display_cols) - width) / 2; /* placement of the window */
 
         /* fix marked item */
         if (curr > len_curr)
@@ -922,7 +923,7 @@ void display_config_autopickup(player *p)
     width = max(36 /* length of first label */, IT_MAX * 2 + 1);
 
     starty = (display_rows - height) / 2;
-    startx = (min(LEVEL_MAX_X, display_cols) - width) / 2;
+    startx = (min(MAP_MAX_X, display_cols) - width) / 2;
 
     cwin = display_window_new(startx, starty, width, height, "Autopickup", NULL);
 
@@ -1019,7 +1020,7 @@ spell *display_spell_select(char *title, player *p)
 
     width = 44;
     starty = (display_rows - height) / 2;
-    startx = (min(LEVEL_MAX_X, display_cols) - width) / 2;
+    startx = (min(MAP_MAX_X, display_cols) - width) / 2;
 
     swin = display_window_new(startx, starty, width, height, title, NULL);
 
@@ -1649,7 +1650,7 @@ int display_get_yesno(char *question, char *yes, char *no)
                 text_width + 2 /* borders */ + (2 * padding));
 
     /* set startx and starty to something that makes sense */
-    startx = (min(LEVEL_MAX_X, display_cols) / 2) - (width / 2);
+    startx = (min(MAP_MAX_X, display_cols) / 2) - (width / 2);
     starty = (display_rows / 2) - 4;
 
     ywin = display_window_new(startx, starty, width, text->len + 4, NULL, NULL);
@@ -1780,7 +1781,7 @@ direction display_get_direction(char *title, int *available)
     width = max(9, strlen(title) + 4);
 
     /* set startx and starty to something that makes sense */
-    startx = (min(LEVEL_MAX_X, display_cols) / 2) - (width / 2);
+    startx = (min(MAP_MAX_X, display_cols) / 2) - (width / 2);
     starty = (display_rows / 2) - 4;
 
     dwin = display_window_new(startx, starty, width, 9, title, NULL);
@@ -1942,7 +1943,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
         /* draw a line between source and target if told to */
         if (draw_line && distance)
         {
-            target = level_get_monster_at(p->level, pos);
+            target = map_get_monster_at(p->map, pos);
 
             display_paint_screen(p);
 
@@ -1954,7 +1955,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
             attron(attrs);
 
             ray = area_new_ray(p->pos, pos,
-                               level_get_obstacles(p->level, p->pos,
+                               map_get_obstacles(p->map, p->pos,
                                                    distance));
 
             for (y = 0; y < ray->size_y; y++)
@@ -2073,7 +2074,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 
         if (pos_valid(npos) && player_pos_visible(p, npos))
         {
-            if (passable && !level_pos_passable(p->level, npos))
+            if (passable && !map_pos_passable(p->map, npos))
                 /* a passable position has been requested and this one isn't */
                 continue;
 

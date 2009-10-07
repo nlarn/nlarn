@@ -19,16 +19,16 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "level.h"
+#include "map.h"
 #include "position.h"
 
 position pos_new(int x, int y, int z)
 {
     position pos;
 
-    assert((x >= 0 && x <= LEVEL_MAX_X) || x == G_MAXINT16);
-    assert((y >= 0 && y <= LEVEL_MAX_Y) || y == G_MAXINT16);
-    assert((z >= 0 && z <= LEVEL_MAX) || z == G_MAXINT16);
+    assert((x >= 0 && x <= MAP_MAX_X) || x == G_MAXINT16);
+    assert((y >= 0 && y <= MAP_MAX_Y) || y == G_MAXINT16);
+    assert((z >= 0 && z <= MAP_MAX) || z == G_MAXINT16);
 
     pos.x = x;
     pos.y = y;
@@ -71,7 +71,7 @@ position pos_move(position pos, direction dir)
         break;
 
     case GD_NE:
-        if ((pos.x < LEVEL_MAX_X - 1) && (pos.y > 0))
+        if ((pos.x < MAP_MAX_X - 1) && (pos.y > 0))
             npos = pos_new(pos.x + 1, pos.y - 1, pos.z);
         else
             npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
@@ -79,7 +79,7 @@ position pos_move(position pos, direction dir)
         break;
 
     case GD_EAST:
-        if (pos.x < LEVEL_MAX_X - 1)
+        if (pos.x < MAP_MAX_X - 1)
             npos = pos_new(pos.x + 1, pos.y, pos.z);
         else
             npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
@@ -87,7 +87,7 @@ position pos_move(position pos, direction dir)
         break;
 
     case GD_SE:
-        if ((pos.x < LEVEL_MAX_X - 1) && (pos.y < LEVEL_MAX_Y - 1))
+        if ((pos.x < MAP_MAX_X - 1) && (pos.y < MAP_MAX_Y - 1))
             npos = pos_new(pos.x + 1, pos.y + 1, pos.z);
         else
             npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
@@ -95,7 +95,7 @@ position pos_move(position pos, direction dir)
         break;
 
     case GD_SOUTH:
-        if (pos.y < LEVEL_MAX_Y - 1)
+        if (pos.y < MAP_MAX_Y - 1)
             npos = pos_new(pos.x, pos.y + 1, pos.z);
         else
             npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
@@ -103,7 +103,7 @@ position pos_move(position pos, direction dir)
         break;
 
     case GD_SW:
-        if ((pos.x > 0) && (pos.y < LEVEL_MAX_Y - 1))
+        if ((pos.x > 0) && (pos.y < MAP_MAX_Y - 1))
             npos = pos_new(pos.x - 1, pos.y + 1, pos.z);
         else
             npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
@@ -149,9 +149,9 @@ int pos_adjacent(position first, position second)
 
 int pos_valid(position pos)
 {
-    return (pos.x >= 0) && (pos.x < LEVEL_MAX_X)
-           && (pos.y >= 0) && (pos.y < LEVEL_MAX_Y)
-           && (pos.z >= 0) && (pos.z < LEVEL_MAX);
+    return (pos.x >= 0) && (pos.x < MAP_MAX_X)
+           && (pos.y >= 0) && (pos.y < MAP_MAX_Y)
+           && (pos.z >= 0) && (pos.z < MAP_MAX);
 }
 
 /**
@@ -172,8 +172,8 @@ rectangle rect_new(int x1, int y1, int x2, int y2)
 
     rect.x1 = (x1 < 0) ? 0 : x1;
     rect.y1 = (y1 < 0) ? 0 : y1;
-    rect.x2 = (x2 > LEVEL_MAX_X) ? LEVEL_MAX_X : x2;
-    rect.y2 = (y2 > LEVEL_MAX_Y) ? LEVEL_MAX_Y : y2;
+    rect.x2 = (x2 > MAP_MAX_X) ? MAP_MAX_X : x2;
+    rect.y2 = (y2 > MAP_MAX_Y) ? MAP_MAX_Y : y2;
 
     return(rect);
 }

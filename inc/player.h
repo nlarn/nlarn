@@ -22,7 +22,7 @@
 #include "amulets.h"
 #include "armour.h"
 #include "buildings.h"
-#include "level.h"
+#include "map.h"
 #include "monsters.h"
 #include "position.h"
 #include "potions.h"
@@ -59,8 +59,8 @@ typedef struct _player_settings
 
 struct _player_tile_memory
 {
-    level_tile_t type;
-    level_stationary_t stationary;
+    map_tile_t type;
+    map_stationary_t stationary;
     item_t item; /* type of item located here */
     trap_t trap;
 };
@@ -122,15 +122,15 @@ typedef struct player
     guint8 identified_scrolls[ST_MAX];
 
     position pos; /* player's position */
-    level *level; /* current dungeon level */
+    map *map; /* current dungeon map */
     player_stats stats; /* statistics */
     message_log *log; /* game message log */
 
     /* player's field of vision */
-    int fov[LEVEL_MAX_Y][LEVEL_MAX_X];
+    int fov[MAP_MAX_Y][MAP_MAX_X];
 
     /* player's memory of the map */
-    player_tile_memory memory[LEVEL_MAX][LEVEL_MAX_Y][LEVEL_MAX_X];
+    player_tile_memory memory[MAP_MAX][MAP_MAX_Y][MAP_MAX_X];
 
     /* courses available in school */
     guint8 school_courses_taken[SCHOOL_COURSE_COUNT];
@@ -187,7 +187,7 @@ gint64 player_calc_score(player *p, int won);
 int player_move(player *p, direction dir);
 int player_attack(player *p, monster *m);
 void player_update_fov(player *p, int radius);
-int player_level_enter(player *p, level *l, gboolean teleported);
+int player_level_enter(player *p, map *l, gboolean teleported);
 item *player_random_armour(player *p);
 
 int player_examine(player *p, position pos);
@@ -282,7 +282,7 @@ char *player_get_lvl_desc(player *p);
 
 /* macros */
 
-#define player_memory_of(p,pos) ((p)->memory[(p)->level->nlevel][(pos).y][(pos).x])
+#define player_memory_of(p,pos) ((p)->memory[(p)->map->nlevel][(pos).y][(pos).x])
 #define player_pos_visible(p,pos) ((p)->fov[(pos).y][(pos).x])
 
 #endif

@@ -45,7 +45,7 @@ int container_open(player *p, inventory **inv, item *container)
     if (container == NULL)
     {
         /* no container has been passed - look for container on the floor */
-        int count = inv_length_filtered(*level_ilist_at(p->level, p->pos),
+        int count = inv_length_filtered(*map_ilist_at(p->map, p->pos),
                                         &inv_filter_container);
 
         if (count == 0)
@@ -55,7 +55,7 @@ int container_open(player *p, inventory **inv, item *container)
         }
         else if (count == 1)
         {
-            container = inv_get_filtered(*level_ilist_at(p->level, p->pos),
+            container = inv_get_filtered(*map_ilist_at(p->map, p->pos),
                                          0, &inv_filter_container);
         }
         else
@@ -116,7 +116,7 @@ int container_item_add(player *p, inventory **inv, item *element)
     if (inv == NULL || (inv == &p->inventory))
     {
         pilen = inv_length_filtered(p->inventory, inv_filter_container);
-        filen = inv_length_filtered(*level_ilist_at(p->level, p->pos),
+        filen = inv_length_filtered(*map_ilist_at(p->map, p->pos),
                                     inv_filter_container);
 
         /* choose the container to add the item element to. */
@@ -135,14 +135,14 @@ int container_item_add(player *p, inventory **inv, item *element)
         else if (filen == 1)
         {
             /* conly one container on the floor */
-            container = inv_get_filtered(*level_ilist_at(p->level, p->pos),
+            container = inv_get_filtered(*map_ilist_at(p->map, p->pos),
                                          0, inv_filter_container);
         }
         else if (filen > 1)
         {
             /* multiple, choose container from floor */
             container = display_inventory("Choose a container", p,
-                                          level_ilist_at(p->level, p->pos),
+                                          map_ilist_at(p->map, p->pos),
                                           NULL, FALSE, inv_filter_container);
         }
     }
