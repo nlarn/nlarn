@@ -881,8 +881,9 @@ void monster_destroy(monster *m)
 
     g_ptr_array_free(m->effects, TRUE);
 
-    /* remove monster from level */
-    g_ptr_array_remove_fast(nlarn->levels[m->pos.z]->mlist, m);
+    /* remove monster from level (if the level existst) */
+    if (nlarn->levels[m->pos.z] != NULL)
+        g_ptr_array_remove_fast(nlarn->levels[m->pos.z]->mlist, m);
 
     /* free inventory */
     if (m->inventory)

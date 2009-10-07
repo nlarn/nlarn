@@ -1001,7 +1001,7 @@ gboolean spell_create_monster(struct player *p)
 
     if (pos_valid(pos))
     {
-        m = monster_new_by_level(p->level);
+        m = monster_new_by_level(p->pos.z);
         monster_position(m, pos);
 
         return TRUE;

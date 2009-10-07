@@ -192,7 +192,7 @@ int building_bank(player *p)
         if (!inv_item_count(p->inventory, IT_GEM, GT_NONE))
             break;
 
-        display_inventory("Sell gems", p, p->inventory, callbacks, TRUE,
+        display_inventory("Sell gems", p, &p->inventory, callbacks, TRUE,
                           &inv_filter_gems);
 
         break;
@@ -255,7 +255,7 @@ int building_dndstore(player *p)
     display_show_message((char *)title, (char *)msg_welcome);
     display_paint_screen(p);
 
-    display_inventory((char *)title, p, nlarn->store_stock, callbacks, TRUE, NULL);
+    display_inventory((char *)title, p, &nlarn->store_stock, callbacks, TRUE, NULL);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);
@@ -606,7 +606,7 @@ int building_tradepost(player *p)
     display_show_message((char *)title, (char *)msg_welcome);
     display_paint_screen(p);
 
-    display_inventory((char *)title, p, p->inventory, callbacks, TRUE, &inv_filter_not_gold);
+    display_inventory((char *)title, p, &p->inventory, callbacks, TRUE, &inv_filter_not_gold);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);

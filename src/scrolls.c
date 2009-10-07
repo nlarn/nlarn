@@ -305,6 +305,8 @@ int scroll_mapping(player *p, item *scroll)
     /* scroll can be null as I use this to fake a known level */
     assert(p != NULL);
 
+    pos.z = p->pos.z;
+
     for (pos.y = 0; pos.y < LEVEL_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < LEVEL_MAX_X; pos.x++)

@@ -558,7 +558,7 @@ int display_draw()
  * @param a filter function: will be called for every item
  *
  */
-item *display_inventory(char *title, player *p, inventory *inv,
+item *display_inventory(char *title, player *p, inventory **inv,
                         GPtrArray *callbacks, int show_price,
                         int (*filter)(item *))
 {
@@ -595,10 +595,10 @@ item *display_inventory(char *title, player *p, inventory *inv,
     assert(p != NULL && inv != NULL);
 
     /* sort inventory by item type */
-    inv_sort(inv, (GCompareDataFunc)item_sort, (gpointer)p);
+    inv_sort(*inv, (GCompareDataFunc)item_sort, (gpointer)p);
 
     /* store inventory length */
-    len_orig = len_curr = inv_length_filtered(inv, filter);
+    len_orig = len_curr = inv_length_filtered(*inv, filter);
 
     if (show_price)
     {
@@ -650,7 +650,7 @@ item *display_inventory(char *title, player *p, inventory *inv,
             {
                 /* inventory has grown */
                 /* sort inventory by item type */
-                inv_sort(inv, (GCompareDataFunc)item_sort, (gpointer)p);
+                inv_sort(*inv, (GCompareDataFunc)item_sort, (gpointer)p);
             }
         }
 
@@ -659,7 +659,7 @@ item *display_inventory(char *title, player *p, inventory *inv,
             iwin = display_window_new(startx, starty, width, height, title, NULL);
         }
 
-        it = inv_get_filtered(inv, curr + offset - 1, filter);
+        it = inv_get_filtered(*inv, curr + offset - 1, filter);
 
         /* assemble window caption (if callbacks have been defined) */
         for (cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
@@ -700,7 +700,7 @@ item *display_inventory(char *title, player *p, inventory *inv,
 
         for (pos = 1; pos <= min(len_curr, maxvis); pos++)
         {
-            it = inv_get_filtered(inv, (pos - 1) + offset, filter);
+            it = inv_get_filtered(*inv, (pos - 1) + offset, filter);
 
             if ((curr == pos) && player_item_is_equipped(p, it))
                 wattron(iwin->window, COLOR_PAIR(13));
@@ -868,7 +868,7 @@ item *display_inventory(char *title, player *p, inventory *inv,
                     time = 0;
 
                     /* trigger callback */
-                    time = cb->function(p, cb->inv, inv_get_filtered(inv, curr + offset - 1, filter));
+                    time = cb->function(p, cb->inv, inv_get_filtered(*inv, curr + offset - 1, filter));
 
                     if (time) game_spin_the_wheel(nlarn, time);
 
@@ -878,7 +878,7 @@ item *display_inventory(char *title, player *p, inventory *inv,
 
         };
 
-        len_curr = inv_length_filtered(inv, filter);
+        len_curr = inv_length_filtered(*inv, filter);
 
     }
     while (keep_running && (len_curr > 0)); /* ESC pressed or empty inventory*/
@@ -888,7 +888,7 @@ item *display_inventory(char *title, player *p, inventory *inv,
     if ((callbacks == NULL) && (key != 27))
     {
         /* return selected item if no callbacks have been provided */
-        return inv_get_filtered(inv, offset + curr - 1, filter);
+        return inv_get_filtered(*inv, offset + curr - 1, filter);
     }
     else
     {

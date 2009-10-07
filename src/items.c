@@ -1096,7 +1096,7 @@ int inv_add(inventory **inv, item *new_item)
     return inv_length(*inv);
 }
 
-item *inv_get(inventory *inv, int idx)
+item *inv_get(inventory *inv, guint idx)
 {
     assert (inv != NULL && idx < inv->content->len);
 
@@ -1164,7 +1164,7 @@ int inv_del_element(inventory **inv, item *item)
 
     return TRUE;
 }
-int inv_length(inventory *inv)
+guint inv_length(inventory *inv)
 {
     return (inv == NULL) ? 0 : inv->content->len;
 }

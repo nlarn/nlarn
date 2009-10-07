@@ -70,7 +70,7 @@ int display_draw();
 
 int display_paint_screen(player *p);
 
-item *display_inventory(char *title, player *p, inventory *inv,
+item *display_inventory(char *title, player *p, inventory **inv,
                         GPtrArray *callbacks, int show_price,
                         int (*filter)(item *));
 

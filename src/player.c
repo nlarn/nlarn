@@ -752,15 +752,14 @@ int player_attack(player *p, monster *m)
 
 /**
  * function to enter a level.  This routine must be called anytime the
- * player changes levels.  If that level is unknown it will be created.
- * A new set of monsters will be created for a new level, and existing
- * levels will get a few more monsters.
+ * player changes levels.
+ * Existing levels will get a few more monsters.
  *
  * Note that it is here we remove genocided monsters from the present level.
  *
  * @param player entering level
  * @param entered level
- * @param previous level
+ * @param has to be TRUE if the player didn't enter the level regularly
  * @return TRUE
  */
 int player_level_enter(player *p, level *l, gboolean teleported)
@@ -779,7 +778,6 @@ int player_level_enter(player *p, level *l, gboolean teleported)
         /* remove link to player */
         p->level->player = NULL;
     }
-
 
     if (p->stats.deepest_level < l->nlevel)
     {
@@ -864,10 +862,6 @@ int player_level_enter(player *p, level *l, gboolean teleported)
 
     /* move player to new level */
     p->level = l;
-
-    /* give player knowledge of level 0 (town) */
-    if (l->nlevel == 0)
-        scroll_mapping(p, NULL);
 
     /* recalculate FOV to make ensure correct display after entering a level */
     /* FIXME: this gives crappy results when level is entered via trapdoor or teleport */
@@ -995,7 +989,7 @@ int player_pickup(player *p)
 
     inv = level_ilist_at(p->level, p->pos);
 
-    if ((*inv == NULL) || (inv_length(*inv) == 0))
+    if (inv_length(*inv) == 0)
     {
         log_add_entry(p->log, "There is nothing here.");
         return 0;
@@ -1016,7 +1010,7 @@ int player_pickup(player *p)
         callback->function = &player_item_pickup;
         g_ptr_array_add(callbacks, callback);
 
-        display_inventory("On the floor", p, *inv, callbacks, FALSE, NULL);
+        display_inventory("On the floor", p, inv, callbacks, FALSE, NULL);
 
         /* clean up callbacks */
         display_inv_callbacks_clean(callbacks);
@@ -1782,7 +1776,7 @@ int player_inv_display(player *p)
     callback->checkfun = &player_item_is_usable;
     g_ptr_array_add(callbacks, callback);
 
-    display_inventory("Inventory", p, p->inventory, callbacks, FALSE, NULL);
+    display_inventory("Inventory", p, &p->inventory, callbacks, FALSE, NULL);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);
@@ -3048,7 +3042,7 @@ int player_altar_pray(player *p)
         }
         else
         {
-            m = monster_new_by_level(p->level);
+            m = monster_new_by_level(p->pos.z);
             monster_position(m, level_find_space_in(p->level,
                                                     rect_new_sized(p->pos, 1),
                                                     LE_MONSTER));
@@ -3063,7 +3057,7 @@ int player_altar_pray(player *p)
         if (donation < tithe || donation < rand_0n(50))
         {
             /* create a monster, it should be very dangerous */
-            m = monster_new_by_level(p->level);
+            m = monster_new_by_level(p->pos.z);
             monster_position(m, level_find_space_in(p->level,
                                                     rect_new_sized(p->pos, 1),
                                                     LE_MONSTER));

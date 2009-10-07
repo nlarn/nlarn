@@ -52,6 +52,9 @@ int main(int argc, char *argv[])
     /* put the player into the town */
     player_level_enter(nlarn->p, nlarn->levels[0], FALSE);
 
+    /* give player knowledge of the town */
+    scroll_mapping(nlarn->p, NULL);
+
     display_init();
     display_draw();
 

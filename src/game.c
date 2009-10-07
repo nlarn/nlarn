@@ -59,8 +59,12 @@ int game_save(game *g, char *filename)
     head->version_minor = VERSION_MINOR;
     head->version_patch = VERSION_PATCH;
 
-    fd = creat(filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IRGRP);
-
+/* mingw does not define the latter */
+#ifdef S_IRGRP
+    fd = creat(filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+#else
+    fd = creat(filename, S_IRUSR | S_IWUSR);
+#endif
     if (fd == -1)
     {
         g_free(head);
