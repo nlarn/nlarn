@@ -738,14 +738,7 @@ int spell_type_point(spell *s, struct player *p)
 
         /* polymorph */
     case SP_PLY:
-        do
-        {
-            monster->type = rand_1n(MT_MAX - 1);
-        }
-        while (monster_is_genocided(monster->type));
-
-        monster->hp = monster_hp_max(monster);
-
+        monster_polymorph(monster);
         break;
 
         /* teleport */
@@ -753,7 +746,7 @@ int spell_type_point(spell *s, struct player *p)
         log_add_entry(p->log, "The %s disappears.",
                       monster_name(monster));
 
-        monster->pos = map_find_space(p->map, LE_MONSTER);
+        monster_set_pos(monster, p->map, map_find_space(p->map, LE_MONSTER));
 
         break; /* SP_TEL */
 
@@ -777,7 +770,7 @@ int spell_type_point(spell *s, struct player *p)
         e->amount *= s->knowledge;
 
         /* show message if monster is visible */
-        if (monster->m_visible && effect_get_msg_m_start(e)
+        if (monster_in_sight(monster) && effect_get_msg_m_start(e)
                 && !monster_effect(monster, e->type))
         {
             log_add_entry(p->log, effect_get_msg_m_start(e),
@@ -999,7 +992,7 @@ gboolean spell_create_monster(struct player *p)
     if (pos_valid(pos))
     {
         m = monster_new_by_level(p->pos.z);
-        monster_position(m, game_map(nlarn, p->pos.z), pos);
+        monster_set_pos(m, game_map(nlarn, p->pos.z), pos);
 
         return TRUE;
     }
@@ -1175,7 +1168,7 @@ gboolean spell_vaporize_rock(player *p)
         tile->type = LT_FLOOR;
     }
 
-    if ((m = map_get_monster_at(p->map, pos)) && (m->type == MT_XORN))
+    if ((m = map_get_monster_at(p->map, pos)) && (monster_type(m) == MT_XORN))
     {
         /* xorns take damage from vpr */
         monster_damage_take(m, damage_new(DAM_PHYSICAL, divert(200, 10), p));
@@ -1229,7 +1222,7 @@ gboolean spell_vaporize_rock(player *p)
     if (m)
     {
         monster_level_enter(m, p->map);
-        monster_position(m, game_map(nlarn, p->pos.z), pos);
+        monster_set_pos(m, game_map(nlarn, p->pos.z), pos);
     }
 
     return TRUE;

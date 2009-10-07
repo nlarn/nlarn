@@ -26,6 +26,37 @@
 
 #define EMPTY_ATTACK { ATT_NONE, DAM_NONE, 0, 0 }
 
+/* monster information hiding */
+struct _monster
+{
+    monster_t type;
+    gint32 hp;
+    position pos;
+    monster_action_t action;    /* current action */
+
+    /* number of turns since when player was last seen; 0 = never */
+    guint32 lastseen;
+
+    /* last known position of player */
+    position player_pos;
+
+    /* level monster is on */
+    struct map *map;
+
+    /* attacks already unsuccessfully tried */
+    gboolean attacks_failed[MONSTER_ATTACK_COUNT];
+
+    inventory *inventory;
+    item *weapon;
+    GPtrArray *effects;
+
+    guint32
+        m_visible: 1,    /* LOS between player -> monster */
+        p_visible: 1,    /* LOS between monster -> player */
+        item_type: 8,    /* item type monster is displayed as */
+        unknown: 1;      /* monster is unknown */
+};
+
 const char *monster_attack_verb[ATT_MAX] =
 {
     NULL,
@@ -708,18 +739,18 @@ static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
 
-monster *monster_new(int monster_type)
+monster *monster_new(int type)
 {
     monster *nmonster;
     int it, icount;     /* item type, item id, item count */
 
-    assert(monster_type > MT_NONE && monster_type < MT_MAX);
+    assert(type > MT_NONE && type < MT_MAX);
 
     /* make room for monster */
     nmonster = g_malloc0(sizeof(monster));
 
-    nmonster->type = monster_type;
-    nmonster->hp = divert(monsters[monster_type].hp_max, 10);
+    nmonster->type = type;
+    nmonster->hp = divert(monsters[type].hp_max, 10);
 
     /* prevent the living dead */
     if (nmonster->hp < 1)
@@ -737,7 +768,7 @@ monster *monster_new(int monster_type)
     }
 
     /* add special items */
-    switch (monster_type)
+    switch (type)
     {
     case MT_LEPRECHAUN:
         if (chance(25))
@@ -771,7 +802,7 @@ monster *monster_new(int monster_type)
         item *weapon;
 
         /* preset weapon types */
-        switch (monster_type)
+        switch (type)
         {
         case MT_HOBGOBLIN:
         case MT_ORC:
@@ -819,7 +850,7 @@ monster *monster_new(int monster_type)
     } /* finished initializing weapons */
 
     /* initialize mimics */
-    if (monster_type == MT_MIMIC)
+    if (type == MT_MIMIC)
     {
         /* determine how the mimic will be displayed */
         nmonster->item_type = rand_1n(IT_MAX);
@@ -883,7 +914,10 @@ void monster_destroy(monster *m)
 
     /* remove monster from map (if the map existst) */
     if (nlarn->maps[m->pos.z] != NULL)
+    {
+        nlarn->maps[m->pos.z]->grid[m->pos.y][m->pos.x].monster = NULL;
         g_ptr_array_remove_fast(nlarn->maps[m->pos.z]->mlist, m);
+    }
 
     /* free inventory */
     if (m->inventory)
@@ -893,6 +927,77 @@ void monster_destroy(monster *m)
     game_monster_unregister(nlarn, m);
 
     g_free(m);
+}
+
+int monster_hp(monster *m)
+{
+    assert (m != NULL);
+    return m->hp;
+}
+
+void monster_inc_hp(monster *m, int amount)
+{
+    assert (m != NULL);
+    m->hp += amount;
+    if (m->hp > monsters[m->type].hp_max)
+        m->hp = monsters[m->type].hp_max;
+}
+
+item_t monster_item_type(monster *m)
+{
+    assert (m != NULL);
+    return m->item_type;
+}
+
+position monster_pos(monster *m)
+{
+    assert (m != NULL);
+
+    return m->pos;
+}
+
+int monster_set_pos(monster *m, map *map, position target)
+{
+    assert(m != NULL && map != NULL);
+
+    if (map_validate_position(map, target, LE_MONSTER))
+    {
+        /* remove current reference to monster from tile */
+        map->grid[m->pos.y][m->pos.x].monster = NULL;
+
+        /* set new position */
+        m->pos = target;
+
+        /* set reference to monster on tile */
+        map->grid[target.y][target.x].monster = m;
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+monster_t monster_type(monster *m)
+{
+    assert (m != NULL);
+    return m->type;
+}
+
+gboolean monster_unknown(monster *m)
+{
+    assert (m != NULL);
+    return m->unknown;
+}
+
+void monster_set_unknown(monster *m, gboolean what)
+{
+    assert (m != NULL);
+    m->unknown = what;
+}
+
+gboolean monster_in_sight(monster *m)
+{
+    assert (m != NULL);
+    return m->m_visible;
 }
 
 void monster_level_enter(monster *m, struct map *l)
@@ -909,7 +1014,7 @@ void monster_level_enter(monster *m, struct map *l)
     m->map = l;
     m->pos.z = l->nlevel;
 
-    if (!monster_position(m, l, map_find_space(l, LE_MONSTER)))
+    if (!monster_set_pos(m, l, map_find_space(l, LE_MONSTER)))
     {
         /* no free space could be found for the monstert -> abort */
         monster_destroy(m);
@@ -1162,7 +1267,7 @@ void monster_move(monster *m, struct player *p)
         else if (!map_is_monster_at(m->map, m_npos)
                  && ls_is_passable(map_stationary_at(m->map, m_npos)))
         {
-            monster_position(m, monster_map(m), m_npos);
+            monster_set_pos(m, game_map(nlarn, m->pos.z), m_npos);
 
             /* check for traps */
             if (map_trap_at(m->map, m->pos))
@@ -1178,19 +1283,6 @@ void monster_move(monster *m, struct player *p)
 
     /* increment count of turns since when player was last seen */
     if (m->lastseen) m->lastseen++;
-}
-
-int monster_position(monster *m, map *map, position target)
-{
-    assert(m != NULL && map != NULL);
-
-    if (map_validate_position(map, target, LE_MONSTER))
-    {
-        m->pos = target;
-        return TRUE;
-    }
-
-    return FALSE;
 }
 
 monster *monster_trap_trigger(monster *m, struct player *p)
@@ -1230,8 +1322,8 @@ monster *monster_trap_trigger(monster *m, struct player *p)
         break;
 
     case TT_TELEPORT:
-        monster_position(m, monster_map(m),
-                         map_find_space(monster_map(m), LE_MONSTER));
+        monster_set_pos(m, game_map(nlarn, m->pos.z),
+                         map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER));
         break;
 
     default:
@@ -1267,6 +1359,19 @@ monster *monster_trap_trigger(monster *m, struct player *p)
     }
 
     return m;
+}
+
+void monster_polymorph(monster *m)
+{
+    assert (m != NULL);
+
+    do
+    {
+        m->type = rand_1n(MT_MAX);
+    }
+    while (monster_is_genocided(m->type));
+
+    m->hp = monster_hp_max(m);
 }
 
 void monster_items_drop(monster *m, inventory **floor)
@@ -1444,8 +1549,8 @@ void monster_player_attack(monster *m, player *p)
                                ? IT_GOLD : IT_ALL))
         {
             /* teleport away */
-            monster_position(m, monster_map(m),
-                             map_find_space(monster_map(m), LE_MONSTER));
+            monster_set_pos(m, game_map(nlarn, m->pos.z),
+                             map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER));
         }
         else
         {
@@ -1710,6 +1815,30 @@ int monster_is_genocided(int monster_id)
 {
     assert(monster_id > MT_NONE && monster_id < MT_MAX);
     return nlarn->monster_genocided[monster_id];
+}
+
+void monster_effect_add(monster *m, effect *e)
+{
+    assert(m != NULL && e != NULL);
+    effect_add(m->effects, e);
+}
+
+int monster_effect_del(monster *m, effect *e)
+{
+    assert(m != NULL && e != NULL);
+    return effect_del(m->effects, e);
+}
+
+effect *monster_effect_get(monster *m , effect_type type)
+{
+    assert(m != NULL && type < ET_MAX);
+    return effect_get(m->effects, type);
+}
+
+int monster_effect(monster *m, effect_type type)
+{
+    assert(m != NULL && type < ET_MAX);
+    return effect_query(m->effects, type);
 }
 
 void monster_effect_expire(monster *m, message_log *log)

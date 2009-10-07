@@ -122,7 +122,7 @@ int scroll_annihilate(struct player *p, item *scroll)
 
         /* FIXME: remove this special case here and give a good resistance to
          * the demon lords */
-        if (m->type < MT_DEMONLORD_II)
+        if (monster_type(m) < MT_DEMONLORD_II)
         {
             m = monster_damage_take(m, damage_new(DAM_MAGICAL, 2000, p));
 
@@ -140,7 +140,8 @@ int scroll_annihilate(struct player *p, item *scroll)
                           monster_name(m));
 
             /* lose half hit points*/
-            m->hp >>=2 +1;
+            damage *dam = damage_new(DAM_MAGICAL, monster_hp(m) / 2, p);
+            monster_damage_take(m, dam);
         }
     }
 
@@ -247,9 +248,9 @@ int scroll_heal_monster(player *p, item *scroll)
     {
         m = g_ptr_array_index(p->map->mlist, idx);
 
-        if (m->hp < monster_hp_max(m))
+        if (monster_hp(m) < monster_hp_max(m))
         {
-            m->hp = monster_hp_max(m);
+            monster_inc_hp(m, monster_hp_max(m));
             count++;
         }
     }

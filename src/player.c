@@ -584,11 +584,11 @@ int player_move(player *p, direction dir)
 
     target_m = map_get_monster_at(p->map, target_p);
 
-    if (target_m && target_m->unknown)
+    if (target_m && monster_unknown(target_m))
     {
         /* reveal the mimic */
         log_add_entry(p->log, "Wait! That is a %s!", monster_name(target_m));
-        target_m->unknown = FALSE;
+        monster_set_unknown(target_m, FALSE);
         return times;
     }
 
@@ -679,7 +679,7 @@ int player_attack(player *p, monster *m)
         }
 
         /* triple damage if hitting a dragon and wearing an amulet of dragon slaying */
-        if ((m->type >= MT_WHITE_DRAGON && m->type <= MT_RED_DRAGON)
+        if ((monster_type(m) >= MT_WHITE_DRAGON && monster_type(m) <= MT_RED_DRAGON)
                 && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
         {
             dam->amount *= 3;
@@ -698,14 +698,14 @@ int player_attack(player *p, monster *m)
                 log_add_entry(p->log, "You behead the %s with your Vorpal Blade!",
                               monster_name(m));
 
-                dam->amount = m->hp + monster_ac(m);
+                dam->amount = monster_hp(m) + monster_ac(m);
             }
 
             /* Lance of Death */
             if ((p->eq_weapon->id == WT_LANCEOFDEATH))
             {
                 /* the lance is pretty deadly for non-demons */
-                if (m->type < MT_DEMONLORD_I)
+                if (monster_type(m) < MT_DEMONLORD_I)
                     dam->amount = 10000;
                 else
                     dam->amount = 300;
@@ -714,7 +714,7 @@ int player_attack(player *p, monster *m)
             /* Slayer */
             if (p->eq_weapon->id == WT_SLAYER)
             {
-                if (m->type >= MT_DEMONLORD_I)
+                if (monster_type(m) >= MT_DEMONLORD_I)
                     dam->amount = 10000;
             }
         }
@@ -835,7 +835,7 @@ int player_level_enter(player *p, map *l, gboolean teleported)
     /* remove monster that might be at player's positon */
     if ((m = map_get_monster_at(l, p->pos)))
     {
-        m->pos = map_find_space(l, LE_MONSTER);
+        monster_set_pos(m, game_map(nlarn, p->pos.z), map_find_space(l, LE_MONSTER));
     }
 
     if (l->nlevel == 0)
@@ -1235,7 +1235,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         }
 
         /* amulet of power cancels demon attacks */
-        if ((m->type >= MT_DEMONLORD_I) && chance(75)
+        if ((monster_type(m) >= MT_DEMONLORD_I) && chance(75)
                 && (p->eq_amulet && p->eq_amulet->id == AM_POWER))
         {
             log_add_entry(p->log, "Your amulet cancels the %s's attack.",
@@ -2971,7 +2971,7 @@ int player_altar_desecrate(player *p)
         monster_level_enter(m, p->map);
 
         /* try to find a space for the monster near the altar */
-        monster_position(m, game_map(nlarn, p->pos.z),
+        monster_set_pos(m, game_map(nlarn, p->pos.z),
                          map_find_space_in(p->map,rect_new_sized(p->pos, 1),
                                            LE_MONSTER));
 
@@ -3037,7 +3037,7 @@ int player_altar_pray(player *p)
         else
         {
             m = monster_new_by_level(p->pos.z);
-            monster_position(m, game_map(nlarn, p->pos.z),
+            monster_set_pos(m, game_map(nlarn, p->pos.z),
                              map_find_space_in(p->map, rect_new_sized(p->pos, 1),
                                                LE_MONSTER));
         }
@@ -3052,7 +3052,7 @@ int player_altar_pray(player *p)
         {
             /* create a monster, it should be very dangerous */
             m = monster_new_by_level(p->pos.z);
-            monster_position(m, game_map(nlarn, p->pos.z),
+            monster_set_pos(m, game_map(nlarn, p->pos.z),
                              map_find_space_in(p->map, rect_new_sized(p->pos, 1),
                                                LE_MONSTER));
 
@@ -3513,7 +3513,7 @@ int player_fountain_wash(player *p)
         monster_level_enter(m, p->map);
 
         /* try to find a space for the monster near the player */
-        monster_position(m, game_map(nlarn, p->pos.z),
+        monster_set_pos(m, game_map(nlarn, p->pos.z),
                          map_find_space_in(p->map,
                                            rect_new_sized(p->pos, 1),
                                            LE_MONSTER));
@@ -3641,7 +3641,7 @@ int player_throne_pillage(player *p)
         monster_level_enter(m, p->map);
 
         /* try to find a space for the monster near the player */
-        monster_position(m, game_map(nlarn, p->pos.z),
+        monster_set_pos(m, game_map(nlarn, p->pos.z),
                          map_find_space_in(p->map, rect_new_sized(p->pos, 1),
                                            LE_MONSTER));
 
@@ -3677,7 +3677,7 @@ int player_throne_sit(player *p)
         monster_level_enter(m, p->map);
 
         /* try to find a space for the monster near the player */
-        monster_position(m, game_map(nlarn, p->pos.z),
+        monster_set_pos(m, game_map(nlarn, p->pos.z),
                          map_find_space_in(p->map, rect_new_sized(p->pos, 1),
                                            LE_MONSTER));
 
@@ -4034,10 +4034,10 @@ void player_update_fov(player *p, int radius)
 
                     player_memory_of(p,pos).item = it->type;
                 }
-                else if (m && m->type == MT_MIMIC && m->unknown)
+                else if (m && monster_type(m) == MT_MIMIC && monster_unknown(m))
                 {
                     /* show the mimic as an item */
-                    player_memory_of(p,pos).item = m->item_type;
+                    player_memory_of(p,pos).item = monster_item_type(m);
                 }
                 else
                 {

@@ -31,6 +31,9 @@
 
 /* forward declarations */
 
+struct _monster;
+typedef struct _monster monster;
+
 struct player;
 struct map;
 
@@ -151,51 +154,40 @@ enum monster_flags
     MF_METALLIVORE  = 1 << 9,   /* eats metal */
 };
 
-/* monster  */
-typedef struct monster
-{
-    monster_t type;
-    gint32 hp;
-    position pos;
-    monster_action_t action;    /* current action */
-
-    /* number of turns since when player was last seen; 0 = never */
-    guint32 lastseen;
-
-    /* last known position of player */
-    position player_pos;
-
-    /* level monster is on */
-    struct map *map;
-
-    /* attacks already unsuccessfully tried */
-    gboolean attacks_failed[MONSTER_ATTACK_COUNT];
-
-    inventory *inventory;
-    item *weapon;
-    GPtrArray *effects;
-
-    guint32
-        m_visible: 1,    /* LOS between player -> monster */
-        p_visible: 1,    /* LOS between monster -> player */
-        item_type: 8,    /* item type monster is displayed as */
-        unknown: 1;      /* monster is unknown */
-} monster;
-
 /* external vars */
 
 extern const monster_data monsters[MT_MAX];
 
 /* function definitions */
 
-monster *monster_new(int monster_type);
+monster *monster_new(int type);
 monster *monster_new_by_level(int nlevel);
 void monster_destroy(monster *m);
 
+/* getter / setter */
+
+int monster_hp(monster *m);
+void monster_inc_hp(monster *m, int amount);
+
+item_t monster_item_type(monster *m);
+
+position monster_pos(monster *m);
+int monster_set_pos(monster *m, struct map *map, position target);
+
+monster_t monster_type(monster *m);
+
+gboolean monster_unknown(monster *m);
+void monster_set_unknown(monster *m, gboolean what);
+
+gboolean monster_in_sight(monster *m);
+
+/* other functions */
+
 void monster_level_enter(monster *m, struct map *l);
 void monster_move(monster *m, struct player *p);
-int monster_position(monster *m, struct map *map, position target);
+
 monster *monster_trap_trigger(monster *m, struct player *p);
+void monster_polymorph(monster *m);
 
 void monster_items_drop(monster *m, inventory **floor);
 void monster_items_pickup(monster *m, struct player *p);
@@ -210,29 +202,28 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
 
 void monsters_genocide(struct map *l);
 
-#define monster_name(monster)        (monsters[(monster)->type].name)
-#define monster_level(monster)       (monsters[(monster)->type].level)
-#define monster_ac(monster)          (monsters[(monster)->type].ac)
-#define monster_int(monster)         (monsters[(monster)->type].intelligence)
-#define monster_gold(monster)        (monsters[(monster)->type].gold)
-#define monster_hp_max(monster)      (monsters[(monster)->type].hp_max)
-#define monster_exp(monster)         (monsters[(monster)->type].exp)
-#define monster_image(monster)       (monsters[(monster)->type].image)
-#define monster_speed(monster)       (monsters[(monster)->type].mspeed)
-#define monster_attack(monster, idx) (monsters[(monster)->type].attacks[(idx)])
-#define monster_map(monster)         (game_map(nlarn, (monster)->pos.z))
+#define monster_name(monster)        (monsters[monster_type(monster)].name)
+#define monster_level(monster)       (monsters[monster_type(monster)].level)
+#define monster_ac(monster)          (monsters[monster_type(monster)].ac)
+#define monster_int(monster)         (monsters[monster_type(monster)].intelligence)
+#define monster_gold(monster)        (monsters[monster_type(monster)].gold)
+#define monster_hp_max(monster)      (monsters[monster_type(monster)].hp_max)
+#define monster_exp(monster)         (monsters[monster_type(monster)].exp)
+#define monster_image(monster)       (monsters[monster_type(monster)].image)
+#define monster_speed(monster)       (monsters[monster_type(monster)].mspeed)
+#define monster_attack(monster, idx) (monsters[monster_type(monster)].attacks[(idx)])
 
 /* flags */
-#define monster_has_head(monster)        (monsters[(monster)->type].flags & MF_HEAD)
-#define monster_is_beheadable(monster)   (!(monsters[(monster)->type].flags & MF_NOBEHEAD))
-#define monster_has_hands(monster)       (monsters[(monster)->type].flags & MF_HANDS)
-#define monster_can_fly(monster)         (monsters[(monster)->type].flags & MF_FLY)
-#define monster_is_spirit(monster)       (monsters[(monster)->type].flags & MF_SPIRIT)
-#define monster_is_undead(monster)       (monsters[(monster)->type].flags & MF_UNDEAD)
-#define monster_is_invisible(monster)    (monsters[(monster)->type].flags & MF_INVISIBLE)
-#define monster_has_infravision(monster) (monsters[(monster)->type].flags & MF_INFRAVISION)
-#define monster_can_regenerate(monster)  (monsters[(monster)->type].flags & MF_REGENERATE)
-#define monster_is_metallivore(monster)  (monsters[(monster)->type].flags & MF_METALLIVORE)
+#define monster_has_head(monster)        (monsters[monster_type(monster)].flags & MF_HEAD)
+#define monster_is_beheadable(monster)   (!(monsters[monster_type(monster)].flags & MF_NOBEHEAD))
+#define monster_has_hands(monster)       (monsters[monster_type(monster)].flags & MF_HANDS)
+#define monster_can_fly(monster)         (monsters[monster_type(monster)].flags & MF_FLY)
+#define monster_is_spirit(monster)       (monsters[monster_type(monster)].flags & MF_SPIRIT)
+#define monster_is_undead(monster)       (monsters[monster_type(monster)].flags & MF_UNDEAD)
+#define monster_is_invisible(monster)    (monsters[monster_type(monster)].flags & MF_INVISIBLE)
+#define monster_has_infravision(monster) (monsters[monster_type(monster)].flags & MF_INFRAVISION)
+#define monster_can_regenerate(monster)  (monsters[monster_type(monster)].flags & MF_REGENERATE)
+#define monster_is_metallivore(monster)  (monsters[monster_type(monster)].flags & MF_METALLIVORE)
 
 #define monster_name_by_type(type)  (monsters[(type)].name)
 #define monster_image_by_type(type) (monsters[(type)].image)
@@ -241,10 +232,10 @@ int monster_genocide(int monster_id);
 int monster_is_genocided(int monster_id);
 
 /* dealing with temporary effects */
-#define monster_effect_add(monster, effect) effect_add((monster)->effects, (effect))
-#define monster_effect_del(monster, effect) effect_del((monster)->effects, (effect))
-#define monster_effect_get(monster, effect_type) effect_get((monster)->effects, (effect_type))
-#define monster_effect(monster, effect_type) effect_query((monster)->effects, (effect_type))
+void monster_effect_add(monster *m, effect *e);
+int monster_effect_del(monster *m, effect *e);
+effect *monster_effect_get(monster *m , effect_type type);
+int monster_effect(monster *m, effect_type type);
 void monster_effect_expire(monster *m, message_log *log);
 
 #endif

@@ -129,7 +129,7 @@ map *map_new(int nlevel, char *mazefile)
     {
         /* read maze from data file */
         map_loaded = map_load_from_file(l, mazefile,
-                                            (l->nlevel == 0) ? 0 : -1);
+                                        (l->nlevel == 0) ? 0 : -1);
     }
 
     if (!map_loaded)
@@ -747,56 +747,41 @@ damage *map_tile_damage(map *l, position pos)
     }
 }
 
-monster *map_get_monster_at(map *l, position pos)
+monster *map_get_monster_at(map *m, position pos)
 {
-    guint idx = 0;
-    monster *m, *match = NULL;
+    assert(m != NULL && pos_valid(pos));
 
-    assert(l != NULL);
-
-    while (idx < l->mlist->len)
-    {
-        m = (monster *)g_ptr_array_index(l->mlist, idx);
-
-        if ((m->pos.x == pos.x) && (m->pos.y == pos.y))
-        {
-            match = m;
-            break;	/* found it! */
-        }
-
-        idx++;
-    }
-
-    return match;
+    return m->grid[pos.y][pos.x].monster;
 }
 
-int map_is_monster_at(map *l, position pos)
+int map_is_monster_at(map *m, position pos)
 {
-    assert(l != NULL);
+    assert(m != NULL);
 
-    if (map_get_monster_at(l, pos))
+    if (map_get_monster_at(m, pos))
         return TRUE;
     else
         return FALSE;
 }
 
-GPtrArray *map_get_monsters_in(map *l, rectangle area)
+GPtrArray *map_get_monsters_in(map *m, rectangle area)
 {
     GPtrArray *monsters;
-    monster *m;
-    guint idx;
+    monster *monst;
+    position pos;
 
-    assert(l != NULL);
+    assert(m != NULL);
 
     monsters = g_ptr_array_new();
 
-    for (idx = 0; idx < l->mlist->len; idx++)
+    for (pos.y = area.y1; pos.y <= area.y2; pos.y++)
     {
-        m = (monster *)g_ptr_array_index(l->mlist, idx);
-
-        if (pos_in_rect(m->pos, area))
+        for (pos.y = area.x1; pos.y <= area.x2; pos.y++)
         {
-            g_ptr_array_add(monsters, m);
+            if ((monst = map_get_monster_at(m, pos)))
+            {
+                g_ptr_array_add(monsters, monst);
+            }
         }
     }
 
@@ -1049,7 +1034,7 @@ static void map_fill_with_objects(map *l)
     for (i = 0; i < rand_0n(3); i++)
     {
         map_add_item(l, item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)),
-                                   rand_0n(6 * (l->nlevel + 1))));
+                                 rand_0n(6 * (l->nlevel + 1))));
     }
 
     /* up to four potions */
@@ -1151,7 +1136,7 @@ static void map_make_maze(map *l)
                     {
                         m = monster_new_by_level(l->nlevel);
                         monster_level_enter(m, l);
-                        monster_position(m, l, pos);
+                        monster_set_pos(m, l, pos);
 
                         want_monster = FALSE;
                     }
@@ -1457,7 +1442,7 @@ static void map_add_treasure_room(map *l)
                 /* create a monster */
                 monst = monster_new_by_level(l->nlevel);
                 monster_level_enter(monst, l);
-                monster_position(monst, l, pos);
+                monster_set_pos(monst, l, pos);
             }
 
             /* now clear out interior */

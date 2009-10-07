@@ -120,9 +120,9 @@ void sphere_move(sphere *s, map *l)
     if ((m = map_get_monster_at(l, s->pos)))
     {
         /* demons dispel spheres */
-        if (m->type >= MT_DEMONLORD_I)
+        if (monster_type(m) >= MT_DEMONLORD_I)
         {
-            if (m->m_visible)
+            if (monster_in_sight(m))
             {
                 log_add_entry(s->owner->log,
                               "The %s dispels the sphere!",
@@ -135,9 +135,9 @@ void sphere_move(sphere *s, map *l)
         }
 
         /* disenchantress cancels sphere */
-        if (m->type == MT_DISENCHANTRESS)
+        if (monster_type(m) == MT_DISENCHANTRESS)
         {
-            if (m->m_visible)
+            if (monster_in_sight(m))
             {
                 log_add_entry(s->owner->log,
                               "The %s causes cancellation of the sphere!",
@@ -213,7 +213,7 @@ static void sphere_kill_monster(sphere *s, monster *m)
     {
         player_exp_gain(s->owner, monster_exp(m));
 
-        if (m->m_visible)
+        if (monster_in_sight(m))
         {
             log_add_entry(s->owner->log,
                           "The sphere of annihilation killed the %s.",

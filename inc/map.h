@@ -100,6 +100,7 @@ typedef struct map_tile
         stationary: 8, /* something special located on this tile */
         trap:       8; /* trap located on this tile */
     guint8 timer;      /* countdown to when the type will become LT_FLOOR again */
+    monster *monster;  /* monster located on this tile */
     inventory *ilist;  /* items located on this tile */
 } map_tile;
 
@@ -185,9 +186,9 @@ void map_stationary_set(map *l, position pos, map_stationary_t type);
 
 damage *map_tile_damage(map *l, position pos);
 
-monster *map_get_monster_at(map *l, position pos);
-int map_is_monster_at(map *l, position pos);
-GPtrArray *map_get_monsters_in(map *l, rectangle area);
+monster *map_get_monster_at(map *m, position pos);
+int map_is_monster_at(map *m, position pos);
+GPtrArray *map_get_monsters_in(map *m, rectangle area);
 int map_fill_with_live(map *l);
 
 void map_timer(map *l, guint8 count);

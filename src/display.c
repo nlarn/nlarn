@@ -234,12 +234,13 @@ int display_paint_screen(player *p)
 
         if (game_wizardmode(nlarn)
                 || player_effect(p, ET_DETECT_MONSTER)
-                || (player_pos_visible(p, monst->pos)
+                || (player_pos_visible(p, monster_pos(monst))
                     && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))
-                    && !monst->unknown)) /* hide the mimic */
+                    && !monster_unknown(monst))) /* hide the mimic */
         {
             attron(COLOR_PAIR(DC_RED));
-            mvaddch(monst->pos.y, monst->pos.x, monster_image(monst));
+            position mpos = monster_pos(monst);
+            mvaddch(mpos.y, mpos.x, monster_image(monst));
             attroff(COLOR_PAIR(DC_RED));
         }
     }
@@ -1177,7 +1178,7 @@ spell *display_spell_select(char *title, player *p)
         case 127: /* backspace */
         case 263:
             if (strlen(code_buf))
-            {
+    {
                 code_buf[strlen(code_buf) - 1] = '\0';
             }
             else
@@ -1956,7 +1957,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 
             ray = area_new_ray(p->pos, pos,
                                map_get_obstacles(p->map, p->pos,
-                                                   distance));
+                                                 distance));
 
             for (y = 0; y < ray->size_y; y++)
             {
@@ -1964,9 +1965,9 @@ position display_get_position(player *p, char *message, int draw_line, int passa
                 {
                     if (area_point_get(ray, x, y))
                     {
-                        if (target
-                                && (target->pos.x == ray->start_x + x)
-                                && (target->pos.y == ray->start_y + y))
+                        position tpos = pos_new(ray->start_x + x, ray->start_y + y, p->pos.z);
+
+                        if (target && pos_identical(monster_pos(target), tpos))
                         {
                             mvaddch(ray->start_y + y, ray->start_x + x, monster_image(target));
                         }
