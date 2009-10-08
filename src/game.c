@@ -216,6 +216,9 @@ void game_new(int argc, char *argv[])
 
     /* randomize unidentified item descriptions */
     game_items_shuffle(nlarn);
+
+    /* fill the store */
+    building_dndstore_init();
 }
 
 int game_destroy(game *g)

@@ -32,8 +32,6 @@ static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
                                       "law, we cannot serve you at this time." \
                                       "\n\nSo Sorry.";
 
-static void building_dndstore_init();
-
 static int building_player_check(player *p, guint amount);
 static void building_player_charge(player *p, guint amount);
 
@@ -227,12 +225,6 @@ int building_dndstore(player *p)
 
     assert(p != NULL);
 
-    if (!nlarn->store_stock)
-    {
-        /* fill store with goods */
-        building_dndstore_init();
-    }
-
     /* no business if player has outstanding taxes */
     if (p->outstanding_taxes)
     {
@@ -261,6 +253,55 @@ int building_dndstore(player *p)
     display_inv_callbacks_clean(callbacks);
 
     return turns;
+}
+
+void building_dndstore_init()
+{
+    static int initialized = FALSE;
+    int loop, count;
+    item_t type = IT_NONE;
+
+    /* this is a one-time process! */
+    if (initialized) return;
+
+    for (type = IT_ARMOUR; type < IT_MAX; type++)
+    {
+        if (type == IT_GOLD || type == IT_GEM || type == IT_CONTAINER)
+        {
+            continue;
+        }
+
+        if (item_is_stackable(type) && (type != IT_BOOK))
+        {
+            count = 3;
+        }
+        else
+        {
+            count = 1;
+        }
+
+        for (loop = 0; loop < count; loop++)
+        {
+            int id;
+
+            for (id = 1; id < item_max_id(type); id++)
+            {
+                item *it = item_new(type, id, 0);
+
+                /* do not generate unobtainable weapons */
+                if ((type == IT_WEAPON) && !weapon_is_obtainable(it))
+                {
+                    item_destroy(it);
+                }
+                else
+                {
+                    inv_add(&nlarn->store_stock, it);
+                }
+            }
+        }
+    }
+
+    initialized = TRUE;
 }
 
 int building_home(player *p)
@@ -639,49 +680,6 @@ static void building_player_charge(player *p, guint amount)
     {
         guint player_gold = player_get_gold(p);
         player_set_gold(p, player_gold - amount);
-    }
-}
-
-static void building_dndstore_init()
-{
-    int loop, count;
-    item_t type = IT_NONE;
-
-    for (type = IT_ARMOUR; type < IT_MAX; type++)
-    {
-        if (type == IT_GOLD || type == IT_GEM || type == IT_CONTAINER)
-        {
-            continue;
-        }
-
-        if (item_is_stackable(type) && (type != IT_BOOK))
-        {
-            count = 3;
-        }
-        else
-        {
-            count = 1;
-        }
-
-        for (loop = 0; loop < count; loop++)
-        {
-            int id;
-
-            for (id = 1; id < item_max_id(type); id++)
-            {
-                item *it = item_new(type, id, 0);
-
-                /* do not generate unobtainable weapons */
-                if ((type == IT_WEAPON) && !weapon_is_obtainable(it))
-                {
-                    item_destroy(it);
-                }
-                else
-                {
-                    inv_add(&nlarn->store_stock, it);
-                }
-            }
-        }
     }
 }
 

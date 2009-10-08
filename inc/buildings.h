@@ -36,6 +36,7 @@ struct player;
 
 int building_bank(struct player *p);
 int building_dndstore(struct player *p);
+void building_dndstore_init();
 int building_home(struct player *p);
 int building_lrs(struct player *p);
 int building_school(struct player *p);

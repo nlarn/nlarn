@@ -948,24 +948,18 @@ int spell_type_blast(spell *s, struct player *p)
 
 gboolean spell_alter_reality(player *p)
 {
-    map *nlevel, *olevel;
+    map *nlevel;
 
-    olevel = game_map(nlarn, p->pos.z);
+    map_destroy(game_map(nlarn, p->pos.z));
 
     /* create new map */
-    nlevel = map_new(olevel->nlevel, game_mazefile(nlarn));
-
-    /* make new map active */
-    nlarn->maps[p->pos.z] = nlevel;
+    nlevel = nlarn->maps[p->pos.z] = map_new(p->pos.z, game_mazefile(nlarn));
 
     /* reposition player (if needed) */
     if (!map_pos_passable(nlevel, p->pos))
     {
         p->pos = map_find_space(nlevel, LE_MONSTER);
     }
-
-    /* destroy old map */
-    map_destroy(olevel);
 
     return TRUE;
 }
