@@ -313,7 +313,7 @@ game_score_t *game_score(game *g, player_cod cod, int cause)
     score->hp_max = g->p->hp_max;
     score->level = g->p->lvl;
     score->level_max = g->p->stats.max_level;
-    score->dlevel = g->p->map->nlevel;
+    score->dlevel = g->p->pos.z;
     score->dlevel_max = g->p->stats.deepest_level;
     score->difficulty = game_difficulty(g);
     score->time_start = g->time_start;
@@ -386,7 +386,7 @@ void game_spin_the_wheel(game *g, guint times)
 
     assert(g != NULL && times > 0);
 
-    map_timer(g->p->map, times);
+    map_timer(game_map(nlarn,g->p->pos.z), times);
 
     for (turn = 0; turn < times; turn++)
     {
@@ -394,17 +394,17 @@ void game_spin_the_wheel(game *g, guint times)
         player_effects_expire(g->p, 1);
 
         /* check if player is stuck inside a wall without walk through wall */
-        if ((map_tiletype_at(g->p->map, g->p->pos) == LT_WALL)
+        if ((map_tiletype_at(game_map(nlarn,g->p->pos.z), g->p->pos) == LT_WALL)
                 && !player_effect(g->p, ET_WALL_WALK))
         {
             player_die(g->p, PD_STUCK, 0);
         }
 
         /* deal damage cause by map tiles to player */
-        if ((dam = map_tile_damage(g->p->map, g->p->pos)))
+        if ((dam = map_tile_damage(game_map(nlarn,g->p->pos.z), g->p->pos)))
         {
             player_damage_take(g->p, dam, PD_LEVEL,
-                               map_tiletype_at(g->p->map, g->p->pos));
+                               map_tiletype_at(game_map(nlarn,g->p->pos.z), g->p->pos));
         }
 
         game_move_monsters(g);
@@ -505,7 +505,7 @@ static void game_move_monsters(game *g)
     assert(g != NULL);
 
     /* make shortcut */
-    l = g->p->map;
+    l = game_map(nlarn,g->p->pos.z);
 
     monsters = g_hash_table_get_values(g->monsters);
 
@@ -537,7 +537,7 @@ static void game_move_spheres(game *g)
     assert(g != NULL);
 
     /* make shortcut */
-    l = g->p->map;
+    l = game_map(nlarn,g->p->pos.z);
 
     for (idx = 0; idx < l->slist->len; idx++)
     {

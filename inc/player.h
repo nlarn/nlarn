@@ -122,7 +122,6 @@ typedef struct player
     guint8 identified_scrolls[ST_MAX];
 
     position pos; /* player's position */
-    map *map; /* current dungeon map */
     player_stats stats; /* statistics */
     message_log *log; /* game message log */
 
@@ -282,7 +281,7 @@ char *player_get_lvl_desc(player *p);
 
 /* macros */
 
-#define player_memory_of(p,pos) ((p)->memory[(p)->map->nlevel][(pos).y][(pos).x])
+#define player_memory_of(p,pos) ((p)->memory[(pos).z][(pos).y][(pos).x])
 #define player_pos_visible(p,pos) ((p)->fov[(pos).y][(pos).x])
 
 #endif

@@ -70,7 +70,7 @@ int building_bank(player *p)
 
     assert(p != NULL);
 
-    if (p->map->nlevel == 0)
+    if (p->pos.z == 0)
         text = g_string_new(msg_greet);
     else
         text = g_string_new(msg_branch);
@@ -895,7 +895,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
     price = item_price(it);
 
     /* modify price if player sells stuff at the trading post */
-    if (map_stationary_at(p->map, p->pos) == LS_TRADEPOST)
+    if (map_stationary_at(game_map(nlarn, p->pos.z), p->pos) == LS_TRADEPOST)
     {
         if (!player_item_is_damaged(p, it))
         {

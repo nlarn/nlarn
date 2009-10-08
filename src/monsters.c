@@ -913,7 +913,7 @@ void monster_destroy(monster *m)
     g_ptr_array_free(m->effects, TRUE);
 
     /* remove monster from map (if the map existst) */
-    if (nlarn->maps[m->pos.z] != NULL)
+    if (pos_valid(m->pos) && nlarn->maps[m->pos.z] != NULL)
     {
         nlarn->maps[m->pos.z]->grid[m->pos.y][m->pos.x].monster = NULL;
     }
@@ -1473,7 +1473,7 @@ void monster_player_attack(monster *m, player *p)
     /* the player is invisible and the monster bashes into thin air */
     if (!pos_identical(m->player_pos, p->pos))
     {
-        if (!map_is_monster_at(p->map, p->pos) && m->m_visible)
+        if (!map_is_monster_at(game_map(nlarn, p->pos.z), p->pos) && m->m_visible)
         {
             log_add_entry(p->log, "The %s bashes into thin air.",
                           monster_name(m));

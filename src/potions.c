@@ -153,7 +153,7 @@ int potion_detect_item(player *p, item *potion)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            if ((inv = *map_ilist_at(p->map, pos)))
+            if ((inv = *map_ilist_at(game_map(nlarn, p->pos.z), pos)))
             {
                 for (idx = 0; idx <  inv_length(inv); idx++)
                 {

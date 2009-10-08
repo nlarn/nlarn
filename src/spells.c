@@ -693,7 +693,7 @@ int spell_type_point(spell *s, struct player *p)
         return FALSE;
     }
 
-    monster = map_get_monster_at(p->map, pos);
+    monster = map_get_monster_at(game_map(nlarn, p->pos.z), pos);
 
     if (!monster)
     {
@@ -746,7 +746,7 @@ int spell_type_point(spell *s, struct player *p)
         log_add_entry(p->log, "The %s disappears.",
                       monster_name(monster));
 
-        monster_set_pos(monster, p->map, map_find_space(p->map, LE_MONSTER));
+        monster_set_pos(monster, game_map(nlarn, p->pos.z), map_find_space(game_map(nlarn, p->pos.z), LE_MONSTER));
 
         break; /* SP_TEL */
 
@@ -805,7 +805,7 @@ int spell_type_ray(spell *s, struct player *p)
         return FALSE;
     }
 
-    if (!(monster = map_get_monster_at(p->map, pos)))
+    if (!(monster = map_get_monster_at(game_map(nlarn, p->pos.z), pos)))
     {
         log_add_entry(p->log, "Which monster are you talking about?");
         return FALSE;
@@ -830,7 +830,7 @@ int spell_type_ray(spell *s, struct player *p)
         break;
     }
 
-    if (map_stationary_at(p->map, pos) == LS_MIRROR)
+    if (map_stationary_at(game_map(nlarn, p->pos.z), pos) == LS_MIRROR)
     {
         log_add_entry(p->log, "The mirror reflects your spell! The %s hits you!",
                       spell_name(s));
@@ -889,9 +889,9 @@ int spell_type_flood(spell *s, struct player *p)
     }
 
     range = area_new_circle_flooded(pos, radius,
-                                    map_get_obstacles(p->map, pos, radius));
+                                    map_get_obstacles(game_map(nlarn, p->pos.z), pos, radius));
 
-    map_set_tiletype(p->map, range, type, amount);
+    map_set_tiletype(game_map(nlarn, p->pos.z), range, type, amount);
     area_destroy(range);
 
     return spell_level(s);
@@ -922,7 +922,7 @@ int spell_type_blast(spell *s, struct player *p)
     /* currently only fireball */
     amount = (25 * s->knowledge) + p->lvl + rand_0n(25 + p->lvl);
 
-    mlist = map_get_monsters_in(p->map, rect_new_sized(pos, 1));
+    mlist = map_get_monsters_in(game_map(nlarn, p->pos.z), rect_new_sized(pos, 1));
 
     for (idx = 0; idx < mlist->len; idx++)
     {
@@ -950,14 +950,13 @@ gboolean spell_alter_reality(player *p)
 {
     map *nlevel, *olevel;
 
-    olevel = p->map;
+    olevel = game_map(nlarn, p->pos.z);
 
     /* create new map */
     nlevel = map_new(olevel->nlevel, game_mazefile(nlarn));
 
     /* make new map active */
-    nlarn->maps[p->map->nlevel] = nlevel;
-    p->map = nlevel;
+    nlarn->maps[p->pos.z] = nlevel;
 
     /* reposition player (if needed) */
     if (!map_pos_passable(nlevel, p->pos))
@@ -978,7 +977,7 @@ gboolean spell_create_monster(struct player *p)
     position pos;
 
     /* this spell doesn't work in town */
-    if (p->map->nlevel == 0)
+    if (p->pos.z == 0)
     {
         log_add_entry(p->log, "Nothing happens.");
         return FALSE;
@@ -1016,7 +1015,7 @@ gboolean spell_create_sphere(spell *s, struct player *p)
     if (pos_valid(pos))
     {
         sphere = sphere_new(pos, p, p->lvl * 10 * s->knowledge);
-        g_ptr_array_add(p->map->slist, sphere);
+        g_ptr_array_add(game_map(nlarn, p->pos.z)->slist, sphere);
 
         return TRUE;
     }
@@ -1120,9 +1119,9 @@ gboolean spell_make_wall(player *p)
         return FALSE;
     }
 
-    if (map_tiletype_at(p->map, pos) != LT_WALL)
+    if (map_tiletype_at(game_map(nlarn, p->pos.z), pos) != LT_WALL)
     {
-        map_tile *tile = map_tile_at(p->map, pos);
+        map_tile *tile = map_tile_at(game_map(nlarn, p->pos.z), pos);
 
         tile->type = tile->base_type = LT_WALL;
 
@@ -1159,14 +1158,14 @@ gboolean spell_vaporize_rock(player *p)
         return FALSE;
     }
 
-    tile = map_tile_at(p->map, pos);
+    tile = map_tile_at(game_map(nlarn, p->pos.z), pos);
 
     if (tile->type == LT_WALL)
     {
         tile->type = LT_FLOOR;
     }
 
-    if ((m = map_get_monster_at(p->map, pos)) && (monster_type(m) == MT_XORN))
+    if ((m = map_get_monster_at(game_map(nlarn, p->pos.z), pos)) && (monster_type(m) == MT_XORN))
     {
         /* xorns take damage from vpr */
         monster_damage_take(m, damage_new(DAM_PHYSICAL, divert(200, 10), p));
@@ -1219,7 +1218,7 @@ gboolean spell_vaporize_rock(player *p)
     /* created a monster - position it correctly */
     if (m)
     {
-        monster_level_enter(m, p->map);
+        monster_level_enter(m, game_map(nlarn, p->pos.z));
         monster_set_pos(m, game_map(nlarn, p->pos.z), pos);
     }
 

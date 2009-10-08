@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
 
             /* open door / container */
         case 'O':
-            if (inv_length_filtered(*map_ilist_at(nlarn->p->map, nlarn->p->pos),
+            if (inv_length_filtered(*map_ilist_at(game_map(nlarn, nlarn->p->pos.z), nlarn->p->pos),
                                     &inv_filter_container) > 0)
             {
                 container_open(nlarn->p, NULL, NULL);
@@ -331,13 +331,13 @@ int main(int argc, char *argv[])
 
             /* *** DEBUGGING SUPPORT *** */
         case '+': /* dungeon map up */
-            if (game_wizardmode(nlarn) && (nlarn->p->map->nlevel > 0))
+            if (game_wizardmode(nlarn) && (nlarn->p->pos.z > 0))
                 moves_count = player_level_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z - 1), TRUE);
 
             break;
 
         case '-': /* dungeon map down */
-            if (game_wizardmode(nlarn) && (nlarn->p->map->nlevel < (MAP_MAX - 1)))
+            if (game_wizardmode(nlarn) && (nlarn->p->pos.z < (MAP_MAX - 1)))
                 moves_count = player_level_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z + 1), TRUE);
             break;
 

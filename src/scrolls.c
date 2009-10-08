@@ -114,7 +114,7 @@ int scroll_annihilate(struct player *p, item *scroll)
 
     assert(p != NULL && scroll != NULL);
 
-    mlist = map_get_monsters_in(p->map, rect_new_sized(p->pos, 1));
+    mlist = map_get_monsters_in(game_map(nlarn, p->pos.z), rect_new_sized(p->pos, 1));
 
     for (idx = 0; idx < mlist->len; idx++)
     {
@@ -162,8 +162,8 @@ int scroll_create_artefact(player *p, item *scroll)
 
     assert(p != NULL && scroll != NULL);
 
-    it = item_new_by_level(rand_1n(IT_MAX), p->map->nlevel);
-    inv_add(map_ilist_at(p->map, p->pos), it);
+    it = item_new_by_level(rand_1n(IT_MAX), p->pos.z);
+    inv_add(map_ilist_at(game_map(nlarn, p->pos.z), p->pos), it);
 
     item_describe(it, player_item_known(p, it), (it->count == 1),
                   FALSE, buf, 60);
@@ -323,8 +323,8 @@ int scroll_mapping(player *p, item *scroll)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            player_memory_of(p, pos).type = map_tiletype_at(p->map, pos);
-            player_memory_of(p, pos).stationary = map_stationary_at(p->map, pos);
+            player_memory_of(p, pos).type = map_tiletype_at(game_map(nlarn, p->pos.z), pos);
+            player_memory_of(p, pos).stationary = map_stationary_at(game_map(nlarn, p->pos.z), pos);
         }
     }
 
@@ -412,14 +412,14 @@ int scroll_teleport(player *p, item *scroll)
 
     assert(p != NULL);
 
-    if (p->map->nlevel == 0)
+    if (p->pos.z == 0)
         nlevel = 0;
-    else if (p->map->nlevel < MAP_DMAX)
+    else if (p->pos.z < MAP_DMAX)
         nlevel = rand_0n(MAP_DMAX);
     else
         nlevel = rand_m_n(MAP_DMAX, MAP_MAX);
 
-    if (nlevel != p->map->nlevel)
+    if (nlevel != p->pos.z)
     {
         player_level_enter(p, game_map(nlarn, nlevel), TRUE);
         return TRUE;
