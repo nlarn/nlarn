@@ -118,7 +118,6 @@ map *map_new(int nlevel, char *mazefile)
     l->nlevel = nlevel;
 
     /* initialize monster and sphere list */
-    l->mlist = g_ptr_array_new();
     l->slist = g_ptr_array_new();
 
     /* create map */
@@ -144,7 +143,9 @@ map *map_new(int nlevel, char *mazefile)
 
         /* home town is safe */
         if (l->nlevel > 0)
-            map_fill_with_live(l);
+        {
+            map_fill_with_life(l);
+        }
 
         /* add treasure room */
         if (l->nlevel > 1
@@ -207,20 +208,25 @@ void map_destroy(map *l)
 {
     guint idx;
     int x, y;
+    monster *m;
+    GList *mlist;
 
     assert(l != NULL);
 
     /* free monster list */
-    if (l->mlist != NULL)
-    {
-        while (l->mlist->len > 0)
-        {
-            idx = l->mlist->len - 1;
-            monster_destroy(g_ptr_array_index(l->mlist, idx));
-        }
+    mlist = g_hash_table_get_values(nlarn->monsters);
 
-        g_ptr_array_free(l->mlist, TRUE);
+    do
+    {
+        m = (monster *)mlist->data;
+
+        position mpos = monster_pos(m);
+        if (mpos.z == l->nlevel)
+        {
+            monster_destroy(m);
+        }
     }
+    while ((mlist = mlist->next));
 
     /* free spheres list */
     if (l->slist != NULL)
@@ -792,7 +798,7 @@ GPtrArray *map_get_monsters_in(map *m, rectangle area)
  * creates an entire set of monsters for a map
  * @param a map
  */
-int map_fill_with_live(map *l)
+int map_fill_with_life(map *l)
 {
     int new_monster_count;
     int i;
@@ -800,9 +806,6 @@ int map_fill_with_live(map *l)
     assert(l != NULL);
 
     new_monster_count = rand_m_n(2, 14) + (l->nlevel >> 1);
-
-    /* if there are some monsters on the map, add only a few */
-    new_monster_count -= l->mlist->len;
 
     if (new_monster_count < 0)
     {
@@ -812,7 +815,8 @@ int map_fill_with_live(map *l)
 
     for (i = 0; i <= new_monster_count; i++)
     {
-        monster_level_enter(monster_new_by_level(l->nlevel), l);
+        monster *nmonster = monster_new_by_level(l->nlevel);
+        monster_level_enter(nmonster, l);
     }
 
     return(new_monster_count);

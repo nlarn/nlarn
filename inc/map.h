@@ -128,11 +128,10 @@ typedef struct map_stationary_data
 
 typedef struct map
 {
-    guint32 nlevel;                             /* map number */
-    map_tile grid[MAP_MAX_Y][MAP_MAX_X];  /* "live" map */
-    guint32 visited;                            /* last time player has been on this map */
-    GPtrArray *mlist;                           /* monsters on this map */
-    GPtrArray *slist;                           /* spheres of annihilation on this map */
+    guint32 nlevel;                       /* map number */
+    map_tile grid[MAP_MAX_Y][MAP_MAX_X];  /* the map */
+    guint32 visited;                      /* last time player has been on this map */
+    GPtrArray *slist;                     /* spheres of annihilation on this map */
 } map;
 
 /* Structure for path elements */
@@ -189,7 +188,7 @@ damage *map_tile_damage(map *l, position pos);
 monster *map_get_monster_at(map *m, position pos);
 int map_is_monster_at(map *m, position pos);
 GPtrArray *map_get_monsters_in(map *m, rectangle area);
-int map_fill_with_live(map *l);
+int map_fill_with_life(map *l);
 
 void map_timer(map *l, guint8 count);
 

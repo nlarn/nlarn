@@ -238,27 +238,38 @@ int scroll_gem_perfection(player *p, item *scroll)
 
 int scroll_heal_monster(player *p, item *scroll)
 {
-    guint idx;
+    GList *mlist;
     int count = 0;
     monster *m;
 
     assert(p != NULL && scroll != NULL);
 
-    for (idx = 0; idx < p->map->mlist->len; idx++)
-    {
-        m = g_ptr_array_index(p->map->mlist, idx);
+    mlist = g_hash_table_get_values(nlarn->monsters);
 
-        if (monster_hp(m) < monster_hp_max(m))
+    /* purge genocided monsters */
+    do
+    {
+        m = (monster *)mlist->data;
+        position mpos = monster_pos(m);
+
+        /* find monsters on the same level */
+        if (mpos.z == p->pos.z)
         {
-            monster_inc_hp(m, monster_hp_max(m));
-            count++;
+            if (monster_hp(m) < monster_hp_max(m))
+            {
+                monster_inc_hp(m, monster_hp_max(m));
+                count++;
+            }
         }
     }
+    while ((mlist = mlist->next));
 
     if (count)
     {
         log_add_entry(p->log, "You feel uneasy.");
     }
+
+    g_list_free(mlist);
 
     return count;
 }

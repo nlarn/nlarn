@@ -224,27 +224,29 @@ int display_paint_screen(player *p)
             }
 
             if (player_pos_visible(p, pos)) attroff(A_BOLD);
+
+            /* draw monsters */
+            monst = map_get_monster_at(game_map(nlarn, pos.z), pos);
+
+            if (monst == NULL)
+            {
+                /* no monster found */
+                continue;
+            }
+
+            if (game_wizardmode(nlarn)
+                    || player_effect(p, ET_DETECT_MONSTER)
+                    || (player_pos_visible(p, monster_pos(monst))
+                        && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))
+                        && !monster_unknown(monst))) /* hide the mimic */
+            {
+                attron(COLOR_PAIR(DC_RED));
+                position mpos = monster_pos(monst);
+                mvaddch(mpos.y, mpos.x, monster_image(monst));
+                attroff(COLOR_PAIR(DC_RED));
+            }
         }
     }
-
-    /* draw monsters */
-    for (i = 1; i <= l->mlist->len; i++)
-    {
-        monst = (monster *) g_ptr_array_index(l->mlist, i - 1);
-
-        if (game_wizardmode(nlarn)
-                || player_effect(p, ET_DETECT_MONSTER)
-                || (player_pos_visible(p, monster_pos(monst))
-                    && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))
-                    && !monster_unknown(monst))) /* hide the mimic */
-        {
-            attron(COLOR_PAIR(DC_RED));
-            position mpos = monster_pos(monst);
-            mvaddch(mpos.y, mpos.x, monster_image(monst));
-            attroff(COLOR_PAIR(DC_RED));
-        }
-    }
-
 
     for (i = 1; i <= l->slist->len; i++)
     {

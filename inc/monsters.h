@@ -200,8 +200,6 @@ gboolean monster_update_action(monster *m);
 void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
 
-void monsters_genocide(struct map *l);
-
 #define monster_name(monster)        (monsters[monster_type(monster)].name)
 #define monster_level(monster)       (monsters[monster_type(monster)].level)
 #define monster_ac(monster)          (monsters[monster_type(monster)].ac)
@@ -212,6 +210,7 @@ void monsters_genocide(struct map *l);
 #define monster_image(monster)       (monsters[monster_type(monster)].image)
 #define monster_speed(monster)       (monsters[monster_type(monster)].mspeed)
 #define monster_attack(monster, idx) (monsters[monster_type(monster)].attacks[(idx)])
+#define monster_map(monster)         (game_map(nlarn, (monster)->pos.z))
 
 /* flags */
 #define monster_has_head(monster)        (monsters[monster_type(monster)].flags & MF_HEAD)

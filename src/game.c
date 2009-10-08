@@ -494,24 +494,38 @@ void game_sphere_unregister(game *g, sphere *s)
 static void game_move_monsters(game *g)
 {
     map *l;
+
+    /* list of monsters */
+    GList *monsters;
+
     /* handle to current monster */
     monster *m;
-    guint idx;
+
 
     assert(g != NULL);
 
     /* make shortcut */
     l = g->p->map;
 
-    for (idx = 0; idx < l->mlist->len; idx++)
+    monsters = g_hash_table_get_values(g->monsters);
+
+    do
     {
-        m = g_ptr_array_index(l->mlist, idx);
+        m = (monster *)monsters->data;
+
+        position mpos = monster_pos(m);
 
         /* modify effects */
         monster_effect_expire(m, g->p->log);
 
-        monster_move(m, g->p);
-    } /* foreach monster */
+        if (mpos.z == g->p->pos.z)
+        {
+            monster_move(m, g->p);
+        }
+    }
+    while ((monsters = monsters->next));
+
+    g_list_free(monsters);
 }
 
 static void game_move_spheres(game *g)

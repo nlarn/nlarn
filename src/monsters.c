@@ -40,9 +40,6 @@ struct _monster
     /* last known position of player */
     position player_pos;
 
-    /* level monster is on */
-    struct map *map;
-
     /* attacks already unsuccessfully tried */
     gboolean attacks_failed[MONSTER_ATTACK_COUNT];
 
@@ -866,6 +863,9 @@ monster *monster_new(int type)
     /* register monster with game */
     game_monster_register(nlarn, nmonster);
 
+    /* set position to something invalid */
+    nmonster->pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+
     return nmonster;
 }
 
@@ -916,7 +916,6 @@ void monster_destroy(monster *m)
     if (nlarn->maps[m->pos.z] != NULL)
     {
         nlarn->maps[m->pos.z]->grid[m->pos.y][m->pos.x].monster = NULL;
-        g_ptr_array_remove_fast(nlarn->maps[m->pos.z]->mlist, m);
     }
 
     /* free inventory */
@@ -963,13 +962,17 @@ int monster_set_pos(monster *m, map *map, position target)
     if (map_validate_position(map, target, LE_MONSTER))
     {
         /* remove current reference to monster from tile */
-        map->grid[m->pos.y][m->pos.x].monster = NULL;
+        if (pos_valid(m->pos))
+        {
+            map->grid[m->pos.y][m->pos.x].monster = NULL;
+        }
 
         /* set new position */
         m->pos = target;
 
         /* set reference to monster on tile */
         map->grid[target.y][target.x].monster = m;
+
         return TRUE;
     }
 
@@ -1005,22 +1008,18 @@ void monster_level_enter(monster *m, struct map *l)
     assert (m != NULL && l != NULL);
 
     /* remove monster from old map if it has been somewhere before */
-    if (m->map != NULL)
+    if (pos_valid(m->pos))
     {
-        g_ptr_array_remove_fast(m->map->mlist, m);
+        map *oldmap = game_map(nlarn, m->pos.z);
+        oldmap->grid[m->pos.y][m->pos.z].monster = NULL;
     }
 
     /* put monster into map */
-    m->map = l;
-    m->pos.z = l->nlevel;
-
     if (!monster_set_pos(m, l, map_find_space(l, LE_MONSTER)))
     {
         /* no free space could be found for the monstert -> abort */
         monster_destroy(m);
     }
-
-    g_ptr_array_add(l->mlist, m);
 }
 
 void monster_move(monster *m, struct player *p)
@@ -1068,7 +1067,7 @@ void monster_move(monster *m, struct player *p)
     else
     {
         /* determine if player's position is visible from monster's position */
-        m->p_visible = map_pos_is_visible(m->map, m->pos, p->pos);
+        m->p_visible = map_pos_is_visible(monster_map(m), m->pos, p->pos);
     }
 
     if (m->p_visible)
@@ -1088,7 +1087,7 @@ void monster_move(monster *m, struct player *p)
     }
 
     /* deal damage caused by floor effects */
-    if ((dam = map_tile_damage(m->map, m->pos)))
+    if ((dam = map_tile_damage(monster_map(m), m->pos)))
     {
         if (!(m = monster_damage_take(m, dam)))
             return;
@@ -1133,8 +1132,8 @@ void monster_move(monster *m, struct player *p)
             m_npos_tmp = pos_move(m->pos, tries);
 
             if (pos_valid(m_npos_tmp)
-                    && lt_is_passable(map_tiletype_at(m->map,m_npos_tmp))
-                    && !map_is_monster_at(m->map, m_npos_tmp)
+                    && lt_is_passable(map_tiletype_at(monster_map(m),m_npos_tmp))
+                    && !map_is_monster_at(monster_map(m), m_npos_tmp)
                     && (pos_distance(p->pos, m_npos_tmp) > dist))
             {
                 /* distance is bigger than current distance */
@@ -1158,8 +1157,8 @@ void monster_move(monster *m, struct player *p)
             tries++;
         }
         while ((!pos_valid(m_npos)
-                || !lt_is_passable(map_tiletype_at(m->map,m_npos))
-                || map_is_monster_at(m->map, m_npos))
+                || !lt_is_passable(map_tiletype_at(monster_map(m),m_npos))
+                || map_is_monster_at(monster_map(m), m_npos))
                 && (tries < GD_MAX));
 
         /* new position has not been found, reset to current position */
@@ -1195,10 +1194,10 @@ void monster_move(monster *m, struct player *p)
                 else
                     what = LS_STAIRSDOWN;
 
-                m->player_pos = map_find_stationary(m->map, what);
+                m->player_pos = map_find_stationary(monster_map(m), what);
             }
 
-            path = map_find_path(m->map, m->pos, m->player_pos);
+            path = map_find_path(monster_map(m), m->pos, m->player_pos);
 
             if (path && !g_queue_is_empty(path->path))
             {
@@ -1233,7 +1232,7 @@ void monster_move(monster *m, struct player *p)
     {
         /* vampires won't step onto mirrors */
         if ((m->type == MT_VAMPIRE)
-                && (map_stationary_at(m->map, m_npos) == LS_MIRROR))
+                && (map_stationary_at(monster_map(m), m_npos) == LS_MIRROR))
         {
             /* FIXME: should try to move around it */
             m_npos = m->pos;
@@ -1249,12 +1248,12 @@ void monster_move(monster *m, struct player *p)
         }
 
         /* check for door */
-        if ((map_stationary_at(m->map, m_npos) == LS_CLOSEDDOOR)
+        if ((map_stationary_at(monster_map(m), m_npos) == LS_CLOSEDDOOR)
                 && monster_has_hands(m)
                 && monster_int(m) > 3) /* lock out zombies */
         {
             /* open the door */
-            map_stationary_set(m->map, m_npos, LS_OPENDOOR);
+            map_stationary_set(monster_map(m), m_npos, LS_OPENDOOR);
 
             /* notify the player if the door is visible */
             if (m->m_visible)
@@ -1264,13 +1263,13 @@ void monster_move(monster *m, struct player *p)
         }
 
         /* move towards player; check for monsters */
-        else if (!map_is_monster_at(m->map, m_npos)
-                 && ls_is_passable(map_stationary_at(m->map, m_npos)))
+        else if (!map_is_monster_at(monster_map(m), m_npos)
+                 && ls_is_passable(map_stationary_at(monster_map(m), m_npos)))
         {
             monster_set_pos(m, game_map(nlarn, m->pos.z), m_npos);
 
             /* check for traps */
-            if (map_trap_at(m->map, m->pos))
+            if (map_trap_at(monster_map(m), m->pos))
             {
                 if (!monster_trap_trigger(m, p))
                     return; /* trap killed the monster */
@@ -1298,7 +1297,7 @@ monster *monster_trap_trigger(monster *m, struct player *p)
 
     assert (m != NULL && p != NULL);
 
-    trap = map_trap_at(m->map, m->pos);
+    trap = map_trap_at(monster_map(m), m->pos);
 
     /* return if the monster has not triggered the trap */
     if (!chance(trap_chance(trap)))
@@ -1397,9 +1396,9 @@ void monster_items_pickup(monster *m, struct player *p)
 
     assert(m != NULL && p != NULL);
 
-    for (idx = 0; idx < inv_length(*map_ilist_at(m->map, m->pos)); idx++)
+    for (idx = 0; idx < inv_length(*map_ilist_at(monster_map(m), m->pos)); idx++)
     {
-        it = inv_get(*map_ilist_at(m->map, m->pos), idx);
+        it = inv_get(*map_ilist_at(monster_map(m), m->pos), idx);
 
         if (m->type == MT_LEPRECHAUN
                 && ((it->type == IT_GEM) || (it->type == IT_GOLD)))
@@ -1423,7 +1422,7 @@ void monster_items_pickup(monster *m, struct player *p)
                 log_add_entry(p->log, "The %s picks up %s.", monster_name(m), buf);
             }
 
-            inv_del_element(map_ilist_at(m->map, m->pos), it);
+            inv_del_element(map_ilist_at(monster_map(m), m->pos), it);
             inv_add(&m->inventory, it);
 
             /* go back one item as the following items lowered their number */
@@ -1667,25 +1666,6 @@ monster *monster_damage_take(monster *m, damage *dam)
     return m;
 }
 
-void monsters_genocide(map *l)
-{
-    guint idx;
-    monster *monst;
-
-    /* purge genocided monsters */
-    for (idx = 0; idx < l->mlist->len; idx++)
-    {
-        monst = g_ptr_array_index(l->mlist, idx);
-
-        if (monster_is_genocided(monst->type))
-        {
-            g_ptr_array_remove_index_fast(l->mlist, idx);
-            monster_destroy(monst);
-            idx--;
-        }
-    }
-}
-
 /**
  * Determine a monster's action.
  *
@@ -1805,9 +1785,27 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
 
 int monster_genocide(int monster_id)
 {
+    GList *mlist;
+    monster *monst;
+
     assert(monster_id > MT_NONE && monster_id < MT_MAX);
 
     nlarn->monster_genocided[monster_id] = TRUE;
+    mlist = g_hash_table_get_values(nlarn->monsters);
+
+    /* purge genocided monsters */
+    do
+    {
+        monst = (monster *)mlist->data;
+        if (monster_is_genocided(monst->type))
+        {
+            monster_destroy(monst);
+        }
+    }
+    while ((mlist = mlist->next));
+
+    g_list_free(mlist);
+
     return nlarn->monster_genocided[monster_id];
 }
 
@@ -1976,7 +1974,7 @@ static void monster_die(monster *m)
     /* drop stuff the monster carries */
     if (inv_length(m->inventory))
     {
-        monster_items_drop(m, map_ilist_at(m->map, m->pos));
+        monster_items_drop(m, map_ilist_at(monster_map(m), m->pos));
     }
 
     monster_destroy(m);

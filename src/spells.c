@@ -1090,8 +1090,6 @@ gboolean spell_genocide_monster(player *p)
                 log_add_entry(p->log, "Wiped out all %ss.",
                               monster_name_by_type(id));
 
-                monsters_genocide(p->map);
-
                 g_free(in);
 
                 return TRUE;

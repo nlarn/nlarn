@@ -755,8 +755,6 @@ int player_attack(player *p, monster *m)
  * player changes levels.
  * Existing levels will get a few more monsters.
  *
- * Note that it is here we remove genocided monsters from the present map.
- *
  * @param player entering map
  * @param entered map
  * @param has to be TRUE if the player didn't enter the map regularly
@@ -788,12 +786,10 @@ int player_level_enter(player *p, map *l, gboolean teleported)
         count = abs(game_turn(nlarn) - l->visited);
         map_timer(l, min(count, G_MAXUINT8));
 
-        monsters_genocide(l);
-
         /* add some new monsters */
         if (l->nlevel > 0)
         {
-            map_fill_with_live(l);
+            map_fill_with_life(l);
         }
     }
 
