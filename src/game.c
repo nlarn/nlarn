@@ -386,10 +386,13 @@ void game_spin_the_wheel(game *g, guint times)
 {
     guint turn;
     damage *dam;
+    map *map;
 
     assert(g != NULL && times > 0);
 
-    map_timer(game_map(nlarn,g->p->pos.z), times);
+    map = game_map(nlarn, g->p->pos.z);
+
+    map_timer(map, times);
 
     for (turn = 0; turn < times; turn++)
     {
@@ -397,17 +400,16 @@ void game_spin_the_wheel(game *g, guint times)
         player_effects_expire(g->p, 1);
 
         /* check if player is stuck inside a wall without walk through wall */
-        if ((map_tiletype_at(game_map(nlarn,g->p->pos.z), g->p->pos) == LT_WALL)
+        if ((map_tiletype_at(map, g->p->pos) == LT_WALL)
                 && !player_effect(g->p, ET_WALL_WALK))
         {
             player_die(g->p, PD_STUCK, 0);
         }
 
         /* deal damage cause by map tiles to player */
-        if ((dam = map_tile_damage(game_map(nlarn,g->p->pos.z), g->p->pos)))
+        if ((dam = map_tile_damage(map, g->p->pos)))
         {
-            player_damage_take(g->p, dam, PD_LEVEL,
-                               map_tiletype_at(game_map(nlarn,g->p->pos.z), g->p->pos));
+            player_damage_take(g->p, dam, PD_MAP, map_tiletype_at(map, g->p->pos));
         }
 
         game_move_monsters(g);

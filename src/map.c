@@ -755,19 +755,26 @@ damage *map_tile_damage(map *l, position pos)
 
 monster *map_get_monster_at(map *m, position pos)
 {
-    assert(m != NULL && pos_valid(pos));
+    assert(m != NULL && m->nlevel == pos.z && pos_valid(pos));
+    monster *mo = m->grid[pos.y][pos.x].monster;
+    assert (mo == NULL || monster_type(mo) > MT_NONE || monster_type(mo) < MT_MAX);
 
     return m->grid[pos.y][pos.x].monster;
+}
+
+int map_set_monster_at(map *map, position pos, monster *monst)
+{
+    assert(map != NULL && map->nlevel == pos.z && pos_valid(pos));
+    map->grid[pos.y][pos.x].monster = monst;
+
+    return TRUE;
 }
 
 int map_is_monster_at(map *m, position pos)
 {
     assert(m != NULL);
 
-    if (map_get_monster_at(m, pos))
-        return TRUE;
-    else
-        return FALSE;
+    return ((map_get_monster_at(m, pos) != NULL));
 }
 
 GPtrArray *map_get_monsters_in(map *m, rectangle area)

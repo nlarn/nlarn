@@ -162,7 +162,7 @@ typedef enum player_cod
     PD_MONSTER,
     PD_SPHERE,
     PD_TRAP,
-    PD_LEVEL, /* damaged by level effects */
+    PD_MAP, /* damaged by map effects */
     PD_SPELL, /* damaged by own spell */
     PD_CURSE, /* damaged by a cursed item */
     PD_STATIONARY, /* killed by stationary item */
@@ -186,7 +186,7 @@ gint64 player_calc_score(player *p, int won);
 int player_move(player *p, direction dir);
 int player_attack(player *p, monster *m);
 void player_update_fov(player *p, int radius);
-int player_level_enter(player *p, map *l, gboolean teleported);
+int player_map_enter(player *p, map *l, gboolean teleported);
 item *player_random_armour(player *p);
 
 int player_examine(player *p, position pos);

@@ -186,7 +186,9 @@ void map_stationary_set(map *l, position pos, map_stationary_t type);
 damage *map_tile_damage(map *l, position pos);
 
 monster *map_get_monster_at(map *m, position pos);
+int map_set_monster_at(map *map, position pos, monster *monst);
 int map_is_monster_at(map *m, position pos);
+
 GPtrArray *map_get_monsters_in(map *m, rectangle area);
 int map_fill_with_life(map *l);
 

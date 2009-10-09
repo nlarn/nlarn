@@ -118,7 +118,7 @@ int display_paint_screen(player *p)
     item *it;
     monster *monst;
     sphere *sphere;
-    map *l;
+    map *map;
 
     /* curses attributes */
     int attrs;
@@ -141,7 +141,7 @@ int display_paint_screen(player *p)
     mvaddch(MAP_MAX_Y, MAP_MAX_X, ACS_LRCORNER);
 
     /* make shortcut */
-    l = game_map(nlarn, p->pos.z);
+    map = game_map(nlarn, p->pos.z);
 
     /* draw map */
     pos.z = p->pos.z;
@@ -157,25 +157,25 @@ int display_paint_screen(player *p)
             if (game_wizardmode(nlarn))
             {
                 /* draw the truth */
-                if (inv_length(*map_ilist_at(l, pos)) > 0)
+                if (inv_length(*map_ilist_at(map, pos)) > 0)
                 {
                     /* draw items */
-                    it = (item *) inv_get(*map_ilist_at(l, pos),
-                                          inv_length(*map_ilist_at(l, pos)) - 1);
+                    it = (item *) inv_get(*map_ilist_at(map, pos),
+                                          inv_length(*map_ilist_at(map, pos)) - 1);
 
                     attron(COLOR_PAIR(DC_BLUE));
                     addch(item_image(it->type));
                     attroff(COLOR_PAIR(DC_BLUE));
                 }
 
-                else if (map_stationary_at(l, pos))
+                else if (map_stationary_at(map, pos))
                 {
                     /* draw stationary stuff */
-                    attron(COLOR_PAIR(ls_get_colour(map_stationary_at(l, pos))));
-                    addch(ls_get_image(map_stationary_at(l, pos)));
-                    attroff(COLOR_PAIR(ls_get_colour(map_stationary_at(l, pos))));
+                    attron(COLOR_PAIR(ls_get_colour(map_stationary_at(map, pos))));
+                    addch(ls_get_image(map_stationary_at(map, pos)));
+                    attroff(COLOR_PAIR(ls_get_colour(map_stationary_at(map, pos))));
                 }
-                else if (map_trap_at(l, pos))
+                else if (map_trap_at(map, pos))
                 {
                     attron(COLOR_PAIR(DC_MAGENTA));
                     addch('^');
@@ -185,9 +185,9 @@ int display_paint_screen(player *p)
                 else
                 {
                     /* draw tile */
-                    attron(COLOR_PAIR(lt_get_colour(map_tiletype_at(l, pos))));
-                    addch(lt_get_image(map_tiletype_at(l, pos)));
-                    attroff(COLOR_PAIR(lt_get_colour(map_tiletype_at(l, pos))));
+                    attron(COLOR_PAIR(lt_get_colour(map_tiletype_at(map, pos))));
+                    addch(lt_get_image(map_tiletype_at(map, pos)));
+                    attroff(COLOR_PAIR(lt_get_colour(map_tiletype_at(map, pos))));
                 }
 
             }
@@ -226,7 +226,7 @@ int display_paint_screen(player *p)
             if (player_pos_visible(p, pos)) attroff(A_BOLD);
 
             /* draw monsters */
-            monst = map_get_monster_at(game_map(nlarn, pos.z), pos);
+            monst = map_get_monster_at(map, pos);
 
             if (monst == NULL)
             {
@@ -248,10 +248,10 @@ int display_paint_screen(player *p)
         }
     }
 
-    for (i = 1; i <= l->slist->len; i++)
+    for (i = 1; i <= map->slist->len; i++)
     {
         /* draw spheres */
-        sphere = g_ptr_array_index(l->slist, i - 1);
+        sphere = g_ptr_array_index(map->slist, i - 1);
 
         if (game_wizardmode(nlarn) || player_pos_visible(p, sphere->pos))
         {
@@ -319,7 +319,7 @@ int display_paint_screen(player *p)
     clrtoeol();
 
     /* dungeon map */
-    mvprintw(MAP_MAX_Y + 2, MAP_MAX_X + 1, "Lvl: %s", map_name(l));
+    mvprintw(MAP_MAX_Y + 2, MAP_MAX_X + 1, "Lvl: %s", map_name(map));
 
 
     /* *** RIGHT STATUS *** */
@@ -1914,6 +1914,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
     int RUN  = TRUE;
     direction dir = GD_NONE;
     position pos, npos;
+    map *map;
 
     /* curses attributes */
     int attrs;
@@ -1934,6 +1935,9 @@ position display_get_position(player *p, char *message, int draw_line, int passa
     /* show cursor */
     curs_set(1);
 
+    /* make shortcut to map */
+    map = game_map(nlarn, p->pos.z);
+
     do
     {
         distance = max(abs(pos.x - p->pos.x),
@@ -1945,7 +1949,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
         /* draw a line between source and target if told to */
         if (draw_line && distance)
         {
-            target = map_get_monster_at(game_map(nlarn, p->pos.z), pos);
+            target = map_get_monster_at(map, pos);
 
             display_paint_screen(p);
 
@@ -1957,8 +1961,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
             attron(attrs);
 
             ray = area_new_ray(p->pos, pos,
-                               map_get_obstacles(game_map(nlarn, p->pos.z),
-                                                 p->pos, distance));
+                               map_get_obstacles(map, p->pos, distance));
 
             for (y = 0; y < ray->size_y; y++)
             {
@@ -2076,7 +2079,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 
         if (pos_valid(npos) && player_pos_visible(p, npos))
         {
-            if (passable && !map_pos_passable(game_map(nlarn, p->pos.z), npos))
+            if (passable && !map_pos_passable(map, npos))
                 /* a passable position has been requested and this one isn't */
                 continue;
 

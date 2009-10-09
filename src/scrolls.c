@@ -421,7 +421,7 @@ int scroll_teleport(player *p, item *scroll)
 
     if (nlevel != p->pos.z)
     {
-        player_level_enter(p, game_map(nlarn, nlevel), TRUE);
+        player_map_enter(p, game_map(nlarn, nlevel), TRUE);
         return TRUE;
     }
 

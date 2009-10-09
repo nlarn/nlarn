@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     game_new(argc, argv);
 
     /* put the player into the town */
-    player_level_enter(nlarn->p, game_map(nlarn, 0), FALSE);
+    player_map_enter(nlarn->p, game_map(nlarn, 0), FALSE);
 
     /* give player knowledge of the town */
     scroll_mapping(nlarn->p, NULL);
@@ -332,13 +332,13 @@ int main(int argc, char *argv[])
             /* *** DEBUGGING SUPPORT *** */
         case '+': /* dungeon map up */
             if (game_wizardmode(nlarn) && (nlarn->p->pos.z > 0))
-                moves_count = player_level_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z - 1), TRUE);
+                moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z - 1), TRUE);
 
             break;
 
         case '-': /* dungeon map down */
             if (game_wizardmode(nlarn) && (nlarn->p->pos.z < (MAP_MAX - 1)))
-                moves_count = player_level_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z + 1), TRUE);
+                moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z + 1), TRUE);
             break;
 
         case 562: /* ^up - gain experience level */
