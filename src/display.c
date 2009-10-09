@@ -266,7 +266,7 @@ int display_paint_screen(player *p)
     clrtoeol();
 
     /* player name and level */
-    printw("%s, %s", p->name, player_get_lvl_desc(p));
+    printw("%s, %s", p->name, player_get_level_desc(p));
 
     /* current HPs */
     if (p->hp <= ((int)p->hp_max / 10)) /* 10% hp left */
@@ -313,7 +313,7 @@ int display_paint_screen(player *p)
     attron(COLOR_PAIR(DC_BLUE) | A_BOLD);
 
     mvprintw(MAP_MAX_Y + 2, MAP_MAX_X - 20, "XP %d/%-5d",
-             p->experience, p->lvl);
+             p->experience, p->level);
 
     attroff(COLOR_PAIR(DC_BLUE) | A_BOLD);
     clrtoeol();

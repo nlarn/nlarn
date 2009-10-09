@@ -90,7 +90,7 @@ typedef struct player
     guint32 interest_lasttime; /* last time interest has been calculated */
 
     guint32 experience; /* experience points */
-    guint32 lvl; /* current experience level */
+    guint32 level; /* current experience level */
 
     /* other stuff */
     GPtrArray *known_spells;
@@ -195,8 +195,8 @@ int player_pickup(player *p);
 void player_autopickup(player *p);
 void player_autopickup_show(player *p);
 
-void player_lvl_gain(player *p, int count);
-void player_lvl_lose(player *p, int count);
+void player_level_gain(player *p, int count);
+void player_level_lose(player *p, int count);
 
 void player_exp_gain(player *p, int count);
 void player_exp_lose(player *p, int count);
@@ -277,7 +277,7 @@ int player_get_cha(player *p);
 guint player_get_gold(player *p);
 guint player_set_gold(player *p, guint amount);
 
-char *player_get_lvl_desc(player *p);
+char *player_get_level_desc(player *p);
 
 /* macros */
 

@@ -38,7 +38,7 @@ static const char aa7[] = "novice guardian";
 static const char aa8[] = "apprentice guardian";
 static const char aa9[] = "The Creator";
 
-static const char *player_lvl_desc[] =
+static const char *player_level_desc[] =
 {
     "novice explorer",		"apprentice explorer",	"practiced explorer",	/* -3 */
     "expert explorer",		"novice adventurer",	"adventurer",			/* -6 */
@@ -120,7 +120,7 @@ player *player_new()
     p->hp = p->hp_max = (p->constitution + rand_0n(10));
     p->mp = p->mp_max = (p->intelligence + rand_0n(10));
 
-    p->lvl = p->stats.max_level = 1;
+    p->level = p->stats.max_level = 1;
 
     p->known_spells = g_ptr_array_new();
     p->effects = g_ptr_array_new();
@@ -317,7 +317,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         if (cause_type == PD_LASTLEVEL)
         {
             /* revert effects of drain level */
-            player_lvl_gain(p, 1);
+            player_level_gain(p, 1);
         }
 
         p->hp = p->hp_max;
@@ -371,7 +371,7 @@ void player_die(player *p, player_cod cause_type, int cause)
 
         p->hp = p->hp_max;
         /* return to level 1 if last level has been lost */
-        if (p->lvl < 1) player_lvl_gain(p, 1);
+        if (p->level < 1) player_level_gain(p, 1);
 
         /* return to the game */
         return;
@@ -622,7 +622,7 @@ int player_attack(player *p, monster *m)
     int roll;           /* the dice */
     effect *e;
 
-    prop = p->lvl
+    prop = p->level
            + player_get_dex(p)
            + (p->eq_weapon ? (weapon_wc(p->eq_weapon) / 4) : 0)
            + monster_ac(m) /* FIXME: I don't want those pointless D&D rules */
@@ -1064,74 +1064,74 @@ void player_autopickup_show(player *p)
     g_string_free(msg, TRUE);
 }
 
-void player_lvl_gain(player *p, int count)
+void player_level_gain(player *p, int count)
 {
     int base;
     int i;
 
     assert(p != NULL && count > 0);
 
-    p->lvl += count;
-    log_add_entry(p->log, "You gain experience and become a %s!", player_lvl_desc[p->lvl]);
+    p->level += count;
+    log_add_entry(p->log, "You gain experience and become a %s!", player_level_desc[p->level]);
 
-    if (p->lvl > p->stats.max_level)
-        p->stats.max_level = p->lvl;
+    if (p->level > p->stats.max_level)
+        p->stats.max_level = p->level;
 
-    if (p->experience < player_lvl_exp[p->lvl])
+    if (p->experience < player_lvl_exp[p->level])
         /* artificially gained a level, need to adjust XP to match level */
-        player_exp_gain(p, player_lvl_exp[p->lvl] - p->experience);
+        player_exp_gain(p, player_lvl_exp[p->level] - p->experience);
 
     for (i = 0; i < count; i++)
     {
         /* increase HP max */
         base = (p->constitution - game_difficulty(nlarn)) >> 1;
-        if (p->lvl < max(7 - game_difficulty(nlarn), 0))
+        if (p->level < max(7 - game_difficulty(nlarn), 0))
             base += p->constitution >> 2;
 
         player_hp_max_gain(p, rand_1n(3) + rand_0n(max(base, 1)));
 
         /* increase MP max */
         base = (p->intelligence - game_difficulty(nlarn)) >> 1;
-        if (p->lvl < max(7 - game_difficulty(nlarn), 0))
+        if (p->level < max(7 - game_difficulty(nlarn), 0))
             base += p->intelligence >> 2;
 
         player_mp_max_gain(p, rand_1n(3) + rand_0n(max(base, 1)));
     }
 }
 
-void player_lvl_lose(player *p, int count)
+void player_level_lose(player *p, int count)
 {
     int base;
     int i;
 
     assert(p != NULL && count > 0);
 
-    p->lvl -= count;
-    log_add_entry(p->log, "You return to experience level %d...", p->lvl);
+    p->level -= count;
+    log_add_entry(p->log, "You return to experience level %d...", p->level);
 
-    if (p->experience > player_lvl_exp[p->lvl])
+    if (p->experience > player_lvl_exp[p->level])
         /* adjust XP to match level */
-        player_exp_lose(p, p->experience - player_lvl_exp[p->lvl]);
+        player_exp_lose(p, p->experience - player_lvl_exp[p->level]);
 
     for (i = 0; i < count; i++)
     {
         /* decrease HP max */
         base = (p->constitution - game_difficulty(nlarn)) >> 1;
-        if (p->lvl < max(7 - game_difficulty(nlarn), 0))
+        if (p->level < max(7 - game_difficulty(nlarn), 0))
             base += p->constitution >> 2;
 
         player_hp_max_lose(p, rand_1n(3) + rand_0n(max(base, 1)));
 
         /* decrease MP max */
         base = (p->intelligence - game_difficulty(nlarn)) >> 1;
-        if (p->lvl < max(7 - game_difficulty(nlarn), 0))
+        if (p->level < max(7 - game_difficulty(nlarn), 0))
             base += p->intelligence >> 2;
 
         player_mp_max_lose(p, rand_1n(3) + rand_0n(max(base, 1)));
     }
 
     /* die if lost level 1 */
-    if (p->lvl == 0)
+    if (p->level == 0)
         player_die(p, PD_LASTLEVEL, 0);
 }
 
@@ -1145,11 +1145,11 @@ void player_exp_gain(player *p, int count)
     if (p->stats.max_xp < p->experience)
         p->stats.max_xp = p->experience;
 
-    while (player_lvl_exp[p->lvl + 1 + numlevels] <= p->experience)
+    while (player_lvl_exp[p->level + 1 + numlevels] <= p->experience)
         numlevels++;
 
     if (numlevels)
-        player_lvl_gain(p, numlevels);
+        player_level_gain(p, numlevels);
 }
 
 void player_exp_lose(player *p, int count)
@@ -1159,11 +1159,11 @@ void player_exp_lose(player *p, int count)
     assert(p != NULL && count > 0);
     p->experience -= count;
 
-    while ((player_lvl_exp[p->lvl - numlevels]) > p->experience)
+    while ((player_lvl_exp[p->level - numlevels]) > p->experience)
         numlevels++;
 
     if (numlevels)
-        player_lvl_lose(p, numlevels);
+        player_level_lose(p, numlevels);
 }
 
 
@@ -1351,7 +1351,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             break;
 
         case DAM_DRAIN_LIFE:
-            player_lvl_lose(p, dam->amount);
+            player_level_lose(p, dam->amount);
             break;
 
         default:
@@ -1505,12 +1505,12 @@ void player_effect_add(player *p, effect *e)
             break;
 
         case ET_INC_LEVEL:
-            player_lvl_gain(p, e->amount);
+            player_level_gain(p, e->amount);
             break;
 
         case ET_INC_EXP:
             /* looks like a reasonable amount */
-            player_exp_gain(p, rand_1n(player_lvl_exp[p->lvl] - player_lvl_exp[p->lvl - 1]));
+            player_exp_gain(p, rand_1n(player_lvl_exp[p->level] - player_lvl_exp[p->level - 1]));
             break;
 
         case ET_INC_HP:
@@ -1566,12 +1566,12 @@ void player_effect_add(player *p, effect *e)
             break;
 
         case ET_DEC_LEVEL:
-            player_lvl_lose(p, e->amount);
+            player_level_lose(p, e->amount);
             break;
 
         case ET_DEC_EXP:
             /* looks like a reasonable amount */
-            player_exp_lose(p, rand_1n(player_lvl_exp[p->lvl] - player_lvl_exp[p->lvl - 1]));
+            player_exp_lose(p, rand_1n(player_lvl_exp[p->level] - player_lvl_exp[p->level - 1]));
             break;
 
         default:
@@ -3871,10 +3871,10 @@ guint player_set_gold(player *p, guint amount)
     return i->count;
 }
 
-char *player_get_lvl_desc(player *p)
+char *player_get_level_desc(player *p)
 {
     assert(p != NULL);
-    return (char *)player_lvl_desc[p->lvl];
+    return (char *)player_level_desc[p->level];
 }
 
 /**

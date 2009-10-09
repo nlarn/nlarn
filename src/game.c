@@ -314,7 +314,7 @@ game_score_t *game_score(game *g, player_cod cod, int cause)
     score->cause = cause;
     score->hp = g->p->hp;
     score->hp_max = g->p->hp_max;
-    score->level = g->p->lvl;
+    score->level = g->p->level;
     score->level_max = g->p->stats.max_level;
     score->dlevel = g->p->pos.z;
     score->dlevel_max = g->p->stats.deepest_level;

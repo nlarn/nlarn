@@ -559,7 +559,7 @@ int spell_learn(player *p, guint spell_type)
         s->learnt = game_turn(nlarn);
 
         /* TODO: add a check for intelligence */
-        if (spell_level(s) > (int)p->lvl)
+        if (spell_level(s) > (int)p->level)
         {
             /* spell is beyond the players scope */
             spell_destroy(s);
@@ -705,7 +705,7 @@ int spell_type_point(spell *s, struct player *p)
     {
         /* dehydration */
     case SP_DRY:
-        amount = (100 * s->knowledge) + p->lvl;
+        amount = (100 * s->knowledge) + p->level;
         monster_damage_take(monster, damage_new(DAM_MAGICAL, amount, p));
         break; /* SP_DRY */
 
@@ -814,19 +814,19 @@ int spell_type_ray(spell *s, struct player *p)
     switch (s->id)
     {
     case SP_MLE:
-        amount = rand_1n(((p->lvl + 1) << s->knowledge)) + p->lvl + 3;
+        amount = rand_1n(((p->level + 1) << s->knowledge)) + p->level + 3;
         break;
 
     case SP_SSP:
-        amount = rand_1n(10) + (15 * s->knowledge) + p->lvl;
+        amount = rand_1n(10) + (15 * s->knowledge) + p->level;
         break;
 
     case SP_CLD:
-        amount = rand_1n(25) + (20 * s->knowledge) + p->lvl;
+        amount = rand_1n(25) + (20 * s->knowledge) + p->level;
         break;
 
     case SP_LIT:
-        amount = rand_1n(25) + (20 * s->knowledge) + (p->lvl << 1);
+        amount = rand_1n(25) + (20 * s->knowledge) + (p->level << 1);
         break;
     }
 
@@ -872,19 +872,19 @@ int spell_type_flood(spell *s, struct player *p)
     case SP_CKL:
         radius = 3;
         type = LT_CLOUD;
-        amount = (10 * s->knowledge) + p->lvl;
+        amount = (10 * s->knowledge) + p->level;
         break;
 
     case SP_FLO:
         radius = 4;
         type = LT_WATER;
-        amount = (25 * s->knowledge) + p->lvl;
+        amount = (25 * s->knowledge) + p->level;
         break;
 
     case SP_MFI:
         radius = 4;
         type = LT_FIRE;
-        amount = (15 * s->knowledge) + p->lvl;
+        amount = (15 * s->knowledge) + p->level;
         break;
     }
 
@@ -920,7 +920,7 @@ int spell_type_blast(spell *s, struct player *p)
     }
 
     /* currently only fireball */
-    amount = (25 * s->knowledge) + p->lvl + rand_0n(25 + p->lvl);
+    amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
 
     mlist = map_get_monsters_in(game_map(nlarn, p->pos.z), rect_new_sized(pos, 1));
 
@@ -1008,7 +1008,7 @@ gboolean spell_create_sphere(spell *s, struct player *p)
 
     if (pos_valid(pos))
     {
-        sphere = sphere_new(pos, p, p->lvl * 10 * s->knowledge);
+        sphere = sphere_new(pos, p, p->level * 10 * s->knowledge);
         g_ptr_array_add(game_map(nlarn, p->pos.z)->slist, sphere);
 
         return TRUE;

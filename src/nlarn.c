@@ -343,13 +343,13 @@ int main(int argc, char *argv[])
 
         case 562: /* ^up - gain experience level */
             if (game_wizardmode(nlarn))
-                player_lvl_gain(nlarn->p, 1);
+                player_level_gain(nlarn->p, 1);
 
             break;
 
         case 521: /* ^down - lose experience level */
             if (game_wizardmode(nlarn))
-                player_lvl_lose(nlarn->p, 1);
+                player_level_lose(nlarn->p, 1);
 
             break;
         }
