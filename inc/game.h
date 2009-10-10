@@ -58,6 +58,14 @@ typedef struct game
     int scroll_desc_mapping[ST_MAX - 1];
     int book_desc_mapping[SP_MAX - 1];
 
+    /* these are the item ids assigned to new objects of the latter types */
+
+    guint inventory_max_id;
+    guint item_max_id;
+    guint effect_max_id;
+    guint monster_max_id;
+    guint sphere_max_id;
+
     /* every object of the types inventory, item and effect will be registered
        in these hashed when created and unregistered when destroyed. */
 
@@ -121,20 +129,25 @@ map *game_map(game *g, guint nmap);
 void game_spin_the_wheel(game *g, guint times);
 
 /* functions to store game data */
-void game_inventory_register(game *g, inventory *inv);
-void game_inventory_unregister(game *g, inventory *inv);
+gpointer game_inventory_register(game *g, inventory *inv);
+void game_inventory_unregister(game *g, gpointer inv);
+inventory *game_inventory_get(game *g, gpointer id);
 
-void game_item_register(game *g, item *it);
-void game_item_unregister(game *g, item *it);
+gpointer game_item_register(game *g, item *it);
+void game_item_unregister(game *g, gpointer it);
+inventory *game_inventory_get(game *g, gpointer id);
 
-void game_effect_register(game *g, effect *e);
-void game_effect_unregister(game *g, effect *e);
+gpointer game_effect_register(game *g, effect *e);
+void game_effect_unregister(game *g, gpointer e);
+effect *game_effect_get(game *g, gpointer id);
 
-void game_monster_register(game *g, monster *m);
-void game_monster_unregister(game *g, monster *m);
+gpointer game_monster_register(game *g, monster *m);
+void game_monster_unregister(game *g, gpointer m);
+monster *game_monster_get(game *g, gpointer id);
 
-void game_sphere_register(game *g, sphere *s);
-void game_sphere_unregister(game *g, sphere *s);
+gpointer game_sphere_register(game *g, sphere *s);
+void game_sphere_unregister(game *g, gpointer s);
+gpointer game_sphere_register(game *g, sphere *s);
 
 /* macros */
 

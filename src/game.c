@@ -420,74 +420,119 @@ void game_spin_the_wheel(game *g, guint times)
     }
 }
 
-void game_inventory_register(game *g, inventory *inv)
+gpointer game_inventory_register(game *g, inventory *inv)
 {
     assert (g != NULL && inv != NULL);
 
-    g_hash_table_insert(g->inventories, inv, inv);
+    gpointer nkey = GUINT_TO_POINTER(++g->inventory_max_id);
+    g_hash_table_insert(g->inventories, nkey, inv);
+
+    return nkey;
 }
 
-void game_inventory_unregister(game *g, inventory *inv)
+void game_inventory_unregister(game *g, gpointer inv)
 {
     assert (g != NULL && inv != NULL);
 
     g_hash_table_remove(g->inventories, inv);
 }
 
-void game_item_register(game *g, item *it)
+inventory *game_inventory_get(game *g, gpointer id)
+{
+    assert(g != NULL && id != NULL);
+    return (inventory *)g_hash_table_lookup(g->inventories, id);
+}
+
+gpointer game_item_register(game *g, item *it)
 {
     assert (g != NULL && it != NULL);
 
-    g_hash_table_insert(g->items, it, it);
+    gpointer nkey = GUINT_TO_POINTER(++g->item_max_id);
+    g_hash_table_insert(g->items, nkey, it);
+
+    return nkey;
 }
 
-void game_item_unregister(game *g, item *it)
+void game_item_unregister(game *g, gpointer it)
 {
     assert (g != NULL && it != NULL);
 
     g_hash_table_remove(g->items, it);
 }
 
-void game_effect_register(game *g, effect *e)
+item *game_item_get(game *g, gpointer id)
+{
+    assert(g != NULL && id != NULL);
+    return (item *)g_hash_table_lookup(g->items, id);
+}
+
+gpointer game_effect_register(game *g, effect *e)
 {
     assert (g != NULL && e != NULL);
 
-    g_hash_table_insert(g->effects, e, e);
+    gpointer nkey = GUINT_TO_POINTER(++g->effect_max_id);
+    g_hash_table_insert(g->effects, nkey, e);
+
+    return nkey;
 }
 
-void game_effect_unregister(game *g, effect *e)
+void game_effect_unregister(game *g, gpointer e)
 {
     assert (g != NULL && e != NULL);
 
     g_hash_table_remove(g->effects, e);
 }
 
-void game_monster_register(game *g, monster *m)
+effect *game_effect_get(game *g, gpointer id)
+{
+    assert(g != NULL && id != NULL);
+    return (effect *)g_hash_table_lookup(g->effects, id);
+}
+
+gpointer game_monster_register(game *g, monster *m)
 {
     assert (g != NULL && m != NULL);
 
-    g_hash_table_insert(g->monsters, m, m);
+    gpointer nkey = GUINT_TO_POINTER(++g->monster_max_id);
+    g_hash_table_insert(g->monsters, nkey, m);
+
+    return nkey;
 }
 
-void game_monster_unregister(game *g, monster *m)
+void game_monster_unregister(game *g, gpointer m)
 {
     assert (g != NULL && m != NULL);
 
     g_hash_table_remove(g->monsters, m);
 }
 
-void game_sphere_register(game *g, sphere *s)
+monster *game_monster_get(game *g, gpointer id)
+{
+    assert(g != NULL && id != NULL);
+    return (monster *)g_hash_table_lookup(g->monsters, id);
+}
+
+gpointer game_sphere_register(game *g, sphere *s)
 {
     assert (g != NULL && s != NULL);
 
-    g_hash_table_insert(g->spheres, s, s);
+    gpointer nkey = GUINT_TO_POINTER(++g->sphere_max_id);
+    g_hash_table_insert(g->spheres, nkey, s);
+
+    return nkey;
 }
 
-void game_sphere_unregister(game *g, sphere *s)
+void game_sphere_unregister(game *g, gpointer s)
 {
     assert (g != NULL && s != NULL);
 
     g_hash_table_remove(g->spheres, s);
+}
+
+sphere *game_sphere_get(game *g, gpointer id)
+{
+    assert(g != NULL && id != NULL);
+    return (sphere *)g_hash_table_lookup(g->spheres, id);
 }
 
 /**
