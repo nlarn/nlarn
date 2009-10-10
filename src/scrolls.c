@@ -127,11 +127,7 @@ int scroll_annihilate(struct player *p, item *scroll)
             m = monster_damage_take(m, damage_new(DAM_MAGICAL, 2000, p));
 
             /* check if the monster has been killed */
-            if (!m)
-            {
-                count++;
-                idx--;
-            }
+            if (!m) count++;
         }
         else
         {
