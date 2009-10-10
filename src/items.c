@@ -202,7 +202,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
     }
 
     /* register item with game */
-    game_item_register(nlarn, nitem);
+    nitem->oid = game_item_register(nlarn, nitem);
 
     return nitem;
 }
@@ -368,6 +368,9 @@ item *item_copy(item *original)
     /* reset inventory */
     nitem->content = NULL;
 
+    /* regíster copy with game */
+    nitem->oid = game_item_register(nlarn, nitem);
+
     return nitem;
 }
 
@@ -406,7 +409,7 @@ void item_destroy(item *it)
     }
 
     /* unregister item */
-    game_item_unregister(nlarn, it);
+    game_item_unregister(nlarn, it->oid);
 
     g_free(it);
 }
@@ -1016,7 +1019,7 @@ inventory *inv_new(gconstpointer owner)
     ninv->owner = owner;
 
     /* register inventory with game */
-    game_inventory_register(nlarn, ninv);
+    ninv->oid = game_inventory_register(nlarn, ninv);
 
     return ninv;
 }
@@ -1033,7 +1036,7 @@ void inv_destroy(inventory *inv)
     g_ptr_array_free(inv->content, TRUE);
 
     /* unregister inventory */
-    game_inventory_unregister(nlarn, inv);
+    game_inventory_unregister(nlarn, inv->oid);
 
     g_free(inv);
 }

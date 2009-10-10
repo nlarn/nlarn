@@ -131,6 +131,7 @@ struct item;
 
 typedef struct effect
 {
+    gpointer oid;           /* effect's game object id */
     effect_type type;       /* type of effect */
     guint32 start;          /* game time the effect began */
     guint32 turns;          /* number of turns this effect remains */

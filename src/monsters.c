@@ -948,7 +948,7 @@ void monster_hp_inc(monster *m, int amount)
         m->hp = monsters[m->type].hp_max;
 }
 
-gpointer monster_id(monster *m)
+gpointer monster_oid(monster *m)
 {
     assert (m != NULL);
     return m->id;

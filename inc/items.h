@@ -91,6 +91,7 @@ typedef void (*inv_callback_void) (struct _inventory *inv, struct _item  *item);
 
 typedef struct _inventory
 {
+    gpointer oid;
     inv_callback_bool pre_add;
     inv_callback_void post_add;
     inv_callback_bool pre_del;
@@ -100,6 +101,7 @@ typedef struct _inventory
 } inventory;
 
 typedef struct _item {
+    gpointer oid;           /* item's game object id */
     item_t type;            /* element type */
     guint32 id;             /* item id, type specific */
     gint32 bonus;

@@ -45,7 +45,7 @@ sphere *sphere_new(position pos, player *owner, int lifetime)
     s->lifetime = lifetime;
 
     /* register sphere */
-    game_sphere_register(nlarn, s);
+    s->oid = game_sphere_register(nlarn, s);
 
     return s;
 }
@@ -55,7 +55,7 @@ void sphere_destroy(sphere *s)
     assert(s != NULL);
 
     /* unregister sphere */
-    game_sphere_unregister(nlarn, s);
+    game_sphere_unregister(nlarn, s->oid);
 
     g_free(s);
 }

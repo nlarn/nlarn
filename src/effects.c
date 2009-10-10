@@ -483,7 +483,7 @@ effect *effect_new(effect_type type, time_t now)
     ne->amount = effects[type].value;
 
     /* register effect */
-    game_effect_register(nlarn, ne);
+    ne->oid = game_effect_register(nlarn, ne);
 
     return ne;
 }
@@ -497,6 +497,9 @@ effect *effect_copy(effect *e)
     ne = g_malloc(sizeof(effect));
     memcpy(ne, e, sizeof(effect));
 
+    /* register copy with game */
+    ne->oid = game_effect_register(nlarn, ne);
+
     return ne;
 }
 
@@ -505,7 +508,7 @@ void effect_destroy(effect *e)
     assert(e != NULL);
 
     /* unregister effect */
-    game_effect_unregister(nlarn, e);
+    game_effect_unregister(nlarn, e->oid);
 
     g_free(e);
 }

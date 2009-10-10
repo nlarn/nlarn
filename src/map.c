@@ -765,7 +765,7 @@ int map_set_monster_at(map *map, position pos, monster *monst)
 {
     assert(map != NULL && map->nlevel == pos.z && pos_valid(pos));
 
-    map->grid[pos.y][pos.x].monster = (monst != NULL) ? monster_id(monst) : NULL;
+    map->grid[pos.y][pos.x].monster = (monst != NULL) ? monster_oid(monst) : NULL;
 
     return TRUE;
 }
@@ -787,9 +787,11 @@ GPtrArray *map_get_monsters_in(map *m, rectangle area)
 
     monsters = g_ptr_array_new();
 
+    pos.z = m->nlevel;
+
     for (pos.y = area.y1; pos.y <= area.y2; pos.y++)
     {
-        for (pos.y = area.x1; pos.y <= area.x2; pos.y++)
+        for (pos.x = area.x1; pos.x <= area.x2; pos.x++)
         {
             if ((monst = map_get_monster_at(m, pos)))
             {

@@ -23,6 +23,7 @@
 #include "player.h"
 
 typedef struct sphere {
+    gpointer oid;       /* sphere's game object id */
     position pos;       /* location of the sphere */
     direction dir;      /* direction sphere is going in */
     guint32 lifetime;   /* duration of the sphere */

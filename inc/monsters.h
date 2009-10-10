@@ -169,7 +169,7 @@ void monster_destroy(monster *m);
 int monster_hp(monster *m);
 void monster_hp_inc(monster *m, int amount);
 
-gpointer monster_id(monster *m);
+gpointer monster_oid(monster *m);
 item_t monster_item_type(monster *m);
 
 position monster_pos(monster *m);
