@@ -746,7 +746,7 @@ int spell_type_point(spell *s, struct player *p)
         log_add_entry(p->log, "The %s disappears.",
                       monster_name(monster));
 
-        monster_set_pos(monster, game_map(nlarn, p->pos.z), map_find_space(game_map(nlarn, p->pos.z), LE_MONSTER));
+        monster_pos_set(monster, game_map(nlarn, p->pos.z), map_find_space(game_map(nlarn, p->pos.z), LE_MONSTER));
 
         break; /* SP_TEL */
 
@@ -966,9 +966,7 @@ gboolean spell_alter_reality(player *p)
 
 gboolean spell_create_monster(struct player *p)
 {
-    monster *m;
-
-    position pos;
+    position mpos;
 
     /* this spell doesn't work in town */
     if (p->pos.z == 0)
@@ -978,15 +976,12 @@ gboolean spell_create_monster(struct player *p)
     }
 
     /* try to find a space for the monster near the player */
-    pos = map_find_space_in(game_map(nlarn, p->pos.z),
-                              rect_new_sized(p->pos, 2),
-                              LE_MONSTER);
+    mpos = map_find_space_in(game_map(nlarn, p->pos.z),
+                             rect_new_sized(p->pos, 2), LE_MONSTER);
 
-    if (pos_valid(pos))
+    if (pos_valid(mpos))
     {
-        m = monster_new_by_level(p->pos.z);
-        monster_set_pos(m, game_map(nlarn, p->pos.z), pos);
-
+        monster_new_by_level(mpos);
         return TRUE;
     }
     else
@@ -1139,12 +1134,14 @@ gboolean spell_make_wall(player *p)
 
 gboolean spell_vaporize_rock(player *p)
 {
+    monster *m;
     position pos;
-    monster *m = NULL;
+    position mpos;      /* position for monster that might be generated */
     char *desc = NULL;
-    map_tile *tile;
+    map *map;             /* current map */
 
     pos = display_get_position(p, "What do you want to vaporize?", FALSE, FALSE);
+    map = game_map(nlarn, p->pos.z);
 
     if (!pos_valid(pos))
     {
@@ -1152,36 +1149,42 @@ gboolean spell_vaporize_rock(player *p)
         return FALSE;
     }
 
-    tile = map_tile_at(game_map(nlarn, p->pos.z), pos);
-
-    if (tile->type == LT_WALL)
+    if (map_tiletype_at(map, pos) == LT_WALL)
     {
-        tile->type = LT_FLOOR;
+        map_stationary_set(map, pos, LT_FLOOR);
     }
 
-    if ((m = map_get_monster_at(game_map(nlarn, p->pos.z), pos)) && (monster_type(m) == MT_XORN))
+    if ((m = map_get_monster_at(map, pos)) && (monster_type(m) == MT_XORN))
     {
         /* xorns take damage from vpr */
         monster_damage_take(m, damage_new(DAM_PHYSICAL, divert(200, 10), p));
     }
 
-    switch (tile->stationary)
+    mpos = map_find_space_in(map, rect_new_sized(p->pos, 1), LE_MONSTER);
+
+    switch (map_stationary_at(map, pos))
     {
     case LS_ALTAR:
-        m = monster_new(MT_DAEMON_PRINCE);
+        if (pos_valid(mpos))
+        {
+            monster_new(MT_DAEMON_PRINCE, mpos);
+        }
         desc = "altar";
         break;
 
     case LS_FOUNTAIN:
-        m = monster_new(MT_WATER_LORD);
+        if (pos_valid(mpos))
+        {
+            monster_new(MT_WATER_LORD, mpos);
+        }
         desc = "fountain";
         break;
 
     case LS_STATUE:
         if (game_difficulty(nlarn) < 3)
         {
-            inv_add(&tile->ilist,
-                    item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)), 0));
+            item *it = item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)), 0);
+            inv_add(map_ilist_at(map, pos), it);
         }
 
         desc = "statue";
@@ -1189,13 +1192,16 @@ gboolean spell_vaporize_rock(player *p)
 
     case LS_THRONE:
     case LS_THRONE2:
-        m = monster_new(MT_GNOME_KING);
+        if (pos_valid(mpos))
+        {
+            monster_new(MT_GNOME_KING, mpos);
+        }
         desc = "throne";
         break;
 
     case LS_DEADFOUNTAIN:
     case LS_DEADTHRONE:
-        tile->stationary = LS_NONE;
+        map_stationary_set(map, pos, LS_NONE);
         break;
 
     default:
@@ -1206,14 +1212,7 @@ gboolean spell_vaporize_rock(player *p)
     if (desc)
     {
         log_add_entry(p->log, "You destroy the %s.", desc);
-        tile->stationary = LS_NONE;
-    }
-
-    /* created a monster - position it correctly */
-    if (m)
-    {
-        monster_level_enter(m, game_map(nlarn, p->pos.z));
-        monster_set_pos(m, game_map(nlarn, p->pos.z), pos);
+        map_stationary_set(map, pos, LS_NONE);
     }
 
     return TRUE;

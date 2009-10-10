@@ -257,7 +257,7 @@ int scroll_heal_monster(player *p, item *scroll)
         {
             if (monster_hp(m) < monster_hp_max(m))
             {
-                monster_inc_hp(m, monster_hp_max(m));
+                monster_hp_inc(m, monster_hp_max(m));
                 count++;
             }
         }

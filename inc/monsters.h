@@ -160,24 +160,25 @@ extern const monster_data monsters[MT_MAX];
 
 /* function definitions */
 
-monster *monster_new(int type);
-monster *monster_new_by_level(int nlevel);
+monster *monster_new(int type, position pos);
+monster *monster_new_by_level(position pos);
 void monster_destroy(monster *m);
 
 /* getter / setter */
 
 int monster_hp(monster *m);
-void monster_inc_hp(monster *m, int amount);
+void monster_hp_inc(monster *m, int amount);
 
+gpointer monster_id(monster *m);
 item_t monster_item_type(monster *m);
 
 position monster_pos(monster *m);
-int monster_set_pos(monster *m, struct map *map, position target);
+int monster_pos_set(monster *m, struct map *map, position target);
 
 monster_t monster_type(monster *m);
 
 gboolean monster_unknown(monster *m);
-void monster_set_unknown(monster *m, gboolean what);
+void monster_unknown_set(monster *m, gboolean what);
 
 gboolean monster_in_sight(monster *m);
 

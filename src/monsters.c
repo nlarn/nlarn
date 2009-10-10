@@ -30,6 +30,7 @@
 struct _monster
 {
     monster_t type;
+    gpointer id; /* monsters id inside the monster hash */
     gint32 hp;
     position pos;
     monster_action_t action;    /* current action */
@@ -736,12 +737,18 @@ static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
 
-monster *monster_new(int type)
+monster *monster_new(int type, position pos)
 {
     monster *nmonster;
     int it, icount;     /* item type, item id, item count */
 
-    assert(type > MT_NONE && type < MT_MAX);
+    assert(type > MT_NONE && type < MT_MAX && pos_valid(pos));
+
+    /* check if supplied position is suitable for a monster */
+    if (!map_pos_validate(game_map(nlarn, pos.z), pos, LE_MONSTER))
+    {
+        return NULL;
+    }
 
     /* make room for monster */
     nmonster = g_malloc0(sizeof(monster));
@@ -861,22 +868,23 @@ monster *monster_new(int type)
     nmonster->player_pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
     /* register monster with game */
-    game_monster_register(nlarn, nmonster);
+    nmonster->id = game_monster_register(nlarn, nmonster);
 
     /* set position to something invalid */
-    nmonster->pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+    nmonster->pos = pos;
 
     return nmonster;
 }
 
-monster *monster_new_by_level(int nlevel)
+monster *monster_new_by_level(position pos)
 {
     const int monster_level[] = { 5, 11, 17, 22, 27, 33, 39, 42, 46, 50, 53, 56, MT_MAX - 1 };
     int monster_id = 0;
     int monster_id_min;
     int monster_id_max;
+    int nlevel = pos.z;
 
-    assert(nlevel > 0 && nlevel < MAP_MAX);
+    assert(pos_valid(pos));
 
     if (nlevel < 5)
     {
@@ -896,7 +904,7 @@ monster *monster_new_by_level(int nlevel)
         monster_id = rand_m_n(monster_id_min, monster_id_max);
     }
 
-    return monster_new(monster_id);
+    return monster_new(monster_id, pos);
 }
 
 void monster_destroy(monster *m)
@@ -913,17 +921,14 @@ void monster_destroy(monster *m)
     g_ptr_array_free(m->effects, TRUE);
 
     /* remove monster from map (if it is on the map) */
-    if (pos_valid(m->pos))
-    {
-        map_set_monster_at(game_map(nlarn, m->pos.z), m->pos, NULL);
-    }
+    map_set_monster_at(game_map(nlarn, m->pos.z), m->pos, NULL);
 
     /* free inventory */
     if (m->inventory)
         inv_destroy(m->inventory);
 
     /* unregister monster */
-    game_monster_unregister(nlarn, m);
+    game_monster_unregister(nlarn, m->id);
 
     g_free(m);
 }
@@ -934,13 +939,19 @@ int monster_hp(monster *m)
     return m->hp;
 }
 
-void monster_inc_hp(monster *m, int amount)
+void monster_hp_inc(monster *m, int amount)
 {
     assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
 
     m->hp += amount;
     if (m->hp > monsters[m->type].hp_max)
         m->hp = monsters[m->type].hp_max;
+}
+
+gpointer monster_id(monster *m)
+{
+    assert (m != NULL);
+    return m->id;
 }
 
 item_t monster_item_type(monster *m)
@@ -955,18 +966,15 @@ position monster_pos(monster *m)
     return m->pos;
 }
 
-int monster_set_pos(monster *m, map *map, position target)
+int monster_pos_set(monster *m, map *map, position target)
 {
     assert(m != NULL && (!pos_valid(m->pos) || (m->pos.z == map->nlevel)));
     assert(m->type > MT_NONE && m->type < MT_MAX && map != NULL);
 
-    if (map_validate_position(map, target, LE_MONSTER))
+    if (map_pos_validate(map, target, LE_MONSTER))
     {
-        /* remove current reference to monster from tile (if located on one) */
-        if (pos_valid(m->pos))
-        {
-            map_set_monster_at(map, m->pos, NULL);
-        }
+        /* remove current reference to monster from tile */
+        map_set_monster_at(map, m->pos, NULL);
 
         /* set new position */
         m->pos = target;
@@ -991,7 +999,7 @@ gboolean monster_unknown(monster *m)
     return m->unknown;
 }
 
-void monster_set_unknown(monster *m, gboolean what)
+void monster_unknown_set(monster *m, gboolean what)
 {
     assert (m != NULL);
     m->unknown = what;
@@ -1007,15 +1015,12 @@ void monster_level_enter(monster *m, struct map *l)
 {
     assert (m != NULL && l != NULL);
 
-    /* remove monster from old map if it has been somewhere before */
-    if (pos_valid(m->pos))
-    {
-        map *oldmap = game_map(nlarn, m->pos.z);
-        map_set_monster_at(oldmap, m->pos, NULL);
-    }
+    /* remove monster from old map  */
+    map *oldmap = game_map(nlarn, m->pos.z);
+    map_set_monster_at(oldmap, m->pos, NULL);
 
     /* put monster into map */
-    if (!monster_set_pos(m, l, map_find_space(l, LE_MONSTER)))
+    if (!monster_pos_set(m, l, map_find_space(l, LE_MONSTER)))
     {
         /* no free space could be found for the monstert -> abort */
         monster_destroy(m);
@@ -1264,9 +1269,9 @@ void monster_move(monster *m, struct player *p)
         }
 
         /* move towards player; check for monsters */
-        else if (map_validate_position(monster_map(m), m_npos, LE_MONSTER))
+        else if (map_pos_validate(monster_map(m), m_npos, LE_MONSTER))
         {
-            monster_set_pos(m, monster_map(m), m_npos);
+            monster_pos_set(m, monster_map(m), m_npos);
 
             /* check for traps */
             if (map_trap_at(monster_map(m), monster_pos(m)))
@@ -1286,8 +1291,8 @@ void monster_move(monster *m, struct player *p)
 
 monster *monster_trap_trigger(monster *m)
 {
-    /* original position of the monster */
-    position pos_orig;
+    /* original and new position of the monster */
+    position opos, npos;
 
     /* the trap */
     trap_t trap;
@@ -1299,19 +1304,19 @@ monster *monster_trap_trigger(monster *m)
 
     trap = map_trap_at(monster_map(m), m->pos);
 
-    /* return if the monster has not triggered the trap */
-    if (!chance(trap_chance(trap)))
-    {
-        return m;
-    }
-
     /* flying monsters are only affected by sleeping gas traps */
     if (monster_can_fly(m) && (trap != TT_SLEEPGAS))
     {
         return m;
     }
 
-    pos_orig = m->pos;
+    /* return if the monster has not triggered the trap */
+    if (!chance(trap_chance(trap)))
+    {
+        return m;
+    }
+
+    opos = monster_pos(m);
 
     /* monster triggered the trap */
     switch (trap)
@@ -1321,8 +1326,8 @@ monster *monster_trap_trigger(monster *m)
         break;
 
     case TT_TELEPORT:
-        monster_set_pos(m, game_map(nlarn, m->pos.z),
-                        map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER));
+        npos = map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER);
+        monster_pos_set(m, monster_map(m), npos);
         break;
 
     default:
@@ -1347,7 +1352,7 @@ monster *monster_trap_trigger(monster *m)
         }
 
         /* set player's knowlege of trap */
-        player_memory_of(nlarn->p, pos_orig).trap = trap;
+        player_memory_of(nlarn->p, opos).trap = trap;
     }
 
     /* inflict damage caused ba the trap */
@@ -1548,7 +1553,7 @@ void monster_player_attack(monster *m, player *p)
                                ? IT_GOLD : IT_ALL))
         {
             /* teleport away */
-            monster_set_pos(m, game_map(nlarn, m->pos.z),
+            monster_pos_set(m, game_map(nlarn, m->pos.z),
                             map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER));
         }
         else
@@ -1974,7 +1979,7 @@ static void monster_die(monster *m)
     /* drop stuff the monster carries */
     if (inv_length(m->inventory))
     {
-        monster_items_drop(m, map_ilist_at(monster_map(m), m->pos));
+        monster_items_drop(m, map_ilist_at(monster_map(m), monster_pos(m)));
     }
 
     monster_destroy(m);

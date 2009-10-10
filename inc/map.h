@@ -100,7 +100,7 @@ typedef struct map_tile
         stationary: 8, /* something special located on this tile */
         trap:       8; /* trap located on this tile */
     guint8 timer;      /* countdown to when the type will become LT_FLOOR again */
-    monster *monster;  /* monster located on this tile */
+    gpointer monster;  /* id of monster located on this tile */
     inventory *ilist;  /* items located on this tile */
 } map_tile;
 
@@ -162,7 +162,7 @@ position map_find_space(map *l, map_element_t element);
 position map_find_space_in(map *l, rectangle where, map_element_t element);
 position map_find_stationary(map *l, map_stationary_t stationary);
 position map_find_stationary_in(map *l, map_stationary_t stationary, rectangle area);
-gboolean map_validate_position(map *l, position pos, map_element_t element);
+gboolean map_pos_validate(map *l, position pos, map_element_t element);
 
 int *map_get_surrounding(map *l, position pos, map_stationary_t type);
 

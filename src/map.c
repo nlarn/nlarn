@@ -114,7 +114,7 @@ map *map_new(int nlevel, char *mazefile)
     gboolean map_loaded = FALSE;
     int x, y;
 
-    map *l = g_malloc0(sizeof(map));
+    map *l = nlarn->maps[nlevel] = g_malloc0(sizeof(map));
     l->nlevel = nlevel;
 
     /* initialize monster and sphere list */
@@ -288,7 +288,7 @@ position map_find_space_in(map *l, rectangle where, map_element_t element)
         if (pos.y < where.y1)
             pos.y = where.y2;
     }
-    while (!map_validate_position(l, pos, element)
+    while (!map_pos_validate(l, pos, element)
             && !pos_identical(pos, pos_orig));
 
     if (pos_identical(pos, pos_orig))
@@ -357,7 +357,7 @@ position map_find_stationary(map *l, map_stationary_t stationary)
     return pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 }
 
-gboolean map_validate_position(map *l, position pos, map_element_t element)
+gboolean map_pos_validate(map *l, position pos, map_element_t element)
 {
     map_tile *tile;
 
@@ -756,16 +756,16 @@ damage *map_tile_damage(map *l, position pos)
 monster *map_get_monster_at(map *m, position pos)
 {
     assert(m != NULL && m->nlevel == pos.z && pos_valid(pos));
-    monster *mo = m->grid[pos.y][pos.x].monster;
-    assert (mo == NULL || monster_type(mo) > MT_NONE || monster_type(mo) < MT_MAX);
 
-    return m->grid[pos.y][pos.x].monster;
+    gpointer mid = m->grid[pos.y][pos.x].monster;
+    return (mid != NULL) ? game_monster_get(nlarn, mid) : NULL;
 }
 
 int map_set_monster_at(map *map, position pos, monster *monst)
 {
     assert(map != NULL && map->nlevel == pos.z && pos_valid(pos));
-    map->grid[pos.y][pos.x].monster = monst;
+
+    map->grid[pos.y][pos.x].monster = (monst != NULL) ? monster_id(monst) : NULL;
 
     return TRUE;
 }
@@ -822,8 +822,8 @@ int map_fill_with_life(map *l)
 
     for (i = 0; i <= new_monster_count; i++)
     {
-        monster *nmonster = monster_new_by_level(l->nlevel);
-        monster_level_enter(nmonster, l);
+        position pos = map_find_space(l, LE_MONSTER);
+        monster_new_by_level(pos);
     }
 
     return(new_monster_count);
@@ -1145,10 +1145,7 @@ static void map_make_maze(map *l)
 
                     if (want_monster == TRUE)
                     {
-                        m = monster_new_by_level(l->nlevel);
-                        monster_level_enter(m, l);
-                        monster_set_pos(m, l, pos);
-
+                        m = monster_new_by_level(pos);
                         want_monster = FALSE;
                     }
                 }
@@ -1365,8 +1362,7 @@ static int map_load_from_file(map *l, char *mazefile, int which)
                 }
                 itm = item_new(IT_AMULET, AM_LARN, 0);
 
-                monst = monster_new(MT_DEMONLORD_I + rand_0n(7));
-                monster_level_enter(monst, l);
+                monst = monster_new(MT_DEMONLORD_I + rand_0n(7), pos);
                 break;
 
             case '!':	/* potion of cure dianthroritis */
@@ -1374,12 +1370,11 @@ static int map_load_from_file(map *l, char *mazefile, int which)
                     break;
 
                 itm = item_new(IT_POTION, PO_CURE_DIANTHR, 0);
-                monst = monster_new(MT_DAEMON_PRINCE);
-                monster_level_enter(monst, l);
+                monst = monster_new(MT_DAEMON_PRINCE, pos);
                 break;
 
             case 'M':	/* random monster */
-                monster_level_enter(monster_new_by_level(l->nlevel), l);
+                monster_new_by_level(pos);
                 break;
 
             case '-':
@@ -1451,9 +1446,7 @@ static void map_add_treasure_room(map *l)
                 inv_add(&tile->ilist, itm);
 
                 /* create a monster */
-                monst = monster_new_by_level(l->nlevel);
-                monster_level_enter(monst, l);
-                monster_set_pos(monst, l, pos);
+                monst = monster_new_by_level(pos);
             }
 
             /* now clear out interior */

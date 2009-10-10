@@ -589,7 +589,7 @@ int player_move(player *p, direction dir)
     {
         /* reveal the mimic */
         log_add_entry(p->log, "Wait! That is a %s!", monster_name(target_m));
-        monster_set_unknown(target_m, FALSE);
+        monster_unknown_set(target_m, FALSE);
         return times;
     }
 
@@ -831,7 +831,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     /* remove monster that might be at player's positon */
     if ((m = map_get_monster_at(l, p->pos)))
     {
-        monster_set_pos(m, game_map(nlarn, p->pos.z), map_find_space(l, LE_MONSTER));
+        monster_pos_set(m, game_map(nlarn, p->pos.z), map_find_space(l, LE_MONSTER));
     }
 
     if (l->nlevel == 0)
@@ -2950,7 +2950,6 @@ int player_item_pickup(player *p, inventory **inv, item *it)
 int player_altar_desecrate(player *p)
 {
     effect *e = NULL;
-    monster *m = NULL;
     map *current;
 
     assert (p != NULL);
@@ -2965,14 +2964,15 @@ int player_altar_desecrate(player *p)
 
     if (chance(60))
     {
-        /* create a monster - should be very dangerous */
-        m = monster_new(MT_RED_DRAGON);
-        monster_level_enter(m, current);
-
         /* try to find a space for the monster near the altar */
-        monster_set_pos(m, current,
-                        map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER));
+        position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
+                                          LE_MONSTER);
+
+        if (pos_valid(mpos))
+        {
+            /* create a monster - should be very dangerous */
+            monster_new(MT_RED_DRAGON, mpos);
+        }
 
         e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(nlarn));
         e->turns = 2500;
@@ -2997,7 +2997,6 @@ int player_altar_pray(player *p)
     int donation = 0;
     int player_gold, tithe;
     effect *e = NULL;
-    monster *m = NULL;
     item *armour = NULL;
     map *current;
 
@@ -3038,10 +3037,13 @@ int player_altar_pray(player *p)
         }
         else
         {
-            m = monster_new_by_level(p->pos.z);
-            monster_set_pos(m, current,
-                            map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                              LE_MONSTER));
+            position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
+                                              LE_MONSTER);
+
+            if (pos_valid(mpos))
+            {
+                monster_new_by_level(mpos);
+            }
         }
     }
     else if (player_gold >= donation)
@@ -3053,10 +3055,13 @@ int player_altar_pray(player *p)
         if (donation < tithe || donation < rand_0n(50))
         {
             /* create a monster, it should be very dangerous */
-            m = monster_new_by_level(p->pos.z);
-            monster_set_pos(m, current,
-                            map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                              LE_MONSTER));
+            position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
+                                              LE_MONSTER);
+
+            if (pos_valid(mpos))
+            {
+                monster_new_by_level(mpos);
+            }
 
             e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(nlarn));
             e->turns = 200;
@@ -3476,7 +3481,6 @@ int player_fountain_drink(player *p)
 
 int player_fountain_wash(player *p)
 {
-    monster *m;
     map *map = game_map(nlarn, p->pos.z);
 
     assert (p != NULL);
@@ -3518,13 +3522,15 @@ int player_fountain_wash(player *p)
     }
     else if (chance(35))
     {
-        /* make water lord */
-        m = monster_new(MT_WATER_LORD);
-        monster_level_enter(m, map);
-
         /* try to find a space for the monster near the player */
-        monster_set_pos(m, map, map_find_space_in(map,
-                        rect_new_sized(p->pos, 1), LE_MONSTER));
+        position mpos = map_find_space_in(map, rect_new_sized(p->pos, 1),
+                                          LE_MONSTER);
+
+        if (pos_valid(mpos))
+        {
+            /* make water lord */
+            monster_new(MT_WATER_LORD, mpos);
+        }
     }
     else
     {
@@ -3609,7 +3615,6 @@ int player_throne_pillage(player *p)
 {
     int i;
     int count = 0; /* gems created */
-    monster *m = NULL;
 
     /* current map */
     map *map = game_map(nlarn, p->pos.z);
@@ -3645,16 +3650,18 @@ int player_throne_pillage(player *p)
     }
     else if (chance(40))
     {
-        /* make gnome king */
-        m = monster_new(MT_GNOME_KING);
-        monster_level_enter(m, map);
-
         /* try to find a space for the monster near the player */
-        monster_set_pos(m, map, map_find_space_in(map,
-                        rect_new_sized(p->pos, 1), LE_MONSTER));
+        position mpos = map_find_space_in(map, rect_new_sized(p->pos, 1),
+                                          LE_MONSTER);
 
-        /* next time there will be no gnome king */
-        map_stationary_set(map, p->pos, LS_THRONE2);
+        if (pos_valid(mpos))
+        {
+            /* make gnome king */
+            monster_new(MT_GNOME_KING, mpos);
+
+            /* next time there will be no gnome king */
+            map_stationary_set(map, p->pos, LS_THRONE2);
+        }
     }
     else
     {
@@ -3666,31 +3673,31 @@ int player_throne_pillage(player *p)
 
 int player_throne_sit(player *p)
 {
-    monster *m = NULL;
     map *map = game_map(nlarn, p->pos.z);
+    map_stationary_t st = map_stationary_at(map, p->pos);
 
     assert (p != NULL);
 
-    if ((map_stationary_at(map, p->pos) != LS_THRONE)
-            && (map_stationary_at(map, p->pos) != LS_THRONE2)
-            && (map_stationary_at(map, p->pos) != LS_DEADTHRONE))
+    if ((st != LS_THRONE) && (st != LS_THRONE2) && (st != LS_DEADTHRONE))
     {
         log_add_entry(p->log, "I see no throne to sit on here.");
         return 0;
     }
 
-    if (chance(30) && (map_stationary_at(map, p->pos) == LS_THRONE))
+    if (chance(30) && (st == LS_THRONE))
     {
-        /* make a gnome king */
-        m = monster_new(MT_GNOME_KING);
-        monster_level_enter(m, map);
-
         /* try to find a space for the monster near the player */
-        monster_set_pos(m, map, map_find_space_in(map,
-                        rect_new_sized(p->pos, 1), LE_MONSTER));
+        position mpos = map_find_space_in(map, rect_new_sized(p->pos, 1),
+                                          LE_MONSTER);
 
-        /* next time there will be no gnome king */
-        map_stationary_set(map, p->pos, LS_THRONE2);
+        if (pos_valid(mpos))
+        {
+            /* make a gnome king */
+            monster_new(MT_GNOME_KING, mpos);
+
+            /* next time there will be no gnome king */
+            map_stationary_set(map, p->pos, LS_THRONE2);
+        }
     }
     else if (chance(35))
     {
