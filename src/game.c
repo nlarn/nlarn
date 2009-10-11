@@ -33,7 +33,6 @@
 #include "utils.h"
 
 static void game_move_monsters(game *g);
-static void game_move_spheres(game *g);
 
 static void game_items_shuffle(game *g);
 
@@ -163,7 +162,8 @@ void game_new(int argc, char *argv[])
     nlarn->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     nlarn->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     nlarn->monsters = g_hash_table_new(&g_direct_hash, &g_direct_equal);
-    nlarn->spheres = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+
+    nlarn->spheres = g_ptr_array_new();
 
     /* generate player */
     nlarn->p = player_new();
@@ -248,7 +248,9 @@ int game_destroy(game *g)
     g_hash_table_destroy(g->items);
     g_hash_table_destroy(g->effects);
     g_hash_table_destroy(g->monsters);
-    g_hash_table_destroy(g->spheres);
+
+    g_ptr_array_foreach(g->spheres, (GFunc)sphere_destroy, g);
+    g_ptr_array_free(g->spheres, TRUE);
 
     g_free(g);
 
@@ -267,7 +269,7 @@ int game_save(game *g, char *filename)
     head->version_minor = VERSION_MINOR;
     head->version_patch = VERSION_PATCH;
 
-/* mingw does not define the latter */
+    /* mingw does not define the latter */
 #ifdef S_IRGRP
     fd = creat(filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 #else
@@ -413,7 +415,7 @@ void game_spin_the_wheel(game *g, guint times)
         }
 
         game_move_monsters(g);
-        game_move_spheres(g);
+        g_ptr_array_foreach(g->spheres, (GFunc)sphere_move, g);
 
         g->gtime++; /* count up the time  */
         log_set_time(g->p->log, g->gtime); /* adjust time for log entries */
@@ -512,29 +514,6 @@ monster *game_monster_get(game *g, gpointer id)
     return (monster *)g_hash_table_lookup(g->monsters, id);
 }
 
-gpointer game_sphere_register(game *g, sphere *s)
-{
-    assert (g != NULL && s != NULL);
-
-    gpointer nkey = GUINT_TO_POINTER(++g->sphere_max_id);
-    g_hash_table_insert(g->spheres, nkey, s);
-
-    return nkey;
-}
-
-void game_sphere_unregister(game *g, gpointer s)
-{
-    assert (g != NULL && s != NULL);
-
-    g_hash_table_remove(g->spheres, s);
-}
-
-sphere *game_sphere_get(game *g, gpointer id)
-{
-    assert(g != NULL && id != NULL);
-    return (sphere *)g_hash_table_lookup(g->spheres, id);
-}
-
 /**
  *  move all monsters on player's current map
  *
@@ -576,24 +555,6 @@ static void game_move_monsters(game *g)
     while ((monsters = monsters->next));
 
     g_list_free(monsters);
-}
-
-static void game_move_spheres(game *g)
-{
-    map *l;
-    sphere *s;
-    guint idx;
-
-    assert(g != NULL);
-
-    /* make shortcut */
-    l = game_map(nlarn,g->p->pos.z);
-
-    for (idx = 0; idx < l->slist->len; idx++)
-    {
-        s = g_ptr_array_index(l->slist, idx);
-        sphere_move(s, l);
-    }
 }
 
 static void game_items_shuffle(game *g)

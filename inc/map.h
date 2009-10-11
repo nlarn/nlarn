@@ -129,9 +129,8 @@ typedef struct map_stationary_data
 typedef struct map
 {
     guint32 nlevel;                       /* map number */
-    map_tile grid[MAP_MAX_Y][MAP_MAX_X];  /* the map */
     guint32 visited;                      /* last time player has been on this map */
-    GPtrArray *slist;                     /* spheres of annihilation on this map */
+    map_tile grid[MAP_MAX_Y][MAP_MAX_X];  /* the map */
 } map;
 
 /* Structure for path elements */
@@ -155,7 +154,7 @@ typedef struct map_path
 /* function declarations */
 
 map *map_new(int nlevel, char *mazefile);
-void map_destroy(map *l);
+void map_destroy(map *m);
 char *map_dump(map *l);
 
 position map_find_space(map *l, map_element_t element);

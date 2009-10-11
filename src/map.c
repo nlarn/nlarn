@@ -43,6 +43,9 @@ static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArra
 static map_path_element *map_path_find_best(map *l, map_path *path);
 static GPtrArray *map_path_get_neighbours(map *l, position pos);
 
+static gboolean map_monster_destroy(gpointer key, monster *monst, map *m);
+static gboolean map_sphere_destroy(sphere *s, map *m);
+
 const map_tile_data map_tiles[LT_MAX] =
 {
     /* type         img  color      desc           pa tr */
@@ -116,9 +119,6 @@ map *map_new(int nlevel, char *mazefile)
 
     map *l = nlarn->maps[nlevel] = g_malloc0(sizeof(map));
     l->nlevel = nlevel;
-
-    /* initialize monster and sphere list */
-    l->slist = g_ptr_array_new();
 
     /* create map */
     if ((l->nlevel == 0)
@@ -204,53 +204,27 @@ char *map_dump(map *l)
     return g_string_free(map, FALSE);
 }
 
-void map_destroy(map *l)
+void map_destroy(map *m)
 {
-    guint idx;
     int x, y;
-    monster *m;
-    GList *mlist;
 
-    assert(l != NULL);
+    assert(m != NULL);
 
-    /* free monster list */
-    mlist = g_hash_table_get_values(nlarn->monsters);
+    /* destroy monster and spheres on this level */
+    g_hash_table_foreach_remove(nlarn->monsters, (GHRFunc) map_monster_destroy, m);
+    g_ptr_array_foreach(nlarn->spheres, (GFunc)map_sphere_destroy, m);
 
-    do
-    {
-        m = (monster *)mlist->data;
-
-        position mpos = monster_pos(m);
-        if (mpos.z == l->nlevel)
-        {
-            monster_destroy(m);
-        }
-    }
-    while ((mlist = mlist->next));
-
-    /* free spheres list */
-    if (l->slist != NULL)
-    {
-        while (l->slist->len > 0)
-        {
-            idx = l->slist->len - 1;
-            sphere_destroy(g_ptr_array_index(l->slist, idx));
-        }
-
-        g_ptr_array_free(l->slist, TRUE);
-    }
-
+    /* free items */
     for (y = 0; y < MAP_MAX_Y; y++)
     {
         for (x = 0; x < MAP_MAX_X; x++)
         {
-            /* free items */
-            if (l->grid[y][x].ilist != NULL)
-                inv_destroy(l->grid[y][x].ilist);
+            if (m->grid[y][x].ilist != NULL)
+                inv_destroy(m->grid[y][x].ilist);
         }
     }
 
-    g_free(l);
+    g_free(m);
 }
 
 /* return coordinates of a free space */
@@ -1613,4 +1587,30 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos)
     }
 
     return neighbours;
+}
+
+static gboolean map_monster_destroy(gpointer key, monster *monst, map *m)
+{
+    if (monster_pos(monst).z != m->nlevel)
+    {
+        return FALSE;
+    }
+
+    monster_oid_set(monst, 0);
+    monster_destroy(monst);
+
+    return TRUE;
+
+}
+
+static gboolean map_sphere_destroy(sphere *s, map *m)
+{
+    if (s->pos.z != m->nlevel)
+    {
+        return FALSE;
+    }
+
+    sphere_destroy(s, nlarn);
+
+    return TRUE;
 }

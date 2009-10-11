@@ -30,7 +30,7 @@
 struct _monster
 {
     monster_t type;
-    gpointer id; /* monsters id inside the monster hash */
+    gpointer oid; /* monsters id inside the monster hash */
     gint32 hp;
     position pos;
     monster_action_t action;    /* current action */
@@ -868,7 +868,7 @@ monster *monster_new(int type, position pos)
     nmonster->player_pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
     /* register monster with game */
-    nmonster->id = game_monster_register(nlarn, nmonster);
+    nmonster->oid = game_monster_register(nlarn, nmonster);
 
     /* set position to something invalid */
     nmonster->pos = pos;
@@ -928,7 +928,12 @@ void monster_destroy(monster *m)
         inv_destroy(m->inventory);
 
     /* unregister monster */
-    game_monster_unregister(nlarn, m->id);
+    if (m->oid > 0)
+    {
+        /* the oid is set to 0 when the monster is destroyed by the
+        g_hash_table_foreach_remove callback */
+        game_monster_unregister(nlarn, m->oid);
+    }
 
     g_free(m);
 }
@@ -948,16 +953,22 @@ void monster_hp_inc(monster *m, int amount)
         m->hp = monsters[m->type].hp_max;
 }
 
-gpointer monster_oid(monster *m)
-{
-    assert (m != NULL);
-    return m->id;
-}
-
 item_t monster_item_type(monster *m)
 {
     assert (m != NULL);
     return m->item_type;
+}
+
+gpointer monster_oid(monster *m)
+{
+    assert (m != NULL);
+    return m->oid;
+}
+
+void monster_oid_set(monster *m, gpointer oid)
+{
+    assert (m != NULL);
+    m->oid = oid;
 }
 
 position monster_pos(monster *m)
@@ -968,8 +979,7 @@ position monster_pos(monster *m)
 
 int monster_pos_set(monster *m, map *map, position target)
 {
-    assert(m != NULL && (!pos_valid(m->pos) || (m->pos.z == map->nlevel)));
-    assert(m->type > MT_NONE && m->type < MT_MAX && map != NULL);
+    assert(m != NULL && map != NULL && pos_valid(target));
 
     if (map_pos_validate(map, target, LE_MONSTER))
     {

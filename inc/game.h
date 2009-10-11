@@ -64,7 +64,6 @@ typedef struct game
     guint item_max_id;
     guint effect_max_id;
     guint monster_max_id;
-    guint sphere_max_id;
 
     /* every object of the types inventory, item and effect will be registered
        in these hashed when created and unregistered when destroyed. */
@@ -73,7 +72,9 @@ typedef struct game
     GHashTable *items;
     GHashTable *effects;
     GHashTable *monsters;
-    GHashTable *spheres;
+
+    /* spheres do not need to be referenced, thus a pointer array is sufficient */
+    GPtrArray *spheres;
 
     /* flags */
     guint32
@@ -144,10 +145,6 @@ effect *game_effect_get(game *g, gpointer id);
 gpointer game_monster_register(game *g, monster *m);
 void game_monster_unregister(game *g, gpointer m);
 monster *game_monster_get(game *g, gpointer id);
-
-gpointer game_sphere_register(game *g, sphere *s);
-void game_sphere_unregister(game *g, gpointer s);
-gpointer game_sphere_register(game *g, sphere *s);
 
 /* macros */
 

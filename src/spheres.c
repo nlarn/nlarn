@@ -23,8 +23,8 @@
 #include "nlarn.h"
 #include "spheres.h"
 
-static void sphere_remove(sphere *s, map *l);
-static void sphere_hit_owner(sphere *s, map *l);
+static guint sphere_at(game *g, position pos);
+static void sphere_hit_owner(game *g, sphere *s);
 static void sphere_kill_monster(sphere *s, monster *m);
 
 sphere *sphere_new(position pos, player *owner, int lifetime)
@@ -44,30 +44,27 @@ sphere *sphere_new(position pos, player *owner, int lifetime)
 
     s->lifetime = lifetime;
 
-    /* register sphere */
-    s->oid = game_sphere_register(nlarn, s);
-
     return s;
 }
 
-void sphere_destroy(sphere *s)
+void sphere_destroy(sphere *s, game *g)
 {
     assert(s != NULL);
 
-    /* unregister sphere */
-    game_sphere_unregister(nlarn, s->oid);
+    g_ptr_array_remove_fast(g->spheres, s);
 
     g_free(s);
 }
 
-void sphere_move(sphere *s, map *l)
+void sphere_move(sphere *s, game *g)
 {
     position npos;
     int tries = 0;
     direction dir;
     monster *m;
+    map *map;
 
-    assert(s != NULL && l != NULL);
+    assert(s != NULL && g != NULL);
 
     /* reduce lifetime */
     s->lifetime--;
@@ -75,10 +72,11 @@ void sphere_move(sphere *s, map *l)
     /* sphere has reached end of life */
     if (s->lifetime == 0)
     {
-        sphere_remove(s, l);
+        sphere_destroy(s, g);
         return;
     }
 
+    map = game_map(g, s->pos.z);
 
     /* try to move sphere into its direction */
     dir = s->dir;
@@ -86,7 +84,7 @@ void sphere_move(sphere *s, map *l)
 
     /* if the new position does not work, try to find another one */
     while ((!pos_valid(npos)
-            || !lt_is_passable(map_tiletype_at(l,npos)))
+            || !lt_is_passable(map_tiletype_at(map, npos)))
             && (tries < GD_MAX))
     {
         dir++;
@@ -109,27 +107,26 @@ void sphere_move(sphere *s, map *l)
     }
     /* otherwise stand still */
 
-
     /* sphere rolled over it's creator */
     if (pos_identical(s->pos, s->owner->pos))
     {
-        sphere_hit_owner(s, l);
+        sphere_hit_owner(g, s);
+        return;
     }
 
     /* check if a monster is located at the sphere's position */
-    if ((m = map_get_monster_at(l, s->pos)))
+    if ((m = map_get_monster_at(map, s->pos)))
     {
         /* demons dispel spheres */
         if (monster_type(m) >= MT_DEMONLORD_I)
         {
             if (monster_in_sight(m))
             {
-                log_add_entry(s->owner->log,
-                              "The %s dispels the sphere!",
+                log_add_entry(s->owner->log, "The %s dispels the sphere!",
                               monster_name(m));
             }
 
-            sphere_remove(s, l);
+            sphere_destroy(s, g);
 
             return;
         }
@@ -144,51 +141,49 @@ void sphere_move(sphere *s, map *l)
                               monster_name(m));
             }
 
-            sphere_remove(s, l);
+            sphere_destroy(s, g);
 
             return;
         }
 
         /* kill monster */
         sphere_kill_monster(s, m);
+
+        return;
     }
 
     /* check if another sphere is located at the same position */
-    if (sphere_at(l, s->pos) != s)
+    if (sphere_at(g, s->pos) > 1)
     {
         log_add_entry(s->owner->log,
                       "Two spheres of annihilation collide! " \
                       "You hear a great earth shaking blast!");
 
-        sphere_remove(s, l);
+        sphere_destroy(s, g);
 
         return;
     }
 }
 
-sphere *sphere_at(map *l, position pos)
+guint sphere_at(game *g, position pos)
 {
+    guint count = 0;
     guint idx;
     sphere *s;
 
-    for (idx = 0; idx < l->slist->len; idx++)
+    for (idx = 0; idx < g->spheres->len; idx++)
     {
-        s = g_ptr_array_index(l->slist, idx);
-
-        if (pos_identical(pos, s->pos))
-            return s;
+        s = (sphere *)g_ptr_array_index(g->spheres, idx);
+        if (pos_identical(s->pos, pos))
+        {
+            count++;
+        }
     }
 
-    return NULL;
+    return count;
 }
 
-static void sphere_remove(sphere *s, map *l)
-{
-    g_ptr_array_remove_fast(l->slist, s);
-    sphere_destroy(s);
-}
-
-static void sphere_hit_owner(sphere *s, map *l)
+static void sphere_hit_owner(game *g, sphere *s)
 {
     /* cancellation protects from spheres */
     if (player_effect(s->owner, ET_CANCELLATION))
@@ -196,30 +191,38 @@ static void sphere_hit_owner(sphere *s, map *l)
         log_add_entry(s->owner->log,
                       "As the cancellation takes effect, you hear a great earth shaking blast!");
 
-        sphere_remove(s, l);
+        sphere_destroy(s, g);
 
         return;
     }
     else
     {
+        log_add_entry(s->owner->log, "The sphere hits you.");
         player_die(s->owner, PD_SPHERE, 0);
     }
 }
 
 static void sphere_kill_monster(sphere *s, monster *m)
 {
-    /* if the owner is set, grant experience */
-    if (s->owner)
-    {
-        player_exp_gain(s->owner, monster_exp(m));
+    monster *mret; /* monster returned by monster_damage_take */
+    guint mexp;    /* xp for killing the monster */
 
-        if (monster_in_sight(m))
-        {
-            log_add_entry(s->owner->log,
-                          "The sphere of annihilation killed the %s.",
-                          monster_name(m));
-        }
+    assert(s != NULL && m != NULL);
+
+    mexp = monster_exp(m);
+
+    if (monster_in_sight(m))
+    {
+        log_add_entry(s->owner->log,
+                      "The sphere of annihilation hits the %s.",
+                      monster_name(m));
     }
 
-    monster_damage_take(m, damage_new(DAM_MAGICAL, 2000, NULL));
+    mret = monster_damage_take(m, damage_new(DAM_MAGICAL, 2000, NULL));
+
+    if (!mret && s->owner)
+    {
+        /* the monster has been killed, grant experience */
+        player_exp_gain(s->owner, mexp);
+    }
 }

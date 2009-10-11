@@ -1004,7 +1004,7 @@ gboolean spell_create_sphere(spell *s, struct player *p)
     if (pos_valid(pos))
     {
         sphere = sphere_new(pos, p, p->level * 10 * s->knowledge);
-        g_ptr_array_add(game_map(nlarn, p->pos.z)->slist, sphere);
+        g_ptr_array_add(nlarn->spheres, sphere);
 
         return TRUE;
     }

@@ -40,6 +40,8 @@ static void display_window_update_caption(display_window *dwin);
 static void display_window_update_arrow_up(display_window *dwin, gboolean on);
 static void display_window_update_arrow_down(display_window *dwin, gboolean on);
 
+static void display_spheres_paint(sphere *s, player *p);
+
 int display_init()
 {
     /* taken from Angband 3.1.1 */
@@ -115,9 +117,6 @@ int display_paint_screen(player *p)
 {
     guint x, y, i;
     position pos;
-    item *it;
-    monster *monst;
-    sphere *sphere;
     map *map;
 
     /* curses attributes */
@@ -160,8 +159,8 @@ int display_paint_screen(player *p)
                 if (inv_length(*map_ilist_at(map, pos)) > 0)
                 {
                     /* draw items */
-                    it = (item *) inv_get(*map_ilist_at(map, pos),
-                                          inv_length(*map_ilist_at(map, pos)) - 1);
+                    item *it = inv_get(*map_ilist_at(map, pos),
+                                       inv_length(*map_ilist_at(map, pos)) - 1);
 
                     attron(COLOR_PAIR(DC_BLUE));
                     addch(item_image(it->type));
@@ -226,7 +225,7 @@ int display_paint_screen(player *p)
             if (player_pos_visible(p, pos)) attroff(A_BOLD);
 
             /* draw monsters */
-            monst = map_get_monster_at(map, pos);
+            monster *monst = map_get_monster_at(map, pos);
 
             if (monst == NULL)
             {
@@ -248,18 +247,9 @@ int display_paint_screen(player *p)
         }
     }
 
-    for (i = 1; i <= map->slist->len; i++)
-    {
-        /* draw spheres */
-        sphere = g_ptr_array_index(map->slist, i - 1);
+    /* draw spheres */
+    g_ptr_array_foreach(nlarn->spheres, (GFunc)display_spheres_paint, p);
 
-        if (game_wizardmode(nlarn) || player_pos_visible(p, sphere->pos))
-        {
-            attron(COLOR_PAIR(DC_MAGENTA));
-            mvaddch(sphere->pos.y, sphere->pos.x, '0');
-            attroff(COLOR_PAIR(DC_MAGENTA));
-        }
-    }
 
     /* *** status line *** */
     move(MAP_MAX_Y + 1, 0);
@@ -2418,5 +2408,19 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
         wattron(dwin->window, COLOR_PAIR(11));
         mvwhline(dwin->window, dwin->height - 1, dwin->width - 5, ACS_HLINE, 3);
         wattroff(dwin->window, COLOR_PAIR(11));
+    }
+}
+
+static void display_spheres_paint(sphere *s, player *p)
+{
+    /* check if sphere is on current level */
+    if (!(s->pos.z == p->pos.z))
+        return;
+
+    if (game_wizardmode(nlarn) || player_pos_visible(p, s->pos))
+    {
+        attron(COLOR_PAIR(DC_MAGENTA));
+        mvaddch(s->pos.y, s->pos.x, '0');
+        attroff(COLOR_PAIR(DC_MAGENTA));
     }
 }

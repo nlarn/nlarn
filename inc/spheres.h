@@ -22,6 +22,8 @@
 #include "map.h"
 #include "player.h"
 
+struct game;
+
 typedef struct sphere {
     gpointer oid;       /* sphere's game object id */
     position pos;       /* location of the sphere */
@@ -32,9 +34,8 @@ typedef struct sphere {
 
 /* function declarations */
 sphere *sphere_new(position pos, player *owner, int lifetime);
-void sphere_destroy(sphere *s);
+void sphere_destroy(sphere *s, struct game *g);
 
-void sphere_move(sphere *s, map *l);
-sphere *sphere_at(map *l, position pos);
+void sphere_move(sphere *s, struct game *g);
 
 #endif
