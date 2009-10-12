@@ -32,7 +32,7 @@
 #include "spheres.h"
 #include "utils.h"
 
-static void game_move_monsters(game *g);
+static void game_monsters_move(game *g);
 
 static void game_items_shuffle(game *g);
 
@@ -414,7 +414,7 @@ void game_spin_the_wheel(game *g, guint times)
             player_damage_take(g->p, dam, PD_MAP, map_tiletype_at(map, g->p->pos));
         }
 
-        game_move_monsters(g);
+        game_monsters_move(g);
         g_ptr_array_foreach(g->spheres, (GFunc)sphere_move, g);
 
         g->gtime++; /* count up the time  */
@@ -520,7 +520,7 @@ monster *game_monster_get(game *g, gpointer id)
  *  @param the game
  *  @return Returns no value.
  */
-static void game_move_monsters(game *g)
+static void game_monsters_move(game *g)
 {
     map *l;
 
@@ -529,7 +529,6 @@ static void game_move_monsters(game *g)
 
     /* handle to current monster */
     monster *m;
-
 
     assert(g != NULL);
 
@@ -547,7 +546,9 @@ static void game_move_monsters(game *g)
         /* modify effects */
         monster_effect_expire(m, g->p->log);
 
-        if (mpos.z == g->p->pos.z)
+        if (mpos.z == g->p->pos.z
+                || (mpos.z == g->p->pos.z - 1)
+                || (mpos.z == g->p->pos.z + 1))
         {
             monster_move(m, g->p);
         }

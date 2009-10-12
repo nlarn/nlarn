@@ -916,7 +916,7 @@ int player_examine(player *p, position pos)
     /* add message if target tile contains a stationary item */
     if (tile->stationary > LS_NONE)
     {
-        log_add_entry(p->log, ls_get_desc(tile->stationary));
+        log_add_entry(p->log, "You see %s %s.", ls_get_desc(tile->stationary), where);
     }
 
     /* add message if target tile contains a known trap */

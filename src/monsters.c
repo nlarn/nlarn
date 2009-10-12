@@ -984,7 +984,7 @@ int monster_pos_set(monster *m, map *map, position target)
     if (map_pos_validate(map, target, LE_MONSTER))
     {
         /* remove current reference to monster from tile */
-        map_set_monster_at(map, m->pos, NULL);
+        map_set_monster_at(monster_map(m), m->pos, NULL);
 
         /* set new position */
         m->pos = target;
@@ -1025,15 +1025,62 @@ void monster_level_enter(monster *m, struct map *l)
 {
     assert (m != NULL && l != NULL);
 
+    map_stationary_t source = map_stationary_at(monster_map(m), m->pos);
+    map_stationary_t target;
+    position npos;
+    char *how;
+
     /* remove monster from old map  */
     map *oldmap = game_map(nlarn, m->pos.z);
     map_set_monster_at(oldmap, m->pos, NULL);
 
+    /* check if the monster used the stairs */
+    switch (source)
+    {
+    case LS_ENTRANCE:
+        target = LS_ENTRANCE;
+        how = "through";
+        break;
+
+    case LS_STAIRSDOWN:
+        target = LS_STAIRSUP;
+        how = "down";
+        break;
+
+    case LS_STAIRSUP:
+        target = LS_STAIRSDOWN;
+        how = "up";
+        break;
+
+    default:
+        target = LS_NONE;
+    }
+
+    /* determine new position */
+    if (target)
+    {
+        npos = map_find_stationary(l, target);
+    }
+    else
+    {
+        map_find_space(l, LE_MONSTER);
+    }
+
     /* put monster into map */
-    if (!monster_pos_set(m, l, map_find_space(l, LE_MONSTER)))
+    if (!monster_pos_set(m, l, npos))
     {
         /* no free space could be found for the monstert -> abort */
         monster_destroy(m);
+    }
+
+    /* update visibility */
+    m->m_visible = player_pos_visible(nlarn->p, npos);
+
+    /* log the event */
+    if (monster_in_sight(m) && target)
+    {
+        log_add_entry(nlarn->p->log, "The %s comes %s %s.", monster_name(m),
+                      how, ls_get_desc(target));
     }
 }
 
@@ -1194,6 +1241,22 @@ void monster_move(monster *m, struct player *p)
                 m_npos = monster_pos(m);
                 log_add_entry(p->log, "The %s vanishes.", monster_name(m));
             }
+        }
+        else if (pos_identical(monster_pos(m), m->player_pos)
+                 && ((map_stationary_at(monster_map(m), m->pos) == LS_STAIRSDOWN)
+                     || (map_stationary_at(monster_map(m), m->pos) == LS_ENTRANCE
+                         && monster_pos(m).z == 0)))
+        {
+            /* go level down */
+            monster_level_enter(m, game_map(nlarn, m->pos.z + 1));
+        }
+        else if (pos_identical(monster_pos(m), m->player_pos)
+                 && (map_stationary_at(monster_map(m), m->pos) == LS_STAIRSUP
+                     || (map_stationary_at(monster_map(m), m->pos) == LS_ENTRANCE
+                         && monster_pos(m).z == 1)))
+        {
+            /* go level up */
+            monster_level_enter(m, game_map(nlarn, m->pos.z - 1));
         }
         else
         {
@@ -2149,4 +2212,8 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
 
         return FALSE;
     }
+}
+
+static gboolean monster_player_visibility(monster *m, struct player *p)
+{
 }
