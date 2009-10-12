@@ -2113,6 +2113,19 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
 
             if (player_item_is_equipped(p, it))
             {
+                if (it->cursed)
+                {
+                    /* cursed items can't be stolen.. */
+                    char buf[61];
+                    item_describe(it, player_item_known(p, it), TRUE, TRUE, buf, 60);
+
+                    log_add_entry(p->log, "The %s tries to steal %s but failed.",
+                                  monster_name(m), buf);
+
+                    /* return true as there actually are things to steal */
+                    return TRUE;
+                }
+
                 log_disable(p->log);
                 player_item_unequip(p, NULL, it);
                 log_enable(p->log);
