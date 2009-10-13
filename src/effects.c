@@ -513,6 +513,19 @@ void effect_destroy(effect *e)
     g_free(e);
 }
 
+void effect_serialize(gpointer oid, effect *e, cJSON *root)
+{
+    cJSON *eval;
+
+    cJSON_AddItemToObject(root, "effect", eval = cJSON_CreateObject());
+
+    cJSON_AddNumberToObject(eval,"oid", GPOINTER_TO_UINT(oid));
+    cJSON_AddNumberToObject(eval,"type", e->type);
+    cJSON_AddNumberToObject(eval,"start", e->start);
+    cJSON_AddNumberToObject(eval,"turns", e->turns);
+    cJSON_AddNumberToObject(eval,"amount", e->amount);
+}
+
 char *effect_get_msg_start(effect *e)
 {
     assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);

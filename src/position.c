@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "cJSON.h"
 #include "map.h"
 #include "position.h"
 
@@ -152,6 +153,17 @@ int pos_valid(position pos)
     return (pos.x >= 0) && (pos.x < MAP_MAX_X)
            && (pos.y >= 0) && (pos.y < MAP_MAX_Y)
            && (pos.z >= 0) && (pos.z < MAP_MAX);
+}
+
+cJSON *pos_serialize(position pos)
+{
+    cJSON *pval = cJSON_CreateObject();
+
+    cJSON_AddNumberToObject(pval, "x", pos.x);
+    cJSON_AddNumberToObject(pval, "y", pos.y);
+    cJSON_AddNumberToObject(pval, "z", pos.z);
+
+    return pval;
 }
 
 /**

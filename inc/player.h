@@ -115,11 +115,11 @@ typedef struct player
     /* enough items for now */
 
     /* items identified */
-    guint8 identified_amulets[AM_MAX];
-    guint8 identified_books[SP_MAX];
-    guint8 identified_potions[PO_MAX];
-    guint8 identified_rings[RT_MAX];
-    guint8 identified_scrolls[ST_MAX];
+    gint identified_amulets[AM_MAX];
+    gint identified_books[SP_MAX];
+    gint identified_potions[PO_MAX];
+    gint identified_rings[RT_MAX];
+    gint identified_scrolls[ST_MAX];
 
     position pos; /* player's position */
     player_stats stats; /* statistics */
@@ -179,6 +179,8 @@ typedef enum player_cod
 
 player *player_new();
 void player_destroy(player *p);
+
+void player_serialize(cJSON *root, player *p);
 
 int player_regenerate(player *p);
 void player_die(player *p, player_cod cause_type, int cause);

@@ -142,6 +142,8 @@ item *item_copy(item *original);
 item *item_split(item *original, guint32 count);
 void item_destroy(item *it);
 
+void item_serialize(gpointer oid, gpointer it, gpointer root);
+
 int item_compare(item *a, item *b);
 int item_sort(gconstpointer a, gconstpointer b, gpointer data);
 char *item_describe(item *it, int known, int singular, int definite, char *str, int str_len);

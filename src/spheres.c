@@ -56,6 +56,21 @@ void sphere_destroy(sphere *s, game *g)
     g_free(s);
 }
 
+void sphere_serialize(sphere *s, cJSON *root)
+{
+    cJSON *sval;
+
+    cJSON_AddItemToObject(root, "spheres", sval = cJSON_CreateObject());
+
+    cJSON_AddNumberToObject(sval, "dir", s->dir);
+    cJSON_AddNumberToObject(sval, "lifetime", s->lifetime);
+    cJSON_AddItemToObject(sval, "pos", pos_serialize(s->pos));
+
+    if (!s->owner)
+        cJSON_AddFalseToObject(sval, "owner");
+}
+
+
 void sphere_move(sphere *s, game *g)
 {
     position npos;

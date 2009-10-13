@@ -864,7 +864,6 @@ monster *monster_new(int type, position pos)
 
     /* initialize AI */
     nmonster->action = MA_WANDER;
-    nmonster->lastseen = -1;
     nmonster->player_pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
     /* register monster with game */
@@ -936,6 +935,57 @@ void monster_destroy(monster *m)
     }
 
     g_free(m);
+}
+
+void monster_serialize(gpointer oid, monster *m, cJSON *root)
+{
+    int idx;
+    cJSON *mval, *invval, *eaval;
+
+    cJSON_AddItemToObject(root, "monster", mval = cJSON_CreateObject());
+    cJSON_AddNumberToObject(mval, "type", monster_type(m));
+    cJSON_AddNumberToObject(mval, "oid", GPOINTER_TO_UINT(oid));
+    cJSON_AddNumberToObject(mval, "hp", m->hp);
+    cJSON_AddItemToObject(mval,"pos", pos_serialize(m->pos));
+
+    if (m->weapon != NULL)
+        cJSON_AddNumberToObject(mval, "weapon", GPOINTER_TO_UINT(m->weapon->oid));
+
+    if (m->unknown)
+        cJSON_AddTrueToObject(mval, "unknown");
+
+    if (m->item_type)
+       cJSON_AddNumberToObject(mval, "item_type", m->item_type);
+
+    if (m->lastseen != 0)
+    {
+        cJSON_AddNumberToObject(mval,"lastseen", m->lastseen);
+        cJSON_AddItemToObject(mval,"player_pos", pos_serialize(m->player_pos));
+    }
+
+    /* inventory */
+    if (inv_length(m->inventory) > 0)
+    {
+        cJSON_AddItemToObject(mval, "inventory", invval = cJSON_CreateArray());
+
+        for (idx = 0; idx < inv_length(m->inventory); idx++)
+        {
+            item *it = inv_get(m->inventory, idx);
+            cJSON_AddItemToArray(invval, cJSON_CreateNumber(GPOINTER_TO_UINT(it->oid)));
+        }
+    }
+
+    /* effects */
+    if (m->effects->len > 0)
+    {
+        cJSON_AddItemToObject(mval, "effects", eaval = cJSON_CreateArray());
+
+        for (idx = 0; idx < m->effects->len; idx++)
+        {
+            effect *e = g_ptr_array_index(m->effects, idx);
+            cJSON_AddItemToArray(eaval, cJSON_CreateNumber(GPOINTER_TO_UINT(e->oid)));
+        }
+    }
 }
 
 int monster_hp(monster *m)

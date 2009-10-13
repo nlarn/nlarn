@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "cJSON.h"
 #include "game.h"
 #include "nlarn.h"
 #include "player.h"
@@ -158,7 +159,6 @@ void game_new(int argc, char *argv[])
     game_wizardmode(nlarn) = wizard;
 
     /* initialize object hashes (here as they will be needed by player_new) */
-    nlarn->inventories = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     nlarn->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     nlarn->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     nlarn->monsters = g_hash_table_new(&g_direct_hash, &g_direct_equal);
@@ -244,7 +244,6 @@ int game_destroy(game *g)
 
     player_destroy(g->p);
 
-    g_hash_table_destroy(g->inventories);
     g_hash_table_destroy(g->items);
     g_hash_table_destroy(g->effects);
     g_hash_table_destroy(g->monsters);
@@ -259,38 +258,82 @@ int game_destroy(game *g)
 
 int game_save(game *g, char *filename)
 {
-    int fd;
-
-    game_save_head_t *head = g_malloc0(sizeof(game_save_head_t));
+    int idx;
+    struct cJSON *save, *obj;
 
     assert(g != NULL && filename != NULL);
 
-    head->version_major = VERSION_MAJOR;
-    head->version_minor = VERSION_MINOR;
-    head->version_patch = VERSION_PATCH;
+    save = cJSON_CreateObject();
 
-    /* mingw does not define the latter */
-#ifdef S_IRGRP
-    fd = creat(filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-#else
-    fd = creat(filename, S_IRUSR | S_IWUSR);
-#endif
-    if (fd == -1)
+    cJSON_AddNumberToObject(save, "time_start", g->time_start);
+    cJSON_AddNumberToObject(save, "gtime", g->gtime);
+    cJSON_AddNumberToObject(save, "difficulty", g->difficulty);
+
+    cJSON_AddItemToObject(save, "amulet_created",
+                          cJSON_CreateIntArray(g->amulet_created, AM_MAX));
+
+    cJSON_AddItemToObject(save, "weapon_created",
+                          cJSON_CreateIntArray(g->weapon_created, WT_MAX));
+
+    if (g->cure_dianthr_created) cJSON_AddTrueToObject(save, "cure_dianthr_created");
+
+    cJSON_AddItemToObject(save, "amulet_material_mapping",
+                          cJSON_CreateIntArray(g->amulet_material_mapping, AM_MAX - 1));
+
+    cJSON_AddItemToObject(save, "potion_desc_mapping",
+                          cJSON_CreateIntArray(g->potion_desc_mapping, PO_MAX - 1));
+
+    cJSON_AddItemToObject(save, "ring_material_mapping",
+                          cJSON_CreateIntArray(g->ring_material_mapping, RT_MAX - 1));
+
+    cJSON_AddItemToObject(save, "scroll_desc_mapping",
+                          cJSON_CreateIntArray(g->scroll_desc_mapping, ST_MAX - 1));
+
+    cJSON_AddItemToObject(save, "book_desc_mapping",
+                          cJSON_CreateIntArray(g->book_desc_mapping, SP_MAX - 1));
+
+    cJSON_AddItemToObject(save, "monster_genocided",
+                          cJSON_CreateIntArray(g->monster_genocided, MT_MAX));
+
+    if (g->wizard) cJSON_AddTrueToObject(save, "wizard");
+
+    /* store stock */
+    if (inv_length(g->store_stock) > 0)
     {
-        g_free(head);
-        return FALSE;
+
+        cJSON_AddItemToObject(save, "store_stock", obj = cJSON_CreateArray());
+
+        for (idx = 0; idx < inv_length(g->store_stock); idx++)
+        {
+            item *it = inv_get(g->store_stock, idx);
+            cJSON_AddItemToArray(obj, cJSON_CreateNumber(GPOINTER_TO_UINT(it->oid)));
+        }
     }
 
-    /* before starting to write jump ahead to leave space for the header */
-    lseek(fd, sizeof(game_save_head_t), SEEK_SET);
+    /* add player */
+    cJSON_AddItemToObject(save, "player", obj = cJSON_CreateObject());
+    player_serialize(obj, g->p);
 
-    /* return to the beginning of the file */
-    lseek(fd, 0, SEEK_SET);
-    /* and write the file header */
-    write(fd, head, sizeof(game_save_head_t));
+    /* add items */
+    cJSON_AddItemToObject(save, "items", obj = cJSON_CreateObject());
+    g_hash_table_foreach(g->items, item_serialize, obj);
 
-    close(fd);
-    g_free(head);
+    /* add effects */
+    cJSON_AddItemToObject(save, "effects", obj = cJSON_CreateObject());
+    g_hash_table_foreach(g->effects, (GHFunc)effect_serialize, obj);
+
+    /* add monsters */
+    cJSON_AddItemToObject(save, "monsters", obj = cJSON_CreateObject());
+    g_hash_table_foreach(g->monsters, (GHFunc)monster_serialize, obj);
+
+    /* add spheres */
+    cJSON_AddItemToObject(save, "spheres", obj = cJSON_CreateObject());
+    g_ptr_array_foreach(g->spheres, (GFunc)sphere_serialize, obj);
+
+    char *sg = cJSON_Print(save);
+    GError *err = NULL;
+    g_file_set_contents(filename, sg, -1, &err);
+    free(sg);
 
     return TRUE;
 }
@@ -420,29 +463,6 @@ void game_spin_the_wheel(game *g, guint times)
         g->gtime++; /* count up the time  */
         log_set_time(g->p->log, g->gtime); /* adjust time for log entries */
     }
-}
-
-gpointer game_inventory_register(game *g, inventory *inv)
-{
-    assert (g != NULL && inv != NULL);
-
-    gpointer nkey = GUINT_TO_POINTER(++g->inventory_max_id);
-    g_hash_table_insert(g->inventories, nkey, inv);
-
-    return nkey;
-}
-
-void game_inventory_unregister(game *g, gpointer inv)
-{
-    assert (g != NULL && inv != NULL);
-
-    g_hash_table_remove(g->inventories, inv);
-}
-
-inventory *game_inventory_get(game *g, gpointer id)
-{
-    assert(g != NULL && id != NULL);
-    return (inventory *)g_hash_table_lookup(g->inventories, id);
 }
 
 gpointer game_item_register(game *g, item *it)

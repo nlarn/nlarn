@@ -21,6 +21,7 @@
 
 #include <glib.h>
 
+#include "cJSON.h"
 #include "defines.h"
 
 typedef struct _position
@@ -53,6 +54,7 @@ int pos_distance(position first, position second);
 int pos_identical(position pos1, position pos2);
 int pos_adjacent(position first, position second);
 int pos_valid(position pos);
+cJSON *pos_serialize(position pos);
 
 rectangle rect_new(int x1, int y1, int x2, int y2);
 rectangle rect_new_sized(position center, int size);

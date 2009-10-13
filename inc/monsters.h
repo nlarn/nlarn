@@ -22,6 +22,7 @@
 #include <glib.h>
 #include <time.h>
 
+#include "cJSON.h"
 #include "defines.h"
 #include "effects.h"
 #include "items.h"
@@ -163,6 +164,8 @@ extern const monster_data monsters[MT_MAX];
 monster *monster_new(int type, position pos);
 monster *monster_new_by_level(position pos);
 void monster_destroy(monster *m);
+
+void monster_serialize(gpointer oid, monster *m, cJSON *root);
 
 /* getter / setter */
 

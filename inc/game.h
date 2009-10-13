@@ -60,15 +60,13 @@ typedef struct game
 
     /* these are the item ids assigned to new objects of the latter types */
 
-    guint inventory_max_id;
     guint item_max_id;
     guint effect_max_id;
     guint monster_max_id;
 
-    /* every object of the types inventory, item and effect will be registered
+    /* every object of the types item, effect and monster will be registered
        in these hashed when created and unregistered when destroyed. */
 
-    GHashTable *inventories;
     GHashTable *items;
     GHashTable *effects;
     GHashTable *monsters;

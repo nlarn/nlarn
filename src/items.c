@@ -414,6 +414,56 @@ void item_destroy(item *it)
     g_free(it);
 }
 
+void item_serialize(gpointer oid, gpointer it, gpointer root)
+{
+    int idx;
+    cJSON *ival, *obj;
+
+    item *i = (item *)it;
+
+    cJSON_AddItemToObject((cJSON *)root, "item", ival = cJSON_CreateObject());
+
+    cJSON_AddNumberToObject(ival, "oid", GPOINTER_TO_UINT(oid));
+    cJSON_AddNumberToObject(ival, "type", i->type);
+    cJSON_AddNumberToObject(ival, "id", i->id);
+    cJSON_AddNumberToObject(ival, "bonus", i->bonus);
+    cJSON_AddNumberToObject(ival, "count", i->count);
+
+    if (i->blessed == 1) cJSON_AddTrueToObject(ival, "blessed");
+    if (i->cursed == 1) cJSON_AddTrueToObject(ival, "cursed");
+    if (i->blessed_known == 1) cJSON_AddTrueToObject(ival, "blessed_known");
+    if (i->bonus_known == 1) cJSON_AddTrueToObject(ival, "bonus_known");
+    if (i->curse_known == 1) cJSON_AddTrueToObject(ival, "curse_known");
+
+    if (i->corroded > 0) cJSON_AddNumberToObject(ival, "corroded", i->corroded);
+    if (i->burnt > 0) cJSON_AddNumberToObject(ival, "burnt", i->burnt);
+    if (i->rusty > 0) cJSON_AddNumberToObject(ival, "rusty", i->rusty);
+
+    /* container content */
+    if (inv_length(i->content) > 0)
+    {
+        cJSON_AddItemToObject(ival, "content", obj = cJSON_CreateArray());
+
+        for (idx = 0; idx < inv_length(i->content); idx++)
+        {
+            item *it = inv_get(i->content, idx);
+            cJSON_AddItemToArray(obj, cJSON_CreateNumber(GPOINTER_TO_UINT(it->oid)));
+        }
+    }
+
+    /* effects */
+    if (i->effects)
+    {
+        cJSON_AddItemToObject(ival, "effects", obj = cJSON_CreateArray());
+
+        for (idx = 0; idx < i->effects->len; idx++)
+        {
+            effect *e = g_ptr_array_index(i->effects, idx);
+            cJSON_AddItemToArray(obj, cJSON_CreateNumber(GPOINTER_TO_UINT(e->oid)));
+        }
+    }
+}
+
 /**
  * Compare two items
  * @param a item1
@@ -1018,9 +1068,6 @@ inventory *inv_new(gconstpointer owner)
 
     ninv->owner = owner;
 
-    /* register inventory with game */
-    ninv->oid = game_inventory_register(nlarn, ninv);
-
     return ninv;
 }
 
@@ -1034,9 +1081,6 @@ void inv_destroy(inventory *inv)
     }
 
     g_ptr_array_free(inv->content, TRUE);
-
-    /* unregister inventory */
-    game_inventory_unregister(nlarn, inv->oid);
 
     g_free(inv);
 }

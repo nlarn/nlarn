@@ -49,6 +49,9 @@ int main(int argc, char *argv[])
 
     game_new(argc, argv);
 
+    game_save(nlarn, "save.dat");
+    exit(EXIT_SUCCESS);
+
     /* put the player into the town */
     player_map_enter(nlarn->p, game_map(nlarn, 0), FALSE);
 

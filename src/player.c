@@ -185,6 +185,84 @@ void player_destroy(player *p)
     g_free(p);
 }
 
+void player_serialize(cJSON *root, player *p)
+{
+    cJSON_AddStringToObject(root, "name", p->name);
+    cJSON_AddStringToObject(root, "sex", p->sex ? "male" : "female");
+
+    cJSON_AddNumberToObject(root, "strength", p->strength);
+    cJSON_AddNumberToObject(root, "intelligence", p->intelligence);
+    cJSON_AddNumberToObject(root, "wisdom", p->wisdom);
+    cJSON_AddNumberToObject(root, "constitution", p->constitution);
+    cJSON_AddNumberToObject(root, "dexterity", p->dexterity);
+    cJSON_AddNumberToObject(root, "charisma", p->charisma);
+
+    cJSON_AddNumberToObject(root, "hp", p->hp);
+    cJSON_AddNumberToObject(root, "hp_max", p->hp_max);
+    cJSON_AddNumberToObject(root, "mp", p->mp);
+    cJSON_AddNumberToObject(root, "mp_max", p->mp_max);
+    cJSON_AddNumberToObject(root, "regen_counter", p->regen_counter);
+
+    cJSON_AddNumberToObject(root, "bank_account", p->bank_account);
+    cJSON_AddNumberToObject(root, "outstanding_taxes", p->outstanding_taxes);
+    cJSON_AddNumberToObject(root, "interest_lasttime", p->interest_lasttime);
+
+    cJSON_AddNumberToObject(root, "experience", p->experience);
+    cJSON_AddNumberToObject(root, "level", p->level);
+
+    if (p->eq_boots)
+        cJSON_AddNumberToObject(root, "eq_boots",
+                                GPOINTER_TO_UINT(p->eq_boots->oid));
+
+    if (p->eq_cloak)
+        cJSON_AddNumberToObject(root, "eq_cloak",
+                                GPOINTER_TO_UINT(p->eq_cloak->oid));
+
+    if (p->eq_gloves)
+        cJSON_AddNumberToObject(root, "eq_gloves",
+                                GPOINTER_TO_UINT(p->eq_gloves->oid));
+
+    if (p->eq_helmet)
+        cJSON_AddNumberToObject(root, "eq_helmet",
+                                GPOINTER_TO_UINT(p->eq_helmet->oid));
+
+    if (p->eq_shield)
+        cJSON_AddNumberToObject(root, "eq_shield",
+                                GPOINTER_TO_UINT(p->eq_shield->oid));
+
+    if (p->eq_suit)
+        cJSON_AddNumberToObject(root, "eq_suit",
+                                GPOINTER_TO_UINT(p->eq_suit->oid));
+
+    if (p->eq_ring_l)
+        cJSON_AddNumberToObject(root, "eq_ring_l",
+                                GPOINTER_TO_UINT(p->eq_ring_l->oid));
+
+    if (p->eq_ring_r)
+        cJSON_AddNumberToObject(root, "eq_ring_r",
+                                GPOINTER_TO_UINT(p->eq_ring_r->oid));
+
+   cJSON_AddItemToObject(root, "identified_amulets",
+                          cJSON_CreateIntArray(p->identified_amulets, AM_MAX));
+
+    cJSON_AddItemToObject(root, "identified_books",
+                          cJSON_CreateIntArray(p->identified_books, SP_MAX));
+
+    cJSON_AddItemToObject(root, "identified_potions",
+                          cJSON_CreateIntArray(p->identified_potions, PO_MAX));
+
+    cJSON_AddItemToObject(root, "identified_rings",
+                          cJSON_CreateIntArray(p->identified_rings, RT_MAX));
+
+    cJSON_AddItemToObject(root, "identified_scrolls",
+                          cJSON_CreateIntArray(p->identified_scrolls, RT_MAX));
+
+    cJSON_AddItemToObject(root, "position", pos_serialize(p->pos));
+
+    /* FIXME: the rest */
+
+}
+
 int player_regenerate(player *p)
 {
     /* number of turns between occasions */
