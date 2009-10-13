@@ -258,7 +258,6 @@ int game_destroy(game *g)
 
 int game_save(game *g, char *filename)
 {
-    int idx;
     struct cJSON *save, *obj;
 
     assert(g != NULL && filename != NULL);
@@ -300,19 +299,11 @@ int game_save(game *g, char *filename)
     /* store stock */
     if (inv_length(g->store_stock) > 0)
     {
-
-        cJSON_AddItemToObject(save, "store_stock", obj = cJSON_CreateArray());
-
-        for (idx = 0; idx < inv_length(g->store_stock); idx++)
-        {
-            item *it = inv_get(g->store_stock, idx);
-            cJSON_AddItemToArray(obj, cJSON_CreateNumber(GPOINTER_TO_UINT(it->oid)));
-        }
+        cJSON_AddItemToObject(save, "store_stock", inv_serialize(g->store_stock));
     }
 
     /* add player */
-    cJSON_AddItemToObject(save, "player", obj = cJSON_CreateObject());
-    player_serialize(obj, g->p);
+    cJSON_AddItemToObject(save, "player",  player_serialize(g->p));
 
     /* add items */
     cJSON_AddItemToObject(save, "items", obj = cJSON_CreateObject());

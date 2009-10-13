@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cJSON.h"
 #include "container.h"
 #include "display.h"
 #include "food.h"
@@ -100,6 +101,7 @@ static const guint32 player_lvl_exp[] =
 static int player_trap_trigger(player *p, trap_t trap);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 
+static cJSON *player_memory_serialize(player *p, position pos);
 static char *player_death_description(game_score_t *score, int verbose);
 
 player *player_new()
@@ -185,82 +187,149 @@ void player_destroy(player *p)
     g_free(p);
 }
 
-void player_serialize(cJSON *root, player *p)
+cJSON *player_serialize(player *p)
 {
-    cJSON_AddStringToObject(root, "name", p->name);
-    cJSON_AddStringToObject(root, "sex", p->sex ? "male" : "female");
+    cJSON *obj;
+    cJSON *pser = cJSON_CreateObject();
 
-    cJSON_AddNumberToObject(root, "strength", p->strength);
-    cJSON_AddNumberToObject(root, "intelligence", p->intelligence);
-    cJSON_AddNumberToObject(root, "wisdom", p->wisdom);
-    cJSON_AddNumberToObject(root, "constitution", p->constitution);
-    cJSON_AddNumberToObject(root, "dexterity", p->dexterity);
-    cJSON_AddNumberToObject(root, "charisma", p->charisma);
+    cJSON_AddStringToObject(pser, "name", p->name);
+    cJSON_AddStringToObject(pser, "sex", p->sex ? "male" : "female");
 
-    cJSON_AddNumberToObject(root, "hp", p->hp);
-    cJSON_AddNumberToObject(root, "hp_max", p->hp_max);
-    cJSON_AddNumberToObject(root, "mp", p->mp);
-    cJSON_AddNumberToObject(root, "mp_max", p->mp_max);
-    cJSON_AddNumberToObject(root, "regen_counter", p->regen_counter);
+    cJSON_AddNumberToObject(pser, "strength", p->strength);
+    cJSON_AddNumberToObject(pser, "intelligence", p->intelligence);
+    cJSON_AddNumberToObject(pser, "wisdom", p->wisdom);
+    cJSON_AddNumberToObject(pser, "constitution", p->constitution);
+    cJSON_AddNumberToObject(pser, "dexterity", p->dexterity);
+    cJSON_AddNumberToObject(pser, "charisma", p->charisma);
 
-    cJSON_AddNumberToObject(root, "bank_account", p->bank_account);
-    cJSON_AddNumberToObject(root, "outstanding_taxes", p->outstanding_taxes);
-    cJSON_AddNumberToObject(root, "interest_lasttime", p->interest_lasttime);
+    cJSON_AddNumberToObject(pser, "hp", p->hp);
+    cJSON_AddNumberToObject(pser, "hp_max", p->hp_max);
+    cJSON_AddNumberToObject(pser, "mp", p->mp);
+    cJSON_AddNumberToObject(pser, "mp_max", p->mp_max);
+    cJSON_AddNumberToObject(pser, "regen_counter", p->regen_counter);
 
-    cJSON_AddNumberToObject(root, "experience", p->experience);
-    cJSON_AddNumberToObject(root, "level", p->level);
+    cJSON_AddNumberToObject(pser, "bank_account", p->bank_account);
+    cJSON_AddNumberToObject(pser, "outstanding_taxes", p->outstanding_taxes);
+    cJSON_AddNumberToObject(pser, "interest_lasttime", p->interest_lasttime);
+
+    cJSON_AddNumberToObject(pser, "experience", p->experience);
+    cJSON_AddNumberToObject(pser, "level", p->level);
+
+    /* known spells */
+    if (p->known_spells->len > 0)
+    {
+        cJSON_AddItemToObject(pser, "known_spells",
+                              spells_serialize(p->known_spells));
+    }
+    /* inventory */
+    if (inv_length(p->inventory) > 0)
+    {
+        cJSON_AddItemToObject(pser, "inventory", inv_serialize(p->inventory));
+    }
+
+    /* effects */
+    if (p->effects->len > 0)
+    {
+        cJSON_AddItemToObject(pser, "effects", effects_serialize(p->effects));
+    }
+
+    /* equipped items */
+    if (p->eq_amulet)
+        cJSON_AddNumberToObject(pser, "eq_amulet",
+                                GPOINTER_TO_UINT(p->eq_amulet->oid));
+
+    if (p->eq_weapon)
+        cJSON_AddNumberToObject(pser, "eq_weapon",
+                                GPOINTER_TO_UINT(p->eq_weapon->oid));
 
     if (p->eq_boots)
-        cJSON_AddNumberToObject(root, "eq_boots",
+        cJSON_AddNumberToObject(pser, "eq_boots",
                                 GPOINTER_TO_UINT(p->eq_boots->oid));
 
     if (p->eq_cloak)
-        cJSON_AddNumberToObject(root, "eq_cloak",
+        cJSON_AddNumberToObject(pser, "eq_cloak",
                                 GPOINTER_TO_UINT(p->eq_cloak->oid));
 
     if (p->eq_gloves)
-        cJSON_AddNumberToObject(root, "eq_gloves",
+        cJSON_AddNumberToObject(pser, "eq_gloves",
                                 GPOINTER_TO_UINT(p->eq_gloves->oid));
 
     if (p->eq_helmet)
-        cJSON_AddNumberToObject(root, "eq_helmet",
+        cJSON_AddNumberToObject(pser, "eq_helmet",
                                 GPOINTER_TO_UINT(p->eq_helmet->oid));
 
     if (p->eq_shield)
-        cJSON_AddNumberToObject(root, "eq_shield",
+        cJSON_AddNumberToObject(pser, "eq_shield",
                                 GPOINTER_TO_UINT(p->eq_shield->oid));
 
     if (p->eq_suit)
-        cJSON_AddNumberToObject(root, "eq_suit",
+        cJSON_AddNumberToObject(pser, "eq_suit",
                                 GPOINTER_TO_UINT(p->eq_suit->oid));
 
     if (p->eq_ring_l)
-        cJSON_AddNumberToObject(root, "eq_ring_l",
+        cJSON_AddNumberToObject(pser, "eq_ring_l",
                                 GPOINTER_TO_UINT(p->eq_ring_l->oid));
 
     if (p->eq_ring_r)
-        cJSON_AddNumberToObject(root, "eq_ring_r",
+        cJSON_AddNumberToObject(pser, "eq_ring_r",
                                 GPOINTER_TO_UINT(p->eq_ring_r->oid));
 
-   cJSON_AddItemToObject(root, "identified_amulets",
+    /* identified items */
+    cJSON_AddItemToObject(pser, "identified_amulets",
                           cJSON_CreateIntArray(p->identified_amulets, AM_MAX));
 
-    cJSON_AddItemToObject(root, "identified_books",
+    cJSON_AddItemToObject(pser, "identified_books",
                           cJSON_CreateIntArray(p->identified_books, SP_MAX));
 
-    cJSON_AddItemToObject(root, "identified_potions",
+    cJSON_AddItemToObject(pser, "identified_potions",
                           cJSON_CreateIntArray(p->identified_potions, PO_MAX));
 
-    cJSON_AddItemToObject(root, "identified_rings",
+    cJSON_AddItemToObject(pser, "identified_rings",
                           cJSON_CreateIntArray(p->identified_rings, RT_MAX));
 
-    cJSON_AddItemToObject(root, "identified_scrolls",
-                          cJSON_CreateIntArray(p->identified_scrolls, RT_MAX));
+    cJSON_AddItemToObject(pser, "identified_scrolls",
+                          cJSON_CreateIntArray(p->identified_scrolls, ST_MAX));
 
-    cJSON_AddItemToObject(root, "position", pos_serialize(p->pos));
+    cJSON_AddItemToObject(pser, "courses_taken",
+                          cJSON_CreateIntArray(p->school_courses_taken, SCHOOL_COURSE_COUNT));
 
-    /* FIXME: the rest */
+    cJSON_AddItemToObject(pser, "position", pos_serialize(p->pos));
 
+    position pos;
+
+    /* store players' memory of the map */
+    cJSON_AddItemToObject(pser, "memory", obj = cJSON_CreateArray());
+
+    for (pos.z = 0; pos.z < MAP_MAX; pos.z++)
+    {
+        cJSON *mm = cJSON_CreateArray();
+
+        for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+            for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+                cJSON_AddItemToArray(mm, player_memory_serialize(p, pos));
+
+        cJSON_AddItemToArray(obj, mm);
+    }
+
+    /* statistics */
+    cJSON_AddItemToObject(pser, "stats", obj = cJSON_CreateObject());
+
+    cJSON_AddNumberToObject(obj, "moves_made", p->stats.moves_made);
+    cJSON_AddNumberToObject(obj, "deepest_level", p->stats.deepest_level);
+    cJSON_AddItemToObject(obj, "monsters_killed",
+                          cJSON_CreateIntArray(p->stats.monsters_killed, MT_MAX) );
+    cJSON_AddNumberToObject(obj, "spells_cast", p->stats.spells_cast);
+    cJSON_AddNumberToObject(obj, "potions_quaffed", p->stats.potions_quaffed);
+    cJSON_AddNumberToObject(obj, "scrolls_read", p->stats.scrolls_read);
+    cJSON_AddNumberToObject(obj, "gold_collected", p->stats.gold_collected);
+    cJSON_AddNumberToObject(obj, "gold_spent", p->stats.gold_spent);
+    cJSON_AddNumberToObject(obj, "times_prayed", p->stats.times_prayed);
+    cJSON_AddNumberToObject(obj, "max_level", p->stats.max_level);
+    cJSON_AddNumberToObject(obj, "max_xp", p->stats.max_xp);
+
+
+
+    return pser;
 }
 
 int player_regenerate(player *p)
@@ -4235,6 +4304,31 @@ static void player_calculate_octant(player *p, int row, float start,
             break;
         }
     }
+}
+
+static cJSON *player_memory_serialize(player *p, position pos)
+{
+    cJSON *mser;
+
+    mser = cJSON_CreateObject();
+
+    if (player_memory_of(p, pos).type > LT_NONE)
+        cJSON_AddNumberToObject(mser, "type",
+                                player_memory_of(p, pos).type);
+
+    if (player_memory_of(p, pos).stationary > LS_NONE)
+        cJSON_AddNumberToObject(mser, "stationary",
+                                player_memory_of(p, pos).stationary);
+
+    if (player_memory_of(p, pos).item > IT_NONE)
+        cJSON_AddNumberToObject(mser, "item",
+                                player_memory_of(p, pos).item);
+
+    if (player_memory_of(p, pos).trap > TT_NONE)
+        cJSON_AddNumberToObject(mser, "trap",
+                                player_memory_of(p, pos).trap);
+
+    return mser;
 }
 
 static char *player_death_description(game_score_t *score, int verbose)

@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "cJSON.h"
 #include "effects.h"
 #include "game.h"
 #include "nlarn.h"
@@ -524,6 +525,20 @@ void effect_serialize(gpointer oid, effect *e, cJSON *root)
     cJSON_AddNumberToObject(eval,"start", e->start);
     cJSON_AddNumberToObject(eval,"turns", e->turns);
     cJSON_AddNumberToObject(eval,"amount", e->amount);
+}
+
+cJSON *effects_serialize(GPtrArray *effects)
+{
+    int idx;
+    cJSON *eser = cJSON_CreateArray();
+
+    for (idx = 0; idx < effects->len; idx++)
+    {
+        effect *e = g_ptr_array_index(effects, idx);
+        cJSON_AddItemToArray(eser, cJSON_CreateNumber(GPOINTER_TO_UINT(e->oid)));
+    }
+
+    return eser;
 }
 
 char *effect_get_msg_start(effect *e)

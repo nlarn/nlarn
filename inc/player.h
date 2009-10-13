@@ -37,18 +37,18 @@ struct game;
 
 typedef struct player_stats
 {
-    guint32 moves_made;
-    guint32 deepest_level;
-    guint32 monsters_killed[MT_MAX];
-    guint32 spells_cast;
-    guint32 potions_quaffed;
-    guint32 scrolls_read;
-    guint32 books_read;
-    guint32 gold_collected;
-    guint32 gold_spent;
-    guint32 times_prayed;
-    guint32 max_level;
-    guint32 max_xp;
+    gint32 moves_made;
+    gint32 deepest_level;
+    gint32 monsters_killed[MT_MAX];
+    gint32 spells_cast;
+    gint32 potions_quaffed;
+    gint32 scrolls_read;
+    gint32 books_read;
+    gint32 gold_collected;
+    gint32 gold_spent;
+    gint32 times_prayed;
+    gint32 max_level;
+    gint32 max_xp;
 } player_stats;
 
 typedef struct _player_settings
@@ -132,7 +132,7 @@ typedef struct player
     player_tile_memory memory[MAP_MAX][MAP_MAX_Y][MAP_MAX_X];
 
     /* courses available in school */
-    guint8 school_courses_taken[SCHOOL_COURSE_COUNT];
+    gint school_courses_taken[SCHOOL_COURSE_COUNT];
 
     player_settings settings; /* game configuration */
 } player;
@@ -180,7 +180,7 @@ typedef enum player_cod
 player *player_new();
 void player_destroy(player *p);
 
-void player_serialize(cJSON *root, player *p);
+cJSON *player_serialize(player *p);
 
 int player_regenerate(player *p);
 void player_die(player *p, player_cod cause_type, int cause);

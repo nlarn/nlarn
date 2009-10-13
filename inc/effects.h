@@ -149,6 +149,7 @@ effect *effect_copy(effect *e);
 void effect_destroy(effect *e);
 
 void effect_serialize(gpointer oid, effect *e, cJSON *root);
+cJSON *effects_serialize(GPtrArray *effects);
 
 char *effect_get_msg_start(effect *e);
 char *effect_get_msg_stop(effect *e);

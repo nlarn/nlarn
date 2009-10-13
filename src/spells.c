@@ -368,6 +368,32 @@ void spell_destroy(spell *s)
     g_free(s);
 }
 
+cJSON *spell_serialize(spell *s)
+{
+    cJSON *sser = cJSON_CreateObject();
+
+    cJSON_AddNumberToObject(sser, "id", s->id);
+    cJSON_AddNumberToObject(sser, "learnt", s->learnt);
+    cJSON_AddNumberToObject(sser, "knowledge", s->knowledge);
+    cJSON_AddNumberToObject(sser, "used", s->used);
+
+    return sser;
+}
+
+cJSON *spells_serialize(GPtrArray *sparr)
+{
+    int idx;
+    cJSON *sser = cJSON_CreateArray();
+
+    for (idx = 0; idx < sparr->len; idx++)
+    {
+        spell *s = g_ptr_array_index(sparr, idx);
+        cJSON_AddItemToArray(sser, spell_serialize(s));
+    }
+
+    return sser;
+}
+
 int spell_sort(gconstpointer a, gconstpointer b)
 {
     gint order;

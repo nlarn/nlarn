@@ -442,13 +442,7 @@ void item_serialize(gpointer oid, gpointer it, gpointer root)
     /* container content */
     if (inv_length(i->content) > 0)
     {
-        cJSON_AddItemToObject(ival, "content", obj = cJSON_CreateArray());
-
-        for (idx = 0; idx < inv_length(i->content); idx++)
-        {
-            item *it = inv_get(i->content, idx);
-            cJSON_AddItemToArray(obj, cJSON_CreateNumber(GPOINTER_TO_UINT(it->oid)));
-        }
+        cJSON_AddItemToObject(ival, "content", inv_serialize(i->content));
     }
 
     /* effects */
@@ -1083,6 +1077,20 @@ void inv_destroy(inventory *inv)
     g_ptr_array_free(inv->content, TRUE);
 
     g_free(inv);
+}
+
+cJSON *inv_serialize(inventory *inv)
+{
+    int idx;
+    cJSON *sinv = cJSON_CreateArray();
+
+    for (idx = 0; idx < inv_length(inv); idx++)
+    {
+        item *it = inv_get(inv, idx);
+        cJSON_AddItemToArray(sinv, cJSON_CreateNumber(GPOINTER_TO_UINT(it->oid)));
+    }
+
+    return sinv;
 }
 
 void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,

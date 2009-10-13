@@ -107,6 +107,10 @@ extern const spell_data spells[SP_MAX];
 
 spell *spell_new(int id);
 void spell_destroy(spell *s);
+
+cJSON *spell_serialize(spell *s);
+cJSON *spells_serialize(GPtrArray *sparr);
+
 int spell_sort(gconstpointer a, gconstpointer b);
 
 int spell_cast(struct player *p);

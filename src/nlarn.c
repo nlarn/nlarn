@@ -49,9 +49,6 @@ int main(int argc, char *argv[])
 
     game_new(argc, argv);
 
-    game_save(nlarn, "save.dat");
-    exit(EXIT_SUCCESS);
-
     /* put the player into the town */
     player_map_enter(nlarn->p, game_map(nlarn, 0), FALSE);
 
@@ -272,7 +269,7 @@ int main(int argc, char *argv[])
             break;
 
             /* sit on throne */
-        case 'S':
+        case 's':
             moves_count = player_throne_sit(nlarn->p);
             break;
 
@@ -298,6 +295,15 @@ int main(int argc, char *argv[])
             }
             break;
 
+            /* save */
+        case 'S':
+            game_save(nlarn, "nlarn.sav");
+            game_destroy(nlarn);
+            display_shutdown();
+            exit(EXIT_SUCCESS);
+            break;
+
+            /* quit */
         case KEY_F(12) :
         case 'Q':
             if (display_get_yesno("Are you sure you want to quit?", NULL, NULL))

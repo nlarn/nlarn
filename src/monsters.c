@@ -939,8 +939,7 @@ void monster_destroy(monster *m)
 
 void monster_serialize(gpointer oid, monster *m, cJSON *root)
 {
-    int idx;
-    cJSON *mval, *invval, *eaval;
+    cJSON *mval;
 
     cJSON_AddItemToObject(root, "monster", mval = cJSON_CreateObject());
     cJSON_AddNumberToObject(mval, "type", monster_type(m));
@@ -966,25 +965,13 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     /* inventory */
     if (inv_length(m->inventory) > 0)
     {
-        cJSON_AddItemToObject(mval, "inventory", invval = cJSON_CreateArray());
-
-        for (idx = 0; idx < inv_length(m->inventory); idx++)
-        {
-            item *it = inv_get(m->inventory, idx);
-            cJSON_AddItemToArray(invval, cJSON_CreateNumber(GPOINTER_TO_UINT(it->oid)));
-        }
+        cJSON_AddItemToObject(mval, "inventory", inv_serialize(m->inventory));
     }
 
     /* effects */
     if (m->effects->len > 0)
     {
-        cJSON_AddItemToObject(mval, "effects", eaval = cJSON_CreateArray());
-
-        for (idx = 0; idx < m->effects->len; idx++)
-        {
-            effect *e = g_ptr_array_index(m->effects, idx);
-            cJSON_AddItemToArray(eaval, cJSON_CreateNumber(GPOINTER_TO_UINT(e->oid)));
-        }
+        cJSON_AddItemToObject(mval, "effects", effects_serialize(m->effects));
     }
 }
 
