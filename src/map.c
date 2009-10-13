@@ -172,6 +172,68 @@ map *map_new(int nlevel, char *mazefile)
     return l;
 }
 
+cJSON *map_serialize(map *m)
+{
+    int x, y;
+    cJSON *mser, *grid, *tile;
+
+    mser = cJSON_CreateObject();
+
+    cJSON_AddNumberToObject(mser, "nlevel", m->nlevel);
+    cJSON_AddNumberToObject(mser, "visited", m->visited);
+
+    cJSON_AddItemToObject(mser, "grid", grid = cJSON_CreateArray());
+
+    for (y = 0; y < MAP_MAX_Y; y++)
+    {
+        for (x = 0; x < MAP_MAX_X; x++)
+        {
+            cJSON_AddItemToArray(grid, tile = cJSON_CreateObject());
+
+            cJSON_AddNumberToObject(tile, "type", m->grid[y][x].type);
+
+            if (m->grid[y][x].base_type > 0
+                    && m->grid[y][x].base_type != m->grid[y][x].type)
+            {
+                cJSON_AddNumberToObject(tile, "base_type",
+                                        m->grid[y][x].base_type);
+            }
+
+            if (m->grid[y][x].stationary)
+            {
+                cJSON_AddNumberToObject(tile, "stationary",
+                                        m->grid[y][x].stationary);
+            }
+
+            if (m->grid[y][x].trap)
+            {
+                cJSON_AddNumberToObject(tile, "trap",
+                                        m->grid[y][x].trap);
+            }
+
+            if (m->grid[y][x].timer)
+            {
+                cJSON_AddNumberToObject(tile, "timer",
+                                        m->grid[y][x].timer);
+            }
+
+            if (m->grid[y][x].monster)
+            {
+                cJSON_AddNumberToObject(tile, "monster",
+                                        GPOINTER_TO_UINT(m->grid[y][x].monster));
+            }
+
+            if (m->grid[y][x].ilist )
+            {
+                cJSON_AddItemToObject(tile, "inventory",
+                                      inv_serialize(m->grid[y][x].ilist));
+            }
+        }
+    }
+
+    return mser;
+}
+
 char *map_dump(map *l)
 {
     position pos;
@@ -633,7 +695,10 @@ void map_set_tiletype(map *l, area *area, map_tile_t type, guint8 duration)
             if (area_point_get(area, x, y))
             {
                 map_tile *tile = map_tile_at(l, pos);
+
+                /* store original type */
                 tile->base_type = map_tiletype_at(l, pos);
+
                 tile->type = type;
                 tile->timer = duration;
             }
@@ -888,7 +953,6 @@ void map_timer(map *l, guint8 count)
                             && (tile->type == LT_GRASS))
                     {
                         tile->type = LT_DIRT;
-                        tile->base_type = LT_DIRT;
                     }
                     else
                     {
@@ -1117,7 +1181,6 @@ static void map_make_maze(map *l)
                 {
                     map_tile *tile = map_tile_at(l, pos);
                     tile->type = LT_FLOOR;
-                    tile->base_type = LT_FLOOR;
 
                     if (want_monster == TRUE)
                     {
@@ -1364,7 +1427,7 @@ static int map_load_from_file(map *l, char *mazefile, int which)
                 break;
             };
 
-            tile->type = tile->base_type = lt;
+            tile->type = lt;
             tile->stationary = ls;
 
             if (itm != NULL)
@@ -1410,12 +1473,12 @@ static void map_add_treasure_room(map *l)
             if ( (pos.y == y1) || (pos.y == y2) || (pos.x == x1) || (pos.x == x2) )
             {
                 /* if we are on the border of a room, make wall */
-                tile->type = tile->base_type = LT_WALL;
+                tile->type = LT_WALL;
             }
             else
             {
                 /* clear out space */
-                tile->type = tile->base_type = LT_FLOOR;
+                tile->type = LT_FLOOR;
 
                 /* create loot */
                 itm = item_new_random(IT_GOLD);
@@ -1463,7 +1526,7 @@ static void map_add_treasure_room(map *l)
 
     tile = map_tile_at(l, pos);
 
-    tile->type = tile->base_type = LT_FLOOR;
+    tile->type = LT_FLOOR;
     tile->stationary = LS_CLOSEDDOOR;
 }
 

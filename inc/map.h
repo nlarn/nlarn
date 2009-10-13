@@ -19,6 +19,7 @@
 #ifndef __MAP_H_
 #define __MAP_H_
 
+#include "cJSON.h"
 #include "items.h"
 #include "monsters.h"
 #include "position.h"
@@ -155,6 +156,8 @@ typedef struct map_path
 
 map *map_new(int nlevel, char *mazefile);
 void map_destroy(map *m);
+
+cJSON *map_serialize(map *m);
 char *map_dump(map *l);
 
 position map_find_space(map *l, map_element_t element);

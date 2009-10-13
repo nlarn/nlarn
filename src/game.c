@@ -258,6 +258,7 @@ int game_destroy(game *g)
 
 int game_save(game *g, char *filename)
 {
+    int idx;
     struct cJSON *save, *obj;
 
     assert(g != NULL && filename != NULL);
@@ -267,6 +268,13 @@ int game_save(game *g, char *filename)
     cJSON_AddNumberToObject(save, "time_start", g->time_start);
     cJSON_AddNumberToObject(save, "gtime", g->gtime);
     cJSON_AddNumberToObject(save, "difficulty", g->difficulty);
+
+    /* maps */
+    cJSON_AddItemToObject(save, "maps", obj = cJSON_CreateArray());
+    for (idx = 0; idx < MAP_MAX; idx++)
+    {
+        cJSON_AddItemToArray(obj, map_serialize(g->maps[idx]));
+    }
 
     cJSON_AddItemToObject(save, "amulet_created",
                           cJSON_CreateIntArray(g->amulet_created, AM_MAX));
@@ -325,6 +333,9 @@ int game_save(game *g, char *filename)
     GError *err = NULL;
     g_file_set_contents(filename, sg, -1, &err);
     free(sg);
+
+    /* free claimed memory */
+    cJSON_Delete(save);
 
     return TRUE;
 }

@@ -317,7 +317,8 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "moves_made", p->stats.moves_made);
     cJSON_AddNumberToObject(obj, "deepest_level", p->stats.deepest_level);
     cJSON_AddItemToObject(obj, "monsters_killed",
-                          cJSON_CreateIntArray(p->stats.monsters_killed, MT_MAX) );
+                          cJSON_CreateIntArray(p->stats.monsters_killed, MT_MAX));
+
     cJSON_AddNumberToObject(obj, "spells_cast", p->stats.spells_cast);
     cJSON_AddNumberToObject(obj, "potions_quaffed", p->stats.potions_quaffed);
     cJSON_AddNumberToObject(obj, "scrolls_read", p->stats.scrolls_read);
@@ -326,8 +327,6 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "times_prayed", p->stats.times_prayed);
     cJSON_AddNumberToObject(obj, "max_level", p->stats.max_level);
     cJSON_AddNumberToObject(obj, "max_xp", p->stats.max_xp);
-
-
 
     return pser;
 }
