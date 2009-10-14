@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <zlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -258,7 +259,7 @@ int game_destroy(game *g)
 
 int game_save(game *g, char *filename)
 {
-    int idx;
+    int idx, err;
     struct cJSON *save, *obj;
 
     assert(g != NULL && filename != NULL);
@@ -330,12 +331,26 @@ int game_save(game *g, char *filename)
     g_ptr_array_foreach(g->spheres, (GFunc)sphere_serialize, obj);
 
     char *sg = cJSON_Print(save);
-    GError *err = NULL;
-    g_file_set_contents(filename, sg, -1, &err);
-    free(sg);
-
     /* free claimed memory */
     cJSON_Delete(save);
+
+    gzFile file = gzopen(filename, "wb");
+    if (file == NULL) {
+        log_add_entry(g->p->log, "Error opening save file.");
+        free(sg);
+        return FALSE;
+    }
+
+    if (gzputs(file, sg) != strlen(sg)) {
+        log_add_entry(g->p->log, "Error writing save file: %s",
+                      gzerror(file, &err));
+
+        free(sg);
+        return FALSE;
+    }
+
+    free(sg);
+    gzclose(file);
 
     return TRUE;
 }

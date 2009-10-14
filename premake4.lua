@@ -44,7 +44,7 @@ solution "NLarn"
 		includedirs { "inc" }
 		defines { "G_DISABLE_DEPRECATED" }
 
-		links { "glib-2.0" }
+		links { "glib-2.0", "m", "z" }
 
 		configuration "Debug"
 			defines { "DEBUG" }

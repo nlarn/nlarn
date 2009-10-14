@@ -297,10 +297,13 @@ int main(int argc, char *argv[])
 
             /* save */
         case 'S':
-            game_save(nlarn, "nlarn.sav");
-            game_destroy(nlarn);
-            display_shutdown();
-            exit(EXIT_SUCCESS);
+            if (game_save(nlarn, "nlarn.sav"))
+            {
+                /* only terminate the game if saving was successful */
+                game_destroy(nlarn);
+                display_shutdown();
+                exit(EXIT_SUCCESS);
+            }
             break;
 
             /* quit */
