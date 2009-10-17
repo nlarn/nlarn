@@ -72,6 +72,7 @@ Section "NLarn (required)"
   File "nlarn.exe"
   File "pdcurses.dll"
   File "libglib-2.0-0.dll"
+  File "zlib1.dll"
   File "LICENSE"
   File "nlarn.ini-sample"
   
