@@ -380,6 +380,18 @@ cJSON *spell_serialize(spell *s)
     return sser;
 }
 
+spell *spell_deserialize(cJSON *sser)
+{
+    spell *s = g_malloc0(sizeof(spell));
+
+    s->id = cJSON_GetObjectItem(sser, "id")->valueint;
+    s->learnt = cJSON_GetObjectItem(sser, "learnt")->valueint;
+    s->knowledge = cJSON_GetObjectItem(sser, "knowledge")->valueint;
+    s->used = cJSON_GetObjectItem(sser, "used")->valueint;
+
+    return s;
+}
+
 cJSON *spells_serialize(GPtrArray *sparr)
 {
     int idx;
@@ -392,6 +404,20 @@ cJSON *spells_serialize(GPtrArray *sparr)
     }
 
     return sser;
+}
+
+GPtrArray *spells_deserialize(cJSON *sser)
+{
+    int idx;
+    GPtrArray *spells = g_ptr_array_new();
+
+    for (idx = 0; idx < cJSON_GetArraySize(sser); idx++)
+    {
+        spell *s = spell_deserialize(cJSON_GetArrayItem(sser, idx));
+        g_ptr_array_add(spells, s);
+    }
+
+    return spells;
 }
 
 int spell_sort(gconstpointer a, gconstpointer b)

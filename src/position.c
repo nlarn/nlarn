@@ -166,6 +166,17 @@ cJSON *pos_serialize(position pos)
     return pval;
 }
 
+position pos_deserialize(cJSON *pser)
+{
+    position pos;
+
+    pos.x = cJSON_GetObjectItem(pser, "x")->valueint;
+    pos.y = cJSON_GetObjectItem(pser, "y")->valueint;
+    pos.z = cJSON_GetObjectItem(pser, "z")->valueint;
+
+    return pos;
+}
+
 /**
  * Create a new rectangle of given dimensions. Do a sanity check and
  * replace out-of-bounds values.

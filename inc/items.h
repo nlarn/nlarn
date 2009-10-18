@@ -83,6 +83,7 @@ enum perish_impact {
 	PI_MAX
 };
 
+struct game;
 struct _inventory;
 struct _item;
 
@@ -143,6 +144,7 @@ item *item_split(item *original, guint32 count);
 void item_destroy(item *it);
 
 void item_serialize(gpointer oid, gpointer it, gpointer root);
+item *item_deserialize(cJSON *iser, struct game *g);
 
 int item_compare(item *a, item *b);
 int item_sort(gconstpointer a, gconstpointer b, gpointer data);
@@ -186,6 +188,7 @@ inventory *inv_new(gconstpointer owner);
 void inv_destroy(inventory *inv);
 
 cJSON *inv_serialize(inventory *inv);
+inventory *inv_deserialize(cJSON *iser);
 
 void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
                        inv_callback_void post_add, inv_callback_bool pre_del,

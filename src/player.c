@@ -102,6 +102,7 @@ static int player_trap_trigger(player *p, trap_t trap);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 
 static cJSON *player_memory_serialize(player *p, position pos);
+static void player_memory_deserialize(player *p, position pos, cJSON *mser);
 static char *player_death_description(game_score_t *score, int verbose);
 
 player *player_new()
@@ -193,7 +194,7 @@ cJSON *player_serialize(player *p)
     cJSON *pser = cJSON_CreateObject();
 
     cJSON_AddStringToObject(pser, "name", p->name);
-    cJSON_AddStringToObject(pser, "sex", p->sex ? "male" : "female");
+    cJSON_AddNumberToObject(pser, "sex", p->sex);
 
     cJSON_AddNumberToObject(pser, "strength", p->strength);
     cJSON_AddNumberToObject(pser, "intelligence", p->intelligence);
@@ -311,6 +312,9 @@ cJSON *player_serialize(player *p)
         cJSON_AddItemToArray(obj, mm);
     }
 
+    /* log */
+    cJSON_AddItemToObject(pser, "log", log_serialize(p->log));
+
     /* statistics */
     cJSON_AddItemToObject(pser, "stats", obj = cJSON_CreateObject());
 
@@ -329,6 +333,167 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "max_xp", p->stats.max_xp);
 
     return pser;
+}
+
+player *player_deserialize(cJSON *pser)
+{
+    player *p;
+    int idx;
+    cJSON *obj, *elem;
+
+    p = g_malloc0(sizeof(player));
+
+    p->name = cJSON_GetObjectItem(pser, "name")->valuestring;
+    p->sex = cJSON_GetObjectItem(pser, "sex")->valueint;
+
+    p->strength = cJSON_GetObjectItem(pser, "strength")->valueint;
+    p->intelligence = cJSON_GetObjectItem(pser, "intelligence")->valueint;
+    p->wisdom = cJSON_GetObjectItem(pser, "wisdom")->valueint;
+    p->constitution = cJSON_GetObjectItem(pser, "constitution")->valueint;
+    p->dexterity = cJSON_GetObjectItem(pser, "dexterity")->valueint;
+    p->charisma = cJSON_GetObjectItem(pser, "charisma")->valueint;
+
+    p->hp = cJSON_GetObjectItem(pser, "hp")->valueint;
+    p->hp_max = cJSON_GetObjectItem(pser, "hp_max")->valueint;
+    p->mp = cJSON_GetObjectItem(pser, "mp")->valueint;
+    p->mp_max = cJSON_GetObjectItem(pser, "mp_max")->valueint;
+    p->regen_counter = cJSON_GetObjectItem(pser, "regen_counter")->valueint;
+
+    p->bank_account = cJSON_GetObjectItem(pser, "bank_account")->valueint;
+    p->outstanding_taxes = cJSON_GetObjectItem(pser, "outstanding_taxes")->valueint;
+    p->interest_lasttime = cJSON_GetObjectItem(pser, "interest_lasttime")->valueint;
+
+    p->experience = cJSON_GetObjectItem(pser, "experience")->valueint;
+    p->level = cJSON_GetObjectItem(pser, "level")->valueint;
+
+
+    /* known spells */
+    obj = cJSON_GetObjectItem(pser, "known_spells");
+    if (obj != NULL)
+        p->known_spells = spells_deserialize(obj);
+    else
+        p->known_spells = g_ptr_array_new();
+
+
+    /* inventory */
+    obj = cJSON_GetObjectItem(pser, "inventory");
+    if (obj != NULL)
+        p->inventory = inv_deserialize(obj);
+    else
+        p->inventory = inv_new(p);
+
+    p->inventory->owner = p;
+    inv_callbacks_set(p->inventory, &player_inv_pre_add, &player_inv_weight_recalc,
+                      NULL, &player_inv_weight_recalc);
+
+
+    /* effects */
+    obj = cJSON_GetObjectItem(pser, "effects");
+    if (obj != NULL)
+        p->effects = effects_deserialize(obj);
+    else
+        p->effects = g_ptr_array_new();
+
+    /* equipped items */
+    obj = cJSON_GetObjectItem(pser, "eq_amulet");
+    if (obj != NULL) p->eq_amulet = GUINT_TO_POINTER(obj->valueint);
+
+    obj = cJSON_GetObjectItem(pser, "eq_weapon");
+    if (obj != NULL) p->eq_weapon = GUINT_TO_POINTER(obj->valueint);
+
+    obj = cJSON_GetObjectItem(pser, "eq_boots");
+    if (obj != NULL) p->eq_boots = GUINT_TO_POINTER(obj->valueint);
+
+    obj = cJSON_GetObjectItem(pser, "eq_cloak");
+    if (obj != NULL) p->eq_cloak = GUINT_TO_POINTER(obj->valueint);
+
+    obj = cJSON_GetObjectItem(pser, "eq_gloves");
+    if (obj != NULL) p->eq_gloves = GUINT_TO_POINTER(obj->valueint);
+
+    obj = cJSON_GetObjectItem(pser, "eq_helmet");
+    if (obj != NULL) p->eq_helmet = GUINT_TO_POINTER(obj->valueint);
+
+    obj = cJSON_GetObjectItem(pser, "eq_shield");
+    if (obj != NULL) p->eq_shield = GUINT_TO_POINTER(obj->valueint);
+
+    obj = cJSON_GetObjectItem(pser, "eq_suit");
+    if (obj != NULL) p->eq_suit = GUINT_TO_POINTER(obj->valueint);
+
+    obj = cJSON_GetObjectItem(pser, "eq_ring_l");
+    if (obj != NULL) p->eq_ring_l = GUINT_TO_POINTER(obj->valueint);
+
+    obj = cJSON_GetObjectItem(pser, "eq_ring_r");
+    if (obj != NULL) p->eq_ring_r = GUINT_TO_POINTER(obj->valueint);
+
+    /* identified items */
+    obj = cJSON_GetObjectItem(pser, "identified_amulets");
+    for (idx = 0; idx < AM_MAX; idx++)
+        p->identified_amulets[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(pser, "identified_books");
+    for (idx = 0; idx < SP_MAX; idx++)
+        p->identified_books[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(pser, "identified_potions");
+    for (idx = 0; idx < PO_MAX; idx++)
+        p->identified_potions[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(pser, "identified_rings");
+    for (idx = 0; idx < RT_MAX; idx++)
+        p->identified_rings[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(pser, "identified_scrolls");
+    for (idx = 0; idx < ST_MAX; idx++)
+        p->identified_scrolls[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(pser, "courses_taken");
+    for (idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
+        p->school_courses_taken[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    p->pos = pos_deserialize(cJSON_GetObjectItem(pser, "position"));
+
+
+    /* restore players' memory of the map */
+    position pos;
+    obj = cJSON_GetObjectItem(pser, "memory");
+
+    for (pos.z = 0; pos.z < MAP_MAX; pos.z++)
+    {
+        elem = cJSON_GetArrayItem(obj, pos.z);
+
+        for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+        {
+            for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+            {
+                cJSON *tile = cJSON_GetArrayItem(elem, pos.x + (MAP_MAX_X * pos.y));
+                player_memory_deserialize(p, pos, tile);
+            }
+        }
+    }
+
+    /* log */
+    p->log = log_deserialize(cJSON_GetObjectItem(pser, "log"));
+
+    /* statistics */
+    obj = cJSON_GetObjectItem(pser, "stats");
+
+    p->stats.moves_made = cJSON_GetObjectItem(obj, "moves_made")->valueint;
+    p->stats.deepest_level = cJSON_GetObjectItem(obj, "deepest_level")->valueint;
+
+    elem = cJSON_GetObjectItem(obj, "monsters_killed");
+    for (idx = 0; idx > MT_MAX; idx++)
+        p->stats.monsters_killed[idx] = cJSON_GetArrayItem(elem, idx)->valueint;
+
+    p->stats.spells_cast = cJSON_GetObjectItem(obj, "spells_cast")->valueint;
+    p->stats.potions_quaffed = cJSON_GetObjectItem(obj, "potions_quaffed")->valueint;
+    p->stats.scrolls_read = cJSON_GetObjectItem(obj, "scrolls_read")->valueint;
+    p->stats.gold_collected = cJSON_GetObjectItem(obj, "gold_collected")->valueint;
+    p->stats.gold_spent = cJSON_GetObjectItem(obj, "gold_spent")->valueint;
+    p->stats.times_prayed = cJSON_GetObjectItem(obj, "times_prayed")->valueint;
+    p->stats.max_level = cJSON_GetObjectItem(obj, "max_level")->valueint;
+    p->stats.max_xp = cJSON_GetObjectItem(obj, "max_xp")->valueint;
+
+    return p;
 }
 
 int player_regenerate(player *p)
@@ -4328,6 +4493,27 @@ static cJSON *player_memory_serialize(player *p, position pos)
                                 player_memory_of(p, pos).trap);
 
     return mser;
+}
+
+static void player_memory_deserialize(player *p, position pos, cJSON *mser)
+{
+    cJSON *obj;
+
+    obj = cJSON_GetObjectItem(mser, "type");
+    if (obj != NULL)
+        player_memory_of(p, pos).type = obj->valueint;
+
+    obj = cJSON_GetObjectItem(mser, "stationary");
+    if (obj != NULL)
+        player_memory_of(p, pos).stationary = obj->valueint;
+
+    obj = cJSON_GetObjectItem(mser, "item");
+    if (obj != NULL)
+        player_memory_of(p, pos).item = obj->valueint;
+
+    obj = cJSON_GetObjectItem(mser, "trap");
+    if (obj != NULL)
+        player_memory_of(p, pos).trap = obj->valueint;
 }
 
 static char *player_death_description(game_score_t *score, int verbose)

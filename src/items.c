@@ -23,6 +23,7 @@
 #include "armour.h"
 #include "container.h"
 #include "food.h"
+#include "game.h"
 #include "gems.h"
 #include "items.h"
 #include "map.h"
@@ -416,12 +417,11 @@ void item_destroy(item *it)
 
 void item_serialize(gpointer oid, gpointer it, gpointer root)
 {
-    int idx;
-    cJSON *ival, *obj;
+    cJSON *ival;
 
     item *i = (item *)it;
 
-    cJSON_AddItemToObject((cJSON *)root, "item", ival = cJSON_CreateObject());
+    cJSON_AddItemToArray((cJSON *)root, ival = cJSON_CreateObject());
 
     cJSON_AddNumberToObject(ival, "oid", GPOINTER_TO_UINT(oid));
     cJSON_AddNumberToObject(ival, "type", i->type);
@@ -448,14 +448,68 @@ void item_serialize(gpointer oid, gpointer it, gpointer root)
     /* effects */
     if (i->effects)
     {
-        cJSON_AddItemToObject(ival, "effects", obj = cJSON_CreateArray());
-
-        for (idx = 0; idx < i->effects->len; idx++)
-        {
-            effect *e = g_ptr_array_index(i->effects, idx);
-            cJSON_AddItemToArray(obj, cJSON_CreateNumber(GPOINTER_TO_UINT(e->oid)));
-        }
+        cJSON_AddItemToObject(ival, "effects", effects_serialize(i->effects));
     }
+}
+
+item *item_deserialize(cJSON *iser, struct game *g)
+{
+    guint oid;
+    item *it;
+    cJSON *obj;
+
+    it = g_malloc0(sizeof(item));
+
+    /* must-have attributes */
+    oid = cJSON_GetObjectItem(iser, "oid")->valueint;
+    it->oid = GUINT_TO_POINTER(oid);
+
+    it->type = cJSON_GetObjectItem(iser, "type")->valueint;
+    it->id = cJSON_GetObjectItem(iser, "id")->valueint;
+    it->bonus = cJSON_GetObjectItem(iser, "bonus")->valueint;
+    it->count = cJSON_GetObjectItem(iser, "count")->valueint;
+
+    /* optional attributes */
+    obj = cJSON_GetObjectItem(iser, "blessed");
+    if (obj != NULL) it->blessed = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "cursed");
+    if (obj != NULL) it->cursed = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "blessed_known");
+    if (obj != NULL) it->blessed_known = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "bonus_known");
+    if (obj != NULL) it->bonus_known = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "curse_known");
+    if (obj != NULL) it->curse_known = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "corroded");
+    if (obj != NULL) it->corroded = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "burnt");
+    if (obj != NULL) it->burnt = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "rusty");
+    if (obj != NULL) it->rusty = obj->valueint;
+
+    /* container content */
+    obj = cJSON_GetObjectItem(iser, "content");
+    if (obj != NULL) it->content = inv_deserialize(obj);
+
+    /* effects */
+    obj = cJSON_GetObjectItem(iser, "effects");
+    if (obj != NULL) it->effects = effects_deserialize(obj);
+
+    /* add item to game */
+    g_hash_table_insert(g->items, it->oid, it);
+
+    /* increase max_id to match used ids */
+    if (g->item_max_id < oid)
+        g->item_max_id = oid;
+
+    return it;
 }
 
 /**
@@ -1091,6 +1145,24 @@ cJSON *inv_serialize(inventory *inv)
     }
 
     return sinv;
+}
+
+inventory *inv_deserialize(cJSON *iser)
+{
+    int idx;
+    inventory *inv;
+
+    inv = g_malloc0(sizeof(inventory));
+
+    inv->content = g_ptr_array_new();
+
+    for (idx = 0; idx < cJSON_GetArraySize(iser); idx++)
+    {
+        guint oid = cJSON_GetArrayItem(iser, idx)->valueint;
+        g_ptr_array_add(inv->content, GUINT_TO_POINTER(oid));
+    }
+
+    return inv;
 }
 
 void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,

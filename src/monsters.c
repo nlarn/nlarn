@@ -941,7 +941,7 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
 {
     cJSON *mval;
 
-    cJSON_AddItemToObject(root, "monster", mval = cJSON_CreateObject());
+    cJSON_AddItemToArray(root, mval = cJSON_CreateObject());
     cJSON_AddNumberToObject(mval, "type", monster_type(m));
     cJSON_AddNumberToObject(mval, "oid", GPOINTER_TO_UINT(oid));
     cJSON_AddNumberToObject(mval, "hp", m->hp);
@@ -973,6 +973,53 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     {
         cJSON_AddItemToObject(mval, "effects", effects_serialize(m->effects));
     }
+}
+
+void monster_deserialize(cJSON *mser, game *g)
+{
+    cJSON *obj;
+    guint oid;
+    monster *m = g_malloc0(sizeof(monster));
+
+    m->type = cJSON_GetObjectItem(mser, "type")->valueint;
+    oid = cJSON_GetObjectItem(mser, "oid")->valueint;
+    m->oid = GUINT_TO_POINTER(oid);
+    m->hp = cJSON_GetObjectItem(mser, "hp")->valueint;
+    m->pos = pos_deserialize(cJSON_GetObjectItem(mser, "pos"));
+
+    if ((obj = cJSON_GetObjectItem(mser, "weapon")))
+        m->weapon = GUINT_TO_POINTER(obj->valueint);
+
+    if ((obj = cJSON_GetObjectItem(mser, "unknown")))
+        m->unknown = TRUE;
+
+    if ((obj = cJSON_GetObjectItem(mser, "item_type")))
+        m->item_type = obj->valueint;
+
+    if ((obj = cJSON_GetObjectItem(mser, "lastseen")))
+        m->lastseen = obj->valueint;
+
+    if ((obj = cJSON_GetObjectItem(mser, "player_pos")))
+        m->player_pos = pos_deserialize(obj);
+
+    /* inventory */
+    if ((obj = cJSON_GetObjectItem(mser, "inventory")))
+        m->inventory = inv_deserialize(obj);
+    else
+        m->inventory = inv_new(m);
+
+    /* effects */
+    if ((obj = cJSON_GetObjectItem(mser, "effects")))
+        m->effects = effects_deserialize(obj);
+    else
+        m->effects = g_ptr_array_new();
+
+    /* add monster to game */
+    g_hash_table_insert(g->monsters, m->oid, m);
+
+    /* increase max_id to match used ids */
+    if (oid > g->monster_max_id)
+        g->monster_max_id = oid;
 }
 
 int monster_hp(monster *m)

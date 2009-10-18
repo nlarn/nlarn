@@ -35,6 +35,7 @@
 struct _monster;
 typedef struct _monster monster;
 
+struct game;
 struct player;
 struct map;
 
@@ -166,6 +167,7 @@ monster *monster_new_by_level(position pos);
 void monster_destroy(monster *m);
 
 void monster_serialize(gpointer oid, monster *m, cJSON *root);
+void monster_deserialize(cJSON *mser, struct game *g);
 
 /* getter / setter */
 

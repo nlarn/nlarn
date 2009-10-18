@@ -158,6 +158,7 @@ map *map_new(int nlevel, char *mazefile);
 void map_destroy(map *m);
 
 cJSON *map_serialize(map *m);
+map *map_deserialize(cJSON *mser, struct game *g);
 char *map_dump(map *l);
 
 position map_find_space(map *l, map_element_t element);

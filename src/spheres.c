@@ -60,7 +60,7 @@ void sphere_serialize(sphere *s, cJSON *root)
 {
     cJSON *sval;
 
-    cJSON_AddItemToObject(root, "spheres", sval = cJSON_CreateObject());
+    cJSON_AddItemToArray(root, sval = cJSON_CreateObject());
 
     cJSON_AddNumberToObject(sval, "dir", s->dir);
     cJSON_AddNumberToObject(sval, "lifetime", s->lifetime);
@@ -70,6 +70,19 @@ void sphere_serialize(sphere *s, cJSON *root)
         cJSON_AddFalseToObject(sval, "owner");
 }
 
+void sphere_deserialize(cJSON *sser, game *g)
+{
+    sphere *s = g_malloc0(sizeof(sphere));
+
+    s->dir = cJSON_GetObjectItem(sser, "dir")->valueint;
+    s->lifetime = cJSON_GetObjectItem(sser, "lifetime")->valueint;
+    s->pos = pos_deserialize(cJSON_GetObjectItem(sser, "pos"));
+
+    if (!cJSON_GetObjectItem(sser, "owner"))
+        s->owner = g->p;
+
+    g_ptr_array_add(g->spheres, s);
+}
 
 void sphere_move(sphere *s, game *g)
 {

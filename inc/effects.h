@@ -141,6 +141,7 @@ typedef struct effect
     struct _item *item;     /* item which causes the effect (if caused by item) */
 } effect;
 
+struct game;
 
 /* function declarations */
 
@@ -149,7 +150,9 @@ effect *effect_copy(effect *e);
 void effect_destroy(effect *e);
 
 void effect_serialize(gpointer oid, effect *e, cJSON *root);
+effect *effect_deserialize(cJSON *eser, struct game *g);
 cJSON *effects_serialize(GPtrArray *effects);
+GPtrArray *effects_deserialize(cJSON *eser);
 
 char *effect_get_msg_start(effect *e);
 char *effect_get_msg_stop(effect *e);

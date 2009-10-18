@@ -20,6 +20,7 @@
 #define __UTILS_H_
 
 #include <time.h>
+#include "cJSON.h"
 #include "defines.h"
 
 /* game messaging */
@@ -62,6 +63,9 @@ int log_add_entry(message_log *log, char *fmt, ...);
 void log_set_time(message_log *log, int gtime);
 void log_delete(message_log *log);
 message_log_entry *log_get_entry(message_log *log, guint id);
+
+cJSON *log_serialize(message_log *log);
+message_log *log_deserialize(cJSON *lser);
 
 #define log_length(log) ((log)->length)
 #define log_enable(log) ((log)->active = TRUE)

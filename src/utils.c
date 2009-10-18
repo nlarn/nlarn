@@ -90,8 +90,6 @@ message_log *log_new()
 
     log = g_malloc0(sizeof(message_log));
 
-    /* to force message assemble on turn 0 */
-    log->gtime = -1;
     log->active = TRUE;
     log->buffer = g_string_new(NULL);
 
@@ -192,6 +190,46 @@ message_log_entry *log_get_entry(message_log *log, guint id)
 {
     assert(log != NULL && id < log->length);
     return(log->entries[id]);
+}
+
+cJSON *log_serialize(message_log *log)
+{
+    int idx;
+    cJSON *le, *lser = cJSON_CreateArray();
+
+    for (idx = 0; idx < log_length(log); idx++)
+    {
+        cJSON_AddItemToArray(lser, le = cJSON_CreateObject());
+
+        cJSON_AddNumberToObject(le, "ltime", log->entries[idx]->ltime);
+        cJSON_AddNumberToObject(le, "gtime", log->entries[idx]->gtime);
+        cJSON_AddStringToObject(le, "message", log->entries[idx]->message);
+    }
+
+    return lser;
+}
+
+message_log *log_deserialize(cJSON *lser)
+{
+    int len, idx;
+    message_log *log = g_malloc0(sizeof(message_log));
+
+    len = cJSON_GetArraySize(lser);
+
+    log->entries = g_malloc0(len * (sizeof(message_log_entry *)));
+
+    for (idx = 0; idx < len; idx++)
+    {
+        cJSON *le = cJSON_GetArrayItem(lser, idx);
+
+        log->entries[idx] = g_malloc0(sizeof(message_log_entry));
+
+        log->entries[idx]->ltime = cJSON_GetObjectItem(le, "ltime")->valueint;
+        log->entries[idx]->gtime = cJSON_GetObjectItem(le, "gtime")->valueint;
+        log->entries[idx]->message = cJSON_GetObjectItem(le, "message")->valuestring;
+    }
+
+    return log;
 }
 
 void log_delete(message_log *log)

@@ -181,6 +181,7 @@ player *player_new();
 void player_destroy(player *p);
 
 cJSON *player_serialize(player *p);
+player *player_deserialize(cJSON *pser);
 
 int player_regenerate(player *p);
 void player_die(player *p, player_cod cause_type, int cause);

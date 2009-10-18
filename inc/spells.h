@@ -109,7 +109,9 @@ spell *spell_new(int id);
 void spell_destroy(spell *s);
 
 cJSON *spell_serialize(spell *s);
+spell *spell_deserialize(cJSON *sser);
 cJSON *spells_serialize(GPtrArray *sparr);
+GPtrArray *spells_deserialize(cJSON *sser);
 
 int spell_sort(gconstpointer a, gconstpointer b);
 

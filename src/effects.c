@@ -518,13 +518,38 @@ void effect_serialize(gpointer oid, effect *e, cJSON *root)
 {
     cJSON *eval;
 
-    cJSON_AddItemToObject(root, "effect", eval = cJSON_CreateObject());
+    cJSON_AddItemToArray(root, eval = cJSON_CreateObject());
 
     cJSON_AddNumberToObject(eval,"oid", GPOINTER_TO_UINT(oid));
     cJSON_AddNumberToObject(eval,"type", e->type);
     cJSON_AddNumberToObject(eval,"start", e->start);
     cJSON_AddNumberToObject(eval,"turns", e->turns);
     cJSON_AddNumberToObject(eval,"amount", e->amount);
+}
+
+effect *effect_deserialize(cJSON *eser, game *g)
+{
+    effect *e;
+    guint oid;
+
+    e = g_malloc0(sizeof(effect));
+
+    oid = cJSON_GetObjectItem(eser, "oid")->valueint;
+    e->oid =  GUINT_TO_POINTER(oid);
+
+    e->type = cJSON_GetObjectItem(eser, "type")->valueint;
+    e->start = cJSON_GetObjectItem(eser, "start")->valueint;
+    e->turns = cJSON_GetObjectItem(eser, "turns")->valueint;
+    e->amount = cJSON_GetObjectItem(eser, "amount")->valueint;
+
+    /* add effect to game */
+    g_hash_table_insert(g->effects, e->oid, e);
+
+    /* increase max_id to match used ids */
+    if (g->effect_max_id < oid)
+        g->effect_max_id = oid;
+
+    return e;
 }
 
 cJSON *effects_serialize(GPtrArray *effects)
@@ -539,6 +564,23 @@ cJSON *effects_serialize(GPtrArray *effects)
     }
 
     return eser;
+}
+
+GPtrArray *effects_deserialize(cJSON *eser)
+{
+    int idx;
+    GPtrArray *effects;
+
+    effects = g_ptr_array_new();
+
+    for (idx = 0; idx < cJSON_GetArraySize(eser); idx++)
+    {
+        cJSON *effser = cJSON_GetArrayItem(eser, idx);
+        guint oid = effser->valueint;
+        g_ptr_array_add(effects, GUINT_TO_POINTER(oid));
+    }
+
+    return effects;
 }
 
 char *effect_get_msg_start(effect *e)

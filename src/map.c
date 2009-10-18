@@ -234,6 +234,50 @@ cJSON *map_serialize(map *m)
     return mser;
 }
 
+map *map_deserialize(cJSON *mser, game *g)
+{
+    int x, y;
+    cJSON *grid, *tile, *obj;
+    map *m;
+
+    m = g_malloc0(sizeof(map));
+
+    m->nlevel = cJSON_GetObjectItem(mser, "nlevel")->valueint;
+    m->visited = cJSON_GetObjectItem(mser, "visited")->valueint;
+
+    grid = cJSON_GetObjectItem(mser, "grid");
+
+    for (y = 0; y < MAP_MAX_Y; y++)
+    {
+        for (x = 0; x < MAP_MAX_X; x++)
+        {
+            tile = cJSON_GetArrayItem(grid, x + (y * MAP_MAX_X));
+
+            m->grid[y][x].type = cJSON_GetObjectItem(tile, "type")->valueint;
+
+            obj = cJSON_GetObjectItem(tile, "base_type");
+            if (obj != NULL) m->grid[y][x].base_type = obj->valueint;
+
+            obj = cJSON_GetObjectItem(tile, "stationary");
+            if (obj != NULL) m->grid[y][x].stationary = obj->valueint;
+
+            obj = cJSON_GetObjectItem(tile, "trap");
+            if (obj != NULL) m->grid[y][x].trap = obj->valueint;
+
+            obj = cJSON_GetObjectItem(tile, "timer");
+            if (obj != NULL) m->grid[y][x].timer = obj->valueint;
+
+            obj = cJSON_GetObjectItem(tile, "monster");
+            if (obj != NULL) m->grid[y][x].monster = GUINT_TO_POINTER(obj->valueint);
+
+            obj = cJSON_GetObjectItem(tile, "inventory");
+            if (obj != NULL) m->grid[y][x].ilist = inv_deserialize(obj);
+        }
+    }
+
+    return m;
+}
+
 char *map_dump(map *l)
 {
     position pos;
