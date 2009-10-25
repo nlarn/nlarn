@@ -913,7 +913,8 @@ void monster_destroy(monster *m)
     /* free effects */
     while (m->effects->len > 0)
     {
-        effect *e = g_ptr_array_remove_index(m->effects, m->effects->len - 1);
+        gpointer effect_id = g_ptr_array_remove_index(m->effects, m->effects->len - 1);
+        effect *e = game_effect_get(nlarn, effect_id);
         effect_destroy(e);
     }
 
@@ -954,7 +955,7 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
         cJSON_AddTrueToObject(mval, "unknown");
 
     if (m->item_type)
-       cJSON_AddNumberToObject(mval, "item_type", m->item_type);
+        cJSON_AddNumberToObject(mval, "item_type", m->item_type);
 
     if (m->lastseen != 0)
     {
@@ -1982,6 +1983,14 @@ void monster_effect_add(monster *m, effect *e)
 int monster_effect_del(monster *m, effect *e)
 {
     assert(m != NULL && e != NULL);
+
+    /* log info if the player can see the monster */
+    if (m->m_visible && effect_get_msg_m_stop(e))
+    {
+        log_add_entry(nlarn->p->log, effect_get_msg_m_stop(e),
+                      monster_name(m));
+    }
+
     return effect_del(m->effects, e);
 }
 
@@ -1997,27 +2006,21 @@ int monster_effect(monster *m, effect_type type)
     return effect_query(m->effects, type);
 }
 
-void monster_effect_expire(monster *m, message_log *log)
+void monster_effects_expire(monster *m)
 {
     guint idx = 0;
-    effect *e;
 
-    assert(m != NULL && log != NULL);
+    assert(m != NULL);
 
     while (idx < m->effects->len)
     {
-        e = g_ptr_array_index(m->effects, idx);
+        gpointer effect_id = g_ptr_array_index(m->effects, idx);;
+        effect *e = game_effect_get(nlarn, effect_id);
 
         if (effect_expire(e, 1) == -1)
         {
             /* effect has expired */
             monster_effect_del(m, e);
-
-            /* log info */
-            if (m->m_visible && effect_get_msg_m_stop(e))
-                log_add_entry(log, effect_get_msg_m_stop(e),
-                              monster_name(m));
-
             effect_destroy(e);
         }
         else

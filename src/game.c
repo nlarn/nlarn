@@ -753,7 +753,7 @@ static void game_monsters_move(game *g)
         position mpos = monster_pos(m);
 
         /* modify effects */
-        monster_effect_expire(m, g->p->log);
+        monster_effects_expire(m);
 
         if (mpos.z == g->p->pos.z
                 || (mpos.z == g->p->pos.z - 1)

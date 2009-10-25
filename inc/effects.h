@@ -161,13 +161,13 @@ char *effect_get_msg_m_stop(effect *e);
 
 int effect_get_amount(effect *e);
 
-void effect_add(GPtrArray *a, effect *e);
-int effect_del(GPtrArray *a, effect *e);
-effect *effect_get(GPtrArray *a, effect_type type);
+void effect_add(GPtrArray *ea, effect *e);
+int effect_del(GPtrArray *ea, effect *e);
+effect *effect_get(GPtrArray *ea, effect_type type);
 
 /* check if an effect is set */
-int effect_query(GPtrArray *a, effect_type type);
+int effect_query(GPtrArray *ea, effect_type type);
 
-int effect_expire(effect *ae, int turns);
+int effect_expire(effect *e, int turns);
 
 #endif

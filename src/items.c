@@ -397,8 +397,10 @@ void item_destroy(item *it)
     {
         while (it->effects->len)
         {
-            effect_destroy(g_ptr_array_remove_index_fast(it->effects,
-                           it->effects->len - 1));
+            gpointer effect_id = g_ptr_array_remove_index_fast(it->effects,
+                                 it->effects->len - 1);
+
+            effect_destroy(game_effect_get(nlarn, effect_id));
         }
 
         g_ptr_array_free(it->effects, TRUE);

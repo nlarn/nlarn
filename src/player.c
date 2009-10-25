@@ -153,7 +153,6 @@ player *player_new()
 void player_destroy(player *p)
 {
     guint idx;
-    effect *eff;
 
     assert(p != NULL);
 
@@ -167,11 +166,12 @@ void player_destroy(player *p)
     /* release effects */
     for (idx = 0; idx < p->effects->len; idx++)
     {
-        eff = g_ptr_array_index(p->effects, idx);
+        gpointer effect_id = g_ptr_array_index(p->effects, idx);
+        effect *e = game_effect_get(nlarn, effect_id);
 
-        if (!eff->item)
+        if (!e->item)
         {
-            effect_destroy(eff);
+            effect_destroy(e);
         }
     }
 
@@ -1908,7 +1908,6 @@ void player_effect_add(player *p, effect *e)
 void player_effects_add(player *p, GPtrArray *effects)
 {
     guint idx;
-    effect *e;
 
     assert (p != NULL);
 
@@ -1917,8 +1916,9 @@ void player_effects_add(player *p, GPtrArray *effects)
 
     for (idx = 0; idx < effects->len; idx++)
     {
-        e = g_ptr_array_index(effects, idx);
-        g_ptr_array_add(p->effects, e);
+        gpointer effect_id = g_ptr_array_index(effects, idx);
+        effect *e = game_effect_get(nlarn, effect_id);
+        g_ptr_array_add(p->effects, effect_id);
 
         if (effect_get_msg_start(e))
         {
@@ -1940,7 +1940,6 @@ int player_effect_del(player *p, effect *e)
 void player_effects_del(player *p, GPtrArray *effects)
 {
     guint idx;
-    effect *e;
 
     assert (p != NULL);
 
@@ -1949,8 +1948,9 @@ void player_effects_del(player *p, GPtrArray *effects)
 
     for (idx = 0; idx < effects->len; idx++)
     {
-        e = g_ptr_array_index(effects, idx);
-        g_ptr_array_remove_fast(p->effects, e);
+        gpointer effect_id = g_ptr_array_index(effects, idx);
+        effect *e = game_effect_get(nlarn, effect_id);
+        g_ptr_array_remove_fast(p->effects, effect_id);
 
         if (effect_get_msg_stop(e))
         {
@@ -1974,13 +1974,13 @@ int player_effect(player *p, int effect_type)
 void player_effects_expire(player *p, int turns)
 {
     guint idx = 0;
-    effect *e;
 
     assert(p != NULL);
 
     while (idx < p->effects->len)
     {
-        e = g_ptr_array_index(p->effects, idx);
+        gpointer effect_id = g_ptr_array_index(p->effects, idx);
+        effect *e = game_effect_get(nlarn, effect_id);
 
         if (effect_expire(e, turns) == -1)
         {

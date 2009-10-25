@@ -621,8 +621,7 @@ void effect_add(GPtrArray *ea, effect *ne)
 
     assert(ea != NULL && ne != NULL);
 
-    /* check for duplicates */
-    /* leave permanent effects alone */
+    /* check for duplicates - leave permanent effects alone */
     if ((e = effect_get(ea, ne->type)) && (e->turns > 1))
     {
         /* either add to effect's lifetime or power */
@@ -639,74 +638,78 @@ void effect_add(GPtrArray *ea, effect *ne)
     }
     else
     {
-        g_ptr_array_add(ea, ne);
+        g_ptr_array_add(ea, ne->oid);
     }
 }
 
-int effect_del(GPtrArray *a, effect *e)
+int effect_del(GPtrArray *ea, effect *e)
 {
-    assert(a != NULL && e != NULL);
-    return g_ptr_array_remove_fast(a,e);
+    assert(ea != NULL && e != NULL);
+    return g_ptr_array_remove_fast(ea, e->oid);
 }
 
-effect *effect_get(GPtrArray *a, effect_type type)
+effect *effect_get(GPtrArray *ea, effect_type type)
 {
     guint idx;
-    effect *e;
 
-    assert(a != NULL && type > ET_NONE && type < ET_MAX);
+    assert(ea != NULL && type > ET_NONE && type < ET_MAX);
 
-    for (idx = 0; idx < a->len; idx++)
+    for (idx = 0; idx < ea->len; idx++)
     {
-        e = g_ptr_array_index(a, idx);
+        gpointer effect_id = g_ptr_array_index(ea, idx);
+        effect *e = game_effect_get(nlarn, effect_id);
+
         if (e->type == type)
+        {
             return e;
+        }
     }
 
     return NULL;
 }
 
-int effect_query(GPtrArray *a, effect_type type)
+int effect_query(GPtrArray *ea, effect_type type)
 {
     guint idx;
-    int value = 0;
-    effect *e;
+    int amount = 0;
 
-    assert(a != NULL && type > ET_NONE && type < ET_MAX);
+    assert(ea != NULL && type > ET_NONE && type < ET_MAX);
 
-    for (idx = 0; idx < a->len; idx++)
+    for (idx = 0; idx < ea->len; idx++)
     {
-        e = (effect *)g_ptr_array_index(a, idx);
+        gpointer effect_id = g_ptr_array_index(ea, idx);
+        effect *e = game_effect_get(nlarn, effect_id);
+
         if (e->type == type)
         {
             if (e->amount)
-                value += e->amount;
+                amount += e->amount;
             else
                 return TRUE;
         }
     }
 
-    return value;
+    return amount;
 }
 
 /**
  * Count down the number of turns remaining for an effect.
  *
- * @param an active_effect
+ * @param an effect
  * @return turns remaining. Expired effects return -1, permantent effects 0
  */
-int effect_expire(effect *ae, int turns)
+int effect_expire(effect *e, int turns)
 {
-    assert(ae != NULL);
+    assert(e != NULL);
 
-    if (ae->turns > 1)
+    if (e->turns > 1)
     {
-        ae->turns -= turns;
+        e->turns -= turns;
     }
-    else if (ae->turns != 0)
+    else if (e->turns != 0)
     {
-        ae->turns = -1;
+        e->turns = -1;
     }
 
-    return ae->turns;
+    return e->turns;
 }

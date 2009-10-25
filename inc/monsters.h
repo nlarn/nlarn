@@ -238,6 +238,6 @@ void monster_effect_add(monster *m, effect *e);
 int monster_effect_del(monster *m, effect *e);
 effect *monster_effect_get(monster *m , effect_type type);
 int monster_effect(monster *m, effect_type type);
-void monster_effect_expire(monster *m, message_log *log);
+void monster_effects_expire(monster *m);
 
 #endif
