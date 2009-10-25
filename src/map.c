@@ -771,11 +771,25 @@ map_tile_t map_tiletype_at(map *l, position pos)
     return l->grid[pos.y][pos.x].type;
 }
 
+void map_tiletype_set(map *l, position pos, map_tile_t type)
+{
+    assert(l != NULL && pos_valid(pos));
+
+    l->grid[pos.y][pos.x].type = type;
+}
+
 map_tile_t map_basetype_at(map *l, position pos)
 {
     assert(l != NULL && pos_valid(pos));
 
     return l->grid[pos.y][pos.x].base_type;
+}
+
+void map_basetype_set(map *l, position pos, map_tile_t type)
+{
+    assert(l != NULL && pos_valid(pos));
+
+    l->grid[pos.y][pos.x].base_type = type;
 }
 
 guint8 map_timer_at(map *l, position pos)

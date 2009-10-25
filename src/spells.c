@@ -1203,7 +1203,7 @@ gboolean spell_vaporize_rock(player *p)
 
     if (map_tiletype_at(map, pos) == LT_WALL)
     {
-        map_stationary_set(map, pos, LT_FLOOR);
+        map_tiletype_set(map, pos, LT_FLOOR);
     }
 
     if ((m = map_get_monster_at(map, pos)) && (monster_type(m) == MT_XORN))
