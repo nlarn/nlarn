@@ -1147,15 +1147,11 @@ void monster_level_enter(monster *m, struct map *l)
     }
     else
     {
-        map_find_space(l, LE_MONSTER);
+        npos = map_find_space(l, LE_MONSTER);
     }
 
     /* put monster into map */
-    if (!monster_pos_set(m, l, npos))
-    {
-        /* no free space could be found for the monstert -> abort */
-        monster_destroy(m);
-    }
+    monster_pos_set(m, l, npos);
 
     /* update visibility */
     m->m_visible = player_pos_visible(nlarn->p, npos);
