@@ -1596,7 +1596,7 @@ static char *item_desc_get(item *it, int known)
         break;
 
     case IT_GEM:
-        return gem_name(it);
+        return (char *)gem_name(it);
         break;
 
     case IT_WEAPON:

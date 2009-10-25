@@ -19,6 +19,8 @@
 #ifndef __GEMS_H_
 #define __GEMS_H_
 
+#include "items.h"
+
 enum gem_types
 {
     GT_NONE,
@@ -29,26 +31,13 @@ enum gem_types
     GT_MAX
 };
 
-typedef struct gem_data
-{
-    int id;
-    char *name;
-	int	material;       /* material type from item_materials */
-	int colour;
-	int price;          /* price per carat in the shops */
-} gem_data;
+/* functions */
 
-/* external vars */
-
-extern const gem_data gems[GT_MAX];
-
-/* macros */
-
-#define gem_name(gem)     (gems[(gem)->id].name)
-#define gem_material(gem) (gems[(gem)->id].material)
-#define gem_colour(gem)   (gems[(gem)->id].colour)
-#define gem_weight(gem)   ((gem)->bonus / 1000)
-#define gem_price(gem)    ((gem)->bonus * gems[(gem)->id].price)
-#define gem_size(gem)     ((gem)->bonus)
+const char *gem_name(item *gem);
+item_material_t gem_material(item *gem);
+int gem_colour(item *gem);
+int gem_weight(item *gem);
+int gem_price(item *gem);
+int gem_size(item *gem);
 
 #endif
