@@ -473,19 +473,33 @@ map *game_map(game *g, guint nmap)
 void game_spin_the_wheel(game *g, guint times)
 {
     guint turn;
-    damage *dam;
+    int nmap;
     map *map;
 
     assert(g != NULL && times > 0);
 
-    map = game_map(nlarn, g->p->pos.z);
+    /* per-map actions */
+    for (nmap = 0; nmap < MAP_MAX; nmap++)
+    {
+        map = game_map(g, nmap);
 
-    map_timer(map, times);
+        /* call map timers */
+        map_timer(map, times);
+
+        /* spawn some monsters every now and then */
+        if (nmap > 0 && (g->gtime % (100 + nmap)) == 0)
+        {
+            map_fill_with_life(map);
+        }
+
+    }
 
     for (turn = 0; turn < times; turn++)
     {
         player_regenerate(g->p);
         player_effects_expire(g->p, 1);
+
+        map = game_map(nlarn, g->p->pos.z);
 
         /* check if player is stuck inside a wall without walk through wall */
         if ((map_tiletype_at(map, g->p->pos) == LT_WALL)
@@ -495,7 +509,8 @@ void game_spin_the_wheel(game *g, guint times)
         }
 
         /* deal damage cause by map tiles to player */
-        if ((dam = map_tile_damage(map, g->p->pos)))
+        damage *dam  = map_tile_damage(map, g->p->pos);
+        if (dam != NULL)
         {
             player_damage_take(g->p, dam, PD_MAP, map_tiletype_at(map, g->p->pos));
         }
@@ -731,25 +746,17 @@ static void game_initialize_settings(game *g, int argc, char *argv[])
  */
 static void game_monsters_move(game *g)
 {
-    map *l;
-
-    /* list of monsters */
-    GList *monsters;
-
-    /* handle to current monster */
-    monster *m;
+    GList *monsters;    /* list of monsters */
+    GList *iter;        /* iterator for monsters list */
+    monster *m;         /* handle to current monster */
 
     assert(g != NULL);
 
-    /* make shortcut */
-    l = game_map(nlarn,g->p->pos.z);
-
     monsters = g_hash_table_get_values(g->monsters);
 
-    do
+    for (iter = monsters; iter != NULL; iter = iter->next)
     {
-        m = (monster *)monsters->data;
-
+        m = (monster *)iter->data;
         position mpos = monster_pos(m);
 
         /* modify effects */
@@ -762,7 +769,6 @@ static void game_monsters_move(game *g)
             monster_move(m, g->p);
         }
     }
-    while ((monsters = monsters->next));
 
     g_list_free(monsters);
 }

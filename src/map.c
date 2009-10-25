@@ -112,23 +112,20 @@ const char *map_names[MAP_MAX] =
     "V3"
 };
 
-map *map_new(int nlevel, char *mazefile)
+map *map_new(int num, char *mazefile)
 {
     gboolean map_loaded = FALSE;
     int x, y;
 
-    map *l = nlarn->maps[nlevel] = g_malloc0(sizeof(map));
-    l->nlevel = nlevel;
+    map *nmap = nlarn->maps[num] = g_malloc0(sizeof(map));
+    nmap->nlevel = num;
 
     /* create map */
-    if ((l->nlevel == 0)
-            || (l->nlevel == MAP_DMAX - 1)
-            || (l->nlevel == MAP_MAX - 1)
-            || (l->nlevel > 1 && chance(25)))
+    if ((num == 0)|| (num == MAP_DMAX - 1)
+            || (num == MAP_MAX - 1)|| (num > 1 && chance(25)))
     {
         /* read maze from data file */
-        map_loaded = map_load_from_file(l, mazefile,
-                                        (l->nlevel == 0) ? 0 : -1);
+        map_loaded = map_load_from_file(nmap, mazefile, (num == 0) ? 0 : -1);
     }
 
     if (!map_loaded)
@@ -136,40 +133,38 @@ map *map_new(int nlevel, char *mazefile)
         /* clear map */
         for (y = 0; y < MAP_MAX_Y; y++)
             for (x = 0; x < MAP_MAX_X; x++)
-                l->grid[y][x].type = LT_WALL;
+                nmap->grid[y][x].type = LT_WALL;
 
         /* generate random map */
-        map_make_maze(l);
+        map_make_maze(nmap);
 
         /* home town is safe */
-        if (l->nlevel > 0)
+        if (num > 0)
         {
-            map_fill_with_life(l);
+            map_fill_with_life(nmap);
         }
 
         /* add treasure room */
-        if (l->nlevel > 1
-                && (l->nlevel == (MAP_DMAX - 1)
-                    || l->nlevel == (MAP_MAX - 1)
-                    || chance(15)))
+        if (num > 1&& (num == (MAP_DMAX - 1)
+                       || num == (MAP_MAX - 1)|| chance(15)))
         {
-            map_add_treasure_room(l);
+            map_add_treasure_room(nmap);
         }
     }
 
-    if (l->nlevel > 0)
+    if (num > 0)
     {
         /* add static content */
-        map_fill_with_stationary(l);
+        map_fill_with_stationary(nmap);
 
         /* home town is not filled with crap */
-        map_fill_with_objects(l);
+        map_fill_with_objects(nmap);
 
         /* and not trapped */
-        map_fill_with_traps(l);
+        map_fill_with_traps(nmap);
     }
 
-    return l;
+    return nmap;
 }
 
 cJSON *map_serialize(map *m)
@@ -911,13 +906,7 @@ int map_fill_with_life(map *l)
 
     assert(l != NULL);
 
-    new_monster_count = rand_m_n(2, 14) + (l->nlevel >> 1);
-
-    if (new_monster_count < 0)
-    {
-        /* sanity check */
-        new_monster_count = 1;
-    }
+    new_monster_count = rand_1n(14) + l->nlevel);
 
     for (i = 0; i <= new_monster_count; i++)
     {
@@ -1197,7 +1186,6 @@ static void map_make_maze(map *l)
     int mx, mxl, mxh;
     int my, myl, myh;
     int nrooms;
-    monster *m = NULL;
     gboolean want_monster = FALSE;
 
     map_make_maze_eat(l, 1, 1);
@@ -1242,7 +1230,7 @@ static void map_make_maze(map *l)
 
                     if (want_monster == TRUE)
                     {
-                        m = monster_new_by_level(pos);
+                        monster_new_by_level(pos);
                         want_monster = FALSE;
                     }
                 }
@@ -1329,19 +1317,17 @@ static void map_make_maze_eat(map *l, int x, int y)
  *      !   potion of cure dianthroritis
  *      -   random object
  */
-static int map_load_from_file(map *l, char *mazefile, int which)
+static int map_load_from_file(map *nmap, char *mazefile, int which)
 {
     position pos;       /* current position on map */
-    int lt, ls;         /* selected tile and static object type */
-    int map_num = 0;  /* number of selected map */
-    monster *monst;     /* placeholder for monster */
-    void *itm;          /* placeholder for objects */
+    int map_num = 0;    /* number of selected map */
     item_t it;          /* item type for random objects */
 
     FILE *levelfile;
 
     if (!(levelfile = fopen(mazefile, "r")))
     {
+        /* maze file cannot be opened */
         return FALSE;
     }
 
@@ -1354,8 +1340,8 @@ static int map_load_from_file(map *l, char *mazefile, int which)
     }
 
     /* FIXME: calculate how many levels are in the file  */
-    /* roll the dice: which map? we can currently choose from a variety of 24 */
 
+    /* roll the dice: which map? we can currently choose from a variety of 24 */
     if (which >= 0 && which < 25)
     {
         map_num = which;
@@ -1372,102 +1358,99 @@ static int map_load_from_file(map *l, char *mazefile, int which)
     /* advance to desired maze */
     fseek(levelfile, (map_num * ((MAP_MAX_X + 1) * MAP_MAX_Y + 1)), SEEK_SET);
 
-    pos.z = l->nlevel;
+    pos.z = nmap->nlevel;
 
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X ; pos.x++)
         {
-            map_tile *tile = map_tile_at(l, pos);
+            map_tile *tile = map_tile_at(nmap, pos);
 
-            monst = NULL;	/* to make checks below work */
-            itm = NULL;		/* default: no new item */
-            lt = LT_FLOOR;	/* floor is default */
-            ls = LS_NONE;	/* no default static element */
+            tile->type = LT_FLOOR;	/* floor is default */
 
             switch (fgetc(levelfile))
             {
 
             case '^': /* mountain */
-                lt = LT_MOUNTAIN;
+                tile->type = LT_MOUNTAIN;
                 break;
 
             case '"': /* grass */
-                lt = LT_GRASS;
+                tile->type = LT_GRASS;
                 break;
 
             case '.': /* dirt */
-                lt = LT_DIRT;
+                tile->type = LT_DIRT;
                 break;
 
             case '&': /* tree */
-                lt = LT_TREE;
+                tile->type = LT_TREE;
                 break;
 
             case '~': /* deep water */
-                lt = LT_DEEPWATER;
+                tile->type = LT_DEEPWATER;
                 break;
 
             case '=': /* lava */
-                lt = LT_LAVA;
+                tile->type = LT_LAVA;
                 break;
 
             case '#': /* wall */
-                lt =  LT_WALL;
+                tile->type =  LT_WALL;
                 break;
 
             case '+': /* door */
-                ls = LS_CLOSEDDOOR;
+                tile->stationary = LS_CLOSEDDOOR;
                 break;
 
             case 'O': /* dungeon entrance */
-                ls = LS_ENTRANCE;
+                tile->stationary = LS_ENTRANCE;
                 break;
 
             case 'I': /* elevator */
-                ls = LS_ELEVATORDOWN;
+                tile->stationary = LS_ELEVATORDOWN;
                 break;
 
             case 'H': /* home */
-                ls = LS_HOME;
+                tile->stationary = LS_HOME;
                 break;
 
             case 'D': /* dnd store */
-                ls = LS_DNDSTORE;
+                tile->stationary = LS_DNDSTORE;
                 break;
 
             case 'T': /* trede post */
-                ls = LS_TRADEPOST;
+                tile->stationary = LS_TRADEPOST;
                 break;
 
             case 'L': /* LRS */
-                ls = LS_LRS;
+                tile->stationary = LS_LRS;
                 break;
 
             case 'S': /* school */
-                ls = LS_SCHOOL;
+                tile->stationary = LS_SCHOOL;
                 break;
 
             case 'B': /*  */
-                ls = LS_BANK;
+                tile->stationary = LS_BANK;
                 break;
 
             case '*': /* eye of larn */
-                if (l->nlevel != MAP_DMAX - 1)
+                if (nmap->nlevel != MAP_DMAX - 1)
                 {
                     break;
                 }
-                itm = item_new(IT_AMULET, AM_LARN, 0);
+                inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN, 0));
 
-                monst = monster_new(MT_DEMONLORD_I + rand_0n(7), pos);
+                monster_new(MT_DEMONLORD_I + rand_0n(7), pos);
                 break;
 
             case '!':	/* potion of cure dianthroritis */
-                if (l->nlevel != MAP_MAX - 1)
+                if (nmap->nlevel != MAP_MAX - 1)
                     break;
 
-                itm = item_new(IT_POTION, PO_CURE_DIANTHR, 0);
-                monst = monster_new(MT_DAEMON_PRINCE, pos);
+                inv_add(&tile->ilist, item_new(IT_POTION, PO_CURE_DIANTHR, 0));
+                monster_new(MT_DAEMON_PRINCE, pos);
                 break;
 
             case 'M':	/* random monster */
@@ -1481,17 +1464,9 @@ static int map_load_from_file(map *l, char *mazefile, int which)
                 }
                 while (it == IT_CONTAINER);
 
-                itm = item_new_by_level(it, l->nlevel);
+                inv_add(&tile->ilist, item_new_by_level(it, nmap->nlevel));
                 break;
             };
-
-            tile->type = lt;
-            tile->stationary = ls;
-
-            if (itm != NULL)
-            {
-                inv_add(&tile->ilist, itm);
-            }
         }
         (void)fgetc(levelfile); /* eat EOL */
     }
@@ -1511,7 +1486,6 @@ static void map_add_treasure_room(map *l)
     position pos, npos;
     map_tile *tile;
     item *itm;
-    monster *monst;
     int success;
 
     x1 = rand_1n(MAP_MAX_X - 9);
@@ -1543,7 +1517,7 @@ static void map_add_treasure_room(map *l)
                 inv_add(&tile->ilist, itm);
 
                 /* create a monster */
-                monst = monster_new_by_level(pos);
+                monster_new_by_level(pos);
             }
 
             /* now clear out interior */

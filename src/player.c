@@ -1076,7 +1076,6 @@ int player_attack(player *p, monster *m)
  */
 int player_map_enter(player *p, map *l, gboolean teleported)
 {
-    int count;
     position pos;
     monster *m;
 
@@ -1088,20 +1087,6 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     if (p->stats.deepest_level < l->nlevel)
     {
         p->stats.deepest_level = l->nlevel;
-    }
-
-    else
-    {
-        /* call map timer */
-        /* count might be negative if time has been modified (time warp) */
-        count = abs(game_turn(nlarn) - l->visited);
-        map_timer(l, min(count, G_MAXUINT8));
-
-        /* add some new monsters */
-        if (l->nlevel > 0)
-        {
-            map_fill_with_life(l);
-        }
     }
 
     /* been teleported here or something like that, need a random spot */

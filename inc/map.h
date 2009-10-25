@@ -154,7 +154,7 @@ typedef struct map_path
 
 /* function declarations */
 
-map *map_new(int nlevel, char *mazefile);
+map *map_new(int num, char *mazefile);
 void map_destroy(map *m);
 
 cJSON *map_serialize(map *m);

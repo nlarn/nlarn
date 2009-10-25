@@ -777,8 +777,8 @@ monster *monster_new(int type, position pos)
     case MT_LEPRECHAUN:
         if (chance(25))
         {
-            inv_add(&nmonster->inventory,
-                    item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)), 0));
+            item *gem = item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)), 0);
+            inv_add(&nmonster->inventory, gem);
         }
         break;
 
@@ -869,8 +869,11 @@ monster *monster_new(int type, position pos)
     /* register monster with game */
     nmonster->oid = game_monster_register(nlarn, nmonster);
 
-    /* set position to something invalid */
+    /* set position */
     nmonster->pos = pos;
+
+    /* link monster to tile */
+    map_set_monster_at(game_map(nlarn, pos.z), pos, nmonster);
 
     return nmonster;
 }
