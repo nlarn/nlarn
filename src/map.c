@@ -906,7 +906,7 @@ int map_fill_with_life(map *l)
 
     assert(l != NULL);
 
-    new_monster_count = rand_1n(14) + l->nlevel);
+    new_monster_count = rand_1n(14) + l->nlevel;
 
     for (i = 0; i <= new_monster_count; i++)
     {
