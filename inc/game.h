@@ -134,7 +134,7 @@ inventory *game_inventory_get(game *g, gpointer id);
 
 gpointer game_item_register(game *g, item *it);
 void game_item_unregister(game *g, gpointer it);
-inventory *game_inventory_get(game *g, gpointer id);
+item *game_item_get(game *g, gpointer id);
 
 gpointer game_effect_register(game *g, effect *e);
 void game_effect_unregister(game *g, gpointer e);

@@ -1303,7 +1303,6 @@ int player_pickup(player *p)
 void player_autopickup(player *p)
 {
     guint idx;
-    item *i;
     inventory **floor;
 
     assert (p != NULL && map_ilist_at(game_map(nlarn, p->pos.z), p->pos));
@@ -1312,7 +1311,7 @@ void player_autopickup(player *p)
 
     for (idx = 0; idx < inv_length(*floor); idx++)
     {
-        i = inv_get(*floor, idx);
+        item *i = inv_get(*floor, idx);
 
         if (p->settings.auto_pickup[i->type])
         {
@@ -3223,13 +3222,14 @@ int player_item_pickup(player *p, inventory **inv, item *it)
     }
 
     /* prepare item description for logging later.
-     * this has to come before adding the item as it can already be freed at
-     * this point (stackable items)
+     * this has to come before adding the item as it may
+     * already be freed then (stackable items)
      */
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
 
     if (inv_add(&p->inventory, it))
     {
+        /* adding item to player's inventory succeeded */
         log_add_entry(p->log, "You pick up %s.", desc);
     }
     else

@@ -36,7 +36,6 @@
 #include "utils.h"
 #include "weapons.h"
 
-
 static void item_typename_pluralize(item *it, char *description, int length);
 static char *item_name_count(char *name, char *add_info, int singular, int definite, int length, int count);
 static char *item_desc_get(item *it, int known);
@@ -523,6 +522,7 @@ item *item_deserialize(cJSON *iser, struct game *g)
 int item_compare(item *a, item *b)
 {
     int tmp_count, result;
+    gpointer oid_a, oid_b;
 
     if (a->type != b->type)
     {
@@ -537,9 +537,20 @@ int item_compare(item *a, item *b)
     tmp_count = b->count;
     b->count = a->count;
 
+    /* store oids (never identical!) */
+    oid_a = a->oid;
+    oid_b = b->oid;
+
+    a->oid = NULL;
+    b->oid = NULL;
+
     result = (memcmp(a, b, sizeof(item)) == 0);
 
     b->count = tmp_count;
+
+    /* restore oids */
+    a->oid = oid_a;
+    b->oid = oid_b;
 
     return result;
 }
@@ -547,8 +558,8 @@ int item_compare(item *a, item *b)
 int item_sort(gconstpointer a, gconstpointer b, gpointer data)
 {
     gint order;
-    item *item_a = *((item**)a);
-    item *item_b = *((item**)b);
+    item *item_a = game_item_get(nlarn, *((gpointer**)a));
+    item *item_b = game_item_get(nlarn, *((gpointer**)b));
     player *p = (player *)data;
 
     if (item_a->type == item_b->type)
@@ -1127,7 +1138,9 @@ void inv_destroy(inventory *inv)
 
     while (inv_length(inv) > 0)
     {
-        item_destroy(g_ptr_array_remove_index(inv->content, inv_length(inv) - 1));
+        item *it = inv_get(inv, inv_length(inv) - 1);
+        g_ptr_array_remove(inv->content, it->oid);
+        item_destroy(it);
     }
 
     g_ptr_array_free(inv->content, TRUE);
@@ -1181,10 +1194,9 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
 
 int inv_add(inventory **inv, item *new_item)
 {
-    guint pos;
-    item *i;
+    guint idx;
 
-    assert(inv != NULL && item_new != NULL);
+    assert(inv != NULL && item_new != NULL && new_item->oid != NULL);
 
     /* create inventory if necessary */
     if (!(*inv))
@@ -1200,9 +1212,9 @@ int inv_add(inventory **inv, item *new_item)
 
     if (item_is_stackable(new_item->type))
     {
-        for (pos = 0; pos < inv_length(*inv); pos++)
+        for (idx = 0; idx < inv_length(*inv); idx++)
         {
-            i = (item *)inv_get(*inv, pos);
+            item *i = inv_get(*inv, idx);
             if (item_compare(i, new_item))
             {
                 /* just increase item count and release the original */
@@ -1214,7 +1226,7 @@ int inv_add(inventory **inv, item *new_item)
         }
     }
 
-    g_ptr_array_add((*inv)->content, new_item);
+    g_ptr_array_add((*inv)->content, new_item->oid);
 
     /* call post_add callback */
     if ((*inv)->post_add)
@@ -1227,9 +1239,12 @@ int inv_add(inventory **inv, item *new_item)
 
 item *inv_get(inventory *inv, guint idx)
 {
-    assert (inv != NULL && idx < inv->content->len);
+    gpointer oid = NULL;
 
-    return g_ptr_array_index(inv->content, idx);
+    assert (inv != NULL && idx < inv->content->len);
+    oid = g_ptr_array_index(inv->content, idx);
+
+    return game_item_get(nlarn, oid);
 }
 
 item *inv_del(inventory **inv, guint idx)
@@ -1248,7 +1263,7 @@ item *inv_del(inventory **inv, guint idx)
         }
     }
 
-    g_ptr_array_remove_index_fast((*inv)->content, idx);
+    g_ptr_array_remove_index((*inv)->content, idx);
 
     if ((*inv)->post_del)
     {
@@ -1277,7 +1292,7 @@ int inv_del_element(inventory **inv, item *item)
         }
     }
 
-    g_ptr_array_remove((*inv)->content, item);
+    g_ptr_array_remove((*inv)->content, item->oid);
 
     if ((*inv)->post_del)
     {
@@ -1298,7 +1313,7 @@ guint inv_length(inventory *inv)
     return (inv == NULL) ? 0 : inv->content->len;
 }
 
-void inv_sort(inventory *inv,GCompareDataFunc compare_func, gpointer user_data)
+void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data)
 {
     assert(inv != NULL && inv->content != NULL);
 
@@ -1328,11 +1343,10 @@ int inv_item_count(inventory *inv, item_t type, guint32 id)
 {
     int count = 0;
     guint idx;
-    item *i;
 
     for (idx = 0; idx < inv_length(inv); idx++)
     {
-        i = inv_get(inv, idx);
+        item *i = inv_get(inv, idx);
         if (id)
         {
             if (i->type == type && i->id == id)
@@ -1353,7 +1367,6 @@ int inv_length_filtered(inventory *inv, int (*filter)(item *))
 {
     int count = 0;
     guint pos;
-    item *i;
 
     if (inv == NULL)
     {
@@ -1369,7 +1382,7 @@ int inv_length_filtered(inventory *inv, int (*filter)(item *))
 
     for (pos = 0; pos < inv_length(inv); pos++)
     {
-        i = inv_get(inv, pos);
+        item *i = inv_get(inv, pos);
 
         if (filter(i))
         {
@@ -1384,7 +1397,6 @@ item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *))
 {
     guint num;
     guint curr = 0;
-    item *i;
 
     /* return the inventory length if no filter has been set */
     if (!filter)
@@ -1394,7 +1406,7 @@ item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *))
 
     for (num = 0; num < inv_length(inv); num++)
     {
-        i = inv_get(inv, num);
+        item *i = inv_get(inv, num);
 
         if (filter(i))
         {

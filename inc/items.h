@@ -92,7 +92,6 @@ typedef void (*inv_callback_void) (struct _inventory *inv, struct _item  *item);
 
 typedef struct _inventory
 {
-    gpointer oid;
     inv_callback_bool pre_add;
     inv_callback_void post_add;
     inv_callback_bool pre_del;

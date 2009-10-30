@@ -45,7 +45,7 @@ struct _monster
     gboolean attacks_failed[MONSTER_ATTACK_COUNT];
 
     inventory *inventory;
-    item *weapon;
+    gpointer weapon;
     GPtrArray *effects;
 
     guint32
@@ -952,7 +952,7 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     cJSON_AddItemToObject(mval,"pos", pos_serialize(m->pos));
 
     if (m->weapon != NULL)
-        cJSON_AddNumberToObject(mval, "weapon", GPOINTER_TO_UINT(m->weapon->oid));
+        cJSON_AddNumberToObject(mval, "weapon", GPOINTER_TO_UINT(m->weapon));
 
     if (m->unknown)
         cJSON_AddTrueToObject(mval, "unknown");
@@ -1694,8 +1694,10 @@ void monster_player_attack(monster *m, player *p)
 
     /* set damage for weapon attacks */
     if ((att->type == ATT_WEAPON) && (m->weapon != NULL))
-        dam->amount = rand_1n(weapon_wc(m->weapon)
-                              + game_difficulty(nlarn));
+    {
+        item *weapon = game_item_get(nlarn, m->weapon);
+        dam->amount = rand_1n(weapon_wc(weapon) + game_difficulty(nlarn));
+    }
 
     /* add variable damage */
     if (att->rand)
@@ -2104,7 +2106,7 @@ static void monster_weapon_wield(monster *m, item *weapon)
     char buf[61] = { 0 };
 
     /* FIXME: time management */
-    m->weapon = weapon;
+    m->weapon = weapon->oid;
 
     /* show message if monster is visible */
     if (m->m_visible)

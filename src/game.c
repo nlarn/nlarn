@@ -543,6 +543,7 @@ void game_item_unregister(game *g, gpointer it)
 item *game_item_get(game *g, gpointer id)
 {
     assert(g != NULL && id != NULL);
+
     return (item *)g_hash_table_lookup(g->items, id);
 }
 
