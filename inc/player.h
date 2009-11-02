@@ -188,7 +188,7 @@ void player_die(player *p, player_cod cause_type, int cause);
 gint64 player_calc_score(player *p, int won);
 int player_move(player *p, direction dir);
 int player_attack(player *p, monster *m);
-void player_update_fov(player *p, int radius);
+void player_update_fov(player *p);
 int player_map_enter(player *p, map *l, gboolean teleported);
 item *player_random_armour(player *p);
 

@@ -128,17 +128,14 @@ typedef struct effect_data
     char *msg_stop_monster;
 } effect_data;
 
-/* forward declaration to avoid circular dependencies */
-struct item;
-
 typedef struct effect
 {
-    gpointer oid;           /* effect's game object id */
-    effect_type type;       /* type of effect */
-    guint32 start;          /* game time the effect began */
-    guint32 turns;          /* number of turns this effect remains */
-    gint32 amount;          /* power of effect, if applicable */
-    struct _item *item;     /* item which causes the effect (if caused by item) */
+    gpointer oid;       /* effect's game object id */
+    effect_type type;   /* type of effect */
+    guint32 start;      /* game time the effect began */
+    guint32 turns;      /* number of turns this effect remains */
+    gint32 amount;      /* power of effect, if applicable */
+    gpointer item;      /* oid of item which causes the effect (if caused by item) */
 } effect;
 
 struct game;

@@ -211,14 +211,16 @@ cJSON *log_serialize(message_log *log)
 
 message_log *log_deserialize(cJSON *lser)
 {
-    int len, idx;
+    int idx;
     message_log *log = g_malloc0(sizeof(message_log));
 
-    len = cJSON_GetArraySize(lser);
+    log->active = TRUE;
+    log->buffer = g_string_new(NULL);
 
-    log->entries = g_malloc0(len * (sizeof(message_log_entry *)));
+    log->length = cJSON_GetArraySize(lser);
+    log->entries = g_malloc0(log->length * (sizeof(message_log_entry *)));
 
-    for (idx = 0; idx < len; idx++)
+    for (idx = 0; idx < log->length; idx++)
     {
         cJSON *le = cJSON_GetArrayItem(lser, idx);
 
@@ -226,7 +228,7 @@ message_log *log_deserialize(cJSON *lser)
 
         log->entries[idx]->ltime = cJSON_GetObjectItem(le, "ltime")->valueint;
         log->entries[idx]->gtime = cJSON_GetObjectItem(le, "gtime")->valueint;
-        log->entries[idx]->message = cJSON_GetObjectItem(le, "message")->valuestring;
+        log->entries[idx]->message = g_strdup(cJSON_GetObjectItem(le, "message")->valuestring);
     }
 
     return log;

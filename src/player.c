@@ -169,7 +169,7 @@ void player_destroy(player *p)
         gpointer effect_id = g_ptr_array_index(p->effects, idx);
         effect *e = game_effect_get(nlarn, effect_id);
 
-        if (!e->item)
+        if (e->item == NULL)
         {
             effect_destroy(e);
         }
@@ -343,7 +343,7 @@ player *player_deserialize(cJSON *pser)
 
     p = g_malloc0(sizeof(player));
 
-    p->name = cJSON_GetObjectItem(pser, "name")->valuestring;
+    p->name = g_strdup(cJSON_GetObjectItem(pser, "name")->valuestring);
     p->sex = cJSON_GetObjectItem(pser, "sex")->valueint;
 
     p->strength = cJSON_GetObjectItem(pser, "strength")->valueint;
@@ -396,34 +396,34 @@ player *player_deserialize(cJSON *pser)
 
     /* equipped items */
     obj = cJSON_GetObjectItem(pser, "eq_amulet");
-    if (obj != NULL) p->eq_amulet = GUINT_TO_POINTER(obj->valueint);
+    if (obj != NULL) p->eq_amulet = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     obj = cJSON_GetObjectItem(pser, "eq_weapon");
-    if (obj != NULL) p->eq_weapon = GUINT_TO_POINTER(obj->valueint);
+    if (obj != NULL) p->eq_weapon = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     obj = cJSON_GetObjectItem(pser, "eq_boots");
-    if (obj != NULL) p->eq_boots = GUINT_TO_POINTER(obj->valueint);
+    if (obj != NULL) p->eq_boots = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     obj = cJSON_GetObjectItem(pser, "eq_cloak");
-    if (obj != NULL) p->eq_cloak = GUINT_TO_POINTER(obj->valueint);
+    if (obj != NULL) p->eq_cloak = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     obj = cJSON_GetObjectItem(pser, "eq_gloves");
-    if (obj != NULL) p->eq_gloves = GUINT_TO_POINTER(obj->valueint);
+    if (obj != NULL) p->eq_gloves = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     obj = cJSON_GetObjectItem(pser, "eq_helmet");
-    if (obj != NULL) p->eq_helmet = GUINT_TO_POINTER(obj->valueint);
+    if (obj != NULL) p->eq_helmet = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     obj = cJSON_GetObjectItem(pser, "eq_shield");
-    if (obj != NULL) p->eq_shield = GUINT_TO_POINTER(obj->valueint);
+    if (obj != NULL) p->eq_shield = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     obj = cJSON_GetObjectItem(pser, "eq_suit");
-    if (obj != NULL) p->eq_suit = GUINT_TO_POINTER(obj->valueint);
+    if (obj != NULL) p->eq_suit = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     obj = cJSON_GetObjectItem(pser, "eq_ring_l");
-    if (obj != NULL) p->eq_ring_l = GUINT_TO_POINTER(obj->valueint);
+    if (obj != NULL) p->eq_ring_l = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     obj = cJSON_GetObjectItem(pser, "eq_ring_r");
-    if (obj != NULL) p->eq_ring_r = GUINT_TO_POINTER(obj->valueint);
+    if (obj != NULL) p->eq_ring_r = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     /* identified items */
     obj = cJSON_GetObjectItem(pser, "identified_amulets");
@@ -1146,7 +1146,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
         log_add_entry(p->log, "You ascend to level %d.", l->nlevel);
 
     /* recalculate FOV to make ensure correct display after entering a level */
-    player_update_fov(p, (player_effect(p, ET_BLINDNESS) ? 0 : 6 + player_effect(p, ET_AWARENESS)));
+    player_update_fov(p);
 
     return TRUE;
 }
@@ -1260,11 +1260,11 @@ int player_examine(player *p, position pos)
 
 int player_pickup(player *p)
 {
-    inventory **inv;
+    inventory **inv = NULL;
     int time = 0;
 
-    GPtrArray *callbacks;
-    display_inv_callback *callback;
+    GPtrArray *callbacks = NULL;
+    display_inv_callback *callback = NULL;
 
     assert(p != NULL);
 
@@ -3199,10 +3199,11 @@ int player_item_drop(player *p, inventory **inv, item *it)
 
 int player_item_pickup(player *p, inventory **inv, item *it)
 {
+    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
     char desc[61];
     guint count = 0;
-
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    gpointer oid = it->oid;
 
     if ((it->count > 1) && (it->type != IT_GOLD))
     {
@@ -3237,7 +3238,7 @@ int player_item_pickup(player *p, inventory **inv, item *it)
         return FALSE;
     }
 
-    inv_del_element(inv, it);
+    inv_del_oid(inv, oid);
 
     /* one turn to pick item up, one to stuff it into the pack */
     return 2;
@@ -4263,14 +4264,12 @@ static int player_trap_trigger(player *p, trap_t trap)
  * ported from python to c using the example at
  * http://roguebasin.roguelikedevelopment.org/index.php?title=Python_shadowcasting_implementation
  */
-void player_update_fov(player *p, int radius)
+void player_update_fov(player *p)
 {
+    int radius;
     int octant;
     position pos;
     map *map;
-
-    item *it;
-    monster *m;
 
     area *enlight;
 
@@ -4281,6 +4280,9 @@ void player_update_fov(player *p, int radius)
         { 0,  1,  1,  0,  0, -1, -1,  0 },
         { 1,  0,  0,  1, -1,  0,  0, -1 }
     };
+
+    /* calculate range */
+    radius = (player_effect(nlarn->p, ET_BLINDNESS) ? 0 : 6 + player_effect(nlarn->p, ET_AWARENESS));
 
     /* reset FOV */
     memset(&(p->fov), 0, MAP_SIZE * sizeof(int));
@@ -4336,26 +4338,27 @@ void player_update_fov(player *p, int radius)
         {
             if (player_pos_visible(p, pos))
             {
-                m = map_get_monster_at(map, pos);
+                monster *m = map_get_monster_at(map, pos);
 
                 player_memory_of(p,pos).type = map_tiletype_at(map, pos);
                 player_memory_of(p,pos).stationary = map_stationary_at(map, pos);
 
-                if (map_ilist_at(map, pos)
-                        && inv_length(*map_ilist_at(map, pos)))
+                if (inv_length(*map_ilist_at(map, pos)))
                 {
-                    it = inv_get(*map_ilist_at(map, pos),
+                    /* memorize the topmost item on the tile */
+                    item *it = inv_get(*map_ilist_at(map, pos),
                                  inv_length(*map_ilist_at(map, pos)) - 1);
 
                     player_memory_of(p,pos).item = it->type;
                 }
                 else if (m && monster_type(m) == MT_MIMIC && monster_unknown(m))
                 {
-                    /* show the mimic as an item */
+                    /* show the undiscovered mimic as an item */
                     player_memory_of(p,pos).item = monster_item_type(m);
                 }
                 else
                 {
+                    /* no item at that position */
                     player_memory_of(p,pos).item = IT_NONE;
                 }
             }

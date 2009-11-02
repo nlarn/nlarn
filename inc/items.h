@@ -152,8 +152,8 @@ item_material_t item_material(item *it);
 guint item_price(item *it);
 int item_weight(item *it);
 
-void item_effect_add(item *i, effect *e);
-void item_effect_del(item *i, effect *e);
+void item_effect_add(item *it, effect *e);
+void item_effect_del(item *it, effect *e);
 
 int item_bless(item *it);
 int item_curse(item *it);
@@ -193,10 +193,11 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
                        inv_callback_void post_add, inv_callback_bool pre_del,
                        inv_callback_void post_del);
 
-int inv_add(inventory **inv, item *item_new);
+int inv_add(inventory **inv, item *it);
 item *inv_get(inventory *inv, guint idx);
 item *inv_del(inventory **inv, guint idx);
-int inv_del_element(inventory **inv, item *item);
+int inv_del_element(inventory **inv, item *it);
+int inv_del_oid(inventory **inv, gpointer oid);
 guint inv_length(inventory *inv);
 void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data);
 int inv_weight(inventory *inv);

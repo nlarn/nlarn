@@ -394,12 +394,15 @@ void item_destroy(item *it)
 
     if (it->effects)
     {
+        effect *eff;
+
         while (it->effects->len)
         {
             gpointer effect_id = g_ptr_array_remove_index_fast(it->effects,
                                  it->effects->len - 1);
 
-            effect_destroy(game_effect_get(nlarn, effect_id));
+            if((eff = game_effect_get(nlarn, effect_id)))
+                effect_destroy(eff);
         }
 
         g_ptr_array_free(it->effects, TRUE);
@@ -922,41 +925,41 @@ int item_weight(item *it)
     }
 }
 
-void item_effect_add(item *i, effect *e)
+void item_effect_add(item *it, effect *e)
 {
-    assert (i != NULL && e != NULL);
+    assert (it != NULL && e != NULL);
 
     /* create list if not existant */
-    if (!i->effects)
+    if (!it->effects)
     {
-        i->effects = g_ptr_array_new();
+        it->effects = g_ptr_array_new();
     }
 
     /* this effect is permanent */
     e->turns = 0;
 
     /* link item to effect */
-    e->item = i;
+    e->item = it->oid;
 
     /* add effect to list */
-    effect_add(i->effects, e);
+    effect_add(it->effects, e);
 }
 
-void item_effect_del(item *i, effect *e)
+void item_effect_del(item *it, effect *e)
 {
-    assert (i != NULL && e != NULL);
+    assert (it != NULL && e != NULL);
 
     /* del effect from list */
-    effect_del(i->effects, e);
+    effect_del(it->effects, e);
 
     /*destroy effect */
     effect_destroy(e);
 
     /* delete array if no effect is left */
-    if (!i->effects->len)
+    if (!it->effects->len)
     {
-        g_ptr_array_free(i->effects, TRUE);
-        i->effects = NULL;
+        g_ptr_array_free(it->effects, TRUE);
+        it->effects = NULL;
     }
 }
 
@@ -1192,11 +1195,11 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
     inv-> post_del = post_del;
 }
 
-int inv_add(inventory **inv, item *new_item)
+int inv_add(inventory **inv, item *it)
 {
     guint idx;
 
-    assert(inv != NULL && item_new != NULL && new_item->oid != NULL);
+    assert(inv != NULL && it != NULL && it->oid != NULL);
 
     /* create inventory if necessary */
     if (!(*inv))
@@ -1204,34 +1207,39 @@ int inv_add(inventory **inv, item *new_item)
         *inv = inv_new(NULL);
     }
 
-    /* call pre_add callback */
+    /* check if pre_add callback is set */
     if ((*inv)->pre_add)
     {
-        if (!(*inv)->pre_add(*inv, new_item)) return FALSE;
+        /* call pre_add callback */
+        if (!(*inv)->pre_add(*inv, it))
+        {
+            return FALSE;
+        }
     }
 
-    if (item_is_stackable(new_item->type))
+    /* stack stackable items */
+    if (item_is_stackable(it->type))
     {
         for (idx = 0; idx < inv_length(*inv); idx++)
         {
             item *i = inv_get(*inv, idx);
-            if (item_compare(i, new_item))
+            if (item_compare(i, it))
             {
                 /* just increase item count and release the original */
-                i->count += new_item->count;
-                item_destroy(new_item);
+                i->count += it->count;
+                item_destroy(it);
 
                 return inv_length(*inv);
             }
         }
     }
 
-    g_ptr_array_add((*inv)->content, new_item->oid);
+    g_ptr_array_add((*inv)->content, it->oid);
 
     /* call post_add callback */
     if ((*inv)->post_add)
     {
-        (*inv)->post_add(*inv, new_item);
+        (*inv)->post_add(*inv, it);
     }
 
     return inv_length(*inv);
@@ -1280,23 +1288,23 @@ item *inv_del(inventory **inv, guint idx)
     return item;
 }
 
-int inv_del_element(inventory **inv, item *item)
+int inv_del_element(inventory **inv, item *it)
 {
-    assert(*inv != NULL && (*inv)->content != NULL && item != NULL);
+    assert(*inv != NULL && (*inv)->content != NULL && it != NULL);
 
     if ((*inv)->pre_del)
     {
-        if (!(*inv)->pre_del(*inv, item))
+        if (!(*inv)->pre_del(*inv, it))
         {
             return FALSE;
         }
     }
 
-    g_ptr_array_remove((*inv)->content, item->oid);
+    g_ptr_array_remove((*inv)->content, it->oid);
 
     if ((*inv)->post_del)
     {
-        (*inv)->post_del(*inv, item);
+        (*inv)->post_del(*inv, it);
     }
 
     /* destroy inventory if empty and not owned by anybody */
@@ -1308,6 +1316,23 @@ int inv_del_element(inventory **inv, item *item)
 
     return TRUE;
 }
+
+int inv_del_oid(inventory **inv, gpointer oid)
+{
+    assert(*inv != NULL && (*inv)->content != NULL && oid != NULL);
+
+    g_ptr_array_remove((*inv)->content, oid);
+
+    /* destroy inventory if empty and not owned by anybody */
+    if (!inv_length(*inv) && !(*inv)->owner)
+    {
+        inv_destroy(*inv);
+        *inv = NULL;
+    }
+
+    return TRUE;
+}
+
 guint inv_length(inventory *inv)
 {
     return (inv == NULL) ? 0 : inv->content->len;
@@ -1473,7 +1498,7 @@ int inv_filter_readable_items(item *it)
 {
     assert (it != NULL);
 
-    return (it->type == IT_GEM) || (it->type == IT_BOOK);
+    return (it->type == IT_SCROLL) || (it->type == IT_BOOK);
 }
 
 static void item_typename_pluralize(item *it, char *description, int length)

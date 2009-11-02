@@ -948,14 +948,14 @@ static int building_item_buy(player *p, inventory **inv, item *it)
 
     p->bank_account += price;
 
-    item *it_clone = item_copy(it);
-    it_clone->count = count;
+    guint count_orig = it->count;
+    it->count = count;
 
-    item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
+    item_describe(it, player_item_known(p, it), (count == 1), FALSE, name, 60);
     log_add_entry(p->log, "You sell %s. The %d gold %s been transferred to your bank account.",
                   name, price, (price == 1) ? "has" : "have");
 
-    item_destroy(it_clone);
+    it->count = count_orig;
 
     if ((it->count > 1) && (count < it->count))
     {

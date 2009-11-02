@@ -268,7 +268,7 @@ game *game_load(char *filename, int argc, char *argv[])
     g_free(sgbuf);
 
     /* allocate space for game structure */
-    g = g_malloc0(sizeof(game));
+    nlarn = g = g_malloc0(sizeof(game));
 
     /* initialize settings */
     game_initialize_settings(g, argc, argv);
@@ -333,6 +333,22 @@ game *game_load(char *filename, int argc, char *argv[])
     for (idx = 0; idx < size; idx++)
         g->monster_genocided[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
+
+    /* restore effects (have to come first) */
+    g->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    obj = cJSON_GetObjectItem(save, "effects");
+
+    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+        effect_deserialize(cJSON_GetArrayItem(obj, idx), g);
+
+
+    /* restore items */
+    g->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    obj = cJSON_GetObjectItem(save, "items");
+    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+        item_deserialize(cJSON_GetArrayItem(obj, idx), g);
+
+
     /* restore maps */
     obj = cJSON_GetObjectItem(save, "maps");
     size = cJSON_GetArraySize(obj);
@@ -348,20 +364,6 @@ game *game_load(char *filename, int argc, char *argv[])
 
     /* restore player */
     g->p = player_deserialize(cJSON_GetObjectItem(save, "player"));
-
-
-    /* restore items */
-    g->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
-    obj = cJSON_GetObjectItem(save, "items");
-    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
-        item_deserialize(cJSON_GetArrayItem(obj, idx), g);
-
-    /* restore effects */
-    g->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
-    obj = cJSON_GetObjectItem(save, "effects");
-
-    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
-        effect_deserialize(cJSON_GetArrayItem(obj, idx), g);
 
 
     /* restore monsters */

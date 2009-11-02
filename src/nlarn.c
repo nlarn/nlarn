@@ -35,9 +35,6 @@ int main(int argc, char *argv[])
     /* used to read in e.g. the help file */
     gchar *file_content;
 
-    /* visual range */
-    int visrange;
-
     /* position to examine */
     position pos;
 
@@ -47,13 +44,26 @@ int main(int argc, char *argv[])
            "This is free software, and you are welcome to\n"
            "redistribute it under certain conditions.\n\n");
 
-    game_new(argc, argv);
+    /* find save file */
+    if (g_file_test("nlarn.sav", G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
+    {
+        /* restore savegame */
+        game_load("nlarn.sav", argc, argv);
 
-    /* put the player into the town */
-    player_map_enter(nlarn->p, game_map(nlarn, 0), FALSE);
+        /* refresh FOV */
+        player_update_fov(nlarn->p);
+    }
+    else
+    {
+        /* start new game */
+        game_new(argc, argv);
 
-    /* give player knowledge of the town */
-    scroll_mapping(nlarn->p, NULL);
+        /* put the player into the town */
+        player_map_enter(nlarn->p, game_map(nlarn, 0), FALSE);
+
+        /* give player knowledge of the town */
+        scroll_mapping(nlarn->p, NULL);
+    }
 
     display_init();
     display_draw();
@@ -376,8 +386,7 @@ int main(int argc, char *argv[])
         }
 
         /* recalculate FOV */
-        visrange = (player_effect(nlarn->p, ET_BLINDNESS) ? 0 : 6 + player_effect(nlarn->p, ET_AWARENESS));
-        player_update_fov(nlarn->p, visrange);
+        player_update_fov(nlarn->p);
 
         /* repaint screen */
         display_paint_screen(nlarn->p);
