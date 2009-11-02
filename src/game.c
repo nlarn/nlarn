@@ -305,7 +305,7 @@ game *game_load(char *filename, int argc, char *argv[])
 
     obj = cJSON_GetObjectItem(save, "potion_desc_mapping");
     size = cJSON_GetArraySize(obj);
-    assert(size = PT_MAX - 1);
+    assert(size = PO_MAX - 1);
     for (idx = 0; idx < size; idx++)
         g->potion_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
