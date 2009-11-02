@@ -117,8 +117,8 @@ typedef struct _game_save_head
 void game_new(int argc, char *argv[]);
 int game_destroy(game *g);
 
-int game_save(game *g, char *filename);
-game *game_load(char *filename, int argc, char *argv[]);
+int game_save(game *g, const char *filename);
+game *game_load(const char *filename, int argc, char *argv[]);
 
 game_score_t *game_score(game *g, player_cod cod, int cause);
 GList *game_score_add(game *g, game_score_t *score);

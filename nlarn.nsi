@@ -28,13 +28,13 @@ Name "NLarn ${VERSION}"
 ; The file to write
 OutFile "nlarn-${VERSION}.exe"
 
-; Compression 
+; Compression
 SetCompressor /SOLID lzma
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\NLarn
 
-; Registry key to check for directory (so if you install again, it will 
+; Registry key to check for directory (so if you install again, it will
 ; overwrite the old one automatically)
 InstallDirRegKey HKLM "Software\NLarn" "Install_Dir"
 
@@ -64,27 +64,27 @@ LicenseForceSelection radiobuttons "I accept" "I decline"
 Section "NLarn (required)"
 
   SectionIn RO
-  
+
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
-  
+
   ; Put file there
   File "nlarn.exe"
   File "pdcurses.dll"
   File "libglib-2.0-0.dll"
-  File "zlib1.dll"
+  File "libz-1.dll"
   File "LICENSE"
   File "nlarn.ini-sample"
-  
+
   SetOutPath "$INSTDIR\lib"
   File "lib\fortune"
   File "lib\maze"
   File "lib\nlarn.hlp"
   File "lib\nlarn.msg"
-  
+
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NLarn "Install_Dir" "$INSTDIR"
-  
+
   ; Write the uninstall keys for Windows
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NLarn" "DisplayName" "NLarn ${VERSION}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NLarn" "UninstallString" '"$INSTDIR\uninstall.exe"'

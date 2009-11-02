@@ -19,6 +19,7 @@
 /* needed for the key definitions */
 #include <curses.h>
 #include <stdlib.h>
+#include <glib/gstdio.h>
 
 #include "container.h"
 #include "display.h"
@@ -38,6 +39,9 @@ int main(int argc, char *argv[])
     /* position to examine */
     position pos;
 
+    /* save file name */
+    const char *save_file_name = "nlarn.sav";
+
     printf("%s",
            "NLarn Copyright (C) 2009  Joachim de Groot\n\n"
            "This program comes with ABSOLUTELY NO WARRANTY.\n"
@@ -45,10 +49,13 @@ int main(int argc, char *argv[])
            "redistribute it under certain conditions.\n\n");
 
     /* find save file */
-    if (g_file_test("nlarn.sav", G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
+    if (g_file_test(save_file_name, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
     {
         /* restore savegame */
-        game_load("nlarn.sav", argc, argv);
+        game_load(save_file_name, argc, argv);
+
+        /* delete save file */
+        g_unlink(save_file_name);
 
         /* refresh FOV */
         player_update_fov(nlarn->p);
@@ -307,7 +314,7 @@ int main(int argc, char *argv[])
 
             /* save */
         case 'S':
-            if (game_save(nlarn, "nlarn.sav"))
+            if (game_save(nlarn, save_file_name))
             {
                 /* only terminate the game if saving was successful */
                 game_destroy(nlarn);

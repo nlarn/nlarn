@@ -3,7 +3,7 @@
 # make NLarn distribution package
 #
 # For Windows this depends on MSYS and 7-Zip
-# 
+#
 
 ARCH=$(uname -m)
 
@@ -11,7 +11,7 @@ if [ "$OS" = "Windows_NT" ]
 then
 	OS=win32
 	SUFFIX="zip"
-	EXE="nlarn.exe pdcurses.dll libglib-2.0-0.dll zlib1.dll"
+	EXE="nlarn.exe pdcurses.dll libglib-2.0-0.dll libz-1.dll"
 	export CC=gcc
 else
 	OS=$(uname -s)
@@ -41,7 +41,7 @@ then
   premake4 gmake
 fi
 
-make verbose=yes 
+make verbose=yes
 
 # Quit on errors
 if [ $? -gt 0 ]

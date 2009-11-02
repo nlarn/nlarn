@@ -128,7 +128,7 @@ int game_destroy(game *g)
     return EXIT_SUCCESS;
 }
 
-int game_save(game *g, char *filename)
+int game_save(game *g, const char *filename)
 {
     int idx, err;
     struct cJSON *save, *obj;
@@ -231,7 +231,7 @@ int game_save(game *g, char *filename)
     return TRUE;
 }
 
-game *game_load(char *filename, int argc, char *argv[])
+game *game_load(const char *filename, int argc, char *argv[])
 {
     int size, idx;
     game *g;

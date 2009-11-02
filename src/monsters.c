@@ -2307,7 +2307,3 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
         return FALSE;
     }
 }
-
-static gboolean monster_player_visibility(monster *m, struct player *p)
-{
-}
