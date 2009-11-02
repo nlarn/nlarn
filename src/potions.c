@@ -149,6 +149,8 @@ int potion_detect_item(player *p, item *potion)
 
     assert(p != NULL && potion != NULL);
 
+    pos.z = p->pos.z;
+
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
