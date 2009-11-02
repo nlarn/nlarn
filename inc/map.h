@@ -131,6 +131,7 @@ typedef struct map
 {
     guint32 nlevel;                       /* map number */
     guint32 visited;                      /* last time player has been on this map */
+    guint32 mcount;                       /* monster count */
     map_tile grid[MAP_MAX_Y][MAP_MAX_X];  /* the map */
 } map;
 

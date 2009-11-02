@@ -875,6 +875,9 @@ monster *monster_new(int type, position pos)
     /* link monster to tile */
     map_set_monster_at(game_map(nlarn, pos.z), pos, nmonster);
 
+    /* increment monster count */
+    game_map(nlarn, pos.z)->mcount++;
+
     return nmonster;
 }
 
@@ -937,6 +940,9 @@ void monster_destroy(monster *m)
         g_hash_table_foreach_remove callback */
         game_monster_unregister(nlarn, m->oid);
     }
+
+    /* decrement monster count */
+    game_map(nlarn, m->pos.z)->mcount--;
 
     g_free(m);
 }

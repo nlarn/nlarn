@@ -908,6 +908,12 @@ int map_fill_with_life(map *l)
 
     new_monster_count = rand_1n(14) + l->nlevel;
 
+    if (l->mcount > new_monster_count)
+        /* no monsters added */
+        return FALSE;
+    else
+        new_monster_count -= l->mcount;
+
     for (i = 0; i <= new_monster_count; i++)
     {
         position pos = map_find_space(l, LE_MONSTER);
