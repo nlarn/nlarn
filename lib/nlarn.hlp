@@ -6,7 +6,7 @@ Movement
      /|\    /|\
     1 2 3  b j n
 
-You can as well use the number pad with num lock off. 
+You can as well use the number pad with num lock off.
 
 
 Commands
@@ -25,8 +25,8 @@ Q  quit the game (alternate key: F12)
 R  remove gems from throne
 s  sit on a throne
 S  save the game
-t  tidy up at a fountain
 v  print program version
+W  wash at a fountain
 Z  teleport yourself
 
 <  climb up stairs / volcanic shaft or enter a building

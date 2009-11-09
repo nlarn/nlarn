@@ -290,14 +290,14 @@ int main(int argc, char *argv[])
             moves_count = player_throne_sit(nlarn->p);
             break;
 
-            /* tidy up at fountain */
-        case 't':
-            moves_count = player_fountain_wash(nlarn->p);
-            break;
-
         case 'v':
             log_add_entry(nlarn->p->log, "NLarn version %d.%d.%d, built on %s.",
                           VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, __DATE__);
+            break;
+
+            /* wash at fountain */
+        case 'W':
+            moves_count = player_fountain_wash(nlarn->p);
             break;
 
         case '\\':

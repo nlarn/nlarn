@@ -1130,12 +1130,6 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     else if (l->nlevel == 1 && p->pos.z == 0)
         log_add_entry(p->log, "You enter the caverns of Larn.");
 
-    else if (p->pos.z < l->nlevel)
-        log_add_entry(p->log, "You descend to level %d.", l->nlevel);
-
-    else
-        log_add_entry(p->log, "You ascend to level %d.", l->nlevel);
-
     /* put player into new map */
     p->pos = pos;
 
@@ -3259,6 +3253,8 @@ int player_altar_desecrate(player *p)
         return FALSE;
     }
 
+    log_add_entry(p->log, "You try to desecrate the altar.");
+
     if (chance(60))
     {
         /* try to find a space for the monster near the altar */
@@ -3312,6 +3308,8 @@ int player_altar_pray(player *p)
 
     if (donation == 0)
     {
+        log_add_entry(p->log, "You pray at the altar.");
+
         if (chance(75))
         {
             log_add_entry(p->log, "Nothing happens.");
@@ -3345,6 +3343,9 @@ int player_altar_pray(player *p)
     }
     else if (player_gold >= donation)
     {
+        log_add_entry(p->log, "You donate %d gold at the altar and pray.",
+                      donation);
+
         tithe = player_gold / 10 ;
         player_set_gold(p, player_gold - donation);
 
@@ -3633,6 +3634,8 @@ int player_fountain_drink(player *p)
         return 0;
     }
 
+    log_add_entry(p->log, "You drink from the fountain.");
+
     if (chance(7))
     {
         e = effect_new(ET_SICKNESS, game_turn(nlarn));
@@ -3794,6 +3797,8 @@ int player_fountain_wash(player *p)
         return 0;
     }
 
+    log_add_entry(p->log, "You wash yourself at the fountain.");
+
     if (chance(10))
     {
         log_add_entry(p->log, "Oh no! The water was foul!");
@@ -3840,15 +3845,19 @@ int player_fountain_wash(player *p)
 int player_stairs_down(player *p)
 {
     map *nlevel = NULL;
+    gboolean show_msg = FALSE;
+    map_stationary_t ms = map_stationary_at(game_map(nlarn, p->pos.z), p->pos);
 
-    switch (map_stationary_at(game_map(nlarn, p->pos.z), p->pos))
+    switch (ms)
     {
     case LS_STAIRSDOWN:
+        show_msg = TRUE;
         nlevel = game_map(nlarn, p->pos.z + 1);;
         break;
 
     case LS_ELEVATORDOWN:
         /* first vulcano map */
+        show_msg = TRUE;
         nlevel = game_map(nlarn, MAP_MAX - 1);
         break;
 
@@ -3864,6 +3873,12 @@ int player_stairs_down(player *p)
         break;
     }
 
+    /* display additional message */
+    if (show_msg)
+    {
+        log_add_entry(p->log, "You climb down %s.", ls_get_desc(ms));
+    }
+
     /* if told to switch level, do so */
     if (nlevel != NULL)
     {
@@ -3876,15 +3891,19 @@ int player_stairs_down(player *p)
 int player_stairs_up(player *p)
 {
     map *nlevel = NULL;
+    gboolean show_msg = FALSE;
+    map_stationary_t ms = map_stationary_at(game_map(nlarn, p->pos.z), p->pos);
 
-    switch (map_stationary_at(game_map(nlarn, p->pos.z), p->pos))
+    switch (ms)
     {
     case LS_STAIRSUP:
+        show_msg = TRUE;
         nlevel = game_map(nlarn, p->pos.z - 1);
         break;
 
     case LS_ELEVATORUP:
         /* return to town */
+        show_msg = TRUE;
         nlevel = game_map(nlarn, 0);
         break;
 
@@ -3897,6 +3916,12 @@ int player_stairs_up(player *p)
         break;
     default:
         log_add_entry(p->log, "I see no stairway up here.");
+    }
+
+    /* display additional message */
+    if (show_msg)
+    {
+        log_add_entry(p->log, "You climb up %s.", ls_get_desc(ms));
     }
 
     /* if told to switch level, do so */
@@ -3916,18 +3941,22 @@ int player_throne_pillage(player *p)
     /* current map */
     map *map = game_map(nlarn, p->pos.z);
 
+    /* type of object at player's position */
+    map_stationary_t ms = map_stationary_at(map, p->pos);
+
     assert (p != NULL);
 
-    if (map_stationary_at(map, p->pos) == LS_DEADTHRONE)
+    if ((ms != LS_THRONE) && (ms != LS_THRONE2) && (ms != LS_DEADTHRONE))
     {
-        log_add_entry(p->log, "There are no gems left on this throne.");
+        log_add_entry(p->log, "I see no throne here to remove gems from.");
         return 0;
     }
 
-    if ((map_stationary_at(map, p->pos) != LS_THRONE)
-            && (map_stationary_at(map, p->pos) != LS_THRONE2))
+    log_add_entry(p->log, "You try to remove the gems from the throne.");
+
+    if (ms == LS_DEADTHRONE)
     {
-        log_add_entry(p->log, "I see no throne here to remove gems from.");
+        log_add_entry(p->log, "There are no gems left on this throne.");
         return 0;
     }
 
@@ -3945,7 +3974,7 @@ int player_throne_pillage(player *p)
 
         map_stationary_set(map, p->pos, LS_DEADTHRONE);
     }
-    else if (chance(40))
+    else if (chance(40) && (ms == LS_THRONE))
     {
         /* try to find a space for the monster near the player */
         position mpos = map_find_space_in(map, rect_new_sized(p->pos, 1),
@@ -3980,6 +4009,8 @@ int player_throne_sit(player *p)
         log_add_entry(p->log, "I see no throne to sit on here.");
         return 0;
     }
+
+    log_add_entry(p->log, "You sit on the trone.");
 
     if (chance(30) && (st == LS_THRONE))
     {
@@ -4347,7 +4378,7 @@ void player_update_fov(player *p)
                 {
                     /* memorize the topmost item on the tile */
                     item *it = inv_get(*map_ilist_at(map, pos),
-                                 inv_length(*map_ilist_at(map, pos)) - 1);
+                                       inv_length(*map_ilist_at(map, pos)) - 1);
 
                     player_memory_of(p,pos).item = it->type;
                 }
