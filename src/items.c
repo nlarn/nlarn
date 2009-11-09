@@ -584,16 +584,52 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     char desc[61] = "";
     char *temp = NULL;
     char *add_info = NULL;
+    GPtrArray *add_info_elems = g_ptr_array_new();
 
     assert((it != NULL) && (it->type > IT_NONE) && (it->type < IT_MAX));
 
+    /* collect additional information */
     if (it->blessed && it->blessed_known)
     {
-        add_info = "blessed";
+        g_ptr_array_add(add_info_elems, "blessed");
     }
     else if (it->cursed && it->curse_known)
     {
-        add_info = "cursed";
+        g_ptr_array_add(add_info_elems, "cursed");
+    }
+
+    if (it->burnt == 1)
+    {
+        g_ptr_array_add(add_info_elems, "burnt");
+    }
+    if (it->burnt == 2)
+    {
+        g_ptr_array_add(add_info_elems, "very burnt");
+    }
+
+    if (it->corroded == 1)
+    {
+        g_ptr_array_add(add_info_elems, "corroded");
+    }
+    if (it->corroded == 2)
+    {
+        g_ptr_array_add(add_info_elems, "very corroded");
+    }
+
+    if (it->rusty == 1)
+    {
+        g_ptr_array_add(add_info_elems, "rusty");
+    }
+    if (it->rusty == 2)
+    {
+        g_ptr_array_add(add_info_elems, "very rusty");
+    }
+
+    if (add_info_elems->len > 0)
+    {
+        /* add sentinel */
+        g_ptr_array_add(add_info_elems, NULL);
+        add_info = g_strjoinv(", ", (char**)(add_info_elems->pdata));
     }
 
     switch (it->type)
@@ -710,6 +746,9 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 
         break;
     }
+
+    g_free(add_info);
+    g_ptr_array_free(add_info_elems, TRUE);
 
     return(str);
 }
