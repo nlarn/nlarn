@@ -1836,15 +1836,21 @@ monster *monster_damage_take(monster *m, damage *dam)
 
     if (m->hp < 1)
     {
-        /* if the monster has been killed by the player give experience */
-        if (p)
-        {
-            player_exp_gain(p, monster_exp(m));
-            p->stats.monsters_killed[m->type] += 1;
-        }
+        /* remember monster type */
+        monster_t mt = m->type;
 
+        /* monster dies */
         monster_die(m);
         m = NULL;
+
+        /* if the monster has been killed by the player give experience
+           this has to happen after the monster died or the messages
+           will not be sorted properly */
+        if (p)
+        {
+            player_exp_gain(p, monster_exp_by_type(mt));
+            p->stats.monsters_killed[mt] += 1;
+        }
     }
 
     g_free(dam);
