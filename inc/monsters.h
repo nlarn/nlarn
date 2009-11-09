@@ -193,7 +193,7 @@ monster *monster_trap_trigger(monster *m);
 void monster_polymorph(monster *m);
 
 void monster_items_drop(monster *m, inventory **floor);
-void monster_items_pickup(monster *m);
+int monster_items_pickup(monster *m);
 
 int monster_attack_count(monster *m);
 void monster_player_attack(monster *m, struct player *p);

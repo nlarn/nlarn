@@ -1193,6 +1193,7 @@ void monster_move(monster *m, struct player *p)
     /* damage caused by map effects */
     damage *dam = NULL;
 
+    /* FIXME: this ought to be different per monster type */
     int monster_visrange = 7;
 
     if (player_effect(p, ET_STEALTH))
@@ -1203,7 +1204,7 @@ void monster_move(monster *m, struct player *p)
     }
 
     /* determine if the monster can see the player */
-    if (pos_distance(monster_pos(m), p->pos) > 7)
+    if (pos_distance(monster_pos(m), p->pos) > monster_visrange)
     {
         m->p_visible = FALSE;
     }
@@ -1265,6 +1266,11 @@ void monster_move(monster *m, struct player *p)
             log_add_entry(p->log, "The %s turns to flee!", monster_name(m));
         }
     }
+
+    /* let the monster have a look at the items at it's current position
+       if it chose to pick up something, the turn is over */
+    if (monster_items_pickup(m))
+        return;
 
     /* determine monster's next move */
     m_npos = monster_pos(m);
@@ -1446,8 +1452,6 @@ void monster_move(monster *m, struct player *p)
         } /* end new position */
     } /* end monster repositioning */
 
-    monster_items_pickup(m);
-
     /* increment count of turns since when player was last seen */
     if (m->lastseen) m->lastseen++;
 }
@@ -1552,7 +1556,13 @@ void monster_items_drop(monster *m, inventory **floor)
     }
 }
 
-void monster_items_pickup(monster *m)
+/**
+ * check stash at monster's position for something desired
+ * @param a monster
+ * @return TRUE if something has been picked up, FALSE if not
+ *
+ */
+int monster_items_pickup(monster *m)
 {
     /* TODO: gelatious cube digests items, rust monster eats metal stuff */
     /* FIXME: time management */
@@ -1576,8 +1586,12 @@ void monster_items_pickup(monster *m)
         }
         else if (it->type == IT_WEAPON && monster_attack_available(m, ATT_WEAPON))
         {
-            /* monster can attack with weapons, get the weapon */
-            pick_up = TRUE;
+            /* monster can attack with weapons */
+            item *mweapon = game_item_get(nlarn, m->weapon);
+
+            /* compare this weapon with the weapon the monster wields */
+            if (weapon == NULL || (weapon_wc(mweapon) < weapon_wc(it)))
+                pick_up = TRUE;
         }
 
         if (pick_up)
@@ -1606,10 +1620,12 @@ void monster_items_pickup(monster *m)
                     monster_weapon_wield(m, best);
                 }
             }
+            /* finish this turn after picking up an item */
+            return TRUE;
+        } /* end if pick_up */
+    } /* end foreach item */
 
-            pick_up = FALSE;
-        }
-    }
+    return FALSE;
 }
 
 /**
