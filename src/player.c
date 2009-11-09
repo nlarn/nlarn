@@ -1067,7 +1067,6 @@ int player_attack(player *p, monster *m)
 /**
  * function to enter a map.  This routine must be called anytime the
  * player changes levels.
- * Existing levels will get a few more monsters.
  *
  * @param player entering map
  * @param entered map
@@ -1122,14 +1121,6 @@ int player_map_enter(player *p, map *l, gboolean teleported)
             pos = map_find_stationary(l, LS_STAIRSUP);
     }
 
-    p->pos = pos;
-
-    /* remove monster that might be at player's positon */
-    if ((m = map_get_monster_at(l, p->pos)))
-    {
-        monster_pos_set(m, game_map(nlarn, p->pos.z), map_find_space(l, LE_MONSTER));
-    }
-
     if (l->nlevel == 0)
     {
         /* do not log this at the start of the game */
@@ -1144,6 +1135,15 @@ int player_map_enter(player *p, map *l, gboolean teleported)
 
     else
         log_add_entry(p->log, "You ascend to level %d.", l->nlevel);
+
+    /* put player into new map */
+    p->pos = pos;
+
+    /* remove monster that might be at player's positon */
+    if ((m = map_get_monster_at(l, p->pos)))
+    {
+        monster_pos_set(m, game_map(nlarn, p->pos.z), map_find_space(l, LE_MONSTER));
+    }
 
     /* recalculate FOV to make ensure correct display after entering a level */
     player_update_fov(p);
