@@ -123,6 +123,9 @@ int potion_amnesia(player *p, item *potion)
 
     assert (p != NULL && potion != NULL);
 
+    /* set position's level to player's position */
+    pos.z = p->pos.z;
+
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
