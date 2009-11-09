@@ -732,7 +732,7 @@ static const attack *monster_attack_get(monster *m, attack_t type);
 static void monster_attack_disable(monster *m, const attack *att);
 static item *monster_weapon_select(monster *m);
 static void monster_weapon_wield(monster *m, item *weapon);
-static void monster_die(monster *m);
+static void monster_die(monster *m, struct player *p);
 static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
@@ -1545,17 +1545,6 @@ void monster_polymorph(monster *m)
     m->hp = monster_hp_max(m);
 }
 
-void monster_items_drop(monster *m, inventory **floor)
-{
-    assert(m != NULL && floor != NULL);
-
-    while (inv_length(m->inventory) > 0)
-    {
-        inv_add(floor, inv_get(m->inventory, 0));
-        inv_del(&m->inventory, 0);
-    }
-}
-
 /**
  * check stash at monster's position for something desired
  * @param a monster
@@ -1836,21 +1825,9 @@ monster *monster_damage_take(monster *m, damage *dam)
 
     if (m->hp < 1)
     {
-        /* remember monster type */
-        monster_t mt = m->type;
-
         /* monster dies */
-        monster_die(m);
+        monster_die(m, p);
         m = NULL;
-
-        /* if the monster has been killed by the player give experience
-           this has to happen after the monster died or the messages
-           will not be sorted properly */
-        if (p)
-        {
-            player_exp_gain(p, monster_exp_by_type(mt));
-            p->stats.monsters_killed[mt] += 1;
-        }
     }
 
     g_free(dam);
@@ -2148,7 +2125,7 @@ static void monster_weapon_wield(monster *m, item *weapon)
 }
 
 
-static void monster_die(monster *m)
+static void monster_die(monster *m, struct player *p)
 {
     char *message = NULL;
 
@@ -2168,7 +2145,18 @@ static void monster_die(monster *m)
     /* drop stuff the monster carries */
     if (inv_length(m->inventory))
     {
-        monster_items_drop(m, map_ilist_at(monster_map(m), monster_pos(m)));
+        inventory **floor = map_ilist_at(monster_map(m), monster_pos(m));
+        while (inv_length(m->inventory) > 0)
+        {
+            inv_add(floor, inv_get(m->inventory, 0));
+            inv_del(&m->inventory, 0);
+        }
+    }
+
+    if (p != NULL)
+    {
+        player_exp_gain(p, monster_exp(m));
+        p->stats.monsters_killed[m->type] += 1;
     }
 
     monster_destroy(m);
