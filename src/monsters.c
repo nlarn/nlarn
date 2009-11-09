@@ -213,7 +213,7 @@ const monster_data monsters[MT_MAX] =
         MF_HEAD | MF_HANDS,
         {
             { ATT_TOUCH, DAM_STEAL_GOLD, 0, 0 },
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
+            { ATT_CLAW, DAM_PHYSICAL, 2, 0 },
         }
     },
     {
@@ -1590,7 +1590,7 @@ int monster_items_pickup(monster *m)
             item *mweapon = game_item_get(nlarn, m->weapon);
 
             /* compare this weapon with the weapon the monster wields */
-            if (weapon == NULL || (weapon_wc(mweapon) < weapon_wc(it)))
+            if (mweapon == NULL || (weapon_wc(mweapon) < weapon_wc(it)))
                 pick_up = TRUE;
         }
 
