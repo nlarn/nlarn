@@ -1155,10 +1155,6 @@ void monster_level_enter(monster *m, struct map *l)
     position npos;
     char *how;
 
-    /* remove monster from old map  */
-    map *oldmap = game_map(nlarn, m->pos.z);
-    map_set_monster_at(oldmap, m->pos, NULL);
-
     /* check if the monster used the stairs */
     switch (source)
     {
@@ -1190,6 +1186,18 @@ void monster_level_enter(monster *m, struct map *l)
     {
         npos = map_find_space(l, LE_MONSTER);
     }
+
+    /* validate new position */
+    if (!map_pos_validate(l, npos, LE_MONSTER))
+    {
+        /* the position somehow isn't valid,
+           e.g. someone is standing on the entrance */
+        return;
+    }
+
+    /* remove monster from old map  */
+    map *oldmap = game_map(nlarn, m->pos.z);
+    map_set_monster_at(oldmap, m->pos, NULL);
 
     /* put monster into map */
     monster_pos_set(m, l, npos);
