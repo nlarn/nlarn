@@ -1190,10 +1190,9 @@ gboolean spell_vaporize_rock(player *p)
     position pos;
     position mpos;      /* position for monster that might be generated */
     char *desc = NULL;
-    map *map;             /* current map */
+    map *map = game_map(nlarn, p->pos.z);
 
     pos = display_get_position(p, "What do you want to vaporize?", FALSE, FALSE);
-    map = game_map(nlarn, p->pos.z);
 
     if (!pos_valid(pos))
     {
@@ -1216,6 +1215,10 @@ gboolean spell_vaporize_rock(player *p)
 
     switch (map_stationary_at(map, pos))
     {
+    case LS_NONE:
+        /* NOP */
+        break;
+
     case LS_ALTAR:
         if (pos_valid(mpos))
         {
