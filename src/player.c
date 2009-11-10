@@ -1199,8 +1199,9 @@ int player_examine(player *p, position pos)
     /* name monster */
     if (tile->monster != NULL)
     {
-        log_add_entry(p->log, "A%s %s.", a_an(monster_name(tile->monster)),
-                      monster_name(tile->monster));
+        monster *m = game_monster_get(nlarn, tile->monster);
+        log_add_entry(p->log, "A%s %s.", a_an(monster_name(m)),
+                      monster_name(m));
     }
 
     /* add message if target tile contains a stationary item */
