@@ -779,7 +779,6 @@ static void game_monsters_move(game *g)
         /* deal damage caused by floor effects */
         if ((dam != NULL) && !(m = monster_damage_take(m, dam)))
         {
-            monster_die(m, NULL);
             continue;
         }
 
