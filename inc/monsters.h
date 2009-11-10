@@ -186,6 +186,8 @@ gboolean monster_in_sight(monster *m);
 
 /* other functions */
 
+void monster_die(monster *m, struct player *p);
+
 void monster_level_enter(monster *m, struct map *l);
 void monster_move(monster *m, struct player *p);
 
@@ -212,7 +214,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
 #define monster_image(monster)       (monsters[monster_type(monster)].image)
 #define monster_speed(monster)       (monsters[monster_type(monster)].mspeed)
 #define monster_attack(monster, idx) (monsters[monster_type(monster)].attacks[(idx)])
-#define monster_map(monster)         (game_map(nlarn, (monster)->pos.z))
+#define monster_map(monster)         (game_map(nlarn, monster_pos((monster)).z))
 
 /* flags */
 #define monster_has_head(monster)        (monsters[monster_type(monster)].flags & MF_HEAD)

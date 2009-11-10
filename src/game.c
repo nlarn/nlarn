@@ -28,6 +28,7 @@
 #include <sys/types.h>
 
 #include "cJSON.h"
+#include "defines.h"
 #include "game.h"
 #include "nlarn.h"
 #include "player.h"
@@ -742,7 +743,7 @@ static void game_initialize_settings(game *g, int argc, char *argv[])
 }
 
 /**
- *  move all monsters on player's current map
+ *  move all monsters in the game
  *
  *  @param the game
  *  @return Returns no value.
@@ -765,6 +766,25 @@ static void game_monsters_move(game *g)
         /* modify effects */
         monster_effects_expire(m);
 
+        /* regenerate / inflict poison upon monster. */
+        if (!monster_regenerate(m, g->gtime, g->difficulty, g->p->log))
+        {
+            monster_die(m, NULL);
+            continue;
+        }
+
+        /* damage caused by map effects */
+        damage *dam = map_tile_damage(monster_map(m), monster_pos(m));
+
+        /* deal damage caused by floor effects */
+        if ((dam != NULL) && !(m = monster_damage_take(m, dam)))
+        {
+            monster_die(m, NULL);
+            continue;
+        }
+
+        /* move the monsters only if they are on the same
+           level as the player or an adjacent level */
         if (mpos.z == g->p->pos.z
                 || (mpos.z == g->p->pos.z - 1)
                 || (mpos.z == g->p->pos.z + 1))

@@ -732,7 +732,6 @@ static const attack *monster_attack_get(monster *m, attack_t type);
 static void monster_attack_disable(monster *m, const attack *att);
 static item *monster_weapon_select(monster *m);
 static void monster_weapon_wield(monster *m, item *weapon);
-static void monster_die(monster *m, struct player *p);
 static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
@@ -1115,6 +1114,38 @@ gboolean monster_in_sight(monster *m)
     return m->m_visible;
 }
 
+void monster_die(monster *m, struct player *p)
+{
+    char *message = "The %s died!";
+
+    assert(m != NULL);
+
+    /* if the player can see the monster describe the event */
+    if (m->m_visible)
+    {
+        log_add_entry(nlarn->p->log, message, monster_name(m));
+    }
+
+    /* drop stuff the monster carries */
+    if (inv_length(m->inventory))
+    {
+        inventory **floor = map_ilist_at(monster_map(m), monster_pos(m));
+        while (inv_length(m->inventory) > 0)
+        {
+            inv_add(floor, inv_get(m->inventory, 0));
+            inv_del(&m->inventory, 0);
+        }
+    }
+
+    if (p != NULL)
+    {
+        player_exp_gain(p, monster_exp(m));
+        p->stats.monsters_killed[m->type] += 1;
+    }
+
+    monster_destroy(m);
+}
+
 void monster_level_enter(monster *m, struct map *l)
 {
     assert (m != NULL && l != NULL);
@@ -1190,9 +1221,6 @@ void monster_move(monster *m, struct player *p)
 
     map_path_element *el = NULL;
 
-    /* damage caused by map effects */
-    damage *dam = NULL;
-
     /* FIXME: this ought to be different per monster type */
     int monster_visrange = 7;
 
@@ -1227,23 +1255,6 @@ void monster_move(monster *m, struct player *p)
     {
         /* update monster's knowledge of player's position */
         monster_update_player_pos(m, p->pos);
-    }
-
-    /*
-     * regenerate / inflict poison upon monster.
-     * as monster might be killed during the process we need
-     * to exit the loop in this case
-     */
-    if (!monster_regenerate(m, game_turn(nlarn), game_difficulty(nlarn), p->log))
-    {
-        return;
-    }
-
-    /* deal damage caused by floor effects */
-    if ((dam = map_tile_damage(monster_map(m), monster_pos(m))))
-    {
-        if (!(m = monster_damage_take(m, dam)))
-            return;
     }
 
     /* update monsters action */
@@ -1946,7 +1957,10 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
         }
 
         if (m->hp < 1)
+        {
+            /* monster died from poison */
             return FALSE;
+        }
     }
 
     return TRUE;
@@ -2122,44 +2136,6 @@ static void monster_weapon_wield(monster *m, item *weapon)
         log_add_entry(nlarn->p->log, "The %s wields %s.",
                       monster_name(m), buf);
     }
-}
-
-
-static void monster_die(monster *m, struct player *p)
-{
-    char *message = NULL;
-
-    assert(m != NULL);
-
-    if (!message)
-    {
-        message = "The %s died!";
-    }
-
-    /* if the player can see the monster describe the event */
-    if (m->m_visible)
-    {
-        log_add_entry(nlarn->p->log, message, monster_name(m));
-    }
-
-    /* drop stuff the monster carries */
-    if (inv_length(m->inventory))
-    {
-        inventory **floor = map_ilist_at(monster_map(m), monster_pos(m));
-        while (inv_length(m->inventory) > 0)
-        {
-            inv_add(floor, inv_get(m->inventory, 0));
-            inv_del(&m->inventory, 0);
-        }
-    }
-
-    if (p != NULL)
-    {
-        player_exp_gain(p, monster_exp(m));
-        p->stats.monsters_killed[m->type] += 1;
-    }
-
-    monster_destroy(m);
 }
 
 static gboolean monster_item_disenchant(monster *m, struct player *p)
