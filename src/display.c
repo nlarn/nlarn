@@ -2313,10 +2313,17 @@ static int display_window_move(display_window *dwin, int key)
 {
     gboolean refresh = TRUE;
 
-    assert (dwin != NULL && key);
+    assert (dwin != NULL);
 
     switch (key)
     {
+    case 0:
+        /* the windows keys generate two key presses, of which the first
+           is a zero. flush the buffer or the second key code will confuse
+           everything. This happens here as all dialogs call this function
+           after everything else. */
+        flushinp();
+        break;
         /* ^left */
     case 541: /* NCurses - Linux */
     case 443: /* PDCurses - Windows */
