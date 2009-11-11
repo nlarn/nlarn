@@ -35,6 +35,7 @@ static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
 static int building_player_check(player *p, guint amount);
 static void building_player_charge(player *p, guint amount);
 
+static void building_item_add(inventory **inv, item *it);
 static int building_item_sell(player *p, inventory **inv, item *it);
 static int building_item_identify(player *p, inventory **inv, item *it);
 static int building_item_repair(player *p, inventory **inv, item *it);
@@ -295,6 +296,13 @@ void building_dndstore_init()
                 }
                 else
                 {
+                    if (type == IT_WEAPON || type == IT_ARMOUR)
+                    {
+                        /* make bonus known */
+                        it->bonus_known = TRUE;
+                    }
+
+                    /* add item to store */
                     inv_add(&nlarn->store_stock, it);
                 }
             }
@@ -683,6 +691,43 @@ static void building_player_charge(player *p, guint amount)
     }
 }
 
+/**
+ *
+ * add an item to the dnd store
+ *
+ * either refurbish and put the item into the store's inventory
+ * or destroy it if it is a gem.
+ *
+ */
+static void building_item_add(inventory **inv, item *it)
+{
+    if (it->type == IT_GEM)
+    {
+        /* gems do not appear in the store */
+        item_destroy(it);
+    }
+    else
+    {
+        /* refurbish item before putting it into the store */
+        if (it->cursed)
+            it->cursed = FALSE;
+
+        if (it->rusty)
+            it->rusty = FALSE;
+
+        if (it->burnt)
+            it->burnt = FALSE;
+
+        if (it->corroded)
+            it->corroded = FALSE;
+
+        if (it->bonus < 0)
+            it->bonus = 0;
+
+        inv_add(inv, it);
+    }
+}
+
 static int building_item_sell(player *p, inventory **inv, item *it)
 {
     guint price;
@@ -959,7 +1004,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
 
     if ((it->count > 1) && (count < it->count))
     {
-        inv_add(inv, item_split(it, count));
+        building_item_add(inv, item_split(it, count));
     }
     else
     {
@@ -969,7 +1014,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
         }
         else
         {
-            inv_add(inv, it);
+            building_item_add(inv, it);
         }
     }
 
