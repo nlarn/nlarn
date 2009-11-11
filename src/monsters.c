@@ -49,8 +49,6 @@ struct _monster
     GPtrArray *effects;
 
     guint32
-        m_visible: 1,    /* LOS between player -> monster */
-        p_visible: 1,    /* LOS between monster -> player */
         item_type: 8,    /* item type monster is displayed as */
         unknown: 1;      /* monster is unknown */
 };
@@ -727,6 +725,7 @@ const monster_data monsters[MT_MAX] =
     }
 };
 
+static gboolean monster_player_visible(monster *m);
 static gboolean monster_attack_available(monster *m, attack_t type);
 static const attack *monster_attack_get(monster *m, attack_t type);
 static void monster_attack_disable(monster *m, const attack *att);
@@ -1111,7 +1110,16 @@ void monster_unknown_set(monster *m, gboolean what)
 gboolean monster_in_sight(monster *m)
 {
     assert (m != NULL);
-    return m->m_visible;
+
+    /* different level */
+    if (m->pos.z != nlarn->p->pos.z)
+        return FALSE;
+
+    /* invisible monster, player has no infravision */
+    if (monster_is_invisible(m) && !player_effect(nlarn->p, ET_INFRAVISION))
+        return FALSE;
+
+    return player_pos_visible(nlarn->p, m->pos);
 }
 
 void monster_die(monster *m, struct player *p)
@@ -1121,7 +1129,7 @@ void monster_die(monster *m, struct player *p)
     assert(m != NULL);
 
     /* if the player can see the monster describe the event */
-    if (m->m_visible)
+    if (monster_in_sight(m))
     {
         log_add_entry(nlarn->p->log, message, monster_name(m));
     }
@@ -1202,9 +1210,6 @@ void monster_level_enter(monster *m, struct map *l)
     /* put monster into map */
     monster_pos_set(m, l, npos);
 
-    /* update visibility */
-    m->m_visible = player_pos_visible(nlarn->p, npos);
-
     /* log the event */
     if (monster_in_sight(m) && target)
     {
@@ -1229,44 +1234,14 @@ void monster_move(monster *m, struct player *p)
 
     map_path_element *el = NULL;
 
-    /* FIXME: this ought to be different per monster type */
-    int monster_visrange = 7;
-
-    if (player_effect(p, ET_STEALTH))
-    {
-        /* if the player is stealthy monsters will only recognize him when
-           standing next to him */
-        monster_visrange = 1;
-    }
-
-    /* determine if the monster can see the player */
-    if (pos_distance(monster_pos(m), p->pos) > monster_visrange)
-    {
-        m->p_visible = FALSE;
-    }
-    else if (player_effect(p, ET_INVISIBILITY) && !monster_has_infravision(m))
-    {
-        m->p_visible = FALSE;
-    }
-    else if (monster_effect(m, ET_BLINDNESS))
-    {
-        /* monster is blinded */
-        m->p_visible = FALSE;
-    }
-    else
-    {
-        /* determine if player's position is visible from monster's position */
-        m->p_visible = map_pos_is_visible(monster_map(m), monster_pos(m), p->pos);
-    }
-
-    if (m->p_visible)
+    if (monster_player_visible(m))
     {
         /* update monster's knowledge of player's position */
         monster_update_player_pos(m, p->pos);
     }
 
     /* update monsters action */
-    if (monster_update_action(m) && m->m_visible)
+    if (monster_update_action(m) && monster_in_sight(m))
     {
         /* the monster has chosen a new action and the player
            can see the new action, so let's describe it */
@@ -1417,9 +1392,6 @@ void monster_move(monster *m, struct player *p)
         break;
     }
 
-    /* can the player see the new position? */
-    m->m_visible = player_pos_visible(p, m_npos);
-
     /* ******** if new position has been found - move the monster ********* */
     map_stationary_t target_st = map_stationary_at(monster_map(m), m_npos);
 
@@ -1450,7 +1422,7 @@ void monster_move(monster *m, struct player *p)
             map_stationary_set(monster_map(m), m_npos, LS_OPENDOOR);
 
             /* notify the player if the door is visible */
-            if (m->m_visible)
+            if (monster_in_sight(m))
             {
                 log_add_entry(p->log, "The %s opens the door.", monster_name(m));
             }
@@ -1527,7 +1499,7 @@ monster *monster_trap_trigger(monster *m)
 
     } /* switch (trap) */
 
-    if (m->m_visible)
+    if (monster_in_sight(m))
     {
         log_add_entry(nlarn->p->log, trap_m_message(trap), monster_name(m));
 
@@ -1605,7 +1577,7 @@ int monster_items_pickup(monster *m)
         if (pick_up)
         {
             /* item has been picked up */
-            if (m->m_visible)
+            if (monster_in_sight(m))
             {
                 item_describe(it, player_item_identified(nlarn->p, it),
                               (it->count == 1), FALSE, buf, 60);
@@ -1665,7 +1637,8 @@ void monster_player_attack(monster *m, player *p)
     /* the player is invisible and the monster bashes into thin air */
     if (!pos_identical(m->player_pos, p->pos))
     {
-        if (!map_is_monster_at(game_map(nlarn, p->pos.z), p->pos) && m->m_visible)
+        if (!map_is_monster_at(game_map(nlarn, p->pos.z), p->pos)
+            && monster_in_sight(m))
         {
             log_add_entry(p->log, "The %s bashes into thin air.",
                           monster_name(m));
@@ -2017,7 +1990,7 @@ int monster_effect_del(monster *m, effect *e)
     assert(m != NULL && e != NULL);
 
     /* log info if the player can see the monster */
-    if (m->m_visible && effect_get_msg_m_stop(e))
+    if (monster_in_sight(m) && effect_get_msg_m_stop(e))
     {
         log_add_entry(nlarn->p->log, effect_get_msg_m_stop(e),
                       monster_name(m));
@@ -2060,6 +2033,34 @@ void monster_effects_expire(monster *m)
             idx++;
         }
     }
+}
+
+static gboolean monster_player_visible(monster *m)
+{
+    /* FIXME: this ought to be different per monster type */
+    int monster_visrange = 7;
+
+    if (player_effect(nlarn->p, ET_STEALTH))
+    {
+        /* if the player is stealthy monsters will only recognize him when
+           standing next to him */
+        monster_visrange = 1;
+    }
+
+    /* determine if the monster can see the player */
+    if (pos_distance(monster_pos(m), nlarn->p->pos) > monster_visrange)
+
+        return FALSE;
+
+    if (player_effect(nlarn->p, ET_INVISIBILITY) && !monster_has_infravision(m))
+        return FALSE;
+
+    /* monster is blinded */
+    if (monster_effect(m, ET_BLINDNESS))
+        return FALSE;
+
+    /* determine if player's position is visible from monster's position */
+        return map_pos_is_visible(monster_map(m), m->pos, nlarn->p->pos);
 }
 
 static gboolean monster_attack_available(monster *m, attack_t type)
@@ -2136,7 +2137,7 @@ static void monster_weapon_wield(monster *m, item *weapon)
     m->weapon = weapon->oid;
 
     /* show message if monster is visible */
-    if (m->m_visible)
+    if (monster_in_sight(m))
     {
         item_describe(weapon, player_item_identified(nlarn->p, weapon),
                       TRUE, FALSE, buf, 60);
