@@ -31,7 +31,7 @@
 #include "spheres.h"
 #include "utils.h"
 
-static void game_initialize_settings(game *g, int argc, char *argv[]);
+static void game_initialize_settings(game *g, int argc, char *argv[], gboolean new_game);
 
 static void game_monsters_move(game *g);
 
@@ -65,7 +65,7 @@ void game_new(int argc, char *argv[])
     nlarn->p = player_new();
 
     /* initialize game settings */
-    game_initialize_settings(nlarn, argc, argv);
+    game_initialize_settings(nlarn, argc, argv, TRUE);
 
     /* allocate space for levels */
     for (idx = 0; idx < MAP_MAX; idx++)
@@ -301,9 +301,6 @@ game *game_load(const char *filename, int argc, char *argv[])
     /* allocate space for game structure */
     nlarn = g = g_malloc0(sizeof(game));
 
-    /* initialize settings */
-    game_initialize_settings(g, argc, argv);
-
     /* restore saved game */
     g->time_start = cJSON_GetObjectItem(save, "time_start")->valueint;
     g->gtime = cJSON_GetObjectItem(save, "gtime")->valueint;
@@ -417,6 +414,13 @@ game *game_load(const char *filename, int argc, char *argv[])
 
     /* free parsed save game */
     cJSON_Delete(save);
+
+    /* initialize settings */
+    game_initialize_settings(g, argc, argv, FALSE);
+
+    /* welcome message */
+    log_add_entry(nlarn->p->log, "Welcome back to NLarn %d.%d.%d!",
+                  VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 
     return g;
 }
@@ -626,7 +630,7 @@ monster *game_monster_get(game *g, gpointer id)
     return (monster *)g_hash_table_lookup(g->monsters, id);
 }
 
-static void game_initialize_settings(game *g, int argc, char *argv[])
+static void game_initialize_settings(game *g, int argc, char *argv[], gboolean new_game)
 {
     const char *default_lib_dir = "/usr/share/games/nlarn";
 
@@ -735,13 +739,13 @@ static void game_initialize_settings(game *g, int argc, char *argv[])
     g->fortunes = g_build_filename(g->libdir, fortunes, NULL);
     g->highscores = g_build_filename(g->libdir, highscores, NULL);
 
-    /* set game parameters */
-    game_difficulty(g) = difficulty;
-    game_wizardmode(g) = wizard;
-
-    if (g->p)
+    if (new_game)
     {
-        /* player has been created, e.g. not restoring a save game */
+        /* not restoring a save game */
+        /* set game parameters */
+        game_difficulty(g) = difficulty;
+        game_wizardmode(g) = wizard;
+
         if (name)
         {
             g->p->name = name;
@@ -754,27 +758,26 @@ static void game_initialize_settings(game *g, int argc, char *argv[])
 
         g->p->sex = !female;
 
-        /* parse autopickup settings */
-        if (auto_pickup)
-        {
-            for (idx = 0; idx < strlen(auto_pickup); idx++)
-            {
-                for (it = IT_NONE; it < IT_MAX; it++)
-                {
-                    if (auto_pickup[idx] == item_image(it))
-                    {
-                        g->p->settings.auto_pickup[it] = TRUE;
-                    }
-                }
-            }
-        }
-
         if (wizard)
         {
             log_add_entry(g->p->log, "Wizard mode has been activated.");
         }
     } /* end new game only settings */
 
+    /* parse autopickup settings */
+    if (auto_pickup)
+    {
+        for (idx = 0; idx < strlen(auto_pickup); idx++)
+        {
+            for (it = IT_NONE; it < IT_MAX; it++)
+            {
+                if (auto_pickup[idx] == item_image(it))
+                {
+                    g->p->settings.auto_pickup[it] = TRUE;
+                }
+            }
+        }
+    } /* end autopickup */
 }
 
 /**
