@@ -40,13 +40,18 @@ int main(int argc, char *argv[])
     position pos;
 
     /* save file name */
-    const char *save_file_name = "nlarn.sav";
+    char *save_file_name = NULL;
 
     printf("%s",
            "NLarn Copyright (C) 2009  Joachim de Groot\n\n"
            "This program comes with ABSOLUTELY NO WARRANTY.\n"
            "This is free software, and you are welcome to\n"
            "redistribute it under certain conditions.\n\n");
+
+    /* assemble save file name */
+    gchar *userdir = game_userdir();
+    save_file_name = g_build_path(G_DIR_SEPARATOR_S, userdir, "nlarn.sav", NULL);
+    g_free(userdir);
 
     /* find save file */
     if (g_file_test(save_file_name, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))

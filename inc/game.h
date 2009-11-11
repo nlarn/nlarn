@@ -35,6 +35,7 @@ typedef struct game
     guint32 gtime;              /* turn count */
     guint8 difficulty;          /* game difficulty */
 
+    gchar *userdir;
     gchar *basedir;
     gchar *libdir;
     gchar *mesgfile;
@@ -117,6 +118,7 @@ typedef struct _game_save_head
 void game_new(int argc, char *argv[]);
 int game_destroy(game *g);
 
+gchar *game_userdir();
 int game_save(game *g, const char *filename);
 game *game_load(const char *filename, int argc, char *argv[]);
 

@@ -17,15 +17,11 @@
  */
 
 #include <assert.h>
-#include <fcntl.h>
 #include <glib.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <zlib.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <glib/gstdio.h>
 
 #include "cJSON.h"
 #include "defines.h"
@@ -106,6 +102,8 @@ int game_destroy(game *g)
         map_destroy(g->maps[i]);
     }
 
+    g_free(g->userdir);
+
     g_free(g->basedir);
     g_free(g->libdir);
 
@@ -127,6 +125,17 @@ int game_destroy(game *g)
     g_free(g);
 
     return EXIT_SUCCESS;
+}
+
+gchar *game_userdir()
+{
+#ifdef WIN32
+    return g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(),
+                        "nlarn", NULL);
+#else
+    return g_build_path(G_DIR_SEPARATOR_S, g_get_home_dir(),
+                        ".nlarn", NULL);
+#endif
 }
 
 int game_save(game *g, const char *filename)
@@ -205,11 +214,31 @@ int game_save(game *g, const char *filename)
         g_ptr_array_foreach(g->spheres, (GFunc)sphere_serialize, obj);
     }
 
+    /* print save game into a string */
     char *sg = cJSON_Print(save);
-    /* free claimed memory */
+
+    /* free memory claimed by json structures */
     cJSON_Delete(save);
 
+    /* verify that user directory exists */
+    if (!g_file_test(g->userdir, G_FILE_TEST_IS_DIR))
+    {
+        /* directory is missing -> create it */
+        int ret = g_mkdir(g->userdir, 0755);
+
+        if (ret == -1)
+        {
+            /* creating the directory failed */
+            log_add_entry(g->p->log, "Failed to create directory %s.", g->userdir);
+            free(sg);
+
+            return FALSE;
+        }
+    }
+
+    /* open save file for writing */
     gzFile file = gzopen(filename, "wb");
+
     if (file == NULL)
     {
         log_add_entry(g->p->log, "Error opening save file.");
@@ -244,6 +273,7 @@ game *game_load(const char *filename, int argc, char *argv[])
 
     /* open save file */
     gzFile file = gzopen(filename, "rb");
+
     if (file == NULL)
     {
         /* failed to open save game file */
@@ -610,6 +640,9 @@ static void game_initialize_settings(game *g, int argc, char *argv[])
     static gboolean female = FALSE; /* default: male */
     static char *auto_pickup = NULL;
 
+    /* define per-user dir */
+    g->userdir = game_userdir();
+
     /* base directory for a local install */
     g->basedir = g_path_get_dirname(argv[0]);
 
@@ -617,14 +650,16 @@ static void game_initialize_settings(game *g, int argc, char *argv[])
     GKeyFile *ini_file = g_key_file_new();
     GError *error = NULL;
 
-    /* This is the path used when the game is installed system wide */
-    gchar *filename = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(),
+    /* this is the default path */
+    gchar *filename = g_build_path(G_DIR_SEPARATOR_S, g->userdir,
                                    "nlarn.ini", NULL);
 
     if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR))
     {
         /* ini file has not been found in user config directory */
         g_free(filename);
+
+        /* try to find it in the binarys directory */
         filename = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, "nlarn.ini", NULL);
     }
 
