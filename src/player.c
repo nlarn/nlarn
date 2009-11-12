@@ -20,6 +20,7 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "cJSON.h"
 #include "container.h"
@@ -597,7 +598,7 @@ int player_regenerate(player *p)
 void player_die(player *p, player_cod cause_type, int cause)
 {
     GString *text;
-    game_score_t *score, *cscore;
+    game_score_t *score, *score_copy, *cscore;
     GList *scores, *iterator;
 
     char *message = NULL;
@@ -605,7 +606,7 @@ void player_die(player *p, player_cod cause_type, int cause)
 
     char *tmp;
 
-    int count, num;
+    int count, pos;
 
     effect *ef;
 
@@ -694,37 +695,49 @@ void player_die(player *p, player_cod cause_type, int cause)
         /* redraw screen to make sure player can see the cause of his death */
         display_paint_screen(p);
 
+        /* sleep a second */
+        sleep(1);
+
+        /* flush keyboard input buffer */
+        flushinp();
+
         score = game_score(nlarn, cause_type, cause);
-        scores = game_score_add(nlarn, score);
+
+        /* need a copy of the current score as it can be freed by adding to the list */
+        score_copy = g_malloc0(sizeof(game_score_t));
+        memcpy(score_copy, score, sizeof(game_score_t));
+        score_copy->player_name = g_strdup(score->player_name);
+
+        scores = game_score_add(nlarn, score_copy);
 
         tmp = player_death_description(score, TRUE);
         text = g_string_new(tmp);
         g_free(tmp);
 
+        /* destroy score */
+        g_free(score->player_name);
+        g_free(score);
+
+        /* determine position of score in the score list */
+        pos = g_list_index(scores, score_copy);
+
+        /* start from first position if score didn't make it into the list */
+        if (pos == -1)
+        {
+            g_string_append_printf(text, " %s didn't make it into the Hall of Fame.",
+                                   p->sex ? "He" : "She");
+
+            pos = 0;
+        }
+
         /* assemble surrounding scores list */
         g_string_append(text, "\n\n");
 
-        /* get position of current score in list */
-        iterator = g_list_find(scores, score);
-
-        /* jump up three entries */
-        count = 1;
-        while (count < 4)
-        {
-            if (iterator->prev == NULL)
-            {
-                break;
-            }
-
-            iterator = iterator->prev;
-            count++;
-        }
-
-        /* determine position of first element of iterator */
-        num = g_list_position(scores, iterator);
+        /* get entry three entries up of current/top score in list */
+        iterator = g_list_nth(scores, max(pos - 3, 1));
 
         /* display up to 7 entries */
-        for (count = 1; iterator && (count < 8);
+        for (count = max(pos - 3, 1); iterator && (count < (max(pos, 0) + 4));
                 iterator = iterator->next, count++)
         {
             gchar *desc;
@@ -733,7 +746,7 @@ void player_die(player *p, player_cod cause_type, int cause)
 
             desc = player_death_description(cscore, FALSE);
             g_string_append_printf(text, "%s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d hp]\n",
-                                   (cscore == score) ? "*" : " ", num + count,
+                                   (cscore == score) ? "*" : " ", count,
                                    cscore->score,
                                    desc,
                                    score->dlevel, cscore->hp);
