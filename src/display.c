@@ -585,6 +585,9 @@ item *display_inventory(char *title, player *p, inventory **inv,
     item *it;
     char item_desc[81];
 
+    /* curses attributes */
+    int attrs;
+
     assert(p != NULL && inv != NULL);
 
     /* sort inventory by item type */
@@ -696,22 +699,22 @@ item *display_inventory(char *title, player *p, inventory **inv,
             it = inv_get_filtered(*inv, (pos - 1) + offset, filter);
 
             if ((curr == pos) && player_item_is_equipped(p, it))
-                wattron(iwin->window, COLOR_PAIR(13));
+                attrs = COLOR_PAIR(13);
             else if (curr == pos)
-                wattron(iwin->window, COLOR_PAIR(10));
+                attrs = COLOR_PAIR(10);
             else if (player_item_is_equipped(p, it))
-                wattron(iwin->window, COLOR_PAIR(9) | A_BOLD);
+                attrs = COLOR_PAIR(9) | A_BOLD;
             else
-                wattron(iwin->window, COLOR_PAIR(9));
+                attrs = COLOR_PAIR(9);
+
+            wattron(iwin->window, attrs);
 
             if (show_price)
             {
                 mvwprintw(iwin->window, pos, 1, "%3d %40s %5dgp %c",
                           pos + offset,
-                          item_describe(it,
-                                        player_item_known(p, it),
-                                        FALSE, FALSE,
-                                        item_desc, 80),
+                          item_describe(it, player_item_known(p, it),
+                                        FALSE, FALSE, item_desc, 80),
                           item_price(it),
                           player_item_is_equipped(p, it) ? '*' : ' ');
             }
@@ -719,22 +722,12 @@ item *display_inventory(char *title, player *p, inventory **inv,
             {
                 mvwprintw(iwin->window, pos, 1, "%3d %41s %c ",
                           pos + offset,
-                          item_describe(it,
-                                        player_item_known(p, it),
-                                        FALSE, FALSE,
-                                        item_desc, 80),
+                          item_describe(it, player_item_known(p, it),
+                                        FALSE, FALSE, item_desc, 80),
                           player_item_is_equipped(p, it) ? '*' : ' ');
             }
 
-            if ((curr == pos) && player_item_is_equipped(p, it))
-                wattroff(iwin->window, COLOR_PAIR(13));
-            else if (curr == pos)
-                wattroff(iwin->window, COLOR_PAIR(10));
-            else if (player_item_is_equipped(p, it))
-                wattroff(iwin->window, COLOR_PAIR(9) | A_BOLD);
-            else
-                wattroff(iwin->window, COLOR_PAIR(9));
-
+            wattroff(iwin->window, attrs);
         }
 
         display_window_update_arrow_up(iwin, offset > 0);
@@ -808,7 +801,7 @@ item *display_inventory(char *title, player *p, inventory **inv,
             {
                 offset = offset + maxvis;
 
-                if ((offset + curr) > len_curr)
+                if ((offset + maxvis) >= len_curr)
                 {
                     curr = min(len_curr, maxvis);
                     offset = len_curr - curr;
