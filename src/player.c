@@ -770,7 +770,7 @@ void player_die(player *p, player_cod cause_type, int cause)
             {
                 g_string_append_printf(text, "%3d %s%s\n",
                                        p->stats.monsters_killed[mnum],
-                                       monster_name_by_type(mnum),
+                                       monster_type_name(mnum),
                                        (p->stats.monsters_killed[mnum] > 1) ? "s" : "");
 
                 body_count += p->stats.monsters_killed[mnum];
@@ -4624,8 +4624,8 @@ static char *player_death_description(game_score_t *score, int verbose)
         /* TODO: regard monster's invisibility */
         /* TODO: while sleeping / doing sth. */
         g_string_append_printf(text, " by a%s %s.",
-                               a_an(monster_name_by_type(score->cause)),
-                               monster_name_by_type(score->cause));
+                               a_an(monster_type_name(score->cause)),
+                               monster_type_name(score->cause));
         break;
 
     case PD_SPHERE:

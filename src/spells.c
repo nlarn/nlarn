@@ -1122,13 +1122,13 @@ gboolean spell_genocide_monster(player *p)
 
     for (id = 1; id < MT_MAX; id++)
     {
-        if (monster_image_by_type(id) == in[0])
+        if (monster_type_image(id) == in[0])
         {
             if (!monster_is_genocided(id))
             {
                 monster_genocide(id);
                 log_add_entry(p->log, "Wiped out all %ss.",
-                              monster_name_by_type(id));
+                              monster_type_name(id));
 
                 g_free(in);
 

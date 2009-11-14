@@ -228,9 +228,10 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
 #define monster_can_regenerate(monster)  (monsters[monster_type(monster)].flags & MF_REGENERATE)
 #define monster_is_metallivore(monster)  (monsters[monster_type(monster)].flags & MF_METALLIVORE)
 
-#define monster_name_by_type(type)  (monsters[(type)].name)
-#define monster_exp_by_type(type)   (monsters[(type)].exp)
-#define monster_image_by_type(type) (monsters[(type)].image)
+#define monster_type_name(type)  (monsters[(type)].name)
+#define monster_type_exp(type)   (monsters[(type)].exp)
+#define monster_type_image(type) (monsters[(type)].image)
+#define monster_type_is_invisible(type) (monsters[(type)].flags & MF_INVISIBLE)
 
 int monster_genocide(int monster_id);
 int monster_is_genocided(int monster_id);
