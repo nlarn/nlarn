@@ -115,6 +115,8 @@ int game_destroy(game *g)
 
     player_destroy(g->p);
 
+    inv_destroy(g->store_stock);
+
     g_hash_table_destroy(g->items);
     g_hash_table_destroy(g->effects);
     g_hash_table_destroy(g->monsters);

@@ -45,7 +45,6 @@ typedef struct game
     gchar *highscores;
 
     /* stock of the dnd store */
-    /* TODO: make sure these items are freed on terminating the game */
     inventory *store_stock;
 
     /* item / monster status */
