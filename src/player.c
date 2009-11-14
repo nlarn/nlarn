@@ -20,7 +20,13 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+
+#ifndef WIN32
+    #include <unistd.h>
+#else
+    #include <windows.h>
+    #define sleep(x) Sleep((x)*1000)
+#endif
 
 #include "cJSON.h"
 #include "container.h"

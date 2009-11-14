@@ -46,6 +46,12 @@ typedef struct message_log {
 #define rand_m_n(m,n)   ((m) == (n) ? (m) : g_random_int_range((m),(n)))
 #define chance(percent) ((percent) >= rand_1n(101))
 
+/* windef.h defines these */
+#ifdef WIN32
+    #undef min
+    #undef max
+#endif
+
 #define min(x,y)    (((x) > (y)) ? (y) : (x))
 #define max(x,y)    (((x) > (y)) ? (x) : (y))
 #define even(x)     (!((x) % 2))
