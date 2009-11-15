@@ -1672,12 +1672,22 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             e = effect_new(ET_DEC_STR, game_turn(nlarn));
             e->turns = dam->amount * 50;
             player_effect_add(p, e);
+
+            if (player_get_str(p) < 1)
+            {
+                player_die(p, PD_EFFECT, ET_DEC_STR);
+            }
             break;
 
         case DAM_DEC_DEX:
             e = effect_new(ET_DEC_DEX, game_turn(nlarn));
             e->turns = dam->amount * 50;
             player_effect_add(p, e);
+
+            if (player_get_str(p) < 1)
+            {
+                player_die(p, PD_EFFECT, ET_DEC_DEX);
+            }
             break;
 
         case DAM_DRAIN_LIFE:
@@ -4642,8 +4652,20 @@ static char *player_death_description(game_score_t *score, int verbose)
     switch (score->cod)
     {
     case PD_EFFECT:
-        /* currently only poison can lead to death */
-        g_string_append(text, " by poison.");
+        switch (score->cause)
+        {
+            case ET_DEC_STR:
+                g_string_append(text, " by enfeeblement.");
+                break;
+
+            case ET_DEC_DEX:
+                g_string_append(text, " by clumsiness.");
+                break;
+
+            case ET_POISON:
+                g_string_append(text, " by poison.");
+                break;
+        }
         break;
 
     case PD_LASTLEVEL:
