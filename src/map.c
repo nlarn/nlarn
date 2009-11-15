@@ -273,7 +273,7 @@ map *map_deserialize(cJSON *mser, game *g)
     return m;
 }
 
-char *map_dump(map *l)
+char *map_dump(map *l, position ppos)
 {
     position pos;
     GString *map;
@@ -287,7 +287,11 @@ char *map_dump(map *l)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            if ((m = map_get_monster_at(l, pos)))
+            if (pos_identical(pos, ppos))
+            {
+                g_string_append_c(map, '@');
+            }
+            else if ((m = map_get_monster_at(l, pos)))
             {
                 g_string_append_c(map, monster_image(m));
             }

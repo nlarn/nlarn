@@ -752,7 +752,7 @@ void player_die(player *p, player_cod cause_type, int cause)
 
             desc = player_death_description(cscore, FALSE);
             g_string_append_printf(text, "%s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d hp]\n",
-                                   (cscore == score) ? "*" : " ", count,
+                                   (cscore == score_copy) ? "*" : " ", count,
                                    cscore->score,
                                    desc,
                                    score->dlevel, cscore->hp);
@@ -761,8 +761,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         }
 
         /* some statistics */
-        g_string_append(text, "\n\n");
-        g_string_append_printf(text, "%s %s after searching the potion for %d mobuls. ",
+        g_string_append_printf(text, "\n%s %s after searching the potion for %d mobuls. ",
                                p->sex ? "He" : "She",
                                cause_type < PD_TOO_LATE ? "died" : "returned",
                                gtime2mobuls(nlarn->gtime));
@@ -781,7 +780,7 @@ void player_die(player *p, player_cod cause_type, int cause)
 
         /* append map of current level */
         g_string_append(text, "\n\nThis is the map of the current level:\n\n");
-        tmp = map_dump(game_map(nlarn, p->pos.z));
+        tmp = map_dump(game_map(nlarn, p->pos.z), p->pos);
         g_string_append(text, tmp);
         g_free(tmp);
 

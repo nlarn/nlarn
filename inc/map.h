@@ -160,7 +160,7 @@ void map_destroy(map *m);
 
 cJSON *map_serialize(map *m);
 map *map_deserialize(cJSON *mser, struct game *g);
-char *map_dump(map *l);
+char *map_dump(map *l, position ppos);
 
 position map_find_space(map *l, map_element_t element);
 position map_find_space_in(map *l, rectangle where, map_element_t element);
