@@ -1555,12 +1555,6 @@ static void item_typename_pluralize(item *it, char *description, int length)
 
 static char *item_name_count(char *name, char *add_info, int singular, int definite, int length, int count)
 {
-    const char *item_count_desc[] = { "two", "three", "four", "five",
-                                      "six", "seven", "eight", "nine", "ten",
-                                      "eleven", "twelve", "thirteen", "fourteen",
-                                      "fivteen", "sixteen", "seventeen", "eighteen",
-                                      "nineteen", "twenty"
-                                    };
     char *incoming;
 
     assert(name != NULL && length > 0 && count > 0);
@@ -1597,12 +1591,12 @@ static char *item_name_count(char *name, char *add_info, int singular, int defin
             if (definite)
                 g_snprintf(name, length, "%s %s", add_info, incoming);
             else
-                g_snprintf(name, length, "%s %s %s", item_count_desc[count - 2],
+                g_snprintf(name, length, "%s %s %s", int2str(count),
                            add_info, incoming);
         }
         else
         {
-            g_snprintf(name, length, "%s %s", item_count_desc[count - 2], incoming);
+            g_snprintf(name, length, "%s %s", int2str(count), incoming);
         }
     }
     else

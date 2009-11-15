@@ -570,6 +570,9 @@ int spell_cast(player *p)
         if (well_done)
         {
             mp_usage = spell_level(spell);
+
+            /* increase number of spells cast */
+            p->stats.spells_cast++;
         }
 
         break;

@@ -24,19 +24,21 @@
 #include "defines.h"
 
 /* game messaging */
-typedef struct message_log_entry {
-	time_t ltime;       /* real time of log entry */
-	guint32 gtime;      /* game time of log entry */
-	char *message;
+typedef struct message_log_entry
+{
+    time_t ltime;       /* real time of log entry */
+    guint32 gtime;      /* game time of log entry */
+    char *message;
 } message_log_entry;
 
-typedef struct message_log {
-	guint32 length;     /* number of entries */
-	guint32 gtime;      /* current game time */
-	gint32 active;      /* flag to disable logging onto this log */
-	GString *buffer;    /* space to assemble a turn's messages */
-	char *lastmsg;      /* copy of last message */
-	message_log_entry **entries;
+typedef struct message_log
+{
+    guint32 length;     /* number of entries */
+    guint32 gtime;      /* current game time */
+    gint32 active;      /* flag to disable logging onto this log */
+    GString *buffer;    /* space to assemble a turn's messages */
+    char *lastmsg;      /* copy of last message */
+    message_log_entry **entries;
 } message_log;
 
 /* macros */
@@ -48,8 +50,8 @@ typedef struct message_log {
 
 /* windef.h defines these */
 #ifdef WIN32
-    #undef min
-    #undef max
+#undef min
+#undef max
 #endif
 
 #define min(x,y)    (((x) > (y)) ? (y) : (x))
@@ -57,9 +59,7 @@ typedef struct message_log {
 #define even(x)     (!((x) % 2))
 
 /* function definitions */
-
 int divert(int value, int percent);
-
 void shuffle(int array[], int length, int skip);
 char *str_replace(char *string, char *orig, char *replace);
 
@@ -84,14 +84,13 @@ GPtrArray *text_append(GPtrArray *first, GPtrArray *second);
 void text_destroy(GPtrArray *text);
 
 /* misc. text functions */
-
 int str_starts_with_vowel(char *str);
+const char *int2str(int val);
 #define a_an(str) (str_starts_with_vowel((str)) ? "n" : "")
 #define plural(i) (((i) > 1) ? "s" : "")
 
 
 /* regarding stuff defined in defines.h */
-
 damage *damage_new(damage_t type, int amount, gpointer originator);
 #define damage_free(dam)    g_free((dam))
 

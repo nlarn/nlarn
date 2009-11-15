@@ -358,6 +358,28 @@ int str_starts_with_vowel(char *str)
     else return FALSE;
 }
 
+const char *int2str(int val)
+{
+    static char buf[21];
+    const char *count_desc[] = { "no", "one", "two", "three", "four", "five",
+                                 "six", "seven", "eight", "nine", "ten",
+                                 "eleven", "twelve", "thirteen", "fourteen",
+                                 "fivteen", "sixteen", "seventeen", "eighteen",
+                                 "nineteen", "twenty"
+                               };
+
+    if (val <= 20)
+    {
+        return count_desc[val];
+    }
+    else
+    {
+        g_snprintf(buf, 20, "%d", val);
+        return buf;
+    }
+
+}
+
 damage *damage_new(damage_t type, int amount, gpointer originator)
 {
     damage *dam = g_malloc0(sizeof(damage));

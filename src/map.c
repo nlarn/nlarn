@@ -277,6 +277,7 @@ char *map_dump(map *l)
 {
     position pos;
     GString *map;
+    monster *m;
 
     map = g_string_new_len(NULL, MAP_SIZE);
 
@@ -286,7 +287,11 @@ char *map_dump(map *l)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            if (map_trap_at(l, pos))
+            if ((m = map_get_monster_at(l, pos)))
+            {
+                g_string_append_c(map, monster_image(m));
+            }
+            else if (map_trap_at(l, pos))
             {
                 g_string_append_c(map, '^');
             }

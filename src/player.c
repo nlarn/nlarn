@@ -22,10 +22,10 @@
 #include <string.h>
 
 #ifndef WIN32
-    #include <unistd.h>
+#include <unistd.h>
 #else
-    #include <windows.h>
-    #define sleep(x) Sleep((x)*1000)
+#include <windows.h>
+#define sleep(x) Sleep((x)*1000)
 #endif
 
 #include "cJSON.h"
@@ -759,6 +759,25 @@ void player_die(player *p, player_cod cause_type, int cause)
 
             g_free(desc);
         }
+
+        /* some statistics */
+        g_string_append(text, "\n\n");
+        g_string_append_printf(text, "%s %s after searching the potion for %d mobuls. ",
+                               p->sex ? "He" : "She",
+                               cause_type < PD_TOO_LATE ? "died" : "returned",
+                               gtime2mobuls(nlarn->gtime));
+
+        g_string_append_printf(text, "%s cast %s spell%s, quaffed %s potion%s " \
+                               "and read %s book%s and %s scroll%s.",
+                               p->sex ? "He": "She",
+                               int2str(p->stats.spells_cast),
+                               p->stats.spells_cast != 1 ? "s" : "",
+                               int2str(p->stats.potions_quaffed),
+                               p->stats.potions_quaffed != 1 ? "s" : "",
+                               int2str(p->stats.books_read),
+                               p->stats.books_read != 1 ? "s" : "",
+                               int2str(p->stats.scrolls_read),
+                               p->stats.scrolls_read != 1 ? "s" : "");
 
         /* append map of current level */
         g_string_append(text, "\n\nThis is the map of the current level:\n\n");
@@ -2896,13 +2915,15 @@ int player_item_use(player *p, inventory **inv, item *it)
 
     switch (it->type)
     {
-
         /* read book */
     case IT_BOOK:
         item_describe(it, player_item_known(p, it),
                       TRUE, TRUE, description, 60);
 
         log_add_entry(p->log, "You read %s.", description);
+
+        /* increase number of books read */
+        p->stats.books_read++;
 
         /* cursed spellbooks have nasty effects */
         if (it->cursed)
@@ -2979,6 +3000,9 @@ int player_item_use(player *p, inventory **inv, item *it)
 
         log_add_entry(p->log, "You drink %s.", description);
 
+        /* increase number of potions quaffed */
+        p->stats.potions_quaffed++;
+
         if (it->cursed)
         {
             damage *dam = damage_new(DAM_POISON, rand_1n(p->hp), NULL);
@@ -3027,6 +3051,9 @@ int player_item_use(player *p, inventory **inv, item *it)
                       TRUE, FALSE, description, 60);
 
         log_add_entry(p->log, "You read %s.", description);
+
+        /* increase number of scrolls read */
+        p->stats.scrolls_read++;
 
         if (it->cursed)
         {
