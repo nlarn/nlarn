@@ -1739,7 +1739,7 @@ direction display_get_direction(char *title, int *available)
 {
     display_window *dwin;
 
-    int *dirs;
+    int *dirs = NULL;
     int startx, starty;
     int width;
     int x, y;
@@ -1886,6 +1886,11 @@ direction display_get_direction(char *title, int *available)
         }
     }
     while ((dir == GD_NONE) && RUN);
+
+	if (!available)
+	{
+		g_free(dirs);
+	}
 
     display_window_destroy(dwin, TRUE);
 
