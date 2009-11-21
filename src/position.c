@@ -249,9 +249,9 @@ area *area_new(int start_x, int start_y, int size_x, int size_y)
  * @param radius of the circle
  * @return a new area.
  */
-area *area_new_circle(position center, int radius)
+area *area_new_circle(position center, int radius, int hollow)
 {
-    area *area;
+    area *circle;
 
     int f = 1 - radius;
     int ddF_x = 1;
@@ -266,19 +266,19 @@ area *area_new_circle(position center, int radius)
         return NULL;
     }
 
-    area = area_new(center.x - radius,
-                    center.y - radius,
-                    2 * radius + 1,
-                    2 * radius + 1);
+    circle = area_new(center.x - radius,
+                      center.y - radius,
+                      2 * radius + 1,
+                      2 * radius + 1);
 
     /* reposition center to relative values */
     center.x = radius;
     center.y = radius;
 
-    area_point_set(area, center.x, center.y + radius);
-    area_point_set(area, center.x, center.y - radius);
-    area_point_set(area, center.x + radius, center.y);
-    area_point_set(area, center.x - radius, center.y);
+    area_point_set(circle, center.x, center.y + radius);
+    area_point_set(circle, center.x, center.y - radius);
+    area_point_set(circle, center.x + radius, center.y);
+    area_point_set(circle, center.x - radius, center.y);
 
     while (x < y)
     {
@@ -297,14 +297,19 @@ area *area_new_circle(position center, int radius)
         ddF_x += 2;
         f += ddF_x;
 
-        area_point_set(area, center.x + x, center.y + y);
-        area_point_set(area, center.x - x, center.y + y);
-        area_point_set(area, center.x + x, center.y - y);
-        area_point_set(area, center.x - x, center.y - y);
-        area_point_set(area, center.x + y, center.y + x);
-        area_point_set(area, center.x - y, center.y + x);
-        area_point_set(area, center.x + y, center.y - x);
-        area_point_set(area, center.x - y, center.y - x);
+        area_point_set(circle, center.x + x, center.y + y);
+        area_point_set(circle, center.x - x, center.y + y);
+        area_point_set(circle, center.x + x, center.y - y);
+        area_point_set(circle, center.x - x, center.y - y);
+        area_point_set(circle, center.x + y, center.y + x);
+        area_point_set(circle, center.x - y, center.y + x);
+        area_point_set(circle, center.x + y, center.y - x);
+        area_point_set(circle, center.x - y, center.y - x);
+    }
+
+    if (hollow)
+    {
+        return circle;
     }
 
     /* fill the circle
@@ -315,14 +320,14 @@ area *area_new_circle(position center, int radius)
      * do not need to fill the first and last row
      */
 
-    for (y = 1; y < area->size_y - 1; y++)
+    for (y = 1; y < circle->size_y - 1; y++)
     {
         fill = 0;
 
-        for (x = 0; x < area->size_x; x++)
+        for (x = 0; x < circle->size_x; x++)
         {
             /* there are double dots at the beginning and the end of the square */
-            if (area_point_get(area, x, y) && (!area_point_get(area, x + 1, y)))
+            if (area_point_get(circle, x, y) && (!area_point_get(circle, x + 1, y)))
             {
                 fill = !fill;
                 continue;
@@ -330,47 +335,35 @@ area *area_new_circle(position center, int radius)
 
             if (fill)
             {
-                area_point_set(area, x, y);
+                area_point_set(circle, x, y);
             }
         }
     }
 
-    return area;
+    return circle;
 }
 
 area *area_new_circle_flooded(position center, int radius, area *obstacles)
 {
-    area *narea, *circle;
-    int x, y;
+    area *narea;
+    int start_x, start_y;
 
-    assert(obstacles != NULL);
+    assert(radius > 0 && obstacles != NULL);
 
     if (!pos_valid(center))
     {
         return NULL;
     }
 
-    narea = area_new(center.x - radius,
-                     center.y - radius,
-                     2 * radius + 1,
-                     2 * radius + 1);
+    /* add circle boundary to obstacle map */
+    obstacles = area_add(obstacles, area_new_circle(center, radius, TRUE));
 
-    circle = area_new_circle(center, radius);
+    /* translate absolute center position to area */
+    start_x = center.x - obstacles->start_x;
+    start_y = center.y - obstacles->start_y;
 
     /* fill narea */
-    for (y = 0; y < narea->size_y; y++)
-    {
-        for (x = 0; x < narea->size_x; x++)
-        {
-            if (area_point_get(circle, x, y) && !area_point_get(obstacles, x, y))
-            {
-                area_point_set(narea, x, y);
-            }
-        }
-    }
-
-    area_destroy(circle);
-    area_destroy(obstacles);
+    narea = area_flood(obstacles, start_x, start_y);
 
     return narea;
 }
@@ -477,6 +470,24 @@ area *area_new_ray(position source, position target, area *obstacles)
     return narea;
 }
 
+/**
+ *
+ * Create a new area with the dimensions of the given one
+ *
+ * @param an area
+ * @return a new area of identical dimensions
+ *
+ */
+area *area_copy(area *a)
+{
+    area *narea;
+
+    assert(a != NULL);
+    narea = area_new(a->start_x, a->start_y, a->size_x, a->size_y);
+
+    return narea;
+}
+
 void area_destroy(area *area)
 {
     int y;
@@ -489,4 +500,91 @@ void area_destroy(area *area)
     g_free(area->area);
 
     g_free(area);
+}
+
+/**
+ * Add one area to another.
+ *
+ * @param first area (will be returned)
+ * @param second area (will be freed)
+ * @return first area with additional set point of second area
+ *
+ */
+area *area_add(area *a, area *b)
+{
+    int x, y;
+
+    assert (a != NULL && b != NULL);
+    assert (a->size_x == b->size_x && a->size_y == b->size_y);
+
+    for (y = 0; y < a->size_y; y++)
+    {
+        for (x = 0; x < a->size_x; x++)
+        {
+            if (area_point_get(b, x, y))
+            {
+                area_point_set(a, x, y);
+            }
+        }
+    }
+
+    return a;
+}
+
+area *area_flood(area *obstacles, int start_x, int start_y)
+{
+    area *flood = NULL;
+
+    void area_flood_worker(int x, int y)
+    {
+        if (area_point_get(obstacles, x, y) || area_point_get(flood, x, y))
+        {
+            return;
+        }
+
+        area_point_set(flood, x, y);
+
+        area_flood_worker(x + 1, y);
+        area_flood_worker(x - 1, y);
+        area_flood_worker(x, y + 1);
+        area_flood_worker(x, y - 1);
+    }
+
+    assert(obstacles != NULL && area_point_valid(obstacles, start_x, start_y));
+
+    flood = area_copy(obstacles);
+
+    area_flood_worker(start_x, start_y);
+
+    area_destroy(obstacles);
+
+    return flood;
+}
+
+void area_point_set(area *a, int x, int y)
+{
+    assert (a != NULL && area_point_valid(a, x, y));
+    a->area[y][x] = TRUE;
+}
+
+int area_point_get(area *a, int x, int y)
+{
+    assert (a != NULL);
+
+    if (!area_point_valid(a, x, y))
+        return FALSE;
+
+    return a->area[y][x];
+}
+
+void area_point_del(area *a, int x, int y)
+{
+    assert (a != NULL && area_point_valid(a, x, y));
+    a->area[y][x] = FALSE;
+}
+
+int area_point_valid(area *a, int x, int y)
+{
+    assert (a != NULL);
+    return ((x < a->size_x) && (x >= 0)) && ((y < a->size_y) && (y >= 0));
 }

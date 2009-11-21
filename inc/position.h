@@ -63,22 +63,18 @@ rectangle rect_new_sized(position center, int size);
 int pos_in_rect(position pos, rectangle rect);
 
 area *area_new(int start_x, int start_y, int size_x, int size_y);
-area *area_new_circle(position center, int radius);
+area *area_new_circle(position center, int radius, int hollow);
 area *area_new_circle_flooded(position center, int radius, area *obstacles);
 area *area_new_ray(position source, position target, area *obstacles);
+area *area_copy(area *a);
 void area_destroy(area *area);
 
-#define area_size(area)         ((area)->size_x * (area)->size_y)
+area *area_add(area *a, area *b);
+area *area_flood(area *obstacles, int start_x, int start_y);
 
-#define area_point_set(a, x, y) ((a)->area[((y) > (a)->size_y - 1) ? \
-                                (a)->size_y - 1 : (y)][((x) > (a)->size_x - 1) ? \
-                                (a)->size_x - 1 : (x)] = TRUE)
-
-#define area_point_get(a, x, y) ((a)->area[(y)][(x)])
-#define area_point_del(a, x, y) ((a)->area[(y)][(x)] = FALSE)
-
-#define area_pos_set(area, pos) ((area)->area[(pos).y][(pos).x] = TRUE)
-#define area_pos_get(area, pos) ((area)->area[(pos).y][(pos).x])
-#define area_pos_del(area, pos) ((area)->area[(pos).y][(pos).x] = FALSE)
+void area_point_set(area *a, int x, int y);
+int  area_point_get(area *a, int x, int y);
+void area_point_del(area *a, int x, int y);
+int area_point_valid(area *a, int x, int y);
 
 #endif

@@ -4398,7 +4398,7 @@ void player_update_fov(player *p)
     {
         int x, y;
 
-        enlight = area_new_circle(p->pos, player_effect(p, ET_ENLIGHTENMENT));
+        enlight = area_new_circle(p->pos, player_effect(p, ET_ENLIGHTENMENT), FALSE);
 
         /* set visible field according to returned area */
         for (y = 0; y <  enlight->size_y; y++)

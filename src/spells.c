@@ -943,8 +943,8 @@ int spell_type_flood(spell *s, struct player *p)
         break;
     }
 
-    range = area_new_circle_flooded(pos, radius,
-                                    map_get_obstacles(game_map(nlarn, p->pos.z), pos, radius));
+    area *obstacles = map_get_obstacles(game_map(nlarn, p->pos.z), pos, radius);
+    range = area_new_circle_flooded(pos, radius, obstacles);
 
     map_set_tiletype(game_map(nlarn, p->pos.z), range, type, amount);
     area_destroy(range);
