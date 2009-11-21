@@ -3137,7 +3137,17 @@ int player_item_use(player *p, inventory **inv, item *it)
                 break;
 
             case ST_PULVERIZATION:
-                spell_vaporize_rock(p);
+                if (!player_item_identified(p, it))
+                {
+                    log_add_entry(p->log, "This is a scroll of %s.", scroll_name(it));
+                }
+
+                if (spell_vaporize_rock(p))
+                {
+                    /* recalc fov if something has been vaporised */
+                    player_update_fov(p);
+                }
+
                 item_identified = TRUE;
                 break;
 

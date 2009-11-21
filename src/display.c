@@ -300,13 +300,15 @@ int display_paint_screen(player *p)
     mvprintw(MAP_MAX_Y + 1, MAP_MAX_X + 1, "T %-6d", game_turn(nlarn));
 
     /* experience points / level */
+    move(MAP_MAX_Y + 2, 0);
+    clrtoeol();
+
     attron(COLOR_PAIR(DC_BLUE) | A_BOLD);
 
     mvprintw(MAP_MAX_Y + 2, MAP_MAX_X - 20, "XP %d/%-5d",
              p->experience, p->level);
 
     attroff(COLOR_PAIR(DC_BLUE) | A_BOLD);
-    clrtoeol();
 
     /* dungeon map */
     mvprintw(MAP_MAX_Y + 2, MAP_MAX_X + 1, "Lvl: %s", map_name(map));
@@ -404,12 +406,20 @@ int display_paint_screen(player *p)
     attroff(attrs | A_BOLD) ;
     clrtoeol();
 
+    /* clear line below charisma */
+    move(7, MAP_MAX_X + 1);
+    clrtoeol();
+
     /* armour class */
     mvprintw(8, MAP_MAX_X + 3, "AC: %2d", player_get_ac(p));
     clrtoeol();
 
     /* gold */
     mvprintw(9, MAP_MAX_X + 3, "$%-7d", player_get_gold(p));
+    clrtoeol();
+
+    /* clear line below gold */
+    move(10, MAP_MAX_X + 1);
     clrtoeol();
 
     /* display negative effects */
