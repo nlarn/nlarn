@@ -1473,6 +1473,10 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                 tile->type =  LT_WALL;
                 break;
 
+            case '_': /* altar */
+                tile->stationary = LS_ALTAR;
+                break;
+
             case '+': /* door */
                 tile->stationary = LS_CLOSEDDOOR;
                 break;
