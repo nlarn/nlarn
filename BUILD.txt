@@ -1,4 +1,0 @@
-Building nlarn
-
-Intstuctions how to build NLarn on Linux, MacOS X and Windows can be found at
-http://sourceforge.net/apps/trac/nlarn/wiki/NLarnBuilding

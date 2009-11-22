@@ -28,9 +28,11 @@ rm -rf $RPM_BUILD_ROOT
 %attr(2755, games, games) /usr/games/nlarn
 %attr(775, games, games) /usr/share/games/nlarn
 %attr(644, games, games) /usr/share/games/nlarn/*
-%doc LICENSE nlarn.ini-sample
+%doc LICENSE README.txt nlarn.ini-sample
 
 %changelog
+* Sun Nov 22 2009 Joachim de Groot <jdegroot@web.de> 
+  -  added README.txt
 * Wed Nov 11 2009 Joachim de Groot <jdegroot@web.de> 
   - removed BUILD.txt
   - Updated for version 0.5.1
