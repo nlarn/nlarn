@@ -131,8 +131,8 @@ map *map_new(int num, char *mazefile)
         /* read maze from data file */
         map_loaded = map_load_from_file(nmap, mazefile, (num == 0) ? 0 : -1);
 
-        /* add stationary objects */
-        map_fill_with_stationary_objects(nmap);
+        /* add stationary objects (not to the town) */
+        if (num > 0) map_fill_with_stationary_objects(nmap);
     }
 
     if (!map_loaded)
