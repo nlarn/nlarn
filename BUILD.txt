@@ -1,24 +1,4 @@
 Building nlarn
 
-nlarn is known to work on Linux, FreeBSD and Windows. 
-
-** Dependencies
-
-You will need glib 2 and a curses library (ncurses and PDCurses are known 
-to work). To generate a makefile you need premake4. Get it at 
-
-	http://industriousone.com/premake
-
-On Windows nlarn builds using MinGW. Just install PDCurses, glib, pkg-config 
-and premake4 into the MinGW folders and premake4 should be able to generate 
-a Makefile.
-
-** Building
-
-Generate a Makefile with premake4:
-
-	premake4 gmake
-
-If you have installed all the dependencies, calling make (or gmake on FreeBSD)
-should build nlarn.
-
+Intstuctions how to build NLarn on Linux, MacOS X and Windows can be found at
+http://sourceforge.net/apps/trac/nlarn/wiki/NLarnBuilding
