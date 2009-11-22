@@ -254,11 +254,6 @@ int main(int argc, char *argv[])
             moves_count = player_door_close(nlarn->p);
             break;
 
-            /* drink from fountain */
-        case 'D':
-            moves_count = player_fountain_drink(nlarn->p);
-            break;
-
             /* open door / container */
         case 'O':
             if (inv_length_filtered(*map_ilist_at(game_map(nlarn, nlarn->p->pos.z), nlarn->p->pos),
@@ -283,6 +278,11 @@ int main(int argc, char *argv[])
                               nlarn->p->outstanding_taxes);
             else
                 log_add_entry(nlarn->p->log, "You do not owe any taxes.");
+            break;
+
+            /* drink from fountain */
+        case 'q':
+            moves_count = player_fountain_drink(nlarn->p);
             break;
 
             /* remove gems from throne */

@@ -14,20 +14,18 @@ Commands
 A  desecrate an altar
 c  cast a spell
 C  close a door
-D  drink at a fountain
 g  get present pack weight
 i  inventory your pockets
-I  list all items found
 O  open a door or chest
 p  pray at an altar
 P  give tax status
+q  drink at a fountain
 Q  quit the game (alternate key: F12)
 R  remove gems from throne
 s  sit on a throne
 S  save the game
 v  print program version
 W  wash at a fountain
-Z  teleport yourself
 
 <  climb up stairs / volcanic shaft or enter a building
 >  climb down stairs / volcanic shaft
@@ -38,7 +36,7 @@ Z  teleport yourself
 /  identify objects in the game
 \  show list of identified objects
 ?  this help screen (alternate key: F1)
-@  toggle auto-pickup
+@  toggle auto-pickup settings
 
 
 Control Keys
@@ -46,3 +44,20 @@ Control Keys
 ^L redraw the screen
 ^R recall message history
 ^W activate wizard mode
+
+
+Dialogs 
+
+Valid actions (and their keys) for selected items are shown
+in the dialog's status line. 
+
+Close a dialog with ESC or enter/space to select an option. 
+Move dialogs with Ctrl and the cursor keys.
+
+
+Wizard mode
+
++     teleport down one level
+-     teleport up one level
+^up   raise experience level
+^down lower experience level
