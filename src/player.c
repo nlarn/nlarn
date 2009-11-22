@@ -3271,6 +3271,26 @@ int player_item_drop(player *p, inventory **inv, item *it)
 
     log_add_entry(p->log, "You drop %s.", desc);
 
+    /* reveal if item is cursed or blessed when dropping it on an altar */
+    map_stationary_t ms = map_stationary_at(game_map(nlarn, p->pos.z), p->pos);
+    if ((ms == LS_ALTAR) && it->cursed)
+    {
+        item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
+        desc[0] = g_ascii_toupper(desc[0]);
+
+        log_add_entry(p->log, "%s is surrounded by a black halo.", desc);
+        it->curse_known = TRUE;
+    }
+
+    if ((ms == LS_ALTAR) && it->blessed)
+    {
+        item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
+        desc[0] = g_ascii_toupper(desc[0]);
+
+        log_add_entry(p->log, "%s is surrounded by a white halo.", desc);
+        it->blessed_known = TRUE;
+    }
+
     return TRUE;
 }
 
