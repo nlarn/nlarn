@@ -561,10 +561,17 @@ area *area_flood(area *obstacles, int start_x, int start_y)
 
     void area_flood_worker(int x, int y)
     {
-        if (area_point_get(obstacles, x, y) || area_point_get(flood, x, y))
-        {
+        /* stepped out of area */
+        if (!area_point_valid(flood, x, y))
             return;
-        }
+
+        /* can't flood this */
+        if (area_point_get(obstacles, x, y))
+            return;
+
+        /* been here before */
+        if (area_point_get(flood, x, y))
+            return;
 
         area_point_set(flood, x, y);
 
