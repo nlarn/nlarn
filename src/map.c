@@ -739,13 +739,24 @@ void map_set_tiletype(map *l, area *area, map_tile_t type, guint8 duration)
                 pos.x < area->start_x + area->size_x;
                 pos.x++, x++)
         {
+            /* check if pos is inside the map */
+            if (!pos_valid(pos))
+            {
+                continue;
+            }
+
             /* if the position is marked in area set the tile to type */
             if (area_point_get(area, x, y))
             {
                 map_tile *tile = map_tile_at(l, pos);
 
-                /* store original type */
-                tile->base_type = map_tiletype_at(l, pos);
+                /* store original type if it has not been set already
+                   (this can occur when casting multiple flood
+                   spells on the same tile) */
+                if (tile->base_type == LT_NONE)
+                {
+                    tile->base_type = map_tiletype_at(l, pos);
+                }
 
                 tile->type = type;
                 tile->timer = duration;
