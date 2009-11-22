@@ -192,7 +192,7 @@ void player_update_fov(player *p);
 int player_map_enter(player *p, map *l, gboolean teleported);
 item *player_random_armour(player *p);
 
-int player_examine(player *p, position pos);
+void player_examine(player *p, position pos);
 int player_pickup(player *p);
 
 void player_autopickup(player *p);

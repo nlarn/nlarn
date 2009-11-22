@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 
             /* look at current position */
         case ':':
-            moves_count = player_examine(nlarn->p, nlarn->p->pos);
+            player_examine(nlarn->p, nlarn->p->pos);
             break;
 
             /* look at different position */

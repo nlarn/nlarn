@@ -1207,13 +1207,14 @@ item *player_random_armour(player *p)
     return armour;
 }
 
-int player_examine(player *p, position pos)
+void player_examine(player *p, position pos)
 {
     map_tile *tile;
     item *it;
     char item_desc[81];
     guint idx;
-    char *desc = NULL, *tmp, *where;
+    char *tmp = NULL, *where;
+    GString *desc;
 
     assert(p != NULL);
 
@@ -1225,31 +1226,33 @@ int player_examine(player *p, position pos)
     tile = map_tile_at(game_map(nlarn, p->pos.z), pos);
 
     /* describe the level tile */
-    desc = g_strdup(lt_get_desc(tile->type));
-    desc[0] = g_ascii_toupper(desc[0]);
-
-    log_add_entry(p->log, "%s.", desc, where);
-    g_free(desc);
+    tmp = g_strdup(lt_get_desc(tile->type));
+    tmp[0] = g_ascii_toupper(tmp[0]);
+    desc = g_string_new(NULL);
+    g_string_append_printf(desc, "%s. ", tmp);
+    g_free(tmp);
 
     /* name monster */
     if (tile->monster != NULL)
     {
         monster *m = game_monster_get(nlarn, tile->monster);
-        log_add_entry(p->log, "A%s %s.", a_an(monster_name(m)),
-                      monster_name(m));
+        g_string_append_printf(desc, "A%s %s. ", a_an(monster_name(m)),
+                               monster_name(m));
     }
 
     /* add message if target tile contains a stationary item */
     if (tile->stationary > LS_NONE)
     {
-        log_add_entry(p->log, "You see %s %s.", ls_get_desc(tile->stationary), where);
+        g_string_append_printf(desc, "You see %s %s. ",
+                               ls_get_desc(tile->stationary), where);
     }
 
     /* add message if target tile contains a known trap */
     if (player_memory_of(p, pos).trap)
     {
-        log_add_entry(p->log, "There is a%s %s %s.", a_an(trap_description(tile->trap)),
-                      trap_description(tile->trap), where);
+        g_string_append_printf(desc, "There is a%s %s %s. ",
+                               a_an(trap_description(tile->trap)),
+                               trap_description(tile->trap), where);
     }
 
     /* add message if target tile contains items */
@@ -1257,10 +1260,12 @@ int player_examine(player *p, position pos)
     {
         if (inv_length(tile->ilist) > 3)
         {
-            log_add_entry(p->log, "There are multiple items %s.", where);
+            g_string_append_printf(desc, "There are multiple items %s.", where);
         }
         else
         {
+            GString *items_desc;
+
             for (idx = 0; idx < inv_length(tile->ilist); idx++)
             {
                 it = inv_get(tile->ilist, idx);
@@ -1268,24 +1273,19 @@ int player_examine(player *p, position pos)
                               FALSE, FALSE, item_desc, 80);
 
                 if (idx > 0)
-                {
-                    tmp = g_strjoin(" and ", desc, item_desc, NULL);
-                    g_free(desc);
-                    desc = tmp;
-                }
+                    g_string_append_printf(items_desc, " and %s", item_desc);
                 else
-                {
-                    desc = g_malloc(strlen(item_desc) + 1);
-                    strcpy(desc, item_desc);
-                }
+                    items_desc = g_string_new(item_desc);
             }
 
-            log_add_entry(p->log, "You see %s %s.", desc, where);
-            g_free(desc);
+            g_string_append_printf(desc, "You see %s %s.",
+                                   items_desc->str, where);
+            g_string_free(items_desc, TRUE);
         }
     }
 
-    return TRUE;
+    log_add_entry(p->log, desc->str);
+    g_string_free(desc, TRUE);
 }
 
 int player_pickup(player *p)
