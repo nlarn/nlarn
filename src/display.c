@@ -1924,7 +1924,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
     monster *target;
 
     /* start at player's position */
-    pos = npos = p->pos;
+    pos = p->pos;
 
     /* display message */
     log_add_entry(p->log, message);
