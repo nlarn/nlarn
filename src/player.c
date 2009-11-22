@@ -44,7 +44,6 @@ static const char aa5[] = "minor deity";
 static const char aa6[] = "major deity";
 static const char aa7[] = "novice guardian";
 static const char aa8[] = "apprentice guardian";
-static const char aa9[] = "The Creator";
 
 static const char *player_level_desc[] =
 {
@@ -81,7 +80,7 @@ static const char *player_level_desc[] =
     aa8, aa8, aa8, /* -93*/
     "earth guardian", "air guardian",	"fire guardian",	/* -96*/
     "water guardian", "time guardian",	"ethereal guardian",/* -99*/
-    aa9       , aa9       , aa9       ,/* -102*/
+    "The Creator", /* 100*/
 };
 
 /*
@@ -90,7 +89,6 @@ static const char *player_level_desc[] =
  */
 static const guint32 player_lvl_exp[] =
 {
-    0,      /* there is no level 0 */
     0, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120,                                        /*  1-11 */
     10240, 20480, 40960, 100000, 200000, 400000, 700000, 1000000,                              /* 12-19 */
     2000000, 3000000, 4000000, 5000000, 6000000, 8000000, 10000000,                            /* 20-26 */
@@ -1399,17 +1397,36 @@ void player_level_gain(player *p, int count)
     int base;
     int i;
 
+    char *desc_orig, *desc_new;
+
     assert(p != NULL && count > 0);
 
+    /* experience level 100 is the end of the career */
+    if (p->level == 100)
+        return;
+
+    desc_orig = player_get_level_desc(p);
+
     p->level += count;
-    log_add_entry(p->log, "You gain experience and become a %s!", player_level_desc[p->level]);
+
+    desc_new = player_get_level_desc(p);
+
+    if (g_strcmp0(desc_orig, desc_new) != 0)
+    {
+        log_add_entry(p->log, "You gain experience and become %s!",
+                      desc_new);
+    }
+    else
+    {
+        log_add_entry(p->log, "You gain experience!");
+    }
 
     if (p->level > p->stats.max_level)
         p->stats.max_level = p->level;
 
-    if (p->experience < player_lvl_exp[p->level])
+    if (p->experience < player_lvl_exp[p->level - 1])
         /* artificially gained a level, need to adjust XP to match level */
-        player_exp_gain(p, player_lvl_exp[p->level] - p->experience);
+        player_exp_gain(p, player_lvl_exp[p->level - 1] - p->experience);
 
     for (i = 0; i < count; i++)
     {
@@ -1439,9 +1456,9 @@ void player_level_lose(player *p, int count)
     p->level -= count;
     log_add_entry(p->log, "You return to experience level %d...", p->level);
 
-    if (p->experience > player_lvl_exp[p->level])
+    if (p->experience > player_lvl_exp[p->level - 1])
         /* adjust XP to match level */
-        player_exp_lose(p, p->experience - player_lvl_exp[p->level]);
+        player_exp_lose(p, p->experience - player_lvl_exp[p->level - 1]);
 
     for (i = 0; i < count; i++)
     {
@@ -1475,7 +1492,7 @@ void player_exp_gain(player *p, int count)
     if (p->stats.max_xp < p->experience)
         p->stats.max_xp = p->experience;
 
-    while (player_lvl_exp[p->level + 1 + numlevels] <= p->experience)
+    while (player_lvl_exp[p->level + numlevels] <= p->experience)
         numlevels++;
 
     if (numlevels)
@@ -1489,7 +1506,7 @@ void player_exp_lose(player *p, int count)
     assert(p != NULL && count > 0);
     p->experience -= count;
 
-    while ((player_lvl_exp[p->level - numlevels]) > p->experience)
+    while ((player_lvl_exp[p->level - 1 - numlevels]) > p->experience)
         numlevels++;
 
     if (numlevels)
@@ -1850,7 +1867,7 @@ void player_effect_add(player *p, effect *e)
 
         case ET_INC_EXP:
             /* looks like a reasonable amount */
-            player_exp_gain(p, rand_1n(player_lvl_exp[p->level] - player_lvl_exp[p->level - 1]));
+            player_exp_gain(p, rand_1n(player_lvl_exp[p->level - 1] - player_lvl_exp[p->level - 2]));
             break;
 
         case ET_INC_HP:
@@ -1911,7 +1928,7 @@ void player_effect_add(player *p, effect *e)
 
         case ET_DEC_EXP:
             /* looks like a reasonable amount */
-            player_exp_lose(p, rand_1n(player_lvl_exp[p->level] - player_lvl_exp[p->level - 1]));
+            player_exp_lose(p, rand_1n(player_lvl_exp[p->level - 1] - player_lvl_exp[p->level - 2]));
             break;
 
         default:
@@ -4284,7 +4301,7 @@ guint player_set_gold(player *p, guint amount)
 char *player_get_level_desc(player *p)
 {
     assert(p != NULL);
-    return (char *)player_level_desc[p->level];
+    return (char *)player_level_desc[p->level - 1];
 }
 
 /**
@@ -4664,17 +4681,17 @@ static char *player_death_description(game_score_t *score, int verbose)
     case PD_EFFECT:
         switch (score->cause)
         {
-            case ET_DEC_STR:
-                g_string_append(text, " by enfeeblement.");
-                break;
+        case ET_DEC_STR:
+            g_string_append(text, " by enfeeblement.");
+            break;
 
-            case ET_DEC_DEX:
-                g_string_append(text, " by clumsiness.");
-                break;
+        case ET_DEC_DEX:
+            g_string_append(text, " by clumsiness.");
+            break;
 
-            case ET_POISON:
-                g_string_append(text, " by poison.");
-                break;
+        case ET_POISON:
+            g_string_append(text, " by poison.");
+            break;
         }
         break;
 
