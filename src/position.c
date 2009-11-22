@@ -475,15 +475,27 @@ area *area_new_ray(position source, position target, area *obstacles)
  * Create a new area with the dimensions of the given one
  *
  * @param an area
- * @return a new area of identical dimensions
+ * @return a new, identical area
  *
  */
 area *area_copy(area *a)
 {
     area *narea;
+    int x, y;
 
     assert(a != NULL);
     narea = area_new(a->start_x, a->start_y, a->size_x, a->size_y);
+
+    for (y = 0; y < a->size_y; y++)
+    {
+        for (x = 0; x < a->size_x; x++)
+        {
+            if (area_point_get(a, x, y))
+            {
+                area_point_set(narea, x, y);
+            }
+        }
+    }
 
     return narea;
 }
@@ -531,9 +543,21 @@ area *area_add(area *a, area *b)
     return a;
 }
 
+/**
+ * Flood fill an area from a given starting point
+ *
+ * @param an area which marks the points which shall not be flooded (will be freed)
+ * @param starting x
+ * @param starting y
+ *
+ * @return an area with all reached points set (newly allocated, must be freed)
+ *
+ */
 area *area_flood(area *obstacles, int start_x, int start_y)
 {
     area *flood = NULL;
+
+    assert (obstacles != NULL && area_point_valid(obstacles, start_x, start_y));
 
     void area_flood_worker(int x, int y)
     {
@@ -552,7 +576,8 @@ area *area_flood(area *obstacles, int start_x, int start_y)
 
     assert(obstacles != NULL && area_point_valid(obstacles, start_x, start_y));
 
-    flood = area_copy(obstacles);
+    flood = area_new(obstacles->start_x, obstacles->start_y,
+                     obstacles->size_x, obstacles->size_y);
 
     area_flood_worker(start_x, start_y);
 
