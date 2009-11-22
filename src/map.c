@@ -26,15 +26,16 @@
 #include "nlarn.h"
 #include "spheres.h"
 
-static void map_fill_with_stationary(map *l);
+static void map_fill_with_stationary_objects(map *maze);
 static void map_fill_with_objects(map *l);
 static void map_fill_with_traps(map *l);
 
 static int map_load_from_file(map *l, char *mazefile, int which);
-static void map_make_maze(map *l);
+static void map_make_maze(map *maze, int treasure_room);
 static void map_make_maze_eat(map *l, int x, int y);
-static void map_add_treasure_room(map *l);
-static void map_add_item(map *l, item *what);
+static void map_make_treasure_room(map *maze, rectangle **rooms);
+static int map_validate(map *maze);
+static void map_item_add(map *maze, item *what);
 
 static map_path *map_path_new(position start, position goal);
 static map_path_element *map_path_element_new(position pos);
@@ -115,48 +116,50 @@ const char *map_names[MAP_MAX] =
 map *map_new(int num, char *mazefile)
 {
     gboolean map_loaded = FALSE;
-    int x, y;
+    gboolean treasure_room = FALSE;
+    gboolean keep_maze = TRUE;
 
     map *nmap = nlarn->maps[num] = g_malloc0(sizeof(map));
     nmap->nlevel = num;
 
     /* create map */
-    if ((num == 0)|| (num == MAP_DMAX - 1)
-            || (num == MAP_MAX - 1)|| (num > 1 && chance(25)))
+    if ((num == 0) /* town is stored in file */
+            || (num == MAP_DMAX - 1) /* level 10 */
+            || (num == MAP_MAX - 1)  /* volcano level 3 */
+            || (num > 1 && chance(25)))
     {
         /* read maze from data file */
         map_loaded = map_load_from_file(nmap, mazefile, (num == 0) ? 0 : -1);
+
+        /* add stationary objects */
+        map_fill_with_stationary_objects(nmap);
     }
 
     if (!map_loaded)
     {
-        /* clear map */
-        for (y = 0; y < MAP_MAX_Y; y++)
-            for (x = 0; x < MAP_MAX_X; x++)
-                nmap->grid[y][x].type = LT_WALL;
+        /* determine if to add treasure room */
+        treasure_room = num > 1 && chance(25);
 
         /* generate random map */
-        map_make_maze(nmap);
-
-        /* home town is safe */
-        if (num > 0)
+        do
         {
-            map_fill_with_life(nmap);
-        }
+            /* dig cave */
+            map_make_maze(nmap, treasure_room);
 
-        /* add treasure room */
-        if (num > 1&& (num == (MAP_DMAX - 1)
-                       || num == (MAP_MAX - 1)|| chance(15)))
-        {
-            map_add_treasure_room(nmap);
+            /* add stationary objects */
+            map_fill_with_stationary_objects(nmap);
+
+            /* check if entire map is reachable */
+            keep_maze = map_validate(nmap);
         }
+        while (!keep_maze);
+
+        /* add monsters */
+        map_fill_with_life(nmap);
     }
 
     if (num > 0)
     {
-        /* add static content */
-        map_fill_with_stationary(nmap);
-
         /* home town is not filled with crap */
         map_fill_with_objects(nmap);
 
@@ -338,22 +341,22 @@ void map_destroy(map *m)
 }
 
 /* return coordinates of a free space */
-position map_find_space(map *l, map_element_t element)
+position map_find_space(map *maze, map_element_t element)
 {
-    rectangle lvl_area = rect_new(1, 1, MAP_MAX_X - 2, MAP_MAX_Y - 2);
+    rectangle entire_map = rect_new(1, 1, MAP_MAX_X - 2, MAP_MAX_Y - 2);
 
-    return map_find_space_in(l, lvl_area, element);
+    return map_find_space_in(maze, entire_map, element);
 }
 
-position map_find_space_in(map *l, rectangle where, map_element_t element)
+position map_find_space_in(map *maze, rectangle where, map_element_t element)
 {
     position pos, pos_orig;
 
-    assert (l != NULL && element > LE_NONE && element < LE_MAX);
+    assert (maze != NULL && element > LE_NONE && element < LE_MAX);
 
     pos_orig.x = pos.x = rand_m_n(where.x1, where.x2);
     pos_orig.y = pos.y = rand_m_n(where.y1, where.y2);
-    pos_orig.z = pos.z = l->nlevel;
+    pos_orig.z = pos.z = maze->nlevel;
 
     do
     {
@@ -372,7 +375,7 @@ position map_find_space_in(map *l, rectangle where, map_element_t element)
         if (pos.y < where.y1)
             pos.y = where.y2;
     }
-    while (!map_pos_validate(l, pos, element)
+    while (!map_pos_validate(maze, pos, element)
             && !pos_identical(pos, pos_orig));
 
     if (pos_identical(pos, pos_orig))
@@ -714,7 +717,7 @@ area *map_get_obstacles(map *l, position center, int radius)
     {
         for (pos.x = center.x - radius, x = 0; pos.x <= center.x + radius; pos.x++, x++)
         {
-            if (!pos_valid(pos) || !map_pos_passable(l,pos))
+            if (!pos_valid(pos) || !map_pos_passable(l, pos))
             {
                 area_point_set(narea, x, y);
             }
@@ -1037,72 +1040,72 @@ void map_timer(map *l, guint8 count)
     } /* for pos.y */
 }
 
-static void map_fill_with_stationary(map *l)
+static void map_fill_with_stationary_objects(map *maze)
 {
     position pos;
     int i;						/* loop var */
 
     /* volcano shaft up from the temple */
-    if (l->nlevel == MAP_MAX -1)
+    if (maze->nlevel == MAP_MAX -1)
     {
-        pos = map_find_space(l, LE_STATIONARY);
-        map_stationary_set(l, pos, LS_ELEVATORUP);
+        pos = map_find_space(maze, LE_STATIONARY);
+        map_stationary_set(maze, pos, LS_ELEVATORUP);
     }
 
     /*  make the fixed objects in the maze: STAIRS */
-    if ((l->nlevel > 0) && (l->nlevel != MAP_DMAX - 1) && (l->nlevel != MAP_MAX - 1))
+    if ((maze->nlevel > 0) && (maze->nlevel != MAP_DMAX - 1) && (maze->nlevel != MAP_MAX - 1))
     {
-        pos = map_find_space(l, LE_STATIONARY);
-        map_stationary_set(l,pos, LS_STAIRSDOWN);
+        pos = map_find_space(maze, LE_STATIONARY);
+        map_stationary_set(maze, pos, LS_STAIRSDOWN);
     }
 
-    if ((l->nlevel > 1) && (l->nlevel != MAP_DMAX))
+    if ((maze->nlevel > 1) && (maze->nlevel != MAP_DMAX))
     {
-        pos = map_find_space(l, LE_STATIONARY);
-        map_stationary_set(l, pos, LS_STAIRSUP);
+        pos = map_find_space(maze, LE_STATIONARY);
+        map_stationary_set(maze, pos, LS_STAIRSUP);
     }
 
     /* make the random objects in the maze */
     /* 33 percent chance for an altar */
     if (chance(33))
     {
-        pos = map_find_space(l, LE_STATIONARY);
-        map_stationary_set(l, pos, LS_ALTAR);
+        pos = map_find_space(maze, LE_STATIONARY);
+        map_stationary_set(maze, pos, LS_ALTAR);
     }
 
     /* up to three statues */
     for (i = 0; i < rand_0n(3); i++)
     {
-        pos = map_find_space(l, LE_STATIONARY);
-        map_stationary_set(l, pos, LS_STATUE);
+        pos = map_find_space(maze, LE_STATIONARY);
+        map_stationary_set(maze, pos, LS_STATUE);
     }
 
     /* up to three fountains */
     for (i = 0; i < rand_0n(3); i++)
     {
-        pos = map_find_space(l, LE_STATIONARY);
-        map_stationary_set(l, pos, LS_FOUNTAIN);
+        pos = map_find_space(maze, LE_STATIONARY);
+        map_stationary_set(maze, pos, LS_FOUNTAIN);
     }
 
     /* up to two thrones */
     for (i = 0; i < rand_0n(2); i++)
     {
-        pos = map_find_space(l, LE_STATIONARY);
-        map_stationary_set(l, pos, LS_THRONE);
+        pos = map_find_space(maze, LE_STATIONARY);
+        map_stationary_set(maze, pos, LS_THRONE);
     }
 
     /* up to two  mirrors */
     for (i = 0; i < rand_0n(2); i++)
     {
-        pos = map_find_space(l, LE_STATIONARY);
-        map_stationary_set(l, pos, LS_MIRROR);
+        pos = map_find_space(maze, LE_STATIONARY);
+        map_stationary_set(maze, pos, LS_MIRROR);
     }
 
-    if (l->nlevel == 5)
+    if (maze->nlevel == 5)
     {
         /* branch office of the bank */
-        pos = map_find_space(l, LE_STATIONARY);
-        map_stationary_set(l, pos, LS_BANK2);
+        pos = map_find_space(maze, LE_STATIONARY);
+        map_stationary_set(maze, pos, LS_BANK2);
     }
 } /* map_fill_with_stationary */
 
@@ -1115,13 +1118,13 @@ static void map_fill_with_objects(map *l)
     /* up to two pieces of armour */
     for (i = 0; i < rand_0n(2); i++)
     {
-        map_add_item(l, item_new_by_level(IT_ARMOUR, l->nlevel));
+        map_item_add(l, item_new_by_level(IT_ARMOUR, l->nlevel));
     }
 
     /* up to three books */
     for (i = 0; i <= rand_0n(3); i++)
     {
-        map_add_item(l, item_new_by_level(IT_BOOK, l->nlevel));
+        map_item_add(l, item_new_by_level(IT_BOOK, l->nlevel));
     }
 
     /* up to two containers */
@@ -1144,45 +1147,45 @@ static void map_fill_with_objects(map *l)
         }
 
         /* add the container to the map */
-        map_add_item(l, container);
+        map_item_add(l, container);
     }
 
     /* up to 10 piles of gold */
     for (i = 0; i < rand_0n(10); i++)
     {
         /* There is nothing like a newly minted pound. */
-        map_add_item(l, item_new(IT_GOLD, rand_m_n(10, (l->nlevel + 1) * 15), 0));
+        map_item_add(l, item_new(IT_GOLD, rand_m_n(10, (l->nlevel + 1) * 15), 0));
     }
 
     /* up to three gems */
     for (i = 0; i < rand_0n(3); i++)
     {
-        map_add_item(l, item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)),
+        map_item_add(l, item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)),
                                  rand_0n(6 * (l->nlevel + 1))));
     }
 
     /* up to four potions */
     for (i = 0; i < rand_0n(4); i++)
     {
-        map_add_item(l, item_new_by_level(IT_POTION, l->nlevel));
+        map_item_add(l, item_new_by_level(IT_POTION, l->nlevel));
     }
 
     /* up to three scrolls */
     for (i = 0; i < rand_0n(3); i++)
     {
-        map_add_item(l, item_new_by_level(IT_SCROLL, l->nlevel));
+        map_item_add(l, item_new_by_level(IT_SCROLL, l->nlevel));
     }
 
     /* up to two rings */
     for (i = 0; i < rand_0n(3); i++)
     {
-        map_add_item(l, item_new_by_level(IT_RING, l->nlevel));
+        map_item_add(l, item_new_by_level(IT_RING, l->nlevel));
     }
 
     /* up to two weapons */
     for (i = 0; i < rand_0n(2); i++)
     {
-        map_add_item(l, item_new_by_level(IT_WEAPON, l->nlevel));
+        map_item_add(l, item_new_by_level(IT_WEAPON, l->nlevel));
     }
 
 } /* map_fill_with_objects */
@@ -1206,63 +1209,108 @@ static void map_fill_with_traps(map *l)
 } /* map_fill_with_traps */
 
 /* subroutine to make the caverns for a given map. only walls are made. */
-static void map_make_maze(map *l)
+static void map_make_maze(map *maze, int treasure_room)
 {
     position pos;
-    int mx, mxl, mxh;
-    int my, myl, myh;
-    int nrooms;
+    int mx, my;
+    int nrooms, room;
+    rectangle **rooms = NULL;
     gboolean want_monster = FALSE;
 
-    map_make_maze_eat(l, 1, 1);
+    assert (maze != NULL);
+
+    pos.z = maze->nlevel;
+
+    /* reset map by filling it with walls */
+    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+        {
+            monster *m;
+
+            map_tiletype_set(maze, pos, LT_WALL);
+            map_stationary_set(maze, pos, LS_NONE);
+
+            if ((m = map_get_monster_at(maze, pos)))
+            {
+                monster_destroy(m);
+            }
+
+            if (map_tile_at(maze, pos)->ilist != NULL)
+            {
+                inv_destroy(map_tile_at(maze, pos)->ilist);
+                map_tile_at(maze, pos)->ilist = NULL;
+            }
+        }
+
+    map_make_maze_eat(maze, 1, 1);
 
     /* add exit to town on map 1 */
-    if (l->nlevel == 1)
+    if (maze->nlevel == 1)
     {
-        l->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].type = LT_FLOOR;
-        l->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].stationary = LS_ENTRANCE;
+        maze->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].type = LT_FLOOR;
+        maze->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].stationary = LS_ENTRANCE;
     }
 
-    /*  now for open spaces -- not on map 10  */
-    if (l->nlevel != (MAP_DMAX - 1))
+    /* generate open spaces */
+    nrooms = rand_1n(3) + 3;
+    if (treasure_room)
+        nrooms++;
+
+    rooms = g_malloc0(sizeof(rectangle *) * (nrooms + 1));
+
+    for (room = 0; room < nrooms; room++)
     {
-        for (nrooms = 0; nrooms < rand_1n(3) + 3; nrooms++)
+        rooms[room] = g_malloc0(sizeof(rectangle));
+
+        my = rand_1n(11) + 2;
+        rooms[room]->y1 = my - rand_1n(2);
+        rooms[room]->y2 = my + rand_1n(2);
+
+        if (maze->nlevel < MAP_DMAX)
         {
-            my = rand_1n(11) + 2;
-            myl = my - rand_1n(2);
-            myh = my + rand_1n(2);
-            if (l->nlevel < MAP_DMAX)
-            {
-                mx = rand_1n(44)+5;
-                mxl = mx - rand_1n(4);
-                mxh = mx + rand_1n(12)+3;
-            }
-            else
-            {
-                mx = rand_1n(60)+3;
-                mxl = mx - rand_1n(2);
-                mxh = mx + rand_1n(2);
-                want_monster = TRUE;
-            }
+            mx = rand_1n(44)+5;
+            rooms[room]->x1 = mx - rand_1n(4);
+            rooms[room]->x2 = mx + rand_1n(12)+3;
+        }
+        else
+        {
+            mx = rand_1n(60)+3;
+            rooms[room]->x1 = mx - rand_1n(2);
+            rooms[room]->x2 = mx + rand_1n(2);
 
-            pos.z = l->nlevel;
+            want_monster = TRUE;
+        }
 
-            for (pos.y = myl ; pos.y < myh ; pos.y++)
+        for (pos.y = rooms[room]->y1 ; pos.y < rooms[room]->y2 ; pos.y++)
+        {
+            for (pos.x = rooms[room]->x1 ; pos.x < rooms[room]->x2 ; pos.x++)
             {
-                for (pos.x = mxl ; pos.x < mxh ; pos.x++)
+                map_tile *tile = map_tile_at(maze, pos);
+                tile->type = LT_FLOOR;
+
+                if (want_monster == TRUE)
                 {
-                    map_tile *tile = map_tile_at(l, pos);
-                    tile->type = LT_FLOOR;
-
-                    if (want_monster == TRUE)
-                    {
-                        monster_new_by_level(pos);
-                        want_monster = FALSE;
-                    }
+                    monster_new_by_level(pos);
+                    want_monster = FALSE;
                 }
             }
         }
     }
+
+    /* mark the end of the rooms array */
+    rooms[nrooms] = NULL;
+
+    /* add treasure room if requested */
+    if (treasure_room)
+    {
+        map_make_treasure_room(maze, rooms);
+    }
+
+    /* cleanup */
+    for (room = 0; room < nrooms; room++)
+        g_free(rooms[room]);
+
+    g_free(rooms);
 }
 
 /* function to eat away a filled in maze */
@@ -1505,97 +1553,158 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
 /*
  * function to make a treasure room on a map
  */
-static void map_add_treasure_room(map *l)
+static void map_make_treasure_room(map *maze, rectangle **rooms)
 {
-    int x1, y1;         /* upper left corner of room */
-    int x2, y2;         /* room dimensions */
     position pos, npos;
-    map_tile *tile;
+    map_stationary_t mst;
     item *itm;
     int success;
 
-    x1 = rand_1n(MAP_MAX_X - 9);
-    y1 = rand_1n(MAP_MAX_Y - 9);
+    int nrooms; /* count of available rooms */
+    int room;   /* number of chose room */
 
-    x2 = x1 + rand_m_n(3, 6);
-    y2 = y1 + rand_m_n(3, 6);
+    /* determine number of rooms */
+    for (nrooms = 0; rooms[nrooms] != NULL; nrooms++);
 
-    pos.z = npos.z = l->nlevel;
+    /* choose a room to turn into an treasure room */
+    room = rand_0n(nrooms);
 
-    for (pos.y = y1; pos.y <= y2; pos.y++)
+    pos.z = npos.z = maze->nlevel;
+
+    for (pos.y = rooms[room]->y1; pos.y <= rooms[room]->y2; pos.y++)
     {
-        for (pos.x = x1; pos.x <= x2; pos.x++)
+        for (pos.x = rooms[room]->x1; pos.x <= rooms[room]->x2; pos.x++)
         {
-            tile = map_tile_at(l, pos);
-
-            if ( (pos.y == y1) || (pos.y == y2) || (pos.x == x1) || (pos.x == x2) )
+            if ( (pos.y == rooms[room]->y1)
+                    || (pos.y == rooms[room]->y2)
+                    || (pos.x == rooms[room]->x1)
+                    || (pos.x == rooms[room]->x2) )
             {
                 /* if we are on the border of a room, make wall */
-                tile->type = LT_WALL;
+                map_tiletype_set(maze, pos, LT_WALL);
             }
             else
             {
-                /* clear out space */
-                tile->type = LT_FLOOR;
-
                 /* create loot */
                 itm = item_new_random(IT_GOLD);
-                inv_add(&tile->ilist, itm);
+                inv_add(map_ilist_at(maze, pos), itm);
 
                 /* create a monster */
                 monster_new_by_level(pos);
             }
 
             /* now clear out interior */
-            if (map_stationary_at(l,pos) > LS_NONE)
+            if ((mst = map_stationary_at(maze, pos)))
             {
                 success = FALSE;
                 do
                 {
-                    npos = map_find_space(l, LE_STATIONARY);
-                    if ( (npos.x > x1) && (npos.x < x2) && (npos.y > y1) && (npos.y < y2) )
+
+                    npos = map_find_space(maze, LE_STATIONARY);
+                    if (!pos_in_rect(npos, *rooms[room]))
                     {
                         /* pos is outside of room */
-                        map_stationary_set(l, npos, map_stationary_at(l,pos));
-                        map_stationary_set(l, pos, LS_NONE);
+                        map_stationary_set(maze, npos, mst);
+                        map_stationary_set(maze, pos, LS_NONE);
 
                         success = TRUE;
                     }
                 }
                 while (!success);
-            } /* if stationary */
+            } /* if map_stationary_at() */
         } /* for x */
     } /* for y */
 
-    /* locate the door on the treasure room */
-    /* FIXME: ensure door is reachable */
+    /* place the door on the treasure room */
     switch (rand_1n(2))
     {
     case 1: /* horizontal */
-        pos.x = rand_m_n(x1, x2);
-        pos.y = rand_0n(1) ? y1 : y2;
+        pos.x = rand_m_n(rooms[room]->x1 + 1, rooms[room]->x2 - 1);
+        pos.y = rand_0n(1) ? rooms[room]->y1 : rooms[room]->y2;
         break;
 
     case 2: /* vertical */
-        pos.x = rand_0n(1) ? x1 : x2;
-        pos.y = rand_m_n(y1, y2);
+        pos.x = rand_0n(1) ? rooms[room]->x1 : rooms[room]->x2;
+        pos.y = rand_m_n(rooms[room]->y1 + 1, rooms[room]->y2 - 1);
         break;
     };
 
-    tile = map_tile_at(l, pos);
+    map_tiletype_set(maze, pos, LT_FLOOR);
+    map_stationary_set(maze, pos, LS_CLOSEDDOOR);
+}
 
-    tile->type = LT_FLOOR;
-    tile->stationary = LS_CLOSEDDOOR;
+/* verify that every space on the map can be reached */
+static int map_validate(map *maze)
+{
+    position pos;
+    int connected = TRUE;
+    area *floodmap = NULL;
+    area *obsmap = area_new(0, 0, MAP_MAX_X, MAP_MAX_Y);
+
+    pos.z = maze->nlevel;
+
+    /* generate an obstacle map */
+    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+            if (!map_pos_passable(maze, pos)
+                    && (map_stationary_at(maze, pos) != LS_CLOSEDDOOR))
+                area_point_set(obsmap, pos.x, pos.y);
+
+    /* get position of entrance */
+    switch (maze->nlevel)
+    {
+        /* caverns entrance */
+    case 1:
+        pos = map_find_stationary(maze, LS_ENTRANCE);
+        break;
+
+        /* volcano entrance */
+    case MAP_MAX - 1:
+        pos = map_find_stationary(maze, LS_ELEVATORUP);
+        break;
+
+    default:
+        pos = map_find_stationary(maze, LS_STAIRSDOWN);
+        break;
+    }
+
+    /* flood fill the maze starting at the entrance */
+    floodmap = area_flood(obsmap, pos.x, pos.y);
+
+    /* compare flooded area with obstacle map */
+    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+    {
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+        {
+            int pp = map_pos_passable(maze, pos);
+            int cd = (map_stationary_at(maze, pos) == LS_CLOSEDDOOR);
+
+            /* point should be set on floodmap if it is passable */
+            if (area_point_get(floodmap, pos.x, pos.y) != (pp || cd))
+            {
+                connected = FALSE;
+                break;
+            }
+
+        }
+
+        if (!connected)
+            break;
+    }
+
+    area_destroy(floodmap);
+
+    return connected;
 }
 
 /* subroutine to put an item onto an empty space */
-static void map_add_item(map *l, item *what)
+static void map_item_add(map *maze, item *what)
 {
     position pos;
 
-    pos = map_find_space(l, LE_ITEM);
+    pos = map_find_space(maze, LE_ITEM);
 
-    inv_add(map_ilist_at(l, pos), what);
+    inv_add(map_ilist_at(maze, pos), what);
 }
 
 static map_path *map_path_new(position start, position goal)

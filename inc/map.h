@@ -162,8 +162,8 @@ cJSON *map_serialize(map *m);
 map *map_deserialize(cJSON *mser, struct game *g);
 char *map_dump(map *l, position ppos);
 
-position map_find_space(map *l, map_element_t element);
-position map_find_space_in(map *l, rectangle where, map_element_t element);
+position map_find_space(map *maze, map_element_t element);
+position map_find_space_in(map *maze, rectangle where, map_element_t element);
 position map_find_stationary(map *l, map_stationary_t stationary);
 position map_find_stationary_in(map *l, map_stationary_t stationary, rectangle area);
 gboolean map_pos_validate(map *l, position pos, map_element_t element);
