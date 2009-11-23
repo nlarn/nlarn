@@ -401,7 +401,7 @@ void item_destroy(item *it)
             gpointer effect_id = g_ptr_array_remove_index_fast(it->effects,
                                  it->effects->len - 1);
 
-            if((eff = game_effect_get(nlarn, effect_id)))
+            if ((eff = game_effect_get(nlarn, effect_id)))
                 effect_destroy(eff);
         }
 
@@ -1055,17 +1055,44 @@ int item_remove_curse(item *it)
 int item_enchant(item *it)
 {
     guint pos;
+    gpointer oid;
     effect *e;
+    char desc[81] = { 0 };
 
     assert(it != NULL);
 
     it->bonus++;
 
+    /* warn against overenchantment */
+    if (it->bonus == 3)
+    {
+        /* hide bonus from description */
+        gboolean bonus_known = it->bonus_known;
+        it->bonus_known = FALSE;
+
+        item_describe(it, player_item_known(nlarn->p, it),
+                      (it->count == 1), TRUE, desc, 80);
+
+        desc[0] = g_ascii_toupper(desc[0]);
+        log_add_entry(nlarn->p->log, "%s vibrate%s strangely.",
+                      desc, (it->count == 1) ? "s" : "");
+
+        it->bonus_known = bonus_known;
+    }
+
+    /* item has been overenchanted */
+    if (it->bonus > 3)
+    {
+        player_item_destroy(nlarn->p, it);
+    }
+
     if ((it->type == IT_RING) && it->effects)
     {
         for (pos = 0; pos < it->effects->len; pos++)
         {
-            e = g_ptr_array_index(it->effects, pos);
+            oid = g_ptr_array_index(it->effects, pos);
+            e = game_effect_get(nlarn, oid);
+
             e->amount++;
         }
     }
@@ -1076,17 +1103,25 @@ int item_enchant(item *it)
 int item_disenchant(item *it)
 {
     guint pos;
+    gpointer oid;
     effect *e;
 
     assert(it != NULL);
 
     it->bonus--;
 
+    if (it->bonus < -3)
+    {
+        player_item_destroy(nlarn->p, it);
+    }
+
     if ((it->type == IT_RING) && it->effects)
     {
         for (pos = 0; pos < it->effects->len; pos++)
         {
-            e = g_ptr_array_index(it->effects, pos);
+            oid = g_ptr_array_index(it->effects, pos);
+            e = game_effect_get(nlarn, oid);
+
             e->amount--;
         }
     }

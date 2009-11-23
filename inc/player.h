@@ -248,6 +248,7 @@ int player_item_identified(player *p, item *it);
 char *player_item_identified_list(player *p);
 void player_item_identify(player *p, inventory **inv, item *it);
 int player_item_use(player *p, inventory **inv, item *it);
+void player_item_destroy(player *p, item *it);
 int player_item_drop(player *p, inventory **inv, item *it);
 int player_item_pickup(player *p, inventory **inv, item *it);
 

@@ -2175,8 +2175,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
     }
     else
     {
-        inv_del_element(&p->inventory, it);
-        item_destroy(it);
+        player_item_destroy(p, it);
     }
 
     return TRUE;
@@ -2203,15 +2202,8 @@ static gboolean monster_item_rust(monster *m, struct player *p)
         else if (pi == PI_DESTROYED)
         {
             /* armour has been destroyed */
-            log_add_entry(p->log, "Your %s disintegrates!",
-                          armour_name(it));
+            player_item_destroy(p, it);
 
-            log_disable(p->log);
-            player_item_unequip(p, NULL, it);
-            log_enable(p->log);
-
-            inv_del_element(&p->inventory, it);
-            item_destroy(it);
             return TRUE;
         }
         else

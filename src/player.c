@@ -1003,15 +1003,7 @@ int player_attack(player *p, monster *m)
             }
             else if (pi == PI_DESTROYED)
             {
-                /* weapon has been destroyed */
-                log_add_entry(p->log, "Your %s disintegrates!", weapon_name(p->eq_weapon));
-
-                /* delete the weapon from the inventory */
-                inv_del_element(&p->inventory, p->eq_weapon);
-
-                /* destroy it and remove the reference to it */
-                item_destroy(p->eq_weapon);
-                p->eq_weapon = NULL;
+                player_item_destroy(p, p->eq_weapon);
             }
         }
 
@@ -3229,6 +3221,29 @@ int player_item_use(player *p, inventory **inv, item *it)
     }
 
     return time;
+}
+
+void player_item_destroy(player *p, item *it)
+{
+    char desc[81] = { 0 };
+
+    item_describe(it, player_item_known(p, it),
+                  (it->count == 1), TRUE, desc, 80);
+
+    desc[0] = g_ascii_toupper(desc[0]);
+
+    if (player_item_is_equipped(p, it))
+    {
+        log_disable(p->log);
+        player_item_unequip(p, &p->inventory, it);
+        log_enable(p->log);
+    }
+
+    log_add_entry(p->log, "%s %s destroyed!",
+                  desc, (it->count == 1) ? "is" : "are");
+
+    inv_del_element(&p->inventory, it);
+    item_destroy(it);
 }
 
 int player_item_drop(player *p, inventory **inv, item *it)
