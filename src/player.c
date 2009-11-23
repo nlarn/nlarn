@@ -1131,12 +1131,12 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     else if ((l->nlevel == 0) && (game_turn(nlarn) == 1))
         pos = map_find_stationary(l, LS_HOME);
 
-    /* took the elevator up */
-    else if ((p->pos.z == 0) && (l->nlevel == (MAP_MAX - 1)))
+    /* took the elevator down */
+    else if ((p->pos.z == 0) && (l->nlevel == (MAP_DMAX)))
         pos = map_find_stationary(l, LS_ELEVATORUP);
 
-    /* took the elevator down */
-    else if ((p->pos.z == (MAP_MAX - 1)) && (l->nlevel == 0))
+    /* took the elevator up */
+    else if ((p->pos.z == (MAP_DMAX)) && (l->nlevel == 0))
         pos = map_find_stationary(l, LS_ELEVATORDOWN);
 
     /* climbing up */
@@ -3961,7 +3961,7 @@ int player_stairs_down(player *p)
     case LS_ELEVATORDOWN:
         /* first vulcano map */
         show_msg = TRUE;
-        nlevel = game_map(nlarn, MAP_MAX - 1);
+        nlevel = game_map(nlarn, MAP_DMAX);
         break;
 
     case LS_ENTRANCE:

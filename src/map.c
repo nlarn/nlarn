@@ -1046,7 +1046,7 @@ static void map_fill_with_stationary_objects(map *maze)
     int i;						/* loop var */
 
     /* volcano shaft up from the temple */
-    if (maze->nlevel == MAP_MAX -1)
+    if (maze->nlevel == MAP_DMAX)
     {
         pos = map_find_space(maze, LE_STATIONARY);
         map_stationary_set(maze, pos, LS_ELEVATORUP);
@@ -1663,7 +1663,7 @@ static int map_validate(map *maze)
         break;
 
         /* volcano entrance */
-    case MAP_MAX - 1:
+    case MAP_DMAX:
         pos = map_find_stationary(maze, LS_ELEVATORUP);
         break;
 
