@@ -172,13 +172,20 @@ int container_item_unpack(player *p, inventory **inv, item *element)
 
     assert(p != NULL && inv != NULL && element != NULL);
 
+    /* remove the item first, it may be destroyed later (stackable items!) */
+    inv_del_element(inv, element);
+
     if (inv_add(&p->inventory, element))
     {
         item_describe(element, player_item_known(p, element), (element->count == 1),
                       FALSE, desc, 60);
         log_add_entry(p->log, "You put %s into your pack.", desc);
-
-        inv_del_element(inv, element);
+    }
+    else
+    {
+        /* if adding the element to the player's pack has failed
+           put it back into the container */
+        inv_add(inv, element);
     }
 
     return 2;
