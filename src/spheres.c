@@ -146,7 +146,7 @@ void sphere_move(sphere *s, game *g)
     if ((m = map_get_monster_at(map, s->pos)))
     {
         /* demons dispel spheres */
-        if (monster_type(m) >= MT_DEMONLORD_I)
+        if (monster_is_demon(m))
         {
             if (monster_in_sight(m))
             {

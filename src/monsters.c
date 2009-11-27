@@ -228,7 +228,7 @@ const monster_data monsters[MT_MAX] =
         MT_QUASIT, "quasit",
         3, 5, 3, 0, 10, 15, 'Q',
         SPEED_NORMAL, ESIZE_SMALL,
-        MF_HEAD | MF_HANDS,
+        MF_HEAD | MF_HANDS | MF_DEMON,
         {
             { ATT_CLAW, DAM_DEC_DEX, 1, 0 },
             { ATT_BITE, DAM_PHYSICAL, 3, 0 },
@@ -647,7 +647,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_I, "type I demon lord",
         12, -30, 20, 0, 140, 50000, '&',
         SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
             { ATT_CLAW, DAM_PHYSICAL, 18, 0 },
             { ATT_BITE, DAM_PHYSICAL, 18, 0 },
@@ -657,7 +657,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_II, "type II demon lord",
         13, -30, 21, 0, 160, 75000, '&',
         SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
             { ATT_CLAW, DAM_PHYSICAL, 18, 0 },
             { ATT_BITE, DAM_PHYSICAL, 18, 0 },
@@ -667,7 +667,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_III, "type III demon lord",
         14, -30,  22, 0, 180, 100000, '&',
         SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
             { ATT_CLAW, DAM_PHYSICAL, 18, 0 },
             { ATT_BITE, DAM_PHYSICAL, 18, 0 },
@@ -677,7 +677,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_IV, "type IV demon lord",
         15, -35, 23, 0, 200, 125000, '&',
         SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
             { ATT_CLAW, DAM_PHYSICAL, 20, 0 },
             { ATT_BITE, DAM_PHYSICAL, 20, 0 },
@@ -687,7 +687,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_V, "type V demon lord",
         16, -40, 24, 0, 220, 150000, '&',
         SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
             { ATT_CLAW, DAM_PHYSICAL, 22, 0 },
             { ATT_BITE, DAM_PHYSICAL, 22, 0 },
@@ -697,7 +697,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_VI, "type VI demon lord",
         17, -45, 25, 0, 240, 175000, '&',
         SPEED_FAST, ESIZE_LARGE,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
             { ATT_CLAW, DAM_PHYSICAL, 24, 0 },
             { ATT_BITE, DAM_PHYSICAL, 24, 0 },
@@ -707,7 +707,7 @@ const monster_data monsters[MT_MAX] =
         MT_DEMONLORD_VII, "type VII demon lord",
         18, -70, 26, 0, 260, 200000, '&',
         SPEED_FAST, ESIZE_HUGE,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
             { ATT_CLAW, DAM_PHYSICAL, 27, 0 },
             { ATT_BITE, DAM_PHYSICAL, 27, 0 },
@@ -717,7 +717,7 @@ const monster_data monsters[MT_MAX] =
         MT_DAEMON_PRINCE, "demon prince",
         25, -127, 28, 0, 345, 300000, '&',
         SPEED_FAST, ESIZE_HUGE,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION,
+        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
             { ATT_CLAW, DAM_PHYSICAL, 30, 0 },
             { ATT_BITE, DAM_PHYSICAL, 30, 0 },

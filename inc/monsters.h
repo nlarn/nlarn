@@ -154,6 +154,7 @@ enum monster_flags
     MF_INFRAVISION  = 1 << 7,   /* can see invisible */
     MF_REGENERATE   = 1 << 8,   /* does regenerate */
     MF_METALLIVORE  = 1 << 9,   /* eats metal */
+    MF_DEMON        = 1 << 10,  /* is a demon */
 };
 
 /* external vars */
@@ -227,6 +228,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
 #define monster_has_infravision(monster) (monsters[monster_type(monster)].flags & MF_INFRAVISION)
 #define monster_can_regenerate(monster)  (monsters[monster_type(monster)].flags & MF_REGENERATE)
 #define monster_is_metallivore(monster)  (monsters[monster_type(monster)].flags & MF_METALLIVORE)
+#define monster_is_demon(monster)        (monsters[monster_type(monster)].flags & MF_DEMON)
 
 #define monster_type_name(type)  (monsters[(type)].name)
 #define monster_type_exp(type)   (monsters[(type)].exp)

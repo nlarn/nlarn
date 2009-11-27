@@ -1046,7 +1046,7 @@ int player_attack(player *p, monster *m)
             if ((p->eq_weapon->id == WT_LANCEOFDEATH))
             {
                 /* the lance is pretty deadly for non-demons */
-                if (monster_type(m) < MT_DEMONLORD_I)
+                if (!monster_is_demon(m))
                     dam->amount = 10000;
                 else
                     dam->amount = 300;
@@ -1055,7 +1055,7 @@ int player_attack(player *p, monster *m)
             /* Slayer */
             if (p->eq_weapon->id == WT_SLAYER)
             {
-                if (monster_type(m) >= MT_DEMONLORD_I)
+                if (monster_is_demon(m))
                     dam->amount = 10000;
             }
         }
@@ -1565,7 +1565,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         }
 
         /* amulet of power cancels demon attacks */
-        if ((monster_type(m) >= MT_DEMONLORD_I) && chance(75)
+        if (monster_is_demon(m) && chance(75)
                 && (p->eq_amulet && p->eq_amulet->id == AM_POWER))
         {
             log_add_entry(p->log, "Your amulet cancels the %s's attack.",
