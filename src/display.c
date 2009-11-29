@@ -2192,6 +2192,7 @@ char display_show_message(char *title, char *message)
                 offset--;
             break;
 
+        case '9':
         case KEY_PPAGE:
         case KEY_A3:
             if (offset > maxvis + 1)
@@ -2200,6 +2201,7 @@ char display_show_message(char *title, char *message)
                 offset = 0;
             break;
 
+        case '7':
         case KEY_HOME:
         case KEY_A1:
             offset = 0;
@@ -2215,11 +2217,13 @@ char display_show_message(char *title, char *message)
                 offset++;
             break;
 
+        case '3':
         case KEY_NPAGE:
         case KEY_C3:
             offset = min((offset + maxvis - 1), text->len - maxvis);
             break;
 
+        case '1':
         case KEY_END:
         case KEY_C1:
             offset = text->len - maxvis;
