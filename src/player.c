@@ -4458,7 +4458,7 @@ void player_update_fov(player *p)
                 pos.y = y + enlight->start_y;
 
                 if (pos_valid(pos) && area_point_get(enlight, x, y))
-                    player_pos_visible(p,pos) = TRUE;
+                    p->fov[(pos).y][(pos).x] = TRUE;
             }
         }
 
@@ -4510,6 +4510,12 @@ void player_update_fov(player *p)
             }
         }
     }
+}
+
+int player_pos_visible(player *p, position pos)
+{
+    assert (p != NULL && pos_valid(pos));
+    return (p->pos.z == pos.z) && p->fov[pos.y][pos.x];
 }
 
 static void player_calculate_octant(player *p, int row, float start,

@@ -924,6 +924,7 @@ GPtrArray *map_get_monsters_in(map *m, rectangle area)
  */
 int map_fill_with_life(map *l)
 {
+    position pos;
     int new_monster_count;
     int i;
 
@@ -939,7 +940,12 @@ int map_fill_with_life(map *l)
 
     for (i = 0; i <= new_monster_count; i++)
     {
-        position pos = map_find_space(l, LE_MONSTER);
+        do
+        {
+            pos = map_find_space(l, LE_MONSTER);
+        }
+        while (player_pos_visible(nlarn->p, pos));
+
         monster_new_by_level(pos);
     }
 

@@ -189,6 +189,7 @@ gint64 player_calc_score(player *p, int won);
 int player_move(player *p, direction dir);
 int player_attack(player *p, monster *m);
 void player_update_fov(player *p);
+int player_pos_visible(player *p, position pos);
 int player_map_enter(player *p, map *l, gboolean teleported);
 item *player_random_armour(player *p);
 
@@ -286,6 +287,5 @@ char *player_get_level_desc(player *p);
 /* macros */
 
 #define player_memory_of(p,pos) ((p)->memory[(pos).z][(pos).y][(pos).x])
-#define player_pos_visible(p,pos) ((p)->fov[(pos).y][(pos).x])
 
 #endif
