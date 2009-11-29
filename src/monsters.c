@@ -1234,7 +1234,9 @@ void monster_move(monster *m, struct player *p)
 
     map_path_element *el = NULL;
 
-    if (monster_player_visible(m))
+    if (monster_player_visible(m)
+            || (player_effect(p, ET_AGGRAVATE_MONSTER)
+                && pos_distance(m->pos, p->pos) < 15))
     {
         /* update monster's knowledge of player's position */
         monster_update_player_pos(m, p->pos);
@@ -1638,7 +1640,7 @@ void monster_player_attack(monster *m, player *p)
     if (!pos_identical(m->player_pos, p->pos))
     {
         if (!map_is_monster_at(game_map(nlarn, p->pos.z), p->pos)
-            && monster_in_sight(m))
+                && monster_in_sight(m))
         {
             log_add_entry(p->log, "The %s bashes into thin air.",
                           monster_name(m));
@@ -2060,7 +2062,7 @@ static gboolean monster_player_visible(monster *m)
         return FALSE;
 
     /* determine if player's position is visible from monster's position */
-        return map_pos_is_visible(monster_map(m), m->pos, nlarn->p->pos);
+    return map_pos_is_visible(monster_map(m), m->pos, nlarn->p->pos);
 }
 
 static gboolean monster_attack_available(monster *m, attack_t type)
