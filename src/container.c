@@ -88,8 +88,8 @@ int container_open(player *p, inventory **inv, item *container)
     callbacks = g_ptr_array_new();
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(t)ake out";
-    callback->key = 't';
+    callback->description = "(g)et";
+    callback->key = 'g';
     callback->inv = &container->content;
     callback->function = &container_item_unpack;
     callback->active = TRUE;
