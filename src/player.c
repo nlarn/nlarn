@@ -138,11 +138,12 @@ player *player_new()
                       NULL, &player_inv_weight_recalc);
 
     it = item_new(IT_ARMOUR, AT_LEATHER, 1);
+    player_item_identify(p, NULL, it);
     inv_add(&p->inventory, it);
     player_item_equip(p, NULL, it);
 
     it = item_new(IT_WEAPON, WT_DAGGER, 0);
-    it->bonus_known = TRUE;
+    player_item_identify(p, NULL, it);
     inv_add(&p->inventory, it);
     player_item_equip(p, NULL, it);
 
@@ -2362,7 +2363,7 @@ int player_item_equip(player *p, inventory **inv, item *it)
                 /* capitalize first letter */
                 description[0] = g_ascii_toupper(description[0]);
                 log_add_entry(p->log, "%s welds itself into your hand.", description);
-                it->curse_known = TRUE;
+                it->blessed_known = TRUE;
             }
         }
         break;
@@ -2415,9 +2416,9 @@ int player_item_unequip(player *p, inventory **inv, item *it)
             else
             {
                 log_add_entry(p->log, "You can not remove %s.%s", desc,
-                              it->curse_known ? "" : " It appears to be cursed.");
+                              it->blessed_known ? "" : " It appears to be cursed.");
 
-                it->curse_known = TRUE;
+                it->blessed_known = TRUE;
             }
         }
         break;
@@ -2500,9 +2501,9 @@ int player_item_unequip(player *p, inventory **inv, item *it)
         else
         {
             log_add_entry(p->log, "You can't take of %s.%s", desc,
-                          it->curse_known ? "" : " It appears to be cursed.");
+                          it->blessed_known ? "" : " It appears to be cursed.");
 
-            it->curse_known = TRUE;
+            it->blessed_known = TRUE;
         }
     }
 
@@ -2522,9 +2523,9 @@ int player_item_unequip(player *p, inventory **inv, item *it)
         else
         {
             log_add_entry(p->log, "You can not remove %s.%s", desc,
-                          it->curse_known ? "" : " It appears to be cursed.");
+                          it->blessed_known ? "" : " It appears to be cursed.");
 
-            it->curse_known = TRUE;
+            it->blessed_known = TRUE;
         }
     }
 
@@ -2779,10 +2780,7 @@ int player_item_identified(player *p, item *it)
 
     known = player_item_known(p, it);
 
-    if (it->cursed && !it->curse_known)
-        known = FALSE;
-
-    if (it->blessed && !it->blessed_known)
+    if (!it->blessed_known)
         known = FALSE;
 
     if ((it->type == IT_ARMOUR || it->type == IT_RING || it->type == IT_WEAPON)
@@ -2902,12 +2900,7 @@ void player_item_identify(player *p, inventory **inv, item *it)
         break;
     }
 
-    if (it->cursed)
-        it->curse_known = TRUE;
-
-    if (it->blessed)
-        it->blessed_known = TRUE;
-
+    it->blessed_known = TRUE;
     it->bonus_known = TRUE;
 }
 
@@ -3288,21 +3281,25 @@ int player_item_drop(player *p, inventory **inv, item *it)
 
     /* reveal if item is cursed or blessed when dropping it on an altar */
     map_stationary_t ms = map_stationary_at(game_map(nlarn, p->pos.z), p->pos);
-    if ((ms == LS_ALTAR) && it->cursed)
+
+    if (ms == LS_ALTAR)
     {
-        item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
-        desc[0] = g_ascii_toupper(desc[0]);
+        if (it->cursed)
+        {
+            item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
+            desc[0] = g_ascii_toupper(desc[0]);
 
-        log_add_entry(p->log, "%s is surrounded by a black halo.", desc);
-        it->curse_known = TRUE;
-    }
+            log_add_entry(p->log, "%s is surrounded by a black halo.", desc);
+        }
 
-    if ((ms == LS_ALTAR) && it->blessed)
-    {
-        item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
-        desc[0] = g_ascii_toupper(desc[0]);
+        if (it->blessed)
+        {
+            item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
+            desc[0] = g_ascii_toupper(desc[0]);
 
-        log_add_entry(p->log, "%s is surrounded by a white halo.", desc);
+            log_add_entry(p->log, "%s is surrounded by a white halo.", desc);
+        }
+
         it->blessed_known = TRUE;
     }
 

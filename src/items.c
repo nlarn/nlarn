@@ -437,7 +437,6 @@ void item_serialize(gpointer oid, gpointer it, gpointer root)
     if (i->cursed == 1) cJSON_AddTrueToObject(ival, "cursed");
     if (i->blessed_known == 1) cJSON_AddTrueToObject(ival, "blessed_known");
     if (i->bonus_known == 1) cJSON_AddTrueToObject(ival, "bonus_known");
-    if (i->curse_known == 1) cJSON_AddTrueToObject(ival, "curse_known");
 
     if (i->corroded > 0) cJSON_AddNumberToObject(ival, "corroded", i->corroded);
     if (i->burnt > 0) cJSON_AddNumberToObject(ival, "burnt", i->burnt);
@@ -485,9 +484,6 @@ item *item_deserialize(cJSON *iser, struct game *g)
 
     obj = cJSON_GetObjectItem(iser, "bonus_known");
     if (obj != NULL) it->bonus_known = obj->valueint;
-
-    obj = cJSON_GetObjectItem(iser, "curse_known");
-    if (obj != NULL) it->curse_known = obj->valueint;
 
     obj = cJSON_GetObjectItem(iser, "corroded");
     if (obj != NULL) it->corroded = obj->valueint;
@@ -589,13 +585,14 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     assert((it != NULL) && (it->type > IT_NONE) && (it->type < IT_MAX));
 
     /* collect additional information */
-    if (it->blessed && it->blessed_known)
+    if (it->blessed_known)
     {
-        g_ptr_array_add(add_info_elems, "blessed");
-    }
-    else if (it->cursed && it->curse_known)
-    {
-        g_ptr_array_add(add_info_elems, "cursed");
+        if (it->blessed)
+            g_ptr_array_add(add_info_elems, "blessed");
+        else if (it->cursed)
+            g_ptr_array_add(add_info_elems, "cursed");
+        else
+            g_ptr_array_add(add_info_elems, "uncursed");
     }
 
     if (it->burnt == 1)
@@ -1030,7 +1027,7 @@ int item_remove_blessing(item *it)
 {
     assert (it != NULL && it->blessed);
 
-    if (it->blessed)
+    if (!it->blessed)
         return FALSE;
 
     it->blessed = FALSE;
@@ -1047,7 +1044,7 @@ int item_remove_curse(item *it)
         return FALSE;
 
     it->cursed = FALSE;
-    it->curse_known = FALSE;
+    it->blessed_known = FALSE;
 
     return TRUE;
 }

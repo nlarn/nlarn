@@ -114,9 +114,8 @@ typedef struct _item {
         corroded: 2,        /* 0: no; 1: yes; 2: very */
         burnt: 2,           /* 0: no; 1: yes; 2: very */
         rusty: 2,           /* 0: no; 1: yes; 2: very */
-        blessed_known: 1,   /* player known that item is blessed */
-        bonus_known: 1,     /* player knows the bonus */
-        curse_known: 1;     /* player knows that item is cursed */
+        blessed_known: 1,   /* player known if item is cursed / blessed */
+        bonus_known: 1;     /* player knows the bonus */
 } item;
 
 typedef struct item_type_data {
