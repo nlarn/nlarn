@@ -55,7 +55,7 @@ UninstPage instfiles
 
 ; The license
 
-LicenseData LICENSE.txt
+LicenseData LICENSE
 LicenseForceSelection radiobuttons "I accept" "I decline"
 
 ;--------------------------------
@@ -101,6 +101,7 @@ Section "Start Menu Shortcuts"
   CreateDirectory "$SMPROGRAMS\NLarn"
   CreateShortCut "$SMPROGRAMS\NLarn\Uninstall.lnk" "$INSTDIR\uninstall.exe"
   CreateShortCut "$SMPROGRAMS\NLarn\NLarn.lnk" "$INSTDIR\nlarn.exe"
+  CreateShortCut "$SMPROGRAMS\NLarn\README.lnk" "$INSTDIR\README.txt"
 
 SectionEnd
 
