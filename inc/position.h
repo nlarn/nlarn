@@ -67,7 +67,7 @@ area *area_new_circle(position center, int radius, int hollow);
 area *area_new_circle_flooded(position center, int radius, area *obstacles);
 area *area_new_ray(position source, position target, area *obstacles);
 area *area_copy(area *a);
-void area_destroy(area *area);
+void area_destroy(area *a);
 
 area *area_add(area *a, area *b);
 area *area_flood(area *obstacles, int start_x, int start_y);

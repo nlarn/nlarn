@@ -222,23 +222,23 @@ int pos_in_rect(position pos, rectangle rect)
 
 area *area_new(int start_x, int start_y, int size_x, int size_y)
 {
-    area *area;
+    area *a;
     int y;
 
-    area = g_malloc0(sizeof(area));
+    a = g_malloc0(sizeof(area));
 
-    area->start_x = start_x;
-    area->start_y = start_y;
+    a->start_x = start_x;
+    a->start_y = start_y;
 
-    area->size_x = size_x;
-    area->size_y = size_y;
+    a->size_x = size_x;
+    a->size_y = size_y;
 
-    area->area = g_malloc0(size_y * sizeof(int *));
+    a->area = g_malloc0(size_y * sizeof(int *));
 
     for (y = 0; y < size_y; y++)
-        area->area[y] = g_malloc0(size_x * sizeof(int));
+        a->area[y] = g_malloc0(size_x * sizeof(int));
 
-    return area;
+    return a;
 }
 
 /**
@@ -500,18 +500,18 @@ area *area_copy(area *a)
     return narea;
 }
 
-void area_destroy(area *area)
+void area_destroy(area *a)
 {
     int y;
 
-    assert(area != NULL);
+    assert(a != NULL);
 
-    for (y = 0; y < area->size_y; y++)
-        g_free(area->area[y]);
+    for (y = 0; y < a->size_y; y++)
+        g_free(a->area[y]);
 
-    g_free(area->area);
+    g_free(a->area);
 
-    g_free(area);
+    g_free(a);
 }
 
 /**
@@ -539,6 +539,8 @@ area *area_add(area *a, area *b)
             }
         }
     }
+
+    area_destroy(b);
 
     return a;
 }
@@ -580,8 +582,6 @@ area *area_flood(area *obstacles, int start_x, int start_y)
         area_flood_worker(x, y + 1);
         area_flood_worker(x, y - 1);
     }
-
-    assert(obstacles != NULL && area_point_valid(obstacles, start_x, start_y));
 
     flood = area_new(obstacles->start_x, obstacles->start_y,
                      obstacles->size_x, obstacles->size_y);
