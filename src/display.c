@@ -250,6 +250,23 @@ int display_paint_screen(player *p)
     /* draw spheres */
     g_ptr_array_foreach(nlarn->spheres, (GFunc)display_spheres_paint, p);
 
+    /* draw player */
+    char pc;
+    if (player_effect(p, ET_INVISIBILITY))
+    {
+        pc = ' ';
+        attrs = A_REVERSE | COLOR_PAIR(DC_WHITE);
+    }
+    else
+    {
+        pc = '@';
+        attrs = A_BOLD | COLOR_PAIR(DC_YELLOW);
+    }
+
+    attron(attrs);
+    mvaddch(p->pos.y, p->pos.x, pc);
+    attroff(attrs);
+
 
     /* *** status line *** */
     move(MAP_MAX_Y + 1, 0);
@@ -507,21 +524,6 @@ int display_paint_screen(player *p)
 
     text_destroy(text);
     g_free(ttime);
-
-
-    /* draw player - has to happen in the end to position cursor */
-    if (player_effect(p, ET_INVISIBILITY))
-    {
-        curs_set(1);
-        move(p->pos.y, p->pos.x);
-    }
-    else
-    {
-        curs_set(0);
-        attron(A_BOLD | COLOR_PAIR(DC_YELLOW));
-        mvaddch(p->pos.y, p->pos.x, '@');
-        attroff(A_BOLD | COLOR_PAIR(DC_YELLOW));
-    }
 
     return display_draw();
 }
