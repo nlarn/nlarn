@@ -723,8 +723,7 @@ item *display_inventory(char *title, player *p, inventory **inv,
 
             if (show_price)
             {
-                mvwprintw(iwin->window, pos, 1, "%3d %40s %5dgp %c",
-                          pos + offset,
+                mvwprintw(iwin->window, pos, 1, " %-43s %5dgp %c",
                           item_describe(it, player_item_known(p, it),
                                         FALSE, FALSE, item_desc, 80),
                           item_price(it),
@@ -732,8 +731,7 @@ item *display_inventory(char *title, player *p, inventory **inv,
             }
             else
             {
-                mvwprintw(iwin->window, pos, 1, "%3d %41s %c ",
-                          pos + offset,
+                mvwprintw(iwin->window, pos, 1, " %-44s %c ",
                           item_describe(it, player_item_known(p, it),
                                         FALSE, FALSE, item_desc, 80),
                           player_item_is_equipped(p, it) ? '*' : ' ');
