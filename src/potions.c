@@ -131,7 +131,7 @@ int potion_amnesia(player *p, item *potion)
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
             player_memory_of(p, pos).type = LT_NONE;
-            player_memory_of(p, pos).stationary = LS_NONE;
+            player_memory_of(p, pos).sobject = LS_NONE;
             player_memory_of(p, pos).item = LT_NONE;
             player_memory_of(p, pos).trap = LT_NONE;
         }

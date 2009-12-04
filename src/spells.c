@@ -885,7 +885,7 @@ int spell_type_ray(spell *s, struct player *p)
         break;
     }
 
-    if (map_stationary_at(game_map(nlarn, p->pos.z), pos) == LS_MIRROR)
+    if (map_sobject_at(game_map(nlarn, p->pos.z), pos) == LS_MIRROR)
     {
         log_add_entry(p->log, "The mirror reflects your spell! The %s hits you!",
                       spell_name(s));
@@ -1216,7 +1216,7 @@ gboolean spell_vaporize_rock(player *p)
 
     mpos = map_find_space_in(map, rect_new_sized(p->pos, 1), LE_MONSTER);
 
-    switch (map_stationary_at(map, pos))
+    switch (map_sobject_at(map, pos))
     {
     case LS_NONE:
         /* NOP */
@@ -1259,7 +1259,7 @@ gboolean spell_vaporize_rock(player *p)
 
     case LS_DEADFOUNTAIN:
     case LS_DEADTHRONE:
-        map_stationary_set(map, pos, LS_NONE);
+        map_sobject_set(map, pos, LS_NONE);
         break;
 
     default:
@@ -1270,7 +1270,7 @@ gboolean spell_vaporize_rock(player *p)
     if (desc)
     {
         log_add_entry(p->log, "You destroy the %s.", desc);
-        map_stationary_set(map, pos, LS_NONE);
+        map_sobject_set(map, pos, LS_NONE);
     }
 
     return TRUE;

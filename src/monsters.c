@@ -1158,8 +1158,8 @@ void monster_level_enter(monster *m, struct map *l)
 {
     assert (m != NULL && l != NULL);
 
-    map_stationary_t source = map_stationary_at(monster_map(m), m->pos);
-    map_stationary_t target;
+    map_sobject_t source = map_sobject_at(monster_map(m), m->pos);
+    map_sobject_t target;
     position npos;
     char *how;
 
@@ -1188,7 +1188,7 @@ void monster_level_enter(monster *m, struct map *l)
     /* determine new position */
     if (target)
     {
-        npos = map_find_stationary(l, target);
+        npos = map_find_sobject(l, target);
     }
     else
     {
@@ -1335,16 +1335,16 @@ void monster_move(monster *m, struct player *p)
             }
         }
         else if (pos_identical(monster_pos(m), m->player_pos)
-                 && ((map_stationary_at(monster_map(m), m->pos) == LS_STAIRSDOWN)
-                     || (map_stationary_at(monster_map(m), m->pos) == LS_ENTRANCE
+                 && ((map_sobject_at(monster_map(m), m->pos) == LS_STAIRSDOWN)
+                     || (map_sobject_at(monster_map(m), m->pos) == LS_ENTRANCE
                          && monster_pos(m).z == 0)))
         {
             /* go level down */
             monster_level_enter(m, game_map(nlarn, m->pos.z + 1));
         }
         else if (pos_identical(monster_pos(m), m->player_pos)
-                 && (map_stationary_at(monster_map(m), m->pos) == LS_STAIRSUP
-                     || (map_stationary_at(monster_map(m), m->pos) == LS_ENTRANCE
+                 && (map_sobject_at(monster_map(m), m->pos) == LS_STAIRSUP
+                     || (map_sobject_at(monster_map(m), m->pos) == LS_ENTRANCE
                          && monster_pos(m).z == 1)))
         {
             /* go level up */
@@ -1358,13 +1358,13 @@ void monster_move(monster *m, struct player *p)
                try to find the staircase to reach the player's map */
             if (m->pos.z != m->player_pos.z)
             {
-                map_stationary_t what;
+                map_sobject_t what;
                 if (m->pos.z > m->player_pos.z)
                     what = LS_STAIRSUP;
                 else
                     what = LS_STAIRSDOWN;
 
-                m->player_pos = map_find_stationary(monster_map(m), what);
+                m->player_pos = map_find_sobject(monster_map(m), what);
             }
 
             path = map_find_path(monster_map(m), monster_pos(m), m->player_pos);
@@ -1395,7 +1395,7 @@ void monster_move(monster *m, struct player *p)
     }
 
     /* ******** if new position has been found - move the monster ********* */
-    map_stationary_t target_st = map_stationary_at(monster_map(m), m_npos);
+    map_sobject_t target_st = map_sobject_at(monster_map(m), m_npos);
 
     if (!pos_identical(m_npos, monster_pos(m)))
     {
@@ -1421,7 +1421,7 @@ void monster_move(monster *m, struct player *p)
                  && monster_has_hands(m) && monster_int(m) > 3)
         {
             /* open the door */
-            map_stationary_set(monster_map(m), m_npos, LS_OPENDOOR);
+            map_sobject_set(monster_map(m), m_npos, LS_OPENDOOR);
 
             /* notify the player if the door is visible */
             if (monster_in_sight(m))
@@ -1862,7 +1862,7 @@ gboolean monster_update_action(monster *m)
 
     if (m->type == MT_MIMIC && m->unknown)
     {
-        /* stationary monsters */
+        /* sobject monsters */
         naction = MA_REMAIN;
     }
     else if (monster_effect(m, ET_HOLD_MONSTER)

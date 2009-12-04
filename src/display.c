@@ -167,12 +167,12 @@ int display_paint_screen(player *p)
                     attroff(COLOR_PAIR(DC_BLUE));
                 }
 
-                else if (map_stationary_at(map, pos))
+                else if (map_sobject_at(map, pos))
                 {
-                    /* draw stationary stuff */
-                    attron(COLOR_PAIR(ls_get_colour(map_stationary_at(map, pos))));
-                    addch(ls_get_image(map_stationary_at(map, pos)));
-                    attroff(COLOR_PAIR(ls_get_colour(map_stationary_at(map, pos))));
+                    /* draw sobject stuff */
+                    attron(COLOR_PAIR(ls_get_colour(map_sobject_at(map, pos))));
+                    addch(ls_get_image(map_sobject_at(map, pos)));
+                    attroff(COLOR_PAIR(ls_get_colour(map_sobject_at(map, pos))));
                 }
                 else if (map_trap_at(map, pos))
                 {
@@ -200,12 +200,12 @@ int display_paint_screen(player *p)
                     addch(item_image(player_memory_of(p, pos).item));
                     attroff(COLOR_PAIR(DC_BLUE));
                 }
-                /* draw stationary stuff */
-                else if (player_memory_of(p, pos).stationary)
+                /* draw stationary objects */
+                else if (player_memory_of(p, pos).sobject)
                 {
-                    attron(COLOR_PAIR(ls_get_colour(player_memory_of(p, pos).stationary)));
-                    addch(ls_get_image(player_memory_of(p, pos).stationary));
-                    attroff(COLOR_PAIR(ls_get_colour(player_memory_of(p, pos).stationary)));
+                    attron(COLOR_PAIR(ls_get_colour(player_memory_of(p, pos).sobject)));
+                    addch(ls_get_image(player_memory_of(p, pos).sobject));
+                    attroff(COLOR_PAIR(ls_get_colour(player_memory_of(p, pos).sobject)));
                 }
                 else if (player_memory_of(p, pos).trap)
                 {

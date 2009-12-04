@@ -1122,31 +1122,31 @@ int player_map_enter(player *p, map *l, gboolean teleported)
 
     /* beginning of the game */
     else if ((l->nlevel == 0) && (game_turn(nlarn) == 1))
-        pos = map_find_stationary(l, LS_HOME);
+        pos = map_find_sobject(l, LS_HOME);
 
     /* took the elevator down */
     else if ((p->pos.z == 0) && (l->nlevel == (MAP_DMAX)))
-        pos = map_find_stationary(l, LS_ELEVATORUP);
+        pos = map_find_sobject(l, LS_ELEVATORUP);
 
     /* took the elevator up */
     else if ((p->pos.z == (MAP_DMAX)) && (l->nlevel == 0))
-        pos = map_find_stationary(l, LS_ELEVATORDOWN);
+        pos = map_find_sobject(l, LS_ELEVATORDOWN);
 
     /* climbing up */
     else if (p->pos.z > l->nlevel)
     {
         if (l->nlevel == 0)
-            pos = map_find_stationary(l, LS_ENTRANCE);
+            pos = map_find_sobject(l, LS_ENTRANCE);
         else
-            pos = map_find_stationary(l, LS_STAIRSDOWN);
+            pos = map_find_sobject(l, LS_STAIRSDOWN);
     }
     /* climbing down */
     else if (l->nlevel > p->pos.z)
     {
         if (l->nlevel == 1)
-            pos = map_find_stationary(l, LS_ENTRANCE);
+            pos = map_find_sobject(l, LS_ENTRANCE);
         else
-            pos = map_find_stationary(l, LS_STAIRSUP);
+            pos = map_find_sobject(l, LS_STAIRSUP);
     }
 
     if (l->nlevel == 0)
@@ -1233,11 +1233,11 @@ void player_examine(player *p, position pos)
                                monster_name(m));
     }
 
-    /* add message if target tile contains a stationary item */
-    if (tile->stationary > LS_NONE)
+    /* add message if target tile contains a stationary object */
+    if (tile->sobject > LS_NONE)
     {
         g_string_append_printf(desc, "You see %s %s. ",
-                               ls_get_desc(tile->stationary), where);
+                               ls_get_desc(tile->sobject), where);
     }
 
     /* add message if target tile contains a known trap */
@@ -3280,7 +3280,7 @@ int player_item_drop(player *p, inventory **inv, item *it)
     log_add_entry(p->log, "You drop %s.", desc);
 
     /* reveal if item is cursed or blessed when dropping it on an altar */
-    map_stationary_t ms = map_stationary_at(game_map(nlarn, p->pos.z), p->pos);
+    map_sobject_t ms = map_sobject_at(game_map(nlarn, p->pos.z), p->pos);
 
     if (ms == LS_ALTAR)
     {
@@ -3362,7 +3362,7 @@ int player_altar_desecrate(player *p)
 
     current = game_map(nlarn, p->pos.z);
 
-    if (map_stationary_at(current, p->pos) != LS_ALTAR)
+    if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
         log_add_entry(p->log, "I see no altar to desecrate here.");
         return FALSE;
@@ -3390,7 +3390,7 @@ int player_altar_desecrate(player *p)
     {
         /* destroy altar */
         log_add_entry(p->log, "The altar crumbles into a pile of dust before your eyes.");
-        map_stationary_set(current, p->pos, LS_NONE);
+        map_sobject_set(current, p->pos, LS_NONE);
     }
     else
     {
@@ -3412,7 +3412,7 @@ int player_altar_pray(player *p)
 
     current = game_map(nlarn, p->pos.z);
 
-    if (map_stationary_at(current, p->pos) != LS_ALTAR)
+    if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
         log_add_entry(p->log, "I see no altar to pray at here.");
         return FALSE;
@@ -3523,7 +3523,7 @@ int player_building_enter(player *p)
 {
     int moves_count = 0;
 
-    switch (map_stationary_at(game_map(nlarn, p->pos.z), p->pos))
+    switch (map_sobject_at(game_map(nlarn, p->pos.z), p->pos))
     {
     case LS_BANK:
     case LS_BANK2:
@@ -3609,7 +3609,7 @@ int player_door_close(player *p)
     if (dir)
     {
         pos = pos_move(p->pos, dir);
-        if (pos_valid(pos) && (map_stationary_at(map, pos) == LS_OPENDOOR))
+        if (pos_valid(pos) && (map_sobject_at(map, pos) == LS_OPENDOOR))
         {
 
             /* check if player is standing in the door */
@@ -3638,7 +3638,7 @@ int player_door_close(player *p)
                 return 0;
             }
 
-            map_stationary_set(map, pos, LS_CLOSEDDOOR);
+            map_sobject_set(map, pos, LS_CLOSEDDOOR);
             log_add_entry(p->log, "You close the door.");
         }
         else
@@ -3706,9 +3706,9 @@ int player_door_open(player *p)
     {
         pos = pos_move(p->pos, dir);
 
-        if (pos_valid(pos) && (map_stationary_at(map, pos) == LS_CLOSEDDOOR))
+        if (pos_valid(pos) && (map_sobject_at(map, pos) == LS_CLOSEDDOOR))
         {
-            map_stationary_set(map, pos, LS_OPENDOOR);
+            map_sobject_set(map, pos, LS_OPENDOOR);
             log_add_entry(p->log, "You open the door.");
         }
         else
@@ -3737,13 +3737,13 @@ int player_fountain_drink(player *p)
 
     assert (p != NULL);
 
-    if (map_stationary_at(map, p->pos) == LS_DEADFOUNTAIN)
+    if (map_sobject_at(map, p->pos) == LS_DEADFOUNTAIN)
     {
         log_add_entry(p->log, "There is no water to drink.");
         return 0;
     }
 
-    if (map_stationary_at(map, p->pos) != LS_FOUNTAIN)
+    if (map_sobject_at(map, p->pos) != LS_FOUNTAIN)
     {
         log_add_entry(p->log, "I see no fountain to drink from here.");
         return 0;
@@ -3838,7 +3838,7 @@ int player_fountain_drink(player *p)
                               amount, plural(amount));
 
                 damage *dam = damage_new(DAM_NONE, amount, NULL);
-                player_damage_take(p, dam, PD_STATIONARY, LS_FOUNTAIN);
+                player_damage_take(p, dam, PD_SOBJECT, LS_FOUNTAIN);
             }
 
             break;
@@ -3888,7 +3888,7 @@ int player_fountain_drink(player *p)
     if (chance(25))
     {
         log_add_entry(p->log, "The fountains bubbling slowly quiets.");
-        map_stationary_set(map, p->pos, LS_DEADFOUNTAIN);
+        map_sobject_set(map, p->pos, LS_DEADFOUNTAIN);
     }
 
     return 1;
@@ -3900,13 +3900,13 @@ int player_fountain_wash(player *p)
 
     assert (p != NULL);
 
-    if (map_stationary_at(map, p->pos) == LS_DEADFOUNTAIN)
+    if (map_sobject_at(map, p->pos) == LS_DEADFOUNTAIN)
     {
         log_add_entry(p->log, "There is no water to wash in.");
         return 0;
     }
 
-    if (map_stationary_at(map, p->pos) != LS_FOUNTAIN)
+    if (map_sobject_at(map, p->pos) != LS_FOUNTAIN)
     {
         log_add_entry(p->log, "I see no fountain to wash at here!");
         return 0;
@@ -3921,7 +3921,7 @@ int player_fountain_wash(player *p)
         damage *dam = damage_new(DAM_POISON,
                                  rand_1n((p->pos.z << 2) + 2), NULL);
 
-        player_damage_take(p, dam, PD_STATIONARY, LS_FOUNTAIN);
+        player_damage_take(p, dam, PD_SOBJECT, LS_FOUNTAIN);
     }
     else if (chance(30))
     {
@@ -3961,7 +3961,7 @@ int player_stairs_down(player *p)
 {
     map *nlevel = NULL;
     gboolean show_msg = FALSE;
-    map_stationary_t ms = map_stationary_at(game_map(nlarn, p->pos.z), p->pos);
+    map_sobject_t ms = map_sobject_at(game_map(nlarn, p->pos.z), p->pos);
 
     switch (ms)
     {
@@ -4007,7 +4007,7 @@ int player_stairs_up(player *p)
 {
     map *nlevel = NULL;
     gboolean show_msg = FALSE;
-    map_stationary_t ms = map_stationary_at(game_map(nlarn, p->pos.z), p->pos);
+    map_sobject_t ms = map_sobject_at(game_map(nlarn, p->pos.z), p->pos);
 
     switch (ms)
     {
@@ -4057,7 +4057,7 @@ int player_throne_pillage(player *p)
     map *map = game_map(nlarn, p->pos.z);
 
     /* type of object at player's position */
-    map_stationary_t ms = map_stationary_at(map, p->pos);
+    map_sobject_t ms = map_sobject_at(map, p->pos);
 
     assert (p != NULL);
 
@@ -4087,7 +4087,7 @@ int player_throne_pillage(player *p)
         log_add_entry(p->log, "You manage to pry off %s gem%s.",
                       count > 1 ? "some" : "a", plural(count));
 
-        map_stationary_set(map, p->pos, LS_DEADTHRONE);
+        map_sobject_set(map, p->pos, LS_DEADTHRONE);
     }
     else if (chance(40) && (ms == LS_THRONE))
     {
@@ -4101,7 +4101,7 @@ int player_throne_pillage(player *p)
             monster_new(MT_GNOME_KING, mpos);
 
             /* next time there will be no gnome king */
-            map_stationary_set(map, p->pos, LS_THRONE2);
+            map_sobject_set(map, p->pos, LS_THRONE2);
         }
     }
     else
@@ -4115,7 +4115,7 @@ int player_throne_pillage(player *p)
 int player_throne_sit(player *p)
 {
     map *map = game_map(nlarn, p->pos.z);
-    map_stationary_t st = map_stationary_at(map, p->pos);
+    map_sobject_t st = map_sobject_at(map, p->pos);
 
     assert (p != NULL);
 
@@ -4139,7 +4139,7 @@ int player_throne_sit(player *p)
             monster_new(MT_GNOME_KING, mpos);
 
             /* next time there will be no gnome king */
-            map_stationary_set(map, p->pos, LS_THRONE2);
+            map_sobject_set(map, p->pos, LS_THRONE2);
         }
     }
     else if (chance(35))
@@ -4487,7 +4487,7 @@ void player_update_fov(player *p)
                 monster *m = map_get_monster_at(map, pos);
 
                 player_memory_of(p,pos).type = map_tiletype_at(map, pos);
-                player_memory_of(p,pos).stationary = map_stationary_at(map, pos);
+                player_memory_of(p,pos).sobject = map_sobject_at(map, pos);
 
                 if (inv_length(*map_ilist_at(map, pos)))
                 {
@@ -4620,9 +4620,9 @@ static cJSON *player_memory_serialize(player *p, position pos)
         cJSON_AddNumberToObject(mser, "type",
                                 player_memory_of(p, pos).type);
 
-    if (player_memory_of(p, pos).stationary > LS_NONE)
-        cJSON_AddNumberToObject(mser, "stationary",
-                                player_memory_of(p, pos).stationary);
+    if (player_memory_of(p, pos).sobject > LS_NONE)
+        cJSON_AddNumberToObject(mser, "sobject",
+                                player_memory_of(p, pos).sobject);
 
     if (player_memory_of(p, pos).item > IT_NONE)
         cJSON_AddNumberToObject(mser, "item",
@@ -4643,9 +4643,9 @@ static void player_memory_deserialize(player *p, position pos, cJSON *mser)
     if (obj != NULL)
         player_memory_of(p, pos).type = obj->valueint;
 
-    obj = cJSON_GetObjectItem(mser, "stationary");
+    obj = cJSON_GetObjectItem(mser, "sobject");
     if (obj != NULL)
-        player_memory_of(p, pos).stationary = obj->valueint;
+        player_memory_of(p, pos).sobject = obj->valueint;
 
     obj = cJSON_GetObjectItem(mser, "item");
     if (obj != NULL)
@@ -4770,7 +4770,7 @@ static char *player_death_description(game_score_t *score, int verbose)
                                item_name_sg(score->cause));
         break;
 
-    case PD_STATIONARY:
+    case PD_SOBJECT:
         /* currently only the fountain can cause death */
         g_string_append(text, " by toxic water from a fountain.");
         break;

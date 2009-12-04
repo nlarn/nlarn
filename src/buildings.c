@@ -938,7 +938,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
     price = item_price(it);
 
     /* modify price if player sells stuff at the trading post */
-    if (map_stationary_at(game_map(nlarn, p->pos.z), p->pos) == LS_TRADEPOST)
+    if (map_sobject_at(game_map(nlarn, p->pos.z), p->pos) == LS_TRADEPOST)
     {
         if (!player_item_is_damaged(p, it))
         {

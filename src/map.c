@@ -64,7 +64,7 @@ const map_tile_data map_tiles[LT_MAX] =
     { LT_WALL,      '#', DC_WHITE,  "a wall",      0, 0 },
 };
 
-const map_stationary_data map_stationaries[LS_MAX] =
+const map_sobject_data map_sobjects[LS_MAX] =
 {
     { LS_NONE,          ' ',  DC_NONE,    NULL,                                  1, 1, },
     { LS_ALTAR,         '_',  DC_WHITE,   "a holy altar",                        1, 1, },
@@ -197,10 +197,10 @@ cJSON *map_serialize(map *m)
                                         m->grid[y][x].base_type);
             }
 
-            if (m->grid[y][x].stationary)
+            if (m->grid[y][x].sobject)
             {
-                cJSON_AddNumberToObject(tile, "stationary",
-                                        m->grid[y][x].stationary);
+                cJSON_AddNumberToObject(tile, "sobject",
+                                        m->grid[y][x].sobject);
             }
 
             if (m->grid[y][x].trap)
@@ -256,8 +256,8 @@ map *map_deserialize(cJSON *mser, game *g)
             obj = cJSON_GetObjectItem(tile, "base_type");
             if (obj != NULL) m->grid[y][x].base_type = obj->valueint;
 
-            obj = cJSON_GetObjectItem(tile, "stationary");
-            if (obj != NULL) m->grid[y][x].stationary = obj->valueint;
+            obj = cJSON_GetObjectItem(tile, "sobject");
+            if (obj != NULL) m->grid[y][x].sobject = obj->valueint;
 
             obj = cJSON_GetObjectItem(tile, "trap");
             if (obj != NULL) m->grid[y][x].trap = obj->valueint;
@@ -302,9 +302,9 @@ char *map_dump(map *l, position ppos)
             {
                 g_string_append_c(map, '^');
             }
-            else if (map_stationary_at(l, pos))
+            else if (map_sobject_at(l, pos))
             {
-                g_string_append_c(map, ls_get_image(map_stationary_at(l, pos)));
+                g_string_append_c(map, ls_get_image(map_sobject_at(l, pos)));
             }
             else
             {
@@ -387,7 +387,7 @@ position map_find_space_in(map *maze, rectangle where, map_element_t element)
     return pos;
 }
 
-int *map_get_surrounding(map *l, position pos, map_stationary_t type)
+int *map_get_surrounding(map *l, position pos, map_sobject_t type)
 {
     position p;
     int move = 1;
@@ -399,7 +399,7 @@ int *map_get_surrounding(map *l, position pos, map_stationary_t type)
     {
         p = pos_move(pos, move);
 
-        if (pos_valid(p) && map_stationary_at(l, p) == type)
+        if (pos_valid(p) && map_sobject_at(l, p) == type)
         {
             dirs[move] = TRUE;
         }
@@ -410,7 +410,7 @@ int *map_get_surrounding(map *l, position pos, map_stationary_t type)
     return dirs;
 }
 
-position map_find_stationary_in(map *l, map_stationary_t stationary, rectangle area)
+position map_find_sobject_in(map *l, map_sobject_t sobject, rectangle area)
 {
     position pos;
 
@@ -420,14 +420,14 @@ position map_find_stationary_in(map *l, map_stationary_t stationary, rectangle a
 
     for (pos.y = area.y1; pos.y <= area.y2; pos.y++)
         for (pos.x = area.x1; pos.x <= area.x2; pos.x++)
-            if (map_stationary_at(l,pos) == stationary)
+            if (map_sobject_at(l,pos) == sobject)
                 return pos;
 
-    /* if we reach this point, the stationary is not on the map */
+    /* if we reach this point, the sobject is not on the map */
     return pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 }
 
-position map_find_stationary(map *l, map_stationary_t stationary)
+position map_find_sobject(map *l, map_sobject_t sobject)
 {
     position pos;
 
@@ -437,10 +437,10 @@ position map_find_stationary(map *l, map_stationary_t stationary)
 
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
-            if (map_stationary_at(l,pos) == stationary)
+            if (map_sobject_at(l,pos) == sobject)
                 return pos;
 
-    /* if we reach this point, the stationary is not on the map */
+    /* if we reach this point, the sobject is not on the map */
     return pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 }
 
@@ -469,25 +469,25 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element)
         return TRUE;
         break;
 
-    case LE_STATIONARY:
-        if (lt_is_passable(tile->type) && (tile->stationary == LS_NONE) )
+    case LE_SOBJECT:
+        if (lt_is_passable(tile->type) && (tile->sobject == LS_NONE) )
         {
-            /* FIXME: don't want two stationaries next to each other */
-            /* FIXME: don't want stationaries next to the wall */
+            /* FIXME: don't want two stationary objects next to each other */
+            /* FIXME: don't want stationary objects next to the wall */
             return TRUE;
         }
         break;
 
     case LE_TRAP:
         if (lt_is_passable(tile->type)
-                && (tile->stationary == LS_NONE)
+                && (tile->sobject == LS_NONE)
                 && (tile->trap == TT_NONE) )
             return TRUE;
         break;
 
     case LE_ITEM:
         /* we can stack like mad, so we only need to check if there is an open space */
-        if (map_pos_passable(l, pos) && (tile->stationary == LS_NONE))
+        if (map_pos_passable(l, pos) && (tile->sobject == LS_NONE))
             return TRUE;
         break;
 
@@ -557,7 +557,7 @@ int map_pos_is_visible(map *l, position s, position t)
             x += ix;
             error += delta_y;
 
-            if (!lt_is_transparent(l->grid[y][x].type) || !ls_is_transparent(l->grid[y][x].stationary))
+            if (!lt_is_transparent(l->grid[y][x].type) || !ls_is_transparent(l->grid[y][x].sobject))
                 return FALSE;
         }
     }
@@ -580,7 +580,7 @@ int map_pos_is_visible(map *l, position s, position t)
             y += iy;
             error += delta_x;
 
-            if (!lt_is_transparent(l->grid[y][x].type) || !ls_is_transparent(l->grid[y][x].stationary))
+            if (!lt_is_transparent(l->grid[y][x].type) || !ls_is_transparent(l->grid[y][x].sobject))
                 return FALSE;
         }
     }
@@ -831,18 +831,18 @@ void map_trap_set(map *l, position pos, trap_t type)
     l->grid[pos.y][pos.x].trap = type;
 }
 
-map_stationary_t map_stationary_at(map *l, position pos)
+map_sobject_t map_sobject_at(map *l, position pos)
 {
     assert(l != NULL && pos_valid(pos));
 
-    return l->grid[pos.y][pos.x].stationary;
+    return l->grid[pos.y][pos.x].sobject;
 }
 
-void map_stationary_set(map *l, position pos, map_stationary_t type)
+void map_sobject_set(map *l, position pos, map_sobject_t type)
 {
     assert(l != NULL && pos_valid(pos));
 
-    l->grid[pos.y][pos.x].stationary = type;
+    l->grid[pos.y][pos.x].sobject = type;
 }
 
 damage *map_tile_damage(map *l, position pos)
@@ -1054,66 +1054,66 @@ static void map_fill_with_stationary_objects(map *maze)
     /* volcano shaft up from the temple */
     if (maze->nlevel == MAP_DMAX)
     {
-        pos = map_find_space(maze, LE_STATIONARY);
-        map_stationary_set(maze, pos, LS_ELEVATORUP);
+        pos = map_find_space(maze, LE_SOBJECT);
+        map_sobject_set(maze, pos, LS_ELEVATORUP);
     }
 
     /*  make the fixed objects in the maze: STAIRS */
     if ((maze->nlevel > 0) && (maze->nlevel != MAP_DMAX - 1) && (maze->nlevel != MAP_MAX - 1))
     {
-        pos = map_find_space(maze, LE_STATIONARY);
-        map_stationary_set(maze, pos, LS_STAIRSDOWN);
+        pos = map_find_space(maze, LE_SOBJECT);
+        map_sobject_set(maze, pos, LS_STAIRSDOWN);
     }
 
     if ((maze->nlevel > 1) && (maze->nlevel != MAP_DMAX))
     {
-        pos = map_find_space(maze, LE_STATIONARY);
-        map_stationary_set(maze, pos, LS_STAIRSUP);
+        pos = map_find_space(maze, LE_SOBJECT);
+        map_sobject_set(maze, pos, LS_STAIRSUP);
     }
 
     /* make the random objects in the maze */
     /* 33 percent chance for an altar */
     if (chance(33))
     {
-        pos = map_find_space(maze, LE_STATIONARY);
-        map_stationary_set(maze, pos, LS_ALTAR);
+        pos = map_find_space(maze, LE_SOBJECT);
+        map_sobject_set(maze, pos, LS_ALTAR);
     }
 
     /* up to three statues */
     for (i = 0; i < rand_0n(3); i++)
     {
-        pos = map_find_space(maze, LE_STATIONARY);
-        map_stationary_set(maze, pos, LS_STATUE);
+        pos = map_find_space(maze, LE_SOBJECT);
+        map_sobject_set(maze, pos, LS_STATUE);
     }
 
     /* up to three fountains */
     for (i = 0; i < rand_0n(3); i++)
     {
-        pos = map_find_space(maze, LE_STATIONARY);
-        map_stationary_set(maze, pos, LS_FOUNTAIN);
+        pos = map_find_space(maze, LE_SOBJECT);
+        map_sobject_set(maze, pos, LS_FOUNTAIN);
     }
 
     /* up to two thrones */
     for (i = 0; i < rand_0n(2); i++)
     {
-        pos = map_find_space(maze, LE_STATIONARY);
-        map_stationary_set(maze, pos, LS_THRONE);
+        pos = map_find_space(maze, LE_SOBJECT);
+        map_sobject_set(maze, pos, LS_THRONE);
     }
 
     /* up to two  mirrors */
     for (i = 0; i < rand_0n(2); i++)
     {
-        pos = map_find_space(maze, LE_STATIONARY);
-        map_stationary_set(maze, pos, LS_MIRROR);
+        pos = map_find_space(maze, LE_SOBJECT);
+        map_sobject_set(maze, pos, LS_MIRROR);
     }
 
     if (maze->nlevel == 5)
     {
         /* branch office of the bank */
-        pos = map_find_space(maze, LE_STATIONARY);
-        map_stationary_set(maze, pos, LS_BANK2);
+        pos = map_find_space(maze, LE_SOBJECT);
+        map_sobject_set(maze, pos, LS_BANK2);
     }
-} /* map_fill_with_stationary */
+}
 
 static void map_fill_with_objects(map *l)
 {
@@ -1234,7 +1234,7 @@ static void map_make_maze(map *maze, int treasure_room)
             monster *m;
 
             map_tiletype_set(maze, pos, LT_WALL);
-            map_stationary_set(maze, pos, LS_NONE);
+            map_sobject_set(maze, pos, LS_NONE);
 
             if ((m = map_get_monster_at(maze, pos)))
             {
@@ -1254,7 +1254,7 @@ static void map_make_maze(map *maze, int treasure_room)
     if (maze->nlevel == 1)
     {
         maze->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].type = LT_FLOOR;
-        maze->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].stationary = LS_ENTRANCE;
+        maze->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].sobject = LS_ENTRANCE;
     }
 
     /* generate open spaces */
@@ -1480,43 +1480,43 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                 break;
 
             case '_': /* altar */
-                tile->stationary = LS_ALTAR;
+                tile->sobject = LS_ALTAR;
                 break;
 
             case '+': /* door */
-                tile->stationary = LS_CLOSEDDOOR;
+                tile->sobject = LS_CLOSEDDOOR;
                 break;
 
             case 'O': /* dungeon entrance */
-                tile->stationary = LS_ENTRANCE;
+                tile->sobject = LS_ENTRANCE;
                 break;
 
             case 'I': /* elevator */
-                tile->stationary = LS_ELEVATORDOWN;
+                tile->sobject = LS_ELEVATORDOWN;
                 break;
 
             case 'H': /* home */
-                tile->stationary = LS_HOME;
+                tile->sobject = LS_HOME;
                 break;
 
             case 'D': /* dnd store */
-                tile->stationary = LS_DNDSTORE;
+                tile->sobject = LS_DNDSTORE;
                 break;
 
             case 'T': /* trede post */
-                tile->stationary = LS_TRADEPOST;
+                tile->sobject = LS_TRADEPOST;
                 break;
 
             case 'L': /* LRS */
-                tile->stationary = LS_LRS;
+                tile->sobject = LS_LRS;
                 break;
 
             case 'S': /* school */
-                tile->stationary = LS_SCHOOL;
+                tile->sobject = LS_SCHOOL;
                 break;
 
             case 'B': /*  */
-                tile->stationary = LS_BANK;
+                tile->sobject = LS_BANK;
                 break;
 
             case '*': /* eye of larn */
@@ -1566,7 +1566,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
 static void map_make_treasure_room(map *maze, rectangle **rooms)
 {
     position pos, npos;
-    map_stationary_t mst;
+    map_sobject_t mst;
     item *itm;
     int success;
 
@@ -1604,24 +1604,24 @@ static void map_make_treasure_room(map *maze, rectangle **rooms)
             }
 
             /* now clear out interior */
-            if ((mst = map_stationary_at(maze, pos)))
+            if ((mst = map_sobject_at(maze, pos)))
             {
                 success = FALSE;
                 do
                 {
 
-                    npos = map_find_space(maze, LE_STATIONARY);
+                    npos = map_find_space(maze, LE_SOBJECT);
                     if (!pos_in_rect(npos, *rooms[room]))
                     {
                         /* pos is outside of room */
-                        map_stationary_set(maze, npos, mst);
-                        map_stationary_set(maze, pos, LS_NONE);
+                        map_sobject_set(maze, npos, mst);
+                        map_sobject_set(maze, pos, LS_NONE);
 
                         success = TRUE;
                     }
                 }
                 while (!success);
-            } /* if map_stationary_at() */
+            } /* if map_sobject_at() */
         } /* for x */
     } /* for y */
 
@@ -1640,7 +1640,7 @@ static void map_make_treasure_room(map *maze, rectangle **rooms)
     };
 
     map_tiletype_set(maze, pos, LT_FLOOR);
-    map_stationary_set(maze, pos, LS_CLOSEDDOOR);
+    map_sobject_set(maze, pos, LS_CLOSEDDOOR);
 }
 
 /* verify that every space on the map can be reached */
@@ -1657,7 +1657,7 @@ static int map_validate(map *maze)
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
             if (!map_pos_passable(maze, pos)
-                    && (map_stationary_at(maze, pos) != LS_CLOSEDDOOR))
+                    && (map_sobject_at(maze, pos) != LS_CLOSEDDOOR))
                 area_point_set(obsmap, pos.x, pos.y);
 
     /* get position of entrance */
@@ -1665,16 +1665,16 @@ static int map_validate(map *maze)
     {
         /* caverns entrance */
     case 1:
-        pos = map_find_stationary(maze, LS_ENTRANCE);
+        pos = map_find_sobject(maze, LS_ENTRANCE);
         break;
 
         /* volcano entrance */
     case MAP_DMAX:
-        pos = map_find_stationary(maze, LS_ELEVATORUP);
+        pos = map_find_sobject(maze, LS_ELEVATORUP);
         break;
 
     default:
-        pos = map_find_stationary(maze, LS_STAIRSDOWN);
+        pos = map_find_sobject(maze, LS_STAIRSDOWN);
         break;
     }
 
@@ -1687,7 +1687,7 @@ static int map_validate(map *maze)
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
             int pp = map_pos_passable(maze, pos);
-            int cd = (map_stationary_at(maze, pos) == LS_CLOSEDDOOR);
+            int cd = (map_sobject_at(maze, pos) == LS_CLOSEDDOOR);
 
             /* point should be set on floodmap if it is passable */
             if (area_point_get(floodmap, pos.x, pos.y) != (pp || cd))

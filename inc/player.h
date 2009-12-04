@@ -60,7 +60,7 @@ typedef struct _player_settings
 struct _player_tile_memory
 {
     map_tile_t type;
-    map_stationary_t stationary;
+    map_sobject_t sobject;
     item_t item; /* type of item located here */
     trap_t trap;
 };
@@ -165,7 +165,7 @@ typedef enum player_cod
     PD_MAP, /* damaged by map effects */
     PD_SPELL, /* damaged by own spell */
     PD_CURSE, /* damaged by a cursed item */
-    PD_STATIONARY, /* killed by stationary item */
+    PD_SOBJECT, /* killed by stationary object */
     /* *** causes above this line can be stopped by live protection *** */
     PD_STUCK, /* stuck in a wall */
     PD_TOO_LATE, /* returned with potion too late */

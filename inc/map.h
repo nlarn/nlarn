@@ -53,7 +53,7 @@ typedef enum map_tile_type
     LT_MAX				/* ~ map tile type count */
 } map_tile_t;
 
-typedef enum map_stationary_type
+typedef enum map_sobject_type
 {
     LS_NONE,
     LS_ALTAR,
@@ -80,13 +80,13 @@ typedef enum map_stationary_type
     LS_BANK,
     LS_BANK2,			/* branch office */
     LS_MAX
-} map_stationary_t;
+} map_sobject_t;
 
 typedef enum map_element_type
 {
     LE_NONE,
     LE_GROUND,
-    LE_STATIONARY,
+    LE_SOBJECT,
     LE_TRAP,
     LE_ITEM,
     LE_MONSTER,
@@ -98,7 +98,7 @@ typedef struct map_tile
     guint32
         type:       8,
         base_type:  8, /* if tile is covered with e.g. fire the original type is stored here */
-        stationary: 8, /* something special located on this tile */
+        sobject:    8, /* something special located on this tile */
         trap:       8; /* trap located on this tile */
     guint8 timer;      /* countdown to when the type will become LT_FLOOR again */
     gpointer monster;  /* id of monster located on this tile */
@@ -116,16 +116,16 @@ typedef struct map_tile_data
         transparent: 1;     /* see-through */
 } map_tile_data;
 
-typedef struct map_stationary_data
+typedef struct map_sobject_data
 {
-    map_stationary_t stationary;
+    map_sobject_t sobject;
     char image;
     short colour;
     char *description;
     unsigned
         passable:     1,   /* can be passed */
         transparent:  1;   /* see-through */
-} map_stationary_data;
+} map_sobject_data;
 
 typedef struct map
 {
@@ -164,11 +164,11 @@ char *map_dump(map *l, position ppos);
 
 position map_find_space(map *maze, map_element_t element);
 position map_find_space_in(map *maze, rectangle where, map_element_t element);
-position map_find_stationary(map *l, map_stationary_t stationary);
-position map_find_stationary_in(map *l, map_stationary_t stationary, rectangle area);
+position map_find_sobject(map *l, map_sobject_t sobject);
+position map_find_sobject_in(map *l, map_sobject_t sobject, rectangle area);
 gboolean map_pos_validate(map *l, position pos, map_element_t element);
 
-int *map_get_surrounding(map *l, position pos, map_stationary_t type);
+int *map_get_surrounding(map *l, position pos, map_sobject_t type);
 
 int map_pos_is_visible(map *l, position source, position target);
 map_path *map_find_path(map *l, position start, position goal);
@@ -186,8 +186,8 @@ void map_basetype_set(map *l, position pos, map_tile_t type);
 guint8 map_timer_at(map *l, position pos);
 trap_t map_trap_at(map *l, position pos);
 void map_trap_set(map *l, position pos, trap_t type);
-map_stationary_t map_stationary_at(map *l, position pos);
-void map_stationary_set(map *l, position pos, map_stationary_t type);
+map_sobject_t map_sobject_at(map *l, position pos);
+void map_sobject_set(map *l, position pos, map_sobject_t type);
 
 damage *map_tile_damage(map *l, position pos);
 
@@ -203,7 +203,7 @@ void map_timer(map *l, guint8 count);
 /* external vars */
 
 extern const map_tile_data map_tiles[LT_MAX];
-extern const map_stationary_data map_stationaries[LS_MAX];
+extern const map_sobject_data map_sobjects[LS_MAX];
 extern const char *map_names[MAP_MAX];
 
 /* Macros */
@@ -214,18 +214,18 @@ extern const char *map_names[MAP_MAX];
 #define lt_is_passable(tile)    (map_tiles[(tile)].passable)
 #define lt_is_transparent(tile) (map_tiles[(tile)].transparent)
 
-#define ls_get_image(stationary)      (map_stationaries[(stationary)].image)
-#define ls_get_colour(stationary)     (map_stationaries[(stationary)].colour)
-#define ls_get_desc(stationary)       (map_stationaries[(stationary)].description)
-#define ls_is_passable(stationary)    (map_stationaries[(stationary)].passable)
-#define ls_is_transparent(stationary) (map_stationaries[(stationary)].transparent)
+#define ls_get_image(sobject)      (map_sobjects[(sobject)].image)
+#define ls_get_colour(sobject)     (map_sobjects[(sobject)].colour)
+#define ls_get_desc(sobject)       (map_sobjects[(sobject)].description)
+#define ls_is_passable(sobject)    (map_sobjects[(sobject)].passable)
+#define ls_is_transparent(sobject) (map_sobjects[(sobject)].transparent)
 
 #define map_name(l) (map_names[(l)->nlevel])
 
 #define map_pos_transparent(l,pos) (lt_is_transparent((l)->grid[(pos).y][(pos).x].type) \
-                                        && ls_is_transparent((l)->grid[(pos).y][(pos).x].stationary))
+                                        && ls_is_transparent((l)->grid[(pos).y][(pos).x].sobject))
 
 #define map_pos_passable(l,pos) (lt_is_passable((l)->grid[(pos).y][(pos).x].type) \
-                                        && ls_is_passable((l)->grid[(pos).y][(pos).x].stationary))
+                                        && ls_is_passable((l)->grid[(pos).y][(pos).x].sobject))
 
 #endif

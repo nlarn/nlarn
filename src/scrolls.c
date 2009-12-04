@@ -320,7 +320,7 @@ int scroll_mapping(player *p, item *scroll)
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
             player_memory_of(p, pos).type = map_tiletype_at(game_map(nlarn, p->pos.z), pos);
-            player_memory_of(p, pos).stationary = map_stationary_at(game_map(nlarn, p->pos.z), pos);
+            player_memory_of(p, pos).sobject = map_sobject_at(game_map(nlarn, p->pos.z), pos);
         }
     }
 
