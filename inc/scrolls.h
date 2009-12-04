@@ -60,6 +60,7 @@ enum scroll_types {
 	ST_ANNIHILATION,
 	ST_PULVERIZATION,
 	ST_LIFE_PROTECTION,
+	ST_GENOCIDE_MONSTER,
 	ST_MAX
 };
 
@@ -73,6 +74,7 @@ int scroll_create_artefact(struct player *p, item *scroll);
 int scroll_enchant_armour(struct player *p, item *scroll);
 int scroll_enchant_weapon(struct player *p, item *scroll);
 int scroll_gem_perfection(struct player *p, item *scroll);
+int scroll_genocide_monster(struct player *p, item *scroll);
 int scroll_heal_monster(struct player *p, item *scroll);
 int scroll_identify(struct player *p, item *scroll);
 int scroll_mapping(struct player *p, item *scroll);

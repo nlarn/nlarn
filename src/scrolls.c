@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "display.h"
 #include "game.h"
 #include "nlarn.h"
 #include "scrolls.h"
@@ -51,6 +52,7 @@ const magic_scroll_data scrolls[ST_MAX] =
     { ST_ANNIHILATION,      "annihilation",       ET_NONE,              3900 },
     { ST_PULVERIZATION,     "pulverization",      ET_NONE,               610 },
     { ST_LIFE_PROTECTION,   "life protection",    ET_LIFE_PROTECTION,   3000 },
+    { ST_GENOCIDE_MONSTER,  "genocide monster",   ET_NONE,              3800 },
 };
 
 static const char *_scroll_desc[ST_MAX - 1] =
@@ -79,6 +81,7 @@ static const char *_scroll_desc[ST_MAX - 1] =
     "Fril Ajich Lsosa",
     "Chados Azil Tzos",
     "Ixos Tzek Ajak",
+    "Xodil Keterulo",
 };
 
 char *scroll_desc(int scroll_id)
@@ -230,6 +233,51 @@ int scroll_gem_perfection(player *p, item *scroll)
     }
 
     return count;
+}
+
+int scroll_genocide_monster(player *p, item *scroll)
+{
+    char *in;
+    int id;
+    GString *msg;
+
+    assert(p != NULL);
+
+    msg = g_string_new(NULL);
+    g_string_append_printf(msg, "This is a scroll of %s. ", scroll_name(scroll));
+    g_string_append(msg, "Which monster do you want to genocide (type letter)?");
+
+    in = display_get_string(msg->str, NULL, 1);
+
+    g_string_free(msg, TRUE);
+
+    if (!in)
+    {
+        log_add_entry(p->log, "You chose not to genocide any monster.");
+        return FALSE;
+    }
+
+    for (id = 1; id < MT_MAX; id++)
+    {
+        if (monster_type_image(id) == in[0])
+        {
+            if (!monster_is_genocided(id))
+            {
+                p->stats.monsters_killed[id] += monster_genocide(id);
+                log_add_entry(p->log, "Wiped out all %ss.",
+                              monster_type_name(id));
+
+                g_free(in);
+
+                return TRUE;
+            }
+        }
+    }
+
+    g_free(in);
+
+    log_add_entry(p->log, "No such monster.");
+    return FALSE;
 }
 
 int scroll_heal_monster(player *p, item *scroll)

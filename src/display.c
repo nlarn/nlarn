@@ -1464,7 +1464,7 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     {
         if (strlen(caption) + basewidth > maxwidth)
         {
-            width = basewidth + max_len;
+            width = maxwidth - basewidth;
         }
         else
         {

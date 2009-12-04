@@ -277,13 +277,6 @@ const spell_data spells[SP_MAX] =
         6, 3500
     },
     {
-        SP_GEN,  "gen", "genocide",
-        SC_OTHER, DAM_NONE, ET_NONE,
-        "Eliminates a species of monster from the caverns.",
-        NULL, NULL,
-        6, 3800
-    },
-    {
         SP_SUM, "sum", "summon demon",
         SC_OTHER, DAM_NONE, ET_NONE,
         "Summons a demon who hopefully helps you out.",
@@ -345,7 +338,7 @@ static const char *book_descriptions[SP_MAX - 1] =
     "dull",
     "canvas",
     "well-thumbed",
-    "chambray",
+    /* "chambray", currently not needed */
 };
 
 
@@ -548,11 +541,6 @@ int spell_cast(player *p)
             /* sphere of annihilation */
         case SP_SPH:
             well_done = spell_create_sphere(spell, p);
-            break;
-
-            /* genocide */
-        case SP_GEN:
-            well_done = spell_genocide_monster(p);
             break;
 
             /* summon daemon */
@@ -1105,45 +1093,6 @@ gboolean spell_cure_blindness(struct player *p)
         log_add_entry(p->log, "You weren't even blinded!");
         return FALSE;
     }
-}
-
-gboolean spell_genocide_monster(player *p)
-{
-    char *in;
-    int id;
-
-    assert(p != NULL);
-
-    display_paint_screen(p);
-    in = display_get_string("Which monster do you want to genocide (type letter)?", NULL, 1);
-
-    if (!in)
-    {
-        log_add_entry(p->log, "You chose not to genocide any monster.");
-        return FALSE;
-    }
-
-    for (id = 1; id < MT_MAX; id++)
-    {
-        if (monster_type_image(id) == in[0])
-        {
-            if (!monster_is_genocided(id))
-            {
-                monster_genocide(id);
-                log_add_entry(p->log, "Wiped out all %ss.",
-                              monster_type_name(id));
-
-                g_free(in);
-
-                return TRUE;
-            }
-        }
-    }
-
-    g_free(in);
-
-    log_add_entry(p->log, "No such monster.");
-    return FALSE;
 }
 
 gboolean spell_make_wall(player *p)

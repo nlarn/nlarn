@@ -92,7 +92,6 @@ typedef enum spell_ids {
 	SP_MFI,		/* magic fire */
 	SP_MKW,		/* make wall */
 	SP_SPH,		/* sphere of annihilation */
-	SP_GEN,		/* genocide monster */
 	SP_SUM,		/* summon daemon */
 	SP_WTW,		/* walk through walls */
 	SP_ALT,		/* alter reality */
@@ -131,7 +130,6 @@ gboolean spell_create_monster(struct player *p);
 gboolean spell_create_sphere(spell *s, struct player *p);
 gboolean spell_cure_poison(struct player *p);
 gboolean spell_cure_blindness(struct player *p);
-gboolean spell_genocide_monster(struct player *p);
 gboolean spell_make_wall(struct player *p);
 gboolean spell_vaporize_rock(struct player *p);
 

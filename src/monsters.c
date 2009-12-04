@@ -1953,6 +1953,7 @@ int monster_genocide(int monster_id)
 {
     GList *mlist;
     monster *monst;
+    int count = 0;
 
     assert(monster_id > MT_NONE && monster_id < MT_MAX);
 
@@ -1966,13 +1967,14 @@ int monster_genocide(int monster_id)
         if (monster_is_genocided(monst->type))
         {
             monster_destroy(monst);
+            count++;
         }
     }
     while ((mlist = mlist->next));
 
     g_list_free(mlist);
 
-    return nlarn->monster_genocided[monster_id];
+    return count;
 }
 
 int monster_is_genocided(int monster_id)

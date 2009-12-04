@@ -3153,6 +3153,11 @@ int player_item_use(player *p, inventory **inv, item *it)
                 item_identified = TRUE;
                 break;
 
+            case ST_GENOCIDE_MONSTER:
+                scroll_genocide_monster(p, it);
+                item_identified = TRUE;
+                break;
+
             default:
                 item_identified = scroll_with_effect(p, it);
                 break;
