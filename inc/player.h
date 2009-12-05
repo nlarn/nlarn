@@ -49,6 +49,12 @@ typedef struct player_stats
     gint32 times_prayed;
     gint32 max_level;
     gint32 max_xp;
+    gint32 str_orig;
+    gint32 int_orig;
+    gint32 wis_orig;
+    gint32 con_orig;
+    gint32 dex_orig;
+    gint32 cha_orig;
 } player_stats;
 
 typedef struct _player_settings

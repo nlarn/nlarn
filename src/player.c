@@ -118,12 +118,12 @@ player *player_new()
     /* initialize player */
     p = g_malloc0(sizeof(player));
 
-    p->strength = 12 + rand_0n(6);
-    p->charisma = 12 + rand_0n(6);
-    p->dexterity = 12 + rand_0n(6);
-    p->wisdom = 12 + rand_0n(6);
-    p->intelligence = 12 + rand_0n(6);
-    p->constitution = 12 + rand_0n(6);
+    p->stats.str_orig = p->strength = 12 + rand_0n(6);
+    p->stats.cha_orig = p->charisma = 12 + rand_0n(6);
+    p->stats.dex_orig = p->dexterity = 12 + rand_0n(6);
+    p->stats.wis_orig = p->wisdom = 12 + rand_0n(6);
+    p->stats.int_orig = p->intelligence = 12 + rand_0n(6);
+    p->stats.con_orig = p->constitution = 12 + rand_0n(6);
 
     p->hp = p->hp_max = (p->constitution + rand_0n(10));
     p->mp = p->mp_max = (p->intelligence + rand_0n(10));
@@ -338,6 +338,13 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "max_level", p->stats.max_level);
     cJSON_AddNumberToObject(obj, "max_xp", p->stats.max_xp);
 
+    cJSON_AddNumberToObject(obj, "str_orig", p->stats.str_orig);
+    cJSON_AddNumberToObject(obj, "int_orig", p->stats.int_orig);
+    cJSON_AddNumberToObject(obj, "wis_orig", p->stats.wis_orig);
+    cJSON_AddNumberToObject(obj, "con_orig", p->stats.con_orig);
+    cJSON_AddNumberToObject(obj, "dex_orig", p->stats.dex_orig);
+    cJSON_AddNumberToObject(obj, "cha_orig", p->stats.cha_orig);
+
     return pser;
 }
 
@@ -499,6 +506,13 @@ player *player_deserialize(cJSON *pser)
     p->stats.max_level = cJSON_GetObjectItem(obj, "max_level")->valueint;
     p->stats.max_xp = cJSON_GetObjectItem(obj, "max_xp")->valueint;
 
+    p->stats.str_orig = cJSON_GetObjectItem(obj, "str_orig")->valueint;
+    p->stats.int_orig = cJSON_GetObjectItem(obj, "int_orig")->valueint;
+    p->stats.wis_orig = cJSON_GetObjectItem(obj, "wis_orig")->valueint;
+    p->stats.con_orig = cJSON_GetObjectItem(obj, "con_orig")->valueint;
+    p->stats.dex_orig = cJSON_GetObjectItem(obj, "dex_orig")->valueint;
+    p->stats.cha_orig = cJSON_GetObjectItem(obj, "cha_orig")->valueint;
+
     return p;
 }
 
@@ -605,15 +619,13 @@ void player_die(player *p, player_cod cause_type, int cause)
     GString *text;
     game_score_t *score, *score_copy, *cscore;
     GList *scores, *iterator;
-
     char *message = NULL;
     char *title = NULL;
-
-    char *tmp;
-
+    char *tmp = NULL;
+    char it_desc[61] = { 0 };
     int count, pos;
-
-    effect *ef;
+    effect *ef = NULL;
+    char *pronoun = p->sex ? "He" : "She";
 
     assert(p != NULL);
 
@@ -730,7 +742,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         if (pos == -1)
         {
             g_string_append_printf(text, " %s didn't make it into the Hall of Fame.",
-                                   p->sex ? "He" : "She");
+                                   pronoun);
 
             pos = 0;
         }
@@ -750,10 +762,9 @@ void player_die(player *p, player_cod cause_type, int cause)
             cscore = (game_score_t *)iterator->data;
 
             desc = player_death_description(cscore, FALSE);
-            g_string_append_printf(text, "%s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d hp]\n",
-                                   (cscore == score_copy) ? "*" : " ", count,
-                                   cscore->score,
-                                   desc,
+            g_string_append_printf(text, "  %s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d hp]\n",
+                                   (cscore == score_copy) ? "*" : " ",
+                                   count, cscore->score, desc,
                                    score->dlevel, cscore->hp);
 
             g_free(desc);
@@ -761,31 +772,57 @@ void player_die(player *p, player_cod cause_type, int cause)
 
         /* some statistics */
         g_string_append_printf(text, "\n%s %s after searching the potion for %d mobuls. ",
-                               p->sex ? "He" : "She",
-                               cause_type < PD_TOO_LATE ? "died" : "returned",
+                               pronoun, cause_type < PD_TOO_LATE ? "died" : "returned",
                                gtime2mobuls(nlarn->gtime));
 
         g_string_append_printf(text, "%s cast %s spell%s, quaffed %s potion%s " \
-                               "and read %s book%s and %s scroll%s.",
-                               p->sex ? "He": "She",
-                               int2str(p->stats.spells_cast),
-                               p->stats.spells_cast != 1 ? "s" : "",
-                               int2str(p->stats.potions_quaffed),
-                               p->stats.potions_quaffed != 1 ? "s" : "",
-                               int2str(p->stats.books_read),
-                               p->stats.books_read != 1 ? "s" : "",
-                               int2str(p->stats.scrolls_read),
-                               p->stats.scrolls_read != 1 ? "s" : "");
+                               "and read %s book%s and %s scroll%s.", pronoun,
+                               int2str(p->stats.spells_cast), plural(p->stats.spells_cast),
+                               int2str(p->stats.potions_quaffed), plural(p->stats.potions_quaffed),
+                               int2str(p->stats.books_read), plural(p->stats.books_read),
+                               int2str(p->stats.scrolls_read), plural(p->stats.scrolls_read));
 
-        /* append map of current level */
-        g_string_append(text, "\n\nThis is the map of the current level:\n\n");
-        tmp = map_dump(game_map(nlarn, p->pos.z), p->pos);
-        g_string_append(text, tmp);
-        g_free(tmp);
+        /* append map of current level if the player died */
+        if (cause < PD_TOO_LATE)
+        {
+            g_string_append(text, "\n\n-- The current level ------------------\n\n");
+            tmp = map_dump(game_map(nlarn, p->pos.z), p->pos);
+            g_string_append(text, tmp);
+            g_free(tmp);
+        }
+
+        /* player's attributes */
+        g_string_append(text, "\n\n-- Attributes -------------------------\n\n");
+        g_string_append_printf(text, "Strength:     %d (%+2d)\n",
+                               p->strength, p->strength - p->stats.str_orig);
+        g_string_append_printf(text, "Intelligence: %d (%+2d)\n",
+                               p->intelligence, p->intelligence - p->stats.int_orig);
+        g_string_append_printf(text, "Wisdom:       %d (%+2d)\n",
+                               p->wisdom, p->wisdom - p->stats.wis_orig);
+        g_string_append_printf(text, "Constitution: %d (%+2d)\n",
+                               p->constitution, p->constitution - p->stats.con_orig);
+        g_string_append_printf(text, "Dexterity:    %d (%+2d)\n",
+                               p->dexterity, p->dexterity - p->stats.dex_orig);
+        g_string_append_printf(text, "Charisma:     %d (%+2d)\n",
+                               p->charisma, p->charisma - p->stats.cha_orig);
+
+        /* append list of known spells */
+        if (p->known_spells->len > 0)
+        {
+            g_string_append(text, "\n\n-- Known Spells -----------------------\n\n");
+
+            for (pos = 0; pos < p->known_spells->len; pos++)
+            {
+                spell *s = (spell *)g_ptr_array_index(p->known_spells, pos);
+
+                g_string_append_printf(text, "%s (%d)\n",
+                                       spell_name(s), s->knowledge);
+            }
+        }
 
         /* list monsters killed */
         guint mnum, body_count = 0;
-        g_string_append(text, "\n\nCreatures vanquished:\n\n");
+        g_string_append(text, "\n\n-- Creatures vanquished ---------------\n\n");
 
         for (mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
         {
@@ -800,6 +837,104 @@ void player_die(player *p, player_cod cause_type, int cause)
             }
         }
         g_string_append_printf(text, "\n%3d total\n\n", body_count);
+
+        /* genocided monsters */
+        for (pos = 1, count = 0; pos < MT_MAX; pos++)
+        {
+            if (monster_is_genocided(pos)) count++;
+        }
+
+        g_string_append_printf(text, "%s genocided %s monsters.\n",
+                               pronoun, int2str(count));
+
+
+        /* identify entire inventory */
+        for (pos = 0; pos < inv_length(p->inventory); pos++)
+        {
+            item *it = inv_get(p->inventory, pos);
+            it->blessed_known = TRUE;
+            it->bonus_known = TRUE;
+        }
+
+        /* equipped items */
+        g_string_append(text, "\n\n-- Equipment --------------------------\n\n");
+        if (p->eq_amulet)
+        {
+            item_describe(p->eq_amulet, TRUE, TRUE, FALSE, it_desc, 60);
+            g_string_append_printf(text, "Amulet:   %s\n", it_desc);
+        }
+        if (p->eq_ring_l)
+        {
+            item_describe(p->eq_ring_l, TRUE, TRUE, FALSE, it_desc, 60);
+            g_string_append_printf(text, "Ring (l): %s\n", it_desc);
+        }
+        if (p->eq_ring_r)
+        {
+            item_describe(p->eq_ring_r, TRUE, TRUE, FALSE, it_desc, 60);
+            g_string_append_printf(text, "Ring (r): %s\n", it_desc);
+        }
+        if (p->eq_weapon)
+        {
+            item_describe(p->eq_weapon, TRUE, TRUE, FALSE, it_desc, 60);
+            g_string_append_printf(text, "Weapon:   %s\n", it_desc);
+        }
+        if (p->eq_suit)
+        {
+            item_describe(p->eq_suit, TRUE, TRUE, FALSE, it_desc, 60);
+            g_string_append_printf(text, "Armour:   %s\n", it_desc);
+        }
+        if (p->eq_helmet)
+        {
+            item_describe(p->eq_helmet, TRUE, TRUE, FALSE, it_desc, 60);
+            g_string_append_printf(text, "Helmet:   %s\n", it_desc);
+        }
+        if (p->eq_shield)
+        {
+            item_describe(p->eq_shield, TRUE, TRUE, FALSE, it_desc, 60);
+            g_string_append_printf(text, "Shield:   %s\n", it_desc);
+        }
+        if (p->eq_cloak)
+        {
+            item_describe(p->eq_cloak, TRUE, TRUE, FALSE, it_desc, 60);
+            g_string_append_printf(text, "Cloak:    %s\n", it_desc);
+        }
+        if (p->eq_gloves)
+        {
+            item_describe(p->eq_gloves, TRUE, TRUE, FALSE, it_desc, 60);
+            g_string_append_printf(text, "Gloves:   %s\n", it_desc);
+        }
+        if (p->eq_boots)
+        {
+            item_describe(p->eq_boots, TRUE, TRUE, FALSE, it_desc, 60);
+            g_string_append_printf(text, "Boots:    %s\n", it_desc);
+        }
+
+        /* inventory */
+        g_string_append(text, "\n\n-- Items in pack ----------------------\n\n");
+        for (pos = 0; pos < inv_length(p->inventory); pos++)
+        {
+            item *it = inv_get(p->inventory, pos);
+            if (!player_item_is_equipped(p, it))
+            {
+                item_describe(it, TRUE, it->count == 1, FALSE, it_desc, 60);
+                g_string_append_printf(text, "%s\n", it_desc);
+
+            }
+        }
+
+        /* messages */
+        g_string_append(text, "\n\n-- Last messages ----------------------\n\n");
+        count = min(10, log_length(p->log));
+        for (pos = log_length(p->log) - count; pos < log_length(p->log); pos++)
+        {
+            message_log_entry *entry = log_get_entry(p->log, pos);
+            g_string_append_printf(text, "%s\n", entry->message);
+        }
+        /* print uncommited messages */
+        if (p->log->buffer->len > 0)
+        {
+            g_string_append_printf(text, "%s\n", p->log->buffer->str);
+        }
 
         display_show_message(title, text->str);
 
@@ -1257,7 +1392,7 @@ void player_examine(player *p, position pos)
         }
         else
         {
-            GString *items_desc;
+            GString *items_desc = NULL;
 
             for (idx = 0; idx < inv_length(tile->ilist); idx++)
             {
@@ -2916,7 +3051,7 @@ int player_item_use(player *p, inventory **inv, item *it)
     case IT_BOOK:
         result = book_read(p, it);
         break;
-        
+
         /* eat food */
     case IT_FOOD:
         result = food_eat(p, it);
@@ -4512,7 +4647,9 @@ static char *player_death_description(game_score_t *score, int verbose)
         break;
 
     case PD_TRAP:
-        g_string_append_printf(text, " by a %s.", trap_description(score->cause));
+        g_string_append_printf(text, " by a%s %s.",
+                               a_an(trap_description(score->cause)),
+                               trap_description(score->cause));
         break;
 
     case PD_MAP:
@@ -4537,7 +4674,7 @@ static char *player_death_description(game_score_t *score, int verbose)
 
     default:
         /* no further description */
-        g_string_append(text, ".");
+        g_string_append_c(text, '.');
         break;
     }
 
