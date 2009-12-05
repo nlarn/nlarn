@@ -806,6 +806,22 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_string_append_printf(text, "Charisma:     %d (%+2d)\n",
                                p->charisma, p->charisma - p->stats.cha_orig);
 
+        /* effects */
+        GPtrArray *effect_desc = player_effect_text(p);
+
+        if (effect_desc->len > 0)
+        {
+            g_string_append(text, "\n\n-- Effects ----------------------------\n\n");
+
+            for (pos = 0; pos < effect_desc->len; pos++)
+            {
+                g_string_append_printf(text, "%s\n",
+                                       (char *)g_ptr_array_index(effect_desc, pos));
+            }
+        }
+
+        g_ptr_array_free(effect_desc, TRUE);
+
         /* append list of known spells */
         if (p->known_spells->len > 0)
         {
@@ -2169,18 +2185,23 @@ void player_effects_expire(player *p, int turns)
 GPtrArray *player_effect_text(player *p)
 {
     GPtrArray *text;
+    int pos;
+    effect *e;
+    char *desc;
 
     text = g_ptr_array_new();
 
-    if (player_effect(p, ET_DIZZINESS))    g_ptr_array_add(text, "dizzy");
-    if (player_effect(p, ET_SICKNESS))     g_ptr_array_add(text, "sick");
-    if (player_effect(p, ET_BLINDNESS))    g_ptr_array_add(text, "blind");
-    if (player_effect(p, ET_CONFUSION))    g_ptr_array_add(text, "confused");
-    if (player_effect(p, ET_PARALYSIS))    g_ptr_array_add(text, "paralyzed");
-    if (player_effect(p, ET_POISON))       g_ptr_array_add(text, "poisoned");
-    if (player_effect(p, ET_SLOWNESS))     g_ptr_array_add(text, "slow");
-    if (player_effect(p, ET_BURDENED))     g_ptr_array_add(text, "burdened");
-    if (player_effect(p, ET_OVERSTRAINED)) g_ptr_array_add(text, "overload");
+    for (pos = 0; pos < p->effects->len; pos++)
+    {
+        e = game_effect_get(nlarn, g_ptr_array_index(p->effects, pos));
+
+        desc = effect_get_desc(e);
+
+        if (desc != NULL)
+        {
+            g_ptr_array_add(text, desc);
+        }
+    }
 
     return text;
 }

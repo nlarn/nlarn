@@ -121,9 +121,9 @@ typedef struct effect_data
     effect_type id;
     int duration;           /* duration of effect. 0 = permanent */
     int value;              /* if modifier: amount of attribute modification */
+    char *desc;             /* description for status display and obituary */
     char *msg_start;        /* message displayed when effect starts */
     char *msg_stop;         /* message displayed when effect ends */
-    /* TODO: perhaps add this field: char *msg_fail; */
     char *msg_start_monster; /*	If the effect happens on a monster */
     char *msg_stop_monster;
 } effect_data;
@@ -151,6 +151,7 @@ effect *effect_deserialize(cJSON *eser, struct game *g);
 cJSON *effects_serialize(GPtrArray *effects);
 GPtrArray *effects_deserialize(cJSON *eser);
 
+char *effect_get_desc(effect *e);
 char *effect_get_msg_start(effect *e);
 char *effect_get_msg_stop(effect *e);
 char *effect_get_msg_m_start(effect *e);
