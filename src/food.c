@@ -21,6 +21,9 @@
 #include <string.h>
 
 #include "food.h"
+#include "game.h"
+#include "nlarn.h"
+#include "player.h"
 #include "utils.h"
 
 const food_data foods[FT_MAX] =
@@ -30,8 +33,34 @@ const food_data foods[FT_MAX] =
     { FT_FORTUNE_COOKIE, "fortune cookie", 10, 2, },
 };
 
+static char *food_get_fortune(char *fortune_file);
+
+item_usage_result food_eat(struct player *p, item *food)
+{
+    char description[61];
+    item_usage_result result;
+    
+    result.identified = TRUE;
+    result.used_up = TRUE;
+    result.time = 2;
+    
+    item_describe(food, player_item_known(p, food),
+                  TRUE, FALSE, description, 60);
+
+    log_add_entry(p->log, "You eat %s.", description);
+
+    if (food->id == FT_FORTUNE_COOKIE)
+    {
+        log_add_entry(p->log,
+                      "It has a piece of paper inside. It reads: \"%s\"",
+                      food_get_fortune(game_fortunes(nlarn)));
+    }
+
+    return result;
+}
+
 /* function to return a random fortune from the fortune file  */
-char *food_get_fortune(char *fortune_file)
+static char *food_get_fortune(char *fortune_file)
 {
 
     /* array of pointers to fortunes */

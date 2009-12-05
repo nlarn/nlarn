@@ -67,21 +67,9 @@ enum scroll_types {
 /* function declarations */
 
 char *scroll_desc(int scroll_id);
-
-int scroll_with_effect(struct player *p, item *scroll);
-int scroll_annihilate(struct player *p, item *scroll);
-int scroll_create_artefact(struct player *p, item *scroll);
-int scroll_enchant_armour(struct player *p, item *scroll);
-int scroll_enchant_weapon(struct player *p, item *scroll);
-int scroll_gem_perfection(struct player *p, item *scroll);
-int scroll_genocide_monster(struct player *p, item *scroll);
-int scroll_heal_monster(struct player *p, item *scroll);
-int scroll_identify(struct player *p, item *scroll);
+item_usage_result scroll_read(struct player *p, item *scroll);
 int scroll_mapping(struct player *p, item *scroll);
-int scroll_remove_curse(struct player *p, item *scroll);
-int scroll_spell_extension(struct player *p, item *scroll);
-int scroll_teleport(struct player *p, item *scroll);
-int scroll_timewarp(struct player *p, item *scroll);
+
 /* external vars */
 
 extern const magic_scroll_data scrolls[ST_MAX];

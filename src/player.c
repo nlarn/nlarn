@@ -2906,284 +2906,39 @@ void player_item_identify(player *p, inventory **inv, item *it)
 
 int player_item_use(player *p, inventory **inv, item *it)
 {
-    char description[61];
-    int item_used_up = TRUE;
-    int item_identified = FALSE;
-    int time = 0; /* number of turns this action took */
+    item_usage_result result;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
-
-    /* don't need that parameter */
-    inv = NULL;
-
-    if (player_effect(p, ET_BLINDNESS) && (it->type == IT_BOOK || it->type == IT_SCROLL))
-    {
-        log_add_entry(p->log, "As you are blind you can't read %s.",
-                      item_describe(it, player_item_known(p, it),
-                                    TRUE, TRUE, description, 60));
-        return time;
-    }
 
     switch (it->type)
     {
         /* read book */
     case IT_BOOK:
-        item_describe(it, player_item_known(p, it),
-                      TRUE, TRUE, description, 60);
-
-        log_add_entry(p->log, "You read %s.", description);
-
-        /* increase number of books read */
-        p->stats.books_read++;
-
-        /* cursed spellbooks have nasty effects */
-        if (it->cursed)
-        {
-            log_add_entry(p->log, "There was something wrong with this book! " \
-                          "It crumbles to dust.");
-
-            player_mp_lose(p, rand_0n(p->mp));
-        }
-        else
-        {
-            switch (spell_learn(p, it->id))
-            {
-            case 0:
-                log_add_entry(p->log, "You cannot understand the content of this book.");
-                item_used_up = FALSE;
-                break;
-
-            case 1:
-                /* learnt spell */
-                log_add_entry(p->log, "You master the spell \"%s\".",
-                              book_name(it));
-
-                item_identified = TRUE;
-                break;
-
-            default:
-                /* improved knowledge of spell */
-                log_add_entry(p->log,
-                              "You improved your knowledge of the spell %s.",
-                              book_name(it));
-                break;
-            }
-
-            /* five percent chance to increase intelligence */
-            if (chance(5))
-            {
-                log_add_entry(p->log, "Reading makes you ingenious.");
-                p->intelligence++;
-            }
-        }
-        time = 2 + spell_level_by_id(it->id);
-
+        result = book_read(p, it);
         break;
-
-
-    case IT_CONTAINER:
-        break;
-
-
+        
         /* eat food */
     case IT_FOOD:
-        item_describe(it, player_item_known(p, it),
-                      TRUE, FALSE, description, 60);
-
-        log_add_entry(p->log, "You eat %s.", description);
-
-        if (it->id == FT_FORTUNE_COOKIE)
-        {
-            log_add_entry(p->log,
-                          "It has a piece of paper inside. It reads: \"%s\"",
-                          food_get_fortune(game_fortunes(nlarn)));
-        }
-
-        time = 2;
-
+        result = food_eat(p, it);
         break;
-
 
         /* drink potion */
     case IT_POTION:
-        item_describe(it, player_item_known(p, it),
-                      TRUE, FALSE, description, 60);
-
-        log_add_entry(p->log, "You drink %s.", description);
-
-        /* increase number of potions quaffed */
-        p->stats.potions_quaffed++;
-
-        if (it->cursed)
-        {
-            damage *dam = damage_new(DAM_POISON, rand_1n(p->hp), NULL);
-
-            log_add_entry(p->log, "The Potion is foul!");
-
-            log_add_entry(p->log, "You spit gore!");
-            player_damage_take(p, dam, PD_CURSE, it->type);
-        }
-        else
-        {
-
-            switch (it->id)
-            {
-            case PO_AMNESIA:
-                item_identified = potion_amnesia(p, it);
-                break;
-
-            case PO_OBJ_DETECT:
-            case PO_TRE_DETECT:
-                item_identified = potion_detect_item(p, it);
-                break;
-
-            case PO_WATER:
-                log_add_entry(p->log, "This tastes like water..");
-                item_identified = TRUE;
-                break;
-
-            case PO_CURE_DIANTHR:
-                log_add_entry(p->log, "You really want to keep the potion for your daughter.");
-                item_used_up = FALSE;
-                break;
-
-            default:
-                item_identified = potion_with_effect(p, it);
-                break;
-            }
-        }
-        time = 2;
+        result = potion_quaff(p, it);
         break;
-
 
         /* read scroll */
     case IT_SCROLL:
-        item_describe(it, player_item_known(p, it),
-                      TRUE, FALSE, description, 60);
-
-        log_add_entry(p->log, "You read %s.", description);
-
-        /* increase number of scrolls read */
-        p->stats.scrolls_read++;
-
-        if (it->cursed)
-        {
-            damage *dam = damage_new(DAM_FIRE, rand_1n(p->hp), NULL);
-
-            log_add_entry(p->log, "The Scroll explodes!");
-
-            log_add_entry(p->log, "You are hurt by the explosion!");
-            player_damage_take(p, dam, PD_CURSE, it->type);
-        }
-        else
-        {
-            switch (it->id)
-            {
-            case ST_ENCH_ARMOUR:
-                item_identified = scroll_enchant_armour(p, it);
-                break;
-
-            case ST_ENCH_WEAPON:
-                item_identified = scroll_enchant_weapon(p, it);
-                break;
-
-            case ST_BLANK:
-                item_used_up = FALSE;
-                item_identified = TRUE;
-                log_add_entry(p->log, "This scroll is blank.");
-                break;
-
-            case ST_CREATE_MONSTER:
-                item_identified = spell_create_monster(p);
-                break;
-
-            case ST_CREATE_ARTIFACT:
-                item_identified = scroll_create_artefact(p, it);
-                break;
-
-            case ST_TIMEWARP:
-                item_identified = scroll_timewarp(p, it);
-                break;
-
-            case ST_TELEPORT:
-                item_identified = scroll_teleport(p, it);
-                break;
-
-            case ST_HEAL_MONSTER:
-                item_identified = scroll_heal_monster(p, it);
-                break;
-
-            case ST_MAPPING:
-                log_add_entry(p->log, "There is a map on the scroll!");
-                item_identified = scroll_mapping(p, it);
-                break;
-
-            case ST_GEM_PERFECTION:
-                item_identified = scroll_gem_perfection(p, it);
-                break;
-
-            case ST_SPELL_EXTENSION:
-                item_identified = scroll_spell_extension(p, it);
-                break;
-
-            case ST_IDENTIFY:
-                item_identified = scroll_identify(p, it);
-                break;
-
-            case ST_REMOVE_CURSE:
-                item_identified = scroll_remove_curse(p, it);
-                break;
-
-            case ST_ANNIHILATION:
-                item_identified = scroll_annihilate(p, it);
-                break;
-
-            case ST_PULVERIZATION:
-                if (!player_item_identified(p, it))
-                {
-                    log_add_entry(p->log, "This is a scroll of %s.", scroll_name(it));
-                }
-
-                if (spell_vaporize_rock(p))
-                {
-                    /* recalc fov if something has been vaporised */
-                    player_update_fov(p);
-                }
-
-                item_identified = TRUE;
-                break;
-
-            case ST_GENOCIDE_MONSTER:
-                scroll_genocide_monster(p, it);
-                item_identified = TRUE;
-                break;
-
-            default:
-                item_identified = scroll_with_effect(p, it);
-                break;
-            }
-
-            if (!item_identified)
-            {
-                log_add_entry(p->log, "Nothing happens.");
-            }
-        }
-
-        time = 2;
+        result = scroll_read(p, it);
         break;
 
     default:
-        item_describe(it, player_item_known(p, it),
-                      TRUE, FALSE, description, 40);
-
-        log_add_entry(p->log,
-                      "I have absolutely no idea how to use %s.",
-                      description);
-
-        item_used_up = FALSE;
+        /* NOP */
+        return 0;
+        break;
     }
 
-    if (item_identified)
+    if (result.identified)
     {
         /* identify the item type, not the entire item */
         switch (it->type)
@@ -3206,7 +2961,7 @@ int player_item_use(player *p, inventory **inv, item *it)
         }
     }
 
-    if (item_used_up)
+    if (result.used_up)
     {
         if (it->count > 1)
         {
@@ -3218,7 +2973,7 @@ int player_item_use(player *p, inventory **inv, item *it)
         }
     }
 
-    return time;
+    return result.time;
 }
 
 void player_item_destroy(player *p, item *it)

@@ -1253,3 +1253,76 @@ int book_weight(item *book)
         return 800;
     }
 }
+
+item_usage_result book_read(struct player *p, item *book)
+{
+    item_usage_result result;
+    char description[61];
+
+    result.time = 1 + spell_level_by_id(book->id);
+    result.used_up = TRUE;
+
+    item_describe(book, player_item_known(p, book),
+                  TRUE, TRUE, description, 60);
+    
+    if (player_effect(p, ET_BLINDNESS))
+    {
+        log_add_entry(p->log, "As you are blind you can't read %s.",
+                      description);
+                      
+        result.identified = FALSE;
+        result.used_up = FALSE;
+        result.time = 2;
+        
+        return result;
+    }
+    
+    log_add_entry(p->log, "You read %s.", description);
+
+    /* increase number of books read */
+    p->stats.books_read++;
+
+    /* cursed spellbooks have nasty effects */
+    if (book->cursed)
+    {
+        log_add_entry(p->log, "There was something wrong with this book! " \
+                      "It crumbles to dust.");
+
+        player_mp_lose(p, rand_0n(p->mp));
+    }
+    else
+    {
+        switch (spell_learn(p, book->id))
+        {
+        case 0:
+            log_add_entry(p->log, "You cannot understand the content of this book.");
+            result.identified = FALSE;
+            result.used_up = FALSE;
+            break;
+
+        case 1:
+            /* learnt spell */
+            log_add_entry(p->log, "You master the spell \"%s\".",
+                          book_name(book));
+
+            result.identified = TRUE;
+            break;
+
+        default:
+            /* improved knowledge of spell */
+            log_add_entry(p->log,
+                          "You improved your knowledge of the spell %s.",
+                          book_name(book));
+            break;
+        }
+
+        /* five percent chance to increase intelligence */
+        if (chance(5))
+        {
+            log_add_entry(p->log, "Reading makes you ingenious.");
+            p->intelligence++;
+        }
+    }
+
+    return result;
+}

@@ -67,7 +67,13 @@ typedef struct item_material_data {
     char *adjective;
 } item_material_data;
 
-/* FIXME: better name, better everything */
+typedef struct item_usage_result
+{
+    int identified;
+    int used_up;
+    int time;
+} item_usage_result;
+
 enum perish_types {
 	PT_NONE,
 	PT_FIRE,

@@ -19,6 +19,8 @@
 #ifndef __FOOD_H_
 #define __FOOD_H_
 
+#include "items.h"
+
 enum food_types
 {
     FT_NONE,
@@ -33,9 +35,13 @@ typedef struct food_data {
     int price;
 } food_data;
 
+/* forward declarations */
+
+struct player;
+
 /* function declarations */
 
-char *food_get_fortune(char *fortune_file);
+item_usage_result food_eat(struct player *p, item *food);
 
 /* external vars */
 

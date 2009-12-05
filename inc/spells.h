@@ -156,8 +156,8 @@ gboolean spell_vaporize_rock(struct player *p);
 /* *** BOOKS *** */
 
 char *book_desc(int book_id);
-
 int book_weight(item *book);
+item_usage_result book_read(struct player *p, item *book);
 
 #define book_name(book)   (spells[(book)->id].name)
 #define book_price(book)  (spells[(book)->id].price)

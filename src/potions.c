@@ -53,6 +53,10 @@ const potion_data potions[PO_MAX] =
     { PO_CURE_DIANTHR,  "cure dianthroritis", ET_NONE,              0 },
 };
 
+static int potion_with_effect(struct player *p, item *potion);
+static int potion_amnesia(struct player *p, item *potion);
+static int potion_detect_item(struct player *p, item *potion);
+
 static const char *_potion_desc[PO_MAX - 1] =
 {
     "clear",
@@ -87,7 +91,65 @@ char *potion_desc(int potion_id)
     return (char *)_potion_desc[nlarn->potion_desc_mapping[potion_id - 1]];
 }
 
-int potion_with_effect(struct player *p, item *potion)
+item_usage_result potion_quaff(struct player *p, item *potion)
+{
+    item_usage_result result;
+    char description[61];
+        
+    item_describe(potion, player_item_known(p, potion),
+                  TRUE, FALSE, description, 60);
+
+    log_add_entry(p->log, "You drink %s.", description);
+
+    /* increase number of potions quaffed */
+    p->stats.potions_quaffed++;
+    
+    result.time = 2;
+    result.identified = TRUE;
+    result.used_up = TRUE;
+
+    if (potion->cursed)
+    {
+        damage *dam = damage_new(DAM_POISON, rand_1n(p->hp), NULL);
+
+        log_add_entry(p->log, "The Potion is foul!");
+
+        log_add_entry(p->log, "You spit gore!");
+        player_damage_take(p, dam, PD_CURSE, potion->type);
+    }
+    else
+    {
+
+        switch (potion->id)
+        {
+        case PO_AMNESIA:
+            result.identified = potion_amnesia(p, potion);
+            break;
+
+        case PO_OBJ_DETECT:
+        case PO_TRE_DETECT:
+            result.identified = potion_detect_item(p, potion);
+            break;
+
+        case PO_WATER:
+            log_add_entry(p->log, "This tastes like water..");
+            break;
+
+        case PO_CURE_DIANTHR:
+            log_add_entry(p->log, "You really want to keep the potion for your daughter.");
+            result.used_up = FALSE;
+            break;
+
+        default:
+            result.identified = potion_with_effect(p, potion);
+            break;
+        }
+    }
+    
+    return result;
+}
+
+static int potion_with_effect(struct player *p, item *potion)
 {
     int identified = TRUE;
     effect *eff;
@@ -117,7 +179,7 @@ int potion_with_effect(struct player *p, item *potion)
     return identified;
 }
 
-int potion_amnesia(player *p, item *potion)
+static int potion_amnesia(player *p, item *potion)
 {
     position pos;
 
@@ -142,7 +204,7 @@ int potion_amnesia(player *p, item *potion)
     return TRUE;
 }
 
-int potion_detect_item(player *p, item *potion)
+static int potion_detect_item(player *p, item *potion)
 {
     position pos;
     guint idx;
