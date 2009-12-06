@@ -454,8 +454,7 @@ game_score_t *game_score(game *g, player_cod cod, int cause)
 
 GList *game_score_add(game *g, game_score_t *score)
 {
-    GList *gs, *el;
-    game_score_t *oscore;
+    GList *gs;
 
     assert (g != NULL && score != NULL);
 
@@ -465,20 +464,7 @@ GList *game_score_add(game *g, game_score_t *score)
     gs = g_list_append(gs, score);
 
     /* sort scoreboard entries */
-    gs = g_list_sort(gs,  (GCompareFunc)game_score_compare);
-
-    /* only interested in the last 99 scores */
-    while (g_list_length(gs) > 99)
-    {
-        el = g_list_last(gs);
-
-        oscore = el->data;
-
-        g_free(oscore->player_name);
-        g_free(oscore);
-
-        gs = g_list_delete_link(gs, el);
-    }
+    gs = g_list_sort(gs, (GCompareFunc)game_score_compare);
 
     /* save new scoreboard */
     game_scores_save(g, gs);

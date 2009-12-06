@@ -617,7 +617,7 @@ int player_regenerate(player *p)
 void player_die(player *p, player_cod cause_type, int cause)
 {
     GString *text;
-    game_score_t *score, *score_copy, *cscore;
+    game_score_t *score, *cscore;
     GList *scores, *iterator;
     char *message = NULL;
     char *title = NULL;
@@ -719,42 +719,23 @@ void player_die(player *p, player_cod cause_type, int cause)
         flushinp();
 
         score = game_score(nlarn, cause_type, cause);
-
-        /* need a copy of the current score as it can be freed by adding to the list */
-        score_copy = g_malloc0(sizeof(game_score_t));
-        memcpy(score_copy, score, sizeof(game_score_t));
-        score_copy->player_name = g_strdup(score->player_name);
-
-        scores = game_score_add(nlarn, score_copy);
+        scores = game_score_add(nlarn, score);
 
         tmp = player_death_description(score, TRUE);
         text = g_string_new(tmp);
         g_free(tmp);
 
-        /* destroy score */
-        g_free(score->player_name);
-        g_free(score);
-
         /* determine position of score in the score list */
-        pos = g_list_index(scores, score_copy);
-
-        /* start from first position if score didn't make it into the list */
-        if (pos == -1)
-        {
-            g_string_append_printf(text, " %s didn't make it into the Hall of Fame.",
-                                   pronoun);
-
-            pos = 0;
-        }
+        pos = g_list_index(scores, score);
 
         /* assemble surrounding scores list */
         g_string_append(text, "\n\n");
 
         /* get entry three entries up of current/top score in list */
-        iterator = g_list_nth(scores, max(pos - 3, 1));
+        iterator = g_list_nth(scores, max(pos - 3, 0));
 
         /* display up to 7 entries */
-        for (count = max(pos - 3, 1); iterator && (count < (max(pos, 0) + 4));
+        for (count = max(pos - 3, 0); iterator && (count < (max(pos, 0) + 4));
                 iterator = iterator->next, count++)
         {
             gchar *desc;
@@ -763,12 +744,14 @@ void player_die(player *p, player_cod cause_type, int cause)
 
             desc = player_death_description(cscore, FALSE);
             g_string_append_printf(text, "  %s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d hp]\n",
-                                   (cscore == score_copy) ? "*" : " ",
-                                   count, cscore->score, desc,
-                                   score->dlevel, cscore->hp);
+                                   (cscore == score) ? "*" : " ",
+                                   count + 1, cscore->score, desc,
+                                   cscore->dlevel, cscore->hp);
 
             g_free(desc);
         }
+
+        game_scores_destroy(scores);
 
         /* some statistics */
         g_string_append_printf(text, "\n%s %s after searching the potion for %d mobuls. ",
@@ -985,7 +968,6 @@ void player_die(player *p, player_cod cause_type, int cause)
         }
 
         g_string_free(text, TRUE);
-        game_scores_destroy(scores);
     }
 
     display_shutdown();
