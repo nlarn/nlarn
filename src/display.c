@@ -40,6 +40,9 @@ static void display_window_update_caption(display_window *dwin);
 static void display_window_update_arrow_up(display_window *dwin, gboolean on);
 static void display_window_update_arrow_down(display_window *dwin, gboolean on);
 
+static void display_windows_hide();
+static void display_windows_show();
+
 static void display_spheres_paint(sphere *s, player *p);
 
 int display_init()
@@ -1926,6 +1929,9 @@ position display_get_position(player *p, char *message, int draw_line, int passa
     /* start at player's position */
     pos = p->pos;
 
+    /* hide windows */
+    display_windows_hide();
+
     /* display message */
     log_add_entry(p->log, message);
     display_paint_screen(p);
@@ -2094,6 +2100,9 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 
     /* hide cursor */
     curs_set(0);
+
+    /* show windows */
+    display_windows_show();
 
     return pos;
 }
@@ -2427,6 +2436,30 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
         wattron(dwin->window, COLOR_PAIR(11));
         mvwhline(dwin->window, dwin->height - 1, dwin->width - 5, ACS_HLINE, 3);
         wattroff(dwin->window, COLOR_PAIR(11));
+    }
+}
+
+static void display_windows_hide()
+{
+    GList *iterator = windows;
+
+    while (iterator)
+    {
+        display_window *win = (display_window *)iterator->data;
+        hide_panel(win->panel);
+        iterator = iterator->next;
+    }
+}
+
+static void display_windows_show()
+{
+    GList *iterator = windows;
+
+    while (iterator)
+    {
+        display_window *win = (display_window *)iterator->data;
+        show_panel(win->panel);
+        iterator = iterator->next;
     }
 }
 
