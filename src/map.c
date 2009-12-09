@@ -350,35 +350,38 @@ position map_find_space(map *maze, map_element_t element)
 
 position map_find_space_in(map *maze, rectangle where, map_element_t element)
 {
-    position pos, pos_orig;
+    position pos;
+    int count, iteration = 0;
 
     assert (maze != NULL && element > LE_NONE && element < LE_MAX);
 
-    pos_orig.x = pos.x = rand_m_n(where.x1, where.x2);
-    pos_orig.y = pos.y = rand_m_n(where.y1, where.y2);
-    pos_orig.z = pos.z = maze->nlevel;
+    pos.x = rand_m_n(where.x1, where.x2);
+    pos.y = rand_m_n(where.y1, where.y2);
+    pos.z = maze->nlevel;
+
+    /* number of positions inside the rectangle */
+    count = (where.x2 - where.x1 + 1) * (where.y2 - where.y1 + 1);
 
     do
     {
-        pos.x += 1;
-        pos.y += 1;
+        pos.x++;
 
         if (pos.x > where.x2)
+        {
             pos.x = where.x1;
-
-        if (pos.x < where.x1)
-            pos.x = where.x2;
+            pos.y++;
+        }
 
         if (pos.y > where.y2)
+        {
             pos.y = where.y1;
+        }
 
-        if (pos.y < where.y1)
-            pos.y = where.y2;
+        iteration++;
     }
-    while (!map_pos_validate(maze, pos, element)
-            && !pos_identical(pos, pos_orig));
+    while (!map_pos_validate(maze, pos, element) && (iteration <= count));
 
-    if (pos_identical(pos, pos_orig))
+    if (iteration > count )
     {
         pos.x = G_MAXINT16;
         pos.y = G_MAXINT16;
