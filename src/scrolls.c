@@ -108,24 +108,24 @@ item_usage_result scroll_read(struct player *p, item *scroll)
 {
     char description[61];
     item_usage_result result;
-    
+
     result.time = 2;
     result.used_up = TRUE;
-    
+
     item_describe(scroll, player_item_known(p, scroll),
-                  TRUE, FALSE, description, 60);
-                  
+                  TRUE, TRUE, description, 60);
+
     if (player_effect(p, ET_BLINDNESS))
     {
         log_add_entry(p->log, "As you are blind you can't read %s.",
                       description);
-                      
+
         result.identified = FALSE;
         result.used_up = FALSE;
-        
+
         return result;
     }
-                  
+
     log_add_entry(p->log, "You read %s.", description);
 
     /* increase number of scrolls read */
@@ -201,9 +201,9 @@ item_usage_result scroll_read(struct player *p, item *scroll)
             break;
 
         case ST_PULVERIZATION:
-            if (!player_item_identified(p, scroll))
+            if (!p->identified_scrolls[ST_PULVERIZATION])
             {
-                log_add_entry(p->log, "This is a scroll of %s.", 
+                log_add_entry(p->log, "This is a scroll of %s. ",
                               scroll_name(scroll));
             }
 
@@ -231,7 +231,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
             log_add_entry(p->log, "Nothing happens.");
         }
     }
-        
+
     return result;
 }
 
@@ -389,7 +389,13 @@ static int scroll_genocide_monster(player *p, item *scroll)
     assert(p != NULL);
 
     msg = g_string_new(NULL);
-    g_string_append_printf(msg, "This is a scroll of %s. ", scroll_name(scroll));
+
+    if (!p->identified_scrolls[ST_GENOCIDE_MONSTER])
+    {
+        g_string_append_printf(msg, "This is a scroll of %s. ",
+                               scroll_name(scroll));
+    }
+
     g_string_append(msg, "Which monster do you want to genocide (type letter)?");
 
     in = display_get_string(msg->str, NULL, 1);
@@ -453,7 +459,7 @@ static int scroll_heal_monster(player *p, item *scroll)
     }
     while ((mlist = mlist->next));
 
-    if (count)
+    if (count > 0)
     {
         log_add_entry(p->log, "You feel uneasy.");
     }
