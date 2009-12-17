@@ -1683,21 +1683,6 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     {
         m = (monster *)dam->originator;
 
-        /* half damage if player is protected against spirits */
-        if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_is_spirit(m))
-        {
-            if (dam->type == DAM_PHYSICAL)
-            {
-                /* half physical damage */
-                dam->amount >>= 1;
-            }
-            else
-            {
-                /* cancel special attacks */
-                dam->amount = 0;
-            }
-        }
-
         /* amulet of power cancels demon attacks */
         if (monster_is_demon(m) && chance(75)
                 && (p->eq_amulet && p->eq_amulet->id == AM_POWER))

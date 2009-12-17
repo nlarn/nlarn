@@ -1694,8 +1694,25 @@ void monster_player_attack(monster *m, player *p)
     dam = damage_new(att->damage, att->base + game_difficulty(nlarn), m);
 
     /* deal with random damage (spirit naga) */
-    if (dam->type == DAM_RANDOM)
-        dam->type = rand_1n(DAM_MAX);
+    if (dam->type == DAM_RANDOM) dam->type = rand_1n(DAM_MAX);
+
+    /* half damage if player is protected against spirits */
+    if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_is_spirit(m))
+    {
+        if (dam->type == DAM_PHYSICAL)
+        {
+            /* half physical damage */
+            dam->amount >>= 1;
+        }
+        else
+        {
+            /* cancel special attacks - mark attack type as useless */
+            monster_attack_disable(m, att);
+            damage_free(dam);
+
+            return;
+        }
+    }
 
     /* set damage for weapon attacks */
     if ((att->type == ATT_WEAPON) && (m->weapon != NULL))
@@ -1705,8 +1722,7 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* add variable damage */
-    if (att->rand)
-        dam->amount += rand_1n(att->rand);
+    if (att->rand) dam->amount += rand_1n(att->rand);
 
     /* handle some damage types here */
     switch (dam->type)
