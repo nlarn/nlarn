@@ -883,7 +883,6 @@ int spell_type_ray(spell *s, struct player *p)
 
     log_add_entry(p->log, spell_msg_succ(s), monster_name(monster));
 
-    /* FIXME: get all monsters in the ray and affect them all */
     monster_damage_take(monster, damage_new(spell_damage(s), amount, p));
 
     return spell_level(s);
@@ -1259,24 +1258,24 @@ item_usage_result book_read(struct player *p, item *book)
     item_usage_result result;
     char description[61];
 
+    result.identified = FALSE;
     result.time = 1 + spell_level_by_id(book->id);
     result.used_up = TRUE;
 
     item_describe(book, player_item_known(p, book),
                   TRUE, TRUE, description, 60);
-    
+
     if (player_effect(p, ET_BLINDNESS))
     {
         log_add_entry(p->log, "As you are blind you can't read %s.",
                       description);
-                      
-        result.identified = FALSE;
+
         result.used_up = FALSE;
         result.time = 2;
-        
+
         return result;
     }
-    
+
     log_add_entry(p->log, "You read %s.", description);
 
     /* increase number of books read */
@@ -1296,23 +1295,22 @@ item_usage_result book_read(struct player *p, item *book)
         {
         case 0:
             log_add_entry(p->log, "You cannot understand the content of this book.");
-            result.identified = FALSE;
             result.used_up = FALSE;
             break;
 
         case 1:
             /* learnt spell */
-            log_add_entry(p->log, "You master the spell \"%s\".",
-                          book_name(book));
+            log_add_entry(p->log, "You master the spell %s.", book_name(book));
 
             result.identified = TRUE;
             break;
 
         default:
             /* improved knowledge of spell */
-            log_add_entry(p->log,
-                          "You improved your knowledge of the spell %s.",
+            log_add_entry(p->log, "You improved your knowledge of the spell %s.",
                           book_name(book));
+
+            result.identified = TRUE;
             break;
         }
 
