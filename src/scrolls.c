@@ -133,7 +133,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
 
     if (scroll->cursed)
     {
-        damage *dam = damage_new(DAM_FIRE, rand_1n(p->hp), NULL);
+        damage *dam = damage_new(DAM_FIRE, ATT_NONE, rand_1n(p->hp), NULL);
         log_add_entry(p->log, "The Scroll explodes!");
         player_damage_take(p, dam, PD_CURSE, scroll->type);
     }
@@ -272,7 +272,7 @@ static int scroll_annihilate(struct player *p, item *scroll)
          * the demon lords */
         if (monster_type(m) < MT_DEMONLORD_II)
         {
-            m = monster_damage_take(m, damage_new(DAM_MAGICAL, 2000, p));
+            m = monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_NONE, 2000, p));
 
             /* check if the monster has been killed */
             if (!m) count++;
@@ -284,7 +284,7 @@ static int scroll_annihilate(struct player *p, item *scroll)
                           monster_name(m));
 
             /* lose half hit points*/
-            damage *dam = damage_new(DAM_MAGICAL, monster_hp(m) / 2, p);
+            damage *dam = damage_new(DAM_MAGICAL, ATT_NONE, monster_hp(m) / 2, p);
             monster_damage_take(m, dam);
         }
     }

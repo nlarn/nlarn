@@ -95,7 +95,7 @@ item_usage_result potion_quaff(struct player *p, item *potion)
 {
     item_usage_result result;
     char description[61];
-        
+
     item_describe(potion, player_item_known(p, potion),
                   TRUE, FALSE, description, 60);
 
@@ -103,14 +103,14 @@ item_usage_result potion_quaff(struct player *p, item *potion)
 
     /* increase number of potions quaffed */
     p->stats.potions_quaffed++;
-    
+
     result.time = 2;
     result.identified = TRUE;
     result.used_up = TRUE;
 
     if (potion->cursed)
     {
-        damage *dam = damage_new(DAM_POISON, rand_1n(p->hp), NULL);
+        damage *dam = damage_new(DAM_POISON, ATT_NONE, rand_1n(p->hp), NULL);
 
         log_add_entry(p->log, "The Potion is foul!");
 
@@ -145,7 +145,7 @@ item_usage_result potion_quaff(struct player *p, item *potion)
             break;
         }
     }
-    
+
     return result;
 }
 

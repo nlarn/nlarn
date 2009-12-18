@@ -118,6 +118,7 @@ typedef struct _attack
 typedef struct _damage
 {
     damage_t type;
+    attack_t attack;
     int amount;
     gpointer originator; /* pointer to player / monster that caused the damage */
 } damage;

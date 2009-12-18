@@ -749,15 +749,16 @@ int spell_type_point(spell *s, struct player *p)
         /* dehydration */
     case SP_DRY:
         amount = (100 * s->knowledge) + p->level;
-        monster_damage_take(monster, damage_new(DAM_MAGICAL, amount, p));
+        monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, p));
         break; /* SP_DRY */
 
         /* drain life */
     case SP_DRL:
         amount = min(p->hp - 1, (int)p->hp_max / 2);
 
-        monster_damage_take(monster, damage_new(DAM_MAGICAL, amount, p));
-        player_damage_take(p, damage_new(DAM_MAGICAL, amount, NULL), PD_SPELL, SP_DRL);
+        monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, p));
+        player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, NULL),
+                           PD_SPELL, SP_DRL);
 
         break; /* SP_DRL */
 
@@ -770,7 +771,7 @@ int spell_type_point(spell *s, struct player *p)
 
         if ((player_get_wis(p) + s->knowledge) > rand_m_n(10,20))
         {
-            monster_damage_take(monster, damage_new(DAM_MAGICAL, 2000, p));
+            monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, p));
         }
         else
         {
@@ -878,12 +879,13 @@ int spell_type_ray(spell *s, struct player *p)
         log_add_entry(p->log, "The mirror reflects your spell! The %s hits you!",
                       spell_name(s));
 
-        player_damage_take(p, damage_new(spell_damage(s), amount, NULL), PD_SPELL, s->id);
+        player_damage_take(p, damage_new(spell_damage(s), ATT_MAGIC, amount, NULL),
+        PD_SPELL, s->id);
     }
 
     log_add_entry(p->log, spell_msg_succ(s), monster_name(monster));
 
-    monster_damage_take(monster, damage_new(spell_damage(s), amount, p));
+    monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount, p));
 
     return spell_level(s);
 }
@@ -969,7 +971,7 @@ int spell_type_blast(spell *s, struct player *p)
     for (idx = 0; idx < mlist->len; idx++)
     {
         monster = g_ptr_array_index(mlist, idx);
-        dam = damage_new(DAM_FIRE, amount, p);
+        dam = damage_new(DAM_FIRE, ATT_MAGIC, amount, p);
 
         monster_damage_take(monster, dam);
     }
@@ -979,7 +981,7 @@ int spell_type_blast(spell *s, struct player *p)
         /* player has been hit by the blast as well */
         log_add_entry(p->log, "The fireball hits you.");
 
-        dam = damage_new(DAM_FIRE, amount, NULL);
+        dam = damage_new(DAM_FIRE, ATT_MAGIC, amount, NULL);
         player_damage_take(p, dam, PD_SPELL, SP_BAL);
     }
 
@@ -1159,7 +1161,7 @@ gboolean spell_vaporize_rock(player *p)
     if ((m = map_get_monster_at(map, pos)) && (monster_type(m) == MT_XORN))
     {
         /* xorns take damage from vpr */
-        monster_damage_take(m, damage_new(DAM_PHYSICAL, divert(200, 10), p));
+        monster_damage_take(m, damage_new(DAM_PHYSICAL, ATT_NONE, divert(200, 10), p));
     }
 
     mpos = map_find_space_in(map, rect_new_sized(p->pos, 1), LE_MONSTER);

@@ -246,7 +246,7 @@ static void sphere_kill_monster(sphere *s, monster *m)
                       monster_name(m));
     }
 
-    mret = monster_damage_take(m, damage_new(DAM_MAGICAL, 2000, NULL));
+    mret = monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, NULL));
 
     if (!mret && s->owner)
     {

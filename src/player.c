@@ -565,7 +565,7 @@ int player_regenerate(player *p)
     {
         if ((game_turn(nlarn) - e->start) % (22 - frequency) == 0)
         {
-            damage *dam = damage_new(DAM_POISON, e->amount, NULL);
+            damage *dam = damage_new(DAM_POISON, ATT_NONE, e->amount, NULL);
 
             player_damage_take(p, dam, PD_EFFECT, e->type);
         }
@@ -1123,7 +1123,7 @@ int player_attack(player *p, monster *m)
                  - 12
                  - game_difficulty(nlarn);
 
-        dam = damage_new(DAM_PHYSICAL, rand_1n(amount + 1), p);
+        dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, rand_1n(amount + 1), p);
 
         /* weapon damage due to rust when hitting certain monsters */
         if (p->eq_weapon && monster_is_metallivore(m))
@@ -1671,9 +1671,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         { "You feel poison running through your veins.", "You resist the poison.", }, /* DAM_POISON */
         { NULL, "You are not blinded.", }, /* DAM_BLINDNESS */
         { NULL, "You are not confused.", }, /* DAM_CONFUSION */
-        { NULL, "", }, /* DAM_PARALYSIS */
-        { NULL, "", }, /* DAM_DEC_STR */
-        { NULL, "", }, /* DAM_DEC_DEX */
+        { NULL, "You avoid eye contact.", }, /* DAM_PARALYSIS */
+        { NULL, "You are not affected.", }, /* DAM_DEC_STR */
+        { NULL, "You are not affected.", }, /* DAM_DEC_DEX */
         { "Your life energy is drained.", "You are not affected.", }, /* DAM_DRAIN_LIFE */
     };
 
@@ -1723,26 +1723,55 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_POISON:
+        if (dam->attack != ATT_NONE)
+        {
+            dam->amount -= rand_0n(player_get_con(p));
+        }
         break;
 
     case DAM_BLINDNESS:
+        dam->amount = chance(dam->amount);
         break;
 
     case DAM_CONFUSION:
+        if (dam->attack == ATT_GAZE && player_effect_get(p, ET_BLINDNESS))
+        {
+            dam->amount = 0;
+        }
+        else
+        {
+            dam->amount = chance(dam->amount - player_get_int(p));
+        }
         break;
 
     case DAM_PARALYSIS:
+        if (dam->attack == ATT_GAZE && player_effect_get(p, ET_BLINDNESS))
+        {
+            dam->amount = 0;
+        }
+        else
+        {
+            dam->amount = chance(dam->amount - player_get_int(p));
+        }
         break;
 
     case DAM_DEC_STR:
+        dam->amount = chance(dam->amount - player_get_str(p));
         break;
 
     case DAM_DEC_DEX:
+        dam->amount = chance(dam->amount - player_get_dex(p));
         break;
 
     case DAM_DRAIN_LIFE:
         if (player_effect(p, ET_UNDEAD_PROTECTION))
+        {
             dam->amount = 0;
+        }
+        else
+        {
+            dam->amount = chance(dam->amount - player_get_wis(p));
+        }
         break;
 
     default:
@@ -1769,6 +1798,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             {
                 e->amount += dam->amount;
             }
+
+            /* no additional HP loss */
+            dam->amount = 0;
             break;
 
         case DAM_BLINDNESS:
@@ -1778,6 +1810,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
                 e = effect_new(ET_BLINDNESS, game_turn(nlarn));
                 player_effect_add(p, e);
             }
+
+            /* no HP loss */
+            dam->amount = 0;
             break;
 
         case DAM_CONFUSION:
@@ -1786,6 +1821,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
                 e = effect_new(ET_CONFUSION, game_turn(nlarn));
                 player_effect_add(p, e);
             }
+
+            /* no HP loss */
+            dam->amount = 0;
             break;
 
         case DAM_PARALYSIS:
@@ -1794,6 +1832,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
                 e = effect_new(ET_PARALYSIS, game_turn(nlarn));
                 player_effect_add(p, e);
             }
+
+            /* no HP loss */
+            dam->amount = 0;
             break;
 
         case DAM_DEC_STR:
@@ -3720,7 +3761,7 @@ int player_fountain_drink(player *p)
                 log_add_entry(p->log, "You lose %d hit point%s!",
                               amount, plural(amount));
 
-                damage *dam = damage_new(DAM_NONE, amount, NULL);
+                damage *dam = damage_new(DAM_NONE, ATT_NONE, amount, NULL);
                 player_damage_take(p, dam, PD_SOBJECT, LS_FOUNTAIN);
             }
 
@@ -3801,7 +3842,7 @@ int player_fountain_wash(player *p)
     {
         log_add_entry(p->log, "Oh no! The water was foul!");
 
-        damage *dam = damage_new(DAM_POISON,
+        damage *dam = damage_new(DAM_POISON, ATT_NONE,
                                  rand_1n((p->pos.z << 2) + 2), NULL);
 
         player_damage_take(p, dam, PD_SOBJECT, LS_FOUNTAIN);
@@ -4260,7 +4301,7 @@ static int player_trap_trigger(player *p, trap_t trap)
         default:
             if (trap_damage(trap))
             {
-                damage *dam = damage_new(DAM_PHYSICAL,
+                damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
                                          rand_1n(trap_damage(trap)) + p->pos.z,
                                          NULL);
 

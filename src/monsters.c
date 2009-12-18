@@ -149,7 +149,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_TINY,
         MF_HEAD,
         {
-            { ATT_BITE, DAM_POISON, 1, 0 },
+            { ATT_BITE, DAM_POISON, 2, 0 },
             { ATT_BITE, DAM_PHYSICAL, 1, 0 },
         }
     },
@@ -159,7 +159,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_TINY,
         MF_HEAD,
         {
-            { ATT_BITE, DAM_DEC_STR, 1, 0 },
+            { ATT_BITE, DAM_DEC_STR, 50, 0 },
             { ATT_BITE, DAM_PHYSICAL, 1, 0 },
         }
     },
@@ -190,7 +190,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD,
         {
-            { ATT_BITE, DAM_DEC_STR, 2, 0 },
+            { ATT_BITE, DAM_DEC_STR, 75, 0 },
             { ATT_BITE, DAM_PHYSICAL, 1, 0 },
         }
     },
@@ -200,7 +200,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_SLOW, ESIZE_MEDIUM,
         MF_FLY,
         {
-            { ATT_GAZE, DAM_PARALYSIS, 1, 0 },
+            { ATT_GAZE, DAM_PARALYSIS, 66, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -230,7 +230,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS | MF_DEMON,
         {
-            { ATT_CLAW, DAM_DEC_DEX, 1, 0 },
+            { ATT_CLAW, DAM_DEC_DEX, 66, 0 },
             { ATT_BITE, DAM_PHYSICAL, 3, 0 },
         }
     },
@@ -379,7 +379,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_SLOW, ESIZE_MEDIUM,
         MF_NONE,
         {
-            { ATT_SLAM, DAM_POISON, 1, 0 },
+            { ATT_SLAM, DAM_POISON, 2, 0 },
             { ATT_SLAM, DAM_PHYSICAL, 3, 0 },
         }
     },
@@ -389,7 +389,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_UNDEAD,
         {
-            { ATT_TOUCH, DAM_DRAIN_LIFE, 1, 0 },
+            { ATT_TOUCH, DAM_DRAIN_LIFE, 50, 0 },
             EMPTY_ATTACK,
         }
     },
@@ -449,7 +449,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_FLY | MF_UNDEAD | MF_INFRAVISION | MF_REGENERATE,
         {
-            { ATT_TOUCH, DAM_DRAIN_LIFE, 1, 0 },
+            { ATT_TOUCH, DAM_DRAIN_LIFE, 75, 0 },
             { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
         }
     },
@@ -509,7 +509,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_SLOW, ESIZE_HUGE,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
-            { ATT_GAZE, DAM_CONFUSION, 0, 0 },
+            { ATT_GAZE, DAM_CONFUSION, 75, 0 },
             { ATT_CLAW, DAM_PHYSICAL, 7, 0 },
         }
     },
@@ -550,7 +550,7 @@ const monster_data monsters[MT_MAX] =
         MF_HEAD,
         {
             { ATT_BITE, DAM_PHYSICAL, 11, 0 },
-            { ATT_STING, DAM_POISON, 3, 0 },
+            { ATT_STING, DAM_POISON, 6, 0 },
         }
     },
     {
@@ -1518,7 +1518,7 @@ monster *monster_trap_trigger(monster *m)
     /* inflict damage caused ba the trap */
     if (trap_damage(trap))
     {
-        damage *dam = damage_new(DAM_PHYSICAL, rand_1n(trap_damage(trap)), NULL);
+        damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE, rand_1n(trap_damage(trap)), NULL);
         m = monster_damage_take(m, dam);
     }
 
@@ -1691,7 +1691,7 @@ void monster_player_attack(monster *m, player *p)
     if (!att) return;
 
     /* generate damage */
-    dam = damage_new(att->damage, att->base + game_difficulty(nlarn), m);
+    dam = damage_new(att->damage, att->type, att->base + game_difficulty(nlarn), m);
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM) dam->type = rand_1n(DAM_MAX);
