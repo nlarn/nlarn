@@ -1354,16 +1354,19 @@ void player_examine(player *p, position pos)
     /* describe the level tile */
     tmp = g_strdup(lt_get_desc(tile->type));
     tmp[0] = g_ascii_toupper(tmp[0]);
-    desc = g_string_new(NULL);
-    g_string_append_printf(desc, "%s. ", tmp);
+    desc = g_string_new(tmp);
     g_free(tmp);
 
     /* name monster */
     if (tile->monster != NULL)
     {
         monster *m = game_monster_get(nlarn, tile->monster);
-        g_string_append_printf(desc, "A%s %s. ", a_an(monster_name(m)),
+        g_string_append_printf(desc, ", %s %s. ", a_an(monster_name(m)),
                                monster_name(m));
+    }
+    else
+    {
+        g_string_append(desc, ". ");
     }
 
     /* add message if target tile contains a stationary object */
@@ -1376,7 +1379,7 @@ void player_examine(player *p, position pos)
     /* add message if target tile contains a known trap */
     if (player_memory_of(p, pos).trap)
     {
-        g_string_append_printf(desc, "There is a%s %s %s. ",
+        g_string_append_printf(desc, "There is %s %s %s. ",
                                a_an(trap_description(tile->trap)),
                                trap_description(tile->trap), where);
     }
@@ -4670,7 +4673,7 @@ static char *player_death_description(game_score_t *score, int verbose)
     case PD_MONSTER:
         /* TODO: regard monster's invisibility */
         /* TODO: while sleeping / doing sth. */
-        g_string_append_printf(text, " by a%s %s.",
+        g_string_append_printf(text, " by %s %s.",
                                a_an(monster_type_name(score->cause)),
                                monster_type_name(score->cause));
         break;
@@ -4680,7 +4683,7 @@ static char *player_death_description(game_score_t *score, int verbose)
         break;
 
     case PD_TRAP:
-        g_string_append_printf(text, " by a%s %s.",
+        g_string_append_printf(text, " by %s %s.",
                                a_an(trap_description(score->cause)),
                                trap_description(score->cause));
         break;

@@ -86,7 +86,7 @@ void text_destroy(GPtrArray *text);
 /* misc. text functions */
 int str_starts_with_vowel(char *str);
 const char *int2str(int val);
-#define a_an(str) (str_starts_with_vowel((str)) ? "n" : "")
+#define a_an(str) (str_starts_with_vowel((str)) ? "an" : "a")
 #define plural(i) (((i) > 1) ? "s" : "")
 
 

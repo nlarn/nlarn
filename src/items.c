@@ -674,8 +674,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 
     case IT_GEM:
         g_snprintf(desc, 60, item_desc_get(it, known));
-        g_snprintf(str, str_len, "%d carats %s",
-                   gem_size(it), desc);
+        g_snprintf(str, str_len, "%s carats %s", gem_size(it), desc);
 
         item_name_count(str, add_info, singular, definite, str_len, it->count);
         break;
@@ -1631,29 +1630,22 @@ static char *item_name_count(char *name, char *add_info, int singular, int defin
 
     if ((count == 1) || singular)
     {
-        if (definite)
+        if (add_info != NULL)
         {
-            if (add_info)
-                g_snprintf(name, length, "the %s %s", add_info, incoming);
-            else
-                g_snprintf(name, length, "the %s", incoming);
+            g_snprintf(name, length, "%s %s %s",
+                       (definite ? "the" : a_an(add_info)),
+                       add_info, incoming);
         }
         else
         {
-            if (add_info)
-                g_snprintf(name, length, "a%s %s %s", a_an(incoming),
-                           add_info, incoming);
-            else
-                g_snprintf(name, length, "a%s %s", a_an(incoming), incoming);
+            g_snprintf(name, length, "%s %s",
+                       (definite ? "the" : a_an(incoming)),
+                       incoming);
         }
-
-        g_free(incoming);
-
-        return name;
     }
-    else if ((count > 1) && (count <= 20 ))
+    else
     {
-        if (add_info)
+        if (add_info != NULL)
         {
             if (definite)
                 g_snprintf(name, length, "%s %s", add_info, incoming);
@@ -1665,13 +1657,6 @@ static char *item_name_count(char *name, char *add_info, int singular, int defin
         {
             g_snprintf(name, length, "%s %s", int2str(count), incoming);
         }
-    }
-    else
-    {
-        if (add_info)
-            g_snprintf(name, length, "%d %s %s", count, add_info, incoming);
-        else
-            g_snprintf(name, length, "%d %s", count, incoming);
     }
 
     g_free(incoming);

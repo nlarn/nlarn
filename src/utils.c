@@ -350,7 +350,7 @@ void text_destroy(GPtrArray *text)
 
 int str_starts_with_vowel(char *str)
 {
-    const char vowels[] = "aeioAEIO";
+    const char vowels[] = "aeiouAEIOU";
 
     assert (str != NULL);
 

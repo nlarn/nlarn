@@ -290,7 +290,7 @@ void building_dndstore_init()
 
                 item *it = item_new(type, id, 0);
 
-                if (item_is_identifable(it->type))
+                if (item_is_identifyable(it->type))
                 {
                     /* make item attributes known */
                     it->bonus_known = TRUE;
