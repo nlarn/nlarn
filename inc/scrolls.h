@@ -32,6 +32,8 @@ typedef struct magic_scroll_data {
 	char *name;
 	effect_type effect; /* if this scroll causes an effect */
 	int price;
+	unsigned
+        obtainable: 1;  /* available in the shop */
 } magic_scroll_data;
 
 enum scroll_types {
@@ -75,6 +77,8 @@ int scroll_mapping(struct player *p, item *scroll);
 extern const magic_scroll_data scrolls[ST_MAX];
 
 /* macros */
+
+#define scroll_type_obtainable(id) (scrolls[id].obtainable)
 
 #define scroll_name(scroll)   (scrolls[(scroll)->id].name)
 #define scroll_effect(scroll) (scrolls[(scroll)->id].effect)

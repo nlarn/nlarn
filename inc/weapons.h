@@ -64,6 +64,8 @@ extern const weapon_data weapons[WT_MAX];
 
 /* macros */
 
+#define weapon_type_obtainable(id) (weapons[id].obtainable)
+
 #define weapon_name(weapon)          (weapons[(weapon)->id].name)
 #define weapon_wc(weapon)            (weapons[(weapon)->id].wc + (weapon)->bonus)
 #define weapon_material(weapon)      (weapons[(weapon)->id].material)
@@ -71,6 +73,5 @@ extern const weapon_data weapons[WT_MAX];
 #define weapon_price(weapon)         (weapons[(weapon)->id].price)
 #define weapon_is_twohanded(weapon)  (weapons[(weapon)->id].twohanded)
 #define weapon_is_unique(weapon)     (weapons[(weapon)->id].unique)
-#define weapon_is_obtainable(weapon) (weapons[(weapon)->id].obtainable)
 
 #endif

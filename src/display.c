@@ -726,9 +726,9 @@ item *display_inventory(char *title, player *p, inventory **inv,
 
             if (show_price)
             {
+                /* inside shop */
                 mvwprintw(iwin->window, pos, 1, " %-43s %5dgp %c",
-                          item_describe(it, player_item_known(p, it),
-                                        FALSE, FALSE, item_desc, 80),
+                          item_describe(it, TRUE, FALSE, FALSE, item_desc, 80),
                           item_price(it),
                           player_item_is_equipped(p, it) ? '*' : ' ');
             }

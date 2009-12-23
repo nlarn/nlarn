@@ -267,11 +267,6 @@ void building_dndstore_init()
 
     for (type = IT_ARMOUR; type < IT_MAX; type++)
     {
-        if (type == IT_GOLD || type == IT_GEM || type == IT_CONTAINER)
-        {
-            continue;
-        }
-
         if (item_is_stackable(type) && (type != IT_BOOK))
         {
             count = 3;
@@ -287,24 +282,20 @@ void building_dndstore_init()
 
             for (id = 1; id < item_max_id(type); id++)
             {
+                /* do not generate unobtainable items */
+                if (!item_obtainable(type, id))
+                {
+                    continue;
+                }
+
                 item *it = item_new(type, id, 0);
 
-                /* do not generate unobtainable weapons */
-                if ((type == IT_WEAPON) && !weapon_is_obtainable(it))
-                {
-                    item_destroy(it);
-                }
-                else
-                {
-                    if (type == IT_WEAPON || type == IT_ARMOUR)
-                    {
-                        /* make bonus known */
-                        it->bonus_known = TRUE;
-                    }
+                /* make item attributes known */
+                it->bonus_known = TRUE;
+                it->blessed_known = TRUE;
 
-                    /* add item to store */
-                    inv_add(&nlarn->store_stock, it);
-                }
+                /* add item to store */
+                inv_add(&nlarn->store_stock, it);
             }
         }
     }
@@ -655,7 +646,7 @@ int building_tradepost(player *p)
     display_show_message((char *)title, (char *)msg_welcome);
     display_paint_screen(p);
 
-    display_inventory((char *)title, p, &p->inventory, callbacks, TRUE, &inv_filter_not_gold);
+    display_inventory((char *)title, p, &p->inventory, callbacks, FALSE, &inv_filter_not_gold);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);
@@ -744,7 +735,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
 
     if (it->count > 1)
     {
-        item_describe(it, player_item_known(p, it), FALSE, FALSE, name, 40);
+        item_describe(it, TRUE, FALSE, FALSE, name, 40);
         g_snprintf(text, 80, "How many %s do you want to buy?", name);
 
         /* get count */
@@ -770,7 +761,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
             it_clone = item_copy(it);
             it_clone->count = count;
 
-            item_describe(it, player_item_known(p, it), FALSE, TRUE, name, 60);
+            item_describe(it, TRUE, FALSE, TRUE, name, 60);
             g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
                        price, name);
 
@@ -787,7 +778,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
     else
     {
         count = 1;
-        item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 60);
+        item_describe(it, TRUE, TRUE, TRUE, name, 60);
         g_snprintf(text, 80, "Do you want to buy %s for %d gold?",
                    name, price);
 
@@ -800,7 +791,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
     }
 
     /* log the event */
-    item_describe(it_clone, player_item_known(p, it_clone), (count == 1), FALSE, name, 60);
+    item_describe(it_clone, TRUE, (count == 1), FALSE, name, 60);
     log_add_entry(p->log, "You buy %s.", name);
 
     /* try to transfer the item */
@@ -816,6 +807,9 @@ static int building_item_sell(player *p, inventory **inv, item *it)
         {
             inv_del_element(inv, it);
         }
+
+        /* identify the item */
+        player_item_identify(p, &p->inventory, it_clone);
     }
     else
     {

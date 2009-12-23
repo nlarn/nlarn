@@ -32,6 +32,8 @@ typedef struct potion_data {
     char *name;
     int	effect_type; 		/* if this potion causes any effect */
     int price;
+    unsigned
+        obtainable: 1;      /* available in the shop */
 } potion_data;
 
 enum potion_objects {
@@ -73,6 +75,8 @@ item_usage_result potion_quaff(struct player *p, item *potion);
 extern const potion_data potions[PO_MAX];
 
 /* macros */
+
+#define potion_type_obtainable(id) (potions[id].obtainable)
 
 #define potion_name(potion)   (potions[(potion)->id].name)
 #define potion_effect(potion) (potions[(potion)->id].effect_type)

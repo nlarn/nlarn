@@ -67,6 +67,12 @@ void game_new(int argc, char *argv[])
     /* initialize game settings */
     game_initialize_settings(nlarn, argc, argv, TRUE);
 
+    /* randomize unidentified item descriptions */
+    game_items_shuffle(nlarn);
+
+    /* fill the store */
+    building_dndstore_init();
+
     /* allocate space for levels */
     for (idx = 0; idx < MAP_MAX; idx++)
     {
@@ -82,12 +88,6 @@ void game_new(int argc, char *argv[])
                   VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 
     log_set_time(nlarn->p->log, nlarn->gtime);
-
-    /* randomize unidentified item descriptions */
-    game_items_shuffle(nlarn);
-
-    /* fill the store */
-    building_dndstore_init();
 }
 
 int game_destroy(game *g)

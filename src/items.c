@@ -1194,6 +1194,41 @@ int item_burn(item *it)
     }
 }
 
+int item_obtainable(item_t type, int id)
+{
+    int obtainable;
+
+    switch (type)
+    {
+        case IT_ARMOUR:
+        case IT_FOOD:
+        case IT_RING:
+            obtainable = TRUE;
+            break;
+
+        case IT_BOOK:
+            obtainable = book_type_obtainable(id);
+            break;
+
+        case IT_POTION:
+            obtainable = potion_type_obtainable(id);
+            break;
+
+        case IT_SCROLL:
+            obtainable = scroll_type_obtainable(id);
+            break;
+
+        case IT_WEAPON:
+            obtainable = weapon_type_obtainable(id);
+            break;
+
+        default:
+            obtainable = FALSE;
+    }
+
+    return obtainable;
+}
+
 inventory *inv_new(gconstpointer owner)
 {
     inventory *ninv;

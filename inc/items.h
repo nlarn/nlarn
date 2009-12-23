@@ -171,6 +171,8 @@ int item_rust(item *it);
 int item_corrode(item *it);
 int item_burn(item *it);
 
+int item_obtainable(item_t type, int id);
+
 /* external vars */
 extern const item_type_data item_data[IT_MAX];
 extern const item_material_data item_materials[IM_MAX];
