@@ -674,7 +674,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 
     case IT_GEM:
         g_snprintf(desc, 60, item_desc_get(it, known));
-        g_snprintf(str, str_len, "%s carats %s", gem_size(it), desc);
+        g_snprintf(str, str_len, "%d carats %s", gem_size(it), desc);
 
         item_name_count(str, add_info, singular, definite, str_len, it->count);
         break;
