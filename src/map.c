@@ -475,9 +475,16 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element)
     case LE_SOBJECT:
         if (lt_is_passable(tile->type) && (tile->sobject == LS_NONE) )
         {
-            /* FIXME: don't want two stationary objects next to each other */
-            /* FIXME: don't want stationary objects next to the wall */
+            /* find free space */
+            position p = pos;
+
+            for (p.y = pos.y -1; p.y < pos.y + 2; p.y++)
+                for (p.x = pos.x -1; p.x < pos.x + 2; p.x++)
+                    if (map_sobject_at(l, p) != LS_NONE)
+                        return FALSE;
+
             return TRUE;
+
         }
         break;
 
