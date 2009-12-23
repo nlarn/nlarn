@@ -613,11 +613,11 @@ item *display_inventory(char *title, player *p, inventory **inv,
 
     if (show_price)
     {
-        width = 56;
+        width = 59;
     }
     else
     {
-        width = 50;
+        width = 54;
     }
 
     /* main loop */
@@ -727,14 +727,13 @@ item *display_inventory(char *title, player *p, inventory **inv,
             if (show_price)
             {
                 /* inside shop */
-                mvwprintw(iwin->window, pos, 1, " %-43s %5dgp %c",
+                mvwprintw(iwin->window, pos, 1, " %-48s %5d$ ",
                           item_describe(it, TRUE, FALSE, FALSE, item_desc, 80),
-                          item_price(it),
-                          player_item_is_equipped(p, it) ? '*' : ' ');
+                          item_price(it));
             }
             else
             {
-                mvwprintw(iwin->window, pos, 1, " %-44s %c ",
+                mvwprintw(iwin->window, pos, 1, " %-48s %c ",
                           item_describe(it, player_item_known(p, it),
                                         FALSE, FALSE, item_desc, 80),
                           player_item_is_equipped(p, it) ? '*' : ' ');
