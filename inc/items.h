@@ -135,7 +135,8 @@ typedef struct item_type_data {
 	unsigned
 		equippable: 1,
 		usable: 1,
-		stackable: 1;
+		stackable: 1,
+		identifyable: 1;
 } item_type_data;
 
 /* function definitions */
@@ -185,6 +186,7 @@ extern const item_material_data item_materials[IM_MAX];
 #define item_is_equippable(type)      item_data[(type)].equippable
 #define item_is_usable(type)          item_data[(type)].usable
 #define item_is_stackable(type)       item_data[(type)].stackable
+#define item_is_identifyable(type)    item_data[(type)].identifyable
 #define item_material_name(type)      item_materials[(type)].name
 #define item_material_adjective(type) item_materials[(type)].adjective
 

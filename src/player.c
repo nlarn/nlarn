@@ -2942,6 +2942,10 @@ int player_item_identified(player *p, item *it)
 
     assert(p != NULL && it != NULL);
 
+    /* some items are always identified */
+    if (!item_is_identifyable(it->type))
+        return TRUE;
+
     known = player_item_known(p, it);
 
     if (!it->blessed_known)

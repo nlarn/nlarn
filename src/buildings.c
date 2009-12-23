@@ -290,9 +290,12 @@ void building_dndstore_init()
 
                 item *it = item_new(type, id, 0);
 
-                /* make item attributes known */
-                it->bonus_known = TRUE;
-                it->blessed_known = TRUE;
+                if (item_is_identifable(it->type))
+                {
+                    /* make item attributes known */
+                    it->bonus_known = TRUE;
+                    it->blessed_known = TRUE;
+                }
 
                 /* add item to store */
                 inv_add(&nlarn->store_stock, it);
