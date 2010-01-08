@@ -103,6 +103,13 @@ static const guint32 player_lvl_exp[] =
     250000000, 260000000, 270000000, 280000000, 290000000, 300000000                           /* 96-101*/
 };
 
+/* a little helper: will be set by player_autopickup() to prevent
+   player_item_pickup() asking how many items of a kind shall be picked up */
+
+static gboolean called_by_autopickup = FALSE;
+
+/* function declarations */
+
 static int player_trap_trigger(player *p, trap_t trap);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 
@@ -1469,6 +1476,9 @@ void player_autopickup(player *p)
 
     floor = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
 
+    /* set flag to tell player_item_pickup() not to ask about the amount */
+    called_by_autopickup = TRUE;
+
     for (idx = 0; idx < inv_length(*floor); idx++)
     {
         item *i = inv_get(*floor, idx);
@@ -1484,6 +1494,9 @@ void player_autopickup(player *p)
             }
         }
     }
+
+    /* reset flag */
+    called_by_autopickup = FALSE;
 }
 
 void player_autopickup_show(player *p)
@@ -3246,7 +3259,7 @@ int player_item_pickup(player *p, inventory **inv, item *it)
     guint count = 0;
     gpointer oid = it->oid;
 
-    if ((it->count > 1) && (it->type != IT_GOLD))
+    if ((!called_by_autopickup) && (it->count > 1))
     {
         g_snprintf(desc, 60, "Pick up how many %s?", item_name_pl(it->type));
 
@@ -3260,6 +3273,9 @@ int player_item_pickup(player *p, inventory **inv, item *it)
         if (count < it->count)
         {
             it = item_split(it, count);
+            /* set oid to NULL to prevent that the original is remove
+               from the originating inventory */
+            oid = NULL;
         }
     }
 
@@ -3279,7 +3295,10 @@ int player_item_pickup(player *p, inventory **inv, item *it)
         return FALSE;
     }
 
-    inv_del_oid(inv, oid);
+    /* if the item has not been split,
+       remove it from the originating inventory */
+    if (oid != NULL)
+        inv_del_oid(inv, oid);
 
     /* one turn to pick item up, one to stuff it into the pack */
     return 2;
