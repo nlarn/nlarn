@@ -984,12 +984,15 @@ void map_timer(map *l, guint8 count)
                 map_tile *tile = map_tile_at(l, pos);
                 tile->timer -= min(map_timer_at(l, pos), count);
 
-                /* affect items */
-                if (tile->ilist != NULL)
+                /* affect items every three turns */
+                if ((tile->ilist != NULL) && (tile->timer % 5 == 0))
                 {
                     for (idx = 0; idx < inv_length(tile->ilist); idx++)
                     {
                         it = inv_get(tile->ilist, idx);
+
+                        item_describe(it, player_item_known(nlarn->p, it),
+                                      (it->count == 1), TRUE, item_desc, 60);
 
                         switch (tile->type)
                         {
@@ -1015,9 +1018,6 @@ void map_timer(map *l, guint8 count)
                         /* notifiy player of impact if the item is visible */
                         if (impact && map_pos_is_visible(l, nlarn->p->pos, pos))
                         {
-                            item_describe(it, player_item_known(nlarn->p, it),
-                                          (it->count == 1), TRUE, item_desc, 60);
-
                             if (impact < PI_DESTROYED)
                             {
                                 log_add_entry(nlarn->p->log, "The %s %s%s.", item_desc,
