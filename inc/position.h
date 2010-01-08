@@ -77,4 +77,8 @@ int  area_point_get(area *a, int x, int y);
 void area_point_del(area *a, int x, int y);
 int area_point_valid(area *a, int x, int y);
 
+void area_pos_set(area *a, position pos);
+int  area_pos_get(area *a, position pos);
+void area_pos_del(area *a, position pos);
+
 #endif

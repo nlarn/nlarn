@@ -1923,7 +1923,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
     area *ray;
     int distance = 0;
     int x, y;
-    monster *target;
+    monster *target, *m;
 
     /* start at player's position */
     pos = p->pos;
@@ -1977,6 +1977,10 @@ position display_get_position(player *p, char *message, int draw_line, int passa
                         if (target && pos_identical(monster_pos(target), tpos))
                         {
                             mvaddch(ray->start_y + y, ray->start_x + x, monster_image(target));
+                        }
+                        else if ((m = map_get_monster_at(map, tpos)))
+                        {
+                            mvaddch(ray->start_y + y, ray->start_x + x, monster_image(m));
                         }
                         else
                         {

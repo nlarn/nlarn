@@ -124,7 +124,7 @@ gint pos_distance(position first, position second)
     if (first.z != second.z)
         return INT_MAX;
 
-    return abs(first.x - second.x)+ abs(first.y - second.y);
+    return (abs(first.x - second.x) + 1) + (abs(first.y - second.y) + 1);
 }
 
 int pos_identical(position pos1, position pos2)
@@ -619,4 +619,40 @@ int area_point_valid(area *a, int x, int y)
 {
     assert (a != NULL);
     return ((x < a->size_x) && (x >= 0)) && ((y < a->size_y) && (y >= 0));
+}
+
+void area_pos_set(area *a, position pos)
+{
+    int x, y;
+
+    assert (a != NULL);
+
+    x = pos.x - a->start_x;
+    y = pos.y - a->start_y;
+
+    area_point_set(a, x, y);
+}
+
+int area_pos_get(area *a, position pos)
+{
+    int x, y;
+
+    assert (a != NULL);
+
+    x = pos.x - a->start_x;
+    y = pos.y - a->start_y;
+
+    return area_point_get(a, x, y);
+}
+
+void area_pos_del(area *a, position pos)
+{
+    int x, y;
+
+    assert (a != NULL);
+
+    x = pos.x - a->start_x;
+    y = pos.y - a->start_y;
+
+    area_point_del(a, x, y);
 }
