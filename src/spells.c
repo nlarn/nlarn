@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "display.h"
+#include "map.h"
 #include "nlarn.h"
 #include "spells.h"
 #include "spheres.h"
@@ -790,7 +791,8 @@ int spell_type_point(spell *s, struct player *p)
         log_add_entry(p->log, "The %s disappears.",
                       monster_name(monster));
 
-        monster_pos_set(monster, game_map(nlarn, p->pos.z), map_find_space(game_map(nlarn, p->pos.z), LE_MONSTER));
+        map *mmap = game_map(nlarn, monster_pos(monster).z);
+        monster_pos_set(monster, mmap, map_find_space(mmap, LE_MONSTER, FALSE));
 
         break; /* SP_TEL */
 
@@ -1058,7 +1060,7 @@ gboolean spell_alter_reality(player *p)
     /* reposition player (if needed) */
     if (!map_pos_passable(nlevel, p->pos))
     {
-        p->pos = map_find_space(nlevel, LE_MONSTER);
+        p->pos = map_find_space(nlevel, LE_MONSTER, FALSE);
     }
 
     return TRUE;
@@ -1077,7 +1079,7 @@ gboolean spell_create_monster(struct player *p)
 
     /* try to find a space for the monster near the player */
     mpos = map_find_space_in(game_map(nlarn, p->pos.z),
-                             rect_new_sized(p->pos, 2), LE_MONSTER);
+                             rect_new_sized(p->pos, 2), LE_MONSTER, FALSE);
 
     if (pos_valid(mpos))
     {
@@ -1220,7 +1222,7 @@ gboolean spell_vaporize_rock(player *p)
         monster_damage_take(m, damage_new(DAM_PHYSICAL, ATT_NONE, divert(200, 10), p));
     }
 
-    mpos = map_find_space_in(map, rect_new_sized(p->pos, 1), LE_MONSTER);
+    mpos = map_find_space_in(map, rect_new_sized(p->pos, 1), LE_MONSTER, FALSE);
 
     switch (map_sobject_at(map, pos))
     {

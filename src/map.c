@@ -341,14 +341,14 @@ void map_destroy(map *m)
 }
 
 /* return coordinates of a free space */
-position map_find_space(map *maze, map_element_t element)
+position map_find_space(map *maze, map_element_t element, int dead_end)
 {
     rectangle entire_map = rect_new(1, 1, MAP_MAX_X - 2, MAP_MAX_Y - 2);
 
-    return map_find_space_in(maze, entire_map, element);
+    return map_find_space_in(maze, entire_map, element, dead_end);
 }
 
-position map_find_space_in(map *maze, rectangle where, map_element_t element)
+position map_find_space_in(map *maze, rectangle where, map_element_t element, int dead_end)
 {
     position pos;
     int count, iteration = 0;
@@ -379,7 +379,7 @@ position map_find_space_in(map *maze, rectangle where, map_element_t element)
 
         iteration++;
     }
-    while (!map_pos_validate(maze, pos, element) && (iteration <= count));
+    while (!map_pos_validate(maze, pos, element, dead_end) && (iteration <= count));
 
     if (iteration > count )
     {
@@ -447,7 +447,7 @@ position map_find_sobject(map *l, map_sobject_t sobject)
     return pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 }
 
-gboolean map_pos_validate(map *l, position pos, map_element_t element)
+gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_end)
 {
     map_tile *tile;
 
@@ -463,6 +463,24 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element)
 
     /* make shortcut */
     tile = map_tile_at(l, pos);
+
+    /* check for an dead end */
+    if (dead_end)
+    {
+        int wall_count = 0;
+        position p = pos;
+
+            for (p.y = pos.y -1; p.y < pos.y + 2; p.y++)
+                for (p.x = pos.x -1; p.x < pos.x + 2; p.x++)
+                    if (map_tiletype_at(l, p) == LT_WALL)
+                        wall_count++;
+
+        if (wall_count < 7)
+        {
+            /* not enclosed by walls */
+            return FALSE;
+        }
+    }
 
     switch (element)
     {
@@ -952,7 +970,7 @@ int map_fill_with_life(map *l)
     {
         do
         {
-            pos = map_find_space(l, LE_MONSTER);
+            pos = map_find_space(l, LE_MONSTER, FALSE);
         }
         while (player_pos_visible(nlarn->p, pos));
 
@@ -1064,20 +1082,20 @@ static void map_fill_with_stationary_objects(map *maze)
     /* volcano shaft up from the temple */
     if (maze->nlevel == MAP_DMAX)
     {
-        pos = map_find_space(maze, LE_SOBJECT);
+        pos = map_find_space(maze, LE_SOBJECT, TRUE);
         map_sobject_set(maze, pos, LS_ELEVATORUP);
     }
 
     /*  make the fixed objects in the maze: STAIRS */
     if ((maze->nlevel > 0) && (maze->nlevel != MAP_DMAX - 1) && (maze->nlevel != MAP_MAX - 1))
     {
-        pos = map_find_space(maze, LE_SOBJECT);
+        pos = map_find_space(maze, LE_SOBJECT, TRUE);
         map_sobject_set(maze, pos, LS_STAIRSDOWN);
     }
 
     if ((maze->nlevel > 1) && (maze->nlevel != MAP_DMAX))
     {
-        pos = map_find_space(maze, LE_SOBJECT);
+        pos = map_find_space(maze, LE_SOBJECT, TRUE);
         map_sobject_set(maze, pos, LS_STAIRSUP);
     }
 
@@ -1085,42 +1103,42 @@ static void map_fill_with_stationary_objects(map *maze)
     /* 33 percent chance for an altar */
     if (chance(33))
     {
-        pos = map_find_space(maze, LE_SOBJECT);
+        pos = map_find_space(maze, LE_SOBJECT, FALSE);
         map_sobject_set(maze, pos, LS_ALTAR);
     }
 
     /* up to three statues */
     for (i = 0; i < rand_0n(3); i++)
     {
-        pos = map_find_space(maze, LE_SOBJECT);
+        pos = map_find_space(maze, LE_SOBJECT, FALSE);
         map_sobject_set(maze, pos, LS_STATUE);
     }
 
     /* up to three fountains */
     for (i = 0; i < rand_0n(3); i++)
     {
-        pos = map_find_space(maze, LE_SOBJECT);
+        pos = map_find_space(maze, LE_SOBJECT, FALSE);
         map_sobject_set(maze, pos, LS_FOUNTAIN);
     }
 
     /* up to two thrones */
     for (i = 0; i < rand_0n(2); i++)
     {
-        pos = map_find_space(maze, LE_SOBJECT);
+        pos = map_find_space(maze, LE_SOBJECT, FALSE);
         map_sobject_set(maze, pos, LS_THRONE);
     }
 
     /* up to two  mirrors */
     for (i = 0; i < rand_0n(2); i++)
     {
-        pos = map_find_space(maze, LE_SOBJECT);
+        pos = map_find_space(maze, LE_SOBJECT, FALSE);
         map_sobject_set(maze, pos, LS_MIRROR);
     }
 
     if (maze->nlevel == 5)
     {
         /* branch office of the bank */
-        pos = map_find_space(maze, LE_SOBJECT);
+        pos = map_find_space(maze, LE_SOBJECT, TRUE);
         map_sobject_set(maze, pos, LS_BANK2);
     }
 }
@@ -1219,7 +1237,7 @@ static void map_fill_with_traps(map *l)
 
     for (count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
     {
-        pos = map_find_space(l, LE_TRAP);
+        pos = map_find_space(l, LE_TRAP, FALSE);
         map_trap_set(l, pos, rand_1n(trapdoor ? TT_MAX : TT_TRAPDOOR));
     }
 } /* map_fill_with_traps */
@@ -1620,7 +1638,7 @@ static void map_make_treasure_room(map *maze, rectangle **rooms)
                 do
                 {
 
-                    npos = map_find_space(maze, LE_SOBJECT);
+                    npos = map_find_space(maze, LE_SOBJECT, FALSE);
                     if (!pos_in_rect(npos, *rooms[room]))
                     {
                         /* pos is outside of room */
@@ -1722,7 +1740,7 @@ static void map_item_add(map *maze, item *what)
 {
     position pos;
 
-    pos = map_find_space(maze, LE_ITEM);
+    pos = map_find_space(maze, LE_ITEM, FALSE);
 
     inv_add(map_ilist_at(maze, pos), what);
 }

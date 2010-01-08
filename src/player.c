@@ -1251,7 +1251,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
 
     /* been teleported here or something like that, need a random spot */
     if (teleported)
-        pos = map_find_space(l, LE_MONSTER);
+        pos = map_find_space(l, LE_MONSTER, FALSE);
 
     /* beginning of the game */
     else if ((l->nlevel == 0) && (game_turn(nlarn) == 1))
@@ -1297,7 +1297,8 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     /* remove monster that might be at player's positon */
     if ((m = map_get_monster_at(l, p->pos)))
     {
-        monster_pos_set(m, game_map(nlarn, p->pos.z), map_find_space(l, LE_MONSTER));
+        position mnpos =  map_find_space(l, LE_MONSTER, FALSE);
+        monster_pos_set(m, game_map(nlarn, p->pos.z), mnpos);
     }
 
     /* recalculate FOV to make ensure correct display after entering a level */
@@ -3305,7 +3306,7 @@ int player_altar_desecrate(player *p)
     {
         /* try to find a space for the monster near the altar */
         position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER);
+                                          LE_MONSTER, FALSE);
 
         if (pos_valid(mpos))
         {
@@ -3379,7 +3380,7 @@ int player_altar_pray(player *p)
         else
         {
             position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                              LE_MONSTER);
+                                              LE_MONSTER, FALSE);
 
             if (pos_valid(mpos))
             {
@@ -3400,7 +3401,7 @@ int player_altar_pray(player *p)
         {
             /* create a monster, it should be very dangerous */
             position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                              LE_MONSTER);
+                                              LE_MONSTER, FALSE);
 
             if (pos_valid(mpos))
             {
@@ -3872,7 +3873,7 @@ int player_fountain_wash(player *p)
     {
         /* try to find a space for the monster near the player */
         position mpos = map_find_space_in(map, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER);
+                                          LE_MONSTER, FALSE);
 
         if (pos_valid(mpos))
         {
@@ -4024,7 +4025,7 @@ int player_throne_pillage(player *p)
     {
         /* try to find a space for the monster near the player */
         position mpos = map_find_space_in(map, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER);
+                                          LE_MONSTER, FALSE);
 
         if (pos_valid(mpos))
         {
@@ -4062,7 +4063,7 @@ int player_throne_sit(player *p)
     {
         /* try to find a space for the monster near the player */
         position mpos = map_find_space_in(map, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER);
+                                          LE_MONSTER, FALSE);
 
         if (pos_valid(mpos))
         {
@@ -4076,7 +4077,7 @@ int player_throne_sit(player *p)
     else if (chance(35))
     {
         log_add_entry(p->log, "Zaaaappp! You've been teleported!");
-        p->pos = map_find_space(map, LE_MONSTER);
+        p->pos = map_find_space(map, LE_MONSTER, FALSE);
     }
     else
     {
@@ -4280,9 +4281,7 @@ static int player_trap_trigger(player *p, trap_t trap)
     int time = 0;
 
     /* chance to trigger the trap on target tile */
-    int possibility;
-
-    possibility = trap_chance(trap);
+    int possibility = trap_chance(trap);
 
     if (player_memory_of(p, p->pos).trap == trap)
         /* if player knows the trap a 5% chance remains */
@@ -4302,7 +4301,7 @@ static int player_trap_trigger(player *p, trap_t trap)
             break;
 
         case TT_TELEPORT:
-            p->pos = map_find_space(game_map(nlarn, p->pos.z), LE_MONSTER);
+            p->pos = map_find_space(game_map(nlarn, p->pos.z), LE_MONSTER, FALSE);
             break;
 
         default:

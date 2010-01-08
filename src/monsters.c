@@ -743,7 +743,7 @@ monster *monster_new(int type, position pos)
     assert(type > MT_NONE && type < MT_MAX && pos_valid(pos));
 
     /* check if supplied position is suitable for a monster */
-    if (!map_pos_validate(game_map(nlarn, pos.z), pos, LE_MONSTER))
+    if (!map_pos_validate(game_map(nlarn, pos.z), pos, LE_MONSTER, FALSE))
     {
         return NULL;
     }
@@ -1073,7 +1073,7 @@ int monster_pos_set(monster *m, map *map, position target)
 {
     assert(m != NULL && map != NULL && pos_valid(target));
 
-    if (map_pos_validate(map, target, LE_MONSTER))
+    if (map_pos_validate(map, target, LE_MONSTER, FALSE))
     {
         /* remove current reference to monster from tile */
         map_set_monster_at(monster_map(m), m->pos, NULL);
@@ -1192,11 +1192,11 @@ void monster_level_enter(monster *m, struct map *l)
     }
     else
     {
-        npos = map_find_space(l, LE_MONSTER);
+        npos = map_find_space(l, LE_MONSTER, FALSE);
     }
 
     /* validate new position */
-    if (!map_pos_validate(l, npos, LE_MONSTER))
+    if (!map_pos_validate(l, npos, LE_MONSTER, FALSE))
     {
         /* the position somehow isn't valid,
            e.g. someone is standing on the entrance */
@@ -1431,7 +1431,7 @@ void monster_move(monster *m, struct player *p)
         }
 
         /* move towards player; check for monsters */
-        else if (map_pos_validate(monster_map(m), m_npos, LE_MONSTER))
+        else if (map_pos_validate(monster_map(m), m_npos, LE_MONSTER, FALSE))
         {
             monster_pos_set(m, monster_map(m), m_npos);
 
@@ -1486,7 +1486,7 @@ monster *monster_trap_trigger(monster *m)
         break;
 
     case TT_TELEPORT:
-        npos = map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER);
+        npos = map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER, FALSE);
         monster_pos_set(m, monster_map(m), npos);
         break;
 
@@ -1734,7 +1734,7 @@ void monster_player_attack(monster *m, player *p)
         {
             /* teleport away */
             monster_pos_set(m, game_map(nlarn, m->pos.z),
-                            map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER));
+                            map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER, FALSE));
         }
         else
         {

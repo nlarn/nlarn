@@ -162,11 +162,11 @@ cJSON *map_serialize(map *m);
 map *map_deserialize(cJSON *mser, struct game *g);
 char *map_dump(map *l, position ppos);
 
-position map_find_space(map *maze, map_element_t element);
-position map_find_space_in(map *maze, rectangle where, map_element_t element);
+position map_find_space(map *maze, map_element_t element, int dead_end);
+position map_find_space_in(map *maze, rectangle where, map_element_t element, int dead_end);
 position map_find_sobject(map *l, map_sobject_t sobject);
 position map_find_sobject_in(map *l, map_sobject_t sobject, rectangle area);
-gboolean map_pos_validate(map *l, position pos, map_element_t element);
+gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_end);
 
 int *map_get_surrounding(map *l, position pos, map_sobject_t type);
 
