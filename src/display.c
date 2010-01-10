@@ -1151,7 +1151,7 @@ spell *display_spell_select(char *title, player *p)
 
         case '?':
         case KEY_F(1):
-                        display_show_message(spell_name(sp), spell_desc(sp));
+            display_show_message(spell_name(sp), spell_desc(sp));
 
             /* repaint everything after displaying the message */
             display_paint_screen(p);
@@ -1174,7 +1174,7 @@ spell *display_spell_select(char *title, player *p)
         case 127: /* backspace */
         case 263:
             if (strlen(code_buf))
-    {
+            {
                 code_buf[strlen(code_buf) - 1] = '\0';
             }
             else
@@ -1260,6 +1260,9 @@ int display_get_count(char *caption, int value)
 
     int tmp;
 
+    /* toggle insert / overwrite mode */
+    int insert_mode = TRUE;
+
     /* user input */
     int key;
 
@@ -1270,13 +1273,13 @@ int display_get_count(char *caption, int value)
     int ipos = 0;
 
     /* input as char */
-    char ivalue[7];
+    char ivalue[8] = { 0 };
 
     /* continue editing the number */
     int cont = TRUE;
 
-    /* 6: input field width; 5: 3 spaces between border, caption + input field, 2 border */
-    basewidth = 6 + 5;
+    /* 8: input field width; 5: 3 spaces between border, caption + input field, 2 border */
+    basewidth = 8 + 5;
 
     /* choose a sane dialog width */
     width = min(basewidth + strlen(caption), display_cols - 4);
@@ -1302,24 +1305,25 @@ int display_get_count(char *caption, int value)
 
     wattroff(mwin->window, COLOR_PAIR(9));
 
-    /* make cursor visible */
-    curs_set(1);
-
     /* prepare string to edit */
-    g_snprintf(ivalue, 7, "%d", value);
-    /* set boundary at end of array */
-    ivalue[6] = '\0';
-
-    ilen = strlen(ivalue);
+    g_snprintf(ivalue, 8, "%d", value);
 
     wattron(mwin->window, COLOR_PAIR(13));
 
     do
     {
-        mvwprintw(mwin->window,  mwin->height - 2, mwin->width - 8,
-                  "%-6s", ivalue);
-        wmove(mwin->window, mwin->height - 2, mwin->width - 8 + ipos);
+        ilen = strlen(ivalue);
 
+        /* make cursor visible and set according to insert mode */
+        if (insert_mode)
+            curs_set(1); /* underline */
+        else
+            curs_set(2); /* block */
+
+        mvwprintw(mwin->window,  mwin->height - 2, mwin->width - 10,
+                  "%-8s", ivalue);
+
+        wmove(mwin->window, mwin->height - 2, mwin->width - 10 + ipos);
         wrefresh(mwin->window);
 
 #ifdef PDCURSES
@@ -1336,11 +1340,12 @@ int display_get_count(char *caption, int value)
             break;
 
         case KEY_RIGHT:
-            if ((ipos < 5) && (ipos < ilen))
+            if (ipos < ilen)
                 ipos++;
             break;
 
         case KEY_BACKSPACE:
+        case 8: /* backspace generates 8, not KEY_BACKSPACE on Windows */
             if ((ipos == ilen) && (ipos > 0))
             {
                 ivalue[ipos - 1] = '\0';
@@ -1353,7 +1358,11 @@ int display_get_count(char *caption, int value)
 
                 ipos--;
             }
+            break;
 
+        case KEY_IC:
+            /* toggle insert mode */
+            insert_mode = !insert_mode;
             break;
 
         case KEY_DC:
@@ -1365,7 +1374,7 @@ int display_get_count(char *caption, int value)
             break;
 
         case KEY_END:
-            ipos = min(5, ilen);
+            ipos = ilen;
             break;
 
         case KEY_HOME:
@@ -1380,32 +1389,39 @@ int display_get_count(char *caption, int value)
             break;
 
         default:
-            if (key == ' ')
+            if ((key >= '0') && (key <= '9'))
             {
-                if ((ipos == 5)
-                        || (ivalue[ipos + 1] == ' ')
-                        || (ivalue[ipos + 1] == '\0'))
+                if (insert_mode)
                 {
-                    /* clear current number */
-                    ivalue[ipos] = '\0';
-                }
-            }
-            else if ((key >= '0') && (key <= '9'))
-            {
-                if ((ipos == 5) || (ivalue[ipos - 1] != ' '))
-                {
-                    ivalue[ipos] = key;
+                    /* insert */
+                    if (strlen(ivalue) < 7)
+                    {
+                        int cppos = strlen(ivalue) + 1;
 
-                    /* set terminator if needed */
-                    if (ipos == ilen)
-                        ivalue[ipos + 1] = '\0';
+                        while (cppos >= ipos)
+                        {
+                            ivalue[cppos] = ivalue[cppos - 1];
+                            cppos--;
+                        }
 
-                    /* move position */
-                    if (ipos < 5) ipos++;
+                        ivalue[ipos] = key;
+
+                        /* move position */
+                        if (ipos < 7) ipos++;
+                    }
+                    else if (!beep()) flash();
                 }
                 else
                 {
+                    /* overwrite */
+                    if (ipos < 8)
+                    {
+                        ivalue[ipos] = key;
+                        /* move position */
+                        if (ipos < 7) ipos++;
+                    }
 
+                    else if (!beep()) flash();
                 }
             }
             else if (!display_window_move(mwin, key))
@@ -1416,8 +1432,6 @@ int display_get_count(char *caption, int value)
 
             break;
         }
-
-        ilen = strlen(ivalue);
     }
     while (cont);
 
@@ -1439,6 +1453,9 @@ char *display_get_string(char *caption, char *value, size_t max_len)
 {
     /* user input */
     int key;
+
+    /* toggle insert / overwrite mode */
+    int insert_mode = TRUE;
 
     /* cursor position */
     guint ipos = 0;
@@ -1495,8 +1512,8 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     display_window *mwin = display_window_new(startx, starty, width, height, NULL, NULL);
 
     wattron(mwin->window, COLOR_PAIR(9));
-
     guint line;
+
     for (line = 0; line < text->len; line++)
     {
         /* print text */
@@ -1505,10 +1522,6 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     }
 
     wattroff(mwin->window, COLOR_PAIR(9));
-
-    /* make cursor visible */
-    curs_set(1);
-
     wattron(mwin->window, COLOR_PAIR(13));
 
     do
@@ -1516,6 +1529,12 @@ char *display_get_string(char *caption, char *value, size_t max_len)
         mvwprintw(mwin->window,  mwin->height - 2, box_start,
                   "%-*s", max_len + 1, string->str);
         wmove(mwin->window, mwin->height - 2, box_start + ipos);
+
+        /* make cursor visible and set according to insert mode */
+        if (insert_mode)
+            curs_set(1); /* underline */
+        else
+            curs_set(2); /* block */
 
         wrefresh(mwin->window);
 
@@ -1533,11 +1552,12 @@ char *display_get_string(char *caption, char *value, size_t max_len)
             break;
 
         case KEY_RIGHT:
-            if (ipos < strlen(string->str))
+            if (ipos < string->len)
                 ipos++;
             break;
 
         case KEY_BACKSPACE:
+        case 8: /* backspace generates 8, not KEY_BACKSPACE on Windows */
             if (ipos > 0)
             {
                 g_string_erase(string, ipos - 1, 1);
@@ -1545,15 +1565,20 @@ char *display_get_string(char *caption, char *value, size_t max_len)
             }
             break;
 
+        case KEY_IC:
+            /* toggle insert mode */
+            insert_mode = !insert_mode;
+            break;
+
         case KEY_DC:
-            if (ipos < max_len)
+            if (ipos < string->len)
             {
                 g_string_erase(string, ipos, 1);
             }
             break;
 
         case KEY_END:
-            ipos = strlen(string->str);
+            ipos = string->len;
             break;
 
         case KEY_HOME:
@@ -1568,13 +1593,45 @@ char *display_get_string(char *caption, char *value, size_t max_len)
             break;
 
         default:
+            /* handle window movement first */
             if (display_window_move(mwin, key))
                 break;
-            if (strlen(string->str) < max_len)
-            {
-                g_string_insert_c(string, ipos, key);
 
-                if (ipos < max_len) ipos++;
+            /* filter out unwanted keys */
+            if (!g_ascii_isalnum(key) && !g_ascii_ispunct(key) && (key != ' '))
+            {
+                if (!beep()) flash();
+                break;
+            }
+
+            if (insert_mode)
+            {
+                if (string->len < max_len)
+                {
+                    g_string_insert_c(string, ipos, key);
+                    if (ipos < max_len) ipos++;
+                }
+                else
+                {
+                    if (!beep()) flash();
+                }
+            }
+            else
+            {
+                if (ipos < string->len)
+                {
+                    string->str[ipos] = key;
+                    if (ipos < max_len) ipos++;
+                }
+                else if (string->len < max_len)
+                {
+                    g_string_append_c(string, key);
+                    ipos++;
+                }
+                else
+                {
+                    if (!beep()) flash();
+                }
             }
             break;
         }
@@ -1899,10 +1956,10 @@ direction display_get_direction(char *title, int *available)
     }
     while ((dir == GD_NONE) && RUN);
 
-	if (!available)
-	{
-		g_free(dirs);
-	}
+    if (!available)
+    {
+        g_free(dirs);
+    }
 
     display_window_destroy(dwin, TRUE);
 
@@ -2275,6 +2332,11 @@ static display_window *display_window_new(int x1, int y1, int width, int height,
     dwin->caption = caption;
 
     dwin->window = newwin(dwin->height, dwin->width, dwin->y1, dwin->x1);
+
+#ifdef PDCURSES
+    /* PDCurses does not inherit keypad setting form stdscr */
+    dwin->window->_use_keypad = stdscr->_use_keypad;
+#endif
 
     /* fill window background */
     wattron(dwin->window, COLOR_PAIR(9));
