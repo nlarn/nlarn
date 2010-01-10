@@ -73,10 +73,16 @@ void game_new(int argc, char *argv[])
     /* fill the store */
     building_dndstore_init();
 
-    /* allocate space for levels */
+    /* generate levels */
     for (idx = 0; idx < MAP_MAX; idx++)
     {
-        nlarn->maps[idx] = map_new(idx, nlarn->mazefile);
+        /* if map_new fails, it returns NULL.
+           loop while no map has been generated */
+        do
+        {
+            nlarn->maps[idx] = map_new(idx, nlarn->mazefile);
+        }
+        while (nlarn->maps[idx] == NULL);
     }
 
     /* game time handling */

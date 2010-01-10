@@ -26,7 +26,7 @@
 #include "nlarn.h"
 #include "spheres.h"
 
-static void map_fill_with_stationary_objects(map *maze);
+static int map_fill_with_stationary_objects(map *maze);
 static void map_fill_with_objects(map *l);
 static void map_fill_with_traps(map *l);
 
@@ -132,7 +132,15 @@ map *map_new(int num, char *mazefile)
         map_loaded = map_load_from_file(nmap, mazefile, (num == 0) ? 0 : -1);
 
         /* add stationary objects (not to the town) */
-        if (num > 0) map_fill_with_stationary_objects(nmap);
+        if (num > 0)
+        {
+            if (!map_fill_with_stationary_objects(nmap))
+            {
+                /* adding stationary objects failed; generate a new map */
+                map_destroy(nmap);
+                return NULL;
+            }
+        }
     }
 
     if (!map_loaded)
@@ -147,7 +155,12 @@ map *map_new(int num, char *mazefile)
             map_make_maze(nmap, treasure_room);
 
             /* add stationary objects */
-            map_fill_with_stationary_objects(nmap);
+            if (!map_fill_with_stationary_objects(nmap))
+            {
+                /* adding stationary objects failed; generate a new map */
+                map_destroy(nmap);
+                return NULL;
+            }
 
             /* check if entire map is reachable */
             keep_maze = map_validate(nmap);
@@ -470,10 +483,10 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_
         int wall_count = 0;
         position p = pos;
 
-            for (p.y = pos.y -1; p.y < pos.y + 2; p.y++)
-                for (p.x = pos.x -1; p.x < pos.x + 2; p.x++)
-                    if (map_tiletype_at(l, p) == LT_WALL)
-                        wall_count++;
+        for (p.y = pos.y -1; p.y < pos.y + 2; p.y++)
+            for (p.x = pos.x -1; p.x < pos.x + 2; p.x++)
+                if (map_tiletype_at(l, p) == LT_WALL)
+                    wall_count++;
 
         if (wall_count < 7)
         {
@@ -1074,7 +1087,7 @@ void map_timer(map *l, guint8 count)
     } /* for pos.y */
 }
 
-static void map_fill_with_stationary_objects(map *maze)
+static int map_fill_with_stationary_objects(map *maze)
 {
     position pos;
     int i;						/* loop var */
@@ -1083,6 +1096,7 @@ static void map_fill_with_stationary_objects(map *maze)
     if (maze->nlevel == MAP_DMAX)
     {
         pos = map_find_space(maze, LE_SOBJECT, TRUE);
+        if (!pos_valid(pos)) return FALSE;
         map_sobject_set(maze, pos, LS_ELEVATORUP);
     }
 
@@ -1090,12 +1104,14 @@ static void map_fill_with_stationary_objects(map *maze)
     if ((maze->nlevel > 0) && (maze->nlevel != MAP_DMAX - 1) && (maze->nlevel != MAP_MAX - 1))
     {
         pos = map_find_space(maze, LE_SOBJECT, TRUE);
+        if (!pos_valid(pos)) return FALSE;
         map_sobject_set(maze, pos, LS_STAIRSDOWN);
     }
 
     if ((maze->nlevel > 1) && (maze->nlevel != MAP_DMAX))
     {
         pos = map_find_space(maze, LE_SOBJECT, TRUE);
+        if (!pos_valid(pos)) return FALSE;
         map_sobject_set(maze, pos, LS_STAIRSUP);
     }
 
@@ -1104,6 +1120,7 @@ static void map_fill_with_stationary_objects(map *maze)
     if (chance(33))
     {
         pos = map_find_space(maze, LE_SOBJECT, FALSE);
+        if (!pos_valid(pos)) return FALSE;
         map_sobject_set(maze, pos, LS_ALTAR);
     }
 
@@ -1111,6 +1128,7 @@ static void map_fill_with_stationary_objects(map *maze)
     for (i = 0; i < rand_0n(3); i++)
     {
         pos = map_find_space(maze, LE_SOBJECT, FALSE);
+        if (!pos_valid(pos)) return FALSE;
         map_sobject_set(maze, pos, LS_STATUE);
     }
 
@@ -1118,6 +1136,7 @@ static void map_fill_with_stationary_objects(map *maze)
     for (i = 0; i < rand_0n(3); i++)
     {
         pos = map_find_space(maze, LE_SOBJECT, FALSE);
+        if (!pos_valid(pos)) return FALSE;
         map_sobject_set(maze, pos, LS_FOUNTAIN);
     }
 
@@ -1125,6 +1144,7 @@ static void map_fill_with_stationary_objects(map *maze)
     for (i = 0; i < rand_0n(2); i++)
     {
         pos = map_find_space(maze, LE_SOBJECT, FALSE);
+        if (!pos_valid(pos)) return FALSE;
         map_sobject_set(maze, pos, LS_THRONE);
     }
 
@@ -1132,6 +1152,7 @@ static void map_fill_with_stationary_objects(map *maze)
     for (i = 0; i < rand_0n(2); i++)
     {
         pos = map_find_space(maze, LE_SOBJECT, FALSE);
+        if (!pos_valid(pos)) return FALSE;
         map_sobject_set(maze, pos, LS_MIRROR);
     }
 
@@ -1139,8 +1160,11 @@ static void map_fill_with_stationary_objects(map *maze)
     {
         /* branch office of the bank */
         pos = map_find_space(maze, LE_SOBJECT, TRUE);
+        if (!pos_valid(pos)) return FALSE;
         map_sobject_set(maze, pos, LS_BANK2);
     }
+
+    return TRUE;
 }
 
 static void map_fill_with_objects(map *l)
