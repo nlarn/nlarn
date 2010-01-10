@@ -2351,7 +2351,9 @@ int player_inv_pre_add(inventory *inv, item *item)
         /* capitalize first letter */
         buf[0] = g_ascii_toupper(buf[0]);
 
-        log_add_entry(p->log, "%s is too heavy for you.", buf);
+        log_add_entry(p->log, "%s %s too heavy for you.", buf,
+                      item->count > 1 ? "are" : "is");
+
         return FALSE;
     }
 
