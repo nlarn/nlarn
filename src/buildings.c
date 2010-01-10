@@ -718,6 +718,10 @@ static void building_item_add(inventory **inv, item *it)
         if (it->bonus < 0)
             it->bonus = 0;
 
+        /* identify item */
+        it->bonus_known = TRUE;
+        it->blessed_known = TRUE;
+
         inv_add(inv, it);
     }
 }
