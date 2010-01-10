@@ -68,7 +68,7 @@ const spell_data spells[SP_MAX] =
         SC_PLAYER, DAM_NONE, ET_CHARM_MONSTER,
         "Some monsters may be awed at your magnificence.",
         NULL, NULL,
-        1, 260
+        1, 260, FALSE
     },
     {
         SP_SSP, "ssp", "sonic spear",
