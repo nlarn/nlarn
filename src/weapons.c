@@ -38,7 +38,7 @@ const weapon_data weapons[WT_MAX] =
     { WT_2SWORD,        "two-handed sword",          26, IM_IRON,  3600,  1000, 1, 0, 1 },
     { WT_SWORDSLASHING, "sword of slashing",         30, IM_IRON,  2200,  6000, 0, 0, 1 },
     /* unique weapons */
-    { WT_LANCEOFDEATH,  "lance of death",            20, IM_WOOD,  2900, 16500, 1, 1, 1 },
+    { WT_LANCEOFDEATH,  "lance of death",            20, IM_WOOD,  2900, 65000, 1, 1, 1 },
     { WT_VORPALBLADE,   "Vorpal blade",              22, IM_STEEL, 1600,  3800, 0, 1, 1 },
     { WT_SLAYER,        "Slayer",                    30, IM_STEEL, 1800,  6800, 0, 1, 1 },
     { WT_SUNSWORD,      "Sunsword",                  32, IM_STEEL, 1800,  7000, 0, 1, 1 },
