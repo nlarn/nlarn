@@ -1129,7 +1129,7 @@ int item_rust(item *it)
 {
     assert(it != NULL);
 
-    if ((item_material(it) == IM_IRON) || (item_material(it) == IM_STEEL))
+    if (item_material(it) == IM_IRON)
     {
         if (it->rusty == 2)
         {
