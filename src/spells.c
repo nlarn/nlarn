@@ -241,6 +241,7 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         5, 2000, FALSE
     },
+/*
     {
         SP_STP, "stp", "time stop",
         SC_OTHER, DAM_NONE, ET_TIMESTOP,
@@ -248,6 +249,7 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         5, 2500, FALSE
     },
+*/
     {
         SP_TEL, "tel", "teleport away",
         SC_POINT, DAM_NONE, ET_NONE,
@@ -277,6 +279,7 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         6, 3500, FALSE
     },
+/*
     {
         SP_SUM, "sum", "summon demon",
         SC_OTHER, DAM_NONE, ET_NONE,
@@ -284,6 +287,7 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         6, 3500, FALSE
     },
+*/
     {
         SP_WTW, "wtw", "walk through walls",
         SC_PLAYER, DAM_NONE, ET_WALL_WALK,
@@ -336,8 +340,8 @@ static const char *book_descriptions[SP_MAX - 1] =
     "bamboo",
     "clasped",
     "ragged",
-    "dull",
-    "canvas",
+/*  "dull",
+    "canvas", two descriptions for unimplemented spells */
     "well-thumbed",
     /* "chambray", currently not needed */
 };
@@ -525,9 +529,10 @@ int spell_cast(player *p)
             break;
 
             /* time stop */
+            /* TODO: implement (ticket 39)
         case SP_STP:
-            /* TODO: implement (ticket 39) */
             break;
+            */
 
             /* vaporize rock */
         case SP_VPR:
@@ -545,9 +550,10 @@ int spell_cast(player *p)
             break;
 
             /* summon daemon */
+            /* TODO: implement (ticket 55)
         case SP_SUM:
-            /* TODO: implement (ticket 55) */
             break;
+            */
 
             /* alter realitiy */
         case SP_ALT:

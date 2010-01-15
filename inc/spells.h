@@ -89,12 +89,12 @@ typedef enum spell_ids {
 	SP_FGR,		/* finger of death */
 	SP_SCA,		/* scare monster */
 	SP_HLD,		/* hold monster */
-	SP_STP,		/* time stop */
+/*	SP_STP,		 time stop: not implemented */
 	SP_TEL,		/* teleport */
 	SP_MFI,		/* magic fire */
 	SP_MKW,		/* make wall */
 	SP_SPH,		/* sphere of annihilation */
-	SP_SUM,		/* summon daemon */
+/*	SP_SUM,		 summon daemon: not implemented */
 	SP_WTW,		/* walk through walls */
 	SP_ALT,		/* alter reality */
 	SP_MAX		/* last known spell */

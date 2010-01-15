@@ -38,7 +38,7 @@ const magic_scroll_data scrolls[ST_MAX] =
     { ST_TIMEWARP,          "time warp",          ET_NONE,               500, FALSE },
     { ST_TELEPORT,          "teleportation",      ET_NONE,               200,  TRUE },
     { ST_AWARENESS,         "expanded awareness", ET_AWARENESS,          250,  TRUE },
-    { ST_SPEED,             "speed",              ET_SPEED,              200, FALSE },
+/*  { ST_SPEED,             "speed",              ET_SPEED,              200, FALSE }, */
     { ST_HEAL_MONSTER,      "monster healing",    ET_NONE,                30, FALSE },
     { ST_SPIRIT_PROTECTION, "spirit protection",  ET_SPIRIT_PROTECTION,  340,  TRUE },
     { ST_UNDEAD_PROTECTION, "undead protection",  ET_UNDEAD_PROTECTION,  340,  TRUE },
@@ -95,7 +95,7 @@ static const char *_scroll_desc[ST_MAX - 1] =
     "Fril Ajich Lsosa",
     "Chados Azil Tzos",
     "Ixos Tzek Ajak",
-    "Xodil Keterulo",
+/*    "Xodil Keterulo", one spare description for the unimplemented scroll */
 };
 
 char *scroll_desc(int scroll_id)
