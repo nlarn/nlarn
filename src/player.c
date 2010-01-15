@@ -772,8 +772,8 @@ void player_die(player *p, player_cod cause_type, int cause)
                                int2str(p->stats.books_read), plural(p->stats.books_read),
                                int2str(p->stats.scrolls_read), plural(p->stats.scrolls_read));
 
-        /* append map of current level if the player died */
-        if (cause < PD_TOO_LATE)
+        /* append map of current level if the player is not in the town */
+        if (p->pos.z > 0)
         {
             g_string_append(text, "\n\n-- The current level ------------------\n\n");
             tmp = map_dump(game_map(nlarn, p->pos.z), p->pos);
