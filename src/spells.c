@@ -1381,7 +1381,7 @@ item_usage_result book_read(struct player *p, item *book)
         }
 
         /* five percent chance to increase intelligence */
-        if (chance(5))
+        if (chance(2))
         {
             log_add_entry(p->log, "Reading makes you ingenious.");
             p->intelligence++;
