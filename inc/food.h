@@ -1,6 +1,6 @@
 /*
  * food.h
- * Copyright (C) Joachim de Groot 2009 <jdegroot@web.de>
+ * Copyright (C) 2009, 2010 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
