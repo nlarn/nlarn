@@ -863,68 +863,82 @@ void player_die(player *p, player_cod cause_type, int cause)
         }
 
         /* equipped items */
+        int equipment_count = 0;
         g_string_append(text, "\n\n-- Equipment --------------------------\n\n");
         if (p->eq_amulet)
         {
             item_describe(p->eq_amulet, TRUE, TRUE, FALSE, it_desc, 60);
             g_string_append_printf(text, "Amulet:   %s\n", it_desc);
+            equipment_count++;
         }
         if (p->eq_ring_l)
         {
             item_describe(p->eq_ring_l, TRUE, TRUE, FALSE, it_desc, 60);
             g_string_append_printf(text, "Ring (l): %s\n", it_desc);
+            equipment_count++;
         }
         if (p->eq_ring_r)
         {
             item_describe(p->eq_ring_r, TRUE, TRUE, FALSE, it_desc, 60);
             g_string_append_printf(text, "Ring (r): %s\n", it_desc);
+            equipment_count++;
         }
         if (p->eq_weapon)
         {
             item_describe(p->eq_weapon, TRUE, TRUE, FALSE, it_desc, 60);
             g_string_append_printf(text, "Weapon:   %s\n", it_desc);
+            equipment_count++;
         }
         if (p->eq_suit)
         {
             item_describe(p->eq_suit, TRUE, TRUE, FALSE, it_desc, 60);
             g_string_append_printf(text, "Armour:   %s\n", it_desc);
+            equipment_count++;
         }
         if (p->eq_helmet)
         {
             item_describe(p->eq_helmet, TRUE, TRUE, FALSE, it_desc, 60);
             g_string_append_printf(text, "Helmet:   %s\n", it_desc);
+            equipment_count++;
         }
         if (p->eq_shield)
         {
             item_describe(p->eq_shield, TRUE, TRUE, FALSE, it_desc, 60);
             g_string_append_printf(text, "Shield:   %s\n", it_desc);
+            equipment_count++;
         }
         if (p->eq_cloak)
         {
             item_describe(p->eq_cloak, TRUE, TRUE, FALSE, it_desc, 60);
             g_string_append_printf(text, "Cloak:    %s\n", it_desc);
+            equipment_count++;
         }
         if (p->eq_gloves)
         {
             item_describe(p->eq_gloves, TRUE, TRUE, FALSE, it_desc, 60);
             g_string_append_printf(text, "Gloves:   %s\n", it_desc);
+            equipment_count++;
         }
         if (p->eq_boots)
         {
             item_describe(p->eq_boots, TRUE, TRUE, FALSE, it_desc, 60);
             g_string_append_printf(text, "Boots:    %s\n", it_desc);
+            equipment_count++;
         }
 
         /* inventory */
-        g_string_append(text, "\n\n-- Items in pack ----------------------\n\n");
-        for (pos = 0; pos < inv_length(p->inventory); pos++)
+        if (equipment_count < inv_length(p->inventory))
         {
-            item *it = inv_get(p->inventory, pos);
-            if (!player_item_is_equipped(p, it))
+            g_string_append(text, "\n\n-- Items in pack ----------------------\n\n");
+            for (pos = 0; pos < inv_length(p->inventory); pos++)
             {
-                item_describe(it, TRUE, it->count == 1, FALSE, it_desc, 60);
-                g_string_append_printf(text, "%s\n", it_desc);
+                item *it = inv_get(p->inventory, pos);
+                if (!player_item_is_equipped(p, it))
+                {
+                    item_describe(it, TRUE, it->count == 1, FALSE, it_desc, 60);
+                    g_string_append_printf(text, "%s\n", it_desc);
 
+                }
             }
         }
 
