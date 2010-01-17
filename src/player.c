@@ -1053,17 +1053,18 @@ int player_move(player *p, direction dir)
     /* impassable */
     if (!map_pos_passable(map, target_p))
     {
-        /* if it is not a wall, it is definitely not passable */
-        if ((!map_tile_at(map, target_p) == LT_WALL))
-            return FALSE;
-
-        /* bump into wall when blind */
-        if (player_effect(p, ET_BLINDNESS))
+        /* bump into walls when blinded or confused */
+        if (player_effect(p, ET_BLINDNESS) || player_effect(p, ET_CONFUSION))
         {
             player_memory_of(p, target_p).type = map_tiletype_at(map, target_p);
-            log_add_entry(p->log, "Ouch!");
+            log_add_entry(p->log, "Ouch! You bump into %s!",
+                          lt_get_desc(map_tiletype_at(map, target_p)));
             return times;
         }
+
+        /* if it is not a wall, it is definitely not passable */
+        if ((!map_tiletype_at(map, target_p) == LT_WALL))
+            return FALSE;
 
         /* return if player cannot walk through walls */
         if (!player_effect(p, ET_WALL_WALK))
