@@ -682,9 +682,25 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     case IT_WEAPON:
         if (weapon_is_unique(it))
         {
-            g_snprintf(str, str_len, "%s%s",
-                       (it->id == WT_BESSMAN || it->id == WT_SLAYER) ? "" : "the ",
-                       item_desc_get(it, known));
+            char aip[41] = { 0 };
+            if (it->bonus_known)
+            {
+                if (add_info != NULL)
+                    g_snprintf(aip, 40, ", %s", add_info);
+
+                g_snprintf(str, str_len, "%s%s (%+d%s)",
+                           weapon_needs_article(it) ? "the " : "",
+                           item_desc_get(it, known), it->bonus, aip);
+            }
+            else
+            {
+                if (add_info != NULL)
+                    g_snprintf(aip, 40, " (%s)", add_info);
+
+                g_snprintf(str, str_len, "%s%s%s",
+                           weapon_needs_article(it) ? "the " : "",
+                           item_desc_get(it, known), aip);
+            }
         }
         else
         {
@@ -1199,30 +1215,30 @@ int item_obtainable(item_t type, int id)
 
     switch (type)
     {
-        case IT_ARMOUR:
-        case IT_FOOD:
-        case IT_RING:
-            obtainable = TRUE;
-            break;
+    case IT_ARMOUR:
+    case IT_FOOD:
+    case IT_RING:
+        obtainable = TRUE;
+        break;
 
-        case IT_BOOK:
-            obtainable = book_type_obtainable(id);
-            break;
+    case IT_BOOK:
+        obtainable = book_type_obtainable(id);
+        break;
 
-        case IT_POTION:
-            obtainable = potion_type_obtainable(id);
-            break;
+    case IT_POTION:
+        obtainable = potion_type_obtainable(id);
+        break;
 
-        case IT_SCROLL:
-            obtainable = scroll_type_obtainable(id);
-            break;
+    case IT_SCROLL:
+        obtainable = scroll_type_obtainable(id);
+        break;
 
-        case IT_WEAPON:
-            obtainable = weapon_type_obtainable(id);
-            break;
+    case IT_WEAPON:
+        obtainable = weapon_type_obtainable(id);
+        break;
 
-        default:
-            obtainable = FALSE;
+    default:
+        obtainable = FALSE;
     }
 
     return obtainable;

@@ -29,6 +29,7 @@ typedef struct weapon_data {
 	unsigned
 		twohanded: 1,	/* needs two hands */
 		unique: 1,		/* unique */
+		article: 1,     /* needs an article */
 		obtainable: 1;  /* available in the shop */
 } weapon_data;
 
@@ -73,5 +74,6 @@ extern const weapon_data weapons[WT_MAX];
 #define weapon_price(weapon)         (weapons[(weapon)->id].price)
 #define weapon_is_twohanded(weapon)  (weapons[(weapon)->id].twohanded)
 #define weapon_is_unique(weapon)     (weapons[(weapon)->id].unique)
+#define weapon_needs_article(weapon) (weapons[(weapon)->id].article)
 
 #endif
