@@ -454,11 +454,22 @@ int display_paint_screen(player *p)
 
     if (text->len > 0)
     {
+        int available_space = display_cols - MAP_MAX_X - 4;
+
         attron( attrs = COLOR_PAIR(DC_CYAN) | A_BOLD);
 
         for (i = 0; i < text->len; i++)
         {
-            mvprintw(11 + i, MAP_MAX_X + 3, g_ptr_array_index(text, i));
+            char *desc = g_strdup(g_ptr_array_index(text, i));
+
+            if (strlen(desc) > available_space)
+            {
+                desc[available_space - 1] = '.';
+                desc[available_space] = '\0';
+            }
+
+            mvprintw(11 + i, MAP_MAX_X + 3, desc);
+            g_free(desc);
         }
 
         attroff(attrs);
