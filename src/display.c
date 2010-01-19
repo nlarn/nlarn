@@ -1065,18 +1065,21 @@ spell *display_spell_select(char *title, player *p)
         case '7':
         case KEY_HOME:
         case KEY_A1:
+
             curr = 1;
             offset = 0;
             code_buf[0] = '\0';
+
             break;
 
         case '9':
         case KEY_PPAGE:
         case KEY_A3:
+
             if ((curr == maxvis) || offset == 0)
                 curr = 1;
             else
-                offset = max(offset - maxvis, 0);
+                offset = (offset > maxvis) ? (offset - maxvis) : 0;
 
             code_buf[0] = '\0';
             break;
@@ -1087,8 +1090,10 @@ spell *display_spell_select(char *title, player *p)
 #ifdef KEY_A2
         case KEY_A2:
 #endif
+
             if (curr > 1)
                 curr--;
+
             else if ((curr == 1) && (offset > 0))
                 offset--;
 
@@ -1115,6 +1120,7 @@ spell *display_spell_select(char *title, player *p)
         case '3':
         case KEY_NPAGE:
         case KEY_C3:
+
             if (curr == 1)
             {
                 curr = maxvis;
@@ -1123,7 +1129,7 @@ spell *display_spell_select(char *title, player *p)
             {
                 offset = offset + maxvis;
 
-                if ((offset + curr) > p->known_spells->len)
+                if ((offset + maxvis) >= p->known_spells->len)
                 {
                     curr = min(p->known_spells->len, maxvis);
                     offset = p->known_spells->len - curr;
@@ -1136,6 +1142,7 @@ spell *display_spell_select(char *title, player *p)
         case '1':
         case KEY_END:
         case KEY_C1:
+
             if (p->known_spells->len > maxvis)
             {
                 curr = maxvis;
