@@ -42,19 +42,19 @@ static char *item_desc_get(item *it, int known);
 
 const item_type_data item_data[IT_MAX] =
 {
-    /* item_t       name_sg      name_pl        IMG  desc_known      desc_unknown         max_id           eq us st id */
-    { IT_NONE,      "",          "",            ' ', "",             "",                  0,               0, 0, 0, 0, },
-    { IT_AMULET,    "amulet",    "amulets",     '"', "amulet of %s", "%s amulet",         AM_LARN,         1, 0, 0, 1, },
-    { IT_ARMOUR,    "armour",    "armour",      '[', "%s",           "%s",                AT_MAX,          1, 0, 0, 1, },
-    { IT_BOOK,      "book",      "books",       '+', "book of %s",   "%s book",           SP_MAX,          0, 1, 1, 1, },
-    { IT_CONTAINER, "container", "containers",  'C', "%s",           "%s",                CT_MAX,          0, 0, 0, 0, },
-    { IT_FOOD,      "food",      "foods",       '%', "%s",           "%s",                FT_MAX,          0, 1, 1, 0, },
-    { IT_GEM,       "gem",       "gems",        '*', "%s",           "%s gem",            GT_MAX,          0, 0, 1, 0, },
-    { IT_GOLD,      "coin",      "coins",       '$', "%s",           "%s",                0,               0, 0, 1, 0, },
-    { IT_POTION,    "potion",    "potions",     '!', "potion of %s", "%s potion",         PO_CURE_DIANTHR, 0, 1, 1, 1, },
-    { IT_RING,      "ring",      "rings",       '=', "ring of %s",   "%s ring",           RT_MAX,          1, 0, 0, 1, },
-    { IT_SCROLL,    "scroll",    "scrolls",     '?', "scroll of %s", "scroll labeled %s", ST_MAX,          0, 1, 1, 1, },
-    { IT_WEAPON,    "weapon",    "weapons",     '(', "%s",           "%s",                WT_MAX,          1, 0, 0, 1, },
+    /* item_t       name_sg      name_pl        IMG  desc_known      desc_unknown         max_id           op eq us st id */
+    { IT_NONE,      "",          "",            ' ', "",             "",                  0,               0, 0, 0, 0, 0, },
+    { IT_AMULET,    "amulet",    "amulets",     '"', "amulet of %s", "%s amulet",         AM_LARN,         0, 1, 0, 0, 1, },
+    { IT_ARMOUR,    "armour",    "armour",      '[', "%s",           "%s",                AT_MAX,          1, 1, 0, 0, 1, },
+    { IT_BOOK,      "book",      "books",       '+', "book of %s",   "%s book",           SP_MAX,          0, 0, 1, 1, 1, },
+    { IT_CONTAINER, "container", "containers",  'C', "%s",           "%s",                CT_MAX,          0, 0, 0, 0, 0, },
+    { IT_FOOD,      "food",      "foods",       '%', "%s",           "%s",                FT_MAX,          0, 0, 1, 1, 0, },
+    { IT_GEM,       "gem",       "gems",        '*', "%s",           "%s gem",            GT_MAX,          1, 0, 0, 1, 0, },
+    { IT_GOLD,      "coin",      "coins",       '$', "%s",           "%s",                0,               0, 0, 0, 1, 0, },
+    { IT_POTION,    "potion",    "potions",     '!', "potion of %s", "%s potion",         PO_CURE_DIANTHR, 0, 0, 1, 1, 1, },
+    { IT_RING,      "ring",      "rings",       '=', "ring of %s",   "%s ring",           RT_MAX,          1, 1, 0, 0, 1, },
+    { IT_SCROLL,    "scroll",    "scrolls",     '?', "scroll of %s", "scroll labeled %s", ST_MAX,          0, 0, 1, 1, 1, },
+    { IT_WEAPON,    "weapon",    "weapons",     '(', "%s",           "%s",                WT_MAX,          1, 1, 0, 0, 1, },
 };
 
 const item_material_data item_materials[IM_MAX] =
@@ -95,6 +95,12 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
     nitem->id = item_id;
     nitem->bonus = item_bonus;
     nitem->count = 1;
+
+    /* set bonus_known on unoptimizable items to avoid stacking problems */
+    if (!item_is_optimizable(item_type))
+    {
+         nitem->bonus_known = TRUE;
+    }
 
     /* special item type specific attributes */
     switch (item_type)
@@ -138,7 +144,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         /* prevent that the unique potion can be created twice */
         if ((item_id == PO_CURE_DIANTHR) && nlarn->cure_dianthr_created)
         {
-            nitem->id = rand_1n(PO_SEE_INVISIBLE);
+            nitem->id = rand_1n(item_max_id(IT_POTION));
         }
         else if (item_id == PO_CURE_DIANTHR)
         {
