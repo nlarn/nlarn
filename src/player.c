@@ -761,16 +761,22 @@ void player_die(player *p, player_cod cause_type, int cause)
         game_scores_destroy(scores);
 
         /* some statistics */
-        g_string_append_printf(text, "\n%s %s after searching the potion for %d mobuls. ",
+        g_string_append_printf(text, "\n%s %s after searching the potion for %d mobul%s. ",
                                pronoun, cause_type < PD_TOO_LATE ? "died" : "returned",
-                               gtime2mobuls(nlarn->gtime));
+                               gtime2mobuls(nlarn->gtime), plural(gtime2mobuls(nlarn->gtime)));
 
-        g_string_append_printf(text, "%s cast %s spell%s, quaffed %s potion%s " \
-                               "and read %s book%s and %s scroll%s.", pronoun,
-                               int2str(p->stats.spells_cast), plural(p->stats.spells_cast),
-                               int2str(p->stats.potions_quaffed), plural(p->stats.potions_quaffed),
-                               int2str(p->stats.books_read), plural(p->stats.books_read),
-                               int2str(p->stats.scrolls_read), plural(p->stats.scrolls_read));
+        g_string_append_printf(text, "%s cast %s spell%s, ", pronoun,
+                               int2str(p->stats.spells_cast),
+                               plural(p->stats.spells_cast));
+        g_string_append_printf(text, "quaffed %s potion%s ",
+                               int2str(p->stats.potions_quaffed),
+                               plural(p->stats.potions_quaffed));
+        g_string_append_printf(text, "and read %s book%s ",
+                               int2str(p->stats.books_read),
+                               plural(p->stats.books_read));
+        g_string_append_printf(text, "and %s scroll%s.",
+                               int2str(p->stats.scrolls_read),
+                               plural(p->stats.scrolls_read));
 
         /* append map of current level if the player is not in the town */
         if (p->pos.z > 0)
