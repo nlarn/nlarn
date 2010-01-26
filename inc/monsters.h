@@ -205,6 +205,8 @@ gboolean monster_update_action(monster *m);
 void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
 
+char *monster_desc(monster *m);
+
 #define monster_name(monster)        (monsters[monster_type(monster)].name)
 #define monster_level(monster)       (monsters[monster_type(monster)].level)
 #define monster_ac(monster)          (monsters[monster_type(monster)].ac)

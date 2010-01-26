@@ -53,6 +53,15 @@ struct _monster
         unknown: 1;      /* monster is unknown */
 };
 
+const char *monster_ai_desc[MA_MAX] =
+{
+    NULL,               /* MA_NONE */
+    "fleeing",          /* MA_FLEE */
+    "standing still",   /* MA_REMAIN */
+    "wandering",        /* MA_WANDER */
+    "attacking"         /* MA_ATTACK */
+};
+
 const char *monster_attack_verb[ATT_MAX] =
 {
     NULL,
@@ -1963,6 +1972,34 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
     }
 
     return TRUE;
+}
+
+char *monster_desc(monster *m)
+{
+    int hp_rel;
+    GString *desc;
+    char *injury;
+
+    assert (m != NULL);
+
+    hp_rel = (((float)m->hp / (float)monster_hp_max(m)) * 100);
+
+    if (m->hp == monster_hp_max(m))
+        injury = "uninjured";
+    else if (hp_rel > 80)
+        injury = "slightly injured";
+    else if (hp_rel > 20)
+        injury = "injured";
+    else if (hp_rel > 10)
+        injury = "heavily injured";
+    else
+        injury = "critically injured";
+
+    desc = g_string_new(NULL);
+    g_string_append_printf(desc, "%s %s %s, %s", a_an(injury),
+                           injury, monster_name(m), monster_ai_desc[m->action]);
+
+    return g_string_free(desc, FALSE);
 }
 
 int monster_genocide(int monster_id)

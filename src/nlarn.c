@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     int moves_count = 0;
 
     /* used to read in e.g. the help file */
-    gchar *file_content;
+    gchar *strbuf;
 
     /* position to examine */
     position pos;
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     display_draw();
 
     /* check if mesgfile exists */
-    if (!g_file_get_contents(game_mesgfile(nlarn), &file_content, NULL, NULL))
+    if (!g_file_get_contents(game_mesgfile(nlarn), &strbuf, NULL, NULL))
     {
         display_shutdown();
         game_destroy(nlarn);
@@ -90,8 +90,8 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    display_show_message("Welcome to the game of NLarn!", file_content);
-    g_free(file_content);
+    display_show_message("Welcome to the game of NLarn!", strbuf);
+    g_free(strbuf);
 
     display_paint_screen(nlarn->p);
 
@@ -168,7 +168,9 @@ int main(int argc, char *argv[])
 
             /* look at current position */
         case ':':
-            player_examine(nlarn->p, nlarn->p->pos);
+            strbuf = map_pos_examine(nlarn->p->pos);
+            log_add_entry(nlarn->p->log, strbuf);
+            g_free(strbuf);
             break;
 
             /* look at different position */
@@ -178,7 +180,11 @@ int main(int argc, char *argv[])
                                        FALSE, FALSE);
 
             if (pos_valid(pos))
-                player_examine(nlarn->p, pos);
+            {
+                strbuf = map_pos_examine(pos);
+                log_add_entry(nlarn->p->log, strbuf);
+                g_free(strbuf);
+            }
             else
                 log_add_entry(nlarn->p->log, "Aborted.");
 
@@ -204,10 +210,10 @@ int main(int argc, char *argv[])
             /* help */
         case KEY_F(1):
         case '?':
-            if (g_file_get_contents(game_helpfile(nlarn), &file_content, NULL, NULL))
+            if (g_file_get_contents(game_helpfile(nlarn), &strbuf, NULL, NULL))
             {
-                display_show_message("Help for The Caverns of NLarn", file_content);
-                g_free(file_content);
+                display_show_message("Help for The Caverns of NLarn", strbuf);
+                g_free(strbuf);
             }
             else
             {
@@ -306,10 +312,10 @@ int main(int argc, char *argv[])
             break;
 
         case '\\':
-            if ((file_content = player_item_identified_list(nlarn->p)))
+            if ((strbuf = player_item_identified_list(nlarn->p)))
             {
-                display_show_message("Identified items", file_content);
-                g_free(file_content);
+                display_show_message("Identified items", strbuf);
+                g_free(strbuf);
             }
             else
             {

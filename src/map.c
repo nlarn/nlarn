@@ -76,7 +76,7 @@ const map_sobject_data map_sobjects[LS_MAX] =
     { LS_ELEVATORDOWN,  'I',  DC_WHITE,   "a volcanic shaft leaning downward",   1, 1, },
     { LS_ELEVATORUP,    'I',  DC_WHITE,   "the base of a volcanic shaft",        1, 1, },
     { LS_FOUNTAIN,      '{',  DC_BLUE,    "a bubbling fountain",                 1, 1, },
-    { LS_DEADFOUNTAIN,  '{',  DC_WHITE,   "There is a dead fountain",            1, 1, },
+    { LS_DEADFOUNTAIN,  '{',  DC_WHITE,   "a dead fountain",                     1, 1, },
     { LS_STATUE,        '|',  DC_WHITE,   "a great marble statue",               1, 1, },
     { LS_URN,           'u',  DC_YELLOW,  "a golden urn",                        1, 1, },
     { LS_MIRROR,        '\'', DC_WHITE,   "a mirror",                            1, 1, },
@@ -907,6 +907,86 @@ damage *map_tile_damage(map *l, position pos)
     default:
         return NULL;
     }
+}
+
+char *map_pos_examine(position pos)
+{
+    map *cm = game_map(nlarn, pos.z);
+    monster *monst;
+    item *it;
+    char item_desc[81];
+    guint idx;
+    char *tmp = NULL, *where;
+    GString *desc = g_string_new(NULL);
+
+    assert(pos_valid(pos));
+
+    if (pos_identical(pos, nlarn->p->pos))
+        where = "here";
+    else
+        where = "there";
+
+    /* describe the level tile */
+    tmp = g_strdup(lt_get_desc(map_tiletype_at(cm, pos)));
+    tmp[0] = g_ascii_toupper(tmp[0]);
+    g_string_append_printf(desc, "%s. ", tmp);
+    g_free(tmp);
+
+    /* add description of monster, if there is one on the tile */
+    if ((monst = map_get_monster_at(cm, pos)))
+    {
+        tmp = monster_desc(monst);
+
+        tmp[0] = g_ascii_toupper(tmp[0]);
+        g_string_append_printf(desc, "%s. ", tmp);
+        g_free(tmp);
+    }
+
+    /* add message if target tile contains a stationary object */
+    if (map_sobject_at(cm, pos) > LS_NONE)
+    {
+        g_string_append_printf(desc, "You see %s %s. ",
+                               ls_get_desc(map_sobject_at(cm, pos)), where);
+    }
+
+    /* add message if target tile contains a known trap */
+    if (player_memory_of(nlarn->p, pos).trap)
+    {
+        g_string_append_printf(desc, "There is %s %s %s. ",
+                               a_an(trap_description(map_trap_at(cm, pos))),
+                               trap_description(map_trap_at(cm, pos)), where);
+    }
+
+    /* add message if target tile contains items */
+    if (inv_length(*map_ilist_at(cm, pos)) > 0)
+    {
+        if (inv_length(*map_ilist_at(cm, pos)) > 3)
+        {
+            g_string_append_printf(desc, "There are multiple items %s.", where);
+        }
+        else
+        {
+            GString *items_desc = NULL;
+
+            for (idx = 0; idx < inv_length(*map_ilist_at(cm, pos)); idx++)
+            {
+                it = inv_get(*map_ilist_at(cm, pos), idx);
+                item_describe(it, player_item_known(nlarn->p, it),
+                              FALSE, FALSE, item_desc, 80);
+
+                if (idx > 0)
+                    g_string_append_printf(items_desc, " and %s", item_desc);
+                else
+                    items_desc = g_string_new(item_desc);
+            }
+
+            g_string_append_printf(desc, "You see %s %s.",
+                                   items_desc->str, where);
+            g_string_free(items_desc, TRUE);
+        }
+    }
+
+    return g_string_free(desc, FALSE);
 }
 
 monster *map_get_monster_at(map *m, position pos)

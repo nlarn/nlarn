@@ -191,6 +191,8 @@ void map_sobject_set(map *l, position pos, map_sobject_t type);
 
 damage *map_tile_damage(map *l, position pos);
 
+char *map_pos_examine(position pos);
+
 monster *map_get_monster_at(map *m, position pos);
 int map_set_monster_at(map *map, position pos, monster *monst);
 int map_is_monster_at(map *m, position pos);
