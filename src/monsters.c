@@ -1978,12 +1978,13 @@ char *monster_desc(monster *m)
 {
     int hp_rel;
     GString *desc;
-    char *injury;
+    char *injury, *effects = NULL;
 
     assert (m != NULL);
 
     hp_rel = (((float)m->hp / (float)monster_hp_max(m)) * 100);
 
+    /* prepare health status description */
     if (m->hp == monster_hp_max(m))
         injury = "uninjured";
     else if (hp_rel > 80)
@@ -1997,7 +1998,33 @@ char *monster_desc(monster *m)
 
     desc = g_string_new(NULL);
     g_string_append_printf(desc, "%s %s %s, %s", a_an(injury),
-                           injury, monster_name(m), monster_ai_desc[m->action]);
+                           injury, monster_name(m),
+                           monster_ai_desc[m->action]);
+
+    /* add effect desctiption */
+    if (m->effects->len > 0)
+    {
+        char **desc_list = strv_new();
+
+        int i;
+        for (i = 0; i < m->effects->len; i++)
+        {
+            effect *e = game_effect_get(nlarn, g_ptr_array_index(m->effects, i));
+
+            if(effect_get_desc(e))
+            {
+                strv_append_unique(&desc_list, effect_get_desc(e));
+            }
+        }
+
+        effects = g_strjoinv(", ", desc_list);
+        g_strfreev(desc_list);
+
+        g_string_append_printf(desc, " (%s)", effects);
+
+        g_free(effects);
+    }
+
 
     return g_string_free(desc, FALSE);
 }
