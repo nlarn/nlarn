@@ -83,6 +83,12 @@ GPtrArray *text_wrap(char *str, int width, int indent);
 GPtrArray *text_append(GPtrArray *first, GPtrArray *second);
 void text_destroy(GPtrArray *text);
 
+/* helpers for NULL-terminated string arrays */
+/* glib offers g_strfreev, g_strdupv, g_strjoinv and g_strv_length */
+char **strv_new();
+int strv_append(char ***list, const char *str);
+int strv_append_unique(char ***list, const char *str);
+
 /* misc. text functions */
 int str_starts_with_vowel(char *str);
 const char *int2str(int val);

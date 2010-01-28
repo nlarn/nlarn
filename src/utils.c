@@ -348,6 +348,49 @@ void text_destroy(GPtrArray *text)
     g_ptr_array_free(text, TRUE);
 }
 
+/**
+ * create a new NULL-terminated string array
+ */
+char **strv_new()
+{
+    char **list = g_new(char *, 1);
+    list[0] = NULL;
+
+    return list;
+}
+
+/**
+ * adds a copy of str to the list
+ */
+int strv_append(char ***list, const char *str)
+{
+    int len = g_strv_length(*list) + 1;
+
+    assert(list != NULL);
+    assert(str != NULL);
+
+    *list = g_realloc (*list, sizeof(char*) * len);
+
+    (*list)[len - 1] = g_strdup(str);
+    (*list)[len] = NULL;
+
+    return len;
+}
+
+/**
+ * add a copy of str to the list if it is not yet part of the list
+ */
+int strv_append_unique(char ***list, const char *str)
+{
+    int len = 0;
+
+    /* compare elements to the new string and return FALSE if the element existed */
+    for (len = 0; *list[len]; len++)
+        if (strcmp(*list[len], str) == 0) return FALSE;
+
+    return strv_append(list, str);
+}
+
 int str_starts_with_vowel(char *str)
 {
     const char vowels[] = "aeiouAEIOU";
