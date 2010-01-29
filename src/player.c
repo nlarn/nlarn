@@ -4315,8 +4315,10 @@ void player_update_fov(player *p)
         { 1,  0,  0,  1, -1,  0,  0, -1 }
     };
 
+    int range = (p->pos.z == 0 ? 15 : 6);
+
     /* calculate range */
-    radius = (player_effect(nlarn->p, ET_BLINDNESS) ? 0 : 6 + player_effect(nlarn->p, ET_AWARENESS));
+    radius = (player_effect(nlarn->p, ET_BLINDNESS) ? 0 : range + player_effect(nlarn->p, ET_AWARENESS));
 
     /* reset FOV */
     memset(&(p->fov), 0, MAP_SIZE * sizeof(int));

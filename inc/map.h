@@ -109,7 +109,7 @@ typedef struct map_tile_data
 {
     map_tile_t tile;
     char image;
-    short colour;
+    int colour;
     char *description;
     unsigned
         passable:    1,     /* can be passed */
@@ -120,7 +120,7 @@ typedef struct map_sobject_data
 {
     map_sobject_t sobject;
     char image;
-    short colour;
+    int colour;
     char *description;
     unsigned
         passable:     1,   /* can be passed */
