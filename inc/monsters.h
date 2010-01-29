@@ -55,6 +55,7 @@ typedef struct monster_data
     int hp_max;
     int exp;			/* xp granted to player */
     char image;
+    int colour;
     speed mspeed;
     esize msize;
     guint32 flags;
@@ -215,6 +216,7 @@ char *monster_desc(monster *m);
 #define monster_hp_max(monster)      (monsters[monster_type(monster)].hp_max)
 #define monster_exp(monster)         (monsters[monster_type(monster)].exp)
 #define monster_image(monster)       (monsters[monster_type(monster)].image)
+#define monster_colour(monster)      (monsters[monster_type(monster)].colour)
 #define monster_speed(monster)       (monsters[monster_type(monster)].mspeed)
 #define monster_attack(monster, idx) (monsters[monster_type(monster)].attacks[(idx)])
 #define monster_map(monster)         (game_map(nlarn, monster_pos((monster)).z))

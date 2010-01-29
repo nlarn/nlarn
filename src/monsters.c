@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "display.h"
 #include "game.h"
 #include "map.h"
 #include "monsters.h"
@@ -83,7 +84,7 @@ const monster_data monsters[MT_MAX] =
      * level ac intelligence gold hitpoints experience image */
     {
         MT_NONE, "",
-        0, 0, 0, 0, 0, 0, ' ',
+        0, 0, 0, 0, 0, 0, ' ', DC_BLACK,
         SPEED_NONE, ESIZE_NONE,
         MF_NONE,
         {
@@ -94,7 +95,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_GIANT_BAT, "giant bat",
-        1, 0, 3, 0, 1, 1, 'B',
+        1, 0, 3, 0, 1, 1, 'B', DC_RED,
         SPEED_FAST, ESIZE_SMALL,
         MF_HEAD | MF_FLY | MF_INFRAVISION,
         {
@@ -104,7 +105,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_GNOME, "gnome",
-        1, 10, 8, 30, 2, 2, 'G',
+        1, 10, 8, 30, 2, 2, 'G', DC_BROWN,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS,
         {
@@ -114,7 +115,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_HOBGOBLIN, "hobgoblin",
-        1, 14, 5, 25, 3, 2, 'H',
+        1, 14, 5, 25, 3, 2, 'H', DC_BROWN,
         SPEED_SLOW, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
@@ -124,7 +125,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_JACKAL, "jackal",
-        1, 17, 4, 0, 1, 1, 'J',
+        1, 17, 4, 0, 1, 1, 'J', DC_BROWN,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD,
         {
@@ -134,7 +135,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_KOBOLD, "kobold",
-        1, 20, 7, 10, 1, 1, 'K',
+        1, 20, 7, 10, 1, 1, 'K', DC_BROWN,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
@@ -144,7 +145,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_ORC, "orc",
-        2, 12, 9, 40, 4, 2, 'O',
+        2, 12, 9, 40, 4, 2, 'O', DC_RED,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
@@ -154,7 +155,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_SNAKE, "snake",
-        2, 15, 3, 0, 3, 1, 'S',
+        2, 15, 3, 0, 3, 1, 'S', DC_LIGHTGREEN,
         SPEED_NORMAL, ESIZE_TINY,
         MF_HEAD,
         {
@@ -164,7 +165,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_CENTIPEDE, "giant centipede",
-        2, 14, 2, 0, 1, 2, 'c',
+        2, 14, 2, 0, 1, 2, 'c', DC_YELLOW,
         SPEED_NORMAL, ESIZE_TINY,
         MF_HEAD,
         {
@@ -175,7 +176,7 @@ const monster_data monsters[MT_MAX] =
     {
         /* a winged, leaping snake */
         MT_JACULUS, "jaculus",
-        2, 20, 3, 0, 2, 1, 'j',
+        2, 20, 3, 0, 2, 1, 'j', DC_GREEN,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_FLY,
         {
@@ -185,7 +186,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_TROGLODYTE, "troglodyte",
-        2, 10, 5, 80, 4, 3, 't',
+        2, 10, 5, 80, 4, 3, 't', DC_BROWN,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS,
         {
@@ -195,7 +196,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_GIANT_ANT, "giant ant",
-        2, 8, 3, 0, 5, 5, 'A',
+        2, 8, 3, 0, 5, 5, 'A', DC_BROWN,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD,
         {
@@ -205,7 +206,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_FLOATING_EYE, "floating eye",
-        3, 8, 3, 0, 5, 2, 'E',
+        3, 8, 3, 0, 5, 2, 'E', DC_BLUE,
         SPEED_SLOW, ESIZE_MEDIUM,
         MF_FLY,
         {
@@ -215,7 +216,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_LEPRECHAUN, "leprechaun",
-        3, 3, 6, 1500, 13, 45, 'L',
+        3, 3, 6, 1500, 13, 45, 'L', DC_GREEN,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS,
         {
@@ -225,7 +226,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_NYMPH, "nymph",
-        3, 3, 9, 0, 18, 45, 'N',
+        3, 3, 9, 0, 18, 45, 'N', DC_BROWN,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS,
         {
@@ -235,7 +236,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_QUASIT, "quasit",
-        3, 5, 3, 0, 10, 15, 'Q',
+        3, 5, 3, 0, 10, 15, 'Q', DC_BLUE,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS | MF_DEMON,
         {
@@ -245,7 +246,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_RUST_MONSTER, "rust monster",
-        3, 4, 3, 0, 18, 25, 'R',
+        3, 4, 3, 0, 18, 25, 'R', DC_BROWN,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_METALLIVORE,
         {
@@ -255,7 +256,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_ZOMBIE, "zombie",
-        3, 12, 3, 0, 6, 7, 'Z',
+        3, 12, 3, 0, 6, 7, 'Z', DC_LIGHTGRAY,
         SPEED_SLOW, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_UNDEAD,
         {
@@ -265,7 +266,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_ASSASSIN_BUG, "assassin bug",
-        4, 9, 3, 0, 20, 15, 'a',
+        4, 9, 3, 0, 20, 15, 'a', DC_LIGHTGRAY,
         SPEED_NORMAL, ESIZE_TINY,
         MF_HEAD,
         {
@@ -275,7 +276,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_BUGBEAR, "bugbear",
-        4, 5, 5, 40, 20, 35, 'b',
+        4, 5, 5, 40, 20, 35, 'b', DC_BROWN,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
@@ -285,7 +286,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_HELLHOUND, "hell hound",
-        4, 5, 6, 0, 16, 35, 'h',
+        4, 5, 6, 0, 16, 35, 'h', DC_LIGHTRED,
         SPEED_FAST, ESIZE_SMALL,
         MF_HEAD,
         {
@@ -295,7 +296,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_ICE_LIZARD, "ice lizard",
-        4, 11, 6, 50, 16, 25, 'i',
+        4, 11, 6, 50, 16, 25, 'i', DC_LIGHTCYAN,
         SPEED_SLOW, ESIZE_MEDIUM,
         MF_HEAD,
         {
@@ -305,7 +306,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_CENTAUR, "centaur",
-        4, 6, 10, 40, 24, 45, 'C',
+        4, 6, 10, 40, 24, 45, 'C', DC_BROWN,
         SPEED_NORMAL, ESIZE_LARGE,
         MF_HEAD | MF_HANDS,
         {
@@ -315,7 +316,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_TROLL, "troll",
-        5, 4, 9, 80, 50, 300, 'T',
+        5, 4, 9, 80, 50, 300, 'T', DC_BROWN,
         SPEED_NORMAL, ESIZE_LARGE,
         MF_HEAD | MF_HANDS | MF_REGENERATE,
         {
@@ -325,7 +326,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_YETI, "yeti",
-        5, 6, 5, 50, 35, 100, 'Y',
+        5, 6, 5, 50, 35, 100, 'Y', DC_LIGHTGRAY,
         SPEED_NORMAL, ESIZE_LARGE,
         MF_HEAD | MF_HANDS,
         {
@@ -335,7 +336,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_ELF, "elf",
-        5, 8, 15, 50, 22, 35, 'e',
+        5, 8, 15, 50, 22, 35, 'e', DC_WHITE,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
@@ -345,7 +346,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_GELATINOUSCUBE, "gelatinous cube",
-        5, 9, 3, 0, 22, 45, 'g',
+        5, 9, 3, 0, 22, 45, 'g', DC_CYAN,
         SPEED_SLOW, ESIZE_LARGE,
         MF_METALLIVORE,
         {
@@ -354,7 +355,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_METAMORPH, "metamorph",
-        6, 7, 3, 0, 30, 40, 'm',
+        6, 7, 3, 0, 30, 40, 'm', DC_WHITE,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_NONE,
         {
@@ -364,7 +365,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_VORTEX, "vortex",
-        6, 4, 3, 0, 30, 55, 'v',
+        6, 4, 3, 0, 30, 55, 'v', DC_DARKGRAY,
         SPEED_NORMAL, ESIZE_TINY,
         MF_NONE,
         {
@@ -374,7 +375,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_ZILLER, "ziller",
-        6, 15, 3, 0, 30, 35, 'z',
+        6, 15, 3, 0, 30, 35, 'z', DC_CYAN,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD,
         {
@@ -384,7 +385,7 @@ const monster_data monsters[MT_MAX] =
     },
     { /* FIXME: I don't want no silly mushrooms */
         MT_VIOLET_FUNGUS, "violet fungi",
-        6, 12, 3, 0, 38, 100, 'F',
+        6, 12, 3, 0, 38, 100, 'F', DC_MAGENTA,
         SPEED_SLOW, ESIZE_MEDIUM,
         MF_NONE,
         {
@@ -394,7 +395,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_WRAITH, "wraith",
-        6, 3, 3, 0, 30, 325, 'w',
+        6, 3, 3, 0, 30, 325, 'w', DC_LIGHTGRAY,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_UNDEAD,
         {
@@ -404,7 +405,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_FORVALAKA, "forvalaka",
-        6, 2, 7, 0, 50, 280, 'f',
+        6, 2, 7, 0, 50, 280, 'f', DC_DARKGRAY,
         SPEED_FAST, ESIZE_MEDIUM,
         MF_HEAD | MF_UNDEAD | MF_INFRAVISION,
         {
@@ -414,7 +415,7 @@ const monster_data monsters[MT_MAX] =
     },
     { /* TODO: get rid of this beast */
         MT_LAMA_NOBE, "lama nobe",
-        7, 7, 6, 0, 35, 80, 'l',
+        7, 7, 6, 0, 35, 80, 'l', DC_BROWN,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD,
         {
@@ -424,7 +425,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_OSQUIP, "osquip",
-        7, 4, 4, 0, 35, 100, 'o',
+        7, 4, 4, 0, 35, 100, 'o', DC_BROWN,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD,
         {
@@ -434,7 +435,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_ROTHE, "rothe",
-        7, 15, 3, 100, 50, 250, 'r',
+        7, 15, 3, 100, 50, 250, 'r', DC_BROWN,
         SPEED_FAST, ESIZE_LARGE,
         MF_HEAD | MF_INFRAVISION,
         {
@@ -444,7 +445,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_XORN, "xorn",
-        7, 0, 13, 0, 60, 300, 'X',
+        7, 0, 13, 0, 60, 300, 'X', DC_DARKGRAY,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_INFRAVISION,
         {
@@ -454,7 +455,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_VAMPIRE, "vampire",
-        7, 3, 17, 0, 50, 1000, 'v',
+        7, 3, 17, 0, 50, 1000, 'v', DC_RED,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_FLY | MF_UNDEAD | MF_INFRAVISION | MF_REGENERATE,
         {
@@ -464,7 +465,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_STALKER, "invisible stalker",
-        7, 3, 14, 0, 50, 350, 'I',
+        7, 3, 14, 0, 50, 350, 'I', DC_LIGHTGRAY,
         SPEED_FAST, ESIZE_MEDIUM,
         MF_HEAD | MF_FLY | MF_INVISIBLE,
         {
@@ -474,7 +475,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_POLTERGEIST, "poltergeist",
-        8, 1, 5, 0, 50, 450, 'p',
+        8, 1, 5, 0, 50, 450, 'p', DC_WHITE,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_UNDEAD | MF_FLY | MF_INVISIBLE,
         {
@@ -484,7 +485,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_DISENCHANTRESS, "disenchantress",
-        8, 3, 5, 0, 50, 500, 'q',
+        8, 3, 5, 0, 50, 500, 'q', DC_WHITE,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_METALLIVORE,
         {
@@ -494,7 +495,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_SHAMBLINGMOUND, "shambling mound",
-        8, 2, 6, 0, 45, 400, 's',
+        8, 2, 6, 0, 45, 400, 's', DC_GREEN,
         SPEED_NORMAL, ESIZE_HUGE,
         MF_NONE,
         {
@@ -504,7 +505,7 @@ const monster_data monsters[MT_MAX] =
     },
     { /* FIXME: replace this beast! */
         MT_YELLOW_MOLD, "yellow mold",
-        8, 12, 3, 0, 35, 250, 'y',
+        8, 12, 3, 0, 35, 250, 'y', DC_YELLOW,
         SPEED_NONE, ESIZE_SMALL,
         MF_NONE,
         {
@@ -514,7 +515,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_UMBER_HULK, "umber hulk",
-        8, 3, 14, 0, 65, 600, 'U',
+        8, 3, 14, 0, 65, 600, 'U', DC_YELLOW,
         SPEED_SLOW, ESIZE_HUGE,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
@@ -524,7 +525,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_GNOME_KING, "gnome king",
-        9, -1, 18, 2000, 100,   3000, 'k',
+        9, -1, 18, 2000, 100,   3000, 'k', DC_RED,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS,
         {
@@ -534,7 +535,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_MIMIC, "mimic",
-        9, 5, 8, 0, 55, 99, 'M',
+        9, 5, 8, 0, 55, 99, 'M', DC_BROWN,
         SPEED_SLOW, ESIZE_MEDIUM,
         MF_NONE,
         {
@@ -544,7 +545,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_WATER_LORD, "water lord",
-        9,-10, 20, 0, 150, 15000, 'w',
+        9,-10, 20, 0, 150, 15000, 'w', DC_BLUE,
         SPEED_NORMAL, ESIZE_LARGE,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS,
         {
@@ -554,7 +555,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_PURPLE_WORM, "purple worm",
-        9, -1, 3, 100, 120, 15000, 'P',
+        9, -1, 3, 100, 120, 15000, 'P', DC_MAGENTA,
         SPEED_SLOW, ESIZE_GARGANTUAN,
         MF_HEAD,
         {
@@ -564,7 +565,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_XVART, "xvart",
-        9, -2, 13, 0, 90, 1000, 'x',
+        9, -2, 13, 0, 90, 1000, 'x', DC_DARKGRAY,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
@@ -574,7 +575,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_WHITE_DRAGON, "white dragon",
-        5, 2, 16,  500, 55, 1000, 'd',
+        5, 2, 16,  500, 55, 1000, 'd', DC_WHITE,
         SPEED_NORMAL, ESIZE_HUGE,
         MF_HEAD,
         {
@@ -584,7 +585,7 @@ const monster_data monsters[MT_MAX] =
     },
     { /* TODO: replace this beast */
         MT_BRONCE_DRAGON, "bronze dragon",
-        9, 2, 16, 300, 80, 4000, 'D',
+        9, 2, 16, 300, 80, 4000, 'D', DC_BROWN,
         SPEED_NORMAL, ESIZE_HUGE,
         MF_HEAD | MF_FLY,
         {
@@ -594,7 +595,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_GREEN_DRAGON, "green dragon",
-        9, 3, 15, 200, 70, 2500, 'D',
+        9, 3, 15, 200, 70, 2500, 'D', DC_GREEN,
         SPEED_NORMAL, ESIZE_HUGE,
         MF_HEAD | MF_FLY,
         {
@@ -604,7 +605,7 @@ const monster_data monsters[MT_MAX] =
     },
     { /* TODO: replace this beast */
         MT_SILVER_DRAGON, "silver dragon",
-        10, -1, 20, 700, 100, 10000, 'D',
+        10, -1, 20, 700, 100, 10000, 'D', DC_LIGHTGRAY,
         SPEED_NORMAL, ESIZE_HUGE,
         MF_HEAD | MF_FLY,
         {
@@ -614,7 +615,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_PLATINUM_DRAGON, "platinum dragon",
-        10, -5, 22, 1000, 130, 24000, 'D',
+        10, -5, 22, 1000, 130, 24000, 'D', DC_WHITE,
         SPEED_NORMAL, ESIZE_HUGE,
         MF_HEAD | MF_FLY,
         {
@@ -624,7 +625,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_RED_DRAGON, "red dragon",
-        10, -2, 19, 800, 110, 14000, 'D',
+        10, -2, 19, 800, 110, 14000, 'D', DC_LIGHTRED,
         SPEED_NORMAL, ESIZE_HUGE,
         MF_HEAD | MF_FLY,
         {
@@ -634,7 +635,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_SPIRIT_NAGA, "spirit naga",
-        10, -20, 23, 0, 95, 20000, 'n',
+        10, -20, 23, 0, 95, 20000, 'n', DC_MAGENTA,
         SPEED_NORMAL, ESIZE_LARGE,
         MF_HEAD | MF_NOBEHEAD | MF_FLY | MF_SPIRIT | MF_INFRAVISION,
         {
@@ -644,7 +645,7 @@ const monster_data monsters[MT_MAX] =
     },
     { /* TODO: relplace this beast */
         MT_GREEN_URCHIN, "green urchin",
-        10, -3, 3, 0, 85, 5000, 'u',
+        10, -3, 3, 0, 85, 5000, 'u', DC_GREEN,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_NONE,
         {
@@ -654,7 +655,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_DEMONLORD_I, "type I demon lord",
-        12, -30, 20, 0, 140, 50000, '&',
+        12, -30, 20, 0, 140, 50000, '&', DC_LIGHTRED,
         SPEED_FAST, ESIZE_MEDIUM,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
@@ -664,7 +665,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_DEMONLORD_II, "type II demon lord",
-        13, -30, 21, 0, 160, 75000, '&',
+        13, -30, 21, 0, 160, 75000, '&', DC_LIGHTRED,
         SPEED_FAST, ESIZE_MEDIUM,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
@@ -674,7 +675,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_DEMONLORD_III, "type III demon lord",
-        14, -30,  22, 0, 180, 100000, '&',
+        14, -30,  22, 0, 180, 100000, '&', DC_LIGHTRED,
         SPEED_FAST, ESIZE_MEDIUM,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
@@ -684,7 +685,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_DEMONLORD_IV, "type IV demon lord",
-        15, -35, 23, 0, 200, 125000, '&',
+        15, -35, 23, 0, 200, 125000, '&', DC_LIGHTRED,
         SPEED_FAST, ESIZE_MEDIUM,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
@@ -694,7 +695,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_DEMONLORD_V, "type V demon lord",
-        16, -40, 24, 0, 220, 150000, '&',
+        16, -40, 24, 0, 220, 150000, '&', DC_LIGHTRED,
         SPEED_FAST, ESIZE_MEDIUM,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
@@ -704,7 +705,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_DEMONLORD_VI, "type VI demon lord",
-        17, -45, 25, 0, 240, 175000, '&',
+        17, -45, 25, 0, 240, 175000, '&', DC_LIGHTRED,
         SPEED_FAST, ESIZE_LARGE,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
@@ -714,7 +715,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_DEMONLORD_VII, "type VII demon lord",
-        18, -70, 26, 0, 260, 200000, '&',
+        18, -70, 26, 0, 260, 200000, '&', DC_LIGHTRED,
         SPEED_FAST, ESIZE_HUGE,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {
@@ -724,7 +725,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_DAEMON_PRINCE, "demon prince",
-        25, -127, 28, 0, 345, 300000, '&',
+        25, -127, 28, 0, 345, 300000, '&', DC_RED,
         SPEED_FAST, ESIZE_HUGE,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
         {

@@ -253,10 +253,10 @@ int display_paint_screen(player *p)
                         && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))
                         && !monster_unknown(monst))) /* hide the mimic */
             {
-                attron(DC_RED);
+                attron(attrs = monster_colour(monst));
                 position mpos = monster_pos(monst);
                 mvaddch(mpos.y, mpos.x, monster_image(monst));
-                attroff(DC_RED);
+                attroff(attrs);
             }
         }
     }
@@ -274,7 +274,7 @@ int display_paint_screen(player *p)
     else
     {
         pc = '@';
-        attrs = DC_YELLOW;
+        attrs = DC_WHITE;
     }
 
     attron(attrs);
