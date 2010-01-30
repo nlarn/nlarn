@@ -1,8 +1,8 @@
 Name: nlarn
 Summary: remake of the roguelike Larn
-Version: 0.5.2
+Version: 0.5.3
 Release: 1
-Source: http://downloads.sourceforge.net/project/nlarn/nlarn/0.5.2/nlarn-0.5.2.tar.gz
+Source: http://downloads.sourceforge.net/project/nlarn/nlarn/0.5.3/nlarn-0.5.3.tar.gz
 License: GPL v3
 Group: Amusements/Games
 
@@ -31,6 +31,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc LICENSE README.txt nlarn.ini-sample
 
 %changelog
+* Sat Jan 30 2010 Joachim de Groot <jdegroot@web.de> 
+  - updated for version 0.5.3
 * Sun Nov 22 2009 Joachim de Groot <jdegroot@web.de> 
   - added README.txt
   - updated for version 0.5.2
