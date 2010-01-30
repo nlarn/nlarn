@@ -369,7 +369,7 @@ int strv_append(char ***list, const char *str)
     assert(list != NULL);
     assert(str != NULL);
 
-    *list = g_realloc (*list, sizeof(char*) * len);
+    *list = g_realloc (*list, sizeof(char*) * (len + 1));
 
     (*list)[len - 1] = g_strdup(str);
     (*list)[len] = NULL;
@@ -385,8 +385,8 @@ int strv_append_unique(char ***list, const char *str)
     int len = 0;
 
     /* compare elements to the new string and return FALSE if the element existed */
-    for (len = 0; *list[len]; len++)
-        if (strcmp(*list[len], str) == 0) return FALSE;
+    for (len = 0; (*list)[len]; len++)
+        if (strcmp((*list)[len], str) == 0) return FALSE;
 
     return strv_append(list, str);
 }

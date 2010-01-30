@@ -104,18 +104,11 @@ int display_paint_screen(player *p)
     guint x, y, i;
     position pos;
     map *map;
-
-    /* curses attributes */
-    int attrs;
-
-    /* needed to display messages */
-    message_log_entry *le;
-
-    /* storage for formatted messages */
-    GPtrArray *text = NULL;
-
-    /* storage for the game time of messages */
-    guint *ttime = NULL;
+    char **effects_desc;    /* container for effect descriptions */
+    int attrs;              /* curses attributes */
+    message_log_entry *le;  /* needed to display messages */
+    GPtrArray *text = NULL; /* storage for formatted messages */
+    guint *ttime = NULL;    /* storage for the game time of messages */
 
     /* refresh screen dimensions */
     getmaxyx(stdscr, display_rows, display_cols);
@@ -453,8 +446,8 @@ int display_paint_screen(player *p)
     move(10, MAP_MAX_X + 1);
     clrtoeol();
 
-    /* display negative effects */
-    text = player_effect_text(p);
+    /* display effect descriptions */
+    effects_desc = player_effect_text(p);
 
     /* clear lines */
     for (i = 0; i < 7; i++)
@@ -463,15 +456,15 @@ int display_paint_screen(player *p)
         clrtoeol();
     }
 
-    if (text->len > 0)
+    if (*effects_desc)
     {
         int available_space = display_cols - MAP_MAX_X - 4;
 
         attron(attrs = DC_LIGHTCYAN);
 
-        for (i = 0; i < text->len; i++)
+        for (i = 0; effects_desc[i]; i++)
         {
-            char *desc = g_strdup(g_ptr_array_index(text, i));
+            char *desc = g_strdup(effects_desc[i]);
 
             if (strlen(desc) > available_space)
             {
@@ -486,8 +479,7 @@ int display_paint_screen(player *p)
         attroff(attrs);
     }
 
-    g_ptr_array_free(text, TRUE);
-    text = NULL; /* needed in this state below */
+    g_strfreev(effects_desc);
 
     /* *** MESSAGES *** */
     /* number of lines which can be displayed */

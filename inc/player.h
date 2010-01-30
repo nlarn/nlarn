@@ -227,7 +227,7 @@ void player_effects_del(player *p, GPtrArray *effects);
 effect *player_effect_get(player *p, int effect_id);
 int player_effect(player *p, int effect_type); /* check if a effect is set */
 void player_effects_expire(player *p, int turns);
-GPtrArray *player_effect_text(player *p);
+char **player_effect_text(player *p);
 
 /* dealing with the inventory */
 int player_inv_display(player *p);

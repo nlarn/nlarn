@@ -803,20 +803,19 @@ void player_die(player *p, player_cod cause_type, int cause)
                                p->charisma, p->charisma - p->stats.cha_orig);
 
         /* effects */
-        GPtrArray *effect_desc = player_effect_text(p);
+        char **effect_desc = player_effect_text(p);
 
-        if (effect_desc->len > 0)
+        if (*effect_desc)
         {
             g_string_append(text, "\n\n-- Effects ----------------------------\n\n");
 
-            for (pos = 0; pos < effect_desc->len; pos++)
+            for (pos = 0; effect_desc[pos]; pos++)
             {
-                g_string_append_printf(text, "%s\n",
-                                       (char *)g_ptr_array_index(effect_desc, pos));
+                g_string_append_printf(text, "%s\n", effect_desc[pos]);
             }
         }
 
-        g_ptr_array_free(effect_desc, TRUE);
+        g_strfreev(effect_desc);
 
         /* append list of known spells */
         if (p->known_spells->len > 0)
@@ -2144,24 +2143,22 @@ void player_effects_expire(player *p, int turns)
     }
 }
 
-GPtrArray *player_effect_text(player *p)
+char **player_effect_text(player *p)
 {
-    GPtrArray *text;
+    char **text;
     int pos;
     effect *e;
     char *desc;
 
-    text = g_ptr_array_new();
+    text = strv_new();
 
     for (pos = 0; pos < p->effects->len; pos++)
     {
         e = game_effect_get(nlarn, g_ptr_array_index(p->effects, pos));
 
-        desc = effect_get_desc(e);
-
-        if (desc != NULL)
+        if ((desc = effect_get_desc(e)) != NULL)
         {
-            g_ptr_array_add(text, desc);
+            strv_append_unique(&text, desc);
         }
     }
 
