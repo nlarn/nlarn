@@ -44,7 +44,7 @@ const spell_data spells[SP_MAX] =
         SP_MLE, "mle", "magic missile",
         SC_RAY, DAM_MAGICAL, ET_NONE,
         "Creates and hurls a magic missile equivalent to a + 1 magic arrow.",
-        "Your missiles hit the %s.",
+        "Your missile hits the %s.",
         "Your missile bounces off the %s.",
         1, 320, TRUE
     },
@@ -159,6 +159,7 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         3, 950, FALSE
     },
+/*
     {
         SP_HAS, "has", "haste self",
         SC_PLAYER, DAM_NONE, ET_SPEED,
@@ -166,12 +167,13 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         3, 950, FALSE
     },
+*/
     {
         SP_CKL, "ckl", "killing cloud",
         SC_FLOOD, DAM_ACID, ET_NONE,
         "Creates a fog of poisonous gas which kills all that is within it.",
         "The %s gasps for air.",
-        "The %s loves the water!",
+        NULL,
         3, 1200, FALSE
     },
     {
@@ -216,7 +218,7 @@ const spell_data spells[SP_MAX] =
         SC_FLOOD, DAM_WATER, ET_NONE,
         "This creates an avalanche of H2O to flood the immediate chamber.",
         "The %s struggles for air in your flood!",
-        NULL,
+        "The %s loves the water!",
         4, 1600, FALSE
     },
     {
@@ -339,9 +341,9 @@ static const char *book_descriptions[SP_MAX - 1] =
     "wax-lined",
     "bamboo",
     "clasped",
-    "ragged",
-/*  "dull",
-    "canvas", two descriptions for unimplemented spells */
+/*  "ragged",
+    "dull",
+    "canvas", three descriptions for unimplemented spells */
     "well-thumbed",
     /* "chambray", currently not needed */
 };
@@ -1213,7 +1215,7 @@ gboolean spell_vaporize_rock(player *p)
 
     if (!pos_valid(pos))
     {
-        log_add_entry(p->log, "So you chose not to vaprize anything.");
+        log_add_entry(p->log, "So you chose not to vaporize anything.");
         return FALSE;
     }
 

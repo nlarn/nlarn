@@ -78,7 +78,7 @@ typedef enum spell_ids {
 	SP_CLD,		/* cold */
 	SP_PLY,		/* polymorph */
 	SP_CAN,		/* cancellation */
-	SP_HAS,		/* haste self */
+/*	SP_HAS,		 haste self: not implemented */
 	SP_CKL,		/* cloud kill */
 	SP_VPR,		/* vaporize rock */
 	SP_DRY,		/* dehydration */
