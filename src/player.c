@@ -1948,6 +1948,7 @@ void player_effect_add(player *p, effect *e)
 
         case ET_INC_STR:
             p->strength += e->amount;
+            player_inv_weight_recalc(p->inventory, NULL);
             break;
 
         case ET_INC_WIS:
@@ -2009,6 +2010,7 @@ void player_effect_add(player *p, effect *e)
 
         case ET_DEC_STR:
             p->strength -= e->amount;
+            player_inv_weight_recalc(p->inventory, NULL);
             break;
 
         case ET_DEC_WIS:
@@ -2049,7 +2051,15 @@ void player_effect_add(player *p, effect *e)
     }
     else
     {
+        int str_orig = player_get_str(p);
+
         effect_add(p->effects, e);
+
+        if (str_orig != player_get_str(p))
+        {
+            /* strength has been modified -> recalc burdened status */
+            player_inv_weight_recalc(p->inventory, NULL);
+        }
     }
 }
 
