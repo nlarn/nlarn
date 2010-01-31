@@ -60,23 +60,23 @@ const item_type_data item_data[IT_MAX] =
 
 const item_material_data item_materials[IM_MAX] =
 {
-    /* type           name           adjective */
-    { IM_NONE,        "",            "",          },
-    { IM_PAPER,       "paper",       "papier",    },
-    { IM_CLOTH,       "cloth",       "cloth",     },
-    { IM_LEATHER,     "leather",     "leathern",  },
-    { IM_WOOD,        "wood",        "wooden",    },
-    { IM_BONE,        "bone",        "osseous",   },
-    { IM_DRAGON_HIDE, "dragon hide", "scabby",    }, /* ? */
-    { IM_IRON,        "iron",        "irony",     },
-    { IM_STEEL,       "steel",       "steely",    },
-    { IM_COPPER,      "copper",      "cupreous",  },
-    { IM_SILVER,      "silver",      "silvery",   },
-    { IM_GOLD,        "gold",        "golden",    },
-    { IM_PLATINUM,    "platinum",    "platinum",  },
-    { IM_MITHRIL,     "mitril",      "mithrial",  },
-    { IM_GLASS,       "glass",       "vitreous",  },
-    { IM_GEMSTONE,    "gemstone",    "gemstone",  }, /* ? */
+    /* type           name           adjective   colour */
+    { IM_NONE,        "",            "",         DC_NONE      },
+    { IM_PAPER,       "paper",       "papier",   DC_WHITE     },
+    { IM_CLOTH,       "cloth",       "cloth",    DC_LIGHTGRAY },
+    { IM_LEATHER,     "leather",     "leathern", DC_BROWN     },
+    { IM_WOOD,        "wood",        "wooden",   DC_BROWN     },
+    { IM_BONE,        "bone",        "osseous",  DC_DARKGRAY  },
+    { IM_DRAGON_HIDE, "dragon hide", "scabby",   DC_NONE      }, /* ? */
+    { IM_IRON,        "iron",        "irony",    DC_LIGHTGRAY },
+    { IM_STEEL,       "steel",       "steely",   DC_WHITE     },
+    { IM_COPPER,      "copper",      "cupreous", DC_BROWN     },
+    { IM_SILVER,      "silver",      "silvery",  DC_LIGHTGRAY },
+    { IM_GOLD,        "gold",        "golden",   DC_YELLOW    },
+    { IM_PLATINUM,    "platinum",    "platinum", DC_WHITE     },
+    { IM_MITHRIL,     "mitril",      "mithrial", DC_LIGHTGRAY },
+    { IM_GLASS,       "glass",       "vitreous", DC_WHITE     },
+    { IM_GEMSTONE,    "gemstone",    "gemstone", DC_NONE      }, /* ? */
 };
 
 /* functions */
@@ -995,13 +995,10 @@ int item_colour(item *it)
     switch (it->type)
     {
     case IT_AMULET:
-        /* FIXME: colour should be set according to material type */
-        return DC_YELLOW;
-        break;
-
     case IT_ARMOUR:
-        /* FIXME: colour should be set according to material type */
-        return DC_WHITE;
+    case IT_RING:
+    case IT_WEAPON:
+        return item_materials[item_material(it)].colour;
         break;
 
     case IT_BOOK:
@@ -1012,11 +1009,6 @@ int item_colour(item *it)
     case IT_POTION:
         /* FIXME: colour should be set according to description */
         return DC_WHITE;
-        break;
-
-    case IT_RING:
-        /* FIXME: colour should be set according to material type */
-        return DC_YELLOW;
         break;
 
     case IT_SCROLL:
@@ -1037,11 +1029,6 @@ int item_colour(item *it)
 
     case IT_GEM:
         return gem_colour(it);
-        break;
-
-    case IT_WEAPON:
-        /* FIXME: colour should be set according to material type */
-        return DC_WHITE;
         break;
 
     default:

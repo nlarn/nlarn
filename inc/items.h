@@ -42,29 +42,30 @@ typedef enum item_types {
 
 /* inspired by Nethack's objclass.h */
 typedef enum item_material_t {
-	IM_NONE,
-	IM_PAPER,
-	IM_CLOTH,
-	IM_LEATHER,
-	IM_WOOD,
-	IM_BONE,
-	IM_DRAGON_HIDE,		/* not leather! */
-	IM_IRON,			/* Fe  */
-	IM_STEEL,           /* stainless steel */
-	IM_COPPER,			/* Cu - includes brass */
-	IM_SILVER,
-	IM_GOLD,			/* Au */
-	IM_PLATINUM,		/* Pt */
-	IM_MITHRIL,
-	IM_GLASS,
-	IM_GEMSTONE,
-	IM_MAX				/* ~ item material count */
+    IM_NONE,
+    IM_PAPER,
+    IM_CLOTH,
+    IM_LEATHER,
+    IM_WOOD,
+    IM_BONE,
+    IM_DRAGON_HIDE,     /* not leather! */
+    IM_IRON,            /* Fe  */
+    IM_STEEL,           /* stainless steel */
+    IM_COPPER,          /* Cu - includes brass */
+    IM_SILVER,
+    IM_GOLD,            /* Au */
+    IM_PLATINUM,        /* Pt */
+    IM_MITHRIL,
+    IM_GLASS,
+    IM_GEMSTONE,
+    IM_MAX              /* ~ item material count */
 } item_material_t;
 
 typedef struct item_material_data {
     item_material_t type;
     char *name;
     char *adjective;
+    int colour;
 } item_material_data;
 
 typedef struct item_usage_result
@@ -75,18 +76,18 @@ typedef struct item_usage_result
 } item_usage_result;
 
 enum perish_types {
-	PT_NONE,
-	PT_FIRE,
-	PT_WATER,
-	PT_ACID,
-	PT_MAX
+    PT_NONE,
+    PT_FIRE,
+    PT_WATER,
+    PT_ACID,
+    PT_MAX
 };
 
 enum perish_impact {
-	PI_NONE,
-	PI_ENFORCED,
-	PI_DESTROYED,
-	PI_MAX
+    PI_NONE,
+    PI_ENFORCED,
+    PI_DESTROYED,
+    PI_MAX
 };
 
 struct game;
@@ -125,19 +126,19 @@ typedef struct _item {
 } item;
 
 typedef struct item_type_data {
-	item_t id;
-	char *name_sg;
-	char *name_pl;
-	char image;
-	char *desc_known;
-	char *desc_unknown;
-	int max_id;
-	unsigned
+    item_t id;
+    char *name_sg;
+    char *name_pl;
+    char image;
+    char *desc_known;
+    char *desc_unknown;
+    int max_id;
+    unsigned
         optimizable: 1,     /* item can have a bonus */
-		equippable: 1,
-		usable: 1,
-		stackable: 1,
-		identifyable: 1;
+        equippable: 1,
+        usable: 1,
+        stackable: 1,
+        identifyable: 1;
 } item_type_data;
 
 /* function definitions */
