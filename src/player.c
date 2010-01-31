@@ -20,13 +20,7 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifndef WIN32
 #include <unistd.h>
-#else
-#include <windows.h>
-#define sleep(x) Sleep((x)*1000)
-#endif
 
 #include "cJSON.h"
 #include "container.h"
@@ -720,7 +714,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         display_paint_screen(p);
 
         /* sleep a second */
-        sleep(1);
+        usleep(1000000);
 
         /* flush keyboard input buffer */
         flushinp();
