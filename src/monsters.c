@@ -1506,7 +1506,7 @@ monster *monster_trap_trigger(monster *m)
         if (trap_effect(trap))
         {
             eff = effect_new(trap_effect(trap), game_turn(nlarn));
-            monster_effect_add(m, eff);
+            eff = monster_effect_add(m, eff);
         }
 
     } /* switch (trap) */
@@ -2064,10 +2064,11 @@ int monster_is_genocided(int monster_id)
     return nlarn->monster_genocided[monster_id];
 }
 
-void monster_effect_add(monster *m, effect *e)
+effect *monster_effect_add(monster *m, effect *e)
 {
     assert(m != NULL && e != NULL);
-    effect_add(m->effects, e);
+
+    return effect_add(m->effects, e);
 }
 
 int monster_effect_del(monster *m, effect *e)

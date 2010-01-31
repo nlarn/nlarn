@@ -822,6 +822,7 @@ int spell_type_point(spell *s, struct player *p)
         }
 
         e->amount *= s->knowledge;
+        e = monster_effect_add(monster, e);
 
         /* show message if monster is visible */
         if (monster_in_sight(monster) && effect_get_msg_m_start(e)
@@ -830,9 +831,6 @@ int spell_type_point(spell *s, struct player *p)
             log_add_entry(p->log, effect_get_msg_m_start(e),
                           monster_name(monster));
         }
-
-        /* has to come in the end as e might be destroyed */
-        monster_effect_add(monster, e);
 
         break;
     }

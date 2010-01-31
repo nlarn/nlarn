@@ -242,7 +242,7 @@ static int scroll_with_effect(struct player *p, item *scroll)
     assert(p != NULL && scroll != NULL);
 
     eff = effect_new(scroll_effect(scroll), game_turn(nlarn));
-    player_effect_add(p, eff);
+    eff = player_effect_add(p, eff);
 
     if (!effect_get_msg_start(eff))
     {

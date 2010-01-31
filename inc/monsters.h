@@ -243,7 +243,7 @@ int monster_genocide(int monster_id);
 int monster_is_genocided(int monster_id);
 
 /* dealing with temporary effects */
-void monster_effect_add(monster *m, effect *e);
+effect *monster_effect_add(monster *m, effect *e);
 int monster_effect_del(monster *m, effect *e);
 effect *monster_effect_get(monster *m , effect_type type);
 int monster_effect(monster *m, effect_type type);

@@ -220,7 +220,7 @@ int player_mp_max_gain(player *p, int count);
 int player_mp_max_lose(player *p, int count);
 
 /* dealing with temporary effects */
-void player_effect_add(player *p, effect *e);
+effect *player_effect_add(player *p, effect *e);
 void player_effects_add(player *p, GPtrArray *effects);
 int player_effect_del(player *p, effect *e);
 void player_effects_del(player *p, GPtrArray *effects);

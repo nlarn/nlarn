@@ -1918,7 +1918,7 @@ int player_mp_max_lose(player *p, int count)
     return p->mp_max;
 }
 
-void player_effect_add(player *p, effect *e)
+effect *player_effect_add(player *p, effect *e)
 {
     assert(p != NULL && e != NULL);
 
@@ -2043,17 +2043,19 @@ void player_effect_add(player *p, effect *e)
             break;
         }
         effect_destroy(e);
+        e = NULL;
     }
     else if (e->type == ET_SLEEP)
     {
         game_spin_the_wheel(nlarn, e->turns);
         effect_destroy(e);
+        e = NULL;
     }
     else
     {
         int str_orig = player_get_str(p);
 
-        effect_add(p->effects, e);
+        e = effect_add(p->effects, e);
 
         if (str_orig != player_get_str(p))
         {
@@ -2061,6 +2063,8 @@ void player_effect_add(player *p, effect *e)
             player_inv_weight_recalc(p->inventory, NULL);
         }
     }
+
+    return e;
 }
 
 void player_effects_add(player *p, GPtrArray *effects)

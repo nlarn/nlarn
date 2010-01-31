@@ -629,7 +629,7 @@ int effect_get_amount(effect *e)
         return 0;
 }
 
-void effect_add(GPtrArray *ea, effect *ne)
+effect *effect_add(GPtrArray *ea, effect *ne)
 {
     effect *e;
 
@@ -649,10 +649,12 @@ void effect_add(GPtrArray *ea, effect *ne)
         }
 
         effect_destroy(ne);
+        return e;
     }
     else
     {
         g_ptr_array_add(ea, ne->oid);
+        return ne;
     }
 }
 

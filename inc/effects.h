@@ -159,7 +159,7 @@ char *effect_get_msg_m_stop(effect *e);
 
 int effect_get_amount(effect *e);
 
-void effect_add(GPtrArray *ea, effect *e);
+effect *effect_add(GPtrArray *ea, effect *e);
 int effect_del(GPtrArray *ea, effect *e);
 effect *effect_get(GPtrArray *ea, effect_type type);
 
