@@ -158,6 +158,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 item_material_t item_material(item *it);
 guint item_price(item *it);
 int item_weight(item *it);
+int item_colour(item *it);
 
 void item_effect_add(item *it, effect *e);
 void item_effect_del(item *it, effect *e);

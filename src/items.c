@@ -22,6 +22,7 @@
 #include "amulets.h"
 #include "armour.h"
 #include "container.h"
+#include "display.h"
 #include "food.h"
 #include "game.h"
 #include "gems.h"
@@ -978,6 +979,73 @@ int item_weight(item *it)
 
     default:
         return 0;
+        break;
+    }
+}
+
+/**
+ * Determine the colour of an given object
+ * @param an item
+ * @return the coulour
+ */
+int item_colour(item *it)
+{
+    assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    switch (it->type)
+    {
+    case IT_AMULET:
+        /* FIXME: colour should be set according to material type */
+        return DC_YELLOW;
+        break;
+
+    case IT_ARMOUR:
+        /* FIXME: colour should be set according to material type */
+        return DC_WHITE;
+        break;
+
+    case IT_BOOK:
+        /* FIXME: colour should be set according to description */
+        return DC_BROWN;
+        break;
+
+    case IT_POTION:
+        /* FIXME: colour should be set according to description */
+        return DC_WHITE;
+        break;
+
+    case IT_RING:
+        /* FIXME: colour should be set according to material type */
+        return DC_YELLOW;
+        break;
+
+    case IT_SCROLL:
+        return DC_WHITE;
+        break;
+
+    case IT_CONTAINER:
+        return DC_BROWN;
+        break;
+
+    case IT_FOOD:
+        return DC_BROWN;
+        break;
+
+    case IT_GOLD:
+        return DC_YELLOW;
+        break;
+
+    case IT_GEM:
+        return gem_colour(it);
+        break;
+
+    case IT_WEAPON:
+        /* FIXME: colour should be set according to material type */
+        return DC_WHITE;
+        break;
+
+    default:
+        return DC_BLACK;
         break;
     }
 }

@@ -130,7 +130,7 @@ int display_paint_screen(player *p)
 
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            if (game_wizardmode(nlarn))
+            if (game_wizardmode(nlarn) || player_pos_visible(p, pos))
             {
                 /* draw the truth */
                 if (inv_length(*map_ilist_at(map, pos)) > 0)
@@ -139,93 +139,59 @@ int display_paint_screen(player *p)
                     item *it = inv_get(*map_ilist_at(map, pos),
                                        inv_length(*map_ilist_at(map, pos)) - 1);
 
-                    if (player_pos_visible(p, pos))
-                        attron(attrs = DC_BLUE);
-                    else
-                        attron(attrs = DC_LIGHTGRAY);
-
+                    attron(attrs = item_colour(it));
                     addch(item_image(it->type));
                     attroff(attrs);
                 }
-
                 else if (map_sobject_at(map, pos))
                 {
                     /* draw sobject stuff */
-                    if (player_pos_visible(p, pos))
-                        attron(attrs = ls_get_colour(map_sobject_at(map, pos)));
-                    else
-                        attron(attrs = DC_DARKGRAY);
-
+                    attron(attrs = ls_get_colour(map_sobject_at(map, pos)));
                     addch(ls_get_image(map_sobject_at(map, pos)));
                     attroff(attrs);
                 }
-                else if (map_trap_at(map, pos))
+                else if (map_trap_at(map, pos) && (game_wizardmode(nlarn) || player_memory_of(p, pos).trap))
                 {
-                    if (player_pos_visible(p, pos))
-                        attron(attrs = DC_MAGENTA);
-                    else
-                        attron(attrs = DC_LIGHTGRAY);
-
+                    /* FIXME - displays trap when unknown!! */
+                    attron(attrs = DC_MAGENTA);
                     addch('^');
                     attroff(attrs);
                 }
-
                 else
                 {
                     /* draw tile */
-                    if (player_pos_visible(p, pos))
-                        attron(attrs = lt_get_colour(map_tiletype_at(map, pos)));
-                    else
-                        attron(attrs = DC_DARKGRAY);
-
+                    attron(attrs = lt_get_colour(map_tiletype_at(map, pos)));
                     addch(lt_get_image(map_tiletype_at(map, pos)));
                     attroff(attrs);
                 }
             }
-            else /* i.e. !wizardmode */
-                /* draw players fov & memory */
+            else /* i.e. !wizardmode && !visible: draw players memory */
             {
-                /* draw items */
                 if (player_memory_of(p, pos).item)
                 {
-                    if (player_pos_visible(p, pos))
-                        attron(attrs = DC_BLUE);
-                    else
-                        attron(attrs = DC_LIGHTGRAY);
-
+                    /* draw items */
+                    attron(attrs = DC_LIGHTGRAY);
                     addch(item_image(player_memory_of(p, pos).item));
                     attroff(attrs);
                 }
-                /* draw stationary objects */
                 else if (player_memory_of(p, pos).sobject)
                 {
-                    if (player_pos_visible(p, pos))
-                        attron(attrs = ls_get_colour(player_memory_of(p, pos).sobject));
-                    else
-                        attron(attrs = DC_DARKGRAY);
-
+                    /* draw stationary object */
+                    attron(attrs = DC_LIGHTGRAY);
                     addch(ls_get_image(player_memory_of(p, pos).sobject));
                     attroff(attrs);
                 }
                 else if (player_memory_of(p, pos).trap)
                 {
-                    if (player_pos_visible(p, pos))
-                        attron(attrs = DC_MAGENTA);
-                    else
-                        attron(attrs = DC_LIGHTGRAY);
-
+                    /* draw trap */
+                    attron(attrs = DC_LIGHTGRAY);
                     addch('^');
                     attroff(attrs);
                 }
-                /* draw tile */
                 else
                 {
                     /* draw tile */
-                    if (player_pos_visible(p, pos))
-                        attron(attrs = lt_get_colour(map_tiletype_at(map, pos)));
-                    else
-                        attron(attrs = DC_DARKGRAY);
-
+                    attron(attrs = DC_DARKGRAY);
                     addch(lt_get_image(player_memory_of(p, pos).type));
                     attroff(attrs);
                 }
