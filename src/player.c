@@ -2047,7 +2047,15 @@ effect *player_effect_add(player *p, effect *e)
     }
     else if (e->type == ET_SLEEP)
     {
-        game_spin_the_wheel(nlarn, e->turns);
+        int i;
+
+        for (i = 0; i < e->turns; i++)
+        {
+            game_spin_the_wheel(nlarn, 1);
+            display_paint_screen(p);
+            usleep(50000);
+        }
+
         effect_destroy(e);
         e = NULL;
     }
