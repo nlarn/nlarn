@@ -18,6 +18,7 @@
 
 #include <assert.h>
 
+#include "display.h"
 #include "game.h"
 #include "nlarn.h"
 #include "player.h"
@@ -57,38 +58,49 @@ static int potion_with_effect(struct player *p, item *potion);
 static int potion_amnesia(struct player *p, item *potion);
 static int potion_detect_item(struct player *p, item *potion);
 
-static const char *_potion_desc[PO_MAX - 1] =
+struct potion_obfuscation_s
 {
-    "clear",
-    "bubbly",
-    "clotted",
-    "smoky",
-    "milky",
-    "fizzy",
-    "murky",
-    "effervescent",
-    "dark",
-    "turbid",
-    "mucilaginous",
-    "gluey",
-    "gooey",
-    "coagulated",
-    "white",
-    "red",
-    "blue",
-    "green",
-    "yellow",
-    "orange",
-    "polychrome",
-    "dichroic",
-    "tricoloured",
-    "black",
+    const char* desc;
+    const int colour;
+}
+potion_obfuscation[PO_MAX - 1] =
+{
+    { "clear",          DC_WHITE,       },
+    { "bubbly",         DC_LIGHTGRAY,   },
+    { "clotted",        DC_DARKGRAY,    },
+    { "smoky",          DC_LIGHTGRAY    },
+    { "milky",          DC_WHITE,       },
+    { "fizzy",          DC_LIGHTBLUE,   },
+    { "murky",          DC_DARKGRAY,    },
+    { "effervescent",   DC_LIGHTBLUE,   },
+    { "dark",           DC_DARKGRAY,    },
+    { "turbid",         DC_DARKGRAY,    },
+    { "mucilaginous",   DC_BROWN,       },
+    { "gluey",          DC_BROWN,       },
+    { "gooey",          DC_BROWN,       },
+    { "coagulated",     DC_DARKGRAY,    },
+    { "white",          DC_WHITE,       },
+    { "red",            DC_RED,         },
+    { "blue",           DC_BLUE,        },
+    { "green",          DC_GREEN        },
+    { "yellow",         DC_YELLOW,      },
+    { "orange",         DC_LIGHTRED,    },
+    { "polychrome",     DC_LIGHTGREEN,  },
+    { "dichroic",       DC_LIGHTMAGENTA,},
+    { "tricoloured",    DC_LIGHTCYAN,   },
+    { "black",          DC_DARKGRAY,    },
 };
 
 char *potion_desc(int potion_id)
 {
     assert(potion_id > PO_NONE && potion_id < PO_MAX);
-    return (char *)_potion_desc[nlarn->potion_desc_mapping[potion_id - 1]];
+    return (char *)potion_obfuscation[nlarn->potion_desc_mapping[potion_id - 1]].desc;
+}
+
+int potion_colour(int potion_id)
+{
+    assert(potion_id > PO_NONE && potion_id < PO_MAX);
+    return potion_obfuscation[nlarn->potion_desc_mapping[potion_id - 1]].colour;
 }
 
 item_usage_result potion_quaff(struct player *p, item *potion)

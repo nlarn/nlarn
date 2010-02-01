@@ -1007,8 +1007,7 @@ int item_colour(item *it)
         break;
 
     case IT_POTION:
-        /* FIXME: colour should be set according to description */
-        return DC_WHITE;
+        return potion_colour(it->id);
         break;
 
     case IT_SCROLL:
