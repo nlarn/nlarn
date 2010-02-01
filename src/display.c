@@ -1953,13 +1953,10 @@ position display_get_position(player *p, char *message, int draw_line, int passa
     direction dir = GD_NONE;
     position pos, npos;
     map *map;
-
-    /* curses attributes */
-    int attrs;
+    int attrs; /* curses attributes */
 
     /* variables for ray painting */
-    area *ray;
-    int distance = 0;
+    area *ray = NULL;
     int x, y;
     monster *target, *m;
 
@@ -1981,28 +1978,20 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 
     do
     {
-        distance = max(abs(pos.x - p->pos.x),
-                       abs(pos.y - p->pos.y));
-
         /* redraw screen to erase old rays */
         if (draw_line) display_paint_screen(p);
 
         /* draw a line between source and target if told to */
-        if (draw_line && distance)
+        if (draw_line && (ray != NULL))
         {
             target = map_get_monster_at(map, pos);
 
             display_paint_screen(p);
 
-            if (target)
-                attrs = DC_LIGHTRED;
-            else
-                attrs = DC_LIGHTCYAN;
+            if (target) attrs = DC_LIGHTRED;
+            else        attrs = DC_LIGHTCYAN;
 
             attron(attrs);
-
-            ray = area_new_ray(p->pos, pos,
-                               map_get_obstacles(map, p->pos, distance));
 
             for (y = 0; y < ray->size_y; y++)
             {
@@ -2030,6 +2019,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 
             attroff(attrs);
             area_destroy(ray);
+            ray = NULL;
         }
 
         /* position cursor */
@@ -2122,20 +2112,37 @@ position display_get_position(player *p, char *message, int draw_line, int passa
             dir = GD_NONE;
         }
 
-        if (pos_valid(npos) && player_pos_visible(p, npos))
+        if (pos_valid(npos))
         {
+            /* don't want to deal with invalid positions */
+            int distance = pos_distance(p->pos, npos);
+
+            /* don't use inappropriate positions */
+            if (!player_pos_visible(p, npos))
+                npos = pos;
             if (passable && !map_pos_passable(map, npos))
-                /* a passable position has been requested and this one isn't */
-                continue;
+                npos = pos;
+
+            if (draw_line)
+            {
+                ray = area_new_ray(p->pos, npos, map_get_obstacles(map, p->pos, distance));
+
+                if (ray == NULL)
+                {
+                    /* it's not possible to draw a ray between the points
+                       -> leave everything as it has been */
+                    npos = pos;
+                    ray = area_new_ray(p->pos, pos, map_get_obstacles(map, p->pos, distance));
+                }
+            }
 
             /* new position is within bounds and visible */
             pos = npos;
-
-            /* make npos invalid */
-            npos.x = G_MAXINT16;
-            npos.y = G_MAXINT16;
         }
 
+        /* make npos invalid */
+        npos.x = G_MAXINT16;
+        npos.y = G_MAXINT16;
     }
     while (RUN);
 
@@ -2524,3 +2531,4 @@ static void display_spheres_paint(sphere *s, player *p)
         attroff(DC_MAGENTA);
     }
 }
+

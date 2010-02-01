@@ -456,7 +456,9 @@ area *area_new_ray(position source, position target, area *obstacles)
             if (area_point_get(obstacles, x + offset_x, y + offset_y))
             {
                 /* stop painting ray */
-                break;
+                area_destroy(obstacles);
+                area_destroy(narea);
+                return NULL;
             }
             else
             {
