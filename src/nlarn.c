@@ -255,6 +255,12 @@ int main(int argc, char *argv[])
             moves_count = player_altar_desecrate(nlarn->p);
             break;
 
+            /* bank account information */
+        case 'B':
+            log_add_entry(nlarn->p->log, "There are %s gp on your bank account.",
+                          int2str(nlarn->p->bank_account));
+            break;
+
             /* close door */
         case 'C':
             moves_count = player_door_close(nlarn->p);
@@ -359,17 +365,22 @@ int main(int argc, char *argv[])
                 if (display_get_yesno("Are you sure you want to switch to Wizard mode?\n" \
                                       "You will not be able to switch back to normal " \
                                       "gameplay and your score will not be counted.", NULL, NULL))
+                {
                     game_wizardmode(nlarn) = TRUE;
-                log_add_entry(nlarn->p->log, "Wizard mode has been activated.");
-            }
+                    log_add_entry(nlarn->p->log, "Wizard mode has been activated.");
+                }
+             }
             else
             {
                 log_add_entry(nlarn->p->log, "Wizard mode is already enabled.");
             }
-
             break;
 
             /* *** DEBUGGING SUPPORT *** */
+        case '$':
+            if (game_wizardmode(nlarn)) nlarn->p->bank_account += 1000;
+            break;
+
         case '+': /* dungeon map up */
             if (game_wizardmode(nlarn) && (nlarn->p->pos.z > 0))
                 moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z - 1), TRUE);

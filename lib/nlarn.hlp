@@ -12,6 +12,7 @@ You can as well use the number pad with num lock off.
 Commands
 
 A  desecrate an altar
+B  show bank account balance
 c  cast a spell
 C  close a door
 g  get present pack weight
@@ -61,3 +62,4 @@ Wizard mode
 -     teleport up one level
 ^up   raise experience level
 ^down lower experience level
+$     add 1000 gp to bank account
