@@ -54,7 +54,6 @@ typedef struct spell_data {
 
 typedef struct spell {
 	guint32 id;         /* reference to spell_data */
-	guint32 learnt;     /* game time learnt */
 	guint32 knowledge;  /* quality of knowledge */
 	guint32 used;       /* usage counter */
 } spell;

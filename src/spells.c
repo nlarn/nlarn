@@ -378,7 +378,6 @@ cJSON *spell_serialize(spell *s)
     cJSON *sser = cJSON_CreateObject();
 
     cJSON_AddNumberToObject(sser, "id", s->id);
-    cJSON_AddNumberToObject(sser, "learnt", s->learnt);
     cJSON_AddNumberToObject(sser, "knowledge", s->knowledge);
     cJSON_AddNumberToObject(sser, "used", s->used);
 
@@ -390,7 +389,6 @@ spell *spell_deserialize(cJSON *sser)
     spell *s = g_malloc0(sizeof(spell));
 
     s->id = cJSON_GetObjectItem(sser, "id")->valueint;
-    s->learnt = cJSON_GetObjectItem(sser, "learnt")->valueint;
     s->knowledge = cJSON_GetObjectItem(sser, "knowledge")->valueint;
     s->used = cJSON_GetObjectItem(sser, "used")->valueint;
 
@@ -575,6 +573,9 @@ int spell_cast(player *p)
 
             /* increase number of spells cast */
             p->stats.spells_cast++;
+
+            /* increase usage counter for this specific spell */
+            spell->used++;
         }
 
         break;
@@ -613,7 +614,6 @@ int spell_learn(player *p, guint spell_type)
     if (!spell_known(p, spell_type))
     {
         s = spell_new(spell_type);
-        s->learnt = game_turn(nlarn);
 
         /* TODO: add a check for intelligence */
         if (spell_level(s) > (int)p->level)

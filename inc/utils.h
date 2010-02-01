@@ -26,7 +26,6 @@
 /* game messaging */
 typedef struct message_log_entry
 {
-    time_t ltime;       /* real time of log entry */
     guint32 gtime;      /* game time of log entry */
     char *message;
 } message_log_entry;

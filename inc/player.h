@@ -44,9 +44,6 @@ typedef struct player_stats
     gint32 potions_quaffed;
     gint32 scrolls_read;
     gint32 books_read;
-    gint32 gold_collected;
-    gint32 gold_spent;
-    gint32 times_prayed;
     gint32 max_level;
     gint32 max_xp;
     gint32 str_orig;

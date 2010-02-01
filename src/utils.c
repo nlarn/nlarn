@@ -115,7 +115,6 @@ void log_set_time(message_log *log, int gtime)
     {
         entry = g_malloc(sizeof(message_log_entry));
         entry->gtime = log->gtime;
-        entry->ltime = time(NULL);
         entry->message = (log->buffer)->str;
 
         /* allocate storage space */
@@ -201,7 +200,6 @@ cJSON *log_serialize(message_log *log)
     {
         cJSON_AddItemToArray(lser, le = cJSON_CreateObject());
 
-        cJSON_AddNumberToObject(le, "ltime", log->entries[idx]->ltime);
         cJSON_AddNumberToObject(le, "gtime", log->entries[idx]->gtime);
         cJSON_AddStringToObject(le, "message", log->entries[idx]->message);
     }
@@ -226,7 +224,6 @@ message_log *log_deserialize(cJSON *lser)
 
         log->entries[idx] = g_malloc0(sizeof(message_log_entry));
 
-        log->entries[idx]->ltime = cJSON_GetObjectItem(le, "ltime")->valueint;
         log->entries[idx]->gtime = cJSON_GetObjectItem(le, "gtime")->valueint;
         log->entries[idx]->message = g_strdup(cJSON_GetObjectItem(le, "message")->valuestring);
     }

@@ -333,9 +333,7 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "spells_cast", p->stats.spells_cast);
     cJSON_AddNumberToObject(obj, "potions_quaffed", p->stats.potions_quaffed);
     cJSON_AddNumberToObject(obj, "scrolls_read", p->stats.scrolls_read);
-    cJSON_AddNumberToObject(obj, "gold_collected", p->stats.gold_collected);
-    cJSON_AddNumberToObject(obj, "gold_spent", p->stats.gold_spent);
-    cJSON_AddNumberToObject(obj, "times_prayed", p->stats.times_prayed);
+    cJSON_AddNumberToObject(obj, "books_read", p->stats.books_read);
     cJSON_AddNumberToObject(obj, "max_level", p->stats.max_level);
     cJSON_AddNumberToObject(obj, "max_xp", p->stats.max_xp);
 
@@ -495,15 +493,13 @@ player *player_deserialize(cJSON *pser)
     p->stats.deepest_level = cJSON_GetObjectItem(obj, "deepest_level")->valueint;
 
     elem = cJSON_GetObjectItem(obj, "monsters_killed");
-    for (idx = 0; idx > MT_MAX; idx++)
+    for (idx = 0; idx < MT_MAX; idx++)
         p->stats.monsters_killed[idx] = cJSON_GetArrayItem(elem, idx)->valueint;
 
     p->stats.spells_cast = cJSON_GetObjectItem(obj, "spells_cast")->valueint;
     p->stats.potions_quaffed = cJSON_GetObjectItem(obj, "potions_quaffed")->valueint;
     p->stats.scrolls_read = cJSON_GetObjectItem(obj, "scrolls_read")->valueint;
-    p->stats.gold_collected = cJSON_GetObjectItem(obj, "gold_collected")->valueint;
-    p->stats.gold_spent = cJSON_GetObjectItem(obj, "gold_spent")->valueint;
-    p->stats.times_prayed = cJSON_GetObjectItem(obj, "times_prayed")->valueint;
+    p->stats.books_read = cJSON_GetObjectItem(obj, "books_read")->valueint;
     p->stats.max_level = cJSON_GetObjectItem(obj, "max_level")->valueint;
     p->stats.max_xp = cJSON_GetObjectItem(obj, "max_xp")->valueint;
 
@@ -4518,7 +4514,6 @@ static cJSON *player_memory_serialize(player *p, position pos)
     cJSON *mser;
 
     mser = cJSON_CreateObject();
-
     if (player_memory_of(p, pos).type > LT_NONE)
         cJSON_AddNumberToObject(mser, "type",
                                 player_memory_of(p, pos).type);
