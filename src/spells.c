@@ -307,47 +307,52 @@ const spell_data spells[SP_MAX] =
     },
 };
 
-static const char *book_descriptions[SP_MAX - 1] =
+struct book_obfuscation_s
 {
-    "parchment-bound",
-    "thick", /* 1 */
-    "dusty",
-    "leather-bound",
-    "heavy", /* 4 */
-    "ancient",
-    "buckram",
-    "gilded",
-    "embossed",
-    "old",
-    "thin", /* 10 */
-    "light", /* 11 */
-    "large", /* 12 */
-    "vellum",
-    "tan",
-    "papyrus",
-    "linen",
-    "musty",
-    "faded",
-    "antique",
-    "worn out",
-    "tattered",
-    "aged",
-    "ornate",
-    "inconspicuous",
-    "awe-inspiring",
-    "stained",
-    "mottled",
-    "plaid",
-    "wax-lined",
-    "bamboo",
-    "clasped",
-/*  "ragged",
-    "dull",
-    "canvas", three descriptions for unimplemented spells */
-    "well-thumbed",
-    /* "chambray", currently not needed */
+    const char* desc;
+    const int weight;
+    const int colour;
+}
+book_obfuscation[SP_MAX - 1] =
+{
+    { "parchment-bound", 800, DC_BROWN,     },
+    { "thick",          1200, DC_LIGHTGRAY, },
+    { "dusty",           800, DC_LIGHTGRAY, },
+    { "leather-bound",   800, DC_BROWN,     },
+    { "heavy",          1200, DC_LIGHTGRAY, },
+    { "ancient",         800, DC_DARKGRAY,  },
+    { "buckram",         800, DC_LIGHTGRAY, },
+    { "gilded",          800, DC_YELLOW,    },
+    { "embossed",        800, DC_LIGHTGRAY, },
+    { "old",             800, DC_LIGHTGRAY, },
+    { "thin",            400, DC_LIGHTGRAY, },
+    { "light",           400, DC_LIGHTGRAY, },
+    { "large",          1200, DC_LIGHTGRAY, },
+    { "vellum",          800, DC_BROWN,     },
+    { "tan",             800, DC_BROWN,     },
+    { "papyrus",         800, DC_BROWN,     },
+    { "linen",           800, DC_WHITE,     },
+    { "musty",           800, DC_GREEN,     },
+    { "faded",           800, DC_DARKGRAY,  },
+    { "antique",         800, DC_DARKGRAY,  },
+    { "worn out",        800, DC_DARKGRAY,  },
+    { "tattered",        800, DC_LIGHTGRAY, },
+    { "aged",            800, DC_DARKGRAY,  },
+    { "ornate",          800, DC_BLUE,      },
+    { "inconspicuous",   800, DC_LIGHTGRAY, },
+    { "awe-inspiring",   800, DC_WHITE,     },
+    { "stained",         800, DC_BROWN,     },
+    { "mottled",         800, DC_RED,       },
+    { "plaid",           800, DC_RED,       },
+    { "wax-lined",       800, DC_BROWN,     },
+    { "bamboo",          800, DC_YELLOW,    },
+    { "clasped",         800, DC_LIGHTGRAY, },
+    { "well-thumbed",    800, DC_LIGHTGRAY, },
+/*
+    reserve descriptions for unimplemented spells:
+    ragged, dull, chambray, canvas
+*/
 };
-
 
 spell *spell_new(int id)
 {
@@ -1294,29 +1299,19 @@ gboolean spell_vaporize_rock(player *p)
 char *book_desc(int book_id)
 {
     assert(book_id > SP_NONE && book_id < SP_MAX);
-    return (char *)book_descriptions[nlarn->book_desc_mapping[book_id - 1]];
+    return (char *)book_obfuscation[nlarn->book_desc_mapping[book_id - 1]].desc;
 }
 
 int book_weight(item *book)
 {
     assert (book != NULL && book->type == IT_BOOK);
+    return book_obfuscation[nlarn->book_desc_mapping[book->id - 1]].weight;
+}
 
-    switch (nlarn->book_desc_mapping[book->id - 1])
-    {
-    case 1: /* thick */
-    case 4: /* heavy */
-    case 12: /* large */
-        return 1200;
-        break;
-
-    case 10: /* thin */
-    case 11: /* light */
-        return 400;
-        break;
-
-    default:
-        return 800;
-    }
+int book_colour(item *book)
+{
+    assert (book != NULL && book->type == IT_BOOK);
+    return book_obfuscation[nlarn->book_desc_mapping[book->id - 1]].colour;
 }
 
 item_usage_result book_read(struct player *p, item *book)

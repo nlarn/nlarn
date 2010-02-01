@@ -1002,8 +1002,7 @@ int item_colour(item *it)
         break;
 
     case IT_BOOK:
-        /* FIXME: colour should be set according to description */
-        return DC_BROWN;
+        return book_colour(it);
         break;
 
     case IT_POTION:

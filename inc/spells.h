@@ -159,6 +159,7 @@ gboolean spell_vaporize_rock(struct player *p);
 
 char *book_desc(int book_id);
 int book_weight(item *book);
+int book_colour(item *book);
 item_usage_result book_read(struct player *p, item *book);
 
 #define book_type_obtainable(id) (spells[id].obtainable)
