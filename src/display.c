@@ -208,9 +208,7 @@ int display_paint_screen(player *p)
 
             if (game_wizardmode(nlarn)
                     || player_effect(p, ET_DETECT_MONSTER)
-                    || (player_pos_visible(p, monster_pos(monst))
-                        && (!monster_is_invisible(monst) || player_effect(p, ET_INFRAVISION))
-                        && !monster_unknown(monst))) /* hide the mimic */
+                    || monster_in_sight(monst))
             {
                 attron(attrs = monster_colour(monst));
                 position mpos = monster_pos(monst);

@@ -49,6 +49,8 @@ struct _monster
     gpointer weapon;
     GPtrArray *effects;
 
+    int colour;          /* for the mimic: the colour the disguised mimic chose */
+
     guint32
         item_type: 8,    /* item type monster is displayed as */
         unknown: 1;      /* monster is unknown */
@@ -537,7 +539,7 @@ const monster_data monsters[MT_MAX] =
         MT_MIMIC, "mimic",
         9, 5, 8, 0, 55, 99, 'M', DC_BROWN,
         SPEED_SLOW, ESIZE_MEDIUM,
-        MF_NONE,
+        MF_MIMIC,
         {
             { ATT_SLAM, DAM_PHYSICAL, 6, 0 },
             EMPTY_ATTACK,
@@ -862,10 +864,28 @@ monster *monster_new(int type, position pos)
     } /* finished initializing weapons */
 
     /* initialize mimics */
-    if (type == MT_MIMIC)
+    if (monster_is_mimic(nmonster))
     {
+        struct
+        {
+            item_t type;
+            int colour;
+        }
+        possible_types[] =
+        {
+          { IT_AMULET,    DC_YELLOW, },
+          { IT_GOLD,      DC_YELLOW, },
+          { IT_RING,      DC_WHITE,  },
+          { IT_GEM,       DC_RED,    },
+          { IT_CONTAINER, DC_BROWN   },
+        };
+
+        int chosen_type = rand_0n(5);
+
         /* determine how the mimic will be displayed */
-        nmonster->item_type = rand_1n(IT_MAX);
+        nmonster->item_type = possible_types[chosen_type].type;
+        nmonster->colour = possible_types[chosen_type].colour;
+
         /* the mimic is not known to be a monster */
         nmonster->unknown = TRUE;
     }
@@ -968,6 +988,9 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     if (m->weapon != NULL)
         cJSON_AddNumberToObject(mval, "weapon", GPOINTER_TO_UINT(m->weapon));
 
+    if (m->colour)
+        cJSON_AddNumberToObject(mval, "colour", m->colour);
+
     if (m->unknown)
         cJSON_AddTrueToObject(mval, "unknown");
 
@@ -1007,6 +1030,9 @@ void monster_deserialize(cJSON *mser, game *g)
 
     if ((obj = cJSON_GetObjectItem(mser, "weapon")))
         m->weapon = GUINT_TO_POINTER(obj->valueint);
+
+    if ((obj = cJSON_GetObjectItem(mser, "colour")))
+        m->colour = obj->valueint;
 
     if ((obj = cJSON_GetObjectItem(mser, "unknown")))
         m->unknown = TRUE;
@@ -1886,7 +1912,7 @@ gboolean monster_update_action(monster *m)
         }
     }
 
-    if (m->type == MT_MIMIC && m->unknown)
+    if (monster_is_mimic(m) && m->unknown)
     {
         /* sobject monsters */
         naction = MA_REMAIN;
@@ -2028,6 +2054,34 @@ char *monster_desc(monster *m)
 
 
     return g_string_free(desc, FALSE);
+}
+
+char monster_image(monster *m)
+{
+    assert (m != NULL);
+
+    if (m->unknown)
+    {
+        return item_image(m->item_type);
+    }
+    else
+    {
+        return monsters[m->type].image;
+    }
+}
+
+int monster_colour(monster *m)
+{
+    assert (m != NULL);
+
+    if (m->unknown)
+    {
+        return m->colour;
+    }
+    else
+    {
+    return monsters[m->type].colour;
+    }
 }
 
 int monster_genocide(int monster_id)

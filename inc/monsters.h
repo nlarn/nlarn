@@ -156,6 +156,7 @@ enum monster_flags
     MF_REGENERATE   = 1 << 8,   /* does regenerate */
     MF_METALLIVORE  = 1 << 9,   /* eats metal */
     MF_DEMON        = 1 << 10,  /* is a demon */
+    MF_MIMIC        = 1 << 11,  /* is a mimic */
 };
 
 /* external vars */
@@ -207,6 +208,8 @@ void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
 
 char *monster_desc(monster *m);
+char monster_image(monster *m);
+int monster_colour(monster *m);
 
 #define monster_name(monster)        (monsters[monster_type(monster)].name)
 #define monster_level(monster)       (monsters[monster_type(monster)].level)
@@ -215,8 +218,6 @@ char *monster_desc(monster *m);
 #define monster_gold(monster)        (monsters[monster_type(monster)].gold)
 #define monster_hp_max(monster)      (monsters[monster_type(monster)].hp_max)
 #define monster_exp(monster)         (monsters[monster_type(monster)].exp)
-#define monster_image(monster)       (monsters[monster_type(monster)].image)
-#define monster_colour(monster)      (monsters[monster_type(monster)].colour)
 #define monster_speed(monster)       (monsters[monster_type(monster)].mspeed)
 #define monster_attack(monster, idx) (monsters[monster_type(monster)].attacks[(idx)])
 #define monster_map(monster)         (game_map(nlarn, monster_pos((monster)).z))
@@ -233,6 +234,7 @@ char *monster_desc(monster *m);
 #define monster_can_regenerate(monster)  (monsters[monster_type(monster)].flags & MF_REGENERATE)
 #define monster_is_metallivore(monster)  (monsters[monster_type(monster)].flags & MF_METALLIVORE)
 #define monster_is_demon(monster)        (monsters[monster_type(monster)].flags & MF_DEMON)
+#define monster_is_mimic(monster)        (monsters[monster_type(monster)].flags & MF_MIMIC)
 
 #define monster_type_name(type)  (monsters[(type)].name)
 #define monster_type_exp(type)   (monsters[(type)].exp)

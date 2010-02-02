@@ -4411,7 +4411,7 @@ void player_update_fov(player *p)
 
                     player_memory_of(p,pos).item = it->type;
                 }
-                else if (m && monster_type(m) == MT_MIMIC && monster_unknown(m))
+                else if (m && monster_is_mimic(m) && monster_unknown(m))
                 {
                     /* show the undiscovered mimic as an item */
                     player_memory_of(p,pos).item = monster_item_type(m);
