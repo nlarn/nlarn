@@ -2089,12 +2089,27 @@ void player_effects_add(player *p, GPtrArray *effects)
 
 int player_effect_del(player *p, effect *e)
 {
+    int str_orig, result;
+
     assert(p != NULL && e != NULL && e->type > ET_NONE && e->type < ET_MAX);
 
-    if (effect_get_msg_stop(e))
-        log_add_entry(p->log, effect_get_msg_stop(e));
+    str_orig = player_get_str(p);
 
-    return effect_del(p->effects, e);
+    if ((result = effect_del(p->effects, e)))
+    {
+        if (effect_get_msg_stop(e))
+        {
+            log_add_entry(p->log, effect_get_msg_stop(e));
+        }
+
+        if (str_orig != player_get_str(p))
+        {
+            /* strength has been modified -> recalc burdened status */
+            player_inv_weight_recalc(p->inventory, NULL);
+        }
+    }
+
+    return result;
 }
 
 void player_effects_del(player *p, GPtrArray *effects)
