@@ -298,7 +298,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_ICE_LIZARD, "ice lizard",
-        4, 11, 6, 50, 16, 25, 'i', DC_LIGHTCYAN,
+        4, 11, 6, 0, 16, 25, 'i', DC_LIGHTCYAN,
         SPEED_SLOW, ESIZE_MEDIUM,
         MF_HEAD,
         {
@@ -437,7 +437,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_ROTHE, "rothe",
-        7, 15, 3, 100, 50, 250, 'r', DC_BROWN,
+        7, 15, 3, 0, 50, 250, 'r', DC_BROWN,
         SPEED_FAST, ESIZE_LARGE,
         MF_HEAD | MF_INFRAVISION,
         {
@@ -557,7 +557,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_PURPLE_WORM, "purple worm",
-        9, -1, 3, 100, 120, 15000, 'P', DC_MAGENTA,
+        9, -1, 3, 0, 120, 15000, 'P', DC_MAGENTA,
         SPEED_SLOW, ESIZE_GARGANTUAN,
         MF_HEAD,
         {
