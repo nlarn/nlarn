@@ -405,8 +405,6 @@ int main(int argc, char *argv[])
         if (moves_count)
         {
             game_spin_the_wheel(nlarn, moves_count);
-
-            nlarn->p->stats.moves_made += moves_count;
             moves_count = 0;
         }
 

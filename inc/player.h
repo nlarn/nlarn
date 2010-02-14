@@ -37,13 +37,13 @@ struct game;
 
 typedef struct player_stats
 {
-    gint32 moves_made;
     gint32 deepest_level;
     gint32 monsters_killed[MT_MAX];
     gint32 spells_cast;
     gint32 potions_quaffed;
     gint32 scrolls_read;
     gint32 books_read;
+    gint32 cookies_nibbled;
     gint32 max_level;
     gint32 max_xp;
     gint32 str_orig;

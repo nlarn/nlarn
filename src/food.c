@@ -39,11 +39,11 @@ item_usage_result food_eat(struct player *p, item *food)
 {
     char description[61];
     item_usage_result result;
-    
+
     result.identified = TRUE;
     result.used_up = TRUE;
     result.time = 2;
-    
+
     item_describe(food, player_item_known(p, food),
                   TRUE, FALSE, description, 60);
 
@@ -51,6 +51,8 @@ item_usage_result food_eat(struct player *p, item *food)
 
     if (food->id == FT_FORTUNE_COOKIE)
     {
+        p->stats.cookies_nibbled++;
+
         log_add_entry(p->log,
                       "It has a piece of paper inside. It reads: \"%s\"",
                       food_get_fortune(game_fortunes(nlarn)));

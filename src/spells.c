@@ -567,22 +567,13 @@ int spell_cast(player *p)
         }
 
         /* spell has been casted successfully, set mp usage accordingly */
-        if (well_done)
-        {
-            mp_usage = spell_level(spell);
-
-            /* increase number of spells cast */
-            p->stats.spells_cast++;
-
-            /* increase usage counter for this specific spell */
-            spell->used++;
-        }
+        if (well_done) mp_usage = spell_level(spell);
 
         break;
 
     case SC_NONE:
     case SC_MAX:
-        log_add_entry(p->log, "internal Error in %s:%d.", __FILE__, __LINE__);
+        log_add_entry(p->log, "Internal Error in %s:%d.", __FILE__, __LINE__);
         break;
     }
 
@@ -590,8 +581,12 @@ int spell_cast(player *p)
     {
         /* charge mana */
         player_mp_lose(p, mp_usage);
-        /* statistics */
+
+        /* increase number of spells cast */
         p->stats.spells_cast++;
+
+        /* increase usage counter for this specific spell */
+        spell->used++;
     }
 
     return turns;

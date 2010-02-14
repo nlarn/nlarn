@@ -84,6 +84,26 @@ char *str_replace(char *string, char *orig, char *replace)
     return buffer;
 }
 
+char *str_capitalize(char *string)
+{
+    int i;
+
+    if (string == NULL)
+    {
+        return NULL;
+    }
+
+    for (i = 0; i < strlen(string); ++i)
+    {
+        if (i == 0 || string[i - 1] == ' ')
+        {
+            string[i] = g_ascii_toupper(string[i]);
+        }
+    }
+
+    return string;
+}
+
 message_log *log_new()
 {
     message_log *log;

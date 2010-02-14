@@ -326,7 +326,6 @@ cJSON *player_serialize(player *p)
     /* statistics */
     cJSON_AddItemToObject(pser, "stats", obj = cJSON_CreateObject());
 
-    cJSON_AddNumberToObject(obj, "moves_made", p->stats.moves_made);
     cJSON_AddNumberToObject(obj, "deepest_level", p->stats.deepest_level);
     cJSON_AddItemToObject(obj, "monsters_killed",
                           cJSON_CreateIntArray(p->stats.monsters_killed, MT_MAX));
@@ -335,6 +334,7 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "potions_quaffed", p->stats.potions_quaffed);
     cJSON_AddNumberToObject(obj, "scrolls_read", p->stats.scrolls_read);
     cJSON_AddNumberToObject(obj, "books_read", p->stats.books_read);
+    cJSON_AddNumberToObject(obj, "cookies_nibbled", p->stats.cookies_nibbled);
     cJSON_AddNumberToObject(obj, "max_level", p->stats.max_level);
     cJSON_AddNumberToObject(obj, "max_xp", p->stats.max_xp);
 
@@ -490,7 +490,6 @@ player *player_deserialize(cJSON *pser)
     /* statistics */
     obj = cJSON_GetObjectItem(pser, "stats");
 
-    p->stats.moves_made = cJSON_GetObjectItem(obj, "moves_made")->valueint;
     p->stats.deepest_level = cJSON_GetObjectItem(obj, "deepest_level")->valueint;
 
     elem = cJSON_GetObjectItem(obj, "monsters_killed");
@@ -501,6 +500,7 @@ player *player_deserialize(cJSON *pser)
     p->stats.potions_quaffed = cJSON_GetObjectItem(obj, "potions_quaffed")->valueint;
     p->stats.scrolls_read = cJSON_GetObjectItem(obj, "scrolls_read")->valueint;
     p->stats.books_read = cJSON_GetObjectItem(obj, "books_read")->valueint;
+    p->stats.cookies_nibbled = cJSON_GetObjectItem(obj, "cookies_nibbled")->valueint;
     p->stats.max_level = cJSON_GetObjectItem(obj, "max_level")->valueint;
     p->stats.max_xp = cJSON_GetObjectItem(obj, "max_xp")->valueint;
 
@@ -759,15 +759,24 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_string_append_printf(text, "%s cast %s spell%s, ", pronoun,
                                int2str(p->stats.spells_cast),
                                plural(p->stats.spells_cast));
-        g_string_append_printf(text, "quaffed %s potion%s ",
+        g_string_append_printf(text, "quaffed %s potion%s, ",
                                int2str(p->stats.potions_quaffed),
                                plural(p->stats.potions_quaffed));
+        g_string_append_printf(text, "nibbled %s cookie%s ",
+                               int2str(p->stats.cookies_nibbled),
+                               plural(p->stats.cookies_nibbled));
         g_string_append_printf(text, "and read %s book%s ",
                                int2str(p->stats.books_read),
                                plural(p->stats.books_read));
-        g_string_append_printf(text, "and %s scroll%s.",
+        g_string_append_printf(text, "and %s scroll%s. ",
                                int2str(p->stats.scrolls_read),
                                plural(p->stats.scrolls_read));
+
+        if (p->bank_account > 0)
+        {
+            g_string_append_printf(text, "%s had %s gp on the bank account.",
+                                   pronoun, int2str(p->bank_account));
+        }
 
         /* append map of current level if the player is not in the town */
         if (p->pos.z > 0)
@@ -816,9 +825,12 @@ void player_die(player *p, player_cod cause_type, int cause)
             for (pos = 0; pos < p->known_spells->len; pos++)
             {
                 spell *s = (spell *)g_ptr_array_index(p->known_spells, pos);
+                tmp = str_capitalize(g_strdup(spell_name(s)));
 
-                g_string_append_printf(text, "%s (%d)\n",
-                                       spell_name(s), s->knowledge);
+                g_string_append_printf(text, "%-24s (lvl. %2d): %3d\n",
+                                       tmp, s->knowledge, s->used);
+
+                g_free(tmp);
             }
         }
 
@@ -830,11 +842,12 @@ void player_die(player *p, player_cod cause_type, int cause)
         {
             if (p->stats.monsters_killed[mnum] > 0)
             {
+                tmp = str_capitalize(g_strdup(monster_type_name(mnum)));
                 g_string_append_printf(text, "%3d %s%s\n",
-                                       p->stats.monsters_killed[mnum],
-                                       monster_type_name(mnum),
+                                       p->stats.monsters_killed[mnum], tmp,
                                        (p->stats.monsters_killed[mnum] > 1) ? "s" : "");
 
+                g_free(tmp);
                 body_count += p->stats.monsters_killed[mnum];
             }
         }
