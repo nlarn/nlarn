@@ -42,12 +42,6 @@ int main(int argc, char *argv[])
     /* save file name */
     char *save_file_name = NULL;
 
-    printf("%s",
-           "NLarn Copyright (C) 2009  Joachim de Groot\n\n"
-           "This program comes with ABSOLUTELY NO WARRANTY.\n"
-           "This is free software, and you are welcome to\n"
-           "redistribute it under certain conditions.\n\n");
-
     /* assemble save file name */
     gchar *userdir = game_userdir();
     save_file_name = g_build_path(G_DIR_SEPARATOR_S, userdir, "nlarn.sav", NULL);
