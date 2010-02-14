@@ -1260,7 +1260,7 @@ gboolean spell_vaporize_rock(player *p)
     case LS_STATUE:
         if (game_difficulty(nlarn) < 3)
         {
-            item *it = item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)), 0);
+            item *it = item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)));
             inv_add(map_ilist_at(map, pos), it);
         }
 

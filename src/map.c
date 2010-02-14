@@ -1269,7 +1269,7 @@ static void map_fill_with_objects(map *l)
     for (i = 1; i <= rand_0n(2); i++)
     {
         /* random container type */
-        container = item_new(IT_CONTAINER, rand_1n(CT_MAX), 0);
+        container = item_new(IT_CONTAINER, rand_1n(CT_MAX));
 
         /* up to 5 items inside the container */
         for (j = 0; j < rand_0n(5); j++)
@@ -1292,14 +1292,15 @@ static void map_fill_with_objects(map *l)
     for (i = 0; i < rand_0n(10); i++)
     {
         /* There is nothing like a newly minted pound. */
-        map_item_add(l, item_new(IT_GOLD, rand_m_n(10, (l->nlevel + 1) * 15), 0));
+        map_item_add(l, item_new(IT_GOLD, rand_m_n(10, (l->nlevel + 1) * 15)));
     }
 
     /* up to three gems */
     for (i = 0; i < rand_0n(3); i++)
     {
-        map_item_add(l, item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)),
-                                 rand_0n(6 * (l->nlevel + 1))));
+        item *it = item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)));
+        it->bonus = rand_0n(6 * (l->nlevel + 1));
+        map_item_add(l, it);
     }
 
     /* up to four potions */
@@ -1656,7 +1657,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                 {
                     break;
                 }
-                inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN, 0));
+                inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN));
 
                 monster_new(MT_DEMONLORD_I + rand_0n(7), pos);
                 break;
@@ -1665,7 +1666,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                 if (nmap->nlevel != MAP_MAX - 1)
                     break;
 
-                inv_add(&tile->ilist, item_new(IT_POTION, PO_CURE_DIANTHR, 0));
+                inv_add(&tile->ilist, item_new(IT_POTION, PO_CURE_DIANTHR));
                 monster_new(MT_DAEMON_PRINCE, pos);
                 break;
 

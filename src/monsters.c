@@ -778,7 +778,7 @@ monster *monster_new(int type, position pos)
     {
         /* add gold to monster's inventory, randomize the amount */
         icount = max(divert(monster_gold(nmonster), 10), 1);
-        inv_add(&nmonster->inventory, item_new(IT_GOLD, icount, 0));
+        inv_add(&nmonster->inventory, item_new(IT_GOLD, icount));
     }
 
     /* add special items */
@@ -787,7 +787,7 @@ monster *monster_new(int type, position pos)
     case MT_LEPRECHAUN:
         if (chance(25))
         {
-            item *gem = item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)), 0);
+            item *gem = item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)));
             inv_add(&nmonster->inventory, gem);
         }
         break;
@@ -856,7 +856,9 @@ monster *monster_new(int type, position pos)
             break;
         }
 
-        weapon = item_new(IT_WEAPON, weapons[rand_0n(weapon_count)], rand_m_n(-2,2));
+        weapon = item_new(IT_WEAPON, weapons[rand_0n(weapon_count)]);
+        item_new_finetouch(weapon);
+
         inv_add(&nmonster->inventory, weapon);
 
         /* wield the new weapon */
@@ -2376,12 +2378,12 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
         {
             if (player_gold > 32767)
             {
-                it = item_new(IT_GOLD, player_gold >> 1, 0);
+                it = item_new(IT_GOLD, player_gold >> 1);
                 player_set_gold(p, player_gold >> 1);
             }
             else
             {
-                it = item_new(IT_GOLD, rand_1n(1 + (player_gold >> 1)), 0);
+                it = item_new(IT_GOLD, rand_1n(1 + (player_gold >> 1)));
                 player_set_gold(p, player_gold - it->count);
             }
 

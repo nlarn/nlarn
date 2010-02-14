@@ -138,12 +138,13 @@ player *player_new()
     inv_callbacks_set(p->inventory, &player_inv_pre_add, &player_inv_weight_recalc,
                       NULL, &player_inv_weight_recalc);
 
-    it = item_new(IT_ARMOUR, AT_LEATHER, 1);
+    it = item_new(IT_ARMOUR, AT_LEATHER);
+    it->bonus = 1;
     player_item_identify(p, NULL, it);
     inv_add(&p->inventory, it);
     player_item_equip(p, NULL, it);
 
-    it = item_new(IT_WEAPON, WT_DAGGER, 0);
+    it = item_new(IT_WEAPON, WT_DAGGER);
     player_item_identify(p, NULL, it);
     inv_add(&p->inventory, it);
     player_item_equip(p, NULL, it);
@@ -2959,7 +2960,7 @@ char *player_item_identified_list(player *p)
     assert (p != NULL);
 
     list = g_string_new(NULL);
-    it = item_new(type_ids[0], 1, 0);
+    it = item_new(type_ids[0], 1);
 
     for (type = 0; type < 5; type++)
     {
@@ -4238,7 +4239,7 @@ guint player_set_gold(player *p, guint amount)
     }
 
     /* no gold found -> generate new gold */
-    i = item_new(IT_GOLD, amount, 0);
+    i = item_new(IT_GOLD, amount);
     inv_add(&p->inventory, i);
 
     return i->count;

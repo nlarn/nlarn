@@ -169,7 +169,7 @@ int building_bank(player *p)
 
         if (amount && (amount <= p->bank_account))
         {
-            item *gold = item_new(IT_GOLD, amount, 0);
+            item *gold = item_new(IT_GOLD, amount);
 
             /* adding the gold might fail (too heavy) */
             if (inv_add(&p->inventory, gold))
@@ -288,7 +288,7 @@ void building_dndstore_init()
                     continue;
                 }
 
-                item *it = item_new(type, id, 0);
+                item *it = item_new(type, id);
 
                 if (item_is_identifyable(it->type))
                 {

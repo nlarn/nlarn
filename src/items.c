@@ -43,19 +43,19 @@ static char *item_desc_get(item *it, int known);
 
 const item_type_data item_data[IT_MAX] =
 {
-    /* item_t       name_sg      name_pl        IMG  desc_known      desc_unknown         max_id           op eq us st id */
-    { IT_NONE,      "",          "",            ' ', "",             "",                  0,               0, 0, 0, 0, 0, },
-    { IT_AMULET,    "amulet",    "amulets",     '"', "amulet of %s", "%s amulet",         AM_LARN,         0, 1, 0, 0, 1, },
-    { IT_ARMOUR,    "armour",    "armour",      '[', "%s",           "%s",                AT_MAX,          1, 1, 0, 0, 1, },
-    { IT_BOOK,      "book",      "books",       '+', "book of %s",   "%s book",           SP_MAX,          0, 0, 1, 1, 1, },
-    { IT_CONTAINER, "container", "containers",  'C', "%s",           "%s",                CT_MAX,          0, 0, 0, 0, 0, },
-    { IT_FOOD,      "food",      "foods",       '%', "%s",           "%s",                FT_MAX,          0, 0, 1, 1, 0, },
-    { IT_GEM,       "gem",       "gems",        '*', "%s",           "%s gem",            GT_MAX,          1, 0, 0, 1, 0, },
-    { IT_GOLD,      "coin",      "coins",       '$', "%s",           "%s",                0,               0, 0, 0, 1, 0, },
-    { IT_POTION,    "potion",    "potions",     '!', "potion of %s", "%s potion",         PO_CURE_DIANTHR, 0, 0, 1, 1, 1, },
-    { IT_RING,      "ring",      "rings",       '=', "ring of %s",   "%s ring",           RT_MAX,          1, 1, 0, 0, 1, },
-    { IT_SCROLL,    "scroll",    "scrolls",     '?', "scroll of %s", "scroll labeled %s", ST_MAX,          0, 0, 1, 1, 1, },
-    { IT_WEAPON,    "weapon",    "weapons",     '(', "%s",           "%s",                WT_MAX,          1, 1, 0, 0, 1, },
+    /* item_t       name_sg      name_pl        IMG  desc_known      desc_unknown         max_id           op bl co eq us st id */
+    { IT_NONE,      "",          "",            ' ', "",             "",                  0,               0, 0, 0, 0, 0, 0, 0, },
+    { IT_AMULET,    "amulet",    "amulets",     '"', "amulet of %s", "%s amulet",         AM_LARN,         0, 1, 0, 1, 0, 0, 1, },
+    { IT_ARMOUR,    "armour",    "armour",      '[', "%s",           "%s",                AT_MAX,          1, 1, 1, 1, 0, 0, 1, },
+    { IT_BOOK,      "book",      "books",       '+', "book of %s",   "%s book",           SP_MAX,          0, 1, 1, 0, 1, 1, 1, },
+    { IT_CONTAINER, "container", "containers",  'C', "%s",           "%s",                CT_MAX,          0, 0, 1, 0, 0, 0, 0, },
+    { IT_FOOD,      "food",      "foods",       '%', "%s",           "%s",                FT_MAX,          0, 0, 0, 0, 1, 1, 0, },
+    { IT_GEM,       "gem",       "gems",        '*', "%s",           "%s gem",            GT_MAX,          1, 0, 0, 0, 0, 1, 0, },
+    { IT_GOLD,      "coin",      "coins",       '$', "%s",           "%s",                0,               0, 0, 0, 0, 0, 1, 0, },
+    { IT_POTION,    "potion",    "potions",     '!', "potion of %s", "%s potion",         PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, },
+    { IT_RING,      "ring",      "rings",       '=', "ring of %s",   "%s ring",           RT_MAX,          1, 1, 1, 1, 0, 0, 1, },
+    { IT_SCROLL,    "scroll",    "scrolls",     '?', "scroll of %s", "scroll labeled %s", ST_MAX,          0, 1, 1, 0, 1, 1, 1, },
+    { IT_WEAPON,    "weapon",    "weapons",     '(', "%s",           "%s",                WT_MAX,          1, 1, 1, 1, 0, 0, 1, },
 };
 
 const item_material_data item_materials[IM_MAX] =
@@ -81,7 +81,7 @@ const item_material_data item_materials[IM_MAX] =
 
 /* functions */
 
-item *item_new(item_t item_type, int item_id, int item_bonus)
+item *item_new(item_t item_type, int item_id)
 {
     item *nitem;
     effect *eff = NULL;
@@ -94,13 +94,12 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
 
     nitem->type = item_type;
     nitem->id = item_id;
-    nitem->bonus = item_bonus;
     nitem->count = 1;
 
     /* set bonus_known on unoptimizable items to avoid stacking problems */
     if (!item_is_optimizable(item_type))
     {
-         nitem->bonus_known = TRUE;
+        nitem->bonus_known = TRUE;
     }
 
     /* special item type specific attributes */
@@ -118,7 +117,7 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         {
             /* every amulet has been created -> return a ring instead */
             g_free(nitem);
-            return item_new(IT_RING, rand_1n(item_max_id(IT_RING)), item_bonus);
+            return item_new(IT_RING, rand_1n(item_max_id(IT_RING)));
         }
 
         nlarn->amulet_created[nitem->id] = TRUE;
@@ -157,11 +156,6 @@ item *item_new(item_t item_type, int item_id, int item_bonus)
         if (ring_effect_type(nitem))
         {
             eff = effect_new(ring_effect_type(nitem), 0);
-
-            if (item_bonus)
-            {
-                eff->amount += item_bonus;
-            }
 
             /* ring of extra regeneration is better than the average */
             if (item_id == RT_EXTRA_REGEN)
@@ -219,9 +213,7 @@ item *item_new_random(item_t item_type)
     item *it;
 
     int item_id = 0;
-    int item_bonus = 0;
     int min_id = 1, max_id = 0;
-    int want_curse = TRUE; /* if the item has a chance to be cursed / blessed */
 
     assert(item_type > IT_NONE && item_type < IT_MAX);
 
@@ -230,33 +222,14 @@ item *item_new_random(item_t item_type)
     /* special settings for some item types */
     switch (item_type)
     {
-    case IT_ARMOUR:
-        item_bonus = rand_m_n(-3, 3);
-        break;
-
     case IT_CONTAINER:
         max_id = CT_CHEST; /* only bags and caskets */
-        want_curse = FALSE;
-        break;
-
-    case IT_FOOD:
-    case IT_GEM:
-        want_curse = FALSE;
         break;
 
     case IT_GOLD:
         /* ID is amount in case of gold */
         min_id = 50;
         max_id = 250;
-        want_curse = FALSE;
-        break;
-
-    case IT_RING:
-        item_bonus = rand_0n(3);
-        break;
-
-    case IT_WEAPON:
-        item_bonus = rand_m_n(-3, 3);
         break;
 
     default:
@@ -264,30 +237,15 @@ item *item_new_random(item_t item_type)
         break;
     }
     item_id = rand_m_n(min_id, max_id - 1);
+    it = item_new(item_type, item_id);
 
-    it = item_new(item_type, item_id, item_bonus);
-
-    /* maybe the item is blessed or cursed */
-    if (want_curse && chance(25))
-    {
-        if (chance(50))
-        {
-            item_bless(it);
-        }
-        else
-        {
-            item_curse(it);
-        }
-    }
-
-    return it;
+    return item_new_finetouch(it);
 }
 
 item *item_new_by_level(item_t item_type, int num_level)
 {
     item *nitem;
     int id_min, id_max;
-    int item_bonus = 0;
     float variance, id_base, divisor;
 
     assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
@@ -300,15 +258,11 @@ item *item_new_by_level(item_t item_type, int num_level)
 
     switch (item_type)
     {
-    case IT_ARMOUR:
-    case IT_WEAPON:
-        item_bonus = rand_m_n(-3, 3);
     case IT_BOOK:
         variance = 0.2;
         break;
 
     case IT_RING:
-        item_bonus = rand_0n(3);
         variance = 0.5;
         break;
 
@@ -327,23 +281,71 @@ item *item_new_by_level(item_t item_type, int num_level)
     if (id_max > item_max_id(item_type)) id_max = item_max_id(item_type);
 
     /* create the item */
-    nitem = item_new(item_type, rand_m_n(id_min, id_max), item_bonus);
+    nitem = item_new(item_type, rand_m_n(id_min, id_max));
 
-    /* fine touch */
+    return item_new_finetouch(nitem);
+}
+
+item *item_new_finetouch(item *it)
+{
+    int i;
+
+    assert(it != NULL);
+
     /* maybe the item is blessed or cursed */
-    if (chance(25))
+    if (item_is_blessable(it->type) && chance(25))
     {
+        /* only blessed or cursed items have a bonus / malus */
+        if (item_is_optimizable(it->type))
+        {
+            it->bonus = rand_1n(3);
+        }
+
         if (chance(50))
         {
-            item_bless(nitem);
+            /* blessed */
+            item_bless(it);
         }
         else
         {
-            item_curse(nitem);
+            /* cursed */
+            it->bonus = 0 - it->bonus;
+
+            if (it->effects)
+            {
+                /* degrade effects linked to the item */
+                for (i = 0; i < it->effects->len; i++)
+                {
+                    gpointer eid = (effect *)g_ptr_array_index(it->effects, i);
+                    effect *e = game_effect_get(nlarn, eid);
+                    e->amount = 0 - e->amount;
+                }
+            }
+
+            item_curse(it);
         }
     }
 
-    return nitem;
+    /* maybe the item is corroded */
+    if (item_is_corrodible(it->type) && chance(25))
+    {
+        switch (rand_1n(PT_MAX))
+        {
+        case PT_FIRE:
+            item_burn(it);
+            break;
+
+        case PT_WATER:
+            item_rust(it);
+            break;
+
+        case PT_ACID:
+            item_corrode(it);
+            break;
+        }
+    }
+
+    return it;
 }
 
 item *item_copy(item *original)

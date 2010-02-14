@@ -134,7 +134,9 @@ typedef struct item_type_data {
     char *desc_unknown;
     int max_id;
     unsigned
-        optimizable: 1,     /* item can have a bonus */
+        optimizable: 1,     /* item type can have a bonus */
+        blessable: 1,       /* item type can be blessed / cursed */
+        corrodible: 1,      /* item type can corrode */
         equippable: 1,
         usable: 1,
         stackable: 1,
@@ -143,9 +145,10 @@ typedef struct item_type_data {
 
 /* function definitions */
 
-item *item_new(item_t item_type, int item_id, int item_bonus);
+item *item_new(item_t item_type, int item_id);
 item *item_new_random(item_t item_type);
 item *item_new_by_level(item_t item_type, int num_level);
+item *item_new_finetouch(item *it);
 item *item_copy(item *original);
 item *item_split(item *original, guint32 count);
 void item_destroy(item *it);
@@ -187,6 +190,8 @@ extern const item_material_data item_materials[IM_MAX];
 #define item_name_pl(type)        item_data[(type)].name_pl
 #define item_max_id(type)         item_data[(type)].max_id
 #define item_is_optimizable(type)     item_data[(type)].optimizable
+#define item_is_blessable(type)       item_data[(type)].blessable
+#define item_is_corrodible(type)      item_data[(type)].corrodible
 #define item_is_equippable(type)      item_data[(type)].equippable
 #define item_is_usable(type)          item_data[(type)].usable
 #define item_is_stackable(type)       item_data[(type)].stackable
