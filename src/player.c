@@ -3059,6 +3059,9 @@ int player_item_use(player *p, inventory **inv, item *it)
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
+    /* hide windows */
+    display_windows_hide();
+
     switch (it->type)
     {
         /* read book */
@@ -3121,6 +3124,9 @@ int player_item_use(player *p, inventory **inv, item *it)
             inv_del_element(&p->inventory, it);
         }
     }
+
+    /* show windows */
+    display_windows_show();
 
     return result.time;
 }

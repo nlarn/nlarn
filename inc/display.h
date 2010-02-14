@@ -117,6 +117,9 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 void display_show_history(message_log *log, char *title);
 char display_show_message(char *title, char *message);
 
+void display_windows_hide();
+void display_windows_show();
+
 #define display_getch getch
 
 
