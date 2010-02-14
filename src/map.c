@@ -1298,9 +1298,7 @@ static void map_fill_with_objects(map *l)
     /* up to three gems */
     for (i = 0; i < rand_0n(3); i++)
     {
-        item *it = item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)));
-        it->bonus = rand_0n(6 * (l->nlevel + 1));
-        map_item_add(l, it);
+        map_item_add(l, item_new_random(IT_GEM));
     }
 
     /* up to four potions */

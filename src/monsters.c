@@ -787,8 +787,7 @@ monster *monster_new(int type, position pos)
     case MT_LEPRECHAUN:
         if (chance(25))
         {
-            item *gem = item_new(IT_GEM, rand_1n(item_max_id(IT_GEM)));
-            inv_add(&nmonster->inventory, gem);
+            inv_add(&nmonster->inventory, item_new_random(IT_GEM));
         }
         break;
 
