@@ -2318,8 +2318,8 @@ static display_window *display_window_new(int x1, int y1, int width, int height,
     dwin->window = newwin(dwin->height, dwin->width, dwin->y1, dwin->x1);
 
 #ifdef PDCURSES
-    /* PDCurses does not inherit keypad setting form stdscr */
-    dwin->window->_use_keypad = stdscr->_use_keypad;
+    /* PDCurses does not inherit keypad setting from stdscr */
+    keypad(dwin->window, TRUE);
 #endif
 
     /* fill window background */
