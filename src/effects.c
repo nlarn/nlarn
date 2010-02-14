@@ -266,19 +266,19 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_UNDEAD_PROTECTION, 400, 0, NULL,
+        ET_UNDEAD_PROTECTION, 400, 0, "undead protection",
         "You feel safe in the dark.",
         NULL, NULL, NULL,
     },
 
     {
-        ET_SPIRIT_PROTECTION, 400, 0, NULL,
+        ET_SPIRIT_PROTECTION, 400, 0, "spirit protection",
         "You feel a protecting force.",
         NULL, NULL, NULL,
     },
 
     {
-        ET_TIMESTOP, 0, 0, NULL,
+        ET_TIMESTOP, 0, 0, "time stop",
         NULL, NULL, NULL, NULL,
     },
 
@@ -290,13 +290,13 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_LIFE_PROTECTION, 0, 0, NULL,
+        ET_LIFE_PROTECTION, 0, 0, "life protection",
         "You never felt so safe.",
         NULL, NULL, NULL,
     },
 
     {
-        ET_NOTHEFT, 0, 0, NULL,
+        ET_NOTHEFT, 0, 0, "theft protection",
         NULL, NULL, NULL, NULL,
     },
 
