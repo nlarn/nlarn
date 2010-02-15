@@ -3275,6 +3275,9 @@ int player_item_pickup(player *p, inventory **inv, item *it)
     }
     else
     {
+        /* if the item has been split, return it to the originating inventory */
+        if (oid == NULL) inv_add(inv, it);
+
         return FALSE;
     }
 
