@@ -910,7 +910,8 @@ static int building_item_repair(player *p, inventory **inv, item *it)
             it->corroded = 0;
             it->rusty = 0;
 
-            log_add_entry(p->log, "Your %s has been repaired.", name);
+            name[0] = g_ascii_toupper(name[0]);
+            log_add_entry(p->log, "%s has been repaired.", name);
             building_player_charge(p, price);
 
             return TRUE;
