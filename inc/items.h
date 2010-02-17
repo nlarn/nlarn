@@ -75,20 +75,13 @@ typedef struct item_usage_result
     int time;
 } item_usage_result;
 
-enum perish_types {
-    PT_NONE,
-    PT_FIRE,
-    PT_WATER,
-    PT_ACID,
-    PT_MAX
-};
-
-enum perish_impact {
-    PI_NONE,
-    PI_ENFORCED,
-    PI_DESTROYED,
-    PI_MAX
-};
+typedef enum item_erosion_t {
+    IET_NONE,
+    IET_BURN,
+    IET_CORRODE,
+    IET_RUST,
+    IET_MAX
+} item_erosion_type;
 
 struct game;
 struct _inventory;
@@ -174,9 +167,7 @@ int item_remove_curse(item *it);
 
 int item_enchant(item *it);
 int item_disenchant(item *it);
-int item_rust(item *it);
-int item_corrode(item *it);
-int item_burn(item *it);
+item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visible);
 
 int item_obtainable(item_t type, int id);
 
@@ -216,6 +207,7 @@ item *inv_get(inventory *inv, guint idx);
 item *inv_del(inventory **inv, guint idx);
 int inv_del_element(inventory **inv, item *it);
 int inv_del_oid(inventory **inv, gpointer oid);
+void inv_erode(inventory **inv, item_erosion_type iet, gboolean visible);
 guint inv_length(inventory *inv);
 void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data);
 int inv_weight(inventory *inv);

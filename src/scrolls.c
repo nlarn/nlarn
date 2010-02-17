@@ -317,20 +317,26 @@ static int scroll_create_artefact(player *p, item *scroll)
     return TRUE;
 }
 
+/**
+ * Scroll "enchant armour".
+ *
+ * @param the player
+ * @param the scroll just read
+ *
+ */
 static int scroll_enchant_armour(player *p, item *scroll)
 {
-    item *it;
+    item **armour;
 
     assert(p != NULL && scroll != NULL);
 
     /* get a random piece of armour to enchant */
-    if ((it = player_random_armour(p)))
+    if ((armour = player_get_random_armour(p)))
     {
-        log_add_entry(p->log,
-                      "Your %s glows for a moment.",
-                      armour_name(it));
+        log_add_entry(p->log, "Your %s glows for a moment.",
+                      armour_name(*armour));
 
-        item_enchant(it);
+        item_enchant(*armour);
 
         return TRUE;
     }

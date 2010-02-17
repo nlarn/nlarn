@@ -1073,14 +1073,17 @@ int map_fill_with_life(map *l)
     return(new_monster_count);
 }
 
+/**
+ *
+ * Process temporary effects for a map.
+ * @param the map on which the
+ * @param the number of turns
+ *
+ */
 void map_timer(map *l, guint8 count)
 {
     position pos;
-    item *it;
-    guint idx;
-    int impact;
-    char *impact_desc;
-    char item_desc[61];
+    item_erosion_type erosion;
 
     assert (l != NULL);
 
@@ -1098,56 +1101,26 @@ void map_timer(map *l, guint8 count)
                 /* affect items every three turns */
                 if ((tile->ilist != NULL) && (tile->timer % 5 == 0))
                 {
-                    for (idx = 0; idx < inv_length(tile->ilist); idx++)
+                    switch (tile->type)
                     {
-                        it = inv_get(tile->ilist, idx);
+                    case LT_CLOUD:
+                        erosion = IET_CORRODE;
+                        break;
 
-                        item_describe(it, player_item_known(nlarn->p, it),
-                                      (it->count == 1), TRUE, item_desc, 60);
+                    case LT_FIRE:
+                        erosion = IET_BURN;
+                        break;
 
-                        switch (tile->type)
-                        {
-                        case LT_FIRE:
-                            impact = item_burn(it);
-                            impact_desc = "burn";
-                            break;
+                    case LT_WATER:
+                        erosion = IET_RUST;
+                        break;
+                    default:
+                        erosion = IET_NONE;
+                        break;
+                    }
 
-                        case LT_CLOUD:
-                            impact = item_corrode(it);
-                            impact_desc = "corrode";
-                            break;
-
-                        case LT_WATER:
-                            impact = item_rust(it);
-                            impact_desc = "rust";
-                            break;
-                        default:
-                            impact = PI_NONE;
-                            break;
-                        }
-
-                        /* notifiy player of impact if the item is visible */
-                        if (impact && map_pos_is_visible(l, nlarn->p->pos, pos))
-                        {
-                            if (impact < PI_DESTROYED)
-                            {
-                                log_add_entry(nlarn->p->log, "The %s %s%s.", item_desc,
-                                              impact_desc, (it->count == 1) ? "s" : "");
-                            }
-                            else
-                            {
-                                log_add_entry(nlarn->p->log, "The %s %s destroyed.", item_desc,
-                                              (it->count == 1) ? "is" : "are");
-                            }
-                        }
-
-                        if (impact == PI_DESTROYED)
-                        {
-                            inv_del_element(&tile->ilist, it);
-                            item_destroy(it);
-                        }
-                    } /* foreach item */
-                } /* if leve_ilist_at */
+                    inv_erode(&tile->ilist, erosion, player_pos_visible(nlarn->p, pos));
+                }
 
                 /* reset tile type if temporary effect has expired */
                 if (tile->timer == 0)

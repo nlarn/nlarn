@@ -874,11 +874,11 @@ monster *monster_new(int type, position pos)
         }
         possible_types[] =
         {
-          { IT_AMULET,    DC_YELLOW, },
-          { IT_GOLD,      DC_YELLOW, },
-          { IT_RING,      DC_WHITE,  },
-          { IT_GEM,       DC_RED,    },
-          { IT_CONTAINER, DC_BROWN   },
+            { IT_AMULET,    DC_YELLOW, },
+            { IT_GOLD,      DC_YELLOW, },
+            { IT_RING,      DC_WHITE,  },
+            { IT_GEM,       DC_RED,    },
+            { IT_CONTAINER, DC_BROWN   },
         };
 
         int chosen_type = rand_0n(5);
@@ -2081,7 +2081,7 @@ int monster_colour(monster *m)
     }
     else
     {
-    return monsters[m->type].colour;
+        return monsters[m->type].colour;
     }
 }
 
@@ -2322,39 +2322,28 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
     return TRUE;
 }
 
+/**
+ * Special monster attack: rust players armour.
+ *
+ * @param the attacking monster
+ * @param the player
+ *
+ */
 static gboolean monster_item_rust(monster *m, struct player *p)
 {
-    item *it;
+    item **it;
 
     assert(m != NULL && p != NULL);
 
     /* get a random piece of armour to damage */
-    if ((it = player_random_armour(p)))
+    if ((it = player_get_random_armour(p)))
     {
-        int pi;
-
-        pi = item_rust(it);
-
-        if (pi == PI_ENFORCED)
-        {
-            log_add_entry(p->log, "Your %s is dulled.", armour_name(it));
-            return TRUE;
-        }
-        else if (pi == PI_DESTROYED)
-        {
-            /* armour has been destroyed */
-            player_item_destroy(p, it);
-
-            return TRUE;
-        }
-        else
-        {
-            log_add_entry(p->log, "Your %s is not affected.", armour_name(it));
-            return FALSE;
-        }
+        *it = item_erode(&p->inventory, *it, IET_RUST, TRUE);
+        return TRUE;
     }
     else
     {
+        log_add_entry(p->log, "Nothing happens.");
         return FALSE;
     }
 }

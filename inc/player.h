@@ -104,7 +104,7 @@ typedef struct player
     item *eq_amulet;
     item *eq_weapon;
 
-    /* armour types */
+    /* armour */
     item *eq_boots;
     item *eq_cloak;
     item *eq_gloves;
@@ -194,7 +194,7 @@ int player_attack(player *p, monster *m);
 void player_update_fov(player *p);
 int player_pos_visible(player *p, position pos);
 int player_map_enter(player *p, map *l, gboolean teleported);
-item *player_random_armour(player *p);
+item **player_get_random_armour(player *p);
 
 int player_pickup(player *p);
 void player_autopickup(player *p);
@@ -254,7 +254,7 @@ void player_item_destroy(player *p, item *it);
 int player_item_drop(player *p, inventory **inv, item *it);
 int player_item_pickup(player *p, inventory **inv, item *it);
 
-/* deal with stationaries */
+/* deal with stationary objects */
 int player_altar_desecrate(player *p);
 int player_altar_pray(player *p);
 int player_building_enter(player *p);

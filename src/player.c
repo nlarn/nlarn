@@ -588,16 +588,15 @@ int player_regenerate(player *p)
     /* handle itching */
     if ((e = player_effect_get(p, ET_ITCHING)))
     {
-        item *it;
+        item **it;
 
-        if (chance(50) && (it = player_random_armour(p)))
+        if (chance(50) && (it = player_get_random_armour(p)))
         {
-            log_disable(p->log);
-            player_item_unequip(p, NULL, it);
-            log_enable(p->log);
+            /* take off armour */
+            it = NULL;
 
             log_add_entry(p->log, effect_get_msg_start(e));
-            player_item_drop(p, &p->inventory, it);
+            player_item_drop(p, &p->inventory, *it);
         }
     }
 
@@ -1159,17 +1158,7 @@ int player_attack(player *p, monster *m)
         /* weapon damage due to rust when hitting certain monsters */
         if (p->eq_weapon && monster_is_metallivore(m))
         {
-            /* impact of perishing */
-            int pi = item_rust(p->eq_weapon);
-
-            if (pi == PI_ENFORCED)
-            {
-                log_add_entry(p->log, "Your weapon is dulled by the %s.", monster_name(m));
-            }
-            else if (pi == PI_DESTROYED)
-            {
-                player_item_destroy(p, p->eq_weapon);
-            }
+            p->eq_weapon = item_erode(&p->inventory, p->eq_weapon, IET_RUST, TRUE);
         }
 
         /* hitting a monster breaks stealth condition */
@@ -1190,7 +1179,6 @@ int player_attack(player *p, monster *m)
         {
             dam->amount *= 3;
         }
-
 
         /* *** SPECIAL WEAPONS *** */
         if (p->eq_weapon)
@@ -1338,22 +1326,29 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     return TRUE;
 }
 
-item *player_random_armour(player *p)
+/**
+ * Choose a random armour the player is wearing.
+ *
+ * @param   the player
+ * @return  a pointer to the slot of the armour
+ *
+ */
+item **player_get_random_armour(player *p)
 {
     GPtrArray *armours;
-    item *armour = NULL;
+    item **armour = NULL;
 
     assert (p != NULL);
 
     armours = g_ptr_array_new();
 
     /* add each equipped piece of armour to the pool to choose from */
-    if (p->eq_boots)  g_ptr_array_add(armours, p->eq_boots);
-    if (p->eq_cloak)  g_ptr_array_add(armours, p->eq_cloak);
-    if (p->eq_gloves) g_ptr_array_add(armours, p->eq_gloves);
-    if (p->eq_helmet) g_ptr_array_add(armours, p->eq_helmet);
-    if (p->eq_shield) g_ptr_array_add(armours, p->eq_shield);
-    if (p->eq_suit)   g_ptr_array_add(armours, p->eq_suit);
+    if (p->eq_boots)  g_ptr_array_add(armours, &p->eq_boots);
+    if (p->eq_cloak)  g_ptr_array_add(armours, &p->eq_cloak);
+    if (p->eq_gloves) g_ptr_array_add(armours, &p->eq_gloves);
+    if (p->eq_helmet) g_ptr_array_add(armours, &p->eq_helmet);
+    if (p->eq_shield) g_ptr_array_add(armours, &p->eq_shield);
+    if (p->eq_suit)   g_ptr_array_add(armours, &p->eq_suit);
 
     if (armours->len > 0)
     {
@@ -3342,7 +3337,7 @@ int player_altar_pray(player *p)
     int donation = 0;
     int player_gold, tithe;
     effect *e = NULL;
-    item *armour = NULL;
+    item **armour = NULL;
     map *current;
 
     assert (p != NULL);
@@ -3366,13 +3361,13 @@ int player_altar_pray(player *p)
         {
             log_add_entry(p->log, "Nothing happens.");
         }
-        else if (chance(4) && (armour = player_random_armour(p)))
+        else if (chance(4) && (armour = player_get_random_armour(p)))
         {
             /* enchant armour */
             log_add_entry(p->log, "You feel your %s vibrate for a moment.",
-                          armour_name(armour));
+                          armour_name(*armour));
 
-            item_enchant(armour);
+            item_enchant(*armour);
         }
         else if (chance(4) && p->eq_weapon)
         {
@@ -3432,13 +3427,13 @@ int player_altar_pray(player *p)
             player_effect_add(p, e);
         }
 
-        if (chance(4) && (armour = player_random_armour(p)))
+        if (chance(4) && (armour = player_get_random_armour(p)))
         {
             /* enchant weapon */
             log_add_entry(p->log, "You feel your %s vibrate for a moment.",
-                          armour_name(armour));
+                          armour_name(*armour));
 
-            item_enchant(armour);
+            item_enchant(*armour);
         }
 
         if (chance(4) && p->eq_weapon)

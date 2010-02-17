@@ -329,20 +329,7 @@ item *item_new_finetouch(item *it)
     /* maybe the item is corroded */
     if (item_is_corrodible(it->type) && chance(25))
     {
-        switch (rand_1n(PT_MAX))
-        {
-        case PT_FIRE:
-            item_burn(it);
-            break;
-
-        case PT_WATER:
-            item_rust(it);
-            break;
-
-        case PT_ACID:
-            item_corrode(it);
-            break;
-        }
+        item_erode(NULL, it, rand_1n(IET_MAX), FALSE);
     }
 
     return it;
@@ -1202,72 +1189,115 @@ int item_disenchant(item *it)
     return it->bonus;
 }
 
-int item_rust(item *it)
+/**
+ * Erode an item.
+ *
+ * @param  the inventory the item is in (may be null for new items)
+ * @param  the item to erode
+ * @param  the type of erosion which affects the item
+ * @param  TRUE if the player can see the item
+ * @return
+ *
+ */
+item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visible)
 {
+    gboolean destroyed = FALSE;
+    char *erosion_desc = NULL;
+    char item_desc[61] = { 0 };
+
     assert(it != NULL);
 
-    if (item_material(it) == IM_IRON)
-    {
-        if (it->rusty == 2)
-        {
-            /* it's been very rusty already -> destroy */
-            return PI_DESTROYED;
-        }
-        else
-        {
-            it->rusty++;
-            return PI_ENFORCED;
-        }
-    }
-    else
-    {
-        /* item cannot rust. */
-        return PI_NONE;
-    }
-}
+    /* prepare item description before it has been affected */
+    item_describe(it, player_item_known(nlarn->p, it),
+                  (it->count == 1), TRUE, item_desc, 60);
 
-int item_corrode(item *it)
-{
-    assert(it != NULL);
-
-    if (item_material(it) == IM_IRON)
+    switch (iet)
     {
-        if (it->corroded == 2)
-        {
-            return PI_DESTROYED;
-        }
-        else
-        {
-            it->corroded++;
-            return PI_ENFORCED;
-        }
-    }
-    else
-    {
-        return PI_NONE;
-    }
-}
-
-int item_burn(item *it)
-{
-    assert(it != NULL);
-
-    if (item_material(it) <= IM_BONE)
-    {
-        if (it->burnt == 2)
-        {
-            return PI_DESTROYED;
-        }
-        else
+    case IET_BURN:
+        if (item_material(it) <= IM_BONE)
         {
             it->burnt++;
-            return PI_ENFORCED;
+            erosion_desc = "burn";
+
+            if (it->burnt == 3) destroyed = TRUE;
         }
+        break;
+
+    case IET_CORRODE:
+        if (item_material(it) == IM_IRON)
+        {
+            it->corroded++;
+            erosion_desc = "corrode";
+
+            if (it->corroded == 3) destroyed = TRUE;
+        }
+
+        break;
+
+    case IET_RUST:
+        if (item_material(it) == IM_IRON)
+        {
+            it->rusty++;
+            erosion_desc = "rust";
+
+            /* it's been very rusty already -> destroy */
+            if (it->rusty == 3) destroyed = TRUE;
+        }
+        break;
+    default:
+        /* well, just do nothing. */
+        break;
     }
-    else
+
+    /* if the item has an inventory, erode it as well */
+    if (it->content != NULL)
     {
-        return PI_NONE;
+        inv_erode(&it->content, iet, FALSE);
     }
+
+    if (erosion_desc != NULL && visible)
+    {
+        /* items has been eroded, describe the event if it is visible */
+        log_add_entry(nlarn->p->log, "The %s %s%s.", item_desc,
+                      erosion_desc, (it->count == 1) ? "s" : "");
+    }
+
+    if (destroyed)
+    {
+        /* item has been destroyed */
+        if (visible)
+        {
+            /* describe the event if the item was visible */
+            log_add_entry(nlarn->p->log, "The %s %s destroyed.", item_desc,
+                          (it->count == 1) ? "is" : "are");
+        }
+
+        if (inv != NULL)
+        {
+            inv_del_element(inv, it);
+        }
+
+        if (it->content != NULL)
+        {
+            /* if the item is a container an still has undestroyed content,
+             * this content has to be put into the items inventory, e.g. a
+             * casket burns -> all undestroyed items inside the casket
+             * continue to exist on the floor tile the casket was standing on
+             */
+             while (inv_length(it->content) > 0)
+             {
+                 item *cit = inv_get(it->content, inv_length(it->content) - 1);
+                 inv_del_element(&it->content, cit);
+                 inv_add(inv, cit);
+             }
+        }
+
+        /* remove the item from the game */
+        item_destroy(it);
+        it = NULL;
+    }
+
+    return it;
 }
 
 int item_obtainable(item_t type, int id)
@@ -1513,6 +1543,28 @@ int inv_del_oid(inventory **inv, gpointer oid)
     }
 
     return TRUE;
+}
+
+/**
+ * Erode all items in an inventory.
+ *
+ * @param pointer to the address of the inventory to erode
+ * @param the erosion type affecting the inventory
+ * @param TRUE if the player can see the inventory, FALSE otherwise
+ *
+ */
+void inv_erode(inventory **inv, item_erosion_type iet, gboolean visible)
+{
+    item *it;
+    guint idx;
+
+    assert(inv != NULL);
+
+    for (idx = 0; idx < inv_length(*inv); idx++)
+    {
+        it = inv_get(*inv, idx);
+        item_erode(inv, it, iet, visible);
+     }
 }
 
 guint inv_length(inventory *inv)
@@ -1806,3 +1858,4 @@ static char *item_desc_get(item *it, int known)
         return "";
     }
 }
+
