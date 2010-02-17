@@ -1970,14 +1970,12 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 
     do
     {
-        /* redraw screen to erase old rays */
-        if (draw_line) display_paint_screen(p);
-
         /* draw a line between source and target if told to */
         if (draw_line && (ray != NULL))
         {
             target = map_get_monster_at(map, pos);
 
+            /* redraw screen to erase old rays */
             display_paint_screen(p);
 
             if (target) attrs = DC_LIGHTRED;
