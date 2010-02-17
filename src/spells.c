@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "display.h"
 #include "map.h"
@@ -844,6 +845,7 @@ int spell_type_ray(spell *s, struct player *p)
     map *cmap;
     area *ray = NULL;
     position target, pos;
+    int attrs; /* curses attributes */
     char buffer[61];
     int amount = 0, distance = 0;
 
@@ -902,10 +904,28 @@ int spell_type_ray(spell *s, struct player *p)
         {
             /* check if the current position has been hit by the ray
                and if a monster is standing a the current position */
-            if (area_pos_get(ray, pos) && (monster = map_get_monster_at(cmap, pos)))
+            if (area_pos_get(ray, pos))
             {
-                log_add_entry(p->log, spell_msg_succ(s), monster_name(monster));
-                monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount, p));
+                if ((monster = map_get_monster_at(cmap, pos)))
+                {
+                    attron((attrs = DC_LIGHTRED));
+                    mvaddch(pos.y, pos.x, monster_image(monster));
+
+                    log_add_entry(p->log, spell_msg_succ(s), monster_name(monster));
+                    monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount, p));
+                }
+                else
+                {
+                    attron((attrs = DC_LIGHTCYAN));
+                    mvaddch(pos.y, pos.x, '*');
+                }
+
+                attroff(attrs);
+                refresh();
+                /* sleep a while to show the ray's position */
+                usleep(100000);
+                /* repaint the screen */
+                display_paint_screen(p);
             }
 
             /* modify horizontal position if needed;
