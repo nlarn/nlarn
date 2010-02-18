@@ -1013,32 +1013,6 @@ int map_is_monster_at(map *m, position pos)
     return ((map_get_monster_at(m, pos) != NULL));
 }
 
-GPtrArray *map_get_monsters_in(map *m, rectangle area)
-{
-    GPtrArray *monsters;
-    monster *monst;
-    position pos;
-
-    assert(m != NULL);
-
-    monsters = g_ptr_array_new();
-
-    pos.z = m->nlevel;
-
-    for (pos.y = area.y1; pos.y <= area.y2; pos.y++)
-    {
-        for (pos.x = area.x1; pos.x <= area.x2; pos.x++)
-        {
-            if ((monst = map_get_monster_at(m, pos)))
-            {
-                g_ptr_array_add(monsters, monst);
-            }
-        }
-    }
-
-    return monsters;
-}
-
 /**
  * creates an entire set of monsters for a map
  * @param a map

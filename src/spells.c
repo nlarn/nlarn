@@ -1115,6 +1115,7 @@ int spell_type_blast(spell *s, struct player *p)
         }
     }
 
+    area_destroy(ball);
     attroff(colour);
 
     /* make sure the blast shows up */

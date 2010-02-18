@@ -2049,10 +2049,9 @@ position display_get_position(player *p, char *message, gboolean ray,
 
                         attroff(attrs);
                     }
-
                 }
              }
-
+             area_destroy(a);
         }
 
         /* position cursor */

@@ -252,49 +252,60 @@ static int scroll_with_effect(struct player *p, item *scroll)
     return TRUE;
 }
 
+/**
+ * Scroll "annihilation".
+ *
+ * @param the player
+ * @param the scroll just read
+ *
+ */
 static int scroll_annihilate(struct player *p, item *scroll)
 {
-    guint idx;
     int count = 0;
-
-    GPtrArray *mlist;
+    area *blast, *obsmap;
+    position cursor = p->pos;
     monster *m;
+    map *cmap = game_map(nlarn, p->pos.z);
 
     assert(p != NULL && scroll != NULL);
 
-    mlist = map_get_monsters_in(game_map(nlarn, p->pos.z), rect_new_sized(p->pos, 1));
+    obsmap = map_get_obstacles(cmap, p->pos, 2);
+    blast = area_new_circle_flooded(p->pos, 2, obsmap);
 
-    for (idx = 0; idx < mlist->len; idx++)
+    for (cursor.y = blast->start_y; cursor.y < blast->start_y + blast->size_y; cursor.y++)
     {
-        m = g_ptr_array_index(mlist, idx);
-
-        /* FIXME: remove this special case here and give a good resistance to
-         * the demon lords */
-        if (monster_type(m) < MT_DEMONLORD_II)
+        for (cursor.x = blast->start_x; cursor.x < blast->start_x + blast->size_x; cursor.x++)
         {
-            m = monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_NONE, 2000, p));
+            if (area_pos_get(blast, cursor) && (m = map_get_monster_at(cmap, cursor)))
+            {
+                /* FIXME: remove this special case here and give a good resistance to
+                 * the demon lords */
+                if (monster_type(m) < MT_DEMONLORD_II)
+                {
+                    m = monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_NONE, 2000, p));
 
-            /* check if the monster has been killed */
-            if (!m) count++;
-        }
-        else
-        {
-            log_add_entry(p->log,
-                          "The %s barely escapes being annihilated.",
-                          monster_name(m));
+                    /* check if the monster has been killed */
+                    if (!m) count++;
+                }
+                else
+                {
+                    log_add_entry(p->log, "The %s barely escapes being annihilated.",
+                                  monster_name(m));
 
-            /* lose half hit points*/
-            damage *dam = damage_new(DAM_MAGICAL, ATT_NONE, monster_hp(m) / 2, p);
-            monster_damage_take(m, dam);
+                    /* lose half hit points*/
+                    damage *dam = damage_new(DAM_MAGICAL, ATT_NONE, monster_hp(m) / 2, p);
+                    monster_damage_take(m, dam);
+                }
+            }
         }
     }
+
+    area_destroy(blast);
 
     if (count)
     {
         log_add_entry(p->log, "You hear loud screams of agony!");
     }
-
-    g_ptr_array_free(mlist, FALSE);
 
     return count;
 }
