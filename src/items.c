@@ -910,7 +910,8 @@ guint item_price(item *it)
 }
 
 /**
- * Calculate the weight of an given object
+ * Calculate the weight of an given item
+ *
  * @param an item
  * @return weight in grams
  */
@@ -1418,6 +1419,21 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
     inv-> post_del = post_del;
 }
 
+/**
+ * Function to add an item to an inventory.
+ *
+ * This function calls the pre_add callback to determine if adding the item
+ * to the inventory is possible at all. If this callback returns FALSE,
+ * the item in not added to the inventory and control is returned to the
+ * calling function.
+ *
+ * After putting the item into the inventory, the post_add callback is
+ * called if it is defined.
+ *
+ * @param the inventory the item has to be added to
+ * @param the item which has to be added
+ * @return FALSE on failure, the new length of the inventory upon success
+ */
 int inv_add(inventory **inv, item *it)
 {
     guint idx;
@@ -1443,9 +1459,11 @@ int inv_add(inventory **inv, item *it)
     /* stack stackable items */
     if (item_is_stackable(it->type))
     {
+        /* loop through items in the target inventory to find a similar item */
         for (idx = 0; idx < inv_length(*inv); idx++)
         {
             item *i = inv_get(*inv, idx);
+            /* compare the current item with the one whis is to be added */
             if (item_compare(i, it))
             {
                 /* just increase item count and release the original */
@@ -1478,6 +1496,21 @@ item *inv_get(inventory *inv, guint idx)
     return game_item_get(nlarn, oid);
 }
 
+/**
+ * Function to remove an item from an inventory by its index.
+ *
+ * If the pre_del callback is set, it is used to determine if the action is
+ * valid. If the post_del callback is set, it is called after removing the
+ * item.
+ *
+ * If the inventories owner attribute is not set, empty inventories get
+ * destroyed.
+ *
+ * @param the inventory from which the item shall be removed
+ * @param the index of the item in the inventory
+ * @return an pointer to the removed item
+ *
+ */
 item *inv_del(inventory **inv, guint idx)
 {
     item *item;
@@ -1511,6 +1544,21 @@ item *inv_del(inventory **inv, guint idx)
     return item;
 }
 
+/**
+ * Function to remove an item from an inventory.
+ *
+ * If the pre_del callback is set, it is used to determine if the action is
+ * valid. If the post_del callback is set, it is called after removing the
+ * item.
+ *
+ * If the inventories owner attribute is not set, empty inventories get
+ * destroyed.
+ *
+ * @param the inventory from which the item shall be removed
+ * @param the item to be removed
+ * @return TRUE upon success, FALSE on failure.
+ *
+ */
 int inv_del_element(inventory **inv, item *it)
 {
     assert(*inv != NULL && (*inv)->content != NULL && it != NULL);
@@ -1540,11 +1588,27 @@ int inv_del_element(inventory **inv, item *it)
     return TRUE;
 }
 
+/**
+ * Function to remove an item from an inventory by its oid.
+ *
+ * The inventory's callback functios are ignored.
+ *
+ * If the inventories owner attribute is not set, empty inventories get
+ * destroyed.
+ *
+ * @param the inventory from which the item shall be removed
+ * @param the oid of the item to be removed
+ * @return TRUE if the oid was removed, FALSE if the oid has not been found.
+ *
+ */
 int inv_del_oid(inventory **inv, gpointer oid)
 {
     assert(*inv != NULL && (*inv)->content != NULL && oid != NULL);
 
-    g_ptr_array_remove((*inv)->content, oid);
+    if (!g_ptr_array_remove((*inv)->content, oid))
+    {
+        return FALSE;
+    }
 
     /* destroy inventory if empty and not owned by anybody */
     if (!inv_length(*inv) && !(*inv)->owner)
@@ -1578,11 +1642,26 @@ void inv_erode(inventory **inv, item_erosion_type iet, gboolean visible)
     }
 }
 
+/**
+ * Function to determine the count of items in an inventory.
+ *
+ * @param the inventory to be counted
+ * @return the count of items in the inventory
+ *
+ */
 guint inv_length(inventory *inv)
 {
     return (inv == NULL) ? 0 : inv->content->len;
 }
 
+/**
+ * Function to sort the items in an inventory.
+ *
+ * @param the inventory to be sorted
+ * @param the function used to compare the items
+ * @param additional data for the compare function
+ *
+ */
 void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data)
 {
     assert(inv != NULL && inv->content != NULL);
@@ -1590,6 +1669,13 @@ void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data)
     g_ptr_array_sort_with_data(inv->content, compare_func, user_data);
 }
 
+/**
+ * Function to determine the weight of all items in an inventory.
+ *
+ * @param the inventory
+ * @return the weight of the inventory in grams
+ *
+ */
 int inv_weight(inventory *inv)
 {
     int sum = 0;
@@ -1609,6 +1695,16 @@ int inv_weight(inventory *inv)
     return sum;
 }
 
+/**
+ * Determine the number of items in an inventory which are of a certain
+ * item type and optionally a specific item.
+ *
+ * @param the inventory
+ * @param the item type to look for
+ * @param the id of the specific item class if required, otherwise 0
+ * @return the count of the requested item (type) in the inventory
+ *
+ */
 int inv_item_count(inventory *inv, item_t type, guint32 id)
 {
     int count = 0;
@@ -1633,6 +1729,14 @@ int inv_item_count(inventory *inv, item_t type, guint32 id)
     return count;
 }
 
+/**
+ * Count an filtered inventory.
+ *
+ * @param the inventory to look in
+ * @param the filter function
+ * @return the number of items for which the filter function returned TRUE
+ *
+ */
 int inv_length_filtered(inventory *inv, int (*filter)(item *))
 {
     int count = 0;

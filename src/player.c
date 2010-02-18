@@ -2289,6 +2289,15 @@ char *player_inv_weight(player *p)
     return buf;
 }
 
+/**
+ * Callback function used from inv_add() for the player's inventory. Here it
+ * is determined it an item can be picked up or if the weight of the player's
+ * pack would be larger than the player could carry afterwards.
+ *
+ * @param the inventory to check
+ * @param the item which is about to be added
+ *
+ */
 int player_inv_pre_add(inventory *inv, item *item)
 {
     player *p;
@@ -2298,7 +2307,6 @@ int player_inv_pre_add(inventory *inv, item *item)
     float can_carry;
 
     p = (player *)inv->owner;
-
 
     if (player_effect(p, ET_OVERSTRAINED))
     {
@@ -2329,6 +2337,15 @@ int player_inv_pre_add(inventory *inv, item *item)
     return TRUE;
 }
 
+/**
+ * Callback function used from inv_add() for the player's inventory. Here the
+ * weight of the inventory gets calculated and the burdened or overstrained
+ * mode is set or removed.
+ *
+ * @param the inventory to check
+ * @param the item which is about to be added
+ *
+ */
 void player_inv_weight_recalc(inventory *inv, item *item)
 {
     int pack_weight;
@@ -2339,18 +2356,12 @@ void player_inv_weight_recalc(inventory *inv, item *item)
 
     assert (inv != NULL);
 
-    /* make shortcut */
-    p = (player *)inv->owner;
+    p = (player *)inv->owner;       /* make shortcut */
+    item = NULL;                    /* don't need that parameter */
+    pack_weight = inv_weight(inv);  /* calculate inventory weight */
 
-    /* don't need that parameter */
-    item = NULL;
-
-    /* calculate inventory weight */
-    pack_weight = inv_weight(inv);
-
-    /* player can carry 2kg per str */
+    /* the player can carry 2kg per str */
     can_carry = 2000 * (float)player_get_str(p);
-
 
     if (pack_weight > (int)(can_carry * 1.3))
     {
