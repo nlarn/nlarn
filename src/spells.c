@@ -1031,15 +1031,30 @@ int spell_type_blast(spell *s, struct player *p)
     area *ball, *obstacles;
     position pos, cursor;
     char buffer[61];
-    int amount;
+    int radius = 0, amount = 0, colour = DC_NONE;
+    damage_t dam_t = DAM_NONE;
+    item_erosion_type iet = IET_NONE;
     damage *dam;
     inventory **inv;
     map *cmap = game_map(nlarn, p->pos.z);
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
 
+    switch (s->id)
+    {
+        /* currently there is only the fireball */
+        case SP_BAL:
+        default:
+            radius = 2;
+            dam_t = DAM_FIRE;
+            iet = IET_BURN;
+            colour = DC_LIGHTRED;
+            amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
+        break;
+    }
+
     g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(s));
-    pos = display_get_position(p, buffer, FALSE, TRUE, 1, TRUE);
+    pos = display_get_position(p, buffer, FALSE, TRUE, radius, TRUE);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -1048,12 +1063,10 @@ int spell_type_blast(spell *s, struct player *p)
         return FALSE;
     }
 
-    /* currently only fireball */
-    amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
-    obstacles = map_get_obstacles(cmap, pos, 2);
-    ball = area_new_circle_flooded(pos, 2, obstacles);
+    obstacles = map_get_obstacles(cmap, pos, radius);
+    ball = area_new_circle_flooded(pos, radius, obstacles);
 
-    attron(DC_LIGHTRED);
+    attron(colour);
     cursor.z = pos.z;
 
     for (cursor.y = ball->start_y; cursor.y < ball->start_y + ball->size_y; cursor.y++)
@@ -1070,7 +1083,7 @@ int spell_type_blast(spell *s, struct player *p)
                     /* blast hit a monster */
                     addch(monster_image(monster));
 
-                    dam = damage_new(DAM_FIRE, ATT_MAGIC, amount, p);
+                    dam = damage_new(dam_t, ATT_MAGIC, amount, p);
                     monster_damage_take(monster, dam);
                 }
                 else if (pos_identical(p->pos, cursor))
@@ -1078,14 +1091,14 @@ int spell_type_blast(spell *s, struct player *p)
                     /* blast hit the player */
                     addch('@');
 
-                    log_add_entry(p->log, "The fireball hits you.");
+                    log_add_entry(p->log, "The %s hits you.", spell_name(s));
 
                     /* damage items in player's inventory */
-                    inv_erode(&p->inventory, IET_BURN, TRUE);
+                    if (iet > IET_NONE) inv_erode(&p->inventory, iet, TRUE);
 
                     /* damage the player */
-                    dam = damage_new(DAM_FIRE, ATT_MAGIC, amount, NULL);
-                    player_damage_take(p, dam, PD_SPELL, SP_BAL);
+                    dam = damage_new(dam_t, ATT_MAGIC, amount, NULL);
+                    player_damage_take(p, dam, PD_SPELL, s->id);
                 }
                 else
                 {
@@ -1094,15 +1107,15 @@ int spell_type_blast(spell *s, struct player *p)
                 }
 
                 /* affect items on the position */
-                if ((inv = map_ilist_at(cmap, cursor)))
+                if ((inv = map_ilist_at(cmap, cursor)) && iet > IET_NONE)
                 {
-                    inv_erode(inv, IET_BURN, player_pos_visible(p, cursor));
+                    inv_erode(inv, iet, player_pos_visible(p, cursor));
                 }
             }
         }
     }
 
-    attroff(DC_LIGHTRED);
+    attroff(colour);
 
     /* make sure the blast shows up */
     refresh();

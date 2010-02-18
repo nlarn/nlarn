@@ -2016,8 +2016,8 @@ position display_get_position(player *p, char *message, gboolean ray,
         /* paint a ball if told to */
         if (ball && radius)
         {
-            area *obstacles = map_get_obstacles(map, pos, 2);
-            a = area_new_circle_flooded(pos, 2, obstacles);
+            area *obstacles = map_get_obstacles(map, pos, radius);
+            a = area_new_circle_flooded(pos, radius, obstacles);
             cursor = pos;
 
             /* repaint screen to get rid of old ball */
@@ -2033,17 +2033,17 @@ position display_get_position(player *p, char *message, gboolean ray,
 
                         if ((m = map_get_monster_at(map, cursor)))
                         {
-                            attron(DC_RED);
+                            attron(attrs = DC_RED);
                             addch(monster_image(m));
                         }
                         else if (pos_identical(p->pos, cursor))
                         {
-                            attron(DC_LIGHTRED);
+                            attron(attrs = DC_LIGHTRED);
                             addch('@');
                         }
                         else
                         {
-                            attron(DC_LIGHTCYAN);
+                            attron(attrs = DC_LIGHTCYAN);
                             addch('*');
                         }
 
