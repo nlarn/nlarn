@@ -112,7 +112,8 @@ int display_get_count(char *caption, int value);
 char *display_get_string(char *caption, char *value, size_t max_len);
 int display_get_yesno(char *question, char *yes, char *no);
 direction display_get_direction(char *title, int *available);
-position display_get_position(player *p, char *message, int draw_line, int passable);
+position display_get_position(player *p, char *message, gboolean ray,
+                              gboolean ball, guint radius, int passable);
 
 void display_show_history(message_log *log, char *title);
 char display_show_message(char *title, char *message);

@@ -737,7 +737,7 @@ int spell_type_point(spell *s, struct player *p)
 
     g_snprintf(buffer, 60, "Select a target for %s.", spell_name(s));
 
-    pos = display_get_position(p, buffer, FALSE, FALSE);
+    pos = display_get_position(p, buffer, FALSE, FALSE, 0, FALSE);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -852,7 +852,7 @@ int spell_type_ray(spell *s, struct player *p)
     assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
 
     g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(s));
-    target = display_get_position(p, buffer, TRUE, TRUE);
+    target = display_get_position(p, buffer, TRUE, FALSE, 0, TRUE);
     cmap = game_map(nlarn, p->pos.z);
 
     /* player pressed ESC */
@@ -986,7 +986,7 @@ int spell_type_flood(spell *s, struct player *p)
     assert(s != NULL && p != NULL && (spell_type(s) == SC_FLOOD));
 
     g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(s));
-    pos = display_get_position(p, buffer, FALSE, TRUE);
+    pos = display_get_position(p, buffer, FALSE, FALSE, 0, TRUE);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -1027,18 +1027,19 @@ int spell_type_flood(spell *s, struct player *p)
 
 int spell_type_blast(spell *s, struct player *p)
 {
-    GPtrArray *mlist;
     monster *monster = NULL;
-    position pos;
+    area *ball, *obstacles;
+    position pos, cursor;
     char buffer[61];
     int amount;
-    guint idx;
     damage *dam;
+    inventory **inv;
+    map *cmap = game_map(nlarn, p->pos.z);
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
 
     g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(s));
-    pos = display_get_position(p, buffer, FALSE, TRUE);
+    pos = display_get_position(p, buffer, FALSE, TRUE, 1, TRUE);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -1049,27 +1050,64 @@ int spell_type_blast(spell *s, struct player *p)
 
     /* currently only fireball */
     amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
+    obstacles = map_get_obstacles(cmap, pos, 2);
+    ball = area_new_circle_flooded(pos, 2, obstacles);
 
-    mlist = map_get_monsters_in(game_map(nlarn, p->pos.z), rect_new_sized(pos, 1));
+    attron(DC_LIGHTRED);
+    cursor.z = pos.z;
 
-    for (idx = 0; idx < mlist->len; idx++)
+    for (cursor.y = ball->start_y; cursor.y < ball->start_y + ball->size_y; cursor.y++)
     {
-        monster = g_ptr_array_index(mlist, idx);
-        dam = damage_new(DAM_FIRE, ATT_MAGIC, amount, p);
+        for (cursor.x = ball->start_x; cursor.x < ball->start_x + ball->size_x; cursor.x++)
+        {
+            if (area_pos_get(ball, cursor))
+            {
+                /* move cursor to position */
+                move(cursor.y, cursor.x);
 
-        monster_damage_take(monster, dam);
+                if ((monster = map_get_monster_at(cmap, cursor)))
+                {
+                    /* blast hit a monster */
+                    addch(monster_image(monster));
+
+                    dam = damage_new(DAM_FIRE, ATT_MAGIC, amount, p);
+                    monster_damage_take(monster, dam);
+                }
+                else if (pos_identical(p->pos, cursor))
+                {
+                    /* blast hit the player */
+                    addch('@');
+
+                    log_add_entry(p->log, "The fireball hits you.");
+
+                    /* damage items in player's inventory */
+                    inv_erode(&p->inventory, IET_BURN, TRUE);
+
+                    /* damage the player */
+                    dam = damage_new(DAM_FIRE, ATT_MAGIC, amount, NULL);
+                    player_damage_take(p, dam, PD_SPELL, SP_BAL);
+                }
+                else
+                {
+                    /* blast hit nothing */
+                    addch('*');
+                }
+
+                /* affect items on the position */
+                if ((inv = map_ilist_at(cmap, cursor)))
+                {
+                    inv_erode(inv, IET_BURN, player_pos_visible(p, cursor));
+                }
+            }
+        }
     }
 
-    if (pos_in_rect(p->pos, rect_new_sized(pos, 1)))
-    {
-        /* player has been hit by the blast as well */
-        log_add_entry(p->log, "The fireball hits you.");
+    attroff(DC_LIGHTRED);
 
-        dam = damage_new(DAM_FIRE, ATT_MAGIC, amount, NULL);
-        player_damage_take(p, dam, PD_SPELL, SP_BAL);
-    }
-
-    g_ptr_array_free(mlist, FALSE);
+    /* make sure the blast shows up */
+    refresh();
+    /* sleep a 3/4 second */
+    usleep(750000);
 
     return TRUE;
 }
@@ -1127,7 +1165,7 @@ gboolean spell_create_sphere(spell *s, struct player *p)
     assert(p != NULL);
 
     pos = display_get_position(p, "Where do you want to place the sphere?",
-                               FALSE, TRUE);
+                               FALSE, FALSE, 0, TRUE);
 
     if (pos_valid(pos))
     {
@@ -1184,7 +1222,8 @@ gboolean spell_make_wall(player *p)
 {
     position pos;
 
-    pos = display_get_position(p, "Select a position where you want to place a wall.", FALSE, TRUE);
+    pos = display_get_position(p, "Select a position where you want to place a wall.",
+                               FALSE, FALSE, 0, TRUE);
 
     if (pos_identical(pos, p->pos))
     {
@@ -1229,7 +1268,8 @@ gboolean spell_vaporize_rock(player *p)
     char *desc = NULL;
     map *map = game_map(nlarn, p->pos.z);
 
-    pos = display_get_position(p, "What do you want to vaporize?", FALSE, FALSE);
+    pos = display_get_position(p, "What do you want to vaporize?",
+                               FALSE, FALSE, 0, FALSE);
 
     if (!pos_valid(pos))
     {

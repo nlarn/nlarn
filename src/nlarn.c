@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
         case ';':
             pos = display_get_position(nlarn->p,
                                        "Choose a position to examine:",
-                                       FALSE, FALSE);
+                                       FALSE, FALSE, 0, FALSE);
 
             if (pos_valid(pos))
             {

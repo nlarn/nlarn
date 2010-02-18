@@ -1274,6 +1274,17 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
 
         if (inv != NULL)
         {
+            if (*inv == nlarn->p->inventory)
+            {
+                /* if the inventory we are working on is the player's
+                 * inventory, try to unequip the item first as we do
+                 * not know if it is eqipped (this would lead to nasty
+                 * segementation faults otherwise) */
+                log_disable(nlarn->p->log);
+                player_item_unequip(nlarn->p, &nlarn->p->inventory, it);
+                log_enable(nlarn->p->log);
+            }
+
             inv_del_element(inv, it);
         }
 
@@ -1284,12 +1295,12 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
              * casket burns -> all undestroyed items inside the casket
              * continue to exist on the floor tile the casket was standing on
              */
-             while (inv_length(it->content) > 0)
-             {
-                 item *cit = inv_get(it->content, inv_length(it->content) - 1);
-                 inv_del_element(&it->content, cit);
-                 inv_add(inv, cit);
-             }
+            while (inv_length(it->content) > 0)
+            {
+                item *cit = inv_get(it->content, inv_length(it->content) - 1);
+                inv_del_element(&it->content, cit);
+                inv_add(inv, cit);
+            }
         }
 
         /* remove the item from the game */
@@ -1564,7 +1575,7 @@ void inv_erode(inventory **inv, item_erosion_type iet, gboolean visible)
     {
         it = inv_get(*inv, idx);
         item_erode(inv, it, iet, visible);
-     }
+    }
 }
 
 guint inv_length(inventory *inv)

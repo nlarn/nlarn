@@ -1942,16 +1942,17 @@ direction display_get_direction(char *title, int *available)
     return dir;
 }
 
-position display_get_position(player *p, char *message, int draw_line, int passable)
+position display_get_position(player *p, char *message, gboolean ray,
+                              gboolean ball, guint radius, int passable)
 {
     int RUN  = TRUE;
     direction dir = GD_NONE;
-    position pos, npos;
+    position pos, npos, cursor;
     map *map;
     int attrs; /* curses attributes */
 
-    /* variables for ray painting */
-    area *ray = NULL;
+    /* variables for ray  or ball painting */
+    area *a = NULL;
     int x, y;
     monster *target, *m;
 
@@ -1971,7 +1972,7 @@ position display_get_position(player *p, char *message, int draw_line, int passa
     do
     {
         /* draw a line between source and target if told to */
-        if (draw_line && (ray != NULL))
+        if (ray && (a != NULL))
         {
             target = map_get_monster_at(map, pos);
 
@@ -1983,33 +1984,75 @@ position display_get_position(player *p, char *message, int draw_line, int passa
 
             attron(attrs);
 
-            for (y = 0; y < ray->size_y; y++)
+            for (y = 0; y < a->size_y; y++)
             {
-                for (x = 0; x < ray->size_x; x++)
+                for (x = 0; x < a->size_x; x++)
                 {
-                    if (area_point_get(ray, x, y))
+                    if (area_point_get(a, x, y))
                     {
-                        position tpos = pos_new(ray->start_x + x, ray->start_y + y, p->pos.z);
+                        position tpos = pos_new(a->start_x + x, a->start_y + y, p->pos.z);
 
                         if (target && pos_identical(monster_pos(target), tpos))
                         {
-                            mvaddch(ray->start_y + y, ray->start_x + x, monster_image(target));
+                            mvaddch(a->start_y + y, a->start_x + x, monster_image(target));
                         }
                         else if ((m = map_get_monster_at(map, tpos)))
                         {
-                            mvaddch(ray->start_y + y, ray->start_x + x, monster_image(m));
+                            mvaddch(a->start_y + y, a->start_x + x, monster_image(m));
                         }
                         else
                         {
-                            mvaddch(ray->start_y + y, ray->start_x + x, '*');
+                            mvaddch(a->start_y + y, a->start_x + x, '*');
                         }
                     }
                 }
             }
 
             attroff(attrs);
-            area_destroy(ray);
-            ray = NULL;
+            area_destroy(a);
+            a = NULL;
+        }
+
+        /* paint a ball if told to */
+        if (ball && radius)
+        {
+            area *obstacles = map_get_obstacles(map, pos, 2);
+            a = area_new_circle_flooded(pos, 2, obstacles);
+            cursor = pos;
+
+            /* repaint screen to get rid of old ball */
+            display_paint_screen(p);
+
+            for (cursor.y = a->start_y; cursor.y < a->start_y + a->size_y; cursor.y++)
+            {
+                for (cursor.x = a->start_x; cursor.x < a->start_x + a->size_x; cursor.x++)
+                {
+                    if (area_pos_get(a, cursor))
+                    {
+                        move(cursor.y, cursor.x);
+
+                        if ((m = map_get_monster_at(map, cursor)))
+                        {
+                            attron(DC_RED);
+                            addch(monster_image(m));
+                        }
+                        else if (pos_identical(p->pos, cursor))
+                        {
+                            attron(DC_LIGHTRED);
+                            addch('@');
+                        }
+                        else
+                        {
+                            attron(DC_LIGHTCYAN);
+                            addch('*');
+                        }
+
+                        attroff(attrs);
+                    }
+
+                }
+             }
+
         }
 
         /* position cursor */
@@ -2113,16 +2156,17 @@ position display_get_position(player *p, char *message, int draw_line, int passa
             if (passable && !map_pos_passable(map, npos))
                 npos = pos;
 
-            if (draw_line)
+            if (ray)
             {
-                ray = area_new_ray(p->pos, npos, map_get_obstacles(map, p->pos, distance));
+                /* painting a ray - validate if new position is in a line */
+                a = area_new_ray(p->pos, npos, map_get_obstacles(map, p->pos, distance));
 
-                if (ray == NULL)
+                if (a == NULL)
                 {
                     /* it's not possible to draw a ray between the points
                        -> leave everything as it has been */
                     npos = pos;
-                    ray = area_new_ray(p->pos, pos, map_get_obstacles(map, p->pos, distance));
+                    a = area_new_ray(p->pos, pos, map_get_obstacles(map, p->pos, distance));
                 }
             }
 
