@@ -356,6 +356,16 @@ const monster_data monsters[MT_MAX] =
         }
     },
     {
+        MT_WHITE_DRAGON, "white dragon",
+        5, 2, 16,  500, 55, 1000, 'd', DC_WHITE,
+        SPEED_NORMAL, ESIZE_HUGE,
+        MF_HEAD | MF_DRAGON,
+        {
+            { ATT_BITE, DAM_PHYSICAL, 4, 0 },
+            { ATT_CLAW, DAM_PHYSICAL, 4, 0 },
+        }
+    },
+    {
         MT_METAMORPH, "metamorph",
         6, 7, 3, 0, 30, 40, 'm', DC_WHITE,
         SPEED_NORMAL, ESIZE_MEDIUM,
@@ -576,20 +586,10 @@ const monster_data monsters[MT_MAX] =
         }
     },
     {
-        MT_WHITE_DRAGON, "white dragon",
-        5, 2, 16,  500, 55, 1000, 'd', DC_WHITE,
-        SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 4, 0 },
-            { ATT_CLAW, DAM_PHYSICAL, 4, 0 },
-        }
-    },
-    { /* TODO: replace this beast */
         MT_BRONCE_DRAGON, "bronze dragon",
         9, 2, 16, 300, 80, 4000, 'D', DC_BROWN,
         SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_FLY,
+        MF_HEAD | MF_FLY | MF_DRAGON,
         {
             { ATT_BITE, DAM_PHYSICAL, 9, 0 },
             { ATT_CLAW, DAM_PHYSICAL, 9, 0 },
@@ -599,7 +599,7 @@ const monster_data monsters[MT_MAX] =
         MT_GREEN_DRAGON, "green dragon",
         9, 3, 15, 200, 70, 2500, 'D', DC_GREEN,
         SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_FLY,
+        MF_HEAD | MF_FLY | MF_DRAGON,
         {
             { ATT_SLAM, DAM_PHYSICAL, 25, 0 },
             { ATT_CLAW, DAM_PHYSICAL, 8, 0 },
@@ -609,7 +609,7 @@ const monster_data monsters[MT_MAX] =
         MT_SILVER_DRAGON, "silver dragon",
         10, -1, 20, 700, 100, 10000, 'D', DC_LIGHTGRAY,
         SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_FLY,
+        MF_HEAD | MF_FLY | MF_DRAGON,
         {
             { ATT_CLAW, DAM_PHYSICAL, 12, 0 },
             { ATT_BITE, DAM_PHYSICAL, 12, 0 },
@@ -619,7 +619,7 @@ const monster_data monsters[MT_MAX] =
         MT_PLATINUM_DRAGON, "platinum dragon",
         10, -5, 22, 1000, 130, 24000, 'D', DC_WHITE,
         SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_FLY,
+        MF_HEAD | MF_FLY | MF_DRAGON,
         {
             { ATT_MAGIC, DAM_MAGICAL, 15, 30 },
             { ATT_BITE, DAM_PHYSICAL, 15, 0 },
@@ -629,7 +629,7 @@ const monster_data monsters[MT_MAX] =
         MT_RED_DRAGON, "red dragon",
         10, -2, 19, 800, 110, 14000, 'D', DC_LIGHTRED,
         SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_FLY,
+        MF_HEAD | MF_FLY | MF_DRAGON,
         {
             { ATT_BREATH, DAM_FIRE, 20, 25 },
             { ATT_CLAW, DAM_PHYSICAL, 13, 0 },

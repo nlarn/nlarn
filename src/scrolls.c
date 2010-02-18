@@ -278,9 +278,7 @@ static int scroll_annihilate(struct player *p, item *scroll)
         {
             if (area_pos_get(blast, cursor) && (m = map_get_monster_at(cmap, cursor)))
             {
-                /* FIXME: remove this special case here and give a good resistance to
-                 * the demon lords */
-                if (monster_type(m) < MT_DEMONLORD_II)
+                if (monster_is_demon(m))
                 {
                     m = monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_NONE, 2000, p));
 

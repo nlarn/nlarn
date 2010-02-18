@@ -101,6 +101,7 @@ typedef enum monster_t
     MT_YETI,
     MT_ELF,
     MT_GELATINOUSCUBE,
+    MT_WHITE_DRAGON,
     MT_METAMORPH,
     MT_VORTEX,
     MT_ZILLER,
@@ -123,7 +124,6 @@ typedef enum monster_t
     MT_WATER_LORD,
     MT_PURPLE_WORM,
     MT_XVART,
-    MT_WHITE_DRAGON,
     MT_BRONCE_DRAGON,
     MT_GREEN_DRAGON,
     MT_SILVER_DRAGON,
@@ -156,7 +156,8 @@ enum monster_flags
     MF_REGENERATE   = 1 << 8,   /* does regenerate */
     MF_METALLIVORE  = 1 << 9,   /* eats metal */
     MF_DEMON        = 1 << 10,  /* is a demon */
-    MF_MIMIC        = 1 << 11,  /* is a mimic */
+    MF_DRAGON       = 1 << 11,  /* is a dragon */
+    MF_MIMIC        = 1 << 12,  /* is a mimic */
 };
 
 /* external vars */
@@ -234,6 +235,7 @@ int monster_colour(monster *m);
 #define monster_can_regenerate(monster)  (monsters[monster_type(monster)].flags & MF_REGENERATE)
 #define monster_is_metallivore(monster)  (monsters[monster_type(monster)].flags & MF_METALLIVORE)
 #define monster_is_demon(monster)        (monsters[monster_type(monster)].flags & MF_DEMON)
+#define monster_is_dragon(monster)       (monsters[monster_type(monster)].flags & MF_DRAGON)
 #define monster_is_mimic(monster)        (monsters[monster_type(monster)].flags & MF_MIMIC)
 
 #define monster_type_name(type)  (monsters[(type)].name)

@@ -1174,8 +1174,7 @@ int player_attack(player *p, monster *m)
         }
 
         /* triple damage if hitting a dragon and wearing an amulet of dragon slaying */
-        if ((monster_type(m) >= MT_WHITE_DRAGON && monster_type(m) <= MT_RED_DRAGON)
-                && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
+        if (monster_is_dragon(m) && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
         {
             dam->amount *= 3;
         }
