@@ -3201,6 +3201,12 @@ int player_item_drop(player *p, inventory **inv, item *it)
         /* otherwise the entire quantity gets dropped */
     }
 
+    /* show the message before dropping the item, as dropping might remove
+       the burdened / overloaded effect. If the pre_del callback fails,
+       it has to display a message which explains why it has failed. */
+    item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
+    log_add_entry(p->log, "You drop %s.", desc);
+
     if (!inv_del_element(inv, it))
     {
         /* if the callback failed, dropping has failed */
@@ -3208,9 +3214,6 @@ int player_item_drop(player *p, inventory **inv, item *it)
     }
 
     inv_add(map_ilist_at(game_map(nlarn, p->pos.z), p->pos), it);
-    item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
-
-    log_add_entry(p->log, "You drop %s.", desc);
 
     /* reveal if item is cursed or blessed when dropping it on an altar */
     map_sobject_t ms = map_sobject_at(game_map(nlarn, p->pos.z), p->pos);
