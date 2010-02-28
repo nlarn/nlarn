@@ -75,11 +75,10 @@ typedef enum _effect_type
     ET_CANCELLATION,            /* cancels spheres */
     ET_UNDEAD_PROTECTION,       /* protection against undead */
     ET_SPIRIT_PROTECTION,       /* protection against spirits */
-
-    ET_TIMESTOP,				/* game time modification */
-    ET_WALL_WALK,               /* ability to walk through walls */
     ET_LIFE_PROTECTION,         /* you only live twice */
     ET_NOTHEFT,                 /* protection from thievish monsters */
+    ET_TIMESTOP,				/* game time modification */
+    ET_WALL_WALK,               /* ability to walk through walls */
 
     /* NEGATIVE EFFECTS */
     /* base attribute modification */
@@ -119,13 +118,18 @@ typedef enum _effect_type
 typedef struct effect_data
 {
     effect_type id;
-    int duration;           /* duration of effect. 0 = permanent */
-    int value;              /* if modifier: amount of attribute modification */
-    char *desc;             /* description for status display and obituary */
-    char *msg_start;        /* message displayed when effect starts */
-    char *msg_stop;         /* message displayed when effect ends */
-    char *msg_start_monster; /*	If the effect happens on a monster */
+    int duration;            /* duration of effect. 0 = permanent */
+    int amount;              /* if modifier: amount of attribute modification */
+    char *desc;              /* description for status display and obituary */
+    char *msg_start;         /* message displayed when effect starts */
+    char *msg_stop;          /* message displayed when effect ends */
+    char *msg_start_monster; /*	messages shown when the effect happens on a monster */
     char *msg_stop_monster;
+    guint                    /* effect flags */
+        var_duration: 1,     /* the effect's duration is variable */
+        var_amount: 1,       /* the effect's amount is variable */
+        inc_duration: 1,     /* extend the duration of unique effects */
+        inc_amount: 1;       /* extend the amount of unique effects */
 } effect_data;
 
 typedef struct effect
@@ -142,7 +146,7 @@ struct game;
 
 /* function declarations */
 
-effect *effect_new(effect_type type, time_t now);
+effect *effect_new(effect_type type);
 effect *effect_copy(effect *e);
 void effect_destroy(effect *e);
 
@@ -151,11 +155,11 @@ effect *effect_deserialize(cJSON *eser, struct game *g);
 cJSON *effects_serialize(GPtrArray *effects);
 GPtrArray *effects_deserialize(cJSON *eser);
 
-char *effect_get_desc(effect *e);
-char *effect_get_msg_start(effect *e);
-char *effect_get_msg_stop(effect *e);
-char *effect_get_msg_m_start(effect *e);
-char *effect_get_msg_m_stop(effect *e);
+const char *effect_get_desc(effect *e);
+const char *effect_get_msg_start(effect *e);
+const char *effect_get_msg_stop(effect *e);
+const char *effect_get_msg_m_start(effect *e);
+const char *effect_get_msg_m_stop(effect *e);
 
 int effect_get_amount(effect *e);
 

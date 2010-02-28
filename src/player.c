@@ -1741,7 +1741,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         case DAM_POISON:
             if (!(e = player_effect_get(p, ET_POISON)))
             {
-                e = effect_new(ET_POISON, game_turn(nlarn));
+                e = effect_new(ET_POISON);
                 e->amount = dam->amount;
                 player_effect_add(p, e);
             }
@@ -1758,7 +1758,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             /* it is not possible to become more blind */
             if (!(e = player_effect_get(p, ET_BLINDNESS)))
             {
-                e = effect_new(ET_BLINDNESS, game_turn(nlarn));
+                e = effect_new(ET_BLINDNESS);
                 player_effect_add(p, e);
             }
 
@@ -1769,7 +1769,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         case DAM_CONFUSION:
             if (!(e = player_effect_get(p, ET_CONFUSION)))
             {
-                e = effect_new(ET_CONFUSION, game_turn(nlarn));
+                e = effect_new(ET_CONFUSION);
                 player_effect_add(p, e);
             }
 
@@ -1780,7 +1780,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         case DAM_PARALYSIS:
             if (!(e = player_effect_get(p, ET_PARALYSIS)))
             {
-                e = effect_new(ET_PARALYSIS, game_turn(nlarn));
+                e = effect_new(ET_PARALYSIS);
                 player_effect_add(p, e);
             }
 
@@ -1789,7 +1789,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             break;
 
         case DAM_DEC_STR:
-            e = effect_new(ET_DEC_STR, game_turn(nlarn));
+            e = effect_new(ET_DEC_STR);
             e->turns = dam->amount * 50;
             player_effect_add(p, e);
 
@@ -1800,7 +1800,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             break;
 
         case DAM_DEC_DEX:
-            e = effect_new(ET_DEC_DEX, game_turn(nlarn));
+            e = effect_new(ET_DEC_DEX);
             e->turns = dam->amount * 50;
             player_effect_add(p, e);
 
@@ -1954,7 +1954,7 @@ effect *player_effect_add(player *p, effect *e)
             break;
 
         case ET_INC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_INC_CHA, ET_INC_WIS), game_turn(nlarn)));
+            player_effect_add(p, effect_new(rand_m_n(ET_INC_CHA, ET_INC_WIS)));
             break;
 
         case ET_INC_HP_MAX:
@@ -2016,7 +2016,7 @@ effect *player_effect_add(player *p, effect *e)
             break;
 
         case ET_DEC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CHA, ET_DEC_WIS), game_turn(nlarn)));
+            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CHA, ET_DEC_WIS)));
             break;
 
         case ET_DEC_HP_MAX:
@@ -2374,7 +2374,7 @@ void player_inv_weight_recalc(inventory *inv, item *item)
         /* make overstrained */
         if (!player_effect(p, ET_OVERSTRAINED))
         {
-            player_effect_add(p, effect_new(ET_OVERSTRAINED, game_turn(nlarn)));
+            player_effect_add(p, effect_new(ET_OVERSTRAINED));
         }
     }
     else if (pack_weight < (int)(can_carry * 1.3) && (pack_weight > can_carry))
@@ -2387,7 +2387,7 @@ void player_inv_weight_recalc(inventory *inv, item *item)
 
         if (!player_effect(p, ET_BURDENED))
         {
-            player_effect_add(p, effect_new(ET_BURDENED, game_turn(nlarn)));
+            player_effect_add(p, effect_new(ET_BURDENED));
         }
     }
     else if (pack_weight < can_carry)
@@ -3327,7 +3327,7 @@ int player_altar_desecrate(player *p)
             monster_new(MT_RED_DRAGON, mpos);
         }
 
-        e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(nlarn));
+        e = effect_new(ET_AGGRAVATE_MONSTER);
         e->turns = 2500;
         player_effect_add(p, e);
     }
@@ -3421,7 +3421,7 @@ int player_altar_pray(player *p)
                 monster_new_by_level(mpos);
             }
 
-            e = effect_new(ET_AGGRAVATE_MONSTER, game_turn(nlarn));
+            e = effect_new(ET_AGGRAVATE_MONSTER);
             e->turns = 200;
             player_effect_add(p, e);
 
@@ -3432,11 +3432,11 @@ int player_altar_pray(player *p)
         {
             log_add_entry(p->log, "You have been heard!");
 
-            e = effect_new(ET_PROTECTION, game_turn(nlarn));
+            e = effect_new(ET_PROTECTION);
             e->turns = 500;
             player_effect_add(p, e);
 
-            e = effect_new(ET_UNDEAD_PROTECTION, game_turn(nlarn));
+            e = effect_new(ET_UNDEAD_PROTECTION);
             player_effect_add(p, e);
         }
 
@@ -3698,13 +3698,13 @@ int player_fountain_drink(player *p)
 
     if (chance(7))
     {
-        e = effect_new(ET_SICKNESS, game_turn(nlarn));
+        e = effect_new(ET_SICKNESS);
         player_effect_add(p, e);
     }
     else if (chance(13))
     {
         /* see invisible */
-        e = effect_new(ET_INFRAVISION, game_turn(nlarn));
+        e = effect_new(ET_INFRAVISION);
         player_effect_add(p, e);
     }
     else if (chance(45))
@@ -3825,7 +3825,7 @@ int player_fountain_drink(player *p)
         /* the rng stated that it wants the players attributes changed */
         if (et)
         {
-            e = effect_new(et, game_turn(nlarn));
+            e = effect_new(et);
             player_effect_add(p, e);
         }
     }
@@ -4336,7 +4336,7 @@ static int player_trap_trigger(player *p, trap_t trap)
                     log_add_entry(p->log, trap_e_message(trap));
                 }
 
-                player_effect_add(p, effect_new(trap_effect(trap), game_turn(nlarn)));
+                player_effect_add(p, effect_new(trap_effect(trap)));
             }
         }
 

@@ -170,7 +170,7 @@ static int potion_with_effect(struct player *p, item *potion)
 
     if (potion_effect(potion) > ET_NONE)
     {
-        eff = effect_new(potion_effect(potion), game_turn(nlarn));
+        eff = effect_new(potion_effect(potion));
 
         /* silly potion of giant strength */
         if (potion->id == PO_GIANT_STR)

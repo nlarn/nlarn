@@ -124,7 +124,7 @@ item *item_new(item_t item_type, int item_id)
 
         if (amulet_effect_type(nitem))
         {
-            eff = effect_new(amulet_effect_type(nitem), 0);
+            eff = effect_new(amulet_effect_type(nitem));
             item_effect_add(nitem, eff);
         }
 
@@ -155,7 +155,7 @@ item *item_new(item_t item_type, int item_id)
     case IT_RING:
         if (ring_effect_type(nitem))
         {
-            eff = effect_new(ring_effect_type(nitem), 0);
+            eff = effect_new(ring_effect_type(nitem));
 
             /* ring of extra regeneration is better than the average */
             if (item_id == RT_EXTRA_REGEN)
@@ -183,15 +183,15 @@ item *item_new(item_t item_type, int item_id)
         /* special effects for Bessman's Hammer */
         if (nitem->id == WT_BESSMAN)
         {
-            eff = effect_new(ET_INC_STR, 0);
+            eff = effect_new(ET_INC_STR);
             eff->amount = 10;
             item_effect_add(nitem, eff);
 
-            eff = effect_new(ET_INC_DEX, 0);
+            eff = effect_new(ET_INC_DEX);
             eff->amount = 10;
             item_effect_add(nitem, eff);
 
-            eff = effect_new(ET_DEC_INT, 0);
+            eff = effect_new(ET_DEC_INT);
             eff->amount = 10;
             item_effect_add(nitem, eff);
         }

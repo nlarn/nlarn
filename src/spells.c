@@ -701,7 +701,7 @@ int spell_type_player(spell *s, struct player *p)
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_PLAYER));
 
-    e = effect_new(spell_effect(s), game_turn(nlarn));
+    e = effect_new(spell_effect(s));
 
     /* make effects that are permanent by default non-permanent */
     /* unless it is the spell of healing, which does work this way */
@@ -815,7 +815,7 @@ int spell_type_point(spell *s, struct player *p)
                           monster_name(monster));
         }
 
-        e = effect_new(spell_effect(s), game_turn(nlarn));
+        e = effect_new(spell_effect(s));
 
         if (!e->amount)
         {

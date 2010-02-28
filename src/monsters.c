@@ -1532,7 +1532,7 @@ monster *monster_trap_trigger(monster *m)
          * monster's list of effects. */
         if (trap_effect(trap))
         {
-            eff = effect_new(trap_effect(trap), game_turn(nlarn));
+            eff = effect_new(trap_effect(trap));
             eff = monster_effect_add(m, eff);
         }
 
