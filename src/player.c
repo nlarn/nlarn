@@ -1799,7 +1799,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         {
             e = player_effect_add(p, effect_new(ET_PARALYSIS));
         }
-        else
+
+        if (!e && !(e = player_effect_get(p, ET_PARALYSIS)))
         {
             log_add_entry(p->log, "You avoid eye contact.");
         }
@@ -1807,13 +1808,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_DEC_STR:
-        if (chance(dam->amount - player_get_con(p)))
+        if (chance(dam->amount -= player_get_con(p)))
         {
-
             e = effect_new(ET_DEC_STR);
             /* the default number of turns for ET_DEC_STR is 1 */
-            e->turns = dam->amount * 50;
-            player_effect_add(p, e);
+            e->turns = dam->amount * 10;
+            e = player_effect_add(p, e);
 
             if (player_get_str(p) < 1)
             {
@@ -1827,12 +1827,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_DEC_DEX:
-        if (chance(dam->amount - player_get_con(p)))
+        if (chance(dam->amount -= player_get_con(p)))
         {
             e = effect_new(ET_DEC_DEX);
             /* the default number of turns for ET_DEC_DEX is 1 */
-            e->turns = dam->amount * 50;
-            player_effect_add(p, e);
+            e->turns = dam->amount * 10;
+            e = player_effect_add(p, e);
 
             if (player_get_dex(p) < 1)
             {
@@ -1946,9 +1946,6 @@ int player_mp_max_lose(player *p, int count)
 effect *player_effect_add(player *p, effect *e)
 {
     assert(p != NULL && e != NULL);
-
-    if (effect_get_msg_start(e))
-        log_add_entry(p->log, "%s", effect_get_msg_start(e));
 
     /* one-time effects are handled here */
     if (e->turns == 1)
@@ -2067,12 +2064,19 @@ effect *player_effect_add(player *p, effect *e)
             /* nop */
             break;
         }
+
+        if (effect_get_msg_start(e))
+            log_add_entry(p->log, "%s", effect_get_msg_start(e));
+
         effect_destroy(e);
         e = NULL;
     }
     else if (e->type == ET_SLEEP)
     {
         int i;
+
+        if (effect_get_msg_start(e))
+            log_add_entry(p->log, "%s", effect_get_msg_start(e));
 
         for (i = 0; i < e->turns; i++)
         {
@@ -2089,6 +2093,10 @@ effect *player_effect_add(player *p, effect *e)
         int str_orig = player_get_str(p);
 
         e = effect_add(p->effects, e);
+
+        /* only log a message if the effect has really been added */
+        if (e && effect_get_msg_start(e))
+            log_add_entry(p->log, "%s", effect_get_msg_start(e));
 
         if (str_orig != player_get_str(p))
         {

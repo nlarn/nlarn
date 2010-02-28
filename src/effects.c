@@ -156,7 +156,7 @@ static const effect_data effects[ET_MAX] =
     {
         ET_PROTECTION, 250, 3, NULL,
         NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, TRUE
+        FALSE, FALSE, TRUE, TRUE
     },
 
     {
@@ -204,7 +204,7 @@ static const effect_data effects[ET_MAX] =
     {
         ET_INVULNERABILITY, 250, 10, NULL,
         NULL, NULL, NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        TRUE, FALSE, TRUE, FALSE
     },
 
     {
@@ -212,7 +212,7 @@ static const effect_data effects[ET_MAX] =
         "You feel your vision sharpen.",
         "You feel your vision return to normal.",
         NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        TRUE, FALSE, TRUE, FALSE
     },
 
     {
@@ -220,7 +220,7 @@ static const effect_data effects[ET_MAX] =
         "You have been granted enlightenment!",
         "You are no longer enlightened.",
         NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        TRUE, FALSE, TRUE, FALSE
     },
 
     {
@@ -300,21 +300,21 @@ static const effect_data effects[ET_MAX] =
     {
         ET_CANCELLATION, 250, 0, "cancellation",
         NULL, NULL, NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        TRUE, FALSE, TRUE, FALSE
     },
 
     {
         ET_UNDEAD_PROTECTION, 400, 0, "undead protection",
         "You feel safe in the dark.",
         NULL, NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        TRUE, FALSE, TRUE, FALSE
     },
 
     {
         ET_SPIRIT_PROTECTION, 400, 0, "spirit protection",
         "You feel a protecting force.",
         NULL, NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        TRUE, FALSE, TRUE, FALSE
     },
 
     {
@@ -327,7 +327,7 @@ static const effect_data effects[ET_MAX] =
     {
         ET_NOTHEFT, 400, 0, "theft protection",
         NULL, NULL, NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        TRUE, FALSE, TRUE, FALSE
     },
 
     {
@@ -341,21 +341,21 @@ static const effect_data effects[ET_MAX] =
         "You can now walk through walls",
         "You can no longer walk through walls.",
         NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        TRUE, FALSE, TRUE, FALSE
     },
 
     {
         ET_DEC_CHA, 1, 1, NULL,
         "You feel rejected.",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, TRUE, TRUE
     },
 
     {
         ET_DEC_CON, 1, 1, NULL,
         "You feel incapacitated.",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, TRUE, TRUE
     },
 
     {
@@ -363,14 +363,14 @@ static const effect_data effects[ET_MAX] =
         "You feel clumsy.",
         "Your dexterousness returns.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, TRUE, TRUE
     },
 
     {
         ET_DEC_INT, 1, 1, NULL,
         "You feel imbecile.",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, TRUE, TRUE
     },
 
     {
@@ -378,14 +378,14 @@ static const effect_data effects[ET_MAX] =
         "You feel weaker.",
         "You regain your strength.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, TRUE, TRUE
     },
 
     {
         ET_DEC_WIS, 1, 1, NULL,
         "You feel ignorant.",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, TRUE, TRUE
     },
 
     {
@@ -546,7 +546,7 @@ effect *effect_new(effect_type type)
 
     assert(type > ET_NONE && type < ET_MAX);
 
-    ne = g_malloc(sizeof(effect));
+    ne = g_malloc0(sizeof(effect));
     ne->type = type;
     ne->start = game_turn(nlarn);
 
@@ -727,21 +727,35 @@ effect *effect_add(GPtrArray *ea, effect *ne)
 
     assert(ea != NULL && ne != NULL);
 
-    /* check for duplicates - leave permanent effects alone */
-    if ((e = effect_get(ea, ne->type)) && (e->turns > 1))
+    /* check for existing effects - leave permanent effects alone */
+    if ((e = effect_get(ea, ne->type)) && (e->turns > 0))
     {
-        /* either add to effect's lifetime or power */
-        if (effect_get_amount(ne) && chance(50))
+        gboolean modified_existing = FALSE;
+
+        /* if the effect's duration can be extended, reset it */
+        if (effects[e->type].inc_duration)
+        {
+            e->turns = max(e->turns, ne->turns);
+            modified_existing = TRUE;
+        }
+
+        /* if the effect's amount can be extended, do so */
+        if (effects[e->type].inc_amount)
         {
             e->amount += ne->amount;
-        }
-        else
-        {
-            e->turns += ne->turns;
+            modified_existing = TRUE;
         }
 
         effect_destroy(ne);
-        return e;
+
+        if (modified_existing == TRUE)
+        {
+            return e;
+        }
+        else
+        {
+            return NULL;
+        }
     }
     else
     {

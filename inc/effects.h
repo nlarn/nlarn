@@ -128,7 +128,7 @@ typedef struct effect_data
     guint                    /* effect flags */
         var_duration: 1,     /* the effect's duration is variable */
         var_amount: 1,       /* the effect's amount is variable */
-        inc_duration: 1,     /* extend the duration of unique effects */
+        inc_duration: 1,     /* reset the duration of unique effects */
         inc_amount: 1;       /* extend the amount of unique effects */
 } effect_data;
 
