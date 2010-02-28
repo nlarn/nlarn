@@ -1602,31 +1602,18 @@ int player_hp_gain(player *p, int count)
     return p->hp;
 }
 
+/**
+ * Inflict damage upon the player
+ *
+ * @param the player
+ * @param the damage
+ * @param of the damage originator
+ * @param the id of the damage originator, specific to the damage originator
+ */
 void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause)
 {
     monster *m = NULL;
     effect *e = NULL;
-
-    const damage_msg damage_msgs[] =
-    {
-        { NULL, NULL, },
-        { "Ouch!", "Your armour protects you.", }, /* DAM_PHYSICAL */
-        { NULL, "You resist.", }, /* DAM_MAGICAL */
-        { "You suffer burns.", "The flames don't phase you.", }, /* DAM_FIRE */
-        { "You suffer from frostbite.", "It doesn't seem so cold.", }, /* DAM_COLD */
-        { NULL, NULL, }, /* DAM_ACID */
-        { "You experience near-drowning.", "The water doesn't affect you.", }, /* DAM_WATER */
-        { NULL, NULL, }, /* DAM_ELECTRICITY */
-        /* effect start messages are covered by player_effect_add
-         * only need to notify if the player resisted */
-        { "You feel poison running through your veins.", "You resist the poison.", }, /* DAM_POISON */
-        { NULL, "You are not blinded.", }, /* DAM_BLINDNESS */
-        { NULL, "You are not confused.", }, /* DAM_CONFUSION */
-        { NULL, "You avoid eye contact.", }, /* DAM_PARALYSIS */
-        { NULL, "You are not affected.", }, /* DAM_DEC_STR */
-        { NULL, "You are not affected.", }, /* DAM_DEC_DEX */
-        { "Your life energy is drained.", "You are not affected.", }, /* DAM_DRAIN_LIFE */
-    };
 
     assert(p != NULL && dam != NULL);
 
@@ -1650,146 +1637,181 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     {
     case DAM_PHYSICAL:
         dam->amount -= player_get_ac(p);
+        /* taken damage */
+        if (dam->amount > 0)
+        {
+            p->hp -= dam->amount;
+            log_add_entry(p->log, "Ouch!");
+        }
+        else
+        {
+            log_add_entry(p->log, "Your armour protects you.");
+        }
         break;
 
     case DAM_MAGICAL:
         dam->amount -= player_effect(p, ET_RESIST_MAGIC);
+
+        if (dam->amount > 0)
+        {
+            p->hp -= dam->amount;
+            log_add_entry(p->log, "Ouch!");
+        }
+        else
+        {
+            log_add_entry(p->log, "You resist.");
+        }
+
         break;
 
     case DAM_FIRE:
         dam->amount -= player_effect(p, ET_RESIST_FIRE);
+        if (dam->amount > 0)
+        {
+            p->hp -= dam->amount;
+            log_add_entry(p->log, "You suffer burns.");
+        }
+        else
+        {
+            log_add_entry(p->log, "The flames don't phase you.");
+        }
         break;
 
     case DAM_COLD:
         dam->amount -= player_effect(p, ET_RESIST_COLD);
-        break;
-
-    case DAM_ACID:
-        break;
-
-    case DAM_WATER:
-        break;
-
-    case DAM_ELECTRICITY:
-        break;
-
-    case DAM_POISON:
-        if (dam->attack != ATT_NONE)
+        if (dam->amount > 0)
         {
-            dam->amount -= rand_0n(player_get_con(p));
+            p->hp -= dam->amount;
+            log_add_entry(p->log, "You suffer from frostbite.");
+        }
+        else
+        {
+            log_add_entry(p->log, "It doesn't seem so cold.");
         }
         break;
 
+    case DAM_ACID:
+        if (dam->amount > 0)
+        {
+            p->hp -= dam->amount;
+            log_add_entry(p->log, "You are splashed with acid.");
+        }
+        else
+        {
+            log_add_entry(p->log, "The acid doesn't affect you.");
+        }
+        break;
+
+    case DAM_WATER:
+        if (dam->amount > 0)
+        {
+            p->hp -= dam->amount;
+            log_add_entry(p->log, "You experience near-drowning.");
+        }
+        else
+        {
+            log_add_entry(p->log, "The water doesn't affect you.");
+        }
+        break;
+
+    case DAM_ELECTRICITY:
+        if (dam->amount > 0)
+        {
+            p->hp -= dam->amount;
+            log_add_entry(p->log, "Zapp!");
+        }
+        else
+        {
+            log_add_entry(p->log, "As you are grounded nothing happens.");
+        }
+        break;
+
+    case DAM_POISON:
+        /* check if the damage is not caused by the effect that is
+           already attached to the player */
+        if (cause_type != PD_EFFECT)
+        {
+            /* check resistance; prevent negative damage amount */
+            dam->amount -= max(0, rand_0n(player_get_con(p)));
+
+            if (dam->amount > 0)
+            {
+            e = effect_new(ET_POISON);
+            e->amount = dam->amount;
+            e = player_effect_add(p, e);
+            }
+            else
+            {
+                log_add_entry(p->log, "You resist the poison.");
+            }
+        }
+        else
+        {
+            /* damage is caused by the effect of the poison effect () */
+            p->hp -= dam->amount;
+            log_add_entry(p->log, "You feel poison running through your veins.");
+        }
+
+        break;
+
     case DAM_BLINDNESS:
-        dam->amount = chance(dam->amount);
+        if (chance(dam->amount))
+        {
+            e = player_effect_add(p, effect_new(ET_BLINDNESS));
+        }
+
+        if (!e && !(e = player_effect_get(p, ET_BLINDNESS)))
+        {
+            log_add_entry(p->log, "You are not blinded.");
+        }
+
         break;
 
     case DAM_CONFUSION:
         if (dam->attack == ATT_GAZE && player_effect_get(p, ET_BLINDNESS))
         {
-            dam->amount = 0;
+            /* it is impossible to see a staring monster when blinded */
+            return;
         }
-        else
+
+        /* check if the player succumbs to the monster's stare */
+        if (chance(dam->amount - player_get_int(p)))
         {
-            dam->amount = chance(dam->amount - player_get_int(p));
+            e = player_effect_add(p, effect_new(ET_CONFUSION));
         }
+
+        if (!e && !(e = player_effect_get(p, ET_CONFUSION)))
+        {
+            log_add_entry(p->log, "You are not confused.");
+        }
+
         break;
 
     case DAM_PARALYSIS:
         if (dam->attack == ATT_GAZE && player_effect_get(p, ET_BLINDNESS))
         {
-            dam->amount = 0;
+            /* it is impossible to see a staring monster when blinded */
+            return;
+        }
+
+        /* check if the player succumbs to the monster's stare */
+        if(chance(dam->amount - player_get_int(p)))
+        {
+            e = player_effect_add(p, effect_new(ET_PARALYSIS));
         }
         else
         {
-            dam->amount = chance(dam->amount - player_get_int(p));
+            log_add_entry(p->log, "You avoid eye contact.");
         }
+
         break;
 
     case DAM_DEC_STR:
-        dam->amount = chance(dam->amount - player_get_str(p));
-        break;
-
-    case DAM_DEC_DEX:
-        dam->amount = chance(dam->amount - player_get_dex(p));
-        break;
-
-    case DAM_DRAIN_LIFE:
-        if (player_effect(p, ET_UNDEAD_PROTECTION))
+        if (chance(dam->amount - player_get_con(p)))
         {
-            dam->amount = 0;
-        }
-        else
-        {
-            dam->amount = chance(dam->amount - player_get_wis(p));
-        }
-        break;
 
-    default:
-        /* well, well */
-        break;
-    }
-
-    /* prevent adding to HP if damage went below zero due to resistances */
-    dam->amount = max(0, dam->amount);
-
-    if (dam->amount)
-    {
-        /* add effects */
-        switch (dam->type)
-        {
-        case DAM_POISON:
-            if (!(e = player_effect_get(p, ET_POISON)))
-            {
-                e = effect_new(ET_POISON);
-                e->amount = dam->amount;
-                player_effect_add(p, e);
-            }
-            else if (cause_type != PD_EFFECT)
-            {
-                e->amount += dam->amount;
-            }
-
-            /* no additional HP loss */
-            dam->amount = 0;
-            break;
-
-        case DAM_BLINDNESS:
-            /* it is not possible to become more blind */
-            if (!(e = player_effect_get(p, ET_BLINDNESS)))
-            {
-                e = effect_new(ET_BLINDNESS);
-                player_effect_add(p, e);
-            }
-
-            /* no HP loss */
-            dam->amount = 0;
-            break;
-
-        case DAM_CONFUSION:
-            if (!(e = player_effect_get(p, ET_CONFUSION)))
-            {
-                e = effect_new(ET_CONFUSION);
-                player_effect_add(p, e);
-            }
-
-            /* no HP loss */
-            dam->amount = 0;
-            break;
-
-        case DAM_PARALYSIS:
-            if (!(e = player_effect_get(p, ET_PARALYSIS)))
-            {
-                e = effect_new(ET_PARALYSIS);
-                player_effect_add(p, e);
-            }
-
-            /* no HP loss */
-            dam->amount = 0;
-            break;
-
-        case DAM_DEC_STR:
             e = effect_new(ET_DEC_STR);
+            /* the default number of turns for ET_DEC_STR is 1 */
             e->turns = dam->amount * 50;
             player_effect_add(p, e);
 
@@ -1797,42 +1819,47 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             {
                 player_die(p, PD_EFFECT, ET_DEC_STR);
             }
-            break;
+        }
+        else
+        {
+            log_add_entry(p->log, "You are not affected.");
+        }
+        break;
 
-        case DAM_DEC_DEX:
+    case DAM_DEC_DEX:
+        if (chance(dam->amount - player_get_con(p)))
+        {
             e = effect_new(ET_DEC_DEX);
+            /* the default number of turns for ET_DEC_DEX is 1 */
             e->turns = dam->amount * 50;
             player_effect_add(p, e);
 
-            if (player_get_str(p) < 1)
+            if (player_get_dex(p) < 1)
             {
                 player_die(p, PD_EFFECT, ET_DEC_DEX);
             }
-            break;
-
-        case DAM_DRAIN_LIFE:
-            player_level_lose(p, dam->amount);
-            break;
-
-        default:
-            /* pfffft. */
-            break;
         }
-
-        /* taken damage */
-        p->hp -= dam->amount;
-
-        /* notify player */
-        if (damage_msgs[dam->type].msg_affected)
+        else
         {
-            log_add_entry(p->log, damage_msgs[dam->type].msg_affected);
+            log_add_entry(p->log, "You are not affected.");
         }
-    }
-    else
-    {
-        /* not affected - notifiy player */
-        if ((dam->type <= DAM_DRAIN_LIFE) && damage_msgs[dam->type].msg_unaffected)
-            log_add_entry(p->log, damage_msgs[dam->type].msg_unaffected);
+        break;
+
+    case DAM_DRAIN_LIFE:
+        if (player_effect(p, ET_UNDEAD_PROTECTION))
+        {
+            /* undead protection cancels drain life attacks */
+            log_add_entry(p->log, "You are not affected.");
+        }
+        else if (chance(dam->amount - player_get_wis(p)))
+        {
+            log_add_entry(p->log, "Your life energy is drained.");
+            player_level_lose(p, dam->amount);
+        }
+        break;
+    default:
+        /* the other damage types are not handled here */
+        break;
     }
 
     g_free(dam);
