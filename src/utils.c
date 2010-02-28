@@ -160,7 +160,7 @@ void log_set_time(message_log *log, int gtime)
     log->gtime = gtime;
 }
 
-int log_add_entry(message_log *log, char *fmt, ...)
+int log_add_entry(message_log *log, const char *fmt, ...)
 {
     va_list argp;
     gchar *msg;

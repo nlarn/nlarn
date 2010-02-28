@@ -2183,7 +2183,6 @@ char **player_effect_text(player *p)
     char **text;
     int pos;
     effect *e;
-    char *desc;
 
     text = strv_new();
 
@@ -2191,9 +2190,9 @@ char **player_effect_text(player *p)
     {
         e = game_effect_get(nlarn, g_ptr_array_index(p->effects, pos));
 
-        if ((desc = effect_get_desc(e)) != NULL)
+        if (effect_get_desc(e) != NULL)
         {
-            strv_append_unique(&text, desc);
+            strv_append_unique(&text, effect_get_desc(e));
         }
     }
 

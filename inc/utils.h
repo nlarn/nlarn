@@ -65,7 +65,7 @@ char *str_capitalize(char *string);
 
 /* message log handling */
 message_log *log_new();
-int log_add_entry(message_log *log, char *fmt, ...);
+int log_add_entry(message_log *log, const char *fmt, ...);
 void log_set_time(message_log *log, int gtime);
 void log_delete(message_log *log);
 message_log_entry *log_get_entry(message_log *log, guint id);
