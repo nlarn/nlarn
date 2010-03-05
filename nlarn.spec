@@ -2,7 +2,7 @@ Name: nlarn
 Summary: remake of the roguelike Larn
 Version: 0.5.3
 Release: 1
-Source: http://downloads.sourceforge.net/project/nlarn/nlarn/0.5.3/nlarn-0.5.3.tar.gz
+Source: http://downloads.sourceforge.net/project/nlarn/nlarn/%{version}/nlarn-%{version}.tar.gz
 License: GPL v3
 Group: Amusements/Games
 
