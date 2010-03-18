@@ -572,18 +572,11 @@ static int scroll_remove_curse(player *p, item *scroll)
         {
             item_remove_curse(item);
 
-            if (item->count > 1)
-            {
-                log_add_entry(p->log, "The %s glow in a white light.",
-                              item_describe(item, player_item_known(p, item),
-                                            FALSE, TRUE, buf, 60));
-            }
-            else
-            {
-                log_add_entry(p->log, "The %s glows in a white light.",
-                              item_describe(item, player_item_known(p, item),
-                                            TRUE, TRUE, buf, 60));
-            }
+            item_describe(item, player_item_known(p, item),
+                          FALSE, TRUE, buf, 60);
+            buf[0] = g_ascii_toupper(buf[0]);
+            log_add_entry(p->log, "%s glow%s in a white light.",
+                          buf, item->count == 1 ? "s" : "");
 
             count_done++;
             count_avail--;
