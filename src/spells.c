@@ -826,8 +826,8 @@ int spell_type_point(spell *s, struct player *p)
         e = monster_effect_add(monster, e);
 
         /* show message if monster is visible */
-        if (monster_in_sight(monster) && effect_get_msg_m_start(e)
-                && !monster_effect(monster, e->type))
+        if (e != NULL && monster_in_sight(monster) && effect_get_msg_m_start(e)
+            && !monster_effect(monster, e->type))
         {
             log_add_entry(p->log, effect_get_msg_m_start(e),
                           monster_name(monster));
