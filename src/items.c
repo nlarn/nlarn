@@ -1211,6 +1211,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     /* prepare item description before it has been affected */
     item_describe(it, player_item_known(nlarn->p, it),
                   (it->count == 1), TRUE, item_desc, 60);
+    item_desc[0] = g_ascii_toupper(item_desc[0]);
 
     switch (iet)
     {
@@ -1259,7 +1260,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     if (erosion_desc != NULL && visible)
     {
         /* items has been eroded, describe the event if it is visible */
-        log_add_entry(nlarn->p->log, "The %s %s%s.", item_desc,
+        log_add_entry(nlarn->p->log, "%s %s%s.", item_desc,
                       erosion_desc, (it->count == 1) ? "s" : "");
     }
 
@@ -1269,7 +1270,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
         if (visible)
         {
             /* describe the event if the item was visible */
-            log_add_entry(nlarn->p->log, "The %s %s destroyed.", item_desc,
+            log_add_entry(nlarn->p->log, "%s %s destroyed.", item_desc,
                           (it->count == 1) ? "is" : "are");
         }
 
