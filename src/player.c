@@ -2666,7 +2666,7 @@ int player_item_unequip(player *p, inventory **inv, item *it)
 
             if (!p->eq_weapon->cursed)
             {
-                log_add_entry(p->log, "You you put away %s.", desc);
+                log_add_entry(p->log, "You put away %s.", desc);
 
                 time = 2 + weapon_is_twohanded(p->eq_weapon);
                 player_effects_del(p, p->eq_weapon->effects);
