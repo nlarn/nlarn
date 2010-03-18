@@ -750,7 +750,6 @@ int spell_type_point(spell *s, struct player *p)
 
     if (!monster)
     {
-        log_add_entry(p->log, "Which monster are you talking about?");
         return FALSE;
     }
 
@@ -797,8 +796,11 @@ int spell_type_point(spell *s, struct player *p)
 
         /* teleport */
     case SP_TEL:
-        log_add_entry(p->log, "The %s disappears.",
-                      monster_name(monster));
+        if (monster_in_sight(monster))
+        {
+            log_add_entry(p->log, "The %s disappears.",
+                          monster_name(monster));
+        }
 
         map *mmap = game_map(nlarn, monster_pos(monster).z);
         monster_pos_set(monster, mmap, map_find_space(mmap, LE_MONSTER, FALSE));
@@ -812,7 +814,7 @@ int spell_type_point(spell *s, struct player *p)
         if (spell_msg_succ(s))
         {
             log_add_entry(p->log, spell_msg_succ(s),
-                          monster_name(monster));
+                          monster_get_name(monster));
         }
 
         e = effect_new(spell_effect(s));
@@ -862,12 +864,6 @@ int spell_type_ray(spell *s, struct player *p)
         return FALSE;
     }
 
-    if (!(monster = map_get_monster_at(cmap, target)))
-    {
-        log_add_entry(p->log, "Which monster are you talking about?");
-        return FALSE;
-    }
-
     /* determine amount of damage */
     switch (s->id)
     {
@@ -908,10 +904,11 @@ int spell_type_ray(spell *s, struct player *p)
             {
                 if ((monster = map_get_monster_at(cmap, pos)))
                 {
-                    attron((attrs = DC_LIGHTRED));
+                    attron((attrs = (monster_in_sight(monster) ? DC_LIGHTRED
+                                                               : DC_LIGHTCYAN)));
                     mvaddch(pos.y, pos.x, monster_image(monster));
 
-                    log_add_entry(p->log, spell_msg_succ(s), monster_name(monster));
+                    log_add_entry(p->log, spell_msg_succ(s), monster_get_name(monster));
                     monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount, p));
                 }
                 else

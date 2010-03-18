@@ -1098,7 +1098,7 @@ int player_move(player *p, direction dir)
     if (target_m && monster_unknown(target_m))
     {
         /* reveal the mimic */
-        log_add_entry(p->log, "Wait! That is a %s!", monster_name(target_m));
+        log_add_entry(p->log, "Wait! That is a %s!", monster_get_name(target_m));
         monster_unknown_set(target_m, FALSE);
         return times;
     }
@@ -1146,7 +1146,7 @@ int player_attack(player *p, monster *m)
     if ((roll <= prop) || (roll == 1))
     {
         /* placed a hit */
-        log_add_entry(p->log, "You hit the %s.", monster_name(m));
+        log_add_entry(p->log, "You hit the %s.", monster_get_name(m));
 
         amount = player_get_str(p)
                  + player_get_wc(p)
@@ -1189,7 +1189,7 @@ int player_attack(player *p, monster *m)
                     && monster_is_beheadable(m))
             {
                 log_add_entry(p->log, "You behead the %s with your Vorpal Blade!",
-                              monster_name(m));
+                              monster_get_name(m));
 
                 dam->amount = monster_hp(m) + monster_ac(m);
             }
@@ -1223,7 +1223,7 @@ int player_attack(player *p, monster *m)
         /* Lance of Death has not killed */
         if (p->eq_weapon && (p->eq_weapon->id == WT_LANCEOFDEATH))
         {
-            log_add_entry(p->log, "Your lance of death tickles the %s!", monster_name(m));
+            log_add_entry(p->log, "Your lance of death tickles the %s!", monster_get_name(m));
         }
 
         /* if the player is invisible and the monster does not have infravision,
@@ -1234,7 +1234,7 @@ int player_attack(player *p, monster *m)
             monster_update_player_pos(m, p->pos);
         }
     }
-    else
+    else if (monster_in_sight(m))
     {
         /* missed */
         log_add_entry(p->log, "You miss the %s.", monster_name(m));
@@ -1626,7 +1626,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
                 && (p->eq_amulet && p->eq_amulet->id == AM_POWER))
         {
             log_add_entry(p->log, "Your amulet cancels the %s's attack.",
-                          monster_name(m));
+                          monster_get_name(m));
 
             return;
         }
@@ -3601,7 +3601,7 @@ int player_door_close(player *p)
             /* check for monster in the doorway */
             m = map_get_monster_at(map, pos);
 
-            if (m)
+            if (m && monster_in_sight(m))
             {
                 log_add_entry(p->log,
                               "You cannot close the door. The %s is in the way.",
@@ -3610,7 +3610,7 @@ int player_door_close(player *p)
             }
 
             /* check for items in the doorway */
-            if (*map_ilist_at(map, pos))
+            if (m || *map_ilist_at(map, pos))
             {
                 log_add_entry(p->log,
                               "You cannot close the door. There is something in the way.");
@@ -4312,7 +4312,7 @@ guint player_set_gold(player *p, guint amount)
 char *player_get_level_desc(player *p)
 {
     assert(p != NULL);
-    return (char *)player_level_desc[p->level - 1];
+    return (char *) player_level_desc[p->level - 1];
 }
 
 /**

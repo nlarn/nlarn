@@ -935,11 +935,14 @@ char *map_pos_examine(position pos)
     /* add description of monster, if there is one on the tile */
     if ((monst = map_get_monster_at(cm, pos)))
     {
-        tmp = monster_desc(monst);
+        if (game_wizardmode(nlarn) || monster_in_sight(monst))
+        {
+            tmp = monster_desc(monst);
 
-        tmp[0] = g_ascii_toupper(tmp[0]);
-        g_string_append_printf(desc, "%s. ", tmp);
-        g_free(tmp);
+            tmp[0] = g_ascii_toupper(tmp[0]);
+            g_string_append_printf(desc, "%s. ", tmp);
+            g_free(tmp);
+        }
     }
 
     /* add message if target tile contains a stationary object */

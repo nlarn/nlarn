@@ -1979,8 +1979,8 @@ position display_get_position(player *p, char *message, gboolean ray,
             /* redraw screen to erase old rays */
             display_paint_screen(p);
 
-            if (target) attrs = DC_LIGHTRED;
-            else        attrs = DC_LIGHTCYAN;
+            if (target && monster_in_sight(target)) attrs = DC_LIGHTRED;
+            else                                    attrs = DC_LIGHTCYAN;
 
             attron(attrs);
 

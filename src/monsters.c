@@ -1159,6 +1159,16 @@ gboolean monster_in_sight(monster *m)
     return player_pos_visible(nlarn->p, m->pos);
 }
 
+// Takes into account visibility.
+// For the real name, use monster_name() directly.
+char *monster_get_name(monster *m)
+{
+    if (!game_wizardmode(nlarn) && !monster_in_sight(m))
+        return ("unseen monster");
+
+    return (monster_name(m));
+}
+
 void monster_die(monster *m, struct player *p)
 {
     char *message = "The %s died!";
@@ -1449,7 +1459,7 @@ void monster_move(monster *m, struct player *p)
             monster_update_player_pos(m, p->pos);
             m_npos = monster_pos(m);
 
-            log_add_entry(p->log, "The %s bumped into you.", monster_name(m));
+            log_add_entry(p->log, "The %s bumped into you.", monster_get_name(m));
         }
 
         /* check for door */
@@ -1692,7 +1702,7 @@ void monster_player_attack(monster *m, player *p)
     if (player_effect(p, ET_INVISIBILITY) && !monster_has_infravision(m)
             && chance(65))
     {
-        log_add_entry(p->log, "The %s misses wildly.", monster_name(m));
+        log_add_entry(p->log, "The %s misses wildly.", monster_get_name(m));
         return;
     }
 
@@ -1700,7 +1710,7 @@ void monster_player_attack(monster *m, player *p)
             && (rand_m_n(5, 30) * monster_level(m) - player_get_cha(p) < 30))
     {
         log_add_entry(p->log, "The %s is awestruck at your magnificence!",
-                      monster_name(m));
+                      monster_get_name(m));
         return;
     }
 
@@ -1781,7 +1791,7 @@ void monster_player_attack(monster *m, player *p)
         break;
 
     case DAM_RUST:
-        log_add_entry(p->log, "The %s %s you.", monster_name(m),
+        log_add_entry(p->log, "The %s %s you.", monster_get_name(m),
                       monster_attack_verb[att->type]);
 
         if (!monster_item_rust(m, p))
@@ -1798,7 +1808,7 @@ void monster_player_attack(monster *m, player *p)
 
     default:
         /* log the attack */
-        log_add_entry(p->log, "The %s %s you.", monster_name(m),
+        log_add_entry(p->log, "The %s %s you.", monster_get_name(m),
                       monster_attack_verb[att->type]);
 
         player_damage_take(p, dam, PD_MONSTER, m->type);
@@ -2061,6 +2071,11 @@ char monster_image(monster *m)
 {
     assert (m != NULL);
 
+    // NOTE: This assumes that for unseen monsters, monster_image()
+    //       is only called when targeting.
+    if (!game_wizardmode(nlarn) && !monster_in_sight(m))
+        return '*';
+
     if (m->unknown)
     {
         return item_image(m->item_type);
@@ -2190,7 +2205,6 @@ static gboolean monster_player_visible(monster *m)
 
     /* determine if the monster can see the player */
     if (pos_distance(monster_pos(m), nlarn->p->pos) > monster_visrange)
-
         return FALSE;
 
     if (player_effect(nlarn->p, ET_INVISIBILITY) && !monster_has_infravision(m))
@@ -2305,7 +2319,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
 
     /* log the attack */
     log_add_entry(p->log, "The %s hits you. You feel a sense of loss.",
-                  monster_name(m));
+                  monster_get_name(m));
 
     if (it->type == IT_WEAPON
             || it->type == IT_ARMOUR
@@ -2376,7 +2390,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
             }
 
             log_add_entry(p->log, "The %s picks your pocket. " \
-                          "Your purse feels lighter", monster_name(m));
+                          "Your purse feels lighter", monster_get_name(m));
         }
     }
     else if (item_type == IT_ALL) /* must be the nymph */
@@ -2394,7 +2408,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                     item_describe(it, player_item_known(p, it), TRUE, TRUE, buf, 60);
 
                     log_add_entry(p->log, "The %s tries to steal %s but failed.",
-                                  monster_name(m), buf);
+                                  monster_get_name(m), buf);
 
                     /* return true as there actually are things to steal */
                     return TRUE;
@@ -2406,7 +2420,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
             }
 
             inv_del_element(&p->inventory, it);
-            log_add_entry(p->log, "The %s picks your pocket.", monster_name(m));
+            log_add_entry(p->log, "The %s picks your pocket.", monster_get_name(m));
         }
     }
 
@@ -2419,7 +2433,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     else
     {
         log_add_entry(p->log, "The %s couldn't find anything to steal.",
-                      monster_name(m));
+                      monster_get_name(m));
 
         return FALSE;
     }

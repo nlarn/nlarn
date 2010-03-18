@@ -189,7 +189,7 @@ void monster_unknown_set(monster *m, gboolean what);
 gboolean monster_in_sight(monster *m);
 
 /* other functions */
-
+char *monster_get_name(monster *m);
 void monster_die(monster *m, struct player *p);
 
 void monster_level_enter(monster *m, struct map *l);
