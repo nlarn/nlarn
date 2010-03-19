@@ -48,8 +48,9 @@ typedef enum item_material_t {
     IM_LEATHER,
     IM_WOOD,
     IM_BONE,
+    /* materials up to here can burn */
     IM_DRAGON_HIDE,     /* not leather! */
-    IM_IRON,            /* Fe  */
+    IM_IRON,            /* Fe, can rust/corrode */
     IM_STEEL,           /* stainless steel */
     IM_COPPER,          /* Cu - includes brass */
     IM_SILVER,

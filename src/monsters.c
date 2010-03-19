@@ -2317,6 +2317,10 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
 
     it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
 
+    /* Don't destroy the potion of cure dianthroritis. */
+    if (it->type == IT_POTION && it->id == PO_CURE_DIANTHR)
+        return (inv_length(p->inventory) > 1);
+
     /* log the attack */
     log_add_entry(p->log, "The %s hits you. You feel a sense of loss.",
                   monster_get_name(m));

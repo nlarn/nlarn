@@ -1169,12 +1169,12 @@ int item_disenchant(item *it)
 
     assert(it != NULL);
 
-    it->bonus--;
-
-    if (it->bonus < -3)
+    if (it->bonus <= -3)
     {
         player_item_destroy(nlarn->p, it);
     }
+
+    it->bonus--;
 
     if ((it->type == IT_RING) && it->effects)
     {
@@ -1207,6 +1207,11 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     char item_desc[61] = { 0 };
 
     assert(it != NULL);
+
+    /* Don't ever destroy the potion of cure dianthroritis.
+       This is not currently possible, but add a check in case that changes. */
+    if (it->type == IT_POTION && it->id == PO_CURE_DIANTHR)
+        return (it);
 
     /* prepare item description before it has been affected */
     item_describe(it, player_item_known(nlarn->p, it),
