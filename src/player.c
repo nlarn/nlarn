@@ -1846,15 +1846,16 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_DRAIN_LIFE:
-        if (player_effect(p, ET_UNDEAD_PROTECTION))
+        if (player_effect(p, ET_UNDEAD_PROTECTION)
+            || !chance(dam->amount - player_get_wis(p)))
         {
             /* undead protection cancels drain life attacks */
             log_add_entry(p->log, "You are not affected.");
         }
-        else if (chance(dam->amount - player_get_wis(p)))
+        else
         {
             log_add_entry(p->log, "Your life energy is drained.");
-            player_level_lose(p, dam->amount);
+            player_level_lose(p, 1);
         }
         break;
     default:
