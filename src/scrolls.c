@@ -535,7 +535,9 @@ int scroll_mapping(player *p, item *scroll)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            player_memory_of(p, pos).type = map_tiletype_at(m, pos);
+            map_tile_t tile = map_tiletype_at(m, pos);
+            if (scroll == NULL || tile != LT_FLOOR)
+                player_memory_of(p, pos).type = tile;
             player_memory_of(p, pos).sobject = map_sobject_at(m, pos);
         }
     }
