@@ -251,7 +251,8 @@ int main(int argc, char *argv[])
 
             /* bank account information */
         case 'B':
-            log_add_entry(nlarn->p->log, "There are %s gp on your bank account.",
+            log_add_entry(nlarn->p->log, "There %s %s gp on your bank account.",
+                          (nlarn->p->bank_account == 1) ? "is" : "are",
                           int2str(nlarn->p->bank_account));
             break;
 
