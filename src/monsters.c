@@ -97,7 +97,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_GIANT_BAT, "giant bat",
-        1, 0, 3, 0, 1, 1, 'B', DC_RED,
+        1, 0, 3, 0, 1, 1, 'b', DC_RED,
         SPEED_FAST, ESIZE_SMALL,
         MF_HEAD | MF_FLY | MF_INFRAVISION,
         {
@@ -107,7 +107,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_GNOME, "gnome",
-        1, 10, 8, 30, 2, 2, 'G', DC_BROWN,
+        1, 10, 8, 30, 2, 2, 'g', DC_BROWN,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS,
         {
@@ -278,7 +278,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_BUGBEAR, "bugbear",
-        4, 5, 5, 40, 20, 35, 'b', DC_BROWN,
+        4, 5, 5, 40, 20, 35, 'B', DC_BROWN,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
@@ -537,7 +537,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_GNOME_KING, "gnome king",
-        9, -1, 18, 2000, 100,   3000, 'k', DC_RED,
+        9, -1, 18, 2000, 100,   3000, 'G', DC_RED,
         SPEED_NORMAL, ESIZE_SMALL,
         MF_HEAD | MF_HANDS,
         {
