@@ -217,8 +217,8 @@ int main(int argc, char *argv[])
 
             break;
 
-            /* cast a spell */
-        case 'c':
+            /* work magic */
+        case 'm':
             moves_count = spell_cast(nlarn->p);
             break;
 
@@ -257,12 +257,12 @@ int main(int argc, char *argv[])
             break;
 
             /* close door */
-        case 'C':
+        case 'c':
             moves_count = player_door_close(nlarn->p);
             break;
 
             /* open door / container */
-        case 'O':
+        case 'o':
             if (inv_length_filtered(*map_ilist_at(game_map(nlarn, nlarn->p->pos.z), nlarn->p->pos),
                                     &inv_filter_container) > 0)
             {

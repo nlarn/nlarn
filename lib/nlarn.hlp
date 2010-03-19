@@ -13,11 +13,11 @@ Commands
 
 A  desecrate an altar
 B  show bank account balance
-c  cast a spell
-C  close a door
+c  close a door
 g  get present pack weight
-i  inventory your pockets
-O  open a door or chest
+i  inventory your pockets, use items
+m  work magic (cast a spell)
+o  open a door or chest
 p  pray at an altar
 P  give tax status
 q  drink at a fountain
@@ -26,15 +26,14 @@ R  remove gems from throne
 s  sit on a throne
 S  save the game
 v  print program version
-W  wash at a fountain
+W  wash yourself at a fountain
 
-<  climb up stairs / volcanic shaft or enter a building
->  climb down stairs / volcanic shaft
+<  climb up stairs/volcanic shaft or enter a building
+>  climb down stairs/volcanic shaft
 ,  pick up item
 :  look at the location you are standing on
 ;  look at another location
 .  rest one turn (alternate key: 5)
-/  identify objects in the game
 \  show list of identified objects
 ?  this help screen (alternate key: F1)
 @  toggle auto-pickup settings
