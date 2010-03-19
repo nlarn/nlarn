@@ -254,12 +254,12 @@ int display_paint_screen(player *p)
         attrs = DC_LIGHTGREEN;
 
     attron(attrs);
-    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, "%3d", p->hp, player_get_hp_max(p));
+    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, "HP %3d", p->hp, player_get_hp_max(p));
     attroff(attrs);
 
     /* max HPs */
     attron(attrs = DC_LIGHTGREEN);
-    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 18, "/%-3d HP", player_get_hp_max(p));
+    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 15, "/%-3d", player_get_hp_max(p));
     attroff(attrs);
 
     /* current MPs */
@@ -273,12 +273,12 @@ int display_paint_screen(player *p)
         attrs = DC_LIGHTCYAN;
 
     attron(attrs);
-    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 10, "%3d", p->mp);
+    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 10, "MP %3d", p->mp);
     attroff(attrs);
 
     /* max MPs */
     attron(attrs = DC_LIGHTCYAN);
-    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 7, "/%-3d MP", player_get_mp_max(p));
+    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 4, "/%-3d", player_get_mp_max(p));
     attroff(attrs);
 
     /* game time */
@@ -290,8 +290,8 @@ int display_paint_screen(player *p)
 
     attron(attrs = DC_LIGHTBLUE);
 
-    mvprintw(MAP_MAX_Y + 2, MAP_MAX_X - 20, "XP %d/%-5d",
-             p->experience, p->level);
+    mvprintw(MAP_MAX_Y + 2, MAP_MAX_X - 21, "XP %3d/%-5d",
+             p->level, p->experience);
 
     attroff(attrs);
 
