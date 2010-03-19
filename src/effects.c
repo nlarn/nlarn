@@ -58,7 +58,7 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_INC_DEX, 1, 1, NULL,
-        "You feel skilfully!",
+        "You feel skilful!",
         NULL, NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
@@ -122,7 +122,7 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_INC_LEVEL, 1, 1, NULL,
-        "You feel much more skillful!",
+        "You feel much more skilful!",
         NULL, NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
