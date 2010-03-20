@@ -1472,9 +1472,9 @@ static void map_make_maze_eat(map *l, int x, int y)
  *  Special characters in maze data file:
  *
  *      #   wall
- *      D   door
- *      .   random monster
- *      ~   eye of larn
+ *      +   door
+ *      M   random monster
+ *      *   eye of larn
  *      !   potion of cure dianthroritis
  *      -   random object
  */
@@ -1521,11 +1521,20 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
 
     pos.z = nmap->nlevel;
 
+    // Sometimes flip the maps. (Never the town)
+    gboolean flip_vertical   = (map_num > 0 && chance(50));
+    gboolean flip_horizontal = (map_num > 0 && chance(50));
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X ; pos.x++)
         {
-            map_tile *tile = map_tile_at(nmap, pos);
+            position map_pos = pos;
+            if (flip_vertical)
+                map_pos.x = MAP_MAX_X - pos.x - 1;
+            if (flip_horizontal)
+                map_pos.y = MAP_MAX_Y - pos.y - 1;
+
+            map_tile *tile = map_tile_at(nmap, map_pos);
 
             tile->type = LT_FLOOR;	/* floor is default */
 
@@ -1607,7 +1616,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                 }
                 inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN));
 
-                monster_new(MT_DEMONLORD_I + rand_0n(7), pos);
+                monster_new(MT_DEMONLORD_I + rand_0n(7), map_pos);
                 break;
 
             case '!':	/* potion of cure dianthroritis */
@@ -1615,11 +1624,11 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                     break;
 
                 inv_add(&tile->ilist, item_new(IT_POTION, PO_CURE_DIANTHR));
-                monster_new(MT_DAEMON_PRINCE, pos);
+                monster_new(MT_DAEMON_PRINCE, map_pos);
                 break;
 
             case 'M':	/* random monster */
-                monster_new_by_level(pos);
+                monster_new_by_level(map_pos);
                 break;
 
             case '-':
