@@ -2408,14 +2408,14 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
         {
             it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
 
+            char buf[61];
+            item_describe(it, player_item_known(p, it), TRUE, TRUE, buf, 60);
+
             if (player_item_is_equipped(p, it))
             {
                 if (it->cursed)
                 {
                     /* cursed items can't be stolen.. */
-                    char buf[61];
-                    item_describe(it, player_item_known(p, it), TRUE, TRUE, buf, 60);
-
                     log_add_entry(p->log, "The %s tries to steal %s but failed.",
                                   monster_get_name(m), buf);
 
@@ -2429,7 +2429,8 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
             }
 
             inv_del_element(&p->inventory, it);
-            log_add_entry(p->log, "The %s picks your pocket.", monster_get_name(m));
+            log_add_entry(p->log, "The %s picks your pocket and steals %s.",
+                          monster_get_name(m), buf);
         }
     }
 
