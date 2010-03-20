@@ -572,13 +572,15 @@ static int scroll_remove_curse(player *p, item *scroll)
 
         if (item->cursed)
         {
-            item_remove_curse(item);
-
+            // Get the description before uncursing the item.
             item_describe(item, player_item_known(p, item),
                           FALSE, TRUE, buf, 60);
             buf[0] = g_ascii_toupper(buf[0]);
+
             log_add_entry(p->log, "%s glow%s in a white light.",
                           buf, item->count == 1 ? "s" : "");
+
+            item_remove_curse(item);
 
             count_done++;
             count_avail--;

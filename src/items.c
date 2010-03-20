@@ -1108,7 +1108,7 @@ int item_remove_curse(item *it)
         return FALSE;
 
     it->cursed = FALSE;
-    it->blessed_known = FALSE;
+    it->blessed_known = TRUE;
 
     return TRUE;
 }
