@@ -821,7 +821,8 @@ static int building_item_sell(player *p, inventory **inv, item *it)
     else
     {
         /* item has not been added to player's inventory */
-        item_destroy(it_clone);
+        /* if a copy of the item has been made, destroy it */
+        if (it != it_clone) item_destroy(it_clone);
         return FALSE;
     }
 
