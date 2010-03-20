@@ -71,7 +71,8 @@ typedef enum map_sobject_type
     LS_MIRROR,
     LS_OPENDOOR,
     LS_CLOSEDDOOR,
-    LS_ENTRANCE,		/* dungeon entrance */
+    LS_DNGN_ENTRANCE,   /* dungeon entrance */
+    LS_DNGN_EXIT,       /* leave the dungeon */
     LS_HOME,
     LS_DNDSTORE,
     LS_TRADEPOST,

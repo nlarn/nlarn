@@ -1287,7 +1287,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     else if (p->pos.z > l->nlevel)
     {
         if (l->nlevel == 0)
-            pos = map_find_sobject(l, LS_ENTRANCE);
+            pos = map_find_sobject(l, LS_DNGN_ENTRANCE);
         else
             pos = map_find_sobject(l, LS_STAIRSDOWN);
     }
@@ -1295,7 +1295,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     else if (l->nlevel > p->pos.z)
     {
         if (l->nlevel == 1)
-            pos = map_find_sobject(l, LS_ENTRANCE);
+            pos = map_find_sobject(l, LS_DNGN_EXIT);
         else
             pos = map_find_sobject(l, LS_STAIRSUP);
     }
@@ -3956,7 +3956,7 @@ int player_stairs_down(player *p)
         nlevel = game_map(nlarn, MAP_DMAX);
         break;
 
-    case LS_ENTRANCE:
+    case LS_DNGN_ENTRANCE:
         if (p->pos.z == 0)
             nlevel = game_map(nlarn, 1);
         else
@@ -3997,20 +3997,19 @@ int player_stairs_up(player *p)
         break;
 
     case LS_ELEVATORUP:
+    case LS_DNGN_EXIT:
         /* return to town */
         show_msg = TRUE;
         nlevel = game_map(nlarn, 0);
         break;
 
-    case LS_ENTRANCE:
-        if (p->pos.z == 1)
-            nlevel = game_map(nlarn, 0);
-        else
-            log_add_entry(p->log, "Climb down to enter the dungeon.");
+    case LS_DNGN_ENTRANCE:
+        log_add_entry(p->log, "Climb down to enter the dungeon.");
+        return 0;
 
-        break;
     default:
         log_add_entry(p->log, "I see no stairway up here.");
+        return 0;
     }
 
     /* display additional message */
@@ -4476,16 +4475,19 @@ void player_update_fov(player *p)
                                        inv_length(*map_ilist_at(map, pos)) - 1);
 
                     player_memory_of(p,pos).item = it->type;
+                    player_memory_of(p,pos).item_colour = item_colour(it);
                 }
                 else if (m && monster_is_mimic(m) && monster_unknown(m))
                 {
-                    /* show the undiscovered mimic as an item */
+                    /* remember the undiscovered mimic as an item */
                     player_memory_of(p,pos).item = monster_item_type(m);
+                    player_memory_of(p,pos).item_colour = monster_colour(m);
                 }
                 else
                 {
                     /* no item at that position */
                     player_memory_of(p,pos).item = IT_NONE;
+                    player_memory_of(p,pos).item_colour = 0;
                 }
             }
         }
@@ -4607,6 +4609,10 @@ static cJSON *player_memory_serialize(player *p, position pos)
         cJSON_AddNumberToObject(mser, "item",
                                 player_memory_of(p, pos).item);
 
+    if (player_memory_of(p, pos).item_colour > 0)
+        cJSON_AddNumberToObject(mser, "item_colour",
+                                player_memory_of(p, pos).item_colour);
+
     if (player_memory_of(p, pos).trap > TT_NONE)
         cJSON_AddNumberToObject(mser, "trap",
                                 player_memory_of(p, pos).trap);
@@ -4629,6 +4635,10 @@ static void player_memory_deserialize(player *p, position pos, cJSON *mser)
     obj = cJSON_GetObjectItem(mser, "item");
     if (obj != NULL)
         player_memory_of(p, pos).item = obj->valueint;
+
+    obj = cJSON_GetObjectItem(mser, "item_colour");
+    if (obj != NULL)
+        player_memory_of(p, pos).item_colour = obj->valueint;
 
     obj = cJSON_GetObjectItem(mser, "trap");
     if (obj != NULL)

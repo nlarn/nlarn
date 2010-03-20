@@ -1213,8 +1213,13 @@ void monster_level_enter(monster *m, struct map *l)
     /* check if the monster used the stairs */
     switch (source)
     {
-    case LS_ENTRANCE:
-        target = LS_ENTRANCE;
+    case LS_DNGN_EXIT:
+        target = LS_DNGN_ENTRANCE;
+        how = "through";
+        break;
+
+    case LS_DNGN_ENTRANCE:
+        target = LS_DNGN_EXIT;
         how = "through";
         break;
 
@@ -1383,7 +1388,7 @@ void monster_move(monster *m, struct player *p)
         }
         else if (pos_identical(monster_pos(m), m->player_pos)
                  && ((map_sobject_at(monster_map(m), m->pos) == LS_STAIRSDOWN)
-                     || (map_sobject_at(monster_map(m), m->pos) == LS_ENTRANCE
+                     || (map_sobject_at(monster_map(m), m->pos) == LS_DNGN_ENTRANCE
                          && monster_pos(m).z == 0)))
         {
             /* go level down */
@@ -1391,7 +1396,7 @@ void monster_move(monster *m, struct player *p)
         }
         else if (pos_identical(monster_pos(m), m->player_pos)
                  && (map_sobject_at(monster_map(m), m->pos) == LS_STAIRSUP
-                     || (map_sobject_at(monster_map(m), m->pos) == LS_ENTRANCE
+                     || (map_sobject_at(monster_map(m), m->pos) == LS_DNGN_EXIT
                          && monster_pos(m).z == 1)))
         {
             /* go level up */

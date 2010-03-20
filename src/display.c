@@ -167,15 +167,17 @@ int display_paint_screen(player *p)
                 if (player_memory_of(p, pos).item)
                 {
                     /* draw items */
-                    attron(attrs = DC_LIGHTGRAY);
+                    attron(attrs = player_memory_of(p, pos).item_colour);
                     addch(item_image(player_memory_of(p, pos).item));
                     attroff(attrs);
                 }
                 else if (player_memory_of(p, pos).sobject)
                 {
                     /* draw stationary object */
-                    attron(attrs = DC_LIGHTGRAY);
-                    addch(ls_get_image(player_memory_of(p, pos).sobject));
+                    map_sobject_t ms = map_sobject_at(map, pos);
+
+                    attron(attrs = ls_get_colour(ms));
+                    addch(ls_get_image(ms));
                     attroff(attrs);
                 }
                 else if (player_memory_of(p, pos).trap)

@@ -35,7 +35,7 @@
 /* forward declaration */
 struct game;
 
-typedef struct player_stats
+typedef struct _player_stats
 {
     gint32 deepest_level;
     gint32 monsters_killed[MT_MAX];
@@ -59,16 +59,14 @@ typedef struct _player_settings
     gboolean auto_pickup[IT_MAX]; /* automatically pick up item of enabled types */
 } player_settings;
 
-
-struct _player_tile_memory
+typedef struct _player_tile_memory
 {
     map_tile_t type;
     map_sobject_t sobject;
-    item_t item; /* type of item located here */
+    item_t item;            /* type of item located here */
+    int item_colour;        /* colour of item located here */
     trap_t trap;
-};
-
-typedef struct _player_tile_memory player_tile_memory;
+} player_tile_memory;
 
 typedef struct player
 {
@@ -140,7 +138,7 @@ typedef struct player
     player_settings settings; /* game configuration */
 } player;
 
-typedef enum player_equipment_t
+typedef enum _player_equipment_t
 {
     PE_NONE,
     PE_AMULET,
@@ -157,7 +155,7 @@ typedef enum player_equipment_t
 } player_equipment_t;
 
 /* various causes of death */
-typedef enum player_cod
+typedef enum _player_cod
 {
     PD_NONE,
     PD_EFFECT,

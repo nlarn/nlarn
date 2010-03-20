@@ -48,7 +48,7 @@ const item_type_data item_data[IT_MAX] =
     { IT_AMULET,    "amulet",    "amulets",     '"', "amulet of %s", "%s amulet",         AM_LARN,         0, 1, 0, 1, 0, 0, 1, },
     { IT_ARMOUR,    "armour",    "armour",      '[', "%s",           "%s",                AT_MAX,          1, 1, 1, 1, 0, 0, 1, },
     { IT_BOOK,      "book",      "books",       '+', "book of %s",   "%s book",           SP_MAX,          0, 1, 1, 0, 1, 1, 1, },
-    { IT_CONTAINER, "container", "containers",  'C', "%s",           "%s",                CT_MAX,          0, 0, 1, 0, 0, 0, 0, },
+    { IT_CONTAINER, "container", "containers",  ']', "%s",           "%s",                CT_MAX,          0, 0, 1, 0, 0, 0, 0, },
     { IT_FOOD,      "food",      "foods",       '%', "%s",           "%s",                FT_MAX,          0, 0, 0, 0, 1, 1, 0, },
     { IT_GEM,       "gem",       "gems",        '*', "%s",           "%s gem",            GT_MAX,          1, 0, 0, 0, 0, 1, 0, },
     { IT_GOLD,      "coin",      "coins",       '$', "%s",           "%s",                0,               0, 0, 0, 0, 0, 1, 0, },

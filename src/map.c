@@ -58,7 +58,7 @@ const map_tile_data map_tiles[LT_MAX] =
     { LT_FLOOR,     '.', DC_LIGHTGRAY,  "floor",       1, 1 },
     { LT_WATER,     '~', DC_LIGHTBLUE,  "water",       1, 1 },
     { LT_DEEPWATER, '~', DC_BLUE,       "deep water",  0, 1 },
-    { LT_LAVA,      '=', DC_RED,        "lava",        0, 1 },
+    { LT_LAVA,      '~', DC_RED,        "lava",        0, 1 },
     { LT_FIRE,      '*', DC_RED,        "fire",        1, 1 },
     { LT_CLOUD,     '*', DC_WHITE,      "a gas cloud", 1, 1 },
     { LT_WALL,      '#', DC_LIGHTGRAY,  "a wall",      0, 0 },
@@ -71,25 +71,26 @@ const map_sobject_data map_sobjects[LS_MAX] =
     { LS_THRONE,        '\\', DC_MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },
     { LS_THRONE2,       '\\', DC_MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },
     { LS_DEADTHRONE,    '\\', DC_LIGHTGRAY, "a massive throne",                    1, 1, },
-    { LS_STAIRSDOWN,    '>',  DC_LIGHTGRAY, "a circular staircase",                1, 1, },
-    { LS_STAIRSUP,      '<',  DC_LIGHTGRAY, "a circular staircase",                1, 1, },
+    { LS_STAIRSDOWN,    '>',  DC_WHITE,     "a circular staircase",                1, 1, },
+    { LS_STAIRSUP,      '<',  DC_WHITE,     "a circular staircase",                1, 1, },
     { LS_ELEVATORDOWN,  'I',  DC_LIGHTGRAY, "a volcanic shaft leaning downward",   1, 1, },
-    { LS_ELEVATORUP,    'I',  DC_LIGHTGRAY, "the base of a volcanic shaft",        1, 1, },
+    { LS_ELEVATORUP,    'I',  DC_WHITE,     "the base of a volcanic shaft",        1, 1, },
     { LS_FOUNTAIN,      '{',  DC_BLUE,      "a bubbling fountain",                 1, 1, },
     { LS_DEADFOUNTAIN,  '{',  DC_LIGHTGRAY, "a dead fountain",                     1, 1, },
     { LS_STATUE,        '|',  DC_LIGHTGRAY, "a great marble statue",               1, 1, },
     { LS_URN,           'u',  DC_YELLOW,    "a golden urn",                        1, 1, },
-    { LS_MIRROR,        '\'', DC_WHITE,     "a mirror",                            1, 1, },
-    { LS_OPENDOOR,      '/',  DC_BROWN,     "an open door",                        1, 1, },
+    { LS_MIRROR,        '|',  DC_WHITE,     "a mirror",                            1, 1, },
+    { LS_OPENDOOR,      '-',  DC_BROWN,     "an open door",                        1, 1, },
     { LS_CLOSEDDOOR,    '+',  DC_BROWN,     "a closed door",                       0, 0, },
-    { LS_ENTRANCE,      'O',  DC_LIGHTGRAY, "the dungeon entrance",                1, 1, },
+    { LS_DNGN_ENTRANCE, 'O',  DC_LIGHTGRAY, "the dungeon entrance",                1, 1, },
+    { LS_DNGN_EXIT,     'O',  DC_WHITE,     "the exit to town",                    1, 1, },
     { LS_HOME,          'H',  DC_LIGHTGRAY, "your home",                           1, 0, },
     { LS_DNDSTORE,      'D',  DC_LIGHTGRAY, "a DND store",                         1, 0, },
     { LS_TRADEPOST,     'T',  DC_LIGHTGRAY, "the Larn trading Post",               1, 0, },
     { LS_LRS,           'L',  DC_LIGHTGRAY, "an LRS office",                       1, 0, },
     { LS_SCHOOL,        'S',  DC_LIGHTGRAY, "the College of Larn",                 1, 0, },
     { LS_BANK,          'B',  DC_LIGHTGRAY, "the bank of Larn",                    1, 0, },
-    { LS_BANK2,         'B',  DC_LIGHTGRAY, "a branch office of the bank of Larn", 1, 0, },
+    { LS_BANK2,         'B',  DC_WHITE,     "a branch office of the bank of Larn", 1, 0, },
 };
 
 /* keep track which levels have been used before */
@@ -1335,7 +1336,7 @@ static void map_make_maze(map *maze, int treasure_room)
     if (maze->nlevel == 1)
     {
         maze->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].type = LT_FLOOR;
-        maze->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].sobject = LS_ENTRANCE;
+        maze->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].sobject = LS_DNGN_EXIT;
     }
 
     /* generate open spaces */
@@ -1578,7 +1579,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                 break;
 
             case 'O': /* dungeon entrance */
-                tile->sobject = LS_ENTRANCE;
+                tile->sobject = LS_DNGN_ENTRANCE;
                 break;
 
             case 'I': /* elevator */
@@ -1755,7 +1756,7 @@ static int map_validate(map *maze)
     {
         /* caverns entrance */
     case 1:
-        pos = map_find_sobject(maze, LS_ENTRANCE);
+        pos = map_find_sobject(maze, LS_DNGN_EXIT);
         break;
 
         /* volcano entrance */
