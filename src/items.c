@@ -310,19 +310,18 @@ item *item_new_finetouch(item *it)
         {
             /* cursed */
             it->bonus = 0 - it->bonus;
-
-            if (it->effects)
-            {
-                /* degrade effects linked to the item */
-                for (i = 0; i < it->effects->len; i++)
-                {
-                    gpointer eid = (effect *)g_ptr_array_index(it->effects, i);
-                    effect *e = game_effect_get(nlarn, eid);
-                    e->amount = 0 - e->amount;
-                }
-            }
-
             item_curse(it);
+        }
+    }
+
+    if ((it->bonus != 0) && it->effects)
+    {
+        /* modify effects linked to the item */
+        for (i = 0; i < it->effects->len; i++)
+        {
+            gpointer eid = (effect *)g_ptr_array_index(it->effects, i);
+            effect *e = game_effect_get(nlarn, eid);
+            e->amount += it->bonus;
         }
     }
 
@@ -1113,7 +1112,7 @@ int item_remove_curse(item *it)
     return TRUE;
 }
 
-int item_enchant(item *it)
+item *item_enchant(item *it)
 {
     guint pos;
     gpointer oid;
@@ -1145,6 +1144,7 @@ int item_enchant(item *it)
     if (it->bonus > 3)
     {
         player_item_destroy(nlarn->p, it);
+        return NULL;
     }
 
     if ((it->type == IT_RING) && it->effects)
@@ -1158,10 +1158,10 @@ int item_enchant(item *it)
         }
     }
 
-    return it->bonus;
+    return it;
 }
 
-int item_disenchant(item *it)
+item *item_disenchant(item *it)
 {
     guint pos;
     gpointer oid;
@@ -1172,6 +1172,7 @@ int item_disenchant(item *it)
     if (it->bonus <= -3)
     {
         player_item_destroy(nlarn->p, it);
+        return NULL;
     }
 
     it->bonus--;
@@ -1187,7 +1188,7 @@ int item_disenchant(item *it)
         }
     }
 
-    return it->bonus;
+    return it;
 }
 
 /**
@@ -1213,10 +1214,13 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     if (it->type == IT_POTION && it->id == PO_CURE_DIANTHR)
         return (it);
 
-    /* prepare item description before it has been affected */
-    item_describe(it, player_item_known(nlarn->p, it),
-                  (it->count == 1), TRUE, item_desc, 60);
-    item_desc[0] = g_ascii_toupper(item_desc[0]);
+    if (visible)
+    {
+        /* prepare item description before it has been affected */
+        item_describe(it, player_item_known(nlarn->p, it),
+                      (it->count == 1), TRUE, item_desc, 60);
+        item_desc[0] = g_ascii_toupper(item_desc[0]);
+    }
 
     switch (iet)
     {

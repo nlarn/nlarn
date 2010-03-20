@@ -160,7 +160,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_STEALTH, 250, 0, "stealthy",
+        ET_STEALTH, 250, TRUE, "stealthy",
         "You start to move stealthily.",
         "You're not stealthy anymore.",
         NULL, NULL,
@@ -193,7 +193,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_INVISIBILITY, 250, 0, "invisible",
+        ET_INVISIBILITY, 250, TRUE, "invisible",
         "Suddenly you can't see yourself!",
         "You are no longer invisible.",
         "The %s disappears.",
@@ -208,7 +208,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_INFRAVISION, 250, 0, "infravision",
+        ET_INFRAVISION, 250, TRUE, "infravision",
         "You feel your vision sharpen.",
         "You feel your vision return to normal.",
         NULL, NULL,
@@ -224,14 +224,14 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_DETECT_MONSTER, 10, 0, NULL,
+        ET_DETECT_MONSTER, 10, TRUE, NULL,
         "You sense the presence of monsters.",
         NULL, NULL, NULL,
         FALSE, FALSE, TRUE, FALSE
     },
 
     {
-        ET_HOLD_MONSTER, 30, 0, NULL,
+        ET_HOLD_MONSTER, 30, TRUE, NULL,
         NULL, NULL,
         "The %s seems to freeze.",
         "The %s can move again.",
@@ -239,7 +239,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_SCARE_MONSTER, 250, 0, NULL,
+        ET_SCARE_MONSTER, 250, TRUE, NULL,
         NULL, NULL,
         "The %s is very afraid.",
         "The %s is no longer scared.",
@@ -247,7 +247,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_CHARM_MONSTER, 250, 0, NULL,
+        ET_CHARM_MONSTER, 250, TRUE, NULL,
         NULL, NULL,
         "The %s is awestruck at your magnificence!",
         "The %s is no longer impressed.",
@@ -255,7 +255,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_AGGRAVATE_MONSTER, 500, 0, "aggravating",
+        ET_AGGRAVATE_MONSTER, 500, TRUE, "aggravating",
         "You sense rising anger.",
         NULL, NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
@@ -298,46 +298,46 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_CANCELLATION, 250, 0, "cancellation",
+        ET_CANCELLATION, 250, TRUE, "cancellation",
         NULL, NULL, NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
     },
 
     {
-        ET_UNDEAD_PROTECTION, 400, 0, "undead protection",
+        ET_UNDEAD_PROTECTION, 400, TRUE, "undead protection",
         "You feel safe in the dark.",
         NULL, NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
     },
 
     {
-        ET_SPIRIT_PROTECTION, 400, 0, "spirit protection",
+        ET_SPIRIT_PROTECTION, 400, TRUE, "spirit protection",
         "You feel a protecting force.",
         NULL, NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
     },
 
     {
-        ET_LIFE_PROTECTION, 0, 0, "life protection",
+        ET_LIFE_PROTECTION, 0, TRUE, "life protection",
         "You never felt so safe.",
         NULL, NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
 
     {
-        ET_NOTHEFT, 400, 0, "theft protection",
+        ET_NOTHEFT, 400, TRUE, "theft protection",
         NULL, NULL, NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
     },
 
     {
-        ET_TIMESTOP, 20, 0, "time stop",
+        ET_TIMESTOP, 20, TRUE, "time stop",
         NULL, NULL, NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
     },
 
     {
-        ET_WALL_WALK, 20, 0, "wall-walk",
+        ET_WALL_WALK, 20, TRUE, "wall-walk",
         "You can now walk through walls",
         "You can no longer walk through walls.",
         NULL, NULL,
@@ -432,7 +432,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_SLEEP, 25, 0, "sleeping",
+        ET_SLEEP, 25, TRUE, "sleeping",
         "You fall asleep.",
         "You wake up.",
         "The %s falls asleep.",
@@ -458,7 +458,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_BLINDNESS, 250, 0, "blind",
+        ET_BLINDNESS, 250, TRUE, "blind",
         "You can't see anything!",
         "The blindness lifts.",
         "The %s seems to be blinded.",
@@ -467,7 +467,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_CLUMSINESS, 250, 0, "clumsy",
+        ET_CLUMSINESS, 250, TRUE, "clumsy",
         "You are unable to hold your weapon.",
         "You now feel less awkward.",
         NULL, NULL,
@@ -475,7 +475,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_ITCHING, 100, 0, "itching",
+        ET_ITCHING, 100, TRUE, "itching",
         "The hysteria of itching forces you to remove your armour!",
         "You feel the irritation subside.",
         NULL, NULL,
@@ -483,7 +483,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_CONFUSION, 25, 0, "confused",
+        ET_CONFUSION, 25, TRUE, "confused",
         "You feel confused.",
         "You regain your senses.",
         "The %s looks confused.",
@@ -492,7 +492,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_PARALYSIS, 25, 0, "paralyzed",
+        ET_PARALYSIS, 25, TRUE, "paralyzed",
         "You are paralyzed.",
         "You can move again.",
         NULL, NULL,
@@ -524,7 +524,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_BURDENED, 0, 0, "burdened",
+        ET_BURDENED, 0, TRUE, "burdened",
         "You are burdened.",
         "You are no longer burdened.",
         NULL, NULL,
@@ -532,7 +532,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_OVERSTRAINED, 0, 0, "overload",
+        ET_OVERSTRAINED, 0, TRUE, "overload",
         "You are overloaded!",
         "You are no longer overloaded.",
         NULL, NULL,
@@ -715,10 +715,8 @@ const char *effect_get_msg_m_stop(effect *e)
 
 int effect_get_amount(effect *e)
 {
-    if (e != NULL)
-        return e->amount;
-    else
-        return 0;
+    assert (e != NULL);
+    return e->amount;
 }
 
 effect *effect_add(GPtrArray *ea, effect *ne)
@@ -802,13 +800,7 @@ int effect_query(GPtrArray *ea, effect_type type)
         gpointer effect_id = g_ptr_array_index(ea, idx);
         effect *e = game_effect_get(nlarn, effect_id);
 
-        if (e->type == type)
-        {
-            if (e->amount)
-                amount += e->amount;
-            else
-                return TRUE;
-        }
+        if (e->type == type) amount += e->amount;
     }
 
     return amount;

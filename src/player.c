@@ -2095,8 +2095,9 @@ effect *player_effect_add(player *p, effect *e)
 
         e = effect_add(p->effects, e);
 
-        /* only log a message if the effect has really been added */
-        if (e && effect_get_msg_start(e))
+        /* only log a message if the effect has really been added and
+           actually has a value */
+        if (e && effect_get_amount(e) && effect_get_msg_start(e))
             log_add_entry(p->log, "%s", effect_get_msg_start(e));
 
         if (str_orig != player_get_str(p))
@@ -2121,10 +2122,10 @@ void player_effects_add(player *p, GPtrArray *effects)
     for (idx = 0; idx < effects->len; idx++)
     {
         gpointer effect_id = g_ptr_array_index(effects, idx);
-        effect *e = game_effect_get(nlarn, effect_id);
         g_ptr_array_add(p->effects, effect_id);
 
-        if (effect_get_msg_start(e))
+        effect *e = game_effect_get(nlarn, effect_id);
+        if (effect_get_amount(e) && effect_get_msg_start(e))
         {
             log_add_entry(p->log, effect_get_msg_start(e));
         }
@@ -2141,7 +2142,7 @@ int player_effect_del(player *p, effect *e)
 
     if ((result = effect_del(p->effects, e)))
     {
-        if (effect_get_msg_stop(e))
+        if (effect_get_amount(e) && effect_get_msg_stop(e))
         {
             log_add_entry(p->log, effect_get_msg_stop(e));
         }
@@ -2178,16 +2179,16 @@ void player_effects_del(player *p, GPtrArray *effects)
     }
 }
 
-effect *player_effect_get(player *p, int effect_id)
+effect *player_effect_get(player *p, effect_type et)
 {
-    assert(p != NULL && effect_id > ET_NONE && effect_id < ET_MAX);
-    return effect_get(p->effects, effect_id);
+    assert(p != NULL && et > ET_NONE && et < ET_MAX);
+    return effect_get(p->effects, et);
 }
 
-int player_effect(player *p, int effect_type)
+int player_effect(player *p, effect_type et)
 {
-    assert(p != NULL && effect_type > ET_NONE && effect_type < ET_MAX);
-    return effect_query(p->effects, effect_type);
+    assert(p != NULL && et > ET_NONE && et < ET_MAX);
+    return effect_query(p->effects, et);
 }
 
 void player_effects_expire(player *p, int turns)
@@ -2445,7 +2446,7 @@ int player_item_equip(player *p, inventory **inv, item *it)
 {
     item **islot = NULL;  /* pointer to chosen item slot */
     int time = 0;         /* time the desired action takes */
-    char description[61];
+    char description[61] = { 0 };
 
     assert(p != NULL && it != NULL);
 

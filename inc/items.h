@@ -166,8 +166,8 @@ int item_curse(item *it);
 int item_remove_blessing(item *it);
 int item_remove_curse(item *it);
 
-int item_enchant(item *it);
-int item_disenchant(item *it);
+item *item_enchant(item *it);
+item *item_disenchant(item *it);
 item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visible);
 
 int item_obtainable(item_t type, int id);
