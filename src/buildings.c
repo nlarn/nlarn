@@ -638,6 +638,13 @@ int building_tradepost(player *p)
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
+    callback = g_malloc0(sizeof(display_inv_callback));
+    callback->description = "(e)quip";
+    callback->key = 'e';
+    callback->function = &player_item_equip;
+    callback->checkfun = &player_item_is_equippable;
+    g_ptr_array_add(callbacks, callback);
+
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(u)nequip";
     callback->key = 'u';
@@ -742,7 +749,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
 
     if (it->count > 1)
     {
-        item_describe(it, TRUE, FALSE, FALSE, name, 40);
+        item_describe(it, TRUE, FALSE, TRUE, name, 40);
         g_snprintf(text, 80, "How many %s do you want to buy?", name);
 
         /* get count */
