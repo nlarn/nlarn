@@ -60,7 +60,7 @@ const spell_data spells[SP_MAX] =
         SP_SLE, "sle", "sleep",
         SC_POINT, DAM_NONE, ET_SLEEP,
         "Causes some monsters to go to sleep.",
-        NULL,
+        "The %s falls asleep.",
         "The %s doesn't sleep.",
         1, 260, TRUE
     },
