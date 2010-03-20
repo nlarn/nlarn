@@ -3253,7 +3253,8 @@ int player_item_drop(player *p, inventory **inv, item *it)
     /* reveal if item is cursed or blessed when dropping it on an altar */
     map_sobject_t ms = map_sobject_at(game_map(nlarn, p->pos.z), p->pos);
 
-    if (ms == LS_ALTAR)
+    if (ms == LS_ALTAR
+        && (!player_effect(p, ET_BLINDNESS) || game_wizardmode(nlarn)))
     {
         if (it->cursed)
         {
