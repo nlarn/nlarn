@@ -20,6 +20,7 @@
 #include <curses.h>
 #include <stdlib.h>
 #include <glib/gstdio.h>
+#include <ctype.h>
 
 #include "container.h"
 #include "display.h"
@@ -27,6 +28,9 @@
 #include "nlarn.h"
 
 game *nlarn = NULL;
+
+static gboolean adjacent_monster(position p);
+static gboolean adjacent_corridor(position pos, char move);
 
 int main(int argc, char *argv[])
 {
@@ -89,11 +93,45 @@ int main(int argc, char *argv[])
 
     display_paint_screen(nlarn->p);
 
+    char run_cmd = 0;
+    int ch;
+    gboolean adj_corr = FALSE;
+    int old_hp;
+
     /* main event loop */
     do
     {
+        if (run_cmd != 0)
+        {
+            ch = run_cmd;
+            // Check if we're in open surroundings.
+            adj_corr = adjacent_corridor(nlarn->p->pos, ch);
+            old_hp = nlarn->p->hp;
+        }
+        else
+        {
+            ch = display_getch();
+
+            switch (ch)
+            {
+            case 'H':
+            case 'J':
+            case 'K':
+            case 'L':
+            case 'Y':
+            case 'U':
+            case 'B':
+            case 'N':
+                ch = tolower(ch);
+                adj_corr = adjacent_corridor(nlarn->p->pos, ch);
+                run_cmd = ch;
+                old_hp = nlarn->p->hp;
+                break;
+            }
+        }
+
         /* get key and analyze it */
-        switch (display_getch())
+        switch (ch)
         {
             /* *** MOVEMENT *** */
         case 'h':
@@ -214,7 +252,6 @@ int main(int argc, char *argv[])
                 display_show_message("Help for The Caverns of NLarn",
                                      "\n The help file could not be found. \n");
             }
-
             break;
 
             /* work magic */
@@ -402,6 +439,23 @@ int main(int argc, char *argv[])
             break;
         }
 
+        if (run_cmd != 0)
+        {
+            // Interrupt if:
+            // * we ran into a wall
+            // * took damage (trap, poison, or invisible monster)
+            // * became confused (umber hulk)
+            // * a monster has moved adjacent to us
+            // * there's a fork in the path ahead
+            if (!moves_count || nlarn->p->hp < old_hp
+                || player_effect_get(nlarn->p, ET_CONFUSION)
+                || adjacent_monster(nlarn->p->pos)
+                || (!adj_corr && adjacent_corridor(nlarn->p->pos, run_cmd)))
+            {
+                run_cmd = 0;
+            }
+        }
+
         /* manipulate game time */
         if (moves_count)
         {
@@ -416,4 +470,84 @@ int main(int argc, char *argv[])
         display_paint_screen(nlarn->p);
     }
     while (TRUE); /* main event loop */
+}
+
+static gboolean adjacent_monster(position p)
+{
+    int i, j;
+    for (i = -1; i <= 1; i++)
+        for (j = -1; j <= 1; j++)
+        {
+            if (i == 0 && j == 0)
+                continue;
+
+            position pos = p;
+            pos.x += i;
+            pos.y += j;
+
+            if (pos.x < 0 || pos.x >= MAP_MAX_X
+                || pos.y < 0 || pos.y >= MAP_MAX_Y)
+            {
+                continue;
+            }
+
+            monster *m = map_get_monster_at(game_map(nlarn, nlarn->p->pos.z), pos);
+            if (m && monster_in_sight(m))
+                return TRUE;
+        }
+
+    return FALSE;
+}
+
+static gboolean adjacent_corridor(position pos, char move)
+{
+    position p1 = pos, p2 = pos;
+    switch (move)
+    {
+    case 'h': // left
+        p1.x -= 1; p1.y -= 1;
+        p2.x -= 1; p2.y += 1;
+        break;
+    case 'j': // down
+        p1.x -= 1; p1.y += 1;
+        p2.x += 1; p2.y += 1;
+        break;
+    case 'k': // up
+        p1.x -= 1; p1.y -= 1;
+        p2.x += 1; p2.y -= 1;
+        break;
+    case 'l': // right
+        p1.x += 1; p1.y -= 1;
+        p2.x += 1; p2.y += 1;
+        break;
+    case 'y': // up left
+        p1.y -= 1;
+        p2.x -= 1;
+        break;
+    case 'u': // up right
+        p1.y -= 1;
+        p2.x += 1;
+        break;
+    case 'b': // down left
+        p1.x -= 1;
+        p2.y += 1;
+        break;
+    case 'n': // down right
+        p1.x += 1;
+        p2.y += 1;
+        break;
+    }
+
+    if (p1.x >= 0 && p1.x < MAP_MAX_X && p1.y >= 0 && p1.y < MAP_MAX_Y
+        && lt_is_passable(map_tiletype_at(game_map(nlarn, nlarn->p->pos.z), p1)))
+    {
+        return TRUE;
+    }
+    if (p2.x >= 0 && p2.x < MAP_MAX_X && p2.y >= 0 && p2.y < MAP_MAX_Y
+        && lt_is_passable(map_tiletype_at(game_map(nlarn, nlarn->p->pos.z), p2)))
+    {
+        return TRUE;
+    }
+
+    return FALSE;
 }
