@@ -985,6 +985,7 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     cJSON_AddNumberToObject(mval, "oid", GPOINTER_TO_UINT(oid));
     cJSON_AddNumberToObject(mval, "hp", m->hp);
     cJSON_AddItemToObject(mval,"pos", pos_serialize(m->pos));
+    cJSON_AddNumberToObject(mval, "action", m->action);
 
     if (m->weapon != NULL)
         cJSON_AddNumberToObject(mval, "weapon", GPOINTER_TO_UINT(m->weapon));
@@ -1028,6 +1029,7 @@ void monster_deserialize(cJSON *mser, game *g)
     m->oid = GUINT_TO_POINTER(oid);
     m->hp = cJSON_GetObjectItem(mser, "hp")->valueint;
     m->pos = pos_deserialize(cJSON_GetObjectItem(mser, "pos"));
+    m->action = cJSON_GetObjectItem(mser, "action")->valueint;
 
     if ((obj = cJSON_GetObjectItem(mser, "weapon")))
         m->weapon = GUINT_TO_POINTER(obj->valueint);
