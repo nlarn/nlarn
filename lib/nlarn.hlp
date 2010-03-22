@@ -25,6 +25,7 @@ R  remove gems from throne
 s  sit on a throne
 S  save the game
 v  print program version
+w  rest up to one mobul or until healed
 W  wash yourself at a fountain
 
 <  climb up stairs/volcanic shaft or enter a building
@@ -63,3 +64,4 @@ t     teleport within a level
 ^up   raise experience level (also x)
 ^down lower experience level
 *     add 1000 gp to bank account
+&     heal yourself

@@ -29,7 +29,7 @@
 
 game *nlarn = NULL;
 
-static gboolean adjacent_monster(position p);
+static gboolean adjacent_monster(position p, gboolean ignore_eye);
 static gboolean adjacent_corridor(position pos, char move);
 
 int main(int argc, char *argv[])
@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
     int ch;
     gboolean adj_corr = FALSE;
     int old_hp;
+    int end_resting = 0;
 
     /* main event loop */
     do
@@ -123,9 +124,15 @@ int main(int argc, char *argv[])
             case 'B':
             case 'N':
                 ch = tolower(ch);
-                adj_corr = adjacent_corridor(nlarn->p->pos, ch);
                 run_cmd = ch;
                 old_hp = nlarn->p->hp;
+                adj_corr = adjacent_corridor(nlarn->p->pos, ch);
+                break;
+            case 'w': /* rest up to 1 mobul */
+                ch = '.';
+                run_cmd = ch;
+                old_hp = nlarn->p->hp;
+                end_resting = game_turn(nlarn) + 100;
                 break;
             }
         }
@@ -448,24 +455,28 @@ int main(int argc, char *argv[])
                 player_level_lose(nlarn->p, 1);
 
             break;
+
+        case '&': /* instaheal */
+            if (game_wizardmode(nlarn))
+            {
+                nlarn->p->hp = nlarn->p->hp_max;
+                nlarn->p->mp = nlarn->p->mp_max;
+
+                /* clear some nasty effects */
+                effect *e;
+                if ((e = player_effect_get(nlarn->p, ET_PARALYSIS)))
+                    player_effect_del(nlarn->p, e);
+                if ((e = player_effect_get(nlarn->p, ET_CONFUSION)))
+                    player_effect_del(nlarn->p, e);
+                if ((e = player_effect_get(nlarn->p, ET_BLINDNESS)))
+                    player_effect_del(nlarn->p, e);
+                if ((e = player_effect_get(nlarn->p, ET_POISON)))
+                    player_effect_del(nlarn->p, e);
+            }
+            break;
         }
 
-        if (run_cmd != 0)
-        {
-            // Interrupt if:
-            // * we ran into a wall
-            // * took damage (trap, poison, or invisible monster)
-            // * became confused (umber hulk)
-            // * a monster has moved adjacent to us
-            // * there's a fork in the path ahead
-            if (!moves_count || nlarn->p->hp < old_hp
-                || player_effect_get(nlarn->p, ET_CONFUSION)
-                || adjacent_monster(nlarn->p->pos)
-                || (!adj_corr && adjacent_corridor(nlarn->p->pos, run_cmd)))
-            {
-                run_cmd = 0;
-            }
-        }
+        gboolean no_move = (moves_count == 0);
 
         /* manipulate game time */
         if (moves_count)
@@ -477,14 +488,57 @@ int main(int argc, char *argv[])
         /* recalculate FOV */
         player_update_fov(nlarn->p);
 
+        if (run_cmd != 0)
+        {
+            // Interrupt running AND resting if:
+            // * last action cost no turns (we ran into a wall)
+            // * we took damage (trap, poison, or invisible monster)
+            // * a monster has moved adjacent to us
+            if (no_move || nlarn->p->hp < old_hp
+                || adjacent_monster(nlarn->p->pos, run_cmd == '.'))
+            {
+                run_cmd = 0;
+            }
+            // Interrupt resting if we've rested for 100 turns OR
+            // * hp is full,
+            // * mp is full,
+            // * we are not confused,
+            // * we are not blinded, AND
+            // * we are not paralyzed
+            else if (run_cmd == '.')
+            {
+                if (game_turn(nlarn) >= end_resting
+                    || (nlarn->p->hp == nlarn->p->hp_max
+                        && nlarn->p->mp == nlarn->p->mp_max
+                        && !player_effect_get(nlarn->p, ET_CONFUSION)
+                        && !player_effect_get(nlarn->p, ET_BLINDNESS)
+                        && !player_effect_get(nlarn->p, ET_PARALYSIS)))
+                {
+                    run_cmd = 0;
+                }
+            }
+            // Interrupt running if:
+            // * became confused (umber hulk)
+            // * there's a fork in the path ahead
+            else if (player_effect_get(nlarn->p, ET_CONFUSION)
+                     || (!adj_corr && adjacent_corridor(nlarn->p->pos, run_cmd)))
+            {
+                run_cmd = 0;
+            }
+        }
+
         /* repaint screen */
         display_paint_screen(nlarn->p);
     }
     while (TRUE); /* main event loop */
 }
 
-static gboolean adjacent_monster(position p)
+static gboolean adjacent_monster(position p, gboolean ignore_eye)
 {
+    // Only ignore floating eye if already paralysed.
+    if (ignore_eye && !player_effect_get(nlarn->p, ET_PARALYSIS))
+        ignore_eye = FALSE;
+
     int i, j;
     for (i = -1; i <= 1; i++)
         for (j = -1; j <= 1; j++)
@@ -503,7 +557,12 @@ static gboolean adjacent_monster(position p)
             }
 
             monster *m = map_get_monster_at(game_map(nlarn, nlarn->p->pos.z), pos);
-            if (m && monster_in_sight(m))
+            if (m == NULL)
+                continue;
+            if (ignore_eye && monster_type(m) == MT_FLOATING_EYE)
+                continue;
+
+            if (monster_in_sight(m))
                 return TRUE;
         }
 
