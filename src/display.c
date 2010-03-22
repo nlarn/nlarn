@@ -1245,8 +1245,8 @@ int display_get_count(char *caption, int value)
     /* curses attributes */
     int attrs;
 
-    /* toggle insert / overwrite mode */
-    int insert_mode = TRUE;
+    /* toggle insert / overwrite mode; start with overwrite */
+    int insert_mode = FALSE;
 
     /* user input */
     int key;
@@ -1365,6 +1365,23 @@ int display_get_count(char *caption, int value)
         case KEY_HOME:
             ipos = 0;
             break;
+
+        /* special cases to speed up getting/dropping multiple items */
+        case 'y': /* yes */
+        case 'd': /* drop */
+        case 'g': /* get */
+            /* reset value to original value */
+            g_snprintf(ivalue, 8, "%d", value);
+            cont = FALSE;
+            break;
+
+        /* special case to speed up aborting */
+        case 'n': /* no */
+            /* set value to 0 */
+            g_snprintf(ivalue, 8, "%d", 0);
+            cont = FALSE;
+            break;
+
 
         case 10: /* LF */
         case 13: /* CR */
