@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
             break;
 
             /* bank account information */
-        case 'B':
+        case '$':
             log_add_entry(nlarn->p->log, "There %s %s gp on your bank account.",
                           (nlarn->p->bank_account == 1) ? "is" : "are",
                           int2str(nlarn->p->bank_account));
@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
             break;
 
             /* *** DEBUGGING SUPPORT *** */
-        case '$':
+        case '*':
             if (game_wizardmode(nlarn)) nlarn->p->bank_account += 1000;
             break;
 

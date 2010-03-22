@@ -1,10 +1,10 @@
-Movement
+Movement                Running
 
-    7 8 9  y k u
-     \|/    \|/
-    4-5-6  h-.-l
-     /|\    /|\
-    1 2 3  b j n
+    7 8 9  y k u            Y K U
+     \|/    \|/              \|/
+    4-5-6  h-.-l            H- -L
+     /|\    /|\              /|\
+    1 2 3  b j n            B J N
 
 You can as well use the number pad with num lock off.
 
@@ -12,7 +12,6 @@ You can as well use the number pad with num lock off.
 Commands
 
 A  desecrate an altar
-B  show bank account balance
 c  close a door
 g  get present pack weight
 i  inventory your pockets, use items
@@ -31,6 +30,7 @@ W  wash yourself at a fountain
 <  climb up stairs/volcanic shaft or enter a building
 >  climb down stairs/volcanic shaft
 ,  pick up item
+$  show bank account balance
 :  look at the location you are standing on
 ;  look at another location
 .  rest one turn (alternate key: 5)
@@ -46,12 +46,12 @@ Control Keys
 ^W activate wizard mode
 
 
-Dialogs 
+Dialogs
 
 Valid actions (and their keys) for selected items are shown
-in the dialog's status line. 
+in the dialog's status line.
 
-Close a dialog with ESC or enter/space to select an option. 
+Close a dialog with ESC or enter/space to select an option.
 Move dialogs with Ctrl and the cursor keys.
 
 
@@ -61,4 +61,4 @@ Wizard mode
 -     teleport up one level
 ^up   raise experience level
 ^down lower experience level
-$     add 1000 gp to bank account
+*     add 1000 gp to bank account
