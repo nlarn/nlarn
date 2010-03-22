@@ -79,7 +79,7 @@ message_log *log_deserialize(cJSON *lser);
 #define log_buffer(log) ((log)->buffer->len ? (log)->buffer->str : NULL)
 
 /* text array handling */
-GPtrArray *text_wrap(char *str, int width, int indent);
+GPtrArray *text_wrap(const char *str, int width, int indent);
 GPtrArray *text_append(GPtrArray *first, GPtrArray *second);
 void text_destroy(GPtrArray *text);
 

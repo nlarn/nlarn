@@ -32,7 +32,10 @@ static guint display_cols = 0;
 /* linked list of opened windows */
 static GList *windows = NULL;
 
-static display_window *display_window_new(int x1, int y1, int width, int height, char *title, char *caption);
+static display_window *display_window_new(int x1, int y1, int width,
+                                          int height, const char *title,
+                                          const char *caption);
+
 static void display_window_destroy(display_window *dwin, gboolean shall_clear);
 
 static int display_window_move(display_window *dwin, int key);
@@ -1133,7 +1136,7 @@ spell *display_spell_select(char *title, player *p)
 
         case '?':
         case KEY_F(1):
-            display_show_message(spell_name(sp), spell_desc(sp));
+            display_show_message(spell_name(sp), spell_desc(sp), 0);
 
             /* repaint everything after displaying the message */
             display_paint_screen(p);
@@ -2204,40 +2207,40 @@ position display_get_position(player *p, char *message, gboolean ray,
     return pos;
 }
 
-void display_show_history(message_log *log, char *title)
+void display_show_history(message_log *log, const char *title)
 {
     guint idx;
-    char *text = NULL;
-    char *tmp = NULL;
     message_log_entry *le;
+    GString *text = g_string_new(NULL);
+    char intrep[11] = { 0 };
+    int twidth; /* the number of characters of the current game time */
 
-    for (idx = 0; idx < log_length(log); idx++)
+    /* determine the width of the current game turn */
+    g_snprintf(intrep, 10, "%d", nlarn->gtime);
+    twidth = strlen(intrep);
+
+    /* assemble reversed game log */
+    for (idx = log_length(log); idx > 0; idx--)
     {
-        le = log_get_entry(log, idx);
-
-        if (!text)
-        {
-            text = g_strconcat(le->message, "\n", NULL);
-        }
-        else
-        {
-            tmp = g_strconcat(text, le->message, "\n", NULL);
-            g_free(text);
-            text = tmp;
-        }
+        le = log_get_entry(log, idx - 1);
+        g_string_append_printf(text, "%*d: %s\n", twidth, le->gtime, le->message);
     }
 
-    display_show_message(title, text);
-    g_free(text);
+    /* display the log */
+    display_show_message(title, text->str, twidth + 2);
+
+    /* free the assembled log */
+    g_string_free(text, TRUE);
 }
 
 /**
  * Simple "popup" message window
  * @param window title
  * @param message to be displayed inside window
+ * @param the number of chars wrapped lines will be indented
  * @return key pressed to close window
  */
-char display_show_message(char *title, char *message)
+char display_show_message(const char *title, const char *message, int indent)
 {
     guint height, width;
     guint startx, starty;
@@ -2255,7 +2258,7 @@ char display_show_message(char *title, char *message)
     width = display_cols - 8;
 
     /* wrap message according to width */
-    text = text_wrap(message, width - 4, 0);
+    text = text_wrap(message, width - 4, indent);
 
     /* set height according to message line count */
     height = min((display_rows - 3), (text->len + 2));
@@ -2269,15 +2272,15 @@ char display_show_message(char *title, char *message)
 
     do
     {
+        wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
+
         for (idx = 0; idx < maxvis; idx++)
         {
-            wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
             mvwprintw(mwin->window, idx + 1, 1, " %-*s ",
-                      width - 4,
-                      g_ptr_array_index(text, idx + offset));
-
-            wattroff(mwin->window, attrs);
+                      width - 4, g_ptr_array_index(text, idx + offset));
         }
+
+        wattroff(mwin->window, attrs);
 
         display_window_update_arrow_up(mwin, offset > 0);
         display_window_update_arrow_down(mwin, (offset + maxvis) < text->len);
@@ -2375,7 +2378,9 @@ void display_windows_show()
     }
 }
 
-static display_window *display_window_new(int x1, int y1, int width, int height, char *title, char *caption)
+static display_window *display_window_new(int x1, int y1, int width,
+                                          int height, const char *title,
+                                          const char *caption)
 {
     int i;
     display_window *dwin;
@@ -2387,8 +2392,9 @@ static display_window *display_window_new(int x1, int y1, int width, int height,
     dwin->y1 = y1;
     dwin->width = width;
     dwin->height = height;
-    dwin->title = title;
-    dwin->caption = caption;
+    /* clone title and caption */
+    dwin->title = g_strdup(title);
+    dwin->caption = g_strdup(caption);
 
     dwin->window = newwin(dwin->height, dwin->width, dwin->y1, dwin->x1);
 
@@ -2442,6 +2448,10 @@ static void display_window_destroy(display_window *dwin, gboolean shall_clear)
 
     /* remove window from the list of windows */
     windows = g_list_remove(windows, dwin);
+
+    /* free title and caption as they are clones */
+    g_free(dwin->title);
+    g_free(dwin->caption);
 
     g_free(dwin);
 

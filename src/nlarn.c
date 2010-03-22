@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    display_show_message("Welcome to the game of NLarn!", strbuf);
+    display_show_message("Welcome to the game of NLarn!", strbuf, 0);
     g_free(strbuf);
 
     display_paint_screen(nlarn->p);
@@ -244,13 +244,13 @@ int main(int argc, char *argv[])
         case '?':
             if (g_file_get_contents(game_helpfile(nlarn), &strbuf, NULL, NULL))
             {
-                display_show_message("Help for The Caverns of NLarn", strbuf);
+                display_show_message("Help for The Caverns of NLarn", strbuf, 0);
                 g_free(strbuf);
             }
             else
             {
                 display_show_message("Help for The Caverns of NLarn",
-                                     "\n The help file could not be found. \n");
+                                     "\n The help file could not be found. \n", 0);
             }
             break;
 
@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
         case '\\':
             if ((strbuf = player_item_identified_list(nlarn->p)))
             {
-                display_show_message("Identified items", strbuf);
+                display_show_message("Identified items", strbuf, 0);
                 g_free(strbuf);
             }
             else

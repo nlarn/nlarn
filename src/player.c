@@ -964,7 +964,7 @@ void player_die(player *p, player_cod cause_type, int cause)
             g_string_append_printf(text, "%s\n", p->log->buffer->str);
         }
 
-        display_show_message(title, text->str);
+        display_show_message(title, text->str, 0);
 
         /* repaint screen */
         display_paint_screen(p);
@@ -986,7 +986,7 @@ void player_die(player *p, player_cod cause_type, int cause)
                 /* file name has been provided. try to save file */
                 if (!g_file_set_contents(filename, text->str, -1, &error))
                 {
-                    display_show_message("Error", error->message);
+                    display_show_message("Error", error->message, 0);
                     g_error_free(error);
                 }
 

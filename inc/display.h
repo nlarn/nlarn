@@ -115,8 +115,8 @@ direction display_get_direction(char *title, int *available);
 position display_get_position(player *p, char *message, gboolean ray,
                               gboolean ball, guint radius, int passable);
 
-void display_show_history(message_log *log, char *title);
-char display_show_message(char *title, char *message);
+void display_show_history(message_log *log, const char *title);
+char display_show_message(const char *title, const char *message, int indent);
 
 void display_windows_hide();
 void display_windows_show();

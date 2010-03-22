@@ -78,7 +78,7 @@ int building_bank(player *p)
     if (p->outstanding_taxes)
     {
         g_string_append_printf(text, msg_frozen, p->outstanding_taxes);
-        display_show_message((char *)msg_title, text->str);
+        display_show_message(msg_title, text->str, 0);
         g_string_free(text, TRUE);
 
         return turns;
@@ -136,7 +136,7 @@ int building_bank(player *p)
         g_ptr_array_add(callbacks, callback);
     }
 
-    cmd = display_show_message((char *)msg_title, text->str);
+    cmd = display_show_message(msg_title, text->str, 0);
     g_string_free(text, TRUE);
 
     /* repaint screen (otherwise background would be black) */
@@ -229,7 +229,7 @@ int building_dndstore(player *p)
     /* no business if player has outstanding taxes */
     if (p->outstanding_taxes)
     {
-        display_show_message((char *)title, (char *)msg_outstanding);
+        display_show_message(title, msg_outstanding, 0);
         return turns;
     }
 
@@ -245,7 +245,7 @@ int building_dndstore(player *p)
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
-    display_show_message((char *)title, (char *)msg_welcome);
+    display_show_message(title, msg_welcome, 0);
     display_paint_screen(p);
 
     display_inventory((char *)title, p, &nlarn->store_stock, callbacks, TRUE, NULL);
@@ -348,7 +348,7 @@ int building_home(player *p)
         {
             /* won the game */
             g_string_append(text, msg_won);
-            display_show_message("You saved your daughter!", text->str);
+            display_show_message("You saved your daughter!", text->str, 0);
             g_string_free(text, TRUE);
 
             display_paint_screen(p);
@@ -358,7 +358,7 @@ int building_home(player *p)
         {
             /* lost the game */
             g_string_append(text, msg_died);
-            display_show_message("You were too late!", text->str);
+            display_show_message("You were too late!", text->str, 0);
             g_string_free(text, TRUE);
 
             display_paint_screen(p);
@@ -369,7 +369,7 @@ int building_home(player *p)
     {
         /* too late, no potion */
         text = g_string_new(msg_died);
-        display_show_message("You were too late!", text->str);
+        display_show_message("You were too late!", text->str, 0);
         g_string_free(text, TRUE);
 
         display_paint_screen(p);
@@ -383,7 +383,7 @@ int building_home(player *p)
                         gtime2mobuls(game_remaining_turns(nlarn)),
                         p->name);
 
-        display_show_message("Your home", text->str);
+        display_show_message("Your home", text->str, 0);
         g_string_free(text, TRUE);
     }
 
@@ -413,7 +413,7 @@ int building_lrs(player *p)
     if (p->outstanding_taxes > player_get_gold(p))
         g_string_append(text, " You cannot afford to pay your taxes this time.");
 
-    display_show_message("Larn Revenue Service", text->str);
+    display_show_message("Larn Revenue Service", text->str, 0);
 
     g_string_free(text, TRUE);
 
@@ -492,7 +492,7 @@ int building_school(player *p)
 
     g_string_append_printf(text, msg_price, price);
 
-    selection = display_show_message("School", text->str);
+    selection = display_show_message("School", text->str, 0);
     g_string_free(text, TRUE);
 
     selection -= 'a';
@@ -606,7 +606,7 @@ int building_tradepost(player *p)
     /* no business if player has outstanding taxes */
     if (p->outstanding_taxes)
     {
-        display_show_message((char *)title, (char *)msg_outstanding);
+        display_show_message(title, msg_outstanding, 0);
         return turns;
     }
 
@@ -653,7 +653,7 @@ int building_tradepost(player *p)
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
-    display_show_message((char *)title, (char *)msg_welcome);
+    display_show_message(title, msg_welcome, 0);
     display_paint_screen(p);
 
     display_inventory((char *)title, p, &p->inventory, callbacks, FALSE, &inv_filter_not_gold);
@@ -781,7 +781,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
 
             item_destroy(it_clone);
 
-            display_show_message(NULL, text);
+            display_show_message(NULL, text, 0);
 
             return FALSE;
         }
@@ -879,7 +879,7 @@ int building_item_identify(player *p, inventory **inv, item *it)
     else
     {
         g_snprintf(message, 80, "Identifying %s costs %d gold.", name_unknown, price);
-        display_show_message((char *)title, message);
+        display_show_message(title, message, 0);
     }
 
     return FALSE;
@@ -928,7 +928,7 @@ static int building_item_repair(player *p, inventory **inv, item *it)
     else
     {
         g_snprintf(message, 80, "Repairing the %s costs %d gold.", name, price);
-        display_show_message((char *)title, message);
+        display_show_message(title, message, 0);
     }
 
     return FALSE;

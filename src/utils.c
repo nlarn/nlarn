@@ -273,31 +273,36 @@ void log_delete(message_log *log)
     g_free(log);
 }
 
-GPtrArray *text_wrap(char *str, int width, int indent)
+GPtrArray *text_wrap(const char *str, int width, int indent)
 {
     GPtrArray *text;
     size_t pos = 0;     /* position in string */
     int lp;             /* last position of whitespace */
     int len;            /* current line length */
-    char *line, *tmp;   /* copy of line */
+    char *line;         /* copy of line */
     char *spaces = NULL;
 
     text = g_ptr_array_new();
 
+    /* prepare indentaion */
     if (indent)
     {
-        spaces = g_malloc((indent + 1) * sizeof(char));
-        for (lp = 0; lp < indent; lp++)
-            spaces[lp] = ' ';
+        /* allocate an empty string */
+        spaces = g_malloc0((indent + 1) * sizeof(char));
 
-        spaces[indent] = '\0';
+        /* fill the string with spaces */
+        for (lp = 0; lp < indent; lp++) spaces[lp] = ' ';
     }
 
     while (pos < strlen(str))
     {
+        /* reset target string lenght and position of last whitespace */
         len = lp = 0;
+
+        /* scan the next line */
         while (len <= width)
         {
+            /* scan for a space to wrap the current line at */
             if ((str[pos + len] == '\0') || isspace(str[pos + len]))
             {
                 lp = len;
@@ -308,26 +313,40 @@ GPtrArray *text_wrap(char *str, int width, int indent)
             }
             len++;
         }
+
+        /* allocate space for the new, shortened line */
         line = g_malloc((lp + 1) * sizeof(char));
+
+        /* copy the text to the new line */
         memcpy(line, &(str[pos]), lp);
+
+        /* terminate the newly copied string */
         line[lp] = '\0';
 
-        /* no indentation on the first line */
+        /* reduce width to make space for indentation after the first line */
         if (indent && text->len == 1)
             width -= indent;
 
-        if (indent && text->len > 0)
+
+        /* indent lines if not on the first line or the first
+           line of a new paragraph */
+        if (indent && text->len && str[pos - 1] != '\n')
         {
-            tmp = g_strconcat(spaces, line, NULL);
+            /* prepend empty string to line (via temporary string) */
+            char *tmp = g_strconcat(spaces, line, NULL);
+
             g_free(line);
             line = tmp;
         }
 
+        /* append new line to the array of lines */
         g_ptr_array_add(text, line);
 
+        /* move position in source string beyond the end of the last line */
         pos += (lp + 1);
     }
 
+    /* free indentation string */
     if (spaces)
         g_free(spaces);
 
