@@ -265,7 +265,7 @@ void building_dndstore_init()
     /* this is a one-time process! */
     if (initialized) return;
 
-    for (type = IT_ARMOUR; type < IT_MAX; type++)
+    for (type = IT_AMULET; type < IT_MAX; type++)
     {
         if (item_is_stackable(type) && (type != IT_BOOK))
         {
@@ -282,11 +282,9 @@ void building_dndstore_init()
 
             for (id = 1; id < item_max_id(type); id++)
             {
-                /* do not generate unobtainable items */
-                if (!item_obtainable(type, id))
-                {
+                /* do not generate unobtainable items except in wizard mode */
+                if (!game_wizardmode(nlarn) && !item_obtainable(type, id))
                     continue;
-                }
 
                 item *it = item_new(type, id);
 
