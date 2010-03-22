@@ -415,16 +415,27 @@ int main(int argc, char *argv[])
 
         case '+': /* dungeon map up */
             if (game_wizardmode(nlarn) && (nlarn->p->pos.z > 0))
-                moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z - 1), TRUE);
+                moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z - 1),
+                                               nlarn->p->pos.z == MAP_DMAX);
 
             break;
 
         case '-': /* dungeon map down */
             if (game_wizardmode(nlarn) && (nlarn->p->pos.z < (MAP_MAX - 1)))
-                moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z + 1), TRUE);
+                moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z + 1),
+                                               nlarn->p->pos.z == MAP_DMAX - 1);
             break;
 
-        case 562: /* ^up - gain experience level */
+        case 't': /* intra-level teleport */
+            if (game_wizardmode(nlarn))
+            {
+                nlarn->p->pos = map_find_space(game_map(nlarn, nlarn->p->pos.z),
+                                               LE_MONSTER, FALSE);
+            }
+            break;
+
+        case 'x': /* gain experience level */
+        case 562: /* ^up */
         case 480: /* same for PDCurses */
             if (game_wizardmode(nlarn))
                 player_level_gain(nlarn->p, 1);
