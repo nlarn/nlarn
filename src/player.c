@@ -695,9 +695,23 @@ void player_die(player *p, player_cod cause_type, int cause)
     {
         log_add_entry(p->log, "WIZARD MODE. You stay alive.");
 
+        /* return to full power */
         p->hp = p->hp_max;
+        p->mp = p->mp_max;
+
         /* return to level 1 if last level has been lost */
         if (p->level < 1) player_level_gain(p, 1);
+
+        /* clear some nasty effects */
+        effect *e;
+        if ((e = player_effect_get(p, ET_PARALYSIS)))
+            player_effect_del(p, e);
+        if ((e = player_effect_get(p, ET_CONFUSION)))
+            player_effect_del(p, e);
+        if ((e = player_effect_get(p, ET_BLINDNESS)))
+            player_effect_del(p, e);
+        if ((e = player_effect_get(p, ET_POISON)))
+            player_effect_del(p, e);
 
         /* return to the game */
         return;
