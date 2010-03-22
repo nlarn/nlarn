@@ -347,7 +347,7 @@ void map_destroy(map *m)
         for (x = 0; x < MAP_MAX_X; x++)
         {
             if (m->grid[y][x].ilist != NULL)
-                inv_destroy(m->grid[y][x].ilist);
+                inv_destroy(m->grid[y][x].ilist, TRUE);
         }
     }
 
@@ -1325,7 +1325,7 @@ static void map_make_maze(map *maze, int treasure_room)
 
             if (map_tile_at(maze, pos)->ilist != NULL)
             {
-                inv_destroy(map_tile_at(maze, pos)->ilist);
+                inv_destroy(map_tile_at(maze, pos)->ilist, TRUE);
                 map_tile_at(maze, pos)->ilist = NULL;
             }
         }

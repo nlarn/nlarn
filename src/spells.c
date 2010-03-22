@@ -1256,7 +1256,7 @@ gboolean spell_make_wall(player *p)
         /* destroy all items at that position */
         if (tile->ilist != NULL)
         {
-            inv_destroy(tile->ilist);
+            inv_destroy(tile->ilist, TRUE);
             tile->ilist = NULL;
         }
 

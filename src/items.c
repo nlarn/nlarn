@@ -405,7 +405,7 @@ void item_destroy(item *it)
 
     if (it->content != NULL)
     {
-        inv_destroy(it->content);
+        inv_destroy(it->content, FALSE);
     }
 
     /* unregister item */
@@ -1369,13 +1369,23 @@ inventory *inv_new(gconstpointer owner)
     return ninv;
 }
 
-void inv_destroy(inventory *inv)
+void inv_destroy(inventory *inv, gboolean special)
 {
     assert(inv != NULL);
 
     while (inv_length(inv) > 0)
     {
         item *it = inv_get(inv, inv_length(inv) - 1);
+
+        if (special)
+        {
+            /* Mark potion of cure dianthroritis and eye of larn
+               as never having been created. */
+            if (it->type == IT_POTION && it->id == PO_CURE_DIANTHR)
+                nlarn->cure_dianthr_created = FALSE;
+            else if (it->type == IT_AMULET && it->id == AM_LARN)
+                nlarn->amulet_created[AM_LARN] = FALSE;
+        }
         g_ptr_array_remove(inv->content, it->oid);
         item_destroy(it);
     }
@@ -1547,7 +1557,7 @@ item *inv_del(inventory **inv, guint idx)
     /* destroy inventory if empty and not owned by anybody */
     if (!inv_length(*inv) && !(*inv)->owner)
     {
-        inv_destroy(*inv);
+        inv_destroy(*inv, FALSE);
         *inv = NULL;
     }
 
@@ -1591,7 +1601,7 @@ int inv_del_element(inventory **inv, item *it)
     /* destroy inventory if empty and not owned by anybody */
     if (!inv_length(*inv) && !(*inv)->owner)
     {
-        inv_destroy(*inv);
+        inv_destroy(*inv, FALSE);
         *inv = NULL;
     }
 
@@ -1623,7 +1633,7 @@ int inv_del_oid(inventory **inv, gpointer oid)
     /* destroy inventory if empty and not owned by anybody */
     if (!inv_length(*inv) && !(*inv)->owner)
     {
-        inv_destroy(*inv);
+        inv_destroy(*inv, FALSE);
         *inv = NULL;
     }
 

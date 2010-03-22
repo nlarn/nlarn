@@ -194,7 +194,7 @@ extern const item_material_data item_materials[IM_MAX];
 /* inventory functions */
 
 inventory *inv_new(gconstpointer owner);
-void inv_destroy(inventory *inv);
+void inv_destroy(inventory *inv, gboolean special);
 
 cJSON *inv_serialize(inventory *inv);
 inventory *inv_deserialize(cJSON *iser);
