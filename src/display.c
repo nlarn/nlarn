@@ -33,8 +33,7 @@ static guint display_cols = 0;
 static GList *windows = NULL;
 
 static display_window *display_window_new(int x1, int y1, int width,
-                                          int height, const char *title,
-                                          const char *caption);
+                                          int height, const char *title);
 
 static void display_window_destroy(display_window *dwin, gboolean shall_clear);
 
@@ -647,7 +646,7 @@ item *display_inventory(char *title, player *p, inventory **inv,
 
         if (!iwin)
         {
-            iwin = display_window_new(startx, starty, width, height, title, NULL);
+            iwin = display_window_new(startx, starty, width, height, title);
         }
 
         it = inv_get_filtered(*inv, curr + offset - 1, filter);
@@ -903,7 +902,7 @@ void display_config_autopickup(player *p)
     starty = (display_rows - height) / 2;
     startx = (min(MAP_MAX_X, display_cols) - width) / 2;
 
-    cwin = display_window_new(startx, starty, width, height, "Autopickup", NULL);
+    cwin = display_window_new(startx, starty, width, height, "Autopickup");
 
     wattron(cwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
     mvwprintw(cwin->window, 1, 2, "Enabled types are shown inverted");
@@ -997,7 +996,7 @@ spell *display_spell_select(char *title, player *p)
     starty = (display_rows - height) / 2;
     startx = (min(MAP_MAX_X, display_cols) - width) / 2;
 
-    swin = display_window_new(startx, starty, width, height, title, NULL);
+    swin = display_window_new(startx, starty, width, height, title);
 
     do
     {
@@ -1278,7 +1277,7 @@ int display_get_count(char *caption, int value)
     starty = (display_rows - height) / 2;
     startx = (display_cols - width) / 2;
 
-    mwin = display_window_new(startx, starty, width, height, NULL, NULL);
+    mwin = display_window_new(startx, starty, width, height, NULL);
 
     wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
 
@@ -1517,7 +1516,7 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     int starty = (display_rows - height) / 2;
     int startx = (display_cols - width) / 2;
 
-    display_window *mwin = display_window_new(startx, starty, width, height, NULL, NULL);
+    display_window *mwin = display_window_new(startx, starty, width, height, NULL);
 
     wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
     guint line;
@@ -1711,7 +1710,7 @@ int display_get_yesno(char *question, char *yes, char *no)
     startx = (min(MAP_MAX_X, display_cols) / 2) - (width / 2);
     starty = (display_rows / 2) - 4;
 
-    ywin = display_window_new(startx, starty, width, text->len + 4, NULL, NULL);
+    ywin = display_window_new(startx, starty, width, text->len + 4, NULL);
 
     wattron(ywin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
 
@@ -1840,7 +1839,7 @@ direction display_get_direction(char *title, int *available)
     startx = (min(MAP_MAX_X, display_cols) / 2) - (width / 2);
     starty = (display_rows / 2) - 4;
 
-    dwin = display_window_new(startx, starty, width, 9, title, NULL);
+    dwin = display_window_new(startx, starty, width, 9, title);
 
     wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
     mvwprintw(dwin->window, 3, 3, "\\|/");
@@ -2266,7 +2265,7 @@ char display_show_message(const char *title, const char *message, int indent)
     starty = (display_rows - height) / 2;
     startx = (display_cols - width) / 2;
 
-    mwin = display_window_new(startx, starty, width, height, title, NULL);
+    mwin = display_window_new(startx, starty, width, height, title);
 
     maxvis = min(text->len, height - 2);
 
@@ -2379,8 +2378,7 @@ void display_windows_show()
 }
 
 static display_window *display_window_new(int x1, int y1, int width,
-                                          int height, const char *title,
-                                          const char *caption)
+                                          int height, const char *title)
 {
     int i;
     display_window *dwin;
@@ -2394,7 +2392,6 @@ static display_window *display_window_new(int x1, int y1, int width,
     dwin->height = height;
     /* clone title and caption */
     dwin->title = g_strdup(title);
-    dwin->caption = g_strdup(caption);
 
     dwin->window = newwin(dwin->height, dwin->width, dwin->y1, dwin->x1);
 
@@ -2411,7 +2408,6 @@ static display_window *display_window_new(int x1, int y1, int width,
 
     wattroff(dwin->window, attrs);
 
-
     /* draw borders */
     wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
     box(dwin->window, 0, 0);
@@ -2422,11 +2418,6 @@ static display_window *display_window_new(int x1, int y1, int width,
         wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED) | A_BOLD));
         mvwprintw(dwin->window, 0, 1, " %s ", title);
         wattroff(dwin->window, attrs);
-    }
-
-    if (caption)
-    {
-        display_window_update_caption(dwin);
     }
 
     /* create a panel for the window */
@@ -2449,9 +2440,8 @@ static void display_window_destroy(display_window *dwin, gboolean shall_clear)
     /* remove window from the list of windows */
     windows = g_list_remove(windows, dwin);
 
-    /* free title and caption as they are clones */
-    g_free(dwin->title);
-    g_free(dwin->caption);
+    /* free title as it is a clone */
+    if (dwin->title != NULL) g_free(dwin->title);
 
     g_free(dwin);
 
