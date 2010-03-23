@@ -94,7 +94,7 @@ const map_sobject_data map_sobjects[LS_MAX] =
 };
 
 /* keep track which levels have been used before */
-static int map_used[23] = { 1, 0 };
+static int map_used[MAP_MAZE_NUM + 1] = { 1, 0 };
 
 const char *map_names[MAP_MAX] =
 {
@@ -1503,28 +1503,40 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
 
     /* FIXME: calculate how many levels are in the file  */
 
-    /* roll the dice: which map? we can currently choose from a variety of 24 */
-    if (which >= 0 && which < 25)
+    /* roll the dice: which map? */
+    if (which >= 0 && which <= MAP_MAX_MAZE_NUM)
     {
         map_num = which;
     }
     else
     {
-        while (map_used[map_num])
+        int tries = 0;
+        do
         {
-            map_num = rand_1n(25);
+            map_num = rand_1n(MAP_MAX_MAZE_NUM);
         }
+        while (map_used[map_num] && ++tries < 100);
+
         map_used[map_num] = TRUE;
     }
 
     /* advance to desired maze */
     fseek(levelfile, (map_num * ((MAP_MAX_X + 1) * MAP_MAX_Y + 1)), SEEK_SET);
 
+    if (feof(levelfile))
+    {
+        /* FIXME: debug output */
+        fclose(levelfile);
+
+        return FALSE;
+    }
+
     pos.z = nmap->nlevel;
 
     // Sometimes flip the maps. (Never the town)
     gboolean flip_vertical   = (map_num > 0 && chance(50));
     gboolean flip_horizontal = (map_num > 0 && chance(50));
+
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X ; pos.x++)
