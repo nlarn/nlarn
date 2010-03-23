@@ -2403,6 +2403,31 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
             log_add_entry(p->log, "The %s picks your pocket. " \
                           "Your purse feels lighter", monster_get_name(m));
         }
+        else
+        {
+            inventory *inv = *map_ilist_at(monster_map(m), p->pos);
+
+            if (inv != NULL)
+            {
+                int idx = 0;
+                for (; idx < inv_length(inv); idx++)
+                {
+                    item *i = inv_get(inv, idx);
+                    if (i->type == IT_GOLD)
+                    {
+                        it = inv_get(inv, idx);
+                        inv_del_element(map_ilist_at(monster_map(m), p->pos), it);
+                        if (monster_in_sight(m))
+                        {
+                            log_add_entry(p->log, "The %s picks up some gold at your feet. ",
+                                          monster_get_name(m));
+                        }
+                        break;
+                    }
+                    g_free(i);
+                }
+            }
+        }
     }
     else if (item_type == IT_ALL) /* must be the nymph */
     {
