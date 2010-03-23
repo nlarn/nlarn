@@ -36,6 +36,10 @@
 #define MAP_VMAX  3						/* max # of levels in the temple of the luran */
 #define MAP_MAX (MAP_DMAX + MAP_VMAX)	/* total number of levels */
 
+/* number of the last custom maze map (including town) */
+#define MAP_MAX_MAZE_NUM 24
+#define MAP_MAZE_NUM     (MAP_MAX_MAZE_NUM + 1)
+
 typedef enum map_tile_type
 {
     LT_NONE,

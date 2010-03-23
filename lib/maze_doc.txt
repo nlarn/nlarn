@@ -1,0 +1,84 @@
+Custom maze maps and how to they are defined
+--------------------------------------------
+
+The file lib/maze contains all custom maps used in level generation. The first
+map is the one used for the town, the following maps are mazes used elsewhere
+in the game.
+
+The first dungeon level is always a randomized maze. After that, each time a
+level is generated, there's a 25% of picking a random pre-defined maze map
+instead of drawing a random maze. In addition, the bottom levels of the dungeon
+and the volcano will always use a custom map.
+
+Staircases and the bank branch (which is guaranteed on dungeon level 5) are
+only ever placed in "dead ends", i.e. a floor tile with exactly seven adjacent
+wall tiles. For each generated level, the game searches a random rectangle of
+the full map (actually biased to the lower right) to place the static object in
+question. If one of these features could not be placed, a new map is generated
+with the same chances of being custom versus randomly generated as before.
+In practise, this means that maps with many such dead ends are more likely to
+be picked than maps that only have a few of them. In particular, a map that has
+no dead ends whatsoever will never be picked.
+
+Within each game, custom maps that have already been used are marked, so they
+don't get picked again.
+
+The number of predefined mazes is defined as MAP_MAX_MAZE_NUM in map.h. This
+value may be smaller than the number of maps actually in maze, in which case
+the later maps simply won't be considered in level generation. This can be
+useful if they are still being developed.
+
+Maps must have a total size of 67 x 17, and symbols are parsed as follows:
+
+
+Items:
+    !   If on last level of the Volcano, place potion of cure dianthroritis and
+        a demon prince to guard it, else empty.
+    *   If on last level of the Dungeon, place eye of larn and a random demon
+        lord to guard it, else empty.
+
+These two must be defined in every map. Without the potion, the game cannot
+be won.
+
+    -   A random item, though not a container.
+        The current maps contain around 6-9 items in fixed positions,
+        averaging ~8.
+        The game will later place additional items in random positions.
+
+Monsters:
+    M   A random monster appropriate for the current depth.
+        The current maps contain around 35-75 monsters, averaging ~50.
+        No further monsters will be placed on initial generation, though of
+        course more will spawn over the course of time.
+
+Dungeon features:
+
+    Space is parsed as floor.
+
+    #   wall
+    _   altar
+    +   closed door
+    ^   mountain
+    ~   deep water
+    =   lava
+    &   tree
+    "   grass
+    .   dirt
+
+Buildings:
+
+    O   dungeon entrance
+    I   volcano entrance
+    H   home
+    D   dnd store
+    T   trading post
+    L   lrs (tax bureau)
+    S   school
+    B   bank
+
+These should not be used outside the town map.
+
+
+The game makes no attempt to check for connectedness, so you need to make very
+sure that all areas of your map are reachable.
+
