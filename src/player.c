@@ -1336,6 +1336,9 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     /* recalculate FOV to make ensure correct display after entering a level */
     player_update_fov(p);
 
+    /* call autopickup */
+    player_autopickup(p);
+
     return TRUE;
 }
 
