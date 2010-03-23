@@ -1047,7 +1047,7 @@ gint64 player_calc_score(player *p, int won)
     return score;
 }
 
-int player_move(player *p, direction dir)
+int player_move(player *p, direction dir, gboolean open_door)
 {
     int times = 1;      /* how many time ticks it took */
     position target_p;  /* coordinates of target */
@@ -1098,8 +1098,11 @@ int player_move(player *p, direction dir)
             return times;
         }
 
+        if (open_door && map_sobject_at(map, target_p) == LS_CLOSEDDOOR)
+            return player_door_open(nlarn->p, dir);
+
         /* if it is not a wall, it is definitely not passable */
-        if ((!map_tiletype_at(map, target_p) == LT_WALL))
+        if (!map_tiletype_at(map, target_p) == LT_WALL)
             return FALSE;
 
         /* return if player cannot walk through walls */
@@ -3655,16 +3658,10 @@ int player_door_close(player *p)
     return 1;
 }
 
-int player_door_open(player *p)
+int player_door_open(player *p, int dir)
 {
     /* position used to interact with stationaries */
     position pos;
-
-    /* possible directions of actions */
-    int *dirs;
-
-    /* direction of action */
-    int dir = GD_NONE;
 
     /* a counter and another one */
     int count, num;
@@ -3672,33 +3669,37 @@ int player_door_open(player *p)
     /* the current map */
     map *map = game_map(nlarn, p->pos.z);
 
-    dirs = map_get_surrounding(map, p->pos, LS_CLOSEDDOOR);
-
-    for (count = 0, num = 1; num < GD_MAX; num++)
+    if (dir == GD_NONE)
     {
-        if (dirs[num])
+        /* possible directions of actions */
+        int *dirs = map_get_surrounding(map, p->pos, LS_CLOSEDDOOR);
+
+        for (count = 0, num = 1; num < GD_MAX; num++)
         {
-            count++;
-            dir = num;
+            if (dirs[num])
+            {
+                count++;
+                dir = num;
+            }
         }
-    }
 
-    if (count > 1)
-    {
-        dir = display_get_direction("Open which door?", dirs);
-    }
-    /* dir has been set in the for loop above if count == 1 */
-    else if (count == 0)
-    {
-        dir = GD_NONE;
-    }
+        if (count > 1)
+        {
+            dir = display_get_direction("Open which door?", dirs);
+        }
+        /* dir has been set in the for loop above if count == 1 */
+        else if (count == 0)
+        {
+            dir = GD_NONE;
+        }
 
-    g_free(dirs);
+        g_free(dirs);
 
-    /* select random direction if player is confused */
-    if (player_effect(p, ET_CONFUSION))
-    {
-        dir = rand_1n(GD_MAX);
+        /* select random direction if player is confused */
+        if (player_effect(p, ET_CONFUSION))
+        {
+            dir = rand_1n(GD_MAX);
+        }
     }
 
     if (dir)

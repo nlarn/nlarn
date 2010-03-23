@@ -147,14 +147,14 @@ int main(int argc, char *argv[])
 #ifdef KEY_B1
         case KEY_B1:
 #endif
-            moves_count = player_move(nlarn->p, GD_WEST);
+            moves_count = player_move(nlarn->p, GD_WEST, run_cmd == 0);
             break;
 
         case 'y':
         case '7':
         case KEY_HOME:
         case KEY_A1:
-            moves_count = player_move(nlarn->p, GD_NW);
+            moves_count = player_move(nlarn->p, GD_NW, run_cmd == 0);
             break;
 
         case 'l':
@@ -163,14 +163,14 @@ int main(int argc, char *argv[])
 #ifdef KEY_B3
         case KEY_B3:
 #endif
-            moves_count = player_move(nlarn->p, GD_EAST);
+            moves_count = player_move(nlarn->p, GD_EAST, run_cmd == 0);
             break;
 
         case 'n':
         case '3':
         case KEY_NPAGE:
         case KEY_C3:
-            moves_count = player_move(nlarn->p, GD_SE);
+            moves_count = player_move(nlarn->p, GD_SE, run_cmd == 0);
             break;
 
         case 'k':
@@ -179,14 +179,14 @@ int main(int argc, char *argv[])
 #ifdef KEY_A2
         case KEY_A2:
 #endif
-            moves_count = player_move(nlarn->p, GD_NORTH);
+            moves_count = player_move(nlarn->p, GD_NORTH, run_cmd == 0);
             break;
 
         case 'u':
         case '9':
         case KEY_PPAGE:
         case KEY_A3:
-            moves_count = player_move(nlarn->p, GD_NE);
+            moves_count = player_move(nlarn->p, GD_NE, run_cmd == 0);
             break;
 
         case 'j':
@@ -195,14 +195,14 @@ int main(int argc, char *argv[])
 #ifdef KEY_C2
         case KEY_C2:
 #endif
-            moves_count = player_move(nlarn->p, GD_SOUTH);
+            moves_count = player_move(nlarn->p, GD_SOUTH, run_cmd == 0);
             break;
 
         case 'b':
         case '1':
         case KEY_END:
         case KEY_C1:
-            moves_count = player_move(nlarn->p, GD_SW);
+            moves_count = player_move(nlarn->p, GD_SW, run_cmd == 0);
             break;
 
             /* look at current position */
@@ -314,7 +314,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                moves_count = player_door_open(nlarn->p);
+                moves_count = player_door_open(nlarn->p, GD_NONE);
             }
             break;
 
