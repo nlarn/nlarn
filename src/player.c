@@ -603,6 +603,19 @@ int player_regenerate(player *p)
     return TRUE;
 }
 
+static const char* monster_type_plural_name(const int montype, const int count)
+{
+    if (count > 1)
+    {
+        if (montype == MT_JACULUS)
+            return "jaculi";
+        else if (montype == MT_DISENCHANTRESS)
+            return "disenchantresses";
+    }
+
+    return g_strconcat(monster_type_name(montype), plural(count), NULL);
+}
+
 /**
  * Kill the player
  *
@@ -855,10 +868,12 @@ void player_die(player *p, player_cod cause_type, int cause)
         {
             if (p->stats.monsters_killed[mnum] > 0)
             {
-                tmp = str_capitalize(g_strdup(monster_type_name(mnum)));
-                g_string_append_printf(text, "%3d %s%s\n",
-                                       p->stats.monsters_killed[mnum], tmp,
-                                       (p->stats.monsters_killed[mnum] > 1) ? "s" : "");
+                const int count = p->stats.monsters_killed[mnum];
+                tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum,
+                                                                       count)));
+
+                g_string_append_printf(text, "%3d %s\n",
+                                       p->stats.monsters_killed[mnum], tmp);
 
                 g_free(tmp);
                 body_count += p->stats.monsters_killed[mnum];
