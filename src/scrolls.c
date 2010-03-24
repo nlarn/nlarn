@@ -134,8 +134,9 @@ item_usage_result scroll_read(struct player *p, item *scroll)
     if (scroll->cursed)
     {
         damage *dam = damage_new(DAM_FIRE, ATT_NONE, rand_1n(p->hp), NULL);
-        log_add_entry(p->log, "The Scroll explodes!");
+        log_add_entry(p->log, "The scroll explodes!");
         player_damage_take(p, dam, PD_CURSE, scroll->type);
+        result.identified = FALSE;
     }
     else
     {

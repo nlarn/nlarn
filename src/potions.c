@@ -124,14 +124,14 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     {
         damage *dam = damage_new(DAM_POISON, ATT_NONE, rand_1n(p->hp), NULL);
 
-        log_add_entry(p->log, "The Potion is foul!");
+        log_add_entry(p->log, "The potion is foul!");
 
         log_add_entry(p->log, "You spit gore!");
         player_damage_take(p, dam, PD_CURSE, potion->type);
+        result.identified = FALSE;
     }
     else
     {
-
         switch (potion->id)
         {
         case PO_AMNESIA:
