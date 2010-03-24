@@ -1052,6 +1052,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     position target_p;  /* coordinates of target */
     map *map;           /* shortcut to player's current map */
     monster *target_m;  /* monster on target tile (if any) */
+    map_sobject_t so;   /* stationary object on target tile (if any) */
 
     assert(p != NULL && dir > GD_NONE && dir < GD_MAX);
 
@@ -1138,6 +1139,12 @@ int player_move(player *p, direction dir, gboolean open_door)
     if (map_ilist_at(map, p->pos))
     {
         player_autopickup(p);
+    }
+
+    /* mention stationary objects at this position */
+    if ((so =map_sobject_at(map, p->pos)))
+    {
+        log_add_entry(p->log, "You see %s here.", ls_get_desc(so));
     }
 
     return times;
