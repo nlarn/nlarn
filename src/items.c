@@ -1177,6 +1177,17 @@ item *item_disenchant(item *it)
 
     it->bonus--;
 
+    if (it->bonus == -3)
+    {
+        char desc[81] = { 0 };
+        item_describe(it, player_item_known(nlarn->p, it),
+                      (it->count == 1), TRUE, desc, 80);
+
+        desc[0] = g_ascii_toupper(desc[0]);
+        log_add_entry(nlarn->p->log, "%s vibrate%s warningly.",
+                      desc, (it->count == 1) ? "s" : "");
+    }
+
     if ((it->type == IT_RING) && it->effects)
     {
         for (pos = 0; pos < it->effects->len; pos++)
