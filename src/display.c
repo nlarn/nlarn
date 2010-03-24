@@ -38,10 +38,11 @@ static display_window *display_window_new(int x1, int y1, int width,
 static void display_window_destroy(display_window *dwin, gboolean shall_clear);
 
 static int display_window_move(display_window *dwin, int key);
-static void display_window_update_caption(display_window *dwin);
+static void display_window_update_caption(display_window *dwin, char *caption);
 static void display_window_update_arrow_up(display_window *dwin, gboolean on);
 static void display_window_update_arrow_down(display_window *dwin, gboolean on);
 
+static void display_item_details(item *it, player *p, gboolean shop);
 static void display_spheres_paint(sphere *s, player *p);
 
 int display_init()
@@ -537,7 +538,7 @@ int display_draw()
 /**
  * Generic inventory display function
  *
- * @param Window caption
+ * @param Window title
  * @param player
  * @param inventory to display
  * @param a GPtrArray of display_inv_callbacks
@@ -557,13 +558,14 @@ item *display_inventory(char *title, player *p, inventory **inv,
 
     gboolean keep_running = TRUE;
 
-    /* temp var to assemble window caption from callback descriptions */
-    char *tmp;
-
     /* used for looping over callbacks */
     guint cb_nr;
     display_inv_callback *cb;
     int key;
+
+    /* string array used to assemble the window caption
+       from the callback descriptions */
+    char **captions;
 
     /* time usage returned by callback function */
     int time;
@@ -649,45 +651,7 @@ item *display_inventory(char *title, player *p, inventory **inv,
             iwin = display_window_new(startx, starty, width, height, title);
         }
 
-        it = inv_get_filtered(*inv, curr + offset - 1, filter);
-
-        /* assemble window caption (if callbacks have been defined) */
-        for (cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
-        {
-            cb = g_ptr_array_index(callbacks, cb_nr);
-
-            /* check if callback is approriate for this item */
-            /* if no checkfunktion is set, always display item */
-            if ((cb->checkfun == NULL) || cb->checkfun(p, it))
-            {
-                cb->active = TRUE;
-
-                if (iwin->caption)
-                {
-                    tmp = g_strconcat(iwin->caption, " ", cb->description, NULL);
-                    g_free(iwin->caption);
-                    iwin->caption = tmp;
-                }
-                else
-                {
-                    iwin->caption = g_strdup(cb->description);
-                }
-            }
-            else
-            {
-                /* it isn't */
-                cb->active = FALSE;
-            }
-        }
-
-        display_window_update_caption(iwin);
-
-        if (iwin->caption)
-        {
-            g_free(iwin->caption);
-            iwin->caption = NULL;
-        }
-
+        /* draw all items */
         for (pos = 1; pos <= min(len_curr, maxvis); pos++)
         {
             it = inv_get_filtered(*inv, (pos - 1) + offset, filter);
@@ -720,6 +684,40 @@ item *display_inventory(char *title, player *p, inventory **inv,
 
             wattroff(iwin->window, attrs);
         }
+
+        /* get the currently selected item */
+        it = inv_get_filtered(*inv, curr + offset - 1, filter);
+
+        /* prepare the string array which will hold all the captions */
+        captions = strv_new();
+
+        /* assemble window caption (if callbacks have been defined) */
+        for (cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
+        {
+            cb = g_ptr_array_index(callbacks, cb_nr);
+
+            /* check if callback is approriate for this item */
+            /* if no checkfunktion is set, always display item */
+            if ((cb->checkfun == NULL) || cb->checkfun(p, it))
+            {
+                cb->active = TRUE;
+                strv_append(&captions, cb->description);
+            }
+            else
+            {
+                /* it isn't */
+                cb->active = FALSE;
+            }
+        }
+
+        /* append the describe action to the array of caption string */
+        strv_append(&captions, "(?) describe");
+
+        /* update the window's caption with the assembled array of captions */
+        display_window_update_caption(iwin, g_strjoinv(" ", captions));
+
+        /* free the array of caption strings */
+        g_strfreev(captions);
 
         display_window_update_arrow_up(iwin, offset > 0);
         display_window_update_arrow_down(iwin, (offset + maxvis) < len_curr);
@@ -813,7 +811,12 @@ item *display_inventory(char *title, player *p, inventory **inv,
             {
                 curr = len_curr;
             }
+            break;
 
+            /* show item details */
+        case '?':
+        case KEY_F(1):
+            display_item_details(it, p, show_price);
             break;
 
         case 27:
@@ -974,6 +977,9 @@ spell *display_spell_select(char *title, player *p)
     /* curses attributes */
     int attrs;
 
+    /* window caption */
+    gchar *caption;
+
     assert(p != NULL);
 
     if (!p->known_spells || !p->known_spells->len)
@@ -1023,16 +1029,14 @@ spell *display_spell_select(char *title, player *p)
         display_window_update_arrow_up(swin, (offset > 0));
         display_window_update_arrow_down(swin, ((offset + maxvis) < p->known_spells->len));
 
-        /* display typeahead keys */
-        gchar caption[39];
-        g_snprintf(caption, 38, "%s%s%s%s(?) description",
-                   (strlen(code_buf) ? "[" : ""),
-                   code_buf,
-                   (strlen(code_buf) ? "]" : ""),
-                   (strlen(code_buf) ? " " : ""));
+        /* construct the window caption: display typeahead keys */
+        caption = g_strdup_printf("%s%s%s%s(?) description",
+                                  (strlen(code_buf) ? "[" : ""),
+                                  code_buf,
+                                  (strlen(code_buf) ? "]" : ""),
+                                  (strlen(code_buf) ? " " : ""));
 
-        swin->caption = caption;
-        display_window_update_caption(swin);
+        display_window_update_caption(swin, caption);
 
         /* store currently highlighted spell */
         sp = g_ptr_array_index(p->known_spells, curr + offset - 1);
@@ -2241,7 +2245,7 @@ void display_show_history(message_log *log, const char *title)
  */
 char display_show_message(const char *title, const char *message, int indent)
 {
-    guint height, width;
+    guint height, width, max_len = 0;
     guint startx, starty;
     display_window *mwin;
     int key;
@@ -2252,12 +2256,24 @@ char display_show_message(const char *title, const char *message, int indent)
     guint maxvis = 0;
     guint offset = 0;
 
+    /* numer of columns required for window border and margin */
+    const guint wred = 4;
+
     gboolean RUN = TRUE;
 
-    width = display_cols - 8;
+    /* default window width according to available screen space */
+    width = display_cols - wred;
 
     /* wrap message according to width */
     text = text_wrap(message, width - 4, indent);
+
+    /* determine the lenght of longest text line */
+    for (idx = 0; idx < text->len; idx++)
+         max_len = max(max_len, strlen(g_ptr_array_index(text, idx)));
+
+    /* shrink the window width if the default width is not required */
+    if (max_len + wred < width)
+        width = max_len + wred;
 
     /* set height according to message line count */
     height = min((display_rows - 3), (text->len + 2));
@@ -2390,8 +2406,15 @@ static display_window *display_window_new(int x1, int y1, int width,
     dwin->y1 = y1;
     dwin->width = width;
     dwin->height = height;
-    /* clone title and caption */
-    dwin->title = g_strdup(title);
+
+    /* clone the window title if one has been provided */
+    if (title && strlen(title))
+    {
+        dwin->title = g_strdup(title);
+
+        /* make sure the first letter of the window title is upper case */
+        dwin->title[0] = g_ascii_toupper(dwin->title[0]);
+    }
 
     dwin->window = newwin(dwin->height, dwin->width, dwin->y1, dwin->x1);
 
@@ -2413,10 +2436,10 @@ static display_window *display_window_new(int x1, int y1, int width,
     box(dwin->window, 0, 0);
     wattroff(dwin->window, attrs);
 
-    if (title && strlen(title))
+    if (dwin->title)
     {
         wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED) | A_BOLD));
-        mvwprintw(dwin->window, 0, 1, " %s ", title);
+        mvwprintw(dwin->window, 0, 1, " %s ", dwin->title);
         wattroff(dwin->window, attrs);
     }
 
@@ -2505,7 +2528,7 @@ static int display_window_move(display_window *dwin, int key)
     return refresh;
 }
 
-static void display_window_update_caption(display_window *dwin)
+static void display_window_update_caption(display_window *dwin, char *caption)
 {
     int attrs; /* curses attributes */
 
@@ -2517,11 +2540,14 @@ static void display_window_update_caption(display_window *dwin)
     wattroff(dwin->window, attrs);
 
     /* print caption if caption is set */
-    if (dwin->caption && strlen(dwin->caption))
+    if (caption && strlen(caption))
     {
         wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-        mvwprintw(dwin->window, dwin->height - 1, 3, " %s ", dwin->caption);
+        mvwprintw(dwin->window, dwin->height - 1, 3, " %s ", caption);
         wattroff(dwin->window, attrs);
+
+        /* free the provided caption */
+        g_free(caption);
     }
 
     wrefresh(dwin->window);
@@ -2565,6 +2591,42 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
         mvwhline(dwin->window, dwin->height - 1, dwin->width - 5, ACS_HLINE, 3);
         wattroff(dwin->window, attrs);
     }
+}
+
+static void display_item_details(item *it, player *p, gboolean shop)
+{
+    /* string for the content of the item description popup */
+    char *msg = NULL;
+
+    /* buffer for the item description */
+    gchar item_desc[81] = { 0 };
+
+    if (shop)
+    {
+        /* inside shop */
+        item_describe(it, TRUE, FALSE, FALSE, item_desc, 80);
+        item_desc[0] = g_ascii_toupper(item_desc[0]);
+
+        msg = g_strdup_printf("%s\n\nWeight:   %.2f kg\nMaterial: %s\nPrice:    %d gp",
+              item_desc, (float)item_weight(it) / 1000,
+              item_material_name(item_material(it)), item_price(it));
+    }
+    else
+    {
+        item_describe(it, player_item_known(p, it), FALSE, FALSE, item_desc, 80);
+        item_desc[0] = g_ascii_toupper(item_desc[0]);
+
+        msg = g_strdup_printf("%s\n\nWeight:   %.2f kg\nMaterial: %s",
+                              item_desc,(float)item_weight(it) / 1000,
+                              item_material_name(item_material(it)));
+    }
+
+    display_show_message("Item details", msg, 0);
+    g_free(msg);
+
+    /* repaint everything after displaying the message */
+    display_paint_screen(p);
+    display_draw();
 }
 
 static void display_spheres_paint(sphere *s, player *p)
