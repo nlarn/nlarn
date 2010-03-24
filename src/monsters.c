@@ -1709,15 +1709,21 @@ void monster_player_attack(monster *m, player *p)
     if (player_effect(p, ET_INVISIBILITY) && !monster_has_infravision(m)
             && chance(65))
     {
-        log_add_entry(p->log, "The %s misses wildly.", monster_get_name(m));
+        if (monster_in_sight(m))
+        {
+            log_add_entry(p->log, "The %s misses wildly.", monster_get_name(m));
+        }
         return;
     }
 
     if (player_effect(p, ET_CHARM_MONSTER)
-            && (rand_m_n(5, 30) * monster_level(m) - player_get_cha(p) < 30))
+        && (rand_m_n(5, 30) * monster_level(m) - player_get_cha(p) < 30))
     {
-        log_add_entry(p->log, "The %s is awestruck at your magnificence!",
-                      monster_get_name(m));
+        if (monster_in_sight(m))
+        {
+            log_add_entry(p->log, "The %s is awestruck at your magnificence!",
+                          monster_get_name(m));
+        }
         return;
     }
 
@@ -1860,7 +1866,7 @@ monster *monster_damage_take(monster *m, damage *dam)
         /* monster has been hit */
         if (p)
         {
-            /* notifiy player */
+            /* notify player */
         }
 
         /* metamorph transforms if HP is low*/
@@ -1868,12 +1874,24 @@ monster *monster_damage_take(monster *m, damage *dam)
         {
             if ((m->hp < 25) && (m->hp > 0))
             {
+                gboolean seen_old = monster_in_sight(m);
                 m->type = MT_BRONCE_DRAGON + rand_0n(9);
+                gboolean seen_new = monster_in_sight(m);
 
-                if (p)
+                if (p && (seen_old || seen_new))
                 {
-                    log_add_entry(p->log, "The metamorph turns into a %s!",
-                                  monster_name(m));
+                    if (seen_old && seen_new)
+                    {
+                        log_add_entry(p->log, "The metamorph turns into a %s!",
+                                      monster_name(m));
+                    }
+                    else if (seen_old)
+                        log_add_entry(p->log, "The metamorph vanishes!");
+                    else
+                    {
+                        log_add_entry(p->log, "A %s suddenly appears!",
+                                      monster_name(m));
+                    }
                 }
             }
         }
