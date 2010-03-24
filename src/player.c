@@ -1013,7 +1013,6 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_string_free(text, TRUE);
     }
 
-    display_shutdown();
     game_destroy(nlarn);
 
     exit(EXIT_SUCCESS);

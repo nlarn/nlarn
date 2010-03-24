@@ -75,13 +75,17 @@ int main(int argc, char *argv[])
         scroll_mapping(nlarn->p, NULL);
     }
 
+    /* initialize display */
     display_init();
+
+    /* call display_shutdown when terminating the game */
+    atexit(display_shutdown);
+
     display_draw();
 
     /* check if mesgfile exists */
     if (!g_file_get_contents(game_mesgfile(nlarn), &strbuf, NULL, NULL))
     {
-        display_shutdown();
         game_destroy(nlarn);
 
         fprintf(stderr, "Error: Cannot find message file.\n");
@@ -374,7 +378,6 @@ int main(int argc, char *argv[])
             {
                 /* only terminate the game if saving was successful */
                 game_destroy(nlarn);
-                display_shutdown();
                 exit(EXIT_SUCCESS);
             }
             break;
