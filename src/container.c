@@ -110,6 +110,8 @@ int container_item_add(player *p, inventory **inv, item *element)
     gchar element_desc[61]  = { 0 };
     guint pilen = 0; /* length of player's filtered inventory */
     guint filen = 0; /* length of filtered floor inventory */
+    int count = 0;
+    item *original = element;
 
     assert(p != NULL && element != NULL);
 
@@ -122,12 +124,12 @@ int container_item_add(player *p, inventory **inv, item *element)
         /* choose the container to add the item element to. */
         if (pilen == 1)
         {
-            /* only one container in inventory - take it */
+            /* only one container in inventory - this is the one */
             container = inv_get_filtered(p->inventory, 0, inv_filter_container);
         }
         else if (pilen > 1)
         {
-            /* multiple, choose container from player's inventory */
+            /* multiple containers in the player's inventory, offer to choose one */
             container = display_inventory("Choose a container", p,
                                           &p->inventory, NULL, FALSE,
                                           inv_filter_container);
@@ -139,29 +141,59 @@ int container_item_add(player *p, inventory **inv, item *element)
         }
         else if (filen > 1)
         {
-            /* multiple, choose container from floor */
+            /* multiple containers on the floor, offer to choose one */
             container = display_inventory("Choose a container", p, floor,
                                           NULL, FALSE, inv_filter_container);
         }
     }
 
-    if (container != NULL)
+    if (container == NULL)
     {
-        /* log the event */
-        item_describe(container, TRUE, TRUE, TRUE, container_desc, 60);
-        item_describe(element, player_item_identified(p, element),
-                      (element->count == 1), TRUE, element_desc, 60 );
-
-        log_add_entry(p->log, "You put %s into %s.", element_desc,
-                      container_desc);
-
-        inv_del_element(&p->inventory, element);
-        inv_add(&container->content, element);
-    }
-    else
-    {
+        /* no container has been selected */
         log_add_entry(p->log, "Huh?");
+        return FALSE;
     }
+
+    /* prepare container description */
+    item_describe(container, TRUE, TRUE, TRUE, container_desc, 60);
+
+    if (element->count > 1)
+    {
+        g_snprintf(element_desc, 60, "How many %s do you want to put into the %s?",
+                   item_name_pl(element->type), container_desc);
+
+        count = display_get_count(element_desc, element->count);
+
+        if (count == 0)
+        {
+            return 0;
+        }
+
+        if (count < element->count)
+        {
+            /* replace element with a copy of element with the chosen amount */
+            element = item_split(element, count);
+
+            /* set original to NULL to prevent that it gets removed
+               from the originating inventory */
+            original = NULL;
+        }
+    }
+
+    /* log the event */
+    item_describe(element, player_item_identified(p, element),
+                  (element->count == 1), TRUE, element_desc, 60 );
+
+    log_add_entry(p->log, "You put %s into %s.", element_desc,
+                  container_desc);
+
+    /* remove the item from the player's inventory if it has not been split */
+    if (original != NULL)
+    {
+        inv_del_element(&p->inventory, element);
+    }
+
+    inv_add(&container->content, element);
 
     return 2;
 }
@@ -169,23 +201,53 @@ int container_item_add(player *p, inventory **inv, item *element)
 int container_item_unpack(player *p, inventory **inv, item *element)
 {
     gchar desc[61] = { 0 };
+    int count = 0;
+    gpointer oid = element->oid;
 
     assert(p != NULL && inv != NULL && element != NULL);
 
-    /* remove the item first, it may be destroyed later (stackable items!) */
-    inv_del_element(inv, element);
+    if (element->count > 1)
+    {
+        g_snprintf(desc, 60, "Pick up how many %s?", item_name_pl(element->type));
+
+        count = display_get_count(desc, element->count);
+
+        if (count == 0)
+        {
+            return FALSE;
+        }
+
+        if (count < element->count)
+        {
+            /* replace element with a copy of element with the chosen amount */
+            element = item_split(element, count);
+
+            /* set original to NULL to prevent that it gets removed
+               from the originating inventory */
+            oid = NULL;
+        }
+    }
 
     if (inv_add(&p->inventory, element))
     {
-        item_describe(element, player_item_known(p, element), (element->count == 1),
-                      FALSE, desc, 60);
+        item_describe(element, player_item_known(p, element),
+                      (element->count == 1), FALSE, desc, 60);
         log_add_entry(p->log, "You put %s into your pack.", desc);
+
+        if (oid != NULL)
+        {
+            /* remove the element from the originating inventory
+               if it has not been split */
+             inv_del_oid(inv, oid);
+        }
     }
-    else
+    else if (oid == NULL)
     {
-        /* if adding the element to the player's pack has failed
-           put it back into the container */
+        /* if adding the newly created element to the player's pack
+           has failed put it back into the container */
         inv_add(inv, element);
+
+        return FALSE;
     }
 
     return 2;
