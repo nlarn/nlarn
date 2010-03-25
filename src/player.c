@@ -104,7 +104,7 @@ static gboolean called_by_autopickup = FALSE;
 
 /* function declarations */
 
-static int player_trap_trigger(player *p, trap_t trap);
+static int player_trap_trigger(player *p, trap_t trap, int force);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 
 static cJSON *player_memory_serialize(player *p, position pos);
@@ -1134,7 +1134,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     /* trigger the trap */
     if (map_trap_at(map, target_p))
     {
-        times += player_trap_trigger(p, map_trap_at(map, target_p));
+        times += player_trap_trigger(p, map_trap_at(map, target_p), FALSE);
     }
 
     /* auto-pickup */
@@ -3969,7 +3969,8 @@ int player_stairs_down(player *p)
 {
     map *nlevel = NULL;
     gboolean show_msg = FALSE;
-    map_sobject_t ms = map_sobject_at(game_map(nlarn, p->pos.z), p->pos);
+    map *map = game_map(nlarn, p->pos.z);
+    map_sobject_t ms = map_sobject_at(map, p->pos);
 
     switch (ms)
     {
@@ -3992,8 +3993,13 @@ int player_stairs_down(player *p)
         break;
 
     default:
-        return FALSE;
-        break;
+    {
+        trap_t trap = map_trap_at(map, p->pos);
+        if (trap == TT_TRAPDOOR)
+            player_trap_trigger(p, trap, TRUE);
+        else
+            return FALSE;
+    }
     }
 
     /* display additional message */
@@ -4350,7 +4356,7 @@ char *player_get_level_desc(player *p)
  * @param the trap
  * @return time this move took
  */
-static int player_trap_trigger(player *p, trap_t trap)
+static int player_trap_trigger(player *p, trap_t trap, int force)
 {
     /* additional time of turn, if any */
     int time = 0;
@@ -4362,7 +4368,7 @@ static int player_trap_trigger(player *p, trap_t trap)
         /* if player knows the trap a 5% chance remains */
         possibility = 5;
 
-    if (chance(possibility))
+    if (force || chance(possibility))
     {
         log_add_entry(p->log, trap_p_message(trap));
 
