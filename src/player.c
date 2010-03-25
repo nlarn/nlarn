@@ -603,19 +603,6 @@ int player_regenerate(player *p)
     return TRUE;
 }
 
-static const char* monster_type_plural_name(const int montype, const int count)
-{
-    if (count > 1)
-    {
-        if (montype == MT_JACULUS)
-            return "jaculi";
-        else if (montype == MT_DISENCHANTRESS)
-            return "disenchantresses";
-    }
-
-    return g_strconcat(monster_type_name(montype), plural(count), NULL);
-}
-
 /**
  * Kill the player
  *

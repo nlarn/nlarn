@@ -431,8 +431,8 @@ static int scroll_genocide_monster(player *p, item *scroll)
             if (!monster_is_genocided(id))
             {
                 p->stats.monsters_killed[id] += monster_genocide(id);
-                log_add_entry(p->log, "Wiped out all %ss.",
-                              monster_type_name(id));
+                log_add_entry(p->log, "Wiped out all %s.",
+                              monster_type_plural_name(id, 2));
 
                 g_free(in);
 

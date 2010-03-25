@@ -1171,6 +1171,19 @@ char *monster_get_name(monster *m)
     return (monster_name(m));
 }
 
+const char* monster_type_plural_name(const int montype, const int count)
+{
+    if (count > 1)
+    {
+        if (montype == MT_JACULUS)
+            return "jaculi";
+        else if (montype == MT_DISENCHANTRESS)
+            return "disenchantresses";
+    }
+
+    return g_strconcat(monster_type_name(montype), plural(count), NULL);
+}
+
 void monster_die(monster *m, struct player *p)
 {
     char *message = "The %s died!";

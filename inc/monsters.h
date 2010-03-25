@@ -190,6 +190,7 @@ gboolean monster_in_sight(monster *m);
 
 /* other functions */
 char *monster_get_name(monster *m);
+const char* monster_type_plural_name(const int montype, const int count);
 void monster_die(monster *m, struct player *p);
 
 void monster_level_enter(monster *m, struct map *l);
