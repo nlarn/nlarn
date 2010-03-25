@@ -31,7 +31,7 @@ const ring_data rings[RT_MAX] =
     { RT_DEXTERITY,    "dexterity",          ET_INC_DEX,       120, 1, 1, },
     { RT_STRENGTH,     "strength",           ET_INC_STR,        85, 1, 1, },
     { RT_CLEVERNESS,   "cleverness",         ET_INC_INT,       120, 1, 1, },
-    { RT_INC_DAMAGE,   "increase damage",    ET_INC_DAMAGE,    125, 0, 0, },
+    { RT_INC_DAMAGE,   "increase damage",    ET_INC_DAMAGE,    125, 1, 0, },
     { RT_EXTRA_REGEN,  "extra regeneration", ET_INC_HP_REGEN, 1000, 1, 0, },
 };
 
