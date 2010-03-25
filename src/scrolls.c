@@ -245,7 +245,7 @@ static int scroll_with_effect(struct player *p, item *scroll)
     eff = effect_new(scroll_effect(scroll));
     eff = player_effect_add(p, eff);
 
-    if (!effect_get_msg_start(eff))
+    if (eff && !effect_get_msg_start(eff))
     {
         return FALSE;
     }
