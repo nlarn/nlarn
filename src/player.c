@@ -1048,6 +1048,25 @@ gint64 player_calc_score(player *p, int won)
     return score;
 }
 
+static gboolean check_movement_possible(player *p)
+{
+    /* no movement if overloaded */
+    if (player_effect(p, ET_OVERSTRAINED))
+    {
+        log_add_entry(p->log, "You cannot move as long you are overstrained.");
+        return FALSE;
+    }
+
+    /* no movement if paralyzed */
+    if (player_effect(p, ET_PARALYSIS))
+    {
+        log_add_entry(p->log, "You can't move!");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
 int player_move(player *p, direction dir, gboolean open_door)
 {
     int times = 1;      /* how many time ticks it took */
@@ -1058,19 +1077,8 @@ int player_move(player *p, direction dir, gboolean open_door)
 
     assert(p != NULL && dir > GD_NONE && dir < GD_MAX);
 
-    /* no movement if overloaded */
-    if (player_effect(p, ET_OVERSTRAINED))
-    {
-        log_add_entry(p->log, "You cannot move as long you are overstrained.");
+    if (!check_movement_possible(p))
         return 0;
-    }
-
-    /* no movement if paralyzed */
-    if (player_effect(p, ET_PARALYSIS))
-    {
-        log_add_entry(p->log, "You can't move!");
-        return 0;
-    }
 
     /* confusion: random movement */
     if (player_effect(p, ET_CONFUSION))
@@ -1764,9 +1772,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
             if (dam->amount > 0)
             {
-            e = effect_new(ET_POISON);
-            e->amount = dam->amount;
-            e = player_effect_add(p, e);
+                e = effect_new(ET_POISON);
+                e->amount = dam->amount;
+                e = player_effect_add(p, e);
             }
             else
             {
@@ -3569,6 +3577,9 @@ int player_building_enter(player *p)
 
 int player_door_close(player *p)
 {
+    if (!check_movement_possible(p))
+        return 0;
+
     /* position used to interact with stationaries */
     position pos;
 
@@ -3668,6 +3679,9 @@ int player_door_close(player *p)
 
 int player_door_open(player *p, int dir)
 {
+    if (!check_movement_possible(p))
+        return 0;
+
     /* position used to interact with stationaries */
     position pos;
 
