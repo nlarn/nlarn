@@ -1390,6 +1390,7 @@ int display_get_count(char *caption, int value)
         case 'y': /* yes */
         case 'd': /* drop */
         case 'g': /* get */
+        case 'p': /* put */
             /* reset value to original value */
             g_snprintf(ivalue, 8, "%d", value);
             cont = FALSE;
