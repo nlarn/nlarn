@@ -536,6 +536,16 @@ int display_draw()
     return doupdate();
 }
 
+static int item_sort_normal(gconstpointer a, gconstpointer b, gpointer data)
+{
+    return item_sort(a, b, data, FALSE);
+}
+
+static int item_sort_shop(gconstpointer a, gconstpointer b, gpointer data)
+{
+    return item_sort(a, b, data, TRUE);
+}
+
 /**
  * Generic inventory display function
  *
@@ -591,7 +601,10 @@ item *display_inventory(char *title, player *p, inventory **inv,
     assert(p != NULL && inv != NULL);
 
     /* sort inventory by item type */
-    inv_sort(*inv, (GCompareDataFunc)item_sort, (gpointer)p);
+    if (show_price)
+        inv_sort(*inv, (GCompareDataFunc)item_sort_shop, (gpointer)p);
+    else
+        inv_sort(*inv, (GCompareDataFunc)item_sort_normal, (gpointer)p);
 
     /* store inventory length */
     len_orig = len_curr = inv_length_filtered(*inv, filter);
@@ -646,7 +659,10 @@ item *display_inventory(char *title, player *p, inventory **inv,
             {
                 /* inventory has grown */
                 /* sort inventory by item type */
-                inv_sort(*inv, (GCompareDataFunc)item_sort, (gpointer)p);
+                if (show_price)
+                    inv_sort(*inv, (GCompareDataFunc)item_sort_shop, (gpointer)p);
+                else
+                    inv_sort(*inv, (GCompareDataFunc)item_sort_normal, (gpointer)p);
             }
         }
 
