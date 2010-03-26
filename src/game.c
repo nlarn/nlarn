@@ -88,6 +88,7 @@ void game_new(int argc, char *argv[])
     /* game time handling */
     nlarn->gtime = 1;
     nlarn->time_start = time(NULL);
+    nlarn->version = SAVEFILE_VERSION;
 
     /* welcome message */
     log_add_entry(nlarn->p->log, "Welcome to NLarn %d.%d.%d!",
@@ -155,6 +156,7 @@ int game_save(game *g, const char *filename)
 
     save = cJSON_CreateObject();
 
+    cJSON_AddNumberToObject(save, "nlarn_version", g->version);
     cJSON_AddNumberToObject(save, "time_start", g->time_start);
     cJSON_AddNumberToObject(save, "gtime", g->gtime);
     cJSON_AddNumberToObject(save, "difficulty", g->difficulty);
@@ -269,7 +271,7 @@ int game_save(game *g, const char *filename)
     return TRUE;
 }
 
-game *game_load(const char *filename, int argc, char *argv[])
+gboolean game_load(const char *filename, int argc, char *argv[])
 {
     int size, idx;
     game *g;
@@ -285,7 +287,7 @@ game *game_load(const char *filename, int argc, char *argv[])
     if (file == NULL)
     {
         /* failed to open save game file */
-        return NULL;
+        return FALSE;
     }
 
     /* temporary buffer to store uncompressed save file content */
@@ -308,6 +310,21 @@ game *game_load(const char *filename, int argc, char *argv[])
 
     /* allocate space for game structure */
     nlarn = g = g_malloc0(sizeof(game));
+
+    /* check for save file incompatibility */
+    gboolean compatible_version = FALSE;
+    if (cJSON_GetObjectItem(save, "nlarn_version"))
+    {
+        g->version = cJSON_GetObjectItem(save, "nlarn_version")->valueint;
+
+        if (g->version == SAVEFILE_VERSION)
+            compatible_version = TRUE;
+    }
+    if (!compatible_version)
+    {
+        cJSON_Delete(save);
+        return FALSE;
+    }
 
     /* restore saved game */
     g->time_start = cJSON_GetObjectItem(save, "time_start")->valueint;
@@ -430,7 +447,7 @@ game *game_load(const char *filename, int argc, char *argv[])
     log_add_entry(nlarn->p->log, "Welcome back to NLarn %d.%d.%d!",
                   VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 
-    return g;
+    return TRUE;
 }
 
 game_score_t *game_score(game *g, player_cod cod, int cause)

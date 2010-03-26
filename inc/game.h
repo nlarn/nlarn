@@ -25,12 +25,15 @@
 #include "spheres.h"
 
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
+/* internal counter for save file compatibility */
+#define SAVEFILE_VERSION    1
 
 /* the world as we know it */
 typedef struct game
 {
     player *p;                  /* the player */
     map *maps[MAP_MAX];         /* the dungeon */
+    guint8 version;             /* save compatibility value */
     guint64 time_start;         /* start time */
     guint32 gtime;              /* turn count */
     guint8 difficulty;          /* game difficulty */
@@ -119,7 +122,7 @@ int game_destroy(game *g);
 
 gchar *game_userdir();
 int game_save(game *g, const char *filename);
-game *game_load(const char *filename, int argc, char *argv[]);
+gboolean game_load(const char *filename, int argc, char *argv[]);
 
 game_score_t *game_score(game *g, player_cod cod, int cause);
 GList *game_score_add(game *g, game_score_t *score);

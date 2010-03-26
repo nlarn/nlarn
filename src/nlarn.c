@@ -52,14 +52,41 @@ int main(int argc, char *argv[])
     g_free(userdir);
 
     /* find save file */
+    gboolean loaded = FALSE;
+    gboolean display_initialised = FALSE;
     if (g_file_test(save_file_name, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
     {
         /* restore savegame */
-        game_load(save_file_name, argc, argv);
+        loaded = game_load(save_file_name, argc, argv);
 
-        /* delete save file */
-        g_unlink(save_file_name);
+        if (!loaded)
+        {
+            /* initialize display */
+            display_init();
 
+            /* call display_shutdown when terminating the game */
+            atexit(display_shutdown);
+
+            display_draw();
+            display_initialised = TRUE;
+
+            if (display_get_yesno("Saved game could not be loaded. " \
+                                  "Delete and start new game?",
+                                  NULL, NULL))
+            {
+                /* delete save file */
+                g_unlink(save_file_name);
+            }
+            else
+            {
+                g_printerr("Save file not compatible to current version.\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+
+    if (loaded)
+    {
         /* refresh FOV */
         player_update_fov(nlarn->p);
     }
@@ -75,13 +102,16 @@ int main(int argc, char *argv[])
         scroll_mapping(nlarn->p, NULL);
     }
 
-    /* initialize display */
-    display_init();
+    if (!display_initialised)
+    {
+        /* initialize display */
+        display_init();
 
-    /* call display_shutdown when terminating the game */
-    atexit(display_shutdown);
+        /* call display_shutdown when terminating the game */
+        atexit(display_shutdown);
 
-    display_draw();
+        display_draw();
+    }
 
     /* check if mesgfile exists */
     if (!g_file_get_contents(game_mesgfile(nlarn), &strbuf, NULL, NULL))
