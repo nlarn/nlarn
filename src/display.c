@@ -38,6 +38,7 @@ static display_window *display_window_new(int x1, int y1, int width,
 static void display_window_destroy(display_window *dwin, gboolean shall_clear);
 
 static int display_window_move(display_window *dwin, int key);
+static void display_window_update_title(display_window *dwin, const char *title);
 static void display_window_update_caption(display_window *dwin, char *caption);
 static void display_window_update_arrow_up(display_window *dwin, gboolean on);
 static void display_window_update_arrow_down(display_window *dwin, gboolean on);
@@ -556,6 +557,9 @@ item *display_inventory(char *title, player *p, inventory **inv,
     guint len_orig, len_curr;
     gboolean redraw = FALSE;
 
+    /* the windows title used for shops */
+    char *stitle = NULL;
+
     gboolean keep_running = TRUE;
 
     /* used for looping over callbacks */
@@ -683,6 +687,16 @@ item *display_inventory(char *title, player *p, inventory **inv,
             }
 
             wattroff(iwin->window, attrs);
+        }
+
+        /* prepare a window title with the bank account balance if in a shop */
+        if (show_price)
+        {
+            stitle = g_strdup_printf("%s - %d gp on bank account",
+                                     title, p->bank_account);
+
+            display_window_update_title(iwin, stitle);
+            g_free(stitle);
         }
 
         /* get the currently selected item */
@@ -2407,15 +2421,6 @@ static display_window *display_window_new(int x1, int y1, int width,
     dwin->width = width;
     dwin->height = height;
 
-    /* clone the window title if one has been provided */
-    if (title && strlen(title))
-    {
-        dwin->title = g_strdup(title);
-
-        /* make sure the first letter of the window title is upper case */
-        dwin->title[0] = g_ascii_toupper(dwin->title[0]);
-    }
-
     dwin->window = newwin(dwin->height, dwin->width, dwin->y1, dwin->x1);
 
 #ifdef PDCURSES
@@ -2436,12 +2441,8 @@ static display_window *display_window_new(int x1, int y1, int width,
     box(dwin->window, 0, 0);
     wattroff(dwin->window, attrs);
 
-    if (dwin->title)
-    {
-        wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED) | A_BOLD));
-        mvwprintw(dwin->window, 0, 1, " %s ", dwin->title);
-        wattroff(dwin->window, attrs);
-    }
+    /* set the window title */
+    display_window_update_title(dwin, title);
 
     /* create a panel for the window */
     dwin->panel = new_panel(dwin->window);
@@ -2526,6 +2527,45 @@ static int display_window_move(display_window *dwin, int key)
     }
 
     return refresh;
+}
+
+static void display_window_update_title(display_window *dwin, const char *title)
+{
+    int attrs; /* curses attributes */
+
+    assert (dwin != NULL && dwin->window != NULL);
+
+    if (dwin->title)
+    {
+        /* free the previous title */
+        g_free(dwin->title);
+
+        /* repaint line to overwrite previous title */
+        wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
+        mvwhline(dwin->window, 0, 2, ACS_HLINE, dwin->width - 7);
+        wattroff(dwin->window, attrs);
+    }
+
+    /* print the provided title */
+    if (title && strlen(title))
+    {
+        /* copy the new title
+         * the maximum length is determined by the window width
+         * minus the space required for the left corner (3)
+         * minus the space reqired for the right corner
+         *       and the scroll marker (7)
+         */
+        dwin->title = g_strndup(title, dwin->width - 10);
+
+        /* make sure the first letter of the window title is upper case */
+        dwin->title[0] = g_ascii_toupper(dwin->title[0]);
+
+        wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
+        mvwprintw(dwin->window, 0, 2, " %s ", dwin->title);
+        wattroff(dwin->window, attrs);
+    }
+
+    wrefresh(dwin->window);
 }
 
 static void display_window_update_caption(display_window *dwin, char *caption)
@@ -2642,4 +2682,3 @@ static void display_spheres_paint(sphere *s, player *p)
         attroff(DC_MAGENTA);
     }
 }
-
