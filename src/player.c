@@ -2568,11 +2568,7 @@ int player_item_equip(player *p, inventory **inv, item *it)
             log_add_entry(p->log, "You put %s on.", description);
 
             *islot = it;
-
-            if (ring_is_observable(it))
-            {
-                p->identified_rings[it->id] = TRUE;
-            }
+            p->identified_rings[it->id] = TRUE;
 
             if (ring_bonus_is_obs(it))
             {

@@ -60,7 +60,6 @@ extern const ring_data rings[RT_MAX];
 #define ring_name(item)          (rings[(item)->id].name)
 #define ring_effect_type(item)   (rings[(item)->id].effect)
 #define ring_price(item)         (rings[(item)->id].price)
-#define ring_is_observable(item) (rings[(item)->id].observable)
 #define ring_bonus_is_obs(item)  (rings[(item)->id].bonus_obs)
 
 #endif
