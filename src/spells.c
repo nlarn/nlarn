@@ -52,7 +52,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_DEX, "dex", "dexterity",
         SC_PLAYER, DAM_NONE, ET_INC_DEX,
-        "Improves the casters dexterity.",
+        "Improves the caster's dexterity.",
         NULL, NULL,
         1, 260, FALSE
     },
@@ -82,7 +82,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_STR, "str", "strength",
         SC_PLAYER, DAM_NONE, ET_INC_STR,
-        "Increase the casters strength for a short term.",
+        "Increase the caster's strength for a short term.",
         NULL, NULL,
         2, 460, FALSE
     },
@@ -164,7 +164,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_HAS, "has", "haste self",
         SC_PLAYER, DAM_NONE, ET_SPEED,
-        "Speeds up the casters movements.",
+        "Speeds up the caster's movements.",
         NULL, NULL,
         3, 950, FALSE
     },
@@ -567,7 +567,7 @@ int spell_cast(player *p)
             break;
         }
 
-        /* spell has been casted successfully, set mp usage accordingly */
+        /* spell has been cast successfully, set mp usage accordingly */
         if (well_done) mp_usage = spell_level(spell);
 
         break;
