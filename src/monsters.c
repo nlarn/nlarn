@@ -1572,12 +1572,6 @@ monster *monster_trap_trigger(monster *m)
     {
         log_add_entry(nlarn->p->log, trap_m_message(trap), monster_name(m));
 
-        if (eff)
-        {
-            log_add_entry(nlarn->p->log, effect_get_msg_m_start(eff),
-                          monster_name(m));
-        }
-
         /* set player's knowlege of trap */
         player_memory_of(nlarn->p, opos).trap = trap;
     }
@@ -2176,7 +2170,16 @@ effect *monster_effect_add(monster *m, effect *e)
 {
     assert(m != NULL && e != NULL);
 
-    return effect_add(m->effects, e);
+    e = effect_add(m->effects, e);
+
+    /* show message if monster is visible */
+    if (e && monster_in_sight(m) && effect_get_msg_m_start(e))
+    {
+        log_add_entry(nlarn->p->log, effect_get_msg_m_start(e),
+                      monster_name(m));
+    }
+
+    return e;
 }
 
 int monster_effect_del(monster *m, effect *e)
@@ -2455,7 +2458,6 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                         }
                         break;
                     }
-                    g_free(i);
                 }
             }
         }
