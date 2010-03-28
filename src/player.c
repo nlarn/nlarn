@@ -2396,7 +2396,7 @@ int player_inv_pre_add(inventory *inv, item *item)
     if ((pack_weight + item_weight(item)) > (int)(can_carry * 1.3))
     {
         /* get item description */
-        item_describe(item, player_item_identified(p, item), (item->count == 1), TRUE, buf, 60);
+        item_describe(item, player_item_known(p, item), (item->count == 1), TRUE, buf, 60);
         /* capitalize first letter */
         buf[0] = g_ascii_toupper(buf[0]);
 
