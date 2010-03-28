@@ -228,7 +228,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_NYMPH, "nymph",
-        3, 3, 9, 0, 18, 45, 'N', DC_BROWN,
+        3, 3, 9, 0, 18, 45, 'n', DC_RED,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS,
         {
@@ -407,7 +407,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_WRAITH, "wraith",
-        6, 3, 3, 0, 30, 325, 'w', DC_LIGHTGRAY,
+        6, 3, 3, 0, 30, 325, 'W', DC_LIGHTGRAY,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_UNDEAD,
         {
@@ -467,7 +467,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_VAMPIRE, "vampire",
-        7, 3, 17, 0, 50, 1000, 'v', DC_RED,
+        7, 3, 17, 0, 50, 1000, 'V', DC_RED,
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_FLY | MF_UNDEAD | MF_INFRAVISION | MF_REGENERATE,
         {
@@ -637,7 +637,7 @@ const monster_data monsters[MT_MAX] =
     },
     {
         MT_SPIRIT_NAGA, "spirit naga",
-        10, -20, 23, 0, 95, 20000, 'n', DC_MAGENTA,
+        10, -20, 23, 0, 95, 20000, 'N', DC_MAGENTA,
         SPEED_NORMAL, ESIZE_LARGE,
         MF_HEAD | MF_NOBEHEAD | MF_FLY | MF_SPIRIT | MF_INFRAVISION,
         {
