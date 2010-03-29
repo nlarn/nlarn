@@ -1,0 +1,247 @@
+Release 0.5.3 (2010-02-28)
+-------------
+
+Changes:
+    * Lots of colours!
+    * GFX for ray and blast type spells.
+    * The display is updated while sleeping.
+    * Updated the fortunes.
+    * When examining a position, the monster on it is described with more
+      details.
+    * Display additional information for unique weapons, like damages, bonus or
+      curses.
+    * Added the ability to display the bank account balance with 'B'.
+    * Modified item generation: only blessed items have a bonus, only cursed
+      items have a malus.
+
+Fixed bugs:
+    * Item stacking sometimes did not work. This has been fixed. Properly
+      returned split items to the originating inventory when adding to the
+      target inventory has failed.
+    * Some effect descriptions are broader than the available space and were
+      wrapped around. This has been fixed. Duplicate effects are no longer
+      listed in the effects list. Added some missing effect descriptions.
+    * Fixed stacking of effects, e.g. it is no longer possible to become
+      paralysed when already paralysed.
+    * Invalid movement counts as a move when confused (i.e. running into a
+      wall).
+    * The inventory is not displayed in obituary when empty. The map is hidden
+      in the obituary if the player is in town. Fixed an issue with the
+      statistics in the obituary.
+    * Burdened state gets recalculated when the player's strength value changes
+      (reported by Nick Genthner).
+    * A crash in the spell selection dialog has been fixed.
+    * Fixed a rare crash bug that occurred when a monster stepped into a poison
+      trap twice.
+    * Fixed two bugs with restoring saved games.
+    * Some animals dropped money. This has been fixed.
+    * The chance to gain intelligence by reading books was way too high and has
+      been significantly lowered.
+    * Fixed some message glitches.
+
+Release 0.5.2 (2010-01-11)
+-------------
+
+Changes:
+    * Improved maze creation: no more unreachable areas when a level contains a
+      treasure room.
+    * Stairways, the volcanic shafts and the bank branch office are placed in
+      dead ends in the maze. Modified the colour of volcano and dungeon
+      entrance to make them distinguishable from monsters.
+    * Changed the floor image to a dot (.) to make finding unexplored regions
+      possible.
+    * Slightly rearranged town buildings and added an altar.
+    * Revised and extended in-game help.
+    * Added a README file with basic instructions and other information.
+    * Cursedness / blessedness of an item is revealed when dropping it on an
+      altar. The item description reflects if an item is known not to be cursed.
+    * Destroy over-/under-enchanted items (> +3 / < -3).
+    * Not all items are available in the DND store, only essential equipment.
+      The items are displayed as identified and identified by purchasing them.
+    * Implemented aggravate monster.
+    * Reduced the speed at which level effects affect items.
+    * Improved the way the player's invisibility is displayed.
+    * Turned spell of genocide into a scroll of genocide monster.
+    * When casting a spell of type ray, all monsters standing in the way are
+      affected.
+    * Roll against constitution when getting poisoned to check if the player
+      resists. The special monster attacks blindness, confusion paralysis and
+      drain life do not automatically succeed for every attack.
+    * Enhanced the obituary further: display attributes, equipment, inventory
+      and effects.
+    * Removed sequential numbers from inventory dialog. Made it broader by 4
+      columns to have enough space for the blessedness information.
+    * Modified number and string input function to allow overwrite mode.
+    * Ask for the desired amount when picking up gold manually.
+    * Changed the key to take items out of containers from 't' to 'g'.
+    * Changed key used to drink from fountain to 'q'.
+
+Fixed bugs:
+    * Fixed flooding behavior of cloud kill, flood and magic fire. Fixed a crash
+      when casting these spells near the borders of the map. Fixed casting these
+      spells multiple times onto the same map squares.
+    * Fixed screen drawing when using the Scroll of Pulverisation.
+    * Fixed messages when gaining an experience level.
+    * Fixed crash in item_enchant() / item_disenchant().
+    * All unique weapons are always available in the DND store.
+    * Fixed a crash when taking stackable items out of containers.
+    * The volcano entrance now leads to level V1, not V3.
+    * Examining the player's current position no longer counts as a move.
+    * New monsters are placed outside of the player's visible area.
+    * Fixed the code to find an available space in a given area which would
+      fail quite frequently before for small areas (e.g. when generating gnome
+      kings).
+    * Fixed some special monster attack related bugs: Spirit Protection and the
+      umber hulk's confusion attack work again.
+    * Fixed number and string input function on Windows.
+    * Auto-pickup no longer asks how many items to pick up when picking up a
+      stack of items.
+    * The regular prices of items in no longer displayed in the trade post.
+      Items sold to the trade post are identified before being added to the DND
+      store.
+    * Corrected item descriptions: a/an is properly used.
+    * Use the plural when applicable in player_inv_pre_add()
+      (e.g. "3221 gold pieces _are_ too heavy for you.").
+    * Allow using of all number keys when displaying a message.
+
+Release 0.5.1 (2009-11-15)
+-------------
+
+Changes:
+    * Monsters do either pick up a single item or move. Previously monsters
+      could even pick up multiple items and move as well.
+    * The Leprechaun steals and teleports again.
+    * Added burnt/corroded/rusty to item description.
+    * Fixed messages given when changing the level.
+    * Drinking a potion of forgetfulness could lead to a crash. This has been
+      fixed.
+    * Washing at the fountain had been assigned the 't' key and been described
+      as "tidy up at fountain". This has been reassigned to 'W' with the
+      description "wash at fountain".
+    * Added description messages when using stationary objects.
+    * Thrones could generate multiple gnome kings. This has been fixed.
+    * Fixed order of messages when killing a monster and thus gaining an
+      experience level.
+    * Monsters can no longer enter a level when the entrance is blocked.
+    * Fixed a crash that occurred when examining a position with a monster on
+      it.
+    * Fixed a mistakable message when casting the spell vaporize rock.
+    * Started using a directory for the user's game related files; read
+      .ini-file from there; put save file into it. Under Linux this directory is
+      called ~/.nlarn, under Windows it is below Application Data (or the
+      localized version thereof).
+    * Read settings from the .ini-file correctly when restoring a saved game.
+    * Fixed a crash when pressing the windows keys while having a window open.
+    * Gems sold to the bank do no longer appear in the DND store.
+    * Items sold to the trade post are refurbished before being added to the DND
+      store.
+    * The bonus of armour and weapons sold in store is now known to the player.
+    * Fixed a crash when displaying high scores and the current score is not in
+      the list.
+    * Fixed a crash in large inventories when scrolling with page down starting
+      with the second entry.
+    * Added monsters and the player to the map shown at the end of the game.
+      Added some statistics to the obituary.
+    * Player dies if strength or dexterity sink below 1.
+
+
+Release 0.5.0 (2009-11-02)
+-------------
+
+Changes:
+    * Save your game and continue playing later.
+    * The town level is now static and has a lake and lots of trees. Buildings
+      can now be recognized as such.
+    * Shops debit the player's bank account for their services.
+    * It is now possible to save a memorial file for a deceased character. The
+      obituary contains a list of vanquished creatures.
+    * Configuration file allows to preset autopickup and the like.
+    * Implemented a string input function.
+    * The caption in the get_count dialog can now be wrapped.
+    * Created a rpm spec file.
+    * Created an installer for Windows.
+    * More weapons and armour types. Raised weapon and armour prices.
+    * Monsters that can use weapons will use weapons - against you!
+    * Implemented taking things out of and putting things into containers.
+    * Added a chance of failure when casting a spell.
+    * Ability to display spell description in the spell selection dialog.
+    * Honour spell knowledge level when calculation spell damage/power.
+    * Added ability to examine any visible position. Enhanced the descriptions
+      of a position.
+    * Monsters can use stairs or even enter the town to follow the player.
+    * Monsters can fall through trap doors and appear on the level below.
+    * Vastly lowered gem values.
+    * Re-enforce monsters on a map every now and then.
+
+Bugs and features fixed in this version:
+    * Fixed stealth.
+    * Fixed a crash in the inventory dialog.
+    * A leprechaun who picked up a gem could cause a crash in the drawing code
+      (this one took me hours to figure out. You got to love C!)
+    * A message is logged when no item has been discovered instead of showing an
+      empty dialog box.
+    * Fixed a bug in auto-pickup code which would lead to a game freeze and 100%
+      CPU usage.
+    * Fixed duplicate knowledge of spells.
+    * Move all Spheres of Destruction.
+    * Fixed the behavior of backspace key in the get_amount dialog.
+    * Fixed a game freeze when a fireball hit monsters.
+    * Books are used up upon successful learning.
+    * Corrected spell MP usage. Aborted spells no longer cost MPs.
+    * Corrected cloning of items with effects.
+    * When withdrawing large sums from the bank without being able to carry it
+      the money was lost. This has been fixed.
+    * Fixed a hang at the end of the game.
+    * Fixed trap generation of traps: now trapdoors are generated, too.
+    * Nymphs can no longer steal cursed items that are equipped.
+
+Release 0.4.1 (2009-09-11)
+-------------
+
+Changes:
+    * Mute duplicate message.
+    * Vi keys now also work in dialogs.
+    * Enter buildings with > (e no longer works).
+    * Sales revenue goes to bank account.
+    * Reworked adding/deleting items to/from inventory.
+
+Thanks for pointing these out go to Grishnak, sinoth and tametick of #rgrd.
+
+Release 0.4.0 (2009-09-10)
+-------------
+
+Changes:
+    * Implemented artefacts.
+    * Cursed and blessed items. Cursed books, potions and scrolls have side
+      effects.
+    * Items match the level the player is on.
+    * Items monsters have stolen are added to the monster's inventory (and can
+      thus be gained back by killing the monster).
+    * Reworked how damage is dealt and taken.
+    * Monsters have multiple attack types and change them when the player takes
+      no damage from an attack.
+    * Implemented spirit naga and mimic; improved the disenchantress.
+    * All windows are displayed when multiple windows are stacked.
+    * Windows can be moved with CTRL + _cursor_.
+    * Spells can be selected by typing their short name in the select spell
+      dialog.
+    * Weapons can have effects.
+    * Raised the number of effects an item can have from one to infinite.
+    * Implemented Bessman's Flailing Hammer.
+    * The inventory weight is respected. Picking up items which are too heavy is
+      no longer possible.
+    * Improved interface. Low HP and MP are displayed in different colour; the
+      most important negative effects and the level names are now shown.
+    * Implemented list of discovered items.
+    * Implemented walk through walls, dizziness and paralysis.
+    * Implemented potion of amnesia.
+    * Made sure monsters can not be positioned on player's tile.
+    * Implemented altar, fountain, mirror and throne.
+    * Items are affected by level effects, e.g. burn or rust.
+    * Improved autopickup - choosing item types to pick up is now possible.
+    * Many, many minor improvements and countless fixes...
+
+Release 0.3.0 (2009-07-13)
+-------------
+
+First publicly available version of nlarn.
