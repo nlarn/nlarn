@@ -589,6 +589,10 @@ int main(int argc, char *argv[])
 
 static gboolean adjacent_monster(position p, gboolean ignore_eye)
 {
+    // Ignore adjacent umber hulk if already confused.
+    const gboolean ignore_umber_hulk
+        = ignore_eye && player_effect_get(nlarn->p, ET_CONFUSION);
+
     // Only ignore floating eye if already paralysed.
     if (ignore_eye && !player_effect_get(nlarn->p, ET_PARALYSIS))
         ignore_eye = FALSE;
@@ -613,7 +617,11 @@ static gboolean adjacent_monster(position p, gboolean ignore_eye)
             monster *m = map_get_monster_at(game_map(nlarn, nlarn->p->pos.z), pos);
             if (m == NULL)
                 continue;
+
             if (ignore_eye && monster_type(m) == MT_FLOATING_EYE)
+                continue;
+
+            if (ignore_umber_hulk && monster_type(m) == MT_UMBER_HULK)
                 continue;
 
             if (monster_in_sight(m))
