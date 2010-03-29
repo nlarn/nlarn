@@ -1055,10 +1055,9 @@ int map_fill_with_life(map *l)
  *
  * Process temporary effects for a map.
  * @param the map on which the
- * @param the number of turns
  *
  */
-void map_timer(map *l, guint8 count)
+void map_timer(map *l)
 {
     position pos;
     item_erosion_type erosion;
@@ -1074,7 +1073,7 @@ void map_timer(map *l, guint8 count)
             if (map_timer_at(l, pos))
             {
                 map_tile *tile = map_tile_at(l, pos);
-                tile->timer -= min(map_timer_at(l, pos), count);
+                tile->timer--;
 
                 /* affect items every three turns */
                 if ((tile->ilist != NULL) && (tile->timer % 5 == 0))

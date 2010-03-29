@@ -535,7 +535,7 @@ int main(int argc, char *argv[])
         /* manipulate game time */
         if (moves_count)
         {
-            game_spin_the_wheel(nlarn, moves_count);
+            player_make_move(nlarn->p, moves_count);
             moves_count = 0;
         }
 

@@ -131,6 +131,9 @@ player *player_new()
 
     p->level = p->stats.max_level = 1;
 
+    /* set the player's default speed */
+    p->speed = SPEED_NORMAL;
+
     p->known_spells = g_ptr_array_new();
     p->effects = g_ptr_array_new();
     p->inventory = inv_new(p);
@@ -223,6 +226,9 @@ cJSON *player_serialize(player *p)
 
     cJSON_AddNumberToObject(pser, "experience", p->experience);
     cJSON_AddNumberToObject(pser, "level", p->level);
+
+    cJSON_AddNumberToObject(pser, "speed", p->speed);
+    cJSON_AddNumberToObject(pser, "movement", p->movement);
 
     /* known spells */
     if (p->known_spells->len > 0)
@@ -379,6 +385,8 @@ player *player_deserialize(cJSON *pser)
     p->experience = cJSON_GetObjectItem(pser, "experience")->valueint;
     p->level = cJSON_GetObjectItem(pser, "level")->valueint;
 
+    p->speed = cJSON_GetObjectItem(pser, "speed")->valueint;
+    p->movement = cJSON_GetObjectItem(pser, "movement")->valueint;
 
     /* known spells */
     obj = cJSON_GetObjectItem(pser, "known_spells");
@@ -514,93 +522,128 @@ player *player_deserialize(cJSON *pser)
     return p;
 }
 
-int player_regenerate(player *p)
+void player_make_move(player *p, int turns)
 {
-    /* number of turns between occasions */
-    int frequency;
-
-    /* amount of regeneration */
-    int regen = 0;
-
-    /* temporary var for effect */
-    effect *e;
+    int frequency; /* number of turns between occasions */
+    int regen = 0; /* amount of regeneration */
+    effect *e; /* temporary var for effect */
+    int idx;
 
     assert(p != NULL);
 
     /* modifier for frequency */
     frequency = game_difficulty(nlarn) << 3;
 
-    /* handle regeneration */
-    if (p->regen_counter == 0)
+    do
     {
-        p->regen_counter = 22 + frequency;
-
-        if (p->hp < player_get_hp_max(p))
+        /* if the number of movement points exceeds 100 reduce number
+           of turns and handle regeneration and some effects */
+        if (p->movement >= SPEED_NORMAL)
         {
-            regen = 1
-                    + player_effect(p, ET_INC_HP_REGEN)
-                    - player_effect(p, ET_DEC_HP_REGEN);
+            /* reduce the player's movement points */
+            p->movement -= SPEED_NORMAL;
 
-            player_hp_gain(p, regen);
         }
 
-        if (p->mp < player_get_mp_max(p))
+        /* player's extra moves have expired */
+        if (p->movement < SPEED_NORMAL)
         {
-            regen = 1
-                    + player_effect(p, ET_INC_MP_REGEN)
-                    - player_effect(p, ET_DEC_MP_REGEN);
+            /* move the rest of the world */
+            game_spin_the_wheel(nlarn);
 
-            player_mp_gain(p, regen);
+            /* expire temporary effects */
+            while (idx < p->effects->len)
+            {
+                gpointer effect_id = g_ptr_array_index(p->effects, idx);
+                e = game_effect_get(nlarn, effect_id);
+
+                if (effect_expire(e, turns) == -1)
+                {
+                    /* effect has expired */
+                    player_effect_del(p, e);
+                    effect_destroy(e);
+                }
+                else
+                {
+                    idx++;
+                }
+            }
+
+            /* handle regeneration */
+            if (p->regen_counter == 0)
+            {
+                p->regen_counter = 22 + frequency;
+
+                if (p->hp < player_get_hp_max(p))
+                {
+                    regen = 1
+                            + player_effect(p, ET_INC_HP_REGEN)
+                            - player_effect(p, ET_DEC_HP_REGEN);
+
+                    player_hp_gain(p, regen);
+                }
+
+                if (p->mp < player_get_mp_max(p))
+                {
+                    regen = 1
+                            + player_effect(p, ET_INC_MP_REGEN)
+                            - player_effect(p, ET_DEC_MP_REGEN);
+
+                    player_mp_gain(p, regen);
+                }
+            }
+            else
+            {
+                p->regen_counter--;
+            }
+
+            /* handle poison */
+            if ((e = player_effect_get(p, ET_POISON)))
+            {
+                if ((game_turn(nlarn) - e->start) % (22 - frequency) == 0)
+                {
+                    damage *dam = damage_new(DAM_POISON, ATT_NONE, e->amount, NULL);
+
+                    player_damage_take(p, dam, PD_EFFECT, e->type);
+                }
+            }
+
+            /* handle clumsiness */
+            if ((e = player_effect_get(p, ET_CLUMSINESS)))
+            {
+                if (chance(33) && p->eq_weapon)
+                {
+                    item *it = p->eq_weapon;
+
+                    log_disable(p->log);
+                    player_item_unequip(p, NULL, it);
+                    log_enable(p->log);
+
+                    log_add_entry(p->log, effect_get_msg_start(e));
+                    player_item_drop(p, &p->inventory, it);
+                }
+            }
+
+            /* handle itching */
+            if ((e = player_effect_get(p, ET_ITCHING)))
+            {
+                item **it;
+
+                if (chance(50) && (it = player_get_random_armour(p)))
+                {
+                    /* take off armour */
+                    it = NULL;
+
+                    log_add_entry(p->log, effect_get_msg_start(e));
+                    player_item_drop(p, &p->inventory, *it);
+                }
+            }
         }
+
+        /* reduce number of turns */
+        turns--;
     }
-    else
-    {
-        p->regen_counter--;
-    }
-
-    /* handle poison */
-    if ((e = player_effect_get(p, ET_POISON)))
-    {
-        if ((game_turn(nlarn) - e->start) % (22 - frequency) == 0)
-        {
-            damage *dam = damage_new(DAM_POISON, ATT_NONE, e->amount, NULL);
-
-            player_damage_take(p, dam, PD_EFFECT, e->type);
-        }
-    }
-
-    /* handle clumsiness */
-    if ((e = player_effect_get(p, ET_CLUMSINESS)))
-    {
-        if (chance(33) && p->eq_weapon)
-        {
-            item *it = p->eq_weapon;
-
-            log_disable(p->log);
-            player_item_unequip(p, NULL, it);
-            log_enable(p->log);
-
-            log_add_entry(p->log, effect_get_msg_start(e));
-            player_item_drop(p, &p->inventory, it);
-        }
-    }
-
-    /* handle itching */
-    if ((e = player_effect_get(p, ET_ITCHING)))
-    {
-        item **it;
-
-        if (chance(50) && (it = player_get_random_armour(p)))
-        {
-            /* take off armour */
-            it = NULL;
-
-            log_add_entry(p->log, effect_get_msg_start(e));
-            player_item_drop(p, &p->inventory, *it);
-        }
-    }
-
-    return TRUE;
+    while (turns > 0);
 }
 
 /**
@@ -857,7 +900,7 @@ void player_die(player *p, player_cod cause_type, int cause)
             {
                 const int count = p->stats.monsters_killed[mnum];
                 tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum,
-                                                                       count)));
+                                              count)));
 
                 g_string_append_printf(text, "%3d %s\n",
                                        p->stats.monsters_killed[mnum], tmp);
@@ -1883,7 +1926,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     case DAM_DRAIN_LIFE:
         if (player_effect(p, ET_UNDEAD_PROTECTION)
-            || !chance(dam->amount - player_get_wis(p)))
+                || !chance(dam->amount - player_get_wis(p)))
         {
             /* undead protection cancels drain life attacks */
             log_add_entry(p->log, "You are not affected.");
@@ -2117,7 +2160,7 @@ effect *player_effect_add(player *p, effect *e)
 
         for (i = 0; i < e->turns; i++)
         {
-            game_spin_the_wheel(nlarn, 1);
+            player_make_move(p, 1);
             display_paint_screen(p);
             usleep(50000);
         }
@@ -2225,30 +2268,6 @@ int player_effect(player *p, effect_type et)
 {
     assert(p != NULL && et > ET_NONE && et < ET_MAX);
     return effect_query(p->effects, et);
-}
-
-void player_effects_expire(player *p, int turns)
-{
-    guint idx = 0;
-
-    assert(p != NULL);
-
-    while (idx < p->effects->len)
-    {
-        gpointer effect_id = g_ptr_array_index(p->effects, idx);
-        effect *e = game_effect_get(nlarn, effect_id);
-
-        if (effect_expire(e, turns) == -1)
-        {
-            /* effect has expired */
-            player_effect_del(p, e);
-            effect_destroy(e);
-        }
-        else
-        {
-            idx++;
-        }
-    }
 }
 
 char **player_effect_text(player *p)
@@ -3287,7 +3306,7 @@ int player_item_drop(player *p, inventory **inv, item *it)
     map_sobject_t ms = map_sobject_at(game_map(nlarn, p->pos.z), p->pos);
 
     if (ms == LS_ALTAR
-        && (!player_effect(p, ET_BLINDNESS) || game_wizardmode(nlarn)))
+            && (!player_effect(p, ET_BLINDNESS) || game_wizardmode(nlarn)))
     {
         if (it->cursed)
         {
@@ -4824,3 +4843,4 @@ static char *player_death_description(game_score_t *score, int verbose)
 
     return g_string_free(text, FALSE);
 }
+

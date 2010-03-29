@@ -100,6 +100,9 @@ typedef struct player
     guint32 experience; /* experience points */
     guint32 level; /* current experience level */
 
+    speed speed; /* player's speed */
+    guint32 movement; /* player's movement points */
+
     /* other stuff */
     GPtrArray *known_spells;
     inventory *inventory;
@@ -191,7 +194,7 @@ void player_destroy(player *p);
 cJSON *player_serialize(player *p);
 player *player_deserialize(cJSON *pser);
 
-int player_regenerate(player *p);
+void player_make_move(player *p, int turns);
 void player_die(player *p, player_cod cause_type, int cause);
 gint64 player_calc_score(player *p, int won);
 int player_move(player *p, direction dir, gboolean open_door);
@@ -228,7 +231,6 @@ int player_effect_del(player *p, effect *e);
 void player_effects_del(player *p, GPtrArray *effects);
 effect *player_effect_get(player *p, effect_type et);
 int player_effect(player *p, effect_type et); /* check if a effect is set */
-void player_effects_expire(player *p, int turns);
 char **player_effect_text(player *p);
 
 /* dealing with the inventory */

@@ -884,7 +884,7 @@ item *display_inventory(char *title, player *p, inventory **inv,
                     /* trigger callback */
                     time = cb->function(p, cb->inv, inv_get_filtered(*inv, curr + offset - 1, filter));
 
-                    if (time) game_spin_the_wheel(nlarn, time);
+                    if (time) player_make_move(p, time);
 
                     redraw = TRUE;
                 }

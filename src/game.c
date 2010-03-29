@@ -518,13 +518,17 @@ map *game_map(game *g, guint nmap)
     return g->maps[nmap];
 }
 
-void game_spin_the_wheel(game *g, guint times)
+void game_spin_the_wheel(game *g)
 {
-    guint turn;
     int nmap;
     map *map;
 
-    assert(g != NULL && times > 0);
+    assert(g != NULL);
+
+    /* add the player's speed to the player's movement points */
+    nlarn->p->movement += nlarn->p->speed
+                          + player_effect(nlarn->p, ET_SPEED)
+                          - player_effect(nlarn->p, ET_SLOWNESS);
 
     /* per-map actions */
     for (nmap = 0; nmap < MAP_MAX; nmap++)
@@ -532,43 +536,36 @@ void game_spin_the_wheel(game *g, guint times)
         map = game_map(g, nmap);
 
         /* call map timers */
-        map_timer(map, times);
+        map_timer(map);
 
         /* spawn some monsters every now and then */
         if (nmap > 0 && (g->gtime % (100 + nmap)) == 0)
         {
             map_fill_with_life(map);
         }
-
     }
 
-    for (turn = 0; turn < times; turn++)
+    map = game_map(nlarn, g->p->pos.z);
+
+    /* check if player is stuck inside a wall without walk through wall */
+    if ((map_tiletype_at(map, g->p->pos) == LT_WALL)
+            && !player_effect(g->p, ET_WALL_WALK))
     {
-        player_regenerate(g->p);
-        player_effects_expire(g->p, 1);
-
-        map = game_map(nlarn, g->p->pos.z);
-
-        /* check if player is stuck inside a wall without walk through wall */
-        if ((map_tiletype_at(map, g->p->pos) == LT_WALL)
-                && !player_effect(g->p, ET_WALL_WALK))
-        {
-            player_die(g->p, PD_STUCK, 0);
-        }
-
-        /* deal damage cause by map tiles to player */
-        damage *dam  = map_tile_damage(map, g->p->pos);
-        if (dam != NULL)
-        {
-            player_damage_take(g->p, dam, PD_MAP, map_tiletype_at(map, g->p->pos));
-        }
-
-        game_monsters_move(g);
-        g_ptr_array_foreach(g->spheres, (GFunc)sphere_move, g);
-
-        g->gtime++; /* count up the time  */
-        log_set_time(g->p->log, g->gtime); /* adjust time for log entries */
+        player_die(g->p, PD_STUCK, 0);
     }
+
+    /* deal damage cause by map tiles to player */
+    damage *dam  = map_tile_damage(map, g->p->pos);
+    if (dam != NULL)
+    {
+        player_damage_take(g->p, dam, PD_MAP, map_tiletype_at(map, g->p->pos));
+    }
+
+    game_monsters_move(g);
+    g_ptr_array_foreach(g->spheres, (GFunc)sphere_move, g);
+
+    g->gtime++; /* count up the time  */
+    log_set_time(g->p->log, g->gtime); /* adjust time for log entries */
 }
 
 gpointer game_item_register(game *g, item *it)

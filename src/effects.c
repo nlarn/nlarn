@@ -176,7 +176,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_SPEED, 250, 1, "fast",
+        ET_SPEED, 250, 25, "fast",
         "You are suddenly moving much faster.",
         "You feel yourself slow down.",
         "The %s seems to move much faster.",
@@ -515,7 +515,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_SLOWNESS, 250, 1, "slow",
+        ET_SLOWNESS, 250, 25, "slow",
         "You feel yourself slow down.",
         "You are moving faster again.",
         "The %s slows down.",

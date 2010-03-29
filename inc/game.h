@@ -26,7 +26,7 @@
 
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 /* internal counter for save file compatibility */
-#define SAVEFILE_VERSION    1
+#define SAVEFILE_VERSION    2
 
 /* the world as we know it */
 typedef struct game
@@ -129,7 +129,7 @@ GList *game_score_add(game *g, game_score_t *score);
 void game_scores_destroy(GList *gs);
 
 map *game_map(game *g, guint nmap);
-void game_spin_the_wheel(game *g, guint times);
+void game_spin_the_wheel(game *g);
 
 /* functions to store game data */
 gpointer game_inventory_register(game *g, inventory *inv);

@@ -34,6 +34,7 @@ struct _monster
     gpointer oid; /* monsters id inside the monster hash */
     gint32 hp;
     position pos;
+    int movement;
     monster_action_t action;    /* current action */
 
     /* number of turns since when player was last seen; 0 = never */
@@ -98,7 +99,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_GIANT_BAT, "giant bat",
         1, 0, 3, 0, 1, 1, 'b', DC_RED,
-        SPEED_FAST, ESIZE_SMALL,
+        SPEED_XFAST, ESIZE_SMALL,
         MF_HEAD | MF_FLY | MF_INFRAVISION,
         {
             { ATT_BITE, DAM_PHYSICAL, 1, 0 },
@@ -128,7 +129,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_JACKAL, "jackal",
         1, 17, 4, 0, 1, 1, 'J', DC_BROWN,
-        SPEED_NORMAL, ESIZE_SMALL,
+        SPEED_FAST, ESIZE_SMALL,
         MF_HEAD,
         {
             { ATT_BITE, DAM_PHYSICAL, 1, 0 },
@@ -179,7 +180,7 @@ const monster_data monsters[MT_MAX] =
         /* a winged, leaping snake */
         MT_JACULUS, "jaculus",
         2, 20, 3, 0, 2, 1, 'j', DC_GREEN,
-        SPEED_NORMAL, ESIZE_MEDIUM,
+        SPEED_XFAST, ESIZE_MEDIUM,
         MF_HEAD | MF_FLY,
         {
             { ATT_BITE, DAM_PHYSICAL, 2, 0 },
@@ -209,7 +210,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_FLOATING_EYE, "floating eye",
         3, 8, 3, 0, 5, 2, 'E', DC_BLUE,
-        SPEED_SLOW, ESIZE_MEDIUM,
+        SPEED_XSLOW, ESIZE_MEDIUM,
         MF_FLY,
         {
             { ATT_GAZE, DAM_PARALYSIS, 66, 0 },
@@ -239,7 +240,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_QUASIT, "quasit",
         3, 5, 3, 0, 10, 15, 'Q', DC_BLUE,
-        SPEED_NORMAL, ESIZE_SMALL,
+        SPEED_FAST, ESIZE_SMALL,
         MF_HEAD | MF_HANDS | MF_DEMON,
         {
             { ATT_CLAW, DAM_DEC_DEX, 66, 0 },
@@ -259,7 +260,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_ZOMBIE, "zombie",
         3, 12, 3, 0, 6, 7, 'Z', DC_LIGHTGRAY,
-        SPEED_SLOW, ESIZE_MEDIUM,
+        SPEED_VSLOW, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_UNDEAD,
         {
             { ATT_CLAW, DAM_PHYSICAL, 2, 0 },
@@ -269,7 +270,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_ASSASSIN_BUG, "assassin bug",
         4, 9, 3, 0, 20, 15, 'a', DC_LIGHTGRAY,
-        SPEED_NORMAL, ESIZE_TINY,
+        SPEED_FAST, ESIZE_TINY,
         MF_HEAD,
         {
             { ATT_BITE, DAM_PHYSICAL, 3, 0 },
@@ -279,7 +280,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_BUGBEAR, "bugbear",
         4, 5, 5, 40, 20, 35, 'B', DC_BROWN,
-        SPEED_NORMAL, ESIZE_MEDIUM,
+        SPEED_SLOW, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
             { ATT_BITE, DAM_PHYSICAL, 5, 10 },
@@ -309,7 +310,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_CENTAUR, "centaur",
         4, 6, 10, 40, 24, 45, 'C', DC_BROWN,
-        SPEED_NORMAL, ESIZE_LARGE,
+        SPEED_FAST, ESIZE_LARGE,
         MF_HEAD | MF_HANDS,
         {
             { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
@@ -319,7 +320,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_TROLL, "troll",
         5, 4, 9, 80, 50, 300, 'T', DC_BROWN,
-        SPEED_NORMAL, ESIZE_LARGE,
+        SPEED_SLOW, ESIZE_LARGE,
         MF_HEAD | MF_HANDS | MF_REGENERATE,
         {
             { ATT_CLAW, DAM_PHYSICAL, 5, 0 },
@@ -339,7 +340,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_ELF, "elf",
         5, 8, 15, 50, 22, 35, 'e', DC_WHITE,
-        SPEED_NORMAL, ESIZE_MEDIUM,
+        SPEED_FAST, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_INFRAVISION,
         {
             { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
@@ -349,7 +350,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_GELATINOUSCUBE, "gelatinous cube",
         5, 9, 3, 0, 22, 45, 'g', DC_CYAN,
-        SPEED_SLOW, ESIZE_LARGE,
+        SPEED_XSLOW, ESIZE_LARGE,
         MF_METALLIVORE,
         {
             { ATT_SLAM, DAM_ACID, 1, 0 },
@@ -398,7 +399,7 @@ const monster_data monsters[MT_MAX] =
     { /* FIXME: I don't want no silly mushrooms */
         MT_VIOLET_FUNGUS, "violet fungi",
         6, 12, 3, 0, 38, 100, 'F', DC_MAGENTA,
-        SPEED_SLOW, ESIZE_MEDIUM,
+        SPEED_XSLOW, ESIZE_MEDIUM,
         MF_NONE,
         {
             { ATT_SLAM, DAM_POISON, 2, 0 },
@@ -418,7 +419,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_FORVALAKA, "forvalaka",
         6, 2, 7, 0, 50, 280, 'f', DC_DARKGRAY,
-        SPEED_FAST, ESIZE_MEDIUM,
+        SPEED_DOUBLE, ESIZE_MEDIUM,
         MF_HEAD | MF_UNDEAD | MF_INFRAVISION,
         {
             { ATT_BITE, DAM_PHYSICAL, 5, 0 },
@@ -438,7 +439,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_OSQUIP, "osquip",
         7, 4, 4, 0, 35, 100, 'o', DC_BROWN,
-        SPEED_NORMAL, ESIZE_SMALL,
+        SPEED_VFAST, ESIZE_SMALL,
         MF_HEAD,
         {
             { ATT_BITE, DAM_PHYSICAL, 10, 15 },
@@ -448,7 +449,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_ROTHE, "rothe",
         7, 15, 3, 0, 50, 250, 'r', DC_BROWN,
-        SPEED_FAST, ESIZE_LARGE,
+        SPEED_VFAST, ESIZE_LARGE,
         MF_HEAD | MF_INFRAVISION,
         {
             { ATT_BITE, DAM_PHYSICAL, 5, 0 },
@@ -508,7 +509,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_SHAMBLINGMOUND, "shambling mound",
         8, 2, 6, 0, 45, 400, 's', DC_GREEN,
-        SPEED_NORMAL, ESIZE_HUGE,
+        SPEED_VSLOW, ESIZE_HUGE,
         MF_NONE,
         {
             { ATT_SLAM, DAM_PHYSICAL, 5, 0 },
@@ -518,7 +519,7 @@ const monster_data monsters[MT_MAX] =
     { /* FIXME: replace this beast! */
         MT_YELLOW_MOLD, "yellow mold",
         8, 12, 3, 0, 35, 250, 'y', DC_YELLOW,
-        SPEED_NONE, ESIZE_SMALL,
+        SPEED_XSLOW, ESIZE_SMALL,
         MF_NONE,
         {
             { ATT_TOUCH, DAM_PHYSICAL, 4, 0 },
@@ -568,7 +569,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_PURPLE_WORM, "purple worm",
         9, -1, 3, 0, 120, 15000, 'P', DC_MAGENTA,
-        SPEED_SLOW, ESIZE_GARGANTUAN,
+        SPEED_VSLOW, ESIZE_GARGANTUAN,
         MF_HEAD,
         {
             { ATT_BITE, DAM_PHYSICAL, 11, 0 },
@@ -638,7 +639,7 @@ const monster_data monsters[MT_MAX] =
     {
         MT_SPIRIT_NAGA, "spirit naga",
         10, -20, 23, 0, 95, 20000, 'N', DC_MAGENTA,
-        SPEED_NORMAL, ESIZE_LARGE,
+        SPEED_FAST, ESIZE_LARGE,
         MF_HEAD | MF_NOBEHEAD | MF_FLY | MF_SPIRIT | MF_INFRAVISION,
         {
             { ATT_MAGIC, DAM_RANDOM, 1, 0 },
@@ -648,7 +649,7 @@ const monster_data monsters[MT_MAX] =
     { /* TODO: relplace this beast */
         MT_GREEN_URCHIN, "green urchin",
         10, -3, 3, 0, 85, 5000, 'u', DC_GREEN,
-        SPEED_NORMAL, ESIZE_SMALL,
+        SPEED_SLOW, ESIZE_SMALL,
         MF_NONE,
         {
             { ATT_STING, DAM_PHYSICAL, 12, 0 },
@@ -985,6 +986,7 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     cJSON_AddNumberToObject(mval, "oid", GPOINTER_TO_UINT(oid));
     cJSON_AddNumberToObject(mval, "hp", m->hp);
     cJSON_AddItemToObject(mval,"pos", pos_serialize(m->pos));
+    cJSON_AddNumberToObject(mval, "movement", m->movement);
     cJSON_AddNumberToObject(mval, "action", m->action);
 
     if (m->weapon != NULL)
@@ -1029,6 +1031,7 @@ void monster_deserialize(cJSON *mser, game *g)
     m->oid = GUINT_TO_POINTER(oid);
     m->hp = cJSON_GetObjectItem(mser, "hp")->valueint;
     m->pos = pos_deserialize(cJSON_GetObjectItem(mser, "pos"));
+    m->movement = cJSON_GetObjectItem(mser, "movement")->valueint;
     m->action = cJSON_GetObjectItem(mser, "action")->valueint;
 
     if ((obj = cJSON_GetObjectItem(mser, "weapon")))
@@ -1301,216 +1304,226 @@ void monster_move(monster *m, struct player *p)
 
     map_path_element *el = NULL;
 
+    /* update monster's knowledge of player's position */
     if (monster_player_visible(m)
             || (player_effect(p, ET_AGGRAVATE_MONSTER)
                 && pos_distance(m->pos, p->pos) < 15))
     {
-        /* update monster's knowledge of player's position */
         monster_update_player_pos(m, p->pos);
     }
 
-    /* update monsters action */
-    if (monster_update_action(m) && monster_in_sight(m))
+    /* add the monster's speed to the monster's movement points */
+    m->movement += monster_speed(m);
+
+    /* let the monster make a move as long it has movement points left */
+    while (m->movement >= SPEED_NORMAL)
     {
-        /* the monster has chosen a new action and the player
-           can see the new action, so let's describe it */
+        /* reduce the monster's movement points */
+        m->movement -= SPEED_NORMAL;
 
-        if (m->action == MA_ATTACK)
+        /* update monsters action */
+        if (monster_update_action(m) && monster_in_sight(m))
         {
-            /* TODO: certain monster types will make a sound when attacking the player */
-            /*
-            log_add_entry(p->log,
-                          "The %s has spotted you and heads towards you!",
-                          monster_name(m));
-             */
-        }
-        else if (m->action == MA_FLEE)
-        {
-            log_add_entry(p->log, "The %s turns to flee!", monster_name(m));
-        }
-    }
+            /* the monster has chosen a new action and the player
+               can see the new action, so let's describe it */
 
-    /* let the monster have a look at the items at it's current position
-       if it chose to pick up something, the turn is over */
-    if (monster_items_pickup(m))
-        return;
-
-    /* determine monster's next move */
-    m_npos = monster_pos(m);
-
-    switch (m->action)
-    {
-    case MA_FLEE:
-        dist = 0;
-
-        for (tries = 1; tries < GD_MAX; tries++)
-        {
-            /* try all fields surrounding the monster if the
-             * distance between monster & player is greater */
-            if (tries == GD_CURR)
-                continue;
-
-            m_npos_tmp = pos_move(monster_pos(m), tries);
-
-            if (pos_valid(m_npos_tmp)
-                    && lt_is_passable(map_tiletype_at(monster_map(m),m_npos_tmp))
-                    && !map_is_monster_at(monster_map(m), m_npos_tmp)
-                    && (pos_distance(p->pos, m_npos_tmp) > dist))
+            if (m->action == MA_ATTACK)
             {
-                /* distance is bigger than current distance */
-                m_npos = m_npos_tmp;
-                dist = pos_distance(m->player_pos, m_npos_tmp);
+                /* TODO: certain monster types will make a sound when attacking the player */
+                /*
+                log_add_entry(p->log,
+                              "The %s has spotted you and heads towards you!",
+                              monster_name(m));
+                 */
+            }
+            else if (m->action == MA_FLEE)
+            {
+                log_add_entry(p->log, "The %s turns to flee!", monster_name(m));
             }
         }
 
-        break; /* end MA_FLEE */
+        /* let the monster have a look at the items at it's current position
+           if it chose to pick up something, the turn is over */
+        if (monster_items_pickup(m))
+            return;
 
-    case MA_REMAIN:
-        /* Sgt. Stan Still - do nothing */
-        break;
+        /* determine monster's next move */
+        m_npos = monster_pos(m);
 
-    case MA_WANDER:
-        tries = 0;
-
-        do
+        switch (m->action)
         {
-            m_npos = pos_move(m->pos, rand_1n(GD_MAX));
-            tries++;
-        }
-        while ((!pos_valid(m_npos)
-                || !lt_is_passable(map_tiletype_at(monster_map(m),m_npos))
-                || map_is_monster_at(monster_map(m), m_npos))
-                && (tries < GD_MAX));
+        case MA_FLEE:
+            dist = 0;
 
-        /* new position has not been found, reset to current position */
-        if (tries == GD_MAX)
-            m_npos = monster_pos(m);
-
-        break; /* end MA_WANDER */
-
-    case MA_ATTACK:
-        if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
-        {
-            /* monster is standing next to player */
-            monster_player_attack(m, p);
-
-            /* monster's position might have changed (teleport) */
-            if (!pos_identical(m_npos, monster_pos(m)))
+            for (tries = 1; tries < GD_MAX; tries++)
             {
+                /* try all fields surrounding the monster if the
+                 * distance between monster & player is greater */
+                if (tries == GD_CURR)
+                    continue;
+
+                m_npos_tmp = pos_move(monster_pos(m), tries);
+
+                if (pos_valid(m_npos_tmp)
+                        && lt_is_passable(map_tiletype_at(monster_map(m),m_npos_tmp))
+                        && !map_is_monster_at(monster_map(m), m_npos_tmp)
+                        && (pos_distance(p->pos, m_npos_tmp) > dist))
+                {
+                    /* distance is bigger than current distance */
+                    m_npos = m_npos_tmp;
+                    dist = pos_distance(m->player_pos, m_npos_tmp);
+                }
+            }
+
+            break; /* end MA_FLEE */
+
+        case MA_REMAIN:
+            /* Sgt. Stan Still - do nothing */
+            break;
+
+        case MA_WANDER:
+            tries = 0;
+
+            do
+            {
+                m_npos = pos_move(m->pos, rand_1n(GD_MAX));
+                tries++;
+            }
+            while ((!pos_valid(m_npos)
+                    || !lt_is_passable(map_tiletype_at(monster_map(m),m_npos))
+                    || map_is_monster_at(monster_map(m), m_npos))
+                    && (tries < GD_MAX));
+
+            /* new position has not been found, reset to current position */
+            if (tries == GD_MAX)
                 m_npos = monster_pos(m);
-                log_add_entry(p->log, "The %s vanishes.", monster_name(m));
-            }
-        }
-        else if (pos_identical(monster_pos(m), m->player_pos)
-                 && ((map_sobject_at(monster_map(m), m->pos) == LS_STAIRSDOWN)
-                     || (map_sobject_at(monster_map(m), m->pos) == LS_DNGN_ENTRANCE
-                         && monster_pos(m).z == 0)))
-        {
-            /* go level down */
-            monster_level_enter(m, game_map(nlarn, m->pos.z + 1));
-        }
-        else if (pos_identical(monster_pos(m), m->player_pos)
-                 && (map_sobject_at(monster_map(m), m->pos) == LS_STAIRSUP
-                     || (map_sobject_at(monster_map(m), m->pos) == LS_DNGN_EXIT
-                         && monster_pos(m).z == 1)))
-        {
-            /* go level up */
-            monster_level_enter(m, game_map(nlarn, m->pos.z - 1));
-        }
-        else
-        {
-            /* monster heads into the direction of the player. */
 
-            /* if the monster is on a different map than the player,
-               try to find the staircase to reach the player's map */
-            if (m->pos.z != m->player_pos.z)
+            break; /* end MA_WANDER */
+
+        case MA_ATTACK:
+            if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
             {
-                map_sobject_t what;
-                if (m->pos.z > m->player_pos.z)
-                    what = LS_STAIRSUP;
-                else
-                    what = LS_STAIRSDOWN;
+                /* monster is standing next to player */
+                monster_player_attack(m, p);
 
-                m->player_pos = map_find_sobject(monster_map(m), what);
+                /* monster's position might have changed (teleport) */
+                if (!pos_identical(m_npos, monster_pos(m)))
+                {
+                    m_npos = monster_pos(m);
+                    log_add_entry(p->log, "The %s vanishes.", monster_name(m));
+                }
             }
-
-            path = map_find_path(monster_map(m), monster_pos(m), m->player_pos);
-
-            if (path && !g_queue_is_empty(path->path))
+            else if (pos_identical(monster_pos(m), m->player_pos)
+                     && ((map_sobject_at(monster_map(m), m->pos) == LS_STAIRSDOWN)
+                         || (map_sobject_at(monster_map(m), m->pos) == LS_DNGN_ENTRANCE
+                             && monster_pos(m).z == 0)))
             {
-                el = g_queue_pop_head(path->path);
-                m_npos = el->pos;
+                /* go level down */
+                monster_level_enter(m, game_map(nlarn, m->pos.z + 1));
+            }
+            else if (pos_identical(monster_pos(m), m->player_pos)
+                     && (map_sobject_at(monster_map(m), m->pos) == LS_STAIRSUP
+                         || (map_sobject_at(monster_map(m), m->pos) == LS_DNGN_EXIT
+                             && monster_pos(m).z == 1)))
+            {
+                /* go level up */
+                monster_level_enter(m, game_map(nlarn, m->pos.z - 1));
             }
             else
             {
-                /* no path found. stop following player */
-                m->lastseen = 0;
-            }
+                /* monster heads into the direction of the player. */
 
-            /* cleanup */
-            if (path)
+                /* if the monster is on a different map than the player,
+                   try to find the staircase to reach the player's map */
+                if (m->pos.z != m->player_pos.z)
+                {
+                    map_sobject_t what;
+                    if (m->pos.z > m->player_pos.z)
+                        what = LS_STAIRSUP;
+                    else
+                        what = LS_STAIRSDOWN;
+
+                    m->player_pos = map_find_sobject(monster_map(m), what);
+                }
+
+                path = map_find_path(monster_map(m), monster_pos(m), m->player_pos);
+
+                if (path && !g_queue_is_empty(path->path))
+                {
+                    el = g_queue_pop_head(path->path);
+                    m_npos = el->pos;
+                }
+                else
+                {
+                    /* no path found. stop following player */
+                    m->lastseen = 0;
+                }
+
+                /* cleanup */
+                if (path)
+                {
+                    map_path_destroy(path);
+                }
+            }
+            break; /* end MA_ATTACK */
+
+        case MA_NONE:
+        case MA_MAX:
+            /* possibly a bug */
+            break;
+        }
+
+        /* ******** if new position has been found - move the monster ********* */
+        map_sobject_t target_st = map_sobject_at(monster_map(m), m_npos);
+
+        if (!pos_identical(m_npos, monster_pos(m)))
+        {
+            /* vampires won't step onto mirrors */
+            if ((m->type == MT_VAMPIRE) && (target_st == LS_MIRROR))
             {
-                map_path_destroy(path);
+                /* FIXME: should try to move around it */
+                m_npos = monster_pos(m);
             }
-        }
-        break; /* end MA_ATTACK */
 
-    case MA_NONE:
-    case MA_MAX:
-        /* possibly a bug */
-        break;
-    }
-
-    /* ******** if new position has been found - move the monster ********* */
-    map_sobject_t target_st = map_sobject_at(monster_map(m), m_npos);
-
-    if (!pos_identical(m_npos, monster_pos(m)))
-    {
-        /* vampires won't step onto mirrors */
-        if ((m->type == MT_VAMPIRE) && (target_st == LS_MIRROR))
-        {
-            /* FIXME: should try to move around it */
-            m_npos = monster_pos(m);
-        }
-
-        else if (pos_identical(p->pos, m_npos))
-        {
-            /* bump into invisible player */
-            monster_update_player_pos(m, p->pos);
-            m_npos = monster_pos(m);
-
-            log_add_entry(p->log, "The %s bumped into you.", monster_get_name(m));
-        }
-
-        /* check for door */
-        else if ((target_st == LS_CLOSEDDOOR)
-                 /* lock out zombies */
-                 && monster_has_hands(m) && monster_int(m) > 3)
-        {
-            /* open the door */
-            map_sobject_set(monster_map(m), m_npos, LS_OPENDOOR);
-
-            /* notify the player if the door is visible */
-            if (monster_in_sight(m))
+            else if (pos_identical(p->pos, m_npos))
             {
-                log_add_entry(p->log, "The %s opens the door.", monster_name(m));
+                /* bump into invisible player */
+                monster_update_player_pos(m, p->pos);
+                m_npos = monster_pos(m);
+
+                log_add_entry(p->log, "The %s bumped into you.", monster_get_name(m));
             }
-        }
 
-        /* move towards player; check for monsters */
-        else if (map_pos_validate(monster_map(m), m_npos, LE_MONSTER, FALSE))
-        {
-            monster_pos_set(m, monster_map(m), m_npos);
-
-            /* check for traps */
-            if (map_trap_at(monster_map(m), monster_pos(m)))
+            /* check for door */
+            else if ((target_st == LS_CLOSEDDOOR)
+                     /* lock out zombies */
+                     && monster_has_hands(m) && monster_int(m) > 3)
             {
-                if (!monster_trap_trigger(m))
-                    return; /* trap killed the monster */
+                /* open the door */
+                map_sobject_set(monster_map(m), m_npos, LS_OPENDOOR);
+
+                /* notify the player if the door is visible */
+                if (monster_in_sight(m))
+                {
+                    log_add_entry(p->log, "The %s opens the door.", monster_name(m));
+                }
             }
 
-        } /* end new position */
-    } /* end monster repositioning */
+            /* move towards player; check for monsters */
+            else if (map_pos_validate(monster_map(m), m_npos, LE_MONSTER, FALSE))
+            {
+                monster_pos_set(m, monster_map(m), m_npos);
+
+                /* check for traps */
+                if (map_trap_at(monster_map(m), monster_pos(m)))
+                {
+                    if (!monster_trap_trigger(m))
+                        return; /* trap killed the monster */
+                }
+
+            } /* end new position */
+        } /* end monster repositioning */
+    } /* while movement >= SPEED_NORMAL */
 
     /* increment count of turns since when player was last seen */
     if (m->lastseen) m->lastseen++;
@@ -1724,7 +1737,7 @@ void monster_player_attack(monster *m, player *p)
     }
 
     if (player_effect(p, ET_CHARM_MONSTER)
-        && (rand_m_n(5, 30) * monster_level(m) - player_get_cha(p) < 30))
+            && (rand_m_n(5, 30) * monster_level(m) - player_get_cha(p) < 30))
     {
         if (monster_in_sight(m))
         {

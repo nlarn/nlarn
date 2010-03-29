@@ -41,9 +41,14 @@ typedef enum _direction
 typedef enum _speed
 {
     SPEED_NONE,
-    SPEED_SLOW,
-    SPEED_NORMAL,
-    SPEED_FAST,
+    SPEED_XSLOW  =  25,
+    SPEED_VSLOW  =  50,
+    SPEED_SLOW   =  75,
+    SPEED_NORMAL = 100,
+    SPEED_FAST   = 125,
+    SPEED_VFAST  = 150,
+    SPEED_XFAST  = 175,
+    SPEED_DOUBLE = 200,
     SPEED_MAX
 } speed;
 
