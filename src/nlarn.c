@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
     if (nlarn->p->sex == PS_NONE)
     {
-        int res = display_get_yesno("Are you male or female?", "female", "male");
+        int res = display_get_yesno("Are you male or female?", "Female", "Male");
 
         /* display_get_yesno() returns 0 or one */
         nlarn->p->sex = (res == TRUE) ?  PS_FEMALE : PS_MALE;

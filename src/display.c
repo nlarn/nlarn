@@ -21,6 +21,7 @@
 #include <panel.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "display.h"
 #include "nlarn.h"
@@ -1754,10 +1755,12 @@ int display_get_yesno(char *question, char *yes, char *no)
     wattron(ywin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
 
     for (line = 0; line < text->len; line++)
+    {
         mvwprintw(ywin->window,
                   line + 1,
                   1 + padding,
                   g_ptr_array_index(text, line));
+    }
 
     wattroff(ywin->window, attrs);
 
@@ -1766,16 +1769,16 @@ int display_get_yesno(char *question, char *yes, char *no)
     do
     {
         /* paint */
-        if (selection) wattron(ywin->window, (attrs = COLOR_PAIR(DCP_BLACK_WHITE) | A_BOLD));
-        else           wattron(ywin->window, (attrs = COLOR_PAIR(DCP_RED_WHITE)));
+        if (selection) wattron(ywin->window, (attrs = COLOR_PAIR(DCP_RED_WHITE)));
+        else           wattron(ywin->window, (attrs = COLOR_PAIR(DCP_BLACK_WHITE) | A_BOLD));
 
         mvwprintw(ywin->window, line + 2, margin, "%*s%s%*s", padding, " ",
                   yes, padding, " ");
 
         wattroff(ywin->window, attrs);
 
-        if (!selection) wattron(ywin->window, (attrs = COLOR_PAIR(DCP_BLACK_WHITE) | A_BOLD));
-        else            wattron(ywin->window, (attrs = COLOR_PAIR(DCP_RED_WHITE)));
+        if (selection) wattron(ywin->window, (attrs = COLOR_PAIR(DCP_BLACK_WHITE) | A_BOLD));
+        else           wattron(ywin->window, (attrs = COLOR_PAIR(DCP_RED_WHITE)));
 
         mvwprintw(ywin->window, line + 2,
                   width - margin - strlen(no) - (2 * padding),
@@ -1784,8 +1787,25 @@ int display_get_yesno(char *question, char *yes, char *no)
         wattroff(ywin->window, attrs);
         wrefresh(ywin->window);
 
+        key = tolower(getch());
+        // Specialcase for the movement keys and y/n.
+        if (key != 'h' && key != 'l' && key != 'y' && key != 'n')
+        {
+            char input_yes = tolower(yes[0]);
+            char input_no  = tolower(no[0]);
+            // If both answers share the same initial letter, we're out of luck.
+            if (input_yes != input_no || input_yes == 'n' || input_no == 'y')
+            {
+                if (key == input_yes)
+                    key = 'y';
+                else if (key == input_no)
+                    key = 'n';
+            }
+        }
+
+
         /* wait for input */
-        switch ((key = getch()))
+        switch (key)
         {
         case 27: /* ESC */
             selection = FALSE;
@@ -1820,13 +1840,11 @@ int display_get_yesno(char *question, char *yes, char *no)
 
             /* shortcuts */
         case 'y':
-        case 'Y':
             selection = TRUE;
             RUN = FALSE;
             break;
 
         case 'n':
-        case 'N':
             selection = FALSE;
             RUN = FALSE;
             break;
@@ -2011,7 +2029,7 @@ position display_get_position(player *p, char *message, gboolean ray,
     map *map;
     int attrs; /* curses attributes */
 
-    /* variables for ray  or ball painting */
+    /* variables for ray or ball painting */
     area *a = NULL;
     int x, y;
     monster *target, *m;
@@ -2703,3 +2721,4 @@ static void display_spheres_paint(sphere *s, player *p)
         attroff(DC_MAGENTA);
     }
 }
+
