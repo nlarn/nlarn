@@ -87,6 +87,9 @@ int main(int argc, char *argv[])
 
     if (loaded)
     {
+        /* delete save file */
+        g_unlink(save_file_name);
+
         /* refresh FOV */
         player_update_fov(nlarn->p);
     }
