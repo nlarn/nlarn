@@ -160,7 +160,6 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         3, 950, FALSE
     },
-/*
     {
         SP_HAS, "has", "haste self",
         SC_PLAYER, DAM_NONE, ET_SPEED,
@@ -168,7 +167,6 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         3, 950, FALSE
     },
-*/
     {
         SP_CKL, "ckl", "killing cloud",
         SC_FLOOD, DAM_ACID, ET_NONE,
@@ -349,9 +347,10 @@ book_obfuscation[SP_MAX - 1] =
     { "bamboo",          800, DC_YELLOW,    },
     { "clasped",         800, DC_LIGHTGRAY, },
     { "well-thumbed",    800, DC_LIGHTGRAY, },
+    { "ragged",          800, DC_LIGHTGRAY, },
 /*
     reserve descriptions for unimplemented spells:
-    ragged, dull, chambray, canvas
+    dull, chambray, canvas
 */
 };
 
