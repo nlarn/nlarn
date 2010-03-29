@@ -471,7 +471,7 @@ const monster_data monsters[MT_MAX] =
         SPEED_NORMAL, ESIZE_MEDIUM,
         MF_HEAD | MF_HANDS | MF_FLY | MF_UNDEAD | MF_INFRAVISION | MF_REGENERATE,
         {
-            { ATT_TOUCH, DAM_DRAIN_LIFE, 75, 0 },
+            { ATT_BITE, DAM_DRAIN_LIFE, 75, 0 },
             { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
         }
     },
@@ -1735,9 +1735,12 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* choose attack type */
-    if (m->weapon != NULL && monster_attack_available(m, ATT_WEAPON))
+    const gboolean has_weap_attack
+        = (m->weapon != NULL && monster_attack_available(m, ATT_WEAPON));
+
+    /* prefer weapon attack */
+    if (has_weap_attack && chance(80))
     {
-        /* prefer weapon attack */
         att = monster_attack_get(m, ATT_WEAPON);
     }
     else
@@ -1752,6 +1755,8 @@ void monster_player_attack(monster *m, player *p)
                 break;
             }
         }
+        if (!att && has_weap_attack)
+            att = monster_attack_get(m, ATT_WEAPON);
     }
 
     /* no attack has been found. return to calling function. */
