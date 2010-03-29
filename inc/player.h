@@ -54,6 +54,13 @@ typedef struct _player_stats
     gint32 cha_orig;
 } player_stats;
 
+typedef enum _player_sex
+{
+    PS_NONE,
+    PS_MALE,
+    PS_FEMALE
+} player_sex;
+
 typedef struct _player_settings
 {
     gboolean auto_pickup[IT_MAX]; /* automatically pick up item of enabled types */
@@ -71,7 +78,7 @@ typedef struct _player_tile_memory
 typedef struct player
 {
     char *name;
-    guint8 sex; /* 0 female, 1 male */
+    player_sex sex;
 
     guint32 strength;
     guint32 intelligence;

@@ -247,7 +247,11 @@ int display_paint_screen(player *p)
     clrtoeol();
 
     /* player name and level */
-    printw("%s, %s", p->name, player_get_level_desc(p));
+    if (p->name)
+    {
+        /* the player's name can be NULL directly after starting the game */
+        printw("%s, %s", p->name, player_get_level_desc(p));
+    }
 
     /* current HPs */
     if (p->hp <= ((int)p->hp_max / 10)) /* 10% hp left */
@@ -1688,7 +1692,7 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     text_destroy(text);
     display_window_destroy(mwin, TRUE);
 
-    if (key == 27)
+    if (key == 27 || string->len == 0)
     {
         g_string_free(string, TRUE);
         return NULL;

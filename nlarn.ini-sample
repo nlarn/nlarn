@@ -8,8 +8,8 @@
 # Set character's name
 name=John Doe
 
-#  Make a female character (default: male)
-# female=true
+#  Choose the sex of your character (m/w)
+sex=m
 
 # Item types to pick up automatically:
 # " amulets

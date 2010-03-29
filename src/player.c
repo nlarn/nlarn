@@ -622,7 +622,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     char it_desc[61] = { 0 };
     int count, pos;
     effect *ef = NULL;
-    char *pronoun = p->sex ? "He" : "She";
+    char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
 
     assert(p != NULL);
 
@@ -4728,8 +4728,8 @@ static char *player_death_description(game_score_t *score, int verbose)
 
     text = g_string_new_len(NULL, 200);
 
-    g_string_append_printf(text, "%s (%c), %s",
-                           score->player_name, score->sex ? 'm' : 'f', desc);
+    g_string_append_printf(text, "%s (%c), %s", score->player_name,
+                           (score->sex == PS_MALE) ? 'm' : 'f', desc);
 
     if (verbose)
     {
@@ -4768,8 +4768,8 @@ static char *player_death_description(game_score_t *score, int verbose)
 
     case PD_LASTLEVEL:
         g_string_append_printf(text,". %s left %s body.",
-                               score->sex ? "He" : "She",
-                               score->sex ? "his" : "her");
+                               (score->sex == PS_MALE) ? "He" : "She",
+                               (score->sex == PS_MALE) ? "his" : "her");
         break;
 
     case PD_MONSTER:
@@ -4796,7 +4796,7 @@ static char *player_death_description(game_score_t *score, int verbose)
 
     case PD_SPELL:
         g_string_append_printf(text, " %s with the spell \"%s\".",
-                               score->sex ? "himself" : "herself",
+                               (score->sex == PS_MALE) ? "himself" : "herself",
                                spell_name_by_id(score->cause));
         break;
 
@@ -4819,7 +4819,7 @@ static char *player_death_description(game_score_t *score, int verbose)
     if (verbose)
     {
         g_string_append_printf(text, " %s has scored %" G_GINT64_FORMAT " points.",
-                               score->sex ? "He" : "She", score->score);
+                               (score->sex == PS_MALE) ? "He" : "She", score->score);
     }
 
     return g_string_free(text, FALSE);

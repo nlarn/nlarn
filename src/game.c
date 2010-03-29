@@ -652,7 +652,7 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
     static gint difficulty = 0;
     static gboolean wizard = FALSE;
     static char *name = NULL;
-    static gboolean female = FALSE; /* default: male */
+    static char *sex = NULL;
     static char *auto_pickup = NULL;
 
     /* define per-user dir */
@@ -694,7 +694,7 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
         name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
         g_clear_error(&error);
 
-        female = g_key_file_get_boolean(ini_file, "nlarn", "female", &error);
+        sex = g_key_file_get_string(ini_file, "nlarn", "sex", &error);
         g_clear_error(&error);
 
         auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
@@ -715,7 +715,7 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
         { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,  "Set difficulty",       NULL },
         { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &wizard,      "Enable wizard mode",   NULL },
         { "name",        'n', 0, G_OPTION_ARG_STRING, &name,        "Set character's name", NULL },
-        { "female",        0, 0, G_OPTION_ARG_NONE,   &female,      "Make a female character (default: male)", NULL },
+        { "sex",         's', 0, G_OPTION_ARG_STRING, &sex,         "Set character's sex (m/f)", NULL },
         { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &auto_pickup, "Item types to pick up automatically, e.g. '$*+'", NULL },
         { NULL }
     };
@@ -729,7 +729,6 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
         exit (EXIT_FAILURE);
     }
     g_option_context_free(context);
-
 
     /* determine paths and file names */
     if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
@@ -761,13 +760,26 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
         {
             g->p->name = name;
         }
-        else
-        {
-            /* get full name from system */
-            g->p->name = (char *)g_get_real_name();
-        }
 
-        g->p->sex = !female;
+        if (sex)
+        {
+            sex[0] = g_ascii_tolower(sex[0]);
+
+            switch(sex[0])
+            {
+            case 'm':
+                g->p->sex = PS_MALE;
+                break;
+
+            case 'f':
+                g->p->sex = PS_FEMALE;
+                break;
+
+            default:
+                g->p->sex = PS_NONE;
+                break;
+            }
+        }
 
         if (wizard)
         {

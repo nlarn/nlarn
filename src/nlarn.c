@@ -130,6 +130,24 @@ int main(int argc, char *argv[])
 
     display_paint_screen(nlarn->p);
 
+    while (nlarn->p->name == NULL)
+    {
+        nlarn->p->name = display_get_string("By what name shall you be called?",
+                                            NULL, 45);
+
+        display_paint_screen(nlarn->p);
+    }
+
+    if (nlarn->p->sex == PS_NONE)
+    {
+        int res = display_get_yesno("Are you male or female?", "female", "male");
+
+        /* display_get_yesno() returns 0 or one */
+        nlarn->p->sex = (res == TRUE) ?  PS_FEMALE : PS_MALE;
+
+        display_paint_screen(nlarn->p);
+    }
+
     char run_cmd = 0;
     int ch;
     gboolean adj_corr = FALSE;
