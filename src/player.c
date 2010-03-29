@@ -542,12 +542,29 @@ void player_make_move(player *p, int turns)
         {
             /* reduce the player's movement points */
             p->movement -= SPEED_NORMAL;
-
         }
 
-        /* player's extra moves have expired */
+        /* player's extra moves have expired - finish a turn */
         if (p->movement < SPEED_NORMAL)
         {
+            /* check for time stop */
+            if ((e = player_effect_get(p, ET_TIMESTOP)))
+            {
+                /* time has been stopped - handle player's movement locally */
+                p->movement += player_get_speed(p);
+
+                /* expire only time stop */
+                if (effect_expire(e, 1) == -1)
+                {
+                    /* time stop has expired - remove it*/
+                    player_effect_del(p, e);
+                    effect_destroy(e);
+                }
+
+                /* nothing else happens as the time is stopped */
+                break;
+            }
+
             /* move the rest of the world */
             game_spin_the_wheel(nlarn);
 
@@ -4318,6 +4335,14 @@ int player_get_cha(player *p)
            - player_effect(p, ET_DEC_CHA)
            + player_effect(p, ET_HEROISM)
            - player_effect(p, ET_DIZZINESS);
+}
+
+int player_get_speed(player *p)
+{
+    assert(p != NULL);
+    return nlarn->p->speed
+           + player_effect(nlarn->p, ET_SPEED)
+           - player_effect(nlarn->p, ET_SLOWNESS);
 }
 
 guint player_get_gold(player *p)

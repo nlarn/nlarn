@@ -285,6 +285,7 @@ int player_get_wis(player *p);
 int player_get_con(player *p);
 int player_get_dex(player *p);
 int player_get_cha(player *p);
+int player_get_speed(player *p);
 
 /* deal with money */
 guint player_get_gold(player *p);

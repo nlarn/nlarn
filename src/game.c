@@ -526,9 +526,7 @@ void game_spin_the_wheel(game *g)
     assert(g != NULL);
 
     /* add the player's speed to the player's movement points */
-    nlarn->p->movement += nlarn->p->speed
-                          + player_effect(nlarn->p, ET_SPEED)
-                          - player_effect(nlarn->p, ET_SLOWNESS);
+    nlarn->p->movement += player_get_speed(nlarn->p);
 
     /* per-map actions */
     for (nmap = 0; nmap < MAP_MAX; nmap++)

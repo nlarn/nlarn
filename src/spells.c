@@ -242,15 +242,13 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         5, 2000, FALSE
     },
-/*
     {
         SP_STP, "stp", "time stop",
-        SC_OTHER, DAM_NONE, ET_TIMESTOP,
+        SC_PLAYER, DAM_NONE, ET_TIMESTOP,
         "All movement in the caverns ceases for a limited duration.",
         NULL, NULL,
         5, 2500, FALSE
     },
-*/
     {
         SP_TEL, "tel", "teleport away",
         SC_POINT, DAM_NONE, ET_NONE,
@@ -348,9 +346,10 @@ book_obfuscation[SP_MAX - 1] =
     { "clasped",         800, DC_LIGHTGRAY, },
     { "well-thumbed",    800, DC_LIGHTGRAY, },
     { "ragged",          800, DC_LIGHTGRAY, },
+    { "dull",            800, DC_DARKGRAY,  },
 /*
     reserve descriptions for unimplemented spells:
-    dull, chambray, canvas
+    chambray, canvas
 */
 };
 
@@ -532,12 +531,6 @@ int spell_cast(player *p)
         case SP_CRE:
             well_done = spell_create_monster(p);
             break;
-
-            /* time stop */
-            /* TODO: implement (ticket 39)
-        case SP_STP:
-            break;
-            */
 
             /* vaporize rock */
         case SP_VPR:
