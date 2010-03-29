@@ -8,7 +8,7 @@
 # Set character's name
 name=John Doe
 
-#  Choose the sex of your character (m/w)
+#  Choose the sex of your character (m/f)
 sex=m
 
 # Item types to pick up automatically:
