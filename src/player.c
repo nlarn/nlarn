@@ -572,6 +572,7 @@ void player_make_move(player *p, int turns)
             game_spin_the_wheel(nlarn);
 
             /* expire temporary effects */
+            idx = 0; // reset idx for proper expiration during multiturn events
             while (idx < p->effects->len)
             {
                 gpointer effect_id = g_ptr_array_index(p->effects, idx);
