@@ -776,6 +776,17 @@ void player_die(player *p, player_cod cause_type, int cause)
         if ((e = player_effect_get(p, ET_POISON)))
             player_effect_del(p, e);
 
+        if (player_get_str(p) <= 0)
+        {
+            if ((e = player_effect_get(p, ET_DEC_STR)))
+                player_effect_del(p, e);
+        }
+        if (player_get_dex(p) <= 0)
+        {
+            if ((e = player_effect_get(p, ET_DEC_DEX)))
+                player_effect_del(p, e);
+        }
+
         /* return to the game */
         return;
     }
