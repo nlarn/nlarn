@@ -812,13 +812,13 @@ int effect_query(GPtrArray *ea, effect_type type)
  * @param an effect
  * @return turns remaining. Expired effects return -1, permantent effects 0
  */
-int effect_expire(effect *e, int turns)
+int effect_expire(effect *e)
 {
     assert(e != NULL);
 
     if (e->turns > 1)
     {
-        e->turns -= turns;
+        e->turns--;
     }
     else if (e->turns != 0)
     {

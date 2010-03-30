@@ -170,6 +170,6 @@ effect *effect_get(GPtrArray *ea, effect_type type);
 /* check if an effect is set */
 int effect_query(GPtrArray *ea, effect_type type);
 
-int effect_expire(effect *e, int turns);
+int effect_expire(effect *e);
 
 #endif

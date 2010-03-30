@@ -554,7 +554,7 @@ void player_make_move(player *p, int turns)
                 p->movement += player_get_speed(p);
 
                 /* expire only time stop */
-                if (effect_expire(e, 1) == -1)
+                if (effect_expire(e) == -1)
                 {
                     /* time stop has expired - remove it*/
                     player_effect_del(p, e);
@@ -574,7 +574,7 @@ void player_make_move(player *p, int turns)
                 gpointer effect_id = g_ptr_array_index(p->effects, idx);
                 e = game_effect_get(nlarn, effect_id);
 
-                if (effect_expire(e, turns) == -1)
+                if (effect_expire(e) == -1)
                 {
                     /* effect has expired */
                     player_effect_del(p, e);

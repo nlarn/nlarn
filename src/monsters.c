@@ -2237,7 +2237,7 @@ void monster_effects_expire(monster *m)
         gpointer effect_id = g_ptr_array_index(m->effects, idx);;
         effect *e = game_effect_get(nlarn, effect_id);
 
-        if (effect_expire(e, 1) == -1)
+        if (effect_expire(e) == -1)
         {
             /* effect has expired */
             monster_effect_del(m, e);
