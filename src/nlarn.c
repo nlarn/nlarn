@@ -380,8 +380,10 @@ int main(int argc, char *argv[])
 
         case 'P':
             if (nlarn->p->outstanding_taxes)
+            {
                 log_add_entry(nlarn->p->log, "You presently owe %d gp in taxes.",
                               nlarn->p->outstanding_taxes);
+            }
             else
                 log_add_entry(nlarn->p->log, "You do not owe any taxes.");
             break;
@@ -476,15 +478,18 @@ int main(int argc, char *argv[])
 
         case '+': /* dungeon map up */
             if (game_wizardmode(nlarn) && (nlarn->p->pos.z > 0))
+            {
                 moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z - 1),
                                                nlarn->p->pos.z == MAP_DMAX);
-
+            }
             break;
 
         case '-': /* dungeon map down */
             if (game_wizardmode(nlarn) && (nlarn->p->pos.z < (MAP_MAX - 1)))
+            {
                 moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z + 1),
                                                nlarn->p->pos.z == MAP_DMAX - 1);
+            }
             break;
 
         case 't': /* intra-level teleport */
@@ -566,7 +571,8 @@ int main(int argc, char *argv[])
                         && nlarn->p->mp == nlarn->p->mp_max
                         && !player_effect_get(nlarn->p, ET_CONFUSION)
                         && !player_effect_get(nlarn->p, ET_BLINDNESS)
-                        && !player_effect_get(nlarn->p, ET_PARALYSIS)))
+                        && !player_effect_get(nlarn->p, ET_DIZZINESS)
+                        && !player_effect_get(nlarn->p, ET_BLINDNESS)))
                 {
                     run_cmd = 0;
                 }
