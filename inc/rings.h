@@ -43,7 +43,6 @@ typedef struct ring_data
     effect_type effect; /* effect causes by this ring */
     int price;
     unsigned
-        observable: 1,  /* can be identified by using */
         bonus_obs: 1;   /* can determine bonus by using */
 } ring_data;
 
