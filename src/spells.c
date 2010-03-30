@@ -742,6 +742,16 @@ int spell_type_point(spell *s, struct player *p)
 
     if (!monster)
     {
+        if (s->id == SP_DRY)
+        {
+            map_tile *tile = map_tile_at(game_map(nlarn, p->pos.z), pos);
+            if (tile->type == LT_DEEPWATER)
+            {
+                tile->type = LT_DIRT;
+                log_add_entry(p->log, "The water evaporates!");
+                return TRUE;
+            }
+        }
         return FALSE;
     }
 
