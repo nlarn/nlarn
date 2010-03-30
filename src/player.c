@@ -560,9 +560,12 @@ void player_make_move(player *p, int turns)
                     player_effect_del(p, e);
                     effect_destroy(e);
                 }
-
-                /* nothing else happens as the time is stopped */
-                break;
+                else
+                {
+                    /* nothing else happens while the time is stopped */
+                    turns--;
+                    continue;
+                }
             }
 
             /* move the rest of the world */
