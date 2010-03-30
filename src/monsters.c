@@ -1176,15 +1176,33 @@ char *monster_get_name(monster *m)
 
 const char* monster_type_plural_name(const int montype, const int count)
 {
+    /* need a static buffer to return to calling functions */
+    static char buf[61] = { 0 };
+
     if (count > 1)
     {
-        if (montype == MT_JACULUS)
+        switch (montype)
+        {
+        case MT_JACULUS:
             return "jaculi";
-        else if (montype == MT_DISENCHANTRESS)
+            break;
+
+        case MT_ELF:
+            return "elves";
+            break;
+
+        case MT_DISENCHANTRESS:
             return "disenchantresses";
+            break;
+
+        default:
+            g_snprintf(buf, 60, "%ss", monster_type_name(montype));
+            return buf;
+            break;
+        }
     }
 
-    return g_strconcat(monster_type_name(montype), plural(count), NULL);
+    return monster_type_name(montype);
 }
 
 void monster_die(monster *m, struct player *p)
