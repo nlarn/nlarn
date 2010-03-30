@@ -41,13 +41,37 @@ static int building_item_identify(player *p, inventory **inv, item *it);
 static int building_item_repair(player *p, inventory **inv, item *it);
 static int building_item_buy(player *p, inventory **inv, item *it);
 
+static int handle_bank_interest(player *p)
+{
+    if (p->bank_account < 250)
+        return 0;
+
+    /* pay interest */
+    if (nlarn->gtime <= p->interest_lasttime)
+        return 0;
+
+    const int mobuls = (nlarn->gtime - p->interest_lasttime) / 100;
+    if (mobuls <= 0)
+        return 0;
+
+    /* store original account */
+    const int interest = p->bank_account;
+
+    int i;
+    for (i = 1; i <= mobuls; i++)
+         p->bank_account += p->bank_account / 250;
+
+    p->interest_lasttime = game_turn(nlarn);
+
+    /* calculate interest payed */
+    return (p->bank_account - interest);
+}
+
 int building_bank(player *p)
 {
     int turns = 2;
     char cmd;
     guint amount = 0;
-    guint interest = 0;
-    int mobuls, i;
 
     GPtrArray *callbacks = NULL;
     display_inv_callback *callback;
@@ -74,7 +98,7 @@ int building_bank(player *p)
     else
         text = g_string_new(msg_branch);
 
-    /* leave bank when taxes are unpayed */
+    /* leave bank when taxes are unpaid */
     if (p->outstanding_taxes)
     {
         g_string_append_printf(text, msg_frozen, p->outstanding_taxes);
@@ -84,24 +108,11 @@ int building_bank(player *p)
         return turns;
     }
 
-    /* pay interest */
-    mobuls = (nlarn->gtime - p->interest_lasttime) / 100;
-
-    if (p->bank_account && (mobuls > 0))
+    int interest = handle_bank_interest(p);
+    if (interest > 0)
     {
-        /* store original account */
-        interest = p->bank_account;
-
-        for (i = 1; i <= mobuls; i++)
-            p->bank_account += p->bank_account / 250;
-
-        p->interest_lasttime = game_turn(nlarn);
-
-        /* calculate interest payed */
-        interest = p->bank_account - interest;
-
-        g_string_append_printf(text, "We have payed you an interest of %d " \
-                               "gold since your last visit.\n", interest);
+        g_string_append_printf(text, "We have paid you an interest of %d " \
+                                     "gold since your last visit.\n", interest);
     }
 
     g_string_append_printf(text,
@@ -425,7 +436,7 @@ int building_lrs(player *p)
         {
             building_player_charge(p, p->outstanding_taxes);
             p->outstanding_taxes = 0;
-            log_add_entry(p->log, "You have payed your taxes.");
+            log_add_entry(p->log, "You have paid your taxes.");
         }
         else
         {
