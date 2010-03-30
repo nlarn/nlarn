@@ -166,7 +166,7 @@ monster *game_monster_get(game *g, gpointer id);
 #define game_highscores(g) ((g)->highscores)
 
 /* gtime <> mobuls conversion */
-#define gtime2mobuls(gtime)  ((abs((int)(gtime)) + 99) / 100)
+#define gtime2mobuls(gtime)  (((gtime < 0) ? -1 : 1) * (abs((int)(gtime)) + 99) / 100)
 #define mobuls2gtime(mobuls) ((int)(mobuls) * 100)
 
 #endif
