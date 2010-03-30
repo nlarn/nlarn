@@ -527,7 +527,7 @@ void player_make_move(player *p, int turns)
     int frequency; /* number of turns between occasions */
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
-    int idx;
+    int idx = 0;
 
     assert(p != NULL);
 
