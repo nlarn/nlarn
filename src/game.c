@@ -443,6 +443,8 @@ gboolean game_load(const char *filename, int argc, char *argv[])
     /* initialize settings */
     game_initialize_settings(g, argc, argv, FALSE);
 
+    log_set_time(nlarn->p->log, g->gtime);
+
     /* welcome message */
     log_add_entry(nlarn->p->log, "Welcome back to NLarn %d.%d.%d!",
                   VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
