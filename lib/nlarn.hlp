@@ -1,4 +1,4 @@
-Movement                Running
+Movement                Running (moving into one direction until interrupted)
 
     7 8 9  y k u            Y K U
      \|/    \|/              \|/
@@ -7,7 +7,7 @@ Movement                Running
     1 2 3  b j n            B J N
 
 You can as well use the number pad with num lock off.
-
+r or /, followed by a direction key, will similarly make your run.
 
 Commands
 

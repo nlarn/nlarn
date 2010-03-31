@@ -168,6 +168,27 @@ int main(int argc, char *argv[])
         {
             ch = display_getch();
 
+            if (ch == '/' || ch == 'r')
+            {
+                ch = toupper(display_getch());
+                switch (ch)
+                {
+                case '1': ch = 'B'; break;
+                case KEY_DOWN:
+                case '2': ch = 'J'; break;
+                case '3': ch = 'N'; break;
+                case KEY_LEFT:
+                case '4': ch = 'H'; break;
+                case '5': ch = 'w'; break;
+                case KEY_RIGHT:
+                case '6': ch = 'L'; break;
+                case '7': ch = 'Y'; break;
+                case KEY_UP:
+                case '8': ch = 'K'; break;
+                case '9': ch = 'B'; break;
+                }
+            }
+
             switch (ch)
             {
             case 'H':
