@@ -23,6 +23,10 @@
 #include <zlib.h>
 #include <glib/gstdio.h>
 
+#ifdef __unix
+#include <sys/stat.h>
+#endif
+
 #include "cJSON.h"
 #include "defines.h"
 #include "game.h"
@@ -728,16 +732,25 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
     g_option_context_free(context);
 
     /* determine paths and file names */
-    if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
+    /* try to use the directory below the binary's location first */
+    g->libdir = g_build_path(G_DIR_SEPARATOR_S, g->basedir, "lib", NULL);
+
+    if (!g_file_test(g->libdir, G_FILE_TEST_IS_DIR))
     {
-        /* system-wide data directory exists */
-        /* string has to be dup'd as it is feed in the end */
-        g->libdir = g_strdup((char *)default_lib_dir);
-    }
-    else
-    {
-        /* try to use installation directory */
-        g->libdir = g_build_path(G_DIR_SEPARATOR_S, g->basedir, "lib", NULL);
+        /* local lib directory could not be found,
+           try the system wide directory */
+        if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
+        {
+            /* system-wide data directory exists */
+            /* string has to be dup'd as it is feed in the end */
+            g->libdir = g_strdup((char *)default_lib_dir);
+        }
+        else
+        {
+            g_printerr("Could not find game library directory.\n");
+            g_printerr("Please reinstall the game.\n");
+            exit(EXIT_FAILURE);
+        }
     }
 
     g->mesgfile = g_build_filename(g->libdir, mesgfile, NULL);
@@ -943,6 +956,11 @@ static void game_scores_save(game *g, GList *gs)
     }
 
     fclose(sb);
+
+#ifdef __unix
+    /* set file permissions */
+    chmod(game_highscores(g), S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+#endif
 }
 
 static int game_score_compare(const void *scr_a, const void *scr_b)
