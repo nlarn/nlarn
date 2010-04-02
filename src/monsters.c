@@ -961,7 +961,7 @@ void monster_destroy(monster *m)
 
     /* free inventory */
     if (m->inventory)
-        inv_destroy(m->inventory, FALSE);
+        inv_destroy(m->inventory, TRUE);
 
     /* unregister monster */
     if (m->oid > 0)
