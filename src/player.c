@@ -2323,6 +2323,8 @@ char **player_effect_text(player *p)
     return text;
 }
 
+static char *player_can_carry(player *p);
+
 int player_inv_display(player *p)
 {
     GPtrArray *callbacks;
@@ -2384,7 +2386,12 @@ int player_inv_display(player *p)
     callback->checkfun = &player_item_is_usable;
     g_ptr_array_add(callbacks, callback);
 
-    display_inventory("Inventory", p, &p->inventory, callbacks, FALSE, NULL);
+    {
+        static char buf[61] = { 0 };
+        g_snprintf(buf, 60, "Inventory - %s of %s carried",
+                   player_inv_weight(p), player_can_carry(p));
+        display_inventory(buf, p, &p->inventory, callbacks, FALSE, NULL);
+    }
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);
@@ -2392,15 +2399,13 @@ int player_inv_display(player *p)
     return TRUE;
 }
 
-char *player_inv_weight(player *p)
+static char *player_print_weight(player *p, float weight)
 {
-    float weight;
-    char *unit = "g";
-    static char buf[21] = "";
-
     assert (p != NULL);
 
-    weight = (float)inv_weight(p->inventory);
+    static char buf[21] = "";
+
+    char *unit = "g";
     if (weight > 1000)
     {
         weight = weight / 1000;
@@ -2409,6 +2414,22 @@ char *player_inv_weight(player *p)
 
     g_snprintf(buf, 20, "%g%s", weight, unit);
 
+    return buf;
+}
+
+static char *player_can_carry(player *p)
+{
+    static char buf[21] = "";
+    g_snprintf(buf, 20, "%s",
+               player_print_weight(p, 2000 * 1.3 * (float)player_get_str(p)));
+    return buf;
+}
+
+char *player_inv_weight(player *p)
+{
+    static char buf[21] = "";
+    g_snprintf(buf, 20, "%s",
+               player_print_weight(p, (float)inv_weight(p->inventory)));
     return buf;
 }
 
