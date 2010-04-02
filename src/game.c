@@ -51,6 +51,14 @@ static const char *mazefile = "maze";
 static const char *fortunes = "fortune";
 static const char *highscores = "highscores";
 
+static void print_welcome_message(gboolean newgame)
+{
+    log_add_entry(nlarn->p->log, "Welcome %sto NLarn %d.%d.%d!",
+                  newgame ? "" : "back ",
+                  VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+    log_add_entry(nlarn->p->log, "For a list of commands, press '?'.");
+}
+
 void game_new(int argc, char *argv[])
 {
     size_t idx;
@@ -95,9 +103,7 @@ void game_new(int argc, char *argv[])
     nlarn->version = SAVEFILE_VERSION;
 
     /* welcome message */
-    log_add_entry(nlarn->p->log, "Welcome to NLarn %d.%d.%d!",
-                  VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
-    log_add_entry(nlarn->p->log, "For a list of commands, press '?'");
+    print_welcome_message(TRUE);
 
     log_set_time(nlarn->p->log, nlarn->gtime);
 }
@@ -451,9 +457,7 @@ gboolean game_load(const char *filename, int argc, char *argv[])
     log_set_time(nlarn->p->log, g->gtime);
 
     /* welcome message */
-    log_add_entry(nlarn->p->log, "Welcome back to NLarn %d.%d.%d!",
-                  VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
-    log_add_entry(nlarn->p->log, "For a list of commands, press '?'");
+    print_welcome_message(FALSE);
 
     return TRUE;
 }
