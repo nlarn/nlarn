@@ -235,6 +235,7 @@ char **player_effect_text(player *p);
 
 /* dealing with the inventory */
 int player_inv_display(player *p);
+char *player_can_carry(player *p);
 char *player_inv_weight(player *p);
 int player_inv_pre_add(inventory *inv, item *item);
 void player_inv_weight_recalc(inventory *inv, item *item);

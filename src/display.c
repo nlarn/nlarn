@@ -719,6 +719,15 @@ item *display_inventory(char *title, player *p, inventory **inv,
             display_window_update_title(iwin, stitle);
             g_free(stitle);
         }
+        else
+        {
+            stitle = g_strdup_printf("%s - %s of %s carried",
+                                     title, player_inv_weight(p),
+                                     player_can_carry(p));
+
+            display_window_update_title(iwin, stitle);
+            g_free(stitle);
+        }
 
         /* get the currently selected item */
         it = inv_get_filtered(*inv, curr + offset - 1, filter);

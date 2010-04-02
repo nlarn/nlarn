@@ -2323,8 +2323,6 @@ char **player_effect_text(player *p)
     return text;
 }
 
-static char *player_can_carry(player *p);
-
 int player_inv_display(player *p)
 {
     GPtrArray *callbacks;
@@ -2388,8 +2386,7 @@ int player_inv_display(player *p)
 
     {
         static char buf[61] = { 0 };
-        g_snprintf(buf, 60, "Inventory - %s of %s carried",
-                   player_inv_weight(p), player_can_carry(p));
+        g_snprintf(buf, 60, "Inventory");
         display_inventory(buf, p, &p->inventory, callbacks, FALSE, NULL);
     }
 
@@ -2417,7 +2414,7 @@ static char *player_print_weight(player *p, float weight)
     return buf;
 }
 
-static char *player_can_carry(player *p)
+char *player_can_carry(player *p)
 {
     static char buf[21] = "";
     g_snprintf(buf, 20, "%s",
