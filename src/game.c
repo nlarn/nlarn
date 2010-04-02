@@ -97,6 +97,7 @@ void game_new(int argc, char *argv[])
     /* welcome message */
     log_add_entry(nlarn->p->log, "Welcome to NLarn %d.%d.%d!",
                   VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+    log_add_entry(nlarn->p->log, "For a list of commands, press '?'");
 
     log_set_time(nlarn->p->log, nlarn->gtime);
 }
@@ -452,6 +453,7 @@ gboolean game_load(const char *filename, int argc, char *argv[])
     /* welcome message */
     log_add_entry(nlarn->p->log, "Welcome back to NLarn %d.%d.%d!",
                   VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+    log_add_entry(nlarn->p->log, "For a list of commands, press '?'");
 
     return TRUE;
 }
