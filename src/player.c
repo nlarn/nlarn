@@ -1502,7 +1502,8 @@ int player_pickup(player *p)
         callback->function = &player_item_pickup;
         g_ptr_array_add(callbacks, callback);
 
-        display_inventory("On the floor", p, inv, callbacks, FALSE, NULL);
+        display_inventory("On the floor", p, inv, callbacks, FALSE,
+                          TRUE, FALSE, NULL);
 
         /* clean up callbacks */
         display_inv_callbacks_clean(callbacks);
@@ -2386,7 +2387,8 @@ int player_inv_display(player *p)
     {
         static char buf[61] = { 0 };
         g_snprintf(buf, 60, "Inventory");
-        display_inventory(buf, p, &p->inventory, callbacks, FALSE, NULL);
+        display_inventory(buf, p, &p->inventory, callbacks, FALSE,
+                          TRUE, FALSE, NULL);
     }
 
     /* clean up */

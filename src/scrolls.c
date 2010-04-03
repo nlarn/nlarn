@@ -399,7 +399,7 @@ static int scroll_gem_perfection(player *p, item *scroll)
     else
     {
         it = display_inventory("Choose a gem to make perfect", p, &p->inventory, NULL,
-                               FALSE, item_filter_gems);
+                               FALSE, FALSE, FALSE, item_filter_gems);
 
         if (it)
         {
@@ -537,7 +537,7 @@ static int scroll_identify(player *p, item *scroll)
 
         /* choose a single item to identify */
         it = display_inventory("Choose an item to identify", p, &p->inventory,
-                               NULL, FALSE, item_filter_unid);
+                               NULL, FALSE, FALSE, FALSE, item_filter_unid);
 
         if (it != NULL)
         {
@@ -621,7 +621,7 @@ static int scroll_remove_curse(player *p, item *scroll)
     {
         /* choose a single item to uncurse */
         it = display_inventory("Choose an item to uncurse", p, &p->inventory,
-                               NULL, FALSE, item_filter_cursed);
+                               NULL, FALSE, FALSE, FALSE, item_filter_cursed);
 
         if (it != NULL)
         {

@@ -98,8 +98,9 @@ int display_draw();
 
 int display_paint_screen(player *p);
 
-item *display_inventory(char *title, player *p, inventory **inv,
-                        GPtrArray *callbacks, int show_price,
+item *display_inventory(const char *title, player *p, inventory **inv,
+                        GPtrArray *callbacks, gboolean show_price,
+                        gboolean show_weight, gboolean show_account,
                         int (*filter)(item *));
 
 void display_inv_callbacks_clean(GPtrArray *callbacks);

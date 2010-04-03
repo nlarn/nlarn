@@ -96,7 +96,8 @@ int container_open(player *p, inventory **inv, item *container)
 
     g_ptr_array_add(callbacks, callback);
 
-    display_inventory(container_desc, p, &container->content, callbacks, FALSE, NULL);
+    display_inventory(container_desc, p, &container->content, callbacks, FALSE,
+                      TRUE, FALSE, NULL);
 
     display_inv_callbacks_clean(callbacks);
 
@@ -131,8 +132,8 @@ int container_item_add(player *p, inventory **inv, item *element)
         {
             /* multiple containers in the player's inventory, offer to choose one */
             container = display_inventory("Choose a container", p,
-                                          &p->inventory, NULL, FALSE,
-                                          item_filter_container);
+                                          &p->inventory, NULL, FALSE, FALSE,
+                                          FALSE, item_filter_container);
         }
         else if (filen == 1)
         {
@@ -142,8 +143,8 @@ int container_item_add(player *p, inventory **inv, item *element)
         else if (filen > 1)
         {
             /* multiple containers on the floor, offer to choose one */
-            container = display_inventory("Choose a container", p, floor,
-                                          NULL, FALSE, item_filter_container);
+            container = display_inventory("Choose a container", p, floor, NULL,
+                                          FALSE, FALSE, FALSE, item_filter_container);
         }
     }
 

@@ -562,8 +562,9 @@ static int item_sort_shop(gconstpointer a, gconstpointer b, gpointer data)
  * @param a filter function: will be called for every item
  *
  */
-item *display_inventory(char *title, player *p, inventory **inv,
-                        GPtrArray *callbacks, int show_price,
+item *display_inventory(const char *title, player *p, inventory **inv,
+                        GPtrArray *callbacks, gboolean show_price,
+                        gboolean show_weight, gboolean show_account,
                         int (*filter)(item *))
 {
     display_window *iwin = NULL;
@@ -710,17 +711,19 @@ item *display_inventory(char *title, player *p, inventory **inv,
             wattroff(iwin->window, attrs);
         }
 
-        /* prepare a window title with the bank account balance if in a shop */
-        if (show_price)
+        /* prepare the window title */
+        if (show_account)
         {
+            /* show the banlance of the bank account */
             stitle = g_strdup_printf("%s - %d gp on bank account",
                                      title, p->bank_account);
 
             display_window_update_title(iwin, stitle);
             g_free(stitle);
         }
-        else
+        else if (show_weight)
         {
+            /* show the weight of the inventory */
             stitle = g_strdup_printf("%s - %s of %s carried",
                                      title, player_inv_weight(p),
                                      player_can_carry(p));
