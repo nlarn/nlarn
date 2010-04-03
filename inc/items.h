@@ -226,7 +226,7 @@ int item_filter_gems(item *it);
 int item_filter_not_gold(item *it);
 int item_filter_potions(item *it);
 int item_filter_legible(item *it);
-int item_filter_unidentified(item *it);
+int item_filter_unid(item *it);
 int item_filter_cursed(item *it);
 
 #endif

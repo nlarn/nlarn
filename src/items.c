@@ -1881,11 +1881,11 @@ int item_filter_legible(item *it)
     return (it->type == IT_SCROLL) || (it->type == IT_BOOK);
 }
 
-int item_filter_unidentified(item *it)
+int item_filter_unid(item *it)
 {
     assert (it != NULL);
 
-    return player_item_identified(nlarn->p, it);
+    return (!player_item_identified(nlarn->p, it));
 }
 
 int item_filter_cursed(item *it)

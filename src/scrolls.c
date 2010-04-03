@@ -374,26 +374,45 @@ static int scroll_enchant_weapon(player *p, item *scroll)
 
 static int scroll_gem_perfection(player *p, item *scroll)
 {
-    int count = 0;
     guint idx;
-
     item *it;
 
     assert(p != NULL && scroll != NULL);
 
-    /* FIXME: too simple. should give the ability to choose a single gem instead */
-    for (idx = 0; idx < inv_length(p->inventory); idx++)
+    if (inv_length_filtered(p->inventory, item_filter_gems) == 0)
     {
-        it = inv_get(p->inventory, idx);
-        if (it->type == IT_GEM)
+        return FALSE;
+    }
+
+    log_add_entry(p->log, "This is a scroll of gem perfection.");
+
+    if (scroll->blessed)
+    {
+        for (idx = 0; idx < inv_length_filtered(p->inventory, item_filter_gems); idx++)
         {
+            it = inv_get_filtered(p->inventory, idx, item_filter_gems);
             /* double gem value */
             it->bonus <<= 1;
-            count++;
+        }
+        log_add_entry(p->log, "You bring all your gems to perfection.");
+    }
+    else
+    {
+        it = display_inventory("Choose a gem to make perfect", p, &p->inventory, NULL,
+                               FALSE, item_filter_gems);
+
+        if (it)
+        {
+            char desc[81];
+            item_describe(it, TRUE, it->count == 1, TRUE, desc, 80);
+            log_add_entry(p->log, "You make %s perfect.", desc);
+
+            /* double gem value */
+            it->bonus <<= 1;
         }
     }
 
-    return count;
+    return TRUE;
 }
 
 static int scroll_genocide_monster(player *p, item *scroll)
@@ -487,38 +506,54 @@ static int scroll_heal_monster(player *p, item *scroll)
 
 static int scroll_identify(player *p, item *scroll)
 {
-    /*
-     * FIXME: too simple and too powerful.
-     * should give the ability to choose a single item instead
-     */
-
-    guint idx;
-    int count = 0; /* how many items have been identified */
     item *it;
 
     assert(p != NULL && scroll != NULL);
 
-    for (idx = 0; idx < inv_length(p->inventory); idx++)
+    if (inv_length_filtered(p->inventory, item_filter_unid) == 0)
     {
-        it = inv_get(p->inventory, idx);
-        if (!player_item_identified(p, it))
-        {
-            player_item_identify(p, NULL, it);
-        }
-
-        count++;
+        /* player has no unidentfied items */
+        log_add_entry(p->log, "Nothing happens.");
+        return FALSE;
     }
 
-    if (count)
+    log_add_entry(p->log, "This is a scroll of identify.");
+
+    if (scroll->blessed)
     {
+        /* identify all items */
         log_add_entry(p->log, "You identify your possessions.");
+
+        while (inv_length_filtered(p->inventory, item_filter_unid))
+        {
+            it = inv_get_filtered(p->inventory, 0, item_filter_unid);
+            player_item_identify(p, NULL, it);
+        }
     }
     else
     {
-        log_add_entry(p->log, "Nothing happens.");
+        /* identify the scroll being read, otherwise it would show up here */
+        player_item_identify(p, NULL, scroll);
+
+        /* choose a single item to identify */
+        it = display_inventory("Choose an item to identify", p, &p->inventory,
+                               NULL, FALSE, item_filter_unid);
+
+        if (it != NULL)
+        {
+            char desc[81];
+
+            item_describe(it, FALSE, (it->count == 1), TRUE, desc, 80);
+            log_add_entry(p->log, "You identify %s.", desc);
+            player_item_identify(p, NULL, it);
+
+            item_describe(it, TRUE, (it->count == 1), FALSE, desc, 80);
+            log_add_entry(p->log, "%s %s.", (it->count > 1) ? "These are" :
+                          "This is", desc);
+        }
     }
 
-    return count;
+    return TRUE;
 }
 
 int scroll_mapping(player *p, item *scroll)
@@ -548,47 +583,62 @@ int scroll_mapping(player *p, item *scroll)
 
 static int scroll_remove_curse(player *p, item *scroll)
 {
-    int count_done = 0; /* how many curses have been removed */
-    int count_avail = 0; /* how many curses can be removed */
-
-    guint idx;
-    item *item;
     char buf[61];
+    item *it;
 
     assert(p != NULL && scroll != NULL);
 
-    /* determine how many curses can be removed */
-    if (scroll && scroll->blessed)
+    if (inv_length_filtered(p->inventory, item_filter_cursed) == 0)
     {
-        count_avail = inv_length(p->inventory);
+        /* player has no cursed items */
+        log_add_entry(p->log, "Nothing happens.");
+        return FALSE;
+    }
+
+    log_add_entry(p->log, "This is a scroll of remove curse.");
+
+    if (scroll->blessed)
+    {
+        /* remove curses on all items */
+        log_add_entry(p->log, "You remove curses on your possessions.");
+
+        while (inv_length_filtered(p->inventory, item_filter_cursed) > 0)
+        {
+            it = inv_get_filtered(p->inventory, 0, item_filter_cursed);
+
+            // Get the description before uncursing the item.
+            item_describe(it, player_item_known(p, it),
+                          FALSE, TRUE, buf, 60);
+
+            buf[0] = g_ascii_toupper(buf[0]);
+            log_add_entry(p->log, "%s glow%s in a white light.",
+                          buf, it->count == 1 ? "s" : "");
+
+            item_remove_curse(it);
+        }
     }
     else
     {
-        count_avail = 1;
-    }
+        /* choose a single item to uncurse */
+        it = display_inventory("Choose an item to uncurse", p, &p->inventory,
+                               NULL, FALSE, item_filter_cursed);
 
-    for (idx = 0; (idx < inv_length(p->inventory)) && (count_avail > 0); idx++)
-    {
-        item = inv_get(p->inventory, idx);
-
-        if (item->cursed)
+        if (it != NULL)
         {
             // Get the description before uncursing the item.
-            item_describe(item, player_item_known(p, item),
+            item_describe(it, player_item_known(p, it),
                           FALSE, TRUE, buf, 60);
+
             buf[0] = g_ascii_toupper(buf[0]);
 
             log_add_entry(p->log, "%s glow%s in a white light.",
-                          buf, item->count == 1 ? "s" : "");
+                          buf, it->count == 1 ? "s" : "");
 
-            item_remove_curse(item);
-
-            count_done++;
-            count_avail--;
+            item_remove_curse(it);
         }
     }
 
-    return count_done;
+    return TRUE;
 }
 
 static int scroll_spell_extension(player *p, item *scroll)
@@ -602,8 +652,17 @@ static int scroll_spell_extension(player *p, item *scroll)
     {
         sp = g_ptr_array_index(p->known_spells, idx);
 
-        /* double spell knowledge */
-        sp->knowledge <<=1;
+        if (scroll->blessed)
+        {
+            /* double spell knowledge */
+            sp->knowledge <<=1;
+        }
+        else
+        {
+            /* increase spell knowledge */
+            sp->knowledge++;
+        }
+
     }
 
     /* give a message if any spell has been extended */
