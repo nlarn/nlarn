@@ -203,7 +203,7 @@ int building_bank(player *p)
             break;
 
         display_inventory("Sell gems", p, &p->inventory, callbacks, TRUE,
-                          &inv_filter_gems);
+                          &item_filter_gems);
 
         break;
 
@@ -669,7 +669,8 @@ int building_tradepost(player *p)
     display_show_message(title, msg_welcome, 0);
     display_paint_screen(p);
 
-    display_inventory((char *)title, p, &p->inventory, callbacks, FALSE, &inv_filter_not_gold);
+    display_inventory((char *)title, p, &p->inventory, callbacks,
+                      FALSE, &item_filter_not_gold);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);

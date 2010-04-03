@@ -47,7 +47,7 @@ int container_open(player *p, inventory **inv, item *container)
     {
         /* no container has been passed - look for container on the floor */
         inventory **inv = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
-        int count = inv_length_filtered(*inv, &inv_filter_container);
+        int count = inv_length_filtered(*inv, &item_filter_container);
 
         if (count == 0)
         {
@@ -56,7 +56,7 @@ int container_open(player *p, inventory **inv, item *container)
         }
         else if (count == 1)
         {
-            container = inv_get_filtered(*inv, 0, &inv_filter_container);
+            container = inv_get_filtered(*inv, 0, &item_filter_container);
         }
         else
         {
@@ -118,32 +118,32 @@ int container_item_add(player *p, inventory **inv, item *element)
     if (inv == NULL || (inv == &p->inventory))
     {
         inventory **floor = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
-        pilen = inv_length_filtered(p->inventory, inv_filter_container);
-        filen = inv_length_filtered(*floor, inv_filter_container);
+        pilen = inv_length_filtered(p->inventory, item_filter_container);
+        filen = inv_length_filtered(*floor, item_filter_container);
 
         /* choose the container to add the item element to. */
         if (pilen == 1)
         {
             /* only one container in inventory - this is the one */
-            container = inv_get_filtered(p->inventory, 0, inv_filter_container);
+            container = inv_get_filtered(p->inventory, 0, item_filter_container);
         }
         else if (pilen > 1)
         {
             /* multiple containers in the player's inventory, offer to choose one */
             container = display_inventory("Choose a container", p,
                                           &p->inventory, NULL, FALSE,
-                                          inv_filter_container);
+                                          item_filter_container);
         }
         else if (filen == 1)
         {
             /* conly one container on the floor */
-            container = inv_get_filtered(*floor, 0, inv_filter_container);
+            container = inv_get_filtered(*floor, 0, item_filter_container);
         }
         else if (filen > 1)
         {
             /* multiple containers on the floor, offer to choose one */
             container = display_inventory("Choose a container", p, floor,
-                                          NULL, FALSE, inv_filter_container);
+                                          NULL, FALSE, item_filter_container);
         }
     }
 

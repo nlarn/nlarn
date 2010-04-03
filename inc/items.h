@@ -217,12 +217,16 @@ int inv_item_count(inventory *inv, item_t type, guint32 id);
 int inv_length_filtered(inventory *inv, int (*filter)(item *));
 item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *));
 
-int inv_filter_container(item *it);
-int inv_filter_not_container(item *it);
-int inv_filter_food(item *it);
-int inv_filter_gems(item *it);
-int inv_filter_not_gold(item *it);
-int inv_filter_potions(item *it);
-int inv_filter_readable_items(item *it);
+/* item filters */
+
+int item_filter_container(item *it);
+int item_filter_not_container(item *it);
+int item_filter_food(item *it);
+int item_filter_gems(item *it);
+int item_filter_not_gold(item *it);
+int item_filter_potions(item *it);
+int item_filter_legible(item *it);
+int item_filter_unidentified(item *it);
+int item_filter_cursed(item *it);
 
 #endif

@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
             /* open door / container */
         case 'o':
             if (inv_length_filtered(*map_ilist_at(game_map(nlarn, nlarn->p->pos.z), nlarn->p->pos),
-                                    &inv_filter_container) > 0)
+                                    &item_filter_container) > 0)
             {
                 container_open(nlarn->p, NULL, NULL);
             }
