@@ -24,6 +24,9 @@
 #include "sobjects.h"
 #include "player.h"
 
+static void monster_appear(monster_t type, position mpos);
+
+
 int player_altar_desecrate(player *p)
 {
     effect *e = NULL;
@@ -35,7 +38,7 @@ int player_altar_desecrate(player *p)
 
     if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
-        log_add_entry(p->log, "I see no altar to desecrate here.");
+        log_add_entry(p->log, "There is no altar here.");
         return FALSE;
     }
 
@@ -50,7 +53,7 @@ int player_altar_desecrate(player *p)
         if (pos_valid(mpos))
         {
             /* create a monster - should be very dangerous */
-            monster_new(MT_RED_DRAGON, mpos);
+            monster_appear(MT_RED_DRAGON, mpos);
         }
 
         e = effect_new(ET_AGGRAVATE_MONSTER);
@@ -65,7 +68,7 @@ int player_altar_desecrate(player *p)
     }
     else
     {
-        log_add_entry(p->log, "Nothing happens.");
+        log_add_entry(p->log, "You fail to destroy the altar.");
     }
 
     return TRUE;
@@ -85,12 +88,15 @@ int player_altar_pray(player *p)
 
     if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
-        log_add_entry(p->log, "I see no altar to pray at here.");
+        log_add_entry(p->log, "There is no altar here.");
         return FALSE;
     }
 
     player_gold = player_get_gold(p);
-    donation = display_get_count("How much do you donate?", player_gold);
+    if (player_gold > 0)
+    {
+        donation = display_get_count("How much gold do you want to donate?", 0);
+    }
 
     if (donation == 0)
     {
@@ -103,7 +109,7 @@ int player_altar_pray(player *p)
         else if (chance(4) && (armour = player_get_random_armour(p)))
         {
             /* enchant armour */
-            log_add_entry(p->log, "You feel your %s vibrate for a moment.",
+            log_add_entry(p->log, "Your %s vibrates for a moment.",
                           armour_name(*armour));
 
             item_enchant(*armour);
@@ -111,7 +117,7 @@ int player_altar_pray(player *p)
         else if (chance(4) && p->eq_weapon)
         {
             /* enchant weapon */
-            log_add_entry(p->log, "You feel your %s vibrate for a moment.",
+            log_add_entry(p->log, "Your %s vibrates for a moment.",
                           weapon_name(p->eq_weapon));
 
             item_enchant(p->eq_weapon);
@@ -123,7 +129,7 @@ int player_altar_pray(player *p)
 
             if (pos_valid(mpos))
             {
-                monster_new_by_level(mpos);
+                monster_appear(MT_MAX, mpos);
             }
         }
     }
@@ -144,7 +150,7 @@ int player_altar_pray(player *p)
 
             if (pos_valid(mpos))
             {
-                monster_new_by_level(mpos);
+                monster_appear(MT_MAX, mpos);
             }
 
             e = effect_new(ET_AGGRAVATE_MONSTER);
@@ -169,7 +175,7 @@ int player_altar_pray(player *p)
         if (chance(4) && (armour = player_get_random_armour(p)))
         {
             /* enchant weapon */
-            log_add_entry(p->log, "You feel your %s vibrate for a moment.",
+            log_add_entry(p->log, "Your %s vibrates for a moment.",
                           armour_name(*armour));
 
             item_enchant(*armour);
@@ -178,7 +184,7 @@ int player_altar_pray(player *p)
         if (chance(4) && p->eq_weapon)
         {
             /* enchant weapon */
-            log_add_entry(p->log, "You feel your %s vibrate for a moment.",
+            log_add_entry(p->log, "Your %s vibrates for a moment.",
                           weapon_name(p->eq_weapon));
 
             item_enchant(p->eq_weapon);
@@ -298,9 +304,11 @@ int player_door_close(player *p)
 
             if (m && monster_in_sight(m))
             {
+                gboolean visible = monster_in_sight(m);
+
                 log_add_entry(p->log,
-                              "You cannot close the door. The %s is in the way.",
-                              monster_name(m));
+                              "You cannot close the door. %s %s is in the way.",
+                              visible ? "The" : "An", monster_get_name(m));
                 return 0;
             }
 
@@ -394,7 +402,7 @@ int player_door_open(player *p, int dir)
     }
     else
     {
-        log_add_entry(p->log, "Which door are you talking about?");
+        log_add_entry(p->log, "What excactly do you want to open?");
         return 0;
     }
 
@@ -420,7 +428,7 @@ int player_fountain_drink(player *p)
 
     if (map_sobject_at(map, p->pos) != LS_FOUNTAIN)
     {
-        log_add_entry(p->log, "I see no fountain to drink from here.");
+        log_add_entry(p->log, "There is no fountain to drink from here.");
         return 0;
     }
 
@@ -577,13 +585,13 @@ int player_fountain_wash(player *p)
 
     if (map_sobject_at(map, p->pos) == LS_DEADFOUNTAIN)
     {
-        log_add_entry(p->log, "There is no water to wash in.");
+        log_add_entry(p->log, "The fountain is dry.");
         return 0;
     }
 
     if (map_sobject_at(map, p->pos) != LS_FOUNTAIN)
     {
-        log_add_entry(p->log, "I see no fountain to wash at here!");
+        log_add_entry(p->log, "There is no fountain to wash at here.");
         return 0;
     }
 
@@ -621,7 +629,7 @@ int player_fountain_wash(player *p)
         if (pos_valid(mpos))
         {
             /* make water lord */
-            monster_new(MT_WATER_LORD, mpos);
+            monster_appear(MT_WATER_LORD, mpos);
         }
     }
     else
@@ -705,7 +713,7 @@ int player_stairs_up(player *p)
         break;
 
     case LS_DNGN_ENTRANCE:
-        log_add_entry(p->log, "Climb down to enter the dungeon.");
+        log_add_entry(p->log, "Climb down to enter the caverns.");
         return 0;
 
     default:
@@ -743,7 +751,7 @@ int player_throne_pillage(player *p)
 
     if ((ms != LS_THRONE) && (ms != LS_THRONE2) && (ms != LS_DEADTHRONE))
     {
-        log_add_entry(p->log, "I see no throne here to remove gems from.");
+        log_add_entry(p->log, "There is no throne here.");
         return 0;
     }
 
@@ -778,7 +786,7 @@ int player_throne_pillage(player *p)
         if (pos_valid(mpos))
         {
             /* make gnome king */
-            monster_new(MT_GNOME_KING, mpos);
+            monster_appear(MT_GNOME_KING, mpos);
 
             /* next time there will be no gnome king */
             map_sobject_set(map, p->pos, LS_THRONE2);
@@ -786,7 +794,7 @@ int player_throne_pillage(player *p)
     }
     else
     {
-        log_add_entry(p->log, "Nothing happens.");
+        log_add_entry(p->log, "You fail to remove the gems.");
     }
 
     return 1 + count;
@@ -801,7 +809,7 @@ int player_throne_sit(player *p)
 
     if ((st != LS_THRONE) && (st != LS_THRONE2) && (st != LS_DEADTHRONE))
     {
-        log_add_entry(p->log, "I see no throne to sit on here.");
+        log_add_entry(p->log, "There is no throne here.");
         return 0;
     }
 
@@ -816,7 +824,7 @@ int player_throne_sit(player *p)
         if (pos_valid(mpos))
         {
             /* make a gnome king */
-            monster_new(MT_GNOME_KING, mpos);
+            monster_appear(MT_GNOME_KING, mpos);
 
             /* next time there will be no gnome king */
             map_sobject_set(map, p->pos, LS_THRONE2);
@@ -833,4 +841,24 @@ int player_throne_sit(player *p)
     }
 
     return 1;
+}
+
+static void monster_appear(monster_t type, position mpos)
+{
+    monster *m;
+
+    if (type == MT_MAX)
+    {
+        m = monster_new_by_level(mpos);
+    }
+    else
+    {
+        m = monster_new(type, mpos);
+    }
+
+    if (monster_in_sight(m))
+    {
+        log_add_entry(nlarn->p->log, "An angry %s appears!",
+                      monster_name(m));
+    }
 }
