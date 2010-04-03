@@ -197,6 +197,7 @@ player *player_deserialize(cJSON *pser);
 void player_make_move(player *p, int turns);
 void player_die(player *p, player_cod cause_type, int cause);
 gint64 player_calc_score(player *p, int won);
+gboolean player_movement_possible(player *p);
 int player_move(player *p, direction dir, gboolean open_door);
 int player_attack(player *p, monster *m);
 void player_update_fov(player *p);
@@ -261,19 +262,6 @@ int player_item_use(player *p, inventory **inv, item *it);
 void player_item_destroy(player *p, item *it);
 int player_item_drop(player *p, inventory **inv, item *it);
 int player_item_pickup(player *p, inventory **inv, item *it);
-
-/* deal with stationary objects */
-int player_altar_desecrate(player *p);
-int player_altar_pray(player *p);
-int player_building_enter(player *p);
-int player_door_close(player *p);
-int player_door_open(player *p, int dir);
-int player_fountain_drink(player *p);
-int player_fountain_wash(player *p);
-int player_stairs_down(player *p);
-int player_stairs_up(player *p);
-int player_throne_pillage(player *p);
-int player_throne_sit(player *p);
 
 /* query values */
 int player_get_ac(player *p);

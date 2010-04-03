@@ -26,6 +26,7 @@
 #include "display.h"
 #include "game.h"
 #include "nlarn.h"
+#include "sobjects.h"
 
 game *nlarn = NULL;
 

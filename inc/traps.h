@@ -47,6 +47,14 @@ typedef struct trap_data
 
 extern const trap_data traps[TT_MAX];
 
+/* forward declarations */
+struct player;
+
+
+/* functions */
+int player_trap_trigger(struct player *p, trap_t trap, int force);
+
+/* macros */
 #define trap_effect(trap) (traps[(trap)].effect_type)
 #define trap_chance(trap) (traps[(trap)].chance)
 #define trap_effect_chance(trap) (traps[(trap)].effect_chance)

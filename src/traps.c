@@ -17,6 +17,9 @@
  */
 
 #include "effects.h"
+#include "game.h"
+#include "nlarn.h"
+#include "player.h"
 #include "traps.h"
 
 const trap_data traps[TT_MAX] = {
@@ -109,3 +112,71 @@ const trap_data traps[TT_MAX] = {
         "The %s falls through a trap door!",
     },
 };
+
+/**
+ * Player stepped on a trap
+ *
+ * @param the player
+ * @param the trap
+ * @return time this move took
+ */
+int player_trap_trigger(player *p, trap_t trap, int force)
+{
+    /* additional time of turn, if any */
+    int time = 0;
+
+    /* chance to trigger the trap on target tile */
+    int possibility = trap_chance(trap);
+
+    if (player_memory_of(p, p->pos).trap == trap)
+        /* if player knows the trap a 5% chance remains */
+        possibility = 5;
+
+    if (force || chance(possibility))
+    {
+        log_add_entry(p->log, trap_p_message(trap));
+
+        /* refresh player's knowlege of trap */
+        player_memory_of(p, p->pos).trap = trap;
+
+        switch (trap)
+        {
+        case TT_TRAPDOOR:
+            time += player_map_enter(p, game_map(nlarn, p->pos.z + 1), TRUE);
+            break;
+
+        case TT_TELEPORT:
+            p->pos = map_find_space(game_map(nlarn, p->pos.z), LE_MONSTER, FALSE);
+            break;
+
+        default:
+            if (trap_damage(trap))
+            {
+                damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
+                                         rand_1n(trap_damage(trap)) + p->pos.z,
+                                         NULL);
+
+                player_damage_take(p, dam, PD_TRAP, trap);
+            }
+
+            /* if there is an effect on the trap add it to player's effects. */
+            if (trap_effect(trap) && chance(trap_effect_chance(trap)))
+            {
+                /* display message if there is one */
+                if (trap_e_message(trap))
+                {
+                    log_add_entry(p->log, trap_e_message(trap));
+                }
+
+                player_effect_add(p, effect_new(trap_effect(trap)));
+            }
+        }
+
+    }
+    else if (player_memory_of(p, p->pos).trap == trap)
+    {
+        log_add_entry(p->log, "You evade the %s.", trap_description(trap));
+    }
+
+    return time;
+}
