@@ -278,6 +278,10 @@ void building_dndstore_init()
 
     for (type = IT_AMULET; type < IT_MAX; type++)
     {
+        /*never generate gems or gold */
+        if (type == IT_GEM || type == IT_GOLD)
+            continue;
+
         if (item_is_stackable(type) && (type != IT_BOOK))
         {
             count = 3;
