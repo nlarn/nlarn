@@ -729,7 +729,7 @@ int spell_type_point(spell *s, struct player *p)
 
     g_snprintf(buffer, 60, "Select a target for %s.", spell_name(s));
 
-    pos = display_get_position(p, buffer, FALSE, FALSE, 0, FALSE);
+    pos = display_get_position(p, buffer, FALSE, FALSE, 0, FALSE, TRUE);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -848,7 +848,7 @@ int spell_type_ray(spell *s, struct player *p)
     assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
 
     g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(s));
-    target = display_get_position(p, buffer, TRUE, FALSE, 0, TRUE);
+    target = display_get_position(p, buffer, TRUE, FALSE, 0, TRUE, TRUE);
     cmap = game_map(nlarn, p->pos.z);
 
     /* player pressed ESC */
@@ -977,7 +977,7 @@ int spell_type_flood(spell *s, struct player *p)
     assert(s != NULL && p != NULL && (spell_type(s) == SC_FLOOD));
 
     g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(s));
-    pos = display_get_position(p, buffer, FALSE, FALSE, 0, TRUE);
+    pos = display_get_position(p, buffer, FALSE, FALSE, 0, TRUE, TRUE);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -1045,7 +1045,7 @@ int spell_type_blast(spell *s, struct player *p)
     }
 
     g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(s));
-    pos = display_get_position(p, buffer, FALSE, TRUE, radius, TRUE);
+    pos = display_get_position(p, buffer, FALSE, TRUE, radius, TRUE, TRUE);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -1170,7 +1170,7 @@ gboolean spell_create_sphere(spell *s, struct player *p)
     assert(p != NULL);
 
     pos = display_get_position(p, "Where do you want to place the sphere?",
-                               FALSE, FALSE, 0, TRUE);
+                               FALSE, FALSE, 0, TRUE, TRUE);
 
     if (pos_valid(pos))
     {
@@ -1228,7 +1228,7 @@ gboolean spell_make_wall(player *p)
     position pos;
 
     pos = display_get_position(p, "Select a position where you want to place a wall.",
-                               FALSE, FALSE, 0, TRUE);
+                               FALSE, FALSE, 0, TRUE, TRUE);
 
     if (pos_identical(pos, p->pos))
     {
@@ -1274,7 +1274,7 @@ gboolean spell_vaporize_rock(player *p)
     map *map = game_map(nlarn, p->pos.z);
 
     pos = display_get_position(p, "What do you want to vaporize?",
-                               FALSE, FALSE, 0, FALSE);
+                               FALSE, FALSE, 0, FALSE, TRUE);
 
     if (!pos_valid(pos))
     {

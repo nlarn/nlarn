@@ -62,7 +62,7 @@ Wizard mode
 
 +     teleport down one level
 -     teleport up one level
-t     teleport within a level
+^T    teleport within a level
 ^up   raise experience level (also x)
 ^down lower experience level
 *     add 1000 gp to bank account

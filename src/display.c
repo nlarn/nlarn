@@ -2030,7 +2030,8 @@ direction display_get_direction(char *title, int *available)
 }
 
 position display_get_position(player *p, char *message, gboolean ray,
-                              gboolean ball, guint radius, int passable)
+                              gboolean ball, guint radius,
+                              gboolean passable, gboolean visible)
 {
     int RUN  = TRUE;
     direction dir = GD_NONE;
@@ -2050,8 +2051,8 @@ position display_get_position(player *p, char *message, gboolean ray,
     log_add_entry(p->log, message);
     display_paint_screen(p);
 
-    /* show cursor */
-    curs_set(1);
+    /* show block cursor */
+    curs_set(2);
 
     /* make shortcut to map */
     map = game_map(nlarn, p->pos.z);
@@ -2231,19 +2232,24 @@ position display_get_position(player *p, char *message, gboolean ray,
             dir = GD_NONE;
         }
 
+        /* don't want to deal with invalid positions */
         if (pos_valid(npos))
         {
-            /* don't want to deal with invalid positions */
-            int distance = pos_distance(p->pos, npos);
+            /* check visibility of chosen position */
+            if (visible)
+            {
+                /* don't use invisible or impassable positions */
+                if (!player_pos_visible(p, npos))
+                    npos = pos;
 
-            /* don't use inappropriate positions */
-            if (!player_pos_visible(p, npos))
-                npos = pos;
-            if (passable && !map_pos_passable(map, npos))
-                npos = pos;
+                if (passable && !map_pos_passable(map, npos))
+                    npos = pos;
+            }
 
             if (ray)
             {
+                int distance = pos_distance(p->pos, npos);
+
                 /* painting a ray - validate if new position is in a line */
                 a = area_new_ray(p->pos, npos, map_get_obstacles(map, p->pos, distance));
 
