@@ -209,8 +209,8 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_INFRAVISION, 250, TRUE, "infravision",
-        "You feel your vision sharpen.",
-        "You feel your vision return to normal.",
+        "Your vision sharpens.",
+        "Your vision returns to normal.",
         NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
     },
@@ -375,7 +375,7 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_DEC_STR, 1, 1, NULL,
-        "You feel weaker.",
+        "You are weaker.",
         "You regain your strength.",
         NULL, NULL,
         FALSE, FALSE, TRUE, TRUE
@@ -442,8 +442,8 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_DIZZINESS, 250, 5, "dizzy",
-        "You feel dizzy and weak!",
-        "You no longer feel dizzy.",
+        "You're dizzy and weak!",
+        "You're no longer dizzy.",
         "The %s looks dizzy and weak.",
         "The %s no longer looks dizzy.",
         TRUE, FALSE, FALSE, FALSE
@@ -469,7 +469,7 @@ static const effect_data effects[ET_MAX] =
     {
         ET_CLUMSINESS, 250, TRUE, "clumsy",
         "You are unable to hold your weapon.",
-        "You now feel less awkward.",
+        "You're less awkward now.",
         NULL, NULL,
         TRUE, FALSE, FALSE, FALSE
     },
@@ -477,14 +477,14 @@ static const effect_data effects[ET_MAX] =
     {
         ET_ITCHING, 100, TRUE, "itching",
         "The hysteria of itching forces you to remove your armour!",
-        "You feel the irritation subside.",
+        "The irritation subsides.",
         NULL, NULL,
         TRUE, FALSE, FALSE, FALSE
     },
 
     {
         ET_CONFUSION, 25, TRUE, "confused",
-        "You feel confused.",
+        "You are confused.",
         "You regain your senses.",
         "The %s looks confused.",
         "The %s seems to have regained it's senses.",
@@ -502,7 +502,7 @@ static const effect_data effects[ET_MAX] =
     {
         ET_POISON, 300, 1, "poisoned",
         NULL, /* message is shown in player_damage_take */
-        "You feel cured.",
+        "You are cured.",
         "The %s looks poisoned.",
         "The %s looks cured.",
         TRUE, FALSE, TRUE, TRUE
