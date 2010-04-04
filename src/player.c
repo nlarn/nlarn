@@ -3847,15 +3847,31 @@ void player_update_fov(player *p)
             if (player_pos_visible(p, pos))
             {
                 monster *m = map_get_monster_at(map, pos);
+                inventory **inv = map_ilist_at(map, pos);
 
                 player_memory_of(p,pos).type = map_tiletype_at(map, pos);
                 player_memory_of(p,pos).sobject = map_sobject_at(map, pos);
 
-                if (inv_length(*map_ilist_at(map, pos)))
+                if (inv_length(*inv) > 0)
                 {
-                    /* memorize the topmost item on the tile */
-                    item *it = inv_get(*map_ilist_at(map, pos),
-                                       inv_length(*map_ilist_at(map, pos)) - 1);
+                    item *it;
+
+                    /* memorize the most interesting item on the tile */
+                    if (inv_item_count(*inv, IT_GEM, 0) > 0)
+                    {
+                        /* there's a gem in the stack */
+                        it = inv_get_filtered(*inv, 0, item_filter_gems);
+                    }
+                    else if (inv_item_count(*inv, IT_GOLD, 0) > 0)
+                    {
+                        /* there is gold in the stack */
+                        it = inv_get_filtered(*inv, 0, item_filter_gold);
+                    }
+                    else
+                    {
+                        /* memorize the topmost item on the stack */
+                        it = inv_get(*inv, inv_length(*inv) - 1);
+                    }
 
                     player_memory_of(p,pos).item = it->type;
                     player_memory_of(p,pos).item_colour = item_colour(it);

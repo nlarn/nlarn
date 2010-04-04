@@ -223,6 +223,7 @@ int item_filter_container(item *it);
 int item_filter_not_container(item *it);
 int item_filter_food(item *it);
 int item_filter_gems(item *it);
+int item_filter_gold(item *it);
 int item_filter_not_gold(item *it);
 int item_filter_potions(item *it);
 int item_filter_legible(item *it);

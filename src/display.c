@@ -135,21 +135,39 @@ int display_paint_screen(player *p)
             if (game_wizardmode(nlarn) || player_pos_visible(p, pos))
             {
                 /* draw the truth */
-                if (inv_length(*map_ilist_at(map, pos)) > 0)
+                inventory **inv = map_ilist_at(map, pos);
+
+                if (map_sobject_at(map, pos))
+                {
+                    /* draw stationary objects first */
+                    attron(attrs = ls_get_colour(map_sobject_at(map, pos)));
+                    addch(ls_get_image(map_sobject_at(map, pos)));
+                    attroff(attrs);
+                }
+                else if (inv_length(*inv) > 0)
                 {
                     /* draw items */
-                    item *it = inv_get(*map_ilist_at(map, pos),
-                                       inv_length(*map_ilist_at(map, pos)) - 1);
+                    item *it;
+
+                    /* memorize the most interesting item on the tile */
+                    if (inv_item_count(*inv, IT_GEM, 0) > 0)
+                    {
+                        /* there's a gem in the stack */
+                        it = inv_get_filtered(*inv, 0, item_filter_gems);
+                    }
+                    else if (inv_item_count(*inv, IT_GOLD, 0) > 0)
+                    {
+                        /* there is gold in the stack */
+                        it = inv_get_filtered(*inv, 0, item_filter_gold);
+                    }
+                    else
+                    {
+                        /* memorize the topmost item on the stack */
+                        it = inv_get(*inv, inv_length(*inv) - 1);
+                    }
 
                     attron(attrs = item_colour(it));
                     addch(item_image(it->type));
-                    attroff(attrs);
-                }
-                else if (map_sobject_at(map, pos))
-                {
-                    /* draw sobject stuff */
-                    attron(attrs = ls_get_colour(map_sobject_at(map, pos)));
-                    addch(ls_get_image(map_sobject_at(map, pos)));
                     attroff(attrs);
                 }
                 else if (map_trap_at(map, pos) && (game_wizardmode(nlarn) || player_memory_of(p, pos).trap))
@@ -169,14 +187,7 @@ int display_paint_screen(player *p)
             }
             else /* i.e. !wizardmode && !visible: draw players memory */
             {
-                if (player_memory_of(p, pos).item)
-                {
-                    /* draw items */
-                    attron(attrs = player_memory_of(p, pos).item_colour);
-                    addch(item_image(player_memory_of(p, pos).item));
-                    attroff(attrs);
-                }
-                else if (player_memory_of(p, pos).sobject)
+                if (player_memory_of(p, pos).sobject)
                 {
                     /* draw stationary object */
                     map_sobject_t ms = map_sobject_at(map, pos);
@@ -185,6 +196,14 @@ int display_paint_screen(player *p)
                     addch(ls_get_image(ms));
                     attroff(attrs);
                 }
+                else if (player_memory_of(p, pos).item)
+                {
+                    /* draw items */
+                    attron(attrs = player_memory_of(p, pos).item_colour);
+                    addch(item_image(player_memory_of(p, pos).item));
+                    attroff(attrs);
+                }
+
                 else if (player_memory_of(p, pos).trap)
                 {
                     /* draw trap */

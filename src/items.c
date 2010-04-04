@@ -1860,6 +1860,13 @@ int item_filter_gems(item *it)
     return (it->type == IT_GEM);
 }
 
+int item_filter_gold(item *it)
+{
+    assert (it != NULL);
+
+    return (it->type == IT_GOLD);
+}
+
 int item_filter_not_gold(item *it)
 {
     assert (it != NULL);
