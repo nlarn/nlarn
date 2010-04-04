@@ -131,6 +131,7 @@ int main(int argc, char *argv[])
 
     display_paint_screen(nlarn->p);
 
+    /* ask for a charakter name if none has been supplied */
     while (nlarn->p->name == NULL)
     {
         nlarn->p->name = display_get_string("By what name shall you be called?",
@@ -139,6 +140,7 @@ int main(int argc, char *argv[])
         display_paint_screen(nlarn->p);
     }
 
+    /* ask for charakter's gender if it is not known yet */
     if (nlarn->p->sex == PS_NONE)
     {
         int res = display_get_yesno("Are you male or female?", "Female", "Male");
@@ -169,7 +171,7 @@ int main(int argc, char *argv[])
         {
             ch = display_getch();
 
-            if (ch == '/' || ch == 'r')
+            if (ch == '/' || ch == 'g')
             {
                 ch = toupper(display_getch());
                 switch (ch)
@@ -342,6 +344,26 @@ int main(int argc, char *argv[])
             moves_count = spell_cast(nlarn->p);
             break;
 
+            /* read something */
+        case 'r':
+            moves_count = player_read(nlarn->p);
+            break;
+
+            /* equip something */
+        case 'e':
+            moves_count = player_equip(nlarn->p);
+            break;
+
+            /* take off something */
+        case 't':
+            moves_count = player_take_off(nlarn->p);
+            break;
+
+            /* drop something */
+        case 'd':
+            moves_count = player_drop(nlarn->p);
+            break;
+
             /* go down stairs / enter a building */
         case '>':
             if (!(moves_count = player_stairs_down(nlarn->p)))
@@ -351,12 +373,6 @@ int main(int argc, char *argv[])
             /* go up stairs */
         case '<':
             moves_count = player_stairs_up(nlarn->p);
-            break;
-
-            /* display inventory weight */
-        case 'g':
-            log_add_entry(nlarn->p->log, "The weight of your inventory is %s.",
-                          player_inv_weight(nlarn->p));
             break;
 
             /* display inventory */
@@ -409,12 +425,26 @@ int main(int argc, char *argv[])
                 log_add_entry(nlarn->p->log, "You do not owe any taxes.");
             break;
 
-            /* drink from fountain */
+            /* drink a potion or from a fountain */
         case 'q':
-            moves_count = player_fountain_drink(nlarn->p);
-            break;
+        {
+            map_sobject_t ms = map_sobject_at(game_map(nlarn, nlarn->p->pos.z),
+                                              nlarn->p->pos);
 
-            /* remove gems from throne */
+            if ((ms == LS_FOUNTAIN || ms == LS_DEADFOUNTAIN)
+                    && display_get_yesno("There is a fountain here, drink from it?",
+                                         NULL, NULL))
+            {
+                moves_count = player_fountain_drink(nlarn->p);
+            }
+            else
+            {
+                player_quaff(nlarn->p);
+            }
+        }
+        break;
+
+        /* remove gems from throne */
         case 'R':
             moves_count = player_throne_pillage(nlarn->p);
             break;
@@ -485,7 +515,7 @@ int main(int argc, char *argv[])
                     game_wizardmode(nlarn) = TRUE;
                     log_add_entry(nlarn->p->log, "Wizard mode has been activated.");
                 }
-             }
+            }
             else
             {
                 log_add_entry(nlarn->p->log, "Wizard mode is already enabled.");
@@ -517,7 +547,7 @@ int main(int argc, char *argv[])
             if (game_wizardmode(nlarn))
             {
                 pos = display_get_position(nlarn->p, "Choose a position to teleport to.",
-                                                     FALSE, FALSE, 0, FALSE, FALSE);
+                                           FALSE, FALSE, 0, FALSE, FALSE);
 
                 if (pos_valid(pos))
                 {
@@ -580,7 +610,7 @@ int main(int argc, char *argv[])
             // * we took damage (trap, poison, or invisible monster)
             // * a monster has moved adjacent to us
             if (no_move || nlarn->p->hp < old_hp
-                || adjacent_monster(nlarn->p->pos, run_cmd == '.'))
+                    || adjacent_monster(nlarn->p->pos, run_cmd == '.'))
             {
                 run_cmd = 0;
             }
@@ -703,12 +733,12 @@ static gboolean adjacent_corridor(position pos, char move)
     }
 
     if (p1.x >= 0 && p1.x < MAP_MAX_X && p1.y >= 0 && p1.y < MAP_MAX_Y
-        && lt_is_passable(map_tiletype_at(game_map(nlarn, nlarn->p->pos.z), p1)))
+            && lt_is_passable(map_tiletype_at(game_map(nlarn, nlarn->p->pos.z), p1)))
     {
         return TRUE;
     }
     if (p2.x >= 0 && p2.x < MAP_MAX_X && p2.y >= 0 && p2.y < MAP_MAX_Y
-        && lt_is_passable(map_tiletype_at(game_map(nlarn, nlarn->p->pos.z), p2)))
+            && lt_is_passable(map_tiletype_at(game_map(nlarn, nlarn->p->pos.z), p2)))
     {
         return TRUE;
     }

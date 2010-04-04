@@ -3437,6 +3437,143 @@ int player_item_pickup(player *p, inventory **inv, item *it)
     return 2;
 }
 
+int player_read(player *p)
+{
+    item *it;
+
+    assert (p != NULL);
+
+    if (inv_length_filtered(p->inventory, item_filter_legible) > 0)
+    {
+        it = display_inventory("Choose an item to read", p, &p->inventory,
+                               NULL, FALSE, FALSE, FALSE, item_filter_legible);
+
+        if (it)
+        {
+            return player_item_use(p, NULL, it);
+        }
+    }
+    else
+    {
+        log_add_entry(p->log, "You have nothing to read.");
+    }
+
+
+    return FALSE;
+}
+
+int player_quaff(player *p)
+{
+    item *it;
+
+    assert (p != NULL);
+
+    if (inv_length_filtered(p->inventory, item_filter_potions) > 0)
+    {
+        it = display_inventory("Choose an item to drink", p, &p->inventory,
+                               NULL, FALSE, FALSE, FALSE, item_filter_potions);
+
+        if (it)
+        {
+            return player_item_use(p, NULL, it);
+        }
+    }
+    else
+    {
+        log_add_entry(p->log, "You have nothing to drink.");
+    }
+
+    return FALSE;
+}
+
+
+int player_equip(player *p)
+{
+    item *it;
+
+    assert (p != NULL);
+
+    int item_filter_equippable(item *it)
+    {
+        return player_item_is_equippable(nlarn->p, it);
+    }
+
+    if (inv_length_filtered(p->inventory, item_filter_equippable) > 0)
+    {
+        it = display_inventory("Choose an item to equip", p, &p->inventory,
+                               NULL, FALSE, FALSE, FALSE, item_filter_equippable);
+
+        if (it)
+        {
+            return player_item_equip(p, NULL, it);
+        }
+    }
+    else
+    {
+        log_add_entry(p->log, "You have nothing you could equip.");
+    }
+
+    return FALSE;
+}
+
+int player_take_off(player *p)
+{
+    item *it;
+
+    assert (p != NULL);
+
+    int item_filter_unequippable(item *it)
+    {
+        return player_item_is_equipped(nlarn->p, it);
+    }
+
+    if (inv_length_filtered(p->inventory, item_filter_unequippable) > 0)
+    {
+        it = display_inventory("Choose an item to take off", p, &p->inventory,
+                               NULL, FALSE, FALSE, FALSE, item_filter_unequippable);
+
+        if (it)
+        {
+            return player_item_unequip(p, NULL, it);
+        }
+    }
+    else
+    {
+        log_add_entry(p->log, "You have nothing you could take off.");
+    }
+
+    return FALSE;
+}
+
+int player_drop(player *p)
+{
+    item *it;
+
+    assert (p != NULL);
+
+    int item_filter_dropable(item *it)
+    {
+        return player_item_is_dropable(nlarn->p, it);
+    }
+
+    if (inv_length_filtered(p->inventory, item_filter_dropable) > 0)
+    {
+        it = display_inventory("Choose an item to drop", p, &p->inventory,
+                               NULL, FALSE, FALSE, FALSE, item_filter_dropable);
+
+        if (it)
+        {
+            return player_item_drop(p, &p->inventory, it);
+        }
+    }
+    else
+    {
+        log_add_entry(p->log, "You have nothing you could drop.");
+    }
+
+    return FALSE;
+}
+
 int player_get_ac(player *p)
 {
     int ac = 0;

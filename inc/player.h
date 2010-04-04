@@ -263,6 +263,13 @@ void player_item_destroy(player *p, item *it);
 int player_item_drop(player *p, inventory **inv, item *it);
 int player_item_pickup(player *p, inventory **inv, item *it);
 
+/* item usage shortcuts */
+int player_read(player *p);
+int player_quaff(player *p);
+int player_equip(player *p);
+int player_take_off(player *p);
+int player_drop(player *p);
+
 /* query values */
 int player_get_ac(player *p);
 int player_get_wc(player *p);
