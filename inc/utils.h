@@ -42,6 +42,7 @@ typedef struct message_log
 
 /* macros */
 
+/* NOTE: g_random_int_range(m,n) returns a value x with m <= x < n. */
 #define rand_1n(n)      (((n) <= 1) ? 1 : g_random_int_range(1,(n)))
 #define rand_0n(n)      (((n) <= 0) ? 0 : g_random_int_range(0,(n)))
 #define rand_m_n(m,n)   ((m) == (n) ? (m) : g_random_int_range((m),(n)))

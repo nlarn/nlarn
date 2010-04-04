@@ -236,7 +236,7 @@ item *item_new_random(item_t item_type)
         /* nop */
         break;
     }
-    item_id = rand_m_n(min_id, max_id - 1);
+    item_id = rand_m_n(min_id, max_id);
     it = item_new(item_type, item_id);
 
     return item_new_finetouch(it);
