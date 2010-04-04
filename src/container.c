@@ -111,8 +111,8 @@ int container_item_add(player *p, inventory **inv, item *element)
     gchar element_desc[61]  = { 0 };
     guint pilen = 0; /* length of player's filtered inventory */
     guint filen = 0; /* length of filtered floor inventory */
+    gboolean carried_container = FALSE;
     int count = 0;
-    item *original = element;
 
     assert(p != NULL && element != NULL);
 
@@ -127,6 +127,7 @@ int container_item_add(player *p, inventory **inv, item *element)
         {
             /* only one container in inventory - this is the one */
             container = inv_get_filtered(p->inventory, 0, item_filter_container);
+            carried_container = TRUE;
         }
         else if (pilen > 1)
         {
@@ -134,6 +135,7 @@ int container_item_add(player *p, inventory **inv, item *element)
             container = display_inventory("Choose a container", p,
                                           &p->inventory, NULL, FALSE, FALSE,
                                           FALSE, item_filter_container);
+            carried_container = TRUE;
         }
         else if (filen == 1)
         {
@@ -158,6 +160,10 @@ int container_item_add(player *p, inventory **inv, item *element)
     /* prepare container description */
     item_describe(container, TRUE, TRUE, TRUE, container_desc, 60);
 
+    /* mute the log if the container is in the player's inventory.
+       otherwise mindless burdened staus messages would appear */
+    if (carried_container) log_disable(p->log);
+
     if (element->count > 1)
     {
         g_snprintf(element_desc, 60, "How many %s do you want to put into the %s?",
@@ -174,12 +180,20 @@ int container_item_add(player *p, inventory **inv, item *element)
         {
             /* replace element with a copy of element with the chosen amount */
             element = item_split(element, count);
-
-            /* set original to NULL to prevent that it gets removed
-               from the originating inventory */
-            original = NULL;
+        }
+        else
+        {
+            /* remove the entire item from the player's inventory */
+            inv_del_element(&p->inventory, element);
         }
     }
+    else
+    {
+        /* remove the item from the player's inventory */
+        inv_del_element(&p->inventory, element);
+    }
+
+    if (carried_container) log_enable(p->log);
 
     /* log the event */
     item_describe(element, player_item_identified(p, element),
@@ -188,13 +202,18 @@ int container_item_add(player *p, inventory **inv, item *element)
     log_add_entry(p->log, "You put %s into %s.", element_desc,
                   container_desc);
 
-    /* remove the item from the player's inventory if it has not been split */
-    if (original != NULL)
-    {
-        inv_del_element(&p->inventory, element);
-    }
-
     inv_add(&container->content, element);
+
+    if (carried_container)
+    {
+        /* the container is in the player's inventory, thus the weight has
+           to recalculated. Silence the log in the meantime to avoid
+           pointless messages. */
+
+        log_disable(p->log);
+        player_inv_weight_recalc(p->inventory, NULL);
+        log_enable(p->log);
+    }
 
     return 2;
 }
@@ -203,13 +222,13 @@ int container_item_unpack(player *p, inventory **inv, item *element)
 {
     gchar desc[61] = { 0 };
     int count = 0;
-    gpointer oid = element->oid;
 
     assert(p != NULL && inv != NULL && element != NULL);
 
     if (element->count > 1)
     {
-        g_snprintf(desc, 60, "Pick up how many %s?", item_name_pl(element->type));
+        g_snprintf(desc, 60, "How many %s do you want to take out?",
+                   item_name_pl(element->type));
 
         count = display_get_count(desc, element->count);
 
@@ -222,11 +241,20 @@ int container_item_unpack(player *p, inventory **inv, item *element)
         {
             /* replace element with a copy of element with the chosen amount */
             element = item_split(element, count);
-
-            /* set original to NULL to prevent that it gets removed
-               from the originating inventory */
-            oid = NULL;
         }
+        else
+        {
+            /* take the entire item out of the container */
+            inv_del_element(inv, element);
+        }
+    }
+    else
+    {
+        /* remove the element from the originating inventory before
+           adding it to the player's. This allows to move items from
+           carried containers to the main inventory without being
+           rejected because of weight issues. */
+        inv_del_element(inv, element);
     }
 
     if (inv_add(&p->inventory, element))
@@ -234,17 +262,10 @@ int container_item_unpack(player *p, inventory **inv, item *element)
         item_describe(element, player_item_known(p, element),
                       (element->count == 1), FALSE, desc, 60);
         log_add_entry(p->log, "You put %s into your pack.", desc);
-
-        if (oid != NULL)
-        {
-            /* remove the element from the originating inventory
-               if it has not been split */
-             inv_del_oid(inv, oid);
-        }
     }
-    else if (oid == NULL)
+    else
     {
-        /* if adding the newly created element to the player's pack
+        /* if adding the element to the player's pack
            has failed put it back into the container */
         inv_add(inv, element);
 
