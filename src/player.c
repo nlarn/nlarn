@@ -3450,6 +3450,9 @@ int player_read(player *p)
 
         if (it)
         {
+            /* repaint screen as it would be plain black
+               if a scroll shows a window */
+            display_paint_screen(p);
             return player_item_use(p, NULL, it);
         }
     }
