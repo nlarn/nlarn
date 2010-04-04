@@ -2507,10 +2507,13 @@ void player_inv_weight_recalc(inventory *inv, item *item)
 
     if (pack_weight > (int)(can_carry * 1.3))
     {
-        /* OVERSTRAINED - if burdened get rid of this */
+        /* OVERSTRAINED  */
         if ((e = player_effect_get(p, ET_BURDENED)))
         {
+            /* get rid of burden effect (mute log to avoid pointless message) */
+            log_disable(p->log);
             player_effect_del(p, e);
+            log_enable(p->log);
         }
 
         /* make overstrained */
@@ -2521,10 +2524,13 @@ void player_inv_weight_recalc(inventory *inv, item *item)
     }
     else if (pack_weight < (int)(can_carry * 1.3) && (pack_weight > can_carry))
     {
-        /* BURDENED - if overstrained get rid of this */
+        /* BURDENED */
         if ((e = player_effect_get(p, ET_OVERSTRAINED)))
         {
+            /* get rid of overstrained effect */
+            log_disable(p->log);
             player_effect_del(p, e);
+            log_enable(p->log);
         }
 
         if (!player_effect(p, ET_BURDENED))
@@ -2540,9 +2546,9 @@ void player_inv_weight_recalc(inventory *inv, item *item)
             player_effect_del(p, e);
         }
 
-        if (player_effect(p, ET_BURDENED))
+        if ((e = player_effect_get(p, ET_BURDENED)))
         {
-            player_effect_del(p, player_effect_get(p, ET_BURDENED));
+            player_effect_del(p, e);
         }
     }
 }
