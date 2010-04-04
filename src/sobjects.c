@@ -402,7 +402,7 @@ int player_door_open(player *p, int dir)
     }
     else
     {
-        log_add_entry(p->log, "What excactly do you want to open?");
+        log_add_entry(p->log, "What exactly do you want to open?");
         return 0;
     }
 
