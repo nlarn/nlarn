@@ -74,6 +74,7 @@ Section "NLarn (required)"
   File "libglib-2.0-0.dll"
   File "libz-1.dll"
   File "README.txt"
+  File "Changelog.txt"
   File "LICENSE"
   File "nlarn.ini-sample"
 
@@ -102,6 +103,7 @@ Section "Start Menu Shortcuts"
   CreateShortCut "$SMPROGRAMS\NLarn\Uninstall.lnk" "$INSTDIR\uninstall.exe"
   CreateShortCut "$SMPROGRAMS\NLarn\NLarn.lnk" "$INSTDIR\nlarn.exe"
   CreateShortCut "$SMPROGRAMS\NLarn\README.lnk" "$INSTDIR\README.txt"
+  CreateShortCut "$SMPROGRAMS\NLarn\Changelog.lnk" "$INSTDIR\Changelog.txt"
 
 SectionEnd
 
