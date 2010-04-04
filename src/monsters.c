@@ -1754,7 +1754,7 @@ void monster_player_attack(monster *m, player *p)
         return;
     }
 
-    if (player_effect(p, ET_CHARM_MONSTER)
+    if (monster_effect(m, ET_CHARM_MONSTER)
             && (rand_m_n(5, 30) * monster_level(m) - player_get_cha(p) < 30))
     {
         if (monster_in_sight(m))
