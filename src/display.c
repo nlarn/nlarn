@@ -2083,16 +2083,21 @@ position display_get_position(player *p, char *message, gboolean ray,
                     {
                         position tpos = pos_new(a->start_x + x, a->start_y + y, p->pos.z);
 
-                        if (target && pos_identical(monster_pos(target), tpos))
+                        if (target && pos_identical(monster_pos(target), tpos)
+                            && monster_in_sight(target))
                         {
+                            /* ray is targeted at a visible monster */
                             mvaddch(a->start_y + y, a->start_x + x, monster_image(target));
                         }
-                        else if ((m = map_get_monster_at(map, tpos)))
+                        else if ((m = map_get_monster_at(map, tpos))
+                                 && monster_in_sight(m))
                         {
+                            /* ray sweeps over a visible monster */
                             mvaddch(a->start_y + y, a->start_x + x, monster_image(m));
                         }
                         else
                         {
+                            /* a position with no or an invisible monster on it */
                             mvaddch(a->start_y + y, a->start_x + x, '*');
                         }
                     }
@@ -2122,7 +2127,7 @@ position display_get_position(player *p, char *message, gboolean ray,
                     {
                         move(cursor.y, cursor.x);
 
-                        if ((m = map_get_monster_at(map, cursor)))
+                        if ((m = map_get_monster_at(map, cursor)) && monster_in_sight(m))
                         {
                             attron(attrs = DC_RED);
                             addch(monster_image(m));

@@ -2139,11 +2139,6 @@ char monster_image(monster *m)
 {
     assert (m != NULL);
 
-    // NOTE: This assumes that for unseen monsters, monster_image()
-    //       is only called when targeting.
-    if (!game_wizardmode(nlarn) && !monster_in_sight(m))
-        return '*';
-
     if (m->unknown)
     {
         return item_image(m->item_type);
