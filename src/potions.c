@@ -243,6 +243,7 @@ static int potion_detect_item(player *p, item *potion)
                         if ((it->type == IT_GOLD) || (it->type == IT_GEM))
                         {
                             player_memory_of(p, pos).item = it->type;
+                            player_memory_of(p, pos).item_colour = item_colour(it);
                             count++;
                         }
                     }
@@ -251,6 +252,7 @@ static int potion_detect_item(player *p, item *potion)
                         if ((it->type != IT_GOLD) && (it->type != IT_GEM))
                         {
                             player_memory_of(p, pos).item = it->type;
+                            player_memory_of(p, pos).item_colour = item_colour(it);
                             count++;
                         }
                     }
