@@ -379,20 +379,20 @@ const monster_data monsters[MT_MAX] =
     {
         MT_VORTEX, "vortex",
         6, 4, 3, 0, 30, 55, 'v', DC_DARKGRAY,
-        SPEED_NORMAL, ESIZE_TINY,
+        SPEED_VFAST, ESIZE_TINY,
         MF_NONE,
         {
-            { ATT_NONE, DAM_NONE, 3, 0 },
+            { ATT_SLAM, DAM_PHYSICAL, 3, 0 },
             EMPTY_ATTACK,
         }
     },
     {
         MT_ZILLER, "ziller",
         6, 15, 3, 0, 30, 35, 'z', DC_CYAN,
-        SPEED_NORMAL, ESIZE_MEDIUM,
+        SPEED_SLOW, ESIZE_MEDIUM,
         MF_HEAD,
         {
-            { ATT_NONE, DAM_NONE, 3, 0 },
+            { ATT_CLAW, DAM_PHYSICAL, 3, 0 },
             EMPTY_ATTACK,
         }
     },
