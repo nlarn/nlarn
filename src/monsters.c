@@ -2500,7 +2500,8 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
             it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
 
             char buf[61];
-            item_describe(it, player_item_known(p, it), TRUE, TRUE, buf, 60);
+            item_describe(it, player_item_known(p, it), it->count, FALSE, buf,
+                          60);
 
             if (player_item_is_equipped(p, it))
             {

@@ -1524,6 +1524,9 @@ void player_autopickup(player *p)
     /* set flag to tell player_item_pickup() not to ask about the amount */
     called_by_autopickup = TRUE;
 
+    int other_items_count = 0;
+    int other_item_id     = -1;
+    gboolean did_pickup   = FALSE;
     for (idx = 0; idx < inv_length(*floor); idx++)
     {
         item *i = inv_get(*floor, idx);
@@ -1536,12 +1539,37 @@ void player_autopickup(player *p)
                 /* item has been picked up */
                 /* go back one item as the following items lowered their number */
                 idx--;
+                did_pickup = TRUE;
             }
+        }
+        else
+        {
+            if (++other_items_count == 1)
+                other_item_id = idx;
         }
     }
 
     /* reset flag */
     called_by_autopickup = FALSE;
+
+    if (did_pickup && other_items_count > 0)
+    {
+        if (other_items_count == 1)
+        {
+            item *it = inv_get(*floor, other_item_id);
+            char item_desc[81] = { 0 };
+            item_describe(it, player_item_known(nlarn->p, it),
+                          (it->count == 1), FALSE, item_desc, 80);
+
+            log_add_entry(p->log, "There %s %s here.",
+                          it->count == 1 ? "is" : "are", item_desc);
+        }
+        else
+        {
+            log_add_entry(p->log, "There are %d more items here.",
+                          other_items_count);
+        }
+    }
 }
 
 void player_autopickup_show(player *p)
@@ -2383,13 +2411,8 @@ int player_inv_display(player *p)
     callback->function = &player_item_use;
     callback->checkfun = &player_item_is_usable;
     g_ptr_array_add(callbacks, callback);
-
-    {
-        static char buf[61] = { 0 };
-        g_snprintf(buf, 60, "Inventory");
-        display_inventory(buf, p, &p->inventory, callbacks, FALSE,
-                          TRUE, FALSE, NULL);
-    }
+    display_inventory("Inventory", p, &p->inventory, callbacks, FALSE,
+                      TRUE, FALSE, NULL);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);
