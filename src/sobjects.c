@@ -671,7 +671,7 @@ int player_stairs_down(player *p)
     {
         trap_t trap = map_trap_at(map, p->pos);
         if (trap == TT_TRAPDOOR)
-            player_trap_trigger(p, trap, TRUE);
+            return player_trap_trigger(p, trap, TRUE);
         else
             return FALSE;
     }
