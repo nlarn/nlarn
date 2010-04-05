@@ -397,7 +397,7 @@ const monster_data monsters[MT_MAX] =
         }
     },
     { /* FIXME: I don't want no silly mushrooms */
-        MT_VIOLET_FUNGUS, "violet fungi",
+        MT_VIOLET_FUNGUS, "violet fungus",
         6, 12, 3, 0, 38, 100, 'F', DC_MAGENTA,
         SPEED_XSLOW, ESIZE_MEDIUM,
         MF_NONE,
@@ -1189,6 +1189,14 @@ const char* monster_type_plural_name(const int montype, const int count)
 
         case MT_ELF:
             return "elves";
+            break;
+
+        case MT_VORTEX:
+            return "vortexes";
+            break;
+
+        case MT_VIOLET_FUNGUS:
+            return "violet fungi";
             break;
 
         case MT_DISENCHANTRESS:
