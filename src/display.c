@@ -1735,6 +1735,8 @@ char *display_get_string(char *caption, char *value, size_t max_len)
 
 int display_get_yesno(char *question, char *yes, char *no)
 {
+    display_paint_screen(nlarn->p);
+
     display_window *ywin;
     guint startx, starty;
     guint width, text_width;
@@ -2362,7 +2364,7 @@ char display_show_message(const char *title, const char *message, int indent)
     /* wrap message according to width */
     text = text_wrap(message, width - 4, indent);
 
-    /* determine the lenght of longest text line */
+    /* determine the length of longest text line */
     for (idx = 0; idx < text->len; idx++)
          max_len = max(max_len, strlen(g_ptr_array_index(text, idx)));
 

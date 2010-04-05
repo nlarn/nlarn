@@ -738,6 +738,12 @@ int spell_type_point(spell *s, struct player *p)
         return FALSE;
     }
 
+    if (pos_identical(pos, p->pos))
+    {
+        log_add_entry(p->log, "This spell only works on monsters.");
+        return FALSE;
+    }
+
     monster = map_get_monster_at(game_map(nlarn, p->pos.z), pos);
 
     if (!monster)
@@ -788,7 +794,6 @@ int spell_type_point(spell *s, struct player *p)
         {
             log_add_entry(p->log, "It didn't work.");
         }
-
         break; /* SP_FGR */
 
         /* polymorph */
@@ -806,7 +811,6 @@ int spell_type_point(spell *s, struct player *p)
 
         map *mmap = game_map(nlarn, monster_pos(monster).z);
         monster_pos_set(monster, mmap, map_find_space(mmap, LE_MONSTER, FALSE));
-
         break; /* SP_TEL */
 
     default:
@@ -855,6 +859,12 @@ int spell_type_ray(spell *s, struct player *p)
     if (!pos_valid(target))
     {
         log_add_entry(p->log, "Aborted.");
+        return FALSE;
+    }
+
+    if (pos_identical(pos, p->pos))
+    {
+        log_add_entry(p->log, "This spell only works on monsters.");
         return FALSE;
     }
 
@@ -1050,6 +1060,22 @@ int spell_type_blast(spell *s, struct player *p)
 
     /* player pressed ESC */
     if (!pos_valid(pos))
+    {
+        log_add_entry(p->log, "Aborted.");
+        return FALSE;
+    }
+
+    if (pos_identical(pos, p->pos))
+    {
+        if (!display_get_yesno("Really target yourself?", NULL, NULL))
+        {
+            log_add_entry(p->log, "Aborted.");
+            return FALSE;
+        }
+    }
+    else if (pos_grid_distance(pos, p->pos) <= (radius + 1)
+                && !display_get_yesno("The spell is going to hit you. " \
+                                      "Cast anyway?", NULL, NULL))
     {
         log_add_entry(p->log, "Aborted.");
         return FALSE;

@@ -127,6 +127,14 @@ gint pos_distance(position first, position second)
     return (abs(first.x - second.x) + 1) + (abs(first.y - second.y) + 1);
 }
 
+gint pos_grid_distance(position first, position second)
+{
+    if (first.z != second.z)
+        return INT_MAX;
+
+    return (max(abs(first.x - second.x) + 1, abs(first.y - second.y) + 1));
+}
+
 int pos_identical(position pos1, position pos2)
 {
     if (pos1.z != pos2.z)

@@ -51,6 +51,7 @@ typedef struct area
 position pos_new(int x, int y, int z);
 position pos_move(position pos, direction dir);
 int pos_distance(position first, position second);
+int pos_grid_distance(position first, position second);
 int pos_identical(position pos1, position pos2);
 int pos_adjacent(position first, position second);
 int pos_valid(position pos);
