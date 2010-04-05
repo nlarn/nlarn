@@ -3595,6 +3595,10 @@ int player_drop(player *p)
 
         if (it)
         {
+             /* repaint the screen as it would be plain black
+                if the dialogue to ask for the amount pops up */
+
+            display_paint_screen(p);
             return player_item_drop(p, &p->inventory, it);
         }
     }
