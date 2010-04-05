@@ -781,11 +781,6 @@ int spell_type_point(spell *s, struct player *p)
 
         /* finger of death */
     case SP_FGR:
-        if (chance(1))
-        {
-            player_die(p, PD_SPELL, SP_FGR);
-        }
-
         if ((player_get_wis(p) + s->knowledge) > rand_m_n(10,20))
         {
             monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, p));
