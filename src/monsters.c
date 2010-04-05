@@ -1840,8 +1840,7 @@ void monster_player_attack(monster *m, player *p)
     {
     case DAM_STEAL_GOLD:
     case DAM_STEAL_ITEM:
-        if (monster_player_rob(m, p, (dam->type == DAM_STEAL_GOLD)
-                               ? IT_GOLD : IT_ALL))
+        if (monster_player_rob(m, p, (dam->type == DAM_STEAL_GOLD) ? IT_GOLD : IT_ALL))
         {
             /* teleport away */
             monster_pos_set(m, game_map(nlarn, m->pos.z),
@@ -1852,22 +1851,26 @@ void monster_player_attack(monster *m, player *p)
             /* if robbery fails mark attack type as useless */
             monster_attack_disable(m, att);
         }
+
+        damage_free(dam);
         break;
 
     case DAM_RUST:
         log_add_entry(p->log, "The %s %s you.", monster_get_name(m),
                       monster_attack_verb[att->type]);
 
+        /* a failed attack causes frustration */
         if (!monster_item_rust(m, p))
-        {
-            /* a failed attack causes frustration */
             monster_attack_disable(m, att);
-        }
+
+        damage_free(dam);
         break;
 
     case DAM_REM_ENCH:
         if (!monster_item_disenchant(m, p))
             monster_attack_disable(m, att);
+
+        damage_free(dam);
         break;
 
     default:
