@@ -24,20 +24,19 @@
 #include "defines.h"
 
 /* game messaging */
-typedef struct message_log_entry
+typedef struct _message_log_entry
 {
     guint32 gtime;      /* game time of log entry */
     char *message;
 } message_log_entry;
 
-typedef struct message_log
+typedef struct _message_log
 {
-    guint32 length;     /* number of entries */
     guint32 gtime;      /* current game time */
     gint32 active;      /* flag to disable logging onto this log */
     GString *buffer;    /* space to assemble a turn's messages */
     char *lastmsg;      /* copy of last message */
-    message_log_entry **entries;
+    GPtrArray *entries;
 } message_log;
 
 /* macros */
@@ -66,18 +65,18 @@ char *str_capitalize(char *string);
 
 /* message log handling */
 message_log *log_new();
+void log_destroy(message_log *log);
 int log_add_entry(message_log *log, const char *fmt, ...);
 void log_set_time(message_log *log, int gtime);
-void log_delete(message_log *log);
 message_log_entry *log_get_entry(message_log *log, guint id);
-
 cJSON *log_serialize(message_log *log);
 message_log *log_deserialize(cJSON *lser);
 
-#define log_length(log) ((log)->length)
-#define log_enable(log) ((log)->active = TRUE)
+#define LOG_MAX_LENGTH   100
+#define log_length(log)  ((log)->entries->len)
+#define log_enable(log)  ((log)->active = TRUE)
 #define log_disable(log) ((log)->active = FALSE)
-#define log_buffer(log) ((log)->buffer->len ? (log)->buffer->str : NULL)
+#define log_buffer(log)  ((log)->buffer->len ? (log)->buffer->str : NULL)
 
 /* text array handling */
 GPtrArray *text_wrap(const char *str, int width, int indent);

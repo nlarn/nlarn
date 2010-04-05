@@ -188,7 +188,7 @@ void player_destroy(player *p)
     g_ptr_array_free(p->effects, TRUE);
 
     inv_destroy(p->inventory, FALSE);
-    log_delete(p->log);
+    log_destroy(p->log);
 
     if (p->name)
     {

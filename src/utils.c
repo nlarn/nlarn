@@ -23,6 +23,8 @@
 
 #include "utils.h"
 
+static void log_entry_destroy(message_log_entry *entry);
+
 int divert(int value, int percent)
 {
     int lower, upper;
@@ -112,52 +114,32 @@ message_log *log_new()
 
     log->active = TRUE;
     log->buffer = g_string_new(NULL);
+    log->entries = g_ptr_array_new();
 
     return log;
 }
 
-/**
- * Update the game time. This function flushes the message buffer and appends
- * the collected messages to the log.
- *
- * @param the log
- * @param the new game time
- *
- */
-void log_set_time(message_log *log, int gtime)
+void log_destroy(message_log *log)
 {
-    message_log_entry *entry;
+    guint idx;
 
     assert(log != NULL);
 
-    /* flush pending entry */
-    if ((log->buffer)->len)
+    /* free log entries */
+    for (idx = 0; idx < log_length(log); idx++)
     {
-        entry = g_malloc(sizeof(message_log_entry));
-        entry->gtime = log->gtime;
-        entry->message = (log->buffer)->str;
-
-        /* allocate storage space */
-        log->entries = g_realloc(log->entries,
-                                 (log->length + 1) * sizeof(message_log_entry *));
-
-        /* append the entry to the message log */
-        log->entries[log->length] = entry;
-        log->length++;
-
-        /* destroy buffer and add prepare new one */
-        g_string_free(log->buffer, FALSE);
-        log->buffer = g_string_new("");
+        log_entry_destroy(log_get_entry(log, idx));
     }
 
-    /* cleanup previous message buffer */
-    if (log->lastmsg)
+    g_ptr_array_free(log->entries, TRUE);
+
+    if (log->lastmsg != NULL)
     {
         g_free(log->lastmsg);
-        log->lastmsg = NULL;
     }
 
-    log->gtime = gtime;
+    g_string_free(log->buffer, TRUE);
+    g_free(log);
 }
 
 int log_add_entry(message_log *log, const char *fmt, ...)
@@ -205,10 +187,57 @@ int log_add_entry(message_log *log, const char *fmt, ...)
     return TRUE;
 }
 
+/**
+ * Update the game time. This function flushes the message buffer and appends
+ * the collected messages to the log.
+ *
+ * @param the log
+ * @param the new game time
+ *
+ */
+void log_set_time(message_log *log, int gtime)
+{
+    message_log_entry *entry;
+
+    assert(log != NULL);
+
+    /* flush pending entry */
+    if ((log->buffer)->len)
+    {
+        entry = g_malloc(sizeof(message_log_entry));
+        entry->gtime = log->gtime;
+        entry->message = (log->buffer)->str;
+
+        /* append the entry to the message log */
+        g_ptr_array_add(log->entries, entry);
+
+        /* destroy buffer and add prepare new one */
+        g_string_free(log->buffer, FALSE);
+        log->buffer = g_string_new(NULL);
+    }
+
+    /* cleanup previous message buffer */
+    if (log->lastmsg)
+    {
+        g_free(log->lastmsg);
+        log->lastmsg = NULL;
+    }
+
+    /* assure the log does not grow too much */
+    while (log_length(log) > LOG_MAX_LENGTH)
+    {
+        /* remove the first entry */
+        entry = g_ptr_array_remove_index(log->entries, 0);
+        log_entry_destroy(entry);
+    }
+
+    log->gtime = gtime;
+}
+
 message_log_entry *log_get_entry(message_log *log, guint id)
 {
-    assert(log != NULL && id < log->length);
-    return(log->entries[id]);
+    assert(log != NULL && id < log_length(log));
+    return g_ptr_array_index(log->entries, id);
 }
 
 cJSON *log_serialize(message_log *log)
@@ -218,10 +247,11 @@ cJSON *log_serialize(message_log *log)
 
     for (idx = 0; idx < log_length(log); idx++)
     {
-        cJSON_AddItemToArray(lser, le = cJSON_CreateObject());
+        message_log_entry *entry = log_get_entry(log, idx);
 
-        cJSON_AddNumberToObject(le, "gtime", log->entries[idx]->gtime);
-        cJSON_AddStringToObject(le, "message", log->entries[idx]->message);
+        cJSON_AddItemToArray(lser, le = cJSON_CreateObject());
+        cJSON_AddNumberToObject(le, "gtime", entry->gtime);
+        cJSON_AddStringToObject(le, "message", entry->message);
     }
 
     return lser;
@@ -234,43 +264,20 @@ message_log *log_deserialize(cJSON *lser)
 
     log->active = TRUE;
     log->buffer = g_string_new(NULL);
+    log->entries = g_ptr_array_new();
 
-    log->length = cJSON_GetArraySize(lser);
-    log->entries = g_malloc0(log->length * (sizeof(message_log_entry *)));
-
-    for (idx = 0; idx < log->length; idx++)
+    for (idx = 0; idx < cJSON_GetArraySize(lser); idx++)
     {
         cJSON *le = cJSON_GetArrayItem(lser, idx);
+        message_log_entry *entry = g_malloc(sizeof(message_log_entry));
 
-        log->entries[idx] = g_malloc0(sizeof(message_log_entry));
+        entry->gtime = cJSON_GetObjectItem(le, "gtime")->valueint;
+        entry->message = g_strdup(cJSON_GetObjectItem(le, "message")->valuestring);
 
-        log->entries[idx]->gtime = cJSON_GetObjectItem(le, "gtime")->valueint;
-        log->entries[idx]->message = g_strdup(cJSON_GetObjectItem(le, "message")->valuestring);
+        g_ptr_array_add(log->entries, entry);
     }
 
     return log;
-}
-
-void log_delete(message_log *log)
-{
-    guint idx;
-
-    assert(log != NULL);
-    for (idx = 0; idx < log->length; idx++)
-    {
-        g_free(log->entries[idx]->message);
-        g_free(log->entries[idx]);
-    }
-
-    g_free(log->entries);
-
-    if (log->lastmsg != NULL)
-    {
-        g_free(log->lastmsg);
-    }
-
-    g_string_free(log->buffer, TRUE);
-    g_free(log);
 }
 
 GPtrArray *text_wrap(const char *str, int width, int indent)
@@ -469,4 +476,11 @@ damage *damage_new(damage_t type, attack_t attack, int amount, gpointer originat
     dam->originator = originator;
 
     return dam;
+}
+
+static void log_entry_destroy(message_log_entry *entry)
+{
+    assert(entry != NULL);
+    g_free(entry->message);
+    g_free(entry);
 }
