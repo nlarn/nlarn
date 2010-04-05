@@ -1149,6 +1149,15 @@ void monster_unknown_set(monster *m, gboolean what)
     m->unknown = what;
 }
 
+static gboolean monster_nearby(monster *m)
+{
+    /* different level */
+    if (m->pos.z != nlarn->p->pos.z)
+        return FALSE;
+
+    return player_pos_visible(nlarn->p, m->pos);
+}
+
 gboolean monster_in_sight(monster *m)
 {
     assert (m != NULL);
@@ -1215,14 +1224,16 @@ const char* monster_type_plural_name(const int montype, const int count)
 
 void monster_die(monster *m, struct player *p)
 {
-    char *message = "The %s died!";
-
     assert(m != NULL);
 
     /* if the player can see the monster describe the event */
-    if (monster_in_sight(m))
+    /* Also give a message for invisible monsters you killed yourself
+       (the xp gain gives this away anyway). */
+    if (monster_in_sight(m) || (p != NULL && monster_nearby(m)))
     {
-        log_add_entry(nlarn->p->log, message, monster_name(m));
+        char *message = "The %s died!";
+
+        log_add_entry(nlarn->p->log, message, monster_get_name(m));
     }
 
     /* drop stuff the monster carries */
