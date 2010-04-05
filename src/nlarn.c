@@ -439,7 +439,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                player_quaff(nlarn->p);
+                moves_count = player_quaff(nlarn->p);
             }
         }
         break;
