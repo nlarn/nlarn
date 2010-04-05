@@ -557,7 +557,6 @@ void player_make_move(player *p, int turns)
                 {
                     /* time stop has expired - remove it*/
                     player_effect_del(p, e);
-                    effect_destroy(e);
                 }
                 else
                 {
@@ -581,7 +580,6 @@ void player_make_move(player *p, int turns)
                 {
                     /* effect has expired */
                     player_effect_del(p, e);
-                    effect_destroy(e);
                 }
                 else
                 {
@@ -2273,7 +2271,7 @@ void player_effects_add(player *p, GPtrArray *effects)
 
 int player_effect_del(player *p, effect *e)
 {
-    int str_orig, result;
+    int result, str_orig;
 
     assert(p != NULL && e != NULL && e->type > ET_NONE && e->type < ET_MAX);
 
@@ -2291,6 +2289,9 @@ int player_effect_del(player *p, effect *e)
             /* strength has been modified -> recalc burdened status */
             player_inv_weight_recalc(p->inventory, NULL);
         }
+
+        /* finally destroy the effect */
+        effect_destroy(e);
     }
 
     return result;

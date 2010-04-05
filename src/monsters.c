@@ -2237,16 +2237,22 @@ effect *monster_effect_add(monster *m, effect *e)
 
 int monster_effect_del(monster *m, effect *e)
 {
+    int result;
+
     assert(m != NULL && e != NULL);
 
     /* log info if the player can see the monster */
     if (monster_in_sight(m) && effect_get_msg_m_stop(e))
     {
-        log_add_entry(nlarn->p->log, effect_get_msg_m_stop(e),
-                      monster_name(m));
+        log_add_entry(nlarn->p->log, effect_get_msg_m_stop(e), monster_name(m));
     }
 
-    return effect_del(m->effects, e);
+    if ((result = effect_del(m->effects, e)))
+    {
+        effect_destroy(e);
+    }
+
+    return result;
 }
 
 effect *monster_effect_get(monster *m , effect_type type)
@@ -2276,7 +2282,6 @@ void monster_effects_expire(monster *m)
         {
             /* effect has expired */
             monster_effect_del(m, e);
-            effect_destroy(e);
         }
         else
         {
