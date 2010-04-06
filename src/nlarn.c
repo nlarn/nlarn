@@ -476,6 +476,10 @@ int main(int argc, char *argv[])
             }
             break;
 
+        case 'D':
+            player_list_sobjmem(nlarn->p);
+            break;
+
             /* save */
         case 'S':
             if (game_save(nlarn, save_file_name))

@@ -106,6 +106,9 @@ static gboolean called_by_autopickup = FALSE;
 /* function declarations */
 
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
+static void player_sobject_memorize(player *p, map_sobject_t sobject, position pos);
+static void player_sobject_forget(player *p, position pos);
+static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
 static void player_memory_deserialize(player *p, position pos, cJSON *mser);
 static char *player_death_description(game_score_t *score, int verbose);
@@ -186,6 +189,12 @@ void player_destroy(player *p)
     }
 
     g_ptr_array_free(p->effects, TRUE);
+
+    /* free memorized stationary objects */
+    if (p->sobjmem != NULL)
+    {
+        g_array_free(p->sobjmem, TRUE);
+    }
 
     inv_destroy(p->inventory, FALSE);
     log_destroy(p->log);
@@ -323,6 +332,28 @@ cJSON *player_serialize(player *p)
                 cJSON_AddItemToArray(mm, player_memory_serialize(p, pos));
 
         cJSON_AddItemToArray(obj, mm);
+    }
+
+    /* store remembered stationary objects */
+    if (p->sobjmem != NULL)
+    {
+        int idx;
+
+        obj = cJSON_CreateArray();
+        cJSON_AddItemToObject(pser, "sobjmem", obj);
+
+        for (idx = 0; idx < p->sobjmem->len; idx++)
+        {
+            player_sobject_memory *som;
+            cJSON *soms = cJSON_CreateObject();
+
+            som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
+
+            cJSON_AddItemToObject(soms, "pos", pos_serialize(som->pos));
+            cJSON_AddNumberToObject(soms, "sobject", som->sobject);
+
+            cJSON_AddItemToArray(obj, soms);
+        }
     }
 
     /* log */
@@ -488,6 +519,27 @@ player *player_deserialize(cJSON *pser)
                 cJSON *tile = cJSON_GetArrayItem(elem, pos.x + (MAP_MAX_X * pos.y));
                 player_memory_deserialize(p, pos, tile);
             }
+        }
+    }
+
+    /* remembered stationary objects */
+    obj = cJSON_GetObjectItem(pser, "sobjmem");
+    if (obj != NULL)
+    {
+        int idx;
+        int count = cJSON_GetArraySize(obj);
+
+        p->sobjmem = g_array_sized_new(FALSE, FALSE, sizeof(player_sobject_memory), count);
+
+        for (idx = 0; idx < count; idx++)
+        {
+            player_sobject_memory som;
+            cJSON *soms = cJSON_GetArrayItem(obj, idx);
+
+            som.pos = pos_deserialize(cJSON_GetObjectItem(soms, "pos"));
+            som.sobject = cJSON_GetObjectItem(soms, "sobject")->valueint;
+
+            g_array_append_val(p->sobjmem, som);
         }
     }
 
@@ -3800,6 +3852,41 @@ char *player_get_level_desc(player *p)
     return (char *) player_level_desc[p->level - 1];
 }
 
+void player_list_sobjmem(player *p)
+{
+    int idx;
+    int prevmap = -1;
+    GString *sobjlist = g_string_new(NULL);
+
+    if (p->sobjmem == NULL)
+    {
+        g_string_append(sobjlist, "You have not discovered any landmarks yet.");
+
+    }
+    else
+    {
+        /* sort the array of memorized landmarks */
+        g_array_sort(p->sobjmem, player_sobjects_sort);
+
+        /* assemble a list of landmarks per map */
+        for (idx = 0; idx < p->sobjmem->len; idx++)
+        {
+            player_sobject_memory *som;
+            som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
+
+            g_string_append_printf(sobjlist, "%-4s %s (%d, %d)\n",
+                                   (som->pos.z > prevmap) ? map_names[som->pos.z] : "",
+                                   ls_get_desc(som->sobject),
+                                   som->pos.y, som->pos.x);
+
+            if (som->pos.z > prevmap) prevmap = som->pos.z;
+        }
+    }
+
+    display_show_message("Discovered landmarks", sobjlist->str, 5);
+    g_string_free(sobjlist, TRUE);
+}
+
 /* this and the following function have been
  * ported from python to c using the example at
  * http://roguebasin.roguelikedevelopment.org/index.php?title=Python_shadowcasting_implementation
@@ -3885,6 +3972,24 @@ void player_update_fov(player *p)
 
                 player_memory_of(p,pos).type = map_tiletype_at(map, pos);
                 player_memory_of(p,pos).sobject = map_sobject_at(map, pos);
+
+                /* remember certain stationary objects */
+                switch (map_sobject_at(map, pos))
+                {
+                    case LS_ALTAR:
+                    case LS_BANK2:
+                    case LS_FOUNTAIN:
+                    case LS_MIRROR:
+                    case LS_THRONE:
+                    case LS_THRONE2:
+                    case LS_STATUE:
+                        player_sobject_memorize(p, map_sobject_at(map, pos), pos);
+                        break;
+
+                    default:
+                        player_sobject_forget(p, pos);
+                        break;
+                }
 
                 if (inv_length(*inv) > 0)
                 {
@@ -4023,6 +4128,91 @@ static void player_calculate_octant(player *p, int row, float start,
             break;
         }
     }
+}
+
+static void player_sobject_memorize(player *p, map_sobject_t sobject, position pos)
+{
+    player_sobject_memory nsom;
+    int idx;
+
+    if (p->sobjmem == NULL)
+    {
+        p->sobjmem = g_array_new(FALSE, FALSE, sizeof(player_sobject_memory));
+    }
+
+    /* check if the sobject has already been memorized */
+    for (idx = 0; idx < p->sobjmem->len; idx++)
+    {
+        player_sobject_memory *som;
+        som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
+
+        /* memory for this position exists */
+        if (pos_identical(som->pos, pos))
+        {
+            /* update remembered sobject */
+            som->sobject = sobject;
+
+            /* the work is done */
+            return;
+        }
+    }
+
+    /* add a new memory entry */
+    nsom.pos = pos;
+    nsom.sobject = sobject;
+
+    g_array_append_val(p->sobjmem, nsom);
+}
+
+static void player_sobject_forget(player *p, position pos)
+{
+    player_sobject_memory *som;
+    int idx;
+
+    /* just return if nothing has been memorized yet */
+    if (p->sobjmem == NULL)
+    {
+        return;
+    }
+
+    for (idx = 0; idx < p->sobjmem->len; idx++)
+    {
+        som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
+
+        /* remove existing entries for this position */
+        if (pos_identical(som->pos, pos))
+        {
+            g_array_remove_index(p->sobjmem, idx);
+            break;
+        }
+    }
+
+    /* free the sobjemt memory if no entry remains */
+    if (p->sobjmem->len == 0)
+    {
+        g_array_free(p->sobjmem, TRUE);
+        p->sobjmem = NULL;
+    }
+}
+
+static int player_sobjects_sort(gconstpointer a, gconstpointer b)
+{
+    player_sobject_memory *som_a = (player_sobject_memory *)a;
+    player_sobject_memory *som_b = (player_sobject_memory *)b;
+
+    if (som_a->pos.z == som_b->pos.z)
+    {
+        if (som_a->sobject == som_b->sobject)
+            return 0;
+        if (som_a->sobject < som_b->sobject)
+            return -1;
+        else
+            return 0;
+    }
+    else if (som_a->pos.z < som_b->pos.z)
+        return -1;
+    else
+        return 1;
 }
 
 static cJSON *player_memory_serialize(player *p, position pos)

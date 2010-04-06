@@ -75,6 +75,12 @@ typedef struct _player_tile_memory
     trap_t trap;
 } player_tile_memory;
 
+typedef struct _player_sobject_memory
+{
+    position pos;
+    map_sobject_t sobject;
+} player_sobject_memory;
+
 typedef struct player
 {
     char *name;
@@ -141,6 +147,9 @@ typedef struct player
 
     /* player's memory of the map */
     player_tile_memory memory[MAP_MAX][MAP_MAX_Y][MAP_MAX_X];
+
+    /* remembered positions of stationary objects */
+    GArray *sobjmem;
 
     /* courses available in school */
     gint school_courses_taken[SCHOOL_COURSE_COUNT];
@@ -288,6 +297,7 @@ guint player_get_gold(player *p);
 guint player_set_gold(player *p, guint amount);
 
 char *player_get_level_desc(player *p);
+void player_list_sobjmem(player *p);
 
 /* macros */
 

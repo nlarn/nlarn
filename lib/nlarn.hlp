@@ -16,6 +16,7 @@ Commands
 A  desecrate an altar
 c  close a door
 d  drop domething
+D  list discovered landmarks
 e  equip an item
 g  move until something interesting is found
 i  inventory your pockets, use items
