@@ -202,6 +202,7 @@ monster *map_get_monster_at(map *m, position pos);
 int map_set_monster_at(map *map, position pos, monster *monst);
 int map_is_monster_at(map *m, position pos);
 int map_fill_with_life(map *l);
+gboolean map_is_exit_at(map *m, position pos);
 void map_timer(map *l);
 
 /* external vars */

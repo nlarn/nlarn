@@ -1051,6 +1051,27 @@ int map_fill_with_life(map *l)
     return(new_monster_count);
 }
 
+gboolean map_is_exit_at(map *m, position pos)
+{
+    assert (m != NULL && pos_valid(pos));
+
+    switch (map_sobject_at(m, pos))
+    {
+        case LS_DNGN_ENTRANCE:
+        case LS_DNGN_EXIT:
+        case LS_ELEVATORDOWN:
+        case LS_ELEVATORUP:
+        case LS_STAIRSUP:
+        case LS_STAIRSDOWN:
+            return TRUE;
+            break;
+
+        default:
+            return FALSE;
+            break;
+    }
+}
+
 /**
  *
  * Process temporary effects for a map.

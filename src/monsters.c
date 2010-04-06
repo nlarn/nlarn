@@ -25,6 +25,10 @@
 #include "monsters.h"
 #include "nlarn.h"
 
+static position monster_move_wander(monster *m, struct player *p);
+static position monster_move_attack(monster *m, struct player *p);
+static position monster_move_flee(monster *m, struct player *p);
+
 #define EMPTY_ATTACK { ATT_NONE, DAM_NONE, 0, 0 }
 
 /* monster information hiding */
@@ -1263,29 +1267,40 @@ void monster_level_enter(monster *m, struct map *l)
     map_sobject_t source = map_sobject_at(monster_map(m), m->pos);
     map_sobject_t target;
     position npos;
-    char *how;
+    char *what;
+    char *how = "comes";
 
     /* check if the monster used the stairs */
     switch (source)
     {
     case LS_DNGN_EXIT:
         target = LS_DNGN_ENTRANCE;
-        how = "through";
+        what = "through";
         break;
 
     case LS_DNGN_ENTRANCE:
         target = LS_DNGN_EXIT;
-        how = "through";
+        what = "through";
         break;
 
     case LS_STAIRSDOWN:
         target = LS_STAIRSUP;
-        how = "down";
+        what = "down";
         break;
 
     case LS_STAIRSUP:
         target = LS_STAIRSDOWN;
-        how = "up";
+        what = "up";
+        break;
+
+    case LS_ELEVATORDOWN:
+        target = LS_ELEVATORUP;
+        what = "down";
+        break;
+
+    case LS_ELEVATORUP:
+        target = LS_ELEVATORDOWN;
+        what = "up";
         break;
 
     default:
@@ -1295,18 +1310,26 @@ void monster_level_enter(monster *m, struct map *l)
     /* determine new position */
     if (target)
     {
+        /* monster came through a map entrance */
         npos = map_find_sobject(l, target);
     }
     else
     {
+        /* monster fell through a trap door */
         npos = map_find_space(l, LE_MONSTER, FALSE);
     }
 
     /* validate new position */
+    if (pos_identical(nlarn->p->pos, npos))
+    {
+        /* player is standing at the target position */
+        how = "squeezes past";
+        npos = map_find_space_in(l, rect_new_sized(npos, 1), LE_MONSTER, FALSE);
+    }
+
     if (!map_pos_validate(l, npos, LE_MONSTER, FALSE))
     {
-        /* the position somehow isn't valid,
-           e.g. someone is standing on the entrance */
+        /* the position somehow isn't valid */
         return;
     }
 
@@ -1317,29 +1340,21 @@ void monster_level_enter(monster *m, struct map *l)
     /* put monster into map */
     monster_pos_set(m, l, npos);
 
+    /* reset the information of the player's last known position */
+    m->lastseen = 0;
+
     /* log the event */
     if (monster_in_sight(m) && target)
     {
-        log_add_entry(nlarn->p->log, "The %s comes %s %s.", monster_name(m),
-                      how, ls_get_desc(target));
+        log_add_entry(nlarn->p->log, "The %s %s %s %s.", monster_name(m),
+                      how, what, ls_get_desc(target));
     }
 }
 
 void monster_move(monster *m, struct player *p)
 {
-    /* monster's new position / temporary position */
-    position m_npos, m_npos_tmp;
-
-    /* number of tries to find m_npos */
-    int tries;
-
-    /* distance between player and m_npos_tmp */
-    int dist;
-
-    /* path to player */
-    map_path *path = NULL;
-
-    map_path_element *el = NULL;
+    /* monster's new position */
+    position m_npos;
 
     /* update monster's knowledge of player's position */
     if (monster_player_visible(m)
@@ -1390,119 +1405,20 @@ void monster_move(monster *m, struct player *p)
         switch (m->action)
         {
         case MA_FLEE:
-            dist = 0;
-
-            for (tries = 1; tries < GD_MAX; tries++)
-            {
-                /* try all fields surrounding the monster if the
-                 * distance between monster & player is greater */
-                if (tries == GD_CURR)
-                    continue;
-
-                m_npos_tmp = pos_move(monster_pos(m), tries);
-
-                if (pos_valid(m_npos_tmp)
-                        && lt_is_passable(map_tiletype_at(monster_map(m),m_npos_tmp))
-                        && !map_is_monster_at(monster_map(m), m_npos_tmp)
-                        && (pos_distance(p->pos, m_npos_tmp) > dist))
-                {
-                    /* distance is bigger than current distance */
-                    m_npos = m_npos_tmp;
-                    dist = pos_distance(m->player_pos, m_npos_tmp);
-                }
-            }
-
-            break; /* end MA_FLEE */
+            m_npos = monster_move_flee(m, p);
+            break;
 
         case MA_REMAIN:
             /* Sgt. Stan Still - do nothing */
             break;
 
         case MA_WANDER:
-            tries = 0;
-
-            do
-            {
-                m_npos = pos_move(m->pos, rand_1n(GD_MAX));
-                tries++;
-            }
-            while ((!pos_valid(m_npos)
-                    || !lt_is_passable(map_tiletype_at(monster_map(m),m_npos))
-                    || map_is_monster_at(monster_map(m), m_npos))
-                    && (tries < GD_MAX));
-
-            /* new position has not been found, reset to current position */
-            if (tries == GD_MAX)
-                m_npos = monster_pos(m);
-
-            break; /* end MA_WANDER */
+            m_npos = monster_move_wander(m, p);
+            break;
 
         case MA_ATTACK:
-            if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
-            {
-                /* monster is standing next to player */
-                monster_player_attack(m, p);
-
-                /* monster's position might have changed (teleport) */
-                if (!pos_identical(m_npos, monster_pos(m)))
-                {
-                    m_npos = monster_pos(m);
-                    log_add_entry(p->log, "The %s vanishes.", monster_name(m));
-                }
-            }
-            else if (pos_identical(monster_pos(m), m->player_pos)
-                     && ((map_sobject_at(monster_map(m), m->pos) == LS_STAIRSDOWN)
-                         || (map_sobject_at(monster_map(m), m->pos) == LS_DNGN_ENTRANCE
-                             && monster_pos(m).z == 0)))
-            {
-                /* go level down */
-                monster_level_enter(m, game_map(nlarn, m->pos.z + 1));
-            }
-            else if (pos_identical(monster_pos(m), m->player_pos)
-                     && (map_sobject_at(monster_map(m), m->pos) == LS_STAIRSUP
-                         || (map_sobject_at(monster_map(m), m->pos) == LS_DNGN_EXIT
-                             && monster_pos(m).z == 1)))
-            {
-                /* go level up */
-                monster_level_enter(m, game_map(nlarn, m->pos.z - 1));
-            }
-            else
-            {
-                /* monster heads into the direction of the player. */
-
-                /* if the monster is on a different map than the player,
-                   try to find the staircase to reach the player's map */
-                if (m->pos.z != m->player_pos.z)
-                {
-                    map_sobject_t what;
-                    if (m->pos.z > m->player_pos.z)
-                        what = LS_STAIRSUP;
-                    else
-                        what = LS_STAIRSDOWN;
-
-                    m->player_pos = map_find_sobject(monster_map(m), what);
-                }
-
-                path = map_find_path(monster_map(m), monster_pos(m), m->player_pos);
-
-                if (path && !g_queue_is_empty(path->path))
-                {
-                    el = g_queue_pop_head(path->path);
-                    m_npos = el->pos;
-                }
-                else
-                {
-                    /* no path found. stop following player */
-                    m->lastseen = 0;
-                }
-
-                /* cleanup */
-                if (path)
-                {
-                    map_path_destroy(path);
-                }
-            }
-            break; /* end MA_ATTACK */
+            m_npos = monster_move_attack(m, p);
+            break;
 
         case MA_NONE:
         case MA_MAX:
@@ -1785,8 +1701,8 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* choose attack type */
-    const gboolean has_weap_attack
-        = (m->weapon != NULL && monster_attack_available(m, ATT_WEAPON));
+    const gboolean has_weap_attack = (m->weapon != NULL
+                                      && monster_attack_available(m, ATT_WEAPON));
 
     /* prefer weapon attack */
     if (has_weap_attack && chance(80))
@@ -2566,4 +2482,141 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
 
         return FALSE;
     }
+}
+
+static position monster_move_wander(monster *m, struct player *p)
+{
+    int tries = 0;
+    position npos = monster_pos(m);
+
+    do
+    {
+        npos = pos_move(m->pos, rand_1n(GD_MAX));
+        tries++;
+    }
+    while ((!pos_valid(npos)
+            || !lt_is_passable(map_tiletype_at(monster_map(m), npos))
+            || map_is_monster_at(monster_map(m), npos))
+            && (tries < GD_MAX));
+
+    /* new position has not been found, reset to current position */
+    if (tries == GD_MAX) npos = monster_pos(m);
+
+    return npos;
+}
+
+static position monster_move_attack(monster *m, struct player *p)
+{
+    /* path to player */
+    map_path *path = NULL;
+    map_path_element *el = NULL;
+
+    position npos = monster_pos(m);
+
+    /* monster is standing next to player */
+    if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
+    {
+        monster_player_attack(m, p);
+
+        /* monster's position might have changed (teleport) */
+        if (!pos_identical(npos, monster_pos(m)))
+        {
+            log_add_entry(p->log, "The %s vanishes.", monster_name(m));
+        }
+
+        return monster_pos(m);
+    }
+
+    /* monster is standing on a map exit and the player has left the map */
+    if (pos_identical(monster_pos(m), m->player_pos)
+            && map_is_exit_at(monster_map(m), monster_pos(m)))
+    {
+        int newmap;
+
+        switch (map_sobject_at(monster_map(m), monster_pos(m)))
+        {
+            case LS_STAIRSDOWN:
+            case LS_DNGN_ENTRANCE:
+                newmap = m->pos.z + 1;
+                break;
+
+            case LS_STAIRSUP:
+            case LS_DNGN_EXIT:
+                newmap = m->pos.z - 1;
+                break;
+
+            case LS_ELEVATORDOWN:
+                /* move into the volcano from the town */
+                newmap = MAP_DMAX + 1;
+                break;
+
+            case LS_ELEVATORUP:
+                /* volcano monster enters the town */
+                newmap = 0;
+                break;
+
+            default:
+                newmap = m->pos.z;
+                break;
+        }
+
+        /* change the map */
+        monster_level_enter(m, game_map(nlarn, newmap));
+
+        return monster_pos(m);
+    }
+
+    /* monster heads into the direction of the player. */
+
+    path = map_find_path(monster_map(m), monster_pos(m), m->player_pos);
+
+    if (path && !g_queue_is_empty(path->path))
+    {
+        el = g_queue_pop_head(path->path);
+        npos = el->pos;
+    }
+    else
+    {
+        /* no path found. stop following player */
+        m->lastseen = 0;
+    }
+
+    /* cleanup */
+    if (path)
+    {
+        map_path_destroy(path);
+    }
+
+    return npos;
+
+}
+
+static position monster_move_flee(monster *m, struct player *p)
+{
+    int tries;
+    int dist = 0;
+    position npos_tmp = monster_pos(m);
+    position npos = monster_pos(m);
+
+    for (tries = 1; tries < GD_MAX; tries++)
+    {
+        /* try all fields surrounding the monster if the
+         * distance between monster & player is greater */
+        if (tries == GD_CURR)
+            continue;
+
+        npos_tmp = pos_move(monster_pos(m), tries);
+
+        if (pos_valid(npos_tmp)
+                && lt_is_passable(map_tiletype_at(monster_map(m), npos_tmp))
+                && !map_is_monster_at(monster_map(m), npos_tmp)
+                && (pos_distance(p->pos, npos_tmp) > dist))
+        {
+            /* distance is bigger than current distance */
+            npos = npos_tmp;
+            dist = pos_distance(m->player_pos, npos_tmp);
+        }
+    }
+
+    return npos;
 }
