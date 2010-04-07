@@ -40,7 +40,7 @@ static const int ring_materials[RT_MAX - 1] =
     IM_GOLD,
     IM_SILVER,
     IM_PLATINUM,
-    IM_SILVER,
+    IM_GEMSTONE,
     IM_COPPER,
     IM_STEEL,
     IM_GLASS,
