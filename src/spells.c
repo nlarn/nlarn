@@ -1025,7 +1025,7 @@ int spell_type_flood(spell *s, struct player *p)
 int spell_type_blast(spell *s, struct player *p)
 {
     monster *monster = NULL;
-    area *ball, *obstacles;
+    area *ball;
     position pos, cursor;
     char buffer[61];
     int radius = 0, amount = 0, colour = DC_NONE;
@@ -1060,24 +1060,16 @@ int spell_type_blast(spell *s, struct player *p)
         return FALSE;
     }
 
-    if (pos_identical(pos, p->pos))
-    {
-        if (!display_get_yesno("Really target yourself?", NULL, NULL))
-        {
-            log_add_entry(p->log, "Aborted.");
-            return FALSE;
-        }
-    }
-    else if (pos_grid_distance(pos, p->pos) <= (radius + 1)
+    ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos, radius));
+
+    if (area_pos_get(ball, p->pos)
                 && !display_get_yesno("The spell is going to hit you. " \
                                       "Cast anyway?", NULL, NULL))
     {
         log_add_entry(p->log, "Aborted.");
+        area_destroy(ball);
         return FALSE;
     }
-
-    obstacles = map_get_obstacles(cmap, pos, radius);
-    ball = area_new_circle_flooded(pos, radius, obstacles);
 
     attron(colour);
     cursor.z = pos.z;
