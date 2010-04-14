@@ -756,7 +756,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
     char name[61];
 
     /* copy of item needed to descibe and transfer original item */
-    item *it_clone;
+    item *it_clone = NULL;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -772,13 +772,23 @@ static int building_item_sell(player *p, inventory **inv, item *it)
 
         if (count > it->count)
         {
+            /* desired amount is larger than the available amount */
             log_add_entry(p->log, "Wouldn't it be nice if the store had %d of those?", count);
             return FALSE;
         }
-
-        if (count == 0)
+        else if (count == 0)
         {
             return FALSE;
+        }
+        else if (count == it->count)
+        {
+            /* player wants the entire stock of the item */
+            it_clone = it;
+        }
+        else if (count < it->count)
+        {
+            /* player wants part of the stock */
+            it_clone = item_split(it, count);
         }
 
         price *= count;
@@ -787,22 +797,17 @@ static int building_item_sell(player *p, inventory **inv, item *it)
         {
             display_paint_screen(p);
 
-            it_clone = item_copy(it);
-            it_clone->count = count;
-
-            item_describe(it, TRUE, FALSE, TRUE, name, 60);
+            item_describe(it_clone, TRUE, (count == 1), TRUE, name, 60);
             g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
                        price, name);
 
-            item_destroy(it_clone);
-
             display_show_message(NULL, text, 0);
+
+            /* if the item has been split add it to the shop */
+            if (it != it_clone) inv_add(inv, it_clone);
 
             return FALSE;
         }
-
-        it_clone = item_copy(it);
-        it_clone->count = count;
     }
     else
     {
@@ -826,14 +831,11 @@ static int building_item_sell(player *p, inventory **inv, item *it)
     /* try to transfer the item */
     if (inv_add(&p->inventory, it_clone))
     {
-        /* item has been added to player's inventory */
-        if (it->count > it_clone->count)
+        /* the item has been added to player's inventory */
+        if (it == it_clone)
         {
-            /* player purchased not all availible items */
-            it->count -= count;
-        }
-        else
-        {
+            /* remove the item from the shop
+               as the player has bought the entire stock */
             inv_del_element(inv, it);
         }
 
@@ -843,8 +845,8 @@ static int building_item_sell(player *p, inventory **inv, item *it)
     else
     {
         /* item has not been added to player's inventory */
-        /* if a copy of the item has been made, destroy it */
-        if (it != it_clone) item_destroy(it_clone);
+        /* if the item has been split, return it to the shop */
+        if (it != it_clone) inv_add(inv, it_clone);
         return FALSE;
     }
 
