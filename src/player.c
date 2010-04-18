@@ -3360,6 +3360,7 @@ int player_item_use(player *p, inventory **inv, item *it)
         else
         {
             inv_del_element(&p->inventory, it);
+            item_destroy(it);
         }
     }
 
