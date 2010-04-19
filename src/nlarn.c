@@ -173,22 +173,57 @@ int main(int argc, char *argv[])
 
             if (ch == '/' || ch == 'g')
             {
+                /* fast movement: get direction of movement */
                 ch = toupper(display_getch());
                 switch (ch)
                 {
-                case '1': ch = 'B'; break;
+                case KEY_END:
+                case KEY_C1:
+                case '1':
+                    ch = 'B';
+                    break;
+
                 case KEY_DOWN:
-                case '2': ch = 'J'; break;
-                case '3': ch = 'N'; break;
+                case '2':
+                    ch = 'J';
+                    break;
+
+                case KEY_NPAGE:
+                case KEY_C3:
+                case '3':
+                    ch = 'N';
+                    break;
+
                 case KEY_LEFT:
-                case '4': ch = 'H'; break;
-                case '5': ch = 'w'; break;
+                case '4':
+                    ch = 'H';
+                    break;
+
+                case '5':
+                    ch = 'w';
+                    break;
+
                 case KEY_RIGHT:
-                case '6': ch = 'L'; break;
-                case '7': ch = 'Y'; break;
+                case '6':
+                    ch = 'L';
+                    break;
+
+                case KEY_HOME:
+                case KEY_A1:
+                case '7':
+                    ch = 'Y';
+                    break;
+
                 case KEY_UP:
-                case '8': ch = 'K'; break;
-                case '9': ch = 'B'; break;
+                case '8':
+                    ch = 'K';
+                    break;
+
+                case KEY_PPAGE:
+                case KEY_A3:
+                case '9':
+                    ch = 'U';
+                    break;
                 }
             }
 
@@ -627,12 +662,12 @@ int main(int argc, char *argv[])
             else if (run_cmd == '.')
             {
                 if (game_turn(nlarn) >= end_resting
-                    || (nlarn->p->hp == nlarn->p->hp_max
-                        && nlarn->p->mp == nlarn->p->mp_max
-                        && !player_effect_get(nlarn->p, ET_CONFUSION)
-                        && !player_effect_get(nlarn->p, ET_BLINDNESS)
-                        && !player_effect_get(nlarn->p, ET_DIZZINESS)
-                        && !player_effect_get(nlarn->p, ET_BLINDNESS)))
+                        || (nlarn->p->hp == nlarn->p->hp_max
+                            && nlarn->p->mp == nlarn->p->mp_max
+                            && !player_effect_get(nlarn->p, ET_CONFUSION)
+                            && !player_effect_get(nlarn->p, ET_BLINDNESS)
+                            && !player_effect_get(nlarn->p, ET_DIZZINESS)
+                            && !player_effect_get(nlarn->p, ET_BLINDNESS)))
                 {
                     run_cmd = 0;
                 }
@@ -656,8 +691,7 @@ int main(int argc, char *argv[])
 static gboolean adjacent_monster(position p, gboolean ignore_eye)
 {
     // Ignore adjacent umber hulk if already confused.
-    const gboolean ignore_umber_hulk
-        = ignore_eye && player_effect_get(nlarn->p, ET_CONFUSION);
+    const gboolean ignore_umber_hulk = ignore_eye && player_effect_get(nlarn->p, ET_CONFUSION);
 
     // Only ignore floating eye if already paralysed.
     if (ignore_eye && !player_effect_get(nlarn->p, ET_PARALYSIS))
@@ -675,7 +709,7 @@ static gboolean adjacent_monster(position p, gboolean ignore_eye)
             pos.y += j;
 
             if (pos.x < 0 || pos.x >= MAP_MAX_X
-                || pos.y < 0 || pos.y >= MAP_MAX_Y)
+                    || pos.y < 0 || pos.y >= MAP_MAX_Y)
             {
                 continue;
             }
@@ -703,20 +737,28 @@ static gboolean adjacent_corridor(position pos, char move)
     switch (move)
     {
     case 'h': // left
-        p1.x -= 1; p1.y -= 1;
-        p2.x -= 1; p2.y += 1;
+        p1.x -= 1;
+        p1.y -= 1;
+        p2.x -= 1;
+        p2.y += 1;
         break;
     case 'j': // down
-        p1.x -= 1; p1.y += 1;
-        p2.x += 1; p2.y += 1;
+        p1.x -= 1;
+        p1.y += 1;
+        p2.x += 1;
+        p2.y += 1;
         break;
     case 'k': // up
-        p1.x -= 1; p1.y -= 1;
-        p2.x += 1; p2.y -= 1;
+        p1.x -= 1;
+        p1.y -= 1;
+        p2.x += 1;
+        p2.y -= 1;
         break;
     case 'l': // right
-        p1.x += 1; p1.y -= 1;
-        p2.x += 1; p2.y += 1;
+        p1.x += 1;
+        p1.y -= 1;
+        p2.x += 1;
+        p2.y += 1;
         break;
     case 'y': // up left
         p1.y -= 1;
