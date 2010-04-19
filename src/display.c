@@ -2326,7 +2326,7 @@ void display_show_history(message_log *log, const char *title)
     g_string_free(text, TRUE);
 }
 
-char display_show_message(const char *title, const char *message, int indent)
+int display_show_message(const char *title, const char *message, int indent)
 {
     guint height, width, max_len = 0;
     guint startx, starty;

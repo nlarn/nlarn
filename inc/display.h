@@ -140,7 +140,7 @@ void display_show_history(message_log *log, const char *title);
  * @param the number of chars wrapped lines will be indented
  * @return key pressed to close window
  */
-char display_show_message(const char *title, const char *message, int indent);
+int display_show_message(const char *title, const char *message, int indent);
 
 void display_windows_hide();
 void display_windows_show();

@@ -70,7 +70,7 @@ static int handle_bank_interest(player *p)
 int building_bank(player *p)
 {
     int turns = 2;
-    char cmd;
+    int cmd;
     guint amount = 0;
 
     GPtrArray *callbacks = NULL;
@@ -459,7 +459,7 @@ int building_school(player *p)
 
     GString *text;
     guint idx;
-    char selection;
+    int selection;
 
     const char msg_greet[] = "The College of Larn offers the exciting " \
                              "opportunity of higher education to all " \
