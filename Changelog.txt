@@ -1,3 +1,116 @@
+Release 0.5.4 (2010-xx-xx)
+-------------
+
+Changes:
+
+    * Implemented different speeds for monsters and the player. Reenabled 
+      the scroll of speed and the spell "haste self". 
+    * Implemented the spell "time stop".
+    * Modified keys for open/close and magic: 
+        * 'o'pen (instead of 'O')
+        * 'c'lose (instead of 'C')
+        * 'm'agic (instead of 'c'ast)
+    * Add fast movement command that uses the following (direction) input 
+      for running (g).
+    * Implement a long-rest command: (w)ait which will ignore adjacent 
+      floating eyes und umber hulks.
+    * Added functionality to (r)ead/(q)uaff/(e)quip/(t)ake off/(d)rop an 
+      item quickly.
+    * Remember visited landmarks. A list of these can be shown with (D).
+    * Rearranged hp/mp/xp display to be more consistent with other stats.
+    * Display carried item weight in inventory header. Removed the command 
+      previously used to display the pack weight.
+    * Display the bank account balance in shop windows.
+    * Added item description popup to inventory.
+    * Allow equipping items in the trade post.
+    * The message history is shown reversed and the entries are prefixed 
+      with their turn number. Truncate the message log to 100 entries.
+    * Enhanced the dialogue to get a number: set overwrite mode as 
+      default; accept 'y', 'g', 'd' and 'p' as the full amount and 'n' as 0 
+      to speed up getting and dropping multiple items. 
+    * Ask for the player's name and sex during game creation if not set in 
+      .ini file or by command line parameters.
+    * Prompt if a fireball is going to hit the player.
+    * When autopicking up stuff, give a message if there are more items 
+      there.
+    * In yes/no prompt, always highlight selected choice in red. Generally 
+      allow the initial letters of the button captions as shortcut.
+    * Mention command help ('?' command) at game start/reload.
+    * Use block cursor when asking for a position.
+    * Display items and stationary objects which are not in sight with 
+      their colour to make finding them again easier. New display order: 
+      stationary objects > items. New item display/memorizsation order: 
+      gems > gold > topmost item.
+    * Made containers ask for the amount when putting things into/taking 
+      things out.
+    * Open doors by walking into them, though not on shift-run.
+    * Modified some monster glyphs. 
+    * Make the potion of cure dianthroritis expensive. This is a simple 
+      flavour change: If you attempt to sell this unique potion, you should 
+      get more money for it than for a corroded dagger.
+    * When magic mapping, only map non-floor tiles.
+    * Sometimes flip custom maze maps when generating levels. Should keep 
+      things more interesting even if you keep seeing the same levels again 
+      and again.
+    * Notify the player of stationary objects when entering a tile.
+    * Allow the player to deliberately jump through trap doors with '>'.
+    * Explicitly name the item a nymph is stealing. 
+    * Make leprechauns steal gold the player is standing on if none 
+      carried.
+    * Give a warning when the disenchantress reduces an item to -3.
+    * Give a message if an unseen monster died and the player got xp for 
+      it.
+    * Allow to auto-id all ring types.
+    * Made the uncursed variants of the scrolls gem perfection, identify, 
+      remove curse and spell extension less powerful and added a blessed 
+      variant with the original power. Let the player decide which gem to make
+      perfect, wich item to identify or to uncurse when using the uncursed 
+      variant. 
+    * Improved messages given when interacting with stationary objects. 
+      Show a message when a monster has been generated.
+    * Replace splash screen backstory with a new text that makes more 
+      sense.
+    * Improved save file compatibility handling.
+    * Added a change log file to the distribution.
+    * Various wizard mode enhancements.
+
+Fixed bugs:
+
+    * Fixed level draining attacks which could lead to a crash. 
+    * Fixed a crash when casting sleep at an already sleeping monster.
+    * Fixed a crash when buying a single item which is too heavy to be 
+      carried.
+    * Fix off-by-one-error preventing generation of the scroll of genocide 
+      and the potion of see invisible.
+    * Fixed item bonuses.
+    * Fixed many information leaks about invisible monsters.
+    * Fixed some monster plural names in the vanquished list and the 
+      message given by the scroll of genocide monster.
+    * Don't identify cursed potions or scrolls on using them.
+    * When blind, don't id curse status of items dropped on altars.
+    * If an item becomes uncursed, its curse status should be known. 
+    * Sort same-type shop items alphabetically by their _identified_ names.
+    * When using alter reality in the tenth dungeon level or the third 
+      volcano level, the unique items _amulet of larn_ and _potion of cure 
+      dianthroritis_ will be regenerated. Never ever destroy the potion of 
+      cure dianthroritis by erosion.
+    * Vampires would never use their bite attack. Now there is a 20% 
+      chance that they will do so. 
+    * The ziller and vortex can now attack again.
+    * Store monster AI state in saved games.
+    * Call autopickup when entering a new level. 
+    * Disallow opening/closing doors while paralysed or overstrained. 
+    * Fixed the calculation of bank account interest when doing a time 
+      warp. 
+    * Fixed "charm monster". Now it affects only a single monster which 
+      has to be targeted by the spell.
+    * Fixed moving items from a container in the players inventory to the 
+      players inventory and vice versa. 
+    * Mute pointless messages when going from burdened to overloaded and 
+      vice versa.
+    * Fixed _lots_ of message glitches.
+    * Fixed some memory leaks.
+
 Release 0.5.3 (2010-02-28)
 -------------
 
@@ -54,7 +167,8 @@ Changes:
     * Revised and extended in-game help.
     * Added a README file with basic instructions and other information.
     * Cursedness / blessedness of an item is revealed when dropping it on an
-      altar. The item description reflects if an item is known not to be cursed.
+      altar. The item description reflects if an item is known not to be 
+      cursed.
     * Destroy over-/under-enchanted items (> +3 / < -3).
     * Not all items are available in the DND store, only essential equipment.
       The items are displayed as identified and identified by purchasing them.
@@ -77,9 +191,9 @@ Changes:
     * Changed key used to drink from fountain to 'q'.
 
 Fixed bugs:
-    * Fixed flooding behavior of cloud kill, flood and magic fire. Fixed a crash
-      when casting these spells near the borders of the map. Fixed casting these
-      spells multiple times onto the same map squares.
+    * Fixed flooding behavior of cloud kill, flood and magic fire. Fixed a 
+      crash when casting these spells near the borders of the map. Fixed 
+      casting these spells multiple times onto the same map squares.
     * Fixed screen drawing when using the Scroll of Pulverisation.
     * Fixed messages when gaining an experience level.
     * Fixed crash in item_enchant() / item_disenchant().
@@ -127,14 +241,14 @@ Changes:
       it.
     * Fixed a mistakable message when casting the spell vaporize rock.
     * Started using a directory for the user's game related files; read
-      .ini-file from there; put save file into it. Under Linux this directory is
-      called ~/.nlarn, under Windows it is below Application Data (or the
+      .ini-file from there; put save file into it. Under Linux this directory 
+      is called ~/.nlarn, under Windows it is below Application Data (or the
       localized version thereof).
     * Read settings from the .ini-file correctly when restoring a saved game.
     * Fixed a crash when pressing the windows keys while having a window open.
     * Gems sold to the bank do no longer appear in the DND store.
-    * Items sold to the trade post are refurbished before being added to the DND
-      store.
+    * Items sold to the trade post are refurbished before being added to the 
+      DND store.
     * The bonus of armour and weapons sold in store is now known to the player.
     * Fixed a crash when displaying high scores and the current score is not in
       the list.
@@ -178,10 +292,10 @@ Bugs and features fixed in this version:
     * Fixed a crash in the inventory dialog.
     * A leprechaun who picked up a gem could cause a crash in the drawing code
       (this one took me hours to figure out. You got to love C!)
-    * A message is logged when no item has been discovered instead of showing an
-      empty dialog box.
-    * Fixed a bug in auto-pickup code which would lead to a game freeze and 100%
-      CPU usage.
+    * A message is logged when no item has been discovered instead of showing 
+      an empty dialog box.
+    * Fixed a bug in auto-pickup code which would lead to a game freeze and 
+      100% CPU usage.
     * Fixed duplicate knowledge of spells.
     * Move all Spheres of Destruction.
     * Fixed the behavior of backspace key in the get_amount dialog.
@@ -192,7 +306,7 @@ Bugs and features fixed in this version:
     * When withdrawing large sums from the bank without being able to carry it
       the money was lost. This has been fixed.
     * Fixed a hang at the end of the game.
-    * Fixed trap generation of traps: now trapdoors are generated, too.
+    * Fixed generation of traps: now trapdoors are generated, too.
     * Nymphs can no longer steal cursed items that are equipped.
 
 Release 0.4.1 (2009-09-11)
@@ -228,8 +342,8 @@ Changes:
     * Weapons can have effects.
     * Raised the number of effects an item can have from one to infinite.
     * Implemented Bessman's Flailing Hammer.
-    * The inventory weight is respected. Picking up items which are too heavy is
-      no longer possible.
+    * The inventory weight is respected. Picking up items which are too heavy 
+      is no longer possible.
     * Improved interface. Low HP and MP are displayed in different colour; the
       most important negative effects and the level names are now shown.
     * Implemented list of discovered items.
