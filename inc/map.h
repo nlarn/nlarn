@@ -175,7 +175,16 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_
 
 int *map_get_surrounding(map *l, position pos, map_sobject_t type);
 
+/**
+ * determine if a position can be seen from another position
+ *
+ * @param the map
+ * @param first position
+ * @param second position
+ * @return TRUE or FALSE
+ */
 int map_pos_is_visible(map *l, position source, position target);
+
 map_path *map_find_path(map *l, position start, position goal);
 void map_path_destroy(map_path *path);
 
@@ -201,8 +210,22 @@ char *map_pos_examine(position pos);
 monster *map_get_monster_at(map *m, position pos);
 int map_set_monster_at(map *map, position pos, monster *monst);
 int map_is_monster_at(map *m, position pos);
+
+/**
+ * creates an entire set of monsters for a map
+ *
+ * @param a map
+ * @return the number of monsters added to the map
+ */
 int map_fill_with_life(map *l);
+
 gboolean map_is_exit_at(map *m, position pos);
+
+/**
+ * Process temporary effects for a map.
+ *
+ * @param the map on which timed events have to be processed
+ */
 void map_timer(map *l);
 
 /* external vars */

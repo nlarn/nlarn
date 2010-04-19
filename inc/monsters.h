@@ -199,13 +199,41 @@ void monster_move(monster *m, struct player *p);
 monster *monster_trap_trigger(monster *m);
 void monster_polymorph(monster *m);
 
+/**
+ * check stash at monster's position for something desired
+ *
+ * @param a monster
+ * @return TRUE if something has been picked up, FALSE if not
+ */
 int monster_items_pickup(monster *m);
 
+/**
+ * Returns the number of attack type a monster can choose from
+ *
+ * @param a monster
+ * @return the number of attacks
+ */
 int monster_attack_count(monster *m);
+
 void monster_player_attack(monster *m, struct player *p);
+
+/**
+ * Deal damage to a monster
+ *
+ * @param monster
+ * @param pointer to the damage to be dealt (will be free'd)
+ * @return the monster if it has survived, othewise NULL
+ */
 monster *monster_damage_take(monster *m, damage *dam);
 
+/**
+ * Determine a monster's action.
+ *
+ * @param the monster
+ * @return TRUE if the action has changed
+ */
 gboolean monster_update_action(monster *m);
+
 void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
 

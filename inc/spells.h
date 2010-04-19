@@ -115,9 +115,39 @@ GPtrArray *spells_deserialize(cJSON *sser);
 
 int spell_sort(gconstpointer a, gconstpointer b);
 
+/**
+ * Select a spell to cast and cast it
+ *
+ * @param the player
+ * @return number of turns elapsed
+ */
 int spell_cast(struct player *p);
+
+/**
+ * Try to add a spell to the list of known spells
+ *
+ * @param the player
+ * @param id of spell to learn
+ * @return FALSE if learning the spell failed, otherwise level of knowledge
+ */
 int spell_learn(struct player *p, guint spell_type);
+
+/**
+ * Remove a spell from the list of known spells
+ *
+ * @param the player
+ * @param the id of the spell to forget
+ * @return TRUE if the spell could be found and removed, othrwise FALSE
+ */
 int spell_forget(struct player *p, guint spell_type);
+
+/**
+ * Check if a spell is known to the player
+ *
+ * @param the player
+ * @param id of the spell in question
+ * @return FALSE if unknown, otherwise level of knowledge of that spell
+ */
 int spell_known(struct player *p, guint spell_type);
 
 int spell_type_player(spell *s, struct player *p);

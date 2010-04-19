@@ -39,13 +39,6 @@ int divert(int value, int percent)
     return rand_m_n(lower, upper);
 }
 
-/**
- * Shuffle an array of integers
- *
- * @param pointer to integer array
- * @param length of array
- * @param how many fields should be skipped
- */
 void shuffle(int array[], int length, int skip)
 {
     int i;
@@ -187,14 +180,6 @@ int log_add_entry(message_log *log, const char *fmt, ...)
     return TRUE;
 }
 
-/**
- * Update the game time. This function flushes the message buffer and appends
- * the collected messages to the log.
- *
- * @param the log
- * @param the new game time
- *
- */
 void log_set_time(message_log *log, int gtime)
 {
     message_log_entry *entry;
@@ -360,14 +345,6 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
     return text;
 }
 
-/**
- * append one array of text to another array of text.
- *
- * @param text to append to
- * @param text to append. this will be freed.
- * @return pointer to combined array.
- *
- */
 GPtrArray *text_append(GPtrArray *first, GPtrArray *second)
 {
     assert(first != NULL && second != NULL);

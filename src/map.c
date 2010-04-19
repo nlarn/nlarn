@@ -552,13 +552,6 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_
     return FALSE;
 }
 
-/**
- * determine if a position can be seen from another position
- * @param the map
- * @param first position
- * @param second position
- * @return TRUE or FALSE
- */
 int map_pos_is_visible(map *l, position s, position t)
 {
     int delta_x, delta_y;
@@ -1017,10 +1010,6 @@ int map_is_monster_at(map *m, position pos)
     return ((map_get_monster_at(m, pos) != NULL));
 }
 
-/**
- * creates an entire set of monsters for a map
- * @param a map
- */
 int map_fill_with_life(map *l)
 {
     position pos;
@@ -1072,12 +1061,6 @@ gboolean map_is_exit_at(map *m, position pos)
     }
 }
 
-/**
- *
- * Process temporary effects for a map.
- * @param the map on which the
- *
- */
 void map_timer(map *l)
 {
     position pos;

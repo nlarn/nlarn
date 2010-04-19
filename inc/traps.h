@@ -52,6 +52,13 @@ struct player;
 
 
 /* functions */
+/**
+ * Player stepped on a trap
+ *
+ * @param the player
+ * @param the trap
+ * @return number of turns this move took
+ */
 int player_trap_trigger(struct player *p, trap_t trap, int force);
 
 /* macros */

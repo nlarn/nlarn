@@ -98,6 +98,18 @@ int display_draw();
 
 int display_paint_screen(player *p);
 
+/**
+ * Generic inventory display function
+ *
+ * @param Window title
+ * @param player
+ * @param inventory to display
+ * @param a GPtrArray of display_inv_callbacks (may be NULL)
+ * @param display prices
+ * @param a filter function: will be called for every item
+ * @return if no callbacks have been supplied, the selected item will be returned on pressing enter
+ *
+ */
 item *display_inventory(const char *title, player *p, inventory **inv,
                         GPtrArray *callbacks, gboolean show_price,
                         gboolean show_weight, gboolean show_account,
@@ -119,6 +131,15 @@ position display_get_position(player *p, char *message, gboolean ray,
                               gboolean passable, gboolean visible);
 
 void display_show_history(message_log *log, const char *title);
+
+/**
+ * Simple "popup" message window
+ *
+ * @param window title
+ * @param message to be displayed inside window
+ * @param the number of chars wrapped lines will be indented
+ * @return key pressed to close window
+ */
 char display_show_message(const char *title, const char *message, int indent);
 
 void display_windows_hide();

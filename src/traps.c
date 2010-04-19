@@ -113,13 +113,6 @@ const trap_data traps[TT_MAX] = {
     },
 };
 
-/**
- * Player stepped on a trap
- *
- * @param the player
- * @param the trap
- * @return time this move took
- */
 int player_trap_trigger(player *p, trap_t trap, int force)
 {
     /* additional time of turn, if any */

@@ -204,14 +204,41 @@ cJSON *player_serialize(player *p);
 player *player_deserialize(cJSON *pser);
 
 void player_make_move(player *p, int turns);
+
+/**
+ * Kill the player
+ *
+ * @param the player
+ * @param the cause, e.g. PD_TRAP
+ * @param the id of the specific cause, e.g. TT_DART
+ *
+ */
 void player_die(player *p, player_cod cause_type, int cause);
+
 gint64 player_calc_score(player *p, int won);
 gboolean player_movement_possible(player *p);
 int player_move(player *p, direction dir, gboolean open_door);
 int player_attack(player *p, monster *m);
 void player_update_fov(player *p);
 int player_pos_visible(player *p, position pos);
+
+/**
+ * Function to enter a map.
+ *
+ * @param the player
+ * @param entered map
+ * @param has to be TRUE if the player didn't enter the map regularly
+ * @return TRUE
+ */
 int player_map_enter(player *p, map *l, gboolean teleported);
+
+/**
+ * Choose a random armour the player is wearing.
+ *
+ * @param   the player
+ * @return  a pointer to the slot of the armour
+ *
+ */
 item **player_get_random_armour(player *p);
 
 int player_pickup(player *p);
@@ -225,7 +252,17 @@ void player_exp_gain(player *p, int count);
 void player_exp_lose(player *p, int count);
 
 int player_hp_gain(player *p, int count);
+
+/**
+ * Inflict damage upon the player
+ *
+ * @param the player
+ * @param pointer to the damage (will be freed)
+ * @param of the damage originator
+ * @param the id of the damage originator, specific to the damage originator
+ */
 void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause);
+
 int player_hp_max_gain(player *p, int count);
 int player_hp_max_lose(player *p, int count);
 
@@ -247,15 +284,54 @@ char **player_effect_text(player *p);
 int player_inv_display(player *p);
 char *player_can_carry(player *p);
 char *player_inv_weight(player *p);
+
+/**
+ * Callback function used from inv_add() for the player's inventory. Here it
+ * is determined it an item can be picked up or if the weight of the player's
+ * pack would be larger than the player could carry afterwards.
+ *
+ * @param the inventory to check
+ * @param the item which is about to be added
+ *
+ */
 int player_inv_pre_add(inventory *inv, item *item);
+
+/**
+ * Callback function used from inv_add() for the player's inventory. Here the
+ * weight of the inventory gets calculated and the burdened or overstrained
+ * mode is set or removed.
+ *
+ * @param the inventory to check
+ * @param the item which is about to be added
+ *
+ */
 void player_inv_weight_recalc(inventory *inv, item *item);
 
+
 /* dealing with items */
+
+/**
+  * Function used to equip an item.
+  *
+  * @param the player
+  * @param unused, needed to make function signature match display_inventory requirements
+  * @param the item
+  */
 int player_item_equip(player *p, inventory **inv, item *it);
+
 int player_item_unequip(player *p, inventory **inv, item *it);
 int player_item_is_container(player *p, item *it);
 int player_item_can_be_added_to_container(player *p, item *it);
+
+/**
+ * Callback funtion used to check if an item is equipped.
+ *
+ * @param the player
+ * @param the item
+ * @return place where item is equipped
+ */
 int player_item_is_equipped(player *p, item *it);
+
 int player_item_is_equippable(player *p, item *it);
 int player_item_is_usable(player *p, item *it);
 int player_item_is_dropable(player *p, item *it);

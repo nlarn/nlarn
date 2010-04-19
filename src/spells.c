@@ -436,11 +436,6 @@ int spell_sort(gconstpointer a, gconstpointer b)
     return order;
 }
 
-/**
- * Select a spell to cast and cast it
- * @param the player
- * @return number of turns elapsed
- */
 int spell_cast(player *p)
 {
     int turns = 0;
@@ -585,13 +580,6 @@ int spell_cast(player *p)
     return turns;
 }
 
-/**
- * Try to add a spell to the list of known spells
- *
- * @param the player
- * @param id of spell to learn
- * @return FALSE if learning the spell failed, otherwise level of knowledge
- */
 int spell_learn(player *p, guint spell_type)
 {
     spell *s;
@@ -635,13 +623,6 @@ int spell_learn(player *p, guint spell_type)
     return FALSE;
 }
 
-/**
- * Remove a spell from the list of known spells
- *
- * @param the player
- * @param the id of the spell to forget
- * @return TRUE if the spell could be found and removed, othrwise FALSE
- */
 int spell_forget(player *p, guint spell_type)
 {
     spell *s;
@@ -662,12 +643,6 @@ int spell_forget(player *p, guint spell_type)
     return FALSE;
 }
 
-/**
- * Check if a spell is known to the player
- * @param the player
- * @param id of the spell in question
- * @return FALSE if unknown, otherwise level of knowledge of that spell
- */
 int spell_known(player *p, guint spell_type)
 {
     spell *s;

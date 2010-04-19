@@ -716,14 +716,6 @@ void player_make_move(player *p, int turns)
     while (turns > 0);
 }
 
-/**
- * Kill the player
- *
- * @param the player
- * @param the cause, e.g. PD_TRAP
- * @param the id of the specific cause, e.g. TT_DART
- *
- */
 void player_die(player *p, player_cod cause_type, int cause)
 {
     GString *text;
@@ -1400,15 +1392,6 @@ int player_attack(player *p, monster *m)
     return 1; /* i.e. turns used */
 }
 
-/**
- * function to enter a map.  This routine must be called anytime the
- * player changes levels.
- *
- * @param player entering map
- * @param entered map
- * @param has to be TRUE if the player didn't enter the map regularly
- * @return TRUE
- */
 int player_map_enter(player *p, map *l, gboolean teleported)
 {
     position pos;
@@ -1485,13 +1468,6 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     return TRUE;
 }
 
-/**
- * Choose a random armour the player is wearing.
- *
- * @param   the player
- * @return  a pointer to the slot of the armour
- *
- */
 item **player_get_random_armour(player *p)
 {
     GPtrArray *armours;
@@ -1791,14 +1767,6 @@ int player_hp_gain(player *p, int count)
     return p->hp;
 }
 
-/**
- * Inflict damage upon the player
- *
- * @param the player
- * @param the damage
- * @param of the damage originator
- * @param the id of the damage originator, specific to the damage originator
- */
 void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause)
 {
     monster *m = NULL;
@@ -2507,15 +2475,6 @@ char *player_inv_weight(player *p)
     return buf;
 }
 
-/**
- * Callback function used from inv_add() for the player's inventory. Here it
- * is determined it an item can be picked up or if the weight of the player's
- * pack would be larger than the player could carry afterwards.
- *
- * @param the inventory to check
- * @param the item which is about to be added
- *
- */
 int player_inv_pre_add(inventory *inv, item *item)
 {
     player *p;
@@ -2555,15 +2514,6 @@ int player_inv_pre_add(inventory *inv, item *item)
     return TRUE;
 }
 
-/**
- * Callback function used from inv_add() for the player's inventory. Here the
- * weight of the inventory gets calculated and the burdened or overstrained
- * mode is set or removed.
- *
- * @param the inventory to check
- * @param the item which is about to be added
- *
- */
 void player_inv_weight_recalc(inventory *inv, item *item)
 {
     int pack_weight;
@@ -2629,7 +2579,6 @@ void player_inv_weight_recalc(inventory *inv, item *item)
     }
 }
 
-/* level is needed to make function signature match display_inventory requirements */
 int player_item_equip(player *p, inventory **inv, item *it)
 {
     item **islot = NULL;  /* pointer to chosen item slot */
@@ -2967,11 +2916,6 @@ int player_item_can_be_added_to_container(player *p, item *it)
     return FALSE;
 }
 
-/**
- * @param the player
- * @param the item
- * @return place where item is equipped
- */
 int player_item_is_equipped(player *p, item *it)
 {
     assert(p != NULL && it != NULL);

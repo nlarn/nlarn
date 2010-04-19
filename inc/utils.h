@@ -59,7 +59,16 @@ typedef struct _message_log
 
 /* function definitions */
 int divert(int value, int percent);
+
+/**
+ * Shuffle an array of integers
+ *
+ * @param pointer to integer array
+ * @param length of array
+ * @param how many fields should be skipped
+ */
 void shuffle(int array[], int length, int skip);
+
 char *str_replace(char *string, char *orig, char *replace);
 char *str_capitalize(char *string);
 
@@ -67,7 +76,16 @@ char *str_capitalize(char *string);
 message_log *log_new();
 void log_destroy(message_log *log);
 int log_add_entry(message_log *log, const char *fmt, ...);
+
+/**
+ * Update the game time. This function flushes the message buffer and appends
+ * the collected messages to the log.
+ *
+ * @param the log
+ * @param the new game time
+ */
 void log_set_time(message_log *log, int gtime);
+
 message_log_entry *log_get_entry(message_log *log, guint id);
 cJSON *log_serialize(message_log *log);
 message_log *log_deserialize(cJSON *lser);
@@ -80,7 +98,16 @@ message_log *log_deserialize(cJSON *lser);
 
 /* text array handling */
 GPtrArray *text_wrap(const char *str, int width, int indent);
+
+/**
+ * append one array of text to another array of text.
+ *
+ * @param text to append to
+ * @param text to append. this will be freed.
+ * @return pointer to combined array.
+ */
 GPtrArray *text_append(GPtrArray *first, GPtrArray *second);
+
 void text_destroy(GPtrArray *text);
 
 /* helpers for NULL-terminated string arrays */

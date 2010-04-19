@@ -1565,12 +1565,6 @@ void monster_polymorph(monster *m)
     m->hp = monster_hp_max(m);
 }
 
-/**
- * check stash at monster's position for something desired
- * @param a monster
- * @return TRUE if something has been picked up, FALSE if not
- *
- */
 int monster_items_pickup(monster *m)
 {
     /* TODO: gelatious cube digests items, rust monster eats metal stuff */
@@ -1637,13 +1631,6 @@ int monster_items_pickup(monster *m)
     return FALSE;
 }
 
-/**
- * Returns the number of attack type a monster can choose from
- *
- * @param a monster
- * @return the number of attacks
- *
- */
 int monster_attack_count(monster *m)
 {
     assert (m != NULL && m->type < MT_MAX);
@@ -1810,12 +1797,6 @@ void monster_player_attack(monster *m, player *p)
     }
 }
 
-/**
- * Deal damage to a monster
- * @param monster
- * @param damage to be dealt
- * @return the monster if it has survived, othewise NULL
- */
 monster *monster_damage_take(monster *m, damage *dam)
 {
     struct player *p;
@@ -1898,12 +1879,6 @@ monster *monster_damage_take(monster *m, damage *dam)
     return m;
 }
 
-/**
- * Determine a monster's action.
- *
- * @param the monster
- * @return TRUE if the action has changed
- */
 gboolean monster_update_action(monster *m)
 {
     monster_action_t naction;   /* new action */
