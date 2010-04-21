@@ -1722,7 +1722,7 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     return g_string_free(string, FALSE);
 }
 
-int display_get_yesno_nopaint(char *question, char *yes, char *no)
+int display_get_yesno(char *question, char *yes, char *no)
 {
     display_window *ywin;
     guint startx, starty;
@@ -1743,6 +1743,10 @@ int display_get_yesno_nopaint(char *question, char *yes, char *no)
 
     if (!no)
         no = "No";
+
+    /* repaint the screen if the game has been initialized */
+    if (nlarn != NULL && nlarn->p != NULL)
+        display_paint_screen(nlarn->p);
 
     /* determine text width, either defined by space available  for the window
      * or the length of question */
@@ -1879,12 +1883,6 @@ int display_get_yesno_nopaint(char *question, char *yes, char *no)
     display_window_destroy(ywin, TRUE);
 
     return selection;
-}
-
-int display_get_yesno(char *question, char *yes, char *no)
-{
-    display_paint_screen(nlarn->p);
-    return display_get_yesno_nopaint(question, yes, no);
 }
 
 direction display_get_direction(char *title, int *available)

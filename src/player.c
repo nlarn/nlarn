@@ -1098,9 +1098,6 @@ void player_die(player *p, player_cod cause_type, int cause)
 
         display_show_message(title, text->str, 0);
 
-        /* repaint screen */
-        display_paint_screen(p);
-
         if (display_get_yesno("Do you want to save a memorial " \
                               "file for your character?", NULL, NULL))
         {

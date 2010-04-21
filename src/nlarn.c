@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
             display_draw();
             display_initialised = TRUE;
 
-            if (display_get_yesno_nopaint("Saved game could not be loaded. " \
+            if (display_get_yesno("Saved game could not be loaded. " \
                                           "Delete and start new game?",
                                           NULL, NULL))
             {

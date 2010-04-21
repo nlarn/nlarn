@@ -434,9 +434,6 @@ int building_lrs(player *p)
     /* offer to pay taxes if player can afford to */
     if (p->outstanding_taxes && (building_player_check(p, p->outstanding_taxes)))
     {
-        /* need to redraw screen first */
-        display_paint_screen(p);
-
         if (display_get_yesno("Do you want to pay your taxes?", NULL, NULL))
         {
             building_player_charge(p, p->outstanding_taxes);
