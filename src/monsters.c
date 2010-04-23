@@ -36,6 +36,7 @@ struct _monster
 {
     monster_t type;
     gpointer oid; /* monsters id inside the monster hash */
+    gint32 hp_max;
     gint32 hp;
     position pos;
     int movement;
@@ -769,11 +770,9 @@ monster *monster_new(int type, position pos)
     nmonster = g_malloc0(sizeof(monster));
 
     nmonster->type = type;
-    nmonster->hp = divert(monsters[type].hp_max, 10);
 
-    /* prevent the living dead */
-    if (nmonster->hp < 1)
-        nmonster->hp = 1;
+    /* determine max hp; prevent the living dead */
+    nmonster->hp_max = nmonster->hp = max(1, divert(monsters[type].hp_max, 10));
 
     nmonster->effects = g_ptr_array_new();
     nmonster->inventory = inv_new(nmonster);
@@ -988,6 +987,7 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     cJSON_AddItemToArray(root, mval = cJSON_CreateObject());
     cJSON_AddNumberToObject(mval, "type", monster_type(m));
     cJSON_AddNumberToObject(mval, "oid", GPOINTER_TO_UINT(oid));
+    cJSON_AddNumberToObject(mval, "hp_max", m->hp_max);
     cJSON_AddNumberToObject(mval, "hp", m->hp);
     cJSON_AddItemToObject(mval,"pos", pos_serialize(m->pos));
     cJSON_AddNumberToObject(mval, "movement", m->movement);
@@ -1033,6 +1033,7 @@ void monster_deserialize(cJSON *mser, game *g)
     m->type = cJSON_GetObjectItem(mser, "type")->valueint;
     oid = cJSON_GetObjectItem(mser, "oid")->valueint;
     m->oid = GUINT_TO_POINTER(oid);
+    m->hp_max = cJSON_GetObjectItem(mser, "hp_max")->valueint;
     m->hp = cJSON_GetObjectItem(mser, "hp")->valueint;
     m->pos = pos_deserialize(cJSON_GetObjectItem(mser, "pos"));
     m->movement = cJSON_GetObjectItem(mser, "movement")->valueint;
@@ -1076,6 +1077,12 @@ void monster_deserialize(cJSON *mser, game *g)
         g->monster_max_id = oid;
 }
 
+int monster_hp_max(monster *m)
+{
+    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    return m->hp_max;
+}
+
 int monster_hp(monster *m)
 {
     assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
@@ -1085,10 +1092,7 @@ int monster_hp(monster *m)
 void monster_hp_inc(monster *m, int amount)
 {
     assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
-
-    m->hp += amount;
-    if (m->hp > monsters[m->type].hp_max)
-        m->hp = monsters[m->type].hp_max;
+    m->hp = min(m->hp + amount, m->hp_max);
 }
 
 item_t monster_item_type(monster *m)

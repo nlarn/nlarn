@@ -175,6 +175,7 @@ void monster_deserialize(cJSON *mser, struct game *g);
 
 /* getter / setter */
 
+int monster_hp_max(monster *m);
 int monster_hp(monster *m);
 void monster_hp_inc(monster *m, int amount);
 item_t monster_item_type(monster *m);
@@ -246,7 +247,6 @@ int monster_colour(monster *m);
 #define monster_ac(monster)          (monsters[monster_type(monster)].ac)
 #define monster_int(monster)         (monsters[monster_type(monster)].intelligence)
 #define monster_gold(monster)        (monsters[monster_type(monster)].gold)
-#define monster_hp_max(monster)      (monsters[monster_type(monster)].hp_max)
 #define monster_exp(monster)         (monsters[monster_type(monster)].exp)
 #define monster_speed(monster)       (monsters[monster_type(monster)].mspeed)
 #define monster_attack(monster, idx) (monsters[monster_type(monster)].attacks[(idx)])
