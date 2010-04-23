@@ -749,6 +749,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
 {
     guint price;
     guint count = 0;
+    gpointer ioid = NULL; /* oid of purchased item */
     char text[81];
     char name[61];
 
@@ -821,19 +822,21 @@ static int building_item_sell(player *p, inventory **inv, item *it)
         it_clone = it;
     }
 
-    /* log the event */
+    /* prepare the item description for logging later */
     item_describe(it_clone, TRUE, (count == 1), FALSE, name, 60);
-    log_add_entry(p->log, "You buy %s.", name);
 
-    /* try to transfer the item */
+    /* try to transfer the item to the player's inventory */
+    ioid = it_clone->oid;
+
     if (inv_add(&p->inventory, it_clone))
     {
         /* the item has been added to player's inventory */
         if (it == it_clone)
         {
-            /* remove the item from the shop
-               as the player has bought the entire stock */
-            inv_del_element(inv, it);
+            /* remove the item from the shop as the player has bought the
+            entire stock. this has to be done by the oid as it_clone may
+            have been destroyed if it was a stackable item. */
+            inv_del_oid(inv, ioid);
         }
 
         /* identify the item */
@@ -847,7 +850,8 @@ static int building_item_sell(player *p, inventory **inv, item *it)
         return FALSE;
     }
 
-    log_add_entry(p->log, "Thank you for your purchase.");
+    /* log the event */
+    log_add_entry(p->log, "You buy %s. Thank you for your purchase.", name);
 
     /* charge player for this purchase */
     building_player_charge(p, price);
