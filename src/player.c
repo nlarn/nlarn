@@ -805,7 +805,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         p->mp = p->mp_max;
 
         /* return to level 1 if last level has been lost */
-        if (p->level < 1) player_level_gain(p, 1);
+        if (p->level < 1) p->level = 1;
 
         /* clear some nasty effects */
         effect *e;
@@ -1695,6 +1695,9 @@ void player_level_lose(player *p, int count)
     p->level -= count;
     log_add_entry(p->log, "You return to experience level %d...", p->level);
 
+    /* die if lost level 1 */
+    if (p->level == 0) player_die(p, PD_LASTLEVEL, 0);
+
     if (p->experience > player_lvl_exp[p->level - 1])
         /* adjust XP to match level */
         player_exp_lose(p, p->experience - player_lvl_exp[p->level - 1]);
@@ -1715,10 +1718,6 @@ void player_level_lose(player *p, int count)
 
         player_mp_max_lose(p, rand_1n(3) + rand_0n(max(base, 1)));
     }
-
-    /* die if lost level 1 */
-    if (p->level == 0)
-        player_die(p, PD_LASTLEVEL, 0);
 }
 
 void player_exp_gain(player *p, int count)
