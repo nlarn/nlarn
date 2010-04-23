@@ -155,14 +155,6 @@ map *map_new(int num, char *mazefile)
             /* dig cave */
             map_make_maze(nmap, treasure_room);
 
-            /* add stationary objects */
-            if (!map_fill_with_stationary_objects(nmap))
-            {
-                /* adding stationary objects failed; generate a new map */
-                map_destroy(nmap);
-                return NULL;
-            }
-
             /* check if entire map is reachable */
             keep_maze = map_validate(nmap);
         }
@@ -1312,6 +1304,7 @@ static void map_make_maze(map *maze, int treasure_room)
 
     pos.z = maze->nlevel;
 
+generate:
     /* reset map by filling it with walls */
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
@@ -1390,6 +1383,13 @@ static void map_make_maze(map *maze, int treasure_room)
 
     /* mark the end of the rooms array */
     rooms[nrooms] = NULL;
+
+    /* add stationary objects */
+    if (!map_fill_with_stationary_objects(maze))
+    {
+        /* adding stationary objects failed; generate a new map */
+        goto generate;
+    }
 
     /* add treasure room if requested */
     if (treasure_room)
