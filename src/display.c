@@ -690,11 +690,19 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         {
             it = inv_get_filtered(*inv, (pos - 1) + offset, filter);
 
-            if ((curr == pos) && player_item_is_equipped(p, it))
+            gboolean item_equipped = FALSE;
+
+            if (!show_price)
+            {
+                /* shop items are definitely not equipped */
+                item_equipped = player_item_is_equipped(p, it);
+            }
+
+            if ((curr == pos) && item_equipped)
                 attrs = COLOR_PAIR(DCP_BLACK_WHITE);
             else if (curr == pos)
                 attrs = COLOR_PAIR(DCP_RED_WHITE);
-            else if (player_item_is_equipped(p, it))
+            else if (item_equipped)
                 attrs = COLOR_PAIR(DCP_WHITE_RED) | A_BOLD;
             else
                 attrs = COLOR_PAIR(DCP_WHITE_RED);
@@ -908,13 +916,14 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                     if (time) player_make_move(p, time);
 
                     redraw = TRUE;
+
+                    /* don't check other callback functions */
+                    break;
                 }
             }
-
         };
 
         len_curr = inv_length_filtered(*inv, filter);
-
     }
     while (keep_running && (len_curr > 0)); /* ESC pressed or empty inventory*/
 
