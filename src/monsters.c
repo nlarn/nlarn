@@ -2020,6 +2020,17 @@ char *monster_desc(monster *m)
         injury = "critically injured";
 
     desc = g_string_new(NULL);
+
+    if (monster_unknown(m))
+    {
+        /* an undiscovered mimic will be described as the item it mimics */
+        g_string_append_printf(desc, "%s %s",
+                               a_an(item_data[monster_item_type(m)].name_sg),
+                               item_data[monster_item_type(m)].name_sg);
+
+        return g_string_free(desc, FALSE);
+    }
+
     g_string_append_printf(desc, "%s %s %s, %s", a_an(injury),
                            injury, monster_name(m),
                            monster_ai_desc[m->action]);
@@ -2034,7 +2045,7 @@ char *monster_desc(monster *m)
         {
             effect *e = game_effect_get(nlarn, g_ptr_array_index(m->effects, i));
 
-            if(effect_get_desc(e))
+            if (effect_get_desc(e))
             {
                 strv_append_unique(&desc_list, effect_get_desc(e));
             }
@@ -2514,29 +2525,29 @@ static position monster_move_attack(monster *m, struct player *p)
 
         switch (map_sobject_at(monster_map(m), monster_pos(m)))
         {
-            case LS_STAIRSDOWN:
-            case LS_DNGN_ENTRANCE:
-                newmap = m->pos.z + 1;
-                break;
+        case LS_STAIRSDOWN:
+        case LS_DNGN_ENTRANCE:
+            newmap = m->pos.z + 1;
+            break;
 
-            case LS_STAIRSUP:
-            case LS_DNGN_EXIT:
-                newmap = m->pos.z - 1;
-                break;
+        case LS_STAIRSUP:
+        case LS_DNGN_EXIT:
+            newmap = m->pos.z - 1;
+            break;
 
-            case LS_ELEVATORDOWN:
-                /* move into the volcano from the town */
-                newmap = MAP_DMAX + 1;
-                break;
+        case LS_ELEVATORDOWN:
+            /* move into the volcano from the town */
+            newmap = MAP_DMAX + 1;
+            break;
 
-            case LS_ELEVATORUP:
-                /* volcano monster enters the town */
-                newmap = 0;
-                break;
+        case LS_ELEVATORUP:
+            /* volcano monster enters the town */
+            newmap = 0;
+            break;
 
-            default:
-                newmap = m->pos.z;
-                break;
+        default:
+            newmap = m->pos.z;
+            break;
         }
 
         /* change the map */
