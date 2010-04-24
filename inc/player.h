@@ -346,6 +346,18 @@ void player_item_identify(player *p, inventory **inv, item *it);
 int player_item_use(player *p, inventory **inv, item *it);
 void player_item_destroy(player *p, item *it);
 int player_item_drop(player *p, inventory **inv, item *it);
+
+/**
+ * @brief Try to pick up an item.
+ *
+ * @param the player
+ * @param the source inventory
+ * @param the item to pick up
+ * @return the number of turns used for the action:
+          0 if the action has been canceled,
+ *        1 when the pre_add callback function failed (e.g. the item is too heavy),
+ *        2 if adding the item to the player's inventory succeeded.
+ */
 int player_item_pickup(player *p, inventory **inv, item *it);
 
 /* item usage shortcuts */

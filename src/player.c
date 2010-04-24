@@ -582,6 +582,9 @@ void player_make_move(player *p, int turns)
 
     assert(p != NULL);
 
+    /* do do nothing if there is nothing to */
+    if (turns == 0) return;
+
     /* modifier for frequency */
     frequency = game_difficulty(nlarn) << 3;
 
@@ -1539,6 +1542,10 @@ void player_autopickup(player *p)
 {
     guint idx;
     inventory **floor;
+    int turns = 0;
+    int other_items_count = 0;
+    int other_item_id     = -1;
+    gboolean did_pickup   = FALSE;
 
     assert (p != NULL && map_ilist_at(game_map(nlarn, p->pos.z), p->pos));
 
@@ -1547,9 +1554,6 @@ void player_autopickup(player *p)
     /* set flag to tell player_item_pickup() not to ask about the amount */
     called_by_autopickup = TRUE;
 
-    int other_items_count = 0;
-    int other_item_id     = -1;
-    gboolean did_pickup   = FALSE;
     for (idx = 0; idx < inv_length(*floor); idx++)
     {
         item *i = inv_get(*floor, idx);
@@ -1557,13 +1561,15 @@ void player_autopickup(player *p)
         if (p->settings.auto_pickup[i->type])
         {
             /* try to pick up the item */
-            if (player_item_pickup(p, floor, i))
+            if ((turns = player_item_pickup(p, floor, i)) == 2)
             {
                 /* item has been picked up */
                 /* go back one item as the following items lowered their number */
                 idx--;
                 did_pickup = TRUE;
             }
+
+            player_make_move(p, turns);
         }
         else
         {
@@ -3432,27 +3438,21 @@ int player_item_pickup(player *p, inventory **inv, item *it)
         }
     }
 
-    /* prepare item description for logging later.
-     * this has to come before adding the item as it may
-     * already be freed then (stackable items)
-     */
+    /* Log the attempt to pick up the item */
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
+    log_add_entry(p->log, "You pick up %s.", desc);
 
-    if (inv_add(&p->inventory, it))
+    if (!inv_add(&p->inventory, it))
     {
-        /* adding item to player's inventory succeeded */
-        log_add_entry(p->log, "You pick up %s.", desc);
-    }
-    else
-    {
-        /* if the item has been split, return it to the originating inventory */
+        /* Adding the item to the player's inventory has failed.
+           If the item has been split, return it to the originating inventory */
         if (oid == NULL) inv_add(inv, it);
 
-        return FALSE;
+        /* the attempt to pick the item up took one turn */
+        return 1;
     }
 
-    /* if the item has not been split,
-       remove it from the originating inventory */
+    /* remove the item from the originating inventory if it has not been split */
     if (oid != NULL)
         inv_del_oid(inv, oid);
 
