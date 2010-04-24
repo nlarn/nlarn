@@ -439,7 +439,6 @@ int spell_sort(gconstpointer a, gconstpointer b)
 int spell_cast(player *p)
 {
     int turns = 0;
-    int mp_usage = 0;
     gboolean well_done = FALSE;
 
     spell *spell;
@@ -485,27 +484,27 @@ int spell_cast(player *p)
     {
         /* spells that cause an effect on the player */
     case SC_PLAYER:
-        mp_usage = spell_type_player(spell, p);
+        well_done = spell_type_player(spell, p);
         break;
 
         /* spells that cause an effect on a monster */
     case SC_POINT:
-        mp_usage = spell_type_point(spell, p);
+        well_done = spell_type_point(spell, p);
         break;
 
         /* creates a ray */
     case SC_RAY:
-        mp_usage = spell_type_ray(spell, p);
+        well_done = spell_type_ray(spell, p);
         break;
 
         /* effect pours like water */
     case SC_FLOOD:
-        mp_usage = spell_type_flood(spell, p);
+        well_done = spell_type_flood(spell, p);
         break;
 
         /* effect occurs like an explosion */
     case SC_BLAST:
-        mp_usage = spell_type_blast(spell, p);
+        well_done = spell_type_blast(spell, p);
         break;
 
     case SC_OTHER:  /* unclassified */
@@ -553,10 +552,6 @@ int spell_cast(player *p)
             well_done = spell_alter_reality(p);
             break;
         }
-
-        /* spell has been cast successfully, set mp usage accordingly */
-        if (well_done) mp_usage = spell_level(spell);
-
         break;
 
     case SC_NONE:
@@ -565,10 +560,10 @@ int spell_cast(player *p)
         break;
     }
 
-    if (mp_usage > 0)
+    if (well_done)
     {
-        /* charge mana */
-        player_mp_lose(p, mp_usage);
+        /* spell has been cast successfully, set mp usage accordingly */
+        player_mp_lose(p, spell_level(spell));
 
         /* increase number of spells cast */
         p->stats.spells_cast++;
@@ -689,7 +684,7 @@ int spell_type_player(spell *s, struct player *p)
 
     player_effect_add(p, e);
 
-    return (spell_level(s));
+    return TRUE;
 }
 
 int spell_type_point(spell *s, struct player *p)
@@ -806,7 +801,7 @@ int spell_type_point(spell *s, struct player *p)
         break;
     }
 
-    return spell_level(s);
+    return TRUE;
 }
 
 int spell_type_ray(spell *s, struct player *p)
@@ -943,7 +938,7 @@ int spell_type_ray(spell *s, struct player *p)
 
     area_destroy(ray);
 
-    return spell_level(s);
+    return TRUE;
 }
 
 int spell_type_flood(spell *s, struct player *p)
@@ -994,7 +989,7 @@ int spell_type_flood(spell *s, struct player *p)
     map_set_tiletype(game_map(nlarn, p->pos.z), range, type, amount);
     area_destroy(range);
 
-    return spell_level(s);
+    return TRUE;
 }
 
 int spell_type_blast(spell *s, struct player *p)
