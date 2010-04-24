@@ -19,20 +19,22 @@ gems in the caverns and sell them to the bank.
 The entrance of the caverns is depicted by the letter 'O'; the shaft leading 
 down to the volcano by the letter 'I'.
 
-You can get help inside the game by pressing '?' or 'F1'.
+You can get help in the game by pressing '?' or 'F1'.
 
 
 * News and announcements
 
 News about NLarn are posted to the website at 
 
-	http://nlarn.sourceforge.net/.
+	http://nlarn.sourceforge.net/
 
 
-* Configuration 
+* Game configuration 
 
 You can predefine some settings in the file nlarn.ini. You can find a sample 
-in the installation directory. The game looks for this file in the directory 
+file in the installation directory; copy and rename it to the directory 
+specific to your operating system. The game looks for nlarn.ini in the
+directory 
 
 	~/.nlarn 
 
@@ -48,7 +50,7 @@ on Windows.
 NLarn is modeled after Larn, which was written by Noah Morgan in 1986.
 For an in-depth review of Larn, have a look at
 
-	http://www.gamesetwatch.com/2008/04/play_larn_or_i_hocked_the_car.php.
+	http://www.gamesetwatch.com/2008/04/play_larn_or_i_hocked_the_car.php
 
 Later in the eigthies, Phil Cordier created ULarn, an extended version of 
 Larn. It comes with more levels, items and adds character classes to the 
@@ -58,28 +60,34 @@ NLarn tries to maintain the atmosphere and story of the last version of
 Larn (12.3) while improving game-play and user experience. Only a few of 
 the additions of Ularn have been included. 
 
-A list of changes to Larn can be found at 
+A list of differences to Larn can be found at 
 
-	http://sourceforge.net/apps/trac/nlarn/wiki/NLarnChangesToLarn.
+	http://sourceforge.net/apps/trac/nlarn/wiki/NLarnChangesToLarn
 
 
 * Compiling NLarn
 
-Instructions how to build NLarn on Linux, Mac OS X and Windows can be found at
+Instructions how to build NLarn on Linux, MacOS X and Windows can be found at
 
-	http://sourceforge.net/apps/trac/nlarn/wiki/NLarnBuilding.
+	http://sourceforge.net/apps/trac/nlarn/wiki/NLarnBuilding
 
 
 * Reporting bugs
 
-Bug reports are very welcome. You can reach me at jaydg@users.sourceforge.net.
-Known bugs are tracked at 
+Bug reports are very welcome. You can either send me an eMail to 
+jaydg@users.sourceforge.net or if you have a SourceForge account you can post 
+to the bug tracker at 
 
-	http://sourceforge.net/apps/trac/nlarn/report.
+  http://sourceforge.net/apps/trac/nlarn/newticket
 
-If you have ideas for changes or additions to the game, let me know. 
-A maintain list of ideas is maintained in the wiki at 
+Known bugs and tasks are tracked at 
 
-	http://sourceforge.net/apps/trac/nlarn/wiki/NLarnIdeas.
+	http://sourceforge.net/apps/trac/nlarn/report
+
+If you have ideas for changes or additions to the game, please let me know. 
+A list of ideas is maintained in the wiki at 
+
+	http://sourceforge.net/apps/trac/nlarn/wiki/NLarnIdeas
 
 
+* Have fun playing NLarn!

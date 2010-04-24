@@ -364,7 +364,7 @@ int main(int argc, char *argv[])
         case '?':
             if (g_file_get_contents(game_helpfile(nlarn), &strbuf, NULL, NULL))
             {
-                display_show_message("Help for The Caverns of NLarn", strbuf, 0);
+                display_show_message("Help for The Caverns of NLarn", strbuf, 1);
                 g_free(strbuf);
             }
             else

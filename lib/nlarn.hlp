@@ -1,17 +1,17 @@
-Movement                Running
+Movement            Running
 
-    7 8 9  y k u            Y K U
-     \|/    \|/              \|/
-    4-5-6  h-.-l            H- -L
-     /|\    /|\              /|\
-    1 2 3  b j n            B J N
+ 7 8 9  y k u        Y K U
+  \|/    \|/          \|/
+ 4-5-6  h-.-l        H- -L
+  /|\    /|\          /|\
+ 1 2 3  b j n        B J N
 
-You can as well use the number pad with num lock off.
+You can also use the number pad with num lock off.
 
-Running means moving into one direction until interrupted.
-g or /, followed by a direction key, will similarly make your run.
+Running means moving into one direction until interrupted. g or /, followed by a direction key, will similarly make your run.
 
-Commands
+
+* Actions
 
 A  desecrate an altar
 c  close a door
@@ -19,7 +19,7 @@ d  drop domething
 D  list discovered landmarks
 e  equip an item
 g  move until something interesting is found
-i  inventory your pockets, use items
+i  open the inventory window
 m  work magic (cast a spell)
 o  open a door or chest
 p  pray at an altar
@@ -47,23 +47,35 @@ $  show bank account balance
 @  toggle auto-pickup settings
 
 
-Control Keys
+* Control Keys
 
 ^L redraw the screen
 ^R recall message history
 ^W activate wizard mode
 
 
-Dialogs
+* The Inventory 
 
-Valid actions (and their keys) for selected items are shown
-in the dialog's status line.
-
-Close a dialog with ESC or enter/space to select an option.
-Move dialogs with Ctrl and the cursor keys.
+When browsing through the inventory, valid actions for the selected item are shown at the bottom of the window. The key used to invoke the action is displayed in braces. 
 
 
-Wizard mode
+* Dialog Windows
+
+Close a dialog window with enter/space to select an option or press ESC to close the window without making a choice. 
+You can move dialogs with Ctrl and the cursor keys.
+
+
+* Spell Casting 
+
+When opening the spell casting window by pressing (m) you'll get a list of spells known by your character. 
+
+The first column shows the mnemonic of the selected spell, which can be used to jump to a spell by typing the letters. 
+The second coulmn shows the spell's name. 
+The third column shows the level of the spell, which is used to determine the MP usage of that spell. 
+The forth column shows the character's knowldege level of that spell. The higher the knowledge level is, the more powerful is the effect of the spell. 
+
+
+* Wizard Mode Actions
 
 +     teleport down one level
 -     teleport up one level
