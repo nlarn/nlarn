@@ -59,21 +59,24 @@ static const effect_data effects[ET_MAX] =
     {
         ET_INC_DEX, 1, 1, NULL,
         "You feel skilful!",
-        NULL, NULL, NULL,
+        "Your dextrousness returns to normal.",
+        NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
 
     {
         ET_INC_INT, 1, 1, NULL,
         "You feel clever!",
-        NULL, NULL, NULL,
+        "You are not so smart anymore.",
+        NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
 
     {
         ET_INC_STR, 1, 1, NULL,
-        "Your muscles feel stronger!",
-        NULL, NULL, NULL,
+        "Your muscles are stronger!",
+        "You strenght returns to normal.",
+        NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
 
