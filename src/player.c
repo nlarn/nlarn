@@ -3937,12 +3937,12 @@ void player_update_fov(player *p)
                     item *it;
 
                     /* memorize the most interesting item on the tile */
-                    if (inv_item_count(*inv, IT_GEM, 0) > 0)
+                    if (inv_length_filtered(*inv, item_filter_gems) > 0)
                     {
                         /* there's a gem in the stack */
                         it = inv_get_filtered(*inv, 0, item_filter_gems);
                     }
-                    else if (inv_item_count(*inv, IT_GOLD, 0) > 0)
+                    else if (inv_length_filtered(*inv, item_filter_gold) > 0)
                     {
                         /* there is gold in the stack */
                         it = inv_get_filtered(*inv, 0, item_filter_gold);

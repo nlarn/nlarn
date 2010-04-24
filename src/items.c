@@ -1611,30 +1611,6 @@ int inv_weight(inventory *inv)
     return sum;
 }
 
-int inv_item_count(inventory *inv, item_t type, guint32 id)
-{
-    int count = 0;
-    guint idx;
-
-    for (idx = 0; idx < inv_length(inv); idx++)
-    {
-        item *i = inv_get(inv, idx);
-        if (id)
-        {
-            if (i->type == type && i->id == id)
-            {
-                count++;
-            }
-        }
-        else if (i->type == type)
-        {
-            count++;
-        }
-    }
-
-    return count;
-}
-
 int inv_length_filtered(inventory *inv, int (*filter)(item *))
 {
     int count = 0;
@@ -1702,71 +1678,67 @@ item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *))
 int item_filter_container(item *it)
 {
     assert (it != NULL);
-
     return (it->type == IT_CONTAINER);
 }
 
 int item_filter_not_container(item *it)
 {
     assert (it != NULL);
-
     return (it->type != IT_CONTAINER);
 }
 
 int item_filter_food(item *it)
 {
     assert (it != NULL);
-
     return (it->type == IT_FOOD);
 }
 
 int item_filter_gems(item *it)
 {
     assert (it != NULL);
-
     return (it->type == IT_GEM);
 }
 
 int item_filter_gold(item *it)
 {
     assert (it != NULL);
-
     return (it->type == IT_GOLD);
 }
 
 int item_filter_not_gold(item *it)
 {
     assert (it != NULL);
-
     return (it->type != IT_GOLD);
 }
 
 int item_filter_potions(item *it)
 {
     assert (it != NULL);
-
     return (it->type == IT_POTION);
 }
 
 int item_filter_legible(item *it)
 {
     assert (it != NULL);
-
     return (it->type == IT_SCROLL) || (it->type == IT_BOOK);
 }
 
 int item_filter_unid(item *it)
 {
     assert (it != NULL);
-
     return (!player_item_identified(nlarn->p, it));
 }
 
 int item_filter_cursed(item *it)
 {
     assert (it != NULL);
-
     return (it->cursed == TRUE);
+}
+
+int item_filter_pcd(item *it)
+{
+    assert (it != NULL);
+    return (it->type == IT_POTION && it->id == PO_CURE_DIANTHR);
 }
 
 static void item_typename_pluralize(item *it, char *description, int length)

@@ -342,18 +342,6 @@ void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data)
 int inv_weight(inventory *inv);
 
 /**
- * Determine the number of items in an inventory which are of a certain
- * item type and optionally a specific item.
- *
- * @param the inventory
- * @param the item type to look for
- * @param the id of the specific item class if required, otherwise 0
- * @return the count of the requested item (type) in the inventory
- *
- */
- int inv_item_count(inventory *inv, item_t type, guint32 id);
-
-/**
  * Count an filtered inventory.
  *
  * @param the inventory to look in
@@ -378,4 +366,10 @@ int item_filter_legible(item *it);
 int item_filter_unid(item *it);
 int item_filter_cursed(item *it);
 
+/**
+ * @brief Item filter function for the potion of cure diantroritis.
+ * @param a pointer to an item
+ * @return TRUE if the supplied item is the potion of cure diantrorihis
+ */
+int item_filter_pcd(item *it);
 #endif

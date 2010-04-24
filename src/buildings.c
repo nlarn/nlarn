@@ -59,7 +59,7 @@ static int handle_bank_interest(player *p)
 
     int i;
     for (i = 1; i <= mobuls; i++)
-         p->bank_account += p->bank_account / 250;
+        p->bank_account += p->bank_account / 250;
 
     p->interest_lasttime = game_turn(nlarn);
 
@@ -112,7 +112,7 @@ int building_bank(player *p)
     if (interest > 0)
     {
         g_string_append_printf(text, "We have paid you an interest of %d " \
-                                     "gold since your last visit.\n", interest);
+                               "gold since your last visit.\n", interest);
     }
 
     g_string_append_printf(text,
@@ -130,7 +130,7 @@ int building_bank(player *p)
         g_string_append(text, "w)ithdraw ");
 
     /* if player has gems, enable selling them */
-    if (inv_item_count(p->inventory, IT_GEM, GT_NONE))
+    if (inv_length_filtered(p->inventory, item_filter_gems))
     {
         g_string_append(text, "s)ell a gem");
 
@@ -156,6 +156,9 @@ int building_bank(player *p)
     switch (cmd)
     {
     case 'd': /* deposit */
+        if (inv_length_filtered(p->inventory, item_filter_gold) == 0)
+            break;
+
         amount = display_get_count("How many gold pieces do you wish to deposit?",
                                    player_get_gold(p));
 
@@ -175,6 +178,9 @@ int building_bank(player *p)
         break;
 
     case 'w': /* withdraw */
+        if (p->bank_account == 0)
+            break;
+
         amount = display_get_count("How many gold pieces do you wish to withdraw?",
                                    p->bank_account);
 
@@ -199,7 +205,7 @@ int building_bank(player *p)
         break;
 
     case 's': /* sell gem */
-        if (!inv_item_count(p->inventory, IT_GEM, GT_NONE))
+        if (inv_length_filtered(p->inventory, item_filter_gems) == 0)
             break;
 
         display_inventory("Sell gems", p, &p->inventory, callbacks, TRUE,
@@ -351,9 +357,8 @@ int building_home(player *p)
 
     assert(p != NULL);
 
-    /* look for potion in player's inventory */
-
-    if (inv_item_count(p->inventory, IT_POTION, PO_CURE_DIANTHR))
+    /* look for potion of cure dianthroritis in player's inventory */
+    if (inv_length_filtered(p->inventory, item_filter_pcd))
     {
         /* carrying the potion */
         text = g_string_new(msg_found);
@@ -366,6 +371,12 @@ int building_home(player *p)
             g_string_free(text, TRUE);
 
             display_paint_screen(p);
+
+            /* remove the potion from the inventory as it has been used up */
+            item *pcd = inv_get_filtered(p->inventory, 0, item_filter_pcd);
+            inv_del_element(&p->inventory, pcd);
+            item_destroy(pcd);
+
             player_die(p, PD_WON, 0);
         }
         else
