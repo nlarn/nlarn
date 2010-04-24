@@ -882,12 +882,13 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             display_item_details(it, p, show_price);
             break;
 
-        case 27:
+        case KEY_ESC:
             keep_running = FALSE;
             break;
 
-        case 10:
-        case 13:
+        case KEY_LF:
+        case KEY_CR:
+        case KEY_ENTER:
             if (callbacks == NULL)
             {
                 /* if no callbacks have been defines enter selects item */
@@ -929,7 +930,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
     display_window_destroy(iwin, TRUE);
 
-    if ((callbacks == NULL) && (key != 27))
+    if ((callbacks == NULL) && (key != KEY_ESC))
     {
         /* return selected item if no callbacks have been provided */
         return inv_get_filtered(*inv, offset + curr - 1, filter);
@@ -994,10 +995,11 @@ void display_config_autopickup(player *p)
 
         switch (key = getch())
         {
-        case 10:
-        case 13:
-        case 27:
-        case 32:
+        case KEY_LF:
+        case KEY_CR:
+        case KEY_ENTER:
+        case KEY_ESC:
+        case KEY_SPC:
             RUN = FALSE;
 
         default:
@@ -1210,21 +1212,21 @@ spell *display_spell_select(char *title, player *p)
             display_draw();
             break;
 
-        case 27: /* ESC */
+        case KEY_ESC:
             RUN = FALSE;
             sp = NULL;
 
             break;
 
-        case 10:
-        case 13:
+        case KEY_LF:
+        case KEY_CR:
         case KEY_ENTER:
-        case 32: /* space bar */
+        case KEY_SPC:
             RUN = FALSE;
             break;
 
-        case 127: /* backspace */
-        case 263:
+        case KEY_BS:
+        case KEY_BACKSPACE:
             if (strlen(code_buf))
             {
                 code_buf[strlen(code_buf) - 1] = '\0';
@@ -1399,8 +1401,8 @@ int display_get_count(char *caption, int value)
                 ipos++;
             break;
 
+        case KEY_BS:
         case KEY_BACKSPACE:
-        case 8: /* backspace generates 8, not KEY_BACKSPACE on Windows */
             if ((ipos == ilen) && (ipos > 0))
             {
                 ivalue[ipos - 1] = '\0';
@@ -1454,10 +1456,10 @@ int display_get_count(char *caption, int value)
             break;
 
 
-        case 10: /* LF */
-        case 13: /* CR */
-        case 27: /* ESC */
-        case KEY_ENTER: /* keypad enter */
+        case KEY_LF:
+        case KEY_CR:
+        case KEY_ENTER:
+        case KEY_ESC:
             cont = FALSE;
             break;
 
@@ -1516,7 +1518,7 @@ int display_get_count(char *caption, int value)
     text_destroy(text);
     display_window_destroy(mwin, TRUE);
 
-    if (key == 27)
+    if (key == KEY_ESC)
         return 0;
 
     return atoi(ivalue);
@@ -1661,10 +1663,10 @@ char *display_get_string(char *caption, char *value, size_t max_len)
             ipos = 0;
             break;
 
-        case 10: /* LF */
-        case 13: /* CR */
-        case 27: /* ESC */
-        case KEY_ENTER: /* keypad enter */
+        case KEY_LF:
+        case KEY_CR:
+        case KEY_ENTER:
+        case KEY_ESC:
             cont = FALSE;
             break;
 
@@ -1722,7 +1724,7 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     text_destroy(text);
     display_window_destroy(mwin, TRUE);
 
-    if (key == 27 || string->len == 0)
+    if (key == KEY_ESC || string->len == 0)
     {
         g_string_free(string, TRUE);
         return NULL;
@@ -1840,14 +1842,14 @@ int display_get_yesno(char *question, char *yes, char *no)
         /* wait for input */
         switch (key)
         {
-        case 27: /* ESC */
+        case KEY_ESC:
             selection = FALSE;
             /* fall through desired */
 
-        case 10: /* LF */
-        case 13: /* CR */
-        case KEY_ENTER: /* keypad enter */
-        case 32: /* space bar */
+        case KEY_LF:
+        case KEY_CR:
+        case KEY_ENTER:
+        case KEY_SPC:
             RUN = FALSE;
             break;
 
@@ -2032,7 +2034,7 @@ direction display_get_direction(char *title, int *available)
             if (dirs[GD_CURR]) dir = GD_CURR;
             break;
 
-        case 27:
+        case KEY_ESC:
             RUN = FALSE;
             break;
 
@@ -2177,15 +2179,15 @@ position display_get_position(player *p, char *message, gboolean ray,
         /* wait for input */
         switch (getch())
         {
-        case 27: /* ESC */
+        case KEY_ESC:
             pos.x = G_MAXINT16;
             pos.y = G_MAXINT16;
             /* fall through desired */
 
-        case 10: /* LF */
-        case 13: /* CR */
-        case KEY_ENTER: /* keypad enter */
-        case 32: /* space bar */
+        case KEY_LF:
+        case KEY_CR:
+        case KEY_ENTER:
+        case KEY_SPC:
             RUN = FALSE;
             break;
 
