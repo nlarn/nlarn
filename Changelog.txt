@@ -1,4 +1,4 @@
-Release 0.5.4 (2010-xx-xx)
+Release 0.5.4 (2010-04-24)
 -------------
 
 Changes:
@@ -47,7 +47,8 @@ Changes:
     * Modified some monster glyphs. 
     * Make the potion of cure dianthroritis expensive. This is a simple 
       flavour change: If you attempt to sell this unique potion, you should 
-      get more money for it than for a corroded dagger.
+      get more money for it than for a corroded dagger. Remove the potion 
+      from the player's inventory when winning the game.
     * When magic mapping, only map non-floor tiles.
     * Sometimes flip custom maze maps when generating levels. Should keep 
       things more interesting even if you keep seeing the same levels again 
@@ -80,10 +81,16 @@ Fixed bugs:
     * Fixed a crash when casting sleep at an already sleeping monster.
     * Fixed a crash when buying a single item which is too heavy to be 
       carried.
+    * Fixed a crash in building_item_sell() that occured when the player 
+      bought the entire stock of a stackable item that already existed in
+      the player's inventory.
+    * Fixed a crash when experience level 1 got drained.
     * Fix off-by-one-error preventing generation of the scroll of genocide 
       and the potion of see invisible.
+    * Make sure stationary objects are moved out of treasure rooms.
     * Fixed item bonuses.
     * Fixed many information leaks about invisible monsters.
+    * Reduced the information leak about unidentified mimics.
     * Fixed some monster plural names in the vanquished list and the 
       message given by the scroll of genocide monster.
     * Don't identify cursed potions or scrolls on using them.
@@ -98,7 +105,9 @@ Fixed bugs:
       chance that they will do so. 
     * The ziller and vortex can now attack again.
     * Store monster AI state in saved games.
-    * Call autopickup when entering a new level. 
+    * Prevent uninjured monsters being displayed as "slightly injured".
+    * Honour time usage when doing auto-pickup. Call autopickup when 
+      entering a new level. 
     * Disallow opening/closing doors while paralysed or overstrained. 
     * Fixed the calculation of bank account interest when doing a time 
       warp. 
