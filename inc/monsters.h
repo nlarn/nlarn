@@ -138,7 +138,7 @@ typedef enum monster_t
     MT_DEMONLORD_V,
     MT_DEMONLORD_VI,
     MT_DEMONLORD_VII,
-    MT_DAEMON_PRINCE,
+    MT_DEMON_PRINCE,
     MT_MAX				/* maximum # monsters in the dungeon */
 } monster_t;
 

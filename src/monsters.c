@@ -732,7 +732,7 @@ const monster_data monsters[MT_MAX] =
         }
     },
     {
-        MT_DAEMON_PRINCE, "demon prince",
+        MT_DEMON_PRINCE, "demon prince",
         25, -127, 28, 0, 345, 300000, '&', DC_RED,
         SPEED_FAST, ESIZE_HUGE,
         MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,

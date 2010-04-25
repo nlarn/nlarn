@@ -1640,7 +1640,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                     break;
 
                 inv_add(&tile->ilist, item_new(IT_POTION, PO_CURE_DIANTHR));
-                monster_new(MT_DAEMON_PRINCE, map_pos);
+                monster_new(MT_DEMON_PRINCE, map_pos);
                 break;
 
             case 'M':	/* random monster */

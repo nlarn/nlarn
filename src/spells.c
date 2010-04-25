@@ -1289,7 +1289,7 @@ gboolean spell_vaporize_rock(player *p)
     case LS_ALTAR:
         if (pos_valid(mpos))
         {
-            monster_new(MT_DAEMON_PRINCE, mpos);
+            monster_new(MT_DEMON_PRINCE, mpos);
         }
         desc = "altar";
         break;
