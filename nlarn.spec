@@ -1,5 +1,5 @@
 Name: nlarn
-Version: 0.5.4
+Version: 0.6
 Release: 1
 Summary: A remake of the roguelike game Larn
 
@@ -37,6 +37,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc LICENSE README.txt Changelog.txt nlarn.ini-sample
 
 %changelog
+* Sun Apr 25 2010 Joachim de Groot <jdegroot@web.de> 
+  - updated for version 0.6
 * Sat Apr 03 2010 Joachim de Groot <jdegroot@web.de> 
   - added Changelog.txt
   - added highscore file
