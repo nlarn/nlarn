@@ -54,25 +54,25 @@ $  show bank account balance
 ^W activate wizard mode
 
 
-* The Inventory 
+* The Inventory
 
-When browsing through the inventory, valid actions for the selected item are shown at the bottom of the window. The key used to invoke the action is displayed in braces. 
+When browsing through the inventory, valid actions for the selected item are shown at the bottom of the window. The key used to invoke the action is displayed in braces.
 
 
 * Dialog Windows
 
-Close a dialog window with enter/space to select an option or press ESC to close the window without making a choice. 
+Close a dialog window with enter/space to select an option or press ESC to close the window without making a choice.
 You can move dialogs with Ctrl and the cursor keys.
 
 
-* Spell Casting 
+* Spell Casting
 
-When opening the spell casting window by pressing (m) you'll get a list of spells known by your character. 
+When opening the spell casting window by pressing (m) you'll get a list of spells known by your character.
 
-The first column shows the mnemonic of the selected spell, which can be used to jump to a spell by typing the letters. 
-The second coulmn shows the spell's name. 
-The third column shows the level of the spell, which is used to determine the MP usage of that spell. 
-The forth column shows the character's knowldege level of that spell. The higher the knowledge level is, the more powerful is the effect of the spell. 
+The first column shows the mnemonic of the selected spell, which can be used to jump to a spell by typing the letters.
+The second column shows the spell's name.
+The third column shows the level of the spell, which is used to determine the MP usage of that spell.
+The forth column shows the character's knowledge level of that spell. The higher the knowledge level is, the more powerful is the effect of the spell.
 
 
 * Wizard Mode Actions
