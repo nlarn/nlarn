@@ -75,7 +75,7 @@ static const effect_data effects[ET_MAX] =
     {
         ET_INC_STR, 1, 1, NULL,
         "Your muscles are stronger!",
-        "You strenght returns to normal.",
+        "Your strength returns to normal.",
         NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
