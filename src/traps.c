@@ -127,7 +127,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
 
     if (force || chance(possibility))
     {
-        log_add_entry(p->log, trap_p_message(trap));
+        log_add_entry(nlarn->log, trap_p_message(trap));
 
         /* refresh player's knowlege of trap */
         player_memory_of(p, p->pos).trap = trap;
@@ -158,7 +158,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
                 /* display message if there is one */
                 if (trap_e_message(trap))
                 {
-                    log_add_entry(p->log, trap_e_message(trap));
+                    log_add_entry(nlarn->log, trap_e_message(trap));
                 }
 
                 player_effect_add(p, effect_new(trap_effect(trap)));
@@ -168,7 +168,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
     }
     else if (player_memory_of(p, p->pos).trap == trap)
     {
-        log_add_entry(p->log, "You evade the %s.", trap_description(trap));
+        log_add_entry(nlarn->log, "You evade the %s.", trap_description(trap));
     }
 
     return time;

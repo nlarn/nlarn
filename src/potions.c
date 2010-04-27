@@ -111,7 +111,7 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     item_describe(potion, player_item_known(p, potion),
                   TRUE, FALSE, description, 60);
 
-    log_add_entry(p->log, "You drink %s.", description);
+    log_add_entry(nlarn->log, "You drink %s.", description);
 
     /* increase number of potions quaffed */
     p->stats.potions_quaffed++;
@@ -124,9 +124,9 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     {
         damage *dam = damage_new(DAM_POISON, ATT_NONE, rand_1n(p->hp), NULL);
 
-        log_add_entry(p->log, "The potion is foul!");
+        log_add_entry(nlarn->log, "The potion is foul!");
 
-        log_add_entry(p->log, "You spit gore!");
+        log_add_entry(nlarn->log, "You spit gore!");
         player_damage_take(p, dam, PD_CURSE, potion->type);
         result.identified = FALSE;
     }
@@ -144,11 +144,11 @@ item_usage_result potion_quaff(struct player *p, item *potion)
             break;
 
         case PO_WATER:
-            log_add_entry(p->log, "This tastes like water..");
+            log_add_entry(nlarn->log, "This tastes like water..");
             break;
 
         case PO_CURE_DIANTHR:
-            log_add_entry(p->log, "You really want to keep the potion for your daughter.");
+            log_add_entry(nlarn->log, "You really want to keep the potion for your daughter.");
             result.used_up = FALSE;
             break;
 
@@ -211,7 +211,7 @@ static int potion_amnesia(player *p, item *potion)
         }
     }
 
-    log_add_entry(p->log, "You stagger for a moment...");
+    log_add_entry(nlarn->log, "You stagger for a moment...");
 
     return TRUE;
 }
@@ -263,11 +263,11 @@ static int potion_detect_item(player *p, item *potion)
 
     if (count && (potion->id == PO_TRE_DETECT))
     {
-        log_add_entry(p->log, "You sense the presence of treasure.");
+        log_add_entry(nlarn->log, "You sense the presence of treasure.");
     }
     else if (count && (potion->id == PO_OBJ_DETECT))
     {
-        log_add_entry(p->log, "You sense the presence of objects.");
+        log_add_entry(nlarn->log, "You sense the presence of objects.");
     }
 
     return count;

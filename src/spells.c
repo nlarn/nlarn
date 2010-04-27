@@ -445,7 +445,7 @@ int spell_cast(player *p)
 
     if (player_effect(p, ET_CONFUSION))
     {
-        log_add_entry(p->log, "You can't aim your magic!");
+        log_add_entry(nlarn->log, "You can't aim your magic!");
         return turns;
     }
 
@@ -460,13 +460,13 @@ int spell_cast(player *p)
     /* insufficient mana */
     if (p->mp < spell_level(spell))
     {
-        log_add_entry(p->log, "You lack the power to cast %s.",
+        log_add_entry(nlarn->log, "You lack the power to cast %s.",
                       spell_name(spell));
 
         return turns;
     }
 
-    log_add_entry(p->log, "You cast %s.", spell_name(spell));
+    log_add_entry(nlarn->log, "You cast %s.", spell_name(spell));
 
     /* time usage */
     turns = 1;
@@ -474,7 +474,7 @@ int spell_cast(player *p)
     /* bad luck */
     if (chance(5) || rand_1n(18) > player_get_int(p))
     {
-        log_add_entry(p->log, "It didn't work!");
+        log_add_entry(nlarn->log, "It didn't work!");
         player_mp_lose(p, spell_level(spell));
 
         return turns;
@@ -556,7 +556,7 @@ int spell_cast(player *p)
 
     case SC_NONE:
     case SC_MAX:
-        log_add_entry(p->log, "Internal Error in %s:%d.", __FILE__, __LINE__);
+        log_add_entry(nlarn->log, "Internal Error in %s:%d.", __FILE__, __LINE__);
         break;
     }
 
@@ -704,13 +704,13 @@ int spell_type_point(spell *s, struct player *p)
     /* player pressed ESC */
     if (!pos_valid(pos))
     {
-        log_add_entry(p->log, "Aborted.");
+        log_add_entry(nlarn->log, "Aborted.");
         return FALSE;
     }
 
     if (pos_identical(pos, p->pos))
     {
-        log_add_entry(p->log, "This spell only works on monsters.");
+        log_add_entry(nlarn->log, "This spell only works on monsters.");
         return FALSE;
     }
 
@@ -724,7 +724,7 @@ int spell_type_point(spell *s, struct player *p)
             if (tile->type == LT_DEEPWATER)
             {
                 tile->type = LT_DIRT;
-                log_add_entry(p->log, "The water evaporates!");
+                log_add_entry(nlarn->log, "The water evaporates!");
                 return TRUE;
             }
         }
@@ -757,7 +757,7 @@ int spell_type_point(spell *s, struct player *p)
         }
         else
         {
-            log_add_entry(p->log, "It didn't work.");
+            log_add_entry(nlarn->log, "It didn't work.");
         }
         break; /* SP_FGR */
 
@@ -770,7 +770,7 @@ int spell_type_point(spell *s, struct player *p)
     case SP_TEL:
         if (monster_in_sight(monster))
         {
-            log_add_entry(p->log, "The %s disappears.",
+            log_add_entry(nlarn->log, "The %s disappears.",
                           monster_name(monster));
         }
 
@@ -784,7 +784,7 @@ int spell_type_point(spell *s, struct player *p)
 
         if (spell_msg_succ(s))
         {
-            log_add_entry(p->log, spell_msg_succ(s),
+            log_add_entry(nlarn->log, spell_msg_succ(s),
                           monster_get_name(monster));
         }
 
@@ -823,13 +823,13 @@ int spell_type_ray(spell *s, struct player *p)
     /* player pressed ESC */
     if (!pos_valid(target))
     {
-        log_add_entry(p->log, "Aborted.");
+        log_add_entry(nlarn->log, "Aborted.");
         return FALSE;
     }
 
     if (pos_identical(pos, p->pos))
     {
-        log_add_entry(p->log, "This spell only works on monsters.");
+        log_add_entry(nlarn->log, "This spell only works on monsters.");
         return FALSE;
     }
 
@@ -878,7 +878,7 @@ int spell_type_ray(spell *s, struct player *p)
                     attron((attrs = (mis ? DC_LIGHTRED : DC_LIGHTCYAN)));
                     mvaddch(pos.y, pos.x, (mis ? monster_image(monster) : '*'));
 
-                    log_add_entry(p->log, spell_msg_succ(s), monster_get_name(monster));
+                    log_add_entry(nlarn->log, spell_msg_succ(s), monster_get_name(monster));
                     monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount, p));
                 }
                 else
@@ -929,7 +929,7 @@ int spell_type_ray(spell *s, struct player *p)
     if (map_sobject_at(cmap, target) == LS_MIRROR)
     {
         /* TODO: this should hit all monsters in the opposite direction as well */
-        log_add_entry(p->log, "The mirror reflects your spell! The %s hits you!",
+        log_add_entry(nlarn->log, "The mirror reflects your spell! The %s hits you!",
                       spell_name(s));
 
         player_damage_take(p, damage_new(spell_damage(s), ATT_MAGIC, amount, NULL),
@@ -958,7 +958,7 @@ int spell_type_flood(spell *s, struct player *p)
     /* player pressed ESC */
     if (!pos_valid(pos))
     {
-        log_add_entry(p->log, "Aborted.");
+        log_add_entry(nlarn->log, "Aborted.");
         return FALSE;
     }
 
@@ -1026,7 +1026,7 @@ int spell_type_blast(spell *s, struct player *p)
     /* player pressed ESC */
     if (!pos_valid(pos))
     {
-        log_add_entry(p->log, "Aborted.");
+        log_add_entry(nlarn->log, "Aborted.");
         return FALSE;
     }
 
@@ -1036,7 +1036,7 @@ int spell_type_blast(spell *s, struct player *p)
                 && !display_get_yesno("The spell is going to hit you. " \
                                       "Cast anyway?", NULL, NULL))
     {
-        log_add_entry(p->log, "Aborted.");
+        log_add_entry(nlarn->log, "Aborted.");
         area_destroy(ball);
         return FALSE;
     }
@@ -1067,7 +1067,7 @@ int spell_type_blast(spell *s, struct player *p)
                     /* blast hit the player */
                     addch('@');
 
-                    log_add_entry(p->log, "The %s hits you.", spell_name(s));
+                    log_add_entry(nlarn->log, "The %s hits you.", spell_name(s));
 
                     /* damage items in player's inventory */
                     if (iet > IET_NONE) inv_erode(&p->inventory, iet, TRUE);
@@ -1127,7 +1127,7 @@ gboolean spell_create_monster(struct player *p)
     /* this spell doesn't work in town */
     if (p->pos.z == 0)
     {
-        log_add_entry(p->log, "Nothing happens.");
+        log_add_entry(nlarn->log, "Nothing happens.");
         return FALSE;
     }
 
@@ -1142,7 +1142,7 @@ gboolean spell_create_monster(struct player *p)
     }
     else
     {
-        log_add_entry(p->log, "You feel failure.");
+        log_add_entry(nlarn->log, "You feel failure.");
         return FALSE;
     }
 }
@@ -1166,7 +1166,7 @@ gboolean spell_create_sphere(spell *s, struct player *p)
     }
     else
     {
-        log_add_entry(p->log, "Huh?");
+        log_add_entry(nlarn->log, "Huh?");
 
         return FALSE;
     }
@@ -1185,7 +1185,7 @@ gboolean spell_cure_poison(struct player *p)
     }
     else
     {
-        log_add_entry(p->log, "You weren't even poisoned!");
+        log_add_entry(nlarn->log, "You weren't even poisoned!");
         return FALSE;
     }
 }
@@ -1203,7 +1203,7 @@ gboolean spell_cure_blindness(struct player *p)
     }
     else
     {
-        log_add_entry(p->log, "You weren't even blinded!");
+        log_add_entry(nlarn->log, "You weren't even blinded!");
         return FALSE;
     }
 }
@@ -1217,12 +1217,12 @@ gboolean spell_make_wall(player *p)
 
     if (pos_identical(pos, p->pos))
     {
-        log_add_entry(p->log, "You are actually standing there.");
+        log_add_entry(nlarn->log, "You are actually standing there.");
         return FALSE;
     }
     else if (!pos_valid(pos))
     {
-        log_add_entry(p->log, "No wall today.");
+        log_add_entry(nlarn->log, "No wall today.");
         return FALSE;
     }
 
@@ -1239,13 +1239,13 @@ gboolean spell_make_wall(player *p)
             tile->ilist = NULL;
         }
 
-        log_add_entry(p->log, "You have created a wall.");
+        log_add_entry(nlarn->log, "You have created a wall.");
 
         return TRUE;
     }
     else
     {
-        log_add_entry(p->log, "There was a wall already..");
+        log_add_entry(nlarn->log, "There was a wall already..");
         return FALSE;
     }
 }
@@ -1263,7 +1263,7 @@ gboolean spell_vaporize_rock(player *p)
 
     if (!pos_valid(pos))
     {
-        log_add_entry(p->log, "So you chose not to vaporize anything.");
+        log_add_entry(nlarn->log, "So you chose not to vaporize anything.");
         return FALSE;
     }
 
@@ -1327,13 +1327,13 @@ gboolean spell_vaporize_rock(player *p)
         break;
 
     default:
-        log_add_entry(p->log, "Somehow that did not work.");
+        log_add_entry(nlarn->log, "Somehow that did not work.");
         /* NOP */
     }
 
     if (desc)
     {
-        log_add_entry(p->log, "You destroy the %s.", desc);
+        log_add_entry(nlarn->log, "You destroy the %s.", desc);
         map_sobject_set(map, pos, LS_NONE);
     }
 
@@ -1373,7 +1373,7 @@ item_usage_result book_read(struct player *p, item *book)
 
     if (player_effect(p, ET_BLINDNESS))
     {
-        log_add_entry(p->log, "As you are blind you can't read %s.",
+        log_add_entry(nlarn->log, "As you are blind you can't read %s.",
                       description);
 
         result.used_up = FALSE;
@@ -1382,7 +1382,7 @@ item_usage_result book_read(struct player *p, item *book)
         return result;
     }
 
-    log_add_entry(p->log, "You read %s.", description);
+    log_add_entry(nlarn->log, "You read %s.", description);
 
     /* increase number of books read */
     p->stats.books_read++;
@@ -1390,7 +1390,7 @@ item_usage_result book_read(struct player *p, item *book)
     /* cursed spellbooks have nasty effects */
     if (book->cursed)
     {
-        log_add_entry(p->log, "There was something wrong with this book! " \
+        log_add_entry(nlarn->log, "There was something wrong with this book! " \
                       "It crumbles to dust.");
 
         player_mp_lose(p, rand_0n(p->mp));
@@ -1400,20 +1400,20 @@ item_usage_result book_read(struct player *p, item *book)
         switch (spell_learn(p, book->id))
         {
         case 0:
-            log_add_entry(p->log, "You cannot understand the content of this book.");
+            log_add_entry(nlarn->log, "You cannot understand the content of this book.");
             result.used_up = FALSE;
             break;
 
         case 1:
             /* learnt spell */
-            log_add_entry(p->log, "You master the spell %s.", book_name(book));
+            log_add_entry(nlarn->log, "You master the spell %s.", book_name(book));
 
             result.identified = TRUE;
             break;
 
         default:
             /* improved knowledge of spell */
-            log_add_entry(p->log, "You improved your knowledge of the spell %s.",
+            log_add_entry(nlarn->log, "You improved your knowledge of the spell %s.",
                           book_name(book));
 
             result.identified = TRUE;
@@ -1423,7 +1423,7 @@ item_usage_result book_read(struct player *p, item *book)
         /* five percent chance to increase intelligence */
         if (chance(2))
         {
-            log_add_entry(p->log, "Reading makes you ingenious.");
+            log_add_entry(nlarn->log, "Reading makes you ingenious.");
             p->intelligence++;
         }
     }

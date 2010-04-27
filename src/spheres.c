@@ -150,7 +150,7 @@ void sphere_move(sphere *s, game *g)
         {
             if (monster_in_sight(m))
             {
-                log_add_entry(s->owner->log, "The %s dispels the sphere!",
+                log_add_entry(nlarn->log, "The %s dispels the sphere!",
                               monster_name(m));
             }
 
@@ -164,7 +164,7 @@ void sphere_move(sphere *s, game *g)
         {
             if (monster_in_sight(m))
             {
-                log_add_entry(s->owner->log,
+                log_add_entry(nlarn->log,
                               "The %s causes cancellation of the sphere!",
                               monster_name(m));
             }
@@ -183,7 +183,7 @@ void sphere_move(sphere *s, game *g)
     /* check if another sphere is located at the same position */
     if (sphere_at(g, s->pos) > 1)
     {
-        log_add_entry(s->owner->log,
+        log_add_entry(nlarn->log,
                       "Two spheres of annihilation collide! " \
                       "You hear a great earth shaking blast!");
 
@@ -216,7 +216,7 @@ static void sphere_hit_owner(game *g, sphere *s)
     /* cancellation protects from spheres */
     if (player_effect(s->owner, ET_CANCELLATION))
     {
-        log_add_entry(s->owner->log,
+        log_add_entry(nlarn->log,
                       "As the cancellation takes effect, you hear a great earth shaking blast!");
 
         sphere_destroy(s, g);
@@ -225,7 +225,7 @@ static void sphere_hit_owner(game *g, sphere *s)
     }
     else
     {
-        log_add_entry(s->owner->log, "The sphere hits you.");
+        log_add_entry(nlarn->log, "The sphere hits you.");
         player_die(s->owner, PD_SPHERE, 0);
     }
 }
@@ -241,7 +241,7 @@ static void sphere_kill_monster(sphere *s, monster *m)
 
     if (monster_in_sight(m))
     {
-        log_add_entry(s->owner->log,
+        log_add_entry(nlarn->log,
                       "The sphere of annihilation hits the %s.",
                       monster_name(m));
     }

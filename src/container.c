@@ -51,7 +51,7 @@ int container_open(player *p, inventory **inv, item *container)
 
         if (count == 0)
         {
-            log_add_entry(p->log, "I see no container here.");
+            log_add_entry(nlarn->log, "I see no container here.");
             return FALSE;
         }
         else if (count == 1)
@@ -61,7 +61,7 @@ int container_open(player *p, inventory **inv, item *container)
         else
         {
             /* multiple containers */
-            log_add_entry(p->log, "I don't know which container I should open!");
+            log_add_entry(nlarn->log, "I don't know which container I should open!");
             return 2;
         }
     }
@@ -73,7 +73,7 @@ int container_open(player *p, inventory **inv, item *container)
                       TRUE, TRUE, container_desc, 60);
 
         container_desc[0] = g_ascii_toupper(container_desc[0]);
-        log_add_entry(p->log, "%s is empty.", container_desc);
+        log_add_entry(nlarn->log, "%s is empty.", container_desc);
 
         return 2;
     }
@@ -153,7 +153,7 @@ int container_item_add(player *p, inventory **inv, item *element)
     if (container == NULL)
     {
         /* no container has been selected */
-        log_add_entry(p->log, "Huh?");
+        log_add_entry(nlarn->log, "Huh?");
         return FALSE;
     }
 
@@ -162,7 +162,7 @@ int container_item_add(player *p, inventory **inv, item *element)
 
     /* mute the log if the container is in the player's inventory.
        otherwise mindless burdened staus messages would appear */
-    if (carried_container) log_disable(p->log);
+    if (carried_container) log_disable(nlarn->log);
 
     if (element->count > 1)
     {
@@ -193,13 +193,13 @@ int container_item_add(player *p, inventory **inv, item *element)
         inv_del_element(&p->inventory, element);
     }
 
-    if (carried_container) log_enable(p->log);
+    if (carried_container) log_enable(nlarn->log);
 
     /* log the event */
     item_describe(element, player_item_identified(p, element),
                   (element->count == 1), TRUE, element_desc, 60 );
 
-    log_add_entry(p->log, "You put %s into %s.", element_desc,
+    log_add_entry(nlarn->log, "You put %s into %s.", element_desc,
                   container_desc);
 
     inv_add(&container->content, element);
@@ -210,9 +210,9 @@ int container_item_add(player *p, inventory **inv, item *element)
            to recalculated. Silence the log in the meantime to avoid
            pointless messages. */
 
-        log_disable(p->log);
+        log_disable(nlarn->log);
         player_inv_weight_recalc(p->inventory, NULL);
-        log_enable(p->log);
+        log_enable(nlarn->log);
     }
 
     return 2;
@@ -261,7 +261,7 @@ int container_item_unpack(player *p, inventory **inv, item *element)
     {
         item_describe(element, player_item_known(p, element),
                       (element->count == 1), FALSE, desc, 60);
-        log_add_entry(p->log, "You put %s into your pack.", desc);
+        log_add_entry(nlarn->log, "You put %s into your pack.", desc);
     }
     else
     {

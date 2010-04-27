@@ -154,9 +154,6 @@ player *player_new()
     inv_add(&p->inventory, it);
     player_item_equip(p, NULL, it);
 
-    /* start a new diary */
-    p->log = log_new();
-
     /* potion of cure dianthroritis is always known */
     p->identified_potions[PO_CURE_DIANTHR] = TRUE;
 
@@ -197,7 +194,6 @@ void player_destroy(player *p)
     }
 
     inv_destroy(p->inventory, FALSE);
-    log_destroy(p->log);
 
     if (p->name)
     {
@@ -355,9 +351,6 @@ cJSON *player_serialize(player *p)
             cJSON_AddItemToArray(obj, soms);
         }
     }
-
-    /* log */
-    cJSON_AddItemToObject(pser, "log", log_serialize(p->log));
 
     /* statistics */
     cJSON_AddItemToObject(pser, "stats", obj = cJSON_CreateObject());
@@ -543,9 +536,6 @@ player *player_deserialize(cJSON *pser)
         }
     }
 
-    /* log */
-    p->log = log_deserialize(cJSON_GetObjectItem(pser, "log"));
-
     /* statistics */
     obj = cJSON_GetObjectItem(pser, "stats");
 
@@ -688,11 +678,11 @@ void player_make_move(player *p, int turns)
                 {
                     item *it = p->eq_weapon;
 
-                    log_disable(p->log);
+                    log_disable(nlarn->log);
                     player_item_unequip(p, NULL, it);
-                    log_enable(p->log);
+                    log_enable(nlarn->log);
 
-                    log_add_entry(p->log, effect_get_msg_start(e));
+                    log_add_entry(nlarn->log, effect_get_msg_start(e));
                     player_item_drop(p, &p->inventory, it);
                 }
             }
@@ -707,7 +697,7 @@ void player_make_move(player *p, int turns)
                     /* take off armour */
                     it = NULL;
 
-                    log_add_entry(p->log, effect_get_msg_start(e));
+                    log_add_entry(nlarn->log, effect_get_msg_start(e));
                     player_item_drop(p, &p->inventory, *it);
                 }
             }
@@ -737,7 +727,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     /* check for life protection */
     if ((cause_type < PD_STUCK) && (ef = player_effect_get(p, ET_LIFE_PROTECTION)))
     {
-        log_add_entry(p->log, "You feel wiiieeeeerrrrrd all over!");
+        log_add_entry(nlarn->log, "You feel wiiieeeeerrrrrd all over!");
 
         if (ef->amount > 1)
         {
@@ -796,12 +786,12 @@ void player_die(player *p, player_cod cause_type, int cause)
         title = "R. I. P.";
     }
 
-    log_add_entry(p->log, message);
+    log_add_entry(nlarn->log, message);
 
     /* resume game if wizard mode is enabled */
     if (game_wizardmode(nlarn) && (cause_type < PD_TOO_LATE))
     {
-        log_add_entry(p->log, "WIZARD MODE. You stay alive.");
+        log_add_entry(nlarn->log, "WIZARD MODE. You stay alive.");
 
         /* return to full power */
         p->hp = p->hp_max;
@@ -1087,16 +1077,16 @@ void player_die(player *p, player_cod cause_type, int cause)
 
         /* messages */
         g_string_append(text, "\n\n-- Last messages ----------------------\n\n");
-        count = min(10, log_length(p->log));
-        for (pos = log_length(p->log) - count; pos < log_length(p->log); pos++)
+        count = min(10, log_length(nlarn->log));
+        for (pos = log_length(nlarn->log) - count; pos < log_length(nlarn->log); pos++)
         {
-            message_log_entry *entry = log_get_entry(p->log, pos);
+            message_log_entry *entry = log_get_entry(nlarn->log, pos);
             g_string_append_printf(text, "%s\n", entry->message);
         }
         /* print uncommited messages */
-        if (p->log->buffer->len > 0)
+        if (nlarn->log->buffer->len > 0)
         {
-            g_string_append_printf(text, "%s\n", p->log->buffer->str);
+            g_string_append_printf(text, "%s\n", nlarn->log->buffer->str);
         }
 
         display_show_message(title, text->str, 0);
@@ -1169,14 +1159,14 @@ gboolean player_movement_possible(player *p)
     /* no movement if overloaded */
     if (player_effect(p, ET_OVERSTRAINED))
     {
-        log_add_entry(p->log, "You cannot move as long you are overstrained.");
+        log_add_entry(nlarn->log, "You cannot move as long you are overstrained.");
         return FALSE;
     }
 
     /* no movement if paralyzed */
     if (player_effect(p, ET_PARALYSIS))
     {
-        log_add_entry(p->log, "You can't move!");
+        log_add_entry(nlarn->log, "You can't move!");
         return FALSE;
     }
 
@@ -1219,7 +1209,7 @@ int player_move(player *p, direction dir, gboolean open_door)
         if (player_effect(p, ET_BLINDNESS) || player_effect(p, ET_CONFUSION))
         {
             player_memory_of(p, target_p).type = map_tiletype_at(map, target_p);
-            log_add_entry(p->log, "Ouch! You bump into %s!",
+            log_add_entry(nlarn->log, "Ouch! You bump into %s!",
                           lt_get_desc(map_tiletype_at(map, target_p)));
             return times;
         }
@@ -1241,7 +1231,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     if (target_m && monster_unknown(target_m))
     {
         /* reveal the mimic */
-        log_add_entry(p->log, "Wait! That is a %s!", monster_get_name(target_m));
+        log_add_entry(nlarn->log, "Wait! That is a %s!", monster_get_name(target_m));
         monster_unknown_set(target_m, FALSE);
         return times;
     }
@@ -1270,7 +1260,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     /* mention stationary objects at this position */
     if ((so =map_sobject_at(map, p->pos)))
     {
-        log_add_entry(p->log, "You see %s here.", ls_get_desc(so));
+        log_add_entry(nlarn->log, "You see %s here.", ls_get_desc(so));
     }
 
     return times;
@@ -1295,7 +1285,7 @@ int player_attack(player *p, monster *m)
     if ((roll <= prop) || (roll == 1))
     {
         /* placed a hit */
-        log_add_entry(p->log, "You hit the %s.", monster_get_name(m));
+        log_add_entry(nlarn->log, "You hit the %s.", monster_get_name(m));
 
         amount = player_get_str(p)
                  + player_get_wc(p)
@@ -1337,7 +1327,7 @@ int player_attack(player *p, monster *m)
                     && monster_has_head(m)
                     && monster_is_beheadable(m))
             {
-                log_add_entry(p->log, "You behead the %s with your Vorpal Blade!",
+                log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
                               monster_get_name(m));
 
                 dam->amount = monster_hp(m) + monster_ac(m);
@@ -1372,7 +1362,7 @@ int player_attack(player *p, monster *m)
         /* Lance of Death has not killed */
         if (p->eq_weapon && (p->eq_weapon->id == WT_LANCEOFDEATH))
         {
-            log_add_entry(p->log, "Your lance of death tickles the %s!", monster_get_name(m));
+            log_add_entry(nlarn->log, "Your lance of death tickles the %s!", monster_get_name(m));
         }
 
         /* if the player is invisible and the monster does not have infravision,
@@ -1386,7 +1376,7 @@ int player_attack(player *p, monster *m)
     else if (monster_in_sight(m))
     {
         /* missed */
-        log_add_entry(p->log, "You miss the %s.", monster_name(m));
+        log_add_entry(nlarn->log, "You miss the %s.", monster_name(m));
     }
 
     return 1; /* i.e. turns used */
@@ -1443,11 +1433,11 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     if (l->nlevel == 0)
     {
         /* do not log this at the start of the game */
-        if (p->log->gtime > 1)
-            log_add_entry(p->log, "You return to town.");
+        if (nlarn->log->gtime > 1)
+            log_add_entry(nlarn->log, "You return to town.");
     }
     else if (l->nlevel == 1 && p->pos.z == 0)
-        log_add_entry(p->log, "You enter the caverns of Larn.");
+        log_add_entry(nlarn->log, "You enter the caverns of Larn.");
 
     /* put player into new map */
     p->pos = pos;
@@ -1509,7 +1499,7 @@ int player_pickup(player *p)
 
     if (inv_length(*inv) == 0)
     {
-        log_add_entry(p->log, "There is nothing here.");
+        log_add_entry(nlarn->log, "There is nothing here.");
         return 0;
     }
     else if (inv_length(*inv) == 1)
@@ -1590,12 +1580,12 @@ void player_autopickup(player *p)
             item_describe(it, player_item_known(nlarn->p, it),
                           (it->count == 1), FALSE, item_desc, 80);
 
-            log_add_entry(p->log, "There %s %s here.",
+            log_add_entry(nlarn->log, "There %s %s here.",
                           it->count == 1 ? "is" : "are", item_desc);
         }
         else
         {
-            log_add_entry(p->log, "There are %d more items here.",
+            log_add_entry(nlarn->log, "There are %d more items here.",
                           other_items_count);
         }
     }
@@ -1632,7 +1622,7 @@ void player_autopickup_show(player *p)
     }
 
 
-    log_add_entry(p->log, msg->str);
+    log_add_entry(nlarn->log, msg->str);
 
     g_string_free(msg, TRUE);
 }
@@ -1658,12 +1648,12 @@ void player_level_gain(player *p, int count)
 
     if (g_strcmp0(desc_orig, desc_new) != 0)
     {
-        log_add_entry(p->log, "You gain experience and become %s %s!",
+        log_add_entry(nlarn->log, "You gain experience and become %s %s!",
                       a_an(desc_new), desc_new);
     }
     else
     {
-        log_add_entry(p->log, "You gain experience!");
+        log_add_entry(nlarn->log, "You gain experience!");
     }
 
     if (p->level > p->stats.max_level)
@@ -1699,7 +1689,7 @@ void player_level_lose(player *p, int count)
     assert(p != NULL && count > 0);
 
     p->level -= count;
-    log_add_entry(p->log, "You return to experience level %d...", p->level);
+    log_add_entry(nlarn->log, "You return to experience level %d...", p->level);
 
     /* die if lost level 1 */
     if (p->level == 0) player_die(p, PD_LASTLEVEL, 0);
@@ -1784,7 +1774,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (monster_is_demon(m) && chance(75)
                 && (p->eq_amulet && p->eq_amulet->id == AM_POWER))
         {
-            log_add_entry(p->log, "Your amulet cancels the %s's attack.",
+            log_add_entry(nlarn->log, "Your amulet cancels the %s's attack.",
                           monster_get_name(m));
 
             return;
@@ -1800,11 +1790,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (dam->amount > 0)
         {
             p->hp -= dam->amount;
-            log_add_entry(p->log, "Ouch!");
+            log_add_entry(nlarn->log, "Ouch!");
         }
         else
         {
-            log_add_entry(p->log, "Your armour protects you.");
+            log_add_entry(nlarn->log, "Your armour protects you.");
         }
         break;
 
@@ -1814,11 +1804,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (dam->amount > 0)
         {
             p->hp -= dam->amount;
-            log_add_entry(p->log, "Ouch!");
+            log_add_entry(nlarn->log, "Ouch!");
         }
         else
         {
-            log_add_entry(p->log, "You resist.");
+            log_add_entry(nlarn->log, "You resist.");
         }
 
         break;
@@ -1828,11 +1818,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (dam->amount > 0)
         {
             p->hp -= dam->amount;
-            log_add_entry(p->log, "You suffer burns.");
+            log_add_entry(nlarn->log, "You suffer burns.");
         }
         else
         {
-            log_add_entry(p->log, "The flames don't phase you.");
+            log_add_entry(nlarn->log, "The flames don't phase you.");
         }
         break;
 
@@ -1841,11 +1831,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (dam->amount > 0)
         {
             p->hp -= dam->amount;
-            log_add_entry(p->log, "You suffer from frostbite.");
+            log_add_entry(nlarn->log, "You suffer from frostbite.");
         }
         else
         {
-            log_add_entry(p->log, "It doesn't seem so cold.");
+            log_add_entry(nlarn->log, "It doesn't seem so cold.");
         }
         break;
 
@@ -1853,11 +1843,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (dam->amount > 0)
         {
             p->hp -= dam->amount;
-            log_add_entry(p->log, "You are splashed with acid.");
+            log_add_entry(nlarn->log, "You are splashed with acid.");
         }
         else
         {
-            log_add_entry(p->log, "The acid doesn't affect you.");
+            log_add_entry(nlarn->log, "The acid doesn't affect you.");
         }
         break;
 
@@ -1865,11 +1855,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (dam->amount > 0)
         {
             p->hp -= dam->amount;
-            log_add_entry(p->log, "You experience near-drowning.");
+            log_add_entry(nlarn->log, "You experience near-drowning.");
         }
         else
         {
-            log_add_entry(p->log, "The water doesn't affect you.");
+            log_add_entry(nlarn->log, "The water doesn't affect you.");
         }
         break;
 
@@ -1877,11 +1867,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (dam->amount > 0)
         {
             p->hp -= dam->amount;
-            log_add_entry(p->log, "Zapp!");
+            log_add_entry(nlarn->log, "Zapp!");
         }
         else
         {
-            log_add_entry(p->log, "As you are grounded nothing happens.");
+            log_add_entry(nlarn->log, "As you are grounded nothing happens.");
         }
         break;
 
@@ -1901,14 +1891,14 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             }
             else
             {
-                log_add_entry(p->log, "You resist the poison.");
+                log_add_entry(nlarn->log, "You resist the poison.");
             }
         }
         else
         {
             /* damage is caused by the effect of the poison effect () */
             p->hp -= dam->amount;
-            log_add_entry(p->log, "You feel poison running through your veins.");
+            log_add_entry(nlarn->log, "You feel poison running through your veins.");
         }
 
         break;
@@ -1921,7 +1911,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
         if (!e && !(e = player_effect_get(p, ET_BLINDNESS)))
         {
-            log_add_entry(p->log, "You are not blinded.");
+            log_add_entry(nlarn->log, "You are not blinded.");
         }
 
         break;
@@ -1941,7 +1931,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
         if (!e && !(e = player_effect_get(p, ET_CONFUSION)))
         {
-            log_add_entry(p->log, "You are not confused.");
+            log_add_entry(nlarn->log, "You are not confused.");
         }
 
         break;
@@ -1961,7 +1951,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
         if (!e && !(e = player_effect_get(p, ET_PARALYSIS)))
         {
-            log_add_entry(p->log, "You avoid eye contact.");
+            log_add_entry(nlarn->log, "You avoid eye contact.");
         }
 
         break;
@@ -1981,7 +1971,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         }
         else
         {
-            log_add_entry(p->log, "You are not affected.");
+            log_add_entry(nlarn->log, "You are not affected.");
         }
         break;
 
@@ -2000,7 +1990,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         }
         else
         {
-            log_add_entry(p->log, "You are not affected.");
+            log_add_entry(nlarn->log, "You are not affected.");
         }
         break;
 
@@ -2009,11 +1999,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
                 || !chance(dam->amount - player_get_wis(p)))
         {
             /* undead protection cancels drain life attacks */
-            log_add_entry(p->log, "You are not affected.");
+            log_add_entry(nlarn->log, "You are not affected.");
         }
         else
         {
-            log_add_entry(p->log, "Your life energy is drained.");
+            log_add_entry(nlarn->log, "Your life energy is drained.");
             player_level_lose(p, 1);
         }
         break;
@@ -2226,7 +2216,7 @@ effect *player_effect_add(player *p, effect *e)
         }
 
         if (effect_get_msg_start(e))
-            log_add_entry(p->log, "%s", effect_get_msg_start(e));
+            log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
 
         effect_destroy(e);
         e = NULL;
@@ -2236,7 +2226,7 @@ effect *player_effect_add(player *p, effect *e)
         int i;
 
         if (effect_get_msg_start(e))
-            log_add_entry(p->log, "%s", effect_get_msg_start(e));
+            log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
 
         for (i = 0; i < e->turns; i++)
         {
@@ -2257,7 +2247,7 @@ effect *player_effect_add(player *p, effect *e)
         /* only log a message if the effect has really been added and
            actually has a value */
         if (e && effect_get_amount(e) && effect_get_msg_start(e))
-            log_add_entry(p->log, "%s", effect_get_msg_start(e));
+            log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
 
         if (str_orig != player_get_str(p))
         {
@@ -2286,7 +2276,7 @@ void player_effects_add(player *p, GPtrArray *effects)
         effect *e = game_effect_get(nlarn, effect_id);
         if (effect_get_amount(e) && effect_get_msg_start(e))
         {
-            log_add_entry(p->log, effect_get_msg_start(e));
+            log_add_entry(nlarn->log, effect_get_msg_start(e));
         }
     }
 }
@@ -2303,7 +2293,7 @@ int player_effect_del(player *p, effect *e)
     {
         if (effect_get_amount(e) && effect_get_msg_stop(e))
         {
-            log_add_entry(p->log, effect_get_msg_stop(e));
+            log_add_entry(nlarn->log, effect_get_msg_stop(e));
         }
 
         if (str_orig != player_get_str(p))
@@ -2336,7 +2326,7 @@ void player_effects_del(player *p, GPtrArray *effects)
 
         if (effect_get_msg_stop(e))
         {
-            log_add_entry(p->log, effect_get_msg_stop(e));
+            log_add_entry(nlarn->log, effect_get_msg_stop(e));
         }
     }
 }
@@ -2384,7 +2374,7 @@ int player_inv_display(player *p)
     if (inv_length(p->inventory) == 0)
     {
         /* don't show empty inventory */
-        log_add_entry(p->log, "You do not carry anything.");
+        log_add_entry(nlarn->log, "You do not carry anything.");
         return FALSE;
     }
 
@@ -2489,7 +2479,7 @@ int player_inv_pre_add(inventory *inv, item *item)
 
     if (player_effect(p, ET_OVERSTRAINED))
     {
-        log_add_entry(p->log, "You are already overloaded!");
+        log_add_entry(nlarn->log, "You are already overloaded!");
         return FALSE;
     }
 
@@ -2507,7 +2497,7 @@ int player_inv_pre_add(inventory *inv, item *item)
         /* capitalize first letter */
         buf[0] = g_ascii_toupper(buf[0]);
 
-        log_add_entry(p->log, "%s %s too heavy for you.", buf,
+        log_add_entry(nlarn->log, "%s %s too heavy for you.", buf,
                       item->count > 1 ? "are" : "is");
 
         return FALSE;
@@ -2539,9 +2529,9 @@ void player_inv_weight_recalc(inventory *inv, item *item)
         if ((e = player_effect_get(p, ET_BURDENED)))
         {
             /* get rid of burden effect (mute log to avoid pointless message) */
-            log_disable(p->log);
+            log_disable(nlarn->log);
             player_effect_del(p, e);
-            log_enable(p->log);
+            log_enable(nlarn->log);
         }
 
         /* make overstrained */
@@ -2556,9 +2546,9 @@ void player_inv_weight_recalc(inventory *inv, item *item)
         if ((e = player_effect_get(p, ET_OVERSTRAINED)))
         {
             /* get rid of overstrained effect */
-            log_disable(p->log);
+            log_disable(nlarn->log);
             player_effect_del(p, e);
-            log_enable(p->log);
+            log_enable(nlarn->log);
         }
 
         if (!player_effect(p, ET_BURDENED))
@@ -2603,7 +2593,7 @@ int player_item_equip(player *p, inventory **inv, item *it)
             p->eq_amulet = it;
 
             item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
-            log_add_entry(p->log, "You put %s on.", description);
+            log_add_entry(nlarn->log, "You put %s on.", description);
             p->identified_amulets[it->id] = TRUE;
             time = 2;
         }
@@ -2653,7 +2643,7 @@ int player_item_equip(player *p, inventory **inv, item *it)
             it->bonus_known = TRUE;
 
             item_describe(it, player_item_known(p, it), TRUE, FALSE, description, 60);
-            log_add_entry(p->log, "You are now wearing %s.", description);
+            log_add_entry(nlarn->log, "You are now wearing %s.", description);
 
             *islot = it;
         }
@@ -2668,7 +2658,7 @@ int player_item_equip(player *p, inventory **inv, item *it)
         if (islot != NULL)
         {
             item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
-            log_add_entry(p->log, "You put %s on.", description);
+            log_add_entry(nlarn->log, "You put %s on.", description);
 
             *islot = it;
             p->identified_rings[it->id] = TRUE;
@@ -2688,7 +2678,7 @@ int player_item_equip(player *p, inventory **inv, item *it)
             item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
 
             p->eq_weapon = it;
-            log_add_entry(p->log, "You now wield %s.", description);
+            log_add_entry(nlarn->log, "You now wield %s.", description);
 
             time = 2 + weapon_is_twohanded(p->eq_weapon);
 
@@ -2696,7 +2686,7 @@ int player_item_equip(player *p, inventory **inv, item *it)
             {
                 /* capitalize first letter */
                 description[0] = g_ascii_toupper(description[0]);
-                log_add_entry(p->log, "%s welds itself into your hand.", description);
+                log_add_entry(nlarn->log, "%s welds itself into your hand.", description);
                 it->blessed_known = TRUE;
             }
         }
@@ -2740,7 +2730,7 @@ int player_item_unequip(player *p, inventory **inv, item *it)
 
             if (!it->cursed)
             {
-                log_add_entry(p->log, "You remove %s.", desc);
+                log_add_entry(nlarn->log, "You remove %s.", desc);
 
                 player_effects_del(p, p->eq_amulet->effects);
                 p->eq_amulet = NULL;
@@ -2749,7 +2739,7 @@ int player_item_unequip(player *p, inventory **inv, item *it)
             }
             else
             {
-                log_add_entry(p->log, "You can not remove %s.%s", desc,
+                log_add_entry(nlarn->log, "You can not remove %s.%s", desc,
                               it->blessed_known ? "" : " It appears to be cursed.");
 
                 it->blessed_known = TRUE;
@@ -2803,7 +2793,7 @@ int player_item_unequip(player *p, inventory **inv, item *it)
 
             if (!p->eq_weapon->cursed)
             {
-                log_add_entry(p->log, "You put away %s.", desc);
+                log_add_entry(nlarn->log, "You put away %s.", desc);
 
                 time = 2 + weapon_is_twohanded(p->eq_weapon);
                 player_effects_del(p, p->eq_weapon->effects);
@@ -2812,7 +2802,7 @@ int player_item_unequip(player *p, inventory **inv, item *it)
             }
             else
             {
-                log_add_entry(p->log, "You can't put away %s. " \
+                log_add_entry(nlarn->log, "You can't put away %s. " \
                               "It's welded into your hands.", desc);
             }
         }
@@ -2826,7 +2816,7 @@ int player_item_unequip(player *p, inventory **inv, item *it)
 
         if (!it->cursed)
         {
-            log_add_entry(p->log, "You finish taking off %s.", desc);
+            log_add_entry(nlarn->log, "You finish taking off %s.", desc);
 
             player_effects_del(p, (*aslot)->effects);
 
@@ -2834,7 +2824,7 @@ int player_item_unequip(player *p, inventory **inv, item *it)
         }
         else
         {
-            log_add_entry(p->log, "You can't take of %s.%s", desc,
+            log_add_entry(nlarn->log, "You can't take of %s.%s", desc,
                           it->blessed_known ? "" : " It appears to be cursed.");
 
             it->blessed_known = TRUE;
@@ -2847,7 +2837,7 @@ int player_item_unequip(player *p, inventory **inv, item *it)
 
         if (!it->cursed)
         {
-            log_add_entry(p->log, "You remove %s.", desc);
+            log_add_entry(nlarn->log, "You remove %s.", desc);
 
             player_effects_del(p, (*rslot)->effects);
 
@@ -2856,7 +2846,7 @@ int player_item_unequip(player *p, inventory **inv, item *it)
         }
         else
         {
-            log_add_entry(p->log, "You can not remove %s.%s", desc,
+            log_add_entry(nlarn->log, "You can not remove %s.%s", desc,
                           it->blessed_known ? "" : " It appears to be cursed.");
 
             it->blessed_known = TRUE;
@@ -3327,12 +3317,12 @@ void player_item_destroy(player *p, item *it)
 
     if (player_item_is_equipped(p, it))
     {
-        log_disable(p->log);
+        log_disable(nlarn->log);
         player_item_unequip(p, &p->inventory, it);
-        log_enable(p->log);
+        log_enable(nlarn->log);
     }
 
-    log_add_entry(p->log, "%s %s destroyed!",
+    log_add_entry(nlarn->log, "%s %s destroyed!",
                   desc, (it->count == 1) ? "is" : "are");
 
     inv_del_element(&p->inventory, it);
@@ -3372,7 +3362,7 @@ int player_item_drop(player *p, inventory **inv, item *it)
        the burdened / overloaded effect. If the pre_del callback fails,
        it has to display a message which explains why it has failed. */
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
-    log_add_entry(p->log, "You drop %s.", desc);
+    log_add_entry(nlarn->log, "You drop %s.", desc);
 
     if (!inv_del_element(inv, it))
     {
@@ -3393,7 +3383,7 @@ int player_item_drop(player *p, inventory **inv, item *it)
             item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
             desc[0] = g_ascii_toupper(desc[0]);
 
-            log_add_entry(p->log, "%s is surrounded by a black halo.", desc);
+            log_add_entry(nlarn->log, "%s is surrounded by a black halo.", desc);
         }
 
         if (it->blessed)
@@ -3401,7 +3391,7 @@ int player_item_drop(player *p, inventory **inv, item *it)
             item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
             desc[0] = g_ascii_toupper(desc[0]);
 
-            log_add_entry(p->log, "%s is surrounded by a white halo.", desc);
+            log_add_entry(nlarn->log, "%s is surrounded by a white halo.", desc);
         }
 
         it->blessed_known = TRUE;
@@ -3440,7 +3430,7 @@ int player_item_pickup(player *p, inventory **inv, item *it)
 
     /* Log the attempt to pick up the item */
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
-    log_add_entry(p->log, "You pick up %s.", desc);
+    log_add_entry(nlarn->log, "You pick up %s.", desc);
 
     if (!inv_add(&p->inventory, it))
     {
@@ -3481,7 +3471,7 @@ int player_read(player *p)
     }
     else
     {
-        log_add_entry(p->log, "You have nothing to read.");
+        log_add_entry(nlarn->log, "You have nothing to read.");
     }
 
 
@@ -3506,7 +3496,7 @@ int player_quaff(player *p)
     }
     else
     {
-        log_add_entry(p->log, "You have nothing to drink.");
+        log_add_entry(nlarn->log, "You have nothing to drink.");
     }
 
     return FALSE;
@@ -3536,7 +3526,7 @@ int player_equip(player *p)
     }
     else
     {
-        log_add_entry(p->log, "You have nothing you could equip.");
+        log_add_entry(nlarn->log, "You have nothing you could equip.");
     }
 
     return FALSE;
@@ -3565,7 +3555,7 @@ int player_take_off(player *p)
     }
     else
     {
-        log_add_entry(p->log, "You have nothing you could take off.");
+        log_add_entry(nlarn->log, "You have nothing you could take off.");
     }
 
     return FALSE;
@@ -3598,7 +3588,7 @@ int player_drop(player *p)
     }
     else
     {
-        log_add_entry(p->log, "You have nothing you could drop.");
+        log_add_entry(nlarn->log, "You have nothing you could drop.");
     }
 
     return FALSE;

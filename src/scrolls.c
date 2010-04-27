@@ -117,7 +117,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
 
     if (player_effect(p, ET_BLINDNESS))
     {
-        log_add_entry(p->log, "As you are blind you can't read %s.",
+        log_add_entry(nlarn->log, "As you are blind you can't read %s.",
                       description);
 
         result.identified = FALSE;
@@ -126,7 +126,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
         return result;
     }
 
-    log_add_entry(p->log, "You read %s.", description);
+    log_add_entry(nlarn->log, "You read %s.", description);
 
     /* increase number of scrolls read */
     p->stats.scrolls_read++;
@@ -134,7 +134,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
     if (scroll->cursed)
     {
         damage *dam = damage_new(DAM_FIRE, ATT_NONE, rand_1n(p->hp), NULL);
-        log_add_entry(p->log, "The scroll explodes!");
+        log_add_entry(nlarn->log, "The scroll explodes!");
         player_damage_take(p, dam, PD_CURSE, scroll->type);
         result.identified = FALSE;
     }
@@ -153,7 +153,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
         case ST_BLANK:
             result.used_up = FALSE;
             result.identified = TRUE;
-            log_add_entry(p->log, "This scroll is blank.");
+            log_add_entry(nlarn->log, "This scroll is blank.");
             break;
 
         case ST_CREATE_MONSTER:
@@ -177,7 +177,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
             break;
 
         case ST_MAPPING:
-            log_add_entry(p->log, "There is a map on the scroll!");
+            log_add_entry(nlarn->log, "There is a map on the scroll!");
             result.identified = scroll_mapping(p, scroll);
             break;
 
@@ -204,7 +204,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
         case ST_PULVERIZATION:
             if (!p->identified_scrolls[ST_PULVERIZATION])
             {
-                log_add_entry(p->log, "This is a scroll of %s. ",
+                log_add_entry(nlarn->log, "This is a scroll of %s. ",
                               scroll_name(scroll));
             }
 
@@ -229,7 +229,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
 
         if (!result.identified)
         {
-            log_add_entry(p->log, "Nothing happens.");
+            log_add_entry(nlarn->log, "Nothing happens.");
         }
     }
 
@@ -288,7 +288,7 @@ static int scroll_annihilate(struct player *p, item *scroll)
                 }
                 else
                 {
-                    log_add_entry(p->log, "The %s barely escapes being annihilated.",
+                    log_add_entry(nlarn->log, "The %s barely escapes being annihilated.",
                                   monster_get_name(m));
 
                     /* lose half hit points*/
@@ -303,7 +303,7 @@ static int scroll_annihilate(struct player *p, item *scroll)
 
     if (count)
     {
-        log_add_entry(p->log, "You hear loud screams of agony!");
+        log_add_entry(nlarn->log, "You hear loud screams of agony!");
     }
 
     return count;
@@ -322,7 +322,7 @@ static int scroll_create_artefact(player *p, item *scroll)
     item_describe(it, player_item_known(p, it), (it->count == 1),
                   FALSE, buf, 60);
 
-    log_add_entry(p->log, "You find %s below your feet.", buf);
+    log_add_entry(nlarn->log, "You find %s below your feet.", buf);
 
     return TRUE;
 }
@@ -343,7 +343,7 @@ static int scroll_enchant_armour(player *p, item *scroll)
     /* get a random piece of armour to enchant */
     if ((armour = player_get_random_armour(p)))
     {
-        log_add_entry(p->log, "Your %s glows for a moment.",
+        log_add_entry(nlarn->log, "Your %s glows for a moment.",
                       armour_name(*armour));
 
         item_enchant(*armour);
@@ -360,7 +360,7 @@ static int scroll_enchant_weapon(player *p, item *scroll)
 
     if (p->eq_weapon)
     {
-        log_add_entry(p->log,
+        log_add_entry(nlarn->log,
                       "Your %s glisters for a moment.",
                       weapon_name(p->eq_weapon));
 
@@ -384,7 +384,7 @@ static int scroll_gem_perfection(player *p, item *scroll)
         return FALSE;
     }
 
-    log_add_entry(p->log, "This is a scroll of gem perfection.");
+    log_add_entry(nlarn->log, "This is a scroll of gem perfection.");
 
     if (scroll->blessed)
     {
@@ -394,7 +394,7 @@ static int scroll_gem_perfection(player *p, item *scroll)
             /* double gem value */
             it->bonus <<= 1;
         }
-        log_add_entry(p->log, "You bring all your gems to perfection.");
+        log_add_entry(nlarn->log, "You bring all your gems to perfection.");
     }
     else
     {
@@ -405,7 +405,7 @@ static int scroll_gem_perfection(player *p, item *scroll)
         {
             char desc[81];
             item_describe(it, TRUE, it->count == 1, TRUE, desc, 80);
-            log_add_entry(p->log, "You make %s perfect.", desc);
+            log_add_entry(nlarn->log, "You make %s perfect.", desc);
 
             /* double gem value */
             it->bonus <<= 1;
@@ -439,7 +439,7 @@ static int scroll_genocide_monster(player *p, item *scroll)
 
     if (!in)
     {
-        log_add_entry(p->log, "You chose not to genocide any monster.");
+        log_add_entry(nlarn->log, "You chose not to genocide any monster.");
         return FALSE;
     }
 
@@ -450,7 +450,7 @@ static int scroll_genocide_monster(player *p, item *scroll)
             if (!monster_is_genocided(id))
             {
                 p->stats.monsters_killed[id] += monster_genocide(id);
-                log_add_entry(p->log, "Wiped out all %s.",
+                log_add_entry(nlarn->log, "Wiped out all %s.",
                               monster_type_plural_name(id, 2));
 
                 g_free(in);
@@ -462,7 +462,7 @@ static int scroll_genocide_monster(player *p, item *scroll)
 
     g_free(in);
 
-    log_add_entry(p->log, "No such monster.");
+    log_add_entry(nlarn->log, "No such monster.");
     return FALSE;
 }
 
@@ -496,7 +496,7 @@ static int scroll_heal_monster(player *p, item *scroll)
 
     if (count > 0)
     {
-        log_add_entry(p->log, "You feel uneasy.");
+        log_add_entry(nlarn->log, "You feel uneasy.");
     }
 
     g_list_free(mlist);
@@ -513,16 +513,16 @@ static int scroll_identify(player *p, item *scroll)
     if (inv_length_filtered(p->inventory, item_filter_unid) == 0)
     {
         /* player has no unidentfied items */
-        log_add_entry(p->log, "Nothing happens.");
+        log_add_entry(nlarn->log, "Nothing happens.");
         return FALSE;
     }
 
-    log_add_entry(p->log, "This is a scroll of identify.");
+    log_add_entry(nlarn->log, "This is a scroll of identify.");
 
     if (scroll->blessed)
     {
         /* identify all items */
-        log_add_entry(p->log, "You identify your possessions.");
+        log_add_entry(nlarn->log, "You identify your possessions.");
 
         while (inv_length_filtered(p->inventory, item_filter_unid))
         {
@@ -544,11 +544,11 @@ static int scroll_identify(player *p, item *scroll)
             char desc[81];
 
             item_describe(it, FALSE, (it->count == 1), TRUE, desc, 80);
-            log_add_entry(p->log, "You identify %s.", desc);
+            log_add_entry(nlarn->log, "You identify %s.", desc);
             player_item_identify(p, NULL, it);
 
             item_describe(it, TRUE, (it->count == 1), FALSE, desc, 80);
-            log_add_entry(p->log, "%s %s.", (it->count > 1) ? "These are" :
+            log_add_entry(nlarn->log, "%s %s.", (it->count > 1) ? "These are" :
                           "This is", desc);
         }
     }
@@ -591,16 +591,16 @@ static int scroll_remove_curse(player *p, item *scroll)
     if (inv_length_filtered(p->inventory, item_filter_cursed) == 0)
     {
         /* player has no cursed items */
-        log_add_entry(p->log, "Nothing happens.");
+        log_add_entry(nlarn->log, "Nothing happens.");
         return FALSE;
     }
 
-    log_add_entry(p->log, "This is a scroll of remove curse.");
+    log_add_entry(nlarn->log, "This is a scroll of remove curse.");
 
     if (scroll->blessed)
     {
         /* remove curses on all items */
-        log_add_entry(p->log, "You remove curses on your possessions.");
+        log_add_entry(nlarn->log, "You remove curses on your possessions.");
 
         while (inv_length_filtered(p->inventory, item_filter_cursed) > 0)
         {
@@ -611,7 +611,7 @@ static int scroll_remove_curse(player *p, item *scroll)
                           FALSE, TRUE, buf, 60);
 
             buf[0] = g_ascii_toupper(buf[0]);
-            log_add_entry(p->log, "%s glow%s in a white light.",
+            log_add_entry(nlarn->log, "%s glow%s in a white light.",
                           buf, it->count == 1 ? "s" : "");
 
             item_remove_curse(it);
@@ -631,7 +631,7 @@ static int scroll_remove_curse(player *p, item *scroll)
 
             buf[0] = g_ascii_toupper(buf[0]);
 
-            log_add_entry(p->log, "%s glow%s in a white light.",
+            log_add_entry(nlarn->log, "%s glow%s in a white light.",
                           buf, it->count == 1 ? "s" : "");
 
             item_remove_curse(it);
@@ -668,7 +668,7 @@ static int scroll_spell_extension(player *p, item *scroll)
     /* give a message if any spell has been extended */
     if (p->known_spells->len > 0)
     {
-        log_add_entry(p->log, "You feel your magic skills improve.");
+        log_add_entry(nlarn->log, "You feel your magic skills improve.");
         return TRUE;
     }
 
@@ -724,7 +724,7 @@ static int scroll_timewarp(player *p, item *scroll)
     }
 
     game_turn(nlarn) += turns;
-    log_add_entry(p->log,
+    log_add_entry(nlarn->log,
                   "You go %sward in time by %d mobul%s.",
                   (mobuls < 0) ? "back" : "for",
                   abs(mobuls),

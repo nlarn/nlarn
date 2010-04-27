@@ -166,11 +166,11 @@ int building_bank(player *p)
         {
             p->bank_account += amount;
             player_set_gold(p, player_get_gold(p) - amount);
-            log_add_entry(p->log, "You deposited %d gp.", amount);
+            log_add_entry(nlarn->log, "You deposited %d gp.", amount);
         }
         else if (amount)
         {
-            log_add_entry(p->log, "You don't have that much.");
+            log_add_entry(nlarn->log, "You don't have that much.");
         }
 
         turns += 2;
@@ -192,12 +192,12 @@ int building_bank(player *p)
             if (inv_add(&p->inventory, gold))
             {
                 p->bank_account -= amount;
-                log_add_entry(p->log, "You withdraw %d gold.", amount);
+                log_add_entry(nlarn->log, "You withdraw %d gold.", amount);
             }
         }
         else if (amount)
         {
-            log_add_entry(p->log, "You don't have that much in the bank!");
+            log_add_entry(nlarn->log, "You don't have that much in the bank!");
         }
 
         turns += 2;
@@ -449,11 +449,11 @@ int building_lrs(player *p)
         {
             building_player_charge(p, p->outstanding_taxes);
             p->outstanding_taxes = 0;
-            log_add_entry(p->log, "You have paid your taxes.");
+            log_add_entry(nlarn->log, "You have paid your taxes.");
         }
         else
         {
-            log_add_entry(p->log, "You chose not to pay your taxes.");
+            log_add_entry(nlarn->log, "You chose not to pay your taxes.");
         }
     }
 
@@ -525,7 +525,7 @@ int building_school(player *p)
     {
         if (!building_player_check(p, price))
         {
-            log_add_entry(p->log,
+            log_add_entry(nlarn->log,
                           "You cannot afford the %d gold for the course.",
                           price);
 
@@ -543,8 +543,7 @@ int building_school(player *p)
         case 1:
             if (!p->school_courses_taken[0])
             {
-                log_add_entry(p->log,
-                              (char *)msg_prerequisite,
+                log_add_entry(nlarn->log, (char *)msg_prerequisite,
                               school_courses[0].description);
 
                 return turns;
@@ -561,8 +560,7 @@ int building_school(player *p)
         case 3:
             if (!p->school_courses_taken[2])
             {
-                log_add_entry(p->log,
-                              (char *)msg_prerequisite,
+                log_add_entry(nlarn->log, (char *)msg_prerequisite,
                               school_courses[2].description);
 
                 return turns;
@@ -596,11 +594,10 @@ int building_school(player *p)
         /* time usage */
         turns += mobuls2gtime(school_courses[(int)selection].course_time);
 
-        log_add_entry(p->log,
-                      "You take the course %s.",
+        log_add_entry(nlarn->log, "You take the course %s.",
                       school_courses[(int)selection].description);
 
-        log_add_entry(p->log, school_courses[(int)selection].message);
+        log_add_entry(nlarn->log, school_courses[(int)selection].message);
     }
 
     return turns;
@@ -705,7 +702,7 @@ static void building_player_charge(player *p, guint amount)
     if (p->bank_account >= amount)
     {
         p->bank_account -= amount;
-        log_add_entry(p->log, "We have debited your bank account %d gold.",
+        log_add_entry(nlarn->log, "We have debited your bank account %d gold.",
                       amount);
     }
     else
@@ -782,7 +779,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
         if (count > it->count)
         {
             /* desired amount is larger than the available amount */
-            log_add_entry(p->log, "Wouldn't it be nice if the store had %d of those?", count);
+            log_add_entry(nlarn->log, "Wouldn't it be nice if the store had %d of those?", count);
             return FALSE;
         }
         else if (count == 0)
@@ -862,7 +859,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
     }
 
     /* log the event */
-    log_add_entry(p->log, "You buy %s. Thank you for your purchase.", name);
+    log_add_entry(nlarn->log, "You buy %s. Thank you for your purchase.", name);
 
     /* charge player for this purchase */
     building_player_charge(p, price);
@@ -899,7 +896,7 @@ int building_item_identify(player *p, inventory **inv, item *it)
             name_unknown[0] = g_ascii_toupper(name_unknown[0]);
             item_describe(it, player_item_known(p, it), TRUE, FALSE, name_known, 60);
 
-            log_add_entry(p->log, "%s is %s.", name_unknown, name_known);
+            log_add_entry(nlarn->log, "%s is %s.", name_unknown, name_known);
             building_player_charge(p, price);
 
             return TRUE;
@@ -948,7 +945,7 @@ static int building_item_repair(player *p, inventory **inv, item *it)
             it->rusty = 0;
 
             name[0] = g_ascii_toupper(name[0]);
-            log_add_entry(p->log, "%s has been repaired.", name);
+            log_add_entry(nlarn->log, "%s has been repaired.", name);
             building_player_charge(p, price);
 
             return TRUE;
@@ -1005,7 +1002,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
 
         if (count > it->count)
         {
-            log_add_entry(p->log, "Wouldn't it be nice to have %d of those?", count);
+            log_add_entry(nlarn->log, "Wouldn't it be nice to have %d of those?", count);
 
             return FALSE;
         }
@@ -1036,7 +1033,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
     it->count = count;
 
     item_describe(it, player_item_known(p, it), (count == 1), FALSE, name, 60);
-    log_add_entry(p->log, "You sell %s. The %d gold %s been transferred to your bank account.",
+    log_add_entry(nlarn->log, "You sell %s. The %d gold %s been transferred to your bank account.",
                   name, price, (price == 1) ? "has" : "have");
 
     it->count = count_orig;

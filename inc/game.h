@@ -26,7 +26,7 @@
 
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 /* internal counter for save file compatibility */
-#define SAVEFILE_VERSION    4
+#define SAVEFILE_VERSION    5
 
 /* the world as we know it */
 typedef struct game
@@ -37,6 +37,7 @@ typedef struct game
     guint64 time_start;         /* start time */
     guint32 gtime;              /* turn count */
     guint8 difficulty;          /* game difficulty */
+    message_log *log;           /* game message log */
 
     gchar *userdir;
     gchar *basedir;

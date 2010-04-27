@@ -1241,7 +1241,7 @@ void monster_die(monster *m, struct player *p)
     {
         char *message = "The %s died!";
 
-        log_add_entry(nlarn->p->log, message, monster_get_name(m));
+        log_add_entry(nlarn->log, message, monster_get_name(m));
     }
 
     /* drop stuff the monster carries */
@@ -1350,7 +1350,7 @@ void monster_level_enter(monster *m, struct map *l)
     /* log the event */
     if (monster_in_sight(m) && target)
     {
-        log_add_entry(nlarn->p->log, "The %s %s %s %s.", monster_name(m),
+        log_add_entry(nlarn->log, "The %s %s %s %s.", monster_name(m),
                       how, what, ls_get_desc(target));
     }
 }
@@ -1387,14 +1387,14 @@ void monster_move(monster *m, struct player *p)
             {
                 /* TODO: certain monster types will make a sound when attacking the player */
                 /*
-                log_add_entry(p->log,
+                log_add_entry(nlarn->log,
                               "The %s has spotted you and heads towards you!",
                               monster_name(m));
                  */
             }
             else if (m->action == MA_FLEE)
             {
-                log_add_entry(p->log, "The %s turns to flee!", monster_name(m));
+                log_add_entry(nlarn->log, "The %s turns to flee!", monster_name(m));
             }
         }
 
@@ -1448,7 +1448,7 @@ void monster_move(monster *m, struct player *p)
                 monster_update_player_pos(m, p->pos);
                 m_npos = monster_pos(m);
 
-                log_add_entry(p->log, "The %s bumped into you.", monster_get_name(m));
+                log_add_entry(nlarn->log, "The %s bumped into you.", monster_get_name(m));
             }
 
             /* check for door */
@@ -1462,7 +1462,7 @@ void monster_move(monster *m, struct player *p)
                 /* notify the player if the door is visible */
                 if (monster_in_sight(m))
                 {
-                    log_add_entry(p->log, "The %s opens the door.", monster_name(m));
+                    log_add_entry(nlarn->log, "The %s opens the door.", monster_name(m));
                 }
             }
 
@@ -1540,7 +1540,7 @@ monster *monster_trap_trigger(monster *m)
 
     if (monster_in_sight(m))
     {
-        log_add_entry(nlarn->p->log, trap_m_message(trap), monster_name(m));
+        log_add_entry(nlarn->log, trap_m_message(trap), monster_name(m));
 
         /* set player's knowlege of trap */
         player_memory_of(nlarn->p, opos).trap = trap;
@@ -1608,7 +1608,7 @@ int monster_items_pickup(monster *m)
             {
                 item_describe(it, player_item_identified(nlarn->p, it),
                               (it->count == 1), FALSE, buf, 60);
-                log_add_entry(nlarn->p->log, "The %s picks up %s.", monster_name(m), buf);
+                log_add_entry(nlarn->log, "The %s picks up %s.", monster_name(m), buf);
             }
 
             inv_del_element(map_ilist_at(monster_map(m), m->pos), it);
@@ -1660,7 +1660,7 @@ void monster_player_attack(monster *m, player *p)
         if (!map_is_monster_at(game_map(nlarn, p->pos.z), p->pos)
                 && monster_in_sight(m))
         {
-            log_add_entry(p->log, "The %s bashes into thin air.",
+            log_add_entry(nlarn->log, "The %s bashes into thin air.",
                           monster_name(m));
         }
 
@@ -1675,7 +1675,7 @@ void monster_player_attack(monster *m, player *p)
     {
         if (monster_in_sight(m))
         {
-            log_add_entry(p->log, "The %s misses wildly.", monster_get_name(m));
+            log_add_entry(nlarn->log, "The %s misses wildly.", monster_get_name(m));
         }
         return;
     }
@@ -1685,7 +1685,7 @@ void monster_player_attack(monster *m, player *p)
     {
         if (monster_in_sight(m))
         {
-            log_add_entry(p->log, "The %s is awestruck at your magnificence!",
+            log_add_entry(nlarn->log, "The %s is awestruck at your magnificence!",
                           monster_get_name(m));
         }
         return;
@@ -1774,7 +1774,7 @@ void monster_player_attack(monster *m, player *p)
         break;
 
     case DAM_RUST:
-        log_add_entry(p->log, "The %s %s you.", monster_get_name(m),
+        log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
                       monster_attack_verb[att->type]);
 
         /* a failed attack causes frustration */
@@ -1793,7 +1793,7 @@ void monster_player_attack(monster *m, player *p)
 
     default:
         /* log the attack */
-        log_add_entry(p->log, "The %s %s you.", monster_get_name(m),
+        log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
                       monster_attack_verb[att->type]);
 
         player_damage_take(p, dam, PD_MONSTER, m->type);
@@ -1848,14 +1848,14 @@ monster *monster_damage_take(monster *m, damage *dam)
                 {
                     if (seen_old && seen_new)
                     {
-                        log_add_entry(p->log, "The metamorph turns into a %s!",
+                        log_add_entry(nlarn->log, "The metamorph turns into a %s!",
                                       monster_name(m));
                     }
                     else if (seen_old)
-                        log_add_entry(p->log, "The metamorph vanishes!");
+                        log_add_entry(nlarn->log, "The metamorph vanishes!");
                     else
                     {
-                        log_add_entry(p->log, "A %s suddenly appears!",
+                        log_add_entry(nlarn->log, "A %s suddenly appears!",
                                       monster_name(m));
                     }
                 }
@@ -2134,7 +2134,7 @@ effect *monster_effect_add(monster *m, effect *e)
     /* show message if monster is visible */
     if (e && monster_in_sight(m) && effect_get_msg_m_start(e))
     {
-        log_add_entry(nlarn->p->log, effect_get_msg_m_start(e),
+        log_add_entry(nlarn->log, effect_get_msg_m_start(e),
                       monster_name(m));
     }
 
@@ -2150,7 +2150,7 @@ int monster_effect_del(monster *m, effect *e)
     /* log info if the player can see the monster */
     if (monster_in_sight(m) && effect_get_msg_m_stop(e))
     {
-        log_add_entry(nlarn->p->log, effect_get_msg_m_stop(e), monster_name(m));
+        log_add_entry(nlarn->log, effect_get_msg_m_stop(e), monster_name(m));
     }
 
     if ((result = effect_del(m->effects, e)))
@@ -2302,7 +2302,7 @@ static void monster_weapon_wield(monster *m, item *weapon)
         item_describe(weapon, player_item_identified(nlarn->p, weapon),
                       TRUE, FALSE, buf, 60);
 
-        log_add_entry(nlarn->p->log, "The %s wields %s.",
+        log_add_entry(nlarn->log, "The %s wields %s.",
                       monster_name(m), buf);
     }
 }
@@ -2327,7 +2327,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
         return (inv_length(p->inventory) > 1);
 
     /* log the attack */
-    log_add_entry(p->log, "The %s hits you. You feel a sense of loss.",
+    log_add_entry(nlarn->log, "The %s hits you. You feel a sense of loss.",
                   monster_get_name(m));
 
     if (it->type == IT_WEAPON
@@ -2366,7 +2366,7 @@ static gboolean monster_item_rust(monster *m, struct player *p)
     }
     else
     {
-        log_add_entry(p->log, "Nothing happens.");
+        log_add_entry(nlarn->log, "Nothing happens.");
         return FALSE;
     }
 }
@@ -2398,7 +2398,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                 player_set_gold(p, player_gold - it->count);
             }
 
-            log_add_entry(p->log, "The %s picks your pocket. " \
+            log_add_entry(nlarn->log, "The %s picks your pocket. " \
                           "Your purse feels lighter.", monster_get_name(m));
         }
         else
@@ -2417,7 +2417,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                         inv_del_element(map_ilist_at(monster_map(m), p->pos), it);
                         if (monster_in_sight(m))
                         {
-                            log_add_entry(p->log, "The %s picks up some gold at your feet. ",
+                            log_add_entry(nlarn->log, "The %s picks up some gold at your feet. ",
                                           monster_get_name(m));
                         }
                         break;
@@ -2441,20 +2441,20 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                 if (it->cursed)
                 {
                     /* cursed items can't be stolen.. */
-                    log_add_entry(p->log, "The %s tries to steal %s but failed.",
+                    log_add_entry(nlarn->log, "The %s tries to steal %s but failed.",
                                   monster_get_name(m), buf);
 
                     /* return true as there actually are things to steal */
                     return TRUE;
                 }
 
-                log_disable(p->log);
+                log_disable(nlarn->log);
                 player_item_unequip(p, NULL, it);
-                log_enable(p->log);
+                log_enable(nlarn->log);
             }
 
             inv_del_element(&p->inventory, it);
-            log_add_entry(p->log, "The %s picks your pocket and steals %s.",
+            log_add_entry(nlarn->log, "The %s picks your pocket and steals %s.",
                           monster_get_name(m), buf);
         }
     }
@@ -2467,7 +2467,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     }
     else
     {
-        log_add_entry(p->log, "The %s couldn't find anything to steal.",
+        log_add_entry(nlarn->log, "The %s couldn't find anything to steal.",
                       monster_get_name(m));
 
         return FALSE;
@@ -2511,7 +2511,7 @@ static position monster_move_attack(monster *m, struct player *p)
         /* monster's position might have changed (teleport) */
         if (!pos_identical(npos, monster_pos(m)))
         {
-            log_add_entry(p->log, "The %s vanishes.", monster_name(m));
+            log_add_entry(nlarn->log, "The %s vanishes.", monster_name(m));
         }
 
         return monster_pos(m);

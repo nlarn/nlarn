@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
             /* look at current position */
         case ':':
             strbuf = map_pos_examine(nlarn->p->pos);
-            log_add_entry(nlarn->p->log, strbuf);
+            log_add_entry(nlarn->log, strbuf);
             g_free(strbuf);
             break;
 
@@ -334,11 +334,11 @@ int main(int argc, char *argv[])
             if (pos_valid(pos))
             {
                 strbuf = map_pos_examine(pos);
-                log_add_entry(nlarn->p->log, strbuf);
+                log_add_entry(nlarn->log, strbuf);
                 g_free(strbuf);
             }
             else
-                log_add_entry(nlarn->p->log, "Aborted.");
+                log_add_entry(nlarn->log, "Aborted.");
 
             break;
 
@@ -422,7 +422,7 @@ int main(int argc, char *argv[])
 
             /* bank account information */
         case '$':
-            log_add_entry(nlarn->p->log, "There %s %s gp on your bank account.",
+            log_add_entry(nlarn->log, "There %s %s gp on your bank account.",
                           (nlarn->p->bank_account == 1) ? "is" : "are",
                           int2str(nlarn->p->bank_account));
             break;
@@ -453,11 +453,11 @@ int main(int argc, char *argv[])
         case 'P':
             if (nlarn->p->outstanding_taxes)
             {
-                log_add_entry(nlarn->p->log, "You presently owe %d gp in taxes.",
+                log_add_entry(nlarn->log, "You presently owe %d gp in taxes.",
                               nlarn->p->outstanding_taxes);
             }
             else
-                log_add_entry(nlarn->p->log, "You do not owe any taxes.");
+                log_add_entry(nlarn->log, "You do not owe any taxes.");
             break;
 
             /* drink a potion or from a fountain */
@@ -490,7 +490,7 @@ int main(int argc, char *argv[])
             break;
 
         case 'v':
-            log_add_entry(nlarn->p->log, "NLarn version %d.%d.%d, built on %s.",
+            log_add_entry(nlarn->log, "NLarn version %d.%d.%d, built on %s.",
                           VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, __DATE__);
             break;
 
@@ -507,7 +507,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                log_add_entry(nlarn->p->log, "You have not discovered any item yet.");
+                log_add_entry(nlarn->log, "You have not discovered any item yet.");
             }
             break;
 
@@ -540,7 +540,7 @@ int main(int argc, char *argv[])
 
             /* message log browser */
         case 18: /* ^R */
-            display_show_history(nlarn->p->log, "Message history");
+            display_show_history(nlarn->log, "Message history");
             break;
 
             /* enable wizard mode */
@@ -552,12 +552,12 @@ int main(int argc, char *argv[])
                                       "gameplay and your score will not be counted.", NULL, NULL))
                 {
                     game_wizardmode(nlarn) = TRUE;
-                    log_add_entry(nlarn->p->log, "Wizard mode has been activated.");
+                    log_add_entry(nlarn->log, "Wizard mode has been activated.");
                 }
             }
             else
             {
-                log_add_entry(nlarn->p->log, "Wizard mode is already enabled.");
+                log_add_entry(nlarn->log, "Wizard mode is already enabled.");
             }
             break;
 

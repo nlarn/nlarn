@@ -1117,7 +1117,7 @@ item *item_enchant(item *it)
                       (it->count == 1), TRUE, desc, 80);
 
         desc[0] = g_ascii_toupper(desc[0]);
-        log_add_entry(nlarn->p->log, "%s vibrate%s strangely.",
+        log_add_entry(nlarn->log, "%s vibrate%s strangely.",
                       desc, (it->count == 1) ? "s" : "");
 
         it->bonus_known = bonus_known;
@@ -1167,7 +1167,7 @@ item *item_disenchant(item *it)
                       (it->count == 1), TRUE, desc, 80);
 
         desc[0] = g_ascii_toupper(desc[0]);
-        log_add_entry(nlarn->p->log, "%s vibrate%s warningly.",
+        log_add_entry(nlarn->log, "%s vibrate%s warningly.",
                       desc, (it->count == 1) ? "s" : "");
     }
 
@@ -1253,7 +1253,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     if (erosion_desc != NULL && visible)
     {
         /* items has been eroded, describe the event if it is visible */
-        log_add_entry(nlarn->p->log, "%s %s%s.", item_desc,
+        log_add_entry(nlarn->log, "%s %s%s.", item_desc,
                       erosion_desc, (it->count == 1) ? "s" : "");
     }
 
@@ -1263,7 +1263,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
         if (visible)
         {
             /* describe the event if the item was visible */
-            log_add_entry(nlarn->p->log, "%s %s destroyed.", item_desc,
+            log_add_entry(nlarn->log, "%s %s destroyed.", item_desc,
                           (it->count == 1) ? "is" : "are");
         }
 
@@ -1275,9 +1275,9 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
                  * inventory, try to unequip the item first as we do
                  * not know if it is eqipped (this would lead to nasty
                  * segementation faults otherwise) */
-                log_disable(nlarn->p->log);
+                log_disable(nlarn->log);
                 player_item_unequip(nlarn->p, &nlarn->p->inventory, it);
-                log_enable(nlarn->p->log);
+                log_enable(nlarn->log);
             }
 
             inv_del_element(inv, it);

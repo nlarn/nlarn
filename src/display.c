@@ -486,17 +486,17 @@ int display_paint_screen(player *p)
     i = 0;
 
     /* if log contains buffered messaged, display them */
-    if (log_buffer(p->log))
+    if (log_buffer(nlarn->log))
     {
-        text = text_wrap(log_buffer(p->log), display_cols, 2);
+        text = text_wrap(log_buffer(nlarn->log), display_cols, 2);
         for (x = 1; x <= min(text->len, y); x++)
             ttime[x - 1] = game_turn(nlarn);
     }
 
     /* retrieve game log and reformat messages to window width */
-    while (((text == NULL) || (text->len < y)) && (log_length(p->log) > i))
+    while (((text == NULL) || (text->len < y)) && (log_length(nlarn->log) > i))
     {
-        le = log_get_entry(p->log, log_length(p->log) - 1 - i);
+        le = log_get_entry(nlarn->log, log_length(nlarn->log) - 1 - i);
 
         if (text == NULL)
             text = text_wrap(le->message, display_cols, 2);
@@ -518,7 +518,7 @@ int display_paint_screen(player *p)
         move(y, 0);
         clrtoeol();
 
-        if ((p->log->gtime - 15) < ttime[i])
+        if ((nlarn->log->gtime - 15) < ttime[i])
             attrs = DC_WHITE;
         else
             attrs = DC_LIGHTGRAY;
@@ -1050,7 +1050,7 @@ spell *display_spell_select(char *title, player *p)
 
     if (!p->known_spells || !p->known_spells->len)
     {
-        log_add_entry(p->log, "You don't know any spells.");
+        log_add_entry(nlarn->log, "You don't know any spells.");
         return NULL;
     }
 
@@ -2074,7 +2074,7 @@ position display_get_position(player *p, char *message, gboolean ray,
     pos = p->pos;
 
     /* display message */
-    log_add_entry(p->log, message);
+    log_add_entry(nlarn->log, message);
     display_paint_screen(p);
 
     /* show block cursor */

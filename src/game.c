@@ -53,10 +53,10 @@ static const char *highscores = "highscores";
 
 static void print_welcome_message(gboolean newgame)
 {
-    log_add_entry(nlarn->p->log, "Welcome %sto NLarn %d.%d.%d!",
+    log_add_entry(nlarn->log, "Welcome %sto NLarn %d.%d.%d!",
                   newgame ? "" : "back ",
                   VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
-    log_add_entry(nlarn->p->log, "For a list of commands, press '?'.");
+    log_add_entry(nlarn->log, "For a list of commands, press '?'.");
 }
 
 void game_new(int argc, char *argv[])
@@ -102,10 +102,13 @@ void game_new(int argc, char *argv[])
     nlarn->time_start = time(NULL);
     nlarn->version = SAVEFILE_VERSION;
 
+    /* start a new diary */
+    nlarn->log = log_new();
+
     /* welcome message */
     print_welcome_message(TRUE);
 
-    log_set_time(nlarn->p->log, nlarn->gtime);
+    log_set_time(nlarn->log, nlarn->gtime);
 }
 
 int game_destroy(game *g)
@@ -132,7 +135,7 @@ int game_destroy(game *g)
     g_free(g->highscores);
 
     player_destroy(g->p);
-
+    log_destroy(g->log);
     inv_destroy(g->store_stock, FALSE);
 
     g_hash_table_destroy(g->items);
@@ -213,6 +216,9 @@ int game_save(game *g, const char *filename)
         cJSON_AddItemToObject(save, "store_stock", inv_serialize(g->store_stock));
     }
 
+    /* log */
+    cJSON_AddItemToObject(save, "log", log_serialize(g->log));
+
     /* add player */
     cJSON_AddItemToObject(save, "player",  player_serialize(g->p));
 
@@ -250,7 +256,7 @@ int game_save(game *g, const char *filename)
         if (ret == -1)
         {
             /* creating the directory failed */
-            log_add_entry(g->p->log, "Failed to create directory %s.", g->userdir);
+            log_add_entry(g->log, "Failed to create directory %s.", g->userdir);
             free(sg);
 
             return FALSE;
@@ -262,14 +268,14 @@ int game_save(game *g, const char *filename)
 
     if (file == NULL)
     {
-        log_add_entry(g->p->log, "Error opening save file.");
+        log_add_entry(g->log, "Error opening save file.");
         free(sg);
         return FALSE;
     }
 
     if (gzputs(file, sg) != strlen(sg))
     {
-        log_add_entry(g->p->log, "Error writing save file: %s",
+        log_add_entry(g->log, "Error writing save file: %s",
                       gzerror(file, &err));
 
         free(sg);
@@ -421,9 +427,12 @@ gboolean game_load(const char *filename, int argc, char *argv[])
         g->maps[idx] = map_deserialize(cJSON_GetArrayItem(obj, idx), g);
 
 
-    /* store dnd store stock */
+    /* restore dnd store stock */
     obj = cJSON_GetObjectItem(save, "store_stock");
     if (obj != NULL) g->store_stock = inv_deserialize(obj);
+
+    /* restore log */
+    g->log = log_deserialize(cJSON_GetObjectItem(save, "log"));
 
 
     /* restore player */
@@ -454,7 +463,7 @@ gboolean game_load(const char *filename, int argc, char *argv[])
     /* initialize settings */
     game_initialize_settings(g, argc, argv, FALSE);
 
-    log_set_time(nlarn->p->log, g->gtime);
+    log_set_time(nlarn->log, g->gtime);
 
     /* welcome message */
     print_welcome_message(FALSE);
@@ -575,7 +584,7 @@ void game_spin_the_wheel(game *g)
     g_ptr_array_foreach(g->spheres, (GFunc)sphere_move, g);
 
     g->gtime++; /* count up the time  */
-    log_set_time(g->p->log, g->gtime); /* adjust time for log entries */
+    log_set_time(g->log, g->gtime); /* adjust time for log entries */
 }
 
 gpointer game_item_register(game *g, item *it)
@@ -799,7 +808,7 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
 
         if (wizard)
         {
-            log_add_entry(g->p->log, "Wizard mode has been activated.");
+            log_add_entry(g->log, "Wizard mode has been activated.");
         }
     } /* end new game only settings */
 
@@ -844,7 +853,7 @@ static void game_monsters_move(game *g)
         monster_effects_expire(m);
 
         /* regenerate / inflict poison upon monster. */
-        if (!monster_regenerate(m, g->gtime, g->difficulty, g->p->log))
+        if (!monster_regenerate(m, g->gtime, g->difficulty, g->log))
         {
             monster_die(m, NULL);
             continue;

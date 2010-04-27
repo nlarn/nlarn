@@ -140,7 +140,6 @@ typedef struct player
 
     position pos; /* player's position */
     player_stats stats; /* statistics */
-    message_log *log; /* game message log */
 
     /* player's field of vision */
     int fov[MAP_MAX_Y][MAP_MAX_X];
