@@ -44,10 +44,10 @@ solution "NLarn"
 		includedirs { "inc" }
 		defines { "G_DISABLE_DEPRECATED" }
 
-		links { "glib-2.0", "m", "z" }
+		links { "glib-2.0", "lua", "m", "z" }
 
 		configuration "Debug"
-			defines { "DEBUG" }
+			defines { "DEBUG", "LUA_USE_APICHECK" }
 			flags { "Symbols", "ExtraWarnings" }
 
 		configuration "Release"

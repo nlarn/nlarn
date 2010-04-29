@@ -19,6 +19,7 @@
 #ifndef __GAME_H_
 #define __GAME_H_
 
+#include <lua.h>
 #include "items.h"
 #include "map.h"
 #include "player.h"
@@ -31,6 +32,7 @@
 /* the world as we know it */
 typedef struct game
 {
+    lua_State *L;               /* the lua engine */
     player *p;                  /* the player */
     map *maps[MAP_MAX];         /* the dungeon */
     guint8 version;             /* save compatibility value */

@@ -20,7 +20,7 @@ else
 fi
 
 MAINFILES="$EXE nlarn.ini-sample README.txt LICENSE"
-LIBFILES="lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg"
+LIBFILES="lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg lib/monsters.lua"
 
 VERSION_MAJOR=$(grep VERSION_MAJOR inc/nlarn.h | cut -f 3 -d" ")
 VERSION_MINOR=$(grep VERSION_MINOR inc/nlarn.h | cut -f 3 -d" ")

@@ -83,6 +83,7 @@ Section "NLarn (required)"
   File "lib\maze"
   File "lib\nlarn.hlp"
   File "lib\nlarn.msg"
+  File "lib\monsters.lua"
 
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NLarn "Install_Dir" "$INSTDIR"

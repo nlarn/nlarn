@@ -20,6 +20,7 @@
 #define __MONSTERS_H_
 
 #include <glib.h>
+#include <lua.h>
 #include <time.h>
 
 #include "cJSON.h"
@@ -40,37 +41,6 @@ struct player;
 struct map;
 
 /* local monster definition for data storage */
-
-#define MONSTER_ATTACK_COUNT 2
-
-/* TODO: spell casting ability, resistances */
-typedef struct monster_data
-{
-    int type;
-    char *name;			/* monster's name */
-    int level;
-    int ac;
-    int intelligence;	/* used to choose movement */
-    int gold;
-    int hp_max;
-    int exp;			/* xp granted to player */
-    char image;
-    int colour;
-    speed mspeed;
-    esize msize;
-    guint32 flags;
-    attack attacks[MONSTER_ATTACK_COUNT];
-} monster_data;
-
-typedef enum monster_action_type
-{
-    MA_NONE,
-    MA_FLEE,
-    MA_REMAIN,
-    MA_WANDER,
-    MA_ATTACK,
-    MA_MAX
-} monster_action_t;
 
 typedef enum monster_t
 {
@@ -142,7 +112,17 @@ typedef enum monster_t
     MT_MAX				/* maximum # monsters in the dungeon */
 } monster_t;
 
-enum monster_flags
+typedef enum monster_action_type
+{
+    MA_NONE,
+    MA_FLEE,
+    MA_REMAIN,
+    MA_WANDER,
+    MA_ATTACK,
+    MA_MAX
+} monster_action_t;
+
+typedef enum monster_flags
 {
     MF_NONE         = 0,
     MF_HEAD         = 1,        /* has a head */
@@ -158,17 +138,14 @@ enum monster_flags
     MF_DEMON        = 1 << 10,  /* is a demon */
     MF_DRAGON       = 1 << 11,  /* is a dragon */
     MF_MIMIC        = 1 << 12,  /* is a mimic */
-};
-
-/* external vars */
-
-extern const monster_data monsters[MT_MAX];
+} monster_flag;
 
 /* function definitions */
 
-monster *monster_new(int type, position pos);
+monster *monster_new(monster_t type, position pos);
 monster *monster_new_by_level(position pos);
 void monster_destroy(monster *m);
+void monsters_wrap(lua_State *L);
 
 void monster_serialize(gpointer oid, monster *m, cJSON *root);
 void monster_deserialize(cJSON *mser, struct game *g);
@@ -190,7 +167,7 @@ void monster_unknown_set(monster *m, gboolean what);
 gboolean monster_in_sight(monster *m);
 
 /* other functions */
-char *monster_get_name(monster *m);
+const char *monster_get_name(monster *m);
 const char* monster_type_plural_name(const int montype, const int count);
 void monster_die(monster *m, struct player *p);
 
@@ -216,6 +193,15 @@ int monster_items_pickup(monster *m);
  */
 int monster_attack_count(monster *m);
 
+/**
+ * Returns the chosen attack type for the monster
+ *
+ * @param a monster
+ * @param the number of an attack
+ * @return an attack
+ */
+attack monster_attack(monster *m, int num);
+
 void monster_player_attack(monster *m, struct player *p);
 
 /**
@@ -239,38 +225,67 @@ void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
 
 char *monster_desc(monster *m);
-char monster_image(monster *m);
-int monster_colour(monster *m);
+char monster_glyph(monster *m);
+int monster_color(monster *m);
 
-#define monster_name(monster)        (monsters[monster_type(monster)].name)
-#define monster_level(monster)       (monsters[monster_type(monster)].level)
-#define monster_ac(monster)          (monsters[monster_type(monster)].ac)
-#define monster_int(monster)         (monsters[monster_type(monster)].intelligence)
-#define monster_gold(monster)        (monsters[monster_type(monster)].gold)
-#define monster_exp(monster)         (monsters[monster_type(monster)].exp)
-#define monster_speed(monster)       (monsters[monster_type(monster)].mspeed)
-#define monster_attack(monster, idx) (monsters[monster_type(monster)].attacks[(idx)])
-#define monster_map(monster)         (game_map(nlarn, monster_pos((monster)).z))
+/* query monster data */
 
-/* flags */
-#define monster_has_head(monster)        (monsters[monster_type(monster)].flags & MF_HEAD)
-#define monster_is_beheadable(monster)   (!(monsters[monster_type(monster)].flags & MF_NOBEHEAD))
-#define monster_has_hands(monster)       (monsters[monster_type(monster)].flags & MF_HANDS)
-#define monster_can_fly(monster)         (monsters[monster_type(monster)].flags & MF_FLY)
-#define monster_is_spirit(monster)       (monsters[monster_type(monster)].flags & MF_SPIRIT)
-#define monster_is_undead(monster)       (monsters[monster_type(monster)].flags & MF_UNDEAD)
-#define monster_is_invisible(monster)    (monsters[monster_type(monster)].flags & MF_INVISIBLE)
-#define monster_has_infravision(monster) (monsters[monster_type(monster)].flags & MF_INFRAVISION)
-#define monster_can_regenerate(monster)  (monsters[monster_type(monster)].flags & MF_REGENERATE)
-#define monster_is_metallivore(monster)  (monsters[monster_type(monster)].flags & MF_METALLIVORE)
-#define monster_is_demon(monster)        (monsters[monster_type(monster)].flags & MF_DEMON)
-#define monster_is_dragon(monster)       (monsters[monster_type(monster)].flags & MF_DRAGON)
-#define monster_is_mimic(monster)        (monsters[monster_type(monster)].flags & MF_MIMIC)
+static inline const char *monster_name(monster *m) {
+    return luaN_query_string("monsters", monster_type(m), "name");
+}
 
-#define monster_type_name(type)  (monsters[(type)].name)
-#define monster_type_exp(type)   (monsters[(type)].exp)
-#define monster_type_image(type) (monsters[(type)].image)
-#define monster_type_is_invisible(type) (monsters[(type)].flags & MF_INVISIBLE)
+static inline int monster_level(monster *m)
+{
+    return luaN_query_int("monsters", monster_type(m), "level");
+    }
+
+static inline int monster_ac(monster *m)
+{
+    return luaN_query_int("monsters", monster_type(m), "ac");
+}
+
+static inline int monster_int(monster *m)
+{
+    return luaN_query_int("monsters", monster_type(m), "intelligence"); }
+
+static inline int monster_gold(monster *m)
+{
+    return luaN_query_int("monsters", monster_type(m), "gold");
+}
+
+static inline int monster_exp(monster *m)
+{
+    return luaN_query_int("monsters", monster_type(m), "exp");
+}
+
+static inline int monster_speed(monster *m)
+{
+    return luaN_query_int("monsters", monster_type(m), "speed");
+}
+
+static inline int monster_flags(monster *m, monster_flag f)
+{
+    return (luaN_query_int("monsters", monster_type(m), "flags") & f);
+}
+
+#define monster_map(M)         game_map(nlarn, monster_pos(M).z)
+
+/* query monster type data */
+
+static inline int monster_type_hp_max(monster_t t)
+{
+    return luaN_query_int("monsters", (t), "hp_max");
+}
+
+static inline char monster_type_image(monster_t t)
+{
+    return luaN_query_char("monsters", (t), "glyph");
+}
+
+static inline const char *monster_type_name(monster_t t)
+{
+    return luaN_query_string("monsters", (t), "name");
+}
 
 int monster_genocide(int monster_id);
 int monster_is_genocided(int monster_id);

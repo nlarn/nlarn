@@ -18,6 +18,8 @@
 
 /* needed for the key definitions */
 #include <curses.h>
+#include <lua.h>
+#include <lauxlib.h>
 #include <stdlib.h>
 #include <glib/gstdio.h>
 #include <ctype.h>
@@ -72,8 +74,8 @@ int main(int argc, char *argv[])
             display_initialised = TRUE;
 
             if (display_get_yesno("Saved game could not be loaded. " \
-                                          "Delete and start new game?",
-                                          NULL, NULL))
+                                  "Delete and start new game?",
+                                  NULL, NULL))
             {
                 /* delete save file */
                 g_unlink(save_file_name);
@@ -541,6 +543,22 @@ int main(int argc, char *argv[])
             /* message log browser */
         case 18: /* ^R */
             display_show_history(nlarn->log, "Message history");
+            break;
+
+            /* interact with the Lua interpreter */
+        case KEY_TAB:
+            if (!game_wizardmode(nlarn)) break;
+
+            strbuf = display_get_string("Interact with the Lua interpreter", NULL, 60);
+            if (!strbuf) break;
+
+            if (luaL_dostring(nlarn->L, strbuf))
+            {
+                log_add_entry(nlarn->log, "E: %s", lua_tostring(nlarn->L, -1));
+                lua_pop(nlarn->L, 1);
+            }
+
+            g_free(strbuf);
             break;
 
             /* enable wizard mode */

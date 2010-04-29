@@ -876,7 +876,7 @@ int spell_type_ray(spell *s, struct player *p)
                     gboolean mis = monster_in_sight(monster);
 
                     attron((attrs = (mis ? DC_LIGHTRED : DC_LIGHTCYAN)));
-                    mvaddch(pos.y, pos.x, (mis ? monster_image(monster) : '*'));
+                    mvaddch(pos.y, pos.x, (mis ? monster_glyph(monster) : '*'));
 
                     log_add_entry(nlarn->log, spell_msg_succ(s), monster_get_name(monster));
                     monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount, p));
@@ -1057,7 +1057,7 @@ int spell_type_blast(spell *s, struct player *p)
                     && monster_in_sight(monster))
                 {
                     /* blast hit a visible monster */
-                    addch(monster_image(monster));
+                    addch(monster_glyph(monster));
 
                     dam = damage_new(dam_t, ATT_MAGIC, amount, p);
                     monster_damage_take(monster, dam);

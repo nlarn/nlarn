@@ -17,6 +17,8 @@
  */
 
 #include <assert.h>
+#include <lua.h>
+#include <lauxlib.h>
 #include <stdlib.h>
 
 #include "display.h"
@@ -25,38 +27,22 @@
 #include "monsters.h"
 #include "nlarn.h"
 
-static position monster_move_wander(monster *m, struct player *p);
-static position monster_move_attack(monster *m, struct player *p);
-static position monster_move_flee(monster *m, struct player *p);
-
-#define EMPTY_ATTACK { ATT_NONE, DAM_NONE, 0, 0 }
-
 /* monster information hiding */
 struct _monster
 {
     monster_t type;
-    gpointer oid; /* monsters id inside the monster hash */
+    gpointer oid;            /* monsters id inside the monster hash */
     gint32 hp_max;
     gint32 hp;
     position pos;
     int movement;
-    monster_action_t action;    /* current action */
-
-    /* number of turns since when player was last seen; 0 = never */
-    guint32 lastseen;
-
-    /* last known position of player */
-    position player_pos;
-
-    /* attacks already unsuccessfully tried */
-    gboolean attacks_failed[MONSTER_ATTACK_COUNT];
-
+    monster_action_t action; /* current action */
+    guint32 lastseen;        /* number of turns since when player was last seen; 0 = never */
+    position player_pos;     /* last known position of player */
     inventory *inventory;
     gpointer weapon;
     GPtrArray *effects;
-
     int colour;          /* for the mimic: the colour the disguised mimic chose */
-
     guint32
         item_type: 8,    /* item type monster is displayed as */
         unknown: 1;      /* monster is unknown */
@@ -86,674 +72,19 @@ const char *monster_attack_verb[ATT_MAX] =
     "gazes at",     /* ATT_GAZE */
 };
 
-const monster_data monsters[MT_MAX] =
-{
-    /* ID NAME
-     * level ac intelligence gold hitpoints experience image */
-    {
-        MT_NONE, "",
-        0, 0, 0, 0, 0, 0, ' ', DC_BLACK,
-        SPEED_NONE, ESIZE_NONE,
-        MF_NONE,
-        {
-            EMPTY_ATTACK,
-            EMPTY_ATTACK,
-        }
-
-    },
-    {
-        MT_GIANT_BAT, "giant bat",
-        1, 0, 3, 0, 1, 1, 'b', DC_RED,
-        SPEED_XFAST, ESIZE_SMALL,
-        MF_HEAD | MF_FLY | MF_INFRAVISION,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_GNOME, "gnome",
-        1, 10, 8, 30, 2, 2, 'g', DC_BROWN,
-        SPEED_NORMAL, ESIZE_SMALL,
-        MF_HEAD | MF_HANDS,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_HOBGOBLIN, "hobgoblin",
-        1, 14, 5, 25, 3, 2, 'H', DC_BROWN,
-        SPEED_SLOW, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS | MF_INFRAVISION,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_JACKAL, "jackal",
-        1, 17, 4, 0, 1, 1, 'J', DC_BROWN,
-        SPEED_FAST, ESIZE_SMALL,
-        MF_HEAD,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_KOBOLD, "kobold",
-        1, 20, 7, 10, 1, 1, 'K', DC_BROWN,
-        SPEED_NORMAL, ESIZE_SMALL,
-        MF_HEAD | MF_HANDS | MF_INFRAVISION,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_ORC, "orc",
-        2, 12, 9, 40, 4, 2, 'O', DC_RED,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS | MF_INFRAVISION,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_SNAKE, "snake",
-        2, 15, 3, 0, 3, 1, 'S', DC_LIGHTGREEN,
-        SPEED_NORMAL, ESIZE_TINY,
-        MF_HEAD,
-        {
-            { ATT_BITE, DAM_POISON, 2, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
-        }
-    },
-    {
-        MT_CENTIPEDE, "giant centipede",
-        2, 14, 2, 0, 1, 2, 'c', DC_YELLOW,
-        SPEED_NORMAL, ESIZE_TINY,
-        MF_HEAD,
-        {
-            { ATT_BITE, DAM_DEC_STR, 50, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
-        }
-    },
-    {
-        /* a winged, leaping snake */
-        MT_JACULUS, "jaculus",
-        2, 20, 3, 0, 2, 1, 'j', DC_GREEN,
-        SPEED_XFAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_FLY,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 2, 0 },
-            { ATT_CLAW, DAM_PHYSICAL, 2, 0 },
-        }
-    },
-    {
-        MT_TROGLODYTE, "troglodyte",
-        2, 10, 5, 80, 4, 3, 't', DC_BROWN,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_GIANT_ANT, "giant ant",
-        2, 8, 3, 0, 5, 5, 'A', DC_BROWN,
-        SPEED_NORMAL, ESIZE_SMALL,
-        MF_HEAD,
-        {
-            { ATT_BITE, DAM_DEC_STR, 75, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 1, 0 },
-        }
-    },
-    {
-        MT_FLOATING_EYE, "floating eye",
-        3, 8, 3, 0, 5, 2, 'E', DC_BLUE,
-        SPEED_XSLOW, ESIZE_MEDIUM,
-        MF_FLY,
-        {
-            { ATT_GAZE, DAM_PARALYSIS, 66, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_LEPRECHAUN, "leprechaun",
-        3, 3, 6, 1500, 13, 45, 'L', DC_GREEN,
-        SPEED_NORMAL, ESIZE_SMALL,
-        MF_HEAD | MF_HANDS,
-        {
-            { ATT_TOUCH, DAM_STEAL_GOLD, 0, 0 },
-            { ATT_CLAW, DAM_PHYSICAL, 2, 0 },
-        }
-    },
-    {
-        MT_NYMPH, "nymph",
-        3, 3, 9, 0, 18, 45, 'n', DC_RED,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS,
-        {
-            { ATT_TOUCH, DAM_STEAL_ITEM, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_QUASIT, "quasit",
-        3, 5, 3, 0, 10, 15, 'Q', DC_BLUE,
-        SPEED_FAST, ESIZE_SMALL,
-        MF_HEAD | MF_HANDS | MF_DEMON,
-        {
-            { ATT_CLAW, DAM_DEC_DEX, 66, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 3, 0 },
-        }
-    },
-    {
-        MT_RUST_MONSTER, "rust monster",
-        3, 4, 3, 0, 18, 25, 'R', DC_BROWN,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_HEAD | MF_METALLIVORE,
-        {
-            { ATT_TOUCH, DAM_RUST, 1, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 3, 0 },
-        }
-    },
-    {
-        MT_ZOMBIE, "zombie",
-        3, 12, 3, 0, 6, 7, 'Z', DC_LIGHTGRAY,
-        SPEED_VSLOW, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS | MF_UNDEAD,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 2, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 2, 0 },
-        }
-    },
-    {
-        MT_ASSASSIN_BUG, "assassin bug",
-        4, 9, 3, 0, 20, 15, 'a', DC_LIGHTGRAY,
-        SPEED_FAST, ESIZE_TINY,
-        MF_HEAD,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 3, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_BUGBEAR, "bugbear",
-        4, 5, 5, 40, 20, 35, 'B', DC_BROWN,
-        SPEED_SLOW, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS | MF_INFRAVISION,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 5, 10 },
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-        }
-    },
-    {
-        MT_HELLHOUND, "hell hound",
-        4, 5, 6, 0, 16, 35, 'h', DC_LIGHTRED,
-        SPEED_FAST, ESIZE_SMALL,
-        MF_HEAD,
-        {
-            { ATT_BREATH, DAM_FIRE, 8, 15 },
-            { ATT_BITE, DAM_PHYSICAL, 2, 0 },
-        }
-    },
-    {
-        MT_ICE_LIZARD, "ice lizard",
-        4, 11, 6, 0, 16, 25, 'i', DC_LIGHTCYAN,
-        SPEED_SLOW, ESIZE_MEDIUM,
-        MF_HEAD,
-        {
-            { ATT_SLAM, DAM_PHYSICAL, 14, 0 },
-            { ATT_CLAW, DAM_PHYSICAL, 2, 0 },
-        }
-    },
-    {
-        MT_CENTAUR, "centaur",
-        4, 6, 10, 40, 24, 45, 'C', DC_BROWN,
-        SPEED_FAST, ESIZE_LARGE,
-        MF_HEAD | MF_HANDS,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            { ATT_KICK, DAM_PHYSICAL, 6, 0 },
-        }
-    },
-    {
-        MT_TROLL, "troll",
-        5, 4, 9, 80, 50, 300, 'T', DC_BROWN,
-        SPEED_SLOW, ESIZE_LARGE,
-        MF_HEAD | MF_HANDS | MF_REGENERATE,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 5, 0 },
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-        }
-    },
-    {
-        MT_YETI, "yeti",
-        5, 6, 5, 50, 35, 100, 'Y', DC_LIGHTGRAY,
-        SPEED_NORMAL, ESIZE_LARGE,
-        MF_HEAD | MF_HANDS,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 4, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_ELF, "elf",
-        5, 8, 15, 50, 22, 35, 'e', DC_WHITE,
-        SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS | MF_INFRAVISION,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_GELATINOUSCUBE, "gelatinous cube",
-        5, 9, 3, 0, 22, 45, 'g', DC_CYAN,
-        SPEED_XSLOW, ESIZE_LARGE,
-        MF_METALLIVORE,
-        {
-            { ATT_SLAM, DAM_ACID, 1, 0 },
-        }
-    },
-    {
-        MT_WHITE_DRAGON, "white dragon",
-        5, 2, 16,  500, 55, 1000, 'd', DC_WHITE,
-        SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_DRAGON,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 4, 0 },
-            { ATT_CLAW, DAM_PHYSICAL, 4, 0 },
-        }
-    },
-    {
-        MT_METAMORPH, "metamorph",
-        6, 7, 3, 0, 30, 40, 'm', DC_WHITE,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_NONE,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 3, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_VORTEX, "vortex",
-        6, 4, 3, 0, 30, 55, 'v', DC_DARKGRAY,
-        SPEED_VFAST, ESIZE_TINY,
-        MF_NONE,
-        {
-            { ATT_SLAM, DAM_PHYSICAL, 3, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_ZILLER, "ziller",
-        6, 15, 3, 0, 30, 35, 'z', DC_CYAN,
-        SPEED_SLOW, ESIZE_MEDIUM,
-        MF_HEAD,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 3, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    { /* FIXME: I don't want no silly mushrooms */
-        MT_VIOLET_FUNGUS, "violet fungus",
-        6, 12, 3, 0, 38, 100, 'F', DC_MAGENTA,
-        SPEED_XSLOW, ESIZE_MEDIUM,
-        MF_NONE,
-        {
-            { ATT_SLAM, DAM_POISON, 2, 0 },
-            { ATT_SLAM, DAM_PHYSICAL, 3, 0 },
-        }
-    },
-    {
-        MT_WRAITH, "wraith",
-        6, 3, 3, 0, 30, 325, 'W', DC_LIGHTGRAY,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS | MF_UNDEAD,
-        {
-            { ATT_TOUCH, DAM_DRAIN_LIFE, 50, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_FORVALAKA, "forvalaka",
-        6, 2, 7, 0, 50, 280, 'f', DC_DARKGRAY,
-        SPEED_DOUBLE, ESIZE_MEDIUM,
-        MF_HEAD | MF_UNDEAD | MF_INFRAVISION,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 5, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    { /* TODO: get rid of this beast */
-        MT_LAMA_NOBE, "lama nobe",
-        7, 7, 6, 0, 35, 80, 'l', DC_BROWN,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_HEAD,
-        {
-            { ATT_BITE, DAM_NONE, 3, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_OSQUIP, "osquip",
-        7, 4, 4, 0, 35, 100, 'o', DC_BROWN,
-        SPEED_VFAST, ESIZE_SMALL,
-        MF_HEAD,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 10, 15 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_ROTHE, "rothe",
-        7, 15, 3, 0, 50, 250, 'r', DC_BROWN,
-        SPEED_VFAST, ESIZE_LARGE,
-        MF_HEAD | MF_INFRAVISION,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 5, 0 },
-            { ATT_CLAW, DAM_PHYSICAL, 3, 0 },
-        }
-    },
-    {
-        MT_XORN, "xorn",
-        7, 0, 13, 0, 60, 300, 'X', DC_DARKGRAY,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_INFRAVISION,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 6, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_VAMPIRE, "vampire",
-        7, 3, 17, 0, 50, 1000, 'V', DC_RED,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS | MF_FLY | MF_UNDEAD | MF_INFRAVISION | MF_REGENERATE,
-        {
-            { ATT_BITE, DAM_DRAIN_LIFE, 75, 0 },
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-        }
-    },
-    {
-        MT_STALKER, "invisible stalker",
-        7, 3, 14, 0, 50, 350, 'I', DC_LIGHTGRAY,
-        SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_FLY | MF_INVISIBLE,
-        {
-            { ATT_SLAM, DAM_PHYSICAL, 6, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_POLTERGEIST, "poltergeist",
-        8, 1, 5, 0, 50, 450, 'p', DC_WHITE,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_UNDEAD | MF_FLY | MF_INVISIBLE,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_DISENCHANTRESS, "disenchantress",
-        8, 3, 5, 0, 50, 500, 'q', DC_WHITE,
-        SPEED_NORMAL, ESIZE_MEDIUM,
-        MF_HEAD | MF_HANDS | MF_METALLIVORE,
-        {
-            { ATT_TOUCH, DAM_REM_ENCH, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_SHAMBLINGMOUND, "shambling mound",
-        8, 2, 6, 0, 45, 400, 's', DC_GREEN,
-        SPEED_VSLOW, ESIZE_HUGE,
-        MF_NONE,
-        {
-            { ATT_SLAM, DAM_PHYSICAL, 5, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    { /* FIXME: replace this beast! */
-        MT_YELLOW_MOLD, "yellow mold",
-        8, 12, 3, 0, 35, 250, 'y', DC_YELLOW,
-        SPEED_XSLOW, ESIZE_SMALL,
-        MF_NONE,
-        {
-            { ATT_TOUCH, DAM_PHYSICAL, 4, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_UMBER_HULK, "umber hulk",
-        8, 3, 14, 0, 65, 600, 'U', DC_YELLOW,
-        SPEED_SLOW, ESIZE_HUGE,
-        MF_HEAD | MF_HANDS | MF_INFRAVISION,
-        {
-            { ATT_GAZE, DAM_CONFUSION, 75, 0 },
-            { ATT_CLAW, DAM_PHYSICAL, 7, 0 },
-        }
-    },
-    {
-        MT_GNOME_KING, "gnome king",
-        9, -1, 18, 2000, 100,   3000, 'G', DC_RED,
-        SPEED_NORMAL, ESIZE_SMALL,
-        MF_HEAD | MF_HANDS,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_MIMIC, "mimic",
-        9, 5, 8, 0, 55, 99, 'M', DC_BROWN,
-        SPEED_SLOW, ESIZE_MEDIUM,
-        MF_MIMIC,
-        {
-            { ATT_SLAM, DAM_PHYSICAL, 6, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_WATER_LORD, "water lord",
-        9,-10, 20, 0, 150, 15000, 'w', DC_BLUE,
-        SPEED_NORMAL, ESIZE_LARGE,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_PURPLE_WORM, "purple worm",
-        9, -1, 3, 0, 120, 15000, 'P', DC_MAGENTA,
-        SPEED_VSLOW, ESIZE_GARGANTUAN,
-        MF_HEAD,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 11, 0 },
-            { ATT_STING, DAM_POISON, 6, 0 },
-        }
-    },
-    {
-        MT_XVART, "xvart",
-        9, -2, 13, 0, 90, 1000, 'x', DC_DARKGRAY,
-        SPEED_NORMAL, ESIZE_SMALL,
-        MF_HEAD | MF_HANDS | MF_INFRAVISION,
-        {
-            { ATT_WEAPON, DAM_PHYSICAL, 0, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_BRONCE_DRAGON, "bronze dragon",
-        9, 2, 16, 300, 80, 4000, 'D', DC_BROWN,
-        SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_FLY | MF_DRAGON,
-        {
-            { ATT_BITE, DAM_PHYSICAL, 9, 0 },
-            { ATT_CLAW, DAM_PHYSICAL, 9, 0 },
-        }
-    },
-    {
-        MT_GREEN_DRAGON, "green dragon",
-        9, 3, 15, 200, 70, 2500, 'D', DC_GREEN,
-        SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_FLY | MF_DRAGON,
-        {
-            { ATT_SLAM, DAM_PHYSICAL, 25, 0 },
-            { ATT_CLAW, DAM_PHYSICAL, 8, 0 },
-        }
-    },
-    { /* TODO: replace this beast */
-        MT_SILVER_DRAGON, "silver dragon",
-        10, -1, 20, 700, 100, 10000, 'D', DC_LIGHTGRAY,
-        SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_FLY | MF_DRAGON,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 12, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 12, 0 },
-        }
-    },
-    {
-        MT_PLATINUM_DRAGON, "platinum dragon",
-        10, -5, 22, 1000, 130, 24000, 'D', DC_WHITE,
-        SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_FLY | MF_DRAGON,
-        {
-            { ATT_MAGIC, DAM_MAGICAL, 15, 30 },
-            { ATT_BITE, DAM_PHYSICAL, 15, 0 },
-        }
-    },
-    {
-        MT_RED_DRAGON, "red dragon",
-        10, -2, 19, 800, 110, 14000, 'D', DC_LIGHTRED,
-        SPEED_NORMAL, ESIZE_HUGE,
-        MF_HEAD | MF_FLY | MF_DRAGON,
-        {
-            { ATT_BREATH, DAM_FIRE, 20, 25 },
-            { ATT_CLAW, DAM_PHYSICAL, 13, 0 },
-        }
-    },
-    {
-        MT_SPIRIT_NAGA, "spirit naga",
-        10, -20, 23, 0, 95, 20000, 'N', DC_MAGENTA,
-        SPEED_FAST, ESIZE_LARGE,
-        MF_HEAD | MF_NOBEHEAD | MF_FLY | MF_SPIRIT | MF_INFRAVISION,
-        {
-            { ATT_MAGIC, DAM_RANDOM, 1, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 12, 0 },
-        }
-    },
-    { /* TODO: relplace this beast */
-        MT_GREEN_URCHIN, "green urchin",
-        10, -3, 3, 0, 85, 5000, 'u', DC_GREEN,
-        SPEED_SLOW, ESIZE_SMALL,
-        MF_NONE,
-        {
-            { ATT_STING, DAM_PHYSICAL, 12, 0 },
-            EMPTY_ATTACK,
-        }
-    },
-    {
-        MT_DEMONLORD_I, "type I demon lord",
-        12, -30, 20, 0, 140, 50000, '&', DC_LIGHTRED,
-        SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 18, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 18, 0 },
-        }
-    },
-    {
-        MT_DEMONLORD_II, "type II demon lord",
-        13, -30, 21, 0, 160, 75000, '&', DC_LIGHTRED,
-        SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 18, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 18, 0 },
-        }
-    },
-    {
-        MT_DEMONLORD_III, "type III demon lord",
-        14, -30,  22, 0, 180, 100000, '&', DC_LIGHTRED,
-        SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 18, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 18, 0 },
-        }
-    },
-    {
-        MT_DEMONLORD_IV, "type IV demon lord",
-        15, -35, 23, 0, 200, 125000, '&', DC_LIGHTRED,
-        SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 20, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 20, 0 },
-        }
-    },
-    {
-        MT_DEMONLORD_V, "type V demon lord",
-        16, -40, 24, 0, 220, 150000, '&', DC_LIGHTRED,
-        SPEED_FAST, ESIZE_MEDIUM,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 22, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 22, 0 },
-        }
-    },
-    {
-        MT_DEMONLORD_VI, "type VI demon lord",
-        17, -45, 25, 0, 240, 175000, '&', DC_LIGHTRED,
-        SPEED_FAST, ESIZE_LARGE,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 24, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 24, 0 },
-        }
-    },
-    {
-        MT_DEMONLORD_VII, "type VII demon lord",
-        18, -70, 26, 0, 260, 200000, '&', DC_LIGHTRED,
-        SPEED_FAST, ESIZE_HUGE,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 27, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 27, 0 },
-        }
-    },
-    {
-        MT_DEMON_PRINCE, "demon prince",
-        25, -127, 28, 0, 345, 300000, '&', DC_RED,
-        SPEED_FAST, ESIZE_HUGE,
-        MF_HEAD | MF_NOBEHEAD | MF_HANDS | MF_FLY | MF_INVISIBLE | MF_INFRAVISION | MF_DEMON,
-        {
-            { ATT_CLAW, DAM_PHYSICAL, 30, 0 },
-            { ATT_BITE, DAM_PHYSICAL, 30, 0 },
-        }
-    }
-};
 
 static gboolean monster_player_visible(monster *m);
 static gboolean monster_attack_available(monster *m, attack_t type);
-static const attack *monster_attack_get(monster *m, attack_t type);
-static void monster_attack_disable(monster *m, const attack *att);
 static item *monster_weapon_select(monster *m);
 static void monster_weapon_wield(monster *m, item *weapon);
 static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
+static position monster_move_wander(monster *m, struct player *p);
+static position monster_move_attack(monster *m, struct player *p);
+static position monster_move_flee(monster *m, struct player *p);
 
-monster *monster_new(int type, position pos)
+monster *monster_new(monster_t type, position pos)
 {
     monster *nmonster;
     int it, icount;     /* item type, item id, item count */
@@ -772,7 +103,7 @@ monster *monster_new(int type, position pos)
     nmonster->type = type;
 
     /* determine max hp; prevent the living dead */
-    nmonster->hp_max = nmonster->hp = max(1, divert(monsters[type].hp_max, 10));
+    nmonster->hp_max = nmonster->hp = max(1, divert(monster_type_hp_max(type), 10));
 
     nmonster->effects = g_ptr_array_new();
     nmonster->inventory = inv_new(nmonster);
@@ -808,6 +139,10 @@ monster *monster_new(int type, position pos)
         while (it == IT_CONTAINER);
 
         inv_add(&nmonster->inventory, item_new_random(it));
+        break;
+
+    default:
+        /* no fancy stuff... */
         break;
     }
 
@@ -869,7 +204,7 @@ monster *monster_new(int type, position pos)
     } /* finished initializing weapons */
 
     /* initialize mimics */
-    if (monster_is_mimic(nmonster))
+    if (monster_flags(nmonster, MF_MIMIC))
     {
         struct
         {
@@ -978,6 +313,129 @@ void monster_destroy(monster *m)
     game_map(nlarn, m->pos.z)->mcount--;
 
     g_free(m);
+}
+
+void monsters_wrap(lua_State *L)
+{
+    int i;
+
+    assert (L != NULL);
+
+    struct
+    {
+        char *name;
+        int value;
+    } constants[] =
+    {
+        /* monster actions */
+        { "FLEE",   MA_FLEE },
+        { "REMAIN", MA_REMAIN },
+        { "WANDER", MA_WANDER },
+        { "ATTACK", MA_ATTACK },
+
+        /* monster flags */
+        { "HEAD",        MF_HEAD },
+        { "NOBEHEAD",    MF_NOBEHEAD },
+        { "HANDS",       MF_HANDS },
+        { "FLY",         MF_FLY },
+        { "SPIRIT",      MF_SPIRIT },
+        { "UNDEAD",      MF_UNDEAD },
+        { "INVISIBLE",   MF_INVISIBLE },
+        { "INFRAVISION", MF_INFRAVISION },
+        { "REGENERATE",  MF_REGENERATE },
+        { "METALLIVORE", MF_METALLIVORE },
+        { "DEMON",       MF_DEMON },
+        { "DRAGON",      MF_DRAGON },
+        { "MIMIC",       MF_MIMIC },
+
+        /* monster types */
+        { "MT_GIANT_BAT",       MT_GIANT_BAT },
+        { "MT_GNOME",           MT_GNOME },
+        { "MT_HOBGOBLIN",       MT_HOBGOBLIN },
+        { "MT_JACKAL",          MT_JACKAL },
+        { "MT_KOBOLD",          MT_KOBOLD },
+        { "MT_ORC",             MT_ORC },
+        { "MT_SNAKE",           MT_SNAKE },
+        { "MT_CENTIPEDE",       MT_CENTIPEDE },
+        { "MT_JACULUS",         MT_JACULUS },
+        { "MT_TROGLODYTE",      MT_TROGLODYTE },
+        { "MT_GIANT_ANT",       MT_GIANT_ANT },
+        { "MT_FLOATING_EYE",    MT_FLOATING_EYE },
+        { "MT_LEPRECHAUN",      MT_LEPRECHAUN },
+        { "MT_NYMPH",           MT_NYMPH },
+        { "MT_QUASIT",          MT_QUASIT },
+        { "MT_RUST_MONSTER",    MT_RUST_MONSTER },
+        { "MT_ZOMBIE",          MT_ZOMBIE },
+        { "MT_ASSASSIN_BUG",    MT_ASSASSIN_BUG },
+        { "MT_BUGBEAR",         MT_BUGBEAR },
+        { "MT_HELLHOUND",       MT_HELLHOUND },
+        { "MT_ICE_LIZARD",      MT_ICE_LIZARD },
+        { "MT_CENTAUR",         MT_CENTAUR },
+        { "MT_TROLL",           MT_TROLL },
+        { "MT_YETI",            MT_YETI },
+        { "MT_ELF",             MT_ELF },
+        { "MT_GELATINOUSCUBE",  MT_GELATINOUSCUBE },
+        { "MT_WHITE_DRAGON",    MT_WHITE_DRAGON },
+        { "MT_METAMORPH",       MT_METAMORPH },
+        { "MT_VORTEX",          MT_VORTEX },
+        { "MT_ZILLER",          MT_ZILLER },
+        { "MT_VIOLET_FUNGUS",   MT_VIOLET_FUNGUS },
+        { "MT_WRAITH",          MT_WRAITH },
+        { "MT_FORVALAKA",       MT_FORVALAKA },
+        { "MT_LAMA_NOBE",       MT_LAMA_NOBE },
+        { "MT_OSQUIP",          MT_OSQUIP },
+        { "MT_ROTHE",           MT_ROTHE },
+        { "MT_XORN",            MT_XORN },
+        { "MT_VAMPIRE",         MT_VAMPIRE },
+        { "MT_STALKER",         MT_STALKER },
+        { "MT_POLTERGEIST",     MT_POLTERGEIST },
+        { "MT_DISENCHANTRESS",  MT_DISENCHANTRESS },
+        { "MT_SHAMBLINGMOUND",  MT_SHAMBLINGMOUND },
+        { "MT_YELLOW_MOLD",     MT_YELLOW_MOLD },
+        { "MT_UMBER_HULK",      MT_UMBER_HULK },
+        { "MT_GNOME_KING",      MT_GNOME_KING },
+        { "MT_MIMIC",           MT_MIMIC },
+        { "MT_WATER_LORD",      MT_WATER_LORD },
+        { "MT_PURPLE_WORM",     MT_PURPLE_WORM },
+        { "MT_XVART",           MT_XVART },
+        { "MT_BRONCE_DRAGON",   MT_BRONCE_DRAGON },
+        { "MT_GREEN_DRAGON",    MT_GREEN_DRAGON },
+        { "MT_SILVER_DRAGON",   MT_SILVER_DRAGON },
+        { "MT_PLATINUM_DRAGON", MT_PLATINUM_DRAGON },
+        { "MT_RED_DRAGON",      MT_RED_DRAGON },
+        { "MT_SPIRIT_NAGA",     MT_SPIRIT_NAGA },
+        { "MT_GREEN_URCHIN",    MT_GREEN_URCHIN },
+        { "MT_DEMONLORD_I",     MT_DEMONLORD_I },
+        { "MT_DEMONLORD_II",    MT_DEMONLORD_II },
+        { "MT_DEMONLORD_III",   MT_DEMONLORD_III },
+        { "MT_DEMONLORD_IV",    MT_DEMONLORD_IV },
+        { "MT_DEMONLORD_V",     MT_DEMONLORD_V },
+        { "MT_DEMONLORD_VI",    MT_DEMONLORD_VI },
+        { "MT_DEMONLORD_VII",   MT_DEMONLORD_VII },
+        { "MT_DEMON_PRINCE",    MT_DEMON_PRINCE },
+
+        { NULL, 0 },
+    };
+
+    for (i = 0; constants[i].name != NULL; i++)
+    {
+        lua_pushinteger(L, constants[i].value);
+        lua_setglobal(L, constants[i].name);
+    }
+
+    /* read monster data */
+    gchar *filename = g_strdup_printf("%s%c%s", nlarn->libdir,
+                                      G_DIR_SEPARATOR, "monsters.lua");
+
+    if (luaL_dofile(L, filename) == 1)
+    {
+        fprintf(stderr, "Error opening '%s': %s\n", filename,
+                lua_tostring(L, -1));
+
+        exit(EXIT_FAILURE);
+    }
+    g_free(filename);
+
 }
 
 void monster_serialize(gpointer oid, monster *m, cJSON *root)
@@ -1175,7 +633,7 @@ gboolean monster_in_sight(monster *m)
         return FALSE;
 
     /* invisible monster, player has no infravision */
-    if (monster_is_invisible(m) && !player_effect(nlarn->p, ET_INFRAVISION))
+    if (monster_flags(m, MF_INVISIBLE) && !player_effect(nlarn->p, ET_INFRAVISION))
         return FALSE;
 
     return player_pos_visible(nlarn->p, m->pos);
@@ -1183,7 +641,7 @@ gboolean monster_in_sight(monster *m)
 
 // Takes into account visibility.
 // For the real name, use monster_name() directly.
-char *monster_get_name(monster *m)
+const char *monster_get_name(monster *m)
 {
     if (!game_wizardmode(nlarn) && !monster_in_sight(m))
         return ("unseen monster");
@@ -1454,7 +912,7 @@ void monster_move(monster *m, struct player *p)
             /* check for door */
             else if ((target_st == LS_CLOSEDDOOR)
                      /* lock out zombies */
-                     && monster_has_hands(m) && monster_int(m) > 3)
+                     && monster_flags(m, MF_HANDS) && monster_int(m) > 3)
             {
                 /* open the door */
                 map_sobject_set(monster_map(m), m_npos, LS_OPENDOOR);
@@ -1502,7 +960,7 @@ monster *monster_trap_trigger(monster *m)
     trap = map_trap_at(monster_map(m), m->pos);
 
     /* flying monsters are only affected by sleeping gas traps */
-    if (monster_can_fly(m) && (trap != TT_SLEEPGAS))
+    if (monster_flags(m, MF_FLY) && (trap != TT_SLEEPGAS))
     {
         return m;
     }
@@ -1637,20 +1095,60 @@ int monster_items_pickup(monster *m)
 
 int monster_attack_count(monster *m)
 {
-    assert (m != NULL && m->type < MT_MAX);
+    int count = 0;
 
-    /* currently very simple */
-    if (monsters[m->type].attacks[1].type)
-        return 2;
-    else
-        return 1;
+    if (luaN_push_table("monsters", m->type, "attacks"))
+    {
+        /* attacks table has been found; query lenght */
+        count = lua_objlen(nlarn->L, -1);
+
+        /* clean up */
+        lua_pop(nlarn->L, 3);
+    }
+
+    return count;
+}
+
+attack monster_attack(monster *m, int num)
+{
+    attack att = { ATT_NONE, DAM_NONE, 0, 0 };
+
+    assert (m != NULL && num <= monster_attack_count(m));
+
+    if (luaN_push_table("monsters", m->type, "attacks"))
+    {
+        lua_rawgeti(nlarn->L, -1, num);
+
+        if (lua_istable(nlarn->L, -1))
+        {
+            /* inside the attack table */
+            lua_getfield(nlarn->L, -1, "type");
+            att.type = lua_tointeger(nlarn->L, -1);
+
+            lua_getfield(nlarn->L, -2, "damage");
+            att.damage = lua_tointeger(nlarn->L, -1);
+
+            lua_getfield(nlarn->L, -3, "base");
+            att.base = lua_tointeger(nlarn->L, -1);
+
+            lua_getfield(nlarn->L, -4, "rand");
+            att.rand = lua_tointeger(nlarn->L, -1);
+
+            /* remove the queried values from the stack */
+            lua_pop(nlarn->L, 4);
+        }
+
+        /* remove the table and ancestors from the stack */
+        lua_pop(nlarn->L, 4);
+    }
+
+    return att;
 }
 
 void monster_player_attack(monster *m, player *p)
 {
     damage *dam;
-    const attack *att = NULL;
-    int idx;
+    attack att = { ATT_NONE };
 
     assert(m != NULL && p != NULL);
 
@@ -1670,7 +1168,7 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* player is invisible and monster tries to hit player */
-    if (player_effect(p, ET_INVISIBILITY) && !monster_has_infravision(m)
+    if (player_effect(p, ET_INVISIBILITY) && !monster_flags(m, MF_INFRAVISION)
             && chance(65))
     {
         if (monster_in_sight(m))
@@ -1691,42 +1189,20 @@ void monster_player_attack(monster *m, player *p)
         return;
     }
 
-    /* choose attack type */
-    const gboolean has_weap_attack = (m->weapon != NULL
-                                      && monster_attack_available(m, ATT_WEAPON));
-
-    /* prefer weapon attack */
-    if (has_weap_attack && chance(80))
-    {
-        att = monster_attack_get(m, ATT_WEAPON);
-    }
-    else
-    {
-        /* choose an attack which is known to work */
-        for (idx = 0; idx < monster_attack_count(m); idx++)
-        {
-            /* if player is resistant to an attack choose next attack type. */
-            if (monsters[m->type].attacks[idx].type && !m->attacks_failed[idx])
-            {
-                att = &monsters[m->type].attacks[idx];
-                break;
-            }
-        }
-        if (!att && has_weap_attack)
-            att = monster_attack_get(m, ATT_WEAPON);
-    }
+    /* choose a random attack type */
+    att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
 
     /* no attack has been found. return to calling function. */
-    if (!att) return;
+    if (att.type == ATT_NONE) return;
 
     /* generate damage */
-    dam = damage_new(att->damage, att->type, att->base + game_difficulty(nlarn), m);
+    dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn), m);
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM) dam->type = rand_1n(DAM_MAX);
 
     /* half damage if player is protected against spirits */
-    if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_is_spirit(m))
+    if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_flags(m, MF_SPIRIT))
     {
         if (dam->type == DAM_PHYSICAL)
         {
@@ -1735,8 +1211,7 @@ void monster_player_attack(monster *m, player *p)
         }
         else
         {
-            /* cancel special attacks - mark attack type as useless */
-            monster_attack_disable(m, att);
+            /* FIXME: give log message */
             damage_free(dam);
 
             return;
@@ -1744,14 +1219,14 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* set damage for weapon attacks */
-    if ((att->type == ATT_WEAPON) && (m->weapon != NULL))
+    if ((att.type == ATT_WEAPON) && (m->weapon != NULL))
     {
         item *weapon = game_item_get(nlarn, m->weapon);
         dam->amount = rand_1n(weapon_wc(weapon) + game_difficulty(nlarn));
     }
 
     /* add variable damage */
-    if (att->rand) dam->amount += rand_1n(att->rand);
+    if (att.rand) dam->amount += rand_1n(att.rand);
 
     /* handle some damage types here */
     switch (dam->type)
@@ -1764,29 +1239,20 @@ void monster_player_attack(monster *m, player *p)
             monster_pos_set(m, game_map(nlarn, m->pos.z),
                             map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER, FALSE));
         }
-        else
-        {
-            /* if robbery fails mark attack type as useless */
-            monster_attack_disable(m, att);
-        }
 
         damage_free(dam);
         break;
 
     case DAM_RUST:
         log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
-                      monster_attack_verb[att->type]);
+                      monster_attack_verb[att.type]);
 
-        /* a failed attack causes frustration */
-        if (!monster_item_rust(m, p))
-            monster_attack_disable(m, att);
-
+        monster_item_rust(m, p);
         damage_free(dam);
         break;
 
     case DAM_REM_ENCH:
-        if (!monster_item_disenchant(m, p))
-            monster_attack_disable(m, att);
+        monster_item_disenchant(m, p);
 
         damage_free(dam);
         break;
@@ -1794,7 +1260,7 @@ void monster_player_attack(monster *m, player *p)
     default:
         /* log the attack */
         log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
-                      monster_attack_verb[att->type]);
+                      monster_attack_verb[att.type]);
 
         player_damage_take(p, dam, PD_MONSTER, m->type);
         break;
@@ -1889,41 +1355,25 @@ gboolean monster_update_action(monster *m)
     guint time;
     gboolean low_hp;
     gboolean smart;
-    gboolean all_attacks_failed = TRUE;
-
-    int idx;
 
     /* FIXME: should include difficulty here */
     time   = monster_int(m) + 25;
     low_hp = (m->hp < (monster_hp_max(m) / 4 ));
     smart  = (monster_int(m) > 4);
 
-    /* check if monster has an attack that is known to work */
-    for (idx = 0; idx < monster_attack_count(m); idx++)
+    if (monster_flags(m, MF_MIMIC) && m->unknown)
     {
-        if (!m->attacks_failed[idx])
-        {
-            all_attacks_failed = FALSE;
-            break;
-        }
-    }
-
-    if (monster_is_mimic(m) && m->unknown)
-    {
-        /* sobject monsters */
+        /* stationary monsters */
         naction = MA_REMAIN;
     }
-    else if (monster_effect(m, ET_HOLD_MONSTER)
-             || monster_effect(m, ET_SLEEP))
+    else if (monster_effect(m, ET_HOLD_MONSTER) || monster_effect(m, ET_SLEEP))
     {
         /* no action if monster is held or sleeping */
         naction = MA_REMAIN;
     }
-    else if ((low_hp && smart)
-             || (monster_effect(m, ET_SCARE_MONSTER) > monster_int(m))
-             || all_attacks_failed)
+    else if ((low_hp && smart) || (monster_effect(m, ET_SCARE_MONSTER) > monster_int(m)))
     {
-        /* low HP or very scared => FLEE player */
+        /* low HP or very scared => FLEE from player */
         naction = MA_FLEE;
     }
     else if (m->lastseen && (m->lastseen < time))
@@ -1971,7 +1421,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
     frequency = difficulty << 3;
 
     /* handle regeneration */
-    if (monster_can_regenerate(m))
+    if (monster_flags(m, MF_REGENERATE))
     {
         /* regenerate every (22- frequency) turns */
         if (gtime % (22 - frequency) == 0)
@@ -2063,7 +1513,7 @@ char *monster_desc(monster *m)
     return g_string_free(desc, FALSE);
 }
 
-char monster_image(monster *m)
+char monster_glyph(monster *m)
 {
     assert (m != NULL);
 
@@ -2073,11 +1523,11 @@ char monster_image(monster *m)
     }
     else
     {
-        return monsters[m->type].image;
+        return luaN_query_char("monsters", m->type, "glyph");
     }
 }
 
-int monster_colour(monster *m)
+int monster_color(monster *m)
 {
     assert (m != NULL);
 
@@ -2087,7 +1537,7 @@ int monster_colour(monster *m)
     }
     else
     {
-        return monsters[m->type].colour;
+        return luaN_query_int("monsters", m->type, "color");
     }
 }
 
@@ -2212,7 +1662,7 @@ static gboolean monster_player_visible(monster *m)
     if (pos_distance(monster_pos(m), nlarn->p->pos) > monster_visrange)
         return FALSE;
 
-    if (player_effect(nlarn->p, ET_INVISIBILITY) && !monster_has_infravision(m))
+    if (player_effect(nlarn->p, ET_INVISIBILITY) && !monster_flags(m, MF_INFRAVISION))
         return FALSE;
 
     /* monster is blinded */
@@ -2225,43 +1675,24 @@ static gboolean monster_player_visible(monster *m)
 
 static gboolean monster_attack_available(monster *m, attack_t type)
 {
-    int idx;
+    gboolean available = FALSE;
+    int pos = 1;
+    int c = monster_attack_count(m);
 
-    for (idx = 0; idx < MONSTER_ATTACK_COUNT; idx++)
+    while (pos <= c)
     {
-        if (monster_attack(m, idx).type == type)
+        attack att = monster_attack(m, pos);
+
+        if (att.type == type)
         {
-            return TRUE;
+            available = TRUE;
+            break;
         }
+
+        pos++;
     }
 
-    return FALSE;
-}
-
-static const attack *monster_attack_get(monster *m, attack_t type)
-{
-    int idx;
-
-    for (idx = 0; idx < MONSTER_ATTACK_COUNT; idx++)
-    {
-        if (monster_attack(m, idx).type == type)
-        {
-            return &monster_attack(m, idx);
-        }
-    }
-
-    return NULL;
-}
-
-static void monster_attack_disable(monster *m, const attack *att)
-{
-    int idx;
-
-    for (idx = 0; idx < MONSTER_ATTACK_COUNT; idx++)
-    {
-        if (monsters[m->type].attacks[idx].type == att->type)
-            m->attacks_failed[idx] = TRUE;
-    }
+    return available;
 }
 
 static item *monster_weapon_select(monster *m)
@@ -2610,3 +2041,4 @@ static position monster_move_flee(monster *m, struct player *p)
 
     return npos;
 }
+

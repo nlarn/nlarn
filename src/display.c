@@ -233,9 +233,9 @@ int display_paint_screen(player *p)
                     || player_effect(p, ET_DETECT_MONSTER)
                     || monster_in_sight(monst))
             {
-                attron(attrs = monster_colour(monst));
+                attron(attrs = monster_color(monst));
                 position mpos = monster_pos(monst);
-                mvaddch(mpos.y, mpos.x, monster_image(monst));
+                mvaddch(mpos.y, mpos.x, monster_glyph(monst));
                 attroff(attrs);
             }
         }
@@ -540,6 +540,46 @@ void display_shutdown()
 {
     /* End curses mode */
     endwin();
+}
+
+void display_wrap(lua_State *L)
+{
+    int i;
+
+    assert (L != NULL);
+
+    struct
+    {
+        char *name;
+        int value;
+    } constants[] =
+    {
+        /* color definitions  */
+        { "BLACK",         DC_BLACK },
+        { "RED",           DC_RED },
+        { "GREEN",         DC_GREEN },
+        { "BROWN",         DC_BROWN },
+        { "BLUE",          DC_BLUE },
+        { "MAGENTA",       DC_MAGENTA },
+        { "CYAN",          DC_CYAN },
+        { "LIGHTGRAY",     DC_LIGHTGRAY },
+        { "DARKGRAY",      DC_DARKGRAY },
+        { "LIGHTRED",      DC_LIGHTRED },
+        { "LIGHTGREEN",    DC_LIGHTGREEN },
+        { "YELLOW",        DC_YELLOW },
+        { "LIGHTBLUE",     DC_LIGHTBLUE },
+        { "LIGHTMAGENTA",  DC_LIGHTMAGENTA },
+        { "LIGHTCYAN",     DC_LIGHTCYAN },
+        { "WHITE",         DC_WHITE },
+
+        { NULL, 0 },
+    };
+
+    for (i = 0; constants[i].name != NULL; i++)
+    {
+        lua_pushinteger(L, constants[i].value);
+        lua_setglobal(L, constants[i].name);
+    }
 }
 
 int display_draw()
@@ -2110,13 +2150,13 @@ position display_get_position(player *p, char *message, gboolean ray,
                             && monster_in_sight(target))
                         {
                             /* ray is targeted at a visible monster */
-                            mvaddch(a->start_y + y, a->start_x + x, monster_image(target));
+                            mvaddch(a->start_y + y, a->start_x + x, monster_glyph(target));
                         }
                         else if ((m = map_get_monster_at(map, tpos))
                                  && monster_in_sight(m))
                         {
                             /* ray sweeps over a visible monster */
-                            mvaddch(a->start_y + y, a->start_x + x, monster_image(m));
+                            mvaddch(a->start_y + y, a->start_x + x, monster_glyph(m));
                         }
                         else
                         {
@@ -2153,7 +2193,7 @@ position display_get_position(player *p, char *message, gboolean ray,
                         if ((m = map_get_monster_at(map, cursor)) && monster_in_sight(m))
                         {
                             attron(attrs = DC_RED);
-                            addch(monster_image(m));
+                            addch(monster_glyph(m));
                         }
                         else if (pos_identical(p->pos, cursor))
                         {

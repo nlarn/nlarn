@@ -23,7 +23,7 @@ make
 mkdir -p $RPM_BUILD_ROOT/usr/games
 mkdir -p $RPM_BUILD_ROOT/usr/share/games/nlarn
 install -g games -o games -m 2755 nlarn $RPM_BUILD_ROOT/usr/games
-install lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg $RPM_BUILD_ROOT/usr/share/games/nlarn
+install lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg lib/monsters.lua $RPM_BUILD_ROOT/usr/share/games/nlarn
 touch $RPM_BUILD_ROOT/usr/share/games/nlarn/highscores
 
 %clean

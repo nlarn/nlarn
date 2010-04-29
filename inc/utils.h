@@ -19,6 +19,7 @@
 #ifndef __UTILS_H_
 #define __UTILS_H_
 
+#include <lua.h>
 #include <time.h>
 #include "cJSON.h"
 #include "defines.h"
@@ -53,9 +54,8 @@ typedef struct _message_log
 #undef max
 #endif
 
-#define min(x,y)    (((x) > (y)) ? (y) : (x))
-#define max(x,y)    (((x) > (y)) ? (x) : (y))
-#define even(x)     (!((x) % 2))
+static inline int min(int x, int y) { return x > y ? y : x; }
+static inline int max(int x, int y) { return x > y ? x : y; }
 
 /* function definitions */
 int divert(int value, int percent);
@@ -117,7 +117,7 @@ int strv_append(char ***list, const char *str);
 int strv_append_unique(char ***list, const char *str);
 
 /* misc. text functions */
-int str_starts_with_vowel(char *str);
+int str_starts_with_vowel(const char *str);
 const char *int2str(int val);
 #define a_an(str) (str_starts_with_vowel((str)) ? "an" : "a")
 #define plural(i) (((i) > 1) ? "s" : "")
@@ -126,5 +126,12 @@ const char *int2str(int val);
 /* regarding stuff defined in defines.h */
 damage *damage_new(damage_t type, attack_t attack, int amount, gpointer originator);
 #define damage_free(dam)    g_free((dam))
+
+/* interaction with the Lua engine */
+void utils_wrap(lua_State *L);
+const char *luaN_query_string(const char *table, guint idx, const char *attrib);
+char luaN_query_char(const char *table, guint idx, const char *attrib);
+int luaN_query_int(const char *table, guint idx, const char *attrib);
+int luaN_push_table(const char *table, guint idx, const char *tname);
 
 #endif

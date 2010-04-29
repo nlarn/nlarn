@@ -18,6 +18,9 @@
 
 #include <assert.h>
 #include <glib.h>
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 #include <stdlib.h>
 #include <string.h>
 #include <zlib.h>
@@ -29,6 +32,7 @@
 
 #include "cJSON.h"
 #include "defines.h"
+#include "display.h"
 #include "game.h"
 #include "nlarn.h"
 #include "player.h"
@@ -36,6 +40,7 @@
 #include "utils.h"
 
 static void game_initialize_settings(game *g, int argc, char *argv[], gboolean new_game);
+static void game_initialize_lua(game *g);
 
 static void game_monsters_move(game *g);
 
@@ -78,6 +83,9 @@ void game_new(int argc, char *argv[])
 
     /* initialize game settings */
     game_initialize_settings(nlarn, argc, argv, TRUE);
+
+    /* initialize Lua interpreter */
+    game_initialize_lua(nlarn);
 
     /* randomize unidentified item descriptions */
     game_items_shuffle(nlarn);
@@ -144,6 +152,9 @@ int game_destroy(game *g)
 
     g_ptr_array_foreach(g->spheres, (GFunc)sphere_destroy, g);
     g_ptr_array_free(g->spheres, TRUE);
+
+    /* terminate the Lua interpreter */
+    lua_close(g->L);
 
     g_free(g);
 
@@ -343,6 +354,12 @@ gboolean game_load(const char *filename, int argc, char *argv[])
         return FALSE;
     }
 
+    /* initialize settings */
+    game_initialize_settings(g, argc, argv, FALSE);
+
+    /* initialize the lua interpreter */
+    game_initialize_lua(g);
+
     /* restore saved game */
     g->time_start = cJSON_GetObjectItem(save, "time_start")->valueint;
     g->gtime = cJSON_GetObjectItem(save, "gtime")->valueint;
@@ -460,9 +477,7 @@ gboolean game_load(const char *filename, int argc, char *argv[])
     /* free parsed save game */
     cJSON_Delete(save);
 
-    /* initialize settings */
-    game_initialize_settings(g, argc, argv, FALSE);
-
+    /* set log turn number to current game turn number */
     log_set_time(nlarn->log, g->gtime);
 
     /* welcome message */
@@ -790,7 +805,7 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
         {
             sex[0] = g_ascii_tolower(sex[0]);
 
-            switch(sex[0])
+            switch (sex[0])
             {
             case 'm':
                 g->p->sex = PS_MALE;
@@ -812,8 +827,8 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
         }
     } /* end new game only settings */
 
-    /* parse autopickup settings */
-    if (auto_pickup)
+    /* parse autopickup settings if the game is not being reloaded */
+    if (auto_pickup && (g->p != NULL))
     {
         for (idx = 0; idx < strlen(auto_pickup); idx++)
         {
@@ -826,6 +841,22 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
             }
         }
     } /* end autopickup */
+}
+
+static void game_initialize_lua(game *g)
+{
+    assert (g != NULL);
+
+    /* initialize Lua interpreter */
+    nlarn->L = luaL_newstate();
+
+    /* open Lua libraries */
+    luaL_openlibs(nlarn->L);
+
+    /* register all required functions */
+    utils_wrap(g->L);
+    display_wrap(g->L);
+    monsters_wrap(g->L);
 }
 
 /**

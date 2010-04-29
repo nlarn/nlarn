@@ -302,7 +302,7 @@ char *map_dump(map *l, position ppos)
             }
             else if ((m = map_get_monster_at(l, pos)))
             {
-                g_string_append_c(map, monster_image(m));
+                g_string_append_c(map, monster_glyph(m));
             }
             else if (map_trap_at(l, pos))
             {

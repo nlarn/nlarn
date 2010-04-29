@@ -1295,7 +1295,7 @@ int player_attack(player *p, monster *m)
         dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, rand_1n(amount + 1), p);
 
         /* weapon damage due to rust when hitting certain monsters */
-        if (p->eq_weapon && monster_is_metallivore(m))
+        if (p->eq_weapon && monster_flags(m, MF_METALLIVORE))
         {
             p->eq_weapon = item_erode(&p->inventory, p->eq_weapon, IET_RUST, TRUE);
         }
@@ -1313,7 +1313,7 @@ int player_attack(player *p, monster *m)
         }
 
         /* triple damage if hitting a dragon and wearing an amulet of dragon slaying */
-        if (monster_is_dragon(m) && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
+        if (monster_flags(m, MF_DRAGON) && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
         {
             dam->amount *= 3;
         }
@@ -1324,8 +1324,8 @@ int player_attack(player *p, monster *m)
             /* Vorpal Blade */
             if ((p->eq_weapon->id == WT_VORPALBLADE)
                     && chance(5)
-                    && monster_has_head(m)
-                    && monster_is_beheadable(m))
+                    && monster_flags(m, MF_HEAD)
+                    && !monster_flags(m, MF_NOBEHEAD))
             {
                 log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
                               monster_get_name(m));
@@ -1337,7 +1337,7 @@ int player_attack(player *p, monster *m)
             if ((p->eq_weapon->id == WT_LANCEOFDEATH))
             {
                 /* the lance is pretty deadly for non-demons */
-                if (!monster_is_demon(m))
+                if (!monster_flags(m, MF_DEMON))
                     dam->amount = 10000;
                 else
                     dam->amount = 300;
@@ -1346,7 +1346,7 @@ int player_attack(player *p, monster *m)
             /* Slayer */
             if (p->eq_weapon->id == WT_SLAYER)
             {
-                if (monster_is_demon(m))
+                if (monster_flags(m, MF_DEMON))
                     dam->amount = 10000;
             }
         }
@@ -1368,7 +1368,7 @@ int player_attack(player *p, monster *m)
         /* if the player is invisible and the monster does not have infravision,
            remember the position where the attack came from
          */
-        if (player_effect(p, ET_INVISIBILITY) && !monster_has_infravision(m))
+        if (player_effect(p, ET_INVISIBILITY) && !monster_flags(m, MF_INFRAVISION))
         {
             monster_update_player_pos(m, p->pos);
         }
@@ -1771,7 +1771,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         m = (monster *)dam->originator;
 
         /* amulet of power cancels demon attacks */
-        if (monster_is_demon(m) && chance(75)
+        if (monster_flags(m, MF_DEMON) && chance(75)
                 && (p->eq_amulet && p->eq_amulet->id == AM_POWER))
         {
             log_add_entry(nlarn->log, "Your amulet cancels the %s's attack.",
@@ -3946,11 +3946,11 @@ void player_update_fov(player *p)
                     player_memory_of(p,pos).item = it->type;
                     player_memory_of(p,pos).item_colour = item_colour(it);
                 }
-                else if (m && monster_is_mimic(m) && monster_unknown(m))
+                else if (m && monster_flags(m, MF_MIMIC) && monster_unknown(m))
                 {
                     /* remember the undiscovered mimic as an item */
                     player_memory_of(p,pos).item = monster_item_type(m);
-                    player_memory_of(p,pos).item_colour = monster_colour(m);
+                    player_memory_of(p,pos).item_colour = monster_color(m);
                 }
                 else
                 {
