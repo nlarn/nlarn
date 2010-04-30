@@ -55,7 +55,7 @@ static int handle_bank_interest(player *p)
         return 0;
 
     /* store original account */
-    const int interest = p->bank_account;
+    const int orig_account = p->bank_account;
 
     int i;
     for (i = 1; i <= mobuls; i++)
@@ -63,8 +63,11 @@ static int handle_bank_interest(player *p)
 
     p->interest_lasttime = game_turn(nlarn);
 
-    /* calculate interest payed */
-    return (p->bank_account - interest);
+    /* calculate interest paid */
+    const int interest = (p->bank_account - orig_account);
+    p->stats.gold_bank_interest += interest;
+
+    return interest;
 }
 
 int building_bank(player *p)
@@ -590,6 +593,7 @@ int building_school(player *p)
 
         /* charge */
         building_player_charge(p, price);
+        p->stats.gold_spent_college += price;
 
         /* time usage */
         turns += mobuls2gtime(school_courses[(int)selection].course_time);
@@ -847,6 +851,9 @@ static int building_item_sell(player *p, inventory **inv, item *it)
             inv_del_oid(inv, ioid);
         }
 
+        p->stats.items_bought    += it_clone->count;
+        p->stats.gold_spent_shop += price;
+
         /* identify the item */
         player_item_identify(p, &p->inventory, it_clone);
     }
@@ -899,6 +906,8 @@ int building_item_identify(player *p, inventory **inv, item *it)
             log_add_entry(nlarn->log, "%s is %s.", name_unknown, name_known);
             building_player_charge(p, price);
 
+            p->stats.gold_spent_id_repair += price;
+
             return TRUE;
         }
     }
@@ -947,6 +956,8 @@ static int building_item_repair(player *p, inventory **inv, item *it)
             name[0] = g_ascii_toupper(name[0]);
             log_add_entry(nlarn->log, "%s has been repaired.", name);
             building_player_charge(p, price);
+
+            p->stats.gold_spent_id_repair += price;
 
             return TRUE;
         }
@@ -1037,6 +1048,17 @@ static int building_item_buy(player *p, inventory **inv, item *it)
                   name, price, (price == 1) ? "has" : "have");
 
     it->count = count_orig;
+
+    if (it->type == IT_GEM)
+    {
+        p->stats.gems_sold += count;
+        p->stats.gold_sold_gems += price;
+    }
+    else
+    {
+        p->stats.items_sold += count;
+        p->stats.gold_sold_items += price;
+    }
 
     if ((it->count > 1) && (count < it->count))
     {

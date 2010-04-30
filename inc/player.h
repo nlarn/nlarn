@@ -43,7 +43,20 @@ typedef struct _player_stats
     gint32 potions_quaffed;
     gint32 scrolls_read;
     gint32 books_read;
-    gint32 cookies_nibbled;
+    gint32 life_protected;
+    // Keep track of the dungeon economy.
+    gint32 items_bought;
+    gint32 items_sold;
+    gint32 gems_sold;
+    gint32 gold_found;
+    gint32 gold_sold_items;
+    gint32 gold_sold_gems;
+    gint32 gold_bank_interest;
+    gint32 gold_spent_shop;
+    gint32 gold_spent_id_repair;
+    gint32 gold_spent_donation;
+    gint32 gold_spent_college;
+
     gint32 max_level;
     gint32 max_xp;
     gint32 str_orig;

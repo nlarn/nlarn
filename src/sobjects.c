@@ -140,6 +140,7 @@ int player_altar_pray(player *p)
 
         tithe = player_gold / 10 ;
         player_set_gold(p, player_gold - donation);
+        p->stats.gold_spent_donation += donation;
 
         /* if player gave less than 10% of players gold, make a monster */
         if (donation < tithe || donation < rand_0n(50))

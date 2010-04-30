@@ -202,6 +202,9 @@ int container_item_add(player *p, inventory **inv, item *element)
     log_add_entry(nlarn->log, "You put %s into %s.", element_desc,
                   container_desc);
 
+    if (element->type == IT_GOLD)
+        p->stats.gold_found -= element->count;
+
     inv_add(&container->content, element);
 
     if (carried_container)
@@ -262,6 +265,9 @@ int container_item_unpack(player *p, inventory **inv, item *element)
         item_describe(element, player_item_known(p, element),
                       (element->count == 1), FALSE, desc, 60);
         log_add_entry(nlarn->log, "You put %s into your pack.", desc);
+
+        if (element->type == IT_GOLD)
+            p->stats.gold_found += element->count;
     }
     else
     {

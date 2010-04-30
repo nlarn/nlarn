@@ -415,7 +415,19 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "potions_quaffed", p->stats.potions_quaffed);
     cJSON_AddNumberToObject(obj, "scrolls_read", p->stats.scrolls_read);
     cJSON_AddNumberToObject(obj, "books_read", p->stats.books_read);
-    cJSON_AddNumberToObject(obj, "cookies_nibbled", p->stats.cookies_nibbled);
+    cJSON_AddNumberToObject(obj, "life_protected", p->stats.life_protected);
+    cJSON_AddNumberToObject(obj, "items_bought", p->stats.items_bought);
+    cJSON_AddNumberToObject(obj, "items_sold", p->stats.items_sold);
+    cJSON_AddNumberToObject(obj, "gems_sold", p->stats.gems_sold);
+    cJSON_AddNumberToObject(obj, "gold_found", p->stats.gold_found);
+    cJSON_AddNumberToObject(obj, "gold_sold_items", p->stats.gold_sold_items);
+    cJSON_AddNumberToObject(obj, "gold_sold_gems", p->stats.gold_sold_gems);
+    cJSON_AddNumberToObject(obj, "gold_bank_interest", p->stats.gold_bank_interest);
+    cJSON_AddNumberToObject(obj, "gold_spent_shop", p->stats.gold_spent_shop);
+    cJSON_AddNumberToObject(obj, "gold_spent_id_repair", p->stats.gold_spent_id_repair);
+    cJSON_AddNumberToObject(obj, "gold_spent_donation", p->stats.gold_spent_donation);
+    cJSON_AddNumberToObject(obj, "gold_spent_college", p->stats.gold_spent_college);
+
     cJSON_AddNumberToObject(obj, "max_level", p->stats.max_level);
     cJSON_AddNumberToObject(obj, "max_xp", p->stats.max_xp);
 
@@ -601,7 +613,23 @@ player *player_deserialize(cJSON *pser)
     p->stats.potions_quaffed = cJSON_GetObjectItem(obj, "potions_quaffed")->valueint;
     p->stats.scrolls_read = cJSON_GetObjectItem(obj, "scrolls_read")->valueint;
     p->stats.books_read = cJSON_GetObjectItem(obj, "books_read")->valueint;
-    p->stats.cookies_nibbled = cJSON_GetObjectItem(obj, "cookies_nibbled")->valueint;
+
+    if (cJSON_GetObjectItem(obj, "life_protected"))
+    {
+        p->stats.life_protected = cJSON_GetObjectItem(obj, "life_protected")->valueint;
+        p->stats.items_bought = cJSON_GetObjectItem(obj, "items_bought")->valueint;
+        p->stats.items_sold   = cJSON_GetObjectItem(obj, "items_sold")->valueint;
+        p->stats.gems_sold    = cJSON_GetObjectItem(obj, "gems_sold")->valueint;
+        p->stats.gold_found         = cJSON_GetObjectItem(obj, "gold_found")->valueint;
+        p->stats.gold_sold_items    = cJSON_GetObjectItem(obj, "gold_sold_items")->valueint;
+        p->stats.gold_sold_gems     = cJSON_GetObjectItem(obj, "gold_sold_gems")->valueint;
+        p->stats.gold_bank_interest = cJSON_GetObjectItem(obj, "gold_bank_interest")->valueint;
+        p->stats.gold_spent_shop      = cJSON_GetObjectItem(obj, "gold_spent_shop")->valueint;
+        p->stats.gold_spent_id_repair = cJSON_GetObjectItem(obj, "gold_spent_id_repair")->valueint;
+        p->stats.gold_spent_donation  = cJSON_GetObjectItem(obj, "gold_spent_donation")->valueint;
+        p->stats.gold_spent_college   = cJSON_GetObjectItem(obj, "gold_spent_college")->valueint;
+    }
+
     p->stats.max_level = cJSON_GetObjectItem(obj, "max_level")->valueint;
     p->stats.max_xp = cJSON_GetObjectItem(obj, "max_xp")->valueint;
 
@@ -761,6 +789,22 @@ void player_make_move(player *p, int turns)
     while (turns > 0);
 }
 
+static const char *int2time_str(int val)
+{
+    static char buf[21];
+    const char *count_desc[] = { "never", "once", "twice", "thrice" };
+
+    if (val <= 3)
+    {
+        return count_desc[val];
+    }
+    else
+    {
+        g_snprintf(buf, 20, "%d times", val);
+        return buf;
+    }
+}
+
 void player_die(player *p, player_cod cause_type, int cause)
 {
     GString *text;
@@ -797,6 +841,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         }
 
         p->hp = p->hp_max;
+        p->stats.life_protected++;
 
         return;
     }
@@ -936,9 +981,6 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_string_append_printf(text, "quaffed %s potion%s, ",
                                int2str(p->stats.potions_quaffed),
                                plural(p->stats.potions_quaffed));
-        g_string_append_printf(text, "nibbled %s cookie%s ",
-                               int2str(p->stats.cookies_nibbled),
-                               plural(p->stats.cookies_nibbled));
         g_string_append_printf(text, "and read %s book%s ",
                                int2str(p->stats.books_read),
                                plural(p->stats.books_read));
@@ -946,11 +988,45 @@ void player_die(player *p, player_cod cause_type, int cause)
                                int2str(p->stats.scrolls_read),
                                plural(p->stats.scrolls_read));
 
-        if (p->bank_account > 0)
+        if (p->stats.life_protected > 0)
         {
-            g_string_append_printf(text, "%s had %s gp on the bank account.",
-                                   pronoun, int2str(p->bank_account));
+            g_string_append_printf(text, "\n%s life was protected %s. ",
+                                   (p->sex == PS_MALE) ? "His" : "Her",
+                                   int2time_str(p->stats.life_protected));
         }
+
+        g_string_append_printf(text, "\n%s had %s gp on %s bank account "
+                                     "when %s %s.",
+                               pronoun, int2str(p->bank_account),
+                               (p->sex == PS_MALE) ? "his" : "her",
+                               (p->sex == PS_MALE) ? "he"  : "she",
+                               cause_type < PD_TOO_LATE ? "died"
+                                                        : "returned home");
+
+        g_string_append_printf(text, "\n%s found %d gold in the dungeon, "
+                                     "sold %s gem%s for %d and %s non-gem "
+                                     "item%s for %d gold, and earned %d gold "
+                                     "as bank interest.",
+                               pronoun, p->stats.gold_found,
+                               int2str(p->stats.gems_sold),
+                               plural(p->stats.gems_sold),
+                               p->stats.gold_sold_gems,
+                               int2str(p->stats.items_sold),
+                               plural(p->stats.items_sold),
+                               p->stats.gold_sold_items,
+                               p->stats.gold_bank_interest);
+
+        g_string_append_printf(text, "\n%s bought %s item%s for %d gold, spent "
+                                     "%d on item identification or repair, "
+                                     "donated %d gold to charitable causes, and "
+                                     "invested %d gold in personal education.",
+                               pronoun,
+                               int2str(p->stats.items_bought),
+                               plural(p->stats.items_bought),
+                               p->stats.gold_spent_shop,
+                               p->stats.gold_spent_id_repair,
+                               p->stats.gold_spent_donation,
+                               p->stats.gold_spent_college);
 
         /* append map of current level if the player is not in the town */
         if (p->pos.z > 0)
@@ -3422,6 +3498,9 @@ int player_item_drop(player *p, inventory **inv, item *it)
         return FALSE;
     }
 
+    if (it->type == IT_GOLD)
+        p->stats.gold_found -= it->count;
+
     inv_add(map_ilist_at(game_map(nlarn, p->pos.z), p->pos), it);
 
     /* reveal if item is cursed or blessed when dropping it on an altar */
@@ -3493,6 +3572,9 @@ int player_item_pickup(player *p, inventory **inv, item *it)
         /* the attempt to pick the item up took one turn */
         return 1;
     }
+
+    if (it->type == IT_GOLD)
+        p->stats.gold_found += it->count;
 
     /* remove the item from the originating inventory if it has not been split */
     if (oid != NULL)

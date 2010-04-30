@@ -51,8 +51,6 @@ item_usage_result food_eat(struct player *p, item *food)
 
     if (food->id == FT_FORTUNE_COOKIE)
     {
-        p->stats.cookies_nibbled++;
-
         log_add_entry(nlarn->log,
                       "It has a piece of paper inside. It reads: \"%s\"",
                       food_get_fortune(game_fortunes(nlarn)));
