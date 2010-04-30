@@ -435,7 +435,7 @@ const char *int2str(int val)
     const char *count_desc[] = { "no", "one", "two", "three", "four", "five",
                                  "six", "seven", "eight", "nine", "ten",
                                  "eleven", "twelve", "thirteen", "fourteen",
-                                 "fivteen", "sixteen", "seventeen", "eighteen",
+                                 "fifteen", "sixteen", "seventeen", "eighteen",
                                  "nineteen", "twenty"
                                };
 
