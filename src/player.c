@@ -121,15 +121,67 @@ player *player_new()
     /* initialize player */
     p = g_malloc0(sizeof(player));
 
-    p->stats.str_orig = p->strength = 12 + rand_0n(6);
-    p->stats.cha_orig = p->charisma = 12 + rand_0n(6);
-    p->stats.dex_orig = p->dexterity = 12 + rand_0n(6);
-    p->stats.wis_orig = p->wisdom = 12 + rand_0n(6);
-    p->stats.int_orig = p->intelligence = 12 + rand_0n(6);
-    p->stats.con_orig = p->constitution = 12 + rand_0n(6);
+    p->strength     = 12;
+    p->constitution = 12;
+    p->intelligence = 12;
+    p->dexterity    = 12;
+    p->wisdom       = 12;
+    p->charisma     = 12;
 
-    p->hp = p->hp_max = (p->constitution + rand_0n(10));
-    p->mp = p->mp_max = (p->intelligence + rand_0n(10));
+    // Allow choice between:
+    // * strong Fighter (Str 20  Dex 15  Con 16  Int 12  Wis 12  Cha 12)
+    // * hardy Fighter  (Str 16  Dex 12  Con 20  Int 12  Wis 15  Cha 12)
+    // * arcane scholar (Str 12  Dex 14  Con 12  Int 20  Wis 17  Cha 12)
+    switch (rand_1n(4)) // only covers choices 1-3
+    {
+        case 1: // strong Fighter
+            p->strength     += 8;
+            p->dexterity    += 3;
+            p->constitution += 4;
+            p->intelligence += 0;
+            p->wisdom       += 0;
+            break;
+        case 2: // hardy Fighter
+            p->strength     += 4;
+            p->dexterity    += 0;
+            p->constitution += 8;
+            p->intelligence += 0;
+            p->wisdom       += 3;
+            break;
+        case 3: // arcane scholar
+            p->strength     += 0;
+            p->dexterity    += 2;
+            p->constitution += 0;
+            p->intelligence += 8;
+            p->wisdom       += 5;
+            break;
+        case 4: // random character
+        {
+            int bonus = 15;
+            while (bonus-- > 0)
+            {
+                switch (rand_1n(6))
+                {
+                case 1: p->strength++;     break;
+                case 2: p->dexterity++;    break;
+                case 3: p->constitution++; break;
+                case 4: p->intelligence++; break;
+                case 5: p->wisdom++;       break;
+                }
+            }
+        }
+    }
+
+    p->stats.str_orig = p->strength;
+    p->stats.con_orig = p->constitution;
+    p->stats.int_orig = p->intelligence;
+    p->stats.dex_orig = p->dexterity;
+    p->stats.wis_orig = p->wisdom;
+    p->stats.cha_orig = p->charisma;
+
+    // hp and mp depend on Con and Int, respectively.
+    p->hp = p->hp_max = (p->constitution + 5);
+    p->mp = p->mp_max = (p->intelligence + 5);
 
     p->level = p->stats.max_level = 1;
 
