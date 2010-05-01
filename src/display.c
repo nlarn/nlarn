@@ -406,35 +406,20 @@ int display_paint_screen(player *p)
     attroff(attrs);
     clrtoeol();
 
-    /* charisma */
-    mvprintw(6, MAP_MAX_X + 3, "CHA ");
-
-    if (player_get_cha(p) > (int)p->charisma)
-        attrs = DC_YELLOW;
-    else if (player_get_cha(p) < (int)p->charisma)
-        attrs = DC_LIGHTRED;
-    else
-        attrs = DC_WHITE;
-
-    attron(attrs);
-    printw("%2d", player_get_cha(p));
-    attroff(attrs) ;
-    clrtoeol();
-
-    /* clear line below charisma */
-    move(7, MAP_MAX_X + 1);
+    /* clear line below Wisdom */
+    move(6, MAP_MAX_X + 1);
     clrtoeol();
 
     /* armour class */
-    mvprintw(8, MAP_MAX_X + 3, "AC: %2d", player_get_ac(p));
+    mvprintw(7, MAP_MAX_X + 3, "AC: %2d", player_get_ac(p));
     clrtoeol();
 
     /* gold */
-    mvprintw(9, MAP_MAX_X + 3, "$%-7d", player_get_gold(p));
+    mvprintw(8, MAP_MAX_X + 3, "$%-7d", player_get_gold(p));
     clrtoeol();
 
     /* clear line below gold */
-    move(10, MAP_MAX_X + 1);
+    move(9, MAP_MAX_X + 1);
     clrtoeol();
 
     /* display effect descriptions */
@@ -443,7 +428,7 @@ int display_paint_screen(player *p)
     /* clear lines */
     for (i = 0; i < 7; i++)
     {
-        move(11 + i, MAP_MAX_X + 3);
+        move(10 + i, MAP_MAX_X + 3);
         clrtoeol();
     }
 

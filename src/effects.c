@@ -43,13 +43,6 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_INC_CHA, 1, 1, NULL,
-        "You feel charismatic!",
-        NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
-    },
-
-    {
         ET_INC_CON, 1, 1, NULL,
         "You have a greater intestinal constitude!",
         NULL, NULL, NULL,
@@ -345,13 +338,6 @@ static const effect_data effects[ET_MAX] =
         "You can no longer walk through walls.",
         NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
-    },
-
-    {
-        ET_DEC_CHA, 1, 1, NULL,
-        "You feel rejected.",
-        NULL, NULL, NULL,
-        FALSE, FALSE, TRUE, TRUE
     },
 
     {

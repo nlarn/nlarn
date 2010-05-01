@@ -126,12 +126,11 @@ player *player_new()
     p->intelligence = 12;
     p->dexterity    = 12;
     p->wisdom       = 12;
-    p->charisma     = 12;
 
     // Allow choice between:
-    // * strong Fighter (Str 20  Dex 15  Con 16  Int 12  Wis 12  Cha 12)
-    // * hardy Fighter  (Str 16  Dex 12  Con 20  Int 12  Wis 15  Cha 12)
-    // * arcane scholar (Str 12  Dex 14  Con 12  Int 20  Wis 17  Cha 12)
+    // * strong Fighter (Str 20  Dex 15  Con 16  Int 12  Wis 12)
+    // * hardy Fighter  (Str 16  Dex 12  Con 20  Int 12  Wis 15)
+    // * arcane scholar (Str 12  Dex 14  Con 12  Int 20  Wis 17)
     switch (rand_1n(4)) // only covers choices 1-3
     {
         case 1: // strong Fighter
@@ -177,7 +176,6 @@ player *player_new()
     p->stats.int_orig = p->intelligence;
     p->stats.dex_orig = p->dexterity;
     p->stats.wis_orig = p->wisdom;
-    p->stats.cha_orig = p->charisma;
 
     // hp and mp depend on Con and Int, respectively.
     p->hp = p->hp_max = (p->constitution + 5);
@@ -268,7 +266,6 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(pser, "wisdom", p->wisdom);
     cJSON_AddNumberToObject(pser, "constitution", p->constitution);
     cJSON_AddNumberToObject(pser, "dexterity", p->dexterity);
-    cJSON_AddNumberToObject(pser, "charisma", p->charisma);
 
     cJSON_AddNumberToObject(pser, "hp", p->hp);
     cJSON_AddNumberToObject(pser, "hp_max", p->hp_max);
@@ -436,8 +433,6 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "wis_orig", p->stats.wis_orig);
     cJSON_AddNumberToObject(obj, "con_orig", p->stats.con_orig);
     cJSON_AddNumberToObject(obj, "dex_orig", p->stats.dex_orig);
-    cJSON_AddNumberToObject(obj, "cha_orig", p->stats.cha_orig);
-
     return pser;
 }
 
@@ -457,7 +452,6 @@ player *player_deserialize(cJSON *pser)
     p->wisdom = cJSON_GetObjectItem(pser, "wisdom")->valueint;
     p->constitution = cJSON_GetObjectItem(pser, "constitution")->valueint;
     p->dexterity = cJSON_GetObjectItem(pser, "dexterity")->valueint;
-    p->charisma = cJSON_GetObjectItem(pser, "charisma")->valueint;
 
     p->hp = cJSON_GetObjectItem(pser, "hp")->valueint;
     p->hp_max = cJSON_GetObjectItem(pser, "hp_max")->valueint;
@@ -638,7 +632,6 @@ player *player_deserialize(cJSON *pser)
     p->stats.wis_orig = cJSON_GetObjectItem(obj, "wis_orig")->valueint;
     p->stats.con_orig = cJSON_GetObjectItem(obj, "con_orig")->valueint;
     p->stats.dex_orig = cJSON_GetObjectItem(obj, "dex_orig")->valueint;
-    p->stats.cha_orig = cJSON_GetObjectItem(obj, "cha_orig")->valueint;
 
     return p;
 }
@@ -1049,8 +1042,6 @@ void player_die(player *p, player_cod cause_type, int cause)
                                p->constitution, p->constitution - p->stats.con_orig);
         g_string_append_printf(text, "Dexterity:    %d (%+2d)\n",
                                p->dexterity, p->dexterity - p->stats.dex_orig);
-        g_string_append_printf(text, "Charisma:     %d (%+2d)\n",
-                               p->charisma, p->charisma - p->stats.cha_orig);
 
         /* effects */
         char **effect_desc = player_effect_text(p);
@@ -2230,10 +2221,6 @@ effect *player_effect_add(player *p, effect *e)
     {
         switch (e->type)
         {
-        case ET_INC_CHA:
-            p->charisma += e->amount;
-            break;
-
         case ET_INC_CON:
             p->constitution += e->amount;
             break;
@@ -2256,7 +2243,7 @@ effect *player_effect_add(player *p, effect *e)
             break;
 
         case ET_INC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_INC_CHA, ET_INC_WIS)));
+            player_effect_add(p, effect_new(rand_m_n(ET_INC_CON, ET_INC_WIS)));
             break;
 
         case ET_INC_HP_MAX:
@@ -2292,10 +2279,6 @@ effect *player_effect_add(player *p, effect *e)
             player_mp_gain(p, player_get_mp_max(p));
             break;
 
-        case ET_DEC_CHA:
-            p->charisma -= e->amount;
-            break;
-
         case ET_DEC_CON:
             p->constitution -= e->amount;
             break;
@@ -2318,7 +2301,7 @@ effect *player_effect_add(player *p, effect *e)
             break;
 
         case ET_DEC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CHA, ET_DEC_WIS)));
+            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CON, ET_DEC_WIS)));
             break;
 
         case ET_DEC_HP_MAX:
@@ -3837,16 +3820,6 @@ int player_get_dex(player *p)
     return p->dexterity
            + player_effect(p, ET_INC_DEX)
            - player_effect(p, ET_DEC_DEX)
-           + player_effect(p, ET_HEROISM)
-           - player_effect(p, ET_DIZZINESS);
-}
-
-int player_get_cha(player *p)
-{
-    assert(p != NULL);
-    return p->charisma
-           + player_effect(p, ET_INC_CHA)
-           - player_effect(p, ET_DEC_CHA)
            + player_effect(p, ET_HEROISM)
            - player_effect(p, ET_DIZZINESS);
 }

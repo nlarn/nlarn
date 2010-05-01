@@ -37,7 +37,6 @@ const potion_data potions[PO_MAX] =
     { PO_LEARNING,      "learning",           ET_INC_INT,           50, FALSE },
     { PO_INC_WIS,       "gain wisdom",        ET_INC_WIS,           50, FALSE },
     { PO_INC_CON,       "sturdiness",         ET_INC_CON,          100, FALSE },
-    { PO_INC_CHA,       "raise charisma",     ET_INC_CHA,           50, FALSE },
     { PO_DIZZINESS,     "dizziness",          ET_DIZZINESS,        100, FALSE },
     { PO_OBJ_DETECT,    "object detection",   ET_NONE,             100,  TRUE },
     { PO_MON_DETECT,    "monster detection",  ET_DETECT_MONSTER,   100,  TRUE },

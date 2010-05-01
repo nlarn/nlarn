@@ -64,7 +64,6 @@ typedef struct _player_stats
     gint32 wis_orig;
     gint32 con_orig;
     gint32 dex_orig;
-    gint32 cha_orig;
 } player_stats;
 
 typedef enum _player_sex
@@ -104,7 +103,6 @@ typedef struct player
     guint32 wisdom;
     guint32 constitution;
     guint32 dexterity;
-    guint32 charisma;
 
     gint32 hp; /* current hp */
     guint32 hp_max; /* max hp */

@@ -20,7 +20,7 @@
 #define __BUILDINGS_H_
 
 /* number of courses available in school */
-#define SCHOOL_COURSE_COUNT 8
+#define SCHOOL_COURSE_COUNT 7
 
 typedef struct school_course {
     int course_time;

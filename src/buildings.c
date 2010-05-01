@@ -488,7 +488,6 @@ int building_school(player *p)
         { 15, "Fighters Training II", "You feel much stronger!" },
         { 10, "Introduction to Wizardry", "The task before you now seems more attainable!" },
         { 20, "Applied Wizardry", "The task before you now seems very attainable!" },
-        { 10, "Behavioral Psychology", "You now feel like a born leader!" },
         { 10, "Faith for Today", "You now feel more confident that you can find the potion in time!" },
         { 10, "Contemporary Dance", "You feel like dancing!" },
         {  5, "History of Larn", "Your instructor told you that the Eye of Larn is rumored to be guarded by a platinum dragon who possesses psionic abilities." },
@@ -572,18 +571,14 @@ int building_school(player *p)
             break;
 
         case 4:
-            p->charisma += 3;
-            break;
-
-        case 5:
             p->wisdom += 2;
             break;
 
-        case 6:
+        case 5:
             p->dexterity += 3;
             break;
 
-        case 7:
+        case 6:
             p->intelligence++;
             break;
         }

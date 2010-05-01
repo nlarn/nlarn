@@ -29,7 +29,6 @@ typedef enum _effect_type
     ET_NONE,                    /* no short-term effect */
     /* POSITIVE EFFECTS */
     /* base attribute modification */
-    ET_INC_CHA,                 /* enhanced charisma */
     ET_INC_CON,                 /* enhanced constitution */
     ET_INC_DEX,                 /* enhanced dexterity */
     ET_INC_INT,                 /* enhanced intelligence */
@@ -82,7 +81,6 @@ typedef enum _effect_type
 
     /* NEGATIVE EFFECTS */
     /* base attribute modification */
-    ET_DEC_CHA,                 /* reduced charisma */
     ET_DEC_CON,                 /* reduced constitution */
     ET_DEC_DEX,                 /* reduced dexterity */
     ET_DEC_INT,                 /* reduced intelligence */

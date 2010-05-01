@@ -501,13 +501,6 @@ int player_fountain_drink(player *p)
             break;
 
         case 6:
-            if (fntchange > 0)
-                et = ET_INC_CHA;
-            else
-                et = ET_DEC_CHA;
-            break;
-
-        case 7:
             amount = rand_1n(p->pos.z + 1);
             if (fntchange > 0)
             {
@@ -527,7 +520,7 @@ int player_fountain_drink(player *p)
 
             break;
 
-        case 8:
+        case 7:
             amount = rand_1n(p->pos.z + 1);
             if (fntchange > 0)
             {
@@ -545,7 +538,7 @@ int player_fountain_drink(player *p)
             }
             break;
 
-        case 9:
+        case 8:
             amount = 5 * rand_1n((p->pos.z + 1) * (p->pos.z + 1));
 
             if (fntchange > 0)
