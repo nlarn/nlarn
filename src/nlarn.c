@@ -683,7 +683,7 @@ int main(int argc, char *argv[])
                         || (nlarn->p->hp == nlarn->p->hp_max
                             && nlarn->p->mp == nlarn->p->mp_max
                             && !player_effect_get(nlarn->p, ET_CONFUSION)
-                            && !player_effect_get(nlarn->p, ET_BLINDNESS)
+                            && !player_effect_get(nlarn->p, ET_PARALYSIS)
                             && !player_effect_get(nlarn->p, ET_DIZZINESS)
                             && !player_effect_get(nlarn->p, ET_BLINDNESS)))
                 {
