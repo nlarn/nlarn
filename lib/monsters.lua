@@ -69,7 +69,9 @@ monsters = {
     },
     [MT_CENTIPEDE] = {
       ac = 14,
-      attacks = { { type = BITE, base = 1, damage = PHYSICAL } },
+      attacks = {
+        { type = BITE, base = 50, damage = DEC_STR },
+        { type = BITE, base = 1, damage = PHYSICAL } },
       color = YELLOW,
       exp = 2,
       flags = HEAD,
@@ -290,7 +292,9 @@ monsters = {
     },
     [MT_GIANT_ANT] = {
       ac = 8,
-      attacks = { { type = BITE, base = 1, damage = PHYSICAL } },
+      attacks = {
+        { type = BITE, base = 75, damage = DEC_STR },
+        { type = BITE, base = 1, damage = PHYSICAL } },
       color = BROWN,
       exp = 5,
       flags = HEAD,
