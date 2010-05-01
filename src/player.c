@@ -608,21 +608,18 @@ player *player_deserialize(cJSON *pser)
     p->stats.scrolls_read = cJSON_GetObjectItem(obj, "scrolls_read")->valueint;
     p->stats.books_read = cJSON_GetObjectItem(obj, "books_read")->valueint;
 
-    if (cJSON_GetObjectItem(obj, "life_protected"))
-    {
-        p->stats.life_protected = cJSON_GetObjectItem(obj, "life_protected")->valueint;
-        p->stats.items_bought = cJSON_GetObjectItem(obj, "items_bought")->valueint;
-        p->stats.items_sold   = cJSON_GetObjectItem(obj, "items_sold")->valueint;
-        p->stats.gems_sold    = cJSON_GetObjectItem(obj, "gems_sold")->valueint;
-        p->stats.gold_found         = cJSON_GetObjectItem(obj, "gold_found")->valueint;
-        p->stats.gold_sold_items    = cJSON_GetObjectItem(obj, "gold_sold_items")->valueint;
-        p->stats.gold_sold_gems     = cJSON_GetObjectItem(obj, "gold_sold_gems")->valueint;
-        p->stats.gold_bank_interest = cJSON_GetObjectItem(obj, "gold_bank_interest")->valueint;
-        p->stats.gold_spent_shop      = cJSON_GetObjectItem(obj, "gold_spent_shop")->valueint;
-        p->stats.gold_spent_id_repair = cJSON_GetObjectItem(obj, "gold_spent_id_repair")->valueint;
-        p->stats.gold_spent_donation  = cJSON_GetObjectItem(obj, "gold_spent_donation")->valueint;
-        p->stats.gold_spent_college   = cJSON_GetObjectItem(obj, "gold_spent_college")->valueint;
-    }
+    p->stats.life_protected = cJSON_GetObjectItem(obj, "life_protected")->valueint;
+    p->stats.items_bought = cJSON_GetObjectItem(obj, "items_bought")->valueint;
+    p->stats.items_sold   = cJSON_GetObjectItem(obj, "items_sold")->valueint;
+    p->stats.gems_sold    = cJSON_GetObjectItem(obj, "gems_sold")->valueint;
+    p->stats.gold_found         = cJSON_GetObjectItem(obj, "gold_found")->valueint;
+    p->stats.gold_sold_items    = cJSON_GetObjectItem(obj, "gold_sold_items")->valueint;
+    p->stats.gold_sold_gems     = cJSON_GetObjectItem(obj, "gold_sold_gems")->valueint;
+    p->stats.gold_bank_interest = cJSON_GetObjectItem(obj, "gold_bank_interest")->valueint;
+    p->stats.gold_spent_shop      = cJSON_GetObjectItem(obj, "gold_spent_shop")->valueint;
+    p->stats.gold_spent_id_repair = cJSON_GetObjectItem(obj, "gold_spent_id_repair")->valueint;
+    p->stats.gold_spent_donation  = cJSON_GetObjectItem(obj, "gold_spent_donation")->valueint;
+    p->stats.gold_spent_college   = cJSON_GetObjectItem(obj, "gold_spent_college")->valueint;
 
     p->stats.max_level = cJSON_GetObjectItem(obj, "max_level")->valueint;
     p->stats.max_xp = cJSON_GetObjectItem(obj, "max_xp")->valueint;

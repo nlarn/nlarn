@@ -37,6 +37,7 @@ const potion_data potions[PO_MAX] =
     { PO_LEARNING,      "learning",           ET_INC_INT,           50, FALSE },
     { PO_INC_WIS,       "gain wisdom",        ET_INC_WIS,           50, FALSE },
     { PO_INC_CON,       "sturdiness",         ET_INC_CON,          100, FALSE },
+    { PO_RECOVERY,      "recovery",           ET_NONE,             200,  TRUE },
     { PO_DIZZINESS,     "dizziness",          ET_DIZZINESS,        100, FALSE },
     { PO_OBJ_DETECT,    "object detection",   ET_NONE,             100,  TRUE },
     { PO_MON_DETECT,    "monster detection",  ET_DETECT_MONSTER,   100,  TRUE },
@@ -56,6 +57,7 @@ const potion_data potions[PO_MAX] =
 static int potion_with_effect(struct player *p, item *potion);
 static int potion_amnesia(struct player *p, item *potion);
 static int potion_detect_item(struct player *p, item *potion);
+static int potion_recovery(struct player *p, item *potion);
 
 struct potion_obfuscation_s
 {
@@ -88,6 +90,7 @@ potion_obfuscation[PO_MAX - 1] =
     { "dichroic",       DC_LIGHTMAGENTA,},
     { "tricoloured",    DC_LIGHTCYAN,   },
     { "black",          DC_DARKGRAY,    },
+//     { "foaming",        DC_WHITE,       }, // reserved f. power
 };
 
 char *potion_desc(int potion_id)
@@ -144,6 +147,10 @@ item_usage_result potion_quaff(struct player *p, item *potion)
 
         case PO_WATER:
             log_add_entry(nlarn->log, "This tastes like water..");
+            break;
+
+        case PO_RECOVERY:
+            result.identified = potion_recovery(p, potion);
             break;
 
         case PO_CURE_DIANTHR:
@@ -270,4 +277,31 @@ static int potion_detect_item(player *p, item *potion)
     }
 
     return count;
+}
+
+static int potion_recovery(player *p, item *potion)
+{
+    assert (p != NULL && potion != NULL);
+
+    gboolean success = FALSE;
+    gint32 et;
+    effect *e;
+    for (et = ET_DEC_CON; et <= ET_DEC_WIS; et++)
+    {
+        if ((e = player_effect_get(p, et)))
+        {
+            player_effect_del(p, e);
+            success = TRUE;
+        }
+    }
+    if ((e = player_effect_get(p, ET_DIZZINESS)))
+    {
+        player_effect_del(p, e);
+        success = TRUE;
+    }
+
+    if (success)
+        log_add_entry(nlarn->log, "You feel more capable.");
+
+    return success;
 }

@@ -47,6 +47,7 @@ enum potion_objects {
 	PO_LEARNING,
 	PO_INC_WIS,
 	PO_INC_CON,
+    PO_RECOVERY,
 	PO_DIZZINESS,
 	PO_OBJ_DETECT,
 	PO_MON_DETECT,
