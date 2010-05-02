@@ -127,57 +127,7 @@ player *player_new()
     p->dexterity    = 12;
     p->wisdom       = 12;
 
-    // Allow choice between:
-    // * strong Fighter (Str 20  Dex 15  Con 16  Int 12  Wis 12)
-    // * hardy Fighter  (Str 16  Dex 12  Con 20  Int 12  Wis 15)
-    // * arcane scholar (Str 12  Dex 14  Con 12  Int 20  Wis 17)
-    switch (rand_1n(4)) // only covers choices 1-3
-    {
-        case 1: // strong Fighter
-            p->strength     += 8;
-            p->dexterity    += 3;
-            p->constitution += 4;
-            p->intelligence += 0;
-            p->wisdom       += 0;
-            break;
-        case 2: // hardy Fighter
-            p->strength     += 4;
-            p->dexterity    += 0;
-            p->constitution += 8;
-            p->intelligence += 0;
-            p->wisdom       += 3;
-            break;
-        case 3: // arcane scholar
-            p->strength     += 0;
-            p->dexterity    += 2;
-            p->constitution += 0;
-            p->intelligence += 8;
-            p->wisdom       += 5;
-            break;
-        case 4: // random character
-        {
-            int bonus = 15;
-            while (bonus-- > 0)
-            {
-                switch (rand_1n(6))
-                {
-                case 1: p->strength++;     break;
-                case 2: p->dexterity++;    break;
-                case 3: p->constitution++; break;
-                case 4: p->intelligence++; break;
-                case 5: p->wisdom++;       break;
-                }
-            }
-        }
-    }
-
-    p->stats.str_orig = p->strength;
-    p->stats.con_orig = p->constitution;
-    p->stats.int_orig = p->intelligence;
-    p->stats.dex_orig = p->dexterity;
-    p->stats.wis_orig = p->wisdom;
-
-    // hp and mp depend on Con and Int, respectively.
+    // some base stats
     p->hp = p->hp_max = (p->constitution + 5);
     p->mp = p->mp_max = (p->intelligence + 5);
 
@@ -208,6 +158,84 @@ player *player_new()
     p->identified_potions[PO_CURE_DIANTHR] = TRUE;
 
     return p;
+}
+
+void player_assign_bonus_stats(player *p)
+{
+    GString *text;
+    text = g_string_new("  a) Strong character\n"
+                        "  b) Tough character\n"
+                        "  c) Smart character\n"
+                        "  d) Randomly strong, tough, or smart\n"
+                        "  e) Stats assigned randomly\n");
+
+    int selection;
+    do
+    {
+        selection = display_show_message("Choose a character build",
+                                         text->str, 0);
+        display_paint_screen(nlarn->p);
+    }
+    while (selection < 'a' || selection > 'e');
+
+    g_string_free(text, TRUE);
+
+    if (selection == 'd')
+        selection = 'a' + rand_0n(3);
+
+    // Allow choice between:
+    // * strong Fighter (Str 20  Dex 15  Con 16  Int 12  Wis 12)
+    // * hardy Fighter  (Str 16  Dex 12  Con 20  Int 12  Wis 15)
+    // * arcane scholar (Str 12  Dex 14  Con 12  Int 20  Wis 17)
+    switch (selection) // only covers choices 1-3
+    {
+        case 'a': // strong Fighter
+            p->strength     += 8;
+            p->dexterity    += 3;
+            p->constitution += 4;
+            p->intelligence += 0;
+            p->wisdom       += 0;
+            break;
+        case 'b': // hardy Fighter
+            p->strength     += 4;
+            p->dexterity    += 0;
+            p->constitution += 8;
+            p->intelligence += 0;
+            p->wisdom       += 3;
+            break;
+        case 'c': // arcane scholar
+            p->strength     += 0;
+            p->dexterity    += 2;
+            p->constitution += 0;
+            p->intelligence += 8;
+            p->wisdom       += 5;
+            break;
+        case 'e': // random character
+        {
+            int bonus = 15;
+            while (bonus-- > 0)
+            {
+                switch (rand_1n(6))
+                {
+                case 1: p->strength++;     break;
+                case 2: p->dexterity++;    break;
+                case 3: p->constitution++; break;
+                case 4: p->intelligence++; break;
+                case 5: p->wisdom++;       break;
+                }
+            }
+        }
+    }
+
+    p->stats.str_orig = p->strength;
+    p->stats.con_orig = p->constitution;
+    p->stats.int_orig = p->intelligence;
+    p->stats.dex_orig = p->dexterity;
+    p->stats.wis_orig = p->wisdom;
+
+    // Recalculate hp and mp because they depend on Con and Int, respectively.
+    p->hp = p->hp_max = (p->constitution + 5);
+    p->mp = p->mp_max = (p->intelligence + 5);
 }
 
 void player_destroy(player *p)

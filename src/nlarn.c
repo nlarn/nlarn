@@ -133,6 +133,12 @@ int main(int argc, char *argv[])
 
     display_paint_screen(nlarn->p);
 
+    if (!loaded)
+    {
+        player_assign_bonus_stats(nlarn->p);
+        display_paint_screen(nlarn->p);
+    }
+
     /* ask for a charakter name if none has been supplied */
     while (nlarn->p->name == NULL)
     {
