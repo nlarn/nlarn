@@ -732,7 +732,9 @@ monsters = {
     },
     [MT_SNAKE] = {
       ac = 15,
-      attacks = { { type = BITE, base = 1, damage = PHYSICAL } },
+      attacks = { { type = BITE, base = 1, damage = PHYSICAL },
+                  { type = BITE, base = 2, damage = POISON }
+      },
       color = LIGHTGREEN,
       exp = 1,
       flags = HEAD,
@@ -844,7 +846,9 @@ monsters = {
     },
     [MT_VIOLET_FUNGUS] = {
       ac = 12,
-      attacks = { { type = SLAM, base = 3, damage = PHYSICAL } },
+      attacks = { { type = SLAM, base = 3, damage = PHYSICAL },
+                  { type = SLAM, base = 2, damage = POISON }
+      },
       color = MAGENTA,
       exp = 100,
       hp_max = 38,
