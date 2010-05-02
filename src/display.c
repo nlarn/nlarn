@@ -167,7 +167,7 @@ int display_paint_screen(player *p)
                     }
 
                     attron(attrs = item_colour(it));
-                    addch(item_image(it->type));
+                    addch(item_glyph(it->type));
                     attroff(attrs);
                 }
                 else if (map_trap_at(map, pos) && (game_wizardmode(nlarn) || player_memory_of(p, pos).trap))
@@ -200,7 +200,7 @@ int display_paint_screen(player *p)
                 {
                     /* draw items */
                     attron(attrs = player_memory_of(p, pos).item_colour);
-                    addch(item_image(player_memory_of(p, pos).item));
+                    addch(item_glyph(player_memory_of(p, pos).item));
                     attroff(attrs);
                 }
 
@@ -1012,7 +1012,7 @@ void display_config_autopickup(player *p)
                 attrs = COLOR_PAIR(DCP_WHITE_RED);
 
             wattron(cwin->window, attrs);
-            mvwprintw(cwin->window, 4, 6 + it * 2, "%c", item_image(it));
+            mvwprintw(cwin->window, 4, 6 + it * 2, "%c", item_glyph(it));
             wattroff(cwin->window, attrs);
         }
 
@@ -1032,7 +1032,7 @@ void display_config_autopickup(player *p)
             {
                 for (it = 1; it < IT_MAX; it++)
                 {
-                    if (item_image(it) == key)
+                    if (item_glyph(it) == key)
                     {
                         p->settings.auto_pickup[it] = !p->settings.auto_pickup[it];
                         break;

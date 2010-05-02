@@ -37,25 +37,23 @@
 #include "utils.h"
 #include "weapons.h"
 
-static void item_typename_pluralize(item *it, char *description, int length);
-static char *item_name_count(char *name, char *add_info, int singular, int definite, int length, int count);
-static char *item_desc_get(item *it, int known);
+static const char *item_desc_get(item *it, int known);
 
 const item_type_data item_data[IT_MAX] =
 {
-    /* item_t       name_sg      name_pl        IMG  desc_known      desc_unknown         max_id           op bl co eq us st id */
-    { IT_NONE,      "",          "",            ' ', "",             "",                  0,               0, 0, 0, 0, 0, 0, 0, },
-    { IT_AMULET,    "amulet",    "amulets",     '"', "amulet of %s", "%s amulet",         AM_LARN,         0, 1, 0, 1, 0, 0, 1, },
-    { IT_ARMOUR,    "armour",    "armour",      '[', "%s",           "%s",                AT_MAX,          1, 1, 1, 1, 0, 0, 1, },
-    { IT_BOOK,      "book",      "books",       '+', "book of %s",   "%s book",           SP_MAX,          0, 1, 1, 0, 1, 1, 1, },
-    { IT_CONTAINER, "container", "containers",  ']', "%s",           "%s",                CT_MAX,          0, 0, 1, 0, 0, 0, 0, },
-    { IT_FOOD,      "food",      "foods",       '%', "%s",           "%s",                FT_MAX,          0, 0, 0, 0, 1, 1, 0, },
-    { IT_GEM,       "gem",       "gems",        '*', "%s",           "%s gem",            GT_MAX,          1, 0, 0, 0, 0, 1, 0, },
-    { IT_GOLD,      "coin",      "coins",       '$', "%s",           "%s",                0,               0, 0, 0, 0, 0, 1, 0, },
-    { IT_POTION,    "potion",    "potions",     '!', "potion of %s", "%s potion",         PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, },
-    { IT_RING,      "ring",      "rings",       '=', "ring of %s",   "%s ring",           RT_MAX,          1, 1, 1, 1, 0, 0, 1, },
-    { IT_SCROLL,    "scroll",    "scrolls",     '?', "scroll of %s", "scroll labeled %s", ST_MAX,          0, 1, 1, 0, 1, 1, 1, },
-    { IT_WEAPON,    "weapon",    "weapons",     '(', "%s",           "%s",                WT_MAX,          1, 1, 1, 1, 0, 0, 1, },
+    /* item_t       name_sg      name_pl        IMG  max_id           op bl co eq us st id */
+    { IT_NONE,      "",          "",            ' ', 0,               0, 0, 0, 0, 0, 0, 0, },
+    { IT_AMULET,    "amulet",    "amulets",     '"', AM_LARN,         0, 1, 0, 1, 0, 0, 1, },
+    { IT_ARMOUR,    "armour",    "armour",      '[', AT_MAX,          1, 1, 1, 1, 0, 0, 1, },
+    { IT_BOOK,      "book",      "books",       '+', SP_MAX,          0, 1, 1, 0, 1, 1, 1, },
+    { IT_CONTAINER, "container", "containers",  ']', CT_MAX,          0, 0, 1, 0, 0, 0, 0, },
+    { IT_FOOD,      "food",      "foods",       '%', FT_MAX,          0, 0, 0, 0, 1, 1, 0, },
+    { IT_GEM,       "gem",       "gems",        '*', GT_MAX,          1, 0, 0, 0, 0, 1, 0, },
+    { IT_GOLD,      "coin",      "coins",       '$', 0,               0, 0, 0, 0, 0, 1, 0, },
+    { IT_POTION,    "potion",    "potions",     '!', PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, },
+    { IT_RING,      "ring",      "rings",       '=', RT_MAX,          1, 1, 1, 1, 0, 0, 1, },
+    { IT_SCROLL,    "scroll",    "scrolls",     '?', ST_MAX,          0, 1, 1, 0, 1, 1, 1, },
+    { IT_WEAPON,    "weapon",    "weapons",     '(', WT_MAX,          1, 1, 1, 1, 0, 0, 1, },
 };
 
 const item_material_data item_materials[IM_MAX] =
@@ -566,190 +564,185 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id
 
 char *item_describe(item *it, int known, int singular, int definite, char *str, int str_len)
 {
-    char desc[61] = "";
-    char *temp = NULL;
+    GString *desc = g_string_new(NULL);
     char *add_info = NULL;
-    GPtrArray *add_info_elems = g_ptr_array_new();
+    char **add_infos = strv_new();
 
     assert((it != NULL) && (it->type > IT_NONE) && (it->type < IT_MAX));
 
     /* collect additional information */
     if (it->blessed_known)
     {
-        if (it->blessed)
-            g_ptr_array_add(add_info_elems, "blessed");
-        else if (it->cursed)
-            g_ptr_array_add(add_info_elems, "cursed");
-        else
-            g_ptr_array_add(add_info_elems, "uncursed");
+        if (it->blessed) strv_append(&add_infos, "blessed");
+        else if (it->cursed) strv_append(&add_infos, "cursed");
+        else strv_append(&add_infos, "uncursed");
     }
 
-    if (it->burnt == 1)
-    {
-        g_ptr_array_add(add_info_elems, "burnt");
-    }
-    if (it->burnt == 2)
-    {
-        g_ptr_array_add(add_info_elems, "very burnt");
-    }
+    if (it->burnt == 1) strv_append(&add_infos, "burnt");
+    if (it->burnt == 2) strv_append(&add_infos, "very burnt");
+    if (it->corroded == 1) strv_append(&add_infos, "corroded");
+    if (it->corroded == 2) strv_append(&add_infos, "very corroded");
+    if (it->rusty == 1) strv_append(&add_infos, "rusty");
+    if (it->rusty == 2) strv_append(&add_infos, "very rusty");
 
-    if (it->corroded == 1)
+    if (g_strv_length(add_infos))
     {
-        g_ptr_array_add(add_info_elems, "corroded");
-    }
-    if (it->corroded == 2)
-    {
-        g_ptr_array_add(add_info_elems, "very corroded");
-    }
-
-    if (it->rusty == 1)
-    {
-        g_ptr_array_add(add_info_elems, "rusty");
-    }
-    if (it->rusty == 2)
-    {
-        g_ptr_array_add(add_info_elems, "very rusty");
-    }
-
-    if (add_info_elems->len > 0)
-    {
-        /* add sentinel */
-        g_ptr_array_add(add_info_elems, NULL);
-        add_info = g_strjoinv(", ", (char**)(add_info_elems->pdata));
+        add_info = g_strjoinv(", ", add_infos);
+        g_strfreev(add_infos);
     }
 
     switch (it->type)
     {
+    case IT_AMULET:
+        if (known)
+            g_string_append_printf(desc, "amulet of %s", item_desc_get(it, known));
+        else
+            g_string_append_printf(desc, "%s amulet", item_desc_get(it, known));
+        break;
+
     case IT_ARMOUR:
-        g_snprintf(desc, 60, item_desc_get(it, known));
+        g_string_append(desc, item_desc_get(it, known));
+
         if (it->bonus_known)
         {
-            g_snprintf(str, str_len, "%s %+d",
-                       item_name_count(desc, add_info, singular, definite, 60,
-                                       it->count), it->bonus);
-        }
-        else
-        {
-            g_snprintf(str, str_len, item_name_count(desc, add_info, singular,
-                       definite, 60, it->count));
+            g_string_append_printf(desc, " %+d", it->bonus);
         }
 
+        break;
+
+    case IT_BOOK:
+        if (known)
+            g_string_append_printf(desc, "book%s of %s", it->count > 1 ? "s" : "",
+                                   item_desc_get(it, known));
+        else
+            g_string_append_printf(desc, "%s book%s", item_desc_get(it, known),
+                                   it->count > 1 ? "s" : "");
         break;
 
     case IT_CONTAINER:
-        g_snprintf(desc, 60, item_desc_get(it, known));
-        item_name_count(desc, add_info, singular, definite, 60, it->count);
-        g_snprintf(str, str_len, desc);
+        g_string_append(desc, item_desc_get(it, known));
         break;
 
     case IT_FOOD:
-        g_snprintf(desc, 60, item_desc_get(it, known));
-        item_name_count(desc, add_info, singular, definite, 60, it->count);
+        g_string_append(desc, item_desc_get(it, known));
 
         if ((it->count > 1) && !singular)
         {
-            g_snprintf(str, str_len, "%ss", desc);
-        }
-        else
-        {
-            g_snprintf(str, str_len, desc);
+            g_string_append_c(desc, 's');
         }
 
-        break;
-
-    case IT_GOLD:
-        g_snprintf(str, str_len, "%d gold pieces", it->count);
         break;
 
     case IT_GEM:
-        g_snprintf(desc, 60, item_desc_get(it, known));
-        g_snprintf(str, str_len, "%d carats %s", gem_size(it), desc);
+        g_string_append_printf(desc, "%d carats %s", gem_size(it), item_desc_get(it, known));
+        break;
 
-        item_name_count(str, add_info, singular, definite, str_len, it->count);
+    case IT_GOLD:
+        g_string_append_printf(desc, "gold piece%s", it->count > 1 ? "s" : "");
+        break;
+
+    case IT_POTION:
+        if (known)
+            g_string_append_printf(desc, "potion%s of %s", it->count > 1 ? "s" : "",
+                                   item_desc_get(it, known));
+        else
+            g_string_append_printf(desc, "%s potion%s", item_desc_get(it, known),
+                                   it->count > 1 ? "s" : "");
+        break;
+
+    case IT_RING:
+        if (known)
+            g_string_append_printf(desc, "ring of %s", item_desc_get(it, known));
+        else
+            g_string_append_printf(desc, "%s ring", item_desc_get(it, known));
+
+        /* display bonus if it is known */
+        if (it->bonus_known)
+            g_string_append_printf(desc, " %+d", it->bonus);
+        break;
+
+    case IT_SCROLL:
+        if (known)
+            g_string_append_printf(desc, "scroll%s of %s", it->count > 1 ? "s" : "",
+                                   item_desc_get(it, known));
+        else
+            g_string_append_printf(desc, "scroll%s labeled %s", it->count > 1 ? "s" : "",
+                                   item_desc_get(it, known));
         break;
 
     case IT_WEAPON:
         if (weapon_is_unique(it))
         {
-            char aip[41] = { 0 };
-            if (it->bonus_known)
-            {
-                if (add_info != NULL)
-                    g_snprintf(aip, 40, ", %s", add_info);
+            g_string_append_printf(desc, "%s%s",
+                                   weapon_needs_article(it) ? "the " : "",
+                                   item_desc_get(it, known));
 
-                g_snprintf(str, str_len, "%s%s (%+d%s)",
-                           weapon_needs_article(it) ? "the " : "",
-                           item_desc_get(it, known), it->bonus, aip);
-            }
-            else
+            if (it->bonus_known || add_info != NULL)
             {
-                if (add_info != NULL)
-                    g_snprintf(aip, 40, " (%s)", add_info);
-
-                g_snprintf(str, str_len, "%s%s%s",
-                           weapon_needs_article(it) ? "the " : "",
-                           item_desc_get(it, known), aip);
+                if (it->bonus_known)
+                {
+                    if (add_info != NULL)
+                    {
+                        /* bonus and additional information */
+                        g_string_append_printf(desc, " (%+d, %s)", it->bonus, add_info);
+                    }
+                    else
+                    {
+                        /* bonus only */
+                        g_string_append_printf(desc, " (%+d)", it->bonus);
+                    }
+                }
+                else
+                {
+                    /* additional information only */
+                    g_string_append_printf(desc, " (%s)", add_info);
+                }
             }
         }
         else
         {
-            g_snprintf(desc, 60, item_desc_get(it, known));
+            g_string_append_printf(desc, item_desc_get(it, known));
+
             if (it->bonus_known)
-            {
-                item_name_count(desc, add_info, singular, definite, 60, it->count);
-                g_snprintf(str, str_len, "%s %+d", desc, it->bonus);
-            }
-            else
-            {
-                item_name_count(desc, add_info, singular, definite, 60, it->count);
-                g_snprintf(str, str_len, desc);
-            }
+                g_string_append_printf(desc, " %+d", it->bonus);
         }
         break;
 
     default:
-        if (known)
-        {
-            g_snprintf(desc, 60, "%s", item_data[it->type].desc_known);
-        }
-        else
-        {
-            if ((it->type == IT_SCROLL) && (it->id == ST_BLANK))
-            {
-                g_snprintf(desc, 60, "unlabeled scroll");
-            }
-            else
-            {
-                g_snprintf(desc, 60, "%s", item_data[it->type].desc_unknown);
-            }
-        }
-
-        if ((it->count > 1) && !singular)
-        {
-            item_typename_pluralize(it, desc, 60);
-        }
-
-        temp = g_strdup(desc);
-        g_snprintf(desc, 60, temp, item_desc_get(it, known));
-        g_free(temp);
-
-        /* display bonus if it is a ring */
-        if (it->bonus_known && it->type == IT_RING)
-        {
-            item_name_count(desc, add_info, singular, definite, 60, it->count);
-            g_snprintf(str, str_len, "%s %+d", desc, it->bonus);
-        }
-        else
-        {
-            item_name_count(desc, add_info, singular, definite, 60, it->count);
-            g_snprintf(str, str_len, desc);
-        }
-
         break;
     }
 
+    /* prepend additional information unless the item is an unique weapon */
+    if (!(it->type == IT_WEAPON && weapon_is_unique(it)))
+    {
+        if (add_info != NULL)
+        {
+            g_string_prepend_c(desc, ' ');
+            g_string_prepend(desc, add_info);
+        }
+
+        /* prepend count or article */
+        gchar first_char = desc->str[0];
+        g_string_prepend_c(desc, ' ');
+
+        if ((it->count == 1) || singular)
+        {
+            g_string_prepend(desc, (const char *)(definite ? "the" : a_an(&first_char)));
+        }
+        else
+        {
+            g_string_prepend(desc, int2str(it->count));
+        }
+    }
+
+    /* copy the assembled string to the destination buffer */
+    g_strlcpy(str, desc->str, str_len);
+
+    /* free the additional information */
     g_free(add_info);
-    g_ptr_array_free(add_info_elems, TRUE);
+
+    /* free the temporary string */
+    g_string_free(desc, TRUE);
 
     return(str);
 }
@@ -1741,65 +1734,7 @@ int item_filter_pcd(item *it)
     return (it->type == IT_POTION && it->id == PO_CURE_DIANTHR);
 }
 
-static void item_typename_pluralize(item *it, char *description, int length)
-{
-    char *replaced;
-
-    assert(it != NULL && description != NULL && length > 0);
-
-    replaced = str_replace(description,
-                           item_data[it->type].name_sg,
-                           item_data[it->type].name_pl);
-
-    g_snprintf(description, length, "%s", replaced);
-}
-
-static char *item_name_count(char *name, char *add_info, int singular, int definite, int length, int count)
-{
-    char *incoming;
-
-    assert(name != NULL && length > 0 && count > 0);
-
-    /* clone current string */
-    incoming = g_strdup(name);
-
-    if ((count == 1) || singular)
-    {
-        if (add_info != NULL)
-        {
-            g_snprintf(name, length, "%s %s %s",
-                       (definite ? "the" : a_an(add_info)),
-                       add_info, incoming);
-        }
-        else
-        {
-            g_snprintf(name, length, "%s %s",
-                       (definite ? "the" : a_an(incoming)),
-                       incoming);
-        }
-    }
-    else
-    {
-        if (add_info != NULL)
-        {
-            if (definite)
-                g_snprintf(name, length, "%s %s", add_info, incoming);
-            else
-                g_snprintf(name, length, "%s %s %s", int2str(count),
-                           add_info, incoming);
-        }
-        else
-        {
-            g_snprintf(name, length, "%s %s", int2str(count), incoming);
-        }
-    }
-
-    g_free(incoming);
-
-    return name;
-}
-
-static char *item_desc_get(item *it, int known)
+static const char *item_desc_get(item *it, int known)
 {
     assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -1864,3 +1799,4 @@ static char *item_desc_get(item *it, int known)
         return "";
     }
 }
+

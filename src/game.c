@@ -834,7 +834,7 @@ static void game_initialize_settings(game *g, int argc, char *argv[], gboolean n
         {
             for (it = IT_NONE; it < IT_MAX; it++)
             {
-                if (auto_pickup[idx] == item_image(it))
+                if (auto_pickup[idx] == item_glyph(it))
                 {
                     g->p->settings.auto_pickup[it] = TRUE;
                 }

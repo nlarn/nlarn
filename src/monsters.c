@@ -1519,7 +1519,7 @@ char monster_glyph(monster *m)
 
     if (m->unknown)
     {
-        return item_image(m->item_type);
+        return item_glyph(m->item_type);
     }
     else
     {

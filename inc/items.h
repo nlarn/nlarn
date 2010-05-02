@@ -123,9 +123,7 @@ typedef struct item_type_data {
     item_t id;
     char *name_sg;
     char *name_pl;
-    char image;
-    char *desc_known;
-    char *desc_unknown;
+    char glyph;
     int max_id;
     unsigned
         optimizable: 1,     /* item type can have a bonus */
@@ -210,7 +208,7 @@ extern const item_type_data item_data[IT_MAX];
 extern const item_material_data item_materials[IM_MAX];
 
 /* item macros */
-#define item_image(type)          item_data[(type)].image
+#define item_glyph(type)          item_data[(type)].glyph
 #define item_name_sg(type)        item_data[(type)].name_sg
 #define item_name_pl(type)        item_data[(type)].name_pl
 #define item_max_id(type)         item_data[(type)].max_id
