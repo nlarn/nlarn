@@ -13,7 +13,7 @@ monsters = {
       size = TINY,
       speed = FAST,
     },
-    [MT_BRONCE_DRAGON] = {
+    [MT_BRONZE_DRAGON] = {
       ac = 2,
       attacks = {
         { type = BITE, base = 9, damage = PHYSICAL },

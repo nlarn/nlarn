@@ -398,7 +398,7 @@ void monsters_wrap(lua_State *L)
         { "MT_WATER_LORD",      MT_WATER_LORD },
         { "MT_PURPLE_WORM",     MT_PURPLE_WORM },
         { "MT_XVART",           MT_XVART },
-        { "MT_BRONCE_DRAGON",   MT_BRONCE_DRAGON },
+        { "MT_BRONZE_DRAGON",   MT_BRONZE_DRAGON },
         { "MT_GREEN_DRAGON",    MT_GREEN_DRAGON },
         { "MT_SILVER_DRAGON",   MT_SILVER_DRAGON },
         { "MT_PLATINUM_DRAGON", MT_PLATINUM_DRAGON },
@@ -1286,7 +1286,7 @@ monster *monster_damage_take(monster *m, damage *dam)
             if ((m->hp < 25) && (m->hp > 0))
             {
                 gboolean seen_old = monster_in_sight(m);
-                m->type = MT_BRONCE_DRAGON + rand_0n(9);
+                m->type = MT_BRONZE_DRAGON + rand_0n(9);
                 gboolean seen_new = monster_in_sight(m);
 
                 if (p && (seen_old || seen_new))
