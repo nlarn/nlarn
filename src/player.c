@@ -429,6 +429,11 @@ cJSON *player_serialize(player *p)
         }
     }
 
+    /* settings */
+    cJSON_AddItemToObject(pser, "settings", obj = cJSON_CreateObject());
+    cJSON_AddItemToObject(obj, "auto_pickup",
+                          cJSON_CreateIntArray(p->settings.auto_pickup, IT_MAX));
+
     /* statistics */
     cJSON_AddItemToObject(pser, "stats", obj = cJSON_CreateObject());
 
@@ -620,6 +625,15 @@ player *player_deserialize(cJSON *pser)
 
             g_array_append_val(p->sobjmem, som);
         }
+    }
+
+    /* settings */
+    obj = cJSON_GetObjectItem(pser, "settings");
+    if (obj)
+    {
+        elem = cJSON_GetObjectItem(obj, "auto_pickup");
+        for (idx = IT_NONE; idx < IT_MAX; idx++)
+            p->settings.auto_pickup[idx] = (gboolean) cJSON_GetArrayItem(elem, idx)->valueint;
     }
 
     /* statistics */
