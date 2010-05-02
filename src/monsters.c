@@ -656,33 +656,12 @@ const char* monster_type_plural_name(const int montype, const int count)
 
     if (count > 1)
     {
-        switch (montype)
+        if (g_strlcpy(buf, luaN_query_string("monsters", montype, "plural_name"), 60) == 0)
         {
-        case MT_JACULUS:
-            return "jaculi";
-            break;
-
-        case MT_ELF:
-            return "elves";
-            break;
-
-        case MT_VORTEX:
-            return "vortexes";
-            break;
-
-        case MT_VIOLET_FUNGUS:
-            return "violet fungi";
-            break;
-
-        case MT_DISENCHANTRESS:
-            return "disenchantresses";
-            break;
-
-        default:
             g_snprintf(buf, 60, "%ss", monster_type_name(montype));
-            return buf;
-            break;
         }
+
+        return buf;
     }
 
     return monster_type_name(montype);

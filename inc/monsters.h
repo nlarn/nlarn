@@ -246,7 +246,8 @@ static inline int monster_ac(monster *m)
 
 static inline int monster_int(monster *m)
 {
-    return luaN_query_int("monsters", monster_type(m), "intelligence"); }
+    return luaN_query_int("monsters", monster_type(m), "intelligence");
+}
 
 static inline int monster_gold(monster *m)
 {
@@ -272,19 +273,19 @@ static inline int monster_flags(monster *m, monster_flag f)
 
 /* query monster type data */
 
-static inline int monster_type_hp_max(monster_t t)
+static inline int monster_type_hp_max(monster_t type)
 {
-    return luaN_query_int("monsters", (t), "hp_max");
+    return luaN_query_int("monsters", type, "hp_max");
 }
 
-static inline char monster_type_image(monster_t t)
+static inline char monster_type_image(monster_t type)
 {
-    return luaN_query_char("monsters", (t), "glyph");
+    return luaN_query_char("monsters", type, "glyph");
 }
 
-static inline const char *monster_type_name(monster_t t)
+static inline const char *monster_type_name(monster_t type)
 {
-    return luaN_query_string("monsters", (t), "name");
+    return luaN_query_string("monsters", type, "name");
 }
 
 int monster_genocide(int monster_id);
