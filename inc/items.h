@@ -363,6 +363,8 @@ int item_filter_potions(item *it);
 int item_filter_legible(item *it);
 int item_filter_unid(item *it);
 int item_filter_cursed(item *it);
+int item_filter_cursed_or_unknown(item *it);
+int item_filter_nonblessed(item *it);
 
 /**
  * @brief Item filter function for the potion of cure diantroritis.

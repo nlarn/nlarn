@@ -113,7 +113,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
     result.used_up = TRUE;
 
     item_describe(scroll, player_item_known(p, scroll),
-                  TRUE, TRUE, description, 60);
+                  TRUE, scroll->count == 1, description, 60);
 
     if (player_effect(p, ET_BLINDNESS))
     {
@@ -621,10 +621,16 @@ static int scroll_remove_curse(player *p, item *scroll)
     {
         /* choose a single item to uncurse */
         it = display_inventory("Choose an item to uncurse", p, &p->inventory,
-                               NULL, FALSE, FALSE, FALSE, item_filter_cursed);
+                               NULL, FALSE, FALSE, FALSE,
+                               item_filter_cursed_or_unknown);
 
         if (it != NULL)
         {
+            if (!it->cursed)
+            {
+                log_add_entry(nlarn->log, "Nothing happens.");
+                return TRUE;
+            }
             // Get the description before uncursing the item.
             item_describe(it, player_item_known(p, it),
                           FALSE, TRUE, buf, 60);

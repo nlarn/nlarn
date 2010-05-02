@@ -291,7 +291,12 @@ item *item_new_finetouch(item *it)
     assert(it != NULL);
 
     /* maybe the item is blessed or cursed */
-    if (item_is_blessable(it->type) && chance(25))
+    if (it->type == IT_POTION && it->id == PO_WATER)
+    {
+        // water is always blessed
+        item_bless(it);
+    }
+    else if (item_is_blessable(it->type) && chance(25))
     {
         /* only blessed or cursed items have a bonus / malus */
         if (item_is_optimizable(it->type))
@@ -1738,6 +1743,18 @@ int item_filter_cursed(item *it)
 {
     assert (it != NULL);
     return (it->cursed == TRUE);
+}
+
+int item_filter_cursed_or_unknown(item *it)
+{
+    assert (it != NULL);
+    return (it->cursed == TRUE || it->blessed_known == FALSE);
+}
+
+int item_filter_nonblessed(item *it)
+{
+    assert (it != NULL);
+    return (it->blessed == FALSE || it->blessed_known == FALSE);
 }
 
 int item_filter_pcd(item *it)

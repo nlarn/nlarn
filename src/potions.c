@@ -28,7 +28,7 @@ const potion_data potions[PO_MAX] =
 {
     /* id               name                  effect            price obtainable */
     { PO_NONE,          "",                   ET_NONE,               0, FALSE },
-    { PO_WATER,         "water",              ET_NONE,              20, FALSE },
+    { PO_WATER,         "holy water",         ET_NONE,             500, FALSE },
     { PO_SLEEP,         "sleep",              ET_SLEEP,             50, FALSE },
     { PO_HEAL,          "healing",            ET_INC_HP,           100,  TRUE },
     { PO_INC_LEVEL,     "raise level",        ET_INC_LEVEL,        500, FALSE },
@@ -58,6 +58,7 @@ static int potion_with_effect(struct player *p, item *potion);
 static int potion_amnesia(struct player *p, item *potion);
 static int potion_detect_item(struct player *p, item *potion);
 static int potion_recovery(struct player *p, item *potion);
+static int potion_holy_water(player *p, item *potion);
 
 struct potion_obfuscation_s
 {
@@ -111,12 +112,11 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     char description[61];
 
     item_describe(potion, player_item_known(p, potion),
-                  TRUE, FALSE, description, 60);
+                  TRUE, potion->count == 1, description, 60);
 
-    log_add_entry(nlarn->log, "You drink %s.", description);
-
-    /* increase number of potions quaffed */
-    p->stats.potions_quaffed++;
+    // These potions aren't drunk.
+    if (potion->id != PO_CURE_DIANTHR && potion->id != PO_WATER)
+        log_add_entry(nlarn->log, "You drink %s.", description);
 
     result.time = 2;
     result.identified = TRUE;
@@ -146,7 +146,7 @@ item_usage_result potion_quaff(struct player *p, item *potion)
             break;
 
         case PO_WATER:
-            log_add_entry(nlarn->log, "This tastes like water..");
+            result.used_up = potion_holy_water(p, potion);
             break;
 
         case PO_RECOVERY:
@@ -164,6 +164,11 @@ item_usage_result potion_quaff(struct player *p, item *potion)
         }
     }
 
+    if (result.used_up)
+    {
+        /* increase number of potions quaffed */
+        p->stats.potions_quaffed++;
+    }
     return result;
 }
 
@@ -304,4 +309,52 @@ static int potion_recovery(player *p, item *potion)
         log_add_entry(nlarn->log, "You feel more capable.");
 
     return success;
+}
+
+static int potion_holy_water(player *p, item *potion)
+{
+    char buf[61];
+    item *it;
+
+    assert (p != NULL && potion != NULL);
+
+    if (inv_length_filtered(p->inventory, item_filter_nonblessed) == 0)
+    {
+        /* player has no cursed items */
+        log_add_entry(nlarn->log, "You're not carrying any items in need of a "
+                                  "blessing.");
+        return FALSE;
+    }
+
+    it = display_inventory("Choose an item to bless", p, &p->inventory,
+                           NULL, FALSE, FALSE, FALSE, item_filter_nonblessed);
+
+    if (it != NULL)
+    {
+        // Get the description before blessing the item.
+        item_describe(it, player_item_known(p, it),
+                      FALSE, TRUE, buf, 60);
+
+        buf[0] = g_ascii_toupper(buf[0]);
+
+        if (it->blessed)
+        {
+            it->blessed_known = TRUE;
+            log_add_entry(nlarn->log, "Nothing happens. Apparently, %s %s "
+                                      "already blessed.",
+                          buf, it->count == 1 ? "was" : "were");
+            return TRUE;
+        }
+
+        log_add_entry(nlarn->log, "%s glow%s in a white light.",
+                      buf, it->count == 1 ? "s" : "");
+
+        if (it->cursed)
+            it->cursed = FALSE;
+        else if (!it->blessed)
+            it->blessed = TRUE;
+
+        return TRUE;
+    }
+    return FALSE;
 }
