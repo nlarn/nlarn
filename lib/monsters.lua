@@ -372,7 +372,9 @@ monsters = {
     },
     [MT_GREEN_URCHIN] = {
       ac = -3,
-      attacks = { { type = STING, base = 12, damage = PHYSICAL } },
+      attacks = { { type = STING, base = 12, damage = PHYSICAL },
+                  { type = STING, base = 50, damage = BLINDNESS }
+      },
       color = GREEN,
       exp = 5000,
       hp_max = 85,
@@ -481,7 +483,9 @@ monsters = {
     },
     [MT_LAMA_NOBE] = {
       ac = 7,
-      attacks = { { type = BITE, base = 3, damage = PHYSICAL } },
+      attacks = { { type = BITE, base = 3, damage = PHYSICAL },
+                  { type = GAZE, base = 25, damage = BLINDNESS }
+      },
       color = BROWN,
       exp = 80,
       flags = HEAD,
