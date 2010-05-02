@@ -3531,20 +3531,14 @@ int player_item_drop(player *p, inventory **inv, item *it)
     if (ms == LS_ALTAR
             && (!player_effect(p, ET_BLINDNESS) || game_wizardmode(nlarn)))
     {
-        if (it->cursed)
+        if (it->cursed || it->blessed)
         {
             item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
             desc[0] = g_ascii_toupper(desc[0]);
 
-            log_add_entry(nlarn->log, "%s is surrounded by a black halo.", desc);
-        }
-
-        if (it->blessed)
-        {
-            item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
-            desc[0] = g_ascii_toupper(desc[0]);
-
-            log_add_entry(nlarn->log, "%s is surrounded by a white halo.", desc);
+            log_add_entry(nlarn->log, "%s %s surrounded by a %s halo.",
+                          desc, it->count == 1 ? "is" : "are",
+                          it->cursed ? "black" : "white");
         }
 
         it->blessed_known = TRUE;

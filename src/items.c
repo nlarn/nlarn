@@ -612,11 +612,14 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 
     case IT_BOOK:
         if (known)
-            g_string_append_printf(desc, "book%s of %s", it->count > 1 ? "s" : "",
+        {
+            g_string_append_printf(desc, "book%s of %s",
+                                   (!singular && it->count > 1) ? "s" : "",
                                    item_desc_get(it, known));
+        }
         else
             g_string_append_printf(desc, "%s book%s", item_desc_get(it, known),
-                                   it->count > 1 ? "s" : "");
+                                   (!singular && it->count > 1) ? "s" : "");
         break;
 
     case IT_CONTAINER:
@@ -643,11 +646,14 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 
     case IT_POTION:
         if (known)
-            g_string_append_printf(desc, "potion%s of %s", it->count > 1 ? "s" : "",
+        {
+            g_string_append_printf(desc, "potion%s of %s",
+                                   (!singular && it->count > 1) ? "s" : "",
                                    item_desc_get(it, known));
+        }
         else
             g_string_append_printf(desc, "%s potion%s", item_desc_get(it, known),
-                                   it->count > 1 ? "s" : "");
+                                   (!singular && it->count > 1) ? "s" : "");
         break;
 
     case IT_RING:
@@ -663,11 +669,17 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 
     case IT_SCROLL:
         if (known)
-            g_string_append_printf(desc, "scroll%s of %s", it->count > 1 ? "s" : "",
+        {
+            g_string_append_printf(desc, "scroll%s of %s",
+                                   (!singular && it->count > 1) ? "s" : "",
                                    item_desc_get(it, known));
+        }
         else
-            g_string_append_printf(desc, "scroll%s labeled %s", it->count > 1 ? "s" : "",
+        {
+            g_string_append_printf(desc, "scroll%s labeled %s",
+                                   (!singular && it->count > 1) ? "s" : "",
                                    item_desc_get(it, known));
+        }
         break;
 
     case IT_WEAPON:
