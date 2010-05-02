@@ -1237,10 +1237,12 @@ void monster_player_attack(monster *m, player *p)
         break;
 
     default:
-        /* log the attack */
-        log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
-                      monster_attack_verb[att.type]);
-
+        if (att.type != ATT_GAZE || !player_effect(p, ET_BLINDNESS))
+        {
+            /* log the attack */
+            log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
+                          monster_attack_verb[att.type]);
+        }
         player_damage_take(p, dam, PD_MONSTER, m->type);
         break;
     }
