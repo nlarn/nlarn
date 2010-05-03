@@ -126,6 +126,14 @@ item_usage_result scroll_read(struct player *p, item *scroll)
         return result;
     }
 
+    if (scroll->cursed && scroll->blessed_known)
+    {
+        log_add_entry(nlarn->log, "You'd rather not read this cursed scroll.");
+        result.used_up    = FALSE;
+        result.identified = FALSE;
+        return result;
+    }
+
     log_add_entry(nlarn->log, "You read %s.", description);
 
     /* increase number of scrolls read */

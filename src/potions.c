@@ -111,16 +111,24 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     item_usage_result result;
     char description[61];
 
+    result.time = 2;
+    result.identified = TRUE;
+    result.used_up = TRUE;
+
+    if (potion->cursed && potion->blessed_known)
+    {
+        log_add_entry(nlarn->log, "You'd rather not drink this cursed potion.");
+        result.used_up    = FALSE;
+        result.identified = FALSE;
+        return result;
+    }
+
     item_describe(potion, player_item_known(p, potion),
                   TRUE, potion->count == 1, description, 60);
 
     // These potions aren't drunk.
     if (potion->id != PO_CURE_DIANTHR && potion->id != PO_WATER)
         log_add_entry(nlarn->log, "You drink %s.", description);
-
-    result.time = 2;
-    result.identified = TRUE;
-    result.used_up = TRUE;
 
     if (potion->cursed)
     {
