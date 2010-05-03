@@ -76,8 +76,6 @@ int player_altar_desecrate(player *p)
 
 int player_altar_pray(player *p)
 {
-    int donation = 0;
-    int player_gold, tithe;
     effect *e = NULL;
     item **armour = NULL;
     map *current;
@@ -92,109 +90,180 @@ int player_altar_pray(player *p)
         return FALSE;
     }
 
-    player_gold = player_get_gold(p);
-    if (player_gold > 0)
+    const int player_gold = player_get_gold(p);
+    const int total_gold  = player_gold + p->bank_account;
+    if (total_gold == 0)
     {
-        donation = display_get_count("How much gold do you want to donate?", 0);
+        log_add_entry(nlarn->log, "You don't have any money to donate.");
+        return FALSE;
+    }
+    // Use a sensible default value, so you don't anger the gods without
+    // meaning to.
+    const int donation = display_get_count("How much gold do you want to donate?",
+                                           200);
+
+    if (donation > total_gold)
+    {
+        log_add_entry(nlarn->log, "You don't have that much money!");
+        return FALSE;
     }
 
-    if (donation == 0)
+    // First pay with carried gold, then pay the rest from the bank account.
+    if (donation >= player_gold)
     {
-        log_add_entry(nlarn->log, "You pray at the altar.");
-
-        if (chance(75))
-        {
-            log_add_entry(nlarn->log, "Nothing happens.");
-        }
-        else if (chance(4) && (armour = player_get_random_armour(p)))
-        {
-            /* enchant armour */
-            log_add_entry(nlarn->log, "Your %s vibrates for a moment.",
-                          armour_name(*armour));
-
-            item_enchant(*armour);
-        }
-        else if (chance(4) && p->eq_weapon)
-        {
-            /* enchant weapon */
-            log_add_entry(nlarn->log, "Your %s vibrates for a moment.",
-                          weapon_name(p->eq_weapon));
-
-            item_enchant(p->eq_weapon);
-        }
-        else
-        {
-            position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                              LE_MONSTER, FALSE);
-
-            if (pos_valid(mpos))
-            {
-                monster_appear(MT_MAX, mpos);
-            }
-        }
+        player_set_gold(p, 0);
+        p->bank_account -= (donation - player_gold);
     }
-    else if (player_gold >= donation)
+    else
     {
-        log_add_entry(nlarn->log, "You donate %d gold at the altar and pray.",
-                      donation);
-
-        tithe = player_gold / 10 ;
         player_set_gold(p, player_gold - donation);
-        p->stats.gold_spent_donation += donation;
+    }
+    p->stats.gold_spent_donation += donation;
 
-        /* if player gave less than 10% of players gold, make a monster */
-        if (donation < tithe || donation < rand_0n(50))
-        {
-            /* create a monster, it should be very dangerous */
-            position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                              LE_MONSTER, FALSE);
+    log_add_entry(nlarn->log, "You donate %d gold at the altar and pray.",
+                  donation);
+    display_paint_screen(p);
 
-            if (pos_valid(mpos))
-            {
-                monster_appear(MT_MAX, mpos);
-            }
+    // The higher the donation, the more likely is a favourable outcome.
+    const int event = min(8, rand_0n(donation/50));
 
-            e = effect_new(ET_AGGRAVATE_MONSTER);
-            e->turns = 200;
-            player_effect_add(p, e);
+    if (event > 0)
+        log_add_entry(nlarn->log, "Thank you!");
+    else
+        log_add_entry(nlarn->log, "The gods are displeased with you.");
 
-            return 1;
-        }
-
-        if (chance(50))
+    int afflictions = 0;
+    gboolean cured_affliction = FALSE;
+    switch (event)
+    {
+    case 8:
+        if (!player_effect(p, ET_UNDEAD_PROTECTION))
         {
             log_add_entry(nlarn->log, "You have been heard!");
+            e = effect_new(ET_UNDEAD_PROTECTION);
+            player_effect_add(p, e);
+            break;
+        }
+        // intentional fall through
+    case 7:
+        afflictions += rand_1n(5);
+        // intentional fall through
+    case 6:
+        afflictions += rand_1n(5);
+        // intentional fall through
+    case 5:
+        afflictions++;
 
+        while (afflictions-- > 0)
+        {
+            if ((e = player_effect_get(p, ET_PARALYSIS)))
+            {
+                player_effect_del(p, e);
+                cured_affliction = TRUE;
+                continue;
+            }
+            if ((e = player_effect_get(p, ET_BLINDNESS)))
+            {
+                player_effect_del(p, e);
+                cured_affliction = TRUE;
+                continue;
+            }
+            if (afflictions >= 5 && (e = player_effect_get(p, ET_DIZZINESS)))
+            {
+                player_effect_del(p, e);
+                cured_affliction = TRUE;
+                afflictions -= 5;
+                continue;
+            }
+            if ((e = player_effect_get(p, ET_CONFUSION)))
+            {
+                player_effect_del(p, e);
+                cured_affliction = TRUE;
+                continue;
+            }
+            if ((e = player_effect_get(p, ET_POISON)))
+            {
+                player_effect_del(p, e);
+                cured_affliction = TRUE;
+                continue;
+            }
+            if ((e = player_effect_get(p, ET_DEC_STR)))
+            {
+                player_effect_del(p, e);
+                cured_affliction = TRUE;
+                continue;
+            }
+            if ((e = player_effect_get(p, ET_DEC_DEX)))
+            {
+                player_effect_del(p, e);
+                cured_affliction = TRUE;
+                continue;
+            }
+            break;
+        }
+
+        if (cured_affliction)
+            break;
+
+        // else intentional fall through
+    case 4:
+        if (chance(10) && p->eq_weapon)
+        {
+            if (p->eq_weapon->bonus < 3)
+            {
+                /* enchant weapon */
+                log_add_entry(nlarn->log, "Your %s vibrates for a moment.",
+                              weapon_name(p->eq_weapon));
+
+                item_enchant(p->eq_weapon);
+                break;
+            }
+        }
+        // intentional fall through
+    case 3:
+        if (chance(10) && (armour = player_get_random_armour(p)))
+        {
+            if ((*armour)->bonus < 3)
+            {
+                log_add_entry(nlarn->log, "Your %s vibrates for a moment.",
+                              armour_name(*armour));
+
+                item_enchant(*armour);
+                break;
+            }
+        }
+        // intentional fall through
+    case 2:
+        if (chance(50) && !player_effect(p, ET_PROTECTION))
+        {
             e = effect_new(ET_PROTECTION);
             e->turns = 500;
             player_effect_add(p, e);
+            break;
+        }
+        // intentional fall through
+    case 1:
+        log_add_entry(nlarn->log, "Nothing happens.");
+        break;
+    case 0:
+        {
+        /* create a monster, it should be very dangerous */
+        position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
+                                          LE_MONSTER, FALSE);
 
-            e = effect_new(ET_UNDEAD_PROTECTION);
+        if (pos_valid(mpos))
+            monster_appear(MT_MAX, mpos);
+
+        if (donation < rand_1n(100) || !pos_valid(mpos))
+        {
+            e = effect_new(ET_AGGRAVATE_MONSTER);
+            e->turns = 200;
             player_effect_add(p, e);
         }
-
-        if (chance(4) && (armour = player_get_random_armour(p)))
-        {
-            /* enchant weapon */
-            log_add_entry(nlarn->log, "Your %s vibrates for a moment.",
-                          armour_name(*armour));
-
-            item_enchant(*armour);
         }
-
-        if (chance(4) && p->eq_weapon)
-        {
-            /* enchant weapon */
-            log_add_entry(nlarn->log, "Your %s vibrates for a moment.",
-                          weapon_name(p->eq_weapon));
-
-            item_enchant(p->eq_weapon);
-        }
-
-        log_add_entry(nlarn->log, "Thank You.");
     }
 
-    return 1;
+    return TRUE;
 }
 
 int player_building_enter(player *p)
