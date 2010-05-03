@@ -335,8 +335,6 @@ static int potion_holy_water(player *p, item *potion)
         item_describe(it, player_item_known(p, it),
                       FALSE, TRUE, buf, 60);
 
-        buf[0] = g_ascii_toupper(buf[0]);
-
         if (it->blessed)
         {
             it->blessed_known = TRUE;
@@ -345,6 +343,8 @@ static int potion_holy_water(player *p, item *potion)
                           buf, it->count == 1 ? "was" : "were");
             return TRUE;
         }
+
+        buf[0] = g_ascii_toupper(buf[0]);
 
         log_add_entry(nlarn->log, "%s glow%s in a white light.",
                       buf, it->count == 1 ? "s" : "");
