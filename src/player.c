@@ -779,7 +779,8 @@ void player_make_move(player *p, int turns)
             /* handle poison */
             if ((e = player_effect_get(p, ET_POISON)))
             {
-                if ((game_turn(nlarn) - e->start) % (22 - frequency) == 0)
+                if ((game_turn(nlarn) - e->start)
+                        % (15 - game_difficulty(nlarn)) == 0)
                 {
                     damage *dam = damage_new(DAM_POISON, ATT_NONE, e->amount, NULL);
 

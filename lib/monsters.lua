@@ -851,7 +851,7 @@ monsters = {
     [MT_VIOLET_FUNGUS] = {
       ac = 12,
       attacks = { { type = SLAM, base = 3, damage = PHYSICAL },
-                  { type = SLAM, base = 2, damage = POISON }
+                  { type = SLAM, base = 4, damage = POISON }
       },
       color = MAGENTA,
       exp = 100,
