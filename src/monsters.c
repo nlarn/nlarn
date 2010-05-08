@@ -251,8 +251,21 @@ monster *monster_new(monster_t type, position pos)
 
 monster *monster_new_by_level(position pos)
 {
-    const int monster_level[] = { 5, 11, 17, 22, 27, 33, 39, 42, 46, 50, 53, 56, MT_MAX - 1 };
-    int monster_id = 0;
+    const int monster_level[] = { MT_KOBOLD,           // D1:   5
+                                  MT_GIANT_ANT,        // D2:  11
+                                  MT_ZOMBIE,           // D3:  17
+                                  MT_CENTAUR,          // D4:  22
+                                  MT_WHITE_DRAGON,     // D5:  27
+                                  MT_FORVALAKA,        // D6:  33
+                                  MT_STALKER,          // D7:  39
+                                  MT_SHAMBLINGMOUND,   // D8:  42
+                                  MT_MIMIC,            // D9:  46
+                                  MT_BRONZE_DRAGON,    // D10: 50
+                                  MT_PLATINUM_DRAGON,  // V1:  53
+                                  MT_GREEN_URCHIN,     // V2:  56
+                                  MT_MAX - 1           // V3
+                                };
+    int monster_id = MT_NONE;
     int monster_id_min;
     int monster_id_max;
     int nlevel = pos.z;
@@ -270,12 +283,14 @@ monster *monster_new_by_level(position pos)
         monster_id_max = monster_level[nlevel - 1];
     }
 
-    while (nlarn->monster_genocided[monster_id]
-            || (monster_id <= MT_NONE)
-            || (monster_id >= MT_MAX))
+    do
     {
         monster_id = rand_m_n(monster_id_min, monster_id_max);
     }
+    while ((monster_id <= MT_NONE)
+            || (monster_id >= MT_MAX)
+            || nlarn->monster_genocided[monster_id]
+            || chance(monster_type_reroll_chance(monster_id)));
 
     return monster_new(monster_id, pos);
 }

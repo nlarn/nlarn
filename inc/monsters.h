@@ -44,67 +44,67 @@ struct map;
 
 typedef enum monster_t
 {
-    MT_NONE,
+    MT_NONE,            //  0
     MT_GIANT_BAT,
     MT_GNOME,
     MT_HOBGOBLIN,
     MT_JACKAL,
-    MT_KOBOLD,
+    MT_KOBOLD,          //  5
     MT_ORC,
     MT_SNAKE,
     MT_CENTIPEDE,
     MT_JACULUS,
-    MT_TROGLODYTE,
+    MT_TROGLODYTE,      // 10
     MT_GIANT_ANT,
     MT_FLOATING_EYE,
     MT_LEPRECHAUN,
     MT_NYMPH,
-    MT_QUASIT,
+    MT_QUASIT,          // 15
     MT_RUST_MONSTER,
     MT_ZOMBIE,
     MT_ASSASSIN_BUG,
     MT_BUGBEAR,
-    MT_HELLHOUND,
+    MT_HELLHOUND,       // 20
     MT_ICE_LIZARD,
     MT_CENTAUR,
     MT_TROLL,
     MT_YETI,
-    MT_ELF,
+    MT_ELF,             // 25
     MT_GELATINOUSCUBE,
     MT_WHITE_DRAGON,
     MT_METAMORPH,
     MT_VORTEX,
-    MT_ZILLER,
+    MT_ZILLER,          // 30
     MT_VIOLET_FUNGUS,
     MT_WRAITH,
     MT_FORVALAKA,
     MT_LAMA_NOBE,
-    MT_OSQUIP,
+    MT_OSQUIP,          // 35
     MT_ROTHE,
     MT_XORN,
     MT_VAMPIRE,
     MT_STALKER,
-    MT_POLTERGEIST,
+    MT_POLTERGEIST,     // 40
     MT_DISENCHANTRESS,
     MT_SHAMBLINGMOUND,
     MT_YELLOW_MOLD,
     MT_UMBER_HULK,
-    MT_GNOME_KING,
+    MT_GNOME_KING,      // 45
     MT_MIMIC,
     MT_WATER_LORD,
     MT_PURPLE_WORM,
     MT_XVART,
-    MT_BRONZE_DRAGON,
+    MT_BRONZE_DRAGON,   // 50
     MT_GREEN_DRAGON,
     MT_SILVER_DRAGON,
     MT_PLATINUM_DRAGON,
     MT_RED_DRAGON,
-    MT_SPIRIT_NAGA,
+    MT_SPIRIT_NAGA,     // 55
     MT_GREEN_URCHIN,
     MT_DEMONLORD_I,
     MT_DEMONLORD_II,
     MT_DEMONLORD_III,
-    MT_DEMONLORD_IV,
+    MT_DEMONLORD_IV,    // 60
     MT_DEMONLORD_V,
     MT_DEMONLORD_VI,
     MT_DEMONLORD_VII,
@@ -237,7 +237,7 @@ static inline const char *monster_name(monster *m) {
 static inline int monster_level(monster *m)
 {
     return luaN_query_int("monsters", monster_type(m), "level");
-    }
+}
 
 static inline int monster_ac(monster *m)
 {
@@ -286,6 +286,11 @@ static inline char monster_type_image(monster_t type)
 static inline const char *monster_type_name(monster_t type)
 {
     return luaN_query_string("monsters", type, "name");
+}
+
+static inline int monster_type_reroll_chance(monster_t type)
+{
+    return luaN_query_int("monsters", type, "reroll_chance");
 }
 
 int monster_genocide(int monster_id);
