@@ -547,9 +547,11 @@ int spell_cast(player *p)
             break;
             */
 
-            /* alter realitiy */
+            /* alter reality */
         case SP_ALT:
             well_done = spell_alter_reality(p);
+            if (!well_done)
+                log_add_entry(nlarn->log, spell_msg_fail_by_id(spell->id));
             break;
         }
         break;
@@ -1104,7 +1106,26 @@ int spell_type_blast(spell *s, struct player *p)
 
 gboolean spell_alter_reality(player *p)
 {
+    if (p->pos.z == 0)
+        return FALSE;
+
     map *nlevel;
+
+    position pos;
+    pos.z = p->pos.z;
+
+    // Overwrite memorised floor tiles with space, to distinguish between
+    // the remembered map of the old level, and newly discovered portions
+    // of the new one.
+    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+    {
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+        {
+            map_tile_t tile = player_memory_of(p, pos).type;
+            if (tile == LT_FLOOR)
+                player_memory_of(p, pos).type = LT_NONE;
+        }
+    }
 
     map_destroy(game_map(nlarn, p->pos.z));
 
