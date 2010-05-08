@@ -64,7 +64,7 @@ const char *monster_attack_verb[ATT_MAX] =
     "points at",    /* ATT_MAGIC */
     "claws",        /* ATT_CLAW */
     "bites",        /* ATT_BITE */
-    "stung",        /* ATT_STING */
+    "stings",       /* ATT_STING */
     "slams",        /* ATT_SLAM */
     "kicks",        /* ATT_KICK */
     "touches",      /* ATT_TOUCH */
