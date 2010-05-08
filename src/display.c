@@ -1095,6 +1095,7 @@ spell *display_spell_select(char *title, player *p)
 
     swin = display_window_new(startx, starty, width, height, title);
 
+    int prev_key = 0;
     do
     {
         /* display spells */
@@ -1131,6 +1132,7 @@ spell *display_spell_select(char *title, player *p)
 
         /* store currently highlighted spell */
         sp = g_ptr_array_index(p->known_spells, curr + offset - 1);
+
 
         switch ((key = getch()))
         {
@@ -1247,6 +1249,16 @@ spell *display_spell_select(char *title, player *p)
         case KEY_CR:
         case KEY_ENTER:
         case KEY_SPC:
+            // It is really easy to cast the topmost spell by accident
+            // simply by pressing m + Enter. If the first keypress in
+            // the menu confirms the autoselected first spell, prompt.
+            if (curr == 1 && prev_key == 0)
+            {
+                char prompt[60];
+                g_snprintf(prompt, 80, "Really cast %s?", spell_name(sp));
+                if (!display_get_yesno(prompt, NULL, NULL))
+                    sp = NULL;
+            }
             RUN = FALSE;
             break;
 
@@ -1319,6 +1331,7 @@ spell *display_spell_select(char *title, player *p)
 
             break;
         }
+        prev_key = key;
     }
     while (RUN);
 
