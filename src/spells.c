@@ -302,6 +302,15 @@ const spell_data spells[SP_MAX] =
         "Polinneaus won't let you mess with his dungeon!",
         6, 3800, FALSE
     },
+    /* monster spells */
+    {
+        SP_MON_FIRE, "mbf", "burst of fire",
+        SC_RAY, DAM_FIRE, ET_NONE,
+        "fire breath attack",
+        "The burst of fire hits the %s.",
+        NULL,
+        3, 0, TRUE
+    },
 };
 
 struct book_obfuscation_s
@@ -310,7 +319,7 @@ struct book_obfuscation_s
     const int weight;
     const int colour;
 }
-book_obfuscation[SP_MAX - 1] =
+book_obfuscation[SP_MAX_BOOK - 1] =
 {
     { "parchment-bound", 800, DC_BROWN,     },
     { "thick",          1200, DC_LIGHTGRAY, },
@@ -582,7 +591,7 @@ int spell_learn(player *p, guint spell_type)
     spell *s;
     guint idx;
 
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX_BOOK);
 
     if (!spell_known(p, spell_type))
     {
@@ -625,7 +634,7 @@ int spell_forget(player *p, guint spell_type)
     spell *s;
     guint idx;
 
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX_BOOK);
 
     for (idx = 0; idx < p->known_spells->len; idx++);
     {
@@ -645,7 +654,7 @@ int spell_known(player *p, guint spell_type)
     spell *s;
     guint idx;
 
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX_BOOK);
 
     for (idx = 0; idx < p->known_spells->len; idx++)
     {
@@ -806,15 +815,27 @@ int spell_type_point(spell *s, struct player *p)
     return TRUE;
 }
 
+static int get_spell_color(spell *sp, gboolean did_hit)
+{
+    switch (sp->id)
+    {
+    case SP_MON_FIRE:
+        return (did_hit ? DC_YELLOW : DC_LIGHTRED);
+    default:
+        return (did_hit ? DC_LIGHTRED : DC_LIGHTCYAN);
+    }
+}
+
 // #define DEBUG_BEAMS
-static position throw_ray(spell *sp, struct player *p,
-                          position start, position target, int damage)
+position throw_ray(spell *sp, struct player *p, position start, position target,
+                   int damage)
 {
 #ifdef DEBUG_BEAMS
     log_add_entry(nlarn->log, "Beam from (%d, %d) -> (%d, %d)",
                   start.x, start.y, target.x, target.y);
 #endif
-    assert(sp != NULL && p != NULL && (spell_type(sp) == SC_RAY));
+    assert(sp != NULL && p != NULL);
+    assert(spell_type(sp) == SC_RAY);
     assert(start.z == target.z);
 
     map *cmap;
@@ -825,6 +846,8 @@ static position throw_ray(spell *sp, struct player *p,
     ray = area_new_ray(start, target, map_get_obstacles(cmap, start, distance));
 
     int attrs; /* curses attributes */
+    const int spell_color     = get_spell_color(sp, FALSE);
+    const int spell_hit_color = get_spell_color(sp, TRUE);
 
     monster *monster = NULL;
     gboolean proceed_y = TRUE;
@@ -848,7 +871,7 @@ static position throw_ray(spell *sp, struct player *p,
                 {
                     gboolean mis = monster_in_sight(monster);
 
-                    attron((attrs = (mis ? DC_LIGHTRED : DC_LIGHTCYAN)));
+                    attron((attrs = (mis ? spell_hit_color : spell_color)));
                     mvaddch(pos.y, pos.x, (mis ? monster_glyph(monster) : '*'));
 
                     log_add_entry(nlarn->log, spell_msg_succ(sp), monster_get_name(monster));
@@ -856,7 +879,47 @@ static position throw_ray(spell *sp, struct player *p,
                 }
                 else
                 {
-                    attron((attrs = DC_LIGHTCYAN));
+                    // Shooting at the player.
+                    if (pos_identical(p->pos, pos))
+                    {
+                        int evasion = p->level/(2+game_difficulty(nlarn)/2)
+                                      + player_get_dex(p)
+                                      - 10
+                                      - game_difficulty(nlarn);
+
+                        // Automatic hit if paralysed.
+                        if (player_effect(p, ET_PARALYSIS))
+                            evasion = 0;
+                        else
+                        {
+                            if (player_effect(p, ET_CONFUSION))
+                                evasion /= 2;
+                            if (player_effect(p, ET_BLINDNESS))
+                                evasion /= 2;
+                        }
+
+                        if (evasion >= rand_1n(21))
+                        {
+                            attron((attrs = spell_color));
+                            if (!player_effect(p, ET_BLINDNESS))
+                            {
+                                log_add_entry(nlarn->log, "The %s whizzes by you!",
+                                              spell_name(sp));
+                            }
+                        }
+                        else
+                        {
+                            attron((attrs = spell_hit_color));
+                            log_add_entry(nlarn->log, "The %s hits you!",
+                                          spell_name(sp));
+                            player_damage_take(p, damage_new(spell_damage(sp),
+                                                             ATT_MAGIC, damage, NULL),
+                                               PD_SPELL, sp->id);
+                        }
+                    }
+                    else
+                        attron((attrs = spell_color));
+
                     mvaddch(pos.y, pos.x, '*');
                 }
 
@@ -975,9 +1038,6 @@ int spell_type_ray(spell *s, struct player *p)
         log_add_entry(nlarn->log, "The mirror reflects your spell!");
 
         throw_ray(s, p, last_pos, p->pos, amount);
-        log_add_entry(nlarn->log, "The %s hits you!", spell_name(s));
-        player_damage_take(p, damage_new(spell_damage(s), ATT_MAGIC, amount, NULL),
-                           PD_SPELL, s->id);
     }
 
     return TRUE;
@@ -1404,7 +1464,7 @@ gboolean spell_vaporize_rock(player *p)
 
 char *book_desc(int book_id)
 {
-    assert(book_id > SP_NONE && book_id < SP_MAX);
+    assert(book_id > SP_NONE && book_id < SP_MAX_BOOK);
     return (char *)book_obfuscation[nlarn->book_desc_mapping[book_id - 1]].desc;
 }
 

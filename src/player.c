@@ -191,7 +191,7 @@ void player_assign_bonus_stats(player *p)
     // * strong Fighter (Str 20  Dex 15  Con 16  Int 12  Wis 12)
     // * hardy Fighter  (Str 16  Dex 12  Con 20  Int 12  Wis 15)
     // * arcane scholar (Str 12  Dex 14  Con 12  Int 20  Wis 17)
-    switch (selection) // only covers choices 1-3
+    switch (selection)
     {
     case 'a': // strong Fighter
         p->strength     += 8;
@@ -389,7 +389,7 @@ cJSON *player_serialize(player *p)
                           cJSON_CreateIntArray(p->identified_amulets, AM_MAX));
 
     cJSON_AddItemToObject(pser, "identified_books",
-                          cJSON_CreateIntArray(p->identified_books, SP_MAX));
+                          cJSON_CreateIntArray(p->identified_books, SP_MAX_BOOK));
 
     cJSON_AddItemToObject(pser, "identified_potions",
                           cJSON_CreateIntArray(p->identified_potions, PO_MAX));
@@ -580,7 +580,7 @@ player *player_deserialize(cJSON *pser)
         p->identified_amulets[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(pser, "identified_books");
-    for (idx = 0; idx < SP_MAX; idx++)
+    for (idx = 0; idx < SP_MAX_BOOK; idx++)
         p->identified_books[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(pser, "identified_potions");
@@ -1873,7 +1873,7 @@ void player_level_gain(player *p, int count)
 
     desc_new = player_get_level_desc(p);
 
-    if (g_strcmp0(desc_orig, desc_new) != 0)
+    if (strcmp(desc_orig, desc_new) != 0)
     {
         log_add_entry(nlarn->log, "You gain experience and become %s %s!",
                       a_an(desc_new), desc_new);
@@ -2872,7 +2872,7 @@ void player_item_equip(player *p, inventory **inv, item *it)
             if (!player_make_move(p, time, TRUE, "wearing %s", description))
                 return; /* interrupted */
 
-            /* the armour's bonus is revealed whe putting it on */
+            /* the armour's bonus is revealed when putting it on */
             it->bonus_known = TRUE;
 
             /* refresh the description */
@@ -3942,7 +3942,8 @@ int player_get_speed(player *p)
     assert(p != NULL);
     return nlarn->p->speed
            + player_effect(nlarn->p, ET_SPEED)
-           - player_effect(nlarn->p, ET_SLOWNESS);
+           - player_effect(nlarn->p, ET_SLOWNESS)
+           - player_effect(nlarn->p, ET_BURDENED);
 }
 
 guint player_get_gold(player *p)

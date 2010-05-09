@@ -214,7 +214,7 @@ int game_save(game *g, const char *filename)
                           cJSON_CreateIntArray(g->scroll_desc_mapping, ST_MAX - 1));
 
     cJSON_AddItemToObject(save, "book_desc_mapping",
-                          cJSON_CreateIntArray(g->book_desc_mapping, SP_MAX - 1));
+                          cJSON_CreateIntArray(g->book_desc_mapping, SP_MAX_BOOK - 1));
 
     cJSON_AddItemToObject(save, "monster_genocided",
                           cJSON_CreateIntArray(g->monster_genocided, MT_MAX));
@@ -410,7 +410,7 @@ gboolean game_load(const char *filename, int argc, char *argv[])
 
     obj = cJSON_GetObjectItem(save, "book_desc_mapping");
     size = cJSON_GetArraySize(obj);
-    assert(size == SP_MAX - 1);
+    assert(size == SP_MAX_BOOK - 1);
     for (idx = 0; idx < size; idx++)
         g->book_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
@@ -918,7 +918,7 @@ static void game_items_shuffle(game *g)
     shuffle(g->potion_desc_mapping, PO_MAX - 1, 1);
     shuffle(g->ring_material_mapping, RT_MAX - 1, 0);
     shuffle(g->scroll_desc_mapping, ST_MAX - 1, 1);
-    shuffle(g->book_desc_mapping, SP_MAX - 1, 0);
+    shuffle(g->book_desc_mapping, SP_MAX_BOOK - 1, 0);
 }
 
 static GList *game_scores_load(game *g)

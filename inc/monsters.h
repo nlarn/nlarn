@@ -203,6 +203,7 @@ int monster_attack_count(monster *m);
 attack monster_attack(monster *m, int num);
 
 void monster_player_attack(monster *m, struct player *p);
+int monster_player_ranged_attack(monster *m, struct player *p);
 
 /**
  * Deal damage to a monster

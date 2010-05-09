@@ -59,44 +59,47 @@ typedef struct spell {
 } spell;
 
 typedef enum spell_ids {
-	SP_NONE,
-	SP_PRO,		/* protection */
-	SP_MLE,		/* magic missile */
-	SP_DEX,		/* dexterity */
-	SP_SLE,		/* sleep */
-	SP_CHM,		/* charm monster */
-	SP_SSP,		/* sonic spear */
-	SP_STR,		/* strength */
-	SP_CPO,		/* cure poison */
-	SP_HEL,		/* healing */
-	SP_CBL,		/* cure blindness */
-	SP_CRE,		/* create monster */
-	SP_PHA,		/* phantasmal forces */
-	SP_INV,		/* invisibility */
-	SP_BAL,		/* fireball */
-	SP_CLD,		/* cold */
-	SP_PLY,		/* polymorph */
-	SP_CAN,		/* cancellation */
-	SP_HAS,		/* haste self */
-	SP_CKL,		/* cloud kill */
-	SP_VPR,		/* vaporize rock */
-	SP_DRY,		/* dehydration */
-	SP_LIT,		/* lightning */
-	SP_DRL,		/* drain life */
-	SP_GLO,		/* globe of invulnerability */
-	SP_FLO,		/* flood */
-	SP_FGR,		/* finger of death */
-	SP_SCA,		/* scare monster */
-	SP_HLD,		/* hold monster */
-  	SP_STP,		/* time stop */
-	SP_TEL,		/* teleport */
-	SP_MFI,		/* magic fire */
-	SP_MKW,		/* make wall */
-	SP_SPH,		/* sphere of annihilation */
-/*	SP_SUM,		 summon daemon: not implemented */
-	SP_WTW,		/* walk through walls */
-	SP_ALT,		/* alter reality */
-	SP_MAX		/* last known spell */
+    SP_NONE,
+    SP_PRO,         /* protection */
+    SP_MLE,         /* magic missile */
+    SP_DEX,         /* dexterity */
+    SP_SLE,         /* sleep */
+    SP_CHM,         /* charm monster */
+    SP_SSP,         /* sonic spear */
+    SP_STR,         /* strength */
+    SP_CPO,         /* cure poison */
+    SP_HEL,         /* healing */
+    SP_CBL,         /* cure blindness */
+    SP_CRE,         /* create monster */
+    SP_PHA,         /* phantasmal forces */
+    SP_INV,         /* invisibility */
+    SP_BAL,         /* fireball */
+    SP_CLD,         /* cold */
+    SP_PLY,         /* polymorph */
+    SP_CAN,         /* cancellation */
+    SP_HAS,         /* haste self */
+    SP_CKL,         /* cloud kill */
+    SP_VPR,         /* vaporize rock */
+    SP_DRY,         /* dehydration */
+    SP_LIT,         /* lightning */
+    SP_DRL,         /* drain life */
+    SP_GLO,         /* globe of invulnerability */
+    SP_FLO,         /* flood */
+    SP_FGR,         /* finger of death */
+    SP_SCA,         /* scare monster */
+    SP_HLD,         /* hold monster */
+    SP_STP,         /* time stop */
+    SP_TEL,         /* teleport */
+    SP_MFI,         /* magic fire */
+    SP_MKW,         /* make wall */
+    SP_SPH,         /* sphere of annihilation */
+/*  SP_SUM,            summon daemon: not implemented */
+    SP_WTW,         /* walk through walls */
+    SP_ALT,         /* alter reality */
+    SP_MAX_BOOK,    /* last known spell */
+    /* monster spells */
+    SP_MON_FIRE = SP_MAX_BOOK,    /* burst of fire */
+    SP_MAX
 } spell_id;
 
 /* external vars */
@@ -149,6 +152,9 @@ int spell_forget(struct player *p, guint spell_type);
  * @return FALSE if unknown, otherwise level of knowledge of that spell
  */
 int spell_known(struct player *p, guint spell_type);
+
+position throw_ray(spell *sp, struct player *p, position start, position target,
+                   int damage);
 
 int spell_type_player(spell *s, struct player *p);
 int spell_type_point(spell *s, struct player *p);

@@ -1263,6 +1263,68 @@ void monster_player_attack(monster *m, player *p)
     }
 }
 
+int monster_player_ranged_attack(monster *m, player *p)
+{
+    damage *dam;
+    attack att = { ATT_NONE };
+
+    assert(m != NULL && p != NULL);
+
+    /* choose a random attack type */
+    att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
+    if (att.type != ATT_BREATH)
+        return FALSE;
+
+    spell *sp = NULL;
+    switch (att.damage)
+    {
+    case DAM_FIRE:
+        sp = spell_new(SP_MON_FIRE);
+        break;
+    default:
+        break;
+    }
+
+    if (sp == NULL)
+        return FALSE;
+
+    if (monster_effect(m, ET_CHARM_MONSTER)
+            && (rand_m_n(5, 30) * monster_level(m) - player_get_wis(p) < 30))
+    {
+        if (monster_in_sight(m))
+        {
+            log_add_entry(nlarn->log, "The %s is awestruck at your magnificence!",
+                          monster_get_name(m));
+        }
+        return TRUE;
+    }
+
+    if (monster_in_sight(m))
+    {
+        log_add_entry(nlarn->log, "The %s breathes a %s!",
+                      monster_get_name(m), spell_name(sp));
+    }
+    else
+    {
+        log_add_entry(nlarn->log, "A %s spews forth from nowhere!",
+                      spell_name(sp));
+    }
+
+    /* generate damage */
+    dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn), m);
+
+    position last_pos = throw_ray(sp, p, m->pos, m->player_pos, dam->amount);
+
+    if (map_sobject_at(game_map(nlarn, last_pos.z), last_pos) == LS_MIRROR)
+    {
+        log_add_entry(nlarn->log, "The mirror reflects the %s!",
+                      spell_name(sp));
+
+        throw_ray(sp, p, last_pos, m->pos, dam->amount);
+    }
+    return TRUE;
+}
+
 monster *monster_damage_take(monster *m, damage *dam)
 {
     struct player *p;
@@ -1930,8 +1992,13 @@ static position monster_move_attack(monster *m, struct player *p)
 
     position npos = monster_pos(m);
 
+    /* monster tries a ranged attack */
+    if (monster_player_visible(m) && monster_player_ranged_attack(m, p))
+    {
+        return monster_pos(m);
+    }
     /* monster is standing next to player */
-    if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
+    else if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
     {
         monster_player_attack(m, p);
 
