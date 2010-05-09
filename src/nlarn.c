@@ -135,7 +135,8 @@ int main(int argc, char *argv[])
 
     if (!loaded)
     {
-        player_assign_bonus_stats(nlarn->p);
+        if (!player_assign_bonus_stats(nlarn->p))
+            exit(EXIT_SUCCESS);
         display_paint_screen(nlarn->p);
     }
 
