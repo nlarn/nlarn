@@ -1242,10 +1242,10 @@ spell *display_spell_select(char *title, player *p)
         case KEY_CR:
         case KEY_ENTER:
         case KEY_SPC:
-            // It is really easy to cast the topmost spell by accident
+            // It is much too easy to accidentally cast alter reality,
             // simply by pressing m + Enter. If the first keypress in
-            // the menu confirms the autoselected first spell, prompt.
-            if (curr == 1 && prev_key == 0)
+            // the menu confirms this autoselected first spell, prompt.
+            if (curr == 1 && prev_key == 0 && sp->id == SP_ALT)
             {
                 char prompt[60];
                 g_snprintf(prompt, 80, "Really cast %s?", spell_name(sp));
