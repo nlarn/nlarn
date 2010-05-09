@@ -1496,6 +1496,12 @@ item_usage_result book_read(struct player *p, item *book)
         return result;
     }
 
+    if (book->cursed && book->blessed_known)
+    {
+        log_add_entry(nlarn->log, "You'd rather not read this cursed book.");
+        return result;
+    }
+
     log_add_entry(nlarn->log, "You read %s.", description);
 
     /* try to complete reading the book */
