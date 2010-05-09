@@ -1272,6 +1272,17 @@ int monster_player_ranged_attack(monster *m, player *p)
 
     /* choose a random attack type */
     att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
+    if (att.type == ATT_GAZE && chance(att.base/3))
+    {
+        if (!player_effect(p, ET_BLINDNESS))
+        {
+            log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
+                          monster_attack_verb[att.type]);
+        }
+        dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn), m);
+        player_damage_take(p, dam, PD_MONSTER, m->type);
+        return TRUE;
+    }
     if (att.type != ATT_BREATH)
         return FALSE;
 
