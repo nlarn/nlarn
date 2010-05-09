@@ -878,6 +878,10 @@ static void game_monsters_move(game *g)
     for (iter = monsters; iter != NULL; iter = iter->next)
     {
         m = (monster *)iter->data;
+        // Monster is no longer valid.
+        if (monster_type(m) <= MT_NONE || monster_type(m) >= MT_MAX)
+            continue;
+
         position mpos = monster_pos(m);
 
         /* modify effects */
