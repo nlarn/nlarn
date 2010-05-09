@@ -193,42 +193,52 @@ void player_assign_bonus_stats(player *p)
     // * arcane scholar (Str 12  Dex 14  Con 12  Int 20  Wis 17)
     switch (selection) // only covers choices 1-3
     {
-        case 'a': // strong Fighter
-            p->strength     += 8;
-            p->dexterity    += 3;
-            p->constitution += 4;
-            p->intelligence += 0;
-            p->wisdom       += 0;
-            break;
-        case 'b': // hardy Fighter
-            p->strength     += 4;
-            p->dexterity    += 0;
-            p->constitution += 8;
-            p->intelligence += 0;
-            p->wisdom       += 3;
-            break;
-        case 'c': // arcane scholar
-            p->strength     += 0;
-            p->dexterity    += 2;
-            p->constitution += 0;
-            p->intelligence += 8;
-            p->wisdom       += 5;
-            break;
-        case 'e': // random character
+    case 'a': // strong Fighter
+        p->strength     += 8;
+        p->dexterity    += 3;
+        p->constitution += 4;
+        p->intelligence += 0;
+        p->wisdom       += 0;
+        break;
+    case 'b': // hardy Fighter
+        p->strength     += 4;
+        p->dexterity    += 0;
+        p->constitution += 8;
+        p->intelligence += 0;
+        p->wisdom       += 3;
+        break;
+    case 'c': // arcane scholar
+        p->strength     += 0;
+        p->dexterity    += 2;
+        p->constitution += 0;
+        p->intelligence += 8;
+        p->wisdom       += 5;
+        break;
+    case 'e': // random character
+    {
+        int bonus = 15;
+        while (bonus-- > 0)
         {
-            int bonus = 15;
-            while (bonus-- > 0)
+            switch (rand_1n(6))
             {
-                switch (rand_1n(6))
-                {
-                case 1: p->strength++;     break;
-                case 2: p->dexterity++;    break;
-                case 3: p->constitution++; break;
-                case 4: p->intelligence++; break;
-                case 5: p->wisdom++;       break;
-                }
+            case 1:
+                p->strength++;
+                break;
+            case 2:
+                p->dexterity++;
+                break;
+            case 3:
+                p->constitution++;
+                break;
+            case 4:
+                p->intelligence++;
+                break;
+            case 5:
+                p->wisdom++;
+                break;
             }
         }
+    }
     }
 
     p->stats.str_orig = p->strength;
@@ -679,17 +689,36 @@ player *player_deserialize(cJSON *pser)
     return p;
 }
 
-void player_make_move(player *p, int turns)
+gboolean player_make_move(player *p, int turns, gboolean interruptible, const char *desc, ...)
 {
+    va_list argp;
     int frequency; /* number of turns between occasions */
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
     int idx = 0;
+    char *question = NULL, *description = NULL;
 
     assert(p != NULL);
 
     /* do do nothing if there is nothing to */
-    if (turns == 0) return;
+    if (turns == 0) return FALSE;
+
+    /* return if the game has not been entirely set up */
+    if (nlarn->p == NULL) return TRUE;
+
+    /* assemble message and append it to the buffer */
+    if (desc != NULL)
+    {
+        va_start(argp, desc);
+        description = g_strdup_vprintf(desc, argp);
+        va_end(argp);
+
+        question = g_strdup_printf("Do you want to continue %s?", description);
+    }
+    else
+    {
+        question = g_strdup("Do you want to continue?");
+    }
 
     /* modifier for frequency */
     frequency = game_difficulty(nlarn) << 3;
@@ -818,12 +847,49 @@ void player_make_move(player *p, int turns)
                     player_item_drop(p, &p->inventory, *it);
                 }
             }
+
+            /* handle multi-turn actions */
+            if (turns > 1)
+            {
+                /* repaint the screen and do a little pause when the action continues */
+                display_paint_screen(p);
+                usleep(50000);
+
+                /* offer to abort the action if the player is unter attack */
+                if (p->attacked && interruptible)
+                {
+                    if(!display_get_yesno(question, FALSE, FALSE))
+                    {
+                        /* user chose to abort the current action */
+                        if (description != NULL)
+                        {
+                            /* log the event */
+                            log_add_entry(nlarn->log, "You stop %s.", description);
+                        }
+
+                        /* clean up */
+                        p->attacked = FALSE;
+                        g_free(description);
+                        g_free(question);
+
+                        return FALSE;
+                    }
+                }
+            }
+            /* always reset the flag */
+            p->attacked = FALSE;
         }
 
         /* reduce number of turns */
         turns--;
     }
     while (turns > 0);
+
+    g_free(description);
+    g_free(question);
+
+    /* successfully completed the action */
+    return TRUE;
 }
 
 static const char *int2time_str(int val)
@@ -1033,17 +1099,17 @@ void player_die(player *p, player_cod cause_type, int cause)
         }
 
         g_string_append_printf(text, "\n%s had %s gp on %s bank account "
-                                     "when %s %s.",
+                               "when %s %s.",
                                pronoun, int2str(p->bank_account),
                                (p->sex == PS_MALE) ? "his" : "her",
                                (p->sex == PS_MALE) ? "he"  : "she",
                                cause_type < PD_TOO_LATE ? "died"
-                                                        : "returned home");
+                               : "returned home");
 
         g_string_append_printf(text, "\n%s found %d gold in the dungeon, "
-                                     "sold %s gem%s for %d and %s non-gem "
-                                     "item%s for %d gold, and earned %d gold "
-                                     "as bank interest.",
+                               "sold %s gem%s for %d and %s non-gem "
+                               "item%s for %d gold, and earned %d gold "
+                               "as bank interest.",
                                pronoun, p->stats.gold_found,
                                int2str(p->stats.gems_sold),
                                plural(p->stats.gems_sold),
@@ -1054,9 +1120,9 @@ void player_die(player *p, player_cod cause_type, int cause)
                                p->stats.gold_bank_interest);
 
         g_string_append_printf(text, "\n%s bought %s item%s for %d gold, spent "
-                                     "%d on item identification or repair, "
-                                     "donated %d gold to charitable causes, and "
-                                     "invested %d gold in personal education.",
+                               "%d on item identification or repair, "
+                               "donated %d gold to charitable causes, and "
+                               "invested %d gold in personal education.",
                                pronoun,
                                int2str(p->stats.items_bought),
                                plural(p->stats.items_bought),
@@ -1648,11 +1714,9 @@ item **player_get_random_armour(player *p)
     return armour;
 }
 
-int player_pickup(player *p)
+void player_pickup(player *p)
 {
     inventory **inv = NULL;
-    int time = 0;
-
     GPtrArray *callbacks = NULL;
     display_inv_callback *callback = NULL;
 
@@ -1663,11 +1727,10 @@ int player_pickup(player *p)
     if (inv_length(*inv) == 0)
     {
         log_add_entry(nlarn->log, "There is nothing here.");
-        return 0;
     }
     else if (inv_length(*inv) == 1)
     {
-        return player_item_pickup(p, inv, inv_get(*inv, 0));
+        player_item_pickup(p, inv, inv_get(*inv, 0));
     }
     else
     {
@@ -1687,15 +1750,12 @@ int player_pickup(player *p)
         /* clean up callbacks */
         display_inv_callbacks_clean(callbacks);
     }
-
-    return time;
 }
 
 void player_autopickup(player *p)
 {
     guint idx;
     inventory **floor;
-    int turns = 0;
     int other_items_count = 0;
     int other_item_id     = -1;
     gboolean did_pickup   = FALSE;
@@ -1713,16 +1773,20 @@ void player_autopickup(player *p)
 
         if (p->settings.auto_pickup[i->type])
         {
+            /* item type is set to be picked up */
+
+            int count_orig = inv_length(*floor);
+
             /* try to pick up the item */
-            if ((turns = player_item_pickup(p, floor, i)) == 2)
+            player_item_pickup(p, floor, i);
+
+            if (count_orig != inv_length(*floor))
             {
                 /* item has been picked up */
                 /* go back one item as the following items lowered their number */
                 idx--;
                 did_pickup = TRUE;
             }
-
-            player_make_move(p, turns);
         }
         else
         {
@@ -1926,6 +1990,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 {
     monster *m = NULL;
     effect *e = NULL;
+    int hp_orig;
+    int effects_count;
 
     assert(p != NULL && dam != NULL);
 
@@ -1943,6 +2009,17 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             return;
         }
     }
+
+    if (dam->attack == ATT_GAZE && player_effect_get(p, ET_BLINDNESS))
+    {
+        /* it is impossible to see a staring monster when blinded */
+        return;
+    }
+
+    /* store player's hit points and the number
+       of effects before calculating the damage */
+    hp_orig = p->hp;
+    effects_count = p->effects->len;
 
     /* check resistances */
     switch (dam->type)
@@ -2080,12 +2157,6 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_CONFUSION:
-        if (dam->attack == ATT_GAZE && player_effect_get(p, ET_BLINDNESS))
-        {
-            /* it is impossible to see a staring monster when blinded */
-            return;
-        }
-
         /* check if the player succumbs to the monster's stare */
         if (chance(dam->amount - player_get_int(p)))
         {
@@ -2100,12 +2171,6 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_PARALYSIS:
-        if (dam->attack == ATT_GAZE && player_effect_get(p, ET_BLINDNESS))
-        {
-            /* it is impossible to see a staring monster when blinded */
-            return;
-        }
-
         /* check if the player succumbs to the monster's stare */
         if(chance(dam->amount - player_get_int(p)))
         {
@@ -2168,6 +2233,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         {
             log_add_entry(nlarn->log, "Your life energy is drained.");
             player_level_lose(p, 1);
+
+            /* this is the only attack that can not be caught by the test below */
+            p->attacked = TRUE;
         }
         break;
     default:
@@ -2176,6 +2244,14 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     }
 
     g_free(dam);
+
+    /* check if an attack had an effect */
+    if (p->hp < hp_orig || p->effects->len > effects_count)
+    {
+        /* set the attacked flag */
+        p->attacked = TRUE;
+    }
+
 
     if (p->hp < 1)
     {
@@ -2378,17 +2454,10 @@ effect *player_effect_add(player *p, effect *e)
     }
     else if (e->type == ET_SLEEP)
     {
-        int i;
-
         if (effect_get_msg_start(e))
             log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
 
-        for (i = 0; i < e->turns; i++)
-        {
-            player_make_move(p, 1);
-            display_paint_screen(p);
-            usleep(50000);
-        }
+        player_make_move(p, e->turns, FALSE, NULL);
 
         effect_destroy(e);
         e = NULL;
@@ -2726,7 +2795,7 @@ void player_inv_weight_recalc(inventory *inv, item *item)
     }
 }
 
-int player_item_equip(player *p, inventory **inv, item *it)
+void player_item_equip(player *p, inventory **inv, item *it)
 {
     item **islot = NULL;  /* pointer to chosen item slot */
     int time = 0;         /* time the desired action takes */
@@ -2749,8 +2818,11 @@ int player_item_equip(player *p, inventory **inv, item *it)
 
             item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
             log_add_entry(nlarn->log, "You put %s on.", description);
+
+            if (!player_make_move(p, 2, TRUE, "putting %s on", description))
+                return; /* interrupted */
+
             p->identified_amulets[it->id] = TRUE;
-            time = 2;
         }
         break;
 
@@ -2795,9 +2867,17 @@ int player_item_equip(player *p, inventory **inv, item *it)
 
         if (*islot == NULL)
         {
+            item_describe(it, player_item_known(p, it), TRUE, FALSE, description, 60);
+
+            if (!player_make_move(p, time, TRUE, "wearing %s", description))
+                return; /* interrupted */
+
+            /* the armour's bonus is revealed whe putting it on */
             it->bonus_known = TRUE;
 
+            /* refresh the description */
             item_describe(it, player_item_known(p, it), TRUE, FALSE, description, 60);
+
             log_add_entry(nlarn->log, "You are now wearing %s.", description);
 
             *islot = it;
@@ -2815,6 +2895,9 @@ int player_item_equip(player *p, inventory **inv, item *it)
             item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
             log_add_entry(nlarn->log, "You put %s on.", description);
 
+            if (!player_make_move(p, 2, TRUE, "putting %s on", description))
+                return; /* interrupted */
+
             *islot = it;
             p->identified_rings[it->id] = TRUE;
 
@@ -2822,8 +2905,6 @@ int player_item_equip(player *p, inventory **inv, item *it)
             {
                 it->bonus_known = TRUE;
             }
-
-            time = 2;
         }
         break;
 
@@ -2832,10 +2913,12 @@ int player_item_equip(player *p, inventory **inv, item *it)
         {
             item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
 
+            if (!player_make_move(p, 2 + weapon_is_twohanded(it),
+                                  TRUE, "wielding %s", description))
+                return; /* action aborted */
+
             p->eq_weapon = it;
             log_add_entry(nlarn->log, "You now wield %s.", description);
-
-            time = 2 + weapon_is_twohanded(p->eq_weapon);
 
             if (it->cursed)
             {
@@ -2853,17 +2936,10 @@ int player_item_equip(player *p, inventory **inv, item *it)
     }
 
     player_effects_add(p, it->effects);
-
-    return time;
 }
 
-int player_item_unequip(player *p, inventory **inv, item *it)
+void player_item_unequip(player *p, inventory **inv, item *it)
 {
-    int equipment_type;
-    item **aslot = NULL;  /* pointer to armour slot */
-    item **rslot = NULL;  /* pointer to ring slot */
-
-    int time = 0;         /* time elapsed */
     char desc[61];        /* item description */
 
     assert(p != NULL && it != NULL);
@@ -2871,26 +2947,26 @@ int player_item_unequip(player *p, inventory **inv, item *it)
     /* don't need that parameter */
     inv = NULL;
 
-    equipment_type = player_item_is_equipped(p, it);
-
     /* the idea behind the time values: one turn to take one item off,
        one turn to get the item out of the pack */
 
-    switch (equipment_type)
-    {
-    case PE_AMULET:
-        if (p->eq_amulet != NULL)
-        {
             item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
 
+
+    switch (it->type)
+    {
+    case IT_AMULET:
+        if (p->eq_amulet != NULL)
+        {
             if (!it->cursed)
             {
                 log_add_entry(nlarn->log, "You remove %s.", desc);
 
+                if (!player_make_move(p, 2, TRUE, "removing %s", desc))
+                    return; /* interrupted */
+
                 player_effects_del(p, p->eq_amulet->effects);
                 p->eq_amulet = NULL;
-
-                time = 2;
             }
             else
             {
@@ -2902,57 +2978,113 @@ int player_item_unequip(player *p, inventory **inv, item *it)
         }
         break;
 
-    case PE_BOOTS:
-        aslot = &(p->eq_boots);
-        time = 3;
-        break;
+        /* take off armour */
+    case IT_ARMOUR:
+    {
+        int time = 0;
+        item **aslot = NULL;  /* pointer to armour slot */
 
-    case PE_CLOAK:
-        aslot = &(p->eq_cloak);
-        time = 2;
-        break;
+        switch (armour_category(it))
+        {
+        case AC_BOOTS:
+            aslot = &(p->eq_boots);
+            time = 3;
 
-    case PE_GLOVES:
-        aslot = &(p->eq_gloves);
-        time = 3;
-        break;
+        case AC_CLOAK:
+            aslot = &(p->eq_cloak);
+            time = 2;
+            break;
 
-    case PE_HELMET:
-        aslot = &(p->eq_helmet);
-        time = 2;
-        break;
+        case AC_GLOVES:
+            aslot = &(p->eq_gloves);
+            time = 3;
+            break;
 
-    case PE_SHIELD:
-        aslot = &(p->eq_shield);
-        time = 2;
-        break;
+        case AC_HELMET:
+            aslot = &(p->eq_helmet);
+            time = 2;
+            break;
 
-    case PE_SUIT:
-        aslot = &(p->eq_suit);
-        /* the better the armour, the longer it takes to get out of it */
-        time = (p->eq_suit)->type + 1;
-        break;
+        case AC_SHIELD:
+            aslot = &(p->eq_shield);
+            time = 2;
+            break;
 
-    case PE_RING_L:
-        rslot = &(p->eq_ring_l);
-        break;
+        case AC_SUIT:
+            aslot = &(p->eq_suit);
+            /* the better the armour, the longer it takes to get out of it */
+            time = (p->eq_suit)->type + 1;
+            break;
+        default:
+            break;
+        }
 
-    case PE_RING_R:
-        rslot = &(p->eq_ring_r);
-        break;
+        if ((aslot != NULL) && (*aslot != NULL))
+        {
+            if (!it->cursed)
+            {
+                if (!player_make_move(p, time, TRUE, "taking %s off", desc))
+                    return; /* interrupted */
 
-    case PE_WEAPON:
+                log_add_entry(nlarn->log, "You finish taking off %s.", desc);
+                player_effects_del(p, (*aslot)->effects);
+                *aslot = NULL;
+            }
+            else
+            {
+                log_add_entry(nlarn->log, "You can't take of %s.%s", desc,
+                              it->blessed_known ? "" : " It appears to be cursed.");
+
+                it->blessed_known = TRUE;
+            }
+        }
+    }
+    break;
+
+    case IT_RING:
+    {
+        item **rslot = NULL;  /* pointer to ring slot */
+
+        if (it == p->eq_ring_l)
+            rslot = &(p->eq_ring_l);
+        else if (it == p->eq_ring_r)
+            rslot = &(p->eq_ring_r);
+
+        if (rslot != NULL)
+        {
+            if (!it->cursed)
+            {
+                log_add_entry(nlarn->log, "You remove %s.", desc);
+
+                if (!player_make_move(p, 2, TRUE, "removing %s", desc))
+                    return; /* interrupted */
+
+                player_effects_del(p, (*rslot)->effects);
+                *rslot = NULL;
+            }
+            else
+            {
+                log_add_entry(nlarn->log, "You can not remove %s.%s", desc,
+                              it->blessed_known ? "" : " It appears to be cursed.");
+
+                it->blessed_known = TRUE;
+            }
+        }
+    }
+    break;
+
+    case IT_WEAPON:
         if (p->eq_weapon != NULL)
         {
-            item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
-
             if (!p->eq_weapon->cursed)
             {
                 log_add_entry(nlarn->log, "You put away %s.", desc);
 
-                time = 2 + weapon_is_twohanded(p->eq_weapon);
-                player_effects_del(p, p->eq_weapon->effects);
+                if (!player_make_move(p, 2 + weapon_is_twohanded(p->eq_weapon),
+                                      TRUE, "putting %s away", desc))
+                    return; /* interrupted */
 
+                player_effects_del(p, p->eq_weapon->effects);
                 p->eq_weapon = NULL;
             }
             else
@@ -2962,53 +3094,10 @@ int player_item_unequip(player *p, inventory **inv, item *it)
             }
         }
         break;
+
+    default:
+        break;
     }
-
-    /* take off armour */
-    if ((aslot != NULL) && (*aslot != NULL))
-    {
-        item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
-
-        if (!it->cursed)
-        {
-            log_add_entry(nlarn->log, "You finish taking off %s.", desc);
-
-            player_effects_del(p, (*aslot)->effects);
-
-            *aslot = NULL;
-        }
-        else
-        {
-            log_add_entry(nlarn->log, "You can't take of %s.%s", desc,
-                          it->blessed_known ? "" : " It appears to be cursed.");
-
-            it->blessed_known = TRUE;
-        }
-    }
-
-    if ((rslot != NULL) && (*rslot != NULL))
-    {
-        item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
-
-        if (!it->cursed)
-        {
-            log_add_entry(nlarn->log, "You remove %s.", desc);
-
-            player_effects_del(p, (*rslot)->effects);
-
-            *rslot = NULL;
-            time = 2;
-        }
-        else
-        {
-            log_add_entry(nlarn->log, "You can not remove %s.%s", desc,
-                          it->blessed_known ? "" : " It appears to be cursed.");
-
-            it->blessed_known = TRUE;
-        }
-    }
-
-    return time;
 }
 
 /* silly filter to get containers */
@@ -3068,39 +3157,39 @@ int player_item_is_equipped(player *p, item *it)
     assert(p != NULL && it != NULL);
 
     if (!item_is_equippable(it->type))
-        return PE_NONE;
+        return FALSE;
 
     if (it == p->eq_amulet)
-        return PE_AMULET;
+        return TRUE;
 
     if (it == p->eq_boots)
-        return PE_BOOTS;
+        return TRUE;
 
     if (it == p->eq_cloak)
-        return PE_CLOAK;
+        return TRUE;
 
     if (it == p->eq_gloves)
-        return PE_GLOVES;
+        return TRUE;
 
     if (it == p->eq_helmet)
-        return PE_HELMET;
+        return TRUE;
 
     if (it == p->eq_ring_l)
-        return PE_RING_L;
+        return TRUE;
 
     if (it == p->eq_ring_r)
-        return PE_RING_R;
+        return TRUE;
 
     if (it == p->eq_shield)
-        return PE_SHIELD;
+        return TRUE;
 
     if (it == p->eq_suit)
-        return PE_SUIT;
+        return TRUE;
 
     if (it == p->eq_weapon)
-        return PE_WEAPON;
+        return TRUE;
 
-    return PE_NONE;
+    return FALSE;
 }
 
 int player_item_is_equippable(player *p, item *it)
@@ -3382,7 +3471,7 @@ void player_item_identify(player *p, inventory **inv, item *it)
     it->bonus_known = TRUE;
 }
 
-int player_item_use(player *p, inventory **inv, item *it)
+void player_item_use(player *p, inventory **inv, item *it)
 {
     item_usage_result result;
 
@@ -3415,7 +3504,7 @@ int player_item_use(player *p, inventory **inv, item *it)
 
     default:
         /* NOP */
-        return 0;
+        return;
         break;
     }
 
@@ -3457,8 +3546,6 @@ int player_item_use(player *p, inventory **inv, item *it)
 
     /* show windows */
     display_windows_show();
-
-    return result.time;
 }
 
 void player_item_destroy(player *p, item *it)
@@ -3484,15 +3571,16 @@ void player_item_destroy(player *p, item *it)
     item_destroy(it);
 }
 
-int player_item_drop(player *p, inventory **inv, item *it)
+void player_item_drop(player *p, inventory **inv, item *it)
 {
     char desc[61];
     guint count = 0;
+    gboolean split = FALSE;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     if (player_item_is_equipped(p, it))
-        return FALSE;
+        return;
 
     if (it->count > 1)
     {
@@ -3501,16 +3589,17 @@ int player_item_drop(player *p, inventory **inv, item *it)
         count = display_get_count(desc, it->count);
 
         if (!count)
-        {
-            return 0;
-        }
+            return;
     }
 
     if (count && count < it->count)
     {
-        /* split the item if only a part of it is to be dropped */
+        /* split the item if only a part of it is to be dropped;
+           otherwise the entire quantity gets dropped */
         it = item_split(it, count);
-        /* otherwise the entire quantity gets dropped */
+
+        /* remember the fact */
+        split = TRUE;
     }
 
     /* show the message before dropping the item, as dropping might remove
@@ -3519,10 +3608,15 @@ int player_item_drop(player *p, inventory **inv, item *it)
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
     log_add_entry(nlarn->log, "You drop %s.", desc);
 
-    if (!inv_del_element(inv, it))
+    /* if the action is aborted or if the callback failed return without dropping the item */
+    if (!player_make_move(p, 2, TRUE, "dropping %s", desc)
+            || !inv_del_element(inv, it))
     {
-        /* if the callback failed, dropping has failed */
-        return FALSE;
+        /* if the item has been split return it */
+        if (split)
+            inv_add(&p->inventory, it);
+
+        return;
     }
 
     if (it->type == IT_GOLD)
@@ -3549,10 +3643,10 @@ int player_item_drop(player *p, inventory **inv, item *it)
         it->blessed_known = TRUE;
     }
 
-    return TRUE;
+    return;
 }
 
-int player_item_pickup(player *p, inventory **inv, item *it)
+void player_item_pickup(player *p, inventory **inv, item *it)
 {
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -3567,9 +3661,7 @@ int player_item_pickup(player *p, inventory **inv, item *it)
         count = display_get_count(desc, it->count);
 
         if (count == 0)
-        {
-            return 0;
-        }
+            return;
 
         if (count < it->count)
         {
@@ -3584,14 +3676,15 @@ int player_item_pickup(player *p, inventory **inv, item *it)
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
     log_add_entry(nlarn->log, "You pick up %s.", desc);
 
-    if (!inv_add(&p->inventory, it))
+    /* one turn to pick item up, one to stuff it into the pack */
+    if (!player_make_move(p, 2, TRUE, "picking up %s", desc)
+            || !inv_add(&p->inventory, it))
     {
         /* Adding the item to the player's inventory has failed.
            If the item has been split, return it to the originating inventory */
         if (oid == NULL) inv_add(inv, it);
 
-        /* the attempt to pick the item up took one turn */
-        return 1;
+        return;
     }
 
     if (it->type == IT_GOLD)
@@ -3601,11 +3694,10 @@ int player_item_pickup(player *p, inventory **inv, item *it)
     if (oid != NULL)
         inv_del_oid(inv, oid);
 
-    /* one turn to pick item up, one to stuff it into the pack */
-    return 2;
+    return;
 }
 
-int player_read(player *p)
+void player_read(player *p)
 {
     item *it;
 
@@ -3621,19 +3713,16 @@ int player_read(player *p)
             /* repaint screen as it would be plain black
                if a scroll shows a window */
             display_paint_screen(p);
-            return player_item_use(p, NULL, it);
+            player_item_use(p, NULL, it);
         }
     }
     else
     {
         log_add_entry(nlarn->log, "You have nothing to read.");
     }
-
-
-    return FALSE;
 }
 
-int player_quaff(player *p)
+void player_quaff(player *p)
 {
     item *it;
 
@@ -3646,19 +3735,17 @@ int player_quaff(player *p)
 
         if (it)
         {
-            return player_item_use(p, NULL, it);
+            player_item_use(p, NULL, it);
         }
     }
     else
     {
         log_add_entry(nlarn->log, "You have nothing to drink.");
     }
-
-    return FALSE;
 }
 
 
-int player_equip(player *p)
+void player_equip(player *p)
 {
     item *it;
 
@@ -3676,18 +3763,16 @@ int player_equip(player *p)
 
         if (it)
         {
-            return player_item_equip(p, NULL, it);
+            player_item_equip(p, NULL, it);
         }
     }
     else
     {
         log_add_entry(nlarn->log, "You have nothing you could equip.");
     }
-
-    return FALSE;
 }
 
-int player_take_off(player *p)
+void player_take_off(player *p)
 {
     item *it;
 
@@ -3705,18 +3790,16 @@ int player_take_off(player *p)
 
         if (it)
         {
-            return player_item_unequip(p, NULL, it);
+            player_item_unequip(p, NULL, it);
         }
     }
     else
     {
         log_add_entry(nlarn->log, "You have nothing you could take off.");
     }
-
-    return FALSE;
 }
 
-int player_drop(player *p)
+void player_drop(player *p)
 {
     item *it;
 
@@ -3733,20 +3816,12 @@ int player_drop(player *p)
                                NULL, FALSE, FALSE, FALSE, item_filter_dropable);
 
         if (it)
-        {
-             /* repaint the screen as it would be plain black
-                if the dialogue to ask for the amount pops up */
-
-            display_paint_screen(p);
-            return player_item_drop(p, &p->inventory, it);
-        }
+            player_item_drop(p, &p->inventory, it);
     }
     else
     {
         log_add_entry(nlarn->log, "You have nothing you could drop.");
     }
-
-    return FALSE;
 }
 
 int player_get_ac(player *p)
@@ -4052,19 +4127,19 @@ void player_update_fov(player *p)
                 /* remember certain stationary objects */
                 switch (map_sobject_at(map, pos))
                 {
-                    case LS_ALTAR:
-                    case LS_BANK2:
-                    case LS_FOUNTAIN:
-                    case LS_MIRROR:
-                    case LS_THRONE:
-                    case LS_THRONE2:
-                    case LS_STATUE:
-                        player_sobject_memorize(p, map_sobject_at(map, pos), pos);
-                        break;
+                case LS_ALTAR:
+                case LS_BANK2:
+                case LS_FOUNTAIN:
+                case LS_MIRROR:
+                case LS_THRONE:
+                case LS_THRONE2:
+                case LS_STATUE:
+                    player_sobject_memorize(p, map_sobject_at(map, pos), pos);
+                    break;
 
-                    default:
-                        player_sobject_forget(p, pos);
-                        break;
+                default:
+                    player_sobject_forget(p, pos);
+                    break;
                 }
 
                 if (inv_length(*inv) > 0)

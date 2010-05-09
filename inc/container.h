@@ -46,11 +46,32 @@ extern const container_data containers[CT_MAX];
 
 struct player;
 
-/* functions */
+/**
+  * @brief Function used to open a container.
+  *
+  * @param the player
+  * @param -unused-
+  * @param the container to be opened
+  */
+void container_open(struct player *p, inventory **inv, item *container);
 
-int container_open(struct player *p, inventory **inv, item *container);
-int container_item_add(struct player *p, inventory **inv, item *element);
-int container_item_unpack(struct player *p, inventory **inv, item *element);
+/**
+  * @brief Function used to add an item to a container.
+  *
+  * @param the player
+  * @param the container
+  * @param the item to be added
+  */
+void container_item_add(struct player *p, inventory **inv, item *element);
+
+/**
+  * @brief Function used to remove an item from a container.
+  *
+  * @param the player
+  * @param the originating inventory
+  * @param the item to be taken out
+  */
+void container_item_unpack(struct player *p, inventory **inv, item *element);
 
 /* macros */
 

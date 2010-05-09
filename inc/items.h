@@ -73,7 +73,6 @@ typedef struct item_usage_result
 {
     int identified;
     int used_up;
-    int time;
 } item_usage_result;
 
 typedef enum item_erosion_t {

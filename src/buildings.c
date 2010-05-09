@@ -36,10 +36,10 @@ static int building_player_check(player *p, guint amount);
 static void building_player_charge(player *p, guint amount);
 
 static void building_item_add(inventory **inv, item *it);
-static int building_item_sell(player *p, inventory **inv, item *it);
-static int building_item_identify(player *p, inventory **inv, item *it);
-static int building_item_repair(player *p, inventory **inv, item *it);
-static int building_item_buy(player *p, inventory **inv, item *it);
+static void building_item_sell(player *p, inventory **inv, item *it);
+static void building_item_identify(player *p, inventory **inv, item *it);
+static void building_item_repair(player *p, inventory **inv, item *it);
+static void building_item_buy(player *p, inventory **inv, item *it);
 
 static int handle_bank_interest(player *p)
 {
@@ -752,7 +752,7 @@ static void building_item_add(inventory **inv, item *it)
     }
 }
 
-static int building_item_sell(player *p, inventory **inv, item *it)
+static void building_item_sell(player *p, inventory **inv, item *it)
 {
     guint price;
     guint count = 0;
@@ -779,11 +779,11 @@ static int building_item_sell(player *p, inventory **inv, item *it)
         {
             /* desired amount is larger than the available amount */
             log_add_entry(nlarn->log, "Wouldn't it be nice if the store had %d of those?", count);
-            return FALSE;
+            return;
         }
         else if (count == 0)
         {
-            return FALSE;
+            return;
         }
         else if (count == it->count)
         {
@@ -811,7 +811,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
             /* if the item has been split add it to the shop */
             if (it != it_clone) inv_add(inv, it_clone);
 
-            return FALSE;
+            return;
         }
     }
     else
@@ -822,9 +822,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
                    name, price);
 
         if (!display_get_yesno(text, NULL, NULL))
-        {
-            return FALSE;
-        }
+            return;
 
         it_clone = it;
     }
@@ -857,7 +855,7 @@ static int building_item_sell(player *p, inventory **inv, item *it)
         /* item has not been added to player's inventory */
         /* if the item has been split, return it to the shop */
         if (it != it_clone) inv_add(inv, it_clone);
-        return FALSE;
+        return;
     }
 
     /* log the event */
@@ -866,10 +864,10 @@ static int building_item_sell(player *p, inventory **inv, item *it)
     /* charge player for this purchase */
     building_player_charge(p, price);
 
-    return TRUE;
+    player_make_move(p, 2, FALSE, NULL);
 }
 
-int building_item_identify(player *p, inventory **inv, item *it)
+static void building_item_identify(player *p, inventory **inv, item *it)
 {
     guint price;
     char name_unknown[61];
@@ -902,8 +900,7 @@ int building_item_identify(player *p, inventory **inv, item *it)
             building_player_charge(p, price);
 
             p->stats.gold_spent_id_repair += price;
-
-            return TRUE;
+            player_make_move(p, 1, FALSE, NULL);
         }
     }
     else
@@ -911,11 +908,9 @@ int building_item_identify(player *p, inventory **inv, item *it)
         g_snprintf(message, 80, "Identifying %s costs %d gold.", name_unknown, price);
         display_show_message(title, message, 0);
     }
-
-    return FALSE;
 }
 
-static int building_item_repair(player *p, inventory **inv, item *it)
+static void building_item_repair(player *p, inventory **inv, item *it)
 {
     int damages = 0;
     guint price;
@@ -953,8 +948,7 @@ static int building_item_repair(player *p, inventory **inv, item *it)
             building_player_charge(p, price);
 
             p->stats.gold_spent_id_repair += price;
-
-            return TRUE;
+            player_make_move(p, 1, FALSE, NULL);
         }
     }
     else
@@ -962,11 +956,9 @@ static int building_item_repair(player *p, inventory **inv, item *it)
         g_snprintf(message, 80, "Repairing the %s costs %d gold.", name, price);
         display_show_message(title, message, 0);
     }
-
-    return FALSE;
 }
 
-static int building_item_buy(player *p, inventory **inv, item *it)
+static void building_item_buy(player *p, inventory **inv, item *it)
 {
     int price;
     guint count = 0;
@@ -1009,14 +1001,11 @@ static int building_item_buy(player *p, inventory **inv, item *it)
         if (count > it->count)
         {
             log_add_entry(nlarn->log, "Wouldn't it be nice to have %d of those?", count);
-
-            return FALSE;
+            return;
         }
 
         if (count == 0)
-        {
-            return FALSE;
-        }
+            return;
 
         price *= count;
     }
@@ -1028,9 +1017,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
                    name, price);
 
         if (!display_get_yesno(question, NULL, NULL))
-        {
-            return FALSE;
-        }
+            return;
     }
 
     p->bank_account += price;
@@ -1063,7 +1050,7 @@ static int building_item_buy(player *p, inventory **inv, item *it)
     {
         if (!inv_del_element(&p->inventory, it))
         {
-            return FALSE;
+            return;
         }
         else
         {
@@ -1071,5 +1058,5 @@ static int building_item_buy(player *p, inventory **inv, item *it)
         }
     }
 
-    return TRUE;
+    player_make_move(p, 1, FALSE, NULL);
 }

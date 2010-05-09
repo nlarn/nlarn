@@ -161,27 +161,14 @@ typedef struct player
     /* remembered positions of stationary objects */
     GArray *sobjmem;
 
+    /* flag to store if the player has been attacked during the current turn */
+    gboolean attacked;
+
     /* courses available in school */
     gint school_courses_taken[SCHOOL_COURSE_COUNT];
 
     player_settings settings; /* game configuration */
 } player;
-
-typedef enum _player_equipment_t
-{
-    PE_NONE,
-    PE_AMULET,
-    PE_BOOTS,
-    PE_CLOAK,
-    PE_GLOVES,
-    PE_HELMET,
-    PE_RING_L,
-    PE_RING_R,
-    PE_SHIELD,
-    PE_SUIT,
-    PE_WEAPON,
-    PE_MAX
-} player_equipment_t;
 
 /* various causes of death */
 typedef enum _player_cod
@@ -214,7 +201,17 @@ void player_destroy(player *p);
 cJSON *player_serialize(player *p);
 player *player_deserialize(cJSON *pser);
 
-void player_make_move(player *p, int turns);
+/**
+ * @brief consume time for an action by the player
+ *
+ * @param the player
+ * @param the number of turns the move takes
+ * @param TRUE if the action can be interrupted
+ * @param (optional) the description of the action in the form "reading the book of foo"
+ * @return TRUE if the action has completed, FALSE if it has been interrupted
+ *
+ */
+gboolean player_make_move(player *p, int turns, gboolean interruptible, const char *desc, ...);
 
 /**
  * Kill the player
@@ -252,7 +249,7 @@ int player_map_enter(player *p, map *l, gboolean teleported);
  */
 item **player_get_random_armour(player *p);
 
-int player_pickup(player *p);
+void player_pickup(player *p);
 void player_autopickup(player *p);
 void player_autopickup_show(player *p);
 
@@ -322,15 +319,23 @@ void player_inv_weight_recalc(inventory *inv, item *item);
 /* dealing with items */
 
 /**
-  * Function used to equip an item.
+  * @brief Function used to equip an item.
   *
   * @param the player
   * @param unused, needed to make function signature match display_inventory requirements
   * @param the item
   */
-int player_item_equip(player *p, inventory **inv, item *it);
+void player_item_equip(player *p, inventory **inv, item *it);
 
-int player_item_unequip(player *p, inventory **inv, item *it);
+/**
+  * @brief Function used to unequip an item.
+  *
+  * @param the player
+  * @param unused, needed to make function signature match display_inventory requirements
+  * @param the item
+  */
+void player_item_unequip(player *p, inventory **inv, item *it);
+
 int player_item_is_container(player *p, item *it);
 int player_item_can_be_added_to_container(player *p, item *it);
 
@@ -354,9 +359,9 @@ int player_item_known(player *p, item *it);
 int player_item_identified(player *p, item *it);
 char *player_item_identified_list(player *p);
 void player_item_identify(player *p, inventory **inv, item *it);
-int player_item_use(player *p, inventory **inv, item *it);
+void player_item_use(player *p, inventory **inv, item *it);
 void player_item_destroy(player *p, item *it);
-int player_item_drop(player *p, inventory **inv, item *it);
+void player_item_drop(player *p, inventory **inv, item *it);
 
 /**
  * @brief Try to pick up an item.
@@ -369,14 +374,14 @@ int player_item_drop(player *p, inventory **inv, item *it);
  *        1 when the pre_add callback function failed (e.g. the item is too heavy),
  *        2 if adding the item to the player's inventory succeeded.
  */
-int player_item_pickup(player *p, inventory **inv, item *it);
+void player_item_pickup(player *p, inventory **inv, item *it);
 
 /* item usage shortcuts */
-int player_read(player *p);
-int player_quaff(player *p);
-int player_equip(player *p);
-int player_take_off(player *p);
-int player_drop(player *p);
+void player_read(player *p);
+void player_quaff(player *p);
+void player_equip(player *p);
+void player_take_off(player *p);
+void player_drop(player *p);
 
 /* query values */
 int player_get_ac(player *p);

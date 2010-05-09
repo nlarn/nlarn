@@ -83,7 +83,7 @@ typedef struct display_inv_callback
     char *description;
     char key;
     inventory **inv;
-    int (*function)(player *, inventory **, item *);
+    void (*function)(player *, inventory **, item *);
     int (*checkfun)(player *, item *);
     gboolean active;
 } display_inv_callback;

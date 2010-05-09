@@ -108,27 +108,37 @@ int potion_colour(int potion_id)
 
 item_usage_result potion_quaff(struct player *p, item *potion)
 {
-    item_usage_result result;
+    item_usage_result result = { FALSE, FALSE };
+    char *verb;
     char description[61];
 
-    result.time = 2;
-    result.identified = TRUE;
-    result.used_up = TRUE;
+    // These potions aren't drunk.
+    if (potion->id == PO_CURE_DIANTHR && potion->id == PO_WATER)
+        verb = "use";
+    else
+        verb = "drink";
 
     if (potion->cursed && potion->blessed_known)
     {
-        log_add_entry(nlarn->log, "You'd rather not drink this cursed potion.");
-        result.used_up    = FALSE;
-        result.identified = FALSE;
+        log_add_entry(nlarn->log, "You'd rather not %s this cursed potion.", verb);
         return result;
     }
 
+    /* prepare item description */
     item_describe(potion, player_item_known(p, potion),
                   TRUE, potion->count == 1, description, 60);
 
-    // These potions aren't drunk.
-    if (potion->id != PO_CURE_DIANTHR && potion->id != PO_WATER)
-        log_add_entry(nlarn->log, "You drink %s.", description);
+    log_add_entry(nlarn->log, "You %s %s.", verb, description);
+
+    /* try to complete quaffing the potion */
+    if (!player_make_move(p, 2, TRUE, "%sing %s", verb, description))
+    {
+        /* the action has been aborted */
+        return result;
+    }
+
+    /* the potion has successfully been quaffed */
+    result.used_up = TRUE;
 
     if (potion->cursed)
     {
@@ -138,7 +148,6 @@ item_usage_result potion_quaff(struct player *p, item *potion)
 
         log_add_entry(nlarn->log, "You spit gore!");
         player_damage_take(p, dam, PD_CURSE, potion->type);
-        result.identified = FALSE;
     }
     else
     {
@@ -154,6 +163,7 @@ item_usage_result potion_quaff(struct player *p, item *potion)
             break;
 
         case PO_WATER:
+            result.identified = TRUE;
             result.used_up = potion_holy_water(p, potion);
             break;
 
@@ -177,6 +187,7 @@ item_usage_result potion_quaff(struct player *p, item *potion)
         /* increase number of potions quaffed */
         p->stats.potions_quaffed++;
     }
+
     return result;
 }
 

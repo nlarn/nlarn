@@ -162,7 +162,6 @@ int main(int argc, char *argv[])
     char run_cmd = 0;
     int ch;
     gboolean adj_corr = FALSE;
-    int old_hp;
     int end_resting = 0;
 
     /* main event loop */
@@ -173,7 +172,6 @@ int main(int argc, char *argv[])
             ch = run_cmd;
             // Check if we're in open surroundings.
             adj_corr = adjacent_corridor(nlarn->p->pos, ch);
-            old_hp = nlarn->p->hp;
         }
         else
         {
@@ -247,13 +245,11 @@ int main(int argc, char *argv[])
             case 'N':
                 ch = tolower(ch);
                 run_cmd = ch;
-                old_hp = nlarn->p->hp;
                 adj_corr = adjacent_corridor(nlarn->p->pos, ch);
                 break;
             case 'w': /* rest up to 1 mobul */
                 ch = '.';
                 run_cmd = ch;
-                old_hp = nlarn->p->hp;
                 end_resting = game_turn(nlarn) + 100;
                 break;
             }
@@ -352,7 +348,7 @@ int main(int argc, char *argv[])
 
             /* pick up */
         case ',':
-            moves_count = player_pickup(nlarn->p);
+            player_pickup(nlarn->p);
             break;
 
         case '@':
@@ -389,22 +385,22 @@ int main(int argc, char *argv[])
 
             /* read something */
         case 'r':
-            moves_count = player_read(nlarn->p);
+            player_read(nlarn->p);
             break;
 
             /* equip something */
         case 'e':
-            moves_count = player_equip(nlarn->p);
+            player_equip(nlarn->p);
             break;
 
             /* take off something */
         case 't':
-            moves_count = player_take_off(nlarn->p);
+            player_take_off(nlarn->p);
             break;
 
             /* drop something */
         case 'd':
-            moves_count = player_drop(nlarn->p);
+            player_drop(nlarn->p);
             break;
 
             /* go down stairs / enter a building */
@@ -482,7 +478,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                moves_count = player_quaff(nlarn->p);
+                player_quaff(nlarn->p);
             }
         }
         break;
@@ -659,7 +655,7 @@ int main(int argc, char *argv[])
         /* manipulate game time */
         if (moves_count)
         {
-            player_make_move(nlarn->p, moves_count);
+            player_make_move(nlarn->p, moves_count, FALSE, NULL);
             moves_count = 0;
         }
 
@@ -672,7 +668,7 @@ int main(int argc, char *argv[])
             // * last action cost no turns (we ran into a wall)
             // * we took damage (trap, poison, or invisible monster)
             // * a monster has moved adjacent to us
-            if (no_move || nlarn->p->hp < old_hp
+            if (no_move || nlarn->p->attacked
                     || adjacent_monster(nlarn->p->pos, run_cmd == '.'))
             {
                 run_cmd = 0;

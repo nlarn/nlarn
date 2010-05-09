@@ -1012,13 +1012,13 @@ int spell_type_blast(spell *s, struct player *p)
     switch (s->id)
     {
         /* currently there is only the fireball */
-        case SP_BAL:
-        default:
-            radius = 2;
-            dam_t = DAM_FIRE;
-            iet = IET_BURN;
-            colour = DC_LIGHTRED;
-            amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
+    case SP_BAL:
+    default:
+        radius = 2;
+        dam_t = DAM_FIRE;
+        iet = IET_BURN;
+        colour = DC_LIGHTRED;
+        amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
         break;
     }
 
@@ -1035,8 +1035,8 @@ int spell_type_blast(spell *s, struct player *p)
     ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos, radius));
 
     if (area_pos_get(ball, p->pos)
-                && !display_get_yesno("The spell is going to hit you. " \
-                                      "Cast anyway?", NULL, NULL))
+            && !display_get_yesno("The spell is going to hit you. " \
+                                  "Cast anyway?", NULL, NULL))
     {
         log_add_entry(nlarn->log, "Aborted.");
         area_destroy(ball);
@@ -1056,7 +1056,7 @@ int spell_type_blast(spell *s, struct player *p)
                 move(cursor.y, cursor.x);
 
                 if ((monster = map_get_monster_at(cmap, cursor))
-                    && monster_in_sight(monster))
+                        && monster_in_sight(monster))
                 {
                     /* blast hit a visible monster */
                     addch(monster_glyph(monster));
@@ -1382,12 +1382,8 @@ int book_colour(item *book)
 
 item_usage_result book_read(struct player *p, item *book)
 {
-    item_usage_result result;
+    item_usage_result result = { FALSE, FALSE };
     char description[61];
-
-    result.identified = FALSE;
-    result.time = 1 + spell_level_by_id(book->id);
-    result.used_up = TRUE;
 
     item_describe(book, player_item_known(p, book),
                   TRUE, TRUE, description, 60);
@@ -1397,15 +1393,20 @@ item_usage_result book_read(struct player *p, item *book)
         log_add_entry(nlarn->log, "As you are blind you can't read %s.",
                       description);
 
-        result.used_up = FALSE;
-        result.time = 2;
-
         return result;
     }
 
     log_add_entry(nlarn->log, "You read %s.", description);
 
-    /* increase number of books read */
+    /* try to complete reading the book */
+    if (!player_make_move(p, 1 + spell_level_by_id(book->id),
+                          TRUE, "reading %s", description))
+    {
+        /* the action has been aborted */
+        return result;
+    }
+
+    /* the book has successfully been read - increase number of books read */
     p->stats.books_read++;
 
     /* cursed spellbooks have nasty effects */
@@ -1422,13 +1423,13 @@ item_usage_result book_read(struct player *p, item *book)
         {
         case 0:
             log_add_entry(nlarn->log, "You cannot understand the content of this book.");
-            result.used_up = FALSE;
             break;
 
         case 1:
             /* learnt spell */
             log_add_entry(nlarn->log, "You master the spell %s.", book_name(book));
 
+            result.used_up = TRUE;
             result.identified = TRUE;
             break;
 
@@ -1437,6 +1438,7 @@ item_usage_result book_read(struct player *p, item *book)
             log_add_entry(nlarn->log, "You improved your knowledge of the spell %s.",
                           book_name(book));
 
+            result.used_up = TRUE;
             result.identified = TRUE;
             break;
         }

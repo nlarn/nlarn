@@ -620,9 +620,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
        from the callback descriptions */
     char **captions;
 
-    /* time usage returned by callback function */
-    int time;
-
     /* offset to element position (when displaying more than maxvis items) */
     guint offset = 0;
 
@@ -934,12 +931,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
                 if ((cb->key == key) && cb->active)
                 {
-                    time = 0;
-
                     /* trigger callback */
-                    time = cb->function(p, cb->inv, inv_get_filtered(*inv, curr + offset - 1, filter));
-
-                    if (time) player_make_move(p, time);
+                    cb->function(p, cb->inv, inv_get_filtered(*inv, curr + offset - 1, filter));
 
                     redraw = TRUE;
 

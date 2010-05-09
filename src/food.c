@@ -38,16 +38,23 @@ static char *food_get_fortune(char *fortune_file);
 item_usage_result food_eat(struct player *p, item *food)
 {
     char description[61];
-    item_usage_result result;
-
-    result.identified = TRUE;
-    result.used_up = TRUE;
-    result.time = 2;
+    item_usage_result result  = { FALSE, FALSE };
 
     item_describe(food, player_item_known(p, food),
                   TRUE, FALSE, description, 60);
 
     log_add_entry(nlarn->log, "You eat %s.", description);
+
+    /* try to complete eating the food */
+    if (!player_make_move(p, 2, TRUE, "eating %s", description))
+    {
+        /* the action has been aborted */
+        return result;
+    }
+
+    /* the food has successfully been eaten */
+    result.identified = TRUE;
+    result.used_up = TRUE;
 
     if (food->id == FT_FORTUNE_COOKIE)
     {

@@ -107,10 +107,7 @@ char *scroll_desc(int scroll_id)
 item_usage_result scroll_read(struct player *p, item *scroll)
 {
     char description[61];
-    item_usage_result result;
-
-    result.time = 2;
-    result.used_up = TRUE;
+    item_usage_result result  = { FALSE, FALSE };
 
     item_describe(scroll, player_item_known(p, scroll),
                   TRUE, scroll->count == 1, description, 60);
@@ -120,21 +117,26 @@ item_usage_result scroll_read(struct player *p, item *scroll)
         log_add_entry(nlarn->log, "As you are blind you can't read %s.",
                       description);
 
-        result.identified = FALSE;
-        result.used_up = FALSE;
-
         return result;
     }
 
     if (scroll->cursed && scroll->blessed_known)
     {
         log_add_entry(nlarn->log, "You'd rather not read this cursed scroll.");
-        result.used_up    = FALSE;
-        result.identified = FALSE;
         return result;
     }
 
     log_add_entry(nlarn->log, "You read %s.", description);
+
+    /* try to complete reading the scroll */
+    if (!player_make_move(p, 2, TRUE, "reading %s", description))
+    {
+        /* the action has been aborted */
+        return result;
+    }
+
+    /* the scroll has successfully been read */
+    result.used_up = TRUE;
 
     /* increase number of scrolls read */
     p->stats.scrolls_read++;
@@ -144,101 +146,100 @@ item_usage_result scroll_read(struct player *p, item *scroll)
         damage *dam = damage_new(DAM_FIRE, ATT_NONE, rand_1n(p->hp), NULL);
         log_add_entry(nlarn->log, "The scroll explodes!");
         player_damage_take(p, dam, PD_CURSE, scroll->type);
-        result.identified = FALSE;
+
+        return result;
     }
-    else
+
+    switch (scroll->id)
     {
-        switch (scroll->id)
+    case ST_ENCH_ARMOUR:
+        result.identified = scroll_enchant_armour(p, scroll);
+        break;
+
+    case ST_ENCH_WEAPON:
+        result.identified = scroll_enchant_weapon(p, scroll);
+        break;
+
+    case ST_BLANK:
+        result.used_up = FALSE;
+        result.identified = TRUE;
+        log_add_entry(nlarn->log, "This scroll is blank.");
+        break;
+
+    case ST_CREATE_MONSTER:
+        result.identified = spell_create_monster(p);
+        break;
+
+    case ST_CREATE_ARTIFACT:
+        result.identified = scroll_create_artefact(p, scroll);
+        break;
+
+    case ST_TIMEWARP:
+        result.identified = scroll_timewarp(p, scroll);
+        break;
+
+    case ST_TELEPORT:
+        result.identified = scroll_teleport(p, scroll);
+        break;
+
+    case ST_HEAL_MONSTER:
+        result.identified = scroll_heal_monster(p, scroll);
+        break;
+
+    case ST_MAPPING:
+        log_add_entry(nlarn->log, "There is a map on the scroll!");
+        result.identified = scroll_mapping(p, scroll);
+        break;
+
+    case ST_GEM_PERFECTION:
+        result.identified = scroll_gem_perfection(p, scroll);
+        break;
+
+    case ST_SPELL_EXTENSION:
+        result.identified = scroll_spell_extension(p, scroll);
+        break;
+
+    case ST_IDENTIFY:
+        result.identified = scroll_identify(p, scroll);
+        break;
+
+    case ST_REMOVE_CURSE:
+        result.identified = scroll_remove_curse(p, scroll);
+        break;
+
+    case ST_ANNIHILATION:
+        result.identified = scroll_annihilate(p, scroll);
+        break;
+
+    case ST_PULVERIZATION:
+        if (!p->identified_scrolls[ST_PULVERIZATION])
         {
-        case ST_ENCH_ARMOUR:
-            result.identified = scroll_enchant_armour(p, scroll);
-            break;
-
-        case ST_ENCH_WEAPON:
-            result.identified = scroll_enchant_weapon(p, scroll);
-            break;
-
-        case ST_BLANK:
-            result.used_up = FALSE;
-            result.identified = TRUE;
-            log_add_entry(nlarn->log, "This scroll is blank.");
-            break;
-
-        case ST_CREATE_MONSTER:
-            result.identified = spell_create_monster(p);
-            break;
-
-        case ST_CREATE_ARTIFACT:
-            result.identified = scroll_create_artefact(p, scroll);
-            break;
-
-        case ST_TIMEWARP:
-            result.identified = scroll_timewarp(p, scroll);
-            break;
-
-        case ST_TELEPORT:
-            result.identified = scroll_teleport(p, scroll);
-            break;
-
-        case ST_HEAL_MONSTER:
-            result.identified = scroll_heal_monster(p, scroll);
-            break;
-
-        case ST_MAPPING:
-            log_add_entry(nlarn->log, "There is a map on the scroll!");
-            result.identified = scroll_mapping(p, scroll);
-            break;
-
-        case ST_GEM_PERFECTION:
-            result.identified = scroll_gem_perfection(p, scroll);
-            break;
-
-        case ST_SPELL_EXTENSION:
-            result.identified = scroll_spell_extension(p, scroll);
-            break;
-
-        case ST_IDENTIFY:
-            result.identified = scroll_identify(p, scroll);
-            break;
-
-        case ST_REMOVE_CURSE:
-            result.identified = scroll_remove_curse(p, scroll);
-            break;
-
-        case ST_ANNIHILATION:
-            result.identified = scroll_annihilate(p, scroll);
-            break;
-
-        case ST_PULVERIZATION:
-            if (!p->identified_scrolls[ST_PULVERIZATION])
-            {
-                log_add_entry(nlarn->log, "This is a scroll of %s. ",
-                              scroll_name(scroll));
-            }
-
-            if (spell_vaporize_rock(p))
-            {
-                /* recalc fov if something has been vaporised */
-                player_update_fov(p);
-            }
-
-            result.identified = TRUE;
-            break;
-
-        case ST_GENOCIDE_MONSTER:
-            scroll_genocide_monster(p, scroll);
-            result.identified = TRUE;
-            break;
-
-        default:
-            result.identified = scroll_with_effect(p, scroll);
-            break;
+            log_add_entry(nlarn->log, "This is a scroll of %s. ",
+                          scroll_name(scroll));
         }
 
-        if (!result.identified)
+        if (spell_vaporize_rock(p))
         {
-            log_add_entry(nlarn->log, "Nothing happens.");
+            /* recalc fov if something has been vaporised */
+            player_update_fov(p);
         }
+
+        result.identified = TRUE;
+        break;
+
+    case ST_GENOCIDE_MONSTER:
+        scroll_genocide_monster(p, scroll);
+        result.identified = TRUE;
+        break;
+
+    default:
+        result.identified = scroll_with_effect(p, scroll);
+        break;
+    }
+
+    if (!result.identified)
+    {
+        log_add_entry(nlarn->log, "Nothing happens.");
     }
 
     return result;

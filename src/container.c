@@ -32,7 +32,7 @@ const container_data containers[CT_MAX] =
     { CT_CRATE,  "crate", 65000, IM_WOOD,  20, },
 };
 
-int container_open(player *p, inventory **inv, item *container)
+void container_open(player *p, inventory **inv, item *container)
 {
     gchar container_desc[61] = { 0 };
     GPtrArray *callbacks;
@@ -52,7 +52,7 @@ int container_open(player *p, inventory **inv, item *container)
         if (count == 0)
         {
             log_add_entry(nlarn->log, "I see no container here.");
-            return FALSE;
+            return;
         }
         else if (count == 1)
         {
@@ -62,27 +62,30 @@ int container_open(player *p, inventory **inv, item *container)
         {
             /* multiple containers */
             log_add_entry(nlarn->log, "I don't know which container I should open!");
-            return 2;
+            return;
         }
     }
+
+    /* Describe container */
+    item_describe(container, player_item_known(p, container),
+                  TRUE, FALSE, container_desc, 60);
+
+    if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
+        return; /* interrupted */
 
     /* check for empty container */
     if (inv_length(container->content) == 0)
     {
-        item_describe(container, player_item_identified(p, container),
+        /* same description, this time definite */
+        item_describe(container, player_item_known(p, container),
                       TRUE, TRUE, container_desc, 60);
 
+        /* and the first char has to be upper case */
         container_desc[0] = g_ascii_toupper(container_desc[0]);
+
         log_add_entry(nlarn->log, "%s is empty.", container_desc);
-
-        return 2;
+        return;
     }
-
-    /* Describe container */
-    item_describe(container, player_item_identified(p, container),
-                  TRUE, FALSE, container_desc, 60);
-
-    container_desc[0] = g_ascii_toupper(container_desc[0]);
 
     /* prepare callback functions */
     callbacks = g_ptr_array_new();
@@ -96,15 +99,16 @@ int container_open(player *p, inventory **inv, item *container)
 
     g_ptr_array_add(callbacks, callback);
 
+    /* upper case the first char for the dialogue title */
+    container_desc[0] = g_ascii_toupper(container_desc[0]);
+
     display_inventory(container_desc, p, &container->content, callbacks, FALSE,
                       TRUE, FALSE, NULL);
 
     display_inv_callbacks_clean(callbacks);
-
-    return 2;
 }
 
-int container_item_add(player *p, inventory **inv, item *element)
+void container_item_add(player *p, inventory **inv, item *element)
 {
     item *container = NULL;
     gchar container_desc[61]  = { 0 };
@@ -154,11 +158,14 @@ int container_item_add(player *p, inventory **inv, item *element)
     {
         /* no container has been selected */
         log_add_entry(nlarn->log, "Huh?");
-        return FALSE;
+        return;
     }
 
     /* prepare container description */
     item_describe(container, TRUE, TRUE, TRUE, container_desc, 60);
+
+    if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
+        return; /* interrupted */
 
     /* mute the log if the container is in the player's inventory.
        otherwise mindless burdened staus messages would appear */
@@ -173,7 +180,7 @@ int container_item_add(player *p, inventory **inv, item *element)
 
         if (count == 0)
         {
-            return 0;
+            return;
         }
 
         if (count < element->count)
@@ -196,7 +203,7 @@ int container_item_add(player *p, inventory **inv, item *element)
     if (carried_container) log_enable(nlarn->log);
 
     /* log the event */
-    item_describe(element, player_item_identified(p, element),
+    item_describe(element, player_item_known(p, element),
                   (element->count == 1), TRUE, element_desc, 60 );
 
     log_add_entry(nlarn->log, "You put %s into %s.", element_desc,
@@ -217,11 +224,9 @@ int container_item_add(player *p, inventory **inv, item *element)
         player_inv_weight_recalc(p->inventory, NULL);
         log_enable(nlarn->log);
     }
-
-    return 2;
 }
 
-int container_item_unpack(player *p, inventory **inv, item *element)
+void container_item_unpack(player *p, inventory **inv, item *element)
 {
     gchar desc[61] = { 0 };
     int count = 0;
@@ -237,7 +242,7 @@ int container_item_unpack(player *p, inventory **inv, item *element)
 
         if (count == 0)
         {
-            return FALSE;
+            return;
         }
 
         if (count < element->count)
@@ -260,10 +265,18 @@ int container_item_unpack(player *p, inventory **inv, item *element)
         inv_del_element(inv, element);
     }
 
+    item_describe(element, player_item_known(p, element), FALSE, FALSE, desc, 60);
+
+    if (!player_make_move(p, 2, TRUE, "putting %s in your pack", desc))
+    {
+        /* interrupted! */
+        /* return the item into the originating inventory */
+        inv_add(inv, element);
+        return;
+    }
+
     if (inv_add(&p->inventory, element))
     {
-        item_describe(element, player_item_known(p, element),
-                      (element->count == 1), FALSE, desc, 60);
         log_add_entry(nlarn->log, "You put %s into your pack.", desc);
 
         if (element->type == IT_GOLD)
@@ -274,9 +287,6 @@ int container_item_unpack(player *p, inventory **inv, item *element)
         /* if adding the element to the player's pack
            has failed put it back into the container */
         inv_add(inv, element);
-
-        return FALSE;
+        return;
     }
-
-    return 2;
 }
