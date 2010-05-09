@@ -109,11 +109,15 @@ monster *monster_new(monster_t type, position pos)
     nmonster->inventory = inv_new(nmonster);
 
     /* fill monsters inventory */
-    if (monster_gold(nmonster) > 0)
+    if (monster_gold_amount(nmonster) > 0)
     {
-        /* add gold to monster's inventory, randomize the amount */
-        icount = max(divert(monster_gold(nmonster), 10), 1);
-        inv_add(&nmonster->inventory, item_new(IT_GOLD, icount));
+        const int gold_chance = monster_gold_chance(nmonster);
+        if (gold_chance == 0 || chance(gold_chance))
+        {
+            /* add gold to monster's inventory, randomize the amount */
+            icount = max(divert(monster_gold_amount(nmonster), 30), 1);
+            inv_add(&nmonster->inventory, item_new(IT_GOLD, icount));
+        }
     }
 
     /* add special items */

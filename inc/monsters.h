@@ -250,7 +250,12 @@ static inline int monster_int(monster *m)
     return luaN_query_int("monsters", monster_type(m), "intelligence");
 }
 
-static inline int monster_gold(monster *m)
+static inline int monster_gold_chance(monster *m)
+{
+    return luaN_query_int("monsters", monster_type(m), "gold_chance");
+}
+
+static inline int monster_gold_amount(monster *m)
 {
     return luaN_query_int("monsters", monster_type(m), "gold");
 }
