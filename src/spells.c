@@ -806,15 +806,124 @@ int spell_type_point(spell *s, struct player *p)
     return TRUE;
 }
 
+// #define DEBUG_BEAMS
+static position throw_ray(spell *sp, struct player *p,
+                          position start, position target, int damage)
+{
+#ifdef DEBUG_BEAMS
+    log_add_entry(nlarn->log, "Beam from (%d, %d) -> (%d, %d)",
+                  start.x, start.y, target.x, target.y);
+#endif
+    assert(sp != NULL && p != NULL && (spell_type(sp) == SC_RAY));
+    assert(start.z == target.z);
+
+    map *cmap;
+    cmap = game_map(nlarn, start.z);
+    int distance = pos_distance(start, target);
+
+    area *ray = NULL;
+    ray = area_new_ray(start, target, map_get_obstacles(cmap, start, distance));
+
+    int attrs; /* curses attributes */
+
+    monster *monster = NULL;
+    gboolean proceed_y = TRUE;
+
+    position pos = start;
+    do
+    {
+        gboolean proceed_x = TRUE;
+
+        do
+        {
+#ifdef DEBUG_BEAMS
+            log_add_entry(nlarn->log, "current pos: (%d, %d)",
+                          pos.x, pos.y);
+#endif
+            /* check if the current position has been hit by the ray
+               and if a monster is standing at the current position */
+            if (area_pos_get(ray, pos))
+            {
+                if ((monster = map_get_monster_at(cmap, pos)))
+                {
+                    gboolean mis = monster_in_sight(monster);
+
+                    attron((attrs = (mis ? DC_LIGHTRED : DC_LIGHTCYAN)));
+                    mvaddch(pos.y, pos.x, (mis ? monster_glyph(monster) : '*'));
+
+                    log_add_entry(nlarn->log, spell_msg_succ(sp), monster_get_name(monster));
+                    monster_damage_take(monster, damage_new(spell_damage(sp), ATT_MAGIC, damage, p));
+                }
+                else
+                {
+                    attron((attrs = DC_LIGHTCYAN));
+                    mvaddch(pos.y, pos.x, '*');
+                }
+
+                attroff(attrs);
+                refresh();
+                /* sleep a while to show the ray's position */
+                usleep(100000);
+                /* repaint the screen */
+                display_paint_screen(p);
+            }
+
+            if (!pos_identical(pos, start)
+                    && map_sobject_at(cmap, pos) == LS_MIRROR)
+            {
+#ifdef DEBUG_BEAMS
+                log_add_entry(nlarn->log, "Reaching mirror. Breaking loop.");
+#endif
+                proceed_x = FALSE;
+                proceed_y = FALSE;
+                break;
+            }
+
+            /* modify horizontal position if needed;
+               exit the loop when the destination has been reached */
+            if (pos.x < target.x)
+                pos.x++;
+            else if (pos.x > target.x)
+                pos.x--;
+            else if (pos.x == target.x)
+                proceed_x = FALSE;
+
+            /* terminate upon reaching the target */
+            if (pos_identical(pos, target))
+                proceed_y = FALSE;
+        }
+        while (proceed_x);
+
+        if (!proceed_y)
+            break;
+
+        /* modify vertical position if needed */
+        if (pos.y < target.y)
+        {
+            pos.y++;
+            /* reset horizontal position upon vertical movement */
+            pos.x = p->pos.x;
+        }
+        else if (pos.y > target.y)
+        {
+            pos.y--;
+            /* reset horizontal position upon vertical movement */
+            pos.x = p->pos.x;
+        }
+    }
+    while (proceed_y);
+
+    area_destroy(ray);
+
+    return pos;
+}
+
 int spell_type_ray(spell *s, struct player *p)
 {
-    monster *monster = NULL;
     map *cmap;
-    area *ray = NULL;
     position target, pos;
-    int attrs; /* curses attributes */
     char buffer[61];
-    int amount = 0, distance = 0;
+    int amount = 0;
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
 
@@ -858,87 +967,18 @@ int spell_type_ray(spell *s, struct player *p)
     /* use pos as cursor and move it to the target. check if there is
        anything in the way that gets hit by the ray as well */
     pos = p->pos;
-    distance = pos_distance(pos, target);
-    ray = area_new_ray(pos, target, map_get_obstacles(cmap, pos, distance));
 
-    gboolean proceed_y = TRUE;
+    position last_pos = throw_ray(s, p, pos, target, amount);
 
-    do
+    if (map_sobject_at(cmap, last_pos) == LS_MIRROR)
     {
-        gboolean proceed_x = TRUE;
+        log_add_entry(nlarn->log, "The mirror reflects your spell!");
 
-        do
-        {
-            /* check if the current position has been hit by the ray
-               and if a monster is standing a the current position */
-            if (area_pos_get(ray, pos))
-            {
-                if ((monster = map_get_monster_at(cmap, pos)))
-                {
-                    gboolean mis = monster_in_sight(monster);
-
-                    attron((attrs = (mis ? DC_LIGHTRED : DC_LIGHTCYAN)));
-                    mvaddch(pos.y, pos.x, (mis ? monster_glyph(monster) : '*'));
-
-                    log_add_entry(nlarn->log, spell_msg_succ(s), monster_get_name(monster));
-                    monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount, p));
-                }
-                else
-                {
-                    attron((attrs = DC_LIGHTCYAN));
-                    mvaddch(pos.y, pos.x, '*');
-                }
-
-                attroff(attrs);
-                refresh();
-                /* sleep a while to show the ray's position */
-                usleep(100000);
-                /* repaint the screen */
-                display_paint_screen(p);
-            }
-
-            /* modify horizontal position if needed;
-               exit the loop when the destination has been reached */
-            if (pos.x < target.x)
-                pos.x++;
-            else if (pos.x > target.x)
-                pos.x--;
-            else if (pos.x == target.x)
-                proceed_x = FALSE;
-
-            /* terminate upon reaching the target */
-            if (pos_identical(pos, target))
-                proceed_y = FALSE;
-        }
-        while (proceed_x);
-
-        /* modify vertical position if needed */
-        if (pos.y < target.y)
-        {
-            pos.y++;
-            /* reset horizontal position upon vertical movement */
-            pos.x = p->pos.x;
-        }
-        else if (pos.y > target.y)
-        {
-            pos.y--;
-            /* reset horizontal position upon vertical movement */
-            pos.x = p->pos.x;
-        }
-    }
-    while (proceed_y);
-
-    if (map_sobject_at(cmap, target) == LS_MIRROR)
-    {
-        /* TODO: this should hit all monsters in the opposite direction as well */
-        log_add_entry(nlarn->log, "The mirror reflects your spell! The %s hits you!",
-                      spell_name(s));
-
+        throw_ray(s, p, last_pos, p->pos, amount);
+        log_add_entry(nlarn->log, "The %s hits you!", spell_name(s));
         player_damage_take(p, damage_new(spell_damage(s), ATT_MAGIC, amount, NULL),
                            PD_SPELL, s->id);
     }
-
-    area_destroy(ray);
 
     return TRUE;
 }
