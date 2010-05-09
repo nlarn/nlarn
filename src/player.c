@@ -706,6 +706,9 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     /* return if the game has not been entirely set up */
     if (nlarn->p == NULL) return TRUE;
 
+    // Initialize attacked marker.
+    p->attacked = FALSE;
+
     /* assemble message and append it to the buffer */
     if (desc != NULL)
     {
@@ -875,9 +878,10 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                         return FALSE;
                     }
                 }
+                // Don't reset if only 1 turn left, so the wait/run checks
+                // can process it correctly.
+                p->attacked = FALSE;
             }
-            /* always reset the flag */
-            p->attacked = FALSE;
         }
 
         /* reduce number of turns */

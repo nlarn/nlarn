@@ -652,10 +652,14 @@ int main(int argc, char *argv[])
 
         gboolean no_move = (moves_count == 0);
 
+        gboolean was_attacked = FALSE;
+
         /* manipulate game time */
         if (moves_count)
         {
             player_make_move(nlarn->p, moves_count, FALSE, NULL);
+            was_attacked = nlarn->p->attacked;
+            nlarn->p->attacked = FALSE;
             moves_count = 0;
         }
 
@@ -668,7 +672,7 @@ int main(int argc, char *argv[])
             // * last action cost no turns (we ran into a wall)
             // * we took damage (trap, poison, or invisible monster)
             // * a monster has moved adjacent to us
-            if (no_move || nlarn->p->attacked
+            if (no_move || was_attacked
                     || adjacent_monster(nlarn->p->pos, run_cmd == '.'))
             {
                 run_cmd = 0;
