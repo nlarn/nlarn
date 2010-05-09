@@ -714,9 +714,9 @@ static int scroll_teleport(player *p, item *scroll)
 
 static int scroll_timewarp(player *p, item *scroll)
 {
-    /* number of mobuls */
-    gint32 mobuls = 0;
-    gint32 turns;
+    gint32 mobuls = 0;  /* number of mobuls */
+    gint32 turns;       /* number of turns */
+    int idx = 0;        /* position inside player's effect list */
 
     assert(p != NULL && scroll != NULL);
 
@@ -745,7 +745,57 @@ static int scroll_timewarp(player *p, item *scroll)
                   abs(mobuls),
                   (abs(mobuls) == 1) ? "" : "s");
 
-    /* FIXME: adjust effects for time warping */
+    /* adjust effects for time warping */
+    while (idx < p->effects->len)
+    {
+        /* loop over all effects which affect the player */
+        effect *e = game_effect_get(nlarn, g_ptr_array_index(p->effects, idx));
+
+        if (e->turns == 0)
+        {
+            /* leave permanent effects alone */
+            idx++;
+            continue;
+        }
+
+        if (turns > 0)
+        {
+            /* gone forward in time */
+            if (e->turns < turns)
+            {
+                /* the effect's remaining turns are smaller
+                   than the number of turns the player moved into the future,
+                   thus the effect is no longer valid. */
+                player_effect_del(p, e);
+            }
+            else
+            {
+                /* reduce the number of remaining turns for this effect */
+                e->turns -= turns;
+
+                /* proceed to next effect */
+                idx++;
+            }
+        }
+        else if (turns < 0)
+        {
+            /* gone backward in time */
+            if (e->start > game_turn(nlarn))
+            {
+                /* the effect started after the new game turn,
+                   thus it is no longer (in fact not yet) valid */
+                player_effect_del(p, e);
+            }
+            else
+            {
+                /* increase the number of remaining turns */
+                e->turns += abs(turns);
+
+                /* proceed to next effect */
+                idx++;
+            }
+        }
+    }
 
     return TRUE;
 }
