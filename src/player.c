@@ -1873,7 +1873,7 @@ void player_level_gain(player *p, int count)
 
     desc_new = player_get_level_desc(p);
 
-    if (strcmp(desc_orig, desc_new) != 0)
+    if (g_strcmp0(desc_orig, desc_new) != 0)
     {
         log_add_entry(nlarn->log, "You gain experience and become %s %s!",
                       a_an(desc_new), desc_new);
