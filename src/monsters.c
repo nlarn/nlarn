@@ -877,6 +877,10 @@ void monster_move(monster *m, struct player *p)
             break;
 
         case MA_ATTACK:
+            /* monster tries a ranged attack */
+            if (monster_player_visible(m) && monster_player_ranged_attack(m, p))
+                return;
+
             m_npos = monster_move_attack(m, p);
             break;
 
@@ -2007,13 +2011,8 @@ static position monster_move_attack(monster *m, struct player *p)
 
     position npos = monster_pos(m);
 
-    /* monster tries a ranged attack */
-    if (monster_player_visible(m) && monster_player_ranged_attack(m, p))
-    {
-        return monster_pos(m);
-    }
     /* monster is standing next to player */
-    else if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
+    if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
     {
         monster_player_attack(m, p);
 
