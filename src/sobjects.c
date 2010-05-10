@@ -826,7 +826,7 @@ int player_throne_pillage(player *p)
         return 0;
     }
 
-    if (chance(25))
+    if (chance(2*player_get_dex(p)))
     {
         for (i = 0; i < rand_1n(4); i++)
         {

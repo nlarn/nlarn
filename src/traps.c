@@ -118,12 +118,31 @@ int player_trap_trigger(player *p, trap_t trap, int force)
     /* additional time of turn, if any */
     int time = 0;
 
+    const int dex = player_get_dex(p);
+
     /* chance to trigger the trap on target tile */
     int possibility = trap_chance(trap);
 
-    if (player_memory_of(p, p->pos).trap == trap)
-        /* if player knows the trap a 5% chance remains */
-        possibility = 5;
+    gboolean known = (player_memory_of(p, p->pos).trap == trap);
+
+    // There's a Dex dependant chance of detecting an unknown trap
+    // before stepping on it.
+    if (!known && dex > 12 && chance((dex-12)/2))
+    {
+        log_add_entry(nlarn->log, "Hey, there's a %s there!",
+                      trap_description(trap));
+        player_memory_of(p, p->pos).trap = trap;
+        known = TRUE;
+    }
+
+    if (known)
+    {
+        // Dex decreases the chance of triggering a known trap.
+        if (dex >= 22)
+            possibility = 0;
+        else
+            possibility = (22-dex)/2;
+    }
 
     if (force || chance(possibility))
     {

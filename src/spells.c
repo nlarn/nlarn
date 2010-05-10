@@ -912,9 +912,11 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                                 evasion = 0;
                             else
                             {
+                                if (player_effect(p, ET_BLINDNESS))
+                                    evasion /= 4;
                                 if (player_effect(p, ET_CONFUSION))
                                     evasion /= 2;
-                                if (player_effect(p, ET_BLINDNESS))
+                                if (player_effect(p, ET_OVERSTRAINED))
                                     evasion /= 2;
                             }
 
