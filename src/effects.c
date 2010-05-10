@@ -314,9 +314,10 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_LIFE_PROTECTION, 0, TRUE, "life protection",
-        "You never felt so safe.",
-        NULL, NULL, NULL,
+        ET_LIFE_PROTECTION, 2500, TRUE, "life protection",
+        "You've never felt so safe.",
+        "You feel less safe than before.",
+        NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
 
