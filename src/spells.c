@@ -828,7 +828,7 @@ static int get_spell_color(spell *sp, gboolean did_hit)
 
 // #define DEBUG_BEAMS
 position throw_ray(spell *sp, struct player *p, position start, position target,
-                   int damage)
+                   int damage, gboolean player_cast)
 {
 #ifdef DEBUG_BEAMS
     log_add_entry(nlarn->log, "Beam from (%d, %d) -> (%d, %d)",
@@ -875,7 +875,9 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                     mvaddch(pos.y, pos.x, (mis ? monster_glyph(monster) : '*'));
 
                     log_add_entry(nlarn->log, spell_msg_succ(sp), monster_get_name(monster));
-                    monster_damage_take(monster, damage_new(spell_damage(sp), ATT_MAGIC, damage, p));
+                    monster_damage_take(monster, damage_new(spell_damage(sp),
+                                                            ATT_MAGIC, damage,
+                                                            player_cast ? p : NULL));
                 }
                 else
                 {
@@ -913,7 +915,8 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                             log_add_entry(nlarn->log, "The %s hits you!",
                                           spell_name(sp));
                             player_damage_take(p, damage_new(spell_damage(sp),
-                                                             ATT_MAGIC, damage, NULL),
+                                                             ATT_MAGIC, damage,
+                                                             player_cast ? p : NULL),
                                                PD_SPELL, sp->id);
                         }
                     }
@@ -1031,13 +1034,13 @@ int spell_type_ray(spell *s, struct player *p)
        anything in the way that gets hit by the ray as well */
     pos = p->pos;
 
-    position last_pos = throw_ray(s, p, pos, target, amount);
+    position last_pos = throw_ray(s, p, pos, target, amount, TRUE);
 
     if (map_sobject_at(cmap, last_pos) == LS_MIRROR)
     {
         log_add_entry(nlarn->log, "The mirror reflects your spell!");
 
-        throw_ray(s, p, last_pos, p->pos, amount);
+        throw_ray(s, p, last_pos, p->pos, amount, TRUE);
     }
 
     return TRUE;

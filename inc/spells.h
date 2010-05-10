@@ -154,7 +154,7 @@ int spell_forget(struct player *p, guint spell_type);
 int spell_known(struct player *p, guint spell_type);
 
 position throw_ray(spell *sp, struct player *p, position start, position target,
-                   int damage);
+                   int damage, gboolean player_cast);
 
 int spell_type_player(spell *s, struct player *p);
 int spell_type_point(spell *s, struct player *p);

@@ -1683,7 +1683,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     /* remove monster that might be at player's positon */
     if ((m = map_get_monster_at(l, p->pos)))
     {
-        position mnpos =  map_find_space(l, LE_MONSTER, FALSE);
+        position mnpos = map_find_space(l, LE_MONSTER, FALSE);
         monster_pos_set(m, game_map(nlarn, p->pos.z), mnpos);
     }
 

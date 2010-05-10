@@ -1332,14 +1332,15 @@ int monster_player_ranged_attack(monster *m, player *p)
     /* generate damage */
     dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn), m);
 
-    position last_pos = throw_ray(sp, p, m->pos, m->player_pos, dam->amount);
+    position last_pos = throw_ray(sp, p, m->pos, m->player_pos, dam->amount,
+                                  FALSE);
 
     if (map_sobject_at(game_map(nlarn, last_pos.z), last_pos) == LS_MIRROR)
     {
         log_add_entry(nlarn->log, "The mirror reflects the %s!",
                       spell_name(sp));
 
-        throw_ray(sp, p, last_pos, m->pos, dam->amount);
+        throw_ray(sp, p, last_pos, m->pos, dam->amount, FALSE);
     }
     return TRUE;
 }
