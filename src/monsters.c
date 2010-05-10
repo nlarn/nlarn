@@ -1147,6 +1147,69 @@ attack monster_attack(monster *m, int num)
     return att;
 }
 
+static int handle_breath_attack(monster *m, player *p, attack att)
+{
+    assert(att.type == ATT_BREATH);
+
+    damage *dam;
+    spell *sp = NULL;
+    switch (att.damage)
+    {
+    case DAM_FIRE:
+        sp = spell_new(SP_MON_FIRE);
+        break;
+    default:
+        break;
+    }
+
+    if (sp == NULL)
+        return FALSE;
+
+    if (monster_effect(m, ET_CHARM_MONSTER)
+            && (rand_m_n(5, 30) * monster_level(m) - player_get_wis(p) < 30))
+    {
+        if (monster_in_sight(m))
+        {
+            log_add_entry(nlarn->log, "The %s is awestruck at your magnificence!",
+                          monster_get_name(m));
+        }
+        return TRUE;
+    }
+
+    if (monster_in_sight(m))
+    {
+        log_add_entry(nlarn->log, "The %s breathes a %s!",
+                      monster_get_name(m), spell_name(sp));
+    }
+    else
+    {
+        log_add_entry(nlarn->log, "A %s spews forth from nowhere!",
+                      spell_name(sp));
+    }
+
+    /* generate damage */
+    dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn), m);
+
+    // store monster position in case the monster dies.
+    position source   = m->pos;
+    position last_pos = throw_ray(sp, p, m->pos, m->player_pos, dam->amount,
+                                  FALSE);
+
+    if (map_sobject_at(game_map(nlarn, last_pos.z), last_pos) == LS_MIRROR)
+    {
+        log_add_entry(nlarn->log, "The mirror reflects the %s!",
+                      spell_name(sp));
+
+        throw_ray(sp, p, last_pos, source, dam->amount, FALSE);
+    }
+    /* attack reflected by player */
+    else if (pos_identical(p->pos, last_pos) && player_effect(p, ET_REFLECTION))
+    {
+        throw_ray(sp, p, last_pos, source, dam->amount, TRUE);
+    }
+    return TRUE;
+}
+
 void monster_player_attack(monster *m, player *p)
 {
     damage *dam;
@@ -1202,6 +1265,12 @@ void monster_player_attack(monster *m, player *p)
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM) dam->type = rand_1n(DAM_MAX);
+
+    if (att.type == ATT_BREATH)
+    {
+        handle_breath_attack(m, p, att);
+        return;
+    }
 
     /* half damage if player is protected against spirits */
     if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_flags(m, MF_SPIRIT))
@@ -1266,7 +1335,13 @@ void monster_player_attack(monster *m, player *p)
             log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
                           monster_attack_verb[att.type]);
         }
-        player_damage_take(p, dam, PD_MONSTER, m->type);
+        if (att.type == ATT_GAZE && player_effect(p, ET_REFLECTION))
+        {
+            if (!player_effect(p, ET_BLINDNESS))
+                log_add_entry(nlarn->log, "The gaze is reflected harmlessly.");
+        }
+        else
+            player_damage_take(p, dam, PD_MONSTER, m->type);
         break;
     }
 }
@@ -1287,62 +1362,23 @@ int monster_player_ranged_attack(monster *m, player *p)
             log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
                           monster_attack_verb[att.type]);
         }
-        dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn), m);
-        player_damage_take(p, dam, PD_MONSTER, m->type);
+        if (player_effect(p, ET_REFLECTION))
+        {
+            if (!player_effect(p, ET_BLINDNESS))
+                log_add_entry(nlarn->log, "The gaze is reflected harmlessly.");
+        }
+        else
+        {
+            dam = damage_new(att.damage, att.type,
+                             att.base + game_difficulty(nlarn), m);
+            player_damage_take(p, dam, PD_MONSTER, m->type);
+        }
         return TRUE;
     }
     if (att.type != ATT_BREATH)
         return FALSE;
 
-    spell *sp = NULL;
-    switch (att.damage)
-    {
-    case DAM_FIRE:
-        sp = spell_new(SP_MON_FIRE);
-        break;
-    default:
-        break;
-    }
-
-    if (sp == NULL)
-        return FALSE;
-
-    if (monster_effect(m, ET_CHARM_MONSTER)
-            && (rand_m_n(5, 30) * monster_level(m) - player_get_wis(p) < 30))
-    {
-        if (monster_in_sight(m))
-        {
-            log_add_entry(nlarn->log, "The %s is awestruck at your magnificence!",
-                          monster_get_name(m));
-        }
-        return TRUE;
-    }
-
-    if (monster_in_sight(m))
-    {
-        log_add_entry(nlarn->log, "The %s breathes a %s!",
-                      monster_get_name(m), spell_name(sp));
-    }
-    else
-    {
-        log_add_entry(nlarn->log, "A %s spews forth from nowhere!",
-                      spell_name(sp));
-    }
-
-    /* generate damage */
-    dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn), m);
-
-    position last_pos = throw_ray(sp, p, m->pos, m->player_pos, dam->amount,
-                                  FALSE);
-
-    if (map_sobject_at(game_map(nlarn, last_pos.z), last_pos) == LS_MIRROR)
-    {
-        log_add_entry(nlarn->log, "The mirror reflects the %s!",
-                      spell_name(sp));
-
-        throw_ray(sp, p, last_pos, m->pos, dam->amount, FALSE);
-    }
-    return TRUE;
+    return handle_breath_attack(m, p, att);
 }
 
 monster *monster_damage_take(monster *m, damage *dam)

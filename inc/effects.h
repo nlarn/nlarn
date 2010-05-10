@@ -109,6 +109,7 @@ typedef enum _effect_type
     ET_SLOWNESS,                /* reduced speed */
     ET_BURDENED,                /* overloaded */
     ET_OVERSTRAINED,            /* extremely overloaded */
+    ET_REFLECTION,              /* reflection */
 
     ET_MAX                      /* last effect known */
 } effect_type;

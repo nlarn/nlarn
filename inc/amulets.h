@@ -31,6 +31,7 @@ enum amulet_types
     AM_NOTHEFT,
     AM_DRAGON_SLAYING,
     AM_POWER,
+    AM_REFLECTION,
     AM_LARN,
     AM_MAX
 };

@@ -527,6 +527,13 @@ static const effect_data effects[ET_MAX] =
         NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
+
+    {
+        ET_REFLECTION, 400, TRUE, "reflection",
+        NULL, NULL, NULL, NULL,
+        TRUE, FALSE, TRUE, FALSE
+    },
+
 };
 
 effect *effect_new(effect_type type)

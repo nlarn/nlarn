@@ -884,40 +884,59 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                     // Shooting at the player.
                     if (pos_identical(p->pos, pos))
                     {
-                        int evasion = p->level/(2+game_difficulty(nlarn)/2)
-                                      + player_get_dex(p)
-                                      - 10
-                                      - game_difficulty(nlarn);
-
-                        // Automatic hit if paralysed.
-                        if (player_effect(p, ET_PARALYSIS))
-                            evasion = 0;
-                        else
+                        if (player_effect(p, ET_REFLECTION))
                         {
-                            if (player_effect(p, ET_CONFUSION))
-                                evasion /= 2;
-                            if (player_effect(p, ET_BLINDNESS))
-                                evasion /= 2;
-                        }
-
-                        if (evasion >= rand_1n(21))
-                        {
-                            attron((attrs = spell_color));
-                            if (!player_effect(p, ET_BLINDNESS))
+                            if (!pos_identical(pos, start))
                             {
-                                log_add_entry(nlarn->log, "The %s whizzes by you!",
+#ifdef DEBUG_BEAMS
+                                log_add_entry(nlarn->log,
+                                              "Reflecting from amulet.");
+#endif
+                                attron((attrs = spell_color));
+                                log_add_entry(nlarn->log, "You reflect the %s!",
                                               spell_name(sp));
+                                proceed_x = FALSE;
+                                proceed_y = FALSE;
                             }
+                            // else silently ignore player
                         }
                         else
                         {
-                            attron((attrs = spell_hit_color));
-                            log_add_entry(nlarn->log, "The %s hits you!",
-                                          spell_name(sp));
-                            player_damage_take(p, damage_new(spell_damage(sp),
-                                                             ATT_MAGIC, damage,
-                                                             player_cast ? p : NULL),
-                                               PD_SPELL, sp->id);
+                            int evasion = p->level/(2+game_difficulty(nlarn)/2)
+                                          + player_get_dex(p)
+                                          - 10
+                                          - game_difficulty(nlarn);
+
+                            // Automatic hit if paralysed.
+                            if (player_effect(p, ET_PARALYSIS))
+                                evasion = 0;
+                            else
+                            {
+                                if (player_effect(p, ET_CONFUSION))
+                                    evasion /= 2;
+                                if (player_effect(p, ET_BLINDNESS))
+                                    evasion /= 2;
+                            }
+
+                            if (evasion >= rand_1n(21))
+                            {
+                                attron((attrs = spell_color));
+                                if (!player_effect(p, ET_BLINDNESS))
+                                {
+                                    log_add_entry(nlarn->log, "The %s whizzes by you!",
+                                                  spell_name(sp));
+                                }
+                            }
+                            else
+                            {
+                                attron((attrs = spell_hit_color));
+                                log_add_entry(nlarn->log, "The %s hits you!",
+                                              spell_name(sp));
+                                player_damage_take(p, damage_new(spell_damage(sp),
+                                                                 ATT_MAGIC, damage,
+                                                                 player_cast ? p : NULL),
+                                                   PD_SPELL, sp->id);
+                            }
                         }
                     }
                     else
@@ -942,8 +961,10 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
 #endif
                 proceed_x = FALSE;
                 proceed_y = FALSE;
-                break;
             }
+
+            if (!proceed_x)
+                break;
 
             /* modify horizontal position if needed;
                exit the loop when the destination has been reached */
@@ -1042,6 +1063,12 @@ int spell_type_ray(spell *s, struct player *p)
 
         throw_ray(s, p, last_pos, p->pos, amount, TRUE);
     }
+    /* spell bounced back to the player -> avoid infinite loops */
+    else if (pos_identical(p->pos, last_pos) && player_effect(p, ET_REFLECTION))
+    {
+        log_add_entry(nlarn->log, "Your amulet absorbs the reflected spell!");
+    }
+
 
     return TRUE;
 }

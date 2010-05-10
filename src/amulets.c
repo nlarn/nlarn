@@ -25,13 +25,14 @@
 const amulet_data amulets[AM_MAX] =
 {
     { AM_NONE,                NULL,               ET_NONE,              0,    },
-    { AM_AWARENESS,           "awareness",        ET_AWARENESS,         360,  },
+    { AM_AWARENESS,           "awareness",        ET_AWARENESS,         400,  },
     { AM_INVISIBILITY,        "invisibility",     ET_INVISIBILITY,      400,  },
     { AM_UNDEAD_CONTROL,      "undead control",   ET_UNDEAD_PROTECTION, 5000, },
-    { AM_NEGATE_SPIRIT,       "negate spirit",    ET_SPIRIT_PROTECTION, 5500, },
+    { AM_NEGATE_SPIRIT,       "negate spirit",    ET_SPIRIT_PROTECTION, 5000, },
     { AM_NOTHEFT,             "theft prevention", ET_NOTHEFT,           6000, },
-    { AM_DRAGON_SLAYING,      "dragon slaying",   ET_NONE,              6500, },
+    { AM_DRAGON_SLAYING,      "dragon slaying",   ET_NONE,              6000, },
     { AM_POWER,               "power",            ET_NONE,              8000, },
+    { AM_REFLECTION,          "reflection",       ET_REFLECTION,        8000, },
     { AM_LARN,                "larn",             ET_INFRAVISION,       9000, },
 };
 
