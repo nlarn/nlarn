@@ -168,10 +168,11 @@ int player_assign_bonus_stats(player *p)
 {
     GString *text;
     text = g_string_new("  a) Strong character\n"
-                        "  b) Tough character\n"
-                        "  c) Smart character\n"
-                        "  d) Randomly strong, tough, or smart\n"
-                        "  e) Stats assigned randomly\n");
+                        "  b) Agile character\n"
+                        "  c) Tough character\n"
+                        "  d) Smart character\n"
+                        "  e) Randomly strong, tough, or smart\n"
+                        "  f) Stats assigned randomly\n");
 
     int selection;
     do
@@ -182,15 +183,16 @@ int player_assign_bonus_stats(player *p)
             return FALSE;
         display_paint_screen(nlarn->p);
     }
-    while (selection < 'a' || selection > 'e');
+    while (selection < 'a' || selection > 'f');
 
     g_string_free(text, TRUE);
 
-    if (selection == 'd')
-        selection = 'a' + rand_0n(3);
+    if (selection == 'e')
+        selection = 'a' + rand_0n(4);
 
     // Allow choice between:
     // * strong Fighter (Str 20  Dex 15  Con 16  Int 12  Wis 12)
+    // * agile Rogue    (Str 15  Dex 20  Con 14  Int 12  Wis 14)
     // * hardy Fighter  (Str 16  Dex 12  Con 20  Int 12  Wis 15)
     // * arcane scholar (Str 12  Dex 14  Con 12  Int 20  Wis 17)
     switch (selection)
@@ -202,21 +204,28 @@ int player_assign_bonus_stats(player *p)
         p->intelligence += 0;
         p->wisdom       += 0;
         break;
-    case 'b': // hardy Fighter
+    case 'b': // Rogue-style character
+        p->strength     += 3;
+        p->dexterity    += 8;
+        p->constitution += 2;
+        p->intelligence += 0;
+        p->wisdom       += 2;
+        break;
+    case 'c': // hardy Fighter
         p->strength     += 4;
         p->dexterity    += 0;
         p->constitution += 8;
         p->intelligence += 0;
         p->wisdom       += 3;
         break;
-    case 'c': // arcane scholar
+    case 'd': // arcane scholar
         p->strength     += 0;
         p->dexterity    += 2;
         p->constitution += 0;
         p->intelligence += 8;
         p->wisdom       += 5;
         break;
-    case 'e': // random character
+    case 'f': // random character
     {
         int bonus = 15;
         while (bonus-- > 0)
