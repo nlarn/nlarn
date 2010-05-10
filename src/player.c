@@ -1535,7 +1535,7 @@ int player_attack(player *p, monster *m)
         log_add_entry(nlarn->log, "You hit the %s.", monster_get_name(m));
 
         amount = player_get_str(p)
-                 + player_get_wc(p)
+                 + player_get_wc(p, m)
                  - 12
                  - game_difficulty(nlarn);
 
@@ -3871,13 +3871,22 @@ int player_get_ac(player *p)
     return ac;
 }
 
-int player_get_wc(player *p)
+int player_get_wc(player *p, monster *m)
 {
     int wc = 0;
     assert(p != NULL);
 
     if (p->eq_weapon != NULL)
+    {
         wc += weapon_wc(p->eq_weapon);
+        // Blessed weapons do 50% bonus damage against demons and undead.
+        if (p->eq_weapon->blessed
+                && (monster_flags(m, MF_DEMON) || monster_flags(m, MF_UNDEAD)))
+        {
+            wc *= 3;
+            wc /= 2;
+        }
+    }
 
     wc += player_effect(p, ET_INC_DAMAGE);
     wc -= player_effect(p, ET_SICKNESS);
