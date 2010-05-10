@@ -1561,6 +1561,9 @@ item_usage_result book_read(struct player *p, item *book)
         {
         case 0:
             log_add_entry(nlarn->log, "You cannot understand the content of this book.");
+            // Bad pun.
+            if (strcmp(book_desc(book->id), "dull") == 0)
+                log_add_entry(nlarn->log, "It seems really boring, though.");
             break;
 
         case 1:
