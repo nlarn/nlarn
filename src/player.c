@@ -171,7 +171,7 @@ int player_assign_bonus_stats(player *p)
                         "  b) Agile character\n"
                         "  c) Tough character\n"
                         "  d) Smart character\n"
-                        "  e) Randomly strong, tough, or smart\n"
+                        "  e) Randomly pick one of the above\n"
                         "  f) Stats assigned randomly\n");
 
     int selection;
