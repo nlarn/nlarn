@@ -1565,6 +1565,7 @@ item_usage_result book_read(struct player *p, item *book)
                       "It crumbles to dust.");
 
         player_mp_lose(p, rand_0n(p->mp));
+        result.used_up = TRUE;
     }
     else
     {
