@@ -1336,7 +1336,9 @@ void monster_player_attack(monster *m, player *p)
             log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
                           monster_attack_verb[att.type]);
         }
-        if (att.type == ATT_GAZE && player_effect(p, ET_REFLECTION))
+        /* 50% chance of reflecting adjacent gazes */
+        if (att.type == ATT_GAZE && player_effect(p, ET_REFLECTION)
+            && chance(50))
         {
             if (!player_effect(p, ET_BLINDNESS))
                 log_add_entry(nlarn->log, "The gaze is reflected harmlessly.");

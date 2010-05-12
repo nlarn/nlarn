@@ -771,7 +771,7 @@ int spell_type_point(spell *s, struct player *p)
             log_add_entry(nlarn->log, "It didn't work.");
         }
         break; /* SP_FGR */
-
+    }
         /* polymorph */
     case SP_PLY:
         monster_polymorph(monster);
@@ -884,24 +884,13 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                     // Shooting at the player.
                     if (pos_identical(p->pos, pos))
                     {
-                        if (player_effect(p, ET_REFLECTION))
+
+                        if (!player_effect(p, ET_REFLECTION)
+                            || !pos_identical(pos, start))
                         {
-                            if (!pos_identical(pos, start))
-                            {
-#ifdef DEBUG_BEAMS
-                                log_add_entry(nlarn->log,
-                                              "Reflecting from amulet.");
-#endif
-                                attron((attrs = spell_color));
-                                log_add_entry(nlarn->log, "You reflect the %s!",
-                                              spell_name(sp));
-                                proceed_x = FALSE;
-                                proceed_y = FALSE;
-                            }
-                            // else silently ignore player
-                        }
-                        else
-                        {
+                            const int reflected
+                                = player_effect(p, ET_REFLECTION);
+
                             int evasion = p->level/(2+game_difficulty(nlarn)/2)
                                           + player_get_dex(p)
                                           - 10
@@ -923,13 +912,14 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                             if (evasion >= rand_1n(21))
                             {
                                 attron((attrs = spell_color));
-                                if (!player_effect(p, ET_BLINDNESS))
+                                if (!reflected && !player_effect(p, ET_BLINDNESS))
                                 {
                                     log_add_entry(nlarn->log, "The %s whizzes by you!",
                                                   spell_name(sp));
                                 }
                             }
-                            else
+                            /* from close by you get hit even if the beam reflects */
+                            else if (!reflected || pos_adjacent(start, p->pos))
                             {
                                 attron((attrs = spell_hit_color));
                                 log_add_entry(nlarn->log, "The %s hits you!",
@@ -938,6 +928,22 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                                                                  ATT_MAGIC, damage,
                                                                  player_cast ? p : NULL),
                                                    PD_SPELL, sp->id);
+                            }
+
+                            if (reflected)
+                            {
+#ifdef DEBUG_BEAMS
+                                log_add_entry(nlarn->log,
+                                              "Reflecting from amulet.");
+#endif
+                                attron((attrs = spell_color));
+                                if (!player_effect(p, ET_BLINDNESS))
+                                {
+                                    log_add_entry(nlarn->log, "You reflect the %s!",
+                                                  spell_name(sp));
+                                }
+                                proceed_x = FALSE;
+                                proceed_y = FALSE;
                             }
                         }
                     }
