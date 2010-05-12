@@ -762,7 +762,12 @@ int spell_type_point(spell *s, struct player *p)
 
         /* finger of death */
     case SP_FGR:
-        if ((player_get_wis(p) + s->knowledge) > rand_m_n(10,20))
+    {
+        // Lower chances of working against undead and demons.
+        const int roll = (monster_flags(monster, MF_UNDEAD) ? 40 :
+                          monster_flags(monster, MF_DEMON)  ? 30 : 20);
+
+        if ((player_get_wis(p) + s->knowledge) > rand_m_n(10, roll))
         {
             monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, p));
         }
