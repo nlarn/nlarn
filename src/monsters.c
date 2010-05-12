@@ -366,6 +366,7 @@ void monsters_wrap(lua_State *L)
         { "DEMON",       MF_DEMON },
         { "DRAGON",      MF_DRAGON },
         { "MIMIC",       MF_MIMIC },
+        { "RES_FIRE",    MF_RES_FIRE },
 
         /* monster types */
         { "MT_GIANT_BAT",       MT_GIANT_BAT },
@@ -1397,6 +1398,19 @@ monster *monster_damage_take(monster *m, damage *dam)
     case DAM_PHYSICAL:
         /* FIXME: the following does currently not work as the combat system sucks */
         /* dam->amount -= monster_ac(m); */
+        break;
+
+    case DAM_FIRE:
+        if (monster_flags(m, MF_RES_FIRE))
+        {
+            dam->amount /= 2;
+            if (monster_in_sight(m))
+            {
+                log_add_entry(nlarn->log, "The %s %sresists the flames.",
+                              monster_name(m),
+                              dam->amount > 0 ? "partly " : "");
+            }
+        }
         break;
 
     default:

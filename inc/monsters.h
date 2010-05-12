@@ -138,6 +138,7 @@ typedef enum monster_flags
     MF_DEMON        = 1 << 10,  /* is a demon */
     MF_DRAGON       = 1 << 11,  /* is a dragon */
     MF_MIMIC        = 1 << 12,  /* is a mimic */
+    MF_RES_FIRE     = 1 << 13,  /* resistant to fire */
 } monster_flag;
 
 /* function definitions */
