@@ -798,12 +798,6 @@ int spell_type_point(spell *s, struct player *p)
         /* spell has an effect, add that to the monster */
         assert(spell_effect(s) != ET_NONE);
 
-        if (spell_msg_succ(s))
-        {
-            log_add_entry(nlarn->log, spell_msg_succ(s),
-                          monster_get_name(monster));
-        }
-
         e = effect_new(spell_effect(s));
 
         if (!e->amount)
@@ -813,6 +807,20 @@ int spell_type_point(spell *s, struct player *p)
 
         e->amount *= s->knowledge;
         e = monster_effect_add(monster, e);
+
+        if (e)
+        {
+            if (spell_msg_succ(s))
+            {
+                log_add_entry(nlarn->log, spell_msg_succ(s),
+                              monster_get_name(monster));
+            }
+        }
+        else if (spell_msg_fail(s))
+        {
+            log_add_entry(nlarn->log, spell_msg_fail(s),
+                          monster_get_name(monster));
+        }
 
         break;
     }

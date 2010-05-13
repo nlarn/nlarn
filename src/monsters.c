@@ -267,7 +267,7 @@ monster *monster_new_by_level(position pos)
                                   MT_BRONZE_DRAGON,    // D10: 50
                                   MT_PLATINUM_DRAGON,  // V1:  53
                                   MT_GREEN_URCHIN,     // V2:  56
-                                  MT_MAX - 1           // V3
+                                  MT_DEMON_PRINCE      // V3
                                 };
     int monster_id = MT_NONE;
     int monster_id_min;
@@ -367,6 +367,7 @@ void monsters_wrap(lua_State *L)
         { "DRAGON",      MF_DRAGON },
         { "MIMIC",       MF_MIMIC },
         { "RES_FIRE",    MF_RES_FIRE },
+        { "RES_SLEEP",   MF_RES_SLEEP },
 
         /* monster types */
         { "MT_GIANT_BAT",       MT_GIANT_BAT },
@@ -1003,7 +1004,7 @@ monster *monster_trap_trigger(monster *m)
     {
         log_add_entry(nlarn->log, trap_m_message(trap), monster_name(m));
 
-        /* set player's knowlege of trap */
+        /* set player's knowledge of trap */
         player_memory_of(nlarn->p, opos).trap = trap;
     }
 
@@ -1615,7 +1616,7 @@ char *monster_desc(monster *m)
                            injury, monster_name(m),
                            monster_ai_desc[m->action]);
 
-    /* add effect desctiption */
+    /* add effect description */
     if (m->effects->len > 0)
     {
         char **desc_list = strv_new();
@@ -1708,6 +1709,9 @@ int monster_is_genocided(int monster_id)
 effect *monster_effect_add(monster *m, effect *e)
 {
     assert(m != NULL && e != NULL);
+
+    if (e->type == ET_SLEEP && monster_flags(m, MF_RES_SLEEP))
+        return NULL;
 
     e = effect_add(m->effects, e);
 
