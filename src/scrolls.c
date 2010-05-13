@@ -329,7 +329,58 @@ static int scroll_create_artefact(player *p, item *scroll)
 
     assert(p != NULL && scroll != NULL);
 
-    it = item_new_by_level(rand_1n(IT_MAX), p->pos.z);
+    const int magic_item_type[] = { IT_AMULET, IT_BOOK, IT_POTION, IT_SCROLL };
+    const int type = magic_item_type[rand_0n(4)];
+
+    int level = p->pos.z;
+    if (scroll->blessed)
+    {
+        if (type == IT_AMULET)
+            level = max(10, p->pos.z);
+        else
+            level = rand_m_n(p->pos.z, MAP_MAX);
+    }
+
+    it = item_new_by_level(type, level);
+
+    it->cursed = FALSE;
+    if (it->bonus < 0)
+        it->bonus = 0;
+
+    // Blessed scrolls tend to hand out better items.
+    if (scroll->blessed)
+    {
+        // Rings get some kind of bonus.
+        if (it->bonus < 1 && item_is_optimizable(it->type))
+            it->bonus = rand_1n(3);
+
+        it->burnt    = 0;
+        it->corroded = 0;
+        it->rusty    = 0;
+
+        if (it->type == IT_POTION || it->type == IT_SCROLL)
+        {
+            // The low-price, unobtainable items are more likely to be bad.
+            while (item_base_price(it) < 200
+                        && !item_obtainable(it->type, it->id))
+            {
+                it->id = rand_1n(item_max_id(it->type));
+            }
+            // holy water should always be blessed
+            if (it->type == IT_POTION && it->id == PO_WATER && !it->blessed)
+                it->blessed = TRUE;
+        }
+        else if (it->type == IT_BOOK)
+        {
+            // Roll again for an unknown, reasonably high-level book.
+            while ((spell_known(p, it->id) && chance(80))
+                    || (it->id < (item_max_id(IT_BOOK) * level) / (MAP_MAX - 1)
+                            && chance(50)))
+            {
+                it->id = rand_1n(item_max_id(it->type));
+            }
+        }
+    }
     inv_add(map_ilist_at(game_map(nlarn, p->pos.z), p->pos), it);
 
     item_describe(it, player_item_known(p, it), (it->count == 1),

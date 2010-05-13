@@ -159,6 +159,7 @@ int item_compare(item *a, item *b);
 int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id);
 char *item_describe(item *it, int known, int singular, int definite, char *str, int str_len);
 item_material_t item_material(item *it);
+guint item_base_price(item *it);
 guint item_price(item *it);
 
 /**

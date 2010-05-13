@@ -824,11 +824,11 @@ item_material_t item_material(item *it)
     return material;
 }
 
-guint item_price(item *it)
+guint item_base_price(item *it)
 {
-    guint price;
-
     assert (it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    guint price;
 
     switch (it->type)
     {
@@ -879,6 +879,15 @@ guint item_price(item *it)
     default:
         price = 0;
     }
+
+    return price;
+}
+
+guint item_price(item *it)
+{
+    assert (it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    guint price = item_base_price(it);
 
     /* modify base prices by item's attributes */
 
