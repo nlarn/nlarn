@@ -869,10 +869,13 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
             {
                 /* repaint the screen and do a little pause when the action
                    continues, for longer episodes a shorter time. */
-                display_paint_screen(p);
-                usleep((turns > 10) ? 100 : 50000);
+                if (!interruptible || p->attacked)
+                {
+                    display_paint_screen(p);
+                    usleep((turns > 10) ? 100 : 50000);
+                }
 
-                /* offer to abort the action if the player is unter attack */
+                /* offer to abort the action if the player is under attack */
                 if (p->attacked && interruptible)
                 {
                     if(!display_get_yesno(question, FALSE, FALSE))
