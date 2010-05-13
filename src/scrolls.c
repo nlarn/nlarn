@@ -777,6 +777,13 @@ static int scroll_timewarp(player *p, item *scroll)
 
     turns = (rand_1n(1000) - 850);
 
+    // For blessed scrolls, use the minimum turn count of three tries.
+    if (scroll->blessed)
+    {
+        turns = min(turns, (rand_1n(1000) - 850));
+        turns = min(turns, (rand_1n(1000) - 850));
+    }
+
     if (turns == 0)
         turns = 1;
 
