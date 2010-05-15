@@ -28,7 +28,7 @@
 static const effect_data effects[ET_MAX] =
 {
     /*
-        type duration amount
+        type duration amount desc
         msg_start
         msg_stop
         msg_start_monster

@@ -31,7 +31,7 @@ const magic_scroll_data scrolls[ST_MAX] =
     { ST_ENCH_ARMOUR,       "enchant armour",     ET_NONE,               100,  TRUE },
     { ST_ENCH_WEAPON,       "enchant weapon",     ET_NONE,               100,  TRUE },
     { ST_ENLIGHTENMENT,     "enlightenment",      ET_ENLIGHTENMENT,      800,  TRUE },
-    { ST_BLANK,             "blank paper",        ET_NONE,                10, FALSE },
+    { ST_BLANK,             "blank paper",        ET_NONE,               100, FALSE },
     { ST_CREATE_MONSTER,    "create monster",     ET_NONE,               100, FALSE },
     { ST_CREATE_ARTIFACT,   "create artifact",    ET_NONE,               400, FALSE },
     { ST_AGGRAVATE_MONSTER, "aggravate monsters", ET_AGGRAVATE_MONSTER,  100, FALSE },

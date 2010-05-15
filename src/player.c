@@ -156,9 +156,8 @@ player *player_new()
     /* potion of cure dianthroritis is always known */
     p->identified_potions[PO_CURE_DIANTHR] = TRUE;
 
-    // as are water and blank scrolls
+    // as is holy water
     p->identified_potions[PO_WATER] = TRUE;
-    p->identified_scrolls[ST_BLANK] = TRUE;
 
     return p;
 }
