@@ -743,6 +743,10 @@ static gboolean adjacent_monster(position p, gboolean ignore_eye)
             if (m == NULL)
                 continue;
 
+            // Ignore the town inhabitants.
+            if (monster_type(m) == MT_TOWN_PERSON)
+                continue;
+
             if (ignore_eye && monster_type(m) == MT_FLOATING_EYE)
                 continue;
 

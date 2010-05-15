@@ -1026,5 +1026,19 @@ monsters = {
       name = "zombie",
       size = MEDIUM,
       speed = VSLOW,
+    },
+    [MT_TOWN_PERSON] = {
+      ac = 10,
+      attacks = { { type = SLAM, base = 0, damage = PHYSICAL } },
+      color = BROWN,
+      exp = 0,
+      flags = HEAD + HANDS,
+      hp_max = 10,
+      glyph = "@",
+      intelligence = 10,
+      level = 1,
+      name = "human",
+      size = MEDIUM,
+      speed = NORMAL,
     }
 }

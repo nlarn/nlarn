@@ -20,6 +20,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "display.h"
 #include "game.h"
@@ -143,6 +144,11 @@ monster *monster_new(monster_t type, position pos)
         while (it == IT_CONTAINER);
 
         inv_add(&nmonster->inventory, item_new_random(it));
+        break;
+
+    case MT_TOWN_PERSON:
+        // initialize name counter
+        nmonster->colour = rand_1n(40);
         break;
 
     default:
@@ -434,6 +440,7 @@ void monsters_wrap(lua_State *L)
         { "MT_DEMONLORD_VI",    MT_DEMONLORD_VI },
         { "MT_DEMONLORD_VII",   MT_DEMONLORD_VII },
         { "MT_DEMON_PRINCE",    MT_DEMON_PRINCE },
+        { "MT_TOWN_PERSON",     MT_TOWN_PERSON },
 
         { NULL, 0 },
     };
@@ -660,12 +667,35 @@ gboolean monster_in_sight(monster *m)
     return player_pos_visible(nlarn->p, m->pos);
 }
 
+static const char *get_town_person_name(int value)
+{
+    // various jobs
+    const char *npc_desc[] = { "peasant woman", "old man", "old woman",
+                               "little boy", "young girl", "fisherman",
+                               "midwife", "errand boy", "bar maid",
+                               "stable-lad", "innkeeper", "woodcutter",
+                               "carpenter", "clerk", "barber",
+                               "teacher", "town guard", "postman",
+                               "cobbler", "baker", "merchant",
+                               "clergyman", "student", "blacksmith",
+                               "nurse", "seamstress", "cartwright",
+                               "student", "sales clerk", "miller"
+                               };
+    if (value >= 30)
+        return "peasant";
+
+    return npc_desc[value];
+}
+
 // Takes into account visibility.
 // For the real name, use monster_name() directly.
 const char *monster_get_name(monster *m)
 {
     if (!game_wizardmode(nlarn) && !monster_in_sight(m))
         return ("unseen monster");
+
+    if (monster_type(m) == MT_TOWN_PERSON)
+        return get_town_person_name(m->colour);
 
     return (monster_name(m));
 }
@@ -1024,7 +1054,7 @@ void monster_polymorph(monster *m)
 
     do
     {
-        m->type = rand_1n(MT_MAX);
+        m->type = rand_1n(MT_MAX_GENERATED);
     }
     while (monster_is_genocided(m->type));
 
@@ -1033,6 +1063,10 @@ void monster_polymorph(monster *m)
 
 int monster_items_pickup(monster *m)
 {
+    // The town people never take your stuff.
+    if (monster_type(m) == MT_TOWN_PERSON)
+        return FALSE;
+
     /* TODO: gelatious cube digests items, rust monster eats metal stuff */
     /* FIXME: time management */
 
@@ -1507,7 +1541,9 @@ gboolean monster_update_action(monster *m)
         /* low HP or very scared => FLEE from player */
         naction = MA_FLEE;
     }
-    else if (m->lastseen && (m->lastseen < time))
+    /* town people never attack the player */
+    else if (monster_type(m) != MT_TOWN_PERSON
+                && m->lastseen && (m->lastseen < time))
     {
         /* after having spotted the player, agressive monster will follow
            the player for a certain amount of time turns, afterwards loose
@@ -1613,7 +1649,7 @@ char *monster_desc(monster *m)
     }
 
     g_string_append_printf(desc, "%s %s %s, %s", a_an(injury),
-                           injury, monster_name(m),
+                           injury, monster_get_name(m),
                            monster_ai_desc[m->action]);
 
     /* add effect description */
@@ -2039,8 +2075,69 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     }
 }
 
+static char *monsters_get_fortune(char *fortune_file)
+{
+    /* array of pointers to fortunes */
+    static GPtrArray *fortunes = NULL;
+
+    if (!fortunes) {
+
+        /* read in the fortunes */
+
+        size_t len = 0;
+        char buffer[80];
+        char *tmp = 0;
+        FILE *fortune_fd;
+
+        fortunes = g_ptr_array_new();
+
+        /* open the file */
+        fortune_fd = fopen(fortune_file, "r");
+        if (fortune_fd == NULL) {
+            /* can't find file */
+            tmp = "Help me! I can't find the fortune file!";
+            g_ptr_array_add(fortunes, tmp);
+        }
+        else
+        {
+            /* read in the entire fortune file */
+            while((fgets(buffer, 79, fortune_fd))) {
+                /* replace EOL with \0 */
+                len = (size_t)(strchr(buffer, '\n') - (char *)&buffer);
+                buffer[len] = '\0';
+
+                /* keep the line */
+                tmp = g_malloc((len + 1) * sizeof(char));
+                memcpy(tmp, &buffer, (len + 1));
+                g_ptr_array_add(fortunes, tmp);
+            }
+
+            fclose(fortune_fd);
+        }
+    }
+
+    return g_ptr_array_index(fortunes, rand_0n(fortunes->len));
+}
+
 static position monster_move_wander(monster *m, struct player *p)
 {
+    if (monster_type(m) == MT_TOWN_PERSON)
+    {
+        if (pos_adjacent(monster_pos(m), p->pos))
+        {
+            // talk
+            log_add_entry(nlarn->log, "The %s says, \"%s\"",
+                          monster_get_name(m),
+                          monsters_get_fortune(game_fortunes(nlarn)));
+        }
+        else if (m->lastseen > 50)
+        {
+            m->lastseen = 2;
+            if (chance(20))
+                m->colour = rand_1n(40);
+        }
+    }
+
     int tries = 0;
     position npos = monster_pos(m);
 

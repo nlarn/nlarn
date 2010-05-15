@@ -1518,6 +1518,13 @@ int player_move(player *p, direction dir, gboolean open_door)
 
 int player_attack(player *p, monster *m)
 {
+    /* disallow attacking other humans */
+    if (monster_type(m) == MT_TOWN_PERSON)
+    {
+        log_add_entry(nlarn->log, "You bump into the %s.", monster_get_name(m));
+        return 1;
+    }
+
     int prop;
     int amount;
     damage *dam;

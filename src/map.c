@@ -164,7 +164,17 @@ map *map_new(int num, char *mazefile)
         map_fill_with_life(nmap);
     }
 
-    if (num > 0)
+    if (num == 0)
+    {
+        // Place 4 town people on the map.
+        int i;
+        for (i = 0; i < 4; i++)
+        {
+            position pos = map_find_space(nmap, LE_MONSTER, FALSE);
+            monster_new(MT_TOWN_PERSON, pos);
+        }
+    }
+    else
     {
         /* home town is not filled with crap */
         map_fill_with_objects(nmap);
