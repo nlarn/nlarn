@@ -23,7 +23,6 @@
 #include "armour.h"
 #include "container.h"
 #include "display.h"
-#include "food.h"
 #include "game.h"
 #include "gems.h"
 #include "items.h"
@@ -47,7 +46,6 @@ const item_type_data item_data[IT_MAX] =
     { IT_ARMOUR,    "armour",    "armour",      '[', AT_MAX,          1, 1, 1, 1, 0, 0, 1, },
     { IT_BOOK,      "book",      "books",       '+', SP_MAX_BOOK,     0, 1, 1, 0, 1, 1, 1, },
     { IT_CONTAINER, "container", "containers",  ']', CT_MAX,          0, 0, 1, 0, 0, 0, 0, },
-    { IT_FOOD,      "food",      "foods",       '%', FT_MAX,          0, 0, 0, 0, 1, 1, 0, },
     { IT_GEM,       "gem",       "gems",        '*', GT_MAX,          1, 0, 0, 0, 0, 1, 0, },
     { IT_GOLD,      "coin",      "coins",       '$', 0,               0, 0, 0, 0, 0, 1, 0, },
     { IT_POTION,    "potion",    "potions",     '!', PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, },
@@ -631,16 +629,6 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         g_string_append(desc, item_desc_get(it, known));
         break;
 
-    case IT_FOOD:
-        g_string_append(desc, item_desc_get(it, known));
-
-        if ((it->count > 1) && !singular)
-        {
-            g_string_append_c(desc, 's');
-        }
-
-        break;
-
     case IT_GEM:
         g_string_append_printf(desc, "%d carats %s", gem_size(it), item_desc_get(it, known));
         break;
@@ -788,11 +776,6 @@ item_material_t item_material(item *it)
         material = container_material(it);
         break;
 
-    case IT_FOOD:
-        /* TODO: food material */
-        material = IM_NONE;
-        break;
-
     case IT_GEM:
         material = IM_GEMSTONE;
         break;
@@ -846,10 +829,6 @@ guint item_base_price(item *it)
 
     case IT_CONTAINER:
         price = container_price(it);
-        break;
-
-    case IT_FOOD:
-        price = food_price(it);
         break;
 
     case IT_GEM:
@@ -955,10 +934,6 @@ int item_weight(item *it)
         return container_weight(it) + inv_weight(it->content);
         break;
 
-    case IT_FOOD:
-        return food_weight(it);
-        break;
-
     case IT_GOLD:
         /* Is this too heavy? is this too light?
            It should give the player a reason to use the bank. */
@@ -1005,10 +980,6 @@ int item_colour(item *it)
         break;
 
     case IT_CONTAINER:
-        return DC_BROWN;
-        break;
-
-    case IT_FOOD:
         return DC_BROWN;
         break;
 
@@ -1332,7 +1303,6 @@ int item_obtainable(item_t type, int id)
     switch (type)
     {
     case IT_ARMOUR:
-    case IT_FOOD:
     case IT_RING:
         obtainable = TRUE;
         break;
@@ -1706,12 +1676,6 @@ int item_filter_not_container(item *it)
     return (it->type != IT_CONTAINER);
 }
 
-int item_filter_food(item *it)
-{
-    assert (it != NULL);
-    return (it->type == IT_FOOD);
-}
-
 int item_filter_gems(item *it)
 {
     assert (it != NULL);
@@ -1798,10 +1762,6 @@ static const char *item_desc_get(item *it, int known)
 
     case IT_CONTAINER:
         return container_name(it);
-        break;
-
-    case IT_FOOD:
-        return food_name(it);
         break;
 
     case IT_POTION:

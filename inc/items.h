@@ -29,7 +29,6 @@ typedef enum item_types {
     IT_ARMOUR,          /* armour, defined in armour.h */
     IT_BOOK,            /* book, defined in spells.h */
     IT_CONTAINER,       /* container, defined in container.h */
-    IT_FOOD,            /* food, defined in food.h */
     IT_GEM,             /* gem, defined in gems.h */
     IT_GOLD,            /* just gold. defined nowhere as type and count are sufficient. */
     IT_POTION,          /* potion, defined in potions.h */
@@ -355,7 +354,6 @@ item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *));
 
 int item_filter_container(item *it);
 int item_filter_not_container(item *it);
-int item_filter_food(item *it);
 int item_filter_gems(item *it);
 int item_filter_gold(item *it);
 int item_filter_not_gold(item *it);

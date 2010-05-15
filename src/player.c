@@ -25,7 +25,6 @@
 #include "cJSON.h"
 #include "container.h"
 #include "display.h"
-#include "food.h"
 #include "game.h"
 #include "nlarn.h"
 #include "player.h"
@@ -3529,11 +3528,6 @@ void player_item_use(player *p, inventory **inv, item *it)
         /* read book */
     case IT_BOOK:
         result = book_read(p, it);
-        break;
-
-        /* eat food */
-    case IT_FOOD:
-        result = food_eat(p, it);
         break;
 
         /* drink potion */
