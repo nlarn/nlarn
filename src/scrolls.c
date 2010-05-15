@@ -519,6 +519,9 @@ static int scroll_genocide_monster(player *p, item *scroll)
 
                 g_free(in);
 
+                if (id == MT_TOWN_PERSON) // Oops!
+                    player_die(p, PD_GENOCIDE, 0);
+
                 return TRUE;
             }
         }
@@ -540,7 +543,6 @@ static int scroll_heal_monster(player *p, item *scroll)
 
     mlist = g_hash_table_get_values(nlarn->monsters);
 
-    /* purge genocided monsters */
     do
     {
         m = (monster *)mlist->data;

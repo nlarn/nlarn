@@ -179,16 +179,18 @@ typedef enum _player_cod
     PD_MONSTER,
     PD_SPHERE,
     PD_TRAP,
-    PD_MAP, /* damaged by map effects */
-    PD_SPELL, /* damaged by own spell */
-    PD_CURSE, /* damaged by a cursed item */
-    PD_SOBJECT, /* killed by stationary object */
+    PD_MAP,       /* damaged by map effects */
+    PD_SPELL,     /* damaged by own spell */
+    PD_CURSE,     /* damaged by a cursed item */
+    PD_SOBJECT,   /* killed by stationary object */
     /* *** causes above this line can be stopped by live protection *** */
-    PD_STUCK, /* stuck in a wall */
-    PD_TOO_LATE, /* returned with potion too late */
-    PD_WON, /* won the game */
-    PD_LOST, /* daughter has died, potion not found */
-    PD_QUIT, /* quit the game */
+    PD_STUCK,     /* stuck in a wall */
+    PD_GENOCIDE,  /* genocided themselves */
+    /* *** caused below this line are described as "returning home" *** */
+    PD_TOO_LATE,  /* returned with potion too late */
+    PD_WON,       /* won the game */
+    PD_LOST,      /* daughter has died, potion not found */
+    PD_QUIT,      /* quit the game */
     PD_MAX
 } player_cod;
 

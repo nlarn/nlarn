@@ -1002,6 +1002,11 @@ void player_die(player *p, player_cod cause_type, int cause)
         title = "The End";
         break;
 
+    case PD_GENOCIDE:
+        message = "You've genocided yourself!";
+        title = "Oops?";
+        break;
+
     default:
         message = "You die...";
         title = "R. I. P.";
@@ -1095,7 +1100,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         game_scores_destroy(scores);
 
         /* some statistics */
-        g_string_append_printf(text, "\n%s %s after searching the potion for %d mobul%s. ",
+        g_string_append_printf(text, "\n%s %s after searching for the potion for %d mobul%s. ",
                                pronoun, cause_type < PD_TOO_LATE ? "died" : "returned",
                                gtime2mobuls(nlarn->gtime), plural(gtime2mobuls(nlarn->gtime)));
 
@@ -1225,16 +1230,24 @@ void player_die(player *p, player_cod cause_type, int cause)
                 body_count += p->stats.monsters_killed[mnum];
             }
         }
-        g_string_append_printf(text, "\n%3d total\n\n", body_count);
+        g_string_append_printf(text, "\n%3d total\n", body_count);
 
         /* genocided monsters */
-        for (pos = 1, count = 0; pos < MT_MAX; pos++)
+        g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
+
+        count = 0;
+        for (mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
         {
-            if (monster_is_genocided(pos)) count++;
+            if (!monster_is_genocided(mnum))
+                continue;
+
+            tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum, 2)));
+            g_string_append_printf(text, "%s\n", tmp);
+            count++;
         }
 
-        g_string_append_printf(text, "%s genocided %s monsters.\n",
-                               pronoun, int2str(count));
+        g_string_append_printf(text, "\n%s genocided %s monster%s.\n",
+                               pronoun, int2str(count), plural(count));
 
 
         /* identify entire inventory */
@@ -1973,9 +1986,12 @@ void player_level_lose(player *p, int count)
 
 void player_exp_gain(player *p, int count)
 {
+    if (count <= 0)
+        return;
+
     int numlevels = 0;
 
-    assert(p != NULL && count > 0);
+    assert(p != NULL);
     p->experience += count;
 
     if (p->stats.max_xp < p->experience)
@@ -2978,7 +2994,7 @@ void player_item_unequip(player *p, inventory **inv, item *it)
     /* the idea behind the time values: one turn to take one item off,
        one turn to get the item out of the pack */
 
-            item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
+    item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
 
 
     switch (it->type)
@@ -4490,6 +4506,10 @@ static char *player_death_description(game_score_t *score, int verbose)
         desc = "quit the game";
         break;
 
+    case PD_GENOCIDE:
+        desc = "genocided";
+        break;
+
     default:
         desc = "killed";
     }
@@ -4498,6 +4518,13 @@ static char *player_death_description(game_score_t *score, int verbose)
 
     g_string_append_printf(text, "%s (%c), %s", score->player_name,
                            (score->sex == PS_MALE) ? 'm' : 'f', desc);
+
+
+    if (score->cod == PD_GENOCIDE)
+    {
+        g_string_append_printf(text, " %sself",
+                               (score->sex == PS_MALE) ? "him" : "her");
+    }
 
     if (verbose)
     {
