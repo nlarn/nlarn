@@ -280,12 +280,12 @@ int building_dndstore(player *p)
 void building_dndstore_init()
 {
     static int initialized = FALSE;
-    int loop, count;
-    item_t type = IT_NONE;
 
     /* this is a one-time process! */
     if (initialized) return;
 
+    int count;
+    item_t type = IT_NONE;
     for (type = IT_AMULET; type < IT_MAX; type++)
     {
         /*never generate gems or gold */
@@ -293,36 +293,29 @@ void building_dndstore_init()
             continue;
 
         if (item_is_stackable(type) && (type != IT_BOOK))
-        {
             count = 3;
-        }
         else
-        {
             count = 1;
-        }
 
-        for (loop = 0; loop < count; loop++)
+        int id;
+        for (id = 1; id < item_max_id(type); id++)
         {
-            int id;
+            /* do not generate unobtainable items except in wizard mode */
+            if (!game_wizardmode(nlarn) && !item_obtainable(type, id))
+                continue;
 
-            for (id = 1; id < item_max_id(type); id++)
+            item *it = item_new(type, id);
+
+            if (item_is_identifyable(it->type))
             {
-                /* do not generate unobtainable items except in wizard mode */
-                if (!game_wizardmode(nlarn) && !item_obtainable(type, id))
-                    continue;
-
-                item *it = item_new(type, id);
-
-                if (item_is_identifyable(it->type))
-                {
-                    /* make item attributes known */
-                    it->bonus_known = TRUE;
-                    it->blessed_known = TRUE;
-                }
-
-                /* add item to store */
-                inv_add(&nlarn->store_stock, it);
+                /* make item attributes known */
+                it->bonus_known = TRUE;
+                it->blessed_known = TRUE;
             }
+            it->count = count;
+
+            /* add item to store */
+            inv_add(&nlarn->store_stock, it);
         }
     }
 
@@ -721,9 +714,10 @@ static void building_player_charge(player *p, guint amount)
  */
 static void building_item_add(inventory **inv, item *it)
 {
-    if (it->type == IT_GEM)
+    if (it->type == IT_GEM
+            || (it->type == IT_WEAPON && !weapon_is_unique(it)))
     {
-        /* gems do not appear in the store */
+        /* gems and non-unique weapons do not appear in the store */
         item_destroy(it);
     }
     else
