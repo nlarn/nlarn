@@ -3031,6 +3031,7 @@ void player_item_unequip(player *p, inventory **inv, item *it)
         case AC_BOOTS:
             aslot = &(p->eq_boots);
             time = 3;
+            break;
 
         case AC_CLOAK:
             aslot = &(p->eq_cloak);
