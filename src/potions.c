@@ -209,11 +209,19 @@ static int potion_with_effect(struct player *p, item *potion)
             eff->amount = 10;
         }
 
+        // Blessed potions last longer or have a stronger effect.
+        // And yes, this also holds for bad effects!
+        if (potion->blessed)
+        {
+            if (eff->turns > 1)
+                eff->turns *= 2;
+            else
+                eff->amount *= 2;
+        }
+
         /* this has to precede p_e_add as eff might be destroyed (e.g. potion of sleep) */
         if (!effect_get_msg_start(eff))
-        {
             identified = FALSE;
-        }
 
         player_effect_add(p, eff);
     }
