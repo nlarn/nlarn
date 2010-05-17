@@ -282,7 +282,12 @@ monster *monster_new_by_level(position pos)
 
     assert(pos_valid(pos));
 
-    if (nlevel < 5)
+    if (nlevel == 0)
+    {
+        monster_id_min = 1;
+        monster_id_max = monster_level[0];
+    }
+    else if (nlevel < 5)
     {
         monster_id_min = 1;
         monster_id_max = monster_level[nlevel - 1];
