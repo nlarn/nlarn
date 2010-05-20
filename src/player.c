@@ -4051,6 +4051,9 @@ guint player_set_gold(player *p, guint amount)
         }
     }
 
+    if (!amount)
+        return 0;
+
     /* no gold found -> generate new gold */
     i = item_new(IT_GOLD, amount);
     inv_add(&p->inventory, i);
