@@ -45,7 +45,8 @@ static const int amulet_materials[AM_MAX - 1] =
     IM_COPPER,
     IM_STEEL,
     IM_GLASS,
-    IM_BONE
+    IM_BONE,
+    IM_GEMSTONE,
 };
 
 item_material_t amulet_material(int amulet_id)
