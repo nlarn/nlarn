@@ -4148,7 +4148,7 @@ void player_update_fov(player *p)
         enlight = area_new_circle(p->pos, player_effect(p, ET_ENLIGHTENMENT), FALSE);
 
         /* set visible field according to returned area */
-        for (y = 0; y <  enlight->size_y; y++)
+        for (y = 0; y < enlight->size_y; y++)
         {
             for (x = 0; x < enlight->size_x; x++)
             {
@@ -4270,7 +4270,7 @@ static void player_calculate_octant(player *p, int row, float start,
 
     radius_squared = radius * radius;
 
-    for (j  = row; j <= radius + 1; j++)
+    for (j = row; j <= radius + 1; j++)
     {
         dx = -j - 1;
         dy = -j;
@@ -4314,6 +4314,7 @@ static void player_calculate_octant(player *p, int row, float start,
                 }
 
                 if (blocked)
+                {
                     /* we're scanning a row of blocked squares */
                     if (!map_pos_transparent(game_map(nlarn, p->pos.z), pos_new(X,Y, p->pos.z)))
                     {
@@ -4325,11 +4326,15 @@ static void player_calculate_octant(player *p, int row, float start,
                         blocked = FALSE;
                         start = new_start;
                     }
+                }
                 else
                 {
-                    if (!map_pos_transparent(game_map(nlarn, p->pos.z), pos_new(X, Y, p->pos.z)) && (j < radius))
+                    if (!map_pos_transparent(game_map(nlarn, p->pos.z),
+                                    pos_new(X, Y, p->pos.z)) && (j < radius))
+                    {
                         /* This is a blocking square, start a child scan */
                         blocked = TRUE;
+                    }
 
                     player_calculate_octant(p, j+1, start, l_slope, radius, xx, xy, yx, yy);
                     new_start = r_slope;

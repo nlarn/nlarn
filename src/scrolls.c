@@ -304,7 +304,7 @@ static int scroll_annihilate(struct player *p, item *scroll)
                     log_add_entry(nlarn->log, "The %s barely escapes being annihilated.",
                                   monster_get_name(m));
 
-                    /* lose half hit points*/
+                    /* lose half hit points */
                     damage *dam = damage_new(DAM_MAGICAL, ATT_NONE, monster_hp(m) / 2, p);
                     monster_damage_take(m, dam);
                 }
