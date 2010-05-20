@@ -252,9 +252,15 @@ static int scroll_with_effect(struct player *p, item *scroll)
     assert(p != NULL && scroll != NULL);
 
     eff = effect_new(scroll_effect(scroll));
-    // Blessed scrolls of life protection are permanent.
-    if (scroll->id == ST_LIFE_PROTECTION && scroll->blessed)
-        eff->turns = 0;
+    // Blessed scrolls last longer.
+    if (scroll->blessed)
+    {
+        // Life protection is permanent.
+        if (scroll->id == ST_LIFE_PROTECTION)
+            eff->turns = 0;
+        else
+            eff->turns *= 2;
+    }
 
     eff = player_effect_add(p, eff);
 
