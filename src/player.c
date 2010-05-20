@@ -3007,8 +3007,11 @@ void player_item_unequip(player *p, inventory **inv, item *it)
                 if (!player_make_move(p, 2, TRUE, "removing %s", desc))
                     return; /* interrupted */
 
-                player_effects_del(p, p->eq_amulet->effects);
-                p->eq_amulet = NULL;
+                if (p->eq_amulet)
+                {
+                    player_effects_del(p, p->eq_amulet->effects);
+                    p->eq_amulet = NULL;
+                }
             }
             else
             {
@@ -3070,8 +3073,12 @@ void player_item_unequip(player *p, inventory **inv, item *it)
                     return; /* interrupted */
 
                 log_add_entry(nlarn->log, "You finish taking off %s.", desc);
-                player_effects_del(p, (*aslot)->effects);
-                *aslot = NULL;
+
+                if (*aslot)
+                {
+                    player_effects_del(p, (*aslot)->effects);
+                    *aslot = NULL;
+                }
             }
             else
             {
@@ -3102,8 +3109,11 @@ void player_item_unequip(player *p, inventory **inv, item *it)
                 if (!player_make_move(p, 2, TRUE, "removing %s", desc))
                     return; /* interrupted */
 
-                player_effects_del(p, (*rslot)->effects);
-                *rslot = NULL;
+                if (*rslot)
+                {
+                    player_effects_del(p, (*rslot)->effects);
+                    *rslot = NULL;
+                }
             }
             else
             {
@@ -3127,8 +3137,11 @@ void player_item_unequip(player *p, inventory **inv, item *it)
                                       TRUE, "putting %s away", desc))
                     return; /* interrupted */
 
-                player_effects_del(p, p->eq_weapon->effects);
-                p->eq_weapon = NULL;
+                if (p->eq_weapon)
+                {
+                    player_effects_del(p, p->eq_weapon->effects);
+                    p->eq_weapon = NULL;
+                }
             }
             else
             {
