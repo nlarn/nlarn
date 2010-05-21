@@ -1175,6 +1175,21 @@ item *item_disenchant(item *it)
     return it;
 }
 
+static int material_affected(item_material_t mat, item_erosion_type iet)
+{
+    switch (iet)
+    {
+    case IET_BURN:
+        return (mat <= IM_BONE);
+    case IET_CORRODE:
+        return (mat == IM_IRON);
+    case IET_RUST:
+        return (mat == IM_IRON);
+    default:
+        return (FALSE);
+    }
+}
+
 item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visible)
 {
     gboolean destroyed = FALSE;
@@ -1188,6 +1203,9 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     if (it->type == IT_POTION && it->id == PO_CURE_DIANTHR)
         return (it);
 
+    if (!material_affected(item_material(it), iet))
+        return (it);
+
     if (visible)
     {
         /* prepare item description before it has been affected */
@@ -1196,39 +1214,42 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
         item_desc[0] = g_ascii_toupper(item_desc[0]);
     }
 
+    // Blessed items have a 50% chance of resisting the erosion.
+    if (it->blessed && chance(50))
+    {
+        if (visible)
+        {
+            log_add_entry(nlarn->log, "%s resist%s.", item_desc,
+                          (it->count == 1) ? "s" : "");
+            it->blessed_known = TRUE;
+        }
+        return (it);
+    }
+
     switch (iet)
     {
     case IET_BURN:
-        if (item_material(it) <= IM_BONE)
-        {
-            it->burnt++;
-            erosion_desc = "burn";
+        it->burnt++;
+        erosion_desc = "burn";
 
-            if (it->burnt == 3) destroyed = TRUE;
-        }
+        if (it->burnt == 3) destroyed = TRUE;
         break;
 
     case IET_CORRODE:
-        if (item_material(it) == IM_IRON)
-        {
-            it->corroded++;
-            erosion_desc = "corrode";
+        it->corroded++;
+        erosion_desc = "corrode";
 
-            if (it->corroded == 3) destroyed = TRUE;
-        }
-
+        if (it->corroded == 3) destroyed = TRUE;
         break;
 
     case IET_RUST:
-        if (item_material(it) == IM_IRON)
-        {
-            it->rusty++;
-            erosion_desc = "rust";
+        it->rusty++;
+        erosion_desc = "rust";
 
-            /* it's been very rusty already -> destroy */
-            if (it->rusty == 3) destroyed = TRUE;
-        }
+        /* it's been very rusty already -> destroy */
+        if (it->rusty == 3) destroyed = TRUE;
         break;
+
     default:
         /* well, just do nothing. */
         break;
@@ -1236,9 +1257,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
 
     /* if the item has an inventory, erode it as well */
     if (it->content != NULL)
-    {
         inv_erode(&it->content, iet, FALSE);
-    }
 
     if (erosion_desc != NULL && visible)
     {

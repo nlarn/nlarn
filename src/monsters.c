@@ -1922,13 +1922,29 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
 
     it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
 
+    /* log the attack */
+    log_add_entry(nlarn->log, "The %s hits you.",
+                  monster_get_name(m));
+
     /* Don't destroy the potion of cure dianthroritis. */
     if (it->type == IT_POTION && it->id == PO_CURE_DIANTHR)
         return (inv_length(p->inventory) > 1);
 
-    /* log the attack */
-    log_add_entry(nlarn->log, "The %s hits you. You feel a sense of loss.",
-                  monster_get_name(m));
+    // Blessed items have a 50% chance of resisting the disenchantment.
+    if (it->blessed && chance(50))
+    {
+        char desc[81] = { 0 };
+        item_describe(it, player_item_known(nlarn->p, it),
+                      (it->count == 1), TRUE, desc, 80);
+
+        desc[0] = g_ascii_toupper(desc[0]);
+        log_add_entry(nlarn->log, "%s resist%s the attack.",
+                      desc, (it->count == 1) ? "s" : "");
+
+        it->blessed_known = TRUE;
+        return TRUE;
+    }
+    log_add_entry(nlarn->log, "You feel a sense of loss.");
 
     if (it->type == IT_WEAPON
             || it->type == IT_ARMOUR
