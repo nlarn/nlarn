@@ -271,7 +271,7 @@ monsters = {
     [MT_FORVALAKA] = {
       ac = 2,
       attacks = { { type = BITE, base = 5, damage = PHYSICAL } },
-      color = DARKGRAY,
+      color = LIGHTGRAY,
       exp = 280,
       flags = HEAD + UNDEAD + INFRAVISION,
       hp_max = 50,
@@ -494,7 +494,7 @@ monsters = {
       attacks = { { type = BITE, base = 3, damage = PHYSICAL },
                   { type = GAZE, base = 25, damage = BLINDNESS }
       },
-      color = BROWN,
+      color = RED,
       exp = 80,
       flags = HEAD,
       hp_max = 35,
@@ -880,7 +880,7 @@ monsters = {
     [MT_VORTEX] = {
       ac = 4,
       attacks = { { type = SLAM, base = 3, damage = PHYSICAL } },
-      color = DARKGRAY,
+      color = CYAN,
       exp = 55,
       flags = RES_SLEEP,
       hp_max = 30,
@@ -941,7 +941,7 @@ monsters = {
     [MT_XORN] = {
       ac = 0,
       attacks = { { type = BITE, base = 6, damage = PHYSICAL } },
-      color = DARKGRAY,
+      color = BROWN,
       exp = 300,
       flags = INFRAVISION,
       hp_max = 60,
@@ -955,7 +955,7 @@ monsters = {
     [MT_XVART] = {
       ac = -2,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = DARKGRAY,
+      color = LIGHTGRAY,
       exp = 1000,
       flags = HEAD + HANDS + INFRAVISION,
       hp_max = 90,
@@ -983,7 +983,7 @@ monsters = {
     [MT_YETI] = {
       ac = 6,
       attacks = { { type = CLAW, base = 4, damage = PHYSICAL } },
-      color = LIGHTGRAY,
+      color = WHITE,
       exp = 100,
       flags = HEAD + HANDS,
       gold_chance = 10,
