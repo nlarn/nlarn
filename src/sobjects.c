@@ -839,6 +839,7 @@ int player_throne_pillage(player *p)
                       count > 1 ? "some" : "a", plural(count));
 
         map_sobject_set(map, p->pos, LS_DEADTHRONE);
+        p->stats.vandalism++;
     }
     else if (chance(40) && (ms == LS_THRONE))
     {

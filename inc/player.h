@@ -44,6 +44,8 @@ typedef struct _player_stats
     gint32 scrolls_read;
     gint32 books_read;
     gint32 life_protected;
+    gint32 vandalism;
+
     // Keep track of the dungeon economy.
     gint32 items_bought;
     gint32 items_sold;

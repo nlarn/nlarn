@@ -471,6 +471,7 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "scrolls_read", p->stats.scrolls_read);
     cJSON_AddNumberToObject(obj, "books_read", p->stats.books_read);
     cJSON_AddNumberToObject(obj, "life_protected", p->stats.life_protected);
+    cJSON_AddNumberToObject(obj, "vandalism", p->stats.vandalism);
     cJSON_AddNumberToObject(obj, "items_bought", p->stats.items_bought);
     cJSON_AddNumberToObject(obj, "items_sold", p->stats.items_sold);
     cJSON_AddNumberToObject(obj, "gems_sold", p->stats.gems_sold);
@@ -676,6 +677,10 @@ player *player_deserialize(cJSON *pser)
     p->stats.books_read = cJSON_GetObjectItem(obj, "books_read")->valueint;
 
     p->stats.life_protected = cJSON_GetObjectItem(obj, "life_protected")->valueint;
+
+    if (cJSON_GetObjectItem(obj, "vandalism"))
+        p->stats.vandalism = cJSON_GetObjectItem(obj, "vandalism")->valueint;
+
     p->stats.items_bought = cJSON_GetObjectItem(obj, "items_bought")->valueint;
     p->stats.items_sold   = cJSON_GetObjectItem(obj, "items_sold")->valueint;
     p->stats.gems_sold    = cJSON_GetObjectItem(obj, "gems_sold")->valueint;
@@ -1114,6 +1119,13 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_string_append_printf(text, "and %s scroll%s. ",
                                int2str(p->stats.scrolls_read),
                                plural(p->stats.scrolls_read));
+
+        if (p->stats.vandalism > 0)
+        {
+            g_string_append_printf(text, "\n%s committed %s act%s of vandalism. ",
+                                   pronoun, int2str(p->stats.vandalism),
+                                   plural(p->stats.vandalism));
+        }
 
         if (p->stats.life_protected > 0)
         {

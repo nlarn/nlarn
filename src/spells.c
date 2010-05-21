@@ -1442,12 +1442,22 @@ gboolean spell_vaporize_rock(player *p)
     if (map_tiletype_at(map, pos) == LT_WALL)
     {
         map_tiletype_set(map, pos, LT_FLOOR);
+        p->stats.vandalism++;
     }
 
-    if ((m = map_get_monster_at(map, pos)) && (monster_type(m) == MT_XORN))
+    if ((m = map_get_monster_at(map, pos)))
     {
         /* xorns take damage from vpr */
-        monster_damage_take(m, damage_new(DAM_PHYSICAL, ATT_NONE, divert(200, 10), p));
+        if (monster_type(m) == MT_XORN)
+        {
+            monster_damage_take(m, damage_new(DAM_PHYSICAL, ATT_NONE,
+                                divert(200, 10), p));
+        }
+        else if (monster_in_sight(m))
+        {
+            log_add_entry(nlarn->log, "The %s can't be vaporized.",
+                          monster_get_name(m));
+        }
     }
 
     mpos = map_find_space_in(map, rect_new_sized(p->pos, 1), LE_MONSTER, FALSE);
@@ -1460,22 +1470,21 @@ gboolean spell_vaporize_rock(player *p)
 
     case LS_ALTAR:
         if (pos_valid(mpos))
-        {
             monster_new(MT_DEMON_PRINCE, mpos);
-        }
+
         desc = "altar";
         break;
 
     case LS_FOUNTAIN:
         if (pos_valid(mpos))
-        {
             monster_new(MT_WATER_LORD, mpos);
-        }
+
         desc = "fountain";
         break;
 
     case LS_STATUE:
-        if (game_difficulty(nlarn) < 3)
+        // diff 0-1: 100%, diff 2: 2/3, diff 3: 50%, ..., diff N: 2/(N+1)
+        if (rand_0n(game_difficulty(nlarn)+1) <= 1)
         {
             item *it = item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)));
             inv_add(map_ilist_at(map, pos), it);
@@ -1487,9 +1496,8 @@ gboolean spell_vaporize_rock(player *p)
     case LS_THRONE:
     case LS_THRONE2:
         if (pos_valid(mpos))
-        {
             monster_new(MT_GNOME_KING, mpos);
-        }
+
         desc = "throne";
         break;
 
@@ -1507,6 +1515,7 @@ gboolean spell_vaporize_rock(player *p)
     {
         log_add_entry(nlarn->log, "You destroy the %s.", desc);
         map_sobject_set(map, pos, LS_NONE);
+        p->stats.vandalism++;
     }
 
     return TRUE;
