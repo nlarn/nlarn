@@ -876,7 +876,7 @@ int player_throne_sit(player *p)
         return 0;
     }
 
-    log_add_entry(nlarn->log, "You sit on the trone.");
+    log_add_entry(nlarn->log, "You sit on the throne.");
 
     if (chance(30) && (st == LS_THRONE))
     {

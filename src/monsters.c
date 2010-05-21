@@ -732,7 +732,7 @@ void monster_die(monster *m, struct player *p)
        (the xp gain gives this away anyway). */
     if (monster_in_sight(m) || (p != NULL && monster_nearby(m)))
     {
-        char *message = "The %s died!";
+        char *message = "The %s dies!";
 
         log_add_entry(nlarn->log, message, monster_get_name(m));
     }
