@@ -317,7 +317,7 @@ static inline int monster_type_reroll_chance(monster_t type)
     return luaN_query_int("monsters", type, "reroll_chance");
 }
 
-int monster_genocide(int monster_id);
+void monster_genocide(int monster_id);
 int monster_is_genocided(int monster_id);
 
 /* dealing with temporary effects */
