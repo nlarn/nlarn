@@ -63,7 +63,7 @@ const item_material_data item_materials[IM_MAX] =
     { IM_LEATHER,     "leather",     "leathern", DC_BROWN     },
     { IM_WOOD,        "wood",        "wooden",   DC_BROWN     },
     { IM_BONE,        "bone",        "osseous",  DC_DARKGRAY  },
-    { IM_DRAGON_HIDE, "dragon hide", "scabby",   DC_NONE      }, /* ? */
+    { IM_DRAGON_HIDE, "dragon hide", "scabby",   DC_GREEN     },
     { IM_IRON,        "iron",        "irony",    DC_LIGHTGRAY },
     { IM_STEEL,       "steel",       "steely",   DC_WHITE     },
     { IM_COPPER,      "copper",      "cupreous", DC_BROWN     },
@@ -71,8 +71,8 @@ const item_material_data item_materials[IM_MAX] =
     { IM_GOLD,        "gold",        "golden",   DC_YELLOW    },
     { IM_PLATINUM,    "platinum",    "platinum", DC_WHITE     },
     { IM_MITHRIL,     "mitril",      "mithrial", DC_LIGHTGRAY },
-    { IM_GLASS,       "glass",       "vitreous", DC_WHITE     },
-    { IM_GEMSTONE,    "gemstone",    "gemstone", DC_NONE      }, /* ? */
+    { IM_GLASS,       "glass",       "vitreous", DC_LIGHTCYAN },
+    { IM_GEMSTONE,    "gemstone",    "gemstone", DC_RED       },
 };
 
 /* functions */
