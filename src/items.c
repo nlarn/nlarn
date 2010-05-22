@@ -187,8 +187,8 @@ item *item_new(item_t item_type, int item_id)
             eff->amount = 10;
             item_effect_add(nitem, eff);
 
-            eff = effect_new(ET_DEC_INT);
-            eff->amount = 10;
+            eff = effect_new(ET_INC_INT);
+            eff->amount = -10;
             item_effect_add(nitem, eff);
         }
         break;
