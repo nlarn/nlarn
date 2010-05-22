@@ -95,7 +95,7 @@ typedef enum _damage_types
 
     /* effects */
     DAM_POISON,         /* traps, snake */
-    DAM_BLINDNESS,
+    DAM_BLINDNESS,      /* lama nobe, green urchin */
     DAM_CONFUSION,      /* umber hulk */
     DAM_PARALYSIS,      /* floating eye */
     DAM_DEC_STR,        /* ant, centipede */

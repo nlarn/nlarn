@@ -379,6 +379,7 @@ void monsters_wrap(lua_State *L)
         { "MIMIC",       MF_MIMIC },
         { "RES_FIRE",    MF_RES_FIRE },
         { "RES_SLEEP",   MF_RES_SLEEP },
+        { "RES_POISON",  MF_RES_POISON },
 
         /* monster types */
         { "MT_GIANT_BAT",       MT_GIANT_BAT },
@@ -1746,6 +1747,9 @@ effect *monster_effect_add(monster *m, effect *e)
     assert(m != NULL && e != NULL);
 
     if (e->type == ET_SLEEP && monster_flags(m, MF_RES_SLEEP))
+        return NULL;
+
+    if (e->type == ET_POISON && monster_flags(m, MF_RES_POISON))
         return NULL;
 
     e = effect_add(m->effects, e);
