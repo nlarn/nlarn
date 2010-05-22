@@ -2500,8 +2500,10 @@ effect *player_effect_add(player *p, effect *e)
             break;
         }
 
-        if (effect_get_msg_start(e))
+        if (effect_get_amount(e) > 0 && effect_get_msg_start(e))
             log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
+        else if (effect_get_amount(e) < 0 && effect_get_msg_stop(e))
+            log_add_entry(nlarn->log, "%s", effect_get_msg_stop(e));
 
         effect_destroy(e);
         e = NULL;
@@ -2524,8 +2526,13 @@ effect *player_effect_add(player *p, effect *e)
 
         /* only log a message if the effect has really been added and
            actually has a value */
-        if (e && effect_get_amount(e) && effect_get_msg_start(e))
-            log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
+        if (e)
+        {
+            if (effect_get_amount(e) > 0 && effect_get_msg_start(e))
+                log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
+            else if (effect_get_amount(e) < 0 && effect_get_msg_stop(e))
+                log_add_entry(nlarn->log, "%s", effect_get_msg_stop(e));
+        }
 
         if (str_orig != player_get_str(p))
         {
@@ -2552,10 +2559,10 @@ void player_effects_add(player *p, GPtrArray *effects)
         g_ptr_array_add(p->effects, effect_id);
 
         effect *e = game_effect_get(nlarn, effect_id);
-        if (effect_get_amount(e) && effect_get_msg_start(e))
-        {
-            log_add_entry(nlarn->log, effect_get_msg_start(e));
-        }
+        if (effect_get_amount(e) > 0 && effect_get_msg_start(e))
+            log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
+        else if (effect_get_amount(e) < 0 && effect_get_msg_stop(e))
+            log_add_entry(nlarn->log, "%s", effect_get_msg_stop(e));
     }
 }
 
@@ -2569,10 +2576,10 @@ int player_effect_del(player *p, effect *e)
 
     if ((result = effect_del(p->effects, e)))
     {
-        if (effect_get_amount(e) && effect_get_msg_stop(e))
-        {
-            log_add_entry(nlarn->log, effect_get_msg_stop(e));
-        }
+        if (effect_get_amount(e) > 0 && effect_get_msg_stop(e))
+            log_add_entry(nlarn->log, "%s", effect_get_msg_stop(e));
+        else if (effect_get_amount(e) < 0 && effect_get_msg_start(e))
+            log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
 
         if (str_orig != player_get_str(p))
         {
@@ -2602,10 +2609,10 @@ void player_effects_del(player *p, GPtrArray *effects)
         effect *e = game_effect_get(nlarn, effect_id);
         g_ptr_array_remove_fast(p->effects, effect_id);
 
-        if (effect_get_msg_stop(e))
-        {
-            log_add_entry(nlarn->log, effect_get_msg_stop(e));
-        }
+        if (effect_get_amount(e) > 0 && effect_get_msg_stop(e))
+            log_add_entry(nlarn->log, "%s", effect_get_msg_stop(e));
+        else if (effect_get_amount(e) < 0 && effect_get_msg_start(e))
+            log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
     }
 }
 
