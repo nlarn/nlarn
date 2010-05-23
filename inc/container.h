@@ -73,6 +73,16 @@ void container_item_add(struct player *p, inventory **inv, item *element);
   */
 void container_item_unpack(struct player *p, inventory **inv, item *element);
 
+/**
+  * @brief Function used to add an entire inventory to another one.
+  *
+  * @param the player
+  * @param the originating inventory
+  * @param the new inventory
+  */
+int container_move_content(struct player *p, inventory **inv,
+                           inventory **new_inv);
+
 /* macros */
 
 #define container_name(container)     (containers[(container)->id].name)

@@ -25,11 +25,11 @@
 
 const container_data containers[CT_MAX] =
 {
-    { CT_NONE,   "",          0, IM_NONE,   0, },
-    { CT_BAG,    "bag",     375, IM_CLOTH,  1, },
-    { CT_CASKET, "casket", 3900, IM_WOOD,   5, },
-    { CT_CHEST,  "chest", 13500, IM_WOOD,  10, },
-    { CT_CRATE,  "crate", 65000, IM_WOOD,  20, },
+    { CT_NONE,   "",          0, IM_NONE,    0, },
+    { CT_BAG,    "bag",     375, IM_CLOTH,  15, },
+    { CT_CASKET, "casket", 3900, IM_WOOD,   30, },
+    { CT_CHEST,  "chest", 13500, IM_WOOD,   70, },
+    { CT_CRATE,  "crate", 65000, IM_WOOD,  100, },
 };
 
 void container_open(player *p, inventory **inv, item *container)
@@ -289,4 +289,23 @@ void container_item_unpack(player *p, inventory **inv, item *element)
         inv_add(inv, element);
         return;
     }
+}
+
+int container_move_content(player *p, inventory **inv, inventory **new_inv)
+{
+    assert(p != NULL && inv != NULL);
+
+    item *it;
+
+    guint idx;
+    guint count = 0;
+    for (idx = 0; idx < inv_length(*inv);)
+    {
+        it = inv_get(*inv, idx);
+        inv_del_element(inv, it);
+        if (inv_add(new_inv, it))
+            count++;
+    }
+
+    return count;
 }

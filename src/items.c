@@ -1342,6 +1342,10 @@ int item_obtainable(item_t type, int id)
         obtainable = weapon_type_obtainable(id);
         break;
 
+    case IT_CONTAINER:
+        obtainable = (id == CT_BAG);
+        break;
+
     default:
         obtainable = FALSE;
     }

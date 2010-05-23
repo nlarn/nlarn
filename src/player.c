@@ -3637,8 +3637,23 @@ void player_item_destroy(player *p, item *it)
     log_add_entry(nlarn->log, "%s %s destroyed!",
                   desc, (it->count == 1) ? "is" : "are");
 
+    int count = 0;
+    if (it->content)
+    {
+        count = container_move_content(p, &it->content,
+                                       map_ilist_at(game_map(nlarn, p->pos.z), p->pos));
+    }
+
     inv_del_element(&p->inventory, it);
     item_destroy(it);
+
+    if (count)
+    {
+        log_add_entry(nlarn->log, "%s's content%s spill%s onto the floor.",
+                      desc,
+                      (count == 1) ? "" : "s",
+                      (count == 1) ? "s" : "");
+    }
 }
 
 void player_item_drop(player *p, inventory **inv, item *it)
