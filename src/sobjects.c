@@ -710,6 +710,9 @@ int player_stairs_down(player *p)
     map *map = game_map(nlarn, p->pos.z);
     map_sobject_t ms = map_sobject_at(map, p->pos);
 
+    if (!player_movement_possible(p))
+        return 0;
+
     switch (ms)
     {
     case LS_STAIRSDOWN:
@@ -760,6 +763,9 @@ int player_stairs_up(player *p)
     map *nlevel = NULL;
     gboolean show_msg = FALSE;
     map_sobject_t ms = map_sobject_at(game_map(nlarn, p->pos.z), p->pos);
+
+    if (!player_movement_possible(p))
+        return 0;
 
     switch (ms)
     {
