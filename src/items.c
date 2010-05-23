@@ -873,6 +873,10 @@ guint item_price(item *it)
     /* 20% price increase / decrease for every +/-1 bonus */
     if (it->bonus != 0) price = price * (1 + (0.2 * it->bonus));
 
+    /* gem prices are not affected by being blessed or cursed */
+    if (it->type == IT_GEM)
+        return price;
+
     /* double price if blessed */
     if (it->blessed) price <<=1;
 
