@@ -36,6 +36,7 @@ typedef struct trap_data
 {
     trap_t type;        /* trap type */
     int effect_type;    /* effect caused by this trap */
+    int color;          /* glyph color */
     int chance;         /* chance this trap triggers */
     int effect_chance;  /* chance the effect is activated */
     int damage;         /* base damage */
@@ -63,6 +64,7 @@ int player_trap_trigger(struct player *p, trap_t trap, int force);
 
 /* macros */
 #define trap_effect(trap) (traps[(trap)].effect_type)
+#define trap_colour(trap) (traps[(trap)].color)
 #define trap_chance(trap) (traps[(trap)].chance)
 #define trap_effect_chance(trap) (traps[(trap)].effect_chance)
 #define trap_damage(trap) (traps[(trap)].damage)

@@ -173,7 +173,7 @@ int display_paint_screen(player *p)
                 else if (map_trap_at(map, pos) && (game_wizardmode(nlarn) || player_memory_of(p, pos).trap))
                 {
                     /* FIXME - displays trap when unknown!! */
-                    attron(attrs = DC_MAGENTA);
+                    attron(attrs = trap_colour(map_trap_at(map, pos)));
                     addch('^');
                     attroff(attrs);
                 }
@@ -203,11 +203,10 @@ int display_paint_screen(player *p)
                     addch(item_glyph(player_memory_of(p, pos).item));
                     attroff(attrs);
                 }
-
                 else if (player_memory_of(p, pos).trap)
                 {
                     /* draw trap */
-                    attron(attrs = DC_LIGHTGRAY);
+                    attron(attrs = trap_colour(map_trap_at(map, pos)));
                     addch('^');
                     attroff(attrs);
                 }
@@ -720,10 +719,14 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                 item_equipped = player_item_is_equipped(p, it);
             }
 
-            if ((curr == pos) && item_equipped)
-                attrs = COLOR_PAIR(DCP_BLACK_WHITE);
-            else if (curr == pos)
-                attrs = COLOR_PAIR(DCP_RED_WHITE);
+            /* currently selected */
+            if (curr == pos)
+            {
+                if (item_equipped)
+                    attrs = COLOR_PAIR(DCP_BLACK_WHITE);
+                else
+                    attrs = COLOR_PAIR(DCP_RED_WHITE);
+            }
             else if (item_equipped)
                 attrs = COLOR_PAIR(DCP_WHITE_RED) | A_BOLD;
             else
@@ -2200,8 +2203,8 @@ position display_get_position(player *p, char *message, gboolean ray,
                         attroff(attrs);
                     }
                 }
-             }
-             area_destroy(a);
+            }
+            area_destroy(a);
         }
 
         /* position cursor */

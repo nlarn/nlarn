@@ -16,6 +16,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "display.h"
 #include "effects.h"
 #include "game.h"
 #include "nlarn.h"
@@ -23,9 +24,22 @@
 #include "traps.h"
 
 const trap_data traps[TT_MAX] = {
+/*
+    trap type
+    effect type
+    glyph colour
+    trigger chance
+    effect chance
+    base damage
+    description
+    player trigger message
+    effect message
+    monster trigger message
+*/
     {
         TT_NONE,
         ET_NONE,
+        DC_NONE,
         0,
         0,
         0,
@@ -37,6 +51,7 @@ const trap_data traps[TT_MAX] = {
     {
         TT_ARROW,
         ET_POISON,
+        DC_CYAN,
         75,
         50,
         10,
@@ -48,6 +63,7 @@ const trap_data traps[TT_MAX] = {
     {
         TT_DART,
         ET_POISON,
+        DC_CYAN,
         75,
         50,
         5,
@@ -59,6 +75,7 @@ const trap_data traps[TT_MAX] = {
     {
         TT_TELEPORT,
         ET_NONE,
+        DC_MAGENTA,
         55,
         0,
         0,
@@ -70,6 +87,7 @@ const trap_data traps[TT_MAX] = {
     {
         TT_PIT,
         ET_NONE,
+        DC_BROWN,
         80,
         0,
         6,
@@ -81,6 +99,7 @@ const trap_data traps[TT_MAX] = {
     {
         TT_SPIKEDPIT,
         ET_POISON,
+        DC_BROWN,
         80,
         60,
         12,
@@ -92,6 +111,7 @@ const trap_data traps[TT_MAX] = {
     {
         TT_SLEEPGAS,
         ET_SLEEP,
+        DC_MAGENTA,
         75,
         100,
         0,
@@ -103,6 +123,7 @@ const trap_data traps[TT_MAX] = {
     {
         TT_TRAPDOOR,
         ET_NONE,
+        DC_BROWN,
         75,
         0,
         5,
