@@ -380,6 +380,7 @@ void monsters_wrap(lua_State *L)
         { "RES_FIRE",    MF_RES_FIRE },
         { "RES_SLEEP",   MF_RES_SLEEP },
         { "RES_POISON",  MF_RES_POISON },
+        { "RES_ELEC",    MF_RES_ELEC },
 
         /* monster types */
         { "MT_GIANT_BAT",       MT_GIANT_BAT },
@@ -1466,6 +1467,21 @@ monster *monster_damage_take(monster *m, damage *dam)
                               monster_name(m),
                               dam->amount > 0 ? "partly " : "");
             }
+        }
+        break;
+
+    case DAM_ELECTRICITY:
+        if (monster_flags(m, MF_RES_ELEC))
+        {
+            dam->amount = 0;
+            log_add_entry(nlarn->log, "The %s is not affected!",
+                          monster_name(m));
+        }
+        /* double damage for flying monsters */
+        else if (monster_flags(m, MF_FLY))
+        {
+            dam->amount *= 2;
+            // special message?
         }
         break;
 

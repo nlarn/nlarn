@@ -884,7 +884,7 @@ monsters = {
       attacks = { { type = SLAM, base = 3, damage = PHYSICAL } },
       color = CYAN,
       exp = 55,
-      flags = RES_SLEEP + RES_POISON,
+      flags = RES_SLEEP + RES_POISON + FLY + RES_ELEC,
       hp_max = 30,
       glyph = "v",
       intelligence = 3,
