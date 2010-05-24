@@ -946,7 +946,7 @@ void monster_move(monster *m, struct player *p)
                 monster_update_player_pos(m, p->pos);
                 m_npos = monster_pos(m);
 
-                log_add_entry(nlarn->log, "The %s bumped into you.", monster_get_name(m));
+                log_add_entry(nlarn->log, "The %s bumps into you.", monster_get_name(m));
             }
 
             /* check for door */
@@ -2084,7 +2084,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                 if (it->cursed)
                 {
                     /* cursed items can't be stolen.. */
-                    log_add_entry(nlarn->log, "The %s tries to steal %s but failed.",
+                    log_add_entry(nlarn->log, "The %s tries to steal %s but fails.",
                                   monster_get_name(m), buf);
 
                     /* return true as there actually are things to steal */
