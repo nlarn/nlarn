@@ -785,7 +785,8 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 gpointer effect_id = g_ptr_array_index(p->effects, idx);
                 e = game_effect_get(nlarn, effect_id);
 
-                if (effect_expire(e) == -1)
+                /* trapped counter only reduces on movement */
+                if (e->type != ET_TRAPPED && effect_expire(e) == -1)
                 {
                     /* effect has expired */
                     player_effect_del(p, e);
@@ -1443,6 +1444,22 @@ gboolean player_movement_possible(player *p)
         return FALSE;
     }
 
+    /* no movement if trapped */
+    if (player_effect(p, ET_TRAPPED))
+    {
+        effect *e = player_effect_get(p, ET_TRAPPED);
+        if (effect_expire(e) == -1)
+        {
+            /* effect has expired */
+            player_effect_del(p, e);
+            log_add_entry(nlarn->log, "You climb out of the pit!");
+        }
+        else
+            log_add_entry(nlarn->log, "You're trapped in a pit!");
+
+        return FALSE;
+    }
+
     return TRUE;
 }
 
@@ -1679,7 +1696,13 @@ int player_map_enter(player *p, map *l, gboolean teleported)
 
     /* been teleported here or something like that, need a random spot */
     if (teleported)
+    {
+        effect *e;
+        if ((e = player_effect_get(p, ET_TRAPPED)))
+            player_effect_del(p, e);
+
         pos = map_find_space(l, LE_MONSTER, FALSE);
+    }
 
     /* beginning of the game */
     else if ((l->nlevel == 0) && (game_turn(nlarn) == 1))

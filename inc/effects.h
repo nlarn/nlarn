@@ -110,6 +110,7 @@ typedef enum _effect_type
     ET_BURDENED,                /* overloaded */
     ET_OVERSTRAINED,            /* extremely overloaded */
     ET_REFLECTION,              /* reflection */
+    ET_TRAPPED,                 /* trapped in a pit */
 
     ET_MAX                      /* last effect known */
 } effect_type;

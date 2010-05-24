@@ -535,6 +535,14 @@ static const effect_data effects[ET_MAX] =
         TRUE, FALSE, TRUE, FALSE
     },
 
+    {
+        ET_TRAPPED, 10, TRUE, "trapped",
+        NULL,
+        "You are no longer trapped!",
+        NULL,
+        "The %s climbs out of the pit!",
+        TRUE, FALSE, TRUE, FALSE
+    },
 };
 
 effect *effect_new(effect_type type)

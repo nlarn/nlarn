@@ -86,10 +86,10 @@ const trap_data traps[TT_MAX] = {
     },
     {
         TT_PIT,
-        ET_NONE,
+        ET_TRAPPED,
         DC_BROWN,
         80,
-        0,
+        100,
         6,
         "pit",
         "You fall into a pit!",
@@ -190,6 +190,20 @@ int player_trap_trigger(player *p, trap_t trap, int force)
                                          NULL);
 
                 player_damage_take(p, dam, PD_TRAP, trap);
+            }
+
+            if (trap == TT_SPIKEDPIT)
+            {
+                const trap_t trap2 = TT_PIT;
+
+                if (trap_effect(trap2) && chance(trap_effect_chance(trap2)))
+                {
+                    /* display message if there is one */
+                    if (trap_e_message(trap2))
+                        log_add_entry(nlarn->log, trap_e_message(trap2));
+
+                    player_effect_add(p, effect_new(trap_effect(trap2)));
+                }
             }
 
             /* if there is an effect on the trap add it to player's effects. */

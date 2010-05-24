@@ -611,6 +611,10 @@ int main(int argc, char *argv[])
 
                 if (pos_valid(pos))
                 {
+                    effect *e;
+                    if ((e = player_effect_get(nlarn->p, ET_TRAPPED)))
+                        player_effect_del(nlarn->p, e);
+
                     nlarn->p->pos = pos;
                 }
             }
@@ -646,6 +650,8 @@ int main(int argc, char *argv[])
                 if ((e = player_effect_get(nlarn->p, ET_BLINDNESS)))
                     player_effect_del(nlarn->p, e);
                 if ((e = player_effect_get(nlarn->p, ET_POISON)))
+                    player_effect_del(nlarn->p, e);
+                if ((e = player_effect_get(nlarn->p, ET_TRAPPED)))
                     player_effect_del(nlarn->p, e);
             }
             break;

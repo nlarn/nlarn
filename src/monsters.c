@@ -1013,6 +1013,14 @@ monster *monster_trap_trigger(monster *m)
 
     opos = monster_pos(m);
 
+    if (monster_in_sight(m))
+    {
+        log_add_entry(nlarn->log, trap_m_message(trap), monster_name(m));
+
+        /* set player's knowledge of trap */
+        player_memory_of(nlarn->p, opos).trap = trap;
+    }
+
     /* monster triggered the trap */
     switch (trap)
     {
@@ -1025,6 +1033,19 @@ monster *monster_trap_trigger(monster *m)
         monster_pos_set(m, monster_map(m), npos);
         break;
 
+    case TT_SPIKEDPIT:
+        {
+            const trap_t trap2 = TT_PIT;
+
+            if (trap_effect(trap2) && chance(trap_effect_chance(trap2)))
+            {
+                effect *e;
+                e = effect_new(trap_effect(trap2));
+                e = monster_effect_add(m, e);
+            }
+        }
+        // intentional fall-through
+
     default:
         /* if there is an effect on the trap add it to the
          * monster's list of effects. */
@@ -1033,21 +1054,13 @@ monster *monster_trap_trigger(monster *m)
             eff = effect_new(trap_effect(trap));
             eff = monster_effect_add(m, eff);
         }
-
     } /* switch (trap) */
 
-    if (monster_in_sight(m))
-    {
-        log_add_entry(nlarn->log, trap_m_message(trap), monster_name(m));
-
-        /* set player's knowledge of trap */
-        player_memory_of(nlarn->p, opos).trap = trap;
-    }
-
-    /* inflict damage caused ba the trap */
+    /* inflict damage caused by the trap */
     if (trap_damage(trap))
     {
-        damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE, rand_1n(trap_damage(trap)), NULL);
+        damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
+                                 rand_1n(trap_damage(trap)), NULL);
         m = monster_damage_take(m, dam);
     }
 
@@ -1537,7 +1550,8 @@ gboolean monster_update_action(monster *m)
         /* stationary monsters */
         naction = MA_REMAIN;
     }
-    else if (monster_effect(m, ET_HOLD_MONSTER) || monster_effect(m, ET_SLEEP))
+    else if (monster_effect(m, ET_HOLD_MONSTER) || monster_effect(m, ET_SLEEP)
+             || monster_effect(m, ET_TRAPPED))
     {
         /* no action if monster is held or sleeping */
         naction = MA_REMAIN;
@@ -1806,6 +1820,15 @@ void monster_effects_expire(monster *m)
     {
         gpointer effect_id = g_ptr_array_index(m->effects, idx);;
         effect *e = game_effect_get(nlarn, effect_id);
+
+        if (monster_effect(m, ET_TRAPPED))
+        {
+            if (monster_effect(m, ET_HOLD_MONSTER)
+                    || monster_effect(m, ET_SLEEP))
+            {
+                continue;
+            }
+        }
 
         if (effect_expire(e) == -1)
         {
