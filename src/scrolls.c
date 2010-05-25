@@ -639,6 +639,8 @@ int scroll_mapping(player *p, item *scroll)
     m = game_map(nlarn, p->pos.z);
     pos.z = p->pos.z;
 
+    const gboolean map_traps = (scroll != NULL && scroll->blessed);
+
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
@@ -647,6 +649,14 @@ int scroll_mapping(player *p, item *scroll)
             if (scroll == NULL || tile != LT_FLOOR)
                 player_memory_of(p, pos).type = tile;
             player_memory_of(p, pos).sobject = map_sobject_at(m, pos);
+
+            if (map_traps)
+            {
+                trap_t trap = map_trap_at(m, pos);
+                if (trap)
+                    player_memory_of(p, pos).trap = trap;
+            }
+
         }
     }
 

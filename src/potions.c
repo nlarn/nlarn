@@ -178,6 +178,29 @@ item_usage_result potion_quaff(struct player *p, item *potion)
 
         default:
             result.identified = potion_with_effect(p, potion);
+
+            if (potion->id == PO_MAX_HP && potion->blessed)
+            {
+                int done = FALSE;
+                effect *e;
+                if ((e = player_effect_get(nlarn->p, ET_POISON)))
+                {
+                    player_effect_del(nlarn->p, e);
+                    done = TRUE;
+                }
+                if ((e = player_effect_get(nlarn->p, ET_CONFUSION)))
+                {
+                    player_effect_del(nlarn->p, e);
+                    done = TRUE;
+                }
+                if ((e = player_effect_get(nlarn->p, ET_BLINDNESS)))
+                {
+                    player_effect_del(nlarn->p, e);
+                    done = TRUE;
+                }
+                if (!result.identified)
+                    result.identified = done;
+            }
             break;
         }
     }
