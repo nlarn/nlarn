@@ -659,7 +659,7 @@ int building_tradepost(player *p)
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(u)nequip";
     callback->key = 'u';
-    callback->function = &player_item_unequip;
+    callback->function = &player_item_unequip_wrapper;
     callback->checkfun = &player_item_is_equipped;
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);

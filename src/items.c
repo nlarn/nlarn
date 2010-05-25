@@ -1163,6 +1163,8 @@ item *item_disenchant(item *it)
         desc[0] = g_ascii_toupper(desc[0]);
         log_add_entry(nlarn->log, "%s vibrate%s warningly.",
                       desc, (it->count == 1) ? "s" : "");
+
+        it->bonus_known = TRUE;
     }
 
     if ((it->type == IT_RING) && it->effects)
@@ -1289,7 +1291,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
                  * not know if it is eqipped (this would lead to nasty
                  * segementation faults otherwise) */
                 log_disable(nlarn->log);
-                player_item_unequip(nlarn->p, &nlarn->p->inventory, it);
+                player_item_unequip(nlarn->p, &nlarn->p->inventory, it, TRUE);
                 log_enable(nlarn->log);
             }
 

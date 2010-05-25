@@ -338,7 +338,8 @@ void player_item_equip(player *p, inventory **inv, item *it);
   * @param unused, needed to make function signature match display_inventory requirements
   * @param the item
   */
-void player_item_unequip(player *p, inventory **inv, item *it);
+void player_item_unequip_wrapper(player *p, inventory **inv, item *it);
+void player_item_unequip(player *p, inventory **inv, item *it, int forced);
 
 int player_item_is_container(player *p, item *it);
 int player_item_can_be_added_to_container(player *p, item *it);

@@ -2106,13 +2106,14 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                     /* cursed items can't be stolen.. */
                     log_add_entry(nlarn->log, "The %s tries to steal %s but fails.",
                                   monster_get_name(m), buf);
+                    it->blessed_known = TRUE;
 
                     /* return true as there actually are things to steal */
                     return TRUE;
                 }
 
                 log_disable(nlarn->log);
-                player_item_unequip(p, NULL, it);
+                player_item_unequip(p, NULL, it, TRUE);
                 log_enable(nlarn->log);
             }
 

@@ -845,7 +845,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                     item *it = p->eq_weapon;
 
                     log_disable(nlarn->log);
-                    player_item_unequip(p, NULL, it);
+                    player_item_unequip(p, NULL, it, TRUE);
                     log_enable(nlarn->log);
 
                     log_add_entry(nlarn->log, effect_get_msg_start(e));
@@ -2722,7 +2722,7 @@ int player_inv_display(player *p)
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(u)nequip";
     callback->key = 'u';
-    callback->function = &player_item_unequip;
+    callback->function = &player_item_unequip_wrapper;
     callback->checkfun = &player_item_is_equipped;
     g_ptr_array_add(callbacks, callback);
 
@@ -3023,7 +3023,12 @@ void player_item_equip(player *p, inventory **inv, item *it)
     player_effects_add(p, it->effects);
 }
 
-void player_item_unequip(player *p, inventory **inv, item *it)
+void player_item_unequip_wrapper(player *p, inventory **inv, item *it)
+{
+    player_item_unequip(p, inv, it, FALSE);
+}
+
+void player_item_unequip(player *p, inventory **inv, item *it, int forced)
 {
     char desc[61];        /* item description */
 
@@ -3043,12 +3048,15 @@ void player_item_unequip(player *p, inventory **inv, item *it)
     case IT_AMULET:
         if (p->eq_amulet != NULL)
         {
-            if (!it->cursed)
+            if (forced || !it->cursed)
             {
-                log_add_entry(nlarn->log, "You remove %s.", desc);
+                if (!forced)
+                {
+                    log_add_entry(nlarn->log, "You remove %s.", desc);
 
-                if (!player_make_move(p, 2, TRUE, "removing %s", desc))
-                    return; /* interrupted */
+                    if (!player_make_move(p, 2, TRUE, "removing %s", desc))
+                        return; /* interrupted */
+                }
 
                 if (p->eq_amulet)
                 {
@@ -3110,13 +3118,15 @@ void player_item_unequip(player *p, inventory **inv, item *it)
 
         if ((aslot != NULL) && (*aslot != NULL))
         {
-            if (!it->cursed)
+            if (forced || !it->cursed)
             {
-                if (!player_make_move(p, time, TRUE, "taking %s off", desc))
-                    return; /* interrupted */
+                if (!forced)
+                {
+                    if (!player_make_move(p, time, TRUE, "taking %s off", desc))
+                        return; /* interrupted */
 
-                log_add_entry(nlarn->log, "You finish taking off %s.", desc);
-
+                    log_add_entry(nlarn->log, "You finish taking off %s.", desc);
+                }
                 if (*aslot)
                 {
                     player_effects_del(p, (*aslot)->effects);
@@ -3145,12 +3155,15 @@ void player_item_unequip(player *p, inventory **inv, item *it)
 
         if (rslot != NULL)
         {
-            if (!it->cursed)
+            if (forced || !it->cursed)
             {
-                log_add_entry(nlarn->log, "You remove %s.", desc);
+                if (!forced)
+                {
+                    log_add_entry(nlarn->log, "You remove %s.", desc);
 
-                if (!player_make_move(p, 2, TRUE, "removing %s", desc))
-                    return; /* interrupted */
+                    if (!player_make_move(p, 2, TRUE, "removing %s", desc))
+                        return; /* interrupted */
+                }
 
                 if (*rslot)
                 {
@@ -3172,13 +3185,16 @@ void player_item_unequip(player *p, inventory **inv, item *it)
     case IT_WEAPON:
         if (p->eq_weapon != NULL)
         {
-            if (!p->eq_weapon->cursed)
+            if (forced || !p->eq_weapon->cursed)
             {
-                log_add_entry(nlarn->log, "You put away %s.", desc);
+                if (!forced)
+                {
+                    log_add_entry(nlarn->log, "You put away %s.", desc);
 
-                if (!player_make_move(p, 2 + weapon_is_twohanded(p->eq_weapon),
-                                      TRUE, "putting %s away", desc))
-                    return; /* interrupted */
+                    if (!player_make_move(p, 2 + weapon_is_twohanded(p->eq_weapon),
+                                          TRUE, "putting %s away", desc))
+                        return; /* interrupted */
+                }
 
                 if (p->eq_weapon)
                 {
@@ -3477,7 +3493,7 @@ char *player_item_identified_list(player *p)
     assert (p != NULL);
 
     list = g_string_new(NULL);
-    it = item_new(type_ids[0], 1);
+    it = item_new(type_ids[1], 1);
 
     for (type = 0; type < 5; type++)
     {
@@ -3654,7 +3670,7 @@ void player_item_destroy(player *p, item *it)
     if (player_item_is_equipped(p, it))
     {
         log_disable(nlarn->log);
-        player_item_unequip(p, &p->inventory, it);
+        player_item_unequip(p, &p->inventory, it, TRUE);
         log_enable(nlarn->log);
     }
 
@@ -3898,9 +3914,7 @@ void player_take_off(player *p)
                                NULL, FALSE, FALSE, FALSE, item_filter_unequippable);
 
         if (it)
-        {
-            player_item_unequip(p, NULL, it);
-        }
+            player_item_unequip(p, NULL, it, FALSE);
     }
     else
     {
