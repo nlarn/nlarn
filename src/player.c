@@ -1457,6 +1457,7 @@ gboolean player_movement_possible(player *p)
         else
             log_add_entry(nlarn->log, "You're trapped in a pit!");
 
+        player_make_move(p, 1, FALSE, NULL);
         return FALSE;
     }
 
@@ -4183,7 +4184,14 @@ void player_update_fov(player *p)
     int range = (p->pos.z == 0 ? 15 : 6);
 
     /* calculate range */
-    radius = (player_effect(nlarn->p, ET_BLINDNESS) ? 0 : range + player_effect(nlarn->p, ET_AWARENESS));
+    if (player_effect(nlarn->p, ET_BLINDNESS))
+        radius = 0;
+    else
+    {
+        radius = range + player_effect(nlarn->p, ET_AWARENESS);
+        if (player_effect(nlarn->p, ET_TRAPPED))
+            radius -= 4;
+    }
 
     /* reset FOV */
     memset(&(p->fov), 0, MAP_SIZE * sizeof(int));

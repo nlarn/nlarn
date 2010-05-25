@@ -1837,12 +1837,14 @@ void monster_effects_expire(monster *m)
         gpointer effect_id = g_ptr_array_index(m->effects, idx);;
         effect *e = game_effect_get(nlarn, effect_id);
 
-        if (monster_effect(m, ET_TRAPPED))
+        if (e->type == ET_TRAPPED)
         {
+            /* if the monster is incapable of movement don't decrease
+               trapped counter */
             if (monster_effect(m, ET_HOLD_MONSTER)
                     || monster_effect(m, ET_SLEEP))
             {
-                continue;
+                idx++;
             }
         }
 
@@ -1860,6 +1862,10 @@ void monster_effects_expire(monster *m)
 
 static gboolean monster_player_visible(monster *m)
 {
+    /* monster is blinded */
+    if (monster_effect(m, ET_BLINDNESS))
+        return FALSE;
+
     /* FIXME: this ought to be different per monster type */
     int monster_visrange = 7;
 
@@ -1869,16 +1875,14 @@ static gboolean monster_player_visible(monster *m)
            standing next to him */
         monster_visrange = 1;
     }
+    else if (monster_effect(m, ET_TRAPPED))
+        monster_visrange = 2;
 
     /* determine if the monster can see the player */
     if (pos_distance(monster_pos(m), nlarn->p->pos) > monster_visrange)
         return FALSE;
 
     if (player_effect(nlarn->p, ET_INVISIBILITY) && !monster_flags(m, MF_INFRAVISION))
-        return FALSE;
-
-    /* monster is blinded */
-    if (monster_effect(m, ET_BLINDNESS))
         return FALSE;
 
     /* determine if player's position is visible from monster's position */
