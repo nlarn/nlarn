@@ -33,16 +33,17 @@ static void map_fill_with_traps(map *l);
 static int map_load_from_file(map *l, char *mazefile, int which);
 static void map_make_maze(map *maze, int treasure_room);
 static void map_make_maze_eat(map *l, int x, int y);
+static void map_make_river(map *map, int rivertype);
+static void map_make_lake(map *map, int laketype);
 static void map_make_treasure_room(map *maze, rectangle **rooms);
 static int map_validate(map *maze);
-static void map_item_add(map *maze, item *what);
 
 static map_path *map_path_new(position start, position goal);
 static map_path_element *map_path_element_new(position pos);
 static int map_path_cost(map *l, map_path_element* element, position target);
 static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArray *list);
 static map_path_element *map_path_find_best(map *l, map_path *path);
-static GPtrArray *map_path_get_neighbours(map *l, position pos);
+static GPtrArray *map_path_get_neighbours(map *l, position pos, int can_fly);
 
 static gboolean map_monster_destroy(gpointer key, monster *monst, map *m);
 static gboolean map_sphere_destroy(sphere *s, map *m);
@@ -113,6 +114,11 @@ const char *map_names[MAP_MAX] =
     "V2",
     "V3"
 };
+
+static gboolean is_volcano_map(int nlevel)
+{
+    return (nlevel >= MAP_DMAX);
+}
 
 map *map_new(int num, char *mazefile)
 {
@@ -345,13 +351,11 @@ void map_destroy(map *m)
 
     /* free items */
     for (y = 0; y < MAP_MAX_Y; y++)
-    {
         for (x = 0; x < MAP_MAX_X; x++)
         {
             if (m->grid[y][x].ilist != NULL)
                 inv_destroy(m->grid[y][x].ilist, TRUE);
         }
-    }
 
     g_free(m);
 }
@@ -500,7 +504,6 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_
 
     switch (element)
     {
-
     case LE_GROUND:
         /* why should we need this case? */
         return TRUE;
@@ -525,8 +528,10 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_
     case LE_TRAP:
         if (lt_is_passable(tile->type)
                 && (tile->sobject == LS_NONE)
-                && (tile->trap == TT_NONE) )
+                && (tile->trap == TT_NONE))
+        {
             return TRUE;
+        }
         break;
 
     case LE_ITEM:
@@ -536,11 +541,21 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_
         break;
 
     case LE_MONSTER:
+    case LE_FLYING_MONSTER:
         /* not ok if player is standing on that tile */
         if (pos_identical(pos, nlarn->p->pos))
             return FALSE;
 
-        if (map_pos_passable(l, pos) && !map_is_monster_at(l, pos))
+        if (map_is_monster_at(l, pos))
+            return FALSE;
+
+        if (element == LE_FLYING_MONSTER)
+        {
+            if (tile->type == LT_DEEPWATER || tile->type == LT_LAVA)
+                return TRUE;
+        }
+
+        if (map_pos_passable(l, pos))
             return TRUE;
         break;
 
@@ -594,8 +609,11 @@ int map_pos_is_visible(map *l, position s, position t)
             x += ix;
             error += delta_y;
 
-            if (!lt_is_transparent(l->grid[y][x].type) || !ls_is_transparent(l->grid[y][x].sobject))
+            if (!lt_is_transparent(l->grid[y][x].type)
+                    || !ls_is_transparent(l->grid[y][x].sobject))
+            {
                 return FALSE;
+            }
         }
     }
     else
@@ -617,15 +635,18 @@ int map_pos_is_visible(map *l, position s, position t)
             y += iy;
             error += delta_x;
 
-            if (!lt_is_transparent(l->grid[y][x].type) || !ls_is_transparent(l->grid[y][x].sobject))
+            if (!lt_is_transparent(l->grid[y][x].type)
+                    || !ls_is_transparent(l->grid[y][x].sobject))
+            {
                 return FALSE;
+            }
         }
     }
 
     return TRUE;
 }
 
-map_path *map_find_path(map *l, position start, position goal)
+map_path *map_find_path(map *l, position start, position goal, int can_fly)
 {
     assert(l != NULL && (start.z == goal.z));
 
@@ -665,7 +686,7 @@ map_path *map_find_path(map *l, position start, position goal)
             return path;
         }
 
-        neighbours = map_path_get_neighbours(l, curr->pos);
+        neighbours = map_path_get_neighbours(l, curr->pos, can_fly);
 
         while (neighbours->len)
         {
@@ -685,7 +706,8 @@ map_path *map_find_path(map *l, position start, position goal)
                 g_ptr_array_add(path->open, next);
                 next_is_better = TRUE;
             }
-            else if (map_path_cost(l, curr, path->goal) > map_path_cost(l, next, path->goal))
+            else if (map_path_cost(l, curr, path->goal)
+                        > map_path_cost(l, next, path->goal))
             {
                 next_is_better = TRUE;
             }
@@ -754,7 +776,7 @@ area *map_get_obstacles(map *l, position center, int radius)
     {
         for (pos.x = center.x - radius, x = 0; pos.x <= center.x + radius; pos.x++, x++)
         {
-            if (!pos_valid(pos) || !map_pos_passable(l, pos))
+            if (!pos_valid(pos) || !map_pos_transparent(l, pos))
             {
                 area_point_set(narea, x, y);
             }
@@ -1336,7 +1358,22 @@ generate:
             }
         }
 
-    map_make_maze_eat(maze, 1, 1);
+    /* Maybe add a river or lake. */
+    const int rivertype = (is_volcano_map(maze->nlevel) ? LT_LAVA
+                                                        : LT_DEEPWATER);
+    if (maze->nlevel > 1
+            && (is_volcano_map(maze->nlevel) ? chance(90) : chance(40)))
+    {
+        if (chance(70))
+            map_make_river(maze, rivertype);
+        else
+            map_make_lake(maze, rivertype);
+
+        if (maze->grid[1][1].type == LT_WALL)
+            map_make_maze_eat(maze, 1, 1);
+    }
+    else
+        map_make_maze_eat(maze, 1, 1);
 
     /* add exit to town on map 1 */
     if (maze->nlevel == 1)
@@ -1360,13 +1397,7 @@ generate:
         rooms[room]->y1 = my - rand_1n(2);
         rooms[room]->y2 = my + rand_1n(2);
 
-        if (maze->nlevel < MAP_DMAX)
-        {
-            mx = rand_1n(44)+5;
-            rooms[room]->x1 = mx - rand_1n(4);
-            rooms[room]->x2 = mx + rand_1n(12)+3;
-        }
-        else
+        if (is_volcano_map(maze->nlevel))
         {
             mx = rand_1n(60)+3;
             rooms[room]->x1 = mx - rand_1n(2);
@@ -1374,12 +1405,21 @@ generate:
 
             want_monster = TRUE;
         }
+        else
+        {
+            mx = rand_1n(44)+5;
+            rooms[room]->x1 = mx - rand_1n(4);
+            rooms[room]->x2 = mx + rand_1n(12)+3;
+        }
 
         for (pos.y = rooms[room]->y1 ; pos.y < rooms[room]->y2 ; pos.y++)
         {
             for (pos.x = rooms[room]->x1 ; pos.x < rooms[room]->x2 ; pos.x++)
             {
                 map_tile *tile = map_tile_at(maze, pos);
+                if (tile->type == rivertype)
+                    continue;
+
                 tile->type = LT_FLOOR;
 
                 if (want_monster == TRUE)
@@ -1403,9 +1443,7 @@ generate:
 
     /* add treasure room if requested */
     if (treasure_room)
-    {
         map_make_treasure_room(maze, rooms);
-    }
 
     /* cleanup */
     for (room = 0; room < nrooms; room++)
@@ -1454,7 +1492,6 @@ static void map_make_maze_eat(map *l, int x, int y)
                 l->grid[y - 1][x].type = l->grid[y - 2][x].type = LT_FLOOR;
                 map_make_maze_eat(l, x, y - 2);
             }
-
             break;
 
         case 4: /* north */
@@ -1472,6 +1509,115 @@ static void map_make_maze_eat(map *l, int x, int y)
         {
             dir = 1;
             --try;
+        }
+    }
+}
+
+/* The river/lake creation algorithm has been copied in entirety
+   from Dungeon Crawl Stone Soup, with only very slight changes. (jpeg) */
+static void map_make_vertical_river(map *map, int rivertype)
+{
+    guint width  = 3 + rand_0n(4);
+    guint startx = 6 - width + rand_0n(MAP_MAX_X - 8);
+
+    const guint starty = rand_1n(4);
+    const guint endy   = MAP_MAX_Y - (4 - starty);
+    const guint minx   = rand_1n(3);
+    const guint maxx   = MAP_MAX_X - rand_1n(3);
+
+    position pos;
+    pos.z = map->nlevel;
+    for (pos.y = starty; pos.y < endy; pos.y++)
+    {
+        if (chance(33)) startx++;
+        if (chance(33)) startx--;
+        if (chance(50)) width++;
+        if (chance(50)) width--;
+
+        if (width < 2) width = 2;
+        if (width > 6) width = 6;
+
+        for (pos.x = startx; pos.x < startx + width; pos.x++)
+        {
+            if (pos.x > minx && pos.x < maxx && chance(99))
+                map_tiletype_set(map, pos, rivertype);
+        }
+    }
+}
+
+static void map_make_river(map *map, int rivertype)
+{
+    if (chance(20))
+    {
+        map_make_vertical_river(map, rivertype);
+        return;
+    }
+
+    guint width  = 3 + rand_0n(4);
+    guint starty = 10 - width + rand_0n(MAP_MAX_Y - 12);
+
+    const guint startx = rand_1n(7);
+    const guint endx   = MAP_MAX_X - (7 - startx);
+    const guint miny   = rand_1n(3);
+    const guint maxy   = MAP_MAX_Y - rand_1n(3);
+
+    position pos;
+    pos.z = map->nlevel;
+    for (pos.x = startx; pos.x < endx; pos.x++)
+    {
+        if (chance(33)) starty++;
+        if (chance(33)) starty--;
+        if (chance(50)) width++;
+        if (chance(50)) width--;
+
+        if (width < 2) width = 2;
+        if (width > 6) width = 6;
+
+        for (pos.y = starty; pos.y < starty + width; pos.y++)
+        {
+            if (pos.y > miny && pos.y < maxy && chance(99))
+                map_tiletype_set(map, pos, rivertype);
+        }
+    }
+}
+
+static void map_make_lake(map *map, int laketype)
+{
+    guint x1 = 5 + rand_0n(MAP_MAX_X - 30);
+    guint y1 = 3 + rand_0n(MAP_MAX_Y - 15);
+    guint x2 = x1 + 4 + rand_0n(16);
+    guint y2 = y1 + 4 + rand_0n(5);
+
+    position pos;
+    pos.z = map->nlevel;
+    for (pos.y = y1; pos.y < y2; pos.y++)
+    {
+        if (pos.y <= 1 || pos.y >= MAP_MAX_Y - 1)
+            continue;
+
+        if (chance(50))  x1 += rand_0n(3);
+        if (chance(50))  x1 -= rand_0n(3);
+        if (chance(50))  x2 += rand_0n(3);
+        if (chance(50))  x2 -= rand_0n(3);
+
+        if (pos.y - y1 < (y2 - y1) / 2)
+        {
+            x2 += rand_0n(3);
+            x1 -= rand_0n(3);
+        }
+        else
+        {
+            x2 -= rand_0n(3);
+            x1 += rand_0n(3);
+        }
+
+        for (pos.x = x1; pos.x < x2 ; pos.x++)
+        {
+            if (pos.x <= 1 || pos.x >= MAP_MAX_X - 1)
+                continue;
+
+            if (chance(99))
+                map_tiletype_set(map, pos, laketype);
         }
     }
 }
@@ -1711,6 +1857,9 @@ static void map_make_treasure_room(map *maze, rectangle **rooms)
             }
             else
             {
+                /* make sure there's floor here */
+                map_tiletype_set(maze, pos, LT_FLOOR);
+
                 /* create loot */
                 itm = item_new_random(IT_GOLD);
                 inv_add(map_ilist_at(maze, pos), itm);
@@ -1774,7 +1923,9 @@ static int map_validate(map *maze)
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
             if (!map_pos_passable(maze, pos)
                     && (map_sobject_at(maze, pos) != LS_CLOSEDDOOR))
+            {
                 area_point_set(obsmap, pos.x, pos.y);
+            }
 
     /* get position of entrance */
     switch (maze->nlevel)
@@ -1811,7 +1962,6 @@ static int map_validate(map *maze)
                 connected = FALSE;
                 break;
             }
-
         }
 
         if (!connected)
@@ -1824,7 +1974,7 @@ static int map_validate(map *maze)
 }
 
 /* subroutine to put an item onto an empty space */
-static void map_item_add(map *maze, item *what)
+void map_item_add(map *maze, item *what)
 {
     position pos;
 
@@ -1839,9 +1989,9 @@ static map_path *map_path_new(position start, position goal)
 
     path = g_malloc0(sizeof(map_path));
 
-    path->open = g_ptr_array_new();
+    path->open   = g_ptr_array_new();
     path->closed = g_ptr_array_new();
-    path->path = g_queue_new();
+    path->path   = g_queue_new();
 
     path->start = start;
     path->goal  = goal;
@@ -1876,7 +2026,6 @@ static int map_path_cost(map *l, map_path_element* element, position target)
         element->h_score += 50;
     }
 
-
     return element->g_score + element->h_score;
 }
 
@@ -1892,9 +2041,7 @@ static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArra
         li = g_ptr_array_index(list, idx);
 
         if (pos_identical(li->pos, el->pos))
-        {
             return li;
-        }
     }
 
     return NULL;
@@ -1909,7 +2056,8 @@ static map_path_element *map_path_find_best(map *l, map_path *path)
     {
         el = g_ptr_array_index(path->open, idx);
 
-        if (best == NULL || map_path_cost(l, el, path->goal) < map_path_cost(l, best, path->goal))
+        if (best == NULL || map_path_cost(l, el, path->goal)
+                                < map_path_cost(l, best, path->goal))
         {
             best = el;
         }
@@ -1918,7 +2066,7 @@ static map_path_element *map_path_find_best(map *l, map_path *path)
     return best;
 }
 
-static GPtrArray *map_path_get_neighbours(map *l, position pos)
+static GPtrArray *map_path_get_neighbours(map *l, position pos, int can_fly)
 {
     GPtrArray *neighbours;
     map_path_element *pe;
@@ -1935,7 +2083,8 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos)
         npos = pos_move(pos, dir);
 
         if (pos_valid(npos)
-                && lt_is_passable(map_tiletype_at(l, npos)))
+            && (can_fly ? map_pos_transparent(l, npos)
+                        : lt_is_passable(map_tiletype_at(l, npos))))
         {
             pe = map_path_element_new(npos);
             g_ptr_array_add(neighbours, pe);

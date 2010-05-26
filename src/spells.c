@@ -1048,7 +1048,7 @@ int spell_type_ray(spell *s, struct player *p)
     assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
 
     g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(s));
-    target = display_get_position(p, buffer, TRUE, FALSE, 0, TRUE, TRUE);
+    target = display_get_position(p, buffer, TRUE, FALSE, 0, FALSE, TRUE);
     cmap = game_map(nlarn, p->pos.z);
 
     /* player pressed ESC */
@@ -1113,7 +1113,7 @@ int spell_type_flood(spell *s, struct player *p)
     assert(s != NULL && p != NULL && (spell_type(s) == SC_FLOOD));
 
     g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(s));
-    pos = display_get_position(p, buffer, FALSE, FALSE, 0, TRUE, TRUE);
+    pos = display_get_position(p, buffer, FALSE, FALSE, 0, FALSE, TRUE);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -1181,7 +1181,7 @@ int spell_type_blast(spell *s, struct player *p)
     }
 
     g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(s));
-    pos = display_get_position(p, buffer, FALSE, TRUE, radius, TRUE, TRUE);
+    pos = display_get_position(p, buffer, FALSE, TRUE, radius, FALSE, TRUE);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -1395,7 +1395,7 @@ gboolean spell_make_wall(player *p)
     position pos;
 
     pos = display_get_position(p, "Select a position where you want to place a wall.",
-                               FALSE, FALSE, 0, TRUE, TRUE);
+                               FALSE, FALSE, 0, FALSE, TRUE);
 
     if (pos_identical(pos, p->pos))
     {

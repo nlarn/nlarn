@@ -211,7 +211,9 @@ int pos_in_rect(position pos, rectangle rect)
             && (pos.x <= rect.x2)
             && (pos.y >= rect.y1)
             && (pos.y <= rect.y2))
+    {
         return TRUE;
+    }
     else
         return FALSE;
 }
@@ -250,9 +252,7 @@ area *area_new_circle(position center, int radius, int hollow)
     int fill;
 
     if (!pos_valid(center))
-    {
         return NULL;
-    }
 
     circle = area_new(center.x - radius,
                       center.y - radius,
@@ -339,9 +339,7 @@ area *area_new_circle_flooded(position center, int radius, area *obstacles)
     assert(radius > 0 && obstacles != NULL);
 
     if (!pos_valid(center))
-    {
         return NULL;
-    }
 
     /* add circle boundary to obstacle map */
     obstacles = area_add(obstacles, area_new_circle(center, radius, TRUE));

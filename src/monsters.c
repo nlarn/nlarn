@@ -616,7 +616,9 @@ int monster_pos_set(monster *m, map *map, position target)
 {
     assert(m != NULL && map != NULL && pos_valid(target));
 
-    if (map_pos_validate(map, target, LE_MONSTER, FALSE))
+    if (map_pos_validate(map, target,
+                         monster_flags(m, MF_FLY) ? LE_FLYING_MONSTER
+                                                  : LE_MONSTER, FALSE))
     {
         /* remove current reference to monster from tile */
         map_set_monster_at(monster_map(m), m->pos, NULL);
@@ -725,6 +727,21 @@ const char* monster_type_plural_name(const int montype, const int count)
     return monster_type_name(montype);
 }
 
+static int item_is_unique(item *it)
+{
+    switch (it->type)
+    {
+    case IT_POTION:
+        return (it->id == PO_CURE_DIANTHR);
+    case IT_AMULET:
+        return (it->id == AM_LARN);
+    case IT_WEAPON:
+        return weapon_is_unique(it);
+    default:
+        return FALSE;
+    }
+}
+
 void monster_die(monster *m, struct player *p)
 {
     assert(m != NULL);
@@ -742,11 +759,39 @@ void monster_die(monster *m, struct player *p)
     /* drop stuff the monster carries */
     if (inv_length(m->inventory))
     {
-        inventory **floor = map_ilist_at(monster_map(m), monster_pos(m));
-        while (inv_length(m->inventory) > 0)
+        /* Did it fall into water? */
+        const int tile = map_tiletype_at(monster_map(m), monster_pos(m));
+        if (tile == LT_DEEPWATER || tile == LT_LAVA)
         {
-            inv_add(floor, inv_get(m->inventory, 0));
-            inv_del(&m->inventory, 0);
+            int count = 0;
+            item *it;
+            while (inv_length(m->inventory) > 0)
+            {
+                it = inv_get(m->inventory, 0);
+                if (item_is_unique(it))
+                {
+                    /* teleport the item to safety */
+                    inv_del_element(&m->inventory, it);
+                    map_item_add(game_map(nlarn, p->pos.z), it);
+                }
+                else
+                {
+                    inv_del(&m->inventory, 0);
+                    count++;
+                }
+            }
+            if (count && monster_nearby(m))
+                log_add_entry(nlarn->log, "You hear a splash!");
+        }
+        else
+        {
+            /* dump items on the floor */
+            inventory **floor = map_ilist_at(monster_map(m), monster_pos(m));
+            while (inv_length(m->inventory) > 0)
+            {
+                inv_add(floor, inv_get(m->inventory, 0));
+                inv_del(&m->inventory, 0);
+            }
         }
     }
 
@@ -966,7 +1011,9 @@ void monster_move(monster *m, struct player *p)
             }
 
             /* move towards player; check for monsters */
-            else if (map_pos_validate(monster_map(m), m_npos, LE_MONSTER, FALSE))
+            else if (map_pos_validate(monster_map(m), m_npos,
+                                  monster_flags(m, MF_FLY) ? LE_FLYING_MONSTER
+                                                           : LE_MONSTER, FALSE))
             {
                 monster_pos_set(m, monster_map(m), m_npos);
 
@@ -2182,6 +2229,14 @@ static char *monsters_get_fortune(char *fortune_file)
     return g_ptr_array_index(fortunes, rand_0n(fortunes->len));
 }
 
+static int valid_monster_movement_pos(monster *m, position npos)
+{
+    if (monster_flags(m, MF_FLY))
+        return map_pos_transparent(monster_map(m), npos);
+
+    return lt_is_passable(map_tiletype_at(monster_map(m), npos));
+}
+
 static position monster_move_wander(monster *m, struct player *p)
 {
     if (monster_type(m) == MT_TOWN_PERSON)
@@ -2210,8 +2265,8 @@ static position monster_move_wander(monster *m, struct player *p)
         tries++;
     }
     while ((!pos_valid(npos)
-            || !lt_is_passable(map_tiletype_at(monster_map(m), npos))
-            || map_is_monster_at(monster_map(m), npos))
+                || !valid_monster_movement_pos(m, npos)
+                || map_is_monster_at(monster_map(m), npos))
             && (tries < GD_MAX));
 
     /* new position has not been found, reset to current position */
@@ -2283,7 +2338,8 @@ static position monster_move_attack(monster *m, struct player *p)
 
     /* monster heads into the direction of the player. */
 
-    path = map_find_path(monster_map(m), monster_pos(m), m->player_pos);
+    path = map_find_path(monster_map(m), monster_pos(m), m->player_pos,
+                         monster_flags(m, MF_FLY));
 
     if (path && !g_queue_is_empty(path->path))
     {
@@ -2298,9 +2354,7 @@ static position monster_move_attack(monster *m, struct player *p)
 
     /* cleanup */
     if (path)
-    {
         map_path_destroy(path);
-    }
 
     return npos;
 
@@ -2323,7 +2377,7 @@ static position monster_move_flee(monster *m, struct player *p)
         npos_tmp = pos_move(monster_pos(m), tries);
 
         if (pos_valid(npos_tmp)
-                && lt_is_passable(map_tiletype_at(monster_map(m), npos_tmp))
+                && valid_monster_movement_pos(m, npos_tmp)
                 && !map_is_monster_at(monster_map(m), npos_tmp)
                 && (pos_distance(p->pos, npos_tmp) > dist))
         {

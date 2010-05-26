@@ -95,6 +95,7 @@ typedef enum map_element_type
     LE_TRAP,
     LE_ITEM,
     LE_MONSTER,
+    LE_FLYING_MONSTER,
     LE_MAX
 } map_element_t;
 
@@ -172,6 +173,7 @@ position map_find_space_in(map *maze, rectangle where, map_element_t element, in
 position map_find_sobject(map *l, map_sobject_t sobject);
 position map_find_sobject_in(map *l, map_sobject_t sobject, rectangle area);
 gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_end);
+void map_item_add(map *maze, item *it);
 
 int *map_get_surrounding(map *l, position pos, map_sobject_t type);
 
@@ -185,7 +187,7 @@ int *map_get_surrounding(map *l, position pos, map_sobject_t type);
  */
 int map_pos_is_visible(map *l, position source, position target);
 
-map_path *map_find_path(map *l, position start, position goal);
+map_path *map_find_path(map *l, position start, position goal, int can_fly);
 void map_path_destroy(map_path *path);
 
 area *map_get_obstacles(map *l, position center, int radius);

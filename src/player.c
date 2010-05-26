@@ -1494,29 +1494,8 @@ int player_move(player *p, direction dir, gboolean open_door)
     /* make a shortcut to the current map */
     map = game_map(nlarn, p->pos.z);
 
-    /* impassable */
-    if (!map_pos_passable(map, target_p))
-    {
-        /* bump into walls when blinded or confused */
-        if (player_effect(p, ET_BLINDNESS) || player_effect(p, ET_CONFUSION))
-        {
-            player_memory_of(p, target_p).type = map_tiletype_at(map, target_p);
-            log_add_entry(nlarn->log, "Ouch! You bump into %s!",
-                          lt_get_desc(map_tiletype_at(map, target_p)));
-            return times;
-        }
-
-        if (open_door && map_sobject_at(map, target_p) == LS_CLOSEDDOOR)
-            return player_door_open(nlarn->p, dir);
-
-        /* if it is not a wall, it is definitely not passable */
-        if (!map_tiletype_at(map, target_p) == LT_WALL)
-            return FALSE;
-
-        /* return if player cannot walk through walls */
-        if (!player_effect(p, ET_WALL_WALK))
-            return FALSE;
-    }
+    if (open_door && map_sobject_at(map, target_p) == LS_CLOSEDDOOR)
+        return player_door_open(nlarn->p, dir);
 
     target_m = map_get_monster_at(map, target_p);
 
@@ -1534,6 +1513,30 @@ int player_move(player *p, direction dir, gboolean open_door)
         return player_attack(p, target_m);
     }
 
+    /* impassable */
+    if (!map_pos_passable(map, target_p))
+    {
+        /* return if player cannot walk through walls */
+        if (map_tiletype_at(map, target_p) != LT_WALL
+                || !player_effect(p, ET_WALL_WALK))
+        {
+            /* bump into walls when blinded or confused */
+            if (player_effect(p, ET_BLINDNESS)
+                    || player_effect(p, ET_CONFUSION))
+            {
+                player_memory_of(p, target_p).type = map_tiletype_at(map, target_p);
+                const int tile = map_tiletype_at(map, target_p);
+                log_add_entry(nlarn->log, "Ouch! You bump into %s!",
+                              (tile == LT_WATER || tile == LT_DEEPWATER
+                                || tile == LT_LAVA) ? "the railing"
+                                                    : lt_get_desc(tile));
+                return times;
+            }
+
+            return FALSE;
+        }
+    }
+
     /* reposition player */
     p->pos = target_p;
 
@@ -1545,9 +1548,7 @@ int player_move(player *p, direction dir, gboolean open_door)
 
     /* auto-pickup */
     if (map_ilist_at(map, p->pos))
-    {
         player_autopickup(p);
-    }
 
     /* mention stationary objects at this position */
     if ((so =map_sobject_at(map, p->pos)))
