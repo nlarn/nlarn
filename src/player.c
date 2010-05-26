@@ -106,7 +106,6 @@ static gboolean called_by_autopickup = FALSE;
 
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 static void player_sobject_memorize(player *p, map_sobject_t sobject, position pos);
-static void player_sobject_forget(player *p, position pos);
 static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
 static void player_memory_deserialize(player *p, position pos, cJSON *mser);
@@ -271,8 +270,10 @@ void player_destroy(player *p)
 
     /* release spells */
     while ((p->known_spells)->len > 0)
+    {
         spell_destroy(g_ptr_array_remove_index_fast(p->known_spells,
                       (p->known_spells)->len - 1));
+    }
 
     g_ptr_array_free(p->known_spells, TRUE);
 
@@ -4490,7 +4491,7 @@ static void player_sobject_memorize(player *p, map_sobject_t sobject, position p
     g_array_append_val(p->sobjmem, nsom);
 }
 
-static void player_sobject_forget(player *p, position pos)
+void player_sobject_forget(player *p, position pos)
 {
     player_sobject_memory *som;
     int idx;
@@ -4513,7 +4514,7 @@ static void player_sobject_forget(player *p, position pos)
         }
     }
 
-    /* free the sobjemt memory if no entry remains */
+    /* free the sobject memory if no entry remains */
     if (p->sobjmem->len == 0)
     {
         g_array_free(p->sobjmem, TRUE);

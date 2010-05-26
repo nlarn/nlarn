@@ -1282,6 +1282,9 @@ gboolean spell_alter_reality(player *p)
             map_tile_t tile = player_memory_of(p, pos).type;
             if (tile == LT_FLOOR)
                 player_memory_of(p, pos).type = LT_NONE;
+
+            if (player_memory_of(p, pos).sobject)
+                player_sobject_forget(p, pos);
         }
     }
 
