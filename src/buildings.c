@@ -664,6 +664,14 @@ int building_tradepost(player *p)
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
+    callback = g_malloc(sizeof(display_inv_callback));
+    callback->description = "(n)ote";
+    callback->key = 'n';
+    callback->function = &player_item_notes;
+    callback->checkfun = NULL;
+    callback->active = FALSE;
+    g_ptr_array_add(callbacks, callback);
+
     display_show_message(title, msg_welcome, 0);
     display_paint_screen(p);
 

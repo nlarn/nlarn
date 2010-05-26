@@ -34,7 +34,7 @@ static guint display_cols = 0;
 static GList *windows = NULL;
 
 static display_window *display_window_new(int x1, int y1, int width,
-                                          int height, const char *title);
+        int height, const char *title);
 
 static void display_window_destroy(display_window *dwin, gboolean shall_clear);
 
@@ -784,7 +784,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         {
             cb = g_ptr_array_index(callbacks, cb_nr);
 
-            /* check if callback is approriate for this item */
+            /* check if callback is appropriate for this item */
             /* if no checkfunktion is set, always display item */
             if ((cb->checkfun == NULL) || cb->checkfun(p, it))
             {
@@ -1472,7 +1472,7 @@ int display_get_count(char *caption, int value)
             ipos = 0;
             break;
 
-        /* special cases to speed up getting/dropping multiple items */
+            /* special cases to speed up getting/dropping multiple items */
         case 'y': /* yes */
         case 'd': /* drop */
         case 'g': /* get */
@@ -1482,7 +1482,7 @@ int display_get_count(char *caption, int value)
             cont = FALSE;
             break;
 
-        /* special case to speed up aborting */
+            /* special case to speed up aborting */
         case 'n': /* no */
             /* set value to 0 */
             g_snprintf(ivalue, 8, "%d", 0);
@@ -2141,7 +2141,7 @@ position display_get_position(player *p, char *message, gboolean ray,
                         position tpos = pos_new(a->start_x + x, a->start_y + y, p->pos.z);
 
                         if (target && pos_identical(monster_pos(target), tpos)
-                            && monster_in_sight(target))
+                                && monster_in_sight(target))
                         {
                             /* ray is targeted at a visible monster */
                             mvaddch(a->start_y + y, a->start_x + x, monster_glyph(target));
@@ -2395,7 +2395,7 @@ int display_show_message(const char *title, const char *message, int indent)
 
     /* determine the length of longest text line */
     for (idx = 0; idx < text->len; idx++)
-         max_len = max(max_len, strlen(g_ptr_array_index(text, idx)));
+        max_len = max(max_len, strlen(g_ptr_array_index(text, idx)));
 
     /* shrink the window width if the default width is not required */
     if (max_len + wred < width)
@@ -2520,7 +2520,7 @@ void display_windows_show()
 }
 
 static display_window *display_window_new(int x1, int y1, int width,
-                                          int height, const char *title)
+        int height, const char *title)
 {
     int i;
     display_window *dwin;
@@ -2759,17 +2759,19 @@ static void display_item_details(item *it, player *p, gboolean shop)
         item_describe(it, TRUE, FALSE, FALSE, item_desc, 80);
         item_desc[0] = g_ascii_toupper(item_desc[0]);
 
-        msg = g_strdup_printf("%s\n\nWeight:   %.2f kg\nMaterial: %s\nPrice:    %d gp",
-              item_desc, (float)item_weight(it) / 1000,
-              item_material_name(item_material(it)), item_price(it));
+        msg = g_strdup_printf("%s\n%s%s\nWeight:   %.2f kg\nMaterial: %s\nPrice:    %d gp",
+                              item_desc, it->notes ? it->notes : "", it->notes ? "\n" : "",
+                              (float)item_weight(it) / 1000,
+                              item_material_name(item_material(it)), item_price(it));
     }
     else
     {
         item_describe(it, player_item_known(p, it), FALSE, FALSE, item_desc, 80);
         item_desc[0] = g_ascii_toupper(item_desc[0]);
 
-        msg = g_strdup_printf("%s\n\nWeight:   %.2f kg\nMaterial: %s",
-                              item_desc,(float)item_weight(it) / 1000,
+        msg = g_strdup_printf("%s\n%s%s\nWeight:   %.2f kg\nMaterial: %s",
+                              item_desc, it->notes ? it->notes : "", it->notes ? "\n" : "",
+                              (float)item_weight(it) / 1000,
                               item_material_name(item_material(it)));
     }
 
@@ -2794,4 +2796,3 @@ static void display_spheres_paint(sphere *s, player *p)
         attroff(DC_MAGENTA);
     }
 }
-

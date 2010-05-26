@@ -2733,6 +2733,14 @@ int player_inv_display(player *p)
     callback->function = &player_item_use;
     callback->checkfun = &player_item_is_usable;
     g_ptr_array_add(callbacks, callback);
+
+    callback = g_malloc0(sizeof(display_inv_callback));
+    callback->description = "(n)ote";
+    callback->key = 'n';
+    callback->function = &player_item_notes;
+    g_ptr_array_add(callbacks, callback);
+
+    /* display inventory */
     display_inventory("Inventory", p, &p->inventory, callbacks, FALSE,
                       TRUE, FALSE, NULL);
 
@@ -3769,6 +3777,25 @@ void player_item_drop(player *p, inventory **inv, item *it)
     }
 
     return;
+}
+
+void player_item_notes(player *p, inventory **inv, item *it)
+{
+    char desc[81];
+    char *caption = NULL;
+    char *temp = NULL;
+
+    item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 80);
+    caption = g_strdup_printf("Add your description for %s (delete with ESC)", desc);
+
+    /* get the new note */
+    temp = display_get_string(caption, it->notes, 70);
+
+    /* free the old note before adding the new note to the item */
+    g_free(it->notes);
+    it->notes = temp;
+
+    g_free(caption);
 }
 
 void player_item_pickup(player *p, inventory **inv, item *it)

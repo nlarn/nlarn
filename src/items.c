@@ -293,6 +293,7 @@ item *item_new_finetouch(item *it)
     {
         // water is always blessed
         item_bless(it);
+        it->blessed_known = TRUE;
     }
     else if (item_is_blessable(it->type) && chance(25))
     {
@@ -409,6 +410,11 @@ void item_destroy(item *it)
         inv_destroy(it->content, FALSE);
     }
 
+    if (it->notes != NULL)
+    {
+        g_free(it->notes);
+    }
+
     /* unregister item */
     game_item_unregister(nlarn, it->oid);
 
@@ -442,6 +448,12 @@ void item_serialize(gpointer oid, gpointer it, gpointer root)
     if (inv_length(i->content) > 0)
     {
         cJSON_AddItemToObject(ival, "content", inv_serialize(i->content));
+    }
+
+    /* player's notes */
+    if (i->notes != NULL)
+    {
+        cJSON_AddStringToObject(ival, "notes", i->notes);
     }
 
     /* effects */
@@ -493,6 +505,10 @@ item *item_deserialize(cJSON *iser, struct game *g)
     /* container content */
     obj = cJSON_GetObjectItem(iser, "content");
     if (obj != NULL) it->content = inv_deserialize(obj);
+
+    /* player's notes */
+    obj = cJSON_GetObjectItem(iser, "notes");
+    if (obj != NULL) it->notes = g_strdup(obj->valuestring);
 
     /* effects */
     obj = cJSON_GetObjectItem(iser, "effects");
@@ -715,6 +731,12 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
 
     default:
         break;
+    }
+
+    if (it->notes)
+    {
+        g_string_append_printf(desc, " (%s)",
+                               (strlen(it->notes) > 5 ? "noted" : it->notes));
     }
 
     /* prepend additional information unless the item is an unique weapon */

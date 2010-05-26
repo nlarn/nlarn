@@ -369,6 +369,11 @@ void player_item_destroy(player *p, item *it);
 void player_item_drop(player *p, inventory **inv, item *it);
 
 /**
+ * @brief Take notes about an item.
+ */
+void player_item_notes(player *p, inventory **inv, item *it);
+
+/**
  * @brief Try to pick up an item.
  *
  * @param the player

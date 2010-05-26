@@ -107,6 +107,7 @@ typedef struct _item {
     guint32 count;          /* for stackable items */
     GPtrArray *effects;     /* storage for effects */
     inventory *content;     /* for containers */
+    char *notes;            /* storage for player's notes about the item */
     guint32
         blessed: 1,
         cursed: 1,
