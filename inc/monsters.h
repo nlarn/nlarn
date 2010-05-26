@@ -328,5 +328,6 @@ int monster_effect_del(monster *m, effect *e);
 effect *monster_effect_get(monster *m , effect_type type);
 int monster_effect(monster *m, effect_type type);
 void monster_effects_expire(monster *m);
+int monster_is_carrying_item(monster *m, item_t type);
 
 #endif

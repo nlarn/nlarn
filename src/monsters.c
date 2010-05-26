@@ -2336,3 +2336,18 @@ static position monster_move_flee(monster *m, struct player *p)
     return npos;
 }
 
+int monster_is_carrying_item(monster *m, item_t type)
+{
+    inventory *inv = m->inventory;
+    item *it;
+
+    int idx;
+    for (idx = 0; idx < inv_length(inv); idx++)
+    {
+        it = inv_get(inv, idx);
+        if (it->type == type)
+            return TRUE;
+    }
+    return FALSE;
+}
+

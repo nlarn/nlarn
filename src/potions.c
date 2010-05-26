@@ -288,14 +288,15 @@ static int potion_detect_item(player *p, item *potion)
     assert(p != NULL && potion != NULL);
 
     pos.z = p->pos.z;
+    map *map = game_map(nlarn, pos.z);
 
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            if ((inv = *map_ilist_at(game_map(nlarn, p->pos.z), pos)))
+            if ((inv = *map_ilist_at(map, pos)))
             {
-                for (idx = 0; idx <  inv_length(inv); idx++)
+                for (idx = 0; idx < inv_length(inv); idx++)
                 {
                     it = inv_get(inv, idx);
 
@@ -306,6 +307,7 @@ static int potion_detect_item(player *p, item *potion)
                             player_memory_of(p, pos).item = it->type;
                             player_memory_of(p, pos).item_colour = item_colour(it);
                             count++;
+                            break;
                         }
                     }
                     else
@@ -315,8 +317,52 @@ static int potion_detect_item(player *p, item *potion)
                             player_memory_of(p, pos).item = it->type;
                             player_memory_of(p, pos).item_colour = item_colour(it);
                             count++;
+                            break;
                         }
                     }
+                }
+            }
+
+            /* blessed potions also detect items carried by monsters */
+            if (potion->blessed)
+            {
+                monster *m = map_get_monster_at(map, pos);
+
+                if (m == NULL)
+                    continue;
+
+                int item_type = IT_NONE;
+                if (potion->id == PO_TRE_DETECT)
+                {
+                    if (monster_is_carrying_item(m, IT_GEM))
+                        item_type = IT_GEM;
+                    else if (monster_is_carrying_item(m, IT_GOLD))
+                        item_type = IT_GOLD;
+                }
+                else
+                {
+                    item_t type = IT_NONE;
+                    for (type = IT_AMULET; type < IT_MAX; type++)
+                    {
+                        if (type == IT_GOLD || type == IT_GEM)
+                            continue;
+
+                        if (monster_is_carrying_item(m, type))
+                        {
+                            item_type = type;
+                            break;
+                        }
+                    }
+                }
+
+                if (item_type != IT_NONE)
+                {
+                    /* colour these differently from items that
+                       don't move around */
+
+                    player_memory_of(p, pos).item = item_type;
+                    player_memory_of(p, pos).item_colour = DC_DARKGRAY;
+                    count++;
                 }
             }
         }
