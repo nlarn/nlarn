@@ -779,7 +779,12 @@ int spell_type_point(spell *s, struct player *p)
     }
         /* polymorph */
     case SP_PLY:
-        monster_polymorph(monster);
+        if (chance(5*(monster_level(monster) - 2*s->knowledge)))
+        {
+            log_add_entry(nlarn->log, "It didn't work.");
+        }
+        else
+            monster_polymorph(monster);
         break;
 
         /* teleport */
