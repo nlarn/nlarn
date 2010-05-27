@@ -294,6 +294,7 @@ static int potion_detect_item(player *p, item *potion)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
+            gboolean found_item = FALSE;
             if ((inv = *map_ilist_at(map, pos)))
             {
                 for (idx = 0; idx < inv_length(inv); idx++)
@@ -306,6 +307,7 @@ static int potion_detect_item(player *p, item *potion)
                         {
                             player_memory_of(p, pos).item = it->type;
                             player_memory_of(p, pos).item_colour = item_colour(it);
+                            found_item = TRUE;
                             count++;
                             break;
                         }
@@ -316,6 +318,7 @@ static int potion_detect_item(player *p, item *potion)
                         {
                             player_memory_of(p, pos).item = it->type;
                             player_memory_of(p, pos).item_colour = item_colour(it);
+                            found_item = TRUE;
                             count++;
                             break;
                         }
@@ -324,7 +327,7 @@ static int potion_detect_item(player *p, item *potion)
             }
 
             /* blessed potions also detect items carried by monsters */
-            if (potion->blessed)
+            if (!found_item && potion->blessed)
             {
                 monster *m = map_get_monster_at(map, pos);
 
