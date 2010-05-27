@@ -97,10 +97,18 @@ int player_altar_pray(player *p)
         log_add_entry(nlarn->log, "You don't have any money to donate.");
         return FALSE;
     }
+
     // Use a sensible default value, so you don't anger the gods without
     // meaning to.
     const int donation = display_get_count("How much gold do you want to donate?",
                                            200);
+
+    /* 0 gold donations are likely to be the result of escaping the prompt */
+    if (!donation)
+    {
+        log_add_entry(nlarn->log, "So you decide not to donate anything.");
+        return FALSE;
+    }
 
     if (donation > total_gold)
     {
@@ -187,18 +195,21 @@ int player_altar_pray(player *p)
                 cured_affliction = TRUE;
                 continue;
             }
-            if ((e = player_effect_get(p, ET_DEC_STR)))
+
+            gint32 et;
+            for (et = ET_DEC_CON; et <= ET_DEC_WIS; et++)
             {
-                player_effect_del(p, e);
-                cured_affliction = TRUE;
-                continue;
+                if ((e = player_effect_get(p, et)))
+                {
+                    player_effect_del(p, e);
+                    cured_affliction = TRUE;
+                    break;
+                }
             }
-            if ((e = player_effect_get(p, ET_DEC_DEX)))
-            {
-                player_effect_del(p, e);
-                cured_affliction = TRUE;
+            if (et <= ET_DEC_WIS)
                 continue;
-            }
+
+            /* nothing else to cure */
             break;
         }
 
