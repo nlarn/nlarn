@@ -49,6 +49,7 @@ const potion_data potions[PO_MAX] =
     { PO_FIRE_RES,      "fire resistance",    ET_RESIST_FIRE,      200, FALSE },
     { PO_TRE_DETECT,    "treasure finding",   ET_NONE,             100,  TRUE },
     { PO_MAX_HP,        "instant healing",    ET_MAX_HP,           500,  TRUE },
+    { PO_INC_MP,        "power",              ET_INC_MP,           200,  TRUE },
     { PO_POISON,        "poison",             ET_POISON,            50, FALSE },
     { PO_SEE_INVISIBLE, "see invisible",      ET_INFRAVISION,      200,  TRUE },
     { PO_LEVITATION,    "levitation",         ET_LEVITATION,       200, FALSE },
@@ -93,7 +94,7 @@ potion_obfuscation[PO_MAX - 1] =
     { "tricoloured",    DC_LIGHTCYAN,   },
     { "black",          DC_DARKGRAY,    },
     { "turquoise",      DC_CYAN,        },
-//     { "foaming",        DC_WHITE,       }, // reserved f. power
+    { "foaming",        DC_WHITE,       },
 };
 
 char *potion_desc(int potion_id)

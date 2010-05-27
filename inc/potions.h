@@ -59,6 +59,7 @@ enum potion_objects {
     PO_FIRE_RES,
     PO_TRE_DETECT,
     PO_MAX_HP,
+    PO_INC_MP,
     PO_POISON,
     PO_SEE_INVISIBLE,
     PO_LEVITATION,
