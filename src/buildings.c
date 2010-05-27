@@ -483,7 +483,7 @@ int building_school(player *p)
         { 20, "Applied Wizardry", "The task before you now seems very attainable!" },
         { 10, "Faith for Today", "You now feel more confident that you can find the potion in time!" },
         { 10, "Contemporary Dance", "You feel like dancing!" },
-        {  5, "History of Larn", "Your instructor told you that the Eye of Larn is rumored to be guarded by a platinum dragon who possesses psionic abilities." },
+        {  5, "History of Larn", "Your instructor told you that the Eye of Larn is rumored to be guarded by an invisible demon lord." },
     };
 
     assert(p != NULL);
