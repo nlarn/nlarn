@@ -1380,7 +1380,11 @@ void monster_player_attack(monster *m, player *p)
     dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn), m);
 
     /* deal with random damage (spirit naga) */
-    if (dam->type == DAM_RANDOM) dam->type = rand_1n(DAM_MAX);
+    if (dam->type == DAM_RANDOM)
+        dam->type = rand_1n(DAM_MAX);
+
+    if (dam->type == DAM_DEC_RND)
+        dam->type = rand_m_n(DAM_DEC_CON, DAM_DEC_RND);
 
     if (att.type == ATT_BREATH)
     {

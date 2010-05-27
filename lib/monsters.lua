@@ -999,8 +999,10 @@ monsters = {
       speed = NORMAL,
     },
     [MT_ZILLER] = {
-      ac = 15,
-      attacks = { { type = CLAW, base = 3, damage = PHYSICAL } },
+      ac = 2,
+      attacks = { { type = CLAW, base = 3, damage = PHYSICAL },
+                  { type = CLAW, base = 70, damage = DEC_RND },
+      },
       color = CYAN,
       exp = 35,
       flags = HEAD,

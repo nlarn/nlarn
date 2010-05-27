@@ -98,8 +98,12 @@ typedef enum _damage_types
     DAM_BLINDNESS,      /* lama nobe, green urchin */
     DAM_CONFUSION,      /* umber hulk */
     DAM_PARALYSIS,      /* floating eye */
-    DAM_DEC_STR,        /* ant, centipede */
+    DAM_DEC_CON,
     DAM_DEC_DEX,        /* quasit */
+    DAM_DEC_INT,
+    DAM_DEC_STR,        /* ant, centipede */
+    DAM_DEC_WIS,
+    DAM_DEC_RND,        /* ziller */
     DAM_DRAIN_LIFE,     /* vampire, wraith */
 
     /* inventory manipulation */
