@@ -381,6 +381,7 @@ void monsters_wrap(lua_State *L)
         { "RES_SLEEP",   MF_RES_SLEEP },
         { "RES_POISON",  MF_RES_POISON },
         { "RES_ELEC",    MF_RES_ELEC },
+        { "SWIM",        MF_SWIM },
 
         /* monster types */
         { "MT_GIANT_BAT",       MT_GIANT_BAT },
@@ -612,13 +613,25 @@ position monster_pos(monster *m)
     return m->pos;
 }
 
+static int monster_map_element(monster *m)
+{
+    if (monster_type(m) == MT_XORN)
+        return LE_XORN;
+
+    if (monster_flags(m, MF_FLY))
+        return LE_FLYING_MONSTER;
+
+    if (monster_flags(m, MF_SWIM))
+        return LE_SWIMMING_MONSTER;
+
+    return LE_MONSTER;
+}
+
 int monster_pos_set(monster *m, map *map, position target)
 {
     assert(m != NULL && map != NULL && pos_valid(target));
 
-    if (map_pos_validate(map, target,
-                         monster_flags(m, MF_FLY) ? LE_FLYING_MONSTER
-                                                  : LE_MONSTER, FALSE))
+    if (map_pos_validate(map, target, monster_map_element(m), FALSE))
     {
         /* remove current reference to monster from tile */
         map_set_monster_at(monster_map(m), m->pos, NULL);
@@ -1012,8 +1025,7 @@ void monster_move(monster *m, struct player *p)
 
             /* move towards player; check for monsters */
             else if (map_pos_validate(monster_map(m), m_npos,
-                                  monster_flags(m, MF_FLY) ? LE_FLYING_MONSTER
-                                                           : LE_MONSTER, FALSE))
+                                      monster_map_element(m), FALSE))
             {
                 monster_pos_set(m, monster_map(m), m_npos);
 
@@ -1341,7 +1353,8 @@ void monster_player_attack(monster *m, player *p)
     {
         if (monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, "The %s misses wildly.", monster_get_name(m));
+            log_add_entry(nlarn->log, "The %s misses wildly.",
+                          monster_get_name(m));
         }
         return;
     }
@@ -2229,14 +2242,6 @@ static char *monsters_get_fortune(char *fortune_file)
     return g_ptr_array_index(fortunes, rand_0n(fortunes->len));
 }
 
-static int valid_monster_movement_pos(monster *m, position npos)
-{
-    if (monster_flags(m, MF_FLY))
-        return map_pos_transparent(monster_map(m), npos);
-
-    return lt_is_passable(map_tiletype_at(monster_map(m), npos));
-}
-
 static position monster_move_wander(monster *m, struct player *p)
 {
     if (monster_type(m) == MT_TOWN_PERSON)
@@ -2264,10 +2269,9 @@ static position monster_move_wander(monster *m, struct player *p)
         npos = pos_move(m->pos, rand_1n(GD_MAX));
         tries++;
     }
-    while ((!pos_valid(npos)
-                || !valid_monster_movement_pos(m, npos)
-                || map_is_monster_at(monster_map(m), npos))
-            && (tries < GD_MAX));
+    while (tries < GD_MAX
+           && !map_pos_validate(monster_map(m), npos, monster_map_element(m),
+                                FALSE));
 
     /* new position has not been found, reset to current position */
     if (tries == GD_MAX) npos = monster_pos(m);
@@ -2339,7 +2343,7 @@ static position monster_move_attack(monster *m, struct player *p)
     /* monster heads into the direction of the player. */
 
     path = map_find_path(monster_map(m), monster_pos(m), m->player_pos,
-                         monster_flags(m, MF_FLY));
+                         monster_map_element(m));
 
     if (path && !g_queue_is_empty(path->path))
     {
@@ -2376,10 +2380,9 @@ static position monster_move_flee(monster *m, struct player *p)
 
         npos_tmp = pos_move(monster_pos(m), tries);
 
-        if (pos_valid(npos_tmp)
-                && valid_monster_movement_pos(m, npos_tmp)
-                && !map_is_monster_at(monster_map(m), npos_tmp)
-                && (pos_distance(p->pos, npos_tmp) > dist))
+        if (map_pos_validate(monster_map(m), npos_tmp, monster_map_element(m),
+                             FALSE)
+            && pos_distance(p->pos, npos_tmp) > dist)
         {
             /* distance is bigger than current distance */
             npos = npos_tmp;

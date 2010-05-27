@@ -43,7 +43,8 @@ static map_path_element *map_path_element_new(position pos);
 static int map_path_cost(map *l, map_path_element* element, position target);
 static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArray *list);
 static map_path_element *map_path_find_best(map *l, map_path *path);
-static GPtrArray *map_path_get_neighbours(map *l, position pos, int can_fly);
+static GPtrArray *map_path_get_neighbours(map *l, position pos,
+                                          map_element_t element);
 
 static gboolean map_monster_destroy(gpointer key, monster *monst, map *m);
 static gboolean map_sphere_destroy(sphere *s, map *m);
@@ -467,7 +468,27 @@ position map_find_sobject(map *l, map_sobject_t sobject)
     return pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 }
 
-gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_end)
+static int valid_monster_movement_pos(map *l, position pos, map_element_t elem)
+{
+    switch (map_tiletype_at(l, pos))
+    {
+    case LT_WALL:
+        return (elem == LE_XORN);
+
+    case LT_DEEPWATER:
+        if (elem == LE_SWIMMING_MONSTER)
+            return TRUE;
+        // else fall through
+    case LT_LAVA:
+        return (elem == LE_FLYING_MONSTER);
+
+    default:
+        return map_pos_passable(l, pos);
+    }
+}
+
+gboolean map_pos_validate(map *l, position pos, map_element_t element,
+                          int dead_end)
 {
     map_tile *tile;
 
@@ -477,7 +498,7 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_
     if (!pos_valid(pos))
         return FALSE;
 
-    /* if the position is on another map it is invalid for this lavel */
+    /* if the position is on another map it is invalid for this level */
     if (pos.z != l->nlevel)
         return FALSE;
 
@@ -541,7 +562,9 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_
         break;
 
     case LE_MONSTER:
+    case LE_SWIMMING_MONSTER:
     case LE_FLYING_MONSTER:
+    case LE_XORN:
         /* not ok if player is standing on that tile */
         if (pos_identical(pos, nlarn->p->pos))
             return FALSE;
@@ -549,14 +572,7 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_
         if (map_is_monster_at(l, pos))
             return FALSE;
 
-        if (element == LE_FLYING_MONSTER)
-        {
-            if (tile->type == LT_DEEPWATER || tile->type == LT_LAVA)
-                return TRUE;
-        }
-
-        if (map_pos_passable(l, pos))
-            return TRUE;
+        return valid_monster_movement_pos(l, pos, element);
         break;
 
     case LE_NONE:
@@ -646,7 +662,8 @@ int map_pos_is_visible(map *l, position s, position t)
     return TRUE;
 }
 
-map_path *map_find_path(map *l, position start, position goal, int can_fly)
+map_path *map_find_path(map *l, position start, position goal,
+                        map_element_t element)
 {
     assert(l != NULL && (start.z == goal.z));
 
@@ -686,7 +703,7 @@ map_path *map_find_path(map *l, position start, position goal, int can_fly)
             return path;
         }
 
-        neighbours = map_path_get_neighbours(l, curr->pos, can_fly);
+        neighbours = map_path_get_neighbours(l, curr->pos, element);
 
         while (neighbours->len)
         {
@@ -2066,7 +2083,8 @@ static map_path_element *map_path_find_best(map *l, map_path *path)
     return best;
 }
 
-static GPtrArray *map_path_get_neighbours(map *l, position pos, int can_fly)
+static GPtrArray *map_path_get_neighbours(map *l, position pos,
+                                          map_element_t element)
 {
     GPtrArray *neighbours;
     map_path_element *pe;
@@ -2082,9 +2100,7 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos, int can_fly)
 
         npos = pos_move(pos, dir);
 
-        if (pos_valid(npos)
-            && (can_fly ? map_pos_transparent(l, npos)
-                        : lt_is_passable(map_tiletype_at(l, npos))))
+        if (pos_valid(npos) && valid_monster_movement_pos(l, npos, element))
         {
             pe = map_path_element_new(npos);
             g_ptr_array_add(neighbours, pe);
@@ -2111,9 +2127,7 @@ static gboolean map_monster_destroy(gpointer key, monster *monst, map *m)
 static gboolean map_sphere_destroy(sphere *s, map *m)
 {
     if (s->pos.z != m->nlevel)
-    {
         return FALSE;
-    }
 
     sphere_destroy(s, nlarn);
 

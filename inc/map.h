@@ -95,7 +95,9 @@ typedef enum map_element_type
     LE_TRAP,
     LE_ITEM,
     LE_MONSTER,
+    LE_SWIMMING_MONSTER,
     LE_FLYING_MONSTER,
+    LE_XORN,    /* can move through walls */
     LE_MAX
 } map_element_t;
 
@@ -187,7 +189,8 @@ int *map_get_surrounding(map *l, position pos, map_sobject_t type);
  */
 int map_pos_is_visible(map *l, position source, position target);
 
-map_path *map_find_path(map *l, position start, position goal, int can_fly);
+map_path *map_find_path(map *l, position start, position goal,
+                        map_element_t element);
 void map_path_destroy(map_path *path);
 
 area *map_get_obstacles(map *l, position center, int radius);
