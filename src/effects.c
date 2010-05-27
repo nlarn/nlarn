@@ -344,7 +344,8 @@ static const effect_data effects[ET_MAX] =
     {
         ET_DEC_CON, 1, 1, NULL,
         "You feel incapacitated.",
-        NULL, NULL, NULL,
+        "You feel tougher.",
+        NULL, NULL,
         FALSE, FALSE, TRUE, TRUE
     },
 
@@ -359,7 +360,8 @@ static const effect_data effects[ET_MAX] =
     {
         ET_DEC_INT, 1, 1, NULL,
         "You feel imbecile.",
-        NULL, NULL, NULL,
+        "Your intelligence returns.",
+        NULL, NULL,
         FALSE, FALSE, TRUE, TRUE
     },
 
@@ -374,7 +376,8 @@ static const effect_data effects[ET_MAX] =
     {
         ET_DEC_WIS, 1, 1, NULL,
         "You feel ignorant.",
-        NULL, NULL, NULL,
+        "You feel less ignorant.",
+        NULL, NULL,
         FALSE, FALSE, TRUE, TRUE
     },
 

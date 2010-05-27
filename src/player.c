@@ -1042,14 +1042,29 @@ void player_die(player *p, player_cod cause_type, int cause)
         if ((e = player_effect_get(p, ET_POISON)))
             player_effect_del(p, e);
 
-        if (player_get_str(p) <= 0)
+        if (player_get_con(p) <= 0)
         {
-            if ((e = player_effect_get(p, ET_DEC_STR)))
+            if ((e = player_effect_get(p, ET_DEC_CON)))
                 player_effect_del(p, e);
         }
         if (player_get_dex(p) <= 0)
         {
             if ((e = player_effect_get(p, ET_DEC_DEX)))
+                player_effect_del(p, e);
+        }
+        if (player_get_int(p) <= 0)
+        {
+            if ((e = player_effect_get(p, ET_DEC_INT)))
+                player_effect_del(p, e);
+        }
+        if (player_get_str(p) <= 0)
+        {
+            if ((e = player_effect_get(p, ET_DEC_STR)))
+                player_effect_del(p, e);
+        }
+        if (player_get_wis(p) <= 0)
+        {
+            if ((e = player_effect_get(p, ET_DEC_WIS)))
                 player_effect_del(p, e);
         }
 
@@ -2252,7 +2267,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     case DAM_PARALYSIS:
         /* check if the player succumbs to the monster's stare */
-        if(chance(dam->amount - player_get_int(p)))
+        if (chance(dam->amount - player_get_int(p)))
         {
             e = player_effect_add(p, effect_new(ET_PARALYSIS));
         }
@@ -2264,36 +2279,51 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
         break;
 
-    case DAM_DEC_STR:
-        if (chance(dam->amount -= player_get_con(p)))
-        {
-            e = effect_new(ET_DEC_STR);
-            /* the default number of turns for ET_DEC_STR is 1 */
-            e->turns = dam->amount * 10;
-            e = player_effect_add(p, e);
-
-            if (player_get_str(p) < 1)
-            {
-                player_die(p, PD_EFFECT, ET_DEC_STR);
-            }
-        }
-        else
-        {
-            log_add_entry(nlarn->log, "You are not affected.");
-        }
-        break;
-
+    case DAM_DEC_CON:
     case DAM_DEC_DEX:
+    case DAM_DEC_INT:
+    case DAM_DEC_STR:
+    case DAM_DEC_WIS:
         if (chance(dam->amount -= player_get_con(p)))
         {
-            e = effect_new(ET_DEC_DEX);
-            /* the default number of turns for ET_DEC_DEX is 1 */
+            int effect_type = (ET_DEC_CON + dam->type - DAM_DEC_CON);
+            e = effect_new(effect_type);
+            /* the default number of turns is 1 */
             e->turns = dam->amount * 10;
             e = player_effect_add(p, e);
 
-            if (player_get_dex(p) < 1)
+            switch (dam->type)
             {
-                player_die(p, PD_EFFECT, ET_DEC_DEX);
+            case DAM_DEC_CON:
+                if (player_get_con(p) < 1)
+                    player_die(p, PD_EFFECT, ET_DEC_CON);
+                break;
+
+            case DAM_DEC_DEX:
+                if (player_get_dex(p) < 1)
+                    player_die(p, PD_EFFECT, ET_DEC_DEX);
+                break;
+
+            case DAM_DEC_INT:
+                if (player_get_int(p) < 1)
+                    player_die(p, PD_EFFECT, ET_DEC_INT);
+                break;
+
+            case DAM_DEC_STR:
+                 /* strength has been modified -> recalc burdened status */
+                 player_inv_weight_recalc(p->inventory, NULL);
+
+                if (player_get_str(p) < 1)
+                    player_die(p, PD_EFFECT, ET_DEC_STR);
+                break;
+
+            case DAM_DEC_WIS:
+                if (player_get_wis(p) < 1)
+                    player_die(p, PD_EFFECT, ET_DEC_WIS);
+                break;
+
+            default:
+                break;
             }
         }
         else
@@ -2318,6 +2348,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             p->attacked = TRUE;
         }
         break;
+
     default:
         /* the other damage types are not handled here */
         break;
@@ -2443,7 +2474,11 @@ effect *player_effect_add(player *p, effect *e)
             break;
 
         case ET_INC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_INC_CON, ET_INC_WIS)));
+            while (e->amount-- > 0)
+            {
+                player_effect_add(p, effect_new(rand_m_n(ET_INC_CON,
+                                                         ET_INC_WIS)));
+            }
             break;
 
         case ET_INC_HP_MAX:
@@ -2464,7 +2499,7 @@ effect *player_effect_add(player *p, effect *e)
             break;
 
         case ET_INC_HP:
-            player_hp_gain(p, (int)(((float)p->hp_max / 100) * e->amount));
+            player_hp_gain(p, (p->hp_max  * e->amount)/ 100);
             break;
 
         case ET_MAX_HP:
@@ -2472,7 +2507,7 @@ effect *player_effect_add(player *p, effect *e)
             break;
 
         case ET_INC_MP:
-            player_mp_gain(p, (int)(((float)p->mp_max / 100) * e->amount));
+            player_mp_gain(p, (p->mp_max  * e->amount)/ 100);
             break;
 
         case ET_MAX_MP:
