@@ -987,6 +987,21 @@ void player_die(player *p, player_cod cause_type, int cause)
         title = "Ouch!";
         break;
 
+    case PD_DROWNED:
+        message = "You've drowned in deep water.";
+        title = "Deep the water, short the breath...";
+        break;
+
+    case PD_MELTED:
+        message = "You've melted.";
+        title = "Aaaaaaaaaaaaa!";
+        break;
+
+    case PD_GENOCIDE:
+        message = "You've genocided yourself!";
+        title = "Oops?";
+        break;
+
     case PD_TOO_LATE:
         message = "You returned home too late!";
         title = "The End";
@@ -1005,11 +1020,6 @@ void player_die(player *p, player_cod cause_type, int cause)
     case PD_QUIT:
         message = "You quit.";
         title = "The End";
-        break;
-
-    case PD_GENOCIDE:
-        message = "You've genocided yourself!";
-        title = "Oops?";
         break;
 
     default:
@@ -1487,6 +1497,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     map *map;           /* shortcut to player's current map */
     monster *target_m;  /* monster on target tile (if any) */
     map_sobject_t so;   /* stationary object on target tile (if any) */
+    gboolean move_possible = FALSE;
 
     assert(p != NULL && dir > GD_NONE && dir < GD_MAX);
 
@@ -1495,9 +1506,7 @@ int player_move(player *p, direction dir, gboolean open_door)
 
     /* confusion: random movement */
     if (player_effect(p, ET_CONFUSION))
-    {
         dir = rand_1n(GD_MAX);
-    }
 
     /* determine target position of move */
     target_p = pos_move(p->pos, dir);
@@ -1524,32 +1533,43 @@ int player_move(player *p, direction dir, gboolean open_door)
 
     /* attack - no movement */
     if (target_m)
-    {
         return player_attack(p, target_m);
+
+    /* check if the move is possible */
+    if (map_pos_passable(map, target_p))
+    {
+        /* target tile is passable */
+        move_possible = TRUE;
+    }
+    else if ((map_tiletype_at(map, target_p) == LT_WALL)
+                && player_effect(p, ET_WALL_WALK))
+    {
+        /* target tile is a wall and player can walk trough walls */
+        move_possible = TRUE;
+    }
+    else if (map_pos_transparent(map, target_p)
+             && player_effect(p, ET_LEVITATION))
+    {
+        /* player is able to float above the obstacle */
+        move_possible = TRUE;
     }
 
-    /* impassable */
-    if (!map_pos_passable(map, target_p))
+    if (!move_possible)
     {
-        /* return if player cannot walk through walls */
-        if (map_tiletype_at(map, target_p) != LT_WALL
-                || !player_effect(p, ET_WALL_WALK))
-        {
-            /* bump into walls when blinded or confused */
-            if (player_effect(p, ET_BLINDNESS)
-                    || player_effect(p, ET_CONFUSION))
-            {
-                player_memory_of(p, target_p).type = map_tiletype_at(map, target_p);
-                const int tile = map_tiletype_at(map, target_p);
-                log_add_entry(nlarn->log, "Ouch! You bump into %s!",
-                              (tile == LT_WATER || tile == LT_DEEPWATER
-                                || tile == LT_LAVA) ? "the railing"
-                                                    : lt_get_desc(tile));
-                return times;
-            }
+        /* return if the move is not possible */
 
-            return FALSE;
+        /* bump into walls when blinded or confused */
+        if (player_effect(p, ET_BLINDNESS) || player_effect(p, ET_CONFUSION))
+        {
+            player_memory_of(p, target_p).type = map_tiletype_at(map, target_p);
+            const int tile = map_tiletype_at(map, target_p);
+            log_add_entry(nlarn->log, "Ouch! You bump into %s!",
+                          (tile == LT_DEEPWATER || tile == LT_LAVA)
+                          ? "the railing" : lt_get_desc(tile));
+            return times;
         }
+
+        return FALSE;
     }
 
     /* reposition player */
@@ -1820,6 +1840,11 @@ void player_pickup(player *p)
     {
         log_add_entry(nlarn->log, "There is nothing here.");
     }
+    else if (player_effect(p, ET_LEVITATION))
+    {
+        log_add_entry(nlarn->log, "You cannot reach the floor!");
+        return;
+    }
     else if (inv_length(*inv) == 1)
     {
         player_item_pickup(p, inv, inv_get(*inv, 0));
@@ -1853,6 +1878,10 @@ void player_autopickup(player *p)
     gboolean did_pickup   = FALSE;
 
     assert (p != NULL && map_ilist_at(game_map(nlarn, p->pos.z), p->pos));
+
+    /* if the player is floating above the ground auto-pickup does not work.. */
+    if (player_effect(p, ET_LEVITATION))
+        return;
 
     floor = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
 

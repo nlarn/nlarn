@@ -68,6 +68,7 @@ const map_tile_data map_tiles[LT_MAX] =
 
 const map_sobject_data map_sobjects[LS_MAX] =
 {
+    /* type             img   color         desc                                   pa tr */
     { LS_NONE,          ' ',  DC_NONE,      NULL,                                  1, 1, },
     { LS_ALTAR,         '_',  DC_WHITE,     "a holy altar",                        1, 1, },
     { LS_THRONE,        '\\', DC_MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },

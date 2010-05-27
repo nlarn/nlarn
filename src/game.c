@@ -588,6 +588,20 @@ void game_spin_the_wheel(game *g)
         player_die(g->p, PD_STUCK, 0);
     }
 
+    /* check if the player is on a deep water tile without levitation */
+    if ((map_tiletype_at(map, g->p->pos) == LT_DEEPWATER)
+        && !player_effect(g->p, ET_LEVITATION))
+    {
+        player_die(g->p, PD_DROWNED, 0);
+    }
+
+    /* check if the player is on a lava tile without levitation */
+    if ((map_tiletype_at(map, g->p->pos) == LT_LAVA)
+        && !player_effect(g->p, ET_LEVITATION))
+    {
+        player_die(g->p, PD_MELTED, 0);
+    }
+
     /* deal damage cause by map tiles to player */
     damage *dam  = map_tile_damage(map, g->p->pos);
     if (dam != NULL)

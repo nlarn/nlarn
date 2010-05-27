@@ -722,7 +722,14 @@ int player_stairs_down(player *p)
     map_sobject_t ms = map_sobject_at(map, p->pos);
 
     if (!player_movement_possible(p))
-        return 0;
+        return FALSE;
+
+    /* the stairs down are unreachable while levitating */
+    if (player_effect(p, ET_LEVITATION))
+    {
+        log_add_entry(nlarn->log, "You cannot reach reach the stairs..");
+        return FALSE;
+    }
 
     switch (ms)
     {

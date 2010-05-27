@@ -335,8 +335,16 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_WALL_WALK, 20, TRUE, "wall-walk",
-        "You can now walk through walls",
+        "You can now walk through walls.",
         "You can no longer walk through walls.",
+        NULL, NULL,
+        TRUE, FALSE, TRUE, FALSE
+    },
+
+    {
+        ET_LEVITATION, 20, TRUE, "levitation",
+        "You start to float in the air.",
+        "You gently sink to the ground.",
         NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
     },

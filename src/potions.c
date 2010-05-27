@@ -51,6 +51,7 @@ const potion_data potions[PO_MAX] =
     { PO_MAX_HP,        "instant healing",    ET_MAX_HP,           500,  TRUE },
     { PO_POISON,        "poison",             ET_POISON,            50, FALSE },
     { PO_SEE_INVISIBLE, "see invisible",      ET_INFRAVISION,      200,  TRUE },
+    { PO_LEVITATION,    "levitation",         ET_LEVITATION,       200, FALSE },
     { PO_CURE_DIANTHR,  "cure dianthroritis", ET_NONE,           10000, FALSE },
 };
 
@@ -91,6 +92,7 @@ potion_obfuscation[PO_MAX - 1] =
     { "dichroic",       DC_LIGHTMAGENTA,},
     { "tricoloured",    DC_LIGHTCYAN,   },
     { "black",          DC_DARKGRAY,    },
+    { "turquoise",      DC_CYAN,        },
 //     { "foaming",        DC_WHITE,       }, // reserved f. power
 };
 

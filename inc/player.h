@@ -187,6 +187,8 @@ typedef enum _player_cod
     PD_SOBJECT,   /* killed by stationary object */
     /* *** causes above this line can be stopped by live protection *** */
     PD_STUCK,     /* stuck in a wall */
+    PD_DROWNED,   /* drowned in deep water */
+    PD_MELTED,    /* stuck in lava */
     PD_GENOCIDE,  /* genocided themselves */
     /* *** caused below this line are described as "returning home" *** */
     PD_TOO_LATE,  /* returned with potion too late */

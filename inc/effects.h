@@ -76,8 +76,9 @@ typedef enum _effect_type
     ET_SPIRIT_PROTECTION,       /* protection against spirits */
     ET_LIFE_PROTECTION,         /* you only live twice */
     ET_NOTHEFT,                 /* protection from thievish monsters */
-    ET_TIMESTOP,				/* game time modification */
+    ET_TIMESTOP,                /* game time modification */
     ET_WALL_WALK,               /* ability to walk through walls */
+    ET_LEVITATION,              /* affected person floats in the air */
 
     /* NEGATIVE EFFECTS */
     /* base attribute modification */
