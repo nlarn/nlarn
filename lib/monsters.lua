@@ -363,12 +363,12 @@ monsters = {
     [MT_GREEN_DRAGON] = {
       ac = 3,
       attacks = {
-        { type = CLAW, base = 8, damage = PHYSICAL },
+        { type = BREATH, base = 8, damage = POISON },
         { type = SLAM, base = 25, damage = PHYSICAL }
       },
-      color = GREEN,
+      color = LIGHTGREEN,
       exp = 2500,
-      flags = HEAD + FLY + DRAGON,
+      flags = HEAD + FLY + DRAGON + RES_POISON,
       gold = 200,
       hp_max = 70,
       glyph = "D",
@@ -600,7 +600,7 @@ monsters = {
       ac = -5,
       attacks = {
         { type = BITE, base = 15, damage = PHYSICAL },
-        { type = MAGIC, base = 15, damage = MAGICAL, rand = 30 }
+        { type = BREATH, base = 15, damage = MAGICAL, rand = 30 }
       },
       color = WHITE,
       exp = 24000,

@@ -311,6 +311,24 @@ const spell_data spells[SP_MAX] =
         NULL,
         3, 0, TRUE
     },
+
+    {
+        SP_MON_PSY, "mpb", "psionic blast",
+        SC_RAY, DAM_MAGICAL, ET_NONE,
+        "magical breath attack",
+        "The psionic blast hits the %s.",
+        NULL,
+        3, 0, TRUE
+    },
+
+    {
+        SP_MON_POISON, "mpg", "burst of noxious fumes",
+        SC_RAY, DAM_POISON, ET_NONE,
+        "poison breath attack",
+        "The burst of poison hits the %s.",
+        NULL,
+        3, 0, TRUE
+    },
 };
 
 struct book_obfuscation_s
@@ -846,6 +864,8 @@ static int get_spell_color(spell *sp, gboolean did_hit)
     {
     case SP_MON_FIRE:
         return (did_hit ? DC_YELLOW : DC_LIGHTRED);
+    case SP_MON_POISON:
+        return (did_hit ? DC_LIGHTGREEN : DC_GREEN);
     default:
         return (did_hit ? DC_LIGHTRED : DC_LIGHTCYAN);
     }

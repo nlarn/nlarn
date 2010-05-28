@@ -99,6 +99,8 @@ typedef enum spell_ids {
     SP_MAX_BOOK,    /* last known spell */
     /* monster spells */
     SP_MON_FIRE = SP_MAX_BOOK,    /* burst of fire */
+    SP_MON_PSY,     /* psionic blast */
+    SP_MON_POISON,  /* poisonous fumes */
     SP_MAX
 } spell_id;
 

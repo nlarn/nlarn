@@ -1326,6 +1326,12 @@ static int handle_breath_attack(monster *m, player *p, attack att)
     case DAM_FIRE:
         sp = spell_new(SP_MON_FIRE);
         break;
+    case DAM_MAGICAL:
+        sp = spell_new(SP_MON_PSY);
+        break;
+    case DAM_POISON:
+        sp = spell_new(SP_MON_POISON);
+        break;
     default:
         break;
     }
