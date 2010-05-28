@@ -794,6 +794,20 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 }
                 else
                 {
+                    /* give a warning if critical effects are about to time out */
+                    if (e->turns == 5)
+                    {
+                        gboolean interrupt_actions = TRUE;
+                        if (e->type == ET_WALL_WALK)
+                            log_add_entry(nlarn->log, "Your attunement to the walls is fading!");
+                        else if (e->type == ET_LEVITATION)
+                            log_add_entry(nlarn->log, "You are starting to drift towards the ground!");
+                        else
+                            interrupt_actions = FALSE;
+
+                        if (interrupt_actions)
+                            p->attacked = TRUE;
+                    }
                     idx++;
                 }
             }

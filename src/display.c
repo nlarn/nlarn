@@ -106,7 +106,6 @@ int display_paint_screen(player *p)
     guint x, y, i;
     position pos;
     map *map;
-    char **effects_desc;    /* container for effect descriptions */
     int attrs;              /* curses attributes */
     message_log_entry *le;  /* needed to display messages */
     GPtrArray *text = NULL; /* storage for formatted messages */
@@ -330,7 +329,7 @@ int display_paint_screen(player *p)
 
     /* *** RIGHT STATUS *** */
 
-    /* strenght */
+    /* strength */
     mvprintw(1, MAP_MAX_X + 3, "STR ");
 
     if (player_get_str(p) > (int)p->strength)
@@ -421,25 +420,27 @@ int display_paint_screen(player *p)
     move(9, MAP_MAX_X + 1);
     clrtoeol();
 
-    /* display effect descriptions */
-    effects_desc = player_effect_text(p);
-
     /* clear lines */
     for (i = 0; i < 7; i++)
     {
         move(10 + i, MAP_MAX_X + 3);
         clrtoeol();
     }
-
-    if (*effects_desc)
+    /* display effect descriptions */
+    if (p->effects->len > 0)
     {
-        int available_space = display_cols - MAP_MAX_X - 4;
+        const int available_space = display_cols - MAP_MAX_X - 4;
 
-        attron(attrs = DC_LIGHTCYAN);
-
-        for (i = 0; effects_desc[i]; i++)
+        effect *e;
+        int pos = 0;
+        for (i = 0; i < p->effects->len; i++)
         {
-            char *desc = g_strdup(effects_desc[i]);
+            e = game_effect_get(nlarn, g_ptr_array_index(p->effects, i));
+
+            if (effect_get_desc(e) == NULL)
+                continue;
+
+            char *desc = g_strdup(effect_get_desc(e));
 
             if (strlen(desc) > available_space)
             {
@@ -447,14 +448,21 @@ int display_paint_screen(player *p)
                 desc[available_space] = '\0';
             }
 
-            mvprintw(11 + i, MAP_MAX_X + 3, desc);
+            if ((e->type == ET_WALL_WALK || e->type == ET_LEVITATION)
+                    && e->turns < 6)
+            {
+                attron(attrs = DC_LIGHTRED);
+            }
+            else
+                attron(attrs = DC_LIGHTCYAN);
+
+            mvprintw(11 + pos, MAP_MAX_X + 3, desc);
+            attroff(attrs);
             g_free(desc);
+
+            pos++;
         }
-
-        attroff(attrs);
     }
-
-    g_strfreev(effects_desc);
 
     /* *** MESSAGES *** */
     /* number of lines which can be displayed */
