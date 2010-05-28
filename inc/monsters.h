@@ -181,6 +181,7 @@ gpointer monster_oid(monster *m);
 void monster_oid_set(monster *m, gpointer oid);
 position monster_pos(monster *m);
 int monster_pos_set(monster *m, struct map *map, position target);
+int valid_monster_movement_pos(struct map *l, position pos, int map_elem);
 monster_t monster_type(monster *m);
 gboolean monster_unknown(monster *m);
 void monster_unknown_set(monster *m, gboolean what);

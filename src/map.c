@@ -469,25 +469,6 @@ position map_find_sobject(map *l, map_sobject_t sobject)
     return pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 }
 
-static int valid_monster_movement_pos(map *l, position pos, map_element_t elem)
-{
-    switch (map_tiletype_at(l, pos))
-    {
-    case LT_WALL:
-        return (elem == LE_XORN);
-
-    case LT_DEEPWATER:
-        if (elem == LE_SWIMMING_MONSTER)
-            return TRUE;
-        // else fall through
-    case LT_LAVA:
-        return (elem == LE_FLYING_MONSTER);
-
-    default:
-        return map_pos_passable(l, pos);
-    }
-}
-
 gboolean map_pos_validate(map *l, position pos, map_element_t element,
                           int dead_end)
 {

@@ -21,6 +21,7 @@
 #include <lauxlib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "display.h"
 #include "game.h"
@@ -627,6 +628,25 @@ static int monster_map_element(monster *m)
     return LE_MONSTER;
 }
 
+int valid_monster_movement_pos(map *l, position pos, int map_elem)
+{
+    switch (map_tiletype_at(l, pos))
+    {
+    case LT_WALL:
+        return (map_elem == LE_XORN);
+
+    case LT_DEEPWATER:
+        if (map_elem == LE_SWIMMING_MONSTER)
+            return TRUE;
+        // else fall through
+    case LT_LAVA:
+        return (map_elem == LE_FLYING_MONSTER);
+
+    default:
+        return map_pos_passable(l, pos);
+    }
+}
+
 int monster_pos_set(monster *m, map *map, position target)
 {
     assert(m != NULL && map != NULL && pos_valid(target));
@@ -1131,13 +1151,46 @@ void monster_polymorph(monster *m)
 {
     assert (m != NULL);
 
+    const map_element_t old_elem = monster_map_element(m);
     do
     {
         m->type = rand_1n(MT_MAX_GENERATED);
     }
     while (monster_is_genocided(m->type));
 
-    m->hp = monster_hp_max(m);
+    /* if the new monster can't survive in this terrain, kill it */
+    const map_element_t new_elem = monster_map_element(m);
+    if (!valid_monster_movement_pos(monster_map(m), m->pos, new_elem))
+    {
+        if (monster_in_sight(m))
+        {
+            /* briefly display the new monster before it dies */
+            display_paint_screen(nlarn->p);
+            usleep(100000);
+
+            switch (old_elem)
+            {
+            case LE_FLYING_MONSTER:
+                log_add_entry(nlarn->log, "The %s falls into the %s!",
+                              monster_get_name(m),
+                              lt_get_desc(map_tiletype_at(monster_map(m), m->pos)));
+                break;
+            case LE_SWIMMING_MONSTER:
+                log_add_entry(nlarn->log, "The %s sinks like a rock!",
+                              monster_get_name(m));
+                break;
+            case LE_XORN:
+                log_add_entry(nlarn->log, "The %s is trapped in the wall!",
+                              monster_get_name(m));
+                break;
+            default:
+                break;
+            }
+        }
+        monster_die(m, nlarn->p);
+    }
+    else /* fully heal monster */
+        m->hp = monster_hp_max(m);
 }
 
 int monster_items_pickup(monster *m)
