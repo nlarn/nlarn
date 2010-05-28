@@ -296,9 +296,7 @@ area *area_new_circle(position center, int radius, int hollow)
     }
 
     if (hollow)
-    {
         return circle;
-    }
 
     /* fill the circle
      * - set fill to 1 when spotting the left border
