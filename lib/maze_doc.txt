@@ -6,9 +6,9 @@ map is the one used for the town, the following maps are mazes used elsewhere
 in the game.
 
 The first dungeon level is always a randomized maze. After that, each time a
-level is generated, there's a 25% of picking a random pre-defined maze map
-instead of drawing a random maze. In addition, the bottom levels of the dungeon
-and the volcano will always use a custom map.
+level is generated, there's a 25% chance of picking a random pre-defined maze
+map instead of drawing a random maze. In addition, the bottom levels of the
+dungeon and the volcano will always use a custom map.
 
 Staircases and the bank branch (which is guaranteed on dungeon level 5) are
 only ever placed in "dead ends", i.e. a floor tile with exactly seven adjacent
@@ -32,15 +32,17 @@ Maps must have a total size of 67 x 17, and symbols are parsed as follows:
 
 
 Items:
-    !   If on last level of the Volcano, place potion of cure dianthroritis and
-        a demon prince to guard it, else empty.
-    *   If on last level of the Dungeon, place eye of larn and a random demon
-        lord to guard it, else empty.
+    !   If on last level of the Dungeon, place amulet of larn and a random
+        demon lord to guard it.
+        If on last level of the Volcano, place potion of cure dianthroritis and
+        a demon prince to guard it.
+        Otherwise, stays empty.
 
-These two must be defined in every map. Without the potion, the game cannot
-be won.
+It is assumed that three of these are defined on every map, one position of
+which is chosen at random. If there are not enough positions defined in the map
+and the object couldn't be placed, it is placed in a random position instead.
 
-    -   A random item, though not a container.
+    o   A random item, though not a container.
         The current maps contain around 6-9 items in fixed positions,
         averaging ~8.
         The game will later place additional items in random positions.
@@ -82,3 +84,6 @@ These should not be used outside the town map.
 The game makes no attempt to check for connectedness, so you need to make very
 sure that all areas of your map are reachable.
 
+Beware that if the special item ('!') is placed in or near a dead-end, the
+player might luck out and find it very quickly, which might or might not be
+what you want.

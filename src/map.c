@@ -117,6 +117,21 @@ const char *map_names[MAP_MAX] =
     "V3"
 };
 
+static gboolean is_town(int nlevel)
+{
+    return (nlevel == 0);
+}
+
+static gboolean is_dungeon_bottom(int nlevel)
+{
+    return (nlevel == MAP_DMAX - 1);
+}
+
+static gboolean is_volcano_bottom(int nlevel)
+{
+    return (nlevel == MAP_MAX - 1);
+}
+
 static gboolean is_volcano_map(int nlevel)
 {
     return (nlevel >= MAP_DMAX);
@@ -133,8 +148,8 @@ map *map_new(int num, char *mazefile)
 
     /* create map */
     if ((num == 0) /* town is stored in file */
-            || (num == MAP_DMAX - 1) /* level 10 */
-            || (num == MAP_MAX - 1)  /* volcano level 3 */
+            || is_dungeon_bottom(num) /* level 10 */
+            || is_volcano_bottom(num) /* volcano level 3 */
             || (num > 1 && chance(25)))
     {
         /* read maze from data file */
@@ -513,15 +528,17 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
         break;
 
     case LE_SOBJECT:
-        if (lt_is_passable(tile->type) && (tile->sobject == LS_NONE) )
+        if (lt_is_passable(tile->type) && (tile->sobject == LS_NONE))
         {
             /* find free space */
             position p = pos;
 
             for (p.y = pos.y -1; p.y < pos.y + 2; p.y++)
                 for (p.x = pos.x -1; p.x < pos.x + 2; p.x++)
+                {
                     if (map_sobject_at(l, p) != LS_NONE)
                         return FALSE;
+                }
 
             return TRUE;
 
@@ -1158,7 +1175,8 @@ static int map_fill_with_stationary_objects(map *maze)
     }
 
     /*  make the fixed objects in the maze: STAIRS */
-    if ((maze->nlevel > 0) && (maze->nlevel != MAP_DMAX - 1) && (maze->nlevel != MAP_MAX - 1))
+    if (!is_town(maze->nlevel) && !is_dungeon_bottom(maze->nlevel)
+            && !is_volcano_bottom(maze->nlevel))
     {
         pos = map_find_space(maze, LE_SOBJECT, TRUE);
         if (!pos_valid(pos)) return FALSE;
@@ -1313,7 +1331,7 @@ static void map_fill_with_traps(map *l)
     assert(l != NULL);
 
     /* Trapdoor cannot be placed in the last dungeon map and the last vulcano map */
-    trapdoor = ((l->nlevel != MAP_DMAX - 1) && (l->nlevel != MAP_MAX - 1));
+    trapdoor = (!is_dungeon_bottom(l->nlevel) && !is_volcano_bottom(l->nlevel));
 
     for (count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
     {
@@ -1621,6 +1639,28 @@ static void map_make_lake(map *map, int laketype)
     }
 }
 
+static void place_special_item(map *nmap, position npos)
+{
+    map_tile *tile = map_tile_at(nmap, npos);
+
+    switch (nmap->nlevel)
+    {
+    case MAP_DMAX - 1: /* eye of larn */
+        inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN));
+
+        monster_new(MT_DEMONLORD_I + rand_0n(7), npos);
+        break;
+
+    case MAP_MAX - 1: /* potion of cure dianthroritis */
+        inv_add(&tile->ilist, item_new(IT_POTION, PO_CURE_DIANTHR));
+        monster_new(MT_DEMON_PRINCE, npos);
+
+    default:
+        /* plain level, add neither monster nor item */
+        break;
+    }
+}
+
 /*
  *  function to read in a maze from a data file
  *
@@ -1633,9 +1673,8 @@ static void map_make_lake(map *map, int laketype)
  *      #   wall
  *      +   door
  *      M   random monster
- *      *   eye of larn
- *      !   potion of cure dianthroritis
- *      -   random object
+ *      !   potion of cure dianthroritis, or eye of larn, as appropriate
+ *      o   random object
  */
 static int map_load_from_file(map *nmap, char *mazefile, int which)
 {
@@ -1694,6 +1733,9 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
     // Sometimes flip the maps. (Never the town)
     gboolean flip_vertical   = (map_num > 0 && chance(50));
     gboolean flip_horizontal = (map_num > 0 && chance(50));
+
+    /* replace which of 3 '!' with a special item? (if appropriate) */
+    int spec_count = rand_0n(3);
 
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
@@ -1780,29 +1822,16 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                 tile->sobject = LS_BANK;
                 break;
 
-            case '*': /* eye of larn */
-                if (nmap->nlevel != MAP_DMAX - 1)
-                {
-                    break;
-                }
-                inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN));
-
-                monster_new(MT_DEMONLORD_I + rand_0n(7), map_pos);
+            case '!': /* potion of cure dianthroritis, eye of larn */
+                if (spec_count-- == 0)
+                    place_special_item(nmap, map_pos);
                 break;
 
-            case '!':	/* potion of cure dianthroritis */
-                if (nmap->nlevel != MAP_MAX - 1)
-                    break;
-
-                inv_add(&tile->ilist, item_new(IT_POTION, PO_CURE_DIANTHR));
-                monster_new(MT_DEMON_PRINCE, map_pos);
-                break;
-
-            case 'M':	/* random monster */
+            case 'M': /* random monster */
                 monster_new_by_level(map_pos);
                 break;
 
-            case '-':
+            case 'o': /* random item */
                 do
                 {
                     it = rand_1n(IT_MAX - 1);
@@ -1817,6 +1846,10 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
     }
 
     fclose(levelfile);
+
+    /* if the eye of larn/pcd has not placed yet, just place it anywhere */
+    if (spec_count >= 0)
+        place_special_item(nmap, map_find_space(nmap, LE_ITEM, FALSE));
 
     return TRUE;
 }
