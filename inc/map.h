@@ -208,7 +208,7 @@ void map_trap_set(map *l, position pos, trap_t type);
 map_sobject_t map_sobject_at(map *l, position pos);
 void map_sobject_set(map *l, position pos, map_sobject_t type);
 
-damage *map_tile_damage(map *l, position pos);
+damage *map_tile_damage(map *l, position pos, int flying);
 
 char *map_pos_examine(position pos);
 

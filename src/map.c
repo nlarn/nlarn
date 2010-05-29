@@ -40,9 +40,11 @@ static int map_validate(map *maze);
 
 static map_path *map_path_new(position start, position goal);
 static map_path_element *map_path_element_new(position pos);
-static int map_path_cost(map *l, map_path_element* element, position target);
+static int map_path_cost(map *l, map_path_element* element, position target,
+                         map_element_t map_elem);
 static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArray *list);
-static map_path_element *map_path_find_best(map *l, map_path *path);
+static map_path_element *map_path_find_best(map *l, map_path *path,
+                                            map_element_t map_elem);
 static GPtrArray *map_path_get_neighbours(map *l, position pos,
                                           map_element_t element);
 
@@ -679,7 +681,7 @@ map_path *map_find_path(map *l, position start, position goal,
 
     while (path->open->len)
     {
-        curr = map_path_find_best(l, path);
+        curr = map_path_find_best(l, path, element);
 
         g_ptr_array_remove_fast(path->open, curr);
         g_ptr_array_add(path->closed, curr);
@@ -722,8 +724,8 @@ map_path *map_find_path(map *l, position start, position goal,
                 g_ptr_array_add(path->open, next);
                 next_is_better = TRUE;
             }
-            else if (map_path_cost(l, curr, path->goal)
-                        > map_path_cost(l, next, path->goal))
+            else if (map_path_cost(l, curr, path->goal, element)
+                        > map_path_cost(l, next, path->goal, element))
             {
                 next_is_better = TRUE;
             }
@@ -917,7 +919,7 @@ void map_sobject_set(map *l, position pos, map_sobject_t type)
     l->grid[pos.y][pos.x].sobject = type;
 }
 
-damage *map_tile_damage(map *l, position pos)
+damage *map_tile_damage(map *l, position pos, int flying)
 {
     assert (l != NULL && pos_valid(pos));
 
@@ -932,6 +934,9 @@ damage *map_tile_damage(map *l, position pos)
         break;
 
     case LT_WATER:
+        if (flying)
+            return NULL;
+
         return damage_new(DAM_WATER, ATT_NONE, 4 + rand_0n(2), NULL);
         break;
 
@@ -2039,7 +2044,8 @@ static map_path_element *map_path_element_new(position pos)
 }
 
 /* Returns cost from position defined by element to goal.*/
-static int map_path_cost(map *l, map_path_element* element, position target)
+static int map_path_cost(map *l, map_path_element* element, position target,
+                         map_element_t map_elem)
 {
     element->h_score = pos_distance(element->pos, target);
 
@@ -2048,11 +2054,18 @@ static int map_path_cost(map *l, map_path_element* element, position target)
         element->h_score += 10;
 
     /* penalize fields covered with water, fire or cloud */
-    if ((map_tiletype_at(l, element->pos) == LT_FIRE)
-            || (map_tiletype_at(l, element->pos) == LT_WATER)
-            || (map_tiletype_at(l, element->pos) == LT_CLOUD))
+    switch (map_tiletype_at(l, element->pos))
     {
+    case LT_WATER:
+        if (map_elem == LE_SWIMMING_MONSTER || map_elem == LE_FLYING_MONSTER)
+            break;
+        /* else fall through */
+    case LT_FIRE:
+    case LT_CLOUD:
         element->h_score += 50;
+        break;
+    default:
+        break;
     }
 
     return element->g_score + element->h_score;
@@ -2076,7 +2089,8 @@ static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArra
     return NULL;
 }
 
-static map_path_element *map_path_find_best(map *l, map_path *path)
+static map_path_element *map_path_find_best(map *l, map_path *path,
+                                            map_element_t map_elem)
 {
     map_path_element *el, *best = NULL;
     guint idx;
@@ -2085,8 +2099,8 @@ static map_path_element *map_path_find_best(map *l, map_path *path)
     {
         el = g_ptr_array_index(path->open, idx);
 
-        if (best == NULL || map_path_cost(l, el, path->goal)
-                                < map_path_cost(l, best, path->goal))
+        if (best == NULL || map_path_cost(l, el, path->goal, map_elem)
+                                < map_path_cost(l, best, path->goal, map_elem))
         {
             best = el;
         }

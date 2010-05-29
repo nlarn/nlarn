@@ -603,11 +603,11 @@ void game_spin_the_wheel(game *g)
     }
 
     /* deal damage cause by map tiles to player */
-    damage *dam  = map_tile_damage(map, g->p->pos);
+    damage *dam = map_tile_damage(map, g->p->pos,
+                                  player_effect(g->p, ET_LEVITATION));
+
     if (dam != NULL)
-    {
         player_damage_take(g->p, dam, PD_MAP, map_tiletype_at(map, g->p->pos));
-    }
 
     game_monsters_move(g);
     g_ptr_array_foreach(g->spheres, (GFunc)sphere_move, g);
@@ -909,7 +909,8 @@ static void game_monsters_move(game *g)
         }
 
         /* damage caused by map effects */
-        damage *dam = map_tile_damage(monster_map(m), monster_pos(m));
+        damage *dam = map_tile_damage(monster_map(m), monster_pos(m),
+                                      monster_flags(m, MF_FLY));
 
         /* deal damage caused by floor effects */
         if ((dam != NULL) && !(m = monster_damage_take(m, dam)))

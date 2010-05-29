@@ -1580,6 +1580,11 @@ monster *monster_damage_take(monster *m, damage *dam)
         /* dam->amount -= monster_ac(m); */
         break;
 
+    case DAM_WATER:
+        if (monster_flags(m, MF_SWIM))
+            dam->amount = 0;
+        break;
+
     case DAM_FIRE:
         if (monster_flags(m, MF_RES_FIRE))
         {
