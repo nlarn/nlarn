@@ -45,8 +45,8 @@ const spell_data spells[SP_MAX] =
         SP_MLE, "mle", "magic missile",
         SC_POINT, DAM_MAGICAL, ET_NONE,
         "Creates and hurls a magic missile equivalent to a + 1 magic arrow.",
-        "Your missile hits the %s.",
-        "Your missile bounces off the %s.",
+        "The missile hits the %s.",
+        "The missile bounces off the %s.",
         1, 320, TRUE
     },
     {
@@ -216,7 +216,7 @@ const spell_data spells[SP_MAX] =
         SP_FLO, "flo", "flood",
         SC_FLOOD, DAM_WATER, ET_NONE,
         "This creates an avalanche of H2O to flood the immediate chamber.",
-        "The %s struggles for air in your flood!",
+        "The %s struggles for air in the flood!",
         "The %s loves the water!",
         4, 1600, FALSE
     },
@@ -716,6 +716,36 @@ int spell_type_player(spell *s, struct player *p)
     return TRUE;
 }
 
+static void print_spell_success_message(spell *s, monster *m)
+{
+    assert(s != NULL && m != NULL);
+
+    /* invisible monster -> no message */
+    if (!monster_in_sight(m))
+        return;
+
+    /* no message defined */
+    if (spell_msg_succ(s) == NULL)
+        return;
+
+    log_add_entry(nlarn->log, spell_msg_succ(s), monster_get_name(m));
+}
+
+static void print_spell_failure_message(spell *s, monster *m)
+{
+    assert(s != NULL && m != NULL);
+
+    /* invisible monster -> no message */
+    if (!monster_in_sight(m))
+        return;
+
+    /* no message defined */
+    if (spell_msg_fail(s) == NULL)
+        return;
+
+    log_add_entry(nlarn->log, spell_msg_fail(s), monster_get_name(m));
+}
+
 int spell_type_point(spell *s, struct player *p)
 {
     monster *monster = NULL;
@@ -765,6 +795,7 @@ int spell_type_point(spell *s, struct player *p)
         /* dehydration */
     case SP_DRY:
         amount = (100 * s->knowledge) + p->level;
+        print_spell_success_message(s, monster);
         monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, p));
         break; /* SP_DRY */
 
@@ -772,6 +803,7 @@ int spell_type_point(spell *s, struct player *p)
     case SP_DRL:
         amount = min(p->hp - 1, (int)p->hp_max / 2);
 
+        print_spell_success_message(s, monster);
         monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, p));
         player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, NULL),
                            PD_SPELL, SP_DRL);
@@ -787,18 +819,18 @@ int spell_type_point(spell *s, struct player *p)
 
         if ((player_get_wis(p) + s->knowledge) > rand_m_n(10, roll))
         {
+            print_spell_success_message(s, monster);
             monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, p));
         }
         else
-        {
-            log_add_entry(nlarn->log, "It didn't work.");
-        }
+            print_spell_failure_message(s, monster);
         break; /* SP_FGR */
     }
 
         /* magic missile */
     case SP_MLE:
         amount = rand_1n(((p->level + 1) << s->knowledge)) + p->level + 3;
+        print_spell_success_message(s, monster);
         monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount, p));
         break;
 
@@ -806,7 +838,8 @@ int spell_type_point(spell *s, struct player *p)
     case SP_PLY:
         if (chance(5*(monster_level(monster) - 2*s->knowledge)))
         {
-            log_add_entry(nlarn->log, "It didn't work.");
+            /* didn't work */
+            print_spell_failure_message(s, monster);
         }
         else
             monster_polymorph(monster);
@@ -839,18 +872,9 @@ int spell_type_point(spell *s, struct player *p)
         e = monster_effect_add(monster, e);
 
         if (e)
-        {
-            if (spell_msg_succ(s))
-            {
-                log_add_entry(nlarn->log, spell_msg_succ(s),
-                              monster_get_name(monster));
-            }
-        }
-        else if (spell_msg_fail(s))
-        {
-            log_add_entry(nlarn->log, spell_msg_fail(s),
-                          monster_get_name(monster));
-        }
+            print_spell_success_message(s, monster);
+        else
+            print_spell_failure_message(s, monster);
 
         break;
     }
@@ -919,7 +943,7 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                     attron((attrs = (mis ? spell_hit_color : spell_color)));
                     mvaddch(pos.y, pos.x, (mis ? monster_glyph(monster) : '*'));
 
-                    log_add_entry(nlarn->log, spell_msg_succ(sp), monster_get_name(monster));
+                    print_spell_success_message(sp, monster);
                     monster_damage_take(monster, damage_new(spell_damage(sp),
                                                             ATT_MAGIC, damage,
                                                             player_cast ? p : NULL));
