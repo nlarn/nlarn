@@ -811,6 +811,11 @@ void map_set_tiletype(map *l, area *area, map_tile_t type, guint8 duration)
 
     assert (l != NULL && area != NULL);
 
+    position centre;
+    centre.x = area->start_x + area->size_x / 2;
+    centre.y = area->start_y + area->size_y / 2;
+    centre.z = l->nlevel;
+
     pos.z = l->nlevel;
     for (pos.y = area->start_y, y = 0;
             pos.y < area->start_y + area->size_y;
@@ -835,8 +840,10 @@ void map_set_tiletype(map *l, area *area, map_tile_t type, guint8 duration)
                 if (tile->base_type == LT_NONE)
                     tile->base_type = map_tiletype_at(l, pos);
 
-                tile->type  = type;
-                tile->timer = duration;
+                tile->type = type;
+                /* if non-permanent, let the radius shrink with time */
+                if (duration != 0)
+                    tile->timer = max(1, duration - 5*pos_distance(pos, centre));
             }
         }
     }
