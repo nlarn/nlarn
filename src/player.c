@@ -2242,6 +2242,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_ELECTRICITY:
+        /* double damage if levitating */
+        if (player_effect_get(p, ET_LEVITATION))
+            dam->amount *= 2;
+
         if (dam->amount > 0)
         {
             p->hp -= dam->amount;
