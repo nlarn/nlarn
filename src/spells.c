@@ -1145,14 +1145,22 @@ int spell_type_ray(spell *s, struct player *p)
     return TRUE;
 }
 
+static void flood_affect_area(position pos, int radius, int type, int duration)
+{
+    area *obstacles = map_get_obstacles(game_map(nlarn, pos.z), pos, radius);
+    area *range = area_new_circle_flooded(pos, radius, obstacles);
+
+    map_set_tiletype(game_map(nlarn, pos.z), range, type, duration);
+    area_destroy(range);
+}
+
 int spell_type_flood(spell *s, struct player *p)
 {
     position pos;
-    area *range = NULL;
-    map_tile_t type = LT_NONE;
+    char buffer[81];
     int radius = 0;
     int amount = 0;
-    char buffer[81];
+    map_tile_t type = LT_NONE;
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_FLOOD));
 
@@ -1187,66 +1195,25 @@ int spell_type_flood(spell *s, struct player *p)
         break;
     }
 
-    area *obstacles = map_get_obstacles(game_map(nlarn, p->pos.z), pos, radius);
-    range = area_new_circle_flooded(pos, radius, obstacles);
-
-    map_set_tiletype(game_map(nlarn, p->pos.z), range, type, amount);
-    area_destroy(range);
-
+    flood_affect_area(pos, radius, type, amount);
     return TRUE;
 }
 
-int spell_type_blast(spell *s, struct player *p)
+static void blast_area_with_spell(struct player *p, area *ball, spell *s,
+                                  damage_t dam_t, item_erosion_type iet,
+                                  position pos, int colour, int amount)
 {
-    monster *monster = NULL;
-    area *ball;
-    position pos, cursor;
-    char buffer[61];
-    int radius = 0, amount = 0, colour = DC_NONE;
-    damage_t dam_t = DAM_NONE;
-    item_erosion_type iet = IET_NONE;
+    assert (p != NULL && ball != NULL && s != NULL);
+
+    monster *m = NULL;
     damage *dam;
     inventory **inv;
-    map *cmap = game_map(nlarn, p->pos.z);
-
-    assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
-
-    switch (s->id)
-    {
-        /* currently there is only the fireball */
-    case SP_BAL:
-    default:
-        radius = 2;
-        dam_t = DAM_FIRE;
-        iet = IET_BURN;
-        colour = DC_LIGHTRED;
-        amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
-        break;
-    }
-
-    g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(s));
-    pos = display_get_position(p, buffer, FALSE, TRUE, radius, FALSE, TRUE);
-
-    /* player pressed ESC */
-    if (!pos_valid(pos))
-    {
-        log_add_entry(nlarn->log, "Aborted.");
-        return FALSE;
-    }
-
-    ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos, radius));
-
-    if (area_pos_get(ball, p->pos)
-            && !display_get_yesno("The spell is going to hit you. " \
-                                  "Cast anyway?", NULL, NULL))
-    {
-        log_add_entry(nlarn->log, "Aborted.");
-        area_destroy(ball);
-        return FALSE;
-    }
+    position cursor;
+    cursor.z = pos.z;
 
     attron(colour);
-    cursor.z = pos.z;
+
+    map *cmap = game_map(nlarn, p->pos.z);
 
     for (cursor.y = ball->start_y; cursor.y < ball->start_y + ball->size_y; cursor.y++)
     {
@@ -1257,14 +1224,19 @@ int spell_type_blast(spell *s, struct player *p)
                 /* move cursor to position */
                 move(cursor.y, cursor.x);
 
-                if ((monster = map_get_monster_at(cmap, cursor))
-                        && monster_in_sight(monster))
+                if ((m = map_get_monster_at(cmap, cursor)))
                 {
                     /* blast hit a visible monster */
-                    addch(monster_glyph(monster));
+                    if (monster_in_sight(m))
+                    {
+                        addch(monster_glyph(m));
+                        print_spell_success_message(s, m);
+                    }
+                    else
+                        addch('*');
 
                     dam = damage_new(dam_t, ATT_MAGIC, amount, p);
-                    monster_damage_take(monster, dam);
+                    monster_damage_take(m, dam);
                 }
                 else if (pos_identical(p->pos, cursor))
                 {
@@ -1282,12 +1254,12 @@ int spell_type_blast(spell *s, struct player *p)
                 }
                 else
                 {
-                    /* blast hit nothing or an invisible monster */
+                    /* blast hit nothing */
                     addch('*');
                 }
 
                 /* affect items on the position */
-                if ((inv = map_ilist_at(cmap, cursor)) && iet > IET_NONE)
+                if (iet > IET_NONE && (inv = map_ilist_at(cmap, cursor)))
                 {
                     inv_erode(inv, iet, player_pos_visible(p, cursor));
                 }
@@ -1302,6 +1274,56 @@ int spell_type_blast(spell *s, struct player *p)
     refresh();
     /* sleep a 3/4 second */
     usleep(750000);
+}
+
+int spell_type_blast(spell *s, struct player *p)
+{
+    area *ball;
+    position pos;
+    char buffer[61];
+    int radius = 0, amount = 0, colour = DC_NONE;
+    damage_t dam_t = DAM_NONE;
+    item_erosion_type iet = IET_NONE;
+    map *cmap = game_map(nlarn, p->pos.z);
+
+    assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
+
+    switch (s->id)
+    {
+        /* currently there is only the fireball */
+    case SP_BAL:
+    default:
+        radius = 2;
+        dam_t  = DAM_FIRE;
+        iet    = IET_BURN;
+        colour = DC_LIGHTRED;
+        amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
+        break;
+    }
+
+    g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(s));
+    pos = display_get_position(p, buffer, FALSE, TRUE, radius, FALSE, TRUE);
+
+    /* player pressed ESC */
+    if (!pos_valid(pos))
+    {
+        log_add_entry(nlarn->log, "Aborted.");
+        return FALSE;
+    }
+
+    ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos,
+                                                                  radius));
+
+    if (area_pos_get(ball, p->pos)
+            && !display_get_yesno("The spell is going to hit you. " \
+                                  "Cast anyway?", NULL, NULL))
+    {
+        log_add_entry(nlarn->log, "Aborted.");
+        area_destroy(ball);
+        return FALSE;
+    }
+
+    blast_area_with_spell(p, ball, s, dam_t, iet, pos, colour, amount);
 
     return TRUE;
 }
@@ -1514,7 +1536,7 @@ gboolean spell_vaporize_rock(player *p)
         }
     }
 
-    mpos = map_find_space_in(map, rect_new_sized(p->pos, 1), LE_MONSTER, FALSE);
+    mpos = map_find_space_in(map, rect_new_sized(pos, 1), LE_MONSTER, FALSE);
 
     switch (map_sobject_at(map, pos))
     {
@@ -1523,21 +1545,42 @@ gboolean spell_vaporize_rock(player *p)
         break;
 
     case LS_ALTAR:
-        if (pos_valid(mpos))
-            monster_new(MT_DEMON_PRINCE, mpos);
+    {
+        log_add_entry(nlarn->log, "You destroy the altar.", desc);
+        map_sobject_set(map, pos, LS_NONE);
+        p->stats.vandalism++;
 
-        desc = "altar";
+        log_add_entry(nlarn->log, "Lightning comes crashing down from above!");
+        spell *sp      = spell_new(SP_LIT);
+        int radius     = 3;
+        damage_t dam_t = DAM_ELECTRICITY;
+        int colour     = DC_LIGHTCYAN;
+        int amount     = 25 + p->level + rand_0n(25 + p->level);
+
+        area *ball = area_new_circle_flooded(p->pos, radius,
+                                             map_get_obstacles(map, p->pos,
+                                                               radius));
+        blast_area_with_spell(p, ball, sp, dam_t, IET_NONE, p->pos, colour,
+                              amount);
+        spell_destroy(sp);
         break;
+    }
 
     case LS_FOUNTAIN:
+        log_add_entry(nlarn->log, "You destroy the fountain.", desc);
+        map_sobject_set(map, pos, LS_NONE);
+        p->stats.vandalism++;
+
+        /* create a permanent shallow pool and place a water lord */
+        log_add_entry(nlarn->log, "A flood of water gushes forth!");
+        flood_affect_area(pos, 3 + rand_0n(2), LT_WATER, 0);
         if (pos_valid(mpos))
             monster_new(MT_WATER_LORD, mpos);
-
-        desc = "fountain";
         break;
 
     case LS_STATUE:
-        // diff 0-1: 100%, diff 2: 2/3, diff 3: 50%, ..., diff N: 2/(N+1)
+        /* chance of finding a book:
+           diff 0-1: 100%, diff 2: 2/3, diff 3: 50%, ..., diff N: 2/(N+1) */
         if (rand_0n(game_difficulty(nlarn)+1) <= 1)
         {
             item *it = item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)));
