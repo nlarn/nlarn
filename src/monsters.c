@@ -88,10 +88,10 @@ static position monster_move_flee(monster *m, struct player *p);
 
 monster *monster_new(monster_t type, position pos)
 {
+    assert(type > MT_NONE && type < MT_MAX && pos_valid(pos));
+
     monster *nmonster;
     int it, icount;     /* item type, item id, item count */
-
-    assert(type > MT_NONE && type < MT_MAX && pos_valid(pos));
 
     /* check if supplied position is suitable for a monster */
     if (!map_pos_validate(game_map(nlarn, pos.z), pos, LE_MONSTER, FALSE))
@@ -101,6 +101,16 @@ monster *monster_new(monster_t type, position pos)
 
     /* make room for monster */
     nmonster = g_malloc0(sizeof(monster));
+
+    /* don't create genocided monsters */
+    if (monster_is_genocided(type))
+    {
+        /* try to find a replacement for the demon prince */
+        if (type == MT_DEMON_PRINCE)
+            return monster_new(MT_DEMONLORD_I + rand_0n(7), pos);
+        else
+            return NULL;
+    }
 
     nmonster->type = type;
 

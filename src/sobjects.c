@@ -254,7 +254,7 @@ int player_altar_pray(player *p)
         }
         // intentional fall through
     case 1:
-        log_add_entry(nlarn->log, "Nothing happens.");
+        log_add_entry(nlarn->log, "Nothing seems to have happened.");
         break;
     case 0:
         {
@@ -925,7 +925,7 @@ int player_throne_sit(player *p)
     }
     else
     {
-        log_add_entry(nlarn->log, "Nothing happens.");
+        log_add_entry(nlarn->log, "Nothing seems to have happened.");
     }
 
     return 1;
@@ -944,9 +944,11 @@ static void monster_appear(monster_t type, position mpos)
         m = monster_new(type, mpos);
     }
 
-    if (monster_in_sight(m))
+    if (m && monster_in_sight(m))
     {
         log_add_entry(nlarn->log, "An angry %s appears!",
                       monster_name(m));
     }
+    else
+        log_add_entry(nlarn->log, "Nothing seems to have happened.");
 }
