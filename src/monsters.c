@@ -2227,6 +2227,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
             item_describe(it, player_item_known(p, it), it->count, FALSE, buf,
                           60);
 
+            gboolean was_equipped = FALSE;
             if (player_item_is_equipped(p, it))
             {
                 if (it->cursed)
@@ -2243,11 +2244,21 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                 log_disable(nlarn->log);
                 player_item_unequip(p, NULL, it, TRUE);
                 log_enable(nlarn->log);
+
+                was_equipped = TRUE;
             }
 
             inv_del_element(&p->inventory, it);
-            log_add_entry(nlarn->log, "The %s picks your pocket and steals %s.",
-                          monster_get_name(m), buf);
+            if (was_equipped)
+            {
+                log_add_entry(nlarn->log, "The %s nimbly removes %s and steals it.",
+                              monster_get_name(m), buf);
+            }
+            else
+            {
+                log_add_entry(nlarn->log, "The %s picks your pocket and steals %s.",
+                              monster_get_name(m), buf);
+            }
         }
     }
 
