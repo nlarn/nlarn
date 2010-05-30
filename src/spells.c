@@ -1195,7 +1195,21 @@ int spell_type_flood(spell *s, struct player *p)
         break;
     }
 
-    flood_affect_area(pos, radius, type, amount);
+    area *obstacles = map_get_obstacles(game_map(nlarn, pos.z), pos, radius);
+    area *range = area_new_circle_flooded(pos, radius, obstacles);
+
+    if (area_pos_get(range, p->pos)
+            && !display_get_yesno("The spell is going to hit you. " \
+                                  "Cast anyway?", NULL, NULL))
+    {
+        log_add_entry(nlarn->log, "Aborted.");
+        area_destroy(range);
+        return FALSE;
+    }
+
+    map_set_tiletype(game_map(nlarn, pos.z), range, type, amount);
+    area_destroy(range);
+
     return TRUE;
 }
 
