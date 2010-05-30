@@ -746,6 +746,70 @@ static void print_spell_failure_message(spell *s, monster *m)
     log_add_entry(nlarn->log, spell_msg_fail(s), monster_get_name(m));
 }
 
+static int count_adjacent_water_squares(position pos)
+{
+    position p;
+    p.z = pos.z;
+
+    int count = 0;
+    for (p.x = pos.x - 1; p.x <= pos.x + 1; p.x++)
+        for (p.y = pos.y - 1; p.y <= pos.y + 1; p.y++)
+        {
+            if (!pos_valid(p))
+                continue;
+
+            if (pos_identical(p, pos))
+                continue;
+
+            const map_tile *tile = map_tile_at(game_map(nlarn, pos.z), p);
+            if (tile->type == LT_WATER || tile->type == LT_DEEPWATER)
+                count++;
+        }
+
+    return count;
+}
+
+static int try_drying_ground(position pos)
+{
+    map_tile *tile = map_tile_at(game_map(nlarn, pos.z), pos);
+    if (tile->type == LT_DEEPWATER)
+    {
+        /* success chance depends on number of adjacent water squares */
+        const int adj_water = count_adjacent_water_squares(pos);
+        if (rand_1n(9) <= adj_water)
+        {
+            log_add_entry(nlarn->log, "Nothing happens.");
+            return FALSE;
+        }
+
+        tile->type = LT_WATER;
+        log_add_entry(nlarn->log, "The water is more shallow now.");
+        return TRUE;
+    }
+    else if (tile->type == LT_WATER)
+    {
+        /* success chance depends on number of adjacent water squares */
+        const int adj_water = count_adjacent_water_squares(pos);
+        if (rand_1n(9) <= adj_water)
+        {
+            log_add_entry(nlarn->log, "Nothing happens.");
+            return FALSE;
+        }
+
+        if (tile->base_type == LT_NONE)
+            tile->type = LT_DIRT;
+        else
+            tile->type = tile->base_type;
+
+        if (tile->timer)
+            tile->timer = 0;
+
+        log_add_entry(nlarn->log, "The water evaporates!");
+        return TRUE;
+    }
+    return FALSE;
+}
+
 int spell_type_point(spell *s, struct player *p)
 {
     monster *monster = NULL;
@@ -778,15 +842,8 @@ int spell_type_point(spell *s, struct player *p)
     if (!monster)
     {
         if (s->id == SP_DRY)
-        {
-            map_tile *tile = map_tile_at(game_map(nlarn, p->pos.z), pos);
-            if (tile->type == LT_DEEPWATER)
-            {
-                tile->type = LT_DIRT;
-                log_add_entry(nlarn->log, "The water evaporates!");
-                return TRUE;
-            }
-        }
+            return try_drying_ground(pos);
+
         return FALSE;
     }
 
