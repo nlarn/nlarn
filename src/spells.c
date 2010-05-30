@@ -463,6 +463,17 @@ int spell_sort(gconstpointer a, gconstpointer b)
     return order;
 }
 
+/* Knowledge of a spell and intelligence make casting easier. */
+static int spell_success_value(player *p, spell *sp)
+{
+    assert(p != NULL && sp != NULL);
+
+    if (player_get_int(p) < 2*spell_level(sp))
+        return 0;
+
+    return (player_get_int(p) - 2*(spell_level(sp) - sp->knowledge));
+}
+
 int spell_cast(player *p)
 {
     int turns = 0;
@@ -473,24 +484,28 @@ int spell_cast(player *p)
     if (player_effect(p, ET_CONFUSION))
     {
         log_add_entry(nlarn->log, "You can't aim your magic!");
-        return turns;
+        return 0;
     }
 
     spell = display_spell_select("Select a spell to cast", p);
 
     /* ESC pressed */
     if (!spell)
-    {
-        return turns;
-    }
+        return 0;
 
+    const int level = spell_level(spell);
     /* insufficient mana */
-    if (p->mp < spell_level(spell))
+    if (p->mp < level)
     {
         log_add_entry(nlarn->log, "You lack the power to cast %s.",
                       spell_name(spell));
 
-        return turns;
+        return 0;
+    }
+    else if (spell_success_value(p, spell) < 1)
+    {
+        log_add_entry(nlarn->log, "This spell is too difficult for you.");
+        return 0;
     }
 
     log_add_entry(nlarn->log, "You cast %s.", spell_name(spell));
@@ -498,11 +513,11 @@ int spell_cast(player *p)
     /* time usage */
     turns = 1;
 
-    /* bad luck */
-    if (chance(5) || rand_1n(18) > player_get_int(p))
+    /* bad luck, low intelligence */
+    if (chance(1) || spell_success_value(p, spell) < rand_1n(16))
     {
         log_add_entry(nlarn->log, "It didn't work!");
-        player_mp_lose(p, spell_level(spell));
+        player_mp_lose(p, level);
 
         return turns;
     }
