@@ -1133,10 +1133,11 @@ void player_die(player *p, player_cod cause_type, int cause)
             cscore = (game_score_t *)iterator->data;
 
             desc = player_death_description(cscore, FALSE);
-            g_string_append_printf(text, "  %s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d hp]\n",
+            g_string_append_printf(text, "  %s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d/%d hp, diff %d]\n",
                                    (cscore == score) ? "*" : " ",
                                    count + 1, cscore->score, desc,
-                                   cscore->dlevel, cscore->hp);
+                                   cscore->dlevel, cscore->hp, cscore->hp_max,
+                                   cscore->difficulty);
 
             g_free(desc);
         }
@@ -1262,45 +1263,6 @@ void player_die(player *p, player_cod cause_type, int cause)
             }
         }
 
-        /* list monsters killed */
-        guint mnum, body_count = 0;
-        g_string_append(text, "\n\n-- Creatures vanquished ---------------\n\n");
-
-        for (mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
-        {
-            if (p->stats.monsters_killed[mnum] > 0)
-            {
-                const int count = p->stats.monsters_killed[mnum];
-                tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum,
-                                              count)));
-
-                g_string_append_printf(text, "%3d %s\n",
-                                       p->stats.monsters_killed[mnum], tmp);
-
-                g_free(tmp);
-                body_count += p->stats.monsters_killed[mnum];
-            }
-        }
-        g_string_append_printf(text, "\n%3d total\n", body_count);
-
-        /* genocided monsters */
-        g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
-
-        count = 0;
-        for (mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
-        {
-            if (!monster_is_genocided(mnum))
-                continue;
-
-            tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum, 2)));
-            g_string_append_printf(text, "%s\n", tmp);
-            count++;
-        }
-
-        g_string_append_printf(text, "\n%s genocided %s monster%s.\n",
-                               pronoun, int2str(count), plural(count));
-
-
         /* identify entire inventory */
         for (pos = 0; pos < inv_length(p->inventory); pos++)
         {
@@ -1388,6 +1350,45 @@ void player_die(player *p, player_cod cause_type, int cause)
                 }
             }
         }
+
+        /* list monsters killed */
+        guint mnum, body_count = 0;
+        g_string_append(text, "\n\n-- Creatures vanquished ---------------\n\n");
+
+        for (mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
+        {
+            if (p->stats.monsters_killed[mnum] > 0)
+            {
+                const int count = p->stats.monsters_killed[mnum];
+                tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum,
+                                              count)));
+
+                g_string_append_printf(text, "%3d %s\n",
+                                       p->stats.monsters_killed[mnum], tmp);
+
+                g_free(tmp);
+                body_count += p->stats.monsters_killed[mnum];
+            }
+        }
+        g_string_append_printf(text, "\n%3d total\n", body_count);
+
+        /* genocided monsters */
+        g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
+
+        count = 0;
+        for (mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
+        {
+            if (!monster_is_genocided(mnum))
+                continue;
+
+            tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum, 2)));
+            g_string_append_printf(text, "%s\n", tmp);
+            count++;
+        }
+
+        g_string_append_printf(text, "\n%s genocided %s monster%s.\n",
+                               pronoun, int2str(count), plural(count));
+
 
         /* messages */
         g_string_append(text, "\n\n-- Last messages ----------------------\n\n");
@@ -4818,8 +4819,10 @@ static char *player_death_description(game_score_t *score, int verbose)
 
     if (verbose)
     {
-        g_string_append_printf(text, " %s has scored %" G_GINT64_FORMAT " points.",
-                               (score->sex == PS_MALE) ? "He" : "She", score->score);
+        g_string_append_printf(text, " %s has scored %" G_GINT64_FORMAT
+                                     " points, with difficulty setting %d.",
+                               (score->sex == PS_MALE) ? "He" : "She",
+                               score->score, score->difficulty);
     }
 
     return g_string_free(text, FALSE);
