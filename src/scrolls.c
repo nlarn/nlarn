@@ -513,30 +513,64 @@ static int scroll_genocide_monster(player *p, item *scroll)
         return FALSE;
     }
 
+    guint32 candidates[10];
+    int found = 0;
     for (id = 1; id < MT_MAX; id++)
     {
         if (monster_type_image(id) == in[0])
         {
             if (!monster_is_genocided(id))
             {
-                monster_genocide(id);
-                log_add_entry(nlarn->log, "Wiped out all %s.",
-                              monster_type_plural_name(id, 2));
-
-                g_free(in);
-
-                if (id == MT_TOWN_PERSON) // Oops!
-                    player_die(p, PD_GENOCIDE, 0);
-
-                return TRUE;
+                candidates[found] = id;
+                if (found++ == 10)
+                    break;
             }
         }
     }
-
     g_free(in);
 
-    log_add_entry(nlarn->log, "No such monster.");
-    return FALSE;
+    if (found == 0)
+    {
+        log_add_entry(nlarn->log, "No such monster.");
+        return FALSE;
+    }
+
+    /* blessed scrolls allow a choice of same-glyph monsters */
+    int which = MT_NONE;
+    if (!scroll->blessed || found == 1)
+        which = candidates[0];
+    else
+    {
+        GString *text = g_string_new("");
+
+        for (id = 0; id < found; id++)
+        {
+            g_string_append_printf(text, "  %c) %-30s\n",
+                                   id + 'a', monster_type_name(candidates[id]));
+        }
+
+        do
+        {
+            which = display_show_message("Genocide which monster?",
+                                         text->str, 0);
+        }
+        while (which < 'a' || which >= found + 'a');
+
+        g_string_free(text, TRUE);
+
+        which -= 'a';
+        assert(which >= 0 && which < found);
+        which = candidates[which];
+    }
+
+    monster_genocide(which);
+    log_add_entry(nlarn->log, "Wiped out all %s.",
+                  monster_type_plural_name(which, 2));
+
+    if (which == MT_TOWN_PERSON) // Oops!
+        player_die(p, PD_GENOCIDE, 0);
+
+    return TRUE;
 }
 
 static int scroll_heal_monster(player *p, item *scroll)
