@@ -101,6 +101,14 @@ int display_init()
     return TRUE;
 }
 
+static int attr_colour(int colour, int reverse)
+{
+    if (reverse)
+        return (A_REVERSE | colour);
+
+    return colour;
+}
+
 int display_paint_screen(player *p)
 {
     guint x, y, i;
@@ -135,15 +143,17 @@ int display_paint_screen(player *p)
             {
                 /* draw the truth */
                 inventory **inv = map_ilist_at(map, pos);
+                const gboolean has_items = inv_length(*inv) > 0;
 
                 if (map_sobject_at(map, pos))
                 {
                     /* draw stationary objects first */
-                    attron(attrs = ls_get_colour(map_sobject_at(map, pos)));
+                    attron(attrs = attr_colour(ls_get_colour(
+                                        map_sobject_at(map, pos)), has_items));
                     addch(ls_get_image(map_sobject_at(map, pos)));
                     attroff(attrs);
                 }
-                else if (inv_length(*inv) > 0)
+                else if (has_items)
                 {
                     /* draw items */
                     item *it;
@@ -165,7 +175,10 @@ int display_paint_screen(player *p)
                         it = inv_get(*inv, inv_length(*inv) - 1);
                     }
 
-                    attron(attrs = item_colour(it));
+                    const gboolean has_trap = (map_trap_at(map, pos)
+                                               && player_memory_of(p, pos).trap);
+
+                    attron(attrs = attr_colour(item_colour(it), has_trap));
                     addch(item_glyph(it->type));
                     attroff(attrs);
                 }
@@ -186,19 +199,23 @@ int display_paint_screen(player *p)
             }
             else /* i.e. !wizardmode && !visible: draw players memory */
             {
+                const gboolean has_items = player_memory_of(p, pos).item;
                 if (player_memory_of(p, pos).sobject)
                 {
                     /* draw stationary object */
                     map_sobject_t ms = map_sobject_at(map, pos);
 
-                    attron(attrs = ls_get_colour(ms));
+                    attron(attrs = attr_colour(ls_get_colour(ms), has_items));
                     addch(ls_get_image(ms));
                     attroff(attrs);
                 }
-                else if (player_memory_of(p, pos).item)
+                else if (has_items)
                 {
                     /* draw items */
-                    attron(attrs = player_memory_of(p, pos).item_colour);
+                    const gboolean has_trap = (player_memory_of(p, pos).trap);
+
+                    attron(attrs = attr_colour(player_memory_of(p, pos).item_colour,
+                                               has_trap));
                     addch(item_glyph(player_memory_of(p, pos).item));
                     attroff(attrs);
                 }
