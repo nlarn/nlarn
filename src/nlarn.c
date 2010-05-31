@@ -54,9 +54,14 @@ int main(int argc, char *argv[])
     save_file_name = g_build_path(G_DIR_SEPARATOR_S, userdir, "nlarn.sav", NULL);
     g_free(userdir);
 
+    /* initialize display */
+    display_init();
+
+    /* call display_shutdown when terminating the game */
+    atexit(display_shutdown);
+
     /* find save file */
     gboolean loaded = FALSE;
-    gboolean display_initialised = FALSE;
     if (g_file_test(save_file_name, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
     {
         /* restore savegame */
@@ -64,15 +69,6 @@ int main(int argc, char *argv[])
 
         if (!loaded)
         {
-            /* initialize display */
-            display_init();
-
-            /* call display_shutdown when terminating the game */
-            atexit(display_shutdown);
-
-            display_draw();
-            display_initialised = TRUE;
-
             if (display_get_yesno("Saved game could not be loaded. " \
                                   "Delete and start new game?",
                                   NULL, NULL))
@@ -108,17 +104,6 @@ int main(int argc, char *argv[])
         scroll_mapping(nlarn->p, NULL);
     }
 
-    if (!display_initialised)
-    {
-        /* initialize display */
-        display_init();
-
-        /* call display_shutdown when terminating the game */
-        atexit(display_shutdown);
-
-        display_draw();
-    }
-
     /* check if mesgfile exists */
     if (!g_file_get_contents(game_mesgfile(nlarn), &strbuf, NULL, NULL))
     {
@@ -131,13 +116,10 @@ int main(int argc, char *argv[])
     display_show_message("Welcome to the game of NLarn!", strbuf, 0);
     g_free(strbuf);
 
-    display_paint_screen(nlarn->p);
-
     if (!loaded)
     {
         if (!player_assign_bonus_stats(nlarn->p))
             exit(EXIT_SUCCESS);
-        display_paint_screen(nlarn->p);
     }
 
     /* ask for a charakter name if none has been supplied */
@@ -145,8 +127,6 @@ int main(int argc, char *argv[])
     {
         nlarn->p->name = display_get_string("By what name shall you be called?",
                                             NULL, 45);
-
-        display_paint_screen(nlarn->p);
     }
 
     /* ask for charakter's gender if it is not known yet */
@@ -156,8 +136,6 @@ int main(int argc, char *argv[])
 
         /* display_get_yesno() returns 0 or one */
         nlarn->p->sex = (res == TRUE) ?  PS_FEMALE : PS_MALE;
-
-        display_paint_screen(nlarn->p);
     }
 
     char run_cmd = 0;
@@ -168,6 +146,9 @@ int main(int argc, char *argv[])
     /* main event loop */
     do
     {
+        /* repaint screen */
+        display_paint_screen(nlarn->p);
+
         if (run_cmd != 0)
         {
             ch = run_cmd;
@@ -712,9 +693,6 @@ int main(int argc, char *argv[])
                 run_cmd = 0;
             }
         }
-
-        /* repaint screen */
-        display_paint_screen(nlarn->p);
     }
     while (TRUE); /* main event loop */
 }

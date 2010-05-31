@@ -178,7 +178,6 @@ int player_assign_bonus_stats(player *p)
                                          text->str, 0);
         if (selection == KEY_ESC)
             return FALSE;
-        display_paint_screen(nlarn->p);
     }
     while (selection < 'a' || selection > 'f');
 
@@ -1411,9 +1410,6 @@ void player_die(player *p, player_cod cause_type, int cause)
         {
             char *filename, *proposal;
             GError *error = NULL;
-
-            /* repaint screen onece again */
-            display_paint_screen(p);
 
             proposal = g_strconcat(p->name, ".txt", NULL);
             filename = display_get_string("Enter filename: ", proposal, 40);
@@ -3947,9 +3943,6 @@ void player_read(player *p)
 
         if (it)
         {
-            /* repaint screen as it would be plain black
-               if a scroll shows a window */
-            display_paint_screen(p);
             player_item_use(p, NULL, it);
         }
     }

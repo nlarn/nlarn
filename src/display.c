@@ -36,7 +36,7 @@ static GList *windows = NULL;
 static display_window *display_window_new(int x1, int y1, int width,
         int height, const char *title);
 
-static void display_window_destroy(display_window *dwin, gboolean shall_clear);
+static void display_window_destroy(display_window *dwin);
 
 static int display_window_move(display_window *dwin, int key);
 static void display_window_update_title(display_window *dwin, const char *title);
@@ -148,8 +148,7 @@ int display_paint_screen(player *p)
                 if (map_sobject_at(map, pos))
                 {
                     /* draw stationary objects first */
-                    attron(attrs = attr_colour(ls_get_colour(
-                                        map_sobject_at(map, pos)), has_items));
+                    attron(attrs = attr_colour(ls_get_colour(map_sobject_at(map, pos)), has_items));
                     addch(ls_get_image(map_sobject_at(map, pos)));
                     attroff(attrs);
                 }
@@ -698,11 +697,9 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             startx = iwin->x1;
             starty = iwin->y1;
 
-            display_window_destroy(iwin, FALSE);
+            display_window_destroy(iwin);
             iwin = NULL;
             redraw = FALSE;
-
-            display_paint_screen(p);
 
             /* check for inventory modifications */
             if (len_orig > len_curr)
@@ -974,7 +971,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     }
     while (keep_running && (len_curr > 0)); /* ESC pressed or empty inventory*/
 
-    display_window_destroy(iwin, TRUE);
+    display_window_destroy(iwin);
 
     if ((callbacks == NULL) && (key != KEY_ESC))
     {
@@ -1064,7 +1061,7 @@ void display_config_autopickup(player *p)
     }
     while (RUN);
 
-    display_window_destroy(cwin, TRUE);
+    display_window_destroy(cwin);
 }
 
 spell *display_spell_select(char *title, player *p)
@@ -1254,10 +1251,6 @@ spell *display_spell_select(char *title, player *p)
         case '?':
         case KEY_F(1):
             display_show_message(spell_name(sp), spell_desc(sp), 0);
-
-            /* repaint everything after displaying the message */
-            display_paint_screen(p);
-            display_draw();
             break;
 
         case KEY_ESC:
@@ -1358,7 +1351,7 @@ spell *display_spell_select(char *title, player *p)
 
     g_free(code_buf);
 
-    display_window_destroy(swin, TRUE);
+    display_window_destroy(swin);
 
     return sp;
 }
@@ -1407,7 +1400,6 @@ int display_get_count(char *caption, int value)
     startx = (display_cols - width) / 2;
 
     mwin = display_window_new(startx, starty, width, height, NULL);
-
     wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
 
     guint line;
@@ -1575,7 +1567,7 @@ int display_get_count(char *caption, int value)
     curs_set(0);
 
     text_destroy(text);
-    display_window_destroy(mwin, TRUE);
+    display_window_destroy(mwin);
 
     if (key == KEY_ESC)
         return 0;
@@ -1781,7 +1773,7 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     curs_set(0);
 
     text_destroy(text);
-    display_window_destroy(mwin, TRUE);
+    display_window_destroy(mwin);
 
     if (key == KEY_ESC || string->len == 0)
     {
@@ -1813,10 +1805,6 @@ int display_get_yesno(char *question, char *yes, char *no)
 
     if (!no)
         no = "No";
-
-    /* repaint the screen if the game has been initialized */
-    if (nlarn != NULL && nlarn->p != NULL)
-        display_paint_screen(nlarn->p);
 
     /* determine text width, either defined by space available  for the window
      * or the length of question */
@@ -1950,7 +1938,7 @@ int display_get_yesno(char *question, char *yes, char *no)
     }
     while (RUN);
 
-    display_window_destroy(ywin, TRUE);
+    display_window_destroy(ywin);
 
     return selection;
 }
@@ -2109,7 +2097,7 @@ direction display_get_direction(char *title, int *available)
         g_free(dirs);
     }
 
-    display_window_destroy(dwin, TRUE);
+    display_window_destroy(dwin);
 
     return dir;
 }
@@ -2514,7 +2502,7 @@ int display_show_message(const char *title, const char *message, int indent)
     }
     while (RUN);
 
-    display_window_destroy(mwin, TRUE);
+    display_window_destroy(mwin);
     text_destroy(text);
 
     return key;
@@ -2584,16 +2572,20 @@ static display_window *display_window_new(int x1, int y1, int width,
     /* create a panel for the window */
     dwin->panel = new_panel(dwin->window);
 
-    /* refresh panels */
-    update_panels();
-
     /* add window to the list of opened windows */
     windows = g_list_append(windows, dwin);
+
+    /* repaint the screen if the game has been initialized */
+    if (nlarn != NULL && nlarn->p != NULL)
+        display_paint_screen(nlarn->p);
+
+    /* refresh panels */
+    update_panels();
 
     return dwin;
 }
 
-static void display_window_destroy(display_window *dwin, gboolean shall_clear)
+static void display_window_destroy(display_window *dwin)
 {
     del_panel(dwin->panel);
     delwin(dwin->window);
@@ -2607,10 +2599,10 @@ static void display_window_destroy(display_window *dwin, gboolean shall_clear)
     g_free(dwin);
 
     /* repaint screen */
-    if (shall_clear)
-    {
-        clear();
-    }
+    clear();
+
+    if (nlarn != NULL && nlarn->p != NULL)
+        display_paint_screen(nlarn->p);
 }
 
 static int display_window_move(display_window *dwin, int key)
@@ -2802,10 +2794,6 @@ static void display_item_details(item *it, player *p, gboolean shop)
 
     display_show_message("Item details", msg, 0);
     g_free(msg);
-
-    /* repaint everything after displaying the message */
-    display_paint_screen(p);
-    display_draw();
 }
 
 static void display_spheres_paint(sphere *s, player *p)

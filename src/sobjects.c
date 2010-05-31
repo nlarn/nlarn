@@ -130,7 +130,6 @@ int player_altar_pray(player *p)
 
     log_add_entry(nlarn->log, "You donate %d gold at the altar and pray.",
                   donation);
-    display_paint_screen(p);
 
     // The higher the donation, the more likely is a favourable outcome.
     const int event = min(8, rand_0n(donation/50));

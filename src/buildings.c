@@ -153,9 +153,6 @@ int building_bank(player *p)
     cmd = display_show_message(msg_title, text->str, 0);
     g_string_free(text, TRUE);
 
-    /* repaint screen (otherwise background would be black) */
-    display_paint_screen(p);
-
     switch (cmd)
     {
     case 'd': /* deposit */
@@ -266,8 +263,6 @@ int building_dndstore(player *p)
     g_ptr_array_add(callbacks, callback);
 
     display_show_message(title, msg_welcome, 0);
-    display_paint_screen(p);
-
     display_inventory(title, p, &nlarn->store_stock, callbacks, TRUE,
                       FALSE, TRUE, NULL);
 
@@ -366,8 +361,6 @@ int building_home(player *p)
             display_show_message("You saved your daughter!", text->str, 0);
             g_string_free(text, TRUE);
 
-            display_paint_screen(p);
-
             /* remove the potion from the inventory as it has been used up */
             item *pcd = inv_get_filtered(p->inventory, 0, item_filter_pcd);
             inv_del_element(&p->inventory, pcd);
@@ -382,7 +375,6 @@ int building_home(player *p)
             display_show_message("You were too late!", text->str, 0);
             g_string_free(text, TRUE);
 
-            display_paint_screen(p);
             player_die(p, PD_TOO_LATE, 0);
         }
     }
@@ -393,7 +385,6 @@ int building_home(player *p)
         display_show_message("You were too late!", text->str, 0);
         g_string_free(text, TRUE);
 
-        display_paint_screen(p);
         player_die(p, PD_LOST, 0);
     }
     else
@@ -673,8 +664,6 @@ int building_tradepost(player *p)
     g_ptr_array_add(callbacks, callback);
 
     display_show_message(title, msg_welcome, 0);
-    display_paint_screen(p);
-
     display_inventory(title, p, &p->inventory, callbacks, FALSE,
                       FALSE, TRUE, &item_filter_not_gold);
 
@@ -802,8 +791,6 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
         if (!building_player_check(p, price))
         {
-            display_paint_screen(p);
-
             item_describe(it_clone, TRUE, (count == 1), TRUE, name, 60);
             g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
                        price, name);
