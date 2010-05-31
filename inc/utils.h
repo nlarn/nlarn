@@ -126,6 +126,7 @@ const char *int2str(int val);
 /* regarding stuff defined in defines.h */
 damage *damage_new(damage_t type, attack_t attack, int amount, gpointer originator);
 #define damage_free(dam)    g_free((dam))
+#define INSTANT_KILL    10000
 
 /* interaction with the Lua engine */
 void utils_wrap(lua_State *L);

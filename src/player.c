@@ -1605,6 +1605,121 @@ int player_move(player *p, direction dir, gboolean open_door)
     return times;
 }
 
+static int calc_to_hit(player *p, monster *m)
+{
+    const int to_hit = p->level
+                       + player_get_dex(p)
+                       + (p->eq_weapon ? (weapon_wc(p->eq_weapon) / 4) : 0)
+                       /* FIXME: I don't want those pointless D&D rules */
+                       + monster_ac(m)
+                       - 12
+                       - game_difficulty(nlarn);
+
+    if (to_hit < 1)
+        return 0;
+
+    if (to_hit >= 20)
+        return 100;
+
+    /* roll the dice */
+    return (5 * to_hit);
+}
+
+
+static int calc_max_damage(player *p, monster *m)
+{
+    const int damage = player_get_str(p)
+                       + player_get_wc(p, m)
+                       - 12
+                       - game_difficulty(nlarn);
+
+    return damage;
+}
+
+static gboolean player_instakill_chance(player *p, monster *m)
+{
+    if (p->eq_weapon)
+    {
+        switch (p->eq_weapon->id)
+        {
+        /* Vorpal Blade */
+        case WT_VORPALBLADE:
+            if (monster_flags(m, MF_HEAD) && !monster_flags(m, MF_NOBEHEAD))
+                return 5;
+            break;
+
+        /* Lance of Death */
+        case WT_LANCEOFDEATH:
+            /* the lance is pretty deadly for non-demons */
+            if (!monster_flags(m, MF_DEMON))
+                return 100;
+            break;
+
+        /* Slayer */
+        case WT_SLAYER:
+            if (monster_flags(m, MF_DEMON))
+                return 100;
+            break;
+
+        default:
+            break;
+        }
+    }
+    return 0;
+}
+
+static int calc_real_damage(player *p, monster *m, int allow_chance)
+{
+    const int max_dam = calc_max_damage(p, m);
+          int damage  = rand_1n(max_dam + 1);
+
+    /* *** SPECIAL WEAPONS *** */
+    if (p->eq_weapon)
+    {
+        switch (p->eq_weapon->id)
+        {
+        /* Vorpal Blade */
+        case WT_VORPALBLADE:
+            if (allow_chance && chance(5) && monster_flags(m, MF_HEAD)
+                    && !monster_flags(m, MF_NOBEHEAD))
+            {
+                log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
+                              monster_get_name(m));
+
+                damage = INSTANT_KILL;
+            }
+            break;
+
+        /* Lance of Death */
+        case WT_LANCEOFDEATH:
+            /* the lance is pretty deadly for non-demons */
+            if (!monster_flags(m, MF_DEMON))
+                damage = INSTANT_KILL;
+            else
+                damage = 300;
+            break;
+
+        /* Slayer */
+        case WT_SLAYER:
+            if (monster_flags(m, MF_DEMON))
+                damage = INSTANT_KILL;
+            break;
+
+        default:
+            /* triple damage if hitting a dragon and wearing an amulet of
+               dragon slaying */
+            if (monster_flags(m, MF_DRAGON)
+                    && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
+            {
+                damage *= 3;
+            }
+            break;
+        }
+    }
+
+    return damage;
+}
+
 int player_attack(player *p, monster *m)
 {
     /* disallow attacking other humans */
@@ -1614,31 +1729,16 @@ int player_attack(player *p, monster *m)
         return 1;
     }
 
-    int prop;
-    int amount;
-    damage *dam;
-    int roll;           /* the dice */
-    effect *e;
-
-    prop = p->level
-           + player_get_dex(p)
-           + (p->eq_weapon ? (weapon_wc(p->eq_weapon) / 4) : 0)
-           + monster_ac(m) /* FIXME: I don't want those pointless D&D rules */
-           - 12
-           - game_difficulty(nlarn);
-
-    roll = rand_1n(21);
-    if ((roll <= prop) || (roll == 1))
+    if (chance(5) || chance(calc_to_hit(p, m)))
     {
+        damage *dam;
+        effect *e;
+
         /* placed a hit */
         log_add_entry(nlarn->log, "You hit the %s.", monster_get_name(m));
 
-        amount = player_get_str(p)
-                 + player_get_wc(p, m)
-                 - 12
-                 - game_difficulty(nlarn);
-
-        dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, rand_1n(amount + 1), p);
+        dam = damage_new(DAM_PHYSICAL, ATT_WEAPON,
+                         calc_real_damage(p, m, TRUE), p);
 
         /* weapon damage due to rust when hitting certain monsters */
         if (p->eq_weapon && monster_flags(m, MF_METALLIVORE))
@@ -1658,46 +1758,6 @@ int player_attack(player *p, monster *m)
             monster_effect_del(m, e);
         }
 
-        /* triple damage if hitting a dragon and wearing an amulet of dragon slaying */
-        if (monster_flags(m, MF_DRAGON) && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
-        {
-            dam->amount *= 3;
-        }
-
-        /* *** SPECIAL WEAPONS *** */
-        if (p->eq_weapon)
-        {
-            /* Vorpal Blade */
-            if ((p->eq_weapon->id == WT_VORPALBLADE)
-                    && chance(5)
-                    && monster_flags(m, MF_HEAD)
-                    && !monster_flags(m, MF_NOBEHEAD))
-            {
-                log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
-                              monster_get_name(m));
-
-                dam->amount = monster_hp(m) + monster_ac(m);
-            }
-
-            /* Lance of Death */
-            if ((p->eq_weapon->id == WT_LANCEOFDEATH))
-            {
-                /* the lance is pretty deadly for non-demons */
-                if (!monster_flags(m, MF_DEMON))
-                    dam->amount = 10000;
-                else
-                    dam->amount = 300;
-            }
-
-            /* Slayer */
-            if (p->eq_weapon->id == WT_SLAYER)
-            {
-                if (monster_flags(m, MF_DEMON))
-                    dam->amount = 10000;
-            }
-        }
-
-
         /* inflict damage */
         if (!(m = monster_damage_take(m, dam)))
         {
@@ -1706,9 +1766,11 @@ int player_attack(player *p, monster *m)
         }
 
         /* Lance of Death has not killed */
-        if (p->eq_weapon && (p->eq_weapon->id == WT_LANCEOFDEATH))
+        if (p->eq_weapon && (p->eq_weapon->id == WT_LANCEOFDEATH)
+                && monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, "Your lance of death tickles the %s!", monster_get_name(m));
+            log_add_entry(nlarn->log, "Your lance of death tickles the %s!",
+                          monster_get_name(m));
         }
 
         /* if the player is invisible and the monster does not have infravision,
@@ -1719,7 +1781,7 @@ int player_attack(player *p, monster *m)
             monster_update_player_pos(m, p->pos);
         }
     }
-    else if (monster_in_sight(m))
+    else if (game_wizardmode(nlarn) || monster_in_sight(m))
     {
         /* missed */
         log_add_entry(nlarn->log, "You miss the %s.", monster_name(m));
@@ -4821,3 +4883,138 @@ static char *player_death_description(game_score_t *score, int verbose)
     return g_string_free(text, FALSE);
 }
 
+void calc_fighting_stats(player *p)
+{
+    assert(p != NULL);
+
+    monster *m;
+    GString *text;
+
+    position pos = map_find_space_in(game_map(nlarn, p->pos.z),
+                            rect_new_sized(p->pos, 2), LE_MONSTER, FALSE);
+
+    if (!pos_valid(pos))
+    {
+        log_add_entry(nlarn->log, "Couldn't create a monster.");
+        return;
+    }
+
+    text = g_string_new("");
+
+    char desc[60] = { 0 };
+    if (p->eq_weapon)
+    {
+        p->eq_weapon->blessed_known = TRUE;
+        p->eq_weapon->bonus_known   = TRUE;
+
+        item_describe(p->eq_weapon, TRUE, TRUE, FALSE, desc, 60);
+    }
+
+    const int damage_modifier = player_effect(p, ET_INC_DAMAGE)
+                                - player_effect(p, ET_SICKNESS);
+
+    g_string_append_printf(text, "\nPlayer stats\n"
+                                 "------------\n"
+                                 "  wielded weapon : %s\n"
+                                 "  weapon class   : %d\n"
+                                 "  experience     : %d\n"
+                                 "  strength       : %d\n"
+                                 "  dexterity      : %d\n"
+                                 "  damage modifier: %d\n"
+                                 "  difficulty     : %d\n\n",
+                               (p->eq_weapon ? desc : "none"),
+                               (p->eq_weapon ? weapon_wc(p->eq_weapon) : 0),
+                               p->level,
+                               player_get_str(p),
+                               player_get_dex(p),
+                               damage_modifier,
+                               game_difficulty(nlarn));
+
+    g_string_append_printf(text, "Monsters\n"
+                                 "--------\n\n");
+
+    gboolean mention_instakill = FALSE;
+
+    guint32 idx;
+    for (idx = MT_NONE + 1; idx < MT_MAX_GENERATED; idx++)
+    {
+        m = monster_new(idx, pos);
+        if (!m)
+        {
+            g_string_append_printf(text, "Monster %s could not be created.\n\n",
+                                   monster_name(m));
+            continue;
+        }
+        int to_hit  = calc_to_hit(p, m);
+            to_hit += ((100 - to_hit) * 5)/100;
+
+        const int instakill_chance = player_instakill_chance(p, m);
+
+        g_string_append_printf(text, "%s (ac: %d, max hp: %d)\n"
+                                     "     to-hit chance: %d%%\n"
+                                     "  instakill chance: %d%%\n",
+                               monster_name(m),
+                               monster_ac(m),
+                               monster_type_hp_max(monster_type(m)),
+                               to_hit, instakill_chance);
+
+        if (instakill_chance < 100)
+        {
+            const int max_dam = calc_max_damage(p, m);
+            double avg_dam = 0;
+            int tries = 100;
+            while (tries-- > 0)
+                avg_dam += calc_real_damage(p, m, FALSE);
+
+            avg_dam /= 100;
+
+            const int hits_needed
+                        = 1 + (monster_type_hp_max(monster_type(m)) / avg_dam);
+
+
+            g_string_append_printf(text, "       max. damage: %d hp\n"
+                                         "       avg. damage: %.2f hp\n"
+                                         "  avg. hits needed: %d%s\n\n",
+                                   max_dam, avg_dam, hits_needed,
+                                   hits_needed > 1
+                                        && instakill_chance > 0 ? " [*]" : "");
+
+            if (!mention_instakill && instakill_chance > 0)
+                mention_instakill = TRUE;
+        }
+        else
+            g_string_append_printf(text, "\n");
+
+        monster_destroy(m);
+    }
+
+    if (mention_instakill)
+        g_string_append_printf(text, "*) ignoring instakills\n");
+
+    display_show_message("Fighting statistics", text->str, 0);
+
+    if (display_get_yesno("Do you want to save the calculations?", NULL, NULL))
+    {
+        char *filename, *proposal;
+        GError *error = NULL;
+
+        proposal = g_strconcat(p->name, ".stat", NULL);
+        filename = display_get_string("Enter filename: ", proposal, 40);
+
+        if (filename != NULL)
+        {
+            /* file name has been provided. try to save file */
+            if (!g_file_set_contents(filename, text->str, -1, &error))
+            {
+                display_show_message("Error", error->message, 0);
+                g_error_free(error);
+            }
+
+            g_free(proposal);
+        }
+
+        g_free(filename);
+    }
+
+    g_string_free(text, TRUE);
+}

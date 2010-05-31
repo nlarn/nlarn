@@ -1822,8 +1822,15 @@ char *monster_desc(monster *m)
         return g_string_free(desc, FALSE);
     }
 
-    g_string_append_printf(desc, "%s %s %s, %s", a_an(injury),
+    GString *hp_string = g_string_new("");
+    if (game_wizardmode(nlarn))
+    {
+        g_string_append_printf(hp_string, " (%d/%d hp)",
+                               m->hp, m->hp_max);
+    }
+    g_string_append_printf(desc, "%s %s %s%s, %s", a_an(injury),
                            injury, monster_get_name(m),
+                           g_string_free(hp_string, FALSE),
                            monster_ai_desc[m->action]);
 
     /* add effect description */

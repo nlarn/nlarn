@@ -84,3 +84,4 @@ The forth column shows the character's knowledge level of that spell. The higher
 ^down lower experience level
 *     add 1000 gp to bank account
 &     heal yourself
+^F    combat simulation

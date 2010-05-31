@@ -636,6 +636,11 @@ int main(int argc, char *argv[])
                     player_effect_del(nlarn->p, e);
             }
             break;
+
+        case 6: /* ^F */
+            if (game_wizardmode(nlarn))
+                calc_fighting_stats(nlarn->p);
+            break;
         }
 
         gboolean no_move = (moves_count == 0);
