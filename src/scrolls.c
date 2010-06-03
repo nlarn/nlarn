@@ -641,12 +641,17 @@ static int scroll_identify(player *p, item *scroll)
         /* identify the scroll being read, otherwise it would show up here */
         player_item_identify(p, NULL, scroll);
 
-        /* choose a single item to identify */
-        it = display_inventory("Choose an item to identify", p, &p->inventory,
-                               NULL, FALSE, FALSE, FALSE, item_filter_unid);
-
-        if (it != NULL)
+        /* may identify up to 3 items */
+        int tries = rand_1n(4);
+        while (tries-- > 0)
         {
+            /* choose a single item to identify */
+            it = display_inventory("Choose an item to identify", p, &p->inventory,
+                                   NULL, FALSE, FALSE, FALSE, item_filter_unid);
+
+            if (it == NULL)
+                break;
+
             char desc[81];
 
             item_describe(it, FALSE, (it->count == 1), TRUE, desc, 80);
@@ -656,6 +661,9 @@ static int scroll_identify(player *p, item *scroll)
             item_describe(it, TRUE, (it->count == 1), FALSE, desc, 80);
             log_add_entry(nlarn->log, "%s %s.", (it->count > 1) ? "These are" :
                           "This is", desc);
+
+            if (inv_length_filtered(p->inventory, item_filter_unid) == 0)
+                break;
         }
     }
 
