@@ -245,7 +245,7 @@ monster *monster_new(monster_t type, position pos)
 
         /* determine how the mimic will be displayed */
         nmonster->item_type = possible_types[chosen_type].type;
-        nmonster->colour = possible_types[chosen_type].colour;
+        nmonster->colour    = possible_types[chosen_type].colour;
 
         /* the mimic is not known to be a monster */
         nmonster->unknown = TRUE;
@@ -707,6 +707,10 @@ static gboolean monster_nearby(monster *m)
 gboolean monster_in_sight(monster *m)
 {
     assert (m != NULL);
+
+    /* player is blind */
+    if (player_effect(nlarn->p, ET_BLINDNESS))
+        return FALSE;
 
     /* different level */
     if (m->pos.z != nlarn->p->pos.z)
@@ -1176,7 +1180,7 @@ void monster_polymorph(monster *m)
         {
             /* briefly display the new monster before it dies */
             display_paint_screen(nlarn->p);
-            usleep(100000);
+            usleep(250000);
 
             switch (old_elem)
             {
@@ -1508,12 +1512,13 @@ void monster_player_attack(monster *m, player *p)
                       monster_attack_verb[att.type]);
 
         monster_item_rust(m, p);
+        p->attacked = TRUE;
         damage_free(dam);
         break;
 
     case DAM_REM_ENCH:
         monster_item_disenchant(m, p);
-
+        p->attacked = TRUE;
         damage_free(dam);
         break;
 
@@ -1855,7 +1860,6 @@ char *monster_desc(monster *m)
 
         g_free(effects);
     }
-
 
     return g_string_free(desc, FALSE);
 }
@@ -2502,4 +2506,3 @@ int monster_is_carrying_item(monster *m, item_t type)
     }
     return FALSE;
 }
-
