@@ -134,6 +134,18 @@ const trap_data traps[TT_MAX] = {
     },
 };
 
+static int modified_effect_chance(trap_t trap, effect_type et, int level)
+{
+    const int base_chance = trap_effect_chance(trap);
+    if (et == ET_POISON && level < 5)
+    {
+        /* lower poison chance in early levels */
+        return (base_chance * level / 5);
+    }
+
+    return base_chance;
+}
+
 int player_trap_trigger(player *p, trap_t trap, int force)
 {
     /* additional time of turn, if any */
@@ -144,19 +156,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
     /* chance to trigger the trap on target tile */
     int possibility = trap_chance(trap);
 
-    gboolean known = (player_memory_of(p, p->pos).trap == trap);
-
-    // There's a Dex dependant chance of detecting an unknown trap
-    // before stepping on it.
-    if (!known && dex > 12 && chance((dex-12)/2))
-    {
-        log_add_entry(nlarn->log, "Hey, there's a %s there!",
-                      trap_description(trap));
-        player_memory_of(p, p->pos).trap = trap;
-        known = TRUE;
-    }
-
-    if (known)
+    if (player_memory_of(p, p->pos).trap == trap)
     {
         // Dex decreases the chance of triggering a known trap.
         if (dex >= 22)
@@ -196,7 +196,9 @@ int player_trap_trigger(player *p, trap_t trap, int force)
             {
                 const trap_t trap2 = TT_PIT;
 
-                if (trap_effect(trap2) && chance(trap_effect_chance(trap2)))
+                if (trap_effect(trap2)
+                        && chance(modified_effect_chance(trap2, trap_effect(trap2),
+                                                         p->pos.z)))
                 {
                     /* display message if there is one */
                     if (trap_e_message(trap2))
@@ -207,7 +209,9 @@ int player_trap_trigger(player *p, trap_t trap, int force)
             }
 
             /* if there is an effect on the trap add it to player's effects. */
-            if (trap_effect(trap) && chance(trap_effect_chance(trap)))
+            if (trap_effect(trap)
+                    && chance(modified_effect_chance(trap, trap_effect(trap),
+                                                     p->pos.z)))
             {
                 /* display message if there is one */
                 if (trap_e_message(trap))
@@ -218,11 +222,18 @@ int player_trap_trigger(player *p, trap_t trap, int force)
                 player_effect_add(p, effect_new(trap_effect(trap)));
             }
         }
-
     }
+    /* not triggering */
     else if (player_memory_of(p, p->pos).trap == trap)
     {
         log_add_entry(nlarn->log, "You evade the %s.", trap_description(trap));
+    }
+    else if (chance((dex-12)/2))
+    {
+        /* detect the trap despite not setting it off */
+        log_add_entry(nlarn->log, "You notice there's a %s here!",
+                      trap_description(trap));
+        player_memory_of(p, p->pos).trap = trap;
     }
 
     return time;
