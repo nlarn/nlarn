@@ -151,7 +151,8 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_PROTECTION, 250, 3, NULL,
-        NULL, NULL, NULL, NULL,
+        "You feel protected!", "Your protection wanes.",
+        NULL, NULL,
         FALSE, FALSE, TRUE, TRUE
     },
 

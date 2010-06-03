@@ -193,7 +193,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_LIT, "lit", "lightning",
         SC_RAY, DAM_ELECTRICITY, ET_NONE,
-        "You finger will emit a lightning bolt when this spell is cast.",
+        "Your finger will emit a lightning bolt when this spell is cast.",
         "A lightning bolt hits the %s.",
         "The %s loves fire and lightning!",
         4, 1600, TRUE
