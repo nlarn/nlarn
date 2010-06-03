@@ -1759,15 +1759,14 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
     assert(m != NULL && log != NULL);
 
     /* modify frequency by difficulty: more regeneration, less poison */
-    frequency = difficulty << 3;
+    frequency = difficulty << 1;
 
     /* handle regeneration */
-    if (monster_flags(m, MF_REGENERATE))
+    if (monster_flags(m, MF_REGENERATE) && (m->hp < monster_hp_max(m)))
     {
-        /* regenerate every (22- frequency) turns */
-        if (gtime % (22 - frequency) == 0)
-            m->hp = min(monster_hp_max(m), m->hp++);
-
+        /* regenerate every (10 - difficulty) turns */
+        if (gtime % (10 - difficulty) == 0)
+            m->hp++;
     }
 
     /* handle poison */

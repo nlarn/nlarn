@@ -4965,6 +4965,12 @@ void calc_fighting_stats(player *p)
 
         if (instakill_chance < 100)
         {
+            if (monster_flags(m, MF_REGENERATE))
+            {
+                g_string_append_printf(text, "      regeneration: every %d turns\n",
+                                       10 - game_difficulty(nlarn));
+            }
+
             const int max_dam = calc_max_damage(p, m);
             double avg_dam = 0;
             int tries = 100;
@@ -4973,9 +4979,9 @@ void calc_fighting_stats(player *p)
 
             avg_dam /= 100;
 
-            const int hits_needed
-                        = 1 + (monster_type_hp_max(monster_type(m)) / avg_dam);
-
+            int hits_needed = (monster_type_hp_max(monster_type(m)) / avg_dam);
+            if (((int) (avg_dam * 10)) % 10)
+                hits_needed++;
 
             g_string_append_printf(text, "       max. damage: %d hp\n"
                                          "       avg. damage: %.2f hp\n"
