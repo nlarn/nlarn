@@ -253,7 +253,7 @@ int player_map_enter(player *p, map *l, gboolean teleported);
  * @return  a pointer to the slot of the armour
  *
  */
-item **player_get_random_armour(player *p);
+item **player_get_random_armour(player *p, int enchantable);
 
 void player_pickup(player *p);
 void player_autopickup(player *p);

@@ -231,7 +231,7 @@ int player_altar_pray(player *p)
         }
         // intentional fall through
     case 3:
-        if (chance(10) && (armour = player_get_random_armour(p)))
+        if (chance(10) && (armour = player_get_random_armour(p, TRUE)))
         {
             if ((*armour)->bonus < 3)
             {

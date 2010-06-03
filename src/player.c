@@ -872,7 +872,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
             {
                 item **it;
 
-                if (chance(50) && (it = player_get_random_armour(p)))
+                if (chance(50) && (it = player_get_random_armour(p, FALSE)))
                 {
                     /* take off armour */
                     it = NULL;
@@ -896,7 +896,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 /* offer to abort the action if the player is under attack */
                 if (p->attacked && interruptible)
                 {
-                    if(!display_get_yesno(question, FALSE, FALSE))
+                    if (!display_get_yesno(question, FALSE, FALSE))
                     {
                         /* user chose to abort the current action */
                         if (description != NULL)
@@ -1107,7 +1107,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         /* flush keyboard input buffer */
         flushinp();
 
-        score = game_score(nlarn, cause_type, cause);
+        score  = game_score(nlarn, cause_type, cause);
         scores = game_score_add(nlarn, score);
 
         tmp = player_death_description(score, TRUE);
@@ -1872,7 +1872,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     return TRUE;
 }
 
-item **player_get_random_armour(player *p)
+item **player_get_random_armour(player *p, int enchantable)
 {
     GPtrArray *armours;
     item **armour = NULL;
@@ -1891,7 +1891,12 @@ item **player_get_random_armour(player *p)
 
     if (armours->len > 0)
     {
-        armour = g_ptr_array_index(armours, rand_0n(armours->len));
+        int tries = 10;
+        do
+        {
+            armour = g_ptr_array_index(armours, rand_0n(armours->len));
+        }
+        while (enchantable && tries-- > 0 && (*armour)->bonus == 3);
     }
 
     g_ptr_array_free(armours, TRUE);

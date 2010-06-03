@@ -2167,7 +2167,7 @@ static gboolean monster_item_rust(monster *m, struct player *p)
     assert(m != NULL && p != NULL);
 
     /* get a random piece of armour to damage */
-    if ((it = player_get_random_armour(p)))
+    if ((it = player_get_random_armour(p, FALSE)))
     {
         *it = item_erode(&p->inventory, *it, IET_RUST, TRUE);
         return TRUE;

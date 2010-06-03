@@ -411,12 +411,36 @@ static int scroll_enchant_armour(player *p, item *scroll)
     assert(p != NULL && scroll != NULL);
 
     /* get a random piece of armour to enchant */
-    if ((armour = player_get_random_armour(p)))
+    /* try to get one not already fully enchanted */
+    if ((armour = player_get_random_armour(p, TRUE)))
     {
-        log_add_entry(nlarn->log, "Your %s glows for a moment.",
-                      armour_name(*armour));
+        if (scroll->blessed)
+        {
+            log_add_entry(nlarn->log, "Your %s glows brightly for a moment.",
+                          armour_name(*armour));
 
-        item_enchant(*armour);
+            (*armour)->rusty = FALSE;
+            (*armour)->burnt = FALSE;
+            (*armour)->corroded = FALSE;
+            if ((*armour)->bonus < 0)
+            {
+                (*armour)->bonus = 0;
+                if (chance(50))
+                    return TRUE;
+            }
+            /* 50% chance of bonus enchantment */
+            else if (chance(50) && (*armour)->bonus < 3)
+                item_enchant(*armour);
+        }
+        else
+        {
+            log_add_entry(nlarn->log, "Your %s glows for a moment.",
+                          armour_name(*armour));
+        }
+
+        /* blessed scroll never overenchants */
+        if (!scroll->blessed || (*armour)->bonus < 3)
+            item_enchant(*armour);
 
         return TRUE;
     }
@@ -430,11 +454,31 @@ static int scroll_enchant_weapon(player *p, item *scroll)
 
     if (p->eq_weapon)
     {
-        log_add_entry(nlarn->log,
-                      "Your %s glisters for a moment.",
-                      weapon_name(p->eq_weapon));
+        if (scroll->blessed)
+        {
+            log_add_entry(nlarn->log,
+                          "Your %s glows brightly for a moment.",
+                          weapon_name(p->eq_weapon));
 
-        item_enchant(p->eq_weapon);
+            p->eq_weapon->rusty = FALSE;
+            p->eq_weapon->burnt = FALSE;
+            p->eq_weapon->corroded = FALSE;
+            if (p->eq_weapon->bonus < 0)
+            {
+                p->eq_weapon->bonus = 0;
+                return TRUE;
+            }
+        }
+        else
+        {
+            log_add_entry(nlarn->log,
+                          "Your %s glisters for a moment.",
+                          weapon_name(p->eq_weapon));
+        }
+
+        /* blessed scroll never overenchants */
+        if (!scroll->blessed || p->eq_weapon->bonus < 3)
+            item_enchant(p->eq_weapon);
 
         return TRUE;
     }
