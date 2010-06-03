@@ -3108,7 +3108,7 @@ void player_item_equip(player *p, inventory **inv, item *it)
 
         if (*islot == NULL)
         {
-            item_describe(it, player_item_known(p, it), TRUE, FALSE, description, 60);
+            item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
 
             if (!player_make_move(p, time, TRUE, "wearing %s", description))
                 return; /* interrupted */
@@ -3122,6 +3122,15 @@ void player_item_equip(player *p, inventory **inv, item *it)
             log_add_entry(nlarn->log, "You are now wearing %s.", description);
 
             *islot = it;
+
+            if (it->cursed)
+            {
+                /* capitalize first letter */
+                description[0] = g_ascii_toupper(description[0]);
+                log_add_entry(nlarn->log, "%s feels uncomfortably cold!",
+                              description);
+                it->blessed_known = TRUE;
+            }
         }
         break;
 
@@ -3143,8 +3152,15 @@ void player_item_equip(player *p, inventory **inv, item *it)
             p->identified_rings[it->id] = TRUE;
 
             if (ring_bonus_is_obs(it))
-            {
                 it->bonus_known = TRUE;
+
+            if (it->cursed)
+            {
+                /* capitalize first letter */
+                description[0] = g_ascii_toupper(description[0]);
+                log_add_entry(nlarn->log, "%s feels uncomfortably cold!",
+                              description);
+                it->blessed_known = TRUE;
             }
         }
         break;
