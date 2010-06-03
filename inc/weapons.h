@@ -68,7 +68,8 @@ extern const weapon_data weapons[WT_MAX];
 #define weapon_type_obtainable(id) (weapons[id].obtainable)
 
 #define weapon_name(weapon)          (weapons[(weapon)->id].name)
-#define weapon_wc(weapon)            (weapons[(weapon)->id].wc + (weapon)->bonus)
+#define weapon_base_wc(weapon)       (weapons[(weapon)->id].wc)
+#define weapon_wc(weapon)            (weapon_base_wc(weapon) + (weapon)->bonus)
 #define weapon_material(weapon)      (weapons[(weapon)->id].material)
 #define weapon_weight(weapon)        (weapons[(weapon)->id].weight)
 #define weapon_price(weapon)         (weapons[(weapon)->id].price)

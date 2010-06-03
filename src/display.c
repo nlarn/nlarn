@@ -2762,6 +2762,37 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
     }
 }
 
+static char *detailed_item_description(item *it, gboolean known)
+{
+    GString *desc = g_string_new("");
+
+    switch (it->type)
+    {
+    case IT_BOOK:
+        if (known)
+            g_string_append_printf(desc, "%s\n", spell_desc_by_id(it->id));
+        break;
+    case IT_WEAPON:
+        if (weapon_is_twohanded(it))
+            g_string_append_printf(desc, "Two-handed weapon\n");
+
+        g_string_append_printf(desc, "Base damage: +%d\n"
+                                     "Base accuracy: +%d\n",
+                               weapon_base_wc(it), weapon_base_wc(it) / 4);
+        break;
+    case IT_ARMOUR:
+        g_string_append_printf(desc, "Base AC: %d\n", armour_base_ac(it));
+        break;
+    default:
+        break;
+    }
+
+    if (it->notes)
+        g_string_append_printf(desc, "Notes: %s\n", it->notes);
+
+    return g_string_free(desc, FALSE);
+}
+
 static void display_item_details(item *it, player *p, gboolean shop)
 {
     /* string for the content of the item description popup */
@@ -2776,18 +2807,21 @@ static void display_item_details(item *it, player *p, gboolean shop)
         item_describe(it, TRUE, FALSE, FALSE, item_desc, 80);
         item_desc[0] = g_ascii_toupper(item_desc[0]);
 
-        msg = g_strdup_printf("%s\n%s%s\nWeight:   %.2f kg\nMaterial: %s\nPrice:    %d gp",
-                              item_desc, it->notes ? it->notes : "", it->notes ? "\n" : "",
+        msg = g_strdup_printf("%s\n%s\nWeight:   %.2f kg\nMaterial: %s\nPrice:    %d gp",
+                              item_desc,
+                              detailed_item_description(it, TRUE),
                               (float)item_weight(it) / 1000,
                               item_material_name(item_material(it)), item_price(it));
     }
     else
     {
-        item_describe(it, player_item_known(p, it), FALSE, FALSE, item_desc, 80);
+        const gboolean known = player_item_known(p, it);
+        item_describe(it, known, FALSE, FALSE, item_desc, 80);
         item_desc[0] = g_ascii_toupper(item_desc[0]);
 
-        msg = g_strdup_printf("%s\n%s%s\nWeight:   %.2f kg\nMaterial: %s",
-                              item_desc, it->notes ? it->notes : "", it->notes ? "\n" : "",
+        msg = g_strdup_printf("%s\n%s\nWeight:   %.2f kg\nMaterial: %s",
+                              item_desc,
+                              detailed_item_description(it, known),
                               (float)item_weight(it) / 1000,
                               item_material_name(item_material(it)));
     }

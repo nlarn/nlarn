@@ -71,7 +71,8 @@ extern const armour_data armours[AT_MAX];
 /* macros */
 
 #define armour_name(armour)     (armours[(armour)->id].name)
-#define armour_ac(armour)       (armours[(armour)->id].ac + (armour)->bonus)
+#define armour_base_ac(armour)  (armours[(armour)->id].ac)
+#define armour_ac(armour)       (armour_base_ac(armour) + (armour)->bonus)
 #define armour_category(armour) (armours[(armour)->id].category)
 #define armour_material(armour) (armours[(armour)->id].material)
 #define armour_weight(armour)   (armours[(armour)->id].weight)
