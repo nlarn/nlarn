@@ -3953,7 +3953,7 @@ void player_item_notes(player *p, inventory **inv, item *it)
     caption = g_strdup_printf("Add your description for %s (delete with ESC)", desc);
 
     /* get the new note */
-    temp = display_get_string(caption, it->notes, 70);
+    temp = display_get_string(caption, it->notes, 60);
 
     /* free the old note before adding the new note to the item */
     g_free(it->notes);
