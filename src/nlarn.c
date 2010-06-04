@@ -742,6 +742,10 @@ static gboolean adjacent_monster(position p, gboolean ignore_eye)
             if (ignore_umber_hulk && monster_type(m) == MT_UMBER_HULK)
                 continue;
 
+            /* unknown mimic */
+            if (monster_unknown(m))
+                continue;
+
             if (monster_in_sight(m))
                 return TRUE;
         }

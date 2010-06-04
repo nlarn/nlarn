@@ -975,6 +975,7 @@ char *map_pos_examine(position pos)
     g_string_append_printf(desc, "%s. ", tmp);
     g_free(tmp);
 
+    gboolean has_mimic = FALSE;
     /* add description of monster, if there is one on the tile */
     if ((monst = map_get_monster_at(cm, pos)))
     {
@@ -985,6 +986,9 @@ char *map_pos_examine(position pos)
             tmp[0] = g_ascii_toupper(tmp[0]);
             g_string_append_printf(desc, "%s. ", tmp);
             g_free(tmp);
+
+            if (monster_unknown(monst))
+                has_mimic = TRUE;
         }
     }
 
@@ -1003,8 +1007,9 @@ char *map_pos_examine(position pos)
                                trap_description(map_trap_at(cm, pos)), where);
     }
 
-    /* add message if target tile contains items */
-    if (inv_length(*map_ilist_at(cm, pos)) > 0)
+    /* add message if target tile contains items, but only if there's
+       a mimic there (items don't stack correctly otherwise) */
+    if (!has_mimic && inv_length(*map_ilist_at(cm, pos)) > 0)
     {
         if (inv_length(*map_ilist_at(cm, pos)) > 3)
         {
@@ -1915,7 +1920,6 @@ static void map_make_treasure_room(map *maze, rectangle **rooms)
                 success = FALSE;
                 do
                 {
-
                     npos = map_find_space(maze, LE_SOBJECT, FALSE);
                     if (!pos_in_rect(npos, *rooms[room]))
                     {

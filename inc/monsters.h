@@ -176,7 +176,6 @@ void monster_deserialize(cJSON *mser, struct game *g);
 int monster_hp_max(monster *m);
 int monster_hp(monster *m);
 void monster_hp_inc(monster *m, int amount);
-item_t monster_item_type(monster *m);
 gpointer monster_oid(monster *m);
 void monster_oid_set(monster *m, gpointer oid);
 position monster_pos(monster *m);
@@ -247,6 +246,7 @@ gboolean monster_update_action(monster *m);
 void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
 
+item *get_mimic_item(monster *m);
 char *monster_desc(monster *m);
 char monster_glyph(monster *m);
 int monster_color(monster *m);

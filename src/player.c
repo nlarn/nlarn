@@ -4473,7 +4473,17 @@ void player_update_fov(player *p)
                     break;
                 }
 
-                if (inv_length(*inv) > 0)
+                if (m && monster_flags(m, MF_MIMIC) && monster_unknown(m))
+                {
+                    /* remember the undiscovered mimic as an item */
+                    item *it = get_mimic_item(m);
+                    if (it != NULL)
+                    {
+                        player_memory_of(p,pos).item = it->type;
+                        player_memory_of(p,pos).item_colour = item_colour(it);
+                    }
+                }
+                else if (inv_length(*inv) > 0)
                 {
                     item *it;
 
@@ -4496,12 +4506,6 @@ void player_update_fov(player *p)
 
                     player_memory_of(p,pos).item = it->type;
                     player_memory_of(p,pos).item_colour = item_colour(it);
-                }
-                else if (m && monster_flags(m, MF_MIMIC) && monster_unknown(m))
-                {
-                    /* remember the undiscovered mimic as an item */
-                    player_memory_of(p,pos).item = monster_item_type(m);
-                    player_memory_of(p,pos).item_colour = monster_color(m);
                 }
                 else
                 {

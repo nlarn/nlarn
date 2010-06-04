@@ -25,6 +25,7 @@
 
 #include "display.h"
 #include "game.h"
+#include "items.h"
 #include "map.h"
 #include "monsters.h"
 #include "nlarn.h"
@@ -44,10 +45,9 @@ struct _monster
     inventory *inventory;
     gpointer weapon;
     GPtrArray *effects;
-    int colour;          /* for the mimic: the colour the disguised mimic chose */
+    int number;          /* random value for some monsters */
     guint32
-        item_type: 8,    /* item type monster is displayed as */
-        unknown: 1;      /* monster is unknown */
+        unknown: 1;      /* monster is unknown (mimic) */
 };
 
 const char *monster_ai_desc[MA_MAX] =
@@ -159,7 +159,7 @@ monster *monster_new(monster_t type, position pos)
 
     case MT_TOWN_PERSON:
         // initialize name counter
-        nmonster->colour = rand_1n(40);
+        nmonster->number = rand_1n(40);
         break;
 
     default:
@@ -227,25 +227,14 @@ monster *monster_new(monster_t type, position pos)
     /* initialize mimics */
     if (monster_flags(nmonster, MF_MIMIC))
     {
-        struct
-        {
-            item_t type;
-            int colour;
-        }
-        possible_types[] =
-        {
-            { IT_AMULET,    DC_YELLOW, },
-            { IT_GOLD,      DC_YELLOW, },
-            { IT_RING,      DC_WHITE,  },
-            { IT_GEM,       DC_RED,    },
-            { IT_CONTAINER, DC_BROWN   },
-        };
+        const int possible_types[] = { IT_AMULET, IT_GOLD, IT_RING, IT_GEM,
+                                       IT_CONTAINER, IT_BOOK, IT_POTION,
+                                       IT_SCROLL };
 
-        int chosen_type = rand_0n(5);
-
-        /* determine how the mimic will be displayed */
-        nmonster->item_type = possible_types[chosen_type].type;
-        nmonster->colour    = possible_types[chosen_type].colour;
+        /* put mimicked item into monster inventory */
+        const int chosen_type = possible_types[rand_0n(8)];
+        item *it = item_new_by_level(chosen_type, nmonster->pos.z);
+        inv_add(&nmonster->inventory, it);
 
         /* the mimic is not known to be a monster */
         nmonster->unknown = TRUE;
@@ -501,14 +490,11 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     if (m->weapon != NULL)
         cJSON_AddNumberToObject(mval, "weapon", GPOINTER_TO_UINT(m->weapon));
 
-    if (m->colour)
-        cJSON_AddNumberToObject(mval, "colour", m->colour);
+    if (m->number)
+        cJSON_AddNumberToObject(mval, "number", m->number);
 
     if (m->unknown)
         cJSON_AddTrueToObject(mval, "unknown");
-
-    if (m->item_type)
-        cJSON_AddNumberToObject(mval, "item_type", m->item_type);
 
     if (m->lastseen != 0)
     {
@@ -547,14 +533,11 @@ void monster_deserialize(cJSON *mser, game *g)
     if ((obj = cJSON_GetObjectItem(mser, "weapon")))
         m->weapon = GUINT_TO_POINTER(obj->valueint);
 
-    if ((obj = cJSON_GetObjectItem(mser, "colour")))
-        m->colour = obj->valueint;
+    if ((obj = cJSON_GetObjectItem(mser, "number")))
+        m->number = obj->valueint;
 
     if ((obj = cJSON_GetObjectItem(mser, "unknown")))
         m->unknown = TRUE;
-
-    if ((obj = cJSON_GetObjectItem(mser, "item_type")))
-        m->item_type = obj->valueint;
 
     if ((obj = cJSON_GetObjectItem(mser, "lastseen")))
         m->lastseen = obj->valueint;
@@ -598,12 +581,6 @@ void monster_hp_inc(monster *m, int amount)
 {
     assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
     m->hp = min(m->hp + amount, m->hp_max);
-}
-
-item_t monster_item_type(monster *m)
-{
-    assert (m != NULL);
-    return m->item_type;
 }
 
 gpointer monster_oid(monster *m)
@@ -751,7 +728,7 @@ const char *monster_get_name(monster *m)
         return ("unseen monster");
 
     if (monster_type(m) == MT_TOWN_PERSON)
-        return get_town_person_name(m->colour);
+        return get_town_person_name(m->number);
 
     return (monster_name(m));
 }
@@ -801,6 +778,13 @@ void monster_die(monster *m, struct player *p)
         char *message = "The %s dies!";
 
         log_add_entry(nlarn->log, message, monster_get_name(m));
+    }
+
+    /* make sure mimics never leave the mimicked item behind */
+    if (monster_flags(m, MF_MIMIC)
+            && inv_length(m->inventory) > 0)
+    {
+        inv_del(&m->inventory, 0);
     }
 
     /* drop stuff the monster carries */
@@ -1164,6 +1148,13 @@ monster *monster_trap_trigger(monster *m)
 void monster_polymorph(monster *m)
 {
     assert (m != NULL);
+
+    /* make sure mimics never leave the mimicked item behind */
+    if (monster_flags(m, MF_MIMIC)
+            && inv_length(m->inventory) > 0)
+    {
+        inv_del(&m->inventory, 0);
+    }
 
     const map_element_t old_elem = monster_map_element(m);
     do
@@ -1792,6 +1783,17 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
     return TRUE;
 }
 
+item *get_mimic_item(monster *m)
+{
+    assert(m && monster_flags(m, MF_MIMIC));
+
+    /* polymorphed mimics may not pose as items */
+    if (inv_length(m->inventory) > 0)
+        return inv_get(m->inventory, 0);
+
+    return NULL;
+}
+
 char *monster_desc(monster *m)
 {
     int hp_rel;
@@ -1799,6 +1801,22 @@ char *monster_desc(monster *m)
     char *injury, *effects = NULL;
 
     assert (m != NULL);
+
+    desc = g_string_new(NULL);
+
+    /* describe mimic as mimicked item */
+    if (monster_unknown(m) && inv_length(m->inventory) > 0)
+    {
+        item *it = get_mimic_item(m);
+        char item_desc[81] = { 0 };
+
+        item_describe(it, player_item_known(nlarn->p, it), (it->count == 1),
+                      FALSE, item_desc, 80);
+
+        g_string_append_printf(desc, "You see %s there", item_desc);
+
+        return g_string_free(desc, FALSE);
+    }
 
     hp_rel = (((float)m->hp / (float)monster_hp_max(m)) * 100);
 
@@ -1813,18 +1831,6 @@ char *monster_desc(monster *m)
         injury = "heavily injured";
     else
         injury = "critically injured";
-
-    desc = g_string_new(NULL);
-
-    if (monster_unknown(m))
-    {
-        /* an undiscovered mimic will be described as the item it mimics */
-        g_string_append_printf(desc, "%s %s",
-                               a_an(item_data[monster_item_type(m)].name_sg),
-                               item_data[monster_item_type(m)].name_sg);
-
-        return g_string_free(desc, FALSE);
-    }
 
     GString *hp_string = g_string_new("");
     if (game_wizardmode(nlarn))
@@ -1868,9 +1874,10 @@ char monster_glyph(monster *m)
 {
     assert (m != NULL);
 
-    if (m->unknown)
+    if (m->unknown && inv_length(m->inventory) > 0)
     {
-        return item_glyph(m->item_type);
+        item *it = inv_get(m->inventory, 0);
+        return item_glyph(it->type);
     }
     else
     {
@@ -1882,9 +1889,10 @@ int monster_color(monster *m)
 {
     assert (m != NULL);
 
-    if (m->unknown)
+    if (m->unknown && inv_length(m->inventory) > 0)
     {
-        return m->colour;
+        item *it = inv_get(m->inventory, 0);
+        return item_colour(it);
     }
     else
     {
@@ -2356,7 +2364,7 @@ static position monster_move_wander(monster *m, struct player *p)
         {
             m->lastseen = 2;
             if (chance(20))
-                m->colour = rand_1n(40);
+                m->number = rand_1n(40);
         }
     }
 

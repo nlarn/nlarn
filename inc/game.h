@@ -26,8 +26,9 @@
 #include "spheres.h"
 
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
+
 /* internal counter for save file compatibility */
-#define SAVEFILE_VERSION    8
+#define SAVEFILE_VERSION    9
 
 /* the world as we know it */
 typedef struct game
