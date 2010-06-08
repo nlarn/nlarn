@@ -2232,7 +2232,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (dam->amount > 0)
         {
             p->hp -= dam->amount;
-            log_add_entry(nlarn->log, "Ouch!");
+            if (dam->amount >= 8 && dam->amount >= p->hp_max/4)
+                log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
+            else if (dam->amount >= p->hp_max/10)
+                log_add_entry(nlarn->log, "Ouch!");
         }
         else
         {
@@ -2246,7 +2249,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (dam->amount > 0)
         {
             p->hp -= dam->amount;
-            log_add_entry(nlarn->log, "Ouch!");
+            if (dam->amount >= 8 && dam->amount >= p->hp_max/4)
+                log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
+            else if (dam->amount >= p->hp_max/10)
+                log_add_entry(nlarn->log, "Ouch!");
         }
         else
         {
@@ -2327,7 +2333,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (cause_type != PD_EFFECT)
         {
             /* check resistance; prevent negative damage amount */
-            dam->amount -= max(0, rand_0n(player_get_con(p)));
+            dam->amount = max(0, dam->amount - rand_0n(player_get_con(p)));
 
             if (dam->amount > 0)
             {
