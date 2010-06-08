@@ -287,6 +287,11 @@ static inline int monster_exp(monster *m)
     return luaN_query_int("monsters", monster_type(m), "exp");
 }
 
+static inline int monster_size(monster *m)
+{
+    return luaN_query_int("monsters", monster_type(m), "size");
+}
+
 static inline int monster_speed(monster *m)
 {
     return luaN_query_int("monsters", monster_type(m), "speed");

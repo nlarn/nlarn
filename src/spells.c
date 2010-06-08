@@ -1542,85 +1542,10 @@ gboolean spell_cure_blindness(struct player *p)
     }
 }
 
-gboolean spell_make_wall(player *p)
+static void destroy_sobject_at(player *p, map *map, position pos)
 {
-    position pos;
-
-    pos = display_get_position(p, "Select a position where you want to place a wall.",
-                               FALSE, FALSE, 0, FALSE, TRUE);
-
-    if (pos_identical(pos, p->pos))
-    {
-        log_add_entry(nlarn->log, "You are actually standing there.");
-        return FALSE;
-    }
-    else if (!pos_valid(pos))
-    {
-        log_add_entry(nlarn->log, "No wall today.");
-        return FALSE;
-    }
-
-    if (map_tiletype_at(game_map(nlarn, p->pos.z), pos) != LT_WALL)
-    {
-        map_tile *tile = map_tile_at(game_map(nlarn, p->pos.z), pos);
-
-        tile->type = tile->base_type = LT_WALL;
-
-        /* destroy all items at that position */
-        if (tile->ilist != NULL)
-        {
-            inv_destroy(tile->ilist, TRUE);
-            tile->ilist = NULL;
-        }
-
-        log_add_entry(nlarn->log, "You have created a wall.");
-
-        return TRUE;
-    }
-    else
-    {
-        log_add_entry(nlarn->log, "There was a wall already..");
-        return FALSE;
-    }
-}
-
-gboolean spell_vaporize_rock(player *p)
-{
-    monster *m;
-    position pos;
     position mpos;      /* position for monster that might be generated */
     char *desc = NULL;
-    map *map = game_map(nlarn, p->pos.z);
-
-    pos = display_get_position(p, "What do you want to vaporize?",
-                               FALSE, FALSE, 0, FALSE, TRUE);
-
-    if (!pos_valid(pos))
-    {
-        log_add_entry(nlarn->log, "So you chose not to vaporize anything.");
-        return FALSE;
-    }
-
-    if (map_tiletype_at(map, pos) == LT_WALL)
-    {
-        map_tiletype_set(map, pos, LT_FLOOR);
-        p->stats.vandalism++;
-    }
-
-    if ((m = map_get_monster_at(map, pos)))
-    {
-        /* xorns take damage from vpr */
-        if (monster_type(m) == MT_XORN)
-        {
-            monster_damage_take(m, damage_new(DAM_PHYSICAL, ATT_NONE,
-                                divert(200, 10), p));
-        }
-        else if (monster_in_sight(m))
-        {
-            log_add_entry(nlarn->log, "The %s can't be vaporized.",
-                          monster_get_name(m));
-        }
-    }
 
     mpos = map_find_space_in(map, rect_new_sized(pos, 1), LE_MONSTER, FALSE);
 
@@ -1700,6 +1625,109 @@ gboolean spell_vaporize_rock(player *p)
         map_sobject_set(map, pos, LS_NONE);
         p->stats.vandalism++;
     }
+}
+
+gboolean spell_make_wall(player *p)
+{
+    position pos;
+
+    pos = display_get_position(p, "Select a position where you want to place a wall.",
+                               FALSE, FALSE, 0, FALSE, TRUE);
+
+    if (pos_identical(pos, p->pos))
+    {
+        log_add_entry(nlarn->log, "You are actually standing there.");
+        return FALSE;
+    }
+    else if (!pos_valid(pos))
+    {
+        log_add_entry(nlarn->log, "No wall today.");
+        return FALSE;
+    }
+
+    map *map = game_map(nlarn, p->pos.z);
+    if (map_tiletype_at(map, pos) != LT_WALL)
+    {
+        map_tile *tile = map_tile_at(game_map(nlarn, p->pos.z), pos);
+
+        /* destroy all items at that position */
+        if (tile->ilist != NULL)
+        {
+            inv_destroy(tile->ilist, TRUE);
+            tile->ilist = NULL;
+        }
+
+        destroy_sobject_at(p, map, pos);
+
+        log_add_entry(nlarn->log, "You have created a wall.");
+
+        tile->type = tile->base_type = LT_WALL;
+
+        monster *m;
+        if ((m = map_get_monster_at(map, pos)))
+        {
+            if (monster_type(m) != MT_XORN)
+            {
+                if (monster_in_sight(m))
+                {
+                    /* briefly display the new monster before it dies */
+                    display_paint_screen(nlarn->p);
+                    usleep(250000);
+
+                    log_add_entry(nlarn->log, "The %s is trapped in the wall!",
+                                  monster_get_name(m));
+                }
+
+                monster_die(m, nlarn->p);
+            }
+        }
+
+        return TRUE;
+    }
+    else
+    {
+        log_add_entry(nlarn->log, "There was a wall already..");
+        return FALSE;
+    }
+}
+
+gboolean spell_vaporize_rock(player *p)
+{
+    monster *m;
+    position pos;
+    map *map = game_map(nlarn, p->pos.z);
+
+    pos = display_get_position(p, "What do you want to vaporize?",
+                               FALSE, FALSE, 0, FALSE, TRUE);
+
+    if (!pos_valid(pos))
+    {
+        log_add_entry(nlarn->log, "So you chose not to vaporize anything.");
+        return FALSE;
+    }
+
+    if (map_tiletype_at(map, pos) == LT_WALL)
+    {
+        map_tiletype_set(map, pos, LT_FLOOR);
+        p->stats.vandalism++;
+    }
+
+    if ((m = map_get_monster_at(map, pos)))
+    {
+        /* xorns take damage from vpr */
+        if (monster_type(m) == MT_XORN)
+        {
+            monster_damage_take(m, damage_new(DAM_PHYSICAL, ATT_NONE,
+                                divert(200, 10), p));
+        }
+        else if (monster_in_sight(m))
+        {
+            log_add_entry(nlarn->log, "The %s can't be vaporized.",
+                          monster_get_name(m));
+        }
+    }
+
+    destroy_sobject_at(p, map, pos);
 
     return TRUE;
 }
