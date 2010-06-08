@@ -1389,6 +1389,25 @@ static int handle_breath_attack(monster *m, player *p, attack att)
     return TRUE;
 }
 
+static int difficulty_modified_damage(int amount, int difficulty)
+{
+    if (difficulty == 0)
+        return amount;
+
+    const int max_damage = min(amount + difficulty,
+                               (amount * (4 + difficulty)) / 4);
+
+    return rand_m_n(amount, max_damage + 1);
+}
+
+static int modified_attack_amount(int amount, int damage_type)
+{
+    if (damage_type == DAM_POISON)
+        return amount + (game_difficulty(nlarn) + 1)/2;
+
+    return amount + game_difficulty(nlarn)/2;
+}
+
 void monster_player_attack(monster *m, player *p)
 {
     damage *dam;
@@ -1441,7 +1460,8 @@ void monster_player_attack(monster *m, player *p)
     if (att.type == ATT_NONE) return;
 
     /* generate damage */
-    dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn), m);
+    dam = damage_new(att.damage, att.type,
+                     modified_attack_amount(att.base, att.damage), m);
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM)
@@ -1455,6 +1475,25 @@ void monster_player_attack(monster *m, player *p)
         handle_breath_attack(m, p, att);
         return;
     }
+
+    /* set damage for weapon attacks */
+    if ((att.type == ATT_WEAPON) && (m->weapon != NULL))
+    {
+        item *weapon = game_item_get(nlarn, m->weapon);
+
+        /* make monster size affect weapon damage */
+        dam->amount  = rand_1n(weapon_wc(weapon) + game_difficulty(nlarn)
+                               + 2*(monster_size(m) - ESIZE_MEDIUM));
+    }
+    else if (dam->type == DAM_PHYSICAL)
+    {
+        /* increase damage with difficulty */
+        dam->amount = difficulty_modified_damage(att.base,
+                                                 game_difficulty(nlarn));
+    }
+
+    /* add variable damage */
+    if (att.rand) dam->amount += rand_1n(att.rand);
 
     /* half damage if player is protected against spirits */
     if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_flags(m, MF_SPIRIT))
@@ -1472,16 +1511,6 @@ void monster_player_attack(monster *m, player *p)
             return;
         }
     }
-
-    /* set damage for weapon attacks */
-    if ((att.type == ATT_WEAPON) && (m->weapon != NULL))
-    {
-        item *weapon = game_item_get(nlarn, m->weapon);
-        dam->amount = rand_1n(weapon_wc(weapon) + game_difficulty(nlarn));
-    }
-
-    /* add variable damage */
-    if (att.rand) dam->amount += rand_1n(att.rand);
 
     /* handle some damage types here */
     switch (dam->type)
