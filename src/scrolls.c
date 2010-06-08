@@ -822,6 +822,10 @@ static int scroll_spell_extension(player *p, item *scroll)
 
     assert(p != NULL && scroll != NULL);
 
+    /* return early if no spells memorised */
+    if (p->known_spells->len == 0)
+        return FALSE;
+
     for (idx = 0; idx < p->known_spells->len; idx++)
     {
         sp = g_ptr_array_index(p->known_spells, idx);
@@ -836,17 +840,11 @@ static int scroll_spell_extension(player *p, item *scroll)
             /* increase spell knowledge */
             sp->knowledge++;
         }
-
     }
 
     /* give a message if any spell has been extended */
-    if (p->known_spells->len > 0)
-    {
-        log_add_entry(nlarn->log, "You feel your magic skills improve.");
-        return TRUE;
-    }
-
-    return FALSE;
+    log_add_entry(nlarn->log, "You feel your magic skills improve.");
+    return TRUE;
 }
 
 static int scroll_teleport(player *p, item *scroll)
