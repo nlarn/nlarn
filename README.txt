@@ -2,7 +2,7 @@
 	Welcome to NLarn!
 
 The goal of the game is to find the potion to cure your daughter from the 
-illness "diantrorithis" and bring it back home. Time is finite - when you
+illness "dianthroritis" and bring it back home. Time is finite - when you
 return to your home, the doctor will tell you how much time is left. In 
 NLarn, time is measured in mobuls. A mobul consists of 100 turns. You can 
 see the number of turns elapsed in the status bar on the right, prefixed 
@@ -78,7 +78,7 @@ Bug reports are very welcome. You can either send me an eMail to
 jaydg@users.sourceforge.net or if you have a SourceForge account you can post 
 to the bug tracker at 
 
-  http://sourceforge.net/apps/trac/nlarn/newticket
+	http://sourceforge.net/apps/trac/nlarn/newticket
 
 Known bugs and tasks are tracked at 
 
