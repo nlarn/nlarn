@@ -24,16 +24,28 @@
 #include <glib/gstdio.h>
 #include <ctype.h>
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include "container.h"
 #include "display.h"
 #include "game.h"
 #include "nlarn.h"
 #include "sobjects.h"
 
+/* global game object */
 game *nlarn = NULL;
+
 
 static gboolean adjacent_monster(position p, gboolean ignore_eye);
 static gboolean adjacent_corridor(position pos, char move);
+#ifdef WIN32
+BOOL nlarn_control_handler(DWORD fdwCtrlType);
+#endif
+
+/* save file name */
+static char *save_file_name = NULL;
 
 int main(int argc, char *argv[])
 {
@@ -45,9 +57,6 @@ int main(int argc, char *argv[])
 
     /* position to examine */
     position pos;
-
-    /* save file name */
-    char *save_file_name = NULL;
 
     /* assemble save file name */
     gchar *userdir = game_userdir();
@@ -103,6 +112,11 @@ int main(int argc, char *argv[])
         /* give player knowledge of the town */
         scroll_mapping(nlarn->p, NULL);
     }
+
+#ifdef WIN32
+    /* set the console shutdown handler */
+    SetConsoleCtrlHandler((PHANDLER_ROUTINE) nlarn_control_handler, TRUE);
+#endif
 
     /* check if mesgfile exists */
     if (!g_file_get_contents(game_mesgfile(nlarn), &strbuf, NULL, NULL))
@@ -813,3 +827,25 @@ static gboolean adjacent_corridor(position pos, char move)
 
     return FALSE;
 }
+
+#ifdef WIN32
+BOOL nlarn_control_handler(DWORD fdwCtrlType)
+{
+    switch(fdwCtrlType)
+    {
+        /* Close Window button pressed: store the game progress */
+    case CTRL_CLOSE_EVENT:
+        /* only try to save the game when the sace file name has been assembled */
+        if (save_file_name != NULL)
+        {
+            game_save(nlarn, save_file_name);
+        }
+        game_destroy(nlarn);
+
+        return TRUE;
+
+    default:
+        return FALSE;
+    }
+}
+#endif
