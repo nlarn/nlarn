@@ -102,7 +102,7 @@ typedef struct display_window
 
 /* function declarations */
 
-int display_init();
+void display_init();
 void display_shutdown();
 void display_wrap(lua_State *L);
 int display_draw();

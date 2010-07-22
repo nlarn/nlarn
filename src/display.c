@@ -29,6 +29,7 @@
 
 static guint display_rows = 0;
 static guint display_cols = 0;
+static gboolean display_initialised = FALSE;
 
 /* linked list of opened windows */
 static GList *windows = NULL;
@@ -47,7 +48,7 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on);
 static void display_item_details(item *it, player *p, gboolean shop);
 static void display_spheres_paint(sphere *s, player *p);
 
-int display_init()
+void display_init()
 {
     /* taken from Angband 3.1.1 */
     /* overwrite bit is false, so users on real (serial) terminals can override
@@ -98,7 +99,8 @@ int display_init()
     /* make cursor invisible */
     curs_set(0);
 
-    return TRUE;
+    /* update display initialisation status */
+    display_initialised = TRUE;
 }
 
 static int attr_colour(int colour, int reverse)
@@ -546,8 +548,15 @@ int display_paint_screen(player *p)
 
 void display_shutdown()
 {
-    /* End curses mode */
-    endwin();
+    /* only terminate curses mode when the display has been initialised */
+    if (display_initialised)
+    {
+        /* end curses mode */
+        endwin();
+
+        /* update display initialisation status */
+        display_initialised = FALSE;
+    }
 }
 
 void display_wrap(lua_State *L)

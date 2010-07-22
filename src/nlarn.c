@@ -17,12 +17,16 @@
  */
 
 /* needed for the key definitions */
+#include <ctype.h>
 #include <curses.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <stdlib.h>
 #include <glib/gstdio.h>
-#include <ctype.h>
+
+#ifdef __unix
+#  include <signal.h>
+#endif
 
 #ifdef WIN32
 #include <windows.h>
@@ -40,8 +44,13 @@ game *nlarn = NULL;
 
 static gboolean adjacent_monster(position p, gboolean ignore_eye);
 static gboolean adjacent_corridor(position pos, char move);
+
 #ifdef WIN32
 BOOL nlarn_control_handler(DWORD fdwCtrlType);
+#endif
+
+#ifdef __unix
+static void nlarn_signal_handler(int signo);
 #endif
 
 /* save file name */
@@ -113,8 +122,12 @@ int main(int argc, char *argv[])
         scroll_mapping(nlarn->p, NULL);
     }
 
-#ifdef WIN32
     /* set the console shutdown handler */
+#ifdef __unix
+    signal(SIGTERM, nlarn_signal_handler);
+#endif
+
+#ifdef WIN32
     SetConsoleCtrlHandler((PHANDLER_ROUTINE) nlarn_control_handler, TRUE);
 #endif
 
@@ -828,6 +841,26 @@ static gboolean adjacent_corridor(position pos, char move)
     return FALSE;
 }
 
+#ifdef __unix
+
+static void nlarn_signal_handler(int signo)
+{
+    /* restore the display down before emitting messages */
+    display_shutdown();
+
+    /* only try to save the game when the save file name has been assembled */
+    if (save_file_name != NULL)
+    {
+        game_save(nlarn, save_file_name);
+        g_printf("Terminated. Your progress has been saved.\n");
+    }
+
+    game_destroy(nlarn);
+    exit(EXIT_SUCCESS);
+}
+
+#endif
+
 #ifdef WIN32
 BOOL nlarn_control_handler(DWORD fdwCtrlType)
 {
@@ -835,7 +868,7 @@ BOOL nlarn_control_handler(DWORD fdwCtrlType)
     {
         /* Close Window button pressed: store the game progress */
     case CTRL_CLOSE_EVENT:
-        /* only try to save the game when the sace file name has been assembled */
+        /* only try to save the game when the save file name has been assembled */
         if (save_file_name != NULL)
         {
             game_save(nlarn, save_file_name);
