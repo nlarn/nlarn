@@ -53,9 +53,6 @@ BOOL nlarn_control_handler(DWORD fdwCtrlType);
 static void nlarn_signal_handler(int signo);
 #endif
 
-/* save file name */
-static char *save_file_name = NULL;
-
 int main(int argc, char *argv[])
 {
     /* count of moves used by last action */
@@ -67,60 +64,11 @@ int main(int argc, char *argv[])
     /* position to examine */
     position pos;
 
-    /* assemble save file name */
-    gchar *userdir = game_userdir();
-    save_file_name = g_build_path(G_DIR_SEPARATOR_S, userdir, "nlarn.sav", NULL);
-    g_free(userdir);
-
-    /* initialize display */
-    display_init();
-
     /* call display_shutdown when terminating the game */
     atexit(display_shutdown);
 
-    /* find save file */
-    gboolean loaded = FALSE;
-    if (g_file_test(save_file_name, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_REGULAR))
-    {
-        /* restore savegame */
-        loaded = game_load(save_file_name, argc, argv);
-
-        if (!loaded)
-        {
-            if (display_get_yesno("Saved game could not be loaded. " \
-                                  "Delete and start new game?",
-                                  NULL, NULL))
-            {
-                /* delete save file */
-                g_unlink(save_file_name);
-            }
-            else
-            {
-                g_printerr("Save file not compatible to current version.\n");
-                exit(EXIT_FAILURE);
-            }
-        }
-    }
-
-    if (loaded)
-    {
-        /* delete save file */
-        g_unlink(save_file_name);
-
-        /* refresh FOV */
-        player_update_fov(nlarn->p);
-    }
-    else
-    {
-        /* start new game */
-        game_new(argc, argv);
-
-        /* put the player into the town */
-        player_map_enter(nlarn->p, game_map(nlarn, 0), FALSE);
-
-        /* give player knowledge of the town */
-        scroll_mapping(nlarn->p, NULL);
-    }
+    /* initialise the game */
+    game_init(argc, argv);
 
     /* set the console shutdown handler */
 #ifdef __unix
@@ -135,34 +83,39 @@ int main(int argc, char *argv[])
     if (!g_file_get_contents(game_mesgfile(nlarn), &strbuf, NULL, NULL))
     {
         game_destroy(nlarn);
+        display_shutdown();
+        g_printerr("Error: Cannot find the message file.\n");
 
-        fprintf(stderr, "Error: Cannot find message file.\n");
         exit(EXIT_FAILURE);
     }
 
     display_show_message("Welcome to the game of NLarn!", strbuf, 0);
     g_free(strbuf);
 
-    if (!loaded)
+    /* complete the player creation process if it is unfinished */
+    if (!nlarn->player_creation_completed)
     {
-        if (!player_assign_bonus_stats(nlarn->p))
-            exit(EXIT_SUCCESS);
-    }
+        /* ask for a charakter name if none has been supplied */
+        while (nlarn->p->name == NULL)
+        {
+            nlarn->p->name = display_get_string("By what name shall you be called?",
+                                                NULL, 45);
+        }
 
-    /* ask for a charakter name if none has been supplied */
-    while (nlarn->p->name == NULL)
-    {
-        nlarn->p->name = display_get_string("By what name shall you be called?",
-                                            NULL, 45);
-    }
+        /* ask for charakter's gender if it is not known yet */
+        if (nlarn->p->sex == PS_NONE)
+        {
+            int res = display_get_yesno("Are you male or female?", "Female", "Male");
 
-    /* ask for charakter's gender if it is not known yet */
-    if (nlarn->p->sex == PS_NONE)
-    {
-        int res = display_get_yesno("Are you male or female?", "Female", "Male");
+            /* display_get_yesno() returns 0 or one */
+            nlarn->p->sex = (res == TRUE) ?  PS_FEMALE : PS_MALE;
+        }
 
-        /* display_get_yesno() returns 0 or one */
-        nlarn->p->sex = (res == TRUE) ?  PS_FEMALE : PS_MALE;
+        /* assign the player's stats */
+        player_assign_bonus_stats(nlarn->p);
+
+        /* we're done */
+        nlarn->player_creation_completed = TRUE;
     }
 
     char run_cmd = 0;
@@ -530,7 +483,7 @@ int main(int argc, char *argv[])
 
             /* save */
         case 'S':
-            if (game_save(nlarn, save_file_name))
+            if (game_save(nlarn, NULL))
             {
                 /* only terminate the game if saving was successful */
                 game_destroy(nlarn);
@@ -848,12 +801,9 @@ static void nlarn_signal_handler(int signo)
     /* restore the display down before emitting messages */
     display_shutdown();
 
-    /* only try to save the game when the save file name has been assembled */
-    if (save_file_name != NULL)
-    {
-        game_save(nlarn, save_file_name);
-        g_printf("Terminated. Your progress has been saved.\n");
-    }
+    /* attempt to save the game */
+    game_save(nlarn, NULL);
+    g_printf("Terminated. Your progress has been saved.\n");
 
     game_destroy(nlarn);
     exit(EXIT_SUCCESS);
@@ -868,11 +818,8 @@ BOOL nlarn_control_handler(DWORD fdwCtrlType)
     {
         /* Close Window button pressed: store the game progress */
     case CTRL_CLOSE_EVENT:
-        /* only try to save the game when the save file name has been assembled */
-        if (save_file_name != NULL)
-        {
-            game_save(nlarn, save_file_name);
-        }
+        /* save the game */
+        game_save(nlarn, NULL);
         game_destroy(nlarn);
 
         return TRUE;

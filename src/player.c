@@ -161,7 +161,7 @@ player *player_new()
     return p;
 }
 
-int player_assign_bonus_stats(player *p)
+void player_assign_bonus_stats(player *p)
 {
     GString *text;
     text = g_string_new("  a) Strong character\n"
@@ -176,8 +176,6 @@ int player_assign_bonus_stats(player *p)
     {
         selection = display_show_message("Choose a character build",
                                          text->str, 0);
-        if (selection == KEY_ESC)
-            return FALSE;
     }
     while (selection < 'a' || selection > 'f');
 
@@ -257,8 +255,6 @@ int player_assign_bonus_stats(player *p)
     // Recalculate hp and mp because they depend on Con and Int, respectively.
     p->hp = p->hp_max = (p->constitution + 5);
     p->mp = p->mp_max = (p->intelligence + 5);
-
-    return TRUE;
 }
 
 void player_destroy(player *p)

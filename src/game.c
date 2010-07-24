@@ -39,8 +39,9 @@
 #include "spheres.h"
 #include "utils.h"
 
-static void game_initialize_settings(game *g, int argc, char *argv[], gboolean new_game);
-static void game_initialize_lua(game *g);
+static void game_new();
+static gboolean game_load(gchar *filename);
+static void game_init_lua(game *g);
 
 static void game_monsters_move(game *g);
 
@@ -64,59 +65,200 @@ static void print_welcome_message(gboolean newgame)
     log_add_entry(nlarn->log, "For a list of commands, press '?'.");
 }
 
-void game_new(int argc, char *argv[])
+void game_init(int argc, char *argv[])
 {
-    size_t idx;
+    const char *default_lib_dir = "/usr/share/games/nlarn";
 
-    /* one game, please */
+    int idx;
+    item_t it;
+
+    /* these will be filled by the command line parser */
+    static gint difficulty = 0;
+    static gboolean wizard = FALSE;
+    static char *name = NULL;
+    static char *sex = NULL;
+    static char *auto_pickup = NULL;
+    static char *savefile = NULL;
+
+    /* allocate space for game structure */
     nlarn = g_malloc0(sizeof(game));
 
-    /* initialize object hashes (here as they will be needed by player_new) */
-    nlarn->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
-    nlarn->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
-    nlarn->monsters = g_hash_table_new(&g_direct_hash, &g_direct_equal);
 
-    nlarn->spheres = g_ptr_array_new();
+    /* determine paths and file names */
+    /* base directory for a local install */
+    nlarn->basedir = g_path_get_dirname(argv[0]);
 
-    /* generate player */
-    nlarn->p = player_new();
+    /* try to use the directory below the binary's location first */
+    nlarn->libdir = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, "lib", NULL);
 
-    /* initialize game settings */
-    game_initialize_settings(nlarn, argc, argv, TRUE);
-
-    /* initialize Lua interpreter */
-    game_initialize_lua(nlarn);
-
-    /* randomize unidentified item descriptions */
-    game_items_shuffle(nlarn);
-
-    /* fill the store */
-    building_dndstore_init();
-
-    /* generate levels */
-    for (idx = 0; idx < MAP_MAX; idx++)
+    if (!g_file_test(nlarn->libdir, G_FILE_TEST_IS_DIR))
     {
-        /* if map_new fails, it returns NULL.
-           loop while no map has been generated */
-        do
+        /* local lib directory could not be found,
+           try the system wide directory */
+        if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
         {
-            nlarn->maps[idx] = map_new(idx, nlarn->mazefile);
+            /* system-wide data directory exists */
+            /* string has to be dup'd as it is feed in the end */
+            nlarn->libdir = g_strdup((char *)default_lib_dir);
         }
-        while (nlarn->maps[idx] == NULL);
+        else
+        {
+            g_printerr("Could not find game library directory.\n");
+            g_printerr("Please reinstall the game.\n");
+
+            exit(EXIT_FAILURE);
+        }
     }
 
-    /* game time handling */
-    nlarn->gtime = 1;
-    nlarn->time_start = time(NULL);
-    nlarn->version = SAVEFILE_VERSION;
+    nlarn->mesgfile = g_build_filename(nlarn->libdir, mesgfile, NULL);
+    nlarn->helpfile = g_build_filename(nlarn->libdir, helpfile, NULL);
+    nlarn->mazefile = g_build_filename(nlarn->libdir, mazefile, NULL);
+    nlarn->fortunes = g_build_filename(nlarn->libdir, fortunes, NULL);
+    nlarn->highscores = g_build_filename(nlarn->libdir, highscores, NULL);
 
-    /* start a new diary */
-    nlarn->log = log_new();
+    /* initialize the lua interpreter */
+    game_init_lua(nlarn);
 
-    /* welcome message */
-    print_welcome_message(TRUE);
 
-    log_set_time(nlarn->log, nlarn->gtime);
+    /* ini file handling */
+    GKeyFile *ini_file = g_key_file_new();
+    GError *error = NULL;
+
+    /* determine location of the configuration file */
+    gchar *filename = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+                                   "nlarn.ini", NULL);
+
+    if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR))
+    {
+        /* ini file has not been found in user config directory */
+        g_free(filename);
+
+        /* try to find it in the binarys directory */
+        filename = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, "nlarn.ini", NULL);
+    }
+
+    /* try to load settings from the configuration file */
+    g_key_file_load_from_file(ini_file, filename, G_KEY_FILE_NONE, &error);
+    g_free(filename);
+
+    if (!error)
+    {
+        /* ini file has been found, get values */
+        /* clear error after each attempt as values need not to be defined */
+        difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
+        g_clear_error(&error);
+
+        wizard = g_key_file_get_boolean(ini_file, "nlarn", "wizard", &error);
+        g_clear_error(&error);
+
+        name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
+        g_clear_error(&error);
+
+        sex = g_key_file_get_string(ini_file, "nlarn", "sex", &error);
+        g_clear_error(&error);
+
+        auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
+        g_clear_error(&error);
+    }
+    else
+    {
+        /* file not found. never mind but clean up the mess */
+        g_clear_error(&error);
+    }
+
+    /* cleanup */
+    g_key_file_free(ini_file);
+
+    /* parse the command line */
+    static GOptionEntry entries[] =
+    {
+        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,  "Set difficulty",       NULL },
+        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &wizard,      "Enable wizard mode",   NULL },
+        { "name",        'n', 0, G_OPTION_ARG_STRING, &name,        "Set character's name", NULL },
+        { "sex",         's', 0, G_OPTION_ARG_STRING, &sex,         "Set character's sex (m/f)", NULL },
+        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &auto_pickup, "Item types to pick up automatically, e.g. '$*+'", NULL },
+#ifdef DEBUG
+        { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &savefile,  "Save file to restore", NULL },
+#endif
+        { NULL }
+    };
+
+    GOptionContext *context = g_option_context_new(NULL);
+    g_option_context_add_main_entries(context, entries, NULL);
+
+    if (!g_option_context_parse(context, &argc, &argv, &error))
+    {
+        g_printerr("option parsing failed: %s\n", error->message);
+
+        exit (EXIT_FAILURE);
+    }
+    g_option_context_free(context);
+
+    /* initialise the display - must not happen before this point
+       otherwise displaying the command line help fails */
+    display_init();
+
+    if (!game_load(savefile))
+    {
+        /* restoring a save game failed - start a new game. */
+        game_new();
+
+        /* set game parameters */
+        game_difficulty(nlarn) = difficulty;
+        game_wizardmode(nlarn) = wizard;
+
+        /* put the player into the town */
+        player_map_enter(nlarn->p, game_map(nlarn, 0), FALSE);
+
+        /* give player knowledge of the town */
+        scroll_mapping(nlarn->p, NULL);
+
+        if (name)
+        {
+            nlarn->p->name = name;
+        }
+
+        if (sex)
+        {
+            sex[0] = g_ascii_tolower(sex[0]);
+
+            switch (sex[0])
+            {
+            case 'm':
+                nlarn->p->sex = PS_MALE;
+                break;
+
+            case 'f':
+                nlarn->p->sex = PS_FEMALE;
+                break;
+
+            default:
+                nlarn->p->sex = PS_NONE;
+                break;
+            }
+        }
+
+        if (wizard)
+        {
+            log_add_entry(nlarn->log, "Wizard mode has been activated.");
+        }
+
+        /* parse autopickup settings */
+        if (auto_pickup && (nlarn->p != NULL))
+        {
+            for (idx = 0; idx < strlen(auto_pickup); idx++)
+            {
+                for (it = IT_NONE; it < IT_MAX; it++)
+                {
+                    if (auto_pickup[idx] == item_glyph(it))
+                    {
+                        nlarn->p->settings.auto_pickup[it] = TRUE;
+                    }
+                }
+            }
+        } /* end autopickup */
+
+    } /* end new game only settings */
 }
 
 int game_destroy(game *g)
@@ -130,8 +272,6 @@ int game_destroy(game *g)
     {
         map_destroy(g->maps[i]);
     }
-
-    g_free(g->userdir);
 
     g_free(g->basedir);
     g_free(g->libdir);
@@ -161,23 +301,31 @@ int game_destroy(game *g)
     return EXIT_SUCCESS;
 }
 
-gchar *game_userdir()
+const gchar *game_userdir()
 {
+    static gchar *userdir = NULL;
+
+    if (userdir == NULL)
+    {
 #ifdef WIN32
-    return g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(),
-                        "nlarn", NULL);
+        userdir = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(),
+                               "nlarn", NULL);
 #else
-    return g_build_path(G_DIR_SEPARATOR_S, g_get_home_dir(),
-                        ".nlarn", NULL);
+        userdir = g_build_path(G_DIR_SEPARATOR_S, g_get_home_dir(),
+                               ".nlarn", NULL);
 #endif
+    }
+
+    return userdir;
 }
 
 int game_save(game *g, const char *filename)
 {
     int idx, err;
     struct cJSON *save, *obj;
+    char *fullname = NULL;
 
-    assert(g != NULL && filename != NULL);
+    assert(g != NULL);
 
     save = cJSON_CreateObject();
 
@@ -259,229 +407,48 @@ int game_save(game *g, const char *filename)
     cJSON_Delete(save);
 
     /* verify that user directory exists */
-    if (!g_file_test(g->userdir, G_FILE_TEST_IS_DIR))
+    if (!g_file_test(game_userdir(), G_FILE_TEST_IS_DIR))
     {
         /* directory is missing -> create it */
-        int ret = g_mkdir(g->userdir, 0755);
+        int ret = g_mkdir(game_userdir(), 0755);
 
         if (ret == -1)
         {
             /* creating the directory failed */
-            log_add_entry(g->log, "Failed to create directory %s.", g->userdir);
+            log_add_entry(g->log, "Failed to create directory %s.", game_userdir());
             free(sg);
 
             return FALSE;
         }
     }
 
+    /* assemble save file name */
+    fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(), filename ? filename : "nlarn.sav", NULL);
+
     /* open save file for writing */
-    gzFile file = gzopen(filename, "wb");
+    gzFile file = gzopen(fullname, "wb");
 
     if (file == NULL)
     {
-        log_add_entry(g->log, "Error opening save file.");
+        log_add_entry(g->log, "Error opening save file \"%s\".", fullname);
         free(sg);
         return FALSE;
     }
 
     if (gzputs(file, sg) != strlen(sg))
     {
-        log_add_entry(g->log, "Error writing save file: %s",
-                      gzerror(file, &err));
+        log_add_entry(g->log, "Error writing save file \"%s\": %s",
+                      fullname, gzerror(file, &err));
 
         free(sg);
         return FALSE;
     }
 
+    /* free the memory acquired by g_strdup_printf */
+    g_free(fullname);
+
     free(sg);
     gzclose(file);
-
-    return TRUE;
-}
-
-gboolean game_load(const char *filename, int argc, char *argv[])
-{
-    int size, idx;
-    game *g;
-    cJSON *save, *obj;
-
-    const int bufsize = 1024 * 1024 * 3;
-
-    assert(filename != NULL);
-
-    /* open save file */
-    gzFile file = gzopen(filename, "rb");
-
-    if (file == NULL)
-    {
-        /* failed to open save game file */
-        return FALSE;
-    }
-
-    /* temporary buffer to store uncompressed save file content */
-    char *sgbuf = g_malloc0(bufsize);
-
-    if (!gzread(file, sgbuf, bufsize))
-    {
-        g_printerr("Failed to restore save file.");
-        exit(EXIT_FAILURE);
-    }
-
-    /* close save file */
-    gzclose(file);
-
-    /* parse save file */
-    save = cJSON_Parse(sgbuf);
-
-    /* throw away the buffer */
-    g_free(sgbuf);
-
-    /* allocate space for game structure */
-    nlarn = g = g_malloc0(sizeof(game));
-
-    /* check for save file incompatibility */
-    gboolean compatible_version = FALSE;
-    if (cJSON_GetObjectItem(save, "nlarn_version"))
-    {
-        g->version = cJSON_GetObjectItem(save, "nlarn_version")->valueint;
-
-        if (g->version == SAVEFILE_VERSION)
-            compatible_version = TRUE;
-    }
-    if (!compatible_version)
-    {
-        cJSON_Delete(save);
-        return FALSE;
-    }
-
-    /* initialize settings */
-    game_initialize_settings(g, argc, argv, FALSE);
-
-    /* initialize the lua interpreter */
-    game_initialize_lua(g);
-
-    /* restore saved game */
-    g->time_start = cJSON_GetObjectItem(save, "time_start")->valueint;
-    g->gtime = cJSON_GetObjectItem(save, "gtime")->valueint;
-    g->difficulty = cJSON_GetObjectItem(save, "difficulty")->valueint;
-
-    if (cJSON_GetObjectItem(save, "wizard"))
-        g->wizard = TRUE;
-
-    obj = cJSON_GetObjectItem(save, "amulet_created");
-    size = cJSON_GetArraySize(obj);
-    assert(size = AM_MAX);
-    for (idx = 0; idx < size; idx++)
-        g->amulet_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
-
-    obj = cJSON_GetObjectItem(save, "weapon_created");
-    size = cJSON_GetArraySize(obj);
-    assert(size = WT_MAX);
-    for (idx = 0; idx < size; idx++)
-        g->weapon_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
-
-    if (cJSON_GetObjectItem(save, "cure_dianthr_created"))
-        g->cure_dianthr_created = TRUE;
-
-
-    obj = cJSON_GetObjectItem(save, "amulet_material_mapping");
-    size = cJSON_GetArraySize(obj);
-    assert(size = AM_MAX - 1);
-    for (idx = 0; idx < size; idx++)
-        g->amulet_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
-
-    obj = cJSON_GetObjectItem(save, "potion_desc_mapping");
-    size = cJSON_GetArraySize(obj);
-    assert(size = PO_MAX - 1);
-    for (idx = 0; idx < size; idx++)
-        g->potion_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
-
-    obj = cJSON_GetObjectItem(save, "ring_material_mapping");
-    size = cJSON_GetArraySize(obj);
-    assert(size = RT_MAX - 1);
-    for (idx = 0; idx < size; idx++)
-        g->ring_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
-
-    obj = cJSON_GetObjectItem(save, "scroll_desc_mapping");
-    size = cJSON_GetArraySize(obj);
-    assert(size == ST_MAX - 1);
-    for (idx = 0; idx < size; idx++)
-        g->scroll_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
-
-    obj = cJSON_GetObjectItem(save, "book_desc_mapping");
-    size = cJSON_GetArraySize(obj);
-    assert(size == SP_MAX_BOOK - 1);
-    for (idx = 0; idx < size; idx++)
-        g->book_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
-
-    obj = cJSON_GetObjectItem(save, "monster_genocided");
-    size = cJSON_GetArraySize(obj);
-    assert(size == MT_MAX);
-    for (idx = 0; idx < size; idx++)
-        g->monster_genocided[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
-
-
-    /* restore effects (have to come first) */
-    g->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
-    obj = cJSON_GetObjectItem(save, "effects");
-
-    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
-        effect_deserialize(cJSON_GetArrayItem(obj, idx), g);
-
-
-    /* restore items */
-    g->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
-    obj = cJSON_GetObjectItem(save, "items");
-    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
-        item_deserialize(cJSON_GetArrayItem(obj, idx), g);
-
-
-    /* restore maps */
-    obj = cJSON_GetObjectItem(save, "maps");
-    size = cJSON_GetArraySize(obj);
-    assert(size == MAP_MAX);
-    for (idx = 0; idx < size; idx++)
-        g->maps[idx] = map_deserialize(cJSON_GetArrayItem(obj, idx), g);
-
-
-    /* restore dnd store stock */
-    obj = cJSON_GetObjectItem(save, "store_stock");
-    if (obj != NULL) g->store_stock = inv_deserialize(obj);
-
-    /* restore log */
-    g->log = log_deserialize(cJSON_GetObjectItem(save, "log"));
-
-
-    /* restore player */
-    g->p = player_deserialize(cJSON_GetObjectItem(save, "player"));
-
-
-    /* restore monsters */
-    g->monsters = g_hash_table_new(&g_direct_hash, &g_direct_equal);
-    obj = cJSON_GetObjectItem(save, "monsters");
-
-    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
-        monster_deserialize(cJSON_GetArrayItem(obj, idx), g);
-
-
-    /* restore spheres */
-    g->spheres = g_ptr_array_new();
-    obj = cJSON_GetObjectItem(save, "spheres");
-
-    if ((obj = cJSON_GetObjectItem(save, "spheres")))
-    {
-        for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
-            sphere_deserialize(cJSON_GetArrayItem(obj, idx), g);
-    }
-
-    /* free parsed save game */
-    cJSON_Delete(save);
-
-    /* set log turn number to current game turn number */
-    log_set_time(nlarn->log, g->gtime);
-
-    /* welcome message */
-    print_welcome_message(FALSE);
 
     return TRUE;
 }
@@ -590,14 +557,14 @@ void game_spin_the_wheel(game *g)
 
     /* check if the player is on a deep water tile without levitation */
     if ((map_tiletype_at(map, g->p->pos) == LT_DEEPWATER)
-        && !player_effect(g->p, ET_LEVITATION))
+            && !player_effect(g->p, ET_LEVITATION))
     {
         player_die(g->p, PD_DROWNED, 0);
     }
 
     /* check if the player is on a lava tile without levitation */
     if ((map_tiletype_at(map, g->p->pos) == LT_LAVA)
-        && !player_effect(g->p, ET_LEVITATION))
+            && !player_effect(g->p, ET_LEVITATION))
     {
         player_die(g->p, PD_MELTED, 0);
     }
@@ -686,178 +653,277 @@ monster *game_monster_get(game *g, gpointer id)
     return (monster *)g_hash_table_lookup(g->monsters, id);
 }
 
-static void game_initialize_settings(game *g, int argc, char *argv[], gboolean new_game)
+static void game_new()
 {
-    const char *default_lib_dir = "/usr/share/games/nlarn";
+    size_t idx;
 
-    int idx;
-    item_t it;
+    /* initialize object hashes (here as they will be needed by player_new) */
+    nlarn->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    nlarn->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    nlarn->monsters = g_hash_table_new(&g_direct_hash, &g_direct_equal);
 
-    /* these will be filled by the command line parser */
-    static gint difficulty = 0;
-    static gboolean wizard = FALSE;
-    static char *name = NULL;
-    static char *sex = NULL;
-    static char *auto_pickup = NULL;
+    nlarn->spheres = g_ptr_array_new();
 
-    /* define per-user dir */
-    g->userdir = game_userdir();
+    /* generate player */
+    nlarn->p = player_new();
 
-    /* base directory for a local install */
-    g->basedir = g_path_get_dirname(argv[0]);
+    /* randomize unidentified item descriptions */
+    game_items_shuffle(nlarn);
 
-    /* ini file handling */
-    GKeyFile *ini_file = g_key_file_new();
-    GError *error = NULL;
+    /* fill the store */
+    building_dndstore_init();
 
-    /* this is the default path */
-    gchar *filename = g_build_path(G_DIR_SEPARATOR_S, g->userdir,
-                                   "nlarn.ini", NULL);
-
-    if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR))
+    /* generate levels */
+    for (idx = 0; idx < MAP_MAX; idx++)
     {
-        /* ini file has not been found in user config directory */
-        g_free(filename);
-
-        /* try to find it in the binarys directory */
-        filename = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, "nlarn.ini", NULL);
-    }
-
-    g_key_file_load_from_file(ini_file, filename, G_KEY_FILE_NONE, &error);
-    g_free(filename);
-
-    if (!error)
-    {
-        /* ini file has been found, get values */
-        /* clear error after each attempt as values need not to be defined */
-        difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
-        g_clear_error(&error);
-
-        wizard = g_key_file_get_boolean(ini_file, "nlarn", "wizard", &error);
-        g_clear_error(&error);
-
-        name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
-        g_clear_error(&error);
-
-        sex = g_key_file_get_string(ini_file, "nlarn", "sex", &error);
-        g_clear_error(&error);
-
-        auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
-        g_clear_error(&error);
-    }
-    else
-    {
-        /* file not found. never mind but clean up the mess */
-        g_clear_error(&error);
-    }
-
-    /* cleanup */
-    g_key_file_free(ini_file);
-
-    /* parse the command line */
-    static GOptionEntry entries[] =
-    {
-        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,  "Set difficulty",       NULL },
-        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &wizard,      "Enable wizard mode",   NULL },
-        { "name",        'n', 0, G_OPTION_ARG_STRING, &name,        "Set character's name", NULL },
-        { "sex",         's', 0, G_OPTION_ARG_STRING, &sex,         "Set character's sex (m/f)", NULL },
-        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &auto_pickup, "Item types to pick up automatically, e.g. '$*+'", NULL },
-        { NULL }
-    };
-
-    GOptionContext *context = g_option_context_new(NULL);
-    g_option_context_add_main_entries(context, entries, NULL);
-
-    if (!g_option_context_parse(context, &argc, &argv, &error))
-    {
-        g_print ("option parsing failed: %s\n", error->message);
-        exit (EXIT_FAILURE);
-    }
-    g_option_context_free(context);
-
-    /* determine paths and file names */
-    /* try to use the directory below the binary's location first */
-    g->libdir = g_build_path(G_DIR_SEPARATOR_S, g->basedir, "lib", NULL);
-
-    if (!g_file_test(g->libdir, G_FILE_TEST_IS_DIR))
-    {
-        /* local lib directory could not be found,
-           try the system wide directory */
-        if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
+        /* if map_new fails, it returns NULL.
+           loop while no map has been generated */
+        do
         {
-            /* system-wide data directory exists */
-            /* string has to be dup'd as it is feed in the end */
-            g->libdir = g_strdup((char *)default_lib_dir);
+            nlarn->maps[idx] = map_new(idx, nlarn->mazefile);
+        }
+        while (nlarn->maps[idx] == NULL);
+    }
+
+    /* game time handling */
+    nlarn->gtime = 1;
+    nlarn->time_start = time(NULL);
+    nlarn->version = SAVEFILE_VERSION;
+
+    /* start a new diary */
+    nlarn->log = log_new();
+
+    /* welcome message */
+    print_welcome_message(TRUE);
+
+    log_set_time(nlarn->log, nlarn->gtime);
+}
+
+static gboolean game_load(gchar *filename)
+{
+    int size, idx;
+    cJSON *save, *obj;
+    char *fullname = NULL;
+
+    /* size of the buffer we allocate to store the uncompressed file content */
+    const int bufsize = 1024 * 1024 * 3;
+
+    /* assemble save file name; if no filename has been supplied, default
+       to "nlarn.sav" */
+    fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+                            filename ? filename : "nlarn.sav", NULL);
+
+    /* try to open save file */
+    gzFile file = gzopen(fullname, "rb");
+
+    if (file == NULL)
+    {
+        /* failed to open save game file */
+        g_free(fullname);
+
+        return FALSE;
+    }
+
+    /* temporary buffer to store uncompressed save file content */
+    char *sgbuf = g_malloc0(bufsize);
+
+    if (!gzread(file, sgbuf, bufsize))
+    {
+        /* Reading the file failed. Terminate the game with an error message */
+        display_shutdown();
+        g_printerr("Failed to restore save file \"%s\".", fullname);
+        g_free(fullname);
+
+        exit(EXIT_FAILURE);
+    }
+
+    /* close save file */
+    gzclose(file);
+
+    /* parse save file */
+    save = cJSON_Parse(sgbuf);
+
+    /* throw away the buffer */
+    g_free(sgbuf);
+
+    /* check for save file incompatibility */
+    gboolean compatible_version = FALSE;
+    if (cJSON_GetObjectItem(save, "nlarn_version"))
+    {
+        nlarn->version = cJSON_GetObjectItem(save, "nlarn_version")->valueint;
+
+        if (nlarn->version == SAVEFILE_VERSION)
+            compatible_version = TRUE;
+    }
+
+    if (!compatible_version)
+    {
+        /* incompatible save file */
+        cJSON_Delete(save);
+
+        /* offer to delete the incompatible save game */
+        if (display_get_yesno("Saved game could not be loaded. " \
+                              "Delete and start new game?",
+                              NULL, NULL))
+        {
+            /* delete save file */
+            g_unlink(fullname);
+            g_free(fullname);
         }
         else
         {
-            g_printerr("Could not find game library directory.\n");
-            g_printerr("Please reinstall the game.\n");
+            display_shutdown();
+            g_printerr("Save file \"%s\" is not compatible to current version.\n", fullname);
+            g_free(fullname);
+
             exit(EXIT_FAILURE);
         }
+
+        return FALSE;
     }
 
-    g->mesgfile = g_build_filename(g->libdir, mesgfile, NULL);
-    g->helpfile = g_build_filename(g->libdir, helpfile, NULL);
-    g->mazefile = g_build_filename(g->libdir, mazefile, NULL);
-    g->fortunes = g_build_filename(g->libdir, fortunes, NULL);
-    g->highscores = g_build_filename(g->libdir, highscores, NULL);
+    /* restore saved game */
+    nlarn->time_start = cJSON_GetObjectItem(save, "time_start")->valueint;
+    nlarn->gtime = cJSON_GetObjectItem(save, "gtime")->valueint;
+    nlarn->difficulty = cJSON_GetObjectItem(save, "difficulty")->valueint;
 
-    if (new_game)
+    if (cJSON_GetObjectItem(save, "wizard"))
+        nlarn->wizard = TRUE;
+
+    obj = cJSON_GetObjectItem(save, "amulet_created");
+    size = cJSON_GetArraySize(obj);
+    assert(size = AM_MAX);
+    for (idx = 0; idx < size; idx++)
+        nlarn->amulet_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(save, "weapon_created");
+    size = cJSON_GetArraySize(obj);
+    assert(size = WT_MAX);
+    for (idx = 0; idx < size; idx++)
+        nlarn->weapon_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    if (cJSON_GetObjectItem(save, "cure_dianthr_created"))
+        nlarn->cure_dianthr_created = TRUE;
+
+
+    obj = cJSON_GetObjectItem(save, "amulet_material_mapping");
+    size = cJSON_GetArraySize(obj);
+    assert(size = AM_MAX - 1);
+    for (idx = 0; idx < size; idx++)
+        nlarn->amulet_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(save, "potion_desc_mapping");
+    size = cJSON_GetArraySize(obj);
+    assert(size = PO_MAX - 1);
+    for (idx = 0; idx < size; idx++)
+        nlarn->potion_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(save, "ring_material_mapping");
+    size = cJSON_GetArraySize(obj);
+    assert(size = RT_MAX - 1);
+    for (idx = 0; idx < size; idx++)
+        nlarn->ring_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(save, "scroll_desc_mapping");
+    size = cJSON_GetArraySize(obj);
+    assert(size == ST_MAX - 1);
+    for (idx = 0; idx < size; idx++)
+        nlarn->scroll_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(save, "book_desc_mapping");
+    size = cJSON_GetArraySize(obj);
+    assert(size == SP_MAX_BOOK - 1);
+    for (idx = 0; idx < size; idx++)
+        nlarn->book_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(save, "monster_genocided");
+    size = cJSON_GetArraySize(obj);
+    assert(size == MT_MAX);
+    for (idx = 0; idx < size; idx++)
+        nlarn->monster_genocided[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+
+    /* restore effects (have to come first) */
+    nlarn->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    obj = cJSON_GetObjectItem(save, "effects");
+
+    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+        effect_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
+
+
+    /* restore items */
+    nlarn->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    obj = cJSON_GetObjectItem(save, "items");
+    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+        item_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
+
+
+    /* restore maps */
+    obj = cJSON_GetObjectItem(save, "maps");
+    size = cJSON_GetArraySize(obj);
+    assert(size == MAP_MAX);
+    for (idx = 0; idx < size; idx++)
+        nlarn->maps[idx] = map_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
+
+
+    /* restore dnd store stock */
+    obj = cJSON_GetObjectItem(save, "store_stock");
+    if (obj != NULL) nlarn->store_stock = inv_deserialize(obj);
+
+    /* restore log */
+    nlarn->log = log_deserialize(cJSON_GetObjectItem(save, "log"));
+
+
+    /* restore player */
+    nlarn->p = player_deserialize(cJSON_GetObjectItem(save, "player"));
+
+
+    /* restore monsters */
+    nlarn->monsters = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+    obj = cJSON_GetObjectItem(save, "monsters");
+
+    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+        monster_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
+
+
+    /* restore spheres */
+    nlarn->spheres = g_ptr_array_new();
+    obj = cJSON_GetObjectItem(save, "spheres");
+
+    if ((obj = cJSON_GetObjectItem(save, "spheres")))
     {
-        /* not restoring a save game */
-        /* set game parameters */
-        game_difficulty(g) = difficulty;
-        game_wizardmode(g) = wizard;
+        for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+            sphere_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
+    }
 
-        if (name)
-        {
-            g->p->name = name;
-        }
+    /* free parsed save game */
+    cJSON_Delete(save);
 
-        if (sex)
-        {
-            sex[0] = g_ascii_tolower(sex[0]);
+    /* set log turn number to current game turn number */
+    log_set_time(nlarn->log, nlarn->gtime);
 
-            switch (sex[0])
-            {
-            case 'm':
-                g->p->sex = PS_MALE;
-                break;
+    /* welcome message */
+    print_welcome_message(FALSE);
 
-            case 'f':
-                g->p->sex = PS_FEMALE;
-                break;
-
-            default:
-                g->p->sex = PS_NONE;
-                break;
-            }
-        }
-
-        if (wizard)
-        {
-            log_add_entry(g->log, "Wizard mode has been activated.");
-        }
-    } /* end new game only settings */
-
-    /* parse autopickup settings if the game is not being reloaded */
-    if (auto_pickup && (g->p != NULL))
+    /* delete save file if it has not been specified on the command line */
+    if (filename == NULL)
     {
-        for (idx = 0; idx < strlen(auto_pickup); idx++)
-        {
-            for (it = IT_NONE; it < IT_MAX; it++)
-            {
-                if (auto_pickup[idx] == item_glyph(it))
-                {
-                    g->p->settings.auto_pickup[it] = TRUE;
-                }
-            }
-        }
-    } /* end autopickup */
+        g_unlink(fullname);
+    }
+
+    /* free memory used by the full file name */
+    g_free(fullname);
+
+    /* refresh FOV */
+    player_update_fov(nlarn->p);
+
+    /* no need to define the player's stats */
+    nlarn->player_creation_completed = TRUE;
+
+    return TRUE;
 }
 
-static void game_initialize_lua(game *g)
+static void game_init_lua(game *g)
 {
     assert (g != NULL);
 

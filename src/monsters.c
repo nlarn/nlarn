@@ -465,7 +465,8 @@ void monsters_wrap(lua_State *L)
 
     if (luaL_dofile(L, filename) == 1)
     {
-        fprintf(stderr, "Error opening '%s': %s\n", filename,
+        display_shutdown();
+        g_printerr("Failed to load monster data: %s\n",
                 lua_tostring(L, -1));
 
         exit(EXIT_FAILURE);

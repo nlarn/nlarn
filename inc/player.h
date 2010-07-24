@@ -201,7 +201,7 @@ typedef enum _player_cod
 /* function declarations */
 
 player *player_new();
-int player_assign_bonus_stats(player *p);
+void player_assign_bonus_stats(player *p);
 void player_destroy(player *p);
 
 cJSON *player_serialize(player *p);

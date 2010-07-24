@@ -42,7 +42,6 @@ typedef struct game
     guint8 difficulty;          /* game difficulty */
     message_log *log;           /* game message log */
 
-    gchar *userdir;
     gchar *basedir;
     gchar *libdir;
     gchar *mesgfile;
@@ -83,6 +82,7 @@ typedef struct game
 
     /* flags */
     guint32
+        player_creation_completed: 1, /* the player's stats have been assigned */
         cure_dianthr_created: 1, /* the potion of cure dianthroritis is a unique item */
         wizard: 1; /* wizard mode */
 } game;
@@ -106,27 +106,32 @@ typedef struct _game_score
     gint64 time_end;
 } game_score_t;
 
-typedef struct _game_save_head
-{
-    guint32
-        version_major: 8,
-        version_minor: 8,
-        version_patch: 8;
-    gint32 inventory_offset;
-    gint32 item_offset;
-    gint32 effect_offset;
-    gint32 monster_offset;
-    gint32 spheres_offset;
-} game_save_head_t;
 
 /* function declarations */
 
-void game_new(int argc, char *argv[]);
+/**
+ * @brief Initialise the game. This function will try to restore a saved game;
+ *        if it fails it will start a new game.
+ *
+ * @param count of command line arguments
+ * @param command line arguments
+ */
+void game_init(int argc, char *argv[]);
+
 int game_destroy(game *g);
 
-gchar *game_userdir();
+/**
+ * @brief Function to return the user-specific directory.
+ */
+const gchar *game_userdir();
+
+/**
+ * @brief Save a game.
+ * @param The game to save
+ * @param The name of the file to be saved. Defaults to "nlarn.sav",
+ *        if a NULL has been supplied.
+ */
 int game_save(game *g, const char *filename);
-gboolean game_load(const char *filename, int argc, char *argv[]);
 
 game_score_t *game_score(game *g, player_cod cod, int cause);
 GList *game_score_add(game *g, game_score_t *score);
