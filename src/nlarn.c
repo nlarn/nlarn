@@ -456,8 +456,9 @@ int main(int argc, char *argv[])
             break;
 
         case 'v':
-            log_add_entry(nlarn->log, "NLarn version %d.%d.%d, built on %s.",
-                          VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, __DATE__);
+            log_add_entry(nlarn->log, "NLarn version %d.%d.%d%s, built on %s.",
+                          VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, SVNID,
+                          __DATE__);
             break;
 
             /* wash at fountain */

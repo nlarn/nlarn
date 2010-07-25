@@ -25,6 +25,11 @@
 #define VERSION_MINOR 6
 #define VERSION_PATCH 0
 
+/* this allows to add the svn id of the build to the version information */
+#ifndef SVNID
+#define SVNID ""
+#endif
+
 #define TAXRATE 1/20    /* tax rate for the LRS */
 
 /* the entire game */

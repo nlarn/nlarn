@@ -59,9 +59,9 @@ static const char *highscores = "highscores";
 
 static void print_welcome_message(gboolean newgame)
 {
-    log_add_entry(nlarn->log, "Welcome %sto NLarn %d.%d.%d!",
-                  newgame ? "" : "back ",
-                  VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+    log_add_entry(nlarn->log, "Welcome %sto NLarn %d.%d.%d%s!",
+                  newgame ? "" : "back ", VERSION_MAJOR, VERSION_MINOR,
+                  VERSION_PATCH, SVNID);
     log_add_entry(nlarn->log, "For a list of commands, press '?'.");
 }
 

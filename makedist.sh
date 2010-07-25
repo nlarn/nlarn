@@ -32,6 +32,14 @@ then
 	VERSION="$VERSION"."$VERSION_PATCH"
 fi
 
+if [ -n "$PREVIEW" ]
+then
+	SVN=$(LANG=C svn info | awk '/Revision/ {print $2}')
+	SVNID="-svn$SVN"
+	export CFLAGS=-DSVNID=\'\"$SVNID\"\'
+	VERSION="$VERSION""$SVNID"
+fi
+
 DIRNAME=nlarn-"$VERSION"
 PACKAGE="$DIRNAME"_"$OS"."$ARCH"."$SUFFIX"
 
