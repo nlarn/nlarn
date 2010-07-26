@@ -110,6 +110,9 @@ static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
 static void player_memory_deserialize(player *p, position pos, cJSON *mser);
 static char *player_death_description(game_score_t *score, int verbose);
+static int item_filter_unequippable(item *it);
+static int item_filter_equippable(item *it);
+static int item_filter_dropable(item *it);
 
 player *player_new()
 {
@@ -1549,7 +1552,7 @@ int player_move(player *p, direction dir, gboolean open_door)
         move_possible = TRUE;
     }
     else if ((map_tiletype_at(map, target_p) == LT_WALL)
-                && player_effect(p, ET_WALL_WALK))
+             && player_effect(p, ET_WALL_WALK))
     {
         /* target tile is a wall and player can walk trough walls */
         move_possible = TRUE;
@@ -1638,20 +1641,20 @@ static gboolean player_instakill_chance(player *p, monster *m)
     {
         switch (p->eq_weapon->id)
         {
-        /* Vorpal Blade */
+            /* Vorpal Blade */
         case WT_VORPALBLADE:
             if (monster_flags(m, MF_HEAD) && !monster_flags(m, MF_NOBEHEAD))
                 return 5;
             break;
 
-        /* Lance of Death */
+            /* Lance of Death */
         case WT_LANCEOFDEATH:
             /* the lance is pretty deadly for non-demons */
             if (!monster_flags(m, MF_DEMON))
                 return 100;
             break;
 
-        /* Slayer */
+            /* Slayer */
         case WT_SLAYER:
             if (monster_flags(m, MF_DEMON))
                 return 100;
@@ -1667,14 +1670,14 @@ static gboolean player_instakill_chance(player *p, monster *m)
 static int calc_real_damage(player *p, monster *m, int allow_chance)
 {
     const int max_dam = calc_max_damage(p, m);
-          int damage  = rand_1n(max_dam + 1);
+    int damage  = rand_1n(max_dam + 1);
 
     /* *** SPECIAL WEAPONS *** */
     if (p->eq_weapon)
     {
         switch (p->eq_weapon->id)
         {
-        /* Vorpal Blade */
+            /* Vorpal Blade */
         case WT_VORPALBLADE:
             if (allow_chance && chance(5) && monster_flags(m, MF_HEAD)
                     && !monster_flags(m, MF_NOBEHEAD))
@@ -1686,7 +1689,7 @@ static int calc_real_damage(player *p, monster *m, int allow_chance)
             }
             break;
 
-        /* Lance of Death */
+            /* Lance of Death */
         case WT_LANCEOFDEATH:
             /* the lance is pretty deadly for non-demons */
             if (!monster_flags(m, MF_DEMON))
@@ -1695,7 +1698,7 @@ static int calc_real_damage(player *p, monster *m, int allow_chance)
                 damage = 300;
             break;
 
-        /* Slayer */
+            /* Slayer */
         case WT_SLAYER:
             if (monster_flags(m, MF_DEMON))
                 damage = INSTANT_KILL;
@@ -2423,8 +2426,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
                 break;
 
             case DAM_DEC_STR:
-                 /* strength has been modified -> recalc burdened status */
-                 player_inv_weight_recalc(p->inventory, NULL);
+                /* strength has been modified -> recalc burdened status */
+                player_inv_weight_recalc(p->inventory, NULL);
 
                 if (player_get_str(p) < 1)
                     player_die(p, PD_EFFECT, ET_DEC_STR);
@@ -2590,7 +2593,7 @@ effect *player_effect_add(player *p, effect *e)
             while (e->amount-- > 0)
             {
                 player_effect_add(p, effect_new(rand_m_n(ET_INC_CON,
-                                                         ET_INC_WIS)));
+                                                ET_INC_WIS)));
             }
             break;
 
@@ -4066,11 +4069,6 @@ void player_equip(player *p)
 
     assert (p != NULL);
 
-    int item_filter_equippable(item *it)
-    {
-        return player_item_is_equippable(nlarn->p, it);
-    }
-
     if (inv_length_filtered(p->inventory, item_filter_equippable) > 0)
     {
         it = display_inventory("Choose an item to equip", p, &p->inventory,
@@ -4093,11 +4091,6 @@ void player_take_off(player *p)
 
     assert (p != NULL);
 
-    int item_filter_unequippable(item *it)
-    {
-        return player_item_is_equipped(nlarn->p, it);
-    }
-
     if (inv_length_filtered(p->inventory, item_filter_unequippable) > 0)
     {
         it = display_inventory("Choose an item to take off", p, &p->inventory,
@@ -4117,11 +4110,6 @@ void player_drop(player *p)
     item *it;
 
     assert (p != NULL);
-
-    int item_filter_dropable(item *it)
-    {
-        return player_item_is_dropable(nlarn->p, it);
-    }
 
     if (inv_length_filtered(p->inventory, item_filter_dropable) > 0)
     {
@@ -4603,7 +4591,7 @@ static void player_calculate_octant(player *p, int row, float start,
                 else
                 {
                     if (!map_pos_transparent(game_map(nlarn, p->pos.z),
-                                    pos_new(X, Y, p->pos.z)) && (j < radius))
+                                             pos_new(X, Y, p->pos.z)) && (j < radius))
                     {
                         /* This is a blocking square, start a child scan */
                         blocked = TRUE;
@@ -4902,7 +4890,7 @@ static char *player_death_description(game_score_t *score, int verbose)
     if (verbose)
     {
         g_string_append_printf(text, " %s has scored %" G_GINT64_FORMAT
-                                     " points, with difficulty setting %d.",
+                               " points, with difficulty setting %d.",
                                (score->sex == PS_MALE) ? "He" : "She",
                                score->score, score->difficulty);
     }
@@ -4918,7 +4906,7 @@ void calc_fighting_stats(player *p)
     GString *text;
 
     position pos = map_find_space_in(game_map(nlarn, p->pos.z),
-                            rect_new_sized(p->pos, 2), LE_MONSTER, FALSE);
+                                     rect_new_sized(p->pos, 2), LE_MONSTER, FALSE);
 
     if (!pos_valid(pos))
     {
@@ -4941,24 +4929,24 @@ void calc_fighting_stats(player *p)
                                 - player_effect(p, ET_SICKNESS);
 
     g_string_append_printf(text, "\nPlayer stats\n"
-                                 "------------\n"
-                                 "  wielded weapon : %s\n"
-                                 "  weapon class   : %d\n"
-                                 "  experience     : %d\n"
-                                 "  strength       : %d\n"
-                                 "  dexterity      : %d\n"
-                                 "  damage modifier: %d\n"
-                                 "  difficulty     : %d\n\n",
-                               (p->eq_weapon ? desc : "none"),
-                               (p->eq_weapon ? weapon_wc(p->eq_weapon) : 0),
-                               p->level,
-                               player_get_str(p),
-                               player_get_dex(p),
-                               damage_modifier,
-                               game_difficulty(nlarn));
+                           "------------\n"
+                           "  wielded weapon : %s\n"
+                           "  weapon class   : %d\n"
+                           "  experience     : %d\n"
+                           "  strength       : %d\n"
+                           "  dexterity      : %d\n"
+                           "  damage modifier: %d\n"
+                           "  difficulty     : %d\n\n",
+                           (p->eq_weapon ? desc : "none"),
+                           (p->eq_weapon ? weapon_wc(p->eq_weapon) : 0),
+                           p->level,
+                           player_get_str(p),
+                           player_get_dex(p),
+                           damage_modifier,
+                           game_difficulty(nlarn));
 
     g_string_append_printf(text, "Monsters\n"
-                                 "--------\n\n");
+                           "--------\n\n");
 
     gboolean mention_instakill = FALSE;
 
@@ -4973,13 +4961,13 @@ void calc_fighting_stats(player *p)
             continue;
         }
         int to_hit  = calc_to_hit(p, m);
-            to_hit += ((100 - to_hit) * 5)/100;
+        to_hit += ((100 - to_hit) * 5)/100;
 
         const int instakill_chance = player_instakill_chance(p, m);
 
         g_string_append_printf(text, "%s (ac: %d, max hp: %d)\n"
-                                     "     to-hit chance: %d%%\n"
-                                     "  instakill chance: %d%%\n",
+                               "     to-hit chance: %d%%\n"
+                               "  instakill chance: %d%%\n",
                                monster_name(m),
                                monster_ac(m),
                                monster_type_hp_max(monster_type(m)),
@@ -5006,11 +4994,11 @@ void calc_fighting_stats(player *p)
                 hits_needed++;
 
             g_string_append_printf(text, "       max. damage: %d hp\n"
-                                         "       avg. damage: %.2f hp\n"
-                                         "  avg. hits needed: %d%s\n\n",
+                                   "       avg. damage: %.2f hp\n"
+                                   "  avg. hits needed: %d%s\n\n",
                                    max_dam, avg_dam, hits_needed,
                                    hits_needed > 1
-                                        && instakill_chance > 0 ? " [*]" : "");
+                                   && instakill_chance > 0 ? " [*]" : "");
 
             if (!mention_instakill && instakill_chance > 0)
                 mention_instakill = TRUE;
@@ -5050,4 +5038,19 @@ void calc_fighting_stats(player *p)
     }
 
     g_string_free(text, TRUE);
+}
+
+static int item_filter_unequippable(item *it)
+{
+    return player_item_is_equipped(nlarn->p, it);
+}
+
+static int item_filter_equippable(item *it)
+{
+    return player_item_is_equippable(nlarn->p, it);
+}
+
+static int item_filter_dropable(item *it)
+{
+    return player_item_is_dropable(nlarn->p, it);
 }

@@ -23,6 +23,8 @@
 #include "map.h"
 #include "position.h"
 
+static void area_flood_worker(area *flood, area *obstacles, int x, int y);
+
 position pos_new(int x, int y, int z)
 {
     position pos;
@@ -521,32 +523,10 @@ area *area_flood(area *obstacles, int start_x, int start_y)
 
     assert (obstacles != NULL && area_point_valid(obstacles, start_x, start_y));
 
-    void area_flood_worker(int x, int y)
-    {
-        /* stepped out of area */
-        if (!area_point_valid(flood, x, y))
-            return;
-
-        /* can't flood this */
-        if (area_point_get(obstacles, x, y))
-            return;
-
-        /* been here before */
-        if (area_point_get(flood, x, y))
-            return;
-
-        area_point_set(flood, x, y);
-
-        area_flood_worker(x + 1, y);
-        area_flood_worker(x - 1, y);
-        area_flood_worker(x, y + 1);
-        area_flood_worker(x, y - 1);
-    }
-
     flood = area_new(obstacles->start_x, obstacles->start_y,
                      obstacles->size_x, obstacles->size_y);
 
-    area_flood_worker(start_x, start_y);
+    area_flood_worker(flood, obstacles, start_x, start_y);
 
     area_destroy(obstacles);
 
@@ -615,4 +595,26 @@ void area_pos_del(area *a, position pos)
     y = pos.y - a->start_y;
 
     area_point_del(a, x, y);
+}
+
+static void area_flood_worker(area *flood, area *obstacles, int x, int y)
+{
+    /* stepped out of area */
+    if (!area_point_valid(flood, x, y))
+        return;
+
+    /* can't flood this */
+    if (area_point_get(obstacles, x, y))
+        return;
+
+    /* been here before */
+    if (area_point_get(flood, x, y))
+        return;
+
+    area_point_set(flood, x, y);
+
+    area_flood_worker(flood, obstacles, x + 1, y);
+    area_flood_worker(flood, obstacles, x - 1, y);
+    area_flood_worker(flood, obstacles, x, y + 1);
+    area_flood_worker(flood, obstacles, x, y - 1);
 }

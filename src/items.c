@@ -722,7 +722,7 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         }
         else
         {
-            g_string_append_printf(desc, item_desc_get(it, known));
+            g_string_append(desc, item_desc_get(it, known));
 
             if (it->bonus_known)
                 g_string_append_printf(desc, " %+d", it->bonus);
