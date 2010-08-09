@@ -3671,6 +3671,7 @@ char *player_item_identified_list(player *p)
 
     list = g_string_new(NULL);
     it = item_new(type_ids[1], 1);
+    it->bonus_known = FALSE;
 
     for (type = 0; type < 5; type++)
     {
@@ -3694,7 +3695,6 @@ char *player_item_identified_list(player *p)
             it->id = id;
             if (player_item_known(p, it))
             {
-
                 item_describe(it, FALSE, TRUE, FALSE, buf_unidentified, 80);
                 item_describe(it, TRUE, TRUE, FALSE, buf_identified, 80);
                 g_string_append_printf(sublist, " %33s - %s \n",
