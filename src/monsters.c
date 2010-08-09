@@ -229,7 +229,8 @@ monster *monster_new(monster_t type, position pos)
     {
         const int possible_types[] = { IT_AMULET, IT_GOLD, IT_RING, IT_GEM,
                                        IT_CONTAINER, IT_BOOK, IT_POTION,
-                                       IT_SCROLL };
+                                       IT_SCROLL
+                                     };
 
         /* put mimicked item into monster inventory */
         const int chosen_type = possible_types[rand_0n(8)];
@@ -467,7 +468,7 @@ void monsters_wrap(lua_State *L)
     {
         display_shutdown();
         g_printerr("Failed to load monster data: %s\n",
-                lua_tostring(L, -1));
+                   lua_tostring(L, -1));
 
         exit(EXIT_FAILURE);
     }
@@ -714,7 +715,7 @@ static const char *get_town_person_name(int value)
                                "clergyman", "student", "blacksmith",
                                "nurse", "seamstress", "cartwright",
                                "student", "sales clerk", "miller"
-                               };
+                             };
     if (value >= 30)
         return "peasant";
 
@@ -1120,17 +1121,17 @@ monster *monster_trap_trigger(monster *m)
         break;
 
     case TT_SPIKEDPIT:
-        {
-            const trap_t trap2 = TT_PIT;
+    {
+        const trap_t trap2 = TT_PIT;
 
-            if (trap_effect(trap2) && chance(trap_effect_chance(trap2)))
-            {
-                effect *e;
-                e = effect_new(trap_effect(trap2));
-                e = monster_effect_add(m, e);
-            }
+        if (trap_effect(trap2) && chance(trap_effect_chance(trap2)))
+        {
+            effect *e;
+            e = effect_new(trap_effect(trap2));
+            e = monster_effect_add(m, e);
         }
-        // intentional fall-through
+    }
+    // intentional fall-through
 
     default:
         /* if there is an effect on the trap add it to the
@@ -1497,7 +1498,7 @@ void monster_player_attack(monster *m, player *p)
     {
         /* increase damage with difficulty */
         dam->amount = difficulty_modified_damage(att.base,
-                                                 game_difficulty(nlarn));
+                      game_difficulty(nlarn));
     }
 
     /* add variable damage */
@@ -1559,7 +1560,7 @@ void monster_player_attack(monster *m, player *p)
         }
         /* 50% chance of reflecting adjacent gazes */
         if (att.type == ATT_GAZE && player_effect(p, ET_REFLECTION)
-            && chance(50))
+                && chance(50))
         {
             if (!player_effect(p, ET_BLINDNESS))
                 log_add_entry(nlarn->log, "The gaze is reflected harmlessly.");
@@ -1750,7 +1751,7 @@ gboolean monster_update_action(monster *m)
     }
     /* town people never attack the player */
     else if (monster_type(m) != MT_TOWN_PERSON
-                && m->lastseen && (m->lastseen < time))
+             && m->lastseen && (m->lastseen < time))
     {
         /* after having spotted the player, agressive monster will follow
            the player for a certain amount of time turns, afterwards loose
@@ -2286,14 +2287,15 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     {
         if (inv_length(p->inventory))
         {
-            it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
-
             char buf[61];
-            item_describe(it, player_item_known(p, it), it->count, FALSE, buf,
-                          60);
-
             gboolean was_equipped = FALSE;
-            if (player_item_is_equipped(p, it))
+            gboolean new_item = FALSE;
+
+            it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
+            item_describe(it, player_item_known(p, it), (it->count == 1),
+                          FALSE, buf, 60);
+
+            if ((was_equipped = player_item_is_equipped(p, it)))
             {
                 if (it->cursed)
                 {
@@ -2302,18 +2304,29 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                                   monster_get_name(m), buf);
                     it->blessed_known = TRUE;
 
-                    /* return true as there actually are things to steal */
+                    /* return true as there are things to steal */
                     return TRUE;
                 }
 
                 log_disable(nlarn->log);
                 player_item_unequip(p, NULL, it, TRUE);
                 log_enable(nlarn->log);
-
-                was_equipped = TRUE;
             }
 
-            inv_del_element(&p->inventory, it);
+            if (it->count > 1)
+            {
+                /* the player has multiple items. Steal only one. */
+                new_item = TRUE;
+                it = item_split(it, rand_1n(it->count));
+                item_describe(it, player_item_known(p, it), (it->count == 1),
+                              FALSE, buf, 60);
+            }
+            else
+            {
+                /* this item's count is one. Steal exactly this one. */
+                inv_del_element(&p->inventory, it);
+            }
+
             if (was_equipped)
             {
                 log_add_entry(nlarn->log, "The %s nimbly removes %s and steals it.",
@@ -2347,7 +2360,8 @@ static char *monsters_get_fortune(char *fortune_file)
     /* array of pointers to fortunes */
     static GPtrArray *fortunes = NULL;
 
-    if (!fortunes) {
+    if (!fortunes)
+    {
 
         /* read in the fortunes */
 
@@ -2360,7 +2374,8 @@ static char *monsters_get_fortune(char *fortune_file)
 
         /* open the file */
         fortune_fd = fopen(fortune_file, "r");
-        if (fortune_fd == NULL) {
+        if (fortune_fd == NULL)
+        {
             /* can't find file */
             tmp = "Help me! I can't find the fortune file!";
             g_ptr_array_add(fortunes, tmp);
@@ -2368,7 +2383,8 @@ static char *monsters_get_fortune(char *fortune_file)
         else
         {
             /* read in the entire fortune file */
-            while((fgets(buffer, 79, fortune_fd))) {
+            while((fgets(buffer, 79, fortune_fd)))
+            {
                 /* replace EOL with \0 */
                 len = (size_t)(strchr(buffer, '\n') - (char *)&buffer);
                 buffer[len] = '\0';
@@ -2414,8 +2430,8 @@ static position monster_move_wander(monster *m, struct player *p)
         tries++;
     }
     while (tries < GD_MAX
-           && !map_pos_validate(monster_map(m), npos, monster_map_element(m),
-                                FALSE));
+            && !map_pos_validate(monster_map(m), npos, monster_map_element(m),
+                                 FALSE));
 
     /* new position has not been found, reset to current position */
     if (tries == GD_MAX) npos = monster_pos(m);
@@ -2526,7 +2542,7 @@ static position monster_move_flee(monster *m, struct player *p)
 
         if (map_pos_validate(monster_map(m), npos_tmp, monster_map_element(m),
                              FALSE)
-            && pos_distance(p->pos, npos_tmp) > dist)
+                && pos_distance(p->pos, npos_tmp) > dist)
         {
             /* distance is bigger than current distance */
             npos = npos_tmp;
