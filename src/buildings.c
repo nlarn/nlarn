@@ -194,6 +194,11 @@ int building_bank(player *p)
                 p->bank_account -= amount;
                 log_add_entry(nlarn->log, "You withdraw %d gold.", amount);
             }
+            else
+            {
+                /* this item is no longer required */
+                item_destroy(gold);
+            }
         }
         else if (amount)
         {

@@ -605,10 +605,9 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     if (it->rusty == 2) strv_append(&add_infos, "very rusty");
 
     if (g_strv_length(add_infos))
-    {
         add_info = g_strjoinv(", ", add_infos);
-        g_strfreev(add_infos);
-    }
+
+    g_strfreev(add_infos);
 
     switch (it->type)
     {
@@ -1499,12 +1498,18 @@ int inv_add(inventory **inv, item *it)
                 i->count += it->count;
                 item_destroy(it);
 
-                return inv_length(*inv);
+                it = NULL;
+
+                break;
             }
         }
     }
 
-    g_ptr_array_add((*inv)->content, it->oid);
+    if (it != NULL)
+    {
+        /* add the item to the inventory if it has not already been added */
+        g_ptr_array_add((*inv)->content, it->oid);
+    }
 
     /* call post_add callback */
     if ((*inv)->post_add)
