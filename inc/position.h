@@ -56,6 +56,13 @@ int pos_identical(position pos1, position pos2);
 int pos_adjacent(position first, position second);
 int pos_valid(position pos);
 
+/**
+ * @brief Determine the direction of a position relative to another position.
+ * @param The source position.
+ * @param The target position.
+ */
+direction pos_dir(position origin, position target);
+
 cJSON *pos_serialize(position pos);
 position pos_deserialize(cJSON *pser);
 

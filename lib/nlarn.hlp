@@ -15,6 +15,7 @@ Running means moving into one direction until interrupted. g or /, followed by a
 
 A  desecrate an altar
 c  close a door
+C  continue travelling  
 d  drop domething
 D  list discovered landmarks
 e  equip an item
@@ -31,6 +32,7 @@ R  remove gems from throne
 s  sit on a throne
 S  save the game
 t  take an item off
+T  travel somewhere
 v  print program version
 w  wait/rest up to one mobul or until healed
 W  wash yourself at a fountain

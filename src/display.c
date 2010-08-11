@@ -24,6 +24,7 @@
 #include <ctype.h>
 
 #include "display.h"
+#include "map.h"
 #include "nlarn.h"
 #include "spheres.h"
 
@@ -2115,7 +2116,7 @@ position display_get_position(player *p, char *message, gboolean ray,
                               gboolean ball, guint radius,
                               gboolean passable, gboolean visible)
 {
-    int RUN  = TRUE;
+    gboolean RUN = TRUE;
     direction dir = GD_NONE;
     position pos, npos, cursor;
     map *map;
@@ -2133,21 +2134,18 @@ position display_get_position(player *p, char *message, gboolean ray,
     log_add_entry(nlarn->log, message);
     display_paint_screen(p);
 
-    /* show block cursor */
-    curs_set(2);
-
     /* make shortcut to map */
     map = game_map(nlarn, p->pos.z);
 
     do
     {
-        /* draw a line between source and target if told to */
+        /* redraw screen to erase previous modifications */
+        display_paint_screen(p);
+
         if (ray && (a != NULL))
         {
+            /* draw a line between source and target if told to */
             target = map_get_monster_at(map, pos);
-
-            /* redraw screen to erase old rays */
-            display_paint_screen(p);
 
             if (target && monster_in_sight(target)) attrs = DC_LIGHTRED;
             else                                    attrs = DC_LIGHTCYAN;
@@ -2187,16 +2185,12 @@ position display_get_position(player *p, char *message, gboolean ray,
             area_destroy(a);
             a = NULL;
         }
-
-        /* paint a ball if told to */
-        if (ball && radius)
+        else if (ball && radius)
         {
+            /* paint a ball if told to */
             area *obstacles = map_get_obstacles(map, pos, radius);
             a = area_new_circle_flooded(pos, radius, obstacles);
             cursor = pos;
-
-            /* repaint screen to get rid of old ball */
-            display_paint_screen(p);
 
             for (cursor.y = a->start_y; cursor.y < a->start_y + a->size_y; cursor.y++)
             {
@@ -2228,9 +2222,11 @@ position display_get_position(player *p, char *message, gboolean ray,
             }
             area_destroy(a);
         }
-
-        /* position cursor */
-        move(pos.y, pos.x);
+        else
+        {
+            /* show the position of the cursor by inversing the attributes */
+            mvwchgat(stdscr, pos.y, pos.x, 1, A_BOLD | A_STANDOUT, DCP_WHITE_BLACK, NULL);
+        }
 
         /* wait for input */
         switch (getch())
@@ -2356,6 +2352,17 @@ position display_get_position(player *p, char *message, gboolean ray,
         /* make npos invalid */
         npos.x = G_MAXINT16;
         npos.y = G_MAXINT16;
+
+        /* if any position has been requested check if it is passable anyway,
+           otherwise the player could be teleported / request a path to an
+           invalid position. In wizard mode all positions are allowed,
+           otherwise only known positions are allowed. */
+        if (RUN == FALSE && pos_valid(pos) && (!map_pos_passable(game_map(nlarn, pos.z), pos)
+            || !(game_wizardmode(nlarn) || player_memory_of(nlarn->p, pos).type > LT_NONE)))
+        {
+            if (!beep()) flash();
+            RUN = TRUE;
+        }
     }
     while (RUN);
 

@@ -61,8 +61,11 @@ int main(int argc, char *argv[])
     /* used to read in e.g. the help file */
     gchar *strbuf;
 
-    /* position to examine */
-    position pos;
+    /* position to examine / to travel to */
+    position pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+
+    /* position chosen for autotravel, allowing to continue travel */
+    position cpos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
     /* call display_shutdown when terminating the game */
     atexit(display_shutdown);
@@ -129,14 +132,54 @@ int main(int argc, char *argv[])
         /* repaint screen */
         display_paint_screen(nlarn->p);
 
-        if (run_cmd != 0)
+        if (pos_valid(pos))
         {
+            /* travel mode */
+
+            /* check if travel mode shall be aborted */
+            if (nlarn->p->attacked || adjacent_monster(nlarn->p->pos, FALSE))
+            {
+                pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            }
+            else if (pos_adjacent(nlarn->p->pos, pos))
+            {
+                /* the target has almost been reached. This is the last move. */
+                moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, pos), TRUE);
+                /* reset the target position */
+                pos = cpos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            }
+            else
+            {
+                /* find a path to the destination */
+                map_path *path = map_find_path(game_map(nlarn, nlarn->p->pos.z),
+                                               nlarn->p->pos, pos, LE_GROUND);
+
+                if (path && !g_queue_is_empty(path->path))
+                {
+                    /* path found. move the player. */
+                    map_path_element *el = g_queue_pop_head(path->path);
+                    moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, el->pos), TRUE);
+                }
+                else
+                {
+                    /* no path found. stop travelling */
+                    pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+                }
+
+                /* cleanup */
+                if (path) map_path_destroy(path);
+            }
+        }
+        else if (run_cmd != 0)
+        {
+            /* run mode */
             ch = run_cmd;
             // Check if we're in open surroundings.
             adj_corr = adjacent_corridor(nlarn->p->pos, ch);
         }
         else
         {
+            /* not running or traveling, get a key and handle it */
             ch = display_getch();
 
             if (ch == '/' || ch == 'g')
@@ -302,6 +345,9 @@ int main(int argc, char *argv[])
                 strbuf = map_pos_examine(pos);
                 log_add_entry(nlarn->log, strbuf);
                 g_free(strbuf);
+
+                /* reset the position */
+                pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
             }
             else
                 log_add_entry(nlarn->log, "Aborted.");
@@ -478,6 +524,20 @@ int main(int argc, char *argv[])
             }
             break;
 
+            /* continue autotravel */
+        case 'C':
+            if (pos_valid(cpos))
+            {
+                /* restore last known autotravel position */
+                pos = cpos;
+                /* reset keyboard input */
+                ch = 0;
+            }
+            else
+                log_add_entry(nlarn->log, "No travel destination know.");
+            break;
+
+            /* show stationary object memory */
         case 'D':
             player_list_sobjmem(nlarn->p);
             break;
@@ -489,6 +549,24 @@ int main(int argc, char *argv[])
                 /* only terminate the game if saving was successful */
                 game_destroy(nlarn);
                 exit(EXIT_SUCCESS);
+            }
+            break;
+
+            /* travel */
+        case 'T':
+            pos = display_get_position(nlarn->p, "Choose a destination to travel to.",
+                                       FALSE, FALSE, 0, FALSE, FALSE);
+
+            if (pos_valid(pos))
+            {
+                /* empty key input buffer to avoid recurring position queries */
+                ch = 0;
+                /* store position for resuming travel */
+                cpos = pos;
+            }
+            else
+            {
+                log_add_entry(nlarn->log, "Aborted.");
             }
             break;
 
@@ -578,6 +656,9 @@ int main(int argc, char *argv[])
                         player_effect_del(nlarn->p, e);
 
                     nlarn->p->pos = pos;
+
+                    /* reset pos, otherwise autotravel would be enabled */
+                    pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
                 }
             }
             break;
@@ -625,7 +706,6 @@ int main(int argc, char *argv[])
         }
 
         gboolean no_move = (moves_count == 0);
-
         gboolean was_attacked = FALSE;
 
         /* manipulate game time */

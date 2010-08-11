@@ -165,6 +165,24 @@ int pos_valid(position pos)
            && (pos.z >= 0) && (pos.z < MAP_MAX);
 }
 
+direction pos_dir(position origin, position target)
+{
+    assert (pos_valid(origin) && pos_valid(target));
+
+    if ((origin.x > target.x)  && (origin.y < target.y))  return GD_SW;
+    if ((origin.x == target.x) && (origin.y < target.y))  return GD_SOUTH;
+    if ((origin.x < target.x)  && (origin.y < target.y))  return GD_SE;
+    if ((origin.x > target.x)  && (origin.y == target.y)) return GD_WEST;
+    if ((origin.x == target.x) && (origin.y == target.y)) return GD_CURR;
+    if ((origin.x < target.x)  && (origin.y == target.y)) return GD_EAST;
+    if ((origin.x > target.x)  && (origin.y > target.y))  return GD_NW;
+    if ((origin.x == target.x) && (origin.y > target.y))  return GD_NORTH;
+    if ((origin.x < target.x)  && (origin.y > target.y))  return GD_NE;
+
+    /* impossible! */
+    return GD_NONE;
+}
+
 cJSON *pos_serialize(position pos)
 {
     cJSON *pval = cJSON_CreateObject();
