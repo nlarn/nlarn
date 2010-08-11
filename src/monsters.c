@@ -262,6 +262,8 @@ monster *monster_new(monster_t type, position pos)
 
 monster *monster_new_by_level(position pos)
 {
+    assert(pos_valid(pos));
+
     const int monster_level[] = { MT_KOBOLD,           // D1:   5
                                   MT_GIANT_ANT,        // D2:  11
                                   MT_ZOMBIE,           // D3:  17
@@ -276,28 +278,34 @@ monster *monster_new_by_level(position pos)
                                   MT_GREEN_URCHIN,     // V2:  56
                                   MT_DEMON_PRINCE      // V3
                                 };
+
+    int nlevel = pos.z;
+
+    int minstep = nlevel - 4;
+    int maxstep = nlevel - 1;
+
     int monster_id = MT_NONE;
     int monster_id_min;
     int monster_id_max;
-    int nlevel = pos.z;
 
-    assert(pos_valid(pos));
+    if (chance(2*game_difficulty(nlarn)))
+        maxstep += 2;
+    else if (chance(7*(game_difficulty(nlarn) + 1)))
+        maxstep++;
+    else if (chance(10))
+        minstep--;
 
-    if (nlevel == 0)
-    {
+    if (minstep < 0)
         monster_id_min = 1;
-        monster_id_max = monster_level[0];
-    }
-    else if (nlevel < 5)
-    {
-        monster_id_min = 1;
-        monster_id_max = monster_level[nlevel - 1];
-    }
     else
-    {
-        monster_id_min = monster_level[nlevel - 4] + 1;
-        monster_id_max = monster_level[nlevel - 1];
-    }
+        monster_id_min = monster_level[minstep] + 1;
+
+    if (maxstep < 0)
+        maxstep = 0;
+    else if (maxstep > MAP_MAX - 2)
+        maxstep = MAP_MAX - 2;
+
+    monster_id_max = monster_level[maxstep];
 
     do
     {
