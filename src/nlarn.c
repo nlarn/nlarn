@@ -155,6 +155,13 @@ int main(int argc, char *argv[])
                     /* path found. move the player. */
                     map_path_element *el = g_queue_pop_head(path->path);
                     moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, el->pos), TRUE);
+
+                    if (moves_count == 0)
+                    {
+                        /* for some reason movement is impossible, therefore
+                           stop autotravel. */
+                        pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+                    }
                 }
                 else
                 {
@@ -522,6 +529,12 @@ int main(int argc, char *argv[])
 
             /* continue autotravel */
         case 'C':
+            /* delete last autotravel target if it was on another map */
+            if (cpos.z != nlarn->p->pos.z)
+            {
+                cpos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            }
+
             if (pos_valid(cpos))
             {
                 /* restore last known autotravel position */

@@ -2357,7 +2357,8 @@ position display_get_position(player *p, char *message, gboolean ray,
            otherwise the player could be teleported / request a path to an
            invalid position. In wizard mode all positions are allowed,
            otherwise only known positions are allowed. */
-        if (RUN == FALSE && pos_valid(pos) && (!map_pos_passable(game_map(nlarn, pos.z), pos)
+        if (RUN == FALSE && !visible && pos_valid(pos)
+            && (!map_pos_passable(game_map(nlarn, pos.z), pos)
             || !(game_wizardmode(nlarn) || player_memory_of(nlarn->p, pos).type > LT_NONE)))
         {
             if (!beep()) flash();
