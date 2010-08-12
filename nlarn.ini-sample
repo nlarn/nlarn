@@ -8,8 +8,17 @@
 # Set character's name
 name=John Doe
 
-#  Choose the sex of your character (m/f)
-sex=m
+# Choose the gender of your character (m/f)
+gender=m
+
+# Choose the stats of your character
+# a Strong character
+# b Agile character
+# c Tough character
+# d Smart character
+# e Randomly pick one of the above
+# f Stats assigned randomly
+stats=f
 
 # Item types to pick up automatically:
 # " amulets

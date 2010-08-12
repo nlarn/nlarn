@@ -82,7 +82,7 @@ typedef struct game
 
     /* flags */
     guint32
-        player_creation_completed: 1, /* the player's stats have been assigned */
+        player_stats_set: 1, /* the player's stats have been assigned */
         cure_dianthr_created: 1, /* the potion of cure dianthroritis is a unique item */
         wizard: 1; /* wizard mode */
 } game;

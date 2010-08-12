@@ -76,9 +76,10 @@ void game_init(int argc, char *argv[])
     static gint difficulty = 0;
     static gboolean wizard = FALSE;
     static char *name = NULL;
-    static char *sex = NULL;
+    static char *gender = NULL;
     static char *auto_pickup = NULL;
     static char *savefile = NULL;
+    static char *stats = NULL;
 
     /* allocate space for game structure */
     nlarn = g_malloc0(sizeof(game));
@@ -154,10 +155,13 @@ void game_init(int argc, char *argv[])
         name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
         g_clear_error(&error);
 
-        sex = g_key_file_get_string(ini_file, "nlarn", "sex", &error);
+        gender = g_key_file_get_string(ini_file, "nlarn", "gender", &error);
         g_clear_error(&error);
 
         auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
+        g_clear_error(&error);
+
+        stats = g_key_file_get_string(ini_file, "nlarn", "stats", &error);
         g_clear_error(&error);
     }
     else
@@ -175,7 +179,8 @@ void game_init(int argc, char *argv[])
         { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,  "Set difficulty",       NULL },
         { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &wizard,      "Enable wizard mode",   NULL },
         { "name",        'n', 0, G_OPTION_ARG_STRING, &name,        "Set character's name", NULL },
-        { "sex",         's', 0, G_OPTION_ARG_STRING, &sex,         "Set character's sex (m/f)", NULL },
+        { "gender",      'g', 0, G_OPTION_ARG_STRING, &gender,      "Set character's gender (m/f)", NULL },
+        { "stats",       's', 0, G_OPTION_ARG_STRING, &stats,       "Set character's stats (a-f)", NULL },
         { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &auto_pickup, "Item types to pick up automatically, e.g. '$*+'", NULL },
 #ifdef DEBUG
         { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &savefile,  "Save file to restore", NULL },
@@ -218,11 +223,11 @@ void game_init(int argc, char *argv[])
             nlarn->p->name = name;
         }
 
-        if (sex)
+        if (gender)
         {
-            sex[0] = g_ascii_tolower(sex[0]);
+            gender[0] = g_ascii_tolower(gender[0]);
 
-            switch (sex[0])
+            switch (gender[0])
             {
             case 'm':
                 nlarn->p->sex = PS_MALE;
@@ -237,6 +242,13 @@ void game_init(int argc, char *argv[])
                 break;
             }
         }
+
+        if (stats)
+        {
+            stats[0] = g_ascii_tolower(stats[0]);
+            nlarn-> player_stats_set = player_assign_bonus_stats(nlarn->p, stats);
+        }
+
 
         if (wizard)
         {
@@ -918,7 +930,7 @@ static gboolean game_load(gchar *filename)
     player_update_fov(nlarn->p);
 
     /* no need to define the player's stats */
-    nlarn->player_creation_completed = TRUE;
+    nlarn->player_stats_set = TRUE;
 
     return TRUE;
 }

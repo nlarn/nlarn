@@ -164,25 +164,30 @@ player *player_new()
     return p;
 }
 
-void player_assign_bonus_stats(player *p)
+gboolean player_assign_bonus_stats(player *p, char *preset)
 {
-    GString *text;
-    text = g_string_new("  a) Strong character\n"
+    int selection = 0;
+    const char *text = "  a) Strong character\n"
                         "  b) Agile character\n"
                         "  c) Tough character\n"
                         "  d) Smart character\n"
                         "  e) Randomly pick one of the above\n"
-                        "  f) Stats assigned randomly\n");
+                        "  f) Stats assigned randomly\n";
 
-    int selection;
-    do
+    const char preset_min = 'a';
+    const char preset_max = 'f';
+
+    if (preset != NULL && strlen(preset) > 0)
     {
-        selection = display_show_message("Choose a character build",
-                                         text->str, 0);
+        selection = preset[0];
+        if (selection < preset_min || selection > preset_max)
+            return FALSE;
     }
-    while (selection < 'a' || selection > 'f');
 
-    g_string_free(text, TRUE);
+    while (selection < preset_min || selection > preset_max)
+    {
+        selection = display_show_message("Choose a character build", text, 0);
+    }
 
     if (selection == 'e')
         selection = 'a' + rand_0n(4);
@@ -258,6 +263,8 @@ void player_assign_bonus_stats(player *p)
     // Recalculate hp and mp because they depend on Con and Int, respectively.
     p->hp = p->hp_max = (p->constitution + 5);
     p->mp = p->mp_max = (p->intelligence + 5);
+
+    return TRUE;
 }
 
 void player_destroy(player *p)

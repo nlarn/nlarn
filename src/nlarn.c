@@ -95,30 +95,26 @@ int main(int argc, char *argv[])
     display_show_message("Welcome to the game of NLarn!", strbuf, 0);
     g_free(strbuf);
 
-    /* complete the player creation process if it is unfinished */
-    if (!nlarn->player_creation_completed)
+    /* ask for a charakter name if none has been supplied */
+    while (nlarn->p->name == NULL)
     {
-        /* ask for a charakter name if none has been supplied */
-        while (nlarn->p->name == NULL)
-        {
-            nlarn->p->name = display_get_string("By what name shall you be called?",
-                                                NULL, 45);
-        }
+        nlarn->p->name = display_get_string("By what name shall you be called?",
+                                            NULL, 45);
+    }
 
-        /* ask for charakter's gender if it is not known yet */
-        if (nlarn->p->sex == PS_NONE)
-        {
-            int res = display_get_yesno("Are you male or female?", "Female", "Male");
+    /* ask for charakter's gender if it is not known yet */
+    if (nlarn->p->sex == PS_NONE)
+    {
+        int res = display_get_yesno("Are you male or female?", "Female", "Male");
 
-            /* display_get_yesno() returns 0 or one */
-            nlarn->p->sex = (res == TRUE) ?  PS_FEMALE : PS_MALE;
-        }
+        /* display_get_yesno() returns 0 or one */
+        nlarn->p->sex = (res == TRUE) ?  PS_FEMALE : PS_MALE;
+    }
 
+    while (!nlarn->player_stats_set)
+    {
         /* assign the player's stats */
-        player_assign_bonus_stats(nlarn->p);
-
-        /* we're done */
-        nlarn->player_creation_completed = TRUE;
+        nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, NULL);
     }
 
     char run_cmd = 0;
