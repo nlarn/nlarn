@@ -769,6 +769,18 @@ int player_stairs_down(player *p)
     /* if told to switch level, do so */
     if (nlevel != NULL)
     {
+        /* check if the player is burdened and cause some damage if so */
+        int bval = player_effect(p, ET_BURDENED);
+
+        if (bval > 0)
+        {
+            log_add_entry(nlarn->log, "You slip!");
+            damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
+                                     rand_1n(bval + nlevel->nlevel), NULL);
+
+            player_damage_take(p, dam, PD_SOBJECT, ms);
+        }
+
         return player_map_enter(p, nlevel, FALSE);
     }
 

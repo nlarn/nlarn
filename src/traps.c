@@ -23,19 +23,20 @@
 #include "player.h"
 #include "traps.h"
 
-const trap_data traps[TT_MAX] = {
-/*
-    trap type
-    effect type
-    glyph colour
-    trigger chance
-    effect chance
-    base damage
-    description
-    player trigger message
-    effect message
-    monster trigger message
-*/
+const trap_data traps[TT_MAX] =
+{
+    /*
+        trap type
+        effect type
+        glyph colour
+        trigger chance
+        effect chance
+        base damage
+        description
+        player trigger message
+        effect message
+        monster trigger message
+    */
     {
         TT_NONE,
         ET_NONE,
@@ -156,21 +157,37 @@ int player_trap_trigger(player *p, trap_t trap, int force)
     /* chance to trigger the trap on target tile */
     int possibility = trap_chance(trap);
 
+    /* the value of the player's burden effect */
+    int bval = player_effect(p, ET_BURDENED);
+
     if (player_memory_of(p, p->pos).trap == trap)
     {
         // Dex decreases the chance of triggering a known trap.
         if (dex >= 22)
             possibility = 0;
         else
-            possibility = (22-dex)/2;
+            possibility = (22 - dex)/2;
     }
 
-    if (force || chance(possibility))
+    /* Check if the player triggers the trap.
+       Being burdened increases the chance due to clumsy movement. */
+    if (force || chance(possibility + bval))
     {
         log_add_entry(nlarn->log, trap_p_message(trap));
 
         /* refresh player's knowlege of trap */
         player_memory_of(p, p->pos).trap = trap;
+
+        if (trap_damage(trap))
+        {
+            /* deal more damage the deeper the dungeon
+               level and if the player is burdened */
+            damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
+                                     rand_1n(trap_damage(trap) + bval) + p->pos.z,
+                                     NULL);
+
+            player_damage_take(p, dam, PD_TRAP, trap);
+        }
 
         switch (trap)
         {
@@ -183,22 +200,13 @@ int player_trap_trigger(player *p, trap_t trap, int force)
             break;
 
         default:
-            if (trap_damage(trap))
-            {
-                damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
-                                         rand_1n(trap_damage(trap)) + p->pos.z,
-                                         NULL);
-
-                player_damage_take(p, dam, PD_TRAP, trap);
-            }
-
             if (trap == TT_SPIKEDPIT)
             {
                 const trap_t trap2 = TT_PIT;
 
                 if (trap_effect(trap2)
                         && chance(modified_effect_chance(trap2, trap_effect(trap2),
-                                                         p->pos.z)))
+                                  p->pos.z)))
                 {
                     /* display message if there is one */
                     if (trap_e_message(trap2))
@@ -211,7 +219,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
             /* if there is an effect on the trap add it to player's effects. */
             if (trap_effect(trap)
                     && chance(modified_effect_chance(trap, trap_effect(trap),
-                                                     p->pos.z)))
+                              p->pos.z)))
             {
                 /* display message if there is one */
                 if (trap_e_message(trap))

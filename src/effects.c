@@ -526,7 +526,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_BURDENED, 0, TRUE, "burdened",
+        ET_BURDENED, 0, 25, "burdened",
         "You are burdened.",
         "You are no longer burdened.",
         NULL, NULL,
