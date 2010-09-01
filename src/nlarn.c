@@ -117,6 +117,9 @@ int main(int argc, char *argv[])
         nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, NULL);
     }
 
+    /* automatic save point */
+    game_save(nlarn, NULL);
+
     char run_cmd = 0;
     int ch;
     gboolean adj_corr = FALSE;

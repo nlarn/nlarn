@@ -1101,6 +1101,8 @@ void player_die(player *p, player_cod cause_type, int cause)
         return;
     }
 
+    /* We really died! */
+
     /* do not show scores when in wizardmode */
     if (!game_wizardmode(nlarn))
     {
@@ -1438,6 +1440,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_string_free(text, TRUE);
     }
 
+    game_delete_savefile();
     game_destroy(nlarn);
 
     exit(EXIT_SUCCESS);
@@ -1874,6 +1877,10 @@ int player_map_enter(player *p, map *l, gboolean teleported)
 
     /* call autopickup */
     player_autopickup(p);
+
+    /* automatic save point */
+    if (game_turn(nlarn) > 1)
+        game_save(nlarn, NULL);
 
     return TRUE;
 }

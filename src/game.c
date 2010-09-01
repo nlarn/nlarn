@@ -917,12 +917,6 @@ static gboolean game_load(gchar *filename)
     /* welcome message */
     print_welcome_message(FALSE);
 
-    /* delete save file if it has not been specified on the command line */
-    if (filename == NULL)
-    {
-        g_unlink(fullname);
-    }
-
     /* free memory used by the full file name */
     g_free(fullname);
 
@@ -1118,4 +1112,22 @@ static int game_score_compare(const void *scr_a, const void *scr_b)
         return 1;
 
     return 0;
+}
+
+void game_delete_savefile()
+{
+    char *fullname = NULL;
+
+    /* assemble save file name */
+    fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+                            "nlarn.sav", NULL);
+
+    gzFile file = gzopen(fullname, "rb");
+    if (file != NULL)
+    {
+        gzclose(file);
+        /* actually delete the file */
+        g_unlink(fullname);
+    }
+    g_free(fullname);
 }

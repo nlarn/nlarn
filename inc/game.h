@@ -157,6 +157,8 @@ gpointer game_monster_register(game *g, monster *m);
 void game_monster_unregister(game *g, gpointer m);
 monster *game_monster_get(game *g, gpointer id);
 
+void game_delete_savefile();
+
 /* macros */
 
 #define game_difficulty(g) ((g)->difficulty)
