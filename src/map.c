@@ -79,7 +79,7 @@ const map_sobject_data map_sobjects[LS_MAX] =
     { LS_DEADTHRONE,    '\\', DC_LIGHTGRAY, "a massive throne",                    1, 1, },
     { LS_STAIRSDOWN,    '>',  DC_WHITE,     "a circular staircase",                1, 1, },
     { LS_STAIRSUP,      '<',  DC_WHITE,     "a circular staircase",                1, 1, },
-    { LS_ELEVATORDOWN,  'I',  DC_LIGHTGRAY, "a volcanic shaft leaning downward",   1, 1, },
+    { LS_ELEVATORDOWN,  'I',  DC_LIGHTGRAY, "a volcanic shaft leading downward",   1, 1, },
     { LS_ELEVATORUP,    'I',  DC_WHITE,     "the base of a volcanic shaft",        1, 1, },
     { LS_FOUNTAIN,      '{',  DC_BLUE,      "a bubbling fountain",                 1, 1, },
     { LS_DEADFOUNTAIN,  '{',  DC_LIGHTGRAY, "a dead fountain",                     1, 1, },

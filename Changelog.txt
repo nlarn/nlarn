@@ -39,7 +39,7 @@ Changes:
     * Use block cursor when asking for a position.
     * Display items and stationary objects which are not in sight with 
       their colour to make finding them again easier. New display order: 
-      stationary objects > items. New item display/memorizsation order: 
+      stationary objects > items. New item display/memorisation order: 
       gems > gold > topmost item.
     * Made containers ask for the amount when putting things into/taking 
       things out.
