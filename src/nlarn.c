@@ -546,7 +546,7 @@ int main(int argc, char *argv[])
                 ch = 0;
             }
             else
-                log_add_entry(nlarn->log, "No travel destination know.");
+                log_add_entry(nlarn->log, "No travel destination known.");
             break;
 
             /* show stationary object memory */
@@ -566,8 +566,9 @@ int main(int argc, char *argv[])
 
             /* travel */
         case 'T':
-            pos = display_get_position(nlarn->p, "Choose a destination to travel to.",
-                                       FALSE, FALSE, 0, FALSE, FALSE);
+            pos = display_get_new_position(nlarn->p, cpos,
+                                           "Choose a destination to travel to.",
+                                           FALSE, FALSE, 0, FALSE, FALSE);
 
             if (pos_valid(pos))
             {

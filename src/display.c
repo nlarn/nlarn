@@ -2116,6 +2116,16 @@ position display_get_position(player *p, char *message, gboolean ray,
                               gboolean ball, guint radius,
                               gboolean passable, gboolean visible)
 {
+    /* start at player's position */
+    return display_get_new_position(p, p->pos, message, ray, ball, radius,
+                                    passable, visible);
+}
+
+position display_get_new_position(player *p, position start,
+                                  char *message, gboolean ray,
+                                  gboolean ball, guint radius,
+                                  gboolean passable, gboolean visible)
+{
     gboolean RUN = TRUE;
     direction dir = GD_NONE;
     position pos, npos, cursor;
@@ -2127,8 +2137,11 @@ position display_get_position(player *p, char *message, gboolean ray,
     int x, y;
     monster *target, *m;
 
-    /* start at player's position */
-    pos = p->pos;
+    /* check the starting position makes sense */
+    if (pos_valid(start) && start.z == p->pos.z)
+        pos = start;
+    else
+        pos = p->pos;
 
     /* display message */
     log_add_entry(nlarn->log, message);
