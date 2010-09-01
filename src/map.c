@@ -46,7 +46,8 @@ static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArra
 static map_path_element *map_path_find_best(map *l, map_path *path,
                                             map_element_t map_elem);
 static GPtrArray *map_path_get_neighbours(map *l, position pos,
-                                          map_element_t element);
+                                          map_element_t element,
+                                          gboolean player);
 
 static gboolean map_monster_destroy(gpointer key, monster *monst, map *m);
 static gboolean map_sphere_destroy(sphere *s, map *m);
@@ -667,7 +668,7 @@ map_path *map_find_path(map *l, position start, position goal,
                         map_element_t element)
 {
     assert(l != NULL && (start.z == goal.z));
-
+    
     map_path *path;
     map_path_element *curr, *next;
     gboolean next_is_better;
@@ -679,6 +680,7 @@ map_path *map_find_path(map *l, position start, position goal,
     curr = map_path_element_new(start);
     g_ptr_array_add(path->open, curr);
 
+    gboolean player = pos_identical(start, nlarn->p->pos);
     while (path->open->len)
     {
         curr = map_path_find_best(l, path, element);
@@ -704,7 +706,8 @@ map_path *map_find_path(map *l, position start, position goal,
             return path;
         }
 
-        neighbours = map_path_get_neighbours(l, curr->pos, element);
+        neighbours = map_path_get_neighbours(l, curr->pos, element,
+                                             player);
 
         while (neighbours->len)
         {
@@ -2121,7 +2124,8 @@ static map_path_element *map_path_find_best(map *l, map_path *path,
 }
 
 static GPtrArray *map_path_get_neighbours(map *l, position pos,
-                                          map_element_t element)
+                                          map_element_t element,
+                                          gboolean player)
 {
     GPtrArray *neighbours;
     map_path_element *pe;
@@ -2137,7 +2141,11 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos,
 
         npos = pos_move(pos, dir);
 
-        if (pos_valid(npos) && valid_monster_movement_pos(l, npos, element))
+        if (!pos_valid(npos))
+            continue;
+
+        if ((player && lt_is_passable(player_memory_of(nlarn->p, npos).type))
+            || (!player && valid_monster_movement_pos(l, npos, element)))
         {
             pe = map_path_element_new(npos);
             g_ptr_array_add(neighbours, pe);
