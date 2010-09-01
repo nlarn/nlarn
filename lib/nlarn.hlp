@@ -10,10 +10,13 @@ You can also use the number pad with num lock off.
 
 Running means moving into one direction until interrupted. g or /, followed by a direction key, will similarly make your run.
 
+
 * Autotravel
 
 C  continue travelling  
 T  travel somewhere on the level
+
+You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. _ for altar).
 
 
 * Other actions

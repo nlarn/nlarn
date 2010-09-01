@@ -137,8 +137,8 @@ char *display_get_string(char *caption, char *value, size_t max_len);
 int display_get_yesno(char *question, char *yes, char *no);
 direction display_get_direction(char *title, int *available);
 position display_get_new_position(player *p, position start,
-                                  char *message, gboolean ray,
-                                  gboolean ball, guint radius,
+                                  char *message, gboolean ray, gboolean ball,
+                                  gboolean travel, guint radius,
                                   gboolean passable, gboolean visible);
 
 position display_get_position(player *p, char *message, gboolean ray,

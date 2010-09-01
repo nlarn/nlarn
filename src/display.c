@@ -2117,13 +2117,13 @@ position display_get_position(player *p, char *message, gboolean ray,
                               gboolean passable, gboolean visible)
 {
     /* start at player's position */
-    return display_get_new_position(p, p->pos, message, ray, ball, radius,
-                                    passable, visible);
+    return display_get_new_position(p, p->pos, message, ray, ball, FALSE,
+                                    radius, passable, visible);
 }
 
 position display_get_new_position(player *p, position start,
-                                  char *message, gboolean ray,
-                                  gboolean ball, guint radius,
+                                  char *message, gboolean ray, gboolean ball,
+                                  gboolean travel, guint radius,
                                   gboolean passable, gboolean visible)
 {
     gboolean RUN = TRUE;
@@ -2242,7 +2242,8 @@ position display_get_new_position(player *p, position start,
         }
 
         /* wait for input */
-        switch (getch())
+        const int ch = getch();
+        switch (ch)
         {
         case KEY_ESC:
             pos.x = G_MAXINT16;
@@ -2319,6 +2320,46 @@ position display_get_new_position(player *p, position start,
         case KEY_END:
         case KEY_C1:
             dir = GD_SW;
+            break;
+            
+        default:
+            /* if travelling, use sobject glyphs as shortcuts */
+            if (travel)
+            {
+                map_sobject_t sobj = LS_NONE;
+                int i;
+                for (i = LS_NONE + 1; i < LS_MAX; i++)
+                    if (ls_get_image(i) == (char) ch)
+                    {
+                        sobj = i;
+                        log_add_entry(nlarn->log, "Looking for '%c' (%s).\n",
+                                      (char) ch, ls_get_desc(sobj));
+                        break;
+                    }
+
+                /* found a matching glyph, now search the remembered level */
+                if (sobj != LS_NONE)
+                {
+                    position start = pos;
+                    while (TRUE)
+                    {
+                        if (++pos.x >= MAP_MAX_X)
+                        {
+                            pos.x = 0;
+                            if (++pos.y >= MAP_MAX_Y)
+                                pos.y = 0;
+                        }
+                        if (pos_identical(start, pos))
+                            break;
+                        
+                        if (player_memory_of(nlarn->p, pos).sobject != LS_NONE
+                            && ls_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
             break;
         }
 

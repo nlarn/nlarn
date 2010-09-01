@@ -568,7 +568,7 @@ int main(int argc, char *argv[])
         case 'T':
             pos = display_get_new_position(nlarn->p, cpos,
                                            "Choose a destination to travel to.",
-                                           FALSE, FALSE, 0, FALSE, FALSE);
+                                           FALSE, FALSE, TRUE, 0, FALSE, FALSE);
 
             if (pos_valid(pos))
             {
