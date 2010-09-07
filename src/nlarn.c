@@ -135,8 +135,10 @@ int main(int argc, char *argv[])
         {
             /* travel mode */
 
-            /* check if travel mode shall be aborted */
-            if (nlarn->p->attacked || adjacent_monster(nlarn->p->pos, FALSE))
+            /* check if travel mode shall be aborted:
+               attacked or fell through trap door */
+            if (nlarn->p->attacked || adjacent_monster(nlarn->p->pos, FALSE)
+                || pos.z != nlarn->p->pos.z)
             {
                 pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
             }
