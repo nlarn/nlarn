@@ -308,6 +308,11 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
                     || (str[pos + len] == '\0')
                     || isspace(str[pos + len]))
             {
+                if (pos + lp == strlen(str) - 1)
+                {
+                    lp = len + 1;
+                    break;
+                }
                 lp = len;
                 if (str[pos + lp] == '\n')
                 {
