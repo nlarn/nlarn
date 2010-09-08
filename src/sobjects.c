@@ -534,7 +534,7 @@ int player_fountain_drink(player *p)
         /* positive effect from list below */
         fntchange = 1;
     }
-    else
+//    else
     {
         /* negative effect from list below */
         fntchange = -1;
@@ -592,11 +592,9 @@ int player_fountain_drink(player *p)
             {
                 log_add_entry(nlarn->log, "You lose %d hit point%s!",
                               amount, plural(amount));
-
-                damage *dam = damage_new(DAM_NONE, ATT_NONE, amount, NULL);
-                player_damage_take(p, dam, PD_SOBJECT, LS_FOUNTAIN);
+                              
+                player_hp_lose(p, amount, PD_SOBJECT, LS_FOUNTAIN);
             }
-
             break;
 
         case 7:

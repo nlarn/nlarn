@@ -266,6 +266,7 @@ void player_exp_gain(player *p, int count);
 void player_exp_lose(player *p, int count);
 
 int player_hp_gain(player *p, int count);
+int player_hp_lose(player *p, int count, player_cod cause_type, int cause);
 
 /**
  * Inflict damage upon the player

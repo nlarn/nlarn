@@ -2202,6 +2202,20 @@ int player_hp_gain(player *p, int count)
     return p->hp;
 }
 
+int player_hp_lose(player *p, int count, player_cod cause_type, int cause)
+{
+    assert(p != NULL);
+
+    p->hp -= count;
+
+    if (p->hp < 1)
+    {
+        player_die(p, cause_type, cause);
+    }
+    
+    return p->hp;
+}
+
 void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause)
 {
     monster *m = NULL;
@@ -2245,11 +2259,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         /* taken damage */
         if (dam->amount > 0)
         {
-            p->hp -= dam->amount;
             if (dam->amount >= 8 && dam->amount >= p->hp_max/4)
                 log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
             else if (dam->amount >= p->hp_max/10)
                 log_add_entry(nlarn->log, "Ouch!");
+                
+            player_hp_lose(p, dam->amount, cause_type, cause);
         }
         else
         {
@@ -2262,11 +2277,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
         if (dam->amount > 0)
         {
-            p->hp -= dam->amount;
             if (dam->amount >= 8 && dam->amount >= p->hp_max/4)
                 log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
             else if (dam->amount >= p->hp_max/10)
                 log_add_entry(nlarn->log, "Ouch!");
+
+            player_hp_lose(p, dam->amount, cause_type, cause);
         }
         else
         {
@@ -2279,8 +2295,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         dam->amount -= player_effect(p, ET_RESIST_FIRE);
         if (dam->amount > 0)
         {
-            p->hp -= dam->amount;
             log_add_entry(nlarn->log, "You suffer burns.");
+            player_hp_lose(p, dam->amount, cause_type, cause);
         }
         else
         {
@@ -2292,8 +2308,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         dam->amount -= player_effect(p, ET_RESIST_COLD);
         if (dam->amount > 0)
         {
-            p->hp -= dam->amount;
             log_add_entry(nlarn->log, "You suffer from frostbite.");
+            player_hp_lose(p, dam->amount, cause_type, cause);
         }
         else
         {
@@ -2304,8 +2320,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_ACID:
         if (dam->amount > 0)
         {
-            p->hp -= dam->amount;
             log_add_entry(nlarn->log, "You are splashed with acid.");
+            player_hp_lose(p, dam->amount, cause_type, cause);
         }
         else
         {
@@ -2316,8 +2332,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_WATER:
         if (dam->amount > 0)
         {
-            p->hp -= dam->amount;
             log_add_entry(nlarn->log, "You experience near-drowning.");
+            player_hp_lose(p, dam->amount, cause_type, cause);
         }
         else
         {
@@ -2332,8 +2348,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
         if (dam->amount > 0)
         {
-            p->hp -= dam->amount;
             log_add_entry(nlarn->log, "Zapp!");
+            player_hp_lose(p, dam->amount, cause_type, cause);
         }
         else
         {
@@ -2363,10 +2379,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         else
         {
             /* damage is caused by the effect of the poison effect () */
-            p->hp -= dam->amount;
             log_add_entry(nlarn->log, "You feel poison running through your veins.");
+            player_hp_lose(p, dam->amount, cause_type, cause);
         }
-
         break;
 
     case DAM_BLINDNESS:
@@ -2499,7 +2514,6 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     {
         player_die(p, cause_type, cause);
     }
-
 }
 
 int player_hp_max_gain(player *p, int count)
