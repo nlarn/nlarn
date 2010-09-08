@@ -291,19 +291,22 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         spaces = g_malloc0((indent + 1) * sizeof(char));
 
         /* fill the string with spaces */
-        for (lp = 0; lp < indent; lp++) spaces[lp] = ' ';
+        for (lp = 0; lp < indent; lp++)
+            spaces[lp] = ' ';
     }
 
     while (pos < strlen(str))
     {
-        /* reset target string lenght and position of last whitespace */
+        /* reset target string length and position of last whitespace */
         len = lp = 0;
 
         /* scan the next line */
         while (len <= width)
         {
-            /* scan for a space to wrap the current line at */
-            if ((str[pos + len] == '\0') || isspace(str[pos + len]))
+            /* scan for a space at which to wrap the current line */
+            if ((pos + len == strlen(str) - 1)
+                    || (str[pos + len] == '\0')
+                    || isspace(str[pos + len]))
             {
                 lp = len;
                 if (str[pos + lp] == '\n')
@@ -330,7 +333,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
 
         /* indent lines if not on the first line or the first
            line of a new paragraph */
-        if (indent && text->len && str[pos - 1] != '\n')
+        if (indent && text->len && pos >= 1 && str[pos - 1] != '\n')
         {
             /* prepend empty string to line (via temporary string) */
             char *tmp = g_strconcat(spaces, line, NULL);
