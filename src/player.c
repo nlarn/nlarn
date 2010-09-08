@@ -939,7 +939,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
 
 static const char *int2time_str(int val)
 {
-    static char buf[21];
+    assert(val >= 0);
     const char *count_desc[] = { "never", "once", "twice", "thrice" };
 
     if (val <= 3)
@@ -948,8 +948,9 @@ static const char *int2time_str(int val)
     }
     else
     {
-        g_snprintf(buf, 20, "%d times", val);
-        return buf;
+        GString *number = g_string_new(NULL);
+        g_string_append_printf(number, "%d times", val);
+        return g_string_free(number, FALSE);
     }
 }
 
@@ -2921,8 +2922,6 @@ static char *player_print_weight(player *p, float weight)
 {
     assert (p != NULL);
 
-    static char buf[21] = "";
-
     char *unit = "g";
     if (weight > 1000)
     {
@@ -2930,25 +2929,27 @@ static char *player_print_weight(player *p, float weight)
         unit = "kg";
     }
 
-    g_snprintf(buf, 20, "%g%s", weight, unit);
-
-    return buf;
+    GString *burden = g_string_new(NULL);
+    g_string_append_printf(burden, "%g%s", weight, unit);
+    return g_string_free(burden, FALSE);
 }
 
 char *player_can_carry(player *p)
 {
-    static char buf[21] = "";
-    g_snprintf(buf, 20, "%s",
-               player_print_weight(p, 2000 * 1.3 * (float)player_get_str(p)));
-    return buf;
+    GString *burden = g_string_new(NULL);
+    g_string_append_printf(burden, "%s",
+                           player_print_weight(p, 2000 * 1.3
+                                                  * (float)player_get_str(p)));
+    return g_string_free(burden, FALSE);
 }
 
 char *player_inv_weight(player *p)
 {
-    static char buf[21] = "";
-    g_snprintf(buf, 20, "%s",
-               player_print_weight(p, (float)inv_weight(p->inventory)));
-    return buf;
+    GString *burden = g_string_new(NULL);
+    g_string_append_printf(burden, "%s",
+                           player_print_weight(p, (float)inv_weight(p->inventory)));
+                           
+    return g_string_free(burden, FALSE);
 }
 
 int player_inv_pre_add(inventory *inv, item *item)

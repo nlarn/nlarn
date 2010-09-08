@@ -1756,7 +1756,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
 
     for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
     {
-        for (pos.x = 0; pos.x < MAP_MAX_X ; pos.x++)
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
             position map_pos = pos;
             if (flip_vertical)
@@ -1864,7 +1864,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
 
     fclose(levelfile);
 
-    /* if the eye of larn/pcd has not placed yet, just place it anywhere */
+    /* if the eye of larn/pcd has not been placed yet, place it randomly */
     if (spec_count >= 0)
         place_special_item(nmap, map_find_space(nmap, LE_ITEM, FALSE));
 

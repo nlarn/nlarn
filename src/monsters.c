@@ -745,27 +745,22 @@ const char *monster_get_name(monster *m)
 
 const char* monster_type_plural_name(const int montype, const int count)
 {
-    /* need a static buffer to return to calling functions */
-    static char buf[61] = { 0 };
+    if (count == 1)
+        return monster_type_name(montype);
 
     /* result of lua data query; monster's plural name */
     const char *mpn = luaN_query_string("monsters", montype, "plural_name");
 
-    if (count > 1)
+    GString *plural = g_string_new(NULL);
+    if (mpn == NULL)
     {
-        if (mpn == NULL)
-        {
-            g_snprintf(buf, 60, "%ss", monster_type_name(montype));
-        }
-        else
-        {
-            g_strlcpy(buf, mpn, 60);
-        }
-
-        return buf;
+        g_string_append_printf(plural, "%ss", monster_type_name(montype));
     }
-
-    return monster_type_name(montype);
+    else
+    {
+        g_string_append_printf(plural, "%s", mpn);
+    }
+    return g_string_free(plural, FALSE);
 }
 
 static int item_is_unique(item *it)
