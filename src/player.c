@@ -4871,7 +4871,9 @@ static char *player_death_description(game_score_t *score, int verbose)
         break;
 
     case PD_TRAP:
-        g_string_append_printf(text, " by %s %s.",
+        g_string_append_printf(text, " by %s%s %s.",
+                               score->cause == TT_TRAPDOOR ? "falling through "
+                                                           : "",
                                a_an(trap_description(score->cause)),
                                trap_description(score->cause));
         break;
@@ -4892,8 +4894,15 @@ static char *player_death_description(game_score_t *score, int verbose)
         break;
 
     case PD_SOBJECT:
-        /* currently only the fountain can cause death */
-        g_string_append(text, " by toxic water from a fountain.");
+        switch (score->cause)
+        {
+        case LS_FOUNTAIN:
+            g_string_append(text, " by toxic water from a fountain.");
+            break;
+        default:
+            g_string_append(text, " by falling down a staircase.");
+            break;
+        }
         break;
 
     default:
