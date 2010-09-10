@@ -236,38 +236,81 @@ message_log_entry *log_get_entry(message_log *log, guint id)
 cJSON *log_serialize(message_log *log)
 {
     int idx;
-    cJSON *le, *lser = cJSON_CreateArray();
+    cJSON *log_entry;
+    cJSON *log_ser = cJSON_CreateObject();
+    cJSON *log_entries = cJSON_CreateArray();
 
+    /* create array of log entries */
     for (idx = 0; idx < log_length(log); idx++)
     {
         message_log_entry *entry = log_get_entry(log, idx);
 
-        cJSON_AddItemToArray(lser, le = cJSON_CreateObject());
-        cJSON_AddNumberToObject(le, "gtime", entry->gtime);
-        cJSON_AddStringToObject(le, "message", entry->message);
+        cJSON_AddItemToArray(log_entries, log_entry = cJSON_CreateObject());
+        cJSON_AddNumberToObject(log_entry, "gtime", entry->gtime);
+        cJSON_AddStringToObject(log_entry, "message", entry->message);
     }
 
-    return lser;
+    /* add this turn's message if filled */
+    if (log->buffer->len > 0)
+    {
+        cJSON_AddStringToObject(log_ser, "buffer", log->buffer->str);
+    }
+
+    /* add last message buffer if filled */
+    if (log->lastmsg != NULL)
+    {
+        cJSON_AddStringToObject(log_ser, "lastmsg", log->lastmsg);
+    }
+
+    /* add array of entries to log object */
+    cJSON_AddItemToObject(log_ser, "entries", log_entries);
+
+    return log_ser;
 }
 
 message_log *log_deserialize(cJSON *lser)
 {
     int idx;
+    cJSON *obj;
+
+    /* create new message log */
     message_log *log = g_malloc0(sizeof(message_log));
 
     log->active = TRUE;
-    log->buffer = g_string_new(NULL);
     log->entries = g_ptr_array_new();
 
-    for (idx = 0; idx < cJSON_GetArraySize(lser); idx++)
+    /* try to restore this turn's message */
+    if ((obj = cJSON_GetObjectItem(lser, "buffer")) != NULL)
     {
-        cJSON *le = cJSON_GetArrayItem(lser, idx);
-        message_log_entry *entry = g_malloc(sizeof(message_log_entry));
+        /* restore buffer from saved value */
+        log->buffer = g_string_new(obj->valuestring);
+    }
+    else
+    {
+        /* create empty buffer */
+        log->buffer = g_string_new(NULL);
+    }
 
-        entry->gtime = cJSON_GetObjectItem(le, "gtime")->valueint;
-        entry->message = g_strdup(cJSON_GetObjectItem(le, "message")->valuestring);
+    /* try to restore the last message */
+    if ((obj = cJSON_GetObjectItem(lser, "lastmsg")) != NULL)
+    {
+        log->lastmsg = g_strdup(obj->valuestring);
+    }
 
-        g_ptr_array_add(log->entries, entry);
+    /* try to get all log entries from the supplied cJSON object */
+    if ((obj = cJSON_GetObjectItem(lser, "entries")) != NULL)
+    {
+    /* reconstruct message log entries */
+        for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+        {
+            cJSON *le = cJSON_GetArrayItem(obj, idx);
+            message_log_entry *entry = g_malloc(sizeof(message_log_entry));
+
+            entry->gtime = cJSON_GetObjectItem(le, "gtime")->valueint;
+            entry->message = g_strdup(cJSON_GetObjectItem(le, "message")->valuestring);
+
+            g_ptr_array_add(log->entries, entry);
+        }
     }
 
     return log;
