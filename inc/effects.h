@@ -61,7 +61,7 @@ typedef enum _effect_type
 
     ET_DETECT_MONSTER,          /* sense presence of monsters */
     ET_HOLD_MONSTER,            /* monsters can't flee */
-    ET_SCARE_MONSTER,           /* monsters turn to flee */
+    ET_SCARED,                  /* monsters turn to flee */
     ET_CHARM_MONSTER,           /* make monsters peaceful */
     ET_AGGRAVATE_MONSTER,       /* aggravate monsters */
 

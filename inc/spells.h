@@ -169,6 +169,8 @@ gboolean spell_create_monster(struct player *p);
 gboolean spell_create_sphere(spell *s, struct player *p);
 gboolean spell_cure_poison(struct player *p);
 gboolean spell_cure_blindness(struct player *p);
+gboolean spell_phantasmal_forces(spell *s, struct player *p);
+gboolean spell_scare_monsters(spell *s, struct player *p);
 gboolean spell_make_wall(struct player *p);
 gboolean spell_vaporize_rock(struct player *p);
 

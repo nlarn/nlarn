@@ -236,7 +236,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_SCARE_MONSTER, 250, TRUE, NULL,
+        ET_SCARED, 250, TRUE, NULL,
         NULL, NULL,
         "The %s is very afraid.",
         "The %s is no longer scared.",

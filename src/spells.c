@@ -116,8 +116,8 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_PHA, "pha", "phantasmal forces",
-        SC_POINT, DAM_NONE, ET_SCARE_MONSTER,
-        "Creates illusions, and if believed, monsters flee.",
+        SC_OTHER, DAM_NONE, ET_NONE,
+        "Creates illusions, and if believed, the monster flees.",
         "The %s believed!",
         "The %s didn't believe the illusions!",
         2, 600, FALSE
@@ -229,9 +229,9 @@ const spell_data spells[SP_MAX] =
         4, 1600, FALSE
     },
     {
-        SP_SCA, "sca", "scare monster",
-        SC_POINT, DAM_NONE, ET_SCARE_MONSTER,
-        "Terrifies the monster so that hopefully he wont hit the magic user.",
+        SP_SCA, "sca", "scare monsters",
+        SC_OTHER, DAM_NONE, ET_NONE,
+        "Terrifies nearby monsters so that hopefully they flee the magic user.",
         NULL, NULL,
         5, 2000, FALSE
     },
@@ -568,9 +568,19 @@ int spell_cast(player *p)
             well_done = spell_create_monster(p);
             break;
 
+            /* phantasmal forces */
+        case SP_PHA:
+            well_done = spell_phantasmal_forces(spell, p);
+            break;
+
             /* vaporize rock */
         case SP_VPR:
             well_done = spell_vaporize_rock(p);
+            break;
+
+            /* scare monsters */
+        case SP_SCA:
+            well_done = spell_scare_monsters(spell, p);
             break;
 
             /* make wall */
@@ -1027,10 +1037,10 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                     {
 
                         if (!player_effect(p, ET_REFLECTION)
-                            || !pos_identical(pos, start))
+                                || !pos_identical(pos, start))
                         {
                             const int reflected
-                                = player_effect(p, ET_REFLECTION);
+                            = player_effect(p, ET_REFLECTION);
 
                             int evasion = p->level/(2+game_difficulty(nlarn)/2)
                                           + player_get_dex(p)
@@ -1398,7 +1408,7 @@ int spell_type_blast(spell *s, struct player *p)
     }
 
     ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos,
-                                                                  radius));
+                                   radius));
 
     if (area_pos_get(ball, p->pos)
             && !display_get_yesno("The spell is going to hit you. " \
@@ -1542,6 +1552,73 @@ gboolean spell_cure_blindness(struct player *p)
     }
 }
 
+gboolean spell_phantasmal_forces(spell *s, struct player *p)
+{
+    position mpos;
+    monster *m = NULL;
+
+    mpos = display_get_position(p, "Choose a target for phantasmal forces.",
+                                FALSE, FALSE, 0, TRUE, TRUE);
+
+    m = map_get_monster_at(game_map(nlarn, mpos.z), mpos);
+
+    if (m == NULL)
+    {
+        return FALSE;
+    }
+
+    if ((player_get_int(p) + s->knowledge) > monster_int(m))
+    {
+        log_add_entry(nlarn->log, spell_msg_succ(s), monster_name(m));
+        monster_effect_add(m, effect_new(ET_SCARED));
+        return TRUE;
+    }
+    else
+    {
+        log_add_entry(nlarn->log, spell_msg_fail(s), monster_name(m));
+        return FALSE;
+    }
+}
+
+gboolean spell_scare_monsters(spell *s, struct player *p)
+{
+    monster *m;
+    int x, y, count = 0;
+    position pos;
+    map *cmap = game_map(nlarn, p->pos.z);
+    pos.z = p->pos.z;
+
+    /* the radius of this spell is determined by the player's level of
+       spell knowledge */
+    area *a = area_new_circle(p->pos, 1 + s->knowledge, FALSE);
+
+    for (y = a->start_y; y < a->start_y + a->size_y; y++)
+    {
+        pos.y = y;
+
+        for (x = a->start_x; x < a->start_x + a->size_x; x++)
+        {
+            pos.x = x;
+            m = map_get_monster_at(cmap, pos);
+
+            /* no monster at position? */
+            if (m == NULL) continue;
+
+            /* there is a monster, check if it is affected */
+            if (player_get_int(p) > monster_int(m))
+            {
+                monster_effect_add(m, effect_new(ET_SCARED));
+                count++;
+            }
+        }
+    }
+
+    /* free allocated memory */
+    area_destroy(a);
+
+    return (count > 0);
+}
+
 static void destroy_sobject_at(player *p, map *map, position pos)
 {
     position mpos;      /* position for monster that might be generated */
@@ -1570,7 +1647,7 @@ static void destroy_sobject_at(player *p, map *map, position pos)
 
         area *ball = area_new_circle_flooded(p->pos, radius,
                                              map_get_obstacles(map, p->pos,
-                                                               radius));
+                                                     radius));
         blast_area_with_spell(p, ball, sp, dam_t, IET_NONE, p->pos, colour,
                               amount);
         spell_destroy(sp);
@@ -1718,7 +1795,7 @@ gboolean spell_vaporize_rock(player *p)
         if (monster_type(m) == MT_XORN)
         {
             monster_damage_take(m, damage_new(DAM_PHYSICAL, ATT_NONE,
-                                divert(200, 10), p));
+                                              divert(200, 10), p));
         }
         else if (monster_in_sight(m))
         {

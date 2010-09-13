@@ -1752,7 +1752,7 @@ gboolean monster_update_action(monster *m)
         /* no action if monster is held or sleeping */
         naction = MA_REMAIN;
     }
-    else if ((low_hp && smart) || (monster_effect(m, ET_SCARE_MONSTER) > monster_int(m)))
+    else if ((low_hp && smart) || monster_effect(m, ET_SCARED))
     {
         /* low HP or very scared => FLEE from player */
         naction = MA_FLEE;
