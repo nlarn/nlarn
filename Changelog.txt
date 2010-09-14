@@ -1,3 +1,128 @@
+Release 0.6.0 (2010-09-19)
+-------------
+
+Changes:
+
+    * Changed the flow of game time management and made actions
+      interrupt-able. The result of an action that takes multiple turns 
+      is revealed after elapsing the required number of turns.
+    * Stats are now chosen from one of three fixed stat packages with high
+      points in strength, constitution, dexterity and intelligence, 
+      respectively. At game start, the player is prompted to choose one or a 
+      random character stat set. This choice can be define on the command line
+      or in the ini file.
+    * The statistics which are collected during the game play have been 
+      enhanced. A new statistics counter, "acts of vandalism" which counts 
+      destruction of walls, statues etc. via vaporisation, and also all those
+      looted thrones, has been added.
+    * Nuked the charisma stat.
+    * Added an auto-travel feature which allows to select a target with 'T'
+      and to continue a travel interrupted by e.g. a monster with 'C'.
+    * Movement speed is reduced when burdened. When going down a level while 
+      burdened, damage may be caused. 
+      The chance of triggering a trap when burdened has been increased.
+    * Give a warning if the effects levitation, wall-walk and protection are 
+      about to time out. 
+    * Added some special effects when vaporising fountains or altars.
+    * Use inverted colours to highlight stationary objects or traps with
+      items on them.
+    * Added a more detailed item description for some item types.
+    * Integrated Lua interpreter into the game. Moved monster data to external
+      lua file.
+    * Added some new fortune/speech phrases.
+    * Flood effect areas shrink as they time out.
+    
+    * Make spell casting success depend on int, spell level and knowledge.
+    * Tweaked the spell "alter reality".
+    * Magic missile is now a single-target spell, and sonic spear has been
+      upped to level 2.
+    * Lightning deals double damage against flying monsters. Player also
+      takes double damage from lightning while levitating.
+    * Make finger of death less likely to succeed against undead or demons.
+    * Make polymorph less likely to succeed the higher the monster level. 
+      A poly-morphed monster that can't survive in its current place gets 
+      killed.
+    * Redesigned the spells "phantasmal forces" and "scare monsters". 
+      Phantasmal forces affects a single monster, scare monsters affects all 
+      monsters that surround the player.
+
+    * Modified the monster generation to have a more interesting mix of 
+      monsters on a level, including out-of-depth monsters.
+    * Made some monsters significantly more rare. 
+    * Tweaked monsters' gold property to make gold drops less reliable.
+    * Added ranged attacks: hell hounds and red dragons breathe bursts of 
+      fire, the green dragon spits poison and the platinum dragon can use its
+      psionic attack at a distance. Gaze attacks are now possible at a 
+      distance with one third of their base chance. 
+    * Xorns can pass through walls, water lords can swim and the ziller now 
+      has a random stat loss attack. The assassin beetle now has the poison 
+      attack. The green urchin and the lama nobe can now cause blindness.
+    * Hell hounds, red dragons and demon princes are resistant to fire, some 
+      monsters have sleep or poison resistance.
+    * Make monster regenerate more often.
+    * Adjust some monsters' colours, get rid of dark grey monsters.
+    * A nymph will only steal a random amount of an item when the player
+      has a larger number of that item.
+    * Populate the town with town person. Eradicate fortune cookies in favour
+      of the talkative town people.
+
+    * Give blessed items a 50% chance to resist erosion/disenchantment.
+    * Refuse to use books, scrolls and potions which are known to be cursed.
+    * New amulet type: reflection. Reflects breath and gaze attacks.
+    * When wearing cursed armour, its curse status is identified immediately.
+    * If a carried container is destroyed, its contents get spill on the floor.
+    * Blessed potions are more powerful.
+    * Change potions of plain water to holy water, which enables the player
+      to bless items.
+    * Add new potion "recovery" healing stat drains, including dizziness.
+    * Added a "potion of levitation" which allows to float over water or lava.
+    * Implemented a "potion of power" which restores MP.
+    * Blessed potions of object and treasure detection detects items carried
+      by monsters.
+    * Improved blessed scrolls of magic mapping and potions of instant healing:
+      a blessed scroll of magic mapping now also reveals all traps on the 
+      level, and a blessed potion of instant healing also heals poison, 
+      confusion, and blindness.
+    * For blessed genocide scrolls, allow to choose out of same-glyph monsters.
+    * Allow uncursed identify scroll to identify up to three items, averaging
+      at two. Blessed scrolls affect all carried items, as before.
+    * Blessed scrolls of enchant armour/weapon now repair damage and may give
+      a bonus enchantment.
+    * Improve the scroll of "create artifact": now only generates amulets, 
+      rings, books, potions or scrolls.
+    * Life protection is only permanent with blessed scrolls.
+    * Blessed weapons do 50% bonus damage against undead and demons.
+    * Blessed time warp scrolls are more likely to go farther back.
+
+    * Added rivers and lakes. Spells can now be cast across water and lava,
+      and flying monsters can cross it. If a monster is killed over water/lava,
+      all carried items get destroyed.
+    * Overhaul altar prayer. Make altar donations also cure stat loss other
+      than strength or dexterity.
+
+    * Display remembered traps in their colour, now different by type.
+    * Pits actually trap player and monsters and restrict vision while
+      trapped.
+    * Cause damage by falling through trap doors.
+    * Make trap poisoning less likely on the early levels.
+    * Make dexterity influence the likelihood of evading a trap.
+
+Fixed bugs:
+
+    * Fixed lots of typos.
+    * Store auto pickup settings in the saved game.
+    * Fixed remove curse scrolls leaking cursedness information for items
+      of unknown curse status.
+    * Expire effects correctly when doing a time warp.
+    * Fix flickering inventory.
+    * Disallow using stairs while paralysed.
+    * Changed many message to present tense.
+    * Fix area effect spells not working under certain circumstances.
+    * Fix various information leaks about unknown mimics.
+    * Don't allow books to difficult to understand increase your Int.
+    * Display correct count of items a nymph steals.
+    * Disable showing an item bonus in the identified items list.
+
 Release 0.5.4 (2010-04-24)
 -------------
 
