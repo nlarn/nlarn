@@ -495,7 +495,7 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
 {
     map_tile *tile;
 
-    assert(l != NULL && element > LT_NONE && element < LE_MAX);
+    assert(l != NULL && element > LE_NONE && element < LE_MAX);
 
     /* if the position is invalid it is invalid for the map as well */
     if (!pos_valid(pos))
