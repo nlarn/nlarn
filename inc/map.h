@@ -40,9 +40,6 @@
 #define MAP_MAX_MAZE_NUM 24
 #define MAP_MAZE_NUM     (MAP_MAX_MAZE_NUM + 1)
 
-/* forward declaration */
-struct player;
-
 typedef enum map_tile_type
 {
     LT_NONE,

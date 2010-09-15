@@ -40,11 +40,14 @@ static int map_validate(map *maze);
 
 static map_path *map_path_new(position start, position goal);
 static map_path_element *map_path_element_new(position pos);
-static int map_path_cost(map *l, map_path_element* element, position target,
-                         map_element_t map_elem);
-static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArray *list);
+static int map_path_cost(map *l, map_path_element* element,
+                         position target, map_element_t map_elem,
+                         gboolean player);
+static map_path_element *map_path_element_in_list(map_path_element* el,
+                                                  GPtrArray *list);
 static map_path_element *map_path_find_best(map *l, map_path *path,
-                                            map_element_t map_elem);
+                                            map_element_t map_elem,
+                                            gboolean player);
 static GPtrArray *map_path_get_neighbours(map *l, position pos,
                                           map_element_t element,
                                           gboolean player);
@@ -668,7 +671,7 @@ map_path *map_find_path(map *l, position start, position goal,
                         map_element_t element)
 {
     assert(l != NULL && (start.z == goal.z));
-    
+
     map_path *path;
     map_path_element *curr, *next;
     gboolean next_is_better;
@@ -680,10 +683,12 @@ map_path *map_find_path(map *l, position start, position goal,
     curr = map_path_element_new(start);
     g_ptr_array_add(path->open, curr);
 
+    /* check if the path is being determined for the player */
     gboolean player = pos_identical(start, nlarn->p->pos);
+
     while (path->open->len)
     {
-        curr = map_path_find_best(l, path, element);
+        curr = map_path_find_best(l, path, element, player);
 
         g_ptr_array_remove_fast(path->open, curr);
         g_ptr_array_add(path->closed, curr);
@@ -706,8 +711,7 @@ map_path *map_find_path(map *l, position start, position goal,
             return path;
         }
 
-        neighbours = map_path_get_neighbours(l, curr->pos, element,
-                                             player);
+        neighbours = map_path_get_neighbours(l, curr->pos, element, player);
 
         while (neighbours->len)
         {
@@ -727,8 +731,8 @@ map_path *map_find_path(map *l, position start, position goal,
                 g_ptr_array_add(path->open, next);
                 next_is_better = TRUE;
             }
-            else if (map_path_cost(l, curr, path->goal, element)
-                        > map_path_cost(l, next, path->goal, element))
+            else if (map_path_cost(l, curr, path->goal, element, player)
+                        > map_path_cost(l, next, path->goal, element, player))
             {
                 next_is_better = TRUE;
             }
@@ -2059,16 +2063,35 @@ static map_path_element *map_path_element_new(position pos)
 
 /* Returns cost from position defined by element to goal.*/
 static int map_path_cost(map *l, map_path_element* element, position target,
-                         map_element_t map_elem)
+                         map_element_t map_elem, gboolean player)
 {
+    map_tile_t tt;
+
+    /* get the monster located on the map tile */
+    monster *m = map_get_monster_at(l, element->pos);
+
+    /* get the tile type of the map tile */
+    if (player)
+    {
+        tt = player_memory_of(nlarn->p, element->pos).type ;
+    }
+    else
+    {
+        tt = map_tiletype_at(l, element->pos);
+    }
+
+    /* determine the distance from the current position to the target */
     element->h_score = pos_distance(element->pos, target);
 
-    /* penalize fields occupied by monsters */
-    if (map_is_monster_at(l, element->pos))
+    /* penalize fields occupied by monsters: always for monsters,
+       for the player only if (s)he can see the monster */
+    if ((player && m != NULL && monster_in_sight(m)) || (m != NULL))
+    {
         element->h_score += 10;
+    }
 
     /* penalize fields covered with water, fire or cloud */
-    switch (map_tiletype_at(l, element->pos))
+    switch (tt)
     {
     case LT_WATER:
         if (map_elem == LE_SWIMMING_MONSTER || map_elem == LE_FLYING_MONSTER)
@@ -2104,7 +2127,8 @@ static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArra
 }
 
 static map_path_element *map_path_find_best(map *l, map_path *path,
-                                            map_element_t map_elem)
+                                            map_element_t map_elem,
+                                            gboolean player)
 {
     map_path_element *el, *best = NULL;
     guint idx;
@@ -2113,8 +2137,8 @@ static map_path_element *map_path_find_best(map *l, map_path *path,
     {
         el = g_ptr_array_index(path->open, idx);
 
-        if (best == NULL || map_path_cost(l, el, path->goal, map_elem)
-                                < map_path_cost(l, best, path->goal, map_elem))
+        if (best == NULL || map_path_cost(l, el, path->goal, map_elem, player)
+                                < map_path_cost(l, best, path->goal, map_elem, player))
         {
             best = el;
         }
