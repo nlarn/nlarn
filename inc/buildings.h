@@ -24,6 +24,7 @@
 
 typedef struct school_course {
     int course_time;
+    int prerequisite;
     char *description;
     char *message;
 } school_course;

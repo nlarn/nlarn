@@ -454,6 +454,7 @@ int building_lrs(player *p)
 
 int building_school(player *p)
 {
+    /* the number of turns it takes to enter and leave the school */
     int turns = 2;
     guint price;
 
@@ -468,18 +469,18 @@ int building_school(player *p)
 
     const char msg_price[] = "\nAll courses cost %d gold pieces.";
 
-    const char msg_prerequisite[] = "Sorry, but this class has a prerequisite of %s.";
+    const char msg_prerequisite[] = "Sorry, but this class has a prerequisite of \"%s\".";
 
     /* school courses */
     const school_course school_courses[SCHOOL_COURSE_COUNT] =
     {
-        { 10, "Fighters Training I", " You feel stronger!" },
-        { 15, "Fighters Training II", "You feel much stronger!" },
-        { 10, "Introduction to Wizardry", "The task before you now seems more attainable!" },
-        { 20, "Applied Wizardry", "The task before you now seems very attainable!" },
-        { 10, "Faith for Today", "You now feel more confident that you can find the potion in time!" },
-        { 10, "Contemporary Dance", "You feel like dancing!" },
-        {  5, "History of Larn", "Your instructor told you that the Eye of Larn is rumored to be guarded by an invisible demon lord." },
+        { 10, -1, "Fighters Training I", "You feel stronger!" },
+        { 15,  0, "Fighters Training II", "You feel much stronger!" },
+        { 10, -1, "Introduction to Wizardry", "The task before you now seems more attainable!" },
+        { 20,  2, "Applied Wizardry", "The task before you now seems very attainable!" },
+        { 10, -1, "Faith for Today", "You now feel more confident that you can find the potion in time!" },
+        { 10, -1, "Contemporary Dance", "You feel like dancing!" },
+        {  5, -1, "History of Larn", "Your instructor told you that the Eye of Larn is rumored to be guarded by an invisible demon lord." },
     };
 
     assert(p != NULL);
@@ -521,9 +522,31 @@ int building_school(player *p)
                           price);
 
             return turns;
-
         }
 
+        /* check if the selected course has a prerequisite
+           and if the player has taken that course */
+        if ((school_courses[selection].prerequisite >= 0) &&
+            !p->school_courses_taken[school_courses[selection].prerequisite])
+        {
+            log_add_entry(nlarn->log, msg_prerequisite,
+                          school_courses[school_courses[selection].prerequisite].description);
+
+            return turns;
+        }
+
+        log_add_entry(nlarn->log, "You take the course \"%s\".",
+                      school_courses[(int)selection].description);
+
+        /* charge the player */
+        building_player_charge(p, price);
+        p->stats.gold_spent_college += price;
+
+        /* time usage */
+        guint course_turns = mobuls2gtime(school_courses[(guint)selection].course_time);
+        player_make_move(p, course_turns, FALSE, NULL);
+
+        /* add the bonus gained by this course */
         switch (selection)
         {
         case 0:
@@ -532,14 +555,6 @@ int building_school(player *p)
             break;
 
         case 1:
-            if (!p->school_courses_taken[0])
-            {
-                log_add_entry(nlarn->log, (char *)msg_prerequisite,
-                              school_courses[0].description);
-
-                return turns;
-            }
-
             p->strength += 2;
             p->constitution += 2;
             break;
@@ -549,13 +564,6 @@ int building_school(player *p)
             break;
 
         case 3:
-            if (!p->school_courses_taken[2])
-            {
-                log_add_entry(nlarn->log, (char *)msg_prerequisite,
-                              school_courses[2].description);
-
-                return turns;
-            }
             p->intelligence += 2;
             break;
 
@@ -572,20 +580,12 @@ int building_school(player *p)
             break;
         }
 
-        /* mark course as taken */
+        /* mark the course as taken */
         p->school_courses_taken[(int)selection] = 1;
 
-        /* charge */
-        building_player_charge(p, price);
-        p->stats.gold_spent_college += price;
-
-        /* time usage */
-        turns += mobuls2gtime(school_courses[(int)selection].course_time);
-
-        log_add_entry(nlarn->log, "You take the course %s.",
-                      school_courses[(int)selection].description);
-
-        log_add_entry(nlarn->log, school_courses[(int)selection].message);
+        log_add_entry(nlarn->log, "You successfully complete the course \"%s\". %s",
+                      school_courses[(int)selection].description,
+                      school_courses[(int)selection].message);
     }
 
     return turns;
