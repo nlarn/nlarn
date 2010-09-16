@@ -441,7 +441,7 @@ cJSON *player_serialize(player *p)
     /* store remembered stationary objects */
     if (p->sobjmem != NULL)
     {
-        int idx;
+        guint idx;
 
         obj = cJSON_CreateArray();
         cJSON_AddItemToObject(pser, "sobjmem", obj);
@@ -717,7 +717,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     int frequency; /* number of turns between occasions */
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
-    int idx = 0;
+    guint idx = 0;
     char *question = NULL, *description = NULL;
 
     assert(p != NULL);
@@ -2211,7 +2211,7 @@ int player_hp_lose(player *p, int count, player_cod cause_type, int cause)
     {
         player_die(p, cause_type, cause);
     }
-    
+
     return p->hp;
 }
 
@@ -2220,7 +2220,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     monster *m = NULL;
     effect *e = NULL;
     int hp_orig;
-    int effects_count;
+    guint effects_count;
 
     assert(p != NULL && dam != NULL);
 
@@ -2262,7 +2262,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
                 log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
             else if (dam->amount >= p->hp_max/10)
                 log_add_entry(nlarn->log, "Ouch!");
-                
+
             player_hp_lose(p, dam->amount, cause_type, cause);
         }
         else
@@ -2836,7 +2836,7 @@ int player_effect(player *p, effect_type et)
 char **player_effect_text(player *p)
 {
     char **text;
-    int pos;
+    guint pos;
     effect *e;
 
     text = strv_new();
@@ -4347,7 +4347,7 @@ char *player_get_level_desc(player *p)
 
 void player_list_sobjmem(player *p)
 {
-    int idx;
+    guint idx;
     int prevmap = -1;
     GString *sobjlist = g_string_new(NULL);
 
@@ -4642,7 +4642,7 @@ static void player_calculate_octant(player *p, int row, float start,
 static void player_sobject_memorize(player *p, map_sobject_t sobject, position pos)
 {
     player_sobject_memory nsom;
-    int idx;
+    guint idx;
 
     if (p->sobjmem == NULL)
     {
@@ -4676,7 +4676,7 @@ static void player_sobject_memorize(player *p, map_sobject_t sobject, position p
 void player_sobject_forget(player *p, position pos)
 {
     player_sobject_memory *som;
-    int idx;
+    guint idx;
 
     /* just return if nothing has been memorized yet */
     if (p->sobjmem == NULL)
@@ -4814,6 +4814,13 @@ static char *player_death_description(game_score_t *score, int verbose)
         desc = "genocided";
         break;
 
+    case PD_SPELL:
+        if (score->cause < SP_MAX_BOOK)
+            desc = "blasted";
+        else
+            desc = "got killed";
+        break;
+
     default:
         desc = "killed";
     }
@@ -4832,11 +4839,11 @@ static char *player_death_description(game_score_t *score, int verbose)
 
     if (verbose)
     {
-        g_string_append_printf(text, " on level %d", score->dlevel);
+        g_string_append_printf(text, " on level %s", map_names[score->dlevel]);
 
         if (score->dlevel_max > score->dlevel)
         {
-            g_string_append_printf(text, " (max. %d)", score->dlevel_max);
+            g_string_append_printf(text, " (max. %s)", map_names[score->dlevel_max]);
         }
 
         if (score->cod < PD_TOO_LATE)
@@ -4896,9 +4903,20 @@ static char *player_death_description(game_score_t *score, int verbose)
         break;
 
     case PD_SPELL:
-        g_string_append_printf(text, " %s with the spell \"%s\".",
-                               (score->sex == PS_MALE) ? "himself" : "herself",
-                               spell_name_by_id(score->cause));
+        if (score->cause < SP_MAX_BOOK)
+        {
+            /* player spell */
+            g_string_append_printf(text, " %s away with the spell \"%s\".",
+                                   (score->sex == PS_MALE) ? "himself" : "herself",
+                                   spell_name_by_id(score->cause));
+        }
+        else
+        {
+            /* monster spell */
+            g_string_append_printf(text, " by %s %s",
+                                   a_an(spell_name_by_id(score->cause)),
+                                   spell_name_by_id(score->cause));
+        }
         break;
 
     case PD_CURSE:
