@@ -51,9 +51,11 @@ Changes:
 
     Monsters
     --------
+    * Overhauled to-hit calculations, now takes into account monster/player
+      speed ratio. Saner AC values.
     * Modified the monster generation to have a more interesting mix of 
       monsters on a level, including out-of-depth monsters.
-    * Made some monsters significantly more rare. 
+    * Made some monsters significantly more rare.
     * Tweaked monsters' gold property to make gold drops less reliable.
     * Added ranged attacks: hell hounds and red dragons breathe bursts of 
       fire, the green dragon spits poison and the platinum dragon can use its
@@ -78,6 +80,7 @@ Changes:
     * Add new potion "recovery" healing stat drains, including dizziness.
     * Added a "potion of levitation", which allows to float over water or lava.
     * Implemented a "potion of power", which restores MP.
+    * Always show wielded weapon in the main view.
     * Give blessed items a 50% chance to resist erosion/disenchantment.
     * Blessed weapons do 50% bonus damage against undead and demons.
     * Blessed potions' effects last longer.
