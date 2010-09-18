@@ -2847,12 +2847,28 @@ static char *detailed_item_description(item *it, gboolean known)
         if (weapon_is_twohanded(it))
             g_string_append_printf(desc, "Two-handed weapon\n");
 
-        g_string_append_printf(desc, "Base damage: +%d\n"
-                                     "Base accuracy: +%d\n",
-                               weapon_base_wc(it), weapon_base_acc(it));
+		if (it->bonus_known)
+		{
+			g_string_append_printf(desc, "Damage: +%d\n"
+										 "Accuracy: +%d\n",
+								   weapon_wc(it), weapon_acc(it));
+		}
+		else
+		{
+			g_string_append_printf(desc, "Base damage: +%d\n"
+										 "Base accuracy: +%d\n",
+								   weapon_base_wc(it), weapon_base_acc(it));
+		}
         break;
     case IT_ARMOUR:
-        g_string_append_printf(desc, "Base AC: %d\n", armour_base_ac(it));
+		if (it->bonus_known)
+		{
+			g_string_append_printf(desc, "Armour class: %d\n", armour_ac(it));
+		}
+		else
+		{
+			g_string_append_printf(desc, "Base AC: %d\n", armour_base_ac(it));
+		}
         break;
     default:
         break;
