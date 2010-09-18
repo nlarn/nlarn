@@ -89,7 +89,7 @@ char *str_replace(char *string, char *orig, char *replace)
 
 char *str_capitalize(char *string)
 {
-    int i;
+    guint i;
 
     if (string == NULL)
     {
@@ -235,7 +235,7 @@ message_log_entry *log_get_entry(message_log *log, guint id)
 
 cJSON *log_serialize(message_log *log)
 {
-    int idx;
+    guint idx;
     cJSON *log_entry;
     cJSON *log_ser = cJSON_CreateObject();
     cJSON *log_entries = cJSON_CreateArray();
@@ -347,15 +347,8 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         while (len <= width)
         {
             /* scan for a space at which to wrap the current line */
-            if ((pos + len == strlen(str) - 1)
-                    || (str[pos + len] == '\0')
-                    || isspace(str[pos + len]))
+            if (str[pos + len] == '\0' || isspace(str[pos + len]))
             {
-                if (pos + lp == strlen(str) - 1)
-                {
-                    lp = len + 1;
-                    break;
-                }
                 lp = len;
                 if (str[pos + lp] == '\n')
                 {
@@ -381,7 +374,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
 
         /* indent lines if not on the first line or the first
            line of a new paragraph */
-        if (indent && text->len && pos >= 1 && str[pos - 1] != '\n')
+        if (indent && text->len && str[pos - 1] != '\n')
         {
             /* prepend empty string to line (via temporary string) */
             char *tmp = g_strconcat(spaces, line, NULL);
