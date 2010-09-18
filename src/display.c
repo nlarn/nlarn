@@ -427,24 +427,87 @@ int display_paint_screen(player *p)
     move(6, MAP_MAX_X + 1);
     clrtoeol();
 
+	/* wielded weapon */
+	if (p->eq_weapon)
+	{
+		char wpn[61];
+        const int available_space = display_cols - MAP_MAX_X - 4;
+
+		GString *desc = g_string_new(NULL);
+		
+		if (p->eq_weapon->bonus_known)
+		{
+			g_string_append_printf(desc, "%c%d ", p->eq_weapon->bonus >= 0 ? '+' : '-',
+			                                      p->eq_weapon->bonus);
+		}
+		
+        g_string_append_printf(desc, "%s", weapon_name(p->eq_weapon));
+
+		// TODO: Add corrosion/curse status in brackets.
+   	    // Alternatively, convey that information with colours.
+		if (p->eq_weapon->burnt || p->eq_weapon->corroded || p->eq_weapon->rusty)
+		{
+	        g_string_append_printf(desc, " (");
+
+			if (p->eq_weapon->burnt == 1)
+				g_string_append_printf(desc, "burnt");
+			else if (p->eq_weapon->burnt == 2)
+				g_string_append_printf(desc, "v. burnt");
+			
+			if (p->eq_weapon->burnt && (p->eq_weapon->corroded || p->eq_weapon->rusty))
+				g_string_append_printf(desc, ", ");
+			
+			if (p->eq_weapon->corroded == 1)
+				g_string_append_printf(desc, "corroded");
+			else if (p->eq_weapon->corroded == 2)
+				g_string_append_printf(desc, "v. corroded");
+				
+			if (p->eq_weapon->rusty && (p->eq_weapon->burnt || p->eq_weapon->corroded))
+				g_string_append_printf(desc, ", ");
+				
+			if (p->eq_weapon->rusty == 1)
+				g_string_append_printf(desc, "rusty");
+			else if (p->eq_weapon->rusty == 2)
+				g_string_append_printf(desc, "v. rusty");
+
+	        g_string_append_printf(desc, ")");
+   	    }
+		g_strlcpy(wpn, desc->str, 60);
+		
+        if (strlen(wpn) > available_space)
+        {
+			if (wpn[available_space - 1] != ' ')
+				wpn[available_space - 1] = '.';
+            wpn[available_space] = '\0';
+        }
+
+		/* free the temporary string */
+		g_string_free(desc, TRUE);
+		mvprintw(7, MAP_MAX_X + 3, "%s", wpn);
+	}
+	else
+		mvprintw(7, MAP_MAX_X + 3, "Unarmed");
+    clrtoeol();
+	
     /* armour class */
-    mvprintw(7, MAP_MAX_X + 3, "AC: %2d", player_get_ac(p));
+    mvprintw(8, MAP_MAX_X + 3, "AC: %2d", player_get_ac(p));
     clrtoeol();
 
     /* gold */
-    mvprintw(8, MAP_MAX_X + 3, "$%-7d", player_get_gold(p));
+    mvprintw(9, MAP_MAX_X + 3, "$%-7d", player_get_gold(p));
     clrtoeol();
 
     /* clear line below gold */
-    move(9, MAP_MAX_X + 1);
+    move(10, MAP_MAX_X + 1);
     clrtoeol();
 
     /* clear lines */
     for (i = 0; i < 7; i++)
     {
-        move(10 + i, MAP_MAX_X + 3);
+        move(11 + i, MAP_MAX_X + 3);
         clrtoeol();
     }
+	
     /* display effect descriptions */
     if (p->effects->len > 0)
     {
