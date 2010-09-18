@@ -2849,7 +2849,7 @@ static char *detailed_item_description(item *it, gboolean known)
 
         g_string_append_printf(desc, "Base damage: +%d\n"
                                      "Base accuracy: +%d\n",
-                               weapon_base_wc(it), weapon_base_wc(it) / 4);
+                               weapon_base_wc(it), weapon_acc(it));
         break;
     case IT_ARMOUR:
         g_string_append_printf(desc, "Base AC: %d\n", armour_base_ac(it));

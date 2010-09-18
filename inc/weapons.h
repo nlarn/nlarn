@@ -22,7 +22,8 @@
 typedef struct weapon_data {
 	int	id;
 	char *name;
-	int wc;				/* weapon class */
+	int wp_class;		/* weapon class */
+	int accuracy;		/* weapon accuracy */
 	int	material;		/* material type from item_materials */
 	int weight;			/* used to determine inventory weight and if item can be thrown */
 	int price;			/* base price in the shops */
@@ -68,8 +69,9 @@ extern const weapon_data weapons[WT_MAX];
 #define weapon_type_obtainable(id) (weapons[id].obtainable)
 
 #define weapon_name(weapon)          (weapons[(weapon)->id].name)
-#define weapon_base_wc(weapon)       (weapons[(weapon)->id].wc)
+#define weapon_base_wc(weapon)       (weapons[(weapon)->id].wp_class)
 #define weapon_wc(weapon)            (weapon_base_wc(weapon) + (weapon)->bonus)
+#define weapon_acc(weapon)           (weapons[(weapon)->id].accuracy)
 #define weapon_material(weapon)      (weapons[(weapon)->id].material)
 #define weapon_weight(weapon)        (weapons[(weapon)->id].weight)
 #define weapon_price(weapon)         (weapons[(weapon)->id].price)

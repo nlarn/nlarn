@@ -1618,7 +1618,7 @@ static int calc_to_hit(player *p, monster *m)
 {
     const int to_hit = p->level
                        + player_get_dex(p)
-                       + (p->eq_weapon ? (weapon_wc(p->eq_weapon) / 4) : 0)
+                       + (p->eq_weapon ? weapon_acc(p->eq_weapon) : 0)
                        /* FIXME: I don't want those pointless D&D rules */
                        + monster_ac(m)
                        - 12
@@ -4987,6 +4987,7 @@ void calc_fighting_stats(player *p)
                            "------------\n"
                            "  wielded weapon : %s\n"
                            "  weapon class   : %d\n"
+						   "  accuracy       : %d\n"
                            "  experience     : %d\n"
                            "  strength       : %d\n"
                            "  dexterity      : %d\n"
@@ -4994,6 +4995,7 @@ void calc_fighting_stats(player *p)
                            "  difficulty     : %d\n\n",
                            (p->eq_weapon ? desc : "none"),
                            (p->eq_weapon ? weapon_wc(p->eq_weapon) : 0),
+                           (p->eq_weapon ? weapon_acc(p->eq_weapon) : 0),
                            p->level,
                            player_get_str(p),
                            player_get_dex(p),
