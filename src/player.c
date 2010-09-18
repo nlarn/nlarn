@@ -1621,8 +1621,7 @@ static int calc_to_hit(player *p, monster *m)
                        + (p->eq_weapon ? weapon_acc(p->eq_weapon) : 0)
                        /* FIXME: I don't want those pointless D&D rules */
                        + monster_ac(m)
-                       - 12
-                       - game_difficulty(nlarn);
+                       - 12;
 
     if (to_hit < 1)
         return 0;
