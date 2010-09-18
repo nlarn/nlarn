@@ -1,6 +1,6 @@
 monsters = {
     [MT_ASSASSIN_BUG] = {
-      ac = 9,
+      ac = 1,
       attacks = { { type = BITE, base = 3, damage = PHYSICAL },
                   { type = BITE, base = 3, damage = POISON }
       },
@@ -16,7 +16,7 @@ monsters = {
       speed = FAST,
     },
     [MT_BRONZE_DRAGON] = {
-      ac = 2,
+      ac = 10,
       attacks = {
         { type = BITE, base = 9, damage = PHYSICAL },
         { type = CLAW, base = 9, damage = PHYSICAL }
@@ -72,14 +72,14 @@ monsters = {
       speed = FAST,
     },
     [MT_CENTIPEDE] = {
-      ac = 14,
+      ac = 1,
       attacks = {
         { type = BITE, base = 50, damage = DEC_STR },
         { type = BITE, base = 1, damage = PHYSICAL } },
       color = YELLOW,
       exp = 2,
       flags = HEAD,
-      hp_max = 1,
+      hp_max = 5,
       glyph = "c",
       intelligence = 2,
       level = 2,
@@ -88,7 +88,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_DEMONLORD_I] = {
-      ac = -30,
+      ac = 17,
       attacks = {
         { type = BITE, base = 18, damage = PHYSICAL },
         { type = CLAW, base = 18, damage = PHYSICAL }
@@ -105,7 +105,7 @@ monsters = {
       speed = FAST,
     },
     [MT_DEMONLORD_II] = {
-      ac = -30,
+      ac = 18,
       attacks = {
         { type = BITE, base = 18, damage = PHYSICAL },
         { type = CLAW, base = 18, damage = PHYSICAL }
@@ -122,7 +122,7 @@ monsters = {
       speed = FAST,
     },
     [MT_DEMONLORD_III] = {
-      ac = -30,
+      ac = 19,
       attacks = {
         { type = BITE, base = 18, damage = PHYSICAL },
         { type = CLAW, base = 18, damage = PHYSICAL }
@@ -139,7 +139,7 @@ monsters = {
       speed = FAST,
     },
     [MT_DEMONLORD_IV] = {
-      ac = -35,
+      ac = 20,
       attacks = {
         { type = BITE, base = 20, damage = PHYSICAL },
         { type = CLAW, base = 20, damage = PHYSICAL }
@@ -156,7 +156,7 @@ monsters = {
       speed = FAST,
     },
     [MT_DEMONLORD_V] = {
-      ac = -40,
+      ac = 21,
       attacks = {
         { type = BITE, base = 22, damage = PHYSICAL },
         { type = CLAW, base = 22, damage = PHYSICAL }
@@ -173,7 +173,7 @@ monsters = {
       speed = FAST,
     },
     [MT_DEMONLORD_VI] = {
-      ac = -45,
+      ac = 22,
       attacks = {
         { type = BITE, base = 24, damage = PHYSICAL },
         { type = CLAW, base = 24, damage = PHYSICAL }
@@ -190,7 +190,7 @@ monsters = {
       speed = FAST,
     },
     [MT_DEMONLORD_VII] = {
-      ac = -70,
+      ac = 23,
       attacks = {
         { type = BITE, base = 27, damage = PHYSICAL },
         { type = CLAW, base = 27, damage = PHYSICAL }
@@ -207,7 +207,7 @@ monsters = {
       speed = FAST,
     },
     [MT_DEMON_PRINCE] = {
-      ac = -127,
+      ac = 25,
       attacks = {
         { type = BITE, base = 30, damage = PHYSICAL },
         { type = CLAW, base = 30, damage = PHYSICAL }
@@ -225,7 +225,7 @@ monsters = {
       speed = FAST,
     },
     [MT_DISENCHANTRESS] = {
-      ac = 3,
+      ac = 7,
       attacks = { { type = TOUCH, damage = REM_ENCH } },
       color = WHITE,
       exp = 500,
@@ -240,7 +240,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_ELF] = {
-      ac = 8,
+      ac = 6,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
       color = WHITE,
       exp = 35,
@@ -257,12 +257,12 @@ monsters = {
       speed = FAST,
     },
     [MT_FLOATING_EYE] = {
-      ac = 8,
+      ac = 2,
       attacks = { { type = GAZE, base = 66, damage = PARALYSIS } },
       color = BLUE,
       exp = 2,
       flags = FLY + INFRAVISION,
-      hp_max = 5,
+      hp_max = 12,
       glyph = "E",
       intelligence = 3,
       level = 3,
@@ -271,7 +271,7 @@ monsters = {
       speed = XSLOW,
     },
     [MT_FORVALAKA] = {
-      ac = 2,
+      ac = 4,
       attacks = { { type = BITE, base = 5, damage = PHYSICAL } },
       color = LIGHTGRAY,
       exp = 280,
@@ -285,7 +285,7 @@ monsters = {
       speed = DOUBLE,
     },
     [MT_GELATINOUSCUBE] = {
-      ac = 9,
+      ac = 1,
       attacks = { { type = SLAM, base = 1, damage = ACID } },
       color = CYAN,
       exp = 45,
@@ -299,14 +299,14 @@ monsters = {
       speed = XSLOW,
     },
     [MT_GIANT_ANT] = {
-      ac = 8,
+      ac = 2,
       attacks = {
         { type = BITE, base = 75, damage = DEC_STR },
         { type = BITE, base = 1, damage = PHYSICAL } },
       color = BROWN,
       exp = 5,
       flags = HEAD,
-      hp_max = 5,
+      hp_max = 6,
       glyph = "A",
       intelligence = 3,
       level = 2,
@@ -320,7 +320,7 @@ monsters = {
       color = RED,
       exp = 1,
       flags = HEAD + FLY + INFRAVISION,
-      hp_max = 1,
+      hp_max = 2,
       glyph = "b",
       intelligence = 3,
       level = 1,
@@ -329,14 +329,14 @@ monsters = {
       speed = XFAST,
     },
     [MT_GNOME] = {
-      ac = 10,
+      ac = 0,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
       color = BROWN,
       exp = 2,
       flags = HEAD + HANDS,
       gold_chance = 80,
       gold = 30,
-      hp_max = 2,
+      hp_max = 6,
       glyph = "g",
       intelligence = 8,
       level = 1,
@@ -345,7 +345,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_GNOME_KING] = {
-      ac = -1,
+      ac = 11,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
       color = RED,
       exp = 3000,
@@ -361,7 +361,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_GREEN_DRAGON] = {
-      ac = 3,
+      ac = 12,
       attacks = {
         { type = BREATH, base = 8, damage = POISON },
         { type = SLAM, base = 25, damage = PHYSICAL }
@@ -379,7 +379,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_GREEN_URCHIN] = {
-      ac = -3,
+      ac = 17,
       attacks = { { type = STING, base = 12, damage = PHYSICAL },
                   { type = STING, base = 50, damage = BLINDNESS }
       },
@@ -411,14 +411,14 @@ monsters = {
       speed = FAST,
     },
     [MT_HOBGOBLIN] = {
-      ac = 14,
+      ac = 1,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
       color = BROWN,
       exp = 2,
       flags = HEAD + HANDS + INFRAVISION,
       gold_chance = 30,
       gold = 40,
-      hp_max = 3,
+      hp_max = 8,
       glyph = "H",
       intelligence = 5,
       level = 1,
@@ -427,7 +427,7 @@ monsters = {
       speed = SLOW,
     },
     [MT_ICE_LIZARD] = {
-      ac = 11,
+      ac = 4,
       attacks = {
         { type = CLAW, base = 2, damage = PHYSICAL },
         { type = SLAM, base = 14, damage = PHYSICAL }
@@ -435,7 +435,7 @@ monsters = {
       color = LIGHTCYAN,
       exp = 25,
       flags = HEAD + SWIM,
-      hp_max = 16,
+      hp_max = 20,
       glyph = "i",
       intelligence = 6,
       level = 4,
@@ -444,12 +444,12 @@ monsters = {
       speed = SLOW,
     },
     [MT_JACKAL] = {
-      ac = 17,
+      ac = 0,
       attacks = { { type = BITE, base = 1, damage = PHYSICAL } },
       color = BROWN,
       exp = 1,
       flags = HEAD,
-      hp_max = 1,
+      hp_max = 3,
       glyph = "J",
       intelligence = 4,
       level = 1,
@@ -458,7 +458,7 @@ monsters = {
       speed = FAST,
     },
     [MT_JACULUS] = {
-      ac = 20,
+      ac = 3,
       attacks = {
         { type = BITE, base = 2, damage = PHYSICAL },
         { type = CLAW, base = 2, damage = PHYSICAL }
@@ -466,7 +466,7 @@ monsters = {
       color = GREEN,
       exp = 1,
       flags = HEAD + FLY,
-      hp_max = 2,
+      hp_max = 8,
       glyph = "j",
       intelligence = 3,
       level = 2,
@@ -476,15 +476,15 @@ monsters = {
       speed = XFAST,
     },
     [MT_KOBOLD] = {
-      ac = 20,
+      ac = 0,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
       color = BROWN,
       exp = 1,
       flags = HEAD + HANDS + INFRAVISION,
       gold_chance = 10,
       gold = 100,
-      hp_max = 1,
-      glyph = "K",
+      hp_max = 4,
+      glyph = "k",
       intelligence = 7,
       level = 1,
       name = "kobold",
@@ -492,7 +492,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_LAMA_NOBE] = {
-      ac = 7,
+      ac = 3,
       attacks = { { type = BITE, base = 3, damage = PHYSICAL },
                   { type = GAZE, base = 25, damage = BLINDNESS }
       },
@@ -508,7 +508,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_LEPRECHAUN] = {
-      ac = 3,
+      ac = 6,
       attacks = {
         { type = CLAW, base = 2, damage = PHYSICAL },
         { type = TOUCH, damage = STEAL_GOLD }
@@ -526,7 +526,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_METAMORPH] = {
-      ac = 7,
+      ac = 3,
       attacks = { { type = WEAPON, base = 3, damage = PHYSICAL } },
       color = WHITE,
       exp = 40,
@@ -553,7 +553,7 @@ monsters = {
       speed = SLOW,
     },
     [MT_NYMPH] = {
-      ac = 3,
+      ac = 5,
       attacks = { { type = TOUCH, damage = STEAL_ITEM } },
       color = RED,
       exp = 45,
@@ -567,14 +567,14 @@ monsters = {
       speed = NORMAL,
     },
     [MT_ORC] = {
-      ac = 12,
+      ac = 3,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
       color = RED,
       exp = 2,
       flags = HEAD + HANDS + INFRAVISION,
       gold_chance = 50,
       gold = 80,
-      hp_max = 4,
+      hp_max = 12,
       glyph = "O",
       intelligence = 9,
       level = 2,
@@ -583,7 +583,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_OSQUIP] = {
-      ac = 4,
+      ac = 5,
       attacks = { { type = BITE, base = 10, damage = PHYSICAL, rand = 15 } },
       color = BROWN,
       exp = 100,
@@ -597,7 +597,7 @@ monsters = {
       speed = VFAST,
     },
     [MT_PLATINUM_DRAGON] = {
-      ac = -5,
+      ac = 15,
       attacks = {
         { type = BITE, base = 15, damage = PHYSICAL },
         { type = BREATH, base = 15, damage = MAGICAL, rand = 30 }
@@ -609,13 +609,13 @@ monsters = {
       hp_max = 130,
       glyph = "D",
       intelligence = 22,
-      level = 10,
+      level = 11,
       name = "platinum dragon",
       size = HUGE,
       speed = NORMAL,
     },
     [MT_POLTERGEIST] = {
-      ac = 1,
+      ac = 6,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
       color = WHITE,
       exp = 450,
@@ -629,7 +629,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_PURPLE_WORM] = {
-      ac = -1,
+      ac = 12,
       attacks = {
         { type = BITE, base = 11, damage = PHYSICAL },
         { type = STING, base = 6, damage = POISON }
@@ -646,7 +646,7 @@ monsters = {
       speed = VSLOW,
     },
     [MT_QUASIT] = {
-      ac = 5,
+      ac = 6,
       attacks = {
         { type = BITE, base = 3, damage = PHYSICAL },
         { type = CLAW, base = 66, damage = DEC_DEX }
@@ -663,7 +663,7 @@ monsters = {
       speed = FAST,
     },
     [MT_RED_DRAGON] = {
-      ac = -2,
+      ac = 14,
       attacks = {
         { type = BREATH, base = 20, damage = FIRE, rand = 25 },
         { type = CLAW, base = 13, damage = PHYSICAL }
@@ -675,13 +675,13 @@ monsters = {
       hp_max = 110,
       glyph = "D",
       intelligence = 19,
-      level = 10,
+      level = 11,
       name = "red dragon",
       size = HUGE,
       speed = NORMAL,
     },
     [MT_ROTHE] = {
-      ac = 15,
+      ac = 5,
       attacks = {
         { type = BITE, base = 5, damage = PHYSICAL },
         { type = CLAW, base = 3, damage = PHYSICAL }
@@ -698,7 +698,7 @@ monsters = {
       speed = VFAST,
     },
     [MT_RUST_MONSTER] = {
-      ac = 4,
+      ac = 6,
       attacks = {
         { type = BITE, base = 3, damage = PHYSICAL },
         { type = TOUCH, base = 1, damage = RUST }
@@ -715,7 +715,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_SHAMBLINGMOUND] = {
-      ac = 2,
+      ac = 8,
       attacks = { { type = SLAM, base = 5, damage = PHYSICAL } },
       color = GREEN,
       exp = 400,
@@ -729,7 +729,7 @@ monsters = {
       speed = VSLOW,
     },
     [MT_SILVER_DRAGON] = {
-      ac = -1,
+      ac = 13,
       attacks = {
         { type = BITE, base = 12, damage = PHYSICAL },
         { type = CLAW, base = 12, damage = PHYSICAL }
@@ -747,7 +747,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_SNAKE] = {
-      ac = 15,
+      ac = 1,
       attacks = { { type = BITE, base = 1, damage = PHYSICAL },
                   { type = BITE, base = 2, damage = POISON }
       },
@@ -763,7 +763,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_SPIRIT_NAGA] = {
-      ac = -20,
+      ac = 16,
       attacks = {
         { type = BITE, base = 12, damage = PHYSICAL },
         { type = MAGIC, base = 1, damage = RANDOM }
@@ -774,13 +774,13 @@ monsters = {
       hp_max = 95,
       glyph = "N",
       intelligence = 23,
-      level = 10,
+      level = 11,
       name = "spirit naga",
       size = LARGE,
       speed = FAST,
     },
     [MT_STALKER] = {
-      ac = 3,
+      ac = 7,
       attacks = { { type = SLAM, base = 6, damage = PHYSICAL } },
       color = LIGHTGRAY,
       exp = 350,
@@ -794,14 +794,14 @@ monsters = {
       speed = FAST,
     },
     [MT_TROGLODYTE] = {
-      ac = 10,
+      ac = 4,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
       color = BROWN,
       exp = 3,
       flags = HEAD + HANDS,
       gold_chance = 25,
       gold = 320,
-      hp_max = 4,
+      hp_max = 10,
       glyph = "t",
       intelligence = 5,
       level = 2,
@@ -810,7 +810,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_TROLL] = {
-      ac = 4,
+      ac = 8,
       attacks = {
         { type = CLAW, base = 5, damage = PHYSICAL },
         { type = WEAPON, damage = PHYSICAL }
@@ -829,7 +829,7 @@ monsters = {
       speed = SLOW,
     },
     [MT_UMBER_HULK] = {
-      ac = 3,
+      ac = 12,
       attacks = {
         { type = CLAW, base = 7, damage = PHYSICAL },
         { type = GAZE, base = 75, damage = CONFUSION }
@@ -846,7 +846,7 @@ monsters = {
       speed = SLOW,
     },
     [MT_VAMPIRE] = {
-      ac = 3,
+      ac = 7,
       attacks = {
         { type = BITE, base = 75, damage = DRAIN_LIFE },
         { type = WEAPON, damage = PHYSICAL }
@@ -863,7 +863,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_VIOLET_FUNGUS] = {
-      ac = 12,
+      ac = 0,
       attacks = { { type = SLAM, base = 3, damage = PHYSICAL },
                   { type = SLAM, base = 4, damage = POISON }
       },
@@ -880,7 +880,7 @@ monsters = {
       speed = XSLOW,
     },
     [MT_VORTEX] = {
-      ac = 4,
+      ac = 6,
       attacks = { { type = SLAM, base = 3, damage = PHYSICAL } },
       color = CYAN,
       exp = 55,
@@ -895,7 +895,7 @@ monsters = {
       speed = VFAST,
     },
     [MT_WATER_LORD] = {
-      ac = -10,
+      ac = 12,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
       color = LIGHTBLUE,
       exp = 15000,
@@ -909,7 +909,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_WHITE_DRAGON] = {
-      ac = 2,
+      ac = 8,
       attacks = {
         { type = BITE, base = 4, damage = PHYSICAL },
         { type = CLAW, base = 4, damage = PHYSICAL }
@@ -927,7 +927,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_WRAITH] = {
-      ac = 3,
+      ac = 7,
       attacks = { { type = TOUCH, base = 50, damage = DRAIN_LIFE } },
       color = LIGHTGRAY,
       exp = 325,
@@ -941,7 +941,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_XORN] = {
-      ac = 0,
+      ac = 10,
       attacks = { { type = BITE, base = 6, damage = PHYSICAL } },
       color = BROWN,
       exp = 300,
@@ -955,7 +955,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_XVART] = {
-      ac = -2,
+      ac = 11,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
       color = LIGHTGRAY,
       exp = 1000,
@@ -969,7 +969,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_YELLOW_MOLD] = {
-      ac = 12,
+      ac = 0,
       attacks = { { type = TOUCH, base = 4, damage = PHYSICAL } },
       color = YELLOW,
       exp = 250,
@@ -983,7 +983,7 @@ monsters = {
       speed = XSLOW,
     },
     [MT_YETI] = {
-      ac = 6,
+      ac = 4,
       attacks = { { type = CLAW, base = 4, damage = PHYSICAL } },
       color = WHITE,
       exp = 100,
@@ -999,7 +999,7 @@ monsters = {
       speed = NORMAL,
     },
     [MT_ZILLER] = {
-      ac = 2,
+      ac = 8,
       attacks = { { type = CLAW, base = 3, damage = PHYSICAL },
                   { type = CLAW, base = 70, damage = DEC_RND },
       },
@@ -1015,7 +1015,7 @@ monsters = {
       speed = SLOW,
     },
     [MT_ZOMBIE] = {
-      ac = 12,
+      ac = 2,
       attacks = {
         { type = BITE, base = 2, damage = PHYSICAL },
         { type = CLAW, base = 2, damage = PHYSICAL }
@@ -1023,7 +1023,7 @@ monsters = {
       color = LIGHTGRAY,
       exp = 7,
       flags = HEAD + HANDS + UNDEAD + RES_SLEEP + RES_POISON,
-      hp_max = 6,
+      hp_max = 12,
       glyph = "Z",
       intelligence = 3,
       level = 3,
@@ -1032,7 +1032,7 @@ monsters = {
       speed = VSLOW,
     },
     [MT_TOWN_PERSON] = {
-      ac = 10,
+      ac = 0,
       attacks = { { type = SLAM, base = 0, damage = PHYSICAL } },
       color = BROWN,
       exp = 0,

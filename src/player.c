@@ -168,11 +168,11 @@ gboolean player_assign_bonus_stats(player *p, char *preset)
 {
     int selection = 0;
     const char *text = "  a) Strong character\n"
-                        "  b) Agile character\n"
-                        "  c) Tough character\n"
-                        "  d) Smart character\n"
-                        "  e) Randomly pick one of the above\n"
-                        "  f) Stats assigned randomly\n";
+                       "  b) Agile character\n"
+                       "  c) Tough character\n"
+                       "  d) Smart character\n"
+                       "  e) Randomly pick one of the above\n"
+                       "  f) Stats assigned randomly\n";
 
     const char preset_min = 'a';
     const char preset_max = 'f';
@@ -1617,11 +1617,11 @@ int player_move(player *p, direction dir, gboolean open_door)
 static int calc_to_hit(player *p, monster *m)
 {
     const int to_hit = p->level
-                       + player_get_dex(p)
+                       + max(0, player_get_dex(p) - 12)
                        + (p->eq_weapon ? weapon_acc(p->eq_weapon) : 0)
-                       /* FIXME: I don't want those pointless D&D rules */
-                       + monster_ac(m)
-                       - 12;
+                       + (player_get_speed(p) / 25)
+                       - monster_ac(m)
+                       - (monster_speed(m) / 25);
 
     if (to_hit < 1)
         return 0;
@@ -1632,7 +1632,6 @@ static int calc_to_hit(player *p, monster *m)
     /* roll the dice */
     return (5 * to_hit);
 }
-
 
 static int calc_max_damage(player *p, monster *m)
 {
@@ -4891,8 +4890,7 @@ static char *player_death_description(game_score_t *score, int verbose)
 
     case PD_TRAP:
         g_string_append_printf(text, " by %s%s %s.",
-                               score->cause == TT_TRAPDOOR ? "falling through "
-                                                           : "",
+                               score->cause == TT_TRAPDOOR ? "falling through " : "",
                                a_an(trap_description(score->cause)),
                                trap_description(score->cause));
         break;
@@ -4986,11 +4984,12 @@ void calc_fighting_stats(player *p)
                            "------------\n"
                            "  wielded weapon : %s\n"
                            "  weapon class   : %d\n"
-						   "  accuracy       : %d\n"
+                           "  accuracy       : %d\n"
                            "  experience     : %d\n"
                            "  strength       : %d\n"
                            "  dexterity      : %d\n"
                            "  damage modifier: %d\n"
+                           "  speed          : %d\n"
                            "  difficulty     : %d\n\n",
                            (p->eq_weapon ? desc : "none"),
                            (p->eq_weapon ? weapon_wc(p->eq_weapon) : 0),
@@ -4999,6 +4998,7 @@ void calc_fighting_stats(player *p)
                            player_get_str(p),
                            player_get_dex(p),
                            damage_modifier,
+                           player_get_speed(p),
                            game_difficulty(nlarn));
 
     g_string_append_printf(text, "Monsters\n"
@@ -5021,12 +5021,13 @@ void calc_fighting_stats(player *p)
 
         const int instakill_chance = player_instakill_chance(p, m);
 
-        g_string_append_printf(text, "%s (ac: %d, max hp: %d)\n"
+        g_string_append_printf(text, "%s (ac: %d, max hp: %d, speed: %d)\n"
                                "     to-hit chance: %d%%\n"
                                "  instakill chance: %d%%\n",
                                monster_name(m),
                                monster_ac(m),
                                monster_type_hp_max(monster_type(m)),
+                               monster_speed(m),
                                to_hit, instakill_chance);
 
         if (instakill_chance < 100)
