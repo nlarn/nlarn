@@ -11,7 +11,7 @@ if [ "$OS" = "Windows_NT" ]
 then
 	OS=win32
 	SUFFIX="zip"
-	EXE="nlarn.exe pdcurses.dll libglib-2.0-0.dll libz-1.dll"
+	EXE="nlarn.exe pdcurses.dll libglib-2.0-0.dll libz-1.dll lua51.dll"
 	export CC=gcc
 else
 	OS=$(uname -s)
