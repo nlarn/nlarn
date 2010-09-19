@@ -22,6 +22,7 @@
 typedef struct weapon_data {
 	int	id;
 	char *name;
+	char *short_name;
 	int wp_class;		/* weapon class */
 	int accuracy;		/* weapon accuracy */
 	int	material;		/* material type from item_materials */
@@ -69,6 +70,7 @@ extern const weapon_data weapons[WT_MAX];
 #define weapon_type_obtainable(id) (weapons[id].obtainable)
 
 #define weapon_name(weapon)          (weapons[(weapon)->id].name)
+#define weapon_short_name(weapon)    (weapons[(weapon)->id].short_name)
 #define weapon_base_wc(weapon)       (weapons[(weapon)->id].wp_class)
 #define weapon_wc(weapon)            (weapon_base_wc(weapon) + (weapon)->bonus)
 #define weapon_base_acc(weapon)      (weapons[(weapon)->id].accuracy)
