@@ -205,12 +205,12 @@ void game_init(int argc, char *argv[])
 
     if (!game_load(savefile))
     {
-        /* restoring a save game failed - start a new game. */
-        game_new();
-
         /* set game parameters */
         game_difficulty(nlarn) = difficulty;
         game_wizardmode(nlarn) = wizard;
+
+        /* restoring a save game failed - start a new game. */
+        game_new();
 
         /* put the player into the town */
         player_map_enter(nlarn->p, game_map(nlarn, 0), FALSE);
