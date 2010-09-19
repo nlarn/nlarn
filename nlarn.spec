@@ -1,5 +1,5 @@
 Name: nlarn
-Version: 0.6
+Version: 0.6.1
 Release: 1
 Summary: A remake of the roguelike game Larn
 
@@ -8,7 +8,7 @@ License: GPL v3
 URL: http://nlarn.sourceforge.net
 Source: http://downloads.sourceforge.net/project/nlarn/nlarn/%{version}/nlarn-%{version}.tar.gz
 
-BuildRequires: glib2-devel ncurses-devel zlib-devel
+BuildRequires: glib2-devel lua-devel ncurses-devel zlib-devel 
 
 %description
 
@@ -37,6 +37,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc LICENSE README.txt Changelog.txt nlarn.ini-sample
 
 %changelog
+* Sun Sep 19 2010 Joachim de Groot <jdegroot@web.de>
+  - updated for version 0.6.1
+  - added missing dependency for lua
 * Sun Apr 25 2010 Joachim de Groot <jdegroot@web.de> 
   - updated for version 0.6
 * Sat Apr 03 2010 Joachim de Groot <jdegroot@web.de> 
