@@ -2085,7 +2085,7 @@ static int map_path_cost(map *l, map_path_element* element, position target,
 
     /* penalize fields occupied by monsters: always for monsters,
        for the player only if (s)he can see the monster */
-    if ((player && m != NULL && monster_in_sight(m)) || (m != NULL))
+    if (m != NULL && (!player || monster_in_sight(m)))
     {
         element->h_score += 10;
     }
