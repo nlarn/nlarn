@@ -1560,6 +1560,11 @@ gboolean spell_phantasmal_forces(spell *s, struct player *p)
     mpos = display_get_position(p, "Choose a target for phantasmal forces.",
                                 FALSE, FALSE, 0, TRUE, TRUE);
 
+    if (!pos_valid(mpos))
+	{
+        return FALSE;
+    }
+
     m = map_get_monster_at(game_map(nlarn, mpos.z), mpos);
 
     if (m == NULL)
