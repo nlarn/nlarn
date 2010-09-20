@@ -614,6 +614,9 @@ int spell_cast(player *p)
         break;
     }
 
+	if (!well_done)
+		return 0;
+		
     if (well_done)
     {
         /* spell has been cast successfully, set mp usage accordingly */
