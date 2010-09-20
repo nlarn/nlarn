@@ -350,7 +350,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
             if (str[pos + len] == '\0' || isspace(str[pos + len]))
             {
                 lp = len;
-                if (str[pos + lp] == '\n')
+                if (str[pos + len] == '\0' || str[pos + lp] == '\n')
                 {
                     break;
                 }
