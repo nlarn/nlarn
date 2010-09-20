@@ -443,8 +443,10 @@ int display_paint_screen(player *p)
 		
 		const gboolean need_bonus
 			= (p->eq_weapon->burnt || p->eq_weapon->corroded 
-                 || p->eq_weapon->rusty || p->eq_weapon->blessed 
-				 || p->eq_weapon->cursed);
+                 || p->eq_weapon->rusty
+				 || (p->eq_weapon->blessed_known 
+				        && (p->eq_weapon->blessed 
+								|| p->eq_weapon->cursed)));
 		
         g_string_append_printf(desc, "%s", 
 							   need_bonus ? weapon_short_name(p->eq_weapon)
@@ -495,17 +497,20 @@ int display_paint_screen(player *p)
 									   need_comma ? ", " : "");
 				need_comma = TRUE;
 			}
-				
-			if (p->eq_weapon->blessed)
+			
+			if (p->eq_weapon->blessed_known)
 			{
-				g_string_append_printf(bonus, "%sblessed", 
-									   need_comma ? ", " : "");
-			}
-			else if (p->eq_weapon->cursed)
-			{
-				g_string_append_printf(bonus, "%scursed", 
-									   need_comma ? ", " : "");
-			}
+				if (p->eq_weapon->blessed)
+				{
+					g_string_append_printf(bonus, "%sblessed", 
+										   need_comma ? ", " : "");
+			    }
+                else if (p->eq_weapon->cursed)
+                {
+				    g_string_append_printf(bonus, "%scursed", 
+					                       need_comma ? ", " : "");
+				}
+            }
 
 			char info[61];
 			g_strlcpy(info, bonus->str, 60);			
