@@ -40,9 +40,9 @@ static int map_validate(map *maze);
 
 static map_path *map_path_new(position start, position goal);
 static map_path_element *map_path_element_new(position pos);
-static int map_path_cost(map *l, map_path_element* element,
-                         position target, map_element_t map_elem,
-                         gboolean player);
+static int map_step_cost(map *l, map_path_element* element,
+                         map_element_t map_elem, gboolean player);
+static int map_path_cost(map_path_element* element, position target);
 static map_path_element *map_path_element_in_list(map_path_element* el,
                                                   GPtrArray *list);
 static map_path_element *map_path_find_best(map *l, map_path *path,
@@ -681,6 +681,7 @@ map_path *map_find_path(map *l, position start, position goal,
 
     /* add start to open list */
     curr = map_path_element_new(start);
+	curr->g_score = 0; /* no distance yet */
     g_ptr_array_add(path->open, curr);
 
     /* check if the path is being determined for the player */
@@ -726,16 +727,19 @@ map_path *map_find_path(map *l, position start, position goal,
                 continue;
             }
 
+			const guint32 next_g_score = 
+					curr->g_score 
+					+ map_step_cost(l, next, element, player);
+					
             if (!map_path_element_in_list(next, path->open))
             {
                 g_ptr_array_add(path->open, next);
                 next_is_better = TRUE;
             }
-            else if (map_path_cost(l, curr, path->goal, element, player)
-                        > map_path_cost(l, next, path->goal, element, player))
-            {
-                next_is_better = TRUE;
-            }
+			else if (next->g_score > next_g_score)
+			{
+				next_is_better = TRUE;
+			}
             else
             {
                 g_free(next);
@@ -743,7 +747,8 @@ map_path *map_find_path(map *l, position start, position goal,
 
             if (next_is_better)
             {
-                next->parent = curr;
+                next->parent  = curr;
+				next->g_score = next_g_score;
             }
         }
 
@@ -2061,11 +2066,12 @@ static map_path_element *map_path_element_new(position pos)
     return lpe;
 }
 
-/* Returns cost from position defined by element to goal.*/
-static int map_path_cost(map *l, map_path_element* element, position target,
+/* calculate the cost of stepping into this new field */
+static int map_step_cost(map *l, map_path_element* element,
                          map_element_t map_elem, gboolean player)
 {
     map_tile_t tt;
+	guint32 step_cost = 1; /* at least 1 movement cost */
 
     /* get the monster located on the map tile */
     monster *m = map_get_monster_at(l, element->pos);
@@ -2080,25 +2086,22 @@ static int map_path_cost(map *l, map_path_element* element, position target,
         tt = map_tiletype_at(l, element->pos);
     }
 
-    /* estimate the distance from the current position to the target */
-    element->h_score = pos_distance(element->pos, target);
-
 	/* penalize for traps known to the player */
     if (player && player_memory_of(nlarn->p, element->pos).trap)
     {
 		const trap_t trap = map_trap_at(l, element->pos);
 		/* especially ones that may cause detours */
 		if (trap == TT_TELEPORT || trap == TT_TRAPDOOR)
-			element->h_score += 50;
+			step_cost += 50;
 		else
-			element->h_score += 10;
+			step_cost += 10;
 	}
 	
     /* penalize fields occupied by monsters: always for monsters,
        for the player only if (s)he can see the monster */
     if (m != NULL && (!player || monster_in_sight(m)))
     {
-        element->h_score += 10;
+        step_cost += 10;
     }
 
     /* penalize fields covered with water, fire or cloud */
@@ -2110,11 +2113,21 @@ static int map_path_cost(map *l, map_path_element* element, position target,
         /* else fall through */
     case LT_FIRE:
     case LT_CLOUD:
-        element->h_score += 50;
+        step_cost += 50;
         break;
     default:
         break;
     }
+	
+	return step_cost;
+}
+
+/* Returns the total estimated cost of the best path going 
+   through this new field */
+static int map_path_cost(map_path_element* element, position target)
+{
+    /* estimate the distance from the current position to the target */
+    element->h_score = pos_distance(element->pos, target);
 
     return element->g_score + element->h_score;
 }
@@ -2148,8 +2161,8 @@ static map_path_element *map_path_find_best(map *l, map_path *path,
     {
         el = g_ptr_array_index(path->open, idx);
 
-        if (best == NULL || map_path_cost(l, el, path->goal, map_elem, player)
-                                < map_path_cost(l, best, path->goal, map_elem, player))
+        if (best == NULL || map_path_cost(el, path->goal)
+                                < map_path_cost(best, path->goal))
         {
             best = el;
         }
