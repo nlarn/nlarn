@@ -2080,9 +2080,20 @@ static int map_path_cost(map *l, map_path_element* element, position target,
         tt = map_tiletype_at(l, element->pos);
     }
 
-    /* determine the distance from the current position to the target */
+    /* estimate the distance from the current position to the target */
     element->h_score = pos_distance(element->pos, target);
 
+	/* penalize for traps known to the player */
+    if (player && player_memory_of(nlarn->p, element->pos).trap)
+    {
+		const trap_t trap = map_trap_at(l, element->pos);
+		/* especially ones that may cause detours */
+		if (trap == TT_TELEPORT || trap == TT_TRAPDOOR)
+			element->h_score += 50;
+		else
+			element->h_score += 10;
+	}
+	
     /* penalize fields occupied by monsters: always for monsters,
        for the player only if (s)he can see the monster */
     if (m != NULL && (!player || monster_in_sight(m)))
