@@ -228,7 +228,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_HOLD_MONSTER, 30, TRUE, NULL,
+        ET_HOLD_MONSTER, 30, TRUE, "held",
         NULL, NULL,
         "The %s seems to freeze.",
         "The %s can move again.",
@@ -236,7 +236,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_SCARED, 250, TRUE, NULL,
+        ET_SCARED, 250, TRUE, "scared",
         NULL, NULL,
         "The %s is very afraid.",
         "The %s is no longer scared.",
@@ -244,7 +244,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_CHARM_MONSTER, 250, TRUE, NULL,
+        ET_CHARM_MONSTER, 250, TRUE, "charmed",
         NULL, NULL,
         "The %s is awestruck at your magnificence!",
         "The %s is no longer impressed.",
