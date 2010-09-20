@@ -1244,11 +1244,16 @@ int monster_items_pickup(monster *m)
         else if (it->type == IT_WEAPON && monster_attack_available(m, ATT_WEAPON))
         {
             /* monster can attack with weapons */
-            item *mweapon = game_item_get(nlarn, m->weapon);
+			if (m->weapon == NULL)
+				pick_up = TRUE;
+			else
+			{
+				item *mweapon = game_item_get(nlarn, m->weapon);
 
-            /* compare this weapon with the weapon the monster wields */
-            if (mweapon == NULL || (weapon_wc(mweapon) < weapon_wc(it)))
-                pick_up = TRUE;
+				/* compare this weapon with the weapon the monster wields */
+				if (mweapon == NULL || (weapon_wc(mweapon) < weapon_wc(it)))
+					pick_up = TRUE;
+			}
         }
 
         if (pick_up)
