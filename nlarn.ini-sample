@@ -31,3 +31,7 @@ stats=f
 # ? scrolls
 # ( weapons
 auto-pickup=$*+
+
+# Disable automatic saving when switching a level. Saving the game is
+# enabled by default, disable when it's too slow on your computer
+# no-autosave=true

@@ -84,7 +84,8 @@ typedef struct game
     guint32
         player_stats_set: 1, /* the player's stats have been assigned */
         cure_dianthr_created: 1, /* the potion of cure dianthroritis is a unique item */
-        wizard: 1; /* wizard mode */
+        wizard: 1, /* wizard mode */
+        autosave: 1; /* save the game when entering a new map */
 } game;
 
 typedef struct _game_score
@@ -163,6 +164,7 @@ void game_delete_savefile();
 
 #define game_difficulty(g) ((g)->difficulty)
 #define game_wizardmode(g) ((g)->wizard)
+#define game_autosave(g)   ((g)->autosave)
 
 #define game_turn(g)            ((g)->gtime)
 #define game_remaining_turns(g) (TIMELIMIT - (g)->gtime)

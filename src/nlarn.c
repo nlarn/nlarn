@@ -118,7 +118,10 @@ int main(int argc, char *argv[])
     }
 
     /* automatic save point */
-    game_save(nlarn, NULL);
+    if (game_autosave(nlarn))
+    {
+        game_save(nlarn, NULL);
+    }
 
     char run_cmd = 0;
     int ch;

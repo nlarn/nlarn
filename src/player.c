@@ -1877,8 +1877,10 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     player_autopickup(p);
 
     /* automatic save point */
-    if (game_turn(nlarn) > 1)
+    if (game_autosave(nlarn) && (game_turn(nlarn) > 1))
+    {
         game_save(nlarn, NULL);
+    }
 
     return TRUE;
 }

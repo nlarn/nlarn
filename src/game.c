@@ -75,6 +75,7 @@ void game_init(int argc, char *argv[])
     /* these will be filled by the command line parser */
     static gint difficulty = 0;
     static gboolean wizard = FALSE;
+    static gboolean no_autosave = FALSE;
     static char *name = NULL;
     static char *gender = NULL;
     static char *auto_pickup = NULL;
@@ -152,6 +153,9 @@ void game_init(int argc, char *argv[])
         wizard = g_key_file_get_boolean(ini_file, "nlarn", "wizard", &error);
         g_clear_error(&error);
 
+        no_autosave = g_key_file_get_boolean(ini_file, "nlarn", "no-autosave", &error);
+        g_clear_error(&error);
+
         name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
         g_clear_error(&error);
 
@@ -176,12 +180,13 @@ void game_init(int argc, char *argv[])
     /* parse the command line */
     static GOptionEntry entries[] =
     {
-        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,  "Set difficulty",       NULL },
-        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &wizard,      "Enable wizard mode",   NULL },
         { "name",        'n', 0, G_OPTION_ARG_STRING, &name,        "Set character's name", NULL },
         { "gender",      'g', 0, G_OPTION_ARG_STRING, &gender,      "Set character's gender (m/f)", NULL },
         { "stats",       's', 0, G_OPTION_ARG_STRING, &stats,       "Set character's stats (a-f)", NULL },
         { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &auto_pickup, "Item types to pick up automatically, e.g. '$*+'", NULL },
+        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,  "Set difficulty",       NULL },
+        { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &no_autosave, "Disable autosave",   NULL },
+        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &wizard,      "Enable wizard mode",   NULL },
 #ifdef DEBUG
         { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &savefile,  "Save file to restore", NULL },
 #endif
@@ -202,6 +207,9 @@ void game_init(int argc, char *argv[])
     /* initialise the display - must not happen before this point
        otherwise displaying the command line help fails */
     display_init();
+
+    /* set autosave setting (default: TRUE) */
+    game_autosave(nlarn) = !no_autosave;
 
     if (!game_load(savefile))
     {
