@@ -616,7 +616,7 @@ int spell_cast(player *p)
 
 	if (!well_done)
 		return 0;
-		
+
     if (well_done)
     {
         /* spell has been cast successfully, set mp usage accordingly */
@@ -1187,7 +1187,7 @@ int spell_type_ray(spell *s, struct player *p)
         return FALSE;
     }
 
-    if (pos_identical(pos, p->pos))
+    if (pos_identical(target, p->pos))
     {
         log_add_entry(nlarn->log, "Why would you want to do that?");
         return FALSE;

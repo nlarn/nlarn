@@ -427,118 +427,118 @@ int display_paint_screen(player *p)
     move(6, MAP_MAX_X + 1);
     clrtoeol();
 
-	/* wielded weapon */
-	if (p->eq_weapon)
-	{
-		char wpn[61];
+    /* wielded weapon */
+    if (p->eq_weapon)
+    {
+        char wpn[61];
         const int available_space = display_cols - MAP_MAX_X - 4;
 
-		GString *desc = g_string_new(NULL);
-		
-		if (p->eq_weapon->bonus_known)
-		{
-			g_string_append_printf(desc, "%c%d ", p->eq_weapon->bonus >= 0 ? '+' : '-',
-			                                      p->eq_weapon->bonus);
-		}
-		
-		const gboolean need_bonus
-			= (p->eq_weapon->burnt || p->eq_weapon->corroded 
-                 || p->eq_weapon->rusty
-				 || (p->eq_weapon->blessed_known 
-				        && (p->eq_weapon->blessed 
-								|| p->eq_weapon->cursed)));
-		
-        g_string_append_printf(desc, "%s", 
-							   need_bonus ? weapon_short_name(p->eq_weapon)
-										  : weapon_name(p->eq_weapon));
-		g_strlcpy(wpn, desc->str, 60);
+        GString *desc = g_string_new(NULL);
 
-		// Add corrosion/curse status in brackets.
-   	    // Alternatively, convey that information with colours.
+        if (p->eq_weapon->bonus_known)
+        {
+            g_string_append_printf(desc, "%c%d ", p->eq_weapon->bonus >= 0 ? '+' : '-',
+                                   p->eq_weapon->bonus);
+        }
+
+        const gboolean need_bonus
+        = (p->eq_weapon->burnt || p->eq_weapon->corroded
+           || p->eq_weapon->rusty
+           || (p->eq_weapon->blessed_known
+               && (p->eq_weapon->blessed
+                   || p->eq_weapon->cursed)));
+
+        g_string_append_printf(desc, "%s",
+                               need_bonus ? weapon_short_name(p->eq_weapon)
+                               : weapon_name(p->eq_weapon));
+        g_strlcpy(wpn, desc->str, 60);
+
+        // Add corrosion/curse status in brackets.
+        // Alternatively, convey that information with colours.
         if (need_bonus && strlen(wpn) < available_space - 4)
-		{
-			GString *bonus = g_string_new(NULL);
-			
-			gboolean need_comma = FALSE;
-			if (p->eq_weapon->burnt == 2)
-			{
-				g_string_append_printf(bonus, "v. burnt, ");
-				need_comma = TRUE;
-			}
-				
-			if (p->eq_weapon->corroded == 2)
-			{
-				g_string_append_printf(bonus, "%sv. corroded", 
-									   need_comma ? ", " : "");
-				need_comma = TRUE;
-			}
-			if (p->eq_weapon->rusty == 2)
-			{
-				g_string_append_printf(bonus, "%sv. rusty", 
-									   need_comma ? ", " : "");
-				need_comma = TRUE;
-			}
-				
-			if (p->eq_weapon->burnt == 1)
-			{
-				g_string_append_printf(bonus, "%sburnt", 
-									   need_comma ? ", " : "");
-				need_comma = TRUE;
-			}
-			if (p->eq_weapon->corroded == 1)
-			{
-				g_string_append_printf(bonus, "%scorroded", 
-									   need_comma ? ", " : "");
-				need_comma = TRUE;
-			}
-			if (p->eq_weapon->rusty == 1)
-			{
-				g_string_append_printf(bonus, "%srusty", 
-									   need_comma ? ", " : "");
-				need_comma = TRUE;
-			}
-			
-			if (p->eq_weapon->blessed_known)
-			{
-				if (p->eq_weapon->blessed)
-				{
-					g_string_append_printf(bonus, "%sblessed", 
-										   need_comma ? ", " : "");
-			    }
-                else if (p->eq_weapon->cursed)
-                {
-				    g_string_append_printf(bonus, "%scursed", 
-					                       need_comma ? ", " : "");
-				}
+        {
+            GString *bonus = g_string_new(NULL);
+
+            gboolean need_comma = FALSE;
+            if (p->eq_weapon->burnt == 2)
+            {
+                g_string_append_printf(bonus, "v. burnt, ");
+                need_comma = TRUE;
             }
 
-			char info[61];
-			g_strlcpy(info, bonus->str, 60);			
-	        g_string_append_printf(desc, " (%s)", info);
-			
-			g_string_free(bonus, TRUE);
-   	    }
-		g_strlcpy(wpn, desc->str, 60);
-		
+            if (p->eq_weapon->corroded == 2)
+            {
+                g_string_append_printf(bonus, "%sv. corroded",
+                                       need_comma ? ", " : "");
+                need_comma = TRUE;
+            }
+            if (p->eq_weapon->rusty == 2)
+            {
+                g_string_append_printf(bonus, "%sv. rusty",
+                                       need_comma ? ", " : "");
+                need_comma = TRUE;
+            }
+
+            if (p->eq_weapon->burnt == 1)
+            {
+                g_string_append_printf(bonus, "%sburnt",
+                                       need_comma ? ", " : "");
+                need_comma = TRUE;
+            }
+            if (p->eq_weapon->corroded == 1)
+            {
+                g_string_append_printf(bonus, "%scorroded",
+                                       need_comma ? ", " : "");
+                need_comma = TRUE;
+            }
+            if (p->eq_weapon->rusty == 1)
+            {
+                g_string_append_printf(bonus, "%srusty",
+                                       need_comma ? ", " : "");
+                need_comma = TRUE;
+            }
+
+            if (p->eq_weapon->blessed_known)
+            {
+                if (p->eq_weapon->blessed)
+                {
+                    g_string_append_printf(bonus, "%sblessed",
+                                           need_comma ? ", " : "");
+                }
+                else if (p->eq_weapon->cursed)
+                {
+                    g_string_append_printf(bonus, "%scursed",
+                                           need_comma ? ", " : "");
+                }
+            }
+
+            char info[61];
+            g_strlcpy(info, bonus->str, 60);
+            g_string_append_printf(desc, " (%s)", info);
+
+            g_string_free(bonus, TRUE);
+        }
+        g_strlcpy(wpn, desc->str, 60);
+
         if (strlen(wpn) > available_space)
         {
-			if (wpn[available_space - 1] != ' ')
-				wpn[available_space - 1] = '.';
+            if (wpn[available_space - 1] != ' ')
+                wpn[available_space - 1] = '.';
             wpn[available_space] = '\0';
         }
 
-		/* free the temporary string */
-		g_string_free(desc, TRUE);
-		mvprintw(7, MAP_MAX_X + 3, "%s", wpn);
-	}
-	else
-	{
-		attron(DC_WHITE);
-		mvprintw(7, MAP_MAX_X + 3, "Unarmed");
-		attroff(DC_WHITE);
-	}
+        /* free the temporary string */
+        g_string_free(desc, TRUE);
+        mvprintw(7, MAP_MAX_X + 3, "%s", wpn);
+    }
+    else
+    {
+        attron(DC_WHITE);
+        mvprintw(7, MAP_MAX_X + 3, "Unarmed");
+        attroff(DC_WHITE);
+    }
     clrtoeol();
-	
+
     /* armour class */
     mvprintw(8, MAP_MAX_X + 3, "AC: %2d", player_get_ac(p));
     clrtoeol();
@@ -557,7 +557,7 @@ int display_paint_screen(player *p)
         move(11 + i, MAP_MAX_X + 3);
         clrtoeol();
     }
-	
+
     /* display effect descriptions */
     if (p->effects->len > 0)
     {
@@ -2268,6 +2268,10 @@ position display_get_new_position(player *p, position start,
         /* redraw screen to erase previous modifications */
         display_paint_screen(p);
 
+        /* reset npos to an invalid position */
+        npos.x = G_MAXINT16;
+        npos.y = G_MAXINT16;
+
         if (ray && (a != NULL))
         {
             /* draw a line between source and target if told to */
@@ -2434,7 +2438,7 @@ position display_get_new_position(player *p, position start,
         case KEY_C1:
             dir = GD_SW;
             break;
-            
+
         default:
             /* if travelling, use sobject glyphs as shortcuts */
             if (travel)
@@ -2464,9 +2468,9 @@ position display_get_new_position(player *p, position start,
                         }
                         if (pos_identical(start, pos))
                             break;
-                        
+
                         if (player_memory_of(nlarn->p, pos).sobject != LS_NONE
-                            && ls_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch)
+                                && ls_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch)
                         {
                             break;
                         }
@@ -2516,17 +2520,13 @@ position display_get_new_position(player *p, position start,
             pos = npos;
         }
 
-        /* make npos invalid */
-        npos.x = G_MAXINT16;
-        npos.y = G_MAXINT16;
-
         /* if any position has been requested check if it is passable anyway,
            otherwise the player could be teleported / request a path to an
            invalid position. In wizard mode all positions are allowed,
            otherwise only known positions are allowed. */
         if (RUN == FALSE && !visible && pos_valid(pos)
-            && (!map_pos_passable(game_map(nlarn, pos.z), pos)
-            || !(game_wizardmode(nlarn) || player_memory_of(nlarn->p, pos).type > LT_NONE)))
+                && (!map_pos_passable(game_map(nlarn, pos.z), pos)
+                    || !(game_wizardmode(nlarn) || player_memory_of(nlarn->p, pos).type > LT_NONE)))
         {
             if (!beep()) flash();
             RUN = TRUE;
@@ -2960,28 +2960,28 @@ static char *detailed_item_description(item *it, gboolean known)
         if (weapon_is_twohanded(it))
             g_string_append_printf(desc, "Two-handed weapon\n");
 
-		if (it->bonus_known)
-		{
-			g_string_append_printf(desc, "Damage: +%d\n"
-										 "Accuracy: +%d\n",
-								   weapon_wc(it), weapon_acc(it));
-		}
-		else
-		{
-			g_string_append_printf(desc, "Base damage: +%d\n"
-										 "Base accuracy: +%d\n",
-								   weapon_base_wc(it), weapon_base_acc(it));
-		}
+        if (it->bonus_known)
+        {
+            g_string_append_printf(desc, "Damage: +%d\n"
+                                   "Accuracy: +%d\n",
+                                   weapon_wc(it), weapon_acc(it));
+        }
+        else
+        {
+            g_string_append_printf(desc, "Base damage: +%d\n"
+                                   "Base accuracy: +%d\n",
+                                   weapon_base_wc(it), weapon_base_acc(it));
+        }
         break;
     case IT_ARMOUR:
-		if (it->bonus_known)
-		{
-			g_string_append_printf(desc, "Armour class: %d\n", armour_ac(it));
-		}
-		else
-		{
-			g_string_append_printf(desc, "Base AC: %d\n", armour_base_ac(it));
-		}
+        if (it->bonus_known)
+        {
+            g_string_append_printf(desc, "Armour class: %d\n", armour_ac(it));
+        }
+        else
+        {
+            g_string_append_printf(desc, "Base AC: %d\n", armour_base_ac(it));
+        }
         break;
     default:
         break;
