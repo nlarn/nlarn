@@ -681,7 +681,7 @@ map_path *map_find_path(map *l, position start, position goal,
 
     /* add start to open list */
     curr = map_path_element_new(start);
-	curr->g_score = 0; /* no distance yet */
+    curr->g_score = 0; /* no distance yet */
     g_ptr_array_add(path->open, curr);
 
     /* check if the path is being determined for the player */
@@ -727,19 +727,19 @@ map_path *map_find_path(map *l, position start, position goal,
                 continue;
             }
 
-			const guint32 next_g_score = 
-					curr->g_score 
-					+ map_step_cost(l, next, element, player);
-					
+            const guint32 next_g_score =
+                curr->g_score
+                + map_step_cost(l, next, element, player);
+
             if (!map_path_element_in_list(next, path->open))
             {
                 g_ptr_array_add(path->open, next);
                 next_is_better = TRUE;
             }
-			else if (next->g_score > next_g_score)
-			{
-				next_is_better = TRUE;
-			}
+            else if (next->g_score > next_g_score)
+            {
+                next_is_better = TRUE;
+            }
             else
             {
                 g_free(next);
@@ -748,12 +748,15 @@ map_path *map_find_path(map *l, position start, position goal,
             if (next_is_better)
             {
                 next->parent  = curr;
-				next->g_score = next_g_score;
+                next->g_score = next_g_score;
             }
         }
 
         g_ptr_array_free(neighbours, TRUE);
     }
+
+    /* could not find a path */
+    map_path_destroy(path);
 
     return NULL;
 }
@@ -1112,18 +1115,18 @@ gboolean map_is_exit_at(map *m, position pos)
 
     switch (map_sobject_at(m, pos))
     {
-        case LS_DNGN_ENTRANCE:
-        case LS_DNGN_EXIT:
-        case LS_ELEVATORDOWN:
-        case LS_ELEVATORUP:
-        case LS_STAIRSUP:
-        case LS_STAIRSDOWN:
-            return TRUE;
-            break;
+    case LS_DNGN_ENTRANCE:
+    case LS_DNGN_EXIT:
+    case LS_ELEVATORDOWN:
+    case LS_ELEVATORUP:
+    case LS_STAIRSUP:
+    case LS_STAIRSDOWN:
+        return TRUE;
+        break;
 
-        default:
-            return FALSE;
-            break;
+    default:
+        return FALSE;
+        break;
     }
 }
 
@@ -1402,8 +1405,8 @@ generate:
         }
 
     /* Maybe add a river or lake. */
-    const int rivertype = (is_volcano_map(maze->nlevel) ? LT_LAVA
-                                                        : LT_DEEPWATER);
+    const int rivertype = (is_volcano_map(maze->nlevel) ? LT_LAVA : LT_DEEPWATER);
+
     if (maze->nlevel > 1
             && (is_volcano_map(maze->nlevel) ? chance(90) : chance(40)))
     {
@@ -2071,7 +2074,7 @@ static int map_step_cost(map *l, map_path_element* element,
                          map_element_t map_elem, gboolean player)
 {
     map_tile_t tt;
-	guint32 step_cost = 1; /* at least 1 movement cost */
+    guint32 step_cost = 1; /* at least 1 movement cost */
 
     /* get the monster located on the map tile */
     monster *m = map_get_monster_at(l, element->pos);
@@ -2086,17 +2089,17 @@ static int map_step_cost(map *l, map_path_element* element,
         tt = map_tiletype_at(l, element->pos);
     }
 
-	/* penalize for traps known to the player */
+    /* penalize for traps known to the player */
     if (player && player_memory_of(nlarn->p, element->pos).trap)
     {
-		const trap_t trap = map_trap_at(l, element->pos);
-		/* especially ones that may cause detours */
-		if (trap == TT_TELEPORT || trap == TT_TRAPDOOR)
-			step_cost += 50;
-		else
-			step_cost += 10;
-	}
-	
+        const trap_t trap = map_trap_at(l, element->pos);
+        /* especially ones that may cause detours */
+        if (trap == TT_TELEPORT || trap == TT_TRAPDOOR)
+            step_cost += 50;
+        else
+            step_cost += 10;
+    }
+
     /* penalize fields occupied by monsters: always for monsters,
        for the player only if (s)he can see the monster */
     if (m != NULL && (!player || monster_in_sight(m)))
@@ -2118,11 +2121,11 @@ static int map_step_cost(map *l, map_path_element* element,
     default:
         break;
     }
-	
-	return step_cost;
+
+    return step_cost;
 }
 
-/* Returns the total estimated cost of the best path going 
+/* Returns the total estimated cost of the best path going
    through this new field */
 static int map_path_cost(map_path_element* element, position target)
 {
@@ -2162,7 +2165,7 @@ static map_path_element *map_path_find_best(map *l, map_path *path,
         el = g_ptr_array_index(path->open, idx);
 
         if (best == NULL || map_path_cost(el, path->goal)
-                                < map_path_cost(best, path->goal))
+                < map_path_cost(best, path->goal))
         {
             best = el;
         }
@@ -2193,7 +2196,7 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos,
             continue;
 
         if ((player && lt_is_passable(player_memory_of(nlarn->p, npos).type))
-            || (!player && valid_monster_movement_pos(l, npos, element)))
+                || (!player && valid_monster_movement_pos(l, npos, element)))
         {
             pe = map_path_element_new(npos);
             g_ptr_array_add(neighbours, pe);
