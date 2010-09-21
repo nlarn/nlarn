@@ -4003,6 +4003,7 @@ void player_item_pickup(player *p, inventory **inv, item *it)
     char desc[61];
     guint count = 0;
     gpointer oid = it->oid;
+    guint gold_amount = 0;
 
     if ((!called_by_autopickup) && (it->count > 1))
     {
@@ -4026,6 +4027,12 @@ void player_item_pickup(player *p, inventory **inv, item *it)
     item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
     log_add_entry(nlarn->log, "You pick up %s.", desc);
 
+    if (it->type == IT_GOLD)
+    {
+        /* record the amound of gold as the item might be destroyed */
+        gold_amount = it->count;
+    }
+
     /* one turn to pick item up, one to stuff it into the pack */
     if (!player_make_move(p, 2, TRUE, "picking up %s", desc)
             || !inv_add(&p->inventory, it))
@@ -4037,8 +4044,12 @@ void player_item_pickup(player *p, inventory **inv, item *it)
         return;
     }
 
-    if (it->type == IT_GOLD)
-        p->stats.gold_found += it->count;
+    if (gold_amount > 0)
+    {
+        /* if the player has tried to pick up gold and succeeded in doing so,
+           add the amount picked up to the statistics */
+        p->stats.gold_found += gold_amount;
+    }
 
     /* remove the item from the originating inventory if it has not been split */
     if (oid != NULL)
