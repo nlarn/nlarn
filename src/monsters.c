@@ -1891,8 +1891,10 @@ char *monster_desc(monster *m)
     }
     g_string_append_printf(desc, "%s %s %s%s, %s", a_an(injury),
                            injury, monster_get_name(m),
-                           g_string_free(hp_string, FALSE),
+                           hp_string->str,
                            monster_ai_desc[m->action]);
+
+    g_string_free(hp_string, TRUE);
 
     /* add effect description */
     if (m->effects->len > 0)
