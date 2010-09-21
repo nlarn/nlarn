@@ -876,15 +876,16 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
             /* handle itching */
             if ((e = player_effect_get(p, ET_ITCHING)))
             {
-                item **it;
+                item **aslot;
 
-                if (chance(50) && (it = player_get_random_armour(p, FALSE)))
+                /* when the player is subject to itching, there is a chance
+                   that (s)he takes off a piece of armour */
+                if (chance(50) && (aslot = player_get_random_armour(p, FALSE)))
                 {
-                    /* take off armour */
-                    it = NULL;
-
-                    log_add_entry(nlarn->log, effect_get_msg_start(e));
-                    player_item_drop(p, &p->inventory, *it);
+                    /* deference the item at the selected armour slot */
+                    item *armour = *aslot;
+                    player_item_unequip(p, &p->inventory, armour, TRUE);
+                    player_item_drop(p, &p->inventory, armour);
                 }
             }
 
