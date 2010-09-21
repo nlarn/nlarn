@@ -1258,7 +1258,16 @@ int monster_items_pickup(monster *m)
 
         if (pick_up)
         {
-            /* item has been picked up */
+            /* The monster has picked up the item.
+
+               Determine if the item is a weapon.
+               This has to be done before adding the item to the monster's
+               intentory as the item might be destroyed after calling inv_add().
+               (Stackable items get destroyed if an item of the kind exists
+                in the target inventory!).
+            */
+            gboolean new_weapon = (it->type == IT_WEAPON);
+
             if (monster_in_sight(m))
             {
                 item_describe(it, player_item_identified(nlarn->p, it),
@@ -1272,11 +1281,14 @@ int monster_items_pickup(monster *m)
             /* go back one item as the following items lowered their number */
             idx--;
 
-            if (it->type == IT_WEAPON)
+            if (new_weapon)
             {
                 /* find out if the new weapon is better than the old one */
                 item *best = monster_weapon_select(m);
 
+                /* If the new item is a weapon, 'it' is still a valid pointer
+                   to the item picked up at this point as weapons are not
+                   stackable. */
                 if (it == best)
                 {
                     monster_weapon_wield(m, best);
