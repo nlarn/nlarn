@@ -1146,7 +1146,11 @@ monster *monster_trap_trigger(monster *m)
          * monster's list of effects. */
         if (trap_effect(trap))
         {
+            /* create a new effect */
             eff = effect_new(trap_effect(trap));
+            /* monster_effect_add() returns the effect which is active for
+               the monster, might be the one generated above, another, similar
+               one, or NULL, it the monster is resistant to this effect. */
             eff = monster_effect_add(m, eff);
         }
     } /* switch (trap) */
@@ -1998,10 +2002,16 @@ effect *monster_effect_add(monster *m, effect *e)
     assert(m != NULL && e != NULL);
 
     if (e->type == ET_SLEEP && monster_flags(m, MF_RES_SLEEP))
+    {
+        effect_destroy(e);
         return NULL;
+    }
 
     if (e->type == ET_POISON && monster_flags(m, MF_RES_POISON))
+    {
+        effect_destroy(e);
         return NULL;
+    }
 
     e = effect_add(m->effects, e);
 
