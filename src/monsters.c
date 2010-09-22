@@ -1248,16 +1248,16 @@ int monster_items_pickup(monster *m)
         else if (it->type == IT_WEAPON && monster_attack_available(m, ATT_WEAPON))
         {
             /* monster can attack with weapons */
-			if (m->weapon == NULL)
-				pick_up = TRUE;
-			else
-			{
-				item *mweapon = game_item_get(nlarn, m->weapon);
+            if (m->weapon == NULL)
+                pick_up = TRUE;
+            else
+            {
+                item *mweapon = game_item_get(nlarn, m->weapon);
 
-				/* compare this weapon with the weapon the monster wields */
-				if (mweapon == NULL || (weapon_wc(mweapon) < weapon_wc(it)))
-					pick_up = TRUE;
-			}
+                /* compare this weapon with the weapon the monster wields */
+                if (mweapon == NULL || (weapon_wc(mweapon) < weapon_wc(it)))
+                    pick_up = TRUE;
+            }
         }
 
         if (pick_up)
@@ -1362,8 +1362,20 @@ static int handle_breath_attack(monster *m, player *p, attack att)
 {
     assert(att.type == ATT_BREATH);
 
-    damage *dam;
+    guint damage;
     spell *sp = NULL;
+
+    if (monster_effect(m, ET_CHARM_MONSTER)
+            && (rand_m_n(5, 30) * monster_level(m) - player_get_wis(p) < 30))
+    {
+        if (monster_in_sight(m))
+        {
+            log_add_entry(nlarn->log, "The %s is awestruck at your magnificence!",
+                          monster_get_name(m));
+        }
+        return TRUE;
+    }
+
     switch (att.damage)
     {
     case DAM_FIRE:
@@ -1382,17 +1394,6 @@ static int handle_breath_attack(monster *m, player *p, attack att)
     if (sp == NULL)
         return FALSE;
 
-    if (monster_effect(m, ET_CHARM_MONSTER)
-            && (rand_m_n(5, 30) * monster_level(m) - player_get_wis(p) < 30))
-    {
-        if (monster_in_sight(m))
-        {
-            log_add_entry(nlarn->log, "The %s is awestruck at your magnificence!",
-                          monster_get_name(m));
-        }
-        return TRUE;
-    }
-
     if (monster_in_sight(m))
     {
         log_add_entry(nlarn->log, "The %s breathes a %s!",
@@ -1405,25 +1406,28 @@ static int handle_breath_attack(monster *m, player *p, attack att)
     }
 
     /* generate damage */
-    dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn), m);
+    damage = att.base + game_difficulty(nlarn);
 
     // store monster position in case the monster dies.
     position source   = m->pos;
-    position last_pos = throw_ray(sp, p, m->pos, m->player_pos, dam->amount,
-                                  FALSE);
+    position last_pos = throw_ray(sp, p, m->pos, m->player_pos, damage, FALSE);
 
     if (map_sobject_at(game_map(nlarn, last_pos.z), last_pos) == LS_MIRROR)
     {
         log_add_entry(nlarn->log, "The mirror reflects the %s!",
                       spell_name(sp));
 
-        throw_ray(sp, p, last_pos, source, dam->amount, FALSE);
+        throw_ray(sp, p, last_pos, source, damage, FALSE);
     }
     /* attack reflected by player */
     else if (pos_identical(p->pos, last_pos) && player_effect(p, ET_REFLECTION))
     {
-        throw_ray(sp, p, last_pos, source, dam->amount, TRUE);
+        throw_ray(sp, p, last_pos, source, damage, TRUE);
     }
+
+    /* tidy up */
+    spell_destroy(sp);
+
     return TRUE;
 }
 
