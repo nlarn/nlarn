@@ -614,8 +614,8 @@ int spell_cast(player *p)
         break;
     }
 
-	if (!well_done)
-		return 0;
+    if (!well_done)
+        return 0;
 
     if (well_done)
     {
@@ -1564,7 +1564,7 @@ gboolean spell_phantasmal_forces(spell *s, struct player *p)
                                 FALSE, FALSE, 0, TRUE, TRUE);
 
     if (!pos_valid(mpos))
-	{
+    {
         return FALSE;
     }
 
@@ -1577,13 +1577,20 @@ gboolean spell_phantasmal_forces(spell *s, struct player *p)
 
     if ((player_get_int(p) + s->knowledge) > monster_int(m))
     {
-        log_add_entry(nlarn->log, spell_msg_succ(s), monster_name(m));
+        if (monster_in_sight(m))
+        {
+            log_add_entry(nlarn->log, spell_msg_succ(s), monster_name(m));
+        }
+
         monster_effect_add(m, effect_new(ET_SCARED));
         return TRUE;
     }
     else
     {
-        log_add_entry(nlarn->log, spell_msg_fail(s), monster_name(m));
+        if (monster_in_sight(m))
+        {
+            log_add_entry(nlarn->log, spell_msg_fail(s), monster_name(m));
+        }
         return FALSE;
     }
 }
