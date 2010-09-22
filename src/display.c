@@ -2955,7 +2955,7 @@ static char *detailed_item_description(item *it, gboolean known)
     case IT_BOOK:
         if (known)
         {
-            g_string_append_printf(desc, "%s\nSpell lavel: %d\n", 
+            g_string_append_printf(desc, "%s\nSpell lavel: %d\n",
                                    spell_desc_by_id(it->id),
                                    spell_level_by_id(it->id));
         }
@@ -3005,6 +3005,12 @@ static void display_item_details(item *it, player *p, gboolean shop)
     /* buffer for the item description */
     gchar item_desc[81] = { 0 };
 
+    /* determine if the item is known or displayed in the shop */
+    const gboolean known = shop | player_item_known(p, it);
+
+    /* the detailed item description */
+    gchar *detailed_desc = detailed_item_description(it, known);
+
     if (shop)
     {
         /* inside shop */
@@ -3012,25 +3018,25 @@ static void display_item_details(item *it, player *p, gboolean shop)
         item_desc[0] = g_ascii_toupper(item_desc[0]);
 
         msg = g_strdup_printf("%s\n%s\nWeight:   %.2f kg\nMaterial: %s\nPrice:    %d gp",
-                              item_desc,
-                              detailed_item_description(it, TRUE),
+                              item_desc, detailed_desc,
                               (float)item_weight(it) / 1000,
                               item_material_name(item_material(it)), item_price(it));
     }
     else
     {
-        const gboolean known = player_item_known(p, it);
         item_describe(it, known, FALSE, FALSE, item_desc, 80);
         item_desc[0] = g_ascii_toupper(item_desc[0]);
 
         msg = g_strdup_printf("%s\n%s\nWeight:   %.2f kg\nMaterial: %s",
-                              item_desc,
-                              detailed_item_description(it, known),
+                              item_desc, detailed_desc,
                               (float)item_weight(it) / 1000,
                               item_material_name(item_material(it)));
     }
 
     display_show_message("Item details", msg, 0);
+
+    /* tidy up */
+    g_free(detailed_desc);
     g_free(msg);
 }
 
