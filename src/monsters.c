@@ -1514,7 +1514,10 @@ void monster_player_attack(monster *m, player *p)
 
     if (att.type == ATT_BREATH)
     {
+        /* the damage generated locally is not needed in handle_breath_attack() */
+        damage_free(dam);
         handle_breath_attack(m, p, att);
+
         return;
     }
 
