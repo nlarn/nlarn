@@ -1614,6 +1614,13 @@ gboolean spell_scare_monsters(spell *s, struct player *p)
         for (x = a->start_x; x < a->start_x + a->size_x; x++)
         {
             pos.x = x;
+
+            if (!pos_valid(pos))
+            {
+                /* possibly reached the level boundary */
+                continue;
+            }
+
             m = map_get_monster_at(cmap, pos);
 
             /* no monster at position? */
