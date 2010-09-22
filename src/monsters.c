@@ -1978,7 +1978,7 @@ int monster_color(monster *m)
 
 void monster_genocide(int monster_id)
 {
-    GList *mlist;
+    GList *mlist, *iter;
     monster *monst;
 
     assert(monster_id > MT_NONE && monster_id < MT_MAX);
@@ -1987,13 +1987,12 @@ void monster_genocide(int monster_id)
     mlist = g_hash_table_get_values(nlarn->monsters);
 
     /* purge genocided monsters */
-    do
+    for (iter = mlist; iter != NULL; iter = iter->next)
     {
         monst = (monster *)mlist->data;
         if (monster_is_genocided(monst->type))
             monster_destroy(monst);
     }
-    while ((mlist = mlist->next));
 
     g_list_free(mlist);
 }
