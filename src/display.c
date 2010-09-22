@@ -2954,7 +2954,11 @@ static char *detailed_item_description(item *it, gboolean known)
     {
     case IT_BOOK:
         if (known)
-            g_string_append_printf(desc, "%s\n", spell_desc_by_id(it->id));
+        {
+            g_string_append_printf(desc, "%s\nSpell lavel: %d\n", 
+                                   spell_desc_by_id(it->id),
+                                   spell_level_by_id(it->id));
+        }
         break;
     case IT_WEAPON:
         if (weapon_is_twohanded(it))
