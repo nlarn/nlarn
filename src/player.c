@@ -2508,12 +2508,6 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         /* set the attacked flag */
         p->attacked = TRUE;
     }
-
-
-    if (p->hp < 1)
-    {
-        player_die(p, cause_type, cause);
-    }
 }
 
 int player_hp_max_gain(player *p, int count)
