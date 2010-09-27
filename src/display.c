@@ -2439,6 +2439,11 @@ position display_get_new_position(player *p, position start,
             dir = GD_SW;
             break;
 
+        case '@':
+            /* bring the cursor back to the player */
+            npos = p->pos;
+            break;
+
         default:
             /* if travelling, use sobject glyphs as shortcuts */
             if (travel)
