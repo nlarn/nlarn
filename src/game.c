@@ -344,8 +344,13 @@ int game_save(game *g, const char *filename)
     int idx, err;
     struct cJSON *save, *obj;
     char *fullname = NULL;
+    display_window *win = NULL;
 
     assert(g != NULL);
+
+    /* if the display has been initialised, show a popup message */
+    if (display_available())
+        win = display_popup(2, 2, NULL, "Saving....");
 
     save = cJSON_CreateObject();
 
@@ -469,6 +474,10 @@ int game_save(game *g, const char *filename)
 
     free(sg);
     gzclose(file);
+
+    /* if a popup message has been opened, destroy it here */
+    if (win != NULL)
+        display_window_destroy(win);
 
     return TRUE;
 }
@@ -724,6 +733,7 @@ static gboolean game_load(gchar *filename)
     int size, idx;
     cJSON *save, *obj;
     char *fullname = NULL;
+    display_window *win = NULL;
 
     /* size of the buffer we allocate to store the uncompressed file content */
     const int bufsize = 1024 * 1024 * 3;
@@ -743,6 +753,10 @@ static gboolean game_load(gchar *filename)
 
         return FALSE;
     }
+
+    /* if the display has been initialised, show a popup message */
+    if (display_available())
+        win = display_popup(2, 2, NULL, "Loading....");
 
     /* temporary buffer to store uncompressed save file content */
     char *sgbuf = g_malloc0(bufsize);
@@ -933,6 +947,10 @@ static gboolean game_load(gchar *filename)
 
     /* no need to define the player's stats */
     nlarn->player_stats_set = TRUE;
+
+    /* if a popup message has been opened, destroy it here */
+    if (win != NULL)
+        display_window_destroy(win);
 
     return TRUE;
 }

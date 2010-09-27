@@ -104,6 +104,13 @@ typedef struct display_window
 
 void display_init();
 void display_shutdown();
+
+/**
+ * @brief Check if the display system has been initialised.
+ * @return TRUE or FALSE
+ */
+gboolean display_available();
+
 void display_wrap(lua_State *L);
 int display_draw();
 
@@ -157,7 +164,33 @@ void display_show_history(message_log *log, const char *title);
  */
 int display_show_message(const char *title, const char *message, int indent);
 
+/**
+ * @brief Show a popup message.
+ *
+ * @param The top left x position.
+ * @param The top left y position.
+ * @param The popup window title. May be NULL.
+ * @param The popup window message. If the message is too long to fit
+ *        the screen, it will be truncated.
+ *
+ * @return A pointer to the newly allocated window structure.
+ */
+display_window *display_popup(int x1, int y1, const char *title, const char *msg);
+
+/**
+ * @brief Destroy a window and the resources allocated for it.
+ * @param A pointer to a window structure.
+ */
+void display_window_destroy(display_window *dwin);
+
+/**
+ * @brief Hide all windows.
+ */
 void display_windows_hide();
+
+/**
+ * @brief Set all windows visible.
+ */
 void display_windows_show();
 
 #define display_getch getch

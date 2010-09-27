@@ -38,8 +38,6 @@ static GList *windows = NULL;
 static display_window *display_window_new(int x1, int y1, int width,
         int height, const char *title);
 
-static void display_window_destroy(display_window *dwin);
-
 static int display_window_move(display_window *dwin, int key);
 static void display_window_update_title(display_window *dwin, const char *title);
 static void display_window_update_caption(display_window *dwin, char *caption);
@@ -671,6 +669,11 @@ void display_shutdown()
         /* update display initialisation status */
         display_initialised = FALSE;
     }
+}
+
+gboolean display_available()
+{
+    return display_initialised;
 }
 
 void display_wrap(lua_State *L)
@@ -2697,6 +2700,64 @@ int display_show_message(const char *title, const char *message, int indent)
     return key;
 }
 
+display_window *display_popup(int x1, int y1, const char *title, const char *msg)
+{
+    display_window *win;
+    GPtrArray *text;
+    int width, height, idx, attrs;
+    const guint max_width = display_cols - x1 - 2;
+    const guint max_height = display_rows - y1 - 2;
+
+    if (strlen(msg) > (max_width - 4))
+        width = max_width - 4;
+    else
+        width = strlen(msg) + 4;
+
+    text = text_wrap(msg, width, 0);
+    height = min(text->len + 2, max_height);
+
+    win = display_window_new(x1, y1, width, height, title);
+
+    /* display message */
+    wattron(win->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
+
+    for (idx = 0; idx < text->len; idx++)
+    {
+        mvwprintw(win->window, idx + 1, 1, " %-*s ",
+                  width - 4, g_ptr_array_index(text, idx));
+    }
+
+    wattroff(win->window, attrs);
+
+    /* clean up */
+    text_destroy(text);
+
+    /* show the window */
+    wrefresh(win->window);
+
+    return win;
+}
+
+void display_window_destroy(display_window *dwin)
+{
+    del_panel(dwin->panel);
+    delwin(dwin->window);
+
+    /* remove window from the list of windows */
+    windows = g_list_remove(windows, dwin);
+
+    /* free title as it is a clone */
+    if (dwin->title != NULL) g_free(dwin->title);
+
+    g_free(dwin);
+
+    /* repaint screen */
+    clear();
+
+    if (nlarn != NULL && nlarn->p != NULL)
+        display_paint_screen(nlarn->p);
+}
+
 void display_windows_hide()
 {
     GList *iterator = windows;
@@ -2772,26 +2833,6 @@ static display_window *display_window_new(int x1, int y1, int width,
     update_panels();
 
     return dwin;
-}
-
-static void display_window_destroy(display_window *dwin)
-{
-    del_panel(dwin->panel);
-    delwin(dwin->window);
-
-    /* remove window from the list of windows */
-    windows = g_list_remove(windows, dwin);
-
-    /* free title as it is a clone */
-    if (dwin->title != NULL) g_free(dwin->title);
-
-    g_free(dwin);
-
-    /* repaint screen */
-    clear();
-
-    if (nlarn != NULL && nlarn->p != NULL)
-        display_paint_screen(nlarn->p);
 }
 
 static int display_window_move(display_window *dwin, int key)
