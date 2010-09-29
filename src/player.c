@@ -1950,7 +1950,7 @@ void player_pickup(player *p)
         callback->description = "(g)et";
         callback->key = 'g';
         callback->inv = inv;
-        callback->function = &player_item_pickup;
+        callback->function = (display_inv_callback_func)&player_item_pickup;
         g_ptr_array_add(callbacks, callback);
 
         display_inventory("On the floor", p, inv, callbacks, FALSE,
@@ -1987,11 +1987,18 @@ void player_autopickup(player *p)
         if (p->settings.auto_pickup[i->type])
         {
             /* item type is set to be picked up */
-
+            guint retval;
             int count_orig = inv_length(*floor);
 
             /* try to pick up the item */
-            player_item_pickup(p, floor, i);
+            retval = player_item_pickup(p, floor, i);
+
+            if (retval == 1)
+            {
+                /* pickup has been canceled by the player */
+                called_by_autopickup = FALSE;
+                return;
+            }
 
             if (count_orig != inv_length(*floor))
             {
@@ -3990,7 +3997,7 @@ void player_item_notes(player *p, inventory **inv, item *it)
     g_free(caption);
 }
 
-void player_item_pickup(player *p, inventory **inv, item *it)
+guint player_item_pickup(player *p, inventory **inv, item *it)
 {
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -4006,7 +4013,7 @@ void player_item_pickup(player *p, inventory **inv, item *it)
         count = display_get_count(desc, it->count);
 
         if (count == 0)
-            return;
+            return 0;
 
         if (count < it->count)
         {
@@ -4028,14 +4035,22 @@ void player_item_pickup(player *p, inventory **inv, item *it)
     }
 
     /* one turn to pick item up, one to stuff it into the pack */
-    if (!player_make_move(p, 2, TRUE, "picking up %s", desc)
-            || !inv_add(&p->inventory, it))
+    if (!player_make_move(p, 2, TRUE, "picking up %s", desc))
     {
         /* Adding the item to the player's inventory has failed.
            If the item has been split, return it to the originating inventory */
         if (oid == NULL) inv_add(inv, it);
 
-        return;
+        return 1;
+    }
+
+    if (!inv_add(&p->inventory, it))
+    {
+        /* Adding the item to the player's inventory has failed.
+           If the item has been split, return it to the originating inventory */
+        if (oid == NULL) inv_add(inv, it);
+
+        return 2;
     }
 
     if (gold_amount > 0)
@@ -4049,7 +4064,7 @@ void player_item_pickup(player *p, inventory **inv, item *it)
     if (oid != NULL)
         inv_del_oid(inv, oid);
 
-    return;
+    return 0;
 }
 
 void player_read(player *p)

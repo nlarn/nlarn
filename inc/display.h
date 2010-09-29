@@ -78,12 +78,14 @@ enum display_colours
     DC_MAX
 };
 
+typedef void (*display_inv_callback_func)(player *, inventory **, item *);
+
 typedef struct display_inv_callback
 {
     char *description;
     char key;
     inventory **inv;
-    void (*function)(player *, inventory **, item *);
+    display_inv_callback_func function;
     int (*checkfun)(player *, item *);
     gboolean active;
 } display_inv_callback;

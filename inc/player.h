@@ -382,12 +382,11 @@ void player_item_notes(player *p, inventory **inv, item *it);
  * @param the player
  * @param the source inventory
  * @param the item to pick up
- * @return the number of turns used for the action:
-          0 if the action has been canceled,
- *        1 when the pre_add callback function failed (e.g. the item is too heavy),
- *        2 if adding the item to the player's inventory succeeded.
+ * @return 0 if the action has been successfully completed
+ *         1 if the action has been canceled,
+ *         2 when the pre_add callback function failed (e.g. the item is too heavy),
  */
-void player_item_pickup(player *p, inventory **inv, item *it);
+guint player_item_pickup(player *p, inventory **inv, item *it);
 
 /* item usage shortcuts */
 void player_read(player *p);
