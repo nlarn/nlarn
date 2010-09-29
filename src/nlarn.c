@@ -117,8 +117,8 @@ int main(int argc, char *argv[])
         nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, NULL);
     }
 
-    /* automatic save point */
-    if (game_autosave(nlarn))
+    /* automatic save point (not when restoring a save) */
+    if ((game_turn(nlarn) == 1) && game_autosave(nlarn))
     {
         game_save(nlarn, NULL);
     }
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     char run_cmd = 0;
     int ch;
     gboolean adj_corr = FALSE;
-    int end_resting = 0;
+    guint end_resting = 0;
 
     /* main event loop */
     do
