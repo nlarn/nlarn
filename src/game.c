@@ -43,8 +43,6 @@ static void game_new();
 static gboolean game_load(gchar *filename);
 static void game_init_lua(game *g);
 
-static void game_monsters_move(game *g);
-
 static void game_items_shuffle(game *g);
 
 static GList *game_scores_load(game *g);
@@ -309,6 +307,7 @@ int game_destroy(game *g)
     g_hash_table_destroy(g->items);
     g_hash_table_destroy(g->effects);
     g_hash_table_destroy(g->monsters);
+    g_ptr_array_free(g->dead_monsters, TRUE);
 
     g_ptr_array_foreach(g->spheres, (GFunc)sphere_destroy, g);
     g_ptr_array_free(g->spheres, TRUE);
@@ -605,7 +604,19 @@ void game_spin_the_wheel(game *g)
     if (dam != NULL)
         player_damage_take(g->p, dam, PD_MAP, map_tiletype_at(map, g->p->pos));
 
-    game_monsters_move(g);
+    /* move all monsters */
+    g_hash_table_foreach(g->monsters, (GHFunc)monster_move, g);
+
+    /* destroy all monsters that have been killed during this turn */
+    while (g->dead_monsters->len > 0)
+    {
+        monster *m = g_ptr_array_index(g->dead_monsters, g->dead_monsters->len - 1);
+
+        monster_destroy(m);
+        g_ptr_array_remove_index(g->dead_monsters, g->dead_monsters->len - 1);
+    }
+
+    /* move all spheres */
     g_ptr_array_foreach(g->spheres, (GFunc)sphere_move, g);
 
     g->gtime++; /* count up the time  */
@@ -690,6 +701,9 @@ static void game_new()
     nlarn->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     nlarn->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     nlarn->monsters = g_hash_table_new(&g_direct_hash, &g_direct_equal);
+
+    /* initialize the array to store monsters that died during the turn */
+    nlarn->dead_monsters = g_ptr_array_new();
 
     nlarn->spheres = g_ptr_array_new();
 
@@ -919,6 +933,9 @@ static gboolean game_load(gchar *filename)
     for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
         monster_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
 
+    /* initialize the array to store monsters that died during the turn */
+    nlarn->dead_monsters = g_ptr_array_new();
+
 
     /* restore spheres */
     nlarn->spheres = g_ptr_array_new();
@@ -969,64 +986,6 @@ static void game_init_lua(game *g)
     utils_wrap(g->L);
     display_wrap(g->L);
     monsters_wrap(g->L);
-}
-
-/**
- *  move all monsters in the game
- *
- *  @param the game
- *  @return Returns no value.
- */
-static void game_monsters_move(game *g)
-{
-    GList *monsters;    /* list of monsters */
-    GList *iter;        /* iterator for monsters list */
-    monster *m;         /* handle to current monster */
-
-    assert(g != NULL);
-
-    monsters = g_hash_table_get_values(g->monsters);
-
-    for (iter = monsters; iter != NULL; iter = iter->next)
-    {
-        m = (monster *)iter->data;
-        // Monster is no longer valid.
-        if (monster_type(m) <= MT_NONE || monster_type(m) >= MT_MAX)
-            continue;
-
-        position mpos = monster_pos(m);
-
-        /* modify effects */
-        monster_effects_expire(m);
-
-        /* regenerate / inflict poison upon monster. */
-        if (!monster_regenerate(m, g->gtime, g->difficulty, g->log))
-        {
-            monster_die(m, NULL);
-            continue;
-        }
-
-        /* damage caused by map effects */
-        damage *dam = map_tile_damage(monster_map(m), monster_pos(m),
-                                      monster_flags(m, MF_FLY));
-
-        /* deal damage caused by floor effects */
-        if ((dam != NULL) && !(m = monster_damage_take(m, dam)))
-        {
-            continue;
-        }
-
-        /* move the monsters only if they are on the same
-           level as the player or an adjacent level */
-        if (mpos.z == g->p->pos.z
-                || (mpos.z == g->p->pos.z - 1)
-                || (mpos.z == g->p->pos.z + 1))
-        {
-            monster_move(m, g->p);
-        }
-    }
-
-    g_list_free(monsters);
 }
 
 static void game_items_shuffle(game *g)

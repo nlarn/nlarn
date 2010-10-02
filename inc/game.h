@@ -77,6 +77,14 @@ typedef struct game
     GHashTable *effects;
     GHashTable *monsters;
 
+    /* Monsters that died during a turn have to be added to this array
+       to allow destroying them after all monsters have been moved.
+       The functions used to iterate over the GHashTable *monsters above
+       do not allow to modify the hash table while iterating over it,
+       giving the most nasty effects when doing so.
+     */
+    GPtrArray *dead_monsters;
+
     /* spheres do not need to be referenced, thus a pointer array is sufficient */
     GPtrArray *spheres;
 

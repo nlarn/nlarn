@@ -849,7 +849,12 @@ void monster_die(monster *m, struct player *p)
         p->stats.monsters_killed[m->type] += 1;
     }
 
-    monster_destroy(m);
+    /* assure that the monster's hp indicates that the monster is dead */
+    if (m->hp > 0)
+        m->hp = 0;
+
+    /* add the monster to the list of dead monsters */
+    g_ptr_array_add(nlarn->dead_monsters, m);
 }
 
 void monster_level_enter(monster *m, struct map *l)
@@ -943,17 +948,50 @@ void monster_level_enter(monster *m, struct map *l)
     }
 }
 
-void monster_move(monster *m, struct player *p)
+void monster_move(gpointer *oid, monster *m, game *g)
 {
     /* monster's new position */
     position m_npos;
 
+    if (monster_hp(m) < 1)
+        /* Monster is already dead. */
+        return;
+
+    position mpos = monster_pos(m);
+
+    /* modify effects */
+    monster_effects_expire(m);
+
+    /* regenerate / inflict poison upon monster. */
+    if (!monster_regenerate(m, g->gtime, g->difficulty, g->log))
+        /* the monster died */
+        return;
+
+    /* damage caused by map effects */
+    damage *dam = map_tile_damage(monster_map(m), monster_pos(m),
+                                  monster_flags(m, MF_FLY));
+
+    /* deal damage caused by floor effects */
+    if ((dam != NULL) && !(m = monster_damage_take(m, dam)))
+        /* the monster died */
+        return;
+
+    /* move the monster only if it is on the same map as the player or
+       an adjacent map */
+    gboolean map_adjacent = (mpos.z == g->p->pos.z
+            || (mpos.z == g->p->pos.z - 1)
+            || (mpos.z == g->p->pos.z + 1)
+            || (mpos.z == MAP_DMAX && g->p->pos.z == 0)
+        );
+    if (!map_adjacent)
+        return;
+
     /* update monster's knowledge of player's position */
     if (monster_player_visible(m)
-            || (player_effect(p, ET_AGGRAVATE_MONSTER)
-                && pos_distance(m->pos, p->pos) < 15))
+            || (player_effect(g->p, ET_AGGRAVATE_MONSTER)
+                && pos_distance(m->pos, g->p->pos) < 15))
     {
-        monster_update_player_pos(m, p->pos);
+        monster_update_player_pos(m, g->p->pos);
     }
 
     /* add the monster's speed to the monster's movement points */
@@ -975,14 +1013,14 @@ void monster_move(monster *m, struct player *p)
             {
                 /* TODO: certain monster types will make a sound when attacking the player */
                 /*
-                log_add_entry(nlarn->log,
+                log_add_entry(g->log,
                               "The %s has spotted you and heads towards you!",
                               monster_name(m));
                  */
             }
             else if (m->action == MA_FLEE)
             {
-                log_add_entry(nlarn->log, "The %s turns to flee!", monster_name(m));
+                log_add_entry(g->log, "The %s turns to flee!", monster_name(m));
             }
         }
 
@@ -997,7 +1035,7 @@ void monster_move(monster *m, struct player *p)
         switch (m->action)
         {
         case MA_FLEE:
-            m_npos = monster_move_flee(m, p);
+            m_npos = monster_move_flee(m, g->p);
             break;
 
         case MA_REMAIN:
@@ -1005,15 +1043,16 @@ void monster_move(monster *m, struct player *p)
             break;
 
         case MA_WANDER:
-            m_npos = monster_move_wander(m, p);
+            m_npos = monster_move_wander(m, g->p);
             break;
 
         case MA_ATTACK:
             /* monster tries a ranged attack */
-            if (monster_player_visible(m) && monster_player_ranged_attack(m, p))
+            if (monster_player_visible(m)
+                && monster_player_ranged_attack(m, g->p))
                 return;
 
-            m_npos = monster_move_attack(m, p);
+            m_npos = monster_move_attack(m, g->p);
             break;
 
         case MA_NONE:
@@ -1034,13 +1073,13 @@ void monster_move(monster *m, struct player *p)
                 m_npos = monster_pos(m);
             }
 
-            else if (pos_identical(p->pos, m_npos))
+            else if (pos_identical(g->p->pos, m_npos))
             {
                 /* bump into invisible player */
-                monster_update_player_pos(m, p->pos);
+                monster_update_player_pos(m, g->p->pos);
                 m_npos = monster_pos(m);
 
-                log_add_entry(nlarn->log, "The %s bumps into you.", monster_get_name(m));
+                log_add_entry(g->log, "The %s bumps into you.", monster_get_name(m));
             }
 
             /* check for door */
@@ -1054,7 +1093,7 @@ void monster_move(monster *m, struct player *p)
                 /* notify the player if the door is visible */
                 if (monster_in_sight(m))
                 {
-                    log_add_entry(nlarn->log, "The %s opens the door.", monster_name(m));
+                    log_add_entry(g->log, "The %s opens the door.", monster_name(m));
                 }
             }
 
@@ -1850,6 +1889,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
         if (m->hp < 1)
         {
             /* monster died from poison */
+            monster_die(m, NULL);
             return FALSE;
         }
     }

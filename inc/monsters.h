@@ -193,7 +193,7 @@ const char* monster_type_plural_name(const int montype, const int count);
 void monster_die(monster *m, struct player *p);
 
 void monster_level_enter(monster *m, struct map *l);
-void monster_move(monster *m, struct player *p);
+void monster_move(gpointer *oid, monster *m, struct game *g);
 
 monster *monster_trap_trigger(monster *m);
 void monster_polymorph(monster *m);
