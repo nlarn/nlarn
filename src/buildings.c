@@ -527,7 +527,7 @@ int building_school(player *p)
         /* check if the selected course has a prerequisite
            and if the player has taken that course */
         if ((school_courses[selection].prerequisite >= 0) &&
-            !p->school_courses_taken[school_courses[selection].prerequisite])
+                !p->school_courses_taken[school_courses[selection].prerequisite])
         {
             log_add_entry(nlarn->log, msg_prerequisite,
                           school_courses[school_courses[selection].prerequisite].description);
@@ -743,6 +743,13 @@ static void building_item_add(inventory **inv, item *it)
         /* identify item */
         it->bonus_known = TRUE;
         it->blessed_known = TRUE;
+
+        /* remove notes */
+        if (it->notes)
+        {
+            g_free(it->notes);
+            it->notes = NULL;
+        }
 
         inv_add(inv, it);
     }
