@@ -3001,7 +3001,7 @@ static char *detailed_item_description(item *it, gboolean known)
     case IT_BOOK:
         if (known)
         {
-            g_string_append_printf(desc, "%s\nSpell lavel: %d\n",
+            g_string_append_printf(desc, "%s\nSpell level: %d\n",
                                    spell_desc_by_id(it->id),
                                    spell_level_by_id(it->id));
         }
