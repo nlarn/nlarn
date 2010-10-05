@@ -217,12 +217,11 @@ int map_set_monster_at(map *map, position pos, monster *monst);
 int map_is_monster_at(map *m, position pos);
 
 /**
- * creates an entire set of monsters for a map
+ * @brief Creates new monsters for a map.
  *
  * @param a map
- * @return the number of monsters added to the map
  */
-int map_fill_with_life(map *l);
+void map_fill_with_life(map *l);
 
 gboolean map_is_exit_at(map *m, position pos);
 

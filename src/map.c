@@ -1079,7 +1079,7 @@ int map_is_monster_at(map *m, position pos)
     return ((map_get_monster_at(m, pos) != NULL));
 }
 
-int map_fill_with_life(map *l)
+void map_fill_with_life(map *l)
 {
     position pos;
     int new_monster_count;
@@ -1100,13 +1100,20 @@ int map_fill_with_life(map *l)
         do
         {
             pos = map_find_space(l, LE_MONSTER, FALSE);
+
+            if (!pos_valid(pos))
+            {
+                /* it seems that the map is fully crowded,
+                   thus abort monster creation. */
+                return;
+            }
         }
         while (player_pos_visible(nlarn->p, pos));
 
         monster_new_by_level(pos);
     }
 
-    return(new_monster_count);
+    return;
 }
 
 gboolean map_is_exit_at(map *m, position pos)
