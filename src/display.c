@@ -1308,6 +1308,10 @@ spell *display_spell_select(char *title, player *p)
 #ifdef KEY_A2
         case KEY_A2:
 #endif
+            if (key == 'k' && strlen(code_buf) > 0)
+            /* yuck, I *hate* gotos, but this one makes sense:
+               it allows to type e.g. 'ckl' */
+               goto mnemonics;
 
             if (curr > 1)
                 curr--;
@@ -1324,6 +1328,10 @@ spell *display_spell_select(char *title, player *p)
 #ifdef KEY_C2
         case KEY_C2:
 #endif
+            if (key == 'j' && strlen(code_buf) > 0)
+            /* see lame excuse above */
+                goto mnemonics;
+
             if ((curr + offset) < p->known_spells->len)
             {
                 if (curr == maxvis)
@@ -1338,7 +1346,6 @@ spell *display_spell_select(char *title, player *p)
         case '3':
         case KEY_NPAGE:
         case KEY_C3:
-
             if (curr == 1)
             {
                 curr = maxvis;
@@ -1360,7 +1367,6 @@ spell *display_spell_select(char *title, player *p)
         case '1':
         case KEY_END:
         case KEY_C1:
-
             if (p->known_spells->len > maxvis)
             {
                 curr = maxvis;
@@ -1421,6 +1427,7 @@ spell *display_spell_select(char *title, player *p)
             {
                 break;
             }
+mnemonics:
             /* add key to spell code buffer */
             if ((key >= 'a') && (key <= 'z'))
             {
