@@ -1091,7 +1091,7 @@ void map_fill_with_life(map *l)
 
     if (l->mcount > new_monster_count)
         /* no monsters added */
-        return FALSE;
+        return;
     else
         new_monster_count -= l->mcount;
 
