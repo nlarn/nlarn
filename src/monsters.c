@@ -573,6 +573,9 @@ void monster_deserialize(cJSON *mser, game *g)
     /* increase max_id to match used ids */
     if (oid > g->monster_max_id)
         g->monster_max_id = oid;
+
+    /* increment the count of monsters of the map the monster is on */
+    game_map(g, m->pos.z)->mcount++;
 }
 
 int monster_hp_max(monster *m)
