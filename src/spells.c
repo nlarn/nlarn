@@ -1021,7 +1021,10 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                and if a monster is standing at the current position */
             if (area_pos_get(ray, pos))
             {
-                if ((monster = map_get_monster_at(cmap, pos)))
+                /* check if a monster is at the affected map
+                   position and if the monster has not been killed before */
+                if ((monster = map_get_monster_at(cmap, pos))
+                    && monster_alive(monster))
                 {
                     gboolean mis = monster_in_sight(monster);
 
