@@ -37,25 +37,25 @@ typedef enum spell_type
 } spell_t;
 
 typedef struct spell_data {
-	guint id;
-	char *code;
-	char *name;
-	spell_t type;
-	damage_t damage_type;
-	effect_type effect;
-	char *description;
-	char *msg_success;
-	char *msg_fail;
-	int level;
-	int price;
-	unsigned
+    guint id;
+    char *code;
+    char *name;
+    spell_t type;
+    damage_t damage_type;
+    effect_type effect;
+    char *description;
+    char *msg_success;
+    char *msg_fail;
+    int level;
+    int price;
+    unsigned
         obtainable: 1;  /* available in the shop */
 } spell_data;
 
 typedef struct spell {
-	guint32 id;         /* reference to spell_data */
-	guint32 knowledge;  /* quality of knowledge */
-	guint32 used;       /* usage counter */
+    guint id;         /* reference to spell_data */
+    guint knowledge;  /* quality of knowledge */
+    guint used;       /* usage counter */
 } spell;
 
 typedef enum spell_ids {

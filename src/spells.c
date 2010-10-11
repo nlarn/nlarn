@@ -380,6 +380,12 @@ book_obfuscation[SP_MAX_BOOK - 1] =
 */
 };
 
+/* local functions */
+static void spell_print_success_message(spell *s, monster *m);
+static void spell_print_failure_message(spell *s, monster *m);
+static int count_adjacent_water_squares(position pos);
+static int try_drying_ground(position pos);
+
 spell *spell_new(int id)
 {
     spell *nspell;
@@ -423,7 +429,7 @@ spell *spell_deserialize(cJSON *sser)
 
 cJSON *spells_serialize(GPtrArray *sparr)
 {
-    int idx;
+    guint idx;
     cJSON *sser = cJSON_CreateArray();
 
     for (idx = 0; idx < sparr->len; idx++)
@@ -481,21 +487,29 @@ int spell_cast(player *p)
 
     spell *spell;
 
+    /* check if the player knows any spell */
+    if (!p->known_spells || !p->known_spells->len)
+    {
+        log_add_entry(nlarn->log, "You don't know any spells.");
+        return NULL;
+    }
+
+    /* spell casting is impossible when confused */
     if (player_effect(p, ET_CONFUSION))
     {
         log_add_entry(nlarn->log, "You can't aim your magic!");
         return 0;
     }
 
+    /* show spell selection dialog */
     spell = display_spell_select("Select a spell to cast", p);
 
-    /* ESC pressed */
+    /* player aborted spell selection by pressing ESC */
     if (!spell)
         return 0;
 
-    const int level = spell_level(spell);
     /* insufficient mana */
-    if (p->mp < level)
+    if (p->mp < spell_level(spell))
     {
         log_add_entry(nlarn->log, "You lack the power to cast %s.",
                       spell_name(spell));
@@ -517,7 +531,7 @@ int spell_cast(player *p)
     if (chance(1) || spell_success_value(p, spell) < rand_1n(16))
     {
         log_add_entry(nlarn->log, "It didn't work!");
-        player_mp_lose(p, level);
+        player_mp_lose(p, spell_level(spell));
 
         return turns;
     }
@@ -744,100 +758,6 @@ int spell_type_player(spell *s, struct player *p)
     return TRUE;
 }
 
-static void print_spell_success_message(spell *s, monster *m)
-{
-    assert(s != NULL && m != NULL);
-
-    /* invisible monster -> no message */
-    if (!monster_in_sight(m))
-        return;
-
-    /* no message defined */
-    if (spell_msg_succ(s) == NULL)
-        return;
-
-    log_add_entry(nlarn->log, spell_msg_succ(s), monster_get_name(m));
-}
-
-static void print_spell_failure_message(spell *s, monster *m)
-{
-    assert(s != NULL && m != NULL);
-
-    /* invisible monster -> no message */
-    if (!monster_in_sight(m))
-        return;
-
-    /* no message defined */
-    if (spell_msg_fail(s) == NULL)
-        return;
-
-    log_add_entry(nlarn->log, spell_msg_fail(s), monster_get_name(m));
-}
-
-static int count_adjacent_water_squares(position pos)
-{
-    position p;
-    p.z = pos.z;
-
-    int count = 0;
-    for (p.x = pos.x - 1; p.x <= pos.x + 1; p.x++)
-        for (p.y = pos.y - 1; p.y <= pos.y + 1; p.y++)
-        {
-            if (!pos_valid(p))
-                continue;
-
-            if (pos_identical(p, pos))
-                continue;
-
-            const map_tile *tile = map_tile_at(game_map(nlarn, pos.z), p);
-            if (tile->type == LT_WATER || tile->type == LT_DEEPWATER)
-                count++;
-        }
-
-    return count;
-}
-
-static int try_drying_ground(position pos)
-{
-    map_tile *tile = map_tile_at(game_map(nlarn, pos.z), pos);
-    if (tile->type == LT_DEEPWATER)
-    {
-        /* success chance depends on number of adjacent water squares */
-        const int adj_water = count_adjacent_water_squares(pos);
-        if (rand_1n(9) <= adj_water)
-        {
-            log_add_entry(nlarn->log, "Nothing happens.");
-            return FALSE;
-        }
-
-        tile->type = LT_WATER;
-        log_add_entry(nlarn->log, "The water is more shallow now.");
-        return TRUE;
-    }
-    else if (tile->type == LT_WATER)
-    {
-        /* success chance depends on number of adjacent water squares */
-        const int adj_water = count_adjacent_water_squares(pos);
-        if (rand_1n(9) <= adj_water)
-        {
-            log_add_entry(nlarn->log, "Nothing happens.");
-            return FALSE;
-        }
-
-        if (tile->base_type == LT_NONE)
-            tile->type = LT_DIRT;
-        else
-            tile->type = tile->base_type;
-
-        if (tile->timer)
-            tile->timer = 0;
-
-        log_add_entry(nlarn->log, "The water evaporates!");
-        return TRUE;
-    }
-    return FALSE;
-}
-
 int spell_type_point(spell *s, struct player *p)
 {
     monster *monster = NULL;
@@ -872,6 +792,8 @@ int spell_type_point(spell *s, struct player *p)
         if (s->id == SP_DRY)
             return try_drying_ground(pos);
 
+        log_add_entry(nlarn->log, "There is no monster there.");
+
         return FALSE;
     }
 
@@ -880,7 +802,7 @@ int spell_type_point(spell *s, struct player *p)
         /* dehydration */
     case SP_DRY:
         amount = (100 * s->knowledge) + p->level;
-        print_spell_success_message(s, monster);
+        spell_print_success_message(s, monster);
         monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, p));
         break; /* SP_DRY */
 
@@ -888,7 +810,7 @@ int spell_type_point(spell *s, struct player *p)
     case SP_DRL:
         amount = min(p->hp - 1, (int)p->hp_max / 2);
 
-        print_spell_success_message(s, monster);
+        spell_print_success_message(s, monster);
         monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, p));
         player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, NULL),
                            PD_SPELL, SP_DRL);
@@ -904,18 +826,18 @@ int spell_type_point(spell *s, struct player *p)
 
         if ((player_get_wis(p) + s->knowledge) > rand_m_n(10, roll))
         {
-            print_spell_success_message(s, monster);
+            spell_print_success_message(s, monster);
             monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, p));
         }
         else
-            print_spell_failure_message(s, monster);
+            spell_print_failure_message(s, monster);
         break; /* SP_FGR */
     }
 
         /* magic missile */
     case SP_MLE:
         amount = rand_1n(((p->level + 1) << s->knowledge)) + p->level + 3;
-        print_spell_success_message(s, monster);
+        spell_print_success_message(s, monster);
         monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount, p));
         break;
 
@@ -924,7 +846,7 @@ int spell_type_point(spell *s, struct player *p)
         if (chance(5*(monster_level(monster) - 2*s->knowledge)))
         {
             /* didn't work */
-            print_spell_failure_message(s, monster);
+            spell_print_success_message(s, monster);
         }
         else
             monster_polymorph(monster);
@@ -957,9 +879,9 @@ int spell_type_point(spell *s, struct player *p)
         e = monster_effect_add(monster, e);
 
         if (e)
-            print_spell_success_message(s, monster);
+            spell_print_success_message(s, monster);
         else
-            print_spell_failure_message(s, monster);
+            spell_print_failure_message(s, monster);
 
         break;
     }
@@ -1031,7 +953,7 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                     attron((attrs = (mis ? spell_hit_color : spell_color)));
                     mvaddch(pos.y, pos.x, (mis ? monster_glyph(monster) : '*'));
 
-                    print_spell_success_message(sp, monster);
+                    spell_print_success_message(sp, monster);
                     monster_damage_take(monster, damage_new(spell_damage(sp),
                                                             ATT_MAGIC, damage,
                                                             player_cast ? p : NULL));
@@ -1332,7 +1254,7 @@ static void blast_area_with_spell(struct player *p, area *ball, spell *s,
                     if (monster_in_sight(m))
                     {
                         addch(monster_glyph(m));
-                        print_spell_success_message(s, m);
+                        spell_print_success_message(s, m);
                     }
                     else
                         addch('*');
@@ -1935,4 +1857,101 @@ item_usage_result book_read(struct player *p, item *book)
     }
 
     return result;
+}
+
+static void spell_print_success_message(spell *s, monster *m)
+{
+    assert(s != NULL && m != NULL);
+
+    /* invisible monster -> no message */
+    if (!monster_in_sight(m))
+    {
+        log_add_entry(nlarn->log, "You think you've hit something.");
+        return;
+    }
+
+    /* no message defined */
+    if (spell_msg_succ(s) == NULL)
+        return;
+
+    log_add_entry(nlarn->log, spell_msg_succ(s), monster_get_name(m));
+}
+
+static void spell_print_failure_message(spell *s, monster *m)
+{
+    assert(s != NULL && m != NULL);
+
+    /* invisible monster -> no message */
+    if (!monster_in_sight(m))
+        return;
+
+    /* no message defined */
+    if (spell_msg_fail(s) == NULL)
+        return;
+
+    log_add_entry(nlarn->log, spell_msg_fail(s), monster_get_name(m));
+}
+
+static int count_adjacent_water_squares(position pos)
+{
+    position p;
+    p.z = pos.z;
+
+    int count = 0;
+    for (p.x = pos.x - 1; p.x <= pos.x + 1; p.x++)
+        for (p.y = pos.y - 1; p.y <= pos.y + 1; p.y++)
+        {
+            if (!pos_valid(p))
+                continue;
+
+            if (pos_identical(p, pos))
+                continue;
+
+            const map_tile *tile = map_tile_at(game_map(nlarn, pos.z), p);
+            if (tile->type == LT_WATER || tile->type == LT_DEEPWATER)
+                count++;
+        }
+
+    return count;
+}
+
+static int try_drying_ground(position pos)
+{
+    map_tile *tile = map_tile_at(game_map(nlarn, pos.z), pos);
+    if (tile->type == LT_DEEPWATER)
+    {
+        /* success chance depends on number of adjacent water squares */
+        const int adj_water = count_adjacent_water_squares(pos);
+        if (rand_1n(9) <= adj_water)
+        {
+            log_add_entry(nlarn->log, "Nothing happens.");
+            return FALSE;
+        }
+
+        tile->type = LT_WATER;
+        log_add_entry(nlarn->log, "The water is more shallow now.");
+        return TRUE;
+    }
+    else if (tile->type == LT_WATER)
+    {
+        /* success chance depends on number of adjacent water squares */
+        const int adj_water = count_adjacent_water_squares(pos);
+        if (rand_1n(9) <= adj_water)
+        {
+            log_add_entry(nlarn->log, "Nothing happens.");
+            return FALSE;
+        }
+
+        if (tile->base_type == LT_NONE)
+            tile->type = LT_DIRT;
+        else
+            tile->type = tile->base_type;
+
+        if (tile->timer)
+            tile->timer = 0;
+
+        log_add_entry(nlarn->log, "The water evaporates!");
+        return TRUE;
+    }
+    return FALSE;
 }
