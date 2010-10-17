@@ -754,7 +754,11 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     display_window *iwin = NULL;
     /* the item description popup */
     display_window *ipop = NULL;
-    guint width, height, maxvis;
+
+    /* the dialog width */
+    const guint width = display_cols - 4;
+
+    guint height, maxvis;
     guint startx, starty;
     guint len_orig, len_curr;
     gboolean redraw = FALSE;
@@ -798,28 +802,20 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     /* store inventory length */
     len_orig = len_curr = inv_length_filtered(*inv, filter);
 
-    if (show_price)
-    {
-        width = 61;
-    }
-    else
-    {
-        width = 61;
-    }
-
     /* main loop */
     do
     {
         /* calculate the dialog height */
         height = min((display_rows - 10), len_curr + 2);
+
         /* calculate how many items can be displayed at a time */
         maxvis = min(len_curr, height - 2);
 
         /* calculate starting position of the window */
         starty = ((display_rows - 7) - height) / 2;
-        startx = (min(MAP_MAX_X, display_cols) - width) / 2;
+        startx = (display_cols - width) / 2;
 
-        /* fix marked item */
+        /* fix selected item */
         if (curr > len_curr)
             curr = len_curr;
 
@@ -847,8 +843,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
             else if (len_curr > len_orig)
             {
-                /* inventory has grown */
-                /* sort inventory by item type */
+                /* inventory has grown - sort inventory again */
                 if (show_price)
                     inv_sort(*inv, (GCompareDataFunc)item_sort_shop, (gpointer)p);
                 else
@@ -892,13 +887,15 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             if (show_price)
             {
                 /* inside shop */
-                mvwprintw(iwin->window, pos, 1, " %-50s %5d$ ",
+                mvwprintw(iwin->window, pos, 1, " %-*s %5d$ ",
+                          width - 11,
                           item_describe(it, TRUE, FALSE, FALSE, item_desc, 80),
                           item_price(it));
             }
             else
             {
-                mvwprintw(iwin->window, pos, 1, " %-55s %c ",
+                mvwprintw(iwin->window, pos, 1, " %-*s %c ",
+                          width - 6,
                           item_describe(it, player_item_known(p, it),
                                         FALSE, FALSE, item_desc, 80),
                           player_item_is_equipped(p, it) ? '*' : ' ');
@@ -957,8 +954,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (ipop != NULL)
             display_window_destroy(ipop);
         ipop = display_item_details(startx, starty + height,
-                                    display_cols - (2 * starty),
-                                    it, p, show_price);
+                                    width, it, p, show_price);
 
         /* update the window's caption with the assembled array of captions */
         display_window_update_caption(iwin, g_strjoinv(" ", captions));
@@ -1074,12 +1070,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
 
         default:
-            /* perhaps the window shall be moved */
-            if (display_window_move(iwin, key))
-            {
-                break;
-            }
-
             /* check callback function keys (if defined) */
             for (cb_nr = 1; callbacks != NULL && cb_nr <= callbacks->len; cb_nr++)
             {
@@ -2730,7 +2720,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
             width = max_width;
     }
 
-    text = text_wrap(msg, width - 2, 0);
+    text = text_wrap(msg, width - 3, 0);
     height = min(text->len + 2, max_height);
 
     win = display_window_new(x1, y1, width, height, title);
@@ -2768,11 +2758,9 @@ void display_window_destroy(display_window *dwin)
 
     g_free(dwin);
 
-    /* repaint screen */
-    clear();
+    /* repaint the screen */
+    refresh();
 
-    if (nlarn != NULL && nlarn->p != NULL)
-        display_paint_screen(nlarn->p);
 }
 
 void display_windows_hide()
@@ -2841,10 +2829,6 @@ static display_window *display_window_new(int x1, int y1, int width,
 
     /* add window to the list of opened windows */
     windows = g_list_append(windows, dwin);
-
-    /* repaint the screen if the game has been initialized */
-    if (nlarn != NULL && nlarn->p != NULL)
-        display_paint_screen(nlarn->p);
 
     /* refresh panels */
     update_panels();
