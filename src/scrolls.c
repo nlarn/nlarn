@@ -368,7 +368,7 @@ static int scroll_create_artefact(player *p, item *scroll)
         {
             // The low-price, unobtainable items are more likely to be bad.
             while (item_base_price(it) < 200
-                        && !item_obtainable(it->type, it->id))
+                    && !item_obtainable(it->type, it->id))
             {
                 it->id = rand_1n(item_max_id(it->type));
             }
@@ -381,7 +381,7 @@ static int scroll_create_artefact(player *p, item *scroll)
             // Roll again for an unknown, reasonably high-level book.
             while ((spell_known(p, it->id) && chance(80))
                     || (it->id < (item_max_id(IT_BOOK) * level) / (MAP_MAX - 1)
-                            && chance(50)))
+                        && chance(50)))
             {
                 it->id = rand_1n(item_max_id(it->type));
             }
@@ -869,12 +869,23 @@ static int scroll_teleport(player *p, item *scroll)
 
     assert(p != NULL);
 
-    if (p->pos.z == 0)
+    if (scroll->blessed)
+    {
+        /* blessed scrolls of teleport always teleport to town level */
         nlevel = 0;
-    else if (p->pos.z < MAP_DMAX)
-        nlevel = rand_0n(MAP_DMAX);
+    }
     else
-        nlevel = rand_m_n(MAP_DMAX, MAP_MAX);
+    {
+        if (p->pos.z == 0)
+            /* teleporting in town does not work */
+            nlevel = 0;
+        else if (p->pos.z < MAP_DMAX)
+            /* choose a cavern level if the player is in the caverns*/
+            nlevel = rand_1n(MAP_DMAX);
+        else
+            /* choose a vulcano level if the player is in the vulcano */
+            nlevel = rand_m_n(MAP_DMAX, MAP_MAX);
+    }
 
     if (nlevel != p->pos.z)
     {
