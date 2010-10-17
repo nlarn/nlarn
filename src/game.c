@@ -349,7 +349,7 @@ int game_save(game *g, const char *filename)
 
     /* if the display has been initialised, show a popup message */
     if (display_available())
-        win = display_popup(2, 2, NULL, "Saving....");
+        win = display_popup(2, 2, 0, NULL, "Saving....");
 
     save = cJSON_CreateObject();
 
@@ -778,7 +778,7 @@ static gboolean game_load(gchar *filename)
 
     /* if the display has been initialised, show a popup message */
     if (display_available())
-        win = display_popup(2, 2, NULL, "Loading....");
+        win = display_popup(2, 2, 0, NULL, "Loading....");
 
     /* temporary buffer to store uncompressed save file content */
     char *sgbuf = g_malloc0(bufsize);

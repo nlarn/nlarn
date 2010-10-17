@@ -44,7 +44,8 @@ static void display_window_update_caption(display_window *dwin, char *caption);
 static void display_window_update_arrow_up(display_window *dwin, gboolean on);
 static void display_window_update_arrow_down(display_window *dwin, gboolean on);
 
-static void display_item_details(item *it, player *p, gboolean shop);
+static display_window *display_item_details(guint x1, guint y1, guint width,
+                                            item *it, player *p, gboolean shop);
 static void display_spheres_paint(sphere *s, player *p);
 
 void display_init()
@@ -749,7 +750,10 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                         gboolean show_weight, gboolean show_account,
                         int (*filter)(item *))
 {
+    /* the inventory window */
     display_window *iwin = NULL;
+    /* the item description popup */
+    display_window *ipop = NULL;
     guint width, height, maxvis;
     guint startx, starty;
     guint len_orig, len_curr;
@@ -772,7 +776,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     /* offset to element position (when displaying more than maxvis items) */
     guint offset = 0;
 
-    /* currently selected item */
+    /* position of currently selected item */
     guint curr = 1;
 
     /* position in inventory (loop var) */
@@ -806,11 +810,14 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     /* main loop */
     do
     {
-        height = min((display_rows - 3), len_curr + 2);
+        /* calculate the dialog height */
+        height = min((display_rows - 10), len_curr + 2);
+        /* calculate how many items can be displayed at a time */
         maxvis = min(len_curr, height - 2);
 
-        starty = (display_rows - height) / 2; /* calculation for centered */
-        startx = (min(MAP_MAX_X, display_cols) - width) / 2; /* placement of the window */
+        /* calculate starting position of the window */
+        starty = ((display_rows - 7) - height) / 2;
+        startx = (min(MAP_MAX_X, display_cols) - width) / 2;
 
         /* fix marked item */
         if (curr > len_curr)
@@ -946,8 +953,12 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
         }
 
-        /* append the describe action to the array of caption string */
-        strv_append(&captions, "(?) describe");
+        /* show the item description popup */
+        if (ipop != NULL)
+            display_window_destroy(ipop);
+        ipop = display_item_details(startx, starty + height,
+                                    display_cols - (2 * starty),
+                                    it, p, show_price);
 
         /* update the window's caption with the assembled array of captions */
         display_window_update_caption(iwin, g_strjoinv(" ", captions));
@@ -1049,12 +1060,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
             break;
 
-            /* show item details */
-        case '?':
-        case KEY_F(1):
-            display_item_details(it, p, show_price);
-            break;
-
         case KEY_ESC:
             keep_running = FALSE;
             break;
@@ -1097,6 +1102,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     }
     while (keep_running && (len_curr > 0)); /* ESC pressed or empty inventory*/
 
+    display_window_destroy(ipop);
     display_window_destroy(iwin);
 
     if ((callbacks == NULL) && (key != KEY_ESC))
@@ -2701,20 +2707,30 @@ int display_show_message(const char *title, const char *message, int indent)
     return key;
 }
 
-display_window *display_popup(int x1, int y1, const char *title, const char *msg)
+display_window *display_popup(int x1, int y1, int width, const char *title, const char *msg)
 {
     display_window *win;
     GPtrArray *text;
-    int width, height, idx, attrs;
-    const guint max_width = display_cols - x1 - 2;
-    const guint max_height = display_rows - y1 - 2;
+    int height, idx, attrs;
+    const guint max_width = display_cols - x1 - 1;
+    const guint max_height = display_rows - y1 - 1;
 
-    if (strlen(msg) > (max_width - 4))
-        width = max_width - 4;
+    if (width == 0)
+    {
+        /* width to be determined */
+        if (strlen(msg) > (max_width - 4))
+            width = max_width - 4;
+        else
+            width = strlen(msg) + 4;
+    }
     else
-        width = strlen(msg) + 4;
+    {
+        /* width supplied. sanity check */
+        if (width > max_width)
+            width = max_width;
+    }
 
-    text = text_wrap(msg, width, 0);
+    text = text_wrap(msg, width - 2, 0);
     height = min(text->len + 2, max_height);
 
     win = display_window_new(x1, y1, width, height, title);
@@ -3041,16 +3057,20 @@ static char *detailed_item_description(item *it, gboolean known)
     if (it->notes)
         g_string_append_printf(desc, "Notes: %s\n", it->notes);
 
+    if (desc->len > 0)
+        g_string_append_c(desc, '\n');
+
     return g_string_free(desc, FALSE);
 }
 
-static void display_item_details(item *it, player *p, gboolean shop)
+static display_window *display_item_details(guint x1, guint y1, guint width,
+                                            item *it, player *p, gboolean shop)
 {
+    /* the popup window created by display_popup */
+    display_window *idpop;
+
     /* string for the content of the item description popup */
     char *msg = NULL;
-
-    /* buffer for the item description */
-    gchar item_desc[81] = { 0 };
 
     /* determine if the item is known or displayed in the shop */
     const gboolean known = shop | player_item_known(p, it);
@@ -3061,30 +3081,24 @@ static void display_item_details(item *it, player *p, gboolean shop)
     if (shop)
     {
         /* inside shop */
-        item_describe(it, TRUE, FALSE, FALSE, item_desc, 80);
-        item_desc[0] = g_ascii_toupper(item_desc[0]);
-
-        msg = g_strdup_printf("%s\n%s\nWeight:   %.2f kg\nMaterial: %s\nPrice:    %d gp",
-                              item_desc, detailed_desc,
-                              (float)item_weight(it) / 1000,
+        msg = g_strdup_printf("%sWeight:   %.2f kg\nMaterial: %s\nPrice:    %d gp",
+                              detailed_desc, (float)item_weight(it) / 1000,
                               item_material_name(item_material(it)), item_price(it));
     }
     else
     {
-        item_describe(it, known, FALSE, FALSE, item_desc, 80);
-        item_desc[0] = g_ascii_toupper(item_desc[0]);
-
-        msg = g_strdup_printf("%s\n%s\nWeight:   %.2f kg\nMaterial: %s",
-                              item_desc, detailed_desc,
-                              (float)item_weight(it) / 1000,
+        msg = g_strdup_printf("%sWeight:   %.2f kg\nMaterial: %s",
+                              detailed_desc, (float)item_weight(it) / 1000,
                               item_material_name(item_material(it)));
     }
 
-    display_show_message("Item details", msg, 0);
+    idpop = display_popup(x1, y1, width, "Item details", msg);
 
     /* tidy up */
     g_free(detailed_desc);
     g_free(msg);
+
+    return idpop;
 }
 
 static void display_spheres_paint(sphere *s, player *p)
