@@ -491,7 +491,7 @@ int spell_cast(player *p)
     if (!p->known_spells || !p->known_spells->len)
     {
         log_add_entry(nlarn->log, "You don't know any spells.");
-        return NULL;
+        return 0;
     }
 
     /* spell casting is impossible when confused */
