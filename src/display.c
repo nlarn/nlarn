@@ -953,8 +953,16 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         ipop = display_item_details(startx, starty + height,
                                     width, it, p, show_price);
 
-        /* update the window's caption with the assembled array of captions */
-        display_window_update_caption(iwin, g_strjoinv(" ", captions));
+        if (g_strv_length(captions) > 0)
+        {
+            /* update the window's caption with the assembled array of captions */
+            display_window_update_caption(iwin, g_strjoinv(" ", captions));
+        }
+        else
+        {
+            /* reset the window caption */
+            display_window_update_caption(iwin, NULL);
+        }
 
         /* free the array of caption strings */
         g_strfreev(captions);
