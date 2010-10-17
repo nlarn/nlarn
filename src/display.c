@@ -45,7 +45,7 @@ static void display_window_update_arrow_up(display_window *dwin, gboolean on);
 static void display_window_update_arrow_down(display_window *dwin, gboolean on);
 
 static display_window *display_item_details(guint x1, guint y1, guint width,
-                                            item *it, player *p, gboolean shop);
+        item *it, player *p, gboolean shop);
 static void display_spheres_paint(sphere *s, player *p);
 
 void display_init()
@@ -719,19 +719,13 @@ void display_wrap(lua_State *L)
 
 int display_draw()
 {
-    GList *win_ptr = g_list_first(windows);
-
     /* mark stdscr for redraw */
-    refresh();
+    wnoutrefresh(curscr);
 
-    /* prepare windows for redraw */
-    if (win_ptr) do
-        {
-            display_window *win = (display_window *)win_ptr->data;
-            redrawwin(win->window);
-        }
-        while ((win_ptr = g_list_next(win_ptr)));
+    /* mark windows for redraw */
+    update_panels();
 
+    /* finally commit all the prepared updates */
     return doupdate();
 }
 
@@ -828,6 +822,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
             display_window_destroy(iwin);
             iwin = NULL;
+
+            display_paint_screen(p);
             redraw = FALSE;
 
             /* check for inventory modifications */
@@ -953,6 +949,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* show the item description popup */
         if (ipop != NULL)
             display_window_destroy(ipop);
+
         ipop = display_item_details(startx, starty + height,
                                     width, it, p, show_price);
 
@@ -1299,9 +1296,9 @@ spell *display_spell_select(char *title, player *p)
         case KEY_A2:
 #endif
             if (key == 'k' && strlen(code_buf) > 0)
-            /* yuck, I *hate* gotos, but this one makes sense:
-               it allows to type e.g. 'ckl' */
-               goto mnemonics;
+                /* yuck, I *hate* gotos, but this one makes sense:
+                   it allows to type e.g. 'ckl' */
+                goto mnemonics;
 
             if (curr > 1)
                 curr--;
@@ -1319,7 +1316,7 @@ spell *display_spell_select(char *title, player *p)
         case KEY_C2:
 #endif
             if (key == 'j' && strlen(code_buf) > 0)
-            /* see lame excuse above */
+                /* see lame excuse above */
                 goto mnemonics;
 
             if ((curr + offset) < p->known_spells->len)
@@ -2244,6 +2241,7 @@ position display_get_new_position(player *p, position start,
     position pos, npos, cursor;
     map *map;
     int attrs; /* curses attributes */
+    display_window *msgpop;
 
     /* variables for ray or ball painting */
     area *a = NULL;
@@ -2257,8 +2255,7 @@ position display_get_new_position(player *p, position start,
         pos = p->pos;
 
     /* display message */
-    log_add_entry(nlarn->log, message);
-    display_paint_screen(p);
+    msgpop = display_popup(3, MAP_MAX_Y + 4, 0, NULL, message);
 
     /* make shortcut to map */
     map = game_map(nlarn, p->pos.z);
@@ -2538,6 +2535,9 @@ position display_get_new_position(player *p, position start,
         }
     }
     while (RUN);
+
+    /* destroy the message popup */
+    display_window_destroy(msgpop);
 
     /* hide cursor */
     curs_set(0);
@@ -2994,7 +2994,7 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
 }
 
 static display_window *display_item_details(guint x1, guint y1, guint width,
-                                            item *it, player *p, gboolean shop)
+        item *it, player *p, gboolean shop)
 {
     /* the popup window created by display_popup */
     display_window *idpop;
