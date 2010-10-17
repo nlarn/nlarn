@@ -1380,6 +1380,71 @@ int item_obtainable(item_t type, int id)
     return obtainable;
 }
 
+char *item_detailed_description(item *it, gboolean known, gboolean shop)
+{
+    assert (it != NULL);
+
+    GString *desc = g_string_new("");
+
+    switch (it->type)
+    {
+    case IT_BOOK:
+        if (known)
+        {
+            g_string_append_printf(desc, "%s\nSpell level: %d\n",
+                                   spell_desc_by_id(it->id),
+                                   spell_level_by_id(it->id));
+        }
+        break;
+    case IT_WEAPON:
+        if (weapon_is_twohanded(it))
+            g_string_append_printf(desc, "Two-handed weapon\n");
+
+        if (it->bonus_known)
+        {
+            g_string_append_printf(desc, "Damage: +%d\n"
+                                   "Accuracy: +%d\n",
+                                   weapon_wc(it), weapon_acc(it));
+        }
+        else
+        {
+            g_string_append_printf(desc, "Base damage: +%d\n"
+                                   "Base accuracy: +%d\n",
+                                   weapon_base_wc(it), weapon_base_acc(it));
+        }
+        break;
+    case IT_ARMOUR:
+        if (it->bonus_known)
+        {
+            g_string_append_printf(desc, "Armour class: %d\n", armour_ac(it));
+        }
+        else
+        {
+            g_string_append_printf(desc, "Base AC: %d\n", armour_base_ac(it));
+        }
+        break;
+    default:
+        break;
+    }
+
+    if (it->notes)
+        g_string_append_printf(desc, "Notes: %s\n", it->notes);
+
+    g_string_append_printf(desc, "Weight:   %.2f kg\n",
+                           (float)item_weight(it) / 1000);
+
+    g_string_append_printf(desc, "Material: %s",
+                           item_material_name(item_material(it)));
+
+    if (shop)
+    {
+        /* inside shop - show the item's price */
+        g_string_append_printf(desc, "\nPrice:    %d gp", item_price(it));
+    }
+
+    return g_string_free(desc, FALSE);
+}
+
 inventory *inv_new(gconstpointer owner)
 {
     inventory *ninv;

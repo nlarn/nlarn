@@ -203,6 +203,16 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
 
 int item_obtainable(item_t type, int id);
 
+/**
+ * @brief Describe an item thoroughly.
+ *
+ * @param An item.
+ * @param (Y/N) if the item is known
+ * @param (Y/N) show the item price
+ * @return A newly allocated string that must be freed in the calling function.
+ */
+char *item_detailed_description(item *it, gboolean known, gboolean shop);
+
 /* external vars */
 extern const item_type_data item_data[IT_MAX];
 extern const item_material_data item_materials[IM_MAX];

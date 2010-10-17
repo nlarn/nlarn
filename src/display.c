@@ -3009,60 +3009,6 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
     }
 }
 
-static char *detailed_item_description(item *it, gboolean known)
-{
-    GString *desc = g_string_new("");
-
-    switch (it->type)
-    {
-    case IT_BOOK:
-        if (known)
-        {
-            g_string_append_printf(desc, "%s\nSpell level: %d\n",
-                                   spell_desc_by_id(it->id),
-                                   spell_level_by_id(it->id));
-        }
-        break;
-    case IT_WEAPON:
-        if (weapon_is_twohanded(it))
-            g_string_append_printf(desc, "Two-handed weapon\n");
-
-        if (it->bonus_known)
-        {
-            g_string_append_printf(desc, "Damage: +%d\n"
-                                   "Accuracy: +%d\n",
-                                   weapon_wc(it), weapon_acc(it));
-        }
-        else
-        {
-            g_string_append_printf(desc, "Base damage: +%d\n"
-                                   "Base accuracy: +%d\n",
-                                   weapon_base_wc(it), weapon_base_acc(it));
-        }
-        break;
-    case IT_ARMOUR:
-        if (it->bonus_known)
-        {
-            g_string_append_printf(desc, "Armour class: %d\n", armour_ac(it));
-        }
-        else
-        {
-            g_string_append_printf(desc, "Base AC: %d\n", armour_base_ac(it));
-        }
-        break;
-    default:
-        break;
-    }
-
-    if (it->notes)
-        g_string_append_printf(desc, "Notes: %s\n", it->notes);
-
-    if (desc->len > 0)
-        g_string_append_c(desc, '\n');
-
-    return g_string_free(desc, FALSE);
-}
-
 static display_window *display_item_details(guint x1, guint y1, guint width,
                                             item *it, player *p, gboolean shop)
 {
@@ -3076,26 +3022,10 @@ static display_window *display_item_details(guint x1, guint y1, guint width,
     const gboolean known = shop | player_item_known(p, it);
 
     /* the detailed item description */
-    gchar *detailed_desc = detailed_item_description(it, known);
-
-    if (shop)
-    {
-        /* inside shop */
-        msg = g_strdup_printf("%sWeight:   %.2f kg\nMaterial: %s\nPrice:    %d gp",
-                              detailed_desc, (float)item_weight(it) / 1000,
-                              item_material_name(item_material(it)), item_price(it));
-    }
-    else
-    {
-        msg = g_strdup_printf("%sWeight:   %.2f kg\nMaterial: %s",
-                              detailed_desc, (float)item_weight(it) / 1000,
-                              item_material_name(item_material(it)));
-    }
-
+    msg = item_detailed_description(it, known, shop);
     idpop = display_popup(x1, y1, width, "Item details", msg);
 
     /* tidy up */
-    g_free(detailed_desc);
     g_free(msg);
 
     return idpop;
