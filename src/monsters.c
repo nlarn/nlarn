@@ -279,7 +279,7 @@ monster *monster_new_by_level(position pos)
                                   MT_DEMON_PRINCE      // V3
                                 };
 
-    int nlevel = pos.z;
+    const int nlevel = pos.z;
 
     int minstep = nlevel - 4;
     int maxstep = nlevel - 1;
@@ -982,10 +982,10 @@ void monster_move(gpointer *oid, monster *m, game *g)
     /* move the monster only if it is on the same map as the player or
        an adjacent map */
     gboolean map_adjacent = (mpos.z == g->p->pos.z
-            || (mpos.z == g->p->pos.z - 1)
-            || (mpos.z == g->p->pos.z + 1)
-            || (mpos.z == MAP_DMAX && g->p->pos.z == 0)
-        );
+                             || (mpos.z == g->p->pos.z - 1)
+                             || (mpos.z == g->p->pos.z + 1)
+                             || (mpos.z == MAP_DMAX && g->p->pos.z == 0)
+                            );
     if (!map_adjacent)
         return;
 
@@ -1052,7 +1052,7 @@ void monster_move(gpointer *oid, monster *m, game *g)
         case MA_ATTACK:
             /* monster tries a ranged attack */
             if (monster_player_visible(m)
-                && monster_player_ranged_attack(m, g->p))
+                    && monster_player_ranged_attack(m, g->p))
                 return;
 
             m_npos = monster_move_attack(m, g->p);
@@ -2019,7 +2019,7 @@ int monster_color(monster *m)
     }
 }
 
-void monster_genocide(int monster_id)
+void monster_genocide(monster_t monster_id)
 {
     GList *mlist, *iter;
     monster *monst;
@@ -2032,15 +2032,22 @@ void monster_genocide(int monster_id)
     /* purge genocided monsters */
     for (iter = mlist; iter != NULL; iter = iter->next)
     {
-        monst = (monster *)mlist->data;
+        monst = (monster *)iter->data;
         if (monster_is_genocided(monst->type))
-            monster_destroy(monst);
+        {
+            /* add the monster to the game's list of dead monsters */
+            g_ptr_array_add(nlarn->dead_monsters, monst);
+        }
     }
 
+    /* free the memory returned by g_hash_table_get_values() */
     g_list_free(mlist);
+
+    /* destroy all monsters that have been genocided */
+    game_remove_dead_monsters(nlarn);
 }
 
-int monster_is_genocided(int monster_id)
+int monster_is_genocided(monster_t monster_id)
 {
     assert(monster_id > MT_NONE && monster_id < MT_MAX);
     return nlarn->monster_genocided[monster_id];

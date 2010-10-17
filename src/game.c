@@ -608,19 +608,27 @@ void game_spin_the_wheel(game *g)
     g_hash_table_foreach(g->monsters, (GHFunc)monster_move, g);
 
     /* destroy all monsters that have been killed during this turn */
-    while (g->dead_monsters->len > 0)
-    {
-        monster *m = g_ptr_array_index(g->dead_monsters, g->dead_monsters->len - 1);
-
-        monster_destroy(m);
-        g_ptr_array_remove_index(g->dead_monsters, g->dead_monsters->len - 1);
-    }
+    game_remove_dead_monsters(g);
 
     /* move all spheres */
     g_ptr_array_foreach(g->spheres, (GFunc)sphere_move, g);
 
     g->gtime++; /* count up the time  */
     log_set_time(g->log, g->gtime); /* adjust time for log entries */
+}
+
+void game_remove_dead_monsters(game *g)
+{
+    assert (g != NULL);
+
+    monster *m;
+    while (g->dead_monsters->len > 0)
+    {
+        m = g_ptr_array_index(g->dead_monsters, g->dead_monsters->len - 1);
+
+        monster_destroy(m);
+        g_ptr_array_remove_index(g->dead_monsters, g->dead_monsters->len - 1);
+    }
 }
 
 gpointer game_item_register(game *g, item *it)

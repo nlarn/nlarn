@@ -531,15 +531,16 @@ static int scroll_gem_perfection(player *p, item *scroll)
 
 static int scroll_genocide_monster(player *p, item *scroll)
 {
-    char *in;
+    char *glyph;
     int id;
-    GString *msg;
+    guint candidates[10] = { 0 };
+    int found = 0;
+    monster_t which = MT_NONE;
+    GString *msg = g_string_new(NULL);
 
     assert(p != NULL);
 
-    msg = g_string_new(NULL);
-
-    if (!p->identified_scrolls[ST_GENOCIDE_MONSTER])
+    if (!player_item_known(p, scroll))
     {
         g_string_append_printf(msg, "This is a scroll of %s. ",
                                scroll_name(scroll));
@@ -547,31 +548,37 @@ static int scroll_genocide_monster(player *p, item *scroll)
 
     g_string_append(msg, "Which monster do you want to genocide (enter its glyph)?");
 
-    in = display_get_string(msg->str, NULL, 1);
+    /* get a single character */
+    glyph = display_get_string(msg->str, NULL, 1);
 
+    /* release memory acquired for the message */
     g_string_free(msg, TRUE);
 
-    if (!in)
+    if (!glyph)
     {
+        /* player hit ESC */
         log_add_entry(nlarn->log, "You chose not to genocide any monster.");
         return FALSE;
     }
 
-    guint32 candidates[10];
-    int found = 0;
+    /* look for the monster id for the glyph entered */
     for (id = 1; id < MT_MAX; id++)
     {
-        if (monster_type_image(id) == in[0])
+        if (monster_type_image(id) == glyph[0])
         {
+            /* character entered matches the monster's glyph */
             if (!monster_is_genocided(id))
             {
+                /* monster has not yet been genocided */
                 candidates[found] = id;
                 if (found++ == 10)
                     break;
             }
         }
     }
-    g_free(in);
+
+    /* release the memory acquired by display_get_string() */
+    g_free(glyph);
 
     if (found == 0)
     {
@@ -580,37 +587,46 @@ static int scroll_genocide_monster(player *p, item *scroll)
     }
 
     /* blessed scrolls allow a choice of same-glyph monsters */
-    int which = MT_NONE;
     if (!scroll->blessed || found == 1)
+    {
+        /* the monster to genocide is the first monster found */
         which = candidates[0];
+    }
     else
     {
-        GString *text = g_string_new("");
+        /* offer a selection of monsters that share the glyph entered */
+        msg = g_string_new("");
 
         for (id = 0; id < found; id++)
         {
-            g_string_append_printf(text, "  %c) %-30s\n",
+            g_string_append_printf(msg, "  %c) %-30s\n",
                                    id + 'a', monster_type_name(candidates[id]));
         }
 
+        /* get the monster to be genocided */
         do
         {
             which = display_show_message("Genocide which monster?",
-                                         text->str, 0);
+                                         msg->str, 0);
         }
         while (which < 'a' || which >= found + 'a');
 
-        g_string_free(text, TRUE);
+        /* release memory acquired for the dialog text */
+        g_string_free(msg, TRUE);
 
         which -= 'a';
-        assert(which >= 0 && which < found);
+        assert(which < found);
+
         which = candidates[which];
     }
 
+    /* genocide the selected monster */
     monster_genocide(which);
+
     log_add_entry(nlarn->log, "Wiped out all %s.",
                   monster_type_plural_name(which, 2));
 
+    /* player genocided h[im|er]self? */
     if (which == MT_TOWN_PERSON) // Oops!
         player_die(p, PD_GENOCIDE, 0);
 
@@ -873,7 +889,7 @@ static int scroll_timewarp(player *p, item *scroll)
 {
     gint32 mobuls = 0;  /* number of mobuls */
     gint32 turns;       /* number of turns */
-    int idx = 0;        /* position inside player's effect list */
+    guint idx = 0;      /* position inside player's effect list */
 
     assert(p != NULL && scroll != NULL);
 

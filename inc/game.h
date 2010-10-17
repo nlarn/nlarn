@@ -148,6 +148,7 @@ void game_scores_destroy(GList *gs);
 
 map *game_map(game *g, guint nmap);
 void game_spin_the_wheel(game *g);
+void game_remove_dead_monsters(game *g);
 
 /* functions to store game data */
 gpointer game_inventory_register(game *g, inventory *inv);
