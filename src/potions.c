@@ -116,7 +116,7 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     char description[61];
 
     // These potions aren't drunk.
-    if (potion->id == PO_CURE_DIANTHR && potion->id == PO_WATER)
+    if (potion->id == PO_CURE_DIANTHR || potion->id == PO_WATER)
         verb = "use";
     else
         verb = "drink";
