@@ -2766,9 +2766,16 @@ void display_window_destroy(display_window *dwin)
 
     g_free(dwin);
 
-    /* repaint the screen */
-    refresh();
-
+    if (nlarn != NULL && nlarn->p != NULL)
+    {
+        /* repaint the screen if the game has been initialized */
+        display_paint_screen(nlarn->p);
+    }
+    else
+    {
+        /* refresh the screen */
+        refresh();
+    }
 }
 
 void display_windows_hide()
@@ -2838,8 +2845,16 @@ static display_window *display_window_new(int x1, int y1, int width,
     /* add window to the list of opened windows */
     windows = g_list_append(windows, dwin);
 
-    /* refresh panels */
-    update_panels();
+    if (nlarn != NULL && nlarn->p != NULL)
+    {
+        /* repaint the screen if the game has been initialized */
+        display_paint_screen(nlarn->p);
+    }
+    else
+    {
+        /* refresh panels */
+        update_panels();
+    }
 
     return dwin;
 }

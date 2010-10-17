@@ -92,9 +92,6 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    /* initially paint the screen */
-    display_paint_screen(nlarn->p);
-
     display_show_message("Welcome to the game of NLarn!", strbuf, 0);
     g_free(strbuf);
 
