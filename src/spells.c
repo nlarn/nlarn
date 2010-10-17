@@ -1354,29 +1354,15 @@ int spell_type_blast(spell *s, struct player *p)
 
 gboolean spell_alter_reality(player *p)
 {
+    map *nlevel;
+    position pos = pos_new(0, 0, p->pos.z);
+
     if (p->pos.z == 0)
         return FALSE;
 
-    map *nlevel;
-
-    position pos;
-    pos.z = p->pos.z;
-
-    // Overwrite memorised floor tiles with space, to distinguish between
-    // the remembered map of the old level, and newly discovered portions
-    // of the new one.
-    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
-    {
-        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
-        {
-            map_tile_t tile = player_memory_of(p, pos).type;
-            if (tile == LT_FLOOR)
-                player_memory_of(p, pos).type = LT_NONE;
-
-            if (player_memory_of(p, pos).sobject)
-                player_sobject_forget(p, pos);
-        }
-    }
+    /* reset the player's memory of the current map */
+    memset(&player_memory_of(p, pos), 0,
+           MAP_MAX_Y * MAP_MAX_X * sizeof(player_tile_memory));
 
     map_destroy(game_map(nlarn, p->pos.z));
 
