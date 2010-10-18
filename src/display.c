@@ -753,7 +753,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     const guint width = display_cols - 4;
 
     guint height, maxvis;
-    guint startx, starty;
     guint len_orig, len_curr;
     gboolean redraw = FALSE;
 
@@ -805,10 +804,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* calculate how many items can be displayed at a time */
         maxvis = min(len_curr, height - 2);
 
-        /* calculate starting position of the window */
-        starty = ((display_rows - 7) - height) / 2;
-        startx = (display_cols - width) / 2;
-
         /* fix selected item */
         if (curr > len_curr)
             curr = len_curr;
@@ -816,10 +811,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* rebuild image if needed */
         if (iwin != NULL && redraw)
         {
-            /* save strarting point */
-            startx = iwin->x1;
-            starty = iwin->y1;
-
             display_window_destroy(iwin);
             iwin = NULL;
 
@@ -849,7 +840,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         if (!iwin)
         {
-            iwin = display_window_new(startx, starty, width, height, title);
+            iwin = display_window_new(2, 2, width, height, title);
         }
 
         /* draw all items */
@@ -950,8 +941,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (ipop != NULL)
             display_window_destroy(ipop);
 
-        ipop = display_item_details(startx, starty + height,
-                                    width, it, p, show_price);
+        ipop = display_item_details(iwin->x1, iwin->y1 + iwin->height,
+                                    iwin->width, it, p, show_price);
 
         if (g_strv_length(captions) > 0)
         {
@@ -2263,7 +2254,7 @@ position display_get_new_position(player *p, position start,
         pos = p->pos;
 
     /* display message */
-    msgpop = display_popup(3, MAP_MAX_Y + 4, 0, NULL, message);
+    msgpop = display_popup(3, min(MAP_MAX_Y + 4, display_rows - 4), 0, NULL, message);
 
     /* make shortcut to map */
     map = game_map(nlarn, p->pos.z);
