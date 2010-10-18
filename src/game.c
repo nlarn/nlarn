@@ -812,10 +812,15 @@ static gboolean game_load(gchar *filename)
             compatible_version = TRUE;
     }
 
+    /* handle incompatible save file */
     if (!compatible_version)
     {
-        /* incompatible save file */
+        /* free the memory allocated by loading the save file */
         cJSON_Delete(save);
+        
+        /* if a popup message has been opened, destroy it here */
+        if (win != NULL)
+            display_window_destroy(win);
 
         /* offer to delete the incompatible save game */
         if (display_get_yesno("Saved game could not be loaded. " \
