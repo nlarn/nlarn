@@ -28,8 +28,6 @@
 #include "nlarn.h"
 #include "spheres.h"
 
-static guint display_rows = 0;
-static guint display_cols = 0;
 static gboolean display_initialised = FALSE;
 
 /* linked list of opened windows */
@@ -62,8 +60,7 @@ void display_init()
     /* Start curses mode */
     initscr();
 
-    /* get screen dimensions */
-    getmaxyx(stdscr, display_rows, display_cols);
+    /* initialize colours */
     start_color();
 
     /* black background */
@@ -120,9 +117,6 @@ int display_paint_screen(player *p)
     message_log_entry *le;  /* needed to display messages */
     GPtrArray *text = NULL; /* storage for formatted messages */
     guint *ttime = NULL;    /* storage for the game time of messages */
-
-    /* refresh screen dimensions */
-    getmaxyx(stdscr, display_rows, display_cols);
 
     /* draw line around map */
     mvhline(MAP_MAX_Y, 0, ACS_HLINE, MAP_MAX_X);
@@ -430,7 +424,7 @@ int display_paint_screen(player *p)
     if (p->eq_weapon)
     {
         char wpn[61];
-        const int available_space = display_cols - MAP_MAX_X - 4;
+        const guint available_space = COLS - MAP_MAX_X - 4;
 
         GString *desc = g_string_new(NULL);
 
@@ -560,7 +554,7 @@ int display_paint_screen(player *p)
     /* display effect descriptions */
     if (p->effects->len > 0)
     {
-        const int available_space = display_cols - MAP_MAX_X - 4;
+        const guint available_space = COLS - MAP_MAX_X - 4;
 
         effect *e;
         int pos = 0;
@@ -597,7 +591,7 @@ int display_paint_screen(player *p)
 
     /* *** MESSAGES *** */
     /* number of lines which can be displayed */
-    y = display_rows - 20;
+    y = LINES - 20;
 
     /* storage for game time of message */
     ttime = g_new0(guint, y);
@@ -611,8 +605,8 @@ int display_paint_screen(player *p)
     /* if log contains buffered messaged, display them */
     if (log_buffer(nlarn->log))
     {
-        text = text_wrap(log_buffer(nlarn->log), display_cols, 2);
-        for (x = 1; x <= min(text->len, y); x++)
+        text = text_wrap(log_buffer(nlarn->log), COLS, 2);
+        for (x = 1; x <= (unsigned)min(text->len, y); x++)
             ttime[x - 1] = game_turn(nlarn);
     }
 
@@ -622,9 +616,9 @@ int display_paint_screen(player *p)
         le = log_get_entry(nlarn->log, log_length(nlarn->log) - 1 - i);
 
         if (text == NULL)
-            text = text_wrap(le->message, display_cols, 2);
+            text = text_wrap(le->message, COLS, 2);
         else
-            text = text_append(text, text_wrap(le->message, display_cols, 2));
+            text = text_append(text, text_wrap(le->message, COLS, 2));
 
         /* store game time for associated text line */
         while ((x <= text->len) && (x <= y))
@@ -636,7 +630,7 @@ int display_paint_screen(player *p)
         i++;
     }
 
-    for (y = 20, i = 0; (y < display_rows) && (i < text->len); i++, y++)
+    for (y = 20, i = 0; (y < (unsigned)LINES) && (i < text->len); i++, y++)
     {
         move(y, 0);
         clrtoeol();
@@ -719,10 +713,7 @@ void display_wrap(lua_State *L)
 
 int display_draw()
 {
-    /* mark stdscr for redraw */
-    wnoutrefresh(curscr);
-
-    /* mark windows for redraw */
+    /* mark stdscr and all panels for redraw */
     update_panels();
 
     /* finally commit all the prepared updates */
@@ -750,7 +741,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     display_window *ipop = NULL;
 
     /* the dialog width */
-    const guint width = display_cols - 4;
+    const guint width = COLS - 4;
 
     guint height, maxvis;
     guint len_orig, len_curr;
@@ -799,7 +790,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     do
     {
         /* calculate the dialog height */
-        height = min((display_rows - 10), len_curr + 2);
+        height = min((LINES - 10), len_curr + 2);
 
         /* calculate how many items can be displayed at a time */
         maxvis = min(len_curr, height - 2);
@@ -844,7 +835,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         }
 
         /* draw all items */
-        for (pos = 1; pos <= min(len_curr, maxvis); pos++)
+        for (pos = 1; pos <= (unsigned)min(len_curr, maxvis); pos++)
         {
             it = inv_get_filtered(*inv, (pos - 1) + offset, filter);
 
@@ -1128,8 +1119,8 @@ void display_config_autopickup(player *p)
     height = 6;
     width = max(36 /* length of first label */, IT_MAX * 2 + 1);
 
-    starty = (display_rows - height) / 2;
-    startx = (min(MAP_MAX_X, display_cols) - width) / 2;
+    starty = (LINES - height) / 2;
+    startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
     cwin = display_window_new(startx, starty, width, height, "Autopickup");
 
@@ -1196,7 +1187,7 @@ spell *display_spell_select(char *title, player *p)
     spell *sp;
 
     /* offset to element position (when displaying more than maxvis items) */
-    int offset = 0;
+    guint offset = 0;
 
     /* currently selected item */
     guint curr = 1;
@@ -1216,12 +1207,12 @@ spell *display_spell_select(char *title, player *p)
     g_ptr_array_sort(p->known_spells, &spell_sort);
 
     /* set height according to spell count */
-    height = min((display_rows - 3), (p->known_spells->len + 2));
+    height = min((LINES - 3), (p->known_spells->len + 2));
     maxvis = min(p->known_spells->len, height - 2);
 
     width = 44;
-    starty = (display_rows - height) / 2;
-    startx = (min(MAP_MAX_X, display_cols) - width) / 2;
+    starty = (LINES - height) / 2;
+    startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
     swin = display_window_new(startx, starty, width, height, title);
 
@@ -1510,13 +1501,13 @@ int display_get_count(char *caption, int value)
     basewidth = 8 + 5;
 
     /* choose a sane dialog width */
-    width = min(basewidth + strlen(caption), display_cols - 4);
+    width = min(basewidth + strlen(caption), COLS - 4);
 
     text = text_wrap(caption, width - basewidth, 0);
     height = 2 + text->len;
 
-    starty = (display_rows - height) / 2;
-    startx = (display_cols - width) / 2;
+    starty = (LINES - height) / 2;
+    startx = (COLS - width) / 2;
 
     mwin = display_window_new(startx, starty, width, height, NULL);
     wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
@@ -1719,7 +1710,7 @@ char *display_get_string(char *caption, char *value, size_t max_len)
 
     /* choose a sane dialog width */
     guint width;
-    guint maxwidth = display_cols - 4;
+    guint maxwidth = COLS - 4;
 
     /* prevent overly large input fields */
     if (max_len + basewidth > maxwidth)
@@ -1754,8 +1745,8 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     int height = 2 + text->len; /* borders and text length */
     if (box_start == 2) height += 1; /* grow the dialog if input box doesn't fit */
 
-    int starty = (display_rows - height) / 2;
-    int startx = (display_cols - width) / 2;
+    int starty = (LINES - height) / 2;
+    int startx = (COLS - width) / 2;
 
     display_window *mwin = display_window_new(startx, starty, width, height, NULL);
 
@@ -1927,7 +1918,7 @@ int display_get_yesno(char *question, char *yes, char *no)
 
     /* determine text width, either defined by space available  for the window
      * or the length of question */
-    text_width = min(display_cols - 2 /* borders */
+    text_width = min(COLS - 2 /* borders */
                      - (2 * margin) /* space outside window */
                      - (2 * padding), /* space between border and text */
                      strlen(question));
@@ -1948,8 +1939,8 @@ int display_get_yesno(char *question, char *yes, char *no)
                 text_width + 2 /* borders */ + (2 * padding));
 
     /* set startx and starty to something that makes sense */
-    startx = (min(MAP_MAX_X, display_cols) / 2) - (width / 2);
-    starty = (display_rows / 2) - 4;
+    startx = (min(MAP_MAX_X, COLS) / 2) - (width / 2);
+    starty = (LINES / 2) - 4;
 
     ywin = display_window_new(startx, starty, width, text->len + 4, NULL);
 
@@ -2094,8 +2085,8 @@ direction display_get_direction(char *title, int *available)
     width = max(9, strlen(title) + 4);
 
     /* set startx and starty to something that makes sense */
-    startx = (min(MAP_MAX_X, display_cols) / 2) - (width / 2);
-    starty = (display_rows / 2) - 4;
+    startx = (min(MAP_MAX_X, COLS) / 2) - (width / 2);
+    starty = (LINES / 2) - 4;
 
     dwin = display_window_new(startx, starty, width, 9, title);
 
@@ -2254,7 +2245,7 @@ position display_get_new_position(player *p, position start,
         pos = p->pos;
 
     /* display message */
-    msgpop = display_popup(3, min(MAP_MAX_Y + 4, display_rows - 4), 0, NULL, message);
+    msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message);
 
     /* make shortcut to map */
     map = game_map(nlarn, p->pos.z);
@@ -2589,7 +2580,7 @@ int display_show_message(const char *title, const char *message, int indent)
     gboolean RUN = TRUE;
 
     /* default window width according to available screen space */
-    width = display_cols - wred;
+    width = COLS - wred;
 
     /* wrap message according to width */
     text = text_wrap(message, width - 4, indent);
@@ -2603,10 +2594,10 @@ int display_show_message(const char *title, const char *message, int indent)
         width = max_len + wred;
 
     /* set height according to message line count */
-    height = min((display_rows - 3), (text->len + 2));
+    height = min((LINES - 3), (text->len + 2));
 
-    starty = (display_rows - height) / 2;
-    startx = (display_cols - width) / 2;
+    starty = (LINES - height) / 2;
+    startx = (COLS - width) / 2;
 
     mwin = display_window_new(startx, starty, width, height, title);
 
@@ -2700,9 +2691,10 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
 {
     display_window *win;
     GPtrArray *text;
-    int height, idx, attrs;
-    const guint max_width = display_cols - x1 - 1;
-    const guint max_height = display_rows - y1 - 1;
+    guint idx;
+    int height, attrs;
+    const guint max_width = COLS - x1 - 1;
+    const guint max_height = LINES - y1 - 1;
 
     if (width == 0)
     {
@@ -2715,7 +2707,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     else
     {
         /* width supplied. sanity check */
-        if (width > max_width)
+        if ((unsigned)width > max_width)
             width = max_width;
     }
 
@@ -2865,6 +2857,7 @@ static int display_window_move(display_window *dwin, int key)
            after everything else. */
         flushinp();
         break;
+
         /* ^left */
     case 541: /* NCurses - Linux */
     case 443: /* PDCurses - Windows */
@@ -2874,7 +2867,7 @@ static int display_window_move(display_window *dwin, int key)
         /* ^right */
     case 556: /* NCurses - Linux */
     case 444: /* PDCurses - Windows */
-        if (dwin->x1 < (display_cols - dwin->width)) dwin->x1++;
+        if (dwin->x1 < (COLS - dwin->width)) dwin->x1++;
         break;
 
         /* ^up */
@@ -2886,7 +2879,7 @@ static int display_window_move(display_window *dwin, int key)
         /* ^down */
     case 521: /* NCurses - Linux */
     case 481: /* PDCurses - Windows */
-        if (dwin->y1 < (display_rows - dwin->height)) dwin->y1++;
+        if (dwin->y1 < (LINES - dwin->height)) dwin->y1++;
         break;
 
     default:
