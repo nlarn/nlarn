@@ -2252,6 +2252,11 @@ position display_get_new_position(player *p, position start,
 
     do
     {
+#ifdef PDCURSES
+        /* I have no idea why, but the message popup window is hidden when
+        using PDCurses without calling touchwin for it. */
+        touchwin(msgpop->window);
+#endif
         /* redraw screen to erase previous modifications */
         display_paint_screen(p);
 
