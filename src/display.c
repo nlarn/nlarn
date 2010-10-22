@@ -1049,6 +1049,9 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         case KEY_LF:
         case KEY_CR:
+#ifdef PADENTER
+        case PADENTER:
+#endif
         case KEY_ENTER:
             if (callbacks == NULL)
             {
@@ -1149,6 +1152,9 @@ void display_config_autopickup(player *p)
         {
         case KEY_LF:
         case KEY_CR:
+#ifdef PADENTER
+        case PADENTER:
+#endif
         case KEY_ENTER:
         case KEY_ESC:
         case KEY_SPC:
@@ -1370,6 +1376,9 @@ spell *display_spell_select(char *title, player *p)
 
         case KEY_LF:
         case KEY_CR:
+#ifdef PADENTER
+        case PADENTER:
+#endif
         case KEY_ENTER:
         case KEY_SPC:
             // It is much too easy to accidentally cast alter reality,
@@ -1619,6 +1628,9 @@ int display_get_count(char *caption, int value)
 
         case KEY_LF:
         case KEY_CR:
+#ifdef PADENTER
+        case PADENTER:
+#endif
         case KEY_ENTER:
         case KEY_ESC:
             cont = FALSE;
@@ -1826,6 +1838,9 @@ char *display_get_string(char *caption, char *value, size_t max_len)
 
         case KEY_LF:
         case KEY_CR:
+#ifdef PADENTER
+        case PADENTER:
+#endif
         case KEY_ENTER:
         case KEY_ESC:
             cont = FALSE;
@@ -2005,6 +2020,9 @@ int display_get_yesno(char *question, char *yes, char *no)
 
         case KEY_LF:
         case KEY_CR:
+#ifdef PADENTER
+        case PADENTER:
+#endif
         case KEY_ENTER:
         case KEY_SPC:
             RUN = FALSE;
@@ -2361,6 +2379,9 @@ position display_get_new_position(player *p, position start,
 
         case KEY_LF:
         case KEY_CR:
+#ifdef PADENTER
+        case PADENTER:
+#endif
         case KEY_ENTER:
         case KEY_SPC:
             RUN = FALSE;

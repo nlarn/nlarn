@@ -30,8 +30,7 @@
 /* missing key definitions */
 #define KEY_BS   8 /* backspace */
 #define KEY_TAB  9 /* tab */
-#define KEY_LF  10 /* line feed, i.e. numeric keypad enter */
-#define KEY_FF  12 /* form feed */
+#define KEY_LF  10 /* line feed, i.e. enter */
 #define KEY_CR  13 /* carriage return */
 #define KEY_ESC 27 /* escape */
 #define KEY_SPC 32 /* space */
