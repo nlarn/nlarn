@@ -1,3 +1,57 @@
+Release 0.6.1 (2010-10-22)
+-------------
+
+Changes: 
+    * Several improvements to auto-travel.
+    * Permanently display the item description in the inventory.
+    * Modified behaviour when picking up items: 
+        ',' just gets the item
+        'g' asks for the amount to pick up
+      Reported by Xecutor.
+    * Use shortened weapon names for the wielded weapon display.
+    * Added an option to disable automatic saving.
+    * Show spell level in book description.
+    * Set native end-of-line characters for nlarn.ini-sample. Reported by
+      R. Alan Monroe.
+    * Show a popup message when loading or saving the game.
+    * Display the message when selecting a position in an popup window.
+      Return the cursor to the player with '@'.
+    * Disable auto-pickup for the player's position after the player has 
+      chosen to abort picking up an item.
+    * Added a message when aborting a spell or hitting an unseen monster 
+      with a spell.
+    * Blessed scrolls of teleport always take the player to town. 
+
+Fixed bugs:
+    * Recognize keypad enter on Windows. Reported by Xecutor and Michael Ax.
+    * Allow using numpad direction keys for fast movement with num lock
+      off on Windows. 
+    * Offer only items that can be blessed or cursed for curse removal or
+      blessing.
+    * Delete the player's memory of the map when successfully casting 'alter
+      reality. Reported by Michael Ax. 
+    * Fixed the scroll of genocide monster. Reported by Michael Ax. 
+    * Interpret 'j' and 'k' as mnemonic letters in the spell casting dialog
+      when another letter has been entered before. 
+    * Abort spawning new monsters when a map is fully crowded. 
+      Recalculate number of monsters on a map when restoring a saved game. 
+      Previously, an unlimited number of monsters has been created when
+      restoring a game frequently. Reported by Peter Casey and Michael Ax.
+    * Added missing monster effect descriptions. Without this, the monster
+      description returned "An uninjured elf, fleeing ()." for an elf
+      affected by "phantasmal forces".
+    * Fixed a very frequent random crash, a very rare crash, and some 
+      pieces of code that potentially could have caused crashes. 
+    * Make aborted spells not cost turns.
+    * Fix an assertion when aborting phantasmal forces and an information 
+      leak in that spell.
+    * Initialize wizard_mode game property before creating a new game. This
+      is necessary if we want to stock the DND store differently depending 
+      on whether a game is started in wizard mode or not.
+    * Remove notes from items sold to the trade post.
+    * Fixed many memory leaks. 
+    * Fixed a typo.
+
 Release 0.6.0 (2010-09-19)
 -------------
 
