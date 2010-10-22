@@ -11,7 +11,7 @@ if [ "$OS" = "Windows_NT" ]
 then
 	OS=win32
 	SUFFIX="zip"
-	EXE="nlarn.exe pdcurses.dll libglib-2.0-0.dll libz-1.dll lua51.dll"
+	EXE="nlarn.exe libglib-2.0-0.dll libz-1.dll"
 	export CC=gcc
 else
 	OS=$(uname -s)
@@ -20,7 +20,7 @@ else
 fi
 
 MAINFILES="$EXE nlarn.ini-sample README.txt LICENSE"
-LIBFILES="lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg lib/monsters.lua"
+LIBFILES="lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.hlp lib/nlarn.msg lib/monsters.lua"
 
 VERSION_MAJOR=$(grep VERSION_MAJOR inc/nlarn.h | cut -f 3 -d" ")
 VERSION_MINOR=$(grep VERSION_MINOR inc/nlarn.h | cut -f 3 -d" ")
