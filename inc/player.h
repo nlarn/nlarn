@@ -376,18 +376,6 @@ void player_item_drop(player *p, inventory **inv, item *it);
  */
 void player_item_notes(player *p, inventory **inv, item *it);
 
-/**
- * @brief Try to pick up an item.
- *
- * @param the player
- * @param the source inventory
- * @param the item to pick up
- * @return 0 if the action has been successfully completed
- *         1 if the action has been canceled,
- *         2 when the pre_add callback function failed (e.g. the item is too heavy),
- */
-guint player_item_pickup(player *p, inventory **inv, item *it);
-
 /* item usage shortcuts */
 void player_read(player *p);
 void player_quaff(player *p);

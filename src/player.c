@@ -97,13 +97,11 @@ static const guint32 player_lvl_exp[] =
     250000000, 260000000, 270000000, 280000000, 290000000, 300000000                           /* 96-101*/
 };
 
-/* a little helper: will be set by player_autopickup() to prevent
-   player_item_pickup() asking how many items of a kind shall be picked up */
-
-static gboolean called_by_autopickup = FALSE;
-
 /* function declarations */
 
+static guint player_item_pickup_all(player *p, inventory **inv, item *it);
+static guint player_item_pickup_ask(player *p, inventory **inv, item *it);
+static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean ask);
 static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 static void player_sobject_memorize(player *p, map_sobject_t sobject, position pos);
 static int player_sobjects_sort(gconstpointer a, gconstpointer b);
@@ -113,6 +111,7 @@ static char *player_death_description(game_score_t *score, int verbose);
 static int item_filter_unequippable(item *it);
 static int item_filter_equippable(item *it);
 static int item_filter_dropable(item *it);
+static int player_item_filter_multiple(player *p, item *it);
 
 player *player_new()
 {
@@ -1939,7 +1938,7 @@ void player_pickup(player *p)
     }
     else if (inv_length(*inv) == 1)
     {
-        player_item_pickup(p, inv, inv_get(*inv, 0));
+        player_item_pickup(p, inv, inv_get(*inv, 0), TRUE);
     }
     else
     {
@@ -1947,10 +1946,18 @@ void player_pickup(player *p)
         callbacks = g_ptr_array_new();
 
         callback = g_malloc0(sizeof(display_inv_callback));
-        callback->description = "(g)et";
+        callback->description = "(,) get";
+        callback->key = ',';
+        callback->inv = inv;
+        callback->function = (display_inv_callback_func)&player_item_pickup_all;
+        g_ptr_array_add(callbacks, callback);
+
+        callback = g_malloc0(sizeof(display_inv_callback));
+        callback->description = "(g)et partly";
         callback->key = 'g';
         callback->inv = inv;
-        callback->function = (display_inv_callback_func)&player_item_pickup;
+        callback->checkfun = &player_item_filter_multiple;
+        callback->function = (display_inv_callback_func)&player_item_pickup_ask;
         g_ptr_array_add(callbacks, callback);
 
         display_inventory("On the floor", p, inv, callbacks, FALSE,
@@ -1977,9 +1984,6 @@ void player_autopickup(player *p)
 
     floor = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
 
-    /* set flag to tell player_item_pickup() not to ask about the amount */
-    called_by_autopickup = TRUE;
-
     for (idx = 0; idx < inv_length(*floor); idx++)
     {
         item *i = inv_get(*floor, idx);
@@ -1991,14 +1995,11 @@ void player_autopickup(player *p)
             int count_orig = inv_length(*floor);
 
             /* try to pick up the item */
-            retval = player_item_pickup(p, floor, i);
+            retval = player_item_pickup(p, floor, i, FALSE);
 
             if (retval == 1)
-            {
                 /* pickup has been canceled by the player */
-                called_by_autopickup = FALSE;
                 return;
-            }
 
             if (count_orig != inv_length(*floor))
             {
@@ -2014,9 +2015,6 @@ void player_autopickup(player *p)
                 other_item_id = idx;
         }
     }
-
-    /* reset flag */
-    called_by_autopickup = FALSE;
 
     if (did_pickup && other_items_count > 0)
     {
@@ -3997,76 +3995,6 @@ void player_item_notes(player *p, inventory **inv, item *it)
     g_free(caption);
 }
 
-guint player_item_pickup(player *p, inventory **inv, item *it)
-{
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
-
-    char desc[61];
-    guint count = 0;
-    gpointer oid = it->oid;
-    guint gold_amount = 0;
-
-    if ((!called_by_autopickup) && (it->count > 1))
-    {
-        g_snprintf(desc, 60, "Pick up how many %s?", item_name_pl(it->type));
-
-        count = display_get_count(desc, it->count);
-
-        if (count == 0)
-            return 0;
-
-        if (count < it->count)
-        {
-            it = item_split(it, count);
-            /* set oid to NULL to prevent that the original is remove
-               from the originating inventory */
-            oid = NULL;
-        }
-    }
-
-    /* Log the attempt to pick up the item */
-    item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
-    log_add_entry(nlarn->log, "You pick up %s.", desc);
-
-    if (it->type == IT_GOLD)
-    {
-        /* record the amound of gold as the item might be destroyed */
-        gold_amount = it->count;
-    }
-
-    /* one turn to pick item up, one to stuff it into the pack */
-    if (!player_make_move(p, 2, TRUE, "picking up %s", desc))
-    {
-        /* Adding the item to the player's inventory has failed.
-           If the item has been split, return it to the originating inventory */
-        if (oid == NULL) inv_add(inv, it);
-
-        return 1;
-    }
-
-    if (!inv_add(&p->inventory, it))
-    {
-        /* Adding the item to the player's inventory has failed.
-           If the item has been split, return it to the originating inventory */
-        if (oid == NULL) inv_add(inv, it);
-
-        return 2;
-    }
-
-    if (gold_amount > 0)
-    {
-        /* if the player has tried to pick up gold and succeeded in doing so,
-           add the amount picked up to the statistics */
-        p->stats.gold_found += gold_amount;
-    }
-
-    /* remove the item from the originating inventory if it has not been split */
-    if (oid != NULL)
-        inv_del_oid(inv, oid);
-
-    return 0;
-}
-
 void player_read(player *p)
 {
     item *it;
@@ -4561,6 +4489,86 @@ int player_pos_visible(player *p, position pos)
 {
     assert (p != NULL && pos_valid(pos));
     return (p->pos.z == pos.z) && p->fov[pos.y][pos.x];
+}
+
+static guint player_item_pickup_all(player *p, inventory **inv, item *it)
+{
+    return player_item_pickup(p, inv, it, FALSE);
+}
+
+static guint player_item_pickup_ask(player *p, inventory **inv, item *it)
+{
+    return player_item_pickup(p, inv, it, TRUE);
+}
+
+static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean ask)
+{
+    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    char desc[61];
+    guint count = 0;
+    gpointer oid = it->oid;
+    guint gold_amount = 0;
+
+    if (ask && (it->count > 1))
+    {
+        g_snprintf(desc, 60, "Pick up how many %s?", item_name_pl(it->type));
+
+        count = display_get_count(desc, it->count);
+
+        if (count == 0)
+            return 0;
+
+        if (count < it->count)
+        {
+            it = item_split(it, count);
+            /* set oid to NULL to prevent that the original is remove
+               from the originating inventory */
+            oid = NULL;
+        }
+    }
+
+    /* Log the attempt to pick up the item */
+    item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
+    log_add_entry(nlarn->log, "You pick up %s.", desc);
+
+    if (it->type == IT_GOLD)
+    {
+        /* record the amound of gold as the item might be destroyed */
+        gold_amount = it->count;
+    }
+
+    /* one turn to pick item up, one to stuff it into the pack */
+    if (!player_make_move(p, 2, TRUE, "picking up %s", desc))
+    {
+        /* Adding the item to the player's inventory has failed.
+           If the item has been split, return it to the originating inventory */
+        if (oid == NULL) inv_add(inv, it);
+
+        return 1;
+    }
+
+    if (!inv_add(&p->inventory, it))
+    {
+        /* Adding the item to the player's inventory has failed.
+           If the item has been split, return it to the originating inventory */
+        if (oid == NULL) inv_add(inv, it);
+
+        return 2;
+    }
+
+    if (gold_amount > 0)
+    {
+        /* if the player has tried to pick up gold and succeeded in doing so,
+           add the amount picked up to the statistics */
+        p->stats.gold_found += gold_amount;
+    }
+
+    /* remove the item from the originating inventory if it has not been split */
+    if (oid != NULL)
+        inv_del_oid(inv, oid);
+
+    return 0;
 }
 
 static void player_calculate_octant(player *p, int row, float start,
@@ -5133,4 +5141,9 @@ static int item_filter_equippable(item *it)
 static int item_filter_dropable(item *it)
 {
     return player_item_is_dropable(nlarn->p, it);
+}
+
+static int player_item_filter_multiple(player *p, item *it)
+{
+    return (it->count > 1);
 }
