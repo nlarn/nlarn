@@ -206,6 +206,9 @@ int main(int argc, char *argv[])
                     break;
 
                 case KEY_DOWN:
+#ifdef KEY_C2
+                case KEY_C2:
+#endif
                 case '2':
                     ch = 'J';
                     break;
@@ -217,15 +220,22 @@ int main(int argc, char *argv[])
                     break;
 
                 case KEY_LEFT:
+#ifdef KEY_B1
+                case KEY_B1:
+#endif
                 case '4':
                     ch = 'H';
                     break;
 
                 case '5':
+                case KEY_B2:
                     ch = 'w';
                     break;
 
                 case KEY_RIGHT:
+#ifdef KEY_B3
+                case KEY_B3:
+#endif
                 case '6':
                     ch = 'L';
                     break;
@@ -237,6 +247,9 @@ int main(int argc, char *argv[])
                     break;
 
                 case KEY_UP:
+#ifdef KEY_A2
+                case KEY_A2:
+#endif
                 case '8':
                     ch = 'K';
                     break;
