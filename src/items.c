@@ -1842,13 +1842,15 @@ int item_filter_cursed(item *it)
 int item_filter_cursed_or_unknown(item *it)
 {
     assert (it != NULL);
-    return (it->cursed == TRUE || it->blessed_known == FALSE);
+    return (it->cursed == TRUE
+            || (it->blessed_known == FALSE && item_is_blessable(it->type)));
 }
 
 int item_filter_nonblessed(item *it)
 {
     assert (it != NULL);
-    return (it->blessed == FALSE || it->blessed_known == FALSE);
+    return (it->blessed == FALSE
+            || (it->blessed_known == FALSE && item_is_blessable(it->type)));
 }
 
 int item_filter_pcd(item *it)
