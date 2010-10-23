@@ -23,16 +23,16 @@
 
 const ring_data rings[RT_MAX] =
 {
-    /* type            name                  effect           price bo */
-    { RT_NONE,         "",                   ET_NONE,            0, 0, },
-    { RT_REGENERATION, "regeneration",       ET_INC_HP_REGEN,  250, 0, },
-    { RT_PROTECTION,   "protection",         ET_PROTECTION,    150, 1, },
-    { RT_ENERGY,       "energy",             ET_INC_MP_REGEN,  250, 0, },
-    { RT_DEXTERITY,    "dexterity",          ET_INC_DEX,       110, 1, },
-    { RT_STRENGTH,     "strength",           ET_INC_STR,       110, 1, },
-    { RT_CLEVERNESS,   "cleverness",         ET_INC_INT,       110, 1, },
-    { RT_INC_DAMAGE,   "increase damage",    ET_INC_DAMAGE,    150, 0, },
-    { RT_EXTRA_REGEN,  "extra regeneration", ET_INC_HP_REGEN, 1000, 0, },
+    /* type            name                  effect           price ob bo */
+    { RT_NONE,         "",                   ET_NONE,            0, 0, 0 },
+    { RT_REGENERATION, "regeneration",       ET_INC_HP_REGEN,  250, 0, 0 },
+    { RT_PROTECTION,   "protection",         ET_PROTECTION,    150, 0, 1 },
+    { RT_ENERGY,       "energy",             ET_INC_MP_REGEN,  250, 0, 0 },
+    { RT_DEXTERITY,    "dexterity",          ET_INC_DEX,       110, 1, 1 },
+    { RT_STRENGTH,     "strength",           ET_INC_STR,       110, 1, 1 },
+    { RT_CLEVERNESS,   "cleverness",         ET_INC_INT,       110, 1, 1 },
+    { RT_INC_DAMAGE,   "increase damage",    ET_INC_DAMAGE,    150, 0, 0 },
+    { RT_EXTRA_REGEN,  "extra regeneration", ET_INC_HP_REGEN, 1000, 0, 0 },
 };
 
 static const int ring_materials[RT_MAX - 1] =

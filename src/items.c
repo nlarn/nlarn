@@ -1349,7 +1349,6 @@ int item_obtainable(item_t type, int id)
     switch (type)
     {
     case IT_ARMOUR:
-    case IT_RING:
         obtainable = TRUE;
         break;
 
@@ -1357,8 +1356,16 @@ int item_obtainable(item_t type, int id)
         obtainable = book_type_obtainable(id);
         break;
 
+    case IT_CONTAINER:
+        obtainable = (id == CT_BAG);
+        break;
+
     case IT_POTION:
         obtainable = potion_type_obtainable(id);
+        break;
+
+    case IT_RING:
+        obtainable = ring_type_obtainable(id);
         break;
 
     case IT_SCROLL:
@@ -1367,10 +1374,6 @@ int item_obtainable(item_t type, int id)
 
     case IT_WEAPON:
         obtainable = weapon_type_obtainable(id);
-        break;
-
-    case IT_CONTAINER:
-        obtainable = (id == CT_BAG);
         break;
 
     default:

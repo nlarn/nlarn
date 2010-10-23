@@ -43,6 +43,7 @@ typedef struct ring_data
     effect_type effect; /* effect causes by this ring */
     int price;
     unsigned
+        obtainable: 1,  /* is available for sale in the shop */
         bonus_obs: 1;   /* can determine bonus by using */
 } ring_data;
 
@@ -60,5 +61,7 @@ extern const ring_data rings[RT_MAX];
 #define ring_effect_type(item)   (rings[(item)->id].effect)
 #define ring_price(item)         (rings[(item)->id].price)
 #define ring_bonus_is_obs(item)  (rings[(item)->id].bonus_obs)
+
+#define ring_type_obtainable(type) (rings[type].obtainable)
 
 #endif
