@@ -77,7 +77,7 @@ Buildings:
     L   lrs (tax bureau)
     S   school
     B   bank
-    M   monastry
+    M   monastery
 
 These should not be used outside the town map.
 
