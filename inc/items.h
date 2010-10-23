@@ -376,9 +376,15 @@ int item_filter_cursed_or_unknown(item *it);
 int item_filter_nonblessed(item *it);
 
 /**
- * @brief Item filter function for the potion of cure diantroritis.
+ * @brief Item filter function for the potion of cure dianthroritis.
  * @param a pointer to an item
- * @return TRUE if the supplied item is the potion of cure diantrorihis
+ * @return TRUE if the supplied item is the potion of cure dianthroritis
  */
 int item_filter_pcd(item *it);
+/**
+ * @brief Item filter function for blank scrolls.
+ * @param a pointer to an item
+ * @return TRUE if the supplied item is a blank scroll
+ */
+int item_filter_blank_scroll(item *it);
 #endif

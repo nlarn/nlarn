@@ -154,11 +154,10 @@ player *player_new()
     inv_add(&p->inventory, it);
     player_item_equip(p, NULL, it);
 
-    /* potion of cure dianthroritis is always known */
+    /* some items are always known */
     p->identified_potions[PO_CURE_DIANTHR] = TRUE;
-
-    // as is holy water
     p->identified_potions[PO_WATER] = TRUE;
+    p->identified_scrolls[ST_BLANK] = TRUE;
 
     return p;
 }

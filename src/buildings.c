@@ -24,6 +24,7 @@
 #include "items.h"
 #include "nlarn.h"
 #include "player.h"
+#include "scrolls.h"
 
 static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
                                       "us to not do business with tax evaders. " \
@@ -452,6 +453,113 @@ int building_lrs(player *p)
     return turns;
 }
 
+static int building_scribe_scroll(player *p, int mobuls)
+{
+    int price;
+    int turns = 2;
+    int i;
+    gboolean split = FALSE;
+    item *scroll;
+    char question[81] = { 0 };
+
+    /* check if the player owns a blank scroll */
+    if (!inv_length_filtered(p->inventory, item_filter_blank_scroll))
+    {
+        log_add_entry(nlarn->log, "To write a scroll, "
+                      "the scribes require a blank scroll.");
+        return turns;
+    }
+
+    scroll = display_inventory("Choose a scroll to inscribe", p,
+                               &p->inventory, NULL, FALSE, FALSE,
+                               FALSE, item_filter_blank_scroll);
+
+    if (!scroll)
+    {
+        log_add_entry(nlarn->log, "Okay then.");
+        return turns;
+    }
+
+    char *new_scroll = display_get_string("Write what scroll?", NULL, 45);
+    if (new_scroll == NULL)
+    {
+        log_add_entry(nlarn->log, "Okay then.");
+        return turns;
+    }
+
+    for (i = 1; i < ST_MAX; i++)
+    {
+        if (g_strcmp0(new_scroll, scrolls[i].name) == 0)
+            break;
+    }
+
+    /* free memory alloc'd by display_get_string */
+    g_free(new_scroll);
+
+    if (i == ST_MAX)
+    {
+        log_add_entry(nlarn->log,
+                      "The scribes haven't ever heard of any such scroll!");
+        return turns;
+    }
+
+    /* jesters might want to get a scroll of blank paper */
+    if (i == ST_BLANK)
+    {
+        log_add_entry(nlarn->log, "The scribes can only write something written!");
+        return turns;
+    }
+
+    /* player has chosen which scroll to write, check if (s)he can afford it */
+    price = 2 * scrolls[i].price;
+    if (!building_player_check(p, price))
+    {
+        log_add_entry(nlarn->log, "You cannot afford the %d gold for the scroll of %s.",
+                      price, scrolls[i].name);
+
+        return turns;
+    }
+
+    g_snprintf(question, 80, "Writing a scroll of %s costs %d gold.\n"
+               "Are you fine with that?", scrolls[i].name, price);
+
+    if (!display_get_yesno(question, NULL, NULL))
+    {
+        log_add_entry(nlarn->log, "You refuse to pay %d gold for a scroll of %s.",
+                      price, scrolls[i].name);
+        return turns;
+    }
+
+    /** Okay, we write the scroll. */
+
+    // If necessary, split a stack of scrolls.
+    if (scroll->count > 1)
+    {
+        scroll = item_split(scroll, 1);
+        split = TRUE;
+    }
+
+    scroll->id = i;
+    p->identified_scrolls[i] = TRUE;
+
+    building_player_charge(p, price);
+    p->stats.gold_spent_college += price;
+
+    log_add_entry(nlarn->log, "The scribes start writing a scroll of %s for you.",
+                  scroll_name(scroll));
+
+    player_make_move(p, mobuls2gtime(mobuls), FALSE, NULL);
+    log_add_entry(nlarn->log,
+                  "The scribes finished writing a scroll of %s for you.",
+                  scroll_name(scroll));
+
+    if (split)
+        inv_add(&p->inventory, scroll);
+
+    /* time usage */
+    return turns;
+}
+
 int building_school(player *p)
 {
     /* the number of turns it takes to enter and leave the school */
@@ -481,6 +589,7 @@ int building_school(player *p)
         { 10, -1, "Faith for Today", "You now feel more confident that you can find the potion in time!" },
         { 10, -1, "Contemporary Dance", "You feel like dancing!" },
         {  5, -1, "History of Larn", "Your instructor told you that the Eye of Larn is rumored to be guarded by an invisible demon lord." },
+        { 10, -1,  "Commission a scroll", NULL }
     };
 
     assert(p != NULL);
@@ -490,7 +599,7 @@ int building_school(player *p)
 
     text = g_string_new(msg_greet);
 
-    for (idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
+    for (idx = 0; idx < SCHOOL_COURSE_COUNT - 1; idx++)
     {
         if (!p->school_courses_taken[idx])
         {
@@ -505,6 +614,10 @@ int building_school(player *p)
     }
 
     g_string_append_printf(text, msg_price, price);
+    g_string_append_printf(text, "\n\nAlternatively,\n"
+                           "  %c) %-30s (%2d mobuls)\n\n",
+                           idx + 'a', school_courses[idx].description,
+                           school_courses[idx].course_time);
 
     selection = display_show_message("School", text->str, 0);
     g_string_free(text, TRUE);
@@ -512,9 +625,12 @@ int building_school(player *p)
     selection -= 'a';
 
     if ((selection >= 0)
-            && ((selection) < SCHOOL_COURSE_COUNT)
+            && (selection < SCHOOL_COURSE_COUNT)
             && !p->school_courses_taken[(int)selection])
     {
+        if (selection == SCHOOL_COURSE_COUNT - 1)
+            return building_scribe_scroll(p, school_courses[(int)selection].course_time);
+
         if (!building_player_check(p, price))
         {
             log_add_entry(nlarn->log,

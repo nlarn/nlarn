@@ -1859,6 +1859,12 @@ int item_filter_pcd(item *it)
     return (it->type == IT_POTION && it->id == PO_CURE_DIANTHR);
 }
 
+int item_filter_blank_scroll(item *it)
+{
+    assert (it != NULL);
+    return (it->type == IT_SCROLL && it->id == ST_BLANK);
+}
+
 static const char *item_desc_get(item *it, int known)
 {
     assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
