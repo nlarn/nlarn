@@ -110,7 +110,7 @@ void container_open(player *p, inventory **inv, item *container)
 
 void container_item_add(player *p, inventory **inv, item *element)
 {
-    item *container = NULL;
+    inventory **target_inv = NULL;
     gchar container_desc[61]  = { 0 };
     gchar element_desc[61]  = { 0 };
     guint pilen = 0; /* length of player's filtered inventory */
@@ -120,8 +120,15 @@ void container_item_add(player *p, inventory **inv, item *element)
 
     assert(p != NULL && element != NULL);
 
-    if (inv == NULL || (inv == &p->inventory))
+    if (inv == &nlarn->player_home)
     {
+        /* player wants to deposit something at home */
+        g_snprintf(container_desc, 60, "your storage room at home");
+        target_inv = &nlarn->player_home;
+    }
+    else if (inv == NULL || (inv == &p->inventory))
+    {
+        item *container = NULL;
         inventory **floor = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
         pilen = inv_length_filtered(p->inventory, item_filter_container);
         filen = inv_length_filtered(*floor, item_filter_container);
@@ -152,20 +159,24 @@ void container_item_add(player *p, inventory **inv, item *element)
             container = display_inventory("Choose a container", p, floor, NULL,
                                           FALSE, FALSE, FALSE, item_filter_container);
         }
+
+        /* has a container been found? */
+        if (container == NULL)
+        {
+            /* no container has been selected */
+            log_add_entry(nlarn->log, "Huh?");
+            return;
+        }
+
+        /* set target inventory for item movement */
+        target_inv = &container->content;
+
+        /* prepare container description */
+        item_describe(container, TRUE, TRUE, TRUE, container_desc, 60);
+
+        if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
+            return; /* interrupted */
     }
-
-    if (container == NULL)
-    {
-        /* no container has been selected */
-        log_add_entry(nlarn->log, "Huh?");
-        return;
-    }
-
-    /* prepare container description */
-    item_describe(container, TRUE, TRUE, TRUE, container_desc, 60);
-
-    if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
-        return; /* interrupted */
 
     /* mute the log if the container is in the player's inventory.
        otherwise mindless burdened staus messages would appear */
@@ -173,7 +184,7 @@ void container_item_add(player *p, inventory **inv, item *element)
 
     if (element->count > 1)
     {
-        g_snprintf(element_desc, 60, "How many %s do you want to put into the %s?",
+        g_snprintf(element_desc, 60, "How many %s do you want to put into %s?",
                    item_name_pl(element->type), container_desc);
 
         count = display_get_count(element_desc, element->count);
@@ -212,7 +223,7 @@ void container_item_add(player *p, inventory **inv, item *element)
     if (element->type == IT_GOLD)
         p->stats.gold_found -= element->count;
 
-    inv_add(&container->content, element);
+    inv_add(target_inv, element);
 
     if (carried_container)
     {

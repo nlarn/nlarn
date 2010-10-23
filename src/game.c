@@ -405,10 +405,16 @@ int game_save(game *g, const char *filename)
         cJSON_AddItemToObject(save, "store_stock", inv_serialize(g->store_stock));
     }
 
-    /* monatry stock */
+    /* monastery stock */
     if (inv_length(g->monastery_stock) > 0)
     {
         cJSON_AddItemToObject(save, "monastery_stock", inv_serialize(g->monastery_stock));
+    }
+
+    /* storage at player's home */
+    if (inv_length(g->player_home) > 0)
+    {
+        cJSON_AddItemToObject(save, "player_home", inv_serialize(g->player_home));
     }
 
     /* log */
@@ -952,6 +958,10 @@ static gboolean game_load(gchar *filename)
     /* restore monastery stock */
     obj = cJSON_GetObjectItem(save, "monastery_stock");
     if (obj != NULL) nlarn->monastery_stock = inv_deserialize(obj);
+
+    /* restore storage of player's home */
+    obj = cJSON_GetObjectItem(save, "player_home");
+    if (obj != NULL) nlarn->player_home = inv_deserialize(obj);
 
     /* restore log */
     nlarn->log = log_deserialize(cJSON_GetObjectItem(save, "log"));

@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "container.h"
 #include "display.h"
 #include "gems.h"
 #include "items.h"
@@ -309,6 +310,8 @@ int building_home(player *p)
     int turns = 2;
     GString *text;
 
+    const char title[] = "Your home";
+
     const char msg_home[] = "Welcome home, %s.\n\nLatest word from the doctor " \
                             "is not good. The diagnosis is confirmed as " \
                             "dianthroritis. He guesses that your daughter " \
@@ -377,13 +380,81 @@ int building_home(player *p)
     else
     {
         /* casual visit, report remaining time */
+
+        int choice;
+        GPtrArray *callbacks;
+        display_inv_callback *callback;
+
         text = g_string_new(NULL);
         g_string_printf(text, msg_home, p->name,
                         gtime2mobuls(game_remaining_turns(nlarn)),
                         p->name);
 
-        display_show_message("Your home", text->str, 0);
+        /* check if the player can deposit something at home or has already done so */
+        if ((inv_length(p->inventory) > 0) || (inv_length(nlarn->player_home) > 0))
+        {
+            g_string_append_printf(text, "\n\nYou may\n");
+
+            if (inv_length(p->inventory) > 0)
+                g_string_append_printf(text, "  d) Deposit something here\n");
+
+            if (inv_length(nlarn->player_home) > 0)
+                g_string_append_printf(text, "  t) Take something with you\n");
+
+            g_string_append_c(text, '\n');
+        }
+
+        choice = display_show_message(title, text->str, 0);
         g_string_free(text, TRUE);
+
+        switch (choice)
+        {
+            /* deposit something */
+        case 'd':
+            if (inv_length(p->inventory) > 0)
+            {
+                /* prepare callback functions */
+                callbacks = g_ptr_array_new();
+
+                callback = g_malloc0(sizeof(display_inv_callback));
+                callback->description = "(d)eposit";
+                callback->key = 'd';
+                callback->inv = &nlarn->player_home;
+                callback->function = &container_item_add;
+                callback->active = TRUE;
+
+                g_ptr_array_add(callbacks, callback);
+
+                display_inventory(title, p, &p->inventory, callbacks, FALSE,
+                                  TRUE, FALSE, NULL);
+
+                display_inv_callbacks_clean(callbacks);
+            }
+            break;
+
+            /* take something */
+        case 't':
+            if (inv_length(nlarn->player_home) > 0)
+            {
+                /* prepare callback functions */
+                callbacks = g_ptr_array_new();
+
+                callback = g_malloc0(sizeof(display_inv_callback));
+                callback->description = "(t)ake";
+                callback->key = 't';
+                callback->inv = &nlarn->player_home;
+                callback->function = &container_item_unpack;
+                callback->active = TRUE;
+
+                g_ptr_array_add(callbacks, callback);
+
+                display_inventory(title, p, &nlarn->player_home, callbacks, FALSE,
+                                  TRUE, FALSE, NULL);
+
+                display_inv_callbacks_clean(callbacks);
+            }
+            break;
+        }
     }
 
     return turns;

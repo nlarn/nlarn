@@ -55,6 +55,9 @@ typedef struct game
     /* stock of the monastery */
     inventory *monastery_stock;
 
+    /* storage of player's home */
+    inventory *player_home;
+
     /* item / monster status */
     int amulet_created[AM_MAX];
     int weapon_created[WT_MAX];
