@@ -135,7 +135,7 @@ int display_paint_screen(player *p)
 
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            if (game_wizardmode(nlarn) || player_pos_visible(p, pos))
+            if (game_fullvis(nlarn) || player_pos_visible(p, pos))
             {
                 /* draw the truth */
                 inventory **inv = map_ilist_at(map, pos);
@@ -177,7 +177,7 @@ int display_paint_screen(player *p)
                     addch(item_glyph(it->type));
                     attroff(attrs);
                 }
-                else if (map_trap_at(map, pos) && (game_wizardmode(nlarn) || player_memory_of(p, pos).trap))
+                else if (map_trap_at(map, pos) && (game_fullvis(nlarn) || player_memory_of(p, pos).trap))
                 {
                     /* FIXME - displays trap when unknown!! */
                     attron(attrs = trap_colour(map_trap_at(map, pos)));
@@ -192,7 +192,7 @@ int display_paint_screen(player *p)
                     attroff(attrs);
                 }
             }
-            else /* i.e. !wizardmode && !visible: draw players memory */
+            else /* i.e. !fullvis && !visible: draw players memory */
             {
                 const gboolean has_items = player_memory_of(p, pos).item;
                 if (player_memory_of(p, pos).sobject)
@@ -239,7 +239,7 @@ int display_paint_screen(player *p)
                 continue;
             }
 
-            if (game_wizardmode(nlarn)
+            if (game_fullvis(nlarn)
                     || player_effect(p, ET_DETECT_MONSTER)
                     || monster_in_sight(monst))
             {
@@ -3054,7 +3054,7 @@ static void display_spheres_paint(sphere *s, player *p)
     if (!(s->pos.z == p->pos.z))
         return;
 
-    if (game_wizardmode(nlarn) || player_pos_visible(p, s->pos))
+    if (game_fullvis(nlarn) || player_pos_visible(p, s->pos))
     {
         attron(DC_MAGENTA);
         mvaddch(s->pos.y, s->pos.x, '0');

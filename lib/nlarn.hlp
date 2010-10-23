@@ -93,3 +93,4 @@ The forth column shows the character's knowledge level of that spell. The higher
 *     add 1000 gp to bank account
 &     heal yourself
 ^F    combat simulation
+^V    toggle visibility of entire map

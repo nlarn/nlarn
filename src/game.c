@@ -397,6 +397,7 @@ int game_save(game *g, const char *filename)
                           cJSON_CreateIntArray(g->monster_genocided, MT_MAX));
 
     if (g->wizard) cJSON_AddTrueToObject(save, "wizard");
+    if (g->fullvis) cJSON_AddTrueToObject(save, "fullvis");
 
     /* store stock */
     if (inv_length(g->store_stock) > 0)
@@ -864,6 +865,9 @@ static gboolean game_load(gchar *filename)
 
     if (cJSON_GetObjectItem(save, "wizard"))
         nlarn->wizard = TRUE;
+
+    if (cJSON_GetObjectItem(save, "fullvis"))
+        nlarn->fullvis = TRUE;
 
     obj = cJSON_GetObjectItem(save, "amulet_created");
     size = cJSON_GetArraySize(obj);

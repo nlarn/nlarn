@@ -654,6 +654,13 @@ int main(int argc, char *argv[])
             break;
 
             /* *** DEBUGGING SUPPORT *** */
+
+            /* toggle visibility of entire map in wizard mode */
+        case 22: /* ^V */
+            if (game_wizardmode(nlarn))
+                game_fullvis(nlarn) = (!game_fullvis(nlarn));
+            break;
+
         case '*':
             if (game_wizardmode(nlarn)) nlarn->p->bank_account += 1000;
             break;
