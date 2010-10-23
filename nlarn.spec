@@ -1,5 +1,5 @@
 Name: nlarn
-Version: 0.6.1
+Version: 0.7.0
 Release: 1
 Summary: A remake of the roguelike game Larn
 
@@ -34,9 +34,12 @@ rm -rf $RPM_BUILD_ROOT
 %attr(2755, root, games) /usr/games/nlarn
 /usr/share/games/nlarn/*
 %config(noreplace) %attr (0664,root,games) /usr/share/games/nlarn/highscores
-%doc LICENSE README.txt Changelog.txt nlarn.ini-sample
+%doc LICENSE README.txt Changelog.txt nlarn.ini-sample lib/maze_doc.txt
 
 %changelog
+* Sat Oct 23 2010 Joachim de Groot <jdegroot@web.de>
+  - updated for version 0.7.0
+  - added maze_doc.txt to documentation
 * Sun Sep 19 2010 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.6.1
   - added missing dependency for lua
