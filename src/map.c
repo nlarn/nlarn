@@ -100,7 +100,7 @@ const map_sobject_data map_sobjects[LS_MAX] =
     { LS_SCHOOL,        'S',  DC_LIGHTGRAY, "the College of Larn",                 1, 0, },
     { LS_BANK,          'B',  DC_LIGHTGRAY, "the bank of Larn",                    1, 0, },
     { LS_BANK2,         'B',  DC_WHITE,     "a branch office of the bank of Larn", 1, 0, },
-    { LS_MONASTRY,      'M',  DC_WHITE,     "the Monastry of Larn",                1, 0, },
+    { LS_MONASTERY,     'M',  DC_WHITE,     "the Monastery of Larn",               1, 0, },
 };
 
 /* keep track which levels have been used before */
@@ -1859,8 +1859,8 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                 tile->sobject = LS_BANK;
                 break;
 
-            case 'M': /* monastry */
-                tile->sobject = LS_MONASTRY;
+            case 'M': /* monastery */
+                tile->sobject = LS_MONASTERY;
                 break;
 
             case '!': /* potion of cure dianthroritis, eye of larn */

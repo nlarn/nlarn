@@ -84,7 +84,7 @@ typedef enum map_sobject_type
     LS_SCHOOL,
     LS_BANK,
     LS_BANK2,			/* branch office */
-    LS_MONASTRY,
+    LS_MONASTERY,
     LS_MAX
 } map_sobject_t;
 

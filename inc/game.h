@@ -52,8 +52,8 @@ typedef struct game
 
     /* stock of the dnd store */
     inventory *store_stock;
-    /* stock of the monastry */
-    inventory *monastry_stock;
+    /* stock of the monastery */
+    inventory *monastery_stock;
 
     /* item / monster status */
     int amulet_created[AM_MAX];

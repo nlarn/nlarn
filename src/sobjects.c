@@ -307,8 +307,8 @@ int player_building_enter(player *p)
         moves_count = building_tradepost(p);
         break;
 
-    case LS_MONASTRY:
-        moves_count = building_monastry(p);
+    case LS_MONASTERY:
+        moves_count = building_monastery(p);
         break;
 
     default:

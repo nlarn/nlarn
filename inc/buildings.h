@@ -42,7 +42,7 @@ int building_home(struct player *p);
 int building_lrs(struct player *p);
 int building_school(struct player *p);
 int building_tradepost(struct player *p);
-int building_monastry(struct player *p);
-void building_monastry_init();
+int building_monastery(struct player *p);
+void building_monastery_init();
 
 #endif

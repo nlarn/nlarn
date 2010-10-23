@@ -775,13 +775,13 @@ int building_tradepost(player *p)
     return turns;
 }
 
-int building_monastry(struct player *p)
+int building_monastery(struct player *p)
 {
-    const char title[] = "The Monastry of Larn";
-    const char msg_welcome[] = "Welcome to the Monastry of Larn!\n\n" \
+    const char title[] = "The Monastery of Larn";
+    const char msg_welcome[] = "Welcome to the Monastery of Larn!\n\n" \
                                "We are here to help you when you are in need of " \
-                               "care and offer a fine selection of useful items " \
-                               "for your quests.\n\n" \
+                               "care and offer a fine selection of items that might "
+                               "be useful for your quests.\n\n" \
                                "Here you may\n\n" \
                                "  a) recieve healing\n" \
                                "  b) ask for curse removal\n" \
@@ -810,7 +810,7 @@ int building_monastry(struct player *p)
         }
 
         question = g_strdup_printf("For healing you, we ask that you "
-                                   "donate %d gold for our monastry. %s",
+                                   "donate %d gold for our monastery. %s",
                                    price, ayfwt);
         choice = display_get_yesno(question, NULL, NULL);
         g_free(question);
@@ -878,7 +878,7 @@ int building_monastry(struct player *p)
 
     /* shop items */
     case 'c':
-        building_shop(p, &nlarn->monastry_stock, title);
+        building_shop(p, &nlarn->monastery_stock, title);
 
         break;
 
@@ -890,11 +890,11 @@ int building_monastry(struct player *p)
     return turns;
 }
 
-void building_monastry_init()
+void building_monastery_init()
 {
     int i = 0, j;
 
-    /* the list of items available in the monastry */
+    /* the list of items available in the monastery */
     struct
     {
         item_t type;
@@ -915,7 +915,7 @@ void building_monastry_init()
         for (j = 0; j < igen[i].count; j++)
         {
             item *nitem = item_new(igen[i].type, igen[i].id);
-            inv_add(&nlarn->monastry_stock, nitem);
+            inv_add(&nlarn->monastery_stock, nitem);
         }
 
         i++;
