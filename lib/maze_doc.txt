@@ -48,7 +48,7 @@ and the object couldn't be placed, it is placed in a random position instead.
         The game will later place additional items in random positions.
 
 Monsters:
-    M   A random monster appropriate for the current depth.
+    m   A random monster appropriate for the current depth.
         The current maps contain around 35-75 monsters, averaging ~50.
         No further monsters will be placed on initial generation, though of
         course more will spawn over the course of time.
@@ -77,6 +77,7 @@ Buildings:
     L   lrs (tax bureau)
     S   school
     B   bank
+    M   monastry
 
 These should not be used outside the town map.
 

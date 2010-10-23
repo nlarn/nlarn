@@ -100,6 +100,7 @@ const map_sobject_data map_sobjects[LS_MAX] =
     { LS_SCHOOL,        'S',  DC_LIGHTGRAY, "the College of Larn",                 1, 0, },
     { LS_BANK,          'B',  DC_LIGHTGRAY, "the bank of Larn",                    1, 0, },
     { LS_BANK2,         'B',  DC_WHITE,     "a branch office of the bank of Larn", 1, 0, },
+    { LS_MONASTRY,      'M',  DC_WHITE,     "the Monastry of Larn",                1, 0, },
 };
 
 /* keep track which levels have been used before */
@@ -1854,8 +1855,12 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                 tile->sobject = LS_SCHOOL;
                 break;
 
-            case 'B': /*  */
+            case 'B': /* bank */
                 tile->sobject = LS_BANK;
+                break;
+
+            case 'M': /* monastry */
+                tile->sobject = LS_MONASTRY;
                 break;
 
             case '!': /* potion of cure dianthroritis, eye of larn */
@@ -1863,7 +1868,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                     place_special_item(nmap, map_pos);
                 break;
 
-            case 'M': /* random monster */
+            case 'm': /* random monster */
                 monster_new_by_level(map_pos);
                 break;
 

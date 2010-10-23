@@ -307,6 +307,10 @@ int player_building_enter(player *p)
         moves_count = building_tradepost(p);
         break;
 
+    case LS_MONASTRY:
+        moves_count = building_monastry(p);
+        break;
+
     default:
         log_add_entry(nlarn->log, "There is nothing to enter here.");
     }
@@ -592,7 +596,7 @@ int player_fountain_drink(player *p)
             {
                 log_add_entry(nlarn->log, "You lose %d hit point%s!",
                               amount, plural(amount));
-                              
+
                 player_hp_lose(p, amount, PD_SOBJECT, LS_FOUNTAIN);
             }
             break;

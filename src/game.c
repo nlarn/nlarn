@@ -302,7 +302,12 @@ int game_destroy(game *g)
 
     player_destroy(g->p);
     log_destroy(g->log);
-    inv_destroy(g->store_stock, FALSE);
+
+    if (g->store_stock)
+        inv_destroy(g->store_stock, FALSE);
+
+    if (g->monastry_stock)
+        inv_destroy(g->monastry_stock, FALSE);
 
     g_hash_table_destroy(g->items);
     g_hash_table_destroy(g->effects);
@@ -397,6 +402,12 @@ int game_save(game *g, const char *filename)
     if (inv_length(g->store_stock) > 0)
     {
         cJSON_AddItemToObject(save, "store_stock", inv_serialize(g->store_stock));
+    }
+
+    /* monatry stock */
+    if (inv_length(g->monastry_stock) > 0)
+    {
+        cJSON_AddItemToObject(save, "monastry_stock", inv_serialize(g->monastry_stock));
     }
 
     /* log */
@@ -724,6 +735,9 @@ static void game_new()
     /* fill the store */
     building_dndstore_init();
 
+    /* initialize the monastry */
+    building_monastry_init();
+
     /* generate levels */
     for (idx = 0; idx < MAP_MAX; idx++)
     {
@@ -817,7 +831,7 @@ static gboolean game_load(gchar *filename)
     {
         /* free the memory allocated by loading the save file */
         cJSON_Delete(save);
-        
+
         /* if a popup message has been opened, destroy it here */
         if (win != NULL)
             display_window_destroy(win);
@@ -930,6 +944,10 @@ static gboolean game_load(gchar *filename)
     /* restore dnd store stock */
     obj = cJSON_GetObjectItem(save, "store_stock");
     if (obj != NULL) nlarn->store_stock = inv_deserialize(obj);
+
+    /* restore monastry stock */
+    obj = cJSON_GetObjectItem(save, "monastry_stock");
+    if (obj != NULL) nlarn->monastry_stock = inv_deserialize(obj);
 
     /* restore log */
     nlarn->log = log_deserialize(cJSON_GetObjectItem(save, "log"));

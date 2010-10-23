@@ -48,7 +48,7 @@ const magic_scroll_data scrolls[ST_MAX] =
     { ST_GEM_PERFECTION,    "gem perfection",     ET_NONE,              3000, FALSE },
     { ST_SPELL_EXTENSION,   "spell extension",    ET_NONE,               800, FALSE },
     { ST_IDENTIFY,          "identify",           ET_NONE,               400,  TRUE },
-    { ST_REMOVE_CURSE,      "remove curse",       ET_NONE,               250,  TRUE },
+    { ST_REMOVE_CURSE,      "remove curse",       ET_NONE,               250, FALSE },
     { ST_ANNIHILATION,      "annihilation",       ET_NONE,              3000, FALSE },
     { ST_PULVERIZATION,     "pulverization",      ET_NONE,               800,  TRUE },
     { ST_LIFE_PROTECTION,   "life protection",    ET_LIFE_PROTECTION,   3000, FALSE },

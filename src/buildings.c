@@ -33,6 +33,7 @@ static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
                                       "law, we cannot serve you at this time." \
                                       "\n\nSo Sorry.";
 
+static void building_shop(player *p, inventory **inv, const char *title);
 static int building_player_check(player *p, guint amount);
 static void building_player_charge(player *p, guint amount);
 
@@ -236,11 +237,7 @@ int building_bank(player *p)
 int building_dndstore(player *p)
 {
     int turns = 2;
-    GPtrArray *callbacks;
-    display_inv_callback *callback;
-
     const char title[] = "DND store";
-
     const char msg_welcome[] = "Welcome to the Nlarn Thrift Shoppe.\n" \
                                "We stock many items explorers find useful in " \
                                "their adventures. Feel free to browse to your " \
@@ -256,24 +253,8 @@ int building_dndstore(player *p)
         return turns;
     }
 
-    /* define callback functions */
-    callbacks = g_ptr_array_new();
-
-    callback = g_malloc(sizeof(display_inv_callback));
-    callback->description = "(b)uy";
-    callback->key = 'b';
-    callback->inv = &nlarn->store_stock;
-    callback->function = &building_item_sell;
-    callback->checkfun = &player_item_is_affordable;
-    callback->active = FALSE;
-    g_ptr_array_add(callbacks, callback);
-
     display_show_message(title, msg_welcome, 0);
-    display_inventory(title, p, &nlarn->store_stock, callbacks, TRUE,
-                      FALSE, TRUE, NULL);
-
-    /* clean up */
-    display_inv_callbacks_clean(callbacks);
+    building_shop(p, &nlarn->store_stock, title);
 
     return turns;
 }
@@ -792,6 +773,183 @@ int building_tradepost(player *p)
     display_inv_callbacks_clean(callbacks);
 
     return turns;
+}
+
+int building_monastry(struct player *p)
+{
+    const char title[] = "The Monastry of Larn";
+    const char msg_welcome[] = "Welcome to the Monastry of Larn!\n\n" \
+                               "We are here to help you when you are in need of " \
+                               "care and offer a fine selection of useful items " \
+                               "for your quests.\n\n" \
+                               "Here you may\n\n" \
+                               "  a) recieve healing\n" \
+                               "  b) ask for curse removal\n" \
+                               "  c) buy something\n\n";
+    const char ayfwt[] = "Are you fine with that?";
+
+    int turns = 2;
+    int selection;
+
+    selection = display_show_message(title, msg_welcome, 0);
+
+    switch (selection)
+    {
+        /* healing */
+    case 'a':
+    {
+        int choice;
+        char *question;
+        /* the price for healing depends on the severity of the injury */
+        int price = (player_get_hp_max(p) - p->hp) * (game_difficulty(nlarn) + 1);
+
+        if (p->hp == player_get_hp_max(p))
+        {
+            log_add_entry(nlarn->log, "You are not in need of healing.");
+            break;
+        }
+
+        question = g_strdup_printf("For healing you, we ask that you "
+                                   "donate %d gold for our monastry. %s",
+                                   price, ayfwt);
+        choice = display_get_yesno(question, NULL, NULL);
+        g_free(question);
+
+        if (choice)
+        {
+            /* player chose to be healed */
+            player_effect_add(p, effect_new(ET_MAX_HP));
+            building_player_charge(p, price);
+            p->stats.gold_spent_donation += price;
+
+        }
+        else
+        {
+            /* no, thanks */
+            log_add_entry(nlarn->log, "You chose not to be healed.");
+        }
+    }
+    break;
+
+    /* remove curse */
+    case 'b':
+    {
+        item *it;
+        int price;
+        int choice;
+        char *question;
+        char desc[81];
+
+        if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
+        {
+            log_add_entry(nlarn->log, "You do not possess any cursed item.");
+            break;
+        }
+
+        it = display_inventory("Choose an item to uncurse", p, &p->inventory,
+                               NULL, FALSE, FALSE, FALSE, item_filter_cursed_or_unknown);
+
+        /* cost of uncursing is 10 percent of item value */
+        /* item value for cursed items is reduced by 50% */
+        price = (item_price(it) / 5) * (game_difficulty(nlarn) + 1);
+
+        item_describe(it, player_item_identified(p, it), it->count, TRUE,
+                      desc, 80);
+
+        question = g_strdup_printf("To remove the curse on %s, we ask you to "
+                                   "donate %d gold for our abbey. %s", desc,
+                                   price, ayfwt);
+
+        choice = display_get_yesno(question, NULL, NULL);
+        g_free(question);
+
+        if (!choice)
+        {
+            log_add_entry(nlarn->log, "You chose leave the curse on %s.", desc);
+            break;
+        }
+
+        log_add_entry(nlarn->log, "The monks remove the curse on %s.", desc);
+        item_remove_curse(it);
+        building_player_charge(p, price);
+        p->stats.gold_spent_donation += price;
+    }
+    break;
+
+    /* shop items */
+    case 'c':
+        building_shop(p, &nlarn->monastry_stock, title);
+
+        break;
+
+    default:
+        /* invalid choice */
+        break;
+    }
+
+    return turns;
+}
+
+void building_monastry_init()
+{
+    int i = 0, j;
+
+    /* the list of items available in the monastry */
+    struct
+    {
+        item_t type;
+        int id;
+        int count;
+    } igen[] =
+    {
+        { IT_POTION, PO_HEAL, 5 },
+        { IT_POTION, PO_MAX_HP, 1 },
+        { IT_POTION, PO_RECOVERY, 5 },
+        { IT_POTION, PO_WATER, 1 },
+        { IT_SCROLL, ST_REMOVE_CURSE, 3 },
+        { IT_NONE, 0, 0 },
+    };
+
+    while (igen[i].type != IT_NONE)
+    {
+        for (j = 0; j < igen[i].count; j++)
+        {
+            item *nitem = item_new(igen[i].type, igen[i].id);
+            inv_add(&nlarn->monastry_stock, nitem);
+        }
+
+        i++;
+    };
+}
+
+static void building_shop(player *p, inventory **inv, const char *title)
+{
+    GPtrArray *callbacks;
+    display_inv_callback *callback;
+
+    if (inv_length(*inv) == 0)
+    {
+        log_add_entry(nlarn->log, "Unfortunately we are sold out.");
+        return;
+    }
+
+    /* define callback functions */
+    callbacks = g_ptr_array_new();
+
+    callback = g_malloc(sizeof(display_inv_callback));
+    callback->description = "(b)uy";
+    callback->key = 'b';
+    callback->inv = inv;
+    callback->function = &building_item_sell;
+    callback->checkfun = &player_item_is_affordable;
+    callback->active = FALSE;
+    g_ptr_array_add(callbacks, callback);
+
+    display_inventory(title, p, inv, callbacks, TRUE,
+                      FALSE, TRUE, NULL);
+
+    /* clean up */
+    display_inv_callbacks_clean(callbacks);
 }
 
 static int building_player_check(player *p, guint amount)
