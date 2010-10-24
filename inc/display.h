@@ -112,7 +112,6 @@ void display_shutdown();
  */
 gboolean display_available();
 
-void display_wrap(lua_State *L);
 int display_draw();
 
 int display_paint_screen(player *p);

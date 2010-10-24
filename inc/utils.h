@@ -19,7 +19,6 @@
 #ifndef __UTILS_H_
 #define __UTILS_H_
 
-#include <lua.h>
 #include <time.h>
 #include "cJSON.h"
 #include "defines.h"
@@ -127,12 +126,5 @@ const char *int2str(int val);
 damage *damage_new(damage_t type, attack_t attack, int amount, gpointer originator);
 #define damage_free(dam)    g_free((dam))
 #define INSTANT_KILL    10000
-
-/* interaction with the Lua engine */
-void utils_wrap(lua_State *L);
-const char *luaN_query_string(const char *table, guint idx, const char *attrib);
-char luaN_query_char(const char *table, guint idx, const char *attrib);
-int luaN_query_int(const char *table, guint idx, const char *attrib);
-int luaN_push_table(const char *table, guint idx, const char *tname);
 
 #endif

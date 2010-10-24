@@ -34,6 +34,7 @@
 #include "defines.h"
 #include "display.h"
 #include "game.h"
+#include "lua_wrappers.h"
 #include "nlarn.h"
 #include "player.h"
 #include "spheres.h"
@@ -1028,9 +1029,9 @@ static void game_init_lua(game *g)
     luaL_openlibs(nlarn->L);
 
     /* register all required functions */
-    utils_wrap(g->L);
-    display_wrap(g->L);
-    monsters_wrap(g->L);
+    wrap_display(g->L);
+    wrap_utils(g->L);
+    wrap_monsters(g->L);
 }
 
 static void game_items_shuffle(game *g)

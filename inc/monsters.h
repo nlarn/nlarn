@@ -27,6 +27,7 @@
 #include "defines.h"
 #include "effects.h"
 #include "items.h"
+#include "lua_wrappers.h"
 #include "position.h"
 #include "traps.h"
 #include "utils.h"
@@ -166,7 +167,6 @@ typedef enum monster_flags
 monster *monster_new(monster_t type, position pos);
 monster *monster_new_by_level(position pos);
 void monster_destroy(monster *m);
-void monsters_wrap(lua_State *L);
 
 void monster_serialize(gpointer oid, monster *m, cJSON *root);
 void monster_deserialize(cJSON *mser, struct game *g);

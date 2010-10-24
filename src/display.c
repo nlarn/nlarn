@@ -671,46 +671,6 @@ gboolean display_available()
     return display_initialised;
 }
 
-void display_wrap(lua_State *L)
-{
-    int i;
-
-    assert (L != NULL);
-
-    struct
-    {
-        char *name;
-        int value;
-    } constants[] =
-    {
-        /* color definitions  */
-        { "BLACK",         DC_BLACK },
-        { "RED",           DC_RED },
-        { "GREEN",         DC_GREEN },
-        { "BROWN",         DC_BROWN },
-        { "BLUE",          DC_BLUE },
-        { "MAGENTA",       DC_MAGENTA },
-        { "CYAN",          DC_CYAN },
-        { "LIGHTGRAY",     DC_LIGHTGRAY },
-        { "DARKGRAY",      DC_DARKGRAY },
-        { "LIGHTRED",      DC_LIGHTRED },
-        { "LIGHTGREEN",    DC_LIGHTGREEN },
-        { "YELLOW",        DC_YELLOW },
-        { "LIGHTBLUE",     DC_LIGHTBLUE },
-        { "LIGHTMAGENTA",  DC_LIGHTMAGENTA },
-        { "LIGHTCYAN",     DC_LIGHTCYAN },
-        { "WHITE",         DC_WHITE },
-
-        { NULL, 0 },
-    };
-
-    for (i = 0; constants[i].name != NULL; i++)
-    {
-        lua_pushinteger(L, constants[i].value);
-        lua_setglobal(L, constants[i].name);
-    }
-}
-
 int display_draw()
 {
     /* mark stdscr and all panels for redraw */
