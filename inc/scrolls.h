@@ -30,7 +30,7 @@ struct player;
 typedef struct magic_scroll_data {
 	int	id;
 	char *name;
-	effect_type effect; /* if this scroll causes an effect */
+	effect_t effect; /* if this scroll causes an effect */
 	int price;
 	unsigned
         obtainable: 1;  /* available in the shop */

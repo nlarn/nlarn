@@ -2436,8 +2436,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_DEC_WIS:
         if (chance(dam->amount -= player_get_con(p)))
         {
-            int effect_type = (ET_DEC_CON + dam->type - DAM_DEC_CON);
-            e = effect_new(effect_type);
+            int effect_t = (ET_DEC_CON + dam->type - DAM_DEC_CON);
+            e = effect_new(effect_t);
             /* the default number of turns is 1 */
             e->turns = dam->amount * 10;
             e = player_effect_add(p, e);
@@ -2820,13 +2820,13 @@ void player_effects_del(player *p, GPtrArray *effects)
     }
 }
 
-effect *player_effect_get(player *p, effect_type et)
+effect *player_effect_get(player *p, effect_t et)
 {
     assert(p != NULL && et > ET_NONE && et < ET_MAX);
     return effect_get(p->effects, et);
 }
 
-int player_effect(player *p, effect_type et)
+int player_effect(player *p, effect_t et)
 {
     assert(p != NULL && et > ET_NONE && et < ET_MAX);
     return effect_query(p->effects, et);

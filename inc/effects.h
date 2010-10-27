@@ -24,7 +24,7 @@
 
 #include "cJSON.h"
 
-typedef enum _effect_type
+typedef enum _effect_t
 {
     ET_NONE,                    /* no short-term effect */
     /* POSITIVE EFFECTS */
@@ -114,11 +114,12 @@ typedef enum _effect_type
     ET_TRAPPED,                 /* trapped in a pit */
 
     ET_MAX                      /* last effect known */
-} effect_type;
+} effect_t;
 
 typedef struct effect_data
 {
-    effect_type id;
+    effect_t id;
+    char *name;              /* name of the effect's constant */
     int duration;            /* duration of effect. 0 = permanent */
     int amount;              /* if modifier: amount of attribute modification */
     char *desc;              /* description for status display and obituary */
@@ -136,7 +137,7 @@ typedef struct effect_data
 typedef struct effect
 {
     gpointer oid;       /* effect's game object id */
-    effect_type type;   /* type of effect */
+    effect_t type;   /* type of effect */
     guint32 start;      /* game time the effect began */
     guint32 turns;      /* number of turns this effect remains */
     gint32 amount;      /* power of effect, if applicable */
@@ -147,7 +148,7 @@ struct game;
 
 /* function declarations */
 
-effect *effect_new(effect_type type);
+effect *effect_new(effect_t type);
 effect *effect_copy(effect *e);
 void effect_destroy(effect *e);
 
@@ -156,6 +157,7 @@ effect *effect_deserialize(cJSON *eser, struct game *g);
 cJSON *effects_serialize(GPtrArray *effects);
 GPtrArray *effects_deserialize(cJSON *eser);
 
+const char *effect_type_name(effect_t type);
 const char *effect_get_desc(effect *e);
 const char *effect_get_msg_start(effect *e);
 const char *effect_get_msg_stop(effect *e);
@@ -166,10 +168,10 @@ int effect_get_amount(effect *e);
 
 effect *effect_add(GPtrArray *ea, effect *e);
 int effect_del(GPtrArray *ea, effect *e);
-effect *effect_get(GPtrArray *ea, effect_type type);
+effect *effect_get(GPtrArray *ea, effect_t type);
 
 /* check if an effect is set */
-int effect_query(GPtrArray *ea, effect_type type);
+int effect_query(GPtrArray *ea, effect_t type);
 
 /**
  * Count down the number of turns remaining for an effect.

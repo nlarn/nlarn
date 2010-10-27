@@ -42,7 +42,7 @@ typedef struct spell_data {
     char *name;
     spell_t type;
     damage_t damage_type;
-    effect_type effect;
+    effect_t effect;
     char *description;
     char *msg_success;
     char *msg_fail;

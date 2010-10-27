@@ -135,7 +135,7 @@ const trap_data traps[TT_MAX] =
     },
 };
 
-static int modified_effect_chance(trap_t trap, effect_type et, int level)
+static int modified_effect_chance(trap_t trap, effect_t et, int level)
 {
     const int base_chance = trap_effect_chance(trap);
     if (et == ET_POISON && level < 5)

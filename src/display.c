@@ -1435,7 +1435,7 @@ mnemonics:
     return sp;
 }
 
-int display_get_count(char *caption, int value)
+int display_get_count(const char *caption, int value)
 {
     display_window *mwin;
     int height, width, basewidth;
@@ -1657,7 +1657,7 @@ int display_get_count(char *caption, int value)
     return atoi(ivalue);
 }
 
-char *display_get_string(char *caption, char *value, size_t max_len)
+char *display_get_string(const char *caption, const char *value, size_t max_len)
 {
     /* user input */
     int key;
@@ -1869,7 +1869,7 @@ char *display_get_string(char *caption, char *value, size_t max_len)
     return g_string_free(string, FALSE);
 }
 
-int display_get_yesno(char *question, char *yes, char *no)
+int display_get_yesno(const char *question, const char *yes, const char *no)
 {
     display_window *ywin;
     guint startx, starty;
@@ -2031,7 +2031,7 @@ int display_get_yesno(char *question, char *yes, char *no)
     return selection;
 }
 
-direction display_get_direction(char *title, int *available)
+direction display_get_direction(const char *title, int *available)
 {
     display_window *dwin;
 
@@ -2190,7 +2190,7 @@ direction display_get_direction(char *title, int *available)
     return dir;
 }
 
-position display_get_position(player *p, char *message, gboolean ray,
+position display_get_position(player *p, const char *message, gboolean ray,
                               gboolean ball, guint radius,
                               gboolean passable, gboolean visible)
 {
@@ -2200,7 +2200,7 @@ position display_get_position(player *p, char *message, gboolean ray,
 }
 
 position display_get_new_position(player *p, position start,
-                                  char *message, gboolean ray, gboolean ball,
+                                  const char *message, gboolean ray, gboolean ball,
                                   gboolean travel, guint radius,
                                   gboolean passable, gboolean visible)
 {

@@ -30,7 +30,7 @@ struct player;
 typedef struct potion_data {
     int	id;
     char *name;
-    int	effect_type; 		/* if this potion causes any effect */
+    int	effect_t; 		/* if this potion causes any effect */
     int price;
     unsigned
         obtainable: 1;      /* available in the shop */
@@ -82,7 +82,7 @@ extern const potion_data potions[PO_MAX];
 #define potion_type_obtainable(id) (potions[id].obtainable)
 
 #define potion_name(potion)   (potions[(potion)->id].name)
-#define potion_effect(potion) (potions[(potion)->id].effect_type)
+#define potion_effect(potion) (potions[(potion)->id].effect_t)
 #define potion_price(potion)  (potions[(potion)->id].price)
 
 #endif

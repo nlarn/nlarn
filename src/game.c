@@ -1030,6 +1030,7 @@ static void game_init_lua(game *g)
 
     /* register all required functions */
     wrap_display(g->L);
+    wrap_effects(g->L);
     wrap_utils(g->L);
     wrap_monsters(g->L);
 }

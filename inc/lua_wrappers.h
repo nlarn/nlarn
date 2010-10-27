@@ -21,6 +21,9 @@
 
 #include <lua.h>
 
+/* functions implemented in wrap_effects.c */
+void wrap_effects(lua_State *L);
+
 /* functions implemented in wrap_display.c */
 void wrap_display(lua_State *L);
 

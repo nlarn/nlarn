@@ -1971,13 +1971,13 @@ int monster_effect_del(monster *m, effect *e)
     return result;
 }
 
-effect *monster_effect_get(monster *m , effect_type type)
+effect *monster_effect_get(monster *m , effect_t type)
 {
     assert(m != NULL && type < ET_MAX);
     return effect_get(m->effects, type);
 }
 
-int monster_effect(monster *m, effect_type type)
+int monster_effect(monster *m, effect_t type)
 {
     assert(m != NULL && type < ET_MAX);
     return effect_query(m->effects, type);

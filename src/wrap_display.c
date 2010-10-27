@@ -20,6 +20,21 @@
 #include <lauxlib.h>
 
 #include "display.h"
+#include "nlarn.h"
+
+static int wrap_draw(lua_State *L);
+static int wrap_get_count(lua_State *L);
+static int wrap_get_yesno(lua_State *L);
+static int wrap_paint(lua_State *L);
+
+static const luaL_reg display_functions[] =
+{
+    { "draw",       wrap_draw },
+    { "get_count",  wrap_get_count },
+    { "get_yesno",  wrap_get_yesno },
+    { "paint",      wrap_paint },
+    { 0, 0 }
+};
 
 void wrap_display(lua_State *L)
 {
@@ -59,4 +74,48 @@ void wrap_display(lua_State *L)
         lua_pushinteger(L, constants[i].value);
         lua_setglobal(L, constants[i].name);
     }
+
+    for (i = 0; display_functions[i].name != NULL; i++)
+    {
+        lua_register(L, display_functions[i].name, display_functions[i].func);
+    }
+}
+
+static int wrap_draw(lua_State *L)
+{
+    display_draw();
+
+    return 0;
+}
+
+static int wrap_get_count(lua_State *L)
+{
+    int res = 0;
+
+    res = display_get_count(luaL_checkstring(L, 1), luaL_checkint(L, 2));
+    lua_pushinteger(L, res);
+
+    return 1;
+}
+
+static int wrap_get_yesno(lua_State *L)
+{
+    int res = 0;
+    int nargs = lua_gettop(L);
+
+    res = display_get_yesno(luaL_checkstring(L, 1),
+                            nargs > 1 ? luaL_checkstring(L, 2) : NULL,
+                            nargs > 2 ? luaL_checkstring(L, 3) : NULL);
+
+    lua_pushboolean(L, res);
+
+    return 1;
+}
+
+static int wrap_paint(lua_State *L)
+{
+    assert(nlarn != NULL);
+
+    display_paint_screen(nlarn->p);
+    return 0;
 }

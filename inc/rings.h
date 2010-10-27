@@ -40,7 +40,7 @@ typedef struct ring_data
 {
     int id;
     char *name;
-    effect_type effect; /* effect causes by this ring */
+    effect_t effect; /* effect causes by this ring */
     int price;
     unsigned
         obtainable: 1,  /* is available for sale in the shop */
@@ -58,7 +58,7 @@ extern const ring_data rings[RT_MAX];
 /* macros */
 
 #define ring_name(item)          (rings[(item)->id].name)
-#define ring_effect_type(item)   (rings[(item)->id].effect)
+#define ring_effect_t(item)   (rings[(item)->id].effect)
 #define ring_price(item)         (rings[(item)->id].price)
 #define ring_bonus_is_obs(item)  (rings[(item)->id].bonus_obs)
 

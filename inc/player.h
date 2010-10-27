@@ -291,8 +291,8 @@ effect *player_effect_add(player *p, effect *e);
 void player_effects_add(player *p, GPtrArray *effects);
 int player_effect_del(player *p, effect *e);
 void player_effects_del(player *p, GPtrArray *effects);
-effect *player_effect_get(player *p, effect_type et);
-int player_effect(player *p, effect_type et); /* check if a effect is set */
+effect *player_effect_get(player *p, effect_t et);
+int player_effect(player *p, effect_t et); /* check if a effect is set */
 char **player_effect_text(player *p);
 
 /* dealing with the inventory */

@@ -332,8 +332,8 @@ int monster_is_genocided(monster_t monster_id);
 /* dealing with temporary effects */
 effect *monster_effect_add(monster *m, effect *e);
 int monster_effect_del(monster *m, effect *e);
-effect *monster_effect_get(monster *m , effect_type type);
-int monster_effect(monster *m, effect_type type);
+effect *monster_effect_get(monster *m , effect_t type);
+int monster_effect(monster *m, effect_t type);
 void monster_effects_expire(monster *m);
 int monster_is_carrying_item(monster *m, item_t type);
 

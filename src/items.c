@@ -118,9 +118,9 @@ item *item_new(item_t item_type, int item_id)
 
         nlarn->amulet_created[nitem->id] = TRUE;
 
-        if (amulet_effect_type(nitem))
+        if (amulet_effect_t(nitem))
         {
-            eff = effect_new(amulet_effect_type(nitem));
+            eff = effect_new(amulet_effect_t(nitem));
             item_effect_add(nitem, eff);
         }
 
@@ -149,9 +149,9 @@ item *item_new(item_t item_type, int item_id)
         break;
 
     case IT_RING:
-        if (ring_effect_type(nitem))
+        if (ring_effect_t(nitem))
         {
-            eff = effect_new(ring_effect_type(nitem));
+            eff = effect_new(ring_effect_t(nitem));
 
             /* ring of extra regeneration is better than the average */
             if (item_id == RT_EXTRA_REGEN)
