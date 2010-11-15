@@ -93,7 +93,7 @@ typedef enum spell_ids {
     SP_MFI,         /* magic fire */
     SP_MKW,         /* make wall */
     SP_SPH,         /* sphere of annihilation */
-/*  SP_SUM,            summon daemon: not implemented */
+    SP_SUM,         /* summon demon */
     SP_WTW,         /* walk through walls */
     SP_ALT,         /* alter reality */
     SP_MAX_BOOK,    /* last known spell */
@@ -171,6 +171,7 @@ gboolean spell_cure_poison(struct player *p);
 gboolean spell_cure_blindness(struct player *p);
 gboolean spell_phantasmal_forces(spell *s, struct player *p);
 gboolean spell_scare_monsters(spell *s, struct player *p);
+gboolean spell_summon_demon(spell *s, struct player *p);
 gboolean spell_make_wall(struct player *p);
 gboolean spell_vaporize_rock(struct player *p);
 

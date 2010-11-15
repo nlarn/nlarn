@@ -278,7 +278,6 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         6, 3500, FALSE
     },
-/*
     {
         SP_SUM, "sum", "summon demon",
         SC_OTHER, DAM_NONE, ET_NONE,
@@ -286,7 +285,6 @@ const spell_data spells[SP_MAX] =
         NULL, NULL,
         6, 3500, FALSE
     },
-*/
     {
         SP_WTW, "wtw", "walk through walls",
         SC_PLAYER, DAM_NONE, ET_WALL_WALK,
@@ -374,9 +372,10 @@ book_obfuscation[SP_MAX_BOOK - 1] =
     { "well-thumbed",    800, DC_BLUE,      },
     { "ragged",          800, DC_LIGHTGRAY, },
     { "dull",            800, DC_DARKGRAY,  },
+    { "canvas",          800, DC_YELLOW,    },
 /*
     reserve descriptions for unimplemented spells:
-    chambray, canvas
+    chambray
 */
 };
 
@@ -607,11 +606,10 @@ int spell_cast(player *p)
             well_done = spell_create_sphere(spell, p);
             break;
 
-            /* summon daemon */
-            /* TODO: implement (ticket 55)
+            /* summon demon */
         case SP_SUM:
+            well_done = spell_summon_demon(spell, p);
             break;
-            */
 
             /* alter reality */
         case SP_ALT:
@@ -1550,6 +1548,29 @@ gboolean spell_scare_monsters(spell *s, struct player *p)
     area_destroy(a);
 
     return (count > 0);
+}
+
+gboolean spell_summon_demon(spell *s, struct player *p)
+{
+    monster *demon;
+    position pos;
+
+    /* find a place near the player for the demon servant */
+    pos = map_find_space_in(game_map(nlarn, p->pos.z),
+                            rect_new_sized(p->pos, 2),
+                            LE_MONSTER, FALSE);
+
+    if (!pos_valid(pos))
+        return FALSE;
+
+    /* generate a demon */
+    demon = monster_new(min(MT_DEMONLORD_I + (s->knowledge - 1),
+                            MT_DEMONLORD_VII), pos);
+
+    /* turn the demon into a servant */
+    monster_update_action(demon, MA_SERVE);
+
+    return TRUE;
 }
 
 static void destroy_sobject_at(player *p, map *map, position pos)

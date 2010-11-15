@@ -41,6 +41,7 @@ void wrap_monsters(lua_State *L)
         { "REMAIN", MA_REMAIN },
         { "WANDER", MA_WANDER },
         { "ATTACK", MA_ATTACK },
+        { "SERVE",  MA_SERVE },
 
         /* monster flags */
         { "HEAD",        MF_HEAD },

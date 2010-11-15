@@ -56,7 +56,8 @@ const char *monster_ai_desc[MA_MAX] =
     "fleeing",          /* MA_FLEE */
     "standing still",   /* MA_REMAIN */
     "wandering",        /* MA_WANDER */
-    "attacking"         /* MA_ATTACK */
+    "attacking",        /* MA_ATTACK */
+    "serving you"       /* MA_SERVE */
 };
 
 const char *monster_attack_verb[ATT_MAX] =
@@ -85,6 +86,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
 static position monster_move_wander(monster *m, struct player *p);
 static position monster_move_attack(monster *m, struct player *p);
 static position monster_move_flee(monster *m, struct player *p);
+static position monster_move_serve(monster *m, struct player *p);
 
 monster *monster_new(monster_t type, position pos)
 {
@@ -877,7 +879,7 @@ void monster_move(gpointer *oid, monster *m, game *g)
         m->movement -= SPEED_NORMAL;
 
         /* update monsters action */
-        if (monster_update_action(m) && monster_in_sight(m))
+        if (monster_update_action(m, MA_NONE) && monster_in_sight(m))
         {
             /* the monster has chosen a new action and the player
                can see the new action, so let's describe it */
@@ -927,6 +929,9 @@ void monster_move(gpointer *oid, monster *m, game *g)
 
             m_npos = monster_move_attack(m, g->p);
             break;
+
+        case MA_SERVE:
+            m_npos = monster_move_serve(m, g->p);
 
         case MA_NONE:
         case MA_MAX:
@@ -1669,7 +1674,7 @@ monster *monster_damage_take(monster *m, damage *dam)
     return m;
 }
 
-gboolean monster_update_action(monster *m)
+gboolean monster_update_action(monster *m, monster_action_t override)
 {
     monster_action_t naction;   /* new action */
     guint time;
@@ -1680,6 +1685,19 @@ gboolean monster_update_action(monster *m)
     time   = monster_int(m) + 25;
     low_hp = (m->hp < (monster_hp_max(m) / 4 ));
     smart  = (monster_int(m) > 4);
+
+    if (override > MA_NONE)
+    {
+        /* set the monster's action to the requested value */
+        m->action = override;
+        return TRUE;
+    }
+
+    if (m->action == MA_SERVE)
+    {
+        /* once servant, forever servant */
+        return FALSE;
+    }
 
     if (monster_flags(m, MF_MIMIC) && m->unknown)
     {
@@ -2514,6 +2532,12 @@ static position monster_move_flee(monster *m, struct player *p)
     }
 
     return npos;
+}
+
+static position monster_move_serve(monster *m, struct player *p)
+{
+    /* pointless placeholder */
+    return m->pos;
 }
 
 int monster_is_carrying_item(monster *m, item_t type)

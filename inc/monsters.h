@@ -136,6 +136,7 @@ typedef enum monster_action_type
     MA_REMAIN,
     MA_WANDER,
     MA_ATTACK,
+    MA_SERVE,
     MA_MAX
 } monster_action_t;
 
@@ -239,9 +240,10 @@ monster *monster_damage_take(monster *m, damage *dam);
  * Determine a monster's action.
  *
  * @param the monster
+ * @param manually set action for a monster
  * @return TRUE if the action has changed
  */
-gboolean monster_update_action(monster *m);
+gboolean monster_update_action(monster *m, monster_action_t override);
 
 void monster_update_player_pos(monster *m, position ppos);
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
