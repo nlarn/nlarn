@@ -143,14 +143,24 @@ int display_get_count(const char *caption, int value);
 char *display_get_string(const char *caption, const char *value, size_t max_len);
 int display_get_yesno(const char *question, const char *yes, const char *no);
 direction display_get_direction(const char *title, int *available);
-position display_get_new_position(player *p, position start,
-                                  const char *message, gboolean ray, gboolean ball,
-                                  gboolean travel, guint radius,
-                                  gboolean passable, gboolean visible);
 
-position display_get_position(player *p, const char *message, gboolean ray,
-                              gboolean ball, guint radius,
-                              gboolean passable, gboolean visible);
+position display_get_new_position(player *p,
+                                  position start,
+                                  const char *message,
+                                  gboolean ray,
+                                  gboolean ball,
+                                  gboolean travel,
+                                  guint radius,
+                                  gboolean passable,
+                                  gboolean visible);
+
+position display_get_position(player *p,
+                              const char *message,
+                              gboolean ray,
+                              gboolean ball,
+                              guint radius,
+                              gboolean passable,
+                              gboolean visible);
 
 void display_show_history(message_log *log, const char *title);
 

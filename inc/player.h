@@ -154,6 +154,9 @@ typedef struct player
     position pos; /* player's position */
     player_stats stats; /* statistics */
 
+    /* oid of the last targeted monster */
+    gpointer *ptarget;
+
     /* player's field of vision */
     int fov[MAP_MAX_Y][MAP_MAX_X];
 

@@ -2189,19 +2189,73 @@ direction display_get_direction(const char *title, int *available)
     return dir;
 }
 
-position display_get_position(player *p, const char *message, gboolean ray,
-                              gboolean ball, guint radius,
-                              gboolean passable, gboolean visible)
+position display_get_position(player *p,
+                              const char *message,
+                              gboolean ray,
+                              gboolean ball,
+                              guint radius,
+                              gboolean passable,
+                              gboolean visible)
 {
     /* start at player's position */
-    return display_get_new_position(p, p->pos, message, ray, ball, FALSE,
+    position start = p->pos;
+
+    /* the position chosen by the player */
+    position cpos;
+
+    /* if the player has recently targeted a monster.. */
+    if (p->ptarget != NULL)
+    {
+        monster *m = game_monster_get(nlarn, p->ptarget);
+
+        /* ..check if it is still alive */
+        if (m == NULL)
+        {
+            /* the monster has been eliminated */
+            p->ptarget = NULL;
+        }
+        else
+        {
+            /* start at the monster's current position */
+            start = monster_pos(m);
+
+            /* don't use invisible position if unwanted */
+            if (visible && !player_pos_visible(p, start))
+            {
+                start = p->pos;
+            }
+        }
+    }
+
+    cpos = display_get_new_position(p, start, message, ray, ball, FALSE,
                                     radius, passable, visible);
+
+    if (pos_valid(cpos))
+    {
+        /* the player has chosen a valid position, check if there
+         * is a monster at that position. */
+        map *map = game_map(nlarn, cpos.z);
+        monster *m = map_get_monster_at(map, cpos);
+
+        if (m != NULL)
+        {
+            /* there is a monster, store its oid for later use */
+            p->ptarget = monster_oid(m);
+        }
+    }
+
+    return cpos;
 }
 
-position display_get_new_position(player *p, position start,
-                                  const char *message, gboolean ray, gboolean ball,
-                                  gboolean travel, guint radius,
-                                  gboolean passable, gboolean visible)
+position display_get_new_position(player *p,
+                                  position start,
+                                  const char *message,
+                                  gboolean ray,
+                                  gboolean ball,
+                                  gboolean travel,
+                                  guint radius,
+                                  gboolean passable,
+                                  gboolean visible)
 {
     gboolean RUN = TRUE;
     direction dir = GD_NONE;

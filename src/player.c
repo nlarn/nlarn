@@ -420,6 +420,12 @@ cJSON *player_serialize(player *p)
 
     cJSON_AddItemToObject(pser, "position", pos_serialize(p->pos));
 
+    /* store last targeted monster */
+    if (p->ptarget != NULL)
+    {
+        cJSON_AddNumberToObject(pser, "ptarget", GPOINTER_TO_UINT(p->ptarget));
+    }
+
     position pos;
 
     /* store players' memory of the map */
@@ -617,6 +623,11 @@ player *player_deserialize(cJSON *pser)
 
     p->pos = pos_deserialize(cJSON_GetObjectItem(pser, "position"));
 
+    /* restore last targeted monster */
+    if ((obj = cJSON_GetObjectItem(pser, "ptarget")) != NULL)
+    {
+        p->ptarget = GUINT_TO_POINTER(obj->valueint);
+    }
 
     /* restore players' memory of the map */
     position pos;
