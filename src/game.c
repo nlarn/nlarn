@@ -878,13 +878,13 @@ static gboolean game_load(gchar *filename)
 
     obj = cJSON_GetObjectItem(save, "amulet_created");
     size = cJSON_GetArraySize(obj);
-    assert(size = AM_MAX);
+    assert(size == AM_MAX);
     for (idx = 0; idx < size; idx++)
         nlarn->amulet_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "weapon_created");
     size = cJSON_GetArraySize(obj);
-    assert(size = WT_MAX);
+    assert(size == WT_MAX);
     for (idx = 0; idx < size; idx++)
         nlarn->weapon_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
@@ -894,19 +894,19 @@ static gboolean game_load(gchar *filename)
 
     obj = cJSON_GetObjectItem(save, "amulet_material_mapping");
     size = cJSON_GetArraySize(obj);
-    assert(size = AM_MAX - 1);
+    assert(size == AM_MAX - 1);
     for (idx = 0; idx < size; idx++)
         nlarn->amulet_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "potion_desc_mapping");
     size = cJSON_GetArraySize(obj);
-    assert(size = PO_MAX - 1);
+    assert(size == PO_MAX - 1);
     for (idx = 0; idx < size; idx++)
         nlarn->potion_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "ring_material_mapping");
     size = cJSON_GetArraySize(obj);
-    assert(size = RT_MAX - 1);
+    assert(size == RT_MAX - 1);
     for (idx = 0; idx < size; idx++)
         nlarn->ring_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
