@@ -430,8 +430,7 @@ int display_paint_screen(player *p)
 
         if (p->eq_weapon->bonus_known)
         {
-            g_string_append_printf(desc, "%c%d ", p->eq_weapon->bonus >= 0 ? '+' : '-',
-                                   p->eq_weapon->bonus);
+            g_string_append_printf(desc, "%+d ", p->eq_weapon->bonus);
         }
 
         const gboolean need_bonus
