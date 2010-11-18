@@ -818,7 +818,7 @@ static gboolean game_load(gchar *filename)
     {
         /* Reading the file failed. Terminate the game with an error message */
         display_shutdown();
-        g_printerr("Failed to restore save file \"%s\".", fullname);
+        g_printerr("Failed to restore save file \"%s\".\n", fullname);
         g_free(fullname);
 
         exit(EXIT_FAILURE);
