@@ -81,15 +81,6 @@ void game_init(int argc, char *argv[])
     static char *savefile = NULL;
     static char *stats = NULL;
 
-    cJSON_Hooks cJH = 
-    {
-        g_malloc,
-        g_free,
-    };
-
-    /* tell the cJSON functions to use the glib memory functions */
-    cJSON_InitHooks(&cJH);
-
     /* allocate space for game structure */
     nlarn = g_malloc0(sizeof(game));
 
