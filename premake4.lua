@@ -68,11 +68,6 @@ solution "NLarn"
 		else
 			links { "lua" }
 		end
-        
-        -- do not include unnecessary header files on Windows
-        if os.is("windows") then
-            defines { "WIN32_LEAN_AND_MEAN", "NOGDI" }
-        end
 
 		configuration "Debug"
 			defines { "DEBUG", "LUA_USE_APICHECK" }
@@ -82,7 +77,13 @@ solution "NLarn"
 			defines { "NDEBUG" }
 			flags { "Optimize" }
 
+		configuration "bsd"
+			includedirs { "/usr/local/include/lua51" }
+			libdirs { "/usr/local/lib/lua51" }
+
 		configuration "windows" 
+			-- do not include unnecessary header files
+			defines { "WIN32_LEAN_AND_MEAN", "NOGDI" }
 			links { "pdcurses" }
 
 		configuration "not windows"
