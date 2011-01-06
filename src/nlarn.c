@@ -42,7 +42,7 @@
 game *nlarn = NULL;
 
 
-static gboolean adjacent_monster(position p, gboolean ignore_eye);
+static gboolean adjacent_monster(player *p, gboolean ignore_harmless);
 static gboolean adjacent_corridor(position pos, char move);
 
 #ifdef WIN32
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
             /* check if travel mode shall be aborted:
                attacked or fell through trap door */
-            if (nlarn->p->attacked || adjacent_monster(nlarn->p->pos, FALSE)
+            if (nlarn->p->attacked || adjacent_monster(nlarn->p, FALSE)
                 || pos.z != nlarn->p->pos.z)
             {
                 pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
@@ -764,8 +764,7 @@ int main(int argc, char *argv[])
             // * last action cost no turns (we ran into a wall)
             // * we took damage (trap, poison, or invisible monster)
             // * a monster has moved adjacent to us
-            if (no_move || was_attacked
-                    || adjacent_monster(nlarn->p->pos, run_cmd == '.'))
+            if (no_move || was_attacked || adjacent_monster(nlarn->p, run_cmd == '.'))
             {
                 run_cmd = 0;
             }
@@ -801,33 +800,19 @@ int main(int argc, char *argv[])
     while (TRUE); /* main event loop */
 }
 
-static gboolean adjacent_monster(position p, gboolean ignore_eye)
+static gboolean adjacent_monster(player *p, gboolean ignore_harmless)
 {
-    // Ignore adjacent umber hulk if already confused.
-    const gboolean ignore_umber_hulk = ignore_eye && player_effect_get(nlarn->p, ET_CONFUSION);
+    position pos = pos_new(0, 0, p->pos.z);
 
-    // Only ignore floating eye if already paralysed.
-    if (ignore_eye && !player_effect_get(nlarn->p, ET_PARALYSIS))
-        ignore_eye = FALSE;
-
-    int i, j;
-    for (i = -1; i <= 1; i++)
-        for (j = -1; j <= 1; j++)
+    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            if (i == 0 && j == 0)
+            /* check if the position if visible */
+            if (!p->fov[pos.y][pos.x])
                 continue;
 
-            position pos = p;
-            pos.x += i;
-            pos.y += j;
+            monster *m = map_get_monster_at(game_map(nlarn, p->pos.z), pos);
 
-            if (pos.x < 0 || pos.x >= MAP_MAX_X
-                    || pos.y < 0 || pos.y >= MAP_MAX_Y)
-            {
-                continue;
-            }
-
-            monster *m = map_get_monster_at(game_map(nlarn, nlarn->p->pos.z), pos);
             if (m == NULL)
                 continue;
 
@@ -835,10 +820,16 @@ static gboolean adjacent_monster(position p, gboolean ignore_eye)
             if (monster_type(m) == MT_TOWN_PERSON)
                 continue;
 
-            if (ignore_eye && monster_type(m) == MT_FLOATING_EYE)
+            /* Only ignore floating eye if already paralysed. */
+            if (ignore_harmless
+                && (monster_type(m) == MT_FLOATING_EYE)
+                && player_effect_get(p, ET_PARALYSIS))
                 continue;
 
-            if (ignore_umber_hulk && monster_type(m) == MT_UMBER_HULK)
+            /* Ignore adjacent umber hulk if already confused. */
+            if (ignore_harmless
+                && (monster_type(m) == MT_UMBER_HULK)
+                && player_effect_get(p, ET_CONFUSION))
                 continue;
 
             /* unknown mimic */
