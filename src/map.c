@@ -1109,7 +1109,7 @@ void map_fill_with_life(map *l)
                 return;
             }
         }
-        while (player_pos_visible(nlarn->p, pos));
+        while (fov_get(nlarn->p->fov, pos));
 
         monster_new_by_level(pos);
     }
@@ -1177,7 +1177,7 @@ void map_timer(map *l)
                         break;
                     }
 
-                    inv_erode(&tile->ilist, erosion, player_pos_visible(nlarn->p, pos));
+                    inv_erode(&tile->ilist, erosion, fov_get(nlarn->p->fov, pos));
                 }
 
                 /* reset tile type if temporary effect has expired */

@@ -808,7 +808,7 @@ static gboolean adjacent_monster(player *p, gboolean ignore_harmless)
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
             /* check if the position if visible */
-            if (!p->fov[pos.y][pos.x])
+            if (!fov_get(p->fov, pos))
                 continue;
 
             monster *m = map_get_monster_at(game_map(nlarn, p->pos.z), pos);

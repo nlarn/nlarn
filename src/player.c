@@ -25,6 +25,7 @@
 #include "cJSON.h"
 #include "container.h"
 #include "display.h"
+#include "fov.h"
 #include "game.h"
 #include "nlarn.h"
 #include "player.h"
@@ -102,7 +103,6 @@ static const guint32 player_lvl_exp[] =
 static guint player_item_pickup_all(player *p, inventory **inv, item *it);
 static guint player_item_pickup_ask(player *p, inventory **inv, item *it);
 static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean ask);
-static void player_calculate_octant(player *p, int row, float start, float end, int radius, int xx, int xy, int yx, int yy);
 static void player_sobject_memorize(player *p, map_sobject_t sobject, position pos);
 static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
@@ -158,6 +158,9 @@ player *player_new()
     p->identified_potions[PO_CURE_DIANTHR] = TRUE;
     p->identified_potions[PO_WATER] = TRUE;
     p->identified_scrolls[ST_BLANK] = TRUE;
+
+    /* initialize the field of vision */
+    p->fov = fov_new(MAP_MAX_X, MAP_MAX_Y);
 
     return p;
 }
@@ -306,6 +309,9 @@ void player_destroy(player *p)
     {
         g_free(p->name);
     }
+
+    /* clean the FOV */
+    fov_free(p->fov);
 
     g_free(p);
 }
@@ -716,6 +722,9 @@ player *player_deserialize(cJSON *pser)
     p->stats.wis_orig = cJSON_GetObjectItem(obj, "wis_orig")->valueint;
     p->stats.con_orig = cJSON_GetObjectItem(obj, "con_orig")->valueint;
     p->stats.dex_orig = cJSON_GetObjectItem(obj, "dex_orig")->valueint;
+
+    /* initialize the field of vision */
+    p->fov = fov_new(MAP_MAX_X, MAP_MAX_Y);
 
     return p;
 }
@@ -4346,26 +4355,13 @@ void player_list_sobjmem(player *p)
     g_string_free(sobjlist, TRUE);
 }
 
-/* this and the following function have been
- * ported from python to c using the example at
- * http://roguebasin.roguelikedevelopment.org/index.php?title=Python_shadowcasting_implementation
- */
 void player_update_fov(player *p)
 {
     int radius;
-    int octant;
     position pos;
     map *map;
 
     area *enlight;
-
-    const int mult[4][8] =
-    {
-        { 1,  0,  0, -1, -1,  0,  0,  1 },
-        { 0,  1, -1,  0,  0, -1,  1,  0 },
-        { 0,  1,  1,  0,  0, -1, -1,  0 },
-        { 1,  0,  0,  1, -1,  0,  0, -1 }
-    };
 
     int range = (p->pos.z == 0 ? 15 : 6);
 
@@ -4379,22 +4375,19 @@ void player_update_fov(player *p)
             radius -= 4;
     }
 
-    /* reset FOV */
-    memset(&(p->fov), 0, MAP_SIZE * sizeof(int));
-
     /* get current map */
     map = game_map(nlarn, p->pos.z);
 
     /* set level correctly */
     pos.z = p->pos.z;
 
-    /* if player is enlightened, use a circular area around the player
-     * otherwise fov algorithm
-     */
-
+    /* if player is enlightened, use a circular area around the player */
     if (player_effect(p, ET_ENLIGHTENMENT))
     {
         int x, y;
+
+        /* reset FOV manually */
+        fov_reset(p->fov);
 
         enlight = area_new_circle(p->pos, player_effect(p, ET_ENLIGHTENMENT), FALSE);
 
@@ -4407,7 +4400,7 @@ void player_update_fov(player *p)
                 pos.y = y + enlight->start_y;
 
                 if (pos_valid(pos) && area_point_get(enlight, x, y))
-                    p->fov[(pos).y][(pos).x] = TRUE;
+                    fov_set(p->fov, pos, TRUE);
             }
         }
 
@@ -4415,15 +4408,8 @@ void player_update_fov(player *p)
     }
     else
     {
-        /* determine which fields are visible */
-        for (octant = 0; octant < 8; octant++)
-        {
-            player_calculate_octant(p, 1, 1.0, 0.0, radius,
-                                    mult[0][octant], mult[1][octant],
-                                    mult[2][octant], mult[3][octant]);
-
-        }
-        p->fov[p->pos.y][p->pos.x] = TRUE;
+        /* otherwise use the fov algorithm */
+        fov_calculate(p->fov, game_map(nlarn, p->pos.z), p->pos, radius);
     }
 
     /* update visible fields in player's memory */
@@ -4431,7 +4417,7 @@ void player_update_fov(player *p)
     {
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            if (player_pos_visible(p, pos))
+            if (fov_get(p->fov, pos))
             {
                 monster *m = map_get_monster_at(map, pos);
                 inventory **inv = map_ilist_at(map, pos);
@@ -4500,12 +4486,6 @@ void player_update_fov(player *p)
             }
         }
     }
-}
-
-int player_pos_visible(player *p, position pos)
-{
-    assert (p != NULL && pos_valid(pos));
-    return (p->pos.z == pos.z) && p->fov[pos.y][pos.x];
 }
 
 static guint player_item_pickup_all(player *p, inventory **inv, item *it)
@@ -4586,103 +4566,6 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
         inv_del_oid(inv, oid);
 
     return 0;
-}
-
-static void player_calculate_octant(player *p, int row, float start,
-                                    float end, int radius, int xx,
-                                    int xy, int yx, int yy)
-{
-    int radius_squared;
-    int j;
-    int dx, dy;
-    int X, Y;
-    int blocked;
-    float l_slope, r_slope;
-    float new_start = 0;
-
-    if (start < end)
-        return;
-
-    radius_squared = radius * radius;
-
-    for (j = row; j <= radius + 1; j++)
-    {
-        dx = -j - 1;
-        dy = -j;
-
-        blocked = FALSE;
-
-        while (dx <= 0)
-        {
-            dx += 1;
-
-            /* Translate the dx, dy coordinates into map coordinates: */
-            X = p->pos.x + dx * xx + dy * xy;
-            Y = p->pos.y + dx * yx + dy * yy;
-
-            /* check if coordinated are within bounds */
-            if ((X < 0) || (X >= MAP_MAX_X))
-                continue;
-
-            if ((Y < 0) || (Y >= MAP_MAX_Y))
-                continue;
-
-            /* l_slope and r_slope store the slopes of the left and right
-             * extremities of the square we're considering: */
-            l_slope = (dx - 0.5) / (dy + 0.5);
-            r_slope = (dx + 0.5) / (dy - 0.5);
-
-            if (start < r_slope)
-            {
-                continue;
-            }
-            else if (end > l_slope)
-            {
-                break;
-            }
-            else
-            {
-                /* Our light beam is touching this square; light it */
-                if ((dx * dx + dy * dy) < radius_squared)
-                {
-                    p->fov[Y][X] = TRUE;
-                }
-
-                if (blocked)
-                {
-                    /* we're scanning a row of blocked squares */
-                    if (!map_pos_transparent(game_map(nlarn, p->pos.z), pos_new(X,Y, p->pos.z)))
-                    {
-                        new_start = r_slope;
-                        continue;
-                    }
-                    else
-                    {
-                        blocked = FALSE;
-                        start = new_start;
-                    }
-                }
-                else
-                {
-                    if (!map_pos_transparent(game_map(nlarn, p->pos.z),
-                                             pos_new(X, Y, p->pos.z)) && (j < radius))
-                    {
-                        /* This is a blocking square, start a child scan */
-                        blocked = TRUE;
-                    }
-
-                    player_calculate_octant(p, j+1, start, l_slope, radius, xx, xy, yx, yy);
-                    new_start = r_slope;
-                }
-            }
-        }
-
-        /* Row is scanned; do next row unless last square was blocked */
-        if (blocked)
-        {
-            break;
-        }
-    }
 }
 
 static void player_sobject_memorize(player *p, map_sobject_t sobject, position pos)

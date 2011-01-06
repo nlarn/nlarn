@@ -22,6 +22,7 @@
 #include "amulets.h"
 #include "armour.h"
 #include "buildings.h"
+#include "fov.h"
 #include "map.h"
 #include "monsters.h"
 #include "position.h"
@@ -158,7 +159,7 @@ typedef struct player
     gpointer *ptarget;
 
     /* player's field of vision */
-    int fov[MAP_MAX_Y][MAP_MAX_X];
+    fov *fov;
 
     /* player's memory of the map */
     player_tile_memory memory[MAP_MAX][MAP_MAX_Y][MAP_MAX_X];
@@ -237,7 +238,6 @@ gboolean player_movement_possible(player *p);
 int player_move(player *p, direction dir, gboolean open_door);
 int player_attack(player *p, monster *m);
 void player_update_fov(player *p);
-int player_pos_visible(player *p, position pos);
 
 /**
  * Function to enter a map.

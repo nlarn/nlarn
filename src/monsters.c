@@ -563,7 +563,7 @@ static gboolean monster_nearby(monster *m)
     if (m->pos.z != nlarn->p->pos.z)
         return FALSE;
 
-    return player_pos_visible(nlarn->p, m->pos);
+    return fov_get(nlarn->p->fov, m->pos);
 }
 
 gboolean monster_in_sight(monster *m)
@@ -582,7 +582,7 @@ gboolean monster_in_sight(monster *m)
     if (monster_flags(m, MF_INVISIBLE) && !player_effect(nlarn->p, ET_INFRAVISION))
         return FALSE;
 
-    return player_pos_visible(nlarn->p, m->pos);
+    return fov_get(nlarn->p->fov, m->pos);
 }
 
 static const char *get_town_person_name(int value)

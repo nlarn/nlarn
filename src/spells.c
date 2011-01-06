@@ -1283,7 +1283,7 @@ static void blast_area_with_spell(struct player *p, area *ball, spell *s,
                 /* affect items on the position */
                 if (iet > IET_NONE && (inv = map_ilist_at(cmap, cursor)))
                 {
-                    inv_erode(inv, iet, player_pos_visible(p, cursor));
+                    inv_erode(inv, iet, fov_get(p->fov, cursor));
                 }
             }
         }

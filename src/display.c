@@ -24,6 +24,7 @@
 #include <ctype.h>
 
 #include "display.h"
+#include "fov.h"
 #include "map.h"
 #include "nlarn.h"
 #include "spheres.h"
@@ -135,7 +136,7 @@ int display_paint_screen(player *p)
 
         for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
         {
-            if (game_fullvis(nlarn) || player_pos_visible(p, pos))
+            if (game_fullvis(nlarn) || fov_get(p->fov, pos))
             {
                 /* draw the truth */
                 inventory **inv = map_ilist_at(map, pos);
@@ -2220,7 +2221,7 @@ position display_get_position(player *p,
             start = monster_pos(m);
 
             /* don't use invisible position if unwanted */
-            if (visible && !player_pos_visible(p, start))
+            if (visible && !fov_get(p->fov, start))
             {
                 start = p->pos;
             }
@@ -2524,7 +2525,7 @@ position display_get_new_position(player *p,
             if (visible)
             {
                 /* don't use invisible or impassable positions */
-                if (!player_pos_visible(p, npos))
+                if (!fov_get(p->fov, npos))
                     npos = pos;
 
                 if (passable && !map_pos_passable(map, npos))
@@ -3067,7 +3068,7 @@ static void display_spheres_paint(sphere *s, player *p)
     if (!(s->pos.z == p->pos.z))
         return;
 
-    if (game_fullvis(nlarn) || player_pos_visible(p, s->pos))
+    if (game_fullvis(nlarn) || fov_get(p->fov, s->pos))
     {
         attron(DC_MAGENTA);
         mvaddch(s->pos.y, s->pos.x, '0');
