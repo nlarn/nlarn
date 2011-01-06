@@ -933,6 +933,10 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 // can process it correctly.
                 p->attacked = FALSE;
             }
+        } else {
+            /* otherwise just clean up monsters killed by the player
+               during the extra turn */
+            game_remove_dead_monsters(nlarn);
         }
 
         /* reduce number of turns */
