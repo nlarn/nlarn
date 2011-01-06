@@ -1784,6 +1784,9 @@ int player_attack(player *p, monster *m)
         {
             /* killed the monster */
             return 1;
+        } else {
+           /* store the monster for subsequent ranged attacks */
+           p->ptarget = monster_oid(m);
         }
 
         /* Lance of Death has not killed */
