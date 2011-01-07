@@ -190,7 +190,16 @@ int *map_get_surrounding(map *l, position pos, map_sobject_t type);
  */
 int map_pos_is_visible(map *l, position source, position target);
 
-map_path *map_find_path(map *l, position start, position goal,
+/**
+ * @brief Find a path between two positions 
+ *
+ * @param the map to work on
+ * @param the starting position
+ * @param the destination
+ * @param the map_element_t that can be travelled
+ * @return a path or NULL if none could be found 
+ */
+map_path *map_find_path(map *m, position start, position goal,
                         map_element_t element);
 void map_path_destroy(map_path *path);
 

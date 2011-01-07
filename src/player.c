@@ -1574,9 +1574,25 @@ int player_move(player *p, direction dir, gboolean open_door)
         return times;
     }
 
-    /* attack - no movement */
-    if (target_m)
+    if (target_m && (monster_action(target_m) == MA_SERVE))
+    {
+        /* bump into a servant -> swap position */
+
+        /* reposition the player here, otherwise monster_pos_set will fail */
+        position old_pos = p->pos;
+        p->pos = target_p;
+        monster_pos_set(target_m, map, old_pos);
+
+        move_possible = TRUE;
+
+        log_add_entry(nlarn->log, "You swap places with the %s.",
+                      monster_get_name(target_m));
+    }
+    else if (target_m)
+    {
+        /* attack - no movement */
         return player_attack(p, target_m);
+    }
 
     /* check if the move is possible */
     if (map_pos_passable(map, target_p))
@@ -1629,7 +1645,7 @@ int player_move(player *p, direction dir, gboolean open_door)
         player_autopickup(p);
 
     /* mention stationary objects at this position */
-    if ((so =map_sobject_at(map, p->pos)))
+    if ((so = map_sobject_at(map, p->pos)))
     {
         log_add_entry(nlarn->log, "You see %s here.", ls_get_desc(so));
     }

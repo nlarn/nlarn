@@ -172,7 +172,7 @@ void monster_destroy(monster *m);
 void monster_serialize(gpointer oid, monster *m, cJSON *root);
 void monster_deserialize(cJSON *mser, struct game *g);
 
-/* getter / setter */
+/* getters / setters */
 
 int monster_hp_max(monster *m);
 int monster_hp(monster *m);
@@ -187,6 +187,13 @@ gboolean monster_unknown(monster *m);
 void monster_unknown_set(monster *m, gboolean what);
 
 gboolean monster_in_sight(monster *m);
+
+/** @brief Get the currently set AI action for a given monster.
+  *
+  * @param A monster.
+  * @return The currently set AI action for the given monster.
+  */
+monster_action_t monster_action(monster *m);
 
 /* other functions */
 const char *monster_get_name(monster *m);

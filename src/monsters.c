@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "display.h"
+#include "fov.h"
 #include "game.h"
 #include "items.h"
 #include "map.h"
@@ -38,6 +39,7 @@ struct _monster
     gint32 hp_max;
     gint32 hp;
     position pos;
+    fov *fov;
     int movement;
     monster_action_t action; /* current action */
     guint32 lastseen;        /* number of turns since when player was last seen; 0 = never */
@@ -353,6 +355,10 @@ void monster_destroy(monster *m)
     /* decrement monster count */
     game_map(nlarn, m->pos.z)->mcount--;
 
+    /* free monster's FOV if existing */
+    if (m->fov)
+        fov_free(m->fov);
+
     g_free(m);
 }
 
@@ -605,6 +611,13 @@ static const char *get_town_person_name(int value)
     return npc_desc[value];
 }
 
+monster_action_t monster_action(monster *m)
+{
+    assert (m != NULL);
+
+    return m->action;
+}
+
 // Takes into account visibility.
 // For the real name, use monster_name() directly.
 const char *monster_get_name(monster *m)
@@ -667,7 +680,13 @@ void monster_die(monster *m, struct player *p)
        (the xp gain gives this away anyway). */
     if (monster_in_sight(m) || (p != NULL && monster_nearby(m)))
     {
-        char *message = "The %s dies!";
+        char *message;
+
+        /* give a different message if a servant is expired */
+        if (monster_action(m) == MA_SERVE && m->number == 0)
+            message = "The %s disappears!";
+        else
+            message = "The %s dies!";
 
         log_add_entry(nlarn->log, message, monster_get_name(m));
     }
@@ -718,7 +737,8 @@ void monster_die(monster *m, struct player *p)
         }
     }
 
-    if (p != NULL)
+    /* reward experience, but not for summoned monsters */
+    if (p != NULL && (monster_action(m) != MA_SERVE))
     {
         player_exp_gain(p, monster_exp(m));
         p->stats.monsters_killed[m->type] += 1;
@@ -827,6 +847,19 @@ void monster_move(gpointer *oid, monster *m, game *g)
 {
     /* monster's new position */
     position m_npos;
+
+    /* expire summoned monsters */
+    if (monster_action(m) == MA_SERVE)
+    {
+        m->number--;
+
+        if (m->number == 0)
+        {
+            /* expired */
+            monster_die(m, g->p);
+            return;
+        }
+    }
 
     if (monster_hp(m) < 1)
         /* Monster is already dead. */
@@ -1690,6 +1723,13 @@ gboolean monster_update_action(monster *m, monster_action_t override)
     {
         /* set the monster's action to the requested value */
         m->action = override;
+
+        /* if the monster is to be a servant, set its lifetime */
+        if (override == MA_SERVE)
+        {
+            /* FIXME: it would be nice to have a variable amount of turns */
+            m->number = 100;
+        }
         return TRUE;
     }
 
@@ -2482,7 +2522,6 @@ static position monster_move_attack(monster *m, struct player *p)
     }
 
     /* monster heads into the direction of the player. */
-
     path = map_find_path(monster_map(m), monster_pos(m), m->player_pos,
                          monster_map_element(m));
 
@@ -2536,8 +2575,42 @@ static position monster_move_flee(monster *m, struct player *p)
 
 static position monster_move_serve(monster *m, struct player *p)
 {
-    /* pointless placeholder */
-    return m->pos;
+    position npos;
+
+    /* generate a fov structure if not yet available */
+    if (!m->fov)
+        m->fov = fov_new(MAP_MAX_X, MAP_MAX_Y);
+
+    /* calculate the monster's fov */
+    /* the monster gets a fov radius of 6 for now*/
+    fov_calculate(m->fov, monster_map(m), m->pos, 6);
+
+    /* a good servant always knows the masters position */
+    if (pos_distance(monster_pos(m), p->pos) > 5)
+    {
+        /* if the distance to the player is too large, follow */
+        map_path *path = NULL;
+
+        path = map_find_path(monster_map(m), monster_pos(m), p->pos,
+                         monster_map_element(m));
+
+        if (path && !g_queue_is_empty(path->path))
+        {
+            map_path_element *pe = g_queue_pop_head(path->path);
+            npos = pe->pos;
+        }
+
+        if (path != NULL)
+            map_path_destroy(path);
+    }
+    else
+    {
+        /* look for worthy foes */
+        /* TODO: implement */
+        npos = m->pos;
+    }
+
+    return npos;
 }
 
 int monster_is_carrying_item(monster *m, item_t type)

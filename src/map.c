@@ -668,15 +668,20 @@ int map_pos_is_visible(map *l, position s, position t)
     return TRUE;
 }
 
-map_path *map_find_path(map *l, position start, position goal,
+map_path *map_find_path(map *m, position start, position goal,
                         map_element_t element)
 {
-    assert(l != NULL && (start.z == goal.z));
+    assert(m != NULL);
 
     map_path *path;
     map_path_element *curr, *next;
     gboolean next_is_better;
     GPtrArray *neighbours;
+
+    /* if the starting position is on another map, fail for now */
+    /* TODO: could be changed to support 3D pathfinding */
+    if (start.z != goal.z)
+        return NULL;
 
     path = map_path_new(start, goal);
 
@@ -690,7 +695,7 @@ map_path *map_find_path(map *l, position start, position goal,
 
     while (path->open->len)
     {
-        curr = map_path_find_best(l, path, element, player);
+        curr = map_path_find_best(m, path, element, player);
 
         g_ptr_array_remove_fast(path->open, curr);
         g_ptr_array_add(path->closed, curr);
@@ -713,7 +718,7 @@ map_path *map_find_path(map *l, position start, position goal,
             return path;
         }
 
-        neighbours = map_path_get_neighbours(l, curr->pos, element, player);
+        neighbours = map_path_get_neighbours(m, curr->pos, element, player);
 
         while (neighbours->len)
         {
@@ -730,7 +735,7 @@ map_path *map_find_path(map *l, position start, position goal,
 
             const guint32 next_g_score =
                 curr->g_score
-                + map_step_cost(l, next, element, player);
+                + map_step_cost(m, next, element, player);
 
             if (!map_path_element_in_list(next, path->open))
             {

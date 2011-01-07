@@ -820,6 +820,10 @@ static gboolean adjacent_monster(player *p, gboolean ignore_harmless)
             if (monster_type(m) == MT_TOWN_PERSON)
                 continue;
 
+            /* ignore servants */
+            if (monster_action(m) == MA_SERVE)
+                continue;
+
             /* Only ignore floating eye if already paralysed. */
             if (ignore_harmless
                 && (monster_type(m) == MT_FLOATING_EYE)
