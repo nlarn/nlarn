@@ -2296,6 +2296,14 @@ position display_get_new_position(player *p,
         npos.x = G_MAXINT16;
         npos.y = G_MAXINT16;
 
+        /* draw a ray if the starting position is not the player's position */
+        if (ray && !pos_identical(pos, p->pos))
+        {
+            a = area_new_ray(p->pos, pos,
+                             map_get_obstacles(map, p->pos,
+                                               pos_distance(p->pos, pos)));
+        }
+
         if (ray && (a != NULL))
         {
             /* draw a line between source and target if told to */
