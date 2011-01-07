@@ -189,22 +189,9 @@ map *map_new(int num, char *mazefile)
             keep_maze = map_validate(nmap);
         }
         while (!keep_maze);
-
-        /* add monsters */
-        map_fill_with_life(nmap);
     }
 
-    if (num == 0)
-    {
-        // Place 4 town people on the map.
-        int i;
-        for (i = 0; i < 4; i++)
-        {
-            position pos = map_find_space(nmap, LE_MONSTER, FALSE);
-            monster_new(MT_TOWN_PERSON, pos);
-        }
-    }
-    else
+    if (num != 0)
     {
         /* home town is not filled with crap */
         map_fill_with_objects(nmap);
@@ -212,6 +199,9 @@ map *map_new(int num, char *mazefile)
         /* and not trapped */
         map_fill_with_traps(nmap);
     }
+
+    /* add inhabitants to the map */
+    map_fill_with_life(nmap);
 
     return nmap;
 }
@@ -530,8 +520,7 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
     switch (element)
     {
     case LE_GROUND:
-        /* why should we need this case? */
-        return TRUE;
+        return lt_is_passable(tile->type);
         break;
 
     case LE_SOBJECT:
@@ -548,23 +537,18 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
                 }
 
             return TRUE;
-
         }
         break;
 
     case LE_TRAP:
-        if (lt_is_passable(tile->type)
+        return (lt_is_passable(tile->type)
                 && (tile->sobject == LS_NONE)
-                && (tile->trap == TT_NONE))
-        {
-            return TRUE;
-        }
+                && (tile->trap == TT_NONE));
         break;
 
     case LE_ITEM:
         /* we can stack like mad, so we only need to check if there is an open space */
-        if (map_pos_passable(l, pos) && (tile->sobject == LS_NONE))
-            return TRUE;
+        return (map_pos_passable(l, pos) && (tile->sobject == LS_NONE));
         break;
 
     case LE_MONSTER:
@@ -578,7 +562,7 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
         if (map_is_monster_at(l, pos))
             return FALSE;
 
-        return valid_monster_movement_pos(l, pos, element);
+        return monster_valid_dest(l, pos, element);
         break;
 
     case LE_NONE:
@@ -1085,27 +1069,33 @@ int map_is_monster_at(map *m, position pos)
     return ((map_get_monster_at(m, pos) != NULL));
 }
 
-void map_fill_with_life(map *l)
+void map_fill_with_life(map *m)
 {
     position pos;
     int new_monster_count;
     int i;
 
-    assert(l != NULL);
+    assert(m != NULL);
 
-    new_monster_count = rand_1n(14 + l->nlevel);
+    new_monster_count = rand_1n(14 + m->nlevel);
 
-    if (l->mcount > new_monster_count)
+    if (m->nlevel == 0)
+    {
+        /* do not add an excessive amount of town people */
+        new_monster_count = min(5, new_monster_count);
+    }
+
+    if (m->mcount > new_monster_count)
         /* no monsters added */
         return;
     else
-        new_monster_count -= l->mcount;
+        new_monster_count -= m->mcount;
 
     for (i = 0; i <= new_monster_count; i++)
     {
         do
         {
-            pos = map_find_space(l, LE_MONSTER, FALSE);
+            pos = map_find_space(m, LE_MONSTER, FALSE);
 
             if (!pos_valid(pos))
             {
@@ -2213,7 +2203,7 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos,
             continue;
 
         if ((player && lt_is_passable(player_memory_of(nlarn->p, npos).type))
-                || (!player && valid_monster_movement_pos(l, npos, element)))
+                || (!player && monster_valid_dest(l, npos, element)))
         {
             pe = map_path_element_new(npos);
             g_ptr_array_add(neighbours, pe);

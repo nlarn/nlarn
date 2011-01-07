@@ -587,7 +587,7 @@ void game_spin_the_wheel(game *g)
         map_timer(map);
 
         /* spawn some monsters every now and then */
-        if (nmap > 0 && (g->gtime % (100 + nmap)) == 0)
+        if (g->gtime % (100 + nmap) == 0)
         {
             map_fill_with_life(map);
         }

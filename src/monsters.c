@@ -59,7 +59,8 @@ const char *monster_ai_desc[MA_MAX] =
     "standing still",   /* MA_REMAIN */
     "wandering",        /* MA_WANDER */
     "attacking",        /* MA_ATTACK */
-    "serving you"       /* MA_SERVE */
+    "serving you",      /* MA_SERVE */
+    "doing something boring", /* MA_CIVILIAN */
 };
 
 const char *monster_attack_verb[ATT_MAX] =
@@ -89,6 +90,7 @@ static position monster_move_wander(monster *m, struct player *p);
 static position monster_move_attack(monster *m, struct player *p);
 static position monster_move_flee(monster *m, struct player *p);
 static position monster_move_serve(monster *m, struct player *p);
+static position monster_move_civilian(monster *m, struct player *p);
 
 monster *monster_new(monster_t type, position pos)
 {
@@ -162,8 +164,10 @@ monster *monster_new(monster_t type, position pos)
         break;
 
     case MT_TOWN_PERSON:
-        // initialize name counter
+        /* initialize name counter */
         nmonster->number = rand_1n(40);
+        /* set the AI to civilian */
+        nmonster->action = MA_CIVILIAN;
         break;
 
     default:
@@ -246,7 +250,8 @@ monster *monster_new(monster_t type, position pos)
     }
 
     /* initialize AI */
-    nmonster->action = MA_WANDER;
+    if (nmonster->action == MA_NONE)
+        nmonster->action = MA_WANDER;
     nmonster->player_pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
 
     /* register monster with game */
@@ -284,41 +289,50 @@ monster *monster_new_by_level(position pos)
                                 };
 
     const int nlevel = pos.z;
-
-    int minstep = nlevel - 4;
-    int maxstep = nlevel - 1;
-
     int monster_id = MT_NONE;
-    int monster_id_min;
-    int monster_id_max;
 
-    if (chance(2*game_difficulty(nlarn)))
-        maxstep += 2;
-    else if (chance(7*(game_difficulty(nlarn) + 1)))
-        maxstep++;
-    else if (chance(10))
-        minstep--;
-
-    if (minstep < 0)
-        monster_id_min = 1;
-    else
-        monster_id_min = monster_level[minstep] + 1;
-
-    if (maxstep < 0)
-        maxstep = 0;
-    else if (maxstep > MAP_MAX - 2)
-        maxstep = MAP_MAX - 2;
-
-    monster_id_max = monster_level[maxstep];
-
-    do
+    if (nlevel == 0)
     {
-        monster_id = rand_m_n(monster_id_min, monster_id_max);
+        /* only town persons in town */
+        monster_id = MT_TOWN_PERSON;
     }
-    while ((monster_id <= MT_NONE)
-            || (monster_id >= MT_MAX)
-            || nlarn->monster_genocided[monster_id]
-            || chance(monster_type_reroll_chance(monster_id)));
+    else
+    {
+        /* everything else in the dungeons */
+        int minstep = nlevel - 4;
+        int maxstep = nlevel - 1;
+
+        int monster_id_min;
+        int monster_id_max;
+
+        if (chance(2*game_difficulty(nlarn)))
+            maxstep += 2;
+        else if (chance(7*(game_difficulty(nlarn) + 1)))
+            maxstep++;
+        else if (chance(10))
+            minstep--;
+
+        if (minstep < 0)
+            monster_id_min = 1;
+        else
+            monster_id_min = monster_level[minstep] + 1;
+
+        if (maxstep < 0)
+            maxstep = 0;
+        else if (maxstep > MAP_MAX - 2)
+            maxstep = MAP_MAX - 2;
+
+        monster_id_max = monster_level[maxstep];
+
+        do
+        {
+            monster_id = rand_m_n(monster_id_min, monster_id_max);
+        }
+        while ((monster_id <= MT_NONE)
+                || (monster_id >= MT_MAX)
+                || nlarn->monster_genocided[monster_id]
+                || chance(monster_type_reroll_chance(monster_id)));
+    }
 
     return monster_new(monster_id, pos);
 }
@@ -506,9 +520,13 @@ static int monster_map_element(monster *m)
     return LE_MONSTER;
 }
 
-int valid_monster_movement_pos(map *l, position pos, int map_elem)
+int monster_valid_dest(map *m, position pos, int map_elem)
 {
-    switch (map_tiletype_at(l, pos))
+    /* only civilians use LE_GROUND and can't move through the player */
+    if (map_elem == LE_GROUND && pos_identical(pos, nlarn->p->pos))
+        return FALSE;
+
+    switch (map_tiletype_at(m, pos))
     {
     case LT_WALL:
         return (map_elem == LE_XORN);
@@ -521,7 +539,8 @@ int valid_monster_movement_pos(map *l, position pos, int map_elem)
         return (map_elem == LE_FLYING_MONSTER);
 
     default:
-        return map_pos_passable(l, pos);
+        /* the map tile must be passable and there must be no monster on it*/
+        return (map_pos_passable(m, pos) && !map_is_monster_at(m, pos));
     }
 }
 
@@ -894,10 +913,16 @@ void monster_move(gpointer *oid, monster *m, game *g)
     if (!map_adjacent)
         return;
 
-    /* update monster's knowledge of player's position */
-    if (monster_player_visible(m)
+    /* Update the monster's knowledge of player's position.
+       Not for civilians or servants: the first don't care,
+       the latter just know. This allows to use player_pos
+       and lastseen for other purposes. */
+    monster_action_t ma = monster_action(m);
+
+    if ((ma != MA_SERVE && ma != MA_CIVILIAN)
+        && (monster_player_visible(m)
             || (player_effect(g->p, ET_AGGRAVATE_MONSTER)
-                && pos_distance(m->pos, g->p->pos) < 15))
+                && pos_distance(m->pos, g->p->pos) < 15)))
     {
         monster_update_player_pos(m, g->p->pos);
     }
@@ -965,6 +990,11 @@ void monster_move(gpointer *oid, monster *m, game *g)
 
         case MA_SERVE:
             m_npos = monster_move_serve(m, g->p);
+            break;
+
+        case MA_CIVILIAN:
+            m_npos = monster_move_civilian(m, g->p);
+            break;
 
         case MA_NONE:
         case MA_MAX:
@@ -1136,7 +1166,7 @@ void monster_polymorph(monster *m)
 
     /* if the new monster can't survive in this terrain, kill it */
     const map_element_t new_elem = monster_map_element(m);
-    if (!valid_monster_movement_pos(monster_map(m), m->pos, new_elem))
+    if (!monster_valid_dest(monster_map(m), m->pos, new_elem))
     {
         if (monster_in_sight(m))
         {
@@ -1739,6 +1769,12 @@ gboolean monster_update_action(monster *m, monster_action_t override)
         return FALSE;
     }
 
+    if (m->action == MA_CIVILIAN)
+    {
+        /* town people never change their behaviour */
+        return FALSE;
+    }
+
     if (monster_flags(m, MF_MIMIC) && m->unknown)
     {
         /* stationary monsters */
@@ -1755,9 +1791,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
         /* low HP or very scared => FLEE from player */
         naction = MA_FLEE;
     }
-    /* town people never attack the player */
-    else if (monster_type(m) != MT_TOWN_PERSON
-             && m->lastseen && (m->lastseen < time))
+    else if (m->lastseen && (m->lastseen < time))
     {
         /* after having spotted the player, agressive monster will follow
            the player for a certain amount of time turns, afterwards loose
@@ -2425,23 +2459,6 @@ static char *monsters_get_fortune(char *fortune_file)
 
 static position monster_move_wander(monster *m, struct player *p)
 {
-    if (monster_type(m) == MT_TOWN_PERSON)
-    {
-        if (pos_adjacent(monster_pos(m), p->pos))
-        {
-            // talk
-            log_add_entry(nlarn->log, "The %s says, \"%s\"",
-                          monster_get_name(m),
-                          monsters_get_fortune(game_fortunes(nlarn)));
-        }
-        else if (m->lastseen > 50)
-        {
-            m->lastseen = 2;
-            if (chance(20))
-                m->number = rand_1n(40);
-        }
-    }
-
     int tries = 0;
     position npos = monster_pos(m);
 
@@ -2608,6 +2625,79 @@ static position monster_move_serve(monster *m, struct player *p)
         /* look for worthy foes */
         /* TODO: implement */
         npos = m->pos;
+    }
+
+    return npos;
+}
+
+static position monster_move_civilian(monster *m, struct player *p)
+{
+    position npos = m->pos;
+
+    /* civilians will pick a random location on the map, travel and remain
+       there for the number of turns that is determined by their town
+       person number. */
+
+    if (!pos_valid(m->player_pos))
+    {
+        /* No target set -> find a new location to travel to.
+           Civilians stay inside the town area. */
+        rectangle town = rect_new(3, 4, MAP_MAX_X, MAP_MAX_Y);
+        m->player_pos = map_find_space_in(monster_map(m), town, LE_GROUND, FALSE);
+    }
+
+    if (pos_identical(m->pos, m->player_pos)
+        && m->lastseen >= (m->number + 25))
+    {
+        /* The person has stayed at the target position for long
+           enough, thus reset the target position. */
+        m->player_pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+    }
+    else if (pos_valid(m->player_pos) && !pos_identical(m->pos, m->player_pos))
+    {
+        /* travel to the selected location */
+        map_path *path = NULL;
+        path = map_find_path(monster_map(m), m->pos, m->player_pos, LE_GROUND);
+
+        if (path && !g_queue_is_empty(path->path))
+        {
+            map_path_element *pe = g_queue_pop_head(path->path);
+            npos = pe->pos;
+
+            if (pos_identical(npos, m->player_pos))
+            {
+                /* the new position is identical to the target, thus reset
+                   the lastseen counter */
+                m->lastseen = 1;
+            }
+        }
+
+        if (path != NULL)
+        {
+            /* clean up */
+            map_path_destroy(path);
+        }
+        else
+        {
+            /* it seems that there is no path to the target, thus get a new one */
+            m->player_pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+        }
+    }
+
+    /* check if the player is next to the civilian and not inside a building */
+    if (pos_adjacent(m->pos, p->pos) && chance(40)
+        && ls_is_transparent(map_sobject_at(monster_map(m), p->pos)))
+    {
+        /* talk */
+        log_add_entry(nlarn->log, "The %s says, \"%s\"",
+                      monster_get_name(m),
+                      monsters_get_fortune(game_fortunes(nlarn)));
+    }
+
+    /* change the town person's name from time to time */
+    if (!fov_get(p->fov, m->pos) && chance(10))
+    {
+        m->number = rand_1n(40);
     }
 
     return npos;
