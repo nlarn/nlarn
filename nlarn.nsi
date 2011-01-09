@@ -1,7 +1,7 @@
 ;
 ; nlarn.nsi
 ;
-; Copyright (C) Joachim de Groot 2009 <jdegroot@web.de>
+; Copyright (C) Joachim de Groot 2009, 2010, 2011  <jdegroot@web.de>
 ;
 ; NLarn is free software: you can redistribute it and/or modify it
 ; under the terms of the GNU General Public License as published by the
