@@ -100,7 +100,7 @@ monster *monster_new(monster_t type, position pos)
     int it, icount;     /* item type, item id, item count */
 
     /* check if supplied position is suitable for a monster */
-    if (!map_pos_validate(game_map(nlarn, pos.z), pos, LE_MONSTER, FALSE))
+    if (!map_pos_validate(game_map(nlarn, Z(pos)), pos, LE_MONSTER, FALSE))
     {
         return NULL;
     }
@@ -242,7 +242,7 @@ monster *monster_new(monster_t type, position pos)
 
         /* put mimicked item into monster inventory */
         const int chosen_type = possible_types[rand_0n(8)];
-        item *it = item_new_by_level(chosen_type, nmonster->pos.z);
+        item *it = item_new_by_level(chosen_type, Z(nmonster->pos));
         inv_add(&nmonster->inventory, it);
 
         /* the mimic is not known to be a monster */
@@ -252,7 +252,7 @@ monster *monster_new(monster_t type, position pos)
     /* initialize AI */
     if (nmonster->action == MA_NONE)
         nmonster->action = MA_WANDER;
-    nmonster->player_pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+    nmonster->player_pos = pos_invalid;
 
     /* register monster with game */
     nmonster->oid = game_monster_register(nlarn, nmonster);
@@ -261,10 +261,10 @@ monster *monster_new(monster_t type, position pos)
     nmonster->pos = pos;
 
     /* link monster to tile */
-    map_set_monster_at(game_map(nlarn, pos.z), pos, nmonster);
+    map_set_monster_at(game_map(nlarn, Z(pos)), pos, nmonster);
 
     /* increment monster count */
-    game_map(nlarn, pos.z)->mcount++;
+    game_map(nlarn, Z(pos))->mcount++;
 
     return nmonster;
 }
@@ -288,7 +288,7 @@ monster *monster_new_by_level(position pos)
                                   MT_DEMON_PRINCE      // V3
                                 };
 
-    const int nlevel = pos.z;
+    const int nlevel = Z(pos);
     int monster_id = MT_NONE;
 
     if (nlevel == 0)
@@ -352,7 +352,7 @@ void monster_destroy(monster *m)
     g_ptr_array_free(m->effects, TRUE);
 
     /* remove monster from map (if it is on the map) */
-    map_set_monster_at(game_map(nlarn, m->pos.z), m->pos, NULL);
+    map_set_monster_at(game_map(nlarn, Z(m->pos)), m->pos, NULL);
 
     /* free inventory */
     if (m->inventory)
@@ -367,7 +367,7 @@ void monster_destroy(monster *m)
     }
 
     /* decrement monster count */
-    game_map(nlarn, m->pos.z)->mcount--;
+    game_map(nlarn, Z(m->pos))->mcount--;
 
     /* free monster's FOV if existing */
     if (m->fov)
@@ -385,7 +385,7 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     cJSON_AddNumberToObject(mval, "oid", GPOINTER_TO_UINT(oid));
     cJSON_AddNumberToObject(mval, "hp_max", m->hp_max);
     cJSON_AddNumberToObject(mval, "hp", m->hp);
-    cJSON_AddItemToObject(mval,"pos", pos_serialize(m->pos));
+    cJSON_AddNumberToObject(mval,"pos", pos_val(m->pos));
     cJSON_AddNumberToObject(mval, "movement", m->movement);
     cJSON_AddNumberToObject(mval, "action", m->action);
 
@@ -401,7 +401,7 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     if (m->lastseen != 0)
     {
         cJSON_AddNumberToObject(mval,"lastseen", m->lastseen);
-        cJSON_AddItemToObject(mval,"player_pos", pos_serialize(m->player_pos));
+        cJSON_AddNumberToObject(mval,"player_pos", pos_val(m->player_pos));
     }
 
     /* inventory */
@@ -428,7 +428,7 @@ void monster_deserialize(cJSON *mser, game *g)
     m->oid = GUINT_TO_POINTER(oid);
     m->hp_max = cJSON_GetObjectItem(mser, "hp_max")->valueint;
     m->hp = cJSON_GetObjectItem(mser, "hp")->valueint;
-    m->pos = pos_deserialize(cJSON_GetObjectItem(mser, "pos"));
+    pos_val(m->pos) = cJSON_GetObjectItem(mser, "pos")->valueint;
     m->movement = cJSON_GetObjectItem(mser, "movement")->valueint;
     m->action = cJSON_GetObjectItem(mser, "action")->valueint;
 
@@ -445,7 +445,7 @@ void monster_deserialize(cJSON *mser, game *g)
         m->lastseen = obj->valueint;
 
     if ((obj = cJSON_GetObjectItem(mser, "player_pos")))
-        m->player_pos = pos_deserialize(obj);
+        pos_val(m->player_pos) = obj->valueint;
 
     /* inventory */
     if ((obj = cJSON_GetObjectItem(mser, "inventory")))
@@ -467,7 +467,7 @@ void monster_deserialize(cJSON *mser, game *g)
         g->monster_max_id = oid;
 
     /* increment the count of monsters of the map the monster is on */
-    game_map(g, m->pos.z)->mcount++;
+    game_map(g, Z(m->pos))->mcount++;
 }
 
 int monster_hp_max(monster *m)
@@ -585,7 +585,7 @@ void monster_unknown_set(monster *m, gboolean what)
 static gboolean monster_nearby(monster *m)
 {
     /* different level */
-    if (m->pos.z != nlarn->p->pos.z)
+    if (Z(m->pos) != Z(nlarn->p->pos))
         return FALSE;
 
     return fov_get(nlarn->p->fov, m->pos);
@@ -600,7 +600,7 @@ gboolean monster_in_sight(monster *m)
         return FALSE;
 
     /* different level */
-    if (m->pos.z != nlarn->p->pos.z)
+    if (Z(m->pos) != Z(nlarn->p->pos))
         return FALSE;
 
     /* invisible monster, player has no infravision */
@@ -733,7 +733,7 @@ void monster_die(monster *m, struct player *p)
                 {
                     /* teleport the item to safety */
                     inv_del_element(&m->inventory, it);
-                    map_item_add(game_map(nlarn, p->pos.z), it);
+                    map_item_add(game_map(nlarn, Z(p->pos)), it);
                 }
                 else
                 {
@@ -845,7 +845,7 @@ void monster_level_enter(monster *m, struct map *l)
     }
 
     /* remove monster from old map  */
-    map *oldmap = game_map(nlarn, m->pos.z);
+    map *oldmap = game_map(nlarn, Z(m->pos));
     map_set_monster_at(oldmap, m->pos, NULL);
 
     /* put monster into map */
@@ -905,10 +905,10 @@ void monster_move(gpointer *oid, monster *m, game *g)
 
     /* move the monster only if it is on the same map as the player or
        an adjacent map */
-    gboolean map_adjacent = (mpos.z == g->p->pos.z
-                             || (mpos.z == g->p->pos.z - 1)
-                             || (mpos.z == g->p->pos.z + 1)
-                             || (mpos.z == MAP_DMAX && g->p->pos.z == 0)
+    gboolean map_adjacent = (Z(mpos) == Z(g->p->pos)
+                             || (Z(mpos) == Z(g->p->pos) - 1)
+                             || (Z(mpos) == Z(g->p->pos) + 1)
+                             || (Z(mpos) == MAP_DMAX && Z(g->p->pos) == 0)
                             );
     if (!map_adjacent)
         return;
@@ -1100,11 +1100,11 @@ monster *monster_trap_trigger(monster *m)
     switch (trap)
     {
     case TT_TRAPDOOR:
-        monster_level_enter(m, game_map(nlarn, m->pos.z + 1));
+        monster_level_enter(m, game_map(nlarn, Z(m->pos) + 1));
         break;
 
     case TT_TELEPORT:
-        npos = map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER, FALSE);
+        npos = map_find_space(game_map(nlarn, Z(m->pos)), LE_MONSTER, FALSE);
         monster_pos_set(m, monster_map(m), npos);
         break;
 
@@ -1392,7 +1392,7 @@ static int handle_breath_attack(monster *m, player *p, attack att)
     position source   = m->pos;
     position last_pos = throw_ray(sp, p, m->pos, m->player_pos, damage, FALSE);
 
-    if (map_sobject_at(game_map(nlarn, last_pos.z), last_pos) == LS_MIRROR)
+    if (map_sobject_at(game_map(nlarn, Z(last_pos)), last_pos) == LS_MIRROR)
     {
         log_add_entry(nlarn->log, "The mirror reflects the %s!",
                       spell_name(sp));
@@ -1440,7 +1440,7 @@ void monster_player_attack(monster *m, player *p)
     /* the player is invisible and the monster bashes into thin air */
     if (!pos_identical(m->player_pos, p->pos))
     {
-        if (!map_is_monster_at(game_map(nlarn, p->pos.z), p->pos)
+        if (!map_is_monster_at(game_map(nlarn, Z(p->pos)), p->pos)
                 && monster_in_sight(m))
         {
             log_add_entry(nlarn->log, "The %s bashes into thin air.",
@@ -1545,8 +1545,8 @@ void monster_player_attack(monster *m, player *p)
         if (monster_player_rob(m, p, (dam->type == DAM_STEAL_GOLD) ? IT_GOLD : IT_ALL))
         {
             /* teleport away */
-            monster_pos_set(m, game_map(nlarn, m->pos.z),
-                            map_find_space(game_map(nlarn, m->pos.z), LE_MONSTER, FALSE));
+            monster_pos_set(m, game_map(nlarn, Z(m->pos)),
+                            map_find_space(game_map(nlarn, Z(m->pos)), LE_MONSTER, FALSE));
         }
 
         damage_free(dam);
@@ -2509,12 +2509,12 @@ static position monster_move_attack(monster *m, struct player *p)
         {
         case LS_STAIRSDOWN:
         case LS_DNGN_ENTRANCE:
-            newmap = m->pos.z + 1;
+            newmap = Z(m->pos) + 1;
             break;
 
         case LS_STAIRSUP:
         case LS_DNGN_EXIT:
-            newmap = m->pos.z - 1;
+            newmap = Z(m->pos) - 1;
             break;
 
         case LS_ELEVATORDOWN:
@@ -2528,7 +2528,7 @@ static position monster_move_attack(monster *m, struct player *p)
             break;
 
         default:
-            newmap = m->pos.z;
+            newmap = Z(m->pos);
             break;
         }
 
@@ -2651,7 +2651,7 @@ static position monster_move_civilian(monster *m, struct player *p)
     {
         /* The person has stayed at the target position for long
            enough, thus reset the target position. */
-        m->player_pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+        m->player_pos = pos_invalid;
     }
     else if (pos_valid(m->player_pos) && !pos_identical(m->pos, m->player_pos))
     {
@@ -2680,7 +2680,7 @@ static position monster_move_civilian(monster *m, struct player *p)
         else
         {
             /* it seems that there is no path to the target, thus get a new one */
-            m->player_pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            m->player_pos = pos_invalid;
         }
     }
 

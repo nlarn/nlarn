@@ -191,13 +191,13 @@ int *map_get_surrounding(map *l, position pos, map_sobject_t type);
 int map_pos_is_visible(map *l, position source, position target);
 
 /**
- * @brief Find a path between two positions 
+ * @brief Find a path between two positions
  *
  * @param the map to work on
  * @param the starting position
  * @param the destination
  * @param the map_element_t that can be travelled
- * @return a path or NULL if none could be found 
+ * @return a path or NULL if none could be found
  */
 map_path *map_find_path(map *m, position start, position goal,
                         map_element_t element);
@@ -264,10 +264,10 @@ extern const char *map_names[MAP_MAX];
 
 #define map_name(l) (map_names[(l)->nlevel])
 
-#define map_pos_transparent(l,pos) (lt_is_transparent((l)->grid[(pos).y][(pos).x].type) \
-                                        && ls_is_transparent((l)->grid[(pos).y][(pos).x].sobject))
+#define map_pos_transparent(l,pos) (lt_is_transparent((l)->grid[Y((pos))][X((pos))].type) \
+                                    && ls_is_transparent((l)->grid[Y((pos))][X((pos))].sobject))
 
-#define map_pos_passable(l,pos) (lt_is_passable((l)->grid[(pos).y][(pos).x].type) \
-                                        && ls_is_passable((l)->grid[(pos).y][(pos).x].sobject))
+#define map_pos_passable(l,pos) (lt_is_passable((l)->grid[Y((pos))][X((pos))].type) \
+                                 && ls_is_passable((l)->grid[Y((pos))][X((pos))].sobject))
 
 #endif

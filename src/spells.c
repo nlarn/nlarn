@@ -783,7 +783,7 @@ int spell_type_point(spell *s, struct player *p)
         return FALSE;
     }
 
-    monster = map_get_monster_at(game_map(nlarn, p->pos.z), pos);
+    monster = map_get_monster_at(game_map(nlarn, Z(p->pos)), pos);
 
     if (!monster)
     {
@@ -858,7 +858,7 @@ int spell_type_point(spell *s, struct player *p)
                           monster_name(monster));
         }
 
-        map *mmap = game_map(nlarn, monster_pos(monster).z);
+        map *mmap = game_map(nlarn, Z(monster_pos(monster)));
         monster_pos_set(monster, mmap, map_find_space(mmap, LE_MONSTER, FALSE));
         break; /* SP_TEL */
 
@@ -906,14 +906,14 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
 {
 #ifdef DEBUG_BEAMS
     log_add_entry(nlarn->log, "Beam from (%d, %d) -> (%d, %d)",
-                  start.x, start.y, target.x, target.y);
+                  X(start), Y(start), X(target), Y(target));
 #endif
     assert(sp != NULL && p != NULL);
     assert(spell_type(sp) == SC_RAY);
-    assert(start.z == target.z);
+    assert(Z(start) == Z(target));
 
     map *cmap;
-    cmap = game_map(nlarn, start.z);
+    cmap = game_map(nlarn, Z(start));
     int distance = pos_distance(start, target);
 
     area *ray = NULL;
@@ -935,7 +935,7 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
         {
 #ifdef DEBUG_BEAMS
             log_add_entry(nlarn->log, "current pos: (%d, %d)",
-                          pos.x, pos.y);
+                          X(pos), Y(pos));
 #endif
             /* check if the current position has been hit by the ray
                and if a monster is standing at the current position */
@@ -949,7 +949,7 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                     gboolean mis = monster_in_sight(monster);
 
                     attron((attrs = (mis ? spell_hit_color : spell_color)));
-                    mvaddch(pos.y, pos.x, (mis ? monster_glyph(monster) : '*'));
+                    mvaddch(Y(pos), X(pos), (mis ? monster_glyph(monster) : '*'));
 
                     spell_print_success_message(sp, monster);
                     monster_damage_take(monster, damage_new(spell_damage(sp),
@@ -961,7 +961,6 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                     // Shooting at the player.
                     if (pos_identical(p->pos, pos))
                     {
-
                         if (!player_effect(p, ET_REFLECTION)
                                 || !pos_identical(pos, start))
                         {
@@ -1027,7 +1026,7 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
                     else
                         attron((attrs = spell_color));
 
-                    mvaddch(pos.y, pos.x, '*');
+                    mvaddch(Y(pos), X(pos), '*');
                 }
 
                 attroff(attrs);
@@ -1053,11 +1052,11 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
 
             /* modify horizontal position if needed;
                exit the loop when the destination has been reached */
-            if (pos.x < target.x)
-                pos.x++;
-            else if (pos.x > target.x)
-                pos.x--;
-            else if (pos.x == target.x)
+            if (X(pos) < X(target))
+                X(pos)++;
+            else if (X(pos) > X(target))
+                X(pos)--;
+            else if (X(pos) == X(target))
                 proceed_x = FALSE;
 
             /* terminate upon reaching the target */
@@ -1070,17 +1069,17 @@ position throw_ray(spell *sp, struct player *p, position start, position target,
             break;
 
         /* modify vertical position if needed */
-        if (pos.y < target.y)
+        if (Y(pos) < Y(target))
         {
-            pos.y++;
+            Y(pos)++;
             /* reset horizontal position upon vertical movement */
-            pos.x = p->pos.x;
+            X(pos) = X(p->pos);
         }
-        else if (pos.y > target.y)
+        else if (Y(pos) > Y(target))
         {
-            pos.y--;
+            Y(pos)--;
             /* reset horizontal position upon vertical movement */
-            pos.x = p->pos.x;
+            X(pos) = X(p->pos);
         }
     }
     while (proceed_y);
@@ -1101,7 +1100,7 @@ int spell_type_ray(spell *s, struct player *p)
 
     g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(s));
     target = display_get_position(p, buffer, TRUE, FALSE, 0, FALSE, TRUE);
-    cmap = game_map(nlarn, p->pos.z);
+    cmap = game_map(nlarn, Z(p->pos));
 
     /* player pressed ESC */
     if (!pos_valid(target))
@@ -1155,10 +1154,10 @@ int spell_type_ray(spell *s, struct player *p)
 
 static void flood_affect_area(position pos, int radius, int type, int duration)
 {
-    area *obstacles = map_get_obstacles(game_map(nlarn, pos.z), pos, radius);
+    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius);
     area *range = area_new_circle_flooded(pos, radius, obstacles);
 
-    map_set_tiletype(game_map(nlarn, pos.z), range, type, duration);
+    map_set_tiletype(game_map(nlarn, Z(pos)), range, type, duration);
     area_destroy(range);
 }
 
@@ -1203,7 +1202,7 @@ int spell_type_flood(spell *s, struct player *p)
         break;
     }
 
-    area *obstacles = map_get_obstacles(game_map(nlarn, pos.z), pos, radius);
+    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius);
     area *range = area_new_circle_flooded(pos, radius, obstacles);
 
     if (area_pos_get(range, p->pos)
@@ -1215,7 +1214,7 @@ int spell_type_flood(spell *s, struct player *p)
         return FALSE;
     }
 
-    map_set_tiletype(game_map(nlarn, pos.z), range, type, amount);
+    map_set_tiletype(game_map(nlarn, Z(pos)), range, type, amount);
     area_destroy(range);
 
     return TRUE;
@@ -1231,20 +1230,20 @@ static void blast_area_with_spell(struct player *p, area *ball, spell *s,
     damage *dam;
     inventory **inv;
     position cursor;
-    cursor.z = pos.z;
+    Z(cursor) = Z(pos);
 
     attron(colour);
 
-    map *cmap = game_map(nlarn, p->pos.z);
+    map *cmap = game_map(nlarn, Z(p->pos));
 
-    for (cursor.y = ball->start_y; cursor.y < ball->start_y + ball->size_y; cursor.y++)
+    for (Y(cursor) = ball->start_y; Y(cursor) < ball->start_y + ball->size_y; Y(cursor)++)
     {
-        for (cursor.x = ball->start_x; cursor.x < ball->start_x + ball->size_x; cursor.x++)
+        for (X(cursor) = ball->start_x; X(cursor) < ball->start_x + ball->size_x; X(cursor)++)
         {
             if (area_pos_get(ball, cursor))
             {
                 /* move cursor to position */
-                move(cursor.y, cursor.x);
+                move(Y(cursor), X(cursor));
 
                 if ((m = map_get_monster_at(cmap, cursor)))
                 {
@@ -1306,7 +1305,7 @@ int spell_type_blast(spell *s, struct player *p)
     int radius = 0, amount = 0, colour = DC_NONE;
     damage_t dam_t = DAM_NONE;
     item_erosion_type iet = IET_NONE;
-    map *cmap = game_map(nlarn, p->pos.z);
+    map *cmap = game_map(nlarn, Z(p->pos));
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
 
@@ -1353,19 +1352,19 @@ int spell_type_blast(spell *s, struct player *p)
 gboolean spell_alter_reality(player *p)
 {
     map *nlevel;
-    position pos = pos_new(0, 0, p->pos.z);
+    position pos = { { 0, 0, Z(p->pos) } };
 
-    if (p->pos.z == 0)
+    if (Z(p->pos) == 0)
         return FALSE;
 
     /* reset the player's memory of the current map */
     memset(&player_memory_of(p, pos), 0,
            MAP_MAX_Y * MAP_MAX_X * sizeof(player_tile_memory));
 
-    map_destroy(game_map(nlarn, p->pos.z));
+    map_destroy(game_map(nlarn, Z(p->pos)));
 
     /* create new map */
-    nlevel = nlarn->maps[p->pos.z] = map_new(p->pos.z, game_mazefile(nlarn));
+    nlevel = nlarn->maps[Z(p->pos)] = map_new(Z(p->pos), game_mazefile(nlarn));
 
     /* reposition player (if needed) */
     if (!map_pos_passable(nlevel, p->pos))
@@ -1381,14 +1380,14 @@ gboolean spell_create_monster(struct player *p)
     position mpos;
 
     /* this spell doesn't work in town */
-    if (p->pos.z == 0)
+    if (Z(p->pos) == 0)
     {
         log_add_entry(nlarn->log, "Nothing happens.");
         return FALSE;
     }
 
     /* try to find a space for the monster near the player */
-    mpos = map_find_space_in(game_map(nlarn, p->pos.z),
+    mpos = map_find_space_in(game_map(nlarn, Z(p->pos)),
                              rect_new_sized(p->pos, 2), LE_MONSTER, FALSE);
 
     if (pos_valid(mpos))
@@ -1477,7 +1476,7 @@ gboolean spell_phantasmal_forces(spell *s, struct player *p)
         return FALSE;
     }
 
-    m = map_get_monster_at(game_map(nlarn, mpos.z), mpos);
+    m = map_get_monster_at(game_map(nlarn, Z(mpos)), mpos);
 
     if (m == NULL)
     {
@@ -1509,8 +1508,8 @@ gboolean spell_scare_monsters(spell *s, struct player *p)
     monster *m;
     int x, y, count = 0;
     position pos;
-    map *cmap = game_map(nlarn, p->pos.z);
-    pos.z = p->pos.z;
+    map *cmap = game_map(nlarn, Z(p->pos));
+    Z(pos) = Z(p->pos);
 
     /* the radius of this spell is determined by the player's level of
        spell knowledge */
@@ -1518,11 +1517,11 @@ gboolean spell_scare_monsters(spell *s, struct player *p)
 
     for (y = a->start_y; y < a->start_y + a->size_y; y++)
     {
-        pos.y = y;
+        Y(pos) = y;
 
         for (x = a->start_x; x < a->start_x + a->size_x; x++)
         {
-            pos.x = x;
+            X(pos) = x;
 
             if (!pos_valid(pos))
             {
@@ -1556,7 +1555,7 @@ gboolean spell_summon_demon(spell *s, struct player *p)
     position pos;
 
     /* find a place near the player for the demon servant */
-    pos = map_find_space_in(game_map(nlarn, p->pos.z),
+    pos = map_find_space_in(game_map(nlarn, Z(p->pos)),
                             rect_new_sized(p->pos, 2),
                             LE_MONSTER, FALSE);
 
@@ -1676,10 +1675,10 @@ gboolean spell_make_wall(player *p)
         return FALSE;
     }
 
-    map *map = game_map(nlarn, p->pos.z);
+    map *map = game_map(nlarn, Z(p->pos));
     if (map_tiletype_at(map, pos) != LT_WALL)
     {
-        map_tile *tile = map_tile_at(game_map(nlarn, p->pos.z), pos);
+        map_tile *tile = map_tile_at(game_map(nlarn, Z(p->pos)), pos);
 
         /* destroy all items at that position */
         if (tile->ilist != NULL)
@@ -1726,7 +1725,7 @@ gboolean spell_vaporize_rock(player *p)
 {
     monster *m;
     position pos;
-    map *map = game_map(nlarn, p->pos.z);
+    map *map = game_map(nlarn, Z(p->pos));
 
     pos = display_get_position(p, "What do you want to vaporize?",
                                FALSE, FALSE, 0, FALSE, TRUE);
@@ -1902,11 +1901,11 @@ static void spell_print_failure_message(spell *s, monster *m)
 static int count_adjacent_water_squares(position pos)
 {
     position p;
-    p.z = pos.z;
+    Z(p) = Z(pos);
 
     int count = 0;
-    for (p.x = pos.x - 1; p.x <= pos.x + 1; p.x++)
-        for (p.y = pos.y - 1; p.y <= pos.y + 1; p.y++)
+    for (X(p) = X(pos) - 1; X(p) <= X(pos) + 1; X(p)++)
+        for (Y(p) = Y(pos) - 1; Y(p) <= Y(pos) + 1; Y(p)++)
         {
             if (!pos_valid(p))
                 continue;
@@ -1914,7 +1913,7 @@ static int count_adjacent_water_squares(position pos)
             if (pos_identical(p, pos))
                 continue;
 
-            const map_tile *tile = map_tile_at(game_map(nlarn, pos.z), p);
+            const map_tile *tile = map_tile_at(game_map(nlarn, Z(pos)), p);
             if (tile->type == LT_WATER || tile->type == LT_DEEPWATER)
                 count++;
         }
@@ -1924,7 +1923,7 @@ static int count_adjacent_water_squares(position pos)
 
 static int try_drying_ground(position pos)
 {
-    map_tile *tile = map_tile_at(game_map(nlarn, pos.z), pos);
+    map_tile *tile = map_tile_at(game_map(nlarn, Z(pos)), pos);
     if (tile->type == LT_DEEPWATER)
     {
         /* success chance depends on number of adjacent water squares */

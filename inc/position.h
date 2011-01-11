@@ -24,19 +24,25 @@
 #include "cJSON.h"
 #include "defines.h"
 
-typedef struct _position
+typedef union _position
 {
-    gint16 x;
-    gint16 y;
-    gint16 z;
+    struct _bf
+    {
+        unsigned int x: 12;
+        unsigned int y: 12;
+        unsigned int z:  8;
+    } bf;
+    unsigned int val;
 } position;
+
+const position pos_invalid;
 
 typedef struct _rectangle
 {
-    gint16 x1;
-    gint16 y1;
-    gint16 x2;
-    gint16 y2;
+    guint64 x1: 16;
+    guint64 y1: 16;
+    guint64 x2: 16;
+    guint64 y2: 16;
 } rectangle;
 
 typedef struct area
@@ -48,10 +54,13 @@ typedef struct area
     int **area;
 } area;
 
-position pos_new(int x, int y, int z);
+#define X(pos) ((pos).bf.x)
+#define Y(pos) ((pos).bf.y)
+#define Z(pos) ((pos).bf.z)
+#define pos_val(pos) ((pos).val)
+
 position pos_move(position pos, direction dir);
 int pos_distance(position first, position second);
-int pos_grid_distance(position first, position second);
 int pos_identical(position pos1, position pos2);
 int pos_adjacent(position first, position second);
 int pos_valid(position pos);
@@ -62,9 +71,6 @@ int pos_valid(position pos);
  * @param The target position.
  */
 direction pos_dir(position origin, position target);
-
-cJSON *pos_serialize(position pos);
-position pos_deserialize(cJSON *pser);
 
 /**
  * Create a new rectangle of given dimensions.

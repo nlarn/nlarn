@@ -183,7 +183,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
             /* deal more damage the deeper the dungeon
                level and if the player is burdened */
             damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
-                                     rand_1n(trap_damage(trap) + bval) + p->pos.z,
+                                     rand_1n(trap_damage(trap) + bval) + Z(p->pos),
                                      NULL);
 
             player_damage_take(p, dam, PD_TRAP, trap);
@@ -192,11 +192,11 @@ int player_trap_trigger(player *p, trap_t trap, int force)
         switch (trap)
         {
         case TT_TRAPDOOR:
-            time += player_map_enter(p, game_map(nlarn, p->pos.z + 1), TRUE);
+            time += player_map_enter(p, game_map(nlarn, Z(p->pos) + 1), TRUE);
             break;
 
         case TT_TELEPORT:
-            p->pos = map_find_space(game_map(nlarn, p->pos.z), LE_MONSTER, FALSE);
+            p->pos = map_find_space(game_map(nlarn, Z(p->pos)), LE_MONSTER, FALSE);
             break;
 
         default:
@@ -206,7 +206,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
 
                 if (trap_effect(trap2)
                         && chance(modified_effect_chance(trap2, trap_effect(trap2),
-                                  p->pos.z)))
+                                  Z(p->pos))))
                 {
                     /* display message if there is one */
                     if (trap_e_message(trap2))
@@ -219,7 +219,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
             /* if there is an effect on the trap add it to player's effects. */
             if (trap_effect(trap)
                     && chance(modified_effect_chance(trap, trap_effect(trap),
-                              p->pos.z)))
+                              Z(p->pos))))
             {
                 /* display message if there is one */
                 if (trap_e_message(trap))

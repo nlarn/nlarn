@@ -424,7 +424,7 @@ cJSON *player_serialize(player *p)
     cJSON_AddItemToObject(pser, "courses_taken",
                           cJSON_CreateIntArray(p->school_courses_taken, SCHOOL_COURSE_COUNT));
 
-    cJSON_AddItemToObject(pser, "position", pos_serialize(p->pos));
+    cJSON_AddNumberToObject(pser, "position", pos_val(p->pos));
 
     /* store last targeted monster */
     if (p->ptarget != NULL)
@@ -437,12 +437,12 @@ cJSON *player_serialize(player *p)
     /* store players' memory of the map */
     cJSON_AddItemToObject(pser, "memory", obj = cJSON_CreateArray());
 
-    for (pos.z = 0; pos.z < MAP_MAX; pos.z++)
+    for (Z(pos) = 0; Z(pos) < MAP_MAX; Z(pos)++)
     {
         cJSON *mm = cJSON_CreateArray();
 
-        for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
-            for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+        for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
+            for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
                 cJSON_AddItemToArray(mm, player_memory_serialize(p, pos));
 
         cJSON_AddItemToArray(obj, mm);
@@ -463,7 +463,7 @@ cJSON *player_serialize(player *p)
 
             som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
 
-            cJSON_AddItemToObject(soms, "pos", pos_serialize(som->pos));
+            cJSON_AddNumberToObject(soms, "pos", pos_val(som->pos));
             cJSON_AddNumberToObject(soms, "sobject", som->sobject);
 
             cJSON_AddItemToArray(obj, soms);
@@ -627,7 +627,7 @@ player *player_deserialize(cJSON *pser)
     for (idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
         p->school_courses_taken[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
-    p->pos = pos_deserialize(cJSON_GetObjectItem(pser, "position"));
+    pos_val(p->pos) = cJSON_GetObjectItem(pser, "position")->valueint;
 
     /* restore last targeted monster */
     if ((obj = cJSON_GetObjectItem(pser, "ptarget")) != NULL)
@@ -639,15 +639,15 @@ player *player_deserialize(cJSON *pser)
     position pos;
     obj = cJSON_GetObjectItem(pser, "memory");
 
-    for (pos.z = 0; pos.z < MAP_MAX; pos.z++)
+    for (Z(pos) = 0; Z(pos) < MAP_MAX; Z(pos)++)
     {
-        elem = cJSON_GetArrayItem(obj, pos.z);
+        elem = cJSON_GetArrayItem(obj, Z(pos));
 
-        for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+        for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
         {
-            for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+            for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
             {
-                cJSON *tile = cJSON_GetArrayItem(elem, pos.x + (MAP_MAX_X * pos.y));
+                cJSON *tile = cJSON_GetArrayItem(elem, X(pos) + (MAP_MAX_X * Y(pos)));
                 player_memory_deserialize(p, pos, tile);
             }
         }
@@ -667,7 +667,7 @@ player *player_deserialize(cJSON *pser)
             player_sobject_memory som;
             cJSON *soms = cJSON_GetArrayItem(obj, idx);
 
-            som.pos = pos_deserialize(cJSON_GetObjectItem(soms, "pos"));
+            pos_val(som.pos) = cJSON_GetObjectItem(soms, "pos")->valueint;
             som.sobject = cJSON_GetObjectItem(soms, "sobject")->valueint;
 
             g_array_append_val(p->sobjmem, som);
@@ -1240,10 +1240,10 @@ void player_die(player *p, player_cod cause_type, int cause)
                                p->stats.gold_spent_college);
 
         /* append map of current level if the player is not in the town */
-        if (p->pos.z > 0)
+        if (Z(p->pos) > 0)
         {
             g_string_append(text, "\n\n-- The current level ------------------\n\n");
-            tmp = map_dump(game_map(nlarn, p->pos.z), p->pos);
+            tmp = map_dump(game_map(nlarn, Z(p->pos)), p->pos);
             g_string_append(text, tmp);
             g_free(tmp);
         }
@@ -1559,7 +1559,7 @@ int player_move(player *p, direction dir, gboolean open_door)
         return FALSE;
 
     /* make a shortcut to the current map */
-    map = game_map(nlarn, p->pos.z);
+    map = game_map(nlarn, Z(p->pos));
 
     if (open_door && map_sobject_at(map, target_p) == LS_CLOSEDDOOR)
         return player_door_open(nlarn->p, dir);
@@ -1847,7 +1847,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     assert(p != NULL && l != NULL);
 
     /* store the last turn player has been on this map */
-    game_map(nlarn, p->pos.z)->visited = game_turn(nlarn);
+    game_map(nlarn, Z(p->pos))->visited = game_turn(nlarn);
 
     if (p->stats.deepest_level < l->nlevel)
     {
@@ -1869,15 +1869,15 @@ int player_map_enter(player *p, map *l, gboolean teleported)
         pos = map_find_sobject(l, LS_HOME);
 
     /* took the elevator down */
-    else if ((p->pos.z == 0) && (l->nlevel == (MAP_DMAX)))
+    else if ((Z(p->pos) == 0) && (l->nlevel == (MAP_DMAX)))
         pos = map_find_sobject(l, LS_ELEVATORUP);
 
     /* took the elevator up */
-    else if ((p->pos.z == (MAP_DMAX)) && (l->nlevel == 0))
+    else if ((Z(p->pos) == (MAP_DMAX)) && (l->nlevel == 0))
         pos = map_find_sobject(l, LS_ELEVATORDOWN);
 
     /* climbing up */
-    else if (p->pos.z > l->nlevel)
+    else if (Z(p->pos) > l->nlevel)
     {
         if (l->nlevel == 0)
             pos = map_find_sobject(l, LS_DNGN_ENTRANCE);
@@ -1885,7 +1885,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
             pos = map_find_sobject(l, LS_STAIRSDOWN);
     }
     /* climbing down */
-    else if (l->nlevel > p->pos.z)
+    else if (l->nlevel > Z(p->pos))
     {
         if (l->nlevel == 1)
             pos = map_find_sobject(l, LS_DNGN_EXIT);
@@ -1899,7 +1899,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
         if (nlarn->log->gtime > 1)
             log_add_entry(nlarn->log, "You return to town.");
     }
-    else if (l->nlevel == 1 && p->pos.z == 0)
+    else if (l->nlevel == 1 && Z(p->pos) == 0)
         log_add_entry(nlarn->log, "You enter the caverns of Larn.");
 
     /* put player into new map */
@@ -1909,7 +1909,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     if ((m = map_get_monster_at(l, p->pos)))
     {
         position mnpos = map_find_space(l, LE_MONSTER, FALSE);
-        monster_pos_set(m, game_map(nlarn, p->pos.z), mnpos);
+        monster_pos_set(m, game_map(nlarn, Z(p->pos)), mnpos);
     }
 
     /* recalculate FOV to make ensure correct display after entering a level */
@@ -1967,7 +1967,7 @@ void player_pickup(player *p)
 
     assert(p != NULL);
 
-    inv = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
+    inv = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     if (inv_length(*inv) == 0)
     {
@@ -2018,13 +2018,13 @@ void player_autopickup(player *p)
     int other_item_id     = -1;
     gboolean did_pickup   = FALSE;
 
-    assert (p != NULL && map_ilist_at(game_map(nlarn, p->pos.z), p->pos));
+    assert (p != NULL && map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos));
 
     /* if the player is floating above the ground auto-pickup does not work.. */
     if (player_effect(p, ET_LEVITATION))
         return;
 
-    floor = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
+    floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     for (idx = 0; idx < inv_length(*floor); idx++)
     {
@@ -3499,7 +3499,7 @@ int player_item_can_be_added_to_container(player *p, item *it)
     }
 
     /* no match till now, check floor for containers */
-    inventory **floor = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
+    inventory **floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     for (idx = 0; idx < inv_length(*floor); idx++)
     {
@@ -3928,7 +3928,7 @@ void player_item_destroy(player *p, item *it)
     if (it->content)
     {
         count = container_move_content(p, &it->content,
-                                       map_ilist_at(game_map(nlarn, p->pos.z), p->pos));
+                                       map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos));
     }
 
     inv_del_element(&p->inventory, it);
@@ -3994,10 +3994,10 @@ void player_item_drop(player *p, inventory **inv, item *it)
     if (it->type == IT_GOLD)
         p->stats.gold_found -= it->count;
 
-    inv_add(map_ilist_at(game_map(nlarn, p->pos.z), p->pos), it);
+    inv_add(map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos), it);
 
     /* reveal if item is cursed or blessed when dropping it on an altar */
-    map_sobject_t ms = map_sobject_at(game_map(nlarn, p->pos.z), p->pos);
+    map_sobject_t ms = map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     if (ms == LS_ALTAR
             && (!player_effect(p, ET_BLINDNESS) || game_wizardmode(nlarn)))
@@ -4359,11 +4359,11 @@ void player_list_sobjmem(player *p)
             som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
 
             g_string_append_printf(sobjlist, "%-4s %s (%d, %d)\n",
-                                   (som->pos.z > prevmap) ? map_names[som->pos.z] : "",
+                                   (Z(som->pos) > prevmap) ? map_names[Z(som->pos)] : "",
                                    ls_get_desc(som->sobject),
-                                   som->pos.y, som->pos.x);
+                                   Y(som->pos), X(som->pos));
 
-            if (som->pos.z > prevmap) prevmap = som->pos.z;
+            if (Z(som->pos) > prevmap) prevmap = Z(som->pos);
         }
     }
 
@@ -4379,7 +4379,7 @@ void player_update_fov(player *p)
 
     area *enlight;
 
-    int range = (p->pos.z == 0 ? 15 : 6);
+    int range = (Z(p->pos) == 0 ? 15 : 6);
 
     /* calculate range */
     if (player_effect(nlarn->p, ET_BLINDNESS))
@@ -4392,10 +4392,10 @@ void player_update_fov(player *p)
     }
 
     /* get current map */
-    map = game_map(nlarn, p->pos.z);
+    map = game_map(nlarn, Z(p->pos));
 
     /* set level correctly */
-    pos.z = p->pos.z;
+    Z(pos) = Z(p->pos);
 
     /* if player is enlightened, use a circular area around the player */
     if (player_effect(p, ET_ENLIGHTENMENT))
@@ -4412,8 +4412,8 @@ void player_update_fov(player *p)
         {
             for (x = 0; x < enlight->size_x; x++)
             {
-                pos.x = x + enlight->start_x;
-                pos.y = y + enlight->start_y;
+                X(pos) = x + enlight->start_x;
+                Y(pos) = y + enlight->start_y;
 
                 if (pos_valid(pos) && area_point_get(enlight, x, y))
                     fov_set(p->fov, pos, TRUE);
@@ -4425,13 +4425,13 @@ void player_update_fov(player *p)
     else
     {
         /* otherwise use the fov algorithm */
-        fov_calculate(p->fov, game_map(nlarn, p->pos.z), p->pos, radius);
+        fov_calculate(p->fov, game_map(nlarn, Z(p->pos)), p->pos, radius);
     }
 
     /* update visible fields in player's memory */
-    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+    for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
     {
-        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+        for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
             if (fov_get(p->fov, pos))
             {
@@ -4654,7 +4654,7 @@ static int player_sobjects_sort(gconstpointer a, gconstpointer b)
     player_sobject_memory *som_a = (player_sobject_memory *)a;
     player_sobject_memory *som_b = (player_sobject_memory *)b;
 
-    if (som_a->pos.z == som_b->pos.z)
+    if (Z(som_a->pos) == Z(som_b->pos))
     {
         if (som_a->sobject == som_b->sobject)
             return 0;
@@ -4663,7 +4663,7 @@ static int player_sobjects_sort(gconstpointer a, gconstpointer b)
         else
             return 0;
     }
-    else if (som_a->pos.z < som_b->pos.z)
+    else if (Z(som_a->pos) < Z(som_b->pos))
         return -1;
     else
         return 1;
@@ -4904,7 +4904,7 @@ void calc_fighting_stats(player *p)
     monster *m;
     GString *text;
 
-    position pos = map_find_space_in(game_map(nlarn, p->pos.z),
+    position pos = map_find_space_in(game_map(nlarn, Z(p->pos)),
                                      rect_new_sized(p->pos, 2), LE_MONSTER, FALSE);
 
     if (!pos_valid(pos))

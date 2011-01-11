@@ -46,7 +46,7 @@ void container_open(player *p, inventory **inv, item *container)
     if (container == NULL)
     {
         /* no container has been passed - look for container on the floor */
-        inventory **inv = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
+        inventory **inv = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
         int count = inv_length_filtered(*inv, &item_filter_container);
 
         if (count == 0)
@@ -129,7 +129,7 @@ void container_item_add(player *p, inventory **inv, item *element)
     else if (inv == NULL || (inv == &p->inventory))
     {
         item *container = NULL;
-        inventory **floor = map_ilist_at(game_map(nlarn, p->pos.z), p->pos);
+        inventory **floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
         pilen = inv_length_filtered(p->inventory, item_filter_container);
         filen = inv_length_filtered(*floor, item_filter_container);
 

@@ -125,16 +125,16 @@ int display_paint_screen(player *p)
     mvaddch(MAP_MAX_Y, MAP_MAX_X, ACS_LRCORNER);
 
     /* make shortcut */
-    map = game_map(nlarn, p->pos.z);
+    map = game_map(nlarn, Z(p->pos));
 
     /* draw map */
-    pos.z = p->pos.z;
-    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+    Z(pos) = Z(p->pos);
+    for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
     {
         /* position cursor */
-        move(pos.y, 0);
+        move(Y(pos), 0);
 
-        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+        for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
             if (game_fullvis(nlarn) || fov_get(p->fov, pos))
             {
@@ -246,7 +246,7 @@ int display_paint_screen(player *p)
             {
                 attron(attrs = monster_color(monst));
                 position mpos = monster_pos(monst);
-                mvaddch(mpos.y, mpos.x, monster_glyph(monst));
+                mvaddch(Y(mpos), X(mpos), monster_glyph(monst));
                 attroff(attrs);
             }
         }
@@ -269,7 +269,7 @@ int display_paint_screen(player *p)
     }
 
     attron(attrs);
-    mvaddch(p->pos.y, p->pos.x, pc);
+    mvaddch(Y(p->pos), X(p->pos), pc);
     attroff(attrs);
 
 
@@ -2235,7 +2235,7 @@ position display_get_position(player *p,
     {
         /* the player has chosen a valid position, check if there
          * is a monster at that position. */
-        map *map = game_map(nlarn, cpos.z);
+        map *map = game_map(nlarn, Z(cpos));
         monster *m = map_get_monster_at(map, cpos);
 
         if (m != NULL)
@@ -2271,7 +2271,7 @@ position display_get_new_position(player *p,
     monster *target, *m;
 
     /* check the starting position makes sense */
-    if (pos_valid(start) && start.z == p->pos.z)
+    if (pos_valid(start) && Z(start) == Z(p->pos))
         pos = start;
     else
         pos = p->pos;
@@ -2280,7 +2280,7 @@ position display_get_new_position(player *p,
     msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message);
 
     /* make shortcut to map */
-    map = game_map(nlarn, p->pos.z);
+    map = game_map(nlarn, Z(p->pos));
 
     do
     {
@@ -2293,8 +2293,7 @@ position display_get_new_position(player *p,
         display_paint_screen(p);
 
         /* reset npos to an invalid position */
-        npos.x = G_MAXINT16;
-        npos.y = G_MAXINT16;
+        npos = pos_invalid;
 
         /* draw a ray if the starting position is not the player's position */
         if (ray && !pos_identical(pos, p->pos))
@@ -2320,7 +2319,7 @@ position display_get_new_position(player *p,
                 {
                     if (area_point_get(a, x, y))
                     {
-                        position tpos = pos_new(a->start_x + x, a->start_y + y, p->pos.z);
+                        position tpos = { { a->start_x + x, a->start_y + y, Z(p->pos) } };
 
                         if (target && pos_identical(monster_pos(target), tpos)
                                 && monster_in_sight(target))
@@ -2354,13 +2353,13 @@ position display_get_new_position(player *p,
             a = area_new_circle_flooded(pos, radius, obstacles);
             cursor = pos;
 
-            for (cursor.y = a->start_y; cursor.y < a->start_y + a->size_y; cursor.y++)
+            for (Y(cursor) = a->start_y; Y(cursor) < a->start_y + a->size_y; Y(cursor)++)
             {
-                for (cursor.x = a->start_x; cursor.x < a->start_x + a->size_x; cursor.x++)
+                for (X(cursor) = a->start_x; X(cursor) < a->start_x + a->size_x; X(cursor)++)
                 {
                     if (area_pos_get(a, cursor))
                     {
-                        move(cursor.y, cursor.x);
+                        move(Y(cursor), X(cursor));
 
                         if ((m = map_get_monster_at(map, cursor)) && monster_in_sight(m))
                         {
@@ -2387,7 +2386,7 @@ position display_get_new_position(player *p,
         else
         {
             /* show the position of the cursor by inversing the attributes */
-            mvwchgat(stdscr, pos.y, pos.x, 1, A_BOLD | A_STANDOUT, DCP_WHITE_BLACK, NULL);
+            mvwchgat(stdscr, Y(pos), X(pos), 1, A_BOLD | A_STANDOUT, DCP_WHITE_BLACK, NULL);
         }
 
         /* wait for input */
@@ -2395,8 +2394,7 @@ position display_get_new_position(player *p,
         switch (ch)
         {
         case KEY_ESC:
-            pos.x = G_MAXINT16;
-            pos.y = G_MAXINT16;
+            pos = pos_invalid;
             /* fall through desired */
 
         case KEY_LF:
@@ -2500,11 +2498,11 @@ position display_get_new_position(player *p,
                     position start = pos;
                     while (TRUE)
                     {
-                        if (++pos.x >= MAP_MAX_X)
+                        if (++X(pos) >= MAP_MAX_X)
                         {
-                            pos.x = 0;
-                            if (++pos.y >= MAP_MAX_Y)
-                                pos.y = 0;
+                            X(pos) = 0;
+                            if (++Y(pos) >= MAP_MAX_Y)
+                                Y(pos) = 0;
                         }
                         if (pos_identical(start, pos))
                             break;
@@ -2565,7 +2563,7 @@ position display_get_new_position(player *p,
            invalid position. In wizard mode all positions are allowed,
            otherwise only known positions are allowed. */
         if (RUN == FALSE && !visible && pos_valid(pos)
-                && (!map_pos_passable(game_map(nlarn, pos.z), pos)
+                && (!map_pos_passable(game_map(nlarn, Z(pos)), pos)
                     || !(game_wizardmode(nlarn) || player_memory_of(nlarn->p, pos).type > LT_NONE)))
         {
             if (!beep()) flash();
@@ -3073,13 +3071,13 @@ static display_window *display_item_details(guint x1, guint y1, guint width,
 static void display_spheres_paint(sphere *s, player *p)
 {
     /* check if sphere is on current level */
-    if (!(s->pos.z == p->pos.z))
+    if (!(Z(s->pos) == Z(p->pos)))
         return;
 
     if (game_fullvis(nlarn) || fov_get(p->fov, s->pos))
     {
         attron(DC_MAGENTA);
-        mvaddch(s->pos.y, s->pos.x, '0');
+        mvaddch(Y(s->pos), X(s->pos), '0');
         attroff(DC_MAGENTA);
     }
 }

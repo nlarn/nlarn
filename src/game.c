@@ -516,7 +516,7 @@ game_score_t *game_score(game *g, player_cod cod, int cause)
     score->hp_max = g->p->hp_max;
     score->level = g->p->level;
     score->level_max = g->p->stats.max_level;
-    score->dlevel = g->p->pos.z;
+    score->dlevel = Z(g->p->pos);
     score->dlevel_max = g->p->stats.deepest_level;
     score->difficulty = game_difficulty(g);
     score->time_start = g->time_start;
@@ -593,7 +593,7 @@ void game_spin_the_wheel(game *g)
         }
     }
 
-    map = game_map(nlarn, g->p->pos.z);
+    map = game_map(nlarn, Z(g->p->pos));
 
     /* check if player is stuck inside a wall without walk through wall */
     if ((map_tiletype_at(map, g->p->pos) == LT_WALL)

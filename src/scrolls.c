@@ -285,16 +285,16 @@ static int scroll_annihilate(struct player *p, item *scroll)
     area *blast, *obsmap;
     position cursor = p->pos;
     monster *m;
-    map *cmap = game_map(nlarn, p->pos.z);
+    map *cmap = game_map(nlarn, Z(p->pos));
 
     assert(p != NULL && scroll != NULL);
 
     obsmap = map_get_obstacles(cmap, p->pos, 2);
     blast = area_new_circle_flooded(p->pos, 2, obsmap);
 
-    for (cursor.y = blast->start_y; cursor.y < blast->start_y + blast->size_y; cursor.y++)
+    for (Y(cursor) = blast->start_y; Y(cursor) < blast->start_y + blast->size_y; Y(cursor)++)
     {
-        for (cursor.x = blast->start_x; cursor.x < blast->start_x + blast->size_x; cursor.x++)
+        for (X(cursor) = blast->start_x; X(cursor) < blast->start_x + blast->size_x; X(cursor)++)
         {
             if (area_pos_get(blast, cursor) && (m = map_get_monster_at(cmap, cursor)))
             {
@@ -338,13 +338,13 @@ static int scroll_create_artefact(player *p, item *scroll)
     const int magic_item_type[] = { IT_AMULET, IT_BOOK, IT_POTION, IT_SCROLL };
     const int type = magic_item_type[rand_0n(4)];
 
-    int level = p->pos.z;
+    int level = Z(p->pos);
     if (scroll->blessed)
     {
         if (type == IT_AMULET)
-            level = max(10, p->pos.z);
+            level = max(10, Z(p->pos));
         else
-            level = rand_m_n(p->pos.z, MAP_MAX);
+            level = rand_m_n(Z(p->pos), MAP_MAX);
     }
 
     it = item_new_by_level(type, level);
@@ -387,7 +387,7 @@ static int scroll_create_artefact(player *p, item *scroll)
             }
         }
     }
-    inv_add(map_ilist_at(game_map(nlarn, p->pos.z), p->pos), it);
+    inv_add(map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos), it);
 
     item_describe(it, player_item_known(p, it), (it->count == 1),
                   FALSE, buf, 60);
@@ -649,7 +649,7 @@ static int scroll_heal_monster(player *p, item *scroll)
         position mpos = monster_pos(m);
 
         /* find monsters on the same level */
-        if (mpos.z == p->pos.z)
+        if (Z(mpos) == Z(p->pos))
         {
             if (monster_hp(m) < monster_hp_max(m))
             {
@@ -738,14 +738,14 @@ int scroll_mapping(player *p, item *scroll)
     /* scroll can be null as I use this to fake a known level */
     assert(p != NULL);
 
-    m = game_map(nlarn, p->pos.z);
-    pos.z = p->pos.z;
+    m = game_map(nlarn, Z(p->pos));
+    Z(pos) = Z(p->pos);
 
     const gboolean map_traps = (scroll != NULL && scroll->blessed);
 
-    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
+    for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
     {
-        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+        for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
             map_tile_t tile = map_tiletype_at(m, pos);
             if (scroll == NULL || tile != LT_FLOOR)
@@ -876,10 +876,10 @@ static int scroll_teleport(player *p, item *scroll)
     }
     else
     {
-        if (p->pos.z == 0)
+        if (Z(p->pos) == 0)
             /* teleporting in town does not work */
             nlevel = 0;
-        else if (p->pos.z < MAP_DMAX)
+        else if (Z(p->pos) < MAP_DMAX)
             /* choose a cavern level if the player is in the caverns*/
             nlevel = rand_1n(MAP_DMAX);
         else
@@ -887,7 +887,7 @@ static int scroll_teleport(player *p, item *scroll)
             nlevel = rand_m_n(MAP_DMAX, MAP_MAX);
     }
 
-    if (nlevel != p->pos.z)
+    if (nlevel != Z(p->pos))
     {
         player_map_enter(p, game_map(nlarn, nlevel), TRUE);
         return TRUE;

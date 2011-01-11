@@ -411,6 +411,6 @@ void calc_fighting_stats(player *p);
 
 /* macros */
 
-#define player_memory_of(p,pos) ((p)->memory[(pos).z][(pos).y][(pos).x])
+#define player_memory_of(p,pos) ((p)->memory[Z(pos)][Y(pos)][X(pos)])
 
 #endif

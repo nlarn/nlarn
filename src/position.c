@@ -23,93 +23,95 @@
 #include "map.h"
 #include "position.h"
 
+#define POS_MAX_XY (1<<11)
+#define POS_MAX_Z  (1<<7)
+
 static void area_flood_worker(area *flood, area *obstacles, int x, int y);
 
-position pos_new(int x, int y, int z)
-{
-    position pos;
-
-    assert((x >= 0 && x <= MAP_MAX_X) || x == G_MAXINT16);
-    assert((y >= 0 && y <= MAP_MAX_Y) || y == G_MAXINT16);
-    assert((z >= 0 && z <= MAP_MAX) || z == G_MAXINT16);
-
-    pos.x = x;
-    pos.y = y;
-    pos.z = z;
-
-    return pos;
-}
+const position pos_invalid = { { POS_MAX_XY, POS_MAX_XY, POS_MAX_Z } };
 
 position pos_move(position pos, direction dir)
 {
     /* return given position if direction is not implemented */
-    position npos;
+    position npos = pos;
 
     assert(dir > GD_NONE && dir < GD_MAX);
 
     switch (dir)
     {
     case GD_WEST:
-        if (pos.x > 0)
-            npos = pos_new(pos.x - 1, pos.y, pos.z);
+        if (X(pos) > 0)
+            X(npos) -= 1;
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            npos = pos_invalid;
 
         break;
 
     case GD_NW:
-        if ((pos.x > 0) && (pos.y > 0))
-            npos = pos_new(pos.x - 1, pos.y - 1, pos.z);
+        if ((X(pos) > 0) && (Y(pos) > 0))
+        {
+            X(npos) -= 1;
+            Y(npos) -= 1;
+        }
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            npos = pos_invalid;
 
         break;
 
     case GD_NORTH:
-        if (pos.y > 0)
-            npos = pos_new(pos.x, pos.y - 1, pos.z);
+        if (Y(pos) > 0)
+            Y(npos) -= 1;
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            npos = pos_invalid;
 
         break;
 
     case GD_NE:
-        if ((pos.x < MAP_MAX_X - 1) && (pos.y > 0))
-            npos = pos_new(pos.x + 1, pos.y - 1, pos.z);
+        if ((X(pos) < MAP_MAX_X - 1) && (Y(pos) > 0))
+        {
+            X(npos) += 1;
+            Y(npos) -= 1;
+        }
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            npos = pos_invalid;
 
         break;
 
     case GD_EAST:
-        if (pos.x < MAP_MAX_X - 1)
-            npos = pos_new(pos.x + 1, pos.y, pos.z);
+        if (X(pos) < MAP_MAX_X - 1)
+            X(npos) += 1;
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            npos = pos_invalid;
 
         break;
 
     case GD_SE:
-        if ((pos.x < MAP_MAX_X - 1) && (pos.y < MAP_MAX_Y - 1))
-            npos = pos_new(pos.x + 1, pos.y + 1, pos.z);
+        if ((X(pos) < MAP_MAX_X - 1) && (Y(pos) < MAP_MAX_Y - 1))
+        {
+            X(npos) += 1;
+            Y(npos) += 1;
+        }
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            npos = pos_invalid;
 
         break;
 
     case GD_SOUTH:
-        if (pos.y < MAP_MAX_Y - 1)
-            npos = pos_new(pos.x, pos.y + 1, pos.z);
+        if (Y(pos) < MAP_MAX_Y - 1)
+            Y(npos) += 1;
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            npos = pos_invalid;
 
         break;
 
     case GD_SW:
-        if ((pos.x > 0) && (pos.y < MAP_MAX_Y - 1))
-            npos = pos_new(pos.x - 1, pos.y + 1, pos.z);
+        if ((X(pos) > 0) && (Y(pos) < MAP_MAX_Y - 1))
+        {
+            X(npos) -= 1;
+            Y(npos) += 1;
+        }
         else
-            npos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+            npos = pos_invalid;
 
         break;
 
@@ -123,86 +125,53 @@ position pos_move(position pos, direction dir)
 
 gint pos_distance(position first, position second)
 {
-    if (first.z != second.z)
+    if (Z(first) != Z(second))
         return INT_MAX;
 
-    return (abs(first.x - second.x) + 1) + (abs(first.y - second.y) + 1);
-}
-
-gint pos_grid_distance(position first, position second)
-{
-    if (first.z != second.z)
-        return INT_MAX;
-
-    return (max(abs(first.x - second.x) + 1, abs(first.y - second.y) + 1));
+    return (abs(X(first) - X(second)) + 1) + (abs(Y(first) - Y(second)) + 1);
 }
 
 int pos_identical(position pos1, position pos2)
 {
-    if (pos1.z != pos2.z)
-        return FALSE;
-
-    return ((pos1).x == (pos2).x) && ((pos1).y == (pos2).y);
+    return (pos1.val == pos2.val);
 }
 
 int pos_adjacent(position first, position second)
 {
     guint dist_x, dist_y;
 
-    if (first.z != second.z)
+    if (Z(first) != Z(second))
         return FALSE;
 
-    dist_x = abs(first.x - second.x);
-    dist_y = abs(first.y - second.y);
+    dist_x = abs(X(first) - X(second));
+    dist_y = abs(Y(first) - Y(second));
 
     return ((dist_x < 2) && (dist_y < 2));
 }
 
 int pos_valid(position pos)
 {
-    return (pos.x >= 0) && (pos.x < MAP_MAX_X)
-           && (pos.y >= 0) && (pos.y < MAP_MAX_Y)
-           && (pos.z >= 0) && (pos.z < MAP_MAX);
+    return (X(pos) >= 0) && (X(pos) < MAP_MAX_X)
+           && (Y(pos) >= 0) && (Y(pos) < MAP_MAX_Y)
+           && (Z(pos) >= 0) && (Z(pos) < MAP_MAX);
 }
 
 direction pos_dir(position origin, position target)
 {
     assert (pos_valid(origin) && pos_valid(target));
 
-    if ((origin.x > target.x)  && (origin.y < target.y))  return GD_SW;
-    if ((origin.x == target.x) && (origin.y < target.y))  return GD_SOUTH;
-    if ((origin.x < target.x)  && (origin.y < target.y))  return GD_SE;
-    if ((origin.x > target.x)  && (origin.y == target.y)) return GD_WEST;
-    if ((origin.x == target.x) && (origin.y == target.y)) return GD_CURR;
-    if ((origin.x < target.x)  && (origin.y == target.y)) return GD_EAST;
-    if ((origin.x > target.x)  && (origin.y > target.y))  return GD_NW;
-    if ((origin.x == target.x) && (origin.y > target.y))  return GD_NORTH;
-    if ((origin.x < target.x)  && (origin.y > target.y))  return GD_NE;
+    if ((X(origin) >  X(target)) && (Y(origin) <  Y(target))) return GD_SW;
+    if ((X(origin) == X(target)) && (Y(origin) <  Y(target))) return GD_SOUTH;
+    if ((X(origin) <  X(target)) && (Y(origin) <  Y(target))) return GD_SE;
+    if ((X(origin) >  X(target)) && (Y(origin) == Y(target))) return GD_WEST;
+    if ((X(origin) == X(target)) && (Y(origin) == Y(target))) return GD_CURR;
+    if ((X(origin) <  X(target)) && (Y(origin) == Y(target))) return GD_EAST;
+    if ((X(origin) >  X(target)) && (Y(origin) >  Y(target))) return GD_NW;
+    if ((X(origin) == X(target)) && (Y(origin) >  Y(target))) return GD_NORTH;
+    if ((X(origin) <  X(target)) && (Y(origin) >  Y(target))) return GD_NE;
 
     /* impossible! */
     return GD_NONE;
-}
-
-cJSON *pos_serialize(position pos)
-{
-    cJSON *pval = cJSON_CreateObject();
-
-    cJSON_AddNumberToObject(pval, "x", pos.x);
-    cJSON_AddNumberToObject(pval, "y", pos.y);
-    cJSON_AddNumberToObject(pval, "z", pos.z);
-
-    return pval;
-}
-
-position pos_deserialize(cJSON *pser)
-{
-    position pos;
-
-    pos.x = cJSON_GetObjectItem(pser, "x")->valueint;
-    pos.y = cJSON_GetObjectItem(pser, "y")->valueint;
-    pos.z = cJSON_GetObjectItem(pser, "z")->valueint;
-
-    return pos;
 }
 
 rectangle rect_new(int x1, int y1, int x2, int y2)
@@ -219,18 +188,18 @@ rectangle rect_new(int x1, int y1, int x2, int y2)
 
 rectangle rect_new_sized(position center, int size)
 {
-    return rect_new(center.x - size,
-                    center.y - size,
-                    center.x + size,
-                    center.y + size);
+    return rect_new(X(center) - size,
+                    Y(center) - size,
+                    X(center) + size,
+                    Y(center) + size);
 }
 
 int pos_in_rect(position pos, rectangle rect)
 {
-    if ((pos.x >= rect.x1)
-            && (pos.x <= rect.x2)
-            && (pos.y >= rect.y1)
-            && (pos.y <= rect.y2))
+    if ((X(pos) >= rect.x1)
+            && (X(pos) <= rect.x2)
+            && (Y(pos) >= rect.y1)
+            && (Y(pos) <= rect.y2))
     {
         return TRUE;
     }
@@ -274,19 +243,19 @@ area *area_new_circle(position center, int radius, int hollow)
     if (!pos_valid(center))
         return NULL;
 
-    circle = area_new(center.x - radius,
-                      center.y - radius,
+    circle = area_new(X(center) - radius,
+                      Y(center) - radius,
                       2 * radius + 1,
                       2 * radius + 1);
 
     /* reposition center to relative values */
-    center.x = radius;
-    center.y = radius;
+    X(center) = radius;
+    Y(center) = radius;
 
-    area_point_set(circle, center.x, center.y + radius);
-    area_point_set(circle, center.x, center.y - radius);
-    area_point_set(circle, center.x + radius, center.y);
-    area_point_set(circle, center.x - radius, center.y);
+    area_point_set(circle, X(center), Y(center) + radius);
+    area_point_set(circle, X(center), Y(center) - radius);
+    area_point_set(circle, X(center) + radius, Y(center));
+    area_point_set(circle, X(center) - radius, Y(center));
 
     while (x < y)
     {
@@ -305,14 +274,14 @@ area *area_new_circle(position center, int radius, int hollow)
         ddF_x += 2;
         f += ddF_x;
 
-        area_point_set(circle, center.x + x, center.y + y);
-        area_point_set(circle, center.x - x, center.y + y);
-        area_point_set(circle, center.x + x, center.y - y);
-        area_point_set(circle, center.x - x, center.y - y);
-        area_point_set(circle, center.x + y, center.y + x);
-        area_point_set(circle, center.x - y, center.y + x);
-        area_point_set(circle, center.x + y, center.y - x);
-        area_point_set(circle, center.x - y, center.y - x);
+        area_point_set(circle, X(center) + x, Y(center) + y);
+        area_point_set(circle, X(center) - x, Y(center) + y);
+        area_point_set(circle, X(center) + x, Y(center) - y);
+        area_point_set(circle, X(center) - x, Y(center) - y);
+        area_point_set(circle, X(center) + y, Y(center) + x);
+        area_point_set(circle, X(center) - y, Y(center) + x);
+        area_point_set(circle, X(center) + y, Y(center) - x);
+        area_point_set(circle, X(center) - y, Y(center) - x);
     }
 
     if (hollow)
@@ -363,8 +332,8 @@ area *area_new_circle_flooded(position center, int radius, area *obstacles)
     obstacles = area_add(obstacles, area_new_circle(center, radius, TRUE));
 
     /* translate absolute center position to area */
-    start_x = center.x - obstacles->start_x;
-    start_y = center.y - obstacles->start_y;
+    start_x = X(center) - obstacles->start_x;
+    start_y = Y(center) - obstacles->start_y;
 
     /* fill narea */
     narea = area_flood(obstacles, start_x, start_y);
@@ -381,39 +350,39 @@ area *area_new_ray(position source, position target, area *obstacles)
     signed int ix, iy;
     int error;
 
-    narea = area_new(min(source.x, target.x), min(source.y, target.y),
-                     abs(target.x - source.x) + 1, abs(target.y - source.y) + 1);
+    narea = area_new(min(X(source), X(target)), min(Y(source), Y(target)),
+                     abs(X(target) - X(source)) + 1, abs(Y(target) - Y(source)) + 1);
 
     /* offset = offset to level map */
     offset_x = narea->start_x;
     offset_y = narea->start_y;
 
     /* reposition source and target to get a position inside narea */
-    source.x -= offset_x;
-    source.y -= offset_y;
-    target.x -= offset_x;
-    target.y -= offset_y;
+    X(source) -= offset_x;
+    Y(source) -= offset_y;
+    X(target) -= offset_x;
+    Y(target) -= offset_y;
 
     /* offset = relative offset for obstacle lookup */
     offset_x -= obstacles->start_x;
     offset_y -= obstacles->start_y;
 
-    x = source.x;
-    y = source.y;
+    x = X(source);
+    y = Y(source);
 
-    delta_x = abs(target.x - source.x) << 1;
-    delta_y = abs(target.y - source.y) << 1;
+    delta_x = abs(X(target) - X(source)) << 1;
+    delta_y = abs(Y(target) - Y(source)) << 1;
 
     /* if x1 == x2 or y1 == y2, then it does not matter what we set here */
-    ix = target.x > source.x ? 1 : -1;
-    iy = target.y > source.y ? 1 : -1;
+    ix = X(target) > X(source) ? 1 : -1;
+    iy = Y(target) > Y(source) ? 1 : -1;
 
     if (delta_x >= delta_y)
     {
         /* error may go below zero */
         error = delta_y - (delta_x >> 1);
 
-        while (x != target.x)
+        while (x != X(target))
         {
             if (error >= 0)
             {
@@ -443,7 +412,7 @@ area *area_new_ray(position source, position target, area *obstacles)
         /* error may go below zero */
         int error = delta_x - (delta_y >> 1);
 
-        while (y != target.y)
+        while (y != Y(target))
         {
             if (error >= 0)
             {
@@ -585,8 +554,8 @@ void area_pos_set(area *a, position pos)
 
     assert (a != NULL);
 
-    x = pos.x - a->start_x;
-    y = pos.y - a->start_y;
+    x = X(pos) - a->start_x;
+    y = Y(pos) - a->start_y;
 
     area_point_set(a, x, y);
 }
@@ -597,8 +566,8 @@ int area_pos_get(area *a, position pos)
 
     assert (a != NULL);
 
-    x = pos.x - a->start_x;
-    y = pos.y - a->start_y;
+    x = X(pos) - a->start_x;
+    y = Y(pos) - a->start_y;
 
     return area_point_get(a, x, y);
 }
@@ -609,8 +578,8 @@ void area_pos_del(area *a, position pos)
 
     assert (a != NULL);
 
-    x = pos.x - a->start_x;
-    y = pos.y - a->start_y;
+    x = X(pos) - a->start_x;
+    y = Y(pos) - a->start_y;
 
     area_point_del(a, x, y);
 }

@@ -312,7 +312,7 @@ static inline int monster_flags(monster *m, monster_flag f)
     return (luaN_query_int("monsters", monster_type(m), "flags") & f);
 }
 
-#define monster_map(M)      game_map(nlarn, monster_pos(M).z)
+#define monster_map(M)      game_map(nlarn, Z(monster_pos(M)))
 #define monster_alive(M)    (monster_hp(M) > 0)
 /* query monster type data */
 

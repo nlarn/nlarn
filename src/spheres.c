@@ -64,7 +64,7 @@ void sphere_serialize(sphere *s, cJSON *root)
 
     cJSON_AddNumberToObject(sval, "dir", s->dir);
     cJSON_AddNumberToObject(sval, "lifetime", s->lifetime);
-    cJSON_AddItemToObject(sval, "pos", pos_serialize(s->pos));
+    cJSON_AddNumberToObject(sval, "pos", pos_val(s->pos));
 
     if (!s->owner)
         cJSON_AddFalseToObject(sval, "owner");
@@ -76,7 +76,7 @@ void sphere_deserialize(cJSON *sser, game *g)
 
     s->dir = cJSON_GetObjectItem(sser, "dir")->valueint;
     s->lifetime = cJSON_GetObjectItem(sser, "lifetime")->valueint;
-    s->pos = pos_deserialize(cJSON_GetObjectItem(sser, "pos"));
+    pos_val(s->pos) = cJSON_GetObjectItem(sser, "pos")->valueint;
 
     if (!cJSON_GetObjectItem(sser, "owner"))
         s->owner = g->p;
@@ -104,7 +104,7 @@ void sphere_move(sphere *s, game *g)
         return;
     }
 
-    map = game_map(g, s->pos.z);
+    map = game_map(g, Z(s->pos));
 
     /* try to move sphere into its direction */
     dir = s->dir;

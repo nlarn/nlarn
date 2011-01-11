@@ -62,10 +62,10 @@ int main(int argc, char *argv[])
     gchar *strbuf;
 
     /* position to examine / to travel to */
-    position pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+    position pos = pos_invalid;
 
     /* position chosen for autotravel, allowing to continue travel */
-    position cpos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+    position cpos = pos_invalid;
 
     /* call display_shutdown when terminating the game */
     atexit(display_shutdown);
@@ -141,21 +141,21 @@ int main(int argc, char *argv[])
             /* check if travel mode shall be aborted:
                attacked or fell through trap door */
             if (nlarn->p->attacked || adjacent_monster(nlarn->p, FALSE)
-                || pos.z != nlarn->p->pos.z)
+                || Z(pos) != Z(nlarn->p->pos))
             {
-                pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+                pos = pos_invalid;
             }
             else if (pos_adjacent(nlarn->p->pos, pos))
             {
                 /* the target has almost been reached. This is the last move. */
                 moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, pos), TRUE);
                 /* reset the target position */
-                pos = cpos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+                pos = cpos = pos_invalid;
             }
             else
             {
                 /* find a path to the destination */
-                map_path *path = map_find_path(game_map(nlarn, nlarn->p->pos.z),
+                map_path *path = map_find_path(game_map(nlarn, Z(nlarn->p->pos)),
                                                nlarn->p->pos, pos, LE_GROUND);
 
                 if (path && !g_queue_is_empty(path->path))
@@ -168,13 +168,13 @@ int main(int argc, char *argv[])
                     {
                         /* for some reason movement is impossible, therefore
                            stop autotravel. */
-                        pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+                        pos = pos_invalid;
                     }
                 }
                 else
                 {
                     /* no path found. stop travelling */
-                    pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+                    pos = pos_invalid;
                 }
 
                 /* cleanup */
@@ -371,7 +371,7 @@ int main(int argc, char *argv[])
                 g_free(strbuf);
 
                 /* reset the position */
-                pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+                pos = pos_invalid;
             }
             else
                 log_add_entry(nlarn->log, "Aborted.");
@@ -470,7 +470,8 @@ int main(int argc, char *argv[])
 
             /* open door / container */
         case 'o':
-            if (inv_length_filtered(*map_ilist_at(game_map(nlarn, nlarn->p->pos.z), nlarn->p->pos),
+            if (inv_length_filtered(*map_ilist_at(game_map(nlarn, Z(nlarn->p->pos)),
+                                                  nlarn->p->pos),
                                     &item_filter_container) > 0)
             {
                 container_open(nlarn->p, NULL, NULL);
@@ -499,7 +500,7 @@ int main(int argc, char *argv[])
             /* drink a potion or from a fountain */
         case 'q':
         {
-            map_sobject_t ms = map_sobject_at(game_map(nlarn, nlarn->p->pos.z),
+            map_sobject_t ms = map_sobject_at(game_map(nlarn, Z(nlarn->p->pos)),
                                               nlarn->p->pos);
 
             if ((ms == LS_FOUNTAIN || ms == LS_DEADFOUNTAIN)
@@ -551,9 +552,9 @@ int main(int argc, char *argv[])
             /* continue autotravel */
         case 'C':
             /* delete last autotravel target if it was on another map */
-            if (cpos.z != nlarn->p->pos.z)
+            if (Z(cpos) != Z(nlarn->p->pos))
             {
-                cpos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+                cpos = pos_invalid;
             }
 
             if (pos_valid(cpos))
@@ -666,18 +667,18 @@ int main(int argc, char *argv[])
             break;
 
         case '+': /* dungeon map up */
-            if (game_wizardmode(nlarn) && (nlarn->p->pos.z > 0))
+            if (game_wizardmode(nlarn) && (Z(nlarn->p->pos) > 0))
             {
-                moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z - 1),
-                                               nlarn->p->pos.z == MAP_DMAX);
+                moves_count = player_map_enter(nlarn->p, game_map(nlarn, Z(nlarn->p->pos) - 1),
+                                               Z(nlarn->p->pos) == MAP_DMAX);
             }
             break;
 
         case '-': /* dungeon map down */
-            if (game_wizardmode(nlarn) && (nlarn->p->pos.z < (MAP_MAX - 1)))
+            if (game_wizardmode(nlarn) && (Z(nlarn->p->pos) < (MAP_MAX - 1)))
             {
-                moves_count = player_map_enter(nlarn->p, game_map(nlarn, nlarn->p->pos.z + 1),
-                                               nlarn->p->pos.z == MAP_DMAX - 1);
+                moves_count = player_map_enter(nlarn->p, game_map(nlarn, Z(nlarn->p->pos) + 1),
+                                               Z(nlarn->p->pos) == MAP_DMAX - 1);
             }
             break;
 
@@ -696,7 +697,7 @@ int main(int argc, char *argv[])
                     nlarn->p->pos = pos;
 
                     /* reset pos, otherwise autotravel would be enabled */
-                    pos = pos_new(G_MAXINT16, G_MAXINT16, G_MAXINT16);
+                    pos = pos_invalid;
                 }
             }
             break;
@@ -802,16 +803,16 @@ int main(int argc, char *argv[])
 
 static gboolean adjacent_monster(player *p, gboolean ignore_harmless)
 {
-    position pos = pos_new(0, 0, p->pos.z);
+    position pos = { { 0, 0, Z(p->pos) } };
 
-    for (pos.y = 0; pos.y < MAP_MAX_Y; pos.y++)
-        for (pos.x = 0; pos.x < MAP_MAX_X; pos.x++)
+    for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
+        for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
             /* check if the position if visible */
             if (!fov_get(p->fov, pos))
                 continue;
 
-            monster *m = map_get_monster_at(game_map(nlarn, p->pos.z), pos);
+            monster *m = map_get_monster_at(game_map(nlarn, Z(p->pos)), pos);
 
             if (m == NULL)
                 continue;
@@ -853,54 +854,54 @@ static gboolean adjacent_corridor(position pos, char move)
     switch (move)
     {
     case 'h': // left
-        p1.x -= 1;
-        p1.y -= 1;
-        p2.x -= 1;
-        p2.y += 1;
+        X(p1) -= 1;
+        Y(p1) -= 1;
+        X(p2) -= 1;
+        Y(p2) += 1;
         break;
     case 'j': // down
-        p1.x -= 1;
-        p1.y += 1;
-        p2.x += 1;
-        p2.y += 1;
+        X(p1) -= 1;
+        Y(p1) += 1;
+        X(p2) += 1;
+        Y(p2) += 1;
         break;
     case 'k': // up
-        p1.x -= 1;
-        p1.y -= 1;
-        p2.x += 1;
-        p2.y -= 1;
+        X(p1) -= 1;
+        Y(p1) -= 1;
+        X(p2) += 1;
+        Y(p2) -= 1;
         break;
     case 'l': // right
-        p1.x += 1;
-        p1.y -= 1;
-        p2.x += 1;
-        p2.y += 1;
+        X(p1) += 1;
+        Y(p1) -= 1;
+        X(p2) += 1;
+        Y(p2) += 1;
         break;
     case 'y': // up left
-        p1.y -= 1;
-        p2.x -= 1;
+        Y(p1) -= 1;
+        X(p2) -= 1;
         break;
     case 'u': // up right
-        p1.y -= 1;
-        p2.x += 1;
+        Y(p1) -= 1;
+        X(p2) += 1;
         break;
     case 'b': // down left
-        p1.x -= 1;
-        p2.y += 1;
+        X(p1) -= 1;
+        Y(p2) += 1;
         break;
     case 'n': // down right
-        p1.x += 1;
-        p2.y += 1;
+        X(p1) += 1;
+        Y(p2) += 1;
         break;
     }
 
-    if (p1.x >= 0 && p1.x < MAP_MAX_X && p1.y >= 0 && p1.y < MAP_MAX_Y
-            && lt_is_passable(map_tiletype_at(game_map(nlarn, nlarn->p->pos.z), p1)))
+    if (X(p1) >= 0 && X(p1) < MAP_MAX_X && Y(p1) >= 0 && Y(p1) < MAP_MAX_Y
+            && lt_is_passable(map_tiletype_at(game_map(nlarn, Z(nlarn->p->pos)), p1)))
     {
         return TRUE;
     }
-    if (p2.x >= 0 && p2.x < MAP_MAX_X && p2.y >= 0 && p2.y < MAP_MAX_Y
-            && lt_is_passable(map_tiletype_at(game_map(nlarn, nlarn->p->pos.z), p2)))
+    if (X(p2) >= 0 && X(p2) < MAP_MAX_X && Y(p2) >= 0 && Y(p2) < MAP_MAX_Y
+            && lt_is_passable(map_tiletype_at(game_map(nlarn, Z(nlarn->p->pos)), p2)))
     {
         return TRUE;
     }

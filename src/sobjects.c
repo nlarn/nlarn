@@ -34,7 +34,7 @@ int player_altar_desecrate(player *p)
 
     assert (p != NULL);
 
-    current = game_map(nlarn, p->pos.z);
+    current = game_map(nlarn, Z(p->pos));
 
     if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
@@ -82,7 +82,7 @@ int player_altar_pray(player *p)
 
     assert (p != NULL);
 
-    current = game_map(nlarn, p->pos.z);
+    current = game_map(nlarn, Z(p->pos));
 
     if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
@@ -280,7 +280,7 @@ int player_building_enter(player *p)
 {
     int moves_count = 0;
 
-    switch (map_sobject_at(game_map(nlarn, p->pos.z), p->pos))
+    switch (map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos))
     {
     case LS_BANK:
     case LS_BANK2:
@@ -339,7 +339,7 @@ int player_door_close(player *p)
     monster *m;
 
     /* the current map */
-    map *map = game_map(nlarn, p->pos.z);
+    map *map = game_map(nlarn, Z(p->pos));
 
     dirs = map_get_surrounding(map, p->pos, LS_OPENDOOR);
 
@@ -434,7 +434,7 @@ int player_door_open(player *p, int dir)
     int count, num;
 
     /* the current map */
-    map *map = game_map(nlarn, p->pos.z);
+    map *map = game_map(nlarn, Z(p->pos));
 
     if (dir == GD_NONE)
     {
@@ -500,7 +500,7 @@ int player_fountain_drink(player *p)
     int fntchange = 0;
     int amount = 0;
     int et = ET_NONE;
-    map *map = game_map(nlarn, p->pos.z);
+    map *map = game_map(nlarn, Z(p->pos));
 
     assert (p != NULL);
 
@@ -584,7 +584,7 @@ int player_fountain_drink(player *p)
             break;
 
         case 6:
-            amount = rand_1n(p->pos.z + 1);
+            amount = rand_1n(Z(p->pos) + 1);
             if (fntchange > 0)
             {
                 log_add_entry(nlarn->log, "You gain %d hit point%s",
@@ -602,7 +602,7 @@ int player_fountain_drink(player *p)
             break;
 
         case 7:
-            amount = rand_1n(p->pos.z + 1);
+            amount = rand_1n(Z(p->pos) + 1);
             if (fntchange > 0)
             {
                 log_add_entry(nlarn->log, "You just gained %d mana point%s.",
@@ -620,7 +620,7 @@ int player_fountain_drink(player *p)
             break;
 
         case 8:
-            amount = 5 * rand_1n((p->pos.z + 1) * (p->pos.z + 1));
+            amount = 5 * rand_1n((Z(p->pos) + 1) * (Z(p->pos) + 1));
 
             if (fntchange > 0)
             {
@@ -654,7 +654,7 @@ int player_fountain_drink(player *p)
 
 int player_fountain_wash(player *p)
 {
-    map *map = game_map(nlarn, p->pos.z);
+    map *map = game_map(nlarn, Z(p->pos));
 
     assert (p != NULL);
 
@@ -677,7 +677,7 @@ int player_fountain_wash(player *p)
         log_add_entry(nlarn->log, "Oh no! The water was foul!");
 
         damage *dam = damage_new(DAM_POISON, ATT_NONE,
-                                 rand_1n((p->pos.z << 2) + 2), NULL);
+                                 rand_1n((Z(p->pos) << 2) + 2), NULL);
 
         player_damage_take(p, dam, PD_SOBJECT, LS_FOUNTAIN);
     }
@@ -719,7 +719,7 @@ int player_stairs_down(player *p)
 {
     map *nlevel = NULL;
     gboolean show_msg = FALSE;
-    map *map = game_map(nlarn, p->pos.z);
+    map *map = game_map(nlarn, Z(p->pos));
     map_sobject_t ms = map_sobject_at(map, p->pos);
 
     if (!player_movement_possible(p))
@@ -736,7 +736,7 @@ int player_stairs_down(player *p)
     {
     case LS_STAIRSDOWN:
         show_msg = TRUE;
-        nlevel = game_map(nlarn, p->pos.z + 1);;
+        nlevel = game_map(nlarn, Z(p->pos) + 1);;
         break;
 
     case LS_ELEVATORDOWN:
@@ -746,7 +746,7 @@ int player_stairs_down(player *p)
         break;
 
     case LS_DNGN_ENTRANCE:
-        if (p->pos.z == 0)
+        if (Z(p->pos) == 0)
             nlevel = game_map(nlarn, 1);
         else
             log_add_entry(nlarn->log, "Climb up to return to town.");
@@ -793,7 +793,7 @@ int player_stairs_up(player *p)
 {
     map *nlevel = NULL;
     gboolean show_msg = FALSE;
-    map_sobject_t ms = map_sobject_at(game_map(nlarn, p->pos.z), p->pos);
+    map_sobject_t ms = map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     if (!player_movement_possible(p))
         return 0;
@@ -802,7 +802,7 @@ int player_stairs_up(player *p)
     {
     case LS_STAIRSUP:
         show_msg = TRUE;
-        nlevel = game_map(nlarn, p->pos.z - 1);
+        nlevel = game_map(nlarn, Z(p->pos) - 1);
         break;
 
     case LS_ELEVATORUP:
@@ -842,7 +842,7 @@ int player_throne_pillage(player *p)
     int count = 0; /* gems created */
 
     /* current map */
-    map *map = game_map(nlarn, p->pos.z);
+    map *map = game_map(nlarn, Z(p->pos));
 
     /* type of object at player's position */
     map_sobject_t ms = map_sobject_at(map, p->pos);
@@ -903,7 +903,7 @@ int player_throne_pillage(player *p)
 
 int player_throne_sit(player *p)
 {
-    map *map = game_map(nlarn, p->pos.z);
+    map *map = game_map(nlarn, Z(p->pos));
     map_sobject_t st = map_sobject_at(map, p->pos);
 
     assert (p != NULL);

@@ -78,19 +78,19 @@ void fov_calculate(fov *fov, map *m, position pos, int radius)
 gboolean fov_get(fov *fov, position pos)
 {
     assert (fov != NULL);
-    assert (pos.x <= fov->size_x);
-    assert (pos.y <= fov->size_y);
+    assert (X(pos) <= fov->size_x);
+    assert (Y(pos) <= fov->size_y);
 
-    return fov->fov_data[pos.y * fov->size_x + pos.x];
+    return fov->fov_data[Y(pos) * fov->size_x + X(pos)];
 }
 
 void fov_set(fov *fov, position pos, gboolean visible)
 {
     assert (fov != NULL);
-    assert (pos.x <= fov->size_x);
-    assert (pos.y <= fov->size_y);
+    assert (X(pos) <= fov->size_x);
+    assert (Y(pos) <= fov->size_y);
 
-    fov->fov_data[pos.y * fov->size_x + pos.x] = visible;
+    fov->fov_data[Y(pos) * fov->size_x + X(pos)] = visible;
 }
 
 void fov_reset(fov *fov)
@@ -139,8 +139,8 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
             dx += 1;
 
             /* Translate the dx, dy coordinates into map coordinates: */
-            X = center.x + dx * xx + dy * xy;
-            Y = center.y + dx * yx + dy * yy;
+            X = X(center) + dx * xx + dy * xy;
+            Y = Y(center) + dx * yx + dy * yy;
 
             /* check if coordinated are within bounds */
             if ((X < 0) || (X >= fov->size_x))
@@ -164,16 +164,18 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
             }
             else
             {
+                position pos = { { X, Y, m->nlevel } };
+
                 /* Our light beam is touching this square; light it */
                 if ((dx * dx + dy * dy) < radius_squared)
                 {
-                    fov_set(fov, pos_new(X, Y, m->nlevel), TRUE);
+                    fov_set(fov, pos, TRUE);
                 }
 
                 if (blocked)
                 {
                     /* we're scanning a row of blocked squares */
-                    if (!map_pos_transparent(m, pos_new(X,Y, m->nlevel)))
+                    if (!map_pos_transparent(m, pos))
                     {
                         new_start = r_slope;
                         continue;
@@ -186,7 +188,7 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
                 }
                 else
                 {
-                    if (!map_pos_transparent(m, pos_new(X, Y, m->nlevel)) && (j < radius))
+                    if (!map_pos_transparent(m, pos) && (j < radius))
                     {
                         /* This is a blocking square, start a child scan */
                         blocked = TRUE;
