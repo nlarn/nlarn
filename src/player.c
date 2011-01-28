@@ -1485,6 +1485,12 @@ gint64 player_calc_score(player *p, int won)
         score += item_price(inv_get(p->inventory, idx));
     }
 
+    /* value of stuff stored at home */
+    for (idx = 0; idx < inv_length(nlarn->player_home); idx++)
+    {
+        score += item_price(inv_get(nlarn->player_home, idx));
+    }
+
     /* experience */
     score += p->experience;
 
