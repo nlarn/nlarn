@@ -361,8 +361,9 @@ int main(int argc, char *argv[])
 
             /* look at different position */
         case ';':
-            pos = display_get_position(nlarn->p, "Choose a position to examine.",
-                                       FALSE, FALSE, 0, FALSE, TRUE);
+            pos = display_get_new_position(nlarn->p, nlarn->p->pos,
+                                           "Choose a position to examine.",
+                                           FALSE, FALSE, FALSE, 0, FALSE, TRUE);
 
             if (pos_valid(pos))
             {
@@ -685,8 +686,9 @@ int main(int argc, char *argv[])
         case 20: /* (^T) intra-level teleport */
             if (game_wizardmode(nlarn))
             {
-                pos = display_get_position(nlarn->p, "Choose a position to teleport to.",
-                                           FALSE, FALSE, 0, FALSE, FALSE);
+                pos = display_get_new_position(nlarn->p, nlarn->p->pos,
+                                               "Choose a position to teleport to.",
+                                               FALSE, FALSE, FALSE, 0, FALSE, FALSE);
 
                 if (pos_valid(pos))
                 {

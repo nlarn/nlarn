@@ -19,13 +19,17 @@
 #include <assert.h>
 #include <string.h>
 #include "fov.h"
+#include "game.h"
 #include "map.h"
+#include "nlarn.h"
 #include "position.h"
 
 static void fov_calculate_octant(fov *fov, map *m, position center,
                                  int row, float start,
                                  float end, int radius, int xx,
                                  int xy, int yx, int yy);
+
+static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b);
 
 struct _fov
 {
@@ -35,6 +39,12 @@ struct _fov
     /* "flattened" array of size size_y * size_x */
     gboolean *fov_data;
 };
+
+typedef struct _fov_visible_monster
+{
+    guint   distance;
+    monster *mon;
+} fov_visible_monster;
 
 fov *fov_new(guint size_x, guint size_y)
 {
@@ -100,6 +110,62 @@ void fov_reset(fov *fov)
 
     /* set fov_data to FALSE */
     memset(fov->fov_data, 0, fov->size_x * fov->size_y * sizeof(int));
+}
+
+monster *fov_get_closest_monster(fov *fov, position center)
+{
+    position pos;
+    monster *closest_monster = NULL;
+    map *map = game_map(nlarn, Z(center));
+    GPtrArray *mlist = g_ptr_array_new();
+
+    Z(pos) = Z(center);
+
+    for (Y(pos) = 0; Y(pos) < fov->size_y; Y(pos)++)
+    {
+        for (X(pos) = 0; X(pos) < fov->size_x; X(pos)++)
+        {
+            monster *m;
+            fov_visible_monster *fvm;
+
+            /* check if the position is visible */
+            if (!fov_get(fov, pos))
+                continue;
+
+            /* check if there is a monster at that position */
+            if (!(m = map_get_monster_at(map, pos)))
+                continue;
+
+            /* found a visible monster -> add it to the list */
+            fvm = g_new0(fov_visible_monster, 1);
+
+            fvm->mon = m;
+            fvm->distance = pos_distance(center, pos);
+
+            g_ptr_array_add(mlist, fvm);
+        }
+    }
+
+    if (mlist->len > 0)
+    {
+        fov_visible_monster *fvm;
+
+        /* sort the monsters list by distance */
+        g_ptr_array_sort(mlist, fov_visible_monster_sort);
+
+        /* get the first element in the list */
+        fvm = g_ptr_array_index(mlist, 0);
+
+        closest_monster = fvm->mon;
+    }
+
+    /* clean up */
+    while (mlist->len > 0)
+        g_free(g_ptr_array_remove_index_fast(mlist, mlist->len - 1));
+
+    g_ptr_array_free(mlist, TRUE);
+
+    return closest_monster;
 }
 
 void fov_free(fov *fov)
@@ -209,4 +275,20 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
             break;
         }
     }
+}
+
+static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b)
+{
+    fov_visible_monster *fvm_a, *fvm_b;
+
+    fvm_a = (fov_visible_monster*)*((gpointer**)a);
+    fvm_b = (fov_visible_monster*)*((gpointer**)b);
+
+    if (fvm_a->distance < fvm_b->distance)
+        return -1;
+
+    if (fvm_a->distance > fvm_b->distance)
+        return 1;
+
+    return 0;
 }

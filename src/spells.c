@@ -1409,8 +1409,9 @@ gboolean spell_create_sphere(spell *s, struct player *p)
 
     assert(p != NULL);
 
-    pos = display_get_position(p, "Where do you want to place the sphere?",
-                               FALSE, FALSE, 0, TRUE, TRUE);
+    pos = display_get_new_position(p, p->pos,
+                                   "Where do you want to place the sphere?",
+                                   FALSE, FALSE, FALSE, 0, TRUE, TRUE);
 
     if (pos_valid(pos))
     {
@@ -1661,8 +1662,9 @@ gboolean spell_make_wall(player *p)
 {
     position pos;
 
-    pos = display_get_position(p, "Select a position where you want to place a wall.",
-                               FALSE, FALSE, 0, FALSE, TRUE);
+    pos = display_get_new_position(p, p->pos,
+                                   "Select a position where you want to place a wall.",
+                                   FALSE, FALSE, FALSE, 0, FALSE, TRUE);
 
     if (pos_identical(pos, p->pos))
     {
@@ -1727,8 +1729,9 @@ gboolean spell_vaporize_rock(player *p)
     position pos;
     map *map = game_map(nlarn, Z(p->pos));
 
-    pos = display_get_position(p, "What do you want to vaporize?",
-                               FALSE, FALSE, 0, FALSE, TRUE);
+    pos = display_get_new_position(p, p->pos,
+                                   "What do you want to vaporize?",
+                                   FALSE, FALSE, FALSE, 0, FALSE, TRUE);
 
     if (!pos_valid(pos))
     {

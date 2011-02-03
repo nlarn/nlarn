@@ -21,6 +21,7 @@
 
 #include <glib.h>
 #include "map.h"
+#include "monsters.h"
 #include "position.h"
 
 
@@ -65,10 +66,15 @@ void fov_set(fov *fov, position pos, gboolean visible);
 /** @brief reset visibility for an entire fov structure.
   *
   * @param pointer to a fov structure.
-  * @param the position to set
-  * @param visibility of the given location (TRUE/FALSE)
   */
 void fov_reset(fov *fov);
+
+/** @brief Get the closest monster for a field of vision.
+  *
+  * @param pointer to a fov structure
+  * @param the center of the fov
+  */
+monster *fov_get_closest_monster(fov *fov, position center);
 
 /** @brief destroy fov data
   *
