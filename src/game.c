@@ -55,6 +55,8 @@ static const char *helpfile = "nlarn.hlp";
 static const char *mazefile = "maze";
 static const char *fortunes = "fortune";
 static const char *highscores = "highscores";
+static const char *config_file = "nlarn.ini";
+static const char *save_file = "nlarn.sav";
 
 static void print_welcome_message(gboolean newgame)
 {
@@ -127,7 +129,7 @@ void game_init(int argc, char *argv[])
 
     /* determine location of the configuration file */
     gchar *filename = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-                                   "nlarn.ini", NULL);
+                                   config_file, NULL);
 
     if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR))
     {
@@ -135,7 +137,7 @@ void game_init(int argc, char *argv[])
         g_free(filename);
 
         /* try to find it in the binarys directory */
-        filename = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, "nlarn.ini", NULL);
+        filename = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, config_file, NULL);
     }
 
     /* try to load settings from the configuration file */
@@ -466,7 +468,7 @@ int game_save(game *g, const char *filename)
     }
 
     /* assemble save file name */
-    fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(), filename ? filename : "nlarn.sav", NULL);
+    fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(), filename ? filename : save_file, NULL);
 
     /* open save file for writing */
     gzFile file = gzopen(fullname, "wb");
@@ -785,7 +787,7 @@ static gboolean game_load(gchar *filename)
     /* assemble save file name; if no filename has been supplied, default
        to "nlarn.sav" */
     fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-                            filename ? filename : "nlarn.sav", NULL);
+                            filename ? filename : save_file, NULL);
 
     /* try to open save file */
     gzFile file = gzopen(fullname, "rb");
@@ -1152,7 +1154,7 @@ void game_delete_savefile()
 
     /* assemble save file name */
     fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-                            "nlarn.sav", NULL);
+                            save_file, NULL);
 
     gzFile file = gzopen(fullname, "rb");
     if (file != NULL)
