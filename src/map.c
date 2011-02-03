@@ -1623,6 +1623,9 @@ static void map_make_river(map *map, map_tile_t rivertype)
         if (chance(50)) width++;
         if (chance(50)) width--;
 
+        /* sanity checks */
+        if (starty < 2) starty = 2;
+        if (starty > maxy) starty = maxy;
         if (width < 2) width = 2;
         if (width > 6) width = 6;
 
