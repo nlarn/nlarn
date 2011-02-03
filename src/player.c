@@ -4006,7 +4006,8 @@ void player_item_drop(player *p, inventory **inv, item *it)
     map_sobject_t ms = map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     if (ms == LS_ALTAR
-            && (!player_effect(p, ET_BLINDNESS) || game_wizardmode(nlarn)))
+            && (!player_effect(p, ET_BLINDNESS) || game_wizardmode(nlarn))
+            && item_is_blessable(it->type))
     {
         if (it->cursed || it->blessed)
         {
