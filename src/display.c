@@ -2308,9 +2308,15 @@ position display_get_new_position(player *p,
         /* draw a ray if the starting position is not the player's position */
         if (ray && !pos_identical(pos, p->pos))
         {
-            a = area_new_ray(p->pos, pos,
-                             map_get_obstacles(map, p->pos,
-                                               pos_distance(p->pos, pos)));
+            area *obsmap = map_get_obstacles(map, p->pos, pos_distance(p->pos, pos));
+            a = area_new_ray(p->pos, pos, obsmap);
+
+            if (a == NULL)
+            {
+                /* It wasn't possible to paint a ray to the target position.
+                   Revert to the player's position.*/
+                pos = p->pos;
+            }
         }
 
         if (ray && (a != NULL))
