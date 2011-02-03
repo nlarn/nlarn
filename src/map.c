@@ -33,8 +33,8 @@ static void map_fill_with_traps(map *l);
 static int map_load_from_file(map *l, char *mazefile, int which);
 static void map_make_maze(map *maze, int treasure_room);
 static void map_make_maze_eat(map *l, int x, int y);
-static void map_make_river(map *map, int rivertype);
-static void map_make_lake(map *map, int laketype);
+static void map_make_river(map *map, map_tile_t rivertype);
+static void map_make_lake(map *map, map_tile_t laketype);
 static void map_make_treasure_room(map *maze, rectangle **rooms);
 static int map_validate(map *maze);
 
@@ -1405,7 +1405,7 @@ generate:
         }
 
     /* Maybe add a river or lake. */
-    const int rivertype = (is_volcano_map(maze->nlevel) ? LT_LAVA : LT_DEEPWATER);
+    const map_tile_t rivertype = (is_volcano_map(maze->nlevel) ? LT_LAVA : LT_DEEPWATER);
 
     if (maze->nlevel > 1
             && (is_volcano_map(maze->nlevel) ? chance(90) : chance(40)))
@@ -1561,7 +1561,7 @@ static void map_make_maze_eat(map *l, int x, int y)
 
 /* The river/lake creation algorithm has been copied in entirety
    from Dungeon Crawl Stone Soup, with only very slight changes. (jpeg) */
-static void map_make_vertical_river(map *map, int rivertype)
+static void map_make_vertical_river(map *map, map_tile_t rivertype)
 {
     guint width  = 3 + rand_0n(4);
     guint startx = 6 - width + rand_0n(MAP_MAX_X - 8);
@@ -1591,7 +1591,7 @@ static void map_make_vertical_river(map *map, int rivertype)
     }
 }
 
-static void map_make_river(map *map, int rivertype)
+static void map_make_river(map *map, map_tile_t rivertype)
 {
     if (chance(20))
     {
@@ -1627,7 +1627,7 @@ static void map_make_river(map *map, int rivertype)
     }
 }
 
-static void map_make_lake(map *map, int laketype)
+static void map_make_lake(map *map, map_tile_t laketype)
 {
     guint x1 = 5 + rand_0n(MAP_MAX_X - 30);
     guint y1 = 3 + rand_0n(MAP_MAX_Y - 15);
