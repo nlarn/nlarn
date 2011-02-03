@@ -1283,6 +1283,13 @@ static void map_fill_with_objects(map *l)
         map_item_add(l, item_new_by_level(IT_ARMOUR, l->nlevel));
     }
 
+    /* up to two amulets on levels > 5 */
+    if (l->nlevel > 5)
+    {
+        for (i = 0; i < rand_0n(2); i++)
+            map_item_add(l, item_new_by_level(IT_AMULET, l->nlevel));
+    }
+
     /* up to three books */
     for (i = 0; i <= rand_0n(3); i++)
     {

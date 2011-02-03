@@ -105,15 +105,30 @@ item *item_new(item_t item_type, int item_id)
         /* if the amulet has already been created try to create another one */
         while (nlarn->amulet_created[nitem->id] && (loops < item_max_id(IT_AMULET)))
         {
-            nitem->id = rand_1n(item_max_id(IT_AMULET));
+            /* loop through all amulets to find an available one */
+            nitem->id++;
+
+            /* do not create the amulet of larn accidentally */
+            if (nitem->id == item_max_id(item_type))
+                nitem->id = 1;
+
             loops++;
         }
 
+        /* every amulet has been created */
         if (loops == item_max_id(IT_AMULET))
         {
-            /* every amulet has been created -> return a ring instead */
+            /* remove the failed attempt */
             g_free(nitem);
-            return item_new(IT_RING, rand_1n(item_max_id(IT_RING)));
+
+            /* create something that is not a container */
+            do
+            {
+                item_type = rand_1n(IT_MAX);
+            }
+            while (item_type == IT_CONTAINER);
+
+            return item_new_random(item_type);
         }
 
         nlarn->amulet_created[nitem->id] = TRUE;
@@ -246,9 +261,14 @@ item *item_new_by_level(item_t item_type, int num_level)
 
     assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
 
-    /* no amulets above map 8 */
-    if ((item_type == IT_AMULET) && (num_level < 8))
-        item_type = IT_RING;
+    /* no amulets above dungeon level 6 */
+    if ((item_type == IT_AMULET) && (num_level < 6))
+    {
+        do
+        {
+            item_type = rand_1n(IT_MAX);
+        } while (item_type == IT_CONTAINER);
+    }
 
     divisor = 1 / (float)(MAP_MAX - 1);
 
