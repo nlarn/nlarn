@@ -119,12 +119,12 @@ int player_altar_pray(player *p)
     // First pay with carried gold, then pay the rest from the bank account.
     if (donation >= player_gold)
     {
-        player_set_gold(p, 0);
+        player_remove_gold(p, player_gold);
         p->bank_account -= (donation - player_gold);
     }
     else
     {
-        player_set_gold(p, player_gold - donation);
+        player_remove_gold(p, donation);
     }
     p->stats.gold_spent_donation += donation;
 

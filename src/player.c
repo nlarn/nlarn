@@ -4287,56 +4287,83 @@ int player_get_speed(player *p)
 guint player_get_gold(player *p)
 {
     guint idx;
+    guint gold = 0;
     item *i;
 
     assert(p != NULL);
 
-    for (idx = 0; idx < inv_length(p->inventory); idx++)
+    /* gold stacks, thus there can only be one item in the inventory */
+    if (inv_length_filtered(p->inventory, item_filter_gold))
     {
-        i = inv_get(p->inventory, idx);
-        if (i->type == IT_GOLD)
-            return i->count;
+        i = inv_get_filtered(p->inventory, 0, item_filter_gold);
+        gold += i->count;
     }
 
-    return 0;
+    /* check content of all containers in player's inventory */
+    for (idx = 0; idx < inv_length_filtered(p->inventory, item_filter_container); idx++)
+    {
+        item *it;
+        i = inv_get_filtered(p->inventory, idx, item_filter_container);
+
+        if (inv_length_filtered(i->content, item_filter_gold))
+        {
+            it = inv_get_filtered(i->content, 0, item_filter_gold);
+            gold += it->count;
+        }
+    }
+
+    return gold;
 }
 
-guint player_set_gold(player *p, guint amount)
+void player_remove_gold(player *p, guint amount)
 {
     guint idx;
     item *i;
 
     assert(p != NULL);
 
-    for (idx = 0; idx < inv_length(p->inventory); idx++)
+    /* gold stacks, thus there can only be one item in the inventory */
+    if (inv_length_filtered(p->inventory, item_filter_gold))
     {
-        i = inv_get(p->inventory, idx);
-        if (i->type == IT_GOLD)
+        i = inv_get_filtered(p->inventory, 0, item_filter_gold);
+
+        if (amount > i->count)
         {
-            if (!amount)
+            amount -= i->count;
+            inv_del_element(&p->inventory, i);
+        }
+        else
+        {
+            i->count -= amount;
+            goto done;
+        }
+    }
+
+    for (idx = 0; idx < inv_length_filtered(p->inventory, item_filter_container); idx++)
+    {
+        i = inv_get_filtered(p->inventory, idx, item_filter_container);
+
+        if (inv_length_filtered(i->content, item_filter_gold))
+        {
+            i = inv_get_filtered(i->content, 0, item_filter_gold);
+
+            if (amount > i->count)
             {
+                amount -= i->count;
                 inv_del_element(&p->inventory, i);
             }
             else
             {
-                i->count = amount;
+                i->count -= amount;
+                goto done;
             }
-
-            /* force recalculation of inventory weight */
-            player_inv_weight_recalc(p->inventory, NULL);
-
-            return !amount ? amount : i->count;
         }
     }
 
-    if (!amount)
-        return 0;
-
-    /* no gold found -> generate new gold */
-    i = item_new(IT_GOLD, amount);
-    inv_add(&p->inventory, i);
-
-    return i->count;
+    /* yes, I _do_ _know_ that goto is evil.. */
+done:
+    /* force recalculation of inventory weight */
+    player_inv_weight_recalc(p->inventory, NULL);
 }
 
 char *player_get_level_desc(player *p)

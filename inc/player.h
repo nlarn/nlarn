@@ -401,7 +401,13 @@ int player_get_speed(player *p);
 
 /* deal with money */
 guint player_get_gold(player *p);
-guint player_set_gold(player *p, guint amount);
+/**
+  * @brief Remove a given number of gold coins from the Player's inventory
+  *
+  * @param The player
+  * @param The amount of gold to remove
+  */
+void player_remove_gold(player *p, guint amount);
 
 char *player_get_level_desc(player *p);
 void player_list_sobjmem(player *p);

@@ -2299,16 +2299,8 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     {
         if ((player_gold = player_get_gold(p)))
         {
-            if (player_gold > 32767)
-            {
-                it = item_new(IT_GOLD, player_gold >> 1);
-                player_set_gold(p, player_gold >> 1);
-            }
-            else
-            {
-                it = item_new(IT_GOLD, rand_1n(1 + (player_gold >> 1)));
-                player_set_gold(p, player_gold - it->count);
-            }
+            it = item_new(IT_GOLD, rand_1n(1 + (player_gold >> 1)));
+            player_remove_gold(p, it->count);
 
             log_add_entry(nlarn->log, "The %s picks your pocket. " \
                           "Your purse feels lighter.", monster_get_name(m));

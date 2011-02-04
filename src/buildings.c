@@ -168,7 +168,7 @@ int building_bank(player *p)
         if (amount && (amount <= player_get_gold(p)))
         {
             p->bank_account += amount;
-            player_set_gold(p, player_get_gold(p) - amount);
+            player_remove_gold(p, amount);
             log_add_entry(nlarn->log, "You deposited %d gp.", amount);
         }
         else if (amount)
@@ -1046,8 +1046,7 @@ static void building_player_charge(player *p, guint amount)
     }
     else
     {
-        guint player_gold = player_get_gold(p);
-        player_set_gold(p, player_gold - amount);
+        player_remove_gold(p, amount);
     }
 }
 
