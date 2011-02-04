@@ -32,6 +32,8 @@ const container_data containers[CT_MAX] =
     { CT_CRATE,  "crate", 65000, IM_WOOD,  100, },
 };
 
+static void container_trigger_trap(player *p, item *container);
+
 void container_open(player *p, inventory **inv, item *container)
 {
     gchar container_desc[61] = { 0 };
@@ -72,6 +74,16 @@ void container_open(player *p, inventory **inv, item *container)
 
     if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
         return; /* interrupted */
+
+    /* check if the container is trapped */
+    if (container->cursed)
+    {
+        /* the player has triggerd the trap on the container */
+        container_trigger_trap(p, container);
+
+        /* remove the trap */
+        container->cursed = FALSE;
+    }
 
     /* check for empty container */
     if (inv_length(container->content) == 0)
@@ -319,4 +331,36 @@ int container_move_content(player *p, inventory **inv, inventory **new_inv)
     }
 
     return count;
+}
+
+static void container_trigger_trap(player *p, item *container)
+{
+    effect_t et;
+    char *msg = "A little needle shoots out and stings you!";
+
+    switch(rand_1n(5))
+    {
+    case 1: /* sickness */
+        et = ET_SICKNESS;
+        break;
+
+    case 2: /* itching powder */
+        et = ET_ITCHING;
+        msg = "You are engulfed in a cloud of dust!";
+        break;
+
+    case 3: /* clumsiness */
+        et = ET_CLUMSINESS;
+        break;
+
+    case 4: /* slowness */
+        et = ET_SLOWNESS;
+        break;
+    }
+
+    /* tell whats happening */
+    log_add_entry(nlarn->log, msg);
+
+    /* add the effect */
+    player_effect_add(p, effect_new(et));
 }

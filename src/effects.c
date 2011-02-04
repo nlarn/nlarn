@@ -470,7 +470,7 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_CLUMSINESS, "ET_CLUMSINESS", 250, TRUE, "clumsy",
-        "You are unable to hold your weapon.",
+        "You begin to lose hand to eye coordination!",
         "You're less awkward now.",
         NULL, NULL,
         TRUE, FALSE, FALSE, FALSE
@@ -478,7 +478,7 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_ITCHING, "ET_ITCHING", 100, TRUE, "itching",
-        "The hysteria of itching forces you to remove your armour!",
+        "You feel an irritation spread over your skin!",
         "The irritation subsides.",
         NULL, NULL,
         TRUE, FALSE, FALSE, FALSE

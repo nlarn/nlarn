@@ -1315,6 +1315,12 @@ static void map_fill_with_objects(map *l)
             inv_add(&(container->content), item_new_by_level(it, l->nlevel));
         }
 
+        /* there is a chance that the container is trapped */
+        if (chance(33))
+        {
+            container->cursed = TRUE;
+        }
+
         /* add the container to the map */
         map_item_add(l, container);
     }

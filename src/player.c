@@ -886,7 +886,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                     player_item_unequip(p, NULL, it, TRUE);
                     log_enable(nlarn->log);
 
-                    log_add_entry(nlarn->log, effect_get_msg_start(e));
+                    log_add_entry(nlarn->log, "You are unable to hold your weapon.");
                     player_item_drop(p, &p->inventory, it);
                 }
             }
@@ -902,6 +902,8 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 {
                     /* deference the item at the selected armour slot */
                     item *armour = *aslot;
+
+                    log_add_entry(nlarn->log, "The hysteria of itching forces you to remove your armour!");
                     player_item_unequip(p, &p->inventory, armour, TRUE);
                     player_item_drop(p, &p->inventory, armour);
                 }
