@@ -473,10 +473,10 @@ static int spell_success_value(player *p, spell *sp)
 {
     assert(p != NULL && sp != NULL);
 
-    if (player_get_int(p) < 2*spell_level(sp))
+    if (player_get_int(p) < (3 * spell_level(sp)))
         return 0;
 
-    return (player_get_int(p) - 2*(spell_level(sp) - sp->knowledge));
+    return (player_get_int(p) - 2 * (spell_level(sp) - sp->knowledge));
 }
 
 int spell_cast(player *p)
@@ -653,16 +653,17 @@ int spell_learn(player *p, guint spell_type)
 
     if (!spell_known(p, spell_type))
     {
-        s = spell_new(spell_type);
-
-        /* TODO: add a check for intelligence */
-        if (spell_level(s) > (int)p->level)
-        {
+        /* Check if the player's intelligence is sufficient to learn the spell */
+        if ((spells[spell_type].level * 3) > (int)player_get_int(p))
             /* spell is beyond the players scope */
-            spell_destroy(s);
             return FALSE;
-        }
 
+        /* Check if the player's level is spell sufficient to learn the spell */
+        if (spells[spell_type].level > (int)p->level)
+            /* spell is beyond the players scope */
+            return FALSE;
+
+        s = spell_new(spell_type);
         g_ptr_array_add(p->known_spells, s);
         return s->knowledge;
     }
