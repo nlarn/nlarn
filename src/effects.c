@@ -46,7 +46,7 @@ static const effect_data effects[ET_MAX] =
         ET_INC_CON, "ET_INC_CON", 1, 1, NULL,
         "You have a greater intestinal constitude!",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, FALSE, TRUE
     },
 
     {
@@ -54,7 +54,7 @@ static const effect_data effects[ET_MAX] =
         "You feel skilful!",
         "Your dextrousness returns to normal.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, FALSE, TRUE
     },
 
     {
@@ -62,7 +62,7 @@ static const effect_data effects[ET_MAX] =
         "You feel clever!",
         "You are not so smart anymore.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, FALSE, TRUE
     },
 
     {
@@ -70,14 +70,14 @@ static const effect_data effects[ET_MAX] =
         "Your muscles are stronger!",
         "Your strength returns to normal.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, FALSE, TRUE
     },
 
     {
         ET_INC_WIS, "ET_INC_WIS", 1, 1, NULL,
         "You feel more self-confident!",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        FALSE, FALSE, FALSE, TRUE
     },
 
     {
@@ -150,10 +150,10 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_PROTECTION, "ET_PROTECTION", 250, 3, NULL,
+        ET_PROTECTION, "ET_PROTECTION", 250, 3, "protected",
         "You feel protected!", "Your protection wanes.",
         NULL, NULL,
-        FALSE, FALSE, TRUE, TRUE
+        TRUE, FALSE, TRUE, FALSE
     },
 
     {
@@ -199,7 +199,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_INVULNERABILITY, "ET_INVULNERABILITY", 250, 10, NULL,
+        ET_INVULNERABILITY, "ET_INVULNERABILITY", 250, 10, "invulnerable",
         NULL, NULL, NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
     },
@@ -706,6 +706,30 @@ const char *effect_type_name(effect_t type)
     return effects[type].name;
 }
 
+int effect_type_amount(effect_t type)
+{
+    assert(type >= 0 && type < ET_MAX);
+    return effects[type].amount;
+}
+
+int effect_type_duration(effect_t type)
+{
+    assert(type >= 0 && type < ET_MAX);
+    return effects[type].duration;
+}
+
+gboolean effect_type_inc_duration(effect_t type)
+{
+    assert(type >= 0 && type < ET_MAX);
+    return effects[type].inc_duration;
+}
+
+gboolean effect_type_inc_amount(effect_t type)
+{
+    assert(type >= 0 && type < ET_MAX);
+    return effects[type].inc_amount;
+}
+
 const char *effect_get_desc(effect *e)
 {
     assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
@@ -748,8 +772,8 @@ effect *effect_add(GPtrArray *ea, effect *ne)
 
     assert(ea != NULL && ne != NULL);
 
-    /* check for existing effects - leave permanent effects alone */
-    if ((e = effect_get(ea, ne->type)) && (e->turns > 0))
+    /* check for existing effects */
+    if ((e = effect_get(ea, ne->type)))
     {
         gboolean modified_existing = FALSE;
 
@@ -802,7 +826,8 @@ effect *effect_get(GPtrArray *ea, effect_t type)
         gpointer effect_id = g_ptr_array_index(ea, idx);
         effect *e = game_effect_get(nlarn, effect_id);
 
-        if (e->type == type)
+        /* do not return effects caused by items */
+        if ((e->type == type) && (e->item == NULL))
         {
             return e;
         }

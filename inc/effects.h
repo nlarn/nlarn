@@ -158,6 +158,10 @@ cJSON *effects_serialize(GPtrArray *effects);
 GPtrArray *effects_deserialize(cJSON *eser);
 
 const char *effect_type_name(effect_t type);
+int effect_type_duration(effect_t type);
+int effect_type_amount(effect_t type);
+gboolean effect_type_inc_duration(effect_t type);
+gboolean effect_type_inc_amount(effect_t type);
 const char *effect_get_desc(effect *e);
 const char *effect_get_msg_start(effect *e);
 const char *effect_get_msg_stop(effect *e);

@@ -732,6 +732,60 @@ int spell_type_player(spell *s, struct player *p)
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_PLAYER));
 
+    /* check if the player is already affected by the effect */
+    if ((e = player_effect_get(p, spell_effect(s))))
+    {
+        /* player has cast this spell before */
+        if (effect_type_inc_amount(e->type))
+        {
+            /* The effect amount can be incremented.
+             * Increase the amount of the effect up to the base
+             * effect value * spell knowledge value. */
+            if (e->amount < (effect_type_amount(e->type) * s->knowledge))
+            {
+                e->amount += effect_type_amount(e->type);
+                log_add_entry(nlarn->log, "You have extended the power of %s.", spell_name(s));
+
+                /* force recalculation of burdened status if extending strength */
+                if (e->type == ET_INC_STR)
+                {
+                    player_inv_weight_recalc(p->inventory, NULL);
+                }
+            }
+            else
+            {
+                /* maximum reached -> indicate failure */
+                log_add_entry(nlarn->log, "You have already extended the power of %s to the extent of your knowledge.",
+                              spell_name(s));
+
+                return FALSE;
+            }
+        }
+        else if (effect_type_inc_duration(e->type))
+        {
+            /* The duration of this effect can be incremented.
+             * Increase the duration of the effect up to the base
+             * effect duration * spell knowledge value. */
+            if (e->amount + effect_type_duration(e->type)
+                < (effect_type_duration(e->type) * s->knowledge))
+            {
+                e->turns += effect_type_duration(e->type);
+                log_add_entry(nlarn->log, "You have extended the duration of %s.", spell_name(s));
+                log_add_entry(nlarn->log, effect_get_msg_start(e));
+            }
+            else
+            {
+                /* maximum reached -> indicate failure */
+                log_add_entry(nlarn->log, "You have already extended the duration of %s to the extent of your knowledge.",
+                              spell_name(s));
+
+                return FALSE;
+            }
+        }
+
+        return TRUE;
+    }
+
     e = effect_new(spell_effect(s));
 
     /* make effects that are permanent by default non-permanent */
@@ -744,11 +798,6 @@ int spell_type_player(spell *s, struct player *p)
     if (e->type == ET_INC_HP)
     {
         e->amount *= s->knowledge;
-    }
-
-    if (e->type == ET_WALL_WALK)
-    {
-        e->turns = 6 + rand_1n(10);
     }
 
     player_effect_add(p, e);
