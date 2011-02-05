@@ -4327,7 +4327,7 @@ void player_remove_gold(player *p, guint amount)
     {
         i = inv_get_filtered(p->inventory, 0, item_filter_gold);
 
-        if (amount > i->count)
+        if (amount >= i->count)
         {
             amount -= i->count;
             inv_del_element(&p->inventory, i);
@@ -4347,7 +4347,7 @@ void player_remove_gold(player *p, guint amount)
         {
             i = inv_get_filtered(i->content, 0, item_filter_gold);
 
-            if (amount > i->count)
+            if (amount >= i->count)
             {
                 amount -= i->count;
                 inv_del_element(&p->inventory, i);
