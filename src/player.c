@@ -3727,6 +3727,11 @@ int player_item_identified(player *p, item *it)
     return known;
 }
 
+int player_item_not_equipped(item *it)
+{
+    return !player_item_is_equipped(nlarn->p, it);
+}
+
 char *player_item_identified_list(player *p)
 {
     GString *list, *sublist;

@@ -391,11 +391,12 @@ int building_home(player *p)
                         p->name);
 
         /* check if the player can deposit something at home or has already done so */
-        if ((inv_length(p->inventory) > 0) || (inv_length(nlarn->player_home) > 0))
+        if ((inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
+            || (inv_length(nlarn->player_home) > 0))
         {
             g_string_append_printf(text, "\n\nYou may\n");
 
-            if (inv_length(p->inventory) > 0)
+            if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
                 g_string_append_printf(text, "  d) Deposit something here\n");
 
             if (inv_length(nlarn->player_home) > 0)
@@ -411,7 +412,7 @@ int building_home(player *p)
         {
             /* deposit something */
         case 'd':
-            if (inv_length(p->inventory) > 0)
+            if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
             {
                 /* prepare callback functions */
                 callbacks = g_ptr_array_new();
@@ -426,7 +427,7 @@ int building_home(player *p)
                 g_ptr_array_add(callbacks, callback);
 
                 display_inventory(title, p, &p->inventory, callbacks, FALSE,
-                                  TRUE, FALSE, NULL);
+                                  TRUE, FALSE, player_item_not_equipped);
 
                 display_inv_callbacks_clean(callbacks);
             }
