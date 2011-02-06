@@ -312,9 +312,11 @@ message_log *log_deserialize(cJSON *lser)
 GPtrArray *text_wrap(const char *str, int width, int indent)
 {
     GPtrArray *text;
-    size_t pos = 0;     /* position in string */
+    int spos = 0;       /* current starting position in source string */
+    int cpos;           /* current working position in source string */
     int lp;             /* last position of whitespace */
-    int len;            /* current line length */
+    int len;            /* length of str */
+    int llen;           /* length of text excluding tags content on current line */
     char *line;         /* copy of line */
     char *spaces = NULL;
 
@@ -331,43 +333,57 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
             spaces[lp] = ' ';
     }
 
-    while (pos < strlen(str))
+    len = strlen(str);
+
+    /* scan through source string */
+    while (spos < len)
     {
+        /* flag to determine if the current char must not be counted */
+        gboolean in_tag = FALSE;
+
         /* reset target string length and position of last whitespace */
-        len = lp = 0;
+        cpos = llen = lp = 0;
 
         /* scan the next line */
-        while (len <= width)
+        while (llen <= width)
         {
-            /* scan for a space at which to wrap the current line */
-            if (str[pos + len] == '\0' || isspace(str[pos + len]))
+            /* toggle the flag if the current character is the tag start / stop symbol */
+            if (str[spos + cpos] == '~')
             {
-                lp = len;
-                if (str[pos + len] == '\0' || str[pos + lp] == '\n')
-                {
-                    break;
-                }
+                in_tag = !in_tag;
             }
-            len++;
+
+            /* stop at the end of the string */
+            if (str[spos + cpos] == '\0' || str[spos + cpos] == '\n')
+            {
+                lp = cpos;
+                break;
+            }
+
+            /* scan for a space at which to wrap the current line */
+            if (isspace(str[spos + cpos]))
+            {
+                lp = cpos;
+            }
+
+            /* increase the string length if not inside or at the end of a tag */
+            if (!in_tag && (str[spos + cpos] != '~'))
+                llen++;
+
+            /* move the current working position */
+            cpos++;
         }
 
-        /* allocate space for the new, shortened line */
-        line = g_malloc((lp + 1) * sizeof(char));
-
         /* copy the text to the new line */
-        memcpy(line, &(str[pos]), lp);
-
-        /* terminate the newly copied string */
-        line[lp] = '\0';
+        line = g_strndup(&(str[spos]), lp);
 
         /* reduce width to make space for indentation after the first line */
         if (indent && text->len == 1)
             width -= indent;
 
-
         /* indent lines if not on the first line or the first
            line of a new paragraph */
-        if (indent && text->len && str[pos - 1] != '\n')
+        if (indent && text->len && str[spos - 1] != '\n')
         {
             /* prepend empty string to line (via temporary string) */
             char *tmp = g_strconcat(spaces, line, NULL);
@@ -380,7 +396,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         g_ptr_array_add(text, line);
 
         /* move position in source string beyond the end of the last line */
-        pos += (lp + 1);
+        spos += (lp + 1);
     }
 
     /* free indentation string */

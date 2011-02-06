@@ -29,10 +29,65 @@
 #include "nlarn.h"
 #include "spheres.h"
 
+typedef struct _display_colset
+{
+    const char *name;
+    const int  val;
+} display_colset;
+
+const display_colset display_default_colset[] =
+{
+    { "",             DC_NONE },
+    { "black",        DC_BLACK },
+    { "red",          DC_RED },
+    { "green",        DC_GREEN },
+    { "brown",        DC_BROWN },
+    { "blue",         DC_BLUE },
+    { "magenta",      DC_MAGENTA },
+    { "cyan",         DC_CYAN },
+    { "lightgray",    DC_LIGHTGRAY },
+    { "darkgrey",     DC_DARKGRAY },
+    { "lightred",     DC_LIGHTRED },
+    { "lightgreen",   DC_LIGHTGREEN },
+    { "yellow",       DC_YELLOW },
+    { "lightblue",    DC_LIGHTBLUE },
+    { "lightmagenta", DC_LIGHTMAGENTA },
+    { "lightcyan",    DC_LIGHTCYAN },
+    { "white",        DC_WHITE },
+    { NULL,           0 },
+};
+
+const display_colset display_dialog_colset[] =
+{
+    { "",             DDC_NONE },
+    { "black",        DDC_BLACK },
+    { "red",          DDC_RED },
+    { "green",        DDC_GREEN },
+    { "brown",        DDC_BROWN },
+    { "blue",         DDC_BLUE },
+    { "magenta",      DDC_MAGENTA },
+    { "cyan",         DDC_CYAN },
+    { "lightgray",    DDC_LIGHTGRAY },
+    { "darkgrey",     DDC_DARKGRAY },
+    { "lightred",     DDC_LIGHTRED },
+    { "lightgreen",   DDC_LIGHTGREEN },
+    { "yellow",       DDC_YELLOW },
+    { "lightblue",    DDC_LIGHTBLUE },
+    { "lightmagenta", DDC_LIGHTMAGENTA },
+    { "lightcyan",    DDC_LIGHTCYAN },
+    { "white",        DDC_WHITE },
+    { NULL,           0 },
+};
+
 static gboolean display_initialised = FALSE;
 
 /* linked list of opened windows */
 static GList *windows = NULL;
+
+static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
+                      int y, int x, const char *fmt, ...);
+
+static int display_get_colval(const display_colset *colset, const char *name);
 
 static display_window *display_window_new(int x1, int y1, int width,
         int height, const char *title);
@@ -76,11 +131,15 @@ void display_init()
 
     /* these colour pairs are used by dialogs */
     init_pair(DCP_WHITE_RED,    COLOR_WHITE,    COLOR_RED);
-    init_pair(DCP_RED_WHITE,    COLOR_RED,      COLOR_WHITE);
+    init_pair(DCP_RED_RED,      COLOR_RED,      COLOR_RED);
+    init_pair(DCP_GREEN_RED,    COLOR_GREEN,    COLOR_RED);
     init_pair(DCP_BLUE_RED,     COLOR_BLUE,     COLOR_RED);
     init_pair(DCP_YELLOW_RED,   COLOR_YELLOW,   COLOR_RED);
-    init_pair(DCP_BLACK_WHITE,  COLOR_BLACK,    COLOR_WHITE);
+    init_pair(DCP_MAGENTA_RED,  COLOR_MAGENTA,  COLOR_RED);
     init_pair(DCP_CYAN_RED,     COLOR_CYAN,     COLOR_RED);
+    init_pair(DCP_BLACK_RED,    COLOR_BLACK,    COLOR_RED);
+    init_pair(DCP_BLACK_WHITE,  COLOR_BLACK,    COLOR_WHITE);
+    init_pair(DCP_RED_WHITE,    COLOR_RED,      COLOR_WHITE);
 
     /* control special keys in application */
     raw();
@@ -630,21 +689,22 @@ int display_paint_screen(player *p)
         i++;
     }
 
+    /* clear the message area */
+    move(20, 0);
+    clrtobot();
+
     for (y = 20, i = 0; (y < (unsigned)LINES) && (i < text->len); i++, y++)
     {
-        move(y, 0);
-        clrtoeol();
+        /* default color for the line */
+        int def_attrs;
 
         if ((nlarn->log->gtime - 15) < ttime[i])
-            attrs = DC_WHITE;
+            def_attrs = DC_WHITE;
         else
-            attrs = DC_LIGHTGRAY;
+            def_attrs = DC_LIGHTGRAY;
 
-        attron(attrs);
-
-        printw(g_ptr_array_index(text, i));
-
-        attroff(attrs);
+        mvwcprintw(stdscr, def_attrs, display_default_colset,
+                   y, 0, g_ptr_array_index(text, i));
     }
 
     text_destroy(text);
@@ -2339,7 +2399,7 @@ position display_get_new_position(player *p,
                         position tpos = { { a->start_x + x, a->start_y + y, Z(p->pos) } };
 
                         if (target && pos_identical(monster_pos(target), tpos)
-                                && monster_in_sight(target))
+                            && monster_in_sight(target))
                         {
                             /* ray is targeted at a visible monster */
                             mvaddch(a->start_y + y, a->start_x + x, monster_glyph(target));
@@ -2525,7 +2585,7 @@ position display_get_new_position(player *p,
                             break;
 
                         if (player_memory_of(nlarn->p, pos).sobject != LS_NONE
-                                && ls_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch)
+                            && ls_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch)
                         {
                             break;
                         }
@@ -2580,8 +2640,8 @@ position display_get_new_position(player *p,
            invalid position. In wizard mode all positions are allowed,
            otherwise only known positions are allowed. */
         if (RUN == FALSE && !visible && pos_valid(pos)
-                && (!map_pos_passable(game_map(nlarn, Z(pos)), pos)
-                    || !(game_wizardmode(nlarn) || player_memory_of(nlarn->p, pos).type > LT_NONE)))
+            && (!map_pos_passable(game_map(nlarn, Z(pos)), pos)
+                || !(game_wizardmode(nlarn) || player_memory_of(nlarn->p, pos).type > LT_NONE)))
         {
             if (!beep()) flash();
             RUN = TRUE;
@@ -2630,7 +2690,6 @@ int display_show_message(const char *title, const char *message, int indent)
     guint startx, starty;
     display_window *mwin;
     int key;
-    int attrs; /* curses attributes */
 
     GPtrArray *text;
     guint idx;
@@ -2668,15 +2727,12 @@ int display_show_message(const char *title, const char *message, int indent)
 
     do
     {
-        wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-
         for (idx = 0; idx < maxvis; idx++)
         {
-            mvwprintw(mwin->window, idx + 1, 1, " %-*s ",
-                      width - 4, g_ptr_array_index(text, idx + offset));
+            mvwcprintw(mwin->window, DDC_LIGHTGRAY, display_dialog_colset,
+                       idx + 1, 1, " %-*s ", width - 4,
+                       g_ptr_array_index(text, idx + offset));
         }
-
-        wattroff(mwin->window, attrs);
 
         display_window_update_arrow_up(mwin, offset > 0);
         display_window_update_arrow_down(mwin, (offset + maxvis) < text->len);
@@ -2755,7 +2811,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     display_window *win;
     GPtrArray *text;
     guint idx;
-    int height, attrs;
+    int height;
     const guint max_width = COLS - x1 - 1;
     const guint max_height = LINES - y1 - 1;
 
@@ -2780,15 +2836,11 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     win = display_window_new(x1, y1, width, height, title);
 
     /* display message */
-    wattron(win->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-
     for (idx = 0; idx < text->len; idx++)
     {
-        mvwprintw(win->window, idx + 1, 1, " %-*s ",
-                  width - 4, g_ptr_array_index(text, idx));
+        mvwcprintw(win->window, DDC_WHITE, display_dialog_colset, idx + 1, 1,
+                  " %-*s ", width - 4, g_ptr_array_index(text, idx));
     }
-
-    wattroff(win->window, attrs);
 
     /* clean up */
     text_destroy(text);
@@ -2848,8 +2900,101 @@ void display_windows_show()
     }
 }
 
+static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
+                      int y, int x, const char *fmt, ...)
+{
+    va_list argp;
+    gchar *msg;
+    int pos;
+    int count = 0;
+    int attr;
+
+    /* assemble the message */
+    va_start(argp, fmt);
+    msg = g_strdup_vprintf(fmt, argp);
+    va_end(argp);
+
+    /* move to the starting position */
+    wmove(win, y, x);
+
+    /* set the default attribute */
+    wattron(win, attr = defattr);
+
+    for (pos = 0; pos < strlen(msg); pos++)
+    {
+        /* parse tags */
+        if (msg[pos] == '~')
+        {
+            /* position of the tag terminator */
+            int tpos;
+
+            /* the tag value */
+            char *tval = NULL;
+
+            /* find position of tag terminator */
+            for (tpos = pos + 1; msg[tpos] != '~'; tpos++);
+
+            /* extract string between the %s */
+            tval = g_strndup(&msg[pos + 1], tpos - pos - 1);
+
+            /* find color value for the tag content */
+            if (strcmp(tval, "end") == 0)
+            {
+                wattroff(win, attr);
+                wattron(win, attr = defattr);
+            }
+            else
+            {
+                wattroff(win, attr);
+                wattron(win, attr = display_get_colval(colset, tval));
+            }
+
+            /* advance position over the end of the tag */
+            pos = tpos + 1;
+        }
+
+        /* the end of the string might be reached in the tag parser */
+        if (pos >= strlen(msg))
+            break;
+
+        /* print the message character wise */
+        waddch(win, msg[pos]);
+
+        /* increment the count of printed chars */
+        count++;
+    }
+
+    /* reset the default attribute */
+    wattroff(win, defattr);
+
+    /* clean assembled string */
+    g_free(msg);
+
+    return count;
+}
+
+static int display_get_colval(const display_colset *colset, const char *name)
+{
+    int colour = 0;
+    int pos = 0;
+
+    while (colset[pos].name != NULL)
+    {
+        if (strcmp(name, colset[pos].name) == 0)
+        {
+            /* colour found */
+            colour = colset[pos].val;
+            break;
+        }
+
+        pos++;
+    }
+
+    return colour;
+}
+
 static display_window *display_window_new(int x1, int y1, int width,
-        int height, const char *title)
+                                          int height, const char *title)
 {
     int i;
     display_window *dwin;
@@ -3064,7 +3209,7 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
 }
 
 static display_window *display_item_details(guint x1, guint y1, guint width,
-        item *it, player *p, gboolean shop)
+                                            item *it, player *p, gboolean shop)
 {
     /* the popup window created by display_popup */
     display_window *idpop;
