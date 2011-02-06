@@ -205,7 +205,10 @@ int display_paint_screen(player *p)
                 {
                     /* draw stationary objects first */
                     attron(attrs = attr_colour(ls_get_colour(map_sobject_at(map, pos)), has_items));
-                    addch(ls_get_image(map_sobject_at(map, pos)));
+                    if (map_sobject_at(map, pos) == LS_CLOSEDDOOR || map_sobject_at(map, pos) == LS_OPENDOOR)
+                        addch(map_get_door_glyph(map, pos));
+                    else
+                        addch(ls_get_image(map_sobject_at(map, pos)));
                     attroff(attrs);
                 }
                 else if (has_items)

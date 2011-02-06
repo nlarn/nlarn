@@ -89,7 +89,7 @@ const map_sobject_data map_sobjects[LS_MAX] =
     { LS_STATUE,        '|',  DC_LIGHTGRAY, "a great marble statue",               1, 1, },
     { LS_URN,           'u',  DC_YELLOW,    "a golden urn",                        1, 1, },
     { LS_MIRROR,        '|',  DC_WHITE,     "a mirror",                            1, 1, },
-    { LS_OPENDOOR,      '-',  DC_BROWN,     "an open door",                        1, 1, },
+    { LS_OPENDOOR,      '/',  DC_BROWN,     "an open door",                        1, 1, },
     { LS_CLOSEDDOOR,    '+',  DC_BROWN,     "a closed door",                       0, 0, },
     { LS_DNGN_ENTRANCE, 'O',  DC_LIGHTGRAY, "the dungeon entrance",                1, 1, },
     { LS_DNGN_EXIT,     'O',  DC_WHITE,     "the exit to town",                    1, 1, },
@@ -1188,6 +1188,70 @@ void map_timer(map *l)
             } /* if map_timer_at */
         } /* for X(pos) */
     } /* for Y(pos) */
+}
+
+char map_get_door_glyph(map *m, position pos)
+{
+    position n,e,s,w;
+
+    assert(m != NULL && pos_valid(pos));
+
+    n = pos_move(pos, GD_NORTH);
+    e = pos_move(pos, GD_EAST);
+    s = pos_move(pos, GD_SOUTH);
+    w = pos_move(pos, GD_WEST);
+
+    /* some predefined maps have double doors, thus it is
+       necessary to check for adjacent doors */
+
+    if (map_sobject_at(m, pos) == LS_CLOSEDDOOR)
+    {
+        /* #-# */
+        if (((map_tiletype_at(m, e) == LT_WALL)
+             || (map_sobject_at(m, e) == LS_CLOSEDDOOR)
+             || (map_sobject_at(m, e) == LS_OPENDOOR))
+             && ((map_tiletype_at(m, w) == LT_WALL)
+             || (map_sobject_at(m, w) == LS_CLOSEDDOOR)
+             || (map_sobject_at(m, w) == LS_OPENDOOR)))
+             return '-';
+
+        /* #
+         * |
+         * # */
+        if (((map_tiletype_at(m, n) == LT_WALL)
+             || (map_sobject_at(m, n) == LS_CLOSEDDOOR)
+             || (map_sobject_at(m, n) == LS_OPENDOOR))
+             && ((map_tiletype_at(m, s) == LT_WALL)
+             || (map_sobject_at(m, s) == LS_CLOSEDDOOR)
+             || (map_sobject_at(m, s) == LS_OPENDOOR)))
+            return '|';
+
+    }
+    else
+    {
+    /* #-# */
+    if ((map_sobject_at(m, e) == LS_CLOSEDDOOR)
+         || (map_sobject_at(m, e) == LS_OPENDOOR))
+         return '/';
+
+    if ((map_sobject_at(m, w) == LS_CLOSEDDOOR)
+         || (map_sobject_at(m, w) == LS_OPENDOOR))
+         return '\\';
+
+    /* #
+     * |
+     * # */
+    if ((map_sobject_at(m, s) == LS_CLOSEDDOOR)
+         || (map_sobject_at(m, s) == LS_OPENDOOR))
+        return '\\';
+
+    if ((map_sobject_at(m, n) == LS_CLOSEDDOOR)
+         || (map_sobject_at(m, n) == LS_OPENDOOR))
+        return '/';
+    }
+
+    /* no idea. */
+    return ls_get_image(map_sobject_at(m, pos));
 }
 
 static int map_fill_with_stationary_objects(map *maze)

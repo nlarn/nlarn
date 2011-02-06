@@ -242,6 +242,16 @@ gboolean map_is_exit_at(map *m, position pos);
  */
 void map_timer(map *l);
 
+/**
+ * @brief Get the glyph for a door.
+ *
+ * @param The map.
+ * @param The position of the door.
+ *
+ * @return The glyph for the door.
+ */
+char map_get_door_glyph(map *m, position pos);
+
 /* external vars */
 
 extern const map_tile_data map_tiles[LT_MAX];
