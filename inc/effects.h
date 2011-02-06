@@ -58,12 +58,12 @@ typedef enum _effect_t
     ET_INVULNERABILITY,         /* invulnerability */
     ET_INFRAVISION,             /* see invisible monsters */
     ET_ENLIGHTENMENT,           /* enlightenment */
+    ET_REFLECTION,              /* reflection */
 
     ET_DETECT_MONSTER,          /* sense presence of monsters */
     ET_HOLD_MONSTER,            /* monsters can't flee */
     ET_SCARED,                  /* monsters turn to flee */
     ET_CHARM_MONSTER,           /* make monsters peaceful */
-    ET_AGGRAVATE_MONSTER,       /* aggravate monsters */
 
     /* healing */
     ET_INC_HP,                  /* heal */
@@ -97,6 +97,7 @@ typedef enum _effect_t
     ET_DEC_LEVEL,               /* lose level */
     ET_DEC_EXP,                 /* lose experience */
 
+    ET_AGGRAVATE_MONSTER,       /* aggravate monsters */
     ET_SLEEP,                   /* no move for a certain amount of time */
     ET_DIZZINESS,               /* decrease all primary attributes */
     ET_SICKNESS,                /* decreased damage */
@@ -110,7 +111,6 @@ typedef enum _effect_t
     ET_SLOWNESS,                /* reduced speed */
     ET_BURDENED,                /* overloaded */
     ET_OVERSTRAINED,            /* extremely overloaded */
-    ET_REFLECTION,              /* reflection */
     ET_TRAPPED,                 /* trapped in a pit */
 
     ET_MAX                      /* last effect known */

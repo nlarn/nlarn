@@ -614,9 +614,11 @@ int display_paint_screen(player *p)
     if (p->effects->len > 0)
     {
         const guint available_space = COLS - MAP_MAX_X - 4;
+        char **efdescs = strv_new();
 
         effect *e;
-        int pos = 0;
+
+        /* collect effect descriptions */
         for (i = 0; i < p->effects->len; i++)
         {
             e = game_effect_get(nlarn, g_ptr_array_index(p->effects, i));
@@ -635,17 +637,33 @@ int display_paint_screen(player *p)
             if ((e->type == ET_WALL_WALK || e->type == ET_LEVITATION)
                     && e->turns < 6)
             {
-                attron(attrs = DC_LIGHTRED);
+                /* fading effects */
+                strv_append_unique(&efdescs, g_strdup_printf("~lightred~%s~end~", desc));
+            }
+            else if (e->type > ET_LEVITATION)
+            {
+                /* negative effects */
+                strv_append_unique(&efdescs, g_strdup_printf("~lightmagenta~%s~end~", desc));
+
             }
             else
-                attron(attrs = DC_LIGHTCYAN);
+            {
+                /* other effects */
+                strv_append_unique(&efdescs, g_strdup(desc));
+            }
 
-            mvprintw(11 + pos, MAP_MAX_X + 3, desc);
-            attroff(attrs);
             g_free(desc);
-
-            pos++;
         }
+
+        /* display effect descriptions */
+        for (i = 0; i < g_strv_length(efdescs); i++)
+        {
+            mvwcprintw(stdscr, DC_LIGHTCYAN, display_default_colset, 11 + i,
+                       MAP_MAX_X + 3, efdescs[i]);
+
+        }
+
+        g_strfreev(efdescs);
     }
 
     /* *** MESSAGES *** */
@@ -2948,6 +2966,9 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
                 wattroff(win, attr);
                 wattron(win, attr = display_get_colval(colset, tval));
             }
+
+            /* free temporary memory */
+            g_free(tval);
 
             /* advance position over the end of the tag */
             pos = tpos + 1;

@@ -221,6 +221,12 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
+        ET_REFLECTION, "ET_REFLECTION", 400, TRUE, "reflection",
+        NULL, NULL, NULL, NULL,
+        TRUE, FALSE, TRUE, FALSE
+    },
+
+    {
         ET_DETECT_MONSTER, "ET_DETECT_MONSTER", 10, TRUE, NULL,
         "You sense the presence of monsters.",
         NULL, NULL, NULL,
@@ -248,13 +254,6 @@ static const effect_data effects[ET_MAX] =
         NULL, NULL,
         "The %s is awestruck at your magnificence!",
         "The %s is no longer impressed.",
-        TRUE, FALSE, TRUE, FALSE
-    },
-
-    {
-        ET_AGGRAVATE_MONSTER, "ET_AGGRAVATE_MONSTER", 500, TRUE, "aggravating",
-        "You sense rising anger.",
-        NULL, NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
     },
 
@@ -434,6 +433,13 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
+        ET_AGGRAVATE_MONSTER, "ET_AGGRAVATE_MONSTER", 500, TRUE, "aggravating",
+        "You sense rising anger.",
+        NULL, NULL, NULL,
+        TRUE, FALSE, TRUE, FALSE
+    },
+
+    {
         ET_SLEEP, "ET_SLEEP", 25, TRUE, "sleeping",
         "You fall asleep.",
         "You wake up.",
@@ -539,12 +545,6 @@ static const effect_data effects[ET_MAX] =
         "You are no longer overloaded.",
         NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
-    },
-
-    {
-        ET_REFLECTION, "ET_REFLECTION", 400, TRUE, "reflection",
-        NULL, NULL, NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
     },
 
     {
