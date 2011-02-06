@@ -122,7 +122,7 @@ item *item_new(item_t item_type, int item_id)
         if (loops == item_max_id(IT_AMULET))
         {
             /* remove the failed attempt */
-            g_free(nitem);
+            item_destroy(nitem);
 
             /* create something that is not a container */
             do

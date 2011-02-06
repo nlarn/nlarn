@@ -39,6 +39,7 @@ void container_open(player *p, inventory **inv, item *container)
     gchar container_desc[61] = { 0 };
     GPtrArray *callbacks;
     display_inv_callback *callback;
+    gboolean container_provided = (container == NULL);
 
     assert (p != NULL);
 
@@ -74,6 +75,10 @@ void container_open(player *p, inventory **inv, item *container)
 
     if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
         return; /* interrupted */
+
+    /* log the event */
+    if (!container_provided)
+        log_add_entry(nlarn->log, "You carefully open the %s.", container_desc);
 
     /* check if the container is trapped */
     if (container->cursed)
