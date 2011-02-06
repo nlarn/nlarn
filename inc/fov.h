@@ -74,11 +74,13 @@ void fov_reset(fov *fov);
   * @param pointer to a fov structure
   * @param the center of the fov
   */
-monster *fov_get_closest_monster(fov *fov, position center);
+monster *fov_get_closest_monster(fov *fov, position center, gboolean infravision);
 
 /** @brief destroy fov data
   *
-  * @param pointer to a fov structure.
+  * @param A pointer to a fov structure.
+  * @param The starting position.
+  * @param True if the mobile looking for monsters has infravision.
   */
 void fov_free(fov *fov);
 

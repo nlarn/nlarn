@@ -112,7 +112,7 @@ void fov_reset(fov *fov)
     memset(fov->fov_data, 0, fov->size_x * fov->size_y * sizeof(int));
 }
 
-monster *fov_get_closest_monster(fov *fov, position center)
+monster *fov_get_closest_monster(fov *fov, position center, gboolean infravision)
 {
     position pos;
     monster *closest_monster = NULL;
@@ -134,6 +134,14 @@ monster *fov_get_closest_monster(fov *fov, position center)
 
             /* check if there is a monster at that position */
             if (!(m = map_get_monster_at(map, pos)))
+                continue;
+
+            /* check if the monster is an unknown mimic */
+            if (monster_unknown(m))
+                continue;
+
+            /* check for invisible monsters */
+            if (monster_flags(m, MF_INVISIBLE) && !infravision)
                 continue;
 
             /* found a visible monster -> add it to the list */
