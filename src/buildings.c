@@ -85,7 +85,7 @@ int building_bank(player *p)
     GString *text;
 
     const char msg_title[] = "First National Bank of Larn";
-    const char msg_greet[] = "Welcome to the First National Bank of Larn.\n\n";
+    const char msg_greet[] = "`white`Welcome to the First National Bank of Larn.`end`\n\n";
 
     const char msg_branch[] = "Welcome to the 5th level branch office of the " \
                               "First National Bank of Larn.\n\n";
@@ -130,15 +130,15 @@ int building_bank(player *p)
     g_string_append(text, "Your wish? ");
 
     if (player_get_gold(p) > 0)
-        g_string_append(text, "d)eposit ");
+        g_string_append(text, "`lightgreen`d`end`)eposit ");
 
     if (p->bank_account > 0)
-        g_string_append(text, "w)ithdraw ");
+        g_string_append(text, "`lightgreen`w`end`)ithdraw ");
 
     /* if player has gems, enable selling them */
     if (inv_length_filtered(p->inventory, item_filter_gems))
     {
-        g_string_append(text, "s)ell a gem");
+        g_string_append(text, "`lightgreen`s`end`)ell a gem");
 
         /* define callback functions */
         callbacks = g_ptr_array_new();
@@ -239,7 +239,7 @@ int building_dndstore(player *p)
 {
     int turns = 2;
     const char title[] = "DND store";
-    const char msg_welcome[] = "Welcome to the Nlarn Thrift Shoppe.\n" \
+    const char msg_welcome[] = "`white`Welcome to the Nlarn Thrift Shoppe.`end`\n\n" \
                                "We stock many items explorers find useful in " \
                                "their adventures. Feel free to browse to your " \
                                "heart's content. Also be advised that if you " \
@@ -312,7 +312,7 @@ int building_home(player *p)
 
     const char title[] = "Your home";
 
-    const char msg_home[] = "Welcome home, %s.\n\nLatest word from the doctor " \
+    const char msg_home[] = "`white`Welcome home, %s.`end`\n\nLatest word from the doctor " \
                             "is not good. The diagnosis is confirmed as " \
                             "dianthroritis. He guesses that your daughter " \
                             "has only %d mobuls left in this world.  It's " \
@@ -321,7 +321,7 @@ int building_home(player *p)
                             "dianthroritis.  It is rumored that only deep in " \
                             "the depths of the caves can this potion be found.\n";
 
-    const char msg_found[] = "Congratulations. You found the potion of cure " \
+    const char msg_found[] = "`white`Congratulations!`end` You found the potion of cure " \
                              "dianthroritis! Frankly, No one thought you " \
                              "could do it. Boy! Did you surprise them!\n\n";
 
@@ -397,10 +397,10 @@ int building_home(player *p)
             g_string_append_printf(text, "\n\nYou may\n");
 
             if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-                g_string_append_printf(text, "  d) Deposit something here\n");
+                g_string_append_printf(text, "  `lightgreen`d`end`) Deposit something here\n");
 
             if (inv_length(nlarn->player_home) > 0)
-                g_string_append_printf(text, "  t) Take something with you\n");
+                g_string_append_printf(text, "  `lightgreen`t`end`) Take something with you\n");
 
             g_string_append_c(text, '\n');
         }
@@ -466,7 +466,7 @@ int building_lrs(player *p)
     int turns = 2;
     GString *text;
 
-    const char msg_greet[] = "Welcome to the Larn Revenue Service district office.\n\n";
+    const char msg_greet[] = "`white`Welcome to the Larn Revenue Service district office.`end`\n\n";
     const char msg_taxes[] = "You presently owe %d gp in taxes.";
     const char msg_notax[] = "You do not owe us any taxes.";
 
@@ -623,9 +623,9 @@ int building_school(player *p)
     guint idx;
     int selection;
 
-    const char msg_greet[] = "The College of Larn offers the exciting " \
-                             "opportunity of higher education to all " \
-                             "inhabitants of the caves.\n\n" \
+    const char msg_greet[] = "`white`Welcome to the College of Larn!`end`\n\n" \
+                             "We offer the exciting opportunity of higher " \
+                             "education to all inhabitants of the caves. " \
                              "Here is a list of the class schedule:\n\n";
 
     const char msg_price[] = "\nAll courses cost %d gold pieces.";
@@ -656,7 +656,7 @@ int building_school(player *p)
     {
         if (!p->school_courses_taken[idx])
         {
-            g_string_append_printf(text, "  %c) %-30s (%2d mobuls)\n",
+            g_string_append_printf(text, "  `lightgreen`%c`end`) %-30s (%2d mobuls)\n",
                                    idx + 'a', school_courses[idx].description,
                                    school_courses[idx].course_time);
         }
@@ -668,7 +668,7 @@ int building_school(player *p)
 
     g_string_append_printf(text, msg_price, price);
     g_string_append_printf(text, "\n\nAlternatively,\n"
-                           "  %c) %-30s (%2d mobuls)\n\n",
+                           "  `lightgreen`%c`end`) %-30s (%2d mobuls)\n\n",
                            idx + 'a', school_courses[idx].description,
                            school_courses[idx].course_time);
 
@@ -768,7 +768,7 @@ int building_tradepost(player *p)
 
     const char title[] = "Trade Post";
 
-    const char msg_welcome[] = "Welcome to the Nlarn Trading Post.\n\nWe buy " \
+    const char msg_welcome[] = "`white`Welcome to the Nlarn Trading Post.`end`\n\nWe buy " \
                                "items that explorers no longer find useful.\n" \
                                "Since the condition of the items you bring in " \
                                "is not certain, and we incur great expense in " \
@@ -850,58 +850,112 @@ int building_tradepost(player *p)
 int building_monastery(struct player *p)
 {
     const char title[] = "The Monastery of Larn";
-    const char msg_welcome[] = "Welcome to the Monastery of Larn!\n\n" \
+    const char msg_welcome[] = "`white`Welcome to the Monastery of Larn!`end`\n\n" \
                                "We are here to help you when you are in need of " \
                                "care and offer a fine selection of items that might "
                                "be useful for your quests.\n\n" \
                                "Here you may\n\n" \
-                               "  a) recieve healing\n" \
-                               "  b) ask for curse removal\n" \
-                               "  c) buy something\n\n";
+                               "  `lightgreen`a`end`) buy something\n" \
+                               "  `lightgreen`b`end`) ask for curse removal\n" \
+                               "  `lightgreen`c`end`) recieve healing\n";
+
     const char ayfwt[] = "Are you fine with that?";
 
+    GString *msg = g_string_new(msg_welcome);
     int turns = 2;
     int selection;
+    int disease_count = 0;
 
-    selection = display_show_message(title, msg_welcome, 0);
+    /* buffer to store all diseases the player currently suffers from */
+    struct
+    {
+        effect_t et;
+        char *desc;
+    } curable_diseases[10] = { { 0 } };
+
+    /* fill the list of curable diseases */
+    if (player_effect(p, ET_POISON))
+    {
+        curable_diseases[disease_count].et = ET_POISON;
+        curable_diseases[disease_count++].desc = "poison";
+    }
+
+    if (player_effect(p, ET_BLINDNESS))
+    {
+        curable_diseases[disease_count].et = ET_BLINDNESS;
+        curable_diseases[disease_count++].desc = "blindness";
+    }
+
+    if (player_effect(p, ET_SICKNESS))
+    {
+        curable_diseases[disease_count].et = ET_SICKNESS;
+        curable_diseases[disease_count++].desc = "sickness";
+    }
+
+    if (player_effect(p, ET_CLUMSINESS))
+    {
+        curable_diseases[disease_count].et = ET_CLUMSINESS;
+        curable_diseases[disease_count++].desc = "clumsiness";
+    }
+
+    if (player_effect(p, ET_DIZZINESS))
+    {
+        curable_diseases[disease_count].et = ET_DIZZINESS;
+        curable_diseases[disease_count++].desc = "dizziness";
+    }
+
+    if (player_effect(p, ET_DEC_CON))
+    {
+        curable_diseases[disease_count].et = ET_DEC_CON;
+        curable_diseases[disease_count++].desc = "incapacitation";
+    }
+
+    if (player_effect(p, ET_DEC_DEX))
+    {
+        curable_diseases[disease_count].et = ET_DEC_DEX;
+        curable_diseases[disease_count++].desc = "awkwardness";
+    }
+
+    if (player_effect(p, ET_DEC_INT))
+    {
+        curable_diseases[disease_count].et = ET_DEC_INT;
+        curable_diseases[disease_count++].desc = "mental deficiency";
+    }
+
+    if (player_effect(p, ET_DEC_STR))
+    {
+        curable_diseases[disease_count].et = ET_DEC_STR;
+        curable_diseases[disease_count++].desc = "weakness";
+    }
+
+    if (player_effect(p, ET_DEC_WIS))
+    {
+        curable_diseases[disease_count].et = ET_DEC_WIS;
+        curable_diseases[disease_count++].desc = "ignorance";
+    }
+
+    /* add found diseases to the menu */
+    for (selection = 0; selection < disease_count; selection++)
+    {
+        g_string_append_printf(msg, "  `lightgreen`%c`end`) heal from %s\n",
+                               'd' + selection, curable_diseases[selection].desc);
+    }
+
+    /* an empty line for the eye */
+    g_string_append_c(msg, '\n');
+
+    /* offer the choices to the player */
+    selection = display_show_message(title, msg->str, 0);
+
+    /* get rid of the temporary string */
+    g_string_free(msg, TRUE);
 
     switch (selection)
     {
-        /* healing */
+    /* shop items */
     case 'a':
-    {
-        int choice;
-        char *question;
-        /* the price for healing depends on the severity of the injury */
-        int price = (player_get_hp_max(p) - p->hp) * (game_difficulty(nlarn) + 1);
-
-        if (p->hp == player_get_hp_max(p))
-        {
-            log_add_entry(nlarn->log, "You are not in need of healing.");
-            break;
-        }
-
-        question = g_strdup_printf("For healing you, we ask that you "
-                                   "donate %d gold for our monastery. %s",
-                                   price, ayfwt);
-        choice = display_get_yesno(question, NULL, NULL);
-        g_free(question);
-
-        if (choice)
-        {
-            /* player chose to be healed */
-            player_effect_add(p, effect_new(ET_MAX_HP));
-            building_player_charge(p, price);
-            p->stats.gold_spent_donation += price;
-
-        }
-        else
-        {
-            /* no, thanks */
-            log_add_entry(nlarn->log, "You chose not to be healed.");
-        }
-    }
-    break;
+        building_shop(p, &nlarn->monastery_stock, title);
+        break;
 
     /* remove curse */
     case 'b':
@@ -948,14 +1002,75 @@ int building_monastery(struct player *p)
     }
     break;
 
-    /* shop items */
+    /* healing */
     case 'c':
-        building_shop(p, &nlarn->monastery_stock, title);
+    {
+        int choice;
+        char *question;
+        /* the price for healing depends on the severity of the injury */
+        int price = (player_get_hp_max(p) - p->hp) * (game_difficulty(nlarn) + 1);
 
-        break;
+        if (p->hp == player_get_hp_max(p))
+        {
+            log_add_entry(nlarn->log, "You are not in need of healing.");
+            break;
+        }
+
+        question = g_strdup_printf("For healing you, we ask that you "
+                                   "donate %d gold for our monastery. %s",
+                                   price, ayfwt);
+        choice = display_get_yesno(question, NULL, NULL);
+        g_free(question);
+
+        if (choice)
+        {
+            /* player chose to be healed */
+            player_effect_add(p, effect_new(ET_MAX_HP));
+            building_player_charge(p, price);
+            p->stats.gold_spent_donation += price;
+
+        }
+        else
+        {
+            /* no, thanks */
+            log_add_entry(nlarn->log, "You chose not to be healed.");
+        }
+    }
+    break;
 
     default:
-        /* invalid choice */
+        selection -= 'd';
+        /* healing of varous negative effects */
+        if (selection >= 0 && selection < disease_count)
+        {
+            int choice;
+            char *question;
+            effect *e = player_effect_get(p, curable_diseases[selection].et);
+            int price = e->turns * (game_difficulty(nlarn) + 1);
+
+            question = g_strdup_printf("For healing you from %s, we ask that you "
+                                       "donate %d gold for our monastery. %s",
+                                       curable_diseases[selection].desc, price, ayfwt);
+
+            choice = display_get_yesno(question, NULL, NULL);
+            g_free(question);
+
+            if (choice)
+            {
+                /* player chose to be healed */
+                player_effect_del(p, e);
+                building_player_charge(p, price);
+                p->stats.gold_spent_donation += price;
+
+            }
+            else
+            {
+                /* no, thanks */
+                log_add_entry(nlarn->log, "You chose not to be cured from %s.",
+                              curable_diseases[selection].desc);
+            }
+
+        }
         break;
     }
 
