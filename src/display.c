@@ -638,12 +638,12 @@ int display_paint_screen(player *p)
                     && e->turns < 6)
             {
                 /* fading effects */
-                strv_append_unique(&efdescs, g_strdup_printf("~lightred~%s~end~", desc));
+                strv_append_unique(&efdescs, g_strdup_printf("`lightred`%s`end`", desc));
             }
             else if (e->type > ET_LEVITATION)
             {
                 /* negative effects */
-                strv_append_unique(&efdescs, g_strdup_printf("~lightmagenta~%s~end~", desc));
+                strv_append_unique(&efdescs, g_strdup_printf("`lightmagenta`%s`end`", desc));
 
             }
             else
@@ -2941,7 +2941,7 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
     for (pos = 0; pos < strlen(msg); pos++)
     {
         /* parse tags */
-        if (msg[pos] == '~')
+        if (msg[pos] == '`')
         {
             /* position of the tag terminator */
             int tpos;
@@ -2950,7 +2950,7 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
             char *tval = NULL;
 
             /* find position of tag terminator */
-            for (tpos = pos + 1; msg[tpos] != '~'; tpos++);
+            for (tpos = pos + 1; msg[tpos] != '`'; tpos++);
 
             /* extract string between the %s */
             tval = g_strndup(&msg[pos + 1], tpos - pos - 1);

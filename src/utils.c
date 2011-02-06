@@ -348,7 +348,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         while (llen <= width)
         {
             /* toggle the flag if the current character is the tag start / stop symbol */
-            if (str[spos + cpos] == '~')
+            if (str[spos + cpos] == '`')
             {
                 in_tag = !in_tag;
             }
@@ -367,7 +367,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
             }
 
             /* increase the string length if not inside or at the end of a tag */
-            if (!in_tag && (str[spos + cpos] != '~'))
+            if (!in_tag && (str[spos + cpos] != '`'))
                 llen++;
 
             /* move the current working position */

@@ -1,4 +1,4 @@
-~yellow~Movement~end~            ~yellow~Running~end~
+`yellow`Movement`end`            `yellow`Running`end`
 
  7 8 9  y k u        Y K U
   \|/    \|/          \|/
@@ -7,89 +7,89 @@
  1 2 3  b j n        B J N
 
 You can also use the number pad with num lock off.
-Running means moving into one direction until interrupted. ~lightgreen~g~end~ or ~lightgreen~/~end~, followed by a direction key, will similarly make your run.
+Running means moving into one direction until interrupted. `lightgreen`g`end` or `lightgreen`/`end`, followed by a direction key, will similarly make your run.
 
 
-~yellow~Autotravel~end~
+`yellow`Autotravel`end`
 
-~lightgreen~C~end~  continue travelling  
-~lightgreen~T~end~  travel somewhere on the level
+`lightgreen`C`end`  continue travelling  
+`lightgreen`T`end`  travel somewhere on the level
 
 You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. _ for altar).
 
 
-~yellow~Other actions~end~
+`yellow`Other actions`end`
 
-~lightgreen~A~end~  desecrate an altar
-~lightgreen~c~end~  close a door
-~lightgreen~d~end~  drop domething
-~lightgreen~D~end~  list discovered landmarks
-~lightgreen~e~end~  equip an item
-~lightgreen~g~end~  move until something interesting is found
-~lightgreen~i~end~  open the inventory window
-~lightgreen~m~end~  work magic (cast a spell)
-~lightgreen~o~end~  open a door or chest
-~lightgreen~p~end~  pray at an altar
-~lightgreen~P~end~  give tax status
-~lightgreen~q~end~  drink a potion or at a fountain
-~lightgreen~Q~end~  quit the game (alternate key: ~lightgreen~F12~end~)
-~lightgreen~r~end~  read something
-~lightgreen~R~end~  remove gems from throne
-~lightgreen~s~end~  sit on a throne
-~lightgreen~S~end~  save the game
-~lightgreen~t~end~  take an item off
-~lightgreen~v~end~  print program version
-~lightgreen~w~end~  wait/rest up to one mobul or until healed
-~lightgreen~W~end~  wash yourself at a fountain
+`lightgreen`A`end`  desecrate an altar
+`lightgreen`c`end`  close a door
+`lightgreen`d`end`  drop domething
+`lightgreen`D`end`  list discovered landmarks
+`lightgreen`e`end`  equip an item
+`lightgreen`g`end`  move until something interesting is found
+`lightgreen`i`end`  open the inventory window
+`lightgreen`m`end`  work magic (cast a spell)
+`lightgreen`o`end`  open a door or chest
+`lightgreen`p`end`  pray at an altar
+`lightgreen`P`end`  give tax status
+`lightgreen`q`end`  drink a potion or at a fountain
+`lightgreen`Q`end`  quit the game (alternate key: `lightgreen`F12`end`)
+`lightgreen`r`end`  read something
+`lightgreen`R`end`  remove gems from throne
+`lightgreen`s`end`  sit on a throne
+`lightgreen`S`end`  save the game
+`lightgreen`t`end`  take an item off
+`lightgreen`v`end`  print program version
+`lightgreen`w`end`  wait/rest up to one mobul or until healed
+`lightgreen`W`end`  wash yourself at a fountain
 
-~lightgreen~<~end~  climb up stairs/volcanic shaft or enter a building
-~lightgreen~>~end~  climb down stairs/volcanic shaft
-~lightgreen~,~end~  pick up item
-~lightgreen~$~end~  show bank account balance
-~lightgreen~:~end~  look at the location you are standing on
-~lightgreen~;~end~  look at another location
-~lightgreen~.~end~  rest one turn (alternate key: ~lightgreen~5~end~)
-~lightgreen~\~end~  show list of identified objects
-~lightgreen~?~end~  this help screen (alternate key: ~lightgreen~F1~end~)
-~lightgreen~@~end~  toggle auto-pickup settings
-
-
-~yellow~Control Keys~end~
-
-~lightgreen~^L~end~ redraw the screen
-~lightgreen~^R~end~ recall message history
-~lightgreen~^W~end~ activate wizard mode
+`lightgreen`<`end`  climb up stairs/volcanic shaft or enter a building
+`lightgreen`>`end`  climb down stairs/volcanic shaft
+`lightgreen`,`end`  pick up item
+`lightgreen`$`end`  show bank account balance
+`lightgreen`:`end`  look at the location you are standing on
+`lightgreen`;`end`  look at another location
+`lightgreen`.`end`  rest one turn (alternate key: `lightgreen`5`end`)
+`lightgreen`\`end`  show list of identified objects
+`lightgreen`?`end`  this help screen (alternate key: `lightgreen`F1`end`)
+`lightgreen`@`end`  toggle auto-pickup settings
 
 
-~yellow~The Inventory~end~
+`yellow`Control Keys`end`
+
+`lightgreen`^L`end` redraw the screen
+`lightgreen`^R`end` recall message history
+`lightgreen`^W`end` activate wizard mode
+
+
+`yellow`The Inventory`end`
 
 When browsing through the inventory, valid actions for the selected item are shown at the bottom of the window. The key used to invoke the action is displayed in braces.
 
 
-~yellow~Dialog Windows~end~
+`yellow`Dialog Windows`end`
 
-Close a dialog window with ~lightgreen~enter~end~/~lightgreen~space~end~ to select an option or press ~lightgreen~ESC~end~ to close the window without making a choice.
+Close a dialog window with `lightgreen`enter`end`/`lightgreen`space`end` to select an option or press `lightgreen`ESC`end` to close the window without making a choice.
 You can move dialogs with Ctrl and the cursor keys.
 
 
-~yellow~Spell Casting~end~
+`yellow`Spell Casting`end`
 
-When opening the spell casting window by pressing (~lightgreen~m~end~) you'll get a list of spells known by your character.
+When opening the spell casting window by pressing (`lightgreen`m`end`) you'll get a list of spells known by your character.
 
-~white~The first column~end~ shows the mnemonic of the selected spell, which can be used to jump to a spell by typing the letters.
-~white~The second column~end~ shows the spell's name.
-~white~The third column~end~ shows the level of the spell, which is used to determine the MP usage of that spell.
-~white~The forth column~end~ shows the character's knowledge level of that spell. The higher the knowledge level is, the more powerful is the effect of the spell.
+`white`The first column`end` shows the mnemonic of the selected spell, which can be used to jump to a spell by typing the letters.
+`white`The second column`end` shows the spell's name.
+`white`The third column`end` shows the level of the spell, which is used to determine the MP usage of that spell.
+`white`The forth column`end` shows the character's knowledge level of that spell. The higher the knowledge level is, the more powerful is the effect of the spell.
 
 
-~yellow~Wizard Mode Actions~end~
+`yellow`Wizard Mode Actions`end`
 
-~lightgreen~+~end~     teleport down one level
-~lightgreen~-~end~     teleport up one level
-~lightgreen~^T~end~    teleport within a level
-~lightgreen~^up~end~   raise experience level (also x)
-~lightgreen~^down~end~ lower experience level
-~lightgreen~*~end~     add 1000 gp to bank account
-~lightgreen~&~end~     heal yourself
-~lightgreen~^F~end~    combat simulation
-~lightgreen~^V~end~    toggle visibility of entire map
+`lightgreen`+`end`     teleport down one level
+`lightgreen`-`end`     teleport up one level
+`lightgreen`^T`end`    teleport within a level
+`lightgreen`^up`end`   raise experience level (also x)
+`lightgreen`^down`end` lower experience level
+`lightgreen`*`end`     add 1000 gp to bank account
+`lightgreen`&`end`     heal yourself
+`lightgreen`^F`end`    combat simulation
+`lightgreen`^V`end`    toggle visibility of entire map
