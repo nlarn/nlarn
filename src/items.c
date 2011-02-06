@@ -98,7 +98,10 @@ item *item_new(item_t item_type, int item_id)
         nitem->bonus_known = TRUE;
     }
 
-    /* special item type specific attributes */
+    /* register item with game */
+    nitem->oid = game_item_register(nlarn, nitem);
+
+    /* add special item type specific attributes */
     switch (item_type)
     {
     case IT_AMULET:
@@ -212,9 +215,6 @@ item *item_new(item_t item_type, int item_id)
         /* nop */
         break;
     }
-
-    /* register item with game */
-    nitem->oid = game_item_register(nlarn, nitem);
 
     return nitem;
 }
@@ -1044,7 +1044,7 @@ int item_colour(item *it)
 
 void item_effect_add(item *it, effect *e)
 {
-    assert (it != NULL && e != NULL);
+    assert (it != NULL && it->oid != NULL && e != NULL);
 
     /* create list if not existant */
     if (!it->effects)
