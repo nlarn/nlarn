@@ -29,7 +29,6 @@
 #include "items.h"
 #include "lua_wrappers.h"
 #include "position.h"
-#include "traps.h"
 #include "utils.h"
 
 /* forward declarations */
@@ -204,7 +203,6 @@ void monster_die(monster *m, struct player *p);
 void monster_level_enter(monster *m, struct map *l);
 void monster_move(gpointer *oid, monster *m, struct game *g);
 
-monster *monster_trap_trigger(monster *m);
 void monster_polymorph(monster *m);
 
 /**

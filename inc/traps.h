@@ -19,6 +19,8 @@
 #ifndef __TRAPS_H_
 #define __TRAPS_H_
 
+#include "monsters.h"
+
 typedef enum trap_types
 {
     TT_NONE,
@@ -61,6 +63,14 @@ struct player;
  * @return number of turns this move took
  */
 int player_trap_trigger(struct player *p, trap_t trap, int force);
+
+/**
+ * A monster stepped on a trap.
+ *
+ * @param The monster.
+ * @return the monster, or NULL if the monster died.
+ */
+monster *monster_trap_trigger(monster *m);
 
 /* macros */
 #define trap_effect(trap) (traps[(trap)].effect_t)

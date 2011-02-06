@@ -246,3 +246,90 @@ int player_trap_trigger(player *p, trap_t trap, int force)
 
     return time;
 }
+
+monster *monster_trap_trigger(monster *m)
+{
+    /* original and new position of the monster */
+    position opos, npos;
+
+    /* the trap */
+    trap_t trap;
+
+    /* effect monster might have gained during the move */
+    effect *eff = NULL;
+
+    assert (m != NULL);
+
+    trap = map_trap_at(monster_map(m), monster_pos(m));
+
+    /* flying monsters are only affected by sleeping gas traps */
+    if (monster_flags(m, MF_FLY) && (trap != TT_SLEEPGAS))
+    {
+        return m;
+    }
+
+    /* return if the monster has not triggered the trap */
+    if (!chance(trap_chance(trap)))
+    {
+        return m;
+    }
+
+    opos = monster_pos(m);
+
+    if (monster_in_sight(m))
+    {
+        log_add_entry(nlarn->log, trap_m_message(trap), monster_name(m));
+
+        /* set player's knowledge of trap */
+        player_memory_of(nlarn->p, opos).trap = trap;
+    }
+
+    /* monster triggered the trap */
+    switch (trap)
+    {
+    case TT_TRAPDOOR:
+        monster_level_enter(m, game_map(nlarn, Z(monster_pos(m)) + 1));
+        break;
+
+    case TT_TELEPORT:
+        npos = map_find_space(game_map(nlarn, Z(monster_pos(m))), LE_MONSTER, FALSE);
+        monster_pos_set(m, monster_map(m), npos);
+        break;
+
+    case TT_SPIKEDPIT:
+    {
+        const trap_t trap2 = TT_PIT;
+
+        if (trap_effect(trap2) && chance(trap_effect_chance(trap2)))
+        {
+            effect *e;
+            e = effect_new(trap_effect(trap2));
+            e = monster_effect_add(m, e);
+        }
+    }
+    // intentional fall-through
+
+    default:
+        /* if there is an effect on the trap add it to the
+         * monster's list of effects. */
+        if (trap_effect(trap))
+        {
+            /* create a new effect */
+            eff = effect_new(trap_effect(trap));
+            /* monster_effect_add() returns the effect which is active for
+               the monster, might be the one generated above, another, similar
+               one, or NULL, it the monster is resistant to this effect. */
+            eff = monster_effect_add(m, eff);
+        }
+    } /* switch (trap) */
+
+    /* inflict damage caused by the trap */
+    if (trap_damage(trap))
+    {
+        damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
+                                 rand_1n(trap_damage(trap)), NULL);
+        m = monster_damage_take(m, dam);
+    }
+
+    return m;
+}
