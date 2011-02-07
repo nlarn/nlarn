@@ -264,7 +264,12 @@ int display_paint_screen(player *p)
                     map_sobject_t ms = map_sobject_at(map, pos);
 
                     attron(attrs = attr_colour(ls_get_colour(ms), has_items));
-                    addch(ls_get_image(ms));
+
+                    if (ms == LS_CLOSEDDOOR || ms == LS_OPENDOOR)
+                        addch(map_get_door_glyph(map, pos));
+                    else
+                        addch(ls_get_image(ms));
+
                     attroff(attrs);
                 }
                 else if (has_items)
