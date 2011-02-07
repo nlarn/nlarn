@@ -2505,7 +2505,7 @@ static position monster_move_serve(monster *m, struct player *p)
 
     /* calculate the monster's fov */
     /* the monster gets a fov radius of 6 for now*/
-    fov_calculate(m->fov, monster_map(m), m->pos, 6);
+    fov_calculate(m->fov, monster_map(m), m->pos, 6, monster_flags(m, MF_INFRAVISION));
 
     /* a good servant always knows the masters position */
     if (pos_distance(monster_pos(m), p->pos) > 5)

@@ -25,7 +25,7 @@
 #include "position.h"
 
 static void fov_calculate_octant(fov *fov, map *m, position center,
-                                 int row, float start,
+                                 int infravision, int row, float start,
                                  float end, int radius, int xx,
                                  int xy, int yx, int yy);
 
@@ -38,6 +38,9 @@ struct _fov
 
     /* "flattened" array of size size_y * size_x */
     gboolean *fov_data;
+
+    /* list of visible monsters */
+    GPtrArray *mlist;
 };
 
 typedef struct _fov_visible_monster
@@ -54,13 +57,15 @@ fov *fov_new(guint size_x, guint size_y)
     fov->size_y = size_y;
     fov->fov_data = g_malloc0(size_x * size_y * sizeof(gboolean));
 
+    fov->mlist = g_ptr_array_new();
+
     return fov;
 }
 /* this and the function fov_calculate_octant() have been
  * ported from python to c using the example at
  * http://roguebasin.roguelikedevelopment.org/index.php?title=Python_shadowcasting_implementation
  */
-void fov_calculate(fov *fov, map *m, position pos, int radius)
+void fov_calculate(fov *fov, map *m, position pos, int radius, gboolean infravision)
 {
     const int mult[4][8] =
     {
@@ -78,7 +83,8 @@ void fov_calculate(fov *fov, map *m, position pos, int radius)
     /* determine which fields are visible */
     for (octant = 0; octant < 8; octant++)
     {
-        fov_calculate_octant(fov, m, pos, 1, 1.0, 0.0, radius,
+        fov_calculate_octant(fov, m, pos, infravision,
+                             1, 1.0, 0.0, radius,
                              mult[0][octant], mult[1][octant],
                              mult[2][octant], mult[3][octant]);
     }
@@ -110,68 +116,28 @@ void fov_reset(fov *fov)
 
     /* set fov_data to FALSE */
     memset(fov->fov_data, 0, fov->size_x * fov->size_y * sizeof(int));
+
+    /* clean list of visible monsters */
+    while (fov->mlist->len > 0)
+        g_free(g_ptr_array_remove_index_fast(fov->mlist, fov->mlist->len - 1));
 }
 
-monster *fov_get_closest_monster(fov *fov, position center, gboolean infravision)
+monster *fov_get_closest_monster(fov *fov)
 {
-    position pos;
     monster *closest_monster = NULL;
-    map *map = game_map(nlarn, Z(center));
-    GPtrArray *mlist = g_ptr_array_new();
 
-    Z(pos) = Z(center);
-
-    for (Y(pos) = 0; Y(pos) < fov->size_y; Y(pos)++)
-    {
-        for (X(pos) = 0; X(pos) < fov->size_x; X(pos)++)
-        {
-            monster *m;
-            fov_visible_monster *fvm;
-
-            /* check if the position is visible */
-            if (!fov_get(fov, pos))
-                continue;
-
-            /* check if there is a monster at that position */
-            if (!(m = map_get_monster_at(map, pos)))
-                continue;
-
-            /* check if the monster is an unknown mimic */
-            if (monster_unknown(m))
-                continue;
-
-            /* check for invisible monsters */
-            if (monster_flags(m, MF_INVISIBLE) && !infravision)
-                continue;
-
-            /* found a visible monster -> add it to the list */
-            fvm = g_new0(fov_visible_monster, 1);
-
-            fvm->mon = m;
-            fvm->distance = pos_distance(center, pos);
-
-            g_ptr_array_add(mlist, fvm);
-        }
-    }
-
-    if (mlist->len > 0)
+    if (fov->mlist->len > 0)
     {
         fov_visible_monster *fvm;
 
         /* sort the monsters list by distance */
-        g_ptr_array_sort(mlist, fov_visible_monster_sort);
+        g_ptr_array_sort(fov->mlist, fov_visible_monster_sort);
 
         /* get the first element in the list */
-        fvm = g_ptr_array_index(mlist, 0);
+        fvm = g_ptr_array_index(fov->mlist, 0);
 
         closest_monster = fvm->mon;
     }
-
-    /* clean up */
-    while (mlist->len > 0)
-        g_free(g_ptr_array_remove_index_fast(mlist, mlist->len - 1));
-
-    g_ptr_array_free(mlist, TRUE);
 
     return closest_monster;
 }
@@ -181,11 +147,18 @@ void fov_free(fov *fov)
     assert (fov != NULL);
 
     g_free(fov->fov_data);
+
+    /* clean the list of visible monsters */
+    while (fov->mlist->len > 0)
+        g_free(g_ptr_array_remove_index_fast(fov->mlist, fov->mlist->len - 1));
+
+    g_ptr_array_free(fov->mlist, TRUE);
+
     g_free(fov);
 }
 
 static void fov_calculate_octant(fov *fov, map *m, position center,
-                                 int row, float start,
+                                 int infravision, int row, float start,
                                  float end, int radius, int xx,
                                  int xy, int yx, int yy)
 {
@@ -244,7 +217,25 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
                 /* Our light beam is touching this square; light it */
                 if ((dx * dx + dy * dy) < radius_squared)
                 {
+                    monster *mon;
+                    fov_visible_monster *fvm;
+
                     fov_set(fov, pos, TRUE);
+
+                    /* check if there is a monster at that position
+                       must not be an unknown mimic or invisible */
+                    if ((mon = map_get_monster_at(m, pos))
+                        && !monster_unknown(mon)
+                        && (!monster_flags(mon, MF_INVISIBLE) || infravision))
+                    {
+                        /* found a visible monster -> add it to the list */
+                        fvm = g_new0(fov_visible_monster, 1);
+
+                        fvm->mon = mon;
+                        fvm->distance = pos_distance(center, pos);
+
+                        g_ptr_array_add(fov->mlist, fvm);
+                    }
                 }
 
                 if (blocked)
@@ -269,7 +260,8 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
                         blocked = TRUE;
                     }
 
-                    fov_calculate_octant(fov, m, center, j + 1, start, l_slope,
+                    fov_calculate_octant(fov, m, center, infravision,
+                                         j + 1, start, l_slope,
                                          radius, xx, xy, yx, yy);
 
                     new_start = r_slope;

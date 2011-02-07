@@ -4466,7 +4466,8 @@ void player_update_fov(player *p)
     else
     {
         /* otherwise use the fov algorithm */
-        fov_calculate(p->fov, game_map(nlarn, Z(p->pos)), p->pos, radius);
+        fov_calculate(p->fov, game_map(nlarn, Z(p->pos)), p->pos, radius, 
+                      player_effect(p, ET_INFRAVISION));
     }
 
     /* update visible fields in player's memory */

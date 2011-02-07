@@ -2312,8 +2312,7 @@ position display_get_position(player *p,
     /* check for visible opponents if no previous opponent has been found */
     if (pos_identical(p->pos, start))
     {
-        monster *m = fov_get_closest_monster(p->fov, p->pos,
-                                             player_effect(p, ET_INFRAVISION));
+        monster *m = fov_get_closest_monster(p->fov);
 
         /* found a visible monster -> use it as target */
         if (m != NULL)

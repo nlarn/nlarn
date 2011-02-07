@@ -44,8 +44,9 @@ fov *fov_new(guint size_x, guint size_y);
   * @param the map
   * @param the starting position
   * @param the radius of vision
+  * @param True if the mobile has infravision.
   */
-void fov_calculate(fov *fov, map *m, position pos, int radius);
+void fov_calculate(fov *fov, map *m, position pos, int radius, gboolean infravision);
 
 /** @brief check if a certain position is visible.
   *
@@ -72,15 +73,13 @@ void fov_reset(fov *fov);
 /** @brief Get the closest monster for a field of vision.
   *
   * @param pointer to a fov structure
-  * @param the center of the fov
   */
-monster *fov_get_closest_monster(fov *fov, position center, gboolean infravision);
+monster *fov_get_closest_monster(fov *fov);
 
 /** @brief destroy fov data
   *
   * @param A pointer to a fov structure.
   * @param The starting position.
-  * @param True if the mobile looking for monsters has infravision.
   */
 void fov_free(fov *fov);
 
