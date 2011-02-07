@@ -142,6 +142,32 @@ monster *fov_get_closest_monster(fov *fov)
     return closest_monster;
 }
 
+GPtrArray *fov_get_visible_monsters(fov *fov)
+{
+    GPtrArray *mlist = NULL;
+
+    if (fov->mlist->len != 0)
+    {
+        int i;
+
+        mlist = g_ptr_array_new();
+
+        /* sort the list of monster by distance */
+        g_ptr_array_sort(fov->mlist, fov_visible_monster_sort);
+
+        /* create a list of pointers to the visible monsters */
+        for (i = 0; i < fov->mlist->len; i++)
+        {
+            fov_visible_monster *fvm;
+
+            fvm = g_ptr_array_index(fov->mlist, i);
+            g_ptr_array_add(mlist, fvm->mon);
+        }
+    }
+
+    return mlist;
+}
+
 void fov_free(fov *fov)
 {
     assert (fov != NULL);

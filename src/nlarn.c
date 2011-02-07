@@ -805,49 +805,50 @@ int main(int argc, char *argv[])
 
 static gboolean adjacent_monster(player *p, gboolean ignore_harmless)
 {
-    position pos = { { 0, 0, Z(p->pos) } };
+    int i;
+    gboolean monster_visible = FALSE;
 
-    for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
-        for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
-        {
-            /* check if the position if visible */
-            if (!fov_get(p->fov, pos))
-                continue;
+    /* get the list of all visible monsters */
+    GPtrArray *mlist = fov_get_visible_monsters(p->fov);
 
-            monster *m = map_get_monster_at(game_map(nlarn, Z(p->pos)), pos);
+    /* no visible monsters? */
+    if (mlist == NULL)
+        return monster_visible;
 
-            if (m == NULL)
-                continue;
+    /* got a list of monsters, check if any are dangerous */
+    for (i = 0; i < mlist->len; i++)
+    {
+        monster *m = (monster *)g_ptr_array_index(mlist, i);
 
-            // Ignore the town inhabitants.
-            if (monster_type(m) == MT_TOWN_PERSON)
-                continue;
+        // Ignore the town inhabitants.
+        if (monster_type(m) == MT_TOWN_PERSON)
+            continue;
 
-            /* ignore servants */
-            if (monster_action(m) == MA_SERVE)
-                continue;
+        /* ignore servants */
+        if (monster_action(m) == MA_SERVE)
+            continue;
 
-            /* Only ignore floating eye if already paralysed. */
-            if (ignore_harmless
-                && (monster_type(m) == MT_FLOATING_EYE)
-                && player_effect_get(p, ET_PARALYSIS))
-                continue;
+        /* Only ignore floating eye if already paralysed. */
+        if (ignore_harmless
+            && (monster_type(m) == MT_FLOATING_EYE)
+            && player_effect_get(p, ET_PARALYSIS))
+            continue;
 
-            /* Ignore adjacent umber hulk if already confused. */
-            if (ignore_harmless
-                && (monster_type(m) == MT_UMBER_HULK)
-                && player_effect_get(p, ET_CONFUSION))
-                continue;
+        /* Ignore adjacent umber hulk if already confused. */
+        if (ignore_harmless
+            && (monster_type(m) == MT_UMBER_HULK)
+            && player_effect_get(p, ET_CONFUSION))
+            continue;
 
-            /* unknown mimic */
-            if (monster_unknown(m))
-                continue;
+        /* when reaching this point, the monster is a threat */
+        monster_visible = TRUE;
+        break;
+    }
 
-            if (monster_in_sight(m))
-                return TRUE;
-        }
+    /* clean up allocated memory */
+    g_ptr_array_free(mlist, TRUE);
 
-    return FALSE;
+    return monster_visible;
 }
 
 static gboolean adjacent_corridor(position pos, char move)

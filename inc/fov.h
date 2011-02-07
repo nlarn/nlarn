@@ -76,6 +76,13 @@ void fov_reset(fov *fov);
   */
 monster *fov_get_closest_monster(fov *fov);
 
+/** @brief Get a list of all visible monsters
+  *
+  * @param A pointer to a fov structure
+  * @return A GPtrArray with all visible monsters, sorted by proximity
+  */
+GPtrArray *fov_get_visible_monsters(fov *fov);
+
 /** @brief destroy fov data
   *
   * @param A pointer to a fov structure.
