@@ -26,108 +26,80 @@
 const trap_data traps[TT_MAX] =
 {
     /*
-        trap type
-        effect type
-        glyph colour
-        trigger chance
-        effect chance
-        base damage
+        trap type - effect type - glyph colour
+        trigger chance - effect chance - base damage
         description
         player trigger message
         effect message
         monster trigger message
     */
     {
-        TT_NONE,
-        ET_NONE,
-        DC_NONE,
-        0,
-        0,
-        0,
+        TT_NONE, ET_NONE, DC_NONE,
+        0, 0, 0,
         NULL,
         NULL,
         NULL,
         NULL,
     },
     {
-        TT_ARROW,
-        ET_POISON,
-        DC_CYAN,
-        75,
-        50,
-        10,
+        TT_ARROW, ET_POISON, DC_CYAN,
+        75, 50, 10,
         "arrow trap",
         "You are hit by an arrow.",
         "The arrow was poisoned.",
         "The %s is hit by an arrow.",
     },
     {
-        TT_DART,
-        ET_POISON,
-        DC_CYAN,
-        75,
-        50,
-        5,
+        TT_DART, ET_POISON, DC_CYAN,
+        75, 50, 5,
         "dart trap",
         "You are hit by a dart.",
         "The dart was poisoned.",
         "The %s is hit by a dart.",
     },
     {
-        TT_TELEPORT,
-        ET_NONE,
-        DC_MAGENTA,
-        55,
-        0,
-        0,
+        TT_TELEPORT, ET_NONE, DC_MAGENTA,
+        55, 0, 0,
         "teleport trap",
         "Zaaaappp! You've been teleported!",
         NULL,
         "The %s has been teleported away.",
     },
     {
-        TT_PIT,
-        ET_TRAPPED,
-        DC_BROWN,
-        80,
-        100,
-        6,
+        TT_PIT, ET_TRAPPED, DC_BROWN,
+        80, 100, 6,
         "pit",
         "You fall into a pit!",
         NULL,
         "The %s falls into a pit.",
     },
     {
-        TT_SPIKEDPIT,
-        ET_POISON,
-        DC_BROWN,
-        80,
-        60,
-        12,
+        TT_SPIKEDPIT, ET_POISON, DC_BROWN,
+        80, 60, 12,
         "pit full of spikes",
         "You fall into a pit full of spikes!",
         "",
         "The %s falls into a pit full of spikes.",
     },
     {
-        TT_SLEEPGAS,
-        ET_SLEEP,
-        DC_MAGENTA,
-        75,
-        100,
-        0,
+        TT_SLEEPGAS, ET_SLEEP, DC_MAGENTA,
+        75, 100, 0,
         "sleeping gas trap",
         "A cloud of gas engulfs you.",
         NULL,
         "A cloud of gas engulfs the %s.",
     },
     {
-        TT_TRAPDOOR,
-        ET_NONE,
-        DC_BROWN,
-        75,
-        0,
-        5,
+        TT_MANADRAIN, ET_NONE, DC_BROWN,
+        75, 0, 0,
+        "magic energy drain trap",
+        "You feel your magical energy drained away!",
+        NULL,
+        NULL,
+    },
+    {
+        TT_TRAPDOOR, ET_NONE, DC_BROWN,
+        75, 0, 5,
         "trapdoor",
         "You fall through a trap door!",
         NULL,
@@ -173,6 +145,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
        Being burdened increases the chance due to clumsy movement. */
     if (force || chance(possibility + bval))
     {
+        /* log the trap's triggered message */
         log_add_entry(nlarn->log, trap_p_message(trap));
 
         /* refresh player's knowlege of trap */
@@ -197,6 +170,13 @@ int player_trap_trigger(player *p, trap_t trap, int force)
 
         case TT_TELEPORT:
             p->pos = map_find_space(game_map(nlarn, Z(p->pos)), LE_MONSTER, FALSE);
+            break;
+
+        case TT_MANADRAIN:
+            if (p->mp > 1)
+            {
+                p->mp -= rand_1n(p->mp / 2);
+            }
             break;
 
         default:

@@ -30,6 +30,7 @@ typedef enum trap_types
     TT_PIT,
     TT_SPIKEDPIT,
     TT_SLEEPGAS,
+    TT_MANADRAIN,
     TT_TRAPDOOR,
     TT_MAX
 } trap_t;
@@ -37,7 +38,7 @@ typedef enum trap_types
 typedef struct trap_data
 {
     trap_t type;        /* trap type */
-    int effect_t;    /* effect caused by this trap */
+    int effect_t;       /* effect caused by this trap */
     int color;          /* glyph color */
     int chance;         /* chance this trap triggers */
     int effect_chance;  /* chance the effect is activated */
