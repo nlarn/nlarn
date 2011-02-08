@@ -361,22 +361,9 @@ int main(int argc, char *argv[])
 
             /* look at different position */
         case ';':
-            pos = display_get_new_position(nlarn->p, nlarn->p->pos,
-                                           "Choose a position to examine.",
+            (void)display_get_new_position(nlarn->p, nlarn->p->pos,
+                                           "Choose a position to examine",
                                            FALSE, FALSE, FALSE, 0, FALSE, TRUE);
-
-            if (pos_valid(pos))
-            {
-                strbuf = map_pos_examine(pos);
-                log_add_entry(nlarn->log, strbuf);
-                g_free(strbuf);
-
-                /* reset the position */
-                pos = pos_invalid;
-            }
-            else
-                log_add_entry(nlarn->log, "Aborted.");
-
             break;
 
             /* pick up */
@@ -588,7 +575,7 @@ int main(int argc, char *argv[])
         case 'T':
             pos = display_get_new_position(nlarn->p, cpos,
                                            "Choose a destination to travel to.",
-                                           FALSE, FALSE, TRUE, 0, FALSE, FALSE);
+                                           FALSE, FALSE, TRUE, 0, TRUE, FALSE);
 
             if (pos_valid(pos))
             {
@@ -688,7 +675,7 @@ int main(int argc, char *argv[])
             {
                 pos = display_get_new_position(nlarn->p, nlarn->p->pos,
                                                "Choose a position to teleport to.",
-                                               FALSE, FALSE, FALSE, 0, FALSE, FALSE);
+                                               FALSE, FALSE, FALSE, 0, TRUE, FALSE);
 
                 if (pos_valid(pos))
                 {
@@ -805,20 +792,20 @@ int main(int argc, char *argv[])
 
 static gboolean adjacent_monster(player *p, gboolean ignore_harmless)
 {
-    int i;
     gboolean monster_visible = FALSE;
 
     /* get the list of all visible monsters */
-    GPtrArray *mlist = fov_get_visible_monsters(p->fov);
+    GList *mlist, *miter;
+    miter = mlist = fov_get_visible_monsters(p->fov);
 
     /* no visible monsters? */
     if (mlist == NULL)
         return monster_visible;
 
     /* got a list of monsters, check if any are dangerous */
-    for (i = 0; i < mlist->len; i++)
+    do
     {
-        monster *m = (monster *)g_ptr_array_index(mlist, i);
+        monster *m = (monster *)miter->data;
 
         // Ignore the town inhabitants.
         if (monster_type(m) == MT_TOWN_PERSON)
@@ -844,9 +831,10 @@ static gboolean adjacent_monster(player *p, gboolean ignore_harmless)
         monster_visible = TRUE;
         break;
     }
+    while ((miter = miter->next) != NULL);
 
-    /* clean up allocated memory */
-    g_ptr_array_free(mlist, TRUE);
+    /* free the list returned by fov_get_visible_monsters() */
+    g_list_free(mlist);
 
     return monster_visible;
 }

@@ -99,7 +99,8 @@ static void display_window_update_arrow_up(display_window *dwin, gboolean on);
 static void display_window_update_arrow_down(display_window *dwin, gboolean on);
 
 static display_window *display_item_details(guint x1, guint y1, guint width,
-        item *it, player *p, gboolean shop);
+                                            item *it, player *p, gboolean shop);
+
 static void display_spheres_paint(sphere *s, player *p);
 
 void display_init()
@@ -2291,7 +2292,7 @@ position display_get_position(player *p,
     position cpos;
 
     /* if the player has recently targeted a monster.. */
-    if (p->ptarget != NULL)
+    if (visible && p->ptarget != NULL)
     {
         monster *m = game_monster_get(nlarn, p->ptarget);
 
@@ -2315,7 +2316,7 @@ position display_get_position(player *p,
     }
 
     /* check for visible opponents if no previous opponent has been found */
-    if (pos_identical(p->pos, start))
+    if (visible && pos_identical(p->pos, start))
     {
         monster *m = fov_get_closest_monster(p->fov);
 
@@ -2359,7 +2360,10 @@ position display_get_new_position(player *p,
     position pos, npos, cursor;
     map *map;
     int attrs; /* curses attributes */
-    display_window *msgpop;
+    display_window *msgpop = NULL;
+
+    /* list of visible monsters and the iterator therefor */
+    GList *mlist = NULL, *miter;
 
     /* variables for ray or ball painting */
     area *a = NULL;
@@ -2372,14 +2376,60 @@ position display_get_new_position(player *p,
     else
         pos = p->pos;
 
-    /* display message */
-    msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message);
-
     /* make shortcut to map */
     map = game_map(nlarn, Z(p->pos));
 
+    /* get the list of visible monsters if looking for a visible position */
+    if (visible)
+        miter = mlist = fov_get_visible_monsters(p->fov);
+
+    if (!visible)
+        msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message);
+
+    /* if a starting position for a ray has been provided, check if it worsk*/
+    if (ray && !pos_identical(p->pos, start))
+    {
+        /* paint a ray to validate the starting position */
+        area *obstacles = map_get_obstacles(map, p->pos, pos_distance(p->pos, pos));
+        a = area_new_ray(p->pos, pos, obstacles);
+
+        if (a == NULL)
+        {
+            /* it's not possible to draw a ray between the points
+               -> leave everything as it has been */
+            pos = p->pos;
+        }
+        else
+        {
+            /* position is valid */
+            area_destroy(a);
+            a = NULL;
+        }
+    } /* ray starting position validity check */
+
     do
     {
+        /* refresh the popup content for every position change
+           while looking for visible positions */
+        if (visible)
+        {
+            /* clean old popup windows */
+            if (msgpop != NULL)
+                display_window_destroy(msgpop);
+
+            /* display message or description of selected position */
+            if (pos_identical(pos, p->pos))
+            {
+                msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message);
+            }
+            else
+            {
+                char *desc = map_pos_examine(pos);
+                msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, message, desc);
+                g_free(desc);
+            }
+        } /* visible */
+
 #ifdef PDCURSES
         /* I have no idea why, but the message popup window is hidden when
         using PDCurses without calling touchwin for it. */
@@ -2483,7 +2533,7 @@ position display_get_new_position(player *p,
                     }
                 }
             }
-            area_destroy(a);
+            area_destroy(a); a = NULL;
         }
         else
         {
@@ -2495,18 +2545,50 @@ position display_get_new_position(player *p,
         const int ch = getch();
         switch (ch)
         {
+            /* abort */
         case KEY_ESC:
             pos = pos_invalid;
-            /* fall through desired */
+            RUN = FALSE;
+            break;
 
+            /* finish */
         case KEY_LF:
         case KEY_CR:
 #ifdef PADENTER
         case PADENTER:
 #endif
         case KEY_ENTER:
-        case KEY_SPC:
             RUN = FALSE;
+            /* if a passable position has been requested check if it
+               actually is passable. Only known positions are allowed. */
+            if (passable
+                && (!(player_memory_of(nlarn->p, pos).type > LT_NONE)
+                    || !map_pos_passable(map, pos)))
+            {
+                if (!beep()) flash();
+                RUN = TRUE;
+            }
+            break;
+
+            /* jump to next visible monster */
+        case KEY_SPC:
+            if ((mlist == NULL) && visible)
+            {
+                flash();
+            }
+            else
+            {
+                /* jump to the next list entry or to the start of
+                   the list if the end has been reached */
+                if ((miter = miter->next) == NULL)
+                    miter = mlist;
+
+                /* get the currently selected monster */
+                monster *m = (monster *)miter->data;
+
+                /* jump to the selected monster */
+                npos = monster_pos(m);
+            }
             break;
 
             /* move cursor */
@@ -2616,10 +2698,11 @@ position display_get_new_position(player *p,
                         }
                     }
                 }
-            }
+            } /* if (travel) */
             break;
         }
 
+        /* get new position if cursor has been move */
         if (dir)
         {
             npos = pos_move(pos, dir);
@@ -2629,50 +2712,39 @@ position display_get_new_position(player *p,
         /* don't want to deal with invalid positions */
         if (pos_valid(npos))
         {
-            /* check visibility of chosen position */
-            if (visible)
-            {
-                /* don't use invisible or impassable positions */
-                if (!fov_get(p->fov, npos))
-                    npos = pos;
-
-                if (passable && !map_pos_passable(map, npos))
-                    npos = pos;
-            }
+            /* don't use invisible positions */
+            if (visible && !fov_get(p->fov, npos))
+                npos = pos;
 
             if (ray)
             {
                 int distance = pos_distance(p->pos, npos);
 
-                /* painting a ray - validate if new position is in a line */
+                /* paint a ray to validate the new position */
                 a = area_new_ray(p->pos, npos, map_get_obstacles(map, p->pos, distance));
 
                 if (a == NULL)
                 {
                     /* it's not possible to draw a ray between the points
-                       -> leave everything as it has been */
+                       -> return to previous position */
                     npos = pos;
-                    a = area_new_ray(p->pos, pos, map_get_obstacles(map, p->pos, distance));
+                }
+                else
+                {
+                    area_destroy(a);
+                    a = NULL;
                 }
             }
 
             /* new position is within bounds and visible */
             pos = npos;
-        }
-
-        /* if any position has been requested check if it is passable anyway,
-           otherwise the player could be teleported / request a path to an
-           invalid position. In wizard mode all positions are allowed,
-           otherwise only known positions are allowed. */
-        if (RUN == FALSE && !visible && pos_valid(pos)
-            && (!map_pos_passable(game_map(nlarn, Z(pos)), pos)
-                || !(game_wizardmode(nlarn) || player_memory_of(nlarn->p, pos).type > LT_NONE)))
-        {
-            if (!beep()) flash();
-            RUN = TRUE;
-        }
+        } /* if (pos_valid(npos) */
     }
     while (RUN);
+
+    /* destroy list of visible monsters */
+    if (mlist != NULL)
+        g_list_free(mlist);
 
     /* destroy the message popup */
     display_window_destroy(msgpop);
@@ -2838,15 +2910,23 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     guint idx;
     int height;
     const guint max_width = COLS - x1 - 1;
-    const guint max_height = LINES - y1 - 1;
+    const guint max_height = LINES - y1;
 
     if (width == 0)
     {
-        /* width to be determined */
-        if (strlen(msg) > (max_width - 4))
+        int maxlen;
+
+        /* The title is padded by 6 additional characters */
+        if ((title != NULL) && (strlen(title) + 6 > strlen(msg)))
+            maxlen = strlen(title) + 6;
+        else
+            maxlen = strlen(msg);
+
+        /* determine window width */
+        if (maxlen > (max_width - 4))
             width = max_width - 4;
         else
-            width = strlen(msg) + 4;
+            width = maxlen + 4;
     }
     else
     {

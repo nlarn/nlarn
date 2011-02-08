@@ -33,10 +33,9 @@ typedef struct _fov fov;
 
 /** @brief Create a FOV data structure
   *
-  * @param X size
-  * @param Y size
+  * @return A new FOV data structure.
   */
-fov *fov_new(guint size_x, guint size_y);
+fov *fov_new();
 
 /** @brief calculate the FOV for a map
   *
@@ -62,7 +61,7 @@ gboolean fov_get(fov *fov, position pos);
   * @param pointer to a fov structure.
   * @param a position.
   */
-void fov_set(fov *fov, position pos, gboolean visible);
+void fov_set(fov *fov, position pos, guchar visible);
 
 /** @brief reset visibility for an entire fov structure.
   *
@@ -73,15 +72,16 @@ void fov_reset(fov *fov);
 /** @brief Get the closest monster for a field of vision.
   *
   * @param pointer to a fov structure
+  * @return a pointer to the closest monster, or NULL
   */
 monster *fov_get_closest_monster(fov *fov);
 
 /** @brief Get a list of all visible monsters
   *
   * @param A pointer to a fov structure
-  * @return A GPtrArray with all visible monsters, sorted by proximity
+  * @return A GList with all visible monsters, sorted by proximity, or NULL
   */
-GPtrArray *fov_get_visible_monsters(fov *fov);
+GList *fov_get_visible_monsters(fov *fov);
 
 /** @brief destroy fov data
   *

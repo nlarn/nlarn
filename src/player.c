@@ -160,7 +160,7 @@ player *player_new()
     p->identified_scrolls[ST_BLANK] = TRUE;
 
     /* initialize the field of vision */
-    p->fov = fov_new(MAP_MAX_X, MAP_MAX_Y);
+    p->fov = fov_new();
 
     return p;
 }
@@ -724,7 +724,7 @@ player *player_deserialize(cJSON *pser)
     p->stats.dex_orig = cJSON_GetObjectItem(obj, "dex_orig")->valueint;
 
     /* initialize the field of vision */
-    p->fov = fov_new(MAP_MAX_X, MAP_MAX_Y);
+    p->fov = fov_new();
 
     return p;
 }
@@ -4466,7 +4466,7 @@ void player_update_fov(player *p)
     else
     {
         /* otherwise use the fov algorithm */
-        fov_calculate(p->fov, game_map(nlarn, Z(p->pos)), p->pos, radius, 
+        fov_calculate(p->fov, game_map(nlarn, Z(p->pos)), p->pos, radius,
                       player_effect(p, ET_INFRAVISION));
     }
 

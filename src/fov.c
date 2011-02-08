@@ -29,37 +29,29 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
                                  float end, int radius, int xx,
                                  int xy, int yx, int yy);
 
-static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b);
+static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b, gpointer center);
 
 struct _fov
 {
-    int size_x;
-    int size_y;
+    /* the actual field of vision */
+    guchar data[MAP_MAX_Y][MAP_MAX_X];
 
-    /* "flattened" array of size size_y * size_x */
-    gboolean *fov_data;
+    /* the center of the fov */
+    position center;
 
-    /* list of visible monsters */
-    GPtrArray *mlist;
+    /* The list of visible monsters - it's a hash as fields may get visited
+       twice, which means that monsters may get added to the list multiple
+       times. The hash overwrites duplicate values. */
+    GHashTable *mlist;
 };
 
-typedef struct _fov_visible_monster
+fov *fov_new()
 {
-    guint   distance;
-    monster *mon;
-} fov_visible_monster;
+    fov *nfov = g_malloc0(sizeof(fov));
+    nfov->center = pos_invalid;
+    nfov->mlist = g_hash_table_new(g_direct_hash, g_direct_equal);
 
-fov *fov_new(guint size_x, guint size_y)
-{
-    fov *fov = g_malloc0(sizeof(fov));
-
-    fov->size_x = size_x;
-    fov->size_y = size_y;
-    fov->fov_data = g_malloc0(size_x * size_y * sizeof(gboolean));
-
-    fov->mlist = g_ptr_array_new();
-
-    return fov;
+    return nfov;
 }
 /* this and the function fov_calculate_octant() have been
  * ported from python to c using the example at
@@ -80,6 +72,9 @@ void fov_calculate(fov *fov, map *m, position pos, int radius, gboolean infravis
     /* reset the entire fov to unseen */
     fov_reset(fov);
 
+    /* set the center of the fov */
+    fov->center = pos;
+
     /* determine which fields are visible */
     for (octant = 0; octant < 8; octant++)
     {
@@ -95,19 +90,17 @@ void fov_calculate(fov *fov, map *m, position pos, int radius, gboolean infravis
 gboolean fov_get(fov *fov, position pos)
 {
     assert (fov != NULL);
-    assert (X(pos) <= fov->size_x);
-    assert (Y(pos) <= fov->size_y);
+    assert (pos_valid(pos));
 
-    return fov->fov_data[Y(pos) * fov->size_x + X(pos)];
+    return fov->data[Y(pos)][X(pos)];
 }
 
-void fov_set(fov *fov, position pos, gboolean visible)
+void fov_set(fov *fov, position pos, guchar visible)
 {
     assert (fov != NULL);
-    assert (X(pos) <= fov->size_x);
-    assert (Y(pos) <= fov->size_y);
+    assert (pos_valid(pos));
 
-    fov->fov_data[Y(pos) * fov->size_x + X(pos)] = visible;
+    fov->data[Y(pos)][X(pos)] = visible;
 }
 
 void fov_reset(fov *fov)
@@ -115,54 +108,49 @@ void fov_reset(fov *fov)
     assert (fov != NULL);
 
     /* set fov_data to FALSE */
-    memset(fov->fov_data, 0, fov->size_x * fov->size_y * sizeof(int));
+    memset(fov->data, 0, MAP_MAX_Y * MAP_MAX_X * sizeof(guchar));
+
+    /* set the center to an invalid position */
+    fov->center = pos_invalid;
 
     /* clean list of visible monsters */
-    while (fov->mlist->len > 0)
-        g_free(g_ptr_array_remove_index_fast(fov->mlist, fov->mlist->len - 1));
+    g_hash_table_remove_all(fov->mlist);
 }
 
 monster *fov_get_closest_monster(fov *fov)
 {
     monster *closest_monster = NULL;
 
-    if (fov->mlist->len > 0)
+    if (g_hash_table_size(fov->mlist) > 0)
     {
-        fov_visible_monster *fvm;
+        GList *mlist;
+
+        /* get the list of all visible monsters */
+        mlist = g_hash_table_get_keys(fov->mlist);
 
         /* sort the monsters list by distance */
-        g_ptr_array_sort(fov->mlist, fov_visible_monster_sort);
+        mlist = g_list_sort_with_data(mlist, fov_visible_monster_sort,
+                                      &fov->center);
 
         /* get the first element in the list */
-        fvm = g_ptr_array_index(fov->mlist, 0);
-
-        closest_monster = fvm->mon;
+        closest_monster = mlist->data;
     }
 
     return closest_monster;
 }
 
-GPtrArray *fov_get_visible_monsters(fov *fov)
+GList *fov_get_visible_monsters(fov *fov)
 {
-    GPtrArray *mlist = NULL;
+    GList *mlist = NULL;
 
-    if (fov->mlist->len != 0)
+    if (g_hash_table_size(fov->mlist) != 0)
     {
-        int i;
-
-        mlist = g_ptr_array_new();
+        /* get a GList of all visible monster all */
+        mlist = g_hash_table_get_keys(fov->mlist);
 
         /* sort the list of monster by distance */
-        g_ptr_array_sort(fov->mlist, fov_visible_monster_sort);
-
-        /* create a list of pointers to the visible monsters */
-        for (i = 0; i < fov->mlist->len; i++)
-        {
-            fov_visible_monster *fvm;
-
-            fvm = g_ptr_array_index(fov->mlist, i);
-            g_ptr_array_add(mlist, fvm->mon);
-        }
+        mlist = g_list_sort_with_data(mlist, fov_visible_monster_sort,
+                                      &fov->center);
     }
 
     return mlist;
@@ -172,14 +160,8 @@ void fov_free(fov *fov)
 {
     assert (fov != NULL);
 
-    g_free(fov->fov_data);
-
-    /* clean the list of visible monsters */
-    while (fov->mlist->len > 0)
-        g_free(g_ptr_array_remove_index_fast(fov->mlist, fov->mlist->len - 1));
-
-    g_ptr_array_free(fov->mlist, TRUE);
-
+    /* free the allocated memory */
+    g_hash_table_destroy(fov->mlist);
     g_free(fov);
 }
 
@@ -217,10 +199,10 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
             Y = Y(center) + dx * yx + dy * yy;
 
             /* check if coordinated are within bounds */
-            if ((X < 0) || (X >= fov->size_x))
+            if ((X < 0) || (X >= MAP_MAX_X))
                 continue;
 
-            if ((Y < 0) || (Y >= fov->size_y))
+            if ((Y < 0) || (Y >= MAP_MAX_Y))
                 continue;
 
             /* l_slope and r_slope store the slopes of the left and right
@@ -244,7 +226,6 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
                 if ((dx * dx + dy * dy) < radius_squared)
                 {
                     monster *mon;
-                    fov_visible_monster *fvm;
 
                     fov_set(fov, pos, TRUE);
 
@@ -255,12 +236,7 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
                         && (!monster_flags(mon, MF_INVISIBLE) || infravision))
                     {
                         /* found a visible monster -> add it to the list */
-                        fvm = g_new0(fov_visible_monster, 1);
-
-                        fvm->mon = mon;
-                        fvm->distance = pos_distance(center, pos);
-
-                        g_ptr_array_add(fov->mlist, fvm);
+                        g_hash_table_insert(fov->mlist, mon, 0);
                     }
                 }
 
@@ -303,17 +279,20 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
     }
 }
 
-static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b)
+static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b, gpointer center)
 {
-    fov_visible_monster *fvm_a, *fvm_b;
+    monster *ma, *mb;
 
-    fvm_a = (fov_visible_monster*)*((gpointer**)a);
-    fvm_b = (fov_visible_monster*)*((gpointer**)b);
+    ma = (monster*)a;
+    mb = (monster*)b;
 
-    if (fvm_a->distance < fvm_b->distance)
+    int da = pos_distance(*(position *)center, monster_pos(ma));
+    int db = pos_distance(*(position *)center, monster_pos(mb));
+
+    if (da < db)
         return -1;
 
-    if (fvm_a->distance > fvm_b->distance)
+    if (da > db)
         return 1;
 
     return 0;

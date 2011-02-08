@@ -2501,7 +2501,7 @@ static position monster_move_serve(monster *m, struct player *p)
 
     /* generate a fov structure if not yet available */
     if (!m->fov)
-        m->fov = fov_new(MAP_MAX_X, MAP_MAX_Y);
+        m->fov = fov_new();
 
     /* calculate the monster's fov */
     /* the monster gets a fov radius of 6 for now*/
