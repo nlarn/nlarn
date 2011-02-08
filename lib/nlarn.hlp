@@ -32,7 +32,6 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`p`end`  pray at an altar
 `lightgreen`P`end`  give tax status
 `lightgreen`q`end`  drink a potion or at a fountain
-`lightgreen`Q`end`  quit the game (alternate key: `lightgreen`F12`end`)
 `lightgreen`r`end`  read something
 `lightgreen`R`end`  remove gems from throne
 `lightgreen`s`end`  sit on a throne
@@ -57,6 +56,7 @@ You can select the travel target by moving the cursor or by typing the desired f
 `yellow`Control Keys`end`
 
 `lightgreen`^L`end` redraw the screen
+`lightgreen`^Q`end` quit the game
 `lightgreen`^R`end` recall message history
 `lightgreen`^W`end` activate wizard mode
 

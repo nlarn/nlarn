@@ -591,8 +591,7 @@ int main(int argc, char *argv[])
             break;
 
             /* quit */
-        case KEY_F(12) :
-        case 'Q':
+        case 17: /* ^Q */
             if (display_get_yesno("Are you sure you want to quit?", NULL, NULL))
                 player_die(nlarn->p, PD_QUIT, 0);
             break;
