@@ -87,8 +87,7 @@ When opening the spell casting window by pressing (`lightgreen`m`end`) you'll ge
 `lightgreen`+`end`     teleport down one level
 `lightgreen`-`end`     teleport up one level
 `lightgreen`^T`end`    teleport within a level
-`lightgreen`^up`end`   raise experience level (also x)
-`lightgreen`^down`end` lower experience level
+`lightgreen`x`end`     raise experience level
 `lightgreen`*`end`     add 1000 gp to bank account
 `lightgreen`&`end`     heal yourself
 `lightgreen`^F`end`    combat simulation

@@ -692,17 +692,8 @@ int main(int argc, char *argv[])
             break;
 
         case 'x': /* gain experience level */
-        case 562: /* ^up */
-        case 480: /* same for PDCurses */
             if (game_wizardmode(nlarn))
                 player_level_gain(nlarn->p, 1);
-
-            break;
-
-        case 521: /* ^down - lose experience level */
-        case 481: /* same for PDCurses */
-            if (game_wizardmode(nlarn))
-                player_level_lose(nlarn->p, 1);
 
             break;
 
