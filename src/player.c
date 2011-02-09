@@ -2811,13 +2811,8 @@ void player_effects_add(player *p, GPtrArray *effects)
     for (idx = 0; idx < effects->len; idx++)
     {
         gpointer effect_id = g_ptr_array_index(effects, idx);
-        g_ptr_array_add(p->effects, effect_id);
-
         effect *e = game_effect_get(nlarn, effect_id);
-        if (effect_get_amount(e) > 0 && effect_get_msg_start(e))
-            log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
-        else if (effect_get_amount(e) < 0 && effect_get_msg_stop(e))
-            log_add_entry(nlarn->log, "%s", effect_get_msg_stop(e));
+        player_effect_add(p, e);
     }
 }
 
@@ -2842,8 +2837,9 @@ int player_effect_del(player *p, effect *e)
             player_inv_weight_recalc(p->inventory, NULL);
         }
 
-        /* finally destroy the effect */
-        effect_destroy(e);
+        /* finally destroy the effect if its not bound to an item*/
+        if (!e->item)
+            effect_destroy(e);
     }
 
     return result;
@@ -2862,12 +2858,7 @@ void player_effects_del(player *p, GPtrArray *effects)
     {
         gpointer effect_id = g_ptr_array_index(effects, idx);
         effect *e = game_effect_get(nlarn, effect_id);
-        g_ptr_array_remove_fast(p->effects, effect_id);
-
-        if (effect_get_amount(e) > 0 && effect_get_msg_stop(e))
-            log_add_entry(nlarn->log, "%s", effect_get_msg_stop(e));
-        else if (effect_get_amount(e) < 0 && effect_get_msg_start(e))
-            log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
+        player_effect_del(p, e);
     }
 }
 
