@@ -1399,7 +1399,7 @@ static void map_fill_with_objects(map *l)
     /* up to three gems */
     for (i = 0; i < rand_0n(3); i++)
     {
-        map_item_add(l, item_new_random(IT_GEM));
+        map_item_add(l, item_new_random(IT_GEM, FALSE));
     }
 
     /* up to four potions */
@@ -2006,7 +2006,7 @@ static void map_make_treasure_room(map *maze, rectangle **rooms)
                 map_tiletype_set(maze, pos, LT_FLOOR);
 
                 /* create loot */
-                itm = item_new_random(IT_GOLD);
+                itm = item_new_random(IT_GOLD, FALSE);
                 inv_add(map_ilist_at(maze, pos), itm);
 
                 /* create a monster */

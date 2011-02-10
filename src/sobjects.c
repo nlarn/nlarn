@@ -868,7 +868,7 @@ int player_throne_pillage(player *p)
         for (i = 0; i < rand_1n(4); i++)
         {
             /* gems pop off the throne */
-            inv_add(map_ilist_at(map, p->pos), item_new_random(IT_GEM));
+            inv_add(map_ilist_at(map, p->pos), item_new_random(IT_GEM, FALSE));
             count++;
         }
 

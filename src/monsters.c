@@ -144,7 +144,7 @@ monster *monster_new(monster_t type, position pos)
     case MT_LEPRECHAUN:
         if (chance(25))
         {
-            inv_add(&nmonster->inventory, item_new_random(IT_GEM));
+            inv_add(&nmonster->inventory, item_new_random(IT_GEM, FALSE));
         }
         break;
 
@@ -160,7 +160,7 @@ monster *monster_new(monster_t type, position pos)
         }
         while (it == IT_CONTAINER);
 
-        inv_add(&nmonster->inventory, item_new_random(it));
+        inv_add(&nmonster->inventory, item_new_random(it, TRUE));
         break;
 
     case MT_TOWN_PERSON:

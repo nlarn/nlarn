@@ -131,7 +131,8 @@ item *item_new(item_t item_type, int item_id)
             }
             while (item_type == IT_CONTAINER);
 
-            return item_new_random(item_type);
+            /* no need to do a finetouch here, will be done in the calling func. */
+            return item_new_random(item_type, FALSE);
         }
 
         nlarn->amulet_created[nitem->id] = TRUE;
@@ -219,7 +220,7 @@ item *item_new(item_t item_type, int item_id)
     return nitem;
 }
 
-item *item_new_random(item_t item_type)
+item *item_new_random(item_t item_type, gboolean finetouch)
 {
     item *it;
 
@@ -250,7 +251,10 @@ item *item_new_random(item_t item_type)
     item_id = rand_m_n(min_id, max_id);
     it = item_new(item_type, item_id);
 
-    return item_new_finetouch(it);
+    if (finetouch)
+        item_new_finetouch(it);
+
+    return it;
 }
 
 item *item_new_by_level(item_t item_type, int num_level)
@@ -284,7 +288,7 @@ item *item_new_by_level(item_t item_type, int num_level)
 
     default:
         /* no per-map randomnization */
-        return item_new_random(item_type);
+        return item_new_random(item_type, TRUE);
     }
 
     id_base = item_max_id(item_type) * (num_level * divisor);

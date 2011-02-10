@@ -137,7 +137,7 @@ typedef struct item_type_data {
 /* function definitions */
 
 item *item_new(item_t item_type, int item_id);
-item *item_new_random(item_t item_type);
+item *item_new_random(item_t item_type, gboolean finetouch);
 item *item_new_by_level(item_t item_type, int num_level);
 item *item_new_finetouch(item *it);
 item *item_copy(item *original);
