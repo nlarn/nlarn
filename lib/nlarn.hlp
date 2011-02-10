@@ -35,8 +35,7 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`q`end`  drink a potion or at a fountain
 `lightgreen`r`end`  read something
 `lightgreen`R`end`  remove gems from throne
-`lightgreen`s`end`  sit on a throne
-`lightgreen`S`end`  save the game
+`lightgreen`S`end`  sit on a throne
 `lightgreen`t`end`  take an item off
 `lightgreen`v`end`  print program version
 `lightgreen`w`end`  wait/rest up to one mobul or until healed
@@ -59,6 +58,7 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`^L`end` redraw the screen
 `lightgreen`^Q`end` quit the game
 `lightgreen`^R`end` recall message history
+`lightgreen`^S`end` save and exit the game
 `lightgreen`^W`end` activate wizard mode
 
 

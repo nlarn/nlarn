@@ -509,25 +509,10 @@ int main(int argc, char *argv[])
         }
         break;
 
-        /* remove gems from throne */
-        case 'R':
-            moves_count = player_throne_pillage(nlarn->p);
-            break;
-
-            /* sit on throne */
-        case 's':
-            moves_count = player_throne_sit(nlarn->p);
-            break;
-
         case 'v':
             log_add_entry(nlarn->log, "NLarn version %d.%d.%d%s, built on %s.",
                           VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, SVNID,
                           __DATE__);
-            break;
-
-            /* wash at fountain */
-        case 'W':
-            moves_count = player_fountain_wash(nlarn->p);
             break;
 
         case '\\':
@@ -566,14 +551,14 @@ int main(int argc, char *argv[])
             player_list_sobjmem(nlarn->p);
             break;
 
-            /* save */
+            /* remove gems from throne */
+        case 'R':
+            moves_count = player_throne_pillage(nlarn->p);
+            break;
+
+            /* sit on throne */
         case 'S':
-            if (game_save(nlarn, NULL))
-            {
-                /* only terminate the game if saving was successful */
-                game_destroy(nlarn);
-                exit(EXIT_SUCCESS);
-            }
+            moves_count = player_throne_sit(nlarn->p);
             break;
 
             /* travel */
@@ -595,10 +580,9 @@ int main(int argc, char *argv[])
             }
             break;
 
-            /* quit */
-        case 17: /* ^Q */
-            if (display_get_yesno("Are you sure you want to quit?", NULL, NULL))
-                player_die(nlarn->p, PD_QUIT, 0);
+            /* wash at fountain */
+        case 'W':
+            moves_count = player_fountain_wash(nlarn->p);
             break;
 
             /* redraw screen */
@@ -607,9 +591,25 @@ int main(int argc, char *argv[])
             display_draw();
             break;
 
+            /* quit */
+        case 17: /* ^Q */
+            if (display_get_yesno("Are you sure you want to quit?", NULL, NULL))
+                player_die(nlarn->p, PD_QUIT, 0);
+            break;
+
             /* message log browser */
         case 18: /* ^R */
             display_show_history(nlarn->log, "Message history");
+            break;
+
+            /* save */
+        case 19: /* ^S */
+            if (game_save(nlarn, NULL))
+            {
+                /* only terminate the game if saving was successful */
+                game_destroy(nlarn);
+                exit(EXIT_SUCCESS);
+            }
             break;
 
             /* interact with the Lua interpreter */
