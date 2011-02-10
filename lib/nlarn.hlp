@@ -28,6 +28,7 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`g`end`  move until something interesting is found
 `lightgreen`i`end`  open the inventory window
 `lightgreen`m`end`  work magic (cast a spell)
+`lightgreen`M`end`  cast the previous spell again
 `lightgreen`o`end`  open a door or chest
 `lightgreen`p`end`  pray at an altar
 `lightgreen`P`end`  give tax status

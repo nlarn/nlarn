@@ -379,7 +379,11 @@ book_obfuscation[SP_MAX_BOOK - 1] =
 */
 };
 
+/* the last cast spell */
+static spell *last_spell = NULL;
+
 /* local functions */
+static int spell_cast(player *p, spell *spell);
 static void spell_print_success_message(spell *s, monster *m);
 static void spell_print_failure_message(spell *s, monster *m);
 static int count_adjacent_water_squares(position pos);
@@ -479,13 +483,9 @@ static int spell_success_value(player *p, spell *sp)
     return (player_get_int(p) - 2 * (spell_level(sp) - sp->knowledge));
 }
 
-int spell_cast(player *p)
+
+int spell_cast_new(struct player *p)
 {
-    int turns = 0;
-    gboolean well_done = FALSE;
-
-    spell *spell;
-
     /* check if the player knows any spell */
     if (!p->known_spells || !p->known_spells->len)
     {
@@ -501,147 +501,31 @@ int spell_cast(player *p)
     }
 
     /* show spell selection dialog */
-    spell = display_spell_select("Select a spell to cast", p);
+    last_spell = display_spell_select("Select a spell to cast", p);
 
     /* player aborted spell selection by pressing ESC */
-    if (!spell)
+    if (!last_spell)
         return 0;
 
-    /* insufficient mana */
-    if (p->mp < spell_level(spell))
-    {
-        log_add_entry(nlarn->log, "You lack the power to cast %s.",
-                      spell_name(spell));
+    return spell_cast(p, last_spell);
+}
 
-        return 0;
-    }
-    else if (spell_success_value(p, spell) < 1)
+int spell_cast_previous(struct player *p)
+{
+    /* spell casting is impossible when confused */
+    if (player_effect(p, ET_CONFUSION))
     {
-        log_add_entry(nlarn->log, "This spell is too difficult for you.");
+        log_add_entry(nlarn->log, "You can't aim your magic!");
         return 0;
     }
 
-    log_add_entry(nlarn->log, "You cast %s.", spell_name(spell));
-
-    /* time usage */
-    turns = 1;
-
-    /* bad luck, low intelligence */
-    if (chance(1) || spell_success_value(p, spell) < rand_1n(16))
+    /* not casted any spell before */
+    if (!last_spell)
     {
-        log_add_entry(nlarn->log, "It didn't work!");
-        player_mp_lose(p, spell_level(spell));
-
-        return turns;
+        return spell_cast_new(p);
     }
 
-    switch (spell_type(spell))
-    {
-        /* spells that cause an effect on the player */
-    case SC_PLAYER:
-        well_done = spell_type_player(spell, p);
-        break;
-
-        /* spells that cause an effect on a monster */
-    case SC_POINT:
-        well_done = spell_type_point(spell, p);
-        break;
-
-        /* creates a ray */
-    case SC_RAY:
-        well_done = spell_type_ray(spell, p);
-        break;
-
-        /* effect pours like water */
-    case SC_FLOOD:
-        well_done = spell_type_flood(spell, p);
-        break;
-
-        /* effect occurs like an explosion */
-    case SC_BLAST:
-        well_done = spell_type_blast(spell, p);
-        break;
-
-    case SC_OTHER:  /* unclassified */
-
-        switch (spell->id)
-        {
-            /* cure poison */
-        case SP_CPO:
-            well_done = spell_cure_poison(p);
-            break;
-
-            /* cure blindness */
-        case SP_CBL:
-            well_done = spell_cure_blindness(p);
-            break;
-
-            /* create monster */
-        case SP_CRE:
-            well_done = spell_create_monster(p);
-            break;
-
-            /* phantasmal forces */
-        case SP_PHA:
-            well_done = spell_phantasmal_forces(spell, p);
-            break;
-
-            /* vaporize rock */
-        case SP_VPR:
-            well_done = spell_vaporize_rock(p);
-            break;
-
-            /* scare monsters */
-        case SP_SCA:
-            well_done = spell_scare_monsters(spell, p);
-            break;
-
-            /* make wall */
-        case SP_MKW:
-            well_done = spell_make_wall(p);
-            break;
-
-            /* sphere of annihilation */
-        case SP_SPH:
-            well_done = spell_create_sphere(spell, p);
-            break;
-
-            /* summon demon */
-        case SP_SUM:
-            well_done = spell_summon_demon(spell, p);
-            break;
-
-            /* alter reality */
-        case SP_ALT:
-            well_done = spell_alter_reality(p);
-            if (!well_done)
-                log_add_entry(nlarn->log, spell_msg_fail_by_id(spell->id));
-            break;
-        }
-        break;
-
-    case SC_NONE:
-    case SC_MAX:
-        log_add_entry(nlarn->log, "Internal Error in %s:%d.", __FILE__, __LINE__);
-        break;
-    }
-
-    if (!well_done)
-        return 0;
-
-    if (well_done)
-    {
-        /* spell has been cast successfully, set mp usage accordingly */
-        player_mp_lose(p, spell_level(spell));
-
-        /* increase number of spells cast */
-        p->stats.spells_cast++;
-
-        /* increase usage counter for this specific spell */
-        spell->used++;
-    }
-
-    return turns;
+    return spell_cast(p, last_spell);
 }
 
 int spell_learn(player *p, guint spell_type)
@@ -1916,6 +1800,148 @@ item_usage_result book_read(struct player *p, item *book)
     }
 
     return result;
+}
+
+static int spell_cast(player *p, spell *spell)
+{
+    int turns = 0;
+    gboolean well_done = FALSE;
+
+    /* insufficient mana */
+    if (p->mp < spell_level(spell))
+    {
+        log_add_entry(nlarn->log, "You lack the power to cast %s.",
+                      spell_name(spell));
+
+        return 0;
+    }
+    else if (spell_success_value(p, spell) < 1)
+    {
+        log_add_entry(nlarn->log, "This spell is too difficult for you.");
+        return 0;
+    }
+
+    log_add_entry(nlarn->log, "You cast %s.", spell_name(spell));
+
+    /* time usage */
+    turns = 1;
+
+    /* bad luck, low intelligence */
+    if (chance(1) || spell_success_value(p, spell) < rand_1n(16))
+    {
+        log_add_entry(nlarn->log, "It didn't work!");
+        player_mp_lose(p, spell_level(spell));
+
+        return turns;
+    }
+
+    switch (spell_type(spell))
+    {
+        /* spells that cause an effect on the player */
+    case SC_PLAYER:
+        well_done = spell_type_player(spell, p);
+        break;
+
+        /* spells that cause an effect on a monster */
+    case SC_POINT:
+        well_done = spell_type_point(spell, p);
+        break;
+
+        /* creates a ray */
+    case SC_RAY:
+        well_done = spell_type_ray(spell, p);
+        break;
+
+        /* effect pours like water */
+    case SC_FLOOD:
+        well_done = spell_type_flood(spell, p);
+        break;
+
+        /* effect occurs like an explosion */
+    case SC_BLAST:
+        well_done = spell_type_blast(spell, p);
+        break;
+
+    case SC_OTHER:  /* unclassified */
+
+        switch (spell->id)
+        {
+            /* cure poison */
+        case SP_CPO:
+            well_done = spell_cure_poison(p);
+            break;
+
+            /* cure blindness */
+        case SP_CBL:
+            well_done = spell_cure_blindness(p);
+            break;
+
+            /* create monster */
+        case SP_CRE:
+            well_done = spell_create_monster(p);
+            break;
+
+            /* phantasmal forces */
+        case SP_PHA:
+            well_done = spell_phantasmal_forces(spell, p);
+            break;
+
+            /* vaporize rock */
+        case SP_VPR:
+            well_done = spell_vaporize_rock(p);
+            break;
+
+            /* scare monsters */
+        case SP_SCA:
+            well_done = spell_scare_monsters(spell, p);
+            break;
+
+            /* make wall */
+        case SP_MKW:
+            well_done = spell_make_wall(p);
+            break;
+
+            /* sphere of annihilation */
+        case SP_SPH:
+            well_done = spell_create_sphere(spell, p);
+            break;
+
+            /* summon demon */
+        case SP_SUM:
+            well_done = spell_summon_demon(spell, p);
+            break;
+
+            /* alter reality */
+        case SP_ALT:
+            well_done = spell_alter_reality(p);
+            if (!well_done)
+                log_add_entry(nlarn->log, spell_msg_fail_by_id(spell->id));
+            break;
+        }
+        break;
+
+    case SC_NONE:
+    case SC_MAX:
+        log_add_entry(nlarn->log, "Internal Error in %s:%d.", __FILE__, __LINE__);
+        break;
+    }
+
+    if (!well_done)
+        return 0;
+
+    if (well_done)
+    {
+        /* spell has been cast successfully, set mp usage accordingly */
+        player_mp_lose(p, spell_level(spell));
+
+        /* increase number of spells cast */
+        p->stats.spells_cast++;
+
+        /* increase usage counter for this specific spell */
+        spell->used++;
+    }
+
+    return turns;
 }
 
 static void spell_print_success_message(spell *s, monster *m)

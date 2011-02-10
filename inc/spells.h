@@ -126,7 +126,15 @@ int spell_sort(gconstpointer a, gconstpointer b);
  * @param the player
  * @return number of turns elapsed
  */
-int spell_cast(struct player *p);
+int spell_cast_new(struct player *p);
+
+/**
+ * Cast the previous spell again
+ *
+ * @param the player
+ * @return number of turns elapsed
+ */
+int spell_cast_previous(struct player *p);
 
 /**
  * Try to add a spell to the list of known spells

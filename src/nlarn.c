@@ -400,7 +400,12 @@ int main(int argc, char *argv[])
 
             /* work magic */
         case 'm':
-            moves_count = spell_cast(nlarn->p);
+            moves_count = spell_cast_new(nlarn->p);
+            break;
+
+            /* recast previous spell */
+        case 'M':
+            moves_count = spell_cast_previous(nlarn->p);
             break;
 
             /* read something */
