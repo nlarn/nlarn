@@ -772,8 +772,8 @@ effect *effect_add(GPtrArray *ea, effect *ne)
 
     assert(ea != NULL && ne != NULL);
 
-    /* check for existing effects */
-    if ((e = effect_get(ea, ne->type)))
+    /* check for existing effects unless the effect belongs to an item */
+    if (!ne->item && (e = effect_get(ea, ne->type)))
     {
         gboolean modified_existing = FALSE;
 
