@@ -2562,7 +2562,8 @@ position display_get_new_position(player *p,
             /* if a passable position has been requested check if it
                actually is passable. Only known positions are allowed. */
             if (passable
-                && (!(player_memory_of(nlarn->p, pos).type > LT_NONE)
+                && (!(player_memory_of(nlarn->p, pos).type > LT_NONE
+                      || game_wizardmode(nlarn))
                     || !map_pos_passable(map, pos)))
             {
                 if (!beep()) flash();
@@ -2576,7 +2577,7 @@ position display_get_new_position(player *p,
             {
                 flash();
             }
-            else
+            else if (mlist != NULL)
             {
                 /* jump to the next list entry or to the start of
                    the list if the end has been reached */
