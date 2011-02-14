@@ -26,6 +26,7 @@
 typedef enum item_types {
     IT_NONE,
     IT_AMULET,          /* amulet, defined in amulets.h */
+    IT_AMMO,            /* ammunition, defined in weapons.h */
     IT_ARMOUR,          /* armour, defined in armour.h */
     IT_BOOK,            /* book, defined in spells.h */
     IT_CONTAINER,       /* container, defined in container.h */
@@ -49,6 +50,7 @@ typedef enum item_material_t {
     IM_BONE,
     /* materials up to here can burn */
     IM_DRAGON_HIDE,     /* not leather! */
+    IM_LEAD,
     IM_IRON,            /* Fe, can rust/corrode */
     IM_STEEL,           /* stainless steel */
     IM_COPPER,          /* Cu - includes brass */
@@ -57,6 +59,7 @@ typedef enum item_material_t {
     IM_PLATINUM,        /* Pt */
     IM_MITHRIL,
     IM_GLASS,
+    IM_STONE,
     IM_GEMSTONE,
     IM_MAX              /* ~ item material count */
 } item_material_t;

@@ -1148,7 +1148,7 @@ int monster_items_pickup(monster *m)
                 item *mweapon = game_item_get(nlarn, m->weapon);
 
                 /* compare this weapon with the weapon the monster wields */
-                if (mweapon == NULL || (weapon_wc(mweapon) < weapon_wc(it)))
+                if (mweapon == NULL || (weapon_damage(mweapon) < weapon_damage(it)))
                     pick_up = TRUE;
             }
         }
@@ -1420,7 +1420,7 @@ void monster_player_attack(monster *m, player *p)
         item *weapon = game_item_get(nlarn, m->weapon);
 
         /* make monster size affect weapon damage */
-        dam->amount  = rand_1n(weapon_wc(weapon) + game_difficulty(nlarn)
+        dam->amount  = rand_1n(weapon_damage(weapon) + game_difficulty(nlarn)
                                + 2*(monster_size(m) - ESIZE_MEDIUM));
     }
     else if (dam->type == DAM_PHYSICAL)
@@ -2088,7 +2088,7 @@ static item *monster_weapon_select(monster *m)
             {
                 best = curr;
             }
-            else if (weapon_wc(curr) > weapon_wc(best))
+            else if (weapon_damage(curr) > weapon_damage(best))
             {
                 best = curr;
             }

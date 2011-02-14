@@ -373,6 +373,14 @@ cJSON *player_serialize(player *p)
         cJSON_AddNumberToObject(pser, "eq_weapon",
                                 GPOINTER_TO_UINT(p->eq_weapon->oid));
 
+    if (p->eq_sweapon)
+        cJSON_AddNumberToObject(pser, "eq_sweapon",
+                                GPOINTER_TO_UINT(p->eq_sweapon->oid));
+
+    if (p->eq_quiver)
+        cJSON_AddNumberToObject(pser, "eq_quiver",
+                                GPOINTER_TO_UINT(p->eq_quiver->oid));
+
     if (p->eq_boots)
         cJSON_AddNumberToObject(pser, "eq_boots",
                                 GPOINTER_TO_UINT(p->eq_boots->oid));
@@ -577,6 +585,12 @@ player *player_deserialize(cJSON *pser)
 
     obj = cJSON_GetObjectItem(pser, "eq_weapon");
     if (obj != NULL) p->eq_weapon = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
+
+    obj = cJSON_GetObjectItem(pser, "eq_sweapon");
+    if (obj != NULL) p->eq_sweapon = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
+
+    obj = cJSON_GetObjectItem(pser, "eq_quiver");
+    if (obj != NULL) p->eq_quiver = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     obj = cJSON_GetObjectItem(pser, "eq_boots");
     if (obj != NULL) p->eq_boots = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
@@ -1661,25 +1675,6 @@ int player_move(player *p, direction dir, gboolean open_door)
     return times;
 }
 
-static int calc_to_hit(player *p, monster *m)
-{
-    const int to_hit = p->level
-                       + max(0, player_get_dex(p) - 12)
-                       + (p->eq_weapon ? weapon_acc(p->eq_weapon) : 0)
-                       + (player_get_speed(p) / 25)
-                       - monster_ac(m)
-                       - (monster_speed(m) / 25);
-
-    if (to_hit < 1)
-        return 0;
-
-    if (to_hit >= 20)
-        return 100;
-
-    /* roll the dice */
-    return (5 * to_hit);
-}
-
 static int calc_max_damage(player *p, monster *m)
 {
     const int damage = player_get_str(p)
@@ -1783,7 +1778,7 @@ int player_attack(player *p, monster *m)
         return 1;
     }
 
-    if (chance(5) || chance(calc_to_hit(p, m)))
+    if (chance(5) || chance(weapon_calc_to_hit(p, m, NULL)))
     {
         damage *dam;
         effect *e;
@@ -3110,6 +3105,123 @@ void player_inv_weight_recalc(inventory *inv, item *item)
     }
 }
 
+void player_paperdoll(player *p)
+{
+    gchar desc[81];
+    GString *pdm = g_string_new(NULL);
+
+    /* amulet */
+    if(p->eq_amulet)
+    {
+        item_describe(p->eq_amulet, player_item_known(p, p->eq_amulet),
+                      p->eq_amulet->count, FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Around neck:`end` %s\n", desc);
+    }
+
+    /* main weapon */
+    if(p->eq_weapon)
+    {
+        item_describe(p->eq_weapon, player_item_known(p, p->eq_weapon),
+                      (p->eq_weapon->count == 1), FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Main weapon:`end` %s\n", desc);
+    }
+
+    /* secondary weapon */
+    if(p->eq_sweapon)
+    {
+        item_describe(p->eq_sweapon, player_item_known(p, p->eq_sweapon),
+                      (p->eq_sweapon->count == 1), FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Sec. weapon:`end` %s\n", desc);
+    }
+
+    /* quiver */
+    if(p->eq_quiver)
+    {
+        item_describe(p->eq_quiver, player_item_known(p, p->eq_quiver),
+                      (p->eq_quiver->count == 1), FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`In quiver:`end`   %s\n", desc);
+    }
+
+    /* boots */
+    if(p->eq_boots)
+    {
+        item_describe(p->eq_boots, player_item_known(p, p->eq_boots),
+                      p->eq_boots->count, FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Boots:`end`       %s\n", desc);
+    }
+
+    /* cloak */
+    if(p->eq_cloak)
+    {
+        item_describe(p->eq_cloak, player_item_known(p, p->eq_cloak),
+                      p->eq_cloak->count, FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Cloak:`end`       %s\n", desc);
+    }
+
+    /* gloves */
+    if(p->eq_gloves)
+    {
+        item_describe(p->eq_gloves, player_item_known(p, p->eq_gloves),
+                      p->eq_gloves->count, FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Gloves:`end`      %s\n", desc);
+    }
+
+    /* helmet */
+    if(p->eq_helmet)
+    {
+        item_describe(p->eq_helmet, player_item_known(p, p->eq_helmet),
+                      p->eq_helmet->count, FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Helmet:`end`      %s\n", desc);
+    }
+
+    /* shield */
+    if(p->eq_shield)
+    {
+        item_describe(p->eq_shield, player_item_known(p, p->eq_shield),
+                      p->eq_shield->count, FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Shield:`end`      %s\n", desc);
+    }
+
+    /* body armour */
+    if(p->eq_suit)
+    {
+        item_describe(p->eq_suit, player_item_known(p, p->eq_suit),
+                      p->eq_suit->count, FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Body armour:`end` %s\n", desc);
+    }
+
+    /* left ring */
+    if(p->eq_ring_l)
+    {
+        item_describe(p->eq_ring_l, player_item_known(p, p->eq_ring_l),
+                      p->eq_ring_l->count, FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Left ring:`end`   %s\n", desc);
+    }
+
+    /* right ring */
+    if(p->eq_ring_r)
+    {
+        item_describe(p->eq_ring_r, player_item_known(p, p->eq_ring_r),
+                      p->eq_ring_r->count, FALSE, desc, 80);
+
+        g_string_append_printf(pdm, "`white`Right ring:`end`  %s\n", desc);
+    }
+
+    display_show_message("Worn equipment", pdm->str, 0);
+    g_string_free(pdm, TRUE);
+}
+
 void player_item_equip(player *p, inventory **inv, item *it)
 {
     item **islot = NULL;  /* pointer to chosen item slot */
@@ -3141,41 +3253,55 @@ void player_item_equip(player *p, inventory **inv, item *it)
         }
         break;
 
-    case IT_ARMOUR:
-        switch (armour_category(it))
+    case IT_AMMO:
+        if (p->eq_quiver == NULL)
         {
-        case AC_BOOTS:
+            item_describe(it, player_item_known(p, it), (it->count == 1),
+                          TRUE, description, 60);
+
+            if (!player_make_move(p, 2, TRUE, "putting %s into the quiver", description))
+                return; /* interrupted */
+
+            p->eq_quiver = it;
+            log_add_entry(nlarn->log, "You put %s into your quiver.", description);
+        }
+        break;
+
+    case IT_ARMOUR:
+        switch (armour_class(it))
+        {
+        case ARMOUR_BOOTS:
             islot = &(p->eq_boots);
             time = 3;
             break;
 
-        case AC_CLOAK:
+        case ARMOUR_CLOAK:
             islot = &(p->eq_cloak);
             time = 2;
             break;
 
-        case AC_GLOVES:
+        case ARMOUR_GLOVES:
             islot = &(p->eq_gloves);
             time = 3;
             break;
 
-        case AC_HELMET:
+        case ARMOUR_HELMET:
             islot = &(p->eq_helmet);
             time = 2;
             break;
 
-        case AC_SHIELD:
+        case ARMOUR_SHIELD:
             islot = &(p->eq_shield);
             time = 2;
             break;
 
-        case AC_SUIT:
+        case ARMOUR_SUIT:
             islot = &(p->eq_suit);
             time = it->id + 1;
             break;
 
-        case AC_NONE:
-        case AC_MAX:
+        case ARMOUR_NONE:
+        case ARMOUR_MAX:
             /* shouldn't happen */
             break;
         }
@@ -3240,6 +3366,12 @@ void player_item_equip(player *p, inventory **inv, item *it)
         break;
 
     case IT_WEAPON:
+        if (p->eq_weapon != NULL && p->eq_sweapon == NULL)
+        {
+            /* make the primary weapon the secondary one */
+            weapon_swap(p);
+        }
+
         if (p->eq_weapon == NULL)
         {
             item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
@@ -3286,8 +3418,7 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
     /* the idea behind the time values: one turn to take one item off,
        one turn to get the item out of the pack */
 
-    item_describe(it, player_item_known(p, it), TRUE, TRUE, desc, 60);
-
+    item_describe(it, player_item_known(p, it), (it->count == 1), TRUE, desc, 60);
 
     switch (it->type)
     {
@@ -3320,40 +3451,51 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
         }
         break;
 
+    case IT_AMMO:
+        if (p->eq_quiver != NULL)
+        {
+            if (!player_make_move(p, 2, TRUE, "taking %s out of the quiver", desc))
+                return; /* interrupted */
+
+            log_add_entry(nlarn->log, "You take %s out your quiver.", desc);
+            p->eq_quiver = NULL;
+        }
+        break;
+
         /* take off armour */
     case IT_ARMOUR:
     {
         int time = 0;
         item **aslot = NULL;  /* pointer to armour slot */
 
-        switch (armour_category(it))
+        switch (armour_class(it))
         {
-        case AC_BOOTS:
+        case ARMOUR_BOOTS:
             aslot = &(p->eq_boots);
             time = 3;
             break;
 
-        case AC_CLOAK:
+        case ARMOUR_CLOAK:
             aslot = &(p->eq_cloak);
             time = 2;
             break;
 
-        case AC_GLOVES:
+        case ARMOUR_GLOVES:
             aslot = &(p->eq_gloves);
             time = 3;
             break;
 
-        case AC_HELMET:
+        case ARMOUR_HELMET:
             aslot = &(p->eq_helmet);
             time = 2;
             break;
 
-        case AC_SHIELD:
+        case ARMOUR_SHIELD:
             aslot = &(p->eq_shield);
             time = 2;
             break;
 
-        case AC_SUIT:
+        case ARMOUR_SUIT:
             aslot = &(p->eq_suit);
             /* the better the armour, the longer it takes to get out of it */
             time = (p->eq_suit)->type + 1;
@@ -3429,24 +3571,31 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
     break;
 
     case IT_WEAPON:
-        if (p->eq_weapon != NULL)
         {
-            if (forced || !p->eq_weapon->cursed)
+            item **wslot = NULL;
+
+            if (p->eq_weapon && it == p->eq_weapon)
+                wslot = &(p->eq_weapon);
+
+            if (p->eq_sweapon && it == p->eq_sweapon)
+                wslot = &(p->eq_sweapon);
+
+            /* wslot mustn't be NULL or there is something seriously wrong */
+            assert(wslot != NULL);
+
+            if (forced || !(*wslot)->cursed)
             {
                 if (!forced)
                 {
                     log_add_entry(nlarn->log, "You put away %s.", desc);
 
-                    if (!player_make_move(p, 2 + weapon_is_twohanded(p->eq_weapon),
+                    if (!player_make_move(p, 2 + weapon_is_twohanded(*wslot),
                                           TRUE, "putting %s away", desc))
                         return; /* interrupted */
                 }
 
-                if (p->eq_weapon)
-                {
-                    player_effects_del(p, p->eq_weapon->effects);
-                    p->eq_weapon = NULL;
-                }
+                player_effects_del(p, (*wslot)->effects);
+                *wslot = NULL;
             }
             else
             {
@@ -3550,6 +3699,12 @@ int player_item_is_equipped(player *p, item *it)
     if (it == p->eq_weapon)
         return TRUE;
 
+    if (it == p->eq_quiver)
+        return TRUE;
+
+    if (it == p->eq_sweapon)
+        return TRUE;
+
     return FALSE;
 }
 
@@ -3567,41 +3722,45 @@ int player_item_is_equippable(player *p, item *it)
     if ((it->type == IT_AMULET) && (p->eq_amulet))
         return FALSE;
 
+    /* ammo */
+    if ((it->type == IT_AMMO) && (p->eq_quiver))
+        return FALSE;
+
     /* armour */
     if ((it->type == IT_ARMOUR)
-            && (armour_category(it) == AC_BOOTS)
+            && (armour_class(it) == ARMOUR_BOOTS)
             && (p->eq_boots))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_category(it) == AC_CLOAK)
+            && (armour_class(it) == ARMOUR_CLOAK)
             && (p->eq_cloak))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_category(it) == AC_GLOVES)
+            && (armour_class(it) == ARMOUR_GLOVES)
             && (p->eq_gloves))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_category(it) == AC_HELMET)
+            && (armour_class(it) == ARMOUR_HELMET)
             && (p->eq_helmet))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_category(it) == AC_SHIELD)
+            && (armour_class(it) == ARMOUR_SHIELD)
             && (p->eq_shield))
         return FALSE;
 
     /* shield / two-handed weapon combination */
     if (it->type == IT_ARMOUR
-            && (armour_category(it) == AC_SHIELD)
+            && (armour_class(it) == ARMOUR_SHIELD)
             && (p->eq_weapon)
             && weapon_is_twohanded(p->eq_weapon))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_category(it) == AC_SUIT)
+            && (armour_class(it) == ARMOUR_SUIT)
             && (p->eq_suit))
         return FALSE;
 
@@ -3610,7 +3769,9 @@ int player_item_is_equippable(player *p, item *it)
         return FALSE;
 
     /* weapons */
-    if ((it->type == IT_WEAPON) && (p->eq_weapon))
+    if ((it->type == IT_WEAPON) &&
+        ((p->eq_weapon && p->eq_sweapon)
+         || (p->eq_weapon && p->eq_weapon->cursed)))
         return FALSE;
 
     /* twohanded weapon / shield combinations */
@@ -4185,7 +4346,7 @@ int player_get_wc(player *p, monster *m)
 
     if (p->eq_weapon != NULL)
     {
-        wc += weapon_wc(p->eq_weapon);
+        wc += weapon_damage(p->eq_weapon);
         // Blessed weapons do 50% bonus damage against demons and undead.
         if (p->eq_weapon->blessed
                 && (monster_flags(m, MF_DEMON) || monster_flags(m, MF_UNDEAD)))
@@ -4972,7 +5133,7 @@ void calc_fighting_stats(player *p)
                            "  speed          : %d\n"
                            "  difficulty     : %d\n\n",
                            (p->eq_weapon ? desc : "none"),
-                           (p->eq_weapon ? weapon_wc(p->eq_weapon) : 0),
+                           (p->eq_weapon ? weapon_damage(p->eq_weapon) : 0),
                            (p->eq_weapon ? weapon_acc(p->eq_weapon) : 0),
                            p->level,
                            player_get_str(p),
@@ -4996,7 +5157,7 @@ void calc_fighting_stats(player *p)
                                    monster_name(m));
             continue;
         }
-        int to_hit  = calc_to_hit(p, m);
+        int to_hit  = weapon_calc_to_hit(p, m, NULL);
         to_hit += ((100 - to_hit) * 5)/100;
 
         const int instakill_chance = player_instakill_chance(p, m);

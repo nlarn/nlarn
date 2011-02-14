@@ -131,6 +131,8 @@ typedef struct player
     /* pointers to elements of items which are currently equipped */
     item *eq_amulet;
     item *eq_weapon;
+    item *eq_sweapon;
+    item *eq_quiver;
 
     /* armour */
     item *eq_boots;
@@ -325,6 +327,12 @@ int player_inv_pre_add(inventory *inv, item *item);
  */
 void player_inv_weight_recalc(inventory *inv, item *item);
 
+/**
+ * @brief Display a message window with a list of equipped items
+ *
+ * @param The player.
+ */
+void player_paperdoll(player *p);
 
 /* dealing with items */
 

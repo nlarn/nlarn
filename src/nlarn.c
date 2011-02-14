@@ -428,6 +428,11 @@ int main(int argc, char *argv[])
             player_drop(nlarn->p);
             break;
 
+            /* fire a ranged weapon */
+        case 'f':
+            moves_count = weapon_fire(nlarn->p);
+            break;
+
             /* go down stairs / enter a building */
         case '>':
             if (!(moves_count = player_stairs_down(nlarn->p)))
@@ -515,6 +520,11 @@ int main(int argc, char *argv[])
                           __DATE__);
             break;
 
+            /* swap weapons */
+        case 'x':
+            weapon_swap(nlarn->p);
+            break;
+
         case '\\':
             if ((strbuf = player_item_identified_list(nlarn->p)))
             {
@@ -585,6 +595,11 @@ int main(int argc, char *argv[])
             moves_count = player_fountain_wash(nlarn->p);
             break;
 
+            /* "paperdoll" */
+        case KEY_TAB:
+            player_paperdoll(nlarn->p);
+            break;
+
             /* redraw screen */
         case 12: /* ^L */
             clear();
@@ -612,22 +627,6 @@ int main(int argc, char *argv[])
             }
             break;
 
-            /* interact with the Lua interpreter */
-        case KEY_TAB:
-            if (!game_wizardmode(nlarn)) break;
-
-            strbuf = display_get_string("Interact with the Lua interpreter", NULL, 60);
-            if (!strbuf) break;
-
-            if (luaL_dostring(nlarn->L, strbuf))
-            {
-                log_add_entry(nlarn->log, "E: %s", lua_tostring(nlarn->L, -1));
-                lua_pop(nlarn->L, 1);
-            }
-
-            g_free(strbuf);
-            break;
-
             /* enable wizard mode */
         case 23: /* ^W */
             if (!game_wizardmode(nlarn))
@@ -647,6 +646,22 @@ int main(int argc, char *argv[])
             break;
 
             /* *** DEBUGGING SUPPORT *** */
+
+            /* interact with the Lua interpreter */
+        case 5: /* ^E */
+            if (!game_wizardmode(nlarn)) break;
+
+            strbuf = display_get_string("Interact with the Lua interpreter", NULL, 60);
+            if (!strbuf) break;
+
+            if (luaL_dostring(nlarn->L, strbuf))
+            {
+                log_add_entry(nlarn->log, "E: %s", lua_tostring(nlarn->L, -1));
+                lua_pop(nlarn->L, 1);
+            }
+
+            g_free(strbuf);
+            break;
 
             /* toggle visibility of entire map in wizard mode */
         case 22: /* ^V */
@@ -695,7 +710,8 @@ int main(int argc, char *argv[])
             }
             break;
 
-        case 'x': /* gain experience level */
+            /* gain experience level */
+        case 24:  /* ^X */
             if (game_wizardmode(nlarn))
                 player_level_gain(nlarn->p, 1);
 

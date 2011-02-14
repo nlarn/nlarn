@@ -12,54 +12,57 @@ Running means moving into one direction until interrupted. `lightgreen`g`end` or
 
 `yellow`Autotravel`end`
 
-`lightgreen`C`end`  continue travelling  
-`lightgreen`T`end`  travel somewhere on the level
+`lightgreen`C`end`   continue travelling  
+`lightgreen`T`end`   travel somewhere on the level
 
 You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. _ for altar).
 
 
 `yellow`Other actions`end`
 
-`lightgreen`A`end`  desecrate an altar
-`lightgreen`c`end`  close a door
-`lightgreen`d`end`  drop domething
-`lightgreen`D`end`  list discovered landmarks
-`lightgreen`e`end`  equip an item
-`lightgreen`g`end`  move until something interesting is found
-`lightgreen`i`end`  open the inventory window
-`lightgreen`m`end`  work magic (cast a spell)
-`lightgreen`M`end`  cast the previous spell again
-`lightgreen`o`end`  open a door or chest
-`lightgreen`p`end`  pray at an altar
-`lightgreen`P`end`  give tax status
-`lightgreen`q`end`  drink a potion or at a fountain
-`lightgreen`r`end`  read something
-`lightgreen`R`end`  remove gems from throne
-`lightgreen`S`end`  sit on a throne
-`lightgreen`t`end`  take an item off
-`lightgreen`v`end`  print program version
-`lightgreen`w`end`  wait/rest up to one mobul or until healed
-`lightgreen`W`end`  wash yourself at a fountain
+`lightgreen`A`end`   desecrate an altar
+`lightgreen`c`end`   close a door
+`lightgreen`d`end`   drop domething
+`lightgreen`D`end`   list discovered landmarks
+`lightgreen`e`end`   equip an item
+`lightgreen`f`end`   fire ranged weapon
+`lightgreen`g`end`   move until something interesting is found
+`lightgreen`i`end`   open the inventory window
+`lightgreen`m`end`   work magic (cast a spell)
+`lightgreen`M`end`   cast the previous spell again
+`lightgreen`o`end`   open a door or chest
+`lightgreen`p`end`   pray at an altar
+`lightgreen`P`end`   give tax status
+`lightgreen`q`end`   drink a potion or at a fountain
+`lightgreen`r`end`   read something
+`lightgreen`R`end`   remove gems from throne
+`lightgreen`S`end`   sit on a throne
+`lightgreen`t`end`   take an item off
+`lightgreen`v`end`   print program version
+`lightgreen`w`end`   wait/rest up to one mobul or until healed
+`lightgreen`W`end`   wash yourself at a fountain
+`lightgreen`x`end`   exchange primary/secondary weapon
 
-`lightgreen`<`end`  climb up stairs/volcanic shaft or enter a building
-`lightgreen`>`end`  climb down stairs/volcanic shaft
-`lightgreen`,`end`  pick up item
-`lightgreen`$`end`  show bank account balance
-`lightgreen`:`end`  look at the location you are standing on
-`lightgreen`;`end`  look at another location
-`lightgreen`.`end`  rest one turn (alternate key: `lightgreen`5`end`)
-`lightgreen`\`end`  show list of identified objects
-`lightgreen`?`end`  this help screen (alternate key: `lightgreen`F1`end`)
-`lightgreen`@`end`  toggle auto-pickup settings
+`lightgreen`<`end`   climb up stairs/volcanic shaft or enter a building
+`lightgreen`>`end`   climb down stairs/volcanic shaft
+`lightgreen`,`end`   pick up item
+`lightgreen`$`end`   show bank account balance
+`lightgreen`:`end`   look at the location you are standing on
+`lightgreen`;`end`   look at another location
+`lightgreen`.`end`   rest one turn (alternate key: `lightgreen`5`end`)
+`lightgreen`\`end`   show list of identified objects
+`lightgreen`?`end`   this help screen (alternate key: `lightgreen`F1`end`)
+`lightgreen`@`end`   toggle auto-pickup settings
 
 
 `yellow`Control Keys`end`
 
-`lightgreen`^L`end` redraw the screen
-`lightgreen`^Q`end` quit the game
-`lightgreen`^R`end` recall message history
-`lightgreen`^S`end` save and exit the game
-`lightgreen`^W`end` activate wizard mode
+`lightgreen`TAB`end` show worn equipment
+`lightgreen`^L`end`  redraw the screen
+`lightgreen`^Q`end`  quit the game
+`lightgreen`^R`end`  recall message history
+`lightgreen`^S`end`  save and exit the game
+`lightgreen`^W`end`  activate wizard mode
 
 
 `yellow`The Inventory`end`
@@ -85,11 +88,11 @@ When opening the spell casting window by pressing (`lightgreen`m`end`) you'll ge
 
 `yellow`Wizard Mode Actions`end`
 
-`lightgreen`+`end`     teleport down one level
-`lightgreen`-`end`     teleport up one level
-`lightgreen`^T`end`    teleport within a level
-`lightgreen`x`end`     raise experience level
-`lightgreen`*`end`     add 1000 gp to bank account
-`lightgreen`&`end`     heal yourself
-`lightgreen`^F`end`    combat simulation
-`lightgreen`^V`end`    toggle visibility of entire map
+`lightgreen`+`end`   teleport down one level
+`lightgreen`-`end`   teleport up one level
+`lightgreen`^T`end`  teleport within a level
+`lightgreen`^X`end`  raise experience level
+`lightgreen`*`end`   add 1000 gp to bank account
+`lightgreen`&`end`   heal yourself
+`lightgreen`^F`end`  combat simulation
+`lightgreen`^V`end`  toggle visibility of entire map

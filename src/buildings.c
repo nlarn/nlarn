@@ -275,7 +275,9 @@ void building_dndstore_init()
         if (type == IT_GEM || type == IT_GOLD)
             continue;
 
-        if (item_is_stackable(type) && (type != IT_BOOK))
+        if (item_is_stackable(type) && (type == IT_AMMO))
+            count = 50;
+        else if (item_is_stackable(type) && (type != IT_BOOK))
             count = 3;
         else
             count = 1;

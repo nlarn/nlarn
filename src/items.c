@@ -40,18 +40,19 @@ static const char *item_desc_get(item *it, int known);
 
 const item_type_data item_data[IT_MAX] =
 {
-    /* item_t       name_sg      name_pl        IMG  max_id           op bl co eq us st id */
-    { IT_NONE,      "",          "",            ' ', 0,               0, 0, 0, 0, 0, 0, 0, },
-    { IT_AMULET,    "amulet",    "amulets",     '"', AM_LARN,         0, 1, 0, 1, 0, 0, 1, },
-    { IT_ARMOUR,    "armour",    "armour",      '[', AT_MAX,          1, 1, 1, 1, 0, 0, 1, },
-    { IT_BOOK,      "book",      "books",       '+', SP_MAX_BOOK,     0, 1, 1, 0, 1, 1, 1, },
-    { IT_CONTAINER, "container", "containers",  ']', CT_MAX,          0, 0, 1, 0, 0, 0, 0, },
-    { IT_GEM,       "gem",       "gems",        '*', GT_MAX,          1, 0, 0, 0, 0, 1, 0, },
-    { IT_GOLD,      "coin",      "coins",       '$', 0,               0, 0, 0, 0, 0, 1, 0, },
-    { IT_POTION,    "potion",    "potions",     '!', PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, },
-    { IT_RING,      "ring",      "rings",       '=', RT_MAX,          1, 1, 1, 1, 0, 0, 1, },
-    { IT_SCROLL,    "scroll",    "scrolls",     '?', ST_MAX,          0, 1, 1, 0, 1, 1, 1, },
-    { IT_WEAPON,    "weapon",    "weapons",     '(', WT_MAX,          1, 1, 1, 1, 0, 0, 1, },
+    /* item_t       name_sg       name_pl        IMG   max_id           op bl co eq us st id */
+    { IT_NONE,      "",           "",            ' ',  0,               0, 0, 0, 0, 0, 0, 0, },
+    { IT_AMULET,    "amulet",     "amulets",     '"',  AM_LARN,         0, 1, 0, 1, 0, 0, 1, },
+    { IT_AMMO,      "ammunition", "ammunition",  '\'', AMT_MAX,         1, 1, 1, 1, 0, 1, 1, },
+    { IT_ARMOUR,    "armour",     "armour",      '[',  AT_MAX,          1, 1, 1, 1, 0, 0, 1, },
+    { IT_BOOK,      "book",       "books",       '+',  SP_MAX_BOOK,     0, 1, 1, 0, 1, 1, 1, },
+    { IT_CONTAINER, "container",  "containers",  ']',  CT_MAX,          0, 0, 1, 0, 0, 0, 0, },
+    { IT_GEM,       "gem",        "gems",        '*',  GT_MAX,          1, 0, 0, 0, 0, 1, 0, },
+    { IT_GOLD,      "coin",       "coins",       '$',  0,               0, 0, 0, 0, 0, 1, 0, },
+    { IT_POTION,    "potion",     "potions",     '!',  PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, },
+    { IT_RING,      "ring",       "rings",       '=',  RT_MAX,          1, 1, 1, 1, 0, 0, 1, },
+    { IT_SCROLL,    "scroll",     "scrolls",     '?',  ST_MAX,          0, 1, 1, 0, 1, 1, 1, },
+    { IT_WEAPON,    "weapon",     "weapons",     '(',  WT_MAX,          1, 1, 1, 1, 0, 0, 1, },
 };
 
 const item_material_data item_materials[IM_MAX] =
@@ -64,6 +65,7 @@ const item_material_data item_materials[IM_MAX] =
     { IM_WOOD,        "wood",        "wooden",   DC_BROWN     },
     { IM_BONE,        "bone",        "osseous",  DC_DARKGRAY  },
     { IM_DRAGON_HIDE, "dragon hide", "scabby",   DC_GREEN     },
+    { IM_LEAD,        "lead",        "leady",    DC_DARKGRAY  },
     { IM_IRON,        "iron",        "irony",    DC_LIGHTGRAY },
     { IM_STEEL,       "steel",       "steely",   DC_WHITE     },
     { IM_COPPER,      "copper",      "cupreous", DC_BROWN     },
@@ -72,6 +74,7 @@ const item_material_data item_materials[IM_MAX] =
     { IM_PLATINUM,    "platinum",    "platinum", DC_WHITE     },
     { IM_MITHRIL,     "mitril",      "mithrial", DC_LIGHTGRAY },
     { IM_GLASS,       "glass",       "vitreous", DC_LIGHTCYAN },
+    { IM_STONE,       "stone",       "stony",    DC_WHITE     },
     { IM_GEMSTONE,    "gemstone",    "gemstone", DC_RED       },
 };
 
@@ -250,6 +253,9 @@ item *item_new_random(item_t item_type, gboolean finetouch)
     }
     item_id = rand_m_n(min_id, max_id);
     it = item_new(item_type, item_id);
+
+    if (item_type == IT_AMMO)
+        it->count = rand_m_n(10, 50);
 
     if (finetouch)
         item_new_finetouch(it);
@@ -642,6 +648,16 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
             g_string_append_printf(desc, "%s amulet", item_desc_get(it, known));
         break;
 
+    case IT_AMMO:
+        g_string_append_printf(desc, "%s%s", item_desc_get(it, known),
+                               (!singular && it->count > 1) ? "s" : "");
+
+        if (it->bonus_known)
+        {
+            g_string_append_printf(desc, " %+d", it->bonus);
+        }
+        break;
+
     case IT_ARMOUR:
         g_string_append(desc, item_desc_get(it, known));
 
@@ -809,6 +825,10 @@ item_material_t item_material(item *it)
         material = amulet_material(it->id);
         break;
 
+    case IT_AMMO:
+        material = ammo_material(it);
+        break;
+
     case IT_ARMOUR:
         material = armour_material(it);
         break;
@@ -862,6 +882,10 @@ guint item_base_price(item *it)
     {
     case IT_AMULET:
         price = amulet_price(it);
+        break;
+
+    case IT_AMMO:
+        price = ammo_price(it);
         break;
 
     case IT_ARMOUR:
@@ -959,6 +983,10 @@ int item_weight(item *it)
         return 150;
         break;
 
+    case IT_AMMO:
+        return it->count * ammo_weight(it);
+        break;
+
     case IT_ARMOUR:
         return armour_weight(it);
         break;
@@ -1010,6 +1038,7 @@ int item_colour(item *it)
     switch (it->type)
     {
     case IT_AMULET:
+    case IT_AMMO:
     case IT_ARMOUR:
     case IT_RING:
     case IT_WEAPON:
@@ -1372,6 +1401,10 @@ int item_obtainable(item_t type, int id)
 
     switch (type)
     {
+    case IT_AMMO:
+        obtainable = ammo_t_obtainable(id);
+        break;
+
     case IT_ARMOUR:
         obtainable = TRUE;
         break;
@@ -1415,6 +1448,25 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop)
 
     switch (it->type)
     {
+    case IT_AMMO:
+        g_string_append_printf(desc, "Ammunition for %ss\n",
+                               ammo_class_name[ammo_class(it)]);
+
+        if (it->bonus_known)
+        {
+            g_string_append_printf(desc, "Damage: +%d\n"
+                                   "Accuracy: +%d\n",
+                                   ammo_damage(it), ammo_accuracy(it));
+        }
+        else
+        {
+            g_string_append_printf(desc, "Base damage: +%d\n"
+                                   "Base accuracy: +%d\n",
+                                   ammo_base_damage(it), ammo_base_accuracy(it));
+        }
+
+        break;
+
     case IT_BOOK:
         if (known)
         {
@@ -1423,23 +1475,28 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop)
                                    spell_level_by_id(it->id));
         }
         break;
+
     case IT_WEAPON:
         if (weapon_is_twohanded(it))
             g_string_append_printf(desc, "Two-handed weapon\n");
+
+        if (weapon_is_ranged(it))
+            g_string_append_printf(desc, "Ranged weapon\n");
 
         if (it->bonus_known)
         {
             g_string_append_printf(desc, "Damage: +%d\n"
                                    "Accuracy: +%d\n",
-                                   weapon_wc(it), weapon_acc(it));
+                                   weapon_damage(it), weapon_acc(it));
         }
         else
         {
             g_string_append_printf(desc, "Base damage: +%d\n"
                                    "Base accuracy: +%d\n",
-                                   weapon_base_wc(it), weapon_base_acc(it));
+                                   weapon_base_damage(it), weapon_base_acc(it));
         }
         break;
+
     case IT_ARMOUR:
         if (it->bonus_known)
         {
@@ -1450,6 +1507,7 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop)
             g_string_append_printf(desc, "Base AC: %d\n", armour_base_ac(it));
         }
         break;
+
     default:
         break;
     }
@@ -1903,6 +1961,10 @@ static const char *item_desc_get(item *it, int known)
             return amulet_name(it);
         else
             return item_material_adjective(item_material(it));
+        break;
+
+    case IT_AMMO:
+        return ammo_name(it);
         break;
 
     case IT_ARMOUR:

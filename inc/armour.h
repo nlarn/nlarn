@@ -21,47 +21,50 @@
 
 #include "items.h"
 
-typedef enum armour_categories {
-	AC_NONE,
-	AC_BOOTS,
-	AC_CLOAK,
-	AC_GLOVES,
-	AC_HELMET,
-	AC_SHIELD,
-	AC_SUIT,
-	AC_MAX
-} armour_cat;
+typedef enum _armour_class
+{
+    ARMOUR_NONE,
+    ARMOUR_BOOTS,
+    ARMOUR_CLOAK,
+    ARMOUR_GLOVES,
+    ARMOUR_HELMET,
+    ARMOUR_SHIELD,
+    ARMOUR_SUIT,
+    ARMOUR_MAX
+} armour_class;
 
-enum armour_types {
-	AT_NONE,
-	AT_LGLOVES,
-	AT_LBOOTS,
-	AT_LHELMET,
-	AT_LEATHER,
-	AT_WSHIELD,
-	AT_SLEATHER,
-	AT_RINGMAIL,
-	AT_LSHIELD,
-	AT_CHAINHOOD,
-	AT_CHAINMAIL,
-	AT_SPLINTMAIL,
-	AT_PHELMET,
-	AT_PBOOTS,
-	AT_PLATEMAIL,
-	AT_SSHIELD,
-	AT_SPLATEMAIL,
-	AT_ELVENCHAIN,
-	AT_MAX
+enum armour_types
+{
+    AT_NONE,
+    AT_LGLOVES,
+    AT_LBOOTS,
+    AT_LHELMET,
+    AT_LEATHER,
+    AT_WSHIELD,
+    AT_SLEATHER,
+    AT_RINGMAIL,
+    AT_LSHIELD,
+    AT_CHAINHOOD,
+    AT_CHAINMAIL,
+    AT_SPLINTMAIL,
+    AT_PHELMET,
+    AT_PBOOTS,
+    AT_PLATEMAIL,
+    AT_SSHIELD,
+    AT_SPLATEMAIL,
+    AT_ELVENCHAIN,
+    AT_MAX
 };
 
-typedef struct armour_data {
-	int id;
-	char *name;
-	int ac;
-    armour_cat category;
-	int	material;       /* material type from item_materials */
-	int weight;         /* used to determine inventory weight and if item can be thrown */
-	int price;          /* base price in the shops */
+typedef struct armour_data
+{
+    int id;
+    char *name;
+    int ac;
+    armour_class category;
+    int material;       /* material type from item_materials */
+    int weight;         /* used to determine inventory weight and if item can be thrown */
+    int price;          /* base price in the shops */
 } armour_data;
 
 /* external vars */
@@ -73,7 +76,7 @@ extern const armour_data armours[AT_MAX];
 #define armour_name(armour)     (armours[(armour)->id].name)
 #define armour_base_ac(armour)  (armours[(armour)->id].ac)
 #define armour_ac(armour)       (armour_base_ac(armour) + (armour)->bonus)
-#define armour_category(armour) (armours[(armour)->id].category)
+#define armour_class(armour)    (armours[(armour)->id].category)
 #define armour_material(armour) (armours[(armour)->id].material)
 #define armour_weight(armour)   (armours[(armour)->id].weight)
 #define armour_price(armour)    (armours[(armour)->id].price)

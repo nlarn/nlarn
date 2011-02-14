@@ -1342,7 +1342,7 @@ static void map_fill_with_objects(map *l)
     item *container = NULL;
 
     /* up to two pieces of armour */
-    for (i = 0; i < rand_0n(2); i++)
+    for (i = 0; i <= rand_0n(2); i++)
     {
         map_item_add(l, item_new_by_level(IT_ARMOUR, l->nlevel));
     }
@@ -1350,8 +1350,14 @@ static void map_fill_with_objects(map *l)
     /* up to two amulets on levels > 5 */
     if (l->nlevel > 5)
     {
-        for (i = 0; i < rand_0n(2); i++)
+        for (i = 0; i <= rand_0n(2); i++)
             map_item_add(l, item_new_by_level(IT_AMULET, l->nlevel));
+    }
+
+    /* up to two piles of ammunition */
+    for (i = 0; i <= rand_0n(2); i++)
+    {
+        map_item_add(l, item_new_by_level(IT_AMMO, l->nlevel));
     }
 
     /* up to three books */
@@ -1390,38 +1396,38 @@ static void map_fill_with_objects(map *l)
     }
 
     /* up to 10 piles of gold */
-    for (i = 0; i < rand_0n(10); i++)
+    for (i = 0; i <= rand_0n(10); i++)
     {
         /* There is nothing like a newly minted pound. */
         map_item_add(l, item_new(IT_GOLD, rand_m_n(10, (l->nlevel + 1) * 15)));
     }
 
     /* up to three gems */
-    for (i = 0; i < rand_0n(3); i++)
+    for (i = 0; i <= rand_0n(3); i++)
     {
         map_item_add(l, item_new_random(IT_GEM, FALSE));
     }
 
     /* up to four potions */
-    for (i = 0; i < rand_0n(4); i++)
+    for (i = 0; i <= rand_0n(4); i++)
     {
         map_item_add(l, item_new_by_level(IT_POTION, l->nlevel));
     }
 
     /* up to three scrolls */
-    for (i = 0; i < rand_0n(3); i++)
+    for (i = 0; i <= rand_0n(3); i++)
     {
         map_item_add(l, item_new_by_level(IT_SCROLL, l->nlevel));
     }
 
     /* up to two rings */
-    for (i = 0; i < rand_0n(3); i++)
+    for (i = 0; i <= rand_0n(2); i++)
     {
         map_item_add(l, item_new_by_level(IT_RING, l->nlevel));
     }
 
     /* up to two weapons */
-    for (i = 0; i < rand_0n(2); i++)
+    for (i = 0; i <= rand_0n(2); i++)
     {
         map_item_add(l, item_new_by_level(IT_WEAPON, l->nlevel));
     }
