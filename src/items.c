@@ -975,60 +975,67 @@ guint item_price(item *it)
 
 int item_weight(item *it)
 {
+    int weight = 0;
+
     assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     switch (it->type)
     {
     case IT_AMULET:
-        return 150;
+        weight = 150;
         break;
 
     case IT_AMMO:
-        return it->count * ammo_weight(it);
+        weight =  ammo_weight(it);
         break;
 
     case IT_ARMOUR:
-        return armour_weight(it);
+        weight =  armour_weight(it);
         break;
 
     case IT_BOOK:
-        return book_weight(it);
+        weight =  book_weight(it);
         break;
 
     case IT_POTION:
-        return 250;
+        weight =  250;
         break;
 
     case IT_RING:
-        return 10;
+        weight =  10;
         break;
 
     case IT_SCROLL:
-        return 100;
+        weight =  100;
         break;
 
     case IT_CONTAINER:
-        return container_weight(it) + inv_weight(it->content);
+        weight = container_weight(it) + inv_weight(it->content);
         break;
 
     case IT_GOLD:
         /* Is this too heavy? is this too light?
            It should give the player a reason to use the bank. */
-        return it->count * 4;
+        weight =  4;
         break;
 
     case IT_GEM:
-        return gem_weight(it);
+        weight =  gem_weight(it);
         break;
 
     case IT_WEAPON:
-        return weapon_weight(it);
+        weight =  weapon_weight(it);
         break;
 
     default:
-        return 0;
+        weight =  0;
         break;
     }
+
+    if (item_is_stackable(it->type))
+        weight = weight * it->count;
+
+    return weight;
 }
 
 int item_colour(item *it)
