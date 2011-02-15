@@ -631,10 +631,20 @@ static void potion_monster_hit(item *potion, monster *m)
     if (potion_effect(potion))
         e = monster_effect_add(m, effect_new(potion_effect(potion)));
 
-    if (!e)
+    if (potion_effect(potion) && !e)
     {
         /* the monster is resistant to the effect */
         log_add_entry(nlarn->log, "The %s is not affected.", monster_get_name(m));
+    }
+
+    if (potion->id == PO_WATER && potion->blessed && monster_flags(m, MF_UNDEAD))
+    {
+        /* this is supposed to hurt really nasty */
+        log_add_entry(nlarn->log, "Smoke emerges where the water pours over the %s.",
+                      monster_get_name(m));
+
+        damage *dam = damage_new(DAM_PHYSICAL, ATT_TOUCH, rand_1n(monster_hp(m) + 1), nlarn->p);
+        monster_damage_take(m, dam);
     }
 
     item_destroy(potion);
