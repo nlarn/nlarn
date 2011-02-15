@@ -12,10 +12,10 @@ Running means moving into one direction until interrupted. `lightgreen`g`end` or
 
 `yellow`Autotravel`end`
 
+`lightgreen`V`end`   voyage (travel) to a location on the level
 `lightgreen`C`end`   continue travelling  
-`lightgreen`T`end`   travel somewhere on the level
 
-You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. _ for altar).
+You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. _ for an altar). Subsequent keypresses will move the cursor around if there are more than one of the desired features on the level. When finished, press ENTER to start the journey. When a foe comes into sight, travelling will be aborted automatically and can be continued with `lightgreen`C`end` when the enemy gets out of sight. 
 
 
 `yellow`Other actions`end`
@@ -24,8 +24,8 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`c`end`   close a door
 `lightgreen`d`end`   drop domething
 `lightgreen`D`end`   list discovered landmarks
-`lightgreen`e`end`   equip an item
 `lightgreen`f`end`   fire ranged weapon
+`lightgreen`F`end`   wash yourself at a fountain
 `lightgreen`g`end`   move until something interesting is found
 `lightgreen`i`end`   open the inventory window
 `lightgreen`m`end`   work magic (cast a spell)
@@ -37,10 +37,11 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`r`end`   read something
 `lightgreen`R`end`   remove gems from throne
 `lightgreen`S`end`   sit on a throne
-`lightgreen`t`end`   take an item off
+`lightgreen`t`end`   throw an item
+`lightgreen`T`end`   take a worn/wielded item off
 `lightgreen`v`end`   print program version
 `lightgreen`w`end`   wait/rest up to one mobul or until healed
-`lightgreen`W`end`   wash yourself at a fountain
+`lightgreen`W`end`   wear/wield an item
 `lightgreen`x`end`   exchange primary/secondary weapon
 
 `lightgreen`<`end`   climb up stairs/volcanic shaft or enter a building

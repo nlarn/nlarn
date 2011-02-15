@@ -398,41 +398,6 @@ int main(int argc, char *argv[])
             }
             break;
 
-            /* work magic */
-        case 'm':
-            moves_count = spell_cast_new(nlarn->p);
-            break;
-
-            /* recast previous spell */
-        case 'M':
-            moves_count = spell_cast_previous(nlarn->p);
-            break;
-
-            /* read something */
-        case 'r':
-            player_read(nlarn->p);
-            break;
-
-            /* equip something */
-        case 'e':
-            player_equip(nlarn->p);
-            break;
-
-            /* take off something */
-        case 't':
-            player_take_off(nlarn->p);
-            break;
-
-            /* drop something */
-        case 'd':
-            player_drop(nlarn->p);
-            break;
-
-            /* fire a ranged weapon */
-        case 'f':
-            moves_count = weapon_fire(nlarn->p);
-            break;
-
             /* go down stairs / enter a building */
         case '>':
             if (!(moves_count = player_stairs_down(nlarn->p)))
@@ -444,16 +409,6 @@ int main(int argc, char *argv[])
             moves_count = player_stairs_up(nlarn->p);
             break;
 
-            /* display inventory */
-        case 'i':
-            player_inv_display(nlarn->p);
-            break;
-
-            /* desecrate altar */
-        case 'A':
-            moves_count = player_altar_desecrate(nlarn->p);
-            break;
-
             /* bank account information */
         case '$':
             log_add_entry(nlarn->log, "There %s %s gp on your bank account.",
@@ -461,9 +416,80 @@ int main(int argc, char *argv[])
                           int2str(nlarn->p->bank_account));
             break;
 
+        case '\\':
+            if ((strbuf = player_item_identified_list(nlarn->p)))
+            {
+                display_show_message("Identified items", strbuf, 0);
+                g_free(strbuf);
+            }
+            else
+            {
+                log_add_entry(nlarn->log, "You have not discovered any item yet.");
+            }
+            break;
+
+            /* desecrate altar */
+        case 'A':
+            moves_count = player_altar_desecrate(nlarn->p);
+            break;
+
+            /* continue autotravel */
+        case 'C':
+            /* delete last autotravel target if it was on another map */
+            if (Z(cpos) != Z(nlarn->p->pos))
+            {
+                cpos = pos_invalid;
+            }
+
+            if (pos_valid(cpos))
+            {
+                /* restore last known autotravel position */
+                pos = cpos;
+                /* reset keyboard input */
+                ch = 0;
+            }
+            else
+                log_add_entry(nlarn->log, "No travel destination known.");
+            break;
+
             /* close door */
         case 'c':
             moves_count = player_door_close(nlarn->p);
+            break;
+
+            /* show stationary object memory */
+        case 'D':
+            player_list_sobjmem(nlarn->p);
+            break;
+
+            /* drop something */
+        case 'd':
+            player_drop(nlarn->p);
+            break;
+
+            /* wash at fountain */
+        case 'F':
+            moves_count = player_fountain_wash(nlarn->p);
+            break;
+
+            /* fire a ranged weapon */
+        case 'f':
+            moves_count = weapon_fire(nlarn->p);
+            break;
+
+            /* display inventory */
+        case 'i':
+            player_inv_display(nlarn->p);
+            break;
+
+            /* work magic */
+        case 'm':
+            moves_count = spell_cast_new(nlarn->p);
+            break;
+
+            /* recast previous spell */
+        case 'M':
+            moves_count = spell_cast_previous(nlarn->p);
             break;
 
             /* open door / container */
@@ -514,56 +540,14 @@ int main(int argc, char *argv[])
         }
         break;
 
-        case 'v':
-            log_add_entry(nlarn->log, "NLarn version %d.%d.%d%s, built on %s.",
-                          VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, SVNID,
-                          __DATE__);
-            break;
-
-            /* swap weapons */
-        case 'x':
-            weapon_swap(nlarn->p);
-            break;
-
-        case '\\':
-            if ((strbuf = player_item_identified_list(nlarn->p)))
-            {
-                display_show_message("Identified items", strbuf, 0);
-                g_free(strbuf);
-            }
-            else
-            {
-                log_add_entry(nlarn->log, "You have not discovered any item yet.");
-            }
-            break;
-
-            /* continue autotravel */
-        case 'C':
-            /* delete last autotravel target if it was on another map */
-            if (Z(cpos) != Z(nlarn->p->pos))
-            {
-                cpos = pos_invalid;
-            }
-
-            if (pos_valid(cpos))
-            {
-                /* restore last known autotravel position */
-                pos = cpos;
-                /* reset keyboard input */
-                ch = 0;
-            }
-            else
-                log_add_entry(nlarn->log, "No travel destination known.");
-            break;
-
-            /* show stationary object memory */
-        case 'D':
-            player_list_sobjmem(nlarn->p);
-            break;
-
             /* remove gems from throne */
         case 'R':
             moves_count = player_throne_pillage(nlarn->p);
+            break;
+
+            /* read something */
+        case 'r':
+            player_read(nlarn->p);
             break;
 
             /* sit on throne */
@@ -571,8 +555,18 @@ int main(int argc, char *argv[])
             moves_count = player_throne_sit(nlarn->p);
             break;
 
-            /* travel */
+            /* take off something */
         case 'T':
+            player_take_off(nlarn->p);
+            break;
+
+            /* throw a potion */
+        case 't':
+            moves_count = potion_throw(nlarn->p);
+            break;
+
+            /* voyage (travel) */
+        case 'V':
             pos = display_get_new_position(nlarn->p, cpos,
                                            "Choose a destination to travel to.",
                                            FALSE, FALSE, TRUE, 0, TRUE, FALSE);
@@ -590,9 +584,20 @@ int main(int argc, char *argv[])
             }
             break;
 
-            /* wash at fountain */
+        case 'v':
+            log_add_entry(nlarn->log, "NLarn version %d.%d.%d%s, built on %s.",
+                          VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, SVNID,
+                          __DATE__);
+            break;
+
+            /* wear/wield something */
         case 'W':
-            moves_count = player_fountain_wash(nlarn->p);
+            player_equip(nlarn->p);
+            break;
+
+            /* swap weapons */
+        case 'x':
+            weapon_swap(nlarn->p);
             break;
 
             /* "paperdoll" */

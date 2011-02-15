@@ -71,6 +71,7 @@ enum potion_objects {
 
 char *potion_desc(int potion_id);
 int potion_colour(int potion_id);
+int potion_throw(struct player *p);
 item_usage_result potion_quaff(struct player *p, item *potion);
 
 /* external vars */

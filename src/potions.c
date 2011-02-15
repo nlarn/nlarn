@@ -61,6 +61,7 @@ static int potion_amnesia(struct player *p, item *potion);
 static int potion_detect_item(struct player *p, item *potion);
 static int potion_recovery(struct player *p, item *potion);
 static int potion_holy_water(player *p, item *potion);
+static void potion_monster_hit(item *potion, monster *m);
 
 struct potion_obfuscation_s
 {
@@ -107,6 +108,159 @@ int potion_colour(int potion_id)
 {
     assert(potion_id > PO_NONE && potion_id < PO_MAX);
     return potion_obfuscation[nlarn->potion_desc_mapping[potion_id - 1]].colour;
+}
+
+int potion_throw(struct player *p)
+{
+    map *map = game_map(nlarn, Z(p->pos));
+    position target;             /* the selected target */
+    area *ray = NULL;            /* the path of the bullet */
+    char desc[81] = {};          /* the potion's description */
+    item *potion;                /* the potion from the inventory */
+    monster *m = NULL;           /* the targeted monster */
+
+    if (inv_length_filtered(p->inventory, item_filter_potions) == 0)
+    {
+        log_add_entry(nlarn->log, "You do not have any potions.");
+        return FALSE;
+    }
+
+    potion = display_inventory("Select a potion to throw", p, &p->inventory,
+                               NULL, FALSE, FALSE, FALSE, item_filter_potions);
+
+    if (!potion)
+    {
+        log_add_entry(nlarn->log, "Aborted.");
+        return FALSE;
+    }
+
+    /* get the description of the potion */
+    item_describe(potion, player_item_known(p, potion), TRUE, TRUE, desc, 80);
+
+    gchar *msg = g_strdup_printf("Choose a target for %s.", desc);
+    target = display_get_position(p, msg, TRUE, FALSE, 0, FALSE, TRUE);
+    g_free(msg);
+
+    if (!pos_valid(target))
+    {
+        /* the player pressed ESC */
+        log_add_entry(nlarn->log, "Aborted.");
+        return FALSE;
+    }
+
+    /* get the targeted monster  */
+    m = map_get_monster_at(map, target);
+
+    /* check if there is a monster at the targeted position */
+    if (!m || !monster_in_sight(m))
+    {
+        log_add_entry(nlarn->log, "I see no monster there.");
+        return FALSE;
+    }
+
+    /* protect townsfolk from agressive players */
+    if (monster_type(m) == MT_TOWN_PERSON)
+    {
+        log_add_entry(nlarn->log, "Gosh! How dare you!");
+        return FALSE;
+    }
+
+    /* determine trajectory of the potion */
+    area *obstacles = map_get_obstacles(map, p->pos, pos_distance(p->pos, target));
+    ray = area_new_ray(p->pos, target, obstacles);
+
+    if (ray == NULL)
+    {
+        /* it's not possible to draw a line from the player's position to the target */
+        log_add_entry(nlarn->log, "That wont work..");
+        return FALSE;
+    }
+
+    /* get the actual item to throw */
+    if (potion->count > 1)
+    {
+        /* potion is actually a stack of potions => get one of them */
+        potion = item_split(potion, 1);
+    }
+    else
+    {
+        /* delete the potion from the inventory */
+        inv_del_element(&p->inventory, potion);
+    }
+
+    /* upper case the first letter of the description */
+    desc[0] = g_ascii_toupper(desc[0]);
+
+    /* follow the ray to determine if the bullet hits something else */
+    position previous = p->pos, cursor = p->pos;
+    int start_x, start_y, stop_x, stop_y;
+    start_x = min(X(p->pos), X(target));
+    start_y = min(Y(p->pos), Y(target));
+    stop_x  = max(X(p->pos), X(target));
+    stop_y  = max(Y(p->pos), Y(target));
+
+    for(Y(cursor) = start_y; Y(cursor) <= stop_y; Y(cursor)++)
+    {
+        for(X(cursor) = start_x; X(cursor) <= stop_x; X(cursor)++)
+        {
+            monster *drive_by = NULL;
+
+            /* check if the current position is part of the ray */
+            if (!area_pos_get(ray, cursor))
+                continue;
+
+            if (!map_pos_passable(map, cursor))
+            {
+                /* the potion hit something - destroy it */
+                map_tile_t mtt = map_tiletype_at(map, cursor);
+                map_sobject_t mst = map_sobject_at(map, cursor);
+
+                if (mst > LS_NONE && !ls_is_passable(mst))
+                {
+                    log_add_entry(nlarn->log, "%s shatters at %s.",
+                                  ls_get_desc(mst));
+                }
+                else
+                {
+                    log_add_entry(nlarn->log, "%s %s %s.", desc,
+                                  (mtt <= LT_FLOOR ? "shatters on the" : "splashes into the"),
+                                  lt_get_desc(mtt));
+                }
+
+                return TRUE;
+            }
+
+            /* check if there is a monster at the position the bullet passes */
+            if ((drive_by = map_get_monster_at(map, cursor)))
+            {
+                /* bullet might have hit the other monster */
+                if (chance(weapon_calc_to_hit(p, drive_by, NULL, NULL)))
+                {
+                    potion_monster_hit(potion, drive_by);
+                    return TRUE;
+                }
+            }
+
+            /* bullet moves unhindered */
+            previous = cursor;
+        }
+    }
+
+    /* arrived at the target position */
+    if (chance(weapon_calc_to_hit(p, m, NULL, NULL)))
+    {
+        potion_monster_hit(potion, m);
+    }
+    else
+    {
+        map_tile_t mtt = map_tiletype_at(map, target);
+        log_add_entry(nlarn->log, "%s misses the %s and %s the %s.", desc, monster_name(m),
+                      (mtt <= LT_FLOOR ? "shatters on" : "splashes into"), lt_get_desc(mtt));
+
+        item_destroy(potion);
+    }
+
+    return TRUE;
 }
 
 item_usage_result potion_quaff(struct player *p, item *potion)
@@ -459,4 +613,29 @@ static int potion_holy_water(player *p, item *potion)
         return TRUE;
     }
     return FALSE;
+}
+
+static void potion_monster_hit(item *potion, monster *m)
+{
+    char desc[81] = {};
+    effect *e = NULL;
+
+    assert (potion != NULL && m != NULL);
+
+    item_describe(potion, player_item_known(nlarn->p, potion), TRUE, TRUE, desc, 80);
+    desc[0] = g_ascii_toupper(desc[0]);
+
+    log_add_entry(nlarn->log, "%s shatters on the %s.",
+                  desc, monster_get_name(m));
+
+    if (potion_effect(potion))
+        e = monster_effect_add(m, effect_new(potion_effect(potion)));
+
+    if (!e)
+    {
+        /* the monster is resistant to the effect */
+        log_add_entry(nlarn->log, "The %s is not affected.", monster_get_name(m));
+    }
+
+    item_destroy(potion);
 }

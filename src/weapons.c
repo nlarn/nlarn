@@ -31,7 +31,7 @@ const ammo_data ammos[AMT_MAX] =
     /*  type       name            ac           dam   acc  mat        we  pr  ob */
     { AMT_NONE,    NULL,           AMMO_NONE,      0,   0, IM_NONE,    0,  0, 0, },
     { AMT_STONE,   "pebble",       AMMO_SLING,     2,   1, IM_STONE, 100,  1, 0, },
-    { AMT_SBULLET, "sling bullet", AMMO_SLING,     4,   2, IM_LEAD,   50,  1, 1, },
+    { AMT_SBULLET, "sling bullet", AMMO_SLING,     4,   2, IM_LEAD,   50,  3, 1, },
     { AMT_ARROW,   "arrow",        AMMO_BOW,       8,   3, IM_WOOD,   80,  5, 1, },
     { AMT_BOLT,    "bolt",         AMMO_CROSSBOW, 10,   4, IM_IRON,  100, 10, 1, },
 };
@@ -77,13 +77,13 @@ const weapon_data weapons[WT_MAX] =
 damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo);
 void weapon_ammo_drop(map *m, item *ammo, position pos);
 
-int weapon_calc_to_hit(struct player *p, struct _monster *m, item *ammo)
+int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item *ammo)
 {
     assert (p != NULL && m != NULL);
 
     const int to_hit = p->level
                        + max(0, player_get_dex(p) - 12)
-                       + (p->eq_weapon ? weapon_acc(p->eq_weapon) : 0)
+                       + (weapon ? weapon_acc(weapon) : 0)
                        + (ammo ? ammo_accuracy(ammo) : 0)
                        + (player_get_speed(p) / 25)
                        - monster_ac(m)
@@ -168,6 +168,13 @@ int weapon_fire(struct player *p)
         return FALSE;
     }
 
+    /* protect townsfolk from agressive players */
+    if (monster_type(m) == MT_TOWN_PERSON)
+    {
+        log_add_entry(nlarn->log, "Gosh! How dare you!");
+        return FALSE;
+    }
+
     /* log the event */
     log_add_entry(nlarn->log, "You fire %s at the %s.", wdesc, monster_name(m));
 
@@ -236,7 +243,7 @@ int weapon_fire(struct player *p)
             if ((drive_by = map_get_monster_at(map, cursor)))
             {
                 /* bullet might have hit the other monster */
-                if (chance(weapon_calc_to_hit(p, drive_by, pammo)))
+                if (chance(weapon_calc_to_hit(p, drive_by, weapon, pammo)))
                 {
                     damage *dam = weapon_get_ranged_damage(p, weapon, pammo);
 
@@ -256,7 +263,7 @@ int weapon_fire(struct player *p)
     }
 
     /* arrived at the target position */
-    if (chance(weapon_calc_to_hit(p, m, ammo)))
+    if (chance(weapon_calc_to_hit(p, m, weapon, ammo)))
     {
         log_add_entry(nlarn->log, "%s hits the %s.", adesc, monster_name(m));
         monster_damage_take(m, weapon_get_ranged_damage(p, weapon, pammo));

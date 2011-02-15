@@ -1778,7 +1778,7 @@ int player_attack(player *p, monster *m)
         return 1;
     }
 
-    if (chance(5) || chance(weapon_calc_to_hit(p, m, NULL)))
+    if (chance(5) || chance(weapon_calc_to_hit(p, m, p->eq_weapon, NULL)))
     {
         damage *dam;
         effect *e;
@@ -5157,7 +5157,7 @@ void calc_fighting_stats(player *p)
                                    monster_name(m));
             continue;
         }
-        int to_hit  = weapon_calc_to_hit(p, m, NULL);
+        int to_hit  = weapon_calc_to_hit(p, m, p->eq_weapon, NULL);
         to_hit += ((100 - to_hit) * 5)/100;
 
         const int instakill_chance = player_instakill_chance(p, m);
