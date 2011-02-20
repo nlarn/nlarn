@@ -105,9 +105,6 @@ monster *monster_new(monster_t type, position pos)
         return NULL;
     }
 
-    /* make room for monster */
-    nmonster = g_malloc0(sizeof(monster));
-
     /* don't create genocided monsters */
     if (monster_is_genocided(type))
     {
@@ -117,6 +114,9 @@ monster *monster_new(monster_t type, position pos)
         else
             return NULL;
     }
+
+    /* make room for monster */
+    nmonster = g_malloc0(sizeof(monster));
 
     nmonster->type = type;
 

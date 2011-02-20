@@ -1055,7 +1055,7 @@ static GList *game_scores_load(game *g)
     guint bufsize = 8192;
 
     /* buffer for unparsed scores */
-    gchar *scores = g_malloc(bufsize);
+    gchar *scores;
 
     /* actual lenght of unparsed scores buffer */
     guint scores_len = 0;
@@ -1075,9 +1075,13 @@ static GList *game_scores_load(game *g)
         return gs;
     }
 
+    /* allocate buffer space */
+    scores = g_malloc(bufsize);
+
     /* read the scoreboard file */
     while((scores_len = gzread(file, scores, bufsize)) == bufsize)
     {
+        /* it seems the buffer space was insufficient -> increase it */
         bufsize += 8192;
         scores = g_realloc(scores, bufsize);
     }
