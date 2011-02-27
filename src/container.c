@@ -140,7 +140,7 @@ void container_item_add(player *p, inventory **inv, item *element)
     if (inv == &nlarn->player_home)
     {
         /* player wants to deposit something at home */
-        g_snprintf(container_desc, 60, "your storage room at home");
+        g_snprintf(container_desc, 60, "your storage room");
         target_inv = &nlarn->player_home;
     }
     else if (inv == NULL || (inv == &p->inventory))
@@ -201,8 +201,10 @@ void container_item_add(player *p, inventory **inv, item *element)
 
     if (element->count > 1)
     {
-        g_snprintf(element_desc, 60, "How many %s do you want to put into %s?",
-                   item_name_pl(element->type), container_desc);
+        /* use the item type plural name except for ammunition */
+        g_snprintf(element_desc, 60, "How many %s%s do you want to put into %s?",
+                   (element->type == IT_AMMO ? ammo_name(element) : item_name_pl(element->type)),
+                   (element->type == IT_AMMO ? "s" : ""), container_desc);
 
         count = display_get_count(element_desc, element->count);
 
@@ -263,8 +265,10 @@ void container_item_unpack(player *p, inventory **inv, item *element)
 
     if (element->count > 1)
     {
-        g_snprintf(desc, 60, "How many %s do you want to take out?",
-                   item_name_pl(element->type));
+        /* use the item type plural name except for ammunition */
+        g_snprintf(desc, 60, "How many %s%s do you want to take out?",
+                   (element->type == IT_AMMO ? ammo_name(element) : item_name_pl(element->type)),
+                   (element->type == IT_AMMO ? "s" : ""));
 
         count = display_get_count(desc, element->count);
 
