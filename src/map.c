@@ -935,18 +935,18 @@ damage *map_tile_damage(map *l, position pos, int flying)
     switch (map_tiletype_at(l, pos))
     {
     case LT_CLOUD:
-        return damage_new(DAM_ACID, ATT_NONE, 3 + rand_0n(2), NULL);
+        return damage_new(DAM_ACID, ATT_NONE, 3 + rand_0n(2), DAMO_MAP, NULL);
         break;
 
     case LT_FIRE:
-        return damage_new(DAM_FIRE, ATT_NONE, 5 + rand_0n(2), NULL);
+        return damage_new(DAM_FIRE, ATT_NONE, 5 + rand_0n(2), DAMO_MAP, NULL);
         break;
 
     case LT_WATER:
         if (flying)
             return NULL;
 
-        return damage_new(DAM_WATER, ATT_NONE, 4 + rand_0n(2), NULL);
+        return damage_new(DAM_WATER, ATT_NONE, 4 + rand_0n(2), DAMO_MAP, NULL);
         break;
 
     default:

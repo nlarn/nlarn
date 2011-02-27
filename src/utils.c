@@ -504,16 +504,28 @@ const char *int2str(int val)
 
 }
 
-damage *damage_new(damage_t type, attack_t attack, int amount, gpointer originator)
+damage *damage_new(damage_t type, attack_t attack, int amount,
+                   damage_originator_t damo, gpointer originator)
 {
     damage *dam = g_malloc0(sizeof(damage));
 
     dam->type = type;
     dam->attack = attack;
     dam->amount = amount;
-    dam->originator = originator;
+    dam->dam_origin.ot = damo;
+    dam->dam_origin.originator = originator;
 
     return dam;
+}
+
+damage *damage_copy(damage *dam)
+{
+    assert (dam != NULL);
+
+    damage *dcopy = g_malloc(sizeof(damage));
+    memcpy(dcopy, dam, sizeof(damage));
+
+    return dcopy;
 }
 
 static void log_entry_destroy(message_log_entry *entry)

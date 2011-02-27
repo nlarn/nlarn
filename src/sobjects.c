@@ -25,7 +25,9 @@
 #include "player.h"
 
 static void monster_appear(monster_t type, position mpos);
-
+static void flood_affect_area(position pos, int radius, int type, int duration);
+static gboolean sobject_blast_hit(position pos, const damage_originator *damo,
+                                  gpointer data1, gpointer data2);
 
 int player_altar_desecrate(player *p)
 {
@@ -677,7 +679,8 @@ int player_fountain_wash(player *p)
         log_add_entry(nlarn->log, "Oh no! The water was foul!");
 
         damage *dam = damage_new(DAM_POISON, ATT_NONE,
-                                 rand_1n((Z(p->pos) << 2) + 2), NULL);
+                                 rand_1n((Z(p->pos) << 2) + 2),
+                                 DAMO_SOBJECT, NULL);
 
         player_damage_take(p, dam, PD_SOBJECT, LS_FOUNTAIN);
     }
@@ -778,7 +781,8 @@ int player_stairs_down(player *p)
         {
             log_add_entry(nlarn->log, "You slip!");
             damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
-                                     rand_1n(bval + nlevel->nlevel), NULL);
+                                     rand_1n(bval + nlevel->nlevel),
+                                     DAMO_SOBJECT, NULL);
 
             player_damage_take(p, dam, PD_SOBJECT, ms);
         }
@@ -944,6 +948,89 @@ int player_throne_sit(player *p)
     return 1;
 }
 
+void sobject_destroy_at(player *p, map *map, position pos)
+{
+    position mpos;      /* position for monster that might be generated */
+    char *desc = NULL;
+
+    mpos = map_find_space_in(map, rect_new_sized(pos, 1), LE_MONSTER, FALSE);
+
+    switch (map_sobject_at(map, pos))
+    {
+    case LS_NONE:
+        /* NOP */
+        break;
+
+    case LS_ALTAR:
+    {
+        log_add_entry(nlarn->log, "You destroy the altar.", desc);
+        map_sobject_set(map, pos, LS_NONE);
+        p->stats.vandalism++;
+
+        log_add_entry(nlarn->log, "Lightning comes crashing down from above!");
+
+        /* flood the area surrounding the altar with lightning */
+        damage_originator damo = { DAMO_GOD, NULL };
+        damage *dam = damage_new(DAM_ELECTRICITY, ATT_MAGIC,
+                                 25 + p->level + rand_0n(25 + p->level),
+                                 damo.ot, damo.originator);
+
+        area_blast(pos, 3, &damo, sobject_blast_hit, dam, NULL, '*', DC_LIGHTCYAN);
+        damage_free(dam);
+
+        break;
+    }
+
+    case LS_FOUNTAIN:
+        log_add_entry(nlarn->log, "You destroy the fountain.", desc);
+        map_sobject_set(map, pos, LS_NONE);
+        p->stats.vandalism++;
+
+        /* create a permanent shallow pool and place a water lord */
+        log_add_entry(nlarn->log, "A flood of water gushes forth!");
+        flood_affect_area(pos, 3 + rand_0n(2), LT_WATER, 0);
+        if (pos_valid(mpos))
+            monster_new(MT_WATER_LORD, mpos);
+        break;
+
+    case LS_STATUE:
+        /* chance of finding a book:
+           diff 0-1: 100%, diff 2: 2/3, diff 3: 50%, ..., diff N: 2/(N+1) */
+        if (rand_0n(game_difficulty(nlarn)+1) <= 1)
+        {
+            item *it = item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)));
+            inv_add(map_ilist_at(map, pos), it);
+        }
+
+        desc = "statue";
+        break;
+
+    case LS_THRONE:
+    case LS_THRONE2:
+        if (pos_valid(mpos))
+            monster_new(MT_GNOME_KING, mpos);
+
+        desc = "throne";
+        break;
+
+    case LS_DEADFOUNTAIN:
+    case LS_DEADTHRONE:
+        map_sobject_set(map, pos, LS_NONE);
+        break;
+
+    default:
+        log_add_entry(nlarn->log, "Somehow that did not work.");
+        /* NOP */
+    }
+
+    if (desc)
+    {
+        log_add_entry(nlarn->log, "You destroy the %s.", desc);
+        map_sobject_set(map, pos, LS_NONE);
+        p->stats.vandalism++;
+    }
+}
+
 static void monster_appear(monster_t type, position mpos)
 {
     monster *m;
@@ -964,4 +1051,81 @@ static void monster_appear(monster_t type, position mpos)
     }
     else
         log_add_entry(nlarn->log, "Nothing seems to have happened.");
+}
+
+static void flood_affect_area(position pos, int radius, int type, int duration)
+{
+    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius);
+    area *range = area_new_circle_flooded(pos, radius, obstacles);
+
+    map_set_tiletype(game_map(nlarn, Z(pos)), range, type, duration);
+    area_destroy(range);
+}
+
+static gboolean sobject_blast_hit(position pos, const damage_originator *damo,
+                                  gpointer data1, gpointer data2)
+{
+    damage *dam = (damage *)data1;
+    map *map = game_map(nlarn, Z(pos));
+    map_sobject_t mst = map_sobject_at(map, pos);
+    monster *monster = map_get_monster_at(map, pos);
+
+    if (mst == LS_STATUE)
+    {
+        /* The blast hit a statue. */
+        sobject_destroy_at(damo->originator, map, pos);
+        return TRUE;
+    }
+    else if (monster != NULL)
+    {
+        /* the blast hit a monster */
+        if (monster_in_sight(monster))
+            log_add_entry(nlarn->log, "The lightning hits the %s.",
+                          monster_get_name(monster));
+
+        monster_damage_take(monster, damage_copy(dam));
+
+        return TRUE;
+    }
+    else if (pos_identical(nlarn->p->pos, pos))
+    {
+        /* the blast hit the player */
+        int evasion = nlarn->p->level/(2+game_difficulty(nlarn)/2)
+                      + player_get_dex(nlarn->p)
+                      - 10
+                      - game_difficulty(nlarn);
+
+        // Automatic hit if paralysed or overstrained.
+        if (player_effect(nlarn->p, ET_PARALYSIS)
+            || player_effect(nlarn->p, ET_OVERSTRAINED))
+            evasion = 0;
+        else
+        {
+            if (player_effect(nlarn->p, ET_BLINDNESS))
+                evasion /= 4;
+            if (player_effect(nlarn->p, ET_CONFUSION))
+                evasion /= 2;
+            if (player_effect(nlarn->p, ET_BURDENED))
+                evasion /= 2;
+        }
+
+        if (evasion >= rand_1n(21))
+        {
+            if (!player_effect(nlarn->p, ET_BLINDNESS))
+                log_add_entry(nlarn->log, "The lightning whizzes by you!");
+
+            /* missed */
+            return FALSE;
+        }
+
+        log_add_entry(nlarn->log, "The lightning hits you!");
+        /* FIXME: correctly state that the player has been killed by the
+                  wrath of a god */
+        player_damage_take(nlarn->p, damage_copy(dam), PD_SPELL, SP_LIT);
+
+        /* hit */
+        return TRUE;
+    }
+
+    return FALSE;
 }

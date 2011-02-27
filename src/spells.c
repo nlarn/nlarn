@@ -20,9 +20,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "defines.h"
 #include "display.h"
 #include "map.h"
 #include "nlarn.h"
+#include "sobjects.h"
 #include "spells.h"
 #include "spheres.h"
 
@@ -32,14 +34,14 @@ const spell_data spells[SP_MAX] =
         SP_NONE, NULL, NULL,
         SC_NONE, DAM_NONE, ET_NONE,
         NULL, NULL, NULL,
-        0, 0, FALSE
+        DC_NONE, 0, 0, FALSE
     },
     {
         SP_PRO, "pro","protection",
         SC_PLAYER, DAM_NONE, ET_PROTECTION,
         "Generates a protection field.",
         NULL, NULL,
-        1, 260, TRUE
+        DC_NONE, 1, 260, TRUE
     },
     {
         SP_MLE, "mle", "magic missile",
@@ -47,14 +49,14 @@ const spell_data spells[SP_MAX] =
         "Creates and hurls a magic missile equivalent to a + 1 magic arrow.",
         "The missile hits the %s.",
         "The missile bounces off the %s.",
-        1, 320, TRUE
+        DC_NONE, 1, 320, TRUE
     },
     {
         SP_DEX, "dex", "dexterity",
         SC_PLAYER, DAM_NONE, ET_INC_DEX,
         "Improves the caster's dexterity.",
         NULL, NULL,
-        1, 260, FALSE
+        DC_NONE, 1, 260, FALSE
     },
     {
         SP_SLE, "sle", "sleep",
@@ -62,14 +64,14 @@ const spell_data spells[SP_MAX] =
         "Causes some monsters to go to sleep.",
         NULL,
         "The %s doesn't sleep.",
-        1, 260, TRUE
+        DC_NONE, 1, 260, TRUE
     },
     {
         SP_CHM, "chm", "charm monster",
         SC_POINT, DAM_NONE, ET_CHARM_MONSTER,
         "Some monsters may be awed at your magnificence.",
         NULL, NULL,
-        1, 260, FALSE
+        DC_NONE, 1, 260, FALSE
     },
     {
         SP_SSP, "ssp", "sonic spear",
@@ -77,42 +79,42 @@ const spell_data spells[SP_MAX] =
         "Causes your hands to emit a screeching sound toward what they point.",
         "The sound damages the %s.",
         "The %s can't hear the noise.",
-        2, 480, TRUE
+        DC_LIGHTCYAN, 2, 480, TRUE
     },
     {
         SP_STR, "str", "strength",
         SC_PLAYER, DAM_NONE, ET_INC_STR,
         "Increase the caster's strength for a short term.",
         NULL, NULL,
-        2, 460, FALSE
+        DC_NONE, 2, 460, FALSE
     },
     {
         SP_CPO, "cpo", "cure poison",
         SC_OTHER, DAM_NONE, ET_NONE,
         "The caster is cured from poison.",
         NULL, NULL,
-        2, 460, TRUE
+        DC_NONE, 2, 460, TRUE
     },
     {
         SP_HEL, "hel", "healing",
         SC_PLAYER, DAM_NONE, ET_INC_HP,
         "Restores some HP to the caster.",
         NULL, NULL,
-        2, 500, TRUE
+        DC_NONE, 2, 500, TRUE
     },
     {
         SP_CBL, "cbl", "cure blindness",
         SC_OTHER, DAM_NONE, ET_NONE,
         "Restores sight to one so unfortunate as to be blinded.",
         NULL, NULL,
-        2, 400, TRUE
+        DC_NONE, 2, 400, TRUE
     },
     {
         SP_CRE, "cre", "create monster",
         SC_OTHER, DAM_NONE, ET_NONE,
         "Creates a monster near the caster appropriate for the location.",
         NULL, NULL,
-        2, 400, FALSE
+        DC_NONE, 2, 400, FALSE
     },
     {
         SP_PHA, "pha", "phantasmal forces",
@@ -120,14 +122,14 @@ const spell_data spells[SP_MAX] =
         "Creates illusions, and if believed, the monster flees.",
         "The %s believed!",
         "The %s didn't believe the illusions!",
-        2, 600, FALSE
+        DC_NONE, 2, 600, FALSE
     },
     {
         SP_INV, "inv", "invisibility",
         SC_PLAYER, DAM_NONE, ET_INVISIBILITY,
         "The caster becomes invisible.",
         NULL, NULL,
-        2, 600, TRUE
+        DC_NONE, 2, 600, TRUE
     },
     {
         SP_BAL, "bal", "fireball",
@@ -135,7 +137,7 @@ const spell_data spells[SP_MAX] =
         "Makes a ball of fire that burns on what it hits.",
         "The fireball hits the %s.",
         NULL,
-        3, 1200, TRUE
+        DC_LIGHTRED, 3, 1200, TRUE
     },
     {
         SP_CLD, "cld", "cone of cold",
@@ -143,7 +145,7 @@ const spell_data spells[SP_MAX] =
         "Sends forth a cone of cold which freezes what it touches.",
         "The cone of cold strikes the %s.",
         "The %s loves the cold!",
-        3, 1200, TRUE
+        DC_WHITE, 3, 1200, TRUE
     },
     {
         SP_PLY, "ply", "polymorph",
@@ -151,21 +153,21 @@ const spell_data spells[SP_MAX] =
         "You can find out what this does for yourself.",
         NULL,
         "The %s resists.",
-        3, 950, FALSE
+        DC_NONE, 3, 950, FALSE
     },
     {
         SP_CAN, "can", "cancellation",
         SC_PLAYER, DAM_NONE, ET_CANCELLATION,
         "Negates the ability of a monster to use his special abilities.",
         NULL, NULL,
-        3, 950, FALSE
+        DC_NONE, 3, 950, FALSE
     },
     {
         SP_HAS, "has", "haste self",
         SC_PLAYER, DAM_NONE, ET_SPEED,
         "Speeds up the caster's movements.",
         NULL, NULL,
-        3, 950, FALSE
+        DC_NONE, 3, 950, FALSE
     },
     {
         SP_CKL, "ckl", "killing cloud",
@@ -173,14 +175,14 @@ const spell_data spells[SP_MAX] =
         "Creates a fog of poisonous gas which kills all that is within it.",
         "The %s gasps for air.",
         NULL,
-        3, 1200, FALSE
+        DC_NONE, 3, 1200, FALSE
     },
     {
         SP_VPR, "vpr", "vaporize rock",
         SC_OTHER, DAM_NONE, ET_NONE,
         "This changes rock to air.",
         NULL, NULL,
-        3, 950, FALSE
+        DC_NONE, 3, 950, FALSE
     },
     {
         SP_DRY, "dry", "dehydration",
@@ -188,7 +190,7 @@ const spell_data spells[SP_MAX] =
         "Dries up water in the immediate vicinity.",
         "The %s shrivels up.",
         "The %s isn't affected.",
-        4, 1600, FALSE
+        DC_NONE, 4, 1600, FALSE
     },
     {
         SP_LIT, "lit", "lightning",
@@ -196,21 +198,21 @@ const spell_data spells[SP_MAX] =
         "Your finger will emit a lightning bolt when this spell is cast.",
         "A lightning bolt hits the %s.",
         "The %s loves fire and lightning!",
-        4, 1600, TRUE
+        DC_YELLOW, 4, 1600, TRUE
     },
     {
         SP_DRL, "drl", "drain life",
         SC_POINT, DAM_PHYSICAL, ET_NONE,
         "Subtracts hit points from both you and a monster.",
         NULL, NULL,
-        4, 1400, FALSE
+        DC_NONE, 4, 1400, FALSE
     },
     {
         SP_GLO, "glo", "invulnerability",
         SC_PLAYER, DAM_NONE, ET_INVULNERABILITY,
         "This globe helps to protect the player from physical attack.",
         NULL, NULL,
-        4, 1400, TRUE
+        DC_NONE, 4, 1400, TRUE
     },
     {
         SP_FLO, "flo", "flood",
@@ -218,7 +220,7 @@ const spell_data spells[SP_MAX] =
         "This creates an avalanche of H2O to flood the immediate chamber.",
         "The %s struggles for air in the flood!",
         "The %s loves the water!",
-        4, 1600, FALSE
+        DC_NONE, 4, 1600, FALSE
     },
     {
         SP_FGR, "fgr", "finger of death",
@@ -226,35 +228,35 @@ const spell_data spells[SP_MAX] =
         "This is a holy spell and calls upon your god to back you up.",
         "The %s's heart stopped.",
         "The %s isn't affected.",
-        4, 1600, FALSE
+        DC_NONE, 4, 1600, FALSE
     },
     {
         SP_SCA, "sca", "scare monsters",
         SC_OTHER, DAM_NONE, ET_NONE,
         "Terrifies nearby monsters so that hopefully they flee the magic user.",
         NULL, NULL,
-        5, 2000, FALSE
+        DC_NONE, 5, 2000, FALSE
     },
     {
         SP_HLD, "hld", "hold monster",
         SC_POINT, DAM_NONE, ET_HOLD_MONSTER,
         "The monster is frozen in his tracks if this is successful.",
         NULL, NULL,
-        5, 2000, FALSE
+        DC_NONE, 5, 2000, FALSE
     },
     {
         SP_STP, "stp", "time stop",
         SC_PLAYER, DAM_NONE, ET_TIMESTOP,
         "All movement in the caverns ceases for a limited duration.",
         NULL, NULL,
-        5, 2500, FALSE
+        DC_NONE, 5, 2500, FALSE
     },
     {
         SP_TEL, "tel", "teleport away",
         SC_POINT, DAM_NONE, ET_NONE,
         "Moves a particular monster around in the dungeon.",
         NULL, NULL,
-        5, 2000, FALSE
+        DC_NONE, 5, 2000, FALSE
     },
     {
         SP_MFI, "mfi", "magic fire",
@@ -262,35 +264,35 @@ const spell_data spells[SP_MAX] =
         "This causes a curtain of fire to appear all around you.",
         "The %s cringes from the flame.",
         NULL,
-        5, 2500, FALSE
+        DC_NONE, 5, 2500, FALSE
     },
     {
         SP_MKW, "mkw", "make wall",
         SC_OTHER, DAM_NONE, ET_NONE,
         "Makes a wall in the specified place.",
         NULL, NULL,
-        6, 3000, FALSE
+        DC_NONE, 6, 3000, FALSE
     },
     {
         SP_SPH, "sph", "sphere of annihilation",
         SC_OTHER, DAM_NONE, ET_NONE,
         "Anything caught in this sphere is instantly killed.",
         NULL, NULL,
-        6, 3500, FALSE
+        DC_NONE, 6, 3500, FALSE
     },
     {
         SP_SUM, "sum", "summon demon",
         SC_OTHER, DAM_NONE, ET_NONE,
         "Summons a demon who hopefully helps you out.",
         NULL, NULL,
-        6, 3500, FALSE
+        DC_NONE, 6, 3500, FALSE
     },
     {
         SP_WTW, "wtw", "walk through walls",
         SC_PLAYER, DAM_NONE, ET_WALL_WALK,
         "Allows the caster to walk through walls for a short period of time.",
         NULL, NULL,
-        6, 3800, FALSE
+        DC_NONE, 6, 3800, FALSE
     },
     {
         SP_ALT, "alt", "alter reality",
@@ -298,34 +300,7 @@ const spell_data spells[SP_MAX] =
         "God only knows what this will do.",
         NULL,
         "Polinneaus won't let you mess with his dungeon!",
-        6, 3800, FALSE
-    },
-    /* monster spells */
-    {
-        SP_MON_FIRE, "mbf", "burst of fire",
-        SC_RAY, DAM_FIRE, ET_NONE,
-        "fire breath attack",
-        "The burst of fire hits the %s.",
-        NULL,
-        3, 0, TRUE
-    },
-
-    {
-        SP_MON_PSY, "mpb", "psionic blast",
-        SC_RAY, DAM_MAGICAL, ET_NONE,
-        "magical breath attack",
-        "The psionic blast hits the %s.",
-        NULL,
-        3, 0, TRUE
-    },
-
-    {
-        SP_MON_POISON, "mpg", "burst of noxious fumes",
-        SC_RAY, DAM_POISON, ET_NONE,
-        "poison breath attack",
-        "The burst of poison hits the %s.",
-        NULL,
-        3, 0, TRUE
+        DC_NONE, 6, 3800, FALSE
     },
 };
 
@@ -335,7 +310,7 @@ struct book_obfuscation_s
     const int weight;
     const int colour;
 }
-book_obfuscation[SP_MAX_BOOK - 1] =
+book_obfuscation[SP_MAX - 1] =
 {
     { "parchment-bound", 800, DC_BROWN,     },
     { "thick",          1200, DC_RED,       },
@@ -388,6 +363,9 @@ static void spell_print_success_message(spell *s, monster *m);
 static void spell_print_failure_message(spell *s, monster *m);
 static int count_adjacent_water_squares(position pos);
 static int try_drying_ground(position pos);
+
+static gboolean spell_pos_hit(position pos, const damage_originator *damo,
+                              gpointer data1, gpointer data2);
 
 spell *spell_new(int id)
 {
@@ -533,7 +511,7 @@ int spell_learn(player *p, guint spell_type)
     spell *s;
     guint idx;
 
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX_BOOK);
+    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
     if (!spell_known(p, spell_type))
     {
@@ -577,7 +555,7 @@ int spell_forget(player *p, guint spell_type)
     spell *s;
     guint idx;
 
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX_BOOK);
+    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
     for (idx = 0; idx < p->known_spells->len; idx++);
     {
@@ -597,7 +575,7 @@ int spell_known(player *p, guint spell_type)
     spell *s;
     guint idx;
 
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX_BOOK);
+    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
     for (idx = 0; idx < p->known_spells->len; idx++)
     {
@@ -735,7 +713,8 @@ int spell_type_point(spell *s, struct player *p)
     case SP_DRY:
         amount = (100 * s->knowledge) + p->level;
         spell_print_success_message(s, monster);
-        monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, p));
+        monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
+                                                DAMO_PLAYER, p));
         break; /* SP_DRY */
 
         /* drain life */
@@ -743,9 +722,11 @@ int spell_type_point(spell *s, struct player *p)
         amount = min(p->hp - 1, (int)p->hp_max / 2);
 
         spell_print_success_message(s, monster);
-        monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, p));
-        player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC, amount, NULL),
-                           PD_SPELL, SP_DRL);
+        monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
+                                                DAMO_PLAYER, p));
+
+        player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
+                                         DAMO_PLAYER, NULL), PD_SPELL, SP_DRL);
 
         break; /* SP_DRL */
 
@@ -759,7 +740,8 @@ int spell_type_point(spell *s, struct player *p)
         if ((player_get_wis(p) + s->knowledge) > rand_m_n(10, roll))
         {
             spell_print_success_message(s, monster);
-            monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, p));
+            monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000,
+                                                    DAMO_PLAYER, p));
         }
         else
             spell_print_failure_message(s, monster);
@@ -770,7 +752,8 @@ int spell_type_point(spell *s, struct player *p)
     case SP_MLE:
         amount = rand_1n(((p->level + 1) << s->knowledge)) + p->level + 3;
         spell_print_success_message(s, monster);
-        monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount, p));
+        monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount,
+                                                DAMO_PLAYER, p));
         break;
 
         /* polymorph */
@@ -821,214 +804,13 @@ int spell_type_point(spell *s, struct player *p)
     return TRUE;
 }
 
-static int get_spell_color(spell *sp, gboolean did_hit)
-{
-    switch (sp->id)
-    {
-    case SP_MON_FIRE:
-        return (did_hit ? DC_YELLOW : DC_LIGHTRED);
-    case SP_MON_POISON:
-        return (did_hit ? DC_LIGHTGREEN : DC_GREEN);
-    default:
-        return (did_hit ? DC_LIGHTRED : DC_LIGHTCYAN);
-    }
-}
-
-// #define DEBUG_BEAMS
-position throw_ray(spell *sp, struct player *p, position start, position target,
-                   int damage, gboolean player_cast)
-{
-#ifdef DEBUG_BEAMS
-    log_add_entry(nlarn->log, "Beam from (%d, %d) -> (%d, %d)",
-                  X(start), Y(start), X(target), Y(target));
-#endif
-    assert(sp != NULL && p != NULL);
-    assert(spell_type(sp) == SC_RAY);
-    assert(Z(start) == Z(target));
-
-    map *cmap;
-    cmap = game_map(nlarn, Z(start));
-    int distance = pos_distance(start, target);
-
-    area *ray = NULL;
-    ray = area_new_ray(start, target, map_get_obstacles(cmap, start, distance));
-
-    int attrs; /* curses attributes */
-    const int spell_color     = get_spell_color(sp, FALSE);
-    const int spell_hit_color = get_spell_color(sp, TRUE);
-
-    monster *monster = NULL;
-    gboolean proceed_y = TRUE;
-
-    position pos = start;
-    do
-    {
-        gboolean proceed_x = TRUE;
-
-        do
-        {
-#ifdef DEBUG_BEAMS
-            log_add_entry(nlarn->log, "current pos: (%d, %d)",
-                          X(pos), Y(pos));
-#endif
-            /* check if the current position has been hit by the ray
-               and if a monster is standing at the current position */
-            if (area_pos_get(ray, pos))
-            {
-                /* check if a monster is at the affected map
-                   position and if the monster has not been killed before */
-                if ((monster = map_get_monster_at(cmap, pos))
-                    && monster_alive(monster))
-                {
-                    gboolean mis = monster_in_sight(monster);
-
-                    attron((attrs = (mis ? spell_hit_color : spell_color)));
-                    mvaddch(Y(pos), X(pos), (mis ? monster_glyph(monster) : '*'));
-
-                    spell_print_success_message(sp, monster);
-                    monster_damage_take(monster, damage_new(spell_damage(sp),
-                                                            ATT_MAGIC, damage,
-                                                            player_cast ? p : NULL));
-                }
-                else
-                {
-                    // Shooting at the player.
-                    if (pos_identical(p->pos, pos))
-                    {
-                        if (!player_effect(p, ET_REFLECTION)
-                                || !pos_identical(pos, start))
-                        {
-                            const int reflected
-                            = player_effect(p, ET_REFLECTION);
-
-                            int evasion = p->level/(2+game_difficulty(nlarn)/2)
-                                          + player_get_dex(p)
-                                          - 10
-                                          - game_difficulty(nlarn);
-
-                            // Automatic hit if paralysed.
-                            if (player_effect(p, ET_PARALYSIS))
-                                evasion = 0;
-                            else
-                            {
-                                if (player_effect(p, ET_BLINDNESS))
-                                    evasion /= 4;
-                                if (player_effect(p, ET_CONFUSION))
-                                    evasion /= 2;
-                                if (player_effect(p, ET_OVERSTRAINED))
-                                    evasion /= 2;
-                            }
-
-                            if (evasion >= rand_1n(21))
-                            {
-                                attron((attrs = spell_color));
-                                if (!reflected && !player_effect(p, ET_BLINDNESS))
-                                {
-                                    log_add_entry(nlarn->log, "The %s whizzes by you!",
-                                                  spell_name(sp));
-                                }
-                            }
-                            /* from close by you get hit even if the beam reflects */
-                            else if (!reflected || pos_adjacent(start, p->pos))
-                            {
-                                attron((attrs = spell_hit_color));
-                                log_add_entry(nlarn->log, "The %s hits you!",
-                                              spell_name(sp));
-                                player_damage_take(p, damage_new(spell_damage(sp),
-                                                                 ATT_MAGIC, damage,
-                                                                 player_cast ? p : NULL),
-                                                   PD_SPELL, sp->id);
-                            }
-
-                            if (reflected)
-                            {
-#ifdef DEBUG_BEAMS
-                                log_add_entry(nlarn->log,
-                                              "Reflecting from amulet.");
-#endif
-                                attron((attrs = spell_color));
-                                if (!player_effect(p, ET_BLINDNESS))
-                                {
-                                    log_add_entry(nlarn->log, "You reflect the %s!",
-                                                  spell_name(sp));
-                                }
-                                proceed_x = FALSE;
-                                proceed_y = FALSE;
-                            }
-                        }
-                    }
-                    else
-                        attron((attrs = spell_color));
-
-                    mvaddch(Y(pos), X(pos), '*');
-                }
-
-                attroff(attrs);
-                refresh();
-                /* sleep a while to show the ray's position */
-                usleep(100000);
-                /* repaint the screen */
-                display_paint_screen(p);
-            }
-
-            if (!pos_identical(pos, start)
-                    && map_sobject_at(cmap, pos) == LS_MIRROR)
-            {
-#ifdef DEBUG_BEAMS
-                log_add_entry(nlarn->log, "Reaching mirror. Breaking loop.");
-#endif
-                proceed_x = FALSE;
-                proceed_y = FALSE;
-            }
-
-            if (!proceed_x)
-                break;
-
-            /* modify horizontal position if needed;
-               exit the loop when the destination has been reached */
-            if (X(pos) < X(target))
-                X(pos)++;
-            else if (X(pos) > X(target))
-                X(pos)--;
-            else if (X(pos) == X(target))
-                proceed_x = FALSE;
-
-            /* terminate upon reaching the target */
-            if (pos_identical(pos, target))
-                proceed_y = FALSE;
-        }
-        while (proceed_x);
-
-        if (!proceed_y)
-            break;
-
-        /* modify vertical position if needed */
-        if (Y(pos) < Y(target))
-        {
-            Y(pos)++;
-            /* reset horizontal position upon vertical movement */
-            X(pos) = X(p->pos);
-        }
-        else if (Y(pos) > Y(target))
-        {
-            Y(pos)--;
-            /* reset horizontal position upon vertical movement */
-            X(pos) = X(p->pos);
-        }
-    }
-    while (proceed_y);
-
-    area_destroy(ray);
-
-    return pos;
-}
-
 int spell_type_ray(spell *s, struct player *p)
 {
     map *cmap;
     position target, pos;
     char buffer[61];
-    int amount = 0;
+    damage_originator damo = { DAMO_PLAYER, p };
+    damage *dam = damage_new(DAM_NONE, ATT_MAGIC, 0, damo.ot, damo.originator);
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
 
@@ -1053,15 +835,20 @@ int spell_type_ray(spell *s, struct player *p)
     switch (s->id)
     {
     case SP_SSP:
-        amount = rand_1n(10) + (15 * s->knowledge) + p->level;
+        dam->amount = rand_1n(10) + (15 * s->knowledge) + p->level;
         break;
 
     case SP_CLD:
-        amount = rand_1n(25) + (20 * s->knowledge) + p->level;
+        dam->type = DAM_COLD;
+        dam->amount = rand_1n(25) + (20 * s->knowledge) + p->level;
         break;
 
     case SP_LIT:
-        amount = rand_1n(25) + (20 * s->knowledge) + (p->level << 1);
+        dam->type = DAM_ELECTRICITY;
+        dam->amount = rand_1n(25) + (20 * s->knowledge) + (p->level << 1);
+        break;
+    default:
+        /* this shouldn't happen */
         break;
     }
 
@@ -1069,30 +856,15 @@ int spell_type_ray(spell *s, struct player *p)
        anything in the way that gets hit by the ray as well */
     pos = p->pos;
 
-    position last_pos = throw_ray(s, p, pos, target, amount, TRUE);
+    /* throw a ray to the selected target */
+    area_ray_trajectory(p->pos, target, &damo, spell_pos_hit,
+                        s, dam, TRUE, '*', spell_colour(s), TRUE);
 
-    if (map_sobject_at(cmap, last_pos) == LS_MIRROR)
-    {
-        log_add_entry(nlarn->log, "The mirror reflects your spell!");
-
-        throw_ray(s, p, last_pos, p->pos, amount, TRUE);
-    }
-    /* spell bounced back to the player -> avoid infinite loops */
-    else if (pos_identical(p->pos, last_pos) && player_effect(p, ET_REFLECTION))
-    {
-        log_add_entry(nlarn->log, "Your amulet absorbs the reflected spell!");
-    }
+    /* The callback functions give a copy of the damage to the specifiv
+       functions, thus the original has to be destroyed here. */
+    damage_free(dam);
 
     return TRUE;
-}
-
-static void flood_affect_area(position pos, int radius, int type, int duration)
-{
-    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius);
-    area *range = area_new_circle_flooded(pos, radius, obstacles);
-
-    map_set_tiletype(game_map(nlarn, Z(pos)), range, type, duration);
-    area_destroy(range);
 }
 
 int spell_type_flood(spell *s, struct player *p)
@@ -1134,6 +906,10 @@ int spell_type_flood(spell *s, struct player *p)
         type = LT_FIRE;
         amount = (15 * s->knowledge) + p->level;
         break;
+
+    default:
+        /* this shouldn't happen */
+        break;
     }
 
     area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius);
@@ -1154,91 +930,15 @@ int spell_type_flood(spell *s, struct player *p)
     return TRUE;
 }
 
-static void blast_area_with_spell(struct player *p, area *ball, spell *s,
-                                  damage_t dam_t, item_erosion_type iet,
-                                  position pos, int colour, int amount)
-{
-    assert (p != NULL && ball != NULL && s != NULL);
-
-    monster *m = NULL;
-    damage *dam;
-    inventory **inv;
-    position cursor;
-    Z(cursor) = Z(pos);
-
-    attron(colour);
-
-    map *cmap = game_map(nlarn, Z(p->pos));
-
-    for (Y(cursor) = ball->start_y; Y(cursor) < ball->start_y + ball->size_y; Y(cursor)++)
-    {
-        for (X(cursor) = ball->start_x; X(cursor) < ball->start_x + ball->size_x; X(cursor)++)
-        {
-            if (area_pos_get(ball, cursor))
-            {
-                /* move cursor to position */
-                move(Y(cursor), X(cursor));
-
-                if ((m = map_get_monster_at(cmap, cursor)))
-                {
-                    /* blast hit a visible monster */
-                    if (monster_in_sight(m))
-                    {
-                        addch(monster_glyph(m));
-                        spell_print_success_message(s, m);
-                    }
-                    else
-                        addch('*');
-
-                    dam = damage_new(dam_t, ATT_MAGIC, amount, p);
-                    monster_damage_take(m, dam);
-                }
-                else if (pos_identical(p->pos, cursor))
-                {
-                    /* blast hit the player */
-                    addch('@');
-
-                    log_add_entry(nlarn->log, "The %s hits you.", spell_name(s));
-
-                    /* damage items in player's inventory */
-                    if (iet > IET_NONE) inv_erode(&p->inventory, iet, TRUE);
-
-                    /* damage the player */
-                    dam = damage_new(dam_t, ATT_MAGIC, amount, NULL);
-                    player_damage_take(p, dam, PD_SPELL, s->id);
-                }
-                else
-                {
-                    /* blast hit nothing */
-                    addch('*');
-                }
-
-                /* affect items on the position */
-                if (iet > IET_NONE && (inv = map_ilist_at(cmap, cursor)))
-                {
-                    inv_erode(inv, iet, fov_get(p->fov, cursor));
-                }
-            }
-        }
-    }
-
-    area_destroy(ball);
-    attroff(colour);
-
-    /* make sure the blast shows up */
-    refresh();
-    /* sleep a 3/4 second */
-    usleep(750000);
-}
-
 int spell_type_blast(spell *s, struct player *p)
 {
     area *ball;
     position pos;
     char buffer[61];
-    int radius = 0, amount = 0, colour = DC_NONE;
-    damage_t dam_t = DAM_NONE;
-    item_erosion_type iet = IET_NONE;
+    int radius = 0;
+    gboolean result;
+    damage_originator damo = { DAMO_PLAYER, p };
+    damage *dam = damage_new(DAM_NONE, ATT_MAGIC, 0, DAMO_PLAYER, p);
     map *cmap = game_map(nlarn, Z(p->pos));
 
     assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
@@ -1249,10 +949,8 @@ int spell_type_blast(spell *s, struct player *p)
     case SP_BAL:
     default:
         radius = 2;
-        dam_t  = DAM_FIRE;
-        iet    = IET_BURN;
-        colour = DC_LIGHTRED;
-        amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
+        dam->type = DAM_FIRE;
+        dam->amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
         break;
     }
 
@@ -1266,19 +964,25 @@ int spell_type_blast(spell *s, struct player *p)
         return FALSE;
     }
 
+    /* get the affected area to determine if the player would be hit */
     ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos,
                                    radius));
 
-    if (area_pos_get(ball, p->pos)
-            && !display_get_yesno("The spell is going to hit you. " \
-                                  "Cast anyway?", NULL, NULL))
+    gboolean player_affected = area_pos_get(ball, p->pos);
+    area_destroy(ball);
+
+    if (player_affected
+        && !display_get_yesno("The spell is going to hit you. Cast anyway?", NULL, NULL))
     {
         log_add_entry(nlarn->log, "Aborted.");
-        area_destroy(ball);
         return FALSE;
     }
 
-    blast_area_with_spell(p, ball, s, dam_t, iet, pos, colour, amount);
+    result = area_blast(pos, radius, &damo, spell_pos_hit,
+                        s, dam, '*', spell_colour(s));
+
+    /* destroy the damage as the callbacks deliver a copy */
+    damage_free(dam);
 
     return TRUE;
 }
@@ -1507,91 +1211,6 @@ gboolean spell_summon_demon(spell *s, struct player *p)
     return TRUE;
 }
 
-static void destroy_sobject_at(player *p, map *map, position pos)
-{
-    position mpos;      /* position for monster that might be generated */
-    char *desc = NULL;
-
-    mpos = map_find_space_in(map, rect_new_sized(pos, 1), LE_MONSTER, FALSE);
-
-    switch (map_sobject_at(map, pos))
-    {
-    case LS_NONE:
-        /* NOP */
-        break;
-
-    case LS_ALTAR:
-    {
-        log_add_entry(nlarn->log, "You destroy the altar.", desc);
-        map_sobject_set(map, pos, LS_NONE);
-        p->stats.vandalism++;
-
-        log_add_entry(nlarn->log, "Lightning comes crashing down from above!");
-        spell *sp      = spell_new(SP_LIT);
-        int radius     = 3;
-        damage_t dam_t = DAM_ELECTRICITY;
-        int colour     = DC_LIGHTCYAN;
-        int amount     = 25 + p->level + rand_0n(25 + p->level);
-
-        area *ball = area_new_circle_flooded(p->pos, radius,
-                                             map_get_obstacles(map, p->pos,
-                                                     radius));
-        blast_area_with_spell(p, ball, sp, dam_t, IET_NONE, p->pos, colour,
-                              amount);
-        spell_destroy(sp);
-        break;
-    }
-
-    case LS_FOUNTAIN:
-        log_add_entry(nlarn->log, "You destroy the fountain.", desc);
-        map_sobject_set(map, pos, LS_NONE);
-        p->stats.vandalism++;
-
-        /* create a permanent shallow pool and place a water lord */
-        log_add_entry(nlarn->log, "A flood of water gushes forth!");
-        flood_affect_area(pos, 3 + rand_0n(2), LT_WATER, 0);
-        if (pos_valid(mpos))
-            monster_new(MT_WATER_LORD, mpos);
-        break;
-
-    case LS_STATUE:
-        /* chance of finding a book:
-           diff 0-1: 100%, diff 2: 2/3, diff 3: 50%, ..., diff N: 2/(N+1) */
-        if (rand_0n(game_difficulty(nlarn)+1) <= 1)
-        {
-            item *it = item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)));
-            inv_add(map_ilist_at(map, pos), it);
-        }
-
-        desc = "statue";
-        break;
-
-    case LS_THRONE:
-    case LS_THRONE2:
-        if (pos_valid(mpos))
-            monster_new(MT_GNOME_KING, mpos);
-
-        desc = "throne";
-        break;
-
-    case LS_DEADFOUNTAIN:
-    case LS_DEADTHRONE:
-        map_sobject_set(map, pos, LS_NONE);
-        break;
-
-    default:
-        log_add_entry(nlarn->log, "Somehow that did not work.");
-        /* NOP */
-    }
-
-    if (desc)
-    {
-        log_add_entry(nlarn->log, "You destroy the %s.", desc);
-        map_sobject_set(map, pos, LS_NONE);
-        p->stats.vandalism++;
-    }
-}
-
 gboolean spell_make_wall(player *p)
 {
     position pos;
@@ -1623,7 +1242,7 @@ gboolean spell_make_wall(player *p)
             tile->ilist = NULL;
         }
 
-        destroy_sobject_at(p, map, pos);
+        sobject_destroy_at(p, map, pos);
 
         log_add_entry(nlarn->log, "You have created a wall.");
 
@@ -1685,7 +1304,7 @@ gboolean spell_vaporize_rock(player *p)
         if (monster_type(m) == MT_XORN)
         {
             monster_damage_take(m, damage_new(DAM_PHYSICAL, ATT_NONE,
-                                              divert(200, 10), p));
+                                              divert(200, 10), DAMO_PLAYER, p));
         }
         else if (monster_in_sight(m))
         {
@@ -1694,7 +1313,7 @@ gboolean spell_vaporize_rock(player *p)
         }
     }
 
-    destroy_sobject_at(p, map, pos);
+    sobject_destroy_at(p, map, pos);
 
     return TRUE;
 }
@@ -1702,7 +1321,7 @@ gboolean spell_vaporize_rock(player *p)
 
 char *book_desc(int book_id)
 {
-    assert(book_id > SP_NONE && book_id < SP_MAX_BOOK);
+    assert(book_id > SP_NONE && book_id < SP_MAX);
     return (char *)book_obfuscation[nlarn->book_desc_mapping[book_id - 1]].desc;
 }
 
@@ -1917,6 +1536,10 @@ static int spell_cast(player *p, spell *spell)
             if (!well_done)
                 log_add_entry(nlarn->log, spell_msg_fail_by_id(spell->id));
             break;
+
+        default:
+            /* this shouldn't happen */
+            break;
         }
         break;
 
@@ -2039,4 +1662,129 @@ static int try_drying_ground(position pos)
         return TRUE;
     }
     return FALSE;
+}
+
+static gboolean spell_pos_hit(position pos, const damage_originator *damo,
+                              gpointer data1, gpointer data2)
+{
+    spell *sp = (spell *)data1;
+    damage *dam = (damage *)data2;
+    map *map = game_map(nlarn, Z(pos));
+    map_sobject_t mst = map_sobject_at(map, pos);
+    monster *monster = map_get_monster_at(map, pos);
+    item_erosion_type iet;
+    gboolean terminated = FALSE;
+
+    /* determine if the spell causes item erosion */
+    switch (sp->id)
+    {
+    case SP_BAL:
+        iet = IET_BURN;
+        break;
+
+    default:
+        iet = IET_NONE;
+        break;
+    }
+
+    /* The spell hit a sobject. */
+    if (mst > LS_NONE)
+    {
+        if (mst == LS_MIRROR && fov_get(nlarn->p->fov, pos))
+        {
+            /* reflection is handled in area_ray_trajectory, but we need
+               to generate a message here if the mirror is visible */
+            log_add_entry(nlarn->log, "The mirror reflects the %s!",spell_name(sp));
+            return terminated;
+        }
+
+        if (mst == LS_STATUE
+            && (sp->id == SP_BAL || sp->id == SP_LIT)
+            && (game_difficulty(nlarn) <= 2))
+        {
+        /* fireball and lightning destroy statues up to diff. level 2 */
+            sobject_destroy_at(damo->originator, map, pos);
+            terminated = TRUE;
+        }
+    }
+
+    /* The spell hit a monster */
+    if (monster != NULL)
+    {
+        spell_print_success_message(sp, monster);
+
+        /* erode the monster's inventory */
+        if (iet > IET_NONE)
+            inv_erode(monster_inv(monster), iet, FALSE);
+
+        monster_damage_take(monster, damage_copy(dam));
+
+        /* if the monster is large, the spell stops at the monster,
+           otherwise it passes and may hit other monsters */
+        if (monster_size(monster) > ESIZE_MEDIUM)
+            terminated = TRUE;
+    }
+
+    /* The spell hit the player */
+    if (pos_identical(nlarn->p->pos, pos))
+    {
+        if (player_effect(nlarn->p, ET_REFLECTION))
+        {
+            /* The player reflects the spell. Actual handling of the reflection
+               is done in area_ray_trajectory, just give a message here. */
+            log_add_entry(nlarn->log, "Your amulet reflects the %s!", spell_name(sp));
+        }
+        else
+        {
+            int evasion = nlarn->p->level/(2+game_difficulty(nlarn)/2)
+                          + player_get_dex(nlarn->p)
+                          - 10
+                          - game_difficulty(nlarn);
+
+            // Automatic hit if paralysed or overstrained.
+            if (player_effect(nlarn->p, ET_PARALYSIS)
+                || player_effect(nlarn->p, ET_OVERSTRAINED))
+                evasion = 0;
+            else
+            {
+                if (player_effect(nlarn->p, ET_BLINDNESS))
+                    evasion /= 4;
+                if (player_effect(nlarn->p, ET_CONFUSION))
+                    evasion /= 2;
+                if (player_effect(nlarn->p, ET_BURDENED))
+                    evasion /= 2;
+            }
+
+            if (evasion >= rand_1n(21))
+            {
+                if (!player_effect(nlarn->p, ET_BLINDNESS))
+                {
+                    log_add_entry(nlarn->log, "The %s whizzes by you!", spell_name(sp));
+                }
+
+                /* missed */
+                terminated = FALSE;
+            }
+            else
+            {
+                log_add_entry(nlarn->log, "The %s hits you!", spell_name(sp));
+                player_damage_take(nlarn->p, damage_copy(dam), PD_SPELL, sp->id);
+
+                /* erode the player's inventory */
+                if (iet > IET_NONE)
+                    inv_erode(&(nlarn->p->inventory), iet, TRUE);
+
+                /* hit */
+                terminated = TRUE;
+            }
+        } /* The spell wasn't reflected */
+    } /* The spell hit the player's position */
+
+    if (iet > IET_NONE && map_ilist_at(map, pos))
+    {
+        /* there are items at the given map position, erode them */
+        inv_erode(map_ilist_at(map, pos), iet, fov_get(nlarn->p->fov, pos));
+    }
+
+    return terminated;
 }

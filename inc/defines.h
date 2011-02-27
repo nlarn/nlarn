@@ -124,12 +124,32 @@ typedef struct _attack
     int rand;
 } attack;
 
+typedef enum _damage_originator_t
+{
+    DAMO_NONE,
+    DAMO_ITEM,
+    DAMO_MAP,
+    DAMO_MONSTER,
+    DAMO_PLAYER,
+    DAMO_SOBJECT,
+    DAMO_SPHERE,
+    DAMO_TRAP,
+    DAMO_GOD,
+    DAMO_MAX
+} damage_originator_t;
+
+typedef struct _damage_originator
+{
+    damage_originator_t ot;
+    gpointer originator;
+} damage_originator;
+
 typedef struct _damage
 {
     damage_t type;
     attack_t attack;
     int amount;
-    gpointer originator; /* pointer to player / monster that caused the damage */
+    damage_originator dam_origin; /* the source of the damage */
 } damage;
 
 typedef struct _damage_msg

@@ -36,28 +36,6 @@ typedef enum spell_type
     SC_MAX
 } spell_t;
 
-typedef struct spell_data {
-    guint id;
-    char *code;
-    char *name;
-    spell_t type;
-    damage_t damage_type;
-    effect_t effect;
-    char *description;
-    char *msg_success;
-    char *msg_fail;
-    int level;
-    int price;
-    unsigned
-        obtainable: 1;  /* available in the shop */
-} spell_data;
-
-typedef struct spell {
-    guint id;         /* reference to spell_data */
-    guint knowledge;  /* quality of knowledge */
-    guint used;       /* usage counter */
-} spell;
-
 typedef enum spell_ids {
     SP_NONE,
     SP_PRO,         /* protection */
@@ -96,13 +74,32 @@ typedef enum spell_ids {
     SP_SUM,         /* summon demon */
     SP_WTW,         /* walk through walls */
     SP_ALT,         /* alter reality */
-    SP_MAX_BOOK,    /* last known spell */
-    /* monster spells */
-    SP_MON_FIRE = SP_MAX_BOOK,    /* burst of fire */
-    SP_MON_PSY,     /* psionic blast */
-    SP_MON_POISON,  /* poisonous fumes */
-    SP_MAX
+    SP_MAX          /* last known spell */
 } spell_id;
+
+
+typedef struct spell_data {
+    spell_id id;
+    char *code;
+    char *name;
+    spell_t type;
+    damage_t damage_type;
+    effect_t effect;    /* the effect cause by thos spell */
+    char *description;  /* the spell's description */
+    char *msg_success;  /* the message given upon success */
+    char *msg_fail;     /* the message give upoon failure */
+    int colour;         /* the colour of visible spells */
+    int level;          /* level of the spell */
+    int price;          /* price of the book*/
+    unsigned
+        obtainable: 1;  /* available in the shop */
+} spell_data;
+
+typedef struct spell {
+    spell_id id;      /* reference to spell_data */
+    guint knowledge;  /* quality of knowledge */
+    guint used;       /* usage counter */
+} spell;
 
 /* external vars */
 
@@ -163,9 +160,6 @@ int spell_forget(struct player *p, guint spell_type);
  */
 int spell_known(struct player *p, guint spell_type);
 
-position throw_ray(spell *sp, struct player *p, position start, position target,
-                   int damage, gboolean player_cast);
-
 int spell_type_player(spell *s, struct player *p);
 int spell_type_point(spell *s, struct player *p);
 int spell_type_ray(spell *s, struct player *p);
@@ -191,6 +185,7 @@ gboolean spell_vaporize_rock(struct player *p);
 #define spell_desc(spell)     (spells[(spell)->id].description)
 #define spell_msg_succ(spell) (spells[(spell)->id].msg_success)
 #define spell_msg_fail(spell) (spells[(spell)->id].msg_fail)
+#define spell_colour(spell)   (spells[(spell)->id].colour)
 #define spell_level(spell)    (spells[(spell)->id].level)
 
 #define spell_code_by_id(id)     (spells[(id)].code)
@@ -201,6 +196,7 @@ gboolean spell_vaporize_rock(struct player *p);
 #define spell_desc_by_id(id)     (spells[(id)].description)
 #define spell_msg_succ_by_id(id) (spells[(id)].msg_success)
 #define spell_msg_fail_by_id(id) (spells[(id)].msg_fail)
+#define spell_colour_by_id(id)   (spells[(id)].colour)
 #define spell_level_by_id(id)    (spells[(id)].level)
 
 /* *** BOOKS *** */

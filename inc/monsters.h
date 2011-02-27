@@ -186,6 +186,14 @@ monster_t monster_type(monster *m);
 gboolean monster_unknown(monster *m);
 void monster_unknown_set(monster *m, gboolean what);
 
+/**
+ * @brief Return the monster's inventory.
+ *
+ * @param A monster.
+ * @return The given monster's inventory.
+ */
+inventory **monster_inv(monster *m);
+
 gboolean monster_in_sight(monster *m);
 
 /** @brief Get the currently set AI action for a given monster.
@@ -311,7 +319,6 @@ static inline int monster_flags(monster *m, monster_flag f)
 }
 
 #define monster_map(M)      game_map(nlarn, Z(monster_pos(M)))
-#define monster_alive(M)    (monster_hp(M) > 0)
 /* query monster type data */
 
 static inline int monster_type_hp_max(monster_t type)

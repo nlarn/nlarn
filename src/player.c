@@ -418,7 +418,7 @@ cJSON *player_serialize(player *p)
                           cJSON_CreateIntArray(p->identified_amulets, AM_MAX));
 
     cJSON_AddItemToObject(pser, "identified_books",
-                          cJSON_CreateIntArray(p->identified_books, SP_MAX_BOOK));
+                          cJSON_CreateIntArray(p->identified_books, SP_MAX));
 
     cJSON_AddItemToObject(pser, "identified_potions",
                           cJSON_CreateIntArray(p->identified_potions, PO_MAX));
@@ -622,7 +622,7 @@ player *player_deserialize(cJSON *pser)
         p->identified_amulets[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(pser, "identified_books");
-    for (idx = 0; idx < SP_MAX_BOOK; idx++)
+    for (idx = 0; idx < SP_MAX; idx++)
         p->identified_books[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(pser, "identified_potions");
@@ -883,7 +883,8 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 if ((game_turn(nlarn) - e->start)
                         % (15 - game_difficulty(nlarn)) == 0)
                 {
-                    damage *dam = damage_new(DAM_POISON, ATT_NONE, e->amount, NULL);
+                    damage *dam = damage_new(DAM_POISON, ATT_NONE, e->amount,
+                                             DAMO_NONE, NULL);
 
                     player_damage_take(p, dam, PD_EFFECT, e->type);
                 }
@@ -1786,8 +1787,8 @@ int player_attack(player *p, monster *m)
         /* placed a hit */
         log_add_entry(nlarn->log, "You hit the %s.", monster_get_name(m));
 
-        dam = damage_new(DAM_PHYSICAL, ATT_WEAPON,
-                         calc_real_damage(p, m, TRUE), p);
+        dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, calc_real_damage(p, m, TRUE),
+                         DAMO_PLAYER, p);
 
         /* weapon damage due to rust when hitting certain monsters */
         if (p->eq_weapon && monster_flags(m, MF_METALLIVORE))
@@ -2275,9 +2276,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     assert(p != NULL && dam != NULL);
 
-    if (dam->originator)
+    if (dam->dam_origin.ot == DAMO_MONSTER)
     {
-        m = (monster *)dam->originator;
+        m = (monster *)dam->dam_origin.originator;
 
         /* amulet of power cancels demon attacks */
         if (monster_flags(m, MF_DEMON) && chance(75)
@@ -4954,7 +4955,7 @@ static char *player_death_description(game_score_t *score, int verbose)
         break;
 
     case PD_SPELL:
-        if (score->cause < SP_MAX_BOOK)
+        if (score->cause < SP_MAX)
             desc = "blasted";
         else
             desc = "got killed";
@@ -5041,7 +5042,7 @@ static char *player_death_description(game_score_t *score, int verbose)
         break;
 
     case PD_SPELL:
-        if (score->cause < SP_MAX_BOOK)
+        if (score->cause < SP_MAX)
         {
             /* player spell */
             g_string_append_printf(text, " %s away with the spell \"%s\".",

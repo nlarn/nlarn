@@ -77,6 +77,9 @@ const weapon_data weapons[WT_MAX] =
 damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo);
 void weapon_ammo_drop(map *m, item *ammo, position pos);
 
+static gboolean weapon_pos_hit(position pos, const damage_originator *damo,
+                               gpointer data1, gpointer data2);
+
 int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item *ammo)
 {
     assert (p != NULL && m != NULL);
@@ -105,12 +108,11 @@ int weapon_fire(struct player *p)
 
     map *map = game_map(nlarn, Z(p->pos));
     position target;             /* the selected target */
-    area *ray = NULL;            /* the path of the bullet */
+    damage_originator damo = { DAMO_PLAYER, p };
     char wdesc[81] = {};         /* the weapon description */
     char adesc[81] = {};         /* the ammo description */
     item *weapon = p->eq_weapon; /* the equipped weapon */
     item *ammo   = p->eq_quiver; /* the quivered ammo */
-    item *pammo  = NULL;         /* the single piece of ammo being shot */
     monster *m = NULL;           /* the targeted monster */
 
     /* check if the player wields a weapon */
@@ -178,103 +180,27 @@ int weapon_fire(struct player *p)
     /* log the event */
     log_add_entry(nlarn->log, "You fire %s at the %s.", wdesc, monster_name(m));
 
-    /* start shooting */
-    if (!player_make_move(p, 1, TRUE, "loading %s", wdesc))
-        return FALSE; /* interrupted */
-
     /* --- finally shooting the weapon --- */
 
     /* get a piece of ammo */
     if (ammo->count > 1)
     {
         /* get a new piece of ammo of the quivered stack */
-        pammo = item_split(ammo, 1);
+        ammo = item_split(ammo, 1);
     }
     else
     {
         /* shooting the last piece of ammo from the quiver */
-        pammo = ammo;
         p->eq_quiver = NULL;
     }
 
-    /* the monster might have moved during the preparation time */
-    target = monster_pos(m);
-
-    if (!monster_in_sight(m))
-    {
-        log_add_entry(nlarn->log, "The %s moved out of sight.", monster_name(m));
-        return FALSE;
-    }
-
     /* paint a ray to follow the path of the bullet */
-    ray = area_new_ray(p->pos, target, map_get_obstacles(map, p->pos,
-                                                         pos_distance(p->pos, target)));
+    if (area_ray_trajectory(p->pos, target, &damo, weapon_pos_hit, weapon, ammo, FALSE,
+                            item_glyph(ammo->type), item_colour(ammo), FALSE))
+        return TRUE; /* one of the callbacks succeeded */
 
-    /* need a definite description for the ammo */
-    item_describe(pammo, player_item_known(p, pammo), TRUE, TRUE, adesc, 80);
-    adesc[0] = g_ascii_toupper(adesc[0]);
-
-    /* follow the ray to determine if the bullet hits something else */
-    position previous = p->pos, cursor = p->pos;
-    int start_x, start_y, stop_x, stop_y;
-    start_x = min(X(p->pos), X(target));
-    start_y = min(Y(p->pos), Y(target));
-    stop_x  = max(X(p->pos), X(target));
-    stop_y  = max(Y(p->pos), Y(target));
-
-    for(Y(cursor) = start_y; Y(cursor) <= stop_y; Y(cursor)++)
-    {
-        for(X(cursor) = start_x; X(cursor) <= stop_x; X(cursor)++)
-        {
-            monster *drive_by = NULL;
-
-            /* check if the point is part of the ray */
-            if (!area_pos_get(ray, cursor))
-                continue;
-
-            if (!map_pos_passable(map, cursor))
-            {
-                /* the bullet hit something - drop it at the previous position */
-                weapon_ammo_drop(map, pammo, previous);
-                return TRUE;
-            }
-
-            /* check if there is a monster at the position the bullet passes */
-            if ((drive_by = map_get_monster_at(map, cursor)))
-            {
-                /* bullet might have hit the other monster */
-                if (chance(weapon_calc_to_hit(p, drive_by, weapon, pammo)))
-                {
-                    damage *dam = weapon_get_ranged_damage(p, weapon, pammo);
-
-                    log_add_entry(nlarn->log, "%s hits the %s.", adesc,
-                                  monster_name(drive_by));
-
-                    monster_damage_take(drive_by, dam);
-                    weapon_ammo_drop(map, pammo, cursor);
-
-                    return TRUE;
-                }
-            }
-
-            /* bullet moves unhindered */
-            previous = cursor;
-        }
-    }
-
-    /* arrived at the target position */
-    if (chance(weapon_calc_to_hit(p, m, weapon, ammo)))
-    {
-        log_add_entry(nlarn->log, "%s hits the %s.", adesc, monster_name(m));
-        monster_damage_take(m, weapon_get_ranged_damage(p, weapon, pammo));
-    }
-    else
-    {
-        log_add_entry(nlarn->log, "%s misses the %s.", adesc, monster_name(m));
-    }
-
-    /* ammo drops at target position nevertheless */
-    weapon_ammo_drop(map, pammo, target);
+    /* none of the callbacks succeeded -> drop the ammo at the target position */
+    weapon_ammo_drop(map, ammo, target);
 
     return TRUE;
 }
@@ -308,7 +234,7 @@ damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)
 {
     assert (p != NULL && weapon != NULL && ammo != NULL);
 
-    damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, 0, p);
+    damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, 0, DAMO_PLAYER, p);
     dam->amount = weapon_damage(weapon) + ammo_damage(ammo);
 
     return dam;
@@ -321,4 +247,57 @@ void weapon_ammo_drop(map *m, item *ammo, position pos)
         inv_add(map_ilist_at(m, pos), ammo);
     else
         item_destroy(ammo);
+}
+
+static gboolean weapon_pos_hit(position pos, const damage_originator *damo,
+                               gpointer data1, gpointer data2)
+{
+    map *map = game_map(nlarn, Z(pos));
+    item *weapon = (item *)data1;
+    item *ammo = (item *)data2;
+    monster *m = map_get_monster_at(map, pos);
+    char adesc[81] = {};
+
+    /* need a definite description for the ammo */
+    item_describe(ammo, player_item_known(nlarn->p, ammo), TRUE, TRUE, adesc, 80);
+    adesc[0] = g_ascii_toupper(adesc[0]);
+
+    if (!map_pos_passable(map, pos))
+    {
+        /* the ammo hit some map feature -> drop it at the position */
+        weapon_ammo_drop(map, ammo, pos);
+        return TRUE;
+    }
+    else if (m != NULL)
+    {
+        /* there is a monster at the position */
+        /* the bullet might have hit the monster */
+        if (chance(weapon_calc_to_hit(nlarn->p, m, weapon, ammo)))
+        {
+            /* hit */
+            damage *dam = weapon_get_ranged_damage(nlarn->p, weapon, ammo);
+
+            if (monster_in_sight(m))
+                log_add_entry(nlarn->log, "%s hits the %s.", adesc, monster_name(m));
+
+            monster_damage_take(m, dam);
+            weapon_ammo_drop(map, ammo, pos);
+
+            return TRUE;
+        }
+        else
+        {
+            /* missed */
+            if (monster_in_sight(m))
+                log_add_entry(nlarn->log, "%s misses the %s.", adesc, monster_name(m));
+        }
+    }
+    else if (pos_identical(nlarn->p->pos, pos))
+    {
+        /* the bullet may hit the player */
+        /* TODO: implement */
+    }
+
+    /* the bullet passed unhindered */
+    return FALSE;
 }

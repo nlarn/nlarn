@@ -78,6 +78,23 @@ const char *monster_attack_verb[ATT_MAX] =
     "gazes at",     /* ATT_GAZE */
 };
 
+static struct _monster_breath_data
+{
+    char *desc;
+    char glyph;
+    int colour;
+} monster_breath_data[] =
+{
+    { NULL, 0, 0 },                                 /* DAM_NONE */
+    { NULL, 0, 0 },                                 /* DAM_PHYSICAL */
+    { "psionic blast", '*', DC_WHITE },             /* DAM_MAGICAL */
+    { "burst of fire", '~', DC_RED },               /* DAM_FIRE */
+    { "beam of frost", '*', DC_LIGHTCYAN },         /* DAM_COLD */
+    { "gush of acid", '*', DC_LIGHTGREEN },         /* DAM_ACID */
+    { "flood of water", '~', DC_BLUE },             /* DAM_WATER */
+    { "ray of lightning", '*', DC_YELLOW },         /* DAM_ELECTRICITY */
+    { "burst of noxious fumes", '%', DC_GREEN },    /* DAM_POISON */
+};
 
 static gboolean monster_player_visible(monster *m);
 static gboolean monster_attack_available(monster *m, attack_t type);
@@ -91,6 +108,9 @@ static position monster_move_attack(monster *m, struct player *p);
 static position monster_move_flee(monster *m, struct player *p);
 static position monster_move_serve(monster *m, struct player *p);
 static position monster_move_civilian(monster *m, struct player *p);
+
+static gboolean monster_breath_hit(position pos, const damage_originator *damo,
+                                   gpointer data1, gpointer data2);
 
 monster *monster_new(monster_t type, position pos)
 {
@@ -351,9 +371,6 @@ void monster_destroy(monster *m)
 
     g_ptr_array_free(m->effects, TRUE);
 
-    /* remove monster from map (if it is on the map) */
-    map_set_monster_at(game_map(nlarn, Z(m->pos)), m->pos, NULL);
-
     /* free inventory */
     if (m->inventory)
         inv_destroy(m->inventory, TRUE);
@@ -582,6 +599,12 @@ void monster_unknown_set(monster *m, gboolean what)
     m->unknown = what;
 }
 
+inventory **monster_inv(monster *m)
+{
+    assert (m != NULL);
+    return &m->inventory;
+}
+
 static gboolean monster_nearby(monster *m)
 {
     /* different level */
@@ -711,8 +734,7 @@ void monster_die(monster *m, struct player *p)
     }
 
     /* make sure mimics never leave the mimicked item behind */
-    if (monster_flags(m, MF_MIMIC)
-            && inv_length(m->inventory) > 0)
+    if (monster_flags(m, MF_MIMIC) && inv_length(m->inventory) > 0)
     {
         inv_del(&m->inventory, 0);
     }
@@ -762,6 +784,9 @@ void monster_die(monster *m, struct player *p)
         player_exp_gain(p, monster_exp(m));
         p->stats.monsters_killed[m->type] += 1;
     }
+
+    /* unlink the monster from its map */
+    map_set_monster_at(monster_map(m), m->pos, NULL);
 
     /* assure that the monster's hp indicates that the monster is dead */
     if (m->hp > 0)
@@ -1251,13 +1276,11 @@ attack monster_attack(monster *m, int num)
     return att;
 }
 
-static int handle_breath_attack(monster *m, player *p, attack att)
+static int monster_breath_attack(monster *m, player *p, attack att)
 {
     assert(att.type == ATT_BREATH);
 
-    guint damage;
-    spell *sp = NULL;
-
+    /* FIXME: charm monster is extremely broken. This should be handled totally different */
     if (monster_effect(m, ET_CHARM_MONSTER)
             && (rand_m_n(5, 30) * monster_level(m) - player_get_wis(p) < 30))
     {
@@ -1269,59 +1292,34 @@ static int handle_breath_attack(monster *m, player *p, attack att)
         return TRUE;
     }
 
-    switch (att.damage)
-    {
-    case DAM_FIRE:
-        sp = spell_new(SP_MON_FIRE);
-        break;
-    case DAM_MAGICAL:
-        sp = spell_new(SP_MON_PSY);
-        break;
-    case DAM_POISON:
-        sp = spell_new(SP_MON_POISON);
-        break;
-    default:
-        break;
-    }
+    /* generate damage */
+    damage *dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn),
+                             DAMO_MONSTER, m);
 
-    if (sp == NULL)
-        return FALSE;
+    /* the attack might have a random amount */
+    if (att.rand > 0)
+        dam->amount += rand_0n(att.rand);
 
     if (monster_in_sight(m))
     {
-        log_add_entry(nlarn->log, "The %s breathes a %s!",
-                      monster_get_name(m), spell_name(sp));
+        log_add_entry(nlarn->log, "The %s breathes a %s!", monster_get_name(m),
+                      monster_breath_data[att.damage].desc);
     }
     else
     {
         log_add_entry(nlarn->log, "A %s spews forth from nowhere!",
-                      spell_name(sp));
+                      monster_breath_data[att.damage].desc);
     }
 
-    /* generate damage */
-    damage = att.base + game_difficulty(nlarn);
+    /* handle the breath */
+    area_ray_trajectory(m->pos, p->pos, &(dam->dam_origin),
+                        monster_breath_hit, dam, NULL, TRUE,
+                        monster_breath_data[att.damage].glyph,
+                        monster_breath_data[att.damage].colour, TRUE);
 
-    // store monster position in case the monster dies.
-    position source   = m->pos;
-    position last_pos = throw_ray(sp, p, m->pos, m->player_pos, damage, FALSE);
+    damage_free(dam);
 
-    if (map_sobject_at(game_map(nlarn, Z(last_pos)), last_pos) == LS_MIRROR)
-    {
-        log_add_entry(nlarn->log, "The mirror reflects the %s!",
-                      spell_name(sp));
-
-        throw_ray(sp, p, last_pos, source, damage, FALSE);
-    }
-    /* attack reflected by player */
-    else if (pos_identical(p->pos, last_pos) && player_effect(p, ET_REFLECTION))
-    {
-        throw_ray(sp, p, last_pos, source, damage, TRUE);
-    }
-
-    /* tidy up */
-    spell_destroy(sp);
-
-    return TRUE;
+    return FALSE;
 }
 
 static int difficulty_modified_damage(int amount, int difficulty)
@@ -1396,7 +1394,7 @@ void monster_player_attack(monster *m, player *p)
 
     /* generate damage */
     dam = damage_new(att.damage, att.type,
-                     modified_attack_amount(att.base, att.damage), m);
+                     modified_attack_amount(att.base, att.damage), DAMO_MAP, m);
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM)
@@ -1407,9 +1405,9 @@ void monster_player_attack(monster *m, player *p)
 
     if (att.type == ATT_BREATH)
     {
-        /* the damage generated locally is not needed in handle_breath_attack() */
+        /* the damage generated locally is not needed in monster_breath_attack() */
         damage_free(dam);
-        handle_breath_attack(m, p, att);
+        monster_breath_attack(m, p, att);
 
         return;
     }
@@ -1523,8 +1521,9 @@ int monster_player_ranged_attack(monster *m, player *p)
         }
         else
         {
-            dam = damage_new(att.damage, att.type,
-                             att.base + game_difficulty(nlarn), m);
+            dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn),
+                             DAMO_MAP, m);
+
             player_damage_take(p, dam, PD_MONSTER, m->type);
         }
         return TRUE;
@@ -1532,17 +1531,19 @@ int monster_player_ranged_attack(monster *m, player *p)
     if (att.type != ATT_BREATH)
         return FALSE;
 
-    return handle_breath_attack(m, p, att);
+    return monster_breath_attack(m, p, att);
 }
 
 monster *monster_damage_take(monster *m, damage *dam)
 {
-    struct player *p;
+    struct player *p = NULL;
     int hp_orig;
 
     assert(m != NULL && dam != NULL);
 
-    p = (player *)dam->originator;
+    if (dam->dam_origin.ot == DAMO_PLAYER)
+        p = (player *)dam->dam_origin.originator;
+
     hp_orig = m->hp;
 
     /* FIXME: implement resistances */
@@ -2621,4 +2622,98 @@ int monster_is_carrying_item(monster *m, item_t type)
             return TRUE;
     }
     return FALSE;
+}
+
+static gboolean monster_breath_hit(position pos, const damage_originator *damo,
+                                           gpointer data1, gpointer data2)
+{
+    monster *m;
+    map *map = game_map(nlarn, Z(pos));
+    damage *dam = (damage *)data1;
+    item_erosion_type iet;
+    gboolean terminated = FALSE;
+
+    /* determine if items should be eroded */
+    switch (dam->type)
+    {
+    case DAM_FIRE:
+        iet = IET_BURN;
+        break;
+
+    case DAM_ACID:
+        iet = IET_CORRODE;
+        break;
+
+    case DAM_WATER:
+        iet = IET_RUST;
+        break;
+
+    default:
+        iet = IET_NONE;
+        break;
+    }
+
+    if ((m = map_get_monster_at(map, pos)))
+    {
+        /* The breath hit a monster. */
+        if (monster_in_sight(m))
+            log_add_entry(nlarn->log, "The %s hits the %s.",
+                          monster_breath_data[dam->type].desc,
+                          monster_get_name(m));
+
+        /* erode the monster's inventory */
+        if (iet && monster_inv(m))
+            inv_erode(monster_inv(m), iet, FALSE);
+
+        monster_damage_take(m, damage_copy(dam));
+
+        /* the breath will sweep over small monsters */
+        if (monster_size(m) >= ESIZE_LARGE)
+            terminated = TRUE;
+    }
+
+    if (pos_identical(pos, nlarn->p->pos))
+    {
+        /* The breath hit the player */
+        if (player_effect(nlarn->p, ET_REFLECTION))
+        {
+            /* The player reflects the breath. Actual handling of the reflection
+               is done in area_ray_trajectory, just give a message here. */
+            log_add_entry(nlarn->log, "Your amulet reflects the %s!",
+                          monster_breath_data[dam->type].desc);
+        }
+        else
+        {
+            /* No reflection -> player takes the damage */
+            /* TODO: evasion!!! */
+            log_add_entry(nlarn->log, "The %s hits you!",
+                          monster_breath_data[dam->type].desc);
+            player_damage_take(nlarn->p, dam, PD_MONSTER,
+                               monster_type(dam->dam_origin.originator));
+
+            /* erode the player's inventory */
+            if (iet != IET_NONE)
+                inv_erode(&nlarn->p->inventory, iet, TRUE);
+
+            terminated = TRUE;
+        }
+    }
+
+    if (iet > IET_NONE && map_ilist_at(map, pos))
+    {
+        /* erode affected items */
+        inv_erode(map_ilist_at(map, pos), iet, fov_get(nlarn->p->fov, pos));
+    }
+
+
+    if (map_sobject_at(map, pos) == LS_MIRROR && fov_get(nlarn->p->fov, pos))
+    {
+        /* A mirror will reflect the breath. Actual handling of the reflection
+           is done in area_ray_trajectory, just give a message here if the
+           mirror is visible by the player. */
+        log_add_entry(nlarn->log, "The mirror reflects the %s!",
+                      monster_breath_data[dam->type].desc);
+    }
+
+    return terminated;
 }

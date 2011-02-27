@@ -17,10 +17,14 @@
  */
 
 #include <assert.h>
+#include <curses.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "cJSON.h"
+#include "display.h"
 #include "map.h"
+#include "nlarn.h"
 #include "position.h"
 
 #define POS_MAX_XY (1<<11)
@@ -214,8 +218,9 @@ area *area_new(int start_x, int start_y, int size_x, int size_y)
 
     a = g_malloc0(sizeof(area));
 
-    a->start_x = start_x;
-    a->start_y = start_y;
+    /* ensure the starting positions are valid */
+    a->start_x = max(start_x, 0);
+    a->start_y = max(start_y, 0);
 
     a->size_x = size_x;
     a->size_y = size_y;
@@ -443,6 +448,191 @@ area *area_new_ray(position source, position target, area *obstacles)
     area_destroy(obstacles);
 
     return narea;
+}
+
+gboolean area_ray_trajectory(position source, position target,
+                             const damage_originator * const damo,
+                             area_hit_sth pos_hitfun,
+                             gpointer data1, gpointer data2, gboolean reflectable,
+                             char glyph, int colour, gboolean keep_ray)
+{
+    assert(pos_valid(source) && pos_valid(target));
+
+    map *map = game_map(nlarn, Z(source));
+
+    /* get the ray */
+    area *obstacles = map_get_obstacles(map, source, pos_distance(source, target));
+    area *ray = area_new_ray(source, target, obstacles);
+
+    /* it was impossible to get a ray for the given positions */
+    if (!ray)
+        return FALSE;
+
+    /* follow the ray to determine if it hits something */
+    position previous = source, cursor = source;
+    gboolean proceed_y = TRUE;
+
+    do
+    {
+        gboolean proceed_x = TRUE;
+
+        do
+        {
+            gboolean result = FALSE;
+
+            /* skip the source position */
+            if (pos_identical(source, cursor))
+                goto move_cursor;
+
+            /* check if the current position is part of the ray */
+            if (!area_pos_get(ray, cursor))
+                goto move_cursor;
+
+            /* the position is affected, call the callback function */
+            if (pos_hitfun(cursor, damo, data1, data2))
+            {
+                /* the callback returned that the ray if finished */
+                result = TRUE;
+            }
+
+            /* check for reflection: mirrors */
+            if (reflectable && (map_sobject_at(map, cursor) == LS_MIRROR))
+            {
+                return area_ray_trajectory(cursor, source, damo, pos_hitfun, data1,
+                                           data2, FALSE,  glyph, colour, keep_ray);
+            }
+
+            /* check for reflection: amulet of reflection */
+            if (reflectable && (pos_identical(cursor, nlarn->p->pos)
+                                && player_effect(nlarn->p, ET_REFLECTION)))
+            {
+                return area_ray_trajectory(cursor, source, damo, pos_hitfun, data1,
+                                           data2, FALSE,  glyph, colour, keep_ray);
+            }
+
+            /* after checking for reflection, abort the function if the
+               callback indicated success */
+            if (result == TRUE)
+                return result;
+
+            /* show the position of the ray*/
+            attron(colour);
+            mvaddch(Y(cursor), X(cursor), glyph);
+            attroff(colour);
+            refresh();
+
+            /* sleep a while to show the ray's position */
+            usleep(100000);
+            /* repaint the screen unless requested otherwise */
+            if (!keep_ray) display_paint_screen(nlarn->p);
+
+            /* cursor moves unhindered */
+            previous = cursor;
+
+            /* modify horizontal position if needed;
+               exit the loop when the destination has been reached */
+move_cursor:
+            if (X(cursor) < X(target))
+                X(cursor)++;
+            else if (X(cursor) > X(target))
+                X(cursor)--;
+            else if (X(cursor) == X(target))
+                proceed_x = FALSE;
+
+            /* terminate upon reaching the target */
+            if (pos_identical(cursor, target))
+                proceed_y = FALSE;
+        }
+        while (proceed_x);
+
+        /* modify vertical position if needed */
+        if (Y(cursor) < Y(target))
+        {
+            Y(cursor)++;
+            /* reset horizontal position upon vertical movement */
+            X(cursor) = X(source);
+        }
+        else if (Y(cursor) > Y(target))
+        {
+            Y(cursor)--;
+            /* reset horizontal position upon vertical movement */
+            X(cursor) = X(source);
+        }
+    }
+    while (proceed_y);
+
+    /* none of the trigger functions succeedes */
+    return FALSE;
+}
+
+gboolean area_blast(position center, guint radius,
+                    const damage_originator *damo,
+                    area_hit_sth pos_hitfun,
+                    gpointer data1, gpointer data2,
+                    char glyph, int colour)
+{
+    map *cmap = game_map(nlarn, Z(center));
+    position cursor = center;
+    gboolean retval = FALSE;
+    area *ball, *obsmap;
+
+    obsmap = map_get_obstacles(cmap, center, radius);
+    ball = area_new_circle_flooded(center, radius, obsmap);
+
+    attron(colour);
+
+    for (Y(cursor) = ball->start_y; Y(cursor) < ball->start_y + ball->size_y; Y(cursor)++)
+    {
+        for (X(cursor) = ball->start_x; X(cursor) < ball->start_x + ball->size_x; X(cursor)++)
+        {
+            monster *m = NULL;
+
+            /* skip this position if it is not affected by the blast */
+            if (!area_pos_get(ball, cursor))
+                continue;
+
+            /* move the cursor to the position */
+            move(Y(cursor), X(cursor));
+
+            if (map_sobject_at(cmap, cursor))
+            {
+                /* The blast hit a stationary object. */
+                addch(ls_get_image(map_sobject_at(cmap, cursor)));
+            }
+            else if ((m = map_get_monster_at(cmap, cursor)))
+            {
+                /* The blast hit a monster */
+                if (monster_in_sight(m))
+                    addch(monster_glyph(m));
+                else
+                    addch(glyph);
+            }
+            else if (pos_identical(nlarn->p->pos, cursor))
+            {
+                /* The blast hit the player */
+                addch('@');
+            }
+            else
+            {
+                /* The blast hit nothing */
+                addch(glyph);
+            }
+
+            /* keep track if the blast hit something */
+            if (pos_hitfun(cursor, damo, data1, data2))
+                retval = TRUE;
+        }
+    }
+
+    area_destroy(ball);
+    attroff(colour);
+
+    /* make sure the blast shows up */
+    refresh();
+    /* sleep a 3/4 second */
+    usleep(750000);
+
+    return retval;
 }
 
 area *area_copy(area *a)

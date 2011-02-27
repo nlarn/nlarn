@@ -158,7 +158,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
                level and if the player is burdened */
             damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
                                      rand_1n(trap_damage(trap) + bval) + Z(p->pos),
-                                     NULL);
+                                     DAMO_TRAP, NULL);
 
             player_damage_take(p, dam, PD_TRAP, trap);
         }
@@ -307,8 +307,9 @@ monster *monster_trap_trigger(monster *m)
     /* inflict damage caused by the trap */
     if (trap_damage(trap))
     {
-        damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
-                                 rand_1n(trap_damage(trap)), NULL);
+        damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE, rand_1n(trap_damage(trap)),
+                                 DAMO_TRAP, NULL);
+
         m = monster_damage_take(m, dam);
     }
 
