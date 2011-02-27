@@ -3873,8 +3873,7 @@ int player_item_identified(player *p, item *it)
     if (!it->blessed_known)
         known = FALSE;
 
-    if ((it->type == IT_ARMOUR || it->type == IT_RING || it->type == IT_WEAPON)
-            && !it->bonus_known)
+    if (item_is_optimizable(it->type) && !it->bonus_known)
         known = FALSE;
 
     return known;
@@ -4122,7 +4121,10 @@ void player_item_drop(player *p, inventory **inv, item *it)
 
     if (it->count > 1)
     {
-        g_snprintf(desc, 60, "Drop how many %s?", item_name_pl(it->type));
+        /* use the item type plural name except for ammunition */
+        g_snprintf(desc, 60, "Drop how many %s%s?",
+                   (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
+                   (it->type == IT_AMMO ? "s" : ""));
 
         count = display_get_count(desc, it->count);
 
@@ -4720,7 +4722,10 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
 
     if (ask && (it->count > 1))
     {
-        g_snprintf(desc, 60, "Pick up how many %s?", item_name_pl(it->type));
+        /* use the item type plural name except for ammunition */
+        g_snprintf(desc, 60, "Pick up how many %s%s?",
+                   (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
+                   (it->type == IT_AMMO ? "s" : ""));
 
         count = display_get_count(desc, it->count);
 

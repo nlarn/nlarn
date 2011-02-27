@@ -47,7 +47,7 @@ const item_type_data item_data[IT_MAX] =
     { IT_ARMOUR,    "armour",     "armour",      '[',  AT_MAX,          1, 1, 1, 1, 0, 0, 1, },
     { IT_BOOK,      "book",       "books",       '+',  SP_MAX,          0, 1, 1, 0, 1, 1, 1, },
     { IT_CONTAINER, "container",  "containers",  ']',  CT_MAX,          0, 0, 1, 0, 0, 0, 0, },
-    { IT_GEM,       "gem",        "gems",        '*',  GT_MAX,          1, 0, 0, 0, 0, 1, 0, },
+    { IT_GEM,       "gem",        "gems",        '*',  GT_MAX,          0, 0, 0, 0, 0, 1, 0, },
     { IT_GOLD,      "coin",       "coins",       '$',  0,               0, 0, 0, 0, 0, 1, 0, },
     { IT_POTION,    "potion",     "potions",     '!',  PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, },
     { IT_RING,      "ring",       "rings",       '=',  RT_MAX,          1, 1, 1, 1, 0, 0, 1, },
