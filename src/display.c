@@ -2761,7 +2761,7 @@ void display_show_history(message_log *log, const char *title)
     guint idx;
     message_log_entry *le;
     GString *text = g_string_new(NULL);
-    char intrep[11] = { 0 };
+    char intrep[11] = { 0 }; /* string representation of the game time */
     int twidth; /* the number of characters of the current game time */
 
     /* determine the width of the current game turn */
@@ -2794,16 +2794,19 @@ int display_show_message(const char *title, const char *message, int indent)
     guint maxvis = 0;
     guint offset = 0;
 
-    /* numer of columns required for window border and margin */
+    /* numer of columns required for
+         a) the window border and the text margin
+         b) the padding around the window */
     const guint wred = 4;
 
     gboolean RUN = TRUE;
 
-    /* default window width according to available screen space */
+    /* default window width according to available screen space;
+       padded by 2 chars on each side */
     width = COLS - wred;
 
     /* wrap message according to width */
-    text = text_wrap(message, width - 4, indent);
+    text = text_wrap(message, width - wred, indent);
 
     /* determine the length of longest text line */
     for (idx = 0; idx < text->len; idx++)
@@ -2825,11 +2828,23 @@ int display_show_message(const char *title, const char *message, int indent)
 
     do
     {
+        /* display the window content */
         for (idx = 0; idx < maxvis; idx++)
         {
-            mvwcprintw(mwin->window, DDC_LIGHTGRAY, display_dialog_colset,
-                       idx + 1, 1, " %-*s ", width - 4,
-                       g_ptr_array_index(text, idx + offset));
+            int pos, count;
+            count = mvwcprintw(mwin->window, DDC_LIGHTGRAY, display_dialog_colset,
+                               idx + 1, 1, " %-*s ", width - wred,
+                               g_ptr_array_index(text, idx + offset));
+
+            /* If the function has printed less characters than the window
+               content width, overwrite the rest of the line with blanks.
+               Actually this should be fixed in mvwcprintw(), but that seems
+               like lot of work. */
+
+            wattron(mwin->window, DDC_LIGHTGRAY);
+            for (pos = count; pos < (width - wred); pos++)
+                waddch(mwin->window, ' ');
+            wattroff(mwin->window, DDC_LIGHTGRAY);
         }
 
         display_window_update_arrow_up(mwin, offset > 0);
