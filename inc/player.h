@@ -38,35 +38,36 @@ struct game;
 
 typedef struct _player_stats
 {
-    gint32 deepest_level;
-    gint32 monsters_killed[MT_MAX];
-    gint32 spells_cast;
-    gint32 potions_quaffed;
-    gint32 scrolls_read;
-    gint32 books_read;
-    gint32 life_protected;
-    gint32 vandalism;
+    gint deepest_level;
+    gint monsters_killed[MT_MAX];
+    gint spells_cast;
+    gint potions_quaffed;
+    gint scrolls_read;
+    gint books_read;
+    gint life_protected;
+    gint vandalism;
 
     // Keep track of the dungeon economy.
-    gint32 items_bought;
-    gint32 items_sold;
-    gint32 gems_sold;
-    gint32 gold_found;
-    gint32 gold_sold_items;
-    gint32 gold_sold_gems;
-    gint32 gold_bank_interest;
-    gint32 gold_spent_shop;
-    gint32 gold_spent_id_repair;
-    gint32 gold_spent_donation;
-    gint32 gold_spent_college;
+    gint items_bought;
+    gint items_sold;
+    gint gems_sold;
+    gint gold_found;
+    gint gold_sold_items;
+    gint gold_sold_gems;
+    gint gold_bank_interest;
+    gint gold_spent_shop;
+    gint gold_spent_id_repair;
+    gint gold_spent_donation;
+    gint gold_spent_college;
+    gint gold_spent_taxes;
 
-    gint32 max_level;
-    gint32 max_xp;
-    gint32 str_orig;
-    gint32 int_orig;
-    gint32 wis_orig;
-    gint32 con_orig;
-    gint32 dex_orig;
+    gint max_level;
+    gint max_xp;
+    gint str_orig;
+    gint int_orig;
+    gint wis_orig;
+    gint con_orig;
+    gint dex_orig;
 } player_stats;
 
 typedef enum _player_sex
@@ -101,27 +102,27 @@ typedef struct player
     char *name;
     player_sex sex;
 
-    guint32 strength;
-    guint32 intelligence;
-    guint32 wisdom;
-    guint32 constitution;
-    guint32 dexterity;
+    guint strength;
+    guint intelligence;
+    guint wisdom;
+    guint constitution;
+    guint dexterity;
 
-    gint32 hp; /* current hp */
-    guint32 hp_max; /* max hp */
-    gint32 mp;
-    guint32 mp_max;
-    guint32 regen_counter; /* regeneration counter */
+    gint  hp; /* current hp */
+    guint hp_max; /* max hp */
+    gint  mp; /* magic points */
+    guint mp_max; /* max mp */
+    guint regen_counter; /* regeneration counter */
 
-    guint32 bank_account; /* There is nothing quite as wonderful as money */
-    guint32 outstanding_taxes;
-    guint32 interest_lasttime; /* last time interest has been calculated */
+    guint bank_account; /* There is nothing quite as wonderful as money */
+    guint bank_ieslvtb; /* The interest earned since last visiting the bank */
+    guint outstanding_taxes;
 
-    guint32 experience; /* experience points */
-    guint32 level; /* current experience level */
+    guint experience; /* experience points */
+    guint level; /* current experience level */
 
     speed speed; /* player's speed */
-    guint32 movement; /* player's movement points */
+    guint movement; /* player's movement points */
 
     /* other stuff */
     GPtrArray *known_spells;

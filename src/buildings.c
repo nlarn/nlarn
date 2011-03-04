@@ -21,6 +21,7 @@
 
 #include "container.h"
 #include "display.h"
+#include "game.h"
 #include "gems.h"
 #include "items.h"
 #include "nlarn.h"
@@ -43,34 +44,31 @@ static void building_item_sell(player *p, inventory **inv, item *it);
 static void building_item_identify(player *p, inventory **inv, item *it);
 static void building_item_repair(player *p, inventory **inv, item *it);
 static void building_item_buy(player *p, inventory **inv, item *it);
+static guint calc_tax_debt(guint income);
 
-static int handle_bank_interest(player *p)
+void building_bank_calc_interest(game *g)
 {
-    if (p->bank_account < 250)
-        return 0;
+    guint interest = 0;
 
-    /* pay interest */
-    if (nlarn->gtime <= p->interest_lasttime)
-        return 0;
+    /* pay interest every 100 turns */
+    if (game_turn(g) % 100 != 0 || g->p->bank_account <= 250)
+        return;
 
-    const int mobuls = (nlarn->gtime - p->interest_lasttime) / 100;
-    if (mobuls <= 0)
-        return 0;
+    /* the bank pays an interest of 2.5% per mobul */
+    interest = g->p->bank_account / 250;
 
-    /* store original account */
-    const int orig_account = p->bank_account;
+    /* add the interest to the bank account.. */
+    g->p->bank_account += interest;
 
-    int i;
-    for (i = 1; i <= mobuls; i++)
-        p->bank_account += p->bank_account / 250;
+    /* ..and the statistics.. */
+    g->p->stats.gold_bank_interest += interest;
 
-    p->interest_lasttime = game_turn(nlarn);
+    /* ..and keep track of the amount paid since the player's last visit to the bank */
+    g->p->bank_ieslvtb += interest;
 
-    /* calculate interest paid */
-    const int interest = (p->bank_account - orig_account);
-    p->stats.gold_bank_interest += interest;
+    /* calculate the tax debt */
+    g->p->outstanding_taxes += calc_tax_debt(interest);
 
-    return interest;
 }
 
 int building_bank(player *p)
@@ -114,11 +112,18 @@ int building_bank(player *p)
         return turns;
     }
 
-    int interest = handle_bank_interest(p);
-    if (interest > 0)
+    if (p->bank_ieslvtb > 0)
     {
+        /* show the earned interest */
         g_string_append_printf(text, "We have paid you an interest of %d " \
-                               "gold since your last visit.\n", interest);
+                               "gold since your last visit.\n", p->bank_ieslvtb);
+
+        /* add it to the game log for later reference */
+        log_add_entry(nlarn->log, "The bank has paid you an interest of %d "
+                      "gold since your last visit.", p->bank_ieslvtb);
+
+        /* reset the value */
+        p->bank_ieslvtb = 0;
     }
 
     g_string_append_printf(text,
@@ -170,6 +175,9 @@ int building_bank(player *p)
             p->bank_account += amount;
             player_remove_gold(p, amount);
             log_add_entry(nlarn->log, "You deposited %d gp.", amount);
+
+            /* income tax for money earned in the dungeon */
+            p->outstanding_taxes += calc_tax_debt(amount);
         }
         else if (amount)
         {
@@ -477,14 +485,9 @@ int building_lrs(player *p)
     text = g_string_new(msg_greet);
 
     if (p->outstanding_taxes)
-        g_string_append_printf(text,
-                               msg_taxes,
-                               p->outstanding_taxes);
+        g_string_append_printf(text, msg_taxes, p->outstanding_taxes);
     else
         g_string_append(text, msg_notax);
-
-    if (p->outstanding_taxes > player_get_gold(p))
-        g_string_append(text, " You cannot afford to pay your taxes this time.");
 
     display_show_message("Larn Revenue Service", text->str, 0);
 
@@ -496,6 +499,7 @@ int building_lrs(player *p)
         if (display_get_yesno("Do you want to pay your taxes?", NULL, NULL))
         {
             building_player_charge(p, p->outstanding_taxes);
+            p->stats.gold_spent_taxes += p->outstanding_taxes;
             p->outstanding_taxes = 0;
             log_add_entry(nlarn->log, "You have paid your taxes.");
         }
@@ -1483,7 +1487,10 @@ static void building_item_buy(player *p, inventory **inv, item *it)
             return;
     }
 
+    /* put the money on the player's bank account */
     p->bank_account += price;
+    /* and charge income taxes... */
+    p->outstanding_taxes += calc_tax_debt(price);
 
     guint count_orig = it->count;
     it->count = count;
@@ -1522,4 +1529,10 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     }
 
     player_make_move(p, 1, FALSE, NULL);
+}
+
+static guint calc_tax_debt(guint income)
+{
+    /* charge 5% income tax per difficulty level */
+    return (income * min(game_difficulty(nlarn), 4) / 20);
 }

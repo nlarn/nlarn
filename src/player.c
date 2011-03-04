@@ -337,8 +337,8 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(pser, "regen_counter", p->regen_counter);
 
     cJSON_AddNumberToObject(pser, "bank_account", p->bank_account);
+    cJSON_AddNumberToObject(pser, "bank_ieslvtb", p->bank_ieslvtb);
     cJSON_AddNumberToObject(pser, "outstanding_taxes", p->outstanding_taxes);
-    cJSON_AddNumberToObject(pser, "interest_lasttime", p->interest_lasttime);
 
     cJSON_AddNumberToObject(pser, "experience", p->experience);
     cJSON_AddNumberToObject(pser, "level", p->level);
@@ -507,6 +507,7 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "gold_spent_id_repair", p->stats.gold_spent_id_repair);
     cJSON_AddNumberToObject(obj, "gold_spent_donation", p->stats.gold_spent_donation);
     cJSON_AddNumberToObject(obj, "gold_spent_college", p->stats.gold_spent_college);
+    cJSON_AddNumberToObject(obj, "gold_spent_taxes", p->stats.gold_spent_taxes);
 
     cJSON_AddNumberToObject(obj, "max_level", p->stats.max_level);
     cJSON_AddNumberToObject(obj, "max_xp", p->stats.max_xp);
@@ -543,8 +544,8 @@ player *player_deserialize(cJSON *pser)
     p->regen_counter = cJSON_GetObjectItem(pser, "regen_counter")->valueint;
 
     p->bank_account = cJSON_GetObjectItem(pser, "bank_account")->valueint;
+    p->bank_ieslvtb = cJSON_GetObjectItem(pser, "bank_ieslvtb")->valueint;
     p->outstanding_taxes = cJSON_GetObjectItem(pser, "outstanding_taxes")->valueint;
-    p->interest_lasttime = cJSON_GetObjectItem(pser, "interest_lasttime")->valueint;
 
     p->experience = cJSON_GetObjectItem(pser, "experience")->valueint;
     p->level = cJSON_GetObjectItem(pser, "level")->valueint;
@@ -727,6 +728,7 @@ player *player_deserialize(cJSON *pser)
     p->stats.gold_spent_id_repair = cJSON_GetObjectItem(obj, "gold_spent_id_repair")->valueint;
     p->stats.gold_spent_donation  = cJSON_GetObjectItem(obj, "gold_spent_donation")->valueint;
     p->stats.gold_spent_college   = cJSON_GetObjectItem(obj, "gold_spent_college")->valueint;
+    p->stats.gold_spent_taxes     = cJSON_GetObjectItem(obj, "gold_spent_taxes")->valueint;
 
     p->stats.max_level = cJSON_GetObjectItem(obj, "max_level")->valueint;
     p->stats.max_xp = cJSON_GetObjectItem(obj, "max_xp")->valueint;
@@ -1255,6 +1257,16 @@ void player_die(player *p, player_cod cause_type, int cause)
                                p->stats.gold_spent_id_repair,
                                p->stats.gold_spent_donation,
                                p->stats.gold_spent_college);
+
+        if (p->outstanding_taxes)
+            g_string_append_printf(text, " %s owed the tax office %d gold%s",
+                                   pronoun, p->outstanding_taxes,
+                                   p->stats.gold_spent_taxes ? "" : ".");
+
+        if (p->stats.gold_spent_taxes)
+            g_string_append_printf(text, " %s paid %d gold taxes.",
+                                   p->outstanding_taxes ? "and" : pronoun,
+                                   p->stats.gold_spent_taxes);
 
         /* append map of current level if the player is not in the town */
         if (Z(p->pos) > 0)

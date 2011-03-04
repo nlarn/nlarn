@@ -30,8 +30,6 @@
 #define SVNID ""
 #endif
 
-#define TAXRATE 1/20    /* tax rate for the LRS */
-
 /* the entire game */
 game *nlarn;
 

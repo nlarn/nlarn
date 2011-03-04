@@ -32,9 +32,10 @@ typedef struct school_course {
 /* forward declarations */
 
 struct player;
+struct game;
 
 /* functions */
-
+void building_bank_calc_interest(struct game *g);
 int building_bank(struct player *p);
 int building_dndstore(struct player *p);
 void building_dndstore_init();

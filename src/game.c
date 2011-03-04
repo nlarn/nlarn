@@ -637,6 +637,9 @@ void game_spin_the_wheel(game *g)
     /* move all spheres */
     g_ptr_array_foreach(g->spheres, (GFunc)sphere_move, g);
 
+    /* calculate bank interest */
+    building_bank_calc_interest(g);
+
     g->gtime++; /* count up the time  */
     log_set_time(g->log, g->gtime); /* adjust time for log entries */
 }
