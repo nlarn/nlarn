@@ -5059,20 +5059,10 @@ static char *player_death_description(game_score_t *score, int verbose)
         break;
 
     case PD_SPELL:
-        if (score->cause < SP_MAX)
-        {
-            /* player spell */
-            g_string_append_printf(text, " %s away with the spell \"%s\".",
-                                   (score->sex == PS_MALE) ? "himself" : "herself",
-                                   spell_name_by_id(score->cause));
-        }
-        else
-        {
-            /* monster spell */
-            g_string_append_printf(text, " by %s %s",
-                                   a_an(spell_name_by_id(score->cause)),
-                                   spell_name_by_id(score->cause));
-        }
+        /* player spell */
+        g_string_append_printf(text, " %s away with the spell \"%s\".",
+                               (score->sex == PS_MALE) ? "himself" : "herself",
+                               spell_name_by_id(score->cause));
         break;
 
     case PD_CURSE:

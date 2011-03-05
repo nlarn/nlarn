@@ -1317,6 +1317,8 @@ static int monster_breath_attack(monster *m, player *p, attack att)
                         monster_breath_data[att.damage].glyph,
                         monster_breath_data[att.damage].colour, TRUE);
 
+    /* the damage is copied in monster_breath_hit(), thus destroy the
+       original damage here */
     damage_free(dam);
 
     return FALSE;
@@ -2688,7 +2690,7 @@ static gboolean monster_breath_hit(position pos, const damage_originator *damo,
             /* TODO: evasion!!! */
             log_add_entry(nlarn->log, "The %s hits you!",
                           monster_breath_data[dam->type].desc);
-            player_damage_take(nlarn->p, dam, PD_MONSTER,
+            player_damage_take(nlarn->p, damage_copy(dam), PD_MONSTER,
                                monster_type(dam->dam_origin.originator));
 
             /* erode the player's inventory */
