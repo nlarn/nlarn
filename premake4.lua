@@ -34,8 +34,8 @@ function get_pkgconfig(query)
   return out
 end
 
--- simple function to determine Linux distribution 
--- will not work if lsb_release is not available 
+-- simple function to determine Linux distribution
+-- will not work if lsb_release is not available
 -- (most modern distribution should provide it)
 function get_linux_distribution()
   fh = io.popen("lsb_release -is")
@@ -55,11 +55,14 @@ solution "NLarn"
     includedirs { "inc" }
     defines { "G_DISABLE_DEPRECATED" }
 
+    -- assume gcc or clang
+    buildoptions { "-std=c99", "-Wextra" }
+    
     links { "glib-2.0", "m", "z" }
 
-    -- Debian and Ubuntu have a specific naming convention for the lua package 
+    -- Debian and Ubuntu have a specific naming convention for the lua package
     -- fortunately it can be configured with pkg-config
-    if os.is("linux") and (get_linux_distribution() == "Debian" 
+    if os.is("linux") and (get_linux_distribution() == "Debian"
         or get_linux_distribution() == "Ubuntu")
       then
       includedirs { get_dirs("include", "lua5.1") }
@@ -81,13 +84,13 @@ solution "NLarn"
       includedirs { "/usr/local/include/lua51" }
       libdirs { "/usr/local/lib/lua51" }
 
-    configuration "windows" 
+    configuration "windows"
       -- do not include unnecessary header files
       defines { "WIN32_LEAN_AND_MEAN", "NOGDI" }
       links { "pdcurses" }
 
     configuration "not windows"
-      includedirs { "/usr/include/ncurses" } 
+      includedirs { "/usr/include/ncurses" }
       links { "ncurses", "panel" }
 
     configuration { "gmake" }
