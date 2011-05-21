@@ -304,7 +304,7 @@ item *item_new_by_level(item_t item_type, int num_level)
     /* clean results */
     if (id_min < 1) id_min = 1;
     if (id_max < 1) id_max = 1;
-    if (id_max > item_max_id(item_type)) id_max = item_max_id(item_type);
+    if (id_max > (int)item_max_id(item_type)) id_max = item_max_id(item_type);
 
     /* create the item */
     nitem = item_new(item_type, rand_m_n(id_min, id_max));
