@@ -456,7 +456,7 @@ void monster_deserialize(cJSON *mser, game *g)
         m->number = obj->valueint;
 
     if ((obj = cJSON_GetObjectItem(mser, "unknown")))
-        m->unknown = TRUE;
+        m->unknown = obj->valueint;
 
     if ((obj = cJSON_GetObjectItem(mser, "lastseen")))
         m->lastseen = obj->valueint;
@@ -755,7 +755,7 @@ void monster_die(monster *m, struct player *p)
                 {
                     /* teleport the item to safety */
                     inv_del_element(&m->inventory, it);
-                    map_item_add(game_map(nlarn, Z(p->pos)), it);
+                    map_item_add(game_map(nlarn, Z(nlarn->p->pos)), it);
                 }
                 else
                 {
@@ -1035,15 +1035,13 @@ void monster_move(gpointer *oid, monster *m, game *g)
             /* vampires won't step onto mirrors */
             if ((m->type == MT_VAMPIRE) && (target_st == LS_MIRROR))
             {
-                /* FIXME: should try to move around it */
-                m_npos = monster_pos(m);
+                /* No movement - FIXME: should try to move around it */
             }
 
             else if (pos_identical(g->p->pos, m_npos))
             {
-                /* bump into invisible player */
+                /* The monster bump into player who is invisible to the monster */
                 monster_update_player_pos(m, g->p->pos);
-                m_npos = monster_pos(m);
 
                 log_add_entry(g->log, "The %s bumps into you.", monster_get_name(m));
             }
@@ -2252,7 +2250,6 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
         {
             char buf[61];
             gboolean was_equipped = FALSE;
-            gboolean new_item = FALSE;
 
             it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
             item_describe(it, player_item_known(p, it), (it->count == 1),
@@ -2279,7 +2276,6 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
             if (it->count > 1)
             {
                 /* the player has multiple items. Steal only one. */
-                new_item = TRUE;
                 it = item_split(it, rand_1n(it->count));
                 item_describe(it, player_item_known(p, it), (it->count == 1),
                               FALSE, buf, 60);
@@ -2368,7 +2364,7 @@ static char *monsters_get_fortune(char *fortune_file)
 static position monster_move_wander(monster *m, struct player *p)
 {
     int tries = 0;
-    position npos = monster_pos(m);
+    position npos;
 
     do
     {
@@ -2473,7 +2469,7 @@ static position monster_move_flee(monster *m, struct player *p)
 {
     int tries;
     int dist = 0;
-    position npos_tmp = monster_pos(m);
+    position npos_tmp;
     position npos = monster_pos(m);
 
     for (tries = 1; tries < GD_MAX; tries++)

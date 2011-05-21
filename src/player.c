@@ -893,7 +893,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
             }
 
             /* handle clumsiness */
-            if ((e = player_effect_get(p, ET_CLUMSINESS)))
+            if ((player_effect_get(p, ET_CLUMSINESS)) != NULL)
             {
                 if (chance(33) && p->eq_weapon)
                 {
@@ -909,7 +909,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
             }
 
             /* handle itching */
-            if ((e = player_effect_get(p, ET_ITCHING)))
+            if ((player_effect_get(p, ET_ITCHING)) != NULL)
             {
                 item **aslot;
 
@@ -2432,7 +2432,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             {
                 e = effect_new(ET_POISON);
                 e->amount = dam->amount;
-                e = player_effect_add(p, e);
+                player_effect_add(p, e);
             }
             else
             {
@@ -2450,10 +2450,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_BLINDNESS:
         if (chance(dam->amount))
         {
-            e = player_effect_add(p, effect_new(ET_BLINDNESS));
+            player_effect_add(p, effect_new(ET_BLINDNESS));
         }
-
-        if (!e && !(e = player_effect_get(p, ET_BLINDNESS)))
+        else if (player_effect_get(p, ET_BLINDNESS) == NULL)
         {
             log_add_entry(nlarn->log, "You are not blinded.");
         }
@@ -2464,10 +2463,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         /* check if the player succumbs to the monster's stare */
         if (chance(dam->amount - player_get_int(p)))
         {
-            e = player_effect_add(p, effect_new(ET_CONFUSION));
+            player_effect_add(p, effect_new(ET_CONFUSION));
         }
-
-        if (!e && !(e = player_effect_get(p, ET_CONFUSION)))
+        else if (player_effect_get(p, ET_CONFUSION) == NULL)
         {
             log_add_entry(nlarn->log, "You are not confused.");
         }
@@ -2478,10 +2476,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         /* check if the player succumbs to the monster's stare */
         if (chance(dam->amount - player_get_int(p)))
         {
-            e = player_effect_add(p, effect_new(ET_PARALYSIS));
+            player_effect_add(p, effect_new(ET_PARALYSIS));
         }
-
-        if (!e && !(e = player_effect_get(p, ET_PARALYSIS)))
+        else if (player_effect_get(p, ET_PARALYSIS) == NULL)
         {
             log_add_entry(nlarn->log, "You avoid eye contact.");
         }
@@ -2499,7 +2496,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             e = effect_new(effect_t);
             /* the default number of turns is 1 */
             e->turns = dam->amount * 10;
-            e = player_effect_add(p, e);
+            (void)player_effect_add(p, e);
 
             switch (dam->type)
             {
@@ -3319,7 +3316,7 @@ void player_item_equip(player *p, inventory **inv, item *it)
             break;
         }
 
-        if (*islot == NULL)
+        if (islot == NULL)
         {
             item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
 
@@ -3329,12 +3326,9 @@ void player_item_equip(player *p, inventory **inv, item *it)
             /* the armour's bonus is revealed when putting it on */
             it->bonus_known = TRUE;
 
-            /* refresh the description */
+            /* Refresh the armour's description before logging. */
             item_describe(it, player_item_known(p, it), TRUE, FALSE, description, 60);
-
             log_add_entry(nlarn->log, "You are now wearing %s.", description);
-
-            *islot = it;
 
             if (it->cursed)
             {

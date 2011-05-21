@@ -344,7 +344,7 @@ int container_move_content(player *p, inventory **inv, inventory **new_inv)
 
 static void container_trigger_trap(player *p, item *container)
 {
-    effect_t et;
+    effect_t et = ET_NONE;
     char *msg = "A little needle shoots out and stings you!";
 
     switch(rand_1n(5))
@@ -367,9 +367,12 @@ static void container_trigger_trap(player *p, item *container)
         break;
     }
 
-    /* tell whats happening */
-    log_add_entry(nlarn->log, msg);
+    if (et != ET_NONE)
+    {
+        /* tell whats happening */
+        log_add_entry(nlarn->log, msg);
 
-    /* add the effect */
-    player_effect_add(p, effect_new(et));
+        /* add the effect */
+        player_effect_add(p, effect_new(et));
+    }
 }

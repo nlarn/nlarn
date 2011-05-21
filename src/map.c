@@ -961,7 +961,8 @@ char *map_pos_examine(position pos)
     item *it;
     char item_desc[81];
     guint idx;
-    char *tmp = NULL, *where;
+    char *tmp = NULL;
+    const char *where;
     GString *desc = g_string_new(NULL);
 
     assert(pos_valid(pos));
@@ -1033,9 +1034,11 @@ char *map_pos_examine(position pos)
                     items_desc = g_string_new(item_desc);
             }
 
-            g_string_append_printf(desc, "You see %s %s.",
-                                   items_desc->str, where);
-            g_string_free(items_desc, TRUE);
+            if (items_desc != NULL)
+            {
+                g_string_append_printf(desc, "You see %s %s.", items_desc->str, where);
+                g_string_free(items_desc, TRUE);
+            }
         }
     }
 
@@ -1983,14 +1986,20 @@ static void map_make_treasure_room(map *maze, rectangle **rooms)
     item *itm;
     int success;
 
-    int nrooms; /* count of available rooms */
+    int nrooms = 0; /* count of available rooms */
     int room;   /* number of chose room */
 
+    /* There's nothing to do if there are no rooms. */
+    if (rooms == NULL) { return; }
+
     /* determine number of rooms */
-    for (nrooms = 0; rooms[nrooms] != NULL; nrooms++);
+    while(rooms[nrooms] != NULL) { nrooms++; }
 
     /* choose a room to turn into an treasure room */
     room = rand_0n(nrooms);
+
+    /* sanity check */
+    if (rooms[room] == NULL) { return; }
 
     Z(pos) = Z(npos) = maze->nlevel;
 

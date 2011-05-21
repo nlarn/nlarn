@@ -1229,8 +1229,9 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     char text[81];
     char name[61];
 
-    /* copy of item needed to descibe and transfer original item */
-    item *it_clone = NULL;
+    /* The item the player actually bought. Usually this is the passed item,
+     * in the case of item stacks it might be a new item. */
+    item *bought_itm = it;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -1252,31 +1253,27 @@ static void building_item_sell(player *p, inventory **inv, item *it)
         }
         else if (count == 0)
         {
+            /* not buying anything */
             return;
-        }
-        else if (count == it->count)
-        {
-            /* player wants the entire stock of the item */
-            it_clone = it;
         }
         else if (count < it->count)
         {
             /* player wants part of the stock */
-            it_clone = item_split(it, count);
+            bought_itm = item_split(it, count);
         }
 
         price *= count;
 
         if (!building_player_check(p, price))
         {
-            item_describe(it_clone, TRUE, (count == 1), TRUE, name, 60);
+            item_describe(bought_itm, TRUE, (count == 1), TRUE, name, 60);
             g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
                        price, name);
 
             display_show_message(NULL, text, 0);
 
             /* if the item has been split add it to the shop */
-            if (it != it_clone) inv_add(inv, it_clone);
+            if (it != bought_itm) inv_add(inv, bought_itm);
 
             return;
         }
@@ -1290,20 +1287,18 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
         if (!display_get_yesno(text, NULL, NULL))
             return;
-
-        it_clone = it;
     }
 
     /* prepare the item description for logging later */
-    item_describe(it_clone, TRUE, (count == 1), FALSE, name, 60);
+    item_describe(bought_itm, TRUE, (count == 1), FALSE, name, 60);
 
     /* try to transfer the item to the player's inventory */
-    ioid = it_clone->oid;
+    ioid = bought_itm->oid;
 
-    if (inv_add(&p->inventory, it_clone))
+    if (inv_add(&p->inventory, bought_itm))
     {
         /* the item has been added to player's inventory */
-        if (it == it_clone)
+        if (it == bought_itm)
         {
             /* remove the item from the shop as the player has bought the
             entire stock. this has to be done by the oid as it_clone may
@@ -1311,17 +1306,17 @@ static void building_item_sell(player *p, inventory **inv, item *it)
             inv_del_oid(inv, ioid);
         }
 
-        p->stats.items_bought    += it_clone->count;
+        p->stats.items_bought    += bought_itm->count;
         p->stats.gold_spent_shop += price;
 
         /* identify the item */
-        player_item_identify(p, &p->inventory, it_clone);
+        player_item_identify(p, &p->inventory, bought_itm);
     }
     else
     {
         /* item has not been added to player's inventory */
         /* if the item has been split, return it to the shop */
-        if (it != it_clone) inv_add(inv, it_clone);
+        if (it != bought_itm) inv_add(inv, bought_itm);
         return;
     }
 

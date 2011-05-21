@@ -469,7 +469,7 @@ gboolean area_ray_trajectory(position source, position target,
         return FALSE;
 
     /* follow the ray to determine if it hits something */
-    position previous = source, cursor = source;
+    position cursor = source;
     gboolean proceed_y = TRUE;
 
     do
@@ -516,8 +516,9 @@ gboolean area_ray_trajectory(position source, position target,
                 return result;
 
             /* show the position of the ray*/
+            /* FIXME: move curses functions to display.c */
             attron(colour);
-            mvaddch(Y(cursor), X(cursor), glyph);
+            (void)mvaddch(Y(cursor), X(cursor), glyph);
             attroff(colour);
             refresh();
 
@@ -525,9 +526,6 @@ gboolean area_ray_trajectory(position source, position target,
             usleep(100000);
             /* repaint the screen unless requested otherwise */
             if (!keep_ray) display_paint_screen(nlarn->p);
-
-            /* cursor moves unhindered */
-            previous = cursor;
 
             /* modify horizontal position if needed;
                exit the loop when the destination has been reached */

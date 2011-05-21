@@ -236,9 +236,6 @@ monster *monster_trap_trigger(monster *m)
     /* the trap */
     trap_t trap;
 
-    /* effect monster might have gained during the move */
-    effect *eff = NULL;
-
     assert (m != NULL);
 
     trap = map_trap_at(monster_map(m), monster_pos(m));
@@ -283,9 +280,7 @@ monster *monster_trap_trigger(monster *m)
 
         if (trap_effect(trap2) && chance(trap_effect_chance(trap2)))
         {
-            effect *e;
-            e = effect_new(trap_effect(trap2));
-            e = monster_effect_add(m, e);
+            monster_effect_add(m, effect_new(trap_effect(trap2)));
         }
     }
     // intentional fall-through
@@ -295,12 +290,7 @@ monster *monster_trap_trigger(monster *m)
          * monster's list of effects. */
         if (trap_effect(trap))
         {
-            /* create a new effect */
-            eff = effect_new(trap_effect(trap));
-            /* monster_effect_add() returns the effect which is active for
-               the monster, might be the one generated above, another, similar
-               one, or NULL, it the monster is resistant to this effect. */
-            eff = monster_effect_add(m, eff);
+            (void)monster_effect_add(m, effect_new(trap_effect(trap)));
         }
     } /* switch (trap) */
 

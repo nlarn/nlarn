@@ -180,9 +180,9 @@ int display_paint_screen(player *p)
     guint *ttime = NULL;    /* storage for the game time of messages */
 
     /* draw line around map */
-    mvhline(MAP_MAX_Y, 0, ACS_HLINE, MAP_MAX_X);
-    mvvline(0, MAP_MAX_X, ACS_VLINE, MAP_MAX_Y);
-    mvaddch(MAP_MAX_Y, MAP_MAX_X, ACS_LRCORNER);
+    (void)mvhline(MAP_MAX_Y, 0, ACS_HLINE, MAP_MAX_X);
+    (void)mvvline(0, MAP_MAX_X, ACS_VLINE, MAP_MAX_Y);
+    (void)mvaddch(MAP_MAX_Y, MAP_MAX_X, ACS_LRCORNER);
 
     /* make shortcut */
     map = game_map(nlarn, Z(p->pos));
@@ -314,7 +314,7 @@ int display_paint_screen(player *p)
             {
                 attron(attrs = monster_color(monst));
                 position mpos = monster_pos(monst);
-                mvaddch(Y(mpos), X(mpos), monster_glyph(monst));
+                (void)mvaddch(Y(mpos), X(mpos), monster_glyph(monst));
                 attroff(attrs);
             }
         }
@@ -337,7 +337,7 @@ int display_paint_screen(player *p)
     }
 
     attron(attrs);
-    mvaddch(Y(p->pos), X(p->pos), pc);
+    (void)mvaddch(Y(p->pos), X(p->pos), pc);
     attroff(attrs);
 
 
@@ -2477,18 +2477,18 @@ position display_get_new_position(player *p,
                             && monster_in_sight(target))
                         {
                             /* ray is targeted at a visible monster */
-                            mvaddch(a->start_y + y, a->start_x + x, monster_glyph(target));
+                            (void)mvaddch(a->start_y + y, a->start_x + x, monster_glyph(target));
                         }
                         else if ((m = map_get_monster_at(map, tpos))
                                  && monster_in_sight(m))
                         {
                             /* ray sweeps over a visible monster */
-                            mvaddch(a->start_y + y, a->start_x + x, monster_glyph(m));
+                            (void)mvaddch(a->start_y + y, a->start_x + x, monster_glyph(m));
                         }
                         else
                         {
                             /* a position with no or an invisible monster on it */
-                            mvaddch(a->start_y + y, a->start_x + x, '*');
+                            (void)mvaddch(a->start_y + y, a->start_x + x, '*');
                         }
                     }
                 }
@@ -2538,7 +2538,7 @@ position display_get_new_position(player *p,
         else
         {
             /* show the position of the cursor by inversing the attributes */
-            mvwchgat(stdscr, Y(pos), X(pos), 1, A_BOLD | A_STANDOUT, DCP_WHITE_BLACK, NULL);
+            (void)mvwchgat(stdscr, Y(pos), X(pos), 1, A_BOLD | A_STANDOUT, DCP_WHITE_BLACK, NULL);
         }
 
         /* wait for input */
@@ -3241,7 +3241,7 @@ static void display_window_update_title(display_window *dwin, const char *title)
 
         /* repaint line to overwrite previous title */
         wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
-        mvwhline(dwin->window, 0, 2, ACS_HLINE, dwin->width - 7);
+        (void)mvwhline(dwin->window, 0, 2, ACS_HLINE, dwin->width - 7);
         wattroff(dwin->window, attrs);
     }
 
@@ -3275,7 +3275,7 @@ static void display_window_update_caption(display_window *dwin, char *caption)
 
     /* repaint line to overwrite previous captions */
     wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
-    mvwhline(dwin->window, dwin->height - 1, 3, ACS_HLINE, dwin->width - 7);
+    (void)mvwhline(dwin->window, dwin->height - 1, 3, ACS_HLINE, dwin->width - 7);
     wattroff(dwin->window, attrs);
 
     /* print caption if caption is set */
@@ -3307,7 +3307,7 @@ static void display_window_update_arrow_up(display_window *dwin, gboolean on)
     else
     {
         wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
-        mvwhline(dwin->window, 0, dwin->width - 5, ACS_HLINE, 3);
+        (void)mvwhline(dwin->window, 0, dwin->width - 5, ACS_HLINE, 3);
         wattroff(dwin->window, attrs);
     }
 }
@@ -3327,7 +3327,7 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
     else
     {
         wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
-        mvwhline(dwin->window, dwin->height - 1, dwin->width - 5, ACS_HLINE, 3);
+        (void)mvwhline(dwin->window, dwin->height - 1, dwin->width - 5, ACS_HLINE, 3);
         wattroff(dwin->window, attrs);
     }
 }
@@ -3363,7 +3363,7 @@ static void display_spheres_paint(sphere *s, player *p)
     if (game_fullvis(nlarn) || fov_get(p->fov, s->pos))
     {
         attron(DC_MAGENTA);
-        mvaddch(Y(s->pos), X(s->pos), '0');
+        (void)mvaddch(Y(s->pos), X(s->pos), '0');
         attroff(DC_MAGENTA);
     }
 }

@@ -806,8 +806,7 @@ int spell_type_point(spell *s, struct player *p)
 
 int spell_type_ray(spell *s, struct player *p)
 {
-    map *cmap;
-    position target, pos;
+    position target;
     char buffer[61];
     damage_originator damo = { DAMO_PLAYER, p };
     damage *dam = damage_new(DAM_NONE, ATT_MAGIC, 0, damo.ot, damo.originator);
@@ -816,7 +815,6 @@ int spell_type_ray(spell *s, struct player *p)
 
     g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(s));
     target = display_get_position(p, buffer, TRUE, FALSE, 0, FALSE, TRUE);
-    cmap = game_map(nlarn, Z(p->pos));
 
     /* player pressed ESC */
     if (!pos_valid(target))
@@ -851,10 +849,6 @@ int spell_type_ray(spell *s, struct player *p)
         /* this shouldn't happen */
         break;
     }
-
-    /* use pos as cursor and move it to the target. check if there is
-       anything in the way that gets hit by the ray as well */
-    pos = p->pos;
 
     /* throw a ray to the selected target */
     area_ray_trajectory(p->pos, target, &damo, spell_pos_hit,
@@ -936,7 +930,6 @@ int spell_type_blast(spell *s, struct player *p)
     position pos;
     char buffer[61];
     int radius = 0;
-    gboolean result;
     damage_originator damo = { DAMO_PLAYER, p };
     damage *dam = damage_new(DAM_NONE, ATT_MAGIC, 0, DAMO_PLAYER, p);
     map *cmap = game_map(nlarn, Z(p->pos));
@@ -978,8 +971,7 @@ int spell_type_blast(spell *s, struct player *p)
         return FALSE;
     }
 
-    result = area_blast(pos, radius, &damo, spell_pos_hit,
-                        s, dam, '*', spell_colour(s));
+    (void)area_blast(pos, radius, &damo, spell_pos_hit, s, dam, '*', spell_colour(s));
 
     /* destroy the damage as the callbacks deliver a copy */
     damage_free(dam);

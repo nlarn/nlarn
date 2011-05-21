@@ -540,7 +540,7 @@ int player_fountain_drink(player *p)
         /* positive effect from list below */
         fntchange = 1;
     }
-//    else
+    else
     {
         /* negative effect from list below */
         fntchange = -1;

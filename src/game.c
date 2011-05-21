@@ -993,7 +993,6 @@ static gboolean game_load(gchar *filename)
 
     /* restore spheres */
     nlarn->spheres = g_ptr_array_new();
-    obj = cJSON_GetObjectItem(save, "spheres");
 
     if ((obj = cJSON_GetObjectItem(save, "spheres")))
     {

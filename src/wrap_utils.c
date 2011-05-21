@@ -136,7 +136,7 @@ char luaN_query_char(const char *table, guint idx, const char *attrib)
         lua_pop(nlarn->L, 3);
     }
 
-    return str[0];
+    return (str != NULL) ? str[0] : 0;
 }
 
 int luaN_query_int(const char *table, guint idx, const char *attrib)
