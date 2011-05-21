@@ -1732,6 +1732,7 @@ static gboolean player_instakill_chance(player *p, monster *m)
 
 static int calc_real_damage(player *p, monster *m, int allow_chance)
 {
+    const int INSTANT_KILL = 10000;
     const int max_dam = calc_max_damage(p, m);
     int real_damage = rand_1n(max_dam + 1);
 

@@ -39,14 +39,26 @@ typedef struct _message_log
     GPtrArray *entries;
 } message_log;
 
-/* macros */
-
 /* NOTE: g_random_int_range(m,n) returns a value x with m <= x < n. */
-#define rand_1n(n)      (((n) <= 1) ? 1 : g_random_int_range(1,(n)))
-#define rand_0n(n)      (((n) <= 0) ? 0 : g_random_int_range(0,(n)))
-/* need to cast m to gint32 as g_random_int_range returns gint32 */
-#define rand_m_n(m,n)   ((gint32)(m) == (gint32)(n) ? (gint32)(m) : g_random_int_range((m),(n)))
-#define chance(percent) ((gint32)(percent) >= rand_1n(101))
+static inline gint32 rand_1n(gint32 n)
+{
+    return (n <= 1) ? 1 : g_random_int_range(1, n);
+}
+
+static inline gint32 rand_0n(gint32 n)
+{
+    return (n <= 0) ? 0 : g_random_int_range(0, n);
+}
+
+static inline gint32 rand_m_n(gint32 m, gint32 n)
+{
+    return (m == n) ? m : g_random_int_range(m, n);
+}
+
+static inline gboolean chance(gint32 percent)
+{
+        return (percent >= rand_1n(101));
+}
 
 /* windef.h defines these */
 #ifdef WIN32
@@ -90,11 +102,14 @@ message_log_entry *log_get_entry(message_log *log, guint id);
 cJSON *log_serialize(message_log *log);
 message_log *log_deserialize(cJSON *lser);
 
-#define LOG_MAX_LENGTH   100
-#define log_length(log)  ((log)->entries->len)
-#define log_enable(log)  ((log)->active = TRUE)
-#define log_disable(log) ((log)->active = FALSE)
-#define log_buffer(log)  ((log)->buffer->len ? (log)->buffer->str : NULL)
+static inline guint log_length(message_log *log) { return log->entries->len; }
+static inline void log_enable(message_log *log)  { log->active = TRUE; }
+static inline void log_disable(message_log *log) { log->active = FALSE; }
+
+static inline char *log_buffer(message_log *log)
+{
+    return log->buffer->len ? log->buffer->str : NULL;
+}
 
 /* text array handling */
 GPtrArray *text_wrap(const char *str, int width, int indent);
@@ -119,9 +134,16 @@ int strv_append_unique(char ***list, const char *str);
 /* misc. text functions */
 int str_starts_with_vowel(const char *str);
 const char *int2str(int val);
-#define a_an(str) (str_starts_with_vowel((str)) ? "an" : "a")
-#define plural(i) (((i) > 1) ? "s" : "")
 
+static inline const char *a_an(const char *str)
+{
+    return str_starts_with_vowel(str) ? "an" : "a";
+}
+
+static inline const char *plural(int i)
+{
+    return (i > 1) ? "s" : "";
+}
 
 /* regarding stuff defined in defines.h */
 damage *damage_new(damage_t type, attack_t att_type, int amount,
@@ -129,7 +151,6 @@ damage *damage_new(damage_t type, attack_t att_type, int amount,
 
 damage *damage_copy(damage *dam);
 
-#define damage_free(dam)    g_free((dam))
-#define INSTANT_KILL    10000
+static inline void damage_free(damage *dam) { g_free(dam); }
 
 #endif

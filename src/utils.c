@@ -24,6 +24,8 @@
 #include "nlarn.h"
 #include "utils.h"
 
+static const guint LOG_MAX_LENGTH = 100;
+
 static void log_entry_destroy(message_log_entry *entry);
 
 int divert(int value, int percent)
