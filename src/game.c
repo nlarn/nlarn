@@ -73,7 +73,7 @@ void game_init(int argc, char *argv[])
 {
     const char *default_lib_dir = "/usr/share/games/nlarn";
 
-    int idx;
+    guint idx;
     item_t it;
 
     /* these will be filled by the command line parser */
@@ -194,7 +194,7 @@ void game_init(int argc, char *argv[])
 #ifdef DEBUG
         { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &savefile,  "Save file to restore", NULL },
 #endif
-        { NULL }
+        { NULL, 0, 0, 0, NULL, NULL, NULL }
     };
 
     GOptionContext *context = g_option_context_new(NULL);
@@ -483,7 +483,7 @@ int game_save(game *g, const char *filename)
         return FALSE;
     }
 
-    if (gzputs(file, sg) != strlen(sg))
+    if (gzputs(file, sg) != (int)strlen(sg))
     {
         log_add_entry(g->log, "Error writing save file \"%s\": %s",
                       fullname, gzerror(file, &err));
@@ -568,7 +568,7 @@ void game_scores_destroy(GList *gs)
 
 map *game_map(game *g, guint nmap)
 {
-    assert (g != NULL && nmap >= 0 && nmap < MAP_MAX);
+    assert (g != NULL && nmap < MAP_MAX);
 
     return g->maps[nmap];
 }
@@ -576,7 +576,7 @@ map *game_map(game *g, guint nmap)
 void game_spin_the_wheel(game *g)
 {
     int nmap;
-    map *map;
+    map *amap;
 
     assert(g != NULL);
 
@@ -586,47 +586,47 @@ void game_spin_the_wheel(game *g)
     /* per-map actions */
     for (nmap = 0; nmap < MAP_MAX; nmap++)
     {
-        map = game_map(g, nmap);
+        amap = game_map(g, nmap);
 
         /* call map timers */
-        map_timer(map);
+        map_timer(amap);
 
         /* spawn some monsters every now and then */
         if (g->gtime % (100 + nmap) == 0)
         {
-            map_fill_with_life(map);
+            map_fill_with_life(amap);
         }
     }
 
-    map = game_map(nlarn, Z(g->p->pos));
+    amap = game_map(nlarn, Z(g->p->pos));
 
     /* check if player is stuck inside a wall without walk through wall */
-    if ((map_tiletype_at(map, g->p->pos) == LT_WALL)
+    if ((map_tiletype_at(amap, g->p->pos) == LT_WALL)
             && !player_effect(g->p, ET_WALL_WALK))
     {
         player_die(g->p, PD_STUCK, 0);
     }
 
     /* check if the player is on a deep water tile without levitation */
-    if ((map_tiletype_at(map, g->p->pos) == LT_DEEPWATER)
+    if ((map_tiletype_at(amap, g->p->pos) == LT_DEEPWATER)
             && !player_effect(g->p, ET_LEVITATION))
     {
         player_die(g->p, PD_DROWNED, 0);
     }
 
     /* check if the player is on a lava tile without levitation */
-    if ((map_tiletype_at(map, g->p->pos) == LT_LAVA)
+    if ((map_tiletype_at(amap, g->p->pos) == LT_LAVA)
             && !player_effect(g->p, ET_LEVITATION))
     {
         player_die(g->p, PD_MELTED, 0);
     }
 
     /* deal damage cause by map tiles to player */
-    damage *dam = map_tile_damage(map, g->p->pos,
+    damage *dam = map_tile_damage(amap, g->p->pos,
                                   player_effect(g->p, ET_LEVITATION));
 
     if (dam != NULL)
-        player_damage_take(g->p, dam, PD_MAP, map_tiletype_at(map, g->p->pos));
+        player_damage_take(g->p, dam, PD_MAP, map_tiletype_at(amap, g->p->pos));
 
     /* move all monsters */
     g_hash_table_foreach(g->monsters, (GHFunc)monster_move, g);
@@ -957,7 +957,7 @@ static gboolean game_load(gchar *filename)
     size = cJSON_GetArraySize(obj);
     assert(size == MAP_MAX);
     for (idx = 0; idx < size; idx++)
-        nlarn->maps[idx] = map_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
+        nlarn->maps[idx] = map_deserialize(cJSON_GetArrayItem(obj, idx));
 
 
     /* restore dnd store stock */
@@ -1149,7 +1149,7 @@ static GList *game_scores_load(game *g)
     else
     {
         /* ** reading a legacy save file ** */
-        int pos = 0;
+        guint pos = 0;
         int nlen;
         const int rlen = sizeof(game_score_t) - sizeof(char *);
 
@@ -1242,7 +1242,7 @@ static void game_scores_save(game *g, GList *gs)
     }
 
     /* write to file */
-    if (gzputs(sb, uscores) != strlen(uscores))
+    if (gzputs(sb, uscores) != (int)strlen(uscores))
     {
         /* handle error */
         int err;

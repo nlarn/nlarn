@@ -173,7 +173,7 @@ int display_paint_screen(player *p)
 {
     guint x, y, i;
     position pos;
-    map *map;
+    map *vmap;
     int attrs;              /* curses attributes */
     message_log_entry *le;  /* needed to display messages */
     GPtrArray *text = NULL; /* storage for formatted messages */
@@ -184,8 +184,8 @@ int display_paint_screen(player *p)
     (void)mvvline(0, MAP_MAX_X, ACS_VLINE, MAP_MAX_Y);
     (void)mvaddch(MAP_MAX_Y, MAP_MAX_X, ACS_LRCORNER);
 
-    /* make shortcut */
-    map = game_map(nlarn, Z(p->pos));
+    /* make shortcut to the visible map */
+    vmap = game_map(nlarn, Z(p->pos));
 
     /* draw map */
     Z(pos) = Z(p->pos);
@@ -199,17 +199,17 @@ int display_paint_screen(player *p)
             if (game_fullvis(nlarn) || fov_get(p->fov, pos))
             {
                 /* draw the truth */
-                inventory **inv = map_ilist_at(map, pos);
+                inventory **inv = map_ilist_at(vmap, pos);
                 const gboolean has_items = inv_length(*inv) > 0;
 
-                if (map_sobject_at(map, pos))
+                if (map_sobject_at(vmap, pos))
                 {
                     /* draw stationary objects first */
-                    attron(attrs = attr_colour(ls_get_colour(map_sobject_at(map, pos)), has_items));
-                    if (map_sobject_at(map, pos) == LS_CLOSEDDOOR || map_sobject_at(map, pos) == LS_OPENDOOR)
-                        addch(map_get_door_glyph(map, pos));
+                    attron(attrs = attr_colour(ls_get_colour(map_sobject_at(vmap, pos)), has_items));
+                    if (map_sobject_at(vmap, pos) == LS_CLOSEDDOOR || map_sobject_at(vmap, pos) == LS_OPENDOOR)
+                        addch(map_get_door_glyph(vmap, pos));
                     else
-                        addch(ls_get_image(map_sobject_at(map, pos)));
+                        addch(ls_get_image(map_sobject_at(vmap, pos)));
                     attroff(attrs);
                 }
                 else if (has_items)
@@ -234,25 +234,25 @@ int display_paint_screen(player *p)
                         it = inv_get(*inv, inv_length(*inv) - 1);
                     }
 
-                    const gboolean has_trap = (map_trap_at(map, pos)
+                    const gboolean has_trap = (map_trap_at(vmap, pos)
                                                && player_memory_of(p, pos).trap);
 
                     attron(attrs = attr_colour(item_colour(it), has_trap));
                     addch(item_glyph(it->type));
                     attroff(attrs);
                 }
-                else if (map_trap_at(map, pos) && (game_fullvis(nlarn) || player_memory_of(p, pos).trap))
+                else if (map_trap_at(vmap, pos) && (game_fullvis(nlarn) || player_memory_of(p, pos).trap))
                 {
                     /* FIXME - displays trap when unknown!! */
-                    attron(attrs = trap_colour(map_trap_at(map, pos)));
+                    attron(attrs = trap_colour(map_trap_at(vmap, pos)));
                     addch('^');
                     attroff(attrs);
                 }
                 else
                 {
                     /* draw tile */
-                    attron(attrs = lt_get_colour(map_tiletype_at(map, pos)));
-                    addch(lt_get_image(map_tiletype_at(map, pos)));
+                    attron(attrs = lt_get_colour(map_tiletype_at(vmap, pos)));
+                    addch(lt_get_image(map_tiletype_at(vmap, pos)));
                     attroff(attrs);
                 }
             }
@@ -262,12 +262,12 @@ int display_paint_screen(player *p)
                 if (player_memory_of(p, pos).sobject)
                 {
                     /* draw stationary object */
-                    map_sobject_t ms = map_sobject_at(map, pos);
+                    map_sobject_t ms = map_sobject_at(vmap, pos);
 
                     attron(attrs = attr_colour(ls_get_colour(ms), has_items));
 
                     if (ms == LS_CLOSEDDOOR || ms == LS_OPENDOOR)
-                        addch(map_get_door_glyph(map, pos));
+                        addch(map_get_door_glyph(vmap, pos));
                     else
                         addch(ls_get_image(ms));
 
@@ -286,7 +286,7 @@ int display_paint_screen(player *p)
                 else if (player_memory_of(p, pos).trap)
                 {
                     /* draw trap */
-                    attron(attrs = trap_colour(map_trap_at(map, pos)));
+                    attron(attrs = trap_colour(map_trap_at(vmap, pos)));
                     addch('^');
                     attroff(attrs);
                 }
@@ -300,7 +300,7 @@ int display_paint_screen(player *p)
             }
 
             /* draw monsters */
-            monster *monst = map_get_monster_at(map, pos);
+            monster *monst = map_get_monster_at(vmap, pos);
 
             if (monst == NULL)
             {
@@ -405,7 +405,7 @@ int display_paint_screen(player *p)
     attroff(attrs);
 
     /* dungeon map */
-    mvprintw(MAP_MAX_Y + 2, MAP_MAX_X + 1, "Lvl: %s", map_name(map));
+    mvprintw(MAP_MAX_Y + 2, MAP_MAX_X + 1, "Lvl: %s", map_name(vmap));
 
 
     /* *** RIGHT STATUS *** */
@@ -780,7 +780,7 @@ static int item_sort_shop(gconstpointer a, gconstpointer b, gpointer data)
 item *display_inventory(const char *title, player *p, inventory **inv,
                         GPtrArray *callbacks, gboolean show_price,
                         gboolean show_weight, gboolean show_account,
-                        int (*filter)(item *))
+                        int (*ifilter)(item *))
 {
     /* the inventory window */
     display_window *iwin = NULL;
@@ -831,7 +831,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         inv_sort(*inv, (GCompareDataFunc)item_sort_normal, (gpointer)p);
 
     /* store inventory length */
-    len_orig = len_curr = inv_length_filtered(*inv, filter);
+    len_orig = len_curr = inv_length_filtered(*inv, ifilter);
 
     /* main loop */
     do
@@ -884,7 +884,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* draw all items */
         for (pos = 1; pos <= (unsigned)min(len_curr, maxvis); pos++)
         {
-            it = inv_get_filtered(*inv, (pos - 1) + offset, filter);
+            it = inv_get_filtered(*inv, (pos - 1) + offset, ifilter);
 
             gboolean item_equipped = FALSE;
 
@@ -951,7 +951,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         }
 
         /* get the currently selected item */
-        it = inv_get_filtered(*inv, curr + offset - 1, filter);
+        it = inv_get_filtered(*inv, curr + offset - 1, ifilter);
 
         /* prepare the string array which will hold all the captions */
         captions = strv_new();
@@ -1115,7 +1115,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                 if ((cb->key == key) && cb->active)
                 {
                     /* trigger callback */
-                    cb->function(p, cb->inv, inv_get_filtered(*inv, curr + offset - 1, filter));
+                    cb->function(p, cb->inv, inv_get_filtered(*inv, curr + offset - 1, ifilter));
 
                     redraw = TRUE;
 
@@ -1125,7 +1125,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
         };
 
-        len_curr = inv_length_filtered(*inv, filter);
+        len_curr = inv_length_filtered(*inv, ifilter);
     }
     while (keep_running && (len_curr > 0)); /* ESC pressed or empty inventory*/
 
@@ -1135,7 +1135,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     if ((callbacks == NULL) && (key != KEY_ESC))
     {
         /* return selected item if no callbacks have been provided */
-        return inv_get_filtered(*inv, offset + curr - 1, filter);
+        return inv_get_filtered(*inv, offset + curr - 1, ifilter);
     }
     else
     {
@@ -2332,8 +2332,8 @@ position display_get_position(player *p,
     {
         /* the player has chosen a valid position, check if there
          * is a monster at that position. */
-        map *map = game_map(nlarn, Z(cpos));
-        monster *m = map_get_monster_at(map, cpos);
+        map *gmap = game_map(nlarn, Z(cpos));
+        monster *m = map_get_monster_at(gmap, cpos);
 
         if (m != NULL)
         {
@@ -2358,7 +2358,7 @@ position display_get_new_position(player *p,
     gboolean RUN = TRUE;
     direction dir = GD_NONE;
     position pos, npos, cursor;
-    map *map;
+    map *vmap;
     int attrs; /* curses attributes */
     display_window *msgpop = NULL;
 
@@ -2376,8 +2376,8 @@ position display_get_new_position(player *p,
     else
         pos = p->pos;
 
-    /* make shortcut to map */
-    map = game_map(nlarn, Z(p->pos));
+    /* make shortcut to visible map */
+    vmap = game_map(nlarn, Z(p->pos));
 
     /* get the list of visible monsters if looking for a visible position */
     if (visible)
@@ -2390,7 +2390,7 @@ position display_get_new_position(player *p,
     if (ray && !pos_identical(p->pos, start))
     {
         /* paint a ray to validate the starting position */
-        area *obstacles = map_get_obstacles(map, p->pos, pos_distance(p->pos, pos));
+        area *obstacles = map_get_obstacles(vmap, p->pos, pos_distance(p->pos, pos));
         a = area_new_ray(p->pos, pos, obstacles);
 
         if (a == NULL)
@@ -2444,7 +2444,7 @@ position display_get_new_position(player *p,
         /* draw a ray if the starting position is not the player's position */
         if (ray && !pos_identical(pos, p->pos))
         {
-            area *obsmap = map_get_obstacles(map, p->pos, pos_distance(p->pos, pos));
+            area *obsmap = map_get_obstacles(vmap, p->pos, pos_distance(p->pos, pos));
             a = area_new_ray(p->pos, pos, obsmap);
 
             if (a == NULL)
@@ -2458,7 +2458,7 @@ position display_get_new_position(player *p,
         if (ray && (a != NULL))
         {
             /* draw a line between source and target if told to */
-            target = map_get_monster_at(map, pos);
+            target = map_get_monster_at(vmap, pos);
 
             if (target && monster_in_sight(target)) attrs = DC_LIGHTRED;
             else                                    attrs = DC_LIGHTCYAN;
@@ -2479,7 +2479,7 @@ position display_get_new_position(player *p,
                             /* ray is targeted at a visible monster */
                             (void)mvaddch(a->start_y + y, a->start_x + x, monster_glyph(target));
                         }
-                        else if ((m = map_get_monster_at(map, tpos))
+                        else if ((m = map_get_monster_at(vmap, tpos))
                                  && monster_in_sight(m))
                         {
                             /* ray sweeps over a visible monster */
@@ -2501,7 +2501,7 @@ position display_get_new_position(player *p,
         else if (ball && radius)
         {
             /* paint a ball if told to */
-            area *obstacles = map_get_obstacles(map, pos, radius);
+            area *obstacles = map_get_obstacles(vmap, pos, radius);
             a = area_new_circle_flooded(pos, radius, obstacles);
             cursor = pos;
 
@@ -2513,7 +2513,7 @@ position display_get_new_position(player *p,
                     {
                         move(Y(cursor), X(cursor));
 
-                        if ((m = map_get_monster_at(map, cursor)) && monster_in_sight(m))
+                        if ((m = map_get_monster_at(vmap, cursor)) && monster_in_sight(m))
                         {
                             attron(attrs = DC_RED);
                             addch(monster_glyph(m));
@@ -2564,7 +2564,7 @@ position display_get_new_position(player *p,
             if (passable
                 && (!(player_memory_of(nlarn->p, pos).type > LT_NONE
                       || game_wizardmode(nlarn))
-                    || !map_pos_passable(map, pos)))
+                    || !map_pos_passable(vmap, pos)))
             {
                 if (!beep()) flash();
                 RUN = TRUE;
@@ -2585,7 +2585,7 @@ position display_get_new_position(player *p,
                     miter = mlist;
 
                 /* get the currently selected monster */
-                monster *m = (monster *)miter->data;
+                m = (monster *)miter->data;
 
                 /* jump to the selected monster */
                 npos = monster_pos(m);
@@ -2680,7 +2680,7 @@ position display_get_new_position(player *p,
                 /* found a matching glyph, now search the remembered level */
                 if (sobj != LS_NONE)
                 {
-                    position start = pos;
+                    position origin = pos;
                     while (TRUE)
                     {
                         if (++X(pos) >= MAP_MAX_X)
@@ -2689,7 +2689,7 @@ position display_get_new_position(player *p,
                             if (++Y(pos) >= MAP_MAX_Y)
                                 Y(pos) = 0;
                         }
-                        if (pos_identical(start, pos))
+                        if (pos_identical(origin, pos))
                             break;
 
                         if (player_memory_of(nlarn->p, pos).sobject != LS_NONE
@@ -2722,7 +2722,7 @@ position display_get_new_position(player *p,
                 int distance = pos_distance(p->pos, npos);
 
                 /* paint a ray to validate the new position */
-                a = area_new_ray(p->pos, npos, map_get_obstacles(map, p->pos, distance));
+                a = area_new_ray(p->pos, npos, map_get_obstacles(vmap, p->pos, distance));
 
                 if (a == NULL)
                 {
@@ -2831,7 +2831,7 @@ int display_show_message(const char *title, const char *message, int indent)
         /* display the window content */
         for (idx = 0; idx < maxvis; idx++)
         {
-            int pos, count;
+            guint pos, count;
             count = mvwcprintw(mwin->window, DDC_LIGHTGRAY, display_dialog_colset,
                                idx + 1, 1, " %-*s ", width - wred,
                                g_ptr_array_index(text, idx + offset));
@@ -2930,7 +2930,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
 
     if (width == 0)
     {
-        int maxlen;
+        guint maxlen;
 
         /* The title is padded by 6 additional characters */
         if ((title != NULL) && (strlen(title) + 6 > strlen(msg)))
@@ -3026,7 +3026,7 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
 {
     va_list argp;
     gchar *msg;
-    int pos;
+    guint pos;
     int count = 0;
     int attr;
 
@@ -3176,7 +3176,7 @@ static display_window *display_window_new(int x1, int y1, int width,
 
 static int display_window_move(display_window *dwin, int key)
 {
-    gboolean refresh = TRUE;
+    gboolean need_refresh = TRUE;
 
     assert (dwin != NULL);
 
@@ -3215,17 +3215,17 @@ static int display_window_move(display_window *dwin, int key)
         break;
 
     default:
-        refresh = FALSE;
+        need_refresh = FALSE;
     }
 
-    if (refresh)
+    if (need_refresh)
     {
         move_panel(dwin->panel, dwin->y1, dwin->x1);
         update_panels();
         doupdate();
     }
 
-    return refresh;
+    return need_refresh;
 }
 
 static void display_window_update_title(display_window *dwin, const char *title)

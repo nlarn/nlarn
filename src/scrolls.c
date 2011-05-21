@@ -55,19 +55,19 @@ const magic_scroll_data scrolls[ST_MAX] =
     { ST_GENOCIDE_MONSTER,  "genocide monster",   ET_NONE,              3000, FALSE },
 };
 
-static int scroll_with_effect(player *p, item *scroll);
-static int scroll_annihilate(player *p, item *scroll);
-static int scroll_create_artefact(player *p, item *scroll);
-static int scroll_enchant_armour(player *p, item *scroll);
-static int scroll_enchant_weapon(player *p, item *scroll);
-static int scroll_gem_perfection(player *p, item *scroll);
-static int scroll_genocide_monster(player *p, item *scroll);
-static int scroll_heal_monster(player *p, item *scroll);
-static int scroll_identify(player *p, item *scroll);
-static int scroll_remove_curse(player *p, item *scroll);
-static int scroll_spell_extension(player *p, item *scroll);
-static int scroll_teleport(player *p, item *scroll);
-static int scroll_timewarp(player *p, item *scroll);
+static int scroll_with_effect(player *p, item *r_scroll);
+static int scroll_annihilate(player *p, item *r_scroll);
+static int scroll_create_artefact(player *p, item *r_scroll);
+static int scroll_enchant_armour(player *p, item *r_scroll);
+static int scroll_enchant_weapon(player *p, item *r_scroll);
+static int scroll_gem_perfection(player *p, item *r_scroll);
+static int scroll_genocide_monster(player *p, item *r_scroll);
+static int scroll_heal_monster(player *p, item *r_scroll);
+static int scroll_identify(player *p, item *r_scroll);
+static int scroll_remove_curse(player *p, item *r_scroll);
+static int scroll_spell_extension(player *p, item *r_scroll);
+static int scroll_teleport(player *p, item *r_scroll);
+static int scroll_timewarp(player *p, item *r_scroll);
 
 static const char *_scroll_desc[ST_MAX - 1] =
 {
@@ -104,13 +104,13 @@ char *scroll_desc(int scroll_id)
     return (char *)_scroll_desc[nlarn->scroll_desc_mapping[scroll_id - 1]];
 }
 
-item_usage_result scroll_read(struct player *p, item *scroll)
+item_usage_result scroll_read(struct player *p, item *r_scroll)
 {
     char description[61];
     item_usage_result result  = { FALSE, FALSE };
 
-    item_describe(scroll, player_item_known(p, scroll),
-                  TRUE, scroll->count == 1, description, 60);
+    item_describe(r_scroll, player_item_known(p, r_scroll),
+                  TRUE, r_scroll->count == 1, description, 60);
 
     if (player_effect(p, ET_BLINDNESS))
     {
@@ -120,7 +120,7 @@ item_usage_result scroll_read(struct player *p, item *scroll)
         return result;
     }
 
-    if (scroll->cursed && scroll->blessed_known)
+    if (r_scroll->cursed && r_scroll->blessed_known)
     {
         log_add_entry(nlarn->log, "You'd rather not read this cursed scroll.");
         return result;
@@ -141,25 +141,25 @@ item_usage_result scroll_read(struct player *p, item *scroll)
     /* increase number of scrolls read */
     p->stats.scrolls_read++;
 
-    if (scroll->cursed)
+    if (r_scroll->cursed)
     {
         damage *dam = damage_new(DAM_FIRE, ATT_NONE, rand_1n(p->hp),
                                  DAMO_ITEM, NULL);
 
         log_add_entry(nlarn->log, "The scroll explodes!");
-        player_damage_take(p, dam, PD_CURSE, scroll->type);
+        player_damage_take(p, dam, PD_CURSE, r_scroll->type);
 
         return result;
     }
 
-    switch (scroll->id)
+    switch (r_scroll->id)
     {
     case ST_ENCH_ARMOUR:
-        result.identified = scroll_enchant_armour(p, scroll);
+        result.identified = scroll_enchant_armour(p, r_scroll);
         break;
 
     case ST_ENCH_WEAPON:
-        result.identified = scroll_enchant_weapon(p, scroll);
+        result.identified = scroll_enchant_weapon(p, r_scroll);
         break;
 
     case ST_BLANK:
@@ -173,51 +173,51 @@ item_usage_result scroll_read(struct player *p, item *scroll)
         break;
 
     case ST_CREATE_ARTIFACT:
-        result.identified = scroll_create_artefact(p, scroll);
+        result.identified = scroll_create_artefact(p, r_scroll);
         break;
 
     case ST_TIMEWARP:
-        result.identified = scroll_timewarp(p, scroll);
+        result.identified = scroll_timewarp(p, r_scroll);
         break;
 
     case ST_TELEPORT:
-        result.identified = scroll_teleport(p, scroll);
+        result.identified = scroll_teleport(p, r_scroll);
         break;
 
     case ST_HEAL_MONSTER:
-        result.identified = scroll_heal_monster(p, scroll);
+        result.identified = scroll_heal_monster(p, r_scroll);
         break;
 
     case ST_MAPPING:
         log_add_entry(nlarn->log, "There is a map on the scroll!");
-        result.identified = scroll_mapping(p, scroll);
+        result.identified = scroll_mapping(p, r_scroll);
         break;
 
     case ST_GEM_PERFECTION:
-        result.identified = scroll_gem_perfection(p, scroll);
+        result.identified = scroll_gem_perfection(p, r_scroll);
         break;
 
     case ST_SPELL_EXTENSION:
-        result.identified = scroll_spell_extension(p, scroll);
+        result.identified = scroll_spell_extension(p, r_scroll);
         break;
 
     case ST_IDENTIFY:
-        result.identified = scroll_identify(p, scroll);
+        result.identified = scroll_identify(p, r_scroll);
         break;
 
     case ST_REMOVE_CURSE:
-        result.identified = scroll_remove_curse(p, scroll);
+        result.identified = scroll_remove_curse(p, r_scroll);
         break;
 
     case ST_ANNIHILATION:
-        result.identified = scroll_annihilate(p, scroll);
+        result.identified = scroll_annihilate(p, r_scroll);
         break;
 
     case ST_PULVERIZATION:
         if (!p->identified_scrolls[ST_PULVERIZATION])
         {
             log_add_entry(nlarn->log, "This is a scroll of %s. ",
-                          scroll_name(scroll));
+                          scroll_name(r_scroll));
         }
 
         if (spell_vaporize_rock(p))
@@ -230,12 +230,12 @@ item_usage_result scroll_read(struct player *p, item *scroll)
         break;
 
     case ST_GENOCIDE_MONSTER:
-        scroll_genocide_monster(p, scroll);
+        scroll_genocide_monster(p, r_scroll);
         result.identified = TRUE;
         break;
 
     default:
-        result.identified = scroll_with_effect(p, scroll);
+        result.identified = scroll_with_effect(p, r_scroll);
         break;
     }
 
@@ -247,18 +247,18 @@ item_usage_result scroll_read(struct player *p, item *scroll)
     return result;
 }
 
-static int scroll_with_effect(struct player *p, item *scroll)
+static int scroll_with_effect(struct player *p, item *r_scroll)
 {
     effect *eff;
 
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
-    eff = effect_new(scroll_effect(scroll));
+    eff = effect_new(scroll_effect(r_scroll));
     // Blessed scrolls last longer.
-    if (scroll->blessed)
+    if (r_scroll->blessed)
     {
         // Life protection is permanent.
-        if (scroll->id == ST_LIFE_PROTECTION)
+        if (r_scroll->id == ST_LIFE_PROTECTION)
             eff->turns = 0;
         else
             eff->turns *= 2;
@@ -281,7 +281,7 @@ static int scroll_with_effect(struct player *p, item *scroll)
  * @param the scroll just read
  *
  */
-static int scroll_annihilate(struct player *p, item *scroll)
+static int scroll_annihilate(struct player *p, item *r_scroll)
 {
     int count = 0;
     area *blast, *obsmap;
@@ -289,7 +289,7 @@ static int scroll_annihilate(struct player *p, item *scroll)
     monster *m;
     map *cmap = game_map(nlarn, Z(p->pos));
 
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
     obsmap = map_get_obstacles(cmap, p->pos, 2);
     blast = area_new_circle_flooded(p->pos, 2, obsmap);
@@ -333,18 +333,18 @@ static int scroll_annihilate(struct player *p, item *scroll)
     return count;
 }
 
-static int scroll_create_artefact(player *p, item *scroll)
+static int scroll_create_artefact(player *p, item *r_scroll)
 {
     item *it;
     char buf[61];
 
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
     const int magic_item_type[] = { IT_AMULET, IT_BOOK, IT_POTION, IT_SCROLL };
     const int type = magic_item_type[rand_0n(4)];
 
     int level = Z(p->pos);
-    if (scroll->blessed)
+    if (r_scroll->blessed)
     {
         if (type == IT_AMULET)
             level = max(10, Z(p->pos));
@@ -359,7 +359,7 @@ static int scroll_create_artefact(player *p, item *scroll)
         it->bonus = 0;
 
     // Blessed scrolls tend to hand out better items.
-    if (scroll->blessed)
+    if (r_scroll->blessed)
     {
         // Rings get some kind of bonus.
         if (it->bonus < 1 && item_is_optimizable(it->type))
@@ -409,17 +409,17 @@ static int scroll_create_artefact(player *p, item *scroll)
  * @param the scroll just read
  *
  */
-static int scroll_enchant_armour(player *p, item *scroll)
+static int scroll_enchant_armour(player *p, item *r_scroll)
 {
     item **armour;
 
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
     /* get a random piece of armour to enchant */
     /* try to get one not already fully enchanted */
     if ((armour = player_get_random_armour(p, TRUE)))
     {
-        if (scroll->blessed)
+        if (r_scroll->blessed)
         {
             log_add_entry(nlarn->log, "Your %s glows brightly for a moment.",
                           armour_name(*armour));
@@ -444,7 +444,7 @@ static int scroll_enchant_armour(player *p, item *scroll)
         }
 
         /* blessed scroll never overenchants */
-        if (!scroll->blessed || (*armour)->bonus < 3)
+        if (!r_scroll->blessed || (*armour)->bonus < 3)
             item_enchant(*armour);
 
         return TRUE;
@@ -453,13 +453,13 @@ static int scroll_enchant_armour(player *p, item *scroll)
     return FALSE;
 }
 
-static int scroll_enchant_weapon(player *p, item *scroll)
+static int scroll_enchant_weapon(player *p, item *r_scroll)
 {
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
     if (p->eq_weapon)
     {
-        if (scroll->blessed)
+        if (r_scroll->blessed)
         {
             log_add_entry(nlarn->log,
                           "Your %s glows brightly for a moment.",
@@ -482,7 +482,7 @@ static int scroll_enchant_weapon(player *p, item *scroll)
         }
 
         /* blessed scroll never overenchants */
-        if (!scroll->blessed || p->eq_weapon->bonus < 3)
+        if (!r_scroll->blessed || p->eq_weapon->bonus < 3)
             item_enchant(p->eq_weapon);
 
         return TRUE;
@@ -491,12 +491,12 @@ static int scroll_enchant_weapon(player *p, item *scroll)
     return FALSE;
 }
 
-static int scroll_gem_perfection(player *p, item *scroll)
+static int scroll_gem_perfection(player *p, item *r_scroll)
 {
     guint idx;
     item *it;
 
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_gems) == 0)
     {
@@ -505,7 +505,7 @@ static int scroll_gem_perfection(player *p, item *scroll)
 
     log_add_entry(nlarn->log, "This is a scroll of gem perfection.");
 
-    if (scroll->blessed)
+    if (r_scroll->blessed)
     {
         for (idx = 0; idx < inv_length_filtered(p->inventory, item_filter_gems); idx++)
         {
@@ -534,21 +534,21 @@ static int scroll_gem_perfection(player *p, item *scroll)
     return TRUE;
 }
 
-static int scroll_genocide_monster(player *p, item *scroll)
+static int scroll_genocide_monster(player *p, item *r_scroll)
 {
     char *glyph;
     int id;
     guint candidates[10] = { 0 };
     int found = 0;
-    monster_t which = MT_NONE;
+    int which = MT_NONE;
     GString *msg = g_string_new(NULL);
 
     assert(p != NULL);
 
-    if (!player_item_known(p, scroll))
+    if (!player_item_known(p, r_scroll))
     {
         g_string_append_printf(msg, "This is a scroll of %s. ",
-                               scroll_name(scroll));
+                               scroll_name(r_scroll));
     }
 
     g_string_append(msg, "Which monster do you want to genocide (enter its glyph)?");
@@ -592,7 +592,7 @@ static int scroll_genocide_monster(player *p, item *scroll)
     }
 
     /* blessed scrolls allow a choice of same-glyph monsters */
-    if (!scroll->blessed || found == 1)
+    if (!r_scroll->blessed || found == 1)
     {
         /* the monster to genocide is the first monster found */
         which = candidates[0];
@@ -638,13 +638,13 @@ static int scroll_genocide_monster(player *p, item *scroll)
     return TRUE;
 }
 
-static int scroll_heal_monster(player *p, item *scroll)
+static int scroll_heal_monster(player *p, item *r_scroll)
 {
     GList *mlist;
     int count = 0;
     monster *m;
 
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
     mlist = g_hash_table_get_values(nlarn->monsters);
 
@@ -675,11 +675,11 @@ static int scroll_heal_monster(player *p, item *scroll)
     return count;
 }
 
-static int scroll_identify(player *p, item *scroll)
+static int scroll_identify(player *p, item *r_scroll)
 {
     item *it;
 
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_unid) == 0)
     {
@@ -690,7 +690,7 @@ static int scroll_identify(player *p, item *scroll)
 
     log_add_entry(nlarn->log, "This is a scroll of identify.");
 
-    if (scroll->blessed)
+    if (r_scroll->blessed)
     {
         /* identify all items */
         log_add_entry(nlarn->log, "You identify your possessions.");
@@ -704,7 +704,7 @@ static int scroll_identify(player *p, item *scroll)
     else
     {
         /* identify the scroll being read, otherwise it would show up here */
-        player_item_identify(p, NULL, scroll);
+        player_item_identify(p, NULL, r_scroll);
 
         /* may identify up to 3 items */
         int tries = rand_1n(4);
@@ -735,7 +735,7 @@ static int scroll_identify(player *p, item *scroll)
     return TRUE;
 }
 
-int scroll_mapping(player *p, item *scroll)
+int scroll_mapping(player *p, item *r_scroll)
 {
     position pos;
     map *m;
@@ -746,14 +746,14 @@ int scroll_mapping(player *p, item *scroll)
     m = game_map(nlarn, Z(p->pos));
     Z(pos) = Z(p->pos);
 
-    const gboolean map_traps = (scroll != NULL && scroll->blessed);
+    const gboolean map_traps = (r_scroll != NULL && r_scroll->blessed);
 
     for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
     {
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
             map_tile_t tile = map_tiletype_at(m, pos);
-            if (scroll == NULL || tile != LT_FLOOR)
+            if (r_scroll == NULL || tile != LT_FLOOR)
                 player_memory_of(p, pos).type = tile;
             player_memory_of(p, pos).sobject = map_sobject_at(m, pos);
 
@@ -770,12 +770,12 @@ int scroll_mapping(player *p, item *scroll)
     return TRUE;
 }
 
-static int scroll_remove_curse(player *p, item *scroll)
+static int scroll_remove_curse(player *p, item *r_scroll)
 {
     char buf[61];
     item *it;
 
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_cursed) == 0)
     {
@@ -786,7 +786,7 @@ static int scroll_remove_curse(player *p, item *scroll)
 
     log_add_entry(nlarn->log, "This is a scroll of remove curse.");
 
-    if (scroll->blessed)
+    if (r_scroll->blessed)
     {
         /* remove curses on all items */
         log_add_entry(nlarn->log, "You remove curses on your possessions.");
@@ -836,12 +836,12 @@ static int scroll_remove_curse(player *p, item *scroll)
     return TRUE;
 }
 
-static int scroll_spell_extension(player *p, item *scroll)
+static int scroll_spell_extension(player *p, item *r_scroll)
 {
     guint idx;
     spell *sp;
 
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
     /* return early if no spells memorised */
     if (p->known_spells->len == 0)
@@ -851,7 +851,7 @@ static int scroll_spell_extension(player *p, item *scroll)
     {
         sp = g_ptr_array_index(p->known_spells, idx);
 
-        if (scroll->blessed)
+        if (r_scroll->blessed)
         {
             /* double spell knowledge */
             sp->knowledge <<=1;
@@ -868,13 +868,13 @@ static int scroll_spell_extension(player *p, item *scroll)
     return TRUE;
 }
 
-static int scroll_teleport(player *p, item *scroll)
+static int scroll_teleport(player *p, item *r_scroll)
 {
     guint nlevel;
 
     assert(p != NULL);
 
-    if (scroll->blessed)
+    if (r_scroll->blessed)
     {
         /* blessed scrolls of teleport always teleport to town level */
         nlevel = 0;
@@ -901,18 +901,18 @@ static int scroll_teleport(player *p, item *scroll)
     return FALSE;
 }
 
-static int scroll_timewarp(player *p, item *scroll)
+static int scroll_timewarp(player *p, item *r_scroll)
 {
-    gint32 mobuls = 0;  /* number of mobuls */
-    gint32 turns;       /* number of turns */
-    guint idx = 0;      /* position inside player's effect list */
+    gint mobuls = 0; /* number of mobuls */
+    gint turns;      /* number of turns */
+    guint idx = 0;   /* position inside player's effect list */
 
-    assert(p != NULL && scroll != NULL);
+    assert(p != NULL && r_scroll != NULL);
 
     turns = (rand_1n(1000) - 850);
 
     // For blessed scrolls, use the minimum turn count of three tries.
-    if (scroll->blessed)
+    if (r_scroll->blessed)
     {
         turns = min(turns, (rand_1n(1000) - 850));
         turns = min(turns, (rand_1n(1000) - 850));
@@ -957,7 +957,7 @@ static int scroll_timewarp(player *p, item *scroll)
         if (turns > 0)
         {
             /* gone forward in time */
-            if (e->turns < turns)
+            if ((gint)e->turns < turns)
             {
                 /* the effect's remaining turns are smaller
                    than the number of turns the player moved into the future,

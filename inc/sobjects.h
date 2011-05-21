@@ -30,5 +30,5 @@ int player_stairs_down(player *p);
 int player_stairs_up(player *p);
 int player_throne_pillage(player *p);
 int player_throne_sit(player *p);
-void sobject_destroy_at(player *p, map *map, position pos);
+void sobject_destroy_at(player *p, map *dmap, position pos);
 

@@ -34,7 +34,7 @@ const container_data containers[CT_MAX] =
 
 static void container_trigger_trap(player *p, item *container);
 
-void container_open(player *p, inventory **inv, item *container)
+void container_open(player *p, inventory **inv __attribute__((unused)), item *container)
 {
     gchar container_desc[61] = { 0 };
     GPtrArray *callbacks;
@@ -43,14 +43,11 @@ void container_open(player *p, inventory **inv, item *container)
 
     assert (p != NULL);
 
-    /* don't need that parameter */
-    inv = NULL;
-
     if (container == NULL)
     {
         /* no container has been passed - look for container on the floor */
-        inventory **inv = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
-        int count = inv_length_filtered(*inv, &item_filter_container);
+        inventory **finv = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
+        int count = inv_length_filtered(*finv, &item_filter_container);
 
         if (count == 0)
         {
@@ -59,7 +56,7 @@ void container_open(player *p, inventory **inv, item *container)
         }
         else if (count == 1)
         {
-            container = inv_get_filtered(*inv, 0, &item_filter_container);
+            container = inv_get_filtered(*finv, 0, &item_filter_container);
         }
         else
         {
@@ -133,7 +130,7 @@ void container_item_add(player *p, inventory **inv, item *element)
     guint pilen = 0; /* length of player's filtered inventory */
     guint filen = 0; /* length of filtered floor inventory */
     gboolean carried_container = FALSE;
-    int count = 0;
+    guint count = 0;
 
     assert(p != NULL && element != NULL);
 
@@ -259,7 +256,7 @@ void container_item_add(player *p, inventory **inv, item *element)
 void container_item_unpack(player *p, inventory **inv, item *element)
 {
     gchar desc[61] = { 0 };
-    int count = 0;
+    guint count = 0;
 
     assert(p != NULL && inv != NULL && element != NULL);
 
@@ -342,7 +339,7 @@ int container_move_content(player *p, inventory **inv, inventory **new_inv)
     return count;
 }
 
-static void container_trigger_trap(player *p, item *container)
+static void container_trigger_trap(player *p, item *container __attribute__((unused)))
 {
     effect_t et = ET_NONE;
     char *msg = "A little needle shoots out and stings you!";

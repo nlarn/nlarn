@@ -45,7 +45,7 @@ fov *fov_new();
   * @param the radius of vision
   * @param True if the mobile has infravision.
   */
-void fov_calculate(fov *fov, map *m, position pos, int radius, gboolean infravision);
+void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravision);
 
 /** @brief check if a certain position is visible.
   *
@@ -54,40 +54,40 @@ void fov_calculate(fov *fov, map *m, position pos, int radius, gboolean infravis
   *
   * @return TRUE/FALSE
   */
-gboolean fov_get(fov *fov, position pos);
+gboolean fov_get(fov *fv, position pos);
 
 /** @brief set visibility for a certain position.
   *
   * @param pointer to a fov structure.
   * @param a position.
   */
-void fov_set(fov *fov, position pos, guchar visible);
+void fov_set(fov *fv, position pos, guchar visible);
 
 /** @brief reset visibility for an entire fov structure.
   *
   * @param pointer to a fov structure.
   */
-void fov_reset(fov *fov);
+void fov_reset(fov *fv);
 
 /** @brief Get the closest monster for a field of vision.
   *
   * @param pointer to a fov structure
   * @return a pointer to the closest monster, or NULL
   */
-monster *fov_get_closest_monster(fov *fov);
+monster *fov_get_closest_monster(fov *fv);
 
 /** @brief Get a list of all visible monsters
   *
   * @param A pointer to a fov structure
   * @return A GList with all visible monsters, sorted by proximity, or NULL
   */
-GList *fov_get_visible_monsters(fov *fov);
+GList *fov_get_visible_monsters(fov *fv);
 
 /** @brief destroy fov data
   *
   * @param A pointer to a fov structure.
   * @param The starting position.
   */
-void fov_free(fov *fov);
+void fov_free(fov *fv);
 
 #endif

@@ -155,9 +155,9 @@ int pos_adjacent(position first, position second)
 
 int pos_valid(position pos)
 {
-    return (X(pos) >= 0) && (X(pos) < MAP_MAX_X)
-           && (Y(pos) >= 0) && (Y(pos) < MAP_MAX_Y)
-           && (Z(pos) >= 0) && (Z(pos) < MAP_MAX);
+    return (X(pos) < MAP_MAX_X)
+            && (Y(pos) < MAP_MAX_Y)
+            && (Z(pos) < MAP_MAX);
 }
 
 direction pos_dir(position origin, position target)
@@ -353,7 +353,6 @@ area *area_new_ray(position source, position target, area *obstacles)
     int offset_x, offset_y;
     int x, y;
     signed int ix, iy;
-    int error;
 
     narea = area_new(min(X(source), X(target)), min(Y(source), Y(target)),
                      abs(X(target) - X(source)) + 1, abs(Y(target) - Y(source)) + 1);
@@ -385,7 +384,7 @@ area *area_new_ray(position source, position target, area *obstacles)
     if (delta_x >= delta_y)
     {
         /* error may go below zero */
-        error = delta_y - (delta_x >> 1);
+        int error = delta_y - (delta_x >> 1);
 
         while (x != X(target))
         {
@@ -458,10 +457,10 @@ gboolean area_ray_trajectory(position source, position target,
 {
     assert(pos_valid(source) && pos_valid(target));
 
-    map *map = game_map(nlarn, Z(source));
+    map *tmap = game_map(nlarn, Z(source));
 
     /* get the ray */
-    area *obstacles = map_get_obstacles(map, source, pos_distance(source, target));
+    area *obstacles = map_get_obstacles(tmap, source, pos_distance(source, target));
     area *ray = area_new_ray(source, target, obstacles);
 
     /* it was impossible to get a ray for the given positions */
@@ -496,7 +495,7 @@ gboolean area_ray_trajectory(position source, position target,
             }
 
             /* check for reflection: mirrors */
-            if (reflectable && (map_sobject_at(map, cursor) == LS_MIRROR))
+            if (reflectable && (map_sobject_at(tmap, cursor) == LS_MIRROR))
             {
                 return area_ray_trajectory(cursor, source, damo, pos_hitfun, data1,
                                            data2, FALSE,  glyph, colour, keep_ray);

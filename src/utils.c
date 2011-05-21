@@ -504,13 +504,13 @@ const char *int2str(int val)
 
 }
 
-damage *damage_new(damage_t type, attack_t attack, int amount,
+damage *damage_new(damage_t type, attack_t att_type, int amount,
                    damage_originator_t damo, gpointer originator)
 {
     damage *dam = g_malloc0(sizeof(damage));
 
     dam->type = type;
-    dam->attack = attack;
+    dam->attack = att_type;
     dam->amount = amount;
     dam->dam_origin.ot = damo;
     dam->dam_origin.originator = originator;

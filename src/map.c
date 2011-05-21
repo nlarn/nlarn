@@ -45,9 +45,7 @@ static int map_step_cost(map *l, map_path_element* element,
 static int map_path_cost(map_path_element* element, position target);
 static map_path_element *map_path_element_in_list(map_path_element* el,
                                                   GPtrArray *list);
-static map_path_element *map_path_find_best(map *l, map_path *path,
-                                            map_element_t map_elem,
-                                            gboolean player);
+static map_path_element *map_path_find_best(map_path *path);
 static GPtrArray *map_path_get_neighbours(map *l, position pos,
                                           map_element_t element,
                                           gboolean player);
@@ -268,7 +266,7 @@ cJSON *map_serialize(map *m)
     return mser;
 }
 
-map *map_deserialize(cJSON *mser, game *g)
+map *map_deserialize(cJSON *mser)
 {
     int x, y;
     cJSON *grid, *tile, *obj;
@@ -315,10 +313,10 @@ map *map_deserialize(cJSON *mser, game *g)
 char *map_dump(map *l, position ppos)
 {
     position pos;
-    GString *map;
+    GString *dump;
     monster *m;
 
-    map = g_string_new_len(NULL, MAP_SIZE);
+    dump = g_string_new_len(NULL, MAP_SIZE);
 
     Z(pos) = l->nlevel;
 
@@ -328,29 +326,29 @@ char *map_dump(map *l, position ppos)
         {
             if (pos_identical(pos, ppos))
             {
-                g_string_append_c(map, '@');
+                g_string_append_c(dump, '@');
             }
             else if ((m = map_get_monster_at(l, pos)))
             {
-                g_string_append_c(map, monster_glyph(m));
+                g_string_append_c(dump, monster_glyph(m));
             }
             else if (map_trap_at(l, pos))
             {
-                g_string_append_c(map, '^');
+                g_string_append_c(dump, '^');
             }
             else if (map_sobject_at(l, pos))
             {
-                g_string_append_c(map, ls_get_image(map_sobject_at(l, pos)));
+                g_string_append_c(dump, ls_get_image(map_sobject_at(l, pos)));
             }
             else
             {
-                g_string_append_c(map, lt_get_image(map_tiletype_at(l, pos)));
+                g_string_append_c(dump, lt_get_image(map_tiletype_at(l, pos)));
             }
         }
-        g_string_append_c(map, '\n');
+        g_string_append_c(dump, '\n');
     }
 
-    return g_string_free(map, FALSE);
+    return g_string_free(dump, FALSE);
 }
 
 void map_destroy(map *m)
@@ -424,27 +422,27 @@ position map_find_space_in(map *maze, rectangle where, map_element_t element, in
 int *map_get_surrounding(map *l, position pos, map_sobject_t type)
 {
     position p;
-    int move = 1;
+    int nmove = 1;
     int *dirs;
 
     dirs = g_malloc0(sizeof(int) * GD_MAX);
 
-    while (move < GD_MAX)
+    while (nmove < GD_MAX)
     {
-        p = pos_move(pos, move);
+        p = pos_move(pos, nmove);
 
         if (pos_valid(p) && map_sobject_at(l, p) == type)
         {
-            dirs[move] = TRUE;
+            dirs[nmove] = TRUE;
         }
 
-        move++;
+        nmove++;
     }
 
     return dirs;
 }
 
-position map_find_sobject_in(map *l, map_sobject_t sobject, rectangle area)
+position map_find_sobject_in(map *l, map_sobject_t sobject, rectangle rect)
 {
     position pos;
 
@@ -452,8 +450,8 @@ position map_find_sobject_in(map *l, map_sobject_t sobject, rectangle area)
 
     Z(pos) = l->nlevel;
 
-    for (Y(pos) = area.y1; Y(pos) <= area.y2; Y(pos)++)
-        for (X(pos) = area.x1; X(pos) <= area.x2; X(pos)++)
+    for (Y(pos) = rect.y1; Y(pos) <= rect.y2; Y(pos)++)
+        for (X(pos) = rect.x1; X(pos) <= rect.x2; X(pos)++)
             if (map_sobject_at(l,pos) == sobject)
                 return pos;
 
@@ -577,7 +575,6 @@ int map_pos_is_visible(map *l, position s, position t)
     int delta_x, delta_y;
     int x, y;
     signed int ix, iy;
-    int error;
 
     /* positions on different levels? */
     if (Z(s) != Z(t))
@@ -596,7 +593,7 @@ int map_pos_is_visible(map *l, position s, position t)
     if (delta_x >= delta_y)
     {
         /* error may go below zero */
-        error = delta_y - (delta_x >> 1);
+        int error = delta_y - (delta_x >> 1);
 
         while (x != X(t))
         {
@@ -672,11 +669,11 @@ map_path *map_find_path(map *m, position start, position goal,
     g_ptr_array_add(path->open, curr);
 
     /* check if the path is being determined for the player */
-    gboolean player = pos_identical(start, nlarn->p->pos);
+    gboolean ppath = pos_identical(start, nlarn->p->pos);
 
     while (path->open->len)
     {
-        curr = map_path_find_best(m, path, element, player);
+        curr = map_path_find_best(path);
 
         g_ptr_array_remove_fast(path->open, curr);
         g_ptr_array_add(path->closed, curr);
@@ -699,7 +696,7 @@ map_path *map_find_path(map *m, position start, position goal,
             return path;
         }
 
-        neighbours = map_path_get_neighbours(m, curr->pos, element, player);
+        neighbours = map_path_get_neighbours(m, curr->pos, element, ppath);
 
         while (neighbours->len)
         {
@@ -716,7 +713,7 @@ map_path *map_find_path(map *m, position start, position goal,
 
             const guint32 next_g_score =
                 curr->g_score
-                + map_step_cost(m, next, element, player);
+                + map_step_cost(m, next, element, ppath);
 
             if (!map_path_element_in_list(next, path->open))
             {
@@ -806,25 +803,25 @@ area *map_get_obstacles(map *l, position center, int radius)
     return narea;
 }
 
-void map_set_tiletype(map *l, area *area, map_tile_t type, guint8 duration)
+void map_set_tiletype(map *l, area *ar, map_tile_t type, guint8 duration)
 {
     position pos;
     int x, y;
 
-    assert (l != NULL && area != NULL);
+    assert (l != NULL && ar != NULL);
 
     position center;
-    X(center) = area->start_x + area->size_x / 2;
-    Y(center) = area->start_y + area->size_y / 2;
+    X(center) = ar->start_x + ar->size_x / 2;
+    Y(center) = ar->start_y + ar->size_y / 2;
     Z(center) = l->nlevel;
 
     Z(pos) = l->nlevel;
-    for (Y(pos) = area->start_y, y = 0;
-            Y(pos) < area->start_y + area->size_y;
+    for (Y(pos) = ar->start_y, y = 0;
+            Y(pos) < ar->start_y + ar->size_y;
             Y(pos)++, y++)
     {
-        for (X(pos) = area->start_x, x = 0;
-                X(pos) < area->start_x + area->size_x;
+        for (X(pos) = ar->start_x, x = 0;
+                X(pos) < ar->start_x + ar->size_x;
                 X(pos)++, x++)
         {
             /* check if pos is inside the map */
@@ -832,7 +829,7 @@ void map_set_tiletype(map *l, area *area, map_tile_t type, guint8 duration)
                 continue;
 
             /* if the position is marked in area set the tile to type */
-            if (area_point_get(area, x, y))
+            if (area_point_get(ar, x, y))
             {
                 map_tile *tile = map_tile_at(l, pos);
 
@@ -1053,11 +1050,11 @@ monster *map_get_monster_at(map *m, position pos)
     return (mid != NULL) ? game_monster_get(nlarn, mid) : NULL;
 }
 
-int map_set_monster_at(map *map, position pos, monster *monst)
+int map_set_monster_at(map *mmap, position pos, monster *monst)
 {
-    assert(map != NULL && map->nlevel == Z(pos) && pos_valid(pos));
+    assert(mmap != NULL && mmap->nlevel == Z(pos) && pos_valid(pos));
 
-    map->grid[Y(pos)][X(pos)].monster = (monst != NULL) ? monster_oid(monst) : NULL;
+    mmap->grid[Y(pos)][X(pos)].monster = (monst != NULL) ? monster_oid(monst) : NULL;
 
     return TRUE;
 }
@@ -1072,8 +1069,8 @@ int map_is_monster_at(map *m, position pos)
 void map_fill_with_life(map *m)
 {
     position pos;
-    int new_monster_count;
-    int i;
+    guint new_monster_count;
+    guint i;
 
     assert(m != NULL);
 
@@ -1647,7 +1644,7 @@ static void map_make_maze_eat(map *l, int x, int y)
 
 /* The river/lake creation algorithm has been copied in entirety
    from Dungeon Crawl Stone Soup, with only very slight changes. (jpeg) */
-static void map_make_vertical_river(map *map, map_tile_t rivertype)
+static void map_make_vertical_river(map *m, map_tile_t rivertype)
 {
     guint width  = 3 + rand_0n(4);
     guint startx = 6 - width + rand_0n(MAP_MAX_X - 8);
@@ -1658,7 +1655,7 @@ static void map_make_vertical_river(map *map, map_tile_t rivertype)
     const guint maxx   = MAP_MAX_X - rand_1n(3);
 
     position pos;
-    Z(pos) = map->nlevel;
+    Z(pos) = m->nlevel;
     for (Y(pos) = starty; Y(pos) < endy; Y(pos)++)
     {
         if (chance(33)) startx++;
@@ -1672,16 +1669,16 @@ static void map_make_vertical_river(map *map, map_tile_t rivertype)
         for (X(pos) = startx; X(pos) < startx + width; X(pos)++)
         {
             if (X(pos) > minx && X(pos) < maxx && chance(99))
-                map_tiletype_set(map, pos, rivertype);
+                map_tiletype_set(m, pos, rivertype);
         }
     }
 }
 
-static void map_make_river(map *map, map_tile_t rivertype)
+static void map_make_river(map *m, map_tile_t rivertype)
 {
     if (chance(20))
     {
-        map_make_vertical_river(map, rivertype);
+        map_make_vertical_river(m, rivertype);
         return;
     }
 
@@ -1694,7 +1691,7 @@ static void map_make_river(map *map, map_tile_t rivertype)
     const guint maxy   = MAP_MAX_Y - rand_1n(3);
 
     position pos;
-    Z(pos) = map->nlevel;
+    Z(pos) = m->nlevel;
     for (X(pos) = startx; X(pos) < endx; X(pos)++)
     {
         if (chance(33)) starty++;
@@ -1711,12 +1708,12 @@ static void map_make_river(map *map, map_tile_t rivertype)
         for (Y(pos) = starty; Y(pos) < starty + width; Y(pos)++)
         {
             if (Y(pos) > miny && Y(pos) < maxy && chance(99))
-                map_tiletype_set(map, pos, rivertype);
+                map_tiletype_set(m, pos, rivertype);
         }
     }
 }
 
-static void map_make_lake(map *map, map_tile_t laketype)
+static void map_make_lake(map *m, map_tile_t laketype)
 {
     guint x1 = 5 + rand_0n(MAP_MAX_X - 30);
     guint y1 = 3 + rand_0n(MAP_MAX_Y - 15);
@@ -1724,7 +1721,7 @@ static void map_make_lake(map *map, map_tile_t laketype)
     guint y2 = y1 + 4 + rand_0n(5);
 
     position pos;
-    Z(pos) = map->nlevel;
+    Z(pos) = m->nlevel;
     for (Y(pos) = y1; Y(pos) < y2; Y(pos)++)
     {
         if (Y(pos) <= 1 || Y(pos) >= MAP_MAX_Y - 1)
@@ -1752,7 +1749,7 @@ static void map_make_lake(map *map, map_tile_t laketype)
                 continue;
 
             if (chance(99))
-                map_tiletype_set(map, pos, laketype);
+                map_tiletype_set(m, pos, laketype);
         }
     }
 }
@@ -2170,7 +2167,7 @@ static map_path_element *map_path_element_new(position pos)
 
 /* calculate the cost of stepping into this new field */
 static int map_step_cost(map *l, map_path_element* element,
-                         map_element_t map_elem, gboolean player)
+                         map_element_t map_elem, gboolean ppath)
 {
     map_tile_t tt;
     guint32 step_cost = 1; /* at least 1 movement cost */
@@ -2179,7 +2176,7 @@ static int map_step_cost(map *l, map_path_element* element,
     monster *m = map_get_monster_at(l, element->pos);
 
     /* get the tile type of the map tile */
-    if (player)
+    if (ppath)
     {
         tt = player_memory_of(nlarn->p, element->pos).type ;
     }
@@ -2189,7 +2186,7 @@ static int map_step_cost(map *l, map_path_element* element,
     }
 
     /* penalize for traps known to the player */
-    if (player && player_memory_of(nlarn->p, element->pos).trap)
+    if (ppath && player_memory_of(nlarn->p, element->pos).trap)
     {
         const trap_t trap = map_trap_at(l, element->pos);
         /* especially ones that may cause detours */
@@ -2201,7 +2198,7 @@ static int map_step_cost(map *l, map_path_element* element,
 
     /* penalize fields occupied by monsters: always for monsters,
        for the player only if (s)he can see the monster */
-    if (m != NULL && (!player || monster_in_sight(m)))
+    if (m != NULL && (!ppath || monster_in_sight(m)))
     {
         step_cost += 10;
     }
@@ -2252,9 +2249,7 @@ static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArra
     return NULL;
 }
 
-static map_path_element *map_path_find_best(map *l, map_path *path,
-                                            map_element_t map_elem,
-                                            gboolean player)
+static map_path_element *map_path_find_best(map_path *path)
 {
     map_path_element *el, *best = NULL;
     guint idx;
@@ -2275,7 +2270,7 @@ static map_path_element *map_path_find_best(map *l, map_path *path,
 
 static GPtrArray *map_path_get_neighbours(map *l, position pos,
                                           map_element_t element,
-                                          gboolean player)
+                                          gboolean ppath)
 {
     GPtrArray *neighbours;
     map_path_element *pe;
@@ -2294,8 +2289,8 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos,
         if (!pos_valid(npos))
             continue;
 
-        if ((player && lt_is_passable(player_memory_of(nlarn->p, npos).type))
-                || (!player && monster_valid_dest(l, npos, element)))
+        if ((ppath && lt_is_passable(player_memory_of(nlarn->p, npos).type))
+                || (!ppath && monster_valid_dest(l, npos, element)))
         {
             pe = map_path_element_new(npos);
             g_ptr_array_add(neighbours, pe);
@@ -2305,7 +2300,8 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos,
     return neighbours;
 }
 
-static gboolean map_monster_destroy(gpointer key, monster *monst, map *m)
+static gboolean map_monster_destroy(gpointer key __attribute__((unused)),
+                                    monster *monst, map *m)
 {
     if (Z(monster_pos(monst)) != m->nlevel)
     {

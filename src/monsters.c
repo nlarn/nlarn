@@ -47,7 +47,7 @@ struct _monster
     inventory *inventory;
     gpointer weapon;
     GPtrArray *effects;
-    int number;          /* random value for some monsters */
+    guint number;        /* random value for some monsters */
     guint32
         unknown: 1;      /* monster is unknown (mimic) */
 };
@@ -199,7 +199,7 @@ monster *monster_new(monster_t type, position pos)
     if (monster_attack_available(nmonster, ATT_WEAPON))
     {
         int weapon_count = 3;
-        int weapons[3]; /* choice of weapon types */
+        int wpns[3]; /* choice of weapon types */
         item *weapon;
 
         /* preset weapon types */
@@ -208,42 +208,42 @@ monster *monster_new(monster_t type, position pos)
         case MT_HOBGOBLIN:
         case MT_ORC:
         case MT_TROLL:
-            weapons[0] = WT_ODAGGER;
-            weapons[1] = WT_OSHORTSWORD;
-            weapons[2] = WT_OSPEAR;
+            wpns[0] = WT_ODAGGER;
+            wpns[1] = WT_OSHORTSWORD;
+            wpns[2] = WT_OSPEAR;
             break;
 
         case MT_ELF:
-            weapons[0] = WT_ESHORTSWORD;
-            weapons[1] = WT_ESPEAR;
+            wpns[0] = WT_ESHORTSWORD;
+            wpns[1] = WT_ESPEAR;
             weapon_count = 2;
             break;
 
         case MT_BUGBEAR:
         case MT_CENTAUR:
         case MT_POLTERGEIST:
-            weapons[0] = WT_MACE;
-            weapons[1] = WT_FLAIL;
-            weapons[2] = WT_BATTLEAXE;
+            wpns[0] = WT_MACE;
+            wpns[1] = WT_FLAIL;
+            wpns[2] = WT_BATTLEAXE;
             break;
 
         case MT_VAMPIRE:
         case MT_GNOME_KING:
         case MT_WATER_LORD:
         case MT_XVART:
-            weapons[0] = WT_LONGSWORD;
-            weapons[1] = WT_2SWORD;
-            weapons[2] = WT_SWORDSLASHING;
+            wpns[0] = WT_LONGSWORD;
+            wpns[1] = WT_2SWORD;
+            wpns[2] = WT_SWORDSLASHING;
             break;
 
         default:
-            weapons[0] = WT_DAGGER;
-            weapons[1] = WT_SPEAR;
-            weapons[2] = WT_SHORTSWORD;
+            wpns[0] = WT_DAGGER;
+            wpns[1] = WT_SPEAR;
+            wpns[2] = WT_SHORTSWORD;
             break;
         }
 
-        weapon = item_new(IT_WEAPON, weapons[rand_0n(weapon_count)]);
+        weapon = item_new(IT_WEAPON, wpns[rand_0n(weapon_count)]);
         item_new_finetouch(weapon);
 
         inv_add(&nmonster->inventory, weapon);
@@ -262,8 +262,8 @@ monster *monster_new(monster_t type, position pos)
 
         /* put mimicked item into monster inventory */
         const int chosen_type = possible_types[rand_0n(8)];
-        item *it = item_new_by_level(chosen_type, Z(nmonster->pos));
-        inv_add(&nmonster->inventory, it);
+        item *itm = item_new_by_level(chosen_type, Z(nmonster->pos));
+        inv_add(&nmonster->inventory, itm);
 
         /* the mimic is not known to be a monster */
         nmonster->unknown = TRUE;
@@ -293,20 +293,20 @@ monster *monster_new_by_level(position pos)
 {
     assert(pos_valid(pos));
 
-    const int monster_level[] = { MT_KOBOLD,           // D1:   5
-                                  MT_GIANT_ANT,        // D2:  11
-                                  MT_ZOMBIE,           // D3:  17
-                                  MT_CENTAUR,          // D4:  22
-                                  MT_WHITE_DRAGON,     // D5:  27
-                                  MT_FORVALAKA,        // D6:  33
-                                  MT_STALKER,          // D7:  39
-                                  MT_SHAMBLINGMOUND,   // D8:  42
-                                  MT_MIMIC,            // D9:  46
-                                  MT_BRONZE_DRAGON,    // D10: 50
-                                  MT_PLATINUM_DRAGON,  // V1:  53
-                                  MT_GREEN_URCHIN,     // V2:  56
-                                  MT_DEMON_PRINCE      // V3
-                                };
+    const int mlevel[] = { MT_KOBOLD,           // D1:   5
+                            MT_GIANT_ANT,        // D2:  11
+                            MT_ZOMBIE,           // D3:  17
+                            MT_CENTAUR,          // D4:  22
+                            MT_WHITE_DRAGON,     // D5:  27
+                            MT_FORVALAKA,        // D6:  33
+                            MT_STALKER,          // D7:  39
+                            MT_SHAMBLINGMOUND,   // D8:  42
+                            MT_MIMIC,            // D9:  46
+                            MT_BRONZE_DRAGON,    // D10: 50
+                            MT_PLATINUM_DRAGON,  // V1:  53
+                            MT_GREEN_URCHIN,     // V2:  56
+                            MT_DEMON_PRINCE      // V3
+                          };
 
     const int nlevel = Z(pos);
     int monster_id = MT_NONE;
@@ -335,14 +335,14 @@ monster *monster_new_by_level(position pos)
         if (minstep < 0)
             monster_id_min = 1;
         else
-            monster_id_min = monster_level[minstep] + 1;
+            monster_id_min = mlevel[minstep] + 1;
 
         if (maxstep < 0)
             maxstep = 0;
         else if (maxstep > MAP_MAX - 2)
             maxstep = MAP_MAX - 2;
 
-        monster_id_max = monster_level[maxstep];
+        monster_id_max = mlevel[maxstep];
 
         do
         {
@@ -376,7 +376,7 @@ void monster_destroy(monster *m)
         inv_destroy(m->inventory, TRUE);
 
     /* unregister monster */
-    if (m->oid > 0)
+    if (m->oid != 0)
     {
         /* the oid is set to 0 when the monster is destroyed by the
         g_hash_table_foreach_remove callback */
@@ -561,11 +561,11 @@ int monster_valid_dest(map *m, position pos, int map_elem)
     }
 }
 
-int monster_pos_set(monster *m, map *map, position target)
+int monster_pos_set(monster *m, map *mp, position target)
 {
-    assert(m != NULL && map != NULL && pos_valid(target));
+    assert(m != NULL && mp != NULL && pos_valid(target));
 
-    if (map_pos_validate(map, target, monster_map_element(m), FALSE))
+    if (map_pos_validate(mp, target, monster_map_element(m), FALSE))
     {
         /* remove current reference to monster from tile */
         map_set_monster_at(monster_map(m), m->pos, NULL);
@@ -574,7 +574,7 @@ int monster_pos_set(monster *m, map *map, position target)
         m->pos = target;
 
         /* set reference to monster on tile */
-        map_set_monster_at(map, target, m);
+        map_set_monster_at(mp, target, m);
 
         return TRUE;
     }
@@ -887,7 +887,7 @@ void monster_level_enter(monster *m, struct map *l)
     }
 }
 
-void monster_move(gpointer *oid, monster *m, game *g)
+void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
 {
     /* monster's new position */
     position m_npos;
@@ -1344,7 +1344,7 @@ static int modified_attack_amount(int amount, int damage_type)
 void monster_player_attack(monster *m, player *p)
 {
     damage *dam;
-    attack att = { ATT_NONE };
+    attack att = { ATT_NONE, DAM_NONE, 0, 0 };
 
     assert(m != NULL && p != NULL);
 
@@ -1501,7 +1501,7 @@ void monster_player_attack(monster *m, player *p)
 int monster_player_ranged_attack(monster *m, player *p)
 {
     damage *dam;
-    attack att = { ATT_NONE };
+    attack att = { ATT_NONE, DAM_NONE, 0, 0 };
 
     assert(m != NULL && p != NULL);
 
@@ -1653,13 +1653,13 @@ monster *monster_damage_take(monster *m, damage *dam)
 
 gboolean monster_update_action(monster *m, monster_action_t override)
 {
-    monster_action_t naction;   /* new action */
-    guint time;
+    monster_action_t naction; /* new action */
+    guint mtime; /* max. number of turns a monster will look for the player */
     gboolean low_hp;
     gboolean smart;
 
     /* FIXME: should include difficulty here */
-    time   = monster_int(m) + 25;
+    mtime  = monster_int(m) + 25;
     low_hp = (m->hp < (monster_hp_max(m) / 4 ));
     smart  = (monster_int(m) > 4);
 
@@ -1705,7 +1705,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
         /* low HP or very scared => FLEE from player */
         naction = MA_FLEE;
     }
-    else if (m->lastseen && (m->lastseen < time))
+    else if (m->lastseen && (m->lastseen < mtime))
     {
         /* after having spotted the player, agressive monster will follow
            the player for a certain amount of time turns, afterwards loose
@@ -1843,7 +1843,7 @@ char *monster_desc(monster *m)
     {
         char **desc_list = strv_new();
 
-        int i;
+        guint i;
         for (i = 0; i < m->effects->len; i++)
         {
             effect *e = game_effect_get(nlarn, g_ptr_array_index(m->effects, i));
@@ -2225,7 +2225,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
 
             if (inv != NULL)
             {
-                int idx = 0;
+                guint idx = 0;
                 for (; idx < inv_length(inv); idx++)
                 {
                     item *i = inv_get(inv, idx);
@@ -2361,7 +2361,7 @@ static char *monsters_get_fortune(char *fortune_file)
     return g_ptr_array_index(fortunes, rand_0n(fortunes->len));
 }
 
-static position monster_move_wander(monster *m, struct player *p)
+static position monster_move_wander(monster *m, struct player *p __attribute__((unused)))
 {
     int tries = 0;
     position npos;
@@ -2612,7 +2612,7 @@ int monster_is_carrying_item(monster *m, item_t type)
     inventory *inv = m->inventory;
     item *it;
 
-    int idx;
+    guint idx;
     for (idx = 0; idx < inv_length(inv); idx++)
     {
         it = inv_get(inv, idx);
@@ -2622,11 +2622,13 @@ int monster_is_carrying_item(monster *m, item_t type)
     return FALSE;
 }
 
-static gboolean monster_breath_hit(position pos, const damage_originator *damo,
-                                           gpointer data1, gpointer data2)
+static gboolean monster_breath_hit(position pos,
+                                   const damage_originator *damo __attribute__((unused)),
+                                   gpointer data1,
+                                   gpointer data2 __attribute__((unused)))
 {
     monster *m;
-    map *map = game_map(nlarn, Z(pos));
+    map *mp = game_map(nlarn, Z(pos));
     damage *dam = (damage *)data1;
     item_erosion_type iet;
     gboolean terminated = FALSE;
@@ -2651,7 +2653,7 @@ static gboolean monster_breath_hit(position pos, const damage_originator *damo,
         break;
     }
 
-    if ((m = map_get_monster_at(map, pos)))
+    if ((m = map_get_monster_at(mp, pos)))
     {
         /* The breath hit a monster. */
         if (monster_in_sight(m))
@@ -2697,14 +2699,14 @@ static gboolean monster_breath_hit(position pos, const damage_originator *damo,
         }
     }
 
-    if (iet > IET_NONE && map_ilist_at(map, pos))
+    if (iet > IET_NONE && map_ilist_at(mp, pos))
     {
         /* erode affected items */
-        inv_erode(map_ilist_at(map, pos), iet, fov_get(nlarn->p->fov, pos));
+        inv_erode(map_ilist_at(mp, pos), iet, fov_get(nlarn->p->fov, pos));
     }
 
 
-    if (map_sobject_at(map, pos) == LS_MIRROR && fov_get(nlarn->p->fov, pos))
+    if (map_sobject_at(mp, pos) == LS_MIRROR && fov_get(nlarn->p->fov, pos))
     {
         /* A mirror will reflect the breath. Actual handling of the reflection
            is done in area_ray_trajectory, just give a message here if the

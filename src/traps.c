@@ -123,7 +123,7 @@ static int modified_effect_chance(trap_t trap, effect_t et, int level)
 int player_trap_trigger(player *p, trap_t trap, int force)
 {
     /* additional time of turn, if any */
-    int time = 0;
+    int ttime = 0;
 
     const int dex = player_get_dex(p);
 
@@ -166,7 +166,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
         switch (trap)
         {
         case TT_TRAPDOOR:
-            time += player_map_enter(p, game_map(nlarn, Z(p->pos) + 1), TRUE);
+            ttime += player_map_enter(p, game_map(nlarn, Z(p->pos) + 1), TRUE);
             break;
 
         case TT_TELEPORT:
@@ -225,7 +225,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
         player_memory_of(p, p->pos).trap = trap;
     }
 
-    return time;
+    return ttime;
 }
 
 monster *monster_trap_trigger(monster *m)

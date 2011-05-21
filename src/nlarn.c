@@ -43,7 +43,7 @@ game *nlarn = NULL;
 
 
 static gboolean adjacent_monster(player *p, gboolean ignore_harmless);
-static gboolean adjacent_corridor(position pos, char move);
+static gboolean adjacent_corridor(position pos, char mv);
 
 #ifdef WIN32
 BOOL nlarn_control_handler(DWORD fdwCtrlType);
@@ -783,8 +783,8 @@ int main(int argc, char *argv[])
             else if (run_cmd == '.')
             {
                 if (game_turn(nlarn) >= end_resting
-                        || (nlarn->p->hp == nlarn->p->hp_max
-                            && nlarn->p->mp == nlarn->p->mp_max
+                        || (nlarn->p->hp == (gint)nlarn->p->hp_max
+                            && nlarn->p->mp == (gint)nlarn->p->mp_max
                             && !player_effect_get(nlarn->p, ET_CONFUSION)
                             && !player_effect_get(nlarn->p, ET_PARALYSIS)
                             && !player_effect_get(nlarn->p, ET_DIZZINESS)
@@ -855,10 +855,10 @@ static gboolean adjacent_monster(player *p, gboolean ignore_harmless)
     return monster_visible;
 }
 
-static gboolean adjacent_corridor(position pos, char move)
+static gboolean adjacent_corridor(position pos, char mv)
 {
     position p1 = pos, p2 = pos;
-    switch (move)
+    switch (mv)
     {
     case 'h': // left
         X(p1) -= 1;

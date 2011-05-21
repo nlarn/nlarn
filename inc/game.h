@@ -183,7 +183,7 @@ void game_delete_savefile();
 #define game_autosave(g)   ((g)->autosave)
 
 #define game_turn(g)            ((g)->gtime)
-#define game_remaining_turns(g) (TIMELIMIT - (g)->gtime)
+#define game_remaining_turns(g) (((g)->gtime > TIMELIMIT) ? 0 : TIMELIMIT - (g)->gtime)
 
 #define game_dir(g) ((g)->basedir)
 #define game_lib(g) ((g)->libdir)
@@ -195,7 +195,7 @@ void game_delete_savefile();
 #define game_highscores(g) ((g)->highscores)
 
 /* gtime <> mobuls conversion */
-#define gtime2mobuls(gtime)  (((gtime < 0) ? -1 : 1) * (abs((int)(gtime)) + 99) / 100)
+#define gtime2mobuls(gtime)  ((abs(((int)gtime)) + 99) / 100)
 #define mobuls2gtime(mobuls) ((int)(mobuls) * 100)
 
 #endif

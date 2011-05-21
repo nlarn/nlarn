@@ -290,7 +290,7 @@ void building_dndstore_init()
         else
             count = 1;
 
-        int id;
+        guint id;
         for (id = 1; id < item_max_id(type); id++)
         {
             /* do not generate unobtainable items except in wizard mode */
@@ -518,7 +518,7 @@ static int building_scribe_scroll(player *p, int mobuls)
     int turns = 2;
     int i;
     gboolean split = FALSE;
-    item *scroll;
+    item *bscroll;
     char question[81] = { 0 };
 
     /* check if the player owns a blank scroll */
@@ -529,11 +529,11 @@ static int building_scribe_scroll(player *p, int mobuls)
         return turns;
     }
 
-    scroll = display_inventory("Choose a scroll to inscribe", p,
-                               &p->inventory, NULL, FALSE, FALSE,
-                               FALSE, item_filter_blank_scroll);
+    bscroll = display_inventory("Choose a scroll to inscribe", p,
+                                &p->inventory, NULL, FALSE, FALSE,
+                                FALSE, item_filter_blank_scroll);
 
-    if (!scroll)
+    if (!bscroll)
     {
         log_add_entry(nlarn->log, "Okay then.");
         return turns;
@@ -592,28 +592,28 @@ static int building_scribe_scroll(player *p, int mobuls)
     /** Okay, we write the scroll. */
 
     // If necessary, split a stack of scrolls.
-    if (scroll->count > 1)
+    if (bscroll->count > 1)
     {
-        scroll = item_split(scroll, 1);
+        bscroll = item_split(bscroll, 1);
         split = TRUE;
     }
 
-    scroll->id = i;
+    bscroll->id = i;
     p->identified_scrolls[i] = TRUE;
 
     building_player_charge(p, price);
     p->stats.gold_spent_college += price;
 
     log_add_entry(nlarn->log, "The scribes start writing a scroll of %s for you.",
-                  scroll_name(scroll));
+                  scroll_name(bscroll));
 
     player_make_move(p, mobuls2gtime(mobuls), FALSE, NULL);
     log_add_entry(nlarn->log,
                   "The scribes finished writing a scroll of %s for you.",
-                  scroll_name(scroll));
+                  scroll_name(bscroll));
 
     if (split)
-        inv_add(&p->inventory, scroll);
+        inv_add(&p->inventory, bscroll);
 
     /* time usage */
     return turns;
@@ -877,7 +877,7 @@ int building_monastery(struct player *p)
     {
         effect_t et;
         char *desc;
-    } curable_diseases[10] = { { 0 } };
+    } curable_diseases[10] = { { 0, NULL } };
 
     /* fill the list of curable diseases */
     if (player_effect(p, ET_POISON))

@@ -84,7 +84,7 @@ item *item_new(item_t item_type, int item_id)
 {
     item *nitem;
     effect *eff = NULL;
-    int loops = 0;
+    guint loops = 0;
 
     assert(item_type > IT_NONE && item_type < IT_MAX);
 
@@ -266,7 +266,7 @@ item *item_new_random(item_t item_type, gboolean finetouch)
 item *item_new_by_level(item_t item_type, int num_level)
 {
     item *nitem;
-    int id_min, id_max;
+    guint id_min, id_max;
     float variance, id_base, divisor;
 
     assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
@@ -302,20 +302,19 @@ item *item_new_by_level(item_t item_type, int num_level)
     id_max = id_base + (item_max_id(item_type) * variance);
 
     /* clean results */
-    if (id_min < 1) id_min = 1;
-    if (id_max < 1) id_max = 1;
-    if (id_max > item_max_id(item_type)) id_max = item_max_id(item_type);
+    if (id_min == 0) id_min = 1;
+    if (id_max == 0) id_max = 1;
+    if (id_max > 1 + item_max_id(item_type)) id_max = item_max_id(item_type);
 
-    /* create the item */
-    nitem = item_new(item_type, rand_m_n(id_min, id_max));
+    /* Create the item. We need to add one to the id_max as g_random_int_range
+     * excludes the second argument. */
+    nitem = item_new(item_type, rand_m_n(id_min, id_max + 1));
 
     return item_new_finetouch(nitem);
 }
 
 item *item_new_finetouch(item *it)
 {
-    int i;
-
     assert(it != NULL);
 
     /* maybe the item is blessed or cursed */
@@ -348,10 +347,12 @@ item *item_new_finetouch(item *it)
 
     if ((it->bonus != 0) && it->effects)
     {
+        guint eff_no;
+
         /* modify effects linked to the item */
-        for (i = 0; i < it->effects->len; i++)
+        for (eff_no = 0; eff_no < it->effects->len; eff_no++)
         {
-            gpointer eid = (effect *)g_ptr_array_index(it->effects, i);
+            gpointer eid = (effect *)g_ptr_array_index(it->effects, eff_no);
             effect *e = game_effect_get(nlarn, eid);
             e->amount += it->bonus;
         }
@@ -1577,7 +1578,7 @@ void inv_destroy(inventory *inv, gboolean special)
 
 cJSON *inv_serialize(inventory *inv)
 {
-    int idx;
+    guint idx;
     cJSON *sinv = cJSON_CreateArray();
 
     for (idx = 0; idx < inv_length(inv); idx++)
@@ -1689,15 +1690,15 @@ item *inv_get(inventory *inv, guint idx)
 
 item *inv_del(inventory **inv, guint idx)
 {
-    item *item;
+    item *itm;
 
     assert(*inv != NULL && (*inv)->content != NULL && idx < inv_length(*inv));
 
-    item = inv_get(*inv, idx);
+    itm = inv_get(*inv, idx);
 
     if ((*inv)->pre_del)
     {
-        if (!(*inv)->pre_del(*inv, item))
+        if (!(*inv)->pre_del(*inv, itm))
         {
             return NULL;
         }
@@ -1707,7 +1708,7 @@ item *inv_del(inventory **inv, guint idx)
 
     if ((*inv)->post_del)
     {
-        (*inv)->post_del(*inv, item);
+        (*inv)->post_del(*inv, itm);
     }
 
     /* destroy inventory if empty and not owned by anybody */
@@ -1717,7 +1718,7 @@ item *inv_del(inventory **inv, guint idx)
         *inv = NULL;
     }
 
-    return item;
+    return itm;
 }
 
 int inv_del_element(inventory **inv, item *it)
@@ -1813,7 +1814,7 @@ int inv_weight(inventory *inv)
     return sum;
 }
 
-int inv_length_filtered(inventory *inv, int (*filter)(item *))
+guint inv_length_filtered(inventory *inv, int (*ifilter)(item *))
 {
     int count = 0;
     guint pos;
@@ -1825,7 +1826,7 @@ int inv_length_filtered(inventory *inv, int (*filter)(item *))
     }
 
     /* return the inventory length if no filter has been set */
-    if (!filter)
+    if (!ifilter)
     {
         return inv_length(inv);
     }
@@ -1834,7 +1835,7 @@ int inv_length_filtered(inventory *inv, int (*filter)(item *))
     {
         item *i = inv_get(inv, pos);
 
-        if (filter(i))
+        if (ifilter(i))
         {
             count++;
         }
@@ -1843,13 +1844,13 @@ int inv_length_filtered(inventory *inv, int (*filter)(item *))
     return count;
 }
 
-item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *))
+item *inv_get_filtered(inventory *inv, guint idx, int (*ifilter)(item *))
 {
     guint num;
     guint curr = 0;
 
     /* return the inventory length if no filter has been set */
-    if (!filter)
+    if (!ifilter)
     {
         return inv_get(inv, idx);
     }
@@ -1858,7 +1859,7 @@ item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *))
     {
         item *i = inv_get(inv, num);
 
-        if (filter(i))
+        if (ifilter(i))
         {
             /* filter matches */
             if (curr == idx)

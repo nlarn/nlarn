@@ -44,8 +44,9 @@ typedef struct _message_log
 /* NOTE: g_random_int_range(m,n) returns a value x with m <= x < n. */
 #define rand_1n(n)      (((n) <= 1) ? 1 : g_random_int_range(1,(n)))
 #define rand_0n(n)      (((n) <= 0) ? 0 : g_random_int_range(0,(n)))
-#define rand_m_n(m,n)   ((m) == (n) ? (m) : g_random_int_range((m),(n)))
-#define chance(percent) ((percent) >= rand_1n(101))
+/* need to cast m to gint32 as g_random_int_range returns gint32 */
+#define rand_m_n(m,n)   ((m) == (n) ? (gint32)(m) : g_random_int_range((m),(n)))
+#define chance(percent) ((gint32)(percent) >= rand_1n(101))
 
 /* windef.h defines these */
 #ifdef WIN32
@@ -123,7 +124,7 @@ const char *int2str(int val);
 
 
 /* regarding stuff defined in defines.h */
-damage *damage_new(damage_t type, attack_t attack, int amount,
+damage *damage_new(damage_t type, attack_t att_type, int amount,
                    damage_originator_t damo, gpointer originator);
 
 damage *damage_copy(damage *dam);

@@ -38,36 +38,36 @@ struct game;
 
 typedef struct _player_stats
 {
-    gint deepest_level;
-    gint monsters_killed[MT_MAX];
-    gint spells_cast;
-    gint potions_quaffed;
-    gint scrolls_read;
-    gint books_read;
-    gint life_protected;
-    gint vandalism;
+    guint deepest_level;
+    gint  monsters_killed[MT_MAX];
+    guint spells_cast;
+    guint potions_quaffed;
+    guint scrolls_read;
+    guint books_read;
+    guint life_protected;
+    guint vandalism;
 
     // Keep track of the dungeon economy.
-    gint items_bought;
-    gint items_sold;
-    gint gems_sold;
-    gint gold_found;
-    gint gold_sold_items;
-    gint gold_sold_gems;
-    gint gold_bank_interest;
-    gint gold_spent_shop;
-    gint gold_spent_id_repair;
-    gint gold_spent_donation;
-    gint gold_spent_college;
-    gint gold_spent_taxes;
+    guint items_bought;
+    guint items_sold;
+    guint gems_sold;
+    guint gold_found;
+    guint gold_sold_items;
+    guint gold_sold_gems;
+    guint gold_bank_interest;
+    guint gold_spent_shop;
+    guint gold_spent_id_repair;
+    guint gold_spent_donation;
+    guint gold_spent_college;
+    guint gold_spent_taxes;
 
-    gint max_level;
-    gint max_xp;
-    gint str_orig;
-    gint int_orig;
-    gint wis_orig;
-    gint con_orig;
-    gint dex_orig;
+    guint max_level;
+    guint max_xp;
+    guint str_orig;
+    guint int_orig;
+    guint wis_orig;
+    guint con_orig;
+    guint dex_orig;
 } player_stats;
 
 typedef enum _player_sex
@@ -315,7 +315,7 @@ char *player_inv_weight(player *p);
  * @param the item which is about to be added
  *
  */
-int player_inv_pre_add(inventory *inv, item *item);
+int player_inv_pre_add(inventory *inv, item *it);
 
 /**
  * Callback function used from inv_add() for the player's inventory. Here the
@@ -326,7 +326,7 @@ int player_inv_pre_add(inventory *inv, item *item);
  * @param the item which is about to be added
  *
  */
-void player_inv_weight_recalc(inventory *inv, item *item);
+void player_inv_weight_recalc(inventory *inv, item *it);
 
 /**
  * @brief Display a message window with a list of equipped items

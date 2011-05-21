@@ -341,9 +341,9 @@ int player_door_close(player *p)
     monster *m;
 
     /* the current map */
-    map *map = game_map(nlarn, Z(p->pos));
+    map *pmap = game_map(nlarn, Z(p->pos));
 
-    dirs = map_get_surrounding(map, p->pos, LS_OPENDOOR);
+    dirs = map_get_surrounding(pmap, p->pos, LS_OPENDOOR);
 
     for (count = 0, num = 1; num < GD_MAX; num++)
     {
@@ -375,7 +375,7 @@ int player_door_close(player *p)
     if (dir)
     {
         pos = pos_move(p->pos, dir);
-        if (pos_valid(pos) && (map_sobject_at(map, pos) == LS_OPENDOOR))
+        if (pos_valid(pos) && (map_sobject_at(pmap, pos) == LS_OPENDOOR))
         {
 
             /* check if player is standing in the door */
@@ -386,7 +386,7 @@ int player_door_close(player *p)
             }
 
             /* check for monster in the doorway */
-            m = map_get_monster_at(map, pos);
+            m = map_get_monster_at(pmap, pos);
 
             if (m && monster_in_sight(m))
             {
@@ -399,14 +399,14 @@ int player_door_close(player *p)
             }
 
             /* check for items in the doorway */
-            if (m || *map_ilist_at(map, pos))
+            if (m || *map_ilist_at(pmap, pos))
             {
                 log_add_entry(nlarn->log,
                               "You cannot close the door. There is something in the way.");
                 return 0;
             }
 
-            map_sobject_set(map, pos, LS_CLOSEDDOOR);
+            map_sobject_set(pmap, pos, LS_CLOSEDDOOR);
             log_add_entry(nlarn->log, "You close the door.");
         }
         else
@@ -436,12 +436,12 @@ int player_door_open(player *p, int dir)
     int count, num;
 
     /* the current map */
-    map *map = game_map(nlarn, Z(p->pos));
+    map *pmap = game_map(nlarn, Z(p->pos));
 
     if (dir == GD_NONE)
     {
         /* possible directions of actions */
-        int *dirs = map_get_surrounding(map, p->pos, LS_CLOSEDDOOR);
+        int *dirs = map_get_surrounding(pmap, p->pos, LS_CLOSEDDOOR);
 
         for (count = 0, num = 1; num < GD_MAX; num++)
         {
@@ -475,9 +475,9 @@ int player_door_open(player *p, int dir)
     {
         pos = pos_move(p->pos, dir);
 
-        if (pos_valid(pos) && (map_sobject_at(map, pos) == LS_CLOSEDDOOR))
+        if (pos_valid(pos) && (map_sobject_at(pmap, pos) == LS_CLOSEDDOOR))
         {
-            map_sobject_set(map, pos, LS_OPENDOOR);
+            map_sobject_set(pmap, pos, LS_OPENDOOR);
             log_add_entry(nlarn->log, "You open the door.");
         }
         else
@@ -502,17 +502,17 @@ int player_fountain_drink(player *p)
     int fntchange = 0;
     int amount = 0;
     int et = ET_NONE;
-    map *map = game_map(nlarn, Z(p->pos));
+    map *pmap = game_map(nlarn, Z(p->pos));
 
     assert (p != NULL);
 
-    if (map_sobject_at(map, p->pos) == LS_DEADFOUNTAIN)
+    if (map_sobject_at(pmap, p->pos) == LS_DEADFOUNTAIN)
     {
         log_add_entry(nlarn->log, "There is no water to drink.");
         return 0;
     }
 
-    if (map_sobject_at(map, p->pos) != LS_FOUNTAIN)
+    if (map_sobject_at(pmap, p->pos) != LS_FOUNTAIN)
     {
         log_add_entry(nlarn->log, "There is no fountain to drink from here.");
         return 0;
@@ -648,7 +648,7 @@ int player_fountain_drink(player *p)
     if (chance(25))
     {
         log_add_entry(nlarn->log, "The fountains bubbling slowly quiets.");
-        map_sobject_set(map, p->pos, LS_DEADFOUNTAIN);
+        map_sobject_set(pmap, p->pos, LS_DEADFOUNTAIN);
     }
 
     return 1;
@@ -656,17 +656,17 @@ int player_fountain_drink(player *p)
 
 int player_fountain_wash(player *p)
 {
-    map *map = game_map(nlarn, Z(p->pos));
+    map *pmap = game_map(nlarn, Z(p->pos));
 
     assert (p != NULL);
 
-    if (map_sobject_at(map, p->pos) == LS_DEADFOUNTAIN)
+    if (map_sobject_at(pmap, p->pos) == LS_DEADFOUNTAIN)
     {
         log_add_entry(nlarn->log, "The fountain is dry.");
         return 0;
     }
 
-    if (map_sobject_at(map, p->pos) != LS_FOUNTAIN)
+    if (map_sobject_at(pmap, p->pos) != LS_FOUNTAIN)
     {
         log_add_entry(nlarn->log, "There is no fountain to wash at here.");
         return 0;
@@ -701,7 +701,7 @@ int player_fountain_wash(player *p)
     else if (chance(35))
     {
         /* try to find a space for the monster near the player */
-        position mpos = map_find_space_in(map, rect_new_sized(p->pos, 1),
+        position mpos = map_find_space_in(pmap, rect_new_sized(p->pos, 1),
                                           LE_MONSTER, FALSE);
 
         if (pos_valid(mpos))
@@ -722,8 +722,8 @@ int player_stairs_down(player *p)
 {
     map *nlevel = NULL;
     gboolean show_msg = FALSE;
-    map *map = game_map(nlarn, Z(p->pos));
-    map_sobject_t ms = map_sobject_at(map, p->pos);
+    map *pmap = game_map(nlarn, Z(p->pos));
+    map_sobject_t ms = map_sobject_at(pmap, p->pos);
 
     if (!player_movement_possible(p))
         return FALSE;
@@ -757,7 +757,7 @@ int player_stairs_down(player *p)
 
     default:
     {
-        trap_t trap = map_trap_at(map, p->pos);
+        trap_t trap = map_trap_at(pmap, p->pos);
         if (trap == TT_TRAPDOOR)
             return player_trap_trigger(p, trap, TRUE);
         else
@@ -846,10 +846,10 @@ int player_throne_pillage(player *p)
     int count = 0; /* gems created */
 
     /* current map */
-    map *map = game_map(nlarn, Z(p->pos));
+    map *pmap = game_map(nlarn, Z(p->pos));
 
     /* type of object at player's position */
-    map_sobject_t ms = map_sobject_at(map, p->pos);
+    map_sobject_t ms = map_sobject_at(pmap, p->pos);
 
     assert (p != NULL);
 
@@ -872,20 +872,20 @@ int player_throne_pillage(player *p)
         for (i = 0; i < rand_1n(4); i++)
         {
             /* gems pop off the throne */
-            inv_add(map_ilist_at(map, p->pos), item_new_random(IT_GEM, FALSE));
+            inv_add(map_ilist_at(pmap, p->pos), item_new_random(IT_GEM, FALSE));
             count++;
         }
 
         log_add_entry(nlarn->log, "You manage to pry off %s gem%s.",
                       count > 1 ? "some" : "a", plural(count));
 
-        map_sobject_set(map, p->pos, LS_DEADTHRONE);
+        map_sobject_set(pmap, p->pos, LS_DEADTHRONE);
         p->stats.vandalism++;
     }
     else if (chance(40) && (ms == LS_THRONE))
     {
         /* try to find a space for the monster near the player */
-        position mpos = map_find_space_in(map, rect_new_sized(p->pos, 1),
+        position mpos = map_find_space_in(pmap, rect_new_sized(p->pos, 1),
                                           LE_MONSTER, FALSE);
 
         if (pos_valid(mpos))
@@ -894,7 +894,7 @@ int player_throne_pillage(player *p)
             monster_appear(MT_GNOME_KING, mpos);
 
             /* next time there will be no gnome king */
-            map_sobject_set(map, p->pos, LS_THRONE2);
+            map_sobject_set(pmap, p->pos, LS_THRONE2);
         }
     }
     else
@@ -907,8 +907,8 @@ int player_throne_pillage(player *p)
 
 int player_throne_sit(player *p)
 {
-    map *map = game_map(nlarn, Z(p->pos));
-    map_sobject_t st = map_sobject_at(map, p->pos);
+    map *pmap = game_map(nlarn, Z(p->pos));
+    map_sobject_t st = map_sobject_at(pmap, p->pos);
 
     assert (p != NULL);
 
@@ -923,7 +923,7 @@ int player_throne_sit(player *p)
     if (chance(30) && (st == LS_THRONE))
     {
         /* try to find a space for the monster near the player */
-        position mpos = map_find_space_in(map, rect_new_sized(p->pos, 1),
+        position mpos = map_find_space_in(pmap, rect_new_sized(p->pos, 1),
                                           LE_MONSTER, FALSE);
 
         if (pos_valid(mpos))
@@ -932,13 +932,13 @@ int player_throne_sit(player *p)
             monster_appear(MT_GNOME_KING, mpos);
 
             /* next time there will be no gnome king */
-            map_sobject_set(map, p->pos, LS_THRONE2);
+            map_sobject_set(pmap, p->pos, LS_THRONE2);
         }
     }
     else if (chance(35))
     {
         log_add_entry(nlarn->log, "Zaaaappp! You've been teleported!");
-        p->pos = map_find_space(map, LE_MONSTER, FALSE);
+        p->pos = map_find_space(pmap, LE_MONSTER, FALSE);
     }
     else
     {
@@ -948,14 +948,14 @@ int player_throne_sit(player *p)
     return 1;
 }
 
-void sobject_destroy_at(player *p, map *map, position pos)
+void sobject_destroy_at(player *p, map *dmap, position pos)
 {
     position mpos;      /* position for monster that might be generated */
     char *desc = NULL;
 
-    mpos = map_find_space_in(map, rect_new_sized(pos, 1), LE_MONSTER, FALSE);
+    mpos = map_find_space_in(dmap, rect_new_sized(pos, 1), LE_MONSTER, FALSE);
 
-    switch (map_sobject_at(map, pos))
+    switch (map_sobject_at(dmap, pos))
     {
     case LS_NONE:
         /* NOP */
@@ -964,7 +964,7 @@ void sobject_destroy_at(player *p, map *map, position pos)
     case LS_ALTAR:
     {
         log_add_entry(nlarn->log, "You destroy the altar.", desc);
-        map_sobject_set(map, pos, LS_NONE);
+        map_sobject_set(dmap, pos, LS_NONE);
         p->stats.vandalism++;
 
         log_add_entry(nlarn->log, "Lightning comes crashing down from above!");
@@ -983,7 +983,7 @@ void sobject_destroy_at(player *p, map *map, position pos)
 
     case LS_FOUNTAIN:
         log_add_entry(nlarn->log, "You destroy the fountain.", desc);
-        map_sobject_set(map, pos, LS_NONE);
+        map_sobject_set(dmap, pos, LS_NONE);
         p->stats.vandalism++;
 
         /* create a permanent shallow pool and place a water lord */
@@ -999,7 +999,7 @@ void sobject_destroy_at(player *p, map *map, position pos)
         if (rand_0n(game_difficulty(nlarn)+1) <= 1)
         {
             item *it = item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)));
-            inv_add(map_ilist_at(map, pos), it);
+            inv_add(map_ilist_at(dmap, pos), it);
         }
 
         desc = "statue";
@@ -1015,7 +1015,7 @@ void sobject_destroy_at(player *p, map *map, position pos)
 
     case LS_DEADFOUNTAIN:
     case LS_DEADTHRONE:
-        map_sobject_set(map, pos, LS_NONE);
+        map_sobject_set(dmap, pos, LS_NONE);
         break;
 
     default:
@@ -1026,7 +1026,7 @@ void sobject_destroy_at(player *p, map *map, position pos)
     if (desc)
     {
         log_add_entry(nlarn->log, "You destroy the %s.", desc);
-        map_sobject_set(map, pos, LS_NONE);
+        map_sobject_set(dmap, pos, LS_NONE);
         p->stats.vandalism++;
     }
 }
@@ -1062,28 +1062,30 @@ static void flood_affect_area(position pos, int radius, int type, int duration)
     area_destroy(range);
 }
 
-static gboolean sobject_blast_hit(position pos, const damage_originator *damo,
-                                  gpointer data1, gpointer data2)
+static gboolean sobject_blast_hit(position pos,
+                                  const damage_originator *damo,
+                                  gpointer data1,
+                                  gpointer data2 __attribute__((unused)))
 {
     damage *dam = (damage *)data1;
-    map *map = game_map(nlarn, Z(pos));
-    map_sobject_t mst = map_sobject_at(map, pos);
-    monster *monster = map_get_monster_at(map, pos);
+    map *cmap = game_map(nlarn, Z(pos));
+    map_sobject_t mst = map_sobject_at(cmap, pos);
+    monster *m = map_get_monster_at(cmap, pos);
 
     if (mst == LS_STATUE)
     {
         /* The blast hit a statue. */
-        sobject_destroy_at(damo->originator, map, pos);
+        sobject_destroy_at(damo->originator, cmap, pos);
         return TRUE;
     }
-    else if (monster != NULL)
+    else if (m != NULL)
     {
         /* the blast hit a monster */
-        if (monster_in_sight(monster))
+        if (monster_in_sight(m))
             log_add_entry(nlarn->log, "The lightning hits the %s.",
-                          monster_get_name(monster));
+                          monster_get_name(m));
 
-        monster_damage_take(monster, damage_copy(dam));
+        monster_damage_take(m, damage_copy(dam));
 
         return TRUE;
     }

@@ -114,7 +114,7 @@ int potion_colour(int potion_id)
 
 int potion_throw(struct player *p)
 {
-    map *map = game_map(nlarn, Z(p->pos));
+    map *pmap = game_map(nlarn, Z(p->pos));
     position target;             /* the selected target */
     char desc[81] = {};          /* the potion's description */
     item *potion;                /* the potion from the inventory */
@@ -150,8 +150,8 @@ int potion_throw(struct player *p)
     }
 
     /* protect townsfolk from agressive players */
-    if (map_get_monster_at(map, target)
-        && monster_type(map_get_monster_at(map, target)) == MT_TOWN_PERSON)
+    if (map_get_monster_at(pmap, target)
+        && monster_type(map_get_monster_at(pmap, target)) == MT_TOWN_PERSON)
     {
         log_add_entry(nlarn->log, "Gosh! How dare you!");
         return FALSE;
@@ -178,7 +178,7 @@ int potion_throw(struct player *p)
     /* upper case the first letter of the description */
     desc[0] = g_ascii_toupper(desc[0]);
 
-    map_tile_t mtt = map_tiletype_at(map, target);
+    map_tile_t mtt = map_tiletype_at(pmap, target);
     log_add_entry(nlarn->log, "%s %s the %s.", desc,
                   (mtt <= LT_FLOOR ? "shatters on" : "splashes into"),
                   lt_get_desc(mtt));
@@ -371,14 +371,14 @@ static int potion_detect_item(player *p, item *potion)
     assert(p != NULL && potion != NULL);
 
     Z(pos) = Z(p->pos);
-    map *map = game_map(nlarn, Z(pos));
+    map *pmap = game_map(nlarn, Z(pos));
 
     for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
     {
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
             gboolean found_item = FALSE;
-            if ((inv = *map_ilist_at(map, pos)))
+            if ((inv = *map_ilist_at(pmap, pos)))
             {
                 for (idx = 0; idx < inv_length(inv); idx++)
                 {
@@ -412,7 +412,7 @@ static int potion_detect_item(player *p, item *potion)
             /* blessed potions also detect items carried by monsters */
             if (!found_item && potion->blessed)
             {
-                monster *m = map_get_monster_at(map, pos);
+                monster *m = map_get_monster_at(pmap, pos);
 
                 if (m == NULL)
                     continue;
@@ -541,15 +541,17 @@ static int potion_holy_water(player *p, item *potion)
     return FALSE;
 }
 
-static gboolean potion_pos_hit(position pos, const damage_originator *damo,
-                               gpointer data1, gpointer data2)
+static gboolean potion_pos_hit(position pos,
+                               const damage_originator *damo __attribute__((unused)),
+                               gpointer data1,
+                               gpointer data2 __attribute__((unused)))
 {
     char desc[81] = {};
     item *potion = (item *)data1;
-    map *map = game_map(nlarn, Z(pos));
-    map_tile_t mtt = map_tiletype_at(map, pos);
-    map_sobject_t mst = map_sobject_at(map, pos);
-    monster *m = map_get_monster_at(map, pos);
+    map *pmap = game_map(nlarn, Z(pos));
+    map_tile_t mtt = map_tiletype_at(pmap, pos);
+    map_sobject_t mst = map_sobject_at(pmap, pos);
+    monster *m = map_get_monster_at(pmap, pos);
 
     /* get the description of the potion */
     item_describe(potion, player_item_known(nlarn->p, potion), TRUE, TRUE, desc, 80);
@@ -563,7 +565,7 @@ static gboolean potion_pos_hit(position pos, const damage_originator *damo,
         log_add_entry(nlarn->log, "%s shatters at %s.",
                       ls_get_desc(mst));
     }
-    else if (!map_pos_passable(map, pos))
+    else if (!map_pos_passable(pmap, pos))
     {
         /* The potion hit a wall or something similar. */
         log_add_entry(nlarn->log, "%s %s %s.", desc,

@@ -672,7 +672,6 @@ player *player_deserialize(cJSON *pser)
     obj = cJSON_GetObjectItem(pser, "sobjmem");
     if (obj != NULL)
     {
-        int idx;
         int count = cJSON_GetArraySize(obj);
 
         p->sobjmem = g_array_sized_new(FALSE, FALSE, sizeof(player_sobject_memory), count);
@@ -1004,7 +1003,8 @@ void player_die(player *p, player_cod cause_type, int cause)
     char *title = NULL;
     char *tmp = NULL;
     char it_desc[61] = { 0 };
-    int count, pos;
+    int count;
+    guint pos;
     effect *ef = NULL;
     char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
 
@@ -1331,7 +1331,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         }
 
         /* equipped items */
-        int equipment_count = 0;
+        guint equipment_count = 0;
         g_string_append(text, "\n\n-- Equipment --------------------------\n\n");
         if (p->eq_amulet)
         {
@@ -1418,7 +1418,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         {
             if (p->stats.monsters_killed[mnum] > 0)
             {
-                const int count = p->stats.monsters_killed[mnum];
+                count = p->stats.monsters_killed[mnum];
                 tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum,
                                               count)));
 
@@ -1572,7 +1572,7 @@ int player_move(player *p, direction dir, gboolean open_door)
 {
     int times = 1;      /* how many time ticks it took */
     position target_p;  /* coordinates of target */
-    map *map;           /* shortcut to player's current map */
+    map *pmap;          /* shortcut to player's current map */
     monster *target_m;  /* monster on target tile (if any) */
     map_sobject_t so;   /* stationary object on target tile (if any) */
     gboolean move_possible = FALSE;
@@ -1594,12 +1594,12 @@ int player_move(player *p, direction dir, gboolean open_door)
         return FALSE;
 
     /* make a shortcut to the current map */
-    map = game_map(nlarn, Z(p->pos));
+    pmap = game_map(nlarn, Z(p->pos));
 
-    if (open_door && map_sobject_at(map, target_p) == LS_CLOSEDDOOR)
+    if (open_door && map_sobject_at(pmap, target_p) == LS_CLOSEDDOOR)
         return player_door_open(nlarn->p, dir);
 
-    target_m = map_get_monster_at(map, target_p);
+    target_m = map_get_monster_at(pmap, target_p);
 
     if (target_m && monster_unknown(target_m))
     {
@@ -1616,7 +1616,7 @@ int player_move(player *p, direction dir, gboolean open_door)
         /* reposition the player here, otherwise monster_pos_set will fail */
         position old_pos = p->pos;
         p->pos = target_p;
-        monster_pos_set(target_m, map, old_pos);
+        monster_pos_set(target_m, pmap, old_pos);
 
         move_possible = TRUE;
 
@@ -1630,18 +1630,18 @@ int player_move(player *p, direction dir, gboolean open_door)
     }
 
     /* check if the move is possible */
-    if (map_pos_passable(map, target_p))
+    if (map_pos_passable(pmap, target_p))
     {
         /* target tile is passable */
         move_possible = TRUE;
     }
-    else if ((map_tiletype_at(map, target_p) == LT_WALL)
+    else if ((map_tiletype_at(pmap, target_p) == LT_WALL)
              && player_effect(p, ET_WALL_WALK))
     {
         /* target tile is a wall and player can walk trough walls */
         move_possible = TRUE;
     }
-    else if (map_pos_transparent(map, target_p)
+    else if (map_pos_transparent(pmap, target_p)
              && player_effect(p, ET_LEVITATION))
     {
         /* player is able to float above the obstacle */
@@ -1655,8 +1655,8 @@ int player_move(player *p, direction dir, gboolean open_door)
         /* bump into walls when blinded or confused */
         if (player_effect(p, ET_BLINDNESS) || player_effect(p, ET_CONFUSION))
         {
-            player_memory_of(p, target_p).type = map_tiletype_at(map, target_p);
-            const int tile = map_tiletype_at(map, target_p);
+            player_memory_of(p, target_p).type = map_tiletype_at(pmap, target_p);
+            const int tile = map_tiletype_at(pmap, target_p);
             log_add_entry(nlarn->log, "Ouch! You bump into %s!",
                           (tile == LT_DEEPWATER || tile == LT_LAVA)
                           ? "the railing" : lt_get_desc(tile));
@@ -1670,17 +1670,17 @@ int player_move(player *p, direction dir, gboolean open_door)
     p->pos = target_p;
 
     /* trigger the trap */
-    if (map_trap_at(map, target_p))
+    if (map_trap_at(pmap, target_p))
     {
-        times += player_trap_trigger(p, map_trap_at(map, target_p), FALSE);
+        times += player_trap_trigger(p, map_trap_at(pmap, target_p), FALSE);
     }
 
     /* auto-pickup */
-    if (map_ilist_at(map, p->pos))
+    if (map_ilist_at(pmap, p->pos))
         player_autopickup(p);
 
     /* mention stationary objects at this position */
-    if ((so = map_sobject_at(map, p->pos)))
+    if ((so = map_sobject_at(pmap, p->pos)))
     {
         log_add_entry(nlarn->log, "You see %s here.", ls_get_desc(so));
     }
@@ -1690,12 +1690,12 @@ int player_move(player *p, direction dir, gboolean open_door)
 
 static int calc_max_damage(player *p, monster *m)
 {
-    const int damage = player_get_str(p)
-                       + player_get_wc(p, m)
-                       - 12
-                       - game_difficulty(nlarn);
+    const int max_damage = player_get_str(p)
+                            + player_get_wc(p, m)
+                            - 12
+                            - game_difficulty(nlarn);
 
-    return damage;
+    return max_damage;
 }
 
 static gboolean player_instakill_chance(player *p, monster *m)
@@ -1733,7 +1733,7 @@ static gboolean player_instakill_chance(player *p, monster *m)
 static int calc_real_damage(player *p, monster *m, int allow_chance)
 {
     const int max_dam = calc_max_damage(p, m);
-    int damage  = rand_1n(max_dam + 1);
+    int real_damage = rand_1n(max_dam + 1);
 
     /* *** SPECIAL WEAPONS *** */
     if (p->eq_weapon)
@@ -1748,7 +1748,7 @@ static int calc_real_damage(player *p, monster *m, int allow_chance)
                 log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
                               monster_get_name(m));
 
-                damage = INSTANT_KILL;
+                real_damage = INSTANT_KILL;
             }
             break;
 
@@ -1756,15 +1756,15 @@ static int calc_real_damage(player *p, monster *m, int allow_chance)
         case WT_LANCEOFDEATH:
             /* the lance is pretty deadly for non-demons */
             if (!monster_flags(m, MF_DEMON))
-                damage = INSTANT_KILL;
+                real_damage = INSTANT_KILL;
             else
-                damage = 300;
+                real_damage = 300;
             break;
 
             /* Slayer */
         case WT_SLAYER:
             if (monster_flags(m, MF_DEMON))
-                damage = INSTANT_KILL;
+                real_damage = INSTANT_KILL;
             break;
 
         default:
@@ -1773,13 +1773,13 @@ static int calc_real_damage(player *p, monster *m, int allow_chance)
             if (monster_flags(m, MF_DRAGON)
                     && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
             {
-                damage *= 3;
+                real_damage *= 3;
             }
             break;
         }
     }
 
-    return damage;
+    return real_damage;
 }
 
 int player_attack(player *p, monster *m)
@@ -1945,32 +1945,32 @@ int player_map_enter(player *p, map *l, gboolean teleported)
 
 item **player_get_random_armour(player *p, int enchantable)
 {
-    GPtrArray *armours;
+    GPtrArray *equipped_armour;
     item **armour = NULL;
 
     assert (p != NULL);
 
-    armours = g_ptr_array_new();
+    equipped_armour = g_ptr_array_new();
 
     /* add each equipped piece of armour to the pool to choose from */
-    if (p->eq_boots)  g_ptr_array_add(armours, &p->eq_boots);
-    if (p->eq_cloak)  g_ptr_array_add(armours, &p->eq_cloak);
-    if (p->eq_gloves) g_ptr_array_add(armours, &p->eq_gloves);
-    if (p->eq_helmet) g_ptr_array_add(armours, &p->eq_helmet);
-    if (p->eq_shield) g_ptr_array_add(armours, &p->eq_shield);
-    if (p->eq_suit)   g_ptr_array_add(armours, &p->eq_suit);
+    if (p->eq_boots)  g_ptr_array_add(equipped_armour, &p->eq_boots);
+    if (p->eq_cloak)  g_ptr_array_add(equipped_armour, &p->eq_cloak);
+    if (p->eq_gloves) g_ptr_array_add(equipped_armour, &p->eq_gloves);
+    if (p->eq_helmet) g_ptr_array_add(equipped_armour, &p->eq_helmet);
+    if (p->eq_shield) g_ptr_array_add(equipped_armour, &p->eq_shield);
+    if (p->eq_suit)   g_ptr_array_add(equipped_armour, &p->eq_suit);
 
-    if (armours->len > 0)
+    if (equipped_armour->len > 0)
     {
         int tries = 10;
         do
         {
-            armour = g_ptr_array_index(armours, rand_0n(armours->len));
+            armour = g_ptr_array_index(equipped_armour, rand_0n(equipped_armour->len));
         }
         while (enchantable && tries-- > 0 && (*armour)->bonus == 3);
     }
 
-    g_ptr_array_free(armours, TRUE);
+    g_ptr_array_free(equipped_armour, TRUE);
 
     return armour;
 }
@@ -2050,7 +2050,7 @@ void player_autopickup(player *p)
         {
             /* item type is set to be picked up */
             guint retval;
-            int count_orig = inv_length(*floor);
+            guint count_orig = inv_length(*floor);
 
             /* try to pick up the item */
             retval = player_item_pickup(p, floor, i, FALSE);
@@ -2170,14 +2170,14 @@ void player_level_gain(player *p, int count)
     {
         /* increase HP max */
         base = (p->constitution - game_difficulty(nlarn)) >> 1;
-        if (p->level < max(7 - game_difficulty(nlarn), 0))
+        if (p->level < (guint)max(7 - game_difficulty(nlarn), 0))
             base += p->constitution >> 2;
 
         player_hp_max_gain(p, rand_1n(3) + rand_0n(max(base, 1)));
 
         /* increase MP max */
         base = (p->intelligence - game_difficulty(nlarn)) >> 1;
-        if (p->level < max(7 - game_difficulty(nlarn), 0))
+        if (p->level < (guint)max(7 - game_difficulty(nlarn), 0))
             base += p->intelligence >> 2;
 
         player_mp_max_gain(p, rand_1n(3) + rand_0n(max(base, 1)));
@@ -2205,14 +2205,14 @@ void player_level_lose(player *p, int count)
     {
         /* decrease HP max */
         base = (p->constitution - game_difficulty(nlarn)) >> 1;
-        if (p->level < max(7 - game_difficulty(nlarn), 0))
+        if (p->level < (guint)max(7 - game_difficulty(nlarn), 0))
             base += p->constitution >> 2;
 
         player_hp_max_lose(p, rand_1n(3) + rand_0n(max(base, 1)));
 
         /* decrease MP max */
         base = (p->intelligence - game_difficulty(nlarn)) >> 1;
-        if (p->level < max(7 - game_difficulty(nlarn), 0))
+        if (p->level < (guint)max(7 - game_difficulty(nlarn), 0))
             base += p->intelligence >> 2;
 
         player_mp_max_lose(p, rand_1n(3) + rand_0n(max(base, 1)));
@@ -2492,8 +2492,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_DEC_WIS:
         if (chance(dam->amount -= player_get_con(p)))
         {
-            int effect_t = (ET_DEC_CON + dam->type - DAM_DEC_CON);
-            e = effect_new(effect_t);
+            effect_t et = (ET_DEC_CON + dam->type - DAM_DEC_CON);
+            e = effect_new(et);
             /* the default number of turns is 1 */
             e->turns = dam->amount * 10;
             (void)player_effect_add(p, e);
@@ -3011,7 +3011,7 @@ char *player_inv_weight(player *p)
     return buf;
 }
 
-int player_inv_pre_add(inventory *inv, item *item)
+int player_inv_pre_add(inventory *inv, item *it)
 {
     player *p;
     char buf[61];
@@ -3034,15 +3034,15 @@ int player_inv_pre_add(inventory *inv, item *item)
     can_carry = 2000 * (float)player_get_str(p);
 
     /* check if item weight can be carried */
-    if ((pack_weight + item_weight(item)) > (int)(can_carry * 1.3))
+    if ((pack_weight + item_weight(it)) > (int)(can_carry * 1.3))
     {
         /* get item description */
-        item_describe(item, player_item_known(p, item), (item->count == 1), TRUE, buf, 60);
+        item_describe(it, player_item_known(p, it), (it->count == 1), TRUE, buf, 60);
         /* capitalize first letter */
         buf[0] = g_ascii_toupper(buf[0]);
 
         log_add_entry(nlarn->log, "%s %s too heavy for you.", buf,
-                      item->count > 1 ? "are" : "is");
+                      it->count > 1 ? "are" : "is");
 
         return FALSE;
     }
@@ -3050,7 +3050,7 @@ int player_inv_pre_add(inventory *inv, item *item)
     return TRUE;
 }
 
-void player_inv_weight_recalc(inventory *inv, item *item)
+void player_inv_weight_recalc(inventory *inv, item *it __attribute__((unused)))
 {
     int pack_weight;
     float can_carry;
@@ -3061,7 +3061,6 @@ void player_inv_weight_recalc(inventory *inv, item *item)
     assert (inv != NULL);
 
     p = (player *)inv->owner;       /* make shortcut */
-    item = NULL;                    /* don't need that parameter */
     pack_weight = inv_weight(inv);  /* calculate inventory weight */
 
     /* the player can carry 2kg per str */
@@ -3235,7 +3234,7 @@ void player_paperdoll(player *p)
 void player_item_equip(player *p, inventory **inv, item *it)
 {
     item **islot = NULL;  /* pointer to chosen item slot */
-    int time = 0;         /* time the desired action takes */
+    int atime = 0;        /* time the desired action takes */
     char description[61] = { 0 };
 
     assert(p != NULL && it != NULL);
@@ -3282,32 +3281,32 @@ void player_item_equip(player *p, inventory **inv, item *it)
         {
         case ARMOUR_BOOTS:
             islot = &(p->eq_boots);
-            time = 3;
+            atime = 3;
             break;
 
         case ARMOUR_CLOAK:
             islot = &(p->eq_cloak);
-            time = 2;
+            atime = 2;
             break;
 
         case ARMOUR_GLOVES:
             islot = &(p->eq_gloves);
-            time = 3;
+            atime = 3;
             break;
 
         case ARMOUR_HELMET:
             islot = &(p->eq_helmet);
-            time = 2;
+            atime = 2;
             break;
 
         case ARMOUR_SHIELD:
             islot = &(p->eq_shield);
-            time = 2;
+            atime = 2;
             break;
 
         case ARMOUR_SUIT:
             islot = &(p->eq_suit);
-            time = it->id + 1;
+            atime = it->id + 1;
             break;
 
         case ARMOUR_NONE:
@@ -3320,7 +3319,7 @@ void player_item_equip(player *p, inventory **inv, item *it)
         {
             item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
 
-            if (!player_make_move(p, time, TRUE, "wearing %s", description))
+            if (!player_make_move(p, atime, TRUE, "wearing %s", description))
                 return; /* interrupted */
 
             /* the armour's bonus is revealed when putting it on */
@@ -3472,40 +3471,40 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
         /* take off armour */
     case IT_ARMOUR:
     {
-        int time = 0;
+        int atime = 0;
         item **aslot = NULL;  /* pointer to armour slot */
 
         switch (armour_class(it))
         {
         case ARMOUR_BOOTS:
             aslot = &(p->eq_boots);
-            time = 3;
+            atime = 3;
             break;
 
         case ARMOUR_CLOAK:
             aslot = &(p->eq_cloak);
-            time = 2;
+            atime = 2;
             break;
 
         case ARMOUR_GLOVES:
             aslot = &(p->eq_gloves);
-            time = 3;
+            atime = 3;
             break;
 
         case ARMOUR_HELMET:
             aslot = &(p->eq_helmet);
-            time = 2;
+            atime = 2;
             break;
 
         case ARMOUR_SHIELD:
             aslot = &(p->eq_shield);
-            time = 2;
+            atime = 2;
             break;
 
         case ARMOUR_SUIT:
             aslot = &(p->eq_suit);
             /* the better the armour, the longer it takes to get out of it */
-            time = (p->eq_suit)->type + 1;
+            atime = (p->eq_suit)->type + 1;
             break;
         default:
             break;
@@ -3517,7 +3516,7 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
             {
                 if (!forced)
                 {
-                    if (!player_make_move(p, time, TRUE, "taking %s off", desc))
+                    if (!player_make_move(p, atime, TRUE, "taking %s off", desc))
                         return; /* interrupted */
 
                     log_add_entry(nlarn->log, "You finish taking off %s.", desc);
@@ -3897,7 +3896,8 @@ char *player_item_identified_list(player *p)
     item *it; /* fake pretend item */
     char *heading;
 
-    int type, id, count;
+    item_t type;
+    guint id, count;
 
     item_t type_ids[] =
     {
@@ -4004,7 +4004,7 @@ void player_item_identify(player *p, inventory **inv, item *it)
     it->bonus_known = TRUE;
 }
 
-void player_item_use(player *p, inventory **inv, item *it)
+void player_item_use(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     item_usage_result result;
 
@@ -4193,7 +4193,7 @@ void player_item_drop(player *p, inventory **inv, item *it)
     return;
 }
 
-void player_item_notes(player *p, inventory **inv, item *it)
+void player_item_notes(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     char desc[81];
     char *caption = NULL;
@@ -4577,7 +4577,7 @@ void player_update_fov(player *p)
 {
     int radius;
     position pos;
-    map *map;
+    map *pmap;
 
     area *enlight;
 
@@ -4594,7 +4594,7 @@ void player_update_fov(player *p)
     }
 
     /* get current map */
-    map = game_map(nlarn, Z(p->pos));
+    pmap = game_map(nlarn, Z(p->pos));
 
     /* set level correctly */
     Z(pos) = Z(p->pos);
@@ -4638,14 +4638,14 @@ void player_update_fov(player *p)
         {
             if (fov_get(p->fov, pos))
             {
-                monster *m = map_get_monster_at(map, pos);
-                inventory **inv = map_ilist_at(map, pos);
+                monster *m = map_get_monster_at(pmap, pos);
+                inventory **inv = map_ilist_at(pmap, pos);
 
-                player_memory_of(p,pos).type = map_tiletype_at(map, pos);
-                player_memory_of(p,pos).sobject = map_sobject_at(map, pos);
+                player_memory_of(p,pos).type = map_tiletype_at(pmap, pos);
+                player_memory_of(p,pos).sobject = map_sobject_at(pmap, pos);
 
                 /* remember certain stationary objects */
-                switch (map_sobject_at(map, pos))
+                switch (map_sobject_at(pmap, pos))
                 {
                 case LS_ALTAR:
                 case LS_BANK2:
@@ -4654,7 +4654,7 @@ void player_update_fov(player *p)
                 case LS_THRONE:
                 case LS_THRONE2:
                 case LS_STATUE:
-                    player_sobject_memorize(p, map_sobject_at(map, pos), pos);
+                    player_sobject_memorize(p, map_sobject_at(pmap, pos), pos);
                     break;
 
                 default:
@@ -5255,7 +5255,7 @@ static int item_filter_dropable(item *it)
     return player_item_is_dropable(nlarn->p, it);
 }
 
-static int player_item_filter_multiple(player *p, item *it)
+static int player_item_filter_multiple(player *p __attribute__((unused)), item *it)
 {
     return (it->count > 1);
 }

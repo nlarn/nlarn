@@ -90,7 +90,7 @@ void sphere_move(sphere *s, game *g)
     int tries = 0;
     direction dir;
     monster *m;
-    map *map;
+    map *smap;
 
     assert(s != NULL && g != NULL);
 
@@ -104,7 +104,7 @@ void sphere_move(sphere *s, game *g)
         return;
     }
 
-    map = game_map(g, Z(s->pos));
+    smap = game_map(g, Z(s->pos));
 
     /* try to move sphere into its direction */
     dir = s->dir;
@@ -112,7 +112,7 @@ void sphere_move(sphere *s, game *g)
 
     /* if the new position does not work, try to find another one */
     while ((!pos_valid(npos)
-            || !lt_is_passable(map_tiletype_at(map, npos)))
+            || !lt_is_passable(map_tiletype_at(smap, npos)))
             && (tries < GD_MAX))
     {
         dir++;
@@ -143,7 +143,7 @@ void sphere_move(sphere *s, game *g)
     }
 
     /* check if a monster is located at the sphere's position */
-    if ((m = map_get_monster_at(map, s->pos)))
+    if ((m = map_get_monster_at(smap, s->pos)))
     {
         /* demons dispel spheres */
         if (monster_flags(m, MF_DEMON))

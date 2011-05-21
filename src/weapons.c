@@ -106,7 +106,7 @@ int weapon_fire(struct player *p)
 {
     assert(p != NULL);
 
-    map *map = game_map(nlarn, Z(p->pos));
+    map *pmap = game_map(nlarn, Z(p->pos));
     position target;             /* the selected target */
     damage_originator damo = { DAMO_PLAYER, p };
     char wdesc[81] = {};         /* the weapon description */
@@ -161,7 +161,7 @@ int weapon_fire(struct player *p)
     }
 
     /* get the targeted monster  */
-    m = map_get_monster_at(map, target);
+    m = map_get_monster_at(pmap, target);
 
     /* check if there is a monster at the targeted position */
     if (!m || !monster_in_sight(m))
@@ -200,7 +200,7 @@ int weapon_fire(struct player *p)
         return TRUE; /* one of the callbacks succeeded */
 
     /* none of the callbacks succeeded -> drop the ammo at the target position */
-    weapon_ammo_drop(map, ammo, target);
+    weapon_ammo_drop(pmap, ammo, target);
 
     return TRUE;
 }
@@ -249,23 +249,25 @@ void weapon_ammo_drop(map *m, item *ammo, position pos)
         item_destroy(ammo);
 }
 
-static gboolean weapon_pos_hit(position pos, const damage_originator *damo,
-                               gpointer data1, gpointer data2)
+static gboolean weapon_pos_hit(position pos,
+                               const damage_originator *damo __attribute__((unused)),
+                               gpointer data1,
+                               gpointer data2)
 {
-    map *map = game_map(nlarn, Z(pos));
+    map *cmap = game_map(nlarn, Z(pos));
     item *weapon = (item *)data1;
     item *ammo = (item *)data2;
-    monster *m = map_get_monster_at(map, pos);
+    monster *m = map_get_monster_at(cmap, pos);
     char adesc[81] = {};
 
     /* need a definite description for the ammo */
     item_describe(ammo, player_item_known(nlarn->p, ammo), TRUE, TRUE, adesc, 80);
     adesc[0] = g_ascii_toupper(adesc[0]);
 
-    if (!map_pos_passable(map, pos))
+    if (!map_pos_passable(cmap, pos))
     {
         /* the ammo hit some map feature -> drop it at the position */
-        weapon_ammo_drop(map, ammo, pos);
+        weapon_ammo_drop(cmap, ammo, pos);
         return TRUE;
     }
     else if (m != NULL)
@@ -281,7 +283,7 @@ static gboolean weapon_pos_hit(position pos, const damage_originator *damo,
                 log_add_entry(nlarn->log, "%s hits the %s.", adesc, monster_name(m));
 
             monster_damage_take(m, dam);
-            weapon_ammo_drop(map, ammo, pos);
+            weapon_ammo_drop(cmap, ammo, pos);
 
             return TRUE;
         }

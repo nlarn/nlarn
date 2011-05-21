@@ -57,7 +57,7 @@ fov *fov_new()
  * ported from python to c using the example at
  * http://roguebasin.roguelikedevelopment.org/index.php?title=Python_shadowcasting_implementation
  */
-void fov_calculate(fov *fov, map *m, position pos, int radius, gboolean infravision)
+void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravision)
 {
     const int mult[4][8] =
     {
@@ -70,67 +70,67 @@ void fov_calculate(fov *fov, map *m, position pos, int radius, gboolean infravis
     int octant;
 
     /* reset the entire fov to unseen */
-    fov_reset(fov);
+    fov_reset(fv);
 
     /* set the center of the fov */
-    fov->center = pos;
+    fv->center = pos;
 
     /* determine which fields are visible */
     for (octant = 0; octant < 8; octant++)
     {
-        fov_calculate_octant(fov, m, pos, infravision,
+        fov_calculate_octant(fv, m, pos, infravision,
                              1, 1.0, 0.0, radius,
                              mult[0][octant], mult[1][octant],
                              mult[2][octant], mult[3][octant]);
     }
 
-    fov_set(fov, pos, TRUE);
+    fov_set(fv, pos, TRUE);
 }
 
-gboolean fov_get(fov *fov, position pos)
+gboolean fov_get(fov *fv, position pos)
 {
-    assert (fov != NULL);
+    assert (fv != NULL);
     assert (pos_valid(pos));
 
-    return fov->data[Y(pos)][X(pos)];
+    return fv->data[Y(pos)][X(pos)];
 }
 
-void fov_set(fov *fov, position pos, guchar visible)
+void fov_set(fov *fv, position pos, guchar visible)
 {
-    assert (fov != NULL);
+    assert (fv != NULL);
     assert (pos_valid(pos));
 
-    fov->data[Y(pos)][X(pos)] = visible;
+    fv->data[Y(pos)][X(pos)] = visible;
 }
 
-void fov_reset(fov *fov)
+void fov_reset(fov *fv)
 {
-    assert (fov != NULL);
+    assert (fv != NULL);
 
     /* set fov_data to FALSE */
-    memset(fov->data, 0, MAP_MAX_Y * MAP_MAX_X * sizeof(guchar));
+    memset(fv->data, 0, MAP_MAX_Y * MAP_MAX_X * sizeof(guchar));
 
     /* set the center to an invalid position */
-    fov->center = pos_invalid;
+    fv->center = pos_invalid;
 
     /* clean list of visible monsters */
-    g_hash_table_remove_all(fov->mlist);
+    g_hash_table_remove_all(fv->mlist);
 }
 
-monster *fov_get_closest_monster(fov *fov)
+monster *fov_get_closest_monster(fov *fv)
 {
     monster *closest_monster = NULL;
 
-    if (g_hash_table_size(fov->mlist) > 0)
+    if (g_hash_table_size(fv->mlist) > 0)
     {
         GList *mlist;
 
         /* get the list of all visible monsters */
-        mlist = g_hash_table_get_keys(fov->mlist);
+        mlist = g_hash_table_get_keys(fv->mlist);
 
         /* sort the monsters list by distance */
         mlist = g_list_sort_with_data(mlist, fov_visible_monster_sort,
-                                      &fov->center);
+                                      &fv->center);
 
         /* get the first element in the list */
         closest_monster = mlist->data;
@@ -139,33 +139,33 @@ monster *fov_get_closest_monster(fov *fov)
     return closest_monster;
 }
 
-GList *fov_get_visible_monsters(fov *fov)
+GList *fov_get_visible_monsters(fov *fv)
 {
     GList *mlist = NULL;
 
-    if (g_hash_table_size(fov->mlist) != 0)
+    if (g_hash_table_size(fv->mlist) != 0)
     {
         /* get a GList of all visible monster all */
-        mlist = g_hash_table_get_keys(fov->mlist);
+        mlist = g_hash_table_get_keys(fv->mlist);
 
         /* sort the list of monster by distance */
         mlist = g_list_sort_with_data(mlist, fov_visible_monster_sort,
-                                      &fov->center);
+                                      &fv->center);
     }
 
     return mlist;
 }
 
-void fov_free(fov *fov)
+void fov_free(fov *fv)
 {
-    assert (fov != NULL);
+    assert (fv != NULL);
 
     /* free the allocated memory */
-    g_hash_table_destroy(fov->mlist);
-    g_free(fov);
+    g_hash_table_destroy(fv->mlist);
+    g_free(fv);
 }
 
-static void fov_calculate_octant(fov *fov, map *m, position center,
+static void fov_calculate_octant(fov *fv, map *m, position center,
                                  int infravision, int row, float start,
                                  float end, int radius, int xx,
                                  int xy, int yx, int yy)
@@ -227,7 +227,7 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
                 {
                     monster *mon;
 
-                    fov_set(fov, pos, TRUE);
+                    fov_set(fv, pos, TRUE);
 
                     /* check if there is a monster at that position
                        must not be an unknown mimic or invisible */
@@ -236,7 +236,7 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
                         && (!monster_flags(mon, MF_INVISIBLE) || infravision))
                     {
                         /* found a visible monster -> add it to the list */
-                        g_hash_table_insert(fov->mlist, mon, 0);
+                        g_hash_table_insert(fv->mlist, mon, 0);
                     }
                 }
 
@@ -262,7 +262,7 @@ static void fov_calculate_octant(fov *fov, map *m, position center,
                         blocked = TRUE;
                     }
 
-                    fov_calculate_octant(fov, m, center, infravision,
+                    fov_calculate_octant(fv, m, center, infravision,
                                          j + 1, start, l_slope,
                                          radius, xx, xy, yx, yy);
 

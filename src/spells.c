@@ -358,7 +358,7 @@ book_obfuscation[SP_MAX - 1] =
 static spell *last_spell = NULL;
 
 /* local functions */
-static int spell_cast(player *p, spell *spell);
+static int spell_cast(player *p, spell *s);
 static void spell_print_success_message(spell *s, monster *m);
 static void spell_print_failure_message(spell *s, monster *m);
 static int count_adjacent_water_squares(position pos);
@@ -425,15 +425,15 @@ cJSON *spells_serialize(GPtrArray *sparr)
 GPtrArray *spells_deserialize(cJSON *sser)
 {
     int idx;
-    GPtrArray *spells = g_ptr_array_new();
+    GPtrArray *n_spells = g_ptr_array_new();
 
     for (idx = 0; idx < cJSON_GetArraySize(sser); idx++)
     {
         spell *s = spell_deserialize(cJSON_GetArrayItem(sser, idx));
-        g_ptr_array_add(spells, s);
+        g_ptr_array_add(n_spells, s);
     }
 
-    return spells;
+    return n_spells;
 }
 
 int spell_sort(gconstpointer a, gconstpointer b)
@@ -604,7 +604,7 @@ int spell_type_player(spell *s, struct player *p)
             /* The effect amount can be incremented.
              * Increase the amount of the effect up to the base
              * effect value * spell knowledge value. */
-            if (e->amount < (effect_type_amount(e->type) * s->knowledge))
+            if (e->amount < (effect_type_amount(e->type) * (int)s->knowledge))
             {
                 e->amount += effect_type_amount(e->type);
                 log_add_entry(nlarn->log, "You have extended the power of %s.", spell_name(s));
@@ -670,7 +670,7 @@ int spell_type_player(spell *s, struct player *p)
 
 int spell_type_point(spell *s, struct player *p)
 {
-    monster *monster = NULL;
+    monster *m = NULL;
     position pos;
     effect *e;
     char buffer[61];
@@ -695,9 +695,9 @@ int spell_type_point(spell *s, struct player *p)
         return FALSE;
     }
 
-    monster = map_get_monster_at(game_map(nlarn, Z(p->pos)), pos);
+    m = map_get_monster_at(game_map(nlarn, Z(p->pos)), pos);
 
-    if (!monster)
+    if (!m)
     {
         if (s->id == SP_DRY)
             return try_drying_ground(pos);
@@ -712,8 +712,8 @@ int spell_type_point(spell *s, struct player *p)
         /* dehydration */
     case SP_DRY:
         amount = (100 * s->knowledge) + p->level;
-        spell_print_success_message(s, monster);
-        monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
+        spell_print_success_message(s, m);
+        monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
                                                 DAMO_PLAYER, p));
         break; /* SP_DRY */
 
@@ -721,8 +721,8 @@ int spell_type_point(spell *s, struct player *p)
     case SP_DRL:
         amount = min(p->hp - 1, (int)p->hp_max / 2);
 
-        spell_print_success_message(s, monster);
-        monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
+        spell_print_success_message(s, m);
+        monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
                                                 DAMO_PLAYER, p));
 
         player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
@@ -734,49 +734,49 @@ int spell_type_point(spell *s, struct player *p)
     case SP_FGR:
     {
         // Lower chances of working against undead and demons.
-        const int roll = (monster_flags(monster, MF_UNDEAD) ? 40 :
-                          monster_flags(monster, MF_DEMON)  ? 30 : 20);
+        const int roll = (monster_flags(m, MF_UNDEAD) ? 40 :
+                          monster_flags(m, MF_DEMON)  ? 30 : 20);
 
-        if ((player_get_wis(p) + s->knowledge) > rand_m_n(10, roll))
+        if ((player_get_wis(p) + s->knowledge) > (guint)rand_m_n(10, roll))
         {
-            spell_print_success_message(s, monster);
-            monster_damage_take(monster, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000,
+            spell_print_success_message(s, m);
+            monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000,
                                                     DAMO_PLAYER, p));
         }
         else
-            spell_print_failure_message(s, monster);
+            spell_print_failure_message(s, m);
         break; /* SP_FGR */
     }
 
         /* magic missile */
     case SP_MLE:
         amount = rand_1n(((p->level + 1) << s->knowledge)) + p->level + 3;
-        spell_print_success_message(s, monster);
-        monster_damage_take(monster, damage_new(spell_damage(s), ATT_MAGIC, amount,
+        spell_print_success_message(s, m);
+        monster_damage_take(m, damage_new(spell_damage(s), ATT_MAGIC, amount,
                                                 DAMO_PLAYER, p));
         break;
 
         /* polymorph */
     case SP_PLY:
-        if (chance(5*(monster_level(monster) - 2*s->knowledge)))
+        if (chance(5*(monster_level(m) - 2*s->knowledge)))
         {
             /* didn't work */
-            spell_print_success_message(s, monster);
+            spell_print_success_message(s, m);
         }
         else
-            monster_polymorph(monster);
+            monster_polymorph(m);
         break;
 
         /* teleport */
     case SP_TEL:
-        if (monster_in_sight(monster))
+        if (monster_in_sight(m))
         {
             log_add_entry(nlarn->log, "The %s disappears.",
-                          monster_name(monster));
+                          monster_name(m));
         }
 
-        map *mmap = game_map(nlarn, Z(monster_pos(monster)));
-        monster_pos_set(monster, mmap, map_find_space(mmap, LE_MONSTER, FALSE));
+        map *mmap = game_map(nlarn, Z(monster_pos(m)));
+        monster_pos_set(m, mmap, map_find_space(mmap, LE_MONSTER, FALSE));
         break; /* SP_TEL */
 
     default:
@@ -791,12 +791,12 @@ int spell_type_point(spell *s, struct player *p)
         }
 
         e->amount *= s->knowledge;
-        e = monster_effect_add(monster, e);
+        e = monster_effect_add(m, e);
 
         if (e)
-            spell_print_success_message(s, monster);
+            spell_print_success_message(s, m);
         else
-            spell_print_failure_message(s, monster);
+            spell_print_failure_message(s, m);
 
         break;
     }
@@ -1035,7 +1035,7 @@ gboolean spell_create_monster(struct player *p)
 gboolean spell_create_sphere(spell *s, struct player *p)
 {
     position pos;
-    sphere *sphere;
+    sphere *sph;
 
     assert(p != NULL);
 
@@ -1045,8 +1045,8 @@ gboolean spell_create_sphere(spell *s, struct player *p)
 
     if (pos_valid(pos))
     {
-        sphere = sphere_new(pos, p, p->level * 10 * s->knowledge);
-        g_ptr_array_add(nlarn->spheres, sphere);
+        sph = sphere_new(pos, p, p->level * 10 * s->knowledge);
+        g_ptr_array_add(nlarn->spheres, sph);
 
         return TRUE;
     }
@@ -1166,7 +1166,7 @@ gboolean spell_scare_monsters(spell *s, struct player *p)
             if (m == NULL) continue;
 
             /* there is a monster, check if it is affected */
-            if (player_get_int(p) > monster_int(m))
+            if (player_get_int(p) > (int)monster_int(m))
             {
                 monster_effect_add(m, effect_new(ET_SCARED));
                 count++;
@@ -1222,10 +1222,10 @@ gboolean spell_make_wall(player *p)
         return FALSE;
     }
 
-    map *map = game_map(nlarn, Z(p->pos));
-    if (map_tiletype_at(map, pos) != LT_WALL)
+    map *pmap = game_map(nlarn, Z(p->pos));
+    if (map_tiletype_at(pmap, pos) != LT_WALL)
     {
-        map_tile *tile = map_tile_at(game_map(nlarn, Z(p->pos)), pos);
+        map_tile *tile = map_tile_at(pmap, pos);
 
         /* destroy all items at that position */
         if (tile->ilist != NULL)
@@ -1234,14 +1234,14 @@ gboolean spell_make_wall(player *p)
             tile->ilist = NULL;
         }
 
-        sobject_destroy_at(p, map, pos);
+        sobject_destroy_at(p, pmap, pos);
 
         log_add_entry(nlarn->log, "You have created a wall.");
 
         tile->type = tile->base_type = LT_WALL;
 
         monster *m;
-        if ((m = map_get_monster_at(map, pos)))
+        if ((m = map_get_monster_at(pmap, pos)))
         {
             if (monster_type(m) != MT_XORN)
             {
@@ -1272,7 +1272,7 @@ gboolean spell_vaporize_rock(player *p)
 {
     monster *m;
     position pos;
-    map *map = game_map(nlarn, Z(p->pos));
+    map *pmap = game_map(nlarn, Z(p->pos));
 
     pos = display_get_new_position(p, p->pos,
                                    "What do you want to vaporize?",
@@ -1284,13 +1284,13 @@ gboolean spell_vaporize_rock(player *p)
         return FALSE;
     }
 
-    if (map_tiletype_at(map, pos) == LT_WALL)
+    if (map_tiletype_at(pmap, pos) == LT_WALL)
     {
-        map_tiletype_set(map, pos, LT_FLOOR);
+        map_tiletype_set(pmap, pos, LT_FLOOR);
         p->stats.vandalism++;
     }
 
-    if ((m = map_get_monster_at(map, pos)))
+    if ((m = map_get_monster_at(pmap, pos)))
     {
         /* xorns take damage from vpr */
         if (monster_type(m) == MT_XORN)
@@ -1305,7 +1305,7 @@ gboolean spell_vaporize_rock(player *p)
         }
     }
 
-    sobject_destroy_at(p, map, pos);
+    sobject_destroy_at(p, pmap, pos);
 
     return TRUE;
 }
@@ -1413,69 +1413,69 @@ item_usage_result book_read(struct player *p, item *book)
     return result;
 }
 
-static int spell_cast(player *p, spell *spell)
+static int spell_cast(player *p, spell *s)
 {
     int turns = 0;
     gboolean well_done = FALSE;
 
     /* insufficient mana */
-    if (p->mp < spell_level(spell))
+    if (p->mp < spell_level(s))
     {
         log_add_entry(nlarn->log, "You lack the power to cast %s.",
-                      spell_name(spell));
+                      spell_name(s));
 
         return 0;
     }
-    else if (spell_success_value(p, spell) < 1)
+    else if (spell_success_value(p, s) < 1)
     {
         log_add_entry(nlarn->log, "This spell is too difficult for you.");
         return 0;
     }
 
-    log_add_entry(nlarn->log, "You cast %s.", spell_name(spell));
+    log_add_entry(nlarn->log, "You cast %s.", spell_name(s));
 
     /* time usage */
     turns = 1;
 
     /* bad luck, low intelligence */
-    if (chance(1) || spell_success_value(p, spell) < rand_1n(16))
+    if (chance(1) || spell_success_value(p, s) < rand_1n(16))
     {
         log_add_entry(nlarn->log, "It didn't work!");
-        player_mp_lose(p, spell_level(spell));
+        player_mp_lose(p, spell_level(s));
 
         return turns;
     }
 
-    switch (spell_type(spell))
+    switch (spell_type(s))
     {
         /* spells that cause an effect on the player */
     case SC_PLAYER:
-        well_done = spell_type_player(spell, p);
+        well_done = spell_type_player(s, p);
         break;
 
         /* spells that cause an effect on a monster */
     case SC_POINT:
-        well_done = spell_type_point(spell, p);
+        well_done = spell_type_point(s, p);
         break;
 
         /* creates a ray */
     case SC_RAY:
-        well_done = spell_type_ray(spell, p);
+        well_done = spell_type_ray(s, p);
         break;
 
         /* effect pours like water */
     case SC_FLOOD:
-        well_done = spell_type_flood(spell, p);
+        well_done = spell_type_flood(s, p);
         break;
 
         /* effect occurs like an explosion */
     case SC_BLAST:
-        well_done = spell_type_blast(spell, p);
+        well_done = spell_type_blast(s, p);
         break;
 
     case SC_OTHER:  /* unclassified */
 
-        switch (spell->id)
+        switch (s->id)
         {
             /* cure poison */
         case SP_CPO:
@@ -1494,7 +1494,7 @@ static int spell_cast(player *p, spell *spell)
 
             /* phantasmal forces */
         case SP_PHA:
-            well_done = spell_phantasmal_forces(spell, p);
+            well_done = spell_phantasmal_forces(s, p);
             break;
 
             /* vaporize rock */
@@ -1504,7 +1504,7 @@ static int spell_cast(player *p, spell *spell)
 
             /* scare monsters */
         case SP_SCA:
-            well_done = spell_scare_monsters(spell, p);
+            well_done = spell_scare_monsters(s, p);
             break;
 
             /* make wall */
@@ -1514,19 +1514,19 @@ static int spell_cast(player *p, spell *spell)
 
             /* sphere of annihilation */
         case SP_SPH:
-            well_done = spell_create_sphere(spell, p);
+            well_done = spell_create_sphere(s, p);
             break;
 
             /* summon demon */
         case SP_SUM:
-            well_done = spell_summon_demon(spell, p);
+            well_done = spell_summon_demon(s, p);
             break;
 
             /* alter reality */
         case SP_ALT:
             well_done = spell_alter_reality(p);
             if (!well_done)
-                log_add_entry(nlarn->log, spell_msg_fail_by_id(spell->id));
+                log_add_entry(nlarn->log, spell_msg_fail_by_id(s->id));
             break;
 
         default:
@@ -1547,13 +1547,13 @@ static int spell_cast(player *p, spell *spell)
     if (well_done)
     {
         /* spell has been cast successfully, set mp usage accordingly */
-        player_mp_lose(p, spell_level(spell));
+        player_mp_lose(p, spell_level(s));
 
         /* increase number of spells cast */
         p->stats.spells_cast++;
 
         /* increase usage counter for this specific spell */
-        spell->used++;
+        s->used++;
     }
 
     return turns;
@@ -1661,9 +1661,9 @@ static gboolean spell_pos_hit(position pos, const damage_originator *damo,
 {
     spell *sp = (spell *)data1;
     damage *dam = (damage *)data2;
-    map *map = game_map(nlarn, Z(pos));
-    map_sobject_t mst = map_sobject_at(map, pos);
-    monster *monster = map_get_monster_at(map, pos);
+    map *cmap = game_map(nlarn, Z(pos));
+    map_sobject_t mst = map_sobject_at(cmap, pos);
+    monster *m = map_get_monster_at(cmap, pos);
     item_erosion_type iet;
     gboolean terminated = FALSE;
 
@@ -1695,25 +1695,25 @@ static gboolean spell_pos_hit(position pos, const damage_originator *damo,
             && (game_difficulty(nlarn) <= 2))
         {
         /* fireball and lightning destroy statues up to diff. level 2 */
-            sobject_destroy_at(damo->originator, map, pos);
+            sobject_destroy_at(damo->originator, cmap, pos);
             terminated = TRUE;
         }
     }
 
     /* The spell hit a monster */
-    if (monster != NULL)
+    if (m != NULL)
     {
-        spell_print_success_message(sp, monster);
+        spell_print_success_message(sp, m);
 
         /* erode the monster's inventory */
         if (iet > IET_NONE)
-            inv_erode(monster_inv(monster), iet, FALSE);
+            inv_erode(monster_inv(m), iet, FALSE);
 
-        monster_damage_take(monster, damage_copy(dam));
+        monster_damage_take(m, damage_copy(dam));
 
         /* if the monster is large, the spell stops at the monster,
            otherwise it passes and may hit other monsters */
-        if (monster_size(monster) > ESIZE_MEDIUM)
+        if (monster_size(m) > ESIZE_MEDIUM)
             terminated = TRUE;
     }
 
@@ -1772,10 +1772,10 @@ static gboolean spell_pos_hit(position pos, const damage_originator *damo,
         } /* The spell wasn't reflected */
     } /* The spell hit the player's position */
 
-    if (iet > IET_NONE && map_ilist_at(map, pos))
+    if (iet > IET_NONE && map_ilist_at(cmap, pos))
     {
         /* there are items at the given map position, erode them */
-        inv_erode(map_ilist_at(map, pos), iet, fov_get(nlarn->p->fov, pos));
+        inv_erode(map_ilist_at(cmap, pos), iet, fov_get(nlarn->p->fov, pos));
     }
 
     return terminated;

@@ -126,7 +126,7 @@ typedef struct item_type_data {
     char *name_sg;
     char *name_pl;
     char glyph;
-    int max_id;
+    guint max_id;
     unsigned
         optimizable: 1,     /* item type can have a bonus */
         blessable: 1,       /* item type can be blessed / cursed */
@@ -360,7 +360,7 @@ int inv_weight(inventory *inv);
  * @return the number of items for which the filter function returned TRUE
  *
  */
- int inv_length_filtered(inventory *inv, int (*filter)(item *));
+guint inv_length_filtered(inventory *inv, int (*filter)(item *));
 
 item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *));
 

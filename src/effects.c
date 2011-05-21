@@ -640,7 +640,7 @@ effect *effect_deserialize(cJSON *eser, game *g)
 {
     effect *e;
     guint oid;
-    cJSON *item;
+    cJSON *itm;
 
     e = g_malloc0(sizeof(effect));
 
@@ -652,9 +652,9 @@ effect *effect_deserialize(cJSON *eser, game *g)
     e->turns = cJSON_GetObjectItem(eser, "turns")->valueint;
     e->amount = cJSON_GetObjectItem(eser, "amount")->valueint;
 
-    if ((item = cJSON_GetObjectItem(eser, "item")))
+    if ((itm = cJSON_GetObjectItem(eser, "item")))
     {
-        e->item = GUINT_TO_POINTER(item->valueint);
+        e->item = GUINT_TO_POINTER(itm->valueint);
     }
 
     /* add effect to game */
@@ -669,14 +669,14 @@ effect *effect_deserialize(cJSON *eser, game *g)
     return e;
 }
 
-cJSON *effects_serialize(GPtrArray *effects)
+cJSON *effects_serialize(GPtrArray *effs)
 {
-    int idx;
+    guint idx;
     cJSON *eser = cJSON_CreateArray();
 
-    for (idx = 0; idx < effects->len; idx++)
+    for (idx = 0; idx < effs->len; idx++)
     {
-        gpointer eff_oid = g_ptr_array_index(effects, idx);
+        gpointer eff_oid = g_ptr_array_index(effs, idx);
         cJSON_AddItemToArray(eser, cJSON_CreateNumber(GPOINTER_TO_UINT(eff_oid)));
     }
 
@@ -686,47 +686,47 @@ cJSON *effects_serialize(GPtrArray *effects)
 GPtrArray *effects_deserialize(cJSON *eser)
 {
     int idx;
-    GPtrArray *effects;
+    GPtrArray *effs;
 
-    effects = g_ptr_array_new();
+    effs = g_ptr_array_new();
 
     for (idx = 0; idx < cJSON_GetArraySize(eser); idx++)
     {
         cJSON *effser = cJSON_GetArrayItem(eser, idx);
         guint oid = effser->valueint;
-        g_ptr_array_add(effects, GUINT_TO_POINTER(oid));
+        g_ptr_array_add(effs, GUINT_TO_POINTER(oid));
     }
 
-    return effects;
+    return effs;
 }
 
 const char *effect_type_name(effect_t type)
 {
-    assert(type >= 0 && type < ET_MAX);
+    assert(type < ET_MAX);
     return effects[type].name;
 }
 
 int effect_type_amount(effect_t type)
 {
-    assert(type >= 0 && type < ET_MAX);
+    assert(type < ET_MAX);
     return effects[type].amount;
 }
 
-int effect_type_duration(effect_t type)
+guint effect_type_duration(effect_t type)
 {
-    assert(type >= 0 && type < ET_MAX);
+    assert(type < ET_MAX);
     return effects[type].duration;
 }
 
 gboolean effect_type_inc_duration(effect_t type)
 {
-    assert(type >= 0 && type < ET_MAX);
+    assert(type < ET_MAX);
     return effects[type].inc_duration;
 }
 
 gboolean effect_type_inc_amount(effect_t type)
 {
-    assert(type >= 0 && type < ET_MAX);
+    assert(type < ET_MAX);
     return effects[type].inc_amount;
 }
 

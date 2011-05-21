@@ -180,7 +180,7 @@ void monster_hp_inc(monster *m, int amount);
 gpointer monster_oid(monster *m);
 void monster_oid_set(monster *m, gpointer oid);
 position monster_pos(monster *m);
-int monster_pos_set(monster *m, struct map *map, position target);
+int monster_pos_set(monster *m, struct map *mp, position target);
 int monster_valid_dest(struct map *m, position pos, int map_elem);
 monster_t monster_type(monster *m);
 gboolean monster_unknown(monster *m);
@@ -283,9 +283,9 @@ static inline int monster_ac(monster *m)
     return luaN_query_int("monsters", monster_type(m), "ac");
 }
 
-static inline int monster_int(monster *m)
+static inline guint monster_int(monster *m)
 {
-    return luaN_query_int("monsters", monster_type(m), "intelligence");
+    return (guint)luaN_query_int("monsters", monster_type(m), "intelligence");
 }
 
 static inline int monster_gold_chance(monster *m)

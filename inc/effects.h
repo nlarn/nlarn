@@ -120,7 +120,7 @@ typedef struct effect_data
 {
     effect_t id;
     char *name;              /* name of the effect's constant */
-    int duration;            /* duration of effect. 0 = permanent */
+    guint duration;          /* duration of effect. 0 = permanent */
     int amount;              /* if modifier: amount of attribute modification */
     char *desc;              /* description for status display and obituary */
     char *msg_start;         /* message displayed when effect starts */
@@ -154,11 +154,11 @@ void effect_destroy(effect *e);
 
 void effect_serialize(gpointer oid, effect *e, cJSON *root);
 effect *effect_deserialize(cJSON *eser, struct game *g);
-cJSON *effects_serialize(GPtrArray *effects);
+cJSON *effects_serialize(GPtrArray *effs);
 GPtrArray *effects_deserialize(cJSON *eser);
 
 const char *effect_type_name(effect_t type);
-int effect_type_duration(effect_t type);
+guint effect_type_duration(effect_t type);
 int effect_type_amount(effect_t type);
 gboolean effect_type_inc_duration(effect_t type);
 gboolean effect_type_inc_amount(effect_t type);
