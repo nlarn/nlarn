@@ -917,8 +917,7 @@ static gboolean adjacent_corridor(position pos, char mv)
 }
 
 #ifdef __unix
-
-static void nlarn_signal_handler(int signo)
+static void nlarn_signal_handler(int signo __attribute__((unused)))
 {
     /* restore the display down before emitting messages */
     display_shutdown();
@@ -930,7 +929,6 @@ static void nlarn_signal_handler(int signo)
     game_destroy(nlarn);
     exit(EXIT_SUCCESS);
 }
-
 #endif
 
 #ifdef WIN32
