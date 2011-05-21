@@ -266,7 +266,7 @@ item *item_new_random(item_t item_type, gboolean finetouch)
 item *item_new_by_level(item_t item_type, int num_level)
 {
     item *nitem;
-    guint id_min, id_max;
+    int id_min, id_max;
     float variance, id_base, divisor;
 
     assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
@@ -302,13 +302,12 @@ item *item_new_by_level(item_t item_type, int num_level)
     id_max = id_base + (item_max_id(item_type) * variance);
 
     /* clean results */
-    if (id_min == 0) id_min = 1;
-    if (id_max == 0) id_max = 1;
-    if (id_max > 1 + item_max_id(item_type)) id_max = item_max_id(item_type);
+    if (id_min < 1) id_min = 1;
+    if (id_max < 1) id_max = 1;
+    if (id_max > item_max_id(item_type)) id_max = item_max_id(item_type);
 
-    /* Create the item. We need to add one to the id_max as g_random_int_range
-     * excludes the second argument. */
-    nitem = item_new(item_type, rand_m_n(id_min, id_max + 1));
+    /* create the item */
+    nitem = item_new(item_type, rand_m_n(id_min, id_max));
 
     return item_new_finetouch(nitem);
 }
