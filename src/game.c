@@ -23,8 +23,10 @@
 #include <lualib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <zlib.h>
 #include <glib/gstdio.h>
+#include <sys/param.h>
 
 #ifdef __unix
 #include <sys/stat.h>
@@ -86,7 +88,6 @@ void game_init(int argc, char *argv[])
     /* allocate space for game structure */
     nlarn = g_malloc0(sizeof(game));
 
-
     /* determine paths and file names */
     /* base directory for a local install */
     nlarn->basedir = g_path_get_dirname(argv[0]);
@@ -96,9 +97,20 @@ void game_init(int argc, char *argv[])
 
     if (!g_file_test(nlarn->libdir, G_FILE_TEST_IS_DIR))
     {
-        /* local lib directory could not be found,
-           try the system wide directory */
-        if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
+        /* local lib directory could not be found, try the current working
+         * directory and after that the system wide directory. */
+
+        char *cwd = getwd(NULL);
+        char *wdlibdir = g_build_path(G_DIR_SEPARATOR_S, cwd, "lib", NULL);
+        free(cwd);
+
+        if (g_file_test(wdlibdir, G_FILE_TEST_IS_DIR))
+        {
+            /* lib dir found below the current working directory */
+            g_free(nlarn->libdir);
+            nlarn->libdir = g_strdup(wdlibdir);
+        }
+        else if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
         {
             /* system-wide data directory exists */
             /* string has to be dup'd as it is feed in the end */
@@ -106,11 +118,22 @@ void game_init(int argc, char *argv[])
         }
         else
         {
-            g_printerr("Could not find game library directory.\n");
-            g_printerr("Please reinstall the game.\n");
+            g_printerr("Could not find game library directory.\n\n"
+                       "Paths I've tried:\n"
+                       " * %s\n"
+                       " * %s\n"
+                       " * %s\n\n"
+                       "Please reinstall the game.\n",
+                       nlarn->libdir, wdlibdir, default_lib_dir);
+
+            g_free(nlarn->libdir);
+            g_free(wdlibdir);
 
             exit(EXIT_FAILURE);
         }
+
+        /* dispose the path below the working directory */
+        g_free(wdlibdir);
     }
 
     nlarn->mesgfile = g_build_filename(nlarn->libdir, mesgfile, NULL);
