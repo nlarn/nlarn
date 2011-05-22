@@ -1,0 +1,10 @@
+Makefile
+NLarn.xcworkspace/
+nlarn
+*.exe
+*.diff
+*.txt
+nlarn.ini
+nlarn.make
+nlarn.xcodeproj/
+obj/
