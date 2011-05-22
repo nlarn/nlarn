@@ -419,7 +419,8 @@ guint player_get_gold(player *p);
   */
 void player_remove_gold(player *p, guint amount);
 
-char *player_get_level_desc(player *p);
+const char *player_get_level_desc(player *p);
+
 void player_list_sobjmem(player *p);
 void player_sobject_forget(player *p, position pos);
 /* fighting simulation */

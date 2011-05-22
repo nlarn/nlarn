@@ -2127,7 +2127,7 @@ void player_autopickup_show(player *p)
 void player_level_gain(player *p, int count)
 {
     int base;
-    char *desc_orig, *desc_new;
+    const char *desc_orig, *desc_new;
 
     assert(p != NULL && count > 0);
 
@@ -4512,10 +4512,10 @@ done:
     player_inv_weight_recalc(p->inventory, NULL);
 }
 
-char *player_get_level_desc(player *p)
+const char *player_get_level_desc(player *p)
 {
     assert(p != NULL);
-    return (char *) player_level_desc[p->level - 1];
+    return player_level_desc[p->level - 1];
 }
 
 void player_list_sobjmem(player *p)
