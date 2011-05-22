@@ -44,21 +44,17 @@ int divert(int value, int percent)
 
 void shuffle(int array[], int length, int skip)
 {
-    int i;
-    int npos;
-    int temp;
-
-    for (i = 0; i < length; i++)
+    for (int i = 0; i < length; i++)
     {
         /* fill the array in order */
         array[i] = i;
     }
 
-    for (i = skip; i < (length / 2); i++)
+    for (int i = skip; i < (length / 2); i++)
     {
         /* randomize positions */
-        npos = i + g_random_int_range(0, length - i);
-        temp = array[i];
+        int npos = i + g_random_int_range(0, length - i);
+        int temp = array[i];
         array[i] = array[npos];
         array[npos] = temp;
     }
@@ -84,14 +80,12 @@ char *str_replace(char *string, char *orig, char *replace)
 
 char *str_capitalize(char *string)
 {
-    guint i;
-
     if (string == NULL)
     {
         return NULL;
     }
 
-    for (i = 0; i < strlen(string); ++i)
+    for (guint i = 0; i < strlen(string); ++i)
     {
         if (i == 0 || string[i - 1] == ' ')
         {
@@ -117,12 +111,10 @@ message_log *log_new()
 
 void log_destroy(message_log *log)
 {
-    guint idx;
-
     assert(log != NULL);
 
     /* free log entries */
-    for (idx = 0; idx < log_length(log); idx++)
+    for (guint idx = 0; idx < log_length(log); idx++)
     {
         log_entry_destroy(log_get_entry(log, idx));
     }
@@ -230,13 +222,12 @@ message_log_entry *log_get_entry(message_log *log, guint id)
 
 cJSON *log_serialize(message_log *log)
 {
-    guint idx;
     cJSON *log_entry;
     cJSON *log_ser = cJSON_CreateObject();
     cJSON *log_entries = cJSON_CreateArray();
 
     /* create array of log entries */
-    for (idx = 0; idx < log_length(log); idx++)
+    for (guint idx = 0; idx < log_length(log); idx++)
     {
         message_log_entry *entry = log_get_entry(log, idx);
 
@@ -265,7 +256,6 @@ cJSON *log_serialize(message_log *log)
 
 message_log *log_deserialize(cJSON *lser)
 {
-    int idx;
     cJSON *obj;
 
     /* create new message log */
@@ -296,7 +286,7 @@ message_log *log_deserialize(cJSON *lser)
     if ((obj = cJSON_GetObjectItem(lser, "entries")) != NULL)
     {
     /* reconstruct message log entries */
-        for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+        for (int idx = 0; idx < cJSON_GetArraySize(obj); idx++)
         {
             cJSON *le = cJSON_GetArrayItem(obj, idx);
             message_log_entry *entry = g_malloc(sizeof(message_log_entry));
@@ -465,10 +455,8 @@ int strv_append(char ***list, const char *str)
  */
 int strv_append_unique(char ***list, const char *str)
 {
-    int len = 0;
-
     /* compare elements to the new string and return FALSE if the element existed */
-    for (len = 0; (*list)[len]; len++)
+    for (int len = 0; (*list)[len]; len++)
         if (strcmp((*list)[len], str) == 0) return FALSE;
 
     return strv_append(list, str);

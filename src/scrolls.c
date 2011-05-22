@@ -493,7 +493,6 @@ static int scroll_enchant_weapon(player *p, item *r_scroll)
 
 static int scroll_gem_perfection(player *p, item *r_scroll)
 {
-    guint idx;
     item *it;
 
     assert(p != NULL && r_scroll != NULL);
@@ -507,7 +506,7 @@ static int scroll_gem_perfection(player *p, item *r_scroll)
 
     if (r_scroll->blessed)
     {
-        for (idx = 0; idx < inv_length_filtered(p->inventory, item_filter_gems); idx++)
+        for (guint idx = 0; idx < inv_length_filtered(p->inventory, item_filter_gems); idx++)
         {
             it = inv_get_filtered(p->inventory, idx, item_filter_gems);
             /* double gem value */
@@ -537,10 +536,9 @@ static int scroll_gem_perfection(player *p, item *r_scroll)
 static int scroll_genocide_monster(player *p, item *r_scroll)
 {
     char *glyph;
-    int id;
     guint candidates[10] = { 0 };
-    int found = 0;
-    int which = MT_NONE;
+    guint found = 0;
+    monster_t which = MT_NONE;
     GString *msg = g_string_new(NULL);
 
     assert(p != NULL);
@@ -567,7 +565,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
     }
 
     /* look for the monster id for the glyph entered */
-    for (id = 1; id < MT_MAX; id++)
+    for (monster_t id = 1; id < MT_MAX; id++)
     {
         if (monster_type_image(id) == glyph[0])
         {
@@ -602,7 +600,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
         /* offer a selection of monsters that share the glyph entered */
         msg = g_string_new("");
 
-        for (id = 0; id < found; id++)
+        for (guint id = 0; id < found; id++)
         {
             g_string_append_printf(msg, "  %c) %-30s\n",
                                    id + 'a', monster_type_name(candidates[id]));
@@ -838,18 +836,15 @@ static int scroll_remove_curse(player *p, item *r_scroll)
 
 static int scroll_spell_extension(player *p, item *r_scroll)
 {
-    guint idx;
-    spell *sp;
-
     assert(p != NULL && r_scroll != NULL);
 
     /* return early if no spells memorised */
     if (p->known_spells->len == 0)
         return FALSE;
 
-    for (idx = 0; idx < p->known_spells->len; idx++)
+    for (guint idx = 0; idx < p->known_spells->len; idx++)
     {
-        sp = g_ptr_array_index(p->known_spells, idx);
+        spell *sp = g_ptr_array_index(p->known_spells, idx);
 
         if (r_scroll->blessed)
         {

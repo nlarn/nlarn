@@ -671,10 +671,9 @@ effect *effect_deserialize(cJSON *eser, game *g)
 
 cJSON *effects_serialize(GPtrArray *effs)
 {
-    guint idx;
     cJSON *eser = cJSON_CreateArray();
 
-    for (idx = 0; idx < effs->len; idx++)
+    for (guint idx = 0; idx < effs->len; idx++)
     {
         gpointer eff_oid = g_ptr_array_index(effs, idx);
         cJSON_AddItemToArray(eser, cJSON_CreateNumber(GPOINTER_TO_UINT(eff_oid)));
@@ -685,12 +684,9 @@ cJSON *effects_serialize(GPtrArray *effs)
 
 GPtrArray *effects_deserialize(cJSON *eser)
 {
-    int idx;
-    GPtrArray *effs;
+    GPtrArray *effs = g_ptr_array_new();
 
-    effs = g_ptr_array_new();
-
-    for (idx = 0; idx < cJSON_GetArraySize(eser); idx++)
+    for (int idx = 0; idx < cJSON_GetArraySize(eser); idx++)
     {
         cJSON *effser = cJSON_GetArrayItem(eser, idx);
         guint oid = effser->valueint;
@@ -817,11 +813,9 @@ int effect_del(GPtrArray *ea, effect *e)
 
 effect *effect_get(GPtrArray *ea, effect_t type)
 {
-    guint idx;
-
     assert(ea != NULL && type > ET_NONE && type < ET_MAX);
 
-    for (idx = 0; idx < ea->len; idx++)
+    for (guint idx = 0; idx < ea->len; idx++)
     {
         gpointer effect_id = g_ptr_array_index(ea, idx);
         effect *e = game_effect_get(nlarn, effect_id);
@@ -838,12 +832,11 @@ effect *effect_get(GPtrArray *ea, effect_t type)
 
 int effect_query(GPtrArray *ea, effect_t type)
 {
-    guint idx;
     int amount = 0;
 
     assert(ea != NULL && type > ET_NONE && type < ET_MAX);
 
-    for (idx = 0; idx < ea->len; idx++)
+    for (guint idx = 0; idx < ea->len; idx++)
     {
         gpointer effect_id = g_ptr_array_index(ea, idx);
         effect *e = game_effect_get(nlarn, effect_id);

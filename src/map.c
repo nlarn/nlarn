@@ -206,7 +206,6 @@ map *map_new(int num, char *mazefile)
 
 cJSON *map_serialize(map *m)
 {
-    int x, y;
     cJSON *mser, *grid, *tile;
 
     mser = cJSON_CreateObject();
@@ -216,9 +215,9 @@ cJSON *map_serialize(map *m)
 
     cJSON_AddItemToObject(mser, "grid", grid = cJSON_CreateArray());
 
-    for (y = 0; y < MAP_MAX_Y; y++)
+    for (int y = 0; y < MAP_MAX_Y; y++)
     {
-        for (x = 0; x < MAP_MAX_X; x++)
+        for (int x = 0; x < MAP_MAX_X; x++)
         {
             cJSON_AddItemToArray(grid, tile = cJSON_CreateObject());
 
@@ -268,7 +267,6 @@ cJSON *map_serialize(map *m)
 
 map *map_deserialize(cJSON *mser)
 {
-    int x, y;
     cJSON *grid, *tile, *obj;
     map *m;
 
@@ -279,9 +277,9 @@ map *map_deserialize(cJSON *mser)
 
     grid = cJSON_GetObjectItem(mser, "grid");
 
-    for (y = 0; y < MAP_MAX_Y; y++)
+    for (int y = 0; y < MAP_MAX_Y; y++)
     {
-        for (x = 0; x < MAP_MAX_X; x++)
+        for (int x = 0; x < MAP_MAX_X; x++)
         {
             tile = cJSON_GetArrayItem(grid, x + (y * MAP_MAX_X));
 
@@ -353,8 +351,6 @@ char *map_dump(map *l, position ppos)
 
 void map_destroy(map *m)
 {
-    int x, y;
-
     assert(m != NULL);
 
     /* destroy monster and spheres on this level */
@@ -362,8 +358,8 @@ void map_destroy(map *m)
     g_ptr_array_foreach(nlarn->spheres, (GFunc)map_sphere_destroy, m);
 
     /* free items */
-    for (y = 0; y < MAP_MAX_Y; y++)
-        for (x = 0; x < MAP_MAX_X; x++)
+    for (int y = 0; y < MAP_MAX_Y; y++)
+        for (int x = 0; x < MAP_MAX_X; x++)
         {
             if (m->grid[y][x].ilist != NULL)
                 inv_destroy(m->grid[y][x].ilist, TRUE);
@@ -747,19 +743,17 @@ map_path *map_find_path(map *m, position start, position goal,
 
 void map_path_destroy(map_path *path)
 {
-    guint idx;
-
     assert(path != NULL);
 
     /* cleanup open list */
-    for (idx = 0; idx < path->open->len; idx++)
+    for (guint idx = 0; idx < path->open->len; idx++)
     {
         g_free(g_ptr_array_index(path->open, idx));
     }
 
     g_ptr_array_free(path->open, TRUE);
 
-    for (idx = 0; idx < path->closed->len; idx++)
+    for (guint idx = 0; idx < path->closed->len; idx++)
     {
         g_free(g_ptr_array_index(path->closed, idx));
     }
@@ -957,7 +951,6 @@ char *map_pos_examine(position pos)
     monster *monst;
     item *it;
     char item_desc[81];
-    guint idx;
     char *tmp = NULL;
     const char *where;
     GString *desc = g_string_new(NULL);
@@ -1019,7 +1012,7 @@ char *map_pos_examine(position pos)
         {
             GString *items_desc = NULL;
 
-            for (idx = 0; idx < inv_length(*map_ilist_at(cm, pos)); idx++)
+            for (guint idx = 0; idx < inv_length(*map_ilist_at(cm, pos)); idx++)
             {
                 it = inv_get(*map_ilist_at(cm, pos), idx);
                 item_describe(it, player_item_known(nlarn->p, it),
@@ -1070,7 +1063,6 @@ void map_fill_with_life(map *m)
 {
     position pos;
     guint new_monster_count;
-    guint i;
 
     assert(m != NULL);
 
@@ -1088,7 +1080,7 @@ void map_fill_with_life(map *m)
     else
         new_monster_count -= m->mcount;
 
-    for (i = 0; i <= new_monster_count; i++)
+    for (guint i = 0; i <= new_monster_count; i++)
     {
         do
         {
@@ -1257,7 +1249,6 @@ char map_get_door_glyph(map *m, position pos)
 static int map_fill_with_stationary_objects(map *maze)
 {
     position pos;
-    int i;						/* loop var */
 
     /* volcano shaft up from the temple */
     if (maze->nlevel == MAP_DMAX)
@@ -1293,7 +1284,7 @@ static int map_fill_with_stationary_objects(map *maze)
     }
 
     /* up to three statues */
-    for (i = 0; i < rand_0n(3); i++)
+    for (int i = 0; i < rand_0n(3); i++)
     {
         pos = map_find_space(maze, LE_SOBJECT, FALSE);
         if (!pos_valid(pos)) return FALSE;
@@ -1301,7 +1292,7 @@ static int map_fill_with_stationary_objects(map *maze)
     }
 
     /* up to three fountains */
-    for (i = 0; i < rand_0n(3); i++)
+    for (int i = 0; i < rand_0n(3); i++)
     {
         pos = map_find_space(maze, LE_SOBJECT, FALSE);
         if (!pos_valid(pos)) return FALSE;
@@ -1309,7 +1300,7 @@ static int map_fill_with_stationary_objects(map *maze)
     }
 
     /* up to two thrones */
-    for (i = 0; i < rand_0n(2); i++)
+    for (int i = 0; i < rand_0n(2); i++)
     {
         pos = map_find_space(maze, LE_SOBJECT, FALSE);
         if (!pos_valid(pos)) return FALSE;
@@ -1317,7 +1308,7 @@ static int map_fill_with_stationary_objects(map *maze)
     }
 
     /* up to two  mirrors */
-    for (i = 0; i < rand_0n(2); i++)
+    for (int i = 0; i < rand_0n(2); i++)
     {
         pos = map_find_space(maze, LE_SOBJECT, FALSE);
         if (!pos_valid(pos)) return FALSE;
@@ -1337,12 +1328,8 @@ static int map_fill_with_stationary_objects(map *maze)
 
 static void map_fill_with_objects(map *l)
 {
-    int i,j;                    /* loop vars */
-    item_t it;
-    item *container = NULL;
-
     /* up to two pieces of armour */
-    for (i = 0; i <= rand_0n(2); i++)
+    for (int i = 0; i <= rand_0n(2); i++)
     {
         map_item_add(l, item_new_by_level(IT_ARMOUR, l->nlevel));
     }
@@ -1350,31 +1337,33 @@ static void map_fill_with_objects(map *l)
     /* up to two amulets on levels > 5 */
     if (l->nlevel > 5)
     {
-        for (i = 0; i <= rand_0n(2); i++)
+        for (int i = 0; i <= rand_0n(2); i++)
             map_item_add(l, item_new_by_level(IT_AMULET, l->nlevel));
     }
 
     /* up to two piles of ammunition */
-    for (i = 0; i <= rand_0n(2); i++)
+    for (int i = 0; i <= rand_0n(2); i++)
     {
         map_item_add(l, item_new_by_level(IT_AMMO, l->nlevel));
     }
 
     /* up to three books */
-    for (i = 0; i <= rand_0n(3); i++)
+    for (int i = 0; i <= rand_0n(3); i++)
     {
         map_item_add(l, item_new_by_level(IT_BOOK, l->nlevel));
     }
 
     /* up to two containers */
-    for (i = 1; i <= rand_0n(2); i++)
+    for (int i = 1; i <= rand_0n(2); i++)
     {
         /* random container type */
-        container = item_new(IT_CONTAINER, rand_1n(CT_MAX));
+        item *container = item_new(IT_CONTAINER, rand_1n(CT_MAX));
 
         /* up to 5 items inside the container */
-        for (j = 0; j < rand_0n(5); j++)
+        for (int j = 0; j < rand_0n(5); j++)
         {
+            item_t it;
+
             /* prevent containers inside the container */
             do
             {
@@ -1396,38 +1385,38 @@ static void map_fill_with_objects(map *l)
     }
 
     /* up to 10 piles of gold */
-    for (i = 0; i <= rand_0n(10); i++)
+    for (int i = 0; i <= rand_0n(10); i++)
     {
         /* There is nothing like a newly minted pound. */
         map_item_add(l, item_new(IT_GOLD, rand_m_n(10, (l->nlevel + 1) * 15)));
     }
 
     /* up to three gems */
-    for (i = 0; i <= rand_0n(3); i++)
+    for (int i = 0; i <= rand_0n(3); i++)
     {
         map_item_add(l, item_new_random(IT_GEM, FALSE));
     }
 
     /* up to four potions */
-    for (i = 0; i <= rand_0n(4); i++)
+    for (int i = 0; i <= rand_0n(4); i++)
     {
         map_item_add(l, item_new_by_level(IT_POTION, l->nlevel));
     }
 
     /* up to three scrolls */
-    for (i = 0; i <= rand_0n(3); i++)
+    for (int i = 0; i <= rand_0n(3); i++)
     {
         map_item_add(l, item_new_by_level(IT_SCROLL, l->nlevel));
     }
 
     /* up to two rings */
-    for (i = 0; i <= rand_0n(2); i++)
+    for (int i = 0; i <= rand_0n(2); i++)
     {
         map_item_add(l, item_new_by_level(IT_RING, l->nlevel));
     }
 
     /* up to two weapons */
-    for (i = 0; i <= rand_0n(2); i++)
+    for (int i = 0; i <= rand_0n(2); i++)
     {
         map_item_add(l, item_new_by_level(IT_WEAPON, l->nlevel));
     }
@@ -1436,18 +1425,16 @@ static void map_fill_with_objects(map *l)
 
 static void map_fill_with_traps(map *l)
 {
-    int count;
-    position pos;
-    int trapdoor = FALSE;
+    gboolean trapdoor = FALSE;
 
     assert(l != NULL);
 
     /* Trapdoor cannot be placed in the last dungeon map and the last vulcano map */
     trapdoor = (!is_dungeon_bottom(l->nlevel) && !is_volcano_bottom(l->nlevel));
 
-    for (count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
+    for (int count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
     {
-        pos = map_find_space(l, LE_TRAP, FALSE);
+        position pos = map_find_space(l, LE_TRAP, FALSE);
         map_trap_set(l, pos, rand_1n(trapdoor ? TT_MAX : TT_TRAPDOOR));
     }
 } /* map_fill_with_traps */
@@ -1457,7 +1444,7 @@ static void map_make_maze(map *maze, int treasure_room)
 {
     position pos;
     int mx, my;
-    int nrooms, room;
+    int nrooms;
     rectangle **rooms = NULL;
     gboolean want_monster = FALSE;
 
@@ -1518,7 +1505,7 @@ generate:
 
     rooms = g_malloc0(sizeof(rectangle *) * (nrooms + 1));
 
-    for (room = 0; room < nrooms; room++)
+    for (int room = 0; room < nrooms; room++)
     {
         rooms[room] = g_malloc0(sizeof(rectangle));
 
@@ -1575,7 +1562,7 @@ generate:
         map_make_treasure_room(maze, rooms);
 
     /* cleanup */
-    for (room = 0; room < nrooms; room++)
+    for (int room = 0; room < nrooms; room++)
         g_free(rooms[room]);
 
     g_free(rooms);
@@ -2233,14 +2220,11 @@ static int map_path_cost(map_path_element* element, position target)
 
 static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArray *list)
 {
-    guint idx;
-    map_path_element *li;
-
     assert(el != NULL && list != NULL);
 
-    for (idx = 0; idx < list->len; idx++)
+    for (guint idx = 0; idx < list->len; idx++)
     {
-        li = g_ptr_array_index(list, idx);
+        map_path_element *li = g_ptr_array_index(list, idx);
 
         if (pos_identical(li->pos, el->pos))
             return li;
@@ -2252,9 +2236,8 @@ static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArra
 static map_path_element *map_path_find_best(map_path *path)
 {
     map_path_element *el, *best = NULL;
-    guint idx;
 
-    for (idx = 0; idx < path->open->len; idx++)
+    for (guint idx = 0; idx < path->open->len; idx++)
     {
         el = g_ptr_array_index(path->open, idx);
 
@@ -2272,19 +2255,14 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos,
                                           map_element_t element,
                                           gboolean ppath)
 {
-    GPtrArray *neighbours;
-    map_path_element *pe;
-    position npos;
-    direction dir;
+    GPtrArray *neighbours = g_ptr_array_new();
 
-    neighbours = g_ptr_array_new();
-
-    for (dir = GD_NONE + 1; dir < GD_MAX; dir++)
+    for (direction dir = GD_NONE + 1; dir < GD_MAX; dir++)
     {
         if (dir == GD_CURR)
             continue;
 
-        npos = pos_move(pos, dir);
+        position npos = pos_move(pos, dir);
 
         if (!pos_valid(npos))
             continue;
@@ -2292,7 +2270,7 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos,
         if ((ppath && lt_is_passable(player_memory_of(nlarn->p, npos).type))
                 || (!ppath && monster_valid_dest(l, npos, element)))
         {
-            pe = map_path_element_new(npos);
+            map_path_element *pe = map_path_element_new(npos);
             g_ptr_array_add(neighbours, pe);
         }
     }

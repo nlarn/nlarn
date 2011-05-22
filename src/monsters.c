@@ -1145,13 +1145,12 @@ int monster_items_pickup(monster *m)
     /* FIXME: time management */
 
     gboolean pick_up = FALSE;
-    guint idx;
     item *it;
     char buf[61] = { 0 };
 
     assert(m != NULL);
 
-    for (idx = 0; idx < inv_length(*map_ilist_at(monster_map(m), m->pos)); idx++)
+    for (guint idx = 0; idx < inv_length(*map_ilist_at(monster_map(m), m->pos)); idx++)
     {
         it = inv_get(*map_ilist_at(monster_map(m), m->pos), idx);
 
@@ -1843,8 +1842,7 @@ char *monster_desc(monster *m)
     {
         char **desc_list = strv_new();
 
-        guint i;
-        for (i = 0; i < m->effects->len; i++)
+        for (guint i = 0; i < m->effects->len; i++)
         {
             effect *e = game_effect_get(nlarn, g_ptr_array_index(m->effects, i));
 
@@ -1897,7 +1895,7 @@ int monster_color(monster *m)
 
 void monster_genocide(monster_t monster_id)
 {
-    GList *mlist, *iter;
+    GList *mlist;
     monster *monst;
 
     assert(monster_id > MT_NONE && monster_id < MT_MAX);
@@ -1906,7 +1904,7 @@ void monster_genocide(monster_t monster_id)
     mlist = g_hash_table_get_values(nlarn->monsters);
 
     /* purge genocided monsters */
-    for (iter = mlist; iter != NULL; iter = iter->next)
+    for (GList *iter = mlist; iter != NULL; iter = iter->next)
     {
         monst = (monster *)iter->data;
         if (monster_is_genocided(monst->type))
@@ -2076,12 +2074,11 @@ static gboolean monster_attack_available(monster *m, attack_t type)
 
 static item *monster_weapon_select(monster *m)
 {
-    item *best = NULL, *curr = NULL;
-    guint idx = 0;
+    item *best = NULL;
 
-    for (idx = 0; idx < inv_length(m->inventory); idx++)
+    for (guint idx = 0; idx < inv_length(m->inventory); idx++)
     {
-        curr = inv_get(m->inventory, idx);
+        item *curr = inv_get(m->inventory, idx);
 
         if (curr->type == IT_WEAPON)
         {
@@ -2225,8 +2222,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
 
             if (inv != NULL)
             {
-                guint idx = 0;
-                for (; idx < inv_length(inv); idx++)
+                for (guint idx = 0; idx < inv_length(inv); idx++)
                 {
                     item *i = inv_get(inv, idx);
                     if (i->type == IT_GOLD)
@@ -2467,12 +2463,11 @@ static position monster_move_attack(monster *m, struct player *p)
 
 static position monster_move_flee(monster *m, struct player *p)
 {
-    int tries;
     int dist = 0;
     position npos_tmp;
     position npos = monster_pos(m);
 
-    for (tries = 1; tries < GD_MAX; tries++)
+    for (int tries = 1; tries < GD_MAX; tries++)
     {
         /* try all fields surrounding the monster if the
          * distance between monster & player is greater */
@@ -2610,12 +2605,10 @@ static position monster_move_civilian(monster *m, struct player *p)
 int monster_is_carrying_item(monster *m, item_t type)
 {
     inventory *inv = m->inventory;
-    item *it;
 
-    guint idx;
-    for (idx = 0; idx < inv_length(inv); idx++)
+    for (guint idx = 0; idx < inv_length(inv); idx++)
     {
-        it = inv_get(inv, idx);
+        item *it = inv_get(inv, idx);
         if (it->type == type)
             return TRUE;
     }

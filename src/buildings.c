@@ -275,10 +275,10 @@ void building_dndstore_init()
     /* this is a one-time process! */
     if (initialized) return;
 
-    int count;
-    item_t type = IT_NONE;
-    for (type = IT_AMULET; type < IT_MAX; type++)
+    for (item_t type = IT_AMULET; type < IT_MAX; type++)
     {
+        int count;
+
         /*never generate gems or gold */
         if (type == IT_GEM || type == IT_GOLD)
             continue;
@@ -290,8 +290,7 @@ void building_dndstore_init()
         else
             count = 1;
 
-        guint id;
-        for (id = 1; id < item_max_id(type); id++)
+        for (guint id = 1; id < item_max_id(type); id++)
         {
             /* do not generate unobtainable items except in wizard mode */
             if (!game_wizardmode(nlarn) && !item_obtainable(type, id))
@@ -1085,7 +1084,7 @@ int building_monastery(struct player *p)
 
 void building_monastery_init()
 {
-    int i = 0, j;
+    int i = 0;
 
     /* the list of items available in the monastery */
     struct
@@ -1105,7 +1104,7 @@ void building_monastery_init()
 
     while (igen[i].type != IT_NONE)
     {
-        for (j = 0; j < igen[i].count; j++)
+        for (int j = 0; j < igen[i].count; j++)
         {
             item *nitem = item_new(igen[i].type, igen[i].id);
             inv_add(&nlarn->monastery_stock, nitem);

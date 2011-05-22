@@ -57,8 +57,6 @@ static const luaL_reg effect_metamethods[] =
 
 void wrap_effects(lua_State *L)
 {
-    effect_t type;
-
     assert (L != NULL);
 
     /* create methods table, add it to the globals */
@@ -88,7 +86,7 @@ void wrap_effects(lua_State *L)
     lua_pop(L, 1);
 
     /* register constants */
-    for (type = ET_NONE; type < ET_MAX; type++)
+    for (effect_t type = ET_NONE; type < ET_MAX; type++)
     {
         lua_pushinteger(L, type);
         lua_setglobal(L, effect_type_name(type));

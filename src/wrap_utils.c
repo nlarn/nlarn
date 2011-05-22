@@ -32,8 +32,6 @@ static gboolean luaN_data_query(const char *table, guint idx, const char *attrib
 
 void wrap_utils(lua_State *L)
 {
-    int i;
-
     assert (L != NULL);
 
     /* register constants */
@@ -101,7 +99,7 @@ void wrap_utils(lua_State *L)
         { NULL, 0 },
     };
 
-    for (i = 0; constants[i].name != NULL; i++)
+    for (int i = 0; constants[i].name != NULL; i++)
     {
         lua_pushinteger(L, constants[i].value);
         lua_setglobal(L, constants[i].name);
@@ -169,9 +167,8 @@ int luaN_push_table(const char *table, guint idx, const char *tname)
 static int wrap_log(lua_State *L)
 {
     int nargs = lua_gettop(L);    /* number of arguments */
-    int i;
 
-    for (i = 1; i <= nargs; i++)
+    for (int i = 1; i <= nargs; i++)
     {
         log_add_entry(nlarn->log, "%s", luaL_checkstring(L, i));
     }

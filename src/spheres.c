@@ -196,12 +196,10 @@ void sphere_move(sphere *s, game *g)
 guint sphere_at(game *g, position pos)
 {
     guint count = 0;
-    guint idx;
-    sphere *s;
 
-    for (idx = 0; idx < g->spheres->len; idx++)
+    for (guint idx = 0; idx < g->spheres->len; idx++)
     {
-        s = (sphere *)g_ptr_array_index(g->spheres, idx);
+        sphere *s = (sphere *)g_ptr_array_index(g->spheres, idx);
         if (pos_identical(s->pos, pos))
         {
             count++;

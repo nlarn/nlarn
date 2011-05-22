@@ -613,7 +613,7 @@ int display_paint_screen(player *p)
     clrtoeol();
 
     /* clear lines */
-    for (i = 0; i < 7; i++)
+    for (int i = 0; i < 7; i++)
     {
         move(11 + i, MAP_MAX_X + 3);
         clrtoeol();
@@ -800,7 +800,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     gboolean keep_running = TRUE;
 
     /* used for looping over callbacks */
-    guint cb_nr;
     display_inv_callback *cb;
     int key;
 
@@ -814,8 +813,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     /* position of currently selected item */
     guint curr = 1;
 
-    /* position in inventory (loop var) */
-    guint pos;
     item *it;
     char item_desc[81];
 
@@ -882,7 +879,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         }
 
         /* draw all items */
-        for (pos = 1; pos <= (unsigned)min(len_curr, maxvis); pos++)
+        for (guint pos = 1; pos <= (unsigned)min(len_curr, maxvis); pos++)
         {
             it = inv_get_filtered(*inv, (pos - 1) + offset, ifilter);
 
@@ -957,7 +954,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         captions = strv_new();
 
         /* assemble window caption (if callbacks have been defined) */
-        for (cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
+        for (guint cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
         {
             cb = g_ptr_array_index(callbacks, cb_nr);
 
@@ -1108,7 +1105,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         default:
             /* check callback function keys (if defined) */
-            for (cb_nr = 1; callbacks != NULL && cb_nr <= callbacks->len; cb_nr++)
+            for (guint cb_nr = 1; callbacks != NULL && cb_nr <= callbacks->len; cb_nr++)
             {
                 cb = g_ptr_array_index(callbacks, cb_nr - 1);
 
@@ -1164,8 +1161,6 @@ void display_config_autopickup(player *p)
     int RUN = TRUE;
     int attrs; /* curses attributes */
 
-    item_t it;
-
     height = 6;
     width = max(36 /* length of first label */, IT_MAX * 2 + 1);
 
@@ -1181,7 +1176,7 @@ void display_config_autopickup(player *p)
 
     do
     {
-        for (it = 1; it < IT_MAX; it++)
+        for (item_t it = 1; it < IT_MAX; it++)
         {
             if (p->settings.auto_pickup[it])
                 attrs = COLOR_PAIR(DCP_RED_WHITE);
@@ -1210,7 +1205,7 @@ void display_config_autopickup(player *p)
         default:
             if (!display_window_move(cwin, key))
             {
-                for (it = 1; it < IT_MAX; it++)
+                for (item_t it = 1; it < IT_MAX; it++)
                 {
                     if (item_glyph(it) == key)
                     {
@@ -1232,7 +1227,6 @@ spell *display_spell_select(char *title, player *p)
     guint width, height;
     guint startx, starty;
     guint maxvis;
-    guint pos;
     int key; /* keyboard input */
     int RUN = TRUE;
 
@@ -1273,7 +1267,7 @@ spell *display_spell_select(char *title, player *p)
     do
     {
         /* display spells */
-        for (pos = 1; pos <= maxvis; pos++)
+        for (guint pos = 1; pos <= maxvis; pos++)
         {
             sp = g_ptr_array_index(p->known_spells, pos + offset - 1);
 
@@ -1469,7 +1463,7 @@ mnemonics:
                     code_buf[strlen(code_buf)] = key;
                     /* search for match */
 
-                    for (pos = 1; pos <= p->known_spells->len; pos++)
+                    for (guint pos = 1; pos <= p->known_spells->len; pos++)
                     {
                         sp = g_ptr_array_index(p->known_spells, pos - 1);
 
@@ -1530,8 +1524,6 @@ int display_get_count(const char *caption, int value)
 
     GPtrArray *text;
 
-    int tmp;
-
     /* curses attributes */
     int attrs;
 
@@ -1568,8 +1560,7 @@ int display_get_count(const char *caption, int value)
     mwin = display_window_new(startx, starty, width, height, NULL);
     wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
 
-    guint line;
-    for (line = 0; line < text->len; line++)
+    for (guint line = 0; line < text->len; line++)
     {
         /* fill the box background */
         mvwprintw(mwin->window, 1 + line, 1, "%-*s", width - 2, "");
@@ -1627,7 +1618,7 @@ int display_get_count(const char *caption, int value)
             }
             else if (ipos > 0)
             {
-                for (tmp = ipos - 1; tmp < ilen; tmp++)
+                for (int tmp = ipos - 1; tmp < ilen; tmp++)
                     ivalue[tmp] = ivalue[tmp + 1];
 
                 ipos--;
@@ -1642,7 +1633,7 @@ int display_get_count(const char *caption, int value)
         case KEY_DC:
             if (ipos < ilen)
             {
-                for (tmp = ipos; tmp < ilen; tmp++)
+                for (int tmp = ipos; tmp < ilen; tmp++)
                     ivalue[tmp] = ivalue[tmp + 1];
             }
             break;
@@ -1810,9 +1801,8 @@ char *display_get_string(const char *caption, const char *value, size_t max_len)
     display_window *mwin = display_window_new(startx, starty, width, height, NULL);
 
     wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-    guint line;
 
-    for (line = 0; line < text->len; line++)
+    for (guint line = 0; line < text->len; line++)
     {
         /* print text */
         mvwprintw(mwin->window, 1 + line, 1, " %-*s ", width - 4,
@@ -2125,7 +2115,6 @@ direction display_get_direction(const char *title, int *available)
     int *dirs = NULL;
     int startx, starty;
     int width;
-    int x, y;
     int attrs; /* curses attributes */
     int key; /* input key buffer */
     int RUN = TRUE;
@@ -2136,7 +2125,7 @@ direction display_get_direction(const char *title, int *available)
     if (!available)
     {
         dirs = g_malloc0(sizeof(int) * GD_MAX);
-        for (x = 0; x < GD_MAX; x++)
+        for (int x = 0; x < GD_MAX; x++)
             dirs[x] = TRUE;
 
         dirs[GD_CURR] = FALSE;
@@ -2163,8 +2152,8 @@ direction display_get_direction(const char *title, int *available)
 
     wattron(dwin->window, (attrs = COLOR_PAIR(DCP_YELLOW_RED)));
 
-    for (x = 0; x < 3; x++)
-        for (y = 0; y < 3; y++)
+    for (int x = 0; x < 3; x++)
+        for (int y = 0; y < 3; y++)
         {
             if (dirs[(x + 1) + (y * 3)])
                 mvwprintw(dwin->window,
@@ -2367,7 +2356,6 @@ position display_get_new_position(player *p,
 
     /* variables for ray or ball painting */
     area *a = NULL;
-    int x, y;
     monster *target, *m;
 
     /* check the starting position makes sense */
@@ -2465,9 +2453,9 @@ position display_get_new_position(player *p,
 
             attron(attrs);
 
-            for (y = 0; y < a->size_y; y++)
+            for (int y = 0; y < a->size_y; y++)
             {
-                for (x = 0; x < a->size_x; x++)
+                for (int x = 0; x < a->size_x; x++)
                 {
                     if (area_point_get(a, x, y))
                     {
@@ -2667,8 +2655,7 @@ position display_get_new_position(player *p,
             if (travel)
             {
                 map_sobject_t sobj = LS_NONE;
-                int i;
-                for (i = LS_NONE + 1; i < LS_MAX; i++)
+                for (int i = LS_NONE + 1; i < LS_MAX; i++)
                     if (ls_get_image(i) == (char) ch)
                     {
                         sobj = i;
@@ -2758,7 +2745,6 @@ position display_get_new_position(player *p,
 
 void display_show_history(message_log *log, const char *title)
 {
-    guint idx;
     message_log_entry *le;
     GString *text = g_string_new(NULL);
     char intrep[11] = { 0 }; /* string representation of the game time */
@@ -2769,7 +2755,7 @@ void display_show_history(message_log *log, const char *title)
     twidth = strlen(intrep);
 
     /* assemble reversed game log */
-    for (idx = log_length(log); idx > 0; idx--)
+    for (guint idx = log_length(log); idx > 0; idx--)
     {
         le = log_get_entry(log, idx - 1);
         g_string_append_printf(text, "%*d: %s\n", twidth, le->gtime, le->message);
@@ -2790,7 +2776,6 @@ int display_show_message(const char *title, const char *message, int indent)
     int key;
 
     GPtrArray *text;
-    guint idx;
     guint maxvis = 0;
     guint offset = 0;
 
@@ -2809,7 +2794,7 @@ int display_show_message(const char *title, const char *message, int indent)
     text = text_wrap(message, width - wred, indent);
 
     /* determine the length of longest text line */
-    for (idx = 0; idx < text->len; idx++)
+    for (guint idx = 0; idx < text->len; idx++)
         max_len = max(max_len, strlen(g_ptr_array_index(text, idx)));
 
     /* shrink the window width if the default width is not required */
@@ -2829,9 +2814,9 @@ int display_show_message(const char *title, const char *message, int indent)
     do
     {
         /* display the window content */
-        for (idx = 0; idx < maxvis; idx++)
+        for (guint idx = 0; idx < maxvis; idx++)
         {
-            guint pos, count;
+            guint count;
             count = mvwcprintw(mwin->window, DDC_LIGHTGRAY, display_dialog_colset,
                                idx + 1, 1, " %-*s ", width - wred,
                                g_ptr_array_index(text, idx + offset));
@@ -2842,7 +2827,7 @@ int display_show_message(const char *title, const char *message, int indent)
                like lot of work. */
 
             wattron(mwin->window, DDC_LIGHTGRAY);
-            for (pos = count; pos < (width - wred); pos++)
+            for (guint pos = count; pos < (width - wred); pos++)
                 waddch(mwin->window, ' ');
             wattroff(mwin->window, DDC_LIGHTGRAY);
         }
@@ -2923,7 +2908,6 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
 {
     display_window *win;
     GPtrArray *text;
-    guint idx;
     int height;
     const guint max_width = COLS - x1 - 1;
     const guint max_height = LINES - y1;
@@ -2957,7 +2941,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     win = display_window_new(x1, y1, width, height, title);
 
     /* display message */
-    for (idx = 0; idx < text->len; idx++)
+    for (guint idx = 0; idx < text->len; idx++)
     {
         mvwcprintw(win->window, DDC_WHITE, display_dialog_colset, idx + 1, 1,
                   " %-*s ", width - 4, g_ptr_array_index(text, idx));
@@ -3026,7 +3010,6 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
 {
     va_list argp;
     gchar *msg;
-    guint pos;
     int count = 0;
     int attr;
 
@@ -3041,7 +3024,7 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
     /* set the default attribute */
     wattron(win, attr = defattr);
 
-    for (pos = 0; pos < strlen(msg); pos++)
+    for (guint pos = 0; pos < strlen(msg); pos++)
     {
         /* parse tags */
         if (msg[pos] == '`')
@@ -3120,7 +3103,6 @@ static int display_get_colval(const display_colset *colset, const char *name)
 static display_window *display_window_new(int x1, int y1, int width,
                                           int height, const char *title)
 {
-    int i;
     display_window *dwin;
     int attrs; /* curses attributes */
 
@@ -3141,7 +3123,7 @@ static display_window *display_window_new(int x1, int y1, int width,
     /* fill window background */
     wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
 
-    for (i = 1; i < height; i++)
+    for (int i = 1; i < height; i++)
         mvwprintw(dwin->window, i, 1, "%*s", width - 2, "");
 
     wattroff(dwin->window, attrs);

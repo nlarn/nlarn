@@ -73,9 +73,6 @@ void game_init(int argc, char *argv[])
 {
     const char *default_lib_dir = "/usr/share/games/nlarn";
 
-    guint idx;
-    item_t it;
-
     /* these will be filled by the command line parser */
     static gint difficulty = 0;
     static gboolean wizard = FALSE;
@@ -270,9 +267,9 @@ void game_init(int argc, char *argv[])
         /* parse autopickup settings */
         if (auto_pickup && (nlarn->p != NULL))
         {
-            for (idx = 0; idx < strlen(auto_pickup); idx++)
+            for (guint idx = 0; idx < strlen(auto_pickup); idx++)
             {
-                for (it = IT_NONE; it < IT_MAX; it++)
+                for (item_t it = IT_NONE; it < IT_MAX; it++)
                 {
                     if (auto_pickup[idx] == item_glyph(it))
                     {
@@ -287,12 +284,10 @@ void game_init(int argc, char *argv[])
 
 int game_destroy(game *g)
 {
-    int i;
-
     assert(g != NULL);
 
     /* everything must go */
-    for (i = 0; i < MAP_MAX; i++)
+    for (int i = 0; i < MAP_MAX; i++)
     {
         map_destroy(g->maps[i]);
     }
@@ -351,7 +346,7 @@ const gchar *game_userdir()
 
 int game_save(game *g, const char *filename)
 {
-    int idx, err;
+    int err;
     struct cJSON *save, *obj;
     char *fullname = NULL;
     display_window *win = NULL;
@@ -371,7 +366,7 @@ int game_save(game *g, const char *filename)
 
     /* maps */
     cJSON_AddItemToObject(save, "maps", obj = cJSON_CreateArray());
-    for (idx = 0; idx < MAP_MAX; idx++)
+    for (int idx = 0; idx < MAP_MAX; idx++)
     {
         cJSON_AddItemToArray(obj, map_serialize(g->maps[idx]));
     }
@@ -552,10 +547,9 @@ GList *game_score_add(game *g, game_score_t *score)
 
 void game_scores_destroy(GList *gs)
 {
-    GList *iterator;
     game_score_t *score;
 
-    for (iterator = gs; iterator; iterator = iterator->next)
+    for (GList *iterator = gs; iterator; iterator = iterator->next)
     {
         score = iterator->data;
         g_free(score->player_name);
@@ -575,7 +569,6 @@ map *game_map(game *g, guint nmap)
 
 void game_spin_the_wheel(game *g)
 {
-    int nmap;
     map *amap;
 
     assert(g != NULL);
@@ -584,7 +577,7 @@ void game_spin_the_wheel(game *g)
     nlarn->p->movement += player_get_speed(nlarn->p);
 
     /* per-map actions */
-    for (nmap = 0; nmap < MAP_MAX; nmap++)
+    for (int nmap = 0; nmap < MAP_MAX; nmap++)
     {
         amap = game_map(g, nmap);
 
@@ -730,8 +723,6 @@ monster *game_monster_get(game *g, gpointer id)
 
 static void game_new()
 {
-    size_t idx;
-
     /* initialize object hashes (here as they will be needed by player_new) */
     nlarn->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     nlarn->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
@@ -755,7 +746,7 @@ static void game_new()
     building_monastery_init();
 
     /* generate levels */
-    for (idx = 0; idx < MAP_MAX; idx++)
+    for (size_t idx = 0; idx < MAP_MAX; idx++)
     {
         /* if map_new fails, it returns NULL.
            loop while no map has been generated */
@@ -782,7 +773,7 @@ static void game_new()
 
 static gboolean game_load(gchar *filename)
 {
-    int size, idx;
+    int size;
     cJSON *save, *obj;
     char *fullname = NULL;
     display_window *win = NULL;
@@ -887,13 +878,13 @@ static gboolean game_load(gchar *filename)
     obj = cJSON_GetObjectItem(save, "amulet_created");
     size = cJSON_GetArraySize(obj);
     assert(size == AM_MAX);
-    for (idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size; idx++)
         nlarn->amulet_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "weapon_created");
     size = cJSON_GetArraySize(obj);
     assert(size == WT_MAX);
-    for (idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size; idx++)
         nlarn->weapon_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     if (cJSON_GetObjectItem(save, "cure_dianthr_created"))
@@ -903,37 +894,37 @@ static gboolean game_load(gchar *filename)
     obj = cJSON_GetObjectItem(save, "amulet_material_mapping");
     size = cJSON_GetArraySize(obj);
     assert(size == AM_MAX - 1);
-    for (idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size; idx++)
         nlarn->amulet_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "potion_desc_mapping");
     size = cJSON_GetArraySize(obj);
     assert(size == PO_MAX - 1);
-    for (idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size; idx++)
         nlarn->potion_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "ring_material_mapping");
     size = cJSON_GetArraySize(obj);
     assert(size == RT_MAX - 1);
-    for (idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size; idx++)
         nlarn->ring_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "scroll_desc_mapping");
     size = cJSON_GetArraySize(obj);
     assert(size == ST_MAX - 1);
-    for (idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size; idx++)
         nlarn->scroll_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "book_desc_mapping");
     size = cJSON_GetArraySize(obj);
     assert(size == SP_MAX - 1);
-    for (idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size; idx++)
         nlarn->book_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "monster_genocided");
     size = cJSON_GetArraySize(obj);
     assert(size == MT_MAX);
-    for (idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size; idx++)
         nlarn->monster_genocided[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
 
@@ -941,14 +932,14 @@ static gboolean game_load(gchar *filename)
     nlarn->effects = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     obj = cJSON_GetObjectItem(save, "effects");
 
-    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+    for (int idx = 0; idx < cJSON_GetArraySize(obj); idx++)
         effect_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
 
 
     /* restore items */
     nlarn->items = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     obj = cJSON_GetObjectItem(save, "items");
-    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+    for (int idx = 0; idx < cJSON_GetArraySize(obj); idx++)
         item_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
 
 
@@ -956,7 +947,7 @@ static gboolean game_load(gchar *filename)
     obj = cJSON_GetObjectItem(save, "maps");
     size = cJSON_GetArraySize(obj);
     assert(size == MAP_MAX);
-    for (idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size; idx++)
         nlarn->maps[idx] = map_deserialize(cJSON_GetArrayItem(obj, idx));
 
 
@@ -984,7 +975,7 @@ static gboolean game_load(gchar *filename)
     nlarn->monsters = g_hash_table_new(&g_direct_hash, &g_direct_equal);
     obj = cJSON_GetObjectItem(save, "monsters");
 
-    for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+    for (int idx = 0; idx < cJSON_GetArraySize(obj); idx++)
         monster_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
 
     /* initialize the array to store monsters that died during the turn */
@@ -996,7 +987,7 @@ static gboolean game_load(gchar *filename)
 
     if ((obj = cJSON_GetObjectItem(save, "spheres")))
     {
-        for (idx = 0; idx < cJSON_GetArraySize(obj); idx++)
+        for (int idx = 0; idx < cJSON_GetArraySize(obj); idx++)
             sphere_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
     }
 
@@ -1188,7 +1179,6 @@ static GList *game_scores_load(game *g)
 
 static void game_scores_save(game *g, GList *gs)
 {
-    GList *iterator;
     cJSON *sf, *scores;
     char *uscores;
     gzFile sb;
@@ -1200,7 +1190,7 @@ static void game_scores_save(game *g, GList *gs)
     scores = cJSON_CreateArray();
     cJSON_AddItemToObject(sf, "scores", scores);
 
-    for (iterator = gs; iterator; iterator = iterator->next)
+    for (GList *iterator = gs; iterator; iterator = iterator->next)
     {
         game_score_t *score = iterator->data;
 

@@ -410,10 +410,9 @@ spell *spell_deserialize(cJSON *sser)
 
 cJSON *spells_serialize(GPtrArray *sparr)
 {
-    guint idx;
     cJSON *sser = cJSON_CreateArray();
 
-    for (idx = 0; idx < sparr->len; idx++)
+    for (guint idx = 0; idx < sparr->len; idx++)
     {
         spell *s = g_ptr_array_index(sparr, idx);
         cJSON_AddItemToArray(sser, spell_serialize(s));
@@ -424,10 +423,9 @@ cJSON *spells_serialize(GPtrArray *sparr)
 
 GPtrArray *spells_deserialize(cJSON *sser)
 {
-    int idx;
     GPtrArray *n_spells = g_ptr_array_new();
 
-    for (idx = 0; idx < cJSON_GetArraySize(sser); idx++)
+    for (int idx = 0; idx < cJSON_GetArraySize(sser); idx++)
     {
         spell *s = spell_deserialize(cJSON_GetArrayItem(sser, idx));
         g_ptr_array_add(n_spells, s);
@@ -508,9 +506,6 @@ int spell_cast_previous(struct player *p)
 
 int spell_learn(player *p, guint spell_type)
 {
-    spell *s;
-    guint idx;
-
     assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
     if (!spell_known(p, spell_type))
@@ -525,17 +520,17 @@ int spell_learn(player *p, guint spell_type)
             /* spell is beyond the players scope */
             return FALSE;
 
-        s = spell_new(spell_type);
+        spell *s = spell_new(spell_type);
         g_ptr_array_add(p->known_spells, s);
         return s->knowledge;
     }
     else
     {
         /* spell already known, improve knowledge */
-        for (idx = 0; idx < p->known_spells->len; idx++)
+        for (guint idx = 0; idx < p->known_spells->len; idx++)
         {
             /* search spell */
-            s = (spell *)g_ptr_array_index(p->known_spells, idx);
+            spell *s = (spell *)g_ptr_array_index(p->known_spells, idx);
 
             if (s->id == spell_type)
             {
@@ -552,14 +547,11 @@ int spell_learn(player *p, guint spell_type)
 
 int spell_forget(player *p, guint spell_type)
 {
-    spell *s;
-    guint idx;
-
     assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
-    for (idx = 0; idx < p->known_spells->len; idx++);
+    for (guint idx = 0; idx < p->known_spells->len; idx++)
     {
-        s = g_ptr_array_index(p->known_spells, idx);
+        spell *s = g_ptr_array_index(p->known_spells, idx);
         if (s->id == spell_type)
         {
             g_ptr_array_remove_index_fast(p->known_spells, idx);
@@ -572,14 +564,11 @@ int spell_forget(player *p, guint spell_type)
 
 int spell_known(player *p, guint spell_type)
 {
-    spell *s;
-    guint idx;
-
     assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
-    for (idx = 0; idx < p->known_spells->len; idx++)
+    for (guint idx = 0; idx < p->known_spells->len; idx++)
     {
-        s = g_ptr_array_index(p->known_spells, idx);
+        spell *s = g_ptr_array_index(p->known_spells, idx);
         if (s->id == spell_type)
         {
             return s->knowledge;
@@ -1137,7 +1126,7 @@ gboolean spell_phantasmal_forces(spell *s, struct player *p)
 gboolean spell_scare_monsters(spell *s, struct player *p)
 {
     monster *m;
-    int x, y, count = 0;
+    int count = 0;
     position pos;
     map *cmap = game_map(nlarn, Z(p->pos));
     Z(pos) = Z(p->pos);
@@ -1146,11 +1135,11 @@ gboolean spell_scare_monsters(spell *s, struct player *p)
        spell knowledge */
     area *a = area_new_circle(p->pos, 1 + s->knowledge, FALSE);
 
-    for (y = a->start_y; y < a->start_y + a->size_y; y++)
+    for (int y = a->start_y; y < a->start_y + a->size_y; y++)
     {
         Y(pos) = y;
 
-        for (x = a->start_x; x < a->start_x + a->size_x; x++)
+        for (int x = a->start_x; x < a->start_x + a->size_x; x++)
         {
             X(pos) = x;
 

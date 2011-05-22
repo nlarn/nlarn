@@ -346,10 +346,8 @@ item *item_new_finetouch(item *it)
 
     if ((it->bonus != 0) && it->effects)
     {
-        guint eff_no;
-
         /* modify effects linked to the item */
-        for (eff_no = 0; eff_no < it->effects->len; eff_no++)
+        for (guint eff_no = 0; eff_no < it->effects->len; eff_no++)
         {
             gpointer eid = (effect *)g_ptr_array_index(it->effects, eff_no);
             effect *e = game_effect_get(nlarn, eid);
@@ -369,7 +367,6 @@ item *item_new_finetouch(item *it)
 item *item_copy(item *original)
 {
     item *nitem;
-    guint idx = 0;
 
     assert(original != NULL);
 
@@ -382,7 +379,7 @@ item *item_copy(item *original)
 
     if (original->effects != NULL)
     {
-        for (idx = 0; idx < original->effects->len; idx++)
+        for (guint idx = 0; idx < original->effects->len; idx++)
         {
             effect *e = g_ptr_array_index(original->effects, idx);
             effect *ne = effect_copy(e);
@@ -1172,7 +1169,6 @@ int item_remove_curse(item *it)
 
 item *item_enchant(item *it)
 {
-    guint pos;
     gpointer oid;
     effect *e;
     char desc[81] = { 0 };
@@ -1207,7 +1203,7 @@ item *item_enchant(item *it)
 
     if ((it->type == IT_RING) && it->effects)
     {
-        for (pos = 0; pos < it->effects->len; pos++)
+        for (guint pos = 0; pos < it->effects->len; pos++)
         {
             oid = g_ptr_array_index(it->effects, pos);
             e = game_effect_get(nlarn, oid);
@@ -1221,7 +1217,6 @@ item *item_enchant(item *it)
 
 item *item_disenchant(item *it)
 {
-    guint pos;
     gpointer oid;
     effect *e;
 
@@ -1250,7 +1245,7 @@ item *item_disenchant(item *it)
 
     if ((it->type == IT_RING) && it->effects)
     {
-        for (pos = 0; pos < it->effects->len; pos++)
+        for (guint pos = 0; pos < it->effects->len; pos++)
         {
             oid = g_ptr_array_index(it->effects, pos);
             e = game_effect_get(nlarn, oid);
@@ -1577,10 +1572,9 @@ void inv_destroy(inventory *inv, gboolean special)
 
 cJSON *inv_serialize(inventory *inv)
 {
-    guint idx;
     cJSON *sinv = cJSON_CreateArray();
 
-    for (idx = 0; idx < inv_length(inv); idx++)
+    for (guint idx = 0; idx < inv_length(inv); idx++)
     {
         item *it = inv_get(inv, idx);
         cJSON_AddItemToArray(sinv, cJSON_CreateNumber(GPOINTER_TO_UINT(it->oid)));
@@ -1591,14 +1585,10 @@ cJSON *inv_serialize(inventory *inv)
 
 inventory *inv_deserialize(cJSON *iser)
 {
-    int idx;
-    inventory *inv;
-
-    inv = g_malloc0(sizeof(inventory));
-
+    inventory *inv = g_malloc0(sizeof(inventory));
     inv->content = g_ptr_array_new();
 
-    for (idx = 0; idx < cJSON_GetArraySize(iser); idx++)
+    for (int idx = 0; idx < cJSON_GetArraySize(iser); idx++)
     {
         guint oid = cJSON_GetArrayItem(iser, idx)->valueint;
         g_ptr_array_add(inv->content, GUINT_TO_POINTER(oid));
@@ -1621,8 +1611,6 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
 
 int inv_add(inventory **inv, item *it)
 {
-    guint idx;
-
     assert(inv != NULL && it != NULL && it->oid != NULL);
 
     /* create inventory if necessary */
@@ -1645,7 +1633,7 @@ int inv_add(inventory **inv, item *it)
     if (item_is_stackable(it->type))
     {
         /* loop through items in the target inventory to find a similar item */
-        for (idx = 0; idx < inv_length(*inv); idx++)
+        for (guint idx = 0; idx < inv_length(*inv); idx++)
         {
             item *i = inv_get(*inv, idx);
             /* compare the current item with the one whis is to be added */
@@ -1770,14 +1758,11 @@ int inv_del_oid(inventory **inv, gpointer oid)
 
 void inv_erode(inventory **inv, item_erosion_type iet, gboolean visible)
 {
-    item *it;
-    guint idx;
-
     assert(inv != NULL);
 
-    for (idx = 0; idx < inv_length(*inv); idx++)
+    for (guint idx = 0; idx < inv_length(*inv); idx++)
     {
-        it = inv_get(*inv, idx);
+        item *it = inv_get(*inv, idx);
         item_erode(inv, it, iet, visible);
     }
 }
@@ -1797,7 +1782,6 @@ void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data)
 int inv_weight(inventory *inv)
 {
     int sum = 0;
-    guint idx;
 
     if (inv == NULL)
     {
@@ -1805,7 +1789,7 @@ int inv_weight(inventory *inv)
     }
 
     /* add contents weight */
-    for (idx = 0; idx < inv_length(inv); idx++)
+    for (guint idx = 0; idx < inv_length(inv); idx++)
     {
         sum += item_weight(inv_get(inv, idx));
     }
@@ -1816,7 +1800,6 @@ int inv_weight(inventory *inv)
 guint inv_length_filtered(inventory *inv, int (*ifilter)(item *))
 {
     int count = 0;
-    guint pos;
 
     if (inv == NULL)
     {
@@ -1830,7 +1813,7 @@ guint inv_length_filtered(inventory *inv, int (*ifilter)(item *))
         return inv_length(inv);
     }
 
-    for (pos = 0; pos < inv_length(inv); pos++)
+    for (guint pos = 0; pos < inv_length(inv); pos++)
     {
         item *i = inv_get(inv, pos);
 
@@ -1845,7 +1828,6 @@ guint inv_length_filtered(inventory *inv, int (*ifilter)(item *))
 
 item *inv_get_filtered(inventory *inv, guint idx, int (*ifilter)(item *))
 {
-    guint num;
     guint curr = 0;
 
     /* return the inventory length if no filter has been set */
@@ -1854,7 +1836,7 @@ item *inv_get_filtered(inventory *inv, guint idx, int (*ifilter)(item *))
         return inv_get(inv, idx);
     }
 
-    for (num = 0; num < inv_length(inv); num++)
+    for (guint num = 0; num < inv_length(inv); num++)
     {
         item *i = inv_get(inv, num);
 

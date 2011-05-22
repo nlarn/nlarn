@@ -270,8 +270,6 @@ gboolean player_assign_bonus_stats(player *p, char *preset)
 
 void player_destroy(player *p)
 {
-    guint idx;
-
     assert(p != NULL);
 
     /* release spells */
@@ -284,7 +282,7 @@ void player_destroy(player *p)
     g_ptr_array_free(p->known_spells, TRUE);
 
     /* release effects */
-    for (idx = 0; idx < p->effects->len; idx++)
+    for (guint idx = 0; idx < p->effects->len; idx++)
     {
         gpointer effect_id = g_ptr_array_index(p->effects, idx);
         effect *e = game_effect_get(nlarn, effect_id);
@@ -459,12 +457,10 @@ cJSON *player_serialize(player *p)
     /* store remembered stationary objects */
     if (p->sobjmem != NULL)
     {
-        guint idx;
-
         obj = cJSON_CreateArray();
         cJSON_AddItemToObject(pser, "sobjmem", obj);
 
-        for (idx = 0; idx < p->sobjmem->len; idx++)
+        for (guint idx = 0; idx < p->sobjmem->len; idx++)
         {
             player_sobject_memory *som;
             cJSON *soms = cJSON_CreateObject();
@@ -523,7 +519,6 @@ cJSON *player_serialize(player *p)
 player *player_deserialize(cJSON *pser)
 {
     player *p;
-    int idx;
     cJSON *obj, *elem;
 
     p = g_malloc0(sizeof(player));
@@ -619,27 +614,27 @@ player *player_deserialize(cJSON *pser)
 
     /* identified items */
     obj = cJSON_GetObjectItem(pser, "identified_amulets");
-    for (idx = 0; idx < AM_MAX; idx++)
+    for (int idx = 0; idx < AM_MAX; idx++)
         p->identified_amulets[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(pser, "identified_books");
-    for (idx = 0; idx < SP_MAX; idx++)
+    for (int idx = 0; idx < SP_MAX; idx++)
         p->identified_books[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(pser, "identified_potions");
-    for (idx = 0; idx < PO_MAX; idx++)
+    for (int idx = 0; idx < PO_MAX; idx++)
         p->identified_potions[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(pser, "identified_rings");
-    for (idx = 0; idx < RT_MAX; idx++)
+    for (int idx = 0; idx < RT_MAX; idx++)
         p->identified_rings[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(pser, "identified_scrolls");
-    for (idx = 0; idx < ST_MAX; idx++)
+    for (int idx = 0; idx < ST_MAX; idx++)
         p->identified_scrolls[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(pser, "courses_taken");
-    for (idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
+    for (int idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
         p->school_courses_taken[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     pos_val(p->pos) = cJSON_GetObjectItem(pser, "position")->valueint;
@@ -676,7 +671,7 @@ player *player_deserialize(cJSON *pser)
 
         p->sobjmem = g_array_sized_new(FALSE, FALSE, sizeof(player_sobject_memory), count);
 
-        for (idx = 0; idx < count; idx++)
+        for (int idx = 0; idx < count; idx++)
         {
             player_sobject_memory som;
             cJSON *soms = cJSON_GetArrayItem(obj, idx);
@@ -693,7 +688,7 @@ player *player_deserialize(cJSON *pser)
     if (obj)
     {
         elem = cJSON_GetObjectItem(obj, "auto_pickup");
-        for (idx = IT_NONE; idx < IT_MAX; idx++)
+        for (int idx = IT_NONE; idx < IT_MAX; idx++)
             p->settings.auto_pickup[idx] = (gboolean) cJSON_GetArrayItem(elem, idx)->valueint;
     }
 
@@ -703,7 +698,7 @@ player *player_deserialize(cJSON *pser)
     p->stats.deepest_level = cJSON_GetObjectItem(obj, "deepest_level")->valueint;
 
     elem = cJSON_GetObjectItem(obj, "monsters_killed");
-    for (idx = 0; idx < MT_MAX; idx++)
+    for (int idx = 0; idx < MT_MAX; idx++)
         p->stats.monsters_killed[idx] = cJSON_GetArrayItem(elem, idx)->valueint;
 
     p->stats.spells_cast = cJSON_GetObjectItem(obj, "spells_cast")->valueint;
@@ -1004,7 +999,6 @@ void player_die(player *p, player_cod cause_type, int cause)
     char *tmp = NULL;
     char it_desc[61] = { 0 };
     int count;
-    guint pos;
     effect *ef = NULL;
     char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
 
@@ -1165,17 +1159,18 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_free(tmp);
 
         /* determine position of score in the score list */
-        pos = g_list_index(scores, score);
+        gint rank = g_list_index(scores, score);
 
         /* assemble surrounding scores list */
         g_string_append(text, "\n\n");
 
         /* get entry three entries up of current/top score in list */
-        iterator = g_list_nth(scores, max(pos - 3, 0));
+        iterator = g_list_nth(scores, max(rank - 3, 0));
 
         /* display up to 7 entries */
-        for (count = max(pos - 3, 0); iterator && (count < (max(pos, 0) + 4));
-                iterator = iterator->next, count++)
+        for (int nrec = max(rank - 3, 0);
+             iterator && (nrec < (max(rank, 0) + 4));
+             iterator = iterator->next, nrec++)
         {
             gchar *desc;
 
@@ -1297,7 +1292,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         {
             g_string_append(text, "\n\n-- Effects ----------------------------\n\n");
 
-            for (pos = 0; effect_desc[pos]; pos++)
+            for (guint pos = 0; effect_desc[pos]; pos++)
             {
                 g_string_append_printf(text, "%s\n", effect_desc[pos]);
             }
@@ -1310,7 +1305,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         {
             g_string_append(text, "\n\n-- Known Spells -----------------------\n\n");
 
-            for (pos = 0; pos < p->known_spells->len; pos++)
+            for (guint pos = 0; pos < p->known_spells->len; pos++)
             {
                 spell *s = (spell *)g_ptr_array_index(p->known_spells, pos);
                 tmp = str_capitalize(g_strdup(spell_name(s)));
@@ -1323,7 +1318,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         }
 
         /* identify entire inventory */
-        for (pos = 0; pos < inv_length(p->inventory); pos++)
+        for (guint pos = 0; pos < inv_length(p->inventory); pos++)
         {
             item *it = inv_get(p->inventory, pos);
             it->blessed_known = TRUE;
@@ -1398,7 +1393,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         if (equipment_count < inv_length(p->inventory))
         {
             g_string_append(text, "\n\n-- Items in pack ----------------------\n\n");
-            for (pos = 0; pos < inv_length(p->inventory); pos++)
+            for (guint pos = 0; pos < inv_length(p->inventory); pos++)
             {
                 item *it = inv_get(p->inventory, pos);
                 if (!player_item_is_equipped(p, it))
@@ -1411,10 +1406,10 @@ void player_die(player *p, player_cod cause_type, int cause)
         }
 
         /* list monsters killed */
-        guint mnum, body_count = 0;
+        guint body_count = 0;
         g_string_append(text, "\n\n-- Creatures vanquished ---------------\n\n");
 
-        for (mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
+        for (guint mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
         {
             if (p->stats.monsters_killed[mnum] > 0)
             {
@@ -1435,7 +1430,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
 
         count = 0;
-        for (mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
+        for (guint mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
         {
             if (!monster_is_genocided(mnum))
                 continue;
@@ -1452,7 +1447,8 @@ void player_die(player *p, player_cod cause_type, int cause)
         /* messages */
         g_string_append(text, "\n\n-- Last messages ----------------------\n\n");
         count = min(10, log_length(nlarn->log));
-        for (pos = log_length(nlarn->log) - count; pos < log_length(nlarn->log); pos++)
+        for (guint pos = log_length(nlarn->log) - count;
+             pos < log_length(nlarn->log); pos++)
         {
             message_log_entry *entry = log_get_entry(nlarn->log, pos);
             g_string_append_printf(text, "%s\n", entry->message);
@@ -1501,7 +1497,6 @@ void player_die(player *p, player_cod cause_type, int cause)
 gint64 player_calc_score(player *p, int won)
 {
     gint64 score = 0;
-    guint idx;
 
     assert (p != NULL);
 
@@ -1509,13 +1504,13 @@ gint64 player_calc_score(player *p, int won)
     score = player_get_gold(p) + p->bank_account - p->outstanding_taxes;
 
     /* value of equipment */
-    for (idx = 0; idx < inv_length(p->inventory); idx++)
+    for (guint idx = 0; idx < inv_length(p->inventory); idx++)
     {
         score += item_price(inv_get(p->inventory, idx));
     }
 
     /* value of stuff stored at home */
-    for (idx = 0; idx < inv_length(nlarn->player_home); idx++)
+    for (guint idx = 0; idx < inv_length(nlarn->player_home); idx++)
     {
         score += item_price(inv_get(nlarn->player_home, idx));
     }
@@ -2029,7 +2024,6 @@ void player_pickup(player *p)
 
 void player_autopickup(player *p)
 {
-    guint idx;
     inventory **floor;
     int other_items_count = 0;
     int other_item_id     = -1;
@@ -2043,7 +2037,7 @@ void player_autopickup(player *p)
 
     floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
 
-    for (idx = 0; idx < inv_length(*floor); idx++)
+    for (guint idx = 0; idx < inv_length(*floor); idx++)
     {
         item *i = inv_get(*floor, idx);
 
@@ -2099,13 +2093,12 @@ void player_autopickup_show(player *p)
 {
     GString *msg;
     int count = 0;
-    item_t it;
 
     assert (p != NULL);
 
     msg = g_string_new(NULL);
 
-    for (it = IT_NONE; it < IT_MAX; it++)
+    for (item_t it = IT_NONE; it < IT_MAX; it++)
     {
         if (p->settings.auto_pickup[it])
         {
@@ -2134,8 +2127,6 @@ void player_autopickup_show(player *p)
 void player_level_gain(player *p, int count)
 {
     int base;
-    int i;
-
     char *desc_orig, *desc_new;
 
     assert(p != NULL && count > 0);
@@ -2167,7 +2158,7 @@ void player_level_gain(player *p, int count)
         /* artificially gained a level, need to adjust XP to match level */
         player_exp_gain(p, player_lvl_exp[p->level - 1] - p->experience);
 
-    for (i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
     {
         /* increase HP max */
         base = (p->constitution - game_difficulty(nlarn)) >> 1;
@@ -2188,7 +2179,6 @@ void player_level_gain(player *p, int count)
 void player_level_lose(player *p, int count)
 {
     int base;
-    int i;
 
     assert(p != NULL && count > 0);
 
@@ -2202,7 +2192,7 @@ void player_level_lose(player *p, int count)
         /* adjust XP to match level */
         player_exp_lose(p, p->experience - player_lvl_exp[p->level - 1]);
 
-    for (i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
     {
         /* decrease HP max */
         base = (p->constitution - game_difficulty(nlarn)) >> 1;
@@ -2807,14 +2797,12 @@ effect *player_effect_add(player *p, effect *e)
 
 void player_effects_add(player *p, GPtrArray *effects)
 {
-    guint idx;
-
     assert (p != NULL);
 
     /* if effects is NULL */
     if (!effects) return;
 
-    for (idx = 0; idx < effects->len; idx++)
+    for (guint idx = 0; idx < effects->len; idx++)
     {
         gpointer effect_id = g_ptr_array_index(effects, idx);
         effect *e = game_effect_get(nlarn, effect_id);
@@ -2853,14 +2841,12 @@ int player_effect_del(player *p, effect *e)
 
 void player_effects_del(player *p, GPtrArray *effects)
 {
-    guint idx;
-
     assert (p != NULL);
 
     /* if effects is NULL */
     if (!effects) return;
 
-    for (idx = 0; idx < effects->len; idx++)
+    for (guint idx = 0; idx < effects->len; idx++)
     {
         gpointer effect_id = g_ptr_array_index(effects, idx);
         effect *e = game_effect_get(nlarn, effect_id);
@@ -2883,12 +2869,11 @@ int player_effect(player *p, effect_t et)
 char **player_effect_text(player *p)
 {
     char **text;
-    guint pos;
     effect *e;
 
     text = strv_new();
 
-    for (pos = 0; pos < p->effects->len; pos++)
+    for (guint pos = 0; pos < p->effects->len; pos++)
     {
         e = game_effect_get(nlarn, g_ptr_array_index(p->effects, pos));
 
@@ -3628,9 +3613,6 @@ int player_item_is_container(player *p, item *it)
 /* silly filter to check if item can be put into a container */
 int player_item_can_be_added_to_container(player *p, item *it)
 {
-    guint idx;
-    item *i;
-
     assert(p != NULL && it != NULL && it->type < IT_MAX);
 
     if (it->type == IT_CONTAINER)
@@ -3644,9 +3626,9 @@ int player_item_can_be_added_to_container(player *p, item *it)
     }
 
     /* check player's inventory for containers */
-    for (idx = 0; idx < inv_length(p->inventory); idx++)
+    for (guint idx = 0; idx < inv_length(p->inventory); idx++)
     {
-        i = inv_get(p->inventory, idx);
+        item *i = inv_get(p->inventory, idx);
         if (i->type == IT_CONTAINER)
         {
             return TRUE;
@@ -3656,9 +3638,9 @@ int player_item_can_be_added_to_container(player *p, item *it)
     /* no match till now, check floor for containers */
     inventory **floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
 
-    for (idx = 0; idx < inv_length(*floor); idx++)
+    for (guint idx = 0; idx < inv_length(*floor); idx++)
     {
-        i = inv_get(*floor, idx);
+        item *i = inv_get(*floor, idx);
         if (i->type == IT_CONTAINER)
         {
             return TRUE;
@@ -3897,9 +3879,6 @@ char *player_item_identified_list(player *p)
     item *it; /* fake pretend item */
     char *heading;
 
-    item_t type;
-    guint id, count;
-
     item_t type_ids[] =
     {
         IT_AMULET,
@@ -3915,9 +3894,9 @@ char *player_item_identified_list(player *p)
     it = item_new(type_ids[1], 1);
     it->bonus_known = FALSE;
 
-    for (type = 0; type < 5; type++)
+    for (item_t type = 0; type < 5; type++)
     {
-        count = 0;
+        guint count = 0;
         sublist = g_string_new(NULL);
 
         /* item category header */
@@ -3932,7 +3911,7 @@ char *player_item_identified_list(player *p)
 
         it->type = type_ids[type];
 
-        for (id = 1; id < item_max_id(type_ids[type]); id++)
+        for (guint id = 1; id < item_max_id(type_ids[type]); id++)
         {
             it->id = id;
             if (player_item_known(p, it))
@@ -4453,7 +4432,6 @@ int player_get_speed(player *p)
 
 guint player_get_gold(player *p)
 {
-    guint idx;
     guint gold = 0;
     item *i;
 
@@ -4467,7 +4445,9 @@ guint player_get_gold(player *p)
     }
 
     /* check content of all containers in player's inventory */
-    for (idx = 0; idx < inv_length_filtered(p->inventory, item_filter_container); idx++)
+    for (guint idx = 0;
+         idx < inv_length_filtered(p->inventory, item_filter_container);
+         idx++)
     {
         item *it;
         i = inv_get_filtered(p->inventory, idx, item_filter_container);
@@ -4484,15 +4464,12 @@ guint player_get_gold(player *p)
 
 void player_remove_gold(player *p, guint amount)
 {
-    guint idx;
-    item *i;
-
     assert(p != NULL);
 
     /* gold stacks, thus there can only be one item in the inventory */
     if (inv_length_filtered(p->inventory, item_filter_gold))
     {
-        i = inv_get_filtered(p->inventory, 0, item_filter_gold);
+        item *i = inv_get_filtered(p->inventory, 0, item_filter_gold);
 
         if (amount >= i->count)
         {
@@ -4506,9 +4483,11 @@ void player_remove_gold(player *p, guint amount)
         }
     }
 
-    for (idx = 0; idx < inv_length_filtered(p->inventory, item_filter_container); idx++)
+    for (guint idx = 0;
+         idx < inv_length_filtered(p->inventory, item_filter_container);
+         idx++)
     {
-        i = inv_get_filtered(p->inventory, idx, item_filter_container);
+        item *i = inv_get_filtered(p->inventory, idx, item_filter_container);
 
         if (inv_length_filtered(i->content, item_filter_gold))
         {
@@ -4541,7 +4520,6 @@ char *player_get_level_desc(player *p)
 
 void player_list_sobjmem(player *p)
 {
-    guint idx;
     int prevmap = -1;
     GString *sobjlist = g_string_new(NULL);
 
@@ -4556,7 +4534,7 @@ void player_list_sobjmem(player *p)
         g_array_sort(p->sobjmem, player_sobjects_sort);
 
         /* assemble a list of landmarks per map */
-        for (idx = 0; idx < p->sobjmem->len; idx++)
+        for (guint idx = 0; idx < p->sobjmem->len; idx++)
         {
             player_sobject_memory *som;
             som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
@@ -4579,7 +4557,6 @@ void player_update_fov(player *p)
     int radius;
     position pos;
     map *pmap;
-
     area *enlight;
 
     int range = (Z(p->pos) == 0 ? 15 : 6);
@@ -4603,17 +4580,15 @@ void player_update_fov(player *p)
     /* if player is enlightened, use a circular area around the player */
     if (player_effect(p, ET_ENLIGHTENMENT))
     {
-        int x, y;
-
         /* reset FOV manually */
         fov_reset(p->fov);
 
         enlight = area_new_circle(p->pos, player_effect(p, ET_ENLIGHTENMENT), FALSE);
 
         /* set visible field according to returned area */
-        for (y = 0; y < enlight->size_y; y++)
+        for (int y = 0; y < enlight->size_y; y++)
         {
-            for (x = 0; x < enlight->size_x; x++)
+            for (int x = 0; x < enlight->size_x; x++)
             {
                 X(pos) = x + enlight->start_x;
                 Y(pos) = y + enlight->start_y;
@@ -4794,7 +4769,6 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
 static void player_sobject_memorize(player *p, map_sobject_t sobject, position pos)
 {
     player_sobject_memory nsom;
-    guint idx;
 
     if (p->sobjmem == NULL)
     {
@@ -4802,7 +4776,7 @@ static void player_sobject_memorize(player *p, map_sobject_t sobject, position p
     }
 
     /* check if the sobject has already been memorized */
-    for (idx = 0; idx < p->sobjmem->len; idx++)
+    for (guint idx = 0; idx < p->sobjmem->len; idx++)
     {
         player_sobject_memory *som;
         som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
@@ -4828,7 +4802,6 @@ static void player_sobject_memorize(player *p, map_sobject_t sobject, position p
 void player_sobject_forget(player *p, position pos)
 {
     player_sobject_memory *som;
-    guint idx;
 
     /* just return if nothing has been memorized yet */
     if (p->sobjmem == NULL)
@@ -4836,7 +4809,7 @@ void player_sobject_forget(player *p, position pos)
         return;
     }
 
-    for (idx = 0; idx < p->sobjmem->len; idx++)
+    for (guint idx = 0; idx < p->sobjmem->len; idx++)
     {
         som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
 
@@ -5150,17 +5123,15 @@ void calc_fighting_stats(player *p)
 
     gboolean mention_instakill = FALSE;
 
-    guint32 idx;
-    for (idx = MT_NONE + 1; idx < MT_MAX_GENERATED; idx++)
+    for (guint32 idx = MT_NONE + 1; idx < MT_MAX_GENERATED; idx++)
     {
-        m = monster_new(idx, pos);
-        if (!m)
+        if (!(m = monster_new(idx, pos)))
         {
             g_string_append_printf(text, "Monster %s could not be created.\n\n",
                                    monster_name(m));
             continue;
         }
-        int to_hit  = weapon_calc_to_hit(p, m, p->eq_weapon, NULL);
+        int to_hit = weapon_calc_to_hit(p, m, p->eq_weapon, NULL);
         to_hit += ((100 - to_hit) * 5)/100;
 
         const int instakill_chance = player_instakill_chance(p, m);

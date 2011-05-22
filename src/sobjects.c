@@ -197,7 +197,7 @@ int player_altar_pray(player *p)
                 continue;
             }
 
-            gint32 et;
+            effect_t et;
             for (et = ET_DEC_CON; et <= ET_DEC_WIS; et++)
             {
                 if ((e = player_effect_get(p, et)))
@@ -842,7 +842,6 @@ int player_stairs_up(player *p)
 
 int player_throne_pillage(player *p)
 {
-    int i;
     int count = 0; /* gems created */
 
     /* current map */
@@ -867,9 +866,9 @@ int player_throne_pillage(player *p)
         return 0;
     }
 
-    if (chance(2*player_get_dex(p)))
+    if (chance(2 * player_get_dex(p)))
     {
-        for (i = 0; i < rand_1n(4); i++)
+        for (int i = 0; i < rand_1n(4); i++)
         {
             /* gems pop off the throne */
             inv_add(map_ilist_at(pmap, p->pos), item_new_random(IT_GEM, FALSE));

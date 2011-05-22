@@ -363,10 +363,8 @@ static int potion_amnesia(player *p, item *potion)
 static int potion_detect_item(player *p, item *potion)
 {
     position pos;
-    guint idx;
     int count = 0; /* count detected items */
     inventory *inv;
-    item *it;
 
     assert(p != NULL && potion != NULL);
 
@@ -380,9 +378,9 @@ static int potion_detect_item(player *p, item *potion)
             gboolean found_item = FALSE;
             if ((inv = *map_ilist_at(pmap, pos)))
             {
-                for (idx = 0; idx < inv_length(inv); idx++)
+                for (guint idx = 0; idx < inv_length(inv); idx++)
                 {
-                    it = inv_get(inv, idx);
+                    item *it = inv_get(inv, idx);
 
                     if (potion->id == PO_TRE_DETECT)
                     {
@@ -427,8 +425,7 @@ static int potion_detect_item(player *p, item *potion)
                 }
                 else
                 {
-                    item_t type = IT_NONE;
-                    for (type = IT_AMULET; type < IT_MAX; type++)
+                    for (item_t type = IT_AMULET; type < IT_MAX; type++)
                     {
                         if (type == IT_GOLD || type == IT_GEM)
                             continue;
@@ -471,9 +468,9 @@ static int potion_recovery(player *p, item *potion)
     assert (p != NULL && potion != NULL);
 
     gboolean success = FALSE;
-    gint32 et;
     effect *e;
-    for (et = ET_DEC_CON; et <= ET_DEC_WIS; et++)
+
+    for (effect_t et = ET_DEC_CON; et <= ET_DEC_WIS; et++)
     {
         if ((e = player_effect_get(p, et)))
         {

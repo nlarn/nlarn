@@ -213,10 +213,7 @@ int pos_in_rect(position pos, rectangle rect)
 
 area *area_new(int start_x, int start_y, int size_x, int size_y)
 {
-    area *a;
-    int y;
-
-    a = g_malloc0(sizeof(area));
+    area *a = g_malloc0(sizeof(area));
 
     /* ensure the starting positions are valid */
     a->start_x = max(start_x, 0);
@@ -227,7 +224,7 @@ area *area_new(int start_x, int start_y, int size_x, int size_y)
 
     a->area = g_malloc0(size_y * sizeof(int *));
 
-    for (y = 0; y < size_y; y++)
+    for (int y = 0; y < size_y; y++)
         a->area[y] = g_malloc0(size_x * sizeof(int));
 
     return a;
@@ -635,14 +632,13 @@ gboolean area_blast(position center, guint radius,
 area *area_copy(area *a)
 {
     area *narea;
-    int x, y;
 
     assert(a != NULL);
     narea = area_new(a->start_x, a->start_y, a->size_x, a->size_y);
 
-    for (y = 0; y < a->size_y; y++)
+    for (int y = 0; y < a->size_y; y++)
     {
-        for (x = 0; x < a->size_x; x++)
+        for (int x = 0; x < a->size_x; x++)
         {
             if (area_point_get(a, x, y))
             {
@@ -656,11 +652,9 @@ area *area_copy(area *a)
 
 void area_destroy(area *a)
 {
-    int y;
-
     assert(a != NULL);
 
-    for (y = 0; y < a->size_y; y++)
+    for (int y = 0; y < a->size_y; y++)
         g_free(a->area[y]);
 
     g_free(a->area);
@@ -670,14 +664,12 @@ void area_destroy(area *a)
 
 area *area_add(area *a, area *b)
 {
-    int x, y;
-
     assert (a != NULL && b != NULL);
     assert (a->size_x == b->size_x && a->size_y == b->size_y);
 
-    for (y = 0; y < a->size_y; y++)
+    for (int y = 0; y < a->size_y; y++)
     {
-        for (x = 0; x < a->size_x; x++)
+        for (int x = 0; x < a->size_x; x++)
         {
             if (area_point_get(b, x, y))
             {

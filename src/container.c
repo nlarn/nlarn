@@ -325,10 +325,9 @@ int container_move_content(player *p, inventory **inv, inventory **new_inv)
     assert(p != NULL && inv != NULL);
 
     item *it;
-
-    guint idx;
     guint count = 0;
-    for (idx = 0; idx < inv_length(*inv);)
+
+    for (guint idx = 0; idx < inv_length(*inv);)
     {
         it = inv_get(*inv, idx);
         inv_del_element(inv, it);

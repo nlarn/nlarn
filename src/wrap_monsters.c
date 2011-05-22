@@ -27,8 +27,6 @@
 
 void wrap_monsters(lua_State *L)
 {
-    int i;
-
     assert (L != NULL);
 
     struct
@@ -134,7 +132,7 @@ void wrap_monsters(lua_State *L)
         { NULL, 0 },
     };
 
-    for (i = 0; constants[i].name != NULL; i++)
+    for (int i = 0; constants[i].name != NULL; i++)
     {
         lua_pushinteger(L, constants[i].value);
         lua_setglobal(L, constants[i].name);

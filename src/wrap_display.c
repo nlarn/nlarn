@@ -39,8 +39,6 @@ static const luaL_reg display_functions[] =
 
 void wrap_display(lua_State *L)
 {
-    int i;
-
     assert (L != NULL);
 
     struct
@@ -70,13 +68,13 @@ void wrap_display(lua_State *L)
         { NULL, 0 },
     };
 
-    for (i = 0; constants[i].name != NULL; i++)
+    for (int i = 0; constants[i].name != NULL; i++)
     {
         lua_pushinteger(L, constants[i].value);
         lua_setglobal(L, constants[i].name);
     }
 
-    for (i = 0; display_functions[i].name != NULL; i++)
+    for (int i = 0; display_functions[i].name != NULL; i++)
     {
         lua_register(L, display_functions[i].name, display_functions[i].func);
     }

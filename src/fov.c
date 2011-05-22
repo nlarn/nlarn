@@ -67,8 +67,6 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
         { 1,  0,  0,  1, -1,  0,  0, -1 }
     };
 
-    int octant;
-
     /* reset the entire fov to unseen */
     fov_reset(fv);
 
@@ -76,7 +74,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
     fv->center = pos;
 
     /* determine which fields are visible */
-    for (octant = 0; octant < 8; octant++)
+    for (int octant = 0; octant < 8; octant++)
     {
         fov_calculate_octant(fv, m, pos, infravision,
                              1, 1.0, 0.0, radius,
@@ -171,7 +169,6 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
                                  int xy, int yx, int yy)
 {
     int radius_squared;
-    int j;
     int dx, dy;
     int X, Y;
     int blocked;
@@ -183,7 +180,7 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
 
     radius_squared = radius * radius;
 
-    for (j = row; j <= radius + 1; j++)
+    for (int j = row; j <= radius + 1; j++)
     {
         dx = -j - 1;
         dy = -j;
