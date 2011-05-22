@@ -903,12 +903,12 @@ static gboolean adjacent_corridor(position pos, char mv)
     }
 
     if (X(p1) >= 0 && X(p1) < MAP_MAX_X && Y(p1) >= 0 && Y(p1) < MAP_MAX_Y
-            && lt_is_passable(map_tiletype_at(game_map(nlarn, Z(nlarn->p->pos)), p1)))
+            && mt_is_passable(map_tiletype_at(game_map(nlarn, Z(nlarn->p->pos)), p1)))
     {
         return TRUE;
     }
     if (X(p2) >= 0 && X(p2) < MAP_MAX_X && Y(p2) >= 0 && Y(p2) < MAP_MAX_Y
-            && lt_is_passable(map_tiletype_at(game_map(nlarn, Z(nlarn->p->pos)), p2)))
+            && mt_is_passable(map_tiletype_at(game_map(nlarn, Z(nlarn->p->pos)), p2)))
     {
         return TRUE;
     }

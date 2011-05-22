@@ -181,7 +181,7 @@ int potion_throw(struct player *p)
     map_tile_t mtt = map_tiletype_at(pmap, target);
     log_add_entry(nlarn->log, "%s %s the %s.", desc,
                   (mtt <= LT_FLOOR ? "shatters on" : "splashes into"),
-                  lt_get_desc(mtt));
+                  mt_get_desc(mtt));
 
     item_destroy(potion);
 
@@ -556,18 +556,18 @@ static gboolean potion_pos_hit(position pos,
     desc[0] = g_ascii_toupper(desc[0]);
 
 
-    if (mst > LS_NONE && !ls_is_passable(mst))
+    if (mst > LS_NONE && !mso_is_passable(mst))
     {
         /* The potion hit a sobject. */
         log_add_entry(nlarn->log, "%s shatters at %s.",
-                      ls_get_desc(mst));
+                      mso_get_desc(mst));
     }
     else if (!map_pos_passable(pmap, pos))
     {
         /* The potion hit a wall or something similar. */
         log_add_entry(nlarn->log, "%s %s %s.", desc,
                       (mtt <= LT_FLOOR ? "shatters on the" : "splashes into the"),
-                      lt_get_desc(mtt));
+                      mt_get_desc(mtt));
     }
     else if (m != NULL)
     {

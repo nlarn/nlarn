@@ -336,11 +336,11 @@ char *map_dump(map *l, position ppos)
             }
             else if (map_sobject_at(l, pos))
             {
-                g_string_append_c(dump, ls_get_image(map_sobject_at(l, pos)));
+                g_string_append_c(dump, mso_get_image(map_sobject_at(l, pos)));
             }
             else
             {
-                g_string_append_c(dump, lt_get_image(map_tiletype_at(l, pos)));
+                g_string_append_c(dump, mt_get_image(map_tiletype_at(l, pos)));
             }
         }
         g_string_append_c(dump, '\n');
@@ -511,11 +511,11 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
     switch (element)
     {
     case LE_GROUND:
-        return lt_is_passable(tile->type);
+        return mt_is_passable(tile->type);
         break;
 
     case LE_SOBJECT:
-        if (lt_is_passable(tile->type) && (tile->sobject == LS_NONE))
+        if (mt_is_passable(tile->type) && (tile->sobject == LS_NONE))
         {
             /* find free space */
             position p = pos;
@@ -532,7 +532,7 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
         break;
 
     case LE_TRAP:
-        return (lt_is_passable(tile->type)
+        return (mt_is_passable(tile->type)
                 && (tile->sobject == LS_NONE)
                 && (tile->trap == TT_NONE));
         break;
@@ -605,8 +605,8 @@ int map_pos_is_visible(map *l, position s, position t)
             x += ix;
             error += delta_y;
 
-            if (!lt_is_transparent(l->grid[y][x].type)
-                    || !ls_is_transparent(l->grid[y][x].sobject))
+            if (!mt_is_transparent(l->grid[y][x].type)
+                    || !mso_is_transparent(l->grid[y][x].sobject))
             {
                 return FALSE;
             }
@@ -631,8 +631,8 @@ int map_pos_is_visible(map *l, position s, position t)
             y += iy;
             error += delta_x;
 
-            if (!lt_is_transparent(l->grid[y][x].type)
-                    || !ls_is_transparent(l->grid[y][x].sobject))
+            if (!mt_is_transparent(l->grid[y][x].type)
+                    || !mso_is_transparent(l->grid[y][x].sobject))
             {
                 return FALSE;
             }
@@ -963,7 +963,7 @@ char *map_pos_examine(position pos)
         where = "there";
 
     /* describe the level tile */
-    tmp = g_strdup(lt_get_desc(map_tiletype_at(cm, pos)));
+    tmp = g_strdup(mt_get_desc(map_tiletype_at(cm, pos)));
     tmp[0] = g_ascii_toupper(tmp[0]);
     g_string_append_printf(desc, "%s. ", tmp);
     g_free(tmp);
@@ -989,7 +989,7 @@ char *map_pos_examine(position pos)
     if (map_sobject_at(cm, pos) > LS_NONE)
     {
         g_string_append_printf(desc, "You see %s %s. ",
-                               ls_get_desc(map_sobject_at(cm, pos)), where);
+                               mso_get_desc(map_sobject_at(cm, pos)), where);
     }
 
     /* add message if target tile contains a known trap */
@@ -1243,7 +1243,7 @@ char map_get_door_glyph(map *m, position pos)
     }
 
     /* no idea. */
-    return ls_get_image(map_sobject_at(m, pos));
+    return mso_get_image(map_sobject_at(m, pos));
 }
 
 static int map_fill_with_stationary_objects(map *maze)
@@ -2267,7 +2267,7 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos,
         if (!pos_valid(npos))
             continue;
 
-        if ((ppath && lt_is_passable(player_memory_of(nlarn->p, npos).type))
+        if ((ppath && mt_is_passable(player_memory_of(nlarn->p, npos).type))
                 || (!ppath && monster_valid_dest(l, npos, element)))
         {
             map_path_element *pe = map_path_element_new(npos);

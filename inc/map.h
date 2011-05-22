@@ -109,7 +109,7 @@ typedef struct map_tile
         base_type:  8, /* if tile is covered with e.g. fire the original type is stored here */
         sobject:    8, /* something special located on this tile */
         trap:       8; /* trap located on this tile */
-    guint8 timer;      /* countdown to when the type will become LT_FLOOR again */
+    guint8 timer;      /* countdown to when the type will become base_type again */
     gpointer monster;  /* id of monster located on this tile */
     inventory *ilist;  /* items located on this tile */
 } map_tile;
@@ -258,26 +258,73 @@ extern const map_tile_data map_tiles[LT_MAX];
 extern const map_sobject_data map_sobjects[LS_MAX];
 extern const char *map_names[MAP_MAX];
 
-/* Macros */
+/* inline accessor functions */
 
-#define lt_get_image(tile)      (map_tiles[(tile)].image)
-#define lt_get_colour(tile)     (map_tiles[(tile)].colour)
-#define lt_get_desc(tile)       (map_tiles[(tile)].description)
-#define lt_is_passable(tile)    (map_tiles[(tile)].passable)
-#define lt_is_transparent(tile) (map_tiles[(tile)].transparent)
+static inline char mt_get_image(map_tile_t t)
+{
+    return map_tiles[t].image;
+}
 
-#define ls_get_image(sobject)      (map_sobjects[(sobject)].image)
-#define ls_get_colour(sobject)     (map_sobjects[(sobject)].colour)
-#define ls_get_desc(sobject)       (map_sobjects[(sobject)].description)
-#define ls_is_passable(sobject)    (map_sobjects[(sobject)].passable)
-#define ls_is_transparent(sobject) (map_sobjects[(sobject)].transparent)
+static inline int  mt_get_colour(map_tile_t t)
+{
+    return map_tiles[t].colour;
+}
 
-#define map_name(l) (map_names[(l)->nlevel])
+static inline const char *mt_get_desc(map_tile_t t)
+{
+    return map_tiles[t].description;
+}
 
-#define map_pos_transparent(l,pos) (lt_is_transparent((l)->grid[Y((pos))][X((pos))].type) \
-                                    && ls_is_transparent((l)->grid[Y((pos))][X((pos))].sobject))
+static inline gboolean mt_is_passable(map_tile_t t)
+{
+    return map_tiles[t].passable;
+}
 
-#define map_pos_passable(l,pos) (lt_is_passable((l)->grid[Y((pos))][X((pos))].type) \
-                                 && ls_is_passable((l)->grid[Y((pos))][X((pos))].sobject))
+static inline gboolean mt_is_transparent(map_tile_t t)
+{
+    return map_tiles[t].transparent;
+}
+
+static inline char mso_get_image(map_sobject_t s)
+{
+    return map_sobjects[s].image;
+}
+
+static inline int mso_get_colour(map_sobject_t s)
+{
+    return map_sobjects[s].colour;
+}
+
+static inline const char *mso_get_desc(map_sobject_t s)
+{
+    return map_sobjects[s].description;
+}
+
+static inline gboolean mso_is_passable(map_sobject_t s)
+{
+    return map_sobjects[s].passable;
+}
+
+static inline gboolean mso_is_transparent(map_sobject_t s)
+{
+    return map_sobjects[s].transparent;
+}
+
+static inline const char *map_name(map *m)
+{
+    return map_names[m->nlevel];
+}
+
+static inline gboolean map_pos_transparent(map *m, position pos)
+{
+    return mt_is_transparent(m->grid[Y(pos)][X(pos)].type)
+        && mso_is_transparent(m->grid[Y(pos)][X(pos)].sobject);
+}
+
+static inline gboolean map_pos_passable(map *m, position pos)
+{
+    return mt_is_passable(m->grid[Y(pos)][X(pos)].type)
+        && mso_is_passable(m->grid[Y(pos)][X(pos)].sobject);
+}
 
 #endif

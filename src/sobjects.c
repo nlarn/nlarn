@@ -768,7 +768,7 @@ int player_stairs_down(player *p)
     /* display additional message */
     if (show_msg)
     {
-        log_add_entry(nlarn->log, "You climb down %s.", ls_get_desc(ms));
+        log_add_entry(nlarn->log, "You climb down %s.", mso_get_desc(ms));
     }
 
     /* if told to switch level, do so */
@@ -828,7 +828,7 @@ int player_stairs_up(player *p)
     /* display additional message */
     if (show_msg)
     {
-        log_add_entry(nlarn->log, "You climb up %s.", ls_get_desc(ms));
+        log_add_entry(nlarn->log, "You climb up %s.", mso_get_desc(ms));
     }
 
     /* if told to switch level, do so */

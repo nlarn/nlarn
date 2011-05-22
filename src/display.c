@@ -205,11 +205,11 @@ int display_paint_screen(player *p)
                 if (map_sobject_at(vmap, pos))
                 {
                     /* draw stationary objects first */
-                    attron(attrs = attr_colour(ls_get_colour(map_sobject_at(vmap, pos)), has_items));
+                    attron(attrs = attr_colour(mso_get_colour(map_sobject_at(vmap, pos)), has_items));
                     if (map_sobject_at(vmap, pos) == LS_CLOSEDDOOR || map_sobject_at(vmap, pos) == LS_OPENDOOR)
                         addch(map_get_door_glyph(vmap, pos));
                     else
-                        addch(ls_get_image(map_sobject_at(vmap, pos)));
+                        addch(mso_get_image(map_sobject_at(vmap, pos)));
                     attroff(attrs);
                 }
                 else if (has_items)
@@ -251,8 +251,8 @@ int display_paint_screen(player *p)
                 else
                 {
                     /* draw tile */
-                    attron(attrs = lt_get_colour(map_tiletype_at(vmap, pos)));
-                    addch(lt_get_image(map_tiletype_at(vmap, pos)));
+                    attron(attrs = mt_get_colour(map_tiletype_at(vmap, pos)));
+                    addch(mt_get_image(map_tiletype_at(vmap, pos)));
                     attroff(attrs);
                 }
             }
@@ -264,12 +264,12 @@ int display_paint_screen(player *p)
                     /* draw stationary object */
                     map_sobject_t ms = map_sobject_at(vmap, pos);
 
-                    attron(attrs = attr_colour(ls_get_colour(ms), has_items));
+                    attron(attrs = attr_colour(mso_get_colour(ms), has_items));
 
                     if (ms == LS_CLOSEDDOOR || ms == LS_OPENDOOR)
                         addch(map_get_door_glyph(vmap, pos));
                     else
-                        addch(ls_get_image(ms));
+                        addch(mso_get_image(ms));
 
                     attroff(attrs);
                 }
@@ -294,7 +294,7 @@ int display_paint_screen(player *p)
                 {
                     /* draw tile */
                     attron(attrs = DC_DARKGRAY);
-                    addch(lt_get_image(player_memory_of(p, pos).type));
+                    addch(mt_get_image(player_memory_of(p, pos).type));
                     attroff(attrs);
                 }
             }
@@ -2656,11 +2656,11 @@ position display_get_new_position(player *p,
             {
                 map_sobject_t sobj = LS_NONE;
                 for (int i = LS_NONE + 1; i < LS_MAX; i++)
-                    if (ls_get_image(i) == (char) ch)
+                    if (mso_get_image(i) == (char) ch)
                     {
                         sobj = i;
                         log_add_entry(nlarn->log, "Looking for '%c' (%s).\n",
-                                      (char) ch, ls_get_desc(sobj));
+                                      (char) ch, mso_get_desc(sobj));
                         break;
                     }
 
@@ -2680,7 +2680,7 @@ position display_get_new_position(player *p,
                             break;
 
                         if (player_memory_of(nlarn->p, pos).sobject != LS_NONE
-                            && ls_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch)
+                            && mso_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch)
                         {
                             break;
                         }

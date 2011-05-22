@@ -883,7 +883,7 @@ void monster_level_enter(monster *m, struct map *l)
     if (monster_in_sight(m) && target)
     {
         log_add_entry(nlarn->log, "The %s %s %s %s.", monster_name(m),
-                      how, what, ls_get_desc(target));
+                      how, what, mso_get_desc(target));
     }
 }
 
@@ -1115,7 +1115,7 @@ void monster_polymorph(monster *m)
             case LE_FLYING_MONSTER:
                 log_add_entry(nlarn->log, "The %s falls into the %s!",
                               monster_get_name(m),
-                              lt_get_desc(map_tiletype_at(monster_map(m), m->pos)));
+                              mt_get_desc(map_tiletype_at(monster_map(m), m->pos)));
                 break;
             case LE_SWIMMING_MONSTER:
                 log_add_entry(nlarn->log, "The %s sinks like a rock!",
@@ -2585,7 +2585,7 @@ static position monster_move_civilian(monster *m, struct player *p)
 
     /* check if the player is next to the civilian and not inside a building */
     if (pos_adjacent(m->pos, p->pos) && chance(40)
-        && ls_is_transparent(map_sobject_at(monster_map(m), p->pos)))
+        && mso_is_transparent(map_sobject_at(monster_map(m), p->pos)))
     {
         /* talk */
         log_add_entry(nlarn->log, "The %s says, \"%s\"",

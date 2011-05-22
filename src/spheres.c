@@ -112,7 +112,7 @@ void sphere_move(sphere *s, game *g)
 
     /* if the new position does not work, try to find another one */
     while ((!pos_valid(npos)
-            || !lt_is_passable(map_tiletype_at(smap, npos)))
+            || !mt_is_passable(map_tiletype_at(smap, npos)))
             && (tries < GD_MAX))
     {
         dir++;

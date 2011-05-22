@@ -1654,7 +1654,7 @@ int player_move(player *p, direction dir, gboolean open_door)
             const int tile = map_tiletype_at(pmap, target_p);
             log_add_entry(nlarn->log, "Ouch! You bump into %s!",
                           (tile == LT_DEEPWATER || tile == LT_LAVA)
-                          ? "the railing" : lt_get_desc(tile));
+                          ? "the railing" : mt_get_desc(tile));
             return times;
         }
 
@@ -1677,7 +1677,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     /* mention stationary objects at this position */
     if ((so = map_sobject_at(pmap, p->pos)))
     {
-        log_add_entry(nlarn->log, "You see %s here.", ls_get_desc(so));
+        log_add_entry(nlarn->log, "You see %s here.", mso_get_desc(so));
     }
 
     return times;
@@ -4541,7 +4541,7 @@ void player_list_sobjmem(player *p)
 
             g_string_append_printf(sobjlist, "%-4s %s (%d, %d)\n",
                                    (Z(som->pos) > prevmap) ? map_names[Z(som->pos)] : "",
-                                   ls_get_desc(som->sobject),
+                                   mso_get_desc(som->sobject),
                                    Y(som->pos), X(som->pos));
 
             if (Z(som->pos) > prevmap) prevmap = Z(som->pos);
@@ -5023,7 +5023,7 @@ static char *player_death_description(game_score_t *score, int verbose)
         break;
 
     case PD_MAP:
-        g_string_append_printf(text, " by %s.", lt_get_desc(score->cause));
+        g_string_append_printf(text, " by %s.", mt_get_desc(score->cause));
         break;
 
     case PD_SPELL:
