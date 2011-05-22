@@ -421,6 +421,14 @@ void player_remove_gold(player *p, guint amount);
 
 const char *player_get_level_desc(player *p);
 
+/**
+  * @brief Look for traps on adjacent map tiles.
+  *
+  * @param the player
+  * @return number of turns passed
+  */
+int player_search(player *p);
+
 void player_list_sobjmem(player *p);
 void player_sobject_forget(player *p, position pos);
 /* fighting simulation */

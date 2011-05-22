@@ -555,6 +555,11 @@ int main(int argc, char *argv[])
             moves_count = player_throne_sit(nlarn->p);
             break;
 
+            /* search */
+        case 's':
+            moves_count = player_search(nlarn->p);
+            break;
+
             /* take off something */
         case 'T':
             player_take_off(nlarn->p);

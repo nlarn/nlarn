@@ -4518,6 +4518,49 @@ const char *player_get_level_desc(player *p)
     return player_level_desc[p->level - 1];
 }
 
+int player_search(player *p)
+{
+    assert (p != NULL);
+
+    int turns = 0;
+    position pos = pos_move(p->pos, GD_NW);
+    map *m = game_map(nlarn, Z(p->pos));
+
+    /* look for traps on adjacent tiles */
+    for (; Y(pos) <= Y(p->pos) + 1; Y(pos)++)
+    {
+        for(X(pos) = X(p->pos) - 1; X(pos) <= X(p->pos) + 1; X(pos)++)
+        {
+            /* skip invalid positions */
+            if (!pos_valid(pos)) continue;
+
+            /* skip unpassable positions */
+            if (!map_pos_passable(m, pos)) continue;
+
+            turns++;
+            trap_t tt = map_trap_at(m, pos);
+
+            if ((tt != TT_NONE) && (tt != player_memory_of(p, pos).trap))
+            {
+                /* found an unknown trap - determine the chance that
+                 * the player can find it */
+                int prop = (trap_chance(tt) / 2) + player_get_int(p);
+
+                if (chance(prop))
+                {
+                    /* discovered the trap */
+                    log_add_entry(nlarn->log, "You find a %s!",
+                                  trap_description(tt));
+
+                    player_memory_of(p, pos).trap = tt;
+                }
+            }
+        }
+    }
+
+    return turns;
+}
+
 void player_list_sobjmem(player *p)
 {
     int prevmap = -1;

@@ -36,6 +36,7 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`q`end`   drink a potion or at a fountain
 `lightgreen`r`end`   read something
 `lightgreen`R`end`   remove gems from throne
+`lightgreen`s`end`   search traps
 `lightgreen`S`end`   sit on a throne
 `lightgreen`t`end`   throw an item
 `lightgreen`T`end`   take a worn/wielded item off
