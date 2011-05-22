@@ -169,16 +169,30 @@ void map_destroy(map *m);
 
 cJSON *map_serialize(map *m);
 map *map_deserialize(cJSON *mser);
-char *map_dump(map *l, position ppos);
+char *map_dump(map *m, position ppos);
 
-position map_find_space(map *maze, map_element_t element, int dead_end);
-position map_find_space_in(map *maze, rectangle where, map_element_t element, int dead_end);
-position map_find_sobject(map *l, map_sobject_t sobject);
-position map_find_sobject_in(map *l, map_sobject_t sobject, rectangle area);
-gboolean map_pos_validate(map *l, position pos, map_element_t element, int dead_end);
-void map_item_add(map *maze, item *it);
+position map_find_space(map *m, map_element_t element,
+                        gboolean dead_end);
 
-int *map_get_surrounding(map *l, position pos, map_sobject_t type);
+position map_find_space_in(map *m,
+                           rectangle where,
+                           map_element_t element,
+                           gboolean dead_end);
+
+position map_find_sobject(map *m, map_sobject_t sobject);
+
+position map_find_sobject_in(map *m,
+                             map_sobject_t sobject,
+                             rectangle area);
+
+gboolean map_pos_validate(map *m,
+                          position pos,
+                          map_element_t element,
+                          gboolean dead_end);
+
+void map_item_add(map *m, item *it);
+
+int *map_get_surrounding(map *m, position pos, map_sobject_t type);
 
 /**
  * determine if a position can be seen from another position
@@ -188,7 +202,7 @@ int *map_get_surrounding(map *l, position pos, map_sobject_t type);
  * @param second position
  * @return TRUE or FALSE
  */
-int map_pos_is_visible(map *l, position source, position target);
+int map_pos_is_visible(map *m, position source, position target);
 
 /**
  * @brief Find a path between two positions
@@ -201,37 +215,30 @@ int map_pos_is_visible(map *l, position source, position target);
  */
 map_path *map_find_path(map *m, position start, position goal,
                         map_element_t element);
+
+/**
+ * @brief Free memory allocated for a given map path.
+ *
+ * @param a map path returned by <map_find_path>"()"
+ */
 void map_path_destroy(map_path *path);
 
-area *map_get_obstacles(map *l, position center, int radius);
-void map_set_tiletype(map *l, area *area, map_tile_t type, guint8 duration);
+area *map_get_obstacles(map *m, position center, int radius);
 
-map_tile *map_tile_at(map *l, position pos);
-inventory **map_ilist_at(map *l, position pos);
-map_tile_t map_tiletype_at(map *l, position pos);
-void map_tiletype_set(map *l, position pos, map_tile_t type);
-map_tile_t map_basetype_at(map *l, position pos);
-void map_basetype_set(map *l, position pos, map_tile_t type);
-guint8 map_timer_at(map *l, position pos);
-trap_t map_trap_at(map *l, position pos);
-void map_trap_set(map *l, position pos, trap_t type);
-map_sobject_t map_sobject_at(map *l, position pos);
-void map_sobject_set(map *l, position pos, map_sobject_t type);
+void map_set_tiletype(map *m, area *area, map_tile_t type, guint8 duration);
 
-damage *map_tile_damage(map *l, position pos, int flying);
+damage *map_tile_damage(map *m, position pos, gboolean flying);
 
 char *map_pos_examine(position pos);
 
 monster *map_get_monster_at(map *m, position pos);
-int map_set_monster_at(map *map, position pos, monster *monst);
-int map_is_monster_at(map *m, position pos);
 
 /**
  * @brief Creates new monsters for a map.
  *
  * @param a map
  */
-void map_fill_with_life(map *l);
+void map_fill_with_life(map *m);
 
 gboolean map_is_exit_at(map *m, position pos);
 
@@ -240,7 +247,7 @@ gboolean map_is_exit_at(map *m, position pos);
  *
  * @param the map on which timed events have to be processed
  */
-void map_timer(map *l);
+void map_timer(map *m);
 
 /**
  * @brief Get the glyph for a door.
@@ -259,6 +266,84 @@ extern const map_sobject_data map_sobjects[LS_MAX];
 extern const char *map_names[MAP_MAX];
 
 /* inline accessor functions */
+
+static inline map_tile *map_tile_at(map *m, position pos)
+{
+    assert(m != NULL && pos_valid(pos));
+    return &m->grid[Y(pos)][X(pos)];
+}
+
+static inline inventory **map_ilist_at(map *m, position pos)
+{
+    assert(m != NULL && pos_valid(pos));
+    return &m->grid[Y(pos)][X(pos)].ilist;
+}
+
+static inline map_tile_t map_tiletype_at(map *m, position pos)
+{
+    assert(m != NULL && pos_valid(pos));
+    return m->grid[Y(pos)][X(pos)].type;
+}
+
+static inline void map_tiletype_set(map *m, position pos, map_tile_t type)
+{
+    assert(m != NULL && pos_valid(pos));
+    m->grid[Y(pos)][X(pos)].type = type;
+}
+
+static inline map_tile_t map_basetype_at(map *m, position pos)
+{
+    assert(m != NULL && pos_valid(pos));
+    return m->grid[Y(pos)][X(pos)].base_type;
+}
+
+static inline void map_basetype_set(map *m, position pos, map_tile_t type)
+{
+    assert(m != NULL && pos_valid(pos));
+    m->grid[Y(pos)][X(pos)].base_type = type;
+}
+
+static inline guint8 map_timer_at(map *m, position pos)
+{
+    assert(m != NULL && pos_valid(pos));
+    return m->grid[Y(pos)][X(pos)].timer;
+}
+
+static inline trap_t map_trap_at(map *m, position pos)
+{
+    assert(m != NULL && pos_valid(pos));
+    return m->grid[Y(pos)][X(pos)].trap;
+}
+
+static inline void map_trap_set(map *m, position pos, trap_t type)
+{
+    assert(m != NULL && pos_valid(pos));
+    m->grid[Y(pos)][X(pos)].trap = type;
+}
+
+static inline map_sobject_t map_sobject_at(map *m, position pos)
+{
+    assert(m != NULL && pos_valid(pos));
+    return m->grid[Y(pos)][X(pos)].sobject;
+}
+
+static inline void map_sobject_set(map *m, position pos, map_sobject_t type)
+{
+    assert(m != NULL && pos_valid(pos));
+    m->grid[Y(pos)][X(pos)].sobject = type;
+}
+
+static inline void map_set_monster_at(map *m, position pos, monster *monst)
+{
+    assert(m != NULL && m->nlevel == Z(pos) && pos_valid(pos));
+    m->grid[Y(pos)][X(pos)].monster = (monst != NULL) ? monster_oid(monst) : NULL;
+}
+
+static inline gboolean map_is_monster_at(map *m, position pos)
+{
+    assert(m != NULL);
+    return ((map_get_monster_at(m, pos) != NULL));
+}
 
 static inline char mt_get_image(map_tile_t t)
 {

@@ -27,26 +27,26 @@
 #include "spheres.h"
 
 static int map_fill_with_stationary_objects(map *maze);
-static void map_fill_with_objects(map *l);
-static void map_fill_with_traps(map *l);
+static void map_fill_with_objects(map *m);
+static void map_fill_with_traps(map *m);
 
-static int map_load_from_file(map *l, char *mazefile, int which);
-static void map_make_maze(map *maze, int treasure_room);
-static void map_make_maze_eat(map *l, int x, int y);
-static void map_make_river(map *map, map_tile_t rivertype);
-static void map_make_lake(map *map, map_tile_t laketype);
-static void map_make_treasure_room(map *maze, rectangle **rooms);
-static int map_validate(map *maze);
+static int map_load_from_file(map *m, char *mazefile, int which);
+static void map_make_maze(map *m, int treasure_room);
+static void map_make_maze_eat(map *m, int x, int y);
+static void map_make_river(map *m, map_tile_t rivertype);
+static void map_make_lake(map *m, map_tile_t laketype);
+static void map_make_treasure_room(map *m, rectangle **rooms);
+static int map_validate(map *m);
 
 static map_path *map_path_new(position start, position goal);
 static map_path_element *map_path_element_new(position pos);
-static int map_step_cost(map *l, map_path_element* element,
+static int map_step_cost(map *m, map_path_element* element,
                          map_element_t map_elem, gboolean player);
 static int map_path_cost(map_path_element* element, position target);
 static map_path_element *map_path_element_in_list(map_path_element* el,
                                                   GPtrArray *list);
 static map_path_element *map_path_find_best(map_path *path);
-static GPtrArray *map_path_get_neighbours(map *l, position pos,
+static GPtrArray *map_path_get_neighbours(map *m, position pos,
                                           map_element_t element,
                                           gboolean player);
 
@@ -308,15 +308,15 @@ map *map_deserialize(cJSON *mser)
     return m;
 }
 
-char *map_dump(map *l, position ppos)
+char *map_dump(map *m, position ppos)
 {
     position pos;
     GString *dump;
-    monster *m;
+    monster *mon;
 
     dump = g_string_new_len(NULL, MAP_SIZE);
 
-    Z(pos) = l->nlevel;
+    Z(pos) = m->nlevel;
 
     for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
     {
@@ -326,21 +326,21 @@ char *map_dump(map *l, position ppos)
             {
                 g_string_append_c(dump, '@');
             }
-            else if ((m = map_get_monster_at(l, pos)))
+            else if ((mon = map_get_monster_at(m, pos)))
             {
-                g_string_append_c(dump, monster_glyph(m));
+                g_string_append_c(dump, monster_glyph(mon));
             }
-            else if (map_trap_at(l, pos))
+            else if (map_trap_at(m, pos))
             {
                 g_string_append_c(dump, '^');
             }
-            else if (map_sobject_at(l, pos))
+            else if (map_sobject_at(m, pos))
             {
-                g_string_append_c(dump, mso_get_image(map_sobject_at(l, pos)));
+                g_string_append_c(dump, mso_get_image(map_sobject_at(m, pos)));
             }
             else
             {
-                g_string_append_c(dump, mt_get_image(map_tiletype_at(l, pos)));
+                g_string_append_c(dump, mt_get_image(map_tiletype_at(m, pos)));
             }
         }
         g_string_append_c(dump, '\n');
@@ -369,23 +369,25 @@ void map_destroy(map *m)
 }
 
 /* return coordinates of a free space */
-position map_find_space(map *maze, map_element_t element, int dead_end)
+position map_find_space(map *m, map_element_t element, gboolean dead_end)
 {
     rectangle entire_map = rect_new(1, 1, MAP_MAX_X - 2, MAP_MAX_Y - 2);
-
-    return map_find_space_in(maze, entire_map, element, dead_end);
+    return map_find_space_in(m, entire_map, element, dead_end);
 }
 
-position map_find_space_in(map *maze, rectangle where, map_element_t element, int dead_end)
+position map_find_space_in(map *m,
+                           rectangle where,
+                           map_element_t element,
+                           gboolean dead_end)
 {
     position pos;
     int count, iteration = 0;
 
-    assert (maze != NULL && element > LE_NONE && element < LE_MAX);
+    assert (m != NULL && element > LE_NONE && element < LE_MAX);
 
     X(pos) = rand_m_n(where.x1, where.x2);
     Y(pos) = rand_m_n(where.y1, where.y2);
-    Z(pos) = maze->nlevel;
+    Z(pos) = m->nlevel;
 
     /* number of positions inside the rectangle */
     count = (where.x2 - where.x1 + 1) * (where.y2 - where.y1 + 1);
@@ -407,7 +409,7 @@ position map_find_space_in(map *maze, rectangle where, map_element_t element, in
 
         iteration++;
     }
-    while (!map_pos_validate(maze, pos, element, dead_end) && (iteration <= count));
+    while (!map_pos_validate(m, pos, element, dead_end) && (iteration <= count));
 
     if (iteration > count )
         pos = pos_invalid;
@@ -415,7 +417,7 @@ position map_find_space_in(map *maze, rectangle where, map_element_t element, in
     return pos;
 }
 
-int *map_get_surrounding(map *l, position pos, map_sobject_t type)
+int *map_get_surrounding(map *m, position pos, map_sobject_t type)
 {
     position p;
     int nmove = 1;
@@ -427,7 +429,7 @@ int *map_get_surrounding(map *l, position pos, map_sobject_t type)
     {
         p = pos_move(pos, nmove);
 
-        if (pos_valid(p) && map_sobject_at(l, p) == type)
+        if (pos_valid(p) && map_sobject_at(m, p) == type)
         {
             dirs[nmove] = TRUE;
         }
@@ -438,57 +440,57 @@ int *map_get_surrounding(map *l, position pos, map_sobject_t type)
     return dirs;
 }
 
-position map_find_sobject_in(map *l, map_sobject_t sobject, rectangle rect)
+position map_find_sobject_in(map *m, map_sobject_t sobject, rectangle rect)
 {
     position pos;
 
-    assert(l != NULL);
+    assert(m != NULL);
 
-    Z(pos) = l->nlevel;
+    Z(pos) = m->nlevel;
 
     for (Y(pos) = rect.y1; Y(pos) <= rect.y2; Y(pos)++)
         for (X(pos) = rect.x1; X(pos) <= rect.x2; X(pos)++)
-            if (map_sobject_at(l,pos) == sobject)
+            if (map_sobject_at(m, pos) == sobject)
                 return pos;
 
     /* if we reach this point, the sobject is not on the map */
     return pos_invalid;
 }
 
-position map_find_sobject(map *l, map_sobject_t sobject)
+position map_find_sobject(map *m, map_sobject_t sobject)
 {
     position pos;
 
-    assert(l != NULL);
+    assert(m != NULL);
 
-    Z(pos) = l->nlevel;
+    Z(pos) = m->nlevel;
 
     for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
-            if (map_sobject_at(l,pos) == sobject)
+            if (map_sobject_at(m, pos) == sobject)
                 return pos;
 
     /* if we reach this point, the sobject is not on the map */
     return pos_invalid;
 }
 
-gboolean map_pos_validate(map *l, position pos, map_element_t element,
+gboolean map_pos_validate(map *m, position pos, map_element_t element,
                           int dead_end)
 {
     map_tile *tile;
 
-    assert(l != NULL && element > LE_NONE && element < LE_MAX);
+    assert(m != NULL && element > LE_NONE && element < LE_MAX);
 
     /* if the position is invalid it is invalid for the map as well */
     if (!pos_valid(pos))
         return FALSE;
 
     /* if the position is on another map it is invalid for this level */
-    if (Z(pos) != l->nlevel)
+    if (Z(pos) != m->nlevel)
         return FALSE;
 
     /* make shortcut */
-    tile = map_tile_at(l, pos);
+    tile = map_tile_at(m, pos);
 
     /* check for an dead end */
     if (dead_end)
@@ -498,7 +500,7 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
 
         for (Y(p) = Y(pos) -1; Y(p) < Y(pos) + 2; Y(p)++)
             for (X(p) = X(pos) -1; X(p) < X(pos) + 2; X(p)++)
-                if (map_tiletype_at(l, p) == LT_WALL)
+                if (map_tiletype_at(m, p) == LT_WALL)
                     wall_count++;
 
         if (wall_count < 7)
@@ -523,7 +525,7 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
             for (Y(p) = Y(pos) -1; Y(p) < Y(pos) + 2; Y(p)++)
                 for (X(p) = X(pos) -1; X(p) < X(pos) + 2; X(p)++)
                 {
-                    if (map_sobject_at(l, p) != LS_NONE)
+                    if (map_sobject_at(m, p) != LS_NONE)
                         return FALSE;
                 }
 
@@ -538,8 +540,9 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
         break;
 
     case LE_ITEM:
-        /* we can stack like mad, so we only need to check if there is an open space */
-        return (map_pos_passable(l, pos) && (tile->sobject == LS_NONE));
+        /* we can stack like mad, so we only need to check if
+         * there is an open space */
+        return (map_pos_passable(m, pos) && (tile->sobject == LS_NONE));
         break;
 
     case LE_MONSTER:
@@ -550,10 +553,10 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
         if (pos_identical(pos, nlarn->p->pos))
             return FALSE;
 
-        if (map_is_monster_at(l, pos))
+        if (map_is_monster_at(m, pos))
             return FALSE;
 
-        return monster_valid_dest(l, pos, element);
+        return monster_valid_dest(m, pos, element);
         break;
 
     case LE_NONE:
@@ -566,7 +569,7 @@ gboolean map_pos_validate(map *l, position pos, map_element_t element,
     return FALSE;
 }
 
-int map_pos_is_visible(map *l, position s, position t)
+int map_pos_is_visible(map *m, position s, position t)
 {
     int delta_x, delta_y;
     int x, y;
@@ -605,8 +608,8 @@ int map_pos_is_visible(map *l, position s, position t)
             x += ix;
             error += delta_y;
 
-            if (!mt_is_transparent(l->grid[y][x].type)
-                    || !mso_is_transparent(l->grid[y][x].sobject))
+            if (!mt_is_transparent(m->grid[y][x].type)
+                    || !mso_is_transparent(m->grid[y][x].sobject))
             {
                 return FALSE;
             }
@@ -631,8 +634,8 @@ int map_pos_is_visible(map *l, position s, position t)
             y += iy;
             error += delta_x;
 
-            if (!mt_is_transparent(l->grid[y][x].type)
-                    || !mso_is_transparent(l->grid[y][x].sobject))
+            if (!mt_is_transparent(m->grid[y][x].type)
+                    || !mso_is_transparent(m->grid[y][x].sobject))
             {
                 return FALSE;
             }
@@ -765,13 +768,13 @@ void map_path_destroy(map_path *path)
     g_free(path);
 }
 
-area *map_get_obstacles(map *l, position center, int radius)
+area *map_get_obstacles(map *m, position center, int radius)
 {
     area *narea;
     position pos;
     int x, y;
 
-    assert(l != NULL);
+    assert(m != NULL);
 
     if (!pos_valid(center))
     {
@@ -781,13 +784,17 @@ area *map_get_obstacles(map *l, position center, int radius)
     narea = area_new(X(center) - radius, Y(center) - radius,
                      radius * 2 + 1, radius * 2 + 1);
 
-    Z(pos) = l->nlevel;
+    Z(pos) = m->nlevel;
 
-    for (Y(pos) = Y(center) - radius, y = 0; Y(pos) <= Y(center) + radius; Y(pos)++, y++)
+    for (Y(pos) = Y(center) - radius, y = 0;
+         Y(pos) <= Y(center) + radius;
+         Y(pos)++, y++)
     {
-        for (X(pos) = X(center) - radius, x = 0; X(pos) <= X(center) + radius; X(pos)++, x++)
+        for (X(pos) = X(center) - radius, x = 0;
+             X(pos) <= X(center) + radius;
+             X(pos)++, x++)
         {
-            if (!pos_valid(pos) || !map_pos_transparent(l, pos))
+            if (!pos_valid(pos) || !map_pos_transparent(m, pos))
             {
                 area_point_set(narea, x, y);
             }
@@ -797,19 +804,19 @@ area *map_get_obstacles(map *l, position center, int radius)
     return narea;
 }
 
-void map_set_tiletype(map *l, area *ar, map_tile_t type, guint8 duration)
+void map_set_tiletype(map *m, area *ar, map_tile_t type, guint8 duration)
 {
     position pos;
     int x, y;
 
-    assert (l != NULL && ar != NULL);
+    assert (m != NULL && ar != NULL);
 
     position center;
     X(center) = ar->start_x + ar->size_x / 2;
     Y(center) = ar->start_y + ar->size_y / 2;
-    Z(center) = l->nlevel;
+    Z(center) = m->nlevel;
 
-    Z(pos) = l->nlevel;
+    Z(pos) = m->nlevel;
     for (Y(pos) = ar->start_y, y = 0;
             Y(pos) < ar->start_y + ar->size_y;
             Y(pos)++, y++)
@@ -825,13 +832,13 @@ void map_set_tiletype(map *l, area *ar, map_tile_t type, guint8 duration)
             /* if the position is marked in area set the tile to type */
             if (area_point_get(ar, x, y))
             {
-                map_tile *tile = map_tile_at(l, pos);
+                map_tile *tile = map_tile_at(m, pos);
 
                 /* store original type if it has not been set already
                    (this can occur when casting multiple flood
                    spells on the same tile) */
                 if (tile->base_type == LT_NONE)
-                    tile->base_type = map_tiletype_at(l, pos);
+                    tile->base_type = map_tiletype_at(m, pos);
 
                 tile->type = type;
                 /* if non-permanent, let the radius shrink with time */
@@ -842,88 +849,11 @@ void map_set_tiletype(map *l, area *ar, map_tile_t type, guint8 duration)
     }
 }
 
-map_tile *map_tile_at(map *l, position pos)
+damage *map_tile_damage(map *m, position pos, gboolean flying)
 {
-    assert(l != NULL && pos_valid(pos));
+    assert (m != NULL && pos_valid(pos));
 
-    return &l->grid[Y(pos)][X(pos)];
-}
-
-inventory **map_ilist_at(map *l, position pos)
-{
-    assert(l != NULL && pos_valid(pos));
-
-    return &l->grid[Y(pos)][X(pos)].ilist;
-}
-
-map_tile_t map_tiletype_at(map *l, position pos)
-{
-    assert(l != NULL && pos_valid(pos));
-
-    return l->grid[Y(pos)][X(pos)].type;
-}
-
-void map_tiletype_set(map *l, position pos, map_tile_t type)
-{
-    assert(l != NULL && pos_valid(pos));
-
-    l->grid[Y(pos)][X(pos)].type = type;
-}
-
-map_tile_t map_basetype_at(map *l, position pos)
-{
-    assert(l != NULL && pos_valid(pos));
-
-    return l->grid[Y(pos)][X(pos)].base_type;
-}
-
-void map_basetype_set(map *l, position pos, map_tile_t type)
-{
-    assert(l != NULL && pos_valid(pos));
-
-    l->grid[Y(pos)][X(pos)].base_type = type;
-}
-
-guint8 map_timer_at(map *l, position pos)
-{
-    assert(l != NULL && pos_valid(pos));
-
-    return l->grid[Y(pos)][X(pos)].timer;
-}
-
-trap_t map_trap_at(map *l, position pos)
-{
-    assert(l != NULL && pos_valid(pos));
-
-    return l->grid[Y(pos)][X(pos)].trap;
-}
-
-void map_trap_set(map *l, position pos, trap_t type)
-{
-    assert(l != NULL && pos_valid(pos));
-
-    l->grid[Y(pos)][X(pos)].trap = type;
-}
-
-map_sobject_t map_sobject_at(map *l, position pos)
-{
-    assert(l != NULL && pos_valid(pos));
-
-    return l->grid[Y(pos)][X(pos)].sobject;
-}
-
-void map_sobject_set(map *l, position pos, map_sobject_t type)
-{
-    assert(l != NULL && pos_valid(pos));
-
-    l->grid[Y(pos)][X(pos)].sobject = type;
-}
-
-damage *map_tile_damage(map *l, position pos, int flying)
-{
-    assert (l != NULL && pos_valid(pos));
-
-    switch (map_tiletype_at(l, pos))
+    switch (map_tiletype_at(m, pos))
     {
     case LT_CLOUD:
         return damage_new(DAM_ACID, ATT_NONE, 3 + rand_0n(2), DAMO_MAP, NULL);
@@ -1043,22 +973,6 @@ monster *map_get_monster_at(map *m, position pos)
     return (mid != NULL) ? game_monster_get(nlarn, mid) : NULL;
 }
 
-int map_set_monster_at(map *mmap, position pos, monster *monst)
-{
-    assert(mmap != NULL && mmap->nlevel == Z(pos) && pos_valid(pos));
-
-    mmap->grid[Y(pos)][X(pos)].monster = (monst != NULL) ? monster_oid(monst) : NULL;
-
-    return TRUE;
-}
-
-int map_is_monster_at(map *m, position pos)
-{
-    assert(m != NULL);
-
-    return ((map_get_monster_at(m, pos) != NULL));
-}
-
 void map_fill_with_life(map *m)
 {
     position pos;
@@ -1122,22 +1036,22 @@ gboolean map_is_exit_at(map *m, position pos)
     }
 }
 
-void map_timer(map *l)
+void map_timer(map *m)
 {
     position pos;
     item_erosion_type erosion;
 
-    assert (l != NULL);
+    assert (m != NULL);
 
-    Z(pos) = l->nlevel;
+    Z(pos) = m->nlevel;
 
     for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
     {
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
-            if (map_timer_at(l, pos))
+            if (map_timer_at(m, pos))
             {
-                map_tile *tile = map_tile_at(l, pos);
+                map_tile *tile = map_tile_at(m, pos);
                 tile->timer--;
 
                 /* affect items every three turns */
@@ -1184,7 +1098,7 @@ void map_timer(map *l)
 
 char map_get_door_glyph(map *m, position pos)
 {
-    position n,e,s,w;
+    position n, e, s, w;
 
     assert(m != NULL && pos_valid(pos));
 
@@ -1246,111 +1160,111 @@ char map_get_door_glyph(map *m, position pos)
     return mso_get_image(map_sobject_at(m, pos));
 }
 
-static int map_fill_with_stationary_objects(map *maze)
+static int map_fill_with_stationary_objects(map *m)
 {
     position pos;
 
     /* volcano shaft up from the temple */
-    if (maze->nlevel == MAP_DMAX)
+    if (m->nlevel == MAP_DMAX)
     {
-        pos = map_find_space(maze, LE_SOBJECT, TRUE);
+        pos = map_find_space(m, LE_SOBJECT, TRUE);
         if (!pos_valid(pos)) return FALSE;
-        map_sobject_set(maze, pos, LS_ELEVATORUP);
+        map_sobject_set(m, pos, LS_ELEVATORUP);
     }
 
     /*  make the fixed objects in the maze: STAIRS */
-    if (!is_town(maze->nlevel) && !is_dungeon_bottom(maze->nlevel)
-            && !is_volcano_bottom(maze->nlevel))
+    if (!is_town(m->nlevel) && !is_dungeon_bottom(m->nlevel)
+            && !is_volcano_bottom(m->nlevel))
     {
-        pos = map_find_space(maze, LE_SOBJECT, TRUE);
+        pos = map_find_space(m, LE_SOBJECT, TRUE);
         if (!pos_valid(pos)) return FALSE;
-        map_sobject_set(maze, pos, LS_STAIRSDOWN);
+        map_sobject_set(m, pos, LS_STAIRSDOWN);
     }
 
-    if ((maze->nlevel > 1) && (maze->nlevel != MAP_DMAX))
+    if ((m->nlevel > 1) && (m->nlevel != MAP_DMAX))
     {
-        pos = map_find_space(maze, LE_SOBJECT, TRUE);
+        pos = map_find_space(m, LE_SOBJECT, TRUE);
         if (!pos_valid(pos)) return FALSE;
-        map_sobject_set(maze, pos, LS_STAIRSUP);
+        map_sobject_set(m, pos, LS_STAIRSUP);
     }
 
     /* make the random objects in the maze */
     /* 33 percent chance for an altar */
     if (chance(33))
     {
-        pos = map_find_space(maze, LE_SOBJECT, FALSE);
+        pos = map_find_space(m, LE_SOBJECT, FALSE);
         if (!pos_valid(pos)) return FALSE;
-        map_sobject_set(maze, pos, LS_ALTAR);
+        map_sobject_set(m, pos, LS_ALTAR);
     }
 
     /* up to three statues */
     for (int i = 0; i < rand_0n(3); i++)
     {
-        pos = map_find_space(maze, LE_SOBJECT, FALSE);
+        pos = map_find_space(m, LE_SOBJECT, FALSE);
         if (!pos_valid(pos)) return FALSE;
-        map_sobject_set(maze, pos, LS_STATUE);
+        map_sobject_set(m, pos, LS_STATUE);
     }
 
     /* up to three fountains */
     for (int i = 0; i < rand_0n(3); i++)
     {
-        pos = map_find_space(maze, LE_SOBJECT, FALSE);
+        pos = map_find_space(m, LE_SOBJECT, FALSE);
         if (!pos_valid(pos)) return FALSE;
-        map_sobject_set(maze, pos, LS_FOUNTAIN);
+        map_sobject_set(m, pos, LS_FOUNTAIN);
     }
 
     /* up to two thrones */
     for (int i = 0; i < rand_0n(2); i++)
     {
-        pos = map_find_space(maze, LE_SOBJECT, FALSE);
+        pos = map_find_space(m, LE_SOBJECT, FALSE);
         if (!pos_valid(pos)) return FALSE;
-        map_sobject_set(maze, pos, LS_THRONE);
+        map_sobject_set(m, pos, LS_THRONE);
     }
 
     /* up to two  mirrors */
     for (int i = 0; i < rand_0n(2); i++)
     {
-        pos = map_find_space(maze, LE_SOBJECT, FALSE);
+        pos = map_find_space(m, LE_SOBJECT, FALSE);
         if (!pos_valid(pos)) return FALSE;
-        map_sobject_set(maze, pos, LS_MIRROR);
+        map_sobject_set(m, pos, LS_MIRROR);
     }
 
-    if (maze->nlevel == 5)
+    if (m->nlevel == 5)
     {
         /* branch office of the bank */
-        pos = map_find_space(maze, LE_SOBJECT, TRUE);
+        pos = map_find_space(m, LE_SOBJECT, TRUE);
         if (!pos_valid(pos)) return FALSE;
-        map_sobject_set(maze, pos, LS_BANK2);
+        map_sobject_set(m, pos, LS_BANK2);
     }
 
     return TRUE;
 }
 
-static void map_fill_with_objects(map *l)
+static void map_fill_with_objects(map *m)
 {
     /* up to two pieces of armour */
     for (int i = 0; i <= rand_0n(2); i++)
     {
-        map_item_add(l, item_new_by_level(IT_ARMOUR, l->nlevel));
+        map_item_add(m, item_new_by_level(IT_ARMOUR, m->nlevel));
     }
 
     /* up to two amulets on levels > 5 */
-    if (l->nlevel > 5)
+    if (m->nlevel > 5)
     {
         for (int i = 0; i <= rand_0n(2); i++)
-            map_item_add(l, item_new_by_level(IT_AMULET, l->nlevel));
+            map_item_add(m, item_new_by_level(IT_AMULET, m->nlevel));
     }
 
     /* up to two piles of ammunition */
     for (int i = 0; i <= rand_0n(2); i++)
     {
-        map_item_add(l, item_new_by_level(IT_AMMO, l->nlevel));
+        map_item_add(m, item_new_by_level(IT_AMMO, m->nlevel));
     }
 
     /* up to three books */
     for (int i = 0; i <= rand_0n(3); i++)
     {
-        map_item_add(l, item_new_by_level(IT_BOOK, l->nlevel));
+        map_item_add(m, item_new_by_level(IT_BOOK, m->nlevel));
     }
 
     /* up to two containers */
@@ -1371,7 +1285,7 @@ static void map_fill_with_objects(map *l)
             }
             while (it == IT_CONTAINER);
 
-            inv_add(&(container->content), item_new_by_level(it, l->nlevel));
+            inv_add(&(container->content), item_new_by_level(it, m->nlevel));
         }
 
         /* there is a chance that the container is trapped */
@@ -1381,66 +1295,66 @@ static void map_fill_with_objects(map *l)
         }
 
         /* add the container to the map */
-        map_item_add(l, container);
+        map_item_add(m, container);
     }
 
     /* up to 10 piles of gold */
     for (int i = 0; i <= rand_0n(10); i++)
     {
         /* There is nothing like a newly minted pound. */
-        map_item_add(l, item_new(IT_GOLD, rand_m_n(10, (l->nlevel + 1) * 15)));
+        map_item_add(m, item_new(IT_GOLD, rand_m_n(10, (m->nlevel + 1) * 15)));
     }
 
     /* up to three gems */
     for (int i = 0; i <= rand_0n(3); i++)
     {
-        map_item_add(l, item_new_random(IT_GEM, FALSE));
+        map_item_add(m, item_new_random(IT_GEM, FALSE));
     }
 
     /* up to four potions */
     for (int i = 0; i <= rand_0n(4); i++)
     {
-        map_item_add(l, item_new_by_level(IT_POTION, l->nlevel));
+        map_item_add(m, item_new_by_level(IT_POTION, m->nlevel));
     }
 
     /* up to three scrolls */
     for (int i = 0; i <= rand_0n(3); i++)
     {
-        map_item_add(l, item_new_by_level(IT_SCROLL, l->nlevel));
+        map_item_add(m, item_new_by_level(IT_SCROLL, m->nlevel));
     }
 
     /* up to two rings */
     for (int i = 0; i <= rand_0n(2); i++)
     {
-        map_item_add(l, item_new_by_level(IT_RING, l->nlevel));
+        map_item_add(m, item_new_by_level(IT_RING, m->nlevel));
     }
 
     /* up to two weapons */
     for (int i = 0; i <= rand_0n(2); i++)
     {
-        map_item_add(l, item_new_by_level(IT_WEAPON, l->nlevel));
+        map_item_add(m, item_new_by_level(IT_WEAPON, m->nlevel));
     }
 
 } /* map_fill_with_objects */
 
-static void map_fill_with_traps(map *l)
+static void map_fill_with_traps(map *m)
 {
     gboolean trapdoor = FALSE;
 
-    assert(l != NULL);
+    assert(m != NULL);
 
     /* Trapdoor cannot be placed in the last dungeon map and the last vulcano map */
-    trapdoor = (!is_dungeon_bottom(l->nlevel) && !is_volcano_bottom(l->nlevel));
+    trapdoor = (!is_dungeon_bottom(m->nlevel) && !is_volcano_bottom(m->nlevel));
 
     for (int count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
     {
-        position pos = map_find_space(l, LE_TRAP, FALSE);
-        map_trap_set(l, pos, rand_1n(trapdoor ? TT_MAX : TT_TRAPDOOR));
+        position pos = map_find_space(m, LE_TRAP, FALSE);
+        map_trap_set(m, pos, rand_1n(trapdoor ? TT_MAX : TT_TRAPDOOR));
     }
 } /* map_fill_with_traps */
 
 /* subroutine to make the caverns for a given map. only walls are made. */
-static void map_make_maze(map *maze, int treasure_room)
+static void map_make_maze(map *m, int treasure_room)
 {
     position pos;
     int mx, my;
@@ -1448,54 +1362,54 @@ static void map_make_maze(map *maze, int treasure_room)
     rectangle **rooms = NULL;
     gboolean want_monster = FALSE;
 
-    assert (maze != NULL);
+    assert (m != NULL);
 
-    Z(pos) = maze->nlevel;
+    Z(pos) = m->nlevel;
 
 generate:
     /* reset map by filling it with walls */
     for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
-            monster *m;
+            monster *mon;
 
-            map_tiletype_set(maze, pos, LT_WALL);
-            map_sobject_set(maze, pos, LS_NONE);
+            map_tiletype_set(m, pos, LT_WALL);
+            map_sobject_set(m, pos, LS_NONE);
 
-            if ((m = map_get_monster_at(maze, pos)))
+            if ((mon = map_get_monster_at(m, pos)))
             {
-                monster_destroy(m);
+                monster_destroy(mon);
             }
 
-            if (map_tile_at(maze, pos)->ilist != NULL)
+            if (map_tile_at(m, pos)->ilist != NULL)
             {
-                inv_destroy(map_tile_at(maze, pos)->ilist, TRUE);
-                map_tile_at(maze, pos)->ilist = NULL;
+                inv_destroy(map_tile_at(m, pos)->ilist, TRUE);
+                map_tile_at(m, pos)->ilist = NULL;
             }
         }
 
     /* Maybe add a river or lake. */
-    const map_tile_t rivertype = (is_volcano_map(maze->nlevel) ? LT_LAVA : LT_DEEPWATER);
+    const map_tile_t rivertype = (is_volcano_map(m->nlevel) ? LT_LAVA : LT_DEEPWATER);
 
-    if (maze->nlevel > 1
-            && (is_volcano_map(maze->nlevel) ? chance(90) : chance(40)))
+    if (m->nlevel > 1
+            && (is_volcano_map(m->nlevel) ? chance(90) : chance(40)))
     {
         if (chance(70))
-            map_make_river(maze, rivertype);
+            map_make_river(m, rivertype);
         else
-            map_make_lake(maze, rivertype);
+            map_make_lake(m, rivertype);
 
-        if (maze->grid[1][1].type == LT_WALL)
-            map_make_maze_eat(maze, 1, 1);
+        if (m->grid[1][1].type == LT_WALL)
+            map_make_maze_eat(m, 1, 1);
     }
     else
-        map_make_maze_eat(maze, 1, 1);
+        map_make_maze_eat(m, 1, 1);
 
     /* add exit to town on map 1 */
-    if (maze->nlevel == 1)
+    if (m->nlevel == 1)
     {
-        maze->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].type = LT_FLOOR;
-        maze->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].sobject = LS_DNGN_EXIT;
+        m->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].type = LT_FLOOR;
+        m->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].sobject = LS_DNGN_EXIT;
     }
 
     /* generate open spaces */
@@ -1513,7 +1427,7 @@ generate:
         rooms[room]->y1 = my - rand_1n(2);
         rooms[room]->y2 = my + rand_1n(2);
 
-        if (is_volcano_map(maze->nlevel))
+        if (is_volcano_map(m->nlevel))
         {
             mx = rand_1n(60)+3;
             rooms[room]->x1 = mx - rand_1n(2);
@@ -1532,7 +1446,7 @@ generate:
         {
             for (X(pos) = rooms[room]->x1 ; X(pos) < rooms[room]->x2 ; X(pos)++)
             {
-                map_tile *tile = map_tile_at(maze, pos);
+                map_tile *tile = map_tile_at(m, pos);
                 if (tile->type == rivertype)
                     continue;
 
@@ -1551,7 +1465,7 @@ generate:
     rooms[nrooms] = NULL;
 
     /* add stationary objects */
-    if (!map_fill_with_stationary_objects(maze))
+    if (!map_fill_with_stationary_objects(m))
     {
         /* adding stationary objects failed; generate a new map */
         goto generate;
@@ -1559,7 +1473,7 @@ generate:
 
     /* add treasure room if requested */
     if (treasure_room)
-        map_make_treasure_room(maze, rooms);
+        map_make_treasure_room(m, rooms);
 
     /* cleanup */
     for (int room = 0; room < nrooms; room++)
@@ -1569,7 +1483,7 @@ generate:
 }
 
 /* function to eat away a filled in maze */
-static void map_make_maze_eat(map *l, int x, int y)
+static void map_make_maze_eat(map *m, int x, int y)
 {
     int dir;
     int try = 2;
@@ -1582,41 +1496,41 @@ static void map_make_maze_eat(map *l, int x, int y)
         {
         case 1: /* west */
             if ((x > 2) &&
-                    (l->grid[y][x - 1].type == LT_WALL) &&
-                    (l->grid[y][x - 2].type == LT_WALL))
+                    (m->grid[y][x - 1].type == LT_WALL) &&
+                    (m->grid[y][x - 2].type == LT_WALL))
             {
-                l->grid[y][x - 1].type = l->grid[y][x - 2].type = LT_FLOOR;
-                map_make_maze_eat(l, x - 2, y);
+                m->grid[y][x - 1].type = m->grid[y][x - 2].type = LT_FLOOR;
+                map_make_maze_eat(m, x - 2, y);
             }
             break;
 
         case 2: /* east */
             if (x < (MAP_MAX_X - 3) &&
-                    (l->grid[y][x + 1].type == LT_WALL) &&
-                    (l->grid[y][x + 2].type == LT_WALL))
+                    (m->grid[y][x + 1].type == LT_WALL) &&
+                    (m->grid[y][x + 2].type == LT_WALL))
             {
-                l->grid[y][x + 1].type = l->grid[y][x + 2].type = LT_FLOOR;
-                map_make_maze_eat(l, x + 2, y);
+                m->grid[y][x + 1].type = m->grid[y][x + 2].type = LT_FLOOR;
+                map_make_maze_eat(m, x + 2, y);
             }
             break;
 
         case 3: /* south */
             if ((y > 2) &&
-                    (l->grid[y - 1][x].type == LT_WALL) &&
-                    (l->grid[y - 2][x].type == LT_WALL))
+                    (m->grid[y - 1][x].type == LT_WALL) &&
+                    (m->grid[y - 2][x].type == LT_WALL))
             {
-                l->grid[y - 1][x].type = l->grid[y - 2][x].type = LT_FLOOR;
-                map_make_maze_eat(l, x, y - 2);
+                m->grid[y - 1][x].type = m->grid[y - 2][x].type = LT_FLOOR;
+                map_make_maze_eat(m, x, y - 2);
             }
             break;
 
         case 4: /* north */
             if ((y < MAP_MAX_Y - 3) &&
-                    (l->grid[y + 1][x].type == LT_WALL) &&
-                    (l->grid[y + 2][x].type == LT_WALL))
+                    (m->grid[y + 1][x].type == LT_WALL) &&
+                    (m->grid[y + 2][x].type == LT_WALL))
             {
-                l->grid[y + 1][x].type = l->grid[y + 2][x].type = LT_FLOOR;
-                map_make_maze_eat(l, x, y + 2);
+                m->grid[y + 1][x].type = m->grid[y + 2][x].type = LT_FLOOR;
+                map_make_maze_eat(m, x, y + 2);
             }
 
             break;
@@ -1741,11 +1655,11 @@ static void map_make_lake(map *m, map_tile_t laketype)
     }
 }
 
-static void place_special_item(map *nmap, position npos)
+static void place_special_item(map *m, position npos)
 {
-    map_tile *tile = map_tile_at(nmap, npos);
+    map_tile *tile = map_tile_at(m, npos);
 
-    switch (nmap->nlevel)
+    switch (m->nlevel)
     {
     case MAP_DMAX - 1: /* eye of larn */
         inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN));
@@ -1778,7 +1692,7 @@ static void place_special_item(map *nmap, position npos)
  *      !   potion of cure dianthroritis, or eye of larn, as appropriate
  *      o   random object
  */
-static int map_load_from_file(map *nmap, char *mazefile, int which)
+static int map_load_from_file(map *m, char *mazefile, int which)
 {
     position pos;       /* current position on map */
     int map_num = 0;    /* number of selected map */
@@ -1830,7 +1744,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
         return FALSE;
     }
 
-    Z(pos) = nmap->nlevel;
+    Z(pos) = m->nlevel;
 
     // Sometimes flip the maps. (Never the town)
     gboolean flip_vertical   = (map_num > 0 && chance(50));
@@ -1849,7 +1763,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
             if (flip_horizontal)
                 Y(map_pos) = MAP_MAX_Y - Y(pos) - 1;
 
-            map_tile *tile = map_tile_at(nmap, map_pos);
+            map_tile *tile = map_tile_at(m, map_pos);
 
             tile->type = LT_FLOOR;	/* floor is default */
 
@@ -1930,7 +1844,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
 
             case '!': /* potion of cure dianthroritis, eye of larn */
                 if (spec_count-- == 0)
-                    place_special_item(nmap, map_pos);
+                    place_special_item(m, map_pos);
                 break;
 
             case 'm': /* random monster */
@@ -1944,7 +1858,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
                 }
                 while (it == IT_CONTAINER);
 
-                inv_add(&tile->ilist, item_new_by_level(it, nmap->nlevel));
+                inv_add(&tile->ilist, item_new_by_level(it, m->nlevel));
                 break;
             };
         }
@@ -1955,7 +1869,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
 
     /* if the eye of larn/pcd has not been placed yet, place it randomly */
     if (spec_count >= 0)
-        place_special_item(nmap, map_find_space(nmap, LE_ITEM, FALSE));
+        place_special_item(m, map_find_space(m, LE_ITEM, FALSE));
 
     return TRUE;
 }
@@ -1963,7 +1877,7 @@ static int map_load_from_file(map *nmap, char *mazefile, int which)
 /*
  * function to make a treasure room on a map
  */
-static void map_make_treasure_room(map *maze, rectangle **rooms)
+static void map_make_treasure_room(map *m, rectangle **rooms)
 {
     position pos, npos;
     map_sobject_t mst;
@@ -1985,7 +1899,7 @@ static void map_make_treasure_room(map *maze, rectangle **rooms)
     /* sanity check */
     if (rooms[room] == NULL) { return; }
 
-    Z(pos) = Z(npos) = maze->nlevel;
+    Z(pos) = Z(npos) = m->nlevel;
 
     for (Y(pos) = rooms[room]->y1; Y(pos) <= rooms[room]->y2; Y(pos)++)
     {
@@ -1997,33 +1911,33 @@ static void map_make_treasure_room(map *maze, rectangle **rooms)
                     || (X(pos) == rooms[room]->x2) )
             {
                 /* if we are on the border of a room, make wall */
-                map_tiletype_set(maze, pos, LT_WALL);
+                map_tiletype_set(m, pos, LT_WALL);
             }
             else
             {
                 /* make sure there's floor here */
-                map_tiletype_set(maze, pos, LT_FLOOR);
+                map_tiletype_set(m, pos, LT_FLOOR);
 
                 /* create loot */
                 itm = item_new_random(IT_GOLD, FALSE);
-                inv_add(map_ilist_at(maze, pos), itm);
+                inv_add(map_ilist_at(m, pos), itm);
 
                 /* create a monster */
                 monster_new_by_level(pos);
             }
 
             /* now clear out interior */
-            if ((mst = map_sobject_at(maze, pos)))
+            if ((mst = map_sobject_at(m, pos)))
             {
                 success = FALSE;
                 do
                 {
-                    npos = map_find_space(maze, LE_SOBJECT, FALSE);
+                    npos = map_find_space(m, LE_SOBJECT, FALSE);
                     if (!pos_in_rect(npos, *rooms[room]))
                     {
                         /* pos is outside of room */
-                        map_sobject_set(maze, npos, mst);
-                        map_sobject_set(maze, pos, LS_NONE);
+                        map_sobject_set(m, npos, mst);
+                        map_sobject_set(m, pos, LS_NONE);
 
                         success = TRUE;
                     }
@@ -2047,44 +1961,44 @@ static void map_make_treasure_room(map *maze, rectangle **rooms)
         break;
     };
 
-    map_tiletype_set(maze, pos, LT_FLOOR);
-    map_sobject_set(maze, pos, LS_CLOSEDDOOR);
+    map_tiletype_set(m, pos, LT_FLOOR);
+    map_sobject_set(m, pos, LS_CLOSEDDOOR);
 }
 
 /* verify that every space on the map can be reached */
-static int map_validate(map *maze)
+static int map_validate(map *m)
 {
     position pos;
     int connected = TRUE;
     area *floodmap = NULL;
     area *obsmap = area_new(0, 0, MAP_MAX_X, MAP_MAX_Y);
 
-    Z(pos) = maze->nlevel;
+    Z(pos) = m->nlevel;
 
     /* generate an obstacle map */
     for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
-            if (!map_pos_passable(maze, pos)
-                    && (map_sobject_at(maze, pos) != LS_CLOSEDDOOR))
+            if (!map_pos_passable(m, pos)
+                    && (map_sobject_at(m, pos) != LS_CLOSEDDOOR))
             {
                 area_point_set(obsmap, X(pos), Y(pos));
             }
 
     /* get position of entrance */
-    switch (maze->nlevel)
+    switch (m->nlevel)
     {
         /* caverns entrance */
     case 1:
-        pos = map_find_sobject(maze, LS_DNGN_EXIT);
+        pos = map_find_sobject(m, LS_DNGN_EXIT);
         break;
 
         /* volcano entrance */
     case MAP_DMAX:
-        pos = map_find_sobject(maze, LS_ELEVATORUP);
+        pos = map_find_sobject(m, LS_ELEVATORUP);
         break;
 
     default:
-        pos = map_find_sobject(maze, LS_STAIRSDOWN);
+        pos = map_find_sobject(m, LS_STAIRSDOWN);
         break;
     }
 
@@ -2096,8 +2010,8 @@ static int map_validate(map *maze)
     {
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
-            int pp = map_pos_passable(maze, pos);
-            int cd = (map_sobject_at(maze, pos) == LS_CLOSEDDOOR);
+            int pp = map_pos_passable(m, pos);
+            int cd = (map_sobject_at(m, pos) == LS_CLOSEDDOOR);
 
             /* point should be set on floodmap if it is passable */
             if (area_point_get(floodmap, X(pos), Y(pos)) != (pp || cd))
@@ -2117,13 +2031,10 @@ static int map_validate(map *maze)
 }
 
 /* subroutine to put an item onto an empty space */
-void map_item_add(map *maze, item *what)
+void map_item_add(map *m, item *what)
 {
-    position pos;
-
-    pos = map_find_space(maze, LE_ITEM, FALSE);
-
-    inv_add(map_ilist_at(maze, pos), what);
+    position pos = map_find_space(m, LE_ITEM, FALSE);
+    inv_add(map_ilist_at(m, pos), what);
 }
 
 static map_path *map_path_new(position start, position goal)
@@ -2153,14 +2064,14 @@ static map_path_element *map_path_element_new(position pos)
 }
 
 /* calculate the cost of stepping into this new field */
-static int map_step_cost(map *l, map_path_element* element,
+static int map_step_cost(map *m, map_path_element* element,
                          map_element_t map_elem, gboolean ppath)
 {
     map_tile_t tt;
     guint32 step_cost = 1; /* at least 1 movement cost */
 
     /* get the monster located on the map tile */
-    monster *m = map_get_monster_at(l, element->pos);
+    monster *mon = map_get_monster_at(m, element->pos);
 
     /* get the tile type of the map tile */
     if (ppath)
@@ -2169,13 +2080,13 @@ static int map_step_cost(map *l, map_path_element* element,
     }
     else
     {
-        tt = map_tiletype_at(l, element->pos);
+        tt = map_tiletype_at(m, element->pos);
     }
 
     /* penalize for traps known to the player */
     if (ppath && player_memory_of(nlarn->p, element->pos).trap)
     {
-        const trap_t trap = map_trap_at(l, element->pos);
+        const trap_t trap = map_trap_at(m, element->pos);
         /* especially ones that may cause detours */
         if (trap == TT_TELEPORT || trap == TT_TRAPDOOR)
             step_cost += 50;
@@ -2185,7 +2096,7 @@ static int map_step_cost(map *l, map_path_element* element,
 
     /* penalize fields occupied by monsters: always for monsters,
        for the player only if (s)he can see the monster */
-    if (m != NULL && (!ppath || monster_in_sight(m)))
+    if (m != NULL && (!ppath || monster_in_sight(mon)))
     {
         step_cost += 10;
     }
@@ -2218,7 +2129,8 @@ static int map_path_cost(map_path_element* element, position target)
     return element->g_score + element->h_score;
 }
 
-static map_path_element *map_path_element_in_list(map_path_element* el, GPtrArray *list)
+static map_path_element *map_path_element_in_list(map_path_element* el,
+                                                  GPtrArray *list)
 {
     assert(el != NULL && list != NULL);
 
@@ -2251,7 +2163,7 @@ static map_path_element *map_path_find_best(map_path *path)
     return best;
 }
 
-static GPtrArray *map_path_get_neighbours(map *l, position pos,
+static GPtrArray *map_path_get_neighbours(map *m, position pos,
                                           map_element_t element,
                                           gboolean ppath)
 {
@@ -2268,7 +2180,7 @@ static GPtrArray *map_path_get_neighbours(map *l, position pos,
             continue;
 
         if ((ppath && mt_is_passable(player_memory_of(nlarn->p, npos).type))
-                || (!ppath && monster_valid_dest(l, npos, element)))
+                || (!ppath && monster_valid_dest(m, npos, element)))
         {
             map_path_element *pe = map_path_element_new(npos);
             g_ptr_array_add(neighbours, pe);
