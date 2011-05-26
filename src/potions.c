@@ -571,10 +571,7 @@ static gboolean potion_pos_hit(position pos,
     }
     else if (m != NULL)
     {
-        /* there is a monster at the position */
-        effect *e = NULL;
-
-        /* the potion might have hit the monster */
+        /* there is a monster at the position the potion might have hit */
         if (!chance(weapon_calc_to_hit(nlarn->p, m, NULL, NULL)))
             return FALSE;
 
@@ -582,7 +579,7 @@ static gboolean potion_pos_hit(position pos,
                   desc, monster_get_name(m));
 
         if (potion_effect(potion))
-            e = monster_effect_add(m, effect_new(potion_effect(potion)));
+            monster_effect_add(m, effect_new(potion_effect(potion)));
 
         if (potion->id == PO_WATER && potion->blessed && monster_flags(m, MF_UNDEAD))
         {

@@ -1943,15 +1943,13 @@ effect *monster_effect_add(monster *m, effect *e)
         effect_destroy(e);
         e = NULL;
     }
-
-    if (e->type == ET_POISON && monster_flags(m, MF_RES_POISON))
+    else if (e->type == ET_POISON && monster_flags(m, MF_RES_POISON))
     {
         /* the monster is poison resistant */
         effect_destroy(e);
         e = NULL;
     }
-
-    if (e->type == ET_LEVITATION && monster_flags(m, MF_FLY))
+    else if (e->type == ET_LEVITATION && monster_flags(m, MF_FLY))
     {
         /* levitation has no effect on flying monsters */
         effect_destroy(e);
@@ -2003,7 +2001,7 @@ effect *monster_effect_add(monster *m, effect *e)
     }
 
     /* clean up one-time effects */
-    if (e->turns == 1)
+    if (e && e->turns == 1)
     {
         effect_destroy(e);
         e = NULL;
