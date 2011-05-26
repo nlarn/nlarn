@@ -19,6 +19,8 @@
 #ifndef __MAP_H_
 #define __MAP_H_
 
+#include <assert.h>
+
 #include "cJSON.h"
 #include "items.h"
 #include "monsters.h"
