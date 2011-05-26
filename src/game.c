@@ -100,9 +100,9 @@ void game_init(int argc, char *argv[])
         /* local lib directory could not be found, try the current working
          * directory and after that the system wide directory. */
 
-        char *cwd = getwd(NULL);
+        char *cwd = g_get_current_dir();
         char *wdlibdir = g_build_path(G_DIR_SEPARATOR_S, cwd, "lib", NULL);
-        free(cwd);
+        g_free(cwd);
 
         if (g_file_test(wdlibdir, G_FILE_TEST_IS_DIR))
         {
