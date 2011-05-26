@@ -584,13 +584,6 @@ static gboolean potion_pos_hit(position pos,
         if (potion_effect(potion))
             e = monster_effect_add(m, effect_new(potion_effect(potion)));
 
-        /* FIXME: this belongs into monster_effect_add */
-        if (potion_effect(potion) && !e)
-        {
-            /* the monster is resistant to the effect */
-            log_add_entry(nlarn->log, "The %s is not affected.", monster_get_name(m));
-        }
-
         if (potion->id == PO_WATER && potion->blessed && monster_flags(m, MF_UNDEAD))
         {
             /* this is supposed to hurt really nasty */

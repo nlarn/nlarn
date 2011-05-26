@@ -241,7 +241,8 @@ monster *monster_trap_trigger(monster *m)
     trap = map_trap_at(monster_map(m), monster_pos(m));
 
     /* flying monsters are only affected by sleeping gas traps */
-    if (monster_flags(m, MF_FLY) && (trap != TT_SLEEPGAS))
+    if ((monster_flags(m, MF_FLY) || monster_effect(m, ET_LEVITATION))
+        && (trap != TT_SLEEPGAS))
     {
         return m;
     }

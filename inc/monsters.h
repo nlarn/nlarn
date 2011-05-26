@@ -267,6 +267,14 @@ char *monster_desc(monster *m);
 char monster_glyph(monster *m);
 int monster_color(monster *m);
 
+/* dealing with temporary effects */
+effect *monster_effect_add(monster *m, effect *e);
+int monster_effect_del(monster *m, effect *e);
+effect *monster_effect_get(monster *m , effect_t type);
+int monster_effect(monster *m, effect_t type);
+void monster_effects_expire(monster *m);
+int monster_is_carrying_item(monster *m, item_t type);
+
 /* query monster data */
 
 static inline const char *monster_name(monster *m) {
@@ -285,7 +293,9 @@ static inline int monster_ac(monster *m)
 
 static inline guint monster_int(monster *m)
 {
-    return (guint)luaN_query_int("monsters", monster_type(m), "intelligence");
+    return (guint)luaN_query_int("monsters", monster_type(m), "intelligence")
+            + monster_effect(m, ET_HEROISM)
+            - monster_effect(m, ET_DIZZINESS);
 }
 
 static inline int monster_gold_chance(monster *m)
@@ -310,7 +320,11 @@ static inline int monster_size(monster *m)
 
 static inline int monster_speed(monster *m)
 {
-    return luaN_query_int("monsters", monster_type(m), "speed");
+    return luaN_query_int("monsters", monster_type(m), "speed")
+            + monster_effect(m, ET_SPEED)
+            + (monster_effect(m, ET_HEROISM) * 5)
+            - monster_effect(m, ET_SLOWNESS)
+            - (monster_effect(m, ET_DIZZINESS) * 5);
 }
 
 static inline int monster_flags(monster *m, monster_flag f)
@@ -343,13 +357,5 @@ static inline int monster_type_reroll_chance(monster_t type)
 
 void monster_genocide(monster_t monster_id);
 int monster_is_genocided(monster_t monster_id);
-
-/* dealing with temporary effects */
-effect *monster_effect_add(monster *m, effect *e);
-int monster_effect_del(monster *m, effect *e);
-effect *monster_effect_get(monster *m , effect_t type);
-int monster_effect(monster *m, effect_t type);
-void monster_effects_expire(monster *m);
-int monster_is_carrying_item(monster *m, item_t type);
 
 #endif

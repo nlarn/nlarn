@@ -921,7 +921,8 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
 
     /* damage caused by map effects */
     damage *dam = map_tile_damage(monster_map(m), monster_pos(m),
-                                  monster_flags(m, MF_FLY));
+                                  monster_flags(m, MF_FLY)
+                                  || monster_effect(m, ET_LEVITATION));
 
     /* deal damage caused by floor effects */
     if ((dam != NULL) && !(m = monster_damage_take(m, dam)))
@@ -1139,6 +1140,10 @@ int monster_items_pickup(monster *m)
 {
     // The town people never take your stuff.
     if (monster_type(m) == MT_TOWN_PERSON)
+        return FALSE;
+
+    /* monsters affected by levitation can't pick up stuff */
+    if (monster_effect(m, ET_LEVITATION))
         return FALSE;
 
     /* TODO: gelatious cube digests items, rust monster eats metal stuff */
@@ -1418,7 +1423,7 @@ void monster_player_attack(monster *m, player *p)
 
         /* make monster size affect weapon damage */
         dam->amount  = rand_1n(weapon_damage(weapon) + game_difficulty(nlarn)
-                               + 2*(monster_size(m) - ESIZE_MEDIUM));
+                               + 2 * (monster_size(m) - ESIZE_MEDIUM));
     }
     else if (dam->type == DAM_PHYSICAL)
     {
@@ -1435,7 +1440,7 @@ void monster_player_attack(monster *m, player *p)
     {
         if (dam->type == DAM_PHYSICAL)
         {
-            /* half physical damage */
+            /* halve physical damage */
             dam->amount >>= 1;
         }
         else
@@ -1579,7 +1584,7 @@ monster *monster_damage_take(monster *m, damage *dam)
                           monster_name(m));
         }
         /* double damage for flying monsters */
-        else if (monster_flags(m, MF_FLY))
+        else if (monster_flags(m, MF_FLY) || monster_effect(m, ET_LEVITATION))
         {
             dam->amount *= 2;
             // special message?
@@ -1930,26 +1935,78 @@ int monster_is_genocided(monster_t monster_id)
 effect *monster_effect_add(monster *m, effect *e)
 {
     assert(m != NULL && e != NULL);
+    gboolean vis_effect = FALSE;
 
     if (e->type == ET_SLEEP && monster_flags(m, MF_RES_SLEEP))
     {
+        /* the monster is resistant to sleep */
         effect_destroy(e);
-        return NULL;
+        e = NULL;
     }
 
     if (e->type == ET_POISON && monster_flags(m, MF_RES_POISON))
     {
+        /* the monster is poison resistant */
         effect_destroy(e);
-        return NULL;
+        e = NULL;
     }
 
-    e = effect_add(m->effects, e);
+    if (e->type == ET_LEVITATION && monster_flags(m, MF_FLY))
+    {
+        /* levitation has no effect on flying monsters */
+        effect_destroy(e);
+        e = NULL;
+    }
+
+    /* one time effects */
+    if (e && e->turns == 1)
+    {
+        switch (e->type)
+        {
+        case ET_INC_HP:
+            {
+                int hp_orig = m->hp;
+                m->hp += min ((m->hp_max  * e->amount) / 100, m->hp_max);
+
+                if (m->hp > hp_orig)
+                    vis_effect = TRUE;
+            }
+
+            break;
+
+        case ET_MAX_HP:
+            if (m->hp < m->hp_max)
+            {
+                m->hp = m->hp_max;
+                vis_effect = TRUE;
+            }
+            break;
+
+        default:
+            /* nothing happens.. */
+            break;
+        }
+    }
+    else if (e)
+    {
+        /* multi-turn effects */
+        e = effect_add(m->effects, e);
+    }
 
     /* show message if monster is visible */
-    if (e && monster_in_sight(m) && effect_get_msg_m_start(e))
+    if (e && monster_in_sight(m)
+        && effect_get_msg_m_start(e)
+        && (e->turns > 0 || vis_effect))
     {
         log_add_entry(nlarn->log, effect_get_msg_m_start(e),
                       monster_name(m));
+    }
+
+    /* clean up one-time effects */
+    if (e->turns == 1)
+    {
+        effect_destroy(e);
+        e = NULL;
     }
 
     return e;
@@ -2043,7 +2100,8 @@ static gboolean monster_player_visible(monster *m)
     if (pos_distance(monster_pos(m), nlarn->p->pos) > monster_visrange)
         return FALSE;
 
-    if (player_effect(nlarn->p, ET_INVISIBILITY) && !monster_flags(m, MF_INFRAVISION))
+    if (player_effect(nlarn->p, ET_INVISIBILITY)
+        && !(monster_flags(m, MF_INFRAVISION) || monster_effect(m, ET_INFRAVISION)))
         return FALSE;
 
     /* determine if player's position is visible from monster's position */

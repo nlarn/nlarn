@@ -185,7 +185,8 @@ static const effect_data effects[ET_MAX] =
         ET_HEROISM, "ET_HEROISM", 250, 5, NULL,
         "WOW!!! You feel Super-fantastic!!!",
         "You return to normal. How sad!",
-        NULL, NULL,
+        "The %s looks more perilous!",
+        "The %s looks less perilous.",
         FALSE, FALSE, FALSE, FALSE
     },
 
@@ -208,7 +209,8 @@ static const effect_data effects[ET_MAX] =
         ET_INFRAVISION, "ET_INFRAVISION", 250, TRUE, "infravision",
         "Your vision sharpens.",
         "Your vision returns to normal.",
-        NULL, NULL,
+        "The %s seems more observant.",
+        "The %s seems less observant.",
         TRUE, FALSE, TRUE, FALSE
     },
 
@@ -343,9 +345,10 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_LEVITATION, "ET_LEVITATION", 20, TRUE, "levitation",
-        "You start to float in the air.",
+        "You start to float in the air!",
         "You gently sink to the ground.",
-        NULL, NULL,
+        "The %s starts to float in the air!",
+        "The %s gently sinks to the ground.",
         TRUE, FALSE, TRUE, FALSE
     },
 
