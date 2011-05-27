@@ -662,11 +662,13 @@ monster_action_t monster_action(monster *m)
     return m->action;
 }
 
-// Takes into account visibility.
+// Takes visibility into account.
 // For the real name, use monster_name() directly.
 const char *monster_get_name(monster *m)
 {
-    if (!game_wizardmode(nlarn) && !monster_in_sight(m))
+    /* only show real names of invisible monsters in
+     * wizard mode when full visibility is enabled */
+    if (!monster_in_sight(m) && !game_fullvis(nlarn))
         return ("unseen monster");
 
     if (monster_type(m) == MT_TOWN_PERSON)
