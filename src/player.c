@@ -1677,7 +1677,7 @@ int player_move(player *p, direction dir, gboolean open_door)
         player_autopickup(p);
 
     /* mention stationary objects at this position */
-    if ((so = map_sobject_at(pmap, p->pos)))
+    if ((so = map_sobject_at(pmap, p->pos)) && !player_effect(p, ET_BLINDNESS))
     {
         log_add_entry(nlarn->log, "You see %s here.", mso_get_desc(so));
     }
