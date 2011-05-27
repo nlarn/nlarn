@@ -16,6 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* $Id$ */
+
 #ifndef __POSITION_H_
 #define __POSITION_H_
 

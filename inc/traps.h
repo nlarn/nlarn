@@ -16,6 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* $Id$ */
+
 #ifndef __TRAPS_H_
 #define __TRAPS_H_
 

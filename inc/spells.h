@@ -16,6 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* $Id$ */
+
 #ifndef __SPELLS_H_
 #define __SPELLS_H_
 

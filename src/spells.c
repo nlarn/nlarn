@@ -16,6 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* $Id$ */
+
 #include <assert.h>
 #include <string.h>
 #include <unistd.h>

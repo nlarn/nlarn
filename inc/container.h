@@ -16,6 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* $Id$ */
+
 #ifndef __CONTAINER_H_
 #define __CONTAINER_H_
 
