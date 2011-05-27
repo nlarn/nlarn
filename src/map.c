@@ -2098,7 +2098,7 @@ static int map_step_cost(map *m, map_path_element* element,
 
     /* penalize fields occupied by monsters: always for monsters,
        for the player only if (s)he can see the monster */
-    if (m != NULL && (!ppath || monster_in_sight(mon)))
+    if (mon != NULL && (!ppath || monster_in_sight(mon)))
     {
         step_cost += 10;
     }
