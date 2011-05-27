@@ -4520,11 +4520,10 @@ const char *player_get_level_desc(player *p)
     return player_level_desc[p->level - 1];
 }
 
-int player_search(player *p)
+void player_search(player *p)
 {
     assert (p != NULL);
 
-    int turns = 0;
     position pos = pos_move(p->pos, GD_NW);
     map *m = game_map(nlarn, Z(p->pos));
 
@@ -4536,10 +4535,27 @@ int player_search(player *p)
             /* skip invalid positions */
             if (!pos_valid(pos)) continue;
 
-            /* skip unpassable positions */
-            if (!map_pos_passable(m, pos)) continue;
+            /* skip unpassable positions unless the player is blind */
+            if (!map_pos_passable(m, pos) && !player_effect(p, ET_BLINDNESS))
+                continue;
 
-            turns++;
+            /* consume one turn per tile */
+            player_make_move(p, 1, FALSE, NULL);
+
+            /* stop searching when the player is under attack */
+            if (p->attacked) return;
+
+            /* examine the surrounding area if blind */
+            if (player_effect(p, ET_BLINDNESS))
+            {
+                /* examine tile types */
+                player_memory_of(p, pos).type = map_tile_at(m, pos)->type;
+
+                /* examine stationary objects */
+                player_memory_of(p, pos).sobject = map_tile_at(m, pos)->sobject;
+            }
+
+            /* search for traps */
             trap_t tt = map_trap_at(m, pos);
 
             if ((tt != TT_NONE) && (tt != player_memory_of(p, pos).trap))
@@ -4559,8 +4575,6 @@ int player_search(player *p)
             }
         }
     }
-
-    return turns;
 }
 
 void player_list_sobjmem(player *p)

@@ -559,7 +559,7 @@ int main(int argc, char *argv[])
 
             /* search */
         case 's':
-            moves_count = player_search(nlarn->p);
+            player_search(nlarn->p);
             break;
 
             /* take off something */
