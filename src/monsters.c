@@ -807,7 +807,7 @@ void monster_level_enter(monster *m, struct map *l)
     map_sobject_t source = map_sobject_at(monster_map(m), m->pos);
     map_sobject_t target;
     position npos;
-    char *what;
+    char *what = NULL;
     char *how = "comes";
 
     /* check if the monster used the stairs */

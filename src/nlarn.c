@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     }
 
     char run_cmd = 0;
-    int ch;
+    int ch = 0;
     gboolean adj_corr = FALSE;
     guint end_resting = 0;
 

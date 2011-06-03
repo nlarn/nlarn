@@ -2354,7 +2354,7 @@ position display_get_new_position(player *p,
     display_window *msgpop = NULL;
 
     /* list of visible monsters and the iterator therefor */
-    GList *mlist = NULL, *miter;
+    GList *mlist = NULL, *miter = NULL;
 
     /* variables for ray or ball painting */
     area *a = NULL;
