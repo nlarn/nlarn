@@ -1181,7 +1181,7 @@ void player_die(player *p, player_cod cause_type, int cause)
             desc = player_death_description(cscore, FALSE);
             g_string_append_printf(text, "  %s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d/%d hp, diff %d]\n",
                                    (cscore == score) ? "*" : " ",
-                                   count + 1, cscore->score, desc,
+                                   nrec + 1, cscore->score, desc,
                                    cscore->dlevel, cscore->hp, cscore->hp_max,
                                    cscore->difficulty);
 
