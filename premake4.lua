@@ -80,6 +80,11 @@ solution "NLarn"
       defines { "NDEBUG" }
       flags { "Optimize" }
 
+    configuration "linux"
+      -- when using c99, the glibc headers require _BSD_SOURCE to be set
+      -- or some functions, e.g. usleep are unavailable.
+      defines { "_BSD_SOURCE" }
+
     configuration "bsd"
       includedirs { "/usr/local/include/lua51" }
       libdirs { "/usr/local/lib/lua51" }
