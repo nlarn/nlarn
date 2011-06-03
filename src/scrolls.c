@@ -283,7 +283,7 @@ static int scroll_with_effect(struct player *p, item *r_scroll)
  * @param the scroll just read
  *
  */
-static int scroll_annihilate(struct player *p, item *r_scroll)
+static int scroll_annihilate(struct player *p, item *r_scroll __attribute__((unused)))
 {
     int count = 0;
     area *blast, *obsmap;
@@ -291,7 +291,7 @@ static int scroll_annihilate(struct player *p, item *r_scroll)
     monster *m;
     map *cmap = game_map(nlarn, Z(p->pos));
 
-    assert(p != NULL && r_scroll != NULL);
+    assert(p != NULL);
 
     obsmap = map_get_obstacles(cmap, p->pos, 2);
     blast = area_new_circle_flooded(p->pos, 2, obsmap);
@@ -638,13 +638,13 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
     return TRUE;
 }
 
-static int scroll_heal_monster(player *p, item *r_scroll)
+static int scroll_heal_monster(player *p, item *r_scroll __attribute__((unused)))
 {
     GList *mlist;
     int count = 0;
     monster *m;
 
-    assert(p != NULL && r_scroll != NULL);
+    assert(p != NULL);
 
     mlist = g_hash_table_get_values(nlarn->monsters);
 

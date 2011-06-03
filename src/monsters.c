@@ -919,7 +919,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     monster_effects_expire(m);
 
     /* regenerate / inflict poison upon monster. */
-    if (!monster_regenerate(m, g->gtime, g->difficulty, g->log))
+    if (!monster_regenerate(m, g->gtime, g->difficulty))
         /* the monster died */
         return;
 
@@ -1744,7 +1744,7 @@ void monster_update_player_pos(monster *m, position ppos)
     m->lastseen = 1;
 }
 
-gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log)
+gboolean monster_regenerate(monster *m, time_t gtime, int difficulty)
 {
     /* number of turns between occasions */
     int frequency;
@@ -1752,7 +1752,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_lo
     /* temporary var for effect */
     effect *e;
 
-    assert(m != NULL && log != NULL);
+    assert(m != NULL);
 
     /* modify frequency by difficulty: more regeneration, less poison */
     frequency = difficulty << 1;
@@ -2235,7 +2235,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
  * @param the player
  *
  */
-static gboolean monster_item_rust(monster *m, struct player *p)
+static gboolean monster_item_rust(monster *m __attribute__((unused)), struct player *p)
 {
     item **it;
 

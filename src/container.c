@@ -322,9 +322,9 @@ void container_item_unpack(player *p, inventory **inv, item *element)
     }
 }
 
-int container_move_content(player *p, inventory **inv, inventory **new_inv)
+int container_move_content(player *p __attribute__((unused)), inventory **inv, inventory **new_inv)
 {
-    assert(p != NULL && inv != NULL);
+    assert(inv != NULL);
 
     item *it;
     guint count = 0;

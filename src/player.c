@@ -2965,10 +2965,8 @@ int player_inv_display(player *p)
     return TRUE;
 }
 
-static char *player_print_weight(player *p, float weight)
+static char *player_print_weight(float weight)
 {
-    assert (p != NULL);
-
     static char buf[21] = "";
 
     char *unit = "g";
@@ -2987,7 +2985,7 @@ char *player_can_carry(player *p)
 {
     static char buf[21] = "";
     g_snprintf(buf, 20, "%s",
-               player_print_weight(p, 2000 * 1.3 * (float)player_get_str(p)));
+               player_print_weight(2000 * 1.3 * (float)player_get_str(p)));
     return buf;
 }
 
@@ -2995,7 +2993,7 @@ char *player_inv_weight(player *p)
 {
     static char buf[21] = "";
     g_snprintf(buf, 20, "%s",
-               player_print_weight(p, (float)inv_weight(p->inventory)));
+               player_print_weight((float)inv_weight(p->inventory)));
     return buf;
 }
 
@@ -3605,9 +3603,9 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
 }
 
 /* silly filter to get containers */
-int player_item_is_container(player *p, item *it)
+int player_item_is_container(player *p __attribute__((unused)), item *it)
 {
-    assert(p != NULL && it != NULL && it->type < IT_MAX);
+    assert(it != NULL && it->type < IT_MAX);
 
     return (it->type == IT_CONTAINER);
 }
@@ -3772,9 +3770,9 @@ int player_item_is_equippable(player *p, item *it)
     return TRUE;
 }
 
-int player_item_is_usable(player *p, item *it)
+int player_item_is_usable(player *p __attribute__((unused)), item *it)
 {
-    assert(p != NULL && it != NULL);
+    assert(it != NULL);
     return item_is_usable(it->type);
 }
 
@@ -3784,9 +3782,9 @@ int player_item_is_dropable(player *p, item *it)
     return !player_item_is_equipped(p, it);
 }
 
-int player_item_is_damaged(player *p, item *it)
+int player_item_is_damaged(player *p __attribute__((unused)), item *it)
 {
-    assert(p != NULL && it != NULL);
+    assert(it != NULL);
 
     if (it->corroded) return TRUE;
     if (it->burnt) return TRUE;
@@ -4426,10 +4424,10 @@ int player_get_dex(player *p)
 int player_get_speed(player *p)
 {
     assert(p != NULL);
-    return nlarn->p->speed
-           + player_effect(nlarn->p, ET_SPEED)
-           - player_effect(nlarn->p, ET_SLOWNESS)
-           - player_effect(nlarn->p, ET_BURDENED);
+    return p->speed
+           + player_effect(p, ET_SPEED)
+           - player_effect(p, ET_SLOWNESS)
+           - player_effect(p, ET_BURDENED);
 }
 
 guint player_get_gold(player *p)

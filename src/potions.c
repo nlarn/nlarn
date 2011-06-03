@@ -337,11 +337,11 @@ static int potion_with_effect(struct player *p, item *potion)
     return identified;
 }
 
-static int potion_amnesia(player *p, item *potion)
+static int potion_amnesia(player *p, item *potion __attribute__((unused)))
 {
     position pos;
 
-    assert (p != NULL && potion != NULL);
+    assert (p != NULL);
 
     /* set position's level to player's position */
     Z(pos) = Z(p->pos);
@@ -465,9 +465,9 @@ static int potion_detect_item(player *p, item *potion)
     return count;
 }
 
-static int potion_recovery(player *p, item *potion)
+static int potion_recovery(player *p, item *potion __attribute__((unused)))
 {
-    assert (p != NULL && potion != NULL);
+    assert (p != NULL);
 
     gboolean success = FALSE;
     effect *e;
@@ -492,12 +492,12 @@ static int potion_recovery(player *p, item *potion)
     return success;
 }
 
-static int potion_holy_water(player *p, item *potion)
+static int potion_holy_water(player *p, item *potion __attribute__((unused)))
 {
     char buf[61];
     item *it;
 
-    assert (p != NULL && potion != NULL);
+    assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_nonblessed) == 0)
     {

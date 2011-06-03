@@ -262,7 +262,7 @@ monster *monster_damage_take(monster *m, damage *dam);
 gboolean monster_update_action(monster *m, monster_action_t override);
 
 void monster_update_player_pos(monster *m, position ppos);
-gboolean monster_regenerate(monster *m, time_t gtime, int difficulty, message_log *log);
+gboolean monster_regenerate(monster *m, time_t gtime, int difficulty);
 
 item *get_mimic_item(monster *m);
 char *monster_desc(monster *m);
