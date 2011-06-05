@@ -3301,7 +3301,7 @@ void player_item_equip(player *p, inventory **inv, item *it)
             break;
         }
 
-        if (islot == NULL)
+        if ((islot != NULL) && (*islot == NULL))
         {
             item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
 
@@ -3314,6 +3314,9 @@ void player_item_equip(player *p, inventory **inv, item *it)
             /* Refresh the armour's description before logging. */
             item_describe(it, player_item_known(p, it), TRUE, FALSE, description, 60);
             log_add_entry(nlarn->log, "You are now wearing %s.", description);
+
+            /* put the piece of armor in the equipment slot */
+            *islot = it;
 
             if (it->cursed)
             {
