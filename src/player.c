@@ -44,14 +44,14 @@ static const char aa8[] = "apprentice guardian";
 
 static const char *player_level_desc[] =
 {
-    "novice explorer",		"apprentice explorer",	"practiced explorer",	/* -3 */
-    "expert explorer",		"novice adventurer",	"adventurer",			/* -6 */
-    "apprentice conjurer",	"conjurer",				"master conjurer",		/*  -9 */
-    "apprentice mage",		"mage", 				"experienced mage",		/* -12 */
-    "master mage",			"apprentice warlord", 	"novice warlord",		/* -15 */
-    "expert warlord",		"master warlord", 		"apprentice gorgon",	/* -18 */
-    "gorgon", 				"practiced gorgon", 	"master gorgon",		/* -21 */
-    "demi-gorgon", 			"evil master", 			"great evil master",	/* -24 */
+    "novice explorer",     "apprentice explorer", "practiced explorer", /* -3 */
+    "expert explorer",     "novice adventurer",   "adventurer",         /* -6 */
+    "apprentice conjurer", "conjurer",            "master conjurer",    /*  -9 */
+    "apprentice mage",     "mage",                "experienced mage",   /* -12 */
+    "master mage",         "apprentice warlord",  "novice warlord",     /* -15 */
+    "expert warlord",      "master warlord",      "apprentice gorgon",  /* -18 */
+    "gorgon",              "practiced gorgon",    "master gorgon",      /* -21 */
+    "demi-gorgon",         "evil master",         "great evil master",  /* -24 */
     aa1, aa1, aa1, /* -27*/
     aa1, aa1, aa1, /* -30*/
     aa1, aa1, aa1, /* -33*/
@@ -75,8 +75,8 @@ static const char *player_level_desc[] =
     aa7, aa7, aa7, /* -87*/
     aa8, aa8, aa8, /* -90*/
     aa8, aa8, aa8, /* -93*/
-    "earth guardian", "air guardian",	"fire guardian",	/* -96*/
-    "water guardian", "time guardian",	"ethereal guardian",/* -99*/
+    "earth guardian", "air guardian",  "fire guardian",    /* -96*/
+    "water guardian", "time guardian", "ethereal guardian",/* -99*/
     "The Creator", /* 100*/
 };
 
@@ -4569,6 +4569,29 @@ void player_search(player *p)
                                   trap_description(tt));
 
                     player_memory_of(p, pos).trap = tt;
+                }
+            }
+
+            /* search for traps on containers */
+            inventory **ti = map_ilist_at(m, pos);
+            if (ti != NULL)
+            {
+                for (guint idx = 0; 
+                        idx < inv_length_filtered(*ti, item_filter_container); 
+                        idx++)
+                {
+                    item *c = inv_get_filtered(*ti, idx, item_filter_container);
+
+                    /* the chance that the player discovers the trap is 3 * int */
+                    if (c->cursed && !c->blessed_known && chance(player_get_int(p) * 3))
+                    {
+                        gchar idesc[81] = { 0 };
+                        item_describe(c, FALSE, TRUE, TRUE, idesc, 80);
+                        /* the container is cursed */
+                        c->blessed_known = TRUE;
+                        log_add_entry(nlarn->log, "You discover a trap on %s!", 
+                                      idesc);
+                    }
                 }
             }
         }

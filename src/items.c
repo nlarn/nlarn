@@ -622,7 +622,13 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
     if (it->blessed_known)
     {
         if (it->blessed) strv_append(&add_infos, "blessed");
-        else if (it->cursed) strv_append(&add_infos, "cursed");
+        else if (it->cursed)
+        {
+            if (it->type == IT_CONTAINER)
+                strv_append(&add_infos, "trapped");
+            else
+                strv_append(&add_infos, "cursed");
+        }
         else strv_append(&add_infos, "uncursed");
     }
 

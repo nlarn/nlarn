@@ -34,7 +34,7 @@ const container_data containers[CT_MAX] =
     { CT_CRATE,  "crate", 65000, IM_WOOD,  100, },
 };
 
-static void container_trigger_trap(player *p, item *container);
+static gboolean container_trigger_trap(player *p, item *container);
 
 void container_open(player *p, inventory **inv __attribute__((unused)), item *container)
 {
@@ -79,14 +79,14 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     if (!container_provided)
         log_add_entry(nlarn->log, "You carefully open the %s.", container_desc);
 
-    /* check if the container is trapped */
-    if (container->cursed)
+    /* check for a trap on the container and if the player triggers it */
+    if (container->cursed && container_trigger_trap(p, container))
     {
-        /* the player has triggerd the trap on the container */
-        container_trigger_trap(p, container);
-
-        /* remove the trap */
+        /* the player has triggered the trap, thus remove it */
         container->cursed = FALSE;
+        
+        /* reset blessed_known, otherwise "uncursed xxx" would appear */
+        container->blessed_known = FALSE;
     }
 
     /* check for empty container */
@@ -340,9 +340,24 @@ int container_move_content(player *p __attribute__((unused)), inventory **inv, i
     return count;
 }
 
-static void container_trigger_trap(player *p, item *container __attribute__((unused)))
+static gboolean container_trigger_trap(player *p, item *container)
 {
     effect_t et = ET_NONE;
+    
+    /* if player knows that the container is trapped,
+     * the chance to trigger the trap is lowered */
+    if (container->blessed_known && chance(3 * player_get_dex(p))) 
+    {
+        gchar idesc[81] = { 0 };
+
+        item_describe(container, FALSE, TRUE, TRUE, idesc, 80);
+        log_add_entry(nlarn->log, "You carefully avoid the trap on %s.",
+                      idesc);
+
+        /* the trap remains on the container */
+        return FALSE;
+    }
+
     char *msg = "A little needle shoots out and stings you!";
 
     switch(rand_1n(5))
@@ -373,4 +388,7 @@ static void container_trigger_trap(player *p, item *container __attribute__((unu
         /* add the effect */
         player_effect_add(p, effect_new(et));
     }
+
+    /* the trap is destroyed */
+    return TRUE;
 }
