@@ -355,7 +355,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
             }
 
             /* scan for a space at which to wrap the current line */
-            if (isspace(str[spos + cpos]))
+            if (g_ascii_isspace(str[spos + cpos]))
             {
                 lp = cpos;
             }

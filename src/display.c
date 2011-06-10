@@ -2037,8 +2037,8 @@ int display_get_yesno(const char *question, const char *yes, const char *no)
         // Specialcase for the movement keys and y/n.
         if (key != 'h' && key != 'l' && key != 'y' && key != 'n')
         {
-            char input_yes = tolower(yes[0]);
-            char input_no  = tolower(no[0]);
+            char input_yes = g_ascii_tolower(yes[0]);
+            char input_no  = g_ascii_tolower(no[0]);
             // If both answers share the same initial letter, we're out of luck.
             if (input_yes != input_no || input_yes == 'n' || input_no == 'y')
             {
