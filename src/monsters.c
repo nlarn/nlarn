@@ -23,7 +23,6 @@
 #include <lauxlib.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "display.h"
 #include "fov.h"
@@ -1113,7 +1112,7 @@ void monster_polymorph(monster *m)
         {
             /* briefly display the new monster before it dies */
             display_paint_screen(nlarn->p);
-            usleep(250000);
+            g_usleep(250000);
 
             switch (old_elem)
             {

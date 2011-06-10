@@ -21,7 +21,6 @@
 #include <assert.h>
 #include <curses.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "cJSON.h"
 #include "display.h"
@@ -521,7 +520,7 @@ gboolean area_ray_trajectory(position source, position target,
             refresh();
 
             /* sleep a while to show the ray's position */
-            usleep(100000);
+            g_usleep(100000);
             /* repaint the screen unless requested otherwise */
             if (!keep_ray) display_paint_screen(nlarn->p);
 
@@ -626,7 +625,7 @@ gboolean area_blast(position center, guint radius,
     /* make sure the blast shows up */
     refresh();
     /* sleep a 3/4 second */
-    usleep(750000);
+    g_usleep(750000);
 
     return retval;
 }

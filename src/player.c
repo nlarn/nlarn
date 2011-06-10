@@ -22,7 +22,6 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "cJSON.h"
 #include "container.h"
@@ -930,7 +929,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 if (!interruptible || p->attacked)
                 {
                     display_paint_screen(p);
-                    usleep((turns > 10) ? 100 : 50000);
+                    g_usleep((turns > 10) ? 100 : 50000);
                 }
 
                 /* offer to abort the action if the player is under attack */
@@ -1148,7 +1147,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         display_paint_screen(p);
 
         /* sleep a second */
-        usleep(1000000);
+        g_usleep(1000000);
 
         /* flush keyboard input buffer */
         flushinp();

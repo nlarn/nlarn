@@ -113,7 +113,7 @@ void display_init()
        once, and I/O-buffering makes the packet very unlikely to be split even
        over networks */
 #ifndef WIN32
-    setenv("ESCDELAY", "0", 0);
+    g_setenv("ESCDELAY", "0", 0);
 #endif
 
     /* Start curses mode */

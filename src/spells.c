@@ -20,7 +20,6 @@
 
 #include <assert.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "defines.h"
 #include "display.h"
@@ -1240,7 +1239,7 @@ gboolean spell_make_wall(player *p)
                 {
                     /* briefly display the new monster before it dies */
                     display_paint_screen(nlarn->p);
-                    usleep(250000);
+                    g_usleep(250000);
 
                     log_add_entry(nlarn->log, "The %s is trapped in the wall!",
                                   monster_get_name(m));
