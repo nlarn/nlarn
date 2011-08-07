@@ -1351,6 +1351,7 @@ static int modified_attack_amount(int amount, int damage_type)
 void monster_player_attack(monster *m, player *p)
 {
     damage *dam;
+    map *mmap = game_map(nlarn, Z(m->pos));
     attack att = { ATT_NONE, DAM_NONE, 0, 0 };
 
     assert(m != NULL && p != NULL);
@@ -1358,8 +1359,7 @@ void monster_player_attack(monster *m, player *p)
     /* the player is invisible and the monster bashes into thin air */
     if (!pos_identical(m->player_pos, p->pos))
     {
-        if (!map_is_monster_at(game_map(nlarn, Z(p->pos)), p->pos)
-                && monster_in_sight(m))
+        if (!map_is_monster_at(mmap, p->pos) && monster_in_sight(m))
         {
             log_add_entry(nlarn->log, "The %s bashes into thin air.",
                           monster_name(m));
@@ -1462,8 +1462,7 @@ void monster_player_attack(monster *m, player *p)
         if (monster_player_rob(m, p, (dam->type == DAM_STEAL_GOLD) ? IT_GOLD : IT_ALL))
         {
             /* teleport away */
-            monster_pos_set(m, game_map(nlarn, Z(m->pos)),
-                            map_find_space(game_map(nlarn, Z(m->pos)), LE_MONSTER, FALSE));
+            monster_pos_set(m, mmap, map_find_space(mmap, LE_MONSTER, FALSE));
         }
 
         damage_free(dam);
