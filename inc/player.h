@@ -399,7 +399,7 @@ void player_take_off(player *p);
 void player_drop(player *p);
 
 /* query values */
-int player_get_ac(player *p);
+guint player_get_ac(player *p);
 int player_get_wc(player *p, monster *m);
 int player_get_hp_max(player *p);
 int player_get_mp_max(player *p);

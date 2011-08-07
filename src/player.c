@@ -4303,7 +4303,7 @@ void player_drop(player *p)
     }
 }
 
-int player_get_ac(player *p)
+guint player_get_ac(player *p)
 {
     int ac = 0;
     assert(p != NULL);
@@ -4580,8 +4580,8 @@ void player_search(player *p)
             inventory **ti = map_ilist_at(m, pos);
             if (ti != NULL)
             {
-                for (guint idx = 0; 
-                        idx < inv_length_filtered(*ti, item_filter_container); 
+                for (guint idx = 0;
+                        idx < inv_length_filtered(*ti, item_filter_container);
                         idx++)
                 {
                     item *c = inv_get_filtered(*ti, idx, item_filter_container);
@@ -4593,7 +4593,7 @@ void player_search(player *p)
                         item_describe(c, FALSE, TRUE, TRUE, idesc, 80);
                         /* the container is cursed */
                         c->blessed_known = TRUE;
-                        log_add_entry(nlarn->log, "You discover a trap on %s!", 
+                        log_add_entry(nlarn->log, "You discover a trap on %s!",
                                       idesc);
                     }
                 }
