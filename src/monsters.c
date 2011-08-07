@@ -377,12 +377,7 @@ void monster_destroy(monster *m)
         inv_destroy(m->inventory, TRUE);
 
     /* unregister monster */
-    if (m->oid != 0)
-    {
-        /* the oid is set to 0 when the monster is destroyed by the
-        g_hash_table_foreach_remove callback */
-        game_monster_unregister(nlarn, m->oid);
-    }
+    game_monster_unregister(nlarn, m->oid);
 
     /* decrement monster count */
     game_map(nlarn, Z(m->pos))->mcount--;
@@ -510,12 +505,6 @@ gpointer monster_oid(monster *m)
 {
     assert (m != NULL);
     return m->oid;
-}
-
-void monster_oid_set(monster *m, gpointer oid)
-{
-    assert (m != NULL);
-    m->oid = oid;
 }
 
 position monster_pos(monster *m)

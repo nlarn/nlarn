@@ -180,7 +180,6 @@ int monster_hp_max(monster *m);
 int monster_hp(monster *m);
 void monster_hp_inc(monster *m, int amount);
 gpointer monster_oid(monster *m);
-void monster_oid_set(monster *m, gpointer oid);
 position monster_pos(monster *m);
 int monster_pos_set(monster *m, struct map *mp, position target);
 int monster_valid_dest(struct map *m, position pos, int map_elem);

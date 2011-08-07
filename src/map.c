@@ -52,7 +52,6 @@ static GPtrArray *map_path_get_neighbours(map *m, position pos,
                                           map_element_t element,
                                           gboolean player);
 
-static gboolean map_monster_destroy(gpointer key, monster *monst, map *m);
 static gboolean map_sphere_destroy(sphere *s, map *m);
 
 const map_tile_data map_tiles[LT_MAX] =
@@ -355,14 +354,22 @@ void map_destroy(map *m)
 {
     assert(m != NULL);
 
-    /* destroy monster and spheres on this level */
-    g_hash_table_foreach_remove(nlarn->monsters, (GHRFunc) map_monster_destroy, m);
+    /* destroy spheres on this level */
     g_ptr_array_foreach(nlarn->spheres, (GFunc)map_sphere_destroy, m);
 
-    /* free items */
+    /* destroy items and monsters */
     for (int y = 0; y < MAP_MAX_Y; y++)
         for (int x = 0; x < MAP_MAX_X; x++)
         {
+            if (m->grid[y][x].monster != NULL) {
+                monster *mon = game_monster_get(nlarn, m->grid[y][x].monster);
+
+                /* I wonder why it is possible that a monster ID is stored at
+                 * a position while there is no matching monster registered.
+                 * This seems to occur when called by game_destroy(). */
+                if (mon != NULL) monster_destroy(mon);
+            }
+
             if (m->grid[y][x].ilist != NULL)
                 inv_destroy(m->grid[y][x].ilist, TRUE);
         }
@@ -2190,21 +2197,6 @@ static GPtrArray *map_path_get_neighbours(map *m, position pos,
     }
 
     return neighbours;
-}
-
-static gboolean map_monster_destroy(gpointer key __attribute__((unused)),
-                                    monster *monst, map *m)
-{
-    if (Z(monster_pos(monst)) != m->nlevel)
-    {
-        return FALSE;
-    }
-
-    monster_oid_set(monst, 0);
-    monster_destroy(monst);
-
-    return TRUE;
-
 }
 
 static gboolean map_sphere_destroy(sphere *s, map *m)
