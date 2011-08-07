@@ -1819,18 +1819,26 @@ char *monster_desc(monster *m)
     else
         injury = "critically injured";
 
-    GString *hp_string = g_string_new("");
+    g_string_append_printf(desc, "%s %s, %s %s", a_an(injury), injury,
+                           monster_ai_desc[m->action], monster_get_name(m));
+
     if (game_wizardmode(nlarn))
     {
-        g_string_append_printf(hp_string, " (%d/%d hp)",
-                               m->hp, m->hp_max);
+        /* show monster's hp and max hp in wizard mode */
+        g_string_append_printf(desc, " (%d/%d hp)", m->hp, m->hp_max);
     }
-    g_string_append_printf(desc, "%s %s %s%s, %s", a_an(injury),
-                           injury, monster_get_name(m),
-                           hp_string->str,
-                           monster_ai_desc[m->action]);
 
-    g_string_free(hp_string, TRUE);
+    if (m->weapon != NULL)
+    {
+        /* describe the weapon the monster wields */
+        gchar weapon_desc[81] = {0};
+        item *weapon = game_item_get(nlarn, m->weapon);
+
+        item_describe(weapon, player_item_known(nlarn->p, weapon),
+                      TRUE, FALSE, weapon_desc, 80);
+
+        g_string_append_printf(desc, ", armed with %s", weapon_desc);
+    }
 
     /* add effect description */
     if (m->effects->len > 0)
