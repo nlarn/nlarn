@@ -1399,6 +1399,13 @@ void monster_player_attack(monster *m, player *p)
     /* no attack has been found. return to calling function. */
     if (att.type == ATT_NONE) return;
 
+    /* handle breath attacks separately */
+    if (att.type == ATT_BREATH)
+    {
+        monster_breath_attack(m, p, att);
+        return;
+    }
+
     /* generate damage */
     dam = damage_new(att.damage, att.type,
                      modified_attack_amount(att.base, att.damage), DAMO_MAP, m);
@@ -1409,15 +1416,6 @@ void monster_player_attack(monster *m, player *p)
 
     if (dam->type == DAM_DEC_RND)
         dam->type = rand_m_n(DAM_DEC_CON, DAM_DEC_RND);
-
-    if (att.type == ATT_BREATH)
-    {
-        /* the damage generated locally is not needed in monster_breath_attack() */
-        damage_free(dam);
-        monster_breath_attack(m, p, att);
-
-        return;
-    }
 
     /* set damage for weapon attacks */
     if ((att.type == ATT_WEAPON) && (m->weapon != NULL))
