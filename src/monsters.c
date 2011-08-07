@@ -1408,7 +1408,8 @@ void monster_player_attack(monster *m, player *p)
 
     /* generate damage */
     dam = damage_new(att.damage, att.type,
-                     modified_attack_amount(att.base, att.damage), DAMO_MAP, m);
+                     modified_attack_amount(att.base, att.damage),
+                     DAMO_MONSTER, m);
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM)
@@ -1527,7 +1528,7 @@ int monster_player_ranged_attack(monster *m, player *p)
         else
         {
             dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn),
-                             DAMO_MAP, m);
+                             DAMO_MONSTER, m);
 
             player_damage_take(p, dam, PD_MONSTER, m->type);
         }
