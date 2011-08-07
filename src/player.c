@@ -2310,10 +2310,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     switch (dam->type)
     {
     case DAM_PHYSICAL:
-        dam->amount -= player_get_ac(p);
-        /* taken damage */
-        if (dam->amount > 0)
+        if (dam->amount > player_get_ac(p))
         {
+            dam->amount -= player_get_ac(p);
+
             if (dam->amount >= 8 && dam->amount >= p->hp_max/4)
                 log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
             else if (dam->amount >= p->hp_max/10)
@@ -2328,10 +2328,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_MAGICAL:
-        dam->amount -= player_effect(p, ET_RESIST_MAGIC);
-
-        if (dam->amount > 0)
+        if (dam->amount > (guint)player_effect(p, ET_RESIST_MAGIC))
         {
+            dam->amount -= player_effect(p, ET_RESIST_MAGIC);
+
             if (dam->amount >= 8 && dam->amount >= p->hp_max/4)
                 log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
             else if (dam->amount >= p->hp_max/10)
@@ -2347,9 +2347,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_FIRE:
-        dam->amount -= player_effect(p, ET_RESIST_FIRE);
-        if (dam->amount > 0)
+        if (dam->amount > (guint)player_effect(p, ET_RESIST_FIRE))
         {
+            dam->amount -= player_effect(p, ET_RESIST_FIRE);
+
             log_add_entry(nlarn->log, "You suffer burns.");
             player_hp_lose(p, dam->amount, cause_type, cause);
         }
@@ -2360,9 +2361,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_COLD:
-        dam->amount -= player_effect(p, ET_RESIST_COLD);
-        if (dam->amount > 0)
+        if (dam->amount > (guint)player_effect(p, ET_RESIST_COLD))
         {
+            dam->amount -= player_effect(p, ET_RESIST_COLD);
+
             log_add_entry(nlarn->log, "You suffer from frostbite.");
             player_hp_lose(p, dam->amount, cause_type, cause);
         }
