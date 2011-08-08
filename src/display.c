@@ -649,18 +649,21 @@ int display_paint_screen(player *p)
                     && e->turns < 6)
             {
                 /* fading effects */
-                strv_append_unique(&efdescs, g_strdup_printf("`lightred`%s`end`", desc));
+                gchar *cdesc = g_strdup_printf("`lightred`%s`end`", desc);
+                strv_append_unique(&efdescs, cdesc);
+                g_free(cdesc);
             }
             else if (e->type > ET_LEVITATION)
             {
                 /* negative effects */
-                strv_append_unique(&efdescs, g_strdup_printf("`lightmagenta`%s`end`", desc));
-
+                gchar *cdesc = g_strdup_printf("`lightmagenta`%s`end`", desc);
+                strv_append_unique(&efdescs, cdesc);
+                g_free(cdesc);
             }
             else
             {
                 /* other effects */
-                strv_append_unique(&efdescs, g_strdup(desc));
+                strv_append_unique(&efdescs, desc);
             }
 
             g_free(desc);

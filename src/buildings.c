@@ -992,7 +992,6 @@ int building_monastery(struct player *p)
                                    "donate %d gold for our abbey. %s", desc,
                                    price, ayfwt);
 
-        g_free(desc);
         choice = display_get_yesno(question, NULL, NULL);
         g_free(question);
 
@@ -1003,6 +1002,7 @@ int building_monastery(struct player *p)
         }
 
         log_add_entry(nlarn->log, "The monks remove the curse on %s.", desc);
+        g_free(desc);
         item_remove_curse(it);
         building_player_charge(p, price);
         p->stats.gold_spent_donation += price;

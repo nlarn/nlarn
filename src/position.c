@@ -495,6 +495,7 @@ gboolean area_ray_trajectory(position source, position target,
             /* check for reflection: mirrors */
             if (reflectable && (map_sobject_at(tmap, cursor) == LS_MIRROR))
             {
+                area_destroy(ray);
                 return area_ray_trajectory(cursor, source, damo, pos_hitfun, data1,
                                            data2, FALSE,  glyph, colour, keep_ray);
             }
@@ -503,6 +504,7 @@ gboolean area_ray_trajectory(position source, position target,
             if (reflectable && (pos_identical(cursor, nlarn->p->pos)
                                 && player_effect(nlarn->p, ET_REFLECTION)))
             {
+                area_destroy(ray);
                 return area_ray_trajectory(cursor, source, damo, pos_hitfun, data1,
                                            data2, FALSE,  glyph, colour, keep_ray);
             }
@@ -510,7 +512,10 @@ gboolean area_ray_trajectory(position source, position target,
             /* after checking for reflection, abort the function if the
                callback indicated success */
             if (result == TRUE)
+            {
+                area_destroy(ray);
                 return result;
+            }
 
             /* show the position of the ray*/
             /* FIXME: move curses functions to display.c */
@@ -557,6 +562,7 @@ move_cursor:
     while (proceed_y);
 
     /* none of the trigger functions succeedes */
+    area_destroy(ray);
     return FALSE;
 }
 

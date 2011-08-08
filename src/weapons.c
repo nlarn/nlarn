@@ -189,6 +189,7 @@ int weapon_fire(struct player *p)
 
     /* log the event */
     log_add_entry(nlarn->log, "You fire %s at the %s.", wdesc, monster_name(m));
+    g_free(wdesc);
 
     /* --- finally shooting the weapon --- */
 

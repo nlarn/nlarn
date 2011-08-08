@@ -134,6 +134,8 @@ monster *fov_get_closest_monster(fov *fv)
 
         /* get the first element in the list */
         closest_monster = mlist->data;
+
+        g_list_free(mlist);
     }
 
     return closest_monster;
