@@ -971,7 +971,7 @@ int building_monastery(struct player *p)
         int price;
         int choice;
         char *question;
-        char desc[81];
+        gchar *desc;
 
         if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
         {
@@ -986,13 +986,13 @@ int building_monastery(struct player *p)
         /* item value for cursed items is reduced by 50% */
         price = (item_price(it) / 5) * (game_difficulty(nlarn) + 1);
 
-        item_describe(it, player_item_identified(p, it), it->count, TRUE,
-                      desc, 80);
+        desc = item_describe(it, player_item_identified(p, it), it->count, TRUE);
 
         question = g_strdup_printf("To remove the curse on %s, we ask you to "
                                    "donate %d gold for our abbey. %s", desc,
                                    price, ayfwt);
 
+        g_free(desc);
         choice = display_get_yesno(question, NULL, NULL);
         g_free(question);
 
@@ -1228,7 +1228,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     guint count = 0;
     gpointer ioid = NULL; /* oid of purchased item */
     char text[81];
-    char name[61];
+    gchar *name;
 
     /* The item the player actually bought. Usually this is the passed item,
      * in the case of item stacks it might be a new item. */
@@ -1240,8 +1240,9 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
     if (it->count > 1)
     {
-        item_describe(it, TRUE, FALSE, TRUE, name, 40);
+        name = item_describe(it, TRUE, FALSE, TRUE);
         g_snprintf(text, 80, "How many %s do you want to buy?", name);
+        g_free(name);
 
         /* get count */
         count = display_get_count(text, it->count);
@@ -1267,9 +1268,10 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
         if (!building_player_check(p, price))
         {
-            item_describe(bought_itm, TRUE, (count == 1), TRUE, name, 60);
+            name = item_describe(bought_itm, TRUE, FALSE, TRUE);
             g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
                        price, name);
+            g_free(name);
 
             display_show_message(NULL, text, 0);
 
@@ -1282,16 +1284,16 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     else
     {
         count = 1;
-        item_describe(it, TRUE, TRUE, TRUE, name, 60);
-        g_snprintf(text, 80, "Do you want to buy %s for %d gold?",
-                   name, price);
+        name = item_describe(it, TRUE, TRUE, TRUE);
+        g_snprintf(text, 80, "Do you want to buy %s for %d gold?", name, price);
+        g_free(name);
 
         if (!display_get_yesno(text, NULL, NULL))
             return;
     }
 
     /* prepare the item description for logging later */
-    item_describe(bought_itm, TRUE, (count == 1), FALSE, name, 60);
+    name = item_describe(bought_itm, TRUE, FALSE, FALSE);
 
     /* try to transfer the item to the player's inventory */
     ioid = bought_itm->oid;
@@ -1323,6 +1325,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
     /* log the event */
     log_add_entry(nlarn->log, "You buy %s. Thank you for your purchase.", name);
+    g_free(name);
 
     /* charge player for this purchase */
     building_player_charge(p, price);
@@ -1330,23 +1333,19 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     player_make_move(p, 2, FALSE, NULL);
 }
 
-static void building_item_identify(player *p, inventory **inv, item *it)
+static void building_item_identify(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     guint price;
-    char name_unknown[61];
-    char name_known[61];
+    gchar *name_unknown;
+    gchar *name_known;
     char message[81];
 
     const char title[] = "Identify item";
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    /* don't need that parameter */
-    inv = NULL;
-
     price = 50 << game_difficulty(nlarn);
-
-    item_describe(it, player_item_known(p, it), TRUE, TRUE, name_unknown, 60);
+    name_unknown = item_describe(it, player_item_known(p, it), TRUE, TRUE);
 
     if (building_player_check(p, price))
     {
@@ -1357,11 +1356,12 @@ static void building_item_identify(player *p, inventory **inv, item *it)
             player_item_identify(p, NULL, it);
             /* upper case first letter */
             name_unknown[0] = g_ascii_toupper(name_unknown[0]);
-            item_describe(it, player_item_known(p, it), TRUE, FALSE, name_known, 60);
+            name_known = item_describe(it, player_item_known(p, it), TRUE, FALSE);
 
             log_add_entry(nlarn->log, "%s is %s.", name_unknown, name_known);
-            building_player_charge(p, price);
+            g_free(name_known);
 
+            building_player_charge(p, price);
             p->stats.gold_spent_id_repair += price;
             player_make_move(p, 1, FALSE, NULL);
         }
@@ -1371,13 +1371,15 @@ static void building_item_identify(player *p, inventory **inv, item *it)
         g_snprintf(message, 80, "Identifying %s costs %d gold.", name_unknown, price);
         display_show_message(title, message, 0);
     }
+
+    g_free(name_unknown);
 }
 
 static void building_item_repair(player *p, inventory **inv, item *it)
 {
     int damages = 0;
     guint price;
-    char name[61];
+    gchar *name;
     char message[81];
 
     const char title[] = "Repair item";
@@ -1394,7 +1396,7 @@ static void building_item_repair(player *p, inventory **inv, item *it)
 
     price = (50 << game_difficulty(nlarn)) * damages;
 
-    item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 60);
+    name = item_describe(it, player_item_known(p, it), TRUE, TRUE);
 
     if (building_player_check(p, price))
     {
@@ -1419,6 +1421,8 @@ static void building_item_repair(player *p, inventory **inv, item *it)
         g_snprintf(message, 80, "Repairing the %s costs %d gold.", name, price);
         display_show_message(title, message, 0);
     }
+
+    g_free(name);
 }
 
 static void building_item_buy(player *p, inventory **inv, item *it)
@@ -1426,11 +1430,9 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     int price;
     guint count = 0;
     char question[121];
-    char name[61];
+    gchar *name;
 
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
-
-    item_describe(it, player_item_known(p, it), FALSE, FALSE, name, 60);
 
     price = item_price(it);
 
@@ -1454,9 +1456,11 @@ static void building_item_buy(player *p, inventory **inv, item *it)
 
     if (it->count > 1)
     {
-        item_describe(it, player_item_known(p, it), FALSE, TRUE, name, 60);
+        name = item_describe(it, player_item_known(p, it), FALSE, TRUE);
         g_snprintf(question, 120, "How many %s do you want to sell for %d gold?",
                    name, price);
+
+        g_free(name);
 
         /* get count */
         count = display_get_count(question, it->count);
@@ -1475,9 +1479,11 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     else
     {
         count = 1;
-        item_describe(it, player_item_known(p, it), TRUE, TRUE, name, 40);
+        name = item_describe(it, player_item_known(p, it), TRUE, TRUE);
         g_snprintf(question, 120, "Do you want to sell %s for %d gold?",
                    name, price);
+
+        g_free(name);
 
         if (!display_get_yesno(question, NULL, NULL))
             return;
@@ -1491,10 +1497,11 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     guint count_orig = it->count;
     it->count = count;
 
-    item_describe(it, player_item_known(p, it), (count == 1), FALSE, name, 60);
+    name = item_describe(it, player_item_known(p, it), FALSE, FALSE);
     log_add_entry(nlarn->log, "You sell %s. The %d gold %s been transferred to your bank account.",
                   name, price, (price == 1) ? "has" : "have");
 
+    g_free(name);
     it->count = count_orig;
 
     if (it->type == IT_GEM)

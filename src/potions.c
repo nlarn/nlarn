@@ -117,9 +117,9 @@ int potion_colour(int potion_id)
 int potion_throw(struct player *p)
 {
     map *pmap = game_map(nlarn, Z(p->pos));
-    position target;             /* the selected target */
-    char desc[81] = {};          /* the potion's description */
-    item *potion;                /* the potion from the inventory */
+    position target;    /* the selected target */
+    gchar *desc;        /* the potion's description */
+    item *potion;       /* the potion from the inventory */
     damage_originator damo = { DAMO_PLAYER, p };
 
     if (inv_length_filtered(p->inventory, item_filter_potions) == 0)
@@ -138,7 +138,7 @@ int potion_throw(struct player *p)
     }
 
     /* get the description of the potion */
-    item_describe(potion, player_item_known(p, potion), TRUE, TRUE, desc, 80);
+    desc = item_describe(potion, player_item_known(p, potion), TRUE, TRUE);
 
     gchar *msg = g_strdup_printf("Choose a target for %s.", desc);
     target = display_get_position(p, msg, TRUE, FALSE, 0, FALSE, TRUE);
@@ -148,6 +148,7 @@ int potion_throw(struct player *p)
     if (!pos_valid(target) || pos_identical(p->pos, target))
     {
         log_add_entry(nlarn->log, "Aborted.");
+        g_free(desc);
         return FALSE;
     }
 
@@ -156,6 +157,7 @@ int potion_throw(struct player *p)
         && monster_type(map_get_monster_at(pmap, target)) == MT_TOWN_PERSON)
     {
         log_add_entry(nlarn->log, "Gosh! How dare you!");
+        g_free(desc);
         return FALSE;
     }
 
@@ -174,7 +176,11 @@ int potion_throw(struct player *p)
     /* follow the trajectory of the potion */
     if (area_ray_trajectory(p->pos, target, &damo, potion_pos_hit, (gpointer)potion, NULL,
                             FALSE, item_glyph(potion->type), item_colour(potion), FALSE))
-                        return TRUE; /* a callback succeeded */
+                            {
+                                /* a callback succeeded */
+                                g_free(desc);
+                                return TRUE;
+                            }
 
     /* no callback succeeded -> potion hits the floor */
     /* upper case the first letter of the description */
@@ -185,6 +191,7 @@ int potion_throw(struct player *p)
                   (mtt <= LT_FLOOR ? "shatters on" : "splashes into"),
                   mt_get_desc(mtt));
 
+    g_free(desc);
     item_destroy(potion);
 
     return TRUE;
@@ -194,7 +201,7 @@ item_usage_result potion_quaff(struct player *p, item *potion)
 {
     item_usage_result result = { FALSE, FALSE };
     char *verb;
-    char description[61];
+    gchar *description;
 
     // These potions aren't drunk.
     if (potion->id == PO_CURE_DIANTHR || potion->id == PO_WATER)
@@ -209,8 +216,8 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     }
 
     /* prepare item description */
-    item_describe(potion, player_item_known(p, potion),
-                  TRUE, potion->count == 1, description, 60);
+    description = item_describe(potion, player_item_known(p, potion),
+                                TRUE, potion->count == 1);
 
     log_add_entry(nlarn->log, "You %s %s.", verb, description);
 
@@ -218,8 +225,11 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     if (!player_make_move(p, 2, TRUE, "%sing %s", verb, description))
     {
         /* the action has been aborted */
+        g_free(description);
         return result;
     }
+
+    g_free(description);
 
     /* the potion has successfully been quaffed */
     result.used_up = TRUE;
@@ -494,9 +504,6 @@ static int potion_recovery(player *p, item *potion __attribute__((unused)))
 
 static int potion_holy_water(player *p, item *potion __attribute__((unused)))
 {
-    char buf[61];
-    item *it;
-
     assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_nonblessed) == 0)
@@ -507,14 +514,13 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
         return FALSE;
     }
 
-    it = display_inventory("Choose an item to bless", p, &p->inventory,
-                           NULL, FALSE, FALSE, FALSE, item_filter_nonblessed);
+    item *it = display_inventory("Choose an item to bless", p, &p->inventory,
+                                 NULL, FALSE, FALSE, FALSE, item_filter_nonblessed);
 
     if (it != NULL)
     {
         // Get the description before blessing the item.
-        item_describe(it, player_item_known(p, it),
-                      FALSE, TRUE, buf, 60);
+        gchar *buf = item_describe(it, player_item_known(p, it), FALSE, TRUE);
 
         if (it->blessed)
         {
@@ -522,6 +528,8 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
             log_add_entry(nlarn->log, "Nothing happens. Apparently, %s %s "
                                       "already blessed.",
                           buf, it->count == 1 ? "was" : "were");
+
+            g_free(buf);
             return TRUE;
         }
 
@@ -529,6 +537,8 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
 
         log_add_entry(nlarn->log, "%s glow%s in a white light.",
                       buf, it->count == 1 ? "s" : "");
+
+        g_free(buf);
 
         if (it->cursed)
             it->cursed = FALSE;
@@ -545,7 +555,6 @@ static gboolean potion_pos_hit(position pos,
                                gpointer data1,
                                gpointer data2 __attribute__((unused)))
 {
-    char desc[81] = {};
     item *potion = (item *)data1;
     map *pmap = game_map(nlarn, Z(pos));
     map_tile_t mtt = map_tiletype_at(pmap, pos);
@@ -553,10 +562,9 @@ static gboolean potion_pos_hit(position pos,
     monster *m = map_get_monster_at(pmap, pos);
 
     /* get the description of the potion */
-    item_describe(potion, player_item_known(nlarn->p, potion), TRUE, TRUE, desc, 80);
+    gchar *desc = item_describe(potion, player_item_known(nlarn->p, potion), TRUE, TRUE);
     /* upper case first letter of the description */
     desc[0] = g_ascii_toupper(desc[0]);
-
 
     if (mst > LS_NONE && !mso_is_passable(mst))
     {
@@ -575,7 +583,10 @@ static gboolean potion_pos_hit(position pos,
     {
         /* there is a monster at the position the potion might have hit */
         if (!chance(weapon_calc_to_hit(nlarn->p, m, NULL, NULL)))
+        {
+            g_free(desc);
             return FALSE;
+        }
 
         log_add_entry(nlarn->log, "%s shatters on the %s.",
                   desc, monster_get_name(m));
@@ -586,8 +597,8 @@ static gboolean potion_pos_hit(position pos,
         if (potion->id == PO_WATER && potion->blessed && monster_flags(m, MF_UNDEAD))
         {
             /* this is supposed to hurt really nasty */
-            log_add_entry(nlarn->log, "Smoke emerges where the water pours over the %s.",
-                          monster_get_name(m));
+            log_add_entry(nlarn->log, "Smoke emerges where %s pours over the %s.",
+                          desc, monster_get_name(m));
 
             damage *dam = damage_new(DAM_PHYSICAL, ATT_TOUCH, rand_1n(monster_hp(m) + 1),
                                      DAMO_PLAYER, nlarn->p);
@@ -602,10 +613,12 @@ static gboolean potion_pos_hit(position pos,
     else
     {
         /* the potion passed unhindered */
+        g_free(desc);
         return FALSE;
     }
 
     item_destroy(potion);
+    g_free(desc);
 
     return TRUE;
 }

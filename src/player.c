@@ -998,7 +998,6 @@ void player_die(player *p, player_cod cause_type, int cause)
     char *message = NULL;
     char *title = NULL;
     char *tmp = NULL;
-    char it_desc[61] = { 0 };
     int count;
     effect *ef = NULL;
     char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
@@ -1143,6 +1142,9 @@ void player_die(player *p, player_cod cause_type, int cause)
     /* do not show scores when in wizardmode */
     if (!game_wizardmode(nlarn))
     {
+        /* buffer for item descriptions */
+        gchar *it_desc;
+
         /* redraw screen to make sure player can see the cause of his death */
         display_paint_screen(p);
 
@@ -1331,62 +1333,72 @@ void player_die(player *p, player_cod cause_type, int cause)
         g_string_append(text, "\n\n-- Equipment --------------------------\n\n");
         if (p->eq_amulet)
         {
-            item_describe(p->eq_amulet, TRUE, TRUE, FALSE, it_desc, 60);
+            it_desc = item_describe(p->eq_amulet, TRUE, TRUE, FALSE);
             g_string_append_printf(text, "Amulet:   %s\n", it_desc);
+            g_free(it_desc);
             equipment_count++;
         }
         if (p->eq_ring_l)
         {
-            item_describe(p->eq_ring_l, TRUE, TRUE, FALSE, it_desc, 60);
+            it_desc = item_describe(p->eq_ring_l, TRUE, TRUE, FALSE);
             g_string_append_printf(text, "Ring (l): %s\n", it_desc);
+            g_free(it_desc);
             equipment_count++;
         }
         if (p->eq_ring_r)
         {
-            item_describe(p->eq_ring_r, TRUE, TRUE, FALSE, it_desc, 60);
+            it_desc = item_describe(p->eq_ring_r, TRUE, TRUE, FALSE);
             g_string_append_printf(text, "Ring (r): %s\n", it_desc);
+            g_free(it_desc);
             equipment_count++;
         }
         if (p->eq_weapon)
         {
-            item_describe(p->eq_weapon, TRUE, TRUE, FALSE, it_desc, 60);
+            it_desc = item_describe(p->eq_weapon, TRUE, TRUE, FALSE);
             g_string_append_printf(text, "Weapon:   %s\n", it_desc);
+            g_free(it_desc);
             equipment_count++;
         }
         if (p->eq_suit)
         {
-            item_describe(p->eq_suit, TRUE, TRUE, FALSE, it_desc, 60);
+            it_desc = item_describe(p->eq_suit, TRUE, TRUE, FALSE);
             g_string_append_printf(text, "Armour:   %s\n", it_desc);
+            g_free(it_desc);
             equipment_count++;
         }
         if (p->eq_helmet)
         {
-            item_describe(p->eq_helmet, TRUE, TRUE, FALSE, it_desc, 60);
+            it_desc = item_describe(p->eq_helmet, TRUE, TRUE, FALSE);
             g_string_append_printf(text, "Helmet:   %s\n", it_desc);
+            g_free(it_desc);
             equipment_count++;
         }
         if (p->eq_shield)
         {
-            item_describe(p->eq_shield, TRUE, TRUE, FALSE, it_desc, 60);
+            it_desc = item_describe(p->eq_shield, TRUE, TRUE, FALSE);
             g_string_append_printf(text, "Shield:   %s\n", it_desc);
+            g_free(it_desc);
             equipment_count++;
         }
         if (p->eq_cloak)
         {
-            item_describe(p->eq_cloak, TRUE, TRUE, FALSE, it_desc, 60);
+            it_desc = item_describe(p->eq_cloak, TRUE, TRUE, FALSE);
             g_string_append_printf(text, "Cloak:    %s\n", it_desc);
+            g_free(it_desc);
             equipment_count++;
         }
         if (p->eq_gloves)
         {
-            item_describe(p->eq_gloves, TRUE, TRUE, FALSE, it_desc, 60);
+            it_desc = item_describe(p->eq_gloves, TRUE, TRUE, FALSE);
             g_string_append_printf(text, "Gloves:   %s\n", it_desc);
+            g_free(it_desc);
             equipment_count++;
         }
         if (p->eq_boots)
         {
-            item_describe(p->eq_boots, TRUE, TRUE, FALSE, it_desc, 60);
+            it_desc = item_describe(p->eq_boots, TRUE, TRUE, FALSE);
             g_string_append_printf(text, "Boots:    %s\n", it_desc);
+            g_free(it_desc);
             equipment_count++;
         }
 
@@ -1399,9 +1411,9 @@ void player_die(player *p, player_cod cause_type, int cause)
                 item *it = inv_get(p->inventory, pos);
                 if (!player_item_is_equipped(p, it))
                 {
-                    item_describe(it, TRUE, it->count == 1, FALSE, it_desc, 60);
+                    it_desc = item_describe(it, TRUE, FALSE, FALSE);
                     g_string_append_printf(text, "%s\n", it_desc);
-
+                    g_free(it_desc);
                 }
             }
         }
@@ -2075,12 +2087,13 @@ void player_autopickup(player *p)
         if (other_items_count == 1)
         {
             item *it = inv_get(*floor, other_item_id);
-            char item_desc[81] = { 0 };
-            item_describe(it, player_item_known(nlarn->p, it),
-                          (it->count == 1), FALSE, item_desc, 80);
+            gchar *it_desc = item_describe(it, player_item_known(nlarn->p, it),
+                                           FALSE, FALSE);
 
             log_add_entry(nlarn->log, "There %s %s here.",
-                          it->count == 1 ? "is" : "are", item_desc);
+                          it->count == 1 ? "is" : "are", it_desc);
+
+            g_free(it_desc);
         }
         else
         {
@@ -3001,8 +3014,6 @@ char *player_inv_weight(player *p)
 int player_inv_pre_add(inventory *inv, item *it)
 {
     player *p;
-    char buf[61];
-
     int pack_weight;
     float can_carry;
 
@@ -3024,13 +3035,14 @@ int player_inv_pre_add(inventory *inv, item *it)
     if ((pack_weight + item_weight(it)) > (int)(can_carry * 1.3))
     {
         /* get item description */
-        item_describe(it, player_item_known(p, it), (it->count == 1), TRUE, buf, 60);
+        gchar *buf = item_describe(it, player_item_known(p, it), FALSE, TRUE);
         /* capitalize first letter */
         buf[0] = g_ascii_toupper(buf[0]);
 
         log_add_entry(nlarn->log, "%s %s too heavy for you.", buf,
                       it->count > 1 ? "are" : "is");
 
+        g_free(buf);
         return FALSE;
     }
 
@@ -3103,131 +3115,140 @@ void player_inv_weight_recalc(inventory *inv, item *it __attribute__((unused)))
 
 void player_paperdoll(player *p)
 {
-    gchar desc[81];
+    gchar *desc;
     GString *pdm = g_string_new(NULL);
 
     /* amulet */
     if(p->eq_amulet)
     {
-        item_describe(p->eq_amulet, player_item_known(p, p->eq_amulet),
-                      p->eq_amulet->count, FALSE, desc, 80);
+        desc = item_describe(p->eq_amulet, player_item_known(p, p->eq_amulet),
+                             TRUE, FALSE);
 
         g_string_append_printf(pdm, "`white`Around neck:`end` %s\n", desc);
+        g_free(desc);
     }
 
     /* main weapon */
     if(p->eq_weapon)
     {
-        item_describe(p->eq_weapon, player_item_known(p, p->eq_weapon),
-                      (p->eq_weapon->count == 1), FALSE, desc, 80);
+        desc = item_describe(p->eq_weapon, player_item_known(p, p->eq_weapon),
+                             FALSE, FALSE);
 
         g_string_append_printf(pdm, "`white`Main weapon:`end` %s\n", desc);
+        g_free(desc);
     }
 
     /* secondary weapon */
     if(p->eq_sweapon)
     {
-        item_describe(p->eq_sweapon, player_item_known(p, p->eq_sweapon),
-                      (p->eq_sweapon->count == 1), FALSE, desc, 80);
+        desc = item_describe(p->eq_sweapon, player_item_known(p, p->eq_sweapon),
+                             FALSE, FALSE);
 
         g_string_append_printf(pdm, "`white`Sec. weapon:`end` %s\n", desc);
+        g_free(desc);
     }
 
     /* quiver */
     if(p->eq_quiver)
     {
-        item_describe(p->eq_quiver, player_item_known(p, p->eq_quiver),
-                      (p->eq_quiver->count == 1), FALSE, desc, 80);
+        desc = item_describe(p->eq_quiver, player_item_known(p, p->eq_quiver),
+                             FALSE, FALSE);
 
         g_string_append_printf(pdm, "`white`In quiver:`end`   %s\n", desc);
+        g_free(desc);
     }
 
     /* boots */
     if(p->eq_boots)
     {
-        item_describe(p->eq_boots, player_item_known(p, p->eq_boots),
-                      p->eq_boots->count, FALSE, desc, 80);
+        desc = item_describe(p->eq_boots, player_item_known(p, p->eq_boots),
+                             TRUE, FALSE);
 
         g_string_append_printf(pdm, "`white`Boots:`end`       %s\n", desc);
+        g_free(desc);
     }
 
     /* cloak */
     if(p->eq_cloak)
     {
-        item_describe(p->eq_cloak, player_item_known(p, p->eq_cloak),
-                      p->eq_cloak->count, FALSE, desc, 80);
+        desc = item_describe(p->eq_cloak, player_item_known(p, p->eq_cloak),
+                             TRUE, FALSE);
 
         g_string_append_printf(pdm, "`white`Cloak:`end`       %s\n", desc);
+        g_free(desc);
     }
 
     /* gloves */
     if(p->eq_gloves)
     {
-        item_describe(p->eq_gloves, player_item_known(p, p->eq_gloves),
-                      p->eq_gloves->count, FALSE, desc, 80);
+        desc = item_describe(p->eq_gloves, player_item_known(p, p->eq_gloves),
+                             TRUE, FALSE);
 
         g_string_append_printf(pdm, "`white`Gloves:`end`      %s\n", desc);
+        g_free(desc);
     }
 
     /* helmet */
     if(p->eq_helmet)
     {
-        item_describe(p->eq_helmet, player_item_known(p, p->eq_helmet),
-                      p->eq_helmet->count, FALSE, desc, 80);
+        desc = item_describe(p->eq_helmet, player_item_known(p, p->eq_helmet),
+                             TRUE, FALSE);
 
         g_string_append_printf(pdm, "`white`Helmet:`end`      %s\n", desc);
+        g_free(desc);
     }
 
     /* shield */
     if(p->eq_shield)
     {
-        item_describe(p->eq_shield, player_item_known(p, p->eq_shield),
-                      p->eq_shield->count, FALSE, desc, 80);
+        desc = item_describe(p->eq_shield, player_item_known(p, p->eq_shield),
+                             TRUE, FALSE);
 
         g_string_append_printf(pdm, "`white`Shield:`end`      %s\n", desc);
+        g_free(desc);
     }
 
     /* body armour */
     if(p->eq_suit)
     {
-        item_describe(p->eq_suit, player_item_known(p, p->eq_suit),
-                      p->eq_suit->count, FALSE, desc, 80);
+        desc = item_describe(p->eq_suit, player_item_known(p, p->eq_suit),
+                             TRUE, FALSE);
 
         g_string_append_printf(pdm, "`white`Body armour:`end` %s\n", desc);
+        g_free(desc);
     }
 
     /* left ring */
     if(p->eq_ring_l)
     {
-        item_describe(p->eq_ring_l, player_item_known(p, p->eq_ring_l),
-                      p->eq_ring_l->count, FALSE, desc, 80);
+        desc = item_describe(p->eq_ring_l, player_item_known(p, p->eq_ring_l),
+                             FALSE, FALSE);
 
         g_string_append_printf(pdm, "`white`Left ring:`end`   %s\n", desc);
+        g_free(desc);
     }
 
     /* right ring */
     if(p->eq_ring_r)
     {
-        item_describe(p->eq_ring_r, player_item_known(p, p->eq_ring_r),
-                      p->eq_ring_r->count, FALSE, desc, 80);
+        desc = item_describe(p->eq_ring_r, player_item_known(p, p->eq_ring_r),
+                             FALSE, FALSE);
 
         g_string_append_printf(pdm, "`white`Right ring:`end`  %s\n", desc);
+        g_free(desc);
     }
 
     display_show_message("Worn equipment", pdm->str, 0);
     g_string_free(pdm, TRUE);
 }
 
-void player_item_equip(player *p, inventory **inv, item *it)
+void player_item_equip(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     item **islot = NULL;  /* pointer to chosen item slot */
     int atime = 0;        /* time the desired action takes */
-    char description[61] = { 0 };
+    gchar *desc = NULL;   /* description of item being equipped */
 
     assert(p != NULL && it != NULL);
-
-    /* don't need that parameter */
-    inv = NULL;
 
     /* the idea behind the time values: one turn to take one item off,
        one turn to get the item out of the pack */
@@ -3239,10 +3260,10 @@ void player_item_equip(player *p, inventory **inv, item *it)
         {
             p->eq_amulet = it;
 
-            item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
-            log_add_entry(nlarn->log, "You put %s on.", description);
+            desc = item_describe(it, player_item_known(p, it), TRUE, TRUE);
+            log_add_entry(nlarn->log, "You put %s on.", desc);
 
-            if (!player_make_move(p, 2, TRUE, "putting %s on", description))
+            if (!player_make_move(p, 2, TRUE, "putting %s on", desc))
                 return; /* interrupted */
 
             p->identified_amulets[it->id] = TRUE;
@@ -3252,14 +3273,17 @@ void player_item_equip(player *p, inventory **inv, item *it)
     case IT_AMMO:
         if (p->eq_quiver == NULL)
         {
-            item_describe(it, player_item_known(p, it), (it->count == 1),
-                          TRUE, description, 60);
+            desc = item_describe(it, player_item_known(p, it), FALSE, TRUE);
 
-            if (!player_make_move(p, 2, TRUE, "putting %s into the quiver", description))
-                return; /* interrupted */
+            if (!player_make_move(p, 2, TRUE, "putting %s into the quiver", desc))
+            {
+                /* interrupted */
+                g_free(desc);
+                return;
+            }
 
             p->eq_quiver = it;
-            log_add_entry(nlarn->log, "You put %s into your quiver.", description);
+            log_add_entry(nlarn->log, "You put %s into your quiver.", desc);
         }
         break;
 
@@ -3304,17 +3328,26 @@ void player_item_equip(player *p, inventory **inv, item *it)
 
         if ((islot != NULL) && (*islot == NULL))
         {
-            item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
+            desc = item_describe(it, player_item_known(p, it), TRUE, TRUE);
 
-            if (!player_make_move(p, atime, TRUE, "wearing %s", description))
-                return; /* interrupted */
+            if (!player_make_move(p, atime, TRUE, "wearing %s", desc))
+            {
+                /* interrupted */
+                g_free(desc);
+                return;
+            }
 
-            /* the armour's bonus is revealed when putting it on */
-            it->bonus_known = TRUE;
+            if (!it->bonus_known)
+            {
+                /* the armour's bonus is revealed when putting it on */
+                it->bonus_known = TRUE;
 
-            /* Refresh the armour's description before logging. */
-            item_describe(it, player_item_known(p, it), TRUE, FALSE, description, 60);
-            log_add_entry(nlarn->log, "You are now wearing %s.", description);
+                /* Refresh the armour's description before logging. */
+                g_free(desc);
+                desc = item_describe(it, player_item_known(p, it), TRUE, FALSE);
+            }
+
+            log_add_entry(nlarn->log, "You are now wearing %s.", desc);
 
             /* put the piece of armor in the equipment slot */
             *islot = it;
@@ -3322,9 +3355,8 @@ void player_item_equip(player *p, inventory **inv, item *it)
             if (it->cursed)
             {
                 /* capitalize first letter */
-                description[0] = g_ascii_toupper(description[0]);
-                log_add_entry(nlarn->log, "%s feels uncomfortably cold!",
-                              description);
+                desc[0] = g_ascii_toupper(desc[0]);
+                log_add_entry(nlarn->log, "%s feels uncomfortably cold!", desc);
                 it->blessed_known = TRUE;
             }
         }
@@ -3338,11 +3370,15 @@ void player_item_equip(player *p, inventory **inv, item *it)
 
         if (islot != NULL)
         {
-            item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
-            log_add_entry(nlarn->log, "You put %s on.", description);
+            desc = item_describe(it, player_item_known(p, it), TRUE, TRUE);
+            log_add_entry(nlarn->log, "You put %s on.", desc);
 
-            if (!player_make_move(p, 2, TRUE, "putting %s on", description))
-                return; /* interrupted */
+            if (!player_make_move(p, 2, TRUE, "putting %s on", desc))
+            {
+                /* interrupted */
+                g_free(desc);
+                return;
+            }
 
             *islot = it;
             p->identified_rings[it->id] = TRUE;
@@ -3353,9 +3389,9 @@ void player_item_equip(player *p, inventory **inv, item *it)
             if (it->cursed)
             {
                 /* capitalize first letter */
-                description[0] = g_ascii_toupper(description[0]);
+                desc[0] = g_ascii_toupper(desc[0]);
                 log_add_entry(nlarn->log, "%s feels uncomfortably cold!",
-                              description);
+                              desc);
                 it->blessed_known = TRUE;
             }
         }
@@ -3370,20 +3406,24 @@ void player_item_equip(player *p, inventory **inv, item *it)
 
         if (p->eq_weapon == NULL)
         {
-            item_describe(it, player_item_known(p, it), TRUE, TRUE, description, 60);
+            desc = item_describe(it, player_item_known(p, it), TRUE, TRUE);
 
             if (!player_make_move(p, 2 + weapon_is_twohanded(it),
-                                  TRUE, "wielding %s", description))
-                return; /* action aborted */
+                                  TRUE, "wielding %s", desc))
+            {
+                /* action aborted */
+                g_free(desc);
+                return;
+            }
 
             p->eq_weapon = it;
-            log_add_entry(nlarn->log, "You now wield %s.", description);
+            log_add_entry(nlarn->log, "You now wield %s.", desc);
 
             if (it->cursed)
             {
                 /* capitalize first letter */
-                description[0] = g_ascii_toupper(description[0]);
-                log_add_entry(nlarn->log, "%s welds itself into your hand.", description);
+                desc[0] = g_ascii_toupper(desc[0]);
+                log_add_entry(nlarn->log, "%s welds itself into your hand.", desc);
                 it->blessed_known = TRUE;
             }
         }
@@ -3394,6 +3434,7 @@ void player_item_equip(player *p, inventory **inv, item *it)
         break;
     }
 
+    g_free(desc);
     player_effects_add(p, it->effects);
 }
 
@@ -3402,19 +3443,15 @@ void player_item_unequip_wrapper(player *p, inventory **inv, item *it)
     player_item_unequip(p, inv, it, FALSE);
 }
 
-void player_item_unequip(player *p, inventory **inv, item *it, int forced)
+void player_item_unequip(player *p, inventory **inv __attribute__((unused)), item *it, int forced)
 {
-    char desc[61];        /* item description */
-
     assert(p != NULL && it != NULL);
-
-    /* don't need that parameter */
-    inv = NULL;
 
     /* the idea behind the time values: one turn to take one item off,
        one turn to get the item out of the pack */
 
-    item_describe(it, player_item_known(p, it), (it->count == 1), TRUE, desc, 60);
+    /* item description */
+    gchar *desc = desc = item_describe(it, player_item_known(p, it), FALSE, TRUE);
 
     switch (it->type)
     {
@@ -3428,7 +3465,11 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
                     log_add_entry(nlarn->log, "You remove %s.", desc);
 
                     if (!player_make_move(p, 2, TRUE, "removing %s", desc))
-                        return; /* interrupted */
+                    {
+                        /* interrupted */
+                        g_free(desc);
+                        return;
+                    }
                 }
 
                 if (p->eq_amulet)
@@ -3451,7 +3492,11 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
         if (p->eq_quiver != NULL)
         {
             if (!player_make_move(p, 2, TRUE, "taking %s out of the quiver", desc))
-                return; /* interrupted */
+            {
+                /* interrupted */
+                g_free(desc);
+                return;
+            }
 
             log_add_entry(nlarn->log, "You take %s out your quiver.", desc);
             p->eq_quiver = NULL;
@@ -3507,7 +3552,11 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
                 if (!forced)
                 {
                     if (!player_make_move(p, atime, TRUE, "taking %s off", desc))
-                        return; /* interrupted */
+                    {
+                        /* interrupted */
+                        g_free(desc);
+                        return;
+                    }
 
                     log_add_entry(nlarn->log, "You finish taking off %s.", desc);
                 }
@@ -3546,7 +3595,11 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
                     log_add_entry(nlarn->log, "You remove %s.", desc);
 
                     if (!player_make_move(p, 2, TRUE, "removing %s", desc))
-                        return; /* interrupted */
+                    {
+                        /* interrupted */
+                        g_free(desc);
+                        return;
+                    }
                 }
 
                 if (*rslot)
@@ -3587,7 +3640,11 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
 
                     if (!player_make_move(p, 2 + weapon_is_twohanded(*wslot),
                                           TRUE, "putting %s away", desc))
-                        return; /* interrupted */
+                    {
+                        /* interrupted */
+                        g_free(desc);
+                        return;
+                    }
                 }
 
                 player_effects_del(p, (*wslot)->effects);
@@ -3604,6 +3661,8 @@ void player_item_unequip(player *p, inventory **inv, item *it, int forced)
     default:
         break;
     }
+
+    g_free(desc);
 }
 
 /* silly filter to get containers */
@@ -3878,10 +3937,8 @@ int player_item_not_equipped(item *it)
 
 char *player_item_identified_list(player *p)
 {
-    GString *list, *sublist;
-    char buf_unidentified[81], buf_identified[81];
+    GString *list;
     item *it; /* fake pretend item */
-    char *heading;
 
     item_t type_ids[] =
     {
@@ -3901,10 +3958,10 @@ char *player_item_identified_list(player *p)
     for (item_t type = 0; type < 5; type++)
     {
         guint count = 0;
-        sublist = g_string_new(NULL);
+        GString *sublist = g_string_new(NULL);
 
         /* item category header */
-        heading = g_strdup(item_name_pl(type_ids[type]));
+        char *heading = g_strdup(item_name_pl(type_ids[type]));
         heading[0] = g_ascii_toupper(heading[0]);
 
         /* no linefeed before first category */
@@ -3920,10 +3977,13 @@ char *player_item_identified_list(player *p)
             it->id = id;
             if (player_item_known(p, it))
             {
-                item_describe(it, FALSE, TRUE, FALSE, buf_unidentified, 80);
-                item_describe(it, TRUE, TRUE, FALSE, buf_identified, 80);
-                g_string_append_printf(sublist, " %33s - %s \n",
-                                       buf_unidentified, buf_identified);
+                gchar *desc_unid = item_describe(it, FALSE, TRUE, FALSE);
+                gchar *desc_id = item_describe(it, TRUE, TRUE, FALSE);
+
+                g_string_append_printf(sublist, " %33s - %s \n", desc_unid, desc_id);
+
+                g_free(desc_id);
+                g_free(desc_unid);
                 count++;
             }
         }
@@ -4062,11 +4122,7 @@ void player_item_use(player *p, inventory **inv __attribute__((unused)), item *i
 
 void player_item_destroy(player *p, item *it)
 {
-    char desc[81] = { 0 };
-
-    item_describe(it, player_item_known(p, it),
-                  (it->count == 1), TRUE, desc, 80);
-
+    gchar *desc = item_describe(it, player_item_known(p, it), FALSE, TRUE);
     desc[0] = g_ascii_toupper(desc[0]);
 
     if (player_item_is_equipped(p, it))
@@ -4096,11 +4152,13 @@ void player_item_destroy(player *p, item *it)
                       (count == 1) ? "" : "s",
                       (count == 1) ? "s" : "");
     }
+
+    g_free(desc);
 }
 
 void player_item_drop(player *p, inventory **inv, item *it)
 {
-    char desc[61];
+    gchar *buf;
     guint count = 0;
     gboolean split = FALSE;
 
@@ -4112,11 +4170,12 @@ void player_item_drop(player *p, inventory **inv, item *it)
     if (it->count > 1)
     {
         /* use the item type plural name except for ammunition */
-        g_snprintf(desc, 60, "Drop how many %s%s?",
-                   (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
-                   (it->type == IT_AMMO ? "s" : ""));
+        buf = g_strdup_printf("Drop how many %s%s?",
+                              (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
+                              (it->type == IT_AMMO ? "s" : ""));
 
-        count = display_get_count(desc, it->count);
+        count = display_get_count(buf, it->count);
+        g_free(buf);
 
         if (!count)
             return;
@@ -4135,22 +4194,29 @@ void player_item_drop(player *p, inventory **inv, item *it)
     /* show the message before dropping the item, as dropping might remove
        the burdened / overloaded effect. If the pre_del callback fails,
        it has to display a message which explains why it has failed. */
-    item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
-    log_add_entry(nlarn->log, "You drop %s.", desc);
+    buf = item_describe(it, player_item_known(p, it), FALSE, FALSE);
+    log_add_entry(nlarn->log, "You drop %s.", buf);
 
     /* if the action is aborted or if the callback failed return without dropping the item */
-    if (!player_make_move(p, 2, TRUE, "dropping %s", desc)
+    if (!player_make_move(p, 2, TRUE, "dropping %s", buf)
             || !inv_del_element(inv, it))
     {
         /* if the item has been split return it */
         if (split)
+        {
             inv_add(&p->inventory, it);
+        }
 
+        g_free(buf);
         return;
     }
 
+    g_free(buf);
+
     if (it->type == IT_GOLD)
+    {
         p->stats.gold_found -= it->count;
+    }
 
     inv_add(map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos), it);
 
@@ -4163,12 +4229,14 @@ void player_item_drop(player *p, inventory **inv, item *it)
     {
         if (it->cursed || it->blessed)
         {
-            item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 60);
-            desc[0] = g_ascii_toupper(desc[0]);
+            buf = item_describe(it, player_item_known(p, it), FALSE, TRUE);
+            buf[0] = g_ascii_toupper(buf[0]);
 
             log_add_entry(nlarn->log, "%s %s surrounded by a %s halo.",
-                          desc, it->count == 1 ? "is" : "are",
+                          buf, it->count == 1 ? "is" : "are",
                           it->cursed ? "black" : "white");
+
+            g_free(buf);
         }
 
         it->blessed_known = TRUE;
@@ -4179,12 +4247,12 @@ void player_item_drop(player *p, inventory **inv, item *it)
 
 void player_item_notes(player *p, inventory **inv __attribute__((unused)), item *it)
 {
-    char desc[81];
     char *caption = NULL;
     char *temp = NULL;
 
-    item_describe(it, player_item_known(p, it), FALSE, TRUE, desc, 80);
+    gchar *desc = item_describe(it, player_item_known(p, it), FALSE, TRUE);
     caption = g_strdup_printf("Add your description for %s (delete with ESC)", desc);
+    g_free(desc);
 
     /* get the new note */
     temp = display_get_string(caption, it->notes, 60);
@@ -4589,12 +4657,13 @@ void player_search(player *p)
                     /* the chance that the player discovers the trap is 3 * int */
                     if (c->cursed && !c->blessed_known && chance(player_get_int(p) * 3))
                     {
-                        gchar idesc[81] = { 0 };
-                        item_describe(c, FALSE, TRUE, TRUE, idesc, 80);
+                        gchar *idesc = item_describe(c, FALSE, TRUE, TRUE);
                         /* the container is cursed */
                         c->blessed_known = TRUE;
                         log_add_entry(nlarn->log, "You discover a trap on %s!",
                                       idesc);
+
+                        g_free(idesc);
                     }
                 }
             }
@@ -4781,7 +4850,7 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
 {
     assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    char desc[61];
+    gchar *buf;
     guint count = 0;
     gpointer oid = it->oid;
     guint gold_amount = 0;
@@ -4789,11 +4858,12 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
     if (ask && (it->count > 1))
     {
         /* use the item type plural name except for ammunition */
-        g_snprintf(desc, 60, "Pick up how many %s%s?",
-                   (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
-                   (it->type == IT_AMMO ? "s" : ""));
+        buf = g_strdup_printf("Pick up how many %s%s?",
+                              (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
+                              (it->type == IT_AMMO ? "s" : ""));
 
-        count = display_get_count(desc, it->count);
+        count = display_get_count(buf, it->count);
+        g_free(buf);
 
         if (count == 0)
             return 0;
@@ -4808,8 +4878,8 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
     }
 
     /* Log the attempt to pick up the item */
-    item_describe(it, player_item_known(p, it), FALSE, FALSE, desc, 60);
-    log_add_entry(nlarn->log, "You pick up %s.", desc);
+    buf = item_describe(it, player_item_known(p, it), FALSE, FALSE);
+    log_add_entry(nlarn->log, "You pick up %s.", buf);
 
     if (it->type == IT_GOLD)
     {
@@ -4818,15 +4888,16 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
     }
 
     /* one turn to pick item up, one to stuff it into the pack */
-    if (!player_make_move(p, 2, TRUE, "picking up %s", desc))
+    if (!player_make_move(p, 2, TRUE, "picking up %s", buf))
     {
         /* Adding the item to the player's inventory has failed.
            If the item has been split, return it to the originating inventory */
         if (oid == NULL) inv_add(inv, it);
-
+        g_free(buf);
         return 1;
     }
 
+    g_free(buf);
     if (!inv_add(&p->inventory, it))
     {
         /* Adding the item to the player's inventory has failed.
@@ -5156,6 +5227,7 @@ void calc_fighting_stats(player *p)
     assert(p != NULL);
 
     monster *m;
+    gchar *desc = NULL;
     GString *text;
 
     position pos = map_find_space_in(game_map(nlarn, Z(p->pos)),
@@ -5169,13 +5241,12 @@ void calc_fighting_stats(player *p)
 
     text = g_string_new("");
 
-    char desc[60] = { 0 };
     if (p->eq_weapon)
     {
         p->eq_weapon->blessed_known = TRUE;
         p->eq_weapon->bonus_known   = TRUE;
 
-        item_describe(p->eq_weapon, TRUE, TRUE, FALSE, desc, 60);
+        desc = item_describe(p->eq_weapon, TRUE, TRUE, FALSE);
     }
 
     const int damage_modifier = player_effect(p, ET_INC_DAMAGE)
@@ -5293,6 +5364,7 @@ void calc_fighting_stats(player *p)
         g_free(filename);
     }
 
+    g_free(desc);
     g_string_free(text, TRUE);
 }
 

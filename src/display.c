@@ -816,7 +816,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     guint curr = 1;
 
     item *it;
-    char item_desc[81];
 
     /* curses attributes */
     int attrs;
@@ -911,18 +910,20 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             if (show_price)
             {
                 /* inside shop */
+                gchar *item_desc = item_describe(it, TRUE, FALSE, FALSE);
                 mvwprintw(iwin->window, pos, 1, " %-*s %5d$ ",
-                          width - 11,
-                          item_describe(it, TRUE, FALSE, FALSE, item_desc, 80),
-                          item_price(it));
+                          width - 11, item_desc, item_price(it));
+
+                g_free(item_desc);
             }
             else
             {
+                gchar *item_desc = item_describe(it, player_item_known(p, it), FALSE, FALSE);
                 mvwprintw(iwin->window, pos, 1, " %-*s %c ",
-                          width - 6,
-                          item_describe(it, player_item_known(p, it),
-                                        FALSE, FALSE, item_desc, 80),
+                          width - 6, item_desc,
                           player_item_is_equipped(p, it) ? '*' : ' ');
+
+                g_free(item_desc);
             }
 
             wattroff(iwin->window, attrs);

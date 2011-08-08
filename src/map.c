@@ -889,7 +889,6 @@ char *map_pos_examine(position pos)
     map *cm = game_map(nlarn, Z(pos));
     monster *monst;
     item *it;
-    char item_desc[81];
     char *tmp = NULL;
     const char *where;
     GString *desc = g_string_new(NULL);
@@ -954,13 +953,15 @@ char *map_pos_examine(position pos)
             for (guint idx = 0; idx < inv_length(*map_ilist_at(cm, pos)); idx++)
             {
                 it = inv_get(*map_ilist_at(cm, pos), idx);
-                item_describe(it, player_item_known(nlarn->p, it),
-                              FALSE, FALSE, item_desc, 80);
+                gchar *item_desc = item_describe(it, player_item_known(nlarn->p, it),
+                                                 FALSE, FALSE);
 
                 if (idx > 0)
                     g_string_append_printf(items_desc, " and %s", item_desc);
                 else
                     items_desc = g_string_new(item_desc);
+
+                g_free(item_desc);
             }
 
             if (items_desc != NULL)

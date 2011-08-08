@@ -108,34 +108,38 @@ char *scroll_desc(int scroll_id)
 
 item_usage_result scroll_read(struct player *p, item *r_scroll)
 {
-    char description[61];
     item_usage_result result  = { FALSE, FALSE };
 
-    item_describe(r_scroll, player_item_known(p, r_scroll),
-                  TRUE, r_scroll->count == 1, description, 60);
+    gchar *desc = item_describe(r_scroll, player_item_known(p, r_scroll),
+                                TRUE, FALSE);
 
     if (player_effect(p, ET_BLINDNESS))
     {
-        log_add_entry(nlarn->log, "As you are blind you can't read %s.",
-                      description);
+        log_add_entry(nlarn->log, "As you are blind you can't read %s.", desc);
 
+        g_free(desc);
         return result;
     }
 
     if (r_scroll->cursed && r_scroll->blessed_known)
     {
         log_add_entry(nlarn->log, "You'd rather not read this cursed scroll.");
+
+        g_free(desc);
         return result;
     }
 
-    log_add_entry(nlarn->log, "You read %s.", description);
+    log_add_entry(nlarn->log, "You read %s.", desc);
 
     /* try to complete reading the scroll */
-    if (!player_make_move(p, 2, TRUE, "reading %s", description))
+    if (!player_make_move(p, 2, TRUE, "reading %s", desc))
     {
         /* the action has been aborted */
+        g_free(desc);
         return result;
     }
+
+    g_free(desc);
 
     /* the scroll has successfully been read */
     result.used_up = TRUE;
@@ -337,9 +341,6 @@ static int scroll_annihilate(struct player *p, item *r_scroll __attribute__((unu
 
 static int scroll_create_artefact(player *p, item *r_scroll)
 {
-    item *it;
-    char buf[61];
-
     assert(p != NULL && r_scroll != NULL);
 
     const int magic_item_type[] = { IT_AMULET, IT_BOOK, IT_POTION, IT_SCROLL };
@@ -354,7 +355,7 @@ static int scroll_create_artefact(player *p, item *r_scroll)
             level = rand_m_n(Z(p->pos), MAP_MAX);
     }
 
-    it = item_new_by_level(type, level);
+    item *it = item_new_by_level(type, level);
 
     it->cursed = FALSE;
     if (it->bonus < 0)
@@ -396,10 +397,9 @@ static int scroll_create_artefact(player *p, item *r_scroll)
     }
     inv_add(map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos), it);
 
-    item_describe(it, player_item_known(p, it), (it->count == 1),
-                  FALSE, buf, 60);
-
+    gchar *buf = item_describe(it, player_item_known(p, it), FALSE, FALSE);
     log_add_entry(nlarn->log, "You find %s below your feet.", buf);
+    g_free(buf);
 
     return TRUE;
 }
@@ -523,8 +523,7 @@ static int scroll_gem_perfection(player *p, item *r_scroll)
 
         if (it)
         {
-            char desc[81];
-            item_describe(it, TRUE, it->count == 1, TRUE, desc, 80);
+            gchar *desc = item_describe(it, TRUE, FALSE, TRUE);
             log_add_entry(nlarn->log, "You make %s perfect.", desc);
 
             /* double gem value */
@@ -717,15 +716,15 @@ static int scroll_identify(player *p, item *r_scroll)
             if (it == NULL)
                 break;
 
-            char desc[81];
-
-            item_describe(it, FALSE, (it->count == 1), TRUE, desc, 80);
+            gchar *desc = item_describe(it, FALSE, FALSE, TRUE);
             log_add_entry(nlarn->log, "You identify %s.", desc);
+            g_free(desc);
             player_item_identify(p, NULL, it);
 
-            item_describe(it, TRUE, (it->count == 1), FALSE, desc, 80);
+            desc = item_describe(it, TRUE, FALSE, FALSE);
             log_add_entry(nlarn->log, "%s %s.", (it->count > 1) ? "These are" :
                           "This is", desc);
+            g_free(desc);
 
             if (inv_length_filtered(p->inventory, item_filter_unid) == 0)
                 break;
@@ -772,9 +771,6 @@ int scroll_mapping(player *p, item *r_scroll)
 
 static int scroll_remove_curse(player *p, item *r_scroll)
 {
-    char buf[61];
-    item *it;
-
     assert(p != NULL && r_scroll != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_cursed) == 0)
@@ -793,15 +789,15 @@ static int scroll_remove_curse(player *p, item *r_scroll)
 
         while (inv_length_filtered(p->inventory, item_filter_cursed) > 0)
         {
-            it = inv_get_filtered(p->inventory, 0, item_filter_cursed);
+            item *it = inv_get_filtered(p->inventory, 0, item_filter_cursed);
 
             // Get the description before uncursing the item.
-            item_describe(it, player_item_known(p, it),
-                          FALSE, TRUE, buf, 60);
-
+            gchar *buf = item_describe(it, player_item_known(p, it), FALSE, TRUE);
             buf[0] = g_ascii_toupper(buf[0]);
             log_add_entry(nlarn->log, "%s glow%s in a white light.",
                           buf, it->count == 1 ? "s" : "");
+
+            g_free(buf);
 
             item_remove_curse(it);
         }
@@ -809,9 +805,9 @@ static int scroll_remove_curse(player *p, item *r_scroll)
     else
     {
         /* choose a single item to uncurse */
-        it = display_inventory("Choose an item to uncurse", p, &p->inventory,
-                               NULL, FALSE, FALSE, FALSE,
-                               item_filter_cursed_or_unknown);
+        item *it = display_inventory("Choose an item to uncurse", p, &p->inventory,
+                                     NULL, FALSE, FALSE, FALSE,
+                                     item_filter_cursed_or_unknown);
 
         if (it != NULL)
         {
@@ -821,14 +817,13 @@ static int scroll_remove_curse(player *p, item *r_scroll)
                 return TRUE;
             }
             // Get the description before uncursing the item.
-            item_describe(it, player_item_known(p, it),
-                          FALSE, TRUE, buf, 60);
-
+            gchar *buf = item_describe(it, player_item_known(p, it), FALSE, TRUE);
             buf[0] = g_ascii_toupper(buf[0]);
 
             log_add_entry(nlarn->log, "%s glow%s in a white light.",
                           buf, it->count == 1 ? "s" : "");
 
+            g_free(buf);
             item_remove_curse(it);
         }
     }

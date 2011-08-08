@@ -162,7 +162,19 @@ item *item_deserialize(cJSON *iser, struct game *g);
 int item_compare(item *a, item *b);
 
 int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id);
-char *item_describe(item *it, int known, int singular, int definite, char *str, int str_len);
+
+/**
+ * Describe an item.
+ *
+ * @param the item
+ * @param TRUE if the item is known to the player.
+ * @param TRUE if the item count shall be ignored and the description for
+ *       a single item of a stack shall be returned.
+ * @param TRUE if the description shall be prepend by the definite article.
+ * @return a newly allocated string that should be disposed with g_free().
+ */
+gchar *item_describe(item *it, int known, int singular, int definite);
+
 item_material_t item_material(item *it);
 guint item_base_price(item *it);
 guint item_price(item *it);

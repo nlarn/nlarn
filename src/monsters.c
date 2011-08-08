@@ -1143,7 +1143,6 @@ int monster_items_pickup(monster *m)
 
     gboolean pick_up = FALSE;
     item *it;
-    char buf[61] = { 0 };
 
     assert(m != NULL);
 
@@ -1186,9 +1185,11 @@ int monster_items_pickup(monster *m)
 
             if (monster_in_sight(m))
             {
-                item_describe(it, player_item_identified(nlarn->p, it),
-                              (it->count == 1), FALSE, buf, 60);
+                gchar *buf = item_describe(it, player_item_identified(nlarn->p, it),
+                                           FALSE, FALSE);
+
                 log_add_entry(nlarn->log, "The %s picks up %s.", monster_name(m), buf);
+                g_free(buf);
             }
 
             inv_del_element(map_ilist_at(monster_map(m), m->pos), it);
@@ -1795,12 +1796,11 @@ char *monster_desc(monster *m)
     if (monster_unknown(m) && inv_length(m->inventory) > 0)
     {
         item *it = get_mimic_item(m);
-        char item_desc[81] = { 0 };
-
-        item_describe(it, player_item_known(nlarn->p, it), (it->count == 1),
-                      FALSE, item_desc, 80);
+        gchar *item_desc= item_describe(it, player_item_known(nlarn->p, it),
+                                        FALSE, FALSE);
 
         g_string_append_printf(desc, "You see %s there", item_desc);
+        g_free(item_desc);
 
         return g_string_free(desc, FALSE);
     }
@@ -1831,13 +1831,12 @@ char *monster_desc(monster *m)
     if (m->weapon != NULL)
     {
         /* describe the weapon the monster wields */
-        gchar weapon_desc[81] = {0};
         item *weapon = game_item_get(nlarn, m->weapon);
-
-        item_describe(weapon, player_item_known(nlarn->p, weapon),
-                      TRUE, FALSE, weapon_desc, 80);
+        gchar *weapon_desc = item_describe(weapon, player_item_known(nlarn->p, weapon),
+                                           TRUE, FALSE);
 
         g_string_append_printf(desc, ", armed with %s", weapon_desc);
+        g_free(weapon_desc);
     }
 
     /* add effect description */
@@ -2152,19 +2151,17 @@ static item *monster_weapon_select(monster *m)
 
 static void monster_weapon_wield(monster *m, item *weapon)
 {
-    char buf[61] = { 0 };
-
     /* FIXME: time management */
     m->weapon = weapon->oid;
 
     /* show message if monster is visible */
     if (monster_in_sight(m))
     {
-        item_describe(weapon, player_item_identified(nlarn->p, weapon),
-                      TRUE, FALSE, buf, 60);
+        gchar *buf = item_describe(weapon, player_item_identified(nlarn->p, weapon),
+                                   TRUE, FALSE);
 
-        log_add_entry(nlarn->log, "The %s wields %s.",
-                      monster_name(m), buf);
+        log_add_entry(nlarn->log, "The %s wields %s.", monster_name(m), buf);
+        g_free(buf);
     }
 }
 
@@ -2194,15 +2191,15 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
     // Blessed items have a 50% chance of resisting the disenchantment.
     if (it->blessed && chance(50))
     {
-        char desc[81] = { 0 };
-        item_describe(it, player_item_known(nlarn->p, it),
-                      (it->count == 1), TRUE, desc, 80);
+        gchar *desc = item_describe(it, player_item_known(nlarn->p, it),
+                                    (it->count == 1), TRUE);
 
         desc[0] = g_ascii_toupper(desc[0]);
         log_add_entry(nlarn->log, "%s resist%s the attack.",
                       desc, (it->count == 1) ? "s" : "");
 
         it->blessed_known = TRUE;
+        g_free(desc);
         return TRUE;
     }
     log_add_entry(nlarn->log, "You feel a sense of loss.");
@@ -2298,12 +2295,10 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     {
         if (inv_length(p->inventory))
         {
-            char buf[61];
             gboolean was_equipped = FALSE;
 
             it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
-            item_describe(it, player_item_known(p, it), (it->count == 1),
-                          FALSE, buf, 60);
+            gchar *buf = item_describe(it, player_item_known(p, it), FALSE, FALSE);
 
             if ((was_equipped = player_item_is_equipped(p, it)))
             {
@@ -2312,7 +2307,9 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                     /* cursed items can't be stolen.. */
                     log_add_entry(nlarn->log, "The %s tries to steal %s but fails.",
                                   monster_get_name(m), buf);
+
                     it->blessed_known = TRUE;
+                    g_free(buf);
 
                     /* return true as there are things to steal */
                     return TRUE;
@@ -2327,8 +2324,8 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
             {
                 /* the player has multiple items. Steal only one. */
                 it = item_split(it, rand_1n(it->count));
-                item_describe(it, player_item_known(p, it), (it->count == 1),
-                              FALSE, buf, 60);
+                g_free(buf);
+                buf = item_describe(it, player_item_known(p, it), FALSE, FALSE);
             }
             else
             {
@@ -2346,6 +2343,8 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                 log_add_entry(nlarn->log, "The %s picks your pocket and steals %s.",
                               monster_get_name(m), buf);
             }
+
+            g_free(buf);
         }
     }
 

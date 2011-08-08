@@ -111,8 +111,7 @@ int weapon_fire(struct player *p)
     map *pmap = game_map(nlarn, Z(p->pos));
     position target;             /* the selected target */
     damage_originator damo = { DAMO_PLAYER, p };
-    char wdesc[81] = {};         /* the weapon description */
-    char adesc[81] = {};         /* the ammo description */
+    gchar *wdesc;                /* the weapon description */
     item *weapon = p->eq_weapon; /* the equipped weapon */
     item *ammo   = p->eq_quiver; /* the quivered ammo */
     monster *m = NULL;           /* the targeted monster */
@@ -125,13 +124,14 @@ int weapon_fire(struct player *p)
     }
 
     /* wielding a weapon, describe it */
-    item_describe(weapon, player_item_known(p, weapon), TRUE, TRUE, wdesc, 80);
+    wdesc = item_describe(weapon, player_item_known(p, weapon), TRUE, TRUE);
 
     /* check if it is a ranged weapon */
     if (!weapon_is_ranged(weapon))
     {
         wdesc[0] = g_ascii_toupper(wdesc[0]);
         log_add_entry(nlarn->log, "%s is not a ranged weapon!", wdesc);
+        g_free(wdesc);
         return FALSE;
     }
 
@@ -139,16 +139,18 @@ int weapon_fire(struct player *p)
     if (!ammo)
     {
         log_add_entry(nlarn->log, "You do not have any ammunition in your quiver!");
+        g_free(wdesc);
         return FALSE;
     }
-
-    /* ammo is quivered, describe it */
-    item_describe(ammo, player_item_known(p, ammo), TRUE, FALSE, adesc, 80);
 
     /* check if the quivered ammo matches the weapon */
     if (weapon_ammo(weapon) != ammo_class(ammo))
     {
+        gchar *adesc = item_describe(ammo, player_item_known(p, ammo), TRUE, FALSE);
         log_add_entry(nlarn->log, "You cannot fire %s with %s.", adesc, wdesc);
+
+        g_free(wdesc);
+        g_free(adesc);
         return FALSE;
     }
 
@@ -159,6 +161,8 @@ int weapon_fire(struct player *p)
     if(!pos_valid(target))
     {
         log_add_entry(nlarn->log, "You did not fire %s.", wdesc);
+
+        g_free(wdesc);
         return FALSE;
     }
 
@@ -169,6 +173,8 @@ int weapon_fire(struct player *p)
     if (!m || !monster_in_sight(m))
     {
         log_add_entry(nlarn->log, "I see no monster there.");
+
+        g_free(wdesc);
         return FALSE;
     }
 
@@ -176,6 +182,8 @@ int weapon_fire(struct player *p)
     if (monster_type(m) == MT_TOWN_PERSON)
     {
         log_add_entry(nlarn->log, "Gosh! How dare you!");
+
+        g_free(wdesc);
         return FALSE;
     }
 
@@ -213,8 +221,8 @@ void weapon_swap(struct player *p)
 
     item *pweapon = p->eq_weapon;
     item *sweapon = p->eq_sweapon;
-    char pdesc[81] = {};
-    char sdesc[81] = {};
+    gchar *pdesc = NULL;
+    gchar *sdesc = NULL;
 
     if (!player_make_move(p, 2, TRUE, "swapping your weapons"))
         return; /* interrupted */
@@ -223,13 +231,16 @@ void weapon_swap(struct player *p)
     p->eq_sweapon = pweapon;
 
     if (pweapon)
-        item_describe(pweapon, player_item_known(p, pweapon), TRUE, FALSE, pdesc, 80);
+        pdesc = item_describe(pweapon, player_item_known(p, pweapon), TRUE, FALSE);
 
     if (sweapon)
-        item_describe(sweapon, player_item_known(p, sweapon), TRUE, FALSE, sdesc, 80);
+        sdesc = item_describe(sweapon, player_item_known(p, sweapon), TRUE, FALSE);
 
     log_add_entry(nlarn->log, "You have swapped your weapons: Primary weapon: %s, secondary weapon, not wielded: %s.",
-                  (sdesc[0] ? sdesc : "none"), (pdesc[0] ? pdesc : "none"));
+                  (sdesc ? sdesc : "none"), (pdesc ? pdesc : "none"));
+
+    g_free(pdesc);
+    g_free(sdesc);
 }
 
 damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)
@@ -260,17 +271,19 @@ static gboolean weapon_pos_hit(position pos,
     item *weapon = (item *)data1;
     item *ammo = (item *)data2;
     monster *m = map_get_monster_at(cmap, pos);
-    char adesc[81] = {};
+    gchar *adesc = NULL;
+    gboolean retval = FALSE;
 
     /* need a definite description for the ammo */
-    item_describe(ammo, player_item_known(nlarn->p, ammo), TRUE, TRUE, adesc, 80);
+    adesc = item_describe(ammo, player_item_known(nlarn->p, ammo), TRUE, TRUE);
     adesc[0] = g_ascii_toupper(adesc[0]);
 
     if (!map_pos_passable(cmap, pos))
     {
         /* the ammo hit some map feature -> drop it at the position */
         weapon_ammo_drop(cmap, ammo, pos);
-        return TRUE;
+
+        retval = TRUE;
     }
     else if (m != NULL)
     {
@@ -287,7 +300,7 @@ static gboolean weapon_pos_hit(position pos,
             monster_damage_take(m, dam);
             weapon_ammo_drop(cmap, ammo, pos);
 
-            return TRUE;
+            retval = TRUE;
         }
         else
         {
@@ -302,6 +315,6 @@ static gboolean weapon_pos_hit(position pos,
         /* TODO: implement */
     }
 
-    /* the bullet passed unhindered */
-    return FALSE;
+    g_free(adesc);
+    return retval;
 }

@@ -610,7 +610,7 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id
     return order;
 }
 
-char *item_describe(item *it, int known, int singular, int definite, char *str, int str_len)
+gchar *item_describe(item *it, int known, int singular, int definite)
 {
     GString *desc = g_string_new(NULL);
     char *add_info = NULL;
@@ -806,16 +806,10 @@ char *item_describe(item *it, int known, int singular, int definite, char *str, 
         }
     }
 
-    /* copy the assembled string to the destination buffer */
-    g_strlcpy(str, desc->str, str_len);
-
     /* free the additional information */
     g_free(add_info);
 
-    /* free the temporary string */
-    g_string_free(desc, TRUE);
-
-    return(str);
+    return g_string_free(desc, FALSE);
 }
 
 item_material_t item_material(item *it)
@@ -1179,7 +1173,6 @@ item *item_enchant(item *it)
 {
     gpointer oid;
     effect *e;
-    char desc[81] = { 0 };
 
     assert(it != NULL);
 
@@ -1192,13 +1185,14 @@ item *item_enchant(item *it)
         gboolean bonus_known = it->bonus_known;
         it->bonus_known = FALSE;
 
-        item_describe(it, player_item_known(nlarn->p, it),
-                      (it->count == 1), TRUE, desc, 80);
+        gchar *desc = item_describe(it, player_item_known(nlarn->p, it),
+                                    (it->count == 1), TRUE);
 
         desc[0] = g_ascii_toupper(desc[0]);
         log_add_entry(nlarn->log, "%s vibrate%s strangely.",
                       desc, (it->count == 1) ? "s" : "");
 
+        g_free(desc);
         it->bonus_known = bonus_known;
     }
 
@@ -1240,14 +1234,13 @@ item *item_disenchant(item *it)
 
     if (it->bonus == -3)
     {
-        char desc[81] = { 0 };
-        item_describe(it, player_item_known(nlarn->p, it),
-                      (it->count == 1), TRUE, desc, 80);
+        gchar *desc = item_describe(it, player_item_known(nlarn->p, it), FALSE, TRUE);
 
         desc[0] = g_ascii_toupper(desc[0]);
         log_add_entry(nlarn->log, "%s vibrate%s warningly.",
                       desc, (it->count == 1) ? "s" : "");
 
+        g_free(desc);
         it->bonus_known = TRUE;
     }
 
@@ -1284,7 +1277,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
 {
     gboolean destroyed = FALSE;
     char *erosion_desc = NULL;
-    char item_desc[61] = { 0 };
+    gchar *item_desc = NULL;
 
     assert(it != NULL);
 
@@ -1299,8 +1292,9 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     if (visible)
     {
         /* prepare item description before it has been affected */
-        item_describe(it, player_item_known(nlarn->p, it),
-                      (it->count == 1), TRUE, item_desc, 60);
+        item_desc = item_describe(it, player_item_known(nlarn->p, it),
+                                  (it->count == 1), TRUE);
+
         item_desc[0] = g_ascii_toupper(item_desc[0]);
     }
 
@@ -1311,6 +1305,8 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
         {
             log_add_entry(nlarn->log, "%s resist%s.", item_desc,
                           (it->count == 1) ? "s" : "");
+
+            g_free(item_desc);
             it->blessed_known = TRUE;
         }
         return (it);
@@ -1401,6 +1397,8 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
         item_destroy(it);
         it = NULL;
     }
+
+    g_free(item_desc);
 
     return it;
 }

@@ -1322,34 +1322,37 @@ int book_colour(item *book)
 item_usage_result book_read(struct player *p, item *book)
 {
     item_usage_result result = { FALSE, FALSE };
-    char description[61];
-
-    item_describe(book, player_item_known(p, book),
-                  TRUE, TRUE, description, 60);
+    gchar *desc = item_describe(book, player_item_known(p, book),
+                                TRUE, TRUE);
 
     if (player_effect(p, ET_BLINDNESS))
     {
         log_add_entry(nlarn->log, "As you are blind you can't read %s.",
-                      description);
+                      desc);
 
+        g_free(desc);
         return result;
     }
 
     if (book->cursed && book->blessed_known)
     {
         log_add_entry(nlarn->log, "You'd rather not read this cursed book.");
+        g_free(desc);
         return result;
     }
 
-    log_add_entry(nlarn->log, "You read %s.", description);
+    log_add_entry(nlarn->log, "You read %s.", desc);
 
     /* try to complete reading the book */
     if (!player_make_move(p, 1 + spell_level_by_id(book->id),
-                          TRUE, "reading %s", description))
+                          TRUE, "reading %s", desc))
     {
         /* the action has been aborted */
+        g_free(desc);
         return result;
     }
+
+    g_free(desc);
 
     /* the book has successfully been read - increase number of books read */
     p->stats.books_read++;

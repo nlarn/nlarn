@@ -38,7 +38,7 @@ static gboolean container_trigger_trap(player *p, item *container);
 
 void container_open(player *p, inventory **inv __attribute__((unused)), item *container)
 {
-    gchar container_desc[61] = { 0 };
+    gchar *container_desc;
     GPtrArray *callbacks;
     display_inv_callback *callback;
     gboolean container_provided = (container == NULL);
@@ -69,22 +69,26 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     }
 
     /* Describe container */
-    item_describe(container, player_item_known(p, container),
-                  TRUE, FALSE, container_desc, 60);
+    container_desc = item_describe(container, player_item_known(p, container),
+                                   TRUE, TRUE);
 
     if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
-        return; /* interrupted */
+    {
+        /* interrupted */
+        g_free(container_desc);
+        return;
+    }
 
     /* log the event */
     if (!container_provided)
-        log_add_entry(nlarn->log, "You carefully open the %s.", container_desc);
+        log_add_entry(nlarn->log, "You carefully open %s.", container_desc);
 
     /* check for a trap on the container and if the player triggers it */
     if (container->cursed && container_trigger_trap(p, container))
     {
         /* the player has triggered the trap, thus remove it */
         container->cursed = FALSE;
-        
+
         /* reset blessed_known, otherwise "uncursed xxx" would appear */
         container->blessed_known = FALSE;
     }
@@ -93,13 +97,14 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     if (inv_length(container->content) == 0)
     {
         /* same description, this time definite */
-        item_describe(container, player_item_known(p, container),
-                      TRUE, TRUE, container_desc, 60);
+        container_desc = item_describe(container, player_item_known(p, container),
+                                       TRUE, TRUE);
 
         /* and the first char has to be upper case */
         container_desc[0] = g_ascii_toupper(container_desc[0]);
 
         log_add_entry(nlarn->log, "%s is empty.", container_desc);
+        g_free(container_desc);
         return;
     }
 
@@ -121,14 +126,14 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     display_inventory(container_desc, p, &container->content, callbacks, FALSE,
                       TRUE, FALSE, NULL);
 
+    g_free(container_desc);
     display_inv_callbacks_clean(callbacks);
 }
 
 void container_item_add(player *p, inventory **inv, item *element)
 {
     inventory **target_inv = NULL;
-    gchar container_desc[61]  = { 0 };
-    gchar element_desc[61]  = { 0 };
+    gchar *container_desc, *element_desc;
     guint pilen = 0; /* length of player's filtered inventory */
     guint filen = 0; /* length of filtered floor inventory */
     gboolean carried_container = FALSE;
@@ -139,7 +144,7 @@ void container_item_add(player *p, inventory **inv, item *element)
     if (inv == &nlarn->player_home)
     {
         /* player wants to deposit something at home */
-        g_snprintf(container_desc, 60, "your storage room");
+        container_desc = g_strdup("your storage room");
         target_inv = &nlarn->player_home;
     }
     else if (inv == NULL || (inv == &p->inventory))
@@ -188,10 +193,13 @@ void container_item_add(player *p, inventory **inv, item *element)
         target_inv = &container->content;
 
         /* prepare container description */
-        item_describe(container, TRUE, TRUE, TRUE, container_desc, 60);
+        container_desc = item_describe(container, TRUE, TRUE, TRUE);
 
         if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
+        {
+            g_free(container_desc);
             return; /* interrupted */
+        }
     }
 
     /* mute the log if the container is in the player's inventory.
@@ -201,14 +209,18 @@ void container_item_add(player *p, inventory **inv, item *element)
     if (element->count > 1)
     {
         /* use the item type plural name except for ammunition */
-        g_snprintf(element_desc, 60, "How many %s%s do you want to put into %s?",
-                   (element->type == IT_AMMO ? ammo_name(element) : item_name_pl(element->type)),
-                   (element->type == IT_AMMO ? "s" : ""), container_desc);
+        gchar *q = g_strdup_printf("How many %s%s do you want to put into %s?",
+                                   (element->type == IT_AMMO
+                                    ? ammo_name(element)
+                                    : item_name_pl(element->type)),
+                                   (element->type == IT_AMMO ? "s" : ""), container_desc);
 
-        count = display_get_count(element_desc, element->count);
+        count = display_get_count(q, element->count);
+        g_free(q);
 
         if (count == 0)
         {
+            g_free(container_desc);
             return;
         }
 
@@ -232,11 +244,14 @@ void container_item_add(player *p, inventory **inv, item *element)
     if (carried_container) log_enable(nlarn->log);
 
     /* log the event */
-    item_describe(element, player_item_known(p, element),
-                  (element->count == 1), TRUE, element_desc, 60 );
+    element_desc = item_describe(element, player_item_known(p, element),
+                                 FALSE, TRUE);
 
-    log_add_entry(nlarn->log, "You put %s into %s.", element_desc,
-                  container_desc);
+    log_add_entry(nlarn->log, "You put %s into %s.",
+                  element_desc, container_desc);
+
+    g_free(element_desc);
+    g_free(container_desc);
 
     if (element->type == IT_GOLD)
         p->stats.gold_found -= element->count;
@@ -257,7 +272,7 @@ void container_item_add(player *p, inventory **inv, item *element)
 
 void container_item_unpack(player *p, inventory **inv, item *element)
 {
-    gchar desc[61] = { 0 };
+    gchar *desc;
     guint count = 0;
 
     assert(p != NULL && inv != NULL && element != NULL);
@@ -265,11 +280,12 @@ void container_item_unpack(player *p, inventory **inv, item *element)
     if (element->count > 1)
     {
         /* use the item type plural name except for ammunition */
-        g_snprintf(desc, 60, "How many %s%s do you want to take out?",
-                   (element->type == IT_AMMO ? ammo_name(element) : item_name_pl(element->type)),
-                   (element->type == IT_AMMO ? "s" : ""));
+        gchar *q = g_strdup_printf("How many %s%s do you want to take out?",
+                                   (element->type == IT_AMMO ? ammo_name(element) : item_name_pl(element->type)),
+                                   (element->type == IT_AMMO ? "s" : ""));
 
-        count = display_get_count(desc, element->count);
+        count = display_get_count(q, element->count);
+        g_free(q);
 
         if (count == 0)
         {
@@ -296,13 +312,14 @@ void container_item_unpack(player *p, inventory **inv, item *element)
         inv_del_element(inv, element);
     }
 
-    item_describe(element, player_item_known(p, element), FALSE, FALSE, desc, 60);
+    desc = item_describe(element, player_item_known(p, element), FALSE, FALSE);
 
     if (!player_make_move(p, 2, TRUE, "putting %s in your pack", desc))
     {
         /* interrupted! */
         /* return the item into the originating inventory */
         inv_add(inv, element);
+        g_free(desc);
         return;
     }
 
@@ -318,8 +335,9 @@ void container_item_unpack(player *p, inventory **inv, item *element)
         /* if adding the element to the player's pack
            has failed put it back into the container */
         inv_add(inv, element);
-        return;
     }
+
+    g_free(desc);
 }
 
 int container_move_content(player *p __attribute__((unused)), inventory **inv, inventory **new_inv)
@@ -343,16 +361,15 @@ int container_move_content(player *p __attribute__((unused)), inventory **inv, i
 static gboolean container_trigger_trap(player *p, item *container)
 {
     effect_t et = ET_NONE;
-    
+
     /* if player knows that the container is trapped,
      * the chance to trigger the trap is lowered */
-    if (container->blessed_known && chance(3 * player_get_dex(p))) 
+    if (container->blessed_known && chance(3 * player_get_dex(p)))
     {
-        gchar idesc[81] = { 0 };
+        gchar *idesc = item_describe(container, FALSE, TRUE, TRUE);
 
-        item_describe(container, FALSE, TRUE, TRUE, idesc, 80);
-        log_add_entry(nlarn->log, "You carefully avoid the trap on %s.",
-                      idesc);
+        log_add_entry(nlarn->log, "You carefully avoid the trap on %s.", idesc);
+        g_free(idesc);
 
         /* the trap remains on the container */
         return FALSE;
