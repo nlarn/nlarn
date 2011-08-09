@@ -26,8 +26,8 @@ function get_dirs(which, lib)
   return paths
 end
 
-function get_pkgconfig(query)
-  fh = io.popen("pkg-config " .. query)
+function get_config(cmd, query)
+  fh = io.popen(cmd .. " " .. query)
   out = fh:read()
   fh:close()
 
@@ -53,24 +53,10 @@ solution "NLarn"
     language "C"
     files { "inc/*.h", "src/*.c" }
     includedirs { "inc" }
+    links { "glib-2.0", "m", "z" }
     defines { "G_DISABLE_DEPRECATED" }
-
     -- assume gcc or clang
     buildoptions { "-std=c99", "-Wextra" }
-    
-    links { "glib-2.0", "m", "z" }
-
-    -- Debian and Ubuntu have a specific naming convention for the lua package
-    -- fortunately it can be configured with pkg-config
-    if os.is("linux") and (get_linux_distribution() == "Debian"
-        or get_linux_distribution() == "Ubuntu")
-      then
-      includedirs { get_dirs("include", "lua5.1") }
-      links { "lua5.1" }
-      libdirs { get_dirs("lib", "lua5.1") }
-    else
-      links { "lua" }
-    end
 
     configuration "Debug"
       defines { "DEBUG", "LUA_USE_APICHECK" }
@@ -80,22 +66,33 @@ solution "NLarn"
       defines { "G_DISABLE_ASSERT" }
       flags { "Optimize" }
 
-    configuration "bsd"
-      includedirs { "/usr/local/include/lua51" }
-      libdirs { "/usr/local/lib/lua51" }
-
     configuration "windows"
       -- do not include unnecessary header files
       defines { "WIN32_LEAN_AND_MEAN", "NOGDI" }
-      links { "pdcurses" }
+      links { "pdcurses", "lua" }
 
     configuration "not windows"
-      includedirs { "/usr/include/ncurses" }
+      includedirs { get_config("ncurses5-config", "--includedir") }
+      libdirs { get_config("ncurses5-config", "--libdir") }
       links { "ncurses", "panel" }
+      
+      -- Debian and Ubuntu have a specific naming convention for the lua package
+      -- fortunately it can be configured with pkg-config
+      if os.is("linux") and (get_linux_distribution() == "Debian"
+          or get_linux_distribution() == "Ubuntu")
+      then
+        includedirs { get_dirs("include", "lua5.1") }
+        links { "lua5.1" }
+        libdirs { get_dirs("lib", "lua5.1") }
+      else
+        includedirs { get_dirs("include", "lua") }
+        links { "lua" }
+        libdirs { get_dirs("lib", "lua") }
+      end
 
     configuration { "gmake" }
-      buildoptions { get_pkgconfig("--cflags glib-2.0") }
-      linkoptions {  get_pkgconfig("--libs glib-2.0") }
+      buildoptions { get_config("pkg-config", "--cflags glib-2.0") }
+      linkoptions {  get_config("pkg-config", "--libs glib-2.0") }
 
     configuration { "not gmake" }
       includedirs { get_dirs("include", "glib-2.0") }
