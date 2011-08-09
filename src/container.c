@@ -133,7 +133,7 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
 void container_item_add(player *p, inventory **inv, item *element)
 {
     inventory **target_inv = NULL;
-    gchar *container_desc, *element_desc;
+    gchar *container_desc = NULL, *element_desc;
     guint pilen = 0; /* length of player's filtered inventory */
     guint filen = 0; /* length of filtered floor inventory */
     gboolean carried_container = FALSE;
