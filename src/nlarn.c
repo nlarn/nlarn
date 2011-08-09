@@ -198,15 +198,17 @@ int main(int argc, char *argv[])
             if (ch == '/' || ch == 'g')
             {
                 /* fast movement: get direction of movement */
-                ch = toupper(display_getch());
+                ch = display_getch();
                 switch (ch)
                 {
+                case 'b':
                 case KEY_END:
                 case KEY_C1:
                 case '1':
                     ch = 'B';
                     break;
 
+                case 'j':
                 case KEY_DOWN:
 #ifdef KEY_C2
                 case KEY_C2:
@@ -215,12 +217,14 @@ int main(int argc, char *argv[])
                     ch = 'J';
                     break;
 
+                case 'n':
                 case KEY_NPAGE:
                 case KEY_C3:
                 case '3':
                     ch = 'N';
                     break;
 
+                case 'h':
                 case KEY_LEFT:
 #ifdef KEY_B1
                 case KEY_B1:
@@ -234,6 +238,7 @@ int main(int argc, char *argv[])
                     ch = 'w';
                     break;
 
+                case 'l':
                 case KEY_RIGHT:
 #ifdef KEY_B3
                 case KEY_B3:
@@ -242,12 +247,14 @@ int main(int argc, char *argv[])
                     ch = 'L';
                     break;
 
+                case 'y':
                 case KEY_HOME:
                 case KEY_A1:
                 case '7':
                     ch = 'Y';
                     break;
 
+                case 'k':
                 case KEY_UP:
 #ifdef KEY_A2
                 case KEY_A2:
@@ -256,6 +263,7 @@ int main(int argc, char *argv[])
                     ch = 'K';
                     break;
 
+                case 'u':
                 case KEY_PPAGE:
                 case KEY_A3:
                 case '9':
