@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <stdlib.h>
@@ -115,7 +115,7 @@ static gboolean monster_breath_hit(position pos, const damage_originator *damo,
 
 monster *monster_new(monster_t type, position pos)
 {
-    assert(type > MT_NONE && type < MT_MAX && pos_valid(pos));
+    g_assert(type > MT_NONE && type < MT_MAX && pos_valid(pos));
 
     monster *nmonster;
     int it, icount;     /* item type, item id, item count */
@@ -292,7 +292,7 @@ monster *monster_new(monster_t type, position pos)
 
 monster *monster_new_by_level(position pos)
 {
-    assert(pos_valid(pos));
+    g_assert(pos_valid(pos));
 
     const int mlevel[] = { MT_KOBOLD,           // D1:   5
                             MT_GIANT_ANT,        // D2:  11
@@ -360,7 +360,7 @@ monster *monster_new_by_level(position pos)
 
 void monster_destroy(monster *m)
 {
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    g_assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
 
     /* free effects */
     while (m->effects->len > 0)
@@ -485,31 +485,31 @@ void monster_deserialize(cJSON *mser, game *g)
 
 int monster_hp_max(monster *m)
 {
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    g_assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
     return m->hp_max;
 }
 
 int monster_hp(monster *m)
 {
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    g_assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
     return m->hp;
 }
 
 void monster_hp_inc(monster *m, int amount)
 {
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    g_assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
     m->hp = min(m->hp + amount, m->hp_max);
 }
 
 gpointer monster_oid(monster *m)
 {
-    assert (m != NULL);
+    g_assert (m != NULL);
     return m->oid;
 }
 
 position monster_pos(monster *m)
 {
-    assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    g_assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
     return m->pos;
 }
 
@@ -553,7 +553,7 @@ int monster_valid_dest(map *m, position pos, int map_elem)
 
 int monster_pos_set(monster *m, map *mp, position target)
 {
-    assert(m != NULL && mp != NULL && pos_valid(target));
+    g_assert(m != NULL && mp != NULL && pos_valid(target));
 
     if (map_pos_validate(mp, target, monster_map_element(m), FALSE))
     {
@@ -579,19 +579,19 @@ monster_t monster_type(monster *m)
 
 gboolean monster_unknown(monster *m)
 {
-    assert (m != NULL);
+    g_assert (m != NULL);
     return m->unknown;
 }
 
 void monster_unknown_set(monster *m, gboolean what)
 {
-    assert (m != NULL);
+    g_assert (m != NULL);
     m->unknown = what;
 }
 
 inventory **monster_inv(monster *m)
 {
-    assert (m != NULL);
+    g_assert (m != NULL);
     return &m->inventory;
 }
 
@@ -606,7 +606,7 @@ static gboolean monster_nearby(monster *m)
 
 gboolean monster_in_sight(monster *m)
 {
-    assert (m != NULL);
+    g_assert (m != NULL);
 
     /* player is blind */
     if (player_effect(nlarn->p, ET_BLINDNESS))
@@ -645,7 +645,7 @@ static const char *get_town_person_name(int value)
 
 monster_action_t monster_action(monster *m)
 {
-    assert (m != NULL);
+    g_assert (m != NULL);
 
     return m->action;
 }
@@ -707,7 +707,7 @@ static int item_is_unique(item *it)
 
 void monster_die(monster *m, struct player *p)
 {
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     /* if the player can see the monster describe the event */
     /* Also give a message for invisible monsters you killed yourself
@@ -790,7 +790,7 @@ void monster_die(monster *m, struct player *p)
 
 void monster_level_enter(monster *m, struct map *l)
 {
-    assert (m != NULL && l != NULL);
+    g_assert (m != NULL && l != NULL);
 
     map_sobject_t source = map_sobject_at(monster_map(m), m->pos);
     map_sobject_t target;
@@ -1077,7 +1077,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
 
 void monster_polymorph(monster *m)
 {
-    assert (m != NULL);
+    g_assert (m != NULL);
 
     /* make sure mimics never leave the mimicked item behind */
     if (monster_flags(m, MF_MIMIC)
@@ -1144,7 +1144,7 @@ int monster_items_pickup(monster *m)
     gboolean pick_up = FALSE;
     item *it;
 
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     for (guint idx = 0; idx < inv_length(*map_ilist_at(monster_map(m), m->pos)); idx++)
     {
@@ -1239,7 +1239,7 @@ attack monster_attack(monster *m, int num)
 {
     attack att = { ATT_NONE, DAM_NONE, 0, 0 };
 
-    assert (m != NULL && num <= monster_attack_count(m));
+    g_assert (m != NULL && num <= monster_attack_count(m));
 
     if (luaN_push_table("monsters", m->type, "attacks"))
     {
@@ -1273,7 +1273,7 @@ attack monster_attack(monster *m, int num)
 
 static int monster_breath_attack(monster *m, player *p, attack att)
 {
-    assert(att.type == ATT_BREATH);
+    g_assert(att.type == ATT_BREATH);
 
     /* FIXME: charm monster is extremely broken. This should be handled totally different */
     if (monster_effect(m, ET_CHARM_MONSTER)
@@ -1344,7 +1344,7 @@ void monster_player_attack(monster *m, player *p)
     map *mmap = game_map(nlarn, Z(m->pos));
     attack att = { ATT_NONE, DAM_NONE, 0, 0 };
 
-    assert(m != NULL && p != NULL);
+    g_assert(m != NULL && p != NULL);
 
     /* the player is invisible and the monster bashes into thin air */
     if (!pos_identical(m->player_pos, p->pos))
@@ -1498,7 +1498,7 @@ int monster_player_ranged_attack(monster *m, player *p)
     damage *dam;
     attack att = { ATT_NONE, DAM_NONE, 0, 0 };
 
-    assert(m != NULL && p != NULL);
+    g_assert(m != NULL && p != NULL);
 
     /* choose a random attack type */
     att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
@@ -1534,7 +1534,7 @@ monster *monster_damage_take(monster *m, damage *dam)
     struct player *p = NULL;
     int hp_orig;
 
-    assert(m != NULL && dam != NULL);
+    g_assert(m != NULL && dam != NULL);
 
     if (dam->dam_origin.ot == DAMO_PLAYER)
         p = (player *)dam->dam_origin.originator;
@@ -1725,7 +1725,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
 
 void monster_update_player_pos(monster *m, position ppos)
 {
-    assert (m != NULL);
+    g_assert (m != NULL);
 
     m->player_pos = ppos;
     m->lastseen = 1;
@@ -1739,7 +1739,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty)
     /* temporary var for effect */
     effect *e;
 
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     /* modify frequency by difficulty: more regeneration, less poison */
     frequency = difficulty << 1;
@@ -1773,7 +1773,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty)
 
 item *get_mimic_item(monster *m)
 {
-    assert(m && monster_flags(m, MF_MIMIC));
+    g_assert(m && monster_flags(m, MF_MIMIC));
 
     /* polymorphed mimics may not pose as items */
     if (inv_length(m->inventory) > 0)
@@ -1788,7 +1788,7 @@ char *monster_desc(monster *m)
     GString *desc;
     char *injury, *effects = NULL;
 
-    assert (m != NULL);
+    g_assert (m != NULL);
 
     desc = g_string_new(NULL);
 
@@ -1867,7 +1867,7 @@ char *monster_desc(monster *m)
 
 char monster_glyph(monster *m)
 {
-    assert (m != NULL);
+    g_assert (m != NULL);
 
     if (m->unknown && inv_length(m->inventory) > 0)
     {
@@ -1882,7 +1882,7 @@ char monster_glyph(monster *m)
 
 int monster_color(monster *m)
 {
-    assert (m != NULL);
+    g_assert (m != NULL);
 
     if (m->unknown && inv_length(m->inventory) > 0)
     {
@@ -1900,7 +1900,7 @@ void monster_genocide(monster_t monster_id)
     GList *mlist;
     monster *monst;
 
-    assert(monster_id > MT_NONE && monster_id < MT_MAX);
+    g_assert(monster_id > MT_NONE && monster_id < MT_MAX);
 
     nlarn->monster_genocided[monster_id] = TRUE;
     mlist = g_hash_table_get_values(nlarn->monsters);
@@ -1925,13 +1925,13 @@ void monster_genocide(monster_t monster_id)
 
 int monster_is_genocided(monster_t monster_id)
 {
-    assert(monster_id > MT_NONE && monster_id < MT_MAX);
+    g_assert(monster_id > MT_NONE && monster_id < MT_MAX);
     return nlarn->monster_genocided[monster_id];
 }
 
 effect *monster_effect_add(monster *m, effect *e)
 {
-    assert(m != NULL && e != NULL);
+    g_assert(m != NULL && e != NULL);
     gboolean vis_effect = FALSE;
 
     if (e->type == ET_SLEEP && monster_flags(m, MF_RES_SLEEP))
@@ -2011,7 +2011,7 @@ int monster_effect_del(monster *m, effect *e)
 {
     int result;
 
-    assert(m != NULL && e != NULL);
+    g_assert(m != NULL && e != NULL);
 
     /* log info if the player can see the monster */
     if (monster_in_sight(m) && effect_get_msg_m_stop(e))
@@ -2029,13 +2029,13 @@ int monster_effect_del(monster *m, effect *e)
 
 effect *monster_effect_get(monster *m , effect_t type)
 {
-    assert(m != NULL && type < ET_MAX);
+    g_assert(m != NULL && type < ET_MAX);
     return effect_get(m->effects, type);
 }
 
 int monster_effect(monster *m, effect_t type)
 {
-    assert(m != NULL && type < ET_MAX);
+    g_assert(m != NULL && type < ET_MAX);
     return effect_query(m->effects, type);
 }
 
@@ -2043,7 +2043,7 @@ void monster_effects_expire(monster *m)
 {
     guint idx = 0;
 
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     while (idx < m->effects->len)
     {
@@ -2169,7 +2169,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
 {
     item *it;
 
-    assert (m != NULL && p != NULL);
+    g_assert (m != NULL && p != NULL);
 
     /* disenchant random item */
     if (!inv_length(p->inventory))
@@ -2230,7 +2230,7 @@ static gboolean monster_item_rust(monster *m __attribute__((unused)), struct pla
 {
     item **it;
 
-    assert(m != NULL && p != NULL);
+    g_assert(m != NULL && p != NULL);
 
     /* get a random piece of armour to damage */
     if ((it = player_get_random_armour(p, FALSE)))
@@ -2250,7 +2250,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     guint player_gold = 0;
     item *it = NULL;
 
-    assert (m != NULL && p != NULL);
+    g_assert (m != NULL && p != NULL);
 
     /* if player has a device of no theft abort the theft */
     if (player_effect(p, ET_NOTHEFT))

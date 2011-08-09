@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <string.h>
 
 #include "cJSON.h"
@@ -566,7 +566,7 @@ effect *effect_new(effect_t type)
 {
     effect *ne;
 
-    assert(type > ET_NONE && type < ET_MAX);
+    g_assert(type > ET_NONE && type < ET_MAX);
 
     ne = g_malloc0(sizeof(effect));
     ne->type = type;
@@ -602,7 +602,7 @@ effect *effect_copy(effect *e)
 {
     effect *ne;
 
-    assert(e != NULL);
+    g_assert(e != NULL);
 
     ne = g_malloc(sizeof(effect));
     memcpy(ne, e, sizeof(effect));
@@ -615,7 +615,7 @@ effect *effect_copy(effect *e)
 
 void effect_destroy(effect *e)
 {
-    assert(e != NULL);
+    g_assert(e != NULL);
 
     /* unregister effect */
     game_effect_unregister(nlarn, e->oid);
@@ -703,67 +703,67 @@ GPtrArray *effects_deserialize(cJSON *eser)
 
 const char *effect_type_name(effect_t type)
 {
-    assert(type < ET_MAX);
+    g_assert(type < ET_MAX);
     return effects[type].name;
 }
 
 int effect_type_amount(effect_t type)
 {
-    assert(type < ET_MAX);
+    g_assert(type < ET_MAX);
     return effects[type].amount;
 }
 
 guint effect_type_duration(effect_t type)
 {
-    assert(type < ET_MAX);
+    g_assert(type < ET_MAX);
     return effects[type].duration;
 }
 
 gboolean effect_type_inc_duration(effect_t type)
 {
-    assert(type < ET_MAX);
+    g_assert(type < ET_MAX);
     return effects[type].inc_duration;
 }
 
 gboolean effect_type_inc_amount(effect_t type)
 {
-    assert(type < ET_MAX);
+    g_assert(type < ET_MAX);
     return effects[type].inc_amount;
 }
 
 const char *effect_get_desc(effect *e)
 {
-    assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
+    g_assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
     return effects[e->type].desc;
 }
 
 const char *effect_get_msg_start(effect *e)
 {
-    assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
+    g_assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
     return effects[e->type].msg_start;
 }
 
 const char *effect_get_msg_stop(effect *e)
 {
-    assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
+    g_assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
     return effects[e->type].msg_stop;
 }
 
 const char *effect_get_msg_m_start(effect *e)
 {
-    assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
+    g_assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
     return effects[e->type].msg_start_monster;
 }
 
 const char *effect_get_msg_m_stop(effect *e)
 {
-    assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
+    g_assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
     return effects[e->type].msg_stop_monster;
 }
 
 int effect_get_amount(effect *e)
 {
-    assert (e != NULL);
+    g_assert (e != NULL);
     return e->amount;
 }
 
@@ -771,7 +771,7 @@ effect *effect_add(GPtrArray *ea, effect *ne)
 {
     effect *e;
 
-    assert(ea != NULL && ne != NULL);
+    g_assert(ea != NULL && ne != NULL);
 
     /* check for existing effects unless the effect belongs to an item */
     if (!ne->item && (e = effect_get(ea, ne->type)))
@@ -812,13 +812,13 @@ effect *effect_add(GPtrArray *ea, effect *ne)
 
 int effect_del(GPtrArray *ea, effect *e)
 {
-    assert(ea != NULL && e != NULL);
+    g_assert(ea != NULL && e != NULL);
     return g_ptr_array_remove_fast(ea, e->oid);
 }
 
 effect *effect_get(GPtrArray *ea, effect_t type)
 {
-    assert(ea != NULL && type > ET_NONE && type < ET_MAX);
+    g_assert(ea != NULL && type > ET_NONE && type < ET_MAX);
 
     for (guint idx = 0; idx < ea->len; idx++)
     {
@@ -839,7 +839,7 @@ int effect_query(GPtrArray *ea, effect_t type)
 {
     int amount = 0;
 
-    assert(ea != NULL && type > ET_NONE && type < ET_MAX);
+    g_assert(ea != NULL && type > ET_NONE && type < ET_MAX);
 
     for (guint idx = 0; idx < ea->len; idx++)
     {
@@ -854,7 +854,7 @@ int effect_query(GPtrArray *ea, effect_t type)
 
 int effect_expire(effect *e)
 {
-    assert(e != NULL);
+    g_assert(e != NULL);
 
     if (e->turns > 1)
     {

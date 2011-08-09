@@ -18,7 +18,6 @@
 
 /* $Id$ */
 
-#include <assert.h>
 #include <glib.h>
 #include "amulets.h"
 #include "items.h"
@@ -53,7 +52,7 @@ static const int amulet_materials[AM_MAX - 1] =
 
 item_material_t amulet_material(int amulet_id)
 {
-    assert(amulet_id > AM_NONE && amulet_id < AM_MAX);
+    g_assert(amulet_id > AM_NONE && amulet_id < AM_MAX);
     return amulet_materials[nlarn->amulet_material_mapping[amulet_id - 1]];
 }
 

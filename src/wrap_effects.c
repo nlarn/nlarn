@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -59,7 +59,7 @@ static const luaL_reg effect_metamethods[] =
 
 void wrap_effects(lua_State *L)
 {
-    assert (L != NULL);
+    g_assert (L != NULL);
 
     /* create methods table, add it to the globals */
     luaL_register(L, EFFECT, effect_methods);

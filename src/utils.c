@@ -18,8 +18,8 @@
 
 /* $Id$ */
 
-#include <assert.h>
 #include <ctype.h>
+#include <glib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -34,7 +34,7 @@ int divert(int value, int percent)
 {
     int lower, upper;
 
-    assert(value > 0 && percent > 0);
+    g_assert(value > 0 && percent > 0);
 
     lower = value - (value / percent);
     upper = value + (value / percent);
@@ -113,7 +113,7 @@ message_log *log_new()
 
 void log_destroy(message_log *log)
 {
-    assert(log != NULL);
+    g_assert(log != NULL);
 
     /* free log entries */
     for (guint idx = 0; idx < log_length(log); idx++)
@@ -181,7 +181,7 @@ void log_set_time(message_log *log, int gtime)
 {
     message_log_entry *entry;
 
-    assert(log != NULL);
+    g_assert(log != NULL);
 
     /* flush pending entry */
     if ((log->buffer)->len)
@@ -218,7 +218,7 @@ void log_set_time(message_log *log, int gtime)
 
 message_log_entry *log_get_entry(message_log *log, guint id)
 {
-    assert(log != NULL && id < log_length(log));
+    g_assert(log != NULL && id < log_length(log));
     return g_ptr_array_index(log->entries, id);
 }
 
@@ -402,7 +402,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
 
 GPtrArray *text_append(GPtrArray *first, GPtrArray *second)
 {
-    assert(first != NULL && second != NULL);
+    g_assert(first != NULL && second != NULL);
 
     while (second->len > 0)
         g_ptr_array_add(first,
@@ -415,7 +415,7 @@ GPtrArray *text_append(GPtrArray *first, GPtrArray *second)
 
 void text_destroy(GPtrArray *text)
 {
-    assert(text != NULL);
+    g_assert(text != NULL);
 
     while (text->len > 0)
         g_free(g_ptr_array_remove_index_fast(text, 0));
@@ -441,8 +441,8 @@ int strv_append(char ***list, const char *str)
 {
     int len = g_strv_length(*list) + 1;
 
-    assert(list != NULL);
-    assert(str != NULL);
+    g_assert(list != NULL);
+    g_assert(str != NULL);
 
     *list = g_realloc (*list, sizeof(char*) * (len + 1));
 
@@ -468,7 +468,7 @@ int str_starts_with_vowel(const char *str)
 {
     const char vowels[] = "aeiouAEIOU";
 
-    assert (str != NULL);
+    g_assert (str != NULL);
 
     if (strchr(vowels, str[0])) return TRUE;
     else return FALSE;
@@ -512,7 +512,7 @@ damage *damage_new(damage_t type, attack_t att_type, int amount,
 
 damage *damage_copy(damage *dam)
 {
-    assert (dam != NULL);
+    g_assert (dam != NULL);
 
     damage *dcopy = g_malloc(sizeof(damage));
     memcpy(dcopy, dam, sizeof(damage));
@@ -522,7 +522,7 @@ damage *damage_copy(damage *dam)
 
 static void log_entry_destroy(message_log_entry *entry)
 {
-    assert(entry != NULL);
+    g_assert(entry != NULL);
     g_free(entry->message);
     g_free(entry);
 }

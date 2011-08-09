@@ -18,8 +18,8 @@
 
 /* $Id$ */
 
-#include <assert.h>
 #include <curses.h>
+#include <glib.h>
 #include <stdlib.h>
 
 #include "cJSON.h"
@@ -40,7 +40,7 @@ position pos_move(position pos, direction dir)
     /* return given position if direction is not implemented */
     position npos = pos;
 
-    assert(dir > GD_NONE && dir < GD_MAX);
+    g_assert(dir > GD_NONE && dir < GD_MAX);
 
     switch (dir)
     {
@@ -163,7 +163,7 @@ int pos_valid(position pos)
 
 direction pos_dir(position origin, position target)
 {
-    assert (pos_valid(origin) && pos_valid(target));
+    g_assert (pos_valid(origin) && pos_valid(target));
 
     if ((X(origin) >  X(target)) && (Y(origin) <  Y(target))) return GD_SW;
     if ((X(origin) == X(target)) && (Y(origin) <  Y(target))) return GD_SOUTH;
@@ -262,9 +262,9 @@ area *area_new_circle(position center, int radius, int hollow)
 
     while (x < y)
     {
-        assert(ddF_x == 2 * x + 1);
-        assert(ddF_y == -2 * y);
-        assert(f == x * x + y * y - radius * radius + 2 * x - y + 1);
+        g_assert(ddF_x == 2 * x + 1);
+        g_assert(ddF_y == -2 * y);
+        g_assert(f == x * x + y * y - radius * radius + 2 * x - y + 1);
 
         if (f >= 0)
         {
@@ -326,7 +326,7 @@ area *area_new_circle_flooded(position center, int radius, area *obstacles)
     area *narea;
     int start_x, start_y;
 
-    assert(radius > 0 && obstacles != NULL);
+    g_assert(radius > 0 && obstacles != NULL);
 
     if (!pos_valid(center))
         return NULL;
@@ -453,7 +453,7 @@ gboolean area_ray_trajectory(position source, position target,
                              gpointer data1, gpointer data2, gboolean reflectable,
                              char glyph, int colour, gboolean keep_ray)
 {
-    assert(pos_valid(source) && pos_valid(target));
+    g_assert(pos_valid(source) && pos_valid(target));
 
     map *tmap = game_map(nlarn, Z(source));
 
@@ -640,7 +640,7 @@ area *area_copy(area *a)
 {
     area *narea;
 
-    assert(a != NULL);
+    g_assert(a != NULL);
     narea = area_new(a->start_x, a->start_y, a->size_x, a->size_y);
 
     for (int y = 0; y < a->size_y; y++)
@@ -659,7 +659,7 @@ area *area_copy(area *a)
 
 void area_destroy(area *a)
 {
-    assert(a != NULL);
+    g_assert(a != NULL);
 
     for (int y = 0; y < a->size_y; y++)
         g_free(a->area[y]);
@@ -671,8 +671,8 @@ void area_destroy(area *a)
 
 area *area_add(area *a, area *b)
 {
-    assert (a != NULL && b != NULL);
-    assert (a->size_x == b->size_x && a->size_y == b->size_y);
+    g_assert (a != NULL && b != NULL);
+    g_assert (a->size_x == b->size_x && a->size_y == b->size_y);
 
     for (int y = 0; y < a->size_y; y++)
     {
@@ -694,7 +694,7 @@ area *area_flood(area *obstacles, int start_x, int start_y)
 {
     area *flood = NULL;
 
-    assert (obstacles != NULL && area_point_valid(obstacles, start_x, start_y));
+    g_assert (obstacles != NULL && area_point_valid(obstacles, start_x, start_y));
 
     flood = area_new(obstacles->start_x, obstacles->start_y,
                      obstacles->size_x, obstacles->size_y);
@@ -708,13 +708,13 @@ area *area_flood(area *obstacles, int start_x, int start_y)
 
 void area_point_set(area *a, int x, int y)
 {
-    assert (a != NULL && area_point_valid(a, x, y));
+    g_assert (a != NULL && area_point_valid(a, x, y));
     a->area[y][x] = TRUE;
 }
 
 int area_point_get(area *a, int x, int y)
 {
-    assert (a != NULL);
+    g_assert (a != NULL);
 
     if (!area_point_valid(a, x, y))
         return FALSE;
@@ -724,13 +724,13 @@ int area_point_get(area *a, int x, int y)
 
 void area_point_del(area *a, int x, int y)
 {
-    assert (a != NULL && area_point_valid(a, x, y));
+    g_assert (a != NULL && area_point_valid(a, x, y));
     a->area[y][x] = FALSE;
 }
 
 int area_point_valid(area *a, int x, int y)
 {
-    assert (a != NULL);
+    g_assert (a != NULL);
     return ((x < a->size_x) && (x >= 0)) && ((y < a->size_y) && (y >= 0));
 }
 
@@ -738,7 +738,7 @@ void area_pos_set(area *a, position pos)
 {
     int x, y;
 
-    assert (a != NULL);
+    g_assert (a != NULL);
 
     x = X(pos) - a->start_x;
     y = Y(pos) - a->start_y;
@@ -750,7 +750,7 @@ int area_pos_get(area *a, position pos)
 {
     int x, y;
 
-    assert (a != NULL);
+    g_assert (a != NULL);
 
     x = X(pos) - a->start_x;
     y = Y(pos) - a->start_y;
@@ -762,7 +762,7 @@ void area_pos_del(area *a, position pos)
 {
     int x, y;
 
-    assert (a != NULL);
+    g_assert (a != NULL);
 
     x = X(pos) - a->start_x;
     y = Y(pos) - a->start_y;

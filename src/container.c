@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 
 #include "container.h"
 #include "display.h"
@@ -43,7 +43,7 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     display_inv_callback *callback;
     gboolean container_provided = (container == NULL);
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if (container == NULL)
     {
@@ -139,7 +139,7 @@ void container_item_add(player *p, inventory **inv, item *element)
     gboolean carried_container = FALSE;
     guint count = 0;
 
-    assert(p != NULL && element != NULL);
+    g_assert(p != NULL && element != NULL);
 
     if (inv == &nlarn->player_home)
     {
@@ -275,7 +275,7 @@ void container_item_unpack(player *p, inventory **inv, item *element)
     gchar *desc;
     guint count = 0;
 
-    assert(p != NULL && inv != NULL && element != NULL);
+    g_assert(p != NULL && inv != NULL && element != NULL);
 
     if (element->count > 1)
     {
@@ -342,7 +342,7 @@ void container_item_unpack(player *p, inventory **inv, item *element)
 
 int container_move_content(player *p __attribute__((unused)), inventory **inv, inventory **new_inv)
 {
-    assert(inv != NULL);
+    g_assert(inv != NULL);
 
     item *it;
     guint count = 0;

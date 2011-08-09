@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <stdlib.h>
 
 #include "container.h"
@@ -352,7 +352,7 @@ char *map_dump(map *m, position ppos)
 
 void map_destroy(map *m)
 {
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     /* destroy spheres on this level */
     g_ptr_array_foreach(nlarn->spheres, (GFunc)map_sphere_destroy, m);
@@ -392,7 +392,7 @@ position map_find_space_in(map *m,
     position pos;
     int count, iteration = 0;
 
-    assert (m != NULL && element > LE_NONE && element < LE_MAX);
+    g_assert (m != NULL && element > LE_NONE && element < LE_MAX);
 
     X(pos) = rand_m_n(where.x1, where.x2);
     Y(pos) = rand_m_n(where.y1, where.y2);
@@ -453,7 +453,7 @@ position map_find_sobject_in(map *m, map_sobject_t sobject, rectangle rect)
 {
     position pos;
 
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     Z(pos) = m->nlevel;
 
@@ -470,7 +470,7 @@ position map_find_sobject(map *m, map_sobject_t sobject)
 {
     position pos;
 
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     Z(pos) = m->nlevel;
 
@@ -488,7 +488,7 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
 {
     map_tile *tile;
 
-    assert(m != NULL && element > LE_NONE && element < LE_MAX);
+    g_assert(m != NULL && element > LE_NONE && element < LE_MAX);
 
     /* if the position is invalid it is invalid for the map as well */
     if (!pos_valid(pos))
@@ -657,7 +657,7 @@ int map_pos_is_visible(map *m, position s, position t)
 map_path *map_find_path(map *m, position start, position goal,
                         map_element_t element)
 {
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     map_path *path;
     map_path_element *curr, *next;
@@ -755,7 +755,7 @@ map_path *map_find_path(map *m, position start, position goal,
 
 void map_path_destroy(map_path *path)
 {
-    assert(path != NULL);
+    g_assert(path != NULL);
 
     /* cleanup open list */
     for (guint idx = 0; idx < path->open->len; idx++)
@@ -783,7 +783,7 @@ area *map_get_obstacles(map *m, position center, int radius)
     position pos;
     int x, y;
 
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     if (!pos_valid(center))
     {
@@ -818,7 +818,7 @@ void map_set_tiletype(map *m, area *ar, map_tile_t type, guint8 duration)
     position pos;
     int x, y;
 
-    assert (m != NULL && ar != NULL);
+    g_assert (m != NULL && ar != NULL);
 
     position center;
     X(center) = ar->start_x + ar->size_x / 2;
@@ -860,7 +860,7 @@ void map_set_tiletype(map *m, area *ar, map_tile_t type, guint8 duration)
 
 damage *map_tile_damage(map *m, position pos, gboolean flying)
 {
-    assert (m != NULL && pos_valid(pos));
+    g_assert (m != NULL && pos_valid(pos));
 
     switch (map_tiletype_at(m, pos))
     {
@@ -893,7 +893,7 @@ char *map_pos_examine(position pos)
     const char *where;
     GString *desc = g_string_new(NULL);
 
-    assert(pos_valid(pos));
+    g_assert(pos_valid(pos));
 
     if (pos_identical(pos, nlarn->p->pos))
         where = "here";
@@ -977,7 +977,7 @@ char *map_pos_examine(position pos)
 
 monster *map_get_monster_at(map *m, position pos)
 {
-    assert(m != NULL && m->nlevel == Z(pos) && pos_valid(pos));
+    g_assert(m != NULL && m->nlevel == Z(pos) && pos_valid(pos));
 
     gpointer mid = m->grid[Y(pos)][X(pos)].monster;
     return (mid != NULL) ? game_monster_get(nlarn, mid) : NULL;
@@ -988,7 +988,7 @@ void map_fill_with_life(map *m)
     position pos;
     guint new_monster_count;
 
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     new_monster_count = rand_1n(14 + m->nlevel);
 
@@ -1027,7 +1027,7 @@ void map_fill_with_life(map *m)
 
 gboolean map_is_exit_at(map *m, position pos)
 {
-    assert (m != NULL && pos_valid(pos));
+    g_assert (m != NULL && pos_valid(pos));
 
     switch (map_sobject_at(m, pos))
     {
@@ -1051,7 +1051,7 @@ void map_timer(map *m)
     position pos;
     item_erosion_type erosion;
 
-    assert (m != NULL);
+    g_assert (m != NULL);
 
     Z(pos) = m->nlevel;
 
@@ -1110,7 +1110,7 @@ char map_get_door_glyph(map *m, position pos)
 {
     position n, e, s, w;
 
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
 
     n = pos_move(pos, GD_NORTH);
     e = pos_move(pos, GD_EAST);
@@ -1351,7 +1351,7 @@ static void map_fill_with_traps(map *m)
 {
     gboolean trapdoor = FALSE;
 
-    assert(m != NULL);
+    g_assert(m != NULL);
 
     /* Trapdoor cannot be placed in the last dungeon map and the last vulcano map */
     trapdoor = (!is_dungeon_bottom(m->nlevel) && !is_volcano_bottom(m->nlevel));
@@ -1372,7 +1372,7 @@ static void map_make_maze(map *m, int treasure_room)
     rectangle **rooms = NULL;
     gboolean want_monster = FALSE;
 
-    assert (m != NULL);
+    g_assert (m != NULL);
 
     Z(pos) = m->nlevel;
 
@@ -2142,7 +2142,7 @@ static int map_path_cost(map_path_element* element, position target)
 static map_path_element *map_path_element_in_list(map_path_element* el,
                                                   GPtrArray *list)
 {
-    assert(el != NULL && list != NULL);
+    g_assert(el != NULL && list != NULL);
 
     for (guint idx = 0; idx < list->len; idx++)
     {

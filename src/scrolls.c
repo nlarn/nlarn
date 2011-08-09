@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <stdlib.h>
 
 #include "display.h"
@@ -102,7 +102,7 @@ static const char *_scroll_desc[ST_MAX - 1] =
 
 char *scroll_desc(int scroll_id)
 {
-    assert(scroll_id > ST_NONE && scroll_id < ST_MAX);
+    g_assert(scroll_id > ST_NONE && scroll_id < ST_MAX);
     return (char *)_scroll_desc[nlarn->scroll_desc_mapping[scroll_id - 1]];
 }
 
@@ -257,7 +257,7 @@ static int scroll_with_effect(struct player *p, item *r_scroll)
 {
     effect *eff;
 
-    assert(p != NULL && r_scroll != NULL);
+    g_assert(p != NULL && r_scroll != NULL);
 
     eff = effect_new(scroll_effect(r_scroll));
     // Blessed scrolls last longer.
@@ -295,7 +295,7 @@ static int scroll_annihilate(struct player *p, item *r_scroll __attribute__((unu
     monster *m;
     map *cmap = game_map(nlarn, Z(p->pos));
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     obsmap = map_get_obstacles(cmap, p->pos, 2);
     blast = area_new_circle_flooded(p->pos, 2, obsmap);
@@ -341,7 +341,7 @@ static int scroll_annihilate(struct player *p, item *r_scroll __attribute__((unu
 
 static int scroll_create_artefact(player *p, item *r_scroll)
 {
-    assert(p != NULL && r_scroll != NULL);
+    g_assert(p != NULL && r_scroll != NULL);
 
     const int magic_item_type[] = { IT_AMULET, IT_BOOK, IT_POTION, IT_SCROLL };
     const int type = magic_item_type[rand_0n(4)];
@@ -415,7 +415,7 @@ static int scroll_enchant_armour(player *p, item *r_scroll)
 {
     item **armour;
 
-    assert(p != NULL && r_scroll != NULL);
+    g_assert(p != NULL && r_scroll != NULL);
 
     /* get a random piece of armour to enchant */
     /* try to get one not already fully enchanted */
@@ -457,7 +457,7 @@ static int scroll_enchant_armour(player *p, item *r_scroll)
 
 static int scroll_enchant_weapon(player *p, item *r_scroll)
 {
-    assert(p != NULL && r_scroll != NULL);
+    g_assert(p != NULL && r_scroll != NULL);
 
     if (p->eq_weapon)
     {
@@ -497,7 +497,7 @@ static int scroll_gem_perfection(player *p, item *r_scroll)
 {
     item *it;
 
-    assert(p != NULL && r_scroll != NULL);
+    g_assert(p != NULL && r_scroll != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_gems) == 0)
     {
@@ -542,7 +542,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
     monster_t which = MT_NONE;
     GString *msg = g_string_new(NULL);
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     if (!player_item_known(p, r_scroll))
     {
@@ -619,7 +619,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
         g_string_free(msg, TRUE);
 
         which -= 'a';
-        assert(which < found);
+        g_assert(which < found);
 
         which = candidates[which];
     }
@@ -643,7 +643,7 @@ static int scroll_heal_monster(player *p, item *r_scroll __attribute__((unused))
     int count = 0;
     monster *m;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     mlist = g_hash_table_get_values(nlarn->monsters);
 
@@ -678,7 +678,7 @@ static int scroll_identify(player *p, item *r_scroll)
 {
     item *it;
 
-    assert(p != NULL && r_scroll != NULL);
+    g_assert(p != NULL && r_scroll != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_unid) == 0)
     {
@@ -740,7 +740,7 @@ int scroll_mapping(player *p, item *r_scroll)
     map *m;
 
     /* scroll can be null as I use this to fake a known level */
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     m = game_map(nlarn, Z(p->pos));
     Z(pos) = Z(p->pos);
@@ -771,7 +771,7 @@ int scroll_mapping(player *p, item *r_scroll)
 
 static int scroll_remove_curse(player *p, item *r_scroll)
 {
-    assert(p != NULL && r_scroll != NULL);
+    g_assert(p != NULL && r_scroll != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_cursed) == 0)
     {
@@ -833,7 +833,7 @@ static int scroll_remove_curse(player *p, item *r_scroll)
 
 static int scroll_spell_extension(player *p, item *r_scroll)
 {
-    assert(p != NULL && r_scroll != NULL);
+    g_assert(p != NULL && r_scroll != NULL);
 
     /* return early if no spells memorised */
     if (p->known_spells->len == 0)
@@ -864,7 +864,7 @@ static int scroll_teleport(player *p, item *r_scroll)
 {
     guint nlevel;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     if (r_scroll->blessed)
     {
@@ -899,7 +899,7 @@ static int scroll_timewarp(player *p, item *r_scroll)
     gint turns;      /* number of turns */
     guint idx = 0;   /* position inside player's effect list */
 
-    assert(p != NULL && r_scroll != NULL);
+    g_assert(p != NULL && r_scroll != NULL);
 
     turns = (rand_1n(1000) - 850);
 

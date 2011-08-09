@@ -18,7 +18,6 @@
 
 /* $Id$ */
 
-#include <assert.h>
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
@@ -271,7 +270,7 @@ gboolean player_assign_bonus_stats(player *p, char *preset)
 
 void player_destroy(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     /* release spells */
     while ((p->known_spells)->len > 0)
@@ -749,7 +748,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     guint idx = 0;
     char *question = NULL, *description = NULL;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     /* do do nothing if there is nothing to */
     if (turns == 0) return FALSE;
@@ -1002,7 +1001,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     effect *ef = NULL;
     char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     /* check for life protection */
     if ((cause_type < PD_STUCK) && (ef = player_effect_get(p, ET_LIFE_PROTECTION)))
@@ -1511,7 +1510,7 @@ gint64 player_calc_score(player *p, int won)
 {
     gint64 score = 0;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     /* money */
     score = player_get_gold(p) + p->bank_account - p->outstanding_taxes;
@@ -1585,7 +1584,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     map_sobject_t so;   /* stationary object on target tile (if any) */
     gboolean move_possible = FALSE;
 
-    assert(p != NULL && dir > GD_NONE && dir < GD_MAX);
+    g_assert(p != NULL && dir > GD_NONE && dir < GD_MAX);
 
     if (!player_movement_possible(p))
         return 0;
@@ -1869,7 +1868,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     position pos;
     monster *m;
 
-    assert(p != NULL && l != NULL);
+    g_assert(p != NULL && l != NULL);
 
     /* store the last turn player has been on this map */
     game_map(nlarn, Z(p->pos))->visited = game_turn(nlarn);
@@ -1957,7 +1956,7 @@ item **player_get_random_armour(player *p, int enchantable)
     GPtrArray *equipped_armour;
     item **armour = NULL;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     equipped_armour = g_ptr_array_new();
 
@@ -1990,7 +1989,7 @@ void player_pickup(player *p)
     GPtrArray *callbacks = NULL;
     display_inv_callback *callback = NULL;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     inv = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
 
@@ -2042,7 +2041,7 @@ void player_autopickup(player *p)
     int other_item_id     = -1;
     gboolean did_pickup   = FALSE;
 
-    assert (p != NULL && map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos));
+    g_assert (p != NULL && map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos));
 
     /* if the player is floating above the ground auto-pickup does not work.. */
     if (player_effect(p, ET_LEVITATION))
@@ -2108,7 +2107,7 @@ void player_autopickup_show(player *p)
     GString *msg;
     int count = 0;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     msg = g_string_new(NULL);
 
@@ -2143,7 +2142,7 @@ void player_level_gain(player *p, int count)
     int base;
     const char *desc_orig, *desc_new;
 
-    assert(p != NULL && count > 0);
+    g_assert(p != NULL && count > 0);
 
     /* experience level 100 is the end of the career */
     if (p->level == 100)
@@ -2194,7 +2193,7 @@ void player_level_lose(player *p, int count)
 {
     int base;
 
-    assert(p != NULL && count > 0);
+    g_assert(p != NULL && count > 0);
 
     p->level -= count;
     log_add_entry(nlarn->log, "You return to experience level %d...", p->level);
@@ -2231,7 +2230,7 @@ void player_exp_gain(player *p, int count)
 
     int numlevels = 0;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
     p->experience += count;
 
     if (p->stats.max_xp < p->experience)
@@ -2248,7 +2247,7 @@ void player_exp_lose(player *p, int count)
 {
     int numlevels = 0;
 
-    assert(p != NULL && count > 0);
+    g_assert(p != NULL && count > 0);
     p->experience -= count;
 
     while ((player_lvl_exp[p->level - 1 - numlevels]) > p->experience)
@@ -2261,7 +2260,7 @@ void player_exp_lose(player *p, int count)
 
 int player_hp_gain(player *p, int count)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     p->hp += count;
     if (p->hp > player_get_hp_max(p))
@@ -2272,7 +2271,7 @@ int player_hp_gain(player *p, int count)
 
 int player_hp_lose(player *p, int count, player_cod cause_type, int cause)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     p->hp -= count;
 
@@ -2291,7 +2290,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     int hp_orig;
     guint effects_count;
 
-    assert(p != NULL && dam != NULL);
+    g_assert(p != NULL && dam != NULL);
 
     if (dam->dam_origin.ot == DAMO_MONSTER)
     {
@@ -2579,7 +2578,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
 int player_hp_max_gain(player *p, int count)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     p->hp_max += count;
     /* do _NOT_ increase hp */
@@ -2589,7 +2588,7 @@ int player_hp_max_gain(player *p, int count)
 
 int player_hp_max_lose(player *p, int count)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     p->hp_max -= count;
 
@@ -2604,7 +2603,7 @@ int player_hp_max_lose(player *p, int count)
 
 int player_mp_gain(player *p, int count)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     p->mp += count;
     if (p->mp > player_get_mp_max(p))
@@ -2615,7 +2614,7 @@ int player_mp_gain(player *p, int count)
 
 int player_mp_lose(player *p, int count)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     p->mp -= count;
     if (p->mp < 0)
@@ -2626,7 +2625,7 @@ int player_mp_lose(player *p, int count)
 
 int player_mp_max_gain(player *p, int count)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     p->mp_max += count;
     /* do _NOT_ increase mp */
@@ -2636,7 +2635,7 @@ int player_mp_max_gain(player *p, int count)
 
 int player_mp_max_lose(player *p, int count)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     p->mp_max -= count;
 
@@ -2651,7 +2650,7 @@ int player_mp_max_lose(player *p, int count)
 
 effect *player_effect_add(player *p, effect *e)
 {
-    assert(p != NULL && e != NULL);
+    g_assert(p != NULL && e != NULL);
 
     /* one-time effects are handled here */
     if (e->turns == 1)
@@ -2813,7 +2812,7 @@ effect *player_effect_add(player *p, effect *e)
 
 void player_effects_add(player *p, GPtrArray *effects)
 {
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     /* if effects is NULL */
     if (!effects) return;
@@ -2830,7 +2829,7 @@ int player_effect_del(player *p, effect *e)
 {
     int result, str_orig;
 
-    assert(p != NULL && e != NULL && e->type > ET_NONE && e->type < ET_MAX);
+    g_assert(p != NULL && e != NULL && e->type > ET_NONE && e->type < ET_MAX);
 
     str_orig = player_get_str(p);
 
@@ -2857,7 +2856,7 @@ int player_effect_del(player *p, effect *e)
 
 void player_effects_del(player *p, GPtrArray *effects)
 {
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     /* if effects is NULL */
     if (!effects) return;
@@ -2872,13 +2871,13 @@ void player_effects_del(player *p, GPtrArray *effects)
 
 effect *player_effect_get(player *p, effect_t et)
 {
-    assert(p != NULL && et > ET_NONE && et < ET_MAX);
+    g_assert(p != NULL && et > ET_NONE && et < ET_MAX);
     return effect_get(p->effects, et);
 }
 
 int player_effect(player *p, effect_t et)
 {
-    assert(p != NULL && et > ET_NONE && et < ET_MAX);
+    g_assert(p != NULL && et > ET_NONE && et < ET_MAX);
     return effect_query(p->effects, et);
 }
 
@@ -2907,7 +2906,7 @@ int player_inv_display(player *p)
     GPtrArray *callbacks;
     display_inv_callback *callback;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     if (inv_length(p->inventory) == 0)
     {
@@ -3057,7 +3056,7 @@ void player_inv_weight_recalc(inventory *inv, item *it __attribute__((unused)))
 
     player *p;
 
-    assert (inv != NULL);
+    g_assert (inv != NULL);
 
     p = (player *)inv->owner;       /* make shortcut */
     pack_weight = inv_weight(inv);  /* calculate inventory weight */
@@ -3248,7 +3247,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
     int atime = 0;        /* time the desired action takes */
     gchar *desc = NULL;   /* description of item being equipped */
 
-    assert(p != NULL && it != NULL);
+    g_assert(p != NULL && it != NULL);
 
     /* the idea behind the time values: one turn to take one item off,
        one turn to get the item out of the pack */
@@ -3445,7 +3444,7 @@ void player_item_unequip_wrapper(player *p, inventory **inv, item *it)
 
 void player_item_unequip(player *p, inventory **inv __attribute__((unused)), item *it, int forced)
 {
-    assert(p != NULL && it != NULL);
+    g_assert(p != NULL && it != NULL);
 
     /* the idea behind the time values: one turn to take one item off,
        one turn to get the item out of the pack */
@@ -3630,7 +3629,7 @@ void player_item_unequip(player *p, inventory **inv __attribute__((unused)), ite
                 wslot = &(p->eq_sweapon);
 
             /* wslot mustn't be NULL or there is something seriously wrong */
-            assert(wslot != NULL);
+            g_assert(wslot != NULL);
 
             if (forced || !(*wslot)->cursed)
             {
@@ -3668,7 +3667,7 @@ void player_item_unequip(player *p, inventory **inv __attribute__((unused)), ite
 /* silly filter to get containers */
 int player_item_is_container(player *p __attribute__((unused)), item *it)
 {
-    assert(it != NULL && it->type < IT_MAX);
+    g_assert(it != NULL && it->type < IT_MAX);
 
     return (it->type == IT_CONTAINER);
 }
@@ -3676,7 +3675,7 @@ int player_item_is_container(player *p __attribute__((unused)), item *it)
 /* silly filter to check if item can be put into a container */
 int player_item_can_be_added_to_container(player *p, item *it)
 {
-    assert(p != NULL && it != NULL && it->type < IT_MAX);
+    g_assert(p != NULL && it != NULL && it->type < IT_MAX);
 
     if (it->type == IT_CONTAINER)
     {
@@ -3716,7 +3715,7 @@ int player_item_can_be_added_to_container(player *p, item *it)
 
 int player_item_is_equipped(player *p, item *it)
 {
-    assert(p != NULL && it != NULL);
+    g_assert(p != NULL && it != NULL);
 
     if (!item_is_equippable(it->type))
         return FALSE;
@@ -3762,7 +3761,7 @@ int player_item_is_equipped(player *p, item *it)
 
 int player_item_is_equippable(player *p, item *it)
 {
-    assert(p != NULL && it != NULL);
+    g_assert(p != NULL && it != NULL);
 
     if (!item_is_equippable(it->type))
         return FALSE;
@@ -3835,19 +3834,19 @@ int player_item_is_equippable(player *p, item *it)
 
 int player_item_is_usable(player *p __attribute__((unused)), item *it)
 {
-    assert(it != NULL);
+    g_assert(it != NULL);
     return item_is_usable(it->type);
 }
 
 int player_item_is_dropable(player *p, item *it)
 {
-    assert(p != NULL && it != NULL);
+    g_assert(p != NULL && it != NULL);
     return !player_item_is_equipped(p, it);
 }
 
 int player_item_is_damaged(player *p __attribute__((unused)), item *it)
 {
-    assert(it != NULL);
+    g_assert(it != NULL);
 
     if (it->corroded) return TRUE;
     if (it->burnt) return TRUE;
@@ -3858,7 +3857,7 @@ int player_item_is_damaged(player *p __attribute__((unused)), item *it)
 
 int player_item_is_affordable(player *p, item *it)
 {
-    assert(p != NULL && it != NULL);
+    g_assert(p != NULL && it != NULL);
 
     return ((item_price(it) <= player_get_gold(p))
             || (item_price(it) <= p->bank_account));
@@ -3866,7 +3865,7 @@ int player_item_is_affordable(player *p, item *it)
 
 int player_item_is_sellable(player *p, item *it)
 {
-    assert(p != NULL && it != NULL);
+    g_assert(p != NULL && it != NULL);
 
     return (!player_item_is_equipped(p, it));
 }
@@ -3879,7 +3878,7 @@ int player_item_is_identifiable(player *p, item *it)
 /* determine if item type is known */
 int player_item_known(player *p, item *it)
 {
-    assert(p != NULL && it != NULL && it->type < IT_MAX);
+    g_assert(p != NULL && it != NULL && it->type < IT_MAX);
 
     switch (it->type)
     {
@@ -3913,7 +3912,7 @@ int player_item_identified(player *p, item *it)
 {
     gboolean known = FALSE;
 
-    assert(p != NULL && it != NULL);
+    g_assert(p != NULL && it != NULL);
 
     /* some items are always identified */
     if (!item_is_identifyable(it->type))
@@ -3949,7 +3948,7 @@ char *player_item_identified_list(player *p)
         IT_SCROLL,
     };
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     list = g_string_new(NULL);
     it = item_new(type_ids[1], 1);
@@ -4012,7 +4011,7 @@ char *player_item_identified_list(player *p)
 
 void player_item_identify(player *p, inventory **inv, item *it)
 {
-    assert(p != NULL && it != NULL);
+    g_assert(p != NULL && it != NULL);
 
     /* don't need that parameter */
     inv = NULL;
@@ -4052,7 +4051,7 @@ void player_item_use(player *p, inventory **inv __attribute__((unused)), item *i
 {
     item_usage_result result;
 
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     /* hide windows */
     display_windows_hide();
@@ -4162,7 +4161,7 @@ void player_item_drop(player *p, inventory **inv, item *it)
     guint count = 0;
     gboolean split = FALSE;
 
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     if (player_item_is_equipped(p, it))
         return;
@@ -4268,7 +4267,7 @@ void player_read(player *p)
 {
     item *it;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_legible) > 0)
     {
@@ -4290,7 +4289,7 @@ void player_quaff(player *p)
 {
     item *it;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_potions) > 0)
     {
@@ -4313,7 +4312,7 @@ void player_equip(player *p)
 {
     item *it;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_equippable) > 0)
     {
@@ -4335,7 +4334,7 @@ void player_take_off(player *p)
 {
     item *it;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_unequippable) > 0)
     {
@@ -4355,7 +4354,7 @@ void player_drop(player *p)
 {
     item *it;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_dropable) > 0)
     {
@@ -4374,7 +4373,7 @@ void player_drop(player *p)
 guint player_get_ac(player *p)
 {
     int ac = 0;
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     if (p->eq_boots != NULL)
         ac += armour_ac(p->eq_boots);
@@ -4403,7 +4402,7 @@ guint player_get_ac(player *p)
 int player_get_wc(player *p, monster *m)
 {
     int wc = 0;
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     if (p->eq_weapon != NULL)
     {
@@ -4429,7 +4428,7 @@ int player_get_wc(player *p, monster *m)
 
 int player_get_hp_max(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
     return p->hp_max
            + player_effect(p, ET_INC_HP_MAX)
            - player_effect(p, ET_DEC_HP_MAX);
@@ -4437,7 +4436,7 @@ int player_get_hp_max(player *p)
 
 int player_get_mp_max(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
     return p->mp_max
            + player_effect(p, ET_INC_MP_MAX)
            - player_effect(p, ET_DEC_MP_MAX);
@@ -4445,7 +4444,7 @@ int player_get_mp_max(player *p)
 
 int player_get_str(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
     return p->strength
            + player_effect(p, ET_INC_STR)
            - player_effect(p, ET_DEC_STR)
@@ -4455,7 +4454,7 @@ int player_get_str(player *p)
 
 int player_get_int(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
     return p->intelligence
            + player_effect(p, ET_INC_INT)
            - player_effect(p, ET_DEC_INT)
@@ -4465,7 +4464,7 @@ int player_get_int(player *p)
 
 int player_get_wis(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
     return p->wisdom
            + player_effect(p, ET_INC_WIS)
            - player_effect(p, ET_DEC_WIS)
@@ -4475,7 +4474,7 @@ int player_get_wis(player *p)
 
 int player_get_con(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
     return p->constitution
            + player_effect(p, ET_INC_CON)
            - player_effect(p, ET_DEC_CON)
@@ -4485,7 +4484,7 @@ int player_get_con(player *p)
 
 int player_get_dex(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
     return p->dexterity
            + player_effect(p, ET_INC_DEX)
            - player_effect(p, ET_DEC_DEX)
@@ -4495,7 +4494,7 @@ int player_get_dex(player *p)
 
 int player_get_speed(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
     return p->speed
            + player_effect(p, ET_SPEED)
            - player_effect(p, ET_SLOWNESS)
@@ -4507,7 +4506,7 @@ guint player_get_gold(player *p)
     guint gold = 0;
     item *i;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     /* gold stacks, thus there can only be one item in the inventory */
     if (inv_length_filtered(p->inventory, item_filter_gold))
@@ -4536,7 +4535,7 @@ guint player_get_gold(player *p)
 
 void player_remove_gold(player *p, guint amount)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     /* gold stacks, thus there can only be one item in the inventory */
     if (inv_length_filtered(p->inventory, item_filter_gold))
@@ -4586,13 +4585,13 @@ done:
 
 const char *player_get_level_desc(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
     return player_level_desc[p->level - 1];
 }
 
 void player_search(player *p)
 {
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     position pos = pos_move(p->pos, GD_NW);
     map *m = game_map(nlarn, Z(p->pos));
@@ -4848,7 +4847,7 @@ static guint player_item_pickup_ask(player *p, inventory **inv, item *it)
 
 static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean ask)
 {
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     gchar *buf;
     guint count = 0;
@@ -5062,7 +5061,7 @@ static char *player_death_description(game_score_t *score, int verbose)
     char *desc;
     GString *text;
 
-    assert(score != NULL);
+    g_assert(score != NULL);
 
     switch (score->cod)
     {
@@ -5224,7 +5223,7 @@ static char *player_death_description(game_score_t *score, int verbose)
 
 void calc_fighting_stats(player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     monster *m;
     gchar *desc = NULL;

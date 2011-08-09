@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 
 #include "display.h"
 #include "game.h"
@@ -36,7 +36,7 @@ int player_altar_desecrate(player *p)
     effect *e = NULL;
     map *current;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     current = game_map(nlarn, Z(p->pos));
 
@@ -84,7 +84,7 @@ int player_altar_pray(player *p)
     item **armour = NULL;
     map *current;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     current = game_map(nlarn, Z(p->pos));
 
@@ -506,7 +506,7 @@ int player_fountain_drink(player *p)
     int et = ET_NONE;
     map *pmap = game_map(nlarn, Z(p->pos));
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if (map_sobject_at(pmap, p->pos) == LS_DEADFOUNTAIN)
     {
@@ -660,7 +660,7 @@ int player_fountain_wash(player *p)
 {
     map *pmap = game_map(nlarn, Z(p->pos));
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if (map_sobject_at(pmap, p->pos) == LS_DEADFOUNTAIN)
     {
@@ -852,7 +852,7 @@ int player_throne_pillage(player *p)
     /* type of object at player's position */
     map_sobject_t ms = map_sobject_at(pmap, p->pos);
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if ((ms != LS_THRONE) && (ms != LS_THRONE2) && (ms != LS_DEADTHRONE))
     {
@@ -911,7 +911,7 @@ int player_throne_sit(player *p)
     map *pmap = game_map(nlarn, Z(p->pos));
     map_sobject_t st = map_sobject_at(pmap, p->pos);
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if ((st != LS_THRONE) && (st != LS_THRONE2) && (st != LS_DEADTHRONE))
     {

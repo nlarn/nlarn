@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 
 #include "display.h"
 #include "gems.h"
@@ -45,36 +45,36 @@ static const gem_data gems[GT_MAX] =
 
 const char *gem_name(item *gem)
 {
-    assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
     return gems[gem->id].name;
 }
 
 item_material_t gem_material(item *gem)
 {
-    assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
     return gems[gem->id].material;
 }
 
 int gem_colour(item *gem)
 {
-    assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
     return gems[gem->id].colour;
 }
 
 int gem_weight(item *gem)
 {
-    assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
     return (gem->bonus / 1000);
 }
 
 int gem_price(item *gem)
 {
-    assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
     return (gem->bonus * gems[gem->id].price);
 }
 
 int gem_size(item *gem)
 {
-    assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
     return gem->bonus;
 }

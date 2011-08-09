@@ -19,7 +19,7 @@
 /* $Id$ */
 
 #include <stdlib.h>
-#include <assert.h>
+#include <glib.h>
 
 #include "container.h"
 #include "display.h"
@@ -97,7 +97,7 @@ int building_bank(player *p)
                               "them. We cannot serve you at this time.  Sorry.\n\n" \
                               "We suggest you go to the LRS office and pay your taxes.";
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     if (Z(p->pos) == 0)
         text = g_string_new(msg_greet);
@@ -255,7 +255,7 @@ int building_dndstore(player *p)
                                "heart's content. Also be advised that if you " \
                                "break 'em, you pay for 'em.";
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     /* no business if player has outstanding taxes */
     if (p->outstanding_taxes)
@@ -347,7 +347,7 @@ int building_home(player *p)
                            "The doctor thinks that your daughter will recover " \
                            "in a few days.\n\nCongratulations!";
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     /* look for potion of cure dianthroritis in player's inventory */
     if (inv_length_filtered(p->inventory, item_filter_pcd))
@@ -481,7 +481,7 @@ int building_lrs(player *p)
     const char msg_taxes[] = "You presently owe %d gp in taxes.";
     const char msg_notax[] = "You do not owe us any taxes.";
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     text = g_string_new(msg_greet);
 
@@ -652,7 +652,7 @@ int building_school(player *p)
         { 10, -1,  "Commission a scroll", NULL }
     };
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     /* courses become more expensive with rising difficulty */
     price = 250 + (game_difficulty(nlarn) * 50);
@@ -784,7 +784,7 @@ int building_tradepost(player *p)
                                "If the items are badly damaged, we will pay " \
                                "only 10% of their new value.";
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     /* no business if player has outstanding taxes */
     if (p->outstanding_taxes)
@@ -1234,7 +1234,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
      * in the case of item stacks it might be a new item. */
     item *bought_itm = it;
 
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     price = item_price(it);
 
@@ -1342,7 +1342,7 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
 
     const char title[] = "Identify item";
 
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     price = 50 << game_difficulty(nlarn);
     name_unknown = item_describe(it, player_item_known(p, it), TRUE, TRUE);
@@ -1384,7 +1384,7 @@ static void building_item_repair(player *p, inventory **inv, item *it)
 
     const char title[] = "Repair item";
 
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     /* don't need that parameter */
     inv = NULL;
@@ -1432,7 +1432,7 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     char question[121];
     gchar *name;
 
-    assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     price = item_price(it);
 

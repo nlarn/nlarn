@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -41,7 +41,7 @@ static const luaL_reg display_functions[] =
 
 void wrap_display(lua_State *L)
 {
-    assert (L != NULL);
+    g_assert (L != NULL);
 
     struct
     {
@@ -115,7 +115,7 @@ static int wrap_get_yesno(lua_State *L)
 
 static int wrap_paint(lua_State *L __attribute__((unused)))
 {
-    assert(nlarn != NULL);
+    g_assert(nlarn != NULL);
 
     display_paint_screen(nlarn->p);
     return 0;

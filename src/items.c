@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <string.h>
 
 #include "amulets.h"
@@ -88,7 +88,7 @@ item *item_new(item_t item_type, int item_id)
     effect *eff = NULL;
     guint loops = 0;
 
-    assert(item_type > IT_NONE && item_type < IT_MAX);
+    g_assert(item_type > IT_NONE && item_type < IT_MAX);
 
     /* has to be zeroed or memcmp will fail */
     nitem = g_malloc0(sizeof(item));
@@ -232,7 +232,7 @@ item *item_new_random(item_t item_type, gboolean finetouch)
     int item_id = 0;
     int min_id = 1, max_id = 0;
 
-    assert(item_type > IT_NONE && item_type < IT_MAX);
+    g_assert(item_type > IT_NONE && item_type < IT_MAX);
 
     max_id = item_max_id(item_type);
 
@@ -271,7 +271,7 @@ item *item_new_by_level(item_t item_type, int num_level)
     int id_min, id_max;
     float variance, id_base, divisor;
 
-    assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
+    g_assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
 
     /* no amulets above dungeon level 6 */
     if ((item_type == IT_AMULET) && (num_level < 6))
@@ -316,7 +316,7 @@ item *item_new_by_level(item_t item_type, int num_level)
 
 item *item_new_finetouch(item *it)
 {
-    assert(it != NULL);
+    g_assert(it != NULL);
 
     /* maybe the item is blessed or cursed */
     if (it->type == IT_POTION && it->id == PO_WATER)
@@ -370,7 +370,7 @@ item *item_copy(item *original)
 {
     item *nitem;
 
-    assert(original != NULL);
+    g_assert(original != NULL);
 
     /* clone item */
     nitem = g_malloc0(sizeof(item));
@@ -404,7 +404,7 @@ item *item_split(item *original, guint32 count)
 {
     item *nitem;
 
-    assert(original != NULL && count < original->count);
+    g_assert(original != NULL && count < original->count);
 
     nitem = item_copy(original);
 
@@ -416,7 +416,7 @@ item *item_split(item *original, guint32 count)
 
 void item_destroy(item *it)
 {
-    assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     if (it->effects)
     {
@@ -616,7 +616,7 @@ gchar *item_describe(item *it, int known, int singular, int definite)
     char *add_info = NULL;
     char **add_infos = strv_new();
 
-    assert((it != NULL) && (it->type > IT_NONE) && (it->type < IT_MAX));
+    g_assert((it != NULL) && (it->type > IT_NONE) && (it->type < IT_MAX));
 
     /* collect additional information */
     if (it->blessed_known)
@@ -816,7 +816,7 @@ item_material_t item_material(item *it)
 {
     item_material_t material;
 
-    assert (it != NULL);
+    g_assert (it != NULL);
 
     switch (it->type)
     {
@@ -873,7 +873,7 @@ item_material_t item_material(item *it)
 
 guint item_base_price(item *it)
 {
-    assert (it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert (it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     guint price;
 
@@ -932,7 +932,7 @@ guint item_base_price(item *it)
 
 guint item_price(item *it)
 {
-    assert (it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert (it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     guint price = item_base_price(it);
 
@@ -976,7 +976,7 @@ int item_weight(item *it)
 {
     int weight = 0;
 
-    assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     switch (it->type)
     {
@@ -1039,7 +1039,7 @@ int item_weight(item *it)
 
 int item_colour(item *it)
 {
-    assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     switch (it->type)
     {
@@ -1083,7 +1083,7 @@ int item_colour(item *it)
 
 void item_effect_add(item *it, effect *e)
 {
-    assert (it != NULL && it->oid != NULL && e != NULL);
+    g_assert (it != NULL && it->oid != NULL && e != NULL);
 
     /* create list if not existant */
     if (!it->effects)
@@ -1103,7 +1103,7 @@ void item_effect_add(item *it, effect *e)
 
 void item_effect_del(item *it, effect *e)
 {
-    assert (it != NULL && e != NULL);
+    g_assert (it != NULL && e != NULL);
 
     /* del effect from list */
     effect_del(it->effects, e);
@@ -1121,7 +1121,7 @@ void item_effect_del(item *it, effect *e)
 
 int item_bless(item *it)
 {
-    assert (it != NULL && !it->cursed);
+    g_assert (it != NULL && !it->cursed);
 
     if (it->blessed)
         return FALSE;
@@ -1133,7 +1133,7 @@ int item_bless(item *it)
 
 int item_curse(item *it)
 {
-    assert (it != NULL && !it->blessed);
+    g_assert (it != NULL && !it->blessed);
 
     if (it->cursed)
         return FALSE;
@@ -1145,7 +1145,7 @@ int item_curse(item *it)
 
 int item_remove_blessing(item *it)
 {
-    assert (it != NULL && it->blessed);
+    g_assert (it != NULL && it->blessed);
 
     if (!it->blessed)
         return FALSE;
@@ -1158,7 +1158,7 @@ int item_remove_blessing(item *it)
 
 int item_remove_curse(item *it)
 {
-    assert (it != NULL && it->cursed);
+    g_assert (it != NULL && it->cursed);
 
     if (!it->cursed || it->blessed)
         return FALSE;
@@ -1174,7 +1174,7 @@ item *item_enchant(item *it)
     gpointer oid;
     effect *e;
 
-    assert(it != NULL);
+    g_assert(it != NULL);
 
     it->bonus++;
 
@@ -1222,7 +1222,7 @@ item *item_disenchant(item *it)
     gpointer oid;
     effect *e;
 
-    assert(it != NULL);
+    g_assert(it != NULL);
 
     if (it->bonus <= -3)
     {
@@ -1279,7 +1279,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     char *erosion_desc = NULL;
     gchar *item_desc = NULL;
 
-    assert(it != NULL);
+    g_assert(it != NULL);
 
     /* Don't ever destroy the potion of cure dianthroritis.
        This is not currently possible, but add a check in case that changes. */
@@ -1450,7 +1450,7 @@ int item_obtainable(item_t type, int id)
 
 char *item_detailed_description(item *it, gboolean known, gboolean shop)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
 
     GString *desc = g_string_new("");
 
@@ -1552,7 +1552,7 @@ inventory *inv_new(gconstpointer owner)
 
 void inv_destroy(inventory *inv, gboolean special)
 {
-    assert(inv != NULL);
+    g_assert(inv != NULL);
 
     while (inv_length(inv) > 0)
     {
@@ -1607,7 +1607,7 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
                        inv_callback_void post_add, inv_callback_bool pre_del,
                        inv_callback_void post_del)
 {
-    assert (inv != NULL);
+    g_assert (inv != NULL);
 
     inv-> pre_add  = pre_add;
     inv-> post_add = post_add;
@@ -1617,7 +1617,7 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
 
 int inv_add(inventory **inv, item *it)
 {
-    assert(inv != NULL && it != NULL && it->oid != NULL);
+    g_assert(inv != NULL && it != NULL && it->oid != NULL);
 
     /* create inventory if necessary */
     if (!(*inv))
@@ -1675,7 +1675,7 @@ item *inv_get(inventory *inv, guint idx)
 {
     gpointer oid = NULL;
 
-    assert (inv != NULL && idx < inv->content->len);
+    g_assert (inv != NULL && idx < inv->content->len);
     oid = g_ptr_array_index(inv->content, idx);
 
     return game_item_get(nlarn, oid);
@@ -1685,7 +1685,7 @@ item *inv_del(inventory **inv, guint idx)
 {
     item *itm;
 
-    assert(*inv != NULL && (*inv)->content != NULL && idx < inv_length(*inv));
+    g_assert(*inv != NULL && (*inv)->content != NULL && idx < inv_length(*inv));
 
     itm = inv_get(*inv, idx);
 
@@ -1716,7 +1716,7 @@ item *inv_del(inventory **inv, guint idx)
 
 int inv_del_element(inventory **inv, item *it)
 {
-    assert(*inv != NULL && (*inv)->content != NULL && it != NULL);
+    g_assert(*inv != NULL && (*inv)->content != NULL && it != NULL);
 
     if ((*inv)->pre_del)
     {
@@ -1745,7 +1745,7 @@ int inv_del_element(inventory **inv, item *it)
 
 int inv_del_oid(inventory **inv, gpointer oid)
 {
-    assert(*inv != NULL && (*inv)->content != NULL && oid != NULL);
+    g_assert(*inv != NULL && (*inv)->content != NULL && oid != NULL);
 
     if (!g_ptr_array_remove((*inv)->content, oid))
     {
@@ -1764,7 +1764,7 @@ int inv_del_oid(inventory **inv, gpointer oid)
 
 void inv_erode(inventory **inv, item_erosion_type iet, gboolean visible)
 {
-    assert(inv != NULL);
+    g_assert(inv != NULL);
 
     for (guint idx = 0; idx < inv_length(*inv); idx++)
     {
@@ -1780,7 +1780,7 @@ guint inv_length(inventory *inv)
 
 void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data)
 {
-    assert(inv != NULL && inv->content != NULL);
+    g_assert(inv != NULL && inv->content != NULL);
 
     g_ptr_array_sort_with_data(inv->content, compare_func, user_data);
 }
@@ -1867,87 +1867,87 @@ item *inv_get_filtered(inventory *inv, guint idx, int (*ifilter)(item *))
 
 int item_filter_container(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->type == IT_CONTAINER);
 }
 
 int item_filter_not_container(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->type != IT_CONTAINER);
 }
 
 int item_filter_gems(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->type == IT_GEM);
 }
 
 int item_filter_gold(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->type == IT_GOLD);
 }
 
 int item_filter_not_gold(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->type != IT_GOLD);
 }
 
 int item_filter_potions(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->type == IT_POTION);
 }
 
 int item_filter_legible(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->type == IT_SCROLL) || (it->type == IT_BOOK);
 }
 
 int item_filter_unid(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (!player_item_identified(nlarn->p, it));
 }
 
 int item_filter_cursed(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->cursed == TRUE);
 }
 
 int item_filter_cursed_or_unknown(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->cursed == TRUE
             || (it->blessed_known == FALSE && item_is_blessable(it->type)));
 }
 
 int item_filter_nonblessed(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->blessed == FALSE
             || (it->blessed_known == FALSE && item_is_blessable(it->type)));
 }
 
 int item_filter_pcd(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->type == IT_POTION && it->id == PO_CURE_DIANTHR);
 }
 
 int item_filter_blank_scroll(item *it)
 {
-    assert (it != NULL);
+    g_assert (it != NULL);
     return (it->type == IT_SCROLL && it->id == ST_BLANK);
 }
 
 static const char *item_desc_get(item *it, int known)
 {
-    assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+    g_assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     switch (it->type)
     {

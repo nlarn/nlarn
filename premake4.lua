@@ -77,7 +77,7 @@ solution "NLarn"
       flags { "Symbols", "ExtraWarnings" }
 
     configuration "Release"
-      defines { "NDEBUG" }
+      defines { "G_DISABLE_ASSERT" }
       flags { "Optimize" }
 
     configuration "bsd"

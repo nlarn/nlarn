@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 
 #include "display.h"
 #include "game.h"
@@ -104,13 +104,13 @@ potion_obfuscation[PO_MAX - 1] =
 
 char *potion_desc(int potion_id)
 {
-    assert(potion_id > PO_NONE && potion_id < PO_MAX);
+    g_assert(potion_id > PO_NONE && potion_id < PO_MAX);
     return (char *)potion_obfuscation[nlarn->potion_desc_mapping[potion_id - 1]].desc;
 }
 
 int potion_colour(int potion_id)
 {
-    assert(potion_id > PO_NONE && potion_id < PO_MAX);
+    g_assert(potion_id > PO_NONE && potion_id < PO_MAX);
     return potion_obfuscation[nlarn->potion_desc_mapping[potion_id - 1]].colour;
 }
 
@@ -314,7 +314,7 @@ static int potion_with_effect(struct player *p, item *potion)
     int identified = TRUE;
     effect *eff;
 
-    assert(p != NULL && potion != NULL);
+    g_assert(p != NULL && potion != NULL);
 
     if (potion_effect(potion) > ET_NONE)
     {
@@ -351,7 +351,7 @@ static int potion_amnesia(player *p, item *potion __attribute__((unused)))
 {
     position pos;
 
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     /* set position's level to player's position */
     Z(pos) = Z(p->pos);
@@ -378,7 +378,7 @@ static int potion_detect_item(player *p, item *potion)
     int count = 0; /* count detected items */
     inventory *inv;
 
-    assert(p != NULL && potion != NULL);
+    g_assert(p != NULL && potion != NULL);
 
     Z(pos) = Z(p->pos);
     map *pmap = game_map(nlarn, Z(pos));
@@ -477,7 +477,7 @@ static int potion_detect_item(player *p, item *potion)
 
 static int potion_recovery(player *p, item *potion __attribute__((unused)))
 {
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     gboolean success = FALSE;
     effect *e;
@@ -504,7 +504,7 @@ static int potion_recovery(player *p, item *potion __attribute__((unused)))
 
 static int potion_holy_water(player *p, item *potion __attribute__((unused)))
 {
-    assert (p != NULL);
+    g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_nonblessed) == 0)
     {

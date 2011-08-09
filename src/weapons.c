@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 
 #include "display.h"
 #include "items.h"
@@ -84,7 +84,7 @@ static gboolean weapon_pos_hit(position pos, const damage_originator *damo,
 
 int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item *ammo)
 {
-    assert (p != NULL && m != NULL);
+    g_assert (p != NULL && m != NULL);
 
     const int to_hit = p->level
                        + max(0, player_get_dex(p) - 12)
@@ -106,7 +106,7 @@ int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item 
 
 int weapon_fire(struct player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     map *pmap = game_map(nlarn, Z(p->pos));
     position target;             /* the selected target */
@@ -218,7 +218,7 @@ int weapon_fire(struct player *p)
 
 void weapon_swap(struct player *p)
 {
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     item *pweapon = p->eq_weapon;
     item *sweapon = p->eq_sweapon;
@@ -246,7 +246,7 @@ void weapon_swap(struct player *p)
 
 damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)
 {
-    assert (p != NULL && weapon != NULL && ammo != NULL);
+    g_assert (p != NULL && weapon != NULL && ammo != NULL);
 
     damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, 0, DAMO_PLAYER, p);
     dam->amount = weapon_damage(weapon) + ammo_damage(ammo);

@@ -18,7 +18,8 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
+
 #include "display.h"
 #include "effects.h"
 #include "game.h"
@@ -238,7 +239,7 @@ monster *monster_trap_trigger(monster *m)
     /* the trap */
     trap_t trap;
 
-    assert (m != NULL);
+    g_assert (m != NULL);
 
     trap = map_trap_at(monster_map(m), monster_pos(m));
 

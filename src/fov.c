@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <string.h>
 #include "fov.h"
 #include "game.h"
@@ -89,23 +89,23 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
 
 gboolean fov_get(fov *fv, position pos)
 {
-    assert (fv != NULL);
-    assert (pos_valid(pos));
+    g_assert (fv != NULL);
+    g_assert (pos_valid(pos));
 
     return fv->data[Y(pos)][X(pos)];
 }
 
 void fov_set(fov *fv, position pos, guchar visible)
 {
-    assert (fv != NULL);
-    assert (pos_valid(pos));
+    g_assert (fv != NULL);
+    g_assert (pos_valid(pos));
 
     fv->data[Y(pos)][X(pos)] = visible;
 }
 
 void fov_reset(fov *fv)
 {
-    assert (fv != NULL);
+    g_assert (fv != NULL);
 
     /* set fov_data to FALSE */
     memset(fv->data, 0, MAP_MAX_Y * MAP_MAX_X * sizeof(guchar));
@@ -160,7 +160,7 @@ GList *fov_get_visible_monsters(fov *fv)
 
 void fov_free(fov *fv)
 {
-    assert (fv != NULL);
+    g_assert (fv != NULL);
 
     /* free the allocated memory */
     g_hash_table_destroy(fv->mlist);

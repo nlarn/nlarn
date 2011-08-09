@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 
 #include "nlarn.h"
 #include "rings.h"
@@ -51,6 +51,6 @@ static const int ring_materials[RT_MAX - 1] =
 
 item_material_t ring_material(int ring_id)
 {
-    assert(ring_id > RT_NONE && ring_id < RT_MAX);
+    g_assert(ring_id > RT_NONE && ring_id < RT_MAX);
     return ring_materials[nlarn->ring_material_mapping[ring_id - 1]];
 }

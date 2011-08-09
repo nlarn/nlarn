@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@
 
 void wrap_monsters(lua_State *L)
 {
-    assert (L != NULL);
+    g_assert (L != NULL);
 
     struct
     {

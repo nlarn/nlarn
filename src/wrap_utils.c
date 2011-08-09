@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -34,7 +34,7 @@ static gboolean luaN_data_query(const char *table, guint idx, const char *attrib
 
 void wrap_utils(lua_State *L)
 {
-    assert (L != NULL);
+    g_assert (L != NULL);
 
     /* register constants */
     struct

@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <string.h>
 
 #include "game.h"
@@ -51,7 +51,7 @@ sphere *sphere_new(position pos, player *owner, int lifetime)
 
 void sphere_destroy(sphere *s, game *g)
 {
-    assert(s != NULL);
+    g_assert(s != NULL);
 
     g_ptr_array_remove_fast(g->spheres, s);
 
@@ -94,7 +94,7 @@ void sphere_move(sphere *s, game *g)
     monster *m;
     map *smap;
 
-    assert(s != NULL && g != NULL);
+    g_assert(s != NULL && g != NULL);
 
     /* reduce lifetime */
     s->lifetime--;
@@ -235,7 +235,7 @@ static void sphere_kill_monster(sphere *s, monster *m)
     monster *mret; /* monster returned by monster_damage_take */
     guint mexp;    /* xp for killing the monster */
 
-    assert(s != NULL && m != NULL);
+    g_assert(s != NULL && m != NULL);
 
     mexp = monster_exp(m);
 

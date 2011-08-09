@@ -18,7 +18,6 @@
 
 /* $Id$ */
 
-#include <assert.h>
 #include <glib.h>
 #include <lua.h>
 #include <lauxlib.h>
@@ -309,7 +308,7 @@ void game_init(int argc, char *argv[])
 
 int game_destroy(game *g)
 {
-    assert(g != NULL);
+    g_assert(g != NULL);
 
     /* everything must go */
     for (int i = 0; i < MAP_MAX; i++)
@@ -376,7 +375,7 @@ int game_save(game *g, const char *filename)
     char *fullname = NULL;
     display_window *win = NULL;
 
-    assert(g != NULL);
+    g_assert(g != NULL);
 
     /* if the display has been initialised, show a popup message */
     if (display_available())
@@ -554,7 +553,7 @@ GList *game_score_add(game *g, game_score_t *score)
 {
     GList *gs;
 
-    assert (g != NULL && score != NULL);
+    g_assert (g != NULL && score != NULL);
 
     gs = game_scores_load(g);
 
@@ -587,7 +586,7 @@ void game_scores_destroy(GList *gs)
 
 map *game_map(game *g, guint nmap)
 {
-    assert (g != NULL && nmap < MAP_MAX);
+    g_assert (g != NULL && nmap < MAP_MAX);
 
     return g->maps[nmap];
 }
@@ -596,7 +595,7 @@ void game_spin_the_wheel(game *g)
 {
     map *amap;
 
-    assert(g != NULL);
+    g_assert(g != NULL);
 
     /* add the player's speed to the player's movement points */
     nlarn->p->movement += player_get_speed(nlarn->p);
@@ -664,7 +663,7 @@ void game_spin_the_wheel(game *g)
 
 void game_remove_dead_monsters(game *g)
 {
-    assert (g != NULL);
+    g_assert (g != NULL);
 
     monster *m;
     while (g->dead_monsters->len > 0)
@@ -678,7 +677,7 @@ void game_remove_dead_monsters(game *g)
 
 gpointer game_item_register(game *g, item *it)
 {
-    assert (g != NULL && it != NULL);
+    g_assert (g != NULL && it != NULL);
 
     gpointer nkey = GUINT_TO_POINTER(++g->item_max_id);
     g_hash_table_insert(g->items, nkey, it);
@@ -688,21 +687,21 @@ gpointer game_item_register(game *g, item *it)
 
 void game_item_unregister(game *g, gpointer it)
 {
-    assert (g != NULL && it != NULL);
+    g_assert (g != NULL && it != NULL);
 
     g_hash_table_remove(g->items, it);
 }
 
 item *game_item_get(game *g, gpointer id)
 {
-    assert(g != NULL && id != NULL);
+    g_assert(g != NULL && id != NULL);
 
     return (item *)g_hash_table_lookup(g->items, id);
 }
 
 gpointer game_effect_register(game *g, effect *e)
 {
-    assert (g != NULL && e != NULL);
+    g_assert (g != NULL && e != NULL);
 
     gpointer nkey = GUINT_TO_POINTER(++g->effect_max_id);
     g_hash_table_insert(g->effects, nkey, e);
@@ -712,20 +711,20 @@ gpointer game_effect_register(game *g, effect *e)
 
 void game_effect_unregister(game *g, gpointer e)
 {
-    assert (g != NULL && e != NULL);
+    g_assert (g != NULL && e != NULL);
 
     g_hash_table_remove(g->effects, e);
 }
 
 effect *game_effect_get(game *g, gpointer id)
 {
-    assert(g != NULL && id != NULL);
+    g_assert(g != NULL && id != NULL);
     return (effect *)g_hash_table_lookup(g->effects, id);
 }
 
 gpointer game_monster_register(game *g, monster *m)
 {
-    assert (g != NULL && m != NULL);
+    g_assert (g != NULL && m != NULL);
 
     gpointer nkey = GUINT_TO_POINTER(++g->monster_max_id);
     g_hash_table_insert(g->monsters, nkey, m);
@@ -735,14 +734,14 @@ gpointer game_monster_register(game *g, monster *m)
 
 void game_monster_unregister(game *g, gpointer m)
 {
-    assert (g != NULL && m != NULL);
+    g_assert (g != NULL && m != NULL);
 
     g_hash_table_remove(g->monsters, m);
 }
 
 monster *game_monster_get(game *g, gpointer id)
 {
-    assert(g != NULL && id != NULL);
+    g_assert(g != NULL && id != NULL);
     return (monster *)g_hash_table_lookup(g->monsters, id);
 }
 
@@ -902,13 +901,13 @@ static gboolean game_load(gchar *filename)
 
     obj = cJSON_GetObjectItem(save, "amulet_created");
     size = cJSON_GetArraySize(obj);
-    assert(size == AM_MAX);
+    g_assert(size == AM_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->amulet_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "weapon_created");
     size = cJSON_GetArraySize(obj);
-    assert(size == WT_MAX);
+    g_assert(size == WT_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->weapon_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
@@ -918,37 +917,37 @@ static gboolean game_load(gchar *filename)
 
     obj = cJSON_GetObjectItem(save, "amulet_material_mapping");
     size = cJSON_GetArraySize(obj);
-    assert(size == AM_MAX - 1);
+    g_assert(size == AM_MAX - 1);
     for (int idx = 0; idx < size; idx++)
         nlarn->amulet_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "potion_desc_mapping");
     size = cJSON_GetArraySize(obj);
-    assert(size == PO_MAX - 1);
+    g_assert(size == PO_MAX - 1);
     for (int idx = 0; idx < size; idx++)
         nlarn->potion_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "ring_material_mapping");
     size = cJSON_GetArraySize(obj);
-    assert(size == RT_MAX - 1);
+    g_assert(size == RT_MAX - 1);
     for (int idx = 0; idx < size; idx++)
         nlarn->ring_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "scroll_desc_mapping");
     size = cJSON_GetArraySize(obj);
-    assert(size == ST_MAX - 1);
+    g_assert(size == ST_MAX - 1);
     for (int idx = 0; idx < size; idx++)
         nlarn->scroll_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "book_desc_mapping");
     size = cJSON_GetArraySize(obj);
-    assert(size == SP_MAX - 1);
+    g_assert(size == SP_MAX - 1);
     for (int idx = 0; idx < size; idx++)
         nlarn->book_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "monster_genocided");
     size = cJSON_GetArraySize(obj);
-    assert(size == MT_MAX);
+    g_assert(size == MT_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->monster_genocided[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
@@ -971,7 +970,7 @@ static gboolean game_load(gchar *filename)
     /* restore maps */
     obj = cJSON_GetObjectItem(save, "maps");
     size = cJSON_GetArraySize(obj);
-    assert(size == MAP_MAX);
+    g_assert(size == MAP_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->maps[idx] = map_deserialize(cJSON_GetArrayItem(obj, idx));
 
@@ -1043,7 +1042,7 @@ static gboolean game_load(gchar *filename)
 
 static void game_init_lua(game *g)
 {
-    assert (g != NULL);
+    g_assert (g != NULL);
 
     /* initialize Lua interpreter */
     nlarn->L = luaL_newstate();

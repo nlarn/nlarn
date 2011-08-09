@@ -18,12 +18,12 @@
 
 /* $Id$ */
 
-#include <assert.h>
 #include <curses.h>
+#include <ctype.h>
+#include <glib.h>
 #include <panel.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "display.h"
 #include "fov.h"
@@ -823,7 +823,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     /* curses attributes */
     int attrs;
 
-    assert(p != NULL && inv != NULL);
+    g_assert(p != NULL && inv != NULL);
 
     /* sort inventory by item type */
     if (show_price)
@@ -1251,7 +1251,7 @@ spell *display_spell_select(char *title, player *p)
     /* window caption */
     gchar *caption;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     /* buffer for spell code type ahead */
     char *code_buf = g_malloc0(sizeof(char) * 4);
@@ -3166,7 +3166,7 @@ static int display_window_move(display_window *dwin, int key)
 {
     gboolean need_refresh = TRUE;
 
-    assert (dwin != NULL);
+    g_assert (dwin != NULL);
 
     switch (key)
     {
@@ -3220,7 +3220,7 @@ static void display_window_update_title(display_window *dwin, const char *title)
 {
     int attrs; /* curses attributes */
 
-    assert (dwin != NULL && dwin->window != NULL);
+    g_assert (dwin != NULL && dwin->window != NULL);
 
     if (dwin->title)
     {
@@ -3259,7 +3259,7 @@ static void display_window_update_caption(display_window *dwin, char *caption)
 {
     int attrs; /* curses attributes */
 
-    assert (dwin != NULL && dwin->window != NULL);
+    g_assert (dwin != NULL && dwin->window != NULL);
 
     /* repaint line to overwrite previous captions */
     wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
@@ -3284,7 +3284,7 @@ static void display_window_update_arrow_up(display_window *dwin, gboolean on)
 {
     int attrs; /* curses attributes */
 
-    assert (dwin != NULL && dwin->window != NULL);
+    g_assert (dwin != NULL && dwin->window != NULL);
 
     if (on)
     {
@@ -3304,7 +3304,7 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
 {
     int attrs; /* curses attributes */
 
-    assert (dwin != NULL && dwin->window != NULL);
+    g_assert (dwin != NULL && dwin->window != NULL);
 
     if (on)
     {

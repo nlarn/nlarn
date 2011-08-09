@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <assert.h>
+#include <glib.h>
 #include <string.h>
 
 #include "defines.h"
@@ -372,7 +372,7 @@ spell *spell_new(int id)
 {
     spell *nspell;
 
-    assert(id > SP_NONE && id < SP_MAX);
+    g_assert(id > SP_NONE && id < SP_MAX);
 
     nspell = g_malloc0(sizeof(spell));
     nspell->id = id;
@@ -383,7 +383,7 @@ spell *spell_new(int id)
 
 void spell_destroy(spell *s)
 {
-    assert(s != NULL);
+    g_assert(s != NULL);
     g_free(s);
 }
 
@@ -452,7 +452,7 @@ int spell_sort(gconstpointer a, gconstpointer b)
 /* Knowledge of a spell and intelligence make casting easier. */
 static int spell_success_value(player *p, spell *sp)
 {
-    assert(p != NULL && sp != NULL);
+    g_assert(p != NULL && sp != NULL);
 
     if (player_get_int(p) < (3 * spell_level(sp)))
         return 0;
@@ -507,7 +507,7 @@ int spell_cast_previous(struct player *p)
 
 int spell_learn(player *p, guint spell_type)
 {
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+    g_assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
     if (!spell_known(p, spell_type))
     {
@@ -548,7 +548,7 @@ int spell_learn(player *p, guint spell_type)
 
 int spell_forget(player *p, guint spell_type)
 {
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+    g_assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
     for (guint idx = 0; idx < p->known_spells->len; idx++)
     {
@@ -565,7 +565,7 @@ int spell_forget(player *p, guint spell_type)
 
 int spell_known(player *p, guint spell_type)
 {
-    assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+    g_assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
 
     for (guint idx = 0; idx < p->known_spells->len; idx++)
     {
@@ -583,7 +583,7 @@ int spell_type_player(spell *s, struct player *p)
 {
     effect *e = NULL;
 
-    assert(s != NULL && p != NULL && (spell_type(s) == SC_PLAYER));
+    g_assert(s != NULL && p != NULL && (spell_type(s) == SC_PLAYER));
 
     /* check if the player is already affected by the effect */
     if ((e = player_effect_get(p, spell_effect(s))))
@@ -666,7 +666,7 @@ int spell_type_point(spell *s, struct player *p)
     char buffer[61];
     int amount = 0;
 
-    assert(s != NULL && p != NULL && (spell_type(s) == SC_POINT));
+    g_assert(s != NULL && p != NULL && (spell_type(s) == SC_POINT));
 
     g_snprintf(buffer, 60, "Select a target for %s.", spell_name(s));
 
@@ -771,7 +771,7 @@ int spell_type_point(spell *s, struct player *p)
 
     default:
         /* spell has an effect, add that to the monster */
-        assert(spell_effect(s) != ET_NONE);
+        g_assert(spell_effect(s) != ET_NONE);
 
         e = effect_new(spell_effect(s));
 
@@ -801,7 +801,7 @@ int spell_type_ray(spell *s, struct player *p)
     damage_originator damo = { DAMO_PLAYER, p };
     damage *dam = damage_new(DAM_NONE, ATT_MAGIC, 0, damo.ot, damo.originator);
 
-    assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
+    g_assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
 
     g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(s));
     target = display_get_position(p, buffer, TRUE, FALSE, 0, FALSE, TRUE);
@@ -859,7 +859,7 @@ int spell_type_flood(spell *s, struct player *p)
     int amount = 0;
     map_tile_t type = LT_NONE;
 
-    assert(s != NULL && p != NULL && (spell_type(s) == SC_FLOOD));
+    g_assert(s != NULL && p != NULL && (spell_type(s) == SC_FLOOD));
 
     g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(s));
     pos = display_get_position(p, buffer, FALSE, FALSE, 0, FALSE, TRUE);
@@ -924,7 +924,7 @@ int spell_type_blast(spell *s, struct player *p)
     damage *dam = damage_new(DAM_NONE, ATT_MAGIC, 0, DAMO_PLAYER, p);
     map *cmap = game_map(nlarn, Z(p->pos));
 
-    assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
+    g_assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
 
     switch (s->id)
     {
@@ -1027,7 +1027,7 @@ gboolean spell_create_sphere(spell *s, struct player *p)
     position pos;
     sphere *sph;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     pos = display_get_new_position(p, p->pos,
                                    "Where do you want to place the sphere?",
@@ -1052,7 +1052,7 @@ gboolean spell_cure_poison(struct player *p)
 {
     effect *eff = NULL;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     if ((eff = player_effect_get(p, ET_POISON)))
     {
@@ -1070,7 +1070,7 @@ gboolean spell_cure_blindness(struct player *p)
 {
     effect *eff = NULL;
 
-    assert(p != NULL);
+    g_assert(p != NULL);
 
     if ((eff = player_effect_get(p, ET_BLINDNESS)))
     {
@@ -1303,19 +1303,19 @@ gboolean spell_vaporize_rock(player *p)
 
 char *book_desc(int book_id)
 {
-    assert(book_id > SP_NONE && book_id < SP_MAX);
+    g_assert(book_id > SP_NONE && book_id < SP_MAX);
     return (char *)book_obfuscation[nlarn->book_desc_mapping[book_id - 1]].desc;
 }
 
 int book_weight(item *book)
 {
-    assert (book != NULL && book->type == IT_BOOK);
+    g_assert (book != NULL && book->type == IT_BOOK);
     return book_obfuscation[nlarn->book_desc_mapping[book->id - 1]].weight;
 }
 
 int book_colour(item *book)
 {
-    assert (book != NULL && book->type == IT_BOOK);
+    g_assert (book != NULL && book->type == IT_BOOK);
     return book_obfuscation[nlarn->book_desc_mapping[book->id - 1]].colour;
 }
 
@@ -1554,7 +1554,7 @@ static int spell_cast(player *p, spell *s)
 
 static void spell_print_success_message(spell *s, monster *m)
 {
-    assert(s != NULL && m != NULL);
+    g_assert(s != NULL && m != NULL);
 
     /* invisible monster -> no message */
     if (!monster_in_sight(m))
@@ -1572,7 +1572,7 @@ static void spell_print_success_message(spell *s, monster *m)
 
 static void spell_print_failure_message(spell *s, monster *m)
 {
-    assert(s != NULL && m != NULL);
+    g_assert(s != NULL && m != NULL);
 
     /* invisible monster -> no message */
     if (!monster_in_sight(m))
