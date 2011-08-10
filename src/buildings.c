@@ -1283,7 +1283,6 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     }
     else
     {
-        count = 1;
         name = item_describe(it, TRUE, TRUE, TRUE);
         g_snprintf(text, 80, "Do you want to buy %s for %d gold?", name, price);
         g_free(name);

@@ -3450,7 +3450,7 @@ void player_item_unequip(player *p, inventory **inv __attribute__((unused)), ite
        one turn to get the item out of the pack */
 
     /* item description */
-    gchar *desc = desc = item_describe(it, player_item_known(p, it), FALSE, TRUE);
+    gchar *desc = item_describe(it, player_item_known(p, it), FALSE, TRUE);
 
     switch (it->type)
     {
