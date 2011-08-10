@@ -173,6 +173,9 @@ int potion_throw(struct player *p)
         inv_del_element(&p->inventory, potion);
     }
 
+    /* mark the potion as fired */
+    potion->fired = TRUE;
+
     /* follow the trajectory of the potion */
     if (area_ray_trajectory(p->pos, target, &damo, potion_pos_hit, (gpointer)potion, NULL,
                             FALSE, item_glyph(potion->type), item_colour(potion), FALSE))

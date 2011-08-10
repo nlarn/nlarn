@@ -205,6 +205,9 @@ int weapon_fire(struct player *p)
         p->eq_quiver = NULL;
     }
 
+    /* mark the ammo as fired */
+    ammo->fired = TRUE;
+
     /* paint a ray to follow the path of the bullet */
     if (area_ray_trajectory(p->pos, target, &damo, weapon_pos_hit, weapon, ammo, FALSE,
                             item_glyph(ammo->type), item_colour(ammo), FALSE))

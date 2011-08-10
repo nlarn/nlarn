@@ -2053,7 +2053,7 @@ void player_autopickup(player *p)
     {
         item *i = inv_get(*floor, idx);
 
-        if (p->settings.auto_pickup[i->type])
+        if (p->settings.auto_pickup[i->type] || i->fired)
         {
             /* item type is set to be picked up */
             guint retval;
@@ -4885,6 +4885,11 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
         /* record the amound of gold as the item might be destroyed */
         gold_amount = it->count;
     }
+
+    /* Reset the fired flag. This has to be done befora adding the item to the
+       inventory as otherwise the item comparision would fail.
+       If picking up fails, the item will not be picked up automatically again. */
+    it->fired = FALSE;
 
     /* one turn to pick item up, one to stuff it into the pack */
     if (!player_make_move(p, 2, TRUE, "picking up %s", buf))
