@@ -71,13 +71,10 @@ solution "NLarn"
       defines { "WIN32_LEAN_AND_MEAN", "NOGDI" }
       links { "pdcurses", "lua" }
 
-    configuration "not windows"
-      includedirs { get_config("ncurses5-config", "--includedir") }
-      libdirs { get_config("ncurses5-config", "--libdir") }
-      links { "ncurses", "panel" }
-      
-      -- Debian and Ubuntu have a specific naming convention for the lua package
-      -- fortunately it can be configured with pkg-config
+    if not os.is("windows") then
+      -- Add configuration for Lua
+      -- Debian and Ubuntu have a specific naming convention for the lua
+      -- package; fortunately it can be configured with pkg-config
       if os.is("linux") and (get_linux_distribution() == "Debian"
           or get_linux_distribution() == "Ubuntu")
       then
@@ -90,6 +87,12 @@ solution "NLarn"
         libdirs { get_dirs("lib", "lua") }
       end
 
+      -- Add configuration for ncurses
+      includedirs { get_config("ncurses5-config", "--includedir") }
+      libdirs { get_config("ncurses5-config", "--libdir") }
+      links { "ncurses", "panel" }
+    end
+ 
     configuration { "gmake" }
       buildoptions { get_config("pkg-config", "--cflags glib-2.0") }
       linkoptions {  get_config("pkg-config", "--libs glib-2.0") }
