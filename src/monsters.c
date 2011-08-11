@@ -1361,7 +1361,8 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* player is invisible and monster tries to hit player */
-    if (player_effect(p, ET_INVISIBILITY) && !monster_flags(m, MF_INFRAVISION)
+    if (player_effect(p, ET_INVISIBILITY) && !(monster_flags(m, MF_INFRAVISION)
+                                               || monster_effect(m, ET_INFRAVISION))
             && chance(65))
     {
         if (monster_in_sight(m))
@@ -2095,6 +2096,7 @@ static gboolean monster_player_visible(monster *m)
     if (pos_distance(monster_pos(m), nlarn->p->pos) > monster_visrange)
         return FALSE;
 
+    /* check if the player is invisible and if the monster has infravision */
     if (player_effect(nlarn->p, ET_INVISIBILITY)
         && !(monster_flags(m, MF_INFRAVISION) || monster_effect(m, ET_INFRAVISION)))
         return FALSE;
@@ -2552,7 +2554,9 @@ static position monster_move_serve(monster *m, struct player *p)
 
     /* calculate the monster's fov */
     /* the monster gets a fov radius of 6 for now*/
-    fov_calculate(m->fov, monster_map(m), m->pos, 6, monster_flags(m, MF_INFRAVISION));
+    fov_calculate(m->fov, monster_map(m), m->pos, 6,
+                  monster_flags(m, MF_INFRAVISION)
+                  || monster_effect(m, ET_INFRAVISION));
 
     /* a good servant always knows the masters position */
     if (pos_distance(monster_pos(m), p->pos) > 5)
