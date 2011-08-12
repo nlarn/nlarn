@@ -3442,7 +3442,10 @@ void player_item_unequip_wrapper(player *p, inventory **inv, item *it)
     player_item_unequip(p, inv, it, FALSE);
 }
 
-void player_item_unequip(player *p, inventory **inv __attribute__((unused)), item *it, int forced)
+void player_item_unequip(player *p,
+                         inventory **inv __attribute__((unused)),
+                         item *it,
+                         gboolean forced)
 {
     g_assert(p != NULL && it != NULL);
 
@@ -3455,7 +3458,7 @@ void player_item_unequip(player *p, inventory **inv __attribute__((unused)), ite
     switch (it->type)
     {
     case IT_AMULET:
-        if (p->eq_amulet != NULL)
+        if (p->eq_amulet == it)
         {
             if (forced || !it->cursed)
             {
@@ -3488,7 +3491,7 @@ void player_item_unequip(player *p, inventory **inv __attribute__((unused)), ite
         break;
 
     case IT_AMMO:
-        if (p->eq_quiver != NULL)
+        if (p->eq_quiver == it)
         {
             if (!player_make_move(p, 2, TRUE, "taking %s out of the quiver", desc))
             {
@@ -3544,7 +3547,7 @@ void player_item_unequip(player *p, inventory **inv __attribute__((unused)), ite
             break;
         }
 
-        if ((aslot != NULL) && (*aslot != NULL))
+        if ((aslot != NULL) && (*aslot == it))
         {
             if (forced || !it->cursed)
             {

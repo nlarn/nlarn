@@ -356,7 +356,19 @@ void player_item_equip(player *p, inventory **inv, item *it);
   * @param the item
   */
 void player_item_unequip_wrapper(player *p, inventory **inv, item *it);
-void player_item_unequip(player *p, inventory **inv, item *it, int forced);
+
+/**
+  * @brief Function used to unequip an item.
+  *
+  * @param the player
+  * @param unused, needed to make function signature match display_inventory requirements
+  * @param the item
+  * @param TRUE if the removal does not occur interactively. No time is consumed in this case.
+  */
+void player_item_unequip(player *p,
+                         inventory **inv __attribute__((unused)),
+                         item *it,
+                         gboolean forced);
 
 int player_item_is_container(player *p, item *it);
 int player_item_can_be_added_to_container(player *p, item *it);
