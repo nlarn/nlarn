@@ -152,6 +152,7 @@ int building_bank(player *p)
 
         callback = g_malloc(sizeof(display_inv_callback));
         callback->description = "(s)ell";
+        callback->helpmsg = "Sell the currently selected gem.";
         callback->key = 's';
         callback->inv = &nlarn->store_stock;
         callback->function = &building_item_buy;
@@ -430,6 +431,7 @@ int building_home(player *p)
 
                 callback = g_malloc0(sizeof(display_inv_callback));
                 callback->description = "(d)eposit";
+                callback->helpmsg = "Deposit the selected item in your storage room at home.";
                 callback->key = 'd';
                 callback->inv = &nlarn->player_home;
                 callback->function = &container_item_add;
@@ -453,6 +455,7 @@ int building_home(player *p)
 
                 callback = g_malloc0(sizeof(display_inv_callback));
                 callback->description = "(t)ake";
+                callback->helpmsg = "Take the selected item out of your storage room and put it into your pack.";
                 callback->key = 't';
                 callback->inv = &nlarn->player_home;
                 callback->function = &container_item_unpack;
@@ -798,6 +801,7 @@ int building_tradepost(player *p)
 
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(s)ell";
+    callback->helpmsg = "Sell the selected item to the Trade Post.";
     callback->key = 's';
     callback->inv = &nlarn->store_stock;
     callback->function = &building_item_buy;
@@ -807,6 +811,7 @@ int building_tradepost(player *p)
 
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(i)dentify";
+    callback->helpmsg = "Have the Trade Post's experts identify your item.";
     callback->key = 'i';
     callback->function = &building_item_identify;
     callback->checkfun = &player_item_is_identifiable;
@@ -815,6 +820,7 @@ int building_tradepost(player *p)
 
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(r)epair";
+    callback->helpmsg = "Have the Trade Post's experts revert any damage done to the selected item.";
     callback->key = 'r';
     callback->function = &building_item_repair;
     callback->checkfun = &player_item_is_damaged;
@@ -823,6 +829,7 @@ int building_tradepost(player *p)
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(e)quip";
+    callback->helpmsg = "Equip the selected item.";
     callback->key = 'e';
     callback->function = &player_item_equip;
     callback->checkfun = &player_item_is_equippable;
@@ -830,6 +837,7 @@ int building_tradepost(player *p)
 
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(u)nequip";
+    callback->helpmsg = "Unequip the selected item.";
     callback->key = 'u';
     callback->function = &player_item_unequip_wrapper;
     callback->checkfun = &player_item_is_equipped;
@@ -838,6 +846,7 @@ int building_tradepost(player *p)
 
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(n)ote";
+    callback->helpmsg = "Add a note to the item.";
     callback->key = 'n';
     callback->function = &player_item_notes;
     callback->checkfun = NULL;
@@ -1132,6 +1141,7 @@ static void building_shop(player *p, inventory **inv, const char *title)
 
     callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(b)uy";
+    callback->helpmsg = "Buy the selected item. If the available quantity exceeds one, you may select the amount you want to purchase.";
     callback->key = 'b';
     callback->inv = inv;
     callback->function = &building_item_sell;

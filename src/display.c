@@ -91,6 +91,8 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
 
 static int display_get_colval(const display_colset *colset, const char *name);
 
+static void display_inventory_help(GPtrArray *callbacks);
+
 static display_window *display_window_new(int x1, int y1, int width,
         int height, const char *title);
 
@@ -803,9 +805,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     char *stitle = NULL;
 
     gboolean keep_running = TRUE;
-
-    /* used for looping over callbacks */
-    display_inv_callback *cb;
     int key;
 
     /* string array used to assemble the window caption
@@ -962,7 +961,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* assemble window caption (if callbacks have been defined) */
         for (guint cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
         {
-            cb = g_ptr_array_index(callbacks, cb_nr);
+            display_inv_callback *cb = g_ptr_array_index(callbacks, cb_nr);
 
             /* check if callback is appropriate for this item */
             /* if no checkfunktion is set, always display item */
@@ -978,7 +977,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
         }
 
-        /* show the item description popup */
+        /* refresh the item description popup */
         if (ipop != NULL)
             display_window_destroy(ipop);
 
@@ -987,6 +986,9 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         if (g_strv_length(captions) > 0)
         {
+            /* append "(?) help" to trigger the help popup */
+            strv_append(&captions, "(?) help");
+
             /* update the window's caption with the assembled array of captions */
             display_window_update_caption(iwin, g_strjoinv(" ", captions));
         }
@@ -1097,6 +1099,10 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             keep_running = FALSE;
             break;
 
+        case '?':
+            display_inventory_help(callbacks);
+            break;
+
         case KEY_LF:
         case KEY_CR:
 #ifdef PADENTER
@@ -1111,9 +1117,9 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         default:
             /* check callback function keys (if defined) */
-            for (guint cb_nr = 1; callbacks != NULL && cb_nr <= callbacks->len; cb_nr++)
+            for (guint cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
             {
-                cb = g_ptr_array_index(callbacks, cb_nr - 1);
+                display_inv_callback *cb = g_ptr_array_index(callbacks, cb_nr);
 
                 if ((cb->key == key) && cb->active)
                 {
@@ -3084,6 +3090,58 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
     g_free(msg);
 
     return count;
+}
+
+static void display_inventory_help(GPtrArray *callbacks)
+{
+    size_t maxlen = 0;
+    GString *help = g_string_new(NULL);
+
+    if (callbacks == NULL || callbacks->len == 0)
+    {
+        /* no callbacks available => select item with ENTER */
+        g_string_append(help, "Select the desired item with ENTER.\n"
+                        "You may abort by pressing the escape key.");
+    }
+    else
+    {
+        /* determine the maximum length of the description */
+        for (guint i = 0; i < callbacks->len; i++)
+        {
+            display_inv_callback *cb = g_ptr_array_index(callbacks, i);
+
+            /* skip this callback function if it is not active */
+            if (!cb->active) continue;
+
+            size_t desclen = strlen(cb->description);
+            if (desclen > maxlen)
+                maxlen = desclen;
+        }
+
+        if (maxlen == 0)
+        {
+            /* no active callbacks */
+            g_string_append(help, "There are no options available for the selected item.");
+        }
+        else
+        {
+            for (guint i = 0; i < callbacks->len; i++)
+            {
+                display_inv_callback *cb = g_ptr_array_index(callbacks, i);
+
+                if (cb->active && cb->helpmsg != NULL)
+                {
+                    g_string_append_printf(help, "`lightgreen`%*s:`end` %s\n",
+                                           (int)maxlen,
+                                           cb->description,
+                                           cb->helpmsg);
+                }
+            }
+        }
+    }
+
+    display_show_message("Help", help->str, maxlen + 2);
+    g_string_free(help, TRUE);
 }
 
 static int display_get_colval(const display_colset *colset, const char *name)

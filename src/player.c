@@ -2013,6 +2013,7 @@ void player_pickup(player *p)
 
         callback = g_malloc0(sizeof(display_inv_callback));
         callback->description = "(,) get";
+        callback->helpmsg = "Get the item. In case of an item stack, get the entire stack.";
         callback->key = ',';
         callback->inv = inv;
         callback->function = (display_inv_callback_func)&player_item_pickup_all;
@@ -2020,6 +2021,7 @@ void player_pickup(player *p)
 
         callback = g_malloc0(sizeof(display_inv_callback));
         callback->description = "(g)et partly";
+        callback->helpmsg = "Get the item. In case of an item stack, choose how many items to pick up.";
         callback->key = 'g';
         callback->inv = inv;
         callback->checkfun = &player_item_filter_multiple;
@@ -2920,6 +2922,7 @@ int player_inv_display(player *p)
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(d)rop";
+    callback->helpmsg = "Drop the selected item. If the item is a stack of multiple items, you will be prompted for the amount you want to drop.";
     callback->key = 'd';
     callback->inv = &p->inventory;
     callback->function = &player_item_drop;
@@ -2928,6 +2931,7 @@ int player_inv_display(player *p)
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(e)quip";
+    callback->helpmsg = "Equip the selected item.";
     callback->key = 'e';
     callback->function = &player_item_equip;
     callback->checkfun = &player_item_is_equippable;
@@ -2935,20 +2939,23 @@ int player_inv_display(player *p)
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(o)pen";
+    callback->helpmsg = "Open the selected container.";
     callback->key = 'o';
     callback->function = &container_open;
     callback->checkfun = &player_item_is_container;
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(p)ut into sth.";
-    callback->key = 'p';
+    callback->description = "(s)tore";
+    callback->helpmsg = "Put the item into a container you carry or one that is on the floor.";
+    callback->key = 's';
     callback->function = &container_item_add;
     callback->checkfun = &player_item_can_be_added_to_container;
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(u)nequip";
+    callback->helpmsg = "Unequip the selected item.";
     callback->key = 'u';
     callback->function = &player_item_unequip_wrapper;
     callback->checkfun = &player_item_is_equipped;
@@ -2957,6 +2964,7 @@ int player_inv_display(player *p)
     /* unequip and use should never appear together */
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(u)se";
+    callback->helpmsg = "Use the selected item.";
     callback->key = 'u';
     callback->function = &player_item_use;
     callback->checkfun = &player_item_is_usable;
@@ -2964,6 +2972,7 @@ int player_inv_display(player *p)
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(n)ote";
+    callback->helpmsg = "Add a note to the selected item or edit or delete an existing note.";
     callback->key = 'n';
     callback->function = &player_item_notes;
     g_ptr_array_add(callbacks, callback);

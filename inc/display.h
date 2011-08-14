@@ -112,6 +112,7 @@ typedef void (*display_inv_callback_func)(player *, inventory **, item *);
 typedef struct display_inv_callback
 {
     char *description;
+    char *helpmsg;
     char key;
     inventory **inv;
     display_inv_callback_func function;
