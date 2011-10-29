@@ -8,3 +8,4 @@ nlarn.ini
 nlarn.make
 nlarn.xcodeproj/
 obj/
+lib/highscores
