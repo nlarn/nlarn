@@ -1,11 +1,22 @@
-Makefile
-NLarn.xcworkspace/
-nlarn
-*.exe
-*.diff
-*.txt
-nlarn.ini
-nlarn.make
-nlarn.xcodeproj/
+# Files generated when building NLarn
 obj/
+nlarn
+nlarn.exe
+nlarn.ini
+
+# Files generated at runtime
+*.txt
 lib/highscores
+
+# GNU make
+Makefile
+nlarn.make
+
+# XCode
+NLarn.xcworkspace/
+nlarn.xcodeproj/
+
+# CodeBlocks
+NLarn.workspace
+nlarn.cbp
+nlarn.depend
