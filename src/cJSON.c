@@ -101,7 +101,7 @@ static const char *parse_number(cJSON *item,const char *num)
 	if (*num=='-') sign=-1,num++;	/* Has sign? */
 	if (*num=='0') num++;			/* is zero */
 	if (*num>='1' && *num<='9')	do	n=(n*10.0)+(*num++ -'0');	while (*num>='0' && *num<='9');	/* Number? */
-	if (*num=='.') {num++;		do	n=(n*10.0)+(*num++ -'0'),scale--; while (*num>='0' && *num<='9');}	/* Fractional part? */
+	if (*num=='.' && num[1]>='0' && num[1]<='9') {num++;		do	n=(n*10.0)+(*num++ -'0'),scale--; while (*num>='0' && *num<='9');}	/* Fractional part? */
 	if (*num=='e' || *num=='E')		/* Exponent? */
 	{	num++;if (*num=='+') num++;	else if (*num=='-') signsubscale=-1,num++;		/* With sign? */
 		while (*num>='0' && *num<='9') subscale=(subscale*10)+(*num++ - '0');	/* Number? */
@@ -142,7 +142,7 @@ static char *print_number(cJSON *item)
 static const unsigned char firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 static const char *parse_string(cJSON *item,const char *str)
 {
-	const char *ptr=str+1;char *ptr2;char *out;int len=0;unsigned uc;
+	const char *ptr=str+1;char *ptr2;char *out;int len=0;unsigned uc,uc2;
 	if (*str!='\"') {ep=str;return 0;}	/* not a string! */
 
 	while (*ptr!='\"' && *ptr && ++len) if (*ptr++ == '\\') ptr++;	/* Skip escaped quotes. */
@@ -164,16 +164,28 @@ static const char *parse_string(cJSON *item,const char *str)
 				case 'n': *ptr2++='\n';	break;
 				case 'r': *ptr2++='\r';	break;
 				case 't': *ptr2++='\t';	break;
-				case 'u':	 /* transcode utf16 to utf8. DOES NOT SUPPORT SURROGATE PAIRS CORRECTLY. */
-					sscanf(ptr+1,"%4x",&uc);	/* get the unicode char. */
-					len=3;if (uc<0x80) len=1;else if (uc<0x800) len=2;ptr2+=len;
-					
+				case 'u':	 /* transcode utf16 to utf8. */
+					sscanf(ptr+1,"%4x",&uc);ptr+=4;	/* get the unicode char. */
+
+					if ((uc>=0xDC00 && uc<=0xDFFF) || uc==0)	break;	// check for invalid.
+
+					if (uc>=0xD800 && uc<=0xDBFF)	// UTF16 surrogate pairs.
+					{
+						if (ptr[1]!='\\' || ptr[2]!='u')	break;	// missing second-half of surrogate.
+						sscanf(ptr+3,"%4x",&uc2);ptr+=6;
+						if (uc2<0xDC00 || uc2>0xDFFF)		break;	// invalid second-half of surrogate.
+						uc=0x10000 | ((uc&0x3FF)<<10) | (uc2&0x3FF);
+					}
+
+					len=4;if (uc<0x80) len=1;else if (uc<0x800) len=2;else if (uc<0x10000) len=3; ptr2+=len;
+
 					switch (len) {
+						case 4: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
 						case 3: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
 						case 2: *--ptr2 =((uc | 0x80) & 0xBF); uc >>= 6;
 						case 1: *--ptr2 =(uc | firstByteMark[len]);
 					}
-					ptr2+=len;ptr+=4;
+					ptr2+=len;
 					break;
 				default:  *ptr2++=*ptr; break;
 			}
@@ -360,7 +372,7 @@ static char *print_array(cJSON *item,int depth,int fmt)
 	}
 	cJSON_free(entries);
 	*ptr++=']';*ptr++=0;
-	return out;	
+	return out;
 }
 
 /* Build an object from the text. */
@@ -454,7 +466,7 @@ static char *print_object(cJSON *item,int depth,int fmt)
 	cJSON_free(names);cJSON_free(entries);
 	if (fmt) for (i=0;i<depth-1;i++) *ptr++='\t';
 	*ptr++='}';*ptr++=0;
-	return out;	
+	return out;
 }
 
 /* Get Array size/item / object item. */
