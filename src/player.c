@@ -3976,7 +3976,7 @@ char *player_item_identified_list(player *p)
         heading[0] = g_ascii_toupper(heading[0]);
 
         /* no linefeed before first category */
-        g_string_append_printf(sublist, (type == 0) ? "%s\n" : "\n%s\n",
+        g_string_append_printf(sublist, (type == 0) ? "%s\n" : "\n`yellow`%s`end`\n",
                                heading);
 
         g_free(heading);
@@ -3991,7 +3991,7 @@ char *player_item_identified_list(player *p)
                 gchar *desc_unid = item_describe(it, FALSE, TRUE, FALSE);
                 gchar *desc_id = item_describe(it, TRUE, TRUE, FALSE);
 
-                g_string_append_printf(sublist, " %33s - %s \n", desc_unid, desc_id);
+                g_string_append_printf(sublist, " `lightgreen`%33s`end` - %s \n", desc_unid, desc_id);
 
                 g_free(desc_id);
                 g_free(desc_unid);
