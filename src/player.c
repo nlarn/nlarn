@@ -3634,14 +3634,17 @@ void player_item_unequip(player *p,
         {
             item **wslot = NULL;
 
-            if (p->eq_weapon && it == p->eq_weapon)
+            if (p->eq_weapon && it == p->eq_weapon) {
                 wslot = &(p->eq_weapon);
-
-            if (p->eq_sweapon && it == p->eq_sweapon)
+            } else if (p->eq_sweapon && it == p->eq_sweapon) {
                 wslot = &(p->eq_sweapon);
-
-            /* wslot mustn't be NULL or there is something seriously wrong */
-            g_assert(wslot != NULL);
+            } else {
+                /* wslot mustn't be NULL or there is something seriously wrong */
+                log_add_entry(nlarn->log, "Something is seriously wrong! Tried "
+                              "to unequip a weapon that is not equipped. "
+                              "(%s, line %d - %s())", __FILE__, __FUNCTION__, __LINE__);
+                return;
+            }
 
             if (forced || !(*wslot)->cursed)
             {
