@@ -60,6 +60,7 @@ const char *monster_ai_desc[MA_MAX] =
     "standing still",   /* MA_REMAIN */
     "wandering",        /* MA_WANDER */
     "attacking",        /* MA_ATTACK */
+    "puzzled",          /* MA_CONFUSION */
     "serving you",      /* MA_SERVE */
     "doing something boring", /* MA_CIVILIAN */
 };
@@ -106,6 +107,7 @@ static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
 static position monster_move_wander(monster *m, struct player *p);
 static position monster_move_attack(monster *m, struct player *p);
+static position monster_move_confused(monster *m, struct player *p);
 static position monster_move_flee(monster *m, struct player *p);
 static position monster_move_serve(monster *m, struct player *p);
 static position monster_move_civilian(monster *m, struct player *p);
@@ -1006,6 +1008,10 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             m_npos = monster_move_attack(m, g->p);
             break;
 
+        case MA_CONFUSION:
+            m_npos = monster_move_confused(m, g->p);
+            break;
+
         case MA_SERVE:
             m_npos = monster_move_serve(m, g->p);
             break;
@@ -1021,10 +1027,14 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
         }
 
         /* ******** if new position has been found - move the monster ********* */
-        map_sobject_t target_st = map_sobject_at(monster_map(m), m_npos);
-
         if (!pos_identical(m_npos, monster_pos(m)))
         {
+            /* get the monster's current map */
+            map *mmap = monster_map(m);
+
+            /* get stationary object at the monster's target position */
+            map_sobject_t target_st = map_sobject_at(mmap, m_npos);
+
             /* vampires won't step onto mirrors */
             if ((m->type == MT_VAMPIRE) && (target_st == LS_MIRROR))
             {
@@ -1033,35 +1043,83 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
 
             else if (pos_identical(g->p->pos, m_npos))
             {
-                /* The monster bump into player who is invisible to the monster */
+                /* The monster bumps into the player who is invisible to the
+                   monster. Thus the monster gains knowledge over the player's
+                   current position. */
                 monster_update_player_pos(m, g->p->pos);
 
                 log_add_entry(g->log, "The %s bumps into you.", monster_get_name(m));
             }
 
             /* check for door */
-            else if ((target_st == LS_CLOSEDDOOR)
-                     /* lock out zombies */
-                     && monster_flags(m, MF_HANDS) && monster_int(m) > 3)
+            else if ((target_st == LS_CLOSEDDOOR) && monster_flags(m, MF_HANDS))
             {
-                /* open the door */
-                map_sobject_set(monster_map(m), m_npos, LS_OPENDOOR);
-
-                /* notify the player if the door is visible */
-                if (monster_in_sight(m))
+                /* dim-witted or confused monster are unable to open doors */
+                if (monster_int(m) < 4 || monster_effect_get(m, ET_CONFUSION))
                 {
-                    log_add_entry(g->log, "The %s opens the door.", monster_name(m));
+                    /* notify the player if the door is visible */
+                    if (monster_in_sight(m))
+                    {
+                        log_add_entry(g->log, "The %s bumps into the door.",
+                                      monster_name(m));
+                    }
+                }
+                else
+                {
+                    /* the monster is capable of opening the door */
+                    map_sobject_set(mmap, m_npos, LS_OPENDOOR);
+
+                    /* notify the player if the door is visible */
+                    if (monster_in_sight(m))
+                    {
+                        log_add_entry(g->log, "The %s opens the door.",
+                                      monster_name(m));
+                    }
                 }
             }
 
-            /* move towards player; check for monsters */
-            else if (map_pos_validate(monster_map(m), m_npos,
-                                      monster_map_element(m), FALSE))
+            /* set the monsters new position */
+            else
             {
-                monster_pos_set(m, monster_map(m), m_npos);
+                /* check if the new position is valid for this monster */
+                if (map_pos_validate(mmap, m_npos, monster_map_element(m), FALSE))
+                {
+                    /* the new position is valid -> reposition the monster */
+                    monster_pos_set(m, mmap, m_npos);
+                }
+                else
+                {
+                    /* the new position is invalid */
+                    map_tile_t nle = map_tiletype_at(mmap, m_npos);
+
+                    switch (nle)
+                    {
+                        case LT_TREE:
+                        case LT_WALL:
+                            if (monster_in_sight(m))
+                            {
+                                log_add_entry(g->log, "The %s bumps into %s.",
+                                              monster_name(m), mt_get_desc(nle));
+                            }
+                            break;
+
+                        case LT_LAVA:
+                        case LT_DEEPWATER:
+                            if (monster_in_sight(m)) {
+                                log_add_entry(g->log, "The %s sinks into %s.",
+                                              monster_name(m), mt_get_desc(nle));
+                            }
+                            monster_die(m, g->p);
+                            break;
+
+                        default:
+                            /* just do not move.. */
+                            break;
+                    }
+                }
 
                 /* check for traps */
-                if (map_trap_at(monster_map(m), monster_pos(m)))
+                if (map_trap_at(mmap, monster_pos(m)))
                 {
                     if (!monster_trap_trigger(m))
                         return; /* trap killed the monster */
@@ -1654,11 +1712,6 @@ gboolean monster_update_action(monster *m, monster_action_t override)
     gboolean low_hp;
     gboolean smart;
 
-    /* FIXME: should include difficulty here */
-    mtime  = monster_int(m) + 25;
-    low_hp = (m->hp < (monster_hp_max(m) / 4 ));
-    smart  = (monster_int(m) > 4);
-
     if (override > MA_NONE)
     {
         /* set the monster's action to the requested value */
@@ -1673,17 +1726,33 @@ gboolean monster_update_action(monster *m, monster_action_t override)
         return TRUE;
     }
 
-    if (m->action == MA_SERVE)
+    /* handle some easy action updates before the more difficult decisions */
+    switch (m->action)
     {
-        /* once servant, forever servant */
-        return FALSE;
+        case MA_SERVE:
+            /* once servant, forever servant */
+            return FALSE;
+            break;
+
+        case MA_CIVILIAN:
+            /* town people never change their behaviour */
+            return FALSE;
+            break;
+
+        case MA_CONFUSION:
+            /* confusion is removed by monster_effect_del() */
+            return FALSE;
+            break;
+
+        default:
+            /* countinue to evaluate... */
+            break;
     }
 
-    if (m->action == MA_CIVILIAN)
-    {
-        /* town people never change their behaviour */
-        return FALSE;
-    }
+    /* FIXME: should include difficulty here */
+    mtime  = monster_int(m) + 25;
+    low_hp = (m->hp < (monster_hp_max(m) / 4 ));
+    smart  = (monster_int(m) > 4);
 
     if (monster_flags(m, MF_MIMIC) && m->unknown)
     {
@@ -1953,6 +2022,12 @@ effect *monster_effect_add(monster *m, effect *e)
         effect_destroy(e);
         e = NULL;
     }
+    else if (e->type == ET_CONFUSION && monster_flags(m, MF_RES_CONF))
+    {
+        /* the monster is resistant against confusion */
+        effect_destroy(e);
+        e = NULL;
+    }
 
     /* one time effects */
     if (e && e->turns == 1)
@@ -1987,6 +2062,11 @@ effect *monster_effect_add(monster *m, effect *e)
     {
         /* multi-turn effects */
         e = effect_add(m->effects, e);
+
+        /* if it's confusion, set the monster's "AI" accordingly */
+        if (e && e->type == ET_CONFUSION) {
+            monster_update_action(m, MA_CONFUSION);
+        }
     }
 
     /* show message if monster is visible */
@@ -2022,6 +2102,11 @@ int monster_effect_del(monster *m, effect *e)
 
     if ((result = effect_del(m->effects, e)))
     {
+        /* if confusion is finished, set the ai back to the default */
+        if ((e->type) == ET_CONFUSION) {
+            monster_update_action(m, MA_WANDER);
+        }
+
         effect_destroy(e);
     }
 
@@ -2514,6 +2599,13 @@ static position monster_move_attack(monster *m, struct player *p)
 
     return npos;
 
+}
+
+static position monster_move_confused(monster *m,
+                                      __attribute__ ((unused)) struct player *p)
+{
+    /* as the monster is confused, choos a random movement direction */
+    return pos_move(monster_pos(m), rand_1n(GD_MAX));
 }
 
 static position monster_move_flee(monster *m, struct player *p)

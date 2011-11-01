@@ -137,6 +137,7 @@ typedef enum monster_action_type
     MA_REMAIN,
     MA_WANDER,
     MA_ATTACK,
+    MA_CONFUSION,
     MA_SERVE,
     MA_CIVILIAN,
     MA_MAX
@@ -162,7 +163,8 @@ typedef enum monster_flags
     MF_RES_SLEEP    = 1 << 14,  /* resistant to sleep */
     MF_RES_POISON   = 1 << 15,  /* resistant to poison */
     MF_RES_ELEC     = 1 << 16,  /* resistant to electricity */
-    MF_SWIM         = 1 << 17,  /* can swim through water */
+    MF_RES_CONF     = 1 << 17,  /* resistant to confusion */
+    MF_SWIM         = 1 << 18,  /* can swim through water */
 } monster_flag;
 
 /* function definitions */
