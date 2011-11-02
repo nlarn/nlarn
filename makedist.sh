@@ -6,9 +6,17 @@
 #
 
 ARCH=$(uname -m)
+PREVIEW=0
+NUMJOBS=1
 
-if [ "$OS" = "Windows_NT" ]
-then
+while getopts "j:p" OPTION; do
+	case "$OPTION" in
+		p) PREVIEW=1;;
+		j) NUMJOBS="$OPTARG";;
+	esac
+done
+
+if [[ "$OS" == "Windows_NT" ]]; then
 	OS=win32
 	SUFFIX="zip"
 	EXE="nlarn.exe libglib-2.0-0.dll libz-1.dll"
@@ -22,38 +30,34 @@ fi
 MAINFILES="$EXE nlarn.ini-sample README.txt LICENSE"
 LIBFILES="lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.hlp lib/nlarn.msg lib/monsters.lua"
 
-VERSION_MAJOR=$(grep VERSION_MAJOR inc/nlarn.h | cut -f 3 -d" ")
-VERSION_MINOR=$(grep VERSION_MINOR inc/nlarn.h | cut -f 3 -d" ")
-VERSION_PATCH=$(grep VERSION_PATCH inc/nlarn.h | cut -f 3 -d" ")
+VERSION_MAJOR=$(awk '/VERSION_MAJOR/ { print $3 }' inc/nlarn.h)
+VERSION_MINOR=$(awk '/VERSION_MINOR/ { print $3 }' inc/nlarn.h)
+VERSION_PATCH=$(awk '/VERSION_PATCH/ { print $3 }' inc/nlarn.h)
 
-VERSION="$VERSION_MAJOR"."$VERSION_MINOR"
-if [ "$VERSION_PATCH" -gt 0 ]
-then
-	VERSION="$VERSION"."$VERSION_PATCH"
+VERSION="${VERSION_MAJOR}.${VERSION_MINOR}"
+if [[ "$VERSION_PATCH" -gt 0 ]]; then
+	VERSION="${VERSION}.${VERSION_PATCH}"
 fi
 
-if [ -n "$PREVIEW" ]
-then
-	SVN=$(LANG=C svn info | awk '/Revision/ {print $2}')
-	SVNID="-svn$SVN"
-	export CFLAGS=-DSVNID=\'\"$SVNID\"\'
-	VERSION="$VERSION""$SVNID"
+if [[ "$PREVIEW" -eq 1 ]]; then
+	GITREV="-$(git show --pretty=oneline | sed -ne '1 s/\(.\{6\}\).*/\1/p')"
+	export CFLAGS=-DGITREV=\'\"$GITREV\"\'
+	VERSION="${VERSION}${GITREV}"
 fi
 
-DIRNAME=nlarn-"$VERSION"
-PACKAGE="$DIRNAME"_"$OS"."$ARCH"."$SUFFIX"
+DIRNAME="nlarn-${VERSION}"
+PACKAGE="${DIRNAME}_${OS}.${ARCH}.${SUFFIX}"
 
 # Regenerate Makefile if necessary
-if [ ! -f Makefile -a ! -f nlarn.make ]
-then
-  premake4 gmake
+if [[ ! -f Makefile || ! -f nlarn.make ]]; then
+	premake4 gmake || exit 1
 fi
 
-make verbose=yes
+make clean
+make -j $NUMJOBS verbose=yes
 
 # Quit on errors
-if [ $? -gt 0 ]
-then
+if [[ $? -ne 0 ]]; then
 	echo Build failed.
 	exit
 fi
@@ -65,8 +69,7 @@ cp $LIBFILES "$DIRNAME"/lib
 rm -f "$PACKAGE"
 
 # create archives for distribution
-if [ "$OS" != "win32" ]
-then
+if [[ "$OS" != "win32" ]]; then
 	tar cfvz "$PACKAGE" "$DIRNAME"
 else
 	zip -r "$PACKAGE" "$DIRNAME"

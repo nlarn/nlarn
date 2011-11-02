@@ -27,9 +27,9 @@
 #define VERSION_MINOR 7
 #define VERSION_PATCH 0
 
-/* this allows to add the svn id of the build to the version information */
-#ifndef SVNID
-#define SVNID ""
+/* this allows to add the id of the current commit to the version information */
+#ifndef GITREV
+#define GITREV ""
 #endif
 
 /* the entire game */
