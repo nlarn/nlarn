@@ -434,18 +434,18 @@ int player_door_open(player *p, int dir)
     /* position used to interact with stationaries */
     position pos;
 
-    /* a counter and another one */
-    int count, num;
-
     /* the current map */
     map *pmap = game_map(nlarn, Z(p->pos));
 
     if (dir == GD_NONE)
     {
+        /* number of valid directions for actions */
+        int count = 0;
+
         /* possible directions of actions */
         int *dirs = map_get_surrounding(pmap, p->pos, LS_CLOSEDDOOR);
 
-        for (count = 0, num = 1; num < GD_MAX; num++)
+        for (int num = 1; num < GD_MAX; num++)
         {
             if (dirs[num])
             {
@@ -502,8 +502,6 @@ int player_fountain_drink(player *p)
     effect *e = NULL;
 
     int fntchange = 0;
-    int amount = 0;
-    int et = ET_NONE;
     map *pmap = game_map(nlarn, Z(p->pos));
 
     g_assert (p != NULL);
@@ -550,6 +548,9 @@ int player_fountain_drink(player *p)
 
     if (fntchange != 0)
     {
+        int amount = 0;
+        effect_t et = ET_NONE;
+
         switch (rand_1n(9))
         {
         case 1:

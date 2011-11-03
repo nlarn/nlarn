@@ -2334,7 +2334,6 @@ static gboolean monster_item_rust(monster *m __attribute__((unused)), struct pla
 
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type)
 {
-    guint player_gold = 0;
     item *it = NULL;
 
     g_assert (m != NULL && p != NULL);
@@ -2346,7 +2345,10 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     /* Leprechaun robs only gold */
     if (item_type == IT_GOLD)
     {
-        if ((player_gold = player_get_gold(p)))
+        /* get amount of gold pieces carried by the player */
+        guint player_gold = player_get_gold(p);
+
+        if (player_gold > 0)
         {
             it = item_new(IT_GOLD, rand_1n(1 + (player_gold >> 1)));
             player_remove_gold(p, it->count);
@@ -2457,10 +2459,7 @@ static char *monsters_get_fortune(char *fortune_file)
 
     if (!fortunes)
     {
-
         /* read in the fortunes */
-
-        size_t len = 0;
         char buffer[80];
         char *tmp = 0;
         FILE *fortune_fd;
@@ -2481,7 +2480,7 @@ static char *monsters_get_fortune(char *fortune_file)
             while((fgets(buffer, 79, fortune_fd)))
             {
                 /* replace EOL with \0 */
-                len = (size_t)(strchr(buffer, '\n') - (char *)&buffer);
+                size_t len = (size_t)(strchr(buffer, '\n') - (char *)&buffer);
                 buffer[len] = '\0';
 
                 /* keep the line */

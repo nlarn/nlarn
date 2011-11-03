@@ -135,8 +135,6 @@ void container_item_add(player *p, inventory **inv, item *element)
 {
     inventory **target_inv = NULL;
     gchar *container_desc = NULL, *element_desc;
-    guint pilen = 0; /* length of player's filtered inventory */
-    guint filen = 0; /* length of filtered floor inventory */
     gboolean carried_container = FALSE;
     guint count = 0;
 
@@ -152,8 +150,10 @@ void container_item_add(player *p, inventory **inv, item *element)
     {
         item *container = NULL;
         inventory **floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
-        pilen = inv_length_filtered(p->inventory, item_filter_container);
-        filen = inv_length_filtered(*floor, item_filter_container);
+        /* length of player's filtered inventory */
+        guint pilen = inv_length_filtered(p->inventory, item_filter_container);
+        /* length of filtered floor inventory */
+        guint filen = inv_length_filtered(*floor, item_filter_container);
 
         /* choose the container to add the item element to. */
         if (pilen == 1)

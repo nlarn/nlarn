@@ -997,7 +997,6 @@ void player_die(player *p, player_cod cause_type, int cause)
     char *message = NULL;
     char *title = NULL;
     char *tmp = NULL;
-    int count;
     effect *ef = NULL;
     char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
 
@@ -1141,7 +1140,9 @@ void player_die(player *p, player_cod cause_type, int cause)
     /* do not show scores when in wizardmode */
     if (!game_wizardmode(nlarn))
     {
-        /* buffer for item descriptions */
+        int count;
+
+       /* buffer for item descriptions */
         gchar *it_desc;
 
         /* redraw screen to make sure player can see the cause of his death */
@@ -1429,11 +1430,10 @@ void player_die(player *p, player_cod cause_type, int cause)
                 tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum,
                                               count)));
 
-                g_string_append_printf(text, "%3d %s\n",
-                                       p->stats.monsters_killed[mnum], tmp);
+                g_string_append_printf(text, "%3d %s\n", count, tmp);
 
                 g_free(tmp);
-                body_count += p->stats.monsters_killed[mnum];
+                body_count += count;
             }
         }
         g_string_append_printf(text, "\n%3d total\n", body_count);
@@ -4687,7 +4687,6 @@ void player_search(player *p)
 
 void player_list_sobjmem(player *p)
 {
-    int prevmap = -1;
     GString *sobjlist = g_string_new(NULL);
 
     if (p->sobjmem == NULL)
@@ -4697,6 +4696,8 @@ void player_list_sobjmem(player *p)
     }
     else
     {
+        int prevmap = -1;
+
         /* sort the array of memorized landmarks */
         g_array_sort(p->sobjmem, player_sobjects_sort);
 

@@ -43,7 +43,7 @@ static int map_validate(map *m);
 static map_path *map_path_new(position start, position goal);
 static map_path_element *map_path_element_new(position pos);
 static int map_step_cost(map *m, map_path_element* element,
-                         map_element_t map_elem, gboolean player);
+                         map_element_t map_elem, gboolean ppath);
 static int map_path_cost(map_path_element* element, position target);
 static map_path_element *map_path_element_in_list(map_path_element* el,
                                                   GPtrArray *list);
