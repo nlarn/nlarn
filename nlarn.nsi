@@ -71,7 +71,7 @@ Section "NLarn (required)"
   ; Put file there
   File "nlarn.exe"
   File "libglib-2.0-0.dll"
-  File "libz-1.dll"
+  File "intl.dll"
   File "README.txt"
   File "Changelog.txt"
   File "LICENSE"

@@ -19,7 +19,7 @@ done
 if [[ "$OS" == "Windows_NT" ]]; then
 	OS=win32
 	SUFFIX="zip"
-	EXE="nlarn.exe libglib-2.0-0.dll libz-1.dll"
+	EXE="nlarn.exe libglib-2.0-0.dll intl.dll"
 	export CC=gcc
 else
 	OS=$(uname -s)
