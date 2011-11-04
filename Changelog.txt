@@ -1,3 +1,94 @@
+Release 0.7.0 (2011-11-04)
+-------------
+
+Changes:
+    * A monastery in town can heal, remove curses and cure the most common
+      diseases for a little. Some special items are available in the
+      monastery's shop.
+    * Implemented a "storage room" at the player's home. It is now possible
+      to store items at home and take them later. Items stored there are
+      added to the player's score when the game ends.
+    * Scribes in the school of Larn can write any scroll on blank scrolls.
+    * Stop automatic movement or resting as soon as a monster enters the
+      field of vision, not only when it is on a field next to the player.
+      This should give the player more time to react accordingly.
+    * Spells that cause effects to the player now extend the effect amount
+      or duration up to (spell knowledge level * base value). Messages are
+      displayed to reflect that an effect has been extended or that the
+      maximum has been reached.
+    * Added an intelligence requirement to learning spells and extended the
+      requirement for casting spellst to 3 * spell level.
+    * Implemented raising taxes:
+      For every difficulty level > 0 the player has to pay 5% of the income,
+      i.e. money deposited on the bank, item sale revenue and interest as
+      taxes. The maximum tax percentage is 20%.
+      Added statistics about paid taxes to the obituary.
+    * Added traps to containers. Every generated container has a 33% chance
+      of being trapped. Trap effects are:
+       * itching (forces the player to remove the armour),
+       * sickness (reduce chance to hit)
+       * clumsiness (forces the player to the weapon)
+       * slowness
+    * Implemented searching for traps on the ground or on containers.
+      Searching is also useful to examine the surroundings when blinded.
+    * Containers known to be trapped are displayed as e.g. "trapped bag".
+    * Enhanced targeting mode:
+      * target the closest monster if no previous selection has been made.
+      * switch between visible monsters with SPACE.
+      * remember the last targeted monster for subsequent targeting.
+      * remember the monster last hit with a direct attack.
+    * Added ranged weapons and ammunition (fire with 'f').
+    * Added new item slots: secondary weapon and quiver.
+    * Enabled swapping primary and secondary weapon ('x').
+    * Implemented a "paperdoll", a list of all equipped items ('TAB').
+    * Implemented thwrowing of potions ('t').
+    * Most potions now work on monsters.
+    * Made the potion of holy water dangerous for undead monsters.
+    * Thrown or fired items will be picked up automatically regardless of
+      autopickup settings.
+    * Added a command (M) to cast the previous spell again.
+    * It is now possible to pay with money stuffed in carried containers.
+      The leprechaun can now to steal money hidden inside carried containers.
+    * Tweaked the behviour of the townsfolk. They will no longer walk around
+      like drunk, do important town people business and only talk when the
+      player is outside a building.
+    * Started to work on summoned monsters:
+      * summoned monsters can follow the player,
+      * do not impact automatic movement,
+      * its possible to swap positions with them,
+      * they disappear after some turns,
+      * and killing them gives no experience points.
+      This is a work in progress and not at all completed.
+    * Added monster's weapon to monster's description.
+    * Implemented a mana drain trap.
+    * Added dynamic help to the inventory dialog.
+    * Messages and dialogs can now be coloured, some already are.
+    * Spell rays or blasts now have differen colours.
+    * Modified effect list display on the right side of the screen:
+      * unique entries only
+      * positive effects coloured cyan
+      * negative effects coloured magenta
+      * fading effects coloured red
+    * Door glyphs now depend on the position of the door.
+      For closed horizontal doors, it is '-', for vertical doors '|'. Opened
+      doors are displayed as '/', but for double doors they become a pair
+      of '/' and '\'.
+    * Reduced availability of rings in store at game start.
+    * Generate amulets starting on level 6 and do not generate a ring every
+      time generating an amulet failed; choose a random item type instead.
+      This should reduce the excessive amount of rings available in the game.
+    * Toggling the visibility of the entire map in wizard mode with ^V.
+    * Redefined quite a lot of keys, the most important being:
+      * 'S' -> 'CTRL-S' (save)
+      * 'Q' -> 'CTRL-Q' (quit)
+      * 'T' -> 'V' (travel, silly memory hook: voyage)
+
+Fixed bugs:
+    * Purge dead monsters after player's extra moves (fixes crash bug).
+    * Only curse-id blessable items when dropping them on an altar.
+    * Fixed weight calculation for stackable items.
+    * Do not mention stationary object on tiles entered while blinded.
+
 Release 0.6.1 (2010-10-22)
 -------------
 
