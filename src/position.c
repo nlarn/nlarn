@@ -216,10 +216,8 @@ area *area_new(int start_x, int start_y, int size_x, int size_y)
 {
     area *a = g_malloc0(sizeof(area));
 
-    /* ensure the starting positions are valid */
-    a->start_x = max(start_x, 0);
-    a->start_y = max(start_y, 0);
-
+    a->start_x = start_x;
+    a->start_y = start_y;
     a->size_x = size_x;
     a->size_y = size_y;
 
@@ -231,7 +229,7 @@ area *area_new(int start_x, int start_y, int size_x, int size_y)
     return a;
 }
 
-area *area_new_circle(position center, int radius, int hollow)
+area *area_new_circle(position center, guint radius, gboolean hollow)
 {
     area *circle;
 
@@ -251,7 +249,7 @@ area *area_new_circle(position center, int radius, int hollow)
                       2 * radius + 1,
                       2 * radius + 1);
 
-    /* reposition center to relative values */
+    /* reposition the center to relative values */
     X(center) = radius;
     Y(center) = radius;
 
@@ -264,7 +262,7 @@ area *area_new_circle(position center, int radius, int hollow)
     {
         g_assert(ddF_x == 2 * x + 1);
         g_assert(ddF_y == -2 * y);
-        g_assert(f == x * x + y * y - radius * radius + 2 * x - y + 1);
+        g_assert(f == x * x + y * y - (int)radius * (int)radius + 2 * x - y + 1);
 
         if (f >= 0)
         {
@@ -321,7 +319,7 @@ area *area_new_circle(position center, int radius, int hollow)
     return circle;
 }
 
-area *area_new_circle_flooded(position center, int radius, area *obstacles)
+area *area_new_circle_flooded(position center, guint radius, area *obstacles)
 {
     area *narea;
     int start_x, start_y;
@@ -708,7 +706,8 @@ area *area_flood(area *obstacles, int start_x, int start_y)
 
 void area_point_set(area *a, int x, int y)
 {
-    g_assert (a != NULL && area_point_valid(a, x, y));
+    g_assert(a != NULL);
+    g_assert(area_point_valid(a, x, y));
     a->area[y][x] = TRUE;
 }
 
@@ -724,7 +723,8 @@ int area_point_get(area *a, int x, int y)
 
 void area_point_del(area *a, int x, int y)
 {
-    g_assert (a != NULL && area_point_valid(a, x, y));
+    g_assert(a != NULL);
+    g_assert(area_point_valid(a, x, y));
     a->area[y][x] = FALSE;
 }
 

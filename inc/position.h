@@ -98,9 +98,10 @@ area *area_new(int start_x, int start_y, int size_x, int size_y);
  *
  * @param center point of the circle
  * @param radius of the circle
+ * @param TRUE if the circle shall not be filled
  * @return a new area.
  */
-area *area_new_circle(position center, int radius, int hollow);
+area *area_new_circle(position center, guint radius, gboolean hollow);
 
 /**
  * Draw a circle with every unobstucted point inside it set.
@@ -110,7 +111,7 @@ area *area_new_circle(position center, int radius, int hollow);
  * @param An area with every obstructed point set.
  * @return a new area.
  */
-area *area_new_circle_flooded(position center, int radius, area *obstacles);
+area *area_new_circle_flooded(position center, guint radius, area *obstacles);
 
 /**
  * Draw a ray with every point
