@@ -217,7 +217,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_ENLIGHTENMENT, "ET_ENLIGHTENMENT", 250, 12, "enlightened",
+        ET_ENLIGHTENMENT, "ET_ENLIGHTENMENT", 250, 8, "enlightened",
         "You have been granted enlightenment!",
         "You are no longer enlightened.",
         NULL, NULL,
