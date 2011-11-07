@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 
 #include "display.h"
@@ -245,6 +243,97 @@ void weapon_swap(struct player *p)
 
     g_free(pdesc);
     g_free(sdesc);
+}
+
+char *weapon_shortdesc(item *weapon, guint available_space)
+{
+    GString *desc = g_string_new(NULL);
+    if (weapon->bonus_known)
+    {
+        g_string_append_printf(desc, "%+d ", weapon->bonus);
+    }
+
+    const gboolean need_bonus
+    = (weapon->burnt || weapon->corroded || weapon->rusty
+       || (weapon->blessed_known
+           && (weapon->blessed || weapon->cursed)));
+
+    g_string_append_printf(desc, "%s", need_bonus
+                           ? weapon_short_name(weapon)
+                           : weapon_name(weapon));
+
+    // Add corrosion/curse status in brackets.
+    // Alternatively, convey that information with colours.
+    if (need_bonus && desc->len < available_space - 4)
+    {
+        GString *bonus = g_string_new(NULL);
+
+        gboolean need_comma = FALSE;
+        if (weapon->burnt == 2)
+        {
+            g_string_append_printf(bonus, "v. burnt, ");
+            need_comma = TRUE;
+        }
+
+        if (weapon->corroded == 2)
+        {
+            g_string_append_printf(bonus, "%sv. corroded",
+                                   need_comma ? ", " : "");
+            need_comma = TRUE;
+        }
+        if (weapon->rusty == 2)
+        {
+            g_string_append_printf(bonus, "%sv. rusty",
+                                   need_comma ? ", " : "");
+            need_comma = TRUE;
+        }
+
+        if (weapon->burnt == 1)
+        {
+            g_string_append_printf(bonus, "%sburnt",
+                                   need_comma ? ", " : "");
+            need_comma = TRUE;
+        }
+        if (weapon->corroded == 1)
+        {
+            g_string_append_printf(bonus, "%scorroded",
+                                   need_comma ? ", " : "");
+            need_comma = TRUE;
+        }
+        if (weapon->rusty == 1)
+        {
+            g_string_append_printf(bonus, "%srusty",
+                                   need_comma ? ", " : "");
+            need_comma = TRUE;
+        }
+
+        if (weapon->blessed_known)
+        {
+            if (weapon->blessed)
+            {
+                g_string_append_printf(bonus, "%sblessed",
+                                       need_comma ? ", " : "");
+            }
+            else if (weapon->cursed)
+            {
+                g_string_append_printf(bonus, "%scursed",
+                                       need_comma ? ", " : "");
+            }
+        }
+
+        g_string_append_printf(desc, " (%s)", bonus->str);
+        g_string_free(bonus, TRUE);
+    }
+
+    if (desc->len > available_space)
+    {
+        if (desc->str[available_space - 1] != ' ')
+            desc->str[available_space - 1] = '.';
+        desc->str[available_space] = '\0';
+    }
+
+    /* free the temporary string */
+    return g_string_free(desc, FALSE);
 }
 
 damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)

@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __WEAPONS_H_
 #define __WEAPONS_H_
 
@@ -124,6 +122,14 @@ extern const weapon_data weapons[WT_MAX];
 int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item *ammo);
 int  weapon_fire(struct player *p);
 void weapon_swap(struct player *p);
+
+/*
+ * @brief Return a shortened description of a given weapon
+ *
+ * @param a weapon
+ * @return a newly allocated string that must be g_free()'d
+ */
+char *weapon_shortdesc(item *weapon, guint available_space);
 
 /* macros */
 #define ammo_name(itm)          (ammos[(itm)->id].name)

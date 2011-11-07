@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <curses.h>
 #include <ctype.h>
 #include <glib.h>
@@ -496,111 +494,13 @@ int display_paint_screen(player *p)
     /* wielded weapon */
     if (p->eq_weapon)
     {
-        char wpn[61];
-        const guint available_space = COLS - MAP_MAX_X - 4;
-
-        GString *desc = g_string_new(NULL);
-
-        if (p->eq_weapon->bonus_known)
-        {
-            g_string_append_printf(desc, "%+d ", p->eq_weapon->bonus);
-        }
-
-        const gboolean need_bonus
-        = (p->eq_weapon->burnt || p->eq_weapon->corroded
-           || p->eq_weapon->rusty
-           || (p->eq_weapon->blessed_known
-               && (p->eq_weapon->blessed
-                   || p->eq_weapon->cursed)));
-
-        g_string_append_printf(desc, "%s",
-                               need_bonus ? weapon_short_name(p->eq_weapon)
-                               : weapon_name(p->eq_weapon));
-        g_strlcpy(wpn, desc->str, 60);
-
-        // Add corrosion/curse status in brackets.
-        // Alternatively, convey that information with colours.
-        if (need_bonus && strlen(wpn) < available_space - 4)
-        {
-            GString *bonus = g_string_new(NULL);
-
-            gboolean need_comma = FALSE;
-            if (p->eq_weapon->burnt == 2)
-            {
-                g_string_append_printf(bonus, "v. burnt, ");
-                need_comma = TRUE;
-            }
-
-            if (p->eq_weapon->corroded == 2)
-            {
-                g_string_append_printf(bonus, "%sv. corroded",
-                                       need_comma ? ", " : "");
-                need_comma = TRUE;
-            }
-            if (p->eq_weapon->rusty == 2)
-            {
-                g_string_append_printf(bonus, "%sv. rusty",
-                                       need_comma ? ", " : "");
-                need_comma = TRUE;
-            }
-
-            if (p->eq_weapon->burnt == 1)
-            {
-                g_string_append_printf(bonus, "%sburnt",
-                                       need_comma ? ", " : "");
-                need_comma = TRUE;
-            }
-            if (p->eq_weapon->corroded == 1)
-            {
-                g_string_append_printf(bonus, "%scorroded",
-                                       need_comma ? ", " : "");
-                need_comma = TRUE;
-            }
-            if (p->eq_weapon->rusty == 1)
-            {
-                g_string_append_printf(bonus, "%srusty",
-                                       need_comma ? ", " : "");
-                need_comma = TRUE;
-            }
-
-            if (p->eq_weapon->blessed_known)
-            {
-                if (p->eq_weapon->blessed)
-                {
-                    g_string_append_printf(bonus, "%sblessed",
-                                           need_comma ? ", " : "");
-                }
-                else if (p->eq_weapon->cursed)
-                {
-                    g_string_append_printf(bonus, "%scursed",
-                                           need_comma ? ", " : "");
-                }
-            }
-
-            char info[61];
-            g_strlcpy(info, bonus->str, 60);
-            g_string_append_printf(desc, " (%s)", info);
-
-            g_string_free(bonus, TRUE);
-        }
-        g_strlcpy(wpn, desc->str, 60);
-
-        if (strlen(wpn) > available_space)
-        {
-            if (wpn[available_space - 1] != ' ')
-                wpn[available_space - 1] = '.';
-            wpn[available_space] = '\0';
-        }
-
-        /* free the temporary string */
-        g_string_free(desc, TRUE);
-        mvprintw(7, MAP_MAX_X + 3, "%s", wpn);
+        char *wdesc = weapon_shortdesc(p->eq_weapon, COLS - MAP_MAX_X - 4);
+        mvprintw(7, MAP_MAX_X + 3, "%s", wdesc);
+        g_free(wdesc);
     }
     else
     {
-        attron(DC_WHITE);
         mvprintw(7, MAP_MAX_X + 3, "Unarmed");
-        attroff(DC_WHITE);
     }
     clrtoeol();
 
