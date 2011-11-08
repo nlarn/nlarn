@@ -1,5 +1,5 @@
 Name: nlarn
-Version: 0.7.0
+Version: 0.8.0
 Release: 1
 Summary: A remake of the roguelike game Larn
 
@@ -37,6 +37,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc LICENSE README.txt Changelog.txt nlarn.ini-sample lib/maze_doc.txt
 
 %changelog
+* Tue Nov 08 2011 Joachim de Groot <jdegroot@web.de>
+  - updated for version 0.8.0
 * Sat Oct 23 2010 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.7.0
   - added maze_doc.txt to documentation

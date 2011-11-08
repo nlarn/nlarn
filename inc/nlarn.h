@@ -24,7 +24,7 @@
 #include "game.h"
 
 #define VERSION_MAJOR 0 /* this is the present version # of the program */
-#define VERSION_MINOR 7
+#define VERSION_MINOR 8
 #define VERSION_PATCH 0
 
 /* this allows to add the id of the current commit to the version information */
