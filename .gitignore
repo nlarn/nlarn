@@ -1,16 +1,18 @@
 # Files generated when building NLarn
-obj/
 nlarn
-nlarn.exe
-nlarn.ini
+*.zip
+*.tar.gz
+*.exe
+*.o
+*.d
+
+# vim swap files
+.*swp
 
 # Files generated at runtime
 *.txt
+nlarn.ini
 lib/highscores
-
-# GNU make
-Makefile
-nlarn.make
 
 # XCode
 NLarn.xcworkspace/
