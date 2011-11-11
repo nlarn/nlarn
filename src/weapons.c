@@ -247,6 +247,9 @@ void weapon_swap(struct player *p)
 
 char *weapon_shortdesc(item *weapon, guint available_space)
 {
+	/* a little sanity check */
+	if (available_space == 0) return NULL;
+
     GString *desc = g_string_new(NULL);
     if (weapon->bonus_known)
     {
