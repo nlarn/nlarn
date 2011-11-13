@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
@@ -108,6 +106,7 @@ static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
 static void player_memory_deserialize(player *p, position pos, cJSON *mser);
 static char *player_death_description(game_score_t *score, int verbose);
+static char *player_create_obituary(player *p, game_score_t *score, GList *scores);
 static int item_filter_unequippable(item *it);
 static int item_filter_equippable(item *it);
 static int item_filter_dropable(item *it);
@@ -991,14 +990,11 @@ static const char *int2time_str(int val)
 
 void player_die(player *p, player_cod cause_type, int cause)
 {
-    GString *text;
-    game_score_t *score, *cscore;
-    GList *scores, *iterator;
+    game_score_t *score;
+    GList *scores;
     char *message = NULL;
     char *title = NULL;
-    char *tmp = NULL;
     effect *ef = NULL;
-    char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
 
     g_assert(p != NULL);
 
@@ -1095,40 +1091,39 @@ void player_die(player *p, player_cod cause_type, int cause)
         if (p->level < 1) p->level = 1;
 
         /* clear some nasty effects */
-        effect *e;
-        if ((e = player_effect_get(p, ET_PARALYSIS)))
-            player_effect_del(p, e);
-        if ((e = player_effect_get(p, ET_CONFUSION)))
-            player_effect_del(p, e);
-        if ((e = player_effect_get(p, ET_BLINDNESS)))
-            player_effect_del(p, e);
-        if ((e = player_effect_get(p, ET_POISON)))
-            player_effect_del(p, e);
+        if ((ef = player_effect_get(p, ET_PARALYSIS)))
+            player_effect_del(p, ef);
+        if ((ef = player_effect_get(p, ET_CONFUSION)))
+            player_effect_del(p, ef);
+        if ((ef = player_effect_get(p, ET_BLINDNESS)))
+            player_effect_del(p, ef);
+        if ((ef = player_effect_get(p, ET_POISON)))
+            player_effect_del(p, ef);
 
         if (player_get_con(p) <= 0)
         {
-            if ((e = player_effect_get(p, ET_DEC_CON)))
-                player_effect_del(p, e);
+            if ((ef = player_effect_get(p, ET_DEC_CON)))
+                player_effect_del(p, ef);
         }
         if (player_get_dex(p) <= 0)
         {
-            if ((e = player_effect_get(p, ET_DEC_DEX)))
-                player_effect_del(p, e);
+            if ((ef = player_effect_get(p, ET_DEC_DEX)))
+                player_effect_del(p, ef);
         }
         if (player_get_int(p) <= 0)
         {
-            if ((e = player_effect_get(p, ET_DEC_INT)))
-                player_effect_del(p, e);
+            if ((ef = player_effect_get(p, ET_DEC_INT)))
+                player_effect_del(p, ef);
         }
         if (player_get_str(p) <= 0)
         {
-            if ((e = player_effect_get(p, ET_DEC_STR)))
-                player_effect_del(p, e);
+            if ((ef = player_effect_get(p, ET_DEC_STR)))
+                player_effect_del(p, ef);
         }
         if (player_get_wis(p) <= 0)
         {
-            if ((e = player_effect_get(p, ET_DEC_WIS)))
-                player_effect_del(p, e);
+            if ((ef = player_effect_get(p, ET_DEC_WIS)))
+                player_effect_del(p, ef);
         }
 
         /* return to the game */
@@ -1140,11 +1135,6 @@ void player_die(player *p, player_cod cause_type, int cause)
     /* do not show scores when in wizardmode */
     if (!game_wizardmode(nlarn))
     {
-        int count;
-
-       /* buffer for item descriptions */
-        gchar *it_desc;
-
         /* redraw screen to make sure player can see the cause of his death */
         display_paint_screen(p);
 
@@ -1157,321 +1147,10 @@ void player_die(player *p, player_cod cause_type, int cause)
         score  = game_score(nlarn, cause_type, cause);
         scores = game_score_add(nlarn, score);
 
-        tmp = player_death_description(score, TRUE);
-        text = g_string_new(tmp);
-        g_free(tmp);
+        /* create a description of the player's achievments */
+        gchar *text = player_create_obituary(p, score, scores);
 
-        /* determine position of score in the score list */
-        gint rank = g_list_index(scores, score);
-
-        /* assemble surrounding scores list */
-        g_string_append(text, "\n\n");
-
-        /* get entry three entries up of current/top score in list */
-        iterator = g_list_nth(scores, max(rank - 3, 0));
-
-        /* display up to 7 entries */
-        for (int nrec = max(rank - 3, 0);
-             iterator && (nrec < (max(rank, 0) + 4));
-             iterator = iterator->next, nrec++)
-        {
-            gchar *desc;
-
-            cscore = (game_score_t *)iterator->data;
-
-            desc = player_death_description(cscore, FALSE);
-            g_string_append_printf(text, "  %s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d/%d hp, diff %d]\n",
-                                   (cscore == score) ? "*" : " ",
-                                   nrec + 1, cscore->score, desc,
-                                   cscore->dlevel, cscore->hp, cscore->hp_max,
-                                   cscore->difficulty);
-
-            g_free(desc);
-        }
-
-        game_scores_destroy(scores);
-
-        /* some statistics */
-        g_string_append_printf(text, "\n%s %s after searching for the potion for %d mobul%s. ",
-                               pronoun, cause_type < PD_TOO_LATE ? "died" : "returned",
-                               gtime2mobuls(nlarn->gtime), plural(gtime2mobuls(nlarn->gtime)));
-
-        g_string_append_printf(text, "%s cast %s spell%s, ", pronoun,
-                               int2str(p->stats.spells_cast),
-                               plural(p->stats.spells_cast));
-        g_string_append_printf(text, "quaffed %s potion%s, ",
-                               int2str(p->stats.potions_quaffed),
-                               plural(p->stats.potions_quaffed));
-        g_string_append_printf(text, "and read %s book%s ",
-                               int2str(p->stats.books_read),
-                               plural(p->stats.books_read));
-        g_string_append_printf(text, "and %s scroll%s. ",
-                               int2str(p->stats.scrolls_read),
-                               plural(p->stats.scrolls_read));
-
-        if (p->stats.vandalism > 0)
-        {
-            g_string_append_printf(text, "\n%s committed %s act%s of vandalism. ",
-                                   pronoun, int2str(p->stats.vandalism),
-                                   plural(p->stats.vandalism));
-        }
-
-        if (p->stats.life_protected > 0)
-        {
-            g_string_append_printf(text, "\n%s life was protected %s. ",
-                                   (p->sex == PS_MALE) ? "His" : "Her",
-                                   int2time_str(p->stats.life_protected));
-        }
-
-        g_string_append_printf(text, "\n%s had %s gp on %s bank account "
-                               "when %s %s.",
-                               pronoun, int2str(p->bank_account),
-                               (p->sex == PS_MALE) ? "his" : "her",
-                               (p->sex == PS_MALE) ? "he"  : "she",
-                               cause_type < PD_TOO_LATE ? "died"
-                               : "returned home");
-
-        g_string_append_printf(text, "\n%s found %d gold in the dungeon, "
-                               "sold %s gem%s for %d and %s non-gem "
-                               "item%s for %d gold, and earned %d gold "
-                               "as bank interest.",
-                               pronoun, p->stats.gold_found,
-                               int2str(p->stats.gems_sold),
-                               plural(p->stats.gems_sold),
-                               p->stats.gold_sold_gems,
-                               int2str(p->stats.items_sold),
-                               plural(p->stats.items_sold),
-                               p->stats.gold_sold_items,
-                               p->stats.gold_bank_interest);
-
-        g_string_append_printf(text, "\n%s bought %s item%s for %d gold, spent "
-                               "%d on item identification or repair, "
-                               "donated %d gold to charitable causes, and "
-                               "invested %d gold in personal education.",
-                               pronoun,
-                               int2str(p->stats.items_bought),
-                               plural(p->stats.items_bought),
-                               p->stats.gold_spent_shop,
-                               p->stats.gold_spent_id_repair,
-                               p->stats.gold_spent_donation,
-                               p->stats.gold_spent_college);
-
-        if (p->outstanding_taxes)
-            g_string_append_printf(text, " %s owed the tax office %d gold%s",
-                                   pronoun, p->outstanding_taxes,
-                                   p->stats.gold_spent_taxes ? "" : ".");
-
-        if (p->stats.gold_spent_taxes)
-            g_string_append_printf(text, " %s paid %d gold taxes.",
-                                   p->outstanding_taxes ? "and" : pronoun,
-                                   p->stats.gold_spent_taxes);
-
-        /* append map of current level if the player is not in the town */
-        if (Z(p->pos) > 0)
-        {
-            g_string_append(text, "\n\n-- The current level ------------------\n\n");
-            tmp = map_dump(game_map(nlarn, Z(p->pos)), p->pos);
-            g_string_append(text, tmp);
-            g_free(tmp);
-        }
-
-        /* player's attributes */
-        g_string_append(text, "\n\n-- Attributes -------------------------\n\n");
-        g_string_append_printf(text, "Strength:     %d (%+2d)\n",
-                               p->strength, p->strength - p->stats.str_orig);
-        g_string_append_printf(text, "Intelligence: %d (%+2d)\n",
-                               p->intelligence, p->intelligence - p->stats.int_orig);
-        g_string_append_printf(text, "Wisdom:       %d (%+2d)\n",
-                               p->wisdom, p->wisdom - p->stats.wis_orig);
-        g_string_append_printf(text, "Constitution: %d (%+2d)\n",
-                               p->constitution, p->constitution - p->stats.con_orig);
-        g_string_append_printf(text, "Dexterity:    %d (%+2d)\n",
-                               p->dexterity, p->dexterity - p->stats.dex_orig);
-
-        /* effects */
-        char **effect_desc = player_effect_text(p);
-
-        if (*effect_desc)
-        {
-            g_string_append(text, "\n\n-- Effects ----------------------------\n\n");
-
-            for (guint pos = 0; effect_desc[pos]; pos++)
-            {
-                g_string_append_printf(text, "%s\n", effect_desc[pos]);
-            }
-        }
-
-        g_strfreev(effect_desc);
-
-        /* append list of known spells */
-        if (p->known_spells->len > 0)
-        {
-            g_string_append(text, "\n\n-- Known Spells -----------------------\n\n");
-
-            for (guint pos = 0; pos < p->known_spells->len; pos++)
-            {
-                spell *s = (spell *)g_ptr_array_index(p->known_spells, pos);
-                tmp = str_capitalize(g_strdup(spell_name(s)));
-
-                g_string_append_printf(text, "%-24s (lvl. %2d): %3d\n",
-                                       tmp, s->knowledge, s->used);
-
-                g_free(tmp);
-            }
-        }
-
-        /* identify entire inventory */
-        for (guint pos = 0; pos < inv_length(p->inventory); pos++)
-        {
-            item *it = inv_get(p->inventory, pos);
-            it->blessed_known = TRUE;
-            it->bonus_known = TRUE;
-        }
-
-        /* equipped items */
-        guint equipment_count = 0;
-        g_string_append(text, "\n\n-- Equipment --------------------------\n\n");
-        if (p->eq_amulet)
-        {
-            it_desc = item_describe(p->eq_amulet, TRUE, TRUE, FALSE);
-            g_string_append_printf(text, "Amulet:   %s\n", it_desc);
-            g_free(it_desc);
-            equipment_count++;
-        }
-        if (p->eq_ring_l)
-        {
-            it_desc = item_describe(p->eq_ring_l, TRUE, TRUE, FALSE);
-            g_string_append_printf(text, "Ring (l): %s\n", it_desc);
-            g_free(it_desc);
-            equipment_count++;
-        }
-        if (p->eq_ring_r)
-        {
-            it_desc = item_describe(p->eq_ring_r, TRUE, TRUE, FALSE);
-            g_string_append_printf(text, "Ring (r): %s\n", it_desc);
-            g_free(it_desc);
-            equipment_count++;
-        }
-        if (p->eq_weapon)
-        {
-            it_desc = item_describe(p->eq_weapon, TRUE, TRUE, FALSE);
-            g_string_append_printf(text, "Weapon:   %s\n", it_desc);
-            g_free(it_desc);
-            equipment_count++;
-        }
-        if (p->eq_suit)
-        {
-            it_desc = item_describe(p->eq_suit, TRUE, TRUE, FALSE);
-            g_string_append_printf(text, "Armour:   %s\n", it_desc);
-            g_free(it_desc);
-            equipment_count++;
-        }
-        if (p->eq_helmet)
-        {
-            it_desc = item_describe(p->eq_helmet, TRUE, TRUE, FALSE);
-            g_string_append_printf(text, "Helmet:   %s\n", it_desc);
-            g_free(it_desc);
-            equipment_count++;
-        }
-        if (p->eq_shield)
-        {
-            it_desc = item_describe(p->eq_shield, TRUE, TRUE, FALSE);
-            g_string_append_printf(text, "Shield:   %s\n", it_desc);
-            g_free(it_desc);
-            equipment_count++;
-        }
-        if (p->eq_cloak)
-        {
-            it_desc = item_describe(p->eq_cloak, TRUE, TRUE, FALSE);
-            g_string_append_printf(text, "Cloak:    %s\n", it_desc);
-            g_free(it_desc);
-            equipment_count++;
-        }
-        if (p->eq_gloves)
-        {
-            it_desc = item_describe(p->eq_gloves, TRUE, TRUE, FALSE);
-            g_string_append_printf(text, "Gloves:   %s\n", it_desc);
-            g_free(it_desc);
-            equipment_count++;
-        }
-        if (p->eq_boots)
-        {
-            it_desc = item_describe(p->eq_boots, TRUE, TRUE, FALSE);
-            g_string_append_printf(text, "Boots:    %s\n", it_desc);
-            g_free(it_desc);
-            equipment_count++;
-        }
-
-        /* inventory */
-        if (equipment_count < inv_length(p->inventory))
-        {
-            g_string_append(text, "\n\n-- Items in pack ----------------------\n\n");
-            for (guint pos = 0; pos < inv_length(p->inventory); pos++)
-            {
-                item *it = inv_get(p->inventory, pos);
-                if (!player_item_is_equipped(p, it))
-                {
-                    it_desc = item_describe(it, TRUE, FALSE, FALSE);
-                    g_string_append_printf(text, "%s\n", it_desc);
-                    g_free(it_desc);
-                }
-            }
-        }
-
-        /* list monsters killed */
-        guint body_count = 0;
-        g_string_append(text, "\n\n-- Creatures vanquished ---------------\n\n");
-
-        for (guint mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
-        {
-            if (p->stats.monsters_killed[mnum] > 0)
-            {
-                count = p->stats.monsters_killed[mnum];
-                tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum,
-                                              count)));
-
-                g_string_append_printf(text, "%3d %s\n", count, tmp);
-
-                g_free(tmp);
-                body_count += count;
-            }
-        }
-        g_string_append_printf(text, "\n%3d total\n", body_count);
-
-        /* genocided monsters */
-        g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
-
-        count = 0;
-        for (guint mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
-        {
-            if (!monster_is_genocided(mnum))
-                continue;
-
-            tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum, 2)));
-            g_string_append_printf(text, "%s\n", tmp);
-            count++;
-        }
-
-        g_string_append_printf(text, "\n%s genocided %s monster%s.\n",
-                               pronoun, int2str(count), plural(count));
-
-
-        /* messages */
-        g_string_append(text, "\n\n-- Last messages ----------------------\n\n");
-        count = min(10, log_length(nlarn->log));
-        for (guint pos = log_length(nlarn->log) - count;
-             pos < log_length(nlarn->log); pos++)
-        {
-            message_log_entry *entry = log_get_entry(nlarn->log, pos);
-            g_string_append_printf(text, "%s\n", entry->message);
-        }
-        /* print uncommited messages */
-        if (nlarn->log->buffer->len > 0)
-        {
-            g_string_append_printf(text, "%s\n", nlarn->log->buffer->str);
-        }
-
-        display_show_message(title, text->str, 0);
+        display_show_message(title, text, 0);
 
         if (display_get_yesno("Do you want to save a memorial " \
                               "file for your character?", NULL, NULL))
@@ -1485,7 +1164,7 @@ void player_die(player *p, player_cod cause_type, int cause)
             if (filename != NULL)
             {
                 /* file name has been provided. try to save file */
-                if (!g_file_set_contents(filename, text->str, -1, &error))
+                if (!g_file_set_contents(filename, text, -1, &error))
                 {
                     display_show_message("Error", error->message, 0);
                     g_error_free(error);
@@ -1497,7 +1176,7 @@ void player_die(player *p, player_cod cause_type, int cause)
             g_free(filename);
         }
 
-        g_string_free(text, TRUE);
+        g_free(text);
     }
 
     game_delete_savefile();
@@ -5386,6 +5065,332 @@ void calc_fighting_stats(player *p)
 
     g_free(desc);
     g_string_free(text, TRUE);
+}
+
+static char *player_create_obituary(player *p, game_score_t *score, GList *scores)
+{
+    const char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
+    GList *iterator;
+
+    /* buffer for item descriptions */
+    gchar *it_desc;
+
+    /* the obituary */
+    GString *text;
+
+    /* determine position of score in the score list */
+    guint rank = g_list_index(scores, score);
+
+    gchar *tmp = player_death_description(score, TRUE);
+    text = g_string_new(tmp);
+    g_free(tmp);
+
+    /* assemble surrounding scores list */
+    g_string_append(text, "\n\n");
+
+    /* get entry three entries up of current/top score in list */
+    iterator = g_list_nth(scores, max(rank - 3, 0));
+
+    /* display up to 7 entries */
+    for (int nrec = max(rank - 3, 0);
+         iterator && (nrec < (max(rank, 0) + 4));
+         iterator = iterator->next, nrec++)
+    {
+        gchar *desc;
+
+        game_score_t *cscore = (game_score_t *)iterator->data;
+
+        desc = player_death_description(cscore, FALSE);
+        g_string_append_printf(text, "  %s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d/%d hp, diff %d]\n",
+                               (cscore == score) ? "*" : " ",
+                               nrec + 1, cscore->score, desc,
+                               cscore->dlevel, cscore->hp, cscore->hp_max,
+                               cscore->difficulty);
+
+        g_free(desc);
+    }
+
+    game_scores_destroy(scores);
+
+    /* some statistics */
+    g_string_append_printf(text, "\n%s %s after searching for the potion for %d mobul%s. ",
+                           pronoun, score->cod < PD_TOO_LATE ? "died" : "returned",
+                           gtime2mobuls(nlarn->gtime), plural(gtime2mobuls(nlarn->gtime)));
+
+    g_string_append_printf(text, "%s cast %s spell%s, ", pronoun,
+                           int2str(p->stats.spells_cast),
+                           plural(p->stats.spells_cast));
+    g_string_append_printf(text, "quaffed %s potion%s, ",
+                           int2str(p->stats.potions_quaffed),
+                           plural(p->stats.potions_quaffed));
+    g_string_append_printf(text, "and read %s book%s ",
+                           int2str(p->stats.books_read),
+                           plural(p->stats.books_read));
+    g_string_append_printf(text, "and %s scroll%s. ",
+                           int2str(p->stats.scrolls_read),
+                           plural(p->stats.scrolls_read));
+
+    if (p->stats.vandalism > 0)
+    {
+        g_string_append_printf(text, "\n%s committed %s act%s of vandalism. ",
+                               pronoun, int2str(p->stats.vandalism),
+                               plural(p->stats.vandalism));
+    }
+
+    if (p->stats.life_protected > 0)
+    {
+        g_string_append_printf(text, "\n%s life was protected %s. ",
+                               (p->sex == PS_MALE) ? "His" : "Her",
+                               int2time_str(p->stats.life_protected));
+    }
+
+    g_string_append_printf(text, "\n%s had %s gp on %s bank account "
+                           "when %s %s.",
+                           pronoun, int2str(p->bank_account),
+                           (p->sex == PS_MALE) ? "his" : "her",
+                           (p->sex == PS_MALE) ? "he"  : "she",
+                           score->cod < PD_TOO_LATE ? "died"
+                           : "returned home");
+
+    g_string_append_printf(text, "\n%s found %d gold in the dungeon, "
+                           "sold %s gem%s for %d and %s non-gem "
+                           "item%s for %d gold, and earned %d gold "
+                           "as bank interest.",
+                           pronoun, p->stats.gold_found,
+                           int2str(p->stats.gems_sold),
+                           plural(p->stats.gems_sold),
+                           p->stats.gold_sold_gems,
+                           int2str(p->stats.items_sold),
+                           plural(p->stats.items_sold),
+                           p->stats.gold_sold_items,
+                           p->stats.gold_bank_interest);
+
+    g_string_append_printf(text, "\n%s bought %s item%s for %d gold, spent "
+                           "%d on item identification or repair, "
+                           "donated %d gold to charitable causes, and "
+                           "invested %d gold in personal education.",
+                           pronoun,
+                           int2str(p->stats.items_bought),
+                           plural(p->stats.items_bought),
+                           p->stats.gold_spent_shop,
+                           p->stats.gold_spent_id_repair,
+                           p->stats.gold_spent_donation,
+                           p->stats.gold_spent_college);
+
+    if (p->outstanding_taxes)
+        g_string_append_printf(text, " %s owed the tax office %d gold%s",
+                               pronoun, p->outstanding_taxes,
+                               p->stats.gold_spent_taxes ? "" : ".");
+
+    if (p->stats.gold_spent_taxes)
+        g_string_append_printf(text, " %s paid %d gold taxes.",
+                               p->outstanding_taxes ? "and" : pronoun,
+                               p->stats.gold_spent_taxes);
+
+    /* append map of current level if the player is not in the town */
+    if (Z(p->pos) > 0)
+    {
+        g_string_append(text, "\n\n-- The current level ------------------\n\n");
+        tmp = map_dump(game_map(nlarn, Z(p->pos)), p->pos);
+        g_string_append(text, tmp);
+        g_free(tmp);
+    }
+
+    /* player's attributes */
+    g_string_append(text, "\n\n-- Attributes -------------------------\n\n");
+    g_string_append_printf(text, "Strength:     %d (%+2d)\n",
+                           p->strength, p->strength - p->stats.str_orig);
+    g_string_append_printf(text, "Intelligence: %d (%+2d)\n",
+                           p->intelligence, p->intelligence - p->stats.int_orig);
+    g_string_append_printf(text, "Wisdom:       %d (%+2d)\n",
+                           p->wisdom, p->wisdom - p->stats.wis_orig);
+    g_string_append_printf(text, "Constitution: %d (%+2d)\n",
+                           p->constitution, p->constitution - p->stats.con_orig);
+    g_string_append_printf(text, "Dexterity:    %d (%+2d)\n",
+                           p->dexterity, p->dexterity - p->stats.dex_orig);
+
+    /* effects */
+    char **effect_desc = player_effect_text(p);
+
+    if (*effect_desc)
+    {
+        g_string_append(text, "\n\n-- Effects ----------------------------\n\n");
+
+        for (guint pos = 0; effect_desc[pos]; pos++)
+        {
+            g_string_append_printf(text, "%s\n", effect_desc[pos]);
+        }
+    }
+
+    g_strfreev(effect_desc);
+
+    /* append list of known spells */
+    if (p->known_spells->len > 0)
+    {
+        g_string_append(text, "\n\n-- Known Spells -----------------------\n\n");
+
+        for (guint pos = 0; pos < p->known_spells->len; pos++)
+        {
+            spell *s = (spell *)g_ptr_array_index(p->known_spells, pos);
+            tmp = str_capitalize(g_strdup(spell_name(s)));
+
+            g_string_append_printf(text, "%-24s (lvl. %2d): %3d\n",
+                                   tmp, s->knowledge, s->used);
+
+            g_free(tmp);
+        }
+    }
+
+    /* identify entire inventory */
+    for (guint pos = 0; pos < inv_length(p->inventory); pos++)
+    {
+        item *it = inv_get(p->inventory, pos);
+        it->blessed_known = TRUE;
+        it->bonus_known = TRUE;
+    }
+
+    /* equipped items */
+    guint equipment_count = 0;
+    g_string_append(text, "\n\n-- Equipment --------------------------\n\n");
+    if (p->eq_amulet)
+    {
+        it_desc = item_describe(p->eq_amulet, TRUE, TRUE, FALSE);
+        g_string_append_printf(text, "Amulet:   %s\n", it_desc);
+        g_free(it_desc);
+        equipment_count++;
+    }
+    if (p->eq_ring_l)
+    {
+        it_desc = item_describe(p->eq_ring_l, TRUE, TRUE, FALSE);
+        g_string_append_printf(text, "Ring (l): %s\n", it_desc);
+        g_free(it_desc);
+        equipment_count++;
+    }
+    if (p->eq_ring_r)
+    {
+        it_desc = item_describe(p->eq_ring_r, TRUE, TRUE, FALSE);
+        g_string_append_printf(text, "Ring (r): %s\n", it_desc);
+        g_free(it_desc);
+        equipment_count++;
+    }
+    if (p->eq_weapon)
+    {
+        it_desc = item_describe(p->eq_weapon, TRUE, TRUE, FALSE);
+        g_string_append_printf(text, "Weapon:   %s\n", it_desc);
+        g_free(it_desc);
+        equipment_count++;
+    }
+    if (p->eq_suit)
+    {
+        it_desc = item_describe(p->eq_suit, TRUE, TRUE, FALSE);
+        g_string_append_printf(text, "Armour:   %s\n", it_desc);
+        g_free(it_desc);
+        equipment_count++;
+    }
+    if (p->eq_helmet)
+    {
+        it_desc = item_describe(p->eq_helmet, TRUE, TRUE, FALSE);
+        g_string_append_printf(text, "Helmet:   %s\n", it_desc);
+        g_free(it_desc);
+        equipment_count++;
+    }
+    if (p->eq_shield)
+    {
+        it_desc = item_describe(p->eq_shield, TRUE, TRUE, FALSE);
+        g_string_append_printf(text, "Shield:   %s\n", it_desc);
+        g_free(it_desc);
+        equipment_count++;
+    }
+    if (p->eq_cloak)
+    {
+        it_desc = item_describe(p->eq_cloak, TRUE, TRUE, FALSE);
+        g_string_append_printf(text, "Cloak:    %s\n", it_desc);
+        g_free(it_desc);
+        equipment_count++;
+    }
+    if (p->eq_gloves)
+    {
+        it_desc = item_describe(p->eq_gloves, TRUE, TRUE, FALSE);
+        g_string_append_printf(text, "Gloves:   %s\n", it_desc);
+        g_free(it_desc);
+        equipment_count++;
+    }
+    if (p->eq_boots)
+    {
+        it_desc = item_describe(p->eq_boots, TRUE, TRUE, FALSE);
+        g_string_append_printf(text, "Boots:    %s\n", it_desc);
+        g_free(it_desc);
+        equipment_count++;
+    }
+
+    /* inventory */
+    if (equipment_count < inv_length(p->inventory))
+    {
+        g_string_append(text, "\n\n-- Items in pack ----------------------\n\n");
+        for (guint pos = 0; pos < inv_length(p->inventory); pos++)
+        {
+            item *it = inv_get(p->inventory, pos);
+            if (!player_item_is_equipped(p, it))
+            {
+                it_desc = item_describe(it, TRUE, FALSE, FALSE);
+                g_string_append_printf(text, "%s\n", it_desc);
+                g_free(it_desc);
+            }
+        }
+    }
+
+    /* list monsters killed */
+    guint body_count = 0;
+    g_string_append(text, "\n\n-- Creatures vanquished ---------------\n\n");
+
+    for (guint mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
+    {
+        if (p->stats.monsters_killed[mnum] > 0)
+        {
+            guint mcount = p->stats.monsters_killed[mnum];
+            tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum,
+                                          mcount)));
+
+            g_string_append_printf(text, "%3d %s\n", mcount, tmp);
+
+            g_free(tmp);
+            body_count += mcount;
+        }
+    }
+    g_string_append_printf(text, "\n%3d total\n", body_count);
+
+    /* genocided monsters */
+    g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
+
+    guint genocided_count = 0;
+    for (guint mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
+    {
+        if (!monster_is_genocided(mnum))
+            continue;
+
+        tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum, 2)));
+        g_string_append_printf(text, "%s\n", tmp);
+        genocided_count++;
+    }
+
+    g_string_append_printf(text, "\n%s genocided %s monster%s.\n", pronoun,
+                           int2str(genocided_count), plural(genocided_count));
+
+     /* messages */
+    g_string_append(text, "\n\n-- Last messages ----------------------\n\n");
+    for (guint pos = log_length(nlarn->log) - min(10, log_length(nlarn->log));
+         pos < log_length(nlarn->log); pos++)
+    {
+        message_log_entry *entry = log_get_entry(nlarn->log, pos);
+        g_string_append_printf(text, "%s\n", entry->message);
+    }
+    /* print uncommited messages */
+    if (nlarn->log->buffer->len > 0)
+    {
+        g_string_append_printf(text, "%s\n", nlarn->log->buffer->str);
+    }
+
+    return (g_string_free(text, FALSE));
 }
 
 static int item_filter_unequippable(item *it)
