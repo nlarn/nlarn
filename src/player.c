@@ -107,6 +107,7 @@ static cJSON *player_memory_serialize(player *p, position pos);
 static void player_memory_deserialize(player *p, position pos, cJSON *mser);
 static char *player_death_description(game_score_t *score, int verbose);
 static char *player_create_obituary(player *p, game_score_t *score, GList *scores);
+static void player_memorial_file_save(player *p, const char *text);
 static int item_filter_unequippable(item *it);
 static int item_filter_equippable(item *it);
 static int item_filter_dropable(item *it);
@@ -1155,25 +1156,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         if (display_get_yesno("Do you want to save a memorial " \
                               "file for your character?", NULL, NULL))
         {
-            char *filename, *proposal;
-            GError *error = NULL;
-
-            proposal = g_strconcat(p->name, ".txt", NULL);
-            filename = display_get_string("Enter filename: ", proposal, 40);
-
-            if (filename != NULL)
-            {
-                /* file name has been provided. try to save file */
-                if (!g_file_set_contents(filename, text, -1, &error))
-                {
-                    display_show_message("Error", error->message, 0);
-                    g_error_free(error);
-                }
-
-                g_free(proposal);
-            }
-
-            g_free(filename);
+            player_memorial_file_save(p, text);
         }
 
         g_free(text);
@@ -5391,6 +5374,80 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
     }
 
     return (g_string_free(text, FALSE));
+}
+
+
+static void player_memorial_file_save(player *p, const char *text)
+{
+    char *proposal = NULL;
+    char *filename;
+    gboolean done = FALSE;
+
+    while (!done)
+    {
+        GError *error = NULL;
+
+        if (proposal == NULL)
+        {
+            /* When starting, propose a file name. Use the previously
+               entered file name when trying to find a new name for an
+               existing file. */
+            proposal = g_strconcat(p->name, ".txt", NULL);
+        }
+
+        filename = display_get_string("Enter filename: ", proposal, 40);
+        g_free(proposal);
+        proposal = NULL;
+
+        if (filename == NULL)
+        {
+            /* user pressed ESC, thus display_get_string() returned NULL */
+            done = TRUE;
+        } else {
+            /* file name has been provided. try to save file */
+            char *fullname = g_build_path(G_DIR_SEPARATOR_S,
+                    g_get_home_dir(), filename, NULL);
+
+            if (g_file_test(fullname, G_FILE_TEST_IS_SYMLINK))
+            {
+                display_show_message("Error", "File is a symlink. I won't " \
+                        "overwrite those....", 0);
+                g_free(fullname);
+                continue;
+            }
+
+            if (g_file_test(fullname, G_FILE_TEST_IS_DIR))
+            {
+                display_show_message("Error", "There is a directory with the " \
+                        "name you gave. Thus I can't write the file.", 0);
+                g_free(fullname);
+                continue;
+            }
+
+            if (g_file_test(fullname, G_FILE_TEST_IS_REGULAR)
+                    && !display_get_yesno("File exists!\n"
+                        "Do you want to overwrite it?", NULL, NULL))
+            {
+                g_free(fullname);
+                proposal = filename;
+                continue;
+            }
+
+            if (g_file_set_contents(fullname, text, -1, &error))
+            {
+                /* successfully saved the memorial file */
+                done = TRUE;
+            }
+            else
+            {
+                display_show_message("Error", error->message, 0);
+                g_error_free(error);
+            }
+
+            g_free(filename);
+            g_free(fullname);
+        }
+    }
 }
 
 static int item_filter_unequippable(item *it)
