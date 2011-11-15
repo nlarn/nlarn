@@ -82,12 +82,14 @@ else
   LDFLAGS += $(shell pkg-config --libs glib-2.0)
 
   # Configuration for ncurses
-  ifneq ($(OS),Darwin)
+  ifeq ($(filter Darwin DragonFly OpenBSD,$(OS)),)
     CFLAGS  += $(shell ncurses5-config --cflags)
     LDFLAGS += $(shell ncurses5-config --libs) -lpanel
   else
-    # 1) there is no ncurses5-config on OSX
-    # 2) the available ncurses5.4-config returns garbage
+    # 1) there is no ncurses5-config on OS X and
+    #    the available ncurses5.4-config returns garbage
+    # 2) DragonFly has ncurses in base
+    # 3) as has OpenBSD
     LDFLAGS += -lncurses -lpanel
   endif
 
