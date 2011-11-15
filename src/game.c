@@ -16,7 +16,12 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
+/* setres[gu]id() from unistd.h are only defined when this is set
+   *before* including it. Another header in the list seems to do so
+   before we include it here.*/
+#ifdef __linux__
+#define _GNU_SOURCE
+#endif
 
 #include <glib.h>
 #include <lua.h>
@@ -53,6 +58,8 @@ static GList *game_scores_load(game *g);
 static void game_scores_save(game *g, GList *scores);
 static int game_score_compare(const void *scr_a, const void *scr_b);
 
+const char *default_lib_dir = "/usr/share/nlarn";
+const char *default_var_dir = "/var/games/nlarn";
 static const char *mesgfile = "nlarn.msg";
 static const char *helpfile = "nlarn.hlp";
 static const char *mazefile = "maze";
@@ -64,6 +71,11 @@ static const char *save_file = "nlarn.sav";
 /* scoreboard version */
 static const gint sb_ver = 1;
 
+#if (defined (__unix) && defined (SETGID))
+/* handle for the scoreboard file when running setgid */
+static FILE *scoreboard_filehandle = NULL ;
+#endif
+
 static void print_welcome_message(gboolean newgame)
 {
     log_add_entry(nlarn->log, "Welcome %sto NLarn %d.%d.%d%s!",
@@ -74,8 +86,6 @@ static void print_welcome_message(gboolean newgame)
 
 void game_init(int argc, char *argv[])
 {
-    const char *default_lib_dir = "/usr/share/games/nlarn";
-
     /* these will be filled by the command line parser */
     static gint difficulty = 0;
     static gboolean wizard = FALSE;
@@ -85,6 +95,46 @@ void game_init(int argc, char *argv[])
     static char *auto_pickup = NULL;
     static char *savefile = NULL;
     static char *stats = NULL;
+
+#if (defined (__unix) && defined (SETGID))
+    gid_t realgid;
+    uid_t realuid;
+    char *scoreboard_filename = NULL;
+
+    /* assemble the scoreboard filename */
+    scoreboard_filename = g_build_path(G_DIR_SEPARATOR_S, default_var_dir,
+                                       "highscores", NULL);
+
+    /* Open the scoreboard file.
+     *
+     * The file is opened with mode "r+" to preserve the existing
+     * contents. Just make sure you don't close() the file after reading
+     * it or you won't be able to write to it again. */
+    scoreboard_filehandle = fopen(scoreboard_filename, "r+");
+
+    /* Figure out who we really are. */
+    realgid = getgid();
+    realuid = getuid();
+
+    /* This is where we drop our setuid/setgid privileges. */
+#ifdef __linux__
+    if (setresgid(-1, realgid, realgid) != 0) {
+#else
+    if (setregid(-1, realgid) != 0) {
+#endif
+        perror("Could not drop setgid privileges.  Aborting.");
+        exit(EXIT_FAILURE);
+    }
+
+#ifdef __linux__
+    if (setresuid(-1, realuid, realuid) != 0) {
+#else
+    if (setreuid(-1, realuid) != 0) {
+#endif
+        perror("Could not drop setuid privileges.  Aborting.");
+        exit(EXIT_FAILURE);
+    }
+#endif
 
     /* allocate space for game structure */
     nlarn = g_malloc0(sizeof(game));
@@ -141,7 +191,11 @@ void game_init(int argc, char *argv[])
     nlarn->helpfile = g_build_filename(nlarn->libdir, helpfile, NULL);
     nlarn->mazefile = g_build_filename(nlarn->libdir, mazefile, NULL);
     nlarn->fortunes = g_build_filename(nlarn->libdir, fortunes, NULL);
+#if (defined (__unix) && defined (SETGID))
+    nlarn->highscores = scoreboard_filename;
+#else
     nlarn->highscores = g_build_filename(nlarn->libdir, highscores, NULL);
+#endif
 
     /* initialize the lua interpreter */
     game_init_lua(nlarn);
@@ -232,6 +286,9 @@ void game_init(int argc, char *argv[])
     /* initialise the display - must not happen before this point
        otherwise displaying the command line help fails */
     display_init();
+
+    /* call display_shutdown when terminating the game */
+    atexit(display_shutdown);
 
     /* set autosave setting (default: TRUE) */
     game_autosave(nlarn) = !no_autosave;
@@ -1083,9 +1140,14 @@ static GList *game_scores_load(game *g)
     /* single scoreboard entry */
     game_score_t *nscore;
 
-
-    /* ** read the scoreboard file into memory ** */
+    /* read the scoreboard file into memory */
+#if (defined (__unix) && defined (SETGID))
+    int keep_fd = fileno(scoreboard_filehandle);
+    int fd = dup(keep_fd);
+    gzFile file = gzdopen(fd, "rb");
+#else
     gzFile file = gzopen(game_highscores(g), "rb");
+#endif
 
     if (file == NULL)
     {
@@ -1103,6 +1165,10 @@ static GList *game_scores_load(game *g)
         scores = g_realloc(scores, bufsize);
     }
 
+#if (defined (__unix) && defined (SETGID))
+    /* reposition to the start otherwise writing would append */
+    gzrewind(file);
+#endif
     /* close save file */
     gzclose(file);
 
@@ -1245,7 +1311,12 @@ static void game_scores_save(game *g, GList *gs)
     cJSON_Delete(sf);
 
     /* open the file for writing */
+#if (defined (__unix) && defined (SETGID))
+    int fd = fileno(scoreboard_filehandle);
+    sb = gzdopen(fd, "wb");
+#else
     sb = gzopen(game_highscores(g), "wb");
+#endif
 
     if (sb == NULL)
     {

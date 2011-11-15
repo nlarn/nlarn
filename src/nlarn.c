@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 /* needed for the key definitions */
 #include <ctype.h>
 #include <curses.h>
@@ -68,9 +66,6 @@ int main(int argc, char *argv[])
 
     /* position chosen for autotravel, allowing to continue travel */
     position cpos = pos_invalid;
-
-    /* call display_shutdown when terminating the game */
-    atexit(display_shutdown);
 
     /* initialise the game */
     game_init(argc, argv);
