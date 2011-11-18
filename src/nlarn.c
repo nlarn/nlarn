@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
     /* set the console shutdown handler */
 #ifdef __unix
     signal(SIGTERM, nlarn_signal_handler);
+    signal(SIGHUP, nlarn_signal_handler);
 #endif
 
 #ifdef WIN32
@@ -927,14 +928,18 @@ static gboolean adjacent_corridor(position pos, char mv)
 }
 
 #ifdef __unix
-static void nlarn_signal_handler(int signo __attribute__((unused)))
+static void nlarn_signal_handler(int signo)
 {
     /* restore the display down before emitting messages */
     display_shutdown();
 
     /* attempt to save the game */
     game_save(nlarn, NULL);
-    g_printf("Terminated. Your progress has been saved.\n");
+
+    if (signo != SIGHUP)
+    {
+        g_printf("Terminated. Your progress has been saved.\n");
+    }
 
     game_destroy(nlarn);
     exit(EXIT_SUCCESS);
