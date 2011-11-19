@@ -59,8 +59,12 @@ CFLAGS  += -std=c99 -Wextra -Iinc
 LDFLAGS += -lz
 
 ifeq ($(MSYSTEM),MINGW32)
+  # fake the content of the OS var to make it more common
+  # (otherwise packages would have silly names)
+  OS = win32
+
   # Libraries specific to Windows
-  LDFLAGS += -lpdcurses -llua
+  LDFLAGS += -static -lpdcurses -llua
 
   # Configuration for glib-2
   # Funny enough, build breaks if these are set as ususal..
