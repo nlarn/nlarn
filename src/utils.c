@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <ctype.h>
 #include <glib.h>
 #include <stdio.h>
@@ -466,6 +464,30 @@ int strv_append_unique(char ***list, const char *str)
         if (strcmp((*list)[len], str) == 0) return FALSE;
 
     return strv_append(list, str);
+}
+
+char *str_prepare_for_saving(const char *str)
+{
+	if (str == NULL) return NULL;
+
+#ifdef G_OS_WIN32
+	const char lend[] = "\r\n";
+#else
+	const char lend[] = "\n";
+#endif
+
+	GPtrArray *wrapped_str = text_wrap(str, 78, 2);
+	GString *nstr = g_string_new(NULL);
+
+	for (guint i = 0; i < wrapped_str->len; i++)
+	{
+        g_string_append(nstr, g_ptr_array_index(wrapped_str, i));
+        g_string_append(nstr, lend);
+	}
+
+	text_destroy(wrapped_str);
+
+	return g_string_free(nstr, FALSE);
 }
 
 int str_starts_with_vowel(const char *str)

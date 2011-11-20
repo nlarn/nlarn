@@ -5376,7 +5376,6 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
     return (g_string_free(text, FALSE));
 }
 
-
 static void player_memorial_file_save(player *p, const char *text)
 {
     char *proposal = NULL;
@@ -5406,12 +5405,17 @@ static void player_memorial_file_save(player *p, const char *text)
         } else {
             /* file name has been provided. try to save file */
             char *fullname = g_build_path(G_DIR_SEPARATOR_S,
-                    g_get_home_dir(), filename, NULL);
+#if G_OS_WIN32
+                    g_get_user_special_dir(G_USER_DIRECTORY_DOCUMENTS),
+#else
+                    g_get_home_dir(),
+#endif
+                    filename, NULL);
 
             if (g_file_test(fullname, G_FILE_TEST_IS_SYMLINK))
             {
                 display_show_message("Error", "File is a symlink. I won't " \
-                        "overwrite those....", 0);
+                        "overwrite those...", 0);
                 g_free(fullname);
                 continue;
             }
@@ -5433,7 +5437,10 @@ static void player_memorial_file_save(player *p, const char *text)
                 continue;
             }
 
-            if (g_file_set_contents(fullname, text, -1, &error))
+			/* wrap the text and insert line feed for the plattform */
+			char *wtext = str_prepare_for_saving(text);
+
+            if (g_file_set_contents(fullname, wtext, -1, &error))
             {
                 /* successfully saved the memorial file */
                 done = TRUE;
@@ -5443,6 +5450,8 @@ static void player_memorial_file_save(player *p, const char *text)
                 display_show_message("Error", error->message, 0);
                 g_error_free(error);
             }
+
+			g_free(wtext);
 
             g_free(filename);
             g_free(fullname);

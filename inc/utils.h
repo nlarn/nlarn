@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __UTILS_H_
 #define __UTILS_H_
 
@@ -134,6 +132,7 @@ int strv_append(char ***list, const char *str);
 int strv_append_unique(char ***list, const char *str);
 
 /* misc. text functions */
+char *str_prepare_for_saving(const char *str);
 int str_starts_with_vowel(const char *str);
 const char *int2str(int val);
 
