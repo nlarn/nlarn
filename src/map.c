@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 #include <stdlib.h>
 
@@ -32,7 +30,7 @@ static int map_fill_with_stationary_objects(map *maze);
 static void map_fill_with_objects(map *m);
 static void map_fill_with_traps(map *m);
 
-static int map_load_from_file(map *m, char *mazefile, int which);
+static gboolean map_load_from_file(map *m, const char *mazefile, guint which);
 static void map_make_maze(map *m, int treasure_room);
 static void map_make_maze_eat(map *m, int x, int y);
 static void map_make_river(map *m, map_tile_t rivertype);
@@ -1671,7 +1669,7 @@ static void place_special_item(map *m, position npos)
 
     switch (m->nlevel)
     {
-    case MAP_DMAX - 1: /* eye of larn */
+    case MAP_DMAX - 1: /* the amulet of larn */
         inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN));
 
         monster_new(MT_DEMONLORD_I + rand_0n(7), npos);
@@ -1698,11 +1696,11 @@ static void place_special_item(map *m, position npos)
  *
  *      #   wall
  *      +   door
- *      M   random monster
- *      !   potion of cure dianthroritis, or eye of larn, as appropriate
+ *      m   random monster
+ *      !   potion of cure dianthroritis, or the amulet of larn, as appropriate
  *      o   random object
  */
-static int map_load_from_file(map *m, char *mazefile, int which)
+static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
 {
     position pos;       /* current position on map */
     int map_num = 0;    /* number of selected map */
@@ -1727,7 +1725,7 @@ static int map_load_from_file(map *m, char *mazefile, int which)
     /* FIXME: calculate how many levels are in the file  */
 
     /* roll the dice: which map? */
-    if (which >= 0 && which <= MAP_MAX_MAZE_NUM)
+    if (which <= MAP_MAX_MAZE_NUM)
     {
         map_num = which;
     }
@@ -1743,8 +1741,15 @@ static int map_load_from_file(map *m, char *mazefile, int which)
         map_used[map_num] = TRUE;
     }
 
+	/* number of line separating character(s) */
+#ifdef G_OS_WIN32
+	const guint lslen = 2; /* i.e. CR/LF*/
+#else
+	const guint lslen = 1; /* i.e. LF */
+#endif
+
     /* advance to desired maze */
-    fseek(levelfile, (map_num * ((MAP_MAX_X + 1) * MAP_MAX_Y + 1)), SEEK_SET);
+    fseek(levelfile, (map_num * ((MAP_MAX_X + lslen) * MAP_MAX_Y + lslen)), SEEK_SET);
 
     if (feof(levelfile))
     {
@@ -1754,8 +1759,6 @@ static int map_load_from_file(map *m, char *mazefile, int which)
         return FALSE;
     }
 
-    Z(pos) = m->nlevel;
-
     // Sometimes flip the maps. (Never the town)
     gboolean flip_vertical   = (map_num > 0 && chance(50));
     gboolean flip_horizontal = (map_num > 0 && chance(50));
@@ -1763,6 +1766,7 @@ static int map_load_from_file(map *m, char *mazefile, int which)
     /* replace which of 3 '!' with a special item? (if appropriate) */
     int spec_count = rand_0n(3);
 
+    Z(pos) = m->nlevel;
     for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
     {
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
@@ -1872,12 +1876,13 @@ static int map_load_from_file(map *m, char *mazefile, int which)
                 break;
             };
         }
+
         (void)fgetc(levelfile); /* eat EOL */
     }
 
     fclose(levelfile);
 
-    /* if the eye of larn/pcd has not been placed yet, place it randomly */
+    /* if the amulet of larn/pcd has not been placed yet, place it randomly */
     if (spec_count >= 0)
         place_special_item(m, map_find_space(m, LE_ITEM, FALSE));
 

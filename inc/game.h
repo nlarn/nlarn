@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __GAME_H_
 #define __GAME_H_
 
@@ -30,7 +28,7 @@
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 
 /* internal counter for save file compatibility */
-#define SAVEFILE_VERSION    16
+#define SAVEFILE_VERSION    17
 
 /* the world as we know it */
 typedef struct game
