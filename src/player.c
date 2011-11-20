@@ -5406,7 +5406,7 @@ static void player_memorial_file_save(player *p, const char *text)
         } else {
             /* file name has been provided. try to save file */
             char *fullname = g_build_path(G_DIR_SEPARATOR_S,
-#if G_OS_WIN32
+#ifdef G_OS_WIN32
                     g_get_user_special_dir(G_USER_DIRECTORY_DOCUMENTS),
 #else
                     g_get_home_dir(),
