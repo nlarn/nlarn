@@ -5084,12 +5084,13 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
         game_score_t *cscore = (game_score_t *)iterator->data;
 
         desc = player_death_description(cscore, FALSE);
-        g_string_append_printf(text, "  %s%2d) %7" G_GINT64_FORMAT " %s [lvl. %d, %d/%d hp, diff %d]\n",
-                               (cscore == score) ? "*" : " ",
-                               nrec + 1, cscore->score, desc,
-                               cscore->dlevel, cscore->hp, cscore->hp_max,
-                               cscore->difficulty);
+        g_string_append_printf(text, "  %c%2d) %7" G_GINT64_FORMAT " %s\n",
+                               (cscore == score) ? '*' : ' ',
+                               nrec + 1, cscore->score, desc);
 
+        g_string_append_printf(text, "               [exp. level %d, dungeon lvl. %s, %d/%d hp, difficulty %d]\n",
+                               cscore->level, map_names[cscore->dlevel],
+                               cscore->hp, cscore->hp_max, cscore->difficulty);
         g_free(desc);
     }
 
