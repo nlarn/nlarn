@@ -48,8 +48,8 @@ else
   endif
 
   ifneq ($(GITREV),)
-    DATE     = $(shell date "+%Y%m%d")
-    VERSION := $(VERSION)-$(DATE)-$(GITREV)
+    date     = $(shell date "+%Y%m%d")
+    VERSION := $(VERSION)-$(date)-$(GITREV)
   endif
 endif
 
@@ -94,7 +94,13 @@ else
     #    the available ncurses5.4-config returns garbage
     # 2) DragonFly has ncurses in base
     # 3) as has OpenBSD
-    LDFLAGS += -lncurses -lpanel
+    ifneq ($(filter -DSDLPDCURSES,$(DEFINES)),)
+	  # build with SDL PDCurses on OS X
+      CFLAGS  += $(shell sdl-config --cflags) -Dmain=SDL_main
+      LDFLAGS += -lpdcurses $(shell sdl-config --static-libs)
+    else
+      LDFLAGS += -lncurses -lpanel
+    endif
   endif
 
   # Determine the name of the Lua 5.1 library

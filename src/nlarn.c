@@ -16,9 +16,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* needed for the key definitions */
 #include <ctype.h>
-#include <curses.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <stdlib.h>

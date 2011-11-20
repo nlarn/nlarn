@@ -16,13 +16,16 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __DISPLAY_H_
 #define __DISPLAY_H_
 
+#ifndef SDLPDCURSES
 #include <curses.h>
 #include <panel.h>
+#else
+#include <pdcurses.h>
+#include <pdpanel.h>
+#endif
 
 #include "game.h"
 #include "items.h"

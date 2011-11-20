@@ -16,10 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <curses.h>
 #include <ctype.h>
 #include <glib.h>
-#include <panel.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -114,6 +112,12 @@ void display_init()
        over networks */
 #ifndef WIN32
     g_setenv("ESCDELAY", "0", 0);
+#endif
+
+#ifdef SDLPDCURSES
+    /* default to 90 columns when using SDL PDCurses */
+    g_setenv("PDC_COLS", "90", 0);
+    g_setenv("PDC_LINES", "25", 0);
 #endif
 
     /* Start curses mode */
