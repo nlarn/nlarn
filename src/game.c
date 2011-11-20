@@ -1344,11 +1344,6 @@ static void game_scores_save(game *g, GList *gs)
 
     /* return memory */
     g_free(uscores);
-
-#ifdef __unix
-    /* set file permissions */
-    chmod(game_highscores(g), S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-#endif
 }
 
 static int game_score_compare(const void *scr_a, const void *scr_b)
