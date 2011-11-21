@@ -58,8 +58,8 @@ static GList *game_scores_load(game *g);
 static void game_scores_save(game *g, GList *scores);
 static int game_score_compare(const void *scr_a, const void *scr_b);
 
-const char *default_lib_dir = "/usr/share/nlarn";
-const char *default_var_dir = "/var/games/nlarn";
+static const char *default_lib_dir = "/usr/share/nlarn";
+static const char *default_var_dir = "/var/games/nlarn";
 static const char *mesgfile = "nlarn.msg";
 static const char *helpfile = "nlarn.hlp";
 static const char *mazefile = "maze";
@@ -153,6 +153,11 @@ void game_init(int argc, char *argv[])
 
         char *cwd = g_get_current_dir();
         char *wdlibdir = g_build_path(G_DIR_SEPARATOR_S, cwd, "lib", NULL);
+#ifdef __APPLE__
+        char *rellibdir = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir,
+                                       "../Resources/NLarn", NULL);
+#endif
+
         g_free(cwd);
 
         if (g_file_test(wdlibdir, G_FILE_TEST_IS_DIR))
@@ -167,19 +172,35 @@ void game_init(int argc, char *argv[])
             /* string has to be dup'd as it is feed in the end */
             nlarn->libdir = g_strdup((char *)default_lib_dir);
         }
+#ifdef __APPLE__
+        else if (g_file_test(rellibdir, G_FILE_TEST_IS_DIR))
+        {
+            /* program seems to be installed relocateable */
+            nlarn->libdir = g_strdup(rellibdir);
+        }
+#endif
         else
         {
             g_printerr("Could not find game library directory.\n\n"
                        "Paths I've tried:\n"
                        " * %s\n"
                        " * %s\n"
+#ifdef __APPLE__
+                       " * %s\n"
+#endif
                        " * %s\n\n"
                        "Please reinstall the game.\n",
-                       nlarn->libdir, wdlibdir, default_lib_dir);
+                       nlarn->libdir, wdlibdir,
+#ifdef __APPLE__
+                       rellibdir,
+#endif
+                       default_lib_dir);
 
             g_free(nlarn->libdir);
             g_free(wdlibdir);
-
+#ifdef __APPLE__
+            g_free(rellibdir);
+#endif
             exit(EXIT_FAILURE);
         }
 
