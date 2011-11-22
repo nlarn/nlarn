@@ -415,6 +415,9 @@ cJSON *player_serialize(player *p)
     cJSON_AddItemToObject(pser, "identified_amulets",
                           cJSON_CreateIntArray(p->identified_amulets, AM_MAX));
 
+    cJSON_AddItemToObject(pser, "identified_armour",
+                          cJSON_CreateIntArray(p->identified_armour, AT_MAX));
+
     cJSON_AddItemToObject(pser, "identified_books",
                           cJSON_CreateIntArray(p->identified_books, SP_MAX));
 
@@ -616,6 +619,10 @@ player *player_deserialize(cJSON *pser)
     obj = cJSON_GetObjectItem(pser, "identified_amulets");
     for (int idx = 0; idx < AM_MAX; idx++)
         p->identified_amulets[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(pser, "identified_armour");
+    for (int idx = 0; idx < AT_MAX; idx++)
+        p->identified_armour[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(pser, "identified_books");
     for (int idx = 0; idx < SP_MAX; idx++)
@@ -2960,38 +2967,38 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
     case IT_ARMOUR:
         switch (armour_class(it))
         {
-        case ARMOUR_BOOTS:
+        case AC_BOOTS:
             islot = &(p->eq_boots);
             atime = 3;
             break;
 
-        case ARMOUR_CLOAK:
+        case AC_CLOAK:
             islot = &(p->eq_cloak);
             atime = 2;
             break;
 
-        case ARMOUR_GLOVES:
+        case AC_GLOVES:
             islot = &(p->eq_gloves);
             atime = 3;
             break;
 
-        case ARMOUR_HELMET:
+        case AC_HELMET:
             islot = &(p->eq_helmet);
             atime = 2;
             break;
 
-        case ARMOUR_SHIELD:
+        case AC_SHIELD:
             islot = &(p->eq_shield);
             atime = 2;
             break;
 
-        case ARMOUR_SUIT:
+        case AC_SUIT:
             islot = &(p->eq_suit);
             atime = it->id + 1;
             break;
 
-        case ARMOUR_NONE:
-        case ARMOUR_MAX:
+        case AC_NONE:
+        case AC_MAX:
             /* shouldn't happen */
             break;
         }
@@ -3006,17 +3013,22 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
                 g_free(desc);
                 return;
             }
+            g_free(desc);
+
+            if (!player_item_known(p, it))
+            {
+                /* identify the armour while wearing */
+                p->identified_armour[it->id] = TRUE;
+            }
 
             if (!it->bonus_known)
             {
                 /* the armour's bonus is revealed when putting it on */
                 it->bonus_known = TRUE;
-
-                /* Refresh the armour's description before logging. */
-                g_free(desc);
-                desc = item_describe(it, player_item_known(p, it), TRUE, FALSE);
             }
 
+            /* Refresh the armour's description before logging. */
+            desc = item_describe(it, player_item_known(p, it), TRUE, FALSE);
             log_add_entry(nlarn->log, "You are now wearing %s.", desc);
 
             /* put the piece of armor in the equipment slot */
@@ -3184,32 +3196,32 @@ void player_item_unequip(player *p,
 
         switch (armour_class(it))
         {
-        case ARMOUR_BOOTS:
+        case AC_BOOTS:
             aslot = &(p->eq_boots);
             atime = 3;
             break;
 
-        case ARMOUR_CLOAK:
+        case AC_CLOAK:
             aslot = &(p->eq_cloak);
             atime = 2;
             break;
 
-        case ARMOUR_GLOVES:
+        case AC_GLOVES:
             aslot = &(p->eq_gloves);
             atime = 3;
             break;
 
-        case ARMOUR_HELMET:
+        case AC_HELMET:
             aslot = &(p->eq_helmet);
             atime = 2;
             break;
 
-        case ARMOUR_SHIELD:
+        case AC_SHIELD:
             aslot = &(p->eq_shield);
             atime = 2;
             break;
 
-        case ARMOUR_SUIT:
+        case AC_SUIT:
             aslot = &(p->eq_suit);
             /* the better the armour, the longer it takes to get out of it */
             atime = (p->eq_suit)->type + 1;
@@ -3456,39 +3468,39 @@ int player_item_is_equippable(player *p, item *it)
 
     /* armour */
     if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == ARMOUR_BOOTS)
+            && (armour_class(it) == AC_BOOTS)
             && (p->eq_boots))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == ARMOUR_CLOAK)
+            && (armour_class(it) == AC_CLOAK)
             && (p->eq_cloak))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == ARMOUR_GLOVES)
+            && (armour_class(it) == AC_GLOVES)
             && (p->eq_gloves))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == ARMOUR_HELMET)
+            && (armour_class(it) == AC_HELMET)
             && (p->eq_helmet))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == ARMOUR_SHIELD)
+            && (armour_class(it) == AC_SHIELD)
             && (p->eq_shield))
         return FALSE;
 
     /* shield / two-handed weapon combination */
     if (it->type == IT_ARMOUR
-            && (armour_class(it) == ARMOUR_SHIELD)
+            && (armour_class(it) == AC_SHIELD)
             && (p->eq_weapon)
             && weapon_is_twohanded(p->eq_weapon))
         return FALSE;
 
     if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == ARMOUR_SUIT)
+            && (armour_class(it) == AC_SUIT)
             && (p->eq_suit))
         return FALSE;
 
@@ -3563,6 +3575,10 @@ int player_item_known(player *p, item *it)
         return p->identified_amulets[it->id];
         break;
 
+    case IT_ARMOUR:
+        return !armour_unique(it) || p->identified_armour[it->id];
+        break;
+
     case IT_BOOK:
         return p->identified_books[it->id];
         break;
@@ -3619,10 +3635,12 @@ char *player_item_identified_list(player *p)
     item_t type_ids[] =
     {
         IT_AMULET,
+        IT_ARMOUR,
         IT_BOOK,
         IT_POTION,
         IT_RING,
         IT_SCROLL,
+        IT_NONE,
     };
 
     g_assert (p != NULL);
@@ -3631,26 +3649,31 @@ char *player_item_identified_list(player *p)
     it = item_new(type_ids[1], 1);
     it->bonus_known = FALSE;
 
-    for (item_t type = 0; type < 5; type++)
+    for (guint idx = 0; type_ids[idx] != IT_NONE; idx++)
     {
         guint count = 0;
         GString *sublist = g_string_new(NULL);
 
         /* item category header */
-        char *heading = g_strdup(item_name_pl(type_ids[type]));
+        char *heading = g_strdup(item_name_pl(type_ids[idx]));
         heading[0] = g_ascii_toupper(heading[0]);
 
         /* no linefeed before first category */
-        g_string_append_printf(sublist, (type == 0) ? "%s\n" : "\n`yellow`%s`end`\n",
+        g_string_append_printf(sublist, (idx == 0) ? "%s\n" : "\n`yellow`%s`end`\n",
                                heading);
 
         g_free(heading);
 
-        it->type = type_ids[type];
+        it->type = type_ids[idx];
 
-        for (guint id = 1; id < item_max_id(type_ids[type]); id++)
+        for (guint id = 1; id < item_max_id(type_ids[idx]); id++)
         {
             it->id = id;
+
+            /* no non-unique armour in the list */
+            if (it->type == IT_ARMOUR && !armour_unique(it))
+                continue;
+
             if (player_item_known(p, it))
             {
                 gchar *desc_unid = item_describe(it, FALSE, TRUE, FALSE);
@@ -3697,6 +3720,10 @@ void player_item_identify(player *p, inventory **inv, item *it)
     {
     case IT_AMULET:
         p->identified_amulets[it->id] = TRUE;
+        break;
+
+    case IT_ARMOUR:
+        p->identified_armour[it->id] = TRUE;
         break;
 
     case IT_BOOK:

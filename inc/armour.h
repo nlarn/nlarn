@@ -19,23 +19,25 @@
 #ifndef __ARMOUR_H_
 #define __ARMOUR_H_
 
+#include "effects.h"
 #include "items.h"
 
 typedef enum _armour_class
 {
-    ARMOUR_NONE,
-    ARMOUR_BOOTS,
-    ARMOUR_CLOAK,
-    ARMOUR_GLOVES,
-    ARMOUR_HELMET,
-    ARMOUR_SHIELD,
-    ARMOUR_SUIT,
-    ARMOUR_MAX
+    AC_NONE,
+    AC_BOOTS,
+    AC_CLOAK,
+    AC_GLOVES,
+    AC_HELMET,
+    AC_SHIELD,
+    AC_SUIT,
+    AC_MAX
 } armour_class;
 
-enum armour_types
+typedef enum _armour_t
 {
     AT_NONE,
+    AT_CLOAK,
     AT_LGLOVES,
     AT_LBOOTS,
     AT_LHELMET,
@@ -49,27 +51,52 @@ enum armour_types
     AT_SPLINTMAIL,
     AT_PHELMET,
     AT_PBOOTS,
+    AT_SPEEDBOOTS,
     AT_PLATEMAIL,
     AT_SSHIELD,
     AT_SPLATEMAIL,
+    AT_INVISCLOAK,
     AT_ELVENCHAIN,
     AT_MAX
-};
+} armour_t;
 
-typedef struct armour_data
+typedef struct _armour_data
 {
-    int id;
+    armour_t id;
     const char *name;
     int ac;
     armour_class category;
-    int material;       /* material type from item_materials */
-    int weight;         /* used to determine inventory weight and if item can be thrown */
+    item_material_t material;
+    effect_t et;        /* for uniques: effect on the item */
+    int weight;         /* used to determine inventory weight */
     int price;          /* base price in the shops */
+    armour_t disguise;  /* item used for description until armour type is identified */
+    unsigned
+        unique: 1;        /* available in the shop? */
 } armour_data;
 
 /* external vars */
 
 extern const armour_data armours[AT_MAX];
+
+/* inline functions */
+static inline effect_t armour_effect(item *armour)
+{
+    g_assert(armour->id < AT_MAX);
+    return armours[armour->id].et;
+}
+
+static inline armour_t armour_disguise(item *armour)
+{
+    g_assert(armour->id < AT_MAX);
+    return armours[armour->id].disguise;
+}
+
+static inline gboolean armour_unique(item *armour)
+{
+    g_assert(armour->id < AT_MAX);
+    return armours[armour->id].unique;
+}
 
 /* macros */
 
@@ -80,6 +107,5 @@ extern const armour_data armours[AT_MAX];
 #define armour_material(armour) (armours[(armour)->id].material)
 #define armour_weight(armour)   (armours[(armour)->id].weight)
 #define armour_price(armour)    (armours[(armour)->id].price)
-#define armour_uniqe(armour)    (armours[(armour)->id].unique)
 
 #endif

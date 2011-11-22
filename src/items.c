@@ -148,6 +148,25 @@ item *item_new(item_t item_type, int item_id)
 
         break;
 
+    case IT_ARMOUR:
+        /* ensure that unique armour isn't created multiple times */
+        while (nlarn->armour_created[nitem->id])
+        {
+            nitem->id = rand_1n(item_max_id(IT_ARMOUR));
+        }
+
+        if (armour_unique(nitem))
+        {
+            nlarn->armour_created[nitem->id] = TRUE;
+        }
+
+        if (armour_effect(nitem))
+        {
+            eff = effect_new(armour_effect(nitem));
+            item_effect_add(nitem, eff);
+        }
+        break;
+
     case IT_GEM:
         /* ensure minimal size */
         if (nitem->bonus == 0)
@@ -284,6 +303,10 @@ item *item_new_by_level(item_t item_type, int num_level)
 
     switch (item_type)
     {
+    case IT_ARMOUR:
+        variance = 0.5;
+        break;
+
     case IT_BOOK:
         variance = 0.2;
         break;
@@ -1416,7 +1439,7 @@ int item_obtainable(item_t type, int id)
         break;
 
     case IT_ARMOUR:
-        obtainable = TRUE;
+        obtainable = ! armours[id].unique;
         break;
 
     case IT_BOOK:
@@ -1965,7 +1988,10 @@ static const char *item_desc_get(item *it, int known)
         break;
 
     case IT_ARMOUR:
-        return armour_name(it);
+        if (!known && armour_disguise(it) != AT_NONE)
+            return armours[armour_disguise(it)].name;
+        else
+            return armour_name(it);
         break;
 
     case IT_BOOK:

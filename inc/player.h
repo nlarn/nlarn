@@ -152,6 +152,7 @@ typedef struct player
 
     /* items identified */
     gint identified_amulets[AM_MAX];
+    gint identified_armour[AT_MAX];
     gint identified_books[SP_MAX];
     gint identified_potions[PO_MAX];
     gint identified_rings[RT_MAX];

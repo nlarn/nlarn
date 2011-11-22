@@ -455,6 +455,9 @@ int game_save(game *g, const char *filename)
     cJSON_AddItemToObject(save, "amulet_created",
                           cJSON_CreateIntArray(g->amulet_created, AM_MAX));
 
+    cJSON_AddItemToObject(save, "armour_created",
+                          cJSON_CreateIntArray(g->armour_created, AT_MAX));
+
     cJSON_AddItemToObject(save, "weapon_created",
                           cJSON_CreateIntArray(g->weapon_created, WT_MAX));
 
@@ -961,6 +964,12 @@ static gboolean game_load(gchar *filename)
     g_assert(size == AM_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->amulet_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+
+    obj = cJSON_GetObjectItem(save, "armour_created");
+    size = cJSON_GetArraySize(obj);
+    g_assert(size == AT_MAX);
+    for (int idx = 0; idx < size; idx++)
+        nlarn->armour_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "weapon_created");
     size = cJSON_GetArraySize(obj);

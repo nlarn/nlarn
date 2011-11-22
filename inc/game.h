@@ -28,7 +28,7 @@
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 
 /* internal counter for save file compatibility */
-#define SAVEFILE_VERSION    17
+#define SAVEFILE_VERSION    18
 
 /* the world as we know it */
 typedef struct game
@@ -60,6 +60,7 @@ typedef struct game
 
     /* item / monster status */
     int amulet_created[AM_MAX];
+    int armour_created[AT_MAX];
     int weapon_created[WT_MAX];
     int monster_genocided[MT_MAX];
 
