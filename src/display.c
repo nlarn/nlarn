@@ -1137,7 +1137,7 @@ void display_config_autopickup(player *p)
     display_window_destroy(cwin);
 }
 
-spell *display_spell_select(char *title, player *p)
+spell *display_spell_select(const char *title, player *p)
 {
     display_window *swin;
     guint width, height;

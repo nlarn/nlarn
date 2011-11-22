@@ -43,7 +43,7 @@ typedef enum _ammo_t
 typedef struct _ammo_data
 {
     ammo_t type;
-    char *name;
+    const char *name;
     ammo_class ac;
     int damage;
     int accuracy;
@@ -93,8 +93,8 @@ typedef enum _weapon_t
 typedef struct _weapon_data
 {
     weapon_t type;
-    char *name;
-    char *short_name;
+    const char *name;
+    const char *short_name;
     weapon_class wc;    /* weapon class */
     ammo_class ammo;    /* required class of ammunition for ranged weapons */
     int damage;         /* weapon's base damage */

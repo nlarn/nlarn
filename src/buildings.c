@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <stdlib.h>
 #include <glib.h>
 
@@ -886,7 +884,7 @@ int building_monastery(struct player *p)
     struct
     {
         effect_t et;
-        char *desc;
+        const char *desc;
     } curable_diseases[10] = { { 0, NULL } };
 
     /* fill the list of curable diseases */

@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __TRAPS_H_
 #define __TRAPS_H_
 
@@ -39,16 +37,16 @@ typedef enum trap_types
 
 typedef struct trap_data
 {
-    trap_t type;        /* trap type */
-    int effect_t;       /* effect caused by this trap */
-    int color;          /* glyph color */
-    int chance;         /* chance this trap triggers */
-    int effect_chance;  /* chance the effect is activated */
-    int damage;         /* base damage */
-    char *description;  /* description of trap */
-    char *p_message;    /* message given to player when triggered */
-    char *e_message;    /* message shown when trap effect is activated */
-    char *m_message;    /* message displayed when a monster triggered the trap */
+    trap_t type;             /* trap type */
+    int effect_t;            /* effect caused by this trap */
+    int color;               /* glyph color */
+    int chance;              /* chance this trap triggers */
+    int effect_chance;       /* chance the effect is activated */
+    int damage;              /* base damage */
+    const char *description; /* description of trap */
+    const char *p_message;   /* message given to player when triggered */
+    const char *e_message;   /* message shown when trap effect is activated */
+    const char *m_message;   /* message displayed when a monster triggered the trap */
 } trap_data;
 
 extern const trap_data traps[TT_MAX];

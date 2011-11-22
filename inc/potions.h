@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __POTIONS_H_
 #define __POTIONS_H_
 
@@ -30,12 +28,12 @@ struct player;
 /* type definitions */
 
 typedef struct potion_data {
-    int	id;
-    char *name;
-    int	effect_t; 		/* if this potion causes any effect */
+    int id;
+    const char *name;
+    int effect_t;       /* if this potion causes any effect */
     int price;
     unsigned
-        obtainable: 1;      /* available in the shop */
+        obtainable: 1;  /* available in the shop */
 } potion_data;
 
 enum potion_objects {

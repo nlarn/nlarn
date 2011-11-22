@@ -114,8 +114,8 @@ typedef void (*display_inv_callback_func)(player *, inventory **, item *);
 
 typedef struct display_inv_callback
 {
-    char *description;
-    char *helpmsg;
+    const char *description;
+    const char *helpmsg;
     char key;
     inventory **inv;
     display_inv_callback_func function;
@@ -171,7 +171,7 @@ void display_inv_callbacks_clean(GPtrArray *callbacks);
 
 void display_config_autopickup(player *p);
 
-spell *display_spell_select(char *title, player *p);
+spell *display_spell_select(const char *title, player *p);
 
 int display_get_count(const char *caption, int value);
 char *display_get_string(const char *caption, const char *value, size_t max_len);

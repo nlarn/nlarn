@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __MAP_H_
 #define __MAP_H_
 
@@ -121,9 +119,9 @@ typedef struct map_tile
 typedef struct map_tile_data
 {
     map_tile_t tile;
-    char image;
+    const char image;
     int colour;
-    char *description;
+    const char *description;
     unsigned
         passable:    1,     /* can be passed */
         transparent: 1;     /* see-through */
@@ -132,9 +130,9 @@ typedef struct map_tile_data
 typedef struct map_sobject_data
 {
     map_sobject_t sobject;
-    char image;
+    const char image;
     int colour;
-    char *description;
+    const char *description;
     unsigned
         passable:     1,   /* can be passed */
         transparent:  1;   /* see-through */

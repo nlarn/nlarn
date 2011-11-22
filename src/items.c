@@ -1,5 +1,5 @@
 /*
- * items.h
+ * items.c
  * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* $Id$ */
 
 #include <glib.h>
 #include <string.h>
@@ -1280,7 +1278,7 @@ static int material_affected(item_material_t mat, item_erosion_type iet)
 item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visible)
 {
     gboolean destroyed = FALSE;
-    char *erosion_desc = NULL;
+    const char *erosion_desc = NULL;
     gchar *item_desc = NULL;
 
     g_assert(it != NULL);

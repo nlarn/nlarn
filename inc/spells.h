@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __SPELLS_H_
 #define __SPELLS_H_
 
@@ -82,17 +80,17 @@ typedef enum spell_ids {
 
 typedef struct spell_data {
     spell_id id;
-    char *code;
-    char *name;
+    const char *code;
+    const char *name;
     spell_t type;
     damage_t damage_type;
-    effect_t effect;    /* the effect cause by thos spell */
-    char *description;  /* the spell's description */
-    char *msg_success;  /* the message given upon success */
-    char *msg_fail;     /* the message give upoon failure */
-    int colour;         /* the colour of visible spells */
-    int level;          /* level of the spell */
-    int price;          /* price of the book*/
+    effect_t effect;          /* the effect cause by thos spell */
+    const char *description;  /* the spell's description */
+    const char *msg_success;  /* the message given upon success */
+    const char *msg_fail;     /* the message give upoon failure */
+    int colour;               /* the colour of visible spells */
+    int level;                /* level of the spell */
+    int price;                /* price of the book*/
     unsigned
         obtainable: 1;  /* available in the shop */
 } spell_data;

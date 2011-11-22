@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 
 #include "display.h"
@@ -203,7 +201,7 @@ int potion_throw(struct player *p)
 item_usage_result potion_quaff(struct player *p, item *potion)
 {
     item_usage_result result = { FALSE, FALSE };
-    char *verb;
+    const char *verb;
     gchar *description;
 
     // These potions aren't drunk.

@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __ITEM_H_
 #define __ITEM_H_
 
@@ -68,8 +66,8 @@ typedef enum item_material_t {
 
 typedef struct item_material_data {
     item_material_t type;
-    char *name;
-    char *adjective;
+    const char *name;
+    const char *adjective;
     int colour;
 } item_material_data;
 
@@ -126,9 +124,9 @@ typedef struct _item {
 
 typedef struct item_type_data {
     item_t id;
-    char *name_sg;
-    char *name_pl;
-    char glyph;
+    const char *name_sg;
+    const char *name_pl;
+    const char glyph;
     guint max_id;
     unsigned
         optimizable: 1,     /* item type can have a bonus */

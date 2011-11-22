@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __AMULETS_H_
 #define __AMULETS_H_
 
@@ -41,9 +39,9 @@ enum amulet_types
 typedef struct amulet_data
 {
     int id;
-    char *name;
+    const char *name;
     effect_t effect; /* effect causes by this amulet */
-    int price;          /* base price in the shops */
+    int price;       /* base price in the shops */
 } amulet_data;
 
 /* external vars */

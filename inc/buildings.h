@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __BUILDINGS_H_
 #define __BUILDINGS_H_
 
@@ -27,8 +25,8 @@
 typedef struct school_course {
     int course_time;
     int prerequisite;
-    char *description;
-    char *message;
+    const char *description;
+    const char *message;
 } school_course;
 
 /* forward declarations */

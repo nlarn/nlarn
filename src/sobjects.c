@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 
 #include "display.h"
@@ -953,7 +951,7 @@ int player_throne_sit(player *p)
 void sobject_destroy_at(player *p, map *dmap, position pos)
 {
     position mpos;      /* position for monster that might be generated */
-    char *desc = NULL;
+    const char *desc = NULL;
 
     mpos = map_find_space_in(dmap, rect_new_sized(pos, 1), LE_MONSTER, FALSE);
 

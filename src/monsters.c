@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 #include <lua.h>
 #include <lauxlib.h>
@@ -82,8 +80,8 @@ const char *monster_attack_verb[ATT_MAX] =
 
 static struct _monster_breath_data
 {
-    char *desc;
-    char glyph;
+    const char *desc;
+    const char glyph;
     int colour;
 } monster_breath_data[] =
 {
@@ -716,7 +714,7 @@ void monster_die(monster *m, struct player *p)
        (the xp gain gives this away anyway). */
     if (monster_in_sight(m) || (p != NULL && monster_nearby(m)))
     {
-        char *message;
+        const char *message;
 
         /* give a different message if a servant is expired */
         if (monster_action(m) == MA_SERVE && m->number == 0)
@@ -797,8 +795,8 @@ void monster_level_enter(monster *m, struct map *l)
     map_sobject_t source = map_sobject_at(monster_map(m), m->pos);
     map_sobject_t target;
     position npos;
-    char *what = NULL;
-    char *how = "comes";
+    const char *what = NULL;
+    const char *how  = "comes";
 
     /* check if the monster used the stairs */
     switch (source)
@@ -856,6 +854,7 @@ void monster_level_enter(monster *m, struct map *l)
         how = "squeezes past";
         npos = map_find_space_in(l, rect_new_sized(npos, 1), LE_MONSTER, FALSE);
     }
+    else
 
     if (!map_pos_validate(l, npos, LE_MONSTER, FALSE))
     {
@@ -1856,7 +1855,8 @@ char *monster_desc(monster *m)
 {
     int hp_rel;
     GString *desc;
-    char *injury, *effects = NULL;
+    const char *injury = NULL; 
+    char *effects = NULL;
 
     g_assert (m != NULL);
 

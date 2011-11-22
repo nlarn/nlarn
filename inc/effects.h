@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __EFFECTS_H_
 #define __EFFECTS_H_
 
@@ -121,14 +119,14 @@ typedef enum _effect_t
 typedef struct effect_data
 {
     effect_t id;
-    char *name;              /* name of the effect's constant */
+    const char *name;        /* name of the effect's constant */
     guint duration;          /* duration of effect. 0 = permanent */
     int amount;              /* if modifier: amount of attribute modification */
-    char *desc;              /* description for status display and obituary */
-    char *msg_start;         /* message displayed when effect starts */
-    char *msg_stop;          /* message displayed when effect ends */
-    char *msg_start_monster; /*	messages shown when the effect happens on a monster */
-    char *msg_stop_monster;
+    const char *desc;        /* description for status display and obituary */
+    const char *msg_start;   /* message displayed when effect starts */
+    const char *msg_stop;    /* message displayed when effect ends */
+    const char *msg_start_monster; /* messages shown when the effect happens on a monster */
+    const char *msg_stop_monster;
     guint                    /* effect flags */
         var_duration: 1,     /* the effect's duration is variable */
         var_amount: 1,       /* the effect's amount is variable */

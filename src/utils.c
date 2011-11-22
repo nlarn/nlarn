@@ -370,8 +370,8 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         /* copy the text to the new line */
         line = g_strndup(&(str[spos]), lp);
 
-	/* skip silly CR chars */
-	if (str[spos + lp] == '\r') lp++;
+    /* skip silly CR chars */
+    if (str[spos + lp] == '\r') lp++;
 
         /* reduce width to make space for indentation after the first line */
         if (indent && text->len == 1)
@@ -468,26 +468,26 @@ int strv_append_unique(char ***list, const char *str)
 
 char *str_prepare_for_saving(const char *str)
 {
-	if (str == NULL) return NULL;
+    if (str == NULL) return NULL;
 
 #ifdef G_OS_WIN32
-	const char lend[] = "\r\n";
+    const char lend[] = "\r\n";
 #else
-	const char lend[] = "\n";
+    const char lend[] = "\n";
 #endif
 
-	GPtrArray *wrapped_str = text_wrap(str, 78, 2);
-	GString *nstr = g_string_new(NULL);
+    GPtrArray *wrapped_str = text_wrap(str, 78, 2);
+    GString *nstr = g_string_new(NULL);
 
-	for (guint i = 0; i < wrapped_str->len; i++)
-	{
+    for (guint i = 0; i < wrapped_str->len; i++)
+    {
         g_string_append(nstr, g_ptr_array_index(wrapped_str, i));
         g_string_append(nstr, lend);
-	}
+    }
 
-	text_destroy(wrapped_str);
+    text_destroy(wrapped_str);
 
-	return g_string_free(nstr, FALSE);
+    return g_string_free(nstr, FALSE);
 }
 
 int str_starts_with_vowel(const char *str)

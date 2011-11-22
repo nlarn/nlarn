@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 
 #include "container.h"
@@ -376,7 +374,7 @@ static gboolean container_trigger_trap(player *p, item *container)
         return FALSE;
     }
 
-    char *msg = "A little needle shoots out and stings you!";
+    const char *msg = "A little needle shoots out and stings you!";
 
     switch(rand_1n(5))
     {

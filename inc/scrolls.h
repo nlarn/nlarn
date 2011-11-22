@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __SCROLLS_H_
 #define __SCROLLS_H_
 
@@ -31,7 +29,7 @@ struct player;
 
 typedef struct magic_scroll_data {
 	int	id;
-	char *name;
+	const char *name;
 	effect_t effect; /* if this scroll causes an effect */
 	int price;
 	unsigned

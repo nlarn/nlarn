@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __ARMOUR_H_
 #define __ARMOUR_H_
 
@@ -61,7 +59,7 @@ enum armour_types
 typedef struct armour_data
 {
     int id;
-    char *name;
+    const char *name;
     int ac;
     armour_class category;
     int material;       /* material type from item_materials */

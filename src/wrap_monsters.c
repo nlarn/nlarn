@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 #include <lua.h>
 #include <lauxlib.h>
@@ -33,7 +31,7 @@ void wrap_monsters(lua_State *L)
 
     struct
     {
-        char *name;
+        const char *name;
         int value;
     } constants[] =
     {

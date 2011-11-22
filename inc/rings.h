@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __RINGS_H_
 #define __RINGS_H_
 
@@ -41,7 +39,7 @@ enum ring_types
 typedef struct ring_data
 {
     int id;
-    char *name;
+    const char *name;
     effect_t effect; /* effect causes by this ring */
     int price;
     unsigned

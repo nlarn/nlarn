@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __CONTAINER_H_
 #define __CONTAINER_H_
 
@@ -34,7 +32,7 @@ enum container_types {
 
 typedef struct container_data {
     int id;
-    char *name;
+    const char *name;
     int weight;
     item_material_t material;
     int price;

@@ -993,8 +993,8 @@ void player_die(player *p, player_cod cause_type, int cause)
 {
     game_score_t *score;
     GList *scores;
-    char *message = NULL;
-    char *title = NULL;
+    const char *message = NULL;
+    const char *title = NULL;
     effect *ef = NULL;
 
     g_assert(p != NULL);
@@ -2653,7 +2653,7 @@ static char *player_print_weight(float weight)
 {
     static char buf[21] = "";
 
-    char *unit = "g";
+    const char *unit = "g";
     if (weight > 1000)
     {
         weight = weight / 1000;
@@ -4741,7 +4741,7 @@ static void player_memory_deserialize(player *p, position pos, cJSON *mser)
 
 static char *player_death_description(game_score_t *score, int verbose)
 {
-    char *desc;
+    const char *desc;
     GString *text;
 
     g_assert(score != NULL);
@@ -5438,8 +5438,8 @@ static void player_memorial_file_save(player *p, const char *text)
                 continue;
             }
 
-			/* wrap the text and insert line feed for the plattform */
-			char *wtext = str_prepare_for_saving(text);
+            /* wrap the text and insert line feed for the plattform */
+            char *wtext = str_prepare_for_saving(text);
 
             if (g_file_set_contents(fullname, wtext, -1, &error))
             {
@@ -5452,7 +5452,7 @@ static void player_memorial_file_save(player *p, const char *text)
                 g_error_free(error);
             }
 
-			g_free(wtext);
+            g_free(wtext);
 
             g_free(filename);
             g_free(fullname);

@@ -47,7 +47,7 @@ const char *ammo_class_name[AMMO_MAX] =
 const weapon_data weapons[WT_MAX] =
 {
     /* weapon_t         name                         short name,       class          ammo      dam  acc  material    we     pr tw un ar ob */
-    { WT_NONE,          "",                          "",		         WC_NONE,     AMMO_NONE,  0,   0, IM_NONE,     0,     0, 0, 0, 0, 0 },
+    { WT_NONE,          "",                          "",                 WC_NONE,     AMMO_NONE,  0,   0, IM_NONE,     0,     0, 0, 0, 0, 0 },
     { WT_ODAGGER,       "orcish dagger",             "orc dagger",      WC_MELEE,     AMMO_NONE,  2,   2, IM_IRON,   850,     6, 0, 0, 1, 0 },
     { WT_DAGGER,        "dagger",                    "dagger",          WC_MELEE,     AMMO_NONE,  3,   3, IM_IRON,   600,    10, 0, 0, 1, 1 },
     { WT_SLING,         "sling",                     "sling",          WC_RANGED,    AMMO_SLING,  1,   2, IM_CLOTH,  200,    15, 0, 0, 1, 1 },
@@ -247,8 +247,8 @@ void weapon_swap(struct player *p)
 
 char *weapon_shortdesc(item *weapon, guint available_space)
 {
-	/* a little sanity check */
-	if (available_space == 0) return NULL;
+    /* a little sanity check */
+    if (available_space == 0) return NULL;
 
     GString *desc = g_string_new(NULL);
     if (weapon->bonus_known)

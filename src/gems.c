@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 
 #include "display.h"
@@ -27,8 +25,8 @@
 typedef struct gem_data
 {
     int id;
-    char *name;
-    item_material_t	material;
+    const char *name;
+    item_material_t material;
     int colour;
     int price;          /* price per carat in the shops */
 } gem_data;

@@ -1741,11 +1741,11 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
         map_used[map_num] = TRUE;
     }
 
-	/* number of line separating character(s) */
+    /* number of line separating character(s) */
 #ifdef G_OS_WIN32
-	const guint lslen = 2; /* i.e. CR/LF*/
+    const guint lslen = 2; /* i.e. CR/LF*/
 #else
-	const guint lslen = 1; /* i.e. LF */
+    const guint lslen = 1; /* i.e. LF */
 #endif
 
     /* advance to desired maze */
@@ -1779,7 +1779,7 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
 
             map_tile *tile = map_tile_at(m, map_pos);
 
-            tile->type = LT_FLOOR;	/* floor is default */
+            tile->type = LT_FLOOR;    /* floor is default */
 
             switch (fgetc(levelfile))
             {
