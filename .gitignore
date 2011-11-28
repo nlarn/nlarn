@@ -5,6 +5,7 @@ nlarn
 *.exe
 *.o
 *.d
+*.res
 
 # vim swap files
 .*swp

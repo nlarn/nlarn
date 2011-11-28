@@ -63,6 +63,13 @@ ifeq ($(MSYSTEM),MINGW32)
   # (otherwise packages would have silly names)
   OS = win32
 
+  RESOURCES := $(patsubst %.rc,%.res,$(wildcard resources/*.rc))
+  RESDEFINE := -DVERSION_MAJOR=$(VERSION_MAJOR)
+  RESDEFINE += -DVERSION_MINOR=$(VERSION_MINOR)
+  RESDEFINE += -DVERSION_PATCH=$(VERSION_PATCH)
+  # Escape-O-Rama! Required in all it's ugliness.
+  RESDEFINE += -DVINFO=\\\"$(VERSION)\\\"
+
   # Libraries specific to Windows
   LDFLAGS += -static -lpdcurses -llua
 
@@ -148,8 +155,6 @@ endif
 
 OBJECTS := $(patsubst %.c,%.o,$(wildcard src/*.c))
 
-RESOURCES := \
-
 all: nlarn$(SUFFIX)
 
 nlarn$(SUFFIX): $(OBJECTS) $(RESOURCES)
@@ -157,6 +162,9 @@ nlarn$(SUFFIX): $(OBJECTS) $(RESOURCES)
 
 $(OBJECTS): %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(RESOURCES): %.res: %.rc
+	windres -v $(RESDEFINE) $< -O coff -o $@
 
 dist: clean $(SRCPKG) $(PACKAGE) $(INSTALLER)
 
@@ -182,7 +190,7 @@ $(INSTALLER): nlarn$(SUFFIX) nlarn.nsi
 clean:
 	@echo Cleaning nlarn
 	rm -f nlarn
-	rm -f $(OBJECTS) $(patsubst %.o,%.d,$(OBJECTS))
+	rm -f $(RESOURCES) $(OBJECTS) $(patsubst %.o,%.d,$(OBJECTS))
 	rm -f $(SRCPKG) $(PACKAGE) $(INSTALLER)
 
 help:
