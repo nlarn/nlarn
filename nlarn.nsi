@@ -17,6 +17,9 @@
 ; with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
+;Include Modern UI
+!include "MUI2.nsh"
+
 ; check if NLarn version number has been defined
 !ifndef VERSION
   !error "VERSION has not been defined"
@@ -42,21 +45,29 @@ InstallDirRegKey HKLM "Software\NLarn" "Install_Dir"
 RequestExecutionLevel admin
 
 ;--------------------------------
+;Interface Configuration
 
+!define MUI_ICON "resources/nlarn-48.ico"
+
+;--------------------------------
 ; Pages
 
-Page license
-Page components
-Page directory
-Page instfiles
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "LICENSE"
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
 
-UninstPage uninstConfirm
-UninstPage instfiles
+!insertmacro MUI_UNPAGE_WELCOME
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
 
-; The license
 
-LicenseData LICENSE
-LicenseForceSelection radiobuttons "I accept" "I decline"
+;--------------------------------
+; Localisation
+!insertmacro MUI_LANGUAGE "English"
+
 
 ;--------------------------------
 
