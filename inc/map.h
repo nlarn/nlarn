@@ -112,7 +112,7 @@ typedef struct map_tile
         sobject:    8, /* something special located on this tile */
         trap:       8; /* trap located on this tile */
     guint8 timer;      /* countdown to when the type will become base_type again */
-    gpointer monster;  /* id of monster located on this tile */
+    gpointer m_oid;    /* id of monster located on this tile */
     inventory *ilist;  /* items located on this tile */
 } map_tile;
 
@@ -338,7 +338,7 @@ static inline void map_sobject_set(map *m, position pos, map_sobject_t type)
 static inline void map_set_monster_at(map *m, position pos, monster *monst)
 {
     assert(m != NULL && m->nlevel == Z(pos) && pos_valid(pos));
-    m->grid[Y(pos)][X(pos)].monster = (monst != NULL) ? monster_oid(monst) : NULL;
+    m->grid[Y(pos)][X(pos)].m_oid = (monst != NULL) ? monster_oid(monst) : NULL;
 }
 
 static inline gboolean map_is_monster_at(map *m, position pos)

@@ -1675,7 +1675,7 @@ static gboolean spell_pos_hit(position pos, const damage_originator *damo,
     /* The spell hit a sobject. */
     if (mst > LS_NONE)
     {
-        if (mst == LS_MIRROR && fov_get(nlarn->p->fov, pos))
+        if (mst == LS_MIRROR && fov_get(nlarn->p->fv, pos))
         {
             /* reflection is handled in area_ray_trajectory, but we need
                to generate a message here if the mirror is visible */
@@ -1768,7 +1768,7 @@ static gboolean spell_pos_hit(position pos, const damage_originator *damo,
     if (iet > IET_NONE && map_ilist_at(cmap, pos))
     {
         /* there are items at the given map position, erode them */
-        inv_erode(map_ilist_at(cmap, pos), iet, fov_get(nlarn->p->fov, pos));
+        inv_erode(map_ilist_at(cmap, pos), iet, fov_get(nlarn->p->fv, pos));
     }
 
     return terminated;

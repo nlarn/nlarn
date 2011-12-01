@@ -821,7 +821,7 @@ static gboolean adjacent_monster(player *p, gboolean ignore_harmless)
 
     /* get the list of all visible monsters */
     GList *mlist, *miter;
-    miter = mlist = fov_get_visible_monsters(p->fov);
+    miter = mlist = fov_get_visible_monsters(p->fv);
 
     /* no visible monsters? */
     if (mlist == NULL)

@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __PLAYER_H_
 #define __PLAYER_H_
 
@@ -165,7 +163,7 @@ typedef struct player
     gpointer *ptarget;
 
     /* player's field of vision */
-    fov *fov;
+    fov *fv;
 
     /* player's memory of the map */
     player_tile_memory memory[MAP_MAX][MAP_MAX_Y][MAP_MAX_X];

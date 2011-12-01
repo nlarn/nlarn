@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 #include <string.h>
 #include "fov.h"
@@ -26,7 +24,7 @@
 #include "nlarn.h"
 #include "position.h"
 
-static void fov_calculate_octant(fov *fov, map *m, position center,
+static void fov_calculate_octant(fov *fv, map *m, position center,
                                  int infravision, int row, float start,
                                  float end, int radius, int xx,
                                  int xy, int yx, int yy);

@@ -38,12 +38,12 @@ struct _monster
     gint32 hp_max;
     gint32 hp;
     position pos;
-    fov *fov;
+    fov *fv;
     int movement;
     monster_action_t action; /* current action */
     guint32 lastseen;        /* number of turns since when player was last seen; 0 = never */
     position player_pos;     /* last known position of player */
-    inventory *inventory;
+    inventory *inv;
     gpointer weapon;
     GPtrArray *effects;
     guint number;        /* random value for some monsters */
@@ -145,7 +145,7 @@ monster *monster_new(monster_t type, position pos)
     nmonster->hp_max = nmonster->hp = max(1, divert(monster_type_hp_max(type), 10));
 
     nmonster->effects = g_ptr_array_new();
-    nmonster->inventory = inv_new(nmonster);
+    nmonster->inv = inv_new(nmonster);
 
     /* fill monsters inventory */
     if (monster_gold_amount(nmonster) > 0)
@@ -155,7 +155,7 @@ monster *monster_new(monster_t type, position pos)
         {
             /* add gold to monster's inventory, randomize the amount */
             icount = max(divert(monster_gold_amount(nmonster), 30), 1);
-            inv_add(&nmonster->inventory, item_new(IT_GOLD, icount));
+            inv_add(&nmonster->inv, item_new(IT_GOLD, icount));
         }
     }
 
@@ -165,7 +165,7 @@ monster *monster_new(monster_t type, position pos)
     case MT_LEPRECHAUN:
         if (chance(25))
         {
-            inv_add(&nmonster->inventory, item_new_random(IT_GEM, FALSE));
+            inv_add(&nmonster->inv, item_new_random(IT_GEM, FALSE));
         }
         break;
 
@@ -181,7 +181,7 @@ monster *monster_new(monster_t type, position pos)
         }
         while (it == IT_CONTAINER);
 
-        inv_add(&nmonster->inventory, item_new_random(it, TRUE));
+        inv_add(&nmonster->inv, item_new_random(it, TRUE));
         break;
 
     case MT_TOWN_PERSON:
@@ -247,7 +247,7 @@ monster *monster_new(monster_t type, position pos)
         weapon = item_new(IT_WEAPON, wpns[rand_0n(weapon_count)]);
         item_new_finetouch(weapon);
 
-        inv_add(&nmonster->inventory, weapon);
+        inv_add(&nmonster->inv, weapon);
 
         /* wield the new weapon */
         monster_weapon_wield(nmonster, weapon);
@@ -264,7 +264,7 @@ monster *monster_new(monster_t type, position pos)
         /* put mimicked item into monster inventory */
         const int chosen_type = possible_types[rand_0n(8)];
         item *itm = item_new_by_level(chosen_type, Z(nmonster->pos));
-        inv_add(&nmonster->inventory, itm);
+        inv_add(&nmonster->inv, itm);
 
         /* the mimic is not known to be a monster */
         nmonster->unknown = TRUE;
@@ -373,8 +373,8 @@ void monster_destroy(monster *m)
     g_ptr_array_free(m->effects, TRUE);
 
     /* free inventory */
-    if (m->inventory)
-        inv_destroy(m->inventory, TRUE);
+    if (m->inv)
+        inv_destroy(m->inv, TRUE);
 
     /* unregister monster */
     game_monster_unregister(nlarn, m->oid);
@@ -383,8 +383,8 @@ void monster_destroy(monster *m)
     game_map(nlarn, Z(m->pos))->mcount--;
 
     /* free monster's FOV if existing */
-    if (m->fov)
-        fov_free(m->fov);
+    if (m->fv)
+        fov_free(m->fv);
 
     g_free(m);
 }
@@ -418,9 +418,9 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     }
 
     /* inventory */
-    if (inv_length(m->inventory) > 0)
+    if (inv_length(m->inv) > 0)
     {
-        cJSON_AddItemToObject(mval, "inventory", inv_serialize(m->inventory));
+        cJSON_AddItemToObject(mval, "inventory", inv_serialize(m->inv));
     }
 
     /* effects */
@@ -462,9 +462,9 @@ void monster_deserialize(cJSON *mser, game *g)
 
     /* inventory */
     if ((obj = cJSON_GetObjectItem(mser, "inventory")))
-        m->inventory = inv_deserialize(obj);
+        m->inv = inv_deserialize(obj);
     else
-        m->inventory = inv_new(m);
+        m->inv = inv_new(m);
 
     /* effects */
     if ((obj = cJSON_GetObjectItem(mser, "effects")))
@@ -592,7 +592,7 @@ void monster_unknown_set(monster *m, gboolean what)
 inventory **monster_inv(monster *m)
 {
     g_assert (m != NULL);
-    return &m->inventory;
+    return &m->inv;
 }
 
 static gboolean monster_nearby(monster *m)
@@ -601,7 +601,7 @@ static gboolean monster_nearby(monster *m)
     if (Z(m->pos) != Z(nlarn->p->pos))
         return FALSE;
 
-    return fov_get(nlarn->p->fov, m->pos);
+    return fov_get(nlarn->p->fv, m->pos);
 }
 
 gboolean monster_in_sight(monster *m)
@@ -620,7 +620,7 @@ gboolean monster_in_sight(monster *m)
     if (monster_flags(m, MF_INVISIBLE) && !player_effect(nlarn->p, ET_INFRAVISION))
         return FALSE;
 
-    return fov_get(nlarn->p->fov, m->pos);
+    return fov_get(nlarn->p->fv, m->pos);
 }
 
 static const char *get_town_person_name(int value)
@@ -726,13 +726,13 @@ void monster_die(monster *m, struct player *p)
     }
 
     /* make sure mimics never leave the mimicked item behind */
-    if (monster_flags(m, MF_MIMIC) && inv_length(m->inventory) > 0)
+    if (monster_flags(m, MF_MIMIC) && inv_length(m->inv) > 0)
     {
-        inv_del(&m->inventory, 0);
+        inv_del(&m->inv, 0);
     }
 
     /* drop stuff the monster carries */
-    if (inv_length(m->inventory))
+    if (inv_length(m->inv))
     {
         /* Did it fall into water? */
         const int tile = map_tiletype_at(monster_map(m), monster_pos(m));
@@ -740,18 +740,18 @@ void monster_die(monster *m, struct player *p)
         {
             int count = 0;
             item *it;
-            while (inv_length(m->inventory) > 0)
+            while (inv_length(m->inv) > 0)
             {
-                it = inv_get(m->inventory, 0);
+                it = inv_get(m->inv, 0);
                 if (item_is_unique(it))
                 {
                     /* teleport the item to safety */
-                    inv_del_element(&m->inventory, it);
+                    inv_del_element(&m->inv, it);
                     map_item_add(game_map(nlarn, Z(nlarn->p->pos)), it);
                 }
                 else
                 {
-                    inv_del(&m->inventory, 0);
+                    inv_del(&m->inv, 0);
                     count++;
                 }
             }
@@ -762,10 +762,10 @@ void monster_die(monster *m, struct player *p)
         {
             /* dump items on the floor */
             inventory **floor = map_ilist_at(monster_map(m), monster_pos(m));
-            while (inv_length(m->inventory) > 0)
+            while (inv_length(m->inv) > 0)
             {
-                inv_add(floor, inv_get(m->inventory, 0));
-                inv_del(&m->inventory, 0);
+                inv_add(floor, inv_get(m->inv, 0));
+                inv_del(&m->inv, 0);
             }
         }
     }
@@ -1138,9 +1138,9 @@ void monster_polymorph(monster *m)
 
     /* make sure mimics never leave the mimicked item behind */
     if (monster_flags(m, MF_MIMIC)
-            && inv_length(m->inventory) > 0)
+            && inv_length(m->inv) > 0)
     {
-        inv_del(&m->inventory, 0);
+        inv_del(&m->inv, 0);
     }
 
     const map_element_t old_elem = monster_map_element(m);
@@ -1250,7 +1250,7 @@ int monster_items_pickup(monster *m)
             }
 
             inv_del_element(map_ilist_at(monster_map(m), m->pos), it);
-            inv_add(&m->inventory, it);
+            inv_add(&m->inv, it);
 
             /* go back one item as the following items lowered their number */
             idx--;
@@ -1845,8 +1845,8 @@ item *get_mimic_item(monster *m)
     g_assert(m && monster_flags(m, MF_MIMIC));
 
     /* polymorphed mimics may not pose as items */
-    if (inv_length(m->inventory) > 0)
-        return inv_get(m->inventory, 0);
+    if (inv_length(m->inv) > 0)
+        return inv_get(m->inv, 0);
 
     return NULL;
 }
@@ -1863,7 +1863,7 @@ char *monster_desc(monster *m)
     desc = g_string_new(NULL);
 
     /* describe mimic as mimicked item */
-    if (monster_unknown(m) && inv_length(m->inventory) > 0)
+    if (monster_unknown(m) && inv_length(m->inv) > 0)
     {
         item *it = get_mimic_item(m);
         gchar *item_desc= item_describe(it, player_item_known(nlarn->p, it),
@@ -1939,9 +1939,9 @@ char monster_glyph(monster *m)
 {
     g_assert (m != NULL);
 
-    if (m->unknown && inv_length(m->inventory) > 0)
+    if (m->unknown && inv_length(m->inv) > 0)
     {
-        item *it = inv_get(m->inventory, 0);
+        item *it = inv_get(m->inv, 0);
         return item_glyph(it->type);
     }
     else
@@ -1954,9 +1954,9 @@ int monster_color(monster *m)
 {
     g_assert (m != NULL);
 
-    if (m->unknown && inv_length(m->inventory) > 0)
+    if (m->unknown && inv_length(m->inv) > 0)
     {
-        item *it = inv_get(m->inventory, 0);
+        item *it = inv_get(m->inv, 0);
         return item_colour(it);
     }
     else
@@ -2216,9 +2216,9 @@ static item *monster_weapon_select(monster *m)
 {
     item *best = NULL;
 
-    for (guint idx = 0; idx < inv_length(m->inventory); idx++)
+    for (guint idx = 0; idx < inv_length(m->inv); idx++)
     {
-        item *curr = inv_get(m->inventory, idx);
+        item *curr = inv_get(m->inv, idx);
 
         if (curr->type == IT_WEAPON)
         {
@@ -2440,7 +2440,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     /* if item / gold has been stolen, add it to the monster's inv */
     if (it)
     {
-        inv_add(&m->inventory, it);
+        inv_add(&m->inv, it);
         return TRUE;
     }
     else
@@ -2640,12 +2640,12 @@ static position monster_move_serve(monster *m, struct player *p)
     position npos;
 
     /* generate a fov structure if not yet available */
-    if (!m->fov)
-        m->fov = fov_new();
+    if (!m->fv)
+        m->fv = fov_new();
 
     /* calculate the monster's fov */
     /* the monster gets a fov radius of 6 for now*/
-    fov_calculate(m->fov, monster_map(m), m->pos, 6,
+    fov_calculate(m->fv, monster_map(m), m->pos, 6,
                   monster_flags(m, MF_INFRAVISION)
                   || monster_effect(m, ET_INFRAVISION));
 
@@ -2742,7 +2742,7 @@ static position monster_move_civilian(monster *m, struct player *p)
     }
 
     /* change the town person's name from time to time */
-    if (!fov_get(p->fov, m->pos) && chance(10))
+    if (!fov_get(p->fv, m->pos) && chance(10))
     {
         m->number = rand_1n(40);
     }
@@ -2752,7 +2752,7 @@ static position monster_move_civilian(monster *m, struct player *p)
 
 int monster_is_carrying_item(monster *m, item_t type)
 {
-    inventory *inv = m->inventory;
+    inventory *inv = m->inv;
 
     for (guint idx = 0; idx < inv_length(inv); idx++)
     {
@@ -2843,11 +2843,11 @@ static gboolean monster_breath_hit(position pos,
     if (iet > IET_NONE && map_ilist_at(mp, pos))
     {
         /* erode affected items */
-        inv_erode(map_ilist_at(mp, pos), iet, fov_get(nlarn->p->fov, pos));
+        inv_erode(map_ilist_at(mp, pos), iet, fov_get(nlarn->p->fv, pos));
     }
 
 
-    if (map_sobject_at(mp, pos) == LS_MIRROR && fov_get(nlarn->p->fov, pos))
+    if (map_sobject_at(mp, pos) == LS_MIRROR && fov_get(nlarn->p->fv, pos))
     {
         /* A mirror will reflect the breath. Actual handling of the reflection
            is done in area_ray_trajectory, just give a message here if the

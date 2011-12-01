@@ -202,7 +202,7 @@ int display_paint_screen(player *p)
 
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
-            if (game_fullvis(nlarn) || fov_get(p->fov, pos))
+            if (game_fullvis(nlarn) || fov_get(p->fv, pos))
             {
                 /* draw the truth */
                 inventory **inv = map_ilist_at(vmap, pos);
@@ -2213,7 +2213,7 @@ position display_get_position(player *p,
             start = monster_pos(m);
 
             /* don't use invisible position if unwanted */
-            if (visible && !fov_get(p->fov, start))
+            if (visible && !fov_get(p->fv, start))
             {
                 start = p->pos;
             }
@@ -2223,7 +2223,7 @@ position display_get_position(player *p,
     /* check for visible opponents if no previous opponent has been found */
     if (visible && pos_identical(p->pos, start))
     {
-        monster *m = fov_get_closest_monster(p->fov);
+        monster *m = fov_get_closest_monster(p->fv);
 
         /* found a visible monster -> use it as target */
         if (m != NULL)
@@ -2285,7 +2285,7 @@ position display_get_new_position(player *p,
 
     /* get the list of visible monsters if looking for a visible position */
     if (visible)
-        miter = mlist = fov_get_visible_monsters(p->fov);
+        miter = mlist = fov_get_visible_monsters(p->fv);
 
     if (!visible)
         msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message);
@@ -2617,7 +2617,7 @@ position display_get_new_position(player *p,
         if (pos_valid(npos))
         {
             /* don't use invisible positions */
-            if (visible && !fov_get(p->fov, npos))
+            if (visible && !fov_get(p->fv, npos))
                 npos = pos;
 
             if (ray)
@@ -3310,7 +3310,7 @@ static void display_spheres_paint(sphere *s, player *p)
     if (!(Z(s->pos) == Z(p->pos)))
         return;
 
-    if (game_fullvis(nlarn) || fov_get(p->fov, s->pos))
+    if (game_fullvis(nlarn) || fov_get(p->fv, s->pos))
     {
         attron(DC_MAGENTA);
         (void)mvaddch(Y(s->pos), X(s->pos), '0');

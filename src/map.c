@@ -48,7 +48,7 @@ static map_path_element *map_path_element_in_list(map_path_element* el,
 static map_path_element *map_path_find_best(map_path *path);
 static GPtrArray *map_path_get_neighbours(map *m, position pos,
                                           map_element_t element,
-                                          gboolean player);
+                                          gboolean ppath);
 
 static gboolean map_sphere_destroy(sphere *s, map *m);
 
@@ -247,10 +247,10 @@ cJSON *map_serialize(map *m)
                                         m->grid[y][x].timer);
             }
 
-            if (m->grid[y][x].monster)
+            if (m->grid[y][x].m_oid)
             {
                 cJSON_AddNumberToObject(tile, "monster",
-                                        GPOINTER_TO_UINT(m->grid[y][x].monster));
+                                        GPOINTER_TO_UINT(m->grid[y][x].m_oid));
             }
 
             if (m->grid[y][x].ilist )
@@ -297,7 +297,7 @@ map *map_deserialize(cJSON *mser)
             if (obj != NULL) m->grid[y][x].timer = obj->valueint;
 
             obj = cJSON_GetObjectItem(tile, "monster");
-            if (obj != NULL) m->grid[y][x].monster = GUINT_TO_POINTER(obj->valueint);
+            if (obj != NULL) m->grid[y][x].m_oid = GUINT_TO_POINTER(obj->valueint);
 
             obj = cJSON_GetObjectItem(tile, "inventory");
             if (obj != NULL) m->grid[y][x].ilist = inv_deserialize(obj);
@@ -359,8 +359,8 @@ void map_destroy(map *m)
     for (int y = 0; y < MAP_MAX_Y; y++)
         for (int x = 0; x < MAP_MAX_X; x++)
         {
-            if (m->grid[y][x].monster != NULL) {
-                monster *mon = game_monster_get(nlarn, m->grid[y][x].monster);
+            if (m->grid[y][x].m_oid != NULL) {
+                monster *mon = game_monster_get(nlarn, m->grid[y][x].m_oid);
 
                 /* I wonder why it is possible that a monster ID is stored at
                  * a position while there is no matching monster registered.
@@ -977,7 +977,7 @@ monster *map_get_monster_at(map *m, position pos)
 {
     g_assert(m != NULL && m->nlevel == Z(pos) && pos_valid(pos));
 
-    gpointer mid = m->grid[Y(pos)][X(pos)].monster;
+    gpointer mid = m->grid[Y(pos)][X(pos)].m_oid;
     return (mid != NULL) ? game_monster_get(nlarn, mid) : NULL;
 }
 
@@ -1015,7 +1015,7 @@ void map_fill_with_life(map *m)
                 return;
             }
         }
-        while (fov_get(nlarn->p->fov, pos));
+        while (fov_get(nlarn->p->fv, pos));
 
         monster_new_by_level(pos);
     }
@@ -1083,7 +1083,7 @@ void map_timer(map *m)
                         break;
                     }
 
-                    inv_erode(&tile->ilist, erosion, fov_get(nlarn->p->fov, pos));
+                    inv_erode(&tile->ilist, erosion, fov_get(nlarn->p->fv, pos));
                 }
 
                 /* reset tile type if temporary effect has expired */

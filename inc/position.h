@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __POSITION_H_
 #define __POSITION_H_
 
@@ -47,7 +45,7 @@ typedef struct _rectangle
     guint64 y2: 16;
 } rectangle;
 
-typedef struct area
+typedef struct _area
 {
     gint16 start_x;
     gint16 start_y;

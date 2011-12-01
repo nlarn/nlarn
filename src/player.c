@@ -160,7 +160,7 @@ player *player_new()
     p->identified_scrolls[ST_BLANK] = TRUE;
 
     /* initialize the field of vision */
-    p->fov = fov_new();
+    p->fv = fov_new();
 
     return p;
 }
@@ -309,7 +309,7 @@ void player_destroy(player *p)
     }
 
     /* clean the FOV */
-    fov_free(p->fov);
+    fov_free(p->fv);
 
     g_free(p);
 }
@@ -741,7 +741,7 @@ player *player_deserialize(cJSON *pser)
     p->stats.dex_orig = cJSON_GetObjectItem(obj, "dex_orig")->valueint;
 
     /* initialize the field of vision */
-    p->fov = fov_new();
+    p->fv = fov_new();
 
     return p;
 }
@@ -4438,7 +4438,7 @@ void player_update_fov(player *p)
     if (player_effect(p, ET_ENLIGHTENMENT))
     {
         /* reset FOV manually */
-        fov_reset(p->fov);
+        fov_reset(p->fv);
 
         enlight = area_new_circle(p->pos, player_effect(p, ET_ENLIGHTENMENT), FALSE);
 
@@ -4451,7 +4451,7 @@ void player_update_fov(player *p)
                 Y(pos) = y + enlight->start_y;
 
                 if (pos_valid(pos) && area_point_get(enlight, x, y))
-                    fov_set(p->fov, pos, TRUE);
+                    fov_set(p->fv, pos, TRUE);
             }
         }
 
@@ -4460,7 +4460,7 @@ void player_update_fov(player *p)
     else
     {
         /* otherwise use the fov algorithm */
-        fov_calculate(p->fov, game_map(nlarn, Z(p->pos)), p->pos, radius,
+        fov_calculate(p->fv, game_map(nlarn, Z(p->pos)), p->pos, radius,
                       player_effect(p, ET_INFRAVISION));
     }
 
@@ -4469,7 +4469,7 @@ void player_update_fov(player *p)
     {
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
-            if (fov_get(p->fov, pos))
+            if (fov_get(p->fv, pos))
             {
                 monster *m = map_get_monster_at(pmap, pos);
                 inventory **inv = map_ilist_at(pmap, pos);
