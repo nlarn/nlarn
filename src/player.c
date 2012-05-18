@@ -4923,7 +4923,7 @@ static char *player_death_description(game_score_t *score, int verbose)
     if (verbose)
     {
         g_string_append_printf(text, " %s has scored %" G_GINT64_FORMAT
-                               " points, with difficulty setting %d.",
+                               " points, with the difficulty set to %d.",
                                (score->sex == PS_MALE) ? "He" : "She",
                                score->score, score->difficulty);
     }
