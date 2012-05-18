@@ -1,6 +1,6 @@
 /*
  * items.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -233,6 +233,18 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop);
 extern const item_type_data item_data[IT_MAX];
 extern const item_material_data item_materials[IM_MAX];
 
+static inline int item_condition_bonus(item *it)
+{
+    g_assert(it->type < IT_MAX);
+
+    /* sum item bonus or malus and the general condition */
+    int bonus = it->bonus;
+    bonus -= it->rusty;
+    bonus -= it->burnt;
+
+    return bonus;
+}
+
 /* item macros */
 #define item_glyph(type)          item_data[(type)].glyph
 #define item_name_sg(type)        item_data[(type)].name_sg
@@ -397,6 +409,7 @@ int item_filter_nonblessed(item *it);
  * @return TRUE if the supplied item is the potion of cure dianthroritis
  */
 int item_filter_pcd(item *it);
+
 /**
  * @brief Item filter function for blank scrolls.
  * @param a pointer to an item

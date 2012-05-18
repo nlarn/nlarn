@@ -1,6 +1,6 @@
 /*
  * armour.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,6 +21,7 @@
 
 #include "effects.h"
 #include "items.h"
+#include "utils.h"
 
 typedef enum _armour_class
 {
@@ -98,11 +99,23 @@ static inline gboolean armour_unique(item *armour)
     return armours[armour->id].unique;
 }
 
+static inline guint armour_base_ac(item *armour)
+{
+    g_assert(armour->id < AT_MAX);
+    return armours[armour->id].ac;
+}
+
+static inline guint armour_ac(item *armour)
+{
+    int ac = armour_base_ac(armour)
+             + item_condition_bonus(armour);
+
+    return (guint)max(ac, 0);
+}
+
 /* macros */
 
 #define armour_name(armour)     (armours[(armour)->id].name)
-#define armour_base_ac(armour)  (armours[(armour)->id].ac)
-#define armour_ac(armour)       (armour_base_ac(armour) + max(0, (armour)->bonus))
 #define armour_class(armour)    (armours[(armour)->id].category)
 #define armour_material(armour) (armours[(armour)->id].material)
 #define armour_weight(armour)   (armours[(armour)->id].weight)

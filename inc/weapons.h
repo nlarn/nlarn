@@ -1,6 +1,6 @@
 /*
  * weapons.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -131,13 +131,61 @@ void weapon_swap(struct player *p);
  */
 char *weapon_shortdesc(item *weapon, guint available_space);
 
+static inline int ammo_base_damage(item *ammo)
+{
+    g_assert(ammo->id < WT_MAX);
+    return ammos[ammo->id].damage;
+}
+
+static inline int ammo_damage(item *ammo)
+{
+    int dmg = ammo_base_damage(ammo)
+              + item_condition_bonus(ammo);
+
+    /* even the worst ammo will not heal monsters */
+    return max(0, dmg);
+}
+
+static inline int ammo_base_accuracy(item *ammo)
+{
+    g_assert(ammo->id < WT_MAX);
+    return ammos[ammo->id].accuracy;
+}
+
+static inline int ammo_accuracy(item *ammo)
+{
+    return ammo_base_accuracy(ammo) + item_condition_bonus(ammo);
+}
+
+static inline int weapon_base_damage(item *weapon)
+{
+    g_assert(weapon->id < WT_MAX);
+    return weapons[weapon->id].damage;
+}
+
+static inline int weapon_damage(item *weapon)
+{
+    int dmg = weapon_base_damage(weapon)
+              + item_condition_bonus(weapon);
+
+    /* even the worst weapon will not heal monsters */
+    return max(0, dmg);
+}
+
+static inline int weapon_base_acc(item *weapon)
+{
+    g_assert(weapon->id < WT_MAX);
+    return weapons[weapon->id].accuracy;
+}
+
+static inline int weapon_acc(item *weapon)
+{
+    return weapon_base_acc(weapon) + item_condition_bonus(weapon);
+}
+
 /* macros */
 #define ammo_name(itm)          (ammos[(itm)->id].name)
 #define ammo_class(itm)         (ammos[(itm)->id].ac)
-#define ammo_base_damage(itm)   (ammos[(itm)->id].damage)
-#define ammo_damage(itm)        (ammo_base_damage(itm) + (itm)->bonus)
-#define ammo_base_accuracy(itm) (ammos[(itm)->id].accuracy)
-#define ammo_accuracy(itm)      (ammos[(itm)->id].accuracy + (itm)->bonus)
 #define ammo_material(itm)      (ammos[(itm)->id].material)
 #define ammo_weight(itm)        (ammos[(itm)->id].weight)
 #define ammo_price(itm)         (ammos[(itm)->id].price)
@@ -148,10 +196,6 @@ char *weapon_shortdesc(item *weapon, guint available_space);
 #define weapon_short_name(weapon)    (weapons[(weapon)->id].short_name)
 #define weapon_class(weapon)         (weapons[(weapon)->id].wc)
 #define weapon_ammo(weapon)          (weapons[(weapon)->id].ammo)
-#define weapon_base_damage(weapon)   (weapons[(weapon)->id].damage)
-#define weapon_damage(weapon)        (weapon_base_damage(weapon) + (weapon)->bonus)
-#define weapon_base_acc(weapon)      (weapons[(weapon)->id].accuracy)
-#define weapon_acc(weapon)           (weapon_base_acc(weapon) + (weapon)->bonus)
 #define weapon_material(weapon)      (weapons[(weapon)->id].material)
 #define weapon_weight(weapon)        (weapons[(weapon)->id].weight)
 #define weapon_price(weapon)         (weapons[(weapon)->id].price)
