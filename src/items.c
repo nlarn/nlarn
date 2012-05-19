@@ -303,14 +303,12 @@ item *item_new_by_level(item_t item_type, int num_level)
 
     switch (item_type)
     {
-    case IT_ARMOUR:
-        variance = 0.5;
-        break;
-
     case IT_BOOK:
+    case IT_WEAPON:
         variance = 0.2;
         break;
 
+    case IT_ARMOUR:
     case IT_RING:
         variance = 0.5;
         break;
