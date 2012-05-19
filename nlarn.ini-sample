@@ -22,15 +22,17 @@ stats=f
 
 # Item types to pick up automatically:
 # " amulets
+# ' ammunition (ammunition once fired will be picked up anyway)
 # [ armour
 # + books
+# ] containers
 # * gems
 # $ money
 # ! potions
 # = rings
 # ? scrolls
 # ( weapons
-auto-pickup=$*+
+auto-pickup="+*$
 
 # Disable automatic saving when switching a level. Saving the game is
 # enabled by default, disable when it's too slow on your computer
