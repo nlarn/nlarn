@@ -1,6 +1,6 @@
 /*
  * potions.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,34 +26,34 @@
 
 const potion_data potions[PO_MAX] =
 {
-    /* id               name                  effect            price obtainable */
-    { PO_NONE,          "",                   ET_NONE,               0, FALSE },
-    { PO_WATER,         "holy water",         ET_NONE,             500, FALSE },
-    { PO_SLEEP,         "sleep",              ET_SLEEP,             50, FALSE },
-    { PO_HEAL,          "healing",            ET_INC_HP,           100, FALSE },
-    { PO_INC_LEVEL,     "raise level",        ET_INC_LEVEL,        500, FALSE },
-    { PO_INC_RND,       "increase ability",   ET_INC_RND,           50, FALSE },
-    { PO_INC_STR,       "gain strength",      ET_INC_STR,          100, FALSE },
-    { PO_LEARNING,      "learning",           ET_INC_INT,           50, FALSE },
-    { PO_INC_WIS,       "gain wisdom",        ET_INC_WIS,           50, FALSE },
-    { PO_INC_CON,       "sturdiness",         ET_INC_CON,          100, FALSE },
-    { PO_RECOVERY,      "recovery",           ET_NONE,             200, FALSE },
-    { PO_DIZZINESS,     "dizziness",          ET_DIZZINESS,        100, FALSE },
-    { PO_OBJ_DETECT,    "object detection",   ET_NONE,             100,  TRUE },
-    { PO_MON_DETECT,    "monster detection",  ET_DETECT_MONSTER,   100,  TRUE },
-    { PO_AMNESIA,       "forgetfulness",      ET_NONE,             100, FALSE },
-    { PO_BLINDNESS,     "blindness",          ET_BLINDNESS,         50, FALSE },
-    { PO_CONFUSION,     "confusion",          ET_CONFUSION,         50, FALSE },
-    { PO_HEROISM,       "heroism",            ET_HEROISM,          500,  TRUE },
-    { PO_GIANT_STR,     "giant strength",     ET_INC_STR,          200,  TRUE },
-    { PO_FIRE_RES,      "fire resistance",    ET_RESIST_FIRE,      200, FALSE },
-    { PO_TRE_DETECT,    "treasure finding",   ET_NONE,             100,  TRUE },
-    { PO_MAX_HP,        "instant healing",    ET_MAX_HP,           500,  TRUE },
-    { PO_INC_MP,        "power",              ET_INC_MP,           200,  TRUE },
-    { PO_POISON,        "poison",             ET_POISON,            50, FALSE },
-    { PO_SEE_INVISIBLE, "see invisible",      ET_INFRAVISION,      200,  TRUE },
-    { PO_LEVITATION,    "levitation",         ET_LEVITATION,       200, FALSE },
-    { PO_CURE_DIANTHR,  "cure dianthroritis", ET_NONE,           10000, FALSE },
+    /* id               name                  effect            price store_stock */
+    { PO_NONE,          "",                   ET_NONE,               0, 0 },
+    { PO_WATER,         "holy water",         ET_NONE,             500, 0 },
+    { PO_SLEEP,         "sleep",              ET_SLEEP,             50, 0 },
+    { PO_HEAL,          "healing",            ET_INC_HP,           100, 0 },
+    { PO_INC_LEVEL,     "raise level",        ET_INC_LEVEL,        500, 0 },
+    { PO_INC_RND,       "increase ability",   ET_INC_RND,           50, 0 },
+    { PO_INC_STR,       "gain strength",      ET_INC_STR,          100, 0 },
+    { PO_LEARNING,      "learning",           ET_INC_INT,           50, 0 },
+    { PO_INC_WIS,       "gain wisdom",        ET_INC_WIS,           50, 0 },
+    { PO_INC_CON,       "sturdiness",         ET_INC_CON,          100, 0 },
+    { PO_RECOVERY,      "recovery",           ET_NONE,             200, 0 },
+    { PO_DIZZINESS,     "dizziness",          ET_DIZZINESS,        100, 0 },
+    { PO_OBJ_DETECT,    "object detection",   ET_NONE,             100, 2 },
+    { PO_MON_DETECT,    "monster detection",  ET_DETECT_MONSTER,   100, 2 },
+    { PO_AMNESIA,       "forgetfulness",      ET_NONE,             100, 0 },
+    { PO_BLINDNESS,     "blindness",          ET_BLINDNESS,         50, 0 },
+    { PO_CONFUSION,     "confusion",          ET_CONFUSION,         50, 0 },
+    { PO_HEROISM,       "heroism",            ET_HEROISM,          500, 0 },
+    { PO_GIANT_STR,     "giant strength",     ET_INC_STR,          200, 0 },
+    { PO_FIRE_RES,      "fire resistance",    ET_RESIST_FIRE,      200, 0 },
+    { PO_TRE_DETECT,    "treasure finding",   ET_NONE,             100, 1 },
+    { PO_MAX_HP,        "instant healing",    ET_MAX_HP,           500, 0 },
+    { PO_INC_MP,        "power",              ET_INC_MP,           200, 5 },
+    { PO_POISON,        "poison",             ET_POISON,            50, 0 },
+    { PO_SEE_INVISIBLE, "see invisible",      ET_INFRAVISION,      200, 1 },
+    { PO_LEVITATION,    "levitation",         ET_LEVITATION,       200, 0 },
+    { PO_CURE_DIANTHR,  "cure dianthroritis", ET_NONE,           10000, 0 },
 };
 
 static int potion_with_effect(struct player *p, item *potion);

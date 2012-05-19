@@ -1,6 +1,6 @@
 /*
  * items.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1439,7 +1439,7 @@ int item_obtainable(item_t type, int id)
         break;
 
     case IT_ARMOUR:
-        obtainable = ! armours[id].unique;
+        obtainable = armours[id].obtainable;
         break;
 
     case IT_BOOK:
@@ -1451,7 +1451,7 @@ int item_obtainable(item_t type, int id)
         break;
 
     case IT_POTION:
-        obtainable = potion_type_obtainable(id);
+        obtainable = (potion_type_store_stock(id) > 0);
         break;
 
     case IT_RING:
@@ -1459,7 +1459,7 @@ int item_obtainable(item_t type, int id)
         break;
 
     case IT_SCROLL:
-        obtainable = scroll_type_obtainable(id);
+        obtainable = (scroll_type_store_stock(id) > 0);
         break;
 
     case IT_WEAPON:

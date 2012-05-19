@@ -1,6 +1,6 @@
 /*
  * scrolls.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 #include <stdlib.h>
 
@@ -28,33 +26,33 @@
 
 const magic_scroll_data scrolls[ST_MAX] =
 {
-    /* ID                   name                  effect               price obtainable */
-    { ST_NONE,              "",                   ET_NONE,                 0, FALSE },
-    { ST_ENCH_ARMOUR,       "enchant armour",     ET_NONE,               100,  TRUE },
-    { ST_ENCH_WEAPON,       "enchant weapon",     ET_NONE,               100,  TRUE },
-    { ST_ENLIGHTENMENT,     "enlightenment",      ET_ENLIGHTENMENT,      800,  TRUE },
-    { ST_BLANK,             "blank paper",        ET_NONE,               100, FALSE },
-    { ST_CREATE_MONSTER,    "create monster",     ET_NONE,               100, FALSE },
-    { ST_CREATE_ARTIFACT,   "create artifact",    ET_NONE,               400, FALSE },
-    { ST_AGGRAVATE_MONSTER, "aggravate monsters", ET_AGGRAVATE_MONSTER,  100, FALSE },
-    { ST_TIMEWARP,          "time warp",          ET_NONE,               800, FALSE },
-    { ST_TELEPORT,          "teleportation",      ET_NONE,               250,  TRUE },
-    { ST_AWARENESS,         "expanded awareness", ET_AWARENESS,          250,  TRUE },
-    { ST_SPEED,             "speed",              ET_SPEED,              250, FALSE },
-    { ST_HEAL_MONSTER,      "monster healing",    ET_NONE,               100, FALSE },
-    { ST_SPIRIT_PROTECTION, "spirit protection",  ET_SPIRIT_PROTECTION,  400,  TRUE },
-    { ST_UNDEAD_PROTECTION, "undead protection",  ET_UNDEAD_PROTECTION,  400,  TRUE },
-    { ST_STEALTH,           "stealth",            ET_STEALTH,            400,  TRUE },
-    { ST_MAPPING,           "magic mapping",      ET_NONE,               250,  TRUE },
-    { ST_HOLD_MONSTER,      "hold monsters",      ET_HOLD_MONSTER,       800, FALSE },
-    { ST_GEM_PERFECTION,    "gem perfection",     ET_NONE,              3000, FALSE },
-    { ST_SPELL_EXTENSION,   "spell extension",    ET_NONE,               800, FALSE },
-    { ST_IDENTIFY,          "identify",           ET_NONE,               400,  TRUE },
-    { ST_REMOVE_CURSE,      "remove curse",       ET_NONE,               250, FALSE },
-    { ST_ANNIHILATION,      "annihilation",       ET_NONE,              3000, FALSE },
-    { ST_PULVERIZATION,     "pulverization",      ET_NONE,               800,  TRUE },
-    { ST_LIFE_PROTECTION,   "life protection",    ET_LIFE_PROTECTION,   3000, FALSE },
-    { ST_GENOCIDE_MONSTER,  "genocide monster",   ET_NONE,              3000, FALSE },
+    /* ID                   name                  effect               price store_stock */
+    { ST_NONE,              "",                   ET_NONE,                 0, 0 },
+    { ST_ENCH_ARMOUR,       "enchant armour",     ET_NONE,               100, 1 },
+    { ST_ENCH_WEAPON,       "enchant weapon",     ET_NONE,               100, 1 },
+    { ST_ENLIGHTENMENT,     "enlightenment",      ET_ENLIGHTENMENT,      800, 0 },
+    { ST_BLANK,             "blank paper",        ET_NONE,               100, 0 },
+    { ST_CREATE_MONSTER,    "create monster",     ET_NONE,               100, 0 },
+    { ST_CREATE_ARTIFACT,   "create artifact",    ET_NONE,               400, 0 },
+    { ST_AGGRAVATE_MONSTER, "aggravate monsters", ET_AGGRAVATE_MONSTER,  100, 0 },
+    { ST_TIMEWARP,          "time warp",          ET_NONE,               800, 0 },
+    { ST_TELEPORT,          "teleportation",      ET_NONE,               250, 3 },
+    { ST_AWARENESS,         "expanded awareness", ET_AWARENESS,          250, 1 },
+    { ST_SPEED,             "speed",              ET_SPEED,              250, 0 },
+    { ST_HEAL_MONSTER,      "monster healing",    ET_NONE,               100, 0 },
+    { ST_SPIRIT_PROTECTION, "spirit protection",  ET_SPIRIT_PROTECTION,  400, 0 },
+    { ST_UNDEAD_PROTECTION, "undead protection",  ET_UNDEAD_PROTECTION,  400, 0 },
+    { ST_STEALTH,           "stealth",            ET_STEALTH,            400, 0 },
+    { ST_MAPPING,           "magic mapping",      ET_NONE,               250, 3 },
+    { ST_HOLD_MONSTER,      "hold monsters",      ET_HOLD_MONSTER,       800, 0 },
+    { ST_GEM_PERFECTION,    "gem perfection",     ET_NONE,              3000, 0 },
+    { ST_SPELL_EXTENSION,   "spell extension",    ET_NONE,               800, 0 },
+    { ST_IDENTIFY,          "identify",           ET_NONE,               400, 3 },
+    { ST_REMOVE_CURSE,      "remove curse",       ET_NONE,               250, 0 },
+    { ST_ANNIHILATION,      "annihilation",       ET_NONE,              3000, 0 },
+    { ST_PULVERIZATION,     "pulverization",      ET_NONE,               800, 0 },
+    { ST_LIFE_PROTECTION,   "life protection",    ET_LIFE_PROTECTION,   3000, 0 },
+    { ST_GENOCIDE_MONSTER,  "genocide monster",   ET_NONE,              3000, 0 },
 };
 
 static int scroll_with_effect(player *p, item *r_scroll);

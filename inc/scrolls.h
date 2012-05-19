@@ -1,6 +1,6 @@
 /*
  * scrolls.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,12 +28,11 @@ struct player;
 /* type definitions */
 
 typedef struct magic_scroll_data {
-	int	id;
-	const char *name;
-	effect_t effect; /* if this scroll causes an effect */
-	int price;
-	unsigned
-        obtainable: 1;  /* available in the shop */
+    int        id;
+    const char *name;
+    effect_t   effect;      /* effect causes by this scroll */
+    int        price;
+    int        store_stock; /* count in the store's starting stock */
 } magic_scroll_data;
 
 enum scroll_types {
@@ -78,7 +77,7 @@ extern const magic_scroll_data scrolls[ST_MAX];
 
 /* macros */
 
-#define scroll_type_obtainable(id) (scrolls[id].obtainable)
+#define scroll_type_store_stock(id) (scrolls[(id)].store_stock)
 
 #define scroll_name(scroll)   (scrolls[(scroll)->id].name)
 #define scroll_effect(scroll) (scrolls[(scroll)->id].effect)

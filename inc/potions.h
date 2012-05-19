@@ -1,6 +1,6 @@
 /*
  * potions.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,12 +28,11 @@ struct player;
 /* type definitions */
 
 typedef struct potion_data {
-    int id;
+    int        id;
     const char *name;
-    int effect_t;       /* if this potion causes any effect */
-    int price;
-    unsigned
-        obtainable: 1;  /* available in the shop */
+    int        effect_t;    /* effect causes by this potion */
+    int        price;
+    int        store_stock; /* count in the store's starting stock */
 } potion_data;
 
 enum potion_objects {
@@ -80,7 +79,7 @@ extern const potion_data potions[PO_MAX];
 
 /* macros */
 
-#define potion_type_obtainable(id) (potions[id].obtainable)
+#define potion_type_store_stock(id) (potions[(id)].store_stock)
 
 #define potion_name(potion)   (potions[(potion)->id].name)
 #define potion_effect(potion) (potions[(potion)->id].effect_t)

@@ -1,6 +1,6 @@
 /*
  * weapons.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -29,11 +29,11 @@
 const ammo_data ammos[AMT_MAX] =
 {
     /*  type       name            ac           dam   acc  mat        we  pr  ob */
-    { AMT_NONE,    NULL,           AMMO_NONE,      0,   0, IM_NONE,    0,  0, 0, },
-    { AMT_STONE,   "pebble",       AMMO_SLING,     2,   1, IM_STONE, 100,  1, 0, },
-    { AMT_SBULLET, "sling bullet", AMMO_SLING,     4,   2, IM_LEAD,   50,  3, 1, },
-    { AMT_ARROW,   "arrow",        AMMO_BOW,       8,   3, IM_WOOD,   80,  5, 1, },
-    { AMT_BOLT,    "bolt",         AMMO_CROSSBOW, 10,   4, IM_IRON,  100, 10, 1, },
+    { AMT_NONE,    NULL,           AMMO_NONE,      0,   0, IM_NONE,    0,  0, FALSE, },
+    { AMT_STONE,   "pebble",       AMMO_SLING,     2,   1, IM_STONE, 100,  1, FALSE, },
+    { AMT_SBULLET, "sling bullet", AMMO_SLING,     4,   2, IM_LEAD,   50,  3,  TRUE, },
+    { AMT_ARROW,   "arrow",        AMMO_BOW,       8,   3, IM_WOOD,   80,  5,  TRUE, },
+    { AMT_BOLT,    "bolt",         AMMO_CROSSBOW, 10,   4, IM_IRON,  100, 10, FALSE, },
 };
 
 const char *ammo_class_name[AMMO_MAX] =
@@ -61,16 +61,16 @@ const weapon_data weapons[WT_MAX] =
     { WT_MACE,          "mace",                      "mace",            WC_MELEE,     AMMO_NONE, 12,   1, IM_IRON,  2600,   160, 0, 0, 1, 1 },
     { WT_FLAIL,         "flail",                     "flail",           WC_MELEE,     AMMO_NONE, 14,   1, IM_IRON,  2900,   195, 1, 0, 1, 1 },
     { WT_BATTLEAXE,     "battle-axe",                "battle-axe",      WC_MELEE,     AMMO_NONE, 18,   2, IM_IRON,  2700,   350, 1, 0, 1, 1 },
-    { WT_CROSSBOW,      "crossbow",                  "crossbow",       WC_RANGED, AMMO_CROSSBOW,  5,   3, IM_WOOD,  3500,   600, 1, 0, 1, 1 },
+    { WT_CROSSBOW,      "crossbow",                  "crossbow",       WC_RANGED, AMMO_CROSSBOW,  5,   3, IM_WOOD,  3500,   600, 1, 0, 1, 0 },
     { WT_LONGSWORD,     "longsword",                 "longsword",       WC_MELEE,     AMMO_NONE, 22,   3, IM_IRON,  1950,   550, 0, 0, 1, 1 },
     { WT_2SWORD,        "two-handed sword",          "2-handed sword",  WC_MELEE,     AMMO_NONE, 26,   4, IM_IRON,  3600,  1000, 1, 0, 1, 1 },
-    { WT_SWORDSLASHING, "sword of slashing",         "slashing",        WC_MELEE,     AMMO_NONE, 30,   5, IM_IRON,  2200,  6000, 0, 0, 1, 1 },
+    { WT_SWORDSLASHING, "sword of slashing",         "slashing",        WC_MELEE,     AMMO_NONE, 30,   5, IM_IRON,  2200,  6000, 0, 0, 1, 0 },
     /* unique weapons */
     { WT_LANCEOFDEATH,  "lance of death",            "lance of death",  WC_MELEE,     AMMO_NONE, 20,   3, IM_WOOD,  2900, 65000, 1, 1, 1, 1 },
-    { WT_VORPALBLADE,   "Vorpal blade",              "Vorpal blade",    WC_MELEE,     AMMO_NONE, 22,   3, IM_STEEL, 1600,  3800, 0, 1, 1, 1 },
-    { WT_SLAYER,        "Slayer",                    "Slayer",          WC_MELEE,     AMMO_NONE, 30,   5, IM_STEEL, 1800,  6800, 0, 1, 0, 1 },
-    { WT_SUNSWORD,      "Sunsword",                  "Sunsword",        WC_MELEE,     AMMO_NONE, 32,   6, IM_STEEL, 1800,  7000, 0, 1, 1, 1 },
-    { WT_BESSMAN,       "Bessman's flailing hammer", "Bessman's",       WC_MELEE,     AMMO_NONE, 35,   6, IM_STEEL, 5800, 10000, 1, 1, 0, 1 },
+    { WT_VORPALBLADE,   "Vorpal blade",              "Vorpal blade",    WC_MELEE,     AMMO_NONE, 22,   3, IM_STEEL, 1600,  3800, 0, 1, 1, 0 },
+    { WT_SLAYER,        "Slayer",                    "Slayer",          WC_MELEE,     AMMO_NONE, 30,   5, IM_STEEL, 1800,  6800, 0, 1, 0, 0 },
+    { WT_SUNSWORD,      "Sunsword",                  "Sunsword",        WC_MELEE,     AMMO_NONE, 32,   6, IM_STEEL, 1800,  7000, 0, 1, 1, 0 },
+    { WT_BESSMAN,       "Bessman's flailing hammer", "Bessman's",       WC_MELEE,     AMMO_NONE, 35,   6, IM_STEEL, 5800, 10000, 1, 1, 0, 0 },
 };
 
 /* static functions */

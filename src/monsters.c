@@ -1,6 +1,6 @@
 /*
  * monsters.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1472,6 +1472,7 @@ void monster_player_attack(monster *m, player *p)
         item *weapon = game_item_get(nlarn, m->weapon);
 
         /* make monster size affect weapon damage */
+        /* FIXME: handle the vorpal blade */
         dam->amount  = rand_1n(weapon_damage(weapon) + game_difficulty(nlarn)
                                + 2 * (monster_size(m) - ESIZE_MEDIUM));
     }
@@ -2239,6 +2240,7 @@ static item *monster_weapon_select(monster *m)
 static void monster_weapon_wield(monster *m, item *weapon)
 {
     /* FIXME: time management */
+    /* FIXME: weapon effects */
     m->weapon = weapon->oid;
 
     /* show message if monster is visible */

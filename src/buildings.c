@@ -1,6 +1,6 @@
 /*
  * buildings.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -278,24 +278,44 @@ void building_dndstore_init()
 
     for (item_t type = IT_AMULET; type < IT_MAX; type++)
     {
-        int count;
-
         /*never generate gems or gold */
         if (type == IT_GEM || type == IT_GOLD)
             continue;
 
-        if (item_is_stackable(type) && (type == IT_AMMO))
-            count = 50;
-        else if (item_is_stackable(type) && (type != IT_BOOK))
-            count = 3;
-        else
-            count = 1;
-
         for (guint id = 1; id < item_max_id(type); id++)
         {
+            int count;
+
             /* do not generate unobtainable items except in wizard mode */
             if (!game_wizardmode(nlarn) && !item_obtainable(type, id))
                 continue;
+
+            switch (type)
+            {
+            case IT_AMMO:
+                count = 50;
+                break;
+
+            case IT_BOOK:
+                count = 1;
+                break;
+
+            case IT_SCROLL:
+                count = scroll_type_store_stock(id);
+                break;
+
+            case IT_POTION:
+                count = potion_type_store_stock(id);
+                break;
+
+            default:
+                {
+                    if (item_is_stackable(type))
+                        count = 3;
+                    else
+                        count = 1;
+                }
+            }
 
             item *it = item_new(type, id);
 

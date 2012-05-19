@@ -73,7 +73,8 @@ typedef struct _armour_data
     int price;          /* base price in the shops */
     armour_t disguise;  /* item used for description until armour type is identified */
     unsigned
-        unique: 1;        /* available in the shop? */
+        obtainable: 1,  /* available in the shop? */
+        unique: 1;      /* generated only once */
 } armour_data;
 
 /* external vars */

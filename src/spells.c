@@ -1,6 +1,6 @@
 /*
  * spells.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* $Id$ */
 
 #include <glib.h>
 #include <string.h>
@@ -80,7 +78,7 @@ const spell_data spells[SP_MAX] =
         "Causes your hands to emit a screeching sound toward what they point.",
         "The sound damages the %s.",
         "The %s can't hear the noise.",
-        DC_LIGHTCYAN, 2, 480, TRUE
+        DC_LIGHTCYAN, 2, 480, FALSE
     },
     {
         SP_STR, "str", "strength",
@@ -130,7 +128,7 @@ const spell_data spells[SP_MAX] =
         SC_PLAYER, DAM_NONE, ET_INVISIBILITY,
         "The caster becomes invisible.",
         NULL, NULL,
-        DC_NONE, 2, 600, TRUE
+        DC_NONE, 2, 600, FALSE
     },
     {
         SP_BAL, "bal", "fireball",
@@ -138,7 +136,7 @@ const spell_data spells[SP_MAX] =
         "Makes a ball of fire that burns on what it hits.",
         "The fireball hits the %s.",
         NULL,
-        DC_LIGHTRED, 3, 1200, TRUE
+        DC_LIGHTRED, 3, 1200, FALSE
     },
     {
         SP_CLD, "cld", "cone of cold",
@@ -146,7 +144,7 @@ const spell_data spells[SP_MAX] =
         "Sends forth a cone of cold which freezes what it touches.",
         "The cone of cold strikes the %s.",
         "The %s loves the cold!",
-        DC_WHITE, 3, 1200, TRUE
+        DC_WHITE, 3, 1200, FALSE
     },
     {
         SP_PLY, "ply", "polymorph",
@@ -199,7 +197,7 @@ const spell_data spells[SP_MAX] =
         "Your finger will emit a lightning bolt when this spell is cast.",
         "A lightning bolt hits the %s.",
         "The %s loves fire and lightning!",
-        DC_YELLOW, 4, 1600, TRUE
+        DC_YELLOW, 4, 1600, FALSE
     },
     {
         SP_DRL, "drl", "drain life",
@@ -213,7 +211,7 @@ const spell_data spells[SP_MAX] =
         SC_PLAYER, DAM_NONE, ET_INVULNERABILITY,
         "This globe helps to protect the player from physical attack.",
         NULL, NULL,
-        DC_NONE, 4, 1400, TRUE
+        DC_NONE, 4, 1400, FALSE
     },
     {
         SP_FLO, "flo", "flood",
