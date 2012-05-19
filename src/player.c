@@ -1914,12 +1914,16 @@ void player_exp_gain(player *p, int count)
         player_level_gain(p, numlevels);
 }
 
-void player_exp_lose(player *p, int count)
+void player_exp_lose(player *p, guint count)
 {
     int numlevels = 0;
 
     g_assert(p != NULL && count > 0);
-    p->experience -= count;
+
+    if (count > p->experience)
+        p->experience = 0;
+    else
+        p->experience -= count;
 
     while ((player_lvl_exp[p->level - 1 - numlevels]) > p->experience)
         numlevels++;

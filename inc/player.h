@@ -1,6 +1,6 @@
 /*
  * player.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -270,7 +270,7 @@ void player_level_gain(player *p, int count);
 void player_level_lose(player *p, int count);
 
 void player_exp_gain(player *p, int count);
-void player_exp_lose(player *p, int count);
+void player_exp_lose(player *p, guint count);
 
 int player_hp_gain(player *p, int count);
 int player_hp_lose(player *p, int count, player_cod cause_type, int cause);
