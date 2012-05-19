@@ -10,49 +10,49 @@ You can also use the number pad with num lock off.
 Running means moving into one direction until interrupted. `lightgreen`g`end` or `lightgreen`/`end`, followed by a direction key, will similarly make your run.
 
 
-`yellow`Autotravel`end`
+`yellow`Auto-travel`end`
 
 `lightgreen`V`end`   voyage (travel) to a location on the level
 `lightgreen`C`end`   continue travelling  
 
-You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. _ for an altar). Subsequent keypresses will move the cursor around if there are more than one of the desired features on the level. When finished, press ENTER to start the journey. When a foe comes into sight, travelling will be aborted automatically and can be continued with `lightgreen`C`end` when the enemy gets out of sight. 
+You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. `lightgreen`_`end` for an altar). Subsequent key presses will move the cursor around if there are more than one of the desired features on the level. When finished, press ENTER to start the journey. When a foe comes into sight, travelling will be aborted automatically and can be continued with `lightgreen`C`end` when the enemy gets out of sight.
 
 
 `yellow`Other actions`end`
 
 `lightgreen`A`end`   desecrate an altar
 `lightgreen`c`end`   close a door
-`lightgreen`d`end`   drop domething
+`lightgreen`d`end`   drop something
 `lightgreen`D`end`   list discovered landmarks
-`lightgreen`f`end`   fire ranged weapon
+`lightgreen`f`end`   fire a ranged weapon
 `lightgreen`F`end`   wash yourself at a fountain
 `lightgreen`g`end`   move until something interesting is found
 `lightgreen`i`end`   open the inventory window
 `lightgreen`m`end`   work magic (cast a spell)
-`lightgreen`M`end`   cast the previous spell again
-`lightgreen`o`end`   open a door or chest
+`lightgreen`M`end`   cast the previously cast spell again
+`lightgreen`o`end`   open a door or a chest
 `lightgreen`p`end`   pray at an altar
-`lightgreen`P`end`   give tax status
-`lightgreen`q`end`   drink a potion or at a fountain
+`lightgreen`P`end`   display tax status
+`lightgreen`q`end`   drink a potion or from a fountain
 `lightgreen`r`end`   read something
-`lightgreen`R`end`   remove gems from throne
-`lightgreen`s`end`   search traps
+`lightgreen`R`end`   remove gems from a throne
+`lightgreen`s`end`   search for traps
 `lightgreen`S`end`   sit on a throne
 `lightgreen`t`end`   throw an item
-`lightgreen`T`end`   take a worn/wielded item off
-`lightgreen`v`end`   print program version
+`lightgreen`T`end`   take off a worn/wielded item
+`lightgreen`v`end`   print the game's version
 `lightgreen`w`end`   wait/rest up to one mobul or until healed
 `lightgreen`W`end`   wear/wield an item
-`lightgreen`x`end`   exchange primary/secondary weapon
+`lightgreen`x`end`   exchange the primary and secondary weapon
 
 `lightgreen`<`end`   climb up stairs/volcanic shaft or enter a building
 `lightgreen`>`end`   climb down stairs/volcanic shaft
-`lightgreen`,`end`   pick up item
-`lightgreen`$`end`   show bank account balance
+`lightgreen`,`end`   pick up items
+`lightgreen`$`end`   display the bank account balance
 `lightgreen`:`end`   look at the location you are standing on
 `lightgreen`;`end`   look at another location
 `lightgreen`.`end`   rest one turn (alternate key: `lightgreen`5`end`)
-`lightgreen`\`end`   show list of identified objects
+`lightgreen`\`end`   show a list of identified objects
 `lightgreen`?`end`   this help screen (alternate key: `lightgreen`F1`end`)
 `lightgreen`@`end`   toggle auto-pickup settings
 
@@ -64,7 +64,14 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`^Q`end`  quit the game
 `lightgreen`^R`end`  recall message history
 `lightgreen`^S`end`  save and exit the game
-`lightgreen`^W`end`  activate wizard mode
+
+
+`yellow`Game Time`end`
+The game time is counted in `white`turns`end`. Usually, moving a single step consumes one turn, but may, depending on your speed, take less or more time. All other creatures in the caverns also vary largely in their rapidness. There is rumor about magical items that may affect the speed of an animate being.
+
+More complex actions, such as using an item, consume multiple turns. Whenever you are concerned with something for a while and your health is endangered, you are offered to abort your current deed. Unfortunately, all turns spent so far are lost.
+
+The larnian unit of time is the `white`mobul`end`. It consists of one hundred turns.
 
 
 `yellow`The Inventory`end`
@@ -75,7 +82,7 @@ When browsing through the inventory, valid actions for the selected item are sho
 `yellow`Dialog Windows`end`
 
 Close a dialog window with `lightgreen`enter`end`/`lightgreen`space`end` to select an option or press `lightgreen`ESC`end` to close the window without making a choice.
-You can move dialogs with Ctrl and the cursor keys.
+You can move dialogues with Ctrl and the cursor keys.
 
 
 `yellow`Spell Casting`end`
@@ -90,6 +97,10 @@ When opening the spell casting window by pressing (`lightgreen`m`end`) you'll ge
 
 `yellow`Wizard Mode Actions`end`
 
+Wizard mode is used to debug the game; therefore it is impossible to die in wizard mode. You will gain insight into otherwise hidden details of the game. Once you enter wizard mode, there is no way back; any progress made during wizard mode will not make it to the high score list.
+When starting the game with the wizard mode command line option (`lightgreen`-w`end`), every item in the game will be available in the store.
+
+`lightgreen`^W`end`  activate wizard mode
 `lightgreen`+`end`   teleport down one level
 `lightgreen`-`end`   teleport up one level
 `lightgreen`^T`end`  teleport within a level
@@ -97,4 +108,4 @@ When opening the spell casting window by pressing (`lightgreen`m`end`) you'll ge
 `lightgreen`*`end`   add 1000 gp to bank account
 `lightgreen`&`end`   heal yourself
 `lightgreen`^F`end`  combat simulation
-`lightgreen`^V`end`  toggle visibility of entire map
+`lightgreen`^V`end`  toggle the visibility of the entire map
