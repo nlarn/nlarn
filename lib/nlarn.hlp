@@ -60,10 +60,12 @@ You can select the travel target by moving the cursor or by typing the desired f
 `yellow`Control Keys`end`
 
 `lightgreen`TAB`end` show worn equipment
+`lightgreen`^D`end`  page down in the inventory, spell list and messages
 `lightgreen`^L`end`  redraw the screen
 `lightgreen`^Q`end`  quit the game
 `lightgreen`^R`end`  recall message history
 `lightgreen`^S`end`  save and exit the game
+`lightgreen`^U`end`  page up in the inventory, spell list and messages
 
 
 `yellow`Game Time`end`

@@ -1,6 +1,6 @@
 /*
  * display.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -925,6 +925,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         case '9':
         case KEY_PPAGE:
         case KEY_A3:
+        case 21: /* ^U */
 
             if ((curr == maxvis) || offset == 0)
                 curr = 1;
@@ -967,6 +968,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         case '3':
         case KEY_NPAGE:
         case KEY_C3:
+        case 4: /* ^D */
 
             if (curr == 1)
             {
@@ -1233,6 +1235,7 @@ spell *display_spell_select(const char *title, player *p)
         case '9':
         case KEY_PPAGE:
         case KEY_A3:
+        case 21: /* ^U */
 
             if ((curr == maxvis) || offset == 0)
                 curr = 1;
@@ -1286,6 +1289,7 @@ spell *display_spell_select(const char *title, player *p)
         case '3':
         case KEY_NPAGE:
         case KEY_C3:
+        case 4: /* ^D */
             if (curr == 1)
             {
                 curr = maxvis;
@@ -2769,6 +2773,7 @@ int display_show_message(const char *title, const char *message, int indent)
         case '9':
         case KEY_PPAGE:
         case KEY_A3:
+        case 21: /* ^U */
             if (offset > maxvis + 1)
                 offset -= maxvis;
             else
@@ -2794,6 +2799,7 @@ int display_show_message(const char *title, const char *message, int indent)
         case '3':
         case KEY_NPAGE:
         case KEY_C3:
+        case 4: /* ^D */
             offset = min((offset + maxvis - 1), text->len - maxvis);
             break;
 
