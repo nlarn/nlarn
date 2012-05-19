@@ -645,7 +645,6 @@ int building_school(player *p)
 {
     /* the number of turns it takes to enter and leave the school */
     int turns = 2;
-    guint price;
 
     GString *text;
     guint idx;
@@ -655,8 +654,6 @@ int building_school(player *p)
                              "We offer the exciting opportunity of higher " \
                              "education to all inhabitants of the caves. " \
                              "Here is a list of the class schedule:\n\n";
-
-    const char msg_price[] = "\nAll courses cost %d gold pieces.";
 
     const char msg_prerequisite[] = "Sorry, but this class has a prerequisite of \"%s\".";
 
@@ -675,18 +672,19 @@ int building_school(player *p)
 
     g_assert(p != NULL);
 
-    /* courses become more expensive with rising difficulty */
-    price = 250 + (game_difficulty(nlarn) * 50);
-
     text = g_string_new(msg_greet);
 
     for (idx = 0; idx < SCHOOL_COURSE_COUNT - 1; idx++)
     {
         if (!p->school_courses_taken[idx])
         {
-            g_string_append_printf(text, "  `lightgreen`%c`end`) %-30s (%2d mobuls)\n",
+            /* courses become more expensive with rising difficulty */
+            guint price = school_courses[idx].course_time
+                          * (game_difficulty(nlarn) + 1) * 100;
+
+            g_string_append_printf(text, " `lightgreen`%c`end`) %-24s - %2d mobuls, %4d gp\n",
                                    idx + 'a', school_courses[idx].description,
-                                   school_courses[idx].course_time);
+                                   school_courses[idx].course_time, price);
         }
         else
         {
@@ -694,9 +692,8 @@ int building_school(player *p)
         }
     }
 
-    g_string_append_printf(text, msg_price, price);
-    g_string_append_printf(text, "\n\nAlternatively,\n"
-                           "  `lightgreen`%c`end`) %-30s (%2d mobuls)\n\n",
+    g_string_append_printf(text, "\nAlternatively,\n"
+                           " `lightgreen`%c`end`) %-24s - %2d mobuls\n\n",
                            idx + 'a', school_courses[idx].description,
                            school_courses[idx].course_time);
 
@@ -711,6 +708,10 @@ int building_school(player *p)
     {
         if (selection == SCHOOL_COURSE_COUNT - 1)
             return building_scribe_scroll(p, school_courses[(int)selection].course_time);
+
+        /* courses become more expensive with rising difficulty */
+        guint price = school_courses[(int)selection].course_time
+                      * (game_difficulty(nlarn) + 1) * 100;
 
         if (!building_player_check(p, price))
         {
