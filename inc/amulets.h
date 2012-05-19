@@ -1,6 +1,6 @@
 /*
  * amulets.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,7 +25,7 @@ enum amulet_types
 {
     AM_NONE,
     AM_AWARENESS,
-    AM_INVISIBILITY,
+    AM_SUSTAINMENT,
     AM_UNDEAD_CONTROL,
     AM_NEGATE_SPIRIT,
     AM_NOTHEFT,

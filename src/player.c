@@ -1,6 +1,6 @@
 /*
  * player.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -2167,7 +2167,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_DEC_INT:
     case DAM_DEC_STR:
     case DAM_DEC_WIS:
-        if (chance(dam->amount -= player_get_con(p)))
+        if (!player_effect(p, ET_SUSTAINMENT)
+	    && chance(dam->amount -= player_get_con(p)))
         {
             effect_t et = (ET_DEC_CON + dam->type - DAM_DEC_CON);
             e = effect_new(et);

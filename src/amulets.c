@@ -1,6 +1,6 @@
 /*
  * amulets.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,8 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
 #include "amulets.h"
 #include "items.h"
@@ -27,7 +25,7 @@ const amulet_data amulets[AM_MAX] =
 {
     { AM_NONE,                NULL,               ET_NONE,              0,    },
     { AM_AWARENESS,           "awareness",        ET_AWARENESS,         400,  },
-    { AM_INVISIBILITY,        "invisibility",     ET_INVISIBILITY,      400,  },
+    { AM_SUSTAINMENT,         "sustainment",      ET_SUSTAINMENT,       400,  },
     { AM_UNDEAD_CONTROL,      "undead control",   ET_UNDEAD_PROTECTION, 5000, },
     { AM_NEGATE_SPIRIT,       "negate spirit",    ET_SPIRIT_PROTECTION, 5000, },
     { AM_NOTHEFT,             "theft prevention", ET_NOTHEFT,           6000, },

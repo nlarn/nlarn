@@ -1,6 +1,6 @@
 /*
  * effects.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -76,6 +76,7 @@ typedef enum _effect_t
     ET_SPIRIT_PROTECTION,       /* protection against spirits */
     ET_LIFE_PROTECTION,         /* you only live twice */
     ET_NOTHEFT,                 /* protection from thievish monsters */
+    ET_SUSTAINMENT,             /* protection from stat drain attacks */
     ET_TIMESTOP,                /* game time modification */
     ET_WALL_WALK,               /* ability to walk through walls */
     ET_LEVITATION,              /* affected person floats in the air */

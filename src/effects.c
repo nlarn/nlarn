@@ -1,6 +1,6 @@
 /*
  * effects.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* $Id$ */
 
 #include <glib.h>
 #include <string.h>
@@ -327,6 +325,12 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_NOTHEFT, "ET_NOTHEFT", 400, TRUE, "theft protection",
+        NULL, NULL, NULL, NULL,
+        TRUE, FALSE, TRUE, FALSE
+    },
+
+    {
+        ET_SUSTAINMENT, "ET_SUSTAINMENT", 400, TRUE, "sustainment",
         NULL, NULL, NULL, NULL,
         TRUE, FALSE, TRUE, FALSE
     },
