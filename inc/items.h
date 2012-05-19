@@ -241,6 +241,7 @@ static inline int item_condition_bonus(item *it)
     int bonus = it->bonus;
     bonus -= it->rusty;
     bonus -= it->burnt;
+    bonus -= it->corroded;
 
     return bonus;
 }
