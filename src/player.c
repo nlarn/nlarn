@@ -1158,6 +1158,9 @@ void player_die(player *p, player_cod cause_type, int cause)
         /* create a description of the player's achievments */
         gchar *text = player_create_obituary(p, score, scores);
 
+        /* free the memory allocated for the scores*/
+        game_scores_destroy(scores);
+
         display_show_message(title, text, 0);
 
         if (display_get_yesno("Do you want to save a memorial " \
@@ -5125,8 +5128,6 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
                                cscore->hp, cscore->hp_max, cscore->difficulty);
         g_free(desc);
     }
-
-    game_scores_destroy(scores);
 
     /* some statistics */
     g_string_append_printf(text, "\n%s %s after searching for the potion for %d mobul%s. ",

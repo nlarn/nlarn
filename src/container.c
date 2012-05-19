@@ -1,6 +1,6 @@
 /*
  * container.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -322,12 +322,13 @@ void container_item_unpack(player *p, inventory **inv, item *element)
         return;
     }
 
+    /* keep track of the amount of gold found as element is free'd by inv_add */
+    int goldcount = (element->type == IT_GOLD) ? goldcount = element->count : 0;
+
     if (inv_add(&p->inventory, element))
     {
         log_add_entry(nlarn->log, "You put %s into your pack.", desc);
-
-        if (element->type == IT_GOLD)
-            p->stats.gold_found += element->count;
+        p->stats.gold_found += goldcount;
     }
     else
     {
