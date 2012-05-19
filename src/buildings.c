@@ -50,11 +50,11 @@ void building_bank_calc_interest(game *g)
 {
     guint interest = 0;
 
-    /* pay interest every 100 turns */
-    if (game_turn(g) % 100 != 0 || g->p->bank_account <= 250)
+    /* pay interest every 1000 turns */
+    if (game_turn(g) % 1000 != 0 || g->p->bank_account <= 250)
         return;
 
-    /* the bank pays an interest of 2.5% per mobul */
+    /* the bank pays an interest of 2.5% every ten mobuls */
     interest = g->p->bank_account / 250;
 
     /* add the interest to the bank account.. */
