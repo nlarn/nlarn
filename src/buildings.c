@@ -1403,7 +1403,7 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
     g_free(name_unknown);
 }
 
-static void building_item_repair(player *p, inventory **inv, item *it)
+static void building_item_repair(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     int damages = 0;
     guint price;
@@ -1413,9 +1413,6 @@ static void building_item_repair(player *p, inventory **inv, item *it)
     const char title[] = "Repair item";
 
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
-
-    /* don't need that parameter */
-    inv = NULL;
 
     /* determine how much the item is damaged */
     damages += it->burnt;

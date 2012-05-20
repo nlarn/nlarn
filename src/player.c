@@ -3717,12 +3717,9 @@ char *player_item_identified_list(player *p)
     }
 }
 
-void player_item_identify(player *p, inventory **inv, item *it)
+void player_item_identify(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     g_assert(p != NULL && it != NULL);
-
-    /* don't need that parameter */
-    inv = NULL;
 
     switch (it->type)
     {
