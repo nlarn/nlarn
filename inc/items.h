@@ -69,6 +69,7 @@ typedef struct item_material_data {
     const char *name;
     const char *adjective;
     int colour;
+    guint fragility;
 } item_material_data;
 
 typedef struct item_usage_result
@@ -193,6 +194,15 @@ int item_weight(item *it);
  * @return the coulour
  */
 int item_colour(item *it);
+
+
+/*
+ * @brief Determine the chance if an item breaks when exposed to force.
+ *
+ * @param a item
+ * @return an integer between 0 and 100.
+ */
+guint item_fragility(item *it);
 
 void item_effect_add(item *it, effect *e);
 void item_effect_del(item *it, effect *e);

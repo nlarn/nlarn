@@ -57,25 +57,25 @@ const item_type_data item_data[IT_MAX] =
 
 const item_material_data item_materials[IM_MAX] =
 {
-    /* type           name           adjective   colour */
-    { IM_NONE,        "",            "",         DC_NONE      },
-    { IM_PAPER,       "paper",       "papier",   DC_WHITE     },
-    { IM_CLOTH,       "cloth",       "cloth",    DC_LIGHTGRAY },
-    { IM_LEATHER,     "leather",     "leathern", DC_BROWN     },
-    { IM_WOOD,        "wood",        "wooden",   DC_BROWN     },
-    { IM_BONE,        "bone",        "osseous",  DC_DARKGRAY  },
-    { IM_DRAGON_HIDE, "dragon hide", "scabby",   DC_GREEN     },
-    { IM_LEAD,        "lead",        "leady",    DC_DARKGRAY  },
-    { IM_IRON,        "iron",        "irony",    DC_LIGHTGRAY },
-    { IM_STEEL,       "steel",       "steely",   DC_WHITE     },
-    { IM_COPPER,      "copper",      "cupreous", DC_BROWN     },
-    { IM_SILVER,      "silver",      "silvery",  DC_LIGHTGRAY },
-    { IM_GOLD,        "gold",        "golden",   DC_YELLOW    },
-    { IM_PLATINUM,    "platinum",    "platinum", DC_WHITE     },
-    { IM_MITHRIL,     "mitril",      "mithrial", DC_LIGHTGRAY },
-    { IM_GLASS,       "glass",       "vitreous", DC_LIGHTCYAN },
-    { IM_STONE,       "stone",       "stony",    DC_WHITE     },
-    { IM_GEMSTONE,    "gemstone",    "gemstone", DC_RED       },
+    /* type           name           adjective   colour       frag */
+    { IM_NONE,        "",            "",         DC_NONE,       0, },
+    { IM_PAPER,       "paper",       "papier",   DC_WHITE,     20, },
+    { IM_CLOTH,       "cloth",       "cloth",    DC_LIGHTGRAY, 20, },
+    { IM_LEATHER,     "leather",     "leathern", DC_BROWN,     10, },
+    { IM_WOOD,        "wood",        "wooden",   DC_BROWN,     25, },
+    { IM_BONE,        "bone",        "osseous",  DC_DARKGRAY,  30, },
+    { IM_DRAGON_HIDE, "dragon hide", "scabby",   DC_GREEN,      5, },
+    { IM_LEAD,        "lead",        "leady",    DC_DARKGRAY,  25, },
+    { IM_IRON,        "iron",        "irony",    DC_LIGHTGRAY, 15, },
+    { IM_STEEL,       "steel",       "steely",   DC_WHITE,      5, },
+    { IM_COPPER,      "copper",      "cupreous", DC_BROWN,     20, },
+    { IM_SILVER,      "silver",      "silvery",  DC_LIGHTGRAY, 15, },
+    { IM_GOLD,        "gold",        "golden",   DC_YELLOW,    10, },
+    { IM_PLATINUM,    "platinum",    "platinum", DC_WHITE,      5, },
+    { IM_MITHRIL,     "mitril",      "mithrial", DC_LIGHTGRAY,  0, },
+    { IM_GLASS,       "glass",       "vitreous", DC_LIGHTCYAN, 50, },
+    { IM_STONE,       "stone",       "stony",    DC_WHITE,     20, },
+    { IM_GEMSTONE,    "gemstone",    "gemstone", DC_RED,        0, },
 };
 
 /* functions */
@@ -1102,6 +1102,23 @@ int item_colour(item *it)
         return DC_BLACK;
         break;
     }
+}
+
+guint item_fragility(item *it)
+{
+    int chance = item_materials[item_material(it)].fragility;
+
+    chance += 15 * it->burnt;
+    chance += 15 * it->corroded;
+    chance += 15 * it->rusty;
+
+    if (it->blessed)
+        chance /= 2;
+
+    if (it->cursed)
+        chance *= 2;
+
+    return (guint)max(0, min(chance, 100));
 }
 
 void item_effect_add(item *it, effect *e)

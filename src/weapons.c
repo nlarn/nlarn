@@ -351,11 +351,13 @@ damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)
 
 void weapon_ammo_drop(map *m, item *ammo, position pos)
 {
-    /* there is a 2/3 chance that the bullet survived the usage */
-    if (chance(66))
-        inv_add(map_ilist_at(m, pos), ammo);
-    else
+    /* check if the ammo survives usage */
+    if (chance(item_fragility(ammo))
+        || map_tiletype_at(m, pos) == LT_DEEPWATER
+        || map_tiletype_at(m, pos) == LT_LAVA)
         item_destroy(ammo);
+    else
+        inv_add(map_ilist_at(m, pos), ammo);
 }
 
 static gboolean weapon_pos_hit(position pos,
