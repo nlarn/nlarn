@@ -136,7 +136,7 @@ int weapon_fire(struct player *p)
     /* check if ammo is quivered */
     if (!ammo)
     {
-        log_add_entry(nlarn->log, "You do not have any ammunition in your quiver!");
+        log_add_entry(nlarn->log, "You have no ammunition in your quiver!");
         g_free(wdesc);
         return FALSE;
     }
@@ -144,7 +144,8 @@ int weapon_fire(struct player *p)
     /* check if the quivered ammo matches the weapon */
     if (weapon_ammo(weapon) != ammo_class(ammo))
     {
-        gchar *adesc = item_describe(ammo, player_item_known(p, ammo), TRUE, FALSE);
+        gchar *adesc = item_describe(ammo, player_item_known(p, ammo),
+                                     TRUE, FALSE);
         log_add_entry(nlarn->log, "You cannot fire %s with %s.", adesc, wdesc);
 
         g_free(wdesc);
@@ -153,7 +154,8 @@ int weapon_fire(struct player *p)
     }
 
     /* all checks are successful */
-    target = display_get_position(p, "Select a target", FALSE, FALSE, 0, FALSE, TRUE);
+    target = display_get_position(p, "Select a target", FALSE, FALSE, 0,
+                                  FALSE, TRUE);
 
     /* is the target a valid position? */
     if(!pos_valid(target))
@@ -207,11 +209,13 @@ int weapon_fire(struct player *p)
     ammo->fired = TRUE;
 
     /* paint a ray to follow the path of the bullet */
-    if (area_ray_trajectory(p->pos, target, &damo, weapon_pos_hit, weapon, ammo, FALSE,
-                            item_glyph(ammo->type), item_colour(ammo), FALSE))
+    if (area_ray_trajectory(p->pos, target, &damo, weapon_pos_hit,
+                            weapon, ammo, FALSE, item_glyph(ammo->type),
+                            item_colour(ammo), FALSE))
         return TRUE; /* one of the callbacks succeeded */
 
-    /* none of the callbacks succeeded -> drop the ammo at the target position */
+    /* none of the callbacks succeeded
+       -> drop the ammo at the target position */
     weapon_ammo_drop(pmap, ammo, target);
 
     return TRUE;
@@ -233,12 +237,15 @@ void weapon_swap(struct player *p)
     p->eq_sweapon = pweapon;
 
     if (pweapon)
-        pdesc = item_describe(pweapon, player_item_known(p, pweapon), TRUE, FALSE);
+        pdesc = item_describe(pweapon, player_item_known(p, pweapon),
+                              TRUE, FALSE);
 
     if (sweapon)
-        sdesc = item_describe(sweapon, player_item_known(p, sweapon), TRUE, FALSE);
+        sdesc = item_describe(sweapon, player_item_known(p, sweapon),
+                              TRUE, FALSE);
 
-    log_add_entry(nlarn->log, "You have swapped your weapons: Primary weapon: %s, secondary weapon, not wielded: %s.",
+    log_add_entry(nlarn->log, "You have swapped your weapons: Primary weapon:"
+                  " %s, secondary weapon, not wielded: %s.",
                   (sdesc ? sdesc : "none"), (pdesc ? pdesc : "none"));
 
     g_free(pdesc);
@@ -376,7 +383,7 @@ static gboolean weapon_pos_hit(position pos,
     adesc = item_describe(ammo, player_item_known(nlarn->p, ammo), TRUE, TRUE);
     adesc[0] = g_ascii_toupper(adesc[0]);
 
-    if (!map_pos_passable(cmap, pos))
+    if (!map_pos_transparent(cmap, pos))
     {
         /* the ammo hit some map feature -> drop it at the position */
         weapon_ammo_drop(cmap, ammo, pos);
@@ -393,7 +400,8 @@ static gboolean weapon_pos_hit(position pos,
             damage *dam = weapon_get_ranged_damage(nlarn->p, weapon, ammo);
 
             if (monster_in_sight(m))
-                log_add_entry(nlarn->log, "%s hits the %s.", adesc, monster_name(m));
+                log_add_entry(nlarn->log, "%s hits the %s.",
+                              adesc, monster_name(m));
 
             monster_damage_take(m, dam);
             weapon_ammo_drop(cmap, ammo, pos);
@@ -404,7 +412,8 @@ static gboolean weapon_pos_hit(position pos,
         {
             /* missed */
             if (monster_in_sight(m))
-                log_add_entry(nlarn->log, "%s misses the %s.", adesc, monster_name(m));
+                log_add_entry(nlarn->log, "%s misses the %s.",
+                              adesc, monster_name(m));
         }
     }
     else if (pos_identical(nlarn->p->pos, pos))
