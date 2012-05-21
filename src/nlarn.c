@@ -1,6 +1,6 @@
 /*
  * nlarn.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -708,7 +708,7 @@ int main(int argc, char *argv[])
             {
                 pos = display_get_new_position(nlarn->p, nlarn->p->pos,
                                                "Choose a position to teleport to.",
-                                               FALSE, FALSE, FALSE, 0, TRUE, FALSE);
+                                               FALSE, FALSE, TRUE, 0, TRUE, FALSE);
 
                 if (pos_valid(pos))
                 {

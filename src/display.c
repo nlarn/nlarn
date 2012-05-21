@@ -2599,8 +2599,16 @@ position display_get_new_position(player *p,
                         if (pos_identical(origin, pos))
                             break;
 
-                        if (player_memory_of(nlarn->p, pos).sobject != LS_NONE
-                            && mso_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch)
+                        /* When in wizard mode, compare the selected glyph
+                           with the real map, otherwise with the player's
+                           memory of the map.
+                           As multiple objects share the same glyph, it is
+                           required to compare the glyph of the present
+                           object with the glyph of the requested object. */
+                        if ((game_wizardmode(nlarn)
+                             && mso_get_image(map_sobject_at(vmap, pos)) == (char) ch)
+                            || (player_memory_of(nlarn->p, pos).sobject != LS_NONE
+                                && mso_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch))
                         {
                             break;
                         }
