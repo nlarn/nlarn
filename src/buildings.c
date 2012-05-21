@@ -420,17 +420,20 @@ int building_home(player *p)
                         gtime2mobuls(game_remaining_turns(nlarn)),
                         p->name);
 
-        /* check if the player can deposit something at home or has already done so */
+        /* check if the player can deposit something
+           at home or has already done so */
         if ((inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
             || (inv_length(nlarn->player_home) > 0))
         {
             g_string_append_printf(text, "\n\nYou may\n");
 
             if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-                g_string_append_printf(text, "  `lightgreen`d`end`) Deposit something here\n");
+                g_string_append_printf(text, "  `lightgreen`d`end`) "
+                                       "Deposit something here\n");
 
             if (inv_length(nlarn->player_home) > 0)
-                g_string_append_printf(text, "  `lightgreen`t`end`) Take something with you\n");
+                g_string_append_printf(text, "  `lightgreen`t`end`) "
+                                       "Take something with you\n");
 
             g_string_append_c(text, '\n');
         }
@@ -449,7 +452,8 @@ int building_home(player *p)
 
                 callback = g_malloc0(sizeof(display_inv_callback));
                 callback->description = "(d)eposit";
-                callback->helpmsg = "Deposit the selected item in your storage room at home.";
+                callback->helpmsg = "Deposit the selected item in "
+                                    "your storage room at home.";
                 callback->key = 'd';
                 callback->inv = &nlarn->player_home;
                 callback->function = &container_item_add;
@@ -473,7 +477,8 @@ int building_home(player *p)
 
                 callback = g_malloc0(sizeof(display_inv_callback));
                 callback->description = "(t)ake";
-                callback->helpmsg = "Take the selected item out of your storage room and put it into your pack.";
+                callback->helpmsg = "Take the selected item out of your "
+                                    "storage room and put it into your pack.";
                 callback->key = 't';
                 callback->inv = &nlarn->player_home;
                 callback->function = &container_item_unpack;
@@ -481,8 +486,8 @@ int building_home(player *p)
 
                 g_ptr_array_add(callbacks, callback);
 
-                display_inventory(title, p, &nlarn->player_home, callbacks, FALSE,
-                                  TRUE, FALSE, NULL);
+                display_inventory(title, p, &nlarn->player_home, callbacks,
+                                  FALSE, TRUE, FALSE, NULL);
 
                 display_inv_callbacks_clean(callbacks);
             }
@@ -624,7 +629,7 @@ static int building_scribe_scroll(player *p, int mobuls)
     p->identified_scrolls[i] = TRUE;
 
     building_player_charge(p, price);
-    p->stats.gold_spent_college += price;
+    p->stats.gold_spent_shop += price;
 
     log_add_entry(nlarn->log, "The scribes start writing a scroll of %s for you.",
                   scroll_name(bscroll));
@@ -1259,8 +1264,8 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     char text[81];
     gchar *name;
 
-    /* The item the player actually bought. Usually this is the passed item,
-     * in the case of item stacks it might be a new item. */
+    /* The item the player actually bought. Usually this is the passed
+     * item, in the case of item stacks it might be a new item. */
     item *bought_itm = it;
 
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
@@ -1279,7 +1284,8 @@ static void building_item_sell(player *p, inventory **inv, item *it)
         if (count > it->count)
         {
             /* desired amount is larger than the available amount */
-            log_add_entry(nlarn->log, "Wouldn't it be nice if the store had %d of those?", count);
+            log_add_entry(nlarn->log, "Wouldn't it be nice if the store "
+                          "had %d of those?", count);
             return;
         }
         else if (count == 0)
@@ -1313,7 +1319,8 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     else
     {
         name = item_describe(it, TRUE, TRUE, TRUE);
-        g_snprintf(text, 80, "Do you want to buy %s for %d gold?", name, price);
+        g_snprintf(text, 80, "Do you want to buy %s for %d gold?",
+                   name, price);
         g_free(name);
 
         if (!display_get_yesno(text, NULL, NULL))
@@ -1331,9 +1338,9 @@ static void building_item_sell(player *p, inventory **inv, item *it)
         /* the item has been added to player's inventory */
         if (it == bought_itm)
         {
-            /* remove the item from the shop as the player has bought the
-            entire stock. this has to be done by the oid as it_clone may
-            have been destroyed if it was a stackable item. */
+            /* remove the item from the shop as the player has bought
+               the entire stock. this has to be done by the oid as it_clone
+               may have been destroyed if it was a stackable item. */
             inv_del_oid(inv, ioid);
         }
 
@@ -1377,7 +1384,8 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
 
     if (building_player_check(p, price))
     {
-        g_snprintf(message, 80, "Pay %d gold to identify %s?", price, name_unknown);
+        g_snprintf(message, 80, "Pay %d gold to identify %s?",
+                   price, name_unknown);
 
         if (display_get_yesno(message, NULL, NULL))
         {
@@ -1396,7 +1404,8 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
     }
     else
     {
-        g_snprintf(message, 80, "Identifying %s costs %d gold.", name_unknown, price);
+        g_snprintf(message, 80, "Identifying %s costs %d gold.",
+                   name_unknown, price);
         display_show_message(title, message, 0);
     }
 
@@ -1523,7 +1532,8 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     it->count = count;
 
     name = item_describe(it, player_item_known(p, it), FALSE, FALSE);
-    log_add_entry(nlarn->log, "You sell %s. The %d gold %s been transferred to your bank account.",
+    log_add_entry(nlarn->log, "You sell %s. The %d gold %s been "
+                  "transferred to your bank account.",
                   name, price, (price == 1) ? "has" : "have");
 
     g_free(name);
