@@ -101,7 +101,7 @@ static const guint32 player_lvl_exp[] =
 static guint player_item_pickup_all(player *p, inventory **inv, item *it);
 static guint player_item_pickup_ask(player *p, inventory **inv, item *it);
 static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean ask);
-static void player_sobject_memorize(player *p, map_sobject_t sobject, position pos);
+static void player_sobject_memorize(player *p, sobject_t sobject, position pos);
 static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
 static void player_memory_deserialize(player *p, position pos, cJSON *mser);
@@ -1253,7 +1253,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     position target_p;  /* coordinates of target */
     map *pmap;          /* shortcut to player's current map */
     monster *target_m;  /* monster on target tile (if any) */
-    map_sobject_t so;   /* stationary object on target tile (if any) */
+    sobject_t so;       /* stationary object on target tile (if any) */
     gboolean move_possible = FALSE;
 
     g_assert(p != NULL && dir > GD_NONE && dir < GD_MAX);
@@ -1361,7 +1361,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     /* mention stationary objects at this position */
     if ((so = map_sobject_at(pmap, p->pos)) && !player_effect(p, ET_BLINDNESS))
     {
-        log_add_entry(nlarn->log, "You see %s here.", mso_get_desc(so));
+        log_add_entry(nlarn->log, "You see %s here.", so_get_desc(so));
     }
 
     return times;
@@ -3929,7 +3929,7 @@ void player_item_drop(player *p, inventory **inv, item *it)
     inv_add(map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos), it);
 
     /* reveal if item is cursed or blessed when dropping it on an altar */
-    map_sobject_t ms = map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos);
+    sobject_t ms = map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     if (ms == LS_ALTAR
             && (!player_effect(p, ET_BLINDNESS) || game_wizardmode(nlarn))
@@ -4403,7 +4403,7 @@ void player_list_sobjmem(player *p)
 
             g_string_append_printf(sobjlist, "%-4s %s (%d, %d)\n",
                                    (Z(som->pos) > prevmap) ? map_names[Z(som->pos)] : "",
-                                   mso_get_desc(som->sobject),
+                                   so_get_desc(som->sobject),
                                    Y(som->pos), X(som->pos));
 
             if (Z(som->pos) > prevmap) prevmap = Z(som->pos);
@@ -4635,7 +4635,7 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
     return 0;
 }
 
-static void player_sobject_memorize(player *p, map_sobject_t sobject, position pos)
+static void player_sobject_memorize(player *p, sobject_t sobject, position pos)
 {
     player_sobject_memory nsom;
 

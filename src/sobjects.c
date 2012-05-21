@@ -1,6 +1,6 @@
 /*
  * sobjects.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,9 +20,41 @@
 
 #include "display.h"
 #include "game.h"
+#include "map.h"
 #include "nlarn.h"
 #include "sobjects.h"
 #include "player.h"
+
+const sobject_data sobjects[LS_MAX] =
+{
+    /* type             img   color         desc                                   pa tr */
+    { LS_NONE,          ' ',  DC_NONE,      NULL,                                  1, 1, },
+    { LS_ALTAR,         '_',  DC_WHITE,     "a holy altar",                        1, 1, },
+    { LS_THRONE,        '\\', DC_MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },
+    { LS_THRONE2,       '\\', DC_MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },
+    { LS_DEADTHRONE,    '\\', DC_LIGHTGRAY, "a massive throne",                    1, 1, },
+    { LS_STAIRSDOWN,    '>',  DC_WHITE,     "a circular staircase",                1, 1, },
+    { LS_STAIRSUP,      '<',  DC_WHITE,     "a circular staircase",                1, 1, },
+    { LS_ELEVATORDOWN,  'I',  DC_LIGHTGRAY, "a volcanic shaft leading downward",   1, 1, },
+    { LS_ELEVATORUP,    'I',  DC_WHITE,     "the base of a volcanic shaft",        1, 1, },
+    { LS_FOUNTAIN,      '{',  DC_BLUE,      "a bubbling fountain",                 1, 1, },
+    { LS_DEADFOUNTAIN,  '{',  DC_LIGHTGRAY, "a dead fountain",                     1, 1, },
+    { LS_STATUE,        '|',  DC_LIGHTGRAY, "a great marble statue",               1, 1, },
+    { LS_URN,           'u',  DC_YELLOW,    "a golden urn",                        1, 1, },
+    { LS_MIRROR,        '|',  DC_WHITE,     "a mirror",                            1, 1, },
+    { LS_OPENDOOR,      '/',  DC_BROWN,     "an open door",                        1, 1, },
+    { LS_CLOSEDDOOR,    '+',  DC_BROWN,     "a closed door",                       0, 0, },
+    { LS_DNGN_ENTRANCE, 'O',  DC_LIGHTGRAY, "the dungeon entrance",                1, 1, },
+    { LS_DNGN_EXIT,     'O',  DC_WHITE,     "the exit to town",                    1, 1, },
+    { LS_HOME,          'H',  DC_LIGHTGRAY, "your home",                           1, 0, },
+    { LS_DNDSTORE,      'D',  DC_LIGHTGRAY, "a DND store",                         1, 0, },
+    { LS_TRADEPOST,     'T',  DC_LIGHTGRAY, "the Larn trading Post",               1, 0, },
+    { LS_LRS,           'L',  DC_LIGHTGRAY, "an LRS office",                       1, 0, },
+    { LS_SCHOOL,        'S',  DC_LIGHTGRAY, "the College of Larn",                 1, 0, },
+    { LS_BANK,          'B',  DC_LIGHTGRAY, "the bank of Larn",                    1, 0, },
+    { LS_BANK2,         'B',  DC_WHITE,     "a branch office of the bank of Larn", 1, 0, },
+    { LS_MONASTERY,     'M',  DC_WHITE,     "the Monastery of Larn",               1, 0, },
+};
 
 static void monster_appear(monster_t type, position mpos);
 static void flood_affect_area(position pos, int radius, int type, int duration);
@@ -724,7 +756,7 @@ int player_stairs_down(player *p)
     map *nlevel = NULL;
     gboolean show_msg = FALSE;
     map *pmap = game_map(nlarn, Z(p->pos));
-    map_sobject_t ms = map_sobject_at(pmap, p->pos);
+    sobject_t ms = map_sobject_at(pmap, p->pos);
 
     if (!player_movement_possible(p))
         return FALSE;
@@ -769,7 +801,7 @@ int player_stairs_down(player *p)
     /* display additional message */
     if (show_msg)
     {
-        log_add_entry(nlarn->log, "You climb down %s.", mso_get_desc(ms));
+        log_add_entry(nlarn->log, "You climb down %s.", so_get_desc(ms));
     }
 
     /* if told to switch level, do so */
@@ -798,7 +830,7 @@ int player_stairs_up(player *p)
 {
     map *nlevel = NULL;
     gboolean show_msg = FALSE;
-    map_sobject_t ms = map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos);
+    sobject_t ms = map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     if (!player_movement_possible(p))
         return 0;
@@ -829,7 +861,7 @@ int player_stairs_up(player *p)
     /* display additional message */
     if (show_msg)
     {
-        log_add_entry(nlarn->log, "You climb up %s.", mso_get_desc(ms));
+        log_add_entry(nlarn->log, "You climb up %s.", so_get_desc(ms));
     }
 
     /* if told to switch level, do so */
@@ -849,7 +881,7 @@ int player_throne_pillage(player *p)
     map *pmap = game_map(nlarn, Z(p->pos));
 
     /* type of object at player's position */
-    map_sobject_t ms = map_sobject_at(pmap, p->pos);
+    sobject_t ms = map_sobject_at(pmap, p->pos);
 
     g_assert (p != NULL);
 
@@ -908,7 +940,7 @@ int player_throne_pillage(player *p)
 int player_throne_sit(player *p)
 {
     map *pmap = game_map(nlarn, Z(p->pos));
-    map_sobject_t st = map_sobject_at(pmap, p->pos);
+    sobject_t st = map_sobject_at(pmap, p->pos);
 
     g_assert (p != NULL);
 
@@ -1069,7 +1101,7 @@ static gboolean sobject_blast_hit(position pos,
 {
     damage *dam = (damage *)data1;
     map *cmap = game_map(nlarn, Z(pos));
-    map_sobject_t mst = map_sobject_at(cmap, pos);
+    sobject_t mst = map_sobject_at(cmap, pos);
     monster *m = map_get_monster_at(cmap, pos);
 
     if (mst == LS_STATUE)

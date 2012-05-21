@@ -559,7 +559,7 @@ static gboolean potion_pos_hit(position pos,
     item *potion = (item *)data1;
     map *pmap = game_map(nlarn, Z(pos));
     map_tile_t mtt = map_tiletype_at(pmap, pos);
-    map_sobject_t mst = map_sobject_at(pmap, pos);
+    sobject_t mst = map_sobject_at(pmap, pos);
     monster *m = map_get_monster_at(pmap, pos);
 
     /* get the description of the potion */
@@ -567,11 +567,11 @@ static gboolean potion_pos_hit(position pos,
     /* upper case first letter of the description */
     desc[0] = g_ascii_toupper(desc[0]);
 
-    if (mst > LS_NONE && !mso_is_passable(mst))
+    if (mst > LS_NONE && !so_is_passable(mst))
     {
         /* The potion hit a sobject. */
         log_add_entry(nlarn->log, "%s shatters at %s.",
-                      mso_get_desc(mst));
+                      so_get_desc(mst));
     }
     else if (!map_pos_passable(pmap, pos))
     {

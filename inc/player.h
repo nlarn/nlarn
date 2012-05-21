@@ -85,7 +85,7 @@ typedef struct _player_settings
 typedef struct _player_tile_memory
 {
     map_tile_t type;
-    map_sobject_t sobject;
+    sobject_t sobject;
     item_t item;            /* type of item located here */
     int item_colour;        /* colour of item located here */
     trap_t trap;
@@ -94,7 +94,7 @@ typedef struct _player_tile_memory
 typedef struct _player_sobject_memory
 {
     position pos;
-    map_sobject_t sobject;
+    sobject_t sobject;
 } player_sobject_memory;
 
 typedef struct player

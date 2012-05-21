@@ -1653,7 +1653,7 @@ static gboolean spell_pos_hit(position pos, const damage_originator *damo,
     spell *sp = (spell *)data1;
     damage *dam = (damage *)data2;
     map *cmap = game_map(nlarn, Z(pos));
-    map_sobject_t mst = map_sobject_at(cmap, pos);
+    sobject_t mst = map_sobject_at(cmap, pos);
     monster *m = map_get_monster_at(cmap, pos);
     item_erosion_type iet;
     gboolean terminated = FALSE;

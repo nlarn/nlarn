@@ -211,11 +211,11 @@ int display_paint_screen(player *p)
                 if (map_sobject_at(vmap, pos))
                 {
                     /* draw stationary objects first */
-                    attron(attrs = attr_colour(mso_get_colour(map_sobject_at(vmap, pos)), has_items));
+                    attron(attrs = attr_colour(so_get_colour(map_sobject_at(vmap, pos)), has_items));
                     if (map_sobject_at(vmap, pos) == LS_CLOSEDDOOR || map_sobject_at(vmap, pos) == LS_OPENDOOR)
                         addch(map_get_door_glyph(vmap, pos));
                     else
-                        addch(mso_get_image(map_sobject_at(vmap, pos)));
+                        addch(so_get_image(map_sobject_at(vmap, pos)));
                     attroff(attrs);
                 }
                 else if (has_items)
@@ -268,14 +268,14 @@ int display_paint_screen(player *p)
                 if (player_memory_of(p, pos).sobject)
                 {
                     /* draw stationary object */
-                    map_sobject_t ms = map_sobject_at(vmap, pos);
+                    sobject_t ms = map_sobject_at(vmap, pos);
 
-                    attron(attrs = attr_colour(mso_get_colour(ms), has_items));
+                    attron(attrs = attr_colour(so_get_colour(ms), has_items));
 
                     if (ms == LS_CLOSEDDOOR || ms == LS_OPENDOOR)
                         addch(map_get_door_glyph(vmap, pos));
                     else
-                        addch(mso_get_image(ms));
+                        addch(so_get_image(ms));
 
                     attroff(attrs);
                 }
@@ -2574,13 +2574,13 @@ position display_get_new_position(player *p,
             /* if travelling, use sobject glyphs as shortcuts */
             if (travel)
             {
-                map_sobject_t sobj = LS_NONE;
+                sobject_t sobj = LS_NONE;
                 for (int i = LS_NONE + 1; i < LS_MAX; i++)
-                    if (mso_get_image(i) == (char) ch)
+                    if (so_get_image(i) == (char) ch)
                     {
                         sobj = i;
                         log_add_entry(nlarn->log, "Looking for '%c' (%s).\n",
-                                      (char) ch, mso_get_desc(sobj));
+                                      (char) ch, so_get_desc(sobj));
                         break;
                     }
 
@@ -2606,9 +2606,9 @@ position display_get_new_position(player *p,
                            required to compare the glyph of the present
                            object with the glyph of the requested object. */
                         if ((game_wizardmode(nlarn)
-                             && mso_get_image(map_sobject_at(vmap, pos)) == (char) ch)
+                             && so_get_image(map_sobject_at(vmap, pos)) == (char) ch)
                             || (player_memory_of(nlarn->p, pos).sobject != LS_NONE
-                                && mso_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch))
+                                && so_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch))
                         {
                             break;
                         }

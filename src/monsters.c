@@ -792,8 +792,8 @@ void monster_level_enter(monster *m, struct map *l)
 {
     g_assert (m != NULL && l != NULL);
 
-    map_sobject_t source = map_sobject_at(monster_map(m), m->pos);
-    map_sobject_t target;
+    sobject_t source = map_sobject_at(monster_map(m), m->pos);
+    sobject_t target;
     position npos;
     const char *what = NULL;
     const char *how  = "comes";
@@ -876,7 +876,7 @@ void monster_level_enter(monster *m, struct map *l)
     if (monster_in_sight(m) && target)
     {
         log_add_entry(nlarn->log, "The %s %s %s %s.", monster_name(m),
-                      how, what, mso_get_desc(target));
+                      how, what, so_get_desc(target));
     }
 }
 
@@ -1032,7 +1032,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             map *mmap = monster_map(m);
 
             /* get stationary object at the monster's target position */
-            map_sobject_t target_st = map_sobject_at(mmap, m_npos);
+            sobject_t target_st = map_sobject_at(mmap, m_npos);
 
             /* vampires won't step onto mirrors */
             if ((m->type == MT_VAMPIRE) && (target_st == LS_MIRROR))
@@ -2735,7 +2735,7 @@ static position monster_move_civilian(monster *m, struct player *p)
 
     /* check if the player is next to the civilian and not inside a building */
     if (pos_adjacent(m->pos, p->pos) && chance(40)
-        && mso_is_transparent(map_sobject_at(monster_map(m), p->pos)))
+        && so_is_transparent(map_sobject_at(monster_map(m), p->pos)))
     {
         /* talk */
         log_add_entry(nlarn->log, "The %s says, \"%s\"",

@@ -528,7 +528,7 @@ int main(int argc, char *argv[])
             /* drink a potion or from a fountain */
         case 'q':
         {
-            map_sobject_t ms = map_sobject_at(game_map(nlarn, Z(nlarn->p->pos)),
+            sobject_t ms = map_sobject_at(game_map(nlarn, Z(nlarn->p->pos)),
                                               nlarn->p->pos);
 
             if ((ms == LS_FOUNTAIN || ms == LS_DEADFOUNTAIN)

@@ -1,6 +1,6 @@
 /*
  * map.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,6 +24,7 @@
 #include "items.h"
 #include "map.h"
 #include "nlarn.h"
+#include "sobjects.h"
 #include "spheres.h"
 
 static int map_fill_with_stationary_objects(map *maze);
@@ -67,37 +68,6 @@ const map_tile_data map_tiles[LT_MAX] =
     { LT_FIRE,      '*', DC_RED,        "fire",        1, 1 },
     { LT_CLOUD,     '*', DC_WHITE,      "a gas cloud", 1, 1 },
     { LT_WALL,      '#', DC_LIGHTGRAY,  "a wall",      0, 0 },
-};
-
-const map_sobject_data map_sobjects[LS_MAX] =
-{
-    /* type             img   color         desc                                   pa tr */
-    { LS_NONE,          ' ',  DC_NONE,      NULL,                                  1, 1, },
-    { LS_ALTAR,         '_',  DC_WHITE,     "a holy altar",                        1, 1, },
-    { LS_THRONE,        '\\', DC_MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },
-    { LS_THRONE2,       '\\', DC_MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },
-    { LS_DEADTHRONE,    '\\', DC_LIGHTGRAY, "a massive throne",                    1, 1, },
-    { LS_STAIRSDOWN,    '>',  DC_WHITE,     "a circular staircase",                1, 1, },
-    { LS_STAIRSUP,      '<',  DC_WHITE,     "a circular staircase",                1, 1, },
-    { LS_ELEVATORDOWN,  'I',  DC_LIGHTGRAY, "a volcanic shaft leading downward",   1, 1, },
-    { LS_ELEVATORUP,    'I',  DC_WHITE,     "the base of a volcanic shaft",        1, 1, },
-    { LS_FOUNTAIN,      '{',  DC_BLUE,      "a bubbling fountain",                 1, 1, },
-    { LS_DEADFOUNTAIN,  '{',  DC_LIGHTGRAY, "a dead fountain",                     1, 1, },
-    { LS_STATUE,        '|',  DC_LIGHTGRAY, "a great marble statue",               1, 1, },
-    { LS_URN,           'u',  DC_YELLOW,    "a golden urn",                        1, 1, },
-    { LS_MIRROR,        '|',  DC_WHITE,     "a mirror",                            1, 1, },
-    { LS_OPENDOOR,      '/',  DC_BROWN,     "an open door",                        1, 1, },
-    { LS_CLOSEDDOOR,    '+',  DC_BROWN,     "a closed door",                       0, 0, },
-    { LS_DNGN_ENTRANCE, 'O',  DC_LIGHTGRAY, "the dungeon entrance",                1, 1, },
-    { LS_DNGN_EXIT,     'O',  DC_WHITE,     "the exit to town",                    1, 1, },
-    { LS_HOME,          'H',  DC_LIGHTGRAY, "your home",                           1, 0, },
-    { LS_DNDSTORE,      'D',  DC_LIGHTGRAY, "a DND store",                         1, 0, },
-    { LS_TRADEPOST,     'T',  DC_LIGHTGRAY, "the Larn trading Post",               1, 0, },
-    { LS_LRS,           'L',  DC_LIGHTGRAY, "an LRS office",                       1, 0, },
-    { LS_SCHOOL,        'S',  DC_LIGHTGRAY, "the College of Larn",                 1, 0, },
-    { LS_BANK,          'B',  DC_LIGHTGRAY, "the bank of Larn",                    1, 0, },
-    { LS_BANK2,         'B',  DC_WHITE,     "a branch office of the bank of Larn", 1, 0, },
-    { LS_MONASTERY,     'M',  DC_WHITE,     "the Monastery of Larn",               1, 0, },
 };
 
 /* keep track which levels have been used before */
@@ -335,7 +305,7 @@ char *map_dump(map *m, position ppos)
             }
             else if (map_sobject_at(m, pos))
             {
-                g_string_append_c(dump, mso_get_image(map_sobject_at(m, pos)));
+                g_string_append_c(dump, so_get_image(map_sobject_at(m, pos)));
             }
             else
             {
@@ -424,7 +394,7 @@ position map_find_space_in(map *m,
     return pos;
 }
 
-int *map_get_surrounding(map *m, position pos, map_sobject_t type)
+int *map_get_surrounding(map *m, position pos, sobject_t type)
 {
     position p;
     int nmove = 1;
@@ -447,7 +417,7 @@ int *map_get_surrounding(map *m, position pos, map_sobject_t type)
     return dirs;
 }
 
-position map_find_sobject_in(map *m, map_sobject_t sobject, rectangle rect)
+position map_find_sobject_in(map *m, sobject_t sobject, rectangle rect)
 {
     position pos;
 
@@ -464,7 +434,7 @@ position map_find_sobject_in(map *m, map_sobject_t sobject, rectangle rect)
     return pos_invalid;
 }
 
-position map_find_sobject(map *m, map_sobject_t sobject)
+position map_find_sobject(map *m, sobject_t sobject)
 {
     position pos;
 
@@ -616,7 +586,7 @@ int map_pos_is_visible(map *m, position s, position t)
             error += delta_y;
 
             if (!mt_is_transparent(m->grid[y][x].type)
-                    || !mso_is_transparent(m->grid[y][x].sobject))
+                    || !so_is_transparent(m->grid[y][x].sobject))
             {
                 return FALSE;
             }
@@ -642,7 +612,7 @@ int map_pos_is_visible(map *m, position s, position t)
             error += delta_x;
 
             if (!mt_is_transparent(m->grid[y][x].type)
-                    || !mso_is_transparent(m->grid[y][x].sobject))
+                    || !so_is_transparent(m->grid[y][x].sobject))
             {
                 return FALSE;
             }
@@ -925,7 +895,7 @@ char *map_pos_examine(position pos)
     if (map_sobject_at(cm, pos) > LS_NONE)
     {
         g_string_append_printf(desc, "You see %s %s. ",
-                               mso_get_desc(map_sobject_at(cm, pos)), where);
+                               so_get_desc(map_sobject_at(cm, pos)), where);
     }
 
     /* add message if target tile contains a known trap */
@@ -1165,7 +1135,7 @@ char map_get_door_glyph(map *m, position pos)
     }
 
     /* no idea. */
-    return mso_get_image(map_sobject_at(m, pos));
+    return so_get_image(map_sobject_at(m, pos));
 }
 
 static int map_fill_with_stationary_objects(map *m)
@@ -1895,7 +1865,7 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
 static void map_make_treasure_room(map *m, rectangle **rooms)
 {
     position pos, npos;
-    map_sobject_t mst;
+    sobject_t mst;
     item *itm;
     int success;
 

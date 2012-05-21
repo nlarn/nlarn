@@ -1,6 +1,6 @@
 /*
  * map.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,6 +25,7 @@
 #include "items.h"
 #include "monsters.h"
 #include "position.h"
+#include "sobjects.h"
 #include "traps.h"
 #include "utils.h"
 
@@ -56,39 +57,8 @@ typedef enum map_tile_type
     LT_FIRE,
     LT_CLOUD, /* gas cloud */
     LT_WALL,
-    LT_MAX				/* ~ map tile type count */
+    LT_MAX    /* ~ map tile type count */
 } map_tile_t;
-
-typedef enum map_sobject_type
-{
-    LS_NONE,
-    LS_ALTAR,
-    LS_THRONE,			/* throne with gems and king */
-    LS_THRONE2,			/* throne with gems, without king */
-    LS_DEADTHRONE,		/* throne without gems or king */
-    LS_STAIRSDOWN,
-    LS_STAIRSUP,
-    LS_ELEVATORDOWN,	/* Enter the volcano */
-    LS_ELEVATORUP,		/* leave the volcano */
-    LS_FOUNTAIN,
-    LS_DEADFOUNTAIN,
-    LS_STATUE,
-    LS_URN,				/* golden urn - not implemented */
-    LS_MIRROR,
-    LS_OPENDOOR,
-    LS_CLOSEDDOOR,
-    LS_DNGN_ENTRANCE,   /* dungeon entrance */
-    LS_DNGN_EXIT,       /* leave the dungeon */
-    LS_HOME,
-    LS_DNDSTORE,
-    LS_TRADEPOST,
-    LS_LRS,				/* Larn Revenue Service */
-    LS_SCHOOL,
-    LS_BANK,
-    LS_BANK2,			/* branch office */
-    LS_MONASTERY,
-    LS_MAX
-} map_sobject_t;
 
 typedef enum map_element_type
 {
@@ -126,17 +96,6 @@ typedef struct map_tile_data
         passable:    1,     /* can be passed */
         transparent: 1;     /* see-through */
 } map_tile_data;
-
-typedef struct map_sobject_data
-{
-    map_sobject_t sobject;
-    const char image;
-    int colour;
-    const char *description;
-    unsigned
-        passable:     1,   /* can be passed */
-        transparent:  1;   /* see-through */
-} map_sobject_data;
 
 typedef struct map
 {
@@ -181,10 +140,10 @@ position map_find_space_in(map *m,
                            map_element_t element,
                            gboolean dead_end);
 
-position map_find_sobject(map *m, map_sobject_t sobject);
+position map_find_sobject(map *m, sobject_t sobject);
 
 position map_find_sobject_in(map *m,
-                             map_sobject_t sobject,
+                             sobject_t sobject,
                              rectangle area);
 
 gboolean map_pos_validate(map *m,
@@ -194,7 +153,7 @@ gboolean map_pos_validate(map *m,
 
 void map_item_add(map *m, item *it);
 
-int *map_get_surrounding(map *m, position pos, map_sobject_t type);
+int *map_get_surrounding(map *m, position pos, sobject_t type);
 
 /**
  * determine if a position can be seen from another position
@@ -264,7 +223,6 @@ char map_get_door_glyph(map *m, position pos);
 /* external vars */
 
 extern const map_tile_data map_tiles[LT_MAX];
-extern const map_sobject_data map_sobjects[LS_MAX];
 extern const char *map_names[MAP_MAX];
 
 /* inline accessor functions */
@@ -323,13 +281,13 @@ static inline void map_trap_set(map *m, position pos, trap_t type)
     m->grid[Y(pos)][X(pos)].trap = type;
 }
 
-static inline map_sobject_t map_sobject_at(map *m, position pos)
+static inline sobject_t map_sobject_at(map *m, position pos)
 {
     assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].sobject;
 }
 
-static inline void map_sobject_set(map *m, position pos, map_sobject_t type)
+static inline void map_sobject_set(map *m, position pos, sobject_t type)
 {
     assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].sobject = type;
@@ -372,31 +330,6 @@ static inline gboolean mt_is_transparent(map_tile_t t)
     return map_tiles[t].transparent;
 }
 
-static inline char mso_get_image(map_sobject_t s)
-{
-    return map_sobjects[s].image;
-}
-
-static inline int mso_get_colour(map_sobject_t s)
-{
-    return map_sobjects[s].colour;
-}
-
-static inline const char *mso_get_desc(map_sobject_t s)
-{
-    return map_sobjects[s].description;
-}
-
-static inline gboolean mso_is_passable(map_sobject_t s)
-{
-    return map_sobjects[s].passable;
-}
-
-static inline gboolean mso_is_transparent(map_sobject_t s)
-{
-    return map_sobjects[s].transparent;
-}
-
 static inline const char *map_name(map *m)
 {
     return map_names[m->nlevel];
@@ -405,13 +338,13 @@ static inline const char *map_name(map *m)
 static inline gboolean map_pos_transparent(map *m, position pos)
 {
     return mt_is_transparent(m->grid[Y(pos)][X(pos)].type)
-        && mso_is_transparent(m->grid[Y(pos)][X(pos)].sobject);
+        && so_is_transparent(m->grid[Y(pos)][X(pos)].sobject);
 }
 
 static inline gboolean map_pos_passable(map *m, position pos)
 {
     return mt_is_passable(m->grid[Y(pos)][X(pos)].type)
-        && mso_is_passable(m->grid[Y(pos)][X(pos)].sobject);
+        && so_is_passable(m->grid[Y(pos)][X(pos)].sobject);
 }
 
 #endif

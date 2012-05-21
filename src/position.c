@@ -1,6 +1,6 @@
 /*
  * position.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -593,7 +593,7 @@ gboolean area_blast(position center, guint radius,
             if (map_sobject_at(cmap, cursor))
             {
                 /* The blast hit a stationary object. */
-                addch(mso_get_image(map_sobject_at(cmap, cursor)));
+                addch(so_get_image(map_sobject_at(cmap, cursor)));
             }
             else if ((m = map_get_monster_at(cmap, cursor)))
             {
