@@ -94,6 +94,8 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     /* check for empty container */
     if (inv_length(container->content) == 0)
     {
+        g_free(container_desc);
+
         /* same description, this time definite */
         container_desc = item_describe(container, player_item_known(p, container),
                                        TRUE, TRUE);
