@@ -4436,7 +4436,7 @@ void player_list_sobjmem(player *p)
 void player_update_fov(player *p)
 {
     int radius;
-    position pos;
+    position pos = p->pos;
     map *pmap;
     area *enlight;
 
@@ -4455,8 +4455,8 @@ void player_update_fov(player *p)
     /* get current map */
     pmap = game_map(nlarn, Z(p->pos));
 
-    /* set level correctly */
-    Z(pos) = Z(p->pos);
+    /* determine if the player has infravision */
+    gboolean infravision = player_effect(p, ET_INFRAVISION);
 
     /* if player is enlightened, use a circular area around the player */
     if (player_effect(p, ET_ENLIGHTENMENT))
@@ -4475,7 +4475,17 @@ void player_update_fov(player *p)
                 Y(pos) = y + enlight->start_y;
 
                 if (pos_valid(pos) && area_point_get(enlight, x, y))
-                    fov_set(p->fv, pos, TRUE);
+                {
+                    /* The position if enlightened.
+                       Now determine if the position has a direct visible connection
+                       to the players position. This is required to instruct fov_set()
+                       if a monster at the position shall be added to the list of the
+                       visible monsters. */
+                    gboolean mchk = ((pos_distance(p->pos, pos) <= 7)
+                                    && map_pos_is_visible(pmap, p->pos, pos));
+
+                    fov_set(p->fv, pos, TRUE, infravision, mchk);
+                }
             }
         }
 
@@ -4484,8 +4494,7 @@ void player_update_fov(player *p)
     else
     {
         /* otherwise use the fov algorithm */
-        fov_calculate(p->fv, game_map(nlarn, Z(p->pos)), p->pos, radius,
-                      player_effect(p, ET_INFRAVISION));
+        fov_calculate(p->fv, pmap, p->pos, radius, infravision);
     }
 
     /* update visible fields in player's memory */

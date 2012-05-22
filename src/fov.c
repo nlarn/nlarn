@@ -1,6 +1,6 @@
 /*
  * fov.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,9 +25,9 @@
 #include "position.h"
 
 static void fov_calculate_octant(fov *fv, map *m, position center,
-                                 int infravision, int row, float start,
-                                 float end, int radius, int xx,
-                                 int xy, int yx, int yy);
+                                 gboolean infravision, int row,
+                                 float start, float end, int radius,
+                                 int xx, int xy, int yx, int yy);
 
 static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b, gpointer center);
 
@@ -82,7 +82,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
                              mult[2][octant], mult[3][octant]);
     }
 
-    fov_set(fv, pos, TRUE);
+    fov_set(fv, pos, TRUE, infravision, TRUE);
 }
 
 gboolean fov_get(fov *fv, position pos)
@@ -93,12 +93,24 @@ gboolean fov_get(fov *fv, position pos)
     return fv->data[Y(pos)][X(pos)];
 }
 
-void fov_set(fov *fv, position pos, guchar visible)
+void fov_set(fov *fv, position pos, guchar visible,
+             gboolean infravision, gboolean mchk)
 {
     g_assert (fv != NULL);
     g_assert (pos_valid(pos));
 
     fv->data[Y(pos)][X(pos)] = visible;
+    monster *mon;
+
+    /* If advised to do so, check if there is a monster at that
+       position. Must not be an unknown mimic or invisible. */
+    if (mchk && (mon = map_get_monster_at(game_map(nlarn, Z(pos)), pos))
+        && !monster_unknown(mon)
+        && (!monster_flags(mon, MF_INVISIBLE) || infravision))
+    {
+        /* found a visible monster -> add it to the list */
+        g_hash_table_insert(fv->mlist, mon, 0);
+    }
 }
 
 void fov_reset(fov *fv)
@@ -166,9 +178,9 @@ void fov_free(fov *fv)
 }
 
 static void fov_calculate_octant(fov *fv, map *m, position center,
-                                 int infravision, int row, float start,
-                                 float end, int radius, int xx,
-                                 int xy, int yx, int yy)
+                                 gboolean infravision, int row,
+                                 float start, float end, int radius,
+                                 int xx, int xy, int yx, int yy)
 {
     int radius_squared;
     int dx, dy;
@@ -224,19 +236,7 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
                 /* Our light beam is touching this square; light it */
                 if ((dx * dx + dy * dy) < radius_squared)
                 {
-                    monster *mon;
-
-                    fov_set(fv, pos, TRUE);
-
-                    /* check if there is a monster at that position
-                       must not be an unknown mimic or invisible */
-                    if ((mon = map_get_monster_at(m, pos))
-                        && !monster_unknown(mon)
-                        && (!monster_flags(mon, MF_INVISIBLE) || infravision))
-                    {
-                        /* found a visible monster -> add it to the list */
-                        g_hash_table_insert(fv->mlist, mon, 0);
-                    }
+                    fov_set(fv, pos, TRUE, infravision, TRUE);
                 }
 
                 if (blocked)

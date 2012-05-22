@@ -1,6 +1,6 @@
 /*
  * fov.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* $Id$ */
 
 #ifndef __FOV_H_
 #define __FOV_H_
@@ -62,8 +60,12 @@ gboolean fov_get(fov *fv, position pos);
   *
   * @param pointer to a fov structure.
   * @param a position.
+  * @param the visibility of the position.
+  * @param Beholder has infravision?
+  * @param Check for monsters at the position?
   */
-void fov_set(fov *fv, position pos, guchar visible);
+void fov_set(fov *fv, position pos, guchar visible,
+             gboolean infravision, gboolean mchk);
 
 /** @brief reset visibility for an entire fov structure.
   *
