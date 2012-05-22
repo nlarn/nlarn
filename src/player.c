@@ -3686,8 +3686,8 @@ char *player_item_identified_list(player *p)
         heading[0] = g_ascii_toupper(heading[0]);
 
         /* no linefeed before first category */
-        g_string_append_printf(sublist, (idx == 0) ? "%s\n" : "\n`yellow`%s`end`\n",
-                               heading);
+        if (idx > 0) g_string_append_c(sublist, '\n');
+        g_string_append_printf(sublist, "`yellow`%s`end`\n", heading);
 
         g_free(heading);
 
