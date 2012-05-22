@@ -493,6 +493,7 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(obj, "potions_quaffed", p->stats.potions_quaffed);
     cJSON_AddNumberToObject(obj, "scrolls_read", p->stats.scrolls_read);
     cJSON_AddNumberToObject(obj, "books_read", p->stats.books_read);
+    cJSON_AddNumberToObject(obj, "weapons_wasted", p->stats.weapons_wasted);
     cJSON_AddNumberToObject(obj, "life_protected", p->stats.life_protected);
     cJSON_AddNumberToObject(obj, "vandalism", p->stats.vandalism);
     cJSON_AddNumberToObject(obj, "items_bought", p->stats.items_bought);
@@ -712,12 +713,9 @@ player *player_deserialize(cJSON *pser)
     p->stats.potions_quaffed = cJSON_GetObjectItem(obj, "potions_quaffed")->valueint;
     p->stats.scrolls_read = cJSON_GetObjectItem(obj, "scrolls_read")->valueint;
     p->stats.books_read = cJSON_GetObjectItem(obj, "books_read")->valueint;
-
+    p->stats.weapons_wasted = cJSON_GetObjectItem(obj, "weapons_wasted")->valueint;
     p->stats.life_protected = cJSON_GetObjectItem(obj, "life_protected")->valueint;
-
-    if (cJSON_GetObjectItem(obj, "vandalism"))
-        p->stats.vandalism = cJSON_GetObjectItem(obj, "vandalism")->valueint;
-
+    p->stats.vandalism = cJSON_GetObjectItem(obj, "vandalism")->valueint;
     p->stats.items_bought = cJSON_GetObjectItem(obj, "items_bought")->valueint;
     p->stats.items_sold   = cJSON_GetObjectItem(obj, "items_sold")->valueint;
     p->stats.gems_sold    = cJSON_GetObjectItem(obj, "gems_sold")->valueint;
@@ -1486,6 +1484,27 @@ int player_attack(player *p, monster *m)
         if (p->eq_weapon && monster_flags(m, MF_METALLIVORE))
         {
             p->eq_weapon = item_erode(&p->inventory, p->eq_weapon, IET_RUST, TRUE);
+
+            /* count destroyed weapons */
+            if (p->eq_weapon == NULL) p->stats.weapons_wasted += 1;
+        }
+
+        /* The weapon may break during usage */
+        if (p->eq_weapon && chance(item_fragility(p->eq_weapon)))
+        {
+            log_add_entry(nlarn->log, "Your %s breaks!",
+                          weapon_name(p->eq_weapon));
+
+            item *weapon = p->eq_weapon;
+
+            /* remove the weapon */
+            log_disable(nlarn->log);
+            player_item_unequip(p, NULL, p->eq_weapon, TRUE);
+            log_enable(nlarn->log);
+
+            inv_del_element(&p->inventory, weapon);
+            item_destroy(weapon);
+            p->stats.weapons_wasted += 1;
         }
 
         /* hitting a monster breaks stealth condition */
@@ -5143,6 +5162,13 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
     g_string_append_printf(text, "and %s scroll%s. ",
                            int2str(p->stats.scrolls_read),
                            plural(p->stats.scrolls_read));
+
+    if (p->stats.weapons_wasted > 0)
+    {
+        g_string_append_printf(text, "\n%s wasted %s weapon%s in combat. ",
+                               pronoun, int2str(p->stats.weapons_wasted),
+                               plural(p->stats.weapons_wasted));
+    }
 
     if (p->stats.vandalism > 0)
     {

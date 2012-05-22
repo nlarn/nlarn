@@ -64,7 +64,7 @@ const weapon_data weapons[WT_MAX] =
     { WT_CROSSBOW,      "crossbow",                  "crossbow",       WC_RANGED, AMMO_CROSSBOW,  5,   3, IM_WOOD,  3500,   600, 1, 0, 1, 0 },
     { WT_LONGSWORD,     "longsword",                 "longsword",       WC_MELEE,     AMMO_NONE, 22,   3, IM_IRON,  1950,   550, 0, 0, 1, 1 },
     { WT_2SWORD,        "two-handed sword",          "2-handed sword",  WC_MELEE,     AMMO_NONE, 26,   4, IM_IRON,  3600,  1000, 1, 0, 1, 1 },
-    { WT_SWORDSLASHING, "sword of slashing",         "slashing",        WC_MELEE,     AMMO_NONE, 30,   5, IM_IRON,  2200,  6000, 0, 0, 1, 0 },
+    { WT_SWORDSLASHING, "sword of slashing",         "slashing",        WC_MELEE,     AMMO_NONE, 30,   5, IM_STEEL, 2200,  6000, 0, 0, 1, 0 },
     /* unique weapons */
     { WT_LANCEOFDEATH,  "lance of death",            "lance of death",  WC_MELEE,     AMMO_NONE, 20,   3, IM_WOOD,  2900, 65000, 1, 1, 1, 1 },
     { WT_VORPALBLADE,   "Vorpal blade",              "Vorpal blade",    WC_MELEE,     AMMO_NONE, 22,   3, IM_STEEL, 1600,  3800, 0, 1, 1, 0 },
@@ -359,7 +359,7 @@ damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)
 void weapon_ammo_drop(map *m, item *ammo, position pos)
 {
     /* check if the ammo survives usage */
-    if (chance(item_fragility(ammo))
+    if (chance(item_fragility(ammo) + 15)
         || map_tiletype_at(m, pos) == LT_DEEPWATER
         || map_tiletype_at(m, pos) == LT_LAVA)
         item_destroy(ammo);

@@ -44,6 +44,7 @@ typedef struct _player_stats
     guint potions_quaffed;
     guint scrolls_read;
     guint books_read;
+    guint weapons_wasted;
     guint life_protected;
     guint vandalism;
 
