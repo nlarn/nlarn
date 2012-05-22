@@ -118,7 +118,8 @@ monster *monster_new(monster_t type, position pos)
     g_assert(type > MT_NONE && type < MT_MAX && pos_valid(pos));
 
     monster *nmonster;
-    int it, icount;     /* item type, item id, item count */
+    item_t itype;      /* item type */
+    int icount;        /* item count */
 
     /* check if supplied position is suitable for a monster */
     if (!map_pos_validate(game_map(nlarn, Z(pos)), pos, LE_MONSTER, FALSE))
@@ -177,11 +178,11 @@ monster *monster_new(monster_t type, position pos)
         /* add something that is not a container */
         do
         {
-            it = rand_1n(IT_MAX);
+            itype = rand_1n(IT_MAX);
         }
-        while (it == IT_CONTAINER);
+        while (itype == IT_CONTAINER);
 
-        inv_add(&nmonster->inv, item_new_random(it, TRUE));
+        inv_add(&nmonster->inv, item_new_by_level(itype, Z(pos)));
         break;
 
     case MT_TOWN_PERSON:
