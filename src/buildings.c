@@ -271,7 +271,7 @@ int building_dndstore(player *p)
 
 void building_dndstore_init()
 {
-    static int initialized = FALSE;
+    static gboolean initialized = FALSE;
 
     /* this is a one-time process! */
     if (initialized) return;
@@ -301,17 +301,17 @@ void building_dndstore_init()
                 break;
 
             case IT_SCROLL:
-                count = scroll_type_store_stock(id);
+                count = game_wizardmode(nlarn) ? 10 : scroll_type_store_stock(id);
                 break;
 
             case IT_POTION:
-                count = potion_type_store_stock(id);
+                count = game_wizardmode(nlarn) ? 10 : potion_type_store_stock(id);
                 break;
 
             default:
                 {
                     if (item_is_stackable(type))
-                        count = 3;
+                        count = game_wizardmode(nlarn) ? 10 : 3;
                     else
                         count = 1;
                 }
