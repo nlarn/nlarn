@@ -230,6 +230,17 @@ void weapon_swap(struct player *p)
     gchar *pdesc = NULL;
     gchar *sdesc = NULL;
 
+    if (pweapon && pweapon->cursed)
+    {
+        pdesc = item_describe(pweapon, player_item_known(p, pweapon),
+                              TRUE, TRUE);
+        log_add_entry(nlarn->log, "You can't put %s away, "
+                      "it is weld into your hand!", pdesc);
+        g_free(pdesc);
+
+        return;
+    }
+
     if (!player_make_move(p, 2, TRUE, "swapping your weapons"))
         return; /* interrupted */
 
@@ -239,7 +250,6 @@ void weapon_swap(struct player *p)
     if (pweapon)
         pdesc = item_describe(pweapon, player_item_known(p, pweapon),
                               TRUE, FALSE);
-
     if (sweapon)
         sdesc = item_describe(sweapon, player_item_known(p, sweapon),
                               TRUE, FALSE);
