@@ -595,9 +595,11 @@ int spell_type_player(spell *s, struct player *p)
             if (e->amount < (effect_type_amount(e->type) * (int)s->knowledge))
             {
                 e->amount += effect_type_amount(e->type);
-                log_add_entry(nlarn->log, "You have extended the power of %s.", spell_name(s));
+                log_add_entry(nlarn->log, "You have extended the power of %s.",
+                        spell_name(s));
 
-                /* force recalculation of burdened status if extending strength */
+                /* force recalculation of burdened
+                   status if extending strength */
                 if (e->type == ET_INC_STR)
                 {
                     player_inv_weight_recalc(p->inventory, NULL);
@@ -606,8 +608,9 @@ int spell_type_player(spell *s, struct player *p)
             else
             {
                 /* maximum reached -> indicate failure */
-                log_add_entry(nlarn->log, "You have already extended the power of %s to the extent of your knowledge.",
-                              spell_name(s));
+                log_add_entry(nlarn->log, "You have already extended the "
+                        "power of %s to the extent of your knowledge.",
+                        spell_name(s));
 
                 return FALSE;
             }
@@ -617,18 +620,19 @@ int spell_type_player(spell *s, struct player *p)
             /* The duration of this effect can be incremented.
              * Increase the duration of the effect up to the base
              * effect duration * spell knowledge value. */
-            if (e->amount + effect_type_duration(e->type)
+            if (e->turns + effect_type_duration(e->type)
                 < (effect_type_duration(e->type) * s->knowledge))
             {
                 e->turns += effect_type_duration(e->type);
-                log_add_entry(nlarn->log, "You have extended the duration of %s.", spell_name(s));
-                log_add_entry(nlarn->log, effect_get_msg_start(e));
+                log_add_entry(nlarn->log, "You have extended the duration "
+                        "of %s.", spell_name(s));
             }
             else
             {
                 /* maximum reached -> indicate failure */
-                log_add_entry(nlarn->log, "You have already extended the duration of %s to the extent of your knowledge.",
-                              spell_name(s));
+                log_add_entry(nlarn->log, "You have already extended the "
+                        "duration of %s to the extent of your knowledge.",
+                        spell_name(s));
 
                 return FALSE;
             }
