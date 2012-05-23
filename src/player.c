@@ -1232,8 +1232,8 @@ gboolean player_movement_possible(player *p)
         if (effect_expire(e) == -1)
         {
             /* effect has expired */
-            player_effect_del(p, e);
             log_add_entry(nlarn->log, "You climb out of the pit!");
+            player_effect_del(p, e);
         }
         else
             log_add_entry(nlarn->log, "You're trapped in a pit!");
