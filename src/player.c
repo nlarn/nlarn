@@ -2194,7 +2194,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_DEC_STR:
     case DAM_DEC_WIS:
         if (!player_effect(p, ET_SUSTAINMENT)
-	    && chance(dam->amount -= player_get_con(p)))
+            && chance(dam->amount -= player_get_con(p)))
         {
             effect_t et = (ET_DEC_CON + dam->type - DAM_DEC_CON);
             e = effect_new(et);
@@ -3174,14 +3174,14 @@ void player_item_unequip(player *p,
             {
                 if (!forced)
                 {
-                    log_add_entry(nlarn->log, "You remove %s.", desc);
-
                     if (!player_make_move(p, 2, TRUE, "removing %s", desc))
                     {
                         /* interrupted */
                         g_free(desc);
                         return;
                     }
+
+                    log_add_entry(nlarn->log, "You remove %s.", desc);
                 }
 
                 if (p->eq_amulet)
@@ -3203,14 +3203,18 @@ void player_item_unequip(player *p,
     case IT_AMMO:
         if (p->eq_quiver == it)
         {
-            if (!player_make_move(p, 2, TRUE, "taking %s out of the quiver", desc))
+            if (!forced)
             {
-                /* interrupted */
-                g_free(desc);
-                return;
+                if (!player_make_move(p, 2, TRUE, "taking %s out of the quiver", desc))
+                {
+                    /* interrupted */
+                    g_free(desc);
+                    return;
+                }
+
+                log_add_entry(nlarn->log, "You take %s out your quiver.", desc);
             }
 
-            log_add_entry(nlarn->log, "You take %s out your quiver.", desc);
             p->eq_quiver = NULL;
         }
         break;
@@ -3304,14 +3308,14 @@ void player_item_unequip(player *p,
             {
                 if (!forced)
                 {
-                    log_add_entry(nlarn->log, "You remove %s.", desc);
-
                     if (!player_make_move(p, 2, TRUE, "removing %s", desc))
                     {
                         /* interrupted */
                         g_free(desc);
                         return;
                     }
+
+                    log_add_entry(nlarn->log, "You remove %s.", desc);
                 }
 
                 if (*rslot)
@@ -3351,8 +3355,6 @@ void player_item_unequip(player *p,
             {
                 if (!forced)
                 {
-                    log_add_entry(nlarn->log, "You put away %s.", desc);
-
                     if (!player_make_move(p, 2 + weapon_is_twohanded(*wslot),
                                           TRUE, "putting %s away", desc))
                     {
@@ -3360,6 +3362,8 @@ void player_item_unequip(player *p,
                         g_free(desc);
                         return;
                     }
+
+                    log_add_entry(nlarn->log, "You put away %s.", desc);
                 }
 
                 player_effects_del(p, (*wslot)->effects);
