@@ -1410,9 +1410,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
                  * inventory, try to unequip the item first as we do
                  * not know if it is eqipped (this would lead to nasty
                  * segementation faults otherwise) */
-                log_disable(nlarn->log);
                 player_item_unequip(nlarn->p, &nlarn->p->inventory, it, TRUE);
-                log_enable(nlarn->log);
             }
 
             inv_del_element(inv, it);

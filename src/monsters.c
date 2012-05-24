@@ -2407,9 +2407,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                     return TRUE;
                 }
 
-                log_disable(nlarn->log);
                 player_item_unequip(p, NULL, it, TRUE);
-                log_enable(nlarn->log);
             }
 
             if (it->count > 1)

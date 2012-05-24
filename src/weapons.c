@@ -202,10 +202,7 @@ int weapon_fire(struct player *p)
     else
     {
         /* shooting the last piece of ammo from the quiver */
-        log_disable(nlarn->log);
         player_item_unequip(p, NULL, ammo, TRUE);
-        log_enable(nlarn->log);
-
         inv_del_element(&p->inventory, ammo);
     }
 

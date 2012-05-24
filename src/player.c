@@ -897,11 +897,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 if (chance(33) && p->eq_weapon)
                 {
                     item *it = p->eq_weapon;
-
-                    log_disable(nlarn->log);
                     player_item_unequip(p, NULL, it, TRUE);
-                    log_enable(nlarn->log);
-
                     log_add_entry(nlarn->log, "You are unable to hold your weapon.");
                     player_item_drop(p, &p->inventory, it);
                 }
@@ -1498,10 +1494,7 @@ int player_attack(player *p, monster *m)
             item *weapon = p->eq_weapon;
 
             /* remove the weapon */
-            log_disable(nlarn->log);
             player_item_unequip(p, NULL, p->eq_weapon, TRUE);
-            log_enable(nlarn->log);
-
             inv_del_element(&p->inventory, weapon);
             item_destroy(weapon);
             p->stats.weapons_wasted += 1;
@@ -3858,9 +3851,7 @@ void player_item_destroy(player *p, item *it)
 
     if (player_item_is_equipped(p, it))
     {
-        log_disable(nlarn->log);
         player_item_unequip(p, &p->inventory, it, TRUE);
-        log_enable(nlarn->log);
     }
 
     log_add_entry(nlarn->log, "%s %s destroyed!",
