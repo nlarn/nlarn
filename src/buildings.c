@@ -755,11 +755,15 @@ int building_school(player *p)
         case 0:
             p->strength += 2;
             p->constitution++;
+            /* strength has been modified -> recalc burdened status */
+            player_inv_weight_recalc(p->inventory, NULL);
             break;
 
         case 1:
             p->strength += 2;
             p->constitution += 2;
+            /* strength has been modified -> recalc burdened status */
+            player_inv_weight_recalc(p->inventory, NULL);
             break;
 
         case 2:
