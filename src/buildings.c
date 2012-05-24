@@ -1379,8 +1379,13 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
 
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    price = 50 << game_difficulty(nlarn);
-    name_unknown = item_describe(it, player_item_known(p, it), TRUE, TRUE);
+    /* The cost for identification is 10% of the item's base price. */
+    price = (item_base_price(it) / 10) * (game_difficulty(nlarn) + 1);
+
+    /* Ensure it costs at least 50gp... */
+    price = max(50, price);
+
+    name_unknown = item_describe(it, player_item_known(p, it), FALSE, TRUE);
 
     if (building_player_check(p, price))
     {
@@ -1428,9 +1433,22 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
     damages += it->corroded;
     damages += it->rusty;
 
-    price = (50 << game_difficulty(nlarn)) * damages;
+    /* The cost of repairing an item is 10% of the item's base price. */
+    price = (item_base_price(it) / 10) * (game_difficulty(nlarn) + 1);
 
-    name = item_describe(it, player_item_known(p, it), TRUE, TRUE);
+    /* Take the level of damage into account. */
+    price *= damages;
+
+    /* Charge repair of item stacks depending on the quantity. */
+    if (item_is_stackable(it->type)) price *= it->count;
+
+    /* If an item is blessed and the player know it, use this and charge :) */
+    if (it->blessed && it->blessed_known) price << 2;
+
+    /* Ensure this costs at least 50gp... */
+    price = max(50, price);
+
+    name = item_describe(it, player_item_known(p, it), FALSE, TRUE);
 
     if (building_player_check(p, price))
     {
