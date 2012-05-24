@@ -44,7 +44,7 @@ const magic_scroll_data scrolls[ST_MAX] =
     { ST_UNDEAD_PROTECTION, "undead protection",  ET_UNDEAD_PROTECTION,  400, 0 },
     { ST_STEALTH,           "stealth",            ET_STEALTH,            400, 0 },
     { ST_MAPPING,           "magic mapping",      ET_NONE,               250, 3 },
-    { ST_HOLD_MONSTER,      "hold monsters",      ET_HOLD_MONSTER,       800, 0 },
+    { ST_HOLD_MONSTER,      "hold monsters",      ET_NONE,               800, 0 },
     { ST_GEM_PERFECTION,    "gem perfection",     ET_NONE,              3000, 0 },
     { ST_SPELL_EXTENSION,   "spell extension",    ET_NONE,               800, 0 },
     { ST_IDENTIFY,          "identify",           ET_NONE,               400, 3 },
@@ -63,6 +63,7 @@ static int scroll_enchant_weapon(player *p, item *r_scroll);
 static int scroll_gem_perfection(player *p, item *r_scroll);
 static int scroll_genocide_monster(player *p, item *r_scroll);
 static int scroll_heal_monster(player *p, item *r_scroll);
+static int scroll_hold_monster(player *p, item *r_scroll);
 static int scroll_identify(player *p, item *r_scroll);
 static int scroll_remove_curse(player *p, item *r_scroll);
 static int scroll_spell_extension(player *p, item *r_scroll);
@@ -203,6 +204,10 @@ item_usage_result scroll_read(struct player *p, item *r_scroll)
 
     case ST_SPELL_EXTENSION:
         result.identified = scroll_spell_extension(p, r_scroll);
+        break;
+
+    case ST_HOLD_MONSTER:
+        result.identified = scroll_hold_monster(p, r_scroll);
         break;
 
     case ST_IDENTIFY:
@@ -670,6 +675,37 @@ static int scroll_heal_monster(player *p, item *r_scroll __attribute__((unused))
     g_list_free(mlist);
 
     return count;
+}
+
+static int scroll_hold_monster(player *p, item *r_scroll __attribute__((unused)))
+{
+    area *blast, *obsmap;
+    position cursor = p->pos;
+    monster *m;
+    gboolean success = FALSE;
+    map *cmap = game_map(nlarn, Z(p->pos));
+
+    g_assert(p != NULL);
+
+    obsmap = map_get_obstacles(cmap, p->pos, 2);
+    blast = area_new_circle_flooded(p->pos, 2, obsmap);
+
+    for (Y(cursor) = blast->start_y; Y(cursor) < blast->start_y + blast->size_y; Y(cursor)++)
+    {
+        for (X(cursor) = blast->start_x; X(cursor) < blast->start_x + blast->size_x; X(cursor)++)
+        {
+            if (area_pos_get(blast, cursor) && (m = map_get_monster_at(cmap, cursor)))
+            {
+                effect *e = effect_new(ET_HOLD_MONSTER);
+                monster_effect_add(m, e);
+
+                success = TRUE;
+            }
+        }
+    }
+    area_destroy(blast);
+
+    return success;
 }
 
 static int scroll_identify(player *p, item *r_scroll)
