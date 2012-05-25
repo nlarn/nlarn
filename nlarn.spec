@@ -1,12 +1,11 @@
-Name: nlarn
-Version: 0.8.0
+Name:    nlarn
+Version: 0.7.1
 Release: 1
 Summary: A remake of the roguelike game Larn
-
-Group: Amusements/Games
+Group:   Amusements/Games
 License: GPL v3
-URL: http://nlarn.sourceforge.net
-Source: http://downloads.sourceforge.net/project/nlarn/nlarn/%{version}/nlarn-%{version}.tar.gz
+URL:     http://nlarn.sourceforge.net
+Source:  http://downloads.sourceforge.net/project/nlarn/nlarn/%{version}/nlarn-%{version}.tar.gz
 
 BuildRequires: glib2-devel lua-devel ncurses-devel zlib-devel 
 
@@ -14,7 +13,6 @@ BuildRequires: glib2-devel lua-devel ncurses-devel zlib-devel
 
 %prep
 %setup
-premake4 gmake
 
 %build
 make
@@ -37,8 +35,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc LICENSE README.txt Changelog.txt nlarn.ini-sample lib/maze_doc.txt
 
 %changelog
-* Tue Nov 08 2011 Joachim de Groot <jdegroot@web.de>
-  - updated for version 0.8.0
+* Fri May 25 2012 Joachim de Groot <jdegroot@web.de>
+  - updated for version 0.7.1
 * Sat Oct 23 2010 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.7.0
   - added maze_doc.txt to documentation
