@@ -1,3 +1,84 @@
+Release 0.7.1 (2012-05-27)
+-------------
+
+Changes:
+    * More armour:
+      * a simple cloak.
+      * Boots of Speed (unique).
+      * Cloak of Invisibility (unique).
+    * Weapons can break during combat. The number of broken weapons is
+      counted and shown in the postmortem.
+    * Make damaged items less effective: burnt, corroded or rusty weapons
+      and ammunition will now cause less damage, damaged armour will protect
+      less.
+    * Redesigned armour and weapon distribution in the dungeon. The elven
+      chain is more heavy and unique.
+    * Reduced the availability of items in the store.
+    * Replaced the amulet of invisibility by the amulet of sustainment,
+      which protects against attribute draining attacks.
+    * The bank pays less interest on player's savings.
+    * Increased school course prices. The course prices now depend on the
+      length of the course, thus maintaining the balance between benefit
+      and cost.
+    * Raise item identification and repair prices. The prices will now depend
+      on the item's value. For lower-prices items the minimum charge stays at
+      50 gold. Repair prices for item stacks depend on the amount of items.
+    * Generate monster item adequate to dungeon level. Previously troglodytes
+      on dungeon level 3 could carry an amulet of power, which was not
+      desirable. Another effect of this change is that monsters in the deep
+      dungeon levels carry more interesting items.
+    * Do not erode items inside containers.
+    * Implemented scroll of hold monster. This scroll was in error set up as
+      a scroll that affects the player, and as the effect "hold monster" has
+      no effect on the player, this mistake went unnoticed until now.
+    * Reduced the range of enlightenment.
+    * Wizard Mode: allow to select stationary objects as teleport destination
+      (as for auto-travel).
+    * Improved the help file.
+    * Modernized the Windows Installer.
+    * Windows Resources now allow icons for the executable and embedded
+      dynamic version information in the executable.
+    * Accept ^U/^D in the inventory, spell list and message windows as
+      PGUP/PGDOWN.
+    * Expanded scores in the memorial file onto two lines. This avoids ugly
+      wraps and allows to display more information. Spelled out explanational
+      remarks and added the dungeon level.
+    * Enhanced saving the memorial file:
+      * Save the file in the user's home directory;
+        on Windows save it under "My Documents".
+      * Offer to chose a new file name if a file exists.
+      * Wrap and indent long lines at column 78.
+      * Choose the line terminator matching the plattform.
+    * Implemented working setgid for system-wide installations on *nix systems.
+
+Fixed bugs:
+    * Adapted the map loading code to native EOL. This fixes unreachable
+      areas when playing on Windows (reported by many).
+    * Fixed enlightenment for the upper left corner of the map
+      (Reported by Krice).
+    * Fixed a crash after shooting the last ammo.
+    * Ensure player's experience can not sink below zero. This fixes a crash
+      that occured when drinking from a fountain and loosing more experience
+      than the player has.
+    * Calculate adjacent monsters while enlightened. This fixes targeting
+      and allows to abort running or auto-travel.
+    * Fixed increase of spell effect duration when casting a spell known at
+      a higher level of knowledge multiple times.
+    * Prevent swapping cursed weapons.
+    * Fixed the descriptions for item stacks in the shop (use the plural form
+      when applicable).
+    * Fix the order of message when unequipping multiple item types: log
+      success only after the time is passed. Fixed the order of messages
+      when climbing out of a pit.
+    * Fixed ranged attacks to monsters over water/lava.
+    * Waste ammo when dropped on deep water or lava.
+    * Slings and bows are twohanded weapons, too.
+    * Recalc burdened status after fighter courses.
+    * Colour first headline in identified item's list.
+    * Count scrolls scribed at the school as item purchase, not as
+      educational purpose.
+    * Fixed a memory leak and accesses to freed memory found by valgrind.
+
 Release 0.7.0 (2011-11-04)
 -------------
 
