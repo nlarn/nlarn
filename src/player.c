@@ -3336,15 +3336,9 @@ void player_item_unequip(player *p,
                 wslot = &(p->eq_weapon);
             } else if (p->eq_sweapon && it == p->eq_sweapon) {
                 wslot = &(p->eq_sweapon);
-            } else {
-                /* wslot mustn't be NULL or there is something seriously wrong */
-                log_add_entry(nlarn->log, "Something is seriously wrong! Tried "
-                              "to unequip a weapon that is not equipped. "
-                              "(%s, line %d - %s())", __FILE__, __FUNCTION__, __LINE__);
-                return;
             }
 
-            if (forced || !(*wslot)->cursed)
+            if (wslot && (forced || !(*wslot)->cursed))
             {
                 if (!forced)
                 {
@@ -3362,7 +3356,7 @@ void player_item_unequip(player *p,
                 player_effects_del(p, (*wslot)->effects);
                 *wslot = NULL;
             }
-            else
+            else if (wslot != NULL)
             {
                 log_add_entry(nlarn->log, "You can't put away %s. " \
                               "It's welded into your hands.", desc);
