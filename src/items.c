@@ -1381,10 +1381,6 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
         break;
     }
 
-    /* if the item has an inventory, erode it as well */
-    if (it->content != NULL)
-        inv_erode(&it->content, iet, FALSE);
-
     if (erosion_desc != NULL && visible)
     {
         /* items has been eroded, describe the event if it is visible */
