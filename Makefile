@@ -33,14 +33,15 @@ ifneq ($(wildcard .git),)
   endif
 endif
 
+VERSION_MAJOR = $(shell awk '/VERSION_MAJOR/ { print $$3 }' inc/nlarn.h)
+VERSION_MINOR = $(shell awk '/VERSION_MINOR/ { print $$3 }' inc/nlarn.h)
+VERSION_PATCH = $(shell awk '/VERSION_PATCH/ { print $$3 }' inc/nlarn.h)
+
 # Collect version information
 ifneq ($(GITTAG),)
   VERSION = $(GITTAG)
 else
   # not on a release tag, determine version manually
-  VERSION_MAJOR = $(shell awk '/VERSION_MAJOR/ { print $$3 }' inc/nlarn.h)
-  VERSION_MINOR = $(shell awk '/VERSION_MINOR/ { print $$3 }' inc/nlarn.h)
-  VERSION_PATCH = $(shell awk '/VERSION_PATCH/ { print $$3 }' inc/nlarn.h)
   VERSION = $(VERSION_MAJOR).$(VERSION_MINOR)
 
   ifneq ($(VERSION_PATCH),0)
