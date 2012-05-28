@@ -106,6 +106,7 @@ static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
 static void player_memory_deserialize(player *p, position pos, cJSON *mser);
 static char *player_death_description(game_score_t *score, int verbose);
+static char *player_equipment_list(player *p, gboolean decorate);
 static char *player_create_obituary(player *p, game_score_t *score, GList *scores);
 static void player_memorial_file_save(player *p, const char *text);
 static int item_filter_unequippable(item *it);
@@ -2812,131 +2813,14 @@ void player_inv_weight_recalc(inventory *inv, item *it __attribute__((unused)))
 
 void player_paperdoll(player *p)
 {
-    gchar *desc;
-    GString *pdm = g_string_new(NULL);
+    gchar *equipment = player_equipment_list(p, TRUE);
 
-    /* amulet */
-    if(p->eq_amulet)
-    {
-        desc = item_describe(p->eq_amulet, player_item_known(p, p->eq_amulet),
-                             TRUE, FALSE);
+    if (strlen(equipment) > 0)
+        display_show_message("Worn equipment", equipment, 0);
+    else
+        log_add_entry(nlarn->log, "You do not wear any equipment.");
 
-        g_string_append_printf(pdm, "`white`Around neck:`end` %s\n", desc);
-        g_free(desc);
-    }
-
-    /* main weapon */
-    if(p->eq_weapon)
-    {
-        desc = item_describe(p->eq_weapon, player_item_known(p, p->eq_weapon),
-                             FALSE, FALSE);
-
-        g_string_append_printf(pdm, "`white`Main weapon:`end` %s\n", desc);
-        g_free(desc);
-    }
-
-    /* secondary weapon */
-    if(p->eq_sweapon)
-    {
-        desc = item_describe(p->eq_sweapon, player_item_known(p, p->eq_sweapon),
-                             FALSE, FALSE);
-
-        g_string_append_printf(pdm, "`white`Sec. weapon:`end` %s\n", desc);
-        g_free(desc);
-    }
-
-    /* quiver */
-    if(p->eq_quiver)
-    {
-        desc = item_describe(p->eq_quiver, player_item_known(p, p->eq_quiver),
-                             FALSE, FALSE);
-
-        g_string_append_printf(pdm, "`white`In quiver:`end`   %s\n", desc);
-        g_free(desc);
-    }
-
-    /* boots */
-    if(p->eq_boots)
-    {
-        desc = item_describe(p->eq_boots, player_item_known(p, p->eq_boots),
-                             TRUE, FALSE);
-
-        g_string_append_printf(pdm, "`white`Boots:`end`       %s\n", desc);
-        g_free(desc);
-    }
-
-    /* cloak */
-    if(p->eq_cloak)
-    {
-        desc = item_describe(p->eq_cloak, player_item_known(p, p->eq_cloak),
-                             TRUE, FALSE);
-
-        g_string_append_printf(pdm, "`white`Cloak:`end`       %s\n", desc);
-        g_free(desc);
-    }
-
-    /* gloves */
-    if(p->eq_gloves)
-    {
-        desc = item_describe(p->eq_gloves, player_item_known(p, p->eq_gloves),
-                             TRUE, FALSE);
-
-        g_string_append_printf(pdm, "`white`Gloves:`end`      %s\n", desc);
-        g_free(desc);
-    }
-
-    /* helmet */
-    if(p->eq_helmet)
-    {
-        desc = item_describe(p->eq_helmet, player_item_known(p, p->eq_helmet),
-                             TRUE, FALSE);
-
-        g_string_append_printf(pdm, "`white`Helmet:`end`      %s\n", desc);
-        g_free(desc);
-    }
-
-    /* shield */
-    if(p->eq_shield)
-    {
-        desc = item_describe(p->eq_shield, player_item_known(p, p->eq_shield),
-                             TRUE, FALSE);
-
-        g_string_append_printf(pdm, "`white`Shield:`end`      %s\n", desc);
-        g_free(desc);
-    }
-
-    /* body armour */
-    if(p->eq_suit)
-    {
-        desc = item_describe(p->eq_suit, player_item_known(p, p->eq_suit),
-                             TRUE, FALSE);
-
-        g_string_append_printf(pdm, "`white`Body armour:`end` %s\n", desc);
-        g_free(desc);
-    }
-
-    /* left ring */
-    if(p->eq_ring_l)
-    {
-        desc = item_describe(p->eq_ring_l, player_item_known(p, p->eq_ring_l),
-                             FALSE, FALSE);
-
-        g_string_append_printf(pdm, "`white`Left ring:`end`   %s\n", desc);
-        g_free(desc);
-    }
-
-    /* right ring */
-    if(p->eq_ring_r)
-    {
-        desc = item_describe(p->eq_ring_r, player_item_known(p, p->eq_ring_r),
-                             FALSE, FALSE);
-
-        g_string_append_printf(pdm, "`white`Right ring:`end`  %s\n", desc);
-        g_free(desc);
-    }
-
-    display_show_message("Worn equipment", pdm->str, 0);
-    g_string_free(pdm, TRUE);
+    g_free(equipment);
 }
 
 void player_item_equip(player *p, inventory **inv __attribute__((unused)), item *it)
@@ -5099,6 +4983,54 @@ void calc_fighting_stats(player *p)
     g_string_free(text, TRUE);
 }
 
+static char *player_equipment_list(player *p, gboolean decorate)
+{
+    int idx = 0;
+    GString *el = g_string_new(NULL);
+
+    struct
+    {
+        item *slot;
+        const char *desc;
+    } slots[] =
+    {
+        { p->eq_weapon,  "Main weapon:" },
+        { p->eq_sweapon, "Sec. weapon:" },
+        { p->eq_quiver,  "In quiver:" },
+        { p->eq_boots,   "Boots:" },
+        { p->eq_cloak,   "Cloak:" },
+        { p->eq_gloves,  "Gloves:" },
+        { p->eq_helmet,  "Helmet:" },
+        { p->eq_shield,  "Shield:" },
+        { p->eq_suit,    "Body armour:" },
+        { p->eq_ring_l,  "Left ring:" },
+        { p->eq_ring_r,  "Right ring:" },
+        { NULL, NULL },
+    };
+
+    while (slots[idx].desc != NULL)
+    {
+        /* skip empty item slots */
+        if (slots[idx].slot == NULL)
+        {
+            idx++;
+            continue;
+        }
+
+        char *desc = item_describe(slots[idx].slot, player_item_known(p,
+                    slots[idx].slot), FALSE, FALSE);
+
+        g_string_append_printf(el, "%s%-12s%s %s\n",
+                decorate ? "`white`" : "", slots[idx].desc,
+                decorate ? "`end`" : "", desc);
+
+        g_free(desc);
+        idx++;
+    }
+
+    return g_string_free(el, FALSE);
+}
+
 static char *player_create_obituary(player *p, game_score_t *score, GList *scores)
 {
     const char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
@@ -5288,78 +5220,22 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
     }
 
     /* equipped items */
+    gchar *el = player_equipment_list(p, FALSE);
     guint equipment_count = 0;
-    g_string_append(text, "\n\n-- Equipment --------------------------\n\n");
-    if (p->eq_amulet)
+
+    if (strlen(el) > 0)
     {
-        it_desc = item_describe(p->eq_amulet, TRUE, TRUE, FALSE);
-        g_string_append_printf(text, "Amulet:   %s\n", it_desc);
-        g_free(it_desc);
-        equipment_count++;
+        g_string_append(text, "\n\n-- Equipment --------------------------\n\n");
+        g_string_append(text, el);
+
+        for (guint idx = 0; idx < inv_length(p->inventory); idx++)
+        {
+            item *it = inv_get(p->inventory, idx);
+            if (player_item_is_equipped(p, it))
+                equipment_count++;
+        }
     }
-    if (p->eq_ring_l)
-    {
-        it_desc = item_describe(p->eq_ring_l, TRUE, TRUE, FALSE);
-        g_string_append_printf(text, "Ring (l): %s\n", it_desc);
-        g_free(it_desc);
-        equipment_count++;
-    }
-    if (p->eq_ring_r)
-    {
-        it_desc = item_describe(p->eq_ring_r, TRUE, TRUE, FALSE);
-        g_string_append_printf(text, "Ring (r): %s\n", it_desc);
-        g_free(it_desc);
-        equipment_count++;
-    }
-    if (p->eq_weapon)
-    {
-        it_desc = item_describe(p->eq_weapon, TRUE, TRUE, FALSE);
-        g_string_append_printf(text, "Weapon:   %s\n", it_desc);
-        g_free(it_desc);
-        equipment_count++;
-    }
-    if (p->eq_suit)
-    {
-        it_desc = item_describe(p->eq_suit, TRUE, TRUE, FALSE);
-        g_string_append_printf(text, "Armour:   %s\n", it_desc);
-        g_free(it_desc);
-        equipment_count++;
-    }
-    if (p->eq_helmet)
-    {
-        it_desc = item_describe(p->eq_helmet, TRUE, TRUE, FALSE);
-        g_string_append_printf(text, "Helmet:   %s\n", it_desc);
-        g_free(it_desc);
-        equipment_count++;
-    }
-    if (p->eq_shield)
-    {
-        it_desc = item_describe(p->eq_shield, TRUE, TRUE, FALSE);
-        g_string_append_printf(text, "Shield:   %s\n", it_desc);
-        g_free(it_desc);
-        equipment_count++;
-    }
-    if (p->eq_cloak)
-    {
-        it_desc = item_describe(p->eq_cloak, TRUE, TRUE, FALSE);
-        g_string_append_printf(text, "Cloak:    %s\n", it_desc);
-        g_free(it_desc);
-        equipment_count++;
-    }
-    if (p->eq_gloves)
-    {
-        it_desc = item_describe(p->eq_gloves, TRUE, TRUE, FALSE);
-        g_string_append_printf(text, "Gloves:   %s\n", it_desc);
-        g_free(it_desc);
-        equipment_count++;
-    }
-    if (p->eq_boots)
-    {
-        it_desc = item_describe(p->eq_boots, TRUE, TRUE, FALSE);
-        g_string_append_printf(text, "Boots:    %s\n", it_desc);
-        g_free(it_desc);
-        equipment_count++;
-    }
+    g_free(el);
 
     /* inventory */
     if (equipment_count < inv_length(p->inventory))
