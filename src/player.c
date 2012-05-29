@@ -159,6 +159,9 @@ player *player_new()
     p->identified_potions[PO_CURE_DIANTHR] = TRUE;
     p->identified_potions[PO_WATER] = TRUE;
     p->identified_scrolls[ST_BLANK] = TRUE;
+    /* identify all non-unique armour items */
+    for (armour_t at = AM_NONE + 1; at < AM_MAX; at++)
+        if (!armours[at].unique) p->identified_armour[at] = TRUE;
 
     /* initialize the field of vision */
     p->fv = fov_new();
@@ -2825,11 +2828,12 @@ void player_paperdoll(player *p)
 
 void player_item_equip(player *p, inventory **inv __attribute__((unused)), item *it)
 {
+    g_assert(p != NULL && it != NULL);
+
     item **islot = NULL;  /* pointer to chosen item slot */
     int atime = 0;        /* time the desired action takes */
-    gchar *desc = NULL;   /* description of item being equipped */
-
-    g_assert(p != NULL && it != NULL);
+    gboolean known = player_item_known(p, it);
+    gchar *desc = item_describe(it, known, FALSE, TRUE);
 
     /* the idea behind the time values: one turn to take one item off,
        one turn to get the item out of the pack */
@@ -2839,14 +2843,15 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
     case IT_AMULET:
         if (p->eq_amulet == NULL)
         {
-            p->eq_amulet = it;
-
-            desc = item_describe(it, player_item_known(p, it), TRUE, TRUE);
-            log_add_entry(nlarn->log, "You put %s on.", desc);
-
             if (!player_make_move(p, 2, TRUE, "putting %s on", desc))
-                return; /* interrupted */
+            {
+                /* interrupted */
+                g_free(desc);
+                return;
+            }
 
+            p->eq_amulet = it;
+            log_add_entry(nlarn->log, "You put %s on.", desc);
             p->identified_amulets[it->id] = TRUE;
         }
         break;
@@ -2854,8 +2859,6 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
     case IT_AMMO:
         if (p->eq_quiver == NULL)
         {
-            desc = item_describe(it, player_item_known(p, it), FALSE, TRUE);
-
             if (!player_make_move(p, 2, TRUE, "putting %s into the quiver", desc))
             {
                 /* interrupted */
@@ -2909,42 +2912,25 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
 
         if ((islot != NULL) && (*islot == NULL))
         {
-            desc = item_describe(it, player_item_known(p, it), TRUE, TRUE);
-
             if (!player_make_move(p, atime, TRUE, "wearing %s", desc))
             {
                 /* interrupted */
                 g_free(desc);
                 return;
             }
-            g_free(desc);
 
-            if (!player_item_known(p, it))
-            {
-                /* identify the armour while wearing */
-                p->identified_armour[it->id] = TRUE;
-            }
-
-            if (!it->bonus_known)
-            {
-                /* the armour's bonus is revealed when putting it on */
-                it->bonus_known = TRUE;
-            }
+            /* identify the armour while wearing */
+            p->identified_armour[it->id] = TRUE;
+            /* the armour's bonus is revealed when putting it on */
+            it->bonus_known = TRUE;
 
             /* Refresh the armour's description before logging. */
-            desc = item_describe(it, player_item_known(p, it), TRUE, FALSE);
+            g_free(desc);
+            desc = item_describe(it, known, TRUE, FALSE);
             log_add_entry(nlarn->log, "You are now wearing %s.", desc);
 
             /* put the piece of armor in the equipment slot */
             *islot = it;
-
-            if (it->cursed)
-            {
-                /* capitalize first letter */
-                desc[0] = g_ascii_toupper(desc[0]);
-                log_add_entry(nlarn->log, "%s feels uncomfortably cold!", desc);
-                it->blessed_known = TRUE;
-            }
         }
         break;
 
@@ -2956,9 +2942,6 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
 
         if (islot != NULL)
         {
-            desc = item_describe(it, player_item_known(p, it), TRUE, TRUE);
-            log_add_entry(nlarn->log, "You put %s on.", desc);
-
             if (!player_make_move(p, 2, TRUE, "putting %s on", desc))
             {
                 /* interrupted */
@@ -2966,20 +2949,12 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
                 return;
             }
 
+            log_add_entry(nlarn->log, "You put %s on.", desc);
             *islot = it;
             p->identified_rings[it->id] = TRUE;
 
             if (ring_bonus_is_obs(it))
                 it->bonus_known = TRUE;
-
-            if (it->cursed)
-            {
-                /* capitalize first letter */
-                desc[0] = g_ascii_toupper(desc[0]);
-                log_add_entry(nlarn->log, "%s feels uncomfortably cold!",
-                              desc);
-                it->blessed_known = TRUE;
-            }
         }
         break;
 
@@ -2992,8 +2967,6 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
 
         if (p->eq_weapon == NULL)
         {
-            desc = item_describe(it, player_item_known(p, it), TRUE, TRUE);
-
             if (!player_make_move(p, 2 + weapon_is_twohanded(it),
                                   TRUE, "wielding %s", desc))
             {
@@ -3004,14 +2977,6 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
 
             p->eq_weapon = it;
             log_add_entry(nlarn->log, "You now wield %s.", desc);
-
-            if (it->cursed)
-            {
-                /* capitalize first letter */
-                desc[0] = g_ascii_toupper(desc[0]);
-                log_add_entry(nlarn->log, "%s welds itself into your hand.", desc);
-                it->blessed_known = TRUE;
-            }
         }
         break;
 
@@ -3020,8 +2985,32 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
         break;
     }
 
+    /* free memory allocated at the beginning */
     g_free(desc);
+
+    if (it->cursed)
+    {
+        /* generate a new description with definite article */
+        desc = item_describe(it, known, TRUE, TRUE);
+
+        /* capitalize first letter */
+        desc[0] = g_ascii_toupper(desc[0]);
+        log_add_entry(nlarn->log, it->type == IT_WEAPON
+                ? "%s welds itself into your hand."
+                : "%s feels uncomfortably cold!", desc);
+        it->blessed_known = TRUE;
+        g_free(desc);
+    }
+
     player_effects_add(p, it->effects);
+
+    if (known != player_item_known(p, it))
+    {
+        /* The player identified the item by using it. */
+        desc = item_describe(it, player_item_known(p, it), FALSE, FALSE);
+        log_add_entry(nlarn->log, "It seems that this is %s.", desc);
+        g_free(desc);
+    }
 }
 
 void player_item_unequip_wrapper(player *p, inventory **inv, item *it)
