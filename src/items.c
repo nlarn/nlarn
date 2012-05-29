@@ -1395,7 +1395,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
         {
             /* describe the event if the item was visible */
             log_add_entry(nlarn->log, "%s %s destroyed.", item_desc,
-                          (it->count == 1) ? "is" : "are");
+                          is_are(it->count));
         }
 
         if (inv != NULL)

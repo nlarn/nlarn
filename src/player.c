@@ -1780,7 +1780,7 @@ void player_autopickup(player *p)
                                            FALSE, FALSE);
 
             log_add_entry(nlarn->log, "There %s %s here.",
-                          it->count == 1 ? "is" : "are", it_desc);
+                          is_are(it->count), it_desc);
 
             g_free(it_desc);
         }
@@ -2741,7 +2741,7 @@ int player_inv_pre_add(inventory *inv, item *it)
         buf[0] = g_ascii_toupper(buf[0]);
 
         log_add_entry(nlarn->log, "%s %s too heavy for you.", buf,
-                      it->count > 1 ? "are" : "is");
+                      is_are(it->count));
 
         g_free(buf);
         return FALSE;
@@ -3721,8 +3721,7 @@ void player_item_destroy(player *p, item *it)
         player_item_unequip(p, &p->inventory, it, TRUE);
     }
 
-    log_add_entry(nlarn->log, "%s %s destroyed!",
-                  desc, (it->count == 1) ? "is" : "are");
+    log_add_entry(nlarn->log, "%s %s destroyed!", desc, is_are(it->count));
 
     int count = 0;
     if (it->content)
@@ -3822,7 +3821,7 @@ void player_item_drop(player *p, inventory **inv, item *it)
             buf[0] = g_ascii_toupper(buf[0]);
 
             log_add_entry(nlarn->log, "%s %s surrounded by a %s halo.",
-                          buf, it->count == 1 ? "is" : "are",
+                          buf, is_are(it->count),
                           it->cursed ? "black" : "white");
 
             g_free(buf);

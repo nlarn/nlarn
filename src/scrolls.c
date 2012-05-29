@@ -964,8 +964,7 @@ static int scroll_timewarp(player *p, item *r_scroll)
     log_add_entry(nlarn->log,
                   "You go %sward in time by %d mobul%s.",
                   (mobuls < 0) ? "back" : "for",
-                  abs(mobuls),
-                  (abs(mobuls) == 1) ? "" : "s");
+                  abs(mobuls), plural(abs(mobuls)));
 
     /* adjust effects for time warping */
     while (idx < p->effects->len)

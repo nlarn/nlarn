@@ -1,6 +1,6 @@
 /*
  * utils.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -139,6 +139,11 @@ const char *int2str(int val);
 static inline const char *a_an(const char *str)
 {
     return str_starts_with_vowel(str) ? "an" : "a";
+}
+
+static inline const char *is_are(int i)
+{
+    return (i == 1) ? "is" : "are";
 }
 
 static inline const char *plural(int i)
