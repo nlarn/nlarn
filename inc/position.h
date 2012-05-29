@@ -168,15 +168,6 @@ gboolean area_blast(position center, guint radius,
                     char glyph, int colour);
 
 /**
- *
- * Create a new area with the dimensions of the given one
- *
- * @param an area
- * @return a new, identical area
- */
-area *area_copy(area *a);
-
-/**
  * @brief Destroy a given area
  *
  * @param An area.

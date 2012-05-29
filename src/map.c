@@ -417,23 +417,6 @@ int *map_get_surrounding(map *m, position pos, sobject_t type)
     return dirs;
 }
 
-position map_find_sobject_in(map *m, sobject_t sobject, rectangle rect)
-{
-    position pos;
-
-    g_assert(m != NULL);
-
-    Z(pos) = m->nlevel;
-
-    for (Y(pos) = rect.y1; Y(pos) <= rect.y2; Y(pos)++)
-        for (X(pos) = rect.x1; X(pos) <= rect.x2; X(pos)++)
-            if (map_sobject_at(m, pos) == sobject)
-                return pos;
-
-    /* if we reach this point, the sobject is not on the map */
-    return pos_invalid;
-}
-
 position map_find_sobject(map *m, sobject_t sobject)
 {
     position pos;

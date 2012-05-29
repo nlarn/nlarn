@@ -19,8 +19,6 @@
 #ifndef __MAP_H_
 #define __MAP_H_
 
-#include <assert.h>
-
 #include "cJSON.h"
 #include "items.h"
 #include "monsters.h"
@@ -141,10 +139,6 @@ position map_find_space_in(map *m,
                            gboolean dead_end);
 
 position map_find_sobject(map *m, sobject_t sobject);
-
-position map_find_sobject_in(map *m,
-                             sobject_t sobject,
-                             rectangle area);
 
 gboolean map_pos_validate(map *m,
                           position pos,

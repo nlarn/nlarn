@@ -631,27 +631,6 @@ gboolean area_blast(position center, guint radius,
     return retval;
 }
 
-area *area_copy(area *a)
-{
-    area *narea;
-
-    g_assert(a != NULL);
-    narea = area_new(a->start_x, a->start_y, a->size_x, a->size_y);
-
-    for (int y = 0; y < a->size_y; y++)
-    {
-        for (int x = 0; x < a->size_x; x++)
-        {
-            if (area_point_get(a, x, y))
-            {
-                area_point_set(narea, x, y);
-            }
-        }
-    }
-
-    return narea;
-}
-
 void area_destroy(area *a)
 {
     g_assert(a != NULL);
