@@ -70,7 +70,16 @@ RequestExecutionLevel admin
 
 
 ;--------------------------------
+; Installer executable version information
+VIProductVersion "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.0"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "NLarn"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Joachim de Groot"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright 2009-2011, 2012 Joachim de Groot"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "NLarn Installation Program"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${VERSION}"
 
+
+;--------------------------------
 ; The stuff to install
 Section "NLarn (required)"
 

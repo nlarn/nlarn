@@ -185,7 +185,10 @@ $(PACKAGE): nlarn$(SUFFIX)
 
 $(INSTALLER): nlarn$(SUFFIX) nlarn.nsi
 	@echo -n Packing $(PACKAGE)
-	@makensis //DVERSION="$(VERSION)" nlarn.nsi
+	@makensis //DVERSION="$(VERSION)" \
+		//DVERSION_MAJOR=$(VERSION_MAJOR) \
+		//DVERSION_MINOR=$(VERSION_MINOR) \
+		//DVERSION_PATCH=$(VERSION_PATCH) nlarn.nsi
 	@echo " - done."
 
 clean:
