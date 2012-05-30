@@ -154,7 +154,7 @@ int weapon_fire(struct player *p)
     }
 
     /* all checks are successful */
-    target = display_get_position(p, "Select a target", FALSE, FALSE, 0,
+    target = display_get_position(p, "Select a target", TRUE, FALSE, 0,
                                   FALSE, TRUE);
 
     /* is the target a valid position? */
@@ -210,9 +210,9 @@ int weapon_fire(struct player *p)
     ammo->fired = TRUE;
 
     /* paint a ray to follow the path of the bullet */
-    if (area_ray_trajectory(p->pos, target, &damo, weapon_pos_hit,
-                            weapon, ammo, FALSE, item_glyph(ammo->type),
-                            item_colour(ammo), FALSE))
+    if (map_trajectory(p->pos, target, &damo, weapon_pos_hit,
+                       weapon, ammo, FALSE, item_glyph(ammo->type),
+                       item_colour(ammo), FALSE))
         return TRUE; /* one of the callbacks succeeded */
 
     /* none of the callbacks succeeded

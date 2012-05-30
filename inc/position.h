@@ -111,41 +111,9 @@ area *area_new_circle(position center, guint radius, gboolean hollow);
  */
 area *area_new_circle_flooded(position center, guint radius, area *obstacles);
 
-/**
- * Draw a ray with every point
- *
- * @param The starting position.
- * @param The destination.
- * @param An area with every obstructed point set.
- * @return An area with every affected point set.
- */
-area *area_new_ray(position source, position target, area *obstacles);
-
 /* callback function for trajectories and blasts */
 typedef gboolean (*area_hit_sth)(position pos, const damage_originator *damo,
                                  gpointer data1, gpointer data2);
-
-/**
- * Follow a ray from target to destination.
- *
- * @param The starting position.
- * @param The destination.
- * @param The originator of the trajectory.
- * @param The callback function for every affected position.
- * @param A pointer passed to the callback function.
- * @param A pointer passed to the callback function.
- * @param TRUE if reflection should be honoured.
- * @param The glyph to display at an affected position
- * @param The colour of the glyph.
- * @param TRUE to keep the glyph at affected positions.
- *
- * @return TRUE if one of the callbacks returned TRUE.
- */
-gboolean area_ray_trajectory(position source, position target,
-                             const damage_originator *damo,
-                             area_hit_sth pos_hitfun,
-                             gpointer data1, gpointer data2, gboolean reflectable,
-                             char glyph, int colour, gboolean keep_ray);
 
 /**
  * Affect an area by a blast.

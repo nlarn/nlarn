@@ -175,13 +175,13 @@ int potion_throw(struct player *p)
     potion->fired = TRUE;
 
     /* follow the trajectory of the potion */
-    if (area_ray_trajectory(p->pos, target, &damo, potion_pos_hit, (gpointer)potion, NULL,
-                            FALSE, item_glyph(potion->type), item_colour(potion), FALSE))
-                            {
-                                /* a callback succeeded */
-                                g_free(desc);
-                                return TRUE;
-                            }
+    if (map_trajectory(p->pos, target, &damo, potion_pos_hit, (gpointer)potion, NULL,
+                       FALSE, item_glyph(potion->type), item_colour(potion), FALSE))
+    {
+        /* a callback succeeded */
+        g_free(desc);
+        return TRUE;
+    }
 
     /* no callback succeeded -> potion hits the floor */
     /* upper case the first letter of the description */

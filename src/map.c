@@ -728,6 +728,159 @@ void map_path_destroy(map_path *path)
     g_free(path);
 }
 
+GList *map_ray(map *m, position source, position target)
+{
+    GList *ray = NULL;
+    int delta_x, delta_y;
+    int offset_x, offset_y;
+    int inc_x, inc_y;
+    position pos = source;
+
+    /* Insert the source position */
+    ray = g_list_append(ray, GUINT_TO_POINTER(source.val));
+
+    delta_x = abs(X(target) - X(source)) << 1;
+    delta_y = abs(Y(target) - Y(source)) << 1;
+
+    /* if x1 == x2 or y1 == y2, then it does not matter what we set here */
+    inc_x = X(target) > X(source) ? 1 : -1;
+    inc_y = Y(target) > Y(source) ? 1 : -1;
+
+    if (delta_x >= delta_y)
+    {
+        /* error may go below zero */
+        int error = delta_y - (delta_x >> 1);
+
+        while (X(pos) != X(target))
+        {
+            if (error >= 0)
+            {
+                if (error || (inc_x > 0))
+                {
+                    Y(pos) += inc_y;
+                    error -= delta_x;
+                }
+            }
+
+            X(pos) += inc_x;
+            error += delta_y;
+
+            /* append even the last position to the list */
+            ray = g_list_append(ray, GUINT_TO_POINTER(pos.val));
+
+            if (!map_pos_transparent(m, pos))
+                break; /* stop following ray */
+        }
+    }
+    else
+    {
+        /* error may go below zero */
+        int error = delta_x - (delta_y >> 1);
+
+        while (Y(pos) != Y(target))
+        {
+            if (error >= 0)
+            {
+                if (error || (inc_y > 0))
+                {
+                    X(pos) += inc_x;
+                    error -= delta_y;
+                }
+            }
+
+            Y(pos) += inc_y;
+            error += delta_x;
+
+            /* append even the last position to the list */
+            ray = g_list_append(ray, GUINT_TO_POINTER(pos.val));
+
+            if (!map_pos_transparent(m, pos))
+                break; /* stop following ray */
+        }
+    }
+
+    if (ray && GPOINTER_TO_UINT(g_list_last(ray)->data) != target.val)
+    {
+        g_list_free(ray);
+        ray = NULL;
+    }
+
+    return ray;
+}
+
+gboolean map_trajectory(position source, position target,
+                        const damage_originator * const damo,
+                        area_hit_sth pos_hitfun,
+                        gpointer data1, gpointer data2, gboolean reflectable,
+                        char glyph, int colour, gboolean keep_ray)
+{
+    g_assert(pos_valid(source) && pos_valid(target));
+
+    map *tmap = game_map(nlarn, Z(source));
+
+    /* get the ray */
+    GList *ray = map_ray(tmap, source, target);
+    GList *iter = ray;
+
+    /* it was impossible to get a ray for the given positions */
+    if (!ray)
+        return FALSE;
+
+    /* follow the ray to determine if it hits something */
+    do
+    {
+        gboolean result = FALSE;
+        position cursor;
+        pos_val(cursor) = GPOINTER_TO_UINT(iter->data);
+
+        /* skip the source position */
+        if (pos_identical(source, cursor))
+            continue;
+
+        /* the position is affected, call the callback function */
+        if (pos_hitfun(cursor, damo, data1, data2))
+        {
+            /* the callback returned that the ray if finished */
+            result = TRUE;
+        }
+
+        /* check for reflection: mirrors and the amulet of reflection */
+        if (reflectable && ((map_sobject_at(tmap, cursor) == LS_MIRROR)
+                || (pos_identical(cursor, nlarn->p->pos)
+                            && player_effect(nlarn->p, ET_REFLECTION))))
+        {
+            g_list_free(ray);
+            return map_trajectory(cursor, source, damo, pos_hitfun, data1,
+                                  data2, FALSE,  glyph, colour, keep_ray);
+        }
+
+        /* after checking for reflection, abort the function if the
+           callback indicated success */
+        if (result == TRUE)
+        {
+            g_list_free(ray);
+            return result;
+        }
+
+        /* show the position of the ray*/
+        /* FIXME: move curses functions to display.c */
+        attron(colour);
+        (void)mvaddch(Y(cursor), X(cursor), glyph);
+        attroff(colour);
+        refresh();
+
+        /* sleep a while to show the ray's position */
+        g_usleep(100000);
+        /* repaint the screen unless requested otherwise */
+        if (!keep_ray) display_paint_screen(nlarn->p);
+    }
+    while (iter = iter->next);
+
+    /* none of the trigger functions succeedes */
+    g_list_free(ray);
+    return FALSE;
+}
+
 area *map_get_obstacles(map *m, position center, int radius)
 {
     area *narea;

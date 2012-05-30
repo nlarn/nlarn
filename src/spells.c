@@ -843,8 +843,8 @@ int spell_type_ray(spell *s, struct player *p)
     }
 
     /* throw a ray to the selected target */
-    area_ray_trajectory(p->pos, target, &damo, spell_pos_hit,
-                        s, dam, TRUE, '*', spell_colour(s), TRUE);
+    map_trajectory(p->pos, target, &damo, spell_pos_hit,
+                   s, dam, TRUE, '*', spell_colour(s), TRUE);
 
     /* The callback functions give a copy of the damage to the specifiv
        functions, thus the original has to be destroyed here. */
@@ -1679,7 +1679,7 @@ static gboolean spell_pos_hit(position pos, const damage_originator *damo,
     {
         if (mst == LS_MIRROR && fov_get(nlarn->p->fv, pos))
         {
-            /* reflection is handled in area_ray_trajectory, but we need
+            /* reflection is handled in map_trajectory, but we need
                to generate a message here if the mirror is visible */
             log_add_entry(nlarn->log, "The mirror reflects the %s!",spell_name(sp));
             return terminated;
@@ -1718,7 +1718,7 @@ static gboolean spell_pos_hit(position pos, const damage_originator *damo,
         if (player_effect(nlarn->p, ET_REFLECTION))
         {
             /* The player reflects the spell. Actual handling of the reflection
-               is done in area_ray_trajectory, just give a message here. */
+               is done in map_trajectory, just give a message here. */
             log_add_entry(nlarn->log, "Your amulet reflects the %s!", spell_name(sp));
         }
         else

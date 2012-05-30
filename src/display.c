@@ -2275,7 +2275,8 @@ position display_get_new_position(player *p,
     GList *mlist = NULL, *miter = NULL;
 
     /* variables for ray or ball painting */
-    area *a = NULL;
+    area *b = NULL;       /* a ball area */
+    GList *r = NULL;      /* a ray position list */
     monster *target, *m;
 
     /* check the starting position makes sense */
@@ -2298,10 +2299,9 @@ position display_get_new_position(player *p,
     if (ray && !pos_identical(p->pos, start))
     {
         /* paint a ray to validate the starting position */
-        area *obstacles = map_get_obstacles(vmap, p->pos, pos_distance(p->pos, pos));
-        a = area_new_ray(p->pos, pos, obstacles);
+        r = map_ray(vmap, p->pos, pos);
 
-        if (a == NULL)
+        if (r == NULL)
         {
             /* it's not possible to draw a ray between the points
                -> leave everything as it has been */
@@ -2310,8 +2310,8 @@ position display_get_new_position(player *p,
         else
         {
             /* position is valid */
-            area_destroy(a);
-            a = NULL;
+            g_list_free(r);
+            r = NULL;
         }
     } /* ray starting position validity check */
 
@@ -2352,10 +2352,9 @@ position display_get_new_position(player *p,
         /* draw a ray if the starting position is not the player's position */
         if (ray && !pos_identical(pos, p->pos))
         {
-            area *obsmap = map_get_obstacles(vmap, p->pos, pos_distance(p->pos, pos));
-            a = area_new_ray(p->pos, pos, obsmap);
+            r = map_ray(vmap, p->pos, pos);
 
-            if (a == NULL)
+            if (r == NULL)
             {
                 /* It wasn't possible to paint a ray to the target position.
                    Revert to the player's position.*/
@@ -2363,7 +2362,7 @@ position display_get_new_position(player *p,
             }
         }
 
-        if (ray && (a != NULL))
+        if (ray && (r != NULL))
         {
             /* draw a line between source and target if told to */
             target = map_get_monster_at(vmap, pos);
@@ -2372,52 +2371,52 @@ position display_get_new_position(player *p,
             else                                    attrs = DC_LIGHTCYAN;
 
             attron(attrs);
+            GList *iter = r;
 
-            for (int y = 0; y < a->size_y; y++)
+            do
             {
-                for (int x = 0; x < a->size_x; x++)
-                {
-                    if (area_point_get(a, x, y))
-                    {
-                        position tpos = { { a->start_x + x, a->start_y + y, Z(p->pos) } };
+                position tpos;
+                pos_val(tpos) = GPOINTER_TO_UINT(iter->data);
 
-                        if (target && pos_identical(monster_pos(target), tpos)
-                            && monster_in_sight(target))
-                        {
-                            /* ray is targeted at a visible monster */
-                            (void)mvaddch(a->start_y + y, a->start_x + x, monster_glyph(target));
-                        }
-                        else if ((m = map_get_monster_at(vmap, tpos))
-                                 && monster_in_sight(m))
-                        {
-                            /* ray sweeps over a visible monster */
-                            (void)mvaddch(a->start_y + y, a->start_x + x, monster_glyph(m));
-                        }
-                        else
-                        {
-                            /* a position with no or an invisible monster on it */
-                            (void)mvaddch(a->start_y + y, a->start_x + x, '*');
-                        }
-                    }
+                /* skip the player's position */
+                if (pos_identical(p->pos, tpos))
+                    continue;
+
+                if (target && pos_identical(monster_pos(target), tpos)
+                    && monster_in_sight(target))
+                {
+                    /* ray is targeted at a visible monster */
+                    (void)mvaddch(Y(tpos), X(tpos), monster_glyph(target));
                 }
-            }
+                else if ((m = map_get_monster_at(vmap, tpos))
+                         && monster_in_sight(m))
+                {
+                    /* ray sweeps over a visible monster */
+                    (void)mvaddch(Y(tpos), X(tpos), monster_glyph(m));
+                }
+                else
+                {
+                    /* a position with no or an invisible monster on it */
+                    (void)mvaddch(Y(tpos), X(tpos), '*');
+                }
+            } while (iter = iter->next);
 
             attroff(attrs);
-            area_destroy(a);
-            a = NULL;
+            g_list_free(r);
+            r = NULL;
         }
         else if (ball && radius)
         {
             /* paint a ball if told to */
             area *obstacles = map_get_obstacles(vmap, pos, radius);
-            a = area_new_circle_flooded(pos, radius, obstacles);
+            b = area_new_circle_flooded(pos, radius, obstacles);
             cursor = pos;
 
-            for (Y(cursor) = a->start_y; Y(cursor) < a->start_y + a->size_y; Y(cursor)++)
+            for (Y(cursor) = b->start_y; Y(cursor) < b->start_y + b->size_y; Y(cursor)++)
             {
-                for (X(cursor) = a->start_x; X(cursor) < a->start_x + a->size_x; X(cursor)++)
+                for (X(cursor) = b->start_x; X(cursor) < b->start_x + b->size_x; X(cursor)++)
                 {
-                    if (area_pos_get(a, cursor))
+                    if (area_pos_get(b, cursor))
                     {
                         move(Y(cursor), X(cursor));
 
@@ -2441,7 +2440,7 @@ position display_get_new_position(player *p,
                     }
                 }
             }
-            area_destroy(a); a = NULL;
+            area_destroy(b); b = NULL;
         }
         else
         {
@@ -2637,9 +2636,9 @@ position display_get_new_position(player *p,
                 int distance = pos_distance(p->pos, npos);
 
                 /* paint a ray to validate the new position */
-                a = area_new_ray(p->pos, npos, map_get_obstacles(vmap, p->pos, distance));
+                r = map_ray(vmap, p->pos, npos);
 
-                if (a == NULL)
+                if (r == NULL)
                 {
                     /* it's not possible to draw a ray between the points
                        -> return to previous position */
@@ -2647,8 +2646,8 @@ position display_get_new_position(player *p,
                 }
                 else
                 {
-                    area_destroy(a);
-                    a = NULL;
+                    g_list_free(r);
+                    r = NULL;
                 }
             }
 

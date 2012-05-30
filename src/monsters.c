@@ -1365,10 +1365,10 @@ static int monster_breath_attack(monster *m, player *p, attack att)
     }
 
     /* handle the breath */
-    area_ray_trajectory(m->pos, p->pos, &(dam->dam_origin),
-                        monster_breath_hit, dam, NULL, TRUE,
-                        monster_breath_data[att.damage].glyph,
-                        monster_breath_data[att.damage].colour, TRUE);
+    map_trajectory(m->pos, p->pos, &(dam->dam_origin),
+                   monster_breath_hit, dam, NULL, TRUE,
+                   monster_breath_data[att.damage].glyph,
+                   monster_breath_data[att.damage].colour, TRUE);
 
     /* the damage is copied in monster_breath_hit(), thus destroy the
        original damage here */
@@ -2820,7 +2820,7 @@ static gboolean monster_breath_hit(position pos,
         if (player_effect(nlarn->p, ET_REFLECTION))
         {
             /* The player reflects the breath. Actual handling of the reflection
-               is done in area_ray_trajectory, just give a message here. */
+               is done in map_trajectory, just give a message here. */
             log_add_entry(nlarn->log, "Your amulet reflects the %s!",
                           monster_breath_data[dam->type].desc);
         }
@@ -2851,7 +2851,7 @@ static gboolean monster_breath_hit(position pos,
     if (map_sobject_at(mp, pos) == LS_MIRROR && fov_get(nlarn->p->fv, pos))
     {
         /* A mirror will reflect the breath. Actual handling of the reflection
-           is done in area_ray_trajectory, just give a message here if the
+           is done in map_trajectory, just give a message here if the
            mirror is visible by the player. */
         log_add_entry(nlarn->log, "The mirror reflects the %s!",
                       monster_breath_data[dam->type].desc);

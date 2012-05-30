@@ -178,6 +178,37 @@ map_path *map_find_path(map *m, position start, position goal,
  */
 void map_path_destroy(map_path *path);
 
+/**
+ * Return a linked list with every position between two points.
+ *
+ * @param The map that contains both positions.
+ * @param The starting position.
+ * @param The destination.
+ */
+GList *map_ray(map *m, position source, position target);
+
+/**
+ * Follow a ray from target to destination.
+ *
+ * @param The starting position.
+ * @param The destination.
+ * @param The originator of the trajectory.
+ * @param The callback function for every affected position.
+ * @param A pointer passed to the callback function.
+ * @param A pointer passed to the callback function.
+ * @param TRUE if reflection should be honoured.
+ * @param The glyph to display at an affected position
+ * @param The colour of the glyph.
+ * @param TRUE to keep the glyph at affected positions.
+ *
+ * @return TRUE if one of the callbacks returned TRUE.
+ */
+gboolean map_trajectory(position source, position target,
+                        const damage_originator *damo,
+                        area_hit_sth pos_hitfun,
+                        gpointer data1, gpointer data2, gboolean reflectable,
+                        char glyph, int colour, gboolean keep_ray);
+
 area *map_get_obstacles(map *m, position center, int radius);
 
 void map_set_tiletype(map *m, area *area, map_tile_t type, guint8 duration);
