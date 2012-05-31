@@ -84,7 +84,7 @@ monsters = {
       intelligence = 2,
       level = 2,
       name = "giant centipede",
-      size = TINY,
+      size = SMALL,
       speed = NORMAL,
     },
     [MT_DEMONLORD_I] = {

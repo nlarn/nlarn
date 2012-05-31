@@ -1,6 +1,6 @@
 /*
  * defines.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* $Id$ */
 
 #ifndef __DEFINES_H_
 #define __DEFINES_H_
@@ -57,12 +55,12 @@ typedef enum _speed
 typedef enum _esize
 {
     ESIZE_NONE,
-    ESIZE_TINY,
-    ESIZE_SMALL,
-    ESIZE_MEDIUM,
-    ESIZE_LARGE,
-    ESIZE_HUGE,
-    ESIZE_GARGANTUAN,
+    ESIZE_TINY         =  25,
+    ESIZE_SMALL        =  75,
+    ESIZE_MEDIUM       = 100,
+    ESIZE_LARGE        = 125,
+    ESIZE_HUGE         = 150,
+    ESIZE_GARGANTUAN   = 200,
     ESIZE_MAX
 } esize;
 
