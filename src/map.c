@@ -874,7 +874,7 @@ gboolean map_trajectory(position source, position target,
         /* repaint the screen unless requested otherwise */
         if (!keep_ray) display_paint_screen(nlarn->p);
     }
-    while (iter = iter->next);
+    while ((iter = iter->next));
 
     /* none of the trigger functions succeedes */
     g_list_free(ray);

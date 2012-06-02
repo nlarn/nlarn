@@ -2399,7 +2399,7 @@ position display_get_new_position(player *p,
                     /* a position with no or an invisible monster on it */
                     (void)mvaddch(Y(tpos), X(tpos), '*');
                 }
-            } while (iter = iter->next);
+            } while ((iter = iter->next));
 
             attroff(attrs);
             g_list_free(r);
