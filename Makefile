@@ -56,7 +56,7 @@ endif
 
 # Definitions required regardless of host OS
 DEFINES += -DG_DISABLE_DEPRECATED
-CFLAGS  += -std=c99 -Wextra -Iinc
+CFLAGS  += -MMD -MP -std=c99 -Wextra -Iinc
 LDFLAGS += -lz
 
 # Make sure warnings do not pass unoticed.
