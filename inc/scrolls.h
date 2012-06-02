@@ -37,10 +37,10 @@ typedef struct magic_scroll_data {
 
 enum scroll_types {
 	ST_NONE,
+	ST_BLANK,
 	ST_ENCH_ARMOUR,
 	ST_ENCH_WEAPON,
 	ST_ENLIGHTENMENT,
-	ST_BLANK,
 	ST_CREATE_MONSTER,
 	ST_CREATE_ARTIFACT,
 	ST_AGGRAVATE_MONSTER,

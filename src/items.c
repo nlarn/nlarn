@@ -747,14 +747,18 @@ gchar *item_describe(item *it, int known, int singular, int definite)
         if (known)
         {
             g_string_append_printf(desc, "scroll%s of %s",
-                                   (!singular && it->count > 1) ? "s" : "",
-                                   item_desc_get(it, known));
+                    (!singular && it->count > 1) ? "s" : "",
+                    item_desc_get(it, known));
         }
         else
         {
-            g_string_append_printf(desc, "scroll%s labeled %s",
-                                   (!singular && it->count > 1) ? "s" : "",
-                                   item_desc_get(it, known));
+            if (strcmp(item_desc_get(it, known), "") == 0)
+                g_string_append_printf(desc, "unlabeled scroll%s",
+                        (!singular && it->count > 1) ? "s" : "");
+            else
+                g_string_append_printf(desc, "scroll%s labeled %s",
+                        (!singular && it->count > 1) ? "s" : "",
+                        item_desc_get(it, known));
         }
         break;
 

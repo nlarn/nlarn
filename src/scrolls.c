@@ -28,10 +28,10 @@ const magic_scroll_data scrolls[ST_MAX] =
 {
     /* ID                   name                  effect               price store_stock */
     { ST_NONE,              "",                   ET_NONE,                 0, 0 },
+    { ST_BLANK,             "blank paper",        ET_NONE,               100, 0 },
     { ST_ENCH_ARMOUR,       "enchant armour",     ET_NONE,               100, 1 },
     { ST_ENCH_WEAPON,       "enchant weapon",     ET_NONE,               100, 1 },
     { ST_ENLIGHTENMENT,     "enlightenment",      ET_ENLIGHTENMENT,      800, 0 },
-    { ST_BLANK,             "blank paper",        ET_NONE,               100, 0 },
     { ST_CREATE_MONSTER,    "create monster",     ET_NONE,               100, 0 },
     { ST_CREATE_ARTIFACT,   "create artifact",    ET_NONE,               400, 0 },
     { ST_AGGRAVATE_MONSTER, "aggravate monsters", ET_AGGRAVATE_MONSTER,  100, 0 },
@@ -72,6 +72,7 @@ static int scroll_timewarp(player *p, item *r_scroll);
 
 static const char *_scroll_desc[ST_MAX - 1] =
 {
+    "",
     "Ssyliir Wyleeum",
     "Etzak Biqolix",
     "Tzaqa Chanim",
@@ -96,7 +97,7 @@ static const char *_scroll_desc[ST_MAX - 1] =
     "Fril Ajich Lsosa",
     "Chados Azil Tzos",
     "Ixos Tzek Ajak",
-    "Xodil Keterulo",
+    /* "Xodil Keterulo", spare label */
 };
 
 char *scroll_desc(int scroll_id)
