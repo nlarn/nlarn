@@ -1031,6 +1031,9 @@ int building_monastery(struct player *p)
            The item value for cursed items is reduced by 50%,
            hence divide by 5 */
         price = (item_price(it) / 5) * (game_difficulty(nlarn) + 1);
+        /* some items are too cheap. */
+        price = max(price, 1);
+        /* Item stacks cost per item. */
         price *= it->count;
 
         desc = item_describe(it, player_item_identified(p, it), FALSE, TRUE);
