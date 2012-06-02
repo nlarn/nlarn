@@ -1447,7 +1447,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
     if (item_is_stackable(it->type)) price *= it->count;
 
     /* If an item is blessed and the player know it, use this and charge :) */
-    if (it->blessed && it->blessed_known) price << 2;
+    if (it->blessed && it->blessed_known) price <<=1;
 
     /* Ensure this costs at least 50gp... */
     price = max(50, price);
