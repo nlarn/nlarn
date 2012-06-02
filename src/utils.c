@@ -1,6 +1,6 @@
 /*
  * utils.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -58,24 +58,6 @@ void shuffle(int array[], int length, int skip)
         array[i] = array[npos];
         array[npos] = temp;
     }
-}
-
-char *str_replace(char *string, char *orig, char *replace)
-{
-    static char buffer[1024];
-    char *ch;
-
-    if (!(ch = strstr(string, orig)))
-        return string;
-
-    strncpy(buffer, string, ch - string);
-    buffer[ch - string] = 0;
-    sprintf(buffer + (ch - string),
-            "%s%s",
-            replace,
-            ch + strlen(orig));
-
-    return buffer;
 }
 
 char *str_capitalize(char *string)

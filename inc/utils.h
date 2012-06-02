@@ -81,7 +81,6 @@ int divert(int value, int percent);
  */
 void shuffle(int array[], int length, int skip);
 
-char *str_replace(char *string, char *orig, char *replace);
 char *str_capitalize(char *string);
 
 /* message log handling */
