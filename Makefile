@@ -11,31 +11,31 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-.PHONY: help clean
+.PHONY: help clean dist
 
 ifndef config
   config=debug
 endif
 
-OS   = $(shell uname -s)
-ARCH = $(shell uname -m)
+OS   := $(shell uname -s)
+ARCH := $(shell uname -m)
 
 # check if operating on a git checkout
 ifneq ($(wildcard .git),)
   # get hash of current commit
-  GITREV  = $(shell git show --pretty=oneline | sed -ne '1 s/\(.\{6\}\).*/\1/p')
+  GITREV := $(shell git show --pretty=oneline | sed -ne '1 s/\(.\{6\}\).*/\1/p')
   # get tag for current commit
-  GITTAG = $(shell git tag --contains $(GITREV) | tr '[:upper:]' '[:lower:]')
+  GITTAG := $(shell git tag --contains $(GITREV) | tr '[:upper:]' '[:lower:]')
   ifeq ($(GITTAG),)
     # current commit is not tagged
     # -> include current commit hash in version information
-    DEFINES += -DGITREV=\"-$(GITREV)\"
+    DEFINES += -DGITREV=\"-g$(GITREV)\"
   endif
 endif
 
-VERSION_MAJOR = $(shell awk '/VERSION_MAJOR/ { print $$3 }' inc/nlarn.h)
-VERSION_MINOR = $(shell awk '/VERSION_MINOR/ { print $$3 }' inc/nlarn.h)
-VERSION_PATCH = $(shell awk '/VERSION_PATCH/ { print $$3 }' inc/nlarn.h)
+VERSION_MAJOR := $(shell awk '/VERSION_MAJOR/ { print $$3 }' inc/nlarn.h)
+VERSION_MINOR := $(shell awk '/VERSION_MINOR/ { print $$3 }' inc/nlarn.h)
+VERSION_PATCH := $(shell awk '/VERSION_PATCH/ { print $$3 }' inc/nlarn.h)
 
 # Collect version information
 ifneq ($(GITTAG),)
@@ -50,7 +50,7 @@ else
 
   ifneq ($(GITREV),)
     date     = $(shell date "+%Y%m%d")
-    VERSION := $(VERSION)-$(date)-$(GITREV)
+    VERSION := $(VERSION)-$(date)-g$(GITREV)
   endif
 endif
 
@@ -59,10 +59,22 @@ DEFINES += -DG_DISABLE_DEPRECATED
 CFLAGS  += -std=c99 -Wextra -Iinc
 LDFLAGS += -lz
 
+# Make sure warnings do not pass unoticed.
+# Make an exception for OpenBSD as the libc headers generate some
+# bogus warings there when using strlen and similar functions.
+ifneq ($(OS),OpenBSD)
+  CFLAGS += -Werror
+endif
+
 ifeq ($(MSYSTEM),MINGW32)
-  # fake the content of the OS var to make it more common
+  # Settings specific to Windows.
+
+  # Fake the content of the OS var to make it more common
   # (otherwise packages would have silly names)
-  OS = win32
+  OS := win32
+
+  # Ensure make doesn't try to run cc
+  CC = gcc
 
   RESOURCES := $(patsubst %.rc,%.res,$(wildcard resources/*.rc))
   RESDEFINE := -DVERSION_MAJOR=$(VERSION_MAJOR)
@@ -87,7 +99,12 @@ ifeq ($(MSYSTEM),MINGW32)
   ARCHIVE_CMD = zip -r
   ARCHIVE_SUFFIX = zip
 else
-  # Settings specific to !Windows
+  # Settings specific to Un*x-like operating systems
+
+  # Use clang on OS X.
+  ifeq ($(OS), Darwin)
+    CC = clang
+  endif
 
   # Configuration for glib-2
   CFLAGS  += $(shell pkg-config --cflags glib-2.0)
@@ -139,7 +156,7 @@ ifneq ($(GITREV),)
 endif
 
 ifeq ($(MSYSTEM),MINGW32)
-  INSTALLER = nlarn-$(VERSION).exe
+  INSTALLER := nlarn-$(VERSION).exe
 endif
 
 ifeq ($(config),debug)
