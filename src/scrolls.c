@@ -771,7 +771,7 @@ static int scroll_identify(player *p, item *r_scroll)
 
 int scroll_mapping(player *p, item *r_scroll)
 {
-    position pos;
+    position pos = pos_invalid;
     map *m;
 
     /* scroll can be null as I use this to fake a known level */

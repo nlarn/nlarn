@@ -279,7 +279,7 @@ map *map_deserialize(cJSON *mser)
 
 char *map_dump(map *m, position ppos)
 {
-    position pos;
+    position pos = pos_invalid;
     GString *dump;
     monster *mon;
 
@@ -357,7 +357,7 @@ position map_find_space_in(map *m,
                            map_element_t element,
                            gboolean dead_end)
 {
-    position pos;
+    position pos = pos_invalid;
     int count, iteration = 0;
 
     g_assert (m != NULL && element > LE_NONE && element < LE_MAX);
@@ -396,7 +396,7 @@ position map_find_space_in(map *m,
 
 int *map_get_surrounding(map *m, position pos, sobject_t type)
 {
-    position p;
+    position p = pos_invalid;
     int nmove = 1;
     int *dirs;
 
@@ -419,7 +419,7 @@ int *map_get_surrounding(map *m, position pos, sobject_t type)
 
 position map_find_sobject(map *m, sobject_t sobject)
 {
-    position pos;
+    position pos = pos_invalid;
 
     g_assert(m != NULL);
 
@@ -884,7 +884,7 @@ gboolean map_trajectory(position source, position target,
 area *map_get_obstacles(map *m, position center, int radius)
 {
     area *narea;
-    position pos;
+    position pos = pos_invalid;
     int x, y;
 
     g_assert(m != NULL);
@@ -919,12 +919,12 @@ area *map_get_obstacles(map *m, position center, int radius)
 
 void map_set_tiletype(map *m, area *ar, map_tile_t type, guint8 duration)
 {
-    position pos;
+    position pos = pos_invalid;
     int x, y;
 
     g_assert (m != NULL && ar != NULL);
 
-    position center;
+    position center = pos_invalid;
     X(center) = ar->start_x + ar->size_x / 2;
     Y(center) = ar->start_y + ar->size_y / 2;
     Z(center) = m->nlevel;
@@ -1089,7 +1089,7 @@ monster *map_get_monster_at(map *m, position pos)
 
 void map_fill_with_life(map *m)
 {
-    position pos;
+    position pos = pos_invalid;
     guint new_monster_count;
 
     g_assert(m != NULL);
@@ -1152,7 +1152,7 @@ gboolean map_is_exit_at(map *m, position pos)
 
 void map_timer(map *m)
 {
-    position pos;
+    position pos = pos_invalid;
     item_erosion_type erosion;
 
     g_assert (m != NULL);
@@ -1276,7 +1276,7 @@ char map_get_door_glyph(map *m, position pos)
 
 static int map_fill_with_stationary_objects(map *m)
 {
-    position pos;
+    position pos = pos_invalid;
 
     /* volcano shaft up from the temple */
     if (m->nlevel == MAP_DMAX)
@@ -1470,7 +1470,7 @@ static void map_fill_with_traps(map *m)
 /* subroutine to make the caverns for a given map. only walls are made. */
 static void map_make_maze(map *m, int treasure_room)
 {
-    position pos;
+    position pos = pos_invalid;
     int mx, my;
     int nrooms;
     rectangle **rooms = NULL;
@@ -1669,7 +1669,7 @@ static void map_make_vertical_river(map *m, map_tile_t rivertype)
     const guint minx   = rand_1n(3);
     const guint maxx   = MAP_MAX_X - rand_1n(3);
 
-    position pos;
+    position pos = pos_invalid;
     Z(pos) = m->nlevel;
     for (Y(pos) = starty; Y(pos) < endy; Y(pos)++)
     {
@@ -1705,7 +1705,7 @@ static void map_make_river(map *m, map_tile_t rivertype)
     const guint miny   = rand_1n(3);
     const guint maxy   = MAP_MAX_Y - rand_1n(3);
 
-    position pos;
+    position pos = pos_invalid;
     Z(pos) = m->nlevel;
     for (X(pos) = startx; X(pos) < endx; X(pos)++)
     {
@@ -1735,7 +1735,7 @@ static void map_make_lake(map *m, map_tile_t laketype)
     guint x2 = x1 + 4 + rand_0n(16);
     guint y2 = y1 + 4 + rand_0n(5);
 
-    position pos;
+    position pos = pos_invalid;
     Z(pos) = m->nlevel;
     for (Y(pos) = y1; Y(pos) < y2; Y(pos)++)
     {
@@ -2000,7 +2000,7 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
  */
 static void map_make_treasure_room(map *m, rectangle **rooms)
 {
-    position pos, npos;
+    position pos = pos_invalid, npos = pos_invalid;
     sobject_t mst;
     item *itm;
     int success;
@@ -2089,7 +2089,7 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
 /* verify that every space on the map can be reached */
 static int map_validate(map *m)
 {
-    position pos;
+    position pos = pos_invalid;
     int connected = TRUE;
     area *floodmap = NULL;
     area *obsmap = area_new(0, 0, MAP_MAX_X, MAP_MAX_Y);

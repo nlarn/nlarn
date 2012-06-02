@@ -445,7 +445,7 @@ cJSON *player_serialize(player *p)
         cJSON_AddNumberToObject(pser, "ptarget", GPOINTER_TO_UINT(p->ptarget));
     }
 
-    position pos;
+    position pos = pos_invalid;
 
     /* store players' memory of the map */
     cJSON_AddItemToObject(pser, "memory", obj = cJSON_CreateArray());
@@ -658,7 +658,7 @@ player *player_deserialize(cJSON *pser)
     }
 
     /* restore players' memory of the map */
-    position pos;
+    position pos = pos_invalid;
     obj = cJSON_GetObjectItem(pser, "memory");
 
     for (Z(pos) = 0; Z(pos) < MAP_MAX; Z(pos)++)

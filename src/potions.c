@@ -350,7 +350,7 @@ static int potion_with_effect(struct player *p, item *potion)
 
 static int potion_amnesia(player *p, item *potion __attribute__((unused)))
 {
-    position pos;
+    position pos = pos_invalid;
 
     g_assert (p != NULL);
 
@@ -375,7 +375,7 @@ static int potion_amnesia(player *p, item *potion __attribute__((unused)))
 
 static int potion_detect_item(player *p, item *potion)
 {
-    position pos;
+    position pos = pos_invalid;
     int count = 0; /* count detected items */
     inventory *inv;
 

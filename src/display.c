@@ -178,7 +178,7 @@ static int attr_colour(int colour, int reverse)
 int display_paint_screen(player *p)
 {
     guint x, y, i;
-    position pos;
+    position pos = pos_invalid;
     map *vmap;
     int attrs;              /* curses attributes */
     message_log_entry *le;  /* needed to display messages */
@@ -2266,7 +2266,7 @@ position display_get_new_position(player *p,
 {
     gboolean RUN = TRUE;
     direction dir = GD_NONE;
-    position pos, npos, cursor;
+    position pos, npos = pos_invalid, cursor = pos_invalid;
     map *vmap;
     int attrs; /* curses attributes */
     display_window *msgpop = NULL;

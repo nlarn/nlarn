@@ -1130,7 +1130,7 @@ gboolean spell_scare_monsters(spell *s, struct player *p)
 {
     monster *m;
     int count = 0;
-    position pos;
+    position pos = pos_invalid;
     map *cmap = game_map(nlarn, Z(p->pos));
     Z(pos) = Z(p->pos);
 
@@ -1589,7 +1589,7 @@ static void spell_print_failure_message(spell *s, monster *m)
 
 static int count_adjacent_water_squares(position pos)
 {
-    position p;
+    position p = pos_invalid;
     Z(p) = Z(pos);
 
     int count = 0;

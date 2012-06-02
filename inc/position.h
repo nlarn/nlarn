@@ -1,6 +1,6 @@
 /*
  * position.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,11 +28,11 @@ typedef union _position
 {
     struct _bf
     {
-        unsigned int x: 12;
-        unsigned int y: 12;
-        unsigned int z:  8;
+        guint32 x: 12;
+        guint32 y: 12;
+        guint32 z:  8;
     } bf;
-    unsigned int val;
+    guint32 val;
 } position;
 
 const position pos_invalid;
