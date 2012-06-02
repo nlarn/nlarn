@@ -1960,8 +1960,7 @@ int item_filter_cursed(item *it)
 int item_filter_cursed_or_unknown(item *it)
 {
     g_assert (it != NULL);
-    return (it->cursed == TRUE
-            || (it->blessed_known == FALSE && item_is_blessable(it->type)));
+    return (item_is_blessable(it->type) && (it->cursed || !it->blessed_known));
 }
 
 int item_filter_nonblessed(item *it)
