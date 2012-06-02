@@ -1017,14 +1017,23 @@ int building_monastery(struct player *p)
         }
 
         it = display_inventory("Choose an item to uncurse", p, &p->inventory,
-                               NULL, FALSE, FALSE, FALSE, item_filter_cursed_or_unknown);
+                NULL, FALSE, FALSE, FALSE,item_filter_cursed_or_unknown);
 
-        /* cost of uncursing is 10 percent of item value */
-        /* item value for cursed items is reduced by 50% */
+        /* It is possible to abort the selection with ESC. */
+        if (it == NULL)
+        {
+            log_add_entry(nlarn->log, "You chose to leave your items as "
+                    "they are.");
+            break;
+        }
+
+        /* The cost of uncursing is 10 percent of item value.
+           The item value for cursed items is reduced by 50%,
+           hence divide by 5 */
         price = (item_price(it) / 5) * (game_difficulty(nlarn) + 1);
+        price *= it->count;
 
-        desc = item_describe(it, player_item_identified(p, it), it->count, TRUE);
-
+        desc = item_describe(it, player_item_identified(p, it), FALSE, TRUE);
         question = g_strdup_printf("To remove the curse on %s, we ask you to "
                                    "donate %d gold for our abbey. %s", desc,
                                    price, ayfwt);
@@ -1038,9 +1047,22 @@ int building_monastery(struct player *p)
             break;
         }
 
-        log_add_entry(nlarn->log, "The monks remove the curse on %s.", desc);
+        /* The player may chose to uncurse items that are actually only of
+           unknown blessedness. */
+        if (it->cursed)
+        {
+            log_add_entry(nlarn->log, "The monks remove the curse on %s.",
+                    desc);
+            item_remove_curse(it);
+        }
+        else
+        {
+            log_add_entry(nlarn->log, "The monks tell you that %s wasn't "
+                    "cursed. Well, now you know for sure..", desc);
+            it->blessed_known = TRUE;
+        }
         g_free(desc);
-        item_remove_curse(it);
+
         building_player_charge(p, price);
         p->stats.gold_spent_donation += price;
     }
