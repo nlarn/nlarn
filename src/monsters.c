@@ -692,21 +692,6 @@ const char* monster_type_plural_name(const int montype, const int count)
     return monster_type_name(montype);
 }
 
-static int item_is_unique(item *it)
-{
-    switch (it->type)
-    {
-    case IT_POTION:
-        return (it->id == PO_CURE_DIANTHR);
-    case IT_AMULET:
-        return (it->id == AM_LARN);
-    case IT_WEAPON:
-        return weapon_is_unique(it);
-    default:
-        return FALSE;
-    }
-}
-
 void monster_die(monster *m, struct player *p)
 {
     g_assert(m != NULL);

@@ -1982,6 +1982,28 @@ int item_filter_blank_scroll(item *it)
     return (it->type == IT_SCROLL && it->id == ST_BLANK);
 }
 
+gboolean item_is_unique(item *it)
+{
+    switch (it->type)
+    {
+    case IT_ARMOUR:
+        return armour_unique(it);
+        break;
+    case IT_POTION:
+        return (it->id == PO_CURE_DIANTHR);
+        break;
+    case IT_AMULET:
+        return TRUE;
+        break;
+    case IT_WEAPON:
+        return weapon_is_unique(it);
+        break;
+    default:
+        return FALSE;
+        break;
+    }
+}
+
 static const char *item_desc_get(item *it, int known)
 {
     g_assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);

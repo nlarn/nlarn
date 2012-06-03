@@ -427,4 +427,13 @@ int item_filter_pcd(item *it);
  * @return TRUE if the supplied item is a blank scroll
  */
 int item_filter_blank_scroll(item *it);
+
+/**
+ * @brief Check if an item is unique.
+ *
+ * @param A pointer to an item.
+ * @return TRUE if the item is unique.
+ */
+gboolean item_is_unique(item *it);
+
 #endif
