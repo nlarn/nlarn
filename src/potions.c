@@ -338,7 +338,8 @@ static int potion_with_effect(struct player *p, item *potion)
                 eff->amount *= 2;
         }
 
-        /* this has to precede p_e_add as eff might be destroyed (e.g. potion of sleep) */
+        /* this has to precede player_effect_add() as eff might be destroyed
+           (e.g. potion of sleep) */
         if (!effect_get_msg_start(eff))
             identified = FALSE;
 

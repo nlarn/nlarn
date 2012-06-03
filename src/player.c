@@ -17,6 +17,7 @@
  */
 
 #include <glib.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -2382,11 +2383,21 @@ effect *player_effect_add(player *p, effect *e)
             break;
 
         case ET_INC_HP_MAX:
-            p->hp_max += ((player_get_hp_max(p) / 100) * e->amount);
+            {
+                float delta = (player_get_hp_max(p) / 100.0) * e->amount;
+                int amount = max(1, (int)round(delta));
+                p->hp_max += amount;
+                player_hp_gain(p, amount);
+            }
             break;
 
         case ET_INC_MP_MAX:
-            p->mp_max += ((player_get_mp_max(p) / 100) * e->amount);
+            {
+                float delta = (player_get_mp_max(p) / 100.0) * e->amount;
+                int amount = max(1, (int)round(delta));
+                p->mp_max += amount;
+                player_mp_gain(p, amount);
+            }
             break;
 
         case ET_INC_LEVEL:
@@ -2395,23 +2406,50 @@ effect *player_effect_add(player *p, effect *e)
 
         case ET_INC_EXP:
             /* looks like a reasonable amount */
-            player_exp_gain(p, rand_1n(player_lvl_exp[p->level - 1] - player_lvl_exp[p->level - 2]));
+            player_exp_gain(p, rand_1n(player_lvl_exp[p->level - 1]
+                                    - player_lvl_exp[p->level - 2]));
             break;
 
         case ET_INC_HP:
-            player_hp_gain(p, (p->hp_max  * e->amount)/ 100);
-            break;
-
         case ET_MAX_HP:
-            player_hp_gain(p, player_get_hp_max(p));
+            if (p->hp != (int)p->hp_max)
+            {
+                    guint amount = (p->hp_max * e->amount) / 100;
+                    player_hp_gain(p, amount);
+            }
+            else
+            {
+                    /* Player's hp is at the max; increase max hp. */
+                    guint amount = e->amount;
+
+                    effect_destroy(e);
+                    e = effect_new(ET_INC_HP_MAX);
+                    /* determine a reasonable percentage max_hp will increase,
+                       i.e. 5% for the MAX_HP, 1% for INC_HP */
+                    e->amount = amount / 20;
+                    return player_effect_add(p, e);
+            }
             break;
 
         case ET_INC_MP:
-            player_mp_gain(p, (p->mp_max  * e->amount)/ 100);
-            break;
-
         case ET_MAX_MP:
-            player_mp_gain(p, player_get_mp_max(p));
+            if (p->mp != (int)p->mp_max)
+            {
+                    guint amount = (p->mp_max * e->amount) / 100;
+                    player_mp_gain(p, amount);
+            }
+            else
+            {
+                    /* Player's mp is at the max; increase max mp. */
+                    guint amount = e->amount;
+
+                    effect_destroy(e);
+                    e = effect_new(ET_INC_MP_MAX);
+                    /* determine a reasonable percentage max_mp will increase,
+                       i.e. 5% for the MAX_MP, 1% for INC_MP */
+                    e->amount = amount / 20;
+                    return player_effect_add(p, e);
+            }
             break;
 
         case ET_DEC_CON:
@@ -2453,7 +2491,8 @@ effect *player_effect_add(player *p, effect *e)
 
         case ET_DEC_EXP:
             /* looks like a reasonable amount */
-            player_exp_lose(p, rand_1n(player_lvl_exp[p->level - 1] - player_lvl_exp[p->level - 2]));
+            player_exp_lose(p, rand_1n(player_lvl_exp[p->level - 1]
+                                    - player_lvl_exp[p->level - 2]));
             break;
 
         default:

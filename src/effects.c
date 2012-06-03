@@ -28,7 +28,7 @@
 static const effect_data effects[ET_MAX] =
 {
     /*
-        name duration amount desc
+        name "name" duration amount desc
         msg_start
         msg_stop
         msg_start_monster
@@ -93,14 +93,16 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_INC_HP_MAX, "ET_INC_HP_MAX", 1, 5, NULL, /* percent */
-        NULL, NULL, NULL, NULL,
+        ET_INC_HP_MAX, "ET_INC_HP_MAX", 1, 5 /* % */, NULL,
+        "You feel healthy!",
+        NULL, NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
 
     {
-        ET_INC_MP_MAX, "ET_INC_MP_MAX", 1, 5, NULL, /* percent */
-        NULL, NULL, NULL, NULL,
+        ET_INC_MP_MAX, "ET_INC_MP_MAX", 1, 5 /* % */, NULL,
+        "You feel energetic!",
+        NULL, NULL, NULL,
         FALSE, FALSE, FALSE, FALSE
     },
 
@@ -260,7 +262,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_INC_HP, "ET_INC_HP", 1, 20, NULL, /* percent */
+        ET_INC_HP, "ET_INC_HP", 1, 20 /* % */, NULL,
         "You feel better.",
         NULL,
         "The %s looks better.",
@@ -269,7 +271,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_MAX_HP, "ET_MAX_HP", 1, 0, NULL,
+        ET_MAX_HP, "ET_MAX_HP", 1, 100 /* % */, NULL,
         "You are completely healed.",
         NULL,
         "The %s looks completely healed.",
@@ -278,7 +280,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_INC_MP, "ET_INC_MP", 1, 20, NULL, /* percent */
+        ET_INC_MP, "ET_INC_MP", 1, 20 /* % */, NULL,
         "Magical energies course through your body.",
         NULL,
         "The %s seems to regain energy.",
@@ -287,7 +289,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_MAX_MP, "ET_MAX_MP", 1, 0, NULL,
+        ET_MAX_MP, "ET_MAX_MP", 1, 100 /* % */, NULL,
         "You feel much more poweful.",
         NULL,
         "The %s looks much more powerful.",
