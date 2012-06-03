@@ -254,79 +254,79 @@ extern const char *map_names[MAP_MAX];
 
 static inline map_tile *map_tile_at(map *m, position pos)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     return &m->grid[Y(pos)][X(pos)];
 }
 
 static inline inventory **map_ilist_at(map *m, position pos)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     return &m->grid[Y(pos)][X(pos)].ilist;
 }
 
 static inline map_tile_t map_tiletype_at(map *m, position pos)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].type;
 }
 
 static inline void map_tiletype_set(map *m, position pos, map_tile_t type)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].type = type;
 }
 
 static inline map_tile_t map_basetype_at(map *m, position pos)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].base_type;
 }
 
 static inline void map_basetype_set(map *m, position pos, map_tile_t type)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].base_type = type;
 }
 
 static inline guint8 map_timer_at(map *m, position pos)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].timer;
 }
 
 static inline trap_t map_trap_at(map *m, position pos)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].trap;
 }
 
 static inline void map_trap_set(map *m, position pos, trap_t type)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].trap = type;
 }
 
 static inline sobject_t map_sobject_at(map *m, position pos)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].sobject;
 }
 
 static inline void map_sobject_set(map *m, position pos, sobject_t type)
 {
-    assert(m != NULL && pos_valid(pos));
+    g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].sobject = type;
 }
 
 static inline void map_set_monster_at(map *m, position pos, monster *monst)
 {
-    assert(m != NULL && m->nlevel == Z(pos) && pos_valid(pos));
+    g_assert(m != NULL && m->nlevel == Z(pos) && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].m_oid = (monst != NULL) ? monster_oid(monst) : NULL;
 }
 
 static inline gboolean map_is_monster_at(map *m, position pos)
 {
-    assert(m != NULL);
+    g_assert(m != NULL);
     return ((map_get_monster_at(m, pos) != NULL));
 }
 
