@@ -56,15 +56,8 @@ endif
 
 # Definitions required regardless of host OS
 DEFINES += -DG_DISABLE_DEPRECATED
-CFLAGS  += -MMD -MP -std=c99 -Wextra -Iinc
+CFLAGS  += -MMD -MP -std=c99 -Wall -Wextra -Werror -Iinc
 LDFLAGS += -lz
-
-# Make sure warnings do not pass unoticed.
-# Make an exception for OpenBSD as the libc headers generate some
-# bogus warings there when using strlen and similar functions.
-ifneq ($(OS),OpenBSD)
-  CFLAGS += -Werror
-endif
 
 ifeq ($(MSYSTEM),MINGW32)
   # Settings specific to Windows.
