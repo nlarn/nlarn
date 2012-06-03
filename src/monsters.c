@@ -1660,27 +1660,65 @@ monster *monster_damage_take(monster *m, damage *dam)
         /* metamorph transforms if HP is low*/
         if (m->type == MT_METAMORPH)
         {
-            if ((m->hp < 25) && (m->hp > 0))
+            /* Get the percentage of hitpoints the metamorph has left.
+               If this is less than 80%, the metamorph will turn into
+               another monster that will usually be mor dangerous. */
+            float relative_hp = (float)m->hp / (float)m->hp_max;
+
+            if ((m->hp > 0) && (relative_hp < 0.8))
             {
+                char *wdesc = NULL;
+                const char *old_name = monster_name(m);
                 gboolean seen_old = monster_in_sight(m);
                 m->type = MT_BRONZE_DRAGON + rand_0n(9);
                 gboolean seen_new = monster_in_sight(m);
 
+                /* Determine the new maximum hitpoints for the new monster
+                   type and set the monster's current hit points to the
+                   relative value of the metamorphs remaining hit points. */
+                if (relative_hp < 0.1) relative_hp = 0.1;
+                m->hp_max = divert(monster_type_hp_max(m->type), 10);
+                m->hp = (int)(m->hp_max * relative_hp);
+
+                /* Drop the weapon if the monster the metamorph turned
+                   into can not handle weapons. */
+                if (m->eq_weapon && !monster_attack_available(m, ATT_WEAPON))
+                {
+                    wdesc = item_describe(m->eq_weapon,
+                                    player_item_known(p, m->eq_weapon),
+                                    FALSE, FALSE);
+
+                    inv_del_element(&m->inv, m->eq_weapon);
+                    inv_add(map_ilist_at(monster_map(m), m->pos), m->eq_weapon);
+                    m->eq_weapon = NULL;
+                }
+
                 if (p && (seen_old || seen_new))
                 {
+                    if (seen_old && wdesc != NULL)
+                    {
+                        log_add_entry(nlarn->log, "The %s drops %s.",
+                                        old_name, wdesc);
+                    }
+
                     if (seen_old && seen_new)
                     {
-                        log_add_entry(nlarn->log, "The metamorph turns into a %s!",
-                                      monster_name(m));
+                        log_add_entry(nlarn->log, "The %s turns into "
+                                        "a %s!", old_name, monster_name(m));
                     }
                     else if (seen_old)
-                        log_add_entry(nlarn->log, "The metamorph vanishes!");
+                    {
+                        log_add_entry(nlarn->log, "The %s vanishes!",
+                                        old_name);
+                    }
                     else
                     {
                         log_add_entry(nlarn->log, "A %s suddenly appears!",
-                                      monster_name(m));
+                                        monster_name(m));
                     }
                 }
+
+                if (wdesc != NULL) g_free(wdesc);
             }
         }
     }
