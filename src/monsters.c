@@ -2733,7 +2733,13 @@ static position monster_move_civilian(monster *m, struct player *p)
         /* No target set -> find a new location to travel to.
            Civilians stay inside the town area. */
         rectangle town = rect_new(3, 4, MAP_MAX_X, MAP_MAX_Y);
-        m->player_pos = map_find_space_in(monster_map(m), town, LE_GROUND, FALSE);
+        do
+        {
+            /* Ensure that the townsfolk do not loiter in locations
+               important for the player. */
+            m->player_pos = map_find_space_in(monster_map(m), town,
+                    LE_GROUND, FALSE);
+        } while (map_sobject_at(monster_map(m), m->player_pos) != LS_NONE);
     }
 
     if (pos_identical(m->pos, m->player_pos)
