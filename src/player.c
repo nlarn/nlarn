@@ -160,7 +160,7 @@ player *player_new()
     p->identified_potions[PO_WATER] = TRUE;
     p->identified_scrolls[ST_BLANK] = TRUE;
     /* identify all non-unique armour items */
-    for (armour_t at = AM_NONE + 1; at < AM_MAX; at++)
+    for (armour_t at = AT_NONE + 1; at < AT_MAX; at++)
         if (!armours[at].unique) p->identified_armour[at] = TRUE;
 
     /* initialize the field of vision */

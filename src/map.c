@@ -732,7 +732,6 @@ GList *map_ray(map *m, position source, position target)
 {
     GList *ray = NULL;
     int delta_x, delta_y;
-    int offset_x, offset_y;
     int inc_x, inc_y;
     position pos = source;
 

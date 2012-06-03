@@ -59,7 +59,7 @@ static void game_scores_save(game *g, GList *scores);
 static int game_score_compare(const void *scr_a, const void *scr_b);
 
 static const char *default_lib_dir = "/usr/share/nlarn";
-#ifdef __unix
+#if (defined (__unix) && defined (SETGID))
 static const char *default_var_dir = "/var/games/nlarn";
 #endif
 static const char *mesgfile = "nlarn.msg";

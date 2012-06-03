@@ -2633,8 +2633,6 @@ position display_get_new_position(player *p,
 
             if (ray)
             {
-                int distance = pos_distance(p->pos, npos);
-
                 /* paint a ray to validate the new position */
                 r = map_ray(vmap, p->pos, npos);
 
