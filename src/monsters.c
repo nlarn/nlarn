@@ -1139,8 +1139,7 @@ void monster_polymorph(monster *m)
     g_assert (m != NULL);
 
     /* make sure mimics never leave the mimicked item behind */
-    if (monster_flags(m, MF_MIMIC)
-            && inv_length(m->inv) > 0)
+    if (monster_flags(m, MF_MIMIC) && inv_length(m->inv) > 0)
     {
         inv_del(&m->inv, 0);
     }
@@ -1154,7 +1153,19 @@ void monster_polymorph(monster *m)
 
     /* if the new monster can't survive in this terrain, kill it */
     const map_element_t new_elem = monster_map_element(m);
-    if (!monster_valid_dest(monster_map(m), m->pos, new_elem))
+
+    /* We need to temporarily remove the monster from it's tile
+       as monster_valid_dest() tests if there is a monster on
+       the tile and hence would always return false. */
+    map_set_monster_at(monster_map(m), m->pos, NULL);
+
+    /* check if the position would be valid.. */
+    gboolean valid_pos = monster_valid_dest(monster_map(m), m->pos, new_elem);
+
+    /* ..and restore the monster to it's position */
+    map_set_monster_at(monster_map(m), m->pos, m);
+
+    if (!valid_pos)
     {
         if (monster_in_sight(m))
         {
@@ -1183,8 +1194,17 @@ void monster_polymorph(monster *m)
         }
         monster_die(m, nlarn->p);
     }
-    else /* fully heal monster */
-        m->hp = monster_hp_max(m);
+    else
+    {
+        /* get the relative amount of hp left */
+        float relative_hp = (float)m->hp / (float)m->hp_max;
+
+        /* Determine the new maximum hitpoints for the new monster
+           type and set the monster's current hit points to the
+           relative value of the monster's remaining hit points. */
+        m->hp_max = divert(monster_type_hp_max(m->type), 10);
+        m->hp = (int)(m->hp_max * relative_hp);
+    }
 }
 
 int monster_items_pickup(monster *m)
