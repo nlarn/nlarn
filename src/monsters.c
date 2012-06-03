@@ -44,7 +44,7 @@ struct _monster
     guint32 lastseen;        /* number of turns since when player was last seen; 0 = never */
     position player_pos;     /* last known position of player */
     inventory *inv;
-    gpointer weapon;
+    item *eq_weapon;
     GPtrArray *effects;
     guint number;        /* random value for some monsters */
     guint32
@@ -403,8 +403,9 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     cJSON_AddNumberToObject(mval, "movement", m->movement);
     cJSON_AddNumberToObject(mval, "action", m->action);
 
-    if (m->weapon != NULL)
-        cJSON_AddNumberToObject(mval, "weapon", GPOINTER_TO_UINT(m->weapon));
+    if (m->eq_weapon != NULL)
+        cJSON_AddNumberToObject(mval, "eq_weapon",
+                        GPOINTER_TO_UINT(m->eq_weapon->oid));
 
     if (m->number)
         cJSON_AddNumberToObject(mval, "number", m->number);
@@ -446,8 +447,8 @@ void monster_deserialize(cJSON *mser, game *g)
     m->movement = cJSON_GetObjectItem(mser, "movement")->valueint;
     m->action = cJSON_GetObjectItem(mser, "action")->valueint;
 
-    if ((obj = cJSON_GetObjectItem(mser, "weapon")))
-        m->weapon = GUINT_TO_POINTER(obj->valueint);
+    if ((obj = cJSON_GetObjectItem(mser, "eq_weapon")))
+        m->eq_weapon = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
 
     if ((obj = cJSON_GetObjectItem(mser, "number")))
         m->number = obj->valueint;
@@ -1217,14 +1218,13 @@ int monster_items_pickup(monster *m)
         else if (it->type == IT_WEAPON && monster_attack_available(m, ATT_WEAPON))
         {
             /* monster can attack with weapons */
-            if (m->weapon == NULL)
+            if (m->eq_weapon == NULL)
                 pick_up = TRUE;
             else
             {
-                item *mweapon = game_item_get(nlarn, m->weapon);
-
                 /* compare this weapon with the weapon the monster wields */
-                if (mweapon == NULL || (weapon_damage(mweapon) < weapon_damage(it)))
+                if (m->eq_weapon == NULL || (weapon_damage(m->eq_weapon)
+                                        < weapon_damage(it)))
                     pick_up = TRUE;
             }
         }
@@ -1468,14 +1468,13 @@ void monster_player_attack(monster *m, player *p)
         dam->type = rand_m_n(DAM_DEC_CON, DAM_DEC_RND);
 
     /* set damage for weapon attacks */
-    if ((att.type == ATT_WEAPON) && (m->weapon != NULL))
+    if ((att.type == ATT_WEAPON) && (m->eq_weapon != NULL))
     {
-        item *weapon = game_item_get(nlarn, m->weapon);
-
         /* make monster size affect weapon damage */
         /* FIXME: handle the vorpal blade */
-        dam->amount  = rand_1n(weapon_damage(weapon) + game_difficulty(nlarn)
-                               + 2 * (monster_size(m) - ESIZE_MEDIUM));
+        dam->amount  = rand_1n(weapon_damage(m->eq_weapon)
+                        + game_difficulty(nlarn)
+                        + 2 * (monster_size(m) - ESIZE_MEDIUM));
     }
     else if (dam->type == DAM_PHYSICAL)
     {
@@ -1655,7 +1654,7 @@ monster *monster_damage_take(monster *m, damage *dam)
         /* monster has been hit */
         if (p)
         {
-            /* notify player */
+            /* TODO: notify player */
         }
 
         /* metamorph transforms if HP is low*/
@@ -1900,12 +1899,12 @@ char *monster_desc(monster *m)
         g_string_append_printf(desc, " (%d/%d hp)", m->hp, m->hp_max);
     }
 
-    if (m->weapon != NULL)
+    if (m->eq_weapon != NULL)
     {
         /* describe the weapon the monster wields */
-        item *weapon = game_item_get(nlarn, m->weapon);
-        gchar *weapon_desc = item_describe(weapon, player_item_known(nlarn->p, weapon),
-                                           TRUE, FALSE);
+        gchar *weapon_desc = item_describe(m->eq_weapon,
+                        player_item_known(nlarn->p, m->eq_weapon),
+                        TRUE, FALSE);
 
         g_string_append_printf(desc, ", armed with %s", weapon_desc);
         g_free(weapon_desc);
@@ -2242,13 +2241,13 @@ static void monster_weapon_wield(monster *m, item *weapon)
 {
     /* FIXME: time management */
     /* FIXME: weapon effects */
-    m->weapon = weapon->oid;
+    m->eq_weapon = weapon;
 
     /* show message if monster is visible */
     if (monster_in_sight(m))
     {
-        gchar *buf = item_describe(weapon, player_item_identified(nlarn->p, weapon),
-                                   TRUE, FALSE);
+        gchar *buf = item_describe(weapon, player_item_identified(nlarn->p,
+                                weapon), TRUE, FALSE);
 
         log_add_entry(nlarn->log, "The %s wields %s.", monster_name(m), buf);
         g_free(buf);
