@@ -1060,8 +1060,9 @@ int building_monastery(struct player *p)
         }
         else
         {
-            log_add_entry(nlarn->log, "The monks tell you that %s wasn't "
-                    "cursed. Well, now you know for sure..", desc);
+            log_add_entry(nlarn->log, "The monks tell you that %s %sn't "
+                    "cursed. Well, now you know for sure...", desc,
+                    (it->count == 1) ? "was" : "were");
             it->blessed_known = TRUE;
         }
         g_free(desc);
