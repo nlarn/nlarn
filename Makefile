@@ -39,7 +39,8 @@ VERSION_PATCH := $(shell awk '/VERSION_PATCH/ { print $$3 }' inc/nlarn.h)
 
 # Collect version information
 ifneq ($(GITTAG),)
-  VERSION = $(GITTAG)
+  # Remove "nlarn-" from the tag name as it will be prepended later.
+  VERSION := $(patsubst nlarn-%,%,$(GITTAG))
 else
   # not on a release tag, determine version manually
   VERSION = $(VERSION_MAJOR).$(VERSION_MINOR)
