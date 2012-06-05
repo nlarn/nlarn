@@ -90,7 +90,8 @@ int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item 
                        + (ammo ? ammo_accuracy(ammo) : 0)
                        + (player_get_speed(p) / 25)
                        - monster_ac(m)
-                       - (monster_speed(m) / 25);
+                       - (monster_speed(m) / 25)
+                       - (!monster_in_sight(m) ? 5 : 0);
 
     if (to_hit < 1)
         return 0;
