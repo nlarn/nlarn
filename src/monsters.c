@@ -110,8 +110,9 @@ static position monster_move_flee(monster *m, struct player *p);
 static position monster_move_serve(monster *m, struct player *p);
 static position monster_move_civilian(monster *m, struct player *p);
 
-static gboolean monster_breath_hit(position pos, const damage_originator *damo,
-                                   gpointer data1, gpointer data2);
+static gboolean monster_breath_hit(const GList *traj,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2);
 
 monster *monster_new(monster_t type, position pos)
 {
@@ -2812,16 +2813,17 @@ int monster_is_carrying_item(monster *m, item_t type)
     return FALSE;
 }
 
-static gboolean monster_breath_hit(position pos,
+static gboolean monster_breath_hit(const GList *traj,
                                    const damage_originator *damo __attribute__((unused)),
                                    gpointer data1,
                                    gpointer data2 __attribute__((unused)))
 {
     monster *m;
-    map *mp = game_map(nlarn, Z(pos));
     damage *dam = (damage *)data1;
     item_erosion_type iet;
     gboolean terminated = FALSE;
+    position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);
+    map *mp = game_map(nlarn, Z(pos));
 
     /* determine if items should be eroded */
     switch (dam->type)

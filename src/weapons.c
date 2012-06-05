@@ -77,8 +77,9 @@ const weapon_data weapons[WT_MAX] =
 damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo);
 void weapon_ammo_drop(map *m, item *ammo, position pos);
 
-static gboolean weapon_pos_hit(position pos, const damage_originator *damo,
-                               gpointer data1, gpointer data2);
+static gboolean weapon_pos_hit(const GList *traj,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2);
 
 int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item *ammo)
 {
@@ -380,11 +381,14 @@ void weapon_ammo_drop(map *m, item *ammo, position pos)
         inv_add(map_ilist_at(m, pos), ammo);
 }
 
-static gboolean weapon_pos_hit(position pos,
+static gboolean weapon_pos_hit(const GList *traj,
                                const damage_originator *damo __attribute__((unused)),
                                gpointer data1,
                                gpointer data2)
 {
+    position pos;
+    pos_val(pos) = GPOINTER_TO_UINT(traj->data);
+
     map *cmap = game_map(nlarn, Z(pos));
     item *weapon = (item *)data1;
     item *ammo = (item *)data2;

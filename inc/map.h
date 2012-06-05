@@ -33,9 +33,9 @@
 #define MAP_SIZE MAP_MAX_X*MAP_MAX_Y
 
 /* number of levels */
-#define MAP_DMAX 11						/* max # levels in the dungeon */
-#define MAP_VMAX  3						/* max # of levels in the temple of the luran */
-#define MAP_MAX (MAP_DMAX + MAP_VMAX)	/* total number of levels */
+#define MAP_DMAX 11                   /* max # levels in the dungeon */
+#define MAP_VMAX  3                   /* max # of levels in the temple of the luran */
+#define MAP_MAX (MAP_DMAX + MAP_VMAX) /* total number of levels */
 
 /* number of the last custom maze map (including town) */
 #define MAP_MAX_MAZE_NUM 24
@@ -121,6 +121,11 @@ typedef struct map_path
     position goal;
 } map_path;
 
+/* callback function for trajectories */
+typedef gboolean (*trajectory_hit_sth)(const GList *trajectory,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2);
+
 /* function declarations */
 
 map *map_new(int num, char *mazefile);
@@ -204,10 +209,10 @@ GList *map_ray(map *m, position source, position target);
  * @return TRUE if one of the callbacks returned TRUE.
  */
 gboolean map_trajectory(position source, position target,
-                        const damage_originator *damo,
-                        area_hit_sth pos_hitfun,
-                        gpointer data1, gpointer data2, gboolean reflectable,
-                        char glyph, int colour, gboolean keep_ray);
+        const damage_originator *damo,
+        trajectory_hit_sth pos_hitfun,
+        gpointer data1, gpointer data2, gboolean reflectable,
+        char glyph, int colour, gboolean keep_ray);
 
 area *map_get_obstacles(map *m, position center, int radius);
 

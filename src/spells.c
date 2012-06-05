@@ -363,8 +363,14 @@ static void spell_print_failure_message(spell *s, monster *m);
 static int count_adjacent_water_squares(position pos);
 static int try_drying_ground(position pos);
 
-static gboolean spell_pos_hit(position pos, const damage_originator *damo,
-                              gpointer data1, gpointer data2);
+/* simple wrapper for spell_area_pos_hit() */
+static gboolean spell_traj_pos_hit(const GList *traj,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2);
+
+static gboolean spell_area_pos_hit(position pos,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2);
 
 spell *spell_new(int id)
 {
@@ -845,7 +851,7 @@ int spell_type_ray(spell *s, struct player *p)
     }
 
     /* throw a ray to the selected target */
-    map_trajectory(p->pos, target, &damo, spell_pos_hit,
+    map_trajectory(p->pos, target, &damo, spell_traj_pos_hit,
                    s, dam, TRUE, '*', spell_colour(s), TRUE);
 
     /* The callback functions give a copy of the damage to the specifiv
@@ -965,7 +971,7 @@ int spell_type_blast(spell *s, struct player *p)
         return FALSE;
     }
 
-    (void)area_blast(pos, radius, &damo, spell_pos_hit, s, dam, '*', spell_colour(s));
+    (void)area_blast(pos, radius, &damo, spell_area_pos_hit, s, dam, '*', spell_colour(s));
 
     /* destroy the damage as the callbacks deliver a copy */
     damage_free(dam);
@@ -1653,8 +1659,19 @@ static int try_drying_ground(position pos)
     return FALSE;
 }
 
-static gboolean spell_pos_hit(position pos, const damage_originator *damo,
-                              gpointer data1, gpointer data2)
+static gboolean spell_traj_pos_hit(const GList *traj,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2)
+{
+    position pos;
+    pos_val(pos) = GPOINTER_TO_UINT(traj->data);
+
+    return spell_area_pos_hit(pos, damo, data1, data2);
+}
+
+static gboolean spell_area_pos_hit(position pos,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2)
 {
     spell *sp = (spell *)data1;
     damage *dam = (damage *)data2;

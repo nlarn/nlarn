@@ -111,7 +111,7 @@ area *area_new_circle(position center, guint radius, gboolean hollow);
  */
 area *area_new_circle_flooded(position center, guint radius, area *obstacles);
 
-/* callback function for trajectories and blasts */
+/* callback function for blasts */
 typedef gboolean (*area_hit_sth)(position pos, const damage_originator *damo,
                                  gpointer data1, gpointer data2);
 

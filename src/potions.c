@@ -62,8 +62,9 @@ static int potion_detect_item(struct player *p, item *potion);
 static int potion_recovery(struct player *p, item *potion);
 static int potion_holy_water(player *p, item *potion);
 
-static gboolean potion_pos_hit(position pos, const damage_originator *damo,
-                                   gpointer data1, gpointer data2);
+static gboolean potion_pos_hit(const GList *traj,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2);
 
 struct potion_obfuscation_s
 {
@@ -552,12 +553,13 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
     return FALSE;
 }
 
-static gboolean potion_pos_hit(position pos,
+static gboolean potion_pos_hit(const GList *traj,
                                const damage_originator *damo __attribute__((unused)),
                                gpointer data1,
                                gpointer data2 __attribute__((unused)))
 {
     item *potion = (item *)data1;
+    position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);
     map *pmap = game_map(nlarn, Z(pos));
     map_tile_t mtt = map_tiletype_at(pmap, pos);
     sobject_t mst = map_sobject_at(pmap, pos);

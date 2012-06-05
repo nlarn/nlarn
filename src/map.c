@@ -809,7 +809,7 @@ GList *map_ray(map *m, position source, position target)
 
 gboolean map_trajectory(position source, position target,
                         const damage_originator * const damo,
-                        area_hit_sth pos_hitfun,
+                        trajectory_hit_sth pos_hitfun,
                         gpointer data1, gpointer data2, gboolean reflectable,
                         char glyph, int colour, gboolean keep_ray)
 {
@@ -837,7 +837,7 @@ gboolean map_trajectory(position source, position target,
             continue;
 
         /* the position is affected, call the callback function */
-        if (pos_hitfun(cursor, damo, data1, data2))
+        if (pos_hitfun(iter, damo, data1, data2))
         {
             /* the callback returned that the ray if finished */
             result = TRUE;
