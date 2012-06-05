@@ -170,7 +170,7 @@ int weapon_fire(struct player *p)
     m = map_get_monster_at(pmap, target);
 
     /* check if there is a monster at the targeted position */
-    if (!m || !monster_in_sight(m))
+    if (m == NULL)
     {
         log_add_entry(nlarn->log, "I see no monster there.");
 
@@ -188,7 +188,8 @@ int weapon_fire(struct player *p)
     }
 
     /* log the event */
-    log_add_entry(nlarn->log, "You fire %s at the %s.", wdesc, monster_name(m));
+    log_add_entry(nlarn->log, "You fire %s at the %s.", wdesc,
+            monster_get_name(m));
     g_free(wdesc);
 
     /* --- finally shooting the weapon --- */
