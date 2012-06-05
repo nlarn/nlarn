@@ -75,7 +75,7 @@ const weapon_data weapons[WT_MAX] =
 
 /* static functions */
 damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo);
-void weapon_ammo_drop(map *m, item *ammo, position pos);
+gboolean weapon_ammo_drop(map *m, item *ammo, const GList *traj);
 
 static gboolean weapon_pos_hit(const GList *traj,
         const damage_originator *damo,
@@ -214,13 +214,9 @@ int weapon_fire(struct player *p)
 
     /* paint a ray to follow the path of the bullet */
     if (map_trajectory(p->pos, target, &damo, weapon_pos_hit,
-                       weapon, ammo, FALSE, item_glyph(ammo->type),
-                       item_colour(ammo), FALSE))
+                weapon, ammo, FALSE, item_glyph(ammo->type),
+                item_colour(ammo), FALSE))
         return TRUE; /* one of the callbacks succeeded */
-
-    /* none of the callbacks succeeded
-       -> drop the ammo at the target position */
-    weapon_ammo_drop(pmap, ammo, target);
 
     return TRUE;
 }
@@ -370,44 +366,57 @@ damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)
     return dam;
 }
 
-void weapon_ammo_drop(map *m, item *ammo, position pos)
+gboolean weapon_ammo_drop(map *m, item *ammo, const GList *traj)
 {
+	/* Due to the recursive usage of this function traj may be NULL
+	   (e.g. when the player is wall-walking and shooting at a xorn). */
+	if (traj == NULL)
+	{
+		item_destroy(ammo);
+		return TRUE;
+	}
+
+    position pos;
+    pos_val(pos) = GPOINTER_TO_UINT(traj->data);
+    map_tile_t tt = map_tiletype_at(m, pos);
+
+	/* If the ammo comes to stop on a solid tile it has to be dropped on
+	   the last tile that is not solid, i.e. the floor before a wall tile. */
+	if (!map_pos_transparent(m, pos))
+		return weapon_ammo_drop(m, ammo, g_list_previous(traj));
+
     /* check if the ammo survives usage */
     if (chance(item_fragility(ammo) + 15)
-        || map_tiletype_at(m, pos) == LT_DEEPWATER
-        || map_tiletype_at(m, pos) == LT_LAVA)
+            || (tt == LT_DEEPWATER)
+            || (tt == LT_LAVA))
         item_destroy(ammo);
     else
         inv_add(map_ilist_at(m, pos), ammo);
+
+    return TRUE;
 }
 
 static gboolean weapon_pos_hit(const GList *traj,
-                               const damage_originator *damo __attribute__((unused)),
-                               gpointer data1,
-                               gpointer data2)
+        const damage_originator *damo __attribute__((unused)),
+        gpointer data1,
+        gpointer data2)
 {
-    position pos;
-    pos_val(pos) = GPOINTER_TO_UINT(traj->data);
+    position cpos;
+    pos_val(cpos) = GPOINTER_TO_UINT(traj->data);
 
-    map *cmap = game_map(nlarn, Z(pos));
+    map *cmap = game_map(nlarn, Z(cpos));
     item *weapon = (item *)data1;
     item *ammo = (item *)data2;
-    monster *m = map_get_monster_at(cmap, pos);
+    monster *m = map_get_monster_at(cmap, cpos);
     gchar *adesc = NULL;
     gboolean retval = FALSE;
+    gboolean ammo_handled = FALSE;
 
     /* need a definite description for the ammo */
     adesc = item_describe(ammo, player_item_known(nlarn->p, ammo), TRUE, TRUE);
     adesc[0] = g_ascii_toupper(adesc[0]);
 
-    if (!map_pos_transparent(cmap, pos))
-    {
-        /* the ammo hit some map feature -> drop it at the position */
-        weapon_ammo_drop(cmap, ammo, pos);
-
-        retval = TRUE;
-    }
-    else if (m != NULL)
+    if (m != NULL)
     {
         /* there is a monster at the position */
         /* the bullet might have hit the monster */
@@ -418,11 +427,11 @@ static gboolean weapon_pos_hit(const GList *traj,
 
             if (monster_in_sight(m))
                 log_add_entry(nlarn->log, "%s hits the %s.",
-                              adesc, monster_name(m));
+                        adesc, monster_name(m));
 
             monster_damage_take(m, dam);
-            weapon_ammo_drop(cmap, ammo, pos);
 
+            ammo_handled = weapon_ammo_drop(cmap, ammo, traj);
             retval = TRUE;
         }
         else
@@ -430,13 +439,21 @@ static gboolean weapon_pos_hit(const GList *traj,
             /* missed */
             if (monster_in_sight(m))
                 log_add_entry(nlarn->log, "%s misses the %s.",
-                              adesc, monster_name(m));
+                        adesc, monster_name(m));
         }
     }
-    else if (pos_identical(nlarn->p->pos, pos))
+    else if (pos_identical(nlarn->p->pos, cpos))
     {
-        /* the bullet may hit the player */
+        /* The bullet may hit the player */
         /* TODO: implement */
+    }
+
+    if (!ammo_handled && !map_pos_transparent(cmap, cpos))
+    {
+        /* The ammo hit some map feature -> stop its movement */
+        weapon_ammo_drop(cmap, ammo, traj);
+
+        retval = TRUE;
     }
 
     g_free(adesc);
