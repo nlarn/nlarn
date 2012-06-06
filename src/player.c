@@ -4221,77 +4221,74 @@ void player_search(player *p)
 {
     g_assert (p != NULL);
 
-    position pos = pos_move(p->pos, GD_NW);
     map *m = game_map(nlarn, Z(p->pos));
 
     /* look for traps on adjacent tiles */
-    for (; Y(pos) <= Y(p->pos) + 1; Y(pos)++)
+    for (direction dir = GD_NONE + 1; dir < GD_MAX; dir++)
     {
-        for(X(pos) = X(p->pos) - 1; X(pos) <= X(p->pos) + 1; X(pos)++)
+        position pos = pos_move(p->pos, dir);
+
+        /* skip invalid positions */
+        if (!pos_valid(pos)) continue;
+
+        /* skip unpassable positions unless the player is blind */
+        if (!map_pos_passable(m, pos) && !player_effect(p, ET_BLINDNESS))
+            continue;
+
+        /* consume one turn per tile */
+        player_make_move(p, 1, FALSE, NULL);
+
+        /* stop searching when the player is under attack */
+        if (p->attacked || player_adjacent_monster(p, TRUE)) return;
+
+        /* examine the surrounding area if blind */
+        if (player_effect(p, ET_BLINDNESS))
         {
-            /* skip invalid positions */
-            if (!pos_valid(pos)) continue;
+            /* examine tile types */
+            player_memory_of(p, pos).type = map_tile_at(m, pos)->type;
 
-            /* skip unpassable positions unless the player is blind */
-            if (!map_pos_passable(m, pos) && !player_effect(p, ET_BLINDNESS))
-                continue;
+            /* examine stationary objects */
+            player_memory_of(p, pos).sobject = map_tile_at(m, pos)->sobject;
+        }
 
-            /* consume one turn per tile */
-            player_make_move(p, 1, FALSE, NULL);
+        /* search for traps */
+        trap_t tt = map_trap_at(m, pos);
 
-            /* stop searching when the player is under attack */
-            if (p->attacked) return;
+        if ((tt != TT_NONE) && (tt != player_memory_of(p, pos).trap))
+        {
+            /* found an unknown trap - determine the chance that
+             * the player can find it */
+            int prop = (trap_chance(tt) / 2) + player_get_int(p);
 
-            /* examine the surrounding area if blind */
-            if (player_effect(p, ET_BLINDNESS))
+            if (chance(prop))
             {
-                /* examine tile types */
-                player_memory_of(p, pos).type = map_tile_at(m, pos)->type;
-
-                /* examine stationary objects */
-                player_memory_of(p, pos).sobject = map_tile_at(m, pos)->sobject;
+                /* discovered the trap */
+                log_add_entry(nlarn->log, "You find a %s!",
+                        trap_description(tt));
+                 player_memory_of(p, pos).trap = tt;
             }
+        }
 
-            /* search for traps */
-            trap_t tt = map_trap_at(m, pos);
-
-            if ((tt != TT_NONE) && (tt != player_memory_of(p, pos).trap))
+        /* search for traps on containers */
+        inventory **ti = map_ilist_at(m, pos);
+        if (ti != NULL)
+        {
+            for (guint idx = 0;
+                    idx < inv_length_filtered(*ti, item_filter_container);
+                    idx++)
             {
-                /* found an unknown trap - determine the chance that
-                 * the player can find it */
-                int prop = (trap_chance(tt) / 2) + player_get_int(p);
+                item *c = inv_get_filtered(*ti, idx, item_filter_container);
 
-                if (chance(prop))
+                /* the chance that the player discovers the trap is 3 * int */
+                if (c->cursed && !c->blessed_known && chance(player_get_int(p) * 3))
                 {
-                    /* discovered the trap */
-                    log_add_entry(nlarn->log, "You find a %s!",
-                                  trap_description(tt));
+                    gchar *idesc = item_describe(c, FALSE, TRUE, TRUE);
+                    /* the container is cursed */
+                    c->blessed_known = TRUE;
+                    log_add_entry(nlarn->log, "You discover a trap on %s!",
+                            idesc);
 
-                    player_memory_of(p, pos).trap = tt;
-                }
-            }
-
-            /* search for traps on containers */
-            inventory **ti = map_ilist_at(m, pos);
-            if (ti != NULL)
-            {
-                for (guint idx = 0;
-                        idx < inv_length_filtered(*ti, item_filter_container);
-                        idx++)
-                {
-                    item *c = inv_get_filtered(*ti, idx, item_filter_container);
-
-                    /* the chance that the player discovers the trap is 3 * int */
-                    if (c->cursed && !c->blessed_known && chance(player_get_int(p) * 3))
-                    {
-                        gchar *idesc = item_describe(c, FALSE, TRUE, TRUE);
-                        /* the container is cursed */
-                        c->blessed_known = TRUE;
-                        log_add_entry(nlarn->log, "You discover a trap on %s!",
-                                      idesc);
-
-                        g_free(idesc);
-                    }
+                    g_free(idesc);
                 }
             }
         }
