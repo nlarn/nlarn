@@ -1,6 +1,6 @@
 /*
  * traps.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -72,6 +72,14 @@ int player_trap_trigger(struct player *p, trap_t trap, int force);
  * @return the monster, or NULL if the monster died.
  */
 monster *monster_trap_trigger(monster *m);
+
+/**
+  * @brief Disarm a trap.
+  *
+  * @params The player.
+  * @return The number of turns elapsed.
+  */
+guint trap_disarm(struct player *p);
 
 /* macros */
 #define trap_effect(trap) (traps[(trap)].effect_t)

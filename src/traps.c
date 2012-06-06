@@ -1,6 +1,6 @@
 /*
  * traps.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* $Id$ */
 
 #include <glib.h>
 
@@ -160,8 +158,8 @@ int player_trap_trigger(player *p, trap_t trap, int force)
             /* deal more damage the deeper the dungeon
                level and if the player is burdened */
             damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
-                                     rand_1n(trap_damage(trap) + bval) + Z(p->pos),
-                                     DAMO_TRAP, NULL);
+                    rand_1n(trap_damage(trap) + bval) + Z(p->pos),
+                    DAMO_TRAP, NULL);
 
             player_damage_take(p, dam, PD_TRAP, trap);
         }
@@ -202,8 +200,8 @@ int player_trap_trigger(player *p, trap_t trap, int force)
 
             /* if there is an effect on the trap add it to player's effects. */
             if (trap_effect(trap)
-                    && chance(modified_effect_chance(trap, trap_effect(trap),
-                              Z(p->pos))))
+                    && chance(modified_effect_chance(trap,
+                            trap_effect(trap),Z(p->pos))))
             {
                 /* display message if there is one */
                 if (trap_e_message(trap))
@@ -233,15 +231,10 @@ int player_trap_trigger(player *p, trap_t trap, int force)
 
 monster *monster_trap_trigger(monster *m)
 {
-    /* original and new position of the monster */
-    position opos, npos;
-
-    /* the trap */
-    trap_t trap;
-
     g_assert (m != NULL);
 
-    trap = map_trap_at(monster_map(m), monster_pos(m));
+    /* the trap */
+    trap_t trap = map_trap_at(monster_map(m), monster_pos(m));
 
     /* flying monsters are only affected by sleeping gas traps */
     if ((monster_flags(m, MF_FLY) || monster_effect(m, ET_LEVITATION))
@@ -256,14 +249,12 @@ monster *monster_trap_trigger(monster *m)
         return m;
     }
 
-    opos = monster_pos(m);
-
     if (monster_in_sight(m))
     {
         log_add_entry(nlarn->log, trap_m_message(trap), monster_name(m));
 
         /* set player's knowledge of trap */
-        player_memory_of(nlarn->p, opos).trap = trap;
+        player_memory_of(nlarn->p, monster_pos(m)).trap = trap;
     }
 
     /* monster triggered the trap */
@@ -274,8 +265,8 @@ monster *monster_trap_trigger(monster *m)
         break;
 
     case TT_TELEPORT:
-        npos = map_find_space(game_map(nlarn, Z(monster_pos(m))), LE_MONSTER, FALSE);
-        monster_pos_set(m, monster_map(m), npos);
+        monster_pos_set(m, monster_map(m), map_find_space(game_map(nlarn,
+                        Z(monster_pos(m))), LE_MONSTER, FALSE));
         break;
 
     case TT_SPIKEDPIT:
@@ -301,11 +292,78 @@ monster *monster_trap_trigger(monster *m)
     /* inflict damage caused by the trap */
     if (trap_damage(trap))
     {
-        damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE, rand_1n(trap_damage(trap)),
-                                 DAMO_TRAP, NULL);
+        damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
+                rand_1n(trap_damage(trap)), DAMO_TRAP, NULL);
 
         m = monster_damage_take(m, dam);
     }
 
     return m;
 }
+
+guint trap_disarm(struct player *p)
+{
+    map *cmap = game_map(nlarn, Z(p->pos));
+    trap_t tt = map_trap_at(cmap, p->pos);
+    gboolean magical_trap = FALSE;
+
+    if (tt == TT_NONE)
+    {
+        log_add_entry(nlarn->log, "There is no trap here.");
+        return 0;
+    }
+
+    if (tt == TT_PIT || tt == TT_SPIKEDPIT)
+    {
+        log_add_entry(nlarn->log, "How do you think you can disable a %s? "
+                "Fill it with rubble?", trap_description(tt));
+
+        return 0;
+    }
+
+    /* determine the player's chance to disable the trap */
+    guint prop = ((100 - trap_chance(tt)) / 10) + p->level;
+
+    if (tt == TT_TELEPORT || tt == TT_MANADRAIN)
+    {
+        prop += player_get_int(p);
+        magical_trap = TRUE;
+    }
+    else
+    {
+        prop += player_get_dex(p);
+    }
+
+    /* Disarming traps is supposed to be tricky. */
+    prop /= 2;
+
+    /* Determine the number of turns required to disable the trap. */
+    guint turns = trap_chance(tt) / 5;
+
+    if (!player_make_move(p, turns, TRUE, "disabling the %s",
+                trap_description(tt)))
+        return 0;
+
+    if (chance(prop))
+    {
+        log_add_entry(nlarn->log, "You manage to %s the %s!",
+                magical_trap ? "dispel" : "disarm",
+                trap_description(tt));
+
+        map_trap_set(cmap, p->pos, TT_NONE);
+        player_memory_of(p, p->pos).trap = TT_NONE;
+    }
+    else if (chance(trap_chance(tt)))
+    {
+        /* player has triggered the trap */
+        return player_trap_trigger(p, tt, TRUE);
+    }
+    else
+    {
+        log_add_entry(nlarn->log, "You fail to disarm the %s.",
+                trap_description(tt));
+    }
+
+    return 0;
+}
+

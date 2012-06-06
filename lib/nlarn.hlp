@@ -23,7 +23,7 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`A`end`   desecrate an altar
 `lightgreen`c`end`   close a door
 `lightgreen`d`end`   drop something
-`lightgreen`D`end`   list discovered landmarks
+`lightgreen`D`end`   disarm a trap
 `lightgreen`f`end`   fire a ranged weapon
 `lightgreen`F`end`   wash yourself at a fountain
 `lightgreen`g`end`   move until something interesting is found
@@ -60,6 +60,7 @@ You can select the travel target by moving the cursor or by typing the desired f
 `yellow`Control Keys`end`
 
 `lightgreen`TAB`end` show worn equipment
+`lightgreen`^D`end`  list discovered landmarks
 `lightgreen`^D`end`  page down in the inventory, spell list and messages
 `lightgreen`^L`end`  redraw the screen
 `lightgreen`^Q`end`  quit the game

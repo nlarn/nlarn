@@ -36,6 +36,7 @@
 #include "nlarn.h"
 #include "player.h"
 #include "sobjects.h"
+#include "traps.h"
 
 /* global game object */
 game *nlarn = NULL;
@@ -461,9 +462,9 @@ int main(int argc, char *argv[])
             moves_count = player_door_close(nlarn->p);
             break;
 
-            /* show stationary object memory */
+            /* disarm a trap */
         case 'D':
-            player_list_sobjmem(nlarn->p);
+            moves_count = trap_disarm(nlarn->p);
             break;
 
             /* drop something */
@@ -607,6 +608,11 @@ int main(int argc, char *argv[])
             /* swap weapons */
         case 'x':
             weapon_swap(nlarn->p);
+            break;
+
+            /* show stationary object memory */
+        case 4: /* ^D */
+            player_list_sobjmem(nlarn->p);
             break;
 
             /* "paperdoll" */
