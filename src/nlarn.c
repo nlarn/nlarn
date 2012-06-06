@@ -34,13 +34,13 @@
 #include "display.h"
 #include "game.h"
 #include "nlarn.h"
+#include "player.h"
 #include "sobjects.h"
 
 /* global game object */
 game *nlarn = NULL;
 
 
-static gboolean adjacent_monster(player *p, gboolean ignore_harmless);
 static gboolean adjacent_corridor(position pos, char mv);
 
 #ifdef WIN32
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 
             /* check if travel mode shall be aborted:
                attacked or fell through trap door */
-            if (nlarn->p->attacked || adjacent_monster(nlarn->p, FALSE)
+            if (nlarn->p->attacked || player_adjacent_monster(nlarn->p, FALSE)
                 || Z(pos) != Z(nlarn->p->pos))
             {
                 pos = pos_invalid;
@@ -779,7 +779,8 @@ int main(int argc, char *argv[])
             // * last action cost no turns (we ran into a wall)
             // * we took damage (trap, poison, or invisible monster)
             // * a monster has moved adjacent to us
-            if (no_move || was_attacked || adjacent_monster(nlarn->p, run_cmd == '.'))
+            if (no_move || was_attacked
+                    || player_adjacent_monster(nlarn->p, run_cmd == '.'))
             {
                 run_cmd = 0;
             }
@@ -813,55 +814,6 @@ int main(int argc, char *argv[])
         }
     }
     while (TRUE); /* main event loop */
-}
-
-static gboolean adjacent_monster(player *p, gboolean ignore_harmless)
-{
-    gboolean monster_visible = FALSE;
-
-    /* get the list of all visible monsters */
-    GList *mlist, *miter;
-    miter = mlist = fov_get_visible_monsters(p->fv);
-
-    /* no visible monsters? */
-    if (mlist == NULL)
-        return monster_visible;
-
-    /* got a list of monsters, check if any are dangerous */
-    do
-    {
-        monster *m = (monster *)miter->data;
-
-        // Ignore the town inhabitants.
-        if (monster_type(m) == MT_TOWN_PERSON)
-            continue;
-
-        /* ignore servants */
-        if (monster_action(m) == MA_SERVE)
-            continue;
-
-        /* Only ignore floating eye if already paralysed. */
-        if (ignore_harmless
-            && (monster_type(m) == MT_FLOATING_EYE)
-            && player_effect_get(p, ET_PARALYSIS))
-            continue;
-
-        /* Ignore adjacent umber hulk if already confused. */
-        if (ignore_harmless
-            && (monster_type(m) == MT_UMBER_HULK)
-            && player_effect_get(p, ET_CONFUSION))
-            continue;
-
-        /* when reaching this point, the monster is a threat */
-        monster_visible = TRUE;
-        break;
-    }
-    while ((miter = miter->next) != NULL);
-
-    /* free the list returned by fov_get_visible_monsters() */
-    g_list_free(mlist);
-
-    return monster_visible;
 }
 
 static gboolean adjacent_corridor(position pos, char mv)

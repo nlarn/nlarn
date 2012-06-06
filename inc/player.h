@@ -444,6 +444,17 @@ void player_search(player *p);
 
 void player_list_sobjmem(player *p);
 void player_sobject_forget(player *p, position pos);
+
+/**
+  * @brief Check for adjacent monsters.
+  *
+  * @param The player.
+  * @param TRUE if harmless monsters shall be ignored.
+  * 
+  * @return TRUE if there are adjacent monsters.
+  */
+gboolean player_adjacent_monster(player *p, gboolean ignore_harmless);
+
 /* fighting simulation */
 void calc_fighting_stats(player *p);
 

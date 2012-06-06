@@ -4626,6 +4626,55 @@ void player_sobject_forget(player *p, position pos)
     }
 }
 
+gboolean player_adjacent_monster(player *p, gboolean ignore_harmless)
+{
+    gboolean monster_visible = FALSE;
+
+    /* get the list of all visible monsters */
+    GList *mlist, *miter;
+    miter = mlist = fov_get_visible_monsters(p->fv);
+
+    /* no visible monsters? */
+    if (mlist == NULL)
+        return monster_visible;
+
+    /* got a list of monsters, check if any are dangerous */
+    do
+    {
+        monster *m = (monster *)miter->data;
+
+        // Ignore the town inhabitants.
+        if (monster_type(m) == MT_TOWN_PERSON)
+            continue;
+
+        /* ignore servants */
+        if (monster_action(m) == MA_SERVE)
+            continue;
+
+        /* Only ignore floating eye if already paralysed. */
+        if (ignore_harmless
+            && (monster_type(m) == MT_FLOATING_EYE)
+            && player_effect_get(p, ET_PARALYSIS))
+            continue;
+
+        /* Ignore adjacent umber hulk if already confused. */
+        if (ignore_harmless
+            && (monster_type(m) == MT_UMBER_HULK)
+            && player_effect_get(p, ET_CONFUSION))
+            continue;
+
+        /* when reaching this point, the monster is a threat */
+        monster_visible = TRUE;
+        break;
+    }
+    while ((miter = miter->next) != NULL);
+
+    /* free the list returned by fov_get_visible_monsters() */
+    g_list_free(mlist);
+
+    return monster_visible;
+}
+
 static int player_sobjects_sort(gconstpointer a, gconstpointer b)
 {
     player_sobject_memory *som_a = (player_sobject_memory *)a;
