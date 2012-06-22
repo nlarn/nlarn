@@ -157,7 +157,7 @@ void game_init(int argc, char *argv[])
         char *wdlibdir = g_build_path(G_DIR_SEPARATOR_S, cwd, "lib", NULL);
 #ifdef __APPLE__
         char *rellibdir = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir,
-                                       "../Resources/NLarn", NULL);
+                                       "../Resources", NULL);
 #endif
 
         g_free(cwd);

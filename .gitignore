@@ -3,6 +3,7 @@ nlarn
 *.zip
 *.tar.gz
 *.exe
+*.dmg
 *.o
 *.d
 *.res
