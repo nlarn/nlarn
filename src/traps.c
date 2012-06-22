@@ -80,7 +80,7 @@ const trap_data traps[TT_MAX] =
         80, 60, 12,
         "pit full of spikes",
         "You fall into a pit full of spikes!",
-        "",
+        NULL,
         "The %s falls into a pit full of spikes.",
     },
     {
@@ -249,7 +249,7 @@ monster *monster_trap_trigger(monster *m)
         return m;
     }
 
-    if (monster_in_sight(m))
+    if (trap_m_message(trap) != NULL && monster_in_sight(m))
     {
         log_add_entry(nlarn->log, trap_m_message(trap), monster_name(m));
 
