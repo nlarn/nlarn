@@ -210,7 +210,7 @@ $(OSXIMAGE): nlarn
 		install_name_tool -change $$lib @executable_path/$${lib##*/} \
 			dmgroot/NLarn.app/Contents/MacOS/nlarn; \
 	done
-	@cp -p lib/{fortune,maze,monsters.lua,nlarn.*} \
+	@cp -p lib/{fortune,maze,monsters.lua,nlarn*} \
 		dmgroot/Nlarn.app/Contents/Resources
 	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
 	@cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources

@@ -21,6 +21,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef SDLPDCURSES
+#  include <SDL.h>
+#endif
+
 #include "display.h"
 #include "fov.h"
 #include "map.h"
@@ -124,12 +128,23 @@ void display_init()
     initscr();
 
 #ifdef SDLPDCURSES
+	/* These initializsations have to be done after initscr(), otherwise
+	   the window is not yet available. */
 	/* Set the window title */
 	char *window_title = g_strdup_printf("NLarn %d.%d.%d%s", VERSION_MAJOR,
 			VERSION_MINOR, VERSION_PATCH, GITREV);
 
 	PDC_set_title(window_title);
 	g_free(window_title);
+
+	/* Set the window icon */
+	char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn->libdir);
+	SDL_Surface *image = SDL_LoadBMP(icon_name);
+	g_free(icon_name);
+
+	Uint32 colorkey = SDL_MapRGB(image->format, 0, 0, 0);
+	SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
+	SDL_WM_SetIcon(image,NULL);
 #endif
 
     /* initialize colours */
