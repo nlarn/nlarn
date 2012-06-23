@@ -210,11 +210,18 @@ $(OSXIMAGE): nlarn
 		install_name_tool -change $$lib @executable_path/$${lib##*/} \
 			dmgroot/NLarn.app/Contents/MacOS/nlarn; \
 	done
+# Copy required files
 	@cp -p lib/{fortune,maze,monsters.lua,nlarn*} \
 		dmgroot/Nlarn.app/Contents/Resources
-	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
 	@cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
 	@cp -pr Changelog.txt README.txt LICENSE dmgroot
+	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
+# Update the version information in the plist
+	/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(VERSION)" \
+		dmgroot/NLarn.app/Contents/Info.plist
+	/usr/libexec/PlistBuddy -c \
+		"Add :CFBundleShortVersionString string $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)" \
+		dmgroot/NLarn.app/Contents/Info.plist
 # Use the same icons for the dmg file
 	@cp -p resources/NLarn.icns dmgroot/.VolumeIcon.icns
 	@SetFile -c icnC dmgroot/.VolumeIcon.icns
