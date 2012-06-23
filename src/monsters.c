@@ -1690,8 +1690,10 @@ monster *monster_damage_take(monster *m, damage *dam)
                    into can not handle weapons. */
                 if (m->eq_weapon && !monster_attack_available(m, ATT_WEAPON))
                 {
+					/* If the monster stepped on a trap p is NULL, thus we
+					   need to use nlarn->p here. */
                     wdesc = item_describe(m->eq_weapon,
-                                    player_item_known(p, m->eq_weapon),
+                                    player_item_known(nlarn->p, m->eq_weapon),
                                     FALSE, FALSE);
 
                     inv_del_element(&m->inv, m->eq_weapon);
