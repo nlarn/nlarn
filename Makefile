@@ -215,11 +215,21 @@ $(OSXIMAGE): nlarn
 	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
 	@cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
 	@cp -pr Changelog.txt README.txt LICENSE dmgroot
+# Use the same icons for the dmg file
+	@cp -p resources/NLarn.icns dmgroot/.VolumeIcon.icns
+	@SetFile -c icnC dmgroot/.VolumeIcon.icns
 # Create the disk image
 	@echo hditool requires superuser rights.
 	@sudo hdiutil create -srcfolder dmgroot -volname "NLarn $(VERSION)" \
-		-uid 99 -gid 99 "$(DIRNAME).dmg"
+		-uid 99 -gid 99 -format UDRW "raw-$(DIRNAME).dmg"
 	@rm -rf dmgroot
+	@mkdir dmgroot
+	@sudo hdiutil attach -readwrite "raw-$(DIRNAME).dmg" -mountpoint dmgroot
+	@sudo SetFile -a C dmgroot
+	@sudo hdiutil detach dmgroot
+	@rm -rf dmgroot
+	@sudo hdiutil convert "raw-$(DIRNAME).dmg" -format UDZO -o "$(DIRNAME).dmg"
+	@sudo rm "raw-$(DIRNAME).dmg"
 
 clean:
 	@echo Cleaning nlarn
