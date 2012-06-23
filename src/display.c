@@ -123,6 +123,15 @@ void display_init()
     /* Start curses mode */
     initscr();
 
+#ifdef SDLPDCURSES
+	/* Set the window title */
+	char *window_title = g_strdup_printf("NLarn %d.%d.%d%s", VERSION_MAJOR,
+			VERSION_MINOR, VERSION_PATCH, GITREV);
+
+	PDC_set_title(window_title);
+	g_free(window_title);
+#endif
+
     /* initialize colours */
     start_color();
 
