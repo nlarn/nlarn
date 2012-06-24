@@ -225,6 +225,10 @@ $(OSXIMAGE): nlarn
 # Use the same icons for the dmg file
 	@cp -p resources/NLarn.icns dmgroot/.VolumeIcon.icns
 	@SetFile -c icnC dmgroot/.VolumeIcon.icns
+# Create a pseudo-installer
+	@ln -s "/Applications" dmgroot/Applications
+	@cp resources/dmg_background.png dmgroot/.background.png
+	@cp resources/dot.DS_Store dmgroot/.DS_store
 # Create the disk image
 	@echo hditool requires superuser rights.
 	@sudo hdiutil create -srcfolder dmgroot -volname "NLarn $(VERSION)" \
