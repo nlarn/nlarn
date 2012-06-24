@@ -32,7 +32,8 @@ const container_data containers[CT_MAX] =
     { CT_CRATE,  "crate", 65000, IM_WOOD,  100, },
 };
 
-static gboolean container_trigger_trap(player *p, item *container);
+static item *container_choose(player *p, inventory **floor, gboolean notice);
+static gboolean container_trigger_trap(player *p, item *container, gboolean force);
 
 void container_open(player *p, inventory **inv __attribute__((unused)), item *container)
 {
@@ -47,28 +48,15 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     {
         /* no container has been passed - look for container on the floor */
         inventory **finv = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
-        int count = inv_length_filtered(*finv, &item_filter_container);
+        container = container_choose(p, finv, TRUE);
 
-        if (count == 0)
-        {
-            log_add_entry(nlarn->log, "I see no container here.");
-            return;
-        }
-        else if (count == 1)
-        {
-            container = inv_get_filtered(*finv, 0, &item_filter_container);
-        }
-        else
-        {
-            /* multiple containers */
-            log_add_entry(nlarn->log, "I don't know which container I should open!");
-            return;
-        }
+        /* abort if no container has been selected */
+        if (container == NULL) return;
     }
 
     /* Describe container */
     container_desc = item_describe(container, player_item_known(p, container),
-                                   TRUE, TRUE);
+            TRUE, TRUE);
 
     if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
     {
@@ -81,15 +69,9 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     if (!container_provided)
         log_add_entry(nlarn->log, "You carefully open %s.", container_desc);
 
-    /* check for a trap on the container and if the player triggers it */
-    if (container->cursed && container_trigger_trap(p, container))
-    {
-        /* the player has triggered the trap, thus remove it */
-        container->cursed = FALSE;
-
-        /* reset blessed_known, otherwise "uncursed xxx" would appear */
-        container->blessed_known = FALSE;
-    }
+    /* If there is a trap on the container the player might trigger it. */
+    if (container->cursed)
+        container_trigger_trap(p, container, FALSE);
 
     /* check for empty container */
     if (inv_length(container->content) == 0)
@@ -156,30 +138,15 @@ void container_item_add(player *p, inventory **inv, item *element)
         guint filen = inv_length_filtered(*floor, item_filter_container);
 
         /* choose the container to add the item element to. */
-        if (pilen == 1)
+        if (pilen > 0)
         {
-            /* only one container in inventory - this is the one */
-            container = inv_get_filtered(p->inventory, 0, item_filter_container);
+            /* choose a container from the player's inventory */
+            container = container_choose(p, &p->inventory, FALSE);
             carried_container = TRUE;
         }
-        else if (pilen > 1)
+        else if (filen > 0)
         {
-            /* multiple containers in the player's inventory, offer to choose one */
-            container = display_inventory("Choose a container", p,
-                                          &p->inventory, NULL, FALSE, FALSE,
-                                          FALSE, item_filter_container);
-            carried_container = TRUE;
-        }
-        else if (filen == 1)
-        {
-            /* conly one container on the floor */
-            container = inv_get_filtered(*floor, 0, item_filter_container);
-        }
-        else if (filen > 1)
-        {
-            /* multiple containers on the floor, offer to choose one */
-            container = display_inventory("Choose a container", p, floor, NULL,
-                                          FALSE, FALSE, FALSE, item_filter_container);
+            container = container_choose(p, floor, TRUE);
         }
 
         /* has a container been found? */
@@ -211,10 +178,8 @@ void container_item_add(player *p, inventory **inv, item *element)
     {
         /* use the item type plural name except for ammunition */
         gchar *q = g_strdup_printf("How many %s%s do you want to put into %s?",
-                                   (element->type == IT_AMMO
-                                    ? ammo_name(element)
-                                    : item_name_pl(element->type)),
-                                   (element->type == IT_AMMO ? "s" : ""), container_desc);
+                (element->type == IT_AMMO ? ammo_name(element) : item_name_pl(element->type)),
+                (element->type == IT_AMMO ? "s" : ""), container_desc);
 
         count = display_get_count(q, element->count);
         g_free(q);
@@ -246,10 +211,10 @@ void container_item_add(player *p, inventory **inv, item *element)
 
     /* log the event */
     element_desc = item_describe(element, player_item_known(p, element),
-                                 FALSE, TRUE);
+            FALSE, TRUE);
 
     log_add_entry(nlarn->log, "You put %s into %s.",
-                  element_desc, container_desc);
+            element_desc, container_desc);
 
     g_free(element_desc);
     g_free(container_desc);
@@ -282,8 +247,8 @@ void container_item_unpack(player *p, inventory **inv, item *element)
     {
         /* use the item type plural name except for ammunition */
         gchar *q = g_strdup_printf("How many %s%s do you want to take out?",
-                                   (element->type == IT_AMMO ? ammo_name(element) : item_name_pl(element->type)),
-                                   (element->type == IT_AMMO ? "s" : ""));
+                (element->type == IT_AMMO ? ammo_name(element) : item_name_pl(element->type)),
+                (element->type == IT_AMMO ? "s" : ""));
 
         count = display_get_count(q, element->count);
         g_free(q);
@@ -360,13 +325,92 @@ int container_move_content(player *p __attribute__((unused)), inventory **inv, i
     return count;
 }
 
-static gboolean container_trigger_trap(player *p, item *container)
+gboolean container_untrap(player *p)
+{
+    map *m = game_map(nlarn, Z(p->pos));
+    inventory **floor = map_ilist_at(m, p->pos);
+    item *container = container_choose(p, floor, FALSE);
+
+    if (container == NULL)
+        return FALSE;
+
+    char *desc = item_describe(container, TRUE, TRUE, TRUE);
+
+    if (!container->cursed && !container->blessed_known)
+    {
+        log_add_entry(nlarn->log, "As far as you know %s is not trapped.", desc);
+        g_free(desc);
+
+        return FALSE;
+    }
+
+    guint prop = (2 * player_get_dex(p)) + p->level;
+    log_add_entry(nlarn->log, "You try to disarm the trap on %s.", desc);
+    /*
+       Time usage: container type * 2:
+         -> a bag takes two turns,
+         -> a crate takes eight turns.
+     */
+    if (!player_make_move(p, container->id * 2, TRUE,
+                "Removing the trap on %s?", desc))
+    {
+        /* action aborted */
+        g_free(desc);
+        return TRUE;
+    }
+
+    if (chance(prop))
+    {
+        log_add_entry(nlarn->log, "You manage to remove the trap on %s!", desc);
+
+        /* Remove the trap. */
+        container->cursed = FALSE;
+        container->blessed_known = FALSE;
+    }
+    else
+    {
+        /* Sorry, mate.. */
+        log_add_entry(nlarn->log, "You trigger the trap on %s!", desc);
+
+        /* The player removed the trap by triggering it. */
+        container_trigger_trap(p, container, TRUE);
+    }
+
+    g_free(desc);
+
+    return TRUE;
+}
+
+static item *container_choose(player *p, inventory **floor, gboolean notice)
+{
+    int count = inv_length_filtered(*floor, &item_filter_container);
+
+    if (count == 0)
+    {
+        if (notice)
+            log_add_entry(nlarn->log, "I see no container here.");
+
+        return NULL;
+    }
+    else if (count == 1)
+    {
+        return inv_get_filtered(*floor, 0, &item_filter_container);
+    }
+    else
+    {
+        /* multiple containers on the floor, offer to choose one */
+        return display_inventory("Choose a container", p, floor, NULL,
+                FALSE, FALSE, FALSE, item_filter_container);
+    }
+}
+
+static gboolean container_trigger_trap(player *p, item *container, gboolean force)
 {
     effect_t et = ET_NONE;
 
     /* if player knows that the container is trapped,
      * the chance to trigger the trap is lowered */
-    if (container->blessed_known && chance(3 * player_get_dex(p)))
+    if (!force && container->blessed_known && chance(3 * player_get_dex(p)))
     {
         gchar *idesc = item_describe(container, FALSE, TRUE, TRUE);
 
@@ -407,6 +451,12 @@ static gboolean container_trigger_trap(player *p, item *container)
         /* add the effect */
         player_effect_add(p, effect_new(et));
     }
+
+    /* the player has triggered the trap, thus remove it */
+    container->cursed = FALSE;
+
+    /* reset blessed_known, otherwise "uncursed xxx" would appear */
+    container->blessed_known = FALSE;
 
     /* the trap is destroyed */
     return TRUE;

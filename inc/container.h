@@ -83,6 +83,14 @@ void container_item_unpack(struct player *p, inventory **inv, item *element);
 int container_move_content(struct player *p, inventory **inv,
                            inventory **new_inv);
 
+/**
+  * @brief Remove a trap on a container
+  *
+  * @param the player
+  * @return TRUE if there is a trapped container at the player's position
+  */
+gboolean container_untrap(struct player *p);
+
 /* macros */
 
 #define container_name(container)     (containers[(container)->id].name)

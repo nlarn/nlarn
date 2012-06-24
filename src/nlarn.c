@@ -462,9 +462,10 @@ int main(int argc, char *argv[])
             moves_count = player_door_close(nlarn->p);
             break;
 
-            /* disarm a trap */
+            /* disarm a trapped container or a trap */
         case 'D':
-            moves_count = trap_disarm(nlarn->p);
+            if (!container_untrap(nlarn->p))
+                moves_count = trap_disarm(nlarn->p);
             break;
 
             /* drop something */
