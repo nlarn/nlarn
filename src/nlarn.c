@@ -622,6 +622,9 @@ int main(int argc, char *argv[])
 
             /* redraw screen */
         case 12: /* ^L */
+#ifdef SDLPDCURSES
+        case KEY_RESIZE: /* SDL window size event */
+#endif
             clear();
             display_draw();
             break;
