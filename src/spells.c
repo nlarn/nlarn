@@ -678,7 +678,9 @@ int spell_type_point(spell *s, struct player *p)
 
     g_snprintf(buffer, 60, "Select a target for %s.", spell_name(s));
 
-    pos = display_get_position(p, buffer, FALSE, FALSE, 0, FALSE, TRUE);
+    /* Allow non-visible positions if the player is blinded. */
+    pos = display_get_position(p, buffer, FALSE, FALSE, 0, FALSE,
+            !player_effect(p, ET_BLINDNESS));
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -693,6 +695,16 @@ int spell_type_point(spell *s, struct player *p)
         return FALSE;
     }
 
+    /* When the player is blinded, check if the position can be reached.
+       As it is possible to target any position, it might be a position
+       the player could not target under normal circumstances. */
+    if (player_effect(p, ET_BLINDNESS) &&
+            !map_pos_is_visible(game_map(nlarn, Z(p->pos)), p->pos, pos))
+    {
+        /* be sure to waste the MPs and give no hints. */
+        return TRUE;
+    }
+
     m = map_get_monster_at(game_map(nlarn, Z(p->pos)), pos);
 
     if (!m)
@@ -700,9 +712,18 @@ int spell_type_point(spell *s, struct player *p)
         if (s->id == SP_DRY)
             return try_drying_ground(pos);
 
-        log_add_entry(nlarn->log, "There is no monster there.");
-
-        return FALSE;
+        if (!player_effect(p, ET_BLINDNESS))
+        {
+            log_add_entry(nlarn->log, "The is no monster there.");
+            return FALSE;
+        }
+        else
+        {
+            /* The spell didn't do anything, but as the player is blinded
+               assume it was targeted at the position intentionally probing
+               for targets. */
+            return TRUE;
+        }
     }
 
     switch (s->id)
@@ -814,7 +835,9 @@ int spell_type_ray(spell *s, struct player *p)
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
 
     g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(s));
-    target = display_get_position(p, buffer, TRUE, FALSE, 0, FALSE, TRUE);
+    /* Allow non-visible positions if the player is blinded. */
+    target = display_get_position(p, buffer, TRUE, FALSE, 0, FALSE,
+            !player_effect(p, ET_BLINDNESS));
 
     /* player pressed ESC */
     if (!pos_valid(target))
@@ -948,7 +971,9 @@ int spell_type_blast(spell *s, struct player *p)
     }
 
     g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(s));
-    pos = display_get_position(p, buffer, FALSE, TRUE, radius, FALSE, TRUE);
+    /* Allow non-visible positions if the player is blinded. */
+    pos = display_get_position(p, buffer, FALSE, TRUE, radius, FALSE,
+            !player_effect(p, ET_BLINDNESS));
 
     /* player pressed ESC */
     if (!pos_valid(pos))
