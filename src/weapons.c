@@ -116,6 +116,10 @@ int weapon_fire(struct player *p)
     item *ammo   = p->eq_quiver; /* the quivered ammo */
     monster *m = NULL;           /* the targeted monster */
 
+    /* Check if the player is able to move. */
+    if (!player_movement_possible(p))
+        return FALSE;
+
     /* check if the player wields a weapon */
     if (weapon == NULL)
     {
@@ -368,22 +372,22 @@ damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)
 
 gboolean weapon_ammo_drop(map *m, item *ammo, const GList *traj)
 {
-	/* Due to the recursive usage of this function traj may be NULL
-	   (e.g. when the player is wall-walking and shooting at a xorn). */
-	if (traj == NULL)
-	{
-		item_destroy(ammo);
-		return TRUE;
-	}
+    /* Due to the recursive usage of this function traj may be NULL
+       (e.g. when the player is wall-walking and shooting at a xorn). */
+    if (traj == NULL)
+    {
+        item_destroy(ammo);
+        return TRUE;
+    }
 
     position pos;
     pos_val(pos) = GPOINTER_TO_UINT(traj->data);
     map_tile_t tt = map_tiletype_at(m, pos);
 
-	/* If the ammo comes to stop on a solid tile it has to be dropped on
-	   the last tile that is not solid, i.e. the floor before a wall tile. */
-	if (!map_pos_transparent(m, pos))
-		return weapon_ammo_drop(m, ammo, g_list_previous(traj));
+    /* If the ammo comes to stop on a solid tile it has to be dropped on
+       the last tile that is not solid, i.e. the floor before a wall tile. */
+    if (!map_pos_transparent(m, pos))
+        return weapon_ammo_drop(m, ammo, g_list_previous(traj));
 
     /* check if the ammo survives usage */
     if (chance(item_fragility(ammo) + 15)

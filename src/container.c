@@ -54,6 +54,10 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
         if (container == NULL) return;
     }
 
+    /* Check if the player is able to move. */
+    if (!player_movement_possible(p))
+        return;
+
     /* Describe container */
     container_desc = item_describe(container, player_item_known(p, container),
             TRUE, TRUE);
@@ -121,6 +125,10 @@ void container_item_add(player *p, inventory **inv, item *element)
     guint count = 0;
 
     g_assert(p != NULL && element != NULL);
+
+    /* Check if the player is able to move. */
+    if (!player_movement_possible(p))
+        return;
 
     if (inv == &nlarn->player_home)
     {

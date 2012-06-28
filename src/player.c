@@ -1691,6 +1691,11 @@ void player_pickup(player *p)
         log_add_entry(nlarn->log, "You cannot reach the floor!");
         return;
     }
+    else if (player_effect(p, ET_PARALYSIS))
+    {
+        log_add_entry(nlarn->log, "You can't move!");
+        return;
+    }
     else if (inv_length(*inv) == 1)
     {
         player_item_pickup(p, inv, inv_get(*inv, 0), TRUE);
@@ -2869,6 +2874,10 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
 {
     g_assert(p != NULL && it != NULL);
 
+    /* Check if the player is able to move. */
+    if (!player_movement_possible(p))
+        return;
+
     item **islot = NULL;  /* pointer to chosen item slot */
     int atime = 0;        /* time the desired action takes */
     gboolean known = player_item_known(p, it);
@@ -3064,8 +3073,12 @@ void player_item_unequip(player *p,
 {
     g_assert(p != NULL && it != NULL);
 
-    /* the idea behind the time values: one turn to take one item off,
-       one turn to get the item out of the pack */
+    /* Check if the player is able to move. */
+    if (!player_movement_possible(p))
+        return;
+
+   /* the idea behind the time values: one turn to take one item off,
+      one turn to get the item out of the pack */
 
     /* item description */
     gchar *desc = item_describe(it, player_item_known(p, it), FALSE, TRUE);
@@ -3687,6 +3700,10 @@ void player_item_use(player *p, inventory **inv __attribute__((unused)), item *i
     /* hide windows */
     display_windows_hide();
 
+    /* Check if the player is able to move. */
+    if (!player_movement_possible(p))
+        return;
+
     switch (it->type)
     {
         /* read book */
@@ -3766,7 +3783,7 @@ void player_item_destroy(player *p, item *it)
     if (it->content)
     {
         count = container_move_content(p, &it->content,
-                                       map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos));
+                map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos));
     }
 
     inv_del_element(&p->inventory, it);
@@ -3790,6 +3807,14 @@ void player_item_drop(player *p, inventory **inv, item *it)
     gboolean split = FALSE;
 
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
+
+    /* Don't use player_movement_possible() here as this would take
+       the possiblity to drop stuff when overstrained. */
+    if (player_effect(p, ET_PARALYSIS))
+    {
+        log_add_entry(nlarn->log, "You can't move!");
+        return;
+    }
 
     if (player_item_is_equipped(p, it))
         return;
