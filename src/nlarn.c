@@ -366,9 +366,13 @@ int main(int argc, char *argv[])
 
             /* look at different position */
         case ';':
-            (void)display_get_new_position(nlarn->p, nlarn->p->pos,
-                                           "Choose a position to examine",
-                                           FALSE, FALSE, FALSE, 0, FALSE, TRUE);
+            if (!player_effect(nlarn->p, ET_BLINDNESS))
+                (void)display_get_new_position(nlarn->p, nlarn->p->pos,
+                        "Choose a position to examine", FALSE, FALSE,
+                        FALSE, 0, FALSE, TRUE);
+            else
+                log_add_entry(nlarn->log, "You can't look around "
+                        "while blinded!");
             break;
 
             /* pick up */
