@@ -234,6 +234,12 @@ void weapon_swap(struct player *p)
     gchar *pdesc = NULL;
     gchar *sdesc = NULL;
 
+    if (pweapon == sweapon && pweapon == NULL)
+    {
+        log_add_entry(nlarn->log, "You have no weapon ready.");
+        return;
+    }
+
     if (pweapon && pweapon->cursed)
     {
         pdesc = item_describe(pweapon, player_item_known(p, pweapon),
