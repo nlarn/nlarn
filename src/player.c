@@ -1543,10 +1543,10 @@ int player_attack(player *p, monster *m)
             monster_update_player_pos(m, p->pos);
         }
     }
-    else if (game_wizardmode(nlarn) || monster_in_sight(m))
+    else
     {
         /* missed */
-        log_add_entry(nlarn->log, "You miss the %s.", monster_name(m));
+        log_add_entry(nlarn->log, "You miss the %s.", monster_get_name(m));
     }
 
     return 1; /* i.e. turns used */
