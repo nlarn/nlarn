@@ -2928,7 +2928,7 @@ void display_window_destroy(display_window *dwin)
     else
     {
         /* refresh the screen */
-        refresh();
+        display_draw();
     }
 }
 
@@ -3206,8 +3206,7 @@ static int display_window_move(display_window *dwin, int key)
     if (need_refresh)
     {
         move_panel(dwin->panel, dwin->y1, dwin->x1);
-        update_panels();
-        doupdate();
+        (void)display_draw();
     }
 
     return need_refresh;
