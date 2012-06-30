@@ -143,9 +143,14 @@ endif
 ifeq ($(OS),Darwin)
   # Use clang on OS X.
   CC = clang
-  # Always build with SDL PDCurses on OS X.
-  CFLAGS  += -DSDLPDCURSES $(shell sdl-config --cflags) -Dmain=SDL_main
-  LDFLAGS += -lpdcurses $(shell sdl-config --static-libs)
+  # Unless requested otherwise build with SDL PDCurses on OS X.
+  ifeq ($(NCURSES),)
+    CFLAGS  += -DSDLPDCURSES $(shell sdl-config --cflags) -Dmain=SDL_main
+    LDFLAGS += -lpdcurses $(shell sdl-config --static-libs)
+  endif
+  ifneq ($(NCURSES),)
+    LDFLAGS += -lcurses -lpanel
+  endif
   OSXIMAGE := nlarn-$(VERSION).dmg
 endif
 
