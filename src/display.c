@@ -23,6 +23,7 @@
 
 #ifdef SDLPDCURSES
 #  include <SDL.h>
+void PDC_update_rects(void);
 #endif
 
 #include "display.h"
@@ -128,23 +129,23 @@ void display_init()
     initscr();
 
 #ifdef SDLPDCURSES
-	/* These initializsations have to be done after initscr(), otherwise
-	   the window is not yet available. */
-	/* Set the window title */
-	char *window_title = g_strdup_printf("NLarn %d.%d.%d%s", VERSION_MAJOR,
-			VERSION_MINOR, VERSION_PATCH, GITREV);
+    /* These initializsations have to be done after initscr(), otherwise
+       the window is not yet available. */
+    /* Set the window title */
+    char *window_title = g_strdup_printf("NLarn %d.%d.%d%s", VERSION_MAJOR,
+            VERSION_MINOR, VERSION_PATCH, GITREV);
 
-	PDC_set_title(window_title);
-	g_free(window_title);
+    PDC_set_title(window_title);
+    g_free(window_title);
 
-	/* Set the window icon */
-	char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn->libdir);
-	SDL_Surface *image = SDL_LoadBMP(icon_name);
-	g_free(icon_name);
+    /* Set the window icon */
+    char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn->libdir);
+    SDL_Surface *image = SDL_LoadBMP(icon_name);
+    g_free(icon_name);
 
-	Uint32 colorkey = SDL_MapRGB(image->format, 0, 0, 0);
-	SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
-	SDL_WM_SetIcon(image,NULL);
+    Uint32 colorkey = SDL_MapRGB(image->format, 0, 0, 0);
+    SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
+    SDL_WM_SetIcon(image,NULL);
 #endif
 
     /* initialize colours */
@@ -699,7 +700,15 @@ int display_draw()
     update_panels();
 
     /* finally commit all the prepared updates */
+#ifdef SDLPDCURSES
+    /* SDL PDCurses does a little trick to increase the performance,
+       have a look at the docs to see why this is required. */
+    int ret = doupdate();
+    PDC_update_rects();
+    return ret;
+#else
     return doupdate();
+#endif
 }
 
 static int item_sort_normal(gconstpointer a, gconstpointer b, gpointer data)
