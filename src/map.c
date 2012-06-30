@@ -305,11 +305,11 @@ char *map_dump(map *m, position ppos)
             }
             else if (map_sobject_at(m, pos))
             {
-                g_string_append_c(dump, so_get_image(map_sobject_at(m, pos)));
+                g_string_append_c(dump, so_get_glyph(map_sobject_at(m, pos)));
             }
             else
             {
-                g_string_append_c(dump, mt_get_image(map_tiletype_at(m, pos)));
+                g_string_append_c(dump, mt_get_glyph(map_tiletype_at(m, pos)));
             }
         }
         g_string_append_c(dump, '\n');
@@ -1270,7 +1270,7 @@ char map_get_door_glyph(map *m, position pos)
     }
 
     /* no idea. */
-    return so_get_image(map_sobject_at(m, pos));
+    return so_get_glyph(map_sobject_at(m, pos));
 }
 
 static int map_fill_with_stationary_objects(map *m)

@@ -343,7 +343,7 @@ static inline int monster_type_hp_max(monster_t type)
     return luaN_query_int("monsters", type, "hp_max");
 }
 
-static inline char monster_type_image(monster_t type)
+static inline char monster_type_glyph(monster_t type)
 {
     return luaN_query_char("monsters", type, "glyph");
 }

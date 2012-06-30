@@ -57,7 +57,7 @@ typedef enum sobject_type
 typedef struct _sobject_data
 {
     sobject_t sobject;
-    const char image;
+    const char glyph;
     int colour;
     const char *description;
     unsigned
@@ -67,9 +67,9 @@ typedef struct _sobject_data
 
 extern const sobject_data sobjects[LS_MAX];
 
-static inline char so_get_image(sobject_t s)
+static inline char so_get_glyph(sobject_t s)
 {
-    return sobjects[s].image;
+    return sobjects[s].glyph;
 }
 
 static inline int so_get_colour(sobject_t s)

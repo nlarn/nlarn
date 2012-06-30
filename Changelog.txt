@@ -542,7 +542,7 @@ Changes:
     * Stairways, the volcanic shafts and the bank branch office are placed in
       dead ends in the maze. Modified the colour of volcano and dungeon
       entrance to make them distinguishable from monsters.
-    * Changed the floor image to a dot (.) to make finding unexplored regions
+    * Changed the floor glyph to a dot (.) to make finding unexplored regions
       possible.
     * Slightly rearranged town buildings and added an altar.
     * Revised and extended in-game help.

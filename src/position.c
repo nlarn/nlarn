@@ -371,7 +371,7 @@ gboolean area_blast(position center, guint radius,
             if (map_sobject_at(cmap, cursor))
             {
                 /* The blast hit a stationary object. */
-                addch(so_get_image(map_sobject_at(cmap, cursor)));
+                addch(so_get_glyph(map_sobject_at(cmap, cursor)));
             }
             else if ((m = map_get_monster_at(cmap, cursor)))
             {

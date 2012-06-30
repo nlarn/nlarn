@@ -87,7 +87,7 @@ typedef struct map_tile
 typedef struct map_tile_data
 {
     map_tile_t tile;
-    const char image;
+    const char glyph;
     int colour;
     const char *description;
     unsigned
@@ -335,9 +335,9 @@ static inline gboolean map_is_monster_at(map *m, position pos)
     return ((map_get_monster_at(m, pos) != NULL));
 }
 
-static inline char mt_get_image(map_tile_t t)
+static inline char mt_get_glyph(map_tile_t t)
 {
-    return map_tiles[t].image;
+    return map_tiles[t].glyph;
 }
 
 static inline int  mt_get_colour(map_tile_t t)

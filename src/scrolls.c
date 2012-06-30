@@ -572,7 +572,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
     /* look for the monster id for the glyph entered */
     for (monster_t id = 1; id < MT_MAX; id++)
     {
-        if (monster_type_image(id) == glyph[0])
+        if (monster_type_glyph(id) == glyph[0])
         {
             /* character entered matches the monster's glyph */
             if (!monster_is_genocided(id))

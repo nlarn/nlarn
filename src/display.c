@@ -239,7 +239,7 @@ int display_paint_screen(player *p)
                     if (map_sobject_at(vmap, pos) == LS_CLOSEDDOOR || map_sobject_at(vmap, pos) == LS_OPENDOOR)
                         addch(map_get_door_glyph(vmap, pos));
                     else
-                        addch(so_get_image(map_sobject_at(vmap, pos)));
+                        addch(so_get_glyph(map_sobject_at(vmap, pos)));
                     attroff(attrs);
                 }
                 else if (has_items)
@@ -282,7 +282,7 @@ int display_paint_screen(player *p)
                 {
                     /* draw tile */
                     attron(attrs = mt_get_colour(map_tiletype_at(vmap, pos)));
-                    addch(mt_get_image(map_tiletype_at(vmap, pos)));
+                    addch(mt_get_glyph(map_tiletype_at(vmap, pos)));
                     attroff(attrs);
                 }
             }
@@ -299,7 +299,7 @@ int display_paint_screen(player *p)
                     if (ms == LS_CLOSEDDOOR || ms == LS_OPENDOOR)
                         addch(map_get_door_glyph(vmap, pos));
                     else
-                        addch(so_get_image(ms));
+                        addch(so_get_glyph(ms));
 
                     attroff(attrs);
                 }
@@ -324,7 +324,7 @@ int display_paint_screen(player *p)
                 {
                     /* draw tile */
                     attron(attrs = DC_DARKGRAY);
-                    addch(mt_get_image(player_memory_of(p, pos).type));
+                    addch(mt_get_glyph(player_memory_of(p, pos).type));
                     attroff(attrs);
                 }
             }
@@ -774,7 +774,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (curr > len_curr)
             curr = len_curr;
 
-        /* rebuild image if needed */
+        /* rebuild screen if needed */
         if (iwin != NULL && redraw)
         {
             display_window_destroy(iwin);
@@ -2599,7 +2599,7 @@ position display_get_new_position(player *p,
             {
                 sobject_t sobj = LS_NONE;
                 for (int i = LS_NONE + 1; i < LS_MAX; i++)
-                    if (so_get_image(i) == (char) ch)
+                    if (so_get_glyph(i) == (char) ch)
                     {
                         sobj = i;
                         log_add_entry(nlarn->log, "Looking for '%c' (%s).\n",
@@ -2629,9 +2629,9 @@ position display_get_new_position(player *p,
                            required to compare the glyph of the present
                            object with the glyph of the requested object. */
                         if ((game_wizardmode(nlarn)
-                             && so_get_image(map_sobject_at(vmap, pos)) == (char) ch)
+                             && so_get_glyph(map_sobject_at(vmap, pos)) == (char) ch)
                             || (player_memory_of(nlarn->p, pos).sobject != LS_NONE
-                                && so_get_image(player_memory_of(nlarn->p, pos).sobject) == (char) ch))
+                                && so_get_glyph(player_memory_of(nlarn->p, pos).sobject) == (char) ch))
                         {
                             break;
                         }
