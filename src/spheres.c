@@ -1,6 +1,6 @@
 /*
  * spheres.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,16 +16,13 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #include <glib.h>
-#include <string.h>
 
 #include "game.h"
 #include "nlarn.h"
 #include "spheres.h"
 
-static guint sphere_at(game *g, position pos);
+static sphere *sphere_at(game *g, position pos, sphere *s);
 static void sphere_hit_owner(game *g, sphere *s);
 static void sphere_kill_monster(sphere *s, monster *m);
 
@@ -54,7 +51,6 @@ void sphere_destroy(sphere *s, game *g)
     g_assert(s != NULL);
 
     g_ptr_array_remove_fast(g->spheres, s);
-
     g_free(s);
 }
 
@@ -113,8 +109,7 @@ void sphere_move(sphere *s, game *g)
     npos = pos_move(s->pos, dir);
 
     /* if the new position does not work, try to find another one */
-    while ((!pos_valid(npos)
-            || !mt_is_passable(map_tiletype_at(smap, npos)))
+    while ((!pos_valid(npos) || !map_pos_passable(smap, npos))
             && (tries < GD_MAX))
     {
         dir++;
@@ -153,7 +148,7 @@ void sphere_move(sphere *s, game *g)
             if (monster_in_sight(m))
             {
                 log_add_entry(nlarn->log, "The %s dispels the sphere!",
-                              monster_name(m));
+                        monster_name(m));
             }
 
             sphere_destroy(s, g);
@@ -167,8 +162,8 @@ void sphere_move(sphere *s, game *g)
             if (monster_in_sight(m))
             {
                 log_add_entry(nlarn->log,
-                              "The %s causes cancellation of the sphere!",
-                              monster_name(m));
+                        "The %s causes cancellation of the sphere!",
+                        monster_name(m));
             }
 
             sphere_destroy(s, g);
@@ -183,49 +178,59 @@ void sphere_move(sphere *s, game *g)
     }
 
     /* check if another sphere is located at the same position */
-    if (sphere_at(g, s->pos) > 1)
+    sphere *other;
+    if ((other = sphere_at(g, s->pos, s)))
     {
-        log_add_entry(nlarn->log,
-                      "Two spheres of annihilation collide! " \
-                      "You hear a great earth shaking blast!");
+        if (fov_get(g->p->fv, s->pos))
+        {
+            log_add_entry(nlarn->log,
+                    "Two spheres of annihilation collide! "
+                    "You hear a great earth shaking blast!");
+        }
+        else if(Z(g->p->pos) == Z(s->pos))
+        {
+            /* The player is on the same level as the spheres */
+            log_add_entry(nlarn->log,
+                    "You hear a great earth shaking blast!");
+        }
 
         sphere_destroy(s, g);
-
-        return;
+        sphere_destroy(other, g);
     }
 }
 
-guint sphere_at(game *g, position pos)
-{
-    guint count = 0;
 
+static sphere *sphere_at(game *g, position pos, sphere *s)
+{
     for (guint idx = 0; idx < g->spheres->len; idx++)
     {
-        sphere *s = (sphere *)g_ptr_array_index(g->spheres, idx);
-        if (pos_identical(s->pos, pos))
-        {
-            count++;
-        }
+        sphere *cs = (sphere *)g_ptr_array_index(g->spheres, idx);
+
+        if (s != cs && pos_identical(cs->pos, pos))
+            return cs;
     }
 
-    return count;
+    return NULL;
 }
 
 static void sphere_hit_owner(game *g, sphere *s)
 {
-    /* cancellation protects from spheres */
+    log_add_entry(nlarn->log, "You are hit by a sphere of annihilation!");
+
     if (player_effect(s->owner, ET_CANCELLATION))
     {
+        /* cancellation protects from spheres */
         log_add_entry(nlarn->log,
-                      "As the cancellation takes effect, you hear a great earth shaking blast!");
+                "As the cancellation takes effect, you "
+                "hear a great earth shaking blast!");
 
         sphere_destroy(s, g);
 
-        return;
+        effect *e = player_effect_get(g->p, ET_CANCELLATION);
+        player_effect_del(g->p, e);
     }
     else
     {
-        log_add_entry(nlarn->log, "The sphere hits you.");
         player_die(s->owner, PD_SPHERE, 0);
     }
 }
@@ -242,8 +247,8 @@ static void sphere_kill_monster(sphere *s, monster *m)
     if (monster_in_sight(m))
     {
         log_add_entry(nlarn->log,
-                      "The sphere of annihilation hits the %s.",
-                      monster_name(m));
+                "The sphere of annihilation hits the %s.",
+                monster_name(m));
     }
 
     mret = monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, DAMO_SPHERE, s));

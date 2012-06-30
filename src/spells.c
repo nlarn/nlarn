@@ -157,7 +157,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_CAN, "can", "cancellation",
         SC_PLAYER, DAM_NONE, ET_CANCELLATION,
-        "Negates the ability of a monster to use his special abilities.",
+        "Protects the caster against spheres of annihilation.",
         NULL, NULL,
         DC_NONE, 3, 950, FALSE
     },

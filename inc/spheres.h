@@ -1,6 +1,6 @@
 /*
  * spheres.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,11 +16,10 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* $Id$ */
-
 #ifndef __SPHERES_H_
 #define __SPHERES_H_
 
+#include "cJSON.h"
 #include "map.h"
 #include "player.h"
 
