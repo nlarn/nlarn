@@ -1616,6 +1616,17 @@ monster *monster_damage_take(monster *m, damage *dam)
         /* dam->amount -= monster_ac(m); */
         break;
 
+  case DAM_MAGICAL:
+        if (monster_flags(m, MF_RES_MAGIC))
+        {
+            dam->amount /= monster_level(m);
+            if (monster_in_sight(m))
+            {
+                log_add_entry(nlarn->log, "The %s %sresists the magic.",
+                        monster_name(m), dam->amount > 0 ? "partly " : "");
+            }
+        }
+
     case DAM_WATER:
         if (monster_flags(m, MF_SWIM))
             dam->amount = 0;
@@ -1628,8 +1639,7 @@ monster *monster_damage_take(monster *m, damage *dam)
             if (monster_in_sight(m))
             {
                 log_add_entry(nlarn->log, "The %s %sresists the flames.",
-                              monster_name(m),
-                              dam->amount > 0 ? "partly " : "");
+                        monster_name(m), dam->amount > 0 ? "partly " : "");
             }
         }
         break;

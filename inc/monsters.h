@@ -1,6 +1,6 @@
 /*
  * monsters.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* $Id$ */
 
 #ifndef __MONSTERS_H_
 #define __MONSTERS_H_
@@ -127,7 +125,7 @@ typedef enum monster_t
     MT_DEMON_PRINCE,
     MT_MAX_GENERATED,
     MT_TOWN_PERSON = MT_MAX_GENERATED,
-    MT_MAX				/* maximum # monsters in the dungeon */
+    MT_MAX                /* maximum # monsters in the dungeon */
 } monster_t;
 
 typedef enum monster_action_type
@@ -148,7 +146,7 @@ typedef enum monster_flags
     MF_NONE         = 0,
     MF_HEAD         = 1,        /* has a head */
     MF_NOBEHEAD     = 1 << 1,   /* cannot be beheaded */
-    MF_HANDS        = 1 << 2,	/* has hands => can open doors */
+    MF_HANDS        = 1 << 2,   /* has hands => can open doors */
     MF_FLY          = 1 << 3,   /* can fly (not affected by pits and trapdoors) */
     MF_SPIRIT       = 1 << 4,   /* is a spirit */
     MF_UNDEAD       = 1 << 5,   /* is undead */
@@ -164,7 +162,8 @@ typedef enum monster_flags
     MF_RES_POISON   = 1 << 15,  /* resistant to poison */
     MF_RES_ELEC     = 1 << 16,  /* resistant to electricity */
     MF_RES_CONF     = 1 << 17,  /* resistant to confusion */
-    MF_SWIM         = 1 << 18,  /* can swim through water */
+    MF_RES_MAGIC    = 1 << 18,  /* resistant to magic */
+    MF_SWIM         = 1 << 19,  /* can swim through water */
 } monster_flag;
 
 /* function definitions */

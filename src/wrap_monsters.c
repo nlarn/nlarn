@@ -61,6 +61,7 @@ void wrap_monsters(lua_State *L)
         { "RES_POISON",  MF_RES_POISON },
         { "RES_ELEC",    MF_RES_ELEC },
         { "RES_CONF",    MF_RES_CONF },
+        { "RES_MAGIC",   MF_RES_MAGIC },
         { "SWIM",        MF_SWIM },
 
         /* monster types */
