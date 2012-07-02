@@ -880,7 +880,7 @@ gboolean map_trajectory(position source, position target,
     return FALSE;
 }
 
-area *map_get_obstacles(map *m, position center, int radius)
+area *map_get_obstacles(map *m, position center, int radius, gboolean doors)
 {
     area *narea;
     position pos = pos_invalid;
@@ -906,10 +906,15 @@ area *map_get_obstacles(map *m, position center, int radius)
              X(pos) <= X(center) + radius;
              X(pos)++, x++)
         {
-            if (!pos_valid(pos) || !map_pos_transparent(m, pos))
+            if (!pos_valid(pos))
             {
                 area_point_set(narea, x, y);
+                continue;
             }
+            if (doors && map_sobject_at(m, pos) == LS_CLOSEDDOOR)
+                continue;
+            else if (!map_pos_transparent(m, pos))
+                area_point_set(narea, x, y);
         }
     }
 

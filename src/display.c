@@ -2441,7 +2441,7 @@ position display_get_new_position(player *p,
         else if (ball && radius)
         {
             /* paint a ball if told to */
-            area *obstacles = map_get_obstacles(vmap, pos, radius);
+            area *obstacles = map_get_obstacles(vmap, pos, radius, FALSE);
             b = area_new_circle_flooded(pos, radius, obstacles);
             cursor = pos;
 

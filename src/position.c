@@ -350,7 +350,7 @@ gboolean area_blast(position center, guint radius,
     gboolean retval = FALSE;
     area *ball, *obsmap;
 
-    obsmap = map_get_obstacles(cmap, center, radius);
+    obsmap = map_get_obstacles(cmap, center, radius, TRUE);
     ball = area_new_circle_flooded(center, radius, obsmap);
 
     attron(colour);

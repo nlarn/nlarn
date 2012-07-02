@@ -214,7 +214,17 @@ gboolean map_trajectory(position source, position target,
         gpointer data1, gpointer data2, gboolean reflectable,
         char glyph, int colour, gboolean keep_ray);
 
-area *map_get_obstacles(map *m, position center, int radius);
+/**
+ * @brief Get an area of defined dimensions with all blocked positions set.
+ *
+ * @param A map.
+ * @param The center position.
+ * @param The radius.
+ * @param Shall closed doors be handled as passable?
+ *
+ * @return A freshly allocated area with all impassable positions set.
+ */
+area *map_get_obstacles(map *m, position center, int radius, gboolean doors);
 
 void map_set_tiletype(map *m, area *area, map_tile_t type, guint8 duration);
 

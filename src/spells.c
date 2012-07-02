@@ -929,7 +929,7 @@ int spell_type_flood(spell *s, struct player *p)
         break;
     }
 
-    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius);
+    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius, FALSE);
     area *range = area_new_circle_flooded(pos, radius, obstacles);
 
     if (area_pos_get(range, p->pos)
@@ -984,7 +984,7 @@ int spell_type_blast(spell *s, struct player *p)
 
     /* get the affected area to determine if the player would be hit */
     ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos,
-                                   radius));
+                radius, TRUE));
 
     gboolean player_affected = area_pos_get(ball, p->pos);
     area_destroy(ball);
@@ -1734,6 +1734,13 @@ static gboolean spell_area_pos_hit(position pos,
             && (game_difficulty(nlarn) <= 2))
         {
         /* fireball and lightning destroy statues up to diff. level 2 */
+            sobject_destroy_at(damo->originator, cmap, pos);
+            terminated = TRUE;
+        }
+
+        if (mst == LS_CLOSEDDOOR && (spell_level(sp) > 2))
+        {
+            /* Blast the door away */
             sobject_destroy_at(damo->originator, cmap, pos);
             terminated = TRUE;
         }

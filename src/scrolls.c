@@ -301,7 +301,7 @@ static int scroll_annihilate(struct player *p, item *r_scroll __attribute__((unu
 
     g_assert(p != NULL);
 
-    obsmap = map_get_obstacles(cmap, p->pos, 2);
+    obsmap = map_get_obstacles(cmap, p->pos, 2, FALSE);
     blast = area_new_circle_flooded(p->pos, 2, obsmap);
 
     for (Y(cursor) = blast->start_y; Y(cursor) < blast->start_y + blast->size_y; Y(cursor)++)
@@ -688,7 +688,7 @@ static int scroll_hold_monster(player *p, item *r_scroll __attribute__((unused))
 
     g_assert(p != NULL);
 
-    obsmap = map_get_obstacles(cmap, p->pos, 2);
+    obsmap = map_get_obstacles(cmap, p->pos, 2, FALSE);
     blast = area_new_circle_flooded(p->pos, 2, obsmap);
 
     for (Y(cursor) = blast->start_y; Y(cursor) < blast->start_y + blast->size_y; Y(cursor)++)

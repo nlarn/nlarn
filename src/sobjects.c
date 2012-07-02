@@ -1050,6 +1050,15 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
         map_sobject_set(dmap, pos, LS_NONE);
         break;
 
+    case LS_CLOSEDDOOR:
+        map_sobject_set(dmap, pos, LS_NONE);
+
+        if(fov_get(p->fv, pos))
+        {
+            log_add_entry(nlarn->log, "The door shatters!");
+        }
+        break;
+
     default:
         log_add_entry(nlarn->log, "Somehow that did not work.");
         /* NOP */
@@ -1087,7 +1096,7 @@ static void monster_appear(monster_t type, position mpos)
 
 static void flood_affect_area(position pos, int radius, int type, int duration)
 {
-    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius);
+    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius, FALSE);
     area *range = area_new_circle_flooded(pos, radius, obstacles);
 
     map_set_tiletype(game_map(nlarn, Z(pos)), range, type, duration);
