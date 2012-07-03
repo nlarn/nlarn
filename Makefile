@@ -214,6 +214,12 @@ $(OSXIMAGE): nlarn
 		chmod 0644 dmgroot/NLarn.app/Contents/MacOS/$${lib##*/}; \
 		install_name_tool -change $$lib @executable_path/$${lib##*/} \
 			dmgroot/NLarn.app/Contents/MacOS/nlarn; \
+		for llib in dmgroot/NLarn.app/Contents/MacOS/*.dylib; do\
+			for libpath in $$(otool -L $$llib | awk '/local/ {print $$1}'); do\
+				install_name_tool -change $$libpath \
+					@executable_path/$${libpath##*/} $$llib; \
+            done; \
+		done; \
 	done
 # Copy required files
 	@cp -p lib/{fortune,maze,monsters.lua,nlarn*} \
@@ -222,9 +228,9 @@ $(OSXIMAGE): nlarn
 	@cp -pr Changelog.txt README.txt LICENSE dmgroot
 	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
 # Update the version information in the plist
-	/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(VERSION)" \
+	@/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(VERSION)" \
 		dmgroot/NLarn.app/Contents/Info.plist
-	/usr/libexec/PlistBuddy -c \
+	@/usr/libexec/PlistBuddy -c \
 		"Add :CFBundleShortVersionString string $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)" \
 		dmgroot/NLarn.app/Contents/Info.plist
 # Use the same icons for the dmg file
