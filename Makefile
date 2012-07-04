@@ -236,18 +236,17 @@ $(OSXIMAGE): nlarn
 # Use the same icons for the dmg file
 	@cp -p resources/NLarn.icns dmgroot/.VolumeIcon.icns
 	@SetFile -c icnC dmgroot/.VolumeIcon.icns
-# Create a pseudo-installer
-	@ln -s "/Applications" dmgroot/Applications
-	@cp resources/dmg_background.png dmgroot/.background.png
-	@cp resources/dot.DS_Store dmgroot/.DS_store
-# Create the disk image
-	@echo hditool requires superuser rights.
+# Create a pseudo-installer disk image
+	@mkdir dmgroot/.background
+	@cp resources/dmg_background.png dmgroot/.background
+	@echo hdiutil requires superuser rights.
 	@sudo hdiutil create -srcfolder dmgroot -volname "NLarn $(VERSION)" \
-		-uid 99 -gid 99 -format UDRW "raw-$(DIRNAME).dmg"
+		-uid 99 -gid 99 -format UDRW -ov "raw-$(DIRNAME).dmg"
 	@rm -rf dmgroot
 	@mkdir dmgroot
-	@sudo hdiutil attach -readwrite "raw-$(DIRNAME).dmg" -mountpoint dmgroot
+	@sudo hdiutil attach -noautoopen -readwrite "raw-$(DIRNAME).dmg" -mountpoint dmgroot
 	@sudo SetFile -a C dmgroot
+	@sed -e 's/##VOLNAME##/NLarn $(VERSION)/' resources/dmg_settings.scpt | osascript
 	@sudo hdiutil detach dmgroot
 	@rm -rf dmgroot
 	@sudo hdiutil convert "raw-$(DIRNAME).dmg" -format UDZO -o "$(DIRNAME).dmg"
