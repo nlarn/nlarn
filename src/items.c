@@ -1112,6 +1112,10 @@ guint item_fragility(item *it)
 {
     int chance = item_materials[item_material(it)].fragility;
 
+    /* Ensure that unique weapons do not break */
+    if (it->type == IT_WEAPON && weapon_is_unique(it))
+        return 0;
+
     chance += 15 * it->burnt;
     chance += 15 * it->corroded;
     chance += 15 * it->rusty;
