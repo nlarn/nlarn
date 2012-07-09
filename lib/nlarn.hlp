@@ -59,14 +59,14 @@ You can select the travel target by moving the cursor or by typing the desired f
 
 `yellow`Control Keys`end`
 
-`lightgreen`TAB`end` show worn equipment
-`lightgreen`^D`end`  list discovered landmarks
-`lightgreen`^D`end`  page down in the inventory, spell list and messages
-`lightgreen`^L`end`  redraw the screen
-`lightgreen`^Q`end`  quit the game
-`lightgreen`^R`end`  recall message history
-`lightgreen`^S`end`  save and exit the game
-`lightgreen`^U`end`  page up in the inventory, spell list and messages
+`lightgreen`TAB`end`     show worn equipment
+`lightgreen`CTRL+D`end`  list discovered landmarks
+`lightgreen`CTRL+D`end`  page down in the inventory, spell list and messages
+`lightgreen`CTRL+L`end`  redraw the screen
+`lightgreen`CTRL+Q`end`  quit the game
+`lightgreen`CTRL+R`end`  recall message history
+`lightgreen`CTRL+S`end`  save and exit the game
+`lightgreen`CTRL+U`end`  page up in the inventory, spell list and messages
 
 
 `yellow`Game Time`end`
@@ -103,12 +103,12 @@ When opening the spell casting window by pressing (`lightgreen`m`end`) you'll ge
 Wizard mode is used to debug the game; therefore it is impossible to die in wizard mode. You will gain insight into otherwise hidden details of the game. Once you enter wizard mode, there is no way back; any progress made during wizard mode will not make it to the high score list.
 When starting the game with the wizard mode command line option (`lightgreen`-w`end`), every item in the game will be available in the store.
 
-`lightgreen`^W`end`  activate wizard mode
-`lightgreen`+`end`   teleport down one level
-`lightgreen`-`end`   teleport up one level
-`lightgreen`^T`end`  teleport within a level
-`lightgreen`^X`end`  raise experience level
-`lightgreen`*`end`   add 1000 gp to bank account
-`lightgreen`&`end`   heal yourself
-`lightgreen`^F`end`  combat simulation
-`lightgreen`^V`end`  toggle the visibility of the entire map
+`lightgreen`CTRL+W`end`  activate wizard mode
+`lightgreen`+`end`       teleport down one level
+`lightgreen`-`end`       teleport up one level
+`lightgreen`CTRL+T`end`  teleport within a level
+`lightgreen`CTRL+X`end`  raise experience level
+`lightgreen`*`end`       add 1000 gp to bank account
+`lightgreen`&`end`       heal yourself
+`lightgreen`CTRL+F`end`  combat simulation
+`lightgreen`CTRL+V`end`  toggle the visibility of the entire map
