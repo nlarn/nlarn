@@ -1,6 +1,6 @@
 #
 # Makefile
-# Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+# Copyright (C) 2009-2012, 2013 Joachim de Groot <jdegroot@web.de>
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -23,7 +23,7 @@ ARCH := $(shell uname -m)
 # check if operating on a git checkout
 ifneq ($(wildcard .git),)
   # get hash of current commit
-  GITREV := $(shell git show --pretty=oneline | sed -ne '1 s/\(.\{6\}\).*/\1/p')
+  GITREV := $(shell git log -n1 --format="%h")
   # get tag for current commit
   GITTAG := $(shell git tag --contains $(GITREV) | tr '[:upper:]' '[:lower:]')
   ifeq ($(GITTAG),)
