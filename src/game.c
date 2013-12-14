@@ -29,12 +29,12 @@
 #include <lualib.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <zlib.h>
 #include <glib/gstdio.h>
 #include <sys/param.h>
 
 #ifdef __unix
+#include <unistd.h>
 #include <sys/stat.h>
 #endif
 
