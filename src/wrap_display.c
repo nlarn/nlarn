@@ -28,7 +28,11 @@ static int wrap_get_count(lua_State *L);
 static int wrap_get_yesno(lua_State *L);
 static int wrap_paint(lua_State *L);
 
+#if LUA_VERSION_NUM > 501
+static const luaL_Reg display_functions[] =
+#else
 static const luaL_reg display_functions[] =
+#endif
 {
     { "draw",       wrap_draw },
     { "get_count",  wrap_get_count },

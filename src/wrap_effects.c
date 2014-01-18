@@ -38,7 +38,11 @@ static int wrap_msg_m_start(lua_State *L);
 static int wrap_msg_m_stop(lua_State *L);
 static int wrap_amount(lua_State *L);
 
+#if LUA_VERSION_NUM > 501
+static const luaL_Reg effect_methods[] =
+#else
 static const luaL_reg effect_methods[] =
+#endif
 {
     { "new",         wrap_new },
     { "desc",        wrap_desc },
@@ -50,7 +54,11 @@ static const luaL_reg effect_methods[] =
     { 0, 0 }
 };
 
+#if LUA_VERSION_NUM > 501
+static const luaL_Reg effect_metamethods[] =
+#else
 static const luaL_reg effect_metamethods[] =
+#endif
 {
     { "__gc",        wrap_destroy },
     { "__tostring",  wrap_tostring },
@@ -62,15 +70,27 @@ void wrap_effects(lua_State *L)
     g_assert (L != NULL);
 
     /* create methods table, add it to the globals */
+#if LUA_VERSION_NUM > 501
+    lua_newtable(L);
+    luaL_setfuncs(L,effect_methods,0);
+    lua_pushvalue(L,-1);
+    lua_setglobal(L,EFFECT);
+#else
     luaL_register(L, EFFECT, effect_methods);
+#endif
 
     /* create metatable for Image, add it to the Lua registry */
     luaL_newmetatable(L, EFFECT);
 
     /* fill metatable */
+#if LUA_VERSION_NUM > 501
+    lua_newtable(L);
+    luaL_setfuncs(L, effect_metamethods, 0);
+    lua_setglobal(L,"__index");
+#else
     luaL_openlib(L, 0, effect_metamethods, 0);
     lua_pushliteral(L, "__index");
-
+#endif
     /* dup methods table*/
     lua_pushvalue(L, -3);
 

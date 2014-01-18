@@ -1292,7 +1292,11 @@ int monster_attack_count(monster *m)
     if (luaN_push_table("monsters", m->type, "attacks"))
     {
         /* attacks table has been found; query lenght */
+#if LUA_VERSION_NUM > 501
+        count = lua_rawlen(nlarn->L, -1);
+#else
         count = lua_objlen(nlarn->L, -1);
+#endif
 
         /* clean up */
         lua_pop(nlarn->L, 3);
