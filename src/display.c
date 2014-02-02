@@ -529,7 +529,9 @@ int display_paint_screen(player *p)
     }
     else
     {
-        mvprintw(7, MAP_MAX_X + 3, "Unarmed");
+        attron(attrs = DC_LIGHTRED);
+        mvprintw(7, MAP_MAX_X + 3, "unarmed");
+        attroff(attrs);
     }
     clrtoeol();
 
