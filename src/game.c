@@ -1353,7 +1353,7 @@ static void game_scores_save(game *g, GList *gs)
     if (sb == NULL)
     {
         /* opening the file failed */
-        log_add_entry(g->log, "Error opening scoreboard file \"%s\".");
+        log_add_entry(g->log, "Error opening scoreboard file.");
         free(uscores);
         return;
     }
