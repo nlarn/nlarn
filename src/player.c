@@ -1,6 +1,6 @@
 /*
  * player.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2013, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1554,9 +1554,6 @@ int player_attack(player *p, monster *m)
 
 int player_map_enter(player *p, map *l, gboolean teleported)
 {
-    position pos;
-    monster *m;
-
     g_assert(p != NULL && l != NULL);
 
     /* store the last turn player has been on this map */
@@ -1574,36 +1571,36 @@ int player_map_enter(player *p, map *l, gboolean teleported)
         if ((e = player_effect_get(p, ET_TRAPPED)))
             player_effect_del(p, e);
 
-        pos = map_find_space(l, LE_MONSTER, FALSE);
+        p->pos = map_find_space(l, LE_MONSTER, FALSE);
     }
 
     /* beginning of the game */
     else if ((l->nlevel == 0) && (game_turn(nlarn) == 1))
-        pos = map_find_sobject(l, LS_HOME);
+        p->pos = map_find_sobject(l, LS_HOME);
 
     /* took the elevator down */
     else if ((Z(p->pos) == 0) && (l->nlevel == (MAP_DMAX)))
-        pos = map_find_sobject(l, LS_ELEVATORUP);
+        p->pos = map_find_sobject(l, LS_ELEVATORUP);
 
     /* took the elevator up */
     else if ((Z(p->pos) == (MAP_DMAX)) && (l->nlevel == 0))
-        pos = map_find_sobject(l, LS_ELEVATORDOWN);
+        p->pos = map_find_sobject(l, LS_ELEVATORDOWN);
 
     /* climbing up */
     else if (Z(p->pos) > l->nlevel)
     {
         if (l->nlevel == 0)
-            pos = map_find_sobject(l, LS_DNGN_ENTRANCE);
+            p->pos = map_find_sobject(l, LS_DNGN_ENTRANCE);
         else
-            pos = map_find_sobject(l, LS_STAIRSDOWN);
+            p->pos = map_find_sobject(l, LS_STAIRSDOWN);
     }
     /* climbing down */
     else if (l->nlevel > Z(p->pos))
     {
         if (l->nlevel == 1)
-            pos = map_find_sobject(l, LS_DNGN_EXIT);
+            p->pos = map_find_sobject(l, LS_DNGN_EXIT);
         else
-            pos = map_find_sobject(l, LS_STAIRSUP);
+            p->pos = map_find_sobject(l, LS_STAIRSUP);
     }
 
     if (l->nlevel == 0)
@@ -1615,14 +1612,12 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     else if (l->nlevel == 1 && Z(p->pos) == 0)
         log_add_entry(nlarn->log, "You enter the caverns of Larn.");
 
-    /* put player into new map */
-    p->pos = pos;
-
     /* remove monster that might be at player's positon */
-    if ((m = map_get_monster_at(l, p->pos)))
+    if ((map_get_monster_at(l, p->pos)))
     {
         position mnpos = map_find_space(l, LE_MONSTER, FALSE);
-        monster_pos_set(m, game_map(nlarn, Z(p->pos)), mnpos);
+        monster_pos_set(map_get_monster_at(l, p->pos),
+		                game_map(nlarn, Z(p->pos)), mnpos);
     }
 
     /* recalculate FOV to make ensure correct display after entering a level */
