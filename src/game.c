@@ -92,6 +92,7 @@ void game_init(int argc, char *argv[])
     static gint difficulty = 0;
     static gboolean wizard = FALSE;
     static gboolean no_autosave = FALSE;
+    static gboolean show_version = FALSE;
     static char *name = NULL;
     static char *gender = NULL;
     static char *auto_pickup = NULL;
@@ -282,15 +283,16 @@ void game_init(int argc, char *argv[])
     /* parse the command line */
     static GOptionEntry entries[] =
     {
-        { "name",        'n', 0, G_OPTION_ARG_STRING, &name,        "Set character's name", NULL },
-        { "gender",      'g', 0, G_OPTION_ARG_STRING, &gender,      "Set character's gender (m/f)", NULL },
-        { "stats",       's', 0, G_OPTION_ARG_STRING, &stats,       "Set character's stats (a-f)", NULL },
-        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &auto_pickup, "Item types to pick up automatically, e.g. '$*+'", NULL },
-        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,  "Set difficulty",       NULL },
-        { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &no_autosave, "Disable autosave",   NULL },
-        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &wizard,      "Enable wizard mode",   NULL },
+        { "name",        'n', 0, G_OPTION_ARG_STRING, &name,         "Set character's name", NULL },
+        { "gender",      'g', 0, G_OPTION_ARG_STRING, &gender,       "Set character's gender (m/f)", NULL },
+        { "stats",       's', 0, G_OPTION_ARG_STRING, &stats,        "Set character's stats (a-f)", NULL },
+        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &auto_pickup,  "Item types to pick up automatically, e.g. '$*+'", NULL },
+        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,   "Set difficulty",       NULL },
+        { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &no_autosave,  "Disable autosave",   NULL },
+        { "version",     'v', 0, G_OPTION_ARG_NONE,   &show_version, "Show version information and exit",   NULL },
+        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &wizard,       "Enable wizard mode",   NULL },
 #ifdef DEBUG
-        { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &savefile,  "Save file to restore", NULL },
+        { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &savefile,   "Save file to restore", NULL },
 #endif
         { NULL, 0, 0, 0, NULL, NULL, NULL }
     };
@@ -305,6 +307,17 @@ void game_init(int argc, char *argv[])
         exit (EXIT_FAILURE);
     }
     g_option_context_free(context);
+
+    if (show_version) {
+        g_printf("NLarn version %d.%d.%d%s, built on %s.\n\n",
+                VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, GITREV,
+                __DATE__);
+        g_printf("Game base directory:\t%s\n", nlarn->basedir);
+        g_printf("Game lib directory:\t%s\n", nlarn->libdir);
+        g_printf("Game savefile version:\t%d\n", SAVEFILE_VERSION);
+
+        exit(EXIT_SUCCESS);
+    }
 
     /* initialise the display - must not happen before this point
        otherwise displaying the command line help fails */
