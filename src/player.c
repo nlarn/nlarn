@@ -979,21 +979,6 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     return TRUE;
 }
 
-static const char *int2time_str(int val)
-{
-    if (val <= 3)
-    {
-        const char *count_desc[] = { "never", "once", "twice", "thrice" };
-        return count_desc[val];
-    }
-    else
-    {
-        static char buf[21];
-        g_snprintf(buf, 20, "%d times", val);
-        return buf;
-    }
-}
-
 void player_die(player *p, player_cod cause_type, int cause)
 {
     const char *message = NULL;

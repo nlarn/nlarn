@@ -510,6 +510,21 @@ const char *int2str(int val)
 
 }
 
+const char *int2time_str(int val)
+{
+    if (val <= 3)
+    {
+        const char *count_desc[] = { "never", "once", "twice", "thrice" };
+        return count_desc[val];
+    }
+    else
+    {
+        static char buf[21];
+        g_snprintf(buf, 20, "%d times", val);
+        return buf;
+    }
+}
+
 damage *damage_new(damage_t type, attack_t att_type, int amount,
                    damage_originator_t damo, gpointer originator)
 {

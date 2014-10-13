@@ -1,6 +1,6 @@
 /*
  * utils.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -134,6 +134,7 @@ int strv_append_unique(char ***list, const char *str);
 char *str_prepare_for_saving(const char *str);
 int str_starts_with_vowel(const char *str);
 const char *int2str(int val);
+const char *int2time_str(int val);
 
 static inline const char *a_an(const char *str)
 {
