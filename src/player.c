@@ -981,15 +981,14 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
 
 static const char *int2time_str(int val)
 {
-    static char buf[21];
-    const char *count_desc[] = { "never", "once", "twice", "thrice" };
-
     if (val <= 3)
     {
+        const char *count_desc[] = { "never", "once", "twice", "thrice" };
         return count_desc[val];
     }
     else
     {
+        static char buf[21];
         g_snprintf(buf, 20, "%d times", val);
         return buf;
     }
@@ -997,8 +996,6 @@ static const char *int2time_str(int val)
 
 void player_die(player *p, player_cod cause_type, int cause)
 {
-    game_score_t *score;
-    GList *scores;
     const char *message = NULL;
     const char *title = NULL;
     effect *ef = NULL;
@@ -1151,8 +1148,8 @@ void player_die(player *p, player_cod cause_type, int cause)
         /* flush keyboard input buffer */
         flushinp();
 
-        score  = game_score(nlarn, cause_type, cause);
-        scores = game_score_add(nlarn, score);
+        game_score_t *score = game_score(nlarn, cause_type, cause);
+        GList *scores = game_score_add(nlarn, score);
 
         /* create a description of the player's achievments */
         gchar *text = player_create_obituary(p, score, scores);
@@ -1617,7 +1614,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     {
         position mnpos = map_find_space(l, LE_MONSTER, FALSE);
         monster_pos_set(map_get_monster_at(l, p->pos),
-		                game_map(nlarn, Z(p->pos)), mnpos);
+                        game_map(nlarn, Z(p->pos)), mnpos);
     }
 
     /* recalculate FOV to make ensure correct display after entering a level */
@@ -1830,7 +1827,6 @@ void player_autopickup_show(player *p)
 
 void player_level_gain(player *p, int count)
 {
-    int base;
     const char *desc_orig, *desc_new;
 
     g_assert(p != NULL && count > 0);
@@ -1864,6 +1860,8 @@ void player_level_gain(player *p, int count)
 
     for (int i = 0; i < count; i++)
     {
+        int base;
+
         /* increase HP max */
         base = (p->constitution - game_difficulty(nlarn)) >> 1;
         if (p->level < (guint)max(7 - game_difficulty(nlarn), 0))
@@ -1882,8 +1880,6 @@ void player_level_gain(player *p, int count)
 
 void player_level_lose(player *p, int count)
 {
-    int base;
-
     g_assert(p != NULL && count > 0);
 
     p->level -= count;
@@ -1898,6 +1894,8 @@ void player_level_lose(player *p, int count)
 
     for (int i = 0; i < count; i++)
     {
+        int base;
+
         /* decrease HP max */
         base = (p->constitution - game_difficulty(nlarn)) >> 1;
         if (p->level < (guint)max(7 - game_difficulty(nlarn), 0))
@@ -1980,7 +1978,6 @@ int player_hp_lose(player *p, int count, player_cod cause_type, int cause)
 
 void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause)
 {
-    monster *m = NULL;
     effect *e = NULL;
     int hp_orig;
     guint effects_count;
@@ -1989,7 +1986,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     if (dam->dam_origin.ot == DAMO_MONSTER)
     {
-        m = (monster *)dam->dam_origin.originator;
+        monster *m = (monster *)dam->dam_origin.originator;
 
         /* amulet of power cancels demon attacks */
         if (monster_flags(m, MF_DEMON) && chance(75)
@@ -2617,14 +2614,11 @@ int player_effect(player *p, effect_t et)
 
 char **player_effect_text(player *p)
 {
-    char **text;
-    effect *e;
-
-    text = strv_new();
+    char **text = strv_new();
 
     for (guint pos = 0; pos < p->effects->len; pos++)
     {
-        e = game_effect_get(nlarn, g_ptr_array_index(p->effects, pos));
+        effect *e = game_effect_get(nlarn, g_ptr_array_index(p->effects, pos));
 
         if (effect_get_desc(e) != NULL)
         {
@@ -3913,14 +3907,12 @@ void player_item_notes(player *p, inventory **inv __attribute__((unused)), item 
 
 void player_read(player *p)
 {
-    item *it;
-
     g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_legible) > 0)
     {
-        it = display_inventory("Choose an item to read", p, &p->inventory,
-                               NULL, FALSE, FALSE, FALSE, item_filter_legible);
+        item *it = display_inventory("Choose an item to read", p,
+                &p->inventory, NULL, FALSE, FALSE, FALSE, item_filter_legible);
 
         if (it)
         {
@@ -3935,14 +3927,12 @@ void player_read(player *p)
 
 void player_quaff(player *p)
 {
-    item *it;
-
     g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_potions) > 0)
     {
-        it = display_inventory("Choose an item to drink", p, &p->inventory,
-                               NULL, FALSE, FALSE, FALSE, item_filter_potions);
+        item *it = display_inventory("Choose an item to drink", p,
+                &p->inventory, NULL, FALSE, FALSE, FALSE, item_filter_potions);
 
         if (it)
         {
@@ -3958,14 +3948,12 @@ void player_quaff(player *p)
 
 void player_equip(player *p)
 {
-    item *it;
-
     g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_equippable) > 0)
     {
-        it = display_inventory("Choose an item to equip", p, &p->inventory,
-                               NULL, FALSE, FALSE, FALSE, item_filter_equippable);
+        item *it = display_inventory("Choose an item to equip", p,
+                &p->inventory, NULL, FALSE, FALSE, FALSE, item_filter_equippable);
 
         if (it)
         {
@@ -3980,14 +3968,12 @@ void player_equip(player *p)
 
 void player_take_off(player *p)
 {
-    item *it;
-
     g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_unequippable) > 0)
     {
-        it = display_inventory("Choose an item to take off", p, &p->inventory,
-                               NULL, FALSE, FALSE, FALSE, item_filter_unequippable);
+        item *it = display_inventory("Choose an item to take off", p,
+                &p->inventory, NULL, FALSE, FALSE, FALSE, item_filter_unequippable);
 
         if (it)
             player_item_unequip(p, NULL, it, FALSE);
@@ -4000,13 +3986,11 @@ void player_take_off(player *p)
 
 void player_drop(player *p)
 {
-    item *it;
-
     g_assert (p != NULL);
 
     if (inv_length_filtered(p->inventory, item_filter_dropable) > 0)
     {
-        it = display_inventory("Choose an item to drop", p, &p->inventory,
+        item *it = display_inventory("Choose an item to drop", p, &p->inventory,
                                NULL, FALSE, FALSE, FALSE, item_filter_dropable);
 
         if (it)
@@ -4152,14 +4136,13 @@ int player_get_speed(player *p)
 guint player_get_gold(player *p)
 {
     guint gold = 0;
-    item *i;
 
     g_assert(p != NULL);
 
     /* gold stacks, thus there can only be one item in the inventory */
     if (inv_length_filtered(p->inventory, item_filter_gold))
     {
-        i = inv_get_filtered(p->inventory, 0, item_filter_gold);
+        item *i = inv_get_filtered(p->inventory, 0, item_filter_gold);
         gold += i->count;
     }
 
@@ -4168,12 +4151,11 @@ guint player_get_gold(player *p)
          idx < inv_length_filtered(p->inventory, item_filter_container);
          idx++)
     {
-        item *it;
-        i = inv_get_filtered(p->inventory, idx, item_filter_container);
+        item *i = inv_get_filtered(p->inventory, idx, item_filter_container);
 
         if (inv_length_filtered(i->content, item_filter_gold))
         {
-            it = inv_get_filtered(i->content, 0, item_filter_gold);
+            item *it = inv_get_filtered(i->content, 0, item_filter_gold);
             gold += it->count;
         }
     }
@@ -4355,7 +4337,6 @@ void player_update_fov(player *p)
     int radius;
     position pos = p->pos;
     map *pmap;
-    area *enlight;
 
     int range = (Z(p->pos) == 0 ? 15 : 6);
 
@@ -4381,7 +4362,8 @@ void player_update_fov(player *p)
         /* reset FOV manually */
         fov_reset(p->fv);
 
-        enlight = area_new_circle(p->pos, player_effect(p, ET_ENLIGHTENMENT), FALSE);
+        area *enlight = area_new_circle(p->pos,
+                player_effect(p, ET_ENLIGHTENMENT), FALSE);
 
         /* set visible field according to returned area */
         for (int y = 0; y < enlight->size_y; y++)
@@ -4615,8 +4597,6 @@ static void player_sobject_memorize(player *p, sobject_t sobject, position pos)
 
 void player_sobject_forget(player *p, position pos)
 {
-    player_sobject_memory *som;
-
     /* just return if nothing has been memorized yet */
     if (p->sobjmem == NULL)
     {
@@ -4625,7 +4605,8 @@ void player_sobject_forget(player *p, position pos)
 
     for (guint idx = 0; idx < p->sobjmem->len; idx++)
     {
-        som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
+        player_sobject_memory *som = &g_array_index(p->sobjmem,
+                player_sobject_memory, idx);
 
         /* remove existing entries for this position */
         if (pos_identical(som->pos, pos))
@@ -4934,7 +4915,6 @@ void calc_fighting_stats(player *p)
 {
     g_assert(p != NULL);
 
-    monster *m;
     gchar *desc = NULL;
     GString *text;
 
@@ -4988,6 +4968,7 @@ void calc_fighting_stats(player *p)
 
     for (guint32 idx = MT_NONE + 1; idx < MT_MAX_GENERATED; idx++)
     {
+        monster *m;
         if (!(m = monster_new(idx, pos)))
         {
             g_string_append_printf(text, "Monster %s could not be created.\n\n",
@@ -5128,9 +5109,6 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
 {
     const char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
     GList *iterator;
-
-    /* buffer for item descriptions */
-    gchar *it_desc;
 
     /* the obituary */
     GString *text;
@@ -5339,7 +5317,7 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
             item *it = inv_get(p->inventory, pos);
             if (!player_item_is_equipped(p, it))
             {
-                it_desc = item_describe(it, TRUE, FALSE, FALSE);
+                gchar *it_desc = item_describe(it, TRUE, FALSE, FALSE);
                 g_string_append_printf(text, "%s\n", it_desc);
                 g_free(it_desc);
             }

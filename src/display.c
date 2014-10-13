@@ -1,6 +1,6 @@
 /*
  * display.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -560,12 +560,10 @@ int display_paint_screen(player *p)
         const guint available_space = COLS - MAP_MAX_X - 4;
         char **efdescs = strv_new();
 
-        effect *e;
-
         /* collect effect descriptions */
         for (i = 0; i < p->effects->len; i++)
         {
-            e = game_effect_get(nlarn, g_ptr_array_index(p->effects, i));
+            effect *e = game_effect_get(nlarn, g_ptr_array_index(p->effects, i));
 
             if (effect_get_desc(e) == NULL)
                 continue;
@@ -1110,7 +1108,6 @@ void display_config_autopickup(player *p)
     display_window *cwin;
     int width, height;
     int startx, starty;
-    int key; /* keyboard input */
     int RUN = TRUE;
     int attrs; /* curses attributes */
 
@@ -1129,6 +1126,8 @@ void display_config_autopickup(player *p)
 
     do
     {
+        int key; /* keyboard input */
+
         for (item_t it = 1; it < IT_MAX; it++)
         {
             if (p->settings.auto_pickup[it])
@@ -1488,9 +1487,6 @@ int display_get_count(const char *caption, int value)
     /* user input */
     int key;
 
-    /* input length */
-    int ilen = 0;
-
     /* cursor position */
     int ipos = 0;
 
@@ -1532,7 +1528,7 @@ int display_get_count(const char *caption, int value)
 
     do
     {
-        ilen = strlen(ivalue);
+        int ilen = strlen(ivalue); /* input length */
 
         /* make cursor visible and set according to insert mode */
         if (insert_mode)
@@ -1911,7 +1907,6 @@ int display_get_yesno(const char *question, const char *yes, const char *no)
     guint line;
     int attrs; /* curses attributes */
     GPtrArray *text;
-    int key; /* input key buffer */
 
     const guint padding = 1;
     const guint margin = 2;
@@ -1986,7 +1981,7 @@ int display_get_yesno(const char *question, const char *yes, const char *no)
         wattroff(ywin->window, attrs);
         wrefresh(ywin->window);
 
-        key = tolower(getch());
+        int key = tolower(getch()); /* input key buffer */
         // Specialcase for the movement keys and y/n.
         if (key != 'h' && key != 'l' && key != 'y' && key != 'n')
         {
@@ -2071,7 +2066,6 @@ direction display_get_direction(const char *title, int *available)
     int startx, starty;
     int width;
     int attrs; /* curses attributes */
-    int key; /* input key buffer */
     int RUN = TRUE;
 
     /* direction to return */
@@ -2128,6 +2122,8 @@ direction display_get_direction(const char *title, int *available)
 
     do
     {
+        int key; /* input key buffer */
+
         switch ((key = getch()))
         {
 
@@ -2705,7 +2701,6 @@ position display_get_new_position(player *p,
 
 void display_show_history(message_log *log, const char *title)
 {
-    message_log_entry *le;
     GString *text = g_string_new(NULL);
     char intrep[11] = { 0 }; /* string representation of the game time */
     int twidth; /* the number of characters of the current game time */
@@ -2717,7 +2712,7 @@ void display_show_history(message_log *log, const char *title)
     /* assemble reversed game log */
     for (guint idx = log_length(log); idx > 0; idx--)
     {
-        le = log_get_entry(log, idx - 1);
+        message_log_entry *le = log_get_entry(log, idx - 1);
         g_string_append_printf(text, "%*d: %s\n", twidth, le->gtime, le->message);
     }
 

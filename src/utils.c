@@ -1,6 +1,6 @@
 /*
  * utils.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -204,7 +204,6 @@ message_log_entry *log_get_entry(message_log *log, guint id)
 
 cJSON *log_serialize(message_log *log)
 {
-    cJSON *log_entry;
     cJSON *log_ser = cJSON_CreateObject();
     cJSON *log_entries = cJSON_CreateArray();
 
@@ -212,8 +211,9 @@ cJSON *log_serialize(message_log *log)
     for (guint idx = 0; idx < log_length(log); idx++)
     {
         message_log_entry *entry = log_get_entry(log, idx);
+        cJSON *log_entry = cJSON_CreateObject();
 
-        cJSON_AddItemToArray(log_entries, log_entry = cJSON_CreateObject());
+        cJSON_AddItemToArray(log_entries, log_entry);
         cJSON_AddNumberToObject(log_entry, "gtime", entry->gtime);
         cJSON_AddStringToObject(log_entry, "message", entry->message);
     }
@@ -287,11 +287,8 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
 {
     GPtrArray *text;
     int spos = 0;       /* current starting position in source string */
-    int cpos;           /* current working position in source string */
     int lp;             /* last position of whitespace */
     int len;            /* length of str */
-    int llen;           /* length of text excluding tags content on current line */
-    char *line;         /* copy of line */
     char *spaces = NULL;
 
     text = g_ptr_array_new();
@@ -315,8 +312,17 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         /* flag to determine if the current char must not be counted */
         gboolean in_tag = FALSE;
 
+        /* current working position in source string */
+        int cpos = 0;
+
+        /* length of text excluding tags content on current line */
+        int llen = 0;
+
         /* reset target string length and position of last whitespace */
-        cpos = llen = lp = 0;
+        lp = 0;
+
+        /* copy of line */
+        char *line;
 
         /* scan the next line */
         while (llen <= width)

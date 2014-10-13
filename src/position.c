@@ -1,6 +1,6 @@
 /*
  * position.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -236,8 +236,6 @@ area *area_new_circle(position center, guint radius, gboolean hollow)
     int x = 0;
     int y = radius;
 
-    int fill;
-
     if (!pos_valid(center))
         return NULL;
 
@@ -286,16 +284,16 @@ area *area_new_circle(position center, guint radius, gboolean hollow)
         return circle;
 
     /* fill the circle
-     * - set fill to 1 when spotting the left border
-     * - set position if (fill == 1)
-     * - set fill = 2 when spotting the right border
+     * - set fill to TRUE when spotting the left border
+     * - set position if (fill == TRUE)
+     * - set fill = FALSE when spotting the right border
      *
      * do not need to fill the first and last row
      */
 
     for (y = 1; y < circle->size_y - 1; y++)
     {
-        fill = 0;
+        gboolean fill = FALSE;
 
         for (x = 0; x < circle->size_x; x++)
         {

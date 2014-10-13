@@ -1,6 +1,6 @@
 /*
  * buildings.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -78,8 +78,6 @@ int building_bank(player *p)
     guint amount = 0;
 
     GPtrArray *callbacks = NULL;
-    display_inv_callback *callback;
-
     GString *text;
 
     const char msg_title[] = "First National Bank of Larn";
@@ -148,7 +146,7 @@ int building_bank(player *p)
         /* define callback functions */
         callbacks = g_ptr_array_new();
 
-        callback = g_malloc(sizeof(display_inv_callback));
+        display_inv_callback *callback = g_malloc(sizeof(display_inv_callback));
         callback->description = "(s)ell";
         callback->helpmsg = "Sell the currently selected gem.";
         callback->key = 's';
@@ -1402,7 +1400,6 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
 {
     guint price;
     gchar *name_unknown;
-    gchar *name_known;
     char message[81];
 
     const char title[] = "Identify item";
@@ -1427,7 +1424,7 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
             player_item_identify(p, NULL, it);
             /* upper case first letter */
             name_unknown[0] = g_ascii_toupper(name_unknown[0]);
-            name_known = item_describe(it, player_item_known(p, it), TRUE, FALSE);
+            gchar *name_known = item_describe(it, player_item_known(p, it), TRUE, FALSE);
 
             log_add_entry(nlarn->log, "%s is %s.", name_unknown, name_known);
             g_free(name_known);

@@ -1,6 +1,6 @@
 /*
  * sobjects.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -63,12 +63,9 @@ static gboolean sobject_blast_hit(position pos, const damage_originator *damo,
 
 int player_altar_desecrate(player *p)
 {
-    effect *e = NULL;
-    map *current;
-
     g_assert (p != NULL);
 
-    current = game_map(nlarn, Z(p->pos));
+    map *current = game_map(nlarn, Z(p->pos));
 
     if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
@@ -90,7 +87,7 @@ int player_altar_desecrate(player *p)
             monster_appear(MT_RED_DRAGON, mpos);
         }
 
-        e = effect_new(ET_AGGRAVATE_MONSTER);
+        effect *e = effect_new(ET_AGGRAVATE_MONSTER);
         e->turns = 2500;
         player_effect_add(p, e);
     }
@@ -369,9 +366,6 @@ int player_door_close(player *p)
     /* a counter and another one */
     int count, num;
 
-    /* a monster */
-    monster *m;
-
     /* the current map */
     map *pmap = game_map(nlarn, Z(p->pos));
 
@@ -418,7 +412,7 @@ int player_door_close(player *p)
             }
 
             /* check for monster in the doorway */
-            m = map_get_monster_at(pmap, pos);
+            monster *m = map_get_monster_at(pmap, pos);
 
             if (m && monster_in_sight(m))
             {

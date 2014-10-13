@@ -1,6 +1,6 @@
 /*
  * container.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -319,12 +319,11 @@ int container_move_content(player *p __attribute__((unused)), inventory **inv, i
 {
     g_assert(inv != NULL);
 
-    item *it;
     guint count = 0;
 
     for (guint idx = 0; idx < inv_length(*inv);)
     {
-        it = inv_get(*inv, idx);
+        item *it = inv_get(*inv, idx);
         inv_del_element(inv, it);
         if (inv_add(new_inv, it))
             count++;

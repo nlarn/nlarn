@@ -1,6 +1,6 @@
 /*
  * scrolls.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -645,7 +645,6 @@ static int scroll_heal_monster(player *p, item *r_scroll __attribute__((unused))
 {
     GList *mlist;
     int count = 0;
-    monster *m;
 
     g_assert(p != NULL);
 
@@ -653,7 +652,7 @@ static int scroll_heal_monster(player *p, item *r_scroll __attribute__((unused))
 
     do
     {
-        m = (monster *)mlist->data;
+        monster *m = (monster *)mlist->data;
         position mpos = monster_pos(m);
 
         /* find monsters on the same level */

@@ -1,6 +1,6 @@
 /*
  * items.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -439,10 +439,9 @@ void item_destroy(item *it)
 
     if (it->effects)
     {
-        effect *eff;
-
         while (it->effects->len)
         {
+            effect *eff;
             gpointer effect_id = g_ptr_array_remove_index_fast(it->effects,
                                  it->effects->len - 1);
 
@@ -1220,7 +1219,6 @@ int item_remove_curse(item *it)
 item *item_enchant(item *it)
 {
     gpointer oid;
-    effect *e;
 
     g_assert(it != NULL);
 
@@ -1256,7 +1254,7 @@ item *item_enchant(item *it)
         for (guint pos = 0; pos < it->effects->len; pos++)
         {
             oid = g_ptr_array_index(it->effects, pos);
-            e = game_effect_get(nlarn, oid);
+            effect *e = game_effect_get(nlarn, oid);
 
             e->amount++;
         }
@@ -1268,7 +1266,6 @@ item *item_enchant(item *it)
 item *item_disenchant(item *it)
 {
     gpointer oid;
-    effect *e;
 
     g_assert(it != NULL);
 
@@ -1297,7 +1294,7 @@ item *item_disenchant(item *it)
         for (guint pos = 0; pos < it->effects->len; pos++)
         {
             oid = g_ptr_array_index(it->effects, pos);
-            e = game_effect_get(nlarn, oid);
+            effect *e = game_effect_get(nlarn, oid);
 
             e->amount--;
         }

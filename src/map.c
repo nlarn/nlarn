@@ -1,6 +1,6 @@
 /*
  * map.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -613,7 +613,6 @@ map_path *map_find_path(map *m, position start, position goal,
     map_path *path;
     map_path_element *curr, *next;
     gboolean next_is_better;
-    GPtrArray *neighbours;
 
     /* if the starting position is on another map, fail for now */
     /* TODO: could be changed to support 3D pathfinding */
@@ -655,7 +654,7 @@ map_path *map_find_path(map *m, position start, position goal,
             return path;
         }
 
-        neighbours = map_path_get_neighbours(m, curr->pos, element, ppath);
+        GPtrArray *neighbours = map_path_get_neighbours(m, curr->pos, element, ppath);
 
         while (neighbours->len)
         {
@@ -996,7 +995,6 @@ char *map_pos_examine(position pos)
 {
     map *cm = game_map(nlarn, Z(pos));
     monster *monst;
-    item *it;
     char *tmp = NULL;
     const char *where;
     GString *desc = g_string_new(NULL);
@@ -1060,7 +1058,7 @@ char *map_pos_examine(position pos)
 
             for (guint idx = 0; idx < inv_length(*map_ilist_at(cm, pos)); idx++)
             {
-                it = inv_get(*map_ilist_at(cm, pos), idx);
+                item *it = inv_get(*map_ilist_at(cm, pos), idx);
                 gchar *item_desc = item_describe(it, player_item_known(nlarn->p, it),
                                                  FALSE, FALSE);
 

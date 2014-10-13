@@ -1,6 +1,6 @@
 /*
  * monsters.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -120,7 +120,6 @@ monster *monster_new(monster_t type, position pos)
 
     monster *nmonster;
     item_t itype;      /* item type */
-    int icount;        /* item count */
 
     /* check if supplied position is suitable for a monster */
     if (!map_pos_validate(game_map(nlarn, Z(pos)), pos, LE_MONSTER, FALSE))
@@ -156,8 +155,8 @@ monster *monster_new(monster_t type, position pos)
         if (gold_chance == 0 || chance(gold_chance))
         {
             /* add gold to monster's inventory, randomize the amount */
-            icount = max(divert(monster_gold_amount(nmonster), 30), 1);
-            inv_add(&nmonster->inv, item_new(IT_GOLD, icount));
+            int gcount = max(divert(monster_gold_amount(nmonster), 30), 1);
+            inv_add(&nmonster->inv, item_new(IT_GOLD, gcount));
         }
     }
 
@@ -670,14 +669,14 @@ const char *monster_get_name(monster *m)
 
 const char* monster_type_plural_name(const int montype, const int count)
 {
-    /* need a static buffer to return to calling functions */
-    static char buf[61] = { 0 };
-
     /* result of lua data query; monster's plural name */
     const char *mpn = luaN_query_string("monsters", montype, "plural_name");
 
     if (count > 1)
     {
+        /* need a static buffer to return to calling functions */
+        static char buf[61] = { 0 };
+
         if (mpn == NULL)
         {
             g_snprintf(buf, 60, "%ss", monster_type_name(montype));
@@ -729,10 +728,9 @@ void monster_die(monster *m, struct player *p)
         if (tile == LT_DEEPWATER || tile == LT_LAVA)
         {
             int count = 0;
-            item *it;
             while (inv_length(m->inv) > 0)
             {
-                it = inv_get(m->inv, 0);
+                item *it = inv_get(m->inv, 0);
                 if (item_is_unique(it))
                 {
                     /* teleport the item to safety */
@@ -1566,7 +1564,6 @@ void monster_player_attack(monster *m, player *p)
 
 int monster_player_ranged_attack(monster *m, player *p)
 {
-    damage *dam;
     attack att = { ATT_NONE, DAM_NONE, 0, 0 };
 
     g_assert(m != NULL && p != NULL);
@@ -1587,8 +1584,8 @@ int monster_player_ranged_attack(monster *m, player *p)
         }
         else
         {
-            dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn),
-                             DAMO_MONSTER, m);
+            damage *dam = damage_new(att.damage, att.type,
+                    att.base + game_difficulty(nlarn), DAMO_MONSTER, m);
 
             player_damage_take(p, dam, PD_MONSTER, m->type);
         }
@@ -1918,8 +1915,7 @@ char *monster_desc(monster *m)
 {
     int hp_rel;
     GString *desc;
-    const char *injury = NULL; 
-    char *effects = NULL;
+    const char *injury = NULL;
 
     g_assert (m != NULL);
 
@@ -1987,7 +1983,7 @@ char *monster_desc(monster *m)
             }
         }
 
-        effects = g_strjoinv(", ", desc_list);
+        char *effects = g_strjoinv(", ", desc_list);
         g_strfreev(desc_list);
 
         g_string_append_printf(desc, " (%s)", effects);
@@ -2031,7 +2027,6 @@ int monster_color(monster *m)
 void monster_genocide(monster_t monster_id)
 {
     GList *mlist;
-    monster *monst;
 
     g_assert(monster_id > MT_NONE && monster_id < MT_MAX);
 
@@ -2041,7 +2036,7 @@ void monster_genocide(monster_t monster_id)
     /* purge genocided monsters */
     for (GList *iter = mlist; iter != NULL; iter = iter->next)
     {
-        monst = (monster *)iter->data;
+        monster *monst = (monster *)iter->data;
         if (monster_is_genocided(monst->type))
         {
             /* add the monster to the game's list of dead monsters */

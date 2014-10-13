@@ -1,6 +1,6 @@
 /*
  * fov.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -183,9 +183,7 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
                                  int xx, int xy, int yx, int yy)
 {
     int radius_squared;
-    int dx, dy;
     int X, Y;
-    int blocked;
     float l_slope, r_slope;
     float new_start = 0;
 
@@ -196,10 +194,10 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
 
     for (int j = row; j <= radius + 1; j++)
     {
-        dx = -j - 1;
-        dy = -j;
+        int dx = -j - 1;
+        int dy = -j;
 
-        blocked = FALSE;
+        int blocked = FALSE;
 
         while (dx <= 0)
         {

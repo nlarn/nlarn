@@ -1,6 +1,6 @@
 /*
  * game.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2013, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -667,11 +667,9 @@ GList *game_score_add(game *g, game_score_t *score)
 
 void game_scores_destroy(GList *gs)
 {
-    game_score_t *score;
-
     for (GList *iterator = gs; iterator; iterator = iterator->next)
     {
-        score = iterator->data;
+        game_score_t *score = iterator->data;
         g_free(score->player_name);
 
         g_free(score);
@@ -761,10 +759,10 @@ void game_remove_dead_monsters(game *g)
 {
     g_assert (g != NULL);
 
-    monster *m;
     while (g->dead_monsters->len > 0)
     {
-        m = g_ptr_array_index(g->dead_monsters, g->dead_monsters->len - 1);
+        monster *m = g_ptr_array_index(g->dead_monsters,
+                                       g->dead_monsters->len - 1);
 
         monster_destroy(m);
         g_ptr_array_remove_index(g->dead_monsters, g->dead_monsters->len - 1);
