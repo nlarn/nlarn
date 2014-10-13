@@ -1,6 +1,6 @@
 #
 # Makefile
-# Copyright (C) 2009-2012, 2013 Joachim de Groot <jdegroot@web.de>
+# Copyright (C) 2009-2014, 2014 Joachim de Groot <jdegroot@web.de>
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -58,7 +58,7 @@ endif
 # Definitions required regardless of host OS
 DEFINES += -DG_DISABLE_DEPRECATED
 CFLAGS  += -MMD -MP -std=c99 -Wall -Wextra -Werror -Iinc
-LDFLAGS += -lz
+LDFLAGS += -lz -lm
 
 ifeq ($(MSYSTEM),MINGW32)
   # Settings specific to Windows.
@@ -113,12 +113,12 @@ else
     endif
   endif
 
-  # Determine the name of the Lua 5.1 library
-  # Debian and derivates use lua5.1, the rest of the world lua
+  # Determine the name of the Lua 5.2 library
+  # Debian and derivates use lua5.2, the rest of the world lua
   ifneq ($(wildcard /etc/debian_version),)
-    lua = lua5.1
+    lua = lua5.2
   else ifeq ($(OS), FreeBSD)
-    lua = lua-5.1
+    lua = lua-5.2
   else
     lua = lua
   endif
