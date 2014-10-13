@@ -1,6 +1,6 @@
 /*
  * position.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -166,8 +166,6 @@ int  area_point_get(area *a, int x, int y);
 void area_point_del(area *a, int x, int y);
 int area_point_valid(area *a, int x, int y);
 
-void area_pos_set(area *a, position pos);
 int  area_pos_get(area *a, position pos);
-void area_pos_del(area *a, position pos);
 
 #endif

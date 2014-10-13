@@ -1,6 +1,6 @@
 /*
  * spells.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -547,23 +547,6 @@ int spell_learn(player *p, guint spell_type)
     }
 
     /* should not reach this point, but who knows.. */
-    return FALSE;
-}
-
-int spell_forget(player *p, guint spell_type)
-{
-    g_assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
-
-    for (guint idx = 0; idx < p->known_spells->len; idx++)
-    {
-        spell *s = g_ptr_array_index(p->known_spells, idx);
-        if (s->id == spell_type)
-        {
-            g_ptr_array_remove_index_fast(p->known_spells, idx);
-            return TRUE;
-        }
-    }
-
     return FALSE;
 }
 

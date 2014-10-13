@@ -1,6 +1,6 @@
 /*
  * gems.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* $Id$ */
 
 #ifndef __GEMS_H_
 #define __GEMS_H_
@@ -36,7 +34,6 @@ enum gem_types
 /* functions */
 
 const char *gem_name(item *gem);
-item_material_t gem_material(item *gem);
 int gem_colour(item *gem);
 int gem_weight(item *gem);
 int gem_price(item *gem);

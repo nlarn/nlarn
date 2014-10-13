@@ -1,6 +1,6 @@
 /*
  * spells.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2011, 2014 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -141,15 +141,6 @@ int spell_cast_previous(struct player *p);
  * @return FALSE if learning the spell failed, otherwise level of knowledge
  */
 int spell_learn(struct player *p, guint spell_type);
-
-/**
- * Remove a spell from the list of known spells
- *
- * @param the player
- * @param the id of the spell to forget
- * @return TRUE if the spell could be found and removed, othrwise FALSE
- */
-int spell_forget(struct player *p, guint spell_type);
 
 /**
  * Check if a spell is known to the player
