@@ -1564,12 +1564,10 @@ void monster_player_attack(monster *m, player *p)
 
 int monster_player_ranged_attack(monster *m, player *p)
 {
-    attack att = { ATT_NONE, DAM_NONE, 0, 0 };
-
     g_assert(m != NULL && p != NULL);
 
     /* choose a random attack type */
-    att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
+    attack att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
     if (att.type == ATT_GAZE && chance(att.base/3))
     {
         if (!player_effect(p, ET_BLINDNESS))

@@ -1455,12 +1455,11 @@ static void map_fill_with_objects(map *m)
 
 static void map_fill_with_traps(map *m)
 {
-    gboolean trapdoor = FALSE;
-
     g_assert(m != NULL);
 
     /* Trapdoor cannot be placed in the last dungeon map and the last vulcano map */
-    trapdoor = (!is_dungeon_bottom(m->nlevel) && !is_volcano_bottom(m->nlevel));
+    gboolean trapdoor = (!is_dungeon_bottom(m->nlevel)
+            && !is_volcano_bottom(m->nlevel));
 
     for (int count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
     {
