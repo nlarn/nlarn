@@ -1651,13 +1651,9 @@ item **player_get_random_armour(player *p, int enchantable)
 
 void player_pickup(player *p)
 {
-    inventory **inv = NULL;
-    GPtrArray *callbacks = NULL;
-    display_inv_callback *callback = NULL;
-
     g_assert(p != NULL);
 
-    inv = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
+    inventory **inv = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     if (inv_length(*inv) == 0)
     {
@@ -1680,9 +1676,9 @@ void player_pickup(player *p)
     else
     {
         /* define callback functions */
-        callbacks = g_ptr_array_new();
+        GPtrArray *callbacks = g_ptr_array_new();
 
-        callback = g_malloc0(sizeof(display_inv_callback));
+        display_inv_callback *callback = g_malloc0(sizeof(display_inv_callback));
         callback->description = "(,) get";
         callback->helpmsg = "Get the item. In case of an item stack, get the entire stack.";
         callback->key = ',';

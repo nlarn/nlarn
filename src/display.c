@@ -734,7 +734,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     /* the dialog width */
     const guint width = COLS - 4;
 
-    guint height, maxvis;
     guint len_orig, len_curr;
     gboolean redraw = FALSE;
 
@@ -774,10 +773,10 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     do
     {
         /* calculate the dialog height */
-        height = min((LINES - 10), len_curr + 2);
+        guint height = min((LINES - 10), len_curr + 2);
 
         /* calculate how many items can be displayed at a time */
-        maxvis = min(len_curr, height - 2);
+        guint maxvis = min(len_curr, height - 2);
 
         /* fix selected item */
         if (curr > len_curr)

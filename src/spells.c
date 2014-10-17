@@ -1042,18 +1042,15 @@ gboolean spell_create_monster(struct player *p)
 
 gboolean spell_create_sphere(spell *s, struct player *p)
 {
-    position pos;
-    sphere *sph;
-
     g_assert(p != NULL);
 
-    pos = display_get_new_position(p, p->pos,
-                                   "Where do you want to place the sphere?",
-                                   FALSE, FALSE, FALSE, 0, TRUE, TRUE);
+    position pos = display_get_new_position(p, p->pos,
+            "Where do you want to place the sphere?",
+            FALSE, FALSE, FALSE, 0, TRUE, TRUE);
 
     if (pos_valid(pos))
     {
-        sph = sphere_new(pos, p, p->level * 10 * s->knowledge);
+        sphere *sph = sphere_new(pos, p, p->level * 10 * s->knowledge);
         g_ptr_array_add(nlarn->spheres, sph);
 
         return TRUE;

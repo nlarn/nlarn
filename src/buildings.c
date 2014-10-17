@@ -1287,7 +1287,6 @@ static void building_item_add(inventory **inv, item *it)
 static void building_item_sell(player *p, inventory **inv, item *it)
 {
     guint price;
-    guint count = 0;
     gpointer ioid = NULL; /* oid of purchased item */
     char text[81];
     gchar *name;
@@ -1307,7 +1306,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
         g_free(name);
 
         /* get count */
-        count = display_get_count(text, it->count);
+        guint count = display_get_count(text, it->count);
 
         if (count > it->count)
         {

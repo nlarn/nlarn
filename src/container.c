@@ -122,7 +122,6 @@ void container_item_add(player *p, inventory **inv, item *element)
     inventory **target_inv = NULL;
     gchar *container_desc = NULL, *element_desc;
     gboolean carried_container = FALSE;
-    guint count = 0;
 
     g_assert(p != NULL && element != NULL);
 
@@ -189,7 +188,7 @@ void container_item_add(player *p, inventory **inv, item *element)
                 (element->type == IT_AMMO ? ammo_name(element) : item_name_pl(element->type)),
                 (element->type == IT_AMMO ? "s" : ""), container_desc);
 
-        count = display_get_count(q, element->count);
+        guint count = display_get_count(q, element->count);
         g_free(q);
 
         if (count == 0)
@@ -247,7 +246,6 @@ void container_item_add(player *p, inventory **inv, item *element)
 void container_item_unpack(player *p, inventory **inv, item *element)
 {
     gchar *desc;
-    guint count = 0;
 
     g_assert(p != NULL && inv != NULL && element != NULL);
 
@@ -258,7 +256,7 @@ void container_item_unpack(player *p, inventory **inv, item *element)
                 (element->type == IT_AMMO ? ammo_name(element) : item_name_pl(element->type)),
                 (element->type == IT_AMMO ? "s" : ""));
 
-        count = display_get_count(q, element->count);
+        guint count = display_get_count(q, element->count);
         g_free(q);
 
         if (count == 0)
