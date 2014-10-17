@@ -163,7 +163,6 @@ area *area_flood(area *obstacles, int start_x, int start_y);
 
 void area_point_set(area *a, int x, int y);
 int  area_point_get(area *a, int x, int y);
-void area_point_del(area *a, int x, int y);
 int area_point_valid(area *a, int x, int y);
 
 int  area_pos_get(area *a, position pos);

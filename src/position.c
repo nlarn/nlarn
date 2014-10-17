@@ -473,13 +473,6 @@ int area_point_get(area *a, int x, int y)
     return a->area[y][x];
 }
 
-void area_point_del(area *a, int x, int y)
-{
-    g_assert(a != NULL);
-    g_assert(area_point_valid(a, x, y));
-    a->area[y][x] = FALSE;
-}
-
 int area_point_valid(area *a, int x, int y)
 {
     g_assert (a != NULL);
