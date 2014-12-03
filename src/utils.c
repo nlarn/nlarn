@@ -293,7 +293,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
 
     text = g_ptr_array_new();
 
-    /* prepare indentaion */
+    /* prepare indentation */
     if (indent)
     {
         /* allocate an empty string */
@@ -358,8 +358,8 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         /* copy the text to the new line */
         line = g_strndup(&(str[spos]), lp);
 
-    /* skip silly CR chars */
-    if (str[spos + lp] == '\r') lp++;
+        /* skip silly CR chars */
+        if (str[spos + lp] == '\r') lp++;
 
         /* reduce width to make space for indentation after the first line */
         if (indent && text->len == 1)
@@ -395,8 +395,7 @@ GPtrArray *text_append(GPtrArray *first, GPtrArray *second)
     g_assert(first != NULL && second != NULL);
 
     while (second->len > 0)
-        g_ptr_array_add(first,
-                        g_ptr_array_remove_index(second, 0));
+        g_ptr_array_add(first, g_ptr_array_remove_index(second, 0));
 
     text_destroy(second);
 

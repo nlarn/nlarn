@@ -57,7 +57,7 @@ static inline gint32 rand_m_n(gint32 m, gint32 n)
 
 static inline gboolean chance(gint32 percent)
 {
-        return (percent >= rand_1n(101));
+    return (percent >= rand_1n(101));
 }
 
 /* windef.h defines these */
