@@ -24,3 +24,8 @@ nlarn.xcodeproj/
 NLarn.workspace
 nlarn.cbp
 nlarn.depend
+
+# Eclipse
+.cproject
+.project
+.settings/
