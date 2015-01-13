@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     display_show_message("Welcome to the game of NLarn!", strbuf, 0);
     g_free(strbuf);
 
-    /* ask for a charakter name if none has been supplied */
+    /* ask for a character name if none has been supplied */
     while (nlarn->p->name == NULL)
     {
         nlarn->p->name = display_get_string("By what name shall you be called?",
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    /* no path found. stop travelling */
+                    /* no path found. stop traveling */
                     pos = pos_invalid;
                 }
 
