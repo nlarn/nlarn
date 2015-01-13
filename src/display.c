@@ -129,7 +129,7 @@ void display_init()
     initscr();
 
 #ifdef SDLPDCURSES
-    /* These initializsations have to be done after initscr(), otherwise
+    /* These initialisations have to be done after initscr(), otherwise
        the window is not yet available. */
     /* Set the window title */
     char *window_title = g_strdup_printf("NLarn %d.%d.%d%s", VERSION_MAJOR,
@@ -176,7 +176,7 @@ void display_init()
     /* control special keys in application */
     raw();
 
-    /* supress input echo */
+    /* suppress input echo */
     noecho();
 
     /* enable function keys */
@@ -870,7 +870,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* prepare the window title */
         if (show_account)
         {
-            /* show the banlance of the bank account */
+            /* show the balance of the bank account */
             stitle = g_strdup_printf("%s - %d gp on bank account",
                                      title, p->bank_account);
 
@@ -900,7 +900,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             display_inv_callback *cb = g_ptr_array_index(callbacks, cb_nr);
 
             /* check if callback is appropriate for this item */
-            /* if no checkfunktion is set, always display item */
+            /* if no check function is set, always display item */
             if ((cb->checkfun == NULL) || cb->checkfun(p, it))
             {
                 cb->active = TRUE;
@@ -1049,7 +1049,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         case KEY_ENTER:
             if (callbacks == NULL)
             {
-                /* if no callbacks have been defines enter selects item */
+                /* if no callbacks have been defined, enter selects item */
                 keep_running = FALSE;
             }
 
@@ -1240,7 +1240,7 @@ spell *display_spell_select(const char *title, player *p)
         display_window_update_arrow_up(swin, (offset > 0));
         display_window_update_arrow_down(swin, ((offset + maxvis) < p->known_spells->len));
 
-        /* construct the window caption: display typeahead keys */
+        /* construct the window caption: display type ahead keys */
         caption = g_strdup_printf("%s%s%s%s(?) description",
                                   (strlen(code_buf) ? "[" : ""),
                                   code_buf,
@@ -2301,7 +2301,7 @@ position display_get_new_position(player *p,
     int attrs; /* curses attributes */
     display_window *msgpop = NULL;
 
-    /* list of visible monsters and the iterator therefor */
+    /* list of visible monsters and the iterator for these */
     GList *mlist = NULL, *miter = NULL;
 
     /* variables for ray or ball painting */
@@ -2325,7 +2325,7 @@ position display_get_new_position(player *p,
     if (!visible)
         msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message);
 
-    /* if a starting position for a ray has been provided, check if it worsk*/
+    /* if a starting position for a ray has been provided, check if it works */
     if (ray && !pos_identical(p->pos, start))
     {
         /* paint a ray to validate the starting position */
@@ -2474,7 +2474,7 @@ position display_get_new_position(player *p,
         }
         else
         {
-            /* show the position of the cursor by inversing the attributes */
+            /* show the position of the cursor by inverting the attributes */
             (void)mvwchgat(stdscr, Y(pos), X(pos), 1, A_BOLD | A_STANDOUT, DCP_WHITE_BLACK, NULL);
         }
 
@@ -2600,7 +2600,7 @@ position display_get_new_position(player *p,
             break;
 
         default:
-            /* if travelling, use sobject glyphs as shortcuts */
+            /* if traveling, use sobject glyphs as shortcuts */
             if (travel)
             {
                 sobject_t sobj = LS_NONE;
@@ -2733,7 +2733,7 @@ int display_show_message(const char *title, const char *message, int indent)
     guint maxvis = 0;
     guint offset = 0;
 
-    /* numer of columns required for
+    /* Number of columns required for
          a) the window border and the text margin
          b) the padding around the window */
     const guint wred = 4;
