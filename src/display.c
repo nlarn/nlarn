@@ -1052,6 +1052,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                 /* if no callbacks have been defined, enter selects item */
                 keep_running = FALSE;
             }
+            break;
 
         default:
             /* check callback function keys (if defined) */
@@ -1152,6 +1153,7 @@ void display_config_autopickup(player *p)
         case KEY_ESC:
         case KEY_SPC:
             RUN = FALSE;
+            break;
 
         default:
             if (!display_window_move(cwin, key))
