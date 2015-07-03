@@ -1,6 +1,6 @@
 /*
  * map.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2014, 2015 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1198,8 +1198,9 @@ void map_timer(map *m)
                 if (tile->timer == 0)
                 {
                     if ((tile->type == LT_FIRE)
-                            && (tile->type == LT_GRASS))
+                            && (tile->base_type == LT_GRASS))
                     {
+                        tile->base_type = LT_NONE;
                         tile->type = LT_DIRT;
                     }
                     else
