@@ -1,6 +1,6 @@
 /*
  * spells.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2014, 2015 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -932,6 +932,8 @@ int spell_type_flood(spell *s, struct player *p)
 
 int spell_type_blast(spell *s, struct player *p)
 {
+    g_assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
+
     area *ball;
     position pos;
     char buffer[61];
@@ -939,8 +941,6 @@ int spell_type_blast(spell *s, struct player *p)
     damage_originator damo = { DAMO_PLAYER, p };
     damage *dam = damage_new(DAM_NONE, ATT_MAGIC, 0, DAMO_PLAYER, p);
     map *cmap = game_map(nlarn, Z(p->pos));
-
-    g_assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
 
     switch (s->id)
     {
