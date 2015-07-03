@@ -1,6 +1,6 @@
 #
 # Makefile
-# Copyright (C) 2009-2013, 2014 Joachim de Groot <jdegroot@web.de>
+# Copyright (C) 2009-2014, 2015 Joachim de Groot <jdegroot@web.de>
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -168,19 +168,20 @@ ifeq ($(config),release)
   RESFLAGS  += $(DEFINES) $(INCLUDES)
 endif
 
-OBJDIR := obj
-OBJECTS := $(patsubst src/%.c,$(OBJDIR)/%.o,$(wildcard src/*.c))
+BUILDDIR := build
+OBJECTS := $(patsubst src/%.c,$(BUILDDIR)/%.o,$(wildcard src/*.c))
+include $(wildcard $(BUILDDIR)/*.d)
 
 all: nlarn$(SUFFIX)
 
 nlarn$(SUFFIX): $(OBJECTS) $(RESOURCES)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(RESOURCES)
 
-$(OBJDIR):
+$(BUILDDIR):
 	mkdir -p "$@"
 
-$(OBJECTS): $(OBJDIR)/%.o: src/%.c $(OBJDIR)
-	$(CC) $(CFLAGS) -o $@ -c $<
+$(OBJECTS): $(BUILDDIR)/%.o: src/%.c $(BUILDDIR)
+	$(CC) $(CFLAGS) -MF $(@:.o=.d) -o $@ -c $<
 
 $(RESOURCES): %.res: %.rc
 	windres -v $(RESDEFINE) $< -O coff -o $@
@@ -261,7 +262,7 @@ $(OSXIMAGE): nlarn
 clean:
 	@echo Cleaning nlarn
 	rm -f nlarn $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
-	rm -rf $(OBJDIR)
+	rm -rf $(BUILDDIR)
 
 help:
 	@echo "Usage: make [config=name] [target]"
