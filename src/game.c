@@ -1,6 +1,6 @@
 /*
  * game.c
- * Copyright (C) 2009-2013, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2014, 2016 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,7 +20,9 @@
    *before* including it. Another header in the list seems to do so
    before we include it here.*/
 #ifdef __linux__
-#define _GNU_SOURCE
+# ifndef _GNU_SOURCE
+#  define _GNU_SOURCE
+# endif
 #endif
 
 #include <glib.h>
