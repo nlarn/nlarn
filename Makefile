@@ -101,16 +101,9 @@ else
   CFLAGS  += $(shell pkg-config --cflags glib-2.0)
   LDFLAGS += $(shell pkg-config --libs glib-2.0)
 
-  # Configuration for ncurses
-  ifeq ($(filter Darwin DragonFly FreeBSD OpenBSD,$(OS)),)
-    CFLAGS  += $(shell ncurses5-config --cflags)
-    LDFLAGS += $(shell ncurses5-config --libs) -lpanel
-  else
-    # OS X is handled separately
-    ifneq ($(OS), Darwin)
-      # DragonFly, FreeBSD and OpenBSD have ncurses in base (and no config tool)
-      LDFLAGS += -lncurses -lpanel
-    endif
+  # Configuration for ncurses - OS X is handled separately
+  ifneq ($(OS), Darwin)
+    LDFLAGS += -lncurses -lpanel
   endif
 
   # Determine the name of the Lua 5.2 library
