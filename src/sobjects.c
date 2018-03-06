@@ -246,7 +246,7 @@ int player_altar_pray(player *p)
         if (cured_affliction)
             break;
 
-        // else intentional fall through
+        /* fall-through */
     case 4:
         if (chance(10) && p->eq_weapon)
         {

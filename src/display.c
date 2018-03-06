@@ -2004,7 +2004,7 @@ int display_get_yesno(const char *question, const char *yes, const char *no)
         {
         case KEY_ESC:
             selection = FALSE;
-            /* fall through desired */
+            /* fall-through */
 
         case KEY_LF:
         case KEY_CR:
