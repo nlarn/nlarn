@@ -1,6 +1,6 @@
 /*
  * display.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -3329,14 +3329,11 @@ static display_window *display_item_details(guint x1, guint y1, guint width,
     /* the popup window created by display_popup */
     display_window *idpop;
 
-    /* string for the content of the item description popup */
-    char *msg = NULL;
-
     /* determine if the item is known or displayed in the shop */
     const gboolean known = shop | player_item_known(p, it);
 
     /* the detailed item description */
-    msg = item_detailed_description(it, known, shop);
+    char *msg = item_detailed_description(it, known, shop);
     idpop = display_popup(x1, y1, width, "Item details", msg);
 
     /* tidy up */

@@ -1,6 +1,6 @@
 /*
  * game.c
- * Copyright (C) 2009-2014, 2016 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -104,11 +104,10 @@ void game_init(int argc, char *argv[])
 #if (defined (__unix) && defined (SETGID))
     gid_t realgid;
     uid_t realuid;
-    char *scoreboard_filename = NULL;
 
     /* assemble the scoreboard filename */
-    scoreboard_filename = g_build_path(G_DIR_SEPARATOR_S, default_var_dir,
-                                       "highscores", NULL);
+    gchar *scoreboard_filename = g_build_path(G_DIR_SEPARATOR_S, default_var_dir,
+                                              "highscores", NULL);
 
     /* Open the scoreboard file.
      *
@@ -895,7 +894,6 @@ static gboolean game_load(gchar *filename)
 {
     int size;
     cJSON *save, *obj;
-    char *fullname = NULL;
     display_window *win = NULL;
 
     /* size of the buffer we allocate to store the uncompressed file content */
@@ -903,8 +901,8 @@ static gboolean game_load(gchar *filename)
 
     /* assemble save file name; if no filename has been supplied, default
        to "nlarn.sav" */
-    fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-                            filename ? filename : save_file, NULL);
+    char *fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+                                  filename ? filename : save_file, NULL);
 
     /* try to open save file */
     gzFile file = gzopen(fullname, "rb");
@@ -1407,11 +1405,9 @@ static int game_score_compare(const void *scr_a, const void *scr_b)
 
 void game_delete_savefile()
 {
-    char *fullname = NULL;
-
     /* assemble save file name */
-    fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-                            save_file, NULL);
+    char *fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+                                  save_file, NULL);
 
     gzFile file = gzopen(fullname, "rb");
     if (file != NULL)

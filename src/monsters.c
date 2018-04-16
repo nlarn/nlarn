@@ -2709,10 +2709,8 @@ static position monster_move_serve(monster *m, struct player *p)
     if (pos_distance(monster_pos(m), p->pos) > 5)
     {
         /* if the distance to the player is too large, follow */
-        map_path *path = NULL;
-
-        path = map_find_path(monster_map(m), monster_pos(m), p->pos,
-                         monster_map_element(m));
+        map_path *path = map_find_path(monster_map(m), monster_pos(m), p->pos,
+                                       monster_map_element(m));
 
         if (path && !g_queue_is_empty(path->path))
         {
@@ -2765,8 +2763,7 @@ static position monster_move_civilian(monster *m, struct player *p)
     else if (pos_valid(m->player_pos) && !pos_identical(m->pos, m->player_pos))
     {
         /* travel to the selected location */
-        map_path *path = NULL;
-        path = map_find_path(monster_map(m), m->pos, m->player_pos, LE_GROUND);
+        map_path *path = map_find_path(monster_map(m), m->pos, m->player_pos, LE_GROUND);
 
         if (path && !g_queue_is_empty(path->path))
         {

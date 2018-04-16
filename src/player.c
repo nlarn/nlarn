@@ -1,6 +1,6 @@
 /*
  * player.c
- * Copyright (C) 2009-2013, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -3869,15 +3869,12 @@ void player_item_drop(player *p, inventory **inv, item *it)
 
 void player_item_notes(player *p, inventory **inv __attribute__((unused)), item *it)
 {
-    char *caption = NULL;
-    char *temp = NULL;
-
     gchar *desc = item_describe(it, player_item_known(p, it), FALSE, TRUE);
-    caption = g_strdup_printf("Add your description for %s (delete with ESC)", desc);
+    gchar *caption = g_strdup_printf("Add your description for %s (delete with ESC)", desc);
     g_free(desc);
 
     /* get the new note */
-    temp = display_get_string(caption, it->notes, 60);
+    gchar *temp = display_get_string(caption, it->notes, 60);
 
     /* free the old note before adding the new note to the item */
     g_free(it->notes);

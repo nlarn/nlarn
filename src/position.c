@@ -1,6 +1,6 @@
 /*
  * position.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -442,12 +442,10 @@ area *area_add(area *a, area *b)
 
 area *area_flood(area *obstacles, int start_x, int start_y)
 {
-    area *flood = NULL;
-
     g_assert (obstacles != NULL && area_point_valid(obstacles, start_x, start_y));
 
-    flood = area_new(obstacles->start_x, obstacles->start_y,
-                     obstacles->size_x, obstacles->size_y);
+    area *flood = area_new(obstacles->start_x, obstacles->start_y,
+                           obstacles->size_x, obstacles->size_y);
 
     area_flood_worker(flood, obstacles, start_x, start_y);
 

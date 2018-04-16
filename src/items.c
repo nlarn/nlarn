@@ -1681,10 +1681,8 @@ int inv_add(inventory **inv, item *it)
 
 item *inv_get(inventory *inv, guint idx)
 {
-    gpointer oid = NULL;
-
     g_assert (inv != NULL && idx < inv->content->len);
-    oid = g_ptr_array_index(inv->content, idx);
+    gpointer oid = g_ptr_array_index(inv->content, idx);
 
     return game_item_get(nlarn, oid);
 }

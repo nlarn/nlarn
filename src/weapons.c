@@ -1,6 +1,6 @@
 /*
  * weapons.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -421,12 +421,11 @@ static gboolean weapon_pos_hit(const GList *traj,
     item *weapon = (item *)data1;
     item *ammo = (item *)data2;
     monster *m = map_get_monster_at(cmap, cpos);
-    gchar *adesc = NULL;
     gboolean retval = FALSE;
     gboolean ammo_handled = FALSE;
 
     /* need a definite description for the ammo */
-    adesc = item_describe(ammo, player_item_known(nlarn->p, ammo), TRUE, TRUE);
+    gchar *adesc = item_describe(ammo, player_item_known(nlarn->p, ammo), TRUE, TRUE);
     adesc[0] = g_ascii_toupper(adesc[0]);
 
     if (m != NULL)
