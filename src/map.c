@@ -1,6 +1,6 @@
 /*
  * map.c
- * Copyright (C) 2009-2014, 2015 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -114,7 +114,6 @@ static gboolean is_volcano_map(int nlevel)
 map *map_new(int num, char *mazefile)
 {
     gboolean map_loaded = FALSE;
-    gboolean treasure_room = FALSE;
     gboolean keep_maze = TRUE;
 
     map *nmap = nlarn->maps[num] = g_malloc0(sizeof(map));
@@ -144,7 +143,7 @@ map *map_new(int num, char *mazefile)
     if (!map_loaded)
     {
         /* determine if to add treasure room */
-        treasure_room = num > 1 && chance(25);
+        gboolean treasure_room = num > 1 && chance(25);
 
         /* generate random map */
         do

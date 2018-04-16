@@ -751,7 +751,6 @@ player *player_deserialize(cJSON *pser)
 
 gboolean player_make_move(player *p, int turns, gboolean interruptible, const char *desc, ...)
 {
-    va_list argp;
     int frequency; /* number of turns between occasions */
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
@@ -772,6 +771,8 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     /* assemble message and append it to the buffer */
     if (desc != NULL)
     {
+        va_list argp;
+
         va_start(argp, desc);
         description = g_strdup_vprintf(desc, argp);
         va_end(argp);
@@ -4465,7 +4466,6 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     gchar *buf;
-    guint count = 0;
     gpointer oid = it->oid;
     guint gold_amount = 0;
 
@@ -4476,7 +4476,7 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
                               (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
                               (it->type == IT_AMMO ? "s" : ""));
 
-        count = display_get_count(buf, it->count);
+        guint count = display_get_count(buf, it->count);
         g_free(buf);
 
         if (count == 0)

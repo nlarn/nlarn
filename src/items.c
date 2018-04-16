@@ -1187,8 +1187,6 @@ int item_remove_curse(item *it)
 
 item *item_enchant(item *it)
 {
-    gpointer oid;
-
     g_assert(it != NULL);
 
     it->bonus++;
@@ -1222,7 +1220,7 @@ item *item_enchant(item *it)
     {
         for (guint pos = 0; pos < it->effects->len; pos++)
         {
-            oid = g_ptr_array_index(it->effects, pos);
+            gpointer oid = g_ptr_array_index(it->effects, pos);
             effect *e = game_effect_get(nlarn, oid);
 
             e->amount++;
@@ -1234,8 +1232,6 @@ item *item_enchant(item *it)
 
 item *item_disenchant(item *it)
 {
-    gpointer oid;
-
     g_assert(it != NULL);
 
     if (it->bonus <= -3)
@@ -1262,7 +1258,7 @@ item *item_disenchant(item *it)
     {
         for (guint pos = 0; pos < it->effects->len; pos++)
         {
-            oid = g_ptr_array_index(it->effects, pos);
+            gpointer oid = g_ptr_array_index(it->effects, pos);
             effect *e = game_effect_get(nlarn, oid);
 
             e->amount--;

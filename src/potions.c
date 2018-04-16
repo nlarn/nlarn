@@ -1,6 +1,6 @@
 /*
  * potions.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -314,13 +314,12 @@ item_usage_result potion_quaff(struct player *p, item *potion)
 static int potion_with_effect(struct player *p, item *potion)
 {
     int identified = TRUE;
-    effect *eff;
 
     g_assert(p != NULL && potion != NULL);
 
     if (potion_effect(potion) > ET_NONE)
     {
-        eff = effect_new(potion_effect(potion));
+        effect *eff = effect_new(potion_effect(potion));
 
         /* silly potion of giant strength */
         if (potion->id == PO_GIANT_STR)
