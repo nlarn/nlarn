@@ -1,6 +1,6 @@
 /*
  * items.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1148,24 +1148,6 @@ void item_effect_add(item *it, effect *e)
     effect_add(it->effects, e);
 }
 
-void item_effect_del(item *it, effect *e)
-{
-    g_assert (it != NULL && e != NULL);
-
-    /* del effect from list */
-    effect_del(it->effects, e);
-
-    /*destroy effect */
-    effect_destroy(e);
-
-    /* delete array if no effect is left */
-    if (!it->effects->len)
-    {
-        g_ptr_array_free(it->effects, TRUE);
-        it->effects = NULL;
-    }
-}
-
 int item_bless(item *it)
 {
     g_assert (it != NULL && !it->cursed);
@@ -1186,19 +1168,6 @@ int item_curse(item *it)
         return FALSE;
 
     it->cursed = TRUE;
-
-    return TRUE;
-}
-
-int item_remove_blessing(item *it)
-{
-    g_assert (it != NULL && it->blessed);
-
-    if (!it->blessed)
-        return FALSE;
-
-    it->blessed = FALSE;
-    it->blessed_known = FALSE;
 
     return TRUE;
 }
@@ -1908,12 +1877,6 @@ int item_filter_container(item *it)
 {
     g_assert (it != NULL);
     return (it->type == IT_CONTAINER);
-}
-
-int item_filter_not_container(item *it)
-{
-    g_assert (it != NULL);
-    return (it->type != IT_CONTAINER);
 }
 
 int item_filter_gems(item *it)

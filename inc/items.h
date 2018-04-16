@@ -1,6 +1,6 @@
 /*
  * items.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -205,11 +205,9 @@ int item_colour(item *it);
 guint item_fragility(item *it);
 
 void item_effect_add(item *it, effect *e);
-void item_effect_del(item *it, effect *e);
 
 int item_bless(item *it);
 int item_curse(item *it);
-int item_remove_blessing(item *it);
 int item_remove_curse(item *it);
 
 item *item_enchant(item *it);
@@ -403,7 +401,6 @@ item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *));
 /* item filters */
 
 int item_filter_container(item *it);
-int item_filter_not_container(item *it);
 int item_filter_gems(item *it);
 int item_filter_gold(item *it);
 int item_filter_not_gold(item *it);
