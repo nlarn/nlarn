@@ -1,6 +1,6 @@
 #
 # Makefile
-# Copyright (C) 2009-2014, 2015 Joachim de Groot <jdegroot@web.de>
+# Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -57,7 +57,7 @@ endif
 
 # Definitions required regardless of host OS
 DEFINES += -DG_DISABLE_DEPRECATED
-CFLAGS  += -MMD -MP -std=c99 -Wall -Wextra -Werror -Iinc
+CFLAGS  += -std=c99 -Wall -Wextra -Werror -Iinc
 LDFLAGS += -lz -lm
 
 ifeq ($(MSYSTEM),MINGW32)
@@ -162,19 +162,15 @@ ifeq ($(config),release)
 endif
 
 BUILDDIR := build
-OBJECTS := $(patsubst src/%.c,$(BUILDDIR)/%.o,$(wildcard src/*.c))
-include $(wildcard $(BUILDDIR)/*.d)
+OBJECTS := $(patsubst %.c,%.o,$(wildcard src/*.c))
 
 all: nlarn$(SUFFIX)
 
 nlarn$(SUFFIX): $(OBJECTS) $(RESOURCES)
 	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(RESOURCES)
 
-$(BUILDDIR):
-	mkdir -p "$@"
-
-$(OBJECTS): $(BUILDDIR)/%.o: src/%.c $(BUILDDIR)
-	$(CC) $(CFLAGS) -MF $(@:.o=.d) -o $@ -c $<
+%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(RESOURCES): %.res: %.rc
 	windres -v $(RESDEFINE) $< -O coff -o $@
@@ -254,8 +250,8 @@ $(OSXIMAGE): nlarn
 
 clean:
 	@echo Cleaning nlarn
-	rm -f nlarn $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
-	rm -rf $(BUILDDIR)
+	rm -f $(OBJECTS)
+	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
 
 help:
 	@echo "Usage: make [config=name] [target]"
@@ -272,5 +268,3 @@ help:
 		echo "                   ($(SRCPKG) and $(PACKAGE))"; \
 	fi
 	@echo ""
-
--include $(OBJECTS:%.o=%.d)
