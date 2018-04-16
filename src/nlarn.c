@@ -1,6 +1,6 @@
 /*
  * nlarn.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -877,12 +877,12 @@ static gboolean adjacent_corridor(position pos, char mv)
         break;
     }
 
-    if (X(p1) >= 0 && X(p1) < MAP_MAX_X && Y(p1) >= 0 && Y(p1) < MAP_MAX_Y
+    if (X(p1) < MAP_MAX_X && Y(p1) < MAP_MAX_Y
             && mt_is_passable(map_tiletype_at(game_map(nlarn, Z(nlarn->p->pos)), p1)))
     {
         return TRUE;
     }
-    if (X(p2) >= 0 && X(p2) < MAP_MAX_X && Y(p2) >= 0 && Y(p2) < MAP_MAX_Y
+    if (X(p2) < MAP_MAX_X && Y(p2) < MAP_MAX_Y
             && mt_is_passable(map_tiletype_at(game_map(nlarn, Z(nlarn->p->pos)), p2)))
     {
         return TRUE;
