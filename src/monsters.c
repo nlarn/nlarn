@@ -1,6 +1,6 @@
 /*
  * monsters.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1290,11 +1290,7 @@ int monster_attack_count(monster *m)
     if (luaN_push_table("monsters", m->type, "attacks"))
     {
         /* attacks table has been found; query lenght */
-#if LUA_VERSION_NUM > 501
         count = lua_rawlen(nlarn->L, -1);
-#else
-        count = lua_objlen(nlarn->L, -1);
-#endif
 
         /* clean up */
         lua_pop(nlarn->L, 3);

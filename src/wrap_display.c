@@ -1,6 +1,6 @@
 /*
  * wrap_display.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,11 +28,7 @@ static int wrap_get_count(lua_State *L);
 static int wrap_get_yesno(lua_State *L);
 static int wrap_paint(lua_State *L);
 
-#if LUA_VERSION_NUM > 501
 static const luaL_Reg display_functions[] =
-#else
-static const luaL_reg display_functions[] =
-#endif
 {
     { "draw",       wrap_draw },
     { "get_count",  wrap_get_count },
@@ -95,7 +91,7 @@ static int wrap_get_count(lua_State *L)
 {
     int res = 0;
 
-    res = display_get_count(luaL_checkstring(L, 1), luaL_checkint(L, 2));
+    res = display_get_count(luaL_checkstring(L, 1), luaL_checkinteger(L, 2));
     lua_pushinteger(L, res);
 
     return 1;

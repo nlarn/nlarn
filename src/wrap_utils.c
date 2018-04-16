@@ -1,6 +1,6 @@
 /*
  * wrap_utils.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -143,7 +143,7 @@ int luaN_query_int(const char *table, guint idx, const char *attrib)
 
     if (luaN_data_query(table, idx, attrib))
     {
-        val = luaL_checkint(nlarn->L, -1);
+        val = luaL_checkinteger(nlarn->L, -1);
         lua_pop(nlarn->L, 3);
     }
 
@@ -183,11 +183,11 @@ static int wrap_rand(lua_State *L)
 
     if (nargs == 2)
     {
-        result = rand_m_n(luaL_checkint(L, 1), luaL_checkint(L, 2));
+        result = rand_m_n(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
     }
     else
     {
-        result = rand_0n(luaL_checkint(L, 1));
+        result = rand_0n(luaL_checkinteger(L, 1));
     }
 
     lua_pushinteger(L, result);
@@ -197,7 +197,7 @@ static int wrap_rand(lua_State *L)
 
 static int wrap_chance(lua_State *L)
 {
-    lua_pushboolean(L, chance(luaL_checkint(L, 1)));
+    lua_pushboolean(L, chance(luaL_checkinteger(L, 1)));
     return 1;
 }
 

@@ -106,12 +106,12 @@ else
     LDFLAGS += -lncurses -lpanel
   endif
 
-  # Determine the name of the Lua 5.2 library
-  # Debian and derivates use lua5.2, the rest of the world lua
+  # Determine the name of the Lua 5.3 library
+  # Debian and derivates use lua5.3, the rest of the world lua
   ifneq ($(wildcard /etc/debian_version),)
-    lua = lua5.2
+    lua = lua5.3
   else ifeq ($(OS), FreeBSD)
-    lua = lua-5.2
+    lua = lua-5.3
   else
     lua = lua
   endif
