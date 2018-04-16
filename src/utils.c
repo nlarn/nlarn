@@ -1,6 +1,6 @@
 /*
  * utils.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -428,10 +428,10 @@ char **strv_new()
  */
 int strv_append(char ***list, const char *str)
 {
-    int len = g_strv_length(*list) + 1;
-
     g_assert(list != NULL);
     g_assert(str != NULL);
+
+    int len = g_strv_length(*list) + 1;
 
     *list = g_realloc (*list, sizeof(char*) * (len + 1));
 

@@ -1,6 +1,6 @@
 /*
  * sobjects.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -523,12 +523,11 @@ int player_door_open(player *p, int dir)
 
 int player_fountain_drink(player *p)
 {
-    effect *e = NULL;
+    g_assert (p != NULL);
 
+    effect *e = NULL;
     int fntchange = 0;
     map *pmap = game_map(nlarn, Z(p->pos));
-
-    g_assert (p != NULL);
 
     if (map_sobject_at(pmap, p->pos) == LS_DEADFOUNTAIN)
     {
@@ -683,9 +682,9 @@ int player_fountain_drink(player *p)
 
 int player_fountain_wash(player *p)
 {
-    map *pmap = game_map(nlarn, Z(p->pos));
-
     g_assert (p != NULL);
+
+    map *pmap = game_map(nlarn, Z(p->pos));
 
     if (map_sobject_at(pmap, p->pos) == LS_DEADFOUNTAIN)
     {
@@ -869,6 +868,8 @@ int player_stairs_up(player *p)
 
 int player_throne_pillage(player *p)
 {
+    g_assert (p != NULL);
+
     int count = 0; /* gems created */
 
     /* current map */
@@ -876,8 +877,6 @@ int player_throne_pillage(player *p)
 
     /* type of object at player's position */
     sobject_t ms = map_sobject_at(pmap, p->pos);
-
-    g_assert (p != NULL);
 
     if ((ms != LS_THRONE) && (ms != LS_THRONE2) && (ms != LS_DEADTHRONE))
     {
@@ -933,10 +932,10 @@ int player_throne_pillage(player *p)
 
 int player_throne_sit(player *p)
 {
+    g_assert (p != NULL);
+
     map *pmap = game_map(nlarn, Z(p->pos));
     sobject_t st = map_sobject_at(pmap, p->pos);
-
-    g_assert (p != NULL);
 
     if ((st != LS_THRONE) && (st != LS_THRONE2) && (st != LS_DEADTHRONE))
     {

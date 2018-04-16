@@ -1,6 +1,6 @@
 /*
  * scrolls.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -293,13 +293,13 @@ static int scroll_with_effect(struct player *p, item *r_scroll)
  */
 static int scroll_annihilate(struct player *p, item *r_scroll __attribute__((unused)))
 {
+    g_assert(p != NULL);
+
     int count = 0;
     area *blast, *obsmap;
     position cursor = p->pos;
     monster *m;
     map *cmap = game_map(nlarn, Z(p->pos));
-
-    g_assert(p != NULL);
 
     obsmap = map_get_obstacles(cmap, p->pos, 2, FALSE);
     blast = area_new_circle_flooded(p->pos, 2, obsmap);
@@ -679,13 +679,13 @@ static int scroll_heal_monster(player *p, item *r_scroll __attribute__((unused))
 
 static int scroll_hold_monster(player *p, item *r_scroll __attribute__((unused)))
 {
+    g_assert(p != NULL);
+
     area *blast, *obsmap;
     position cursor = p->pos;
     monster *m;
     gboolean success = FALSE;
     map *cmap = game_map(nlarn, Z(p->pos));
-
-    g_assert(p != NULL);
 
     obsmap = map_get_obstacles(cmap, p->pos, 2, FALSE);
     blast = area_new_circle_flooded(p->pos, 2, obsmap);

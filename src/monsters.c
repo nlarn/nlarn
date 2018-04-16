@@ -1195,6 +1195,8 @@ void monster_polymorph(monster *m)
 
 int monster_items_pickup(monster *m)
 {
+    g_assert(m != NULL);
+
     // The town people never take your stuff.
     if (monster_type(m) == MT_TOWN_PERSON)
         return FALSE;
@@ -1208,8 +1210,6 @@ int monster_items_pickup(monster *m)
 
     gboolean pick_up = FALSE;
     item *it;
-
-    g_assert(m != NULL);
 
     for (guint idx = 0; idx < inv_length(*map_ilist_at(monster_map(m), m->pos)); idx++)
     {
@@ -1404,11 +1404,11 @@ static int modified_attack_amount(int amount, int damage_type)
 
 void monster_player_attack(monster *m, player *p)
 {
+    g_assert(m != NULL && p != NULL);
+
     damage *dam;
     map *mmap = game_map(nlarn, Z(m->pos));
     attack att = { ATT_NONE, DAM_NONE, 0, 0 };
-
-    g_assert(m != NULL && p != NULL);
 
     /* the player is invisible and the monster bashes into thin air */
     if (!pos_identical(m->player_pos, p->pos))
