@@ -22,8 +22,11 @@
 #include <string.h>
 
 #ifdef SDLPDCURSES
-#  include <SDL.h>
-void PDC_update_rects(void);
+/* include PDCurses SDL1 port specific functions */
+# include "sdl1/pdcsdl.h"
+/* pdcsdl.h imports curspriv.h, which defines the following two conflicting macros. */
+# undef min
+# undef max
 #endif
 
 #include "display.h"
@@ -123,6 +126,10 @@ void display_init()
     /* default to 90 columns when using SDL PDCurses */
     g_setenv("PDC_COLS", "90", 0);
     g_setenv("PDC_LINES", "25", 0);
+
+    /* Set the window icon */
+    char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn->libdir);
+    g_setenv("PDC_ICON", icon_name, 1);
 #endif
 
     /* Start curses mode */
@@ -137,15 +144,6 @@ void display_init()
 
     PDC_set_title(window_title);
     g_free(window_title);
-
-    /* Set the window icon */
-    char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn->libdir);
-    SDL_Surface *image = SDL_LoadBMP(icon_name);
-    g_free(icon_name);
-
-    Uint32 colorkey = SDL_MapRGB(image->format, 0, 0, 0);
-    SDL_SetColorKey(image, SDL_SRCCOLORKEY, colorkey);
-    SDL_WM_SetIcon(image,NULL);
 #endif
 
     /* initialize colours */
@@ -673,7 +671,7 @@ int display_paint_screen(player *p)
     text_destroy(text);
     g_free(ttime);
 
-    return display_draw();
+    return display_draw(FALSE);
 }
 
 void display_shutdown()
@@ -694,17 +692,26 @@ gboolean display_available()
     return display_initialised;
 }
 
-int display_draw()
+#ifndef SDLPDCURSES
+# define PERHAPSUNUSED __attribute__((unused))
+#else
+# define PERHAPSUNUSED
+#endif
+int display_draw(gboolean force_full_refresh PERHAPSUNUSED)
 {
     /* mark stdscr and all panels for redraw */
     update_panels();
 
     /* finally commit all the prepared updates */
 #ifdef SDLPDCURSES
-    /* SDL PDCurses does a little trick to increase the performance,
-       have a look at the docs to see why this is required. */
     int ret = doupdate();
-    PDC_update_rects();
+
+    if (force_full_refresh) {
+      /* SDL PDCurses does a little trick to increase the performance,
+       * have a look at the PDCurses docs to see why this is required. */
+      PDC_update_rects();
+    }
+
     return ret;
 #else
     return doupdate();
@@ -2935,7 +2942,7 @@ void display_window_destroy(display_window *dwin)
     else
     {
         /* refresh the screen */
-        display_draw();
+        display_draw(FALSE);
     }
 }
 
@@ -3213,7 +3220,7 @@ static int display_window_move(display_window *dwin, int key)
     if (need_refresh)
     {
         move_panel(dwin->panel, dwin->y1, dwin->x1);
-        (void)display_draw();
+        (void)display_draw(FALSE);
     }
 
     return need_refresh;

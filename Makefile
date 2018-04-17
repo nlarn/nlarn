@@ -78,7 +78,7 @@ ifeq ($(MSYSTEM),MINGW32)
   RESDEFINE += -DVINFO=\\\"$(VERSION)\\\"
 
   # Libraries specific to Windows
-  LDFLAGS += -static -lpdcurses -llua
+  LDFLAGS += -llua
 
   # Configuration for glib-2
   # Funny enough, build breaks if these are set as ususal..
@@ -101,11 +101,6 @@ else
   CFLAGS  += $(shell pkg-config --cflags glib-2.0)
   LDFLAGS += $(shell pkg-config --libs glib-2.0)
 
-  # Configuration for ncurses - OS X is handled separately
-  ifneq ($(OS), Darwin)
-    LDFLAGS += -lncurses -lpanel
-  endif
-
   # Determine the name of the Lua 5.3 library
   # Debian and derivates use lua5.3, the rest of the world lua
   ifneq ($(wildcard /etc/debian_version),)
@@ -126,6 +121,15 @@ else
   ARCHIVE_SUFFIX = tar.gz
 endif
 
+# Unless requested otherwise build with ncurses.
+ifeq ($(SDLPDCURSES),)
+	LDFLAGS += -lncurses -lpanel
+else
+	PDCLIB  := PDCurses/sdl1/libpdcurses.a
+	CFLAGS  += -IPDCurses -DSDLPDCURSES $(shell sdl-config --cflags)
+	LDFLAGS += $(shell sdl-config --libs) -lSDL_ttf
+endif
+
 # Enable creating packages when working on a git checkout
 ifneq ($(GITREV),)
   DIRNAME   = nlarn-$(VERSION)
@@ -138,14 +142,6 @@ endif
 ifeq ($(OS),Darwin)
   # Use clang on OS X.
   CC = clang
-  # Unless requested otherwise build with SDL PDCurses on OS X.
-  ifeq ($(NCURSES),)
-    CFLAGS  += -DSDLPDCURSES $(shell sdl-config --cflags) -Dmain=SDL_main
-    LDFLAGS += -lpdcurses $(shell sdl-config --static-libs)
-  endif
-  ifneq ($(NCURSES),)
-    LDFLAGS += -lcurses -lpanel
-  endif
   OSXIMAGE := nlarn-$(VERSION).dmg
 endif
 
@@ -168,14 +164,19 @@ OBJECTS += $(patsubst %.c,%.o,$(wildcard src/external/*.c))
 
 all: nlarn$(SUFFIX)
 
-nlarn$(SUFFIX): $(OBJECTS) $(RESOURCES)
-	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(RESOURCES)
+nlarn$(SUFFIX): $(PDCLIB) $(OBJECTS) $(RESOURCES)
+	$(CC) -o $@ $(OBJECTS) $(PDCLIB) $(LDFLAGS) $(RESOURCES)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(RESOURCES): %.res: %.rc
 	windres -v $(RESDEFINE) $< -O coff -o $@
+
+$(PDCLIB):
+	@git submodule init
+	@git submodule update --recommend-shallow
+	$(MAKE) -C PDCurses/sdl1 WIDE=Y UTF8=Y libs
 
 dist: clean $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
 
@@ -254,6 +255,9 @@ clean:
 	@echo Cleaning nlarn
 	rm -f $(OBJECTS)
 	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
+	@if \[ -n "$(PDCLIB)" \]; then \
+		$(MAKE) -C PDCurses/sdl1 clean; \
+	fi
 
 help:
 	@echo "Usage: make [config=name] [target]"

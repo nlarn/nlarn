@@ -631,7 +631,7 @@ int main(int argc, char *argv[])
         case KEY_RESIZE: /* SDL window size event */
 #endif
             clear();
-            display_draw();
+            display_draw(FALSE);
             break;
 
             /* quit */

@@ -1,6 +1,6 @@
 /*
  * display.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,13 +19,8 @@
 #ifndef __DISPLAY_H_
 #define __DISPLAY_H_
 
-#ifndef SDLPDCURSES
 #include <curses.h>
 #include <panel.h>
-#else
-#include <pdcurses.h>
-#include <pdpanel.h>
-#endif
 
 #include "game.h"
 #include "items.h"
@@ -146,7 +141,15 @@ void display_shutdown();
  */
 gboolean display_available();
 
-int display_draw();
+/**
+ * Repaint the screen.
+ *
+ * @param force a full refresh of the entire screen.
+ *        This parameter is only used with PDCurses and only required when
+ *        it's drawing optimisation skips desired screen updated. So far
+ *        this only happens when showing animations (i.e. missile flight)
+ */
+int display_draw(gboolean force_full_refresh);
 
 int display_paint_screen(player *p);
 

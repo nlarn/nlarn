@@ -864,7 +864,7 @@ gboolean map_trajectory(position source, position target,
         attron(colour);
         (void)mvaddch(Y(cursor), X(cursor), glyph);
         attroff(colour);
-        display_draw();
+        display_draw(TRUE);
 
         /* sleep a while to show the ray's position */
         g_usleep(100000);
