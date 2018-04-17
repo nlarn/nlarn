@@ -57,7 +57,7 @@ endif
 
 # Definitions required regardless of host OS
 DEFINES += -DG_DISABLE_DEPRECATED
-CFLAGS  += -std=c99 -Wall -Wextra -Werror -Iinc
+CFLAGS  += -std=c99 -Wall -Wextra -Werror -Iinc -Iinc/external
 LDFLAGS += -lz -lm
 
 ifeq ($(MSYSTEM),MINGW32)
@@ -163,6 +163,8 @@ endif
 
 BUILDDIR := build
 OBJECTS := $(patsubst %.c,%.o,$(wildcard src/*.c))
+OBJECTS += $(patsubst %.c,%.o,$(wildcard src/wrappers/*.c))
+OBJECTS += $(patsubst %.c,%.o,$(wildcard src/external/*.c))
 
 all: nlarn$(SUFFIX)
 
