@@ -113,13 +113,13 @@ static void display_spheres_paint(sphere *s, player *p);
 
 void display_init()
 {
-    /* taken from Angband 3.1.1 */
-    /* overwrite bit is false, so users on real (serial) terminals can override
-       this; terminal emulators drop an entire sequence into the input buffer at
-       once, and I/O-buffering makes the packet very unlikely to be split even
-       over networks */
-#ifndef WIN32
-    g_setenv("ESCDELAY", "0", 0);
+#ifdef NCURSES_VERSION
+    /*
+     * Don't wait for trailing key codes after an ESC key is pressed.
+     * This breaks compatibility with very old terminals connected over
+     * very slow serial lines - I think I can live with that.
+     */
+    set_escdelay(0);
 #endif
 
 #ifdef SDLPDCURSES
