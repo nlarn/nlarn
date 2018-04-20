@@ -239,17 +239,15 @@ $(OSXIMAGE): nlarn
 	@mkdir dmgroot/.background
 	@cp resources/dmg_background.png dmgroot/.background
 	@echo hdiutil requires superuser rights.
-	@sudo hdiutil create -srcfolder dmgroot -volname "NLarn $(VERSION)" \
-		-uid 99 -gid 99 -format UDRW -ov "raw-$(DIRNAME).dmg"
+	@hdiutil create -srcfolder dmgroot -volname "NLarn $(VERSION)" \
+		-uid 99 -gid 99 -format UDRW -ov "raw-$(DIRNAME).dmg" || rm -rf dmgroot
 	@rm -rf dmgroot
-	@mkdir dmgroot
-	@sudo hdiutil attach -noautoopen -readwrite "raw-$(DIRNAME).dmg" -mountpoint dmgroot
-	@sudo SetFile -a C dmgroot
+	@hdiutil attach -noautoopen -readwrite "raw-$(DIRNAME).dmg"
+	@SetFile -a C "/Volumes/NLarn $(VERSION)"
 	@sed -e 's/##VOLNAME##/NLarn $(VERSION)/' resources/dmg_settings.scpt | osascript
-	@sudo hdiutil detach dmgroot
-	@rm -rf dmgroot
-	@sudo hdiutil convert "raw-$(DIRNAME).dmg" -format UDZO -o "$(DIRNAME).dmg"
-	@sudo rm "raw-$(DIRNAME).dmg"
+	@hdiutil detach "/Volumes/NLarn $(VERSION)"
+	@hdiutil convert "raw-$(DIRNAME).dmg" -format UDZO -o "$(DIRNAME).dmg"
+	@rm "raw-$(DIRNAME).dmg"
 
 clean:
 	@echo Cleaning nlarn
