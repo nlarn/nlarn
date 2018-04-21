@@ -4501,7 +4501,7 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
         gold_amount = it->count;
     }
 
-    /* Reset the fired flag. This has to be done befora adding the item to the
+    /* Reset the fired flag. This has to be done befor adding the item to the
        inventory as otherwise the item comparision would fail.
        If picking up fails, the item will not be picked up automatically again. */
     it->fired = FALSE;
