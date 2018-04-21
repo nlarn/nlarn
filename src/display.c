@@ -382,14 +382,23 @@ int display_paint_screen(player *p)
     }
 
     /* current HPs */
-    if (p->hp <= ((int)p->hp_max / 10)) /* 10% hp left */
-        attrs = DC_LIGHTRED;
+    if (p->hp <= ((int)p->hp_max / 10))      /* 10% hp left */
+        attrs = DC_LIGHTRED | A_BLINK;
     else if (p->hp <= ((int)p->hp_max / 4))  /* 25% hp left */
         attrs = DC_RED;
     else if (p->hp <= ((int)p->hp_max / 2))  /* 50% hp left */
         attrs = DC_GREEN;
     else
         attrs = DC_LIGHTGREEN;
+
+#ifdef SDLPDCURSES
+    /* enable blinking on SDL PDCurses display for very low hp */
+    if (attrs & A_BLINK) {
+        PDC_set_blink(TRUE);
+    } else {
+        PDC_set_blink(FALSE);
+    }
+#endif
 
     attron(attrs);
     mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, "HP %3d", p->hp, player_get_hp_max(p));
