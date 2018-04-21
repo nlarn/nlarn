@@ -847,6 +847,10 @@ gboolean map_trajectory(position source, position target,
                             && player_effect(nlarn->p, ET_REFLECTION))))
         {
             g_list_free(ray);
+            /* repaint the screen before showing the reflection, otherwise
+             * the reflection wouldn't be visible! */
+            display_paint_screen(nlarn->p);
+
             return map_trajectory(cursor, source, damo, pos_hitfun, data1,
                                   data2, FALSE,  glyph, colour, keep_ray);
         }
