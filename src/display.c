@@ -130,6 +130,7 @@ void display_init()
     /* Set the window icon */
     char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn->libdir);
     g_setenv("PDC_ICON", icon_name, 1);
+    g_free(icon_name);
 
     /* Set the font - allow overriding this default */
     gchar *font_name = g_strdup_printf("%s/FiraMono-Medium.otf", nlarn->libdir);
