@@ -400,9 +400,10 @@ gboolean area_blast(position center, guint radius,
     attroff(colour);
 
     /* make sure the blast shows up */
-    display_draw(TRUE);
+    display_draw();
+
     /* sleep a 3/4 second */
-    g_usleep(750000);
+    napms(750);
 
     return retval;
 }

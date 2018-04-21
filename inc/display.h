@@ -143,13 +143,8 @@ gboolean display_available();
 
 /**
  * Repaint the screen.
- *
- * @param force a full refresh of the entire screen.
- *        This parameter is only used with PDCurses and only required when
- *        it's drawing optimisation skips desired screen updated. So far
- *        this only happens when showing animations (i.e. missile flight)
- */
-int display_draw(gboolean force_full_refresh);
+  */
+int display_draw();
 
 int display_paint_screen(player *p);
 

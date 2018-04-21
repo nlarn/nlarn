@@ -685,7 +685,7 @@ int display_paint_screen(player *p)
     text_destroy(text);
     g_free(ttime);
 
-    return display_draw(FALSE);
+    return display_draw();
 }
 
 void display_shutdown()
@@ -706,30 +706,13 @@ gboolean display_available()
     return display_initialised;
 }
 
-#ifndef SDLPDCURSES
-# define PERHAPSUNUSED __attribute__((unused))
-#else
-# define PERHAPSUNUSED
-#endif
-int display_draw(gboolean force_full_refresh PERHAPSUNUSED)
+int display_draw()
 {
     /* mark stdscr and all panels for redraw */
     update_panels();
 
     /* finally commit all the prepared updates */
-#ifdef SDLPDCURSES
-    int ret = doupdate();
-
-    if (force_full_refresh) {
-      /* SDL PDCurses does a little trick to increase the performance,
-       * have a look at the PDCurses docs to see why this is required. */
-      PDC_update_rects();
-    }
-
-    return ret;
-#else
     return doupdate();
-#endif
 }
 
 static int item_sort_normal(gconstpointer a, gconstpointer b, gpointer data)
@@ -2956,7 +2939,7 @@ void display_window_destroy(display_window *dwin)
     else
     {
         /* refresh the screen */
-        display_draw(FALSE);
+        display_draw();
     }
 }
 
@@ -3234,7 +3217,7 @@ static int display_window_move(display_window *dwin, int key)
     if (need_refresh)
     {
         move_panel(dwin->panel, dwin->y1, dwin->x1);
-        (void)display_draw(FALSE);
+        (void)display_draw();
     }
 
     return need_refresh;

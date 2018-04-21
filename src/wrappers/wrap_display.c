@@ -82,7 +82,7 @@ void wrap_display(lua_State *L)
 
 static int wrap_draw(lua_State *L __attribute__((unused)))
 {
-    display_draw(FALSE);
+    display_draw();
 
     return 0;
 }
