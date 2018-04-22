@@ -212,6 +212,16 @@ static int attr_colour(int colour, int reverse)
 
 #define aaddch(attrs, ch) waaddch(stdscr, attrs, ch)
 
+/* mvwprintw with an additional attribute parameter */
+#define mvwaprintw(win, y, x, attrs, fmt, ...) \
+    wattron(win, attrs); \
+    mvwprintw(win, y, x, fmt, ##__VA_ARGS__); \
+    wattroff(win, attrs)
+
+/* mvprintw with an additional attribute parameter */
+#define mvaprintw(y, x, attrs, fmt, ...) \
+    mvwaprintw(stdscr, y, x, attrs, fmt, ##__VA_ARGS__)
+
 int display_paint_screen(player *p)
 {
     guint x, y, i;
@@ -405,14 +415,10 @@ int display_paint_screen(player *p)
     }
 #endif
 
-    attron(attrs);
-    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, "HP %3d", p->hp, player_get_hp_max(p));
-    attroff(attrs);
+    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, attrs, "HP %3d", p->hp, player_get_hp_max(p));
 
     /* max HPs */
-    attron(attrs = DC_LIGHTGREEN);
-    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 15, "/%-3d", player_get_hp_max(p));
-    attroff(attrs);
+    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 15, DC_LIGHTGREEN, "/%-3d", player_get_hp_max(p));
 
     /* current MPs */
     if (p->mp <= ((int)p->mp_max / 10)) /* 10% mp left */
@@ -424,14 +430,10 @@ int display_paint_screen(player *p)
     else
         attrs = DC_LIGHTCYAN;
 
-    attron(attrs);
-    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 10, "MP %3d", p->mp);
-    attroff(attrs);
+    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 10, attrs, "MP %3d", p->mp);
 
     /* max MPs */
-    attron(attrs = DC_LIGHTCYAN);
-    mvprintw(MAP_MAX_Y + 1, MAP_MAX_X - 4, "/%-3d", player_get_mp_max(p));
-    attroff(attrs);
+    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 4, DC_LIGHTCYAN, "/%-3d", player_get_mp_max(p));
 
     /* game time */
     mvprintw(MAP_MAX_Y + 1, MAP_MAX_X + 1, "T %-6d", game_turn(nlarn));
@@ -440,12 +442,8 @@ int display_paint_screen(player *p)
     move(MAP_MAX_Y + 2, 0);
     clrtoeol();
 
-    attron(attrs = DC_LIGHTBLUE);
-
-    mvprintw(MAP_MAX_Y + 2, MAP_MAX_X - 21, "XP %3d/%-5d",
+    mvaprintw(MAP_MAX_Y + 2, MAP_MAX_X - 21, DC_LIGHTBLUE, "XP %3d/%-5d",
              p->level, p->experience);
-
-    attroff(attrs);
 
     /* dungeon map */
     mvprintw(MAP_MAX_Y + 2, MAP_MAX_X + 1, "Lvl: %s", map_name(vmap));
@@ -541,9 +539,7 @@ int display_paint_screen(player *p)
     }
     else
     {
-        attron(attrs = DC_LIGHTRED);
-        mvprintw(7, MAP_MAX_X + 3, "unarmed");
-        attroff(attrs);
+        mvaprintw(7, MAP_MAX_X + 3, DC_LIGHTRED, "unarmed");
     }
     clrtoeol();
 
@@ -847,13 +843,11 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             else
                 attrs = COLOR_PAIR(DCP_WHITE_RED);
 
-            wattron(iwin->window, attrs);
-
             if (show_price)
             {
                 /* inside shop */
                 gchar *item_desc = item_describe(it, TRUE, FALSE, FALSE);
-                mvwprintw(iwin->window, pos, 1, " %-*s %5d$ ",
+                mvwaprintw(iwin->window, pos, 1, attrs, " %-*s %5d$ ",
                           width - 11, item_desc, item_price(it));
 
                 g_free(item_desc);
@@ -861,14 +855,12 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             else
             {
                 gchar *item_desc = item_describe(it, player_item_known(p, it), FALSE, FALSE);
-                mvwprintw(iwin->window, pos, 1, " %-*s %c ",
+                mvwaprintw(iwin->window, pos, 1, attrs, " %-*s %c ",
                           width - 6, item_desc,
                           player_item_is_equipped(p, it) ? '*' : ' ');
 
                 g_free(item_desc);
             }
-
-            wattroff(iwin->window, attrs);
         }
 
         /* prepare the window title */
@@ -1123,10 +1115,8 @@ void display_config_autopickup(player *p)
 
     cwin = display_window_new(startx, starty, width, height, "Autopickup");
 
-    wattron(cwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-    mvwprintw(cwin->window, 1, 2, "Enabled types are shown inverted");
-    mvwprintw(cwin->window, 2, 7, "type symbol to toggle");
-    wattroff(cwin->window, attrs);
+    mvwaprintw(cwin->window, 1, 2, COLOR_PAIR(DCP_WHITE_RED), "Enabled types are shown inverted");
+    mvwaprintw(cwin->window, 2, 7, COLOR_PAIR(DCP_WHITE_RED), "type symbol to toggle");
 
     do
     {
@@ -1139,9 +1129,7 @@ void display_config_autopickup(player *p)
             else
                 attrs = COLOR_PAIR(DCP_WHITE_RED);
 
-            wattron(cwin->window, attrs);
-            mvwprintw(cwin->window, 4, 6 + it * 2, "%c", item_glyph(it));
-            wattroff(cwin->window, attrs);
+            mvwaprintw(cwin->window, 4, 6 + it * 2, attrs, "%c", item_glyph(it));
         }
 
         wrefresh(cwin->window);
@@ -1231,15 +1219,12 @@ spell *display_spell_select(const char *title, player *p)
             if (curr == pos) attrs = COLOR_PAIR(DCP_RED_WHITE);
             else attrs = COLOR_PAIR(DCP_WHITE_RED);
 
-            wattron(swin->window, attrs);
-
-            mvwprintw(swin->window, pos, 1, " %3s - %-23s (Lvl %d) %2d ",
+            mvwaprintw(swin->window, pos, 1, attrs,
+                      " %3s - %-23s (Lvl %d) %2d ",
                       spell_code(sp),
                       spell_name(sp),
                       spell_level(sp),
                       sp->knowledge);
-
-            wattroff(swin->window, attrs);
         }
 
         /* display up / down markers */
@@ -1483,9 +1468,6 @@ int display_get_count(const char *caption, int value)
 
     GPtrArray *text;
 
-    /* curses attributes */
-    int attrs;
-
     /* toggle insert / overwrite mode; start with overwrite */
     int insert_mode = FALSE;
 
@@ -1514,22 +1496,17 @@ int display_get_count(const char *caption, int value)
     startx = (COLS - width) / 2;
 
     mwin = display_window_new(startx, starty, width, height, NULL);
-    wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
 
     for (guint line = 0; line < text->len; line++)
     {
         /* fill the box background */
-        mvwprintw(mwin->window, 1 + line, 1, "%-*s", width - 2, "");
+        mvwaprintw(mwin->window, 1 + line, 1, COLOR_PAIR(DCP_WHITE_RED), "%-*s", width - 2, "");
         /* print text */
-        mvwprintw(mwin->window, 1 + line, 2, g_ptr_array_index(text, line));
+        mvwaprintw(mwin->window, 1 + line, 2, COLOR_PAIR(DCP_WHITE_RED), g_ptr_array_index(text, line));
     }
-
-    wattroff(mwin->window, attrs);
 
     /* prepare string to edit */
     g_snprintf(ivalue, 8, "%d", value);
-
-    wattron(mwin->window, (attrs = COLOR_PAIR(DCP_BLACK_WHITE)));
 
     do
     {
@@ -1541,8 +1518,8 @@ int display_get_count(const char *caption, int value)
         else
             curs_set(2); /* block */
 
-        mvwprintw(mwin->window,  mwin->height - 2, mwin->width - 10,
-                  "%-8s", ivalue);
+        mvwaprintw(mwin->window,  mwin->height - 2, mwin->width - 10,
+                  COLOR_PAIR(DCP_BLACK_WHITE), "%-8s", ivalue);
 
         wmove(mwin->window, mwin->height - 2, mwin->width - 10 + ipos);
         wrefresh(mwin->window);
@@ -1677,8 +1654,6 @@ int display_get_count(const char *caption, int value)
     }
     while (cont);
 
-    wattroff(mwin->window, attrs);
-
     /* hide cursor */
     curs_set(0);
 
@@ -1695,9 +1670,6 @@ char *display_get_string(const char *caption, const char *value, size_t max_len)
 {
     /* user input */
     int key;
-
-    /* curses attributes */
-    int attrs;
 
     /* toggle insert / overwrite mode */
     int insert_mode = TRUE;
@@ -1756,21 +1728,17 @@ char *display_get_string(const char *caption, const char *value, size_t max_len)
 
     display_window *mwin = display_window_new(startx, starty, width, height, NULL);
 
-    wattron(mwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-
     for (guint line = 0; line < text->len; line++)
     {
         /* print text */
-        mvwprintw(mwin->window, 1 + line, 1, " %-*s ", width - 4,
-                  g_ptr_array_index(text, line));
+        mvwaprintw(mwin->window, 1 + line, 1, COLOR_PAIR(DCP_WHITE_RED),
+                  " %-*s ", width - 4, g_ptr_array_index(text, line));
     }
-
-    wattroff(mwin->window, attrs);
-    wattron(mwin->window, (attrs = COLOR_PAIR(DCP_BLACK_WHITE)));
 
     do
     {
-        mvwprintw(mwin->window,  mwin->height - 2, box_start,
+        mvwaprintw(mwin->window,  mwin->height - 2, box_start,
+                   COLOR_PAIR(DCP_BLACK_WHITE),
                   "%-*s", max_len + 1, string->str);
         wmove(mwin->window, mwin->height - 2, box_start + ipos);
 
@@ -1885,8 +1853,6 @@ char *display_get_string(const char *caption, const char *value, size_t max_len)
     }
     while (cont);
 
-    wattroff(mwin->window, attrs);
-
     /* hide cursor */
     curs_set(0);
 
@@ -1910,7 +1876,6 @@ int display_get_yesno(const char *question, const char *yes, const char *no)
     int RUN = TRUE;
     int selection = FALSE;
     guint line;
-    int attrs; /* curses attributes */
     GPtrArray *text;
 
     const guint padding = 1;
@@ -1951,37 +1916,31 @@ int display_get_yesno(const char *question, const char *yes, const char *no)
 
     ywin = display_window_new(startx, starty, width, text->len + 4, NULL);
 
-    wattron(ywin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-
     for (line = 0; line < text->len; line++)
     {
-        mvwprintw(ywin->window,
-                  line + 1,
-                  1 + padding,
-                  g_ptr_array_index(text, line));
+        mvwaprintw(ywin->window, line + 1, 1 + padding, COLOR_PAIR(DCP_WHITE_RED),
+                   g_ptr_array_index(text, line));
     }
-
-    wattroff(ywin->window, attrs);
 
     text_destroy(text);
 
     do
     {
         /* paint */
-        if (selection) wattron(ywin->window, (attrs = COLOR_PAIR(DCP_RED_WHITE)));
-        else           wattron(ywin->window, (attrs = COLOR_PAIR(DCP_BLACK_WHITE) | A_BOLD));
+        int attrs;
 
-        mvwprintw(ywin->window, line + 2, margin, "%*s%s%*s", padding, " ",
-                  yes, padding, " ");
+        if (selection) attrs = COLOR_PAIR(DCP_RED_WHITE);
+        else           attrs = COLOR_PAIR(DCP_BLACK_WHITE) | A_BOLD;
 
-        wattroff(ywin->window, attrs);
+        mvwaprintw(ywin->window, line + 2, margin, attrs,
+                   "%*s%s%*s", padding, " ", yes, padding, " ");
 
-        if (selection) wattron(ywin->window, (attrs = COLOR_PAIR(DCP_BLACK_WHITE) | A_BOLD));
-        else           wattron(ywin->window, (attrs = COLOR_PAIR(DCP_RED_WHITE)));
+        if (selection) attrs = COLOR_PAIR(DCP_BLACK_WHITE) | A_BOLD;
+        else           attrs = COLOR_PAIR(DCP_RED_WHITE);
 
-        mvwprintw(ywin->window, line + 2,
-                  width - margin - strlen(no) - (2 * padding),
-                  "%*s%s%*s", padding, " ", no, padding, " ");
+        mvwaprintw(ywin->window, line + 2,
+                   width - margin - strlen(no) - (2 * padding),
+                   attrs, "%*s%s%*s", padding, " ", no, padding, " ");
 
         wattroff(ywin->window, attrs);
         wrefresh(ywin->window);
@@ -2070,7 +2029,6 @@ direction display_get_direction(const char *title, int *available)
     int *dirs = NULL;
     int startx, starty;
     int width;
-    int attrs; /* curses attributes */
     int RUN = TRUE;
 
     /* direction to return */
@@ -2098,27 +2056,21 @@ direction display_get_direction(const char *title, int *available)
 
     dwin = display_window_new(startx, starty, width, 9, title);
 
-    wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-    mvwprintw(dwin->window, 3, 3, "\\|/");
-    mvwprintw(dwin->window, 4, 3, "- -");
-    mvwprintw(dwin->window, 5, 3, "/|\\");
-    wattroff(dwin->window, attrs);
-
-    wattron(dwin->window, (attrs = COLOR_PAIR(DCP_YELLOW_RED)));
+    mvwaprintw(dwin->window, 3, 3, COLOR_PAIR(DCP_WHITE_RED), "\\|/");
+    mvwaprintw(dwin->window, 4, 3, COLOR_PAIR(DCP_WHITE_RED), "- -");
+    mvwaprintw(dwin->window, 5, 3, COLOR_PAIR(DCP_WHITE_RED), "/|\\");
 
     for (int x = 0; x < 3; x++)
         for (int y = 0; y < 3; y++)
         {
             if (dirs[(x + 1) + (y * 3)])
-                mvwprintw(dwin->window,
+                mvwaprintw(dwin->window,
                           6 - (y * 2), /* start in the last row, move up, skip one */
                           (x * 2) + 2, /* start in the second col, skip one */
+                          COLOR_PAIR(DCP_YELLOW_RED),
                           "%d",
                           (x + 1) + (y * 3));
-
         }
-
-    wattroff(dwin->window, attrs);
 
     if (!available)
         g_free(dirs);
@@ -3112,7 +3064,6 @@ static display_window *display_window_new(int x1, int y1, int width,
                                           int height, const char *title)
 {
     display_window *dwin;
-    int attrs; /* curses attributes */
 
     dwin = g_malloc0(sizeof(display_window));
 
@@ -3129,17 +3080,15 @@ static display_window *display_window_new(int x1, int y1, int width,
 #endif
 
     /* fill window background */
-    wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-
-    for (int i = 1; i < height; i++)
-        mvwprintw(dwin->window, i, 1, "%*s", width - 2, "");
-
-    wattroff(dwin->window, attrs);
+    for (int i = 1; i < height; i++) {
+        mvwaprintw(dwin->window, i, 1, COLOR_PAIR(DCP_WHITE_RED),
+                   "%*s", width - 2, "");
+    }
 
     /* draw borders */
-    wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
+    wattron(dwin->window, COLOR_PAIR(DCP_BLUE_RED));
     box(dwin->window, 0, 0);
-    wattroff(dwin->window, attrs);
+    wattroff(dwin->window, COLOR_PAIR(DCP_BLUE_RED));
 
     /* set the window title */
     display_window_update_title(dwin, title);
@@ -3248,9 +3197,7 @@ static void display_window_update_title(display_window *dwin, const char *title)
         /* make sure the first letter of the window title is upper case */
         dwin->title[0] = g_ascii_toupper(dwin->title[0]);
 
-        wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-        mvwprintw(dwin->window, 0, 2, " %s ", dwin->title);
-        wattroff(dwin->window, attrs);
+        mvwaprintw(dwin->window, 0, 2, COLOR_PAIR(DCP_WHITE_RED), " %s ", dwin->title);
     }
 
     wrefresh(dwin->window);
@@ -3270,9 +3217,8 @@ static void display_window_update_caption(display_window *dwin, char *caption)
     /* print caption if caption is set */
     if (caption && strlen(caption))
     {
-        wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-        mvwprintw(dwin->window, dwin->height - 1, 3, " %s ", caption);
-        wattroff(dwin->window, attrs);
+        mvwaprintw(dwin->window, dwin->height - 1, 3, COLOR_PAIR(DCP_WHITE_RED),
+                   " %s ", caption);
 
         /* free the provided caption */
         g_free(caption);
@@ -3289,9 +3235,8 @@ static void display_window_update_arrow_up(display_window *dwin, gboolean on)
 
     if (on)
     {
-        wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-        mvwprintw(dwin->window, 0, dwin->width - 5, " ^ ");
-        wattroff(dwin->window, attrs);
+        mvwaprintw(dwin->window, 0, dwin->width - 5,
+                  COLOR_PAIR(DCP_WHITE_RED), " ^ ");
     }
     else
     {
@@ -3309,9 +3254,8 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
 
     if (on)
     {
-        wattron(dwin->window, (attrs = COLOR_PAIR(DCP_WHITE_RED)));
-        mvwprintw(dwin->window, dwin->height - 1, dwin->width - 5, " v ");
-        wattroff(dwin->window, attrs);
+        mvwaprintw(dwin->window, dwin->height - 1, dwin->width - 5,
+                  COLOR_PAIR(DCP_WHITE_RED), " v ");
     }
     else
     {
