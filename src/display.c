@@ -212,6 +212,12 @@ static int attr_colour(int colour, int reverse)
 
 #define aaddch(attrs, ch) waaddch(stdscr, attrs, ch)
 
+/* printw with an additional attribute parameter */
+#define aprintw(attrs, fmt, ...) \
+    attron(attrs); \
+    printw(fmt, ##__VA_ARGS__); \
+    attroff(attrs)
+
 /* mvwprintw with an additional attribute parameter */
 #define mvwaprintw(win, y, x, attrs, fmt, ...) \
     wattron(win, attrs); \
@@ -467,9 +473,7 @@ int display_paint_screen(player *p)
     else
         attrs = DC_WHITE;
 
-    attron(attrs);
-    printw("%2d", player_get_str(p));
-    attroff(attrs);
+    aprintw(attrs, "%2d", player_get_str(p));
     clrtoeol();
 
     /* dexterity */
@@ -482,9 +486,7 @@ int display_paint_screen(player *p)
     else
         attrs = DC_WHITE;
 
-    attron(attrs);
-    printw("%2d", player_get_dex(p));
-    attroff(attrs);
+    aprintw(attrs, "%2d", player_get_dex(p));
     clrtoeol();
 
     /* constitution */
@@ -497,9 +499,7 @@ int display_paint_screen(player *p)
     else
         attrs = DC_WHITE;
 
-    attron(attrs);
-    printw("%2d", player_get_con(p));
-    attroff(attrs);
+    aprintw(attrs, "%2d", player_get_con(p));
     clrtoeol();
 
     /* intelligence */
@@ -512,9 +512,7 @@ int display_paint_screen(player *p)
     else
         attrs = DC_WHITE;
 
-    attron(attrs);
-    printw("%2d", player_get_int(p));
-    attroff(attrs);
+    aprintw(attrs, "%2d", player_get_int(p));
     clrtoeol();
 
     /* wisdom */
@@ -527,9 +525,7 @@ int display_paint_screen(player *p)
     else
         attrs = DC_WHITE;
 
-    attron(attrs);
-    printw("%2d", player_get_wis(p));
-    attroff(attrs);
+    aprintw(attrs, "%2d", player_get_wis(p));
     clrtoeol();
 
     /* clear line below Wisdom */
