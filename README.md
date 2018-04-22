@@ -61,16 +61,14 @@ the additions of Ularn have been included.
 ## Compiling NLarn
 
 Instructions how to build NLarn on Linux, MacOS X and Windows can be found at
-https://sourceforge.net/p/nlarn/wiki/NLarnBuilding/
+https://github.com/nlarn/nlarn/wiki/Building
 
 
 ## Reporting bugs
 
 Bug reports are very welcome. You can either send me an eMail to
-jaydg@users.sourceforge.net or if you have a SourceForge account you can post
-to the bug tracker at https://sourceforge.net/p/nlarn/tickets/new/
-
-Known bugs and tasks are tracked at https://sourceforge.net/p/nlarn/tickets/
+<jdegroot@web.de> or create an issue on GitHub.
+Known bugs and tasks are tracked at https://github.com/nlarn/nlarn/issues
 
 If you have ideas for changes or additions to the game, please let me know.
-A list of ideas is maintained in the wiki at https://sourceforge.net/p/nlarn/wiki/Ideas/
+A list of ideas is maintained in the wiki at https://github.com/nlarn/nlarn/wiki/Ideas
