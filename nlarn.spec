@@ -7,7 +7,7 @@ License: GPL v3
 URL:     http://nlarn.sourceforge.net
 Source:  http://downloads.sourceforge.net/project/nlarn/nlarn/%{version}/nlarn-%{version}.tar.gz
 
-BuildRequires: glib2-devel lua-devel ncurses-devel zlib-devel 
+BuildRequires: glib2-devel lua-devel ncurses-devel zlib-devel
 
 %description
 
@@ -32,7 +32,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(2755, root, games) /usr/games/nlarn
 /usr/share/games/nlarn/*
 %config(noreplace) %attr (0664,root,games) /usr/share/games/nlarn/highscores
-%doc LICENSE README.txt Changelog.txt nlarn.ini-sample lib/maze_doc.txt
+%doc LICENSE README.md Changelog.txt nlarn.ini-sample lib/maze_doc.txt
 
 %changelog
 * Fri May 25 2012 Joachim de Groot <jdegroot@web.de>
@@ -43,19 +43,19 @@ rm -rf $RPM_BUILD_ROOT
 * Sun Sep 19 2010 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.6.1
   - added missing dependency for lua
-* Sun Apr 25 2010 Joachim de Groot <jdegroot@web.de> 
+* Sun Apr 25 2010 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.6
-* Sat Apr 03 2010 Joachim de Groot <jdegroot@web.de> 
+* Sat Apr 03 2010 Joachim de Groot <jdegroot@web.de>
   - added Changelog.txt
   - added highscore file
   - fixed file permissions
   - updated for version 0.5.4
-* Sat Jan 30 2010 Joachim de Groot <jdegroot@web.de> 
+* Sat Jan 30 2010 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.5.3
-* Sun Nov 22 2009 Joachim de Groot <jdegroot@web.de> 
+* Sun Nov 22 2009 Joachim de Groot <jdegroot@web.de>
   - added README.txt
   - updated for version 0.5.2
-* Wed Nov 11 2009 Joachim de Groot <jdegroot@web.de> 
+* Wed Nov 11 2009 Joachim de Groot <jdegroot@web.de>
   - removed BUILD.txt
   - Updated for version 0.5.1
 * Tue Sep 22 2009 Joachim de Groot <jdegroot@web.de>

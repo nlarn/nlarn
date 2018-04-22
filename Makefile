@@ -135,7 +135,7 @@ ifneq ($(GITREV),)
   DIRNAME   = nlarn-$(VERSION)
   SRCPKG    = nlarn-$(VERSION).tar.gz
   PACKAGE   = $(DIRNAME)_$(OS).$(ARCH).$(ARCHIVE_SUFFIX)
-  MAINFILES = nlarn$(SUFFIX) nlarn.ini-sample README.txt LICENSE
+  MAINFILES = nlarn$(SUFFIX) nlarn.ini-sample README.md LICENSE
   LIBFILES  = lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.* lib/*.lua
 endif
 
@@ -224,7 +224,7 @@ $(OSXIMAGE): nlarn
 	@cp -p lib/{fortune,maze,monsters.lua,nlarn*} \
 		dmgroot/Nlarn.app/Contents/Resources
 	@cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
-	@cp -pr Changelog.txt README.txt LICENSE dmgroot
+	@cp -pr Changelog.txt README.md LICENSE dmgroot
 	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
 # Update the version information in the plist
 	@/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(VERSION)" \
