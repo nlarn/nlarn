@@ -204,6 +204,14 @@ static int attr_colour(int colour, int reverse)
     return colour;
 }
 
+/* convenience helper against endless repetition */
+#define waaddch(win, attrs, ch) \
+    wattron(win, attrs); \
+    waddch(win, ch); \
+    wattroff(win, attrs)
+
+#define aaddch(attrs, ch) waaddch(stdscr, attrs, ch)
+
 int display_paint_screen(player *p)
 {
     guint x, y, i;
@@ -240,12 +248,14 @@ int display_paint_screen(player *p)
                 if (map_sobject_at(vmap, pos))
                 {
                     /* draw stationary objects first */
-                    attron(attrs = attr_colour(so_get_colour(map_sobject_at(vmap, pos)), has_items));
+                    gchar glyph;
                     if (map_sobject_at(vmap, pos) == LS_CLOSEDDOOR || map_sobject_at(vmap, pos) == LS_OPENDOOR)
-                        addch(map_get_door_glyph(vmap, pos));
+                        glyph = map_get_door_glyph(vmap, pos);
                     else
-                        addch(so_get_glyph(map_sobject_at(vmap, pos)));
-                    attroff(attrs);
+                        glyph = so_get_glyph(map_sobject_at(vmap, pos));
+
+                    aaddch(attr_colour(so_get_colour(map_sobject_at(vmap, pos)), has_items),
+                           glyph);
                 }
                 else if (has_items)
                 {
@@ -272,23 +282,19 @@ int display_paint_screen(player *p)
                     const gboolean has_trap = (map_trap_at(vmap, pos)
                                                && player_memory_of(p, pos).trap);
 
-                    attron(attrs = attr_colour(item_colour(it), has_trap));
-                    addch(item_glyph(it->type));
-                    attroff(attrs);
+                    aaddch(attr_colour(item_colour(it), has_trap),
+                           item_glyph(it->type));
                 }
                 else if (map_trap_at(vmap, pos) && (game_fullvis(nlarn) || player_memory_of(p, pos).trap))
                 {
                     /* FIXME - displays trap when unknown!! */
-                    attron(attrs = trap_colour(map_trap_at(vmap, pos)));
-                    addch('^');
-                    attroff(attrs);
+                    aaddch(trap_colour(map_trap_at(vmap, pos)), '^');
                 }
                 else
                 {
                     /* draw tile */
-                    attron(attrs = mt_get_colour(map_tiletype_at(vmap, pos)));
-                    addch(mt_get_glyph(map_tiletype_at(vmap, pos)));
-                    attroff(attrs);
+                    aaddch(mt_get_colour(map_tiletype_at(vmap, pos)),
+                           mt_get_glyph(map_tiletype_at(vmap, pos)));
                 }
             }
             else /* i.e. !fullvis && !visible: draw players memory */
@@ -299,38 +305,31 @@ int display_paint_screen(player *p)
                     /* draw stationary object */
                     sobject_t ms = map_sobject_at(vmap, pos);
 
-                    attron(attrs = attr_colour(so_get_colour(ms), has_items));
-
+                    gchar glyph;
                     if (ms == LS_CLOSEDDOOR || ms == LS_OPENDOOR)
-                        addch(map_get_door_glyph(vmap, pos));
+                        glyph = map_get_door_glyph(vmap, pos);
                     else
-                        addch(so_get_glyph(ms));
+                        glyph = so_get_glyph(ms);
 
-                    attroff(attrs);
+                    aaddch(attr_colour(so_get_colour(ms), has_items), glyph);
                 }
                 else if (has_items)
                 {
                     /* draw items */
                     const gboolean has_trap = (player_memory_of(p, pos).trap);
 
-                    attron(attrs = attr_colour(player_memory_of(p, pos).item_colour,
-                                               has_trap));
-                    addch(item_glyph(player_memory_of(p, pos).item));
-                    attroff(attrs);
+                    aaddch(attr_colour(player_memory_of(p, pos).item_colour, has_trap),
+                           item_glyph(player_memory_of(p, pos).item));
                 }
                 else if (player_memory_of(p, pos).trap)
                 {
                     /* draw trap */
-                    attron(attrs = trap_colour(map_trap_at(vmap, pos)));
-                    addch('^');
-                    attroff(attrs);
+                    aaddch(trap_colour(map_trap_at(vmap, pos)), '^');
                 }
                 else
                 {
                     /* draw tile */
-                    attron(attrs = DC_DARKGRAY);
-                    addch(mt_get_glyph(player_memory_of(p, pos).type));
-                    attroff(attrs);
+                    aaddch(DC_DARKGRAY, mt_get_glyph(player_memory_of(p, pos).type));
                 }
             }
 
@@ -2459,21 +2458,16 @@ position display_get_new_position(player *p,
 
                         if ((m = map_get_monster_at(vmap, cursor)) && monster_in_sight(m))
                         {
-                            attron(attrs = DC_RED);
-                            addch(monster_glyph(m));
+                            aaddch(DC_RED, monster_glyph(m));
                         }
                         else if (pos_identical(p->pos, cursor))
                         {
-                            attron(attrs = DC_LIGHTRED);
-                            addch('@');
+                            aaddch(DC_LIGHTRED, '@');
                         }
                         else
                         {
-                            attron(attrs = DC_LIGHTCYAN);
-                            addch('*');
+                            aaddch(DC_LIGHTCYAN, '*');
                         }
-
-                        attroff(attrs);
                     }
                 }
             }
@@ -2786,11 +2780,10 @@ int display_show_message(const char *title, const char *message, int indent)
                content width, overwrite the rest of the line with blanks.
                Actually this should be fixed in mvwcprintw(), but that seems
                like lot of work. */
-
-            wattron(mwin->window, DDC_LIGHTGRAY);
             for (guint pos = count; pos < (width - wred); pos++)
-                waddch(mwin->window, ' ');
-            wattroff(mwin->window, DDC_LIGHTGRAY);
+            {
+                waaddch(mwin->window, DDC_LIGHTGRAY, ' ');
+            }
         }
 
         display_window_update_arrow_up(mwin, offset > 0);
