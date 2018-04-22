@@ -212,6 +212,12 @@ static int attr_colour(int colour, int reverse)
 
 #define aaddch(attrs, ch) waaddch(stdscr, attrs, ch)
 
+/* mvaddch with an additional attribute parameter */
+#define mvaaddch(y, x, attrs, ch) \
+    attron(attrs); \
+    mvaddch(y, x, ch); \
+    attroff(attrs)
+
 /* printw with an additional attribute parameter */
 #define aprintw(attrs, fmt, ...) \
     attron(attrs); \
@@ -368,10 +374,8 @@ int display_paint_screen(player *p)
                     || player_effect(p, ET_DETECT_MONSTER)
                     || monster_in_sight(monst))
             {
-                attron(attrs = monster_color(monst));
                 position mpos = monster_pos(monst);
-                (void)mvaddch(Y(mpos), X(mpos), monster_glyph(monst));
-                attroff(attrs);
+                mvaaddch(Y(mpos), X(mpos), monster_color(monst), monster_glyph(monst));
             }
         }
     }
@@ -392,9 +396,7 @@ int display_paint_screen(player *p)
         attrs = DC_WHITE;
     }
 
-    attron(attrs);
-    (void)mvaddch(Y(p->pos), X(p->pos), pc);
-    attroff(attrs);
+    mvaaddch(Y(p->pos), X(p->pos), attrs, pc);
 
 
     /* *** status line *** */
@@ -2376,22 +2378,21 @@ position display_get_new_position(player *p,
                     && monster_in_sight(target))
                 {
                     /* ray is targeted at a visible monster */
-                    (void)mvaddch(Y(tpos), X(tpos), monster_glyph(target));
+                    mvaaddch(Y(tpos), X(tpos), attrs, monster_glyph(target));
                 }
                 else if ((m = map_get_monster_at(vmap, tpos))
                          && monster_in_sight(m))
                 {
                     /* ray sweeps over a visible monster */
-                    (void)mvaddch(Y(tpos), X(tpos), monster_glyph(m));
+                    mvaaddch(Y(tpos), X(tpos), attrs, monster_glyph(m));
                 }
                 else
                 {
                     /* a position with no or an invisible monster on it */
-                    (void)mvaddch(Y(tpos), X(tpos), '*');
+                    mvaaddch(Y(tpos), X(tpos), attrs, '*');
                 }
             } while ((iter = iter->next));
 
-            attroff(attrs);
             g_list_free(r);
             r = NULL;
         }
@@ -3282,8 +3283,6 @@ static void display_spheres_paint(sphere *s, player *p)
 
     if (game_fullvis(nlarn) || fov_get(p->fv, s->pos))
     {
-        attron(DC_MAGENTA);
-        (void)mvaddch(Y(s->pos), X(s->pos), '0');
-        attroff(DC_MAGENTA);
+        mvaaddch(Y(s->pos), X(s->pos), DC_MAGENTA, '0');
     }
 }
