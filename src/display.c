@@ -222,6 +222,12 @@ static int attr_colour(int colour, int reverse)
 #define mvaprintw(y, x, attrs, fmt, ...) \
     mvwaprintw(stdscr, y, x, attrs, fmt, ##__VA_ARGS__)
 
+/* mvwhline with an additional attribute parameter */
+#define mvwahline(win, y, x, attrs, ch, n) \
+    wattron(win, attrs); \
+    mvwhline(win, y, x, ch, n); \
+    wattroff(win, attrs)
+
 int display_paint_screen(player *p)
 {
     guint x, y, i;
@@ -3168,8 +3174,6 @@ static int display_window_move(display_window *dwin, int key)
 
 static void display_window_update_title(display_window *dwin, const char *title)
 {
-    int attrs; /* curses attributes */
-
     g_assert (dwin != NULL && dwin->window != NULL);
 
     if (dwin->title)
@@ -3178,9 +3182,8 @@ static void display_window_update_title(display_window *dwin, const char *title)
         g_free(dwin->title);
 
         /* repaint line to overwrite previous title */
-        wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
-        (void)mvwhline(dwin->window, 0, 2, ACS_HLINE, dwin->width - 7);
-        wattroff(dwin->window, attrs);
+        mvwahline(dwin->window, 0, 2, COLOR_PAIR(DCP_BLUE_RED),
+                  ACS_HLINE, dwin->width - 7);
     }
 
     /* print the provided title */
@@ -3205,14 +3208,11 @@ static void display_window_update_title(display_window *dwin, const char *title)
 
 static void display_window_update_caption(display_window *dwin, char *caption)
 {
-    int attrs; /* curses attributes */
-
     g_assert (dwin != NULL && dwin->window != NULL);
 
     /* repaint line to overwrite previous captions */
-    wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
-    (void)mvwhline(dwin->window, dwin->height - 1, 3, ACS_HLINE, dwin->width - 7);
-    wattroff(dwin->window, attrs);
+    mvwahline(dwin->window, dwin->height - 1, 3, COLOR_PAIR(DCP_BLUE_RED),
+              ACS_HLINE, dwin->width - 7);
 
     /* print caption if caption is set */
     if (caption && strlen(caption))
@@ -3229,8 +3229,6 @@ static void display_window_update_caption(display_window *dwin, char *caption)
 
 static void display_window_update_arrow_up(display_window *dwin, gboolean on)
 {
-    int attrs; /* curses attributes */
-
     g_assert (dwin != NULL && dwin->window != NULL);
 
     if (on)
@@ -3240,16 +3238,13 @@ static void display_window_update_arrow_up(display_window *dwin, gboolean on)
     }
     else
     {
-        wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
-        (void)mvwhline(dwin->window, 0, dwin->width - 5, ACS_HLINE, 3);
-        wattroff(dwin->window, attrs);
+        mvwahline(dwin->window, 0, dwin->width - 5, COLOR_PAIR(DCP_BLUE_RED),
+                 ACS_HLINE, 3);
     }
 }
 
 static void display_window_update_arrow_down(display_window *dwin, gboolean on)
 {
-    int attrs; /* curses attributes */
-
     g_assert (dwin != NULL && dwin->window != NULL);
 
     if (on)
@@ -3259,9 +3254,8 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
     }
     else
     {
-        wattron(dwin->window, (attrs = COLOR_PAIR(DCP_BLUE_RED)));
-        (void)mvwhline(dwin->window, dwin->height - 1, dwin->width - 5, ACS_HLINE, 3);
-        wattroff(dwin->window, attrs);
+        mvwahline(dwin->window, dwin->height - 1, dwin->width - 5,
+                  COLOR_PAIR(DCP_BLUE_RED), ACS_HLINE, 3);
     }
 }
 
