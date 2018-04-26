@@ -1122,7 +1122,7 @@ void player_die(player *p, player_cod cause_type, int cause)
 
     /* We really died! */
 
-    /* do not show scores when in wizardmode */
+    /* do not show scores when in wizard mode */
     if (!game_wizardmode(nlarn))
     {
         /* redraw screen to make sure player can see the cause of his death */
@@ -1137,7 +1137,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         game_score_t *score = game_score(nlarn, cause_type, cause);
         GList *scores = game_score_add(nlarn, score);
 
-        /* create a description of the player's achievments */
+        /* create a description of the player's achievements */
         gchar *text = player_create_obituary(p, score, scores);
 
         /* free the memory allocated for the scores*/
@@ -1595,7 +1595,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     else if (l->nlevel == 1 && Z(p->pos) == 0)
         log_add_entry(nlarn->log, "You enter the caverns of Larn.");
 
-    /* remove monster that might be at player's positon */
+    /* remove monster that might be at player's position */
     if ((map_get_monster_at(l, p->pos)))
     {
         position mnpos = map_find_space(l, LE_MONSTER, FALSE);
@@ -1733,7 +1733,7 @@ void player_autopickup(player *p)
             retval = player_item_pickup(p, floor, i, FALSE);
 
             if (retval == 1)
-                /* pickup has been canceled by the player */
+                /* pickup has been cancelled by the player */
                 return;
 
             if (count_orig != inv_length(*floor))
@@ -2948,7 +2948,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
             desc = item_describe(it, known, TRUE, FALSE);
             log_add_entry(nlarn->log, "You are now wearing %s.", desc);
 
-            /* put the piece of armor in the equipment slot */
+            /* put the piece of armour in the equipment slot */
             *islot = it;
         }
         break;
@@ -3428,7 +3428,7 @@ int player_item_is_equippable(player *p, item *it)
          || (p->eq_weapon && p->eq_weapon->cursed)))
         return FALSE;
 
-    /* twohanded weapon / shield combinations */
+    /* two-handed weapon / shield combinations */
     if ((it->type == IT_WEAPON) && weapon_is_twohanded(it)&& (p->eq_shield))
         return FALSE;
 
@@ -3780,7 +3780,7 @@ void player_item_drop(player *p, inventory **inv, item *it)
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     /* Don't use player_movement_possible() here as this would take
-       the possiblity to drop stuff when overstrained. */
+       the possibility to drop stuff when overstrained. */
     if (player_effect(p, ET_PARALYSIS))
     {
         log_add_entry(nlarn->log, "You can't move!");
@@ -4497,12 +4497,12 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean a
 
     if (it->type == IT_GOLD)
     {
-        /* record the amound of gold as the item might be destroyed */
+        /* record the amount of gold as the item might be destroyed */
         gold_amount = it->count;
     }
 
     /* Reset the fired flag. This has to be done before adding the item to the
-       inventory as otherwise the item comparision would fail.
+       inventory as otherwise the item comparison would fail.
        If picking up fails, the item will not be picked up automatically again. */
     it->fired = FALSE;
 
@@ -5018,7 +5018,7 @@ void calc_fighting_stats(player *p)
 
         if (filename != NULL)
         {
-            /* file name has been provided. try to save file */
+            /* file name has been provided. Try to save file */
             if (!g_file_set_contents(filename, text->str, -1, &error))
             {
                 display_show_message("Error", error->message, 0);
@@ -5347,7 +5347,7 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
         message_log_entry *entry = log_get_entry(nlarn->log, pos);
         g_string_append_printf(text, "%s\n", entry->message);
     }
-    /* print uncommited messages */
+    /* print uncommitted messages */
     if (nlarn->log->buffer->len > 0)
     {
         g_string_append_printf(text, "%s\n", nlarn->log->buffer->str);
@@ -5383,7 +5383,7 @@ static void player_memorial_file_save(player *p, const char *text)
             /* user pressed ESC, thus display_get_string() returned NULL */
             done = TRUE;
         } else {
-            /* file name has been provided. try to save file */
+            /* file name has been provided, try to save file */
             char *fullname = g_build_path(G_DIR_SEPARATOR_S,
 #ifdef G_OS_WIN32
                     g_get_user_special_dir(G_USER_DIRECTORY_DOCUMENTS),
@@ -5417,7 +5417,7 @@ static void player_memorial_file_save(player *p, const char *text)
                 continue;
             }
 
-            /* wrap the text and insert line feed for the plattform */
+            /* wrap the text and insert line feed for the platform */
             char *wtext = str_prepare_for_saving(text);
 
             if (g_file_set_contents(fullname, wtext, -1, &error))

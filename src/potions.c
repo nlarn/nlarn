@@ -151,7 +151,7 @@ int potion_throw(struct player *p)
         return FALSE;
     }
 
-    /* protect townsfolk from agressive players */
+    /* protect townsfolk from aggressive players */
     if (map_get_monster_at(pmap, target)
         && monster_type(map_get_monster_at(pmap, target)) == MT_TOWN_PERSON)
     {

@@ -669,7 +669,7 @@ const char *monster_get_name(monster *m)
 
 const char* monster_type_plural_name(const int montype, const int count)
 {
-    /* result of lua data query; monster's plural name */
+    /* result of Lua data query; monster's plural name */
     const char *mpn = luaN_query_string("monsters", montype, "plural_name");
 
     if (count > 1)
@@ -1205,7 +1205,7 @@ int monster_items_pickup(monster *m)
     if (monster_effect(m, ET_LEVITATION))
         return FALSE;
 
-    /* TODO: gelatious cube digests items, rust monster eats metal stuff */
+    /* TODO: gelatinous cube digests items, rust monster eats metal stuff */
     /* FIXME: time management */
 
     gboolean pick_up = FALSE;
@@ -1241,7 +1241,7 @@ int monster_items_pickup(monster *m)
 
                Determine if the item is a weapon.
                This has to be done before adding the item to the monster's
-               intentory as the item might be destroyed after calling inv_add().
+               inventory as the item might be destroyed after calling inv_add().
                (Stackable items get destroyed if an item of the kind exists
                 in the target inventory!).
             */
@@ -1289,7 +1289,7 @@ int monster_attack_count(monster *m)
 
     if (luaN_push_table("monsters", m->type, "attacks"))
     {
-        /* attacks table has been found; query lenght */
+        /* attacks table has been found; query length */
         count = lua_rawlen(nlarn->L, -1);
 
         /* clean up */
@@ -1451,7 +1451,7 @@ void monster_player_attack(monster *m, player *p)
     /* choose a random attack type */
     att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
 
-    /* no attack has been found. return to calling function. */
+    /* No attack has been found. Return to calling function. */
     if (att.type == ATT_NONE) return;
 
     /* handle breath attacks separately */
@@ -1659,7 +1659,7 @@ monster *monster_damage_take(monster *m, damage *dam)
         break;
     }
 
-    /* substract damage from HP;
+    /* subtract damage from HP;
      * prevent adding to HP after resistance has lowered damage amount */
     m->hp -= max(0, dam->amount);
 
@@ -1676,7 +1676,7 @@ monster *monster_damage_take(monster *m, damage *dam)
         {
             /* Get the percentage of hitpoints the metamorph has left.
                If this is less than 80%, the metamorph will turn into
-               another monster that will usually be mor dangerous. */
+               another monster that will usually be more dangerous. */
             float relative_hp = (float)m->hp / (float)m->hp_max;
 
             if ((m->hp > 0) && (relative_hp < 0.8))
@@ -1799,7 +1799,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
             break;
 
         default:
-            /* countinue to evaluate... */
+            /* continue to evaluate... */
             break;
     }
 
@@ -1826,10 +1826,10 @@ gboolean monster_update_action(monster *m, monster_action_t override)
     }
     else if (m->lastseen && (m->lastseen < mtime))
     {
-        /* after having spotted the player, agressive monster will follow
+        /* after having spotted the player, aggressive monster will follow
            the player for a certain amount of time turns, afterwards loose
            interest. More peaceful monsters will do something else. */
-        /* TODO: need to test for agressiveness */
+        /* TODO: need to test for aggressiveness */
         naction = MA_ATTACK;
     }
     else
@@ -2155,7 +2155,7 @@ int monster_effect_del(monster *m, effect *e)
 
     if ((result = effect_del(m->effects, e)))
     {
-        /* if confusion is finished, set the ai back to the default */
+        /* if confusion is finished, set the AI back to the default */
         if ((e->type) == ET_CONFUSION) {
             monster_update_action(m, MA_WANDER);
         }
@@ -2489,7 +2489,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
         }
     }
 
-    /* if item / gold has been stolen, add it to the monster's inv */
+    /* if item / gold has been stolen, add it to the monster's inventory */
     if (it)
     {
         inv_add(&m->inv, it);
@@ -2644,11 +2644,11 @@ static position monster_move_attack(monster *m, struct player *p)
     }
     else
     {
-        /* no path found. stop following player */
+        /* No path found. Stop following player */
         m->lastseen = 0;
     }
 
-    /* cleanup */
+    /* clean up */
     if (path)
         map_path_destroy(path);
 
@@ -2659,7 +2659,7 @@ static position monster_move_attack(monster *m, struct player *p)
 static position monster_move_confused(monster *m,
                                       __attribute__ ((unused)) struct player *p)
 {
-    /* as the monster is confused, choos a random movement direction */
+    /* as the monster is confused, choose a random movement direction */
     return pos_move(monster_pos(m), rand_1n(GD_MAX));
 }
 

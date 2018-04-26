@@ -481,7 +481,7 @@ int spell_cast_new(struct player *p)
         return 0;
     }
 
-    /* show spell selection dialog */
+    /* show spell selection dialogue */
     last_spell = display_spell_select("Select a spell to cast", p);
 
     /* player aborted spell selection by pressing ESC */
@@ -860,7 +860,7 @@ int spell_type_ray(spell *s, struct player *p)
     map_trajectory(p->pos, target, &damo, spell_traj_pos_hit,
                    s, dam, TRUE, '*', spell_colour(s), TRUE);
 
-    /* The callback functions give a copy of the damage to the specifiv
+    /* The callback functions give a copy of the damage to the specific
        functions, thus the original has to be destroyed here. */
     damage_free(dam);
 
@@ -1372,7 +1372,7 @@ item_usage_result book_read(struct player *p, item *book)
     /* the book has successfully been read - increase number of books read */
     p->stats.books_read++;
 
-    /* cursed spellbooks have nasty effects */
+    /* cursed spell books have nasty effects */
     if (book->cursed)
     {
         log_add_entry(nlarn->log, "There was something wrong with this book! " \

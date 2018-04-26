@@ -44,7 +44,7 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_INC_CON, "ET_INC_CON", 1, 1, NULL,
-        "You have a greater intestinal constitude!",
+        "You have a greater intestinal constitution!",
         NULL, NULL, NULL,
         FALSE, FALSE, FALSE, TRUE
     },
@@ -290,7 +290,7 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_MAX_MP, "ET_MAX_MP", 1, 100 /* % */, NULL,
-        "You feel much more poweful.",
+        "You feel much more powerful.",
         NULL,
         "The %s looks much more powerful.",
         NULL,
@@ -511,8 +511,8 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_PARALYSIS, "ET_PARALYSIS", 25, TRUE, "paralyzed",
-        "You are paralyzed.",
+        ET_PARALYSIS, "ET_PARALYSIS", 25, TRUE, "paralysed",
+        "You are paralysed.",
         "You can move again.",
         NULL, NULL,
         TRUE, FALSE, FALSE, FALSE

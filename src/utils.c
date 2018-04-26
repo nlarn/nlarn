@@ -178,7 +178,7 @@ void log_set_time(message_log *log, int gtime)
         log->buffer = g_string_new(NULL);
     }
 
-    /* cleanup previous message buffer */
+    /* clean up previous message buffer */
     if (log->lastmsg)
     {
         g_free(log->lastmsg);
@@ -218,7 +218,7 @@ cJSON *log_serialize(message_log *log)
         cJSON_AddStringToObject(log_entry, "message", entry->message);
     }
 
-    /* add this turn's message if filled */
+    /* add this turns message if filled */
     if (log->buffer->len > 0)
     {
         cJSON_AddStringToObject(log_ser, "buffer", log->buffer->str);
@@ -246,7 +246,7 @@ message_log *log_deserialize(cJSON *lser)
     log->active = TRUE;
     log->entries = g_ptr_array_new();
 
-    /* try to restore this turn's message */
+    /* try to restore this turns message */
     if ((obj = cJSON_GetObjectItem(lser, "buffer")) != NULL)
     {
         /* restore buffer from saved value */

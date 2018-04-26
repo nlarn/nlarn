@@ -134,7 +134,8 @@ item *item_new(item_t item_type, int item_id)
             }
             while (item_type == IT_CONTAINER);
 
-            /* no need to do a finetouch here, will be done in the calling func. */
+            /* No need to do a fine touch here, that
+			 * will be done in the calling function. */
             return item_new_random(item_type, FALSE);
         }
 
@@ -314,7 +315,7 @@ item *item_new_by_level(item_t item_type, int num_level)
         break;
 
     default:
-        /* no per-map randomnization */
+        /* no per-map randomisation */
         return item_new_random(item_type, TRUE);
     }
 
@@ -346,7 +347,7 @@ item *item_new_finetouch(item *it)
     }
     else if (item_is_blessable(it->type) && chance(25))
     {
-        /* only blessed or cursed items have a bonus / malus */
+        /* only blessed or cursed items have bonus / minus points */
         if (item_is_optimizable(it->type))
         {
             it->bonus = rand_1n(3);
@@ -413,7 +414,7 @@ item *item_copy(item *original)
     /* reset inventory */
     nitem->content = NULL;
 
-    /* regíster copy with game */
+    /* register copy with game */
     nitem->oid = game_item_register(nlarn, nitem);
 
     return nitem;
@@ -620,7 +621,7 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id
 
     if (item_a->type == item_b->type)
     {
-        /* both items are of identical type. compare their names. */
+        /* Both items are of identical type. Compare their names. */
         order = g_ascii_strcasecmp(item_desc_get(item_a, force_id || player_item_known(p, item_a)),
                                    item_desc_get(item_b, force_id || player_item_known(p, item_b)));
     }
@@ -752,10 +753,10 @@ gchar *item_describe(item *it, int known, int singular, int definite)
         else
         {
             if (strcmp(item_desc_get(it, known), "") == 0)
-                g_string_append_printf(desc, "unlabeled scroll%s",
+                g_string_append_printf(desc, "unlabelled scroll%s",
                         (!singular && it->count > 1) ? "s" : "");
             else
-                g_string_append_printf(desc, "scroll%s labeled %s",
+                g_string_append_printf(desc, "scroll%s labelled %s",
                         (!singular && it->count > 1) ? "s" : "",
                         item_desc_get(it, known));
         }
@@ -1039,7 +1040,7 @@ int item_weight(item *it)
         break;
 
     case IT_GOLD:
-        /* Is this too heavy? is this too light?
+        /* Is this too heavy? Is this too light?
            It should give the player a reason to use the bank. */
         weight =  4;
         break;
@@ -1132,7 +1133,7 @@ void item_effect_add(item *it, effect *e)
 {
     g_assert (it != NULL && it->oid != NULL && e != NULL);
 
-    /* create list if not existant */
+    /* create list if not existent */
     if (!it->effects)
     {
         it->effects = g_ptr_array_new();
@@ -1191,7 +1192,7 @@ item *item_enchant(item *it)
 
     it->bonus++;
 
-    /* warn against overenchantment */
+    /* warn against over-enchantment */
     if (it->bonus == 3)
     {
         /* hide bonus from description */
@@ -1209,7 +1210,7 @@ item *item_enchant(item *it)
         it->bonus_known = bonus_known;
     }
 
-    /* item has been overenchanted */
+    /* item has been over-enchanted */
     if (it->bonus > 3)
     {
         player_item_destroy(nlarn->p, it);
@@ -1374,8 +1375,8 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
             {
                 /* if the inventory we are working on is the player's
                  * inventory, try to unequip the item first as we do
-                 * not know if it is eqipped (this would lead to nasty
-                 * segementation faults otherwise) */
+                 * not know if it is equipped (this would lead to nasty
+                 * segmentation faults otherwise) */
                 player_item_unequip(nlarn->p, &nlarn->p->inventory, it, TRUE);
             }
 
@@ -1646,7 +1647,7 @@ int inv_add(inventory **inv, item *it)
         for (guint idx = 0; idx < inv_length(*inv); idx++)
         {
             item *i = inv_get(*inv, idx);
-            /* compare the current item with the one whis is to be added */
+            /* compare the current item with the one which is to be added */
             if (item_compare(i, it))
             {
                 /* just increase item count and release the original */
@@ -1811,7 +1812,7 @@ guint inv_length_filtered(inventory *inv, int (*ifilter)(item *))
 
     if (inv == NULL)
     {
-        /* check for non-existant inventories */
+        /* check for non-existent inventories */
         return 0;
     }
 

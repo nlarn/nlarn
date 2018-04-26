@@ -619,7 +619,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
         }
         while (which < 'a' || which >= found + 'a');
 
-        /* release memory acquired for the dialog text */
+        /* release memory acquired for the dialogue text */
         g_string_free(msg, TRUE);
 
         which -= 'a';
@@ -716,7 +716,7 @@ static int scroll_identify(player *p, item *r_scroll)
 
     if (inv_length_filtered(p->inventory, item_filter_unid) == 0)
     {
-        /* player has no unidentfied items */
+        /* player has no unidentified items */
         log_add_entry(nlarn->log, "Nothing happens.");
         return FALSE;
     }
@@ -914,7 +914,7 @@ static int scroll_teleport(player *p, item *r_scroll)
             /* choose a cavern level if the player is in the caverns*/
             nlevel = rand_1n(MAP_DMAX);
         else
-            /* choose a vulcano level if the player is in the vulcano */
+            /* choose a volcano level if the player is in the volcano */
             nlevel = rand_m_n(MAP_DMAX, MAP_MAX);
     }
 

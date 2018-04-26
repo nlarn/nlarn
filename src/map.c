@@ -508,7 +508,7 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
     case LE_SWIMMING_MONSTER:
     case LE_FLYING_MONSTER:
     case LE_XORN:
-        /* not ok if player is standing on that tile */
+        /* not OK if player is standing on that tile */
         if (pos_identical(pos, nlarn->p->pos))
             return FALSE;
 
@@ -614,7 +614,7 @@ map_path *map_find_path(map *m, position start, position goal,
     gboolean next_is_better;
 
     /* if the starting position is on another map, fail for now */
-    /* TODO: could be changed to support 3D pathfinding */
+    /* TODO: could be changed to support 3D path finding */
     if (Z(start) != Z(goal))
         return NULL;
 
@@ -706,7 +706,7 @@ void map_path_destroy(map_path *path)
 {
     g_assert(path != NULL);
 
-    /* cleanup open list */
+    /* clean up open list */
     for (guint idx = 0; idx < path->open->len; idx++)
     {
         g_free(g_ptr_array_index(path->open, idx));
@@ -877,7 +877,7 @@ gboolean map_trajectory(position source, position target,
     }
     while ((iter = iter->next));
 
-    /* none of the trigger functions succeedes */
+    /* none of the trigger functions succeeded */
     g_list_free(ray);
     return FALSE;
 }
@@ -1461,7 +1461,7 @@ static void map_fill_with_traps(map *m)
 {
     g_assert(m != NULL);
 
-    /* Trapdoor cannot be placed in the last dungeon map and the last vulcano map */
+    /* Trapdoor cannot be placed in the last dungeon map and the last volcano map */
     gboolean trapdoor = (!is_dungeon_bottom(m->nlevel)
             && !is_volcano_bottom(m->nlevel));
 
@@ -1472,7 +1472,7 @@ static void map_fill_with_traps(map *m)
     }
 } /* map_fill_with_traps */
 
-/* subroutine to make the caverns for a given map. only walls are made. */
+/* Subroutine to make the caverns for a given map. Only walls are made. */
 static void map_make_maze(map *m, int treasure_room)
 {
     position pos = pos_invalid;
@@ -1594,7 +1594,7 @@ generate:
     if (treasure_room)
         map_make_treasure_room(m, rooms);
 
-    /* cleanup */
+    /* clean up */
     for (int room = 0; room < nrooms; room++)
         g_free(rooms[room]);
 
@@ -1947,7 +1947,7 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
                 tile->sobject = LS_DNDSTORE;
                 break;
 
-            case 'T': /* trede post */
+            case 'T': /* trade post */
                 tile->sobject = LS_TRADEPOST;
                 break;
 

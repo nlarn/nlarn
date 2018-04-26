@@ -187,7 +187,7 @@ int weapon_fire(struct player *p)
         return FALSE;
     }
 
-    /* protect townsfolk from agressive players */
+    /* protect townsfolk from aggressive players */
     if (monster_type(m) == MT_TOWN_PERSON)
     {
         log_add_entry(nlarn->log, "Gosh! How dare you!");

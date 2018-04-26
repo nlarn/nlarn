@@ -150,7 +150,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
         /* log the trap's triggered message */
         log_add_entry(nlarn->log, trap_p_message(trap));
 
-        /* refresh player's knowlege of trap */
+        /* refresh player's knowledge of trap */
         player_memory_of(p, p->pos).trap = trap;
 
         if (trap_damage(trap))

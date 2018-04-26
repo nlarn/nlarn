@@ -769,7 +769,7 @@ int player_stairs_down(player *p)
         break;
 
     case LS_ELEVATORDOWN:
-        /* first vulcano map */
+        /* first volcano map */
         show_msg = TRUE;
         nlevel = game_map(nlarn, MAP_DMAX);
         break;

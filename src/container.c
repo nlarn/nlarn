@@ -178,7 +178,7 @@ void container_item_add(player *p, inventory **inv, item *element)
     }
 
     /* mute the log if the container is in the player's inventory.
-       otherwise mindless burdened staus messages would appear */
+       otherwise mindless burdened status messages would appear */
     if (carried_container) log_disable(nlarn->log);
 
     if (element->count > 1)
@@ -295,7 +295,7 @@ void container_item_unpack(player *p, inventory **inv, item *element)
         return;
     }
 
-    /* keep track of the amount of gold found as element is free'd by inv_add */
+    /* keep track of the amount of gold found as element is freed by inv_add */
     int goldcount = (element->type == IT_GOLD) ? goldcount = element->count : 0;
 
     if (inv_add(&p->inventory, element))
@@ -450,7 +450,7 @@ static gboolean container_trigger_trap(player *p, item *container, gboolean forc
 
     if (et != ET_NONE)
     {
-        /* tell whats happening */
+        /* tell what's happening */
         log_add_entry(nlarn->log, msg);
 
         /* add the effect */

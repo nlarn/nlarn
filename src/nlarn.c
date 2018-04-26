@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     /* position to examine / to travel to */
     position pos = pos_invalid;
 
-    /* position chosen for autotravel, allowing to continue travel */
+    /* position chosen for auto travel, allowing to continue travel */
     position cpos = pos_invalid;
 
     /* initialise the game */
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
                                             NULL, 45);
     }
 
-    /* ask for charakter's gender if it is not known yet */
+    /* ask for character's gender if it is not known yet */
     if (nlarn->p->sex == PS_NONE)
     {
         int res = display_get_yesno("Are you male or female?", "Female", "Male");
@@ -157,24 +157,24 @@ int main(int argc, char *argv[])
 
                 if (path && !g_queue_is_empty(path->path))
                 {
-                    /* path found. move the player. */
+                    /* Path found. Move the player. */
                     map_path_element *el = g_queue_pop_head(path->path);
                     moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, el->pos), TRUE);
 
                     if (moves_count == 0)
                     {
                         /* for some reason movement is impossible, therefore
-                           stop autotravel. */
+                           stop auto travel. */
                         pos = pos_invalid;
                     }
                 }
                 else
                 {
-                    /* no path found. stop traveling */
+                    /* No path found. Stop traveling */
                     pos = pos_invalid;
                 }
 
-                /* cleanup */
+                /* clean up */
                 if (path) map_path_destroy(path);
             }
         }
@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            /* not running or traveling, get a key and handle it */
+            /* not running or travelling, get a key and handle it */
             ch = display_getch();
 
             if (ch == '/' || ch == 'g')
@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        /* get key and analyze it */
+        /* get key and analyse it */
         switch (ch)
         {
             /* *** MOVEMENT *** */
@@ -442,9 +442,9 @@ int main(int argc, char *argv[])
             moves_count = player_altar_desecrate(nlarn->p);
             break;
 
-            /* continue autotravel */
+            /* continue auto travel */
         case 'C':
-            /* delete last autotravel target if it was on another map */
+            /* delete last auto travel target if it was on another map */
             if (Z(cpos) != Z(nlarn->p->pos))
             {
                 cpos = pos_invalid;
@@ -452,7 +452,7 @@ int main(int argc, char *argv[])
 
             if (pos_valid(cpos))
             {
-                /* restore last known autotravel position */
+                /* restore last known auto travel position */
                 pos = cpos;
                 /* reset keyboard input */
                 ch = 0;
@@ -620,7 +620,7 @@ int main(int argc, char *argv[])
             player_list_sobjmem(nlarn->p);
             break;
 
-            /* "paperdoll" */
+            /* "paper doll" */
         case KEY_TAB:
             player_paperdoll(nlarn->p);
             break;
@@ -732,7 +732,7 @@ int main(int argc, char *argv[])
 
                     nlarn->p->pos = pos;
 
-                    /* reset pos, otherwise autotravel would be enabled */
+                    /* reset pos, otherwise auto travel would be enabled */
                     pos = pos_invalid;
                 }
             }
@@ -803,7 +803,7 @@ int main(int argc, char *argv[])
             // * mp is full,
             // * we are not confused,
             // * we are not blinded, AND
-            // * we are not paralyzed
+            // * we are not paralysed
             else if (run_cmd == '.')
             {
                 if (game_turn(nlarn) >= end_resting

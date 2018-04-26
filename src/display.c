@@ -165,7 +165,7 @@ void display_init()
     init_pair(DCP_CYAN_BLACK,    COLOR_CYAN,    COLOR_BLACK);
     init_pair(DCP_BLACK_BLACK,   COLOR_BLACK,   COLOR_BLACK);
 
-    /* these colour pairs are used by dialogs */
+    /* these colour pairs are used by dialogues */
     init_pair(DCP_WHITE_RED,    COLOR_WHITE,    COLOR_RED);
     init_pair(DCP_RED_RED,      COLOR_RED,      COLOR_RED);
     init_pair(DCP_GREEN_RED,    COLOR_GREEN,    COLOR_RED);
@@ -670,7 +670,7 @@ int display_paint_screen(player *p)
 
     for (y = 20, i = 0; (y < (unsigned)LINES) && (i < text->len); i++, y++)
     {
-        /* default color for the line */
+        /* default colour for the line */
         int def_attrs;
 
         if ((nlarn->log->gtime - 15) < ttime[i])
@@ -732,10 +732,10 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 {
     /* the inventory window */
     display_window *iwin = NULL;
-    /* the item description popup */
+    /* the item description pop-up */
     display_window *ipop = NULL;
 
-    /* the dialog width */
+    /* the dialogue width */
     const guint width = COLS - 4;
 
     guint len_orig, len_curr;
@@ -776,7 +776,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     /* main loop */
     do
     {
-        /* calculate the dialog height */
+        /* calculate the dialogue height */
         guint height = min((LINES - 10), len_curr + 2);
 
         /* calculate how many items can be displayed at a time */
@@ -913,7 +913,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
         }
 
-        /* refresh the item description popup */
+        /* refresh the item description pop-up */
         if (ipop != NULL)
             display_window_destroy(ipop);
 
@@ -922,7 +922,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         if (g_strv_length(captions) > 0)
         {
-            /* append "(?) help" to trigger the help popup */
+            /* append "(?) help" to trigger the help pop-up */
             strv_append(&captions, "(?) help");
 
             /* update the window's caption with the assembled array of captions */
@@ -1117,7 +1117,7 @@ void display_config_autopickup(player *p)
     starty = (LINES - height) / 2;
     startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
-    cwin = display_window_new(startx, starty, width, height, "Autopickup");
+    cwin = display_window_new(startx, starty, width, height, "Auto pick-up");
 
     mvwaprintw(cwin->window, 1, 2, COLOR_PAIR(DCP_WHITE_RED), "Enabled types are shown inverted");
     mvwaprintw(cwin->window, 2, 7, COLOR_PAIR(DCP_WHITE_RED), "type symbol to toggle");
@@ -1206,7 +1206,7 @@ spell *display_spell_select(const char *title, player *p)
     height = min((LINES - 3), (p->known_spells->len + 2));
     maxvis = min(p->known_spells->len, height - 2);
 
-    width = 44;
+    width = 46;
     starty = (LINES - height) / 2;
     startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
@@ -1224,7 +1224,7 @@ spell *display_spell_select(const char *title, player *p)
             else attrs = COLOR_PAIR(DCP_WHITE_RED);
 
             mvwaprintw(swin->window, pos, 1, attrs,
-                      " %3s - %-23s (Lvl %d) %2d ",
+                      " %3s - %-23s (Level %d) %2d ",
                       spell_code(sp),
                       spell_name(sp),
                       spell_level(sp),
@@ -1371,8 +1371,8 @@ spell *display_spell_select(const char *title, player *p)
         case KEY_ENTER:
         case KEY_SPC:
             // It is much too easy to accidentally cast alter reality,
-            // simply by pressing m + Enter. If the first keypress in
-            // the menu confirms this autoselected first spell, prompt.
+            // simply by pressing m + Enter. If the first key press in
+            // the menu confirms this auto selected first spell, prompt.
             if (curr == 1 && prev_key == 0 && sp->id == SP_ALT)
             {
                 char prompt[60];
@@ -1490,7 +1490,7 @@ int display_get_count(const char *caption, int value)
     /* 8: input field width; 5: 3 spaces between border, caption + input field, 2 border */
     basewidth = 8 + 5;
 
-    /* choose a sane dialog width */
+    /* choose a sane dialogue width */
     width = min(basewidth + strlen(caption), COLS - 4);
 
     text = text_wrap(caption, width - basewidth, 0);
@@ -1690,7 +1690,7 @@ char *display_get_string(const char *caption, const char *value, size_t max_len)
     /* 3 spaces between border, caption + input field, 2 border */
     int basewidth = 5;
 
-    /* choose a sane dialog width */
+    /* choose a sane dialogue width */
     guint width;
     guint maxwidth = COLS - 4;
 
@@ -1725,7 +1725,7 @@ char *display_get_string(const char *caption, const char *value, size_t max_len)
         box_start = 2;
 
     int height = 2 + text->len; /* borders and text length */
-    if (box_start == 2) height += 1; /* grow the dialog if input box doesn't fit */
+    if (box_start == 2) height += 1; /* grow the dialogue if input box doesn't fit */
 
     int starty = (LINES - height) / 2;
     int startx = (COLS - width) / 2;
@@ -1906,7 +1906,7 @@ int display_get_yesno(const char *question, const char *yes, const char *no)
     /* wrap question according to width */
     text = text_wrap(question, text_width + 1, 0);
 
-    /* determine window width. either defined by the length of the button
+    /* Determine window width. Either defined by the length of the button
      * labels or width of the text */
     width = max(strlen(yes) + strlen(no)
                 + 2 /* borders */
@@ -1950,7 +1950,7 @@ int display_get_yesno(const char *question, const char *yes, const char *no)
         wrefresh(ywin->window);
 
         int key = tolower(getch()); /* input key buffer */
-        // Specialcase for the movement keys and y/n.
+        // Special case for the movement keys and y/n.
         if (key != 'h' && key != 'l' && key != 'y' && key != 'n')
         {
             char input_yes = g_ascii_tolower(yes[0]);
@@ -2309,11 +2309,11 @@ position display_get_new_position(player *p,
 
     do
     {
-        /* refresh the popup content for every position change
+        /* refresh the pop-up content for every position change
            while looking for visible positions */
         if (visible)
         {
-            /* clean old popup windows */
+            /* clean old pop-up windows */
             if (msgpop != NULL)
                 display_window_destroy(msgpop);
 
@@ -2331,7 +2331,7 @@ position display_get_new_position(player *p,
         } /* visible */
 
 #ifdef PDCURSES
-        /* I have no idea why, but the message popup window is hidden when
+        /* I have no idea why, but the message pop-up window is hidden when
         using PDCurses without calling touchwin for it. */
         touchwin(msgpop->window);
 #endif
@@ -2556,7 +2556,7 @@ position display_get_new_position(player *p,
             break;
 
         default:
-            /* if traveling, use sobject glyphs as shortcuts */
+            /* if travelling, use sobject glyphs as shortcuts */
             if (travel)
             {
                 sobject_t sobj = LS_NONE;
@@ -2645,7 +2645,7 @@ position display_get_new_position(player *p,
     if (mlist != NULL)
         g_list_free(mlist);
 
-    /* destroy the message popup */
+    /* destroy the message pop-up */
     display_window_destroy(msgpop);
 
     /* hide cursor */
@@ -2841,7 +2841,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     }
     else
     {
-        /* width supplied. sanity check */
+        /* width supplied. Sanity check */
         if ((unsigned)width > max_width)
             width = max_width;
     }
@@ -2952,7 +2952,7 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
             /* extract string between the %s */
             tval = g_strndup(&msg[pos + 1], tpos - pos - 1);
 
-            /* find color value for the tag content */
+            /* find colour value for the tag content */
             if (strcmp(tval, "end") == 0)
             {
                 wattroff(win, attr);
@@ -3125,9 +3125,9 @@ static int display_window_move(display_window *dwin, int key)
     switch (key)
     {
     case 0:
-        /* the windows keys generate two key presses, of which the first
-           is a zero. flush the buffer or the second key code will confuse
-           everything. This happens here as all dialogs call this function
+        /* The windows keys generate two key presses, of which the first
+           is a zero. Flush the buffer or the second key code will confuse
+           everything. This happens here as all dialogue call this function
            after everything else. */
         flushinp();
         break;
@@ -3189,7 +3189,7 @@ static void display_window_update_title(display_window *dwin, const char *title)
         /* copy the new title
          * the maximum length is determined by the window width
          * minus the space required for the left corner (3)
-         * minus the space reqired for the right corner
+         * minus the space required for the right corner
          *       and the scroll marker (7)
          */
         dwin->title = g_strndup(title, dwin->width - 10);
@@ -3259,7 +3259,7 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
 static display_window *display_item_details(guint x1, guint y1, guint width,
                                             item *it, player *p, gboolean shop)
 {
-    /* the popup window created by display_popup */
+    /* the pop-up window created by display_popup */
     display_window *idpop;
 
     /* determine if the item is known or displayed in the shop */

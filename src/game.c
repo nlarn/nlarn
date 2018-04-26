@@ -179,7 +179,7 @@ void game_init(int argc, char *argv[])
 #ifdef __APPLE__
         else if (g_file_test(rellibdir, G_FILE_TEST_IS_DIR))
         {
-            /* program seems to be installed relocateable */
+            /* program seems to be installed relocatable */
             nlarn->libdir = g_strdup(rellibdir);
         }
 #endif
@@ -222,7 +222,7 @@ void game_init(int argc, char *argv[])
     nlarn->highscores = g_build_filename(nlarn->libdir, highscores, NULL);
 #endif
 
-    /* initialize the lua interpreter */
+    /* initialize the Lua interpreter */
     game_init_lua(nlarn);
 
 
@@ -236,10 +236,10 @@ void game_init(int argc, char *argv[])
 
     if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR))
     {
-        /* ini file has not been found in user config directory */
+        /* ini file has not been found in user configuration directory */
         g_free(filename);
 
-        /* try to find it in the binarys directory */
+        /* try to find it in the binary directory */
         filename = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, config_file, NULL);
     }
 
@@ -274,11 +274,11 @@ void game_init(int argc, char *argv[])
     }
     else
     {
-        /* file not found. never mind but clean up the mess */
+        /* File not found. Never mind but clean up the mess */
         g_clear_error(&error);
     }
 
-    /* cleanup */
+    /* clean-up */
     g_key_file_free(ini_file);
 
     /* parse the command line */
@@ -382,7 +382,7 @@ void game_init(int argc, char *argv[])
             log_add_entry(nlarn->log, "Wizard mode has been activated.");
         }
 
-        /* parse autopickup settings */
+        /* parse auto pick-up settings */
         if (auto_pickup && (nlarn->p != NULL))
         {
             for (guint idx = 0; idx < strlen(auto_pickup); idx++)
@@ -395,7 +395,7 @@ void game_init(int argc, char *argv[])
                     }
                 }
             }
-        } /* end autopickup */
+        } /* end auto pick-up */
 
     } /* end new game only settings */
 }
@@ -471,7 +471,7 @@ int game_save(game *g, const char *filename)
 
     g_assert(g != NULL);
 
-    /* if the display has been initialised, show a popup message */
+    /* if the display has been initialised, show a pop-up message */
     if (display_available())
         win = display_popup(2, 2, 0, NULL, "Saving....");
 
@@ -567,7 +567,7 @@ int game_save(game *g, const char *filename)
     /* print save game into a string */
     char *sg = cJSON_Print(save);
 
-    /* free memory claimed by json structures */
+    /* free memory claimed by JSON structures */
     cJSON_Delete(save);
 
     /* verify that user directory exists */
@@ -614,7 +614,7 @@ int game_save(game *g, const char *filename)
     free(sg);
     gzclose(file);
 
-    /* if a popup message has been opened, destroy it here */
+    /* if a pop-up message has been opened, destroy it here */
     if (win != NULL)
         display_window_destroy(win);
 
@@ -915,7 +915,7 @@ static gboolean game_load(gchar *filename)
         return FALSE;
     }
 
-    /* if the display has been initialised, show a popup message */
+    /* if the display has been initialised, show a pop-up message */
     if (display_available())
         win = display_popup(2, 2, 0, NULL, "Loading....");
 
@@ -957,7 +957,7 @@ static gboolean game_load(gchar *filename)
         /* free the memory allocated by loading the save file */
         cJSON_Delete(save);
 
-        /* if a popup message has been opened, destroy it here */
+        /* if a pop-up message has been opened, destroy it here */
         if (win != NULL)
             display_window_destroy(win);
 
@@ -1133,7 +1133,7 @@ static gboolean game_load(gchar *filename)
     /* no need to define the player's stats */
     nlarn->player_stats_set = TRUE;
 
-    /* if a popup message has been opened, destroy it here */
+    /* if a pop-up message has been opened, destroy it here */
     if (win != NULL)
         display_window_destroy(win);
 
@@ -1174,7 +1174,7 @@ static GList *game_scores_load(game *g)
     /* buffer for unparsed scores */
     gchar *scores;
 
-    /* actual lenght of unparsed scores buffer */
+    /* actual length of unparsed scores buffer */
     guint scores_len = 0;
 
     /* linked list of all scores */
