@@ -135,7 +135,7 @@ item *item_new(item_t item_type, int item_id)
             while (item_type == IT_CONTAINER);
 
             /* No need to do a fine touch here, that
-			 * will be done in the calling function. */
+             * will be done in the calling function. */
             return item_new_random(item_type, FALSE);
         }
 
@@ -636,12 +636,27 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id
 gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean definite)
 {
     GString *desc = g_string_new(NULL);
-    char *add_info = NULL;
-    char **add_infos = strv_new();
 
     g_assert((it != NULL) && (it->type > IT_NONE) && (it->type < IT_MAX));
 
+    /*
+     * Return a simplified description if the player is blinded.
+     * We need to ensure the player object exists as this function
+     * is called very early in the game.
+     */
+    if (nlarn->p && player_effect_get(nlarn->p, ET_BLINDNESS))
+    {
+        struct item_type_data itd = item_data[it->type];
+        g_string_append_printf(desc, "%s %s",
+            it->count == 1 ? a_an(itd.name_sg) : "some",
+            it->count == 1 ? itd.name_sg : itd.name_pl);
+
+        return g_string_free(desc, FALSE);
+    }
+
     /* collect additional information */
+    char *add_info = NULL;
+    char **add_infos = strv_new();
     if (it->blessed_known)
     {
         if (it->blessed) strv_append(&add_infos, "blessed");
