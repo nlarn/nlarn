@@ -173,7 +173,7 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id
  * @param TRUE if the description shall be prepend by the definite article.
  * @return a newly allocated string that should be disposed with g_free().
  */
-gchar *item_describe(item *it, int known, int singular, int definite);
+gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean definite);
 
 item_material_t item_material(item *it);
 guint item_base_price(item *it);

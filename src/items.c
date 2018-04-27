@@ -633,7 +633,7 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id
     return order;
 }
 
-gchar *item_describe(item *it, int known, int singular, int definite)
+gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean definite)
 {
     GString *desc = g_string_new(NULL);
     char *add_info = NULL;
