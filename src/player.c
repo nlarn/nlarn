@@ -3385,65 +3385,78 @@ int player_item_is_equippable(player *p, item *it)
     if (player_item_is_equipped(p, it))
         return FALSE;
 
-    /* amulets */
-    if ((it->type == IT_AMULET) && (p->eq_amulet))
-        return FALSE;
+    switch(it->type)
+    {
+        /* amulets */
+        case IT_AMULET:
+            if (p->eq_amulet) return FALSE;
+            break;
 
-    /* ammo */
-    if ((it->type == IT_AMMO) && (p->eq_quiver))
-        return FALSE;
+        /* ammo */
+        case IT_AMMO:
+            if (p->eq_quiver) return FALSE;
+            break;
 
-    /* armour */
-    if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == AC_BOOTS)
-            && (p->eq_boots))
-        return FALSE;
+        /* armour */
+        case IT_ARMOUR:
+            switch (armour_class(it))
+            {
+                case AC_BOOTS:
+                    if (p->eq_boots) return FALSE;
+                    break;
 
-    if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == AC_CLOAK)
-            && (p->eq_cloak))
-        return FALSE;
+                case AC_CLOAK:
+                    if (p->eq_cloak) return FALSE;
+                    break;
 
-    if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == AC_GLOVES)
-            && (p->eq_gloves))
-        return FALSE;
+                case AC_GLOVES:
+                    if (p->eq_gloves) return FALSE;
+                    break;
 
-    if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == AC_HELMET)
-            && (p->eq_helmet))
-        return FALSE;
+                case AC_HELMET:
+                    if (p->eq_helmet) return FALSE;
+                    break;
 
-    if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == AC_SHIELD)
-            && (p->eq_shield))
-        return FALSE;
+                case AC_SHIELD:
+                    if (p->eq_shield) return FALSE;
 
-    /* shield / two-handed weapon combination */
-    if (it->type == IT_ARMOUR
-            && (armour_class(it) == AC_SHIELD)
-            && (p->eq_weapon)
-            && weapon_is_twohanded(p->eq_weapon))
-        return FALSE;
+                    /* shield / two-handed weapon combination */
+                    if (p->eq_weapon && weapon_is_twohanded(p->eq_weapon))
+                        return FALSE;
+                    break;
 
-    if ((it->type == IT_ARMOUR)
-            && (armour_class(it) == AC_SUIT)
-            && (p->eq_suit))
-        return FALSE;
+                case AC_SUIT:
+                    if (p->eq_suit) return FALSE;
+                    break;
+                default:
+                    assert(0);
+                    break;
+            }
+            break;
 
-    /* rings */
-    if ((it->type == IT_RING) && (p->eq_ring_l) && (p->eq_ring_r))
-        return FALSE;
+        /* rings */
+        case IT_RING:
+            /* wearing gloves */
+            if (p->eq_gloves) return FALSE;
 
-    /* weapons */
-    if ((it->type == IT_WEAPON) &&
-        ((p->eq_weapon && p->eq_sweapon)
-         || (p->eq_weapon && p->eq_weapon->cursed)))
-        return FALSE;
+            /* already wearing two rings */
+            if (p->eq_ring_l && p->eq_ring_r) return FALSE;
+            break;
 
-    /* two-handed weapon / shield combinations */
-    if ((it->type == IT_WEAPON) && weapon_is_twohanded(it)&& (p->eq_shield))
-        return FALSE;
+        /* weapons */
+        case IT_WEAPON:
+            /* primary and secondary weapon slot used */
+            if (p->eq_weapon && p->eq_sweapon) return FALSE;
+
+            /* primary weapon is cursed */
+            if (p->eq_weapon && p->eq_weapon->cursed) return FALSE;
+
+            /* two-handed weapon / shield combinations */
+            if (weapon_is_twohanded(it) && (p->eq_shield)) return FALSE;
+            break;
+        default:
+            return FALSE;
+        }
 
     return TRUE;
 }
