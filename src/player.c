@@ -2954,6 +2954,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
         break;
 
     case IT_RING:
+        /* determine item slot */
         if (p->eq_ring_l == NULL)
             islot = &(p->eq_ring_l);
         else if (p->eq_ring_r == NULL)
@@ -3186,6 +3187,7 @@ void player_item_unequip(player *p,
     {
         item **rslot = NULL;  /* pointer to ring slot */
 
+        /* determine ring slot */
         if (it == p->eq_ring_l)
             rslot = &(p->eq_ring_l);
         else if (it == p->eq_ring_r)
@@ -3197,6 +3199,17 @@ void player_item_unequip(player *p,
             {
                 if (!forced)
                 {
+                    if (p->eq_gloves)
+                    {
+                        log_add_entry(
+                            nlarn->log,
+                            "You cannot remove %s while wearing a glove.",
+                            desc
+                        );
+                        g_free(desc);
+                        return;
+                    }
+
                     if (!player_make_move(p, 2, TRUE, "removing %s", desc))
                     {
                         /* interrupted */
