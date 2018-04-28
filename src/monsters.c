@@ -1594,14 +1594,13 @@ int monster_player_ranged_attack(monster *m, player *p)
 monster *monster_damage_take(monster *m, damage *dam)
 {
     struct player *p = NULL;
-    int hp_orig;
 
     g_assert(m != NULL && dam != NULL);
 
     if (dam->dam_origin.ot == DAMO_PLAYER)
         p = (player *)dam->dam_origin.originator;
 
-    hp_orig = m->hp;
+    int hp_orig = m->hp;
 
     /* FIXME: implement resistances */
     switch (dam->type)
@@ -1666,17 +1665,14 @@ monster *monster_damage_take(monster *m, damage *dam)
     if (m->hp < hp_orig)
     {
         /* monster has been hit */
-        if (p)
-        {
-            /* TODO: notify player */
-        }
-
-        /* metamorph transforms if HP is low*/
         if (m->type == MT_METAMORPH)
         {
-            /* Get the percentage of hitpoints the metamorph has left.
-               If this is less than 80%, the metamorph will turn into
-               another monster that will usually be more dangerous. */
+            /*
+             * The metamorph transforms if HP is low.
+             * Get the percentage of hitpoints the metamorph has left.
+             * If this is less than 80%, the metamorph will turn into
+             * another monster that will usually be more dangerous.
+             */
             float relative_hp = (float)m->hp / (float)m->hp_max;
 
             if ((m->hp > 0) && (relative_hp < 0.8))
@@ -1736,14 +1732,6 @@ monster *monster_damage_take(monster *m, damage *dam)
 
                 if (wdesc != NULL) g_free(wdesc);
             }
-        }
-    }
-    else
-    {
-        /* monster is not affected */
-        if (p)
-        {
-            /* notify player */
         }
     }
 
