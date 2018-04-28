@@ -1,6 +1,6 @@
 /*
  * rings.h
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,9 +22,8 @@
 #include "effects.h"
 #include "items.h"
 
-enum ring_types
+typedef enum ring_types
 {
-    RT_NONE,
     RT_REGENERATION,
     RT_PROTECTION,
     RT_ENERGY,
@@ -34,7 +33,7 @@ enum ring_types
     RT_INC_DAMAGE,
     RT_EXTRA_REGEN,
     RT_MAX
-};
+} ring_t;
 
 typedef struct ring_data
 {
@@ -49,7 +48,7 @@ typedef struct ring_data
 
 /* function definitions */
 
-item_material_t ring_material(int ring_id);
+item_material_t ring_material(ring_t ring_id);
 
 /* external vars */
 

@@ -24,7 +24,6 @@
 const ring_data rings[RT_MAX] =
 {
     /* type            name                  effect           price ob bo */
-    { RT_NONE,         "",                   ET_NONE,            0, 0, 0 },
     { RT_REGENERATION, "regeneration",       ET_INC_HP_REGEN,  250, 0, 0 },
     { RT_PROTECTION,   "protection",         ET_PROTECTION,    150, 0, 1 },
     { RT_ENERGY,       "energy",             ET_INC_MP_REGEN,  250, 0, 0 },
@@ -35,7 +34,7 @@ const ring_data rings[RT_MAX] =
     { RT_EXTRA_REGEN,  "extra regeneration", ET_INC_HP_REGEN, 1000, 0, 0 },
 };
 
-static const int ring_materials[RT_MAX - 1] =
+static const int ring_materials[RT_MAX] =
 {
     IM_GOLD,
     IM_SILVER,
@@ -47,8 +46,8 @@ static const int ring_materials[RT_MAX - 1] =
     IM_BONE
 };
 
-item_material_t ring_material(int ring_id)
+item_material_t ring_material(ring_t ring_id)
 {
-    g_assert(ring_id > RT_NONE && ring_id < RT_MAX);
-    return ring_materials[nlarn->ring_material_mapping[ring_id - 1]];
+    g_assert(ring_id < RT_MAX);
+    return ring_materials[nlarn->ring_material_mapping[ring_id]];
 }
