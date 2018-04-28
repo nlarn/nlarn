@@ -352,7 +352,7 @@ static spell *last_spell = NULL;
 
 /* local functions */
 static int spell_cast(player *p, spell *s);
-static void spell_print_success_message(spell *s, monster *m);
+static void spell_print_success_message(spell *s, monster *m, damage *dam);
 static void spell_print_failure_message(spell *s, monster *m);
 static int count_adjacent_water_squares(position pos);
 static int try_drying_ground(position pos);
@@ -648,6 +648,7 @@ int spell_type_point(spell *s, struct player *p)
     monster *m = NULL;
     position pos;
     effect *e;
+    damage *dam;
     char buffer[61];
     int amount = 0;
 
@@ -707,22 +708,22 @@ int spell_type_point(spell *s, struct player *p)
     {
         /* dehydration */
     case SP_DRY:
-        amount = (100 * s->knowledge) + p->level;
-        spell_print_success_message(s, m);
-        monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
-                                                DAMO_PLAYER, p));
+        dam = damage_new(DAM_MAGICAL, ATT_MAGIC, (100 * s->knowledge) + p->level,
+                         DAMO_PLAYER, p);
+        spell_print_success_message(s, m, dam);
+        monster_damage_take(m, dam);
         break; /* SP_DRY */
 
         /* drain life */
     case SP_DRL:
         amount = min(p->hp - 1, (int)p->hp_max / 2);
 
-        spell_print_success_message(s, m);
-        monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
-                                                DAMO_PLAYER, p));
+        dam = damage_new(DAM_MAGICAL, ATT_MAGIC, amount, DAMO_PLAYER, p);
+        spell_print_success_message(s, m, dam);
+        monster_damage_take(m, dam);
 
-        player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
-                                         DAMO_PLAYER, NULL), PD_SPELL, SP_DRL);
+        dam = damage_new(DAM_MAGICAL, ATT_MAGIC, amount, DAMO_PLAYER, NULL),
+        player_damage_take(p, dam, PD_SPELL, SP_DRL);
 
         break; /* SP_DRL */
 
@@ -735,9 +736,9 @@ int spell_type_point(spell *s, struct player *p)
 
         if ((player_get_wis(p) + s->knowledge) > (guint)rand_m_n(10, roll))
         {
-            spell_print_success_message(s, m);
-            monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000,
-                                                    DAMO_PLAYER, p));
+            dam = damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, DAMO_PLAYER, p);
+            spell_print_success_message(s, m, dam);
+            monster_damage_take(m, dam);
         }
         else
             spell_print_failure_message(s, m);
@@ -784,7 +785,7 @@ int spell_type_point(spell *s, struct player *p)
         e = monster_effect_add(m, e);
 
         if (e)
-            spell_print_success_message(s, m);
+            spell_print_success_message(s, m, NULL);
         else
             spell_print_failure_message(s, m);
 
@@ -1555,7 +1556,7 @@ static int spell_cast(player *p, spell *s)
     return turns;
 }
 
-static void spell_print_success_message(spell *s, monster *m)
+static void spell_print_success_message(spell *s, monster *m, damage *dam)
 {
     g_assert(s != NULL && m != NULL);
 
@@ -1571,6 +1572,10 @@ static void spell_print_success_message(spell *s, monster *m)
         return;
 
     log_add_entry(nlarn->log, spell_msg_succ(s), monster_get_name(m));
+    if (game_wizardmode(nlarn) && dam)
+    {
+        log_add_entry(nlarn->log, "(damage: %d)", dam->amount);
+    }
 }
 
 static void spell_print_failure_message(spell *s, monster *m)
@@ -1717,7 +1722,7 @@ static gboolean spell_area_pos_hit(position pos,
     /* The spell hit a monster */
     if (m != NULL)
     {
-        spell_print_success_message(sp, m);
+        spell_print_success_message(sp, m, dam);
 
         /* erode the monster's inventory */
         if (iet > IET_NONE)
