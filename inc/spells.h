@@ -1,6 +1,6 @@
 /*
  * spells.h
- * Copyright (C) 2009-2011, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,7 +26,6 @@
 
 typedef enum spell_type
 {
-    SC_NONE,
     SC_PLAYER, /* affects the player */
     SC_POINT,  /* affects a single monster */
     SC_RAY,    /* creates a ray */
@@ -37,7 +36,6 @@ typedef enum spell_type
 } spell_t;
 
 typedef enum spell_ids {
-    SP_NONE,
     SP_PRO,         /* protection */
     SP_MLE,         /* magic missile */
     SP_DEX,         /* dexterity */
@@ -107,7 +105,7 @@ extern const spell_data spells[SP_MAX];
 
 /* function definitions */
 
-spell *spell_new(int id);
+spell *spell_new(spell_id id);
 void spell_destroy(spell *s);
 
 cJSON *spell_serialize(spell *s);
@@ -140,7 +138,7 @@ int spell_cast_previous(struct player *p);
  * @param id of spell to learn
  * @return FALSE if learning the spell failed, otherwise level of knowledge
  */
-int spell_learn(struct player *p, guint spell_type);
+int spell_learn(struct player *p, spell_id spell_type);
 
 /**
  * Check if a spell is known to the player
@@ -149,7 +147,7 @@ int spell_learn(struct player *p, guint spell_type);
  * @param id of the spell in question
  * @return FALSE if unknown, otherwise level of knowledge of that spell
  */
-int spell_known(struct player *p, guint spell_type);
+int spell_known(struct player *p, spell_id spell_type);
 
 int spell_type_player(spell *s, struct player *p);
 int spell_type_point(spell *s, struct player *p);
@@ -192,7 +190,7 @@ gboolean spell_vaporize_rock(struct player *p);
 
 /* *** BOOKS *** */
 
-char *book_desc(int book_id);
+char *book_desc(spell_id book_id);
 int book_weight(item *book);
 int book_colour(item *book);
 item_usage_result book_read(struct player *p, item *book);

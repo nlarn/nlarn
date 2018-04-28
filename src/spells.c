@@ -1,6 +1,6 @@
 /*
  * spells.c
- * Copyright (C) 2009-2014, 2015 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -29,12 +29,6 @@
 
 const spell_data spells[SP_MAX] =
 {
-    {
-        SP_NONE, NULL, NULL,
-        SC_NONE, DAM_NONE, ET_NONE,
-        NULL, NULL, NULL,
-        DC_NONE, 0, 0, FALSE
-    },
     {
         SP_PRO, "pro","protection",
         SC_PLAYER, DAM_NONE, ET_PROTECTION,
@@ -309,7 +303,7 @@ struct book_obfuscation_s
     const int weight;
     const int colour;
 }
-book_obfuscation[SP_MAX - 1] =
+book_obfuscation[SP_MAX] =
 {
     { "parchment-bound", 800, DC_BROWN,     },
     { "thick",          1200, DC_RED,       },
@@ -372,11 +366,11 @@ static gboolean spell_area_pos_hit(position pos,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
-spell *spell_new(int id)
+spell *spell_new(spell_id id)
 {
     spell *nspell;
 
-    g_assert(id > SP_NONE && id < SP_MAX);
+    g_assert(id < SP_MAX);
 
     nspell = g_malloc0(sizeof(spell));
     nspell->id = id;
@@ -509,9 +503,9 @@ int spell_cast_previous(struct player *p)
     return spell_cast(p, last_spell);
 }
 
-int spell_learn(player *p, guint spell_type)
+int spell_learn(player *p, spell_id spell_type)
 {
-    g_assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+    g_assert(p != NULL && spell_type < SP_MAX);
 
     if (!spell_known(p, spell_type))
     {
@@ -550,9 +544,9 @@ int spell_learn(player *p, guint spell_type)
     return FALSE;
 }
 
-int spell_known(player *p, guint spell_type)
+int spell_known(player *p, spell_id spell_type)
 {
-    g_assert(p != NULL && spell_type > SP_NONE && spell_type < SP_MAX);
+    g_assert(p != NULL && spell_type < SP_MAX);
 
     for (guint idx = 0; idx < p->known_spells->len; idx++)
     {
@@ -1316,22 +1310,22 @@ gboolean spell_vaporize_rock(player *p)
 }
 
 
-char *book_desc(int book_id)
+char *book_desc(spell_id book_id)
 {
-    g_assert(book_id > SP_NONE && book_id < SP_MAX);
-    return (char *)book_obfuscation[nlarn->book_desc_mapping[book_id - 1]].desc;
+    g_assert(book_id < SP_MAX);
+    return (char *)book_obfuscation[nlarn->book_desc_mapping[book_id]].desc;
 }
 
 int book_weight(item *book)
 {
     g_assert (book != NULL && book->type == IT_BOOK);
-    return book_obfuscation[nlarn->book_desc_mapping[book->id - 1]].weight;
+    return book_obfuscation[nlarn->book_desc_mapping[book->id]].weight;
 }
 
 int book_colour(item *book)
 {
     g_assert (book != NULL && book->type == IT_BOOK);
-    return book_obfuscation[nlarn->book_desc_mapping[book->id - 1]].colour;
+    return book_obfuscation[nlarn->book_desc_mapping[book->id]].colour;
 }
 
 item_usage_result book_read(struct player *p, item *book)
@@ -1543,7 +1537,6 @@ static int spell_cast(player *p, spell *s)
         }
         break;
 
-    case SC_NONE:
     case SC_MAX:
         log_add_entry(nlarn->log, "Internal Error in %s:%d.", __FILE__, __LINE__);
         break;
