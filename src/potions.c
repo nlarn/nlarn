@@ -27,7 +27,6 @@
 const potion_data potions[PO_MAX] =
 {
     /* id               name                  effect            price store_stock */
-    { PO_NONE,          "",                   ET_NONE,               0, 0 },
     { PO_WATER,         "holy water",         ET_NONE,             500, 0 },
     { PO_SLEEP,         "sleep",              ET_SLEEP,             50, 0 },
     { PO_HEAL,          "healing",            ET_INC_HP,           100, 0 },
@@ -71,7 +70,7 @@ struct potion_obfuscation_s
     const char* desc;
     const int colour;
 }
-potion_obfuscation[PO_MAX - 1] =
+potion_obfuscation[PO_MAX] =
 {
     { "clear",          DC_WHITE,       },
     { "bubbly",         DC_LIGHTGRAY,   },
@@ -101,16 +100,16 @@ potion_obfuscation[PO_MAX - 1] =
     { "foaming",        DC_WHITE,       },
 };
 
-char *potion_desc(int potion_id)
+char *potion_desc(potion_t potion_id)
 {
-    g_assert(potion_id > PO_NONE && potion_id < PO_MAX);
-    return (char *)potion_obfuscation[nlarn->potion_desc_mapping[potion_id - 1]].desc;
+    g_assert(potion_id < PO_MAX);
+    return (char *)potion_obfuscation[nlarn->potion_desc_mapping[potion_id]].desc;
 }
 
-int potion_colour(int potion_id)
+int potion_colour(potion_t potion_id)
 {
-    g_assert(potion_id > PO_NONE && potion_id < PO_MAX);
-    return potion_obfuscation[nlarn->potion_desc_mapping[potion_id - 1]].colour;
+    g_assert(potion_id < PO_MAX);
+    return potion_obfuscation[nlarn->potion_desc_mapping[potion_id]].colour;
 }
 
 int potion_throw(struct player *p)

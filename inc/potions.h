@@ -27,16 +27,7 @@ struct player;
 
 /* type definitions */
 
-typedef struct potion_data {
-    int        id;
-    const char *name;
-    int        effect_t;    /* effect causes by this potion */
-    int        price;
-    int        store_stock; /* count in the store's starting stock */
-} potion_data;
-
-enum potion_objects {
-    PO_NONE,
+typedef enum potion_objects {
     PO_WATER,
     PO_SLEEP,
     PO_HEAL,
@@ -64,12 +55,20 @@ enum potion_objects {
     PO_LEVITATION,
     PO_CURE_DIANTHR,
     PO_MAX
-};
+} potion_t;
+
+typedef struct potion_data {
+    potion_t   id;
+    const char *name;
+    int        effect_t;    /* effect causes by this potion */
+    int        price;
+    int        store_stock; /* count in the store's starting stock */
+} potion_data;
 
 /* function declarations */
 
-char *potion_desc(int potion_id);
-int potion_colour(int potion_id);
+char *potion_desc(potion_t potion_id);
+int potion_colour(potion_t potion_id);
 int potion_throw(struct player *p);
 item_usage_result potion_quaff(struct player *p, item *potion);
 
