@@ -38,7 +38,7 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_MLE, "mle", "magic missile",
-        SC_POINT, DAM_MAGICAL, ET_NONE,
+        SC_RAY, DAM_MAGICAL, ET_NONE,
         "Creates and hurls a magic missile equivalent to a + 1 magic arrow.",
         "The missile hits the %s.",
         "The missile bounces off the %s.",
@@ -744,14 +744,6 @@ int spell_type_point(spell *s, struct player *p)
         break; /* SP_FGR */
     }
 
-        /* magic missile */
-    case SP_MLE:
-        amount = rand_1n(((p->level + 1) << s->knowledge)) + p->level + 3;
-        spell_print_success_message(s, m);
-        monster_damage_take(m, damage_new(spell_damage(s), ATT_MAGIC, amount,
-                                                DAMO_PLAYER, p));
-        break;
-
         /* polymorph */
     case SP_PLY:
         if (chance(5 * (monster_level(m) - 2 * s->knowledge)))
@@ -833,6 +825,10 @@ int spell_type_ray(spell *s, struct player *p)
     /* determine amount of damage */
     switch (s->id)
     {
+    case SP_MLE:
+        dam->amount = rand_1n(((p->level + 1) << s->knowledge)) + p->level + 3;
+        break;
+
     case SP_SSP:
         dam->amount = rand_1n(10) + (15 * s->knowledge) + p->level;
         break;
