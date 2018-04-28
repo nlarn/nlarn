@@ -1,6 +1,6 @@
 /*
  * gems.c
- * Copyright (C) 2009-2011, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,9 +22,18 @@
 #include "gems.h"
 #include "items.h"
 
+typedef enum gem_types
+{
+    GT_DIAMOND,
+    GT_RUBY,
+    GT_EMERALD,
+    GT_SAPPHIRE,
+    GT_MAX
+} gem_t;
+
 typedef struct gem_data
 {
-    int id;
+    gem_t id;
     const char *name;
     int colour;
     int price;          /* price per carat in the shops */
@@ -33,7 +42,6 @@ typedef struct gem_data
 static const gem_data gems[GT_MAX] =
 {
     /* id          name        colour    pr */
-    { GT_NONE,     "",         DC_NONE,  0, },
     { GT_DIAMOND,  "diamond",  DC_WHITE, 50, },
     { GT_RUBY,     "ruby",     DC_RED,   40, },
     { GT_EMERALD,  "emerald",  DC_GREEN, 30, },
@@ -42,30 +50,30 @@ static const gem_data gems[GT_MAX] =
 
 const char *gem_name(item *gem)
 {
-    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id < IT_MAX);
     return gems[gem->id].name;
 }
 
 int gem_colour(item *gem)
 {
-    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id < IT_MAX);
     return gems[gem->id].colour;
 }
 
 int gem_weight(item *gem)
 {
-    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id < IT_MAX);
     return (gem->bonus / 1000);
 }
 
 int gem_price(item *gem)
 {
-    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id < IT_MAX);
     return (gem->bonus * gems[gem->id].price);
 }
 
 int gem_size(item *gem)
 {
-    g_assert(gem->type == IT_GEM && gem->id > GT_NONE && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id < IT_MAX);
     return gem->bonus;
 }
