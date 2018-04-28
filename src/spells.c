@@ -1725,9 +1725,11 @@ static gboolean spell_area_pos_hit(position pos,
 
         monster_damage_take(m, damage_copy(dam));
 
-        /* if the monster is large, the spell stops at the monster,
-           otherwise it passes and may hit other monsters */
-        if (monster_size(m) > ESIZE_MEDIUM)
+        /*
+         * If the monster is at least of human size, the spell stops at
+         * the monster, otherwise it passes and may hit other monsters
+         */
+        if (monster_size(m) >= ESIZE_MEDIUM)
             terminated = TRUE;
     }
 
