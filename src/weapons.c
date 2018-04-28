@@ -29,7 +29,6 @@
 const ammo_data ammos[AMT_MAX] =
 {
     /*  type       name            ac           dam   acc  mat        we  pr  ob */
-    { AMT_NONE,    NULL,           AMMO_NONE,      0,   0, IM_NONE,    0,  0, FALSE, },
     { AMT_STONE,   "pebble",       AMMO_SLING,     2,   1, IM_STONE, 100,  1, FALSE, },
     { AMT_SBULLET, "sling bullet", AMMO_SLING,     4,   2, IM_LEAD,   50,  3,  TRUE, },
     { AMT_ARROW,   "arrow",        AMMO_BOW,       8,   3, IM_WOOD,   80,  5,  TRUE, },
@@ -38,7 +37,6 @@ const ammo_data ammos[AMT_MAX] =
 
 const char *ammo_class_name[AMMO_MAX] =
 {
-    NULL,
     "sling",
     "bow",
     "crossbow",
@@ -47,7 +45,6 @@ const char *ammo_class_name[AMMO_MAX] =
 const weapon_data weapons[WT_MAX] =
 {
     /* weapon_t         name                         short name,       class          ammo      dam  acc  material    we     pr tw un ar ob */
-    { WT_NONE,          "",                          "",                 WC_NONE,     AMMO_NONE,  0,   0, IM_NONE,     0,     0, 0, 0, 0, 0 },
     { WT_ODAGGER,       "orcish dagger",             "orc dagger",      WC_MELEE,     AMMO_NONE,  2,   2, IM_IRON,   850,     6, 0, 0, 1, 0 },
     { WT_DAGGER,        "dagger",                    "dagger",          WC_MELEE,     AMMO_NONE,  3,   3, IM_IRON,   600,    10, 0, 0, 1, 1 },
     { WT_SLING,         "sling",                     "sling",          WC_RANGED,    AMMO_SLING,  1,   2, IM_CLOTH,  200,    15, 1, 0, 1, 1 },

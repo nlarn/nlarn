@@ -1,6 +1,6 @@
 /*
  * weapons.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -32,7 +32,6 @@ typedef enum _ammo_class
 
 typedef enum _ammo_t
 {
-    AMT_NONE,
     AMT_STONE,
     AMT_SBULLET,
     AMT_ARROW,
@@ -56,7 +55,6 @@ typedef struct _ammo_data
 
 typedef enum _weapon_class
 {
-    WC_NONE,
     WC_MELEE,   /* melee weapon */
     WC_RANGED,  /* ranged weapon */
     WC_MAX
@@ -64,7 +62,6 @@ typedef enum _weapon_class
 
 typedef enum _weapon_t
 {
-    WT_NONE,
     WT_ODAGGER,
     WT_DAGGER,
     WT_SLING,
