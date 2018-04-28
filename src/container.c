@@ -1,6 +1,6 @@
 /*
  * container.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,7 +25,6 @@
 
 const container_data containers[CT_MAX] =
 {
-    { CT_NONE,   "",          0, IM_NONE,    0, },
     { CT_BAG,    "bag",     375, IM_CLOTH,  15, },
     { CT_CASKET, "casket", 3900, IM_WOOD,   30, },
     { CT_CHEST,  "chest", 13500, IM_WOOD,   70, },
