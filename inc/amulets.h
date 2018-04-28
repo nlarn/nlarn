@@ -1,6 +1,6 @@
 /*
  * amulets.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,9 +21,8 @@
 
 #include "items.h"
 
-enum amulet_types
+typedef enum amulet_types
 {
-    AM_NONE,
     AM_AWARENESS,
     AM_SUSTAINMENT,
     AM_UNDEAD_CONTROL,
@@ -34,11 +33,11 @@ enum amulet_types
     AM_REFLECTION,
     AM_LARN,
     AM_MAX
-};
+} amulet_t;
 
 typedef struct amulet_data
 {
-    int id;
+    amulet_t id;
     const char *name;
     effect_t effect; /* effect causes by this amulet */
     int price;       /* base price in the shops */
@@ -50,7 +49,7 @@ extern const amulet_data amulets[AM_MAX];
 
 /* function declarations */
 
-item_material_t amulet_material(int amulet_id);
+item_material_t amulet_material(amulet_t amulet_id);
 
 /* macros */
 

@@ -1,6 +1,6 @@
 /*
  * amulets.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,7 +23,6 @@
 
 const amulet_data amulets[AM_MAX] =
 {
-    { AM_NONE,                NULL,               ET_NONE,              0,    },
     { AM_AWARENESS,           "awareness",        ET_AWARENESS,         400,  },
     { AM_SUSTAINMENT,         "sustainment",      ET_SUSTAINMENT,       400,  },
     { AM_UNDEAD_CONTROL,      "undead control",   ET_UNDEAD_PROTECTION, 5000, },
@@ -35,7 +34,7 @@ const amulet_data amulets[AM_MAX] =
     { AM_LARN,                "larn",             ET_INFRAVISION,       9000, },
 };
 
-static const int amulet_materials[AM_MAX - 1] =
+static const int amulet_materials[AM_MAX] =
 {
     IM_GOLD,
     IM_SILVER,
@@ -48,9 +47,9 @@ static const int amulet_materials[AM_MAX - 1] =
     IM_GEMSTONE,
 };
 
-item_material_t amulet_material(int amulet_id)
+item_material_t amulet_material(amulet_t amulet_id)
 {
-    g_assert(amulet_id > AM_NONE && amulet_id < AM_MAX);
-    return amulet_materials[nlarn->amulet_material_mapping[amulet_id - 1]];
+    g_assert(amulet_id < AM_MAX);
+    return amulet_materials[nlarn->amulet_material_mapping[amulet_id]];
 }
 
