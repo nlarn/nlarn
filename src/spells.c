@@ -927,9 +927,9 @@ int spell_type_blast(spell *s, struct player *p)
     area *ball;
     position pos;
     char buffer[61];
+    int amount = 0;
     int radius = 0;
     damage_originator damo = { DAMO_PLAYER, p };
-    damage *dam = damage_new(DAM_NONE, ATT_MAGIC, 0, DAMO_PLAYER, p);
     map *cmap = game_map(nlarn, Z(p->pos));
 
     switch (s->id)
@@ -938,8 +938,7 @@ int spell_type_blast(spell *s, struct player *p)
     case SP_BAL:
     default:
         radius = 2;
-        dam->type = DAM_FIRE;
-        dam->amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
+        amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
         break;
     }
 
@@ -969,7 +968,9 @@ int spell_type_blast(spell *s, struct player *p)
         return FALSE;
     }
 
-    (void)area_blast(pos, radius, &damo, spell_area_pos_hit, s, dam, '*', spell_colour(s));
+    damage *dam = damage_new(spells[s->id].damage_type, ATT_MAGIC,
+                             amount, DAMO_PLAYER, p);
+    area_blast(pos, radius, &damo, spell_area_pos_hit, s, dam, '*', spell_colour(s));
 
     /* destroy the damage as the callbacks deliver a copy */
     damage_free(dam);
