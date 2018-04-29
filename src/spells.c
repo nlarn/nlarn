@@ -804,12 +804,13 @@ int spell_type_point(spell *s, struct player *p)
 
 int spell_type_ray(spell *s, struct player *p)
 {
+    g_assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
+
     position target;
     char buffer[61];
     damage_originator damo = { DAMO_PLAYER, p };
-    damage *dam = damage_new(DAM_NONE, ATT_MAGIC, 0, damo.ot, damo.originator);
-
-    g_assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
+    damage *dam = damage_new(spells[s->id].damage_type, ATT_MAGIC, 0,
+                             damo.ot, damo.originator);
 
     g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(s));
     /* Allow non-visible positions if the player is blinded. */
@@ -837,12 +838,10 @@ int spell_type_ray(spell *s, struct player *p)
         break;
 
     case SP_CLD:
-        dam->type = DAM_COLD;
         dam->amount = rand_1n(25) + (20 * s->knowledge) + p->level;
         break;
 
     case SP_LIT:
-        dam->type = DAM_ELECTRICITY;
         dam->amount = rand_1n(25) + (20 * s->knowledge) + (p->level << 1);
         break;
     default:
