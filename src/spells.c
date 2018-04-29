@@ -827,19 +827,19 @@ int spell_type_ray(spell *s, struct player *p)
     switch (s->id)
     {
     case SP_MLE:
-        dam->amount = rand_1n(((p->level + 1) << s->knowledge)) + p->level + 3;
+        dam->amount = (1 + rand_1n(5)) * s->knowledge + p->level;
         break;
 
     case SP_SSP:
-        dam->amount = rand_1n(10) + (15 * s->knowledge) + p->level;
+        dam->amount = (2 + rand_1n(10)) * s->knowledge + p->level;
         break;
 
     case SP_CLD:
-        dam->amount = rand_1n(25) + (20 * s->knowledge) + p->level;
+        dam->amount = (3 + rand_1n(15)) * s->knowledge + p->level;
         break;
 
     case SP_LIT:
-        dam->amount = rand_1n(25) + (20 * s->knowledge) + (p->level << 1);
+        dam->amount = (4 + rand_1n(20)) * s->knowledge + p->level;
         break;
     default:
         /* this shouldn't happen */
