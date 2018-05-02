@@ -3605,7 +3605,7 @@ char *player_item_identified_list(player *p)
 
         it->type = type_ids[idx];
 
-        for (guint id = 1; id < item_max_id(type_ids[idx]); id++)
+        for (guint id = 0; id < item_max_id(type_ids[idx]); id++)
         {
             it->id = id;
 
