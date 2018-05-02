@@ -28,7 +28,7 @@
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 
 /* internal counter for save file compatibility */
-#define SAVEFILE_VERSION    21
+#define SAVEFILE_VERSION    22
 
 /* the world as we know it */
 typedef struct game
