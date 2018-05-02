@@ -25,7 +25,6 @@
 
 typedef enum _armour_class
 {
-    AC_NONE,
     AC_BOOTS,
     AC_CLOAK,
     AC_GLOVES,
@@ -37,7 +36,6 @@ typedef enum _armour_class
 
 typedef enum _armour_t
 {
-    AT_NONE,
     AT_CLOAK,
     AT_LGLOVES,
     AT_LBOOTS,

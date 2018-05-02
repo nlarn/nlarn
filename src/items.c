@@ -1996,7 +1996,7 @@ static const char *item_desc_get(item *it, int known)
         break;
 
     case IT_ARMOUR:
-        if (!known && armour_disguise(it) != AT_NONE)
+        if (!known && armour_disguise(it) != AT_MAX)
             return armours[armour_disguise(it)].name;
         else
             return armour_name(it);
