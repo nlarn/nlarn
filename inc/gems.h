@@ -21,6 +21,15 @@
 
 #include "items.h"
 
+typedef enum gem_types
+{
+    GT_DIAMOND,
+    GT_RUBY,
+    GT_EMERALD,
+    GT_SAPPHIRE,
+    GT_MAX
+} gem_t;
+
 /* functions */
 
 const char *gem_name(item *gem);
