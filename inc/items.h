@@ -42,7 +42,6 @@ typedef enum item_types {
 
 /* inspired by Nethack's objclass.h */
 typedef enum item_material_t {
-    IM_NONE,
     IM_PAPER,
     IM_CLOTH,
     IM_LEATHER,

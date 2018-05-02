@@ -58,7 +58,6 @@ const item_type_data item_data[IT_MAX] =
 const item_material_data item_materials[IM_MAX] =
 {
     /* type           name           adjective   colour       frag */
-    { IM_NONE,        "",            "",         DC_NONE,       0, },
     { IM_PAPER,       "paper",       "papier",   DC_WHITE,     20, },
     { IM_CLOTH,       "cloth",       "cloth",    DC_LIGHTGRAY, 15, },
     { IM_LEATHER,     "leather",     "leathern", DC_BROWN,     10, },
@@ -907,7 +906,7 @@ item_material_t item_material(item *it)
         break;
 
     default:
-        material = IM_NONE;
+        g_assert(0);
     }
 
     return material;
