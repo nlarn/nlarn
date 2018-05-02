@@ -27,7 +27,6 @@
 const magic_scroll_data scrolls[ST_MAX] =
 {
     /* ID                   name                  effect               price store_stock */
-    { ST_NONE,              "",                   ET_NONE,                 0, 0 },
     { ST_BLANK,             "blank paper",        ET_NONE,               100, 0 },
     { ST_ENCH_ARMOUR,       "enchant armour",     ET_NONE,               100, 1 },
     { ST_ENCH_WEAPON,       "enchant weapon",     ET_NONE,               100, 1 },
@@ -70,7 +69,7 @@ static int scroll_spell_extension(player *p, item *r_scroll);
 static int scroll_teleport(player *p, item *r_scroll);
 static int scroll_timewarp(player *p, item *r_scroll);
 
-static const char *_scroll_desc[ST_MAX - 1] =
+static const char *_scroll_desc[ST_MAX] =
 {
     "",
     "Ssyliir Wyleeum",
@@ -100,10 +99,10 @@ static const char *_scroll_desc[ST_MAX - 1] =
     /* "Xodil Keterulo", spare label */
 };
 
-char *scroll_desc(int scroll_id)
+char *scroll_desc(scroll_t id)
 {
-    g_assert(scroll_id > ST_NONE && scroll_id < ST_MAX);
-    return (char *)_scroll_desc[nlarn->scroll_desc_mapping[scroll_id - 1]];
+    g_assert(id < ST_MAX);
+    return (char *)_scroll_desc[nlarn->scroll_desc_mapping[id]];
 }
 
 item_usage_result scroll_read(struct player *p, item *r_scroll)

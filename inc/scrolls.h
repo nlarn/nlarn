@@ -27,16 +27,7 @@ struct player;
 
 /* type definitions */
 
-typedef struct magic_scroll_data {
-    int        id;
-    const char *name;
-    effect_t   effect;      /* effect causes by this scroll */
-    int        price;
-    int        store_stock; /* count in the store's starting stock */
-} magic_scroll_data;
-
-enum scroll_types {
-	ST_NONE,
+typedef enum scroll_types {
 	ST_BLANK,
 	ST_ENCH_ARMOUR,
 	ST_ENCH_WEAPON,
@@ -63,11 +54,19 @@ enum scroll_types {
 	ST_LIFE_PROTECTION,
 	ST_GENOCIDE_MONSTER,
 	ST_MAX
-};
+} scroll_t;
+
+typedef struct magic_scroll_data {
+    scroll_t   id;
+    const char *name;
+    effect_t   effect;      /* effect causes by this scroll */
+    int        price;
+    int        store_stock; /* count in the store's starting stock */
+} magic_scroll_data;
 
 /* function declarations */
 
-char *scroll_desc(int scroll_id);
+char *scroll_desc(scroll_t id);
 item_usage_result scroll_read(struct player *p, item *scroll);
 int scroll_mapping(struct player *p, item *scroll);
 
