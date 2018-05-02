@@ -1,6 +1,6 @@
 /*
  * player.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -150,12 +150,12 @@ typedef struct player
     /* enough items for now */
 
     /* items identified */
-    gint identified_amulets[AM_MAX];
-    gint identified_armour[AT_MAX];
-    gint identified_books[SP_MAX];
-    gint identified_potions[PO_MAX];
-    gint identified_rings[RT_MAX];
-    gint identified_scrolls[ST_MAX];
+    amulet_t identified_amulets[AM_MAX];
+    armour_t identified_armour[AT_MAX];
+    spell_t  identified_books[SP_MAX];
+    potion_t identified_potions[PO_MAX];
+    ring_t   identified_rings[RT_MAX];
+    scroll_t identified_scrolls[ST_MAX];
 
     position pos; /* player's position */
     player_stats stats; /* statistics */
@@ -450,7 +450,7 @@ void player_sobject_forget(player *p, position pos);
   *
   * @param The player.
   * @param TRUE if harmless monsters shall be ignored.
-  * 
+  *
   * @return TRUE if there are adjacent monsters.
   */
 gboolean player_adjacent_monster(player *p, gboolean ignore_harmless);

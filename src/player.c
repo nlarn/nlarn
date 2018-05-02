@@ -418,22 +418,22 @@ cJSON *player_serialize(player *p)
 
     /* identified items */
     cJSON_AddItemToObject(pser, "identified_amulets",
-                          cJSON_CreateIntArray(p->identified_amulets, AM_MAX));
+                          cJSON_CreateIntArray((int*)p->identified_amulets, AM_MAX));
 
     cJSON_AddItemToObject(pser, "identified_armour",
-                          cJSON_CreateIntArray(p->identified_armour, AT_MAX));
+                          cJSON_CreateIntArray((int*)p->identified_armour, AT_MAX));
 
     cJSON_AddItemToObject(pser, "identified_books",
-                          cJSON_CreateIntArray(p->identified_books, SP_MAX));
+                          cJSON_CreateIntArray((int*)p->identified_books, SP_MAX));
 
     cJSON_AddItemToObject(pser, "identified_potions",
-                          cJSON_CreateIntArray(p->identified_potions, PO_MAX));
+                          cJSON_CreateIntArray((int*)p->identified_potions, PO_MAX));
 
     cJSON_AddItemToObject(pser, "identified_rings",
-                          cJSON_CreateIntArray(p->identified_rings, RT_MAX));
+                          cJSON_CreateIntArray((int*)p->identified_rings, RT_MAX));
 
     cJSON_AddItemToObject(pser, "identified_scrolls",
-                          cJSON_CreateIntArray(p->identified_scrolls, ST_MAX));
+                          cJSON_CreateIntArray((int*)p->identified_scrolls, ST_MAX));
 
     cJSON_AddItemToObject(pser, "courses_taken",
                           cJSON_CreateIntArray(p->school_courses_taken, SCHOOL_COURSE_COUNT));

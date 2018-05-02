@@ -501,19 +501,19 @@ int game_save(game *g, const char *filename)
     if (g->cure_dianthr_created) cJSON_AddTrueToObject(save, "cure_dianthr_created");
 
     cJSON_AddItemToObject(save, "amulet_material_mapping",
-                          cJSON_CreateIntArray(g->amulet_material_mapping, AM_MAX - 1));
+                          cJSON_CreateIntArray(g->amulet_material_mapping, AM_MAX));
 
     cJSON_AddItemToObject(save, "potion_desc_mapping",
-                          cJSON_CreateIntArray(g->potion_desc_mapping, PO_MAX - 1));
+                          cJSON_CreateIntArray(g->potion_desc_mapping, PO_MAX));
 
     cJSON_AddItemToObject(save, "ring_material_mapping",
-                          cJSON_CreateIntArray(g->ring_material_mapping, RT_MAX - 1));
+                          cJSON_CreateIntArray(g->ring_material_mapping, RT_MAX));
 
     cJSON_AddItemToObject(save, "scroll_desc_mapping",
-                          cJSON_CreateIntArray(g->scroll_desc_mapping, ST_MAX - 1));
+                          cJSON_CreateIntArray(g->scroll_desc_mapping, ST_MAX));
 
     cJSON_AddItemToObject(save, "book_desc_mapping",
-                          cJSON_CreateIntArray(g->book_desc_mapping, SP_MAX - 1));
+                          cJSON_CreateIntArray(g->book_desc_mapping, SP_MAX));
 
     cJSON_AddItemToObject(save, "monster_genocided",
                           cJSON_CreateIntArray(g->monster_genocided, MT_MAX));
@@ -1017,31 +1017,31 @@ static gboolean game_load(gchar *filename)
 
     obj = cJSON_GetObjectItem(save, "amulet_material_mapping");
     size = cJSON_GetArraySize(obj);
-    g_assert(size == AM_MAX - 1);
+    g_assert(size == AM_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->amulet_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "potion_desc_mapping");
     size = cJSON_GetArraySize(obj);
-    g_assert(size == PO_MAX - 1);
+    g_assert(size == PO_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->potion_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "ring_material_mapping");
     size = cJSON_GetArraySize(obj);
-    g_assert(size == RT_MAX - 1);
+    g_assert(size == RT_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->ring_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "scroll_desc_mapping");
     size = cJSON_GetArraySize(obj);
-    g_assert(size == ST_MAX - 1);
+    g_assert(size == ST_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->scroll_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "book_desc_mapping");
     size = cJSON_GetArraySize(obj);
-    g_assert(size == SP_MAX - 1);
+    g_assert(size == SP_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->book_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
@@ -1159,11 +1159,11 @@ static void game_init_lua(game *g)
 
 static void game_items_shuffle(game *g)
 {
-    shuffle(g->amulet_material_mapping, AM_MAX - 1, 0);
-    shuffle(g->potion_desc_mapping, PO_MAX - 1, 1);
-    shuffle(g->ring_material_mapping, RT_MAX - 1, 0);
-    shuffle(g->scroll_desc_mapping, ST_MAX - 1, 1);
-    shuffle(g->book_desc_mapping, SP_MAX - 1, 0);
+    shuffle(g->amulet_material_mapping, AM_MAX, 0);
+    shuffle(g->potion_desc_mapping, PO_MAX, 1);
+    shuffle(g->ring_material_mapping, RT_MAX, 0);
+    shuffle(g->scroll_desc_mapping, ST_MAX, 1);
+    shuffle(g->book_desc_mapping, SP_MAX, 0);
 }
 
 static GList *game_scores_load(game *g)

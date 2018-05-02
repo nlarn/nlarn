@@ -1,6 +1,6 @@
 /*
  * game.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -64,11 +64,12 @@ typedef struct game
     int weapon_created[WT_MAX];
     int monster_genocided[MT_MAX];
 
-    int amulet_material_mapping[AM_MAX - 1];
-    int potion_desc_mapping[PO_MAX - 1];
-    int ring_material_mapping[RT_MAX - 1];
-    int scroll_desc_mapping[ST_MAX - 1];
-    int book_desc_mapping[SP_MAX - 1];
+    /* Item obfuscation mappings */
+    int amulet_material_mapping[AM_MAX];
+    int potion_desc_mapping[PO_MAX];
+    int ring_material_mapping[RT_MAX];
+    int scroll_desc_mapping[ST_MAX];
+    int book_desc_mapping[SP_MAX];
 
     /* these are the item ids assigned to new objects of the latter types */
 
