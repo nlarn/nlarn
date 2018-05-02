@@ -55,7 +55,7 @@ static gboolean map_sphere_destroy(sphere *s, map *m);
 
 const map_tile_data map_tiles[LT_MAX] =
 {
-    /* type         img  color          desc           pa tr */
+    /* type         gly  color          desc           pa tr */
     { LT_NONE,      ' ', DC_NONE,       NULL,          0, 0 },
     { LT_MOUNTAIN,  '^', DC_LIGHTGRAY,  "a mountain",  0, 0 },
     { LT_GRASS,     '"', DC_LIGHTGREEN, "grass",       1, 1 },
