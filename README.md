@@ -24,7 +24,7 @@ You can get help in the game by pressing **?** or **F1**.
 
 ## News and announcements
 
-News about NLarn are posted to the website at http://nlarn.sourceforge.net/
+News about NLarn are posted to the website at https://nlarn.github.io/
 
 
 ## Game configuration
