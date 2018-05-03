@@ -625,7 +625,7 @@ int display_paint_screen(player *p)
 
     /* *** MESSAGES *** */
     /* number of lines which can be displayed */
-    y = LINES - 20;
+    y = LINES > 20 ? LINES - 20 : 0;
 
     /* storage for game time of message */
     ttime = g_new0(guint, y);
