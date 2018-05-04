@@ -37,7 +37,11 @@
 
 #ifdef __unix
 #include <unistd.h>
+#include <sys/file.h>
 #include <sys/stat.h>
+
+/* file descriptor for locking the savegame file */
+static int sgfd = 0;
 #endif
 
 #include "cJSON.h"
@@ -86,6 +90,26 @@ static void print_welcome_message(gboolean newgame)
                   newgame ? "" : "back ", VERSION_MAJOR, VERSION_MINOR,
                   VERSION_PATCH, GITREV);
     log_add_entry(nlarn->log, "For a list of commands, press '?'.");
+}
+
+static int try_locking_savegame_file(FILE *sg)
+{
+    /*
+     * get a copy of the file descriptor for locking - gzclose would close
+     * it and thus unlock the file.
+     */
+    int fd = dup(fileno(sg));
+
+    /* Try to obtain the lock on the save file to avoid reading it twice */
+    if (flock(fd, LOCK_EX | LOCK_NB) == -1)
+    {
+        /* could not obtain the lock */
+        display_shutdown();
+        fprintf(stderr, "Another instance of NLarn is already running!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return fd;
 }
 
 void game_init(int argc, char *argv[])
@@ -590,15 +614,44 @@ int game_save(game *g, const char *filename)
     fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(), filename ? filename : save_file, NULL);
 
     /* open save file for writing */
-    gzFile file = gzopen(fullname, "wb");
+    FILE* fhandle;
+#ifdef __unix
+    if (sgfd)
+    {
+        /*
+         * we need to open a duplicate of the file descriptor as gzclose
+         * would close the file descriptor we keep to ensure the lock
+         * on the file is kept.
+         */
+        fhandle = fdopen(dup(sgfd), "w");
+        /* position at beginning of file, otherwise zlib would append */
+        rewind(fhandle);
+    }
+    else
+    {
+#endif
+        /* cranky indentation, but the next line is not conditional on !__unix */
+        fhandle = fopen(fullname, "wb");
+#ifdef __unix
+    }
+#endif
 
-    if (file == NULL)
+    if (fhandle == NULL)
     {
         log_add_entry(g->log, "Error opening save file \"%s\".", fullname);
         free(sg);
         return FALSE;
     }
 
+#ifdef __unix
+    if (!sgfd)
+    {
+        /* first time save, try locking the file */
+        sgfd = try_locking_savegame_file(fhandle);
+    }
+#endif
+
+    gzFile file = gzdopen(fileno(fhandle), "wb");
     if (gzputs(file, sg) != (int)strlen(sg))
     {
         log_add_entry(g->log, "Error writing save file \"%s\": %s",
@@ -905,7 +958,7 @@ static gboolean game_load(gchar *filename)
                                   filename ? filename : save_file, NULL);
 
     /* try to open save file */
-    gzFile file = gzopen(fullname, "rb");
+    FILE* file = fopen(fullname, "rb+");
 
     if (file == NULL)
     {
@@ -915,6 +968,18 @@ static gboolean game_load(gchar *filename)
         return FALSE;
     }
 
+#ifdef __unix
+    /*
+     * When not on Windows, lock the save file as long the process is
+     * alive. This ensures no two instances of the game can be started
+     * from the user's saved game.
+     */
+    sgfd = try_locking_savegame_file(file);
+#endif
+
+    /* open the file with zlib */
+    gzFile sg = gzdopen(fileno(file), "rb");
+
     /* if the display has been initialised, show a pop-up message */
     if (display_available())
         win = display_popup(2, 2, 0, NULL, "Loading....");
@@ -922,7 +987,7 @@ static gboolean game_load(gchar *filename)
     /* temporary buffer to store uncompressed save file content */
     char *sgbuf = g_malloc0(bufsize);
 
-    if (!gzread(file, sgbuf, bufsize))
+    if (!gzread(sg, sgbuf, bufsize))
     {
         /* Reading the file failed. Terminate the game with an error message */
         display_shutdown();
@@ -933,7 +998,7 @@ static gboolean game_load(gchar *filename)
     }
 
     /* close save file */
-    gzclose(file);
+    gzclose(sg);
 
     /* parse save file */
     save = cJSON_Parse(sgbuf);
