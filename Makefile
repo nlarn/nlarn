@@ -60,15 +60,12 @@ DEFINES += -DG_DISABLE_DEPRECATED
 CFLAGS  += -std=c99 -Wall -Wextra -Werror -Iinc -Iinc/external
 LDFLAGS += -lz -lm
 
-ifeq ($(MSYSTEM),MINGW32)
+ifneq (,$(findstring MINGW, $(MSYSTEM)))
   # Settings specific to Windows.
 
   # Fake the content of the OS var to make it more common
   # (otherwise packages would have silly names)
   OS := win32
-
-  # Ensure make doesn't try to run cc
-  CC = gcc
 
   RESOURCES := $(patsubst %.rc,%.res,$(wildcard resources/*.rc))
   RESDEFINE := -DVERSION_MAJOR=$(VERSION_MAJOR)
@@ -76,14 +73,6 @@ ifeq ($(MSYSTEM),MINGW32)
   RESDEFINE += -DVERSION_PATCH=$(VERSION_PATCH)
   # Escape-O-Rama! Required in all it's ugliness.
   RESDEFINE += -DVINFO=\\\"$(VERSION)\\\"
-
-  # Libraries specific to Windows
-  LDFLAGS += -llua
-
-  # Configuration for glib-2
-  # Funny enough, build breaks if these are set as ususal..
-  CFLAGS  += `pkg-config --cflags glib-2.0`
-  LDFLAGS += `pkg-config --libs glib-2.0`
 
   # Defines specific to Windows
   DEFINES += -DWIN32_LEAN_AND_MEAN -DNOGDI
@@ -93,33 +82,30 @@ ifeq ($(MSYSTEM),MINGW32)
   ARCHIVE_CMD = zip -r
   ARCHIVE_SUFFIX = zip
   INSTALLER := nlarn-$(VERSION).exe
-
 else
-  # Settings specific to Un*x-like operating systems
-
-  # Configuration for glib-2
-  CFLAGS  += $(shell pkg-config --cflags glib-2.0)
-  LDFLAGS += $(shell pkg-config --libs glib-2.0)
-
-  # Determine the name of the Lua 5.3 library
-  # Debian and derivates use lua5.3, the rest of the world lua
-  ifneq ($(wildcard /etc/debian_version),)
-    lua = lua5.3
-  else ifeq ($(OS), FreeBSD)
-    lua = lua-5.3
-  else
-    lua = lua
-  endif
-
-  # Configure Lua
-  CFLAGS  += $(shell pkg-config --cflags $(lua))
-  LDFLAGS += $(shell pkg-config --libs $(lua))
-
   # executables on other plattforms do not have a funny suffix
   SUFFIX =
   ARCHIVE_CMD = tar czf
   ARCHIVE_SUFFIX = tar.gz
 endif
+
+# Configuration for glib-2
+CFLAGS  += $(shell pkg-config --cflags glib-2.0)
+LDFLAGS += $(shell pkg-config --libs glib-2.0)
+
+# Determine the name of the Lua 5.3 library
+# Debian and derivates use lua5.3, the rest of the world lua
+ifneq ($(wildcard /etc/debian_version),)
+lua = lua5.3
+else ifeq ($(OS), FreeBSD)
+lua = lua-5.3
+else
+lua = lua
+endif
+
+# Configure Lua
+CFLAGS  += $(shell pkg-config --cflags $(lua))
+LDFLAGS += $(shell pkg-config --libs $(lua))
 
 # Unless requested otherwise build with ncurses.
 ifeq ($(SDLPDCURSES),)
