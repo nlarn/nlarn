@@ -1,7 +1,7 @@
 ;
 ; nlarn.nsi
 ;
-; Copyright (C) Joachim de Groot 2009, 2010, 2011  <jdegroot@web.de>
+; Copyright (C) Joachim de Groot 2009-2018  <jdegroot@web.de>
 ;
 ; NLarn is free software: you can redistribute it and/or modify it
 ; under the terms of the GNU General Public License as published by the
@@ -74,7 +74,7 @@ RequestExecutionLevel admin
 VIProductVersion "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.0"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "NLarn"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Joachim de Groot"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright 2009-2011, 2012 Joachim de Groot"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright 2009-2018 Joachim de Groot"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "NLarn Installation Program"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${VERSION}"
 
@@ -90,8 +90,22 @@ Section "NLarn (required)"
 
   ; Put file there
   File "nlarn.exe"
+  File "libbz2-1.dll"
+  File "libfreetype-6.dll"
+  File "libgcc_s_dw2-1.dll"
   File "libglib-2.0-0.dll"
-  File "intl.dll"
+  File "libgraphite2.dll"
+  File "libharfbuzz-0.dll"
+  File "libiconv-2.dll"
+  File "libintl-8.dll"
+  File "libpcre-1.dll"
+  File "libpng16-16.dll"
+  File "libstdc++-6.dll"
+  File "libwinpthread-1.dll"
+  File "lua53.dll"
+  File "SDL.dll"
+  File "SDL_ttf.dll"
+  File "zlib1.dll"
   File "README.md"
   File "Changelog.txt"
   File "LICENSE"
@@ -103,6 +117,8 @@ Section "NLarn (required)"
   File "lib\nlarn.hlp"
   File "lib\nlarn.msg"
   File "lib\monsters.lua"
+  File "lib\FiraMono-Medium.otf"
+  File "lib\nlarn-128.bmp"
 
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NLarn "Install_Dir" "$INSTDIR"
