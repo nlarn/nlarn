@@ -1,6 +1,6 @@
 /*
  * defines.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,7 +40,6 @@ typedef enum _direction
 
 typedef enum _speed
 {
-    SPEED_NONE,
     SPEED_XSLOW  =  25,
     SPEED_VSLOW  =  50,
     SPEED_SLOW   =  75,
@@ -54,7 +53,6 @@ typedef enum _speed
 
 typedef enum _esize
 {
-    ESIZE_NONE,
     ESIZE_TINY         =  25,
     ESIZE_SMALL        =  75,
     ESIZE_MEDIUM       = 100,

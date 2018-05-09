@@ -1,6 +1,6 @@
 /*
  * monsters.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -143,7 +143,6 @@ typedef enum monster_action_type
 
 typedef enum monster_flags
 {
-    MF_NONE         = 0,
     MF_HEAD         = 1,        /* has a head */
     MF_NOBEHEAD     = 1 << 1,   /* cannot be beheaded */
     MF_HANDS        = 1 << 2,   /* has hands => can open doors */
