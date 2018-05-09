@@ -23,7 +23,6 @@
 
 typedef enum _ammo_class
 {
-    AMMO_NONE,
     AMMO_SLING,
     AMMO_BOW,
     AMMO_CROSSBOW,
