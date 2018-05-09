@@ -1,6 +1,6 @@
 /*
  * map.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -60,7 +60,6 @@ typedef enum map_tile_type
 
 typedef enum map_element_type
 {
-    LE_NONE,
     LE_GROUND,
     LE_SOBJECT,
     LE_TRAP,

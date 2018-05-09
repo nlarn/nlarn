@@ -359,7 +359,7 @@ position map_find_space_in(map *m,
     position pos = pos_invalid;
     int count, iteration = 0;
 
-    g_assert (m != NULL && element > LE_NONE && element < LE_MAX);
+    g_assert (m != NULL && element < LE_MAX);
 
     X(pos) = rand_m_n(where.x1, where.x2);
     Y(pos) = rand_m_n(where.y1, where.y2);
@@ -438,7 +438,7 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
 {
     map_tile *tile;
 
-    g_assert(m != NULL && element > LE_NONE && element < LE_MAX);
+    g_assert(m != NULL && element < LE_MAX);
 
     /* if the position is invalid it is invalid for the map as well */
     if (!pos_valid(pos))
@@ -518,7 +518,6 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
         return monster_valid_dest(m, pos, element);
         break;
 
-    case LE_NONE:
     case LE_MAX:
         return FALSE;
         break;
