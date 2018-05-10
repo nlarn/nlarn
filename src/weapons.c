@@ -251,6 +251,23 @@ void weapon_swap(struct player *p)
         return;
     }
 
+    if (sweapon && p->eq_shield && weapon_is_twohanded(sweapon))
+    {
+        /* variable abuse: pdesc describes secondary weapon */
+        pdesc = item_describe(sweapon, player_item_known(p, sweapon),
+                              TRUE, TRUE);
+        /* variable abuse: sdesc describes held shield */
+        sdesc = item_describe(p->eq_shield, player_item_known(p,
+                              p->eq_shield), TRUE, TRUE);
+
+        log_add_entry(nlarn->log, "You can't ready %s while "
+                      "holding the %s!", pdesc, sdesc);
+        g_free(pdesc);
+        g_free(sdesc);
+
+        return;
+    }
+
     if (!player_make_move(p, 2, TRUE, "swapping your weapons"))
         return; /* interrupted */
 
