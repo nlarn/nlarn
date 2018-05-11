@@ -148,12 +148,15 @@ OBJECTS := $(patsubst %.c,%.o,$(wildcard src/*.c))
 OBJECTS += $(patsubst %.c,%.o,$(wildcard src/wrappers/*.c))
 OBJECTS += $(patsubst %.c,%.o,$(wildcard src/external/*.c))
 
+INCLUDES := $(wildcard inc/*.h)
+INCLUDES += $(wildcard inc/external/*.h)
+
 all: nlarn$(SUFFIX)
 
 nlarn$(SUFFIX): $(PDCLIB) $(OBJECTS) $(RESOURCES)
 	$(CC) -o $@ $(OBJECTS) $(PDCLIB) $(LDFLAGS) $(RESOURCES)
 
-%.o: %.c
+%.o: %.c ${INCLUDES}
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(RESOURCES): %.res: %.rc
