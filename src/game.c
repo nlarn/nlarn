@@ -92,6 +92,7 @@ static void print_welcome_message(gboolean newgame)
     log_add_entry(nlarn->log, "For a list of commands, press '?'.");
 }
 
+#ifdef __unix
 static int try_locking_savegame_file(FILE *sg)
 {
     /*
@@ -111,6 +112,7 @@ static int try_locking_savegame_file(FILE *sg)
 
     return fd;
 }
+#endif
 
 void game_init(int argc, char *argv[])
 {
