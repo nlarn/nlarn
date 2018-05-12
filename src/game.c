@@ -105,8 +105,8 @@ static int try_locking_savegame_file(FILE *sg)
     if (flock(fd, LOCK_EX | LOCK_NB) == -1)
     {
         /* could not obtain the lock */
+        display_show_message("Error", "Another instance of NLarn is already running!", 0);
         display_shutdown();
-        fprintf(stderr, "Another instance of NLarn is already running!\n");
         exit(EXIT_FAILURE);
     }
 
