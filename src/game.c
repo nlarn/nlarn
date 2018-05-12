@@ -35,7 +35,7 @@
 #include <glib/gstdio.h>
 #include <sys/param.h>
 
-#ifdef __unix
+#if (defined __unix) || (defined __APPLE__)
 #include <unistd.h>
 #include <sys/file.h>
 #include <sys/stat.h>
@@ -92,7 +92,7 @@ static void print_welcome_message(gboolean newgame)
     log_add_entry(nlarn->log, "For a list of commands, press '?'.");
 }
 
-#ifdef __unix
+#if (defined __unix) || (defined __APPLE__)
 static int try_locking_savegame_file(FILE *sg)
 {
     /*
@@ -617,7 +617,7 @@ int game_save(game *g, const char *filename)
 
     /* open save file for writing */
     FILE* fhandle;
-#ifdef __unix
+#if (defined __unix) || (defined __APPLE__)
     if (sgfd)
     {
         /*
@@ -634,7 +634,7 @@ int game_save(game *g, const char *filename)
 #endif
         /* cranky indentation, but the next line is not conditional on !__unix */
         fhandle = fopen(fullname, "wb");
-#ifdef __unix
+#if (defined __unix) || (defined __APPLE__)
     }
 #endif
 
@@ -645,7 +645,7 @@ int game_save(game *g, const char *filename)
         return FALSE;
     }
 
-#ifdef __unix
+#if (defined __unix) || (defined __APPLE__)
     if (!sgfd)
     {
         /* first time save, try locking the file */
@@ -970,7 +970,7 @@ static gboolean game_load(gchar *filename)
         return FALSE;
     }
 
-#ifdef __unix
+#if (defined __unix) || (defined __APPLE__)
     /*
      * When not on Windows, lock the save file as long the process is
      * alive. This ensures no two instances of the game can be started
