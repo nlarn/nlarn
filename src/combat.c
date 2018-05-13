@@ -18,8 +18,12 @@
 
 #include <string.h>
 
-#include "enumFactory.h"
 #include "combat.h"
+#include "enumFactory.h"
+
+DEFINE_ENUM(attack_t, ATTACK_T_ENUM)
+DEFINE_ENUM(damage_t, DAMAGE_T_ENUM)
+DEFINE_ENUM(damage_originator_t, DAMAGE_ORIGINATOR_T_ENUM)
 
 damage *damage_new(damage_t type, attack_t att_type, int amount,
                    damage_originator_t damo, gpointer originator)

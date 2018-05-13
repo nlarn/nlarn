@@ -21,57 +21,56 @@
 
 #include <glib.h>
 
-typedef enum _attack_types
-{
-    ATT_NONE,
-    ATT_WEAPON,
-    ATT_MAGIC,  /* e.g. psionics */
-    ATT_CLAW,   /* some dragons */
-    ATT_BITE,   /* bugbear, osequip, snake */
-    ATT_STING,  /* ant, centipede */
-    ATT_SLAM,   /* shambling mound */
-    ATT_KICK,   /* centaur? */
-    ATT_TOUCH,  /* vampire, wraith */
-    ATT_BREATH, /* dragons, hellhound */
-    ATT_GAZE,   /* floating eye */
-    ATT_MAX
-} attack_t;
+#include "enumFactory.h"
 
-typedef enum _damage_types
-{
-    DAM_NONE,           /* pass-through: just reduce HP */
-    DAM_PHYSICAL,
-    DAM_MAGICAL,        /* e.g. magic missile */
+#define ATTACK_T_ENUM(ATT) \
+    ATT(ATT_NONE,) \
+    ATT(ATT_WEAPON,) \
+    ATT(ATT_MAGIC,)  /* e.g. psionics */ \
+    ATT(ATT_CLAW,)   /* some dragons */ \
+    ATT(ATT_BITE,)   /* bugbear, osquip, snake */ \
+    ATT(ATT_STING,)  /* ant, centipede */ \
+    ATT(ATT_SLAM,)   /* shambling mound */ \
+    ATT(ATT_KICK,)   /* centaur */ \
+    ATT(ATT_TOUCH,)  /* vampire, wraith */ \
+    ATT(ATT_BREATH,) /* dragons, hellhound */ \
+    ATT(ATT_GAZE,)   /* floating eye */ \
+    ATT(ATT_MAX,) \
 
-    /* elements */
-    DAM_FIRE,
-    DAM_COLD,
-    DAM_ACID,
-    DAM_WATER,
-    DAM_ELECTRICITY,
+DECLARE_ENUM(attack_t, ATTACK_T_ENUM)
 
-    /* effects */
-    DAM_POISON,         /* traps, snake */
-    DAM_BLINDNESS,      /* lama nobe, green urchin */
-    DAM_CONFUSION,      /* umber hulk */
-    DAM_PARALYSIS,      /* floating eye */
-    DAM_DEC_CON,
-    DAM_DEC_DEX,        /* quasit */
-    DAM_DEC_INT,
-    DAM_DEC_STR,        /* ant, centipede */
-    DAM_DEC_WIS,
-    DAM_DEC_RND,        /* ziller */
-    DAM_DRAIN_LIFE,     /* vampire, wraith */
+#define DAMAGE_T_ENUM(DAM) \
+    DAM(DAM_NONE,)           /* pass-through: just reduce HP */ \
+    DAM(DAM_PHYSICAL,)       /* e.g. magic missile */ \
+    DAM(DAM_MAGICAL,) \
+    /* elements */ \
+    DAM(DAM_FIRE,) \
+    DAM(DAM_COLD,) \
+    DAM(DAM_ACID,) \
+    DAM(DAM_WATER,) \
+    DAM(DAM_ELECTRICITY,) \
+    /* effects */ \
+    DAM(DAM_POISON,)         /* traps, snake */ \
+    DAM(DAM_BLINDNESS,)      /* lama nobe, green urchin */ \
+    DAM(DAM_CONFUSION,)      /* umber hulk */ \
+    DAM(DAM_PARALYSIS,)      /* floating eye */ \
+    DAM(DAM_DEC_CON,) \
+    DAM(DAM_DEC_DEX,)        /* quasit */ \
+    DAM(DAM_DEC_INT,) \
+    DAM(DAM_DEC_STR,)        /* ant, centipede */ \
+    DAM(DAM_DEC_WIS,) \
+    DAM(DAM_DEC_RND,)        /* ziller */ \
+    DAM(DAM_DRAIN_LIFE,)     /* vampire, wraith */ \
+    /* inventory manipulation */ \
+    /* these damage types are handled by the monster, not the player */ \
+    DAM(DAM_STEAL_GOLD,)     /* leprechaun */ \
+    DAM(DAM_STEAL_ITEM,)     /* nymph */ \
+    DAM(DAM_RUST,)           /* rust monster, gelatious cube */ \
+    DAM(DAM_REM_ENCH,)       /* remove enchantment from player's items */ \
+    DAM(DAM_MAX,) \
+    DAM(DAM_RANDOM,)         /* random damage: any of the types above */ \
 
-    /* inventory manipulation */
-    /* these damage types are handled by the monster, not the player */
-    DAM_STEAL_GOLD,     /* leprechaun */
-    DAM_STEAL_ITEM,     /* nymph */
-    DAM_RUST,           /* rust monster, gelatious cube */
-    DAM_REM_ENCH,       /* disenchantress */
-    DAM_MAX,
-    DAM_RANDOM          /* random damage: spirit naga */
-} damage_t;
+DECLARE_ENUM(damage_t, DAMAGE_T_ENUM)
 
 typedef struct _attack
 {
@@ -81,19 +80,19 @@ typedef struct _attack
     int rand;
 } attack;
 
-typedef enum _damage_originator_t
-{
-    DAMO_NONE,
-    DAMO_ITEM,
-    DAMO_MAP,
-    DAMO_MONSTER,
-    DAMO_PLAYER,
-    DAMO_SOBJECT,
-    DAMO_SPHERE,
-    DAMO_TRAP,
-    DAMO_GOD,
-    DAMO_MAX
-} damage_originator_t;
+#define DAMAGE_ORIGINATOR_T_ENUM(DAMO) \
+    DAMO(DAMO_NONE,) \
+    DAMO(DAMO_ITEM,) \
+    DAMO(DAMO_MAP,) \
+    DAMO(DAMO_MONSTER,) \
+    DAMO(DAMO_PLAYER,) \
+    DAMO(DAMO_SOBJECT,) \
+    DAMO(DAMO_SPHERE,) \
+    DAMO(DAMO_TRAP,) \
+    DAMO(DAMO_GOD,) \
+    DAMO(DAMO_MAX,) \
+
+DECLARE_ENUM(damage_originator_t, DAMAGE_ORIGINATOR_T_ENUM)
 
 typedef struct _damage_originator
 {
