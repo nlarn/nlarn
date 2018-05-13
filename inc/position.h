@@ -23,7 +23,23 @@
 
 #include "cJSON.h"
 #include "combat.h"
-#include "defines.h"
+
+/* direction of movement */
+/* ordered by number keys */
+typedef enum _direction
+{
+    GD_NONE,
+    GD_SW,
+    GD_SOUTH,
+    GD_SE,
+    GD_WEST,
+    GD_CURR, /* special case: current position */
+    GD_EAST,
+    GD_NW,
+    GD_NORTH,
+    GD_NE,
+    GD_MAX
+} direction;
 
 typedef union _position
 {
