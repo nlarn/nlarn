@@ -1,6 +1,6 @@
 /*
  * utils.h
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,8 +20,8 @@
 #define __UTILS_H_
 
 #include <time.h>
+
 #include "cJSON.h"
-#include "defines.h"
 
 /* game messaging */
 typedef struct _message_log_entry
@@ -150,13 +150,5 @@ static inline const char *plural(int i)
 {
     return (i > 1) ? "s" : "";
 }
-
-/* regarding stuff defined in defines.h */
-damage *damage_new(damage_t type, attack_t att_type, int amount,
-                   damage_originator_t damo, gpointer originator);
-
-damage *damage_copy(damage *dam);
-
-static inline void damage_free(damage *dam) { g_free(dam); }
 
 #endif

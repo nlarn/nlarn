@@ -524,30 +524,6 @@ const char *int2time_str(int val)
     }
 }
 
-damage *damage_new(damage_t type, attack_t att_type, int amount,
-                   damage_originator_t damo, gpointer originator)
-{
-    damage *dam = g_malloc0(sizeof(damage));
-
-    dam->type = type;
-    dam->attack = att_type;
-    dam->amount = amount;
-    dam->dam_origin.ot = damo;
-    dam->dam_origin.originator = originator;
-
-    return dam;
-}
-
-damage *damage_copy(damage *dam)
-{
-    g_assert (dam != NULL);
-
-    damage *dcopy = g_malloc(sizeof(damage));
-    memcpy(dcopy, dam, sizeof(damage));
-
-    return dcopy;
-}
-
 static void log_entry_destroy(message_log_entry *entry)
 {
     g_assert(entry != NULL);
