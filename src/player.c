@@ -2396,9 +2396,12 @@ effect *player_effect_add(player *p, effect *e)
                     guint amount = (p->hp_max * e->amount) / 100;
                     player_hp_gain(p, amount);
             }
-            else
+            else if (e->item)
             {
-                    /* Player's hp is at the max; increase max hp. */
+                    /*
+                     * Player's hp is at the max; increase max hp.
+                     * (only when drinking a potion)
+                     */
                     guint amount = e->amount;
 
                     effect_destroy(e);
@@ -2417,9 +2420,12 @@ effect *player_effect_add(player *p, effect *e)
                     guint amount = (p->mp_max * e->amount) / 100;
                     player_mp_gain(p, amount);
             }
-            else
+            else if (e->item)
             {
-                    /* Player's mp is at the max; increase max mp. */
+                    /*
+                     * Player's mp is at the max; increase max mp.
+                     * (only when drinking a potion)
+                     */
                     guint amount = e->amount;
 
                     effect_destroy(e);
