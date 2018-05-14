@@ -113,7 +113,11 @@ static int try_locking_savegame_file(FILE *sg)
 #endif
     {
         /* could not obtain the lock */
-        display_show_message("Error", "Another instance of NLarn is already running!", 0);
+        GString *desc = g_string_new("NLarn cannot be started.\n\n"
+                                     "Could not lock the savegame file:\n");
+        g_string_append(desc, strerror(errno));
+        display_show_message("Error", desc->str, 0);
+        g_string_free(desc, TRUE);
         display_shutdown();
         exit(EXIT_FAILURE);
     }
