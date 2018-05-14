@@ -1851,12 +1851,17 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
         map_used[map_num] = TRUE;
     }
 
-    /* number of line separating character(s) */
-#ifdef G_OS_WIN32
-    const guint lslen = 2; /* i.e. CR/LF*/
-#else
-    const guint lslen = 1; /* i.e. LF */
-#endif
+    /* determine number of line separating character(s) */
+    guint lslen;
+
+    /* get first character at the end of the first line */
+    fseek(levelfile, MAP_MAX_X, SEEK_SET);
+    switch (fgetc(levelfile))
+    {
+        case 10: lslen = 1; break; /* i.e. LF */
+        case 13: lslen = 2; break; /* i.e. CR/LF*/
+        default: g_assert(0);
+    }
 
     /* advance to desired maze */
     fseek(levelfile, (map_num * ((MAP_MAX_X + lslen) * MAP_MAX_Y + lslen)), SEEK_SET);
