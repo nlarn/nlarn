@@ -121,4 +121,6 @@ damage *damage_copy(damage *dam);
 
 static inline void damage_free(damage *dam) { g_free(dam); }
 
+char *damage_to_str(damage *dam);
+
 #endif

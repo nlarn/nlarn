@@ -1966,6 +1966,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     g_assert(p != NULL && dam != NULL);
 
+    if (game_wizardmode(nlarn))
+        log_add_entry(nlarn->log, damage_to_str(dam));
+
     if (dam->dam_origin.ot == DAMO_MONSTER)
     {
         monster *m = (monster *)dam->dam_origin.originator;
@@ -2242,6 +2245,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     }
 
     g_free(dam);
+
+    if (game_wizardmode(nlarn))
+        log_add_entry(nlarn->log, "[applied: %d]", hp_orig - p->hp);
 
     /* check if an attack had an effect */
     if (p->hp < hp_orig || p->effects->len > effects_count)

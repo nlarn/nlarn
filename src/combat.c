@@ -49,3 +49,15 @@ damage *damage_copy(damage *dam)
     return dcopy;
 }
 
+char *damage_to_str(damage *dam)
+{
+    static char buf[121];
+    g_snprintf(buf, 120, "[%s - %s - %s: %d]",
+            attack_t_string(dam->attack),
+            damage_t_string(dam->type),
+            dam->type > DAM_ELECTRICITY ? "chance" : "hp",
+            dam->amount);
+
+    return buf;
+}
+

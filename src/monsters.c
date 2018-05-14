@@ -1600,6 +1600,9 @@ monster *monster_damage_take(monster *m, damage *dam)
     if (dam->dam_origin.ot == DAMO_PLAYER)
         p = (player *)dam->dam_origin.originator;
 
+    if (game_wizardmode(nlarn) && fov_get(nlarn->p->fv, m->pos))
+        log_add_entry(nlarn->log, damage_to_str(dam));
+
     int hp_orig = m->hp;
 
     /* FIXME: implement resistances */
@@ -1661,6 +1664,9 @@ monster *monster_damage_take(monster *m, damage *dam)
     /* subtract damage from HP;
      * prevent adding to HP after resistance has lowered damage amount */
     m->hp -= max(0, dam->amount);
+
+    if (game_wizardmode(nlarn) && fov_get(nlarn->p->fv, m->pos))
+        log_add_entry(nlarn->log, "[applied: %d]", hp_orig - m->hp);
 
     if (m->hp < hp_orig)
     {
