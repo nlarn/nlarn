@@ -25,6 +25,7 @@
 # endif
 #endif
 
+#include <errno.h>
 #include <glib.h>
 #include <lua.h>
 #include <lauxlib.h>
