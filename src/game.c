@@ -39,9 +39,11 @@
 #include <unistd.h>
 #include <sys/file.h>
 #include <sys/stat.h>
+#endif
 
-/* file descriptor for locking the savegame file */
-static int sgfd = 0;
+#ifdef WIN32
+#include <io.h>
+#include <sys/locking.h>
 #endif
 
 #include "cJSON.h"
@@ -79,6 +81,9 @@ static const char *save_file = "nlarn.sav";
 /* scoreboard version */
 static const gint sb_ver = 1;
 
+/* file descriptor for locking the savegame file */
+static int sgfd = 0;
+
 #if (defined (__unix) && defined (SETGID))
 /* handle for the scoreboard file when running setgid */
 static FILE *scoreboard_filehandle = NULL ;
@@ -92,7 +97,6 @@ static void print_welcome_message(gboolean newgame)
     log_add_entry(nlarn->log, "For a list of commands, press '?'.");
 }
 
-#if (defined __unix) || (defined __APPLE__)
 static int try_locking_savegame_file(FILE *sg)
 {
     /*
@@ -102,7 +106,11 @@ static int try_locking_savegame_file(FILE *sg)
     int fd = dup(fileno(sg));
 
     /* Try to obtain the lock on the save file to avoid reading it twice */
+#if (defined __unix) || (defined __APPLE__)
     if (flock(fd, LOCK_EX | LOCK_NB) == -1)
+#elif (defined(WIN32))
+    if (_locking(fd, LK_NBLCK, 0xffffffff) == -1)
+#endif
     {
         /* could not obtain the lock */
         display_show_message("Error", "Another instance of NLarn is already running!", 0);
@@ -112,7 +120,6 @@ static int try_locking_savegame_file(FILE *sg)
 
     return fd;
 }
-#endif
 
 void game_init(int argc, char *argv[])
 {
@@ -617,26 +624,23 @@ int game_save(game *g, const char *filename)
 
     /* open save file for writing */
     FILE* fhandle;
-#if (defined __unix) || (defined __APPLE__)
     if (sgfd)
     {
         /*
-         * we need to open a duplicate of the file descriptor as gzclose
+         * File is already opened.
+         * We need to open a duplicate of the file descriptor as gzclose
          * would close the file descriptor we keep to ensure the lock
          * on the file is kept.
          */
         fhandle = fdopen(dup(sgfd), "w");
-        /* position at beginning of file, otherwise zlib would append */
+        /* Position at beginning of file, otherwise zlib would append */
         rewind(fhandle);
     }
     else
     {
-#endif
-        /* cranky indentation, but the next line is not conditional on !__unix */
+        /* File need to be opened for the first time */
         fhandle = fopen(fullname, "wb");
-#if (defined __unix) || (defined __APPLE__)
     }
-#endif
 
     if (fhandle == NULL)
     {
@@ -645,13 +649,11 @@ int game_save(game *g, const char *filename)
         return FALSE;
     }
 
-#if (defined __unix) || (defined __APPLE__)
     if (!sgfd)
     {
         /* first time save, try locking the file */
         sgfd = try_locking_savegame_file(fhandle);
     }
-#endif
 
     gzFile file = gzdopen(fileno(fhandle), "wb");
     if (gzputs(file, sg) != (int)strlen(sg))
@@ -970,14 +972,12 @@ static gboolean game_load(gchar *filename)
         return FALSE;
     }
 
-#if (defined __unix) || (defined __APPLE__)
     /*
      * When not on Windows, lock the save file as long the process is
      * alive. This ensures no two instances of the game can be started
      * from the user's saved game.
      */
     sgfd = try_locking_savegame_file(file);
-#endif
 
     /* open the file with zlib */
     gzFile sg = gzdopen(fileno(file), "rb");
