@@ -165,7 +165,7 @@ static inline int weapon_damage(item *weapon)
               + item_condition_bonus(weapon);
 
     /* even the worst weapon will not heal monsters */
-    return max(0, dmg);
+    return max(1, dmg);
 }
 
 static inline int weapon_base_acc(item *weapon)

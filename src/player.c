@@ -1357,34 +1357,47 @@ int player_move(player *p, direction dir, gboolean open_door)
     return times;
 }
 
-static int calc_max_damage(player *p, monster *m)
+typedef struct min_max_damage
 {
-    int wc = 0;
+    int min_damage;
+    int max_damage;
+} min_max_damage;
+
+static min_max_damage calc_min_max_damage(player *p, monster *m)
+{
+    /* without weapon cause a basic unarmed combat damage */
+    int min_damage = 1;
 
     if (p->eq_weapon != NULL)
     {
-        wc += weapon_damage(p->eq_weapon);
+        /* wielded weapon base damage */
+        min_damage = weapon_damage(p->eq_weapon);
+
         // Blessed weapons do 50% bonus damage against demons and undead.
         if (p->eq_weapon->blessed
                 && (monster_flags(m, MF_DEMON) || monster_flags(m, MF_UNDEAD)))
         {
-            wc *= 3;
-            wc /= 2;
+            min_damage *= 3;
+            min_damage /= 2;
         }
     }
 
-    wc += player_effect(p, ET_INC_DAMAGE);
-    wc -= player_effect(p, ET_SICKNESS);
+    min_damage += player_effect(p, ET_INC_DAMAGE);
+    min_damage -= player_effect(p, ET_SICKNESS);
+
+    /* calculate maximum damage: strength bonus and difficulty malus */
+    int max_damage = min_damage
+                     + player_get_str(p) - 12
+                     - game_difficulty(nlarn);
 
     /* ensure minimal damage */
-    wc = max(wc, 1);
+    min_max_damage ret =
+    {
+        max(1, min_damage),
+        max(max(1, min_damage), max_damage)
+    };
 
-    const int max_damage = player_get_str(p)
-                            + wc
-                            - 12
-                            - game_difficulty(nlarn);
-
-    return max_damage;
+    return ret;
 }
 
 static gboolean player_instakill_chance(player *p, monster *m)
@@ -1422,8 +1435,8 @@ static gboolean player_instakill_chance(player *p, monster *m)
 static int calc_real_damage(player *p, monster *m, int allow_chance)
 {
     const int INSTANT_KILL = 10000;
-    const int max_dam = calc_max_damage(p, m);
-    int real_damage = rand_1n(max_dam + 1);
+    const min_max_damage mmd = calc_min_max_damage(p, m);
+    int real_damage = rand_m_n(mmd.min_damage, mmd.max_damage + 1);
 
     /* *** SPECIAL WEAPONS *** */
     if (p->eq_weapon)
@@ -4986,14 +4999,17 @@ void calc_fighting_stats(player *p)
 
         const int instakill_chance = player_instakill_chance(p, m);
 
-        g_string_append_printf(text, "%s (ac: %d, max hp: %d, speed: %d)\n"
-                               "     to-hit chance: %d%%\n"
-                               "  instakill chance: %d%%\n",
-                               monster_name(m),
-                               monster_ac(m),
-                               monster_type_hp_max(monster_type(m)),
-                               monster_speed(m),
-                               to_hit, instakill_chance);
+        g_string_append_printf(
+            text,
+            "%s (ac: %d, max hp: %d, speed: %d)\n"
+            "     to-hit chance: %d%%\n"
+            "  instakill chance: %d%%\n",
+            monster_name(m),
+            monster_ac(m),
+            monster_type_hp_max(monster_type(m)),
+            monster_speed(m),
+            to_hit, instakill_chance
+        );
 
         if (instakill_chance < 100)
         {
@@ -5003,7 +5019,7 @@ void calc_fighting_stats(player *p)
                                        10 - game_difficulty(nlarn));
             }
 
-            const int max_dam = calc_max_damage(p, m);
+            const min_max_damage mmd = calc_min_max_damage(p, m);
             double avg_dam = 0;
             int tries = 100;
             while (tries-- > 0)
@@ -5015,12 +5031,16 @@ void calc_fighting_stats(player *p)
             if (((int) (avg_dam * 10)) % 10)
                 hits_needed++;
 
-            g_string_append_printf(text, "       max. damage: %d hp\n"
-                                   "       avg. damage: %.2f hp\n"
-                                   "  avg. hits needed: %d%s\n\n",
-                                   max_dam, avg_dam, hits_needed,
-                                   hits_needed > 1
-                                   && instakill_chance > 0 ? " [*]" : "");
+            g_string_append_printf(
+                text,
+                "       min. damage: %d hp\n"
+                "       max. damage: %d hp\n"
+                "       avg. damage: %.2f hp\n"
+                "  avg. hits needed: %d%s\n\n",
+                mmd.min_damage, mmd.max_damage,
+                avg_dam, hits_needed,
+                hits_needed > 1 && instakill_chance > 0 ? " [*]" : ""
+            );
 
             if (!mention_instakill && instakill_chance > 0)
                 mention_instakill = TRUE;
