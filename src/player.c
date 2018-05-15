@@ -1359,8 +1359,28 @@ int player_move(player *p, direction dir, gboolean open_door)
 
 static int calc_max_damage(player *p, monster *m)
 {
+    int wc = 0;
+
+    if (p->eq_weapon != NULL)
+    {
+        wc += weapon_damage(p->eq_weapon);
+        // Blessed weapons do 50% bonus damage against demons and undead.
+        if (p->eq_weapon->blessed
+                && (monster_flags(m, MF_DEMON) || monster_flags(m, MF_UNDEAD)))
+        {
+            wc *= 3;
+            wc /= 2;
+        }
+    }
+
+    wc += player_effect(p, ET_INC_DAMAGE);
+    wc -= player_effect(p, ET_SICKNESS);
+
+    /* ensure minimal damage */
+    wc = max(wc, 1);
+
     const int max_damage = player_get_str(p)
-                            + player_get_wc(p, m)
+                            + wc
                             - 12
                             - game_difficulty(nlarn);
 
@@ -4053,33 +4073,6 @@ guint player_get_ac(player *p)
     ac += player_effect(p, ET_INVULNERABILITY);
 
     return ac;
-}
-
-int player_get_wc(player *p, monster *m)
-{
-    int wc = 0;
-    g_assert(p != NULL);
-
-    if (p->eq_weapon != NULL)
-    {
-        wc += weapon_damage(p->eq_weapon);
-        // Blessed weapons do 50% bonus damage against demons and undead.
-        if (p->eq_weapon->blessed
-                && (monster_flags(m, MF_DEMON) || monster_flags(m, MF_UNDEAD)))
-        {
-            wc *= 3;
-            wc /= 2;
-        }
-    }
-
-    wc += player_effect(p, ET_INC_DAMAGE);
-    wc -= player_effect(p, ET_SICKNESS);
-
-    /* minimal damage */
-    if (wc < 1)
-        wc = 1;
-
-    return wc;
 }
 
 int player_get_hp_max(player *p)

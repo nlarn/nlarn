@@ -412,7 +412,6 @@ void player_drop(player *p);
 
 /* query values */
 guint player_get_ac(player *p);
-int player_get_wc(player *p, monster *m);
 int player_get_hp_max(player *p);
 int player_get_mp_max(player *p);
 int player_get_str(player *p);
