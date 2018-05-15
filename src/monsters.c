@@ -1480,7 +1480,7 @@ void monster_player_attack(monster *m, player *p)
         /* FIXME: handle the vorpal blade */
         dam->amount  = rand_1n(weapon_damage(m->eq_weapon)
                         + game_difficulty(nlarn)
-                        + 2 * (monster_size(m) - ESIZE_MEDIUM));
+                        + 2 * ((monster_size(m) - ESIZE_MEDIUM)) / 25);
     }
     else if (dam->type == DAM_PHYSICAL)
     {
