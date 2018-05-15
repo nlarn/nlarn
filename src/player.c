@@ -3448,7 +3448,7 @@ int player_item_is_equippable(player *p, item *it)
                     if (p->eq_suit) return FALSE;
                     break;
                 default:
-                    assert(0);
+                    g_assert(0);
                     break;
             }
             break;
