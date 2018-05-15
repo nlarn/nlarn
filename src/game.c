@@ -438,16 +438,11 @@ void game_init(int argc, char *argv[])
     } /* end new game only settings */
 }
 
-int game_destroy(game *g)
+game *game_destroy(game *g)
 {
     g_assert(g != NULL);
 
     /* everything must go */
-    for (int i = 0; i < MAP_MAX; i++)
-    {
-        map_destroy(g->maps[i]);
-    }
-
     g_free(g->basedir);
     g_free(g->libdir);
 
@@ -456,6 +451,17 @@ int game_destroy(game *g)
     g_free(g->mazefile);
     g_free(g->fortunes);
     g_free(g->highscores);
+
+    for (int i = 0; i < MAP_MAX; i++)
+    {
+        if (g->maps[i] == NULL)
+        {
+            /* killed early during game initialisation */
+            g_free(g);
+            return NULL;
+        }
+        map_destroy(g->maps[i]);
+    }
 
     player_destroy(g->p);
     log_destroy(g->log);
@@ -479,7 +485,7 @@ int game_destroy(game *g)
 
     g_free(g);
 
-    return EXIT_SUCCESS;
+    return NULL;
 }
 
 const gchar *game_userdir()

@@ -135,7 +135,7 @@ typedef struct _game_score
  */
 void game_init(int argc, char *argv[]);
 
-int game_destroy(game *g);
+game *game_destroy(game *g);
 
 /**
  * @brief Function to return the user-specific directory.

@@ -1861,9 +1861,18 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
     fseek(levelfile, MAP_MAX_X, SEEK_SET);
     switch (fgetc(levelfile))
     {
-        case 10: lslen = 1; break; /* i.e. LF */
-        case 13: lslen = 2; break; /* i.e. CR/LF*/
-        default: g_assert(0);
+        case 10: /* i.e. LF */
+            lslen = 1;
+            break;
+        case 13: /* i.e. CR/LF*/
+            lslen = 2;
+            break;
+        default:
+            /* maze file is corrupted - show error message and quit */
+            nlarn = game_destroy(nlarn);
+            display_show_message("Error", "Maze file is corrupted. Please reinstall the game.", 0);
+            exit(EXIT_FAILURE);
+            break;
     }
 
     /* advance to desired maze */

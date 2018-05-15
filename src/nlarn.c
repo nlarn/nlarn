@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     /* check if mesgfile exists */
     if (!g_file_get_contents(game_mesgfile(nlarn), &strbuf, NULL, NULL))
     {
-        game_destroy(nlarn);
+        nlarn = game_destroy(nlarn);
         display_shutdown();
         g_printerr("Error: Cannot find the message file.\n");
 
@@ -650,7 +650,7 @@ int main(int argc, char *argv[])
             if (game_save(nlarn, NULL))
             {
                 /* only terminate the game if saving was successful */
-                game_destroy(nlarn);
+                nlarn = game_destroy(nlarn);
                 exit(EXIT_SUCCESS);
             }
             break;
@@ -905,7 +905,7 @@ static void nlarn_signal_handler(int signo)
         g_printf("Terminated. Your progress has been saved.\n");
     }
 
-    game_destroy(nlarn);
+    nlarn = game_destroy(nlarn);
     exit(EXIT_SUCCESS);
 }
 #endif
@@ -919,7 +919,7 @@ BOOL nlarn_control_handler(DWORD fdwCtrlType)
     case CTRL_CLOSE_EVENT:
         /* save the game */
         game_save(nlarn, NULL);
-        game_destroy(nlarn);
+        nlarn = game_destroy(nlarn);
 
         return TRUE;
 
