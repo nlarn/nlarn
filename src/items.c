@@ -855,61 +855,59 @@ gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean defin
 
 item_material_t item_material(item *it)
 {
-    item_material_t material;
-
     g_assert (it != NULL);
 
     switch (it->type)
     {
     case IT_AMULET:
-        material = amulet_material(it->id);
+        return amulet_material(it->id);
         break;
 
     case IT_AMMO:
-        material = ammo_material(it);
+        return ammo_material(it);
         break;
 
     case IT_ARMOUR:
-        material = armour_material(it);
+        return armour_material(it);
         break;
 
     case IT_BOOK:
-        material = IM_PAPER;
+        return IM_PAPER;
         break;
 
     case IT_CONTAINER:
-        material = container_material(it);
+        return container_material(it);
         break;
 
     case IT_GEM:
-        material = IM_GEMSTONE;
+        return IM_GEMSTONE;
         break;
 
     case IT_GOLD:
-        material = IM_GOLD;
+        return IM_GOLD;
         break;
 
     case IT_POTION:
-        material = IM_GLASS;
+        return IM_GLASS;
         break;
 
     case IT_RING:
-        material = ring_material(it->id);
+        return ring_material(it->id);
         break;
 
     case IT_SCROLL:
-        material = IM_PAPER;
+        return IM_PAPER;
         break;
 
     case IT_WEAPON:
-        material =  weapon_material(it);
+        return weapon_material(it);
         break;
 
     default:
         g_assert(0);
+        /* required to silence a release mode warning */
+        return IM_MAX;
     }
-
-    return material;
 }
 
 guint item_base_price(item *it)
