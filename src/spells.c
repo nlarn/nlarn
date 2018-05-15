@@ -937,7 +937,7 @@ int spell_type_blast(spell *s, struct player *p)
     case SP_BAL:
     default:
         radius = 2;
-        amount = (25 * s->knowledge) + p->level + rand_0n(25 + p->level);
+        amount = (3 + rand_1n(15)) * s->knowledge + p->level;
         break;
     }
 
