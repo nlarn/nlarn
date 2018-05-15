@@ -1609,8 +1609,7 @@ monster *monster_damage_take(monster *m, damage *dam)
     switch (dam->type)
     {
     case DAM_PHYSICAL:
-        /* FIXME: the following does currently not work as the combat system sucks */
-        /* dam->amount -= monster_ac(m); */
+        dam->amount -= monster_ac(m);
         break;
 
   case DAM_MAGICAL:
