@@ -51,7 +51,10 @@ static GPtrArray *map_path_get_neighbours(map *m, position pos,
                                           map_element_t element,
                                           gboolean ppath);
 
-static gboolean map_sphere_destroy(sphere *s, map *m);
+static inline void map_sphere_destroy(sphere *s, map *m __attribute__((unused)))
+{
+    sphere_destroy(s, nlarn);
+}
 
 const map_tile_data map_tiles[LT_MAX] =
 {
@@ -2318,14 +2321,4 @@ static GPtrArray *map_path_get_neighbours(map *m, position pos,
     }
 
     return neighbours;
-}
-
-static gboolean map_sphere_destroy(sphere *s, map *m)
-{
-    if (Z(s->pos) != m->nlevel)
-        return FALSE;
-
-    sphere_destroy(s, nlarn);
-
-    return TRUE;
 }

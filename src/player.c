@@ -99,9 +99,17 @@ static const guint32 player_lvl_exp[] =
 
 /* function declarations */
 
-static guint player_item_pickup_all(player *p, inventory **inv, item *it);
-static guint player_item_pickup_ask(player *p, inventory **inv, item *it);
 static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean ask);
+static inline void player_item_pickup_all(player *p, inventory **inv, item *it)
+{
+    player_item_pickup(p, inv, it, FALSE);
+}
+
+static inline void player_item_pickup_ask(player *p, inventory **inv, item *it)
+{
+    player_item_pickup(p, inv, it, TRUE);
+}
+
 static void player_sobject_memorize(player *p, sobject_t sobject, position pos);
 static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
@@ -4486,16 +4494,6 @@ void player_update_fov(player *p)
             }
         }
     }
-}
-
-static guint player_item_pickup_all(player *p, inventory **inv, item *it)
-{
-    return player_item_pickup(p, inv, it, FALSE);
-}
-
-static guint player_item_pickup_ask(player *p, inventory **inv, item *it)
-{
-    return player_item_pickup(p, inv, it, TRUE);
 }
 
 static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean ask)
