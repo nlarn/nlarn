@@ -465,6 +465,12 @@ static int potion_detect_item(player *p, item *potion)
         }
     }
 
+    if (pmap->nlevel == 5 && potion->id == PO_TRE_DETECT)
+    {
+        pos = map_find_sobject(pmap, LS_BANK2);
+        player_memory_of(p, pos).sobject = LS_BANK2;
+    }
+
     if (count && (potion->id == PO_TRE_DETECT))
     {
         log_add_entry(nlarn->log, "You sense the presence of treasure.");
