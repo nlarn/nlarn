@@ -1502,23 +1502,43 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop)
         break;
 
     case IT_WEAPON:
-        if (weapon_is_twohanded(it))
-            g_string_append_printf(desc, "Two-handed weapon\n");
-
-        if (weapon_is_ranged(it))
-            g_string_append_printf(desc, "Ranged weapon\n");
-
-        if (it->bonus_known)
         {
-            g_string_append_printf(desc, "Damage:   +%d\n"
-                                   "Accuracy: +%d\n",
-                                   weapon_damage(it), weapon_acc(it));
-        }
-        else
-        {
-            g_string_append_printf(desc, "Base damage: +%d\n"
-                                   "Base accuracy: +%d\n",
-                                   weapon_base_damage(it), weapon_base_acc(it));
+            /* assemble a string of weapon attributes */
+            char **attributes = strv_new();
+
+            if (weapon_is_twohanded(it))
+                strv_append(&attributes, "two-handed");
+
+            if (weapon_is_ranged(it))
+                strv_append(&attributes, "ranged");
+
+            if (weapon_is_unique(it))
+                strv_append(&attributes, "unique");
+
+            if (g_strv_length(attributes) > 0)
+            {
+                gchar *tmp = g_strjoinv(", ", attributes);
+                tmp[0] = g_ascii_toupper(tmp[0]);
+                g_string_append_printf(desc, "%s weapon\n", tmp);
+                g_free(tmp);
+            }
+
+            g_strfreev(attributes);
+
+            if (it->bonus_known)
+            {
+                g_string_append_printf(desc,
+                    "Damage:   +%d\n"
+                    "Accuracy: +%d\n",
+                    weapon_damage(it), weapon_acc(it));
+            }
+            else
+            {
+                g_string_append_printf(desc,
+                    "Base damage: +%d\n"
+                    "Base accuracy: +%d\n",
+                    weapon_base_damage(it), weapon_base_acc(it));
+            }
         }
         break;
 
