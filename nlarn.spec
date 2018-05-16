@@ -1,13 +1,13 @@
 Name:    nlarn
-Version: 0.7.1
+Version: 0.7.2
 Release: 1
 Summary: A remake of the roguelike game Larn
 Group:   Amusements/Games
 License: GPL v3
-URL:     http://nlarn.sourceforge.net
+URL:     https://nlarn.github.io/
 Source:  http://downloads.sourceforge.net/project/nlarn/nlarn/%{version}/nlarn-%{version}.tar.gz
 
-BuildRequires: glib2-devel lua-devel ncurses-devel zlib-devel
+BuildRequires: gcc glib2-devel lua-devel ncurses-devel zlib-devel
 
 %description
 
@@ -15,26 +15,29 @@ BuildRequires: glib2-devel lua-devel ncurses-devel zlib-devel
 %setup
 
 %build
-make
+make config=release SETGID=Y
 
 %install
-mkdir -p $RPM_BUILD_ROOT/usr/games
-mkdir -p $RPM_BUILD_ROOT/usr/share/games/nlarn
-install -g games -o games -m 2755 nlarn $RPM_BUILD_ROOT/usr/games
-install lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg lib/monsters.lua $RPM_BUILD_ROOT/usr/share/games/nlarn
-touch $RPM_BUILD_ROOT/usr/share/games/nlarn/highscores
-
-%clean
-rm -rf $RPM_BUILD_ROOT
+mkdir -p %{buildroot}/%{_bindir}
+mkdir -p %{buildroot}/%{_datadir}/%{name}
+mkdir -p %{buildroot}/var/games/%{name}
+install -g games -o games -m 2755 nlarn %{buildroot}/%{_bindir}
+install lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg lib/monsters.lua %{buildroot}/%{_datadir}/%{name}
+touch %{buildroot}/var/games/%{name}/highscores
 
 %files
 %defattr(-,root,root,-)
-%attr(2755, root, games) /usr/games/nlarn
-/usr/share/games/nlarn/*
-%config(noreplace) %attr (0664,root,games) /usr/share/games/nlarn/highscores
+%attr(2755, root, games) %{_bindir}/nlarn
+%{_datadir}/%{name}/*
+%config(noreplace) %attr (0664,root,games) /var/games/nlarn/highscores
 %doc LICENSE README.md Changelog.txt nlarn.ini-sample lib/maze_doc.txt
 
 %changelog
+* Thu May 17 2018 Joachim de Groot <jdegroot@web.de>
+  - updated for version 0.7.2
+  - compile with support for shared scoreboard
+  - enable optimisation
+  - fix paths
 * Fri May 25 2012 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.7.1
 * Sat Oct 23 2010 Joachim de Groot <jdegroot@web.de>
