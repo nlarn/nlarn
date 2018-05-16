@@ -108,12 +108,17 @@ CFLAGS  += $(shell pkg-config --cflags $(lua))
 LDFLAGS += $(shell pkg-config --libs $(lua))
 
 # Unless requested otherwise build with ncurses.
-ifeq ($(SDLPDCURSES),)
+ifneq ($(SDLPDCURSES),Y)
 	LDFLAGS += -lncurses -lpanel
 else
 	PDCLIB  := PDCurses/sdl1/libpdcurses.a
 	CFLAGS  += -IPDCurses -DSDLPDCURSES $(shell sdl-config --cflags)
 	LDFLAGS += $(shell sdl-config --libs) -lSDL_ttf
+endif
+
+# System-wide installation on *nix
+ifeq ($(SETGID),Y)
+	CFLAGS += -DSETGID
 endif
 
 # Enable creating packages when working on a git checkout
@@ -247,17 +252,22 @@ clean:
 	fi
 
 help:
-	@echo "Usage: make [config=name] [target]"
+	@echo "Usage: make [config=name] [options] [target]"
 	@echo ""
 	@echo "CONFIGURATIONS:"
 	@echo "   debug"
 	@echo "   release"
+	@echo ""
+	@echo "OPTIONS:"
+	@echo "   SDLPDCURSES=Y - compile with PDCurses for SDL (instead of ncurses)"
+	@echo "   SETGID=Y      - compile for system-wide installations on *nix platforms"
 	@echo ""
 	@echo "TARGETS:"
 	@echo "   all (default) - builds nlarn$(SUFFIX)"
 	@echo "   clean         - cleans the working directory"
 	@if \[ -n "$(GITREV)" \]; then \
 		echo "   dist          - create source and binary packages for distribution"; \
-		echo "                   ($(SRCPKG) and $(PACKAGE))"; \
+		echo "                   ($(SRCPKG) and"; \
+		echo "                   $(PACKAGE))"; \
 	fi
 	@echo ""
