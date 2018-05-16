@@ -305,7 +305,7 @@ guint trap_disarm(struct player *p)
 {
     map *cmap = game_map(nlarn, Z(p->pos));
     trap_t tt = map_trap_at(cmap, p->pos);
-    gboolean magical_trap = FALSE;
+    gboolean magical_trap = (tt == TT_TELEPORT || tt == TT_MANADRAIN);
 
     if (tt == TT_NONE)
     {
@@ -324,10 +324,9 @@ guint trap_disarm(struct player *p)
     /* determine the player's chance to disable the trap */
     guint prop = ((100 - trap_chance(tt)) / 10) + p->level;
 
-    if (tt == TT_TELEPORT || tt == TT_MANADRAIN)
+    if (magical_trap)
     {
         prop += player_get_int(p);
-        magical_trap = TRUE;
     }
     else
     {
@@ -356,6 +355,8 @@ guint trap_disarm(struct player *p)
     else if (chance(trap_chance(tt)))
     {
         /* player has triggered the trap */
+        log_add_entry(nlarn->log, "You accidentally trigger the %s.",
+                trap_description(tt));
         return player_trap_trigger(p, tt, TRUE);
     }
     else
