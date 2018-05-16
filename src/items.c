@@ -1479,7 +1479,7 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop)
 
         if (it->bonus_known)
         {
-            g_string_append_printf(desc, "Damage: +%d\n"
+            g_string_append_printf(desc, "Damage:   +%d\n"
                                    "Accuracy: +%d\n",
                                    ammo_damage(it), ammo_accuracy(it));
         }
@@ -1510,7 +1510,7 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop)
 
         if (it->bonus_known)
         {
-            g_string_append_printf(desc, "Damage: +%d\n"
+            g_string_append_printf(desc, "Damage:   +%d\n"
                                    "Accuracy: +%d\n",
                                    weapon_damage(it), weapon_acc(it));
         }
