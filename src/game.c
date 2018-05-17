@@ -63,7 +63,7 @@ static void game_init_lua(game *g);
 
 static void game_items_shuffle(game *g);
 
-static GList *game_scores_load(game *g);
+static GList *game_scores_load();
 static void game_scores_save(game *g, GList *scores);
 static int game_score_compare(const void *scr_a, const void *scr_b);
 
@@ -86,8 +86,8 @@ static const gint sb_ver = 1;
 static int sgfd = 0;
 
 #if (defined (__unix) && defined (SETGID))
-/* handle for the scoreboard file when running setgid */
-static FILE *scoreboard_filehandle = NULL ;
+/* file descriptor for the scoreboard file when running setgid */
+static int scoreboard_fd = -1;
 #endif
 
 static void print_welcome_message(gboolean newgame)
@@ -145,14 +145,14 @@ void game_init(int argc, char *argv[])
 
     /* assemble the scoreboard filename */
     gchar *scoreboard_filename = g_build_path(G_DIR_SEPARATOR_S, default_var_dir,
-                                              "highscores", NULL);
+                                              highscores, NULL);
 
-    /* Open the scoreboard file.
-     *
-     * The file is opened with mode "r+" to preserve the existing
-     * contents. Just make sure you don't close() the file after reading
-     * it or you won't be able to write to it again. */
-    scoreboard_filehandle = fopen(scoreboard_filename, "r+");
+    /* Open the scoreboard file. */
+    if ((scoreboard_fd = open(scoreboard_filename, O_RDWR)) == -1)
+    {
+        perror("Could not open scoreboard file.");
+        exit(EXIT_FAILURE);
+    }
 
     /* Figure out who we really are. */
     realgid = getgid();
@@ -720,7 +720,7 @@ GList *game_score_add(game *g, game_score_t *score)
 
     g_assert (g != NULL && score != NULL);
 
-    gs = game_scores_load(g);
+    gs = game_scores_load();
 
     /* add new score */
     gs = g_list_append(gs, score);
@@ -1244,7 +1244,7 @@ static void game_items_shuffle(game *g)
     shuffle(g->book_desc_mapping, SP_MAX, 0);
 }
 
-static GList *game_scores_load(game *g)
+static GList *game_scores_load()
 {
     /* size of buffer to store uncompressed scoreboard content */
     guint bufsize = 8192;
@@ -1263,11 +1263,21 @@ static GList *game_scores_load(game *g)
 
     /* read the scoreboard file into memory */
 #if (defined (__unix) && defined (SETGID))
-    int keep_fd = fileno(scoreboard_filehandle);
-    int fd = dup(keep_fd);
+    /* we'll need the file desciptor for saving, too, so duplicate it */
+    int fd = dup(scoreboard_fd);
+
+    /*
+     * Lock the scoreboard file while updating the scoreboard.
+     * Wait until another process that holds the lock releases it again.
+     */
+    if (flock(fd, LOCK_EX) == -1)
+    {
+        perror("Could not lock the scoreboard file.");
+    }
+
     gzFile file = gzdopen(fd, "rb");
 #else
-    gzFile file = gzopen(game_highscores(g), "rb");
+    gzFile file = gzopen(nlarn->highscores, "rb");
 #endif
 
     if (file == NULL)
@@ -1297,7 +1307,11 @@ static GList *game_scores_load(game *g)
     cJSON *pscores, *s_entry;
 
     /* parse the scores */
-    pscores = cJSON_Parse(scores);
+    if ((pscores = cJSON_Parse(scores)) == NULL)
+    {
+        /* empty file, no entries */
+        return gs;
+    }
 
     /* version of scoreboard file */
     gint version = cJSON_GetObjectItem(pscores, "version")->valueint;
@@ -1392,10 +1406,9 @@ static void game_scores_save(game *g, GList *gs)
 
     /* open the file for writing */
 #if (defined (__unix) && defined (SETGID))
-    int fd = fileno(scoreboard_filehandle);
-    sb = gzdopen(fd, "wb");
+    sb = gzdopen(scoreboard_fd, "wb");
 #else
-    sb = gzopen(game_highscores(g), "wb");
+    sb = gzopen(nlarn->highscores, "wb");
 #endif
 
     if (sb == NULL)
@@ -1419,7 +1432,11 @@ static void game_scores_save(game *g, GList *gs)
         return;
     }
 
-    /* close file */
+    /*
+     * Close file.
+     * As this was the last reference to that file, this action
+     * unlocks the scoreboard file again.
+     */
     gzclose(sb);
 
     /* return memory */

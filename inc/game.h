@@ -194,7 +194,6 @@ void game_delete_savefile();
 #define game_helpfile(g) ((g)->helpfile)
 #define game_mazefile(g) ((g)->mazefile)
 #define game_fortunes(g) ((g)->fortunes)
-#define game_highscores(g) ((g)->highscores)
 
 /* gtime <> mobuls conversion */
 #define gtime2mobuls(gtime)  ((abs(((int)gtime)) + 99) / 100)
