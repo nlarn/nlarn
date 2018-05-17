@@ -126,18 +126,75 @@ static int try_locking_savegame_file(FILE *sg)
     return fd;
 }
 
+struct game_config {
+    /* these will be filled by the command line parser */
+    gint difficulty;
+    gboolean wizard;
+    gboolean no_autosave;
+    gboolean show_version;
+    char *name;
+    char *gender;
+    char *auto_pickup;
+    char *savefile;
+    char *stats;
+};
+
+static gboolean game_parse_ini_file(const char *filename, struct game_config *config)
+{
+    /* ini file handling */
+    GKeyFile *ini_file = g_key_file_new();
+    GError *error = NULL;
+    gboolean success;
+
+    g_key_file_load_from_file(ini_file, filename, G_KEY_FILE_NONE, &error);
+
+    if ((success = (!error)))
+    {
+        /* ini file has been found, get values */
+        /* clear error after each attempt as values need not to be defined */
+        int difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
+        if (!error) config->difficulty = difficulty;
+        g_clear_error(&error);
+
+        gboolean wizard = g_key_file_get_boolean(ini_file, "nlarn", "wizard", &error);
+        if (!error) config->wizard = wizard;
+        g_clear_error(&error);
+
+        gboolean no_autosave = g_key_file_get_boolean(ini_file, "nlarn", "no-autosave", &error);
+        if (!error) config->no_autosave = no_autosave;
+        g_clear_error(&error);
+
+           char *name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
+        if (!error) config->name = name;
+        g_clear_error(&error);
+
+        char *gender = g_key_file_get_string(ini_file, "nlarn", "gender", &error);
+        if (!error) config->gender = gender;
+        g_clear_error(&error);
+
+        char *auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
+        if (!error) config->auto_pickup = auto_pickup;
+        g_clear_error(&error);
+
+        char *stats = g_key_file_get_string(ini_file, "nlarn", "stats", &error);
+        if (!error) config->stats = stats;
+        g_clear_error(&error);
+    }
+    else
+    {
+        /* File not found. Never mind but clean up the mess */
+        g_clear_error(&error);
+    }
+
+    /* clean-up */
+    g_key_file_free(ini_file);
+
+    return success;
+}
+
 void game_init(int argc, char *argv[])
 {
-    /* these will be filled by the command line parser */
-    static gint difficulty = 0;
-    static gboolean wizard = FALSE;
-    static gboolean no_autosave = FALSE;
-    static gboolean show_version = FALSE;
-    static char *name = NULL;
-    static char *gender = NULL;
-    static char *auto_pickup = NULL;
-    static char *savefile = NULL;
-    static char *stats = NULL;
+    static struct game_config config = {0};
 
 #if (defined (__unix) && defined (SETGID))
     gid_t realgid;
@@ -263,79 +320,40 @@ void game_init(int argc, char *argv[])
     /* initialize the Lua interpreter */
     game_init_lua(nlarn);
 
-
-    /* ini file handling */
-    GKeyFile *ini_file = g_key_file_new();
-    GError *error = NULL;
-
     /* determine location of the configuration file */
     gchar *filename = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
                                    config_file, NULL);
 
-    if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR))
+    /* try to load settings from the configuration file */
+    if (!game_parse_ini_file(filename, &config))
     {
         /* ini file has not been found in user configuration directory */
         g_free(filename);
 
         /* try to find it in the binary directory */
         filename = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, config_file, NULL);
+        game_parse_ini_file(filename, &config);
+        g_free(filename);
     }
-
-    /* try to load settings from the configuration file */
-    g_key_file_load_from_file(ini_file, filename, G_KEY_FILE_NONE, &error);
-    g_free(filename);
-
-    if (!error)
-    {
-        /* ini file has been found, get values */
-        /* clear error after each attempt as values need not to be defined */
-        difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
-        g_clear_error(&error);
-
-        wizard = g_key_file_get_boolean(ini_file, "nlarn", "wizard", &error);
-        g_clear_error(&error);
-
-        no_autosave = g_key_file_get_boolean(ini_file, "nlarn", "no-autosave", &error);
-        g_clear_error(&error);
-
-        name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
-        g_clear_error(&error);
-
-        gender = g_key_file_get_string(ini_file, "nlarn", "gender", &error);
-        g_clear_error(&error);
-
-        auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
-        g_clear_error(&error);
-
-        stats = g_key_file_get_string(ini_file, "nlarn", "stats", &error);
-        g_clear_error(&error);
-    }
-    else
-    {
-        /* File not found. Never mind but clean up the mess */
-        g_clear_error(&error);
-    }
-
-    /* clean-up */
-    g_key_file_free(ini_file);
 
     /* parse the command line */
     static GOptionEntry entries[] =
     {
-        { "name",        'n', 0, G_OPTION_ARG_STRING, &name,         "Set character's name", NULL },
-        { "gender",      'g', 0, G_OPTION_ARG_STRING, &gender,       "Set character's gender (m/f)", NULL },
-        { "stats",       's', 0, G_OPTION_ARG_STRING, &stats,        "Set character's stats (a-f)", NULL },
-        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &auto_pickup,  "Item types to pick up automatically, e.g. '$*+'", NULL },
-        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &difficulty,   "Set difficulty",       NULL },
-        { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &no_autosave,  "Disable autosave",   NULL },
-        { "version",     'v', 0, G_OPTION_ARG_NONE,   &show_version, "Show version information and exit",   NULL },
-        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &wizard,       "Enable wizard mode",   NULL },
+        { "name",        'n', 0, G_OPTION_ARG_STRING, &config.name,         "Set character's name", NULL },
+        { "gender",      'g', 0, G_OPTION_ARG_STRING, &config.gender,       "Set character's gender (m/f)", NULL },
+        { "stats",       's', 0, G_OPTION_ARG_STRING, &config.stats,        "Set character's stats (a-f)", NULL },
+        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &config.auto_pickup,  "Item types to pick up automatically, e.g. '$*+'", NULL },
+        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &config.difficulty,   "Set difficulty",       NULL },
+        { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config.no_autosave,  "Disable autosave",   NULL },
+        { "version",     'v', 0, G_OPTION_ARG_NONE,   &config.show_version, "Show version information and exit",   NULL },
+        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config.wizard,       "Enable wizard mode",   NULL },
 #ifdef DEBUG
-        { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &savefile,   "Save file to restore", NULL },
+        { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &config.savefile,   "Save file to restore", NULL },
 #endif
         { NULL, 0, 0, 0, NULL, NULL, NULL }
     };
 
+    GError *error = NULL;
     GOptionContext *context = g_option_context_new(NULL);
     g_option_context_add_main_entries(context, entries, NULL);
 
@@ -347,7 +365,7 @@ void game_init(int argc, char *argv[])
     }
     g_option_context_free(context);
 
-    if (show_version) {
+    if (config.show_version) {
         g_printf("NLarn version %d.%d.%d%s, built on %s.\n\n",
                 VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, GITREV,
                 __DATE__);
@@ -366,13 +384,13 @@ void game_init(int argc, char *argv[])
     atexit(display_shutdown);
 
     /* set autosave setting (default: TRUE) */
-    game_autosave(nlarn) = !no_autosave;
+    game_autosave(nlarn) = !config.no_autosave;
 
-    if (!game_load(savefile))
+    if (!game_load(config.savefile))
     {
         /* set game parameters */
-        game_difficulty(nlarn) = difficulty;
-        game_wizardmode(nlarn) = wizard;
+        game_difficulty(nlarn) = config.difficulty;
+        game_wizardmode(nlarn) = config.wizard;
 
         /* restoring a save game failed - start a new game. */
         game_new();
@@ -383,16 +401,16 @@ void game_init(int argc, char *argv[])
         /* give player knowledge of the town */
         scroll_mapping(nlarn->p, NULL);
 
-        if (name)
+        if (config.name)
         {
-            nlarn->p->name = name;
+            nlarn->p->name = config.name;
         }
 
-        if (gender)
+        if (config.gender)
         {
-            gender[0] = g_ascii_tolower(gender[0]);
+            config.gender[0] = g_ascii_tolower(config.gender[0]);
 
-            switch (gender[0])
+            switch (config.gender[0])
             {
             case 'm':
                 nlarn->p->sex = PS_MALE;
@@ -408,26 +426,26 @@ void game_init(int argc, char *argv[])
             }
         }
 
-        if (stats)
+        if (config.stats)
         {
-            stats[0] = g_ascii_tolower(stats[0]);
-            nlarn-> player_stats_set = player_assign_bonus_stats(nlarn->p, stats);
+            config.stats[0] = g_ascii_tolower(config.stats[0]);
+            nlarn-> player_stats_set = player_assign_bonus_stats(nlarn->p, config.stats);
         }
 
 
-        if (wizard)
+        if (config.wizard)
         {
             log_add_entry(nlarn->log, "Wizard mode has been activated.");
         }
 
         /* parse auto pick-up settings */
-        if (auto_pickup && (nlarn->p != NULL))
+        if (config.auto_pickup && (nlarn->p != NULL))
         {
-            for (guint idx = 0; idx < strlen(auto_pickup); idx++)
+            for (guint idx = 0; idx < strlen(config.auto_pickup); idx++)
             {
                 for (item_t it = IT_NONE; it < IT_MAX; it++)
                 {
-                    if (auto_pickup[idx] == item_glyph(it))
+                    if (config.auto_pickup[idx] == item_glyph(it))
                     {
                         nlarn->p->settings.auto_pickup[it] = TRUE;
                     }
