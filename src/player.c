@@ -5373,7 +5373,6 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
     /* genocided monsters */
     g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
 
-    guint genocided_count = 0;
     for (guint mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
     {
         if (!monster_is_genocided(mnum))
@@ -5381,11 +5380,7 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
 
         tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum, 2)));
         g_string_append_printf(text, "%s\n", tmp);
-        genocided_count++;
     }
-
-    g_string_append_printf(text, "\n%s genocided %s monster%s.\n", pronoun,
-                           int2str(genocided_count), plural(genocided_count));
 
      /* messages */
     g_string_append(text, "\n\n-- Last messages ----------------------\n\n");
