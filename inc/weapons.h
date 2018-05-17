@@ -102,7 +102,8 @@ typedef struct _weapon_data
         twohanded: 1,   /* needs two hands */
         unique: 1,      /* unique */
         article: 1,     /* needs an article in the description */
-        obtainable: 1;  /* available in the shop */
+        obtainable: 1,  /* available in the shop */
+        throwable: 1;   /* can be thrown */
 } weapon_data;
 
 /* forward declarations */
@@ -198,6 +199,7 @@ static inline int weapon_acc(item *weapon)
 #define weapon_is_twohanded(weapon)  (weapons[(weapon)->id].twohanded)
 #define weapon_is_ranged(weapon)     (weapons[(weapon)->id].wc == WC_RANGED)
 #define weapon_is_unique(weapon)     (weapons[(weapon)->id].unique)
+#define weapon_is_throwable(weapon)  (weapons[(weapon)->id].throwable)
 #define weapon_needs_article(weapon) (weapons[(weapon)->id].article)
 
 #endif
