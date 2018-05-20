@@ -131,8 +131,6 @@ ifneq ($(GITREV),)
 endif
 
 ifeq ($(OS),Darwin)
-  # Use clang on OS X.
-  CC = clang
   OSXIMAGE := nlarn-$(VERSION).dmg
 endif
 
