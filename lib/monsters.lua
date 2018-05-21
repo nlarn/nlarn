@@ -1029,7 +1029,7 @@ monsters = {
       },
       color = LIGHTGRAY,
       exp = 7,
-      flags = HEAD + HANDS + UNDEAD + RES_SLEEP + RES_POISON,
+      flags = HEAD + HANDS + UNDEAD + RES_SLEEP + RES_POISON + RES_CONF,
       hp_max = 12,
       glyph = "Z",
       intelligence = 3,
