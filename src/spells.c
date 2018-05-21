@@ -1346,10 +1346,13 @@ item_usage_result book_read(struct player *p, item *book)
         return result;
     }
 
-    log_add_entry(nlarn->log, "You read %s.", desc);
+    log_add_entry(nlarn->log, "You start reading %s.", desc);
 
-    /* try to complete reading the book */
-    if (!player_make_move(p, 1 + spell_level_by_id(book->id),
+    /*
+     * Try to complete reading the book.
+     * Reading a book takes ten turns per spell level.
+     */
+    if (!player_make_move(p, 10 * spell_level_by_id(book->id),
                           TRUE, "reading %s", desc))
     {
         /* the action has been aborted */
