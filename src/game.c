@@ -194,7 +194,7 @@ static gboolean game_parse_ini_file(const char *filename, struct game_config *co
 
 void game_init(int argc, char *argv[])
 {
-    static struct game_config config = {};
+    static struct game_config config = {0};
 
 #if (defined (__unix) && defined (SETGID))
     gid_t realgid;
