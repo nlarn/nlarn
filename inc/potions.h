@@ -1,6 +1,6 @@
 /*
  * potions.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -72,6 +72,8 @@ char *potion_desc(potion_t potion_id);
 colour_t potion_colour(potion_t potion_id);
 int potion_throw(struct player *p);
 item_usage_result potion_quaff(struct player *p, item *potion);
+bool potion_pos_hit(const GList *traj, const damage_originator *damo,
+    gpointer data1, gpointer data2);
 
 /* external vars */
 

@@ -3717,6 +3717,90 @@ void player_item_use(player *p, inventory **inv __attribute__((unused)), item *i
     display_windows_show();
 }
 
+void player_item_throw(player *p, inventory **inv __attribute__((unused)), item *it)
+{
+    map *pmap = game_map(nlarn, Z(p->pos));
+    position target;    /* the selected target */
+    gchar *desc;        /* the item's description */
+    damage_originator damo = { DAMO_PLAYER, p };
+
+    /* get the description of the item */
+    desc = item_describe(it, player_item_known(p, it), true, true);
+
+    gchar *msg = g_strdup_printf("Choose a target for %s.", desc);
+    target = display_get_position(p, msg, true, false, 0, false, true);
+    g_free(msg);
+
+    /* check if we got a usable target position */
+    if (!pos_valid(target) || pos_identical(p->pos, target))
+    {
+        log_add_entry(nlarn->log, "Aborted.");
+        g_free(desc);
+        return;
+    }
+
+    /* protect townsfolk from aggressive players */
+    if (map_get_monster_at(pmap, target)
+        && monster_type(map_get_monster_at(pmap, target)) == MT_TOWN_PERSON)
+    {
+        log_add_entry(nlarn->log, "Gosh! How dare you!");
+        g_free(desc);
+        return;
+    }
+
+    /* get the actual item to throw */
+    if (it->count > 1)
+    {
+        /* it is actually a stack of items => get one of them */
+        it = item_split(it, 1);
+    }
+    else
+    {
+        /* delete the item from the inventory */
+        inv_del_element(&p->inventory, it);
+    }
+
+    /* mark the item as fired */
+    it->fired = TRUE;
+
+    if (it->type == IT_POTION)
+    {
+        /* potion_pos_hit destroys the potion when it hits something */
+        if (!map_trajectory(p->pos, target, &damo, potion_pos_hit, it, NULL,
+                            false, item_glyph(it->type), item_colour(it), false))
+        {
+            /* potion reached the target without hitting anything */
+            desc[0] = g_ascii_toupper(desc[0]);
+            map_tile_t mtt = map_tiletype_at(pmap, target);
+            log_add_entry(nlarn->log, "%s %s the %s.", desc,
+                          (mtt <= LT_FLOOR ? "shatters on" : "splashes into"),
+                          mt_get_desc(mtt));
+            if (mtt <= LT_FLOOR)
+                map_spill_set(pmap, target, potion_colour(it->id));
+            item_destroy(it);
+        }
+    }
+    else if (it->type == IT_WEAPON)
+    {
+        /* weapon_throw_pos_hit drops the weapon when it hits something */
+        if (!map_trajectory(p->pos, target, &damo, weapon_throw_pos_hit, it, NULL,
+                            false, item_glyph(it->type), item_colour(it), false))
+        {
+            /* weapon reached the target without hitting anything - land on floor */
+            map_tile_t tt = map_tiletype_at(pmap, target);
+            if (chance(item_fragility(it) + 15) || tt == LT_DEEPWATER || tt == LT_LAVA)
+                item_destroy(it);
+            else
+                inv_add(map_ilist_at(pmap, target), it);
+        }
+    }
+
+    g_free(desc);
+
+    /* consume time */
+    player_make_move(p, 1, false, NULL);
+}
+
 void player_item_destroy(player *p, item *it)
 {
     gchar *desc = item_describe(it, player_item_known(p, it), false, true);
@@ -3959,6 +4043,42 @@ void player_drop(player *p)
     {
         log_add_entry(nlarn->log, "You have nothing you could drop.");
     }
+}
+
+void player_throw(player *p)
+{
+    g_assert(p != NULL);
+
+    if (inv_length_filtered(p->inventory, item_filter_throwable) == 0)
+    {
+        log_add_entry(nlarn->log, "You have nothing you could throw.");
+        return;
+    }
+
+    item *it = display_inventory("Choose an item to throw", p, &p->inventory,
+                           NULL, FALSE, FALSE, FALSE, item_filter_throwable);
+
+    if (it == NULL)
+        return;
+
+    if (it->type == IT_WEAPON && player_item_is_equipped(p, it))
+    {
+        if (it->cursed)
+        {
+            gchar *desc = item_describe(it, player_item_known(p, it), true, true);
+            log_add_entry(nlarn->log, "You can't throw %s, it's welded to your hands!", desc);
+            g_free(desc);
+            return;
+        }
+        /* Silently unequip before throwing */
+        player_item_unequip(p, NULL, it, true);
+    }
+
+    player_item_throw(p, &p->inventory, it);
+
+    /* Check if the player is able to move. */
+    if (!player_movement_possible(p))
+        return;
 }
 
 guint player_get_ac(player *p)

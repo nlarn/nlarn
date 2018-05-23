@@ -758,7 +758,7 @@ static void mainloop()
 
             /* throw a potion */
         case 't':
-            moves_count = potion_throw(nlarn->p);
+            player_throw(nlarn->p);
             break;
 
             /* voyage (travel) */

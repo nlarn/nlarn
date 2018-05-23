@@ -1,6 +1,6 @@
 /*
  * items.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1637,6 +1637,16 @@ int item_filter_legible(item *it)
 {
     g_assert (it != NULL);
     return (it->type == IT_SCROLL) || (it->type == IT_BOOK);
+}
+
+int item_filter_throwable(item *it)
+{
+    g_assert (it != NULL);
+
+    if (it->type == IT_POTION) return TRUE;
+    if (it->type == IT_WEAPON && weapon_is_throwable(it)) return TRUE;
+
+    return FALSE;
 }
 
 int item_filter_unid(item *it)

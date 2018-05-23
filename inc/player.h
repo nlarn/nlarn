@@ -419,6 +419,7 @@ int player_item_not_equipped(item *it);
 char *player_item_identified_list(player *p);
 void player_item_identify(player *p, inventory **inv, item *it);
 void player_item_use(player *p, inventory **inv, item *it);
+void player_item_throw(player *p, inventory **inv, item *it);
 void player_item_destroy(player *p, item *it);
 void player_item_drop(player *p, inventory **inv, item *it);
 
@@ -433,6 +434,7 @@ void player_quaff(player *p);
 void player_equip(player *p);
 void player_take_off(player *p);
 void player_drop(player *p);
+void player_throw(player *p);
 
 /* query values */
 guint player_get_ac(player *p);

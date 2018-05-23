@@ -1,6 +1,6 @@
 /*
  * potions.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -65,10 +65,6 @@ static int potion_detect_item(struct player *p, item *potion);
 static int potion_recovery(struct player *p, item *potion);
 static int potion_holy_water(player *p, item *potion);
 
-static bool potion_pos_hit(const GList *traj,
-        const damage_originator *damo,
-        gpointer data1, gpointer data2);
-
 struct potion_obfuscation_s
 {
     const char* desc;
@@ -114,94 +110,6 @@ colour_t potion_colour(potion_t potion_id)
 {
     g_assert(potion_id < PO_MAX);
     return potion_obfuscation[nlarn->potion_desc_mapping[potion_id]].fg;
-}
-
-int potion_throw(struct player *p)
-{
-    map *pmap = game_map(nlarn, Z(p->pos));
-    damage_originator damo = { DAMO_PLAYER, p };
-
-    if (inv_length_filtered(p->inventory, item_filter_potions) == 0)
-    {
-        log_add_entry(nlarn->log, "You do not have any potions.");
-        return false;
-    }
-
-    item *potion = display_inventory("Select a potion to throw", p, &p->inventory,
-                                     NULL, false, false, false, item_filter_potions);
-
-    if (!potion)
-    {
-        log_add_entry(nlarn->log, "Aborted.");
-        return false;
-    }
-
-    /* get the description of the potion */
-    gchar *desc = item_describe(potion, player_item_known(p, potion), true, true);
-
-    gchar *msg = g_strdup_printf("Choose a target for %s.", desc);
-    position target = display_get_position(p, msg, true, false, 0, false, true);
-    g_free(msg);
-
-    /* check if we got a usable target position */
-    if (!pos_valid(target) || pos_identical(p->pos, target))
-    {
-        log_add_entry(nlarn->log, "Aborted.");
-        g_free(desc);
-        return false;
-    }
-
-    /* protect townsfolk from aggressive players */
-    if (map_get_monster_at(pmap, target)
-        && monster_type(map_get_monster_at(pmap, target)) == MT_TOWN_PERSON)
-    {
-        log_add_entry(nlarn->log, "Gosh! How dare you!");
-        g_free(desc);
-        return false;
-    }
-
-    /* get the actual item to throw */
-    if (potion->count > 1)
-    {
-        /* potion is actually a stack of potions => get one of them */
-        potion = item_split(potion, 1);
-    }
-    else
-    {
-        /* delete the potion from the inventory */
-        inv_del_element(&p->inventory, potion);
-    }
-
-    /* mark the potion as fired */
-    potion->fired = true;
-
-    /* follow the trajectory of the potion */
-    if (map_trajectory(p->pos, target, &damo, potion_pos_hit, (gpointer)potion, NULL,
-                       false, item_glyph(potion->type), item_colour(potion), false))
-    {
-        /* a callback succeeded */
-        g_free(desc);
-        return true;
-    }
-
-    /* no callback succeeded -> potion hits the floor */
-    /* upper case the first letter of the description */
-    desc[0] = g_ascii_toupper(desc[0]);
-
-    map_tile_t mtt = map_tiletype_at(pmap, target);
-    log_add_entry(nlarn->log, "%s %s the %s.", desc,
-                  (mtt <= LT_FLOOR ? "shatters on" : "splashes into"),
-                  mt_get_desc(mtt));
-
-    if (mtt <= LT_FLOOR)
-    {
-        map_spill_set(pmap, target, potion_colour(potion->id));
-    }
-
-    g_free(desc);
-    item_destroy(potion);
-
-    return true;
 }
 
 item_usage_result potion_quaff(struct player *p, item *potion)
@@ -571,10 +479,10 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
     return false;
 }
 
-static bool potion_pos_hit(const GList *traj,
-                           const damage_originator *damo __attribute__((unused)),
-                           gpointer data1,
-                           gpointer data2 __attribute__((unused)))
+bool potion_pos_hit(const GList *traj,
+    const damage_originator *damo __attribute__((unused)),
+    gpointer data1,
+    gpointer data2 __attribute__((unused)))
 {
     item *potion = (item *)data1;
     position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);

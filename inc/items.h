@@ -1,6 +1,6 @@
 /*
  * items.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -269,6 +269,7 @@ int item_filter_gold(item *it);
 int item_filter_not_gold(item *it);
 int item_filter_potions(item *it);
 int item_filter_legible(item *it);
+int item_filter_throwable(item *it);
 int item_filter_unid(item *it);
 int item_filter_cursed(item *it);
 int item_filter_cursed_or_unknown(item *it);

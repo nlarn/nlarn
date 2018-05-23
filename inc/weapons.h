@@ -1,6 +1,6 @@
 /*
  * weapons.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -120,6 +120,8 @@ extern const weapon_data weapons[WT_MAX];
 /* functions */
 int  weapon_fire(struct player *p);
 void weapon_swap(struct player *p);
+bool weapon_throw_pos_hit(const GList *traj, const damage_originator *damo,
+    gpointer data1, gpointer data2);
 
 /**
  * @brief Return a shortened description of a given weapon

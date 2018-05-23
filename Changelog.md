@@ -4,6 +4,8 @@
 
 ### Changes
 
+* Allow throwing of weapons
+
 ### Fixed bugs
 
 

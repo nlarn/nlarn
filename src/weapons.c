@@ -1,6 +1,6 @@
 /*
  * weapons.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -80,6 +80,8 @@ const weapon_data weapons[WT_MAX] =
 /* static functions */
 damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo);
 bool weapon_ammo_drop(map *m, item *ammo, const GList *traj);
+bool weapon_throw_pos_hit(const GList *traj, const damage_originator *damo,
+    gpointer data1, gpointer data2);
 
 static bool weapon_pos_hit(const GList *traj,
         const damage_originator *damo,
@@ -462,6 +464,58 @@ static bool weapon_pos_hit(const GList *traj,
     }
 
     g_free(adesc);
+    return retval;
+}
+
+bool weapon_throw_pos_hit(const GList *traj,
+    const damage_originator *damo __attribute__((unused)),
+    gpointer data1,
+    gpointer data2 __attribute__((unused)))
+{
+    position cpos;
+    pos_val(cpos) = GPOINTER_TO_UINT(traj->data);
+
+    map *cmap = game_map(nlarn, Z(cpos));
+    item *weapon = (item *)data1;
+    monster *m = map_get_monster_at(cmap, cpos);
+    bool weapon_handled = false;
+    bool retval = false;
+
+    gchar *wdesc = item_describe(weapon, player_item_known(nlarn->p, weapon), true, true);
+    wdesc[0] = g_ascii_toupper(wdesc[0]);
+
+    if (m != NULL)
+    {
+        if (chance(combat_chance_player_to_monster_hit(nlarn->p, m, false)))
+        {
+            if (monster_in_sight(m))
+                log_add_entry(nlarn->log, "%s hits the %s.", wdesc, monster_get_name(m));
+
+            damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, weapon_damage(weapon),
+                                     DAMO_PLAYER, nlarn->p);
+            monster_damage_take(m, dam);
+
+            weapon_handled = weapon_ammo_drop(cmap, weapon, traj);
+            retval = weapon_handled;
+        }
+        else
+        {
+            if (monster_in_sight(m))
+                log_add_entry(nlarn->log, "%s misses the %s.", wdesc, monster_get_name(m));
+        }
+    }
+    else if (pos_identical(nlarn->p->pos, cpos))
+    {
+        /* TODO: thrown weapon hits the player */
+    }
+
+    if (!weapon_handled && !map_pos_transparent(cmap, cpos))
+    {
+        weapon_ammo_drop(cmap, weapon, traj);
+        retval = true;
+    }
+
+    g_free(wdesc);
     return retval;
 }
 
