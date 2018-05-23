@@ -2719,7 +2719,7 @@ int player_inv_display(player *p)
     callback->helpmsg = "Unequip the selected item.";
     callback->key = 'u';
     callback->function = &player_item_unequip_wrapper;
-    callback->checkfun = &player_item_is_equipped;
+    callback->checkfun = &player_item_is_unequippable;
     g_ptr_array_add(callbacks, callback);
 
     /* unequip and use should never appear together */
@@ -3251,17 +3251,6 @@ void player_item_unequip(player *p,
             {
                 if (!forced)
                 {
-                    if (p->eq_gloves)
-                    {
-                        log_add_entry(
-                            nlarn->log,
-                            "You cannot remove %s while wearing a glove.",
-                            desc
-                        );
-                        g_free(desc);
-                        return;
-                    }
-
                     if (!player_make_move(p, 2, TRUE, "removing %s", desc))
                     {
                         /* interrupted */
@@ -3478,6 +3467,7 @@ int player_item_is_equippable(player *p, item *it)
                     break;
 
                 case AC_SUIT:
+                    if (p->eq_cloak) return FALSE;
                     if (p->eq_suit) return FALSE;
                     break;
                 default:
@@ -3509,6 +3499,17 @@ int player_item_is_equippable(player *p, item *it)
         default:
             return FALSE;
         }
+
+    return TRUE;
+}
+
+int player_item_is_unequippable(player *p, item *it)
+{
+    assert(it);
+
+    if (!player_item_is_equipped(p, it)) return FALSE;
+    if (it == p->eq_suit && p->eq_cloak) return FALSE;
+    if (it->type == IT_RING && p->eq_gloves) return FALSE;
 
     return TRUE;
 }
@@ -5484,7 +5485,7 @@ static void player_memorial_file_save(player *p, const char *text)
 
 static int item_filter_unequippable(item *it)
 {
-    return player_item_is_equipped(nlarn->p, it);
+    return player_item_is_unequippable(nlarn->p, it);
 }
 
 static int item_filter_equippable(item *it)

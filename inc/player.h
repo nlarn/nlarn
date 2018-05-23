@@ -383,6 +383,7 @@ int player_item_can_be_added_to_container(player *p, item *it);
 int player_item_is_equipped(player *p, item *it);
 
 int player_item_is_equippable(player *p, item *it);
+int player_item_is_unequippable(player *p, item *it);
 int player_item_is_usable(player *p, item *it);
 int player_item_is_dropable(player *p, item *it);
 int player_item_is_damaged(player *p, item *it);

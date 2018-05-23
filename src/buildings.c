@@ -1,6 +1,6 @@
 /*
  * buildings.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -866,7 +866,7 @@ int building_tradepost(player *p)
     callback->helpmsg = "Unequip the selected item.";
     callback->key = 'u';
     callback->function = &player_item_unequip_wrapper;
-    callback->checkfun = &player_item_is_equipped;
+    callback->checkfun = &player_item_is_unequippable;
     callback->active = FALSE;
     g_ptr_array_add(callbacks, callback);
 
