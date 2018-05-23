@@ -71,6 +71,7 @@ typedef enum _weapon_t
     WT_SPEAR,
     WT_ESPEAR,
     WT_BOW,
+    WT_CLUB,
     WT_MACE,
     WT_FLAIL,
     WT_BATTLEAXE,

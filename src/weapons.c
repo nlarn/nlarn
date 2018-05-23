@@ -55,6 +55,7 @@ const weapon_data weapons[WT_MAX] =
     { WT_SPEAR,         "spear",                     "spear",           WC_MELEE,     AMMO_MAX, 10,   3, IM_IRON,  1800,   120, 0, 0, 1, 1, 1 },
     { WT_ESPEAR,        "elven spear",               "elf spear",       WC_MELEE,     AMMO_MAX, 11,   4, IM_WOOD,  1600,   140, 0, 0, 1, 0, 1 },
     { WT_BOW,           "bow",                       "bow",            WC_RANGED,     AMMO_BOW,  3,   4, IM_WOOD,  1000,   220, 1, 0, 1, 1, 0 },
+    { WT_CLUB,          "heavy club",                "club",            WC_MELEE,     AMMO_MAX, 10,   2, IM_WOOD,  3500,    50, 0, 0, 1, 0, 0 },
     { WT_MACE,          "mace",                      "mace",            WC_MELEE,     AMMO_MAX, 12,   3, IM_IRON,  2600,   160, 0, 0, 1, 1, 0 },
     { WT_FLAIL,         "flail",                     "flail",           WC_MELEE,     AMMO_MAX, 14,   2, IM_IRON,  2900,   195, 1, 0, 1, 1, 0 },
     { WT_BATTLEAXE,     "battle-axe",                "battle-axe",      WC_MELEE,     AMMO_MAX, 18,   2, IM_IRON,  2700,   350, 1, 0, 1, 1, 0 },
