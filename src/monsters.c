@@ -1388,17 +1388,6 @@ static int monster_breath_attack(monster *m, player *p, attack att)
     return FALSE;
 }
 
-static int difficulty_modified_damage(int amount, int difficulty)
-{
-    if (difficulty == 0)
-        return amount;
-
-    const int max_damage = min(amount + difficulty,
-                               (amount * (4 + difficulty)) / 4);
-
-    return rand_m_n(amount, max_damage + 1);
-}
-
 static int modified_attack_amount(int amount, int damage_type)
 {
     if (damage_type == DAM_POISON)
@@ -1479,19 +1468,21 @@ void monster_player_attack(monster *m, player *p)
         dam->type = rand_m_n(DAM_DEC_CON, DAM_DEC_RND);
 
     /* set damage for weapon attacks */
-    if ((att.type == ATT_WEAPON) && (m->eq_weapon != NULL))
+    if (att.type == ATT_WEAPON)
     {
         /* make monster size affect weapon damage */
         /* FIXME: handle the vorpal blade */
-        dam->amount  = rand_1n(weapon_damage(m->eq_weapon)
-                        + game_difficulty(nlarn)
-                        + 2 * ((monster_size(m) - ESIZE_MEDIUM)) / 25);
+        dam->amount  = (m->eq_weapon != NULL) ? weapon_damage(m->eq_weapon) : 1
+                        + rand_0n(game_difficulty(nlarn) + 2)
+                        + monster_level(m)
+                        + 2 * ((monster_size(m) - ESIZE_MEDIUM)) / 25;
     }
     else if (dam->type == DAM_PHYSICAL)
     {
         /* increase damage with difficulty */
-        dam->amount = difficulty_modified_damage(att.base,
-                      game_difficulty(nlarn));
+        dam->amount = att.base
+                      + monster_level(m)
+                      + rand_0n(game_difficulty(nlarn) + 2);
     }
 
     /* add variable damage */
