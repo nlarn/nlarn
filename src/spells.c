@@ -137,7 +137,7 @@ const spell_data spells[SP_MAX] =
         SC_RAY, DAM_COLD, ET_NONE,
         "Sends forth a cone of cold which freezes what it touches.",
         "The cone of cold strikes the %s.",
-        "The %s loves the cold!",
+        NULL,
         DC_WHITE, 3, 1200, FALSE
     },
     {

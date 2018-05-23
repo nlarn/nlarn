@@ -1622,11 +1622,6 @@ monster *monster_damage_take(monster *m, damage *dam)
                         monster_name(m), dam->amount > 0 ? "partly " : "");
             }
         }
-		break;
-
-    case DAM_WATER:
-        if (monster_flags(m, MF_SWIM))
-            dam->amount = 0;
         break;
 
     case DAM_FIRE:
@@ -1639,6 +1634,23 @@ monster *monster_damage_take(monster *m, damage *dam)
                         monster_name(m), dam->amount > 0 ? "partly " : "");
             }
         }
+        break;
+
+    case DAM_COLD:
+        if (monster_flags(m, MF_RES_COLD))
+        {
+            dam->amount = 0;
+            if (monster_in_sight(m))
+            {
+                log_add_entry(nlarn->log, "The %s loves the cold!",
+                        monster_name(m));
+            }
+        }
+        break;
+
+    case DAM_WATER:
+        if (monster_flags(m, MF_SWIM))
+            dam->amount = 0;
         break;
 
     case DAM_ELECTRICITY:

@@ -440,7 +440,7 @@ monsters = {
       },
       color = LIGHTCYAN,
       exp = 25,
-      flags = HEAD + SWIM,
+      flags = HEAD + SWIM + RES_COLD,
       hp_max = 20,
       glyph = "i",
       intelligence = 6,

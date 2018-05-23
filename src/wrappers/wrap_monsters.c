@@ -1,6 +1,6 @@
 /*
  * wrap_monsters.c
- * Copyright (C) 2009, 2010, 2011 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -57,9 +57,10 @@ void wrap_monsters(lua_State *L)
         { "DRAGON",      MF_DRAGON },
         { "MIMIC",       MF_MIMIC },
         { "RES_FIRE",    MF_RES_FIRE },
-        { "RES_SLEEP",   MF_RES_SLEEP },
-        { "RES_POISON",  MF_RES_POISON },
+        { "RES_COLD",    MF_RES_COLD },
         { "RES_ELEC",    MF_RES_ELEC },
+        { "RES_POISON",  MF_RES_POISON },
+        { "RES_SLEEP",   MF_RES_SLEEP },
         { "RES_CONF",    MF_RES_CONF },
         { "RES_MAGIC",   MF_RES_MAGIC },
         { "SWIM",        MF_SWIM },
