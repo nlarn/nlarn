@@ -209,10 +209,15 @@ monster *monster_new(monster_t type, position pos)
         {
         case MT_HOBGOBLIN:
         case MT_ORC:
-        case MT_TROLL:
             wpns[0] = WT_ODAGGER;
             wpns[1] = WT_OSHORTSWORD;
             wpns[2] = WT_OSPEAR;
+            break;
+
+        case MT_TROLL:
+            wpns[0] = WT_CLUB;
+            wpns[1] = WT_CLUB;
+            wpns[2] = WT_BATTLEAXE;
             break;
 
         case MT_ELF:
