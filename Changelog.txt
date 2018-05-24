@@ -1,3 +1,34 @@
+Release 0.7.3 (unreleased)
+-------------
+
+Changes:
+    * Gerneric SDL PDCurses support for all platforms
+    * Combat: take enemy size into account
+    * Combat: balance weapon damage
+    * Magic: Animate reflection of rays
+    * Magic: Magic Missile is handled as ray spell
+    * Magic: Terminate ray spells at medium sized monsters
+    * Magic: Balance spell damage
+    * Added cold resistance for monsters
+    * Minimalistic item descriptions when blinded
+    * Blinking display for very low HP (always with SDL PDCurses, when
+      compiled with ncurses blinking depends on terminal support)
+    * Bright red warning when unarmed
+    * The potion of treasure finding now detects the bank branch office
+    * Occasionally drop arrows when disarming arrow traps
+    * Lock savegame file while the game is running (prevents accidentially
+      launching the game multiple times from autosaves)
+    * Code cleanup
+
+Fixed bugs:
+    * Fixed burning of grass
+    * Prevent increasing max. HP with healing spell
+    * Prevent wearing ring / body armour when wearing gloves / a cloak
+    * Prevent swapping weapons when secondary weapon is twohanded and
+      holding a shield
+    * Corrected some messages
+    * Fixed some visual glitches
+
 Release 0.7.2 (2012-07-06)
 -------------
 
