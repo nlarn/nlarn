@@ -107,9 +107,9 @@ endif
 CFLAGS  += $(shell pkg-config --cflags $(lua))
 LDFLAGS += $(shell pkg-config --libs $(lua))
 
-# Unless requested otherwise build with ncurses.
+# Unless requested otherwise build with curses.
 ifneq ($(SDLPDCURSES),Y)
-	LDFLAGS += -lncurses -lpanel
+	LDFLAGS += -lcurses -lpanel
 else
 	PDCLIB  := PDCurses/sdl1/libpdcurses.a
 	CFLAGS  += -IPDCurses -DSDLPDCURSES $(shell sdl-config --cflags)
