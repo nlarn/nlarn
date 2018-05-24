@@ -36,7 +36,7 @@
 #include <glib/gstdio.h>
 #include <sys/param.h>
 
-#if (defined __unix) || (defined __APPLE__)
+#if (defined __unix) || (defined __unix__) || (defined __APPLE__)
 #include <unistd.h>
 #include <sys/file.h>
 #include <sys/stat.h>
@@ -68,7 +68,7 @@ static void game_scores_save(game *g, GList *scores);
 static int game_score_compare(const void *scr_a, const void *scr_b);
 
 static const char *default_lib_dir = "/usr/share/nlarn";
-#if (defined (__unix) && defined (SETGID))
+#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
 static const char *default_var_dir = "/var/games/nlarn";
 #endif
 static const char *mesgfile = "nlarn.msg";
@@ -85,7 +85,7 @@ static const gint sb_ver = 1;
 /* file descriptor for locking the savegame file */
 static int sgfd = 0;
 
-#if (defined (__unix) && defined (SETGID))
+#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
 /* file descriptor for the scoreboard file when running setgid */
 static int scoreboard_fd = -1;
 #endif
@@ -107,7 +107,7 @@ static int try_locking_savegame_file(FILE *sg)
     int fd = dup(fileno(sg));
 
     /* Try to obtain the lock on the save file to avoid reading it twice */
-#if (defined __unix) || (defined __APPLE__)
+#if (defined __unix) || (defined __unix__) || (defined __APPLE__)
     if (flock(fd, LOCK_EX | LOCK_NB) == -1)
 #elif (defined(WIN32))
     if (_locking(fd, LK_NBLCK, 0xffffffff) == -1)
@@ -196,7 +196,7 @@ void game_init(int argc, char *argv[])
 {
     static struct game_config config = {0};
 
-#if (defined (__unix) && defined (SETGID))
+#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     gid_t realgid;
     uid_t realuid;
 
@@ -311,7 +311,7 @@ void game_init(int argc, char *argv[])
     nlarn->helpfile = g_build_filename(nlarn->libdir, helpfile, NULL);
     nlarn->mazefile = g_build_filename(nlarn->libdir, mazefile, NULL);
     nlarn->fortunes = g_build_filename(nlarn->libdir, fortunes, NULL);
-#if (defined (__unix) && defined (SETGID))
+#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     nlarn->highscores = scoreboard_filename;
 #else
     nlarn->highscores = g_build_filename(nlarn->libdir, highscores, NULL);
@@ -1280,7 +1280,7 @@ static GList *game_scores_load()
     game_score_t *nscore;
 
     /* read the scoreboard file into memory */
-#if (defined (__unix) && defined (SETGID))
+#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     /* we'll need the file desciptor for saving, too, so duplicate it */
     int fd = dup(scoreboard_fd);
 
@@ -1314,7 +1314,7 @@ static GList *game_scores_load()
         scores = g_realloc(scores, bufsize);
     }
 
-#if (defined (__unix) && defined (SETGID))
+#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     /* reposition to the start otherwise writing would append */
     gzrewind(file);
 #endif
@@ -1423,7 +1423,7 @@ static void game_scores_save(game *g, GList *gs)
     cJSON_Delete(sf);
 
     /* open the file for writing */
-#if (defined (__unix) && defined (SETGID))
+#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     sb = gzdopen(scoreboard_fd, "wb");
 #else
     sb = gzopen(nlarn->highscores, "wb");
