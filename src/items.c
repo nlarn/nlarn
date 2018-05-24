@@ -1797,14 +1797,23 @@ int inv_del_oid(inventory **inv, gpointer oid)
     return TRUE;
 }
 
-void inv_erode(inventory **inv, item_erosion_type iet, gboolean visible)
+void inv_erode(inventory **inv, item_erosion_type iet,
+               gboolean visible, int (*ifilter)(item *))
 {
     g_assert(inv != NULL);
 
     for (guint idx = 0; idx < inv_length(*inv); idx++)
     {
         item *it = inv_get(*inv, idx);
-        item_erode(inv, it, iet, visible);
+
+        /*
+         * If no filter was given, erode all items, otherwise
+         * those which are agreed on by the filter function.
+         */
+        if (ifilter == NULL || ifilter(it))
+        {
+            item_erode(inv, it, iet, visible);
+        }
     }
 }
 

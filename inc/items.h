@@ -353,9 +353,11 @@ int inv_del_oid(inventory **inv, gpointer oid);
  * @param pointer to the address of the inventory to erode
  * @param the erosion type affecting the inventory
  * @param TRUE if the player can see the inventory, FALSE otherwise
+ * @param a filter function to restrict the eroded items
  *
  */
-void inv_erode(inventory **inv, item_erosion_type iet, gboolean visible);
+void inv_erode(inventory **inv, item_erosion_type iet,
+		gboolean visible, int (*ifilter)(item *));
 
 /**
  * Function to determine the count of items in an inventory.

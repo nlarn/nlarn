@@ -1196,7 +1196,8 @@ void map_timer(map *m)
                         break;
                     }
 
-                    inv_erode(&tile->ilist, erosion, fov_get(nlarn->p->fv, pos));
+                    inv_erode(&tile->ilist, erosion,
+                            fov_get(nlarn->p->fv, pos), NULL);
                 }
 
                 /* reset tile type if temporary effect has expired */

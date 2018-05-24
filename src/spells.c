@@ -1725,7 +1725,7 @@ static gboolean spell_area_pos_hit(position pos,
 
         /* erode the monster's inventory */
         if (iet > IET_NONE)
-            inv_erode(monster_inv(m), iet, FALSE);
+            inv_erode(monster_inv(m), iet, FALSE, NULL);
 
         monster_damage_take(m, damage_copy(dam));
 
@@ -1784,7 +1784,15 @@ static gboolean spell_area_pos_hit(position pos,
 
                 /* erode the player's inventory */
                 if (iet > IET_NONE)
-                    inv_erode(&(nlarn->p->inventory), iet, TRUE);
+                {
+                    /*
+                     * Filter equipped and exposed items, e.g.
+                     * a body armour will not be affected by erosion
+                     * when the player wears a cloak over it.
+                     */
+                    inv_erode(&(nlarn->p->inventory), iet, TRUE,
+                            player_item_filter_unequippable);
+                }
 
                 /* hit */
                 terminated = TRUE;
@@ -1795,7 +1803,8 @@ static gboolean spell_area_pos_hit(position pos,
     if (iet > IET_NONE && map_ilist_at(cmap, pos))
     {
         /* there are items at the given map position, erode them */
-        inv_erode(map_ilist_at(cmap, pos), iet, fov_get(nlarn->p->fv, pos));
+        inv_erode(map_ilist_at(cmap, pos), iet,
+                fov_get(nlarn->p->fv, pos), NULL);
     }
 
     return terminated;

@@ -22,6 +22,7 @@ Changes:
 
 Fixed bugs:
     * Fixed burning of grass
+    * Only erode player's exposed items from monster breath attacks
     * Prevent increasing max. HP with healing spell
     * Prevent wearing ring / body armour when wearing gloves / a cloak
     * Prevent swapping weapons when secondary weapon is twohanded and

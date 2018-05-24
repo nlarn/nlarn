@@ -372,6 +372,7 @@ void player_item_unequip(player *p,
 
 int player_item_is_container(player *p, item *it);
 int player_item_can_be_added_to_container(player *p, item *it);
+int player_item_filter_unequippable(item* it);
 
 /**
  * Callback funtion used to check if an item is equipped.

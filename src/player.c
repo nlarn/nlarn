@@ -118,7 +118,6 @@ static char *player_death_description(game_score_t *score, int verbose);
 static char *player_equipment_list(player *p, gboolean decorate);
 static char *player_create_obituary(player *p, game_score_t *score, GList *scores);
 static void player_memorial_file_save(player *p, const char *text);
-static int item_filter_unequippable(item *it);
 static int item_filter_equippable(item *it);
 static int item_filter_dropable(item *it);
 static int player_item_filter_multiple(player *p, item *it);
@@ -3370,6 +3369,11 @@ int player_item_can_be_added_to_container(player *p, item *it)
     return FALSE;
 }
 
+int player_item_filter_unequippable(item* it)
+{
+	return player_item_is_unequippable(nlarn->p, it);
+}
+
 int player_item_is_equipped(player *p, item *it)
 {
     g_assert(p != NULL && it != NULL);
@@ -4028,10 +4032,11 @@ void player_take_off(player *p)
 {
     g_assert (p != NULL);
 
-    if (inv_length_filtered(p->inventory, item_filter_unequippable) > 0)
+    if (inv_length_filtered(p->inventory, player_item_filter_unequippable) > 0)
     {
         item *it = display_inventory("Choose an item to take off", p,
-                &p->inventory, NULL, FALSE, FALSE, FALSE, item_filter_unequippable);
+                &p->inventory, NULL, FALSE, FALSE, FALSE,
+                player_item_filter_unequippable);
 
         if (it)
             player_item_unequip(p, NULL, it, FALSE);
@@ -5481,11 +5486,6 @@ static void player_memorial_file_save(player *p, const char *text)
             g_free(fullname);
         }
     }
-}
-
-static int item_filter_unequippable(item *it)
-{
-    return player_item_is_unequippable(nlarn->p, it);
 }
 
 static int item_filter_equippable(item *it)
