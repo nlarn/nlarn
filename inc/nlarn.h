@@ -1,6 +1,6 @@
 /*
  * nlarn.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,7 +23,7 @@
 
 #define VERSION_MAJOR 0 /* this is the present version # of the program */
 #define VERSION_MINOR 7
-#define VERSION_PATCH 2
+#define VERSION_PATCH 3
 
 /* this allows to add the id of the current commit to the version information */
 #ifndef GITREV
