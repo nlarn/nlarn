@@ -1601,14 +1601,13 @@ monster *monster_damage_take(monster *m, damage *dam)
 
     int hp_orig = m->hp;
 
-    /* FIXME: implement resistances */
     switch (dam->type)
     {
     case DAM_PHYSICAL:
         dam->amount -= monster_ac(m);
         break;
 
-  case DAM_MAGICAL:
+    case DAM_MAGICAL:
         if (monster_flags(m, MF_RES_MAGIC))
         {
             dam->amount /= monster_level(m);
@@ -1623,7 +1622,11 @@ monster *monster_damage_take(monster *m, damage *dam)
     case DAM_FIRE:
         if (monster_flags(m, MF_RES_FIRE))
         {
-            dam->amount /= 2;
+            /*
+             * The monster's fire resistance reduces the damage taken
+             * by 5% per monster level
+             */
+            dam->amount -= (guint)(((float)dam->amount / 100) * (monster_level(m) * 5));
             if (monster_in_sight(m))
             {
                 log_add_entry(nlarn->log, "The %s %sresists the flames.",
