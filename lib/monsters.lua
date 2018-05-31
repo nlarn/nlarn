@@ -113,6 +113,8 @@ monsters = {
        },
       color = LIGHTRED,
       exp = 75000,
+      flags = HEAD + NOBEHEAD + HANDS + FLY + INVISIBLE + INFRAVISION
+        + DEMON + RES_POISON + RES_MAGIC,
       hp_max = 160,
       glyph = "&",
       intelligence = 21,
