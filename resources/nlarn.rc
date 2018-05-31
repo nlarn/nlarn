@@ -14,7 +14,7 @@ BEGIN
       VALUE "FileDescription", "NLarn"
       VALUE "FileVersion", VINFO
       VALUE "InternalName", "nlarn"
-      VALUE "LegalCopyright", "(C) 2009-2011, 2012 Joachim de Groot"
+      VALUE "LegalCopyright", "(C) 2009-2018 Joachim de Groot"
       VALUE "OriginalFilename", "nlarn.exe"
       VALUE "ProductName", "NLarn"
       VALUE "ProductVersion", VINFO
