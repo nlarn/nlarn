@@ -9,7 +9,8 @@ Changes:
     * Magic: Magic Missile is handled as ray spell
     * Magic: Terminate ray spells at medium sized monsters
     * Magic: Balance spell damage
-    * Added cold resistance for monsters
+    * Added cold resistance for monsters (the ice lizard, the yeti and the
+      white dragon don't take damage from cone of cold)
     * Minimalistic item descriptions when blinded
     * Blinking display for very low HP (always with SDL PDCurses, when
       compiled with ncurses blinking depends on terminal support)
