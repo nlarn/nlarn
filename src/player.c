@@ -870,18 +870,14 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
 
                 if (p->hp < player_get_hp_max(p))
                 {
-                    regen = 1
-                            + player_effect(p, ET_INC_HP_REGEN)
-                            - player_effect(p, ET_DEC_HP_REGEN);
+                    regen = 1 + player_effect(p, ET_INC_HP_REGEN);
 
                     player_hp_gain(p, regen);
                 }
 
                 if (p->mp < player_get_mp_max(p))
                 {
-                    regen = 1
-                            + player_effect(p, ET_INC_MP_REGEN)
-                            - player_effect(p, ET_DEC_MP_REGEN);
+                    regen = 1 + player_effect(p, ET_INC_MP_REGEN);
 
                     player_mp_gain(p, regen);
                 }
@@ -2508,24 +2504,6 @@ effect *player_effect_add(player *p, effect *e)
             player_effect_add(p, effect_new(rand_m_n(ET_DEC_CON, ET_DEC_WIS)));
             break;
 
-        case ET_DEC_HP_MAX:
-            p->hp_max -= ((player_get_hp_max(p) / 100) * e->amount);
-            break;
-
-        case ET_DEC_MP_MAX:
-            p->mp_max -= ((player_get_mp_max(p) / 100) * e->amount);
-            break;
-
-        case ET_DEC_LEVEL:
-            player_level_lose(p, e->amount);
-            break;
-
-        case ET_DEC_EXP:
-            /* looks like a reasonable amount */
-            player_exp_lose(p, rand_1n(player_lvl_exp[p->level - 1]
-                                    - player_lvl_exp[p->level - 2]));
-            break;
-
         default:
             /* nop */
             break;
@@ -4097,17 +4075,13 @@ guint player_get_ac(player *p)
 int player_get_hp_max(player *p)
 {
     g_assert(p != NULL);
-    return p->hp_max
-           + player_effect(p, ET_INC_HP_MAX)
-           - player_effect(p, ET_DEC_HP_MAX);
+    return p->hp_max + player_effect(p, ET_INC_HP_MAX);
 }
 
 int player_get_mp_max(player *p)
 {
     g_assert(p != NULL);
-    return p->mp_max
-           + player_effect(p, ET_INC_MP_MAX)
-           - player_effect(p, ET_DEC_MP_MAX);
+    return p->mp_max + player_effect(p, ET_INC_MP_MAX);
 }
 
 int player_get_str(player *p)

@@ -90,14 +90,6 @@ typedef enum _effect_t
     ET_DEC_WIS,                 /* reduced wisdom */
     ET_DEC_RND,                 /* reduce random attribute */
 
-    /* secondary attributes modification */
-    ET_DEC_HP_MAX,              /* decreased HP max */
-    ET_DEC_MP_MAX,              /* decreased MP max */
-    ET_DEC_HP_REGEN,            /* decreased hp regeneration */
-    ET_DEC_MP_REGEN,            /* decreased mp regeneration */
-    ET_DEC_LEVEL,               /* lose level */
-    ET_DEC_EXP,                 /* lose experience */
-
     ET_AGGRAVATE_MONSTER,       /* aggravate monsters */
     ET_SLEEP,                   /* no move for a certain amount of time */
     ET_DIZZINESS,               /* decrease all primary attributes */

@@ -407,43 +407,6 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_DEC_HP_MAX, "ET_DEC_HP_MAX", 1, 5, NULL, /* percent */
-        NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
-    },
-
-    {
-        ET_DEC_MP_MAX, "ET_DEC_MP_MAX", 1, 5, NULL, /* percent */
-        NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
-    },
-
-    {
-        ET_DEC_HP_REGEN, "ET_DEC_HP_REGEN", 0, 1, NULL,
-        NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
-    },
-
-    {
-        ET_DEC_MP_REGEN, "ET_DEC_MP_REGEN", 0, 1, NULL,
-        NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
-    },
-
-    {
-        ET_DEC_LEVEL, "ET_DEC_LEVEL", 1, 1, NULL,
-        "You stagger for a moment...",
-        NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
-    },
-
-    {
-        ET_DEC_EXP, "ET_DEC_EXP", 1, 0, NULL,
-        NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
-    },
-
-    {
         ET_AGGRAVATE_MONSTER, "ET_AGGRAVATE_MONSTER", 500, TRUE, "aggravating",
         "You sense rising anger.",
         NULL, NULL, NULL,
