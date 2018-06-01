@@ -1626,7 +1626,9 @@ monster *monster_damage_take(monster *m, damage *dam)
              * The monster's fire resistance reduces the damage taken
              * by 5% per monster level
              */
-            dam->amount -= (guint)(((float)dam->amount / 100) * (monster_level(m) * 5));
+            dam->amount -= (guint)(((float)dam->amount / 100) *
+                 /* prevent uint wrap around for monsters with level > 20 */
+                 (min(monster_level(m), 20) * 5));
             if (monster_in_sight(m))
             {
                 log_add_entry(nlarn->log, "The %s %sresists the flames.",
