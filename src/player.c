@@ -937,8 +937,19 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                    continues, for longer episodes a shorter time. */
                 if (!interruptible || p->attacked)
                 {
+#ifdef SDLPDCURSES
+                    /*
+                     * Only draw every 10th frame on SDL PDCurses,
+                     * otherwise redraws are unbearable slow.
+                     */
+                    if (turns > 10 && !(turns % 10))
+                    {
+#endif
                     display_paint_screen(p);
-                    g_usleep((turns > 10) ? 100 : 50000);
+                    napms((turns > 10) ? 1 : 50);
+#ifdef SDLPDCURSES
+                    }
+#endif
                 }
 
                 /* offer to abort the action if the player is under attack */
