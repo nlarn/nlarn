@@ -4075,13 +4075,13 @@ guint player_get_ac(player *p)
 int player_get_hp_max(player *p)
 {
     g_assert(p != NULL);
-    return p->hp_max + player_effect(p, ET_INC_HP_MAX);
+    return p->hp_max;
 }
 
 int player_get_mp_max(player *p)
 {
     g_assert(p != NULL);
-    return p->mp_max + player_effect(p, ET_INC_MP_MAX);
+    return p->mp_max;
 }
 
 int player_get_str(player *p)
