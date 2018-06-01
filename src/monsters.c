@@ -1787,18 +1787,9 @@ gboolean monster_update_action(monster *m, monster_action_t override)
     /* handle some easy action updates before the more difficult decisions */
     switch (m->action)
     {
-        case MA_SERVE:
-            /* once servant, forever servant */
-            return FALSE;
-            break;
-
-        case MA_CIVILIAN:
-            /* town people never change their behaviour */
-            return FALSE;
-            break;
-
-        case MA_CONFUSION:
-            /* confusion is removed by monster_effect_del() */
+        case MA_SERVE:     /* once servant, forever servant */
+        case MA_CIVILIAN:  /* town people never change their behaviour */
+        case MA_CONFUSION: /* confusion is removed by monster_effect_del() */
             return FALSE;
             break;
 
