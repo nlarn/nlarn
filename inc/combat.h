@@ -104,7 +104,7 @@ typedef struct _damage
 {
     damage_t type;
     attack_t attack;
-    guint amount;
+    gint amount;
     damage_originator dam_origin; /* the source of the damage */
 } damage;
 

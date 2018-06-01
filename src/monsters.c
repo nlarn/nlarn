@@ -1605,6 +1605,10 @@ monster *monster_damage_take(monster *m, damage *dam)
     {
     case DAM_PHYSICAL:
         dam->amount -= monster_ac(m);
+        if (dam->amount < 1 && monster_in_sight(m))
+        {
+            log_add_entry(nlarn->log, "The %s isn't hurt.", monster_name(m));
+        }
         break;
 
     case DAM_MAGICAL:
