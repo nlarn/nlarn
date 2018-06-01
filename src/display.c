@@ -2068,12 +2068,14 @@ direction display_get_direction(const char *title, int *available)
         for (int y = 0; y < 3; y++)
         {
             if (dirs[(x + 1) + (y * 3)])
+            {
                 mvwaprintw(dwin->window,
                           6 - (y * 2), /* start in the last row, move up, skip one */
                           (x * 2) + 2, /* start in the second col, skip one */
                           COLOR_PAIR(DCP_YELLOW_RED),
                           "%d",
                           (x + 1) + (y * 3));
+            }
         }
 
     if (!available)
