@@ -1798,8 +1798,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
             break;
     }
 
-    /* FIXME: should include difficulty here */
-    mtime  = monster_int(m) + 25;
+    mtime  = monster_int(m) + 25 + (5 * game_difficulty(nlarn));
     low_hp = (m->hp < (monster_hp_max(m) / 4 ));
     smart  = (monster_int(m) > 4);
 
