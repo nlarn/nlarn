@@ -525,8 +525,6 @@ int player_fountain_drink(player *p)
 {
     g_assert (p != NULL);
 
-    effect *e = NULL;
-    int fntchange = 0;
     map *pmap = game_map(nlarn, Z(p->pos));
 
     if (map_sobject_at(pmap, p->pos) == LS_DEADFOUNTAIN)
@@ -544,16 +542,17 @@ int player_fountain_drink(player *p)
     log_add_entry(nlarn->log, "You drink from the fountain.");
 
     gint event = rand_1n(101);
+    int amount = 0;
+    effect_t et = ET_NONE;
+
     if (event < 7)
     {
-        e = effect_new(ET_SICKNESS);
-        player_effect_add(p, e);
+        et = ET_SICKNESS;
     }
     else if (event < 13)
     {
         /* see invisible */
-        e = effect_new(ET_INFRAVISION);
-        player_effect_add(p, e);
+        et = ET_INFRAVISION;
     }
     else if (event < 45)
     {
@@ -561,115 +560,106 @@ int player_fountain_drink(player *p)
     }
     else if (chance(67))
     {
-        /* positive effect from list below */
-        fntchange = 1;
-    }
-    else
-    {
-        /* negative effect from list below */
-        fntchange = -1;
-    }
-
-    if (fntchange != 0)
-    {
-        int amount = 0;
-        effect_t et = ET_NONE;
-
+        /* positive effect */
         switch (rand_1n(9))
         {
         case 1:
-            if (fntchange > 0)
-                et = ET_INC_STR;
-            else
-                et = ET_DEC_STR;
+            et = ET_INC_STR;
             break;
 
         case 2:
-            if (fntchange > 0)
-                et = ET_INC_INT;
-            else
-                et = ET_DEC_INT;
+            et = ET_INC_INT;
             break;
 
         case 3:
-            if (fntchange > 0)
-                et = ET_INC_WIS;
-            else
-                et = ET_DEC_WIS;
+            et = ET_INC_WIS;
             break;
 
         case 4:
-            if (fntchange > 0)
-                et = ET_INC_CON;
-            else
-                et = ET_DEC_CON;
+            et = ET_INC_CON;
             break;
 
         case 5:
-            if (fntchange > 0)
-                et = ET_INC_DEX;
-            else
-                et = ET_DEC_DEX;
+            et = ET_INC_DEX;
             break;
 
         case 6:
             amount = rand_1n(Z(p->pos) + 1);
-            if (fntchange > 0)
-            {
-                log_add_entry(nlarn->log, "You gain %d hit point%s",
-                              amount, plural(amount));
+            log_add_entry(nlarn->log, "You gain %d hit point%s",
+                          amount, plural(amount));
 
-                player_hp_gain(p, amount);
-            }
-            else
-            {
-                log_add_entry(nlarn->log, "You lose %d hit point%s!",
-                              amount, plural(amount));
-
-                player_hp_lose(p, amount, PD_SOBJECT, LS_FOUNTAIN);
-            }
+            player_hp_gain(p, amount);
             break;
 
         case 7:
             amount = rand_1n(Z(p->pos) + 1);
-            if (fntchange > 0)
-            {
-                log_add_entry(nlarn->log, "You just gained %d mana point%s.",
-                              amount, plural(amount));
+            log_add_entry(nlarn->log, "You just gained %d mana point%s.",
+                          amount, plural(amount));
 
-                player_mp_gain(p, amount);
-            }
-            else
-            {
-                log_add_entry(nlarn->log, "You just lost %d mana point%s.",
-                              amount, plural(amount));
-
-                player_mp_lose(p, amount);
-            }
+            player_mp_gain(p, amount);
             break;
 
         case 8:
             amount = 5 * rand_1n((Z(p->pos) + 1) * (Z(p->pos) + 1));
 
-            if (fntchange > 0)
-            {
-                log_add_entry(nlarn->log, "You just gained experience.");
-                player_exp_gain(p, amount);
-            }
-            else
-            {
-                log_add_entry(nlarn->log, "You just lost experience.");
-                player_exp_lose(p, amount);
-            }
+            log_add_entry(nlarn->log, "You just gained experience.");
+            player_exp_gain(p, amount);
             break;
         }
-
-        /* the rng stated that it wants the players attributes changed */
-        if (et)
+    }
+    else
+    {
+        /* negative effect */
+        switch (rand_1n(9))
         {
-            e = effect_new(et);
-            player_effect_add(p, e);
+        case 1:
+            et = ET_DEC_STR;
+            break;
+
+        case 2:
+            et = ET_DEC_INT;
+            break;
+
+        case 3:
+            et = ET_DEC_WIS;
+            break;
+
+        case 4:
+            et = ET_DEC_CON;
+            break;
+
+        case 5:
+            et = ET_DEC_DEX;
+            break;
+
+        case 6:
+            amount = rand_1n(Z(p->pos) + 1);
+            log_add_entry(nlarn->log, "You lose %d hit point%s!",
+                              amount, plural(amount));
+
+            player_hp_lose(p, amount, PD_SOBJECT, LS_FOUNTAIN);
+            break;
+        case 7:
+            amount = rand_1n(Z(p->pos) + 1);
+            log_add_entry(nlarn->log, "You just lost %d mana point%s.",
+                          amount, plural(amount));
+
+            player_mp_lose(p, amount);
+            break;
+
+        case 8:
+            amount = 5 * rand_1n((Z(p->pos) + 1) * (Z(p->pos) + 1));
+
+            log_add_entry(nlarn->log, "You just lost experience.");
+            player_exp_lose(p, amount);
+            break;
         }
+    }
+
+    /* Create an effect if the RNG decided to */
+    if (et)
+    {
+        player_effect_add(p, effect_new(et));
     }
 
     if (chance(25))
