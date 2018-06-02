@@ -16,6 +16,7 @@ Changes:
       compiled with ncurses blinking depends on terminal support)
     * Bright red warning when unarmed
     * The potion of treasure finding now detects the bank branch office
+    * The potion of healing and the healing spell can now cure sickness
     * Occasionally drop arrows when disarming arrow traps
     * Lock savegame file while the game is running (prevents accidentially
       launching the game multiple times from autosaves)
