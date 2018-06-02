@@ -585,7 +585,7 @@ int player_fountain_drink(player *p)
 
         case 6:
             amount = rand_1n(Z(p->pos) + 1);
-            log_add_entry(nlarn->log, "You gain %d hit point%s",
+            log_add_entry(nlarn->log, "You gain %d hit point%s.",
                           amount, plural(amount));
 
             player_hp_gain(p, amount);
