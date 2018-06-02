@@ -710,20 +710,28 @@ int player_fountain_wash(player *p)
                                  DAMO_SOBJECT, NULL);
 
         player_damage_take(p, dam, PD_SOBJECT, LS_FOUNTAIN);
+
+        return 1;
     }
-    else if (chance(30))
+    else if (chance(60))
     {
         effect *e = NULL;
         if ((e = player_effect_get(p, ET_ITCHING)))
         {
-            log_add_entry(nlarn->log, "You got the dirt off!");
-            player_effect_del(p, e);
-        }
-    }
-    else if (chance(30))
-    {
-        log_add_entry(nlarn->log, "This water seems to be hard water! " \
+            if (chance(50))
+            {
+                log_add_entry(nlarn->log, "You got the dirt off!");
+                player_effect_del(p, e);
+            }
+            else
+            {
+                log_add_entry(nlarn->log,
+                      "This water seems to be hard water! "
                       "The dirt didn't come off!");
+            }
+
+            return 1;
+        }
     }
     else if (chance(35))
     {
@@ -736,11 +744,11 @@ int player_fountain_wash(player *p)
             /* make water lord */
             monster_appear(MT_WATER_LORD, mpos);
         }
+
+        return 1;
     }
-    else
-    {
-        log_add_entry(nlarn->log, "Nothing seems to have happened.");
-    }
+
+    log_add_entry(nlarn->log, "Nothing seems to have happened.");
 
     return 1;
 }

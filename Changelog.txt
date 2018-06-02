@@ -31,6 +31,7 @@ Fixed bugs:
     * Match fountain event probabilities with those of the original Larn
     * Fixed type II demon lords (who lost all their special abilities
       with the previous release)
+    * Fixed handling of itching when washing at a fountain
     * Fixed burning of grass
     * Corrected some messages
     * Fixed some visual glitches
