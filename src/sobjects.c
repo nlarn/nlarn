@@ -543,22 +543,23 @@ int player_fountain_drink(player *p)
 
     log_add_entry(nlarn->log, "You drink from the fountain.");
 
-    if (chance(7))
+    gint event = rand_1n(101);
+    if (event < 7)
     {
         e = effect_new(ET_SICKNESS);
         player_effect_add(p, e);
     }
-    else if (chance(13))
+    else if (event < 13)
     {
         /* see invisible */
         e = effect_new(ET_INFRAVISION);
         player_effect_add(p, e);
     }
-    else if (chance(45))
+    else if (event < 45)
     {
         log_add_entry(nlarn->log, "Nothing seems to have happened.");
     }
-    else if (chance(15))
+    else if (chance(67))
     {
         /* positive effect from list below */
         fntchange = 1;

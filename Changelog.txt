@@ -28,6 +28,7 @@ Fixed bugs:
     * Prevent wearing ring or body armour when wearing gloves or a cloak
     * Prevent swapping weapons when secondary weapon is two-handed and
       holding a shield
+    * Match fountain event probabilities with those of the original Larn
     * Fixed type II demon lords (who lost all their special abilities
       with the previous release)
     * Fixed burning of grass
