@@ -21,14 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef SDLPDCURSES
-/* include PDCurses SDL1 port specific functions */
-# include "sdl1/pdcsdl.h"
-/* pdcsdl.h imports curspriv.h, which defines the following two conflicting macros. */
-# undef min
-# undef max
-#endif
-
 #include "display.h"
 #include "fov.h"
 #include "map.h"

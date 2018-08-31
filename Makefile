@@ -111,9 +111,9 @@ LDFLAGS += $(shell pkg-config --libs $(lua))
 ifneq ($(SDLPDCURSES),Y)
 	LDFLAGS += -lcurses -lpanel
 else
-	PDCLIB  := PDCurses/sdl1/libpdcurses.a
-	CFLAGS  += -IPDCurses -DSDLPDCURSES $(shell sdl-config --cflags)
-	LDFLAGS += $(shell sdl-config --libs) -lSDL_ttf
+	PDCLIB  := PDCurses/sdl2/libpdcurses.a
+	CFLAGS  += -IPDCurses -DSDLPDCURSES $(pkg-config SDL2_ttf --cflags)
+	LDFLAGS += $(shell pkg-config SDL2_ttf --libs)
 endif
 
 # System-wide installation on *nix
@@ -168,7 +168,7 @@ $(RESOURCES): %.res: %.rc
 $(PDCLIB):
 	@git submodule init
 	@git submodule update --recommend-shallow
-	$(MAKE) -C PDCurses/sdl1 WIDE=Y UTF8=Y libs
+	$(MAKE) -C PDCurses/sdl2 WIDE=Y UTF8=Y libs
 
 dist: clean $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
 
@@ -246,7 +246,7 @@ clean:
 	rm -f $(OBJECTS)
 	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
 	@if \[ -n "$(PDCLIB)" \]; then \
-		$(MAKE) -C PDCurses/sdl1 clean; \
+		$(MAKE) -C PDCurses/sdl2 clean; \
 	fi
 
 help:
