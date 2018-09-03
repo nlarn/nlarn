@@ -29,17 +29,10 @@ News about NLarn are posted on the [NLarn website](https://nlarn.github.io/).
 
 ## Game configuration
 
-You can predefine some settings in the file nlarn.ini. You can find a sample
+You can predefine some settings in the file `nlarn.ini`. You can find a sample
 file in the installation directory; copy and rename it to the directory
-specific to your operating system. The game looks for nlarn.ini in the
-directory
-
-	~/.nlarn
-
-on Linux, BSD and MacOS X or
-
-	%LOCALAPPDATA%\nlarn
-
+specific to your operating system. The game looks for `nlarn.ini` in the
+directory `~/.nlarn` on Linux, BSD and MacOS X or `%LOCALAPPDATA%\nlarn`
 on Windows.
 
 
