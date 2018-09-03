@@ -126,7 +126,7 @@ ifneq ($(GITREV),)
   DIRNAME   = nlarn-$(VERSION)
   SRCPKG    = nlarn-$(VERSION).tar.gz
   PACKAGE   = $(DIRNAME)_$(OS).$(ARCH).$(ARCHIVE_SUFFIX)
-  MAINFILES = nlarn$(SUFFIX) nlarn.ini-sample README.md LICENSE
+  MAINFILES = nlarn$(SUFFIX) nlarn.ini-sample README.html LICENSE
   LIBFILES  = lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.* lib/*.lua
 endif
 
@@ -170,6 +170,9 @@ $(PDCLIB):
 	@git submodule update --recommend-shallow
 	$(MAKE) -C PDCurses/sdl2 WIDE=Y UTF8=Y libs
 
+README.html: README.md
+	markdown -t "NLarn README" -h $< > $@
+
 dist: clean $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
 
 $(SRCPKG):
@@ -177,7 +180,7 @@ $(SRCPKG):
 	@git archive --prefix $(DIRNAME)/ --format=tar $(GITREV) | gzip > $(SRCPKG)
 	@echo " - done."
 
-$(PACKAGE): nlarn$(SUFFIX)
+$(PACKAGE): nlarn$(SUFFIX) README.html
 	@echo -n Packing $(PACKAGE)
 	@mkdir -p $(DIRNAME)/lib
 	@cp -p $(MAINFILES) $(DIRNAME)
@@ -187,7 +190,7 @@ $(PACKAGE): nlarn$(SUFFIX)
 	@echo " - done."
 
 # The Windows installer
-$(INSTALLER): nlarn$(SUFFIX) nlarn.nsi
+$(INSTALLER): nlarn$(SUFFIX) README.html nlarn.nsi
 	@echo -n Packing $(PACKAGE)
 	@makensis //DVERSION="$(VERSION)" \
 		//DVERSION_MAJOR=$(VERSION_MAJOR) \
@@ -196,7 +199,7 @@ $(INSTALLER): nlarn$(SUFFIX) nlarn.nsi
 	@echo " - done."
 
 # The OSX installer
-$(OSXIMAGE): nlarn
+$(OSXIMAGE): nlarn README.html
 	@mkdir -p dmgroot/NLarn.app/Contents/{Frameworks,MacOS,Resources}
 	@cp -p nlarn dmgroot/NLarn.app/Contents/MacOS
 # Copy local libraries into the app folder and instruct the linker.
@@ -216,7 +219,7 @@ $(OSXIMAGE): nlarn
 	@cp -p lib/{fortune,maze,monsters.lua,nlarn*} \
 		dmgroot/Nlarn.app/Contents/Resources
 	@cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
-	@cp -pr Changelog.txt README.md LICENSE dmgroot
+	@cp -pr Changelog.txt README.html LICENSE dmgroot
 	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
 # Update the version information in the plist
 	@/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(VERSION)" \
@@ -244,7 +247,7 @@ $(OSXIMAGE): nlarn
 clean:
 	@echo Cleaning nlarn
 	rm -f $(OBJECTS)
-	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
+	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) README.html
 	@if \[ -n "$(PDCLIB)" \]; then \
 		$(MAKE) -C PDCurses/sdl2 clean; \
 	fi
