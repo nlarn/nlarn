@@ -171,7 +171,7 @@ $(PDCLIB):
 	$(MAKE) -C PDCurses/sdl2 WIDE=Y UTF8=Y libs
 
 README.html: README.md
-	markdown -t "NLarn README" -h $< > $@
+	makepage $< > $@
 
 dist: clean $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
 
