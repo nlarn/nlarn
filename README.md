@@ -24,7 +24,7 @@ You can get help in the game by pressing **?** or **F1**.
 
 ## News and announcements
 
-News about NLarn are posted to the website at https://nlarn.github.io/
+News about NLarn are posted on the [NLarn website](https://nlarn.github.io/).
 
 
 ## Game configuration
@@ -46,8 +46,8 @@ on Windows.
 ## Heritage
 
 NLarn is modeled after Larn, which was written by Noah Morgan in 1986.
-For an in-depth review of Larn, have a look at
-http://www.gamesetwatch.com/2008/04/play_larn_or_i_hocked_the_car.php
+For an in-depth review of Larn, have a look at the
+[@Play review of Larn](http://www.gamesetwatch.com/2008/04/play_larn_or_i_hocked_the_car.php).
 
 Later in the eigthies, Phil Cordier created ULarn, an extended version of
 Larn. It comes with more levels, items and adds character classes to the
@@ -60,15 +60,16 @@ the additions of Ularn have been included.
 
 ## Compiling NLarn
 
-Instructions how to build NLarn on Linux, MacOS X and Windows can be found at
-https://github.com/nlarn/nlarn/wiki/Building
+Instructions how to build NLarn on Linux, MacOS X and Windows can be found on
+a [wiki page](https://github.com/nlarn/nlarn/wiki/Building).
 
 
 ## Reporting bugs
 
 Bug reports are very welcome. You can either send me an eMail to
-<jdegroot@web.de> or create an issue on GitHub.
-Known bugs and tasks are tracked at https://github.com/nlarn/nlarn/issues
+<jdegroot@web.de> or create an issue on the
+[NLarn bug tracker](https://github.com/nlarn/nlarn/issues), where
+known bugs and planned tasks are tracked.
 
 If you have ideas for changes or additions to the game, please let me know.
-A list of ideas is maintained in the wiki at https://github.com/nlarn/nlarn/wiki/Ideas
+A list of ideas is maintained on a [wiki page](https://github.com/nlarn/nlarn/wiki/Ideas).
