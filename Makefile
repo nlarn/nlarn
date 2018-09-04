@@ -180,7 +180,7 @@ $(SRCPKG):
 	@git archive --prefix $(DIRNAME)/ --format=tar $(GITREV) | gzip > $(SRCPKG)
 	@echo " - done."
 
-$(PACKAGE): nlarn$(SUFFIX) README.html
+$(PACKAGE): $(MAINFILES)
 	@echo -n Packing $(PACKAGE)
 	@mkdir -p $(DIRNAME)/lib
 	@cp -p $(MAINFILES) $(DIRNAME)
@@ -190,7 +190,7 @@ $(PACKAGE): nlarn$(SUFFIX) README.html
 	@echo " - done."
 
 # The Windows installer
-$(INSTALLER): nlarn$(SUFFIX) README.html nlarn.nsi
+$(INSTALLER): $(MAINFILES) nlarn.nsi
 	@echo -n Packing $(PACKAGE)
 	@makensis //DVERSION="$(VERSION)" \
 		//DVERSION_MAJOR=$(VERSION_MAJOR) \
