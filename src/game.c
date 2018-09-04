@@ -1477,16 +1477,22 @@ static int game_score_compare(const void *scr_a, const void *scr_b)
 
 void game_delete_savefile()
 {
+    if (sgfd == 0)
+    {
+        /* no savegame present */
+        return;
+    }
+
+    /* close and thus unlock the savegame file descriptor;
+     * Windows won't let us delete the file otherwise */
+    close(sgfd);
+    sgfd = 0;
+
     /* assemble save file name */
     char *fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-                                  save_file, NULL);
+            save_file, NULL);
 
-    gzFile file = gzopen(fullname, "rb");
-    if (file != NULL)
-    {
-        gzclose(file);
-        /* actually delete the file */
-        g_unlink(fullname);
-    }
+    /* actually delete the file */
+    g_unlink(fullname);
     g_free(fullname);
 }
