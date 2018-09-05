@@ -66,6 +66,11 @@ ifneq (,$(findstring MINGW, $(MSYSTEM)))
     $(error Building without SDLPDCURSES is not supported on Windows.)
   endif
 
+  DLLS := libbz2-1.dll libfreetype-6.dll libgcc_s_dw2-1.dll libglib-2.0-0.dll
+  DLLS += libgraphite2.dll libharfbuzz-0.dll libiconv-2.dll libintl-8.dll
+  DLLS += libpcre-1.dll libpng16-16.dll libstdc++-6.dll libwinpthread-1.dll
+  DLLS += lua53.dll SDL2.dll SDL2_ttf.dll zlib1.dll
+
   # Fake the content of the OS var to make it more common
   # (otherwise packages would have silly names)
   OS := win32
@@ -164,6 +169,10 @@ nlarn$(SUFFIX): $(PDCLIB) $(OBJECTS) $(RESOURCES)
 %.o: %.c ${INCLUDES}
 	$(CC) $(CFLAGS) -o $@ -c $<
 
+.SECONDEXPANSION:
+$(DLLS): $$(patsubst %, /mingw32/bin/%, $$@)
+	cp $< $@
+
 $(RESOURCES): %.res: %.rc
 	windres -v $(RESDEFINE) $< -O coff -o $@
 
@@ -182,17 +191,17 @@ $(SRCPKG):
 	@git archive --prefix $(DIRNAME)/ --format=tar $(GITREV) | gzip > $(SRCPKG)
 	@echo " - done."
 
-$(PACKAGE): $(MAINFILES)
+$(PACKAGE): $(MAINFILES) $(DLLS)
 	@echo -n Packing $(PACKAGE)
 	@mkdir -p $(DIRNAME)/lib
-	@cp -p $(MAINFILES) $(DIRNAME)
+	@cp -p $(MAINFILES) $(DLLS) $(DIRNAME)
 	@cp -p $(LIBFILES) $(DIRNAME)/lib
 	@$(ARCHIVE_CMD) $(PACKAGE) $(DIRNAME)
 	@rm -rf $(DIRNAME)
 	@echo " - done."
 
 # The Windows installer
-$(INSTALLER): $(MAINFILES) nlarn.nsi
+$(INSTALLER): $(MAINFILES) $(DLLS) nlarn.nsi
 	@echo -n Packing $(PACKAGE)
 	@makensis //DVERSION="$(VERSION)" \
 		//DVERSION_MAJOR=$(VERSION_MAJOR) \
@@ -248,7 +257,7 @@ $(OSXIMAGE): nlarn README.html
 
 clean:
 	@echo Cleaning nlarn
-	rm -f $(OBJECTS)
+	rm -f $(OBJECTS) $(DLLS)
 	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) README.html
 	@if \[ -n "$(PDCLIB)" \]; then \
 		$(MAKE) -C PDCurses/sdl2 clean; \
