@@ -62,6 +62,9 @@ LDFLAGS += -lz -lm
 
 ifneq (,$(findstring MINGW, $(MSYSTEM)))
   # Settings specific to Windows.
+  ifneq (Y, $(SDLPDCURSES))
+    $(error Building without SDLPDCURSES is not supported on Windows.)
+  endif
 
   # Fake the content of the OS var to make it more common
   # (otherwise packages would have silly names)
