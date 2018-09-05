@@ -85,40 +85,13 @@ Section "NLarn (required)"
 
   SectionIn RO
 
-  ; Set output path to the installation directory.
+  ; root directory
   SetOutPath $INSTDIR
+  !include "mainfiles.nsh"
 
-  ; Put file there
-  File "nlarn.exe"
-  File "libbz2-1.dll"
-  File "libfreetype-6.dll"
-  File "libgcc_s_dw2-1.dll"
-  File "libglib-2.0-0.dll"
-  File "libgraphite2.dll"
-  File "libharfbuzz-0.dll"
-  File "libiconv-2.dll"
-  File "libintl-8.dll"
-  File "libpcre-1.dll"
-  File "libpng16-16.dll"
-  File "libstdc++-6.dll"
-  File "libwinpthread-1.dll"
-  File "lua53.dll"
-  File "SDL2.dll"
-  File "SDL2_ttf.dll"
-  File "zlib1.dll"
-  File "README.html"
-  File "Changelog.txt"
-  File "LICENSE"
-  File "nlarn.ini-sample"
-
+  ; lib subdirectory
   SetOutPath "$INSTDIR\lib"
-  File "lib\fortune"
-  File "lib\maze"
-  File "lib\nlarn.hlp"
-  File "lib\nlarn.msg"
-  File "lib\monsters.lua"
-  File "lib\FiraMono-Medium.otf"
-  File "lib\nlarn-128.bmp"
+  !include "libfiles.nsh"
 
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\NLarn "Install_Dir" "$INSTDIR"

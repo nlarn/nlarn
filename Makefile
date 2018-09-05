@@ -70,6 +70,7 @@ ifneq (,$(findstring MINGW, $(MSYSTEM)))
   DLLS += libgraphite2.dll libharfbuzz-0.dll libiconv-2.dll libintl-8.dll
   DLLS += libpcre-1.dll libpng16-16.dll libstdc++-6.dll libwinpthread-1.dll
   DLLS += lua53.dll SDL2.dll SDL2_ttf.dll zlib1.dll
+  LIBFILES := lib/FiraMono-Medium.otf lib/nlarn-128.bmp
 
   # Fake the content of the OS var to make it more common
   # (otherwise packages would have silly names)
@@ -134,8 +135,8 @@ ifneq ($(GITREV),)
   DIRNAME   = nlarn-$(VERSION)
   SRCPKG    = nlarn-$(VERSION).tar.gz
   PACKAGE   = $(DIRNAME)_$(OS).$(ARCH).$(ARCHIVE_SUFFIX)
-  MAINFILES = nlarn$(SUFFIX) nlarn.ini-sample README.html LICENSE
-  LIBFILES  = lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.* lib/*.lua
+  MAINFILES = nlarn$(SUFFIX) nlarn.ini-sample README.html LICENSE Changelog.txt
+  LIBFILES += lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.* lib/*.lua
 endif
 
 ifeq ($(OS),Darwin)
@@ -200,14 +201,27 @@ $(PACKAGE): $(MAINFILES) $(DLLS)
 	@rm -rf $(DIRNAME)
 	@echo " - done."
 
+mainfiles.nsh:
+	@touch $@
+	@for FILE in $(MAINFILES) $(DLLS) ; \
+	do echo "  File \"$$FILE\"" >> $@; \
+	done
+
+libfiles.nsh:
+	@touch $@
+	@for FILE in $(LIBFILES) ; \
+	do echo "  File \"$$FILE\"" | sed -e 's|/|\\|' >> $@; \
+	done
+
 # The Windows installer
-$(INSTALLER): $(MAINFILES) $(DLLS) nlarn.nsi
+$(INSTALLER): $(MAINFILES) $(DLLS) mainfiles.nsh libfiles.nsh nlarn.nsi
 	@echo -n Packing $(PACKAGE)
 	@makensis //DVERSION="$(VERSION)" \
 		//DVERSION_MAJOR=$(VERSION_MAJOR) \
 		//DVERSION_MINOR=$(VERSION_MINOR) \
 		//DVERSION_PATCH=$(VERSION_PATCH) nlarn.nsi
 	@echo " - done."
+	@rm mainfiles.nsh libfiles.nsh
 
 # The OSX installer
 $(OSXIMAGE): nlarn README.html
