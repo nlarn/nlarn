@@ -146,7 +146,6 @@ ifeq ($(config),release)
   RESFLAGS  += $(DEFINES) $(INCLUDES)
 endif
 
-BUILDDIR := build
 OBJECTS := $(patsubst %.c,%.o,$(wildcard src/*.c))
 OBJECTS += $(patsubst %.c,%.o,$(wildcard src/wrappers/*.c))
 OBJECTS += $(patsubst %.c,%.o,$(wildcard src/external/*.c))
