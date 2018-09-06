@@ -2,9 +2,6 @@
 # Set difficulty
 # difficulty=5
 
-# Enable wizard mode
-# wizard=true
-
 # Set character's name
 name=John Doe
 

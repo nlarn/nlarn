@@ -159,10 +159,6 @@ static gboolean game_parse_ini_file(const char *filename, struct game_config *co
         if (!error) config->difficulty = difficulty;
         g_clear_error(&error);
 
-        gboolean wizard = g_key_file_get_boolean(ini_file, "nlarn", "wizard", &error);
-        if (!error) config->wizard = wizard;
-        g_clear_error(&error);
-
         gboolean no_autosave = g_key_file_get_boolean(ini_file, "nlarn", "no-autosave", &error);
         if (!error) config->no_autosave = no_autosave;
         g_clear_error(&error);
