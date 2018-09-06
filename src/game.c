@@ -391,7 +391,7 @@ void game_init(int argc, char *argv[])
     {
         gchar size[4];
         g_snprintf(size, 3, "%d", config.font_size);
-        setenv("PDC_FONT_SIZE", size, TRUE);
+        g_setenv("PDC_FONT_SIZE", size, TRUE);
     }
 #endif
     /* initialise the display - must not happen before this point
