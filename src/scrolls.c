@@ -713,7 +713,12 @@ static int scroll_identify(player *p, item *r_scroll)
 
     g_assert(p != NULL && r_scroll != NULL);
 
-    if (inv_length_filtered(p->inventory, item_filter_unid) == 0)
+    /* When the player has not identified the scroll of identify,
+     * it fails when it is the only unidentified item in the inventory. */
+    guint allowed_unid = player_item_known(p, r_scroll) ? 0 : 1;
+    guint unid_count = inv_length_filtered(p->inventory, item_filter_unid);
+
+    if (unid_count == allowed_unid)
     {
         /* player has no unidentified items */
         log_add_entry(nlarn->log, "Nothing happens.");
@@ -739,7 +744,7 @@ static int scroll_identify(player *p, item *r_scroll)
         player_item_identify(p, NULL, r_scroll);
 
         /* may identify up to 3 items */
-        int tries = rand_1n(4);
+        int tries = rand_1n(min(unid_count, 4));
         while (tries-- > 0)
         {
             /* choose a single item to identify */

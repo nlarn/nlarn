@@ -33,6 +33,8 @@ Fixed bugs:
     * Fixed type II demon lords (who lost all their special abilities
       with the previous release)
     * Fixed handling of itching when washing at a fountain
+    * Fixed crash when reading scroll of identify without or very few
+      unidentified items
     * Fixed burning of grass
     * Corrected some messages
     * Fixed some visual glitches
