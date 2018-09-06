@@ -137,6 +137,9 @@ struct game_config {
     char *auto_pickup;
     char *savefile;
     char *stats;
+#ifdef SDLPDCURSES
+    int font_size;
+#endif
 };
 
 static gboolean game_parse_ini_file(const char *filename, struct game_config *config)
@@ -179,6 +182,12 @@ static gboolean game_parse_ini_file(const char *filename, struct game_config *co
         char *stats = g_key_file_get_string(ini_file, "nlarn", "stats", &error);
         if (!error) config->stats = stats;
         g_clear_error(&error);
+
+#ifdef SDLPDCURSES
+        int font_size = g_key_file_get_integer(ini_file, "nlarn", "font-size", &error);
+        if (!error) config->font_size = font_size;
+        g_clear_error(&error);
+#endif
     }
     else
     {
@@ -350,6 +359,9 @@ void game_init(int argc, char *argv[])
 #ifdef DEBUG
         { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &config.savefile,   "Save file to restore", NULL },
 #endif
+#ifdef SDLPDCURSES
+        { "font-size",   'S', 0, G_OPTION_ARG_INT,    &config.font_size,   "Set font size",       NULL },
+#endif
         { NULL, 0, 0, 0, NULL, NULL, NULL }
     };
 
@@ -376,6 +388,16 @@ void game_init(int argc, char *argv[])
         exit(EXIT_SUCCESS);
     }
 
+#ifdef SDLPDCURSES
+    /* If a font size was defined, export it to the environment
+     * before initialising PDCurses. */
+    if (config.font_size)
+    {
+        gchar size[4];
+        g_snprintf(size, 3, "%d", config.font_size);
+        setenv("PDC_FONT_SIZE", size, TRUE);
+    }
+#endif
     /* initialise the display - must not happen before this point
        otherwise displaying the command line help fails */
     display_init();

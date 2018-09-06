@@ -34,6 +34,10 @@ stats=f
 # ( weapons
 auto-pickup="+*$
 
+# Font size for the SDL2 version of the game (i.e. Windows and macOS).
+# Ignored when not built with SDL2 support. Defaults to 18 when not defined.
+font-size=18
+
 # Disable automatic saving when switching a level. Saving the game is
 # enabled by default, disable when it's too slow on your computer
 # no-autosave=true
