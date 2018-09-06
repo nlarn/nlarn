@@ -3,10 +3,10 @@
 # difficulty=5
 
 # Set character's name
-name=John Doe
+# name=Jane Doe
 
 # Choose the gender of your character (m/f)
-gender=m
+# gender=f
 
 # Choose the stats of your character
 # a Strong character
@@ -15,7 +15,7 @@ gender=m
 # d Smart character
 # e Randomly pick one of the above
 # f Stats assigned randomly
-stats=f
+# stats=f
 
 # Item types to pick up automatically:
 # " amulets
