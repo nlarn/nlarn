@@ -3357,7 +3357,7 @@ int player_item_can_be_added_to_container(player *p, item *it)
 
 int player_item_filter_unequippable(item* it)
 {
-	return player_item_is_unequippable(nlarn->p, it);
+    return player_item_is_unequippable(nlarn->p, it);
 }
 
 int player_item_is_equipped(player *p, item *it)
@@ -5359,12 +5359,16 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
     g_string_append_printf(text, "\n%3d total\n", body_count);
 
     /* genocided monsters */
-    g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
-
+    gboolean printed_headline = FALSE;
     for (guint mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
     {
         if (!monster_is_genocided(mnum))
             continue;
+
+        if (!printed_headline)
+        {
+                g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
+        }
 
         tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum, 2)));
         g_string_append_printf(text, "%s\n", tmp);
