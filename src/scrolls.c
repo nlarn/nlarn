@@ -877,24 +877,28 @@ static int scroll_spell_extension(player *p, item *r_scroll)
     if (p->known_spells->len == 0)
         return FALSE;
 
-    for (guint idx = 0; idx < p->known_spells->len; idx++)
+    if (r_scroll->blessed)
     {
-        spell *sp = g_ptr_array_index(p->known_spells, idx);
+        /* blessed scroll: increase knowledge of all spells */
+        for (guint idx = 0; idx < p->known_spells->len; idx++)
+        {
+            spell *sp = g_ptr_array_index(p->known_spells, idx);
 
-        if (r_scroll->blessed)
-        {
-            /* double spell knowledge */
-            sp->knowledge <<=1;
-        }
-        else
-        {
-            /* increase spell knowledge */
             sp->knowledge++;
         }
     }
+    else
+    {
+        /* uncursed scroll: increase knowledge of one random spell */
+        spell *sp = g_ptr_array_index(p->known_spells,
+                rand_0n(p->known_spells->len));
+
+        sp->knowledge++;
+    }
 
     /* give a message if any spell has been extended */
-    log_add_entry(nlarn->log, "You feel your magic skills improve.");
+    log_add_entry(nlarn->log, "You feel your magic skills %simprove.",
+            r_scroll->blessed ? "greatly " : "");
     return TRUE;
 }
 
