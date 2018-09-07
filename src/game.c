@@ -330,16 +330,8 @@ void game_init(int argc, char *argv[])
                                    config_file, NULL);
 
     /* try to load settings from the configuration file */
-    if (!game_parse_ini_file(filename, &config))
-    {
-        /* ini file has not been found in user configuration directory */
-        g_free(filename);
-
-        /* try to find it in the binary directory */
-        filename = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, config_file, NULL);
-        game_parse_ini_file(filename, &config);
-        g_free(filename);
-    }
+    game_parse_ini_file(filename, &config);
+    g_free(filename);
 
     /* parse the command line */
     static GOptionEntry entries[] =
