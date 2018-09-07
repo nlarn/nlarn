@@ -20,6 +20,7 @@ Changes:
     * The potion of healing and the healing spell can now cure sickness
     * Mitigated the scroll of spell extension
     * Occasionally drop arrows when disarming arrow traps
+    * Pay taxes in one step
     * Lock savegame file while the game is running (prevents accidentially
       launching the game multiple times from autosaves)
     * Code cleanup

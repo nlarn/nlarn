@@ -501,8 +501,9 @@ int building_lrs(player *p)
     int turns = 2;
     GString *text;
 
-    const char msg_greet[] = "`white`Welcome to the Larn Revenue Service district office.`end`\n\n";
-    const char msg_taxes[] = "You presently owe %d gp in taxes.";
+    const char title[] ="Larn Revenue Service";
+    const char msg_greet[] = "Welcome to the Larn Revenue Service district office.\n\n";
+    const char msg_taxes[] = "You presently owe %d gp in taxes.\n\n";
     const char msg_notax[] = "You do not owe us any taxes.";
 
     g_assert(p != NULL);
@@ -510,29 +511,40 @@ int building_lrs(player *p)
     text = g_string_new(msg_greet);
 
     if (p->outstanding_taxes)
-        g_string_append_printf(text, msg_taxes, p->outstanding_taxes);
-    else
-        g_string_append(text, msg_notax);
-
-    display_show_message("Larn Revenue Service", text->str, 0);
-
-    g_string_free(text, TRUE);
-
-    /* offer to pay taxes if player can afford to */
-    if (p->outstanding_taxes && (building_player_check(p, p->outstanding_taxes)))
     {
-        if (display_get_yesno("Do you want to pay your taxes?", NULL, NULL, NULL))
+        g_string_append_printf(text, msg_taxes, p->outstanding_taxes);
+
+        /* offer to pay taxes if player can afford to */
+        if (building_player_check(p, p->outstanding_taxes))
         {
-            building_player_charge(p, p->outstanding_taxes);
-            p->stats.gold_spent_taxes += p->outstanding_taxes;
-            p->outstanding_taxes = 0;
-            log_add_entry(nlarn->log, "You have paid your taxes.");
+            g_string_append(text, "Do you want to pay your taxes?");
+
+            if (display_get_yesno(text->str, title, NULL, NULL))
+            {
+                building_player_charge(p, p->outstanding_taxes);
+                p->stats.gold_spent_taxes += p->outstanding_taxes;
+                p->outstanding_taxes = 0;
+                log_add_entry(nlarn->log, "You have paid your taxes.");
+            }
+            else
+            {
+                log_add_entry(nlarn->log, "You chose not to pay your taxes.");
+            }
         }
         else
         {
-            log_add_entry(nlarn->log, "You chose not to pay your taxes.");
+            g_string_append(text, "Unfortunately, it seems that you cannot "
+                    "afford to pay your taxes at this time.");
+            display_show_message(title, text->str, 0);
         }
     }
+    else
+    {
+        g_string_append(text, msg_notax);
+        display_show_message(title, text->str, 0);
+    }
+
+    g_string_free(text, TRUE);
 
     return turns;
 }
