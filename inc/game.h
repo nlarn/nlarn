@@ -108,7 +108,7 @@ typedef struct _game_score
 {
     char *player_name;
     gint8 sex;
-    gint64 score;
+    guint64 score;
     guint32 moves;
     player_cod cod;
     gint32 cause;

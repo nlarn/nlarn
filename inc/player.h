@@ -238,7 +238,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
  */
 void player_die(player *p, player_cod cause_type, int cause);
 
-gint64 player_calc_score(player *p, int won);
+guint64 player_calc_score(player *p, int won);
 gboolean player_movement_possible(player *p);
 int player_move(player *p, direction dir, gboolean open_door);
 int player_attack(player *p, monster *m);

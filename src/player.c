@@ -1163,9 +1163,9 @@ void player_die(player *p, player_cod cause_type, int cause)
     exit(EXIT_SUCCESS);
 }
 
-gint64 player_calc_score(player *p, int won)
+guint64 player_calc_score(player *p, int won)
 {
-    gint64 score = 0;
+    guint64 score = 0;
 
     g_assert (p != NULL);
 
