@@ -1369,7 +1369,7 @@ spell *display_spell_select(const char *title, player *p)
             {
                 char prompt[60];
                 g_snprintf(prompt, 80, "Really cast %s?", spell_name(sp));
-                if (!display_get_yesno(prompt, NULL, NULL))
+                if (!display_get_yesno(prompt, NULL, NULL, NULL))
                     sp = NULL;
             }
             RUN = FALSE;
@@ -1864,7 +1864,7 @@ char *display_get_string(const char *caption, const char *value, size_t max_len)
     return g_string_free(string, FALSE);
 }
 
-int display_get_yesno(const char *question, const char *yes, const char *no)
+int display_get_yesno(const char *question, const char *title, const char *yes, const char *no)
 {
     display_window *ywin;
     guint startx, starty;
@@ -1910,7 +1910,7 @@ int display_get_yesno(const char *question, const char *yes, const char *no)
     startx = (min(MAP_MAX_X, COLS) / 2) - (width / 2);
     starty = (LINES / 2) - 4;
 
-    ywin = display_window_new(startx, starty, width, text->len + 4, NULL);
+    ywin = display_window_new(startx, starty, width, text->len + 4, title);
 
     for (line = 0; line < text->len; line++)
     {

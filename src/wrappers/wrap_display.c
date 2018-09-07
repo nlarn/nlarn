@@ -104,7 +104,8 @@ static int wrap_get_yesno(lua_State *L)
 
     res = display_get_yesno(luaL_checkstring(L, 1),
                             nargs > 1 ? luaL_checkstring(L, 2) : NULL,
-                            nargs > 2 ? luaL_checkstring(L, 3) : NULL);
+                            nargs > 2 ? luaL_checkstring(L, 3) : NULL,
+                            nargs > 3 ? luaL_checkstring(L, 4) : NULL);
 
     lua_pushboolean(L, res);
 

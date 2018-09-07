@@ -1078,7 +1078,7 @@ static gboolean game_load(gchar *filename)
         /* offer to delete the incompatible save game */
         if (display_get_yesno("Saved game could not be loaded. " \
                               "Delete and start new game?",
-                              NULL, NULL))
+                              NULL, NULL, NULL))
         {
             /* delete save file */
             g_unlink(fullname);

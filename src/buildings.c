@@ -521,7 +521,7 @@ int building_lrs(player *p)
     /* offer to pay taxes if player can afford to */
     if (p->outstanding_taxes && (building_player_check(p, p->outstanding_taxes)))
     {
-        if (display_get_yesno("Do you want to pay your taxes?", NULL, NULL))
+        if (display_get_yesno("Do you want to pay your taxes?", NULL, NULL, NULL))
         {
             building_player_charge(p, p->outstanding_taxes);
             p->stats.gold_spent_taxes += p->outstanding_taxes;
@@ -607,7 +607,7 @@ static int building_scribe_scroll(player *p, int mobuls)
     g_snprintf(question, 80, "Writing a scroll of %s costs %d gold.\n"
                "Are you fine with that?", scrolls[i].name, price);
 
-    if (!display_get_yesno(question, NULL, NULL))
+    if (!display_get_yesno(question, NULL, NULL, NULL))
     {
         log_add_entry(nlarn->log, "You refuse to pay %d gold for a scroll of %s.",
                       price, scrolls[i].name);
@@ -1039,7 +1039,7 @@ int building_monastery(struct player *p)
                                    "donate %d gold for our abbey. %s", desc,
                                    price, ayfwt);
 
-        choice = display_get_yesno(question, NULL, NULL);
+        choice = display_get_yesno(question, NULL, NULL, NULL);
         g_free(question);
 
         if (!choice)
@@ -1087,7 +1087,7 @@ int building_monastery(struct player *p)
         question = g_strdup_printf("For healing you, we ask that you "
                                    "donate %d gold for our monastery. %s",
                                    price, ayfwt);
-        choice = display_get_yesno(question, NULL, NULL);
+        choice = display_get_yesno(question, NULL, NULL, NULL);
         g_free(question);
 
         if (choice)
@@ -1120,7 +1120,7 @@ int building_monastery(struct player *p)
                                        "donate %d gold for our monastery. %s",
                                        curable_diseases[selection].desc, price, ayfwt);
 
-            choice = display_get_yesno(question, NULL, NULL);
+            choice = display_get_yesno(question, NULL, NULL, NULL);
             g_free(question);
 
             if (choice)
@@ -1350,7 +1350,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
                    name, price);
         g_free(name);
 
-        if (!display_get_yesno(text, NULL, NULL))
+        if (!display_get_yesno(text, NULL, NULL, NULL))
             return;
     }
 
@@ -1418,7 +1418,7 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
         g_snprintf(message, 80, "Pay %d gold to identify %s?",
                    price, name_unknown);
 
-        if (display_get_yesno(message, NULL, NULL))
+        if (display_get_yesno(message, NULL, NULL, NULL))
         {
             player_item_identify(p, NULL, it);
             /* upper case first letter */
@@ -1480,7 +1480,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
     {
         g_snprintf(message, 80, "Pay %d gold to repair %s?", price, name);
 
-        if (display_get_yesno(message, NULL, NULL))
+        if (display_get_yesno(message, NULL, NULL, NULL))
         {
             it->burnt = 0;
             it->corroded = 0;
@@ -1563,7 +1563,7 @@ static void building_item_buy(player *p, inventory **inv, item *it)
 
         g_free(name);
 
-        if (!display_get_yesno(question, NULL, NULL))
+        if (!display_get_yesno(question, NULL, NULL, NULL))
             return;
     }
 

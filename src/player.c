@@ -944,7 +944,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 /* offer to abort the action if the player is under attack */
                 if (p->attacked && interruptible)
                 {
-                    if (!display_get_yesno(question, FALSE, FALSE))
+                    if (!display_get_yesno(question, NULL, NULL, NULL))
                     {
                         /* user chose to abort the current action */
                         if (description != NULL)
@@ -1149,7 +1149,7 @@ void player_die(player *p, player_cod cause_type, int cause)
         display_show_message(title, text, 0);
 
         if (display_get_yesno("Do you want to save a memorial " \
-                              "file for your character?", NULL, NULL))
+                              "file for your character?", NULL, NULL, NULL))
         {
             player_memorial_file_save(p, text);
         }
@@ -5044,7 +5044,7 @@ void calc_fighting_stats(player *p)
 
     display_show_message("Fighting statistics", text->str, 0);
 
-    if (display_get_yesno("Do you want to save the calculations?", NULL, NULL))
+    if (display_get_yesno("Do you want to save the calculations?",NULL, NULL, NULL))
     {
         char *filename, *proposal;
         GError *error = NULL;
@@ -5445,7 +5445,7 @@ static void player_memorial_file_save(player *p, const char *text)
 
             if (g_file_test(fullname, G_FILE_TEST_IS_REGULAR)
                     && !display_get_yesno("File exists!\n"
-                        "Do you want to overwrite it?", NULL, NULL))
+                        "Do you want to overwrite it?", NULL, NULL, NULL))
             {
                 g_free(fullname);
                 proposal = filename;

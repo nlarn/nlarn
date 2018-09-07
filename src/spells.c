@@ -906,7 +906,7 @@ int spell_type_flood(spell *s, struct player *p)
 
     if (area_pos_get(range, p->pos)
             && !display_get_yesno("The spell is going to hit you. " \
-                                  "Cast anyway?", NULL, NULL))
+                                  "Cast anyway?", NULL, NULL, NULL))
     {
         log_add_entry(nlarn->log, "Aborted.");
         area_destroy(range);
@@ -961,7 +961,7 @@ int spell_type_blast(spell *s, struct player *p)
     area_destroy(ball);
 
     if (player_affected
-        && !display_get_yesno("The spell is going to hit you. Cast anyway?", NULL, NULL))
+        && !display_get_yesno("The spell is going to hit you. Cast anyway?", NULL, NULL, NULL))
     {
         log_add_entry(nlarn->log, "Aborted.");
         return FALSE;

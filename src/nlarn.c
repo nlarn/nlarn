@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     /* ask for character's gender if it is not known yet */
     if (nlarn->p->sex == PS_NONE)
     {
-        int res = display_get_yesno("Are you male or female?", "Female", "Male");
+        int res = display_get_yesno("Are you male or female?", NULL, "Female", "Male");
 
         /* display_get_yesno() returns 0 or one */
         nlarn->p->sex = (res == TRUE) ?  PS_FEMALE : PS_MALE;
@@ -539,7 +539,7 @@ int main(int argc, char *argv[])
 
             if ((ms == LS_FOUNTAIN || ms == LS_DEADFOUNTAIN)
                     && display_get_yesno("There is a fountain here, drink from it?",
-                                         NULL, NULL))
+                                         NULL, NULL, NULL))
             {
                 moves_count = player_fountain_drink(nlarn->p);
             }
@@ -636,7 +636,7 @@ int main(int argc, char *argv[])
 
             /* quit */
         case 17: /* ^Q */
-            if (display_get_yesno("Are you sure you want to quit?", NULL, NULL))
+            if (display_get_yesno("Are you sure you want to quit?", NULL, NULL, NULL))
                 player_die(nlarn->p, PD_QUIT, 0);
             break;
 
@@ -661,7 +661,7 @@ int main(int argc, char *argv[])
             {
                 if (display_get_yesno("Are you sure you want to switch to Wizard mode?\n" \
                                       "You will not be able to switch back to normal " \
-                                      "gameplay and your score will not be counted.", NULL, NULL))
+                                      "gameplay and your score will not be counted.", NULL, NULL, NULL))
                 {
                     game_wizardmode(nlarn) = TRUE;
                     log_add_entry(nlarn->log, "Wizard mode has been activated.");
