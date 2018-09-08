@@ -70,7 +70,7 @@ ifneq (,$(findstring MINGW, $(MSYSTEM)))
   DLLS += libgraphite2.dll libharfbuzz-0.dll libiconv-2.dll libintl-8.dll
   DLLS += libpcre-1.dll libpng16-16.dll libstdc++-6.dll libwinpthread-1.dll
   DLLS += lua53.dll SDL.dll SDL_ttf.dll zlib1.dll
-  LIBFILES := lib/FiraMono-Medium.otf lib/nlarn-128.bmp
+  LIBFILES := lib/nlarn-128.bmp
 
   # Fake the content of the OS var to make it more common
   # (otherwise packages would have silly names)
@@ -120,9 +120,10 @@ LDFLAGS += $(shell pkg-config --libs $(lua))
 ifneq ($(SDLPDCURSES),Y)
 	LDFLAGS += -lcurses -lpanel
 else
-	PDCLIB  := PDCurses/sdl1/libpdcurses.a
-	CFLAGS  += -IPDCurses -DSDLPDCURSES $(pkg-config SDL_ttf --cflags)
-	LDFLAGS += $(shell pkg-config SDL_ttf --libs)
+	PDCLIB   := PDCurses/sdl1/libpdcurses.a
+	CFLAGS   += -IPDCurses -DSDLPDCURSES $(pkg-config SDL_ttf --cflags)
+	LDFLAGS  += $(shell pkg-config SDL_ttf --libs)
+	LIBFILES += lib/FiraMono-Medium.otf
 endif
 
 # System-wide installation on *nix
@@ -241,8 +242,7 @@ $(OSXIMAGE): nlarn README.html
 		done; \
 	done
 # Copy required files
-	@cp -p lib/{fortune,maze,monsters.lua,nlarn*} \
-		dmgroot/Nlarn.app/Contents/Resources
+	@cp -p $(LIBFILES) dmgroot/Nlarn.app/Contents/Resources
 	@cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
 	@cp -pr Changelog.txt README.html LICENSE dmgroot
 	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
