@@ -2,8 +2,8 @@ Release 0.7.3 (unreleased)
 -------------
 
 Changes:
-    * Gerneric SDL2 PDCurses support for all platforms
-    * Configurable font size for the SDL2 version
+    * Gerneric SDL PDCurses support for all platforms
+    * Configurable font size for the SDL version
     * Combat: take enemy size into account
     * Combat: balance weapon damage
     * Magic: Animate reflection of rays

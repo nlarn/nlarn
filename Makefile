@@ -69,7 +69,7 @@ ifneq (,$(findstring MINGW, $(MSYSTEM)))
   DLLS := libbz2-1.dll libfreetype-6.dll libgcc_s_dw2-1.dll libglib-2.0-0.dll
   DLLS += libgraphite2.dll libharfbuzz-0.dll libiconv-2.dll libintl-8.dll
   DLLS += libpcre-1.dll libpng16-16.dll libstdc++-6.dll libwinpthread-1.dll
-  DLLS += lua53.dll SDL2.dll SDL2_ttf.dll zlib1.dll
+  DLLS += lua53.dll SDL.dll SDL_ttf.dll zlib1.dll
   LIBFILES := lib/FiraMono-Medium.otf lib/nlarn-128.bmp
 
   # Fake the content of the OS var to make it more common
@@ -120,9 +120,9 @@ LDFLAGS += $(shell pkg-config --libs $(lua))
 ifneq ($(SDLPDCURSES),Y)
 	LDFLAGS += -lcurses -lpanel
 else
-	PDCLIB  := PDCurses/sdl2/libpdcurses.a
-	CFLAGS  += -IPDCurses -DSDLPDCURSES $(pkg-config SDL2_ttf --cflags)
-	LDFLAGS += $(shell pkg-config SDL2_ttf --libs)
+	PDCLIB  := PDCurses/sdl1/libpdcurses.a
+	CFLAGS  += -IPDCurses -DSDLPDCURSES $(pkg-config SDL_ttf --cflags)
+	LDFLAGS += $(shell pkg-config SDL_ttf --libs)
 endif
 
 # System-wide installation on *nix
@@ -180,7 +180,7 @@ $(RESOURCES): %.res: %.rc
 $(PDCLIB):
 	@git submodule init
 	@git submodule update --recommend-shallow
-	$(MAKE) -C PDCurses/sdl2 WIDE=Y UTF8=Y libs
+	$(MAKE) -C PDCurses/sdl1 WIDE=Y UTF8=Y libs
 
 README.html: README.md
 	makepage $< > $@
@@ -274,7 +274,7 @@ clean:
 	rm -f $(OBJECTS) $(DLLS)
 	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) README.html
 	@if \[ -n "$(PDCLIB)" \]; then \
-		$(MAKE) -C PDCurses/sdl2 clean; \
+		$(MAKE) -C PDCurses/sdl1 clean; \
 	fi
 
 help:
