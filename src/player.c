@@ -145,7 +145,8 @@ player *player_new()
     /* set the player's default speed */
     p->speed = SPEED_NORMAL;
 
-    p->known_spells = g_ptr_array_new();
+    p->known_spells = g_ptr_array_new_with_free_func(
+            (GDestroyNotify)spell_destroy);
     p->effects = g_ptr_array_new();
     p->inventory = inv_new(p);
 
@@ -285,12 +286,6 @@ void player_destroy(player *p)
     g_assert(p != NULL);
 
     /* release spells */
-    while ((p->known_spells)->len > 0)
-    {
-        spell_destroy(g_ptr_array_remove_index_fast(p->known_spells,
-                      (p->known_spells)->len - 1));
-    }
-
     g_ptr_array_free(p->known_spells, TRUE);
 
     /* release effects */
@@ -569,7 +564,8 @@ player *player_deserialize(cJSON *pser)
     if (obj != NULL)
         p->known_spells = spells_deserialize(obj);
     else
-        p->known_spells = g_ptr_array_new();
+        p->known_spells = g_ptr_array_new_with_free_func(
+                (GDestroyNotify)spell_destroy);
 
 
     /* inventory */

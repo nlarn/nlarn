@@ -858,10 +858,6 @@ void game_remove_dead_monsters(game *g)
 
     while (g->dead_monsters->len > 0)
     {
-        monster *m = g_ptr_array_index(g->dead_monsters,
-                                       g->dead_monsters->len - 1);
-
-        monster_destroy(m);
         g_ptr_array_remove_index(g->dead_monsters, g->dead_monsters->len - 1);
     }
 }
@@ -944,7 +940,8 @@ static void game_new()
     nlarn->monsters = g_hash_table_new(&g_direct_hash, &g_direct_equal);
 
     /* initialize the array to store monsters that died during the turn */
-    nlarn->dead_monsters = g_ptr_array_new();
+    nlarn->dead_monsters = g_ptr_array_new_with_free_func(
+            (GDestroyNotify)monster_destroy);
 
     nlarn->spheres = g_ptr_array_new();
 
@@ -1209,7 +1206,8 @@ static gboolean game_load(gchar *filename)
         monster_deserialize(cJSON_GetArrayItem(obj, idx), nlarn);
 
     /* initialize the array to store monsters that died during the turn */
-    nlarn->dead_monsters = g_ptr_array_new();
+    nlarn->dead_monsters = g_ptr_array_new_with_free_func(
+            (GDestroyNotify)monster_destroy);
 
 
     /* restore spheres */

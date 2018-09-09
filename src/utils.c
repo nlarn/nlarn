@@ -86,7 +86,8 @@ message_log *log_new()
 
     log->active = TRUE;
     log->buffer = g_string_new(NULL);
-    log->entries = g_ptr_array_new();
+    log->entries = g_ptr_array_new_with_free_func(
+            (GDestroyNotify)log_entry_destroy);
 
     return log;
 }
@@ -94,12 +95,6 @@ message_log *log_new()
 void log_destroy(message_log *log)
 {
     g_assert(log != NULL);
-
-    /* free log entries */
-    for (guint idx = 0; idx < log_length(log); idx++)
-    {
-        log_entry_destroy(log_get_entry(log, idx));
-    }
 
     g_ptr_array_free(log->entries, TRUE);
 
@@ -189,8 +184,7 @@ void log_set_time(message_log *log, int gtime)
     while (log_length(log) > LOG_MAX_LENGTH)
     {
         /* remove the first entry */
-        entry = g_ptr_array_remove_index(log->entries, 0);
-        log_entry_destroy(entry);
+        g_ptr_array_remove_index(log->entries, 0);
     }
 
     log->gtime = gtime;
@@ -244,7 +238,8 @@ message_log *log_deserialize(cJSON *lser)
     message_log *log = g_malloc0(sizeof(message_log));
 
     log->active = TRUE;
-    log->entries = g_ptr_array_new();
+    log->entries = g_ptr_array_new_with_free_func(
+            (GDestroyNotify)log_entry_destroy);
 
     /* try to restore this turns message */
     if ((obj = cJSON_GetObjectItem(lser, "buffer")) != NULL)
