@@ -112,7 +112,7 @@ Section "Start Menu Shortcuts"
   CreateShortCut "$SMPROGRAMS\NLarn\Uninstall.lnk" "$INSTDIR\uninstall.exe"
   CreateShortCut "$SMPROGRAMS\NLarn\NLarn.lnk" "$INSTDIR\nlarn.exe"
   CreateShortCut "$SMPROGRAMS\NLarn\README.lnk" "$INSTDIR\README.html"
-  CreateShortCut "$SMPROGRAMS\NLarn\Changelog.lnk" "$INSTDIR\Changelog.txt"
+  CreateShortCut "$SMPROGRAMS\NLarn\Changelog.lnk" "$INSTDIR\Changelog.html"
 
 SectionEnd
 

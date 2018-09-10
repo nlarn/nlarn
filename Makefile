@@ -136,7 +136,7 @@ ifneq ($(GITREV),)
   DIRNAME   = nlarn-$(VERSION)
   SRCPKG    = nlarn-$(VERSION).tar.gz
   PACKAGE   = $(DIRNAME)_$(OS).$(ARCH).$(ARCHIVE_SUFFIX)
-  MAINFILES = nlarn$(SUFFIX) nlarn.ini-sample README.html LICENSE Changelog.txt
+  MAINFILES = nlarn$(SUFFIX) nlarn.ini-sample README.html LICENSE Changelog.html
   LIBFILES += lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.* lib/*.lua
 endif
 
@@ -171,6 +171,9 @@ nlarn$(SUFFIX): $(PDCLIB) $(OBJECTS) $(RESOURCES)
 %.o: %.c ${INCLUDES}
 	$(CC) $(CFLAGS) -o $@ -c $<
 
+%.html: %.md
+	makepage $< > $@
+
 .SECONDEXPANSION:
 $(DLLS): $$(patsubst %, /mingw32/bin/%, $$@)
 	cp $< $@
@@ -182,9 +185,6 @@ $(PDCLIB):
 	@git submodule init
 	@git submodule update --recommend-shallow
 	$(MAKE) -C PDCurses/sdl1 WIDE=Y UTF8=Y libs
-
-README.html: README.md
-	makepage $< > $@
 
 dist: clean $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
 
@@ -225,7 +225,7 @@ $(INSTALLER): $(MAINFILES) $(DLLS) mainfiles.nsh libfiles.nsh nlarn.nsi
 	@rm mainfiles.nsh libfiles.nsh
 
 # The OSX installer
-$(OSXIMAGE): nlarn README.html
+$(OSXIMAGE): $(MAINFILES)
 	@mkdir -p dmgroot/NLarn.app/Contents/{Frameworks,MacOS,Resources}
 	@cp -p nlarn dmgroot/NLarn.app/Contents/MacOS
 # Copy local libraries into the app folder and instruct the linker.
@@ -242,9 +242,9 @@ $(OSXIMAGE): nlarn README.html
 		done; \
 	done
 # Copy required files
+	@cp -p $(MAINFILES) dmgroot
 	@cp -p $(LIBFILES) dmgroot/Nlarn.app/Contents/Resources
 	@cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
-	@cp -pr Changelog.txt README.html LICENSE dmgroot
 	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
 # Update the version information in the plist
 	@/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(VERSION)" \
