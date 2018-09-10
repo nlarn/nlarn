@@ -48,6 +48,7 @@ RequestExecutionLevel admin
 ;Interface Configuration
 
 !define MUI_ICON "resources/nlarn-48.ico"
+!define MUI_UNICON "resources/nlarn-48.ico"
 
 ;--------------------------------
 ; Pages
@@ -97,7 +98,10 @@ Section "NLarn (required)"
   WriteRegStr HKLM SOFTWARE\NLarn "Install_Dir" "$INSTDIR"
 
   ; Write the uninstall keys for Windows
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NLarn" "DisplayIcon" '"$INSTDIR\uninstall.exe"'
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NLarn" "DisplayName" "NLarn ${VERSION}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NLarn" "DisplayVersion" "${VERSION}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NLarn" "Publisher" "Joachim de Groot"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NLarn" "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NLarn" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NLarn" "NoRepair" 1
