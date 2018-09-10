@@ -83,6 +83,9 @@ ifneq (,$(findstring MINGW, $(MSYSTEM)))
   # Escape-O-Rama! Required in all it's ugliness.
   RESDEFINE += -DVINFO=\\\"$(VERSION)\\\"
 
+  # This is a windows application
+  LDFLAGS += -mwindows
+
   # and finally the dreaded executable suffix from the eighties
   SUFFIX = .exe
   ARCHIVE_CMD = zip -r
