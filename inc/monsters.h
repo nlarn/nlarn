@@ -26,6 +26,7 @@
 #include "cJSON.h"
 #include "defines.h"
 #include "effects.h"
+#include "inventory.h"
 #include "items.h"
 #include "lua_wrappers.h"
 #include "position.h"

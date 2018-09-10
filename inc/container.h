@@ -20,6 +20,7 @@
 #define __CONTAINER_H_
 
 #include "items.h"
+#include "inventory.h"
 
 enum container_types {
     CT_BAG,
