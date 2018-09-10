@@ -422,7 +422,8 @@ cJSON *spells_serialize(GPtrArray *sparr)
 
 GPtrArray *spells_deserialize(cJSON *sser)
 {
-    GPtrArray *n_spells = g_ptr_array_new();
+    GPtrArray *n_spells = g_ptr_array_new_with_free_func(
+            (GDestroyNotify)spell_destroy);
 
     for (int idx = 0; idx < cJSON_GetArraySize(sser); idx++)
     {
