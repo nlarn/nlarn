@@ -23,11 +23,11 @@
 #include <glib/gstdio.h>
 
 #ifdef __unix
-#  include <signal.h>
+# include <signal.h>
 #endif
 
 #ifdef WIN32
-#include <windows.h>
+# include <windows.h>
 #endif
 
 #include "container.h"

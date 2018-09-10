@@ -37,14 +37,14 @@
 #include <sys/param.h>
 
 #if (defined __unix) || (defined __unix__) || (defined __APPLE__)
-#include <unistd.h>
-#include <sys/file.h>
-#include <sys/stat.h>
+# include <unistd.h>
+# include <sys/file.h>
+# include <sys/stat.h>
 #endif
 
 #ifdef WIN32
-#include <io.h>
-#include <sys/locking.h>
+# include <io.h>
+# include <sys/locking.h>
 #endif
 
 #include "cJSON.h"
