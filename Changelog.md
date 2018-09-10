@@ -1,7 +1,7 @@
 ## Release 0.7.3 (2018-09-08)
 
 ### Changes:
-* Gerneric SDL PDCurses support for all platforms
+* Generic SDL PDCurses support for all platforms
 * Configurable font size for the SDL version
 * Combat: take enemy size into account
 * Combat: balance weapon damage
@@ -20,7 +20,7 @@
 * Mitigated the scroll of spell extension
 * Occasionally drop arrows when disarming arrow traps
 * Pay taxes in one step
-* Lock savegame file while the game is running (prevents accidentially
+* Lock savegame file while the game is running (prevents accidentally
   launching the game multiple times from autosaves)
 * Code cleanup
 
@@ -70,22 +70,22 @@
 ### Fixed bugs:
 * Fixed a crash that could occur when a blast of fire (caused by hell
   hounds or red dragon) destroyed items in the inventory.
-* Fixed a crash when a monster triggerd a trap with a specific message.
-* Various fixes and enhancements for spheres of anihillation.
+* Fixed a crash when a monster triggered a trap with a specific message.
+* Various fixes and enhancements for spheres of annihilation.
 * Do not swap weapons when none is readied.
-* Inhibit various actions while paralyzed.
+* Inhibit various actions while paralysed.
 * Corrected combat messages and disable looking around while blinded.
 * Fixed the spell "polymorph".
 * Ensure the townsfolk don't block important places.
 * Some fixes to the monastery:
-  * Fix two crashes: one occured when aborting the item selection; the other
+  * Fix two crashes: one occurred when aborting the item selection; the other
     when uncursing uncursed, but unidentified items.
   * The monastery will no longer "remove curses" on containers (i.e. traps).
   * Ensure the price for remove curse is at least 1gp.
   * Handle plural case in a monastery message.
 * Avoid ammo that is stuck inside walls.
 * Fix repair price calculation for blessed items.
-* Ensure the scroll of blank paper is unlabeled.
+* Ensure the scroll of blank paper is unlabelled.
 * Show sec. weapon and quivered item in obituary.
 * Corrected the description of the spell "cancellation".
 * Don't show monster's name for unseen monsters.
@@ -128,7 +128,7 @@ Release 0.7.1 (2012-05-27)
 * Wizard Mode: allow to select stationary objects as teleport destination
   (as for auto-travel).
 * Improved the help file.
-* Modernized the Windows Installer.
+* Modernised the Windows Installer.
 * Windows Resources now allow icons for the executable and embedded
   dynamic version information in the executable.
 * Accept ^U/^D in the inventory, spell list and message windows as
@@ -141,7 +141,7 @@ Release 0.7.1 (2012-05-27)
     on Windows save it under "My Documents".
   * Offer to chose a new file name if a file exists.
   * Wrap and indent long lines at column 78.
-  * Choose the line terminator matching the plattform.
+  * Choose the line terminator matching the platform.
 * Implemented working setgid for system-wide installations on \*nix systems.
 
 ### Fixed bugs:
@@ -151,7 +151,7 @@ Release 0.7.1 (2012-05-27)
   (Reported by Krice).
 * Fixed a crash after shooting the last ammo.
 * Ensure player's experience can not sink below zero. This fixes a crash
-  that occured when drinking from a fountain and loosing more experience
+  that occurred when drinking from a fountain and loosing more experience
   than the player has.
 * Calculate adjacent monsters while enlightened. This fixes targeting
   and allows to abort running or auto-travel.
@@ -165,7 +165,7 @@ Release 0.7.1 (2012-05-27)
   when climbing out of a pit.
 * Fixed ranged attacks to monsters over water/lava.
 * Waste ammo when dropped on deep water or lava.
-* Slings and bows are twohanded weapons, too.
+* Slings and bows are two-handed weapons, too.
 * Recalc burdened status after fighter courses.
 * Colour first headline in identified item's list.
 * Count scrolls scribed at the school as item purchase, not as
@@ -191,7 +191,7 @@ Release 0.7.0 (2011-11-04)
   displayed to reflect that an effect has been extended or that the
   maximum has been reached.
 * Added an intelligence requirement to learning spells and extended the
-  requirement for casting spellst to 3 * spell level.
+  requirement for casting spells to 3 * spell level.
 * Implemented raising taxes:
   For every difficulty level > 0 the player has to pay 5% of the income,
   i.e. money deposited on the bank, item sale revenue and interest as
@@ -215,7 +215,7 @@ Release 0.7.0 (2011-11-04)
 * Added new item slots: secondary weapon and quiver.
 * Enabled swapping primary and secondary weapon ('x').
 * Implemented a "paperdoll", a list of all equipped items ('TAB').
-* Implemented thwrowing of potions ('t').
+* Implemented throwing of potions ('t').
 * Most potions now work on monsters.
 * Made the potion of holy water dangerous for undead monsters.
 * Thrown or fired items will be picked up automatically regardless of
@@ -223,7 +223,7 @@ Release 0.7.0 (2011-11-04)
 * Added a command (M) to cast the previous spell again.
 * It is now possible to pay with money stuffed in carried containers.
   The leprechaun can now to steal money hidden inside carried containers.
-* Tweaked the behviour of the townsfolk. They will no longer walk around
+* Tweaked the behaviour of the townsfolk. They will no longer walk around
   like drunk, do important town people business and only talk when the
   player is outside a building.
 * Started to work on summoned monsters:
@@ -236,8 +236,8 @@ Release 0.7.0 (2011-11-04)
 * Added monster's weapon to monster's description.
 * Implemented a mana drain trap.
 * Added dynamic help to the inventory dialog.
-* Messages and dialogs can now be coloured, some already are.
-* Spell rays or blasts now have differen colours.
+* Messages and dialogues can now be coloured, some already are.
+* Spell rays or blasts now have different colours.
 * Modified effect list display on the right side of the screen:
   * unique entries only
   * positive effects coloured cyan
@@ -291,7 +291,7 @@ Release 0.7.0 (2011-11-04)
 
 ### Fixed bugs:
 
-* Recognize keypad enter on Windows. Reported by Xecutor and Michael Ax.
+* Recognise keypad enter on Windows. Reported by Xecutor and Michael Ax.
 * Allow using numpad direction keys for fast movement with num lock
   off on Windows.
 * Offer only items that can be blessed or cursed for curse removal or
@@ -313,7 +313,7 @@ Release 0.7.0 (2011-11-04)
 * Make aborted spells not cost turns.
 * Fix an assertion when aborting phantasmal forces and an information
   leak in that spell.
-* Initialize wizard_mode game property before creating a new game. This
+* Initialise wizard_mode game property before creating a new game. This
   is necessary if we want to stock the DND store differently depending
   on whether a game is started in wizard mode or not.
 * Remove notes from items sold to the trade post.
@@ -417,7 +417,7 @@ Release 0.7.0 (2011-11-04)
   a bonus enchantment.
 * Uncursed identify scrolls allow identifying up to three items, averaging
   at two. Blessed scrolls affect all carried items, as before.
-* Improve the scroll of "create artifact": now only generates amulets,
+* Improve the scroll of "create artefact": now only generates amulets,
   rings, books, potions or scrolls.
 * Life protection is only permanent with blessed scrolls.
 * Blessed time warp scrolls are more likely to go farther back.
@@ -468,7 +468,7 @@ Release 0.7.0 (2011-11-04)
 
 ### Changes:
 
-* Implemented different speeds for monsters and the player. Reenabled
+* Implemented different speeds for monsters and the player. Re-enabled
   the scroll of speed and the spell "haste self".
 * Implemented the spell "time stop".
 * Modified keys for open/close and magic:
@@ -478,7 +478,7 @@ Release 0.7.0 (2011-11-04)
 * Add fast movement command that uses the following (direction) input
   for running (g).
 * Implement a long-rest command: (w)ait which will ignore adjacent
-  floating eyes und umber hulks.
+  floating eyes and umber hulks.
 * Added functionality to (r)ead/(q)uaff/(e)quip/(t)ake off/(d)rop an
   item quickly.
 * Remember visited landmarks. A list of these can be shown with (D).
@@ -530,7 +530,7 @@ Release 0.7.0 (2011-11-04)
 * Made the uncursed variants of the scrolls gem perfection, identify,
   remove curse and spell extension less powerful and added a blessed
   variant with the original power. Let the player decide which gem to make
-  perfect, wich item to identify or to uncurse when using the uncursed
+  perfect, which item to identify or to uncurse when using the uncursed
   variant.
 * Improved messages given when interacting with stationary objects.
   Show a message when a monster has been generated.
@@ -546,7 +546,7 @@ Release 0.7.0 (2011-11-04)
 * Fixed a crash when casting sleep at an already sleeping monster.
 * Fixed a crash when buying a single item which is too heavy to be
   carried.
-* Fixed a crash in building_item_sell() that occured when the player
+* Fixed a crash in building_item_sell() that occurred when the player
   bought the entire stock of a stackable item that already existed in
   the player's inventory.
 * Fixed a crash when experience level 1 got drained.
@@ -669,7 +669,7 @@ Release 0.7.0 (2011-11-04)
 
 ### Fixed bugs:
 
-* Fixed flooding behavior of cloud kill, flood and magic fire. Fixed a
+* Fixed flooding behaviour of cloud kill, flood and magic fire. Fixed a
   crash when casting these spells near the borders of the map. Fixed
   casting these spells multiple times onto the same map squares.
 * Fixed screen drawing when using the Scroll of Pulverisation.
@@ -718,11 +718,11 @@ Release 0.7.0 (2011-11-04)
 * Monsters can no longer enter a level when the entrance is blocked.
 * Fixed a crash that occurred when examining a position with a monster on
   it.
-* Fixed a mistakable message when casting the spell vaporize rock.
+* Fixed a mistakable message when casting the spell vaporise rock.
 * Started using a directory for the user's game related files; read
   .ini-file from there; put save file into it. Under Linux this directory
   is called ~/.nlarn, under Windows it is below Application Data (or the
-  localized version thereof).
+  localised version thereof).
 * Read settings from the .ini-file correctly when restoring a saved game.
 * Fixed a crash when pressing the windows keys while having a window open.
 * Gems sold to the bank do no longer appear in the DND store.
@@ -744,7 +744,7 @@ Release 0.7.0 (2011-11-04)
 
 * Save your game and continue playing later.
 * The town level is now static and has a lake and lots of trees. Buildings
-  can now be recognized as such.
+  can now be recognised as such.
 * Shops debit the player's bank account for their services.
 * It is now possible to save a memorial file for a deceased character. The
   obituary contains a list of vanquished creatures.
@@ -777,7 +777,7 @@ Release 0.7.0 (2011-11-04)
   100% CPU usage.
 * Fixed duplicate knowledge of spells.
 * Move all Spheres of Destruction.
-* Fixed the behavior of backspace key in the get_amount dialog.
+* Fixed the behaviour of backspace key in the get_amount dialog.
 * Fixed a game freeze when a fireball hit monsters.
 * Books are used up upon successful learning.
 * Corrected spell MP usage. Aborted spells no longer cost MPs.
@@ -794,7 +794,7 @@ Release 0.7.0 (2011-11-04)
 ### Changes:
 
 * Mute duplicate message.
-* Vi keys now also work in dialogs.
+* Vi keys now also work in dialogues.
 * Enter buildings with > (e no longer works).
 * Sales revenue goes to bank account.
 * Reworked adding/deleting items to/from inventory.
