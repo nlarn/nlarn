@@ -121,8 +121,8 @@ ifneq ($(SDLPDCURSES),Y)
 	LDFLAGS += -lcurses -lpanel
 else
 	PDCLIB   := PDCurses/sdl1/libpdcurses.a
-	CFLAGS   += -IPDCurses -DSDLPDCURSES $(pkg-config SDL_ttf --cflags)
-	LDFLAGS  += $(shell pkg-config SDL_ttf --libs)
+	CFLAGS   += $(shell pkg-config --cflags SDL_ttf) -IPDCurses -DSDLPDCURSES
+	LDFLAGS  += $(shell pkg-config --libs SDL_ttf )
 	LIBFILES += lib/FiraMono-Medium.otf
 endif
 
