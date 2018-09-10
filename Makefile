@@ -83,9 +83,6 @@ ifneq (,$(findstring MINGW, $(MSYSTEM)))
   # Escape-O-Rama! Required in all it's ugliness.
   RESDEFINE += -DVINFO=\\\"$(VERSION)\\\"
 
-  # Defines specific to Windows
-  DEFINES += -DWIN32_LEAN_AND_MEAN -DNOGDI
-
   # and finally the dreaded executable suffix from the eighties
   SUFFIX = .exe
   ARCHIVE_CMD = zip -r
