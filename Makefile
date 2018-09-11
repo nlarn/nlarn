@@ -242,7 +242,7 @@ $(OSXIMAGE): $(MAINFILES)
 		done; \
 	done
 # Copy required files
-	@cp -p $(MAINFILES) dmgroot
+	@cp -p nlarn.ini-sample README.html LICENSE Changelog.html dmgroot
 	@cp -p $(LIBFILES) dmgroot/Nlarn.app/Contents/Resources
 	@cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
 	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
