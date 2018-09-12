@@ -23,7 +23,7 @@
 #include "effects.h"
 #include "game.h"
 #include "nlarn.h"
-#include "utils.h"
+#include "random.h"
 
 static const effect_data effects[ET_MAX] =
 {

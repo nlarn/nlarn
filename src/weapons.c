@@ -24,6 +24,7 @@
 #include "monsters.h"
 #include "nlarn.h"
 #include "player.h"
+#include "random.h"
 #include "weapons.h"
 
 const ammo_data ammos[AMT_MAX] =

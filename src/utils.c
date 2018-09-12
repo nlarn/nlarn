@@ -28,38 +28,6 @@ static const guint LOG_MAX_LENGTH = 100;
 
 static void log_entry_destroy(message_log_entry *entry);
 
-int divert(int value, int percent)
-{
-    int lower, upper;
-
-    g_assert(value > 0 && percent > 0);
-
-    lower = value - (value / percent);
-    upper = value + (value / percent);
-    if (lower == upper)
-        return value;
-
-    return rand_m_n(lower, upper);
-}
-
-void shuffle(int array[], int length, int skip)
-{
-    for (int i = 0; i < length; i++)
-    {
-        /* fill the array in order */
-        array[i] = i;
-    }
-
-    for (int i = skip; i < (length / 2); i++)
-    {
-        /* randomize positions */
-        int npos = i + g_random_int_range(0, length - i);
-        int temp = array[i];
-        array[i] = array[npos];
-        array[npos] = temp;
-    }
-}
-
 char *str_capitalize(char *string)
 {
     if (string == NULL)

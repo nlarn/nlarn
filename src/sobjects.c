@@ -24,6 +24,7 @@
 #include "nlarn.h"
 #include "sobjects.h"
 #include "player.h"
+#include "random.h"
 
 const sobject_data sobjects[LS_MAX] =
 {
@@ -121,8 +122,8 @@ int player_altar_pray(player *p)
         return FALSE;
     }
 
-    const int player_gold = player_get_gold(p);
-    const int total_gold  = player_gold + p->bank_account;
+    const guint player_gold = player_get_gold(p);
+    const guint total_gold  = player_gold + p->bank_account;
     if (total_gold == 0)
     {
         log_add_entry(nlarn->log, "You don't have any money to donate.");
@@ -131,7 +132,7 @@ int player_altar_pray(player *p)
 
     // Use a sensible default value, so you don't anger the gods without
     // meaning to.
-    const int donation = display_get_count("How much gold do you want to donate?",
+    const guint donation = display_get_count("How much gold do you want to donate?",
                                            200);
 
     /* 0 gold donations are likely to be the result of escaping the prompt */
@@ -893,7 +894,7 @@ int player_throne_pillage(player *p)
 
     if (chance(2 * player_get_dex(p)))
     {
-        for (int i = 0; i < rand_1n(4); i++)
+        for (guint i = 0; i < rand_1n(4); i++)
         {
             /* gems pop off the throne */
             inv_add(map_ilist_at(pmap, p->pos), item_new_random(IT_GEM, FALSE));
@@ -1144,7 +1145,7 @@ static gboolean sobject_blast_hit(position pos,
                 evasion /= 2;
         }
 
-        if (evasion >= rand_1n(21))
+        if (evasion >= (int)rand_1n(21))
         {
             if (!player_effect(nlarn->p, ET_BLINDNESS))
                 log_add_entry(nlarn->log, "The lightning whizzes by you!");

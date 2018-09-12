@@ -28,6 +28,7 @@
 #include "game.h"
 #include "nlarn.h"
 #include "player.h"
+#include "random.h"
 #include "sobjects.h"
 
 static const char aa1[] = "mighty evil master";

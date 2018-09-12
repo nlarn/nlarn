@@ -55,7 +55,7 @@
 #include "nlarn.h"
 #include "player.h"
 #include "spheres.h"
-#include "utils.h"
+#include "random.h"
 
 static void game_new();
 static gboolean game_load(gchar *filename);
@@ -553,6 +553,7 @@ int game_save(game *g, const char *filename)
     cJSON_AddNumberToObject(save, "time_start", g->time_start);
     cJSON_AddNumberToObject(save, "gtime", g->gtime);
     cJSON_AddNumberToObject(save, "difficulty", g->difficulty);
+    cJSON_AddItemToObject(save, "rng_state", rand_serialize());
 
     /* maps */
     cJSON_AddItemToObject(save, "maps", obj = cJSON_CreateArray());
@@ -1089,6 +1090,7 @@ static gboolean game_load(gchar *filename)
     nlarn->time_start = cJSON_GetObjectItem(save, "time_start")->valueint;
     nlarn->gtime = cJSON_GetObjectItem(save, "gtime")->valueint;
     nlarn->difficulty = cJSON_GetObjectItem(save, "difficulty")->valueint;
+    rand_deserialize(cJSON_GetObjectItem(save, "rng_state"));
 
     if (cJSON_GetObjectItem(save, "wizard"))
         nlarn->wizard = TRUE;

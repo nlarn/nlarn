@@ -22,7 +22,7 @@
 
 #include "defines.h"
 #include "nlarn.h"
-
+#include "random.h"
 
 /* local functions */
 static int wrap_log(lua_State *L);

@@ -30,6 +30,7 @@
 #include "nlarn.h"
 #include "player.h"
 #include "potions.h"
+#include "random.h"
 #include "rings.h"
 #include "scrolls.h"
 #include "spells.h"

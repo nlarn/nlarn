@@ -20,6 +20,7 @@
 
 #include "game.h"
 #include "nlarn.h"
+#include "random.h"
 #include "spheres.h"
 
 static sphere *sphere_at(game *g, position pos, sphere *s);

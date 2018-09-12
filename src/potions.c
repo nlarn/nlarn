@@ -23,6 +23,7 @@
 #include "nlarn.h"
 #include "player.h"
 #include "potions.h"
+#include "random.h"
 
 const potion_data potions[PO_MAX] =
 {

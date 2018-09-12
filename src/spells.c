@@ -23,6 +23,7 @@
 #include "display.h"
 #include "map.h"
 #include "nlarn.h"
+#include "random.h"
 #include "sobjects.h"
 #include "spells.h"
 #include "spheres.h"
@@ -1440,7 +1441,7 @@ static int spell_cast(player *p, spell *s)
     turns = 1;
 
     /* bad luck, low intelligence */
-    if (chance(1) || spell_success_value(p, s) < rand_1n(16))
+    if (chance(1) || spell_success_value(p, s) < (int)rand_1n(16))
     {
         log_add_entry(nlarn->log, "It didn't work!");
         player_mp_lose(p, spell_level(s));
@@ -1623,7 +1624,7 @@ static int try_drying_ground(position pos)
     {
         /* success chance depends on number of adjacent water squares */
         const int adj_water = count_adjacent_water_squares(pos);
-        if (rand_1n(9) <= adj_water)
+        if ((int)rand_1n(9) <= adj_water)
         {
             log_add_entry(nlarn->log, "Nothing happens.");
             return FALSE;
@@ -1637,7 +1638,7 @@ static int try_drying_ground(position pos)
     {
         /* success chance depends on number of adjacent water squares */
         const int adj_water = count_adjacent_water_squares(pos);
-        if (rand_1n(9) <= adj_water)
+        if ((int)rand_1n(9) <= adj_water)
         {
             log_add_entry(nlarn->log, "Nothing happens.");
             return FALSE;
@@ -1768,7 +1769,7 @@ static gboolean spell_area_pos_hit(position pos,
                     evasion /= 2;
             }
 
-            if (evasion >= rand_1n(21))
+            if (evasion >= (int)rand_1n(21))
             {
                 if (!player_effect(nlarn->p, ET_BLINDNESS))
                 {

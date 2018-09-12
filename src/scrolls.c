@@ -22,6 +22,7 @@
 #include "display.h"
 #include "game.h"
 #include "nlarn.h"
+#include "random.h"
 #include "scrolls.h"
 
 const magic_scroll_data scrolls[ST_MAX] =

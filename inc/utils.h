@@ -39,27 +39,6 @@ typedef struct _message_log
     GPtrArray *entries;
 } message_log;
 
-/* NOTE: g_random_int_range(m,n) returns a value x with m <= x < n. */
-static inline gint32 rand_1n(gint32 n)
-{
-    return (n <= 1) ? 1 : g_random_int_range(1, n);
-}
-
-static inline gint32 rand_0n(gint32 n)
-{
-    return (n <= 0) ? 0 : g_random_int_range(0, n);
-}
-
-static inline gint32 rand_m_n(gint32 m, gint32 n)
-{
-    return (m == n) ? m : g_random_int_range(m, n);
-}
-
-static inline gboolean chance(gint32 percent)
-{
-    return (percent >= rand_1n(101));
-}
-
 /* windef.h defines these */
 #ifdef WIN32
 #undef min
@@ -70,17 +49,6 @@ static inline int min(int x, int y) { return x > y ? y : x; }
 static inline int max(int x, int y) { return x > y ? x : y; }
 
 /* function definitions */
-int divert(int value, int percent);
-
-/**
- * Shuffle an array of integers
- *
- * @param pointer to integer array
- * @param length of array
- * @param how many fields should be skipped
- */
-void shuffle(int array[], int length, int skip);
-
 char *str_capitalize(char *string);
 
 /* message log handling */

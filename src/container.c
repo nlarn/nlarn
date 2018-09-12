@@ -22,6 +22,7 @@
 #include "display.h"
 #include "nlarn.h"
 #include "player.h"
+#include "random.h"
 
 const container_data containers[CT_MAX] =
 {

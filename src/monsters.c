@@ -29,6 +29,7 @@
 #include "map.h"
 #include "monsters.h"
 #include "nlarn.h"
+#include "random.h"
 
 /* monster information hiding */
 struct _monster
@@ -1473,7 +1474,7 @@ void monster_player_attack(monster *m, player *p)
         /* make monster size affect weapon damage */
         /* FIXME: handle the vorpal blade */
         dam->amount  = (m->eq_weapon != NULL) ? weapon_damage(m->eq_weapon) : 1
-                        + rand_0n(game_difficulty(nlarn) + 2)
+                        + (int)rand_0n(game_difficulty(nlarn) + 2)
                         + monster_level(m)
                         + 2 * ((monster_size(m) - ESIZE_MEDIUM)) / 25;
     }

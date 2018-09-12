@@ -23,6 +23,7 @@
 #include "game.h"
 #include "nlarn.h"
 #include "player.h"
+#include "random.h"
 #include "traps.h"
 
 const trap_data traps[TT_MAX] =
