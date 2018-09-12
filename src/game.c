@@ -212,7 +212,7 @@ void game_init(int argc, char *argv[])
     /* Open the scoreboard file. */
     if ((scoreboard_fd = open(scoreboard_filename, O_RDWR)) == -1)
     {
-        perror("Could not open scoreboard file.");
+        perror("Could not open scoreboard file");
         exit(EXIT_FAILURE);
     }
 
@@ -226,7 +226,7 @@ void game_init(int argc, char *argv[])
 #else
     if (setregid(-1, realgid) != 0) {
 #endif
-        perror("Could not drop setgid privileges.  Aborting.");
+        perror("Could not drop setgid privileges");
         exit(EXIT_FAILURE);
     }
 
@@ -235,7 +235,7 @@ void game_init(int argc, char *argv[])
 #else
     if (setreuid(-1, realuid) != 0) {
 #endif
-        perror("Could not drop setuid privileges.  Aborting.");
+        perror("Could not drop setuid privileges");
         exit(EXIT_FAILURE);
     }
 #endif
@@ -1298,7 +1298,7 @@ static GList *game_scores_load()
      */
     if (flock(fd, LOCK_EX) == -1)
     {
-        perror("Could not lock the scoreboard file.");
+        perror("Could not lock the scoreboard file");
     }
 
     gzFile file = gzdopen(fd, "rb");
