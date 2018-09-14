@@ -1539,7 +1539,7 @@ generate:
     if (treasure_room)
         nrooms++;
 
-    rooms = g_malloc0(sizeof(rectangle *) * (nrooms + 1));
+    rooms = g_malloc0(sizeof(rectangle*) * (nrooms + 1));
 
     for (int room = 0; room < nrooms; room++)
     {
@@ -1551,7 +1551,7 @@ generate:
 
         if (is_volcano_map(m->nlevel))
         {
-            mx = rand_1n(60)+3;
+            mx = rand_1n(60) + 3;
             rooms[room]->x1 = mx - rand_1n(2);
             rooms[room]->x2 = mx + rand_1n(2);
 
@@ -1559,9 +1559,9 @@ generate:
         }
         else
         {
-            mx = rand_1n(44)+5;
+            mx = rand_1n(44) + 5;
             rooms[room]->x1 = mx - rand_1n(4);
-            rooms[room]->x2 = mx + rand_1n(12)+3;
+            rooms[room]->x2 = mx + rand_1n(12) + 3;
         }
 
         for (Y(pos) = rooms[room]->y1 ; Y(pos) < rooms[room]->y2 ; Y(pos)++)
