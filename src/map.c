@@ -2094,13 +2094,13 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
     switch (rand_1n(2))
     {
     case 1: /* horizontal */
-        X(pos) = rand_m_n(rooms[room]->x1 + 1, rooms[room]->x2 - 1);
+        X(pos) = rand_m_n(rooms[room]->x1, rooms[room]->x2);
         Y(pos) = rand_0n(1) ? rooms[room]->y1 : rooms[room]->y2;
         break;
 
     case 2: /* vertical */
         X(pos) = rand_0n(1) ? rooms[room]->x1 : rooms[room]->x2;
-        Y(pos) = rand_m_n(rooms[room]->y1 + 1, rooms[room]->y2 - 1);
+        Y(pos) = rand_m_n(rooms[room]->y1, rooms[room]->y2);
         break;
     };
 
