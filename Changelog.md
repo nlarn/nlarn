@@ -1,3 +1,15 @@
+## Release 0.7.4 (unrelease)
+
+### Changes:
+* Replaced the random number generator (Mersenne Twister) with
+  the much faster xoshiro128\*\* and save it's state with the savegame.
+* Distribute Changelog in HTML format on macOS and Windows
+* Add author, icon and version number to Windows uninstaller
+
+### Fixed bugs:
+* don't generate rooms with one floor tile in one direction
+* Hide the console windows on Windows
+
 ## Release 0.7.3 (2018-09-08)
 
 ### Changes:
