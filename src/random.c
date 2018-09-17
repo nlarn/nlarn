@@ -20,7 +20,9 @@
 #include <stdint.h>
 
 #ifdef __linux__
-# define __USE_XOPEN_EXTENDED
+# ifndef __USE_XOPEN_EXTENDED
+#  define __USE_XOPEN_EXTENDED
+# endif
 #endif
 #ifdef G_OS_WIN32
 # define _CRT_RAND_S
