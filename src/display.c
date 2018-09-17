@@ -1097,22 +1097,33 @@ void display_inv_callbacks_clean(GPtrArray *callbacks)
 
 void display_config_autopickup(player *p)
 {
-    display_window *cwin;
-    int width, height;
-    int startx, starty;
     int RUN = TRUE;
     int attrs; /* curses attributes */
 
-    height = 6;
-    width = max(36 /* length of first label */, IT_MAX * 2 + 1);
+    const int height = 13;
+    const int width = 38;
 
-    starty = (LINES - height) / 2;
-    startx = (min(MAP_MAX_X, COLS) - width) / 2;
+    const int starty = (LINES - height) / 2;
+    const int startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
-    cwin = display_window_new(startx, starty, width, height, "Auto pick-up");
+    display_window *cwin = display_window_new(startx, starty, width, height, "Configure auto pick-up");
 
-    mvwaprintw(cwin->window, 1, 2, COLOR_PAIR(DCP_WHITE_RED), "Enabled types are shown inverted");
-    mvwaprintw(cwin->window, 2, 7, COLOR_PAIR(DCP_WHITE_RED), "type symbol to toggle");
+    mvwaprintw(cwin->window, 1, 2, COLOR_PAIR(DCP_WHITE_RED), "Item types which will be picked up");
+    mvwaprintw(cwin->window, 2, 2, COLOR_PAIR(DCP_WHITE_RED), "automatically are shown inverted. ");
+
+    mvwaprintw(cwin->window, 4,  6, COLOR_PAIR(DCP_WHITE_RED), "amulets");
+    mvwaprintw(cwin->window, 5,  6, COLOR_PAIR(DCP_WHITE_RED), "ammunition");
+    mvwaprintw(cwin->window, 6,  6, COLOR_PAIR(DCP_WHITE_RED), "armour");
+    mvwaprintw(cwin->window, 7,  6, COLOR_PAIR(DCP_WHITE_RED), "books");
+    mvwaprintw(cwin->window, 8,  6, COLOR_PAIR(DCP_WHITE_RED), "containers");
+    mvwaprintw(cwin->window, 9,  6, COLOR_PAIR(DCP_WHITE_RED), "gems");
+    mvwaprintw(cwin->window, 4, 23, COLOR_PAIR(DCP_WHITE_RED), "money");
+    mvwaprintw(cwin->window, 5, 23, COLOR_PAIR(DCP_WHITE_RED), "potions");
+    mvwaprintw(cwin->window, 6, 23, COLOR_PAIR(DCP_WHITE_RED), "rings");
+    mvwaprintw(cwin->window, 7, 23, COLOR_PAIR(DCP_WHITE_RED), "scrolls");
+    mvwaprintw(cwin->window, 8, 23, COLOR_PAIR(DCP_WHITE_RED), "weapons");
+
+    mvwaprintw(cwin->window, 11, 6, COLOR_PAIR(DCP_WHITE_RED), "Type a symbol to toggle.");
 
     do
     {
@@ -1125,7 +1136,10 @@ void display_config_autopickup(player *p)
             else
                 attrs = COLOR_PAIR(DCP_WHITE_RED);
 
-            mvwaprintw(cwin->window, 4, 6 + it * 2, attrs, "%c", item_glyph(it));
+            /* x / y position of the glyph depends on the item type number */
+            int xpos = it < 7 ? 4 : 21;
+            int ypos = it < 7 ? 3 + it : it - 3;
+            mvwaprintw(cwin->window, ypos, xpos, attrs, "%c", item_glyph(it));
         }
 
         wrefresh(cwin->window);
