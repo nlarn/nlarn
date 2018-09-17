@@ -1286,9 +1286,6 @@ static GList *game_scores_load()
     /* linked list of all scores */
     GList *gs = NULL;
 
-    /* single scoreboard entry */
-    game_score_t *nscore;
-
     /* read the scoreboard file into memory */
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     /* we'll need the file desciptor for saving, too, so duplicate it */
@@ -1355,7 +1352,7 @@ static GList *game_scores_load()
     while (s_entry != NULL)
     {
         /* create new score record */
-        nscore = g_malloc(sizeof(game_score_t));
+        game_score_t *nscore = g_malloc(sizeof(game_score_t));
 
         /* add record to array */
         gs = g_list_append(gs, nscore);

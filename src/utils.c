@@ -122,14 +122,13 @@ int log_add_entry(message_log *log, const char *fmt, ...)
 
 void log_set_time(message_log *log, int gtime)
 {
-    message_log_entry *entry;
 
     g_assert(log != NULL);
 
     /* flush pending entry */
     if ((log->buffer)->len)
     {
-        entry = g_malloc(sizeof(message_log_entry));
+        message_log_entry *entry = g_malloc(sizeof(message_log_entry));
         entry->gtime = log->gtime;
         entry->message = (log->buffer)->str;
 
