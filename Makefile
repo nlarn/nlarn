@@ -108,6 +108,8 @@ ifneq ($(wildcard /etc/debian_version),)
   lua = lua5.3
 else ifneq ($(filter $(OS), FreeBSD NetBSD),)
   lua = lua-5.3
+else ifneq ($(filter $(OS), OpenBSD),)
+  lua = lua53
 else
   lua = lua
 endif
