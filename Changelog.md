@@ -4,6 +4,7 @@
 * Replaced the random number generator (Mersenne Twister) with
   the much faster xoshiro128\*\* and save it's state with the savegame.
 * Show item type description in auto-pickup configuration dialogue
+* Permanently show spell description below spell selection window
 * Distribute Changelog in HTML format on macOS and Windows
 * Add author, icon and version number to Windows uninstaller
 

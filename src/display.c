@@ -1178,7 +1178,7 @@ void display_config_autopickup(player *p)
 
 spell *display_spell_select(const char *title, player *p)
 {
-    display_window *swin;
+    display_window *swin, *ipop = NULL;
     guint width, height;
     guint startx, starty;
     guint maxvis;
@@ -1242,17 +1242,22 @@ spell *display_spell_select(const char *title, player *p)
         display_window_update_arrow_down(swin, ((offset + maxvis) < p->known_spells->len));
 
         /* construct the window caption: display type ahead keys */
-        caption = g_strdup_printf("%s%s%s%s(?) description",
+        caption = g_strdup_printf("%s%s%s",
                                   (strlen(code_buf) ? "[" : ""),
                                   code_buf,
-                                  (strlen(code_buf) ? "]" : ""),
-                                  (strlen(code_buf) ? " " : ""));
+                                  (strlen(code_buf) ? "]" : ""));
 
         display_window_update_caption(swin, caption);
 
         /* store currently highlighted spell */
         sp = g_ptr_array_index(p->known_spells, curr + offset - 1);
 
+        /* refresh the spell description pop-up */
+        if (ipop != NULL)
+            display_window_destroy(ipop);
+
+        ipop = display_popup(swin->x1, swin->y1 + swin->height, width,
+                spell_name(sp), spell_desc(sp));
 
         switch ((key = getch()))
         {
@@ -1358,11 +1363,6 @@ spell *display_spell_select(const char *title, player *p)
             code_buf[0] = '\0';
             break;
 
-        case '?':
-        case KEY_F(1):
-            display_show_message(spell_name(sp), spell_desc(sp), 0);
-            break;
-
         case KEY_ESC:
             RUN = FALSE;
             sp = NULL;
@@ -1466,6 +1466,7 @@ mnemonics:
     g_free(code_buf);
 
     display_window_destroy(swin);
+    display_window_destroy(ipop);
 
     return sp;
 }
