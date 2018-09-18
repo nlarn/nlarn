@@ -28,33 +28,33 @@
 #include "spells.h"
 #include "spheres.h"
 
-static int spell_type_player(spell *s, struct player *p);
-static int spell_type_point(spell *s, struct player *p);
-static int spell_type_ray(spell *s, struct player *p);
-static int spell_type_flood(spell *s, struct player *p);
-static int spell_type_blast(spell *s, struct player *p);
+static gboolean spell_type_player(spell *s, struct player *p);
+static gboolean spell_type_point(spell *s, struct player *p);
+static gboolean spell_type_ray(spell *s, struct player *p);
+static gboolean spell_type_flood(spell *s, struct player *p);
+static gboolean spell_type_blast(spell *s, struct player *p);
 
-static gboolean spell_alter_reality(struct player *p);
+static gboolean spell_alter_reality(spell *s, struct player *p);
 static gboolean spell_create_sphere(spell *s, struct player *p);
-static gboolean spell_cure_poison(struct player *p);
-static gboolean spell_cure_blindness(struct player *p);
+static gboolean spell_cure_poison(spell *s, struct player *p);
+static gboolean spell_cure_blindness(spell *s, struct player *p);
 static gboolean spell_phantasmal_forces(spell *s, struct player *p);
 static gboolean spell_scare_monsters(spell *s, struct player *p);
 static gboolean spell_summon_demon(spell *s, struct player *p);
-static gboolean spell_make_wall(struct player *p);
+static gboolean spell_make_wall(spell *s, struct player *p);
 
 const spell_data spells[SP_MAX] =
 {
     {
         SP_PRO, "pro","protection",
-        SC_PLAYER, DAM_NONE, ET_PROTECTION,
+        SC_PLAYER, DAM_NONE, ET_PROTECTION, spell_type_player,
         "Generates a protection field",
         NULL, NULL,
         DC_NONE, 1, 260, TRUE
     },
     {
         SP_MLE, "mle", "magic missile",
-        SC_RAY, DAM_MAGICAL, ET_NONE,
+        SC_RAY, DAM_MAGICAL, ET_NONE, spell_type_ray,
         "Creates and hurls a missile magic of magical energy at a target",
         "The missile hits the %s.",
         "The missile bounces off the %s.",
@@ -62,14 +62,14 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_DEX, "dex", "dexterity",
-        SC_PLAYER, DAM_NONE, ET_INC_DEX,
+        SC_PLAYER, DAM_NONE, ET_INC_DEX, spell_type_player,
         "Improves the caster's dexterity",
         NULL, NULL,
         DC_NONE, 1, 260, FALSE
     },
     {
         SP_SLE, "sle", "sleep",
-        SC_POINT, DAM_NONE, ET_SLEEP,
+        SC_POINT, DAM_NONE, ET_SLEEP, spell_type_point,
         "Causes some monsters to go to sleep",
         NULL,
         "The %s doesn't sleep.",
@@ -77,14 +77,14 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_CHM, "chm", "charm monster",
-        SC_POINT, DAM_NONE, ET_CHARM_MONSTER,
+        SC_POINT, DAM_NONE, ET_CHARM_MONSTER, spell_type_point,
         "Some monsters may be awed at your magnificence",
         NULL, NULL,
         DC_NONE, 1, 260, FALSE
     },
     {
         SP_SSP, "ssp", "sonic spear",
-        SC_RAY, DAM_PHYSICAL, ET_NONE,
+        SC_RAY, DAM_PHYSICAL, ET_NONE, spell_type_ray,
         "Causes your hands to emit a screeching sound toward what they point",
         "The sound damages the %s.",
         "The %s can't hear the noise.",
@@ -92,42 +92,42 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_STR, "str", "strength",
-        SC_PLAYER, DAM_NONE, ET_INC_STR,
+        SC_PLAYER, DAM_NONE, ET_INC_STR, spell_type_player,
         "Increase the caster's strength for a short term",
         NULL, NULL,
         DC_NONE, 2, 460, FALSE
     },
     {
         SP_CPO, "cpo", "cure poison",
-        SC_OTHER, DAM_NONE, ET_NONE,
+        SC_OTHER, DAM_NONE, ET_NONE, spell_cure_poison,
         "The caster is cured from poison",
         NULL, NULL,
         DC_NONE, 2, 460, TRUE
     },
     {
         SP_HEL, "hel", "healing",
-        SC_PLAYER, DAM_NONE, ET_INC_HP,
+        SC_PLAYER, DAM_NONE, ET_INC_HP, spell_type_player,
         "Restores some HP to the caster",
         NULL, NULL,
         DC_NONE, 2, 500, TRUE
     },
     {
         SP_CBL, "cbl", "cure blindness",
-        SC_OTHER, DAM_NONE, ET_NONE,
+        SC_OTHER, DAM_NONE, ET_NONE, spell_cure_blindness,
         "Restores sight to one so unfortunate as to be blinded",
         NULL, NULL,
         DC_NONE, 2, 400, TRUE
     },
     {
         SP_CRE, "cre", "create monster",
-        SC_OTHER, DAM_NONE, ET_NONE,
+        SC_OTHER, DAM_NONE, ET_NONE, spell_create_monster,
         "Creates a monster near the caster appropriate for the location",
         NULL, NULL,
         DC_NONE, 2, 400, FALSE
     },
     {
         SP_PHA, "pha", "phantasmal forces",
-        SC_OTHER, DAM_NONE, ET_NONE,
+        SC_OTHER, DAM_NONE, ET_NONE, spell_phantasmal_forces,
         "Creates illusions, and if believed, the monster flees",
         "The %s believed!",
         "The %s didn't believe the illusions!",
@@ -135,14 +135,14 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_INV, "inv", "invisibility",
-        SC_PLAYER, DAM_NONE, ET_INVISIBILITY,
+        SC_PLAYER, DAM_NONE, ET_INVISIBILITY, spell_type_player,
         "The caster becomes invisible",
         NULL, NULL,
         DC_NONE, 2, 600, FALSE
     },
     {
         SP_BAL, "bal", "fireball",
-        SC_BLAST, DAM_FIRE, ET_NONE,
+        SC_BLAST, DAM_FIRE, ET_NONE, spell_type_blast,
         "Makes a ball of fire that burns on what it hits",
         "The fireball hits the %s.",
         NULL,
@@ -150,7 +150,7 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_CLD, "cld", "cone of cold",
-        SC_RAY, DAM_COLD, ET_NONE,
+        SC_RAY, DAM_COLD, ET_NONE, spell_type_ray,
         "Sends forth a cone of cold which freezes what it touches",
         "The cone of cold strikes the %s.",
         NULL,
@@ -158,7 +158,7 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_PLY, "ply", "polymorph",
-        SC_POINT, DAM_NONE, ET_NONE,
+        SC_POINT, DAM_NONE, ET_NONE, spell_type_point,
         "You can find out what this does for yourself",
         NULL,
         "The %s resists.",
@@ -166,21 +166,21 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_CAN, "can", "cancellation",
-        SC_PLAYER, DAM_NONE, ET_CANCELLATION,
+        SC_PLAYER, DAM_NONE, ET_CANCELLATION, spell_type_player,
         "Protects the caster against spheres of annihilation",
         NULL, NULL,
         DC_NONE, 3, 950, FALSE
     },
     {
         SP_HAS, "has", "haste self",
-        SC_PLAYER, DAM_NONE, ET_SPEED,
+        SC_PLAYER, DAM_NONE, ET_SPEED, spell_type_player,
         "Speeds up the caster's movements",
         NULL, NULL,
         DC_NONE, 3, 950, FALSE
     },
     {
         SP_CKL, "ckl", "killing cloud",
-        SC_FLOOD, DAM_ACID, ET_NONE,
+        SC_FLOOD, DAM_ACID, ET_NONE, spell_type_flood,
         "Creates a fog of poisonous gas which kills all that is within it",
         "The %s gasps for air.",
         NULL,
@@ -188,14 +188,14 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_VPR, "vpr", "vaporize rock",
-        SC_OTHER, DAM_NONE, ET_NONE,
+        SC_OTHER, DAM_NONE, ET_NONE, spell_vaporize_rock,
         "This changes rock to air",
         NULL, NULL,
         DC_NONE, 3, 950, FALSE
     },
     {
         SP_DRY, "dry", "dehydration",
-        SC_POINT, DAM_PHYSICAL, ET_NONE,
+        SC_POINT, DAM_PHYSICAL, ET_NONE, spell_type_point,
         "Dries up water in the immediate vicinity",
         "The %s shrivels up.",
         "The %s isn't affected.",
@@ -203,7 +203,7 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_LIT, "lit", "lightning",
-        SC_RAY, DAM_ELECTRICITY, ET_NONE,
+        SC_RAY, DAM_ELECTRICITY, ET_NONE, spell_type_ray,
         "Your finger will emit a lightning bolt when this spell is cast",
         "A lightning bolt hits the %s.",
         "The %s loves fire and lightning!",
@@ -211,21 +211,21 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_DRL, "drl", "drain life",
-        SC_POINT, DAM_PHYSICAL, ET_NONE,
+        SC_POINT, DAM_PHYSICAL, ET_NONE, spell_type_point,
         "Subtracts hit points from both you and a monster",
         NULL, NULL,
         DC_NONE, 4, 1400, FALSE
     },
     {
         SP_GLO, "glo", "invulnerability",
-        SC_PLAYER, DAM_NONE, ET_INVULNERABILITY,
+        SC_PLAYER, DAM_NONE, ET_INVULNERABILITY, spell_type_player,
         "This globe helps to protect the player from physical attack",
         NULL, NULL,
         DC_NONE, 4, 1400, FALSE
     },
     {
         SP_FLO, "flo", "flood",
-        SC_FLOOD, DAM_WATER, ET_NONE,
+        SC_FLOOD, DAM_WATER, ET_NONE, spell_type_flood,
         "This creates an avalanche of H2O to flood the immediate chamber",
         "The %s struggles for air in the flood!",
         "The %s loves the water!",
@@ -233,7 +233,7 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_FGR, "fgr", "finger of death",
-        SC_POINT, DAM_PHYSICAL, ET_NONE,
+        SC_POINT, DAM_PHYSICAL, ET_NONE, spell_type_point,
         "This is a holy spell and calls upon your god to back you up",
         "The %s's heart stopped.",
         "The %s isn't affected.",
@@ -241,35 +241,35 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_SCA, "sca", "scare monsters",
-        SC_OTHER, DAM_NONE, ET_NONE,
+        SC_OTHER, DAM_NONE, ET_NONE, spell_scare_monsters,
         "Terrifies nearby monsters so that hopefully they flee the magic user",
         NULL, NULL,
         DC_NONE, 5, 2000, FALSE
     },
     {
         SP_HLD, "hld", "hold monster",
-        SC_POINT, DAM_NONE, ET_HOLD_MONSTER,
+        SC_POINT, DAM_NONE, ET_HOLD_MONSTER, spell_type_point,
         "The monster is frozen in his tracks if this is successful",
         NULL, NULL,
         DC_NONE, 5, 2000, FALSE
     },
     {
         SP_STP, "stp", "time stop",
-        SC_PLAYER, DAM_NONE, ET_TIMESTOP,
+        SC_PLAYER, DAM_NONE, ET_TIMESTOP, spell_type_player,
         "All movement in the caverns ceases for a limited duration",
         NULL, NULL,
         DC_NONE, 5, 2500, FALSE
     },
     {
         SP_TEL, "tel", "teleport away",
-        SC_POINT, DAM_NONE, ET_NONE,
+        SC_POINT, DAM_NONE, ET_NONE, spell_type_point,
         "Moves a particular monster around in the dungeon",
         NULL, NULL,
         DC_NONE, 5, 2000, FALSE
     },
     {
         SP_MFI, "mfi", "magic fire",
-        SC_FLOOD, DAM_FIRE, ET_NONE,
+        SC_FLOOD, DAM_FIRE, ET_NONE, spell_type_flood,
         "This causes a curtain of fire to appear all around you",
         "The %s cringes from the flame.",
         NULL,
@@ -277,35 +277,35 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_MKW, "mkw", "make wall",
-        SC_OTHER, DAM_NONE, ET_NONE,
+        SC_OTHER, DAM_NONE, ET_NONE, spell_make_wall,
         "Makes a wall in the specified place",
         NULL, NULL,
         DC_NONE, 6, 3000, FALSE
     },
     {
         SP_SPH, "sph", "sphere of annihilation",
-        SC_OTHER, DAM_NONE, ET_NONE,
+        SC_OTHER, DAM_NONE, ET_NONE, spell_create_sphere,
         "Anything caught in this sphere is instantly killed",
         NULL, NULL,
         DC_NONE, 6, 3500, FALSE
     },
     {
         SP_SUM, "sum", "summon demon",
-        SC_OTHER, DAM_NONE, ET_NONE,
+        SC_OTHER, DAM_NONE, ET_NONE, spell_summon_demon,
         "Summons a demon who hopefully helps you out",
         NULL, NULL,
         DC_NONE, 6, 3500, FALSE
     },
     {
         SP_WTW, "wtw", "walk through walls",
-        SC_PLAYER, DAM_NONE, ET_WALL_WALK,
+        SC_PLAYER, DAM_NONE, ET_WALL_WALK, spell_type_player,
         "Allows the caster to walk through walls for a short period of time",
         NULL, NULL,
         DC_NONE, 6, 3800, FALSE
     },
     {
         SP_ALT, "alt", "alter reality",
-        SC_OTHER, DAM_NONE, ET_NONE,
+        SC_OTHER, DAM_NONE, ET_NONE, spell_alter_reality,
         "God only knows what this will do",
         NULL,
         "Polinneaus won't let you mess with his dungeon!",
@@ -613,7 +613,7 @@ gchar* spell_desc_by_id(spell_id sid)
     return g_string_free(desc, FALSE);
 }
 
-static int spell_type_player(spell *s, struct player *p)
+static gboolean spell_type_player(spell *s, struct player *p)
 {
     effect *e = NULL;
 
@@ -696,7 +696,7 @@ static int spell_type_player(spell *s, struct player *p)
     return TRUE;
 }
 
-static int spell_type_point(spell *s, struct player *p)
+static gboolean spell_type_point(spell *s, struct player *p)
 {
     monster *m = NULL;
     position pos;
@@ -847,7 +847,7 @@ static int spell_type_point(spell *s, struct player *p)
     return TRUE;
 }
 
-static int spell_type_ray(spell *s, struct player *p)
+static gboolean spell_type_ray(spell *s, struct player *p)
 {
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
 
@@ -909,7 +909,7 @@ static int spell_type_ray(spell *s, struct player *p)
     return TRUE;
 }
 
-static int spell_type_flood(spell *s, struct player *p)
+static gboolean spell_type_flood(spell *s, struct player *p)
 {
     position pos;
     char buffer[81];
@@ -972,7 +972,7 @@ static int spell_type_flood(spell *s, struct player *p)
     return TRUE;
 }
 
-static int spell_type_blast(spell *s, struct player *p)
+static gboolean spell_type_blast(spell *s, struct player *p)
 {
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
 
@@ -1030,13 +1030,16 @@ static int spell_type_blast(spell *s, struct player *p)
     return TRUE;
 }
 
-static gboolean spell_alter_reality(player *p)
+static gboolean spell_alter_reality(spell *s, player *p)
 {
     map *nlevel;
     position pos = { { 0, 0, Z(p->pos) } };
 
     if (Z(p->pos) == 0)
+    {
+        log_add_entry(nlarn->log, spell_msg_fail(s));
         return FALSE;
+    }
 
     /* reset the player's memory of the current map */
     memset(&player_memory_of(p, pos), 0,
@@ -1056,7 +1059,7 @@ static gboolean spell_alter_reality(player *p)
     return TRUE;
 }
 
-gboolean spell_create_monster(struct player *p)
+gboolean spell_create_monster(spell *s __attribute__((unused)), struct player *p)
 {
     position mpos;
 
@@ -1106,7 +1109,7 @@ static gboolean spell_create_sphere(spell *s, struct player *p)
     }
 }
 
-static gboolean spell_cure_poison(struct player *p)
+static gboolean spell_cure_poison(spell *s __attribute__((unused)), struct player *p)
 {
     effect *eff = NULL;
 
@@ -1124,7 +1127,7 @@ static gboolean spell_cure_poison(struct player *p)
     }
 }
 
-static gboolean spell_cure_blindness(struct player *p)
+static gboolean spell_cure_blindness(spell *s __attribute__((unused)), struct player *p)
 {
     effect *eff = NULL;
 
@@ -1251,7 +1254,7 @@ static gboolean spell_summon_demon(spell *s, struct player *p)
     return TRUE;
 }
 
-static gboolean spell_make_wall(player *p)
+static gboolean spell_make_wall(spell *s __attribute__((unused)), player *p)
 {
     position pos;
 
@@ -1316,7 +1319,7 @@ static gboolean spell_make_wall(player *p)
     }
 }
 
-gboolean spell_vaporize_rock(player *p)
+gboolean spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
 {
     monster *m;
     position pos;
@@ -1500,99 +1503,8 @@ static int spell_cast(player *p, spell *s)
         return turns;
     }
 
-    switch (spell_type(s))
-    {
-        /* spells that cause an effect on the player */
-    case SC_PLAYER:
-        well_done = spell_type_player(s, p);
-        break;
-
-        /* spells that cause an effect on a monster */
-    case SC_POINT:
-        well_done = spell_type_point(s, p);
-        break;
-
-        /* creates a ray */
-    case SC_RAY:
-        well_done = spell_type_ray(s, p);
-        break;
-
-        /* effect pours like water */
-    case SC_FLOOD:
-        well_done = spell_type_flood(s, p);
-        break;
-
-        /* effect occurs like an explosion */
-    case SC_BLAST:
-        well_done = spell_type_blast(s, p);
-        break;
-
-    case SC_OTHER:  /* unclassified */
-
-        switch (s->id)
-        {
-            /* cure poison */
-        case SP_CPO:
-            well_done = spell_cure_poison(p);
-            break;
-
-            /* cure blindness */
-        case SP_CBL:
-            well_done = spell_cure_blindness(p);
-            break;
-
-            /* create monster */
-        case SP_CRE:
-            well_done = spell_create_monster(p);
-            break;
-
-            /* phantasmal forces */
-        case SP_PHA:
-            well_done = spell_phantasmal_forces(s, p);
-            break;
-
-            /* vaporize rock */
-        case SP_VPR:
-            well_done = spell_vaporize_rock(p);
-            break;
-
-            /* scare monsters */
-        case SP_SCA:
-            well_done = spell_scare_monsters(s, p);
-            break;
-
-            /* make wall */
-        case SP_MKW:
-            well_done = spell_make_wall(p);
-            break;
-
-            /* sphere of annihilation */
-        case SP_SPH:
-            well_done = spell_create_sphere(s, p);
-            break;
-
-            /* summon demon */
-        case SP_SUM:
-            well_done = spell_summon_demon(s, p);
-            break;
-
-            /* alter reality */
-        case SP_ALT:
-            well_done = spell_alter_reality(p);
-            if (!well_done)
-                log_add_entry(nlarn->log, spell_msg_fail_by_id(s->id));
-            break;
-
-        default:
-            /* this shouldn't happen */
-            break;
-        }
-        break;
-
-    case SC_MAX:
-        log_add_entry(nlarn->log, "Internal Error in %s:%d.", __FILE__, __LINE__);
-        break;
-    }
+    /* call the spell's function */
+    well_done = spells[s->id].function(s, p);
 
     if (!well_done)
         return 0;

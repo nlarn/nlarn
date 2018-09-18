@@ -175,7 +175,7 @@ item_usage_result scroll_read(struct player *p, item *r_scroll)
         break;
 
     case ST_CREATE_MONSTER:
-        result.identified = spell_create_monster(p);
+        result.identified = spell_create_monster(NULL, p);
         break;
 
     case ST_CREATE_ARTIFACT:
@@ -230,7 +230,7 @@ item_usage_result scroll_read(struct player *p, item *r_scroll)
                           scroll_name(r_scroll));
         }
 
-        if (spell_vaporize_rock(p))
+        if (spell_vaporize_rock(NULL, p))
         {
             /* recalc fov if something has been vaporised */
             player_update_fov(p);

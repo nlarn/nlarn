@@ -75,6 +75,12 @@ typedef enum spell_ids {
     SP_MAX          /* last known spell */
 } spell_id;
 
+/* forward declarations */
+struct spell;
+struct player;
+
+/* a function that implements a spell */
+typedef int (*spell_func)(struct spell *, struct player *);
 
 typedef struct spell_data {
     spell_id id;
@@ -82,7 +88,8 @@ typedef struct spell_data {
     const char *name;
     spell_t type;
     damage_t damage_type;
-    effect_t effect;          /* the effect cause by thos spell */
+    effect_t effect;          /* the effect cause by this spell */
+    spell_func function;      /* the function implementing this spell */
     const char *description;  /* the spell's description */
     const char *msg_success;  /* the message given upon success */
     const char *msg_fail;     /* the message give upoon failure */
@@ -157,8 +164,8 @@ int spell_known(struct player *p, spell_id spell_type);
  */
 gchar* spell_desc_by_id(spell_id sid);
 
-gboolean spell_create_monster(struct player *p);
-gboolean spell_vaporize_rock(struct player *p);
+gboolean spell_create_monster(spell *s, struct player *p);
+gboolean spell_vaporize_rock(spell *s, struct player *p);
 
 #define spell_code(spell)     (spells[(spell)->id].code)
 #define spell_name(spell)     (spells[(spell)->id].name)
