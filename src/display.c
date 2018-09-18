@@ -2857,7 +2857,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
             width = max_width;
     }
 
-    text = text_wrap(msg, width - 3, 0);
+    text = text_wrap(msg, width - 4, 0);
     height = min(text->len + 2, max_height);
 
     win = display_window_new(x1, y1, width, height, title);
