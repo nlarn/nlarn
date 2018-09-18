@@ -213,8 +213,9 @@ int display_show_message(const char *title, const char *message, int indent);
  * @param The top left y position.
  * @param The width of the popup. Determined automatically if 0.
  * @param The popup window title. May be NULL.
- * @param The popup window message. If the message is too long to fit
- *        the screen, it will be truncated.
+ * @param The popup window message. The message will be wrapped to fit the
+ *        window's width. If the message is too long to fit the screen, it
+ *        will be truncated.
  *
  * @return A pointer to the newly allocated window structure.
  */
