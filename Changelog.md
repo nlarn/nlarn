@@ -1,15 +1,17 @@
-## Release 0.7.4 (unrelease)
+## Release 0.7.4 (unreleased)
 
 ### Changes:
 * Replaced the random number generator (Mersenne Twister) with
   the much faster xoshiro128\*\* and save it's state with the savegame.
 * Show item type description in auto-pickup configuration dialogue
 * Permanently show spell description below spell selection window
+* Describe spell type for most spells in spell description
 * Distribute Changelog in HTML format on macOS and Windows
 * Add author, icon and version number to Windows uninstaller
 
 ### Fixed bugs:
-* don't generate rooms with one floor tile in one direction
+* Don't generate rooms with one floor tile in one direction
+* Fix text wrapping in message popup
 * Hide the console windows on Windows
 
 ## Release 0.7.3 (2018-09-08)
