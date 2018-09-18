@@ -28,6 +28,21 @@
 #include "spells.h"
 #include "spheres.h"
 
+static int spell_type_player(spell *s, struct player *p);
+static int spell_type_point(spell *s, struct player *p);
+static int spell_type_ray(spell *s, struct player *p);
+static int spell_type_flood(spell *s, struct player *p);
+static int spell_type_blast(spell *s, struct player *p);
+
+static gboolean spell_alter_reality(struct player *p);
+static gboolean spell_create_sphere(spell *s, struct player *p);
+static gboolean spell_cure_poison(struct player *p);
+static gboolean spell_cure_blindness(struct player *p);
+static gboolean spell_phantasmal_forces(spell *s, struct player *p);
+static gboolean spell_scare_monsters(spell *s, struct player *p);
+static gboolean spell_summon_demon(spell *s, struct player *p);
+static gboolean spell_make_wall(struct player *p);
+
 const spell_data spells[SP_MAX] =
 {
     {
@@ -598,7 +613,7 @@ gchar* spell_desc_by_id(spell_id sid)
     return g_string_free(desc, FALSE);
 }
 
-int spell_type_player(spell *s, struct player *p)
+static int spell_type_player(spell *s, struct player *p)
 {
     effect *e = NULL;
 
@@ -681,7 +696,7 @@ int spell_type_player(spell *s, struct player *p)
     return TRUE;
 }
 
-int spell_type_point(spell *s, struct player *p)
+static int spell_type_point(spell *s, struct player *p)
 {
     monster *m = NULL;
     position pos;
@@ -832,7 +847,7 @@ int spell_type_point(spell *s, struct player *p)
     return TRUE;
 }
 
-int spell_type_ray(spell *s, struct player *p)
+static int spell_type_ray(spell *s, struct player *p)
 {
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
 
@@ -894,7 +909,7 @@ int spell_type_ray(spell *s, struct player *p)
     return TRUE;
 }
 
-int spell_type_flood(spell *s, struct player *p)
+static int spell_type_flood(spell *s, struct player *p)
 {
     position pos;
     char buffer[81];
@@ -957,7 +972,7 @@ int spell_type_flood(spell *s, struct player *p)
     return TRUE;
 }
 
-int spell_type_blast(spell *s, struct player *p)
+static int spell_type_blast(spell *s, struct player *p)
 {
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
 
@@ -1015,7 +1030,7 @@ int spell_type_blast(spell *s, struct player *p)
     return TRUE;
 }
 
-gboolean spell_alter_reality(player *p)
+static gboolean spell_alter_reality(player *p)
 {
     map *nlevel;
     position pos = { { 0, 0, Z(p->pos) } };
@@ -1068,7 +1083,7 @@ gboolean spell_create_monster(struct player *p)
     }
 }
 
-gboolean spell_create_sphere(spell *s, struct player *p)
+static gboolean spell_create_sphere(spell *s, struct player *p)
 {
     g_assert(p != NULL);
 
@@ -1091,7 +1106,7 @@ gboolean spell_create_sphere(spell *s, struct player *p)
     }
 }
 
-gboolean spell_cure_poison(struct player *p)
+static gboolean spell_cure_poison(struct player *p)
 {
     effect *eff = NULL;
 
@@ -1109,7 +1124,7 @@ gboolean spell_cure_poison(struct player *p)
     }
 }
 
-gboolean spell_cure_blindness(struct player *p)
+static gboolean spell_cure_blindness(struct player *p)
 {
     effect *eff = NULL;
 
@@ -1127,7 +1142,7 @@ gboolean spell_cure_blindness(struct player *p)
     }
 }
 
-gboolean spell_phantasmal_forces(spell *s, struct player *p)
+static gboolean spell_phantasmal_forces(spell *s, struct player *p)
 {
     position mpos;
     monster *m = NULL;
@@ -1167,7 +1182,7 @@ gboolean spell_phantasmal_forces(spell *s, struct player *p)
     }
 }
 
-gboolean spell_scare_monsters(spell *s, struct player *p)
+static gboolean spell_scare_monsters(spell *s, struct player *p)
 {
     monster *m;
     int count = 0;
@@ -1213,7 +1228,7 @@ gboolean spell_scare_monsters(spell *s, struct player *p)
     return (count > 0);
 }
 
-gboolean spell_summon_demon(spell *s, struct player *p)
+static gboolean spell_summon_demon(spell *s, struct player *p)
 {
     monster *demon;
     position pos;
@@ -1236,7 +1251,7 @@ gboolean spell_summon_demon(spell *s, struct player *p)
     return TRUE;
 }
 
-gboolean spell_make_wall(player *p)
+static gboolean spell_make_wall(player *p)
 {
     position pos;
 

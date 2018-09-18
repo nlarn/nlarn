@@ -157,21 +157,7 @@ int spell_known(struct player *p, spell_id spell_type);
  */
 gchar* spell_desc_by_id(spell_id sid);
 
-int spell_type_player(spell *s, struct player *p);
-int spell_type_point(spell *s, struct player *p);
-int spell_type_ray(spell *s, struct player *p);
-int spell_type_flood(spell *s, struct player *p);
-int spell_type_blast(spell *s, struct player *p);
-
-gboolean spell_alter_reality(struct player *p);
 gboolean spell_create_monster(struct player *p);
-gboolean spell_create_sphere(spell *s, struct player *p);
-gboolean spell_cure_poison(struct player *p);
-gboolean spell_cure_blindness(struct player *p);
-gboolean spell_phantasmal_forces(spell *s, struct player *p);
-gboolean spell_scare_monsters(spell *s, struct player *p);
-gboolean spell_summon_demon(spell *s, struct player *p);
-gboolean spell_make_wall(struct player *p);
 gboolean spell_vaporize_rock(struct player *p);
 
 #define spell_code(spell)     (spells[(spell)->id].code)
