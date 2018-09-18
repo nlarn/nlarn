@@ -1256,8 +1256,10 @@ spell *display_spell_select(const char *title, player *p)
         if (ipop != NULL)
             display_window_destroy(ipop);
 
+        gchar *spdesc = spell_desc_by_id(sp->id);;
         ipop = display_popup(swin->x1, swin->y1 + swin->height, width,
-                spell_name(sp), spell_desc(sp));
+                spell_name(sp), spdesc);
+        g_free(spdesc);
 
         switch ((key = getch()))
         {

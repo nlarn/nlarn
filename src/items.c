@@ -1496,9 +1496,10 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop)
     case IT_BOOK:
         if (known)
         {
+            gchar *stdesc = spell_desc_by_id(it->id);
             g_string_append_printf(desc, "%s\nSpell level: %d\n",
-                                   spell_desc_by_id(it->id),
-                                   spell_level_by_id(it->id));
+                    stdesc, spell_level_by_id(it->id));
+            g_free(stdesc);
         }
         break;
 
