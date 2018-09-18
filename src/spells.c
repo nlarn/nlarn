@@ -99,7 +99,7 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_CPO, "cpo", "cure poison",
-        SC_OTHER, DAM_NONE, ET_NONE, spell_cure_poison,
+        SC_PLAYER, DAM_NONE, ET_NONE, spell_cure_poison,
         "The caster is cured from poison",
         NULL, NULL,
         DC_NONE, 2, 460, TRUE
@@ -113,7 +113,7 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_CBL, "cbl", "cure blindness",
-        SC_OTHER, DAM_NONE, ET_NONE, spell_cure_blindness,
+        SC_PLAYER, DAM_NONE, ET_NONE, spell_cure_blindness,
         "Restores sight to one so unfortunate as to be blinded",
         NULL, NULL,
         DC_NONE, 2, 400, TRUE
