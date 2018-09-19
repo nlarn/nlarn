@@ -2694,7 +2694,8 @@ static position monster_move_flee(monster *m, struct player *p)
 
 static position monster_move_serve(monster *m, struct player *p)
 {
-    position npos = pos_invalid;
+    /* If a new position cannot be found, keep the current position */
+    position npos = m->pos;
 
     /* generate a fov structure if not yet available */
     if (!m->fv)
@@ -2726,7 +2727,6 @@ static position monster_move_serve(monster *m, struct player *p)
     {
         /* look for worthy foes */
         /* TODO: implement */
-        npos = m->pos;
     }
 
     return npos;
