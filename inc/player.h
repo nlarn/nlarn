@@ -264,7 +264,6 @@ int player_map_enter(player *p, map *l, gboolean teleported);
 item **player_get_random_armour(player *p, int enchantable);
 
 void player_pickup(player *p);
-void player_autopickup(player *p);
 void player_autopickup_show(player *p);
 
 void player_level_gain(player *p, int count);

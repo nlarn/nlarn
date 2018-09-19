@@ -99,7 +99,7 @@ static const guint32 player_lvl_exp[] =
 };
 
 /* function declarations */
-
+static void player_autopickup(player *p);
 static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean ask);
 static inline void player_item_pickup_all(player *p, inventory **inv, item *it)
 {
@@ -1337,8 +1337,10 @@ int player_move(player *p, direction dir, gboolean open_door)
     }
 
     /* auto-pickup */
-    if (map_ilist_at(pmap, p->pos))
+    if (map_ilist_at(pmap, p->pos) && !player_effect_get(p, ET_BLINDNESS))
+    {
         player_autopickup(p);
+    }
 
     /* mention stationary objects at this position */
     if ((so = map_sobject_at(pmap, p->pos)) && !player_effect(p, ET_BLINDNESS))
@@ -1737,7 +1739,7 @@ void player_pickup(player *p)
     }
 }
 
-void player_autopickup(player *p)
+static void player_autopickup(player *p)
 {
     inventory **floor;
     int other_items_count = 0;
