@@ -2546,6 +2546,16 @@ effect *player_effect_add(player *p, effect *e)
                 log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
             else if (effect_get_amount(e) < 0 && effect_get_msg_stop(e))
                 log_add_entry(nlarn->log, "%s", effect_get_msg_stop(e));
+
+            /* If the effect was caused by a potion, delete the link
+             * between item and effect now, otherwise the effects caused
+             * by potions are not returned whenever player_effect_get()
+             * is used. (e.g. the spell "cure blindness" cannot cure
+             * blindness) anymore. */
+            if (e->item && ((item *)game_item_get(nlarn, e->item))->type == IT_POTION)
+            {
+                e->item = NULL;
+            }
         }
 
         if (str_orig != player_get_str(p))

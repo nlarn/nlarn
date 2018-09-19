@@ -320,7 +320,8 @@ static int potion_with_effect(struct player *p, item *potion)
     if (potion_effect(potion) > ET_NONE)
     {
         effect *eff = effect_new(potion_effect(potion));
-        eff->item = potion;
+        /* allow referencing the effect back to the potion */
+        eff->item = potion->oid;
 
         /* silly potion of giant strength */
         if (potion->id == PO_GIANT_STR)

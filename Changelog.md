@@ -10,6 +10,7 @@
 * Add author, icon and version number to Windows uninstaller
 
 ### Fixed bugs:
+* Fix "Cure Blindness" spell
 * Don't generate rooms with one floor tile in one direction
 * Fix text wrapping in message popup
 * Hide the console windows on Windows
