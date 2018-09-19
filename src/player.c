@@ -1620,6 +1620,11 @@ int player_map_enter(player *p, map *l, gboolean teleported)
         else
             p->pos = map_find_sobject(l, LS_STAIRSUP);
     }
+    /* all cases should have been handled until here */
+    else
+    {
+        g_assert_not_reached();
+    }
 
     if (l->nlevel == 0)
     {
