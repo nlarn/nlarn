@@ -31,6 +31,8 @@
 #include "nlarn.h"
 #include "random.h"
 
+DEFINE_ENUM(monster_flag, MONSTER_FLAG_ENUM)
+
 /* monster information hiding */
 struct _monster
 {
