@@ -32,6 +32,7 @@
 #include "random.h"
 
 DEFINE_ENUM(monster_flag, MONSTER_FLAG_ENUM)
+DEFINE_ENUM(monster_t, MONSTER_TYPE_ENUM)
 
 /* monster information hiding */
 struct _monster

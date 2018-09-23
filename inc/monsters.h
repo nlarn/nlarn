@@ -44,91 +44,91 @@ struct map;
 
 /* local monster definition for data storage */
 
-typedef enum monster_t
-{
-    MT_NONE,            //  0
-    // D1 - D4
-    MT_GIANT_BAT,
-    MT_GNOME,
-    MT_HOBGOBLIN,
-    MT_JACKAL,
-    // D2 - D4
-    MT_KOBOLD,          //  5
-    MT_ORC,
-    MT_SNAKE,
-    MT_CENTIPEDE,
-    MT_JACULUS,
-    MT_TROGLODYTE,      // 10
-    // D3 - D5
-    MT_GIANT_ANT,
-    MT_FLOATING_EYE,
-    MT_LEPRECHAUN,
-    MT_NYMPH,
-    MT_QUASIT,          // 15
-    MT_RUST_MONSTER,
-    // D4 - D6
-    MT_ZOMBIE,
-    MT_ASSASSIN_BUG,
-    MT_BUGBEAR,
-    MT_HELLHOUND,       // 20
-    MT_ICE_LIZARD,
-    // D5 - D7
-    MT_CENTAUR,
-    MT_TROLL,
-    MT_YETI,
-    MT_ELF,             // 25
-    MT_GELATINOUSCUBE,
-    // D6 - D8
-    MT_WHITE_DRAGON,
-    MT_METAMORPH,
-    MT_VORTEX,
-    MT_ZILLER,          // 30
-    MT_VIOLET_FUNGUS,
-    MT_WRAITH,
-    // D7 - D9
-    MT_FORVALAKA,
-    MT_LAMA_NOBE,
-    MT_OSQUIP,          // 35
-    MT_ROTHE,
-    MT_XORN,
-    MT_VAMPIRE,
-    // D8 - D10
-    MT_STALKER,
-    MT_POLTERGEIST,     // 40
-    MT_DISENCHANTRESS,
-    // D9 - V1
-    MT_SHAMBLINGMOUND,
-    MT_YELLOW_MOLD,
-    MT_UMBER_HULK,
-    MT_GNOME_KING,      // 45
-    // D10 - V2
-    MT_MIMIC,
-    MT_WATER_LORD,
-    MT_PURPLE_WORM,
-    MT_XVART,
-    // V1 - V3
-    MT_BRONZE_DRAGON,   // 50
-    MT_GREEN_DRAGON,
-    MT_SILVER_DRAGON,
-    // V2 - V3
-    MT_PLATINUM_DRAGON,
-    MT_RED_DRAGON,
-    MT_SPIRIT_NAGA,     // 55
-    // V3
-    MT_GREEN_URCHIN,
-    MT_DEMONLORD_I,
-    MT_DEMONLORD_II,
-    MT_DEMONLORD_III,
-    MT_DEMONLORD_IV,    // 60
-    MT_DEMONLORD_V,
-    MT_DEMONLORD_VI,
-    MT_DEMONLORD_VII,
-    // not actually generated randomly
-    MT_DEMON_PRINCE,
-    MT_MAX_GENERATED,
-    MT_TOWN_PERSON = MT_MAX_GENERATED,
-    MT_MAX                /* maximum # monsters in the dungeon */
-} monster_t;
+#define MONSTER_TYPE_ENUM(MT) \
+    MT(MT_NONE,)            /*  0 */ \
+    /* D1 - D4 */ \
+    MT(MT_GIANT_BAT,) \
+    MT(MT_GNOME,) \
+    MT(MT_HOBGOBLIN,) \
+    MT(MT_JACKAL,) \
+    /* D2 - D4 */ \
+    MT(MT_KOBOLD,)          /*  5 */ \
+    MT(MT_ORC,) \
+    MT(MT_SNAKE,) \
+    MT(MT_CENTIPEDE,) \
+    MT(MT_JACULUS,) \
+    MT(MT_TROGLODYTE,)      /* 10 */ \
+    /* D3 - D5 */ \
+    MT(MT_GIANT_ANT,) \
+    MT(MT_FLOATING_EYE,) \
+    MT(MT_LEPRECHAUN,) \
+    MT(MT_NYMPH,) \
+    MT(MT_QUASIT,)          /* 15 */ \
+    MT(MT_RUST_MONSTER,) \
+    /* D4 - D6 */ \
+    MT(MT_ZOMBIE,) \
+    MT(MT_ASSASSIN_BUG,) \
+    MT(MT_BUGBEAR,) \
+    MT(MT_HELLHOUND,)       /* 20 */ \
+    MT(MT_ICE_LIZARD,) \
+    /* D5 - D7 */ \
+    MT(MT_CENTAUR,) \
+    MT(MT_TROLL,) \
+    MT(MT_YETI,) \
+    MT(MT_ELF,)             /* 25 */ \
+    MT(MT_GELATINOUSCUBE,) \
+    /* D6 - D8 */ \
+    MT(MT_WHITE_DRAGON,) \
+    MT(MT_METAMORPH,) \
+    MT(MT_VORTEX,) \
+    MT(MT_ZILLER,)          /* 30 */ \
+    MT(MT_VIOLET_FUNGUS,) \
+    MT(MT_WRAITH,) \
+    /* D7 - D9 */ \
+    MT(MT_FORVALAKA,) \
+    MT(MT_LAMA_NOBE,) \
+    MT(MT_OSQUIP,)          /* 35 */ \
+    MT(MT_ROTHE,) \
+    MT(MT_XORN,) \
+    MT(MT_VAMPIRE,) \
+    /* D8 - D10 */ \
+    MT(MT_STALKER,) \
+    MT(MT_POLTERGEIST,)     /* 40 */ \
+    MT(MT_DISENCHANTRESS,) \
+    /* D9 - V1 */ \
+    MT(MT_SHAMBLINGMOUND,) \
+    MT(MT_YELLOW_MOLD,) \
+    MT(MT_UMBER_HULK,) \
+    MT(MT_GNOME_KING,)      /* 45 */ \
+    /* D10 - V2 */ \
+    MT(MT_MIMIC,) \
+    MT(MT_WATER_LORD,) \
+    MT(MT_PURPLE_WORM,) \
+    MT(MT_XVART,) \
+    /* V1 - V3 */ \
+    MT(MT_BRONZE_DRAGON,)   /* 50 */ \
+    MT(MT_GREEN_DRAGON,) \
+    MT(MT_SILVER_DRAGON,) \
+    /* V2 - V3 */ \
+    MT(MT_PLATINUM_DRAGON,) \
+    MT(MT_RED_DRAGON,) \
+    MT(MT_SPIRIT_NAGA,)     /* 55 */ \
+    /* V3 */ \
+    MT(MT_GREEN_URCHIN,) \
+    MT(MT_DEMONLORD_I,) \
+    MT(MT_DEMONLORD_II,) \
+    MT(MT_DEMONLORD_III,) \
+    MT(MT_DEMONLORD_IV,)    /* 60 */ \
+    MT(MT_DEMONLORD_V,) \
+    MT(MT_DEMONLORD_VI,) \
+    MT(MT_DEMONLORD_VII,) \
+    /* not actually generated randomly */ \
+    MT(MT_DEMON_PRINCE,) \
+    MT(MT_MAX_GENERATED,) \
+    MT(MT_TOWN_PERSON,) \
+    MT(MT_MAX,)                /* maximum # monsters in the dungeon */
+
+DECLARE_ENUM(monster_t, MONSTER_TYPE_ENUM)
 
 typedef enum monster_action_type
 {
