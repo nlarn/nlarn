@@ -152,7 +152,12 @@ static gboolean game_parse_ini_file(const char *filename)
     GError *error = NULL;
     gboolean success;
 
-    g_key_file_load_from_file(ini_file, filename, G_KEY_FILE_NONE, &error);
+    /* determine location of the configuration file */
+    gchar *filepath = g_build_path(G_DIR_SEPARATOR_S,
+            game_userdir(), filename, NULL);
+
+    g_key_file_load_from_file(ini_file, filepath, G_KEY_FILE_NONE, &error);
+    g_free(filepath);
 
     if ((success = (!error)))
     {
@@ -358,13 +363,8 @@ void game_init(int argc, char *argv[])
     nlarn->highscores = g_build_filename(nlarn->libdir, highscores, NULL);
 #endif
 
-    /* determine location of the configuration file */
-    gchar *filename = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-                                   config_file, NULL);
-
     /* try to load settings from the configuration file */
-    game_parse_ini_file(filename);
-    g_free(filename);
+    game_parse_ini_file(config_file);
 
     /* parse the command line options */
     game_parse_commandline(argc, argv);
