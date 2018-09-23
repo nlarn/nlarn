@@ -137,6 +137,7 @@ struct game_config {
     char *auto_pickup;
     char *savefile;
     char *stats;
+    char *inifile;
 #ifdef SDLPDCURSES
     int font_size;
 #endif
@@ -152,12 +153,15 @@ static gboolean game_parse_ini_file(const char *filename)
     GError *error = NULL;
     gboolean success;
 
-    /* determine location of the configuration file */
-    gchar *filepath = g_build_path(G_DIR_SEPARATOR_S,
-            game_userdir(), filename, NULL);
+    /* assemble full path of the default configuration file */
+    gchar *defaultpath = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+            config_file, NULL);
 
-    g_key_file_load_from_file(ini_file, filepath, G_KEY_FILE_NONE, &error);
-    g_free(filepath);
+    /* config file defined on the command line precedes over the default */
+    g_key_file_load_from_file(ini_file, filename ? filename : defaultpath,
+            G_KEY_FILE_NONE, &error);
+
+    g_free(defaultpath);
 
     if ((success = (!error)))
     {
@@ -218,6 +222,7 @@ static void game_parse_commandline(int argc, char *argv[])
         { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config.no_autosave,  "Disable autosave", NULL },
         { "version",     'v', 0, G_OPTION_ARG_NONE,   &config.show_version, "Show version information and exit", NULL },
         { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config.wizard,       "Enable wizard mode", NULL },
+        { "config",      'c', 0, G_OPTION_ARG_FILENAME, &config.inifile,    "Alternate configuration file name", NULL },
 #ifdef DEBUG
         { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &config.savefile,   "Save file to restore", NULL },
 #endif
@@ -367,7 +372,15 @@ void game_init(int argc, char *argv[])
     game_parse_commandline(argc, argv);
 
     /* try to load settings from the configuration file */
-    game_parse_ini_file(config_file);
+    const gboolean success = game_parse_ini_file(config.inifile);
+
+    /* if a custom ini file was specified, we require its presence */
+    if (config.inifile && !success)
+    {
+        g_printerr("Error: could not find configuration file '%s'.",
+                config.inifile);
+        exit(EXIT_FAILURE);
+    }
 
     if (config.show_version) {
         g_printf("NLarn version %d.%d.%d%s, built on %s.\n\n",
