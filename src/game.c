@@ -164,32 +164,32 @@ static gboolean game_parse_ini_file(const char *filename)
         /* ini file has been found, get values */
         /* clear error after each attempt as values need not to be defined */
         int difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
-        if (!error) config.difficulty = difficulty;
+        if (!config.difficulty && !error) config.difficulty = difficulty;
         g_clear_error(&error);
 
         gboolean no_autosave = g_key_file_get_boolean(ini_file, "nlarn", "no-autosave", &error);
-        if (!error) config.no_autosave = no_autosave;
+        if (!config.no_autosave && !error) config.no_autosave = no_autosave;
         g_clear_error(&error);
 
-           char *name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
-        if (!error) config.name = name;
+        char *name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
+        if (!config.name && !error) config.name = name;
         g_clear_error(&error);
 
         char *gender = g_key_file_get_string(ini_file, "nlarn", "gender", &error);
-        if (!error) config.gender = gender;
+        if (!config.gender && !error) config.gender = gender;
         g_clear_error(&error);
 
         char *auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
-        if (!error) config.auto_pickup = auto_pickup;
+        if (!config.auto_pickup && !error) config.auto_pickup = auto_pickup;
         g_clear_error(&error);
 
         char *stats = g_key_file_get_string(ini_file, "nlarn", "stats", &error);
-        if (!error) config.stats = stats;
+        if (!config.stats && !error) config.stats = stats;
         g_clear_error(&error);
 
 #ifdef SDLPDCURSES
         int font_size = g_key_file_get_integer(ini_file, "nlarn", "font-size", &error);
-        if (!error) config.font_size = font_size;
+        if (!config.font_size && !error) config.font_size = font_size;
         g_clear_error(&error);
 #endif
     }
@@ -363,11 +363,11 @@ void game_init(int argc, char *argv[])
     nlarn->highscores = g_build_filename(nlarn->libdir, highscores, NULL);
 #endif
 
-    /* try to load settings from the configuration file */
-    game_parse_ini_file(config_file);
-
     /* parse the command line options */
     game_parse_commandline(argc, argv);
+
+    /* try to load settings from the configuration file */
+    game_parse_ini_file(config_file);
 
     if (config.show_version) {
         g_printf("NLarn version %d.%d.%d%s, built on %s.\n\n",
