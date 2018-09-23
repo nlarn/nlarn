@@ -166,6 +166,8 @@ typedef enum monster_action_type
     MF(RES_MAGIC    , = 1 << 19) /* resistant to magic */ \
     MF(SWIM         , = 1 << 20) /* can swim through water */ \
 
+#define MONSTER_FLAG_COUNT 20
+
 DECLARE_ENUM(monster_flag, MONSTER_FLAG_ENUM)
 
 /* function definitions */

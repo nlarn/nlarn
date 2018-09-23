@@ -29,109 +29,20 @@ void wrap_monsters(lua_State *L)
 {
     g_assert (L != NULL);
 
-    struct
+    /* monster flags */
+    for (int mfs = 0; mfs <= MONSTER_FLAG_COUNT; mfs++)
     {
-        const char *name;
-        int value;
-    } constants[] =
+        /* shift with the current loop iteration to get the enum value */
+        int mfv = 1 << mfs;
+        lua_pushinteger(L, mfv);
+        lua_setglobal(L, monster_flag_string(mfv));
+    }
+
+    /* monster types */
+    for (monster_t mt = 0; mt < MT_MAX; mt++)
     {
-        /* monster flags */
-        { "HEAD",        HEAD },
-        { "NOBEHEAD",    NOBEHEAD },
-        { "HANDS",       HANDS },
-        { "FLY",         FLY },
-        { "SPIRIT",      SPIRIT },
-        { "UNDEAD",      UNDEAD },
-        { "INVISIBLE",   INVISIBLE },
-        { "INFRAVISION", INFRAVISION },
-        { "REGENERATE",  REGENERATE },
-        { "METALLIVORE", METALLIVORE },
-        { "DEMON",       DEMON },
-        { "DRAGON",      DRAGON },
-        { "MIMIC",       MIMIC },
-        { "RES_FIRE",    RES_FIRE },
-        { "RES_COLD",    RES_COLD },
-        { "RES_ELEC",    RES_ELEC },
-        { "RES_POISON",  RES_POISON },
-        { "RES_SLEEP",   RES_SLEEP },
-        { "RES_CONF",    RES_CONF },
-        { "RES_MAGIC",   RES_MAGIC },
-        { "SWIM",        SWIM },
-
-        /* monster types */
-        { "MT_GIANT_BAT",       MT_GIANT_BAT },
-        { "MT_GNOME",           MT_GNOME },
-        { "MT_HOBGOBLIN",       MT_HOBGOBLIN },
-        { "MT_JACKAL",          MT_JACKAL },
-        { "MT_KOBOLD",          MT_KOBOLD },
-        { "MT_ORC",             MT_ORC },
-        { "MT_SNAKE",           MT_SNAKE },
-        { "MT_CENTIPEDE",       MT_CENTIPEDE },
-        { "MT_JACULUS",         MT_JACULUS },
-        { "MT_TROGLODYTE",      MT_TROGLODYTE },
-        { "MT_GIANT_ANT",       MT_GIANT_ANT },
-        { "MT_FLOATING_EYE",    MT_FLOATING_EYE },
-        { "MT_LEPRECHAUN",      MT_LEPRECHAUN },
-        { "MT_NYMPH",           MT_NYMPH },
-        { "MT_QUASIT",          MT_QUASIT },
-        { "MT_RUST_MONSTER",    MT_RUST_MONSTER },
-        { "MT_ZOMBIE",          MT_ZOMBIE },
-        { "MT_ASSASSIN_BUG",    MT_ASSASSIN_BUG },
-        { "MT_BUGBEAR",         MT_BUGBEAR },
-        { "MT_HELLHOUND",       MT_HELLHOUND },
-        { "MT_ICE_LIZARD",      MT_ICE_LIZARD },
-        { "MT_CENTAUR",         MT_CENTAUR },
-        { "MT_TROLL",           MT_TROLL },
-        { "MT_YETI",            MT_YETI },
-        { "MT_ELF",             MT_ELF },
-        { "MT_GELATINOUSCUBE",  MT_GELATINOUSCUBE },
-        { "MT_WHITE_DRAGON",    MT_WHITE_DRAGON },
-        { "MT_METAMORPH",       MT_METAMORPH },
-        { "MT_VORTEX",          MT_VORTEX },
-        { "MT_ZILLER",          MT_ZILLER },
-        { "MT_VIOLET_FUNGUS",   MT_VIOLET_FUNGUS },
-        { "MT_WRAITH",          MT_WRAITH },
-        { "MT_FORVALAKA",       MT_FORVALAKA },
-        { "MT_LAMA_NOBE",       MT_LAMA_NOBE },
-        { "MT_OSQUIP",          MT_OSQUIP },
-        { "MT_ROTHE",           MT_ROTHE },
-        { "MT_XORN",            MT_XORN },
-        { "MT_VAMPIRE",         MT_VAMPIRE },
-        { "MT_STALKER",         MT_STALKER },
-        { "MT_POLTERGEIST",     MT_POLTERGEIST },
-        { "MT_DISENCHANTRESS",  MT_DISENCHANTRESS },
-        { "MT_SHAMBLINGMOUND",  MT_SHAMBLINGMOUND },
-        { "MT_YELLOW_MOLD",     MT_YELLOW_MOLD },
-        { "MT_UMBER_HULK",      MT_UMBER_HULK },
-        { "MT_GNOME_KING",      MT_GNOME_KING },
-        { "MT_MIMIC",           MT_MIMIC },
-        { "MT_WATER_LORD",      MT_WATER_LORD },
-        { "MT_PURPLE_WORM",     MT_PURPLE_WORM },
-        { "MT_XVART",           MT_XVART },
-        { "MT_BRONZE_DRAGON",   MT_BRONZE_DRAGON },
-        { "MT_GREEN_DRAGON",    MT_GREEN_DRAGON },
-        { "MT_SILVER_DRAGON",   MT_SILVER_DRAGON },
-        { "MT_PLATINUM_DRAGON", MT_PLATINUM_DRAGON },
-        { "MT_RED_DRAGON",      MT_RED_DRAGON },
-        { "MT_SPIRIT_NAGA",     MT_SPIRIT_NAGA },
-        { "MT_GREEN_URCHIN",    MT_GREEN_URCHIN },
-        { "MT_DEMONLORD_I",     MT_DEMONLORD_I },
-        { "MT_DEMONLORD_II",    MT_DEMONLORD_II },
-        { "MT_DEMONLORD_III",   MT_DEMONLORD_III },
-        { "MT_DEMONLORD_IV",    MT_DEMONLORD_IV },
-        { "MT_DEMONLORD_V",     MT_DEMONLORD_V },
-        { "MT_DEMONLORD_VI",    MT_DEMONLORD_VI },
-        { "MT_DEMONLORD_VII",   MT_DEMONLORD_VII },
-        { "MT_DEMON_PRINCE",    MT_DEMON_PRINCE },
-        { "MT_TOWN_PERSON",     MT_TOWN_PERSON },
-
-        { NULL, 0 },
-    };
-
-    for (int i = 0; constants[i].name != NULL; i++)
-    {
-        lua_pushinteger(L, constants[i].value);
-        lua_setglobal(L, constants[i].name);
+        lua_pushinteger(L, mt);
+        lua_setglobal(L, monster_t_string(mt));
     }
 
     /* read monster data */
