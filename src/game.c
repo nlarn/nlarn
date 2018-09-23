@@ -142,7 +142,10 @@ struct game_config {
 #endif
 };
 
-static gboolean game_parse_ini_file(const char *filename, struct game_config *config)
+/* the game settings */
+static struct game_config config = {0};
+
+static gboolean game_parse_ini_file(const char *filename)
 {
     /* ini file handling */
     GKeyFile *ini_file = g_key_file_new();
@@ -156,32 +159,32 @@ static gboolean game_parse_ini_file(const char *filename, struct game_config *co
         /* ini file has been found, get values */
         /* clear error after each attempt as values need not to be defined */
         int difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
-        if (!error) config->difficulty = difficulty;
+        if (!error) config.difficulty = difficulty;
         g_clear_error(&error);
 
         gboolean no_autosave = g_key_file_get_boolean(ini_file, "nlarn", "no-autosave", &error);
-        if (!error) config->no_autosave = no_autosave;
+        if (!error) config.no_autosave = no_autosave;
         g_clear_error(&error);
 
            char *name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
-        if (!error) config->name = name;
+        if (!error) config.name = name;
         g_clear_error(&error);
 
         char *gender = g_key_file_get_string(ini_file, "nlarn", "gender", &error);
-        if (!error) config->gender = gender;
+        if (!error) config.gender = gender;
         g_clear_error(&error);
 
         char *auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
-        if (!error) config->auto_pickup = auto_pickup;
+        if (!error) config.auto_pickup = auto_pickup;
         g_clear_error(&error);
 
         char *stats = g_key_file_get_string(ini_file, "nlarn", "stats", &error);
-        if (!error) config->stats = stats;
+        if (!error) config.stats = stats;
         g_clear_error(&error);
 
 #ifdef SDLPDCURSES
         int font_size = g_key_file_get_integer(ini_file, "nlarn", "font-size", &error);
-        if (!error) config->font_size = font_size;
+        if (!error) config.font_size = font_size;
         g_clear_error(&error);
 #endif
     }
@@ -197,10 +200,43 @@ static gboolean game_parse_ini_file(const char *filename, struct game_config *co
     return success;
 }
 
+/* parse the command line */
+static void game_parse_commandline(int argc, char *argv[])
+{
+    const GOptionEntry entries[] =
+    {
+        { "name",        'n', 0, G_OPTION_ARG_STRING, &config.name,         "Set character's name", NULL },
+        { "gender",      'g', 0, G_OPTION_ARG_STRING, &config.gender,       "Set character's gender (m/f)", NULL },
+        { "stats",       's', 0, G_OPTION_ARG_STRING, &config.stats,        "Set character's stats (a-f)", NULL },
+        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &config.auto_pickup,  "Item types to pick up automatically, e.g. '$*+'", NULL },
+        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &config.difficulty,   "Set difficulty", NULL },
+        { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config.no_autosave,  "Disable autosave", NULL },
+        { "version",     'v', 0, G_OPTION_ARG_NONE,   &config.show_version, "Show version information and exit", NULL },
+        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config.wizard,       "Enable wizard mode", NULL },
+#ifdef DEBUG
+        { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &config.savefile,   "Save file to restore", NULL },
+#endif
+#ifdef SDLPDCURSES
+        { "font-size",   'S', 0, G_OPTION_ARG_INT,    &config.font_size,   "Set font size", NULL },
+#endif
+        { NULL, 0, 0, 0, NULL, NULL, NULL }
+    };
+
+    GError *error = NULL;
+    GOptionContext *context = g_option_context_new(NULL);
+    g_option_context_add_main_entries(context, entries, NULL);
+
+    if (!g_option_context_parse(context, &argc, &argv, &error))
+    {
+        g_printerr("option parsing failed: %s\n", error->message);
+
+        exit (EXIT_FAILURE);
+    }
+    g_option_context_free(context);
+}
+
 void game_init(int argc, char *argv[])
 {
-    static struct game_config config = {0};
-
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     gid_t realgid;
     uid_t realuid;
@@ -330,40 +366,11 @@ void game_init(int argc, char *argv[])
                                    config_file, NULL);
 
     /* try to load settings from the configuration file */
-    game_parse_ini_file(filename, &config);
+    game_parse_ini_file(filename);
     g_free(filename);
 
-    /* parse the command line */
-    static GOptionEntry entries[] =
-    {
-        { "name",        'n', 0, G_OPTION_ARG_STRING, &config.name,         "Set character's name", NULL },
-        { "gender",      'g', 0, G_OPTION_ARG_STRING, &config.gender,       "Set character's gender (m/f)", NULL },
-        { "stats",       's', 0, G_OPTION_ARG_STRING, &config.stats,        "Set character's stats (a-f)", NULL },
-        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &config.auto_pickup,  "Item types to pick up automatically, e.g. '$*+'", NULL },
-        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &config.difficulty,   "Set difficulty",       NULL },
-        { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config.no_autosave,  "Disable autosave",   NULL },
-        { "version",     'v', 0, G_OPTION_ARG_NONE,   &config.show_version, "Show version information and exit",   NULL },
-        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config.wizard,       "Enable wizard mode",   NULL },
-#ifdef DEBUG
-        { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &config.savefile,   "Save file to restore", NULL },
-#endif
-#ifdef SDLPDCURSES
-        { "font-size",   'S', 0, G_OPTION_ARG_INT,    &config.font_size,   "Set font size",       NULL },
-#endif
-        { NULL, 0, 0, 0, NULL, NULL, NULL }
-    };
-
-    GError *error = NULL;
-    GOptionContext *context = g_option_context_new(NULL);
-    g_option_context_add_main_entries(context, entries, NULL);
-
-    if (!g_option_context_parse(context, &argc, &argv, &error))
-    {
-        g_printerr("option parsing failed: %s\n", error->message);
-
-        exit (EXIT_FAILURE);
-    }
-    g_option_context_free(context);
+    /* parse the command line options */
+    game_parse_commandline(argc, argv);
 
     if (config.show_version) {
         g_printf("NLarn version %d.%d.%d%s, built on %s.\n\n",
