@@ -35,13 +35,6 @@ void wrap_monsters(lua_State *L)
         int value;
     } constants[] =
     {
-        /* monster actions */
-        { "FLEE",   MA_FLEE },
-        { "REMAIN", MA_REMAIN },
-        { "WANDER", MA_WANDER },
-        { "ATTACK", MA_ATTACK },
-        { "SERVE",  MA_SERVE },
-
         /* monster flags */
         { "HEAD",        HEAD },
         { "NOBEHEAD",    NOBEHEAD },
