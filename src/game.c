@@ -358,9 +358,6 @@ void game_init(int argc, char *argv[])
     nlarn->highscores = g_build_filename(nlarn->libdir, highscores, NULL);
 #endif
 
-    /* initialize the Lua interpreter */
-    game_init_lua(nlarn);
-
     /* determine location of the configuration file */
     gchar *filename = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
                                    config_file, NULL);
@@ -402,6 +399,9 @@ void game_init(int argc, char *argv[])
 
     /* set autosave setting (default: TRUE) */
     game_autosave(nlarn) = !config.no_autosave;
+
+    /* initialize the Lua interpreter */
+    game_init_lua(nlarn);
 
     if (!game_load(config.savefile))
     {
