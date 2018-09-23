@@ -605,7 +605,7 @@ static gboolean potion_pos_hit(const GList *traj,
         if (potion_effect(potion))
             monster_effect_add(m, effect_new(potion_effect(potion)));
 
-        if (potion->id == PO_WATER && potion->blessed && monster_flags(m, MF_UNDEAD))
+        if (potion->id == PO_WATER && potion->blessed && monster_flags(m, UNDEAD))
         {
             /* this is supposed to hurt really nasty */
             log_add_entry(nlarn->log, "Smoke emerges where %s pours over the %s.",

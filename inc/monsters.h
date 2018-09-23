@@ -144,27 +144,27 @@ typedef enum monster_action_type
 } monster_action_t;
 
 #define MONSTER_FLAG_ENUM(MF) \
-    MF(MF_HEAD         , = 1)       /* has a head */ \
-    MF(MF_NOBEHEAD     , = 1 << 1)  /* cannot be beheaded */ \
-    MF(MF_HANDS        , = 1 << 2)  /* has hands => can open doors */ \
-    MF(MF_FLY          , = 1 << 3)  /* can fly (not affected by pits and trapdoors) */ \
-    MF(MF_SPIRIT       , = 1 << 4)  /* is a spirit */ \
-    MF(MF_UNDEAD       , = 1 << 5)  /* is undead */ \
-    MF(MF_INVISIBLE    , = 1 << 6)  /* is invisible */ \
-    MF(MF_INFRAVISION  , = 1 << 7)  /* can see invisible */ \
-    MF(MF_REGENERATE   , = 1 << 8)  /* does regenerate */ \
-    MF(MF_METALLIVORE  , = 1 << 9)  /* eats metal */ \
-    MF(MF_DEMON        , = 1 << 10) /* is a demon */ \
-    MF(MF_DRAGON       , = 1 << 11) /* is a dragon */ \
-    MF(MF_MIMIC        , = 1 << 12) /* is a mimic */ \
-    MF(MF_RES_FIRE     , = 1 << 13) /* resistant to fire (half damage)*/ \
-    MF(MF_RES_COLD     , = 1 << 14) /* resistant to cold */ \
-    MF(MF_RES_ELEC     , = 1 << 15) /* resistant to electricity */ \
-    MF(MF_RES_SLEEP    , = 1 << 16) /* resistant to sleep */ \
-    MF(MF_RES_POISON   , = 1 << 17) /* resistant to poison */ \
-    MF(MF_RES_CONF     , = 1 << 18) /* resistant to confusion */ \
-    MF(MF_RES_MAGIC    , = 1 << 19) /* resistant to magic */ \
-    MF(MF_SWIM         , = 1 << 20) /* can swim through water */ \
+    MF(HEAD         , = 1)       /* has a head */ \
+    MF(NOBEHEAD     , = 1 << 1)  /* cannot be beheaded */ \
+    MF(HANDS        , = 1 << 2)  /* has hands => can open doors */ \
+    MF(FLY          , = 1 << 3)  /* can fly (not affected by pits and trapdoors) */ \
+    MF(SPIRIT       , = 1 << 4)  /* is a spirit */ \
+    MF(UNDEAD       , = 1 << 5)  /* is undead */ \
+    MF(INVISIBLE    , = 1 << 6)  /* is invisible */ \
+    MF(INFRAVISION  , = 1 << 7)  /* can see invisible */ \
+    MF(REGENERATE   , = 1 << 8)  /* does regenerate */ \
+    MF(METALLIVORE  , = 1 << 9)  /* eats metal */ \
+    MF(DEMON        , = 1 << 10) /* is a demon */ \
+    MF(DRAGON       , = 1 << 11) /* is a dragon */ \
+    MF(MIMIC        , = 1 << 12) /* is a mimic */ \
+    MF(RES_FIRE     , = 1 << 13) /* resistant to fire (half damage)*/ \
+    MF(RES_COLD     , = 1 << 14) /* resistant to cold */ \
+    MF(RES_ELEC     , = 1 << 15) /* resistant to electricity */ \
+    MF(RES_SLEEP    , = 1 << 16) /* resistant to sleep */ \
+    MF(RES_POISON   , = 1 << 17) /* resistant to poison */ \
+    MF(RES_CONF     , = 1 << 18) /* resistant to confusion */ \
+    MF(RES_MAGIC    , = 1 << 19) /* resistant to magic */ \
+    MF(SWIM         , = 1 << 20) /* can swim through water */ \
 
 DECLARE_ENUM(monster_flag, MONSTER_FLAG_ENUM)
 

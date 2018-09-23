@@ -263,7 +263,7 @@ monster *monster_new(monster_t type, position pos)
     } /* finished initializing weapons */
 
     /* initialize mimics */
-    if (monster_flags(nmonster, MF_MIMIC))
+    if (monster_flags(nmonster, MIMIC))
     {
         const int possible_types[] = { IT_AMULET, IT_GOLD, IT_RING, IT_GEM,
                                        IT_CONTAINER, IT_BOOK, IT_POTION,
@@ -528,10 +528,10 @@ static int monster_map_element(monster *m)
     if (monster_type(m) == MT_XORN)
         return LE_XORN;
 
-    if (monster_flags(m, MF_FLY))
+    if (monster_flags(m, FLY))
         return LE_FLYING_MONSTER;
 
-    if (monster_flags(m, MF_SWIM))
+    if (monster_flags(m, SWIM))
         return LE_SWIMMING_MONSTER;
 
     return LE_MONSTER;
@@ -627,7 +627,7 @@ gboolean monster_in_sight(monster *m)
         return FALSE;
 
     /* invisible monster, player has no infravision */
-    if (monster_flags(m, MF_INVISIBLE) && !player_effect(nlarn->p, ET_INFRAVISION))
+    if (monster_flags(m, INVISIBLE) && !player_effect(nlarn->p, ET_INFRAVISION))
         return FALSE;
 
     return fov_get(nlarn->p->fv, m->pos);
@@ -723,7 +723,7 @@ void monster_die(monster *m, struct player *p)
     }
 
     /* make sure mimics never leave the mimicked item behind */
-    if (monster_flags(m, MF_MIMIC) && inv_length(m->inv) > 0)
+    if (monster_flags(m, MIMIC) && inv_length(m->inv) > 0)
     {
         inv_del(&m->inv, 0);
     }
@@ -910,7 +910,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
 
     /* damage caused by map effects */
     damage *dam = map_tile_damage(monster_map(m), monster_pos(m),
-                                  monster_flags(m, MF_FLY)
+                                  monster_flags(m, FLY)
                                   || monster_effect(m, ET_LEVITATION));
 
     /* deal damage caused by floor effects */
@@ -1047,7 +1047,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             }
 
             /* check for door */
-            else if ((target_st == LS_CLOSEDDOOR) && monster_flags(m, MF_HANDS))
+            else if ((target_st == LS_CLOSEDDOOR) && monster_flags(m, HANDS))
             {
                 /* dim-witted or confused monster are unable to open doors */
                 if (monster_int(m) < 4 || monster_effect_get(m, ET_CONFUSION))
@@ -1133,7 +1133,7 @@ void monster_polymorph(monster *m)
     g_assert (m != NULL);
 
     /* make sure mimics never leave the mimicked item behind */
-    if (monster_flags(m, MF_MIMIC) && inv_length(m->inv) > 0)
+    if (monster_flags(m, MIMIC) && inv_length(m->inv) > 0)
     {
         inv_del(&m->inv, 0);
     }
@@ -1422,7 +1422,7 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* player is invisible and monster tries to hit player */
-    if (player_effect(p, ET_INVISIBILITY) && !(monster_flags(m, MF_INFRAVISION)
+    if (player_effect(p, ET_INVISIBILITY) && !(monster_flags(m, INFRAVISION)
                                                || monster_effect(m, ET_INFRAVISION))
             && chance(65))
     {
@@ -1492,7 +1492,7 @@ void monster_player_attack(monster *m, player *p)
     if (att.rand) dam->amount += rand_1n(att.rand);
 
     /* half damage if player is protected against spirits */
-    if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_flags(m, MF_SPIRIT))
+    if (player_effect(p, ET_SPIRIT_PROTECTION) && monster_flags(m, SPIRIT))
     {
         if (dam->type == DAM_PHYSICAL)
         {
@@ -1615,7 +1615,7 @@ monster *monster_damage_take(monster *m, damage *dam)
         break;
 
     case DAM_MAGICAL:
-        if (monster_flags(m, MF_RES_MAGIC))
+        if (monster_flags(m, RES_MAGIC))
         {
             dam->amount /= monster_level(m);
             if (monster_in_sight(m))
@@ -1627,7 +1627,7 @@ monster *monster_damage_take(monster *m, damage *dam)
         break;
 
     case DAM_FIRE:
-        if (monster_flags(m, MF_RES_FIRE))
+        if (monster_flags(m, RES_FIRE))
         {
             /*
              * The monster's fire resistance reduces the damage taken
@@ -1645,7 +1645,7 @@ monster *monster_damage_take(monster *m, damage *dam)
         break;
 
     case DAM_COLD:
-        if (monster_flags(m, MF_RES_COLD))
+        if (monster_flags(m, RES_COLD))
         {
             dam->amount = 0;
             if (monster_in_sight(m))
@@ -1657,19 +1657,19 @@ monster *monster_damage_take(monster *m, damage *dam)
         break;
 
     case DAM_WATER:
-        if (monster_flags(m, MF_SWIM))
+        if (monster_flags(m, SWIM))
             dam->amount = 0;
         break;
 
     case DAM_ELECTRICITY:
-        if (monster_flags(m, MF_RES_ELEC))
+        if (monster_flags(m, RES_ELEC))
         {
             dam->amount = 0;
             log_add_entry(nlarn->log, "The %s is not affected!",
                           monster_name(m));
         }
         /* double damage for flying monsters */
-        else if (monster_flags(m, MF_FLY) || monster_effect(m, ET_LEVITATION))
+        else if (monster_flags(m, FLY) || monster_effect(m, ET_LEVITATION))
         {
             dam->amount *= 2;
             // special message?
@@ -1811,7 +1811,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
     low_hp = (m->hp < (monster_hp_max(m) / 4 ));
     smart  = (monster_int(m) > 4);
 
-    if (monster_flags(m, MF_MIMIC) && m->unknown)
+    if (monster_flags(m, MIMIC) && m->unknown)
     {
         /* stationary monsters */
         naction = MA_REMAIN;
@@ -1872,7 +1872,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty)
     frequency = difficulty << 1;
 
     /* handle regeneration */
-    if (monster_flags(m, MF_REGENERATE) && (m->hp < monster_hp_max(m)))
+    if (monster_flags(m, REGENERATE) && (m->hp < monster_hp_max(m)))
     {
         /* regenerate every (10 - difficulty) turns */
         if (gtime % (10 - difficulty) == 0)
@@ -1900,7 +1900,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty)
 
 item *get_mimic_item(monster *m)
 {
-    g_assert(m && monster_flags(m, MF_MIMIC));
+    g_assert(m && monster_flags(m, MIMIC));
 
     /* polymorphed mimics may not pose as items */
     if (inv_length(m->inv) > 0)
@@ -2060,25 +2060,25 @@ effect *monster_effect_add(monster *m, effect *e)
     g_assert(m != NULL && e != NULL);
     gboolean vis_effect = FALSE;
 
-    if (e->type == ET_SLEEP && monster_flags(m, MF_RES_SLEEP))
+    if (e->type == ET_SLEEP && monster_flags(m, RES_SLEEP))
     {
         /* the monster is resistant to sleep */
         effect_destroy(e);
         e = NULL;
     }
-    else if (e->type == ET_POISON && monster_flags(m, MF_RES_POISON))
+    else if (e->type == ET_POISON && monster_flags(m, RES_POISON))
     {
         /* the monster is poison resistant */
         effect_destroy(e);
         e = NULL;
     }
-    else if (e->type == ET_LEVITATION && monster_flags(m, MF_FLY))
+    else if (e->type == ET_LEVITATION && monster_flags(m, FLY))
     {
         /* levitation has no effect on flying monsters */
         effect_destroy(e);
         e = NULL;
     }
-    else if (e->type == ET_CONFUSION && monster_flags(m, MF_RES_CONF))
+    else if (e->type == ET_CONFUSION && monster_flags(m, RES_CONF))
     {
         /* the monster is resistant against confusion */
         effect_destroy(e);
@@ -2239,7 +2239,7 @@ static gboolean monster_player_visible(monster *m)
 
     /* check if the player is invisible and if the monster has infravision */
     if (player_effect(nlarn->p, ET_INVISIBILITY)
-        && !(monster_flags(m, MF_INFRAVISION) || monster_effect(m, ET_INFRAVISION)))
+        && !(monster_flags(m, INFRAVISION) || monster_effect(m, ET_INFRAVISION)))
         return FALSE;
 
     /* determine if player's position is visible from monster's position */
@@ -2706,7 +2706,7 @@ static position monster_move_serve(monster *m, struct player *p)
     /* calculate the monster's fov */
     /* the monster gets a fov radius of 6 for now*/
     fov_calculate(m->fv, monster_map(m), m->pos, 6,
-                  monster_flags(m, MF_INFRAVISION)
+                  monster_flags(m, INFRAVISION)
                   || monster_effect(m, ET_INFRAVISION));
 
     /* a good servant always knows the masters position */

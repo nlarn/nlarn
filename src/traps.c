@@ -1,6 +1,6 @@
 /*
  * traps.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -238,7 +238,7 @@ monster *monster_trap_trigger(monster *m)
     trap_t trap = map_trap_at(monster_map(m), monster_pos(m));
 
     /* flying monsters are only affected by sleeping gas traps */
-    if ((monster_flags(m, MF_FLY) || monster_effect(m, ET_LEVITATION))
+    if ((monster_flags(m, FLY) || monster_effect(m, ET_LEVITATION))
         && (trap != TT_SLEEPGAS))
     {
         return m;

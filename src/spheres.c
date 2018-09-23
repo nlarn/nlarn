@@ -1,6 +1,6 @@
 /*
  * spheres.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -144,7 +144,7 @@ void sphere_move(sphere *s, game *g)
     if ((m = map_get_monster_at(smap, s->pos)))
     {
         /* demons dispel spheres */
-        if (monster_flags(m, MF_DEMON))
+        if (monster_flags(m, DEMON))
         {
             if (monster_in_sight(m))
             {

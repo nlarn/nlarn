@@ -1,6 +1,6 @@
 /*
  * fov.c
- * Copyright (C) 2009-2012, 2014 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -106,7 +106,7 @@ void fov_set(fov *fv, position pos, guchar visible,
        position. Must not be an unknown mimic or invisible. */
     if (mchk && (mon = map_get_monster_at(game_map(nlarn, Z(pos)), pos))
         && !monster_unknown(mon)
-        && (!monster_flags(mon, MF_INVISIBLE) || infravision))
+        && (!monster_flags(mon, INVISIBLE) || infravision))
     {
         /* found a visible monster -> add it to the list */
         g_hash_table_insert(fv->mlist, mon, 0);

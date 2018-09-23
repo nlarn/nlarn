@@ -783,8 +783,8 @@ static gboolean spell_type_point(spell *s, struct player *p)
     case SP_FGR:
     {
         // Lower chances of working against undead and demons.
-        const int roll = (monster_flags(m, MF_UNDEAD) ? 40 :
-                          monster_flags(m, MF_DEMON)  ? 30 : 20);
+        const int roll = (monster_flags(m, UNDEAD) ? 40 :
+                          monster_flags(m, DEMON)  ? 30 : 20);
 
         if ((player_get_wis(p) + s->knowledge) > (guint)rand_m_n(10, roll))
         {

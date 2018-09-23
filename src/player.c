@@ -1369,7 +1369,7 @@ static min_max_damage calc_min_max_damage(player *p, monster *m)
 
         // Blessed weapons do 50% bonus damage against demons and undead.
         if (p->eq_weapon->blessed
-                && (monster_flags(m, MF_DEMON) || monster_flags(m, MF_UNDEAD)))
+                && (monster_flags(m, DEMON) || monster_flags(m, UNDEAD)))
         {
             min_damage *= 3;
             min_damage /= 2;
@@ -1402,20 +1402,20 @@ static gboolean player_instakill_chance(player *p, monster *m)
         {
             /* Vorpal Blade */
         case WT_VORPALBLADE:
-            if (monster_flags(m, MF_HEAD) && !monster_flags(m, MF_NOBEHEAD))
+            if (monster_flags(m, HEAD) && !monster_flags(m, NOBEHEAD))
                 return 5;
             break;
 
             /* Lance of Death */
         case WT_LANCEOFDEATH:
             /* the lance is pretty deadly for non-demons */
-            if (!monster_flags(m, MF_DEMON))
+            if (!monster_flags(m, DEMON))
                 return 100;
             break;
 
             /* Slayer */
         case WT_SLAYER:
-            if (monster_flags(m, MF_DEMON))
+            if (monster_flags(m, DEMON))
                 return 100;
             break;
 
@@ -1439,8 +1439,8 @@ static int calc_real_damage(player *p, monster *m, int allow_chance)
         {
             /* Vorpal Blade */
         case WT_VORPALBLADE:
-            if (allow_chance && chance(5) && monster_flags(m, MF_HEAD)
-                    && !monster_flags(m, MF_NOBEHEAD))
+            if (allow_chance && chance(5) && monster_flags(m, HEAD)
+                    && !monster_flags(m, NOBEHEAD))
             {
                 log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
                               monster_get_name(m));
@@ -1452,7 +1452,7 @@ static int calc_real_damage(player *p, monster *m, int allow_chance)
             /* Lance of Death */
         case WT_LANCEOFDEATH:
             /* the lance is pretty deadly for non-demons */
-            if (!monster_flags(m, MF_DEMON))
+            if (!monster_flags(m, DEMON))
                 real_damage = INSTANT_KILL;
             else
                 real_damage = 300;
@@ -1460,14 +1460,14 @@ static int calc_real_damage(player *p, monster *m, int allow_chance)
 
             /* Slayer */
         case WT_SLAYER:
-            if (monster_flags(m, MF_DEMON))
+            if (monster_flags(m, DEMON))
                 real_damage = INSTANT_KILL;
             break;
 
         default:
             /* triple damage if hitting a dragon and wearing an amulet of
                dragon slaying */
-            if (monster_flags(m, MF_DRAGON)
+            if (monster_flags(m, DRAGON)
                     && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
             {
                 real_damage *= 3;
@@ -1500,7 +1500,7 @@ int player_attack(player *p, monster *m)
                          DAMO_PLAYER, p);
 
         /* weapon damage due to rust when hitting certain monsters */
-        if (p->eq_weapon && monster_flags(m, MF_METALLIVORE))
+        if (p->eq_weapon && monster_flags(m, METALLIVORE))
         {
             p->eq_weapon = item_erode(&p->inventory, p->eq_weapon, IET_RUST, TRUE);
 
@@ -1556,7 +1556,7 @@ int player_attack(player *p, monster *m)
         /* if the player is invisible and the monster does not have infravision,
            remember the position where the attack came from
          */
-        if (player_effect(p, ET_INVISIBILITY) && !monster_flags(m, MF_INFRAVISION))
+        if (player_effect(p, ET_INVISIBILITY) && !monster_flags(m, INFRAVISION))
         {
             monster_update_player_pos(m, p->pos);
         }
@@ -2014,7 +2014,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         monster *m = (monster *)dam->dam_origin.originator;
 
         /* amulet of power cancels demon attacks */
-        if (monster_flags(m, MF_DEMON) && chance(75)
+        if (monster_flags(m, DEMON) && chance(75)
                 && (p->eq_amulet && p->eq_amulet->id == AM_POWER))
         {
             log_add_entry(nlarn->log, "Your amulet cancels the %s's attack.",
@@ -4459,7 +4459,7 @@ void player_update_fov(player *p)
                     break;
                 }
 
-                if (m && monster_flags(m, MF_MIMIC) && monster_unknown(m))
+                if (m && monster_flags(m, MIMIC) && monster_unknown(m))
                 {
                     /* remember the undiscovered mimic as an item */
                     item *it = get_mimic_item(m);
@@ -5015,7 +5015,7 @@ void calc_fighting_stats(player *p)
 
         if (instakill_chance < 100)
         {
-            if (monster_flags(m, MF_REGENERATE))
+            if (monster_flags(m, REGENERATE))
             {
                 g_string_append_printf(text, "      regeneration: every %d turns\n",
                                        10 - game_difficulty(nlarn));
