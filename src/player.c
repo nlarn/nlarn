@@ -3509,7 +3509,7 @@ int player_item_is_equippable(player *p, item *it)
 
 int player_item_is_unequippable(player *p, item *it)
 {
-    assert(it);
+    g_assert(it);
 
     if (!player_item_is_equipped(p, it)) return FALSE;
     if (it == p->eq_suit && p->eq_cloak) return FALSE;
