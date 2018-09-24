@@ -12,6 +12,7 @@
 
 ### Fixed bugs:
 * Fix "Cure Blindness" spell
+* Fix crash when reading large scoreboard file
 * Disable auto-pickup when blinded
 * Don't generate rooms with one floor tile in one direction
 * Fix text wrapping in message popup

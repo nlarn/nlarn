@@ -1294,15 +1294,6 @@ static void game_items_shuffle(game *g)
 
 static GList *game_scores_load()
 {
-    /* size of buffer to store uncompressed scoreboard content */
-    guint bufsize = 8192;
-
-    /* buffer for unparsed scores */
-    gchar *scores;
-
-    /* actual length of unparsed scores buffer */
-    guint scores_len = 0;
-
     /* linked list of all scores */
     GList *gs = NULL;
 
@@ -1330,15 +1321,22 @@ static GList *game_scores_load()
         return gs;
     }
 
-    /* allocate buffer space */
-    scores = g_malloc(bufsize);
+    /* size of buffer to store uncompressed scoreboard content */
+    const gint bufsize = 8192;
 
-    /* read the scoreboard file */
-    while((scores_len = gzread(file, scores, bufsize)) == bufsize)
+    /* allocate buffer space */
+    gchar *scores = g_malloc(bufsize);
+
+    /* count of buffer allocations */
+    gint bufcount = 1;
+
+    /* read the scoreboard file
+     * append subsequent blocks at the end of the previously read block */
+    while(gzread(file, scores + ((bufcount - 1) * bufsize), bufsize) == bufsize)
     {
         /* it seems the buffer space was insufficient -> increase it */
-        bufsize += 8192;
-        scores = g_realloc(scores, bufsize);
+        bufcount += 1;
+        scores = g_realloc(scores, (bufsize * bufcount));
     }
 
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
