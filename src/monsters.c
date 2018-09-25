@@ -2349,10 +2349,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
     }
     log_add_entry(nlarn->log, "You feel a sense of loss.");
 
-    if (it->type == IT_WEAPON
-            || it->type == IT_ARMOUR
-            || it->type == IT_RING
-            || it->type == IT_AMULET)
+    if (item_is_optimizable(it->type))
     {
         item_disenchant(it);
     }
