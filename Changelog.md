@@ -6,6 +6,7 @@
 * Show item type description in auto-pickup configuration dialogue
 * Permanently show spell description below spell selection window
 * Describe spell type for most spells in spell description
+* Add worn amulet to player's equipment overview
 * Distribute Changelog in HTML format on macOS and Windows
 * Allow specifying a custom configuration file on the command line
 * Add author, icon and version number to Windows uninstaller

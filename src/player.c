@@ -5096,6 +5096,7 @@ static char *player_equipment_list(player *p, gboolean decorate)
         const char *desc;
     } slots[] =
     {
+        { p->eq_amulet,  "Necklace:" },
         { p->eq_weapon,  "Main weapon:" },
         { p->eq_sweapon, "Sec. weapon:" },
         { p->eq_quiver,  "In quiver:" },
