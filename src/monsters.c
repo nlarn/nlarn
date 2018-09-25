@@ -2405,6 +2405,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
 
         if (player_gold > 0)
         {
+            /* steel gold carried by the player */
             it = item_new(IT_GOLD, rand_1n(1 + (player_gold >> 1)));
             player_remove_gold(p, it->count);
 
@@ -2413,24 +2414,18 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
         }
         else
         {
-            inventory *inv = *map_ilist_at(monster_map(m), p->pos);
-
-            if (inv != NULL)
+            /* grab gold at player's position */
+            inventory **floor = map_ilist_at(monster_map(m), p->pos);
+            if (inv_length_filtered(*floor, item_filter_gold))
             {
-                for (guint idx = 0; idx < inv_length(inv); idx++)
+                it = inv_get_filtered(*floor, 0, item_filter_gold);
+                inv_del_element(floor, it);
+
+                if (monster_in_sight(m))
                 {
-                    item *i = inv_get(inv, idx);
-                    if (i->type == IT_GOLD)
-                    {
-                        it = inv_get(inv, idx);
-                        inv_del_element(map_ilist_at(monster_map(m), p->pos), it);
-                        if (monster_in_sight(m))
-                        {
-                            log_add_entry(nlarn->log, "The %s picks up some gold at your feet. ",
-                                          monster_get_name(m));
-                        }
-                        break;
-                    }
+                    log_add_entry(nlarn->log,
+                            "The %s picks up some gold at your feet.",
+                            monster_get_name(m));
                 }
             }
         }
