@@ -33,10 +33,10 @@ typedef struct gem_data
 static const gem_data gems[GT_MAX] =
 {
     /* id          name        colour    pr */
-    { GT_DIAMOND,  "diamond",  DC_WHITE, 50, },
-    { GT_RUBY,     "ruby",     DC_RED,   40, },
-    { GT_EMERALD,  "emerald",  DC_GREEN, 30, },
-    { GT_SAPPHIRE, "sapphire", DC_BLUE,  20, },
+    { GT_DIAMOND,  "diamond",  WHITE, 50, },
+    { GT_RUBY,     "ruby",     RED,   40, },
+    { GT_EMERALD,  "emerald",  GREEN, 30, },
+    { GT_SAPPHIRE, "sapphire", BLUE,  20, },
 };
 
 const char *gem_name(item *gem)

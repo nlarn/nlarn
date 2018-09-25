@@ -35,23 +35,23 @@ typedef struct _display_colset
 
 const display_colset display_default_colset[] =
 {
-    { "",             DC_NONE },
-    { "black",        DC_BLACK },
-    { "red",          DC_RED },
-    { "green",        DC_GREEN },
-    { "brown",        DC_BROWN },
-    { "blue",         DC_BLUE },
-    { "magenta",      DC_MAGENTA },
-    { "cyan",         DC_CYAN },
-    { "lightgray",    DC_LIGHTGRAY },
-    { "darkgrey",     DC_DARKGRAY },
-    { "lightred",     DC_LIGHTRED },
-    { "lightgreen",   DC_LIGHTGREEN },
-    { "yellow",       DC_YELLOW },
-    { "lightblue",    DC_LIGHTBLUE },
-    { "lightmagenta", DC_LIGHTMAGENTA },
-    { "lightcyan",    DC_LIGHTCYAN },
-    { "white",        DC_WHITE }
+    { "",             COLOURLESS },
+    { "black",        BLACK },
+    { "red",          RED },
+    { "green",        GREEN },
+    { "brown",        BROWN },
+    { "blue",         BLUE },
+    { "magenta",      MAGENTA },
+    { "cyan",         CYAN },
+    { "lightgray",    LIGHTGRAY },
+    { "darkgrey",     DARKGRAY },
+    { "lightred",     LIGHTRED },
+    { "lightgreen",   LIGHTGREEN },
+    { "yellow",       YELLOW },
+    { "lightblue",    LIGHTBLUE },
+    { "lightmagenta", LIGHTMAGENTA },
+    { "lightcyan",    LIGHTCYAN },
+    { "white",        WHITE }
 };
 
 const display_colset display_dialog_colset[] =
@@ -346,7 +346,7 @@ int display_paint_screen(player *p)
                 else
                 {
                     /* draw tile */
-                    aaddch(DC_DARKGRAY, mt_get_glyph(player_memory_of(p, pos).type));
+                    aaddch(DARKGRAY, mt_get_glyph(player_memory_of(p, pos).type));
                 }
             }
 
@@ -377,12 +377,12 @@ int display_paint_screen(player *p)
     if (player_effect(p, ET_INVISIBILITY))
     {
         pc = ' ';
-        attrs = A_REVERSE | DC_WHITE;
+        attrs = A_REVERSE | WHITE;
     }
     else
     {
         pc = '@';
-        attrs = DC_WHITE;
+        attrs = WHITE;
     }
 
     mvaaddch(Y(p->pos), X(p->pos), attrs, pc);
@@ -401,13 +401,13 @@ int display_paint_screen(player *p)
 
     /* current HPs */
     if (p->hp <= ((int)p->hp_max / 10))      /* 10% hp left */
-        attrs = DC_LIGHTRED | A_BLINK;
+        attrs = LIGHTRED | A_BLINK;
     else if (p->hp <= ((int)p->hp_max / 4))  /* 25% hp left */
-        attrs = DC_RED;
+        attrs = RED;
     else if (p->hp <= ((int)p->hp_max / 2))  /* 50% hp left */
-        attrs = DC_GREEN;
+        attrs = GREEN;
     else
-        attrs = DC_LIGHTGREEN;
+        attrs = LIGHTGREEN;
 
 #ifdef SDLPDCURSES
     /* enable blinking on SDL PDCurses display for very low hp */
@@ -421,22 +421,22 @@ int display_paint_screen(player *p)
     mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, attrs, "HP %3d", p->hp, player_get_hp_max(p));
 
     /* max HPs */
-    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 15, DC_LIGHTGREEN, "/%-3d", player_get_hp_max(p));
+    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 15, LIGHTGREEN, "/%-3d", player_get_hp_max(p));
 
     /* current MPs */
     if (p->mp <= ((int)p->mp_max / 10)) /* 10% mp left */
-        attrs = DC_LIGHTMAGENTA;
+        attrs = LIGHTMAGENTA;
     else if (p->mp <= ((int)p->mp_max / 4))  /* 25% mp left */
-        attrs = DC_MAGENTA;
+        attrs = MAGENTA;
     else if (p->mp <= ((int)p->mp_max / 2))  /* 50% mp left */
-        attrs = DC_CYAN;
+        attrs = CYAN;
     else
-        attrs = DC_LIGHTCYAN;
+        attrs = LIGHTCYAN;
 
     mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 10, attrs, "MP %3d", p->mp);
 
     /* max MPs */
-    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 4, DC_LIGHTCYAN, "/%-3d", player_get_mp_max(p));
+    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 4, LIGHTCYAN, "/%-3d", player_get_mp_max(p));
 
     /* game time */
     mvprintw(MAP_MAX_Y + 1, MAP_MAX_X + 1, "T %-6d", game_turn(nlarn));
@@ -445,7 +445,7 @@ int display_paint_screen(player *p)
     move(MAP_MAX_Y + 2, 0);
     clrtoeol();
 
-    mvaprintw(MAP_MAX_Y + 2, MAP_MAX_X - 21, DC_LIGHTBLUE, "XP %3d/%-5d",
+    mvaprintw(MAP_MAX_Y + 2, MAP_MAX_X - 21, LIGHTBLUE, "XP %3d/%-5d",
              p->level, p->experience);
 
     /* dungeon map */
@@ -458,11 +458,11 @@ int display_paint_screen(player *p)
     mvprintw(1, MAP_MAX_X + 3, "STR ");
 
     if (player_get_str(p) > (int)p->strength)
-        attrs = DC_YELLOW;
+        attrs = YELLOW;
     else if (player_get_str(p) < (int)p->strength)
-        attrs = DC_LIGHTRED;
+        attrs = LIGHTRED;
     else
-        attrs = DC_WHITE;
+        attrs = WHITE;
 
     aprintw(attrs, "%2d", player_get_str(p));
     clrtoeol();
@@ -471,11 +471,11 @@ int display_paint_screen(player *p)
     mvprintw(2, MAP_MAX_X + 3, "DEX ");
 
     if (player_get_dex(p) > (int)p->dexterity)
-        attrs = DC_YELLOW;
+        attrs = YELLOW;
     else if (player_get_dex(p) < (int)p->dexterity)
-        attrs = DC_LIGHTRED;
+        attrs = LIGHTRED;
     else
-        attrs = DC_WHITE;
+        attrs = WHITE;
 
     aprintw(attrs, "%2d", player_get_dex(p));
     clrtoeol();
@@ -484,11 +484,11 @@ int display_paint_screen(player *p)
     mvprintw(3, MAP_MAX_X + 3, "CON ");
 
     if (player_get_con(p) > (int)p->constitution)
-        attrs = DC_YELLOW;
+        attrs = YELLOW;
     else if (player_get_con(p) < (int)p->constitution)
-        attrs = DC_LIGHTRED;
+        attrs = LIGHTRED;
     else
-        attrs = DC_WHITE;
+        attrs = WHITE;
 
     aprintw(attrs, "%2d", player_get_con(p));
     clrtoeol();
@@ -497,11 +497,11 @@ int display_paint_screen(player *p)
     mvprintw(4, MAP_MAX_X + 3, "INT ");
 
     if (player_get_int(p) > (int)p->intelligence)
-        attrs = DC_YELLOW;
+        attrs = YELLOW;
     else if (player_get_int(p) < (int)p->intelligence)
-        attrs = DC_LIGHTRED;
+        attrs = LIGHTRED;
     else
-        attrs = DC_WHITE;
+        attrs = WHITE;
 
     aprintw(attrs, "%2d", player_get_int(p));
     clrtoeol();
@@ -510,11 +510,11 @@ int display_paint_screen(player *p)
     mvprintw(5, MAP_MAX_X + 3, "WIS ");
 
     if (player_get_wis(p) > (int)p->wisdom)
-        attrs = DC_YELLOW;
+        attrs = YELLOW;
     else if (player_get_wis(p) < (int)p->wisdom)
-        attrs = DC_LIGHTRED;
+        attrs = LIGHTRED;
     else
-        attrs = DC_WHITE;
+        attrs = WHITE;
 
     aprintw(attrs, "%2d", player_get_wis(p));
     clrtoeol();
@@ -532,7 +532,7 @@ int display_paint_screen(player *p)
     }
     else
     {
-        mvaprintw(7, MAP_MAX_X + 3, DC_LIGHTRED, "unarmed");
+        mvaprintw(7, MAP_MAX_X + 3, LIGHTRED, "unarmed");
     }
     clrtoeol();
 
@@ -604,7 +604,7 @@ int display_paint_screen(player *p)
         /* display effect descriptions */
         for (i = 0; i < g_strv_length(efdescs); i++)
         {
-            mvwcprintw(stdscr, DC_LIGHTCYAN, display_default_colset, 11 + i,
+            mvwcprintw(stdscr, LIGHTCYAN, display_default_colset, 11 + i,
                        MAP_MAX_X + 3, efdescs[i]);
 
         }
@@ -663,9 +663,9 @@ int display_paint_screen(player *p)
         int def_attrs;
 
         if ((nlarn->log->gtime - 15) < ttime[i])
-            def_attrs = DC_WHITE;
+            def_attrs = WHITE;
         else
-            def_attrs = DC_LIGHTGRAY;
+            def_attrs = LIGHTGRAY;
 
         mvwcprintw(stdscr, def_attrs, display_default_colset,
                    y, 0, g_ptr_array_index(text, i));
@@ -2367,8 +2367,8 @@ position display_get_new_position(player *p,
             /* draw a line between source and target if told to */
             target = map_get_monster_at(vmap, pos);
 
-            if (target && monster_in_sight(target)) attrs = DC_LIGHTRED;
-            else                                    attrs = DC_LIGHTCYAN;
+            if (target && monster_in_sight(target)) attrs = LIGHTRED;
+            else                                    attrs = LIGHTCYAN;
 
             attron(attrs);
             GList *iter = r;
@@ -2421,15 +2421,15 @@ position display_get_new_position(player *p,
 
                         if ((m = map_get_monster_at(vmap, cursor)) && monster_in_sight(m))
                         {
-                            aaddch(DC_RED, monster_glyph(m));
+                            aaddch(RED, monster_glyph(m));
                         }
                         else if (pos_identical(p->pos, cursor))
                         {
-                            aaddch(DC_LIGHTRED, '@');
+                            aaddch(LIGHTRED, '@');
                         }
                         else
                         {
-                            aaddch(DC_LIGHTCYAN, '*');
+                            aaddch(LIGHTCYAN, '*');
                         }
                     }
                 }
@@ -3291,6 +3291,6 @@ static void display_spheres_paint(sphere *s, player *p)
 
     if (game_fullvis(nlarn) || fov_get(p->fv, s->pos))
     {
-        mvaaddch(Y(s->pos), X(s->pos), DC_MAGENTA, '0');
+        mvaaddch(Y(s->pos), X(s->pos), MAGENTA, '0');
     }
 }

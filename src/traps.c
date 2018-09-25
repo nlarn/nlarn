@@ -37,7 +37,7 @@ const trap_data traps[TT_MAX] =
         monster trigger message
     */
     {
-        TT_NONE, ET_NONE, DC_NONE,
+        TT_NONE, ET_NONE, COLOURLESS,
         0, 0, 0,
         NULL,
         NULL,
@@ -45,7 +45,7 @@ const trap_data traps[TT_MAX] =
         NULL,
     },
     {
-        TT_ARROW, ET_POISON, DC_CYAN,
+        TT_ARROW, ET_POISON, CYAN,
         75, 50, 10,
         "arrow trap",
         "You are hit by an arrow.",
@@ -53,7 +53,7 @@ const trap_data traps[TT_MAX] =
         "The %s is hit by an arrow.",
     },
     {
-        TT_DART, ET_POISON, DC_CYAN,
+        TT_DART, ET_POISON, CYAN,
         75, 50, 5,
         "dart trap",
         "You are hit by a dart.",
@@ -61,7 +61,7 @@ const trap_data traps[TT_MAX] =
         "The %s is hit by a dart.",
     },
     {
-        TT_TELEPORT, ET_NONE, DC_MAGENTA,
+        TT_TELEPORT, ET_NONE, MAGENTA,
         55, 0, 0,
         "teleport trap",
         "Zaaaappp! You've been teleported!",
@@ -69,7 +69,7 @@ const trap_data traps[TT_MAX] =
         "The %s has been teleported away.",
     },
     {
-        TT_PIT, ET_TRAPPED, DC_BROWN,
+        TT_PIT, ET_TRAPPED, BROWN,
         80, 100, 6,
         "pit",
         "You fall into a pit!",
@@ -77,7 +77,7 @@ const trap_data traps[TT_MAX] =
         "The %s falls into a pit.",
     },
     {
-        TT_SPIKEDPIT, ET_POISON, DC_BROWN,
+        TT_SPIKEDPIT, ET_POISON, BROWN,
         80, 60, 12,
         "pit full of spikes",
         "You fall into a pit full of spikes!",
@@ -85,7 +85,7 @@ const trap_data traps[TT_MAX] =
         "The %s falls into a pit full of spikes.",
     },
     {
-        TT_SLEEPGAS, ET_SLEEP, DC_MAGENTA,
+        TT_SLEEPGAS, ET_SLEEP, MAGENTA,
         75, 100, 0,
         "sleeping gas trap",
         "A cloud of gas engulfs you.",
@@ -93,7 +93,7 @@ const trap_data traps[TT_MAX] =
         "A cloud of gas engulfs the %s.",
     },
     {
-        TT_MANADRAIN, ET_NONE, DC_BROWN,
+        TT_MANADRAIN, ET_NONE, BROWN,
         75, 0, 0,
         "magic energy drain trap",
         "You feel your magical energy drained away!",
@@ -101,7 +101,7 @@ const trap_data traps[TT_MAX] =
         NULL,
     },
     {
-        TT_TRAPDOOR, ET_NONE, DC_BROWN,
+        TT_TRAPDOOR, ET_NONE, BROWN,
         75, 0, 5,
         "trapdoor",
         "You fall through a trap door!",

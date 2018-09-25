@@ -73,32 +73,32 @@ struct potion_obfuscation_s
 }
 potion_obfuscation[PO_MAX] =
 {
-    { "clear",          DC_WHITE,       },
-    { "bubbly",         DC_LIGHTGRAY,   },
-    { "clotted",        DC_DARKGRAY,    },
-    { "smoky",          DC_LIGHTGRAY    },
-    { "milky",          DC_WHITE,       },
-    { "fizzy",          DC_LIGHTBLUE,   },
-    { "murky",          DC_DARKGRAY,    },
-    { "effervescent",   DC_LIGHTBLUE,   },
-    { "dark",           DC_DARKGRAY,    },
-    { "turbid",         DC_DARKGRAY,    },
-    { "mucilaginous",   DC_BROWN,       },
-    { "gluey",          DC_BROWN,       },
-    { "gooey",          DC_BROWN,       },
-    { "coagulated",     DC_DARKGRAY,    },
-    { "white",          DC_WHITE,       },
-    { "red",            DC_RED,         },
-    { "blue",           DC_BLUE,        },
-    { "green",          DC_GREEN        },
-    { "yellow",         DC_YELLOW,      },
-    { "orange",         DC_LIGHTRED,    },
-    { "polychrome",     DC_LIGHTGREEN,  },
-    { "dichroic",       DC_LIGHTMAGENTA,},
-    { "tricoloured",    DC_LIGHTCYAN,   },
-    { "black",          DC_DARKGRAY,    },
-    { "turquoise",      DC_CYAN,        },
-    { "foaming",        DC_WHITE,       },
+    { "clear",          WHITE,       },
+    { "bubbly",         LIGHTGRAY,   },
+    { "clotted",        DARKGRAY,    },
+    { "smoky",          LIGHTGRAY    },
+    { "milky",          WHITE,       },
+    { "fizzy",          LIGHTBLUE,   },
+    { "murky",          DARKGRAY,    },
+    { "effervescent",   LIGHTBLUE,   },
+    { "dark",           DARKGRAY,    },
+    { "turbid",         DARKGRAY,    },
+    { "mucilaginous",   BROWN,       },
+    { "gluey",          BROWN,       },
+    { "gooey",          BROWN,       },
+    { "coagulated",     DARKGRAY,    },
+    { "white",          WHITE,       },
+    { "red",            RED,         },
+    { "blue",           BLUE,        },
+    { "green",          GREEN        },
+    { "yellow",         YELLOW,      },
+    { "orange",         LIGHTRED,    },
+    { "polychrome",     LIGHTGREEN,  },
+    { "dichroic",       LIGHTMAGENTA,},
+    { "tricoloured",    LIGHTCYAN,   },
+    { "black",          DARKGRAY,    },
+    { "turquoise",      CYAN,        },
+    { "foaming",        WHITE,       },
 };
 
 char *potion_desc(potion_t potion_id)
@@ -460,7 +460,7 @@ static int potion_detect_item(player *p, item *potion)
                        don't move around */
 
                     player_memory_of(p, pos).item = item_type;
-                    player_memory_of(p, pos).item_colour = DC_DARKGRAY;
+                    player_memory_of(p, pos).item_colour = DARKGRAY;
                     count++;
                 }
             }

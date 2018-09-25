@@ -29,32 +29,32 @@
 const sobject_data sobjects[LS_MAX] =
 {
     /* type             gly   color         desc                                   pa tr */
-    { LS_NONE,          ' ',  DC_NONE,      NULL,                                  1, 1, },
-    { LS_ALTAR,         '_',  DC_WHITE,     "a holy altar",                        1, 1, },
-    { LS_THRONE,        '\\', DC_MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },
-    { LS_THRONE2,       '\\', DC_MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },
-    { LS_DEADTHRONE,    '\\', DC_LIGHTGRAY, "a massive throne",                    1, 1, },
-    { LS_STAIRSDOWN,    '>',  DC_WHITE,     "a circular staircase",                1, 1, },
-    { LS_STAIRSUP,      '<',  DC_WHITE,     "a circular staircase",                1, 1, },
-    { LS_ELEVATORDOWN,  'I',  DC_LIGHTGRAY, "a volcanic shaft leading downward",   1, 1, },
-    { LS_ELEVATORUP,    'I',  DC_WHITE,     "the base of a volcanic shaft",        1, 1, },
-    { LS_FOUNTAIN,      '{',  DC_BLUE,      "a bubbling fountain",                 1, 1, },
-    { LS_DEADFOUNTAIN,  '{',  DC_LIGHTGRAY, "a dead fountain",                     1, 1, },
-    { LS_STATUE,        '|',  DC_LIGHTGRAY, "a great marble statue",               1, 1, },
-    { LS_URN,           'u',  DC_YELLOW,    "a golden urn",                        1, 1, },
-    { LS_MIRROR,        '|',  DC_WHITE,     "a mirror",                            1, 1, },
-    { LS_OPENDOOR,      '/',  DC_BROWN,     "an open door",                        1, 1, },
-    { LS_CLOSEDDOOR,    '+',  DC_BROWN,     "a closed door",                       0, 0, },
-    { LS_DNGN_ENTRANCE, 'O',  DC_LIGHTGRAY, "the dungeon entrance",                1, 1, },
-    { LS_DNGN_EXIT,     'O',  DC_WHITE,     "the exit to town",                    1, 1, },
-    { LS_HOME,          'H',  DC_LIGHTGRAY, "your home",                           1, 0, },
-    { LS_DNDSTORE,      'D',  DC_LIGHTGRAY, "a DND store",                         1, 0, },
-    { LS_TRADEPOST,     'T',  DC_LIGHTGRAY, "the Larn trading Post",               1, 0, },
-    { LS_LRS,           'L',  DC_LIGHTGRAY, "an LRS office",                       1, 0, },
-    { LS_SCHOOL,        'S',  DC_LIGHTGRAY, "the College of Larn",                 1, 0, },
-    { LS_BANK,          'B',  DC_LIGHTGRAY, "the bank of Larn",                    1, 0, },
-    { LS_BANK2,         'B',  DC_WHITE,     "a branch office of the bank of Larn", 1, 0, },
-    { LS_MONASTERY,     'M',  DC_WHITE,     "the Monastery of Larn",               1, 0, },
+    { LS_NONE,          ' ',  COLOURLESS,   NULL,                                  1, 1, },
+    { LS_ALTAR,         '_',  WHITE,     "a holy altar",                        1, 1, },
+    { LS_THRONE,        '\\', MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },
+    { LS_THRONE2,       '\\', MAGENTA,   "a handsome, jewel-encrusted throne",  1, 1, },
+    { LS_DEADTHRONE,    '\\', LIGHTGRAY, "a massive throne",                    1, 1, },
+    { LS_STAIRSDOWN,    '>',  WHITE,     "a circular staircase",                1, 1, },
+    { LS_STAIRSUP,      '<',  WHITE,     "a circular staircase",                1, 1, },
+    { LS_ELEVATORDOWN,  'I',  LIGHTGRAY, "a volcanic shaft leading downward",   1, 1, },
+    { LS_ELEVATORUP,    'I',  WHITE,     "the base of a volcanic shaft",        1, 1, },
+    { LS_FOUNTAIN,      '{',  BLUE,      "a bubbling fountain",                 1, 1, },
+    { LS_DEADFOUNTAIN,  '{',  LIGHTGRAY, "a dead fountain",                     1, 1, },
+    { LS_STATUE,        '|',  LIGHTGRAY, "a great marble statue",               1, 1, },
+    { LS_URN,           'u',  YELLOW,    "a golden urn",                        1, 1, },
+    { LS_MIRROR,        '|',  WHITE,     "a mirror",                            1, 1, },
+    { LS_OPENDOOR,      '/',  BROWN,     "an open door",                        1, 1, },
+    { LS_CLOSEDDOOR,    '+',  BROWN,     "a closed door",                       0, 0, },
+    { LS_DNGN_ENTRANCE, 'O',  LIGHTGRAY, "the dungeon entrance",                1, 1, },
+    { LS_DNGN_EXIT,     'O',  WHITE,     "the exit to town",                    1, 1, },
+    { LS_HOME,          'H',  LIGHTGRAY, "your home",                           1, 0, },
+    { LS_DNDSTORE,      'D',  LIGHTGRAY, "a DND store",                         1, 0, },
+    { LS_TRADEPOST,     'T',  LIGHTGRAY, "the Larn trading Post",               1, 0, },
+    { LS_LRS,           'L',  LIGHTGRAY, "an LRS office",                       1, 0, },
+    { LS_SCHOOL,        'S',  LIGHTGRAY, "the College of Larn",                 1, 0, },
+    { LS_BANK,          'B',  LIGHTGRAY, "the bank of Larn",                    1, 0, },
+    { LS_BANK2,         'B',  WHITE,     "a branch office of the bank of Larn", 1, 0, },
+    { LS_MONASTERY,     'M',  WHITE,     "the Monastery of Larn",               1, 0, },
 };
 
 static void monster_appear(monster_t type, position mpos);
@@ -1000,7 +1000,7 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
                                  25 + p->level + rand_0n(25 + p->level),
                                  damo.ot, damo.originator);
 
-        area_blast(pos, 3, &damo, sobject_blast_hit, dam, NULL, '*', DC_LIGHTCYAN);
+        area_blast(pos, 3, &damo, sobject_blast_hit, dam, NULL, '*', LIGHTCYAN);
         damage_free(dam);
 
         break;

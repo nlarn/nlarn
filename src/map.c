@@ -60,18 +60,18 @@ static inline void map_sphere_destroy(sphere *s, map *m __attribute__((unused)))
 const map_tile_data map_tiles[LT_MAX] =
 {
     /* type         gly  color          desc           pa tr */
-    { LT_NONE,      ' ', DC_NONE,       NULL,          0, 0 },
-    { LT_MOUNTAIN,  '^', DC_LIGHTGRAY,  "a mountain",  0, 0 },
-    { LT_GRASS,     '"', DC_LIGHTGREEN, "grass",       1, 1 },
-    { LT_DIRT,      '.', DC_BROWN,      "dirt",        1, 1 },
-    { LT_TREE,      '&', DC_GREEN,      "a tree",      0, 0 },
-    { LT_FLOOR,     '.', DC_LIGHTGRAY,  "floor",       1, 1 },
-    { LT_WATER,     '~', DC_LIGHTBLUE,  "water",       1, 1 },
-    { LT_DEEPWATER, '~', DC_BLUE,       "deep water",  0, 1 },
-    { LT_LAVA,      '~', DC_RED,        "lava",        0, 1 },
-    { LT_FIRE,      '*', DC_RED,        "fire",        1, 1 },
-    { LT_CLOUD,     '*', DC_WHITE,      "a gas cloud", 1, 1 },
-    { LT_WALL,      '#', DC_LIGHTGRAY,  "a wall",      0, 0 },
+    { LT_NONE,      ' ', COLOURLESS,    NULL,          0, 0 },
+    { LT_MOUNTAIN,  '^', LIGHTGRAY,  "a mountain",  0, 0 },
+    { LT_GRASS,     '"', LIGHTGREEN, "grass",       1, 1 },
+    { LT_DIRT,      '.', BROWN,      "dirt",        1, 1 },
+    { LT_TREE,      '&', GREEN,      "a tree",      0, 0 },
+    { LT_FLOOR,     '.', LIGHTGRAY,  "floor",       1, 1 },
+    { LT_WATER,     '~', LIGHTBLUE,  "water",       1, 1 },
+    { LT_DEEPWATER, '~', BLUE,       "deep water",  0, 1 },
+    { LT_LAVA,      '~', RED,        "lava",        0, 1 },
+    { LT_FIRE,      '*', RED,        "fire",        1, 1 },
+    { LT_CLOUD,     '*', WHITE,      "a gas cloud", 1, 1 },
+    { LT_WALL,      '#', LIGHTGRAY,  "a wall",      0, 0 },
 };
 
 /* keep track which levels have been used before */

@@ -59,23 +59,23 @@ const item_type_data item_data[IT_MAX] =
 const item_material_data item_materials[IM_MAX] =
 {
     /* type           name           adjective   colour       frag */
-    { IM_PAPER,       "paper",       "papier",   DC_WHITE,     20, },
-    { IM_CLOTH,       "cloth",       "cloth",    DC_LIGHTGRAY, 15, },
-    { IM_LEATHER,     "leather",     "leathern", DC_BROWN,     10, },
-    { IM_WOOD,        "wood",        "wooden",   DC_BROWN,     10, },
-    { IM_BONE,        "bone",        "osseous",  DC_DARKGRAY,  15, },
-    { IM_DRAGON_HIDE, "dragon hide", "scabby",   DC_GREEN,      2, },
-    { IM_LEAD,        "lead",        "leady",    DC_DARKGRAY,  15, },
-    { IM_IRON,        "iron",        "irony",    DC_LIGHTGRAY,  5, },
-    { IM_STEEL,       "steel",       "steely",   DC_WHITE,      1, },
-    { IM_COPPER,      "copper",      "cupreous", DC_BROWN,      8, },
-    { IM_SILVER,      "silver",      "silvery",  DC_LIGHTGRAY,  7, },
-    { IM_GOLD,        "gold",        "golden",   DC_YELLOW,     6, },
-    { IM_PLATINUM,    "platinum",    "platinum", DC_WHITE,      3, },
-    { IM_MITHRIL,     "mitril",      "mithrial", DC_LIGHTGRAY,  0, },
-    { IM_GLASS,       "glass",       "vitreous", DC_LIGHTCYAN, 50, },
-    { IM_STONE,       "stone",       "stony",    DC_WHITE,     20, },
-    { IM_GEMSTONE,    "gemstone",    "gemstone", DC_RED,        0, },
+    { IM_PAPER,       "paper",       "papier",   WHITE,     20, },
+    { IM_CLOTH,       "cloth",       "cloth",    LIGHTGRAY, 15, },
+    { IM_LEATHER,     "leather",     "leathern", BROWN,     10, },
+    { IM_WOOD,        "wood",        "wooden",   BROWN,     10, },
+    { IM_BONE,        "bone",        "osseous",  DARKGRAY,  15, },
+    { IM_DRAGON_HIDE, "dragon hide", "scabby",   GREEN,      2, },
+    { IM_LEAD,        "lead",        "leady",    DARKGRAY,  15, },
+    { IM_IRON,        "iron",        "irony",    LIGHTGRAY,  5, },
+    { IM_STEEL,       "steel",       "steely",   WHITE,      1, },
+    { IM_COPPER,      "copper",      "cupreous", BROWN,      8, },
+    { IM_SILVER,      "silver",      "silvery",  LIGHTGRAY,  7, },
+    { IM_GOLD,        "gold",        "golden",   YELLOW,     6, },
+    { IM_PLATINUM,    "platinum",    "platinum", WHITE,      3, },
+    { IM_MITHRIL,     "mitril",      "mithrial", LIGHTGRAY,  0, },
+    { IM_GLASS,       "glass",       "vitreous", LIGHTCYAN, 50, },
+    { IM_STONE,       "stone",       "stony",    WHITE,     20, },
+    { IM_GEMSTONE,    "gemstone",    "gemstone", RED,        0, },
 };
 
 /* functions */
@@ -1100,15 +1100,15 @@ int item_colour(item *it)
         break;
 
     case IT_SCROLL:
-        return DC_WHITE;
+        return WHITE;
         break;
 
     case IT_CONTAINER:
-        return DC_BROWN;
+        return BROWN;
         break;
 
     case IT_GOLD:
-        return DC_YELLOW;
+        return YELLOW;
         break;
 
     case IT_GEM:
@@ -1116,7 +1116,7 @@ int item_colour(item *it)
         break;
 
     default:
-        return DC_BLACK;
+        return BLACK;
         break;
     }
 }

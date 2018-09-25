@@ -91,13 +91,13 @@ static struct _monster_breath_data
 {
     { NULL, 0, 0 },                                 /* DAM_NONE */
     { NULL, 0, 0 },                                 /* DAM_PHYSICAL */
-    { "psionic blast", '*', DC_WHITE },             /* DAM_MAGICAL */
-    { "burst of fire", '~', DC_RED },               /* DAM_FIRE */
-    { "beam of frost", '*', DC_LIGHTCYAN },         /* DAM_COLD */
-    { "gush of acid", '*', DC_LIGHTGREEN },         /* DAM_ACID */
-    { "flood of water", '~', DC_BLUE },             /* DAM_WATER */
-    { "ray of lightning", '*', DC_YELLOW },         /* DAM_ELECTRICITY */
-    { "burst of noxious fumes", '%', DC_GREEN },    /* DAM_POISON */
+    { "psionic blast", '*', WHITE },             /* DAM_MAGICAL */
+    { "burst of fire", '~', RED },               /* DAM_FIRE */
+    { "beam of frost", '*', LIGHTCYAN },         /* DAM_COLD */
+    { "gush of acid", '*', LIGHTGREEN },         /* DAM_ACID */
+    { "flood of water", '~', BLUE },             /* DAM_WATER */
+    { "ray of lightning", '*', YELLOW },         /* DAM_ELECTRICITY */
+    { "burst of noxious fumes", '%', GREEN },    /* DAM_POISON */
 };
 
 static gboolean monster_player_visible(monster *m);

@@ -50,7 +50,7 @@ const spell_data spells[SP_MAX] =
         SC_PLAYER, DAM_NONE, ET_PROTECTION, spell_type_player,
         "Generates a protection field",
         NULL, NULL,
-        DC_NONE, 1, 260, TRUE
+        COLOURLESS, 1, 260, TRUE
     },
     {
         SP_MLE, "mle", "magic missile",
@@ -58,14 +58,14 @@ const spell_data spells[SP_MAX] =
         "Creates and hurls a missile magic of magical energy at a target",
         "The missile hits the %s.",
         "The missile bounces off the %s.",
-        DC_NONE, 1, 320, TRUE
+        COLOURLESS, 1, 320, TRUE
     },
     {
         SP_DEX, "dex", "dexterity",
         SC_PLAYER, DAM_NONE, ET_INC_DEX, spell_type_player,
         "Improves the caster's dexterity",
         NULL, NULL,
-        DC_NONE, 1, 260, FALSE
+        COLOURLESS, 1, 260, FALSE
     },
     {
         SP_SLE, "sle", "sleep",
@@ -73,14 +73,14 @@ const spell_data spells[SP_MAX] =
         "Causes some monsters to go to sleep",
         NULL,
         "The %s doesn't sleep.",
-        DC_NONE, 1, 260, TRUE
+        COLOURLESS, 1, 260, TRUE
     },
     {
         SP_CHM, "chm", "charm monster",
         SC_POINT, DAM_NONE, ET_CHARM_MONSTER, spell_type_point,
         "Some monsters may be awed at your magnificence",
         NULL, NULL,
-        DC_NONE, 1, 260, FALSE
+        COLOURLESS, 1, 260, FALSE
     },
     {
         SP_SSP, "ssp", "sonic spear",
@@ -88,42 +88,42 @@ const spell_data spells[SP_MAX] =
         "Causes your hands to emit a screeching sound toward what they point",
         "The sound damages the %s.",
         "The %s can't hear the noise.",
-        DC_LIGHTCYAN, 2, 480, FALSE
+        LIGHTCYAN, 2, 480, FALSE
     },
     {
         SP_STR, "str", "strength",
         SC_PLAYER, DAM_NONE, ET_INC_STR, spell_type_player,
         "Increase the caster's strength for a short term",
         NULL, NULL,
-        DC_NONE, 2, 460, FALSE
+        COLOURLESS, 2, 460, FALSE
     },
     {
         SP_CPO, "cpo", "cure poison",
         SC_PLAYER, DAM_NONE, ET_NONE, spell_cure_poison,
         "The caster is cured from poison",
         NULL, NULL,
-        DC_NONE, 2, 460, TRUE
+        COLOURLESS, 2, 460, TRUE
     },
     {
         SP_HEL, "hel", "healing",
         SC_PLAYER, DAM_NONE, ET_INC_HP, spell_type_player,
         "Restores some HP to the caster",
         NULL, NULL,
-        DC_NONE, 2, 500, TRUE
+        COLOURLESS, 2, 500, TRUE
     },
     {
         SP_CBL, "cbl", "cure blindness",
         SC_PLAYER, DAM_NONE, ET_NONE, spell_cure_blindness,
         "Restores sight to one so unfortunate as to be blinded",
         NULL, NULL,
-        DC_NONE, 2, 400, TRUE
+        COLOURLESS, 2, 400, TRUE
     },
     {
         SP_CRE, "cre", "create monster",
         SC_OTHER, DAM_NONE, ET_NONE, spell_create_monster,
         "Creates a monster near the caster appropriate for the location",
         NULL, NULL,
-        DC_NONE, 2, 400, FALSE
+        COLOURLESS, 2, 400, FALSE
     },
     {
         SP_PHA, "pha", "phantasmal forces",
@@ -131,14 +131,14 @@ const spell_data spells[SP_MAX] =
         "Creates illusions, and if believed, the monster flees",
         "The %s believed!",
         "The %s didn't believe the illusions!",
-        DC_NONE, 2, 600, FALSE
+        COLOURLESS, 2, 600, FALSE
     },
     {
         SP_INV, "inv", "invisibility",
         SC_PLAYER, DAM_NONE, ET_INVISIBILITY, spell_type_player,
         "The caster becomes invisible",
         NULL, NULL,
-        DC_NONE, 2, 600, FALSE
+        COLOURLESS, 2, 600, FALSE
     },
     {
         SP_BAL, "bal", "fireball",
@@ -146,7 +146,7 @@ const spell_data spells[SP_MAX] =
         "Makes a ball of fire that burns on what it hits",
         "The fireball hits the %s.",
         NULL,
-        DC_LIGHTRED, 3, 1200, FALSE
+        LIGHTRED, 3, 1200, FALSE
     },
     {
         SP_CLD, "cld", "cone of cold",
@@ -154,7 +154,7 @@ const spell_data spells[SP_MAX] =
         "Sends forth a cone of cold which freezes what it touches",
         "The cone of cold strikes the %s.",
         NULL,
-        DC_WHITE, 3, 1200, FALSE
+        WHITE, 3, 1200, FALSE
     },
     {
         SP_PLY, "ply", "polymorph",
@@ -162,21 +162,21 @@ const spell_data spells[SP_MAX] =
         "You can find out what this does for yourself",
         NULL,
         "The %s resists.",
-        DC_NONE, 3, 950, FALSE
+        COLOURLESS, 3, 950, FALSE
     },
     {
         SP_CAN, "can", "cancellation",
         SC_PLAYER, DAM_NONE, ET_CANCELLATION, spell_type_player,
         "Protects the caster against spheres of annihilation",
         NULL, NULL,
-        DC_NONE, 3, 950, FALSE
+        COLOURLESS, 3, 950, FALSE
     },
     {
         SP_HAS, "has", "haste self",
         SC_PLAYER, DAM_NONE, ET_SPEED, spell_type_player,
         "Speeds up the caster's movements",
         NULL, NULL,
-        DC_NONE, 3, 950, FALSE
+        COLOURLESS, 3, 950, FALSE
     },
     {
         SP_CKL, "ckl", "killing cloud",
@@ -184,14 +184,14 @@ const spell_data spells[SP_MAX] =
         "Creates a fog of poisonous gas which kills all that is within it",
         "The %s gasps for air.",
         NULL,
-        DC_NONE, 3, 1200, FALSE
+        COLOURLESS, 3, 1200, FALSE
     },
     {
         SP_VPR, "vpr", "vaporize rock",
         SC_OTHER, DAM_NONE, ET_NONE, spell_vaporize_rock,
         "This changes rock to air",
         NULL, NULL,
-        DC_NONE, 3, 950, FALSE
+        COLOURLESS, 3, 950, FALSE
     },
     {
         SP_DRY, "dry", "dehydration",
@@ -199,7 +199,7 @@ const spell_data spells[SP_MAX] =
         "Dries up water in the immediate vicinity",
         "The %s shrivels up.",
         "The %s isn't affected.",
-        DC_NONE, 4, 1600, FALSE
+        COLOURLESS, 4, 1600, FALSE
     },
     {
         SP_LIT, "lit", "lightning",
@@ -207,21 +207,21 @@ const spell_data spells[SP_MAX] =
         "Your finger will emit a lightning bolt when this spell is cast",
         "A lightning bolt hits the %s.",
         "The %s loves fire and lightning!",
-        DC_YELLOW, 4, 1600, FALSE
+        YELLOW, 4, 1600, FALSE
     },
     {
         SP_DRL, "drl", "drain life",
         SC_POINT, DAM_PHYSICAL, ET_NONE, spell_type_point,
         "Subtracts hit points from both you and a monster",
         NULL, NULL,
-        DC_NONE, 4, 1400, FALSE
+        COLOURLESS, 4, 1400, FALSE
     },
     {
         SP_GLO, "glo", "invulnerability",
         SC_PLAYER, DAM_NONE, ET_INVULNERABILITY, spell_type_player,
         "This globe helps to protect the player from physical attack",
         NULL, NULL,
-        DC_NONE, 4, 1400, FALSE
+        COLOURLESS, 4, 1400, FALSE
     },
     {
         SP_FLO, "flo", "flood",
@@ -229,7 +229,7 @@ const spell_data spells[SP_MAX] =
         "This creates an avalanche of H2O to flood the immediate chamber",
         "The %s struggles for air in the flood!",
         "The %s loves the water!",
-        DC_NONE, 4, 1600, FALSE
+        COLOURLESS, 4, 1600, FALSE
     },
     {
         SP_FGR, "fgr", "finger of death",
@@ -237,35 +237,35 @@ const spell_data spells[SP_MAX] =
         "This is a holy spell and calls upon your god to back you up",
         "The %s's heart stopped.",
         "The %s isn't affected.",
-        DC_NONE, 4, 1600, FALSE
+        COLOURLESS, 4, 1600, FALSE
     },
     {
         SP_SCA, "sca", "scare monsters",
         SC_OTHER, DAM_NONE, ET_NONE, spell_scare_monsters,
         "Terrifies nearby monsters so that hopefully they flee the magic user",
         NULL, NULL,
-        DC_NONE, 5, 2000, FALSE
+        COLOURLESS, 5, 2000, FALSE
     },
     {
         SP_HLD, "hld", "hold monster",
         SC_POINT, DAM_NONE, ET_HOLD_MONSTER, spell_type_point,
         "The monster is frozen in his tracks if this is successful",
         NULL, NULL,
-        DC_NONE, 5, 2000, FALSE
+        COLOURLESS, 5, 2000, FALSE
     },
     {
         SP_STP, "stp", "time stop",
         SC_PLAYER, DAM_NONE, ET_TIMESTOP, spell_type_player,
         "All movement in the caverns ceases for a limited duration",
         NULL, NULL,
-        DC_NONE, 5, 2500, FALSE
+        COLOURLESS, 5, 2500, FALSE
     },
     {
         SP_TEL, "tel", "teleport away",
         SC_POINT, DAM_NONE, ET_NONE, spell_type_point,
         "Moves a particular monster around in the dungeon",
         NULL, NULL,
-        DC_NONE, 5, 2000, FALSE
+        COLOURLESS, 5, 2000, FALSE
     },
     {
         SP_MFI, "mfi", "magic fire",
@@ -273,35 +273,35 @@ const spell_data spells[SP_MAX] =
         "This causes a curtain of fire to appear all around you",
         "The %s cringes from the flame.",
         NULL,
-        DC_NONE, 5, 2500, FALSE
+        COLOURLESS, 5, 2500, FALSE
     },
     {
         SP_MKW, "mkw", "make wall",
         SC_OTHER, DAM_NONE, ET_NONE, spell_make_wall,
         "Makes a wall in the specified place",
         NULL, NULL,
-        DC_NONE, 6, 3000, FALSE
+        COLOURLESS, 6, 3000, FALSE
     },
     {
         SP_SPH, "sph", "sphere of annihilation",
         SC_OTHER, DAM_NONE, ET_NONE, spell_create_sphere,
         "Anything caught in this sphere is instantly killed",
         NULL, NULL,
-        DC_NONE, 6, 3500, FALSE
+        COLOURLESS, 6, 3500, FALSE
     },
     {
         SP_SUM, "sum", "summon demon",
         SC_OTHER, DAM_NONE, ET_NONE, spell_summon_demon,
         "Summons a demon who hopefully helps you out",
         NULL, NULL,
-        DC_NONE, 6, 3500, FALSE
+        COLOURLESS, 6, 3500, FALSE
     },
     {
         SP_WTW, "wtw", "walk through walls",
         SC_PLAYER, DAM_NONE, ET_WALL_WALK, spell_type_player,
         "Allows the caster to walk through walls for a short period of time",
         NULL, NULL,
-        DC_NONE, 6, 3800, FALSE
+        COLOURLESS, 6, 3800, FALSE
     },
     {
         SP_ALT, "alt", "alter reality",
@@ -309,7 +309,7 @@ const spell_data spells[SP_MAX] =
         "God only knows what this will do",
         NULL,
         "Polinneaus won't let you mess with his dungeon!",
-        DC_NONE, 6, 3800, FALSE
+        COLOURLESS, 6, 3800, FALSE
     },
 };
 
@@ -321,42 +321,42 @@ struct book_obfuscation_s
 }
 book_obfuscation[SP_MAX] =
 {
-    { "parchment-bound", 800, DC_BROWN,     },
-    { "thick",          1200, DC_RED,       },
-    { "dusty",           800, DC_LIGHTGRAY, },
-    { "leather-bound",   800, DC_BROWN,     },
-    { "heavy",          1200, DC_GREEN,     },
-    { "ancient",         800, DC_DARKGRAY,  },
-    { "buckram",         800, DC_LIGHTGRAY, },
-    { "gilded",          800, DC_YELLOW,    },
-    { "embossed",        800, DC_BLUE,      },
-    { "old",             800, DC_LIGHTGRAY, },
-    { "thin",            400, DC_GREEN,     },
-    { "light",           400, DC_WHITE,     },
-    { "large",          1200, DC_BLUE,      },
-    { "vellum",          800, DC_BROWN,     },
-    { "tan",             800, DC_BROWN,     },
-    { "papyrus",         800, DC_BROWN,     },
-    { "linen",           800, DC_WHITE,     },
-    { "musty",           800, DC_GREEN,     },
-    { "faded",           800, DC_DARKGRAY,  },
-    { "antique",         800, DC_DARKGRAY,  },
-    { "worn out",        800, DC_DARKGRAY,  },
-    { "tattered",        800, DC_LIGHTGRAY, },
-    { "aged",            800, DC_DARKGRAY,  },
-    { "ornate",          800, DC_BLUE,      },
-    { "inconspicuous",   800, DC_LIGHTGRAY, },
-    { "awe-inspiring",   800, DC_WHITE,     },
-    { "stained",         800, DC_BROWN,     },
-    { "mottled",         800, DC_RED,       },
-    { "plaid",           800, DC_RED,       },
-    { "wax-lined",       800, DC_BROWN,     },
-    { "bamboo",          800, DC_YELLOW,    },
-    { "clasped",         800, DC_YELLOW,    },
-    { "well-thumbed",    800, DC_BLUE,      },
-    { "ragged",          800, DC_LIGHTGRAY, },
-    { "dull",            800, DC_DARKGRAY,  },
-    { "canvas",          800, DC_YELLOW,    },
+    { "parchment-bound", 800, BROWN,     },
+    { "thick",          1200, RED,       },
+    { "dusty",           800, LIGHTGRAY, },
+    { "leather-bound",   800, BROWN,     },
+    { "heavy",          1200, GREEN,     },
+    { "ancient",         800, DARKGRAY,  },
+    { "buckram",         800, LIGHTGRAY, },
+    { "gilded",          800, YELLOW,    },
+    { "embossed",        800, BLUE,      },
+    { "old",             800, LIGHTGRAY, },
+    { "thin",            400, GREEN,     },
+    { "light",           400, WHITE,     },
+    { "large",          1200, BLUE,      },
+    { "vellum",          800, BROWN,     },
+    { "tan",             800, BROWN,     },
+    { "papyrus",         800, BROWN,     },
+    { "linen",           800, WHITE,     },
+    { "musty",           800, GREEN,     },
+    { "faded",           800, DARKGRAY,  },
+    { "antique",         800, DARKGRAY,  },
+    { "worn out",        800, DARKGRAY,  },
+    { "tattered",        800, LIGHTGRAY, },
+    { "aged",            800, DARKGRAY,  },
+    { "ornate",          800, BLUE,      },
+    { "inconspicuous",   800, LIGHTGRAY, },
+    { "awe-inspiring",   800, WHITE,     },
+    { "stained",         800, BROWN,     },
+    { "mottled",         800, RED,       },
+    { "plaid",           800, RED,       },
+    { "wax-lined",       800, BROWN,     },
+    { "bamboo",          800, YELLOW,    },
+    { "clasped",         800, YELLOW,    },
+    { "well-thumbed",    800, BLUE,      },
+    { "ragged",          800, LIGHTGRAY, },
+    { "dull",            800, DARKGRAY,  },
+    { "canvas",          800, YELLOW,    },
 /*
     reserve descriptions for unimplemented spells:
     chambray
