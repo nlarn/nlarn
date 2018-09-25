@@ -38,7 +38,6 @@
 /* colour pairs */
 enum display_colour_pairs
 {
-    DCP_NONE,
     DCP_WHITE_BLACK,
     DCP_RED_BLACK,
     DCP_GREEN_BLACK,
@@ -58,8 +57,7 @@ enum display_colour_pairs
     DCP_BLACK_RED,
 
     DCP_RED_WHITE,
-    DCP_BLACK_WHITE,
-    DCP_MAX
+    DCP_BLACK_WHITE
 };
 
 enum display_default_colours
@@ -80,13 +78,11 @@ enum display_default_colours
     DC_LIGHTBLUE    = COLOR_PAIR(DCP_BLUE_BLACK)    | A_BOLD,
     DC_LIGHTMAGENTA = COLOR_PAIR(DCP_MAGENTA_BLACK) | A_BOLD,
     DC_LIGHTCYAN    = COLOR_PAIR(DCP_CYAN_BLACK)    | A_BOLD,
-    DC_WHITE        = COLOR_PAIR(DCP_WHITE_BLACK)   | A_BOLD,
-    DC_MAX
+    DC_WHITE        = COLOR_PAIR(DCP_WHITE_BLACK)   | A_BOLD
 };
 
 enum display_dialog_colours
 {
-    DDC_NONE,
     DDC_BLACK        = COLOR_PAIR(DCP_BLACK_RED),
     DDC_RED          = COLOR_PAIR(DCP_RED_RED),
     DDC_GREEN        = COLOR_PAIR(DCP_GREEN_RED),
@@ -102,8 +98,7 @@ enum display_dialog_colours
     DDC_LIGHTBLUE    = COLOR_PAIR(DCP_BLUE_RED)    | A_BOLD,
     DDC_LIGHTMAGENTA = COLOR_PAIR(DCP_MAGENTA_RED) | A_BOLD,
     DDC_LIGHTCYAN    = COLOR_PAIR(DCP_CYAN_RED)    | A_BOLD,
-    DDC_WHITE        = COLOR_PAIR(DCP_WHITE_RED)   | A_BOLD,
-    DDC_MAX
+    DDC_WHITE        = COLOR_PAIR(DCP_WHITE_RED)   | A_BOLD
 };
 typedef void (*display_inv_callback_func)(player *, inventory **, item *);
 

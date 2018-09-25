@@ -51,13 +51,11 @@ const display_colset display_default_colset[] =
     { "lightblue",    DC_LIGHTBLUE },
     { "lightmagenta", DC_LIGHTMAGENTA },
     { "lightcyan",    DC_LIGHTCYAN },
-    { "white",        DC_WHITE },
-    { NULL,           0 },
+    { "white",        DC_WHITE }
 };
 
 const display_colset display_dialog_colset[] =
 {
-    { "",             DDC_NONE },
     { "black",        DDC_BLACK },
     { "red",          DDC_RED },
     { "green",        DDC_GREEN },
@@ -73,8 +71,7 @@ const display_colset display_dialog_colset[] =
     { "lightblue",    DDC_LIGHTBLUE },
     { "lightmagenta", DDC_LIGHTMAGENTA },
     { "lightcyan",    DDC_LIGHTCYAN },
-    { "white",        DDC_WHITE },
-    { NULL,           0 },
+    { "white",        DDC_WHITE }
 };
 
 static gboolean display_initialised = FALSE;
