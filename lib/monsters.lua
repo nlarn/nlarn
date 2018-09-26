@@ -4,7 +4,7 @@ monsters = {
       attacks = { { type = BITE, base = 3, damage = PHYSICAL },
                   { type = BITE, base = 3, damage = POISON }
       },
-      color = GREEN,
+      color = "GREEN",
       exp = 15,
       flags = HEAD + RES_POISON,
       hp_max = 20,
@@ -21,7 +21,7 @@ monsters = {
         { type = BITE, base = 9, damage = PHYSICAL },
         { type = CLAW, base = 9, damage = PHYSICAL }
       },
-      color = BROWN,
+      color = "BROWN",
       exp = 4000,
       flags = HEAD + FLY + DRAGON,
       gold = 300,
@@ -39,7 +39,7 @@ monsters = {
         { type = BITE, base = 5, damage = PHYSICAL, rand = 10 },
         { type = WEAPON, damage = PHYSICAL }
       },
-      color = BROWN,
+      color = "BROWN",
       exp = 35,
       flags = HEAD + HANDS + INFRAVISION,
       gold_chance = 10,
@@ -58,7 +58,7 @@ monsters = {
         { type = KICK, base = 6, damage = PHYSICAL },
         { type = WEAPON, damage = PHYSICAL }
       },
-      color = BROWN,
+      color = "BROWN",
       exp = 45,
       flags = HEAD + HANDS,
       gold_chance = 50,
@@ -76,7 +76,7 @@ monsters = {
       attacks = {
         { type = BITE, base = 50, damage = DEC_STR },
         { type = BITE, base = 1, damage = PHYSICAL } },
-      color = YELLOW,
+      color = "YELLOW",
       exp = 2,
       flags = HEAD,
       hp_max = 5,
@@ -93,7 +93,7 @@ monsters = {
         { type = BITE, base = 18, damage = PHYSICAL },
         { type = CLAW, base = 18, damage = PHYSICAL }
       },
-      color = LIGHTRED,
+      color = "LIGHTRED",
       exp = 50000,
       flags = HEAD + NOBEHEAD + HANDS + FLY + INVISIBLE + INFRAVISION
         + DEMON + RES_POISON + RES_MAGIC,
@@ -111,7 +111,7 @@ monsters = {
         { type = BITE, base = 18, damage = PHYSICAL },
         { type = CLAW, base = 18, damage = PHYSICAL }
        },
-      color = LIGHTRED,
+      color = "LIGHTRED",
       exp = 75000,
       flags = HEAD + NOBEHEAD + HANDS + FLY + INVISIBLE + INFRAVISION
         + DEMON + RES_POISON + RES_MAGIC,
@@ -129,7 +129,7 @@ monsters = {
         { type = BITE, base = 18, damage = PHYSICAL },
         { type = CLAW, base = 18, damage = PHYSICAL }
       },
-      color = LIGHTRED,
+      color = "LIGHTRED",
       exp = 100000,
       flags = HEAD + NOBEHEAD + HANDS + FLY + INVISIBLE + INFRAVISION
         + DEMON + RES_POISON + RES_MAGIC,
@@ -147,7 +147,7 @@ monsters = {
         { type = BITE, base = 20, damage = PHYSICAL },
         { type = CLAW, base = 20, damage = PHYSICAL }
       },
-      color = LIGHTRED,
+      color = "LIGHTRED",
       exp = 125000,
       flags = HEAD + NOBEHEAD + HANDS + FLY + INVISIBLE + INFRAVISION
         + DEMON + RES_POISON + RES_MAGIC,
@@ -165,7 +165,7 @@ monsters = {
         { type = BITE, base = 22, damage = PHYSICAL },
         { type = CLAW, base = 22, damage = PHYSICAL }
       },
-      color = LIGHTRED,
+      color = "LIGHTRED",
       exp = 150000,
       flags = HEAD + NOBEHEAD + HANDS + FLY + INVISIBLE + INFRAVISION
         + DEMON + RES_POISON + RES_MAGIC,
@@ -183,7 +183,7 @@ monsters = {
         { type = BITE, base = 24, damage = PHYSICAL },
         { type = CLAW, base = 24, damage = PHYSICAL }
       },
-      color = LIGHTRED,
+      color = "LIGHTRED",
       exp = 175000,
       flags = HEAD + NOBEHEAD + HANDS + FLY + INVISIBLE + INFRAVISION
         + DEMON + RES_POISON + RES_MAGIC,
@@ -201,7 +201,7 @@ monsters = {
         { type = BITE, base = 27, damage = PHYSICAL },
         { type = CLAW, base = 27, damage = PHYSICAL }
       },
-      color = LIGHTRED,
+      color = "LIGHTRED",
       exp = 200000,
       flags = HEAD + NOBEHEAD + HANDS + FLY + INVISIBLE + INFRAVISION
         + DEMON + RES_POISON + RES_CONF + RES_MAGIC,
@@ -219,7 +219,7 @@ monsters = {
         { type = BITE, base = 30, damage = PHYSICAL },
         { type = CLAW, base = 30, damage = PHYSICAL }
       },
-      color = RED,
+      color = "RED",
       exp = 300000,
       flags = HEAD + NOBEHEAD + HANDS + FLY + INVISIBLE + INFRAVISION
         + DEMON + RES_FIRE + RES_SLEEP + RES_POISON + RES_CONF + RES_MAGIC,
@@ -235,7 +235,7 @@ monsters = {
     [MT_DISENCHANTRESS] = {
       ac = 7,
       attacks = { { type = TOUCH, damage = REM_ENCH } },
-      color = WHITE,
+      color = "WHITE",
       exp = 500,
       flags = HEAD + HANDS + METALLIVORE,
       hp_max = 50,
@@ -250,7 +250,7 @@ monsters = {
     [MT_ELF] = {
       ac = 6,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = WHITE,
+      color = "WHITE",
       exp = 35,
       flags = HEAD + HANDS + INFRAVISION,
       gold_chance = 50,
@@ -267,7 +267,7 @@ monsters = {
     [MT_FLOATING_EYE] = {
       ac = 2,
       attacks = { { type = GAZE, base = 66, damage = PARALYSIS } },
-      color = BLUE,
+      color = "BLUE",
       exp = 2,
       flags = FLY + INFRAVISION + RES_CONF,
       hp_max = 12,
@@ -281,7 +281,7 @@ monsters = {
     [MT_FORVALAKA] = {
       ac = 4,
       attacks = { { type = BITE, base = 5, damage = PHYSICAL } },
-      color = LIGHTGRAY,
+      color = "LIGHTGRAY",
       exp = 280,
       flags = HEAD + UNDEAD + INFRAVISION + RES_POISON,
       hp_max = 50,
@@ -295,7 +295,7 @@ monsters = {
     [MT_GELATINOUSCUBE] = {
       ac = 1,
       attacks = { { type = SLAM, base = 1, damage = ACID } },
-      color = CYAN,
+      color = "CYAN",
       exp = 45,
       flags = METALLIVORE + RES_SLEEP + RES_POISON + RES_CONF,
       hp_max = 22,
@@ -311,7 +311,7 @@ monsters = {
       attacks = {
         { type = BITE, base = 75, damage = DEC_STR },
         { type = BITE, base = 1, damage = PHYSICAL } },
-      color = BROWN,
+      color = "BROWN",
       exp = 5,
       flags = HEAD,
       hp_max = 6,
@@ -325,7 +325,7 @@ monsters = {
     [MT_GIANT_BAT] = {
       ac = 0,
       attacks = { { type = BITE, base = 1, damage = PHYSICAL } },
-      color = RED,
+      color = "RED",
       exp = 1,
       flags = HEAD + FLY + INFRAVISION,
       hp_max = 2,
@@ -339,7 +339,7 @@ monsters = {
     [MT_GNOME] = {
       ac = 0,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = BROWN,
+      color = "BROWN",
       exp = 2,
       flags = HEAD + HANDS,
       gold_chance = 80,
@@ -355,7 +355,7 @@ monsters = {
     [MT_GNOME_KING] = {
       ac = 11,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = RED,
+      color = "RED",
       exp = 3000,
       flags = HEAD + HANDS + RES_SLEEP,
       gold = 2000,
@@ -374,7 +374,7 @@ monsters = {
         { type = BREATH, base = 8, damage = POISON },
         { type = SLAM, base = 25, damage = PHYSICAL }
       },
-      color = LIGHTGREEN,
+      color = "LIGHTGREEN",
       exp = 2500,
       flags = HEAD + FLY + DRAGON + RES_POISON,
       gold = 200,
@@ -391,7 +391,7 @@ monsters = {
       attacks = { { type = STING, base = 12, damage = PHYSICAL },
                   { type = STING, base = 50, damage = BLINDNESS }
       },
-      color = GREEN,
+      color = "GREEN",
       exp = 5000,
       hp_max = 85,
       glyph = "u",
@@ -407,7 +407,7 @@ monsters = {
         { type = BITE, base = 2, damage = PHYSICAL },
         { type = BREATH, base = 8, damage = FIRE, rand = 15 }
       },
-      color = LIGHTRED,
+      color = "LIGHTRED",
       exp = 35,
       flags = HEAD + RES_FIRE + RES_MAGIC,
       hp_max = 16,
@@ -421,7 +421,7 @@ monsters = {
     [MT_HOBGOBLIN] = {
       ac = 1,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = BROWN,
+      color = "BROWN",
       exp = 2,
       flags = HEAD + HANDS + INFRAVISION,
       gold_chance = 30,
@@ -440,7 +440,7 @@ monsters = {
         { type = CLAW, base = 2, damage = PHYSICAL },
         { type = SLAM, base = 14, damage = PHYSICAL }
       },
-      color = LIGHTCYAN,
+      color = "LIGHTCYAN",
       exp = 25,
       flags = HEAD + SWIM + RES_COLD,
       hp_max = 20,
@@ -454,7 +454,7 @@ monsters = {
     [MT_JACKAL] = {
       ac = 0,
       attacks = { { type = BITE, base = 1, damage = PHYSICAL } },
-      color = BROWN,
+      color = "BROWN",
       exp = 1,
       flags = HEAD,
       hp_max = 3,
@@ -471,7 +471,7 @@ monsters = {
         { type = BITE, base = 2, damage = PHYSICAL },
         { type = CLAW, base = 2, damage = PHYSICAL }
       },
-      color = GREEN,
+      color = "GREEN",
       exp = 1,
       flags = HEAD + FLY,
       hp_max = 8,
@@ -486,7 +486,7 @@ monsters = {
     [MT_KOBOLD] = {
       ac = 0,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = BROWN,
+      color = "BROWN",
       exp = 1,
       flags = HEAD + HANDS + INFRAVISION,
       gold_chance = 10,
@@ -504,7 +504,7 @@ monsters = {
       attacks = { { type = BITE, base = 3, damage = PHYSICAL },
                   { type = GAZE, base = 25, damage = BLINDNESS }
       },
-      color = RED,
+      color = "RED",
       exp = 80,
       flags = HEAD,
       hp_max = 35,
@@ -521,7 +521,7 @@ monsters = {
         { type = CLAW, base = 2, damage = PHYSICAL },
         { type = TOUCH, damage = STEAL_GOLD }
       },
-      color = GREEN,
+      color = "GREEN",
       exp = 45,
       flags = HEAD + HANDS,
       gold = 1500,
@@ -536,7 +536,7 @@ monsters = {
     [MT_METAMORPH] = {
       ac = 3,
       attacks = { { type = WEAPON, base = 3, damage = PHYSICAL } },
-      color = WHITE,
+      color = "WHITE",
       exp = 40,
       hp_max = 30,
       glyph = "m",
@@ -549,7 +549,7 @@ monsters = {
     [MT_MIMIC] = {
       ac = 5,
       attacks = { { type = SLAM, base = 6, damage = PHYSICAL } },
-      color = BROWN,
+      color = "BROWN",
       exp = 99,
       flags = MIMIC,
       hp_max = 55,
@@ -563,7 +563,7 @@ monsters = {
     [MT_NYMPH] = {
       ac = 5,
       attacks = { { type = TOUCH, damage = STEAL_ITEM } },
-      color = RED,
+      color = "RED",
       exp = 45,
       flags = HEAD + HANDS,
       hp_max = 18,
@@ -577,7 +577,7 @@ monsters = {
     [MT_ORC] = {
       ac = 3,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = RED,
+      color = "RED",
       exp = 2,
       flags = HEAD + HANDS + INFRAVISION,
       gold_chance = 50,
@@ -593,7 +593,7 @@ monsters = {
     [MT_OSQUIP] = {
       ac = 5,
       attacks = { { type = BITE, base = 10, damage = PHYSICAL, rand = 15 } },
-      color = BROWN,
+      color = "BROWN",
       exp = 100,
       flags = HEAD,
       hp_max = 35,
@@ -610,7 +610,7 @@ monsters = {
         { type = BITE, base = 15, damage = PHYSICAL },
         { type = BREATH, base = 15, damage = MAGICAL, rand = 30 }
       },
-      color = WHITE,
+      color = "WHITE",
       exp = 24000,
       flags = HEAD + FLY + DRAGON + RES_CONF,
       gold = 1000,
@@ -625,7 +625,7 @@ monsters = {
     [MT_POLTERGEIST] = {
       ac = 6,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = WHITE,
+      color = "WHITE",
       exp = 450,
       flags = FLY + UNDEAD + INVISIBLE + RES_SLEEP + RES_POISON,
       hp_max = 50,
@@ -642,7 +642,7 @@ monsters = {
         { type = BITE, base = 11, damage = PHYSICAL },
         { type = STING, base = 6, damage = POISON }
       },
-      color = MAGENTA,
+      color = "MAGENTA",
       exp = 15000,
       flags = HEAD + RES_POISON,
       hp_max = 120,
@@ -659,7 +659,7 @@ monsters = {
         { type = BITE, base = 3, damage = PHYSICAL },
         { type = CLAW, base = 66, damage = DEC_DEX }
       },
-      color = BLUE,
+      color = "BLUE",
       exp = 15,
       flags = HEAD + HANDS + DEMON,
       hp_max = 10,
@@ -676,7 +676,7 @@ monsters = {
         { type = BREATH, base = 20, damage = FIRE, rand = 25 },
         { type = CLAW, base = 13, damage = PHYSICAL }
       },
-      color = LIGHTRED,
+      color = "LIGHTRED",
       exp = 14000,
       flags = HEAD + FLY + DRAGON + RES_FIRE,
       gold = 800,
@@ -694,7 +694,7 @@ monsters = {
         { type = BITE, base = 5, damage = PHYSICAL },
         { type = CLAW, base = 3, damage = PHYSICAL }
       },
-      color = BROWN,
+      color = "BROWN",
       exp = 250,
       flags = HEAD + INFRAVISION,
       hp_max = 50,
@@ -711,7 +711,7 @@ monsters = {
         { type = BITE, base = 3, damage = PHYSICAL },
         { type = TOUCH, base = 1, damage = RUST }
       },
-      color = BROWN,
+      color = "BROWN",
       exp = 25,
       flags = HEAD + METALLIVORE,
       hp_max = 18,
@@ -725,7 +725,7 @@ monsters = {
     [MT_SHAMBLINGMOUND] = {
       ac = 8,
       attacks = { { type = SLAM, base = 5, damage = PHYSICAL } },
-      color = GREEN,
+      color = "GREEN",
       exp = 400,
       flags = RES_SLEEP + RES_POISON,
       hp_max = 45,
@@ -742,7 +742,7 @@ monsters = {
         { type = BITE, base = 12, damage = PHYSICAL },
         { type = CLAW, base = 12, damage = PHYSICAL }
       },
-      color = LIGHTGRAY,
+      color = "LIGHTGRAY",
       exp = 10000,
       flags = HEAD + FLY + DRAGON,
       gold = 700,
@@ -759,7 +759,7 @@ monsters = {
       attacks = { { type = BITE, base = 1, damage = PHYSICAL },
                   { type = BITE, base = 2, damage = POISON }
       },
-      color = LIGHTGREEN,
+      color = "LIGHTGREEN",
       exp = 1,
       flags = HEAD,
       hp_max = 3,
@@ -776,7 +776,7 @@ monsters = {
         { type = BITE, base = 12, damage = PHYSICAL },
         { type = MAGIC, base = 1, damage = RANDOM }
       },
-      color = MAGENTA,
+      color = "MAGENTA",
       exp = 20000,
       flags = HEAD + NOBEHEAD + FLY + SPIRIT + INFRAVISION + RES_SLEEP
         + RES_POISON + RES_CONF + RES_MAGIC,
@@ -791,7 +791,7 @@ monsters = {
     [MT_STALKER] = {
       ac = 7,
       attacks = { { type = SLAM, base = 6, damage = PHYSICAL } },
-      color = LIGHTGRAY,
+      color = "LIGHTGRAY",
       exp = 350,
       flags = HEAD + FLY + INVISIBLE,
       hp_max = 50,
@@ -805,7 +805,7 @@ monsters = {
     [MT_TROGLODYTE] = {
       ac = 4,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = BROWN,
+      color = "BROWN",
       exp = 3,
       flags = HEAD + HANDS,
       gold_chance = 25,
@@ -824,7 +824,7 @@ monsters = {
         { type = CLAW, base = 5, damage = PHYSICAL },
         { type = WEAPON, damage = PHYSICAL }
       },
-      color = BROWN,
+      color = "BROWN",
       exp = 300,
       flags = HEAD + HANDS + REGENERATE,
       gold_chance = 20,
@@ -843,7 +843,7 @@ monsters = {
         { type = CLAW, base = 7, damage = PHYSICAL },
         { type = GAZE, base = 75, damage = CONFUSION }
       },
-      color = YELLOW,
+      color = "YELLOW",
       exp = 600,
       flags = HEAD + HANDS + INFRAVISION + RES_CONF,
       hp_max = 65,
@@ -860,7 +860,7 @@ monsters = {
         { type = BITE, base = 75, damage = DRAIN_LIFE },
         { type = WEAPON, damage = PHYSICAL }
       },
-      color = RED,
+      color = "RED",
       exp = 1000,
       flags = HEAD + HANDS + FLY + UNDEAD + INFRAVISION + REGENERATE + RES_SLEEP + RES_POISON + RES_CONF,
       hp_max = 50,
@@ -876,7 +876,7 @@ monsters = {
       attacks = { { type = SLAM, base = 3, damage = PHYSICAL },
                   { type = SLAM, base = 4, damage = POISON }
       },
-      color = MAGENTA,
+      color = "MAGENTA",
       exp = 100,
       flags = RES_SLEEP + RES_POISON + RES_CONF,
       hp_max = 38,
@@ -891,7 +891,7 @@ monsters = {
     [MT_VORTEX] = {
       ac = 6,
       attacks = { { type = SLAM, base = 3, damage = PHYSICAL } },
-      color = CYAN,
+      color = "CYAN",
       exp = 55,
       flags = RES_SLEEP + RES_POISON + FLY + RES_ELEC + RES_CONF,
       hp_max = 30,
@@ -906,7 +906,7 @@ monsters = {
     [MT_WATER_LORD] = {
       ac = 12,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = LIGHTBLUE,
+      color = "LIGHTBLUE",
       exp = 15000,
       flags = HEAD + NOBEHEAD + HANDS + RES_SLEEP + SWIM,
       hp_max = 150,
@@ -923,7 +923,7 @@ monsters = {
         { type = BITE, base = 4, damage = PHYSICAL },
         { type = CLAW, base = 4, damage = PHYSICAL }
       },
-      color = WHITE,
+      color = "WHITE",
       exp = 1000,
       flags = HEAD + DRAGON + RES_COLD,
       gold = 500,
@@ -938,7 +938,7 @@ monsters = {
     [MT_WRAITH] = {
       ac = 7,
       attacks = { { type = TOUCH, base = 50, damage = DRAIN_LIFE } },
-      color = LIGHTGRAY,
+      color = "LIGHTGRAY",
       exp = 325,
       flags = HEAD + HANDS + UNDEAD + RES_SLEEP + RES_POISON + RES_CONF,
       hp_max = 30,
@@ -952,7 +952,7 @@ monsters = {
     [MT_XORN] = {
       ac = 10,
       attacks = { { type = BITE, base = 6, damage = PHYSICAL } },
-      color = BROWN,
+      color = "BROWN",
       exp = 300,
       flags = INFRAVISION,
       hp_max = 60,
@@ -966,7 +966,7 @@ monsters = {
     [MT_XVART] = {
       ac = 11,
       attacks = { { type = WEAPON, damage = PHYSICAL } },
-      color = LIGHTGRAY,
+      color = "LIGHTGRAY",
       exp = 1000,
       flags = HEAD + HANDS + INFRAVISION,
       hp_max = 90,
@@ -980,7 +980,7 @@ monsters = {
     [MT_YELLOW_MOLD] = {
       ac = 0,
       attacks = { { type = TOUCH, base = 4, damage = PHYSICAL } },
-      color = YELLOW,
+      color = "YELLOW",
       exp = 250,
       flags = RES_SLEEP + RES_POISON + RES_CONF,
       hp_max = 35,
@@ -994,7 +994,7 @@ monsters = {
     [MT_YETI] = {
       ac = 4,
       attacks = { { type = CLAW, base = 4, damage = PHYSICAL } },
-      color = WHITE,
+      color = "WHITE",
       exp = 100,
       flags = HEAD + HANDS + RES_COLD,
       gold_chance = 10,
@@ -1012,7 +1012,7 @@ monsters = {
       attacks = { { type = CLAW, base = 3, damage = PHYSICAL },
                   { type = CLAW, base = 70, damage = DEC_RND },
       },
-      color = CYAN,
+      color = "CYAN",
       exp = 35,
       flags = HEAD + RES_CONF,
       hp_max = 30,
@@ -1029,7 +1029,7 @@ monsters = {
         { type = BITE, base = 2, damage = PHYSICAL },
         { type = CLAW, base = 2, damage = PHYSICAL }
       },
-      color = LIGHTGRAY,
+      color = "LIGHTGRAY",
       exp = 7,
       flags = HEAD + HANDS + UNDEAD + RES_SLEEP + RES_POISON + RES_CONF,
       hp_max = 12,
@@ -1043,7 +1043,7 @@ monsters = {
     [MT_TOWN_PERSON] = {
       ac = 0,
       attacks = { { type = SLAM, base = 0, damage = PHYSICAL } },
-      color = BROWN,
+      color = "BROWN",
       exp = 0,
       flags = HEAD + HANDS,
       hp_max = 10,

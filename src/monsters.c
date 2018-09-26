@@ -2019,7 +2019,8 @@ int monster_color(monster *m)
     }
     else
     {
-        return luaN_query_int("monsters", m->type, "color");
+        const char *colour = luaN_query_string("monsters", m->type, "color");
+        return display_colour_value(colour);
     }
 }
 
