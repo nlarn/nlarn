@@ -1321,10 +1321,10 @@ attack monster_attack(monster *m, int num)
         {
             /* inside the attack table */
             lua_getfield(nlarn->L, -1, "type");
-            att.type = lua_tointeger(nlarn->L, -1);
+            att.type = attack_t_value(lua_tostring(nlarn->L, -1));
 
             lua_getfield(nlarn->L, -2, "damage");
-            att.damage = lua_tointeger(nlarn->L, -1);
+            att.damage = damage_t_value(lua_tostring(nlarn->L, -1));
 
             lua_getfield(nlarn->L, -3, "base");
             att.base = lua_tointeger(nlarn->L, -1);

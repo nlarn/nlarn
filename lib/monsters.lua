@@ -1,8 +1,8 @@
 monsters = {
     [MT_ASSASSIN_BUG] = {
       ac = 1,
-      attacks = { { type = BITE, base = 3, damage = PHYSICAL },
-                  { type = BITE, base = 3, damage = POISON }
+      attacks = { { type = "ATT_BITE", base = 3, damage = "DAM_PHYSICAL" },
+                  { type = "ATT_BITE", base = 3, damage = "DAM_POISON" }
       },
       color = "GREEN",
       exp = 15,
@@ -18,8 +18,8 @@ monsters = {
     [MT_BRONZE_DRAGON] = {
       ac = 10,
       attacks = {
-        { type = BITE, base = 9, damage = PHYSICAL },
-        { type = CLAW, base = 9, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 9, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 9, damage = "DAM_PHYSICAL" }
       },
       color = "BROWN",
       exp = 4000,
@@ -36,8 +36,8 @@ monsters = {
     [MT_BUGBEAR] = {
       ac = 5,
       attacks = {
-        { type = BITE, base = 5, damage = PHYSICAL, rand = 10 },
-        { type = WEAPON, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 5, damage = "DAM_PHYSICAL", rand = 10 },
+        { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" }
       },
       color = "BROWN",
       exp = 35,
@@ -55,8 +55,8 @@ monsters = {
     [MT_CENTAUR] = {
       ac = 6,
       attacks = {
-        { type = KICK, base = 6, damage = PHYSICAL },
-        { type = WEAPON, damage = PHYSICAL }
+        { type = "ATT_KICK", base = 6, damage = "DAM_PHYSICAL" },
+        { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" }
       },
       color = "BROWN",
       exp = 45,
@@ -74,8 +74,8 @@ monsters = {
     [MT_CENTIPEDE] = {
       ac = 1,
       attacks = {
-        { type = BITE, base = 50, damage = DEC_STR },
-        { type = BITE, base = 1, damage = PHYSICAL } },
+        { type = "ATT_BITE", base = 50, damage = "DAM_DEC_STR" },
+        { type = "ATT_BITE", base = 1, damage = "DAM_PHYSICAL" } },
       color = "YELLOW",
       exp = 2,
       flags = HEAD,
@@ -90,8 +90,8 @@ monsters = {
     [MT_DEMONLORD_I] = {
       ac = 17,
       attacks = {
-        { type = BITE, base = 18, damage = PHYSICAL },
-        { type = CLAW, base = 18, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 18, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 18, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTRED",
       exp = 50000,
@@ -108,8 +108,8 @@ monsters = {
     [MT_DEMONLORD_II] = {
       ac = 18,
       attacks = {
-        { type = BITE, base = 18, damage = PHYSICAL },
-        { type = CLAW, base = 18, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 18, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 18, damage = "DAM_PHYSICAL" }
        },
       color = "LIGHTRED",
       exp = 75000,
@@ -126,8 +126,8 @@ monsters = {
     [MT_DEMONLORD_III] = {
       ac = 19,
       attacks = {
-        { type = BITE, base = 18, damage = PHYSICAL },
-        { type = CLAW, base = 18, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 18, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 18, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTRED",
       exp = 100000,
@@ -144,8 +144,8 @@ monsters = {
     [MT_DEMONLORD_IV] = {
       ac = 20,
       attacks = {
-        { type = BITE, base = 20, damage = PHYSICAL },
-        { type = CLAW, base = 20, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 20, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 20, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTRED",
       exp = 125000,
@@ -162,8 +162,8 @@ monsters = {
     [MT_DEMONLORD_V] = {
       ac = 21,
       attacks = {
-        { type = BITE, base = 22, damage = PHYSICAL },
-        { type = CLAW, base = 22, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 22, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 22, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTRED",
       exp = 150000,
@@ -180,8 +180,8 @@ monsters = {
     [MT_DEMONLORD_VI] = {
       ac = 22,
       attacks = {
-        { type = BITE, base = 24, damage = PHYSICAL },
-        { type = CLAW, base = 24, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 24, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 24, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTRED",
       exp = 175000,
@@ -198,8 +198,8 @@ monsters = {
     [MT_DEMONLORD_VII] = {
       ac = 23,
       attacks = {
-        { type = BITE, base = 27, damage = PHYSICAL },
-        { type = CLAW, base = 27, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 27, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 27, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTRED",
       exp = 200000,
@@ -216,8 +216,8 @@ monsters = {
     [MT_DEMON_PRINCE] = {
       ac = 25,
       attacks = {
-        { type = BITE, base = 30, damage = PHYSICAL },
-        { type = CLAW, base = 30, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 30, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 30, damage = "DAM_PHYSICAL" }
       },
       color = "RED",
       exp = 300000,
@@ -234,7 +234,7 @@ monsters = {
     },
     [MT_DISENCHANTRESS] = {
       ac = 7,
-      attacks = { { type = TOUCH, damage = REM_ENCH } },
+      attacks = { { type = "ATT_TOUCH", damage = "DAM_REM_ENCH" } },
       color = "WHITE",
       exp = 500,
       flags = HEAD + HANDS + METALLIVORE,
@@ -249,7 +249,7 @@ monsters = {
     },
     [MT_ELF] = {
       ac = 6,
-      attacks = { { type = WEAPON, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" } },
       color = "WHITE",
       exp = 35,
       flags = HEAD + HANDS + INFRAVISION,
@@ -266,7 +266,7 @@ monsters = {
     },
     [MT_FLOATING_EYE] = {
       ac = 2,
-      attacks = { { type = GAZE, base = 66, damage = PARALYSIS } },
+      attacks = { { type = "ATT_GAZE", base = 66, damage = "DAM_PARALYSIS" } },
       color = "BLUE",
       exp = 2,
       flags = FLY + INFRAVISION + RES_CONF,
@@ -280,7 +280,7 @@ monsters = {
     },
     [MT_FORVALAKA] = {
       ac = 4,
-      attacks = { { type = BITE, base = 5, damage = PHYSICAL } },
+      attacks = { { type = "ATT_BITE", base = 5, damage = "DAM_PHYSICAL" } },
       color = "LIGHTGRAY",
       exp = 280,
       flags = HEAD + UNDEAD + INFRAVISION + RES_POISON,
@@ -294,7 +294,7 @@ monsters = {
     },
     [MT_GELATINOUSCUBE] = {
       ac = 1,
-      attacks = { { type = SLAM, base = 1, damage = ACID } },
+      attacks = { { type = "ATT_SLAM", base = 1, damage = "DAM_ACID" } },
       color = "CYAN",
       exp = 45,
       flags = METALLIVORE + RES_SLEEP + RES_POISON + RES_CONF,
@@ -309,8 +309,8 @@ monsters = {
     [MT_GIANT_ANT] = {
       ac = 2,
       attacks = {
-        { type = BITE, base = 75, damage = DEC_STR },
-        { type = BITE, base = 1, damage = PHYSICAL } },
+        { type = "ATT_BITE", base = 75, damage = "DAM_DEC_STR" },
+        { type = "ATT_BITE", base = 1, damage = "DAM_PHYSICAL" } },
       color = "BROWN",
       exp = 5,
       flags = HEAD,
@@ -324,7 +324,7 @@ monsters = {
     },
     [MT_GIANT_BAT] = {
       ac = 0,
-      attacks = { { type = BITE, base = 1, damage = PHYSICAL } },
+      attacks = { { type = "ATT_BITE", base = 1, damage = "DAM_PHYSICAL" } },
       color = "RED",
       exp = 1,
       flags = HEAD + FLY + INFRAVISION,
@@ -338,7 +338,7 @@ monsters = {
     },
     [MT_GNOME] = {
       ac = 0,
-      attacks = { { type = WEAPON, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" } },
       color = "BROWN",
       exp = 2,
       flags = HEAD + HANDS,
@@ -354,7 +354,7 @@ monsters = {
     },
     [MT_GNOME_KING] = {
       ac = 11,
-      attacks = { { type = WEAPON, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" } },
       color = "RED",
       exp = 3000,
       flags = HEAD + HANDS + RES_SLEEP,
@@ -371,8 +371,8 @@ monsters = {
     [MT_GREEN_DRAGON] = {
       ac = 12,
       attacks = {
-        { type = BREATH, base = 8, damage = POISON },
-        { type = SLAM, base = 25, damage = PHYSICAL }
+        { type = "ATT_BREATH", base = 8, damage = "DAM_POISON" },
+        { type = "ATT_SLAM", base = 25, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTGREEN",
       exp = 2500,
@@ -388,8 +388,8 @@ monsters = {
     },
     [MT_GREEN_URCHIN] = {
       ac = 17,
-      attacks = { { type = STING, base = 12, damage = PHYSICAL },
-                  { type = STING, base = 50, damage = BLINDNESS }
+      attacks = { { type = "ATT_STING", base = 12, damage = "DAM_PHYSICAL" },
+                  { type = "ATT_STING", base = 50, damage = "DAM_BLINDNESS" }
       },
       color = "GREEN",
       exp = 5000,
@@ -404,8 +404,8 @@ monsters = {
     [MT_HELLHOUND] = {
       ac = 5,
       attacks = {
-        { type = BITE, base = 2, damage = PHYSICAL },
-        { type = BREATH, base = 8, damage = FIRE, rand = 15 }
+        { type = "ATT_BITE", base = 2, damage = "DAM_PHYSICAL" },
+        { type = "ATT_BREATH", base = 8, damage = "DAM_FIRE", rand = 15 }
       },
       color = "LIGHTRED",
       exp = 35,
@@ -420,7 +420,7 @@ monsters = {
     },
     [MT_HOBGOBLIN] = {
       ac = 1,
-      attacks = { { type = WEAPON, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" } },
       color = "BROWN",
       exp = 2,
       flags = HEAD + HANDS + INFRAVISION,
@@ -437,8 +437,8 @@ monsters = {
     [MT_ICE_LIZARD] = {
       ac = 4,
       attacks = {
-        { type = CLAW, base = 2, damage = PHYSICAL },
-        { type = SLAM, base = 14, damage = PHYSICAL }
+        { type = "ATT_CLAW", base = 2, damage = "DAM_PHYSICAL" },
+        { type = "ATT_SLAM", base = 14, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTCYAN",
       exp = 25,
@@ -453,7 +453,7 @@ monsters = {
     },
     [MT_JACKAL] = {
       ac = 0,
-      attacks = { { type = BITE, base = 1, damage = PHYSICAL } },
+      attacks = { { type = "ATT_BITE", base = 1, damage = "DAM_PHYSICAL" } },
       color = "BROWN",
       exp = 1,
       flags = HEAD,
@@ -468,8 +468,8 @@ monsters = {
     [MT_JACULUS] = {
       ac = 3,
       attacks = {
-        { type = BITE, base = 2, damage = PHYSICAL },
-        { type = CLAW, base = 2, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 2, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 2, damage = "DAM_PHYSICAL" }
       },
       color = "GREEN",
       exp = 1,
@@ -485,7 +485,7 @@ monsters = {
     },
     [MT_KOBOLD] = {
       ac = 0,
-      attacks = { { type = WEAPON, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" } },
       color = "BROWN",
       exp = 1,
       flags = HEAD + HANDS + INFRAVISION,
@@ -501,8 +501,8 @@ monsters = {
     },
     [MT_LAMA_NOBE] = {
       ac = 3,
-      attacks = { { type = BITE, base = 3, damage = PHYSICAL },
-                  { type = GAZE, base = 25, damage = BLINDNESS }
+      attacks = { { type = "ATT_BITE", base = 3, damage = "DAM_PHYSICAL" },
+                  { type = "ATT_GAZE", base = 25, damage = "DAM_BLINDNESS" }
       },
       color = "RED",
       exp = 80,
@@ -518,8 +518,8 @@ monsters = {
     [MT_LEPRECHAUN] = {
       ac = 6,
       attacks = {
-        { type = CLAW, base = 2, damage = PHYSICAL },
-        { type = TOUCH, damage = STEAL_GOLD }
+        { type = "ATT_CLAW", base = 2, damage = "DAM_PHYSICAL" },
+        { type = "ATT_TOUCH", damage = "DAM_STEAL_GOLD" }
       },
       color = "GREEN",
       exp = 45,
@@ -535,7 +535,7 @@ monsters = {
     },
     [MT_METAMORPH] = {
       ac = 3,
-      attacks = { { type = WEAPON, base = 3, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", base = 3, damage = "DAM_PHYSICAL" } },
       color = "WHITE",
       exp = 40,
       hp_max = 30,
@@ -548,7 +548,7 @@ monsters = {
     },
     [MT_MIMIC] = {
       ac = 5,
-      attacks = { { type = SLAM, base = 6, damage = PHYSICAL } },
+      attacks = { { type = "ATT_SLAM", base = 6, damage = "DAM_PHYSICAL" } },
       color = "BROWN",
       exp = 99,
       flags = MIMIC,
@@ -562,7 +562,7 @@ monsters = {
     },
     [MT_NYMPH] = {
       ac = 5,
-      attacks = { { type = TOUCH, damage = STEAL_ITEM } },
+      attacks = { { type = "ATT_TOUCH", damage = "DAM_STEAL_ITEM" } },
       color = "RED",
       exp = 45,
       flags = HEAD + HANDS,
@@ -576,7 +576,7 @@ monsters = {
     },
     [MT_ORC] = {
       ac = 3,
-      attacks = { { type = WEAPON, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" } },
       color = "RED",
       exp = 2,
       flags = HEAD + HANDS + INFRAVISION,
@@ -592,7 +592,7 @@ monsters = {
     },
     [MT_OSQUIP] = {
       ac = 5,
-      attacks = { { type = BITE, base = 10, damage = PHYSICAL, rand = 15 } },
+      attacks = { { type = "ATT_BITE", base = 10, damage = "DAM_PHYSICAL", rand = 15 } },
       color = "BROWN",
       exp = 100,
       flags = HEAD,
@@ -607,8 +607,8 @@ monsters = {
     [MT_PLATINUM_DRAGON] = {
       ac = 15,
       attacks = {
-        { type = BITE, base = 15, damage = PHYSICAL },
-        { type = BREATH, base = 15, damage = MAGICAL, rand = 30 }
+        { type = "ATT_BITE", base = 15, damage = "DAM_PHYSICAL" },
+        { type = "ATT_BREATH", base = 15, damage = "DAM_MAGICAL", rand = 30 }
       },
       color = "WHITE",
       exp = 24000,
@@ -624,7 +624,7 @@ monsters = {
     },
     [MT_POLTERGEIST] = {
       ac = 6,
-      attacks = { { type = WEAPON, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" } },
       color = "WHITE",
       exp = 450,
       flags = FLY + UNDEAD + INVISIBLE + RES_SLEEP + RES_POISON,
@@ -639,8 +639,8 @@ monsters = {
     [MT_PURPLE_WORM] = {
       ac = 12,
       attacks = {
-        { type = BITE, base = 11, damage = PHYSICAL },
-        { type = STING, base = 6, damage = POISON }
+        { type = "ATT_BITE", base = 11, damage = "DAM_PHYSICAL" },
+        { type = "ATT_STING", base = 6, damage = "DAM_POISON" }
       },
       color = "MAGENTA",
       exp = 15000,
@@ -656,8 +656,8 @@ monsters = {
     [MT_QUASIT] = {
       ac = 6,
       attacks = {
-        { type = BITE, base = 3, damage = PHYSICAL },
-        { type = CLAW, base = 66, damage = DEC_DEX }
+        { type = "ATT_BITE", base = 3, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 66, damage = "DAM_DEC_DEX" }
       },
       color = "BLUE",
       exp = 15,
@@ -673,8 +673,8 @@ monsters = {
     [MT_RED_DRAGON] = {
       ac = 14,
       attacks = {
-        { type = BREATH, base = 20, damage = FIRE, rand = 25 },
-        { type = CLAW, base = 13, damage = PHYSICAL }
+        { type = "ATT_BREATH", base = 20, damage = "DAM_FIRE", rand = 25 },
+        { type = "ATT_CLAW", base = 13, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTRED",
       exp = 14000,
@@ -691,8 +691,8 @@ monsters = {
     [MT_ROTHE] = {
       ac = 5,
       attacks = {
-        { type = BITE, base = 5, damage = PHYSICAL },
-        { type = CLAW, base = 3, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 5, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 3, damage = "DAM_PHYSICAL" }
       },
       color = "BROWN",
       exp = 250,
@@ -708,8 +708,8 @@ monsters = {
     [MT_RUST_MONSTER] = {
       ac = 6,
       attacks = {
-        { type = BITE, base = 3, damage = PHYSICAL },
-        { type = TOUCH, base = 1, damage = RUST }
+        { type = "ATT_BITE", base = 3, damage = "DAM_PHYSICAL" },
+        { type = "ATT_TOUCH", base = 1, damage = "DAM_RUST" }
       },
       color = "BROWN",
       exp = 25,
@@ -724,7 +724,7 @@ monsters = {
     },
     [MT_SHAMBLINGMOUND] = {
       ac = 8,
-      attacks = { { type = SLAM, base = 5, damage = PHYSICAL } },
+      attacks = { { type = "ATT_SLAM", base = 5, damage = "DAM_PHYSICAL" } },
       color = "GREEN",
       exp = 400,
       flags = RES_SLEEP + RES_POISON,
@@ -739,8 +739,8 @@ monsters = {
     [MT_SILVER_DRAGON] = {
       ac = 13,
       attacks = {
-        { type = BITE, base = 12, damage = PHYSICAL },
-        { type = CLAW, base = 12, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 12, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 12, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTGRAY",
       exp = 10000,
@@ -756,8 +756,8 @@ monsters = {
     },
     [MT_SNAKE] = {
       ac = 1,
-      attacks = { { type = BITE, base = 1, damage = PHYSICAL },
-                  { type = BITE, base = 2, damage = POISON }
+      attacks = { { type = "ATT_BITE", base = 1, damage = "DAM_PHYSICAL" },
+                  { type = "ATT_BITE", base = 2, damage = "DAM_POISON" }
       },
       color = "LIGHTGREEN",
       exp = 1,
@@ -773,8 +773,8 @@ monsters = {
     [MT_SPIRIT_NAGA] = {
       ac = 16,
       attacks = {
-        { type = BITE, base = 12, damage = PHYSICAL },
-        { type = MAGIC, base = 1, damage = RANDOM }
+        { type = "ATT_BITE", base = 12, damage = "DAM_PHYSICAL" },
+        { type = "ATT_MAGIC", base = 1, damage = "DAM_RANDOM" }
       },
       color = "MAGENTA",
       exp = 20000,
@@ -790,7 +790,7 @@ monsters = {
     },
     [MT_STALKER] = {
       ac = 7,
-      attacks = { { type = SLAM, base = 6, damage = PHYSICAL } },
+      attacks = { { type = "ATT_SLAM", base = 6, damage = "DAM_PHYSICAL" } },
       color = "LIGHTGRAY",
       exp = 350,
       flags = HEAD + FLY + INVISIBLE,
@@ -804,7 +804,7 @@ monsters = {
     },
     [MT_TROGLODYTE] = {
       ac = 4,
-      attacks = { { type = WEAPON, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" } },
       color = "BROWN",
       exp = 3,
       flags = HEAD + HANDS,
@@ -821,8 +821,8 @@ monsters = {
     [MT_TROLL] = {
       ac = 8,
       attacks = {
-        { type = CLAW, base = 5, damage = PHYSICAL },
-        { type = WEAPON, damage = PHYSICAL }
+        { type = "ATT_CLAW", base = 5, damage = "DAM_PHYSICAL" },
+        { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" }
       },
       color = "BROWN",
       exp = 300,
@@ -840,8 +840,8 @@ monsters = {
     [MT_UMBER_HULK] = {
       ac = 12,
       attacks = {
-        { type = CLAW, base = 7, damage = PHYSICAL },
-        { type = GAZE, base = 75, damage = CONFUSION }
+        { type = "ATT_CLAW", base = 7, damage = "DAM_PHYSICAL" },
+        { type = "ATT_GAZE", base = 75, damage = "DAM_CONFUSION" }
       },
       color = "YELLOW",
       exp = 600,
@@ -857,8 +857,8 @@ monsters = {
     [MT_VAMPIRE] = {
       ac = 7,
       attacks = {
-        { type = BITE, base = 75, damage = DRAIN_LIFE },
-        { type = WEAPON, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 75, damage = "DAM_DRAIN_LIFE" },
+        { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" }
       },
       color = "RED",
       exp = 1000,
@@ -873,8 +873,8 @@ monsters = {
     },
     [MT_VIOLET_FUNGUS] = {
       ac = 0,
-      attacks = { { type = SLAM, base = 3, damage = PHYSICAL },
-                  { type = SLAM, base = 4, damage = POISON }
+      attacks = { { type = "ATT_SLAM", base = 3, damage = "DAM_PHYSICAL" },
+                  { type = "ATT_SLAM", base = 4, damage = "DAM_POISON" }
       },
       color = "MAGENTA",
       exp = 100,
@@ -890,7 +890,7 @@ monsters = {
     },
     [MT_VORTEX] = {
       ac = 6,
-      attacks = { { type = SLAM, base = 3, damage = PHYSICAL } },
+      attacks = { { type = "ATT_SLAM", base = 3, damage = "DAM_PHYSICAL" } },
       color = "CYAN",
       exp = 55,
       flags = RES_SLEEP + RES_POISON + FLY + RES_ELEC + RES_CONF,
@@ -905,7 +905,7 @@ monsters = {
     },
     [MT_WATER_LORD] = {
       ac = 12,
-      attacks = { { type = WEAPON, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" } },
       color = "LIGHTBLUE",
       exp = 15000,
       flags = HEAD + NOBEHEAD + HANDS + RES_SLEEP + SWIM,
@@ -920,8 +920,8 @@ monsters = {
     [MT_WHITE_DRAGON] = {
       ac = 8,
       attacks = {
-        { type = BITE, base = 4, damage = PHYSICAL },
-        { type = CLAW, base = 4, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 4, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 4, damage = "DAM_PHYSICAL" }
       },
       color = "WHITE",
       exp = 1000,
@@ -937,7 +937,7 @@ monsters = {
     },
     [MT_WRAITH] = {
       ac = 7,
-      attacks = { { type = TOUCH, base = 50, damage = DRAIN_LIFE } },
+      attacks = { { type = "ATT_TOUCH", base = 50, damage = "DAM_DRAIN_LIFE" } },
       color = "LIGHTGRAY",
       exp = 325,
       flags = HEAD + HANDS + UNDEAD + RES_SLEEP + RES_POISON + RES_CONF,
@@ -951,7 +951,7 @@ monsters = {
     },
     [MT_XORN] = {
       ac = 10,
-      attacks = { { type = BITE, base = 6, damage = PHYSICAL } },
+      attacks = { { type = "ATT_BITE", base = 6, damage = "DAM_PHYSICAL" } },
       color = "BROWN",
       exp = 300,
       flags = INFRAVISION,
@@ -965,7 +965,7 @@ monsters = {
     },
     [MT_XVART] = {
       ac = 11,
-      attacks = { { type = WEAPON, damage = PHYSICAL } },
+      attacks = { { type = "ATT_WEAPON", damage = "DAM_PHYSICAL" } },
       color = "LIGHTGRAY",
       exp = 1000,
       flags = HEAD + HANDS + INFRAVISION,
@@ -979,7 +979,7 @@ monsters = {
     },
     [MT_YELLOW_MOLD] = {
       ac = 0,
-      attacks = { { type = TOUCH, base = 4, damage = PHYSICAL } },
+      attacks = { { type = "ATT_TOUCH", base = 4, damage = "DAM_PHYSICAL" } },
       color = "YELLOW",
       exp = 250,
       flags = RES_SLEEP + RES_POISON + RES_CONF,
@@ -993,7 +993,7 @@ monsters = {
     },
     [MT_YETI] = {
       ac = 4,
-      attacks = { { type = CLAW, base = 4, damage = PHYSICAL } },
+      attacks = { { type = "ATT_CLAW", base = 4, damage = "DAM_PHYSICAL" } },
       color = "WHITE",
       exp = 100,
       flags = HEAD + HANDS + RES_COLD,
@@ -1009,8 +1009,8 @@ monsters = {
     },
     [MT_ZILLER] = {
       ac = 8,
-      attacks = { { type = CLAW, base = 3, damage = PHYSICAL },
-                  { type = CLAW, base = 70, damage = DEC_RND },
+      attacks = { { type = "ATT_CLAW", base = 3, damage = "DAM_PHYSICAL" },
+                  { type = "ATT_CLAW", base = 70, damage = "DAM_DEC_RND" },
       },
       color = "CYAN",
       exp = 35,
@@ -1026,8 +1026,8 @@ monsters = {
     [MT_ZOMBIE] = {
       ac = 2,
       attacks = {
-        { type = BITE, base = 2, damage = PHYSICAL },
-        { type = CLAW, base = 2, damage = PHYSICAL }
+        { type = "ATT_BITE", base = 2, damage = "DAM_PHYSICAL" },
+        { type = "ATT_CLAW", base = 2, damage = "DAM_PHYSICAL" }
       },
       color = "LIGHTGRAY",
       exp = 7,
@@ -1042,7 +1042,7 @@ monsters = {
     },
     [MT_TOWN_PERSON] = {
       ac = 0,
-      attacks = { { type = SLAM, base = 0, damage = PHYSICAL } },
+      attacks = { { type = "ATT_SLAM", base = 0, damage = "DAM_PHYSICAL" } },
       color = "BROWN",
       exp = 0,
       flags = HEAD + HANDS,

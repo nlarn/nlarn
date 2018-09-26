@@ -33,59 +33,6 @@ void wrap_utils(lua_State *L)
 {
     g_assert (L != NULL);
 
-    /* register constants */
-    struct
-    {
-        const char *name;
-        int value;
-    } constants[] =
-    {
-        /* attack types */
-        { "WEAPON", ATT_WEAPON },
-        { "MAGIC",  ATT_MAGIC },
-        { "CLAW",   ATT_CLAW },
-        { "BITE",   ATT_BITE },
-        { "STING",  ATT_STING },
-        { "SLAM",   ATT_SLAM },
-        { "KICK",   ATT_KICK },
-        { "TOUCH",  ATT_TOUCH },
-        { "BREATH", ATT_BREATH },
-        { "GAZE",   ATT_GAZE },
-
-        /*  damage types */
-        { "PHYSICAL",    DAM_PHYSICAL },
-        { "MAGICAL",     DAM_MAGICAL },
-        { "FIRE",        DAM_FIRE },
-        { "COLD",        DAM_COLD },
-        { "ACID",        DAM_ACID },
-        { "WATER",       DAM_WATER },
-        { "ELECTRICITY", DAM_ELECTRICITY },
-        { "POISON",      DAM_POISON },
-        { "BLINDNESS",   DAM_BLINDNESS },
-        { "CONFUSION",   DAM_CONFUSION },
-        { "PARALYSIS",   DAM_PARALYSIS },
-        { "DEC_CON",     DAM_DEC_CON },
-        { "DEC_DEX",     DAM_DEC_DEX },
-        { "DEC_INT",     DAM_DEC_INT },
-        { "DEC_STR",     DAM_DEC_STR },
-        { "DEC_WIS",     DAM_DEC_WIS },
-        { "DEC_RND",     DAM_DEC_RND },
-        { "DRAIN_LIFE",  DAM_DRAIN_LIFE },
-        { "STEAL_GOLD",  DAM_STEAL_GOLD },
-        { "STEAL_ITEM",  DAM_STEAL_ITEM },
-        { "RUST",        DAM_RUST },
-        { "REM_ENCH",    DAM_REM_ENCH },
-        { "RANDOM",      DAM_RANDOM },
-
-        { NULL, 0 },
-    };
-
-    for (int i = 0; constants[i].name != NULL; i++)
-    {
-        lua_pushinteger(L, constants[i].value);
-        lua_setglobal(L, constants[i].name);
-    }
-
     /* register functions */
     lua_register(L, "log", wrap_log);
     lua_register(L, "rand", wrap_rand);
