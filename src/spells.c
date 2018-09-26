@@ -19,7 +19,6 @@
 #include <glib.h>
 #include <string.h>
 
-#include "defines.h"
 #include "display.h"
 #include "map.h"
 #include "nlarn.h"

@@ -24,7 +24,6 @@
 #include <time.h>
 
 #include "cJSON.h"
-#include "defines.h"
 #include "effects.h"
 #include "enumFactory.h"
 #include "inventory.h"

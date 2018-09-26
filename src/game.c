@@ -48,7 +48,6 @@
 #endif
 
 #include "cJSON.h"
-#include "defines.h"
 #include "display.h"
 #include "game.h"
 #include "lua_wrappers.h"

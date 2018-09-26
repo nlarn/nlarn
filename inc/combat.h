@@ -23,6 +23,28 @@
 
 #include "enumFactory.h"
 
+typedef enum _speed
+{
+    SPEED_XSLOW  =  25,
+    SPEED_VSLOW  =  50,
+    SPEED_SLOW   =  75,
+    SPEED_NORMAL = 100,
+    SPEED_FAST   = 125,
+    SPEED_VFAST  = 150,
+    SPEED_XFAST  = 175,
+    SPEED_DOUBLE = 200,
+} speed;
+
+typedef enum _esize
+{
+    ESIZE_TINY         =  25,
+    ESIZE_SMALL        =  75,
+    ESIZE_MEDIUM       = 100,
+    ESIZE_LARGE        = 125,
+    ESIZE_HUGE         = 150,
+    ESIZE_GARGANTUAN   = 200,
+} esize;
+
 #define ATTACK_T_ENUM(ATT) \
     ATT(ATT_NONE,) \
     ATT(ATT_WEAPON,) \

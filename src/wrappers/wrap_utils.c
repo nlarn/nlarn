@@ -20,7 +20,6 @@
 #include <lua.h>
 #include <lauxlib.h>
 
-#include "defines.h"
 #include "nlarn.h"
 #include "random.h"
 

@@ -19,7 +19,6 @@
 #ifndef __SPELLS_H_
 #define __SPELLS_H_
 
-#include "defines.h"
 #include "effects.h"
 #include "items.h"
 #include "player.h"
