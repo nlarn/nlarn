@@ -27,6 +27,8 @@
 #include "nlarn.h"
 #include "spheres.h"
 
+DEFINE_ENUM(display_colour, DISPLAY_COLOUR_ENUM)
+
 typedef struct _display_colset
 {
     const char *name;
