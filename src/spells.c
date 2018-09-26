@@ -1697,7 +1697,7 @@ static gboolean spell_area_pos_hit(position pos,
          * If the monster is at least of human size, the spell stops at
          * the monster, otherwise it passes and may hit other monsters
          */
-        if (monster_size(m) >= ESIZE_MEDIUM)
+        if (monster_size(m) >= MEDIUM)
             terminated = TRUE;
     }
 

@@ -23,27 +23,27 @@
 
 #include "enumFactory.h"
 
-typedef enum _speed
-{
-    SPEED_XSLOW  =  25,
-    SPEED_VSLOW  =  50,
-    SPEED_SLOW   =  75,
-    SPEED_NORMAL = 100,
-    SPEED_FAST   = 125,
-    SPEED_VFAST  = 150,
-    SPEED_XFAST  = 175,
-    SPEED_DOUBLE = 200,
-} speed;
+#define SPEED_ENUM(SPEED) \
+    SPEED(XSLOW,  =  25) \
+    SPEED(VSLOW,  =  50) \
+    SPEED(SLOW,   =  75) \
+    SPEED(NORMAL, = 100) \
+    SPEED(FAST,   = 125) \
+    SPEED(VFAST,  = 150) \
+    SPEED(XFAST,  = 175) \
+    SPEED(DOUBLE, = 200) \
 
-typedef enum _esize
-{
-    ESIZE_TINY         =  25,
-    ESIZE_SMALL        =  75,
-    ESIZE_MEDIUM       = 100,
-    ESIZE_LARGE        = 125,
-    ESIZE_HUGE         = 150,
-    ESIZE_GARGANTUAN   = 200,
-} esize;
+DECLARE_ENUM(speed, SPEED_ENUM)
+
+#define SIZE_ENUM(SIZE) \
+    SIZE(TINY,       =  25) \
+    SIZE(SMALL,      =  75) \
+    SIZE(MEDIUM,     = 100) \
+    SIZE(LARGE,      = 125) \
+    SIZE(HUGE,       = 150) \
+    SIZE(GARGANTUAN, = 200) \
+
+DECLARE_ENUM(size, SIZE_ENUM)
 
 #define ATTACK_T_ENUM(ATT) \
     ATT(ATT_NONE,) \

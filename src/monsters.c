@@ -947,10 +947,10 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     m->movement += monster_speed(m);
 
     /* let the monster make a move as long it has movement points left */
-    while (m->movement >= SPEED_NORMAL)
+    while (m->movement >= NORMAL)
     {
         /* reduce the monster's movement points */
-        m->movement -= SPEED_NORMAL;
+        m->movement -= NORMAL;
 
         /* update monsters action */
         if (monster_update_action(m, MA_NONE) && monster_in_sight(m))
@@ -1122,7 +1122,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
 
             } /* end new position */
         } /* end monster repositioning */
-    } /* while movement >= SPEED_NORMAL */
+    } /* while movement >= NORMAL */
 
     /* increment count of turns since when player was last seen */
     if (m->lastseen) m->lastseen++;
@@ -1478,7 +1478,7 @@ void monster_player_attack(monster *m, player *p)
         dam->amount  = (m->eq_weapon != NULL) ? weapon_damage(m->eq_weapon) : 1
                         + (int)rand_0n(game_difficulty(nlarn) + 2)
                         + monster_level(m)
-                        + 2 * ((monster_size(m) - ESIZE_MEDIUM)) / 25;
+                        + 2 * ((monster_size(m) - MEDIUM)) / 25;
     }
     else if (dam->type == DAM_PHYSICAL)
     {
@@ -2865,7 +2865,7 @@ static gboolean monster_breath_hit(const GList *traj,
         monster_damage_take(m, damage_copy(dam));
 
         /* the breath will sweep over small monsters */
-        if (monster_size(m) >= ESIZE_LARGE)
+        if (monster_size(m) >= LARGE)
             terminated = TRUE;
     }
 

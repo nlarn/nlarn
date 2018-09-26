@@ -144,7 +144,7 @@ player *player_new()
     p->level = p->stats.max_level = 1;
 
     /* set the player's default speed */
-    p->speed = SPEED_NORMAL;
+    p->speed = NORMAL;
 
     p->known_spells = g_ptr_array_new_with_free_func(
             (GDestroyNotify)spell_destroy);
@@ -795,14 +795,14 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     {
         /* if the number of movement points exceeds 100 reduce number
            of turns and handle regeneration and some effects */
-        if (p->movement >= SPEED_NORMAL)
+        if (p->movement >= NORMAL)
         {
             /* reduce the player's movement points */
-            p->movement -= SPEED_NORMAL;
+            p->movement -= NORMAL;
         }
 
         /* player's extra moves have expired - finish a turn */
-        if (p->movement < SPEED_NORMAL)
+        if (p->movement < NORMAL)
         {
             /* check for time stop */
             if ((e = player_effect_get(p, ET_TIMESTOP)))

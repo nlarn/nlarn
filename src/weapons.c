@@ -91,7 +91,7 @@ int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item 
                        + (player_get_speed(p) / 25)
                        /* the rule below gives a -3 for tiny monsters and a +4
                           for gargantuan monsters */
-                       + ((monster_size(m) - ESIZE_MEDIUM) / 25)
+                       + ((monster_size(m) - MEDIUM) / 25)
                        - monster_ac(m)
                        - (monster_speed(m) / 25)
                        - (!monster_in_sight(m) ? 5 : 0);

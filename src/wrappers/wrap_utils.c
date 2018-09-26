@@ -41,22 +41,22 @@ void wrap_utils(lua_State *L)
     } constants[] =
     {
         /* speed definitions */
-        { "XSLOW",  SPEED_XSLOW },
-        { "VSLOW",  SPEED_VSLOW },
-        { "SLOW",   SPEED_SLOW },
-        { "NORMAL", SPEED_NORMAL },
-        { "FAST",   SPEED_FAST },
-        { "VFAST",  SPEED_VFAST },
-        { "XFAST",  SPEED_XFAST },
-        { "DOUBLE", SPEED_DOUBLE },
+        { "XSLOW",  XSLOW },
+        { "VSLOW",  VSLOW },
+        { "SLOW",   SLOW },
+        { "NORMAL", NORMAL },
+        { "FAST",   FAST },
+        { "VFAST",  VFAST },
+        { "XFAST",  XFAST },
+        { "DOUBLE", DOUBLE },
 
         /*  size definitions */
-        { "TINY",       ESIZE_TINY },
-        { "SMALL",      ESIZE_SMALL },
-        { "MEDIUM",     ESIZE_MEDIUM },
-        { "LARGE",      ESIZE_LARGE },
-        { "HUGE",       ESIZE_HUGE },
-        { "GARGANTUAN", ESIZE_GARGANTUAN },
+        { "TINY",       TINY },
+        { "SMALL",      SMALL },
+        { "MEDIUM",     MEDIUM },
+        { "LARGE",      LARGE },
+        { "HUGE",       HUGE },
+        { "GARGANTUAN", GARGANTUAN },
 
         /* attack types */
         { "WEAPON", ATT_WEAPON },
