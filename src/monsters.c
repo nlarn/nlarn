@@ -55,7 +55,7 @@ struct _monster
         unknown: 1;      /* monster is unknown (mimic) */
 };
 
-const char *monster_ai_desc[MA_MAX] =
+const char *monster_ai_desc[] =
 {
     NULL,               /* MA_NONE */
     "fleeing",          /* MA_FLEE */
@@ -67,7 +67,7 @@ const char *monster_ai_desc[MA_MAX] =
     "doing something boring", /* MA_CIVILIAN */
 };
 
-const char *monster_attack_verb[ATT_MAX] =
+const char *monster_attack_verb[] =
 {
     NULL,
     "hits",         /* ATT_WEAPON */
@@ -1017,7 +1017,6 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             break;
 
         case MA_NONE:
-        case MA_MAX:
             /* possibly a bug */
             break;
         }

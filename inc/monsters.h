@@ -140,7 +140,6 @@ typedef enum monster_action_type
     MA_CONFUSION,
     MA_SERVE,
     MA_CIVILIAN,
-    MA_MAX
 } monster_action_t;
 
 #define MONSTER_FLAG_ENUM(MF) \

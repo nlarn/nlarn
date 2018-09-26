@@ -35,7 +35,6 @@
     ATT(ATT_TOUCH,)  /* vampire, wraith */ \
     ATT(ATT_BREATH,) /* dragons, hellhound */ \
     ATT(ATT_GAZE,)   /* floating eye */ \
-    ATT(ATT_MAX,) \
 
 DECLARE_ENUM(attack_t, ATTACK_T_ENUM)
 
@@ -90,7 +89,6 @@ typedef struct _attack
     DAMO(DAMO_SPHERE,) \
     DAMO(DAMO_TRAP,) \
     DAMO(DAMO_GOD,) \
-    DAMO(DAMO_MAX,) \
 
 DECLARE_ENUM(damage_originator_t, DAMAGE_ORIGINATOR_T_ENUM)
 

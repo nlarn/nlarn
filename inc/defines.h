@@ -29,7 +29,6 @@ typedef enum _speed
     SPEED_VFAST  = 150,
     SPEED_XFAST  = 175,
     SPEED_DOUBLE = 200,
-    SPEED_MAX
 } speed;
 
 typedef enum _esize
@@ -40,7 +39,6 @@ typedef enum _esize
     ESIZE_LARGE        = 125,
     ESIZE_HUGE         = 150,
     ESIZE_GARGANTUAN   = 200,
-    ESIZE_MAX
 } esize;
 
 #endif
