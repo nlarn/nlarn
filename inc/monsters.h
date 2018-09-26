@@ -319,12 +319,14 @@ static inline int monster_exp(monster *m)
 
 static inline int monster_size(monster *m)
 {
-    return luaN_query_int("monsters", monster_type(m), "size");
+    const char *size = luaN_query_string("monsters", monster_type(m), "size");
+    return size_value(size);
 }
 
 static inline int monster_speed(monster *m)
 {
-    return luaN_query_int("monsters", monster_type(m), "speed")
+    const char *speed = luaN_query_string("monsters", monster_type(m), "speed");
+    return speed_value(speed)
             + monster_effect(m, ET_SPEED)
             + (monster_effect(m, ET_HEROISM) * 5)
             - monster_effect(m, ET_SLOWNESS)

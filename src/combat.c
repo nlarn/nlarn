@@ -21,6 +21,8 @@
 #include "combat.h"
 #include "enumFactory.h"
 
+DEFINE_ENUM(speed, SPEED_ENUM)
+DEFINE_ENUM(size, SIZE_ENUM)
 DEFINE_ENUM(attack_t, ATTACK_T_ENUM)
 DEFINE_ENUM(damage_t, DAMAGE_T_ENUM)
 DEFINE_ENUM(damage_originator_t, DAMAGE_ORIGINATOR_T_ENUM)

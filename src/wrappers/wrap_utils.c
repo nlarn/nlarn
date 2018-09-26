@@ -40,24 +40,6 @@ void wrap_utils(lua_State *L)
         int value;
     } constants[] =
     {
-        /* speed definitions */
-        { "XSLOW",  XSLOW },
-        { "VSLOW",  VSLOW },
-        { "SLOW",   SLOW },
-        { "NORMAL", NORMAL },
-        { "FAST",   FAST },
-        { "VFAST",  VFAST },
-        { "XFAST",  XFAST },
-        { "DOUBLE", DOUBLE },
-
-        /*  size definitions */
-        { "TINY",       TINY },
-        { "SMALL",      SMALL },
-        { "MEDIUM",     MEDIUM },
-        { "LARGE",      LARGE },
-        { "HUGE",       HUGE },
-        { "GARGANTUAN", GARGANTUAN },
-
         /* attack types */
         { "WEAPON", ATT_WEAPON },
         { "MAGIC",  ATT_MAGIC },
