@@ -17,8 +17,6 @@
  */
 
 #include <ctype.h>
-#include <lua.h>
-#include <lauxlib.h>
 #include <stdlib.h>
 #include <glib/gstdio.h>
 
@@ -674,22 +672,6 @@ int main(int argc, char *argv[])
             break;
 
             /* *** DEBUGGING SUPPORT *** */
-
-            /* interact with the Lua interpreter */
-        case 5: /* ^E */
-            if (!game_wizardmode(nlarn)) break;
-
-            strbuf = display_get_string("Interact with the Lua interpreter", NULL, 60);
-            if (!strbuf) break;
-
-            if (luaL_dostring(nlarn->L, strbuf))
-            {
-                log_add_entry(nlarn->log, "E: %s", lua_tostring(nlarn->L, -1));
-                lua_pop(nlarn->L, 1);
-            }
-
-            g_free(strbuf);
-            break;
 
             /* toggle visibility of entire map in wizard mode */
         case 22: /* ^V */
