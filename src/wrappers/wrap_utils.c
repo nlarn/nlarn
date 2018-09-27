@@ -24,20 +24,7 @@
 #include "random.h"
 
 /* local functions */
-static int wrap_log(lua_State *L);
-static int wrap_rand(lua_State *L);
-static int wrap_chance(lua_State *L);
 static gboolean luaN_data_query(const char *table, guint idx, const char *attrib);
-
-void wrap_utils(lua_State *L)
-{
-    g_assert (L != NULL);
-
-    /* register functions */
-    lua_register(L, "log", wrap_log);
-    lua_register(L, "rand", wrap_rand);
-    lua_register(L, "chance", wrap_chance);
-}
 
 const char *luaN_query_string(const char *table, guint idx, const char *attrib)
 {
@@ -90,43 +77,6 @@ int luaN_push_table(const char *table, guint idx, const char *tname)
     }
 
     return TRUE;
-}
-
-static int wrap_log(lua_State *L)
-{
-    int nargs = lua_gettop(L);    /* number of arguments */
-
-    for (int i = 1; i <= nargs; i++)
-    {
-        log_add_entry(nlarn->log, "%s", luaL_checkstring(L, i));
-    }
-
-    return 0;
-}
-
-static int wrap_rand(lua_State *L)
-{
-    int nargs = lua_gettop(L);
-    int result;
-
-    if (nargs == 2)
-    {
-        result = rand_m_n(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
-    }
-    else
-    {
-        result = rand_0n(luaL_checkinteger(L, 1));
-    }
-
-    lua_pushinteger(L, result);
-
-    return 1;
-}
-
-static int wrap_chance(lua_State *L)
-{
-    lua_pushboolean(L, chance(luaL_checkinteger(L, 1)));
-    return 1;
 }
 
 static gboolean luaN_data_query(const char *table, guint idx, const char *attrib)

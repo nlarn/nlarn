@@ -21,17 +21,10 @@
 
 #include <lua.h>
 
-/* functions implemented in wrap_effects.c */
-void wrap_effects(lua_State *L);
-
-/* functions implemented in wrap_display.c */
-void wrap_display(lua_State *L);
-
 /* functions implemented in wrap_monsters.c */
 void wrap_monsters(lua_State *L);
 
 /* functions implemented in wrap_utils.c */
-void wrap_utils(lua_State *L);
 const char *luaN_query_string(const char *table, guint idx, const char *attrib);
 char luaN_query_char(const char *table, guint idx, const char *attrib);
 int luaN_query_int(const char *table, guint idx, const char *attrib);

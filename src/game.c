@@ -1276,7 +1276,6 @@ static void game_init_lua(game *g)
     luaL_openlibs(nlarn->L);
 
     /* register all required functions */
-    wrap_utils(g->L);
     wrap_monsters(g->L);
 }
 
