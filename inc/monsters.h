@@ -20,7 +20,6 @@
 #define __MONSTERS_H_
 
 #include <glib.h>
-#include <lua.h>
 #include <time.h>
 
 #include "cJSON.h"
@@ -28,7 +27,6 @@
 #include "enumFactory.h"
 #include "inventory.h"
 #include "items.h"
-#include "lua_wrappers.h"
 #include "position.h"
 #include "utils.h"
 
@@ -41,10 +39,7 @@ struct game;
 struct player;
 struct map;
 
-/* local monster definition for data storage */
-
 #define MONSTER_TYPE_ENUM(MT) \
-    MT(MT_NONE,)            /*  0 */ \
     /* D1 - D4 */ \
     MT(MT_GIANT_BAT,) \
     MT(MT_GNOME,) \
@@ -123,7 +118,6 @@ struct map;
     MT(MT_DEMONLORD_VII,) \
     /* not actually generated randomly */ \
     MT(MT_DEMON_PRINCE,) \
-    MT(MT_MAX_GENERATED,) \
     MT(MT_TOWN_PERSON,) \
     MT(MT_MAX,)                /* maximum # monsters in the dungeon */
 
@@ -209,7 +203,7 @@ monster_action_t monster_action(monster *m);
 
 /* other functions */
 const char *monster_get_name(monster *m);
-const char* monster_type_plural_name(const int montype, const int count);
+const char* monster_type_plural_name(monster_t mt, const int count);
 void monster_die(monster *m, struct player *p);
 
 void monster_level_enter(monster *m, struct map *l);
@@ -280,86 +274,24 @@ void monster_effects_expire(monster *m);
 int monster_is_carrying_item(monster *m, item_t type);
 
 /* query monster data */
-
-static inline const char *monster_name(monster *m) {
-    return luaN_query_string("monsters", monster_type(m), "name");
-}
-
-static inline int monster_level(monster *m)
-{
-    return luaN_query_int("monsters", monster_type(m), "level");
-}
-
-static inline int monster_ac(monster *m)
-{
-    return luaN_query_int("monsters", monster_type(m), "ac");
-}
-
-static inline guint monster_int(monster *m)
-{
-    return (guint)luaN_query_int("monsters", monster_type(m), "intelligence")
-            + monster_effect(m, ET_HEROISM)
-            - monster_effect(m, ET_DIZZINESS);
-}
-
-static inline int monster_gold_chance(monster *m)
-{
-    return luaN_query_int("monsters", monster_type(m), "gold_chance");
-}
-
-static inline int monster_gold_amount(monster *m)
-{
-    return luaN_query_int("monsters", monster_type(m), "gold");
-}
-
-static inline int monster_exp(monster *m)
-{
-    return luaN_query_int("monsters", monster_type(m), "exp");
-}
-
-static inline int monster_size(monster *m)
-{
-    const char *size = luaN_query_string("monsters", monster_type(m), "size");
-    return size_value(size);
-}
-
-static inline int monster_speed(monster *m)
-{
-    const char *speed = luaN_query_string("monsters", monster_type(m), "speed");
-    return speed_value(speed)
-            + monster_effect(m, ET_SPEED)
-            + (monster_effect(m, ET_HEROISM) * 5)
-            - monster_effect(m, ET_SLOWNESS)
-            - (monster_effect(m, ET_DIZZINESS) * 5);
-}
-
-static inline int monster_flags(monster *m, monster_flag f)
-{
-    return (luaN_query_int("monsters", monster_type(m), "flags") & f);
-}
+const char *monster_name(monster *m);
+int monster_level(monster *m);
+int monster_ac(monster *m);
+guint monster_int(monster *m);
+int monster_gold_chance(monster *m);
+int monster_gold_amount(monster *m);
+int monster_exp(monster *m);
+int monster_size(monster *m);
+int monster_speed(monster *m);
+int monster_flags(monster *m, monster_flag f);
 
 #define monster_map(M)      game_map(nlarn, Z(monster_pos(M)))
+
 /* query monster type data */
-
-static inline int monster_type_hp_max(monster_t type)
-{
-    return luaN_query_int("monsters", type, "hp_max");
-}
-
-static inline char monster_type_glyph(monster_t type)
-{
-    return luaN_query_char("monsters", type, "glyph");
-}
-
-static inline const char *monster_type_name(monster_t type)
-{
-    return luaN_query_string("monsters", type, "name");
-}
-
-static inline int monster_type_reroll_chance(monster_t type)
-{
-    return luaN_query_int("monsters", type, "reroll_chance");
-}
+int monster_type_hp_max(monster_t type);
+char monster_type_glyph(monster_t type);
+const char *monster_type_name(monster_t type);
+int monster_type_reroll_chance(monster_t type);
 
 void monster_genocide(monster_t monster_id);
 int monster_is_genocided(monster_t monster_id);

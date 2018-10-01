@@ -10,6 +10,7 @@
 * Distribute Changelog in HTML format on macOS and Windows
 * Allow specifying a custom configuration file on the command line
 * Add author, icon and version number to Windows uninstaller
+* Got rid of the unfinished Lua integration
 
 ### Fixed bugs:
 * Fix "Cure Blindness" spell

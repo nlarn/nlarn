@@ -543,7 +543,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
     char *glyph;
     guint candidates[10] = { 0 };
     guint found = 0;
-    monster_t which = MT_NONE;
+    monster_t which;
     GString *msg = g_string_new(NULL);
 
     g_assert(p != NULL);

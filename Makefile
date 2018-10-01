@@ -69,7 +69,7 @@ ifneq (,$(findstring MINGW, $(MSYSTEM)))
   DLLS := libbz2-1.dll libfreetype-6.dll libgcc_s_dw2-1.dll libglib-2.0-0.dll
   DLLS += libgraphite2.dll libharfbuzz-0.dll libiconv-2.dll libintl-8.dll
   DLLS += libpcre-1.dll libpng16-16.dll libstdc++-6.dll libwinpthread-1.dll
-  DLLS += lua53.dll SDL.dll SDL_ttf.dll zlib1.dll
+  DLLS += SDL.dll SDL_ttf.dll zlib1.dll
   LIBFILES := lib/nlarn-128.bmp
 
   # Fake the content of the OS var to make it more common
@@ -102,22 +102,6 @@ endif
 CFLAGS  += $(shell pkg-config --cflags glib-2.0)
 LDFLAGS += $(shell pkg-config --libs glib-2.0)
 
-# Determine the name of the Lua 5.3 library
-# Debian and derivates use lua5.3, the rest of the world lua
-ifneq ($(wildcard /etc/debian_version),)
-  lua = lua5.3
-else ifneq ($(filter $(OS), FreeBSD NetBSD),)
-  lua = lua-5.3
-else ifneq ($(filter $(OS), OpenBSD),)
-  lua = lua53
-else
-  lua = lua
-endif
-
-# Configure Lua
-CFLAGS  += $(shell pkg-config --cflags $(lua))
-LDFLAGS += $(shell pkg-config --libs $(lua))
-
 # Unless requested otherwise build with curses.
 ifneq ($(SDLPDCURSES),Y)
 	LDFLAGS += -lcurses -lpanel
@@ -139,7 +123,7 @@ ifneq ($(GITREV),)
   SRCPKG    = nlarn-$(VERSION).tar.gz
   PACKAGE   = $(DIRNAME)_$(OS).$(ARCH).$(ARCHIVE_SUFFIX)
   MAINFILES = nlarn$(SUFFIX) nlarn.ini-sample README.html LICENSE Changelog.html
-  LIBFILES += lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.* lib/*.lua
+  LIBFILES += lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.*
 endif
 
 ifeq ($(OS),Darwin)
@@ -147,7 +131,7 @@ ifeq ($(OS),Darwin)
 endif
 
 ifeq ($(config),debug)
-  DEFINES   += -DDEBUG -DLUA_USE_APICHECK
+  DEFINES   += -DDEBUG
   CFLAGS    += $(DEFINES) -g
   RESFLAGS  += $(DEFINES) $(INCLUDES)
 endif

@@ -27,9 +27,6 @@
 
 #include <errno.h>
 #include <glib.h>
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
 #include <stdlib.h>
 #include <string.h>
 #include <zlib.h>
@@ -50,7 +47,6 @@
 #include "cJSON.h"
 #include "display.h"
 #include "game.h"
-#include "lua_wrappers.h"
 #include "nlarn.h"
 #include "player.h"
 #include "spheres.h"
@@ -58,10 +54,7 @@
 
 static void game_new();
 static gboolean game_load(gchar *filename);
-static void game_init_lua(game *g);
-
 static void game_items_shuffle(game *g);
-
 static GList *game_scores_load();
 static void game_scores_save(game *g, GList *scores);
 static int game_score_compare(const void *scr_a, const void *scr_b);
@@ -412,9 +405,6 @@ void game_init(int argc, char *argv[])
     /* set autosave setting (default: TRUE) */
     game_autosave(nlarn) = !config.no_autosave;
 
-    /* initialize the Lua interpreter */
-    game_init_lua(nlarn);
-
     if (!game_load(config.savefile))
     {
         /* set game parameters */
@@ -526,10 +516,6 @@ game *game_destroy(game *g)
 
     g_ptr_array_foreach(g->spheres, (GFunc)sphere_destroy, g);
     g_ptr_array_free(g->spheres, TRUE);
-
-    /* terminate the Lua interpreter */
-    lua_close(g->L);
-
     g_free(g);
 
     return NULL;
@@ -1263,20 +1249,6 @@ static gboolean game_load(gchar *filename)
         display_window_destroy(win);
 
     return TRUE;
-}
-
-static void game_init_lua(game *g)
-{
-    g_assert (g != NULL);
-
-    /* initialize Lua interpreter */
-    nlarn->L = luaL_newstate();
-
-    /* open Lua libraries */
-    luaL_openlibs(nlarn->L);
-
-    /* register all required functions */
-    wrap_monsters(g->L);
 }
 
 static void game_items_shuffle(game *g)

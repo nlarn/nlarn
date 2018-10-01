@@ -17,8 +17,6 @@
  */
 
 #include <glib.h>
-#include <lua.h>
-#include <lauxlib.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -33,6 +31,26 @@
 
 DEFINE_ENUM(monster_flag, MONSTER_FLAG_ENUM)
 DEFINE_ENUM(monster_t, MONSTER_TYPE_ENUM)
+
+/* local monster definition for data storage */
+typedef struct {
+    const char *name;        /* monster's name */
+    const char *plural_name;
+    const char glyph;
+    int colour;
+    int exp;                 /* xp granted to player */
+    int gold_chance;
+    int gold;
+    int reroll_chance;
+    int ac;
+    int hp_max;
+    int level;
+    int intelligence;        /* used to choose movement */
+    speed speed;
+    size size;
+    int flags;
+    attack attacks[2];
+} monster_data_t;
 
 /* monster information hiding */
 struct _monster
@@ -100,6 +118,631 @@ static struct _monster_breath_data
     { "burst of noxious fumes", '%', GREEN },    /* DAM_POISON */
 };
 
+monster_data_t monster_data[] = {
+    { /* MT_GIANT_BAT */
+        .name = "giant bat", .glyph = 'b', .colour = RED,
+        .exp = 1, .ac = 0, .hp_max = 2,
+        .level = 1, .intelligence = 3, .speed = XFAST, .size = SMALL,
+        .flags = HEAD | FLY | INFRAVISION,
+        .attacks = {
+            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_GNOME */
+        .name = "gnome", .glyph = 'g', .colour = BROWN,
+        .exp = 2, .gold_chance = 80, .gold = 30, .ac = 0, .hp_max = 6,
+        .level = 1, .intelligence = 8, .speed = NORMAL, .size = SMALL,
+        .flags = HEAD | HANDS,
+        .attacks = {
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_HOBGOBLIN */
+        .name = "hobgoblin", .glyph = 'H', .colour = BROWN,
+        .exp = 2, .gold_chance = 30, .gold = 40, .ac = 1, .hp_max = 8,
+        .level = 1, .intelligence = 5, .speed = SLOW, .size = MEDIUM,
+        .flags = HEAD | HANDS | INFRAVISION,
+        .attacks = {
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_JACKAL */
+        .name = "jackal", .glyph = 'J', .colour = BROWN,
+        .exp = 1, .ac = 0, .hp_max = 3,
+        .level = 1, .intelligence = 4, .speed = FAST, .size = SMALL,
+        .flags = HEAD,
+        .attacks = {
+            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_KOBOLD */
+        .name = "kobold", .glyph = 'k', .colour = BROWN,
+        .exp = 1, .gold_chance = 10, .gold = 100, .ac = 0, .hp_max = 4,
+        .level = 1, .intelligence = 7, .speed = NORMAL, .size = SMALL,
+        .flags = HEAD | HANDS | INFRAVISION,
+        .attacks = {
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_ORC */
+        .name = "orc", .glyph = 'O', .colour = RED,
+        .exp = 2, .gold_chance = 50, .gold = 80, .ac = 3, .hp_max = 12,
+        .level = 2, .intelligence = 9, .speed = NORMAL, .size = MEDIUM,
+        .flags = HEAD | HANDS | INFRAVISION,
+        .attacks = {
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_SNAKE */
+        .name = "snake", .glyph = 'S', .colour = LIGHTGREEN,
+        .exp = 1, .ac = 1, .hp_max = 3,
+        .level = 2, .intelligence = 3, .speed = NORMAL, .size = TINY,
+        .flags = HEAD,
+        .attacks = {
+            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
+            { .type = ATT_BITE, .base = 2, .damage = DAM_POISON },
+        }
+    },
+    { /* MT_CENTIPEDE */
+        .name = "giant centipede", .glyph = 'c', .colour = YELLOW,
+        .exp = 2, .ac = 1, .hp_max = 5,
+        .level = 2, .intelligence = 2, .speed = NORMAL, .size = SMALL,
+        .flags = HEAD,
+        .attacks = {
+            { .type = ATT_BITE, .base = 50, .damage = DAM_DEC_STR },
+            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_JACULUS */
+        .name = "jaculus", .plural_name = "jaculi", .glyph = 'j', .colour = GREEN,
+        .exp = 1, .ac = 3, .hp_max = 8,
+        .level = 2, .intelligence = 3, .speed = XFAST, .size = MEDIUM,
+        .flags = HEAD | FLY,
+        .attacks = {
+            { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_TROGLODYTE */
+        .name = "troglodyte", .glyph = 't', .colour = BROWN,
+        .exp = 3, .gold_chance = 25, .gold = 320, .ac = 4, .hp_max = 10,
+        .level = 2, .intelligence = 5, .speed = NORMAL, .size = MEDIUM,
+        .flags = HEAD | HANDS,
+        .attacks = {
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_GIANT_ANT */
+        .name = "giant ant", .glyph = 'A', .colour = BROWN,
+        .exp = 5, .ac = 2, .hp_max = 6,
+        .level = 2, .intelligence = 3, .speed = NORMAL, .size = SMALL,
+        .flags = HEAD,
+        .attacks = {
+            { .type = ATT_BITE, .base = 75, .damage = DAM_DEC_STR },
+            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_FLOATING_EYE */
+        .name = "floating eye", .glyph = 'E', .colour = BLUE,
+        .exp = 2, .ac = 2, .hp_max = 12,
+        .level = 3, .intelligence = 3, .speed = XSLOW, .size = MEDIUM,
+        .flags = FLY | INFRAVISION | RES_CONF,
+        .attacks = {
+            { .type = ATT_GAZE, .base = 66, .damage = DAM_PARALYSIS },
+        }
+    },
+    { /* MT_LEPRECHAUN */
+        .name = "leprechaun", .glyph = 'L', .colour = GREEN,
+        .exp = 45, .gold = 1500, .ac = 6, .hp_max = 13,
+        .level = 3, .intelligence = 6, .speed = NORMAL, .size = SMALL,
+        .flags = HEAD | HANDS,
+        .attacks = {
+            { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
+            { .type = ATT_TOUCH, .damage = DAM_STEAL_GOLD },
+        }
+    },
+    { /* MT_NYMPH */
+        .name = "nymph", .glyph = 'n', .colour = RED,
+        .exp = 45, .ac = 5, .hp_max = 18,
+        .level = 3, .intelligence = 9, .speed = NORMAL, .size = MEDIUM,
+        .flags = HEAD | HANDS,
+        .attacks = {
+            { .type = ATT_TOUCH, .damage = DAM_STEAL_ITEM },
+        }
+    },
+    { /* MT_QUASIT */
+        .name = "quasit", .glyph = 'Q', .colour = BLUE,
+        .exp = 15, .ac = 6, .hp_max = 10,
+        .level = 3, .intelligence = 3, .speed = FAST, .size = SMALL,
+        .flags = HEAD | HANDS | DEMON,
+        .attacks = {
+            { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 66, .damage = DAM_DEC_DEX },
+        }
+    },
+    { /* MT_RUST_MONSTER */
+        .name = "rust monster", .glyph = 'R', .colour = BROWN,
+        .exp = 25, .ac = 6, .hp_max = 18,
+        .level = 3, .intelligence = 3, .speed = NORMAL, .size = MEDIUM,
+        .flags = HEAD | METALLIVORE,
+        .attacks = {
+            { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
+            { .type = ATT_TOUCH, .base = 1, .damage = DAM_RUST },
+        }
+    },
+    { /* MT_ZOMBIE */
+        .name = "zombie", .glyph = 'Z', .colour = LIGHTGRAY,
+        .exp = 7, .ac = 2, .hp_max = 12,
+        .level = 3, .intelligence = 3, .speed = VSLOW, .size = MEDIUM,
+        .flags = HEAD | HANDS | UNDEAD | RES_SLEEP | RES_POISON | RES_CONF,
+        .attacks = {
+            { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_ASSASSIN_BUG */
+        .name = "assassin bug", .glyph = 'a', .colour = GREEN,
+        .exp = 15, .ac = 1, .hp_max = 20,
+        .level = 4, .intelligence = 3, .speed = FAST, .size = TINY,
+        .flags = HEAD | RES_POISON,
+        .attacks = {
+            { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
+            { .type = ATT_BITE, .base = 3, .damage = DAM_POISON },
+        }
+    },
+    { /* MT_BUGBEAR */
+        .name = "bugbear", .glyph = 'B', .colour = BROWN,
+        .exp = 35, .gold_chance = 10, .gold = 400, .ac = 5, .hp_max = 20,
+        .level = 4, .intelligence = 5, .speed = SLOW, .size = MEDIUM,
+        .flags = HEAD | HANDS | INFRAVISION,
+        .attacks = {
+            { .type = ATT_BITE, .base = 5, .damage = DAM_PHYSICAL, .rand = 10 },
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_HELLHOUND */
+        .name = "hell hound", .glyph = 'h', .colour = LIGHTRED,
+        .exp = 35, .ac = 5, .hp_max = 16,
+        .level = 4, .intelligence = 6, .speed = FAST, .size = SMALL,
+        .flags = HEAD | RES_FIRE | RES_MAGIC,
+        .attacks = {
+            { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
+            { .type = ATT_BREATH, .base = 8, .damage = DAM_FIRE, .rand = 15 },
+        }
+    },
+    { /* MT_ICE_LIZARD */
+        .name = "ice lizard", .glyph = 'i', .colour = LIGHTCYAN,
+        .exp = 25, .ac = 4, .hp_max = 20,
+        .level = 4, .intelligence = 6, .speed = SLOW, .size = MEDIUM,
+        .flags = HEAD | SWIM | RES_COLD,
+        .attacks = {
+            { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
+            { .type = ATT_SLAM, .base = 14, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_CENTAUR */
+        .name = "centaur", .glyph = 'C', .colour = BROWN,
+        .exp = 45, .gold_chance = 50, .gold = 80, .ac = 6, .hp_max = 24,
+        .level = 4, .intelligence = 10, .speed = FAST, .size = LARGE,
+        .flags = HEAD | HANDS,
+        .attacks = {
+            { .type = ATT_KICK, .base = 6, .damage = DAM_PHYSICAL },
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_TROLL */
+        .name = "troll", .glyph = 'T', .colour = BROWN,
+        .exp = 300, .gold_chance = 20, .gold = 400, .ac = 8, .hp_max = 50,
+        .level = 5, .intelligence = 9, .speed = SLOW, .size = LARGE,
+        .flags = HEAD | HANDS | REGENERATE,
+        .attacks = {
+            { .type = ATT_CLAW, .base = 5, .damage = DAM_PHYSICAL },
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_YETI */
+        .name = "yeti", .glyph = 'Y', .colour = WHITE,
+        .exp = 100, .gold_chance = 10, .gold = 200, .ac = 4, .hp_max = 35,
+        .level = 5, .intelligence = 5, .speed = NORMAL, .size = LARGE,
+        .flags = HEAD | HANDS | RES_COLD,
+        .attacks = {
+            { .type = ATT_CLAW, .base = 4, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_ELF */
+        .name = "elf", .plural_name = "elves", .glyph = 'e', .colour = WHITE,
+        .exp = 35, .gold_chance = 50, .gold = 150, .ac = 6, .hp_max = 22,
+        .level = 5, .intelligence = 15, .speed = FAST, .size = MEDIUM,
+        .flags = HEAD | HANDS | INFRAVISION,
+        .attacks = {
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_GELATINOUSCUBE */
+        .name = "gelatinous cube", .glyph = 'g', .colour = CYAN,
+        .exp = 45, .ac = 1, .hp_max = 22,
+        .level = 5, .intelligence = 3, .speed = XSLOW, .size = LARGE,
+        .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF,
+        .attacks = {
+            { .type = ATT_SLAM, .base = 1, .damage = DAM_ACID },
+        }
+    },
+    { /* MT_WHITE_DRAGON */
+        .name = "white dragon", .glyph = 'd', .colour = WHITE,
+        .exp = 1000, .gold = 500, .ac = 8, .hp_max = 55,
+        .level = 5, .intelligence = 16, .speed = NORMAL, .size = HUGE,
+        .flags = HEAD | DRAGON | RES_COLD,
+        .attacks = {
+            { .type = ATT_BITE, .base = 4, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 4, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_METAMORPH */
+        .name = "metamorph", .glyph = 'm', .colour = WHITE,
+        .exp = 40, .ac = 3, .hp_max = 30,
+        .level = 6, .intelligence = 3, .speed = NORMAL, .size = MEDIUM,
+        .flags = 0,
+        .attacks = {
+            { .type = ATT_WEAPON, .base = 3, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_VORTEX */
+        .name = "vortex", .plural_name = "vortexes", .glyph = 'v', .colour = CYAN,
+        .exp = 55, .ac = 6, .hp_max = 30,
+        .level = 6, .intelligence = 3, .speed = VFAST, .size = TINY,
+        .flags = RES_SLEEP | RES_POISON | FLY | RES_ELEC | RES_CONF,
+        .attacks = {
+            { .type = ATT_SLAM, .base = 3, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_ZILLER */
+        .name = "ziller", .glyph = 'z', .colour = CYAN,
+        .exp = 35, .ac = 8, .hp_max = 30,
+        .level = 6, .intelligence = 3, .speed = SLOW, .size = MEDIUM,
+        .flags = HEAD | RES_CONF,
+        .attacks = {
+            { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 70, .damage = DAM_DEC_RND },
+        }
+    },
+    { /* MT_VIOLET_FUNGUS */
+        .name = "violet fungus", .plural_name = "violet fungi", .glyph = 'F', .colour = MAGENTA,
+        .exp = 100, .ac = 0, .hp_max = 38,
+        .level = 6, .intelligence = 3, .speed = XSLOW, .size = MEDIUM,
+        .flags = RES_SLEEP | RES_POISON | RES_CONF,
+        .attacks = {
+            { .type = ATT_SLAM, .base = 3, .damage = DAM_PHYSICAL },
+            { .type = ATT_SLAM, .base = 4, .damage = DAM_POISON },
+        }
+    },
+    { /* MT_WRAITH */
+        .name = "wraith", .glyph = 'W', .colour = LIGHTGRAY,
+        .exp = 325, .ac = 7, .hp_max = 30,
+        .level = 6, .intelligence = 3, .speed = NORMAL, .size = MEDIUM,
+        .flags = HEAD | HANDS | UNDEAD | RES_SLEEP | RES_POISON | RES_CONF,
+        .attacks = {
+            { .type = ATT_TOUCH, .base = 50, .damage = DAM_DRAIN_LIFE },
+        }
+    },
+    { /* MT_FORVALAKA */
+        .name = "forvalaka", .glyph = 'f', .colour = LIGHTGRAY,
+        .exp = 280, .ac = 4, .hp_max = 50,
+        .level = 6, .intelligence = 7, .speed = DOUBLE, .size = MEDIUM,
+        .flags = HEAD | UNDEAD | INFRAVISION | RES_POISON,
+        .attacks = {
+            { .type = ATT_BITE, .base = 5, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_LAMA_NOBE */
+        .name = "lama nobe", .glyph = 'l', .colour = RED,
+        .exp = 80, .ac = 3, .hp_max = 35,
+        .level = 7, .intelligence = 6, .speed = NORMAL, .size = MEDIUM,
+        .flags = HEAD,
+        .attacks = {
+            { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
+            { .type = ATT_GAZE, .base = 25, .damage = DAM_BLINDNESS },
+        }
+    },
+    { /* MT_OSQUIP */
+        .name = "osquip", .glyph = 'o', .colour = BROWN,
+        .exp = 100, .ac = 5, .hp_max = 35,
+        .level = 7, .intelligence = 4, .speed = VFAST, .size = SMALL,
+        .flags = HEAD,
+        .attacks = {
+            { .type = ATT_BITE, .base = 10, .damage = DAM_PHYSICAL, .rand = 15 },
+        }
+    },
+    { /* MT_ROTHE */
+        .name = "rothe", .glyph = 'r', .colour = BROWN,
+        .exp = 250, .ac = 5, .hp_max = 50,
+        .level = 7, .intelligence = 5, .speed = VFAST, .size = LARGE,
+        .flags = HEAD | INFRAVISION,
+        .attacks = {
+            { .type = ATT_BITE, .base = 5, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_XORN */
+        .name = "xorn", .glyph = 'X', .colour = BROWN,
+        .exp = 300, .ac = 10, .hp_max = 60,
+        .level = 7, .intelligence = 13, .speed = NORMAL, .size = MEDIUM,
+        .flags = INFRAVISION,
+        .attacks = {
+            { .type = ATT_BITE, .base = 6, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_VAMPIRE */
+        .name = "vampire", .glyph = 'V', .colour = RED,
+        .exp = 1000, .ac = 7, .hp_max = 50,
+        .level = 7, .intelligence = 17, .speed = NORMAL, .size = MEDIUM,
+        .flags = HEAD | HANDS | FLY | UNDEAD | INFRAVISION | REGENERATE | RES_SLEEP | RES_POISON | RES_CONF,
+        .attacks = {
+            { .type = ATT_BITE, .base = 75, .damage = DAM_DRAIN_LIFE },
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_STALKER */
+        .name = "invisible stalker", .glyph = 'I', .colour = LIGHTGRAY,
+        .exp = 350, .ac = 7, .hp_max = 50,
+        .level = 7, .intelligence = 14, .speed = FAST, .size = MEDIUM,
+        .flags = HEAD | FLY | INVISIBLE,
+        .attacks = {
+            { .type = ATT_SLAM, .base = 6, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_POLTERGEIST */
+        .name = "poltergeist", .glyph = 'p', .colour = WHITE,
+        .exp = 450, .ac = 6, .hp_max = 50,
+        .level = 8, .intelligence = 5, .speed = NORMAL, .size = MEDIUM,
+        .flags = FLY | UNDEAD | INVISIBLE | RES_SLEEP | RES_POISON,
+        .attacks = {
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_DISENCHANTRESS */
+        .name = "disenchantress", .plural_name = "disenchantresses", .glyph = 'q', .colour = WHITE,
+        .exp = 500, .ac = 7, .hp_max = 50,
+        .level = 8, .intelligence = 5, .speed = NORMAL, .size = MEDIUM,
+        .flags = HEAD | HANDS | METALLIVORE,
+        .attacks = {
+            { .type = ATT_TOUCH, .damage = DAM_REM_ENCH },
+        }
+    },
+    { /* MT_SHAMBLINGMOUND */
+        .name = "shambling mound", .glyph = 's', .colour = GREEN,
+        .exp = 400, .ac = 8, .hp_max = 45,
+        .level = 8, .intelligence = 6, .speed = VSLOW, .size = HUGE,
+        .flags = RES_SLEEP | RES_POISON,
+        .attacks = {
+            { .type = ATT_SLAM, .base = 5, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_YELLOW_MOLD */
+        .name = "yellow mold", .glyph = 'y', .colour = YELLOW,
+        .exp = 250, .ac = 0, .hp_max = 35,
+        .level = 8, .intelligence = 3, .speed = XSLOW, .size = SMALL,
+        .flags = RES_SLEEP | RES_POISON | RES_CONF,
+        .attacks = {
+            { .type = ATT_TOUCH, .base = 4, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_UMBER_HULK */
+        .name = "umber hulk", .glyph = 'U', .colour = YELLOW,
+        .exp = 600, .ac = 12, .hp_max = 65,
+        .level = 8, .intelligence = 14, .speed = SLOW, .size = HUGE,
+        .flags = HEAD | HANDS | INFRAVISION | RES_CONF,
+        .attacks = {
+            { .type = ATT_CLAW, .base = 7, .damage = DAM_PHYSICAL },
+            { .type = ATT_GAZE, .base = 75, .damage = DAM_CONFUSION },
+        }
+    },
+    { /* MT_GNOME_KING */
+        .name = "gnome king", .glyph = 'G', .colour = RED,
+        .exp = 3000, .gold = 2000, .reroll_chance = 80, .ac = 11, .hp_max = 100,
+        .level = 9, .intelligence = 18, .speed = NORMAL, .size = SMALL,
+        .flags = HEAD | HANDS | RES_SLEEP,
+        .attacks = {
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_MIMIC */
+        .name = "mimic", .glyph = 'M', .colour = BROWN,
+        .exp = 99, .ac = 5, .hp_max = 55,
+        .level = 9, .intelligence = 8, .speed = SLOW, .size = MEDIUM,
+        .flags = MIMIC,
+        .attacks = {
+            { .type = ATT_SLAM, .base = 6, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_WATER_LORD */
+        .name = "water lord", .glyph = 'w', .colour = LIGHTBLUE,
+        .exp = 15000, .ac = 12, .hp_max = 150,
+        .level = 9, .intelligence = 20, .speed = NORMAL, .size = LARGE,
+        .flags = HEAD | NOBEHEAD | HANDS | RES_SLEEP | SWIM,
+        .attacks = {
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_PURPLE_WORM */
+        .name = "purple worm", .glyph = 'P', .colour = MAGENTA,
+        .exp = 15000, .ac = 12, .hp_max = 120,
+        .level = 9, .intelligence = 3, .speed = VSLOW, .size = GARGANTUAN,
+        .flags = HEAD | RES_POISON,
+        .attacks = {
+            { .type = ATT_BITE, .base = 11, .damage = DAM_PHYSICAL },
+            { .type = ATT_STING, .base = 6, .damage = DAM_POISON },
+        }
+    },
+    { /* MT_XVART */
+        .name = "xvart", .glyph = 'x', .colour = LIGHTGRAY,
+        .exp = 1000, .ac = 11, .hp_max = 90,
+        .level = 9, .intelligence = 13, .speed = NORMAL, .size = SMALL,
+        .flags = HEAD | HANDS | INFRAVISION,
+        .attacks = {
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_BRONZE_DRAGON */
+        .name = "bronze dragon", .glyph = 'D', .colour = BROWN,
+        .exp = 4000, .gold = 300, .ac = 10, .hp_max = 80,
+        .level = 9, .intelligence = 16, .speed = NORMAL, .size = HUGE,
+        .flags = HEAD | FLY | DRAGON,
+        .attacks = {
+            { .type = ATT_BITE, .base = 9, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 9, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_GREEN_DRAGON */
+        .name = "green dragon", .glyph = 'D', .colour = LIGHTGREEN,
+        .exp = 2500, .gold = 200, .ac = 12, .hp_max = 70,
+        .level = 9, .intelligence = 15, .speed = NORMAL, .size = HUGE,
+        .flags = HEAD | FLY | DRAGON | RES_POISON,
+        .attacks = {
+            { .type = ATT_BREATH, .base = 8, .damage = DAM_POISON },
+            { .type = ATT_SLAM, .base = 25, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_SILVER_DRAGON */
+        .name = "silver dragon", .glyph = 'D', .colour = LIGHTGRAY,
+        .exp = 10000, .gold = 700, .ac = 13, .hp_max = 100,
+        .level = 10, .intelligence = 20, .speed = NORMAL, .size = HUGE,
+        .flags = HEAD | FLY | DRAGON,
+        .attacks = {
+            { .type = ATT_BITE, .base = 12, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 12, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_PLATINUM_DRAGON */
+        .name = "platinum dragon", .glyph = 'D', .colour = WHITE,
+        .exp = 24000, .gold = 1000, .ac = 15, .hp_max = 130,
+        .level = 11, .intelligence = 22, .speed = NORMAL, .size = HUGE,
+        .flags = HEAD | FLY | DRAGON | RES_CONF,
+        .attacks = {
+            { .type = ATT_BITE, .base = 15, .damage = DAM_PHYSICAL },
+            { .type = ATT_BREATH, .base = 15, .damage = DAM_MAGICAL, .rand = 30 },
+        }
+    },
+    { /* MT_RED_DRAGON */
+        .name = "red dragon", .glyph = 'D', .colour = LIGHTRED,
+        .exp = 14000, .gold = 800, .ac = 14, .hp_max = 110,
+        .level = 11, .intelligence = 19, .speed = NORMAL, .size = HUGE,
+        .flags = HEAD | FLY | DRAGON | RES_FIRE,
+        .attacks = {
+            { .type = ATT_BREATH, .base = 20, .damage = DAM_FIRE, .rand = 25 },
+            { .type = ATT_CLAW, .base = 13, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_SPIRIT_NAGA */
+        .name = "spirit naga", .glyph = 'N', .colour = MAGENTA,
+        .exp = 20000, .ac = 16, .hp_max = 95,
+        .level = 11, .intelligence = 23, .speed = FAST, .size = LARGE,
+        .flags = HEAD | NOBEHEAD | FLY | SPIRIT | INFRAVISION | RES_SLEEP | RES_POISON | RES_CONF | RES_MAGIC,
+        .attacks = {
+            { .type = ATT_BITE, .base = 12, .damage = DAM_PHYSICAL },
+            { .type = ATT_MAGIC, .base = 1, .damage = DAM_RANDOM },
+        }
+    },
+    { /* MT_GREEN_URCHIN */
+        .name = "green urchin", .glyph = 'u', .colour = GREEN,
+        .exp = 5000, .ac = 17, .hp_max = 85,
+        .level = 10, .intelligence = 3, .speed = SLOW, .size = SMALL,
+        .flags = 0,
+        .attacks = {
+            { .type = ATT_STING, .base = 12, .damage = DAM_PHYSICAL },
+            { .type = ATT_STING, .base = 50, .damage = DAM_BLINDNESS },
+        }
+    },
+    { /* MT_DEMONLORD_I */
+        .name = "type I demon lord", .glyph = '&', .colour = LIGHTRED,
+        .exp = 50000, .ac = 17, .hp_max = 140,
+        .level = 12, .intelligence = 20, .speed = FAST, .size = MEDIUM,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .attacks = {
+            { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_DEMONLORD_II */
+        .name = "type II demon lord", .glyph = '&', .colour = LIGHTRED,
+        .exp = 75000, .ac = 18, .hp_max = 160,
+        .level = 13, .intelligence = 21, .speed = FAST, .size = MEDIUM,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .attacks = {
+            { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_DEMONLORD_III */
+        .name = "type III demon lord", .glyph = '&', .colour = LIGHTRED,
+        .exp = 100000, .ac = 19, .hp_max = 180,
+        .level = 14, .intelligence = 22, .speed = FAST, .size = MEDIUM,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .attacks = {
+            { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_DEMONLORD_IV */
+        .name = "type IV demon lord", .glyph = '&', .colour = LIGHTRED,
+        .exp = 125000, .ac = 20, .hp_max = 200,
+        .level = 15, .intelligence = 23, .speed = FAST, .size = MEDIUM,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .attacks = {
+            { .type = ATT_BITE, .base = 20, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 20, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_DEMONLORD_V */
+        .name = "type V demon lord", .glyph = '&', .colour = LIGHTRED,
+        .exp = 150000, .ac = 21, .hp_max = 220,
+        .level = 16, .intelligence = 24, .speed = FAST, .size = MEDIUM,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .attacks = {
+            { .type = ATT_BITE, .base = 22, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 22, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_DEMONLORD_VI */
+        .name = "type VI demon lord", .glyph = '&', .colour = LIGHTRED,
+        .exp = 175000, .ac = 22, .hp_max = 240,
+        .level = 17, .intelligence = 25, .speed = FAST, .size = LARGE,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .attacks = {
+            { .type = ATT_BITE, .base = 24, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 24, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_DEMONLORD_VII */
+        .name = "type VII demon lord", .glyph = '&', .colour = LIGHTRED,
+        .exp = 200000, .ac = 23, .hp_max = 260,
+        .level = 18, .intelligence = 26, .speed = FAST, .size = HUGE,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_CONF | RES_MAGIC,
+        .attacks = {
+            { .type = ATT_BITE, .base = 27, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 27, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_DEMON_PRINCE */
+        .name = "demon prince", .glyph = '&', .colour = RED,
+        .exp = 300000, .ac = 25, .hp_max = 345,
+        .level = 25, .intelligence = 28, .speed = FAST, .size = HUGE,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_FIRE | RES_SLEEP | RES_POISON | RES_CONF | RES_MAGIC,
+        .attacks = {
+            { .type = ATT_BITE, .base = 30, .damage = DAM_PHYSICAL },
+            { .type = ATT_CLAW, .base = 30, .damage = DAM_PHYSICAL },
+        }
+    },
+    { /* MT_TOWN_PERSON */
+        .name = "human", .glyph = '@', .colour = BROWN,
+        .exp = 0, .ac = 0, .hp_max = 10,
+        .level = 1, .intelligence = 10, .speed = NORMAL, .size = MEDIUM,
+        .flags = HEAD | HANDS,
+        .attacks = {
+            { .type = ATT_SLAM, .base = 0, .damage = DAM_PHYSICAL },
+        }
+    },
+};
+
 static gboolean monster_player_visible(monster *m);
 static gboolean monster_attack_available(monster *m, attack_t type);
 static item *monster_weapon_select(monster *m);
@@ -120,7 +763,7 @@ static gboolean monster_breath_hit(const GList *traj,
 
 monster *monster_new(monster_t type, position pos)
 {
-    g_assert(type > MT_NONE && type < MT_MAX && pos_valid(pos));
+    g_assert(type < MT_MAX && pos_valid(pos));
 
     monster *nmonster;
     item_t itype;      /* item type */
@@ -320,7 +963,7 @@ monster *monster_new_by_level(position pos)
                           };
 
     const int nlevel = Z(pos);
-    int monster_id = MT_NONE;
+    int monster_id;
 
     if (nlevel == 0)
     {
@@ -359,7 +1002,7 @@ monster *monster_new_by_level(position pos)
         {
             monster_id = rand_m_n(monster_id_min, monster_id_max);
         }
-        while ((monster_id <= MT_NONE)
+        while ((monster_id < 0)
                 || (monster_id >= MT_MAX)
                 || nlarn->monster_genocided[monster_id]
                 || chance(monster_type_reroll_chance(monster_id)));
@@ -370,7 +1013,7 @@ monster *monster_new_by_level(position pos)
 
 void monster_destroy(monster *m)
 {
-    g_assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    g_assert(m != NULL && m->type < MT_MAX);
 
     /* free effects */
     while (m->effects->len > 0)
@@ -496,19 +1139,19 @@ void monster_deserialize(cJSON *mser, game *g)
 
 int monster_hp_max(monster *m)
 {
-    g_assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    g_assert(m != NULL && m->type < MT_MAX);
     return m->hp_max;
 }
 
 int monster_hp(monster *m)
 {
-    g_assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    g_assert(m != NULL && m->type < MT_MAX);
     return m->hp;
 }
 
 void monster_hp_inc(monster *m, int amount)
 {
-    g_assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    g_assert(m != NULL && m->type < MT_MAX);
     m->hp = min(m->hp + amount, m->hp_max);
 }
 
@@ -520,7 +1163,7 @@ gpointer monster_oid(monster *m)
 
 position monster_pos(monster *m)
 {
-    g_assert(m != NULL && m->type > MT_NONE && m->type < MT_MAX);
+    g_assert(m != NULL && m->type < MT_MAX);
     return m->pos;
 }
 
@@ -585,7 +1228,8 @@ int monster_pos_set(monster *m, map *mp, position target)
 
 monster_t monster_type(monster *m)
 {
-    return (m != NULL) ? m->type : MT_NONE;
+    g_assert(m != NULL);
+    return m->type;
 }
 
 gboolean monster_unknown(monster *m)
@@ -676,29 +1320,24 @@ const char *monster_get_name(monster *m)
     return (monster_name(m));
 }
 
-const char* monster_type_plural_name(const int montype, const int count)
+const char* monster_type_plural_name(monster_t mt, const int count)
 {
-    /* result of Lua data query; monster's plural name */
-    const char *mpn = luaN_query_string("monsters", montype, "plural_name");
-
     if (count > 1)
     {
-        /* need a static buffer to return to calling functions */
-        static char buf[61] = { 0 };
-
-        if (mpn == NULL)
+        if (monster_data[mt].plural_name == NULL)
         {
-            g_snprintf(buf, 60, "%ss", monster_type_name(montype));
+            /* need a static buffer to return to calling functions */
+            static char buf[61] = { 0 };
+            g_snprintf(buf, 60, "%ss", monster_type_name(mt));
+            return buf;
         }
         else
         {
-            g_strlcpy(buf, mpn, 60);
+            return monster_data[mt].plural_name;
         }
-
-        return buf;
     }
 
-    return monster_type_name(montype);
+    return monster_type_name(mt);
 }
 
 void monster_die(monster *m, struct player *p)
@@ -1141,7 +1780,7 @@ void monster_polymorph(monster *m)
     const map_element_t old_elem = monster_map_element(m);
     do
     {
-        m->type = rand_1n(MT_MAX_GENERATED);
+        m->type = rand_1n(MT_DEMON_PRINCE);
     }
     while (monster_is_genocided(m->type));
 
@@ -1295,52 +1934,17 @@ int monster_attack_count(monster *m)
 {
     int count = 0;
 
-    if (luaN_push_table("monsters", m->type, "attacks"))
-    {
-        /* attacks table has been found; query length */
-        count = lua_rawlen(nlarn->L, -1);
-
-        /* clean up */
-        lua_pop(nlarn->L, 3);
-    }
+    while (monster_data[m->type].attacks[count].type != ATT_NONE)
+        count++;
 
     return count;
 }
 
 attack monster_attack(monster *m, int num)
 {
-    attack att = { ATT_NONE, DAM_NONE, 0, 0 };
-
     g_assert (m != NULL && num <= monster_attack_count(m));
 
-    if (luaN_push_table("monsters", m->type, "attacks"))
-    {
-        lua_rawgeti(nlarn->L, -1, num);
-
-        if (lua_istable(nlarn->L, -1))
-        {
-            /* inside the attack table */
-            lua_getfield(nlarn->L, -1, "type");
-            att.type = attack_t_value(lua_tostring(nlarn->L, -1));
-
-            lua_getfield(nlarn->L, -2, "damage");
-            att.damage = damage_t_value(lua_tostring(nlarn->L, -1));
-
-            lua_getfield(nlarn->L, -3, "base");
-            att.base = lua_tointeger(nlarn->L, -1);
-
-            lua_getfield(nlarn->L, -4, "rand");
-            att.rand = lua_tointeger(nlarn->L, -1);
-
-            /* remove the queried values from the stack */
-            lua_pop(nlarn->L, 4);
-        }
-
-        /* remove the table and ancestors from the stack */
-        lua_pop(nlarn->L, 4);
-    }
-
-    return att;
+    return monster_data[m->type].attacks[num];
 }
 
 static int monster_breath_attack(monster *m, player *p, attack att)
@@ -2003,7 +2607,7 @@ char monster_glyph(monster *m)
     }
     else
     {
-        return luaN_query_char("monsters", m->type, "glyph");
+        return monster_data[m->type].glyph;
     }
 }
 
@@ -2018,8 +2622,7 @@ int monster_color(monster *m)
     }
     else
     {
-        const char *colour = luaN_query_string("monsters", m->type, "color");
-        return display_colour_value(colour);
+        return monster_data[m->type].colour;
     }
 }
 
@@ -2027,7 +2630,7 @@ void monster_genocide(monster_t monster_id)
 {
     GList *mlist;
 
-    g_assert(monster_id > MT_NONE && monster_id < MT_MAX);
+    g_assert(monster_id < MT_MAX);
 
     nlarn->monster_genocided[monster_id] = TRUE;
     mlist = g_hash_table_get_values(nlarn->monsters);
@@ -2052,7 +2655,7 @@ void monster_genocide(monster_t monster_id)
 
 int monster_is_genocided(monster_t monster_id)
 {
-    g_assert(monster_id > MT_NONE && monster_id < MT_MAX);
+    g_assert(monster_id < MT_MAX);
     return nlarn->monster_genocided[monster_id];
 }
 
@@ -2817,6 +3420,82 @@ int monster_is_carrying_item(monster *m, item_t type)
     }
     return FALSE;
 }
+
+inline const char *monster_name(monster *m) {
+    return monster_data[m->type].name;
+}
+
+inline int monster_level(monster *m)
+{
+    return monster_data[m->type].level;
+}
+
+inline int monster_ac(monster *m)
+{
+    return monster_data[m->type].ac;
+}
+
+inline guint monster_int(monster *m)
+{
+    return monster_data[m->type].intelligence
+            + monster_effect(m, ET_HEROISM)
+            - monster_effect(m, ET_DIZZINESS);
+}
+
+inline int monster_gold_chance(monster *m)
+{
+    return monster_data[m->type].gold_chance;
+}
+
+inline int monster_gold_amount(monster *m)
+{
+    return monster_data[m->type].gold;
+}
+
+inline int monster_exp(monster *m)
+{
+    return monster_data[m->type].exp;
+}
+
+inline int monster_size(monster *m)
+{
+    return monster_data[m->type].size;
+}
+
+inline int monster_speed(monster *m)
+{
+    return monster_data[m->type].speed
+            + monster_effect(m, ET_SPEED)
+            + (monster_effect(m, ET_HEROISM) * 5)
+            - monster_effect(m, ET_SLOWNESS)
+            - (monster_effect(m, ET_DIZZINESS) * 5);
+}
+
+inline int monster_flags(monster *m, monster_flag f)
+{
+    return monster_data[m->type].flags & f;
+}
+
+inline int monster_type_hp_max(monster_t type)
+{
+    return monster_data[type].hp_max;
+}
+
+inline char monster_type_glyph(monster_t type)
+{
+    return monster_data[type].glyph;
+}
+
+inline const char *monster_type_name(monster_t type)
+{
+    return monster_data[type].name;
+}
+
+inline int monster_type_reroll_chance(monster_t type)
+{
+    return monster_data[type].reroll_chance;
+}
+
 
 static gboolean monster_breath_hit(const GList *traj,
                                    const damage_originator *damo __attribute__((unused)),

@@ -4987,7 +4987,7 @@ void calc_fighting_stats(player *p)
 
     gboolean mention_instakill = FALSE;
 
-    for (guint32 idx = MT_NONE + 1; idx < MT_MAX_GENERATED; idx++)
+    for (guint32 idx = 0; idx < MT_TOWN_PERSON; idx++)
     {
         monster *m;
         if (!(m = monster_new(idx, pos)))
@@ -5357,7 +5357,7 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
     guint body_count = 0;
     g_string_append(text, "\n\n-- Creatures vanquished ---------------\n\n");
 
-    for (guint mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
+    for (guint mnum = 0; mnum < MT_MAX; mnum++)
     {
         if (p->stats.monsters_killed[mnum] > 0)
         {
@@ -5375,7 +5375,7 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
 
     /* genocided monsters */
     gboolean printed_headline = FALSE;
-    for (guint mnum = MT_NONE + 1; mnum < MT_MAX; mnum++)
+    for (guint mnum = 0; mnum < MT_MAX; mnum++)
     {
         if (!monster_is_genocided(mnum))
             continue;

@@ -7,7 +7,7 @@ License: GPL v3
 URL:     https://nlarn.github.io/
 Source:  http://downloads.sourceforge.net/project/nlarn/nlarn/%{version}/nlarn-%{version}.tar.gz
 
-BuildRequires: gcc glib2-devel lua-devel ncurses-devel zlib-devel
+BuildRequires: gcc glib2-devel ncurses-devel zlib-devel
 
 %description
 
@@ -22,7 +22,7 @@ mkdir -p %{buildroot}/%{_bindir}
 mkdir -p %{buildroot}/%{_datadir}/%{name}
 mkdir -p %{buildroot}/var/games/%{name}
 install -g games -o games -m 2755 nlarn %{buildroot}/%{_bindir}
-install lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg lib/monsters.lua %{buildroot}/%{_datadir}/%{name}
+install lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg %{buildroot}/%{_datadir}/%{name}
 touch %{buildroot}/var/games/%{name}/highscores
 
 %files
