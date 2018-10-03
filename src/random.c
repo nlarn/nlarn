@@ -16,17 +16,15 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <glib.h>
-#include <stdint.h>
-
 #ifdef __linux__
-# ifndef __USE_XOPEN_EXTENDED
-#  define __USE_XOPEN_EXTENDED
-# endif
+# define _XOPEN_SOURCE 700
 #endif
 #ifdef G_OS_WIN32
 # define _CRT_RAND_S
 #endif
+
+#include <glib.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "random.h"
