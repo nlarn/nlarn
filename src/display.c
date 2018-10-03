@@ -1208,11 +1208,11 @@ spell *display_spell_select(const char *title, player *p)
     g_ptr_array_sort(p->known_spells, &spell_sort);
 
     /* set height according to spell count */
-    height = min((LINES - 3), (p->known_spells->len + 2));
+    height = min((LINES - 7), (p->known_spells->len + 2));
     maxvis = min(p->known_spells->len, height - 2);
 
     width = 46;
-    starty = (LINES - height) / 2;
+    starty = (LINES - 3 - height) / 2;
     startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
     swin = display_window_new(startx, starty, width, height, title);
