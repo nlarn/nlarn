@@ -93,8 +93,8 @@ int main(int argc, char *argv[])
     /* ask for a character name if none has been supplied */
     while (nlarn->p->name == NULL)
     {
-        nlarn->p->name = display_get_string("By what name shall you be called?",
-                                            NULL, 45);
+        nlarn->p->name = display_get_string("Choose your name",
+                "By what name shall you be called?", NULL, 45);
     }
 
     /* ask for character's gender if it is not known yet */

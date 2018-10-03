@@ -168,7 +168,7 @@ void display_config_autopickup(player *p);
 spell *display_spell_select(const char *title, player *p);
 
 int display_get_count(const char *caption, int value);
-char *display_get_string(const char *caption, const char *value, size_t max_len);
+char *display_get_string(const char *title, const char *caption, const char *value, size_t max_len);
 int display_get_yesno(const char *question, const char *title, const char *yes, const char *no);
 direction display_get_direction(const char *title, int *available);
 

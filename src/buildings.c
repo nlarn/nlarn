@@ -576,7 +576,7 @@ static int building_scribe_scroll(player *p, int mobuls)
         return turns;
     }
 
-    char *new_scroll = display_get_string("Write what scroll?", NULL, 45);
+    char *new_scroll = display_get_string(NULL, "Write what scroll?", NULL, 45);
     if (new_scroll == NULL)
     {
         log_add_entry(nlarn->log, "Okay then.");

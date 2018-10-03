@@ -557,7 +557,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
     g_string_append(msg, "Which monster do you want to genocide (enter its glyph)?");
 
     /* get a single character */
-    glyph = display_get_string(msg->str, NULL, 1);
+    glyph = display_get_string(NULL, msg->str, NULL, 1);
 
     /* release memory acquired for the message */
     g_string_free(msg, TRUE);

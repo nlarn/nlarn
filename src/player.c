@@ -3958,7 +3958,7 @@ void player_item_notes(player *p, inventory **inv __attribute__((unused)), item 
     g_free(desc);
 
     /* get the new note */
-    gchar *temp = display_get_string(caption, it->notes, 60);
+    gchar *temp = display_get_string("Edit item notes", caption, it->notes, 60);
 
     /* free the old note before adding the new note to the item */
     g_free(it->notes);
@@ -5064,7 +5064,7 @@ void calc_fighting_stats(player *p)
         GError *error = NULL;
 
         proposal = g_strconcat(p->name, ".stat", NULL);
-        filename = display_get_string("Enter filename: ", proposal, 40);
+        filename = display_get_string(NULL, "Enter filename: ", proposal, 40);
 
         if (filename != NULL)
         {
@@ -5424,7 +5424,7 @@ static void player_memorial_file_save(player *p, const char *text)
             proposal = g_strconcat(p->name, ".txt", NULL);
         }
 
-        filename = display_get_string("Enter filename: ", proposal, 40);
+        filename = display_get_string(NULL, "Enter filename: ", proposal, 40);
         g_free(proposal);
         proposal = NULL;
 

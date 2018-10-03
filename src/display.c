@@ -1678,7 +1678,7 @@ int display_get_count(const char *caption, int value)
     return atoi(ivalue);
 }
 
-char *display_get_string(const char *caption, const char *value, size_t max_len)
+char *display_get_string(const char *title, const char *caption, const char *value, size_t max_len)
 {
     /* user input */
     int key;
@@ -1738,7 +1738,7 @@ char *display_get_string(const char *caption, const char *value, size_t max_len)
     int starty = (LINES - height) / 2;
     int startx = (COLS - width) / 2;
 
-    display_window *mwin = display_window_new(startx, starty, width, height, NULL);
+    display_window *mwin = display_window_new(startx, starty, width, height, title);
 
     for (guint line = 0; line < text->len; line++)
     {
