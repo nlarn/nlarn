@@ -370,7 +370,7 @@ monster_data_t monster_data[] = {
     { /* MT_WHITE_DRAGON */
         .name = "white dragon", .glyph = 'd', .colour = WHITE,
         .exp = 1000, .gold = 500, .ac = 8, .hp_max = 55,
-        .level = 5, .intelligence = 16, .speed = NORMAL, .size = HUGE,
+        .level = 5, .intelligence = 16, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | DRAGON | RES_COLD,
         .attacks = {
             { .type = ATT_BITE, .base = 4, .damage = DAM_PHYSICAL },
@@ -511,7 +511,7 @@ monster_data_t monster_data[] = {
     { /* MT_SHAMBLINGMOUND */
         .name = "shambling mound", .glyph = 's', .colour = GREEN,
         .exp = 400, .ac = 8, .hp_max = 45,
-        .level = 8, .intelligence = 6, .speed = VSLOW, .size = HUGE,
+        .level = 8, .intelligence = 6, .speed = VSLOW, .size = GIANT,
         .flags = RES_SLEEP | RES_POISON,
         .attacks = {
             { .type = ATT_SLAM, .base = 5, .damage = DAM_PHYSICAL },
@@ -529,7 +529,7 @@ monster_data_t monster_data[] = {
     { /* MT_UMBER_HULK */
         .name = "umber hulk", .glyph = 'U', .colour = YELLOW,
         .exp = 600, .ac = 12, .hp_max = 65,
-        .level = 8, .intelligence = 14, .speed = SLOW, .size = HUGE,
+        .level = 8, .intelligence = 14, .speed = SLOW, .size = GIANT,
         .flags = HEAD | HANDS | INFRAVISION | RES_CONF,
         .attacks = {
             { .type = ATT_CLAW, .base = 7, .damage = DAM_PHYSICAL },
@@ -585,7 +585,7 @@ monster_data_t monster_data[] = {
     { /* MT_BRONZE_DRAGON */
         .name = "bronze dragon", .glyph = 'D', .colour = BROWN,
         .exp = 4000, .gold = 300, .ac = 10, .hp_max = 80,
-        .level = 9, .intelligence = 16, .speed = NORMAL, .size = HUGE,
+        .level = 9, .intelligence = 16, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON,
         .attacks = {
             { .type = ATT_BITE, .base = 9, .damage = DAM_PHYSICAL },
@@ -595,7 +595,7 @@ monster_data_t monster_data[] = {
     { /* MT_GREEN_DRAGON */
         .name = "green dragon", .glyph = 'D', .colour = LIGHTGREEN,
         .exp = 2500, .gold = 200, .ac = 12, .hp_max = 70,
-        .level = 9, .intelligence = 15, .speed = NORMAL, .size = HUGE,
+        .level = 9, .intelligence = 15, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON | RES_POISON,
         .attacks = {
             { .type = ATT_BREATH, .base = 8, .damage = DAM_POISON },
@@ -605,7 +605,7 @@ monster_data_t monster_data[] = {
     { /* MT_SILVER_DRAGON */
         .name = "silver dragon", .glyph = 'D', .colour = LIGHTGRAY,
         .exp = 10000, .gold = 700, .ac = 13, .hp_max = 100,
-        .level = 10, .intelligence = 20, .speed = NORMAL, .size = HUGE,
+        .level = 10, .intelligence = 20, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON,
         .attacks = {
             { .type = ATT_BITE, .base = 12, .damage = DAM_PHYSICAL },
@@ -615,7 +615,7 @@ monster_data_t monster_data[] = {
     { /* MT_PLATINUM_DRAGON */
         .name = "platinum dragon", .glyph = 'D', .colour = WHITE,
         .exp = 24000, .gold = 1000, .ac = 15, .hp_max = 130,
-        .level = 11, .intelligence = 22, .speed = NORMAL, .size = HUGE,
+        .level = 11, .intelligence = 22, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON | RES_CONF,
         .attacks = {
             { .type = ATT_BITE, .base = 15, .damage = DAM_PHYSICAL },
@@ -625,7 +625,7 @@ monster_data_t monster_data[] = {
     { /* MT_RED_DRAGON */
         .name = "red dragon", .glyph = 'D', .colour = LIGHTRED,
         .exp = 14000, .gold = 800, .ac = 14, .hp_max = 110,
-        .level = 11, .intelligence = 19, .speed = NORMAL, .size = HUGE,
+        .level = 11, .intelligence = 19, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON | RES_FIRE,
         .attacks = {
             { .type = ATT_BREATH, .base = 20, .damage = DAM_FIRE, .rand = 25 },
@@ -715,7 +715,7 @@ monster_data_t monster_data[] = {
     { /* MT_DEMONLORD_VII */
         .name = "type VII demon lord", .glyph = '&', .colour = LIGHTRED,
         .exp = 200000, .ac = 23, .hp_max = 260,
-        .level = 18, .intelligence = 26, .speed = FAST, .size = HUGE,
+        .level = 18, .intelligence = 26, .speed = FAST, .size = GIANT,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_CONF | RES_MAGIC,
         .attacks = {
             { .type = ATT_BITE, .base = 27, .damage = DAM_PHYSICAL },
@@ -725,7 +725,7 @@ monster_data_t monster_data[] = {
     { /* MT_DEMON_PRINCE */
         .name = "demon prince", .glyph = '&', .colour = RED,
         .exp = 300000, .ac = 25, .hp_max = 345,
-        .level = 25, .intelligence = 28, .speed = FAST, .size = HUGE,
+        .level = 25, .intelligence = 28, .speed = FAST, .size = GIANT,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_FIRE | RES_SLEEP | RES_POISON | RES_CONF | RES_MAGIC,
         .attacks = {
             { .type = ATT_BITE, .base = 30, .damage = DAM_PHYSICAL },

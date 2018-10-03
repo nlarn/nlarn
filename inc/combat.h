@@ -40,7 +40,7 @@ DECLARE_ENUM(speed, SPEED_ENUM)
     SIZE(SMALL,      =  75) \
     SIZE(MEDIUM,     = 100) \
     SIZE(LARGE,      = 125) \
-    SIZE(HUGE,       = 150) \
+    SIZE(GIANT,      = 150) \
     SIZE(GARGANTUAN, = 200) \
 
 DECLARE_ENUM(size, SIZE_ENUM)
