@@ -7,6 +7,7 @@
 * Permanently show spell description below spell selection window
 * Describe spell type for most spells in spell description
 * Add worn amulet to player's equipment overview
+* Allow intentionally triggering a teleport trap
 * Distribute Changelog in HTML format on macOS and Windows
 * Allow specifying a custom configuration file on the command line
 * Add author, icon and version number to Windows uninstaller
