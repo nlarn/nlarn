@@ -13,7 +13,7 @@ Running means moving into one direction until interrupted. `lightgreen`g`end` or
 `yellow`Auto-travel`end`
 
 `lightgreen`V`end`   voyage (travel) to a location on the level
-`lightgreen`C`end`   continue travelling  
+`lightgreen`C`end`   continue travelling
 
 You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. `lightgreen`_`end` for an altar). Subsequent key presses will move the cursor around if there are more than one of the desired features on the level. When finished, press ENTER to start the journey. When a foe comes into sight, travelling will be aborted automatically and can be continued with `lightgreen`C`end` when the enemy gets out of sight.
 
@@ -54,12 +54,12 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`.`end`   rest one turn (alternate key: `lightgreen`5`end`)
 `lightgreen`\`end`   show a list of identified objects
 `lightgreen`?`end`   this help screen (alternate key: `lightgreen`F1`end`)
-`lightgreen`@`end`   toggle auto-pickup settings
 
 
 `yellow`Control Keys`end`
 
 `lightgreen`TAB`end`     show worn equipment
+`lightgreen`CTRL+A`end`  configure auto-pickup settings
 `lightgreen`CTRL+D`end`  list discovered landmarks
 `lightgreen`CTRL+D`end`  page down in the inventory, spell list and messages
 `lightgreen`CTRL+L`end`  redraw the screen

@@ -378,7 +378,7 @@ int main(int argc, char *argv[])
             player_pickup(nlarn->p);
             break;
 
-        case '@':
+        case 1: /* ^A */
             display_config_autopickup(nlarn->p);
             player_autopickup_show(nlarn->p);
             break;
