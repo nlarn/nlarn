@@ -19,7 +19,7 @@
 #ifdef __linux__
 # define _XOPEN_SOURCE 700
 #endif
-#ifdef G_OS_WIN32
+#ifdef _WIN32
 # define _CRT_RAND_S
 #endif
 
