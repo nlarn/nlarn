@@ -1937,14 +1937,14 @@ int monster_attack_count(monster *m)
     while (monster_data[m->type].attacks[count].type != ATT_NONE)
         count++;
 
-    return count;
+    return count + 1;
 }
 
 attack monster_attack(monster *m, int num)
 {
     g_assert (m != NULL && num <= monster_attack_count(m));
 
-    return monster_data[m->type].attacks[num];
+    return monster_data[m->type].attacks[num - 1];
 }
 
 static int monster_breath_attack(monster *m, player *p, attack att)
