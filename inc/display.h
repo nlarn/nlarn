@@ -22,7 +22,6 @@
 #include <curses.h>
 #include <panel.h>
 
-#include "enumFactory.h"
 #include "game.h"
 #include "items.h"
 #include "player.h"
@@ -61,26 +60,26 @@ enum display_colour_pairs
     DCP_BLACK_WHITE
 };
 
-#define DISPLAY_COLOUR_ENUM(DC) \
-    DC(COLOURLESS,   = -1) \
-    DC(BLACK,        = COLOR_PAIR(DCP_BLACK_BLACK)) \
-    DC(RED,          = COLOR_PAIR(DCP_RED_BLACK)) \
-    DC(GREEN,        = COLOR_PAIR(DCP_GREEN_BLACK)) \
-    DC(BROWN,        = COLOR_PAIR(DCP_YELLOW_BLACK)) \
-    DC(BLUE,         = COLOR_PAIR(DCP_BLUE_BLACK)) \
-    DC(MAGENTA,      = COLOR_PAIR(DCP_MAGENTA_BLACK)) \
-    DC(CYAN,         = COLOR_PAIR(DCP_CYAN_BLACK)) \
-    DC(LIGHTGRAY,    = COLOR_PAIR(DCP_WHITE_BLACK)) \
-    DC(DARKGRAY,     = (COLOR_PAIR(DCP_BLACK_BLACK)   | A_BOLD)) \
-    DC(LIGHTRED,     = (COLOR_PAIR(DCP_RED_BLACK)     | A_BOLD)) \
-    DC(LIGHTGREEN,   = (COLOR_PAIR(DCP_GREEN_BLACK)   | A_BOLD)) \
-    DC(YELLOW,       = (COLOR_PAIR(DCP_YELLOW_BLACK)  | A_BOLD)) \
-    DC(LIGHTBLUE,    = (COLOR_PAIR(DCP_BLUE_BLACK)    | A_BOLD)) \
-    DC(LIGHTMAGENTA, = (COLOR_PAIR(DCP_MAGENTA_BLACK) | A_BOLD)) \
-    DC(LIGHTCYAN,    = (COLOR_PAIR(DCP_CYAN_BLACK)    | A_BOLD)) \
-    DC(WHITE,        = (COLOR_PAIR(DCP_WHITE_BLACK)   | A_BOLD))
-
-DECLARE_ENUM(display_colour, DISPLAY_COLOUR_ENUM)
+enum display_default_colours
+{
+    COLOURLESS,
+    BLACK        = COLOR_PAIR(DCP_BLACK_BLACK),
+    RED          = COLOR_PAIR(DCP_RED_BLACK),
+    GREEN        = COLOR_PAIR(DCP_GREEN_BLACK),
+    BROWN        = COLOR_PAIR(DCP_YELLOW_BLACK),
+    BLUE         = COLOR_PAIR(DCP_BLUE_BLACK),
+    MAGENTA      = COLOR_PAIR(DCP_MAGENTA_BLACK),
+    CYAN         = COLOR_PAIR(DCP_CYAN_BLACK),
+    LIGHTGRAY    = COLOR_PAIR(DCP_WHITE_BLACK),
+    DARKGRAY     = COLOR_PAIR(DCP_BLACK_BLACK)   | A_BOLD,
+    LIGHTRED     = COLOR_PAIR(DCP_RED_BLACK)     | A_BOLD,
+    LIGHTGREEN   = COLOR_PAIR(DCP_GREEN_BLACK)   | A_BOLD,
+    YELLOW       = COLOR_PAIR(DCP_YELLOW_BLACK)  | A_BOLD,
+    LIGHTBLUE    = COLOR_PAIR(DCP_BLUE_BLACK)    | A_BOLD,
+    LIGHTMAGENTA = COLOR_PAIR(DCP_MAGENTA_BLACK) | A_BOLD,
+    LIGHTCYAN    = COLOR_PAIR(DCP_CYAN_BLACK)    | A_BOLD,
+    WHITE        = COLOR_PAIR(DCP_WHITE_BLACK)   | A_BOLD
+};
 
 enum display_dialog_colours
 {
