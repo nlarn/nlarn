@@ -887,11 +887,11 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
             /* handle poison */
             if ((e = player_effect_get(p, ET_POISON)))
             {
-                if ((game_turn(nlarn) - e->start)
-                        % (15 - game_difficulty(nlarn)) == 0)
+                int t = 15 / e->amount;
+                if ((game_turn(nlarn) - e->start) % t == 0)
                 {
-                    damage *dam = damage_new(DAM_POISON, ATT_NONE, e->amount,
-                                             DAMO_NONE, NULL);
+                    damage *dam = damage_new(DAM_POISON, ATT_NONE,
+                            game_difficulty(nlarn) + 1, DAMO_NONE, NULL);
 
                     player_damage_take(p, dam, PD_EFFECT, e->type);
                 }
