@@ -1194,9 +1194,6 @@ spell *display_spell_select(const char *title, player *p)
     /* curses attributes */
     int attrs;
 
-    /* window caption */
-    gchar *caption;
-
     g_assert(p != NULL);
 
     /* buffer for spell code type ahead */
@@ -1239,10 +1236,10 @@ spell *display_spell_select(const char *title, player *p)
         display_window_update_arrow_down(swin, ((offset + maxvis) < p->known_spells->len));
 
         /* construct the window caption: display type ahead keys */
-        caption = g_strdup_printf("%s%s%s",
-                                  (strlen(code_buf) ? "[" : ""),
-                                  code_buf,
-                                  (strlen(code_buf) ? "]" : ""));
+        gchar *caption = g_strdup_printf("%s%s%s",
+                (strlen(code_buf) ? "[" : ""),
+                code_buf,
+                (strlen(code_buf) ? "]" : ""));
 
         display_window_update_caption(swin, caption);
 
@@ -3224,7 +3221,10 @@ static void display_window_update_caption(display_window *dwin, char *caption)
     {
         mvwaprintw(dwin->window, dwin->height - 1, 3, COLOR_PAIR(DCP_WHITE_RED),
                    " %s ", caption);
+    }
 
+    if (caption)
+    {
         /* free the provided caption */
         g_free(caption);
     }
