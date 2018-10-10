@@ -284,21 +284,23 @@ void game_init(int argc, char *argv[])
     /* parse the command line options */
     game_parse_commandline(argc, argv);
 
-    /* assemble full path of the default configuration file */
-    gchar *defaultpath = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-            config_file, NULL);
-
-    /* try to load settings from the configuration file */
-    const gboolean success = parse_ini_file(config.inifile
-            ? config.inifile : defaultpath, &config);
-
-    g_free(defaultpath);
     /* if a custom ini file was specified, we require its presence */
-    if (config.inifile && !success)
+    if (config.inifile && !parse_ini_file(config.inifile, &config))
     {
         g_printerr("Error: could not find configuration file '%s'.",
                 config.inifile);
         exit(EXIT_FAILURE);
+    }
+    else
+    {
+        /* try loading settings from the default configuration file */
+        gchar *defaultpath = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+                config_file, NULL);
+
+        /* try to load settings from the configuration file */
+        parse_ini_file(defaultpath, &config);
+
+        g_free(defaultpath);
     }
 
     if (config.show_version) {
