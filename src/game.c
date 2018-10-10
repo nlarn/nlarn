@@ -45,6 +45,7 @@
 #endif
 
 #include "cJSON.h"
+#include "config.h"
 #include "display.h"
 #include "game.h"
 #include "nlarn.h"
@@ -118,88 +119,8 @@ static int try_locking_savegame_file(FILE *sg)
     return fd;
 }
 
-struct game_config {
-    /* these will be filled by the command line parser */
-    gint difficulty;
-    gboolean wizard;
-    gboolean no_autosave;
-    gboolean show_version;
-    char *name;
-    char *gender;
-    char *auto_pickup;
-    char *savefile;
-    char *stats;
-    char *inifile;
-#ifdef SDLPDCURSES
-    int font_size;
-#endif
-};
-
 /* the game settings */
 static struct game_config config = {0};
-
-static gboolean game_parse_ini_file(const char *filename)
-{
-    /* ini file handling */
-    GKeyFile *ini_file = g_key_file_new();
-    GError *error = NULL;
-    gboolean success;
-
-    /* assemble full path of the default configuration file */
-    gchar *defaultpath = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-            config_file, NULL);
-
-    /* config file defined on the command line precedes over the default */
-    g_key_file_load_from_file(ini_file, filename ? filename : defaultpath,
-            G_KEY_FILE_NONE, &error);
-
-    g_free(defaultpath);
-
-    if ((success = (!error)))
-    {
-        /* ini file has been found, get values */
-        /* clear error after each attempt as values need not to be defined */
-        int difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
-        if (!config.difficulty && !error) config.difficulty = difficulty;
-        g_clear_error(&error);
-
-        gboolean no_autosave = g_key_file_get_boolean(ini_file, "nlarn", "no-autosave", &error);
-        if (!config.no_autosave && !error) config.no_autosave = no_autosave;
-        g_clear_error(&error);
-
-        char *name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
-        if (!config.name && !error) config.name = name;
-        g_clear_error(&error);
-
-        char *gender = g_key_file_get_string(ini_file, "nlarn", "gender", &error);
-        if (!config.gender && !error) config.gender = gender;
-        g_clear_error(&error);
-
-        char *auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
-        if (!config.auto_pickup && !error) config.auto_pickup = auto_pickup;
-        g_clear_error(&error);
-
-        char *stats = g_key_file_get_string(ini_file, "nlarn", "stats", &error);
-        if (!config.stats && !error) config.stats = stats;
-        g_clear_error(&error);
-
-#ifdef SDLPDCURSES
-        int font_size = g_key_file_get_integer(ini_file, "nlarn", "font-size", &error);
-        if (!config.font_size && !error) config.font_size = font_size;
-        g_clear_error(&error);
-#endif
-    }
-    else
-    {
-        /* File not found. Never mind but clean up the mess */
-        g_clear_error(&error);
-    }
-
-    /* clean-up */
-    g_key_file_free(ini_file);
-
-    return success;
-}
 
 /* parse the command line */
 static void game_parse_commandline(int argc, char *argv[])
@@ -363,9 +284,15 @@ void game_init(int argc, char *argv[])
     /* parse the command line options */
     game_parse_commandline(argc, argv);
 
-    /* try to load settings from the configuration file */
-    const gboolean success = game_parse_ini_file(config.inifile);
+    /* assemble full path of the default configuration file */
+    gchar *defaultpath = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+            config_file, NULL);
 
+    /* try to load settings from the configuration file */
+    const gboolean success = parse_ini_file(config.inifile
+            ? config.inifile : defaultpath, &config);
+
+    g_free(defaultpath);
     /* if a custom ini file was specified, we require its presence */
     if (config.inifile && !success)
     {
