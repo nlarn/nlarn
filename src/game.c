@@ -175,25 +175,12 @@ void game_init(int argc, char *argv[])
 
     if (!g_file_test(nlarn->libdir, G_FILE_TEST_IS_DIR))
     {
-        /* local lib directory could not be found, try the current working
-         * directory and after that the system wide directory. */
-
-        char *cwd = g_get_current_dir();
-        char *wdlibdir = g_build_path(G_DIR_SEPARATOR_S, cwd, "lib", NULL);
+        /* local lib directory could not be found, try the system wide directory. */
 #ifdef __APPLE__
         char *rellibdir = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir,
                                        "../Resources", NULL);
 #endif
-
-        g_free(cwd);
-
-        if (g_file_test(wdlibdir, G_FILE_TEST_IS_DIR))
-        {
-            /* lib dir found below the current working directory */
-            g_free(nlarn->libdir);
-            nlarn->libdir = g_strdup(wdlibdir);
-        }
-        else if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
+        if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
         {
             /* system-wide data directory exists */
             /* string has to be dup'd as it is feed in the end */
@@ -211,28 +198,23 @@ void game_init(int argc, char *argv[])
             g_printerr("Could not find game library directory.\n\n"
                        "Paths I've tried:\n"
                        " * %s\n"
-                       " * %s\n"
 #ifdef __APPLE__
                        " * %s\n"
 #endif
                        " * %s\n\n"
                        "Please reinstall the game.\n",
-                       nlarn->libdir, wdlibdir,
+                       nlarn->libdir,
 #ifdef __APPLE__
                        rellibdir,
 #endif
                        default_lib_dir);
 
             g_free(nlarn->libdir);
-            g_free(wdlibdir);
 #ifdef __APPLE__
             g_free(rellibdir);
 #endif
             exit(EXIT_FAILURE);
         }
-
-        /* dispose the path below the working directory */
-        g_free(wdlibdir);
     }
 
     nlarn->mesgfile = g_build_filename(nlarn->libdir, mesgfile, NULL);
