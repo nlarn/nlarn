@@ -122,42 +122,6 @@ static int try_locking_savegame_file(FILE *sg)
 /* the game settings */
 static struct game_config config = {0};
 
-/* parse the command line */
-static void game_parse_commandline(int argc, char *argv[])
-{
-    const GOptionEntry entries[] =
-    {
-        { "name",        'n', 0, G_OPTION_ARG_STRING, &config.name,         "Set character's name", NULL },
-        { "gender",      'g', 0, G_OPTION_ARG_STRING, &config.gender,       "Set character's gender (m/f)", NULL },
-        { "stats",       's', 0, G_OPTION_ARG_STRING, &config.stats,        "Set character's stats (a-f)", NULL },
-        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &config.auto_pickup,  "Item types to pick up automatically, e.g. '$*+'", NULL },
-        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &config.difficulty,   "Set difficulty", NULL },
-        { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config.no_autosave,  "Disable autosave", NULL },
-        { "version",     'v', 0, G_OPTION_ARG_NONE,   &config.show_version, "Show version information and exit", NULL },
-        { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config.wizard,       "Enable wizard mode", NULL },
-        { "config",      'c', 0, G_OPTION_ARG_FILENAME, &config.inifile,    "Alternate configuration file name", NULL },
-#ifdef DEBUG
-        { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &config.savefile,   "Save file to restore", NULL },
-#endif
-#ifdef SDLPDCURSES
-        { "font-size",   'S', 0, G_OPTION_ARG_INT,    &config.font_size,   "Set font size", NULL },
-#endif
-        { NULL, 0, 0, 0, NULL, NULL, NULL }
-    };
-
-    GError *error = NULL;
-    GOptionContext *context = g_option_context_new(NULL);
-    g_option_context_add_main_entries(context, entries, NULL);
-
-    if (!g_option_context_parse(context, &argc, &argv, &error))
-    {
-        g_printerr("option parsing failed: %s\n", error->message);
-
-        exit (EXIT_FAILURE);
-    }
-    g_option_context_free(context);
-}
-
 void game_init(int argc, char *argv[])
 {
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
@@ -282,7 +246,7 @@ void game_init(int argc, char *argv[])
 #endif
 
     /* parse the command line options */
-    game_parse_commandline(argc, argv);
+    parse_commandline(argc, argv, &config);
 
     /* if a custom ini file was specified, we require its presence */
     if (config.inifile && !parse_ini_file(config.inifile, &config))
