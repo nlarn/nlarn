@@ -18,6 +18,8 @@
 
 #include <glib.h>
 
+#include "player.h"
+
 struct game_config {
     gint difficulty;
     gboolean wizard;
@@ -38,3 +40,5 @@ gboolean parse_ini_file(const char *filename, struct game_config *config);
 
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config);
+
+void parse_autopickup_settings(const char *settings, player *p);

@@ -114,4 +114,19 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
     return success;
 }
 
+void parse_autopickup_settings(const char *settings, player *p)
+{
+    g_assert(settings != NULL);
+    g_assert(p != NULL);
 
+    for (guint idx = 0; idx < strlen(settings); idx++)
+    {
+        for (item_t it = IT_NONE; it < IT_MAX; it++)
+        {
+            if (settings[idx] == item_glyph(it))
+            {
+                p->settings.auto_pickup[it] = TRUE;
+            }
+        }
+    }
+}
