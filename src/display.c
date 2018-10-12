@@ -1092,7 +1092,7 @@ void display_inv_callbacks_clean(GPtrArray *callbacks)
     g_ptr_array_free(callbacks, TRUE);
 }
 
-void display_config_autopickup(player *p)
+void display_config_autopickup(gboolean settings[IT_MAX])
 {
     int RUN = TRUE;
     int attrs; /* curses attributes */
@@ -1128,7 +1128,7 @@ void display_config_autopickup(player *p)
 
         for (item_t it = 1; it < IT_MAX; it++)
         {
-            if (p->settings.auto_pickup[it])
+            if (settings[it])
                 attrs = COLOR_PAIR(DCP_RED_WHITE);
             else
                 attrs = COLOR_PAIR(DCP_WHITE_RED);
@@ -1161,7 +1161,7 @@ void display_config_autopickup(player *p)
                 {
                     if (item_glyph(it) == key)
                     {
-                        p->settings.auto_pickup[it] = !p->settings.auto_pickup[it];
+                        settings[it] = !settings[it];
                         break;
                     }
                 }

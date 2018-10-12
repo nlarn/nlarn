@@ -379,7 +379,7 @@ int main(int argc, char *argv[])
             break;
 
         case 1: /* ^A */
-            display_config_autopickup(nlarn->p);
+            display_config_autopickup(nlarn->p->settings.auto_pickup);
             player_autopickup_show(nlarn->p);
             break;
 

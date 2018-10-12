@@ -162,7 +162,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
 void display_inv_callbacks_clean(GPtrArray *callbacks);
 
-void display_config_autopickup(player *p);
+void display_config_autopickup(gboolean settings[IT_MAX]);
 
 spell *display_spell_select(const char *title, player *p);
 

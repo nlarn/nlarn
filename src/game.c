@@ -335,7 +335,8 @@ void game_init(int argc, char *argv[])
         /* parse auto pick-up settings */
         if (config.auto_pickup && (nlarn->p != NULL))
         {
-            parse_autopickup_settings(config.auto_pickup, nlarn->p);
+            parse_autopickup_settings(config.auto_pickup,
+                    nlarn->p->settings.auto_pickup);
         }
 
     } /* end new game only settings */

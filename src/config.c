@@ -17,9 +17,11 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <glib.h>
 
 #include "config.h"
+#include "items.h"
 
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config)
@@ -114,10 +116,12 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
     return success;
 }
 
-void parse_autopickup_settings(const char *settings, player *p)
+void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX])
 {
     g_assert(settings != NULL);
-    g_assert(p != NULL);
+
+    /* reset configuration */
+    memset(config, 0, sizeof(gboolean) * IT_MAX);
 
     for (guint idx = 0; idx < strlen(settings); idx++)
     {
@@ -125,7 +129,7 @@ void parse_autopickup_settings(const char *settings, player *p)
         {
             if (settings[idx] == item_glyph(it))
             {
-                p->settings.auto_pickup[it] = TRUE;
+                config[it] = TRUE;
             }
         }
     }
