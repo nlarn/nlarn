@@ -134,3 +134,20 @@ void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX])
         }
     }
 }
+
+char *compose_autopickup_settings(const gboolean config[IT_MAX])
+{
+    char *settings = g_malloc0(IT_MAX);
+
+    int idx = 0;
+    for (item_t it = IT_NONE; it < IT_MAX; it++)
+    {
+        if (config[it])
+        {
+            settings[idx] = item_glyph(it);
+            idx++;
+        }
+    }
+
+    return settings;
+}

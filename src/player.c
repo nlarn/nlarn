@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "cJSON.h"
+#include "config.h"
 #include "container.h"
 #include "display.h"
 #include "fov.h"
@@ -487,8 +488,8 @@ cJSON *player_serialize(player *p)
 
     /* settings */
     cJSON_AddItemToObject(pser, "settings", obj = cJSON_CreateObject());
-    cJSON_AddItemToObject(obj, "auto_pickup",
-                          cJSON_CreateIntArray(p->settings.auto_pickup, IT_MAX));
+    cJSON_AddStringToObject(obj, "auto_pickup",
+            compose_autopickup_settings(p->settings.auto_pickup));
 
     /* statistics */
     cJSON_AddItemToObject(pser, "stats", obj = cJSON_CreateObject());
@@ -704,9 +705,9 @@ player *player_deserialize(cJSON *pser)
     obj = cJSON_GetObjectItem(pser, "settings");
     if (obj)
     {
-        elem = cJSON_GetObjectItem(obj, "auto_pickup");
-        for (int idx = IT_NONE; idx < IT_MAX; idx++)
-            p->settings.auto_pickup[idx] = (gboolean) cJSON_GetArrayItem(elem, idx)->valueint;
+        parse_autopickup_settings(
+                cJSON_GetObjectItem(obj, "auto_pickup")->valuestring,
+                p->settings.auto_pickup);
     }
 
     /* statistics */
