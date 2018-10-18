@@ -1932,10 +1932,14 @@ int monster_items_pickup(monster *m)
 
 int monster_attack_count(monster *m)
 {
+    const int max_attacks = sizeof(monster_data[m->type].attacks)
+        / sizeof(monster_data[m->type].attacks[0]);
     int count = 0;
 
-    while (monster_data[m->type].attacks[count].type != ATT_NONE)
+    while (count < max_attacks && monster_data[m->type].attacks[count].type != ATT_NONE)
+    {
         count++;
+    }
 
     return count + 1;
 }
