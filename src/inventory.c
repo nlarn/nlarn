@@ -98,10 +98,10 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
 {
     g_assert (inv != NULL);
 
-    inv-> pre_add  = pre_add;
-    inv-> post_add = post_add;
-    inv-> pre_del  = pre_del;
-    inv-> post_del = post_del;
+    inv->pre_add  = pre_add;
+    inv->post_add = post_add;
+    inv->pre_del  = pre_del;
+    inv->post_del = post_del;
 }
 
 int inv_add(inventory **inv, item *it)
