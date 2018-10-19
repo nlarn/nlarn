@@ -43,3 +43,6 @@ void parse_commandline(int argc, char *argv[], struct game_config *config);
 
 void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX]);
 char *compose_autopickup_settings(const gboolean config[IT_MAX]);
+
+int parse_gender(const char gender);
+char compose_gender(const int gender);

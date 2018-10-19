@@ -22,6 +22,7 @@
 
 #include "config.h"
 #include "items.h"
+#include "player.h"
 
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config)
@@ -150,4 +151,39 @@ char *compose_autopickup_settings(const gboolean config[IT_MAX])
     }
 
     return settings;
+}
+
+int parse_gender(const char gender)
+{
+    char _gender = g_ascii_tolower(gender);
+
+    switch (_gender)
+    {
+    case 'm':
+        return PS_MALE;
+        break;
+
+    case 'f':
+        return PS_FEMALE;
+        break;
+
+    default:
+        return PS_NONE;
+        break;
+    }
+}
+
+char compose_gender(const int gender)
+{
+    switch(gender)
+    {
+        case PS_MALE:
+            return 'm';
+            break;
+        case PS_FEMALE:
+            return 'f';
+            break;
+        default:
+            return ' ';
+    }
 }

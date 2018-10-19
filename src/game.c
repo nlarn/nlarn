@@ -302,22 +302,7 @@ void game_init(int argc, char *argv[])
 
         if (config.gender)
         {
-            config.gender[0] = g_ascii_tolower(config.gender[0]);
-
-            switch (config.gender[0])
-            {
-            case 'm':
-                nlarn->p->sex = PS_MALE;
-                break;
-
-            case 'f':
-                nlarn->p->sex = PS_FEMALE;
-                break;
-
-            default:
-                nlarn->p->sex = PS_NONE;
-                break;
-            }
+            nlarn->p->sex = parse_gender(config.gender[0]);
         }
 
         if (config.stats)
