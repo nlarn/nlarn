@@ -12,6 +12,7 @@
 * Add worn amulet to player's equipment overview
 * Allow intentionally triggering a teleport trap
 * Distribute Changelog in HTML format on macOS and Windows
+* Write a default configuration file when none is present
 * Allow specifying a custom configuration file on the command line
 * Add author, icon and version number to Windows uninstaller
 * Moved auto-pickup configuration key from '@' to CTRL-A

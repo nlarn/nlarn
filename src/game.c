@@ -243,6 +243,9 @@ void game_init(int argc, char *argv[])
         gchar *defaultpath = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
                 config_file, NULL);
 
+        /* write a default configuration file, if none exists */
+        write_ini_file(defaultpath);
+
         /* try to load settings from the configuration file */
         parse_ini_file(defaultpath, &config);
 
@@ -295,7 +298,7 @@ void game_init(int argc, char *argv[])
         /* give player knowledge of the town */
         scroll_mapping(nlarn->p, NULL);
 
-        if (config.name)
+        if (config.name && strlen(config.name) > 0)
         {
             nlarn->p->name = config.name;
         }
@@ -305,7 +308,7 @@ void game_init(int argc, char *argv[])
             nlarn->p->sex = parse_gender(config.gender[0]);
         }
 
-        if (config.stats)
+        if (config.stats && strlen(config.stats) > 0)
         {
             config.stats[0] = g_ascii_tolower(config.stats[0]);
             nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, config.stats);

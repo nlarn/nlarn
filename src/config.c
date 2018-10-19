@@ -24,6 +24,49 @@
 #include "items.h"
 #include "player.h"
 
+static const char *default_config_file =
+    "[nlarn]\n"
+    "# Set difficulty\n"
+    "difficulty=0\n"
+    "\n"
+    "# Set character's name\n"
+    "name=\n"
+    "\n"
+    "# Choose the gender of your character (m/f)\n"
+    "gender=\n"
+    "\n"
+    "# Choose the stats of your character\n"
+    "# a Strong character\n"
+    "# b Agile character\n"
+    "# c Tough character\n"
+    "# d Smart character\n"
+    "# e Randomly pick one of the above\n"
+    "# f Stats assigned randomly\n"
+    "stats=\n"
+    "\n"
+    "# Item types to pick up automatically:\n"
+    "# \" amulets\n"
+    "# ' ammunition (ammunition once fired will be picked up anyway)\n"
+    "# [ armour\n"
+    "# + books\n"
+    "# ] containers\n"
+    "# * gems\n"
+    "# $ money\n"
+    "# ! potions\n"
+    "# = rings\n"
+    "# ? scrolls\n"
+    "# ( weapons\n"
+    "auto-pickup=\"+*$\n"
+    "\n"
+#ifdef SDLPDCURSES
+    "# Font size for the game. Defaults to 18 when not defined.\n"
+    "font-size=18\n"
+    "\n"
+#endif
+    "# Disable automatic saving when switching a level. Saving the game is\n"
+    "# enabled by default, disable when it's too slow on your computer\n"
+    "no-autosave=false\n";
+
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config)
 {
@@ -115,6 +158,18 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
     g_key_file_free(ini_file);
 
     return success;
+}
+
+void write_ini_file(const char *filename)
+{
+    if (g_file_test(filename, G_FILE_TEST_IS_REGULAR))
+    {
+        return;
+    }
+
+    /* write default config file contents to the give file */
+    g_file_set_contents(filename, default_config_file,
+            strlen(default_config_file), NULL);
 }
 
 void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX])

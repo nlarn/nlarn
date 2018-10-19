@@ -122,7 +122,7 @@ ifneq ($(GITREV),)
   DIRNAME   = nlarn-$(VERSION)
   SRCPKG    = nlarn-$(VERSION).tar.gz
   PACKAGE   = $(DIRNAME)_$(OS).$(ARCH).$(ARCHIVE_SUFFIX)
-  MAINFILES = nlarn$(SUFFIX) nlarn.ini-sample README.html LICENSE Changelog.html
+  MAINFILES = nlarn$(SUFFIX) README.html LICENSE Changelog.html
   LIBFILES += lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.*
 endif
 
@@ -228,7 +228,7 @@ $(OSXIMAGE): $(MAINFILES)
 		done; \
 	done
 # Copy required files
-	@cp -p nlarn.ini-sample README.html LICENSE Changelog.html dmgroot
+	@cp -p README.html LICENSE Changelog.html dmgroot
 	@cp -p $(LIBFILES) dmgroot/Nlarn.app/Contents/Resources
 	@cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
 	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents

@@ -30,7 +30,7 @@ touch %{buildroot}/var/games/%{name}/highscores
 %attr(2755, root, games) %{_bindir}/nlarn
 %{_datadir}/%{name}/*
 %config(noreplace) %attr (0664,root,games) /var/games/nlarn/highscores
-%doc LICENSE README.md Changelog.md nlarn.ini-sample lib/maze_doc.txt
+%doc LICENSE README.md Changelog.md lib/maze_doc.txt
 
 %changelog
 * Thu May 17 2018 Joachim de Groot <jdegroot@web.de>
