@@ -36,8 +36,9 @@ struct game_config {
 #endif
 };
 
+/* configuration file reading and writing */
 gboolean parse_ini_file(const char *filename, struct game_config *config);
-void write_ini_file(const char *filename);
+void write_ini_file(const char *filename, struct game_config *config);
 
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config);

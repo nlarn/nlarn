@@ -120,7 +120,7 @@ static int try_locking_savegame_file(FILE *sg)
 }
 
 /* the game settings */
-static struct game_config config = {0};
+static struct game_config config = { .auto_pickup = "\"+*$" };
 
 void game_init(int argc, char *argv[])
 {
@@ -244,7 +244,10 @@ void game_init(int argc, char *argv[])
                 config_file, NULL);
 
         /* write a default configuration file, if none exists */
-        write_ini_file(defaultpath);
+        if (!g_file_test(defaultpath, G_FILE_TEST_IS_REGULAR))
+        {
+            write_ini_file(defaultpath, &config);
+        }
 
         /* try to load settings from the configuration file */
         parse_ini_file(defaultpath, &config);
