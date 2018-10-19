@@ -225,7 +225,7 @@ int monster_items_pickup(monster *m);
  * @param a monster
  * @return the number of attacks
  */
-int monster_attack_count(monster *m);
+guint monster_attack_count(monster *m);
 
 /**
  * Returns the chosen attack type for the monster
@@ -234,7 +234,7 @@ int monster_attack_count(monster *m);
  * @param the number of an attack
  * @return an attack
  */
-attack monster_attack(monster *m, int num);
+attack monster_attack(monster *m, guint num);
 
 void monster_player_attack(monster *m, struct player *p);
 int monster_player_ranged_attack(monster *m, struct player *p);

@@ -1930,13 +1930,12 @@ int monster_items_pickup(monster *m)
     return FALSE;
 }
 
-int monster_attack_count(monster *m)
+guint monster_attack_count(monster *m)
 {
-    const int max_attacks = sizeof(monster_data[m->type].attacks)
-        / sizeof(monster_data[m->type].attacks[0]);
-    int count = 0;
+    guint count = 0;
 
-    while (count < max_attacks && monster_data[m->type].attacks[count].type != ATT_NONE)
+    while (count < G_N_ELEMENTS(monster_data[m->type].attacks)
+            && monster_data[m->type].attacks[count].type != ATT_NONE)
     {
         count++;
     }
@@ -1944,7 +1943,7 @@ int monster_attack_count(monster *m)
     return count + 1;
 }
 
-attack monster_attack(monster *m, int num)
+attack monster_attack(monster *m, guint num)
 {
     g_assert (m != NULL && num <= monster_attack_count(m));
 
