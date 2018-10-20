@@ -186,12 +186,12 @@ static char preset_max = 'f';
 char player_select_bonus_stats()
 {
     int selection = 0;
-    const char *text = "  a) Strong character\n"
-                       "  b) Agile character\n"
-                       "  c) Tough character\n"
-                       "  d) Smart character\n"
-                       "  e) Randomly pick one of the above\n"
-                       "  f) Stats assigned randomly\n";
+    const char *text = "  `lightgreen`a`end`) Strong character\n"
+                       "  `lightgreen`b`end`) Agile character\n"
+                       "  `lightgreen`c`end`) Tough character\n"
+                       "  `lightgreen`d`end`) Smart character\n"
+                       "  `lightgreen`e`end`) Randomly pick one of the above\n"
+                       "  `lightgreen`f`end`) Stats assigned randomly\n";
 
     while (selection < preset_min || selection > preset_max)
     {
