@@ -180,7 +180,10 @@ player *player_new()
     return p;
 }
 
-gboolean player_assign_bonus_stats(player *p, char *preset)
+static const char preset_min = 'a';
+static char preset_max = 'f';
+
+char player_select_bonus_stats()
 {
     int selection = 0;
     const char *text = "  a) Strong character\n"
@@ -190,30 +193,28 @@ gboolean player_assign_bonus_stats(player *p, char *preset)
                        "  e) Randomly pick one of the above\n"
                        "  f) Stats assigned randomly\n";
 
-    const char preset_min = 'a';
-    const char preset_max = 'f';
-
-    if (preset != NULL && strlen(preset) > 0)
-    {
-        selection = preset[0];
-        if (selection < preset_min || selection > preset_max)
-            return FALSE;
-    }
-
     while (selection < preset_min || selection > preset_max)
     {
         selection = display_show_message("Choose a character build", text, 0);
     }
 
-    if (selection == 'e')
-        selection = 'a' + rand_0n(4);
+    return selection;
+}
+
+gboolean player_assign_bonus_stats(player *p, char preset)
+{
+    if (preset < preset_min || preset > preset_max)
+        return FALSE;
+
+    if (preset == 'e')
+        preset = 'a' + rand_0n(4);
 
     // Allow choice between:
     // * strong Fighter (Str 20  Dex 15  Con 16  Int 12  Wis 12)
     // * agile Rogue    (Str 15  Dex 20  Con 14  Int 12  Wis 14)
     // * hardy Fighter  (Str 16  Dex 12  Con 20  Int 12  Wis 15)
     // * arcane scholar (Str 12  Dex 14  Con 12  Int 20  Wis 17)
-    switch (selection)
+    switch (preset)
     {
     case 'a': // strong Fighter
         p->strength     += 8;

@@ -210,7 +210,15 @@ typedef enum _player_cod
 /* function declarations */
 
 player *player_new();
-gboolean player_assign_bonus_stats(player *p, char *preset);
+char player_select_bonus_stats();
+/**
+ * @brief Assigns player's stats to the given preset
+ *
+ * @param the player
+ * @param the preset (between 'a' and 'f')
+ * @return TRUE for valid presets, FALSE for invalid presets
+ */
+gboolean player_assign_bonus_stats(player *p, char preset);
 void player_destroy(player *p);
 
 cJSON *player_serialize(player *p);

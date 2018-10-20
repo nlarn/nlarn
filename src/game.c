@@ -314,7 +314,8 @@ void game_init(int argc, char *argv[])
         if (config.stats && strlen(config.stats) > 0)
         {
             config.stats[0] = g_ascii_tolower(config.stats[0]);
-            nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, config.stats);
+            nlarn->player_stats_set = player_assign_bonus_stats(
+                    nlarn->p, config.stats[0]);
         }
 
 

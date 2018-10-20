@@ -109,7 +109,8 @@ int main(int argc, char *argv[])
     while (!nlarn->player_stats_set)
     {
         /* assign the player's stats */
-        nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, NULL);
+        char selection = player_select_bonus_stats();
+        nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, selection);
     }
 
     /* automatic save point (not when restoring a save) */
