@@ -73,12 +73,10 @@ void building_bank_calc_interest(game *g)
 
 int building_bank(player *p)
 {
-    int turns = 2;
-    int cmd;
+    int turns = 0;
     guint amount = 0;
 
-    GPtrArray *callbacks = NULL;
-    GString *text;
+    GString *greeting;
 
     const char msg_title[] = "First National Bank of Larn";
     const char msg_greet[] = "`white`Welcome to the First National Bank of Larn.`end`\n\n";
@@ -96,24 +94,14 @@ int building_bank(player *p)
     g_assert(p != NULL);
 
     if (Z(p->pos) == 0)
-        text = g_string_new(msg_greet);
+        greeting = g_string_new(msg_greet);
     else
-        text = g_string_new(msg_branch);
-
-    /* leave bank when taxes are unpaid */
-    if (p->outstanding_taxes)
-    {
-        g_string_append_printf(text, msg_frozen, p->outstanding_taxes);
-        display_show_message(msg_title, text->str, 0);
-        g_string_free(text, TRUE);
-
-        return turns;
-    }
+        greeting = g_string_new(msg_branch);
 
     if (p->bank_ieslvtb > 0)
     {
         /* show the earned interest */
-        g_string_append_printf(text, "We have paid you an interest of %d " \
+        g_string_append_printf(greeting, "We have paid you an interest of %d " \
                                "gold since your last visit.\n", p->bank_ieslvtb);
 
         /* add it to the game log for later reference */
@@ -124,120 +112,139 @@ int building_bank(player *p)
         p->bank_ieslvtb = 0;
     }
 
-    g_string_append_printf(text,
-                           "You have %d gold pieces in the bank.\n" \
-                           "You have %d gold pieces.\n\n",
-                           p->bank_account,
-                           player_get_gold(p));
-
-    g_string_append(text, "Your wish? ");
-
-    if (player_get_gold(p) > 0)
-        g_string_append(text, "`lightgreen`d`end`)eposit ");
-
-    if (p->bank_account > 0)
-        g_string_append(text, "`lightgreen`w`end`)ithdraw ");
-
-    /* if player has gems, enable selling them */
-    if (inv_length_filtered(p->inventory, item_filter_gems))
+    /* leave bank when taxes are unpaid */
+    if (p->outstanding_taxes)
     {
-        g_string_append(text, "`lightgreen`s`end`)ell a gem");
+        g_string_append_printf(greeting, msg_frozen, p->outstanding_taxes);
+        display_show_message(msg_title, greeting->str, 0);
+        g_string_free(greeting, TRUE);
 
-        /* define callback functions */
-        callbacks = g_ptr_array_new();
-
-        display_inv_callback *callback = g_malloc(sizeof(display_inv_callback));
-        callback->description = "(s)ell";
-        callback->helpmsg = "Sell the currently selected gem.";
-        callback->key = 's';
-        callback->inv = &nlarn->store_stock;
-        callback->function = &building_item_buy;
-        callback->checkfun = &player_item_is_sellable;
-        callback->active = FALSE;
-        g_ptr_array_add(callbacks, callback);
+        return 2; /* turns */
     }
 
-    cmd = display_show_message(msg_title, text->str, 0);
-    g_string_free(text, TRUE);
-
-    switch (cmd)
+    gboolean leaving = FALSE;
+    while (!leaving)
     {
-    case 'd': /* deposit */
-        if (inv_length_filtered(p->inventory, item_filter_gold) == 0)
-            break;
+        GString *text = g_string_new(greeting->str);
 
-        amount = display_get_count("How many gold pieces do you wish to deposit?",
-                                   player_get_gold(p));
-
-        if (amount && (amount <= player_get_gold(p)))
-        {
-            p->bank_account += amount;
-            player_remove_gold(p, amount);
-            log_add_entry(nlarn->log, "You deposited %d gp.", amount);
-
-            /* income tax for money earned in the dungeon */
-            p->outstanding_taxes += calc_tax_debt(amount);
-        }
-        else if (amount)
-        {
-            log_add_entry(nlarn->log, "You don't have that much.");
-        }
-
+        /* every interaction in the bank takes two turns */
         turns += 2;
 
-        break;
+        g_string_append_printf(text,
+                "You have %d gold pieces in the bank.\n" \
+                "You have %d gold pieces.\n\n",
+                p->bank_account, player_get_gold(p));
 
-    case 'w': /* withdraw */
-        if (p->bank_account == 0)
+        g_string_append(text, "Your wish? ");
+
+        if (player_get_gold(p) > 0)
+            g_string_append(text, "`lightgreen`d`end`)eposit ");
+
+        if (p->bank_account > 0)
+            g_string_append(text, "`lightgreen`w`end`)ithdraw ");
+
+        /* if player has gems, enable selling them */
+        if (inv_length_filtered(p->inventory, item_filter_gems))
+            g_string_append(text, "`lightgreen`s`end`)ell a gem");
+
+        int cmd = display_show_message(msg_title, text->str, 0);
+        g_string_free(text, TRUE);
+
+        switch (cmd)
+        {
+        case 'd': /* deposit */
+            if (inv_length_filtered(p->inventory, item_filter_gold) == 0)
+                break;
+
+            amount = display_get_count("How many gold pieces do you wish to deposit?",
+                                       player_get_gold(p));
+
+            if (amount && (amount <= player_get_gold(p)))
+            {
+                p->bank_account += amount;
+                player_remove_gold(p, amount);
+                log_add_entry(nlarn->log, "You deposited %d gp.", amount);
+
+                /* income tax for money earned in the dungeon */
+                p->outstanding_taxes += calc_tax_debt(amount);
+            }
+            else if (amount)
+            {
+                log_add_entry(nlarn->log, "You don't have that much.");
+            }
+
+            turns += 2;
+
             break;
 
-        amount = display_get_count("How many gold pieces do you wish to withdraw?",
-                                   p->bank_account);
+        case 'w': /* withdraw */
+            if (p->bank_account == 0)
+                break;
 
-        if (amount && (amount <= p->bank_account))
-        {
-            item *gold = item_new(IT_GOLD, amount);
+            amount = display_get_count("How many gold pieces do you wish to withdraw?",
+                                       p->bank_account);
 
-            /* adding the gold might fail (too heavy) */
-            if (inv_add(&p->inventory, gold))
+            if (amount && (amount <= p->bank_account))
             {
-                p->bank_account -= amount;
-                log_add_entry(nlarn->log, "You withdraw %d gold.", amount);
+                item *gold = item_new(IT_GOLD, amount);
+
+                /* adding the gold might fail (too heavy) */
+                if (inv_add(&p->inventory, gold))
+                {
+                    p->bank_account -= amount;
+                    log_add_entry(nlarn->log, "You withdraw %d gold.", amount);
+                }
+                else
+                {
+                    /* this item is no longer required */
+                    item_destroy(gold);
+                }
             }
-            else
+            else if (amount)
             {
-                /* this item is no longer required */
-                item_destroy(gold);
+                log_add_entry(nlarn->log, "You don't have that much in the bank!");
             }
-        }
-        else if (amount)
-        {
-            log_add_entry(nlarn->log, "You don't have that much in the bank!");
-        }
 
-        turns += 2;
+            turns += 2;
 
-        break;
-
-    case 's': /* sell gem */
-        if (inv_length_filtered(p->inventory, item_filter_gems) == 0)
             break;
 
-        display_inventory("Sell gems", p, &p->inventory, callbacks, TRUE,
-                          FALSE, TRUE, &item_filter_gems);
+        case 's': /* sell gem */
+            {
+                if (inv_length_filtered(p->inventory, item_filter_gems) == 0)
+                    break;
 
-        break;
+                /* define callback functions */
+                GPtrArray *callbacks = g_ptr_array_new();
 
-    default:
-        /* do nothing */
-        break;
+                display_inv_callback *callback = g_malloc(sizeof(display_inv_callback));
+                callback->description = "(s)ell";
+                callback->helpmsg = "Sell the currently selected gem.";
+                callback->key = 's';
+                callback->inv = &nlarn->store_stock;
+                callback->function = &building_item_buy;
+                callback->checkfun = &player_item_is_sellable;
+                callback->active = FALSE;
+                g_ptr_array_add(callbacks, callback);
+
+                display_inventory("Sell gems", p, &p->inventory, callbacks,
+                        TRUE, FALSE, TRUE, &item_filter_gems);
+
+                display_inv_callbacks_clean(callbacks);
+            }
+            break;
+
+        case KEY_ESC:
+            leaving = TRUE;
+            break;
+
+        default:
+            /* do nothing */
+            break;
+        }
     }
 
-    if (callbacks)
-    {
-        /* clean up */
-        display_inv_callbacks_clean(callbacks);
-    }
+    g_string_free(greeting, TRUE);
 
     return turns;
 }
