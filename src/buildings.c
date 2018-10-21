@@ -550,7 +550,7 @@ int building_lrs(player *p)
     return turns;
 }
 
-static int building_scribe_scroll(player *p, int mobuls)
+static int building_scribe_scroll(player *p)
 {
     int price;
     int turns = 2;
@@ -562,8 +562,9 @@ static int building_scribe_scroll(player *p, int mobuls)
     /* check if the player owns a blank scroll */
     if (!inv_length_filtered(p->inventory, item_filter_blank_scroll))
     {
-        log_add_entry(nlarn->log, "To write a scroll, "
-                      "the scribes require a blank scroll.");
+        display_show_message("School", "To write a scroll, the scribes "
+                "require a blank scroll.", 0);
+
         return turns;
     }
 
@@ -577,14 +578,15 @@ static int building_scribe_scroll(player *p, int mobuls)
         return turns;
     }
 
-    char *new_scroll = display_get_string(NULL, "Write what scroll?", NULL, 45);
+    char *new_scroll = display_get_string("School", "Write what scroll?",
+            NULL, 45);
     if (new_scroll == NULL)
     {
-        log_add_entry(nlarn->log, "Okay then.");
+        display_show_message("School", "Okay then.", 0);
         return turns;
     }
 
-    for (i = 1; i < ST_MAX; i++)
+    for (i = 0; i < ST_MAX; i++)
     {
         if (g_strcmp0(new_scroll, scrolls[i].name) == 0)
             break;
@@ -595,15 +597,16 @@ static int building_scribe_scroll(player *p, int mobuls)
 
     if (i == ST_MAX)
     {
-        log_add_entry(nlarn->log,
-                      "The scribes haven't ever heard of any such scroll!");
+        display_show_message("School", "The scribes haven't ever heard of any "
+                "such scroll!", 0);
         return turns;
     }
 
     /* jesters might want to get a scroll of blank paper */
     if (i == ST_BLANK)
     {
-        log_add_entry(nlarn->log, "The scribes can only write something written!");
+        display_show_message("School", "The scribes can only write something "
+                "written!", 0);
         return turns;
     }
 
@@ -611,8 +614,10 @@ static int building_scribe_scroll(player *p, int mobuls)
     price = 2 * scrolls[i].price;
     if (!building_player_check(p, price))
     {
-        log_add_entry(nlarn->log, "You cannot afford the %d gold for the scroll of %s.",
-                      price, scrolls[i].name);
+        char *msg = g_strdup_printf("You cannot afford the %d gold for the "
+                "scroll of %s.", price, scrolls[i].name);
+        display_show_message("School", msg, 0);
+        g_free(msg);
 
         return turns;
     }
@@ -620,10 +625,8 @@ static int building_scribe_scroll(player *p, int mobuls)
     g_snprintf(question, 80, "Writing a scroll of %s costs %d gold.\n"
                "Are you fine with that?", scrolls[i].name, price);
 
-    if (!display_get_yesno(question, NULL, NULL, NULL))
+    if (!display_get_yesno(question, "School", NULL, NULL))
     {
-        log_add_entry(nlarn->log, "You refuse to pay %d gold for a scroll of %s.",
-                      price, scrolls[i].name);
         return turns;
     }
 
@@ -642,30 +645,115 @@ static int building_scribe_scroll(player *p, int mobuls)
     building_player_charge(p, price);
     p->stats.gold_spent_shop += price;
 
-    log_add_entry(nlarn->log, "The scribes start writing a scroll of %s for you.",
-                  scroll_name(bscroll));
+    /* shop popup window */
+    char *msg = g_strdup_printf("The scribes are currently writing a scroll "
+            "of %s for you.", scroll_name(bscroll));
+    display_window *pop = display_popup(2, 2, 40, "School", msg);
+    g_free(msg);
 
-    player_make_move(p, mobuls2gtime(mobuls), FALSE, NULL);
+    /* writing a scroll takes 10 mobuls */
+    player_make_move(p, 1000, FALSE, NULL);
+
+    /* remove popup window */
+    display_window_destroy(pop);
+
     log_add_entry(nlarn->log,
-                  "The scribes finished writing a scroll of %s for you.",
-                  scroll_name(bscroll));
+            "The scribes finished writing a scroll of %s for you.",
+            scroll_name(bscroll));
 
     if (split)
         inv_add(&p->inventory, bscroll);
 
+    return 0;
+}
+
+/* school courses */
+typedef struct school_course {
+    int course_time;
+    int prerequisite;
+    const char *description;
+    const char *message;
+} school_course;
+
+static const school_course school_courses[SCHOOL_COURSE_COUNT] =
+{
+    { 10, -1, "Fighters Training I", "You feel stronger!" },
+    { 15,  0, "Fighters Training II", "You feel much stronger!" },
+    { 10, -1, "Introduction to Wizardry", "The task before you now seems more attainable!" },
+    { 20,  2, "Applied Wizardry", "The task before you now seems very attainable!" },
+    { 10, -1, "Faith for Today", "You now feel more confident that you can find the potion in time!" },
+    { 10, -1, "Contemporary Dance", "You feel like dancing!" },
+    {  5, -1, "History of Larn", "Your instructor told you that the Eye of Larn is rumored to be guarded by an invisible demon lord." },
+};
+
+static void building_school_take_course(player *p, int course, guint price)
+{
+    /* shop popup window */
+    char *msg = g_strdup_printf("You are currently taking the course \"%s\".",
+            school_courses[course].description);
+    display_window *pop = display_popup(2, 2, 40, "School", msg);
+    g_free(msg);
+
+    /* charge the player */
+    building_player_charge(p, price);
+    p->stats.gold_spent_college += price;
+
     /* time usage */
-    return turns;
+    guint course_turns = mobuls2gtime(school_courses[course].course_time);
+    player_make_move(p, course_turns, FALSE, NULL);
+
+    /* remove popup window */
+    display_window_destroy(pop);
+
+    /* add the bonus gained by this course */
+    switch (course)
+    {
+    case 0:
+        p->strength += 2;
+        p->constitution++;
+        /* strength has been modified -> recalc burdened status */
+        player_inv_weight_recalc(p->inventory, NULL);
+        break;
+
+    case 1:
+        p->strength += 2;
+        p->constitution += 2;
+        /* strength has been modified -> recalc burdened status */
+        player_inv_weight_recalc(p->inventory, NULL);
+        break;
+
+    case 2:
+        p->intelligence += 2;
+        break;
+
+    case 3:
+        p->intelligence += 2;
+        break;
+
+    case 4:
+        p->wisdom += 2;
+        break;
+
+    case 5:
+        p->dexterity += 3;
+        break;
+
+    case 6:
+        p->intelligence++;
+        break;
+    }
+
+    /* mark the course as taken */
+    p->school_courses_taken[course] = 1;
+
+    log_add_entry(nlarn->log,
+            "You successfully complete the course \"%s\". %s",
+            school_courses[course].description,
+            school_courses[course].message);
 }
 
 int building_school(player *p)
 {
-    /* the number of turns it takes to enter and leave the school */
-    int turns = 2;
-
-    GString *text;
-    guint idx;
-    int selection;
-
     const char msg_greet[] = "`white`Welcome to the College of Larn!`end`\n\n" \
                              "We offer the exciting opportunity of higher " \
                              "education to all inhabitants of the caves. " \
@@ -673,144 +761,88 @@ int building_school(player *p)
 
     const char msg_prerequisite[] = "Sorry, but this class has a prerequisite of \"%s\".";
 
-    /* school courses */
-    const school_course school_courses[SCHOOL_COURSE_COUNT] =
-    {
-        { 10, -1, "Fighters Training I", "You feel stronger!" },
-        { 15,  0, "Fighters Training II", "You feel much stronger!" },
-        { 10, -1, "Introduction to Wizardry", "The task before you now seems more attainable!" },
-        { 20,  2, "Applied Wizardry", "The task before you now seems very attainable!" },
-        { 10, -1, "Faith for Today", "You now feel more confident that you can find the potion in time!" },
-        { 10, -1, "Contemporary Dance", "You feel like dancing!" },
-        {  5, -1, "History of Larn", "Your instructor told you that the Eye of Larn is rumored to be guarded by an invisible demon lord." },
-        { 10, -1,  "Commission a scroll", NULL }
-    };
-
     g_assert(p != NULL);
 
-    text = g_string_new(msg_greet);
-
-    for (idx = 0; idx < SCHOOL_COURSE_COUNT - 1; idx++)
+    gboolean leaving = FALSE;
+    while (!leaving)
     {
-        if (!p->school_courses_taken[idx])
+        GString *text = g_string_new(msg_greet);
+
+        for (int idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
         {
-            /* courses become more expensive with rising difficulty */
-            guint price = school_courses[idx].course_time
-                          * (game_difficulty(nlarn) + 1) * 100;
+            if (!p->school_courses_taken[idx])
+            {
+                /* courses become more expensive with rising difficulty */
+                guint price = school_courses[idx].course_time
+                              * (game_difficulty(nlarn) + 1) * 100;
 
-            g_string_append_printf(text,
-                    " `lightgreen`%c`end`) %-24s - %2d mobuls, %4d gp\n",
-                    idx + 'a', school_courses[idx].description,
-                    school_courses[idx].course_time, price);
-        }
-        else
-        {
-            g_string_append(text, "\n");
-        }
-    }
-
-    g_string_append_printf(text, "\nAlternatively,\n"
-            " `lightgreen`%c`end`) %-24s - %2d mobuls\n\n",
-            idx + 'a', school_courses[idx].description,
-            school_courses[idx].course_time);
-
-    selection = display_show_message("School", text->str, 0);
-    g_string_free(text, TRUE);
-
-    selection -= 'a';
-
-    if ((selection >= 0)
-            && (selection < SCHOOL_COURSE_COUNT)
-            && !p->school_courses_taken[(int)selection])
-    {
-        if (selection == SCHOOL_COURSE_COUNT - 1)
-        {
-            return building_scribe_scroll(p, school_courses[(int)selection].course_time);
+                g_string_append_printf(text,
+                        " `lightgreen`%c`end`) %-24s - %2d mobuls, %4d gp\n",
+                        idx + 'a', school_courses[idx].description,
+                        school_courses[idx].course_time, price);
+            }
+            else
+            {
+                g_string_append(text, "\n");
+            }
         }
 
-        /* courses become more expensive with rising difficulty */
-        guint price = school_courses[(int)selection].course_time
-                      * (game_difficulty(nlarn) + 1) * 100;
+        g_string_append_printf(text, "\nAlternatively,\n"
+                " `lightgreen`%c`end`) %-24s - 10 mobuls\n\n",
+                SCHOOL_COURSE_COUNT + 'a', "Commission a scroll");
 
-        if (!building_player_check(p, price))
-        {
-            log_add_entry(nlarn->log,
-                    "You cannot afford the %d gold for the course.",
-                    price);
+        int selection = display_show_message("School", text->str, 0);
+        g_string_free(text, TRUE);
 
-            return turns;
-        }
-
-        /* check if the selected course has a prerequisite
-           and if the player has taken that course */
-        if ((school_courses[selection].prerequisite >= 0) &&
-                !p->school_courses_taken[school_courses[selection].prerequisite])
-        {
-            log_add_entry(nlarn->log, msg_prerequisite,
-                    school_courses[school_courses[selection].prerequisite].description);
-
-            return turns;
-        }
-
-        log_add_entry(nlarn->log, "You take the course \"%s\".",
-                school_courses[(int)selection].description);
-
-        /* charge the player */
-        building_player_charge(p, price);
-        p->stats.gold_spent_college += price;
-
-        /* time usage */
-        guint course_turns = mobuls2gtime(school_courses[(guint)selection].course_time);
-        player_make_move(p, course_turns, FALSE, NULL);
-
-        /* add the bonus gained by this course */
         switch (selection)
         {
-        case 0:
-            p->strength += 2;
-            p->constitution++;
-            /* strength has been modified -> recalc burdened status */
-            player_inv_weight_recalc(p->inventory, NULL);
-            break;
+            case 'a' + SCHOOL_COURSE_COUNT:
+                player_make_move(p, building_scribe_scroll(p), FALSE, NULL);
+                break;
 
-        case 1:
-            p->strength += 2;
-            p->constitution += 2;
-            /* strength has been modified -> recalc burdened status */
-            player_inv_weight_recalc(p->inventory, NULL);
-            break;
+            case KEY_ESC:
+                leaving = TRUE;
+                break;
 
-        case 2:
-            p->intelligence += 2;
-            break;
+            default:
+            {
+                int course = selection - 'a';
+                if ((course < SCHOOL_COURSE_COUNT)
+                        && !p->school_courses_taken[course])
+                {
+                    /* course prices increase with rising difficulty */
+                    guint price = school_courses[course].course_time
+                                  * (game_difficulty(nlarn) + 1) * 100;
 
-        case 3:
-            p->intelligence += 2;
-            break;
-
-        case 4:
-            p->wisdom += 2;
-            break;
-
-        case 5:
-            p->dexterity += 3;
-            break;
-
-        case 6:
-            p->intelligence++;
-            break;
+                    if (!building_player_check(p, price))
+                    {
+                        char *msg = g_strdup_printf("You cannot afford "
+                                "the %d gold for the course.", price);
+                        display_show_message("School", msg, 0);
+                        g_free(msg);
+                    }
+                    /* check if the selected course has a prerequisite
+                       and if the player has taken that course */
+                    else if ((school_courses[course].prerequisite >= 0) &&
+                            !p->school_courses_taken[school_courses[course].prerequisite])
+                    {
+                        char *msg = g_strdup_printf(msg_prerequisite,
+                                school_courses[school_courses[course].prerequisite]
+                                .description);
+                        display_show_message("School", msg, 0);
+                        g_free(msg);
+                    }
+                    else
+                    {
+                        building_school_take_course(p, course, price);
+                    }
+                }
+            }
         }
 
-        /* mark the course as taken */
-        p->school_courses_taken[(int)selection] = 1;
-
-        log_add_entry(nlarn->log,
-                "You successfully complete the course \"%s\". %s",
-                school_courses[(int)selection].description,
-                school_courses[(int)selection].message);
     }
 
-    return turns;
+    return 0;
 }
 
 int building_tradepost(player *p)
