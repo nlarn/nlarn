@@ -73,9 +73,7 @@ void building_bank_calc_interest(game *g)
 
 int building_bank(player *p)
 {
-    int turns = 0;
     guint amount = 0;
-
     GString *greeting;
 
     const char msg_title[] = "First National Bank of Larn";
@@ -127,9 +125,6 @@ int building_bank(player *p)
     {
         GString *text = g_string_new(greeting->str);
 
-        /* every interaction in the bank takes two turns */
-        turns += 2;
-
         g_string_append_printf(text,
                 "You have %d gold pieces in the bank.\n" \
                 "You have %d gold pieces.\n\n",
@@ -173,8 +168,6 @@ int building_bank(player *p)
                 log_add_entry(nlarn->log, "You don't have that much.");
             }
 
-            turns += 2;
-
             break;
 
         case 'w': /* withdraw */
@@ -204,8 +197,6 @@ int building_bank(player *p)
             {
                 log_add_entry(nlarn->log, "You don't have that much in the bank!");
             }
-
-            turns += 2;
 
             break;
 
@@ -242,11 +233,14 @@ int building_bank(player *p)
             /* do nothing */
             break;
         }
+
+        /* every interaction in the bank takes two turns */
+        player_make_move(p, 2, FALSE, NULL);
     }
 
     g_string_free(greeting, TRUE);
 
-    return turns;
+    return 0;
 }
 
 int building_dndstore(player *p)
@@ -927,16 +921,12 @@ int building_monastery(struct player *p)
     const char ayfwt[] = "Are you fine with that?";
 
     gboolean leaving = FALSE;
-    int turns = 0;
 
     while (!leaving)
     {
         GString *msg = g_string_new(msg_welcome);
         int selection;
         int disease_count = 0;
-
-        /* track time usage */
-        turns += 2;
 
         /* buffer to store all diseases the player currently suffers from */
         struct
@@ -1176,9 +1166,12 @@ int building_monastery(struct player *p)
             }
             break;
         }
+
+        /* track time usage */
+        player_make_move(p, 2, FALSE, NULL);
     }
 
-    return turns;
+    return 0;
 }
 
 void building_monastery_init()
