@@ -704,9 +704,10 @@ int building_school(player *p)
             guint price = school_courses[idx].course_time
                           * (game_difficulty(nlarn) + 1) * 100;
 
-            g_string_append_printf(text, " `lightgreen`%c`end`) %-24s - %2d mobuls, %4d gp\n",
-                                   idx + 'a', school_courses[idx].description,
-                                   school_courses[idx].course_time, price);
+            g_string_append_printf(text,
+                    " `lightgreen`%c`end`) %-24s - %2d mobuls, %4d gp\n",
+                    idx + 'a', school_courses[idx].description,
+                    school_courses[idx].course_time, price);
         }
         else
         {
@@ -715,9 +716,9 @@ int building_school(player *p)
     }
 
     g_string_append_printf(text, "\nAlternatively,\n"
-                           " `lightgreen`%c`end`) %-24s - %2d mobuls\n\n",
-                           idx + 'a', school_courses[idx].description,
-                           school_courses[idx].course_time);
+            " `lightgreen`%c`end`) %-24s - %2d mobuls\n\n",
+            idx + 'a', school_courses[idx].description,
+            school_courses[idx].course_time);
 
     selection = display_show_message("School", text->str, 0);
     g_string_free(text, TRUE);
@@ -729,7 +730,9 @@ int building_school(player *p)
             && !p->school_courses_taken[(int)selection])
     {
         if (selection == SCHOOL_COURSE_COUNT - 1)
+        {
             return building_scribe_scroll(p, school_courses[(int)selection].course_time);
+        }
 
         /* courses become more expensive with rising difficulty */
         guint price = school_courses[(int)selection].course_time
@@ -738,8 +741,8 @@ int building_school(player *p)
         if (!building_player_check(p, price))
         {
             log_add_entry(nlarn->log,
-                          "You cannot afford the %d gold for the course.",
-                          price);
+                    "You cannot afford the %d gold for the course.",
+                    price);
 
             return turns;
         }
@@ -750,13 +753,13 @@ int building_school(player *p)
                 !p->school_courses_taken[school_courses[selection].prerequisite])
         {
             log_add_entry(nlarn->log, msg_prerequisite,
-                          school_courses[school_courses[selection].prerequisite].description);
+                    school_courses[school_courses[selection].prerequisite].description);
 
             return turns;
         }
 
         log_add_entry(nlarn->log, "You take the course \"%s\".",
-                      school_courses[(int)selection].description);
+                school_courses[(int)selection].description);
 
         /* charge the player */
         building_player_charge(p, price);
@@ -807,9 +810,10 @@ int building_school(player *p)
         /* mark the course as taken */
         p->school_courses_taken[(int)selection] = 1;
 
-        log_add_entry(nlarn->log, "You successfully complete the course \"%s\". %s",
-                      school_courses[(int)selection].description,
-                      school_courses[(int)selection].message);
+        log_add_entry(nlarn->log,
+                "You successfully complete the course \"%s\". %s",
+                school_courses[(int)selection].description,
+                school_courses[(int)selection].message);
     }
 
     return turns;
