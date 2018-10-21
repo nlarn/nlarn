@@ -1940,7 +1940,7 @@ guint monster_attack_count(monster *m)
         count++;
     }
 
-    return count + 1;
+    return count;
 }
 
 attack monster_attack(monster *m, guint num)
@@ -2012,7 +2012,7 @@ void monster_player_attack(monster *m, player *p)
 
     damage *dam;
     map *mmap = game_map(nlarn, Z(m->pos));
-    attack att = { ATT_NONE, DAM_NONE, 0, 0 };
+    attack att = {};
 
     /* the player is invisible and the monster bashes into thin air */
     if (!pos_identical(m->player_pos, p->pos))
