@@ -915,230 +915,204 @@ int building_monastery(struct player *p)
 
     const char ayfwt[] = "Are you fine with that?";
 
-    GString *msg = g_string_new(msg_welcome);
-    int turns = 2;
-    int selection;
-    int disease_count = 0;
+    gboolean leaving = FALSE;
+    int turns = 0;
 
-    /* buffer to store all diseases the player currently suffers from */
-    struct
+    while (!leaving)
     {
-        effect_t et;
-        const char *desc;
-    } curable_diseases[10] = { { 0, NULL } };
+        GString *msg = g_string_new(msg_welcome);
+        int selection;
+        int disease_count = 0;
 
-    /* fill the list of curable diseases */
-    if (player_effect(p, ET_POISON))
-    {
-        curable_diseases[disease_count].et = ET_POISON;
-        curable_diseases[disease_count++].desc = "poison";
-    }
+        /* track time usage */
+        turns += 2;
 
-    if (player_effect(p, ET_BLINDNESS))
-    {
-        curable_diseases[disease_count].et = ET_BLINDNESS;
-        curable_diseases[disease_count++].desc = "blindness";
-    }
-
-    if (player_effect(p, ET_SICKNESS))
-    {
-        curable_diseases[disease_count].et = ET_SICKNESS;
-        curable_diseases[disease_count++].desc = "sickness";
-    }
-
-    if (player_effect(p, ET_CLUMSINESS))
-    {
-        curable_diseases[disease_count].et = ET_CLUMSINESS;
-        curable_diseases[disease_count++].desc = "clumsiness";
-    }
-
-    if (player_effect(p, ET_DIZZINESS))
-    {
-        curable_diseases[disease_count].et = ET_DIZZINESS;
-        curable_diseases[disease_count++].desc = "dizziness";
-    }
-
-    if (player_effect(p, ET_DEC_CON))
-    {
-        curable_diseases[disease_count].et = ET_DEC_CON;
-        curable_diseases[disease_count++].desc = "incapacitation";
-    }
-
-    if (player_effect(p, ET_DEC_DEX))
-    {
-        curable_diseases[disease_count].et = ET_DEC_DEX;
-        curable_diseases[disease_count++].desc = "awkwardness";
-    }
-
-    if (player_effect(p, ET_DEC_INT))
-    {
-        curable_diseases[disease_count].et = ET_DEC_INT;
-        curable_diseases[disease_count++].desc = "mental deficiency";
-    }
-
-    if (player_effect(p, ET_DEC_STR))
-    {
-        curable_diseases[disease_count].et = ET_DEC_STR;
-        curable_diseases[disease_count++].desc = "weakness";
-    }
-
-    if (player_effect(p, ET_DEC_WIS))
-    {
-        curable_diseases[disease_count].et = ET_DEC_WIS;
-        curable_diseases[disease_count++].desc = "ignorance";
-    }
-
-    /* add found diseases to the menu */
-    for (selection = 0; selection < disease_count; selection++)
-    {
-        g_string_append_printf(msg, "  `lightgreen`%c`end`) heal from %s\n",
-                               'd' + selection, curable_diseases[selection].desc);
-    }
-
-    /* an empty line for the eye */
-    g_string_append_c(msg, '\n');
-
-    /* offer the choices to the player */
-    selection = display_show_message(title, msg->str, 0);
-
-    /* get rid of the temporary string */
-    g_string_free(msg, TRUE);
-
-    switch (selection)
-    {
-    /* shop items */
-    case 'a':
-        building_shop(p, &nlarn->monastery_stock, title);
-        break;
-
-    /* remove curse */
-    case 'b':
-    {
-        item *it;
-        int price;
-        int choice;
-        char *question;
-        gchar *desc;
-
-        if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
+        /* buffer to store all diseases the player currently suffers from */
+        struct
         {
-            log_add_entry(nlarn->log, "You do not possess any cursed item.");
+            effect_t et;
+            const char *desc;
+        } curable_diseases[10] = { { 0, NULL } };
+
+        /* fill the list of curable diseases */
+        if (player_effect(p, ET_POISON))
+        {
+            curable_diseases[disease_count].et = ET_POISON;
+            curable_diseases[disease_count++].desc = "poison";
+        }
+
+        if (player_effect(p, ET_BLINDNESS))
+        {
+            curable_diseases[disease_count].et = ET_BLINDNESS;
+            curable_diseases[disease_count++].desc = "blindness";
+        }
+
+        if (player_effect(p, ET_SICKNESS))
+        {
+            curable_diseases[disease_count].et = ET_SICKNESS;
+            curable_diseases[disease_count++].desc = "sickness";
+        }
+
+        if (player_effect(p, ET_CLUMSINESS))
+        {
+            curable_diseases[disease_count].et = ET_CLUMSINESS;
+            curable_diseases[disease_count++].desc = "clumsiness";
+        }
+
+        if (player_effect(p, ET_DIZZINESS))
+        {
+            curable_diseases[disease_count].et = ET_DIZZINESS;
+            curable_diseases[disease_count++].desc = "dizziness";
+        }
+
+        if (player_effect(p, ET_DEC_CON))
+        {
+            curable_diseases[disease_count].et = ET_DEC_CON;
+            curable_diseases[disease_count++].desc = "incapacitation";
+        }
+
+        if (player_effect(p, ET_DEC_DEX))
+        {
+            curable_diseases[disease_count].et = ET_DEC_DEX;
+            curable_diseases[disease_count++].desc = "awkwardness";
+        }
+
+        if (player_effect(p, ET_DEC_INT))
+        {
+            curable_diseases[disease_count].et = ET_DEC_INT;
+            curable_diseases[disease_count++].desc = "mental deficiency";
+        }
+
+        if (player_effect(p, ET_DEC_STR))
+        {
+            curable_diseases[disease_count].et = ET_DEC_STR;
+            curable_diseases[disease_count++].desc = "weakness";
+        }
+
+        if (player_effect(p, ET_DEC_WIS))
+        {
+            curable_diseases[disease_count].et = ET_DEC_WIS;
+            curable_diseases[disease_count++].desc = "ignorance";
+        }
+
+        /* add found diseases to the menu */
+        for (selection = 0; selection < disease_count; selection++)
+        {
+            g_string_append_printf(msg, "  `lightgreen`%c`end`) heal from %s\n",
+                                   'd' + selection, curable_diseases[selection].desc);
+        }
+
+        /* an empty line for the eye */
+        g_string_append_c(msg, '\n');
+
+        /* offer the choices to the player */
+        selection = display_show_message(title, msg->str, 0);
+
+        /* get rid of the temporary string */
+        g_string_free(msg, TRUE);
+
+        switch (selection)
+        {
+        /* shop items */
+        case 'a':
+            building_shop(p, &nlarn->monastery_stock, title);
             break;
-        }
 
-        it = display_inventory("Choose an item to uncurse", p, &p->inventory,
-                NULL, FALSE, FALSE, FALSE,item_filter_cursed_or_unknown);
-
-        /* It is possible to abort the selection with ESC. */
-        if (it == NULL)
+        /* remove curse */
+        case 'b':
         {
-            log_add_entry(nlarn->log, "You chose to leave your items as "
-                    "they are.");
-            break;
-        }
+            item *it;
+            int price;
+            int choice;
+            char *question;
+            gchar *desc;
 
-        /* The cost of uncursing is 10 percent of item value.
-           The item value for cursed items is reduced by 50%,
-           hence divide by 5 */
-        price = (item_price(it) / 5) * (game_difficulty(nlarn) + 1);
-        /* some items are too cheap. */
-        price = max(price, 1);
-        /* Item stacks cost per item. */
-        price *= it->count;
+            if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
+            {
+                log_add_entry(nlarn->log, "You do not possess any cursed item.");
+                break;
+            }
 
-        desc = item_describe(it, player_item_identified(p, it), FALSE, TRUE);
-        question = g_strdup_printf("To remove the curse on %s, we ask you to "
-                                   "donate %d gold for our abbey. %s", desc,
-                                   price, ayfwt);
+            it = display_inventory("Choose an item to uncurse", p, &p->inventory,
+                    NULL, FALSE, FALSE, FALSE,item_filter_cursed_or_unknown);
 
-        choice = display_get_yesno(question, NULL, NULL, NULL);
-        g_free(question);
+            /* It is possible to abort the selection with ESC. */
+            if (it == NULL)
+            {
+                log_add_entry(nlarn->log, "You chose to leave your items as "
+                        "they are.");
+                break;
+            }
 
-        if (!choice)
-        {
-            log_add_entry(nlarn->log, "You chose leave the curse on %s.", desc);
-            break;
-        }
+            /* The cost of uncursing is 10 percent of item value.
+               The item value for cursed items is reduced by 50%,
+               hence divide by 5 */
+            price = (item_price(it) / 5) * (game_difficulty(nlarn) + 1);
+            /* some items are too cheap. */
+            price = max(price, 1);
+            /* Item stacks cost per item. */
+            price *= it->count;
 
-        /* The player may chose to uncurse items that are actually only of
-           unknown blessedness. */
-        if (it->cursed)
-        {
-            log_add_entry(nlarn->log, "The monks remove the curse on %s.",
-                    desc);
-            item_remove_curse(it);
-        }
-        else
-        {
-            log_add_entry(nlarn->log, "The monks tell you that %s %sn't "
-                    "cursed. Well, now you know for sure...", desc,
-                    (it->count == 1) ? "was" : "were");
-            it->blessed_known = TRUE;
-        }
-        g_free(desc);
+            desc = item_describe(it, player_item_identified(p, it), FALSE, TRUE);
+            question = g_strdup_printf("To remove the curse on %s, we ask you to "
+                                       "donate %d gold for our abbey. %s", desc,
+                                       price, ayfwt);
 
-        building_player_charge(p, price);
-        p->stats.gold_spent_donation += price;
-    }
-    break;
+            choice = display_get_yesno(question, NULL, NULL, NULL);
+            g_free(question);
 
-    /* healing */
-    case 'c':
-    {
-        int choice;
-        char *question;
-        /* the price for healing depends on the severity of the injury */
-        int price = (player_get_hp_max(p) - p->hp) * (game_difficulty(nlarn) + 1);
+            if (!choice)
+            {
+                log_add_entry(nlarn->log, "You chose leave the curse on %s.", desc);
+                break;
+            }
 
-        if (p->hp == player_get_hp_max(p))
-        {
-            log_add_entry(nlarn->log, "You are not in need of healing.");
-            break;
-        }
+            /* The player may chose to uncurse items that are actually only of
+               unknown blessedness. */
+            if (it->cursed)
+            {
+                log_add_entry(nlarn->log, "The monks remove the curse on %s.",
+                        desc);
+                item_remove_curse(it);
+            }
+            else
+            {
+                log_add_entry(nlarn->log, "The monks tell you that %s %sn't "
+                        "cursed. Well, now you know for sure...", desc,
+                        (it->count == 1) ? "was" : "were");
+                it->blessed_known = TRUE;
+            }
+            g_free(desc);
 
-        question = g_strdup_printf("For healing you, we ask that you "
-                                   "donate %d gold for our monastery. %s",
-                                   price, ayfwt);
-        choice = display_get_yesno(question, NULL, NULL, NULL);
-        g_free(question);
-
-        if (choice)
-        {
-            /* player chose to be healed */
-            player_effect_add(p, effect_new(ET_MAX_HP));
             building_player_charge(p, price);
             p->stats.gold_spent_donation += price;
-
         }
-        else
-        {
-            /* no, thanks */
-            log_add_entry(nlarn->log, "You chose not to be healed.");
-        }
-    }
-    break;
+        break;
 
-    default:
-        selection -= 'd';
-        /* healing of varous negative effects */
-        if (selection >= 0 && selection < disease_count)
+        /* healing */
+        case 'c':
         {
             int choice;
             char *question;
-            effect *e = player_effect_get(p, curable_diseases[selection].et);
-            int price = e->turns * (game_difficulty(nlarn) + 1);
+            /* the price for healing depends on the severity of the injury */
+            int price = (player_get_hp_max(p) - p->hp) * (game_difficulty(nlarn) + 1);
 
-            question = g_strdup_printf("For healing you from %s, we ask that you "
+            if (p->hp == player_get_hp_max(p))
+            {
+                log_add_entry(nlarn->log, "You are not in need of healing.");
+                break;
+            }
+
+            question = g_strdup_printf("For healing you, we ask that you "
                                        "donate %d gold for our monastery. %s",
-                                       curable_diseases[selection].desc, price, ayfwt);
-
+                                       price, ayfwt);
             choice = display_get_yesno(question, NULL, NULL, NULL);
             g_free(question);
 
             if (choice)
             {
                 /* player chose to be healed */
-                player_effect_del(p, e);
+                player_effect_add(p, effect_new(ET_MAX_HP));
                 building_player_charge(p, price);
                 p->stats.gold_spent_donation += price;
 
@@ -1146,12 +1120,51 @@ int building_monastery(struct player *p)
             else
             {
                 /* no, thanks */
-                log_add_entry(nlarn->log, "You chose not to be cured from %s.",
-                              curable_diseases[selection].desc);
+                log_add_entry(nlarn->log, "You chose not to be healed.");
             }
-
         }
         break;
+
+        /* leave the monastery */
+        case KEY_ESC:
+            leaving = TRUE;
+            break;
+
+        default:
+            selection -= 'd';
+            /* healing of varous negative effects */
+            if (selection >= 0 && selection < disease_count)
+            {
+                int choice;
+                char *question;
+                effect *e = player_effect_get(p, curable_diseases[selection].et);
+                int price = e->turns * (game_difficulty(nlarn) + 1);
+
+                question = g_strdup_printf("For healing you from %s, we ask that you "
+                                           "donate %d gold for our monastery. %s",
+                                           curable_diseases[selection].desc, price, ayfwt);
+
+                choice = display_get_yesno(question, NULL, NULL, NULL);
+                g_free(question);
+
+                if (choice)
+                {
+                    /* player chose to be healed */
+                    player_effect_del(p, e);
+                    building_player_charge(p, price);
+                    p->stats.gold_spent_donation += price;
+
+                }
+                else
+                {
+                    /* no, thanks */
+                    log_add_entry(nlarn->log, "You chose not to be cured from %s.",
+                                  curable_diseases[selection].desc);
+                }
+
+            }
+            break;
+        }
     }
 
     return turns;
