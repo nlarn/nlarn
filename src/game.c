@@ -120,7 +120,7 @@ static int try_locking_savegame_file(FILE *sg)
 }
 
 /* the game settings */
-static struct game_config config = { .auto_pickup = "\"+*$" };
+static struct game_config config = {};
 
 void game_init(int argc, char *argv[])
 {
@@ -246,7 +246,13 @@ void game_init(int argc, char *argv[])
         /* write a default configuration file, if none exists */
         if (!g_file_test(defaultpath, G_FILE_TEST_IS_REGULAR))
         {
+            /* ensure sane auto-pickup defaults */
+            config.auto_pickup = "\"+*$";
+
             write_ini_file(defaultpath, &config);
+
+            /* reset auto-pick setting so they can be free'd later */
+            config.auto_pickup = NULL;
         }
 
         /* try to load settings from the configuration file */
@@ -329,6 +335,8 @@ void game_init(int argc, char *argv[])
         {
             parse_autopickup_settings(config.auto_pickup,
                     nlarn->p->settings.auto_pickup);
+
+            g_free(config.auto_pickup);
         }
 
     } /* end new game only settings */

@@ -177,6 +177,9 @@ void write_ini_file(const char *filename, struct game_config *config)
 
     /* write config file contents to the give file */
     g_key_file_save_to_file(kf, filename, NULL);
+
+    /* clean up */
+    g_key_file_free(kf);
 }
 
 void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX])

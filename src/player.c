@@ -488,9 +488,10 @@ cJSON *player_serialize(player *p)
     }
 
     /* settings */
+    char *aps = compose_autopickup_settings(p->settings.auto_pickup);
     cJSON_AddItemToObject(pser, "settings", obj = cJSON_CreateObject());
-    cJSON_AddStringToObject(obj, "auto_pickup",
-            compose_autopickup_settings(p->settings.auto_pickup));
+    cJSON_AddStringToObject(obj, "auto_pickup", aps);
+    g_free(aps);
 
     /* statistics */
     cJSON_AddItemToObject(pser, "stats", obj = cJSON_CreateObject());
