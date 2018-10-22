@@ -1023,7 +1023,7 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
            diff 0-1: 100%, diff 2: 2/3, diff 3: 50%, ..., diff N: 2/(N+1) */
         if (rand_0n(game_difficulty(nlarn)+1) <= 1)
         {
-            item *it = item_new(IT_BOOK, rand_1n(item_max_id(IT_BOOK)));
+            item *it = item_new(IT_BOOK, rand_0n(item_max_id(IT_BOOK)));
             inv_add(map_ilist_at(dmap, pos), it);
         }
 

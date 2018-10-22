@@ -116,7 +116,7 @@ item *item_new(item_t item_type, int item_id)
 
             /* do not create the amulet of larn accidentally */
             if (nitem->id == item_max_id(item_type))
-                nitem->id = 1;
+                nitem->id = 0;
 
             loops++;
         }
@@ -153,7 +153,7 @@ item *item_new(item_t item_type, int item_id)
         /* ensure that unique armour isn't created multiple times */
         while (nlarn->armour_created[nitem->id])
         {
-            nitem->id = rand_1n(item_max_id(IT_ARMOUR));
+            nitem->id = rand_0n(item_max_id(IT_ARMOUR));
         }
 
         if (armour_unique(nitem))
@@ -182,7 +182,7 @@ item *item_new(item_t item_type, int item_id)
         /* prevent that the unique potion can be created twice */
         if ((item_id == PO_CURE_DIANTHR) && nlarn->cure_dianthr_created)
         {
-            nitem->id = rand_1n(item_max_id(IT_POTION));
+            nitem->id = rand_0n(item_max_id(IT_POTION));
         }
         else if (item_id == PO_CURE_DIANTHR)
         {
@@ -209,7 +209,7 @@ item *item_new(item_t item_type, int item_id)
         while (weapon_is_unique(nitem) && nlarn->weapon_created[nitem->id])
         {
             /* create another random weapon instead */
-            nitem->id = rand_1n(WT_MAX);
+            nitem->id = rand_0n(WT_MAX);
         }
 
         if (weapon_is_unique(nitem))
@@ -247,12 +247,11 @@ item *item_new_random(item_t item_type, gboolean finetouch)
 {
     item *it;
 
-    int item_id = 0;
-    int min_id = 1, max_id = 0;
 
     g_assert(item_type > IT_NONE && item_type < IT_MAX);
 
-    max_id = item_max_id(item_type);
+    int min_id = 0;
+    int max_id = item_max_id(item_type);
 
     /* special settings for some item types */
     switch (item_type)
@@ -271,7 +270,8 @@ item *item_new_random(item_t item_type, gboolean finetouch)
         /* nop */
         break;
     }
-    item_id = rand_m_n(min_id, max_id);
+
+    int item_id = rand_m_n(min_id, max_id);
     it = item_new(item_type, item_id);
 
     if (item_type == IT_AMMO)
@@ -286,7 +286,6 @@ item *item_new_random(item_t item_type, gboolean finetouch)
 item *item_new_by_level(item_t item_type, int num_level)
 {
     item *nitem;
-    int id_min, id_max;
     float variance, id_base, divisor;
 
     g_assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
@@ -320,11 +319,11 @@ item *item_new_by_level(item_t item_type, int num_level)
     }
 
     id_base = item_max_id(item_type) * (num_level * divisor);
-    id_min = id_base - (item_max_id(item_type) * variance);
-    id_max = id_base + (item_max_id(item_type) * variance);
+    int id_min = id_base - (item_max_id(item_type) * variance);
+    int id_max = id_base + (item_max_id(item_type) * variance);
 
     /* clean results */
-    if (id_min < 1) id_min = 1;
+    if (id_min < 0) id_min = 0;
     if (id_max < 1) id_max = 1;
     if (id_max > (int)item_max_id(item_type)) id_max = item_max_id(item_type);
 

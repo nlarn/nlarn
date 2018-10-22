@@ -281,7 +281,7 @@ void building_dndstore_init()
         if (type == IT_GEM || type == IT_GOLD)
             continue;
 
-        for (guint id = 1; id < item_max_id(type); id++)
+        for (guint id = 0; id < item_max_id(type); id++)
         {
             int count;
 

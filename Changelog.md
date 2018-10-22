@@ -21,6 +21,7 @@
 ### Fixed bugs:
 * Fix "Cure Blindness" spell
 * Fix crash when reading large scoreboard file
+* Generate all items again (0.7.3 didn't generate first item of type)
 * Disable auto-pickup when blinded
 * Don't generate rooms with one floor tile in one direction
 * Correct the effect of the disenchantress on some item type
