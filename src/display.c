@@ -730,7 +730,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     guint len_orig, len_curr;
     gboolean redraw = FALSE;
 
-    /* the windows title used for shops */
+    /* the window title used for shops */
     char *stitle = NULL;
 
     gboolean keep_running = TRUE;
