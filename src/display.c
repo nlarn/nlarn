@@ -697,6 +697,17 @@ gboolean display_available()
 
 void display_draw()
 {
+#ifdef PDCURSES
+    /* I have no idea why, but panels are not redrawn when
+     * using PDCurses without calling touchwin for it. */
+    GList *iterator = windows;
+    while (iterator) {
+        display_window *win = (display_window *)iterator->data;
+        touchwin(win->window);
+        iterator = iterator->next;
+    }
+#endif
+
     /* mark stdscr and all panels for redraw */
     update_panels();
 
