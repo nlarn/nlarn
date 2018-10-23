@@ -5386,6 +5386,7 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
         if (!printed_headline)
         {
                 g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
+                printed_headline = TRUE;
         }
 
         tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum, 2)));
