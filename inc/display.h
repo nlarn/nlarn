@@ -139,9 +139,9 @@ gboolean display_available();
 /**
  * Repaint the screen.
   */
-int display_draw();
+void display_draw();
 
-int display_paint_screen(player *p);
+void display_paint_screen(player *p);
 
 /**
  * Generic inventory display function

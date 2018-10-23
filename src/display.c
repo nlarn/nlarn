@@ -229,7 +229,7 @@ static int attr_colour(int colour, int reverse)
     mvwhline(win, y, x, ch, n); \
     wattroff(win, attrs)
 
-int display_paint_screen(player *p)
+void display_paint_screen(player *p)
 {
     guint x, y, i;
     position pos = pos_invalid;
@@ -674,7 +674,7 @@ int display_paint_screen(player *p)
     text_destroy(text);
     g_free(ttime);
 
-    return display_draw();
+    display_draw();
 }
 
 void display_shutdown()
@@ -695,13 +695,13 @@ gboolean display_available()
     return display_initialised;
 }
 
-int display_draw()
+void display_draw()
 {
     /* mark stdscr and all panels for redraw */
     update_panels();
 
     /* finally commit all the prepared updates */
-    return doupdate();
+    doupdate();
 }
 
 static int item_sort_normal(gconstpointer a, gconstpointer b, gpointer data)
@@ -3168,7 +3168,7 @@ static int display_window_move(display_window *dwin, int key)
     if (need_refresh)
     {
         move_panel(dwin->panel, dwin->y1, dwin->x1);
-        (void)display_draw();
+        display_draw();
     }
 
     return need_refresh;
