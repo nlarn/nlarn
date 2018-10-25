@@ -231,34 +231,39 @@ void game_init(int argc, char *argv[])
     parse_commandline(argc, argv, &config);
 
     /* if a custom ini file was specified, we require its presence */
-    if (config.inifile && !parse_ini_file(config.inifile, &config))
+    if (config.inifile)
     {
-        g_printerr("Error: could not find configuration file '%s'.",
-                config.inifile);
-        exit(EXIT_FAILURE);
+        if (!parse_ini_file(config.inifile, &config))
+        {
+            g_printerr("Error: could not find configuration file '%s'.",
+                    config.inifile);
+            exit(EXIT_FAILURE);
+        }
+        else
+        {
+            nlarn->inifile = g_strdup(config.inifile);
+        }
     }
     else
     {
         /* try loading settings from the default configuration file */
-        gchar *defaultpath = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+        nlarn->inifile = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
                 config_file, NULL);
 
         /* write a default configuration file, if none exists */
-        if (!g_file_test(defaultpath, G_FILE_TEST_IS_REGULAR))
+        if (!g_file_test(nlarn->inifile, G_FILE_TEST_IS_REGULAR))
         {
             /* ensure sane auto-pickup defaults */
             config.auto_pickup = "\"+*$";
 
-            write_ini_file(defaultpath, &config);
+            write_ini_file(nlarn->inifile, &config);
 
             /* reset auto-pick setting so they can be free'd later */
             config.auto_pickup = NULL;
         }
 
         /* try to load settings from the configuration file */
-        parse_ini_file(defaultpath, &config);
-
-        g_free(defaultpath);
+        parse_ini_file(nlarn->inifile, &config);
     }
 
     if (config.show_version) {
@@ -355,6 +360,7 @@ game *game_destroy(game *g)
     g_free(g->mazefile);
     g_free(g->fortunes);
     g_free(g->highscores);
+    g_free(g->inifile);
 
     for (int i = 0; i < MAP_MAX; i++)
     {

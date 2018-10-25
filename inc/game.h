@@ -48,6 +48,7 @@ typedef struct game
     gchar *mazefile;
     gchar *fortunes;
     gchar *highscores;
+    gchar *inifile;
 
     /* stock of the dnd store */
     inventory *store_stock;
