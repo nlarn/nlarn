@@ -7,6 +7,7 @@
   poison kicks in, only take 1 hp, but increase the frequency depending
   on poisoning
 * Stay in bank, monastery and school until explicitly leaving (with ESC)
+* Configure game defaults with CTRL-P
 * Show item type description in auto-pickup configuration dialogue
 * Permanently show spell description below spell selection window
 * Describe spell type for most spells in spell description

@@ -48,3 +48,6 @@ char *compose_autopickup_settings(const gboolean config[IT_MAX]);
 
 int parse_gender(const char gender);
 char compose_gender(const int gender);
+
+/* configure game defaults */
+void configure_defaults(const char *inifile);

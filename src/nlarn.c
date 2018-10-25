@@ -28,6 +28,7 @@
 # include <windows.h>
 #endif
 
+#include "config.h"
 #include "container.h"
 #include "display.h"
 #include "game.h"
@@ -632,6 +633,11 @@ int main(int argc, char *argv[])
 #endif
             clear();
             display_draw();
+            break;
+
+            /* configure defaults */
+        case 16: /* ^P */
+            configure_defaults(nlarn->inifile);
             break;
 
             /* quit */

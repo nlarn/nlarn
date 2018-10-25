@@ -21,6 +21,7 @@
 #include <glib.h>
 
 #include "config.h"
+#include "display.h"
 #include "items.h"
 #include "player.h"
 
@@ -169,10 +170,10 @@ void write_ini_file(const char *filename, struct game_config *config)
 
     /* apply configuration to configuration file */
     g_key_file_set_integer(kf, "nlarn", "difficulty",  config->difficulty);
-    g_key_file_set_string(kf,  "nlarn", "name",        config->name);
-    g_key_file_set_value(kf,   "nlarn", "gender",      config->gender);
-    g_key_file_set_value(kf,   "nlarn", "stats",       config->stats);
-    g_key_file_set_value(kf,   "nlarn", "auto-pickup", config->auto_pickup);
+    g_key_file_set_string(kf,  "nlarn", "name",        config->name ? config->name : "");
+    g_key_file_set_value(kf,   "nlarn", "gender",      config->gender ? config->gender : "");
+    g_key_file_set_value(kf,   "nlarn", "stats",       config->stats ? config->stats : "");
+    g_key_file_set_value(kf,   "nlarn", "auto-pickup", config->auto_pickup ? config->auto_pickup : "");
     g_key_file_set_boolean(kf, "nlarn", "no-autosave", config->no_autosave);
 
     /* write config file contents to the give file */
@@ -251,4 +252,122 @@ char compose_gender(const int gender)
         default:
             return ' ';
     }
+}
+
+void configure_defaults(const char *inifile)
+{
+    const char *menu =
+        "Configure game defaults\n"
+        "\n"
+        "  `lightgreen`a`end`) Choose character name   (current: %s)\n"
+        "  `lightgreen`b`end`) Choose character gender (current: %s)\n"
+        "  `lightgreen`c`end`) Choose character stats  (current: %s)\n"
+        "  `lightgreen`d`end`) Configure auto-pickup   (current: %s)\n"
+        "\n"
+        "Clear values with `lightgreen`A`end`-`lightgreen`D`end`\n";
+
+    struct game_config config = {};
+    parse_ini_file(inifile, &config);
+
+    gboolean leaving = FALSE;
+
+    while (!leaving)
+    {
+        char *msg = g_strdup_printf(menu,
+                config.name ? config.name : "",
+                config.gender ? ((strcmp(config.gender, "m") == 0) ? "male" : "female") : "",
+                config.stats ? config.stats: "",
+                config.auto_pickup ? config.auto_pickup : "");
+
+        int res = display_show_message("Configure defaults", msg, 5);
+
+        switch (res)
+        {
+            /* default name */
+            case 'a':
+            {
+                char *name = display_get_string("Choose default name",
+                        "By what name shall all your charactes be called?",
+                        NULL, 45);
+
+                if (config.name) g_free(config.name);
+                config.name = name;
+                break;
+            }
+
+            /* clear name */
+            case 'A':
+                if (config.name) g_free(config.name);
+                config.name = NULL;
+                break;
+
+            /* default gender */
+            case 'b':
+            {
+                int gender = (display_get_yesno("Shall your future characters be "
+                            "male or female?", "Choose default gender",
+                            "Female", "Male") == TRUE)
+                    ? PS_FEMALE : PS_MALE;
+
+                if (config.gender) g_free(config.gender);
+                config.gender = g_strdup_printf("%c", compose_gender(gender));
+                break;
+            }
+
+            /* clear gender */
+            case 'B':
+                if (config.gender) g_free(config.gender);
+                config.gender = NULL;
+                break;
+
+            /* default stats */
+            case 'c':
+            {
+                char stats = player_select_bonus_stats();
+
+                if (config.stats) free(config.stats);
+                config.stats = g_strdup_printf("%c", stats);
+                break;
+            }
+
+            /* clear stats */
+            case 'C':
+                if (config.stats) g_free(config.stats);
+                config.stats = NULL;
+                break;
+
+            /* auto-pickup defaults */
+            case 'd':
+            {
+                gboolean conf[IT_MAX] = {};
+                if (config.auto_pickup)
+                {
+                    parse_autopickup_settings(config.auto_pickup, conf);
+                    g_free(config.auto_pickup);
+                }
+
+                display_config_autopickup(conf);
+                config.auto_pickup = compose_autopickup_settings(conf);
+
+                break;
+            }
+
+            /* clear auto-pickup */
+            case 'D':
+                if (config.auto_pickup) g_free(config.auto_pickup);
+                config.auto_pickup = NULL;
+                break;
+
+            case KEY_ESC:
+                leaving = TRUE;
+                break;
+
+            default:
+                /* ignore input */
+                break;
+        }
+    }
+
+    /* write back modified config */
+    write_ini_file(inifile, &config);
 }

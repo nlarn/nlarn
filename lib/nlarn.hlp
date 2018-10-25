@@ -63,6 +63,7 @@ You can select the travel target by moving the cursor or by typing the desired f
 `lightgreen`CTRL+D`end`  list discovered landmarks
 `lightgreen`CTRL+D`end`  page down in the inventory, spell list and messages
 `lightgreen`CTRL+L`end`  redraw the screen
+`lightgreen`CTRL+P`end`  configure presets for new games
 `lightgreen`CTRL+Q`end`  quit the game
 `lightgreen`CTRL+R`end`  recall message history
 `lightgreen`CTRL+S`end`  save and exit the game
