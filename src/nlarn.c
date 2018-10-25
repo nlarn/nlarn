@@ -379,11 +379,6 @@ int main(int argc, char *argv[])
             player_pickup(nlarn->p);
             break;
 
-        case 1: /* ^A */
-            display_config_autopickup(nlarn->p->settings.auto_pickup);
-            player_autopickup_show(nlarn->p);
-            break;
-
             /* sit and wait */
         case '5':
         case '.':
@@ -612,6 +607,12 @@ int main(int argc, char *argv[])
             /* swap weapons */
         case 'x':
             weapon_swap(nlarn->p);
+            break;
+
+            /* configure auto-pickup */
+        case 1: /* ^A */
+            display_config_autopickup(nlarn->p->settings.auto_pickup);
+            player_autopickup_show(nlarn->p);
             break;
 
             /* show stationary object memory */
