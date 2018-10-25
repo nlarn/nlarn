@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
         int res = display_get_yesno("Are you male or female?", NULL, "Female", "Male");
 
         /* display_get_yesno() returns 0 or one */
-        nlarn->p->sex = (res == TRUE) ?  PS_FEMALE : PS_MALE;
+        nlarn->p->sex = (res == TRUE) ? PS_FEMALE : PS_MALE;
     }
 
     while (!nlarn->player_stats_set)
