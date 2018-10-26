@@ -247,13 +247,11 @@ message_log *log_deserialize(cJSON *lser)
 
 GPtrArray *text_wrap(const char *str, int width, int indent)
 {
-    GPtrArray *text;
-    int spos = 0;       /* current starting position in source string */
+    GPtrArray *text = g_ptr_array_new();
+    unsigned spos = 0;  /* current starting position in source string */
+    int pwidth = width; /* the width of the current paragraph */
     int lp;             /* last position of whitespace */
-    int len;            /* length of str */
     char *spaces = NULL;
-
-    text = g_ptr_array_new();
 
     /* prepare indentation */
     if (indent)
@@ -266,10 +264,8 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
             spaces[lp] = ' ';
     }
 
-    len = strlen(str);
-
     /* scan through source string */
-    while (spos < len)
+    while (spos < strlen(str))
     {
         /* flag to determine if the current char must not be counted */
         gboolean in_tag = FALSE;
@@ -287,7 +283,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         char *line;
 
         /* scan the next line */
-        while (llen <= width)
+        while (llen <= pwidth)
         {
             /* toggle the flag if the current character is the tag start / stop symbol */
             if (str[spos + cpos] == '`')
@@ -300,6 +296,9 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
             if (next == '\0' || next == '\n' || next == '\r')
             {
                 lp = cpos;
+                /* reset the width of the next line to the full width
+                 * after the end of a paragraph. */
+                pwidth = width;
                 break;
             }
 
@@ -323,9 +322,9 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         /* skip silly CR chars */
         if (str[spos + lp] == '\r') lp++;
 
-        /* reduce width to make space for indentation after the first line */
-        if (indent && text->len == 1)
-            width -= indent;
+        /* reduce width while inside a paragraph to make space
+         * for indentation after the first line */
+        if (str[cpos + spos] != '\n') pwidth = width - indent;
 
         /* indent lines if not on the first line or the first
            line of a new paragraph */

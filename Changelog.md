@@ -27,6 +27,7 @@
 * Disable auto-pickup when blinded
 * Don't generate rooms with one floor tile in one direction
 * Correct the effect of the disenchantress on some item type
+* Fixed wrapping texts with indentation
 * Fix text wrapping in message popup
 * Hide the console windows on Windows
 
