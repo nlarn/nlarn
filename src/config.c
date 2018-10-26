@@ -219,6 +219,26 @@ char *compose_autopickup_settings(const gboolean config[IT_MAX])
     return settings;
 }
 
+char *verbose_autopickup_settings(const gboolean config[IT_MAX])
+{
+    GString *settings = g_string_new(NULL);
+    int count = 0;
+
+    for (item_t it = IT_NONE; it < IT_MAX; it++)
+    {
+        if (config[it])
+        {
+            if (count)
+                g_string_append(settings, ", ");
+
+            g_string_append(settings, item_name_pl(it));
+            count++;
+        }
+    }
+
+    return g_string_free(settings, settings->len == 0);
+}
+
 int parse_gender(const char gender)
 {
     char _gender = g_ascii_tolower(gender);
@@ -256,13 +276,14 @@ char compose_gender(const int gender)
 
 void configure_defaults(const char *inifile)
 {
+    const char *undef = "not defined";
     const char *menu =
         "Configure game defaults\n"
         "\n"
-        "  `lightgreen`a`end`) Choose character name   (current: %s)\n"
-        "  `lightgreen`b`end`) Choose character gender (current: %s)\n"
-        "  `lightgreen`c`end`) Choose character stats  (current: %s)\n"
-        "  `lightgreen`d`end`) Configure auto-pickup   (current: %s)\n"
+        "  `lightgreen`a`end`) Character name        - %s\n"
+        "  `lightgreen`b`end`) Character gender      - %s\n"
+        "  `lightgreen`c`end`) Character stats       - %s\n"
+        "  `lightgreen`d`end`) Configure auto-pickup - %s\n"
         "\n"
         "Clear values with `lightgreen`A`end`-`lightgreen`D`end`\n";
 
@@ -273,13 +294,41 @@ void configure_defaults(const char *inifile)
 
     while (!leaving)
     {
-        char *msg = g_strdup_printf(menu,
-                config.name ? config.name : "",
-                config.gender ? ((strcmp(config.gender, "m") == 0) ? "male" : "female") : "",
-                config.stats ? config.stats: "",
-                config.auto_pickup ? config.auto_pickup : "");
+        /* name */
+        char *nbuf = (config.name && strlen(config.name) > 0)
+            ? g_strdup_printf("`yellow`%s`end`", config.name)
+            : NULL;
+        /* gender */
+        char *gbuf = config.gender
+            ? g_strdup_printf("`yellow`%s`end`",
+                    ((strcmp(config.gender, "m") == 0) ? "male" : "female"))
+            : NULL;
+        /* stats */
+        char *sbuf = (config.stats && strlen(config.stats) > 0)
+            ? g_strdup_printf("`yellow`%s`end`", player_bonus_stat_desc[config.stats[0] - 'a'])
+            : NULL;
+        /* auto-pickup */
+        gboolean autopickup[IT_MAX];
+        parse_autopickup_settings(config.auto_pickup, autopickup);
+        char *verboseap = verbose_autopickup_settings(autopickup);
+        char *abuf = config.auto_pickup
+            ? g_strdup_printf("`yellow`%s`end`", verboseap)
+            : NULL;
+        if (verboseap) g_free(verboseap);
 
-        int res = display_show_message("Configure defaults", msg, 5);
+        char *msg = g_strdup_printf(menu,
+                nbuf ? nbuf : undef,
+                gbuf ? gbuf : undef,
+                sbuf ? sbuf : undef,
+                abuf ? abuf: undef);
+
+        if (nbuf) g_free(nbuf);
+        if (gbuf) g_free(gbuf);
+        if (sbuf) g_free(sbuf);
+        if (abuf) g_free(abuf);
+
+        int res = display_show_message("Configure defaults", msg, 29);
+        g_free(msg);
 
         switch (res)
         {
@@ -288,10 +337,12 @@ void configure_defaults(const char *inifile)
             {
                 char *name = display_get_string("Choose default name",
                         "By what name shall all your charactes be called?",
-                        NULL, 45);
-
-                if (config.name) g_free(config.name);
-                config.name = name;
+                        config.name, 45);
+                if (name)
+                {
+                    if (config.name) g_free(config.name);
+                    config.name = name;
+                }
                 break;
             }
 
@@ -370,4 +421,10 @@ void configure_defaults(const char *inifile)
 
     /* write back modified config */
     write_ini_file(inifile, &config);
+
+    /* clean up */
+    if (config.name)        g_free(config.name);
+    if (config.gender)      g_free(config.gender);
+    if (config.stats)       g_free(config.stats);
+    if (config.auto_pickup) g_free(config.auto_pickup);
 }

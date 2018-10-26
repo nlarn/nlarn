@@ -612,8 +612,20 @@ int main(int argc, char *argv[])
 
             /* configure auto-pickup */
         case 1: /* ^A */
-            display_config_autopickup(nlarn->p->settings.auto_pickup);
-            player_autopickup_show(nlarn->p);
+            {
+                display_config_autopickup(nlarn->p->settings.auto_pickup);
+                char *settings = verbose_autopickup_settings(nlarn->p->settings.auto_pickup);
+
+                if (!settings)
+                {
+                    log_add_entry(nlarn->log, "Auto-pickup is not enabled.");
+                }
+                else
+                {
+                    log_add_entry(nlarn->log, "Auto-pickup is enabled for %s.", settings);
+                    g_free(settings);
+                }
+            }
             break;
 
             /* show stationary object memory */

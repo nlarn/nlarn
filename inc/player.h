@@ -210,6 +210,9 @@ typedef enum _player_cod
 /* function declarations */
 
 player *player_new();
+
+/* an array with textual descriptions of the player stac configurations */
+extern const char *player_bonus_stat_desc[];
 char player_select_bonus_stats();
 /**
  * @brief Assigns player's stats to the given preset
@@ -272,7 +275,6 @@ int player_map_enter(player *p, map *l, gboolean teleported);
 item **player_get_random_armour(player *p, int enchantable);
 
 void player_pickup(player *p);
-void player_autopickup_show(player *p);
 
 void player_level_gain(player *p, int count);
 void player_level_lose(player *p, int count);

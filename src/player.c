@@ -183,20 +183,30 @@ player *player_new()
 static const char preset_min = 'a';
 static char preset_max = 'f';
 
+const char *player_bonus_stat_desc[] = {
+    "Strong character",
+    "Agile character",
+    "Tough character",
+    "Smart character",
+    "Randomly selected character preset",
+    "All stats assigned randomly"
+};
+
 char player_select_bonus_stats()
 {
     int selection = 0;
-    const char *text = "  `lightgreen`a`end`) Strong character\n"
-                       "  `lightgreen`b`end`) Agile character\n"
-                       "  `lightgreen`c`end`) Tough character\n"
-                       "  `lightgreen`d`end`) Smart character\n"
-                       "  `lightgreen`e`end`) Randomly pick one of the above\n"
-                       "  `lightgreen`f`end`) Stats assigned randomly\n";
+    GString *text = g_string_new(NULL);
+    for (int idx = preset_min; idx <=  preset_max; idx++)
+    {
+        g_string_append_printf(text, "  `lightgreen`%c`end`) %s\n",
+                idx, player_bonus_stat_desc[idx - preset_min]);
+    }
 
     while (selection < preset_min || selection > preset_max)
     {
-        selection = display_show_message("Choose a character build", text, 0);
+        selection = display_show_message("Choose a character build", text->str, 0);
     }
+    g_string_free(text, TRUE);
 
     return selection;
 }
@@ -1814,41 +1824,6 @@ static void player_autopickup(player *p)
                           other_items_count);
         }
     }
-}
-
-void player_autopickup_show(player *p)
-{
-    GString *msg;
-    int count = 0;
-
-    g_assert (p != NULL);
-
-    msg = g_string_new(NULL);
-
-    for (item_t it = IT_NONE; it < IT_MAX; it++)
-    {
-        if (p->settings.auto_pickup[it])
-        {
-            if (count)
-                g_string_append(msg, ", ");
-
-            g_string_append(msg, item_name_pl(it));
-            count++;
-        }
-    }
-
-    if (!count)
-        g_string_append(msg, "Auto-pickup is not enabled.");
-    else
-    {
-        g_string_prepend(msg, "Auto-pickup is enabled for ");
-        g_string_append(msg, ".");
-    }
-
-
-    log_add_entry(nlarn->log, msg->str);
-
-    g_string_free(msg, TRUE);
 }
 
 void player_level_gain(player *p, int count)

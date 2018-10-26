@@ -46,6 +46,16 @@ void parse_commandline(int argc, char *argv[], struct game_config *config);
 void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX]);
 char *compose_autopickup_settings(const gboolean config[IT_MAX]);
 
+/**
+ * @brief Return a comma separated list of all selected item types
+ *
+ * @param a boolean array (size IT_MAX)
+ *
+ * @return NULL if no item type is selected, otherwise a comma-separated
+ *         list of item type names
+ */
+char *verbose_autopickup_settings(const gboolean config[IT_MAX]);
+
 int parse_gender(const char gender);
 char compose_gender(const int gender);
 
