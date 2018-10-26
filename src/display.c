@@ -79,8 +79,8 @@ static gboolean display_initialised = FALSE;
 /* linked list of opened windows */
 static GList *windows = NULL;
 
-static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
-                      int y, int x, const char *fmt, ...);
+static int mvwcprintw(WINDOW *win, int defattr, int currattr,
+        const display_colset *colset, int y, int x, const char *fmt, ...);
 
 static int display_get_colval(const display_colset *colset, const char *name);
 
@@ -602,10 +602,11 @@ void display_paint_screen(player *p)
         }
 
         /* display effect descriptions */
+        int currattr = COLOURLESS;
         for (i = 0; i < g_strv_length(efdescs); i++)
         {
-            mvwcprintw(stdscr, LIGHTCYAN, display_default_colset, 11 + i,
-                       MAP_MAX_X + 3, efdescs[i]);
+            currattr = mvwcprintw(stdscr, LIGHTCYAN, currattr,
+                    display_default_colset, 11 + i, MAP_MAX_X + 3, efdescs[i]);
 
         }
 
@@ -653,10 +654,7 @@ void display_paint_screen(player *p)
         i++;
     }
 
-    /* clear the message area */
-    move(20, 0);
-    clrtobot();
-
+    int currattr = COLOURLESS;
     for (y = 20, i = 0; (y < (unsigned)LINES) && (i < text->len); i++, y++)
     {
         /* default colour for the line */
@@ -667,8 +665,8 @@ void display_paint_screen(player *p)
         else
             def_attrs = LIGHTGRAY;
 
-        mvwcprintw(stdscr, def_attrs, display_default_colset,
-                   y, 0, g_ptr_array_index(text, i));
+        currattr = mvwcprintw(stdscr, def_attrs, currattr,
+                display_default_colset, y, 0, g_ptr_array_index(text, i));
     }
 
     text_destroy(text);
@@ -2740,21 +2738,12 @@ int display_show_message(const char *title, const char *message, int indent)
     do
     {
         /* display the window content */
+        int currattr = COLOURLESS;
         for (guint idx = 0; idx < maxvis; idx++)
         {
-            guint count;
-            count = mvwcprintw(mwin->window, DDC_LIGHTGRAY, display_dialog_colset,
-                               idx + 1, 1, " %-*s ", width - wred,
-                               g_ptr_array_index(text, idx + offset));
-
-            /* If the function has printed less characters than the window
-               content width, overwrite the rest of the line with blanks.
-               Actually this should be fixed in mvwcprintw(), but that seems
-               like lot of work. */
-            for (guint pos = count; pos < (width - wred); pos++)
-            {
-                waaddch(mwin->window, DDC_LIGHTGRAY, ' ');
-            }
+            currattr = mvwcprintw(mwin->window, DDC_LIGHTGRAY, currattr,
+                    display_dialog_colset, idx + 1, 1, " %-*s ", width - wred,
+                    g_ptr_array_index(text, idx + offset));
         }
 
         display_window_update_arrow_up(mwin, offset > 0);
@@ -2868,10 +2857,12 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     win = display_window_new(x1, y1, width, height, title);
 
     /* display message */
+    int currattr = COLOURLESS;
     for (guint idx = 0; idx < text->len; idx++)
     {
-        mvwcprintw(win->window, DDC_WHITE, display_dialog_colset, idx + 1, 1,
-                  " %-*s ", width - 4, g_ptr_array_index(text, idx));
+        currattr = mvwcprintw(win->window, DDC_WHITE, currattr,
+                display_dialog_colset, idx + 1, 1, " %-*s ",
+                width - 4, g_ptr_array_index(text, idx));
     }
 
     /* clean up */
@@ -2932,12 +2923,11 @@ void display_windows_show()
     }
 }
 
-static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
-                      int y, int x, const char *fmt, ...)
+static int mvwcprintw(WINDOW *win, int defattr, int currattr,
+        const display_colset *colset, int y, int x, const char *fmt, ...)
 {
     va_list argp;
     gchar *msg;
-    int count = 0;
     int attr;
 
     /* assemble the message */
@@ -2948,8 +2938,12 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
     /* move to the starting position */
     wmove(win, y, x);
 
-    /* set the default attribute */
-    wattron(win, attr = defattr);
+    if (currattr != COLOURLESS)
+        /* restore the previously used attribute */
+        wattron(win, attr = currattr);
+    else
+        /* set the default attribute */
+        wattron(win, attr = defattr);
 
     for (guint pos = 0; pos < strlen(msg); pos++)
     {
@@ -2959,14 +2953,11 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
             /* position of the tag terminator */
             int tpos;
 
-            /* the tag value */
-            char *tval = NULL;
-
             /* find position of tag terminator */
             for (tpos = pos + 1; msg[tpos] != '`'; tpos++);
 
-            /* extract string between the %s */
-            tval = g_strndup(&msg[pos + 1], tpos - pos - 1);
+            /* extract the tag value */
+            char *tval = g_strndup(&msg[pos + 1], tpos - pos - 1);
 
             /* find colour value for the tag content */
             if (strcmp(tval, "end") == 0)
@@ -2993,18 +2984,19 @@ static int mvwcprintw(WINDOW *win, int defattr, const display_colset *colset,
 
         /* print the message character wise */
         waddch(win, msg[pos]);
-
-        /* increment the count of printed chars */
-        count++;
     }
 
-    /* reset the default attribute */
-    wattroff(win, defattr);
+    /* erase to the end of the line (spare borders of windows) */
+    for (int pos = getcurx(win); pos < getmaxx(win) - (win == stdscr ? 0 : 1); pos++)
+    {
+        waaddch(win, attr, ' ');
+    }
 
     /* clean assembled string */
     g_free(msg);
 
-    return count;
+    /* return active attribute */
+    return attr;
 }
 
 static void display_inventory_help(GPtrArray *callbacks)
