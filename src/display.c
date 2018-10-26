@@ -2694,30 +2694,24 @@ void display_show_history(message_log *log, const char *title)
 
 int display_show_message(const char *title, const char *message, int indent)
 {
-    guint height, width, max_len = 0;
-    guint startx, starty;
-    display_window *mwin;
     int key;
 
-    GPtrArray *text;
-    guint maxvis = 0;
-    guint offset = 0;
-
     /* Number of columns required for
-         a) the window border and the text margin
-         b) the padding around the window */
+         a) the window border and the text padding
+         b) the margin around the window */
     const guint wred = 4;
 
     gboolean RUN = TRUE;
 
     /* default window width according to available screen space;
-       padded by 2 chars on each side */
-    width = COLS - wred;
+       wred/2 chars margin on each side */
+    guint width = COLS - wred;
 
-    /* wrap message according to width */
-    text = text_wrap(message, width - wred, indent);
+    /* wrap message according to width (minus border and padding) */
+    GPtrArray *text = text_wrap(message, width - wred, indent);
 
     /* determine the length of longest text line */
+    guint max_len = 0;
     for (guint idx = 0; idx < text->len; idx++)
         max_len = max(max_len, strlen(g_ptr_array_index(text, idx)));
 
@@ -2726,23 +2720,23 @@ int display_show_message(const char *title, const char *message, int indent)
         width = max_len + wred;
 
     /* set height according to message line count */
-    height = min((LINES - 3), (text->len + 2));
+    guint height = min((LINES - 3), (text->len + 2));
 
-    starty = (LINES - height) / 2;
-    startx = (COLS - width) / 2;
-
-    mwin = display_window_new(startx, starty, width, height, title);
-
-    maxvis = min(text->len, height - 2);
+    guint starty = (LINES - height) / 2;
+    guint startx = (COLS - width) / 2;
+    display_window *mwin = display_window_new(startx, starty, width, height, title);
+    guint maxvis = min(text->len, height - 2);
+    guint offset = 0;
 
     do
     {
         /* display the window content */
         int currattr = COLOURLESS;
+
         for (guint idx = 0; idx < maxvis; idx++)
         {
             currattr = mvwcprintw(mwin->window, DDC_LIGHTGRAY, currattr,
-                    display_dialog_colset, idx + 1, 1, " %-*s ", width - wred,
+                    display_dialog_colset, idx + 1, 2,
                     g_ptr_array_index(text, idx + offset));
         }
 
