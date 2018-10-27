@@ -143,7 +143,7 @@ int building_bank(player *p)
             g_string_append(text, "`lightgreen`s`end`)ell a gem");
 
         display_window *bwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
-                47, msg_title, text->str);
+                47, msg_title, text->str, 0);
 
         g_string_free(text, TRUE);
 
@@ -653,7 +653,7 @@ static int building_scribe_scroll(player *p)
     /* shop popup window */
     char *msg = g_strdup_printf("The scribes are currently writing a scroll "
             "of %s for you.", scroll_name(bscroll));
-    display_window *pop = display_popup(2, 2, 40, "School", msg);
+    display_window *pop = display_popup(2, 2, 40, "School", msg, 0);
     g_free(msg);
 
     /* writing a scroll takes 10 mobuls */
@@ -696,7 +696,7 @@ static void building_school_take_course(player *p, int course, guint price)
     /* shop popup window */
     char *msg = g_strdup_printf("You are currently taking the course \"%s\".",
             school_courses[course].description);
-    display_window *pop = display_popup(2, 2, 40, "School", msg);
+    display_window *pop = display_popup(2, 2, 40, "School", msg, 0);
     g_free(msg);
 
     /* charge the player */
@@ -1044,7 +1044,7 @@ int building_monastery(struct player *p)
 
         /* offer the choices to the player */
         display_window *mwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
-                47, title, msg->str);
+                47, title, msg->str, 0);
 
         int selection = wgetch(mwin->window);
 

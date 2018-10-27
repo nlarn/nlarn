@@ -211,10 +211,12 @@ int display_show_message(const char *title, const char *message, int indent);
  * @param The popup window message. The message will be wrapped to fit the
  *        window's width. If the message is too long to fit the screen, it
  *        will be truncated.
+ * @param Indentation for wrapped lines
  *
  * @return A pointer to the newly allocated window structure.
  */
-display_window *display_popup(int x1, int y1, int width, const char *title, const char *msg);
+display_window *display_popup(int x1, int y1, int width, const char *title,
+		const char *msg, int indent);
 
 /**
  * @brief Destroy a window and the resources allocated for it.

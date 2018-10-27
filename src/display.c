@@ -1261,7 +1261,7 @@ spell *display_spell_select(const char *title, player *p)
 
         gchar *spdesc = spell_desc_by_id(sp->id);;
         ipop = display_popup(swin->x1, swin->y1 + swin->height, width,
-                spell_name(sp), spdesc);
+                spell_name(sp), spdesc, 0);
         g_free(spdesc);
 
         switch ((key = getch()))
@@ -2299,7 +2299,7 @@ position display_get_new_position(player *p,
         miter = mlist = fov_get_visible_monsters(p->fv);
 
     if (!visible)
-        msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message);
+        msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message, 0);
 
     /* if a starting position for a ray has been provided, check if it works */
     if (ray && !pos_identical(p->pos, start))
@@ -2334,12 +2334,12 @@ position display_get_new_position(player *p,
             /* display message or description of selected position */
             if (pos_identical(pos, p->pos))
             {
-                msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message);
+                msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, NULL, message, 0);
             }
             else
             {
                 char *desc = map_pos_examine(pos);
-                msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, message, desc);
+                msgpop = display_popup(3, min(MAP_MAX_Y + 4, LINES - 4), 0, message, desc, 0);
                 g_free(desc);
             }
         } /* visible */
@@ -2812,7 +2812,7 @@ int display_show_message(const char *title, const char *message, int indent)
     return key;
 }
 
-display_window *display_popup(int x1, int y1, int width, const char *title, const char *msg)
+display_window *display_popup(int x1, int y1, int width, const char *title, const char *msg, int indent)
 {
     display_window *win;
     GPtrArray *text;
@@ -2843,7 +2843,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
             width = max_width;
     }
 
-    text = text_wrap(msg, width - 4, 0);
+    text = text_wrap(msg, width - 4, indent);
     height = min(text->len + 2, max_height);
 
     win = display_window_new(x1, y1, width, height, title);
@@ -3270,7 +3270,7 @@ static display_window *display_item_details(guint x1, guint y1, guint width,
 
     /* the detailed item description */
     char *msg = item_detailed_description(it, known, shop);
-    idpop = display_popup(x1, y1, width, "Item details", msg);
+    idpop = display_popup(x1, y1, width, "Item details", msg, 0);
 
     /* tidy up */
     g_free(msg);
