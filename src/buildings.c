@@ -142,8 +142,12 @@ int building_bank(player *p)
         if (inv_length_filtered(p->inventory, item_filter_gems))
             g_string_append(text, "`lightgreen`s`end`)ell a gem");
 
-        int cmd = display_show_message(msg_title, text->str, 0);
+        display_window *bwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
+                47, msg_title, text->str);
+
         g_string_free(text, TRUE);
+
+        int cmd = wgetch(bwin->window);
 
         switch (cmd)
         {
@@ -236,6 +240,7 @@ int building_bank(player *p)
 
         /* every interaction in the bank takes two turns */
         player_make_move(p, 2, FALSE, NULL);
+        display_window_destroy(bwin);
     }
 
     g_string_free(greeting, TRUE);
@@ -957,7 +962,6 @@ int building_monastery(struct player *p)
     while (!leaving)
     {
         GString *msg = g_string_new(msg_welcome);
-        int selection;
         int disease_count = 0;
 
         /* buffer to store all diseases the player currently suffers from */
@@ -1029,17 +1033,20 @@ int building_monastery(struct player *p)
         }
 
         /* add found diseases to the menu */
-        for (selection = 0; selection < disease_count; selection++)
+        for (int idx = 0; idx < disease_count; idx++)
         {
             g_string_append_printf(msg, "  `lightgreen`%c`end`) heal from %s\n",
-                                   'd' + selection, curable_diseases[selection].desc);
+                                   'd' + idx, curable_diseases[idx].desc);
         }
 
         /* an empty line for the eye */
         g_string_append_c(msg, '\n');
 
         /* offer the choices to the player */
-        selection = display_show_message(title, msg->str, 0);
+        display_window *mwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
+                47, title, msg->str);
+
+        int selection = wgetch(mwin->window);
 
         /* get rid of the temporary string */
         g_string_free(msg, TRUE);
@@ -1201,6 +1208,8 @@ int building_monastery(struct player *p)
 
         /* track time usage */
         player_make_move(p, 2, FALSE, NULL);
+
+        display_window_destroy(mwin);
     }
 
     return 0;
