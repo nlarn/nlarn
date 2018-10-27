@@ -363,6 +363,20 @@ GPtrArray *text_append(GPtrArray *first, GPtrArray *second)
     return first;
 }
 
+int text_get_longest_line(GPtrArray *text)
+{
+    g_assert(text != NULL);
+
+    int max_len = 0;
+
+    for (guint idx = 0; idx < text->len; idx++)
+    {
+        max_len = max(max_len, strlen(g_ptr_array_index(text, idx)));
+    }
+
+    return max_len;
+}
+
 void text_destroy(GPtrArray *text)
 {
     g_assert(text != NULL);

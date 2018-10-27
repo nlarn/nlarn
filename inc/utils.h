@@ -90,6 +90,14 @@ GPtrArray *text_wrap(const char *str, int width, int indent);
  */
 GPtrArray *text_append(GPtrArray *first, GPtrArray *second);
 
+/**
+ * Determine the length of longest text line
+ *
+ * @param an array of strings
+ * @return the length of the longest string in the array
+ */
+int text_get_longest_line(GPtrArray *text);
+
 void text_destroy(GPtrArray *text);
 
 /* helpers for NULL-terminated string arrays */

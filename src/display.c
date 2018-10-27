@@ -2711,9 +2711,7 @@ int display_show_message(const char *title, const char *message, int indent)
     GPtrArray *text = text_wrap(message, width - wred, indent);
 
     /* determine the length of longest text line */
-    guint max_len = 0;
-    for (guint idx = 0; idx < text->len; idx++)
-        max_len = max(max_len, strlen(g_ptr_array_index(text, idx)));
+    guint max_len = text_get_longest_line(text);
 
     /* shrink the window width if the default width is not required */
     if (max_len + wred < width)
