@@ -14,7 +14,7 @@
 .PHONY: help clean dist
 
 ifndef config
-	config=debug
+  config=debug
 endif
 
 OS   := $(shell uname -s)
@@ -22,15 +22,15 @@ ARCH := $(shell uname -m)
 
 # check if operating on a git checkout
 ifneq ($(wildcard .git),)
-	# get hash of current commit
-	GITREV := $(shell git log -n1 --format="%h")
-	# get tag for current commit
-	GITTAG := $(shell git tag --contains $(GITREV) | tr '[:upper:]' '[:lower:]')
-	ifeq ($(GITTAG),)
-		# current commit is not tagged
-		# -> include current commit hash in version information
-		DEFINES += -DGITREV=\"-g$(GITREV)\"
-	endif
+  # get hash of current commit
+  GITREV := $(shell git log -n1 --format="%h")
+  # get tag for current commit
+  GITTAG := $(shell git tag --contains $(GITREV) | tr '[:upper:]' '[:lower:]')
+  ifeq ($(GITTAG),)
+    # current commit is not tagged
+    # -> include current commit hash in version information
+    DEFINES += -DGITREV=\"-g$(GITREV)\"
+  endif
 endif
 
 VERSION_MAJOR := $(shell awk '/VERSION_MAJOR/ { print $$3 }' inc/nlarn.h)
@@ -39,20 +39,20 @@ VERSION_PATCH := $(shell awk '/VERSION_PATCH/ { print $$3 }' inc/nlarn.h)
 
 # Collect version information
 ifneq ($(GITTAG),)
-	# Remove "nlarn-" from the tag name as it will be prepended later.
-	VERSION := $(patsubst nlarn-%,%,$(GITTAG))
+  # Remove "nlarn-" from the tag name as it will be prepended later.
+  VERSION := $(patsubst nlarn-%,%,$(GITTAG))
 else
-	# not on a release tag, determine version manually
-	VERSION = $(VERSION_MAJOR).$(VERSION_MINOR)
+  # not on a release tag, determine version manually
+  VERSION = $(VERSION_MAJOR).$(VERSION_MINOR)
 
-	ifneq ($(VERSION_PATCH),0)
-		VERSION := $(VERSION).$(VERSION_PATCH)
-	endif
+  ifneq ($(VERSION_PATCH),0)
+	VERSION := $(VERSION).$(VERSION_PATCH)
+  endif
 
-	ifneq ($(GITREV),)
-		date     = $(shell date "+%Y%m%d")
-		VERSION := $(VERSION)-$(date)-g$(GITREV)
-	endif
+  ifneq ($(GITREV),)
+    date     = $(shell date "+%Y%m%d")
+    VERSION := $(VERSION)-$(date)-g$(GITREV)
+  endif
 endif
 
 # Definitions required regardless of host OS
@@ -61,41 +61,41 @@ CFLAGS  += -std=c99 -Wall -Wextra -Iinc -Iinc/external
 LDFLAGS += -lz -lm
 
 ifneq (,$(findstring MINGW, $(MSYSTEM)))
-	# Settings specific to Windows.
-	ifneq (Y, $(SDLPDCURSES))
-		$(error Building without SDLPDCURSES is not supported on Windows.)
-	endif
+  # Settings specific to Windows.
+  ifneq (Y, $(SDLPDCURSES))
+    $(error Building without SDLPDCURSES is not supported on Windows.)
+  endif
 
-	DLLS := libbz2-1.dll libfreetype-6.dll libgcc_s_dw2-1.dll libglib-2.0-0.dll
-	DLLS += libgraphite2.dll libharfbuzz-0.dll libiconv-2.dll libintl-8.dll
-	DLLS += libpcre-1.dll libpng16-16.dll libstdc++-6.dll libwinpthread-1.dll
-	DLLS += SDL2.dll SDL2_ttf.dll zlib1.dll
-	LIBFILES := lib/nlarn-128.bmp
+  DLLS := libbz2-1.dll libfreetype-6.dll libgcc_s_dw2-1.dll libglib-2.0-0.dll
+  DLLS += libgraphite2.dll libharfbuzz-0.dll libiconv-2.dll libintl-8.dll
+  DLLS += libpcre-1.dll libpng16-16.dll libstdc++-6.dll libwinpthread-1.dll
+  DLLS += SDL2.dll SDL2_ttf.dll zlib1.dll
+  LIBFILES := lib/nlarn-128.bmp
 
-	# Fake the content of the OS var to make it more common
-	# (otherwise packages would have silly names)
-	OS := win32
+  # Fake the content of the OS var to make it more common
+  # (otherwise packages would have silly names)
+  OS := win32
 
-	RESOURCES := $(patsubst %.rc,%.res,$(wildcard resources/*.rc))
-	RESDEFINE := -DVERSION_MAJOR=$(VERSION_MAJOR)
-	RESDEFINE += -DVERSION_MINOR=$(VERSION_MINOR)
-	RESDEFINE += -DVERSION_PATCH=$(VERSION_PATCH)
-	# Escape-O-Rama! Required in all it's ugliness.
-	RESDEFINE += -DVINFO=\\\"$(VERSION)\\\"
+  RESOURCES := $(patsubst %.rc,%.res,$(wildcard resources/*.rc))
+  RESDEFINE := -DVERSION_MAJOR=$(VERSION_MAJOR)
+  RESDEFINE += -DVERSION_MINOR=$(VERSION_MINOR)
+  RESDEFINE += -DVERSION_PATCH=$(VERSION_PATCH)
+  # Escape-O-Rama! Required in all it's ugliness.
+  RESDEFINE += -DVINFO=\\\"$(VERSION)\\\"
 
-	# This is a windows application
-	LDFLAGS += -mwindows
+  # This is a windows application
+  LDFLAGS += -mwindows
 
-	# and finally the dreaded executable suffix from the eighties
-	SUFFIX = .exe
-	ARCHIVE_CMD = zip -r
-	ARCHIVE_SUFFIX = zip
-	INSTALLER := nlarn-$(VERSION).exe
+  # and finally the dreaded executable suffix from the eighties
+  SUFFIX = .exe
+  ARCHIVE_CMD = zip -r
+  ARCHIVE_SUFFIX = zip
+  INSTALLER := nlarn-$(VERSION).exe
 else
-	# executables on other plattforms do not have a funny suffix
-	SUFFIX =
-	ARCHIVE_CMD = tar czf
-	ARCHIVE_SUFFIX = tar.gz
+  # executables on other plattforms do not have a funny suffix
+  SUFFIX =
+  ARCHIVE_CMD = tar czf
+  ARCHIVE_SUFFIX = tar.gz
 endif
 
 # Configuration for glib-2
@@ -119,27 +119,27 @@ endif
 
 # Enable creating packages when working on a git checkout
 ifneq ($(GITREV),)
-	DIRNAME   = nlarn-$(VERSION)
-	SRCPKG    = nlarn-$(VERSION).tar.gz
-	PACKAGE   = $(DIRNAME)_$(OS).$(ARCH).$(ARCHIVE_SUFFIX)
-	MAINFILES = nlarn$(SUFFIX) README.html LICENSE Changelog.html
-	LIBFILES += lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.*
+  DIRNAME   = nlarn-$(VERSION)
+  SRCPKG    = nlarn-$(VERSION).tar.gz
+  PACKAGE   = $(DIRNAME)_$(OS).$(ARCH).$(ARCHIVE_SUFFIX)
+  MAINFILES = nlarn$(SUFFIX) README.html LICENSE Changelog.html
+  LIBFILES += lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.*
 endif
 
 ifeq ($(OS),Darwin)
-	OSXIMAGE := nlarn-$(VERSION).dmg
+  OSXIMAGE := nlarn-$(VERSION).dmg
 endif
 
 ifeq ($(config),debug)
-	DEFINES  += -DDEBUG
-	CFLAGS   += $(DEFINES) -g
-	RESFLAGS += $(DEFINES) $(INCLUDES)
+  DEFINES   += -DDEBUG
+  CFLAGS    += $(DEFINES) -g
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
 endif
 
 ifeq ($(config),release)
-	DEFINES  += -DG_DISABLE_ASSERT
-	CFLAGS   += $(DEFINES) -O2
-	RESFLAGS += $(DEFINES) $(INCLUDES)
+  DEFINES   += -DG_DISABLE_ASSERT
+  CFLAGS    += $(DEFINES) -O2
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
 endif
 
 OBJECTS := $(patsubst %.c,%.o,$(wildcard src/*.c))
@@ -224,7 +224,7 @@ $(OSXIMAGE): $(MAINFILES)
 			for libpath in $$(otool -L $$llib | awk '/local/ {print $$1}'); do\
 				install_name_tool -change $$libpath \
 					@executable_path/$${libpath##*/} $$llib; \
-			done; \
+            done; \
 		done; \
 	done
 # Copy required files
@@ -264,19 +264,19 @@ help:
 	@echo "Usage: make [config=name] [options] [target]"
 	@echo ""
 	@echo "CONFIGURATIONS:"
-	@echo "  debug"
-	@echo "  release"
+	@echo "   debug"
+	@echo "   release"
 	@echo ""
 	@echo "OPTIONS:"
-	@echo "  SDLPDCURSES=Y - compile with PDCurses for SDL2 (instead of ncurses)"
-	@echo "  SETGID=Y      - compile for system-wide installations on *nix platforms"
+	@echo "   SDLPDCURSES=Y - compile with PDCurses for SDL2 (instead of ncurses)"
+	@echo "   SETGID=Y      - compile for system-wide installations on *nix platforms"
 	@echo ""
 	@echo "TARGETS:"
-	@echo "  all (default) - builds nlarn$(SUFFIX)"
-	@echo "  clean         - cleans the working directory"
+	@echo "   all (default) - builds nlarn$(SUFFIX)"
+	@echo "   clean         - cleans the working directory"
 	@if \[ -n "$(GITREV)" \]; then \
-		echo "  dist          - create source and binary packages for distribution"; \
-		echo "                  ($(SRCPKG) and"; \
+		echo "   dist          - create source and binary packages for distribution"; \
+		echo "                   ($(SRCPKG) and"; \
 		echo "                   $(PACKAGE))"; \
 	fi
 	@echo ""
