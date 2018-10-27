@@ -327,9 +327,11 @@ void configure_defaults(const char *inifile)
         if (sbuf) g_free(sbuf);
         if (abuf) g_free(abuf);
 
-        int res = display_show_message("Configure defaults", msg, 29);
+        display_window *cwin = display_popup(COLS / 2 - 34, LINES / 2 - 6, 68,
+                "Configure defaults", msg, 29);
         g_free(msg);
 
+        int res = wgetch(cwin->window);
         switch (res)
         {
             /* default name */
@@ -417,6 +419,7 @@ void configure_defaults(const char *inifile)
                 /* ignore input */
                 break;
         }
+        display_window_destroy(cwin);
     }
 
     /* write back modified config */
