@@ -1887,8 +1887,6 @@ char *display_get_string(const char *title, const char *caption, const char *val
 int display_get_yesno(const char *question, const char *title, const char *yes, const char *no)
 {
     display_window *ywin;
-    guint startx, starty;
-    guint width, text_width;
     int RUN = TRUE;
     int selection = FALSE;
     guint line;
@@ -1906,7 +1904,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 
     /* determine text width, either defined by space available  for the window
      * or the length of question */
-    text_width = min(COLS - 2 /* borders */
+    guint text_width = min(COLS - 2 /* borders */
                      - (2 * margin) /* space outside window */
                      - (2 * padding), /* space between border and text */
                      strlen(question));
@@ -1920,15 +1918,15 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 
     /* Determine window width. Either defined by the length of the button
      * labels or width of the text */
-    width = max(strlen(yes) + strlen(no)
+    guint width = max(strlen(yes) + strlen(no)
                 + 2 /* borders */
                 + (4 * padding)  /* space between "button" border and label */
                 + margin, /* space between "buttons" */
                 text_width + 2 /* borders */ + (2 * padding));
 
     /* set startx and starty to something that makes sense */
-    startx = (min(MAP_MAX_X, COLS) / 2) - (width / 2);
-    starty = (LINES / 2) - 4;
+    guint startx = (COLS / 2) - (width / 2);
+    guint starty = (LINES / 2) - 4;
 
     ywin = display_window_new(startx, starty, width, text->len + 4, title);
 
