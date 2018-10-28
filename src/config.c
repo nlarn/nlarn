@@ -175,7 +175,9 @@ void write_ini_file(const char *filename, struct game_config *config)
     g_key_file_set_value(kf,   "nlarn", "stats",       config->stats ? config->stats : "");
     g_key_file_set_value(kf,   "nlarn", "auto-pickup", config->auto_pickup ? config->auto_pickup : "");
     g_key_file_set_boolean(kf, "nlarn", "no-autosave", config->no_autosave);
-
+#ifdef SDLPDCURSES
+    g_key_file_set_integer(kf, "nlarn", "font-size", config->font_size);
+#endif
     /* write config file contents to the give file */
     g_key_file_save_to_file(kf, filename, NULL);
 
@@ -280,10 +282,14 @@ void configure_defaults(const char *inifile)
     const char *menu =
         "Configure game defaults\n"
         "\n"
-        "  `lightgreen`a`end`) Character name        - %s\n"
-        "  `lightgreen`b`end`) Character gender      - %s\n"
-        "  `lightgreen`c`end`) Character stats       - %s\n"
-        "  `lightgreen`d`end`) Configure auto-pickup - %s\n"
+        "  `lightgreen`a`end`) Character name         - %s\n"
+        "  `lightgreen`b`end`) Character gender       - %s\n"
+        "  `lightgreen`c`end`) Character stats        - %s\n"
+        "  `lightgreen`d`end`) Configure auto-pickup  - %s\n"
+        "  `lightgreen`e`end`) Autosave on map change - `yellow`%s`end`\n"
+#ifdef SDLPDCURSES
+        "  `lightgreen`f`end`) Configure font size    - `yellow`%d`end`\n"
+#endif
         "\n"
         "Clear values with `lightgreen`A`end`-`lightgreen`D`end`\n";
 
@@ -320,7 +326,12 @@ void configure_defaults(const char *inifile)
                 nbuf ? nbuf : undef,
                 gbuf ? gbuf : undef,
                 sbuf ? sbuf : undef,
-                abuf ? abuf: undef);
+                abuf ? abuf: undef,
+                config.no_autosave ? "no" : "yes"
+#ifdef SDLPDCURSES
+                , config.font_size
+#endif
+                );
 
         if (nbuf) g_free(nbuf);
         if (gbuf) g_free(gbuf);
@@ -328,7 +339,7 @@ void configure_defaults(const char *inifile)
         if (abuf) g_free(abuf);
 
         display_window *cwin = display_popup(COLS / 2 - 34, LINES / 2 - 6, 68,
-                "Configure defaults", msg, 29);
+                "Configure defaults", msg, 30);
         g_free(msg);
 
         int res = wgetch(cwin->window);
@@ -410,6 +421,38 @@ void configure_defaults(const char *inifile)
                 if (config.auto_pickup) g_free(config.auto_pickup);
                 config.auto_pickup = NULL;
                 break;
+
+            /* autosave */
+            case 'e':
+                config.no_autosave = !config.no_autosave;
+                break;
+
+            /* font size */
+#ifdef SDLPDCURSES
+            case 'f':
+                {
+                    char *cval = g_strdup_printf("%d", config.font_size);
+                    char *nval = display_get_string("Default font size",
+                        "Font size (6 - 48): ", cval, 2);
+                    g_free(cval);
+
+                    if (nval)
+                    {
+                        int val = atoi(nval);
+                        g_free(nval);
+
+                        if (val >= 6 && val <= 48)
+                        {
+                            config.font_size = val;
+                        }
+                        else
+                        {
+                            display_show_message("Error", "Invalid font size", 0);
+                        }
+                    }
+                }
+                break;
+#endif
 
             case KEY_ESC:
                 leaving = TRUE;
