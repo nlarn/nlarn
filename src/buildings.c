@@ -858,14 +858,14 @@ int building_tradepost(player *p)
 
     const char title[] = "Trade Post";
 
-    const char msg_welcome[] = "`white`Welcome to the Nlarn Trading Post.`end`\n\nWe buy " \
-                               "items that explorers no longer find useful.\n" \
-                               "Since the condition of the items you bring in " \
-                               "is not certain, and we incur great expense in " \
-                               "reconditioning the items, we usually pay only " \
-                               "20% of their value were they to be new.\n" \
-                               "If the items are badly damaged, we will pay " \
-                               "only 10% of their new value.";
+    const char msg_welcome[] = "`white`Welcome to the Nlarn Trading Post.`end`\n\n"
+                               "We buy items that explorers no longer find useful.\n"
+                               "Since the condition of the items you bring in "
+                               "is not certain, and we incur great expense in "
+                               "reconditioning the items, we usually pay only "
+                               "20%% of their value were they to be new.\n"
+                               "If the items are badly damaged, we will pay "
+                               "only 10%% of their new value.";
 
     g_assert(p != NULL);
 
