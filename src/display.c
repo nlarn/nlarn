@@ -388,15 +388,15 @@ void display_paint_screen(player *p)
     mvaaddch(Y(p->pos), X(p->pos), attrs, pc);
 
 
-    /* *** status line *** */
+    /* *** first status line below map *** */
     move(MAP_MAX_Y + 1, 0);
     clrtoeol();
 
-    /* player name and level */
+    /* player name */
     if (p->name)
     {
         /* the player's name can be NULL directly after starting the game */
-        printw("%s, %s", p->name, player_get_level_desc(p));
+        printw("%s", p->name);
     }
 
     /* current HPs */
@@ -441,10 +441,17 @@ void display_paint_screen(player *p)
     /* game time */
     mvprintw(MAP_MAX_Y + 1, MAP_MAX_X + 1, "T %-6d", game_turn(nlarn));
 
-    /* experience points / level */
+    /* *** second status line below map *** */
     move(MAP_MAX_Y + 2, 0);
     clrtoeol();
 
+    /* player level description */
+    char *pld = g_strdup(player_get_level_desc(p));
+    pld[0] = g_ascii_toupper(pld[0]);
+    printw(pld);
+    g_free(pld);
+
+    /* experience points / level */
     mvaprintw(MAP_MAX_Y + 2, MAP_MAX_X - 21, LIGHTBLUE, "XP %3d/%-5d",
              p->level, p->experience);
 
