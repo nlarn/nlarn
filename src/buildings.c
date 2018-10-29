@@ -1371,9 +1371,8 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
     if (it->count > 1)
     {
-        name = item_describe(it, TRUE, FALSE, TRUE);
-        g_snprintf(text, 80, "How many %s do you want to buy?", name);
-        g_free(name);
+        g_snprintf(text, 80, "How many %s do you want to buy?",
+                it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type));
 
         /* get count */
         guint count = display_get_count(text, it->count);
@@ -1604,11 +1603,8 @@ static void building_item_buy(player *p, inventory **inv, item *it)
 
     if (it->count > 1)
     {
-        name = item_describe(it, player_item_known(p, it), FALSE, TRUE);
         g_snprintf(question, 120, "How many %s do you want to sell for %d gold?",
-                   name, price);
-
-        g_free(name);
+                it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type), price);
 
         /* get count */
         count = display_get_count(question, it->count);
