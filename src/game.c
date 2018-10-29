@@ -230,6 +230,20 @@ void game_init(int argc, char *argv[])
     /* parse the command line options */
     parse_commandline(argc, argv, &config);
 
+    /* verify that user directory exists */
+    if (!g_file_test(game_userdir(), G_FILE_TEST_IS_DIR))
+    {
+        /* directory is missing -> create it */
+        int ret = g_mkdir(game_userdir(), 0755);
+
+        if (ret == -1)
+        {
+            /* creating the directory failed */
+            g_printerr("Failed to create directory %s.", game_userdir());
+            exit(EXIT_FAILURE);
+        }
+    }
+
     /* if a custom ini file was specified, we require its presence */
     if (config.inifile)
     {
@@ -520,22 +534,6 @@ int game_save(game *g, const char *filename)
 
     /* free memory claimed by JSON structures */
     cJSON_Delete(save);
-
-    /* verify that user directory exists */
-    if (!g_file_test(game_userdir(), G_FILE_TEST_IS_DIR))
-    {
-        /* directory is missing -> create it */
-        int ret = g_mkdir(game_userdir(), 0755);
-
-        if (ret == -1)
-        {
-            /* creating the directory failed */
-            log_add_entry(g->log, "Failed to create directory %s.", game_userdir());
-            free(sg);
-
-            return FALSE;
-        }
-    }
 
     /* assemble save file name */
     fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(), filename ? filename : save_file, NULL);
