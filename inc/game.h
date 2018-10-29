@@ -49,6 +49,7 @@ typedef struct game
     gchar *fortunes;
     gchar *highscores;
     gchar *inifile;
+    gchar *savefile;
 
     /* stock of the dnd store */
     inventory *store_stock;
@@ -148,7 +149,7 @@ const gchar *game_userdir();
  * @param The name of the file to be saved. Defaults to "nlarn.sav",
  *        if a NULL has been supplied.
  */
-int game_save(game *g, const char *filename);
+int game_save(game *g);
 
 game_score_t *game_score(game *g, player_cod cod, int cause);
 GList *game_score_add(game *g, game_score_t *score);

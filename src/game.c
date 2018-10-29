@@ -54,7 +54,7 @@
 #include "random.h"
 
 static void game_new();
-static gboolean game_load(gchar *filename);
+static gboolean game_load();
 static void game_items_shuffle(game *g);
 static GList *game_scores_load();
 static void game_scores_save(game *g, GList *scores);
@@ -311,7 +311,12 @@ void game_init(int argc, char *argv[])
     /* set autosave setting (default: TRUE) */
     game_autosave(nlarn) = !config.no_autosave;
 
-    if (!game_load(config.savefile))
+    /* assemble save file name; if no filename has been supplied,
+     * default to "nlarn.sav" */
+    nlarn->savefile = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+            config.savefile ? config.savefile : save_file, NULL);
+
+    if (!game_load())
     {
         /* set game parameters */
         game_difficulty(nlarn) = config.difficulty;
@@ -375,6 +380,7 @@ game *game_destroy(game *g)
     g_free(g->fortunes);
     g_free(g->highscores);
     g_free(g->inifile);
+    g_free(g->savefile);
 
     for (int i = 0; i < MAP_MAX; i++)
     {
@@ -426,11 +432,10 @@ const gchar *game_userdir()
     return userdir;
 }
 
-int game_save(game *g, const char *filename)
+int game_save(game *g)
 {
     int err;
     struct cJSON *save, *obj;
-    char *fullname = NULL;
     display_window *win = NULL;
 
     g_assert(g != NULL);
@@ -535,9 +540,6 @@ int game_save(game *g, const char *filename)
     /* free memory claimed by JSON structures */
     cJSON_Delete(save);
 
-    /* assemble save file name */
-    fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(), filename ? filename : save_file, NULL);
-
     /* open save file for writing */
     FILE* fhandle;
     if (sgfd)
@@ -555,12 +557,12 @@ int game_save(game *g, const char *filename)
     else
     {
         /* File need to be opened for the first time */
-        fhandle = fopen(fullname, "wb");
+        fhandle = fopen(g->savefile, "wb");
     }
 
     if (fhandle == NULL)
     {
-        log_add_entry(g->log, "Error opening save file \"%s\".", fullname);
+        log_add_entry(g->log, "Error opening save file \"%s\".", g->savefile);
         free(sg);
         return FALSE;
     }
@@ -575,14 +577,11 @@ int game_save(game *g, const char *filename)
     if (gzputs(file, sg) != (int)strlen(sg))
     {
         log_add_entry(g->log, "Error writing save file \"%s\": %s",
-                      fullname, gzerror(file, &err));
+                g->savefile, gzerror(file, &err));
 
         free(sg);
         return FALSE;
     }
-
-    /* free the memory acquired by g_strdup_printf */
-    g_free(fullname);
 
     free(sg);
     gzclose(file);
@@ -860,7 +859,7 @@ static void game_new()
     log_set_time(nlarn->log, nlarn->gtime);
 }
 
-static gboolean game_load(gchar *filename)
+static gboolean game_load()
 {
     int size;
     cJSON *save, *obj;
@@ -869,19 +868,12 @@ static gboolean game_load(gchar *filename)
     /* size of the buffer we allocate to store the uncompressed file content */
     const int bufsize = 1024 * 1024 * 3;
 
-    /* assemble save file name; if no filename has been supplied, default
-       to "nlarn.sav" */
-    char *fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-                                  filename ? filename : save_file, NULL);
-
     /* try to open save file */
-    FILE* file = fopen(fullname, "rb+");
+    FILE* file = fopen(nlarn->savefile, "rb+");
 
     if (file == NULL)
     {
         /* failed to open save game file */
-        g_free(fullname);
-
         return FALSE;
     }
 
@@ -906,8 +898,7 @@ static gboolean game_load(gchar *filename)
     {
         /* Reading the file failed. Terminate the game with an error message */
         display_shutdown();
-        g_printerr("Failed to restore save file \"%s\".\n", fullname);
-        g_free(fullname);
+        g_printerr("Failed to restore save file \"%s\".\n", nlarn->savefile);
 
         exit(EXIT_FAILURE);
     }
@@ -942,19 +933,17 @@ static gboolean game_load(gchar *filename)
             display_window_destroy(win);
 
         /* offer to delete the incompatible save game */
-        if (display_get_yesno("Saved game could not be loaded. " \
-                              "Delete and start new game?",
-                              NULL, NULL, NULL))
+        if (display_get_yesno("Saved game could not be loaded. "
+                    "Delete and start new game?", NULL, NULL, NULL))
         {
             /* delete save file */
-            g_unlink(fullname);
-            g_free(fullname);
+            g_unlink(nlarn->savefile);
         }
         else
         {
             display_shutdown();
-            g_printerr("Save file \"%s\" is not compatible to current version.\n", fullname);
-            g_free(fullname);
+            g_printerr("Save file \"%s\" is not compatible to current version.\n",
+                    nlarn->savefile);
 
             exit(EXIT_FAILURE);
         }
@@ -1105,9 +1094,6 @@ static gboolean game_load(gchar *filename)
 
     /* welcome message */
     print_welcome_message(FALSE);
-
-    /* free memory used by the full file name */
-    g_free(fullname);
 
     /* refresh FOV */
     player_update_fov(nlarn->p);

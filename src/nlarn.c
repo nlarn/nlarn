@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     /* automatic save point (not when restoring a save) */
     if ((game_turn(nlarn) == 1) && game_autosave(nlarn))
     {
-        game_save(nlarn, NULL);
+        game_save(nlarn);
     }
 
     char run_cmd = 0;
@@ -665,7 +665,7 @@ int main(int argc, char *argv[])
 
             /* save */
         case 19: /* ^S */
-            if (game_save(nlarn, NULL))
+            if (game_save(nlarn))
             {
                 /* only terminate the game if saving was successful */
                 nlarn = game_destroy(nlarn);
@@ -900,7 +900,7 @@ static void nlarn_signal_handler(int signo)
     display_shutdown();
 
     /* attempt to save the game */
-    game_save(nlarn, NULL);
+    game_save(nlarn);
 
     if (signo != SIGHUP)
     {
@@ -920,7 +920,7 @@ BOOL nlarn_control_handler(DWORD fdwCtrlType)
         /* Close Window button pressed: store the game progress */
     case CTRL_CLOSE_EVENT:
         /* save the game */
-        game_save(nlarn, NULL);
+        game_save(nlarn);
         nlarn = game_destroy(nlarn);
 
         return TRUE;
