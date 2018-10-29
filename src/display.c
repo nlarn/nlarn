@@ -2739,7 +2739,7 @@ int display_show_message(const char *title, const char *message, int indent)
         for (guint idx = 0; idx < maxvis; idx++)
         {
             currattr = mvwcprintw(mwin->window, DDC_LIGHTGRAY, currattr,
-                    display_dialog_colset, idx + 1, 2,
+                    display_dialog_colset, idx + 1, 2, "%s",
                     g_ptr_array_index(text, idx + offset));
         }
 
