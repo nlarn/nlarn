@@ -2529,7 +2529,7 @@ effect *player_effect_add(player *p, effect *e)
         if (effect_get_msg_start(e))
             log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
 
-        player_make_move(p, e->turns, FALSE, NULL);
+        player_make_move(p, e->turns, FALSE, "asleep");
 
         effect_destroy(e);
         e = NULL;
