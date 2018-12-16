@@ -797,35 +797,38 @@ int building_school(player *p)
             default:
             {
                 int course = selection - 'a';
-                if ((course < SCHOOL_COURSE_COUNT)
-                        && !p->school_courses_taken[course])
+                if ((course < 0) || (course > SCHOOL_COURSE_COUNT)
+                        || p->school_courses_taken[course])
                 {
-                    /* course prices increase with rising difficulty */
-                    guint price = school_courses[course].course_time
-                                  * (game_difficulty(nlarn) + 1) * 100;
+                    /* invalid course or course already taken */
+                    break;
+                }
 
-                    if (!building_player_check(p, price))
-                    {
-                        char *msg = g_strdup_printf("You cannot afford "
-                                "the %d gold for the course.", price);
-                        display_show_message("School", msg, 0);
-                        g_free(msg);
-                    }
-                    /* check if the selected course has a prerequisite
-                       and if the player has taken that course */
-                    else if ((school_courses[course].prerequisite >= 0) &&
-                            !p->school_courses_taken[school_courses[course].prerequisite])
-                    {
-                        char *msg = g_strdup_printf(msg_prerequisite,
-                                school_courses[school_courses[course].prerequisite]
-                                .description);
-                        display_show_message("School", msg, 0);
-                        g_free(msg);
-                    }
-                    else
-                    {
-                        building_school_take_course(p, course, price);
-                    }
+                /* course prices increase with rising difficulty */
+                guint price = school_courses[course].course_time
+                              * (game_difficulty(nlarn) + 1) * 100;
+
+                if (!building_player_check(p, price))
+                {
+                    char *msg = g_strdup_printf("You cannot afford "
+                            "the %d gold for the course.", price);
+                    display_show_message("School", msg, 0);
+                    g_free(msg);
+                }
+                /* check if the selected course has a prerequisite
+                   and if the player has taken that course */
+                else if ((school_courses[course].prerequisite >= 0) &&
+                        !p->school_courses_taken[school_courses[course].prerequisite])
+                {
+                    char *msg = g_strdup_printf(msg_prerequisite,
+                            school_courses[school_courses[course].prerequisite]
+                            .description);
+                    display_show_message("School", msg, 0);
+                    g_free(msg);
+                }
+                else
+                {
+                    building_school_take_course(p, course, price);
                 }
             }
         }
