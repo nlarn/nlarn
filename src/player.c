@@ -772,7 +772,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
     guint idx = 0;
-    char *question = NULL, *description = NULL;
+    g_autofree char *question = NULL, *description = NULL, *popup_desc = NULL;
 
     g_assert(p != NULL);
 
@@ -799,6 +799,15 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     else
     {
         question = g_strdup("Do you want to continue?");
+    }
+
+    display_window *pop = NULL;
+    if (turns > 10 && description)
+    {
+        /* shop popup window */
+        popup_desc = g_strdup_printf("You are currently %s.",
+                description);
+        pop = display_popup(2, 2, 40, NULL, popup_desc, 0);
     }
 
     /* modifier for frequency */
@@ -966,8 +975,12 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
 
                         /* clean up */
                         p->attacked = FALSE;
-                        g_free(description);
-                        g_free(question);
+
+                        if (pop)
+                        {
+                            /* remove the popup window */
+                            display_window_destroy(pop);
+                        }
 
                         return FALSE;
                     }
@@ -987,8 +1000,11 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     }
     while (turns > 0);
 
-    g_free(description);
-    g_free(question);
+    if (pop)
+    {
+        /* remove the popup window */
+        display_window_destroy(pop);
+    }
 
     /* successfully completed the action */
     return TRUE;

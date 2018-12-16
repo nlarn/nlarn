@@ -650,17 +650,9 @@ static int building_scribe_scroll(player *p)
     building_player_charge(p, price);
     p->stats.gold_spent_shop += price;
 
-    /* shop popup window */
-    char *msg = g_strdup_printf("The scribes are currently writing a scroll "
-            "of %s for you.", scroll_name(bscroll));
-    display_window *pop = display_popup(2, 2, 40, "School", msg, 0);
-    g_free(msg);
-
     /* writing a scroll takes 10 mobuls */
-    player_make_move(p, 1000, FALSE, NULL);
-
-    /* remove popup window */
-    display_window_destroy(pop);
+    player_make_move(p, 1000, FALSE, "waiting for the scribes to write a "
+            "scroll of %s for you", scroll_name(bscroll));
 
     log_add_entry(nlarn->log,
             "The scribes finished writing a scroll of %s for you.",
@@ -693,11 +685,6 @@ static const school_course school_courses[SCHOOL_COURSE_COUNT] =
 
 static void building_school_take_course(player *p, int course, guint price)
 {
-    /* shop popup window */
-    char *msg = g_strdup_printf("You are currently taking the course \"%s\".",
-            school_courses[course].description);
-    display_window *pop = display_popup(2, 2, 40, "School", msg, 0);
-    g_free(msg);
 
     /* charge the player */
     building_player_charge(p, price);
@@ -705,10 +692,8 @@ static void building_school_take_course(player *p, int course, guint price)
 
     /* time usage */
     guint course_turns = mobuls2gtime(school_courses[course].course_time);
-    player_make_move(p, course_turns, FALSE, NULL);
-
-    /* remove popup window */
-    display_window_destroy(pop);
+    player_make_move(p, course_turns, FALSE, "taking the course \"%s\"",
+            school_courses[course].description);
 
     /* add the bonus gained by this course */
     switch (course)
