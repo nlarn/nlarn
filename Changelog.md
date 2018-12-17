@@ -19,6 +19,8 @@
 * Allow specifying a custom configuration file on the command line
 * Add author, icon and version number to Windows uninstaller
 * Moved auto-pickup configuration key from '@' to CTRL-A
+* Auto-pickup settings are not stored with saved game anymore, but
+  set from the defaults when loading a game
 * Got rid of the unfinished Lua integration
 
 ### Fixed bugs:

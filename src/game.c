@@ -348,16 +348,16 @@ void game_init(int argc, char *argv[])
             log_add_entry(nlarn->log, "Wizard mode has been activated.");
         }
 
-        /* parse auto pick-up settings */
-        if (config.auto_pickup && (nlarn->p != NULL))
-        {
-            parse_autopickup_settings(config.auto_pickup,
-                    nlarn->p->settings.auto_pickup);
-
-            g_free(config.auto_pickup);
-        }
-
     } /* end new game only settings */
+
+    /* parse auto pick-up settings */
+    if (config.auto_pickup && (nlarn->p != NULL))
+    {
+        parse_autopickup_settings(config.auto_pickup,
+                nlarn->p->settings.auto_pickup);
+
+         g_free(config.auto_pickup);
+    }
 }
 
 game *game_destroy(game *g)
