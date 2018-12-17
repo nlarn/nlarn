@@ -138,6 +138,7 @@ void display_init()
             VERSION_MINOR, VERSION_PATCH, GITREV);
 
     PDC_set_title(window_title);
+    PDC_save_key_modifiers(FALSE);
     g_free(window_title);
 #endif
 
