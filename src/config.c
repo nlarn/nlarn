@@ -57,7 +57,7 @@ static const char *default_config_file =
     "# = rings\n"
     "# ? scrolls\n"
     "# ( weapons\n"
-    "auto-pickup=\n"
+    "auto-pickup=\"+*$\n"
     "\n"
 #ifdef SDLPDCURSES
     "# Font size for the game. Defaults to 18 when not defined.\n"
@@ -168,16 +168,20 @@ void write_ini_file(const char *filename, struct game_config *config)
     g_key_file_load_from_data(kf, default_config_file,
             strlen(default_config_file), G_KEY_FILE_KEEP_COMMENTS, NULL);
 
-    /* apply configuration to configuration file */
-    g_key_file_set_integer(kf, "nlarn", "difficulty",  config->difficulty);
-    g_key_file_set_string(kf,  "nlarn", "name",        config->name ? config->name : "");
-    g_key_file_set_value(kf,   "nlarn", "gender",      config->gender ? config->gender : "");
-    g_key_file_set_value(kf,   "nlarn", "stats",       config->stats ? config->stats : "");
-    g_key_file_set_value(kf,   "nlarn", "auto-pickup", config->auto_pickup ? config->auto_pickup : "");
-    g_key_file_set_boolean(kf, "nlarn", "no-autosave", config->no_autosave);
+    if (config)
+    {
+        /* apply configuration to configuration file */
+        g_key_file_set_integer(kf, "nlarn", "difficulty",  config->difficulty);
+        g_key_file_set_string(kf,  "nlarn", "name",        config->name ? config->name : "");
+        g_key_file_set_value(kf,   "nlarn", "gender",      config->gender ? config->gender : "");
+        g_key_file_set_value(kf,   "nlarn", "stats",       config->stats ? config->stats : "");
+        g_key_file_set_value(kf,   "nlarn", "auto-pickup", config->auto_pickup ? config->auto_pickup : "");
+        g_key_file_set_boolean(kf, "nlarn", "no-autosave", config->no_autosave);
 #ifdef SDLPDCURSES
-    g_key_file_set_integer(kf, "nlarn", "font-size", config->font_size);
+        g_key_file_set_integer(kf, "nlarn", "font-size", config->font_size);
 #endif
+    }
+
     /* write config file contents to the give file */
     g_key_file_save_to_file(kf, filename, NULL);
 

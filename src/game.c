@@ -267,13 +267,7 @@ void game_init(int argc, char *argv[])
         /* write a default configuration file, if none exists */
         if (!g_file_test(nlarn->inifile, G_FILE_TEST_IS_REGULAR))
         {
-            /* ensure sane auto-pickup defaults */
-            config.auto_pickup = "\"+*$";
-
-            write_ini_file(nlarn->inifile, &config);
-
-            /* reset auto-pick setting so they can be free'd later */
-            config.auto_pickup = NULL;
+            write_ini_file(nlarn->inifile, NULL);
         }
 
         /* try to load settings from the configuration file */
