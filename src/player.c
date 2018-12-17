@@ -790,7 +790,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     if (turns > 10 && description)
     {
         /* shop popup window */
-        popup_desc = g_strdup_printf("You are currently %s.",
+        popup_desc = g_strdup_printf("You are %s.",
                 description);
         pop = display_popup(2, 2, 40, NULL, popup_desc, 0);
     }
