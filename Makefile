@@ -259,6 +259,9 @@ clean:
 	@echo Cleaning nlarn
 	rm -f $(OBJECTS) $(DLLS)
 	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) README.html Changelog.html
+	@if \[ -n "$(PDCLIB)" \]; then \
+		$(MAKE) -C PDCurses/sdl2 clean; \
+	fi
 
 help:
 	@echo "Usage: make [config=name] [options] [target]"
