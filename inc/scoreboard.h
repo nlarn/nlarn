@@ -22,7 +22,7 @@
 
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
 /* file descriptor for the scoreboard file when running setgid */
-extern int scoreboard_fd = -1;
+extern int scoreboard_fd;
 #endif
 
 typedef struct _score_t

@@ -16,8 +16,14 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <zlib.h>
+
+#if (defined __unix) || (defined __unix__) || (defined __APPLE__)
+# include <sys/file.h>
+#endif
 
 #include "nlarn.h"
 #include "scoreboard.h"
