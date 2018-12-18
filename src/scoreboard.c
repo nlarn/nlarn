@@ -151,15 +151,10 @@ static GList *scores_load()
 
 static void scores_save(game *g, GList *gs)
 {
-    cJSON *sf, *scores;
-    char *uscores;
-    gzFile sb;
-
     /* serialize the scores */
-    sf = cJSON_CreateObject();
-
+    cJSON *sf = cJSON_CreateObject();
     cJSON_AddNumberToObject(sf, "version", sb_ver);
-    scores = cJSON_CreateArray();
+    cJSON *scores = cJSON_CreateArray();
     cJSON_AddItemToObject(sf, "scores", scores);
 
     for (GList *iterator = gs; iterator; iterator = iterator->next)
@@ -189,14 +184,14 @@ static void scores_save(game *g, GList *gs)
     }
 
     /* export the cJSON structure to a string */
-    uscores = cJSON_PrintUnformatted(sf);
+    char *uscores = cJSON_PrintUnformatted(sf);
     cJSON_Delete(sf);
 
     /* open the file for writing */
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-    sb = gzdopen(scoreboard_fd, "wb");
+    gzFile sb = gzdopen(scoreboard_fd, "wb");
 #else
-    sb = gzopen(nlarn->highscores, "wb");
+    gzFile sb = gzopen(nlarn->highscores, "wb");
 #endif
 
     if (sb == NULL)
@@ -247,9 +242,7 @@ static int score_compare(const void *scr_a, const void *scr_b)
 
 score_t *score_new(game *g, player_cod cod, int cause)
 {
-    score_t *score;
-
-    score = g_malloc0(sizeof(score_t));
+    score_t *score = g_malloc0(sizeof(score_t));
 
     score->player_name = g_strdup(g->p->name);
     score->sex = g->p->sex;
@@ -272,11 +265,9 @@ score_t *score_new(game *g, player_cod cod, int cause)
 
 GList *score_add(game *g, score_t *score)
 {
-    GList *gs;
-
     g_assert (g != NULL && score != NULL);
 
-    gs = scores_load();
+    GList *gs = scores_load();
 
     /* add new score */
     gs = g_list_append(gs, score);
