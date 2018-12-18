@@ -30,6 +30,7 @@
 #include "nlarn.h"
 #include "player.h"
 #include "random.h"
+#include "scoreboard.h"
 #include "sobjects.h"
 
 static const char aa1[] = "mighty evil master";
@@ -116,9 +117,9 @@ static void player_sobject_memorize(player *p, sobject_t sobject, position pos);
 static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
 static void player_memory_deserialize(player *p, position pos, cJSON *mser);
-static char *player_death_description(game_score_t *score, int verbose);
+static char *player_death_description(score_t *score, int verbose);
 static char *player_equipment_list(player *p, gboolean decorate);
-static char *player_create_obituary(player *p, game_score_t *score, GList *scores);
+static char *player_create_obituary(player *p, score_t *score, GList *scores);
 static void player_memorial_file_save(player *p, const char *text);
 static int item_filter_equippable(item *it);
 static int item_filter_dropable(item *it);
@@ -1149,14 +1150,14 @@ void player_die(player *p, player_cod cause_type, int cause)
         /* flush keyboard input buffer */
         flushinp();
 
-        game_score_t *score = game_score(nlarn, cause_type, cause);
-        GList *scores = game_score_add(nlarn, score);
+        score_t *score = score_new(nlarn, cause_type, cause);
+        GList *scores = score_add(nlarn, score);
 
         /* create a description of the player's achievements */
         gchar *text = player_create_obituary(p, score, scores);
 
         /* free the memory allocated for the scores*/
-        game_scores_destroy(scores);
+        scores_destroy(scores);
 
         display_show_message(title, text, 0);
 
@@ -4747,7 +4748,7 @@ static void player_memory_deserialize(player *p, position pos, cJSON *mser)
         player_memory_of(p, pos).trap = obj->valueint;
 }
 
-static char *player_death_description(game_score_t *score, int verbose)
+static char *player_death_description(score_t *score, int verbose)
 {
     const char *desc;
     GString *text;
@@ -5114,7 +5115,7 @@ static char *player_equipment_list(player *p, gboolean decorate)
     return g_string_free(el, FALSE);
 }
 
-static char *player_create_obituary(player *p, game_score_t *score, GList *scores)
+static char *player_create_obituary(player *p, score_t *score, GList *scores)
 {
     const char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
     GList *iterator;
@@ -5142,7 +5143,7 @@ static char *player_create_obituary(player *p, game_score_t *score, GList *score
     {
         gchar *desc;
 
-        game_score_t *cscore = (game_score_t *)iterator->data;
+        score_t *cscore = (score_t *)iterator->data;
 
         desc = player_death_description(cscore, FALSE);
         g_string_append_printf(text, "  %c%2d) %7" G_GINT64_FORMAT " %s\n",

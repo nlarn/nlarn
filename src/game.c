@@ -50,15 +50,13 @@
 #include "game.h"
 #include "nlarn.h"
 #include "player.h"
+#include "scoreboard.h"
 #include "spheres.h"
 #include "random.h"
 
 static void game_new();
 static gboolean game_load();
 static void game_items_shuffle(game *g);
-static GList *game_scores_load();
-static void game_scores_save(game *g, GList *scores);
-static int game_score_compare(const void *scr_a, const void *scr_b);
 
 static const char *default_lib_dir = "/usr/share/nlarn";
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
@@ -72,16 +70,8 @@ static const char *highscores = "highscores";
 static const char *config_file = "nlarn.ini";
 static const char *save_file = "nlarn.sav";
 
-/* scoreboard version */
-static const gint sb_ver = 1;
-
 /* file descriptor for locking the savegame file */
 static int sgfd = 0;
-
-#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-/* file descriptor for the scoreboard file when running setgid */
-static int scoreboard_fd = -1;
-#endif
 
 static void print_welcome_message(gboolean newgame)
 {
@@ -587,64 +577,6 @@ int game_save(game *g)
     return TRUE;
 }
 
-game_score_t *game_score(game *g, player_cod cod, int cause)
-{
-    game_score_t *score;
-
-    score = g_malloc0(sizeof(game_score_t));
-
-    score->player_name = g_strdup(g->p->name);
-    score->sex = g->p->sex;
-    score->score = player_calc_score(g->p, (cod == PD_WON) ? TRUE : FALSE);
-    score->moves = game_turn(g);
-    score->cod = cod;
-    score->cause = cause;
-    score->hp = g->p->hp;
-    score->hp_max = g->p->hp_max;
-    score->level = g->p->level;
-    score->level_max = g->p->stats.max_level;
-    score->dlevel = Z(g->p->pos);
-    score->dlevel_max = g->p->stats.deepest_level;
-    score->difficulty = game_difficulty(g);
-    score->time_start = g->time_start;
-    score->time_end = time(0);
-
-    return score;
-}
-
-GList *game_score_add(game *g, game_score_t *score)
-{
-    GList *gs;
-
-    g_assert (g != NULL && score != NULL);
-
-    gs = game_scores_load();
-
-    /* add new score */
-    gs = g_list_append(gs, score);
-
-    /* sort scoreboard entries */
-    gs = g_list_sort(gs, (GCompareFunc)game_score_compare);
-
-    /* save new scoreboard */
-    game_scores_save(g, gs);
-
-    return gs;
-}
-
-void game_scores_destroy(GList *gs)
-{
-    for (GList *iterator = gs; iterator; iterator = iterator->next)
-    {
-        game_score_t *score = iterator->data;
-        g_free(score->player_name);
-
-        g_free(score);
-    }
-
-    g_list_free(gs);
-}
-
 map *game_map(game *g, guint nmap)
 {
     g_assert (g != NULL && nmap < MAP_MAX);
@@ -1109,214 +1041,6 @@ static void game_items_shuffle(game *g)
     shuffle(g->ring_material_mapping, RT_MAX, 0);
     shuffle(g->scroll_desc_mapping, ST_MAX, 1);
     shuffle(g->book_desc_mapping, SP_MAX, 0);
-}
-
-static GList *game_scores_load()
-{
-    /* linked list of all scores */
-    GList *gs = NULL;
-
-    /* read the scoreboard file into memory */
-#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-    /* we'll need the file desciptor for saving, too, so duplicate it */
-    int fd = dup(scoreboard_fd);
-
-    /*
-     * Lock the scoreboard file while updating the scoreboard.
-     * Wait until another process that holds the lock releases it again.
-     */
-    if (flock(fd, LOCK_EX) == -1)
-    {
-        perror("Could not lock the scoreboard file");
-    }
-
-    gzFile file = gzdopen(fd, "rb");
-#else
-    gzFile file = gzopen(nlarn->highscores, "rb");
-#endif
-
-    if (file == NULL)
-    {
-        return gs;
-    }
-
-    /* size of buffer to store uncompressed scoreboard content */
-    const gint bufsize = 8192;
-
-    /* allocate buffer space */
-    gchar *scores = g_malloc(bufsize);
-
-    /* count of buffer allocations */
-    gint bufcount = 1;
-
-    /* read the scoreboard file
-     * append subsequent blocks at the end of the previously read block */
-    while(gzread(file, scores + ((bufcount - 1) * bufsize), bufsize) == bufsize)
-    {
-        /* it seems the buffer space was insufficient -> increase it */
-        bufcount += 1;
-        scores = g_realloc(scores, (bufsize * bufcount));
-    }
-
-#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-    /* reposition to the start otherwise writing would append */
-    gzrewind(file);
-#endif
-    /* close save file */
-    gzclose(file);
-
-    /* parsed scoreboard; scoreboard entry */
-    cJSON *pscores, *s_entry;
-
-    /* parse the scores */
-    if ((pscores = cJSON_Parse(scores)) == NULL)
-    {
-        /* empty file, no entries */
-        return gs;
-    }
-
-    /* version of scoreboard file */
-    gint version = cJSON_GetObjectItem(pscores, "version")->valueint;
-
-    if (version < sb_ver)
-    {
-        /* TODO: when there are multiple versions, handle old versions here */
-    }
-
-    /* point to the first entry of the scores array */
-    s_entry = cJSON_GetObjectItem(pscores, "scores")->child;
-
-    while (s_entry != NULL)
-    {
-        /* create new score record */
-        game_score_t *nscore = g_malloc(sizeof(game_score_t));
-
-        /* add record to array */
-        gs = g_list_append(gs, nscore);
-
-        /* fill score record fields with data */
-        nscore->player_name = g_strdup(cJSON_GetObjectItem(s_entry, "player_name")->valuestring);
-        nscore->sex        = cJSON_GetObjectItem(s_entry, "sex")->valueint;
-        nscore->score      = cJSON_GetObjectItem(s_entry, "score")->valueint;
-        nscore->moves      = cJSON_GetObjectItem(s_entry, "moves")->valueint;
-        nscore->cod        = cJSON_GetObjectItem(s_entry, "cod")->valueint;
-        nscore->cause      = cJSON_GetObjectItem(s_entry, "cause")->valueint;
-        nscore->hp         = cJSON_GetObjectItem(s_entry, "hp")->valueint;
-        nscore->hp_max     = cJSON_GetObjectItem(s_entry, "hp_max")->valueint;
-        nscore->level      = cJSON_GetObjectItem(s_entry, "level")->valueint;
-        nscore->level_max  = cJSON_GetObjectItem(s_entry, "level_max")->valueint;
-        nscore->dlevel     = cJSON_GetObjectItem(s_entry, "dlevel")->valueint;
-        nscore->dlevel_max = cJSON_GetObjectItem(s_entry, "dlevel_max")->valueint;
-        nscore->difficulty = cJSON_GetObjectItem(s_entry, "difficulty")->valueint;
-        nscore->time_start = cJSON_GetObjectItem(s_entry, "time_start")->valueint;
-        nscore->time_end   = cJSON_GetObjectItem(s_entry, "time_end")->valueint;
-
-        s_entry = s_entry->next;
-    }
-
-    /* free memory  */
-    cJSON_Delete(pscores);
-
-    /* free the memory allocated for gzread */
-    g_free(scores);
-
-    return gs;
-}
-
-static void game_scores_save(game *g, GList *gs)
-{
-    cJSON *sf, *scores;
-    char *uscores;
-    gzFile sb;
-
-    /* serialize the scores */
-    sf = cJSON_CreateObject();
-
-    cJSON_AddNumberToObject(sf, "version", sb_ver);
-    scores = cJSON_CreateArray();
-    cJSON_AddItemToObject(sf, "scores", scores);
-
-    for (GList *iterator = gs; iterator; iterator = iterator->next)
-    {
-        game_score_t *score = iterator->data;
-
-        /* create new object to store a single scoreboard entry */
-        cJSON *sc = cJSON_CreateObject();
-        cJSON_AddItemToArray(scores, sc);
-
-        /* add all scoreboard entry values */
-        cJSON_AddStringToObject(sc, "player_name", score->player_name);
-        cJSON_AddNumberToObject(sc, "sex", score->sex);
-        cJSON_AddNumberToObject(sc, "score", score->score);
-        cJSON_AddNumberToObject(sc, "moves", score->moves);
-        cJSON_AddNumberToObject(sc, "cod", score->cod);
-        cJSON_AddNumberToObject(sc, "cause", score->cause);
-        cJSON_AddNumberToObject(sc, "hp", score->hp);
-        cJSON_AddNumberToObject(sc, "hp_max", score->hp_max);
-        cJSON_AddNumberToObject(sc, "level", score->level);
-        cJSON_AddNumberToObject(sc, "level_max", score->level_max);
-        cJSON_AddNumberToObject(sc, "dlevel", score->dlevel);
-        cJSON_AddNumberToObject(sc, "dlevel_max", score->dlevel_max);
-        cJSON_AddNumberToObject(sc, "difficulty", score->difficulty);
-        cJSON_AddNumberToObject(sc, "time_start", score->time_start);
-        cJSON_AddNumberToObject(sc, "time_end", score->time_end);
-    }
-
-    /* export the cJSON structure to a string */
-    uscores = cJSON_PrintUnformatted(sf);
-    cJSON_Delete(sf);
-
-    /* open the file for writing */
-#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-    sb = gzdopen(scoreboard_fd, "wb");
-#else
-    sb = gzopen(nlarn->highscores, "wb");
-#endif
-
-    if (sb == NULL)
-    {
-        /* opening the file failed */
-        log_add_entry(g->log, "Error opening scoreboard file.");
-        free(uscores);
-        return;
-    }
-
-    /* write to file */
-    if (gzputs(sb, uscores) != (int)strlen(uscores))
-    {
-        /* handle error */
-        int err;
-
-        log_add_entry(g->log, "Error writing scoreboard file: %s",
-                      gzerror(sb, &err));
-
-        free(uscores);
-        return;
-    }
-
-    /*
-     * Close file.
-     * As this was the last reference to that file, this action
-     * unlocks the scoreboard file again.
-     */
-    gzclose(sb);
-
-    /* return memory */
-    g_free(uscores);
-}
-
-static int game_score_compare(const void *scr_a, const void *scr_b)
-{
-    game_score_t *a = (game_score_t *)scr_a;
-    game_score_t *b = (game_score_t *)scr_b;
-
-    if (a->score > b->score)
-        return -1;
-
-    if (b->score > a->score)
-        return 1;
-
-    return 0;
 }
 
 void game_delete_savefile()

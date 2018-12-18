@@ -105,25 +105,6 @@ typedef struct game
         autosave: 1; /* save the game when entering a new map */
 } game;
 
-typedef struct _game_score
-{
-    char *player_name;
-    gint8 sex;
-    guint64 score;
-    guint32 moves;
-    player_cod cod;
-    gint32 cause;
-    gint32 hp;
-    guint32 hp_max;
-    gint32 level;
-    gint32 level_max;
-    gint32 dlevel;
-    gint32 dlevel_max;
-    gint32 difficulty;
-    gint64 time_start;
-    gint64 time_end;
-} game_score_t;
-
 
 /* function declarations */
 
@@ -150,10 +131,6 @@ const gchar *game_userdir();
  *        if a NULL has been supplied.
  */
 int game_save(game *g);
-
-game_score_t *game_score(game *g, player_cod cod, int cause);
-GList *game_score_add(game *g, game_score_t *score);
-void game_scores_destroy(GList *gs);
 
 map *game_map(game *g, guint nmap);
 void game_spin_the_wheel(game *g);
