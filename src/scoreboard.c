@@ -281,6 +281,204 @@ GList *score_add(game *g, score_t *score)
     return gs;
 }
 
+char *score_death_description(score_t *score, int verbose)
+{
+    const char *desc;
+    GString *text;
+
+    g_assert(score != NULL);
+
+    switch (score->cod)
+    {
+    case PD_LASTLEVEL:
+        desc = "passed away";
+        break;
+
+    case PD_STUCK:
+        desc = "got stuck in solid rock";
+        break;
+
+    case PD_TOO_LATE:
+        desc = "returned with the potion too late";
+        break;
+
+    case PD_WON:
+        desc = "returned in time with the cure";
+        break;
+
+    case PD_LOST:
+        desc = "could not find the potion in time";
+        break;
+
+    case PD_QUIT:
+        desc = "quit the game";
+        break;
+
+    case PD_GENOCIDE:
+        desc = "genocided";
+        break;
+
+    case PD_SPELL:
+        if (score->cause < SP_MAX)
+            desc = "blasted";
+        else
+            desc = "got killed";
+        break;
+
+    default:
+        desc = "killed";
+    }
+
+    text = g_string_new_len(NULL, 200);
+
+    g_string_append_printf(text, "%s (%c), %s", score->player_name,
+                           (score->sex == PS_MALE) ? 'm' : 'f', desc);
+
+
+    if (score->cod == PD_GENOCIDE)
+    {
+        g_string_append_printf(text, " %sself",
+                               (score->sex == PS_MALE) ? "him" : "her");
+    }
+
+    if (verbose)
+    {
+        g_string_append_printf(text, " on level %s", map_names[score->dlevel]);
+
+        if (score->dlevel_max > score->dlevel)
+        {
+            g_string_append_printf(text, " (max. %s)", map_names[score->dlevel_max]);
+        }
+
+        if (score->cod < PD_TOO_LATE)
+        {
+            g_string_append_printf(text, " with %d and a maximum of %d hp",
+                                   score->hp, score->hp_max);
+        }
+    }
+
+    switch (score->cod)
+    {
+    case PD_EFFECT:
+        switch (score->cause)
+        {
+        case ET_DEC_STR:
+            g_string_append(text, " by enfeeblement.");
+            break;
+
+        case ET_DEC_DEX:
+            g_string_append(text, " by clumsiness.");
+            break;
+
+        case ET_POISON:
+            g_string_append(text, " by poison.");
+            break;
+        }
+        break;
+
+    case PD_LASTLEVEL:
+        g_string_append_printf(text,". %s left %s body.",
+                               (score->sex == PS_MALE) ? "He" : "She",
+                               (score->sex == PS_MALE) ? "his" : "her");
+        break;
+
+    case PD_MONSTER:
+        /* TODO: regard monster's invisibility */
+        /* TODO: while sleeping / doing sth. */
+        g_string_append_printf(text, " by %s %s.",
+                               a_an(monster_type_name(score->cause)),
+                               monster_type_name(score->cause));
+        break;
+
+    case PD_SPHERE:
+        g_string_append(text, " by a sphere of destruction.");
+        break;
+
+    case PD_TRAP:
+        g_string_append_printf(text, " by %s%s %s.",
+                               score->cause == TT_TRAPDOOR ? "falling through " : "",
+                               a_an(trap_description(score->cause)),
+                               trap_description(score->cause));
+        break;
+
+    case PD_MAP:
+        g_string_append_printf(text, " by %s.", mt_get_desc(score->cause));
+        break;
+
+    case PD_SPELL:
+        /* player spell */
+        g_string_append_printf(text, " %s away with the spell \"%s\".",
+                               (score->sex == PS_MALE) ? "himself" : "herself",
+                               spell_name_by_id(score->cause));
+        break;
+
+    case PD_CURSE:
+        g_string_append_printf(text, " by a cursed %s.",
+                               item_name_sg(score->cause));
+        break;
+
+    case PD_SOBJECT:
+        switch (score->cause)
+        {
+        case LS_FOUNTAIN:
+            g_string_append(text, " by toxic water from a fountain.");
+            break;
+        default:
+            g_string_append(text, " by falling down a staircase.");
+            break;
+        }
+        break;
+
+    default:
+        /* no further description */
+        g_string_append_c(text, '.');
+        break;
+    }
+
+    if (verbose)
+    {
+        g_string_append_printf(text, " %s has scored %" G_GINT64_FORMAT
+                               " points, with the difficulty set to %d.",
+                               (score->sex == PS_MALE) ? "He" : "She",
+                               score->score, score->difficulty);
+    }
+
+    return g_string_free(text, FALSE);
+}
+
+char *scores_to_string(GList *scores, score_t *score)
+{
+    GString *text = g_string_new(NULL);
+
+    /* determine position of score in the score list */
+    guint rank = g_list_index(scores, score);
+
+    /* get entry three entries up of current/top score in list */
+    GList *iterator = g_list_nth(scores, max(rank - 3, 0));
+
+    /* display up to 7 entries */
+    for (int nrec = max(rank - 3, 0);
+         iterator && (nrec < (max(rank, 0) + 4));
+         iterator = iterator->next, nrec++)
+    {
+        gchar *desc;
+
+        score_t *cscore = (score_t *)iterator->data;
+
+        desc = score_death_description(cscore, FALSE);
+        g_string_append_printf(text, "  %c%2d) %7" G_GINT64_FORMAT " %s\n",
+                               (cscore == score) ? '*' : ' ',
+                               nrec + 1, cscore->score, desc);
+
+        g_string_append_printf(text, "               [exp. level %d, dungeon lvl. %s, %d/%d hp, difficulty %d]\n",
+                               cscore->level, map_names[cscore->dlevel],
+                               cscore->hp, cscore->hp_max, cscore->difficulty);
+        g_free(desc);
+    }
+
+    return g_string_free(text, FALSE);
+}
+
 void scores_destroy(GList *gs)
 {
     for (GList *iterator = gs; iterator; iterator = iterator->next)

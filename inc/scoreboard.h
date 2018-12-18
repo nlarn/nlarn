@@ -45,5 +45,12 @@ typedef struct _score_t
 } score_t;
 
 score_t *score_new(game *g, player_cod cod, int cause);
+
 GList *score_add(game *g, score_t *score);
+
+char *score_death_description(score_t *score, int verbose);
+
+/* renders a given GList of scores to string, with 3 entries surrounding score */
+char *scores_to_string(GList *scores, score_t *score);
+
 void scores_destroy(GList *gs);
