@@ -81,10 +81,7 @@ void parse_commandline(int argc, char *argv[], struct game_config *config)
         { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config->no_autosave,  "Disable autosave", NULL },
         { "version",     'v', 0, G_OPTION_ARG_NONE,   &config->show_version, "Show version information and exit", NULL },
         { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config->wizard,       "Enable wizard mode", NULL },
-        { "config",      'c', 0, G_OPTION_ARG_FILENAME, &config->inifile,    "Alternate configuration file name", NULL },
-#ifdef DEBUG
-        { "savefile",    'f', 0, G_OPTION_ARG_FILENAME, &config->savefile,   "Save file to restore", NULL },
-#endif
+        { "userdir",     'D', 0, G_OPTION_ARG_FILENAME, &config->userdir,    "Alternate directory for config file and saved games", NULL },
 #ifdef SDLPDCURSES
         { "font-size",   'S', 0, G_OPTION_ARG_INT,    &config->font_size,   "Set font size", NULL },
 #endif

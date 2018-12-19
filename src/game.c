@@ -234,35 +234,18 @@ void game_init(int argc, char *argv[])
         }
     }
 
-    /* if a custom ini file was specified, we require its presence */
-    if (config.inifile)
-    {
-        if (!parse_ini_file(config.inifile, &config))
-        {
-            g_printerr("Error: could not find configuration file '%s'.",
-                    config.inifile);
-            exit(EXIT_FAILURE);
-        }
-        else
-        {
-            nlarn->inifile = g_strdup(config.inifile);
-        }
-    }
-    else
-    {
-        /* try loading settings from the default configuration file */
-        nlarn->inifile = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-                config_file, NULL);
+    /* try loading settings from the default configuration file */
+    nlarn->inifile = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
+            config_file, NULL);
 
-        /* write a default configuration file, if none exists */
-        if (!g_file_test(nlarn->inifile, G_FILE_TEST_IS_REGULAR))
-        {
-            write_ini_file(nlarn->inifile, NULL);
-        }
-
-        /* try to load settings from the configuration file */
-        parse_ini_file(nlarn->inifile, &config);
+    /* write a default configuration file, if none exists */
+    if (!g_file_test(nlarn->inifile, G_FILE_TEST_IS_REGULAR))
+    {
+        write_ini_file(nlarn->inifile, NULL);
     }
+
+    /* try to load settings from the configuration file */
+    parse_ini_file(nlarn->inifile, &config);
 
     if (config.show_version) {
         g_printf("NLarn version %d.%d.%d%s, built on %s.\n\n",
@@ -295,10 +278,9 @@ void game_init(int argc, char *argv[])
     /* set autosave setting (default: TRUE) */
     game_autosave(nlarn) = !config.no_autosave;
 
-    /* assemble save file name; if no filename has been supplied,
-     * default to "nlarn.sav" */
+    /* assemble the save file name */
     nlarn->savefile = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-            config.savefile ? config.savefile : save_file, NULL);
+            save_file, NULL);
 
     if (!game_load())
     {
@@ -404,13 +386,31 @@ const gchar *game_userdir()
 
     if (userdir == NULL)
     {
+        if (config.userdir)
+        {
+            if (!g_file_test(config.userdir, G_FILE_TEST_IS_DIR))
+            {
+                g_printerr("Supplied user directory \"%s\" does not exist.",
+                        config.userdir);
+
+                exit(EXIT_FAILURE);
+            }
+            else
+            {
+                userdir = g_strdup(config.userdir);
+            }
+
+        }
+        else
+        {
 #ifdef WIN32
-        userdir = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(),
-                               "nlarn", NULL);
+            userdir = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(),
+                    "nlarn", NULL);
 #else
-        userdir = g_build_path(G_DIR_SEPARATOR_S, g_get_home_dir(),
-                               ".nlarn", NULL);
+            userdir = g_build_path(G_DIR_SEPARATOR_S, g_get_home_dir(),
+                    ".nlarn", NULL);
 #endif
+        }
     }
 
     return userdir;

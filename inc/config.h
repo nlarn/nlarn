@@ -28,9 +28,8 @@ struct game_config {
     char *name;
     char *gender;
     char *auto_pickup;
-    char *savefile;
     char *stats;
-    char *inifile;
+    char *userdir;
 #ifdef SDLPDCURSES
     int font_size;
 #endif
