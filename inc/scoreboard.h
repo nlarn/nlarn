@@ -44,6 +44,8 @@ typedef struct _score_t
     gint64 time_end;
 } score_t;
 
+GList *scores_load();
+
 score_t *score_new(game *g, player_cod cod, int cause);
 
 GList *score_add(game *g, score_t *score);

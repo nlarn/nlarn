@@ -79,12 +79,13 @@ void parse_commandline(int argc, char *argv[], struct game_config *config)
         { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &config->auto_pickup,  "Item types to pick up automatically, e.g. '$*+'", NULL },
         { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &config->difficulty,   "Set difficulty", NULL },
         { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config->no_autosave,  "Disable autosave", NULL },
-        { "version",     'v', 0, G_OPTION_ARG_NONE,   &config->show_version, "Show version information and exit", NULL },
         { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config->wizard,       "Enable wizard mode", NULL },
-        { "userdir",     'D', 0, G_OPTION_ARG_FILENAME, &config->userdir,    "Alternate directory for config file and saved games", NULL },
 #ifdef SDLPDCURSES
         { "font-size",   'S', 0, G_OPTION_ARG_INT,    &config->font_size,   "Set font size", NULL },
 #endif
+        { "userdir",     'D', 0, G_OPTION_ARG_FILENAME, &config->userdir,    "Alternate directory for config file and saved games", NULL },
+        { "highscores",  'h', 0, G_OPTION_ARG_NONE,   &config->show_scores,  "Show highscores and exit", NULL },
+        { "version",     'v', 0, G_OPTION_ARG_NONE,   &config->show_version, "Show version information and exit", NULL },
         { NULL, 0, 0, 0, NULL, NULL, NULL }
     };
 

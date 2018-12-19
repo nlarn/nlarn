@@ -24,15 +24,16 @@ struct game_config {
     gint difficulty;
     gboolean wizard;
     gboolean no_autosave;
-    gboolean show_version;
     char *name;
     char *gender;
     char *auto_pickup;
     char *stats;
-    char *userdir;
 #ifdef SDLPDCURSES
     int font_size;
 #endif
+    char *userdir;
+    gboolean show_scores;
+    gboolean show_version;
 };
 
 /* configuration file reading and writing */

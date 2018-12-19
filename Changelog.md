@@ -18,6 +18,7 @@
 * Write a default configuration file when none is present
 * Allow specifying a custom user directory for the save and configuration
   file on the command line
+* Added a command line option to show the Hall of Fame (highscores)
 * Add author, icon and version number to Windows uninstaller
 * Moved auto-pickup configuration key from '@' to CTRL-A
 * Auto-pickup settings are not stored with saved game anymore, but

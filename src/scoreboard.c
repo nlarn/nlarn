@@ -37,7 +37,7 @@ int scoreboard_fd = -1;
 /* scoreboard version */
 static const gint sb_ver = 1;
 
-static GList *scores_load()
+GList *scores_load()
 {
     /* linked list of all scores */
     GList *gs = NULL;
@@ -450,15 +450,22 @@ char *scores_to_string(GList *scores, score_t *score)
 {
     GString *text = g_string_new(NULL);
 
-    /* determine position of score in the score list */
-    guint rank = g_list_index(scores, score);
+    guint rank = 0;
+    GList *iterator = scores;
 
-    /* get entry three entries up of current/top score in list */
-    GList *iterator = g_list_nth(scores, max(rank - 3, 0));
+    /* show scores surrounding a specific score? */
+    if (score)
+    {
+        /* determine position of score in the score list */
+        rank = g_list_index(scores, score);
 
-    /* display up to 7 entries */
+        /* get entry three entries up of current/top score in list */
+       iterator = g_list_nth(scores, max(rank - 3, 0));
+    }
+
+    /* display up to 7 surronding entries or all when score wasn't specified */
     for (int nrec = max(rank - 3, 0);
-         iterator && (nrec < (max(rank, 0) + 4));
+         iterator && (score ? (nrec < (max(rank, 0) + 4)) : TRUE);
          iterator = iterator->next, nrec++)
     {
         gchar *desc;

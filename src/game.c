@@ -220,6 +220,29 @@ void game_init(int argc, char *argv[])
     /* parse the command line options */
     parse_commandline(argc, argv, &config);
 
+    /* show version information */
+    if (config.show_version) {
+        g_printf("NLarn version %d.%d.%d%s, built on %s.\n\n",
+                VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, GITREV,
+                __DATE__);
+        g_printf("Game base directory:\t%s\n", nlarn->basedir);
+        g_printf("Game lib directory:\t%s\n", nlarn->libdir);
+        g_printf("Game savefile version:\t%d\n", SAVEFILE_VERSION);
+
+        exit(EXIT_SUCCESS);
+    }
+
+    /* show highscores */
+    if (config.show_scores) {
+        GList *scores = scores_load();
+        g_autofree char *s = scores_to_string(scores, NULL);
+
+        g_printf("NLarn Hall of Fame\n==================\n\n%s", s);
+        scores_destroy(scores);
+
+        exit(EXIT_SUCCESS);
+    }
+
     /* verify that user directory exists */
     if (!g_file_test(game_userdir(), G_FILE_TEST_IS_DIR))
     {
@@ -246,17 +269,6 @@ void game_init(int argc, char *argv[])
 
     /* try to load settings from the configuration file */
     parse_ini_file(nlarn->inifile, &config);
-
-    if (config.show_version) {
-        g_printf("NLarn version %d.%d.%d%s, built on %s.\n\n",
-                VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, GITREV,
-                __DATE__);
-        g_printf("Game base directory:\t%s\n", nlarn->basedir);
-        g_printf("Game lib directory:\t%s\n", nlarn->libdir);
-        g_printf("Game savefile version:\t%d\n", SAVEFILE_VERSION);
-
-        exit(EXIT_SUCCESS);
-    }
 
 #ifdef SDLPDCURSES
     /* If a font size was defined, export it to the environment
