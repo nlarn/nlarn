@@ -106,7 +106,7 @@ LDFLAGS += $(shell pkg-config --libs glib-2.0)
 ifneq ($(SDLPDCURSES),Y)
 	LDFLAGS += -lcurses -lpanel
 else
-	PDCLIB   := PDCurses/sdl2/libpdcurses.a
+	PDCLIB   := PDCurses/sdl2/pdcurses.a
 	CFLAGS   += $(shell pkg-config --cflags SDL2_ttf) -IPDCurses -DSDLPDCURSES
 	LDFLAGS  += $(shell pkg-config --libs SDL2_ttf )
 	LIBFILES += lib/FiraMono-Medium.otf
