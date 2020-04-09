@@ -1661,7 +1661,7 @@ static void map_make_maze_eat(map *m, int x, int y)
         if (++dir > 4)
         {
             dir = 1;
-            --try;
+            try--;
         }
     }
 }
