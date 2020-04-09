@@ -26,6 +26,8 @@
 * Got rid of the unfinished Lua integration
 
 ### Fixed bugs:
+* Fix movement with keypad keys while Numi lock is enabled
+  (only affected Windows and macOS)
 * Fix "Cure Blindness" spell
 * Fix crash when reading large scoreboard file
 * Generate all items again (0.7.3 didn't generate first item of type)

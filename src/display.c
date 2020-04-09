@@ -1,6 +1,6 @@
 /*
  * display.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -139,6 +139,9 @@ void display_init()
 
     PDC_set_title(window_title);
     g_free(window_title);
+
+    /* return modifier keys pressed with key */
+    PDC_return_key_modifiers(TRUE);
 #endif
 
     /* initialize colours */
@@ -947,7 +950,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         wrefresh(iwin->window);
 
-        switch (key = getch())
+        switch (key = display_getch(iwin->window))
         {
 
         case '7':
@@ -1157,7 +1160,7 @@ void display_config_autopickup(gboolean settings[IT_MAX])
 
         wrefresh(cwin->window);
 
-        switch (key = getch())
+        switch (key = display_getch(cwin->window))
         {
         case KEY_LF:
         case KEY_CR:
@@ -1271,7 +1274,7 @@ spell *display_spell_select(const char *title, player *p)
                 spell_name(sp), spdesc, 0);
         g_free(spdesc);
 
-        switch ((key = getch()))
+        switch ((key = display_getch(swin->window)))
         {
         case '7':
         case KEY_HOME:
@@ -1547,12 +1550,7 @@ int display_get_count(const char *caption, int value)
         wmove(mwin->window, mwin->height - 2, mwin->width - 10 + ipos);
         wrefresh(mwin->window);
 
-#ifdef PDCURSES
-        key = wgetch(mwin->window);
-#else
-        key = getch();
-#endif
-
+        key = display_getch(mwin->window);
         switch (key)
         {
         case KEY_LEFT:
@@ -1773,12 +1771,7 @@ char *display_get_string(const char *title, const char *caption, const char *val
 
         wrefresh(mwin->window);
 
-#ifdef PDCURSES
-        key = wgetch(mwin->window);
-#else
-        key = getch();
-#endif
-
+        key = display_getch(mwin->window);
         switch (key)
         {
         case KEY_LEFT:
@@ -1966,7 +1959,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
         wattroff(ywin->window, attrs);
         wrefresh(ywin->window);
 
-        int key = tolower(getch()); /* input key buffer */
+        int key = tolower(display_getch(ywin->window)); /* input key buffer */
         // Special case for the movement keys and y/n.
         if (key != 'h' && key != 'l' && key != 'y' && key != 'n')
         {
@@ -2104,7 +2097,7 @@ direction display_get_direction(const char *title, int *available)
     {
         int key; /* input key buffer */
 
-        switch ((key = getch()))
+        switch ((key = display_getch(dwin->window)))
         {
 
         case 'h':
@@ -2454,7 +2447,7 @@ position display_get_new_position(player *p,
         }
 
         /* wait for input */
-        const int ch = getch();
+        const int ch = display_getch(NULL);
         switch (ch)
         {
             /* abort */
@@ -2747,8 +2740,8 @@ int display_show_message(const char *title, const char *message, int indent)
         display_window_update_arrow_down(mwin, (offset + maxvis) < text->len);
 
         wrefresh(mwin->window);
-        key = getch();
 
+        key = display_getch(mwin->window);
         switch (key)
         {
         case 'k':
@@ -2920,6 +2913,22 @@ void display_windows_show()
     }
 }
 
+int display_getch(WINDOW *win) {
+    int ch = wgetch(win ? win : stdscr);
+#ifdef SDLPDCURSES
+        /* on SDL2 PDCurses, keys entered on the numeric keypad while num
+           lock is enabled are returned twice. Hence we need to swallow
+           the first one here. */
+        if ((ch >= '1' && ch <= '9')
+                && (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_NUMLOCK))
+        {
+            ch = wgetch(win ? win : stdscr);
+        }
+#endif
+    return ch;
+}
+
+
 static int mvwcprintw(WINDOW *win, int defattr, int currattr,
         const display_colset *colset, int y, int x, const char *fmt, ...)
 {
@@ -3081,11 +3090,7 @@ static display_window *display_window_new(int x1, int y1, int width,
     dwin->height = height;
 
     dwin->window = newwin(dwin->height, dwin->width, dwin->y1, dwin->x1);
-
-#ifdef PDCURSES
-    /* PDCurses does not inherit keypad setting from stdscr */
     keypad(dwin->window, TRUE);
-#endif
 
     /* fill window background */
     for (int i = 1; i < height; i++) {

@@ -1,6 +1,6 @@
 /*
  * display.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -234,7 +234,13 @@ void display_windows_hide();
  */
 void display_windows_show();
 
-#define display_getch getch
+
+/**
+ * @brief Wrap curses wgetch() with added functionality
+ * @param A pointer to a window structure. May be NULL.
+          In this case stdscr is used.
+ */
+int display_getch(WINDOW *win);
 
 
 #endif

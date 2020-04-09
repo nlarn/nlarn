@@ -1,6 +1,6 @@
 /*
  * buildings.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -147,7 +147,7 @@ int building_bank(player *p)
 
         g_string_free(text, TRUE);
 
-        int cmd = wgetch(bwin->window);
+        int cmd = display_getch(bwin->window);
 
         switch (cmd)
         {
@@ -1034,7 +1034,7 @@ int building_monastery(struct player *p)
         display_window *mwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
                 47, title, msg->str, 0);
 
-        int selection = wgetch(mwin->window);
+        int selection = display_getch(mwin->window);
 
         /* get rid of the temporary string */
         g_string_free(msg, TRUE);

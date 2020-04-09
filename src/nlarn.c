@@ -1,6 +1,6 @@
 /*
  * nlarn.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -188,12 +188,12 @@ int main(int argc, char *argv[])
         else
         {
             /* not running or travelling, get a key and handle it */
-            ch = display_getch();
+            ch = display_getch(NULL);
 
             if (ch == '/' || ch == 'g')
             {
                 /* fast movement: get direction of movement */
-                ch = display_getch();
+                ch = display_getch(NULL);
                 switch (ch)
                 {
                 case 'b':
