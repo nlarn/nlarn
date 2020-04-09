@@ -1,4 +1,4 @@
-## Release 0.7.4 (unreleased)
+## Release 0.7.4 (2020-04-09)
 
 ### Changes:
 * Replaced the random number generator (Mersenne Twister) with
@@ -26,7 +26,7 @@
 * Got rid of the unfinished Lua integration
 
 ### Fixed bugs:
-* Fix movement with keypad keys while Numi lock is enabled
+* Fix movement with keypad keys while Num lock is enabled
   (only affected Windows and macOS)
 * Fix "Cure Blindness" spell
 * Fix crash when reading large scoreboard file
