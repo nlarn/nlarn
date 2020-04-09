@@ -75,7 +75,7 @@ RequestExecutionLevel admin
 VIProductVersion "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.0"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "NLarn"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Joachim de Groot"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright 2009-2018 Joachim de Groot"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright 2009-2020 Joachim de Groot"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "NLarn Installation Program"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${VERSION}"
 
