@@ -28,7 +28,7 @@
 #include "player.h"
 #include "scrolls.h"
 
-static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
+static const char msg_outstanding[] = "The Larn Revenue Service has ordered " \
                                       "us to not do business with tax evaders. " \
                                       "They have also told us that you owe back " \
                                       "taxes and, as we must comply with the " \
@@ -252,7 +252,7 @@ int building_dndstore(player *p)
 {
     int turns = 2;
     const char title[] = "DND store";
-    const char msg_welcome[] = "`white`Welcome to the Nlarn Thrift Shoppe.`end`\n\n" \
+    const char msg_welcome[] = "`white`Welcome to the Larn Thrift Shoppe.`end`\n\n" \
                                "We stock many items explorers find useful in " \
                                "their adventures. Feel free to browse to your " \
                                "heart's content. Also be advised that if you " \
@@ -846,7 +846,7 @@ int building_tradepost(player *p)
 
     const char title[] = "Trade Post";
 
-    const char msg_welcome[] = "`white`Welcome to the Nlarn Trading Post.`end`\n\nWe buy " \
+    const char msg_welcome[] = "`white`Welcome to the Larn Trading Post.`end`\n\nWe buy " \
                                "items that explorers no longer find useful.\n" \
                                "Since the condition of the items you bring in " \
                                "is not certain, and we incur great expense in " \

@@ -4,6 +4,7 @@
 
 ### Fixed bugs:
 * They're the caverns, not some random dungeon
+* Consistent naming of the buildings
 
 ## Release 0.7.4 (2020-04-09)
 
