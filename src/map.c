@@ -1,6 +1,6 @@
 /*
  * map.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -100,9 +100,9 @@ static gboolean is_town(int nlevel)
     return (nlevel == 0);
 }
 
-static gboolean is_dungeon_bottom(int nlevel)
+static gboolean is_caverns_bottom(int nlevel)
 {
-    return (nlevel == MAP_DMAX - 1);
+    return (nlevel == MAP_CMAX - 1);
 }
 
 static gboolean is_volcano_bottom(int nlevel)
@@ -112,7 +112,7 @@ static gboolean is_volcano_bottom(int nlevel)
 
 static gboolean is_volcano_map(int nlevel)
 {
-    return (nlevel >= MAP_DMAX);
+    return (nlevel >= MAP_CMAX);
 }
 
 map *map_new(int num, char *mazefile)
@@ -125,7 +125,7 @@ map *map_new(int num, char *mazefile)
 
     /* create map */
     if ((num == 0) /* town is stored in file */
-            || is_dungeon_bottom(num) /* level 10 */
+            || is_caverns_bottom(num) /* level 10 */
             || is_volcano_bottom(num) /* volcano level 3 */
             || (num > 1 && chance(25)))
     {
@@ -1143,8 +1143,8 @@ gboolean map_is_exit_at(map *m, position pos)
 
     switch (map_sobject_at(m, pos))
     {
-    case LS_DNGN_ENTRANCE:
-    case LS_DNGN_EXIT:
+    case LS_CAVERNS_ENTRY:
+    case LS_CAVERNS_EXIT:
     case LS_ELEVATORDOWN:
     case LS_ELEVATORUP:
     case LS_STAIRSUP:
@@ -1289,7 +1289,7 @@ static int map_fill_with_stationary_objects(map *m)
     position pos = pos_invalid;
 
     /* volcano shaft up from the temple */
-    if (m->nlevel == MAP_DMAX)
+    if (m->nlevel == MAP_CMAX)
     {
         pos = map_find_space(m, LE_SOBJECT, TRUE);
         if (!pos_valid(pos)) return FALSE;
@@ -1297,7 +1297,7 @@ static int map_fill_with_stationary_objects(map *m)
     }
 
     /*  make the fixed objects in the maze: STAIRS */
-    if (!is_town(m->nlevel) && !is_dungeon_bottom(m->nlevel)
+    if (!is_town(m->nlevel) && !is_caverns_bottom(m->nlevel)
             && !is_volcano_bottom(m->nlevel))
     {
         pos = map_find_space(m, LE_SOBJECT, TRUE);
@@ -1305,7 +1305,7 @@ static int map_fill_with_stationary_objects(map *m)
         map_sobject_set(m, pos, LS_STAIRSDOWN);
     }
 
-    if ((m->nlevel > 1) && (m->nlevel != MAP_DMAX))
+    if ((m->nlevel > 1) && (m->nlevel != MAP_CMAX))
     {
         pos = map_find_space(m, LE_SOBJECT, TRUE);
         if (!pos_valid(pos)) return FALSE;
@@ -1465,8 +1465,8 @@ static void map_fill_with_traps(map *m)
 {
     g_assert(m != NULL);
 
-    /* Trapdoor cannot be placed in the last dungeon map and the last volcano map */
-    gboolean trapdoor = (!is_dungeon_bottom(m->nlevel)
+    /* Trapdoor cannot be placed in the last caverns map and the last volcano map */
+    gboolean trapdoor = (!is_caverns_bottom(m->nlevel)
             && !is_volcano_bottom(m->nlevel));
 
     for (guint count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
@@ -1532,7 +1532,7 @@ generate:
     if (m->nlevel == 1)
     {
         m->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].type = LT_FLOOR;
-        m->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].sobject = LS_DNGN_EXIT;
+        m->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].sobject = LS_CAVERNS_EXIT;
     }
 
     /* generate open spaces */
@@ -1784,7 +1784,7 @@ static void place_special_item(map *m, position npos)
 
     switch (m->nlevel)
     {
-    case MAP_DMAX - 1: /* the amulet of larn */
+    case MAP_CMAX - 1: /* the amulet of larn */
         inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN));
 
         monster_new(MT_DEMONLORD_I + rand_0n(7), npos);
@@ -1949,8 +1949,8 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
                 tile->sobject = LS_CLOSEDDOOR;
                 break;
 
-            case 'O': /* dungeon entrance */
-                tile->sobject = LS_DNGN_ENTRANCE;
+            case 'O': /* caverns entrance */
+                tile->sobject = LS_CAVERNS_ENTRY;
                 break;
 
             case 'I': /* elevator */
@@ -2133,11 +2133,11 @@ static int map_validate(map *m)
     {
         /* caverns entrance */
     case 1:
-        pos = map_find_sobject(m, LS_DNGN_EXIT);
+        pos = map_find_sobject(m, LS_CAVERNS_EXIT);
         break;
 
         /* volcano entrance */
-    case MAP_DMAX:
+    case MAP_CMAX:
         pos = map_find_sobject(m, LS_ELEVATORUP);
         break;
 

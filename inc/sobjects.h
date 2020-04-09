@@ -1,6 +1,6 @@
 /*
  * sobjects.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -41,8 +41,8 @@ typedef enum sobject_type
     LS_MIRROR,
     LS_OPENDOOR,
     LS_CLOSEDDOOR,
-    LS_DNGN_ENTRANCE, /* dungeon entrance */
-    LS_DNGN_EXIT,     /* leave the dungeon */
+    LS_CAVERNS_ENTRY,
+    LS_CAVERNS_EXIT,
     LS_HOME,
     LS_DNDSTORE,
     LS_TRADEPOST,

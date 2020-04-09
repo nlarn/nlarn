@@ -703,19 +703,19 @@ int main(int argc, char *argv[])
             if (game_wizardmode(nlarn)) nlarn->p->bank_account += 1000;
             break;
 
-        case '+': /* dungeon map up */
+        case '+': /* map up */
             if (game_wizardmode(nlarn) && (Z(nlarn->p->pos) > 0))
             {
                 moves_count = player_map_enter(nlarn->p, game_map(nlarn, Z(nlarn->p->pos) - 1),
-                                               Z(nlarn->p->pos) == MAP_DMAX);
+                                               Z(nlarn->p->pos) == MAP_CMAX);
             }
             break;
 
-        case '-': /* dungeon map down */
+        case '-': /* map down */
             if (game_wizardmode(nlarn) && (Z(nlarn->p->pos) < (MAP_MAX - 1)))
             {
                 moves_count = player_map_enter(nlarn->p, game_map(nlarn, Z(nlarn->p->pos) + 1),
-                                               Z(nlarn->p->pos) == MAP_DMAX - 1);
+                                               Z(nlarn->p->pos) == MAP_CMAX - 1);
             }
             break;
 

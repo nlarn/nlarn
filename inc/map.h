@@ -1,6 +1,6 @@
 /*
  * map.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,15 +27,15 @@
 #include "traps.h"
 #include "utils.h"
 
-/* dungeon dimensions */
+/* map dimensions */
 #define MAP_MAX_X 67
 #define MAP_MAX_Y 17
 #define MAP_SIZE MAP_MAX_X*MAP_MAX_Y
 
 /* number of levels */
-#define MAP_DMAX 11                   /* max # levels in the dungeon */
+#define MAP_CMAX 11                   /* max # levels in the caverns */
 #define MAP_VMAX  3                   /* max # of levels in the temple of the luran */
-#define MAP_MAX (MAP_DMAX + MAP_VMAX) /* total number of levels */
+#define MAP_MAX (MAP_CMAX + MAP_VMAX) /* total number of levels */
 
 /* number of the last custom maze map (including town) */
 #define MAP_MAX_MAZE_NUM 24

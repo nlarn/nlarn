@@ -1,6 +1,6 @@
 /*
  * items.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -290,7 +290,7 @@ item *item_new_by_level(item_t item_type, int num_level)
 
     g_assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
 
-    /* no amulets above dungeon level 6 */
+    /* no amulets above caverns level 6 */
     if ((item_type == IT_AMULET) && (num_level < 6))
     {
         do

@@ -1,6 +1,6 @@
 /*
  * scoreboard.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -477,7 +477,7 @@ char *scores_to_string(GList *scores, score_t *score)
                                (cscore == score) ? '*' : ' ',
                                nrec + 1, cscore->score, desc);
 
-        g_string_append_printf(text, "               [exp. level %d, dungeon lvl. %s, %d/%d hp, difficulty %d]\n",
+        g_string_append_printf(text, "               [exp. level %d, caverns lvl. %s, %d/%d hp, difficulty %d]\n",
                                cscore->level, map_names[cscore->dlevel],
                                cscore->hp, cscore->hp_max, cscore->difficulty);
         g_free(desc);

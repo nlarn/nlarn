@@ -1,6 +1,6 @@
 /*
  * spells.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -262,7 +262,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_TEL, "tel", "teleport away",
         SC_POINT, DAM_NONE, ET_NONE, spell_type_point,
-        "Moves a particular monster around in the dungeon",
+        "Moves a particular monster around the caverns",
         NULL, NULL,
         COLOURLESS, 5, 2000, FALSE
     },
@@ -307,7 +307,7 @@ const spell_data spells[SP_MAX] =
         SC_OTHER, DAM_NONE, ET_NONE, spell_alter_reality,
         "God only knows what this will do",
         NULL,
-        "Polinneaus won't let you mess with his dungeon!",
+        "Polinneaus won't let you mess with his caverns!",
         COLOURLESS, 6, 3800, FALSE
     },
 };

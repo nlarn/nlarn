@@ -164,7 +164,7 @@ int building_bank(player *p)
                 player_remove_gold(p, amount);
                 log_add_entry(nlarn->log, "You deposited %d gp.", amount);
 
-                /* income tax for money earned in the dungeon */
+                /* income tax for money earned in the caverns */
                 p->outstanding_taxes += calc_tax_debt(amount);
             }
             else if (amount)

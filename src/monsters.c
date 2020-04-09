@@ -1,6 +1,6 @@
 /*
  * monsters.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -972,7 +972,7 @@ monster *monster_new_by_level(position pos)
     }
     else
     {
-        /* everything else in the dungeons */
+        /* everything else in the caverns */
         int minstep = nlevel - 4;
         int maxstep = nlevel - 1;
 
@@ -1437,13 +1437,13 @@ void monster_level_enter(monster *m, struct map *l)
     /* check if the monster used the stairs */
     switch (source)
     {
-    case LS_DNGN_EXIT:
-        target = LS_DNGN_ENTRANCE;
+    case LS_CAVERNS_EXIT:
+        target = LS_CAVERNS_ENTRY;
         what = "through";
         break;
 
-    case LS_DNGN_ENTRANCE:
-        target = LS_DNGN_EXIT;
+    case LS_CAVERNS_ENTRY:
+        target = LS_CAVERNS_EXIT;
         what = "through";
         break;
 
@@ -1563,7 +1563,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     gboolean map_adjacent = (Z(mpos) == Z(g->p->pos)
                              || (Z(mpos) == Z(g->p->pos) - 1)
                              || (Z(mpos) == Z(g->p->pos) + 1)
-                             || (Z(mpos) == MAP_DMAX && Z(g->p->pos) == 0)
+                             || (Z(mpos) == MAP_CMAX && Z(g->p->pos) == 0)
                             );
     if (!map_adjacent)
         return;
@@ -3205,18 +3205,18 @@ static position monster_move_attack(monster *m, struct player *p)
         switch (map_sobject_at(monster_map(m), monster_pos(m)))
         {
         case LS_STAIRSDOWN:
-        case LS_DNGN_ENTRANCE:
+        case LS_CAVERNS_ENTRY:
             newmap = Z(m->pos) + 1;
             break;
 
         case LS_STAIRSUP:
-        case LS_DNGN_EXIT:
+        case LS_CAVERNS_EXIT:
             newmap = Z(m->pos) - 1;
             break;
 
         case LS_ELEVATORDOWN:
             /* move into the volcano from the town */
-            newmap = MAP_DMAX + 1;
+            newmap = MAP_CMAX + 1;
             break;
 
         case LS_ELEVATORUP:

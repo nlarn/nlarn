@@ -1,6 +1,6 @@
 /*
  * player.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1612,18 +1612,18 @@ int player_map_enter(player *p, map *l, gboolean teleported)
         p->pos = map_find_sobject(l, LS_HOME);
 
     /* took the elevator down */
-    else if ((Z(p->pos) == 0) && (l->nlevel == (MAP_DMAX)))
+    else if ((Z(p->pos) == 0) && (l->nlevel == (MAP_CMAX)))
         p->pos = map_find_sobject(l, LS_ELEVATORUP);
 
     /* took the elevator up */
-    else if ((Z(p->pos) == (MAP_DMAX)) && (l->nlevel == 0))
+    else if ((Z(p->pos) == (MAP_CMAX)) && (l->nlevel == 0))
         p->pos = map_find_sobject(l, LS_ELEVATORDOWN);
 
     /* climbing up */
     else if (Z(p->pos) > l->nlevel)
     {
         if (l->nlevel == 0)
-            p->pos = map_find_sobject(l, LS_DNGN_ENTRANCE);
+            p->pos = map_find_sobject(l, LS_CAVERNS_ENTRY);
         else
             p->pos = map_find_sobject(l, LS_STAIRSDOWN);
     }
@@ -1631,7 +1631,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     else if (l->nlevel > Z(p->pos))
     {
         if (l->nlevel == 1)
-            p->pos = map_find_sobject(l, LS_DNGN_EXIT);
+            p->pos = map_find_sobject(l, LS_CAVERNS_EXIT);
         else
             p->pos = map_find_sobject(l, LS_STAIRSUP);
     }
@@ -5013,7 +5013,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
                            score->cod < PD_TOO_LATE ? "died"
                            : "returned home");
 
-    g_string_append_printf(text, "\n%s found %d gold in the dungeon, "
+    g_string_append_printf(text, "\n%s found %d gold in the caverns, "
                            "sold %s gem%s for %d and %s non-gem "
                            "item%s for %d gold, and earned %d gold "
                            "as bank interest.",

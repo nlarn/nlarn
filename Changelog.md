@@ -1,3 +1,10 @@
+## Release 0.7.5 (unrelease)
+
+### Changes:
+
+### Fixed bugs:
+* They're the caverns, not some random dungeon
+
 ## Release 0.7.4 (2020-04-09)
 
 ### Changes:

@@ -1,6 +1,6 @@
 /*
  * scrolls.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -919,12 +919,12 @@ static int scroll_teleport(player *p, item *r_scroll)
         if (Z(p->pos) == 0)
             /* teleporting in town does not work */
             nlevel = 0;
-        else if (Z(p->pos) < MAP_DMAX)
+        else if (Z(p->pos) < MAP_CMAX)
             /* choose a cavern level if the player is in the caverns*/
-            nlevel = rand_1n(MAP_DMAX);
+            nlevel = rand_1n(MAP_CMAX);
         else
             /* choose a volcano level if the player is in the volcano */
-            nlevel = rand_m_n(MAP_DMAX, MAP_MAX);
+            nlevel = rand_m_n(MAP_CMAX, MAP_MAX);
     }
 
     if (nlevel != Z(p->pos))
