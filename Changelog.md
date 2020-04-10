@@ -1,6 +1,7 @@
 ## Release 0.7.5 (unrelease)
 
 ### Changes:
+* Remove the option to set the game difficulty from the command line
 
 ### Fixed bugs:
 * They're the caverns, not some random dungeon

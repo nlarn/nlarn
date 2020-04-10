@@ -77,7 +77,6 @@ void parse_commandline(int argc, char *argv[], struct game_config *config)
         { "gender",      'g', 0, G_OPTION_ARG_STRING, &config->gender,       "Set character's gender (m/f)", NULL },
         { "stats",       's', 0, G_OPTION_ARG_STRING, &config->stats,        "Set character's stats (a-f)", NULL },
         { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &config->auto_pickup,  "Item types to pick up automatically, e.g. '$*+'", NULL },
-        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &config->difficulty,   "Set difficulty", NULL },
         { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config->no_autosave,  "Disable autosave", NULL },
         { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config->wizard,       "Enable wizard mode", NULL },
 #ifdef SDLPDCURSES
