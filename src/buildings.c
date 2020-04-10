@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <glib.h>
 
+#include "config.h"
 #include "container.h"
 #include "display.h"
 #include "game.h"
@@ -389,6 +390,9 @@ int building_home(player *p)
             item *pcd = inv_get_filtered(p->inventory, 0, item_filter_pcd);
             inv_del_element(&p->inventory, pcd);
             item_destroy(pcd);
+
+            /* increase difficulty level */
+            config_increase_difficulty(nlarn->inifile, nlarn->difficulty + 1);
 
             player_die(p, PD_WON, 0);
         }

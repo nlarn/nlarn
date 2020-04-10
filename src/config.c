@@ -27,7 +27,7 @@
 
 static const char *default_config_file =
     "[nlarn]\n"
-    "# Set difficulty\n"
+    "# Difficulty (i.e. number of games won)\n"
     "difficulty=0\n"
     "\n"
     "# Set character's name\n"
@@ -67,6 +67,15 @@ static const char *default_config_file =
     "# Disable automatic saving when switching a level. Saving the game is\n"
     "# enabled by default, disable when it's too slow on your computer\n"
     "no-autosave=false\n";
+
+/* shared config cleanup helper */
+static void free_config(const struct game_config config)
+{
+    if (config.name)        g_free(config.name);
+    if (config.gender)      g_free(config.gender);
+    if (config.stats)       g_free(config.stats);
+    if (config.auto_pickup) g_free(config.auto_pickup);
+}
 
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config)
@@ -470,8 +479,19 @@ void configure_defaults(const char *inifile)
     write_ini_file(inifile, &config);
 
     /* clean up */
-    if (config.name)        g_free(config.name);
-    if (config.gender)      g_free(config.gender);
-    if (config.stats)       g_free(config.stats);
-    if (config.auto_pickup) g_free(config.auto_pickup);
+    free_config(config);
+}
+
+void config_increase_difficulty(const char *inifile, const int new_difficulty)
+{
+    struct game_config config = {};
+    parse_ini_file(inifile, &config);
+
+    config.difficulty = new_difficulty;
+
+    /* write back modified config */
+    write_ini_file(inifile, &config);
+
+    /* clean up */
+    free_config(config);
 }

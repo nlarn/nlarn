@@ -1,6 +1,7 @@
 ## Release 0.7.5 (unrelease)
 
 ### Changes:
+* Increase difficulty after winning the game
 * Remove the option to set the game difficulty from the command line
 
 ### Fixed bugs:

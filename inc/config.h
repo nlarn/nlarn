@@ -1,6 +1,6 @@
 /*
  * config.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -61,3 +61,6 @@ char compose_gender(const int gender);
 
 /* configure game defaults */
 void configure_defaults(const char *inifile);
+
+/* increase difficulty after winning the game */
+void config_increase_difficulty(const char *inifile, const int new_difficulty);
