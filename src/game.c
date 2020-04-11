@@ -214,7 +214,8 @@ void game_init(int argc, char *argv[])
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     nlarn->highscores = scoreboard_filename;
 #else
-    nlarn->highscores = g_build_filename(nlarn->libdir, highscores, NULL);
+    /* store high scores in the same directory as the configuation */
+    nlarn->highscores = g_build_filename(game_userdir(), highscores, NULL);
 #endif
 
     /* parse the command line options */
