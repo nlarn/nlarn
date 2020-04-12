@@ -3,6 +3,7 @@
 ### Changes:
 * Increase difficulty after winning the game
 * Remove the option to set the game difficulty from the command line
+* Increased robustness against broken configuration files
 
 ### Fixed bugs:
 * Fix saving highscores on Windows

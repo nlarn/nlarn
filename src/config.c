@@ -22,6 +22,7 @@
 
 #include "config.h"
 #include "display.h"
+#include "nlarn.h"
 #include "items.h"
 #include "player.h"
 
@@ -158,6 +159,11 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
     else
     {
         /* File not found. Never mind but clean up the mess */
+        if (nlarn && nlarn->log) {
+            log_add_entry(nlarn->log,
+                "Unable to parse configuration file: %s\n",
+                error->message);
+        }
         g_clear_error(&error);
     }
 
@@ -197,10 +203,11 @@ void write_ini_file(const char *filename, struct game_config *config)
 
 void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX])
 {
-    g_assert(settings != NULL);
-
     /* reset configuration */
     memset(config, 0, sizeof(gboolean) * IT_MAX);
+
+    /* parsing config has failed, not settings string given */
+    if (!settings) return;
 
     for (guint idx = 0; idx < strlen(settings); idx++)
     {
