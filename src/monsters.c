@@ -947,20 +947,21 @@ monster *monster_new_by_level(position pos)
 {
     g_assert(pos_valid(pos));
 
-    const int mlevel[] = { MT_KOBOLD,           // D1:   5
-                            MT_GIANT_ANT,        // D2:  11
-                            MT_ZOMBIE,           // D3:  17
-                            MT_CENTAUR,          // D4:  22
-                            MT_WHITE_DRAGON,     // D5:  27
-                            MT_FORVALAKA,        // D6:  33
-                            MT_STALKER,          // D7:  39
-                            MT_SHAMBLINGMOUND,   // D8:  42
-                            MT_MIMIC,            // D9:  46
-                            MT_BRONZE_DRAGON,    // D10: 50
-                            MT_PLATINUM_DRAGON,  // V1:  53
-                            MT_GREEN_URCHIN,     // V2:  56
-                            MT_DEMON_PRINCE      // V3
-                          };
+    const int mlevel[] = {
+        MT_KOBOLD,           // D1:   5
+        MT_GIANT_ANT,        // D2:  11
+        MT_ZOMBIE,           // D3:  17
+        MT_CENTAUR,          // D4:  22
+        MT_WHITE_DRAGON,     // D5:  27
+        MT_FORVALAKA,        // D6:  33
+        MT_STALKER,          // D7:  39
+        MT_SHAMBLINGMOUND,   // D8:  42
+        MT_MIMIC,            // D9:  46
+        MT_BRONZE_DRAGON,    // D10: 50
+        MT_PLATINUM_DRAGON,  // V1:  53
+        MT_GREEN_URCHIN,     // V2:  56
+        MT_DEMON_PRINCE      // V3
+    };
 
     const int nlevel = Z(pos);
     int monster_id;
@@ -979,9 +980,9 @@ monster *monster_new_by_level(position pos)
         int monster_id_min;
         int monster_id_max;
 
-        if (chance(2*game_difficulty(nlarn)))
+        if (chance(2 * game_difficulty(nlarn)))
             maxstep += 2;
-        else if (chance(7*(game_difficulty(nlarn) + 1)))
+        else if (chance(7 * (game_difficulty(nlarn) + 1)))
             maxstep++;
         else if (chance(10))
             minstep--;
