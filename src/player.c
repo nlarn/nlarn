@@ -5029,14 +5029,15 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     g_string_append_printf(text, "\n%s bought %s item%s for %d gold, spent "
                            "%d on item identification or repair, "
                            "donated %d gold to charitable causes, and "
-                           "invested %d gold in personal education.",
+                           "invested %d gold in %s personal education.",
                            pronoun,
                            int2str(p->stats.items_bought),
                            plural(p->stats.items_bought),
                            p->stats.gold_spent_shop,
                            p->stats.gold_spent_id_repair,
                            p->stats.gold_spent_donation,
-                           p->stats.gold_spent_college);
+                           p->stats.gold_spent_college,
+                           (p->sex == PS_MALE) ? "his" : "her");
 
     if (p->outstanding_taxes)
         g_string_append_printf(text, " %s owed the tax office %d gold%s",
