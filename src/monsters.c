@@ -988,7 +988,7 @@ monster *monster_new_by_level(position pos)
             minstep--;
 
         if (minstep < 0)
-            monster_id_min = 1;
+            monster_id_min = MT_GIANT_BAT;
         else
             monster_id_min = mlevel[minstep] + 1;
 
