@@ -51,7 +51,7 @@ BOOL nlarn_control_handler(DWORD fdwCtrlType);
 static void nlarn_signal_handler(int signo);
 #endif
 
-int main(int argc, char *argv[])
+static int mainloop()
 {
     /* count of moves used by last action */
     int moves_count = 0;
@@ -64,61 +64,6 @@ int main(int argc, char *argv[])
 
     /* position chosen for auto travel, allowing to continue travel */
     position cpos = pos_invalid;
-
-    /* initialise the game */
-    game_init(argc, argv);
-
-    /* set the console shutdown handler */
-#ifdef __unix
-    signal(SIGTERM, nlarn_signal_handler);
-    signal(SIGHUP, nlarn_signal_handler);
-#endif
-
-#ifdef WIN32
-    SetConsoleCtrlHandler((PHANDLER_ROUTINE) nlarn_control_handler, TRUE);
-#endif
-
-    /* check if mesgfile exists */
-    if (!g_file_get_contents(game_mesgfile(nlarn), &strbuf, NULL, NULL))
-    {
-        nlarn = game_destroy(nlarn);
-        display_shutdown();
-        g_printerr("Error: Cannot find the message file.\n");
-
-        exit(EXIT_FAILURE);
-    }
-
-    display_show_message("Welcome to the game of NLarn!", strbuf, 0);
-    g_free(strbuf);
-
-    /* ask for a character name if none has been supplied */
-    while (nlarn->p->name == NULL)
-    {
-        nlarn->p->name = display_get_string("Choose your name",
-                "By what name shall you be called?", NULL, 45);
-    }
-
-    /* ask for character's gender if it is not known yet */
-    if (nlarn->p->sex == PS_NONE)
-    {
-        int res = display_get_yesno("Are you male or female?", NULL, "Female", "Male");
-
-        /* display_get_yesno() returns 0 or one */
-        nlarn->p->sex = (res == TRUE) ? PS_FEMALE : PS_MALE;
-    }
-
-    while (!nlarn->player_stats_set)
-    {
-        /* assign the player's stats */
-        char selection = player_select_bonus_stats();
-        nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, selection);
-    }
-
-    /* automatic save point (not when restoring a save) */
-    if ((game_turn(nlarn) == 1) && game_autosave(nlarn))
-    {
-        game_save(nlarn);
-    }
 
     char run_cmd = 0;
     int ch = 0;
@@ -669,7 +614,7 @@ int main(int argc, char *argv[])
             {
                 /* only terminate the game if saving was successful */
                 nlarn = game_destroy(nlarn);
-                exit(EXIT_SUCCESS);
+                return EXIT_SUCCESS;
             }
             break;
 
@@ -829,7 +774,69 @@ int main(int argc, char *argv[])
             }
         }
     }
-    while (TRUE); /* main event loop */
+    while (TRUE);
+}
+
+int main(int argc, char *argv[])
+{
+    /* initialise the game */
+    game_init(argc, argv);
+
+    /* set the console shutdown handler */
+#ifdef __unix
+    signal(SIGTERM, nlarn_signal_handler);
+    signal(SIGHUP, nlarn_signal_handler);
+#endif
+
+#ifdef WIN32
+    SetConsoleCtrlHandler((PHANDLER_ROUTINE) nlarn_control_handler, TRUE);
+#endif
+
+    /* check if the message file exists */
+    gchar *message_file = NULL;
+    if (!g_file_get_contents(game_mesgfile(nlarn), &message_file, NULL, NULL))
+    {
+        nlarn = game_destroy(nlarn);
+        display_shutdown();
+        g_printerr("Error: Cannot find the message file.\n");
+
+        return EXIT_FAILURE;
+    }
+
+    display_show_message("Welcome to the game of NLarn!", message_file, 0);
+    g_free(message_file);
+
+    /* ask for a character name if none has been supplied */
+    while (nlarn->p->name == NULL)
+    {
+        nlarn->p->name = display_get_string("Choose your name",
+                "By what name shall you be called?", NULL, 45);
+    }
+
+    /* ask for character's gender if it is not known yet */
+    if (nlarn->p->sex == PS_NONE)
+    {
+        int res = display_get_yesno("Are you male or female?", NULL, "Female", "Male");
+
+        /* display_get_yesno() returns 0 or one */
+        nlarn->p->sex = (res == TRUE) ? PS_FEMALE : PS_MALE;
+    }
+
+    while (!nlarn->player_stats_set)
+    {
+        /* assign the player's stats */
+        char selection = player_select_bonus_stats();
+        nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, selection);
+    }
+
+    /* automatic save point (not when restoring a save) */
+    if ((game_turn(nlarn) == 1) && game_autosave(nlarn))
+    {
+        game_save(nlarn);
+    }
+
+    /* main event loop */
+    return mainloop();
 }
 
 static gboolean adjacent_corridor(position pos, char mv)
