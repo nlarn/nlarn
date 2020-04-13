@@ -134,8 +134,7 @@ void display_init()
     /* These initialisations have to be done after initscr(), otherwise
        the window is not yet available. */
     /* Set the window title */
-    char *window_title = g_strdup_printf("NLarn %d.%d.%d%s", VERSION_MAJOR,
-            VERSION_MINOR, VERSION_PATCH, GITREV);
+    char *window_title = g_strdup_printf("NLarn %s", nlarn_version);
 
     PDC_set_title(window_title);
     g_free(window_title);

@@ -37,6 +37,13 @@
 #include "sobjects.h"
 #include "traps.h"
 
+/* see https://stackoverflow.com/q/36764885/1519878 */
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
+/* version string */
+const char *nlarn_version = STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_PATCH) GITREV;
+
 /* global game object */
 game *nlarn = NULL;
 
@@ -540,9 +547,7 @@ static int mainloop()
             break;
 
         case 'v':
-            log_add_entry(nlarn->log, "NLarn version %d.%d.%d%s, built on %s.",
-                          VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, GITREV,
-                          __DATE__);
+            log_add_entry(nlarn->log, "NLarn version %s, built on %s.", nlarn_version, __DATE__);
             break;
 
             /* wear/wield something */

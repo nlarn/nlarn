@@ -75,9 +75,8 @@ static int sgfd = 0;
 
 static void print_welcome_message(gboolean newgame)
 {
-    log_add_entry(nlarn->log, "Welcome %sto NLarn %d.%d.%d%s!",
-                  newgame ? "" : "back ", VERSION_MAJOR, VERSION_MINOR,
-                  VERSION_PATCH, GITREV);
+    log_add_entry(nlarn->log, "Welcome %sto NLarn %s!",
+                  newgame ? "" : "back ", nlarn_version);
     log_add_entry(nlarn->log, "For a list of commands, press '?'.");
 }
 
@@ -223,9 +222,7 @@ void game_init(int argc, char *argv[])
 
     /* show version information */
     if (config.show_version) {
-        g_printf("NLarn version %d.%d.%d%s, built on %s.\n\n",
-                VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, GITREV,
-                __DATE__);
+        g_printf("NLarn version %s, built on %s.\n\n", nlarn_version, __DATE__);
         g_printf("Game base directory:\t%s\n", nlarn->basedir);
         g_printf("Game lib directory:\t%s\n", nlarn->libdir);
         g_printf("Game savefile version:\t%d\n", SAVEFILE_VERSION);
