@@ -165,11 +165,6 @@ void game_delete_savefile();
 #define game_turn(g)            ((g)->gtime)
 #define game_remaining_turns(g) (((g)->gtime > TIMELIMIT) ? 0 : TIMELIMIT - (g)->gtime)
 
-#define game_mesgfile(g) ((g)->mesgfile)
-#define game_helpfile(g) ((g)->helpfile)
-#define game_mazefile(g) ((g)->mazefile)
-#define game_fortunes(g) ((g)->fortunes)
-
 /* gtime <> mobuls conversion */
 #define gtime2mobuls(gtime)  ((abs(((int)gtime)) + 99) / 100)
 #define mobuls2gtime(mobuls) ((int)(mobuls) * 100)

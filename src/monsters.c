@@ -3400,7 +3400,7 @@ static position monster_move_civilian(monster *m, struct player *p)
         /* talk */
         log_add_entry(nlarn->log, "The %s says, \"%s\"",
                       monster_get_name(m),
-                      monsters_get_fortune(game_fortunes(nlarn)));
+                      monsters_get_fortune(nlarn->fortunes));
     }
 
     /* change the town person's name from time to time */

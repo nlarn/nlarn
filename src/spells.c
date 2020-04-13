@@ -1047,7 +1047,7 @@ static gboolean spell_alter_reality(spell *s, player *p)
     map_destroy(game_map(nlarn, Z(p->pos)));
 
     /* create new map */
-    nlevel = nlarn->maps[Z(p->pos)] = map_new(Z(p->pos), game_mazefile(nlarn));
+    nlevel = nlarn->maps[Z(p->pos)] = map_new(Z(p->pos), nlarn->mazefile);
 
     /* reposition player (if needed) */
     if (!map_pos_passable(nlevel, p->pos))

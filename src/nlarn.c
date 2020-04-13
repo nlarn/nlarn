@@ -342,7 +342,7 @@ static int mainloop()
             /* help */
         case KEY_F(1):
         case '?':
-            if (g_file_get_contents(game_helpfile(nlarn), &strbuf, NULL, NULL))
+            if (g_file_get_contents(nlarn->helpfile, &strbuf, NULL, NULL))
             {
                 display_show_message("Help for The Caverns of NLarn", strbuf, 1);
                 g_free(strbuf);
@@ -799,7 +799,7 @@ int main(int argc, char *argv[])
 
     /* check if the message file exists */
     gchar *message_file = NULL;
-    if (!g_file_get_contents(game_mesgfile(nlarn), &message_file, NULL, NULL))
+    if (!g_file_get_contents(nlarn->mesgfile, &message_file, NULL, NULL))
     {
         nlarn = game_destroy(nlarn);
         display_shutdown();
