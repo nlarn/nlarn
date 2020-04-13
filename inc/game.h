@@ -1,6 +1,6 @@
 /*
  * game.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -164,9 +164,6 @@ void game_delete_savefile();
 
 #define game_turn(g)            ((g)->gtime)
 #define game_remaining_turns(g) (((g)->gtime > TIMELIMIT) ? 0 : TIMELIMIT - (g)->gtime)
-
-#define game_dir(g) ((g)->basedir)
-#define game_lib(g) ((g)->libdir)
 
 #define game_mesgfile(g) ((g)->mesgfile)
 #define game_helpfile(g) ((g)->helpfile)
