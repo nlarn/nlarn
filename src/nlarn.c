@@ -24,10 +24,6 @@
 # include <signal.h>
 #endif
 
-#ifdef WIN32
-# include <windows.h>
-#endif
-
 #include "config.h"
 #include "container.h"
 #include "display.h"
@@ -49,10 +45,6 @@ game *nlarn = NULL;
 
 
 static gboolean adjacent_corridor(position pos, char mv);
-
-#ifdef WIN32
-BOOL nlarn_control_handler(DWORD fdwCtrlType);
-#endif
 
 #ifdef __unix
 static void nlarn_signal_handler(int signo);
@@ -793,10 +785,6 @@ int main(int argc, char *argv[])
     signal(SIGHUP, nlarn_signal_handler);
 #endif
 
-#ifdef WIN32
-    SetConsoleCtrlHandler((PHANDLER_ROUTINE) nlarn_control_handler, TRUE);
-#endif
-
     /* check if the message file exists */
     gchar *message_file = NULL;
     if (!g_file_get_contents(nlarn->mesgfile, &message_file, NULL, NULL))
@@ -921,24 +909,5 @@ static void nlarn_signal_handler(int signo)
 
     nlarn = game_destroy(nlarn);
     exit(EXIT_SUCCESS);
-}
-#endif
-
-#ifdef WIN32
-BOOL nlarn_control_handler(DWORD fdwCtrlType)
-{
-    switch(fdwCtrlType)
-    {
-        /* Close Window button pressed: store the game progress */
-    case CTRL_CLOSE_EVENT:
-        /* save the game */
-        game_save(nlarn);
-        nlarn = game_destroy(nlarn);
-
-        return TRUE;
-
-    default:
-        return FALSE;
-    }
 }
 #endif
