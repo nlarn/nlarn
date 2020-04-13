@@ -117,12 +117,12 @@ void display_init()
     g_setenv("PDC_LINES", "25", 0);
 
     /* Set the window icon */
-    char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn->libdir);
+    char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn_libdir);
     g_setenv("PDC_ICON", icon_name, 1);
     g_free(icon_name);
 
     /* Set the font - allow overriding this default */
-    gchar *font_name = g_strdup_printf("%s/FiraMono-Medium.otf", nlarn->libdir);
+    gchar *font_name = g_strdup_printf("%s/FiraMono-Medium.otf", nlarn_libdir);
     g_setenv("PDC_FONT", font_name, 0);
     g_free(font_name);
 #endif

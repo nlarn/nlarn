@@ -36,4 +36,15 @@ const char *nlarn_version;
 /* the entire game */
 game *nlarn;
 
+/* file paths */
+const char *nlarn_basedir;
+const char *nlarn_libdir;
+const char *nlarn_mesgfile;
+const char *nlarn_helpfile;
+const char *nlarn_mazefile;
+const char *nlarn_fortunes;
+const char *nlarn_highscores;
+const char *nlarn_inifile;
+const char *nlarn_savefile;
+
 #endif

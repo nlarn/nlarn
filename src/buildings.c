@@ -392,7 +392,7 @@ int building_home(player *p)
             item_destroy(pcd);
 
             /* increase difficulty level */
-            config_increase_difficulty(nlarn->inifile, nlarn->difficulty + 1);
+            config_increase_difficulty(nlarn_inifile, nlarn->difficulty + 1);
 
             player_die(p, PD_WON, 0);
         }

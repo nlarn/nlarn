@@ -127,7 +127,7 @@ typedef gboolean (*trajectory_hit_sth)(const GList *trajectory,
 
 /* function declarations */
 
-map *map_new(int num, char *mazefile);
+map *map_new(int num, const char *mazefile);
 void map_destroy(map *m);
 
 cJSON *map_serialize(map *m);
