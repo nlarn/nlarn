@@ -283,6 +283,12 @@ static void nlarn_init(int argc, char *argv[])
     /* assemble the save file name */
     nlarn_savefile = g_build_path(G_DIR_SEPARATOR_S, nlarn_userdir(),
             save_file, NULL);
+
+    /* set the console shutdown handler */
+#ifdef __unix
+    signal(SIGTERM, nlarn_signal_handler);
+    signal(SIGHUP, nlarn_signal_handler);
+#endif
 }
 
 static int mainloop()
@@ -1017,12 +1023,6 @@ int main(int argc, char *argv[])
     /* initialise the game */
     game_init(&config);
 
-    /* set the console shutdown handler */
-#ifdef __unix
-    signal(SIGTERM, nlarn_signal_handler);
-    signal(SIGHUP, nlarn_signal_handler);
-#endif
-
     /* check if the message file exists */
     gchar *message_file = NULL;
     if (!g_file_get_contents(nlarn_mesgfile, &message_file, NULL, NULL))
@@ -1137,15 +1137,19 @@ static void nlarn_signal_handler(int signo)
     /* restore the display down before emitting messages */
     display_shutdown();
 
-    /* attempt to save the game */
-    game_save(nlarn);
-
-    if (signo != SIGHUP)
+    /* attempt to save and clear the game, when initialized */
+    if (nlarn)
     {
-        g_printf("Terminated. Your progress has been saved.\n");
+            game_save(nlarn);
+
+        if (signo != SIGHUP)
+        {
+            g_printf("Terminated. Your progress has been saved.\n");
+        }
+
+        nlarn = game_destroy(nlarn);
     }
 
-    nlarn = game_destroy(nlarn);
     exit(EXIT_SUCCESS);
 }
 #endif
