@@ -169,15 +169,16 @@ static void nlarn_init(int argc, char *argv[])
     nlarn_fortunes = g_build_filename(nlarn_libdir, fortunes, NULL);
 
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
+    /* highscore file handling for SETGID builds */
     gid_t realgid;
     uid_t realuid;
 
     /* assemble the scoreboard filename */
-    gchar *scoreboard_filename = g_build_path(G_DIR_SEPARATOR_S, default_var_dir,
+    nlarn_highscores = g_build_path(G_DIR_SEPARATOR_S, default_var_dir,
                                               highscores, NULL);
 
     /* Open the scoreboard file. */
-    if ((scoreboard_fd = open(scoreboard_filename, O_RDWR)) == -1)
+    if ((scoreboard_fd = open(nlarn_highscores, O_RDWR)) == -1)
     {
         perror("Could not open scoreboard file");
         exit(EXIT_FAILURE);
@@ -205,12 +206,10 @@ static void nlarn_init(int argc, char *argv[])
         perror("Could not drop setuid privileges");
         exit(EXIT_FAILURE);
     }
-#endif
 
-#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-    nlarn_highscores = scoreboard_filename;
 #else
-    /* store high scores in the same directory as the configuation */
+    /* highscore file handling for non-SETGID builds -
+       store high scores in the same directory as the configuation */
     nlarn_highscores = g_build_filename(nlarn_userdir(), highscores, NULL);
 #endif
 
