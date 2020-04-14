@@ -118,16 +118,16 @@ static void nlarn_init(int argc, char *argv[])
 {
     /* determine paths and file names */
     /* base directory for a local install */
-    nlarn_basedir = g_path_get_dirname(argv[0]);
+    g_autofree char *basedir = g_path_get_dirname(argv[0]);
 
     /* try to use the directory below the binary's location first */
-    nlarn_libdir = g_build_path(G_DIR_SEPARATOR_S, nlarn_basedir, "lib", NULL);
+    nlarn_libdir = g_build_path(G_DIR_SEPARATOR_S, basedir, "lib", NULL);
 
     if (!g_file_test(nlarn_libdir, G_FILE_TEST_IS_DIR))
     {
         /* local lib directory could not be found, try the system wide directory. */
 #ifdef __APPLE__
-        char *rellibdir = g_build_path(G_DIR_SEPARATOR_S, nlarn_basedir,
+        char *rellibdir = g_build_path(G_DIR_SEPARATOR_S, basedir,
                                        "../Resources", NULL);
 #endif
         if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
@@ -220,7 +220,6 @@ static void nlarn_init(int argc, char *argv[])
     /* show version information */
     if (config.show_version) {
         g_printf("NLarn version %s, built on %s.\n\n", nlarn_version, __DATE__);
-        g_printf("Game base directory:\t%s\n", nlarn_basedir);
         g_printf("Game lib directory:\t%s\n", nlarn_libdir);
         g_printf("Game savefile version:\t%d\n", SAVEFILE_VERSION);
 

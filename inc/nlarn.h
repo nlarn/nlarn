@@ -37,7 +37,6 @@ const char *nlarn_version;
 game *nlarn;
 
 /* file paths */
-const char *nlarn_basedir;
 const char *nlarn_libdir;
 const char *nlarn_mesgfile;
 const char *nlarn_helpfile;
