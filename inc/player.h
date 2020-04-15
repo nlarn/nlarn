@@ -1,6 +1,6 @@
 /*
  * player.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -184,7 +184,7 @@ typedef struct player
 /* various causes of death */
 typedef enum _player_cod
 {
-    PD_NONE,
+    PD_NONE,      /* 0, required by setjmp for initialisation */
     PD_EFFECT,
     PD_LASTLEVEL, /* lost a level at level 1 */
     PD_MONSTER,

@@ -1073,10 +1073,14 @@ int main(int argc, char *argv[])
 
     /* Create the jump target for player death. Death will destroy the game
        object, thus control will be returned to the line after this one, i.e
-       the game will be created again and the main menu will be shown. */
-    setjmp(nlarn_death_jump);
+       the game will be created again and the main menu will be shown. To
+       ensure that the game quits when quitting from inside the game, return
+       the cause of death from player_die().
+    */
+    player_cod cod = setjmp(nlarn_death_jump);
 
-    while (TRUE) /* can be broken with q or ESC in main menu */
+    /* can be broken by quitting in the game, or with q or ESC in main menu */
+    while (cod != PD_QUIT)
     {
         /* initialise the game */
         game_init(&config);

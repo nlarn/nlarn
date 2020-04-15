@@ -1174,7 +1174,7 @@ void player_die(player *p, player_cod cause_type, int cause)
 
     /* JUMP JUMP Everybody JUMP!
        Restart game and return to the main menu */
-    longjmp(nlarn_death_jump, TRUE);
+    longjmp(nlarn_death_jump, cause_type);
 }
 
 guint64 player_calc_score(player *p, int won)
