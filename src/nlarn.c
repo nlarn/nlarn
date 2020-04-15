@@ -336,12 +336,12 @@ static int mainloop()
         case '?':
             if (g_file_get_contents(nlarn->helpfile, &strbuf, NULL, NULL))
             {
-                display_show_message("Help for The Caverns of NLarn", strbuf, 1);
+                display_show_message("Help for the game of NLarn", strbuf, 1);
                 g_free(strbuf);
             }
             else
             {
-                display_show_message("Help for The Caverns of NLarn",
+                display_show_message("Error",
                                      "\n The help file could not be found. \n", 0);
             }
             break;
