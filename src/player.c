@@ -1170,7 +1170,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     }
 
     game_delete_savefile();
-    game_destroy(nlarn);
+    nlarn = game_destroy(nlarn);
 
     exit(EXIT_SUCCESS);
 }
