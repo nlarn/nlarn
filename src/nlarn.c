@@ -72,6 +72,9 @@ game *nlarn = NULL;
 /* the game settings */
 static struct game_config config = {};
 
+/* death jump buffer - used to return to the main loop when the player has died */
+jmp_buf nlarn_death_jump;
+
 static gboolean adjacent_corridor(position pos, char mv);
 
 #ifdef __unix
@@ -291,7 +294,7 @@ static void nlarn_init(int argc, char *argv[])
 #endif
 }
 
-static int mainloop()
+static void mainloop()
 {
     /* count of moves used by last action */
     int moves_count = 0;
@@ -310,8 +313,9 @@ static int mainloop()
     gboolean adj_corr = FALSE;
     guint end_resting = 0;
 
-    /* main event loop */
-    do
+    /* main event loop
+       keep running until the game object was destroyed */
+    while (nlarn)
     {
         /* repaint screen */
         display_paint_screen(nlarn->p);
@@ -852,7 +856,7 @@ static int mainloop()
             {
                 /* only terminate the game if saving was successful */
                 nlarn = game_destroy(nlarn);
-                return EXIT_SUCCESS;
+                return;
             }
             break;
 
@@ -1012,7 +1016,54 @@ static int mainloop()
             }
         }
     }
-    while (TRUE);
+}
+
+gboolean main_menu()
+{
+    const char *main_menu_tpl =
+        "\n"
+        "      `lightgreen`a`end`) %s Game\n"
+        "      `lightgreen`b`end`) Configure Settings\n"
+        "      `lightgreen`c`end`) View High Scores\n"
+        "\n"
+        "      `lightgreen`q`end`) Quit Game\n"
+        "\n";
+
+
+    g_autofree char *title = g_strdup_printf("NLarn %s", nlarn_version);
+    g_autofree char *main_menu = g_strdup_printf(main_menu_tpl,
+        (game_turn(nlarn) == 1) ? "New" : "Continue saved");
+
+    char input = 0;
+
+    while (input != 'q' && input != KEY_ESC)
+    {
+        input = display_show_message(title, main_menu, 0);
+
+        switch (input)
+        {
+        case 'a':
+            return TRUE;
+            break;
+
+        case 'b':
+            configure_defaults(nlarn_inifile);
+            break;
+
+        case 'c':
+        {
+            GList *highscores = NULL;
+            highscores = scores_load();
+            char *rendered_highscores = scores_to_string(highscores, NULL);
+            display_show_message("Highscores", rendered_highscores, 0);
+            scores_destroy(highscores);
+            g_free(rendered_highscores);
+        }
+            break;
+        }
+    }
+
+    return FALSE;
 }
 
 int main(int argc, char *argv[])
@@ -1020,54 +1071,69 @@ int main(int argc, char *argv[])
     /* initialisation */
     nlarn_init(argc, argv);
 
-    /* initialise the game */
-    game_init(&config);
+    /* Create the jump target for player death. Death will destroy the game
+       object, thus control will be returned to the line after this one, i.e
+       the game will be created again and the main menu will be shown. */
+    setjmp(nlarn_death_jump);
 
-    /* check if the message file exists */
-    gchar *message_file = NULL;
-    if (!g_file_get_contents(nlarn_mesgfile, &message_file, NULL, NULL))
+    while (TRUE) /* can be broken with q or ESC in main menu */
     {
-        nlarn = game_destroy(nlarn);
-        display_shutdown();
-        g_printerr("Error: Cannot find the message file.\n");
+        /* initialise the game */
+        game_init(&config);
 
-        return EXIT_FAILURE;
+        /* present main menu - */
+        if (FALSE == main_menu()) {
+            break;
+        }
+
+        /* check if the message file exists */
+        gchar *message_file = NULL;
+        if (!g_file_get_contents(nlarn_mesgfile, &message_file, NULL, NULL))
+        {
+            nlarn = game_destroy(nlarn);
+            display_shutdown();
+            g_printerr("Error: Cannot find the message file.\n");
+
+            return EXIT_FAILURE;
+        }
+
+        display_show_message("Welcome to the game of NLarn!", message_file, 0);
+        g_free(message_file);
+
+        /* ask for a character name if none has been supplied */
+        while (nlarn->p->name == NULL)
+        {
+            nlarn->p->name = display_get_string("Choose your name",
+                    "By what name shall you be called?", NULL, 45);
+        }
+
+        /* ask for character's gender if it is not known yet */
+        if (nlarn->p->sex == PS_NONE)
+        {
+            int res = display_get_yesno("Are you male or female?", NULL, "Female", "Male");
+
+            /* display_get_yesno() returns 0 or one */
+            nlarn->p->sex = (res == TRUE) ? PS_FEMALE : PS_MALE;
+        }
+
+        while (!nlarn->player_stats_set)
+        {
+            /* assign the player's stats */
+            char selection = player_select_bonus_stats();
+            nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, selection);
+        }
+
+        /* automatic save point (not when restoring a save) */
+        if ((game_turn(nlarn) == 1) && game_autosave(nlarn))
+        {
+            game_save(nlarn);
+        }
+
+        /* main event loop */
+        mainloop();
     }
 
-    display_show_message("Welcome to the game of NLarn!", message_file, 0);
-    g_free(message_file);
-
-    /* ask for a character name if none has been supplied */
-    while (nlarn->p->name == NULL)
-    {
-        nlarn->p->name = display_get_string("Choose your name",
-                "By what name shall you be called?", NULL, 45);
-    }
-
-    /* ask for character's gender if it is not known yet */
-    if (nlarn->p->sex == PS_NONE)
-    {
-        int res = display_get_yesno("Are you male or female?", NULL, "Female", "Male");
-
-        /* display_get_yesno() returns 0 or one */
-        nlarn->p->sex = (res == TRUE) ? PS_FEMALE : PS_MALE;
-    }
-
-    while (!nlarn->player_stats_set)
-    {
-        /* assign the player's stats */
-        char selection = player_select_bonus_stats();
-        nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, selection);
-    }
-
-    /* automatic save point (not when restoring a save) */
-    if ((game_turn(nlarn) == 1) && game_autosave(nlarn))
-    {
-        game_save(nlarn);
-    }
-
-    /* main event loop */
-    return mainloop();
+    return EXIT_SUCCESS;
 }
 
 static gboolean adjacent_corridor(position pos, char mv)

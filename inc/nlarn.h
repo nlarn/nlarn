@@ -19,6 +19,8 @@
 #ifndef __NLARN_H_
 #define __NLARN_H_
 
+#include <setjmp.h>
+
 #include "game.h"
 
 #define VERSION_MAJOR 0 /* this is the present version # of the program */
@@ -35,6 +37,9 @@ const char *nlarn_version;
 
 /* the entire game */
 game *nlarn;
+
+/* death jump buffer - used to return to the main loop when the player has died */
+extern jmp_buf nlarn_death_jump;
 
 /* file paths */
 const char *nlarn_libdir;

@@ -1172,7 +1172,9 @@ void player_die(player *p, player_cod cause_type, int cause)
     game_delete_savefile();
     nlarn = game_destroy(nlarn);
 
-    exit(EXIT_SUCCESS);
+    /* JUMP JUMP Everybody JUMP!
+       Restart game and return to the main menu */
+    longjmp(nlarn_death_jump, TRUE);
 }
 
 guint64 player_calc_score(player *p, int won)
