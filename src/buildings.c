@@ -276,11 +276,6 @@ int building_dndstore(player *p)
 
 void building_dndstore_init()
 {
-    static gboolean initialized = FALSE;
-
-    /* this is a one-time process! */
-    if (initialized) return;
-
     for (item_t type = IT_AMULET; type < IT_MAX; type++)
     {
         /*never generate gems or gold */
@@ -336,8 +331,6 @@ void building_dndstore_init()
             inv_add(&nlarn->store_stock, it);
         }
     }
-
-    initialized = TRUE;
 }
 
 int building_home(player *p)
