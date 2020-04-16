@@ -856,7 +856,10 @@ static void mainloop()
             {
                 /* only terminate the game if saving was successful */
                 nlarn = game_destroy(nlarn);
-                return;
+
+                /* return control to the main function and
+                   indicate our desire to quit the game */
+                longjmp(nlarn_death_jump, PD_QUIT);
             }
             break;
 
