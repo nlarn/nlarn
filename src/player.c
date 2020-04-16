@@ -757,7 +757,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
     guint idx = 0;
-    g_autofree char *question = NULL, *description = NULL, *popup_desc = NULL;
+    g_autofree char *description = NULL, *popup_desc = NULL;
 
     g_assert(p != NULL);
 
@@ -778,12 +778,6 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
         va_start(argp, desc);
         description = g_strdup_vprintf(desc, argp);
         va_end(argp);
-
-        question = g_strdup_printf("Do you want to continue %s?", description);
-    }
-    else
-    {
-        question = g_strdup("Do you want to continue?");
     }
 
     display_window *pop = NULL;
@@ -949,6 +943,10 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 /* offer to abort the action if the player is under attack */
                 if (p->attacked && interruptible)
                 {
+                    g_autofree char *question = description
+                        ? g_strdup_printf("Do you want to continue %s?", description)
+                        : g_strdup("Do you want to continue?");
+
                     if (!display_get_yesno(question, NULL, NULL, NULL))
                     {
                         /* user chose to abort the current action */
