@@ -40,6 +40,9 @@ struct game_config {
 gboolean parse_ini_file(const char *filename, struct game_config *config);
 void write_ini_file(const char *filename, struct game_config *config);
 
+/* shared config cleanup helper */
+void free_config(const struct game_config config);
+
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config);
 
