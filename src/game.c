@@ -138,12 +138,10 @@ void game_init(struct game_config *config)
     } /* end new game only settings */
 
     /* parse auto pick-up settings */
-    if (config->auto_pickup && (nlarn->p != NULL))
+    if (config->auto_pickup)
     {
         parse_autopickup_settings(config->auto_pickup,
                 nlarn->p->settings.auto_pickup);
-
-         g_free(config->auto_pickup);
     }
 }
 
