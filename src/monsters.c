@@ -3107,7 +3107,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     }
 }
 
-static char *monsters_get_fortune(char *fortune_file)
+static char *monsters_get_fortune(const char *fortune_file)
 {
     /* array of pointers to fortunes */
     static GPtrArray *fortunes = NULL;
@@ -3400,7 +3400,7 @@ static position monster_move_civilian(monster *m, struct player *p)
         /* talk */
         log_add_entry(nlarn->log, "The %s says, \"%s\"",
                       monster_get_name(m),
-                      monsters_get_fortune(nlarn->fortunes));
+                      monsters_get_fortune(nlarn_fortunes));
     }
 
     /* change the town person's name from time to time */

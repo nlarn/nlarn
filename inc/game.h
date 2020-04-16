@@ -41,16 +41,6 @@ typedef struct game
     guint8 difficulty;          /* game difficulty */
     message_log *log;           /* game message log */
 
-    gchar *basedir;
-    gchar *libdir;
-    gchar *mesgfile;
-    gchar *helpfile;
-    gchar *mazefile;
-    gchar *fortunes;
-    gchar *highscores;
-    gchar *inifile;
-    gchar *savefile;
-
     /* stock of the dnd store */
     inventory *store_stock;
     /* stock of the monastery */
@@ -106,23 +96,22 @@ typedef struct game
 } game;
 
 
+/* forward declarations */
+
+struct game_config;
+
+
 /* function declarations */
 
 /**
  * @brief Initialise the game. This function will try to restore a saved game;
  *        if it fails it will start a new game.
  *
- * @param count of command line arguments
- * @param command line arguments
+ * @param pointer to a parsed command line configuration
  */
-void game_init(int argc, char *argv[]);
+void game_init(struct game_config *config);
 
 game *game_destroy(game *g);
-
-/**
- * @brief Function to return the user-specific directory.
- */
-const gchar *game_userdir();
 
 /**
  * @brief Save a game.

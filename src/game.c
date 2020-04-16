@@ -16,9 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* setres[gu]id() from unistd.h are only defined when this is set
-   *before* including it. Another header in the list seems to do so
-   before we include it here.*/
 #ifdef __linux__
 # ifndef _GNU_SOURCE
 #  define _GNU_SOURCE
@@ -31,12 +28,9 @@
 #include <string.h>
 #include <zlib.h>
 #include <glib/gstdio.h>
-#include <sys/param.h>
 
 #if (defined __unix) || (defined __unix__) || (defined __APPLE__)
-# include <unistd.h>
 # include <sys/file.h>
-# include <sys/stat.h>
 #endif
 
 #ifdef WIN32
@@ -50,25 +44,12 @@
 #include "game.h"
 #include "nlarn.h"
 #include "player.h"
-#include "scoreboard.h"
 #include "spheres.h"
 #include "random.h"
 
 static void game_new();
 static gboolean game_load();
 static void game_items_shuffle(game *g);
-
-static const char *default_lib_dir = "/usr/share/nlarn";
-#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-static const char *default_var_dir = "/var/games/nlarn";
-#endif
-static const char *mesgfile = "nlarn.msg";
-static const char *helpfile = "nlarn.hlp";
-static const char *mazefile = "maze";
-static const char *fortunes = "fortune";
-static const char *highscores = "highscores";
-static const char *config_file = "nlarn.ini";
-static const char *save_file = "nlarn.sav";
 
 /* file descriptor for locking the savegame file */
 static int sgfd = 0;
@@ -108,195 +89,19 @@ static int try_locking_savegame_file(FILE *sg)
     return fd;
 }
 
-/* the game settings */
-static struct game_config config = {};
-
-void game_init(int argc, char *argv[])
+void game_init(struct game_config *config)
 {
-#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-    gid_t realgid;
-    uid_t realuid;
-
-    /* assemble the scoreboard filename */
-    gchar *scoreboard_filename = g_build_path(G_DIR_SEPARATOR_S, default_var_dir,
-                                              highscores, NULL);
-
-    /* Open the scoreboard file. */
-    if ((scoreboard_fd = open(scoreboard_filename, O_RDWR)) == -1)
-    {
-        perror("Could not open scoreboard file");
-        exit(EXIT_FAILURE);
-    }
-
-    /* Figure out who we really are. */
-    realgid = getgid();
-    realuid = getuid();
-
-    /* This is where we drop our setuid/setgid privileges. */
-#ifdef __linux__
-    if (setresgid(-1, realgid, realgid) != 0) {
-#else
-    if (setregid(-1, realgid) != 0) {
-#endif
-        perror("Could not drop setgid privileges");
-        exit(EXIT_FAILURE);
-    }
-
-#ifdef __linux__
-    if (setresuid(-1, realuid, realuid) != 0) {
-#else
-    if (setreuid(-1, realuid) != 0) {
-#endif
-        perror("Could not drop setuid privileges");
-        exit(EXIT_FAILURE);
-    }
-#endif
-
     /* allocate space for game structure */
     nlarn = g_malloc0(sizeof(game));
 
-    /* determine paths and file names */
-    /* base directory for a local install */
-    nlarn->basedir = g_path_get_dirname(argv[0]);
-
-    /* try to use the directory below the binary's location first */
-    nlarn->libdir = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir, "lib", NULL);
-
-    if (!g_file_test(nlarn->libdir, G_FILE_TEST_IS_DIR))
-    {
-        /* local lib directory could not be found, try the system wide directory. */
-#ifdef __APPLE__
-        char *rellibdir = g_build_path(G_DIR_SEPARATOR_S, nlarn->basedir,
-                                       "../Resources", NULL);
-#endif
-        if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
-        {
-            /* system-wide data directory exists */
-            /* string has to be dup'd as it is feed in the end */
-            nlarn->libdir = g_strdup((char *)default_lib_dir);
-        }
-#ifdef __APPLE__
-        else if (g_file_test(rellibdir, G_FILE_TEST_IS_DIR))
-        {
-            /* program seems to be installed relocatable */
-            nlarn->libdir = g_strdup(rellibdir);
-        }
-#endif
-        else
-        {
-            g_printerr("Could not find game library directory.\n\n"
-                       "Paths I've tried:\n"
-                       " * %s\n"
-#ifdef __APPLE__
-                       " * %s\n"
-#endif
-                       " * %s\n\n"
-                       "Please reinstall the game.\n",
-                       nlarn->libdir,
-#ifdef __APPLE__
-                       rellibdir,
-#endif
-                       default_lib_dir);
-
-            g_free(nlarn->libdir);
-#ifdef __APPLE__
-            g_free(rellibdir);
-#endif
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    nlarn->mesgfile = g_build_filename(nlarn->libdir, mesgfile, NULL);
-    nlarn->helpfile = g_build_filename(nlarn->libdir, helpfile, NULL);
-    nlarn->mazefile = g_build_filename(nlarn->libdir, mazefile, NULL);
-    nlarn->fortunes = g_build_filename(nlarn->libdir, fortunes, NULL);
-#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-    nlarn->highscores = scoreboard_filename;
-#else
-    /* store high scores in the same directory as the configuation */
-    nlarn->highscores = g_build_filename(game_userdir(), highscores, NULL);
-#endif
-
-    /* parse the command line options */
-    parse_commandline(argc, argv, &config);
-
-    /* show version information */
-    if (config.show_version) {
-        g_printf("NLarn version %s, built on %s.\n\n", nlarn_version, __DATE__);
-        g_printf("Game base directory:\t%s\n", nlarn->basedir);
-        g_printf("Game lib directory:\t%s\n", nlarn->libdir);
-        g_printf("Game savefile version:\t%d\n", SAVEFILE_VERSION);
-
-        exit(EXIT_SUCCESS);
-    }
-
-    /* show highscores */
-    if (config.show_scores) {
-        GList *scores = scores_load();
-        g_autofree char *s = scores_to_string(scores, NULL);
-
-        g_printf("NLarn Hall of Fame\n==================\n\n%s", s);
-        scores_destroy(scores);
-
-        exit(EXIT_SUCCESS);
-    }
-
-    /* verify that user directory exists */
-    if (!g_file_test(game_userdir(), G_FILE_TEST_IS_DIR))
-    {
-        /* directory is missing -> create it */
-        int ret = g_mkdir(game_userdir(), 0755);
-
-        if (ret == -1)
-        {
-            /* creating the directory failed */
-            g_printerr("Failed to create directory %s.", game_userdir());
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    /* try loading settings from the default configuration file */
-    nlarn->inifile = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-            config_file, NULL);
-
-    /* write a default configuration file, if none exists */
-    if (!g_file_test(nlarn->inifile, G_FILE_TEST_IS_REGULAR))
-    {
-        write_ini_file(nlarn->inifile, NULL);
-    }
-
-    /* try to load settings from the configuration file */
-    parse_ini_file(nlarn->inifile, &config);
-
-#ifdef SDLPDCURSES
-    /* If a font size was defined, export it to the environment
-     * before initialising PDCurses. */
-    if (config.font_size)
-    {
-        gchar size[4];
-        g_snprintf(size, 3, "%d", config.font_size);
-        g_setenv("PDC_FONT_SIZE", size, TRUE);
-    }
-#endif
-    /* initialise the display - must not happen before this point
-       otherwise displaying the command line help fails */
-    display_init();
-
-    /* call display_shutdown when terminating the game */
-    atexit(display_shutdown);
-
     /* set autosave setting (default: TRUE) */
-    game_autosave(nlarn) = !config.no_autosave;
-
-    /* assemble the save file name */
-    nlarn->savefile = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-            save_file, NULL);
+    game_autosave(nlarn) = !config->no_autosave;
 
     if (!game_load())
     {
         /* set game parameters */
-        game_difficulty(nlarn) = config.difficulty;
-        game_wizardmode(nlarn) = config.wizard;
+        game_difficulty(nlarn) = config->difficulty;
+        game_wizardmode(nlarn) = config->wizard;
 
         /* restoring a save game failed - start a new game. */
         game_new();
@@ -307,25 +112,25 @@ void game_init(int argc, char *argv[])
         /* give player knowledge of the town */
         scroll_mapping(nlarn->p, NULL);
 
-        if (config.name && strlen(config.name) > 0)
+        if (config->name && strlen(config->name) > 0)
         {
-            nlarn->p->name = config.name;
+            nlarn->p->name = g_strdup(config->name);
         }
 
-        if (config.gender)
+        if (config->gender)
         {
-            nlarn->p->sex = parse_gender(config.gender[0]);
+            nlarn->p->sex = parse_gender(config->gender[0]);
         }
 
-        if (config.stats && strlen(config.stats) > 0)
+        if (config->stats && strlen(config->stats) > 0)
         {
-            config.stats[0] = g_ascii_tolower(config.stats[0]);
+            config->stats[0] = g_ascii_tolower(config->stats[0]);
             nlarn->player_stats_set = player_assign_bonus_stats(
-                    nlarn->p, config.stats[0]);
+                    nlarn->p, config->stats[0]);
         }
 
 
-        if (config.wizard)
+        if (config->wizard)
         {
             log_add_entry(nlarn->log, "Wizard mode has been activated.");
         }
@@ -333,12 +138,10 @@ void game_init(int argc, char *argv[])
     } /* end new game only settings */
 
     /* parse auto pick-up settings */
-    if (config.auto_pickup && (nlarn->p != NULL))
+    if (config->auto_pickup)
     {
-        parse_autopickup_settings(config.auto_pickup,
+        parse_autopickup_settings(config->auto_pickup,
                 nlarn->p->settings.auto_pickup);
-
-         g_free(config.auto_pickup);
     }
 }
 
@@ -347,17 +150,6 @@ game *game_destroy(game *g)
     g_assert(g != NULL);
 
     /* everything must go */
-    g_free(g->basedir);
-    g_free(g->libdir);
-
-    g_free(g->mesgfile);
-    g_free(g->helpfile);
-    g_free(g->mazefile);
-    g_free(g->fortunes);
-    g_free(g->highscores);
-    g_free(g->inifile);
-    g_free(g->savefile);
-
     for (int i = 0; i < MAP_MAX; i++)
     {
         if (g->maps[i] == NULL)
@@ -388,42 +180,6 @@ game *game_destroy(game *g)
     g_free(g);
 
     return NULL;
-}
-
-const gchar *game_userdir()
-{
-    static gchar *userdir = NULL;
-
-    if (userdir == NULL)
-    {
-        if (config.userdir)
-        {
-            if (!g_file_test(config.userdir, G_FILE_TEST_IS_DIR))
-            {
-                g_printerr("Supplied user directory \"%s\" does not exist.",
-                        config.userdir);
-
-                exit(EXIT_FAILURE);
-            }
-            else
-            {
-                userdir = g_strdup(config.userdir);
-            }
-
-        }
-        else
-        {
-#ifdef WIN32
-            userdir = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(),
-                    "nlarn", NULL);
-#else
-            userdir = g_build_path(G_DIR_SEPARATOR_S, g_get_home_dir(),
-                    ".nlarn", NULL);
-#endif
-        }
-    }
-
-    return userdir;
 }
 
 int game_save(game *g)
@@ -551,12 +307,12 @@ int game_save(game *g)
     else
     {
         /* File need to be opened for the first time */
-        fhandle = fopen(g->savefile, "wb");
+        fhandle = fopen(nlarn_savefile, "wb");
     }
 
     if (fhandle == NULL)
     {
-        log_add_entry(g->log, "Error opening save file \"%s\".", g->savefile);
+        log_add_entry(g->log, "Error opening save file \"%s\".", nlarn_savefile);
         free(sg);
         return FALSE;
     }
@@ -571,7 +327,7 @@ int game_save(game *g)
     if (gzputs(file, sg) != (int)strlen(sg))
     {
         log_add_entry(g->log, "Error writing save file \"%s\": %s",
-                g->savefile, gzerror(file, &err));
+                nlarn_savefile, gzerror(file, &err));
 
         free(sg);
         return FALSE;
@@ -776,7 +532,7 @@ static void game_new()
            loop while no map has been generated */
         do
         {
-            nlarn->maps[idx] = map_new(idx, nlarn->mazefile);
+            nlarn->maps[idx] = map_new(idx, nlarn_mazefile);
         }
         while (nlarn->maps[idx] == NULL);
     }
@@ -805,7 +561,7 @@ static gboolean game_load()
     const int bufsize = 1024 * 1024 * 3;
 
     /* try to open save file */
-    FILE* file = fopen(nlarn->savefile, "rb+");
+    FILE* file = fopen(nlarn_savefile, "rb+");
 
     if (file == NULL)
     {
@@ -834,7 +590,7 @@ static gboolean game_load()
     {
         /* Reading the file failed. Terminate the game with an error message */
         display_shutdown();
-        g_printerr("Failed to restore save file \"%s\".\n", nlarn->savefile);
+        g_printerr("Failed to restore save file \"%s\".\n", nlarn_savefile);
 
         exit(EXIT_FAILURE);
     }
@@ -873,13 +629,13 @@ static gboolean game_load()
                     "Delete and start new game?", NULL, NULL, NULL))
         {
             /* delete save file */
-            g_unlink(nlarn->savefile);
+            g_unlink(nlarn_savefile);
         }
         else
         {
             display_shutdown();
             g_printerr("Save file \"%s\" is not compatible to current version.\n",
-                    nlarn->savefile);
+                    nlarn_savefile);
 
             exit(EXIT_FAILURE);
         }
@@ -1066,11 +822,6 @@ void game_delete_savefile()
     close(sgfd);
     sgfd = 0;
 
-    /* assemble save file name */
-    char *fullname = g_build_path(G_DIR_SEPARATOR_S, game_userdir(),
-            save_file, NULL);
-
     /* actually delete the file */
-    g_unlink(fullname);
-    g_free(fullname);
+    g_unlink(nlarn_savefile);
 }

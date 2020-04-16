@@ -70,7 +70,7 @@ static const char *default_config_file =
     "no-autosave=false\n";
 
 /* shared config cleanup helper */
-static void free_config(const struct game_config config)
+void free_config(const struct game_config config)
 {
     if (config.name)        g_free(config.name);
     if (config.gender)      g_free(config.gender);

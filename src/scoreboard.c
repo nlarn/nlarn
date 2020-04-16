@@ -58,7 +58,7 @@ GList *scores_load()
 
     gzFile file = gzdopen(fd, "rb");
 #else
-    gzFile file = gzopen(nlarn->highscores, "rb");
+    gzFile file = gzopen(nlarn_highscores, "rb");
 #endif
 
     if (file == NULL)
@@ -191,7 +191,7 @@ static void scores_save(game *g, GList *gs)
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     gzFile sb = gzdopen(scoreboard_fd, "wb");
 #else
-    gzFile sb = gzopen(nlarn->highscores, "wb");
+    gzFile sb = gzopen(nlarn_highscores, "wb");
 #endif
 
     if (sb == NULL)

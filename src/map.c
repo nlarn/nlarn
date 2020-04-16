@@ -115,7 +115,7 @@ static gboolean is_volcano_map(int nlevel)
     return (nlevel >= MAP_CMAX);
 }
 
-map *map_new(int num, char *mazefile)
+map *map_new(int num, const char *mazefile)
 {
     gboolean map_loaded = FALSE;
     gboolean keep_maze = TRUE;

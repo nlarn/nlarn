@@ -757,7 +757,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
     guint idx = 0;
-    g_autofree char *question = NULL, *description = NULL, *popup_desc = NULL;
+    g_autofree char *description = NULL, *popup_desc = NULL;
 
     g_assert(p != NULL);
 
@@ -778,12 +778,6 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
         va_start(argp, desc);
         description = g_strdup_vprintf(desc, argp);
         va_end(argp);
-
-        question = g_strdup_printf("Do you want to continue %s?", description);
-    }
-    else
-    {
-        question = g_strdup("Do you want to continue?");
     }
 
     display_window *pop = NULL;
@@ -949,6 +943,10 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 /* offer to abort the action if the player is under attack */
                 if (p->attacked && interruptible)
                 {
+                    g_autofree char *question = description
+                        ? g_strdup_printf("Do you want to continue %s?", description)
+                        : g_strdup("Do you want to continue?");
+
                     if (!display_get_yesno(question, NULL, NULL, NULL))
                     {
                         /* user chose to abort the current action */
@@ -1172,7 +1170,9 @@ void player_die(player *p, player_cod cause_type, int cause)
     game_delete_savefile();
     nlarn = game_destroy(nlarn);
 
-    exit(EXIT_SUCCESS);
+    /* JUMP JUMP Everybody JUMP!
+       Restart game and return to the main menu */
+    longjmp(nlarn_death_jump, cause_type);
 }
 
 guint64 player_calc_score(player *p, int won)
@@ -2015,20 +2015,27 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     hp_orig = p->hp;
     effects_count = p->effects->len;
 
+    /* keep damage type and amount for subsequent usage, but free the damage
+       object itself - when the player dies, the object will be leaked */
+    damage_t damage_type = dam->type;
+    gint damage_amount = dam->amount;
+    g_free(dam);
+
+
     /* check resistances */
-    switch (dam->type)
+    switch (damage_type)
     {
     case DAM_PHYSICAL:
-        if (dam->amount > (gint)player_get_ac(p))
+        if (damage_amount > (gint)player_get_ac(p))
         {
-            dam->amount -= player_get_ac(p);
+            damage_amount -= player_get_ac(p);
 
-            if (dam->amount >= 8 && dam->amount >= (gint)p->hp_max/4)
+            if (damage_amount >= 8 && damage_amount >= (gint)p->hp_max/4)
                 log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
-            else if (dam->amount >= (gint)p->hp_max/10)
+            else if (damage_amount >= (gint)p->hp_max/10)
                 log_add_entry(nlarn->log, "Ouch!");
 
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2037,16 +2044,16 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_MAGICAL:
-        if (dam->amount > (gint)(guint)player_effect(p, ET_RESIST_MAGIC))
+        if (damage_amount > (gint)(guint)player_effect(p, ET_RESIST_MAGIC))
         {
-            dam->amount -= player_effect(p, ET_RESIST_MAGIC);
+            damage_amount -= player_effect(p, ET_RESIST_MAGIC);
 
-            if (dam->amount >= 8 && dam->amount >= (gint)p->hp_max/4)
+            if (damage_amount >= 8 && damage_amount >= (gint)p->hp_max/4)
                 log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
-            else if (dam->amount >= (gint)p->hp_max/10)
+            else if (damage_amount >= (gint)p->hp_max/10)
                 log_add_entry(nlarn->log, "Ouch!");
 
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2056,12 +2063,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_FIRE:
-        if (dam->amount > (gint)player_effect(p, ET_RESIST_FIRE))
+        if (damage_amount > (gint)player_effect(p, ET_RESIST_FIRE))
         {
-            dam->amount -= player_effect(p, ET_RESIST_FIRE);
+            damage_amount -= player_effect(p, ET_RESIST_FIRE);
 
             log_add_entry(nlarn->log, "You suffer burns.");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2070,12 +2077,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_COLD:
-        if (dam->amount > (gint)player_effect(p, ET_RESIST_COLD))
+        if (damage_amount > (gint)player_effect(p, ET_RESIST_COLD))
         {
-            dam->amount -= player_effect(p, ET_RESIST_COLD);
+            damage_amount -= player_effect(p, ET_RESIST_COLD);
 
             log_add_entry(nlarn->log, "You suffer from frostbite.");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2084,10 +2091,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_ACID:
-        if (dam->amount > 0)
+        if (damage_amount > 0)
         {
             log_add_entry(nlarn->log, "You are splashed with acid.");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2096,10 +2103,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_WATER:
-        if (dam->amount > 0)
+        if (damage_amount > 0)
         {
             log_add_entry(nlarn->log, "You experience near-drowning.");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2110,12 +2117,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_ELECTRICITY:
         /* double damage if levitating */
         if (player_effect(p, ET_LEVITATION))
-            dam->amount *= 2;
+            damage_amount *= 2;
 
-        if (dam->amount > 0)
+        if (damage_amount > 0)
         {
             log_add_entry(nlarn->log, "Zapp!");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2129,12 +2136,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (cause_type != PD_EFFECT)
         {
             /* check resistance; prevent negative damage amount */
-            dam->amount = max(0, dam->amount - rand_0n(player_get_con(p)));
+            damage_amount = max(0, damage_amount - rand_0n(player_get_con(p)));
 
-            if (dam->amount > 0)
+            if (damage_amount > 0)
             {
                 e = effect_new(ET_POISON);
-                e->amount = dam->amount;
+                e->amount = damage_amount;
                 player_effect_add(p, e);
             }
             else
@@ -2146,12 +2153,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         {
             /* damage is caused by the effect of the poison effect () */
             log_add_entry(nlarn->log, "You feel poison running through your veins.");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         break;
 
     case DAM_BLINDNESS:
-        if (chance(dam->amount))
+        if (chance(damage_amount))
         {
             player_effect_add(p, effect_new(ET_BLINDNESS));
         }
@@ -2164,7 +2171,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     case DAM_CONFUSION:
         /* check if the player succumbs to the monster's stare */
-        if (chance(dam->amount - player_get_int(p)))
+        if (chance(damage_amount - player_get_int(p)))
         {
             player_effect_add(p, effect_new(ET_CONFUSION));
         }
@@ -2177,7 +2184,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     case DAM_PARALYSIS:
         /* check if the player succumbs to the monster's stare */
-        if (chance(dam->amount - player_get_int(p)))
+        if (chance(damage_amount - player_get_int(p)))
         {
             player_effect_add(p, effect_new(ET_PARALYSIS));
         }
@@ -2194,15 +2201,15 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_DEC_STR:
     case DAM_DEC_WIS:
         if (!player_effect(p, ET_SUSTAINMENT)
-            && chance(dam->amount -= player_get_con(p)))
+            && chance(damage_amount -= player_get_con(p)))
         {
-            effect_t et = (ET_DEC_CON + dam->type - DAM_DEC_CON);
+            effect_t et = (ET_DEC_CON + damage_type - DAM_DEC_CON);
             e = effect_new(et);
             /* the default number of turns is 1 */
-            e->turns = dam->amount * 10;
+            e->turns = damage_amount * 10;
             (void)player_effect_add(p, e);
 
-            switch (dam->type)
+            switch (damage_type)
             {
             case DAM_DEC_CON:
                 if (player_get_con(p) < 1)
@@ -2244,7 +2251,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     case DAM_DRAIN_LIFE:
         if (player_effect(p, ET_UNDEAD_PROTECTION)
-                || !chance(dam->amount - player_get_wis(p)))
+                || !chance(damage_amount - player_get_wis(p)))
         {
             /* undead protection cancels drain life attacks */
             log_add_entry(nlarn->log, "You are not affected.");
@@ -2263,8 +2270,6 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         /* the other damage types are not handled here */
         break;
     }
-
-    g_free(dam);
 
     if (game_wizardmode(nlarn))
         log_add_entry(nlarn->log, "[applied: %d]", hp_orig - p->hp);
