@@ -1074,6 +1074,21 @@ int main(int argc, char *argv[])
     /* initialisation */
     nlarn_init(argc, argv);
 
+    /* check if the message file exists */
+    gchar *message_file = NULL;
+    if (!g_file_get_contents(nlarn_mesgfile, &message_file, NULL, NULL))
+    {
+        nlarn = game_destroy(nlarn);
+        display_shutdown();
+        g_printerr("Error: Cannot find the message file.\n");
+
+        return EXIT_FAILURE;
+    }
+
+    /* show message file */
+    display_show_message("Welcome to the game of NLarn!", message_file, 0);
+    g_free(message_file);
+
     /* Create the jump target for player death. Death will destroy the game
        object, thus control will be returned to the line after this one, i.e
        the game will be created again and the main menu will be shown. To
@@ -1092,20 +1107,6 @@ int main(int argc, char *argv[])
         if (FALSE == main_menu()) {
             break;
         }
-
-        /* check if the message file exists */
-        gchar *message_file = NULL;
-        if (!g_file_get_contents(nlarn_mesgfile, &message_file, NULL, NULL))
-        {
-            nlarn = game_destroy(nlarn);
-            display_shutdown();
-            g_printerr("Error: Cannot find the message file.\n");
-
-            return EXIT_FAILURE;
-        }
-
-        display_show_message("Welcome to the game of NLarn!", message_file, 0);
-        g_free(message_file);
 
         /* ask for a character name if none has been supplied */
         while (nlarn->p->name == NULL)
