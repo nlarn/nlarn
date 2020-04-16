@@ -114,7 +114,7 @@ void game_init(struct game_config *config)
 
         if (config->name && strlen(config->name) > 0)
         {
-            nlarn->p->name = config->name;
+            nlarn->p->name = g_strdup(config->name);
         }
 
         if (config->gender)
