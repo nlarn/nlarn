@@ -1,6 +1,10 @@
-## Release 0.7.5 (unrelease)
+## Release 0.7.5 (unreleased)
 
 ### Changes:
+* Add a menu system: instead of dropping into to the game on start,
+  present a menu with the option to start a or continue the saved
+  game, configure the settings and view the highscores. When the
+  player dies, don't drop out of the game, but return to the menu.
 * Increase difficulty after winning the game
 * Remove the option to set the game difficulty from the command line
 * Increased robustness against broken configuration files
