@@ -229,6 +229,15 @@ void map_set_tiletype(map *m, area *area, map_tile_t type, guint8 duration);
 
 damage *map_tile_damage(map *m, position pos, gboolean flying);
 
+/**
+ * @brief Creates description of items on the floor for a given position.
+ *
+ * @param a map
+ * @param a position
+ * @param "here" or "there"
+ */
+char *map_inv_description(map *m, position pos, const char* where);
+
 char *map_pos_examine(position pos);
 
 monster *map_get_monster_at(map *m, position pos);

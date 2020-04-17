@@ -997,6 +997,44 @@ damage *map_tile_damage(map *m, position pos, gboolean flying)
     }
 }
 
+char *map_inv_description(map *m, position pos, const char* where)
+{
+    g_assert(m != NULL);
+    g_assert(pos_valid(pos));
+    g_assert(m->nlevel == Z(pos));
+
+    if (inv_length(*map_ilist_at(m, pos)) > 3)
+    {
+        return g_strdup_printf("There are multiple items %s.", where);
+    }
+    else
+    {
+        GString *items_desc = NULL;
+
+        for (guint idx = 0; idx < inv_length(*map_ilist_at(m, pos)); idx++)
+        {
+            item *it = inv_get(*map_ilist_at(m, pos), idx);
+            gchar *item_desc = item_describe(it, player_item_known(nlarn->p, it),
+                                                FALSE, FALSE);
+
+            if (idx > 0)
+                g_string_append_printf(items_desc, " and %s", item_desc);
+            else
+                items_desc = g_string_new(item_desc);
+
+            g_free(item_desc);
+        }
+
+        if (items_desc != NULL)
+        {
+            char *description = g_strdup_printf("You see %s %s.", items_desc->str, where);
+            g_string_free(items_desc, TRUE);
+
+            return description;
+        }
+    }
+}
+
 char *map_pos_examine(position pos)
 {
     map *cm = game_map(nlarn, Z(pos));
@@ -1051,37 +1089,12 @@ char *map_pos_examine(position pos)
     }
 
     /* add message if target tile contains items, but only if there's
-       a mimic there (items don't stack correctly otherwise) */
+       no mimic there (items don't stack correctly otherwise) */
     if (!has_mimic && inv_length(*map_ilist_at(cm, pos)) > 0)
     {
-        if (inv_length(*map_ilist_at(cm, pos)) > 3)
-        {
-            g_string_append_printf(desc, "There are multiple items %s.", where);
-        }
-        else
-        {
-            GString *items_desc = NULL;
-
-            for (guint idx = 0; idx < inv_length(*map_ilist_at(cm, pos)); idx++)
-            {
-                item *it = inv_get(*map_ilist_at(cm, pos), idx);
-                gchar *item_desc = item_describe(it, player_item_known(nlarn->p, it),
-                                                 FALSE, FALSE);
-
-                if (idx > 0)
-                    g_string_append_printf(items_desc, " and %s", item_desc);
-                else
-                    items_desc = g_string_new(item_desc);
-
-                g_free(item_desc);
-            }
-
-            if (items_desc != NULL)
-            {
-                g_string_append_printf(desc, "You see %s %s.", items_desc->str, where);
-                g_string_free(items_desc, TRUE);
-            }
-        }
+        char *inv_description = map_inv_description(cm, pos, where);
+        g_string_append(desc, inv_description);
+        g_free(inv_description);
     }
 
     return g_string_free(desc, FALSE);

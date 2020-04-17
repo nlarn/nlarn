@@ -6,6 +6,7 @@
   game, configure the settings and view the highscores. When the
   player dies, don't drop out of the game, but return to the menu.
 * Increase difficulty after winning the game
+* Mention items at player's position in the log
 * Remove the option to set the game difficulty from the command line
 * Increased robustness against broken configuration files
 

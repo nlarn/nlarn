@@ -1761,18 +1761,13 @@ void player_pickup(player *p)
 
 static void player_autopickup(player *p)
 {
-    inventory **floor;
-    int other_items_count = 0;
-    int other_item_id     = -1;
-    gboolean did_pickup   = FALSE;
-
     g_assert (p != NULL && map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos));
 
     /* if the player is floating above the ground auto-pickup does not work.. */
     if (player_effect(p, ET_LEVITATION))
         return;
 
-    floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
+    inventory **floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     for (guint idx = 0; idx < inv_length(*floor); idx++)
     {
@@ -1796,34 +1791,15 @@ static void player_autopickup(player *p)
                 /* item has been picked up */
                 /* go back one item as the following items lowered their number */
                 idx--;
-                did_pickup = TRUE;
             }
-        }
-        else
-        {
-            if (++other_items_count == 1)
-                other_item_id = idx;
         }
     }
 
-    if (did_pickup && other_items_count > 0)
+    /* if there are some items left on the floor, describe them */
+    if (inv_length(*floor))
     {
-        if (other_items_count == 1)
-        {
-            item *it = inv_get(*floor, other_item_id);
-            gchar *it_desc = item_describe(it, player_item_known(nlarn->p, it),
-                                           FALSE, FALSE);
-
-            log_add_entry(nlarn->log, "There %s %s here.",
-                          is_are(it->count), it_desc);
-
-            g_free(it_desc);
-        }
-        else
-        {
-            log_add_entry(nlarn->log, "There are %d more items here.",
-                          other_items_count);
-        }
+        log_add_entry(nlarn->log, map_inv_description(
+            game_map(nlarn, Z(p->pos)), p->pos, "here"));
     }
 }
 
