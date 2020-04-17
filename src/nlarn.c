@@ -1097,6 +1097,9 @@ int main(int argc, char *argv[])
     */
     player_cod cod = setjmp(nlarn_death_jump);
 
+    /* clear the screen to wipe remains from the previous game */
+    clear();
+
     /* can be broken by quitting in the game, or with q or ESC in main menu */
     while (cod != PD_QUIT)
     {
