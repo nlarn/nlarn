@@ -1352,10 +1352,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     }
 
     /* auto-pickup */
-    if (map_ilist_at(pmap, p->pos) && !player_effect_get(p, ET_BLINDNESS))
-    {
-        player_autopickup(p);
-    }
+    player_autopickup(p);
 
     /* mention stationary objects at this position */
     if ((so = map_sobject_at(pmap, p->pos)) && !player_effect(p, ET_BLINDNESS))
@@ -1765,6 +1762,10 @@ static void player_autopickup(player *p)
 
     /* if the player is floating above the ground auto-pickup does not work.. */
     if (player_effect(p, ET_LEVITATION))
+        return;
+
+    /* if the player is blinded, don't do anything */
+    if(player_effect_get(p, ET_BLINDNESS))
         return;
 
     inventory **floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
