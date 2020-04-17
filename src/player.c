@@ -848,9 +848,9 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                     {
                         gboolean interrupt_actions = TRUE;
                         if (e->type == ET_WALL_WALK)
-                            log_add_entry(nlarn->log, "Your attunement to the walls is fading!");
+                            log_add_entry(nlarn->log, "`lightred`Your attunement to the walls is fading!`end`");
                         else if (e->type == ET_LEVITATION)
-                            log_add_entry(nlarn->log, "You are starting to drift towards the ground!");
+                            log_add_entry(nlarn->log, "`lightred`You are starting to drift towards the ground!`end`");
                         else
                             interrupt_actions = FALSE;
 
@@ -906,7 +906,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 {
                     item *it = p->eq_weapon;
                     player_item_unequip(p, NULL, it, TRUE);
-                    log_add_entry(nlarn->log, "You are unable to hold your weapon.");
+                    log_add_entry(nlarn->log, "`lightmagenta`You are unable to hold your weapon.`end`");
                     player_item_drop(p, &p->inventory, it);
                 }
             }
@@ -923,7 +923,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                     /* deference the item at the selected armour slot */
                     item *armour = *aslot;
 
-                    log_add_entry(nlarn->log, "The hysteria of itching forces you to remove your armour!");
+                    log_add_entry(nlarn->log, "`lightmagenta`The hysteria of itching forces you to remove your armour!`end`");
                     player_item_unequip(p, &p->inventory, armour, TRUE);
                     player_item_drop(p, &p->inventory, armour);
                 }
@@ -1004,7 +1004,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     /* check for life protection */
     if ((cause_type < PD_STUCK) && (ef = player_effect_get(p, ET_LIFE_PROTECTION)))
     {
-        log_add_entry(nlarn->log, "You feel wiiieeeeerrrrrd all over!");
+        log_add_entry(nlarn->log, "`lightcyan`You feel wiiieeeeerrrrrd all over!`end`");
 
         if (ef->amount > 1)
         {
@@ -1523,7 +1523,7 @@ int player_attack(player *p, monster *m)
         /* The weapon may break during usage */
         if (p->eq_weapon && chance(item_fragility(p->eq_weapon)))
         {
-            log_add_entry(nlarn->log, "Your %s breaks!",
+            log_add_entry(nlarn->log, "`lightmagenta`Your %s breaks!`end`",
                           weapon_name(p->eq_weapon));
 
             item *weapon = p->eq_weapon;
@@ -1822,12 +1822,12 @@ void player_level_gain(player *p, int count)
 
     if (g_strcmp0(desc_orig, desc_new) != 0)
     {
-        log_add_entry(nlarn->log, "You gain experience and become %s %s!",
+        log_add_entry(nlarn->log, "`lightgreen`You gain experience and become %s %s!`end`",
                       a_an(desc_new), desc_new);
     }
     else
     {
-        log_add_entry(nlarn->log, "You gain experience!");
+        log_add_entry(nlarn->log, "`lightgreen`You gain experience!`end`");
     }
 
     if (p->level > p->stats.max_level)
@@ -1862,7 +1862,7 @@ void player_level_lose(player *p, int count)
     g_assert(p != NULL && count > 0);
 
     p->level -= count;
-    log_add_entry(nlarn->log, "You return to experience level %d...", p->level);
+    log_add_entry(nlarn->log, "`lightred`You return to experience level %d...`end`", p->level);
 
     /* die if lost level 1 */
     if (p->level == 0) player_die(p, PD_LASTLEVEL, 0);
@@ -2008,9 +2008,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             damage_amount -= player_get_ac(p);
 
             if (damage_amount >= 8 && damage_amount >= (gint)p->hp_max/4)
-                log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
+                log_add_entry(nlarn->log, "`lightred`Ouch, that REALLY hurt!`end`");
             else if (damage_amount >= (gint)p->hp_max/10)
-                log_add_entry(nlarn->log, "Ouch!");
+                log_add_entry(nlarn->log, "`lightred`Ouch!`end`");
 
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
@@ -2026,9 +2026,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             damage_amount -= player_effect(p, ET_RESIST_MAGIC);
 
             if (damage_amount >= 8 && damage_amount >= (gint)p->hp_max/4)
-                log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
+                log_add_entry(nlarn->log, "`lightred`Ouch, that REALLY hurt!`end`");
             else if (damage_amount >= (gint)p->hp_max/10)
-                log_add_entry(nlarn->log, "Ouch!");
+                log_add_entry(nlarn->log, "`lightred`Ouch!`end`");
 
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
@@ -2235,7 +2235,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         }
         else
         {
-            log_add_entry(nlarn->log, "Your life energy is drained.");
+            log_add_entry(nlarn->log, "`lightred`Your life energy is drained.`end`");
             player_level_lose(p, 1);
 
             /* this is the only attack that can not be caught by the test below */
@@ -3028,9 +3028,10 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
 
         /* capitalize first letter */
         desc[0] = g_ascii_toupper(desc[0]);
-        log_add_entry(nlarn->log, it->type == IT_WEAPON
-                ? "%s welds itself into your hand."
-                : "%s feels uncomfortably cold!", desc);
+        log_add_entry(nlarn->log, "`lightmagenta`%s %s`end`",
+            desc, it->type == IT_WEAPON
+                ? "welds itself into your hand."
+                : "feels uncomfortably cold!");
         it->blessed_known = TRUE;
         g_free(desc);
     }
@@ -3793,7 +3794,7 @@ void player_item_destroy(player *p, item *it)
         player_item_unequip(p, &p->inventory, it, TRUE);
     }
 
-    log_add_entry(nlarn->log, "%s %s destroyed!", desc, is_are(it->count));
+    log_add_entry(nlarn->log, "`lightmagenta`%s %s destroyed!`end`", desc, is_are(it->count));
 
     int count = 0;
     if (it->content)
@@ -3902,7 +3903,7 @@ void player_item_drop(player *p, inventory **inv, item *it)
 
             log_add_entry(nlarn->log, "%s %s surrounded by a %s halo.",
                           buf, is_are(it->count),
-                          it->cursed ? "black" : "white");
+                          it->cursed ? "`darkgray`black`end`" : "`white`white`end`");
 
             g_free(buf);
         }
@@ -4259,7 +4260,7 @@ void player_search(player *p)
             if (chance(prop))
             {
                 /* discovered the trap */
-                log_add_entry(nlarn->log, "You find a %s!",
+                log_add_entry(nlarn->log, "`lightmagenta`You find a %s!`end`",
                         trap_description(tt));
                  player_memory_of(p, pos).trap = tt;
             }
@@ -4281,7 +4282,7 @@ void player_search(player *p)
                     gchar *idesc = item_describe(c, FALSE, TRUE, TRUE);
                     /* the container is cursed */
                     c->blessed_known = TRUE;
-                    log_add_entry(nlarn->log, "You discover a trap on %s!",
+                    log_add_entry(nlarn->log, "`lightmagenta`You discover a trap on %s!`end`",
                             idesc);
 
                     g_free(idesc);

@@ -6,6 +6,8 @@
   game, configure the settings and view the highscores. When the
   player dies, don't drop out of the game, but return to the menu.
 * Increase difficulty after winning the game
+* Emphasise important messages with color (e.g. a critical hit is
+  shown in bright red)
 * Mention items at player's position in the log
 * Remove the option to set the game difficulty from the command line
 * Increased robustness against broken configuration files
