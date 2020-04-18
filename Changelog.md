@@ -8,6 +8,7 @@
 * Increase difficulty after winning the game
 * Emphasise important messages with color (e.g. a critical hit is
   shown in bright red)
+* Emphasise most recent message in the log, show others grayed out
 * Mention items at player's position in the log
 * Remove the option to set the game difficulty from the command line
 * Increased robustness against broken configuration files

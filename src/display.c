@@ -663,19 +663,15 @@ void display_paint_screen(player *p)
         i++;
     }
 
-    int currattr = COLOURLESS;
     for (y = 20, i = 0; (y < (unsigned)LINES) && (i < text->len); i++, y++)
     {
         /* default colour for the line */
-        int def_attrs;
+        int def_attrs = (i == 0 && ttime[i] > game_turn(nlarn) - 5)
+            ? WHITE
+            : DARKGRAY;
 
-        if ((nlarn->log->gtime - 15) < ttime[i])
-            def_attrs = WHITE;
-        else
-            def_attrs = LIGHTGRAY;
-
-        currattr = mvwcprintw(stdscr, def_attrs, currattr,
-                display_default_colset, y, 0, g_ptr_array_index(text, i));
+        mvwcprintw(stdscr, def_attrs, COLOURLESS,
+            display_default_colset, y, 0, g_ptr_array_index(text, i));
     }
 
     text_destroy(text);
