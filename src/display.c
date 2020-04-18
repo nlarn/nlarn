@@ -233,13 +233,9 @@ static int attr_colour(int colour, int reverse)
 
 void display_paint_screen(player *p)
 {
-    guint x, y, i;
     position pos = pos_invalid;
     map *vmap;
     int attrs;              /* curses attributes */
-    message_log_entry *le;  /* needed to display messages */
-    GPtrArray *text = NULL; /* storage for formatted messages */
-    guint *ttime = NULL;    /* storage for the game time of messages */
 
     /* draw line around map */
     (void)mvhline(MAP_MAX_Y, 0, ACS_HLINE, MAP_MAX_X);
@@ -558,7 +554,7 @@ void display_paint_screen(player *p)
     clrtoeol();
 
     /* clear lines */
-    for (int i = 0; i < 7; i++)
+    for (guint i = 0; i < 7; i++)
     {
         move(11 + i, MAP_MAX_X + 3);
         clrtoeol();
@@ -571,7 +567,7 @@ void display_paint_screen(player *p)
         char **efdescs = strv_new();
 
         /* collect effect descriptions */
-        for (i = 0; i < p->effects->len; i++)
+        for (guint i = 0; i < p->effects->len; i++)
         {
             effect *e = game_effect_get(nlarn, g_ptr_array_index(p->effects, i));
 
@@ -612,7 +608,7 @@ void display_paint_screen(player *p)
 
         /* display effect descriptions */
         int currattr = COLOURLESS;
-        for (i = 0; i < g_strv_length(efdescs); i++)
+        for (guint i = 0; i < g_strv_length(efdescs); i++)
         {
             currattr = mvwcprintw(stdscr, LIGHTCYAN, currattr,
                     display_default_colset, 11 + i, MAP_MAX_X + 3, efdescs[i]);
@@ -624,16 +620,19 @@ void display_paint_screen(player *p)
 
     /* *** MESSAGES *** */
     /* number of lines which can be displayed */
-    y = LINES > 20 ? LINES - 20 : 0;
+    guint y = LINES > 20 ? LINES - 20 : 0;
 
-    /* storage for game time of message */
-    ttime = g_new0(guint, y);
+    /* storage for the game time of messages */
+    guint ttime[y];
 
     /* hold original length of text */
-    x = 1;
+    guint x = 1;
 
     /* line counter */
-    i = 0;
+    guint i = 0;
+
+    /* storage for formatted messages */
+    GPtrArray *text = NULL;
 
     /* if log contains buffered messaged, display them */
     if (log_buffer(nlarn->log))
@@ -646,7 +645,8 @@ void display_paint_screen(player *p)
     /* retrieve game log and reformat messages to window width */
     while (((text == NULL) || (text->len < y)) && (log_length(nlarn->log) > i))
     {
-        le = log_get_entry(nlarn->log, log_length(nlarn->log) - 1 - i);
+        message_log_entry *le = log_get_entry(nlarn->log,
+                                              log_length(nlarn->log) - 1 - i);
 
         if (text == NULL)
             text = text_wrap(le->message, COLS, 2);
@@ -679,7 +679,6 @@ void display_paint_screen(player *p)
     }
 
     text_destroy(text);
-    g_free(ttime);
 
     display_draw();
 }
