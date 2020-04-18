@@ -1007,32 +1007,32 @@ char *map_inv_description(map *m, position pos, const char* where)
     {
         return g_strdup_printf("There are multiple items %s.", where);
     }
-    else
+
+    GString *items_desc = NULL;
+
+    for (guint idx = 0; idx < inv_length(*map_ilist_at(m, pos)); idx++)
     {
-        GString *items_desc = NULL;
+        item *it = inv_get(*map_ilist_at(m, pos), idx);
+        gchar *item_desc = item_describe(it, player_item_known(nlarn->p, it),
+                                            FALSE, FALSE);
 
-        for (guint idx = 0; idx < inv_length(*map_ilist_at(m, pos)); idx++)
-        {
-            item *it = inv_get(*map_ilist_at(m, pos), idx);
-            gchar *item_desc = item_describe(it, player_item_known(nlarn->p, it),
-                                                FALSE, FALSE);
+        if (idx > 0)
+            g_string_append_printf(items_desc, " and %s", item_desc);
+        else
+            items_desc = g_string_new(item_desc);
 
-            if (idx > 0)
-                g_string_append_printf(items_desc, " and %s", item_desc);
-            else
-                items_desc = g_string_new(item_desc);
-
-            g_free(item_desc);
-        }
-
-        if (items_desc != NULL)
-        {
-            char *description = g_strdup_printf("You see %s %s.", items_desc->str, where);
-            g_string_free(items_desc, TRUE);
-
-            return description;
-        }
+        g_free(item_desc);
     }
+
+    if (items_desc != NULL)
+    {
+        char *description = g_strdup_printf("You see %s %s.", items_desc->str, where);
+        g_string_free(items_desc, TRUE);
+
+        return description;
+    }
+
+    return NULL;
 }
 
 char *map_pos_examine(position pos)
