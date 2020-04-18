@@ -195,12 +195,13 @@ const char *player_bonus_stat_desc[] = {
 char player_select_bonus_stats()
 {
     int selection = 0;
-    GString *text = g_string_new(NULL);
+    GString *text = g_string_new("\n");
     for (int idx = preset_min; idx <=  preset_max; idx++)
     {
         g_string_append_printf(text, "  `lightgreen`%c`end`) %s\n",
                 idx, player_bonus_stat_desc[idx - preset_min]);
     }
+     g_string_append_c(text, '\n');
 
     while (selection < preset_min || selection > preset_max)
     {
