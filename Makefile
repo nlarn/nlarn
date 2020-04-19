@@ -57,7 +57,7 @@ endif
 
 # Definitions required regardless of host OS
 DEFINES += -DG_DISABLE_DEPRECATED
-CFLAGS  += -std=c99 -Wall -Wextra -Iinc -Iinc/external
+CFLAGS  += -std=c99 -Wall -Wextra -Werror -Iinc -Iinc/external
 LDFLAGS += -lz -lm
 
 ifneq (,$(findstring MINGW, $(MSYSTEM)))
