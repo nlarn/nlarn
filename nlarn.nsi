@@ -1,7 +1,6 @@
 ;
 ; nlarn.nsi
-;
-; Copyright (C) Joachim de Groot 2009-2018  <jdegroot@web.de>
+; Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
 ;
 ; NLarn is free software: you can redistribute it and/or modify it
 ; under the terms of the GNU General Public License as published by the
@@ -17,7 +16,10 @@
 ; with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
 
-;Include Modern UI
+; Unicode Installer
+Unicode True
+
+; Include Modern UI
 !include "MUI2.nsh"
 
 ; check if NLarn version number has been defined
