@@ -663,6 +663,8 @@ void display_paint_screen(player *p)
         i++;
     }
 
+    /* ensure consistent colours for messages spanning multiple lines */
+    int currattr = COLOURLESS;
     for (y = 20, i = 0; (y < (unsigned)LINES) && (i < text->len); i++, y++)
     {
         /* default colour for the line */
@@ -670,7 +672,11 @@ void display_paint_screen(player *p)
             ? WHITE
             : DARKGRAY;
 
-        mvwcprintw(stdscr, def_attrs, COLOURLESS,
+        /* reset current color when switching log entries */
+        if (i > 0 && ttime[i - 1] != ttime[i])
+            currattr = COLOURLESS;
+
+        currattr = mvwcprintw(stdscr, def_attrs, currattr,
             display_default_colset, y, 0, g_ptr_array_index(text, i));
     }
 
