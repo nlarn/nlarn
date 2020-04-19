@@ -1,6 +1,6 @@
 #
 # Makefile
-# Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+# Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -258,7 +258,7 @@ $(OSXIMAGE): $(MAINFILES)
 clean:
 	@echo Cleaning nlarn
 	rm -f $(OBJECTS) $(DLLS)
-	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) README.html Changelog.html
+	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) mainfiles.nsh libfiles.nsh README.html Changelog.html
 	@if \[ -n "$(PDCLIB)" -a -d PDcurses/sdl2 \]; then \
 		$(MAKE) -C PDCurses/sdl2 clean; \
 	fi
