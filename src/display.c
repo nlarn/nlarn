@@ -2974,7 +2974,15 @@ static int mvwcprintw(WINDOW *win, int defattr, int currattr,
             else
             {
                 wattroff(win, attr);
-                wattron(win, attr = display_get_colval(colset, tval));
+
+                attr = display_get_colval(colset, tval);
+                /* dim bright colous when the default colour is dark */
+                if (defattr == DARKGRAY && attr > LIGHTGRAY)
+                {
+                    attr ^= A_BOLD;
+                }
+
+                wattron(win, attr);
             }
 
             /* free temporary memory */
