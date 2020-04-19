@@ -1030,12 +1030,13 @@ gboolean main_menu()
         "      `lightgreen`c`end`) View High Scores\n"
         "\n"
         "      `lightgreen`q`end`) Quit Game\n"
-        "\n";
+        "\n"
+        "    You have reached difficulty level %d\n";
 
 
     g_autofree char *title = g_strdup_printf("NLarn %s", nlarn_version);
     g_autofree char *main_menu = g_strdup_printf(main_menu_tpl,
-        (game_turn(nlarn) == 1) ? "New" : "Continue saved");
+        (game_turn(nlarn) == 1) ? "New" : "Continue saved", game_difficulty(nlarn));
 
     char input = 0;
 
