@@ -81,7 +81,7 @@ const char *monster_ai_desc[] =
     "wandering",        /* MA_WANDER */
     "attacking",        /* MA_ATTACK */
     "puzzled",          /* MA_CONFUSION */
-    "serving you",      /* MA_SERVE */
+    "obedient",         /* MA_SERVE */
     "doing something boring", /* MA_CIVILIAN */
 };
 
