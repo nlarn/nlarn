@@ -1955,18 +1955,6 @@ static int monster_breath_attack(monster *m, player *p, attack att)
 {
     g_assert(att.type == ATT_BREATH);
 
-    /* FIXME: charm monster is extremely broken. This should be handled totally different */
-    if (monster_effect(m, ET_CHARM_MONSTER)
-            && (rand_m_n(5, 30) * monster_level(m) - player_get_wis(p) < 30))
-    {
-        if (monster_in_sight(m))
-        {
-            log_add_entry(nlarn->log, "The %s is awestruck at your magnificence!",
-                          monster_get_name(m));
-        }
-        return TRUE;
-    }
-
     /* generate damage */
     damage *dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn),
                              DAMO_MONSTER, m);
@@ -2037,17 +2025,6 @@ void monster_player_attack(monster *m, player *p)
         if (monster_in_sight(m))
         {
             log_add_entry(nlarn->log, "The %s misses wildly.",
-                          monster_get_name(m));
-        }
-        return;
-    }
-
-    if (monster_effect(m, ET_CHARM_MONSTER)
-            && (rand_m_n(5, 30) * monster_level(m) - player_get_wis(p) < 30))
-    {
-        if (monster_in_sight(m))
-        {
-            log_add_entry(nlarn->log, "The %s is awestruck at your magnificence!",
                           monster_get_name(m));
         }
         return;
@@ -2731,6 +2708,11 @@ effect *monster_effect_add(monster *m, effect *e)
         if (e && e->type == ET_CONFUSION) {
             monster_update_action(m, MA_CONFUSION);
         }
+
+        /* charm monster turns monsters into servants */
+        if (e && e->type == ET_CHARM_MONSTER) {
+            monster_update_action(m, MA_SERVE);
+        }
     }
 
     /* show message if monster is visible */
@@ -2766,8 +2748,8 @@ int monster_effect_del(monster *m, effect *e)
 
     if ((result = effect_del(m->effects, e)))
     {
-        /* if confusion is finished, set the AI back to the default */
-        if ((e->type) == ET_CONFUSION) {
+        /* if confusion or charm is finished, set the AI back to the default */
+        if (e->type == ET_CONFUSION || e->type == ET_CHARM_MONSTER) {
             monster_update_action(m, MA_WANDER);
         }
 

@@ -1,6 +1,6 @@
 /*
  * effects.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -254,7 +254,7 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_CHARM_MONSTER, "ET_CHARM_MONSTER", 250, TRUE, "charmed",
+        ET_CHARM_MONSTER, "ET_CHARM_MONSTER", 50, TRUE, "charmed",
         NULL, NULL,
         "The %s is awestruck at your magnificence!",
         "The %s is no longer impressed.",

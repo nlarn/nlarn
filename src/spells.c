@@ -78,7 +78,7 @@ const spell_data spells[SP_MAX] =
         SP_CHM, "chm", "charm monster",
         SC_POINT, DAM_NONE, ET_CHARM_MONSTER, spell_type_point,
         "Some monsters may be awed at your magnificence",
-        NULL, NULL,
+        NULL, "The %s isn't impressed.",
         COLOURLESS, 1, 260, FALSE
     },
     {
@@ -757,6 +757,21 @@ static gboolean spell_type_point(spell *s, struct player *p)
 
     switch (s->id)
     {
+        /* charm monster */
+    case SP_CHM:
+        if ((rand_m_n(5, 30) * monster_level(m) - player_get_wis(p)) < 30)
+        {
+            e = effect_new(spell_effect(s));
+            e->turns *= s->knowledge;
+            e = monster_effect_add(m, e);
+        }
+        else
+        {
+            spell_print_failure_message(s, m);
+        }
+
+        break; /* SP_CHM */
+
         /* dehydration */
     case SP_DRY:
         amount = (100 * s->knowledge) + p->level;
