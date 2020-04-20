@@ -117,7 +117,7 @@ static void player_sobject_memorize(player *p, sobject_t sobject, position pos);
 static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
 static void player_memory_deserialize(player *p, position pos, cJSON *mser);
-static char *player_equipment_list(player *p, gboolean decorate);
+static char *player_equipment_list(player *p);
 static char *player_create_obituary(player *p, score_t *score, GList *scores);
 static void player_memorial_file_save(player *p, const char *text);
 static int item_filter_equippable(item *it);
@@ -2846,7 +2846,7 @@ void player_inv_weight_recalc(inventory *inv, item *it __attribute__((unused)))
 
 void player_paperdoll(player *p)
 {
-    gchar *equipment = player_equipment_list(p, TRUE);
+    gchar *equipment = player_equipment_list(p);
 
     if (strlen(equipment) > 0)
         display_show_message("Worn equipment", equipment, 0);
@@ -4884,7 +4884,7 @@ void calc_fighting_stats(player *p)
     g_string_free(text, TRUE);
 }
 
-static char *player_equipment_list(player *p, gboolean decorate)
+static char *player_equipment_list(player *p)
 {
     int idx = 0;
     GString *el = g_string_new(NULL);
@@ -4922,9 +4922,8 @@ static char *player_equipment_list(player *p, gboolean decorate)
         char *desc = item_describe(slots[idx].slot, player_item_known(p,
                     slots[idx].slot), FALSE, FALSE);
 
-        g_string_append_printf(el, "%s%-12s%s %s\n",
-                decorate ? "`white`" : "", slots[idx].desc,
-                decorate ? "`end`" : "", desc);
+        g_string_append_printf(el, "`white`%-12s`end` %s\n",
+                    slots[idx].desc, desc);
 
         g_free(desc);
         idx++;
@@ -5096,7 +5095,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     }
 
     /* equipped items */
-    gchar *el = player_equipment_list(p, FALSE);
+    gchar *el = player_equipment_list(p);
     guint equipment_count = 0;
 
     if (strlen(el) > 0)
