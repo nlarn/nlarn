@@ -2362,7 +2362,6 @@ gboolean monster_update_action(monster *m, monster_action_t override)
     monster_action_t naction; /* new action */
     guint mtime; /* max. number of turns a monster will look for the player */
     gboolean low_hp;
-    gboolean smart;
 
     if (override > MA_NONE)
     {
@@ -2394,7 +2393,6 @@ gboolean monster_update_action(monster *m, monster_action_t override)
 
     mtime  = monster_int(m) + 25 + (5 * game_difficulty(nlarn));
     low_hp = (m->hp < (monster_hp_max(m) / 4 ));
-    smart  = (monster_int(m) > 4);
 
     if (monster_flags(m, MIMIC) && m->unknown)
     {
@@ -2407,7 +2405,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
         /* no action if monster is held or sleeping */
         naction = MA_REMAIN;
     }
-    else if ((low_hp && smart) || monster_effect(m, ET_SCARED))
+    else if ((low_hp && (monster_int(m) > 4)) || monster_effect(m, ET_SCARED))
     {
         /* low HP or very scared => FLEE from player */
         naction = MA_FLEE;
