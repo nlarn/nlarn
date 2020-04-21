@@ -77,12 +77,12 @@ const char *monster_ai_desc[] =
 {
     NULL,               /* MA_NONE */
     "fleeing",          /* MA_FLEE */
-    "standing still",   /* MA_REMAIN */
+    "idling",           /* MA_REMAIN */
     "wandering",        /* MA_WANDER */
     "attacking",        /* MA_ATTACK */
     "puzzled",          /* MA_CONFUSION */
     "obedient",         /* MA_SERVE */
-    "doing something boring", /* MA_CIVILIAN */
+    "working",          /* MA_CIVILIAN */
 };
 
 const char *monster_attack_verb[] =
