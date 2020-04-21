@@ -50,6 +50,7 @@ typedef struct {
     size size;
     int flags;
     attack attacks[2];
+    monster_action_t default_ai;
 } monster_data_t;
 
 /* monster information hiding */
@@ -126,7 +127,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | FLY | INFRAVISION,
         .attacks = {
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GNOME */
         .name = "gnome", .glyph = 'g', .colour = BROWN,
@@ -135,7 +136,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_HOBGOBLIN */
         .name = "hobgoblin", .glyph = 'H', .colour = BROWN,
@@ -144,7 +145,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_JACKAL */
         .name = "jackal", .glyph = 'J', .colour = BROWN,
@@ -153,7 +154,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD,
         .attacks = {
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_KOBOLD */
         .name = "kobold", .glyph = 'k', .colour = BROWN,
@@ -162,7 +163,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ORC */
         .name = "orc", .glyph = 'O', .colour = RED,
@@ -171,7 +172,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_SNAKE */
         .name = "snake", .glyph = 'S', .colour = LIGHTGREEN,
@@ -181,7 +182,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
             { .type = ATT_BITE, .base = 2, .damage = DAM_POISON },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_CENTIPEDE */
         .name = "giant centipede", .glyph = 'c', .colour = YELLOW,
@@ -191,7 +192,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 50, .damage = DAM_DEC_STR },
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_JACULUS */
         .name = "jaculus", .plural_name = "jaculi", .glyph = 'j', .colour = GREEN,
@@ -201,7 +202,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_TROGLODYTE */
         .name = "troglodyte", .glyph = 't', .colour = BROWN,
@@ -210,7 +211,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GIANT_ANT */
         .name = "giant ant", .glyph = 'A', .colour = BROWN,
@@ -220,7 +221,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 75, .damage = DAM_DEC_STR },
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_FLOATING_EYE */
         .name = "floating eye", .glyph = 'E', .colour = BLUE,
@@ -229,7 +230,7 @@ monster_data_t monster_data[] = {
         .flags = FLY | INFRAVISION | RES_CONF,
         .attacks = {
             { .type = ATT_GAZE, .base = 66, .damage = DAM_PARALYSIS },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_LEPRECHAUN */
         .name = "leprechaun", .glyph = 'L', .colour = GREEN,
@@ -239,7 +240,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_TOUCH, .damage = DAM_STEAL_GOLD },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_NYMPH */
         .name = "nymph", .glyph = 'n', .colour = RED,
@@ -248,7 +249,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS,
         .attacks = {
             { .type = ATT_TOUCH, .damage = DAM_STEAL_ITEM },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_QUASIT */
         .name = "quasit", .glyph = 'Q', .colour = BLUE,
@@ -258,7 +259,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 66, .damage = DAM_DEC_DEX },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_RUST_MONSTER */
         .name = "rust monster", .glyph = 'R', .colour = BROWN,
@@ -268,7 +269,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_TOUCH, .base = 1, .damage = DAM_RUST },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ZOMBIE */
         .name = "zombie", .glyph = 'Z', .colour = LIGHTGRAY,
@@ -278,7 +279,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ASSASSIN_BUG */
         .name = "assassin bug", .glyph = 'a', .colour = GREEN,
@@ -288,7 +289,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_BITE, .base = 3, .damage = DAM_POISON },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_BUGBEAR */
         .name = "bugbear", .glyph = 'B', .colour = BROWN,
@@ -298,7 +299,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 5, .damage = DAM_PHYSICAL, .rand = 10 },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_HELLHOUND */
         .name = "hell hound", .glyph = 'h', .colour = LIGHTRED,
@@ -308,7 +309,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_BREATH, .base = 8, .damage = DAM_FIRE, .rand = 15 },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ICE_LIZARD */
         .name = "ice lizard", .glyph = 'i', .colour = LIGHTCYAN,
@@ -318,7 +319,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_SLAM, .base = 14, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_CENTAUR */
         .name = "centaur", .glyph = 'C', .colour = BROWN,
@@ -328,7 +329,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_KICK, .base = 6, .damage = DAM_PHYSICAL },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_TROLL */
         .name = "troll", .glyph = 'T', .colour = BROWN,
@@ -338,7 +339,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 5, .damage = DAM_PHYSICAL },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_YETI */
         .name = "yeti", .glyph = 'Y', .colour = WHITE,
@@ -347,7 +348,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | RES_COLD,
         .attacks = {
             { .type = ATT_CLAW, .base = 4, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ELF */
         .name = "elf", .plural_name = "elves", .glyph = 'e', .colour = WHITE,
@@ -356,7 +357,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GELATINOUSCUBE */
         .name = "gelatinous cube", .glyph = 'g', .colour = CYAN,
@@ -365,7 +366,7 @@ monster_data_t monster_data[] = {
         .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF,
         .attacks = {
             { .type = ATT_SLAM, .base = 1, .damage = DAM_ACID },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_WHITE_DRAGON */
         .name = "white dragon", .glyph = 'd', .colour = WHITE,
@@ -375,7 +376,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 4, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 4, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_METAMORPH */
         .name = "metamorph", .glyph = 'm', .colour = WHITE,
@@ -384,7 +385,7 @@ monster_data_t monster_data[] = {
         .flags = 0,
         .attacks = {
             { .type = ATT_WEAPON, .base = 3, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_VORTEX */
         .name = "vortex", .plural_name = "vortexes", .glyph = 'v', .colour = CYAN,
@@ -393,7 +394,7 @@ monster_data_t monster_data[] = {
         .flags = RES_SLEEP | RES_POISON | FLY | RES_ELEC | RES_CONF,
         .attacks = {
             { .type = ATT_SLAM, .base = 3, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ZILLER */
         .name = "ziller", .glyph = 'z', .colour = CYAN,
@@ -403,7 +404,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 70, .damage = DAM_DEC_RND },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_VIOLET_FUNGUS */
         .name = "violet fungus", .plural_name = "violet fungi", .glyph = 'F', .colour = MAGENTA,
@@ -413,7 +414,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_SLAM, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_SLAM, .base = 4, .damage = DAM_POISON },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_WRAITH */
         .name = "wraith", .glyph = 'W', .colour = LIGHTGRAY,
@@ -422,7 +423,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | UNDEAD | RES_SLEEP | RES_POISON | RES_CONF,
         .attacks = {
             { .type = ATT_TOUCH, .base = 50, .damage = DAM_DRAIN_LIFE },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_FORVALAKA */
         .name = "forvalaka", .glyph = 'f', .colour = LIGHTGRAY,
@@ -431,7 +432,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | UNDEAD | INFRAVISION | RES_POISON,
         .attacks = {
             { .type = ATT_BITE, .base = 5, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_LAMA_NOBE */
         .name = "lama nobe", .glyph = 'l', .colour = RED,
@@ -441,7 +442,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_GAZE, .base = 25, .damage = DAM_BLINDNESS },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_OSQUIP */
         .name = "osquip", .glyph = 'o', .colour = BROWN,
@@ -450,7 +451,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD,
         .attacks = {
             { .type = ATT_BITE, .base = 10, .damage = DAM_PHYSICAL, .rand = 15 },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ROTHE */
         .name = "rothe", .glyph = 'r', .colour = BROWN,
@@ -460,7 +461,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 5, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_XORN */
         .name = "xorn", .glyph = 'X', .colour = BROWN,
@@ -469,7 +470,7 @@ monster_data_t monster_data[] = {
         .flags = INFRAVISION,
         .attacks = {
             { .type = ATT_BITE, .base = 6, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_VAMPIRE */
         .name = "vampire", .glyph = 'V', .colour = RED,
@@ -479,7 +480,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 75, .damage = DAM_DRAIN_LIFE },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_STALKER */
         .name = "invisible stalker", .glyph = 'I', .colour = LIGHTGRAY,
@@ -488,7 +489,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | FLY | INVISIBLE,
         .attacks = {
             { .type = ATT_SLAM, .base = 6, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_POLTERGEIST */
         .name = "poltergeist", .glyph = 'p', .colour = WHITE,
@@ -497,7 +498,7 @@ monster_data_t monster_data[] = {
         .flags = FLY | UNDEAD | INVISIBLE | RES_SLEEP | RES_POISON,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DISENCHANTRESS */
         .name = "disenchantress", .plural_name = "disenchantresses", .glyph = 'q', .colour = WHITE,
@@ -506,7 +507,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | METALLIVORE,
         .attacks = {
             { .type = ATT_TOUCH, .damage = DAM_REM_ENCH },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_SHAMBLINGMOUND */
         .name = "shambling mound", .glyph = 's', .colour = GREEN,
@@ -515,7 +516,7 @@ monster_data_t monster_data[] = {
         .flags = RES_SLEEP | RES_POISON,
         .attacks = {
             { .type = ATT_SLAM, .base = 5, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_YELLOW_MOLD */
         .name = "yellow mold", .glyph = 'y', .colour = YELLOW,
@@ -524,7 +525,7 @@ monster_data_t monster_data[] = {
         .flags = RES_SLEEP | RES_POISON | RES_CONF,
         .attacks = {
             { .type = ATT_TOUCH, .base = 4, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_UMBER_HULK */
         .name = "umber hulk", .glyph = 'U', .colour = YELLOW,
@@ -534,7 +535,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 7, .damage = DAM_PHYSICAL },
             { .type = ATT_GAZE, .base = 75, .damage = DAM_CONFUSION },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GNOME_KING */
         .name = "gnome king", .glyph = 'G', .colour = RED,
@@ -543,7 +544,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | RES_SLEEP,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_MIMIC */
         .name = "mimic", .glyph = 'M', .colour = BROWN,
@@ -552,7 +553,7 @@ monster_data_t monster_data[] = {
         .flags = MIMIC,
         .attacks = {
             { .type = ATT_SLAM, .base = 6, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_WATER_LORD */
         .name = "water lord", .glyph = 'w', .colour = LIGHTBLUE,
@@ -561,7 +562,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | NOBEHEAD | HANDS | RES_SLEEP | SWIM,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_PURPLE_WORM */
         .name = "purple worm", .glyph = 'P', .colour = MAGENTA,
@@ -571,7 +572,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 11, .damage = DAM_PHYSICAL },
             { .type = ATT_STING, .base = 6, .damage = DAM_POISON },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_XVART */
         .name = "xvart", .glyph = 'x', .colour = LIGHTGRAY,
@@ -580,7 +581,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_BRONZE_DRAGON */
         .name = "bronze dragon", .glyph = 'D', .colour = BROWN,
@@ -590,7 +591,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 9, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 9, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GREEN_DRAGON */
         .name = "green dragon", .glyph = 'D', .colour = LIGHTGREEN,
@@ -600,7 +601,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BREATH, .base = 8, .damage = DAM_POISON },
             { .type = ATT_SLAM, .base = 25, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_SILVER_DRAGON */
         .name = "silver dragon", .glyph = 'D', .colour = LIGHTGRAY,
@@ -610,7 +611,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 12, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 12, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_PLATINUM_DRAGON */
         .name = "platinum dragon", .glyph = 'D', .colour = WHITE,
@@ -620,7 +621,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 15, .damage = DAM_PHYSICAL },
             { .type = ATT_BREATH, .base = 15, .damage = DAM_MAGICAL, .rand = 30 },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_RED_DRAGON */
         .name = "red dragon", .glyph = 'D', .colour = LIGHTRED,
@@ -630,7 +631,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BREATH, .base = 20, .damage = DAM_FIRE, .rand = 25 },
             { .type = ATT_CLAW, .base = 13, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_SPIRIT_NAGA */
         .name = "spirit naga", .glyph = 'N', .colour = MAGENTA,
@@ -640,7 +641,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 12, .damage = DAM_PHYSICAL },
             { .type = ATT_MAGIC, .base = 1, .damage = DAM_RANDOM },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GREEN_URCHIN */
         .name = "green urchin", .glyph = 'u', .colour = GREEN,
@@ -650,7 +651,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_STING, .base = 12, .damage = DAM_PHYSICAL },
             { .type = ATT_STING, .base = 50, .damage = DAM_BLINDNESS },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_I */
         .name = "type I demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -660,7 +661,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_II */
         .name = "type II demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -670,7 +671,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_III */
         .name = "type III demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -680,7 +681,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_IV */
         .name = "type IV demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -690,7 +691,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 20, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 20, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_V */
         .name = "type V demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -700,7 +701,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 22, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 22, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_VI */
         .name = "type VI demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -710,7 +711,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 24, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 24, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_VII */
         .name = "type VII demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -720,7 +721,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 27, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 27, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMON_PRINCE */
         .name = "demon prince", .glyph = '&', .colour = RED,
@@ -730,7 +731,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 30, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 30, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_TOWN_PERSON */
         .name = "human", .glyph = '@', .colour = BROWN,
@@ -739,10 +740,11 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS,
         .attacks = {
             { .type = ATT_SLAM, .base = 0, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_CIVILIAN
     },
 };
 
+static inline monster_action_t monster_default_ai(monster *m);
 static gboolean monster_player_visible(monster *m);
 static gboolean monster_attack_available(monster *m, attack_t type);
 static item *monster_weapon_select(monster *m);
@@ -835,8 +837,6 @@ monster *monster_new(monster_t type, position pos)
     case MT_TOWN_PERSON:
         /* initialize name counter */
         nmonster->number = rand_1n(40);
-        /* set the AI to civilian */
-        nmonster->action = MA_CIVILIAN;
         break;
 
     default:
@@ -924,8 +924,7 @@ monster *monster_new(monster_t type, position pos)
     }
 
     /* initialize AI */
-    if (nmonster->action == MA_NONE)
-        nmonster->action = MA_WANDER;
+    nmonster->action = monster_default_ai(nmonster);
     nmonster->player_pos = pos_invalid;
 
     /* register monster with game */
@@ -1523,7 +1522,8 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     position m_npos;
 
     /* expire summoned monsters */
-    if (monster_action(m) == MA_SERVE)
+    if (monster_action(m) == MA_SERVE
+            && !monster_effect(m, ET_CHARM_MONSTER))
     {
         m->number--;
 
@@ -2383,6 +2383,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
         case MA_SERVE:     /* once servant, forever servant */
         case MA_CIVILIAN:  /* town people never change their behaviour */
         case MA_CONFUSION: /* confusion is removed by monster_effect_del() */
+        case MA_REMAIN:    /* status set by hold monster/sleep/being trapped */
             return FALSE;
             break;
 
@@ -2397,12 +2398,6 @@ gboolean monster_update_action(monster *m, monster_action_t override)
     if (monster_flags(m, MIMIC) && m->unknown)
     {
         /* stationary monsters */
-        naction = MA_REMAIN;
-    }
-    else if (monster_effect(m, ET_HOLD_MONSTER) || monster_effect(m, ET_SLEEP)
-             || monster_effect(m, ET_TRAPPED))
-    {
-        /* no action if monster is held or sleeping */
         naction = MA_REMAIN;
     }
     else if ((low_hp && (monster_int(m) > 4)) || monster_effect(m, ET_SCARED))
@@ -2711,6 +2706,12 @@ effect *monster_effect_add(monster *m, effect *e)
         if (e && e->type == ET_CHARM_MONSTER) {
             monster_update_action(m, MA_SERVE);
         }
+
+        /* no action if monster is held or sleeping */
+        if (e->type == ET_HOLD_MONSTER || e->type == ET_SLEEP || e->type == ET_TRAPPED)
+        {
+            monster_update_action(m, MA_REMAIN);
+        }
     }
 
     /* show message if monster is visible */
@@ -2748,7 +2749,19 @@ int monster_effect_del(monster *m, effect *e)
     {
         /* if confusion or charm is finished, set the AI back to the default */
         if (e->type == ET_CONFUSION || e->type == ET_CHARM_MONSTER) {
-            monster_update_action(m, MA_WANDER);
+            monster_update_action(m, monster_default_ai(m));
+        }
+
+        /* end of holding, sleeping or being trapped */
+        if (e->type == ET_HOLD_MONSTER || e->type == ET_SLEEP || e->type == ET_TRAPPED)
+        {
+            /* only reset the AI when no other "idling" effect is left */
+            if (!monster_effect(m, ET_HOLD_MONSTER)
+                    && !monster_effect(m, ET_SLEEP)
+                    && !monster_effect(m, ET_TRAPPED))
+            {
+                monster_update_action(m, monster_default_ai(m));
+            }
         }
 
         effect_destroy(e);
@@ -2801,6 +2814,11 @@ void monster_effects_expire(monster *m)
             idx++;
         }
     }
+}
+
+static inline monster_action_t monster_default_ai(monster *m)
+{
+    return monster_data[m->type].default_ai;
 }
 
 static gboolean monster_player_visible(monster *m)
