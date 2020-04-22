@@ -18,6 +18,7 @@
 * Stay at home until explicitly leaving (with ESC)
 * More robust save file format. Future additions of items will not break
   existing savegames anymore
+* Toggle full screen with ALT-Enter on macOS and Windows
 * Switch Windows build to WIN64
 
 ### Fixed bugs:

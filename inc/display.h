@@ -177,5 +177,9 @@ void display_windows_show();
  */
 int display_getch(WINDOW *win);
 
+#ifdef SDLPDCURSES
+/* toggle SDL fullscreen mode */
+void display_toggle_fullscreen();
+#endif
 
 #endif

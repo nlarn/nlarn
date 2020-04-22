@@ -840,6 +840,13 @@ static void mainloop()
             display_draw();
             break;
 
+#ifdef SDLPDCURSES
+        case 13: /* ENTER */
+            if (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_ALT)
+                display_toggle_fullscreen();
+            break;
+#endif
+
             /* configure defaults */
         case 16: /* ^P */
             configure_defaults(nlarn_inifile);

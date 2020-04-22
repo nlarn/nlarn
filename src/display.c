@@ -21,6 +21,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef SDLPDCURSES
+# include "sdl2/pdcsdl.h"
+# undef min
+# undef max
+#endif
+
 #include "colours.h"
 #include "display.h"
 #include "fov.h"
@@ -2867,6 +2873,23 @@ int display_getch(WINDOW *win) {
     return ch;
 }
 
+#ifdef SDLPDCURSES
+void display_toggle_fullscreen()
+{
+    fullscreen = fullscreen == SDL_WINDOW_FULLSCREEN_DESKTOP
+        ? 0
+        : SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+    SDL_SetWindowFullscreen(pdc_window, fullscreen);
+
+    /* adapt and resize PDCurses internal structures */
+    pdc_screen = SDL_GetWindowSurface(pdc_window);
+    pdc_sheight = pdc_screen->h - pdc_xoffset;
+    pdc_swidth = pdc_screen->w - pdc_yoffset;
+    resize_term(PDC_get_rows(), PDC_get_columns());
+}
+#endif
+
 static int mvwcprintw(WINDOW *win, int defattr, int currattr,
         const colour bg, int y, int x, const char *fmt, ...)
 {
@@ -3089,6 +3112,13 @@ static int display_window_move(display_window *dwin, int key)
         clear();
         display_draw();
         break;
+
+#ifdef SDLPDCURSES
+    case 13: /* ENTER */
+        if (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_ALT)
+            display_toggle_fullscreen();
+        break;
+#endif
 
     default:
         need_refresh = FALSE;
