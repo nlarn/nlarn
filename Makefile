@@ -215,18 +215,7 @@ $(OSXIMAGE): $(MAINFILES)
 	@mkdir -p dmgroot/NLarn.app/Contents/{Frameworks,MacOS,Resources}
 	@cp -p nlarn dmgroot/NLarn.app/Contents/MacOS
 # Copy local libraries into the app folder and instruct the linker.
-	@for lib in $$(otool -L nlarn | awk '/local/ {print $$1}'); do\
-		cp $$lib dmgroot/NLarn.app/Contents/MacOS/; \
-		chmod 0644 dmgroot/NLarn.app/Contents/MacOS/$${lib##*/}; \
-		install_name_tool -change $$lib @executable_path/$${lib##*/} \
-			dmgroot/NLarn.app/Contents/MacOS/nlarn; \
-		for llib in dmgroot/NLarn.app/Contents/MacOS/*.dylib; do\
-			for libpath in $$(otool -L $$llib | awk '/local/ {print $$1}'); do\
-				install_name_tool -change $$libpath \
-					@executable_path/$${libpath##*/} $$llib; \
-            done; \
-		done; \
-	done
+	dylibbundler -cd -d dmgroot/NLarn.app/Contents/MacOS/libs -b -x dmgroot/NLarn.app/Contents/MacOS/nlarn
 # Copy required files
 	@cp -p README.html LICENSE Changelog.html dmgroot
 	@cp -p $(LIBFILES) dmgroot/Nlarn.app/Contents/Resources
