@@ -1,4 +1,4 @@
-## Release 0.7.5 (unreleased)
+## Release 0.7.5 (2020-04-24)
 
 ### Changes:
 * Add a menu system: instead of dropping into to the game on start,
