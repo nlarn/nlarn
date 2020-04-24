@@ -997,22 +997,22 @@ damage *map_tile_damage(map *m, position pos, gboolean flying)
     }
 }
 
-char *map_inv_description(map *m, position pos, const char* where)
+char *map_inv_description(map *m, position pos, const char* where, int (*ifilter)(item *))
 {
     g_assert(m != NULL);
     g_assert(pos_valid(pos));
     g_assert(m->nlevel == Z(pos));
 
-    if (inv_length(*map_ilist_at(m, pos)) > 3)
+    if (inv_length_filtered(*map_ilist_at(m, pos), ifilter) > 3)
     {
         return g_strdup_printf("There are multiple items %s.", where);
     }
 
     GString *items_desc = NULL;
 
-    for (guint idx = 0; idx < inv_length(*map_ilist_at(m, pos)); idx++)
+    for (guint idx = 0; idx < inv_length_filtered(*map_ilist_at(m, pos), ifilter); idx++)
     {
-        item *it = inv_get(*map_ilist_at(m, pos), idx);
+        item *it = inv_get_filtered(*map_ilist_at(m, pos), idx, ifilter);
         gchar *item_desc = item_describe(it, player_item_known(nlarn->p, it),
                                             FALSE, FALSE);
 
@@ -1092,7 +1092,7 @@ char *map_pos_examine(position pos)
        no mimic there (items don't stack correctly otherwise) */
     if (!has_mimic && inv_length(*map_ilist_at(cm, pos)) > 0)
     {
-        char *inv_description = map_inv_description(cm, pos, where);
+        char *inv_description = map_inv_description(cm, pos, where, NULL);
         g_string_append(desc, inv_description);
         g_free(inv_description);
     }

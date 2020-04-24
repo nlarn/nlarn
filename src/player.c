@@ -1757,9 +1757,15 @@ void player_pickup(player *p)
     }
 }
 
+static int filter_item_noautopickup(item *i)
+{
+    return !(nlarn->p->settings.auto_pickup[i->type] || i->fired);
+}
+
 static void player_autopickup(player *p)
 {
     g_assert (p != NULL && map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos));
+
 
     /* if the player is floating above the ground auto-pickup does not work.. */
     if (player_effect(p, ET_LEVITATION))
@@ -1773,35 +1779,35 @@ static void player_autopickup(player *p)
 
     for (guint idx = 0; idx < inv_length(*floor); idx++)
     {
+        guint count_orig = inv_length(*floor);
         item *i = inv_get(*floor, idx);
 
-        if (p->settings.auto_pickup[i->type] || i->fired)
+        /* the given item is not configured for auto-pickup */
+        if (filter_item_noautopickup(i)) continue;
+
+        /* try to pick up the item */
+        if (1 == player_item_pickup(p, floor, i, FALSE))
         {
-            /* item type is set to be picked up */
-            guint retval;
-            guint count_orig = inv_length(*floor);
+            /* pickup has been cancelled by the player */
+            return;
+        }
 
-            /* try to pick up the item */
-            retval = player_item_pickup(p, floor, i, FALSE);
-
-            if (retval == 1)
-                /* pickup has been cancelled by the player */
-                return;
-
-            if (count_orig != inv_length(*floor))
-            {
-                /* item has been picked up */
-                /* go back one item as the following items lowered their number */
-                idx--;
-            }
+        if (count_orig != inv_length(*floor))
+        {
+            /* item has been picked up */
+            /* go back one item as the following items lowered their number */
+            idx--;
         }
     }
 
-    /* if there are some items left on the floor, describe them */
-    if (inv_length(*floor))
+    /* If there are some items on the floor which are not configured for
+       autopickup, describe them. We cannot simply describe all remaining
+       items, as some may be configured for autopickup, but too heavy to
+       carry. Those would result in duplicate messages. */
+    if (inv_length_filtered(*floor, filter_item_noautopickup))
     {
         log_add_entry(nlarn->log, map_inv_description(
-            game_map(nlarn, Z(p->pos)), p->pos, "here"));
+            game_map(nlarn, Z(p->pos)), p->pos, "here", filter_item_noautopickup));
     }
 }
 

@@ -235,8 +235,9 @@ damage *map_tile_damage(map *m, position pos, gboolean flying);
  * @param a map
  * @param a position
  * @param "here" or "there"
+ * @param a filter function to restrict the described items
  */
-char *map_inv_description(map *m, position pos, const char* where);
+char *map_inv_description(map *m, position pos, const char* where, int (*ifilter)(item *));
 
 char *map_pos_examine(position pos);
 
