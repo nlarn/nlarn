@@ -763,7 +763,7 @@ static gboolean spell_type_point(spell *s, struct player *p)
         {
             e = effect_new(spell_effect(s));
             e->turns *= s->knowledge;
-            e = monster_effect_add(m, e);
+            monster_effect_add(m, e);
         }
         else
         {

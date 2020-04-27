@@ -1909,9 +1909,6 @@ int monster_items_pickup(monster *m)
             inv_del_element(map_ilist_at(monster_map(m), m->pos), it);
             inv_add(&m->inv, it);
 
-            /* go back one item as the following items lowered their number */
-            idx--;
-
             if (new_weapon)
             {
                 /* find out if the new weapon is better than the old one */
