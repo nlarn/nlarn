@@ -2711,7 +2711,7 @@ effect *monster_effect_add(monster *m, effect *e)
         }
 
         /* no action if monster is held or sleeping */
-        if (e->type == ET_HOLD_MONSTER || e->type == ET_SLEEP || e->type == ET_TRAPPED)
+        if (e && (e->type == ET_HOLD_MONSTER || e->type == ET_SLEEP || e->type == ET_TRAPPED))
         {
             monster_update_action(m, MA_REMAIN);
         }
