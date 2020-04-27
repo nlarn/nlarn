@@ -118,7 +118,6 @@ static gboolean is_volcano_map(int nlevel)
 map *map_new(int num, const char *mazefile)
 {
     gboolean map_loaded = FALSE;
-    gboolean keep_maze = TRUE;
 
     map *nmap = nlarn->maps[num] = g_malloc0(sizeof(map));
     nmap->nlevel = num;
@@ -150,6 +149,7 @@ map *map_new(int num, const char *mazefile)
         gboolean treasure_room = num > 1 && chance(25);
 
         /* generate random map */
+        gboolean keep_maze = TRUE;
         do
         {
             /* dig cave */
@@ -399,15 +399,12 @@ position map_find_space_in(map *m,
 
 int *map_get_surrounding(map *m, position pos, sobject_t type)
 {
-    position p = pos_invalid;
     int nmove = 1;
-    int *dirs;
-
-    dirs = g_malloc0(sizeof(int) * GD_MAX);
+    int *dirs = g_malloc0(sizeof(int) * GD_MAX);
 
     while (nmove < GD_MAX)
     {
-        p = pos_move(pos, nmove);
+        position p = pos_move(pos, nmove);
 
         if (pos_valid(p) && map_sobject_at(m, p) == type)
         {
@@ -1110,12 +1107,9 @@ monster *map_get_monster_at(map *m, position pos)
 
 void map_fill_with_life(map *m)
 {
-    position pos = pos_invalid;
-    guint new_monster_count;
-
     g_assert(m != NULL);
 
-    new_monster_count = rand_1n(14 + m->nlevel);
+    guint new_monster_count = rand_1n(14 + m->nlevel);
 
     if (m->nlevel == 0)
     {
@@ -1131,6 +1125,8 @@ void map_fill_with_life(map *m)
 
     for (guint i = 0; i <= new_monster_count; i++)
     {
+        position pos = pos_invalid;
+
         do
         {
             pos = map_find_space(m, LE_MONSTER, FALSE);

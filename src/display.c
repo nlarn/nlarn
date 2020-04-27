@@ -2270,7 +2270,7 @@ position display_get_new_position(player *p,
 {
     gboolean RUN = TRUE;
     direction dir = GD_NONE;
-    position pos, npos = pos_invalid, cursor = pos_invalid;
+    position pos, npos = pos_invalid;
     map *vmap;
     int attrs; /* curses attributes */
     display_window *msgpop = NULL;
@@ -2413,7 +2413,7 @@ position display_get_new_position(player *p,
             /* paint a ball if told to */
             area *obstacles = map_get_obstacles(vmap, pos, radius, FALSE);
             b = area_new_circle_flooded(pos, radius, obstacles);
-            cursor = pos;
+            position cursor = pos;
 
             for (Y(cursor) = b->start_y; Y(cursor) < b->start_y + b->size_y; Y(cursor)++)
             {
