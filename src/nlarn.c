@@ -1027,7 +1027,7 @@ gboolean main_menu()
         "\n"
         "      `lightgreen`a`end`) %s Game\n"
         "      `lightgreen`b`end`) Configure Settings\n"
-        "      `lightgreen`c`end`) View High Scores\n"
+        "      `lightgreen`c`end`) Visit the Hall of Fame\n"
         "\n"
         "      `lightgreen`q`end`) Quit Game\n"
         "\n"
