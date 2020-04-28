@@ -245,9 +245,6 @@ item *item_new(item_t item_type, int item_id)
 
 item *item_new_random(item_t item_type, gboolean finetouch)
 {
-    item *it;
-
-
     g_assert(item_type > IT_NONE && item_type < IT_MAX);
 
     int min_id = 0;
@@ -272,13 +269,13 @@ item *item_new_random(item_t item_type, gboolean finetouch)
     }
 
     int item_id = rand_m_n(min_id, max_id);
-    it = item_new(item_type, item_id);
+    item *it = item_new(item_type, item_id);
 
     if (item_type == IT_AMMO)
         it->count = rand_m_n(10, 50);
 
     if (finetouch)
-        item_new_finetouch(it);
+        it = item_new_finetouch(it);
 
     return it;
 }
@@ -379,7 +376,7 @@ item *item_new_finetouch(item *it)
     /* maybe the item is corroded */
     if (item_is_corrodible(it->type) && chance(25))
     {
-        item_erode(NULL, it, rand_1n(IET_MAX), FALSE);
+        it = item_erode(NULL, it, rand_1n(IET_MAX), FALSE);
     }
 
     return it;
@@ -1739,4 +1736,3 @@ static const char *item_desc_get(item *it, int known)
         return "";
     }
 }
-
