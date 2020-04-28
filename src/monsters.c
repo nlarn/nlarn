@@ -1998,9 +1998,7 @@ void monster_player_attack(monster *m, player *p)
 {
     g_assert(m != NULL && p != NULL);
 
-    damage *dam;
     map *mmap = game_map(nlarn, Z(m->pos));
-    attack att = {};
 
     /* the player is invisible and the monster bashes into thin air */
     if (!pos_identical(m->player_pos, p->pos))
@@ -2030,7 +2028,7 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* choose a random attack type */
-    att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
+    attack att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
 
     /* No attack has been found. Return to calling function. */
     if (att.type == ATT_NONE) return;
@@ -2043,9 +2041,9 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* generate damage */
-    dam = damage_new(att.damage, att.type,
-                     modified_attack_amount(att.base, att.damage),
-                     DAMO_MONSTER, m);
+    damage *dam = damage_new(att.damage, att.type,
+                        modified_attack_amount(att.base, att.damage),
+                        DAMO_MONSTER, m);
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM)
