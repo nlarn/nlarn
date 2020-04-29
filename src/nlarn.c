@@ -1060,16 +1060,15 @@ gboolean main_menu()
 
         case 'c':
         {
-            GList *highscores = NULL;
-            highscores = scores_load();
-            char *rendered_highscores = scores_to_string(highscores, NULL);
+            GList *hs = scores_load();
+            char *rendered_highscores = scores_to_string(hs, NULL);
 
             display_show_message("NLarn Hall of Fame",
                     highscores ? rendered_highscores : room_for_improvement, 0);
 
-            if (highscores)
+            if (hs)
             {
-                scores_destroy(highscores);
+                scores_destroy(hs);
                 g_free(rendered_highscores);
             }
         }
