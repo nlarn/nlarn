@@ -1119,23 +1119,23 @@ int item_colour(item *it)
 
 guint item_fragility(item *it)
 {
-    int chance = item_materials[item_material(it)].fragility;
+    int probability = item_materials[item_material(it)].fragility;
 
     /* Ensure that unique weapons do not break */
     if (it->type == IT_WEAPON && weapon_is_unique(it))
         return 0;
 
-    chance += 15 * it->burnt;
-    chance += 15 * it->corroded;
-    chance += 15 * it->rusty;
+    probability += 15 * it->burnt;
+    probability += 15 * it->corroded;
+    probability += 15 * it->rusty;
 
     if (it->blessed)
-        chance /= 2;
+        probability /= 2;
 
     if (it->cursed)
-        chance *= 2;
+        probability *= 2;
 
-    return (guint)max(0, min(chance, 100));
+    return (guint)max(0, min(probability, 100));
 }
 
 void item_effect_add(item *it, effect *e)
