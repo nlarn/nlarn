@@ -1,5 +1,8 @@
 ## Release 0.7.6 (unreleased)
 
+### Changes:
+* Sort stats in obituary matching to order on main screen
+
 ### Fixed bugs:
 * Fix macOS application bundle
 * Handle empty scoreboard correctly

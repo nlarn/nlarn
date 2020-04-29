@@ -5051,14 +5051,14 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     g_string_append(text, "\n\n-- Attributes -------------------------\n\n");
     g_string_append_printf(text, "Strength:     %d (%+2d)\n",
                            p->strength, p->strength - p->stats.str_orig);
+    g_string_append_printf(text, "Dexterity:    %d (%+2d)\n",
+                           p->dexterity, p->dexterity - p->stats.dex_orig);
+    g_string_append_printf(text, "Constitution: %d (%+2d)\n",
+                           p->constitution, p->constitution - p->stats.con_orig);
     g_string_append_printf(text, "Intelligence: %d (%+2d)\n",
                            p->intelligence, p->intelligence - p->stats.int_orig);
     g_string_append_printf(text, "Wisdom:       %d (%+2d)\n",
                            p->wisdom, p->wisdom - p->stats.wis_orig);
-    g_string_append_printf(text, "Constitution: %d (%+2d)\n",
-                           p->constitution, p->constitution - p->stats.con_orig);
-    g_string_append_printf(text, "Dexterity:    %d (%+2d)\n",
-                           p->dexterity, p->dexterity - p->stats.dex_orig);
 
     /* effects */
     char **effect_desc = player_effect_text(p);
