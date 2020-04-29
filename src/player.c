@@ -33,6 +33,8 @@
 #include "scoreboard.h"
 #include "sobjects.h"
 
+const char *player_sex_str[] = {"not defined", "male", "female"};
+
 static const char aa1[] = "mighty evil master";
 static const char aa2[] = "apprentice demi-god";
 static const char aa3[] = "minor demi-god";

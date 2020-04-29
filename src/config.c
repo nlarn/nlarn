@@ -324,7 +324,7 @@ void configure_defaults(const char *inifile)
         /* gender */
         char *gbuf = config.gender
             ? g_strdup_printf("`yellow`%s`end`",
-                    ((strcmp(config.gender, "m") == 0) ? "male" : "female"))
+                    player_sex_str[parse_gender(config.gender[0])])
             : NULL;
         /* stats */
         char *sbuf = (config.stats && strlen(config.stats) > 0)

@@ -6,6 +6,7 @@
 ### Fixed bugs:
 * Fix macOS application bundle
 * Handle empty scoreboard correctly
+* Show undefined gender correctly in configuration dialogue
 
 ## Release 0.7.5 (2020-04-24)
 
