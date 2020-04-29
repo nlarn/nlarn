@@ -1,3 +1,8 @@
+## Release 0.7.6 (unreleased)
+
+### Fixed bugs:
+* Fix macOS application bundle
+
 ## Release 0.7.5 (2020-04-24)
 
 ### Changes:
