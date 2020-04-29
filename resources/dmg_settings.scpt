@@ -14,7 +14,7 @@ tell application "Finder"
 		set position of item "Applications" of container window to {300, 140}
 		set position of item "Changelog.html" of container window to {100, 270}
 		set position of item "README.html" of container window to {200, 270}
-		set position of item "License" of container window to {300, 270}
+		set position of item "LICENSE" of container window to {300, 270}
 		update without registering applications
 		close
 	end tell

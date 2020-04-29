@@ -218,7 +218,7 @@ $(OSXIMAGE): $(MAINFILES)
 	dylibbundler -cd -d dmgroot/NLarn.app/Contents/MacOS/libs -b -x dmgroot/NLarn.app/Contents/MacOS/nlarn -p '@executable_path/libs/'
 # Copy required files
 	cp -p README.html LICENSE Changelog.html dmgroot
-	cp -p $(LIBFILES) dmgroot/Nlarn.app/Contents/Resources
+	cp -p $(LIBFILES) dmgroot/NLarn.app/Contents/Resources
 	cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
 	cp -p resources/Info.plist dmgroot/NLarn.app/Contents
 # Update the version information in the plist
