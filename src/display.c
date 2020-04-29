@@ -2270,7 +2270,7 @@ position display_get_new_position(player *p,
 {
     gboolean RUN = TRUE;
     direction dir = GD_NONE;
-    position pos, npos = pos_invalid;
+    position pos;
     map *vmap;
     int attrs; /* curses attributes */
     display_window *msgpop = NULL;
@@ -2351,7 +2351,7 @@ position display_get_new_position(player *p,
         display_paint_screen(p);
 
         /* reset npos to an invalid position */
-        npos = pos_invalid;
+        position npos = pos_invalid;
 
         /* draw a ray if the starting position is not the player's position */
         if (ray && !pos_identical(pos, p->pos))
