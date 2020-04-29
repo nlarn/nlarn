@@ -53,6 +53,9 @@
 /* version string */
 const char *nlarn_version = STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_PATCH) GITREV;
 
+/* empty scoreboard description */
+const char *room_for_improvement = "\n...room for improvement...\n";
+
 /* path and file name constants*/
 static const char *default_lib_dir = "/usr/share/nlarn";
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
@@ -233,7 +236,8 @@ static void nlarn_init(int argc, char *argv[])
         GList *scores = scores_load();
         g_autofree char *s = scores_to_string(scores, NULL);
 
-        g_printf("NLarn Hall of Fame\n==================\n\n%s", s);
+        g_printf("NLarn Hall of Fame\n==================\n%s",
+                scores ? s : room_for_improvement);
         scores_destroy(scores);
 
         exit(EXIT_SUCCESS);
@@ -1059,9 +1063,15 @@ gboolean main_menu()
             GList *highscores = NULL;
             highscores = scores_load();
             char *rendered_highscores = scores_to_string(highscores, NULL);
-            display_show_message("Highscores", rendered_highscores, 0);
-            scores_destroy(highscores);
-            g_free(rendered_highscores);
+
+            display_show_message("NLarn Hall of Fame",
+                    highscores ? rendered_highscores : room_for_improvement, 0);
+
+            if (highscores)
+            {
+                scores_destroy(highscores);
+                g_free(rendered_highscores);
+            }
         }
             break;
         }

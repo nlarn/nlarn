@@ -448,6 +448,9 @@ char *score_death_description(score_t *score, int verbose)
 
 char *scores_to_string(GList *scores, score_t *score)
 {
+    /* no scoreboard entries? */
+    if (!scores) return NULL;
+
     GString *text = g_string_new(NULL);
 
     guint rank = 0;
