@@ -2221,10 +2221,7 @@ position display_get_position(player *p,
             start = monster_pos(m);
 
             /* don't use invisible position if unwanted */
-            if (visible && !fov_get(p->fv, start))
-            {
-                start = p->pos;
-            }
+            if (!fov_get(p->fv, start)) start = p->pos;
         }
     }
 
