@@ -3106,7 +3106,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     }
 }
 
-static char *monsters_get_fortune(const char *fortune_file)
+static char *monster_get_fortune(const char *fortune_file)
 {
     /* array of pointers to fortunes */
     static GPtrArray *fortunes = NULL;
@@ -3115,36 +3115,32 @@ static char *monsters_get_fortune(const char *fortune_file)
     {
         /* read in the fortunes */
         char buffer[80];
-        char *tmp = 0;
         FILE *fortune_fd;
-
-        fortunes = g_ptr_array_new();
 
         /* open the file */
         fortune_fd = fopen(fortune_file, "r");
         if (fortune_fd == NULL)
         {
             /* can't find file */
-            tmp = "Help me! I can't find the fortune file!";
+            return "Help me! I can't find the fortune file!";
+        }
+
+        fortunes = g_ptr_array_new();
+
+        /* read in the entire fortune file */
+        while((fgets(buffer, 79, fortune_fd)))
+        {
+            /* replace EOL with \0 */
+            size_t len = (size_t)(strchr(buffer, '\n') - (char *)&buffer);
+            buffer[len] = '\0';
+
+            /* keep the line */
+            char *tmp = g_malloc((len + 1) * sizeof(char));
+            memcpy(tmp, &buffer, (len + 1));
             g_ptr_array_add(fortunes, tmp);
         }
-        else
-        {
-            /* read in the entire fortune file */
-            while((fgets(buffer, 79, fortune_fd)))
-            {
-                /* replace EOL with \0 */
-                size_t len = (size_t)(strchr(buffer, '\n') - (char *)&buffer);
-                buffer[len] = '\0';
 
-                /* keep the line */
-                tmp = g_malloc((len + 1) * sizeof(char));
-                memcpy(tmp, &buffer, (len + 1));
-                g_ptr_array_add(fortunes, tmp);
-            }
-
-            fclose(fortune_fd);
-        }
+        fclose(fortune_fd);
     }
 
     return g_ptr_array_index(fortunes, rand_0n(fortunes->len));
@@ -3399,7 +3395,7 @@ static position monster_move_civilian(monster *m, struct player *p)
         /* talk */
         log_add_entry(nlarn->log, "The %s says, \"%s\"",
                       monster_get_name(m),
-                      monsters_get_fortune(nlarn_fortunes));
+                      monster_get_fortune(nlarn_fortunes));
     }
 
     /* change the town person's name from time to time */
