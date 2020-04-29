@@ -1523,17 +1523,14 @@ static int spell_cast(player *p, spell *s)
     if (!well_done)
         return 0;
 
-    if (well_done)
-    {
-        /* spell has been cast successfully, set mp usage accordingly */
-        player_mp_lose(p, spell_level(s));
+    /* spell has been cast successfully, set mp usage accordingly */
+    player_mp_lose(p, spell_level(s));
 
-        /* increase number of spells cast */
-        p->stats.spells_cast++;
+    /* increase number of spells cast */
+    p->stats.spells_cast++;
 
-        /* increase usage counter for this specific spell */
-        s->used++;
-    }
+    /* increase usage counter for this specific spell */
+    s->used++;
 
     return turns;
 }
