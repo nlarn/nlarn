@@ -86,7 +86,7 @@ int building_bank(player *p)
     const char msg_frozen[] = "The Larn Revenue Service has ordered that your " \
                               "account be frozen until all levied taxes have " \
                               "been paid.  They have also told us that you " \
-                              "owe %d gp in taxes, and we must comply with " \
+                              "owe %d gold in taxes, and we must comply with " \
                               "them. We cannot serve you at this time.  Sorry.\n\n" \
                               "We suggest you go to the LRS office and pay your taxes.";
 
@@ -163,7 +163,7 @@ int building_bank(player *p)
             {
                 p->bank_account += amount;
                 player_remove_gold(p, amount);
-                log_add_entry(nlarn->log, "You deposited %d gp.", amount);
+                log_add_entry(nlarn->log, "You deposited %d gold.", amount);
 
                 /* income tax for money earned in the caverns */
                 p->outstanding_taxes += calc_tax_debt(amount);
@@ -506,7 +506,7 @@ int building_lrs(player *p)
 
     const char title[] ="Larn Revenue Service";
     const char msg_greet[] = "Welcome to the Larn Revenue Service district office.\n\n";
-    const char msg_taxes[] = "You presently owe %d gp in taxes.\n\n";
+    const char msg_taxes[] = "You presently owe %d gold in taxes.\n\n";
     const char msg_notax[] = "You do not owe us any taxes.";
 
     g_assert(p != NULL);
@@ -764,7 +764,7 @@ int building_school(player *p)
                               * (game_difficulty(nlarn) + 1) * 100;
 
                 g_string_append_printf(text,
-                        " `lightgreen`%c`end`) %-24s - %2d mobuls, %4d gp\n",
+                        " `lightgreen`%c`end`) %-24s - %2d mobuls, %4d gold\n",
                         idx + 'a', school_courses[idx].description,
                         school_courses[idx].course_time, price);
             }

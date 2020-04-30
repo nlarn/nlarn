@@ -608,7 +608,7 @@ static void mainloop()
 
             /* bank account information */
         case '$':
-            log_add_entry(nlarn->log, "There %s %s gp on your bank account.",
+            log_add_entry(nlarn->log, "There %s %s gold on your bank account.",
                           is_are(nlarn->p->bank_account),
                           int2str(nlarn->p->bank_account));
             break;
@@ -712,7 +712,7 @@ static void mainloop()
         case 'P':
             if (nlarn->p->outstanding_taxes)
             {
-                log_add_entry(nlarn->log, "You presently owe %d gp in taxes.",
+                log_add_entry(nlarn->log, "You presently owe %d gold in taxes.",
                               nlarn->p->outstanding_taxes);
             }
             else

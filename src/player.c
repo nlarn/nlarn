@@ -4996,7 +4996,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
                                int2time_str(p->stats.life_protected));
     }
 
-    g_string_append_printf(text, "\n%s had %s gp on %s bank account "
+    g_string_append_printf(text, "\n%s had %s gold on %s bank account "
                            "when %s %s.",
                            pronoun, int2str(p->bank_account),
                            (p->sex == PS_MALE) ? "his" : "her",

@@ -859,8 +859,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             {
                 /* inside shop */
                 gchar *item_desc = item_describe(it, TRUE, FALSE, FALSE);
-                mvwaprintw(iwin->window, pos, 1, attrs, " %-*s %5d$ ",
-                          width - 11, item_desc, item_price(it));
+                mvwaprintw(iwin->window, pos, 1, attrs, " %-*s %5d gold ",
+                          width - 15, item_desc, item_price(it));
 
                 g_free(item_desc);
             }
@@ -879,7 +879,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (show_account)
         {
             /* show the balance of the bank account */
-            stitle = g_strdup_printf("%s - %d gp on bank account",
+            stitle = g_strdup_printf("%s - %d gold on bank account",
                                      title, p->bank_account);
 
             display_window_update_title(iwin, stitle);
