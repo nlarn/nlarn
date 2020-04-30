@@ -1567,7 +1567,8 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop)
     if (shop)
     {
         /* inside shop - show the item's price */
-        g_string_append_printf(desc, "\nPrice:    %d gold", item_price(it));
+        g_string_append_printf(desc, "\nPrice:    %d gold%s", item_price(it),
+                it->count > 1 ? " each" : "");
     }
 
     return g_string_free(desc, FALSE);

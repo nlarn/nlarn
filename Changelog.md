@@ -4,6 +4,7 @@
 * Consistently call the currency "gold"
 * Consistently show monastery messages as windows
 * Sort stats in obituary matching to order on main screen
+* Document that shop prices for item stacks are per item
 
 ### Fixed bugs:
 * Fix macOS application bundle
