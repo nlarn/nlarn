@@ -11,6 +11,7 @@
 * Fix macOS application bundle
 * Handle empty scoreboard correctly
 * Show undefined gender correctly in configuration dialogue
+* Keep townsfolk inside the town area
 * Fix debit message
 
 ## Release 0.7.5 (2020-04-24)
