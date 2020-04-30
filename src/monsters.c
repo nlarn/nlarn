@@ -3286,6 +3286,7 @@ static position monster_move_attack(monster *m, struct player *p)
         return monster_pos(m);
     }
 
+    /* monster heads into the direction of the player. */
     npos = monster_find_next_pos_to(m, m->player_pos);
 
     /* No path found. Stop following player */
@@ -3347,6 +3348,7 @@ static position monster_move_serve(monster *m, struct player *p)
     /* a good servant always knows the masters position */
     if (pos_distance(monster_pos(m), p->pos) > 5)
     {
+         /* if the distance to the player is too large, follow */
         npos = monster_find_next_pos_to(m, p->pos);
     }
     else
