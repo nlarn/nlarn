@@ -1288,8 +1288,8 @@ static void building_player_charge(player *p, guint amount)
     if (p->bank_account >= amount)
     {
         p->bank_account -= amount;
-        log_add_entry(nlarn->log, "We have debited your bank account %d gold.",
-                      amount);
+        log_add_entry(nlarn->log, "We have debited %d gold from your bank "
+                "account.", amount);
     }
     else
     {
