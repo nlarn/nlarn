@@ -1054,7 +1054,7 @@ int building_monastery(struct player *p)
 
             if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
             {
-                log_add_entry(nlarn->log, "You do not possess any cursed item.");
+                display_show_message(title, "You do not possess any cursed item.", 0);
                 break;
             }
 
@@ -1064,8 +1064,8 @@ int building_monastery(struct player *p)
             /* It is possible to abort the selection with ESC. */
             if (it == NULL)
             {
-                log_add_entry(nlarn->log, "You chose to leave your items as "
-                        "they are.");
+                display_show_message(title, "You chose to leave your items as "
+                        "they are.", 0);
                 break;
             }
 
@@ -1088,7 +1088,9 @@ int building_monastery(struct player *p)
 
             if (!choice)
             {
-                log_add_entry(nlarn->log, "You chose leave the curse on %s.", desc);
+                char *msg = g_strdup_printf("You chose leave the curse on %s.", desc);
+                display_show_message(title, msg, 0);
+                g_free(msg);
                 break;
             }
 
@@ -1096,15 +1098,18 @@ int building_monastery(struct player *p)
                unknown blessedness. */
             if (it->cursed)
             {
-                log_add_entry(nlarn->log, "The monks remove the curse on %s.",
-                        desc);
+                char *msg = g_strdup_printf("The monks remove the curse on %s.", desc);
+                display_show_message(title, msg, 0);
+                g_free(msg);
                 item_remove_curse(it);
             }
             else
             {
-                log_add_entry(nlarn->log, "The monks tell you that %s %sn't "
+                char *msg = g_strdup_printf("The monks tell you that %s %sn't "
                         "cursed. Well, now you know for sure...", desc,
                         (it->count == 1) ? "was" : "were");
+                display_show_message(title, msg, 0);
+                g_free(msg);
                 it->blessed_known = TRUE;
             }
             g_free(desc);
@@ -1124,7 +1129,7 @@ int building_monastery(struct player *p)
 
             if (p->hp == player_get_hp_max(p))
             {
-                log_add_entry(nlarn->log, "You are not in need of healing.");
+                display_show_message(title, "You are not in need of healing.", 0);
                 break;
             }
 
@@ -1145,7 +1150,7 @@ int building_monastery(struct player *p)
             else
             {
                 /* no, thanks */
-                log_add_entry(nlarn->log, "You chose not to be healed.");
+                display_show_message(title, "You chose not to be healed.", 0);
             }
         }
         break;
@@ -1183,8 +1188,10 @@ int building_monastery(struct player *p)
                 else
                 {
                     /* no, thanks */
-                    log_add_entry(nlarn->log, "You chose not to be cured from %s.",
+                    char *msg = g_strdup_printf("You chose not to be cured from %s.",
                                   curable_diseases[selection].desc);
+                    display_show_message(title, msg, 0);
+                    g_free(msg);
                 }
 
             }
