@@ -1,6 +1,7 @@
 ## Release 0.7.6 (unreleased)
 
 ### Changes:
+* Some monsters now appear in packs (e.g. osquips and rothes)
 * Consistently call the currency "gold"
 * Consistently show monastery messages as windows
 * Sort stats in obituary matching to order on main screen

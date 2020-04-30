@@ -4797,7 +4797,7 @@ void calc_fighting_stats(player *p)
     for (guint32 idx = 0; idx < MT_TOWN_PERSON; idx++)
     {
         monster *m;
-        if (!(m = monster_new(idx, pos)))
+        if (!(m = monster_new(idx, pos, NULL)))
         {
             g_string_append_printf(text, "Monster %s could not be created.\n\n",
                                    monster_name(m));

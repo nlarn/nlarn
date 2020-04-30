@@ -1,6 +1,6 @@
 /*
  * monsters.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -157,6 +157,7 @@ typedef enum monster_action_type
     MF(RES_CONF     , = 1 << 18) /* resistant to confusion */ \
     MF(RES_MAGIC    , = 1 << 19) /* resistant to magic */ \
     MF(SWIM         , = 1 << 20) /* can swim through water */ \
+    MF(PACK         , = 1 << 21) /* creature appears in packs */ \
 
 #define MONSTER_FLAG_COUNT 20
 
@@ -164,7 +165,7 @@ DECLARE_ENUM(monster_flag, MONSTER_FLAG_ENUM)
 
 /* function definitions */
 
-monster *monster_new(monster_t type, position pos);
+monster *monster_new(monster_t type, position pos, gpointer leader);
 monster *monster_new_by_level(position pos);
 void monster_destroy(monster *m);
 

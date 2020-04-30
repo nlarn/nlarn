@@ -1260,7 +1260,7 @@ static gboolean spell_summon_demon(spell *s, struct player *p)
 
     /* generate a demon */
     demon = monster_new(min(MT_DEMONLORD_I + (s->knowledge - 1),
-                            MT_DEMONLORD_VII), pos);
+                            MT_DEMONLORD_VII), pos, NULL);
 
     /* turn the demon into a servant */
     monster_update_action(demon, MA_SERVE);

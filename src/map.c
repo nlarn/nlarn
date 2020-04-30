@@ -1117,13 +1117,8 @@ void map_fill_with_life(map *m)
         new_monster_count = min(5, new_monster_count);
     }
 
-    if (m->mcount > new_monster_count)
-        /* no monsters added */
-        return;
-    else
-        new_monster_count -= m->mcount;
-
-    for (guint i = 0; i <= new_monster_count; i++)
+    /* create monsters until the desired count is reached */
+    while (m->mcount <= new_monster_count)
     {
         position pos = pos_invalid;
 
@@ -1142,8 +1137,6 @@ void map_fill_with_life(map *m)
 
         monster_new_by_level(pos);
     }
-
-    return;
 }
 
 gboolean map_is_exit_at(map *m, position pos)
@@ -1796,12 +1789,12 @@ static void place_special_item(map *m, position npos)
     case MAP_CMAX - 1: /* the amulet of larn */
         inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN));
 
-        monster_new(MT_DEMONLORD_I + rand_0n(7), npos);
+        monster_new(MT_DEMONLORD_I + rand_0n(7), npos, NULL);
         break;
 
     case MAP_MAX - 1: /* potion of cure dianthroritis */
         inv_add(&tile->ilist, item_new(IT_POTION, PO_CURE_DIANTHR));
-        monster_new(MT_DEMON_PRINCE, npos);
+        monster_new(MT_DEMON_PRINCE, npos, NULL);
 
     default:
         /* plain level, add neither monster nor item */

@@ -70,6 +70,7 @@ struct _monster
     item *eq_weapon;
     GPtrArray *effects;
     guint number;        /* random value for some monsters */
+    gpointer leader;    /* for pack monsters: ID of the leader */
     guint32
         unknown: 1;      /* monster is unknown (mimic) */
 };
@@ -169,7 +170,7 @@ monster_data_t monster_data[] = {
         .name = "orc", .glyph = 'O', .colour = RED,
         .exp = 2, .gold_chance = 50, .gold = 80, .ac = 3, .hp_max = 12,
         .level = 2, .intelligence = 9, .speed = NORMAL, .size = MEDIUM,
-        .flags = HEAD | HANDS | INFRAVISION,
+        .flags = HEAD | HANDS | INFRAVISION | PACK,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
@@ -217,7 +218,7 @@ monster_data_t monster_data[] = {
         .name = "giant ant", .glyph = 'A', .colour = BROWN,
         .exp = 5, .ac = 2, .hp_max = 6,
         .level = 2, .intelligence = 3, .speed = NORMAL, .size = SMALL,
-        .flags = HEAD,
+        .flags = HEAD | PACK,
         .attacks = {
             { .type = ATT_BITE, .base = 75, .damage = DAM_DEC_STR },
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
@@ -325,7 +326,7 @@ monster_data_t monster_data[] = {
         .name = "centaur", .glyph = 'C', .colour = BROWN,
         .exp = 45, .gold_chance = 50, .gold = 80, .ac = 6, .hp_max = 24,
         .level = 4, .intelligence = 10, .speed = FAST, .size = LARGE,
-        .flags = HEAD | HANDS,
+        .flags = HEAD | HANDS | PACK,
         .attacks = {
             { .type = ATT_KICK, .base = 6, .damage = DAM_PHYSICAL },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
@@ -448,7 +449,7 @@ monster_data_t monster_data[] = {
         .name = "osquip", .glyph = 'o', .colour = BROWN,
         .exp = 100, .ac = 5, .hp_max = 35,
         .level = 7, .intelligence = 4, .speed = VFAST, .size = SMALL,
-        .flags = HEAD,
+        .flags = HEAD | PACK,
         .attacks = {
             { .type = ATT_BITE, .base = 10, .damage = DAM_PHYSICAL, .rand = 15 },
         }, .default_ai = MA_WANDER
@@ -457,7 +458,7 @@ monster_data_t monster_data[] = {
         .name = "rothe", .glyph = 'r', .colour = BROWN,
         .exp = 250, .ac = 5, .hp_max = 50,
         .level = 7, .intelligence = 5, .speed = VFAST, .size = LARGE,
-        .flags = HEAD | INFRAVISION,
+        .flags = HEAD | INFRAVISION | PACK,
         .attacks = {
             { .type = ATT_BITE, .base = 5, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL },
@@ -752,6 +753,8 @@ static void monster_weapon_wield(monster *m, item *weapon);
 static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
+
+static position monster_find_next_pos_to(monster *m, position dest);
 static position monster_move_wander(monster *m, struct player *p);
 static position monster_move_attack(monster *m, struct player *p);
 static position monster_move_confused(monster *m, struct player *p);
@@ -763,7 +766,7 @@ static gboolean monster_breath_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
-monster *monster_new(monster_t type, position pos)
+monster *monster_new(monster_t type, position pos, gpointer leader)
 {
     g_assert(type < MT_MAX && pos_valid(pos));
 
@@ -781,7 +784,7 @@ monster *monster_new(monster_t type, position pos)
     {
         /* try to find a replacement for the demon prince */
         if (type == MT_DEMON_PRINCE)
-            return monster_new(MT_DEMONLORD_I + rand_0n(7), pos);
+            return monster_new(MT_DEMONLORD_I + rand_0n(7), pos, NULL);
         else
             return NULL;
     }
@@ -926,6 +929,7 @@ monster *monster_new(monster_t type, position pos)
     /* initialize AI */
     nmonster->action = monster_default_ai(nmonster);
     nmonster->player_pos = pos_invalid;
+    nmonster->leader = leader;
 
     /* register monster with game */
     nmonster->oid = game_monster_register(nlarn, nmonster);
@@ -935,6 +939,23 @@ monster *monster_new(monster_t type, position pos)
 
     /* link monster to tile */
     map_set_monster_at(game_map(nlarn, Z(pos)), pos, nmonster);
+
+    /* add some members to the pack if we created a pack monster */
+    if (monster_flags(nmonster, PACK) && !leader)
+    {
+        guint count = rand_1n(5);
+        while (count > 0)
+        {
+            position mpos = map_find_space_in(game_map(nlarn, Z(pos)),
+                                    rect_new_sized(pos, 4), LE_MONSTER, FALSE);
+            /* no space left? */
+            if (!pos_valid(mpos)) break;
+
+            /* valid position returned, place a pack member there */
+            monster_new(type, mpos, nmonster->oid);
+            count--;
+        }
+    }
 
     /* increment monster count */
     game_map(nlarn, Z(pos))->mcount++;
@@ -1008,7 +1029,7 @@ monster *monster_new_by_level(position pos)
                 || chance(monster_type_reroll_chance(monster_id)));
     }
 
-    return monster_new(monster_id, pos);
+    return monster_new(monster_id, pos, NULL);
 }
 
 void monster_destroy(monster *m)
@@ -3146,10 +3167,48 @@ static char *monster_get_fortune(const char *fortune_file)
     return g_ptr_array_index(fortunes, rand_0n(fortunes->len));
 }
 
+static position monster_find_next_pos_to(monster *m, position dest)
+{
+    /* next position */
+    position npos = monster_pos(m);
+
+    /* find the next step in the direction of dest */
+    map_path *path = map_find_path(monster_map(m), monster_pos(m), dest,
+                                    monster_map_element(m));
+
+    if (path && !g_queue_is_empty(path->path))
+    {
+        map_path_element *el = g_queue_pop_head(path->path);
+        npos = el->pos;
+    }
+
+    /* clean up */
+    if (path)  map_path_destroy(path);
+
+    return npos;
+}
+
 static position monster_move_wander(monster *m, struct player *p __attribute__((unused)))
 {
     int tries = 0;
     position npos;
+
+    if (m->leader)
+    {
+        /* monster is part of a pack */
+        monster *leader = game_monster_get(nlarn, m->leader);
+
+        if (!leader)
+        {
+            /* is seems that the leader was killed.
+               From now on, wander aimlessly */
+            m->leader = NULL;
+        } else {
+            /* stay close to the pack leader */
+            if (pos_distance(monster_pos(m), monster_pos(leader)) > 4)
+                return monster_find_next_pos_to(m, monster_pos(leader));
+        }
+    }
 
     do
     {
@@ -3168,10 +3227,6 @@ static position monster_move_wander(monster *m, struct player *p __attribute__((
 
 static position monster_move_attack(monster *m, struct player *p)
 {
-    /* path to player */
-    map_path *path = NULL;
-    map_path_element *el = NULL;
-
     position npos = monster_pos(m);
 
     /* monster is standing next to player */
@@ -3231,27 +3286,12 @@ static position monster_move_attack(monster *m, struct player *p)
         return monster_pos(m);
     }
 
-    /* monster heads into the direction of the player. */
-    path = map_find_path(monster_map(m), monster_pos(m), m->player_pos,
-                         monster_map_element(m));
+    npos = monster_find_next_pos_to(m, m->player_pos);
 
-    if (path && !g_queue_is_empty(path->path))
-    {
-        el = g_queue_pop_head(path->path);
-        npos = el->pos;
-    }
-    else
-    {
-        /* No path found. Stop following player */
-        m->lastseen = 0;
-    }
-
-    /* clean up */
-    if (path)
-        map_path_destroy(path);
+    /* No path found. Stop following player */
+    if (!pos_valid(npos)) m->lastseen = 0;
 
     return npos;
-
 }
 
 static position monster_move_confused(monster *m,
@@ -3307,18 +3347,7 @@ static position monster_move_serve(monster *m, struct player *p)
     /* a good servant always knows the masters position */
     if (pos_distance(monster_pos(m), p->pos) > 5)
     {
-        /* if the distance to the player is too large, follow */
-        map_path *path = map_find_path(monster_map(m), monster_pos(m), p->pos,
-                                       monster_map_element(m));
-
-        if (path && !g_queue_is_empty(path->path))
-        {
-            map_path_element *pe = g_queue_pop_head(path->path);
-            npos = pe->pos;
-        }
-
-        if (path != NULL)
-            map_path_destroy(path);
+        npos = monster_find_next_pos_to(m, p->pos);
     }
     else
     {
@@ -3361,29 +3390,16 @@ static position monster_move_civilian(monster *m, struct player *p)
     else if (pos_valid(m->player_pos) && !pos_identical(m->pos, m->player_pos))
     {
         /* travel to the selected location */
-        map_path *path = map_find_path(monster_map(m), m->pos, m->player_pos, LE_GROUND);
+        npos = monster_find_next_pos_to(m, m->player_pos);
 
-        if (path && !g_queue_is_empty(path->path))
+        if (pos_identical(npos, m->player_pos))
         {
-            map_path_element *pe = g_queue_pop_head(path->path);
-            npos = pe->pos;
-
-            if (pos_identical(npos, m->player_pos))
-            {
-                /* the new position is identical to the target, thus reset
-                   the lastseen counter */
-                m->lastseen = 1;
-            }
+            /* arrived at target, thus reset the lastseen counter */
+            m->lastseen = 1;
         }
-
-        if (path != NULL)
+        else if (pos_identical(npos, monster_pos(m)))
         {
-            /* clean up */
-            map_path_destroy(path);
-        }
-        else
-        {
-            /* it seems that there is no path to the target, thus get a new one */
+            /* it seems there is no path to the target, thus get a new one */
             m->player_pos = pos_invalid;
         }
     }

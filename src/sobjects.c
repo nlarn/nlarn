@@ -1015,7 +1015,7 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
         log_add_entry(nlarn->log, "A flood of water gushes forth!");
         flood_affect_area(pos, 3 + rand_0n(2), LT_WATER, 0);
         if (pos_valid(mpos))
-            monster_new(MT_WATER_LORD, mpos);
+            monster_new(MT_WATER_LORD, mpos, NULL);
         break;
 
     case LS_STATUE:
@@ -1033,7 +1033,7 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
     case LS_THRONE:
     case LS_THRONE2:
         if (pos_valid(mpos))
-            monster_new(MT_GNOME_KING, mpos);
+            monster_new(MT_GNOME_KING, mpos, NULL);
 
         desc = "throne";
         break;
@@ -1075,7 +1075,7 @@ static void monster_appear(monster_t type, position mpos)
     }
     else
     {
-        m = monster_new(type, mpos);
+        m = monster_new(type, mpos, NULL);
     }
 
     if (m && monster_in_sight(m))
