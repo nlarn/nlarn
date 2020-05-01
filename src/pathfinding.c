@@ -35,20 +35,15 @@ path *path_find(map *m, position start, position goal, map_element_t element)
 {
     g_assert(m != NULL);
 
-    path *pt;
-    path_element *curr, *next;
-    gboolean next_is_better;
-
     /* if the starting position is on another map, fail for now */
     /* TODO: could be changed to support 3D path finding */
     if (Z(start) != Z(goal))
         return NULL;
 
-    pt = path_new(start, goal);
+    path *pt = path_new(start, goal);
 
     /* add start to open list */
-    curr = path_element_new(start);
-    curr->g_score = 0; /* no distance yet */
+    path_element *curr = path_element_new(start);
     g_ptr_array_add(pt->open, curr);
 
     /* check if the path is being determined for the player */
@@ -63,9 +58,7 @@ path *path_find(map *m, position start, position goal, map_element_t element)
 
         if (pos_identical(curr->pos, pt->goal))
         {
-            /* arrived at goal */
-
-            /* reconstruct path */
+            /* arrived at goal - reconstruct path */
             do
             {
                 /* don't need the starting point in the path */
@@ -83,10 +76,10 @@ path *path_find(map *m, position start, position goal, map_element_t element)
 
         while (neighbours->len)
         {
-            next = g_ptr_array_remove_index_fast(neighbours,
-                                                 neighbours->len - 1);
+            path_element *next = g_ptr_array_remove_index_fast(neighbours,
+                                                neighbours->len - 1);
 
-            next_is_better = FALSE;
+            gboolean next_is_better = FALSE;
 
             if (path_element_in_list(next, pt->closed))
             {
@@ -94,8 +87,7 @@ path *path_find(map *m, position start, position goal, map_element_t element)
                 continue;
             }
 
-            const guint32 next_g_score =
-                curr->g_score
+            const guint32 next_g_score = curr->g_score
                 + path_step_cost(m, next, element, ppath);
 
             if (!path_element_in_list(next, pt->open))
@@ -137,26 +129,21 @@ void path_destroy(path *pt)
     {
         g_free(g_ptr_array_index(pt->open, idx));
     }
-
     g_ptr_array_free(pt->open, TRUE);
 
     for (guint idx = 0; idx < pt->closed->len; idx++)
     {
         g_free(g_ptr_array_index(pt->closed, idx));
     }
-
     g_ptr_array_free(pt->closed, TRUE);
 
     g_queue_free(pt->path);
-
     g_free(pt);
 }
 
 static path *path_new(position start, position goal)
 {
-    path *pt;
-
-    pt = g_malloc0(sizeof(path));
+    path *pt = g_malloc0(sizeof(path));
 
     pt->open   = g_ptr_array_new();
     pt->closed = g_ptr_array_new();
@@ -170,9 +157,7 @@ static path *path_new(position start, position goal)
 
 static path_element *path_element_new(position pos)
 {
-    path_element *lpe;
-
-    lpe = g_malloc0(sizeof(path_element));
+    path_element *lpe = g_malloc0(sizeof(path_element));
     lpe->pos = pos;
 
     return lpe;
@@ -184,9 +169,6 @@ static int path_step_cost(map *m, path_element* element,
 {
     map_tile_t tt;
     guint32 step_cost = 1; /* at least 1 movement cost */
-
-    /* get the monster located on the map tile */
-    monster *mon = map_get_monster_at(m, element->pos);
 
     /* get the tile type of the map tile */
     if (ppath)
@@ -211,6 +193,7 @@ static int path_step_cost(map *m, path_element* element,
 
     /* penalize fields occupied by monsters: always for monsters,
        for the player only if (s)he can see the monster */
+    monster *mon = map_get_monster_at(m, element->pos);
     if (mon != NULL && (!ppath || monster_in_sight(mon)))
     {
         step_cost += 10;
@@ -244,8 +227,7 @@ static int path_cost(path_element* element, position target)
     return element->g_score + element->h_score;
 }
 
-static path_element *path_element_in_list(path_element* el,
-                                          GPtrArray *list)
+static path_element *path_element_in_list(path_element* el, GPtrArray *list)
 {
     g_assert(el != NULL && list != NULL);
 
@@ -262,11 +244,11 @@ static path_element *path_element_in_list(path_element* el,
 
 static path_element *path_find_best(path *pt)
 {
-    path_element *el, *best = NULL;
+    path_element *best = NULL;
 
     for (guint idx = 0; idx < pt->open->len; idx++)
     {
-        el = g_ptr_array_index(pt->open, idx);
+        path_element *el = g_ptr_array_index(pt->open, idx);
 
         if (best == NULL || path_cost(el, pt->goal)
                 < path_cost(best, pt->goal))

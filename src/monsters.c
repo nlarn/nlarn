@@ -3383,8 +3383,7 @@ static position monster_move_civilian(monster *m, struct player *p)
         {
             /* Ensure that the townsfolk do not loiter in locations
                important for the player. */
-            m->player_pos = map_find_space_in(monster_map(m), town,
-                    LE_GROUND, FALSE);
+            m->player_pos = map_find_space_in(monster_map(m), town, LE_GROUND, FALSE);
         } while (map_sobject_at(monster_map(m), m->player_pos) != LS_NONE);
     }
 
