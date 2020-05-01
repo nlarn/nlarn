@@ -3232,17 +3232,11 @@ static position monster_move_attack(monster *m, struct player *p)
     /* monster is standing next to player */
     if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
     {
-        /* We need to store the monster's name here, otherwise it would
-           always be 'unseen monster' for monsters that teleport away. */
-        const char *mname = monster_get_name(m);
-
         monster_player_attack(m, p);
 
         /* monster's position might have changed (teleport) */
         if (!pos_identical(npos, monster_pos(m)))
-        {
-            log_add_entry(nlarn->log, "The %s vanishes.", mname);
-        }
+            log_add_entry(nlarn->log, "The %s vanishes.", monster_name(m));
 
         return monster_pos(m);
     }
