@@ -1083,6 +1083,9 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     if (m->number)
         cJSON_AddNumberToObject(mval, "number", m->number);
 
+    if (m->leader)
+        cJSON_AddNumberToObject(mval, "leader", GPOINTER_TO_UINT(m->leader));
+
     if (m->unknown)
         cJSON_AddTrueToObject(mval, "unknown");
 
@@ -1125,6 +1128,12 @@ void monster_deserialize(cJSON *mser, game *g)
 
     if ((obj = cJSON_GetObjectItem(mser, "number")))
         m->number = obj->valueint;
+
+    if ((obj = cJSON_GetObjectItem(mser, "leader")))
+    {
+        guint leader = obj->valueint;
+        m->leader = GUINT_TO_POINTER(leader);
+    }
 
     if ((obj = cJSON_GetObjectItem(mser, "unknown")))
         m->unknown = obj->valueint;
