@@ -3181,6 +3181,9 @@ static char *monster_get_fortune(const char *fortune_file)
 
 static position monster_find_next_pos_to(monster *m, position dest)
 {
+    g_assert(m != NULL);
+    g_assert(pos_valid(dest));
+
     /* next position */
     position npos = monster_pos(m);
 

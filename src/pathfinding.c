@@ -34,6 +34,9 @@ static GPtrArray *path_get_neighbours(map *m, position pos,
 path *path_find(map *m, position start, position goal, map_element_t element)
 {
     g_assert(m != NULL);
+    g_assert(pos_valid(start));
+    g_assert(pos_valid(goal));
+    g_assert(element < LE_MAX);
 
     /* if the starting position is on another map, fail for now */
     /* TODO: could be changed to support 3D path finding */
@@ -143,6 +146,9 @@ void path_destroy(path *pt)
 
 static path *path_new(position start, position goal)
 {
+    g_assert(pos_valid(start));
+    g_assert(pos_valid(goal));
+
     path *pt = g_malloc0(sizeof(path));
 
     pt->open   = g_ptr_array_new();
@@ -157,6 +163,8 @@ static path *path_new(position start, position goal)
 
 static path_element *path_element_new(position pos)
 {
+    g_assert(pos_valid(pos));
+
     path_element *lpe = g_malloc0(sizeof(path_element));
     lpe->pos = pos;
 
