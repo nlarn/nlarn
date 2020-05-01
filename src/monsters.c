@@ -27,6 +27,7 @@
 #include "map.h"
 #include "monsters.h"
 #include "nlarn.h"
+#include "pathfinding.h"
 #include "random.h"
 
 DEFINE_ENUM(monster_flag, MONSTER_FLAG_ENUM)
@@ -3184,17 +3185,17 @@ static position monster_find_next_pos_to(monster *m, position dest)
     position npos = monster_pos(m);
 
     /* find the next step in the direction of dest */
-    map_path *path = map_find_path(monster_map(m), monster_pos(m), dest,
-                                    monster_map_element(m));
+    path *path = path_find(monster_map(m), monster_pos(m), dest,
+                           monster_map_element(m));
 
     if (path && !g_queue_is_empty(path->path))
     {
-        map_path_element *el = g_queue_pop_head(path->path);
+        path_element *el = g_queue_pop_head(path->path);
         npos = el->pos;
     }
 
     /* clean up */
-    if (path)  map_path_destroy(path);
+    if (path) path_destroy(path);
 
     return npos;
 }

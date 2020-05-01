@@ -41,6 +41,7 @@
 #include "display.h"
 #include "game.h"
 #include "nlarn.h"
+#include "pathfinding.h"
 #include "player.h"
 #include "scoreboard.h"
 #include "sobjects.h"
@@ -345,13 +346,13 @@ static void mainloop()
             else
             {
                 /* find a path to the destination */
-                map_path *path = map_find_path(game_map(nlarn, Z(nlarn->p->pos)),
-                                               nlarn->p->pos, pos, LE_GROUND);
+                path *path = path_find(game_map(nlarn, Z(nlarn->p->pos)),
+                                       nlarn->p->pos, pos, LE_GROUND);
 
                 if (path && !g_queue_is_empty(path->path))
                 {
                     /* Path found. Move the player. */
-                    map_path_element *el = g_queue_pop_head(path->path);
+                    path_element *el = g_queue_pop_head(path->path);
                     moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, el->pos), TRUE);
 
                     if (moves_count == 0)
@@ -368,7 +369,7 @@ static void mainloop()
                 }
 
                 /* clean up */
-                if (path) map_path_destroy(path);
+                if (path) path_destroy(path);
             }
         }
         else if (run_cmd != 0)

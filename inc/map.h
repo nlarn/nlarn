@@ -102,24 +102,6 @@ typedef struct map
     map_tile grid[MAP_MAX_Y][MAP_MAX_X];  /* the map */
 } map;
 
-/* Structure for path elements */
-typedef struct map_path_element
-{
-    position pos;
-    guint32 g_score;
-    guint32 h_score;
-    struct map_path_element* parent;
-} map_path_element;
-
-typedef struct map_path
-{
-    GQueue *path;
-    GPtrArray *closed;
-    GPtrArray *open;
-    position start;
-    position goal;
-} map_path;
-
 /* callback function for trajectories */
 typedef gboolean (*trajectory_hit_sth)(const GList *trajectory,
         const damage_originator *damo,
@@ -162,25 +144,6 @@ int *map_get_surrounding(map *m, position pos, sobject_t type);
  * @return TRUE or FALSE
  */
 int map_pos_is_visible(map *m, position source, position target);
-
-/**
- * @brief Find a path between two positions
- *
- * @param the map to work on
- * @param the starting position
- * @param the destination
- * @param the map_element_t that can be travelled
- * @return a path or NULL if none could be found
- */
-map_path *map_find_path(map *m, position start, position goal,
-                        map_element_t element);
-
-/**
- * @brief Free memory allocated for a given map path.
- *
- * @param a map path returned by <map_find_path>"()"
- */
-void map_path_destroy(map_path *path);
 
 /**
  * Return a linked list with every position between two points.
