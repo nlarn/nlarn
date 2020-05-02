@@ -2563,8 +2563,8 @@ char *monster_desc(monster *m)
     {
         /* show monster's hp and max hp in wizard mode */
         g_string_append_printf(desc, " %s(%d/%d hp)",
-			m->leader ? "(pack member) " : "",
-			m->hp, m->hp_max);
+            m->leader ? "(pack member) " : "",
+            m->hp, m->hp_max);
     }
 
     if (m->eq_weapon != NULL)
