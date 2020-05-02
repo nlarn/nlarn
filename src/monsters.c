@@ -1231,8 +1231,8 @@ int monster_valid_dest(map *m, position pos, int map_elem)
         return (map_elem == LE_FLYING_MONSTER);
 
     default:
-        /* the map tile must be passable and there must be no monster on it*/
-        return (map_pos_passable(m, pos) && !map_is_monster_at(m, pos));
+        /* the map tile must be passable */
+        return map_pos_passable(m, pos);
     }
 }
 
