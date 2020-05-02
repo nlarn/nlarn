@@ -3406,9 +3406,10 @@ static position monster_move_civilian(monster *m, struct player *p)
             /* arrived at target, thus reset the lastseen counter */
             m->lastseen = 1;
         }
-        else if (pos_identical(npos, monster_pos(m)))
+        else if (pos_identical(npos, monster_pos(m)) || map_is_monster_at(monster_map(m), npos))
         {
-            /* it seems there is no path to the target, thus get a new one */
+            /* it seems there is no path to the target, or the destianation
+               is blocked by another townsperson, thus get a new destination */
             m->player_pos = pos_invalid;
         }
     }
