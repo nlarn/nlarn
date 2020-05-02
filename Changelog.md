@@ -2,6 +2,7 @@
 
 ### Changes:
 * Some monsters now appear in packs (e.g. osquips and rothes)
+* Some monsters produce sounds when attacking
 * Consistently call the currency "gold"
 * Consistently show monastery messages as windows
 * Sort stats in obituary matching to order on main screen

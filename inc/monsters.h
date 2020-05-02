@@ -285,6 +285,7 @@ int monster_exp(monster *m);
 int monster_size(monster *m);
 int monster_speed(monster *m);
 int monster_flags(monster *m, monster_flag f);
+const char *monster_sound(monster *m);
 
 #define monster_map(M)      game_map(nlarn, Z(monster_pos(M)))
 

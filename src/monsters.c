@@ -52,6 +52,7 @@ typedef struct {
     int flags;
     attack attacks[2];
     monster_action_t default_ai;
+    const char *sound;
 } monster_data_t;
 
 /* monster information hiding */
@@ -156,7 +157,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD,
         .attacks = {
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-        }, .default_ai = MA_WANDER
+        }, .default_ai = MA_WANDER, .sound = "growl"
     },
     { /* MT_KOBOLD */
         .name = "kobold", .glyph = 'k', .colour = BROWN,
@@ -174,7 +175,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION | PACK,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }, .default_ai = MA_WANDER
+        }, .default_ai = MA_WANDER, .sound = "shout"
     },
     { /* MT_SNAKE */
         .name = "snake", .glyph = 'S', .colour = LIGHTGREEN,
@@ -184,7 +185,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
             { .type = ATT_BITE, .base = 2, .damage = DAM_POISON },
-        }, .default_ai = MA_WANDER
+        }, .default_ai = MA_WANDER, .sound = "hiss"
     },
     { /* MT_CENTIPEDE */
         .name = "giant centipede", .glyph = 'c', .colour = YELLOW,
@@ -281,7 +282,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
-        }, .default_ai = MA_WANDER
+        }, .default_ai = MA_WANDER, .sound = "groan"
     },
     { /* MT_ASSASSIN_BUG */
         .name = "assassin bug", .glyph = 'a', .colour = GREEN,
@@ -311,7 +312,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_BREATH, .base = 8, .damage = DAM_FIRE, .rand = 15 },
-        }, .default_ai = MA_WANDER
+        }, .default_ai = MA_WANDER, .sound = "bark"
     },
     { /* MT_ICE_LIZARD */
         .name = "ice lizard", .glyph = 'i', .colour = LIGHTCYAN,
@@ -341,7 +342,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 5, .damage = DAM_PHYSICAL },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }, .default_ai = MA_WANDER
+        }, .default_ai = MA_WANDER, .sound = "grunt"
     },
     { /* MT_YETI */
         .name = "yeti", .glyph = 'Y', .colour = WHITE,
@@ -500,7 +501,7 @@ monster_data_t monster_data[] = {
         .flags = FLY | UNDEAD | INVISIBLE | RES_SLEEP | RES_POISON,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }, .default_ai = MA_WANDER
+        }, .default_ai = MA_WANDER, .sound = "laugh"
     },
     { /* MT_DISENCHANTRESS */
         .name = "disenchantress", .plural_name = "disenchantresses", .glyph = 'q', .colour = WHITE,
@@ -1629,14 +1630,12 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             /* the monster has chosen a new action and the player
                can see the new action, so let's describe it */
 
-            if (m->action == MA_ATTACK)
+            if (m->action == MA_ATTACK && monster_sound(m))
             {
-                /* TODO: certain monster types will make a sound when attacking the player */
-                /*
-                log_add_entry(g->log,
-                              "The %s has spotted you and heads towards you!",
-                              monster_name(m));
-                 */
+                const char *sound = monster_sound(m);
+                log_add_entry(g->log, "The %s %s%ss!",
+                              monster_name(m), sound,
+                              sound[strlen(sound) - 1] == 's' ? "e": "");
             }
             else if (m->action == MA_FLEE)
             {
@@ -3499,6 +3498,10 @@ inline int monster_speed(monster *m)
 inline int monster_flags(monster *m, monster_flag f)
 {
     return monster_data[m->type].flags & f;
+}
+
+inline const char *monster_sound(monster *m) {
+    return monster_data[m->type].sound;
 }
 
 inline int monster_type_hp_max(monster_t type)
