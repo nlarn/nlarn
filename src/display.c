@@ -2415,7 +2415,7 @@ position display_get_new_position(player *p,
 
                         if ((m = map_get_monster_at(vmap, cursor)) && monster_in_sight(m))
                         {
-                            aaddch(RED, monster_glyph(m));
+                            aaddch(monster_color(m) == RED ? LIGHTRED : RED, monster_glyph(m));
                         }
                         else if (pos_identical(p->pos, cursor))
                         {
@@ -2635,6 +2635,12 @@ position display_get_new_position(player *p,
                     g_list_free(r);
                     r = NULL;
                 }
+            }
+
+            if (ball)
+            {
+                /* check bounds of the ball */
+                if (!map_pos_passable(vmap, npos)) npos = pos;
             }
 
             /* new position is within bounds and visible */

@@ -13,7 +13,10 @@
 * Fix macOS application bundle
 * Handle empty scoreboard correctly
 * Show undefined gender correctly in configuration dialogue
-* Fix casting fireball in topmost corridor
+* Several fixes to casting fireballs:
+  * now works in the topmost corridor
+  * selecting the location only allows valid selections
+  * red monsters are shown as light red when they'll be hit.
 * Keep townsfolk inside the town area
 * Fix debit message
 
