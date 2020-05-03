@@ -1,6 +1,6 @@
 /*
  * player.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -32,6 +32,8 @@
 #include "random.h"
 #include "scoreboard.h"
 #include "sobjects.h"
+
+const char *player_sex_str[] = {"not defined", "male", "female"};
 
 static const char aa1[] = "mighty evil master";
 static const char aa2[] = "apprentice demi-god";
@@ -117,7 +119,7 @@ static void player_sobject_memorize(player *p, sobject_t sobject, position pos);
 static int player_sobjects_sort(gconstpointer a, gconstpointer b);
 static cJSON *player_memory_serialize(player *p, position pos);
 static void player_memory_deserialize(player *p, position pos, cJSON *mser);
-static char *player_equipment_list(player *p, gboolean decorate);
+static char *player_equipment_list(player *p);
 static char *player_create_obituary(player *p, score_t *score, GList *scores);
 static void player_memorial_file_save(player *p, const char *text);
 static int item_filter_equippable(item *it);
@@ -195,12 +197,13 @@ const char *player_bonus_stat_desc[] = {
 char player_select_bonus_stats()
 {
     int selection = 0;
-    GString *text = g_string_new(NULL);
+    GString *text = g_string_new("\n");
     for (int idx = preset_min; idx <=  preset_max; idx++)
     {
         g_string_append_printf(text, "  `lightgreen`%c`end`) %s\n",
                 idx, player_bonus_stat_desc[idx - preset_min]);
     }
+     g_string_append_c(text, '\n');
 
     while (selection < preset_min || selection > preset_max)
     {
@@ -757,7 +760,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
     guint idx = 0;
-    g_autofree char *question = NULL, *description = NULL, *popup_desc = NULL;
+    g_autofree char *description = NULL, *popup_desc = NULL;
 
     g_assert(p != NULL);
 
@@ -778,12 +781,6 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
         va_start(argp, desc);
         description = g_strdup_vprintf(desc, argp);
         va_end(argp);
-
-        question = g_strdup_printf("Do you want to continue %s?", description);
-    }
-    else
-    {
-        question = g_strdup("Do you want to continue?");
     }
 
     display_window *pop = NULL;
@@ -854,9 +851,9 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                     {
                         gboolean interrupt_actions = TRUE;
                         if (e->type == ET_WALL_WALK)
-                            log_add_entry(nlarn->log, "Your attunement to the walls is fading!");
+                            log_add_entry(nlarn->log, "`lightred`Your attunement to the walls is fading!`end`");
                         else if (e->type == ET_LEVITATION)
-                            log_add_entry(nlarn->log, "You are starting to drift towards the ground!");
+                            log_add_entry(nlarn->log, "`lightred`You are starting to drift towards the ground!`end`");
                         else
                             interrupt_actions = FALSE;
 
@@ -912,7 +909,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 {
                     item *it = p->eq_weapon;
                     player_item_unequip(p, NULL, it, TRUE);
-                    log_add_entry(nlarn->log, "You are unable to hold your weapon.");
+                    log_add_entry(nlarn->log, "`lightmagenta`You are unable to hold your weapon.`end`");
                     player_item_drop(p, &p->inventory, it);
                 }
             }
@@ -929,7 +926,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                     /* deference the item at the selected armour slot */
                     item *armour = *aslot;
 
-                    log_add_entry(nlarn->log, "The hysteria of itching forces you to remove your armour!");
+                    log_add_entry(nlarn->log, "`lightmagenta`The hysteria of itching forces you to remove your armour!`end`");
                     player_item_unequip(p, &p->inventory, armour, TRUE);
                     player_item_drop(p, &p->inventory, armour);
                 }
@@ -949,6 +946,10 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
                 /* offer to abort the action if the player is under attack */
                 if (p->attacked && interruptible)
                 {
+                    g_autofree char *question = description
+                        ? g_strdup_printf("Do you want to continue %s?", description)
+                        : g_strdup("Do you want to continue?");
+
                     if (!display_get_yesno(question, NULL, NULL, NULL))
                     {
                         /* user chose to abort the current action */
@@ -1006,7 +1007,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     /* check for life protection */
     if ((cause_type < PD_STUCK) && (ef = player_effect_get(p, ET_LIFE_PROTECTION)))
     {
-        log_add_entry(nlarn->log, "You feel wiiieeeeerrrrrd all over!");
+        log_add_entry(nlarn->log, "`lightcyan`You feel wiiieeeeerrrrrd all over!`end`");
 
         if (ef->amount > 1)
         {
@@ -1170,9 +1171,11 @@ void player_die(player *p, player_cod cause_type, int cause)
     }
 
     game_delete_savefile();
-    game_destroy(nlarn);
+    nlarn = game_destroy(nlarn);
 
-    exit(EXIT_SUCCESS);
+    /* JUMP JUMP Everybody JUMP!
+       Restart game and return to the main menu */
+    longjmp(nlarn_death_jump, cause_type);
 }
 
 guint64 player_calc_score(player *p, int won)
@@ -1352,10 +1355,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     }
 
     /* auto-pickup */
-    if (map_ilist_at(pmap, p->pos) && !player_effect_get(p, ET_BLINDNESS))
-    {
-        player_autopickup(p);
-    }
+    player_autopickup(p);
 
     /* mention stationary objects at this position */
     if ((so = map_sobject_at(pmap, p->pos)) && !player_effect(p, ET_BLINDNESS))
@@ -1526,7 +1526,7 @@ int player_attack(player *p, monster *m)
         /* The weapon may break during usage */
         if (p->eq_weapon && chance(item_fragility(p->eq_weapon)))
         {
-            log_add_entry(nlarn->log, "Your %s breaks!",
+            log_add_entry(nlarn->log, "`lightmagenta`Your %s breaks!`end`",
                           weapon_name(p->eq_weapon));
 
             item *weapon = p->eq_weapon;
@@ -1612,18 +1612,18 @@ int player_map_enter(player *p, map *l, gboolean teleported)
         p->pos = map_find_sobject(l, LS_HOME);
 
     /* took the elevator down */
-    else if ((Z(p->pos) == 0) && (l->nlevel == (MAP_DMAX)))
+    else if ((Z(p->pos) == 0) && (l->nlevel == (MAP_CMAX)))
         p->pos = map_find_sobject(l, LS_ELEVATORUP);
 
     /* took the elevator up */
-    else if ((Z(p->pos) == (MAP_DMAX)) && (l->nlevel == 0))
+    else if ((Z(p->pos) == (MAP_CMAX)) && (l->nlevel == 0))
         p->pos = map_find_sobject(l, LS_ELEVATORDOWN);
 
     /* climbing up */
     else if (Z(p->pos) > l->nlevel)
     {
         if (l->nlevel == 0)
-            p->pos = map_find_sobject(l, LS_DNGN_ENTRANCE);
+            p->pos = map_find_sobject(l, LS_CAVERNS_ENTRY);
         else
             p->pos = map_find_sobject(l, LS_STAIRSDOWN);
     }
@@ -1631,7 +1631,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     else if (l->nlevel > Z(p->pos))
     {
         if (l->nlevel == 1)
-            p->pos = map_find_sobject(l, LS_DNGN_EXIT);
+            p->pos = map_find_sobject(l, LS_CAVERNS_EXIT);
         else
             p->pos = map_find_sobject(l, LS_STAIRSUP);
     }
@@ -1759,71 +1759,57 @@ void player_pickup(player *p)
     }
 }
 
+static int filter_item_noautopickup(item *i)
+{
+    return !(nlarn->p->settings.auto_pickup[i->type] || i->fired);
+}
+
 static void player_autopickup(player *p)
 {
-    inventory **floor;
-    int other_items_count = 0;
-    int other_item_id     = -1;
-    gboolean did_pickup   = FALSE;
-
     g_assert (p != NULL && map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos));
+
 
     /* if the player is floating above the ground auto-pickup does not work.. */
     if (player_effect(p, ET_LEVITATION))
         return;
 
-    floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
+    /* if the player is blinded, don't do anything */
+    if(player_effect_get(p, ET_BLINDNESS))
+        return;
+
+    inventory **floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     for (guint idx = 0; idx < inv_length(*floor); idx++)
     {
+        guint count_orig = inv_length(*floor);
         item *i = inv_get(*floor, idx);
 
-        if (p->settings.auto_pickup[i->type] || i->fired)
+        /* the given item is not configured for auto-pickup */
+        if (filter_item_noautopickup(i)) continue;
+
+        /* try to pick up the item */
+        if (1 == player_item_pickup(p, floor, i, FALSE))
         {
-            /* item type is set to be picked up */
-            guint retval;
-            guint count_orig = inv_length(*floor);
-
-            /* try to pick up the item */
-            retval = player_item_pickup(p, floor, i, FALSE);
-
-            if (retval == 1)
-                /* pickup has been cancelled by the player */
-                return;
-
-            if (count_orig != inv_length(*floor))
-            {
-                /* item has been picked up */
-                /* go back one item as the following items lowered their number */
-                idx--;
-                did_pickup = TRUE;
-            }
+            /* pickup has been cancelled by the player */
+            return;
         }
-        else
+
+        if (count_orig != inv_length(*floor))
         {
-            if (++other_items_count == 1)
-                other_item_id = idx;
+            /* item has been picked up */
+            /* go back one item as the following items lowered their number */
+            idx--;
         }
     }
 
-    if (did_pickup && other_items_count > 0)
+    /* If there are some items on the floor which are not configured for
+       autopickup, describe them. We cannot simply describe all remaining
+       items, as some may be configured for autopickup, but too heavy to
+       carry. Those would result in duplicate messages. */
+    if (inv_length_filtered(*floor, filter_item_noautopickup))
     {
-        if (other_items_count == 1)
-        {
-            item *it = inv_get(*floor, other_item_id);
-            gchar *it_desc = item_describe(it, player_item_known(nlarn->p, it),
-                                           FALSE, FALSE);
-
-            log_add_entry(nlarn->log, "There %s %s here.",
-                          is_are(it->count), it_desc);
-
-            g_free(it_desc);
-        }
-        else
-        {
-            log_add_entry(nlarn->log, "There are %d more items here.",
-                          other_items_count);
-        }
+        log_add_entry(nlarn->log, map_inv_description(
+            game_map(nlarn, Z(p->pos)), p->pos, "here", filter_item_noautopickup));
     }
 }
 
@@ -1845,12 +1831,12 @@ void player_level_gain(player *p, int count)
 
     if (g_strcmp0(desc_orig, desc_new) != 0)
     {
-        log_add_entry(nlarn->log, "You gain experience and become %s %s!",
+        log_add_entry(nlarn->log, "`lightgreen`You gain experience and become %s %s!`end`",
                       a_an(desc_new), desc_new);
     }
     else
     {
-        log_add_entry(nlarn->log, "You gain experience!");
+        log_add_entry(nlarn->log, "`lightgreen`You gain experience!`end`");
     }
 
     if (p->level > p->stats.max_level)
@@ -1885,7 +1871,7 @@ void player_level_lose(player *p, int count)
     g_assert(p != NULL && count > 0);
 
     p->level -= count;
-    log_add_entry(nlarn->log, "You return to experience level %d...", p->level);
+    log_add_entry(nlarn->log, "`lightred`You return to experience level %d...`end`", p->level);
 
     /* die if lost level 1 */
     if (p->level == 0) player_die(p, PD_LASTLEVEL, 0);
@@ -2015,20 +2001,27 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     hp_orig = p->hp;
     effects_count = p->effects->len;
 
+    /* keep damage type and amount for subsequent usage, but free the damage
+       object itself - when the player dies, the object will be leaked */
+    damage_t damage_type = dam->type;
+    gint damage_amount = dam->amount;
+    g_free(dam);
+
+
     /* check resistances */
-    switch (dam->type)
+    switch (damage_type)
     {
     case DAM_PHYSICAL:
-        if (dam->amount > (gint)player_get_ac(p))
+        if (damage_amount > (gint)player_get_ac(p))
         {
-            dam->amount -= player_get_ac(p);
+            damage_amount -= player_get_ac(p);
 
-            if (dam->amount >= 8 && dam->amount >= (gint)p->hp_max/4)
-                log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
-            else if (dam->amount >= (gint)p->hp_max/10)
-                log_add_entry(nlarn->log, "Ouch!");
+            if (damage_amount >= 8 && damage_amount >= (gint)p->hp_max/4)
+                log_add_entry(nlarn->log, "`lightred`Ouch, that REALLY hurt!`end`");
+            else if (damage_amount >= (gint)p->hp_max/10)
+                log_add_entry(nlarn->log, "`lightred`Ouch!`end`");
 
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2037,16 +2030,16 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_MAGICAL:
-        if (dam->amount > (gint)(guint)player_effect(p, ET_RESIST_MAGIC))
+        if (damage_amount > (gint)(guint)player_effect(p, ET_RESIST_MAGIC))
         {
-            dam->amount -= player_effect(p, ET_RESIST_MAGIC);
+            damage_amount -= player_effect(p, ET_RESIST_MAGIC);
 
-            if (dam->amount >= 8 && dam->amount >= (gint)p->hp_max/4)
-                log_add_entry(nlarn->log, "Ouch, that REALLY hurt!");
-            else if (dam->amount >= (gint)p->hp_max/10)
-                log_add_entry(nlarn->log, "Ouch!");
+            if (damage_amount >= 8 && damage_amount >= (gint)p->hp_max/4)
+                log_add_entry(nlarn->log, "`lightred`Ouch, that REALLY hurt!`end`");
+            else if (damage_amount >= (gint)p->hp_max/10)
+                log_add_entry(nlarn->log, "`lightred`Ouch!`end`");
 
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2056,12 +2049,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_FIRE:
-        if (dam->amount > (gint)player_effect(p, ET_RESIST_FIRE))
+        if (damage_amount > (gint)player_effect(p, ET_RESIST_FIRE))
         {
-            dam->amount -= player_effect(p, ET_RESIST_FIRE);
+            damage_amount -= player_effect(p, ET_RESIST_FIRE);
 
             log_add_entry(nlarn->log, "You suffer burns.");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2070,12 +2063,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_COLD:
-        if (dam->amount > (gint)player_effect(p, ET_RESIST_COLD))
+        if (damage_amount > (gint)player_effect(p, ET_RESIST_COLD))
         {
-            dam->amount -= player_effect(p, ET_RESIST_COLD);
+            damage_amount -= player_effect(p, ET_RESIST_COLD);
 
             log_add_entry(nlarn->log, "You suffer from frostbite.");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2084,10 +2077,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_ACID:
-        if (dam->amount > 0)
+        if (damage_amount > 0)
         {
             log_add_entry(nlarn->log, "You are splashed with acid.");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2096,10 +2089,10 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_WATER:
-        if (dam->amount > 0)
+        if (damage_amount > 0)
         {
             log_add_entry(nlarn->log, "You experience near-drowning.");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2110,12 +2103,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_ELECTRICITY:
         /* double damage if levitating */
         if (player_effect(p, ET_LEVITATION))
-            dam->amount *= 2;
+            damage_amount *= 2;
 
-        if (dam->amount > 0)
+        if (damage_amount > 0)
         {
             log_add_entry(nlarn->log, "Zapp!");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
@@ -2129,12 +2122,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (cause_type != PD_EFFECT)
         {
             /* check resistance; prevent negative damage amount */
-            dam->amount = max(0, dam->amount - rand_0n(player_get_con(p)));
+            damage_amount = max(0, damage_amount - rand_0n(player_get_con(p)));
 
-            if (dam->amount > 0)
+            if (damage_amount > 0)
             {
                 e = effect_new(ET_POISON);
-                e->amount = dam->amount;
+                e->amount = damage_amount;
                 player_effect_add(p, e);
             }
             else
@@ -2146,12 +2139,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         {
             /* damage is caused by the effect of the poison effect () */
             log_add_entry(nlarn->log, "You feel poison running through your veins.");
-            player_hp_lose(p, dam->amount, cause_type, cause);
+            player_hp_lose(p, damage_amount, cause_type, cause);
         }
         break;
 
     case DAM_BLINDNESS:
-        if (chance(dam->amount))
+        if (chance(damage_amount))
         {
             player_effect_add(p, effect_new(ET_BLINDNESS));
         }
@@ -2164,7 +2157,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     case DAM_CONFUSION:
         /* check if the player succumbs to the monster's stare */
-        if (chance(dam->amount - player_get_int(p)))
+        if (chance(damage_amount - player_get_int(p)))
         {
             player_effect_add(p, effect_new(ET_CONFUSION));
         }
@@ -2177,7 +2170,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     case DAM_PARALYSIS:
         /* check if the player succumbs to the monster's stare */
-        if (chance(dam->amount - player_get_int(p)))
+        if (chance(damage_amount - player_get_int(p)))
         {
             player_effect_add(p, effect_new(ET_PARALYSIS));
         }
@@ -2194,15 +2187,15 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_DEC_STR:
     case DAM_DEC_WIS:
         if (!player_effect(p, ET_SUSTAINMENT)
-            && chance(dam->amount -= player_get_con(p)))
+            && chance(damage_amount -= player_get_con(p)))
         {
-            effect_t et = (ET_DEC_CON + dam->type - DAM_DEC_CON);
+            effect_t et = (ET_DEC_CON + damage_type - DAM_DEC_CON);
             e = effect_new(et);
             /* the default number of turns is 1 */
-            e->turns = dam->amount * 10;
+            e->turns = damage_amount * 10;
             (void)player_effect_add(p, e);
 
-            switch (dam->type)
+            switch (damage_type)
             {
             case DAM_DEC_CON:
                 if (player_get_con(p) < 1)
@@ -2244,14 +2237,14 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     case DAM_DRAIN_LIFE:
         if (player_effect(p, ET_UNDEAD_PROTECTION)
-                || !chance(dam->amount - player_get_wis(p)))
+                || !chance(damage_amount - player_get_wis(p)))
         {
             /* undead protection cancels drain life attacks */
             log_add_entry(nlarn->log, "You are not affected.");
         }
         else
         {
-            log_add_entry(nlarn->log, "Your life energy is drained.");
+            log_add_entry(nlarn->log, "`lightred`Your life energy is drained.`end`");
             player_level_lose(p, 1);
 
             /* this is the only attack that can not be caught by the test below */
@@ -2263,8 +2256,6 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         /* the other damage types are not handled here */
         break;
     }
-
-    g_free(dam);
 
     if (game_wizardmode(nlarn))
         log_add_entry(nlarn->log, "[applied: %d]", hp_orig - p->hp);
@@ -2863,7 +2854,7 @@ void player_inv_weight_recalc(inventory *inv, item *it __attribute__((unused)))
 
 void player_paperdoll(player *p)
 {
-    gchar *equipment = player_equipment_list(p, TRUE);
+    gchar *equipment = player_equipment_list(p);
 
     if (strlen(equipment) > 0)
         display_show_message("Worn equipment", equipment, 0);
@@ -3046,9 +3037,10 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
 
         /* capitalize first letter */
         desc[0] = g_ascii_toupper(desc[0]);
-        log_add_entry(nlarn->log, it->type == IT_WEAPON
-                ? "%s welds itself into your hand."
-                : "%s feels uncomfortably cold!", desc);
+        log_add_entry(nlarn->log, "`lightmagenta`%s %s`end`",
+            desc, it->type == IT_WEAPON
+                ? "welds itself into your hand."
+                : "feels uncomfortably cold!");
         it->blessed_known = TRUE;
         g_free(desc);
     }
@@ -3811,7 +3803,7 @@ void player_item_destroy(player *p, item *it)
         player_item_unequip(p, &p->inventory, it, TRUE);
     }
 
-    log_add_entry(nlarn->log, "%s %s destroyed!", desc, is_are(it->count));
+    log_add_entry(nlarn->log, "`lightmagenta`%s %s destroyed!`end`", desc, is_are(it->count));
 
     int count = 0;
     if (it->content)
@@ -3920,7 +3912,7 @@ void player_item_drop(player *p, inventory **inv, item *it)
 
             log_add_entry(nlarn->log, "%s %s surrounded by a %s halo.",
                           buf, is_are(it->count),
-                          it->cursed ? "black" : "white");
+                          it->cursed ? "`darkgray`black`end`" : "`white`white`end`");
 
             g_free(buf);
         }
@@ -4277,7 +4269,7 @@ void player_search(player *p)
             if (chance(prop))
             {
                 /* discovered the trap */
-                log_add_entry(nlarn->log, "You find a %s!",
+                log_add_entry(nlarn->log, "`lightmagenta`You find a %s!`end`",
                         trap_description(tt));
                  player_memory_of(p, pos).trap = tt;
             }
@@ -4299,7 +4291,7 @@ void player_search(player *p)
                     gchar *idesc = item_describe(c, FALSE, TRUE, TRUE);
                     /* the container is cursed */
                     c->blessed_known = TRUE;
-                    log_add_entry(nlarn->log, "You discover a trap on %s!",
+                    log_add_entry(nlarn->log, "`lightmagenta`You discover a trap on %s!`end`",
                             idesc);
 
                     g_free(idesc);
@@ -4805,7 +4797,7 @@ void calc_fighting_stats(player *p)
     for (guint32 idx = 0; idx < MT_TOWN_PERSON; idx++)
     {
         monster *m;
-        if (!(m = monster_new(idx, pos)))
+        if (!(m = monster_new(idx, pos, NULL)))
         {
             g_string_append_printf(text, "Monster %s could not be created.\n\n",
                                    monster_name(m));
@@ -4900,7 +4892,7 @@ void calc_fighting_stats(player *p)
     g_string_free(text, TRUE);
 }
 
-static char *player_equipment_list(player *p, gboolean decorate)
+static char *player_equipment_list(player *p)
 {
     int idx = 0;
     GString *el = g_string_new(NULL);
@@ -4938,9 +4930,8 @@ static char *player_equipment_list(player *p, gboolean decorate)
         char *desc = item_describe(slots[idx].slot, player_item_known(p,
                     slots[idx].slot), FALSE, FALSE);
 
-        g_string_append_printf(el, "%s%-12s%s %s\n",
-                decorate ? "`white`" : "", slots[idx].desc,
-                decorate ? "`end`" : "", desc);
+        g_string_append_printf(el, "`white`%-12s`end` %s\n",
+                    slots[idx].desc, desc);
 
         g_free(desc);
         idx++;
@@ -5005,7 +4996,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
                                int2time_str(p->stats.life_protected));
     }
 
-    g_string_append_printf(text, "\n%s had %s gp on %s bank account "
+    g_string_append_printf(text, "\n%s had %s gold on %s bank account "
                            "when %s %s.",
                            pronoun, int2str(p->bank_account),
                            (p->sex == PS_MALE) ? "his" : "her",
@@ -5013,7 +5004,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
                            score->cod < PD_TOO_LATE ? "died"
                            : "returned home");
 
-    g_string_append_printf(text, "\n%s found %d gold in the dungeon, "
+    g_string_append_printf(text, "\n%s found %d gold in the caverns, "
                            "sold %s gem%s for %d and %s non-gem "
                            "item%s for %d gold, and earned %d gold "
                            "as bank interest.",
@@ -5029,14 +5020,15 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     g_string_append_printf(text, "\n%s bought %s item%s for %d gold, spent "
                            "%d on item identification or repair, "
                            "donated %d gold to charitable causes, and "
-                           "invested %d gold in personal education.",
+                           "invested %d gold in %s personal education.",
                            pronoun,
                            int2str(p->stats.items_bought),
                            plural(p->stats.items_bought),
                            p->stats.gold_spent_shop,
                            p->stats.gold_spent_id_repair,
                            p->stats.gold_spent_donation,
-                           p->stats.gold_spent_college);
+                           p->stats.gold_spent_college,
+                           (p->sex == PS_MALE) ? "his" : "her");
 
     if (p->outstanding_taxes)
         g_string_append_printf(text, " %s owed the tax office %d gold%s",
@@ -5061,14 +5053,14 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     g_string_append(text, "\n\n-- Attributes -------------------------\n\n");
     g_string_append_printf(text, "Strength:     %d (%+2d)\n",
                            p->strength, p->strength - p->stats.str_orig);
+    g_string_append_printf(text, "Dexterity:    %d (%+2d)\n",
+                           p->dexterity, p->dexterity - p->stats.dex_orig);
+    g_string_append_printf(text, "Constitution: %d (%+2d)\n",
+                           p->constitution, p->constitution - p->stats.con_orig);
     g_string_append_printf(text, "Intelligence: %d (%+2d)\n",
                            p->intelligence, p->intelligence - p->stats.int_orig);
     g_string_append_printf(text, "Wisdom:       %d (%+2d)\n",
                            p->wisdom, p->wisdom - p->stats.wis_orig);
-    g_string_append_printf(text, "Constitution: %d (%+2d)\n",
-                           p->constitution, p->constitution - p->stats.con_orig);
-    g_string_append_printf(text, "Dexterity:    %d (%+2d)\n",
-                           p->dexterity, p->dexterity - p->stats.dex_orig);
 
     /* effects */
     char **effect_desc = player_effect_text(p);
@@ -5111,7 +5103,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     }
 
     /* equipped items */
-    gchar *el = player_equipment_list(p, FALSE);
+    gchar *el = player_equipment_list(p);
     guint equipment_count = 0;
 
     if (strlen(el) > 0)

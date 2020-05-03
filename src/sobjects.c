@@ -1,6 +1,6 @@
 /*
  * sobjects.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -45,8 +45,8 @@ const sobject_data sobjects[LS_MAX] =
     { LS_MIRROR,        '|',  WHITE,     "a mirror",                            1, 1, },
     { LS_OPENDOOR,      '/',  BROWN,     "an open door",                        1, 1, },
     { LS_CLOSEDDOOR,    '+',  BROWN,     "a closed door",                       0, 0, },
-    { LS_DNGN_ENTRANCE, 'O',  LIGHTGRAY, "the dungeon entrance",                1, 1, },
-    { LS_DNGN_EXIT,     'O',  WHITE,     "the exit to town",                    1, 1, },
+    { LS_CAVERNS_ENTRY, 'O',  LIGHTGRAY, "the entrance to the caverns",         1, 1, },
+    { LS_CAVERNS_EXIT,  'O',  WHITE,     "the exit to town",                    1, 1, },
     { LS_HOME,          'H',  LIGHTGRAY, "your home",                           1, 0, },
     { LS_DNDSTORE,      'D',  LIGHTGRAY, "a DND store",                         1, 0, },
     { LS_TRADEPOST,     'T',  LIGHTGRAY, "the Larn trading Post",               1, 0, },
@@ -771,10 +771,10 @@ int player_stairs_down(player *p)
     case LS_ELEVATORDOWN:
         /* first volcano map */
         show_msg = TRUE;
-        nlevel = game_map(nlarn, MAP_DMAX);
+        nlevel = game_map(nlarn, MAP_CMAX);
         break;
 
-    case LS_DNGN_ENTRANCE:
+    case LS_CAVERNS_ENTRY:
         if (Z(p->pos) == 0)
             nlevel = game_map(nlarn, 1);
         else
@@ -836,13 +836,13 @@ int player_stairs_up(player *p)
         break;
 
     case LS_ELEVATORUP:
-    case LS_DNGN_EXIT:
+    case LS_CAVERNS_EXIT:
         /* return to town */
         show_msg = TRUE;
         nlevel = game_map(nlarn, 0);
         break;
 
-    case LS_DNGN_ENTRANCE:
+    case LS_CAVERNS_ENTRY:
         log_add_entry(nlarn->log, "Climb down to enter the caverns.");
         return 0;
 
@@ -1015,7 +1015,7 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
         log_add_entry(nlarn->log, "A flood of water gushes forth!");
         flood_affect_area(pos, 3 + rand_0n(2), LT_WATER, 0);
         if (pos_valid(mpos))
-            monster_new(MT_WATER_LORD, mpos);
+            monster_new(MT_WATER_LORD, mpos, NULL);
         break;
 
     case LS_STATUE:
@@ -1033,7 +1033,7 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
     case LS_THRONE:
     case LS_THRONE2:
         if (pos_valid(mpos))
-            monster_new(MT_GNOME_KING, mpos);
+            monster_new(MT_GNOME_KING, mpos, NULL);
 
         desc = "throne";
         break;
@@ -1075,7 +1075,7 @@ static void monster_appear(monster_t type, position mpos)
     }
     else
     {
-        m = monster_new(type, mpos);
+        m = monster_new(type, mpos, NULL);
     }
 
     if (m && monster_in_sight(m))

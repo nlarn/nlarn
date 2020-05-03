@@ -5,12 +5,12 @@ The file lib/maze contains all custom maps used in level generation. The first
 map is the one used for the town, the following maps are mazes used elsewhere
 in the game.
 
-The first dungeon level is always a randomized maze. After that, each time a
+The first caverns level is always a randomized maze. After that, each time a
 level is generated, there's a 25% chance of picking a random pre-defined maze
 map instead of drawing a random maze. In addition, the bottom levels of the
-dungeon and the volcano will always use a custom map.
+caverns and the volcano will always use a custom map.
 
-Staircases and the bank branch (which is guaranteed on dungeon level 5) are
+Staircases and the bank branch (which is guaranteed on caverns level 5) are
 only ever placed in "dead ends", i.e. a floor tile with exactly seven adjacent
 wall tiles. For each generated level, the game searches a random rectangle of
 the full map (actually biased to the lower right) to place the static object in
@@ -32,7 +32,7 @@ Maps must have a total size of 67 x 17, and symbols are parsed as follows:
 
 
 Items:
-    !   If on last level of the Dungeon, place amulet of larn and a random
+    !   If on last level of the caverns, place amulet of larn and a random
         demon lord to guard it.
         If on last level of the Volcano, place potion of cure dianthroritis and
         a demon prince to guard it.
@@ -69,7 +69,7 @@ Dungeon features:
 
 Buildings:
 
-    O   dungeon entrance
+    O   caverns entrance
     I   volcano entrance
     H   home
     D   dnd store

@@ -1,6 +1,6 @@
 /*
  * scoreboard.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -58,7 +58,7 @@ GList *scores_load()
 
     gzFile file = gzdopen(fd, "rb");
 #else
-    gzFile file = gzopen(nlarn->highscores, "rb");
+    gzFile file = gzopen(nlarn_highscores, "rb");
 #endif
 
     if (file == NULL)
@@ -191,7 +191,7 @@ static void scores_save(game *g, GList *gs)
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     gzFile sb = gzdopen(scoreboard_fd, "wb");
 #else
-    gzFile sb = gzopen(nlarn->highscores, "wb");
+    gzFile sb = gzopen(nlarn_highscores, "wb");
 #endif
 
     if (sb == NULL)
@@ -448,6 +448,9 @@ char *score_death_description(score_t *score, int verbose)
 
 char *scores_to_string(GList *scores, score_t *score)
 {
+    /* no scoreboard entries? */
+    if (!scores) return NULL;
+
     GString *text = g_string_new(NULL);
 
     guint rank = 0;
@@ -477,7 +480,7 @@ char *scores_to_string(GList *scores, score_t *score)
                                (cscore == score) ? '*' : ' ',
                                nrec + 1, cscore->score, desc);
 
-        g_string_append_printf(text, "               [exp. level %d, dungeon lvl. %s, %d/%d hp, difficulty %d]\n",
+        g_string_append_printf(text, "               [exp. level %d, caverns lvl. %s, %d/%d hp, difficulty %d]\n",
                                cscore->level, map_names[cscore->dlevel],
                                cscore->hp, cscore->hp_max, cscore->difficulty);
         g_free(desc);

@@ -1,6 +1,6 @@
 /*
  * nlarn.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,16 +16,24 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* setres[gu]id() from unistd.h are only defined when this is set
+   *before* including it. Another header in the list seems to do so
+   before we include it here.*/
+#ifdef __linux__
+# ifndef _GNU_SOURCE
+#  define _GNU_SOURCE
+# endif
+#endif
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <glib/gstdio.h>
 
 #ifdef __unix
 # include <signal.h>
-#endif
-
-#ifdef WIN32
-# include <windows.h>
+# include <unistd.h>
+# include <sys/file.h>
+# include <sys/stat.h>
 #endif
 
 #include "config.h"
@@ -33,25 +41,265 @@
 #include "display.h"
 #include "game.h"
 #include "nlarn.h"
+#include "pathfinding.h"
 #include "player.h"
+#include "scoreboard.h"
 #include "sobjects.h"
 #include "traps.h"
+
+/* see https://stackoverflow.com/q/36764885/1519878 */
+#define _STR(x) #x
+#define STR(x) _STR(x)
+
+/* version string */
+const char *nlarn_version = STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_PATCH) GITREV;
+
+/* empty scoreboard description */
+const char *room_for_improvement = "\n...room for improvement...\n";
+
+/* path and file name constants*/
+static const char *default_lib_dir = "/usr/share/nlarn";
+#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
+static const char *default_var_dir = "/var/games/nlarn";
+#endif
+static const char *mesgfile = "nlarn.msg";
+static const char *helpfile = "nlarn.hlp";
+static const char *mazefile = "maze";
+static const char *fortunes = "fortune";
+static const char *highscores = "highscores";
+static const char *config_file = "nlarn.ini";
+static const char *save_file = "nlarn.sav";
 
 /* global game object */
 game *nlarn = NULL;
 
+/* the game settings */
+static struct game_config config = {};
+
+/* death jump buffer - used to return to the main loop when the player has died */
+jmp_buf nlarn_death_jump;
 
 static gboolean adjacent_corridor(position pos, char mv);
-
-#ifdef WIN32
-BOOL nlarn_control_handler(DWORD fdwCtrlType);
-#endif
 
 #ifdef __unix
 static void nlarn_signal_handler(int signo);
 #endif
 
-int main(int argc, char *argv[])
+static const gchar *nlarn_userdir()
+{
+    static gchar *userdir = NULL;
+
+    if (userdir == NULL)
+    {
+        if (config.userdir)
+        {
+            if (!g_file_test(config.userdir, G_FILE_TEST_IS_DIR))
+            {
+                g_printerr("Supplied user directory \"%s\" does not exist.",
+                        config.userdir);
+
+                exit(EXIT_FAILURE);
+            }
+            else
+            {
+                userdir = g_strdup(config.userdir);
+            }
+        }
+        else
+        {
+#ifdef G_OS_WIN32
+            userdir = g_build_path(G_DIR_SEPARATOR_S, g_get_user_config_dir(),
+                    "nlarn", NULL);
+#else
+            userdir = g_build_path(G_DIR_SEPARATOR_S, g_get_home_dir(),
+                    ".nlarn", NULL);
+#endif
+        }
+    }
+
+    return userdir;
+}
+
+/* initialize runtime environment */
+static void nlarn_init(int argc, char *argv[])
+{
+    /* determine paths and file names */
+    /* base directory for a local install */
+    g_autofree char *basedir = g_path_get_dirname(argv[0]);
+
+    /* try to use the directory below the binary's location first */
+    nlarn_libdir = g_build_path(G_DIR_SEPARATOR_S, basedir, "lib", NULL);
+
+    if (!g_file_test(nlarn_libdir, G_FILE_TEST_IS_DIR))
+    {
+        /* local lib directory could not be found, try the system wide directory. */
+#ifdef __APPLE__
+        char *rellibdir = g_build_path(G_DIR_SEPARATOR_S, basedir,
+                                       "../Resources", NULL);
+#endif
+        if (g_file_test(default_lib_dir, G_FILE_TEST_IS_DIR))
+        {
+            /* system-wide data directory exists */
+            /* string has to be dup'd as it is feed in the end */
+            nlarn_libdir = g_strdup((char *)default_lib_dir);
+        }
+#ifdef __APPLE__
+        else if (g_file_test(rellibdir, G_FILE_TEST_IS_DIR))
+        {
+            /* program seems to be installed relocatable */
+            nlarn_libdir = g_strdup(rellibdir);
+        }
+#endif
+        else
+        {
+            g_printerr("Could not find game library directory.\n\n"
+                       "Paths I've tried:\n"
+                       " * %s\n"
+#ifdef __APPLE__
+                       " * %s\n"
+#endif
+                       " * %s\n\n"
+                       "Please reinstall the game.\n",
+                       nlarn_libdir,
+#ifdef __APPLE__
+                       rellibdir,
+#endif
+                       default_lib_dir);
+
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    nlarn_mesgfile = g_build_filename(nlarn_libdir, mesgfile, NULL);
+    nlarn_helpfile = g_build_filename(nlarn_libdir, helpfile, NULL);
+    nlarn_mazefile = g_build_filename(nlarn_libdir, mazefile, NULL);
+    nlarn_fortunes = g_build_filename(nlarn_libdir, fortunes, NULL);
+
+#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
+    /* highscore file handling for SETGID builds */
+    gid_t realgid;
+    uid_t realuid;
+
+    /* assemble the scoreboard filename */
+    nlarn_highscores = g_build_path(G_DIR_SEPARATOR_S, default_var_dir,
+                                              highscores, NULL);
+
+    /* Open the scoreboard file. */
+    if ((scoreboard_fd = open(nlarn_highscores, O_RDWR)) == -1)
+    {
+        perror("Could not open scoreboard file");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Figure out who we really are. */
+    realgid = getgid();
+    realuid = getuid();
+
+    /* This is where we drop our setuid/setgid privileges. */
+#ifdef __linux__
+    if (setresgid(-1, realgid, realgid) != 0) {
+#else
+    if (setregid(-1, realgid) != 0) {
+#endif
+        perror("Could not drop setgid privileges");
+        exit(EXIT_FAILURE);
+    }
+
+#ifdef __linux__
+    if (setresuid(-1, realuid, realuid) != 0) {
+#else
+    if (setreuid(-1, realuid) != 0) {
+#endif
+        perror("Could not drop setuid privileges");
+        exit(EXIT_FAILURE);
+    }
+
+#else
+    /* highscore file handling for non-SETGID builds -
+       store high scores in the same directory as the configuation */
+    nlarn_highscores = g_build_filename(nlarn_userdir(), highscores, NULL);
+#endif
+
+    /* parse the command line options */
+    parse_commandline(argc, argv, &config);
+
+    /* show version information */
+    if (config.show_version) {
+        g_printf("NLarn version %s, built on %s.\n\n", nlarn_version, __DATE__);
+        g_printf("Game lib directory:\t%s\n", nlarn_libdir);
+        g_printf("Game savefile version:\t%d\n", SAVEFILE_VERSION);
+
+        exit(EXIT_SUCCESS);
+    }
+
+    /* show highscores */
+    if (config.show_scores) {
+        GList *scores = scores_load();
+        g_autofree char *s = scores_to_string(scores, NULL);
+
+        g_printf("NLarn Hall of Fame\n==================\n%s",
+                scores ? s : room_for_improvement);
+        scores_destroy(scores);
+
+        exit(EXIT_SUCCESS);
+    }
+
+    /* verify that user directory exists */
+    if (!g_file_test(nlarn_userdir(), G_FILE_TEST_IS_DIR))
+    {
+        /* directory is missing -> create it */
+        int ret = g_mkdir(nlarn_userdir(), 0755);
+
+        if (ret == -1)
+        {
+            /* creating the directory failed */
+            g_printerr("Failed to create directory %s.", nlarn_userdir());
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /* try loading settings from the default configuration file */
+    nlarn_inifile = g_build_path(G_DIR_SEPARATOR_S, nlarn_userdir(),
+            config_file, NULL);
+
+    /* write a default configuration file, if none exists */
+    if (!g_file_test(nlarn_inifile, G_FILE_TEST_IS_REGULAR))
+    {
+        write_ini_file(nlarn_inifile, NULL);
+    }
+
+    /* try to load settings from the configuration file */
+    parse_ini_file(nlarn_inifile, &config);
+
+#ifdef SDLPDCURSES
+    /* If a font size was defined, export it to the environment
+     * before initialising PDCurses. */
+    if (config.font_size)
+    {
+        gchar size[4];
+        g_snprintf(size, 3, "%d", config.font_size);
+        g_setenv("PDC_FONT_SIZE", size, TRUE);
+    }
+#endif
+    /* initialise the display - must not happen before this point
+       otherwise displaying the command line help fails */
+    display_init();
+
+    /* call display_shutdown when terminating the game */
+    atexit(display_shutdown);
+
+    /* assemble the save file name */
+    nlarn_savefile = g_build_path(G_DIR_SEPARATOR_S, nlarn_userdir(),
+            save_file, NULL);
+
+    /* set the console shutdown handler */
+#ifdef __unix
+    signal(SIGTERM, nlarn_signal_handler);
+    signal(SIGHUP, nlarn_signal_handler);
+#endif
+}
+
+static void mainloop()
 {
     /* count of moves used by last action */
     int moves_count = 0;
@@ -65,68 +313,14 @@ int main(int argc, char *argv[])
     /* position chosen for auto travel, allowing to continue travel */
     position cpos = pos_invalid;
 
-    /* initialise the game */
-    game_init(argc, argv);
-
-    /* set the console shutdown handler */
-#ifdef __unix
-    signal(SIGTERM, nlarn_signal_handler);
-    signal(SIGHUP, nlarn_signal_handler);
-#endif
-
-#ifdef WIN32
-    SetConsoleCtrlHandler((PHANDLER_ROUTINE) nlarn_control_handler, TRUE);
-#endif
-
-    /* check if mesgfile exists */
-    if (!g_file_get_contents(game_mesgfile(nlarn), &strbuf, NULL, NULL))
-    {
-        nlarn = game_destroy(nlarn);
-        display_shutdown();
-        g_printerr("Error: Cannot find the message file.\n");
-
-        exit(EXIT_FAILURE);
-    }
-
-    display_show_message("Welcome to the game of NLarn!", strbuf, 0);
-    g_free(strbuf);
-
-    /* ask for a character name if none has been supplied */
-    while (nlarn->p->name == NULL)
-    {
-        nlarn->p->name = display_get_string("Choose your name",
-                "By what name shall you be called?", NULL, 45);
-    }
-
-    /* ask for character's gender if it is not known yet */
-    if (nlarn->p->sex == PS_NONE)
-    {
-        int res = display_get_yesno("Are you male or female?", NULL, "Female", "Male");
-
-        /* display_get_yesno() returns 0 or one */
-        nlarn->p->sex = (res == TRUE) ? PS_FEMALE : PS_MALE;
-    }
-
-    while (!nlarn->player_stats_set)
-    {
-        /* assign the player's stats */
-        char selection = player_select_bonus_stats();
-        nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, selection);
-    }
-
-    /* automatic save point (not when restoring a save) */
-    if ((game_turn(nlarn) == 1) && game_autosave(nlarn))
-    {
-        game_save(nlarn);
-    }
-
     char run_cmd = 0;
     int ch = 0;
     gboolean adj_corr = FALSE;
     guint end_resting = 0;
 
-    /* main event loop */
-    do
+    /* main event loop
+       keep running until the game object was destroyed */
+    while (nlarn)
     {
         /* repaint screen */
         display_paint_screen(nlarn->p);
@@ -152,13 +346,13 @@ int main(int argc, char *argv[])
             else
             {
                 /* find a path to the destination */
-                map_path *path = map_find_path(game_map(nlarn, Z(nlarn->p->pos)),
-                                               nlarn->p->pos, pos, LE_GROUND);
+                path *path = path_find(game_map(nlarn, Z(nlarn->p->pos)),
+                                       nlarn->p->pos, pos, LE_GROUND);
 
                 if (path && !g_queue_is_empty(path->path))
                 {
                     /* Path found. Move the player. */
-                    map_path_element *el = g_queue_pop_head(path->path);
+                    path_element *el = g_queue_pop_head(path->path);
                     moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, el->pos), TRUE);
 
                     if (moves_count == 0)
@@ -175,7 +369,7 @@ int main(int argc, char *argv[])
                 }
 
                 /* clean up */
-                if (path) map_path_destroy(path);
+                if (path) path_destroy(path);
             }
         }
         else if (run_cmd != 0)
@@ -188,12 +382,12 @@ int main(int argc, char *argv[])
         else
         {
             /* not running or travelling, get a key and handle it */
-            ch = display_getch();
+            ch = display_getch(NULL);
 
             if (ch == '/' || ch == 'g')
             {
                 /* fast movement: get direction of movement */
-                ch = display_getch();
+                ch = display_getch(NULL);
                 switch (ch)
                 {
                 case 'b':
@@ -390,14 +584,14 @@ int main(int argc, char *argv[])
             /* help */
         case KEY_F(1):
         case '?':
-            if (g_file_get_contents(game_helpfile(nlarn), &strbuf, NULL, NULL))
+            if (g_file_get_contents(nlarn_helpfile, &strbuf, NULL, NULL))
             {
-                display_show_message("Help for The Caverns of NLarn", strbuf, 1);
+                display_show_message("Help for the game of NLarn", strbuf, 1);
                 g_free(strbuf);
             }
             else
             {
-                display_show_message("Help for The Caverns of NLarn",
+                display_show_message("Error",
                                      "\n The help file could not be found. \n", 0);
             }
             break;
@@ -415,7 +609,7 @@ int main(int argc, char *argv[])
 
             /* bank account information */
         case '$':
-            log_add_entry(nlarn->log, "There %s %s gp on your bank account.",
+            log_add_entry(nlarn->log, "There %s %s gold on your bank account.",
                           is_are(nlarn->p->bank_account),
                           int2str(nlarn->p->bank_account));
             break;
@@ -519,7 +713,7 @@ int main(int argc, char *argv[])
         case 'P':
             if (nlarn->p->outstanding_taxes)
             {
-                log_add_entry(nlarn->log, "You presently owe %d gp in taxes.",
+                log_add_entry(nlarn->log, "You presently owe %d gold in taxes.",
                               nlarn->p->outstanding_taxes);
             }
             else
@@ -595,9 +789,7 @@ int main(int argc, char *argv[])
             break;
 
         case 'v':
-            log_add_entry(nlarn->log, "NLarn version %d.%d.%d%s, built on %s.",
-                          VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, GITREV,
-                          __DATE__);
+            log_add_entry(nlarn->log, "NLarn version %s, built on %s.", nlarn_version, __DATE__);
             break;
 
             /* wear/wield something */
@@ -649,7 +841,7 @@ int main(int argc, char *argv[])
 
             /* configure defaults */
         case 16: /* ^P */
-            configure_defaults(nlarn->inifile);
+            configure_defaults(nlarn_inifile);
             break;
 
             /* quit */
@@ -669,7 +861,10 @@ int main(int argc, char *argv[])
             {
                 /* only terminate the game if saving was successful */
                 nlarn = game_destroy(nlarn);
-                exit(EXIT_SUCCESS);
+
+                /* return control to the main function and
+                   indicate our desire to quit the game */
+                longjmp(nlarn_death_jump, PD_QUIT);
             }
             break;
 
@@ -703,19 +898,19 @@ int main(int argc, char *argv[])
             if (game_wizardmode(nlarn)) nlarn->p->bank_account += 1000;
             break;
 
-        case '+': /* dungeon map up */
+        case '+': /* map up */
             if (game_wizardmode(nlarn) && (Z(nlarn->p->pos) > 0))
             {
                 moves_count = player_map_enter(nlarn->p, game_map(nlarn, Z(nlarn->p->pos) - 1),
-                                               Z(nlarn->p->pos) == MAP_DMAX);
+                                               Z(nlarn->p->pos) == MAP_CMAX);
             }
             break;
 
-        case '-': /* dungeon map down */
+        case '-': /* map down */
             if (game_wizardmode(nlarn) && (Z(nlarn->p->pos) < (MAP_MAX - 1)))
             {
                 moves_count = player_map_enter(nlarn->p, game_map(nlarn, Z(nlarn->p->pos) + 1),
-                                               Z(nlarn->p->pos) == MAP_DMAX - 1);
+                                               Z(nlarn->p->pos) == MAP_CMAX - 1);
             }
             break;
 
@@ -829,7 +1024,140 @@ int main(int argc, char *argv[])
             }
         }
     }
-    while (TRUE); /* main event loop */
+}
+
+gboolean main_menu()
+{
+    const char *main_menu_tpl =
+        "\n"
+        "      `lightgreen`a`end`) %s Game\n"
+        "      `lightgreen`b`end`) Configure Settings\n"
+        "      `lightgreen`c`end`) Visit the Hall of Fame\n"
+        "\n"
+        "      `lightgreen`q`end`) Quit Game\n"
+        "\n"
+        "    You have reached difficulty level %d\n";
+
+
+    g_autofree char *title = g_strdup_printf("NLarn %s", nlarn_version);
+    g_autofree char *main_menu = g_strdup_printf(main_menu_tpl,
+        (game_turn(nlarn) == 1) ? "New" : "Continue saved", game_difficulty(nlarn));
+
+    char input = 0;
+
+    while (input != 'q' && input != KEY_ESC)
+    {
+        input = display_show_message(title, main_menu, 0);
+
+        switch (input)
+        {
+        case 'a':
+            return TRUE;
+            break;
+
+        case 'b':
+            configure_defaults(nlarn_inifile);
+            break;
+
+        case 'c':
+        {
+            GList *hs = scores_load();
+            char *rendered_highscores = scores_to_string(hs, NULL);
+
+            display_show_message("NLarn Hall of Fame",
+                    highscores ? rendered_highscores : room_for_improvement, 0);
+
+            if (hs)
+            {
+                scores_destroy(hs);
+                g_free(rendered_highscores);
+            }
+        }
+            break;
+        }
+    }
+
+    return FALSE;
+}
+
+int main(int argc, char *argv[])
+{
+    /* initialisation */
+    nlarn_init(argc, argv);
+
+    /* check if the message file exists */
+    gchar *message_file = NULL;
+    if (!g_file_get_contents(nlarn_mesgfile, &message_file, NULL, NULL))
+    {
+        nlarn = game_destroy(nlarn);
+        display_shutdown();
+        g_printerr("Error: Cannot find the message file.\n");
+
+        return EXIT_FAILURE;
+    }
+
+    /* show message file */
+    display_show_message("Welcome to the game of NLarn!", message_file, 0);
+    g_free(message_file);
+
+    /* Create the jump target for player death. Death will destroy the game
+       object, thus control will be returned to the line after this one, i.e
+       the game will be created again and the main menu will be shown. To
+       ensure that the game quits when quitting from inside the game, return
+       the cause of death from player_die().
+    */
+    player_cod cod = setjmp(nlarn_death_jump);
+
+    /* clear the screen to wipe remains from the previous game */
+    clear();
+
+    /* can be broken by quitting in the game, or with q or ESC in main menu */
+    while (cod != PD_QUIT)
+    {
+        /* initialise the game */
+        game_init(&config);
+
+        /* present main menu - */
+        if (FALSE == main_menu()) {
+            break;
+        }
+
+        /* ask for a character name if none has been supplied */
+        while (nlarn->p->name == NULL)
+        {
+            nlarn->p->name = display_get_string("Choose your name",
+                    "By what name shall you be called?", NULL, 45);
+        }
+
+        /* ask for character's gender if it is not known yet */
+        if (nlarn->p->sex == PS_NONE)
+        {
+            int res = display_get_yesno("Are you male or female?", NULL, "Female", "Male");
+
+            /* display_get_yesno() returns 0 or one */
+            nlarn->p->sex = (res == TRUE) ? PS_FEMALE : PS_MALE;
+        }
+
+        while (!nlarn->player_stats_set)
+        {
+            /* assign the player's stats */
+            char selection = player_select_bonus_stats();
+            nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, selection);
+        }
+
+        /* automatic save point (not when restoring a save) */
+        if ((game_turn(nlarn) == 1) && game_autosave(nlarn))
+        {
+            game_save(nlarn);
+        }
+
+        /* main event loop */
+        mainloop();
+    }
+
+    free_config(config);
+
+    return EXIT_SUCCESS;
 }
 
 static gboolean adjacent_corridor(position pos, char mv)
@@ -899,34 +1227,19 @@ static void nlarn_signal_handler(int signo)
     /* restore the display down before emitting messages */
     display_shutdown();
 
-    /* attempt to save the game */
-    game_save(nlarn);
-
-    if (signo != SIGHUP)
+    /* attempt to save and clear the game, when initialized */
+    if (nlarn)
     {
-        g_printf("Terminated. Your progress has been saved.\n");
-    }
+            game_save(nlarn);
 
-    nlarn = game_destroy(nlarn);
-    exit(EXIT_SUCCESS);
-}
-#endif
+        if (signo != SIGHUP)
+        {
+            g_printf("Terminated. Your progress has been saved.\n");
+        }
 
-#ifdef WIN32
-BOOL nlarn_control_handler(DWORD fdwCtrlType)
-{
-    switch(fdwCtrlType)
-    {
-        /* Close Window button pressed: store the game progress */
-    case CTRL_CLOSE_EVENT:
-        /* save the game */
-        game_save(nlarn);
         nlarn = game_destroy(nlarn);
-
-        return TRUE;
-
-    default:
-        return FALSE;
     }
+
+    exit(EXIT_SUCCESS);
 }
 #endif

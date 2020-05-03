@@ -1,6 +1,6 @@
 /*
  * items.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -245,9 +245,6 @@ item *item_new(item_t item_type, int item_id)
 
 item *item_new_random(item_t item_type, gboolean finetouch)
 {
-    item *it;
-
-
     g_assert(item_type > IT_NONE && item_type < IT_MAX);
 
     int min_id = 0;
@@ -272,13 +269,13 @@ item *item_new_random(item_t item_type, gboolean finetouch)
     }
 
     int item_id = rand_m_n(min_id, max_id);
-    it = item_new(item_type, item_id);
+    item *it = item_new(item_type, item_id);
 
     if (item_type == IT_AMMO)
         it->count = rand_m_n(10, 50);
 
     if (finetouch)
-        item_new_finetouch(it);
+        it = item_new_finetouch(it);
 
     return it;
 }
@@ -290,7 +287,7 @@ item *item_new_by_level(item_t item_type, int num_level)
 
     g_assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
 
-    /* no amulets above dungeon level 6 */
+    /* no amulets above caverns level 6 */
     if ((item_type == IT_AMULET) && (num_level < 6))
     {
         do
@@ -379,7 +376,7 @@ item *item_new_finetouch(item *it)
     /* maybe the item is corroded */
     if (item_is_corrodible(it->type) && chance(25))
     {
-        item_erode(NULL, it, rand_1n(IET_MAX), FALSE);
+        it = item_erode(NULL, it, rand_1n(IET_MAX), FALSE);
     }
 
     return it;
@@ -1122,23 +1119,23 @@ int item_colour(item *it)
 
 guint item_fragility(item *it)
 {
-    int chance = item_materials[item_material(it)].fragility;
+    int probability = item_materials[item_material(it)].fragility;
 
     /* Ensure that unique weapons do not break */
     if (it->type == IT_WEAPON && weapon_is_unique(it))
         return 0;
 
-    chance += 15 * it->burnt;
-    chance += 15 * it->corroded;
-    chance += 15 * it->rusty;
+    probability += 15 * it->burnt;
+    probability += 15 * it->corroded;
+    probability += 15 * it->rusty;
 
     if (it->blessed)
-        chance /= 2;
+        probability /= 2;
 
     if (it->cursed)
-        chance *= 2;
+        probability *= 2;
 
-    return (guint)max(0, min(chance, 100));
+    return (guint)max(0, min(probability, 100));
 }
 
 void item_effect_add(item *it, effect *e)
@@ -1570,7 +1567,8 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop)
     if (shop)
     {
         /* inside shop - show the item's price */
-        g_string_append_printf(desc, "\nPrice:    %d gp", item_price(it));
+        g_string_append_printf(desc, "\nPrice:    %d gold%s", item_price(it),
+                it->count > 1 ? " each" : "");
     }
 
     return g_string_free(desc, FALSE);
@@ -1739,4 +1737,3 @@ static const char *item_desc_get(item *it, int known)
         return "";
     }
 }
-

@@ -1,6 +1,6 @@
 /*
  * config.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,6 +40,9 @@ struct game_config {
 gboolean parse_ini_file(const char *filename, struct game_config *config);
 void write_ini_file(const char *filename, struct game_config *config);
 
+/* shared config cleanup helper */
+void free_config(const struct game_config config);
+
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config);
 
@@ -61,3 +64,6 @@ char compose_gender(const int gender);
 
 /* configure game defaults */
 void configure_defaults(const char *inifile);
+
+/* increase difficulty after winning the game */
+void config_increase_difficulty(const char *inifile, const int new_difficulty);

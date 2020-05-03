@@ -1,6 +1,6 @@
 #
 # Makefile
-# Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+# Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -57,7 +57,7 @@ endif
 
 # Definitions required regardless of host OS
 DEFINES += -DG_DISABLE_DEPRECATED
-CFLAGS  += -std=c99 -Wall -Wextra -Iinc -Iinc/external
+CFLAGS  += -std=c99 -Wall -Wextra -Werror -Iinc -Iinc/external
 LDFLAGS += -lz -lm
 
 ifneq (,$(findstring MINGW, $(MSYSTEM)))
@@ -106,7 +106,7 @@ LDFLAGS += $(shell pkg-config --libs glib-2.0)
 ifneq ($(SDLPDCURSES),Y)
 	LDFLAGS += -lcurses -lpanel
 else
-	PDCLIB   := PDCurses/sdl2/libpdcurses.a
+	PDCLIB   := PDCurses/sdl2/pdcurses.a
 	CFLAGS   += $(shell pkg-config --cflags SDL2_ttf) -IPDCurses -DSDLPDCURSES
 	LDFLAGS  += $(shell pkg-config --libs SDL2_ttf )
 	LIBFILES += lib/FiraMono-Medium.otf
@@ -168,97 +168,86 @@ $(RESOURCES): %.res: %.rc
 	windres -v $(RESDEFINE) $< -O coff -o $@
 
 $(PDCLIB):
-	@git submodule init
-	@git submodule update --recommend-shallow
+	git submodule init
+	git submodule update --recommend-shallow
 	$(MAKE) -C PDCurses/sdl2 WIDE=Y UTF8=Y libs
 
 dist: clean $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
 
 $(SRCPKG):
 	@echo -n Packing source archive $(SRCPKG)
-	@git archive --prefix $(DIRNAME)/ --format=tar $(GITREV) | gzip > $(SRCPKG)
+	git archive --prefix $(DIRNAME)/ --format=tar $(GITREV) | gzip > $(SRCPKG)
 	@echo " - done."
 
 $(PACKAGE): $(MAINFILES) $(DLLS)
 	@echo -n Packing $(PACKAGE)
-	@mkdir -p $(DIRNAME)/lib
-	@cp -p $(MAINFILES) $(DLLS) $(DIRNAME)
-	@cp -p $(LIBFILES) $(DIRNAME)/lib
-	@$(ARCHIVE_CMD) $(PACKAGE) $(DIRNAME)
-	@rm -rf $(DIRNAME)
+	mkdir -p $(DIRNAME)/lib
+	cp -p $(MAINFILES) $(DLLS) $(DIRNAME)
+	cp -p $(LIBFILES) $(DIRNAME)/lib
+	$(ARCHIVE_CMD) $(PACKAGE) $(DIRNAME)
+	rm -rf $(DIRNAME)
 	@echo " - done."
 
 mainfiles.nsh:
-	@touch $@
-	@for FILE in $(MAINFILES) $(DLLS) ; \
+	touch $@
+	for FILE in $(MAINFILES) $(DLLS) ; \
 	do echo "  File \"$$FILE\"" >> $@; \
 	done
 
 libfiles.nsh:
-	@touch $@
-	@for FILE in $(LIBFILES) ; \
+	touch $@
+	for FILE in $(LIBFILES) ; \
 	do echo "  File \"$$FILE\"" | sed -e 's|/|\\|' >> $@; \
 	done
 
 # The Windows installer
 $(INSTALLER): $(MAINFILES) $(DLLS) mainfiles.nsh libfiles.nsh nlarn.nsi
 	@echo -n Packing $(PACKAGE)
-	@makensis //DVERSION="$(VERSION)" \
+	makensis //DVERSION="$(VERSION)" \
 		//DVERSION_MAJOR=$(VERSION_MAJOR) \
 		//DVERSION_MINOR=$(VERSION_MINOR) \
 		//DVERSION_PATCH=$(VERSION_PATCH) nlarn.nsi
 	@echo " - done."
-	@rm mainfiles.nsh libfiles.nsh
+	rm mainfiles.nsh libfiles.nsh
 
 # The OSX installer
 $(OSXIMAGE): $(MAINFILES)
-	@mkdir -p dmgroot/NLarn.app/Contents/{Frameworks,MacOS,Resources}
-	@cp -p nlarn dmgroot/NLarn.app/Contents/MacOS
+	mkdir -p dmgroot/NLarn.app/Contents/{Frameworks,MacOS,Resources}
+	cp -p nlarn dmgroot/NLarn.app/Contents/MacOS
 # Copy local libraries into the app folder and instruct the linker.
-	@for lib in $$(otool -L nlarn | awk '/local/ {print $$1}'); do\
-		cp $$lib dmgroot/NLarn.app/Contents/MacOS/; \
-		chmod 0644 dmgroot/NLarn.app/Contents/MacOS/$${lib##*/}; \
-		install_name_tool -change $$lib @executable_path/$${lib##*/} \
-			dmgroot/NLarn.app/Contents/MacOS/nlarn; \
-		for llib in dmgroot/NLarn.app/Contents/MacOS/*.dylib; do\
-			for libpath in $$(otool -L $$llib | awk '/local/ {print $$1}'); do\
-				install_name_tool -change $$libpath \
-					@executable_path/$${libpath##*/} $$llib; \
-            done; \
-		done; \
-	done
+	dylibbundler -cd -d dmgroot/NLarn.app/Contents/MacOS/libs -b -x dmgroot/NLarn.app/Contents/MacOS/nlarn -p '@executable_path/libs/'
 # Copy required files
-	@cp -p README.html LICENSE Changelog.html dmgroot
-	@cp -p $(LIBFILES) dmgroot/Nlarn.app/Contents/Resources
-	@cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
-	@cp -p resources/Info.plist dmgroot/NLarn.app/Contents
+	cp -p README.html LICENSE Changelog.html dmgroot
+	cp -p $(LIBFILES) dmgroot/NLarn.app/Contents/Resources
+	cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
+	cp -p resources/Info.plist dmgroot/NLarn.app/Contents
 # Update the version information in the plist
-	@/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(VERSION)" \
+	/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(VERSION)" \
 		dmgroot/NLarn.app/Contents/Info.plist
-	@/usr/libexec/PlistBuddy -c \
+	/usr/libexec/PlistBuddy -c \
 		"Add :CFBundleShortVersionString string $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)" \
 		dmgroot/NLarn.app/Contents/Info.plist
 # Use the same icons for the dmg file
-	@cp -p resources/NLarn.icns dmgroot/.VolumeIcon.icns
-	@SetFile -c icnC dmgroot/.VolumeIcon.icns
+	cp -p resources/NLarn.icns dmgroot/.VolumeIcon.icns
+	SetFile -c icnC dmgroot/.VolumeIcon.icns
 # Create a pseudo-installer disk image
-	@mkdir dmgroot/.background
-	@cp resources/dmg_background.png dmgroot/.background
-	@echo hdiutil requires superuser rights.
-	@hdiutil create -srcfolder dmgroot -volname "NLarn $(VERSION)" \
+	mkdir dmgroot/.background
+	cp resources/dmg_background.png dmgroot/.background
+	echo hdiutil requires superuser rights.
+	hdiutil create -srcfolder dmgroot -volname "NLarn $(VERSION)" \
 		-uid 99 -gid 99 -format UDRW -ov "raw-$(DIRNAME).dmg" || rm -rf dmgroot
-	@rm -rf dmgroot
-	@hdiutil attach -noautoopen -readwrite "raw-$(DIRNAME).dmg"
-	@SetFile -a C "/Volumes/NLarn $(VERSION)"
-	@sed -e 's/##VOLNAME##/NLarn $(VERSION)/' resources/dmg_settings.scpt | osascript
-	@hdiutil detach "/Volumes/NLarn $(VERSION)"
-	@hdiutil convert "raw-$(DIRNAME).dmg" -format UDZO -o "$(DIRNAME).dmg"
-	@rm "raw-$(DIRNAME).dmg"
+	rm -rf dmgroot
+	hdiutil attach -noautoopen -readwrite "raw-$(DIRNAME).dmg"
+	SetFile -a C "/Volumes/NLarn $(VERSION)"
+	sed -e 's/##VOLNAME##/NLarn $(VERSION)/' resources/dmg_settings.scpt | osascript
+	hdiutil detach "/Volumes/NLarn $(VERSION)"
+	hdiutil convert "raw-$(DIRNAME).dmg" -format UDZO -o "$(DIRNAME).dmg"
+	rm "raw-$(DIRNAME).dmg"
 
 clean:
 	@echo Cleaning nlarn
 	rm -f $(OBJECTS) $(DLLS)
-	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) README.html Changelog.html
+	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) mainfiles.nsh libfiles.nsh README.html Changelog.html
 	@if \[ -n "$(PDCLIB)" -a -d PDcurses/sdl2 \]; then \
 		$(MAKE) -C PDCurses/sdl2 clean; \
 	fi

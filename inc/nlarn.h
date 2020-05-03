@@ -1,6 +1,6 @@
 /*
  * nlarn.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,18 +19,36 @@
 #ifndef __NLARN_H_
 #define __NLARN_H_
 
+#include <setjmp.h>
+
 #include "game.h"
 
 #define VERSION_MAJOR 0 /* this is the present version # of the program */
 #define VERSION_MINOR 7
-#define VERSION_PATCH 4
+#define VERSION_PATCH 6
 
 /* this allows to add the id of the current commit to the version information */
 #ifndef GITREV
 #define GITREV ""
 #endif
 
+/* game version string */
+const char *nlarn_version;
+
 /* the entire game */
 game *nlarn;
+
+/* death jump buffer - used to return to the main loop when the player has died */
+extern jmp_buf nlarn_death_jump;
+
+/* file paths */
+const char *nlarn_libdir;
+const char *nlarn_mesgfile;
+const char *nlarn_helpfile;
+const char *nlarn_mazefile;
+const char *nlarn_fortunes;
+const char *nlarn_highscores;
+const char *nlarn_inifile;
+const char *nlarn_savefile;
 
 #endif

@@ -1,6 +1,6 @@
 /*
  * map.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -39,18 +39,6 @@ static void map_make_river(map *m, map_tile_t rivertype);
 static void map_make_lake(map *m, map_tile_t laketype);
 static void map_make_treasure_room(map *m, rectangle **rooms);
 static int map_validate(map *m);
-
-static map_path *map_path_new(position start, position goal);
-static map_path_element *map_path_element_new(position pos);
-static int map_step_cost(map *m, map_path_element* element,
-                         map_element_t map_elem, gboolean ppath);
-static int map_path_cost(map_path_element* element, position target);
-static map_path_element *map_path_element_in_list(map_path_element* el,
-                                                  GPtrArray *list);
-static map_path_element *map_path_find_best(map_path *path);
-static GPtrArray *map_path_get_neighbours(map *m, position pos,
-                                          map_element_t element,
-                                          gboolean ppath);
 
 static inline void map_sphere_destroy(sphere *s, map *m __attribute__((unused)))
 {
@@ -100,9 +88,9 @@ static gboolean is_town(int nlevel)
     return (nlevel == 0);
 }
 
-static gboolean is_dungeon_bottom(int nlevel)
+static gboolean is_caverns_bottom(int nlevel)
 {
-    return (nlevel == MAP_DMAX - 1);
+    return (nlevel == MAP_CMAX - 1);
 }
 
 static gboolean is_volcano_bottom(int nlevel)
@@ -112,20 +100,19 @@ static gboolean is_volcano_bottom(int nlevel)
 
 static gboolean is_volcano_map(int nlevel)
 {
-    return (nlevel >= MAP_DMAX);
+    return (nlevel >= MAP_CMAX);
 }
 
-map *map_new(int num, char *mazefile)
+map *map_new(int num, const char *mazefile)
 {
     gboolean map_loaded = FALSE;
-    gboolean keep_maze = TRUE;
 
     map *nmap = nlarn->maps[num] = g_malloc0(sizeof(map));
     nmap->nlevel = num;
 
     /* create map */
     if ((num == 0) /* town is stored in file */
-            || is_dungeon_bottom(num) /* level 10 */
+            || is_caverns_bottom(num) /* level 10 */
             || is_volcano_bottom(num) /* volcano level 3 */
             || (num > 1 && chance(25)))
     {
@@ -150,6 +137,7 @@ map *map_new(int num, char *mazefile)
         gboolean treasure_room = num > 1 && chance(25);
 
         /* generate random map */
+        gboolean keep_maze = TRUE;
         do
         {
             /* dig cave */
@@ -399,15 +387,12 @@ position map_find_space_in(map *m,
 
 int *map_get_surrounding(map *m, position pos, sobject_t type)
 {
-    position p = pos_invalid;
     int nmove = 1;
-    int *dirs;
-
-    dirs = g_malloc0(sizeof(int) * GD_MAX);
+    int *dirs = g_malloc0(sizeof(int) * GD_MAX);
 
     while (nmove < GD_MAX)
     {
-        p = pos_move(pos, nmove);
+        position p = pos_move(pos, nmove);
 
         if (pos_valid(p) && map_sobject_at(m, p) == type)
         {
@@ -605,128 +590,6 @@ int map_pos_is_visible(map *m, position s, position t)
     }
 
     return TRUE;
-}
-
-map_path *map_find_path(map *m, position start, position goal,
-                        map_element_t element)
-{
-    g_assert(m != NULL);
-
-    map_path *path;
-    map_path_element *curr, *next;
-    gboolean next_is_better;
-
-    /* if the starting position is on another map, fail for now */
-    /* TODO: could be changed to support 3D path finding */
-    if (Z(start) != Z(goal))
-        return NULL;
-
-    path = map_path_new(start, goal);
-
-    /* add start to open list */
-    curr = map_path_element_new(start);
-    curr->g_score = 0; /* no distance yet */
-    g_ptr_array_add(path->open, curr);
-
-    /* check if the path is being determined for the player */
-    gboolean ppath = pos_identical(start, nlarn->p->pos);
-
-    while (path->open->len)
-    {
-        curr = map_path_find_best(path);
-
-        g_ptr_array_remove_fast(path->open, curr);
-        g_ptr_array_add(path->closed, curr);
-
-        if (pos_identical(curr->pos, path->goal))
-        {
-            /* arrived at goal */
-
-            /* reconstruct path */
-            do
-            {
-                /* don't need the starting point in the path */
-                if (curr->parent != NULL)
-                    g_queue_push_head(path->path, curr);
-
-                curr = curr->parent;
-            }
-            while (curr != NULL);
-
-            return path;
-        }
-
-        GPtrArray *neighbours = map_path_get_neighbours(m, curr->pos, element, ppath);
-
-        while (neighbours->len)
-        {
-            next = g_ptr_array_remove_index_fast(neighbours,
-                                                 neighbours->len - 1);
-
-            next_is_better = FALSE;
-
-            if (map_path_element_in_list(next, path->closed))
-            {
-                g_free(next);
-                continue;
-            }
-
-            const guint32 next_g_score =
-                curr->g_score
-                + map_step_cost(m, next, element, ppath);
-
-            if (!map_path_element_in_list(next, path->open))
-            {
-                g_ptr_array_add(path->open, next);
-                next_is_better = TRUE;
-            }
-            else if (next->g_score > next_g_score)
-            {
-                next_is_better = TRUE;
-            }
-            else
-            {
-                g_free(next);
-            }
-
-            if (next_is_better)
-            {
-                next->parent  = curr;
-                next->g_score = next_g_score;
-            }
-        }
-
-        g_ptr_array_free(neighbours, TRUE);
-    }
-
-    /* could not find a path */
-    map_path_destroy(path);
-
-    return NULL;
-}
-
-void map_path_destroy(map_path *path)
-{
-    g_assert(path != NULL);
-
-    /* clean up open list */
-    for (guint idx = 0; idx < path->open->len; idx++)
-    {
-        g_free(g_ptr_array_index(path->open, idx));
-    }
-
-    g_ptr_array_free(path->open, TRUE);
-
-    for (guint idx = 0; idx < path->closed->len; idx++)
-    {
-        g_free(g_ptr_array_index(path->closed, idx));
-    }
-
-    g_ptr_array_free(path->closed, TRUE);
-
-    g_queue_free(path->path);
-
-    g_free(path);
 }
 
 GList *map_ray(map *m, position source, position target)
@@ -997,6 +860,44 @@ damage *map_tile_damage(map *m, position pos, gboolean flying)
     }
 }
 
+char *map_inv_description(map *m, position pos, const char* where, int (*ifilter)(item *))
+{
+    g_assert(m != NULL);
+    g_assert(pos_valid(pos));
+    g_assert(m->nlevel == Z(pos));
+
+    if (inv_length_filtered(*map_ilist_at(m, pos), ifilter) > 3)
+    {
+        return g_strdup_printf("There are multiple items %s.", where);
+    }
+
+    GString *items_desc = NULL;
+
+    for (guint idx = 0; idx < inv_length_filtered(*map_ilist_at(m, pos), ifilter); idx++)
+    {
+        item *it = inv_get_filtered(*map_ilist_at(m, pos), idx, ifilter);
+        gchar *item_desc = item_describe(it, player_item_known(nlarn->p, it),
+                                            FALSE, FALSE);
+
+        if (idx > 0)
+            g_string_append_printf(items_desc, " and %s", item_desc);
+        else
+            items_desc = g_string_new(item_desc);
+
+        g_free(item_desc);
+    }
+
+    if (items_desc != NULL)
+    {
+        char *description = g_strdup_printf("You see %s %s.", items_desc->str, where);
+        g_string_free(items_desc, TRUE);
+
+        return description;
+    }
+
+    return NULL;
+}
+
 char *map_pos_examine(position pos)
 {
     map *cm = game_map(nlarn, Z(pos));
@@ -1051,37 +952,12 @@ char *map_pos_examine(position pos)
     }
 
     /* add message if target tile contains items, but only if there's
-       a mimic there (items don't stack correctly otherwise) */
+       no mimic there (items don't stack correctly otherwise) */
     if (!has_mimic && inv_length(*map_ilist_at(cm, pos)) > 0)
     {
-        if (inv_length(*map_ilist_at(cm, pos)) > 3)
-        {
-            g_string_append_printf(desc, "There are multiple items %s.", where);
-        }
-        else
-        {
-            GString *items_desc = NULL;
-
-            for (guint idx = 0; idx < inv_length(*map_ilist_at(cm, pos)); idx++)
-            {
-                item *it = inv_get(*map_ilist_at(cm, pos), idx);
-                gchar *item_desc = item_describe(it, player_item_known(nlarn->p, it),
-                                                 FALSE, FALSE);
-
-                if (idx > 0)
-                    g_string_append_printf(items_desc, " and %s", item_desc);
-                else
-                    items_desc = g_string_new(item_desc);
-
-                g_free(item_desc);
-            }
-
-            if (items_desc != NULL)
-            {
-                g_string_append_printf(desc, "You see %s %s.", items_desc->str, where);
-                g_string_free(items_desc, TRUE);
-            }
-        }
+        char *inv_description = map_inv_description(cm, pos, where, NULL);
+        g_string_append(desc, inv_description);
+        g_free(inv_description);
     }
 
     return g_string_free(desc, FALSE);
@@ -1097,12 +973,9 @@ monster *map_get_monster_at(map *m, position pos)
 
 void map_fill_with_life(map *m)
 {
-    position pos = pos_invalid;
-    guint new_monster_count;
-
     g_assert(m != NULL);
 
-    new_monster_count = rand_1n(14 + m->nlevel);
+    guint new_monster_count = rand_1n(14 + m->nlevel);
 
     if (m->nlevel == 0)
     {
@@ -1110,14 +983,11 @@ void map_fill_with_life(map *m)
         new_monster_count = min(5, new_monster_count);
     }
 
-    if (m->mcount > new_monster_count)
-        /* no monsters added */
-        return;
-    else
-        new_monster_count -= m->mcount;
-
-    for (guint i = 0; i <= new_monster_count; i++)
+    /* create monsters until the desired count is reached */
+    while (m->mcount <= new_monster_count)
     {
+        position pos = pos_invalid;
+
         do
         {
             pos = map_find_space(m, LE_MONSTER, FALSE);
@@ -1133,8 +1003,6 @@ void map_fill_with_life(map *m)
 
         monster_new_by_level(pos);
     }
-
-    return;
 }
 
 gboolean map_is_exit_at(map *m, position pos)
@@ -1143,8 +1011,8 @@ gboolean map_is_exit_at(map *m, position pos)
 
     switch (map_sobject_at(m, pos))
     {
-    case LS_DNGN_ENTRANCE:
-    case LS_DNGN_EXIT:
+    case LS_CAVERNS_ENTRY:
+    case LS_CAVERNS_EXIT:
     case LS_ELEVATORDOWN:
     case LS_ELEVATORUP:
     case LS_STAIRSUP:
@@ -1289,7 +1157,7 @@ static int map_fill_with_stationary_objects(map *m)
     position pos = pos_invalid;
 
     /* volcano shaft up from the temple */
-    if (m->nlevel == MAP_DMAX)
+    if (m->nlevel == MAP_CMAX)
     {
         pos = map_find_space(m, LE_SOBJECT, TRUE);
         if (!pos_valid(pos)) return FALSE;
@@ -1297,7 +1165,7 @@ static int map_fill_with_stationary_objects(map *m)
     }
 
     /*  make the fixed objects in the maze: STAIRS */
-    if (!is_town(m->nlevel) && !is_dungeon_bottom(m->nlevel)
+    if (!is_town(m->nlevel) && !is_caverns_bottom(m->nlevel)
             && !is_volcano_bottom(m->nlevel))
     {
         pos = map_find_space(m, LE_SOBJECT, TRUE);
@@ -1305,7 +1173,7 @@ static int map_fill_with_stationary_objects(map *m)
         map_sobject_set(m, pos, LS_STAIRSDOWN);
     }
 
-    if ((m->nlevel > 1) && (m->nlevel != MAP_DMAX))
+    if ((m->nlevel > 1) && (m->nlevel != MAP_CMAX))
     {
         pos = map_find_space(m, LE_SOBJECT, TRUE);
         if (!pos_valid(pos)) return FALSE;
@@ -1465,8 +1333,8 @@ static void map_fill_with_traps(map *m)
 {
     g_assert(m != NULL);
 
-    /* Trapdoor cannot be placed in the last dungeon map and the last volcano map */
-    gboolean trapdoor = (!is_dungeon_bottom(m->nlevel)
+    /* Trapdoor cannot be placed in the last caverns map and the last volcano map */
+    gboolean trapdoor = (!is_caverns_bottom(m->nlevel)
             && !is_volcano_bottom(m->nlevel));
 
     for (guint count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
@@ -1532,7 +1400,7 @@ generate:
     if (m->nlevel == 1)
     {
         m->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].type = LT_FLOOR;
-        m->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].sobject = LS_DNGN_EXIT;
+        m->grid[MAP_MAX_Y - 1][(MAP_MAX_X - 1) / 2].sobject = LS_CAVERNS_EXIT;
     }
 
     /* generate open spaces */
@@ -1661,7 +1529,7 @@ static void map_make_maze_eat(map *m, int x, int y)
         if (++dir > 4)
         {
             dir = 1;
-            --try;
+            try--;
         }
     }
 }
@@ -1784,15 +1652,15 @@ static void place_special_item(map *m, position npos)
 
     switch (m->nlevel)
     {
-    case MAP_DMAX - 1: /* the amulet of larn */
+    case MAP_CMAX - 1: /* the amulet of larn */
         inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN));
 
-        monster_new(MT_DEMONLORD_I + rand_0n(7), npos);
+        monster_new(MT_DEMONLORD_I + rand_0n(7), npos, NULL);
         break;
 
     case MAP_MAX - 1: /* potion of cure dianthroritis */
         inv_add(&tile->ilist, item_new(IT_POTION, PO_CURE_DIANTHR));
-        monster_new(MT_DEMON_PRINCE, npos);
+        monster_new(MT_DEMON_PRINCE, npos, NULL);
 
     default:
         /* plain level, add neither monster nor item */
@@ -1949,8 +1817,8 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
                 tile->sobject = LS_CLOSEDDOOR;
                 break;
 
-            case 'O': /* dungeon entrance */
-                tile->sobject = LS_DNGN_ENTRANCE;
+            case 'O': /* caverns entrance */
+                tile->sobject = LS_CAVERNS_ENTRY;
                 break;
 
             case 'I': /* elevator */
@@ -2133,11 +2001,11 @@ static int map_validate(map *m)
     {
         /* caverns entrance */
     case 1:
-        pos = map_find_sobject(m, LS_DNGN_EXIT);
+        pos = map_find_sobject(m, LS_CAVERNS_EXIT);
         break;
 
         /* volcano entrance */
-    case MAP_DMAX:
+    case MAP_CMAX:
         pos = map_find_sobject(m, LS_ELEVATORUP);
         break;
 
@@ -2179,157 +2047,4 @@ void map_item_add(map *m, item *what)
 {
     position pos = map_find_space(m, LE_ITEM, FALSE);
     inv_add(map_ilist_at(m, pos), what);
-}
-
-static map_path *map_path_new(position start, position goal)
-{
-    map_path *path;
-
-    path = g_malloc0(sizeof(map_path));
-
-    path->open   = g_ptr_array_new();
-    path->closed = g_ptr_array_new();
-    path->path   = g_queue_new();
-
-    path->start = start;
-    path->goal  = goal;
-
-    return path;
-}
-
-static map_path_element *map_path_element_new(position pos)
-{
-    map_path_element *lpe;
-
-    lpe = g_malloc0(sizeof(map_path_element));
-    lpe->pos = pos;
-
-    return lpe;
-}
-
-/* calculate the cost of stepping into this new field */
-static int map_step_cost(map *m, map_path_element* element,
-                         map_element_t map_elem, gboolean ppath)
-{
-    map_tile_t tt;
-    guint32 step_cost = 1; /* at least 1 movement cost */
-
-    /* get the monster located on the map tile */
-    monster *mon = map_get_monster_at(m, element->pos);
-
-    /* get the tile type of the map tile */
-    if (ppath)
-    {
-        tt = player_memory_of(nlarn->p, element->pos).type ;
-    }
-    else
-    {
-        tt = map_tiletype_at(m, element->pos);
-    }
-
-    /* penalize for traps known to the player */
-    if (ppath && player_memory_of(nlarn->p, element->pos).trap)
-    {
-        const trap_t trap = map_trap_at(m, element->pos);
-        /* especially ones that may cause detours */
-        if (trap == TT_TELEPORT || trap == TT_TRAPDOOR)
-            step_cost += 50;
-        else
-            step_cost += 10;
-    }
-
-    /* penalize fields occupied by monsters: always for monsters,
-       for the player only if (s)he can see the monster */
-    if (mon != NULL && (!ppath || monster_in_sight(mon)))
-    {
-        step_cost += 10;
-    }
-
-    /* penalize fields covered with water, fire or cloud */
-    switch (tt)
-    {
-    case LT_WATER:
-        if (map_elem == LE_SWIMMING_MONSTER || map_elem == LE_FLYING_MONSTER)
-            break;
-        /* else fall through */
-    case LT_FIRE:
-    case LT_CLOUD:
-        step_cost += 50;
-        break;
-    default:
-        break;
-    }
-
-    return step_cost;
-}
-
-/* Returns the total estimated cost of the best path going
-   through this new field */
-static int map_path_cost(map_path_element* element, position target)
-{
-    /* estimate the distance from the current position to the target */
-    element->h_score = pos_distance(element->pos, target);
-
-    return element->g_score + element->h_score;
-}
-
-static map_path_element *map_path_element_in_list(map_path_element* el,
-                                                  GPtrArray *list)
-{
-    g_assert(el != NULL && list != NULL);
-
-    for (guint idx = 0; idx < list->len; idx++)
-    {
-        map_path_element *li = g_ptr_array_index(list, idx);
-
-        if (pos_identical(li->pos, el->pos))
-            return li;
-    }
-
-    return NULL;
-}
-
-static map_path_element *map_path_find_best(map_path *path)
-{
-    map_path_element *el, *best = NULL;
-
-    for (guint idx = 0; idx < path->open->len; idx++)
-    {
-        el = g_ptr_array_index(path->open, idx);
-
-        if (best == NULL || map_path_cost(el, path->goal)
-                < map_path_cost(best, path->goal))
-        {
-            best = el;
-        }
-    }
-
-    return best;
-}
-
-static GPtrArray *map_path_get_neighbours(map *m, position pos,
-                                          map_element_t element,
-                                          gboolean ppath)
-{
-    GPtrArray *neighbours = g_ptr_array_new();
-
-    for (direction dir = GD_NONE + 1; dir < GD_MAX; dir++)
-    {
-        if (dir == GD_CURR)
-            continue;
-
-        position npos = pos_move(pos, dir);
-
-        if (!pos_valid(npos))
-            continue;
-
-        if ((ppath && mt_is_passable(player_memory_of(nlarn->p, npos).type))
-                || (!ppath && monster_valid_dest(m, npos, element)))
-        {
-            map_path_element *pe = map_path_element_new(npos);
-            g_ptr_array_add(neighbours, pe);
-        }
-    }
-
-    return neighbours;
 }

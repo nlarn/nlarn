@@ -438,9 +438,28 @@ char *str_prepare_for_saving(const char *str)
     const char lend[] = "\n";
 #endif
 
-    GPtrArray *wrapped_str = text_wrap(str, 78, 2);
-    GString *nstr = g_string_new(NULL);
+    /* first, strip color tags from str */
+    gboolean in_tag = FALSE;
+    /* alloc the size of the original string to avoid permanent reallocations */
+    GString *stripped = g_string_sized_new(strlen(str));
+    for (guint idx = 0; idx < strlen(str); idx++)
+    {
+        if (str[idx] == '`')
+        {
+            in_tag = !in_tag;
+            continue;
+        }
 
+        if (!in_tag)
+            g_string_append_c(stripped, str[idx]);
+    }
+
+    /* then wrap the resulting string */
+    GPtrArray *wrapped_str = text_wrap(stripped->str, 78, 2);
+    g_string_free(stripped, TRUE);
+
+    /* then assemble the file content */
+    GString *nstr = g_string_new(NULL);
     for (guint i = 0; i < wrapped_str->len; i++)
     {
         g_string_append(nstr, g_ptr_array_index(wrapped_str, i));

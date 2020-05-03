@@ -1,6 +1,6 @@
 /*
  * config.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,12 +22,13 @@
 
 #include "config.h"
 #include "display.h"
+#include "nlarn.h"
 #include "items.h"
 #include "player.h"
 
 static const char *default_config_file =
     "[nlarn]\n"
-    "# Set difficulty\n"
+    "# Difficulty (i.e. number of games won)\n"
     "difficulty=0\n"
     "\n"
     "# Set character's name\n"
@@ -68,6 +69,15 @@ static const char *default_config_file =
     "# enabled by default, disable when it's too slow on your computer\n"
     "no-autosave=false\n";
 
+/* shared config cleanup helper */
+void free_config(const struct game_config config)
+{
+    if (config.name)        g_free(config.name);
+    if (config.gender)      g_free(config.gender);
+    if (config.stats)       g_free(config.stats);
+    if (config.auto_pickup) g_free(config.auto_pickup);
+}
+
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config)
 {
@@ -77,7 +87,6 @@ void parse_commandline(int argc, char *argv[], struct game_config *config)
         { "gender",      'g', 0, G_OPTION_ARG_STRING, &config->gender,       "Set character's gender (m/f)", NULL },
         { "stats",       's', 0, G_OPTION_ARG_STRING, &config->stats,        "Set character's stats (a-f)", NULL },
         { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &config->auto_pickup,  "Item types to pick up automatically, e.g. '$*+'", NULL },
-        { "difficulty",  'd', 0, G_OPTION_ARG_INT,    &config->difficulty,   "Set difficulty", NULL },
         { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config->no_autosave,  "Disable autosave", NULL },
         { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config->wizard,       "Enable wizard mode", NULL },
 #ifdef SDLPDCURSES
@@ -150,6 +159,11 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
     else
     {
         /* File not found. Never mind but clean up the mess */
+        if (nlarn && nlarn->log) {
+            log_add_entry(nlarn->log,
+                "Unable to parse configuration file: %s\n",
+                error->message);
+        }
         g_clear_error(&error);
     }
 
@@ -189,10 +203,11 @@ void write_ini_file(const char *filename, struct game_config *config)
 
 void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX])
 {
-    g_assert(settings != NULL);
-
     /* reset configuration */
     memset(config, 0, sizeof(gboolean) * IT_MAX);
+
+    /* parsing config has failed, not settings string given */
+    if (!settings) return;
 
     for (guint idx = 0; idx < strlen(settings); idx++)
     {
@@ -309,7 +324,7 @@ void configure_defaults(const char *inifile)
         /* gender */
         char *gbuf = config.gender
             ? g_strdup_printf("`yellow`%s`end`",
-                    ((strcmp(config.gender, "m") == 0) ? "male" : "female"))
+                    player_sex_str[parse_gender(config.gender[0])])
             : NULL;
         /* stats */
         char *sbuf = (config.stats && strlen(config.stats) > 0)
@@ -344,7 +359,7 @@ void configure_defaults(const char *inifile)
                 "Configure defaults", msg, 30);
         g_free(msg);
 
-        int res = wgetch(cwin->window);
+        int res = display_getch(cwin->window);
         switch (res)
         {
             /* default name */
@@ -471,8 +486,19 @@ void configure_defaults(const char *inifile)
     write_ini_file(inifile, &config);
 
     /* clean up */
-    if (config.name)        g_free(config.name);
-    if (config.gender)      g_free(config.gender);
-    if (config.stats)       g_free(config.stats);
-    if (config.auto_pickup) g_free(config.auto_pickup);
+    free_config(config);
+}
+
+void config_increase_difficulty(const char *inifile, const int new_difficulty)
+{
+    struct game_config config = {};
+    parse_ini_file(inifile, &config);
+
+    config.difficulty = new_difficulty;
+
+    /* write back modified config */
+    write_ini_file(inifile, &config);
+
+    /* clean up */
+    free_config(config);
 }

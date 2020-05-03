@@ -1,6 +1,6 @@
 /*
  * monsters.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,6 +27,7 @@
 #include "map.h"
 #include "monsters.h"
 #include "nlarn.h"
+#include "pathfinding.h"
 #include "random.h"
 
 DEFINE_ENUM(monster_flag, MONSTER_FLAG_ENUM)
@@ -50,6 +51,7 @@ typedef struct {
     size size;
     int flags;
     attack attacks[2];
+    monster_action_t default_ai;
 } monster_data_t;
 
 /* monster information hiding */
@@ -69,6 +71,7 @@ struct _monster
     item *eq_weapon;
     GPtrArray *effects;
     guint number;        /* random value for some monsters */
+    gpointer leader;    /* for pack monsters: ID of the leader */
     guint32
         unknown: 1;      /* monster is unknown (mimic) */
 };
@@ -77,12 +80,12 @@ const char *monster_ai_desc[] =
 {
     NULL,               /* MA_NONE */
     "fleeing",          /* MA_FLEE */
-    "standing still",   /* MA_REMAIN */
+    "idling",           /* MA_REMAIN */
     "wandering",        /* MA_WANDER */
     "attacking",        /* MA_ATTACK */
     "puzzled",          /* MA_CONFUSION */
-    "serving you",      /* MA_SERVE */
-    "doing something boring", /* MA_CIVILIAN */
+    "obedient",         /* MA_SERVE */
+    "working",          /* MA_CIVILIAN */
 };
 
 const char *monster_attack_verb[] =
@@ -126,7 +129,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | FLY | INFRAVISION,
         .attacks = {
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GNOME */
         .name = "gnome", .glyph = 'g', .colour = BROWN,
@@ -135,7 +138,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_HOBGOBLIN */
         .name = "hobgoblin", .glyph = 'H', .colour = BROWN,
@@ -144,7 +147,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_JACKAL */
         .name = "jackal", .glyph = 'J', .colour = BROWN,
@@ -153,7 +156,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD,
         .attacks = {
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_KOBOLD */
         .name = "kobold", .glyph = 'k', .colour = BROWN,
@@ -162,16 +165,16 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ORC */
         .name = "orc", .glyph = 'O', .colour = RED,
         .exp = 2, .gold_chance = 50, .gold = 80, .ac = 3, .hp_max = 12,
         .level = 2, .intelligence = 9, .speed = NORMAL, .size = MEDIUM,
-        .flags = HEAD | HANDS | INFRAVISION,
+        .flags = HEAD | HANDS | INFRAVISION | PACK,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_SNAKE */
         .name = "snake", .glyph = 'S', .colour = LIGHTGREEN,
@@ -181,7 +184,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
             { .type = ATT_BITE, .base = 2, .damage = DAM_POISON },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_CENTIPEDE */
         .name = "giant centipede", .glyph = 'c', .colour = YELLOW,
@@ -191,7 +194,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 50, .damage = DAM_DEC_STR },
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_JACULUS */
         .name = "jaculus", .plural_name = "jaculi", .glyph = 'j', .colour = GREEN,
@@ -201,7 +204,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_TROGLODYTE */
         .name = "troglodyte", .glyph = 't', .colour = BROWN,
@@ -210,17 +213,17 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GIANT_ANT */
         .name = "giant ant", .glyph = 'A', .colour = BROWN,
         .exp = 5, .ac = 2, .hp_max = 6,
         .level = 2, .intelligence = 3, .speed = NORMAL, .size = SMALL,
-        .flags = HEAD,
+        .flags = HEAD | PACK,
         .attacks = {
             { .type = ATT_BITE, .base = 75, .damage = DAM_DEC_STR },
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_FLOATING_EYE */
         .name = "floating eye", .glyph = 'E', .colour = BLUE,
@@ -229,7 +232,7 @@ monster_data_t monster_data[] = {
         .flags = FLY | INFRAVISION | RES_CONF,
         .attacks = {
             { .type = ATT_GAZE, .base = 66, .damage = DAM_PARALYSIS },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_LEPRECHAUN */
         .name = "leprechaun", .glyph = 'L', .colour = GREEN,
@@ -239,7 +242,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_TOUCH, .damage = DAM_STEAL_GOLD },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_NYMPH */
         .name = "nymph", .glyph = 'n', .colour = RED,
@@ -248,7 +251,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS,
         .attacks = {
             { .type = ATT_TOUCH, .damage = DAM_STEAL_ITEM },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_QUASIT */
         .name = "quasit", .glyph = 'Q', .colour = BLUE,
@@ -258,7 +261,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 66, .damage = DAM_DEC_DEX },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_RUST_MONSTER */
         .name = "rust monster", .glyph = 'R', .colour = BROWN,
@@ -268,7 +271,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_TOUCH, .base = 1, .damage = DAM_RUST },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ZOMBIE */
         .name = "zombie", .glyph = 'Z', .colour = LIGHTGRAY,
@@ -278,7 +281,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ASSASSIN_BUG */
         .name = "assassin bug", .glyph = 'a', .colour = GREEN,
@@ -288,7 +291,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_BITE, .base = 3, .damage = DAM_POISON },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_BUGBEAR */
         .name = "bugbear", .glyph = 'B', .colour = BROWN,
@@ -298,7 +301,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 5, .damage = DAM_PHYSICAL, .rand = 10 },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_HELLHOUND */
         .name = "hell hound", .glyph = 'h', .colour = LIGHTRED,
@@ -308,7 +311,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_BREATH, .base = 8, .damage = DAM_FIRE, .rand = 15 },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ICE_LIZARD */
         .name = "ice lizard", .glyph = 'i', .colour = LIGHTCYAN,
@@ -318,17 +321,17 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_SLAM, .base = 14, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_CENTAUR */
         .name = "centaur", .glyph = 'C', .colour = BROWN,
         .exp = 45, .gold_chance = 50, .gold = 80, .ac = 6, .hp_max = 24,
         .level = 4, .intelligence = 10, .speed = FAST, .size = LARGE,
-        .flags = HEAD | HANDS,
+        .flags = HEAD | HANDS | PACK,
         .attacks = {
             { .type = ATT_KICK, .base = 6, .damage = DAM_PHYSICAL },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_TROLL */
         .name = "troll", .glyph = 'T', .colour = BROWN,
@@ -338,7 +341,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 5, .damage = DAM_PHYSICAL },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_YETI */
         .name = "yeti", .glyph = 'Y', .colour = WHITE,
@@ -347,7 +350,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | RES_COLD,
         .attacks = {
             { .type = ATT_CLAW, .base = 4, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ELF */
         .name = "elf", .plural_name = "elves", .glyph = 'e', .colour = WHITE,
@@ -356,7 +359,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GELATINOUSCUBE */
         .name = "gelatinous cube", .glyph = 'g', .colour = CYAN,
@@ -365,7 +368,7 @@ monster_data_t monster_data[] = {
         .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF,
         .attacks = {
             { .type = ATT_SLAM, .base = 1, .damage = DAM_ACID },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_WHITE_DRAGON */
         .name = "white dragon", .glyph = 'd', .colour = WHITE,
@@ -375,7 +378,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 4, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 4, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_METAMORPH */
         .name = "metamorph", .glyph = 'm', .colour = WHITE,
@@ -384,7 +387,7 @@ monster_data_t monster_data[] = {
         .flags = 0,
         .attacks = {
             { .type = ATT_WEAPON, .base = 3, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_VORTEX */
         .name = "vortex", .plural_name = "vortexes", .glyph = 'v', .colour = CYAN,
@@ -393,7 +396,7 @@ monster_data_t monster_data[] = {
         .flags = RES_SLEEP | RES_POISON | FLY | RES_ELEC | RES_CONF,
         .attacks = {
             { .type = ATT_SLAM, .base = 3, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ZILLER */
         .name = "ziller", .glyph = 'z', .colour = CYAN,
@@ -403,7 +406,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 70, .damage = DAM_DEC_RND },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_VIOLET_FUNGUS */
         .name = "violet fungus", .plural_name = "violet fungi", .glyph = 'F', .colour = MAGENTA,
@@ -413,7 +416,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_SLAM, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_SLAM, .base = 4, .damage = DAM_POISON },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_WRAITH */
         .name = "wraith", .glyph = 'W', .colour = LIGHTGRAY,
@@ -422,7 +425,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | UNDEAD | RES_SLEEP | RES_POISON | RES_CONF,
         .attacks = {
             { .type = ATT_TOUCH, .base = 50, .damage = DAM_DRAIN_LIFE },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_FORVALAKA */
         .name = "forvalaka", .glyph = 'f', .colour = LIGHTGRAY,
@@ -431,7 +434,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | UNDEAD | INFRAVISION | RES_POISON,
         .attacks = {
             { .type = ATT_BITE, .base = 5, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_LAMA_NOBE */
         .name = "lama nobe", .glyph = 'l', .colour = RED,
@@ -441,26 +444,26 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
             { .type = ATT_GAZE, .base = 25, .damage = DAM_BLINDNESS },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_OSQUIP */
         .name = "osquip", .glyph = 'o', .colour = BROWN,
         .exp = 100, .ac = 5, .hp_max = 35,
         .level = 7, .intelligence = 4, .speed = VFAST, .size = SMALL,
-        .flags = HEAD,
+        .flags = HEAD | PACK,
         .attacks = {
             { .type = ATT_BITE, .base = 10, .damage = DAM_PHYSICAL, .rand = 15 },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_ROTHE */
         .name = "rothe", .glyph = 'r', .colour = BROWN,
         .exp = 250, .ac = 5, .hp_max = 50,
         .level = 7, .intelligence = 5, .speed = VFAST, .size = LARGE,
-        .flags = HEAD | INFRAVISION,
+        .flags = HEAD | INFRAVISION | PACK,
         .attacks = {
             { .type = ATT_BITE, .base = 5, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_XORN */
         .name = "xorn", .glyph = 'X', .colour = BROWN,
@@ -469,7 +472,7 @@ monster_data_t monster_data[] = {
         .flags = INFRAVISION,
         .attacks = {
             { .type = ATT_BITE, .base = 6, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_VAMPIRE */
         .name = "vampire", .glyph = 'V', .colour = RED,
@@ -479,7 +482,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 75, .damage = DAM_DRAIN_LIFE },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_STALKER */
         .name = "invisible stalker", .glyph = 'I', .colour = LIGHTGRAY,
@@ -488,7 +491,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | FLY | INVISIBLE,
         .attacks = {
             { .type = ATT_SLAM, .base = 6, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_POLTERGEIST */
         .name = "poltergeist", .glyph = 'p', .colour = WHITE,
@@ -497,7 +500,7 @@ monster_data_t monster_data[] = {
         .flags = FLY | UNDEAD | INVISIBLE | RES_SLEEP | RES_POISON,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DISENCHANTRESS */
         .name = "disenchantress", .plural_name = "disenchantresses", .glyph = 'q', .colour = WHITE,
@@ -506,7 +509,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | METALLIVORE,
         .attacks = {
             { .type = ATT_TOUCH, .damage = DAM_REM_ENCH },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_SHAMBLINGMOUND */
         .name = "shambling mound", .glyph = 's', .colour = GREEN,
@@ -515,7 +518,7 @@ monster_data_t monster_data[] = {
         .flags = RES_SLEEP | RES_POISON,
         .attacks = {
             { .type = ATT_SLAM, .base = 5, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_YELLOW_MOLD */
         .name = "yellow mold", .glyph = 'y', .colour = YELLOW,
@@ -524,7 +527,7 @@ monster_data_t monster_data[] = {
         .flags = RES_SLEEP | RES_POISON | RES_CONF,
         .attacks = {
             { .type = ATT_TOUCH, .base = 4, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_UMBER_HULK */
         .name = "umber hulk", .glyph = 'U', .colour = YELLOW,
@@ -534,7 +537,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_CLAW, .base = 7, .damage = DAM_PHYSICAL },
             { .type = ATT_GAZE, .base = 75, .damage = DAM_CONFUSION },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GNOME_KING */
         .name = "gnome king", .glyph = 'G', .colour = RED,
@@ -543,7 +546,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | RES_SLEEP,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_MIMIC */
         .name = "mimic", .glyph = 'M', .colour = BROWN,
@@ -552,7 +555,7 @@ monster_data_t monster_data[] = {
         .flags = MIMIC,
         .attacks = {
             { .type = ATT_SLAM, .base = 6, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_WATER_LORD */
         .name = "water lord", .glyph = 'w', .colour = LIGHTBLUE,
@@ -561,7 +564,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | NOBEHEAD | HANDS | RES_SLEEP | SWIM,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_PURPLE_WORM */
         .name = "purple worm", .glyph = 'P', .colour = MAGENTA,
@@ -571,7 +574,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 11, .damage = DAM_PHYSICAL },
             { .type = ATT_STING, .base = 6, .damage = DAM_POISON },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_XVART */
         .name = "xvart", .glyph = 'x', .colour = LIGHTGRAY,
@@ -580,7 +583,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_BRONZE_DRAGON */
         .name = "bronze dragon", .glyph = 'D', .colour = BROWN,
@@ -590,7 +593,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 9, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 9, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GREEN_DRAGON */
         .name = "green dragon", .glyph = 'D', .colour = LIGHTGREEN,
@@ -600,7 +603,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BREATH, .base = 8, .damage = DAM_POISON },
             { .type = ATT_SLAM, .base = 25, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_SILVER_DRAGON */
         .name = "silver dragon", .glyph = 'D', .colour = LIGHTGRAY,
@@ -610,7 +613,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 12, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 12, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_PLATINUM_DRAGON */
         .name = "platinum dragon", .glyph = 'D', .colour = WHITE,
@@ -620,7 +623,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 15, .damage = DAM_PHYSICAL },
             { .type = ATT_BREATH, .base = 15, .damage = DAM_MAGICAL, .rand = 30 },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_RED_DRAGON */
         .name = "red dragon", .glyph = 'D', .colour = LIGHTRED,
@@ -630,7 +633,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BREATH, .base = 20, .damage = DAM_FIRE, .rand = 25 },
             { .type = ATT_CLAW, .base = 13, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_SPIRIT_NAGA */
         .name = "spirit naga", .glyph = 'N', .colour = MAGENTA,
@@ -640,7 +643,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 12, .damage = DAM_PHYSICAL },
             { .type = ATT_MAGIC, .base = 1, .damage = DAM_RANDOM },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_GREEN_URCHIN */
         .name = "green urchin", .glyph = 'u', .colour = GREEN,
@@ -650,7 +653,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_STING, .base = 12, .damage = DAM_PHYSICAL },
             { .type = ATT_STING, .base = 50, .damage = DAM_BLINDNESS },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_I */
         .name = "type I demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -660,7 +663,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_II */
         .name = "type II demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -670,7 +673,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_III */
         .name = "type III demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -680,7 +683,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_IV */
         .name = "type IV demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -690,7 +693,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 20, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 20, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_V */
         .name = "type V demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -700,7 +703,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 22, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 22, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_VI */
         .name = "type VI demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -710,7 +713,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 24, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 24, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_VII */
         .name = "type VII demon lord", .glyph = '&', .colour = LIGHTRED,
@@ -720,7 +723,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 27, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 27, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_DEMON_PRINCE */
         .name = "demon prince", .glyph = '&', .colour = RED,
@@ -730,7 +733,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_BITE, .base = 30, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 30, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_WANDER
     },
     { /* MT_TOWN_PERSON */
         .name = "human", .glyph = '@', .colour = BROWN,
@@ -739,10 +742,11 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS,
         .attacks = {
             { .type = ATT_SLAM, .base = 0, .damage = DAM_PHYSICAL },
-        }
+        }, .default_ai = MA_CIVILIAN
     },
 };
 
+static inline monster_action_t monster_default_ai(monster *m);
 static gboolean monster_player_visible(monster *m);
 static gboolean monster_attack_available(monster *m, attack_t type);
 static item *monster_weapon_select(monster *m);
@@ -750,6 +754,8 @@ static void monster_weapon_wield(monster *m, item *weapon);
 static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
+
+static position monster_find_next_pos_to(monster *m, position dest);
 static position monster_move_wander(monster *m, struct player *p);
 static position monster_move_attack(monster *m, struct player *p);
 static position monster_move_confused(monster *m, struct player *p);
@@ -761,7 +767,7 @@ static gboolean monster_breath_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
-monster *monster_new(monster_t type, position pos)
+monster *monster_new(monster_t type, position pos, gpointer leader)
 {
     g_assert(type < MT_MAX && pos_valid(pos));
 
@@ -779,7 +785,7 @@ monster *monster_new(monster_t type, position pos)
     {
         /* try to find a replacement for the demon prince */
         if (type == MT_DEMON_PRINCE)
-            return monster_new(MT_DEMONLORD_I + rand_0n(7), pos);
+            return monster_new(MT_DEMONLORD_I + rand_0n(7), pos, NULL);
         else
             return NULL;
     }
@@ -835,8 +841,6 @@ monster *monster_new(monster_t type, position pos)
     case MT_TOWN_PERSON:
         /* initialize name counter */
         nmonster->number = rand_1n(40);
-        /* set the AI to civilian */
-        nmonster->action = MA_CIVILIAN;
         break;
 
     default:
@@ -924,9 +928,9 @@ monster *monster_new(monster_t type, position pos)
     }
 
     /* initialize AI */
-    if (nmonster->action == MA_NONE)
-        nmonster->action = MA_WANDER;
+    nmonster->action = monster_default_ai(nmonster);
     nmonster->player_pos = pos_invalid;
+    nmonster->leader = leader;
 
     /* register monster with game */
     nmonster->oid = game_monster_register(nlarn, nmonster);
@@ -936,6 +940,23 @@ monster *monster_new(monster_t type, position pos)
 
     /* link monster to tile */
     map_set_monster_at(game_map(nlarn, Z(pos)), pos, nmonster);
+
+    /* add some members to the pack if we created a pack monster */
+    if (monster_flags(nmonster, PACK) && !leader)
+    {
+        guint count = rand_1n(5);
+        while (count > 0)
+        {
+            position mpos = map_find_space_in(game_map(nlarn, Z(pos)),
+                                    rect_new_sized(pos, 4), LE_MONSTER, FALSE);
+            /* no space left? */
+            if (!pos_valid(mpos)) break;
+
+            /* valid position returned, place a pack member there */
+            monster_new(type, mpos, nmonster->oid);
+            count--;
+        }
+    }
 
     /* increment monster count */
     game_map(nlarn, Z(pos))->mcount++;
@@ -947,20 +968,21 @@ monster *monster_new_by_level(position pos)
 {
     g_assert(pos_valid(pos));
 
-    const int mlevel[] = { MT_KOBOLD,           // D1:   5
-                            MT_GIANT_ANT,        // D2:  11
-                            MT_ZOMBIE,           // D3:  17
-                            MT_CENTAUR,          // D4:  22
-                            MT_WHITE_DRAGON,     // D5:  27
-                            MT_FORVALAKA,        // D6:  33
-                            MT_STALKER,          // D7:  39
-                            MT_SHAMBLINGMOUND,   // D8:  42
-                            MT_MIMIC,            // D9:  46
-                            MT_BRONZE_DRAGON,    // D10: 50
-                            MT_PLATINUM_DRAGON,  // V1:  53
-                            MT_GREEN_URCHIN,     // V2:  56
-                            MT_DEMON_PRINCE      // V3
-                          };
+    const int mlevel[] = {
+        MT_KOBOLD,           // D1:   5
+        MT_GIANT_ANT,        // D2:  11
+        MT_ZOMBIE,           // D3:  17
+        MT_CENTAUR,          // D4:  22
+        MT_WHITE_DRAGON,     // D5:  27
+        MT_FORVALAKA,        // D6:  33
+        MT_STALKER,          // D7:  39
+        MT_SHAMBLINGMOUND,   // D8:  42
+        MT_MIMIC,            // D9:  46
+        MT_BRONZE_DRAGON,    // D10: 50
+        MT_PLATINUM_DRAGON,  // V1:  53
+        MT_GREEN_URCHIN,     // V2:  56
+        MT_DEMON_PRINCE      // V3
+    };
 
     const int nlevel = Z(pos);
     int monster_id;
@@ -972,22 +994,22 @@ monster *monster_new_by_level(position pos)
     }
     else
     {
-        /* everything else in the dungeons */
+        /* everything else in the caverns */
         int minstep = nlevel - 4;
         int maxstep = nlevel - 1;
 
         int monster_id_min;
         int monster_id_max;
 
-        if (chance(2*game_difficulty(nlarn)))
+        if (chance(2 * game_difficulty(nlarn)))
             maxstep += 2;
-        else if (chance(7*(game_difficulty(nlarn) + 1)))
+        else if (chance(7 * (game_difficulty(nlarn) + 1)))
             maxstep++;
         else if (chance(10))
             minstep--;
 
         if (minstep < 0)
-            monster_id_min = 1;
+            monster_id_min = MT_GIANT_BAT;
         else
             monster_id_min = mlevel[minstep] + 1;
 
@@ -1008,7 +1030,7 @@ monster *monster_new_by_level(position pos)
                 || chance(monster_type_reroll_chance(monster_id)));
     }
 
-    return monster_new(monster_id, pos);
+    return monster_new(monster_id, pos, NULL);
 }
 
 void monster_destroy(monster *m)
@@ -1062,6 +1084,9 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     if (m->number)
         cJSON_AddNumberToObject(mval, "number", m->number);
 
+    if (m->leader)
+        cJSON_AddNumberToObject(mval, "leader", GPOINTER_TO_UINT(m->leader));
+
     if (m->unknown)
         cJSON_AddTrueToObject(mval, "unknown");
 
@@ -1104,6 +1129,12 @@ void monster_deserialize(cJSON *mser, game *g)
 
     if ((obj = cJSON_GetObjectItem(mser, "number")))
         m->number = obj->valueint;
+
+    if ((obj = cJSON_GetObjectItem(mser, "leader")))
+    {
+        guint leader = obj->valueint;
+        m->leader = GUINT_TO_POINTER(leader);
+    }
 
     if ((obj = cJSON_GetObjectItem(mser, "unknown")))
         m->unknown = obj->valueint;
@@ -1437,13 +1468,13 @@ void monster_level_enter(monster *m, struct map *l)
     /* check if the monster used the stairs */
     switch (source)
     {
-    case LS_DNGN_EXIT:
-        target = LS_DNGN_ENTRANCE;
+    case LS_CAVERNS_EXIT:
+        target = LS_CAVERNS_ENTRY;
         what = "through";
         break;
 
-    case LS_DNGN_ENTRANCE:
-        target = LS_DNGN_EXIT;
+    case LS_CAVERNS_ENTRY:
+        target = LS_CAVERNS_EXIT;
         what = "through";
         break;
 
@@ -1511,7 +1542,7 @@ void monster_level_enter(monster *m, struct map *l)
     /* log the event */
     if (monster_in_sight(m) && target)
     {
-        log_add_entry(nlarn->log, "The %s %s %s %s.", monster_name(m),
+        log_add_entry(nlarn->log, "The %s %s %s %s.", monster_get_name(m),
                       how, what, so_get_desc(target));
     }
 }
@@ -1522,7 +1553,8 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     position m_npos;
 
     /* expire summoned monsters */
-    if (monster_action(m) == MA_SERVE)
+    if (monster_action(m) == MA_SERVE
+            && !monster_effect(m, ET_CHARM_MONSTER))
     {
         m->number--;
 
@@ -1563,7 +1595,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     gboolean map_adjacent = (Z(mpos) == Z(g->p->pos)
                              || (Z(mpos) == Z(g->p->pos) - 1)
                              || (Z(mpos) == Z(g->p->pos) + 1)
-                             || (Z(mpos) == MAP_DMAX && Z(g->p->pos) == 0)
+                             || (Z(mpos) == MAP_CMAX && Z(g->p->pos) == 0)
                             );
     if (!map_adjacent)
         return;
@@ -1608,7 +1640,8 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             }
             else if (m->action == MA_FLEE)
             {
-                log_add_entry(g->log, "The %s turns to flee!", monster_name(m));
+                log_add_entry(g->log, "The %s turns to flee!",
+                        monster_get_name(m));
             }
         }
 
@@ -1695,7 +1728,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                     if (monster_in_sight(m))
                     {
                         log_add_entry(g->log, "The %s bumps into the door.",
-                                      monster_name(m));
+                                      monster_get_name(m));
                     }
                 }
                 else
@@ -1707,7 +1740,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                     if (monster_in_sight(m))
                     {
                         log_add_entry(g->log, "The %s opens the door.",
-                                      monster_name(m));
+                                      monster_get_name(m));
                     }
                 }
             }
@@ -1733,7 +1766,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                             if (monster_in_sight(m))
                             {
                                 log_add_entry(g->log, "The %s bumps into %s.",
-                                              monster_name(m), mt_get_desc(nle));
+                                        monster_get_name(m), mt_get_desc(nle));
                             }
                             break;
 
@@ -1741,7 +1774,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                         case LT_DEEPWATER:
                             if (monster_in_sight(m)) {
                                 log_add_entry(g->log, "The %s sinks into %s.",
-                                              monster_name(m), mt_get_desc(nle));
+                                        monster_get_name(m), mt_get_desc(nle));
                             }
                             monster_die(m, g->p);
                             break;
@@ -1899,15 +1932,13 @@ int monster_items_pickup(monster *m)
                 gchar *buf = item_describe(it, player_item_identified(nlarn->p, it),
                                            FALSE, FALSE);
 
-                log_add_entry(nlarn->log, "The %s picks up %s.", monster_name(m), buf);
+                log_add_entry(nlarn->log, "The %s picks up %s.",
+                        monster_get_name(m), buf);
                 g_free(buf);
             }
 
             inv_del_element(map_ilist_at(monster_map(m), m->pos), it);
             inv_add(&m->inv, it);
-
-            /* go back one item as the following items lowered their number */
-            idx--;
 
             if (new_weapon)
             {
@@ -1954,18 +1985,6 @@ static int monster_breath_attack(monster *m, player *p, attack att)
 {
     g_assert(att.type == ATT_BREATH);
 
-    /* FIXME: charm monster is extremely broken. This should be handled totally different */
-    if (monster_effect(m, ET_CHARM_MONSTER)
-            && (rand_m_n(5, 30) * monster_level(m) - player_get_wis(p) < 30))
-    {
-        if (monster_in_sight(m))
-        {
-            log_add_entry(nlarn->log, "The %s is awestruck at your magnificence!",
-                          monster_get_name(m));
-        }
-        return TRUE;
-    }
-
     /* generate damage */
     damage *dam = damage_new(att.damage, att.type, att.base + game_difficulty(nlarn),
                              DAMO_MONSTER, m);
@@ -2010,9 +2029,7 @@ void monster_player_attack(monster *m, player *p)
 {
     g_assert(m != NULL && p != NULL);
 
-    damage *dam;
     map *mmap = game_map(nlarn, Z(m->pos));
-    attack att = {};
 
     /* the player is invisible and the monster bashes into thin air */
     if (!pos_identical(m->player_pos, p->pos))
@@ -2020,7 +2037,7 @@ void monster_player_attack(monster *m, player *p)
         if (!map_is_monster_at(mmap, p->pos) && monster_in_sight(m))
         {
             log_add_entry(nlarn->log, "The %s bashes into thin air.",
-                          monster_name(m));
+                    monster_get_name(m));
         }
 
         m->lastseen++;
@@ -2041,19 +2058,8 @@ void monster_player_attack(monster *m, player *p)
         return;
     }
 
-    if (monster_effect(m, ET_CHARM_MONSTER)
-            && (rand_m_n(5, 30) * monster_level(m) - player_get_wis(p) < 30))
-    {
-        if (monster_in_sight(m))
-        {
-            log_add_entry(nlarn->log, "The %s is awestruck at your magnificence!",
-                          monster_get_name(m));
-        }
-        return;
-    }
-
     /* choose a random attack type */
-    att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
+    attack att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
 
     /* No attack has been found. Return to calling function. */
     if (att.type == ATT_NONE) return;
@@ -2066,9 +2072,9 @@ void monster_player_attack(monster *m, player *p)
     }
 
     /* generate damage */
-    dam = damage_new(att.damage, att.type,
-                     modified_attack_amount(att.base, att.damage),
-                     DAMO_MONSTER, m);
+    damage *dam = damage_new(att.damage, att.type,
+                        modified_attack_amount(att.base, att.damage),
+                        DAMO_MONSTER, m);
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM)
@@ -2217,7 +2223,8 @@ monster *monster_damage_take(monster *m, damage *dam)
         dam->amount -= monster_ac(m);
         if (dam->amount < 1 && monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, "The %s isn't hurt.", monster_name(m));
+            log_add_entry(nlarn->log, "The %s isn't hurt.",
+                    monster_get_name(m));
         }
         break;
 
@@ -2228,7 +2235,7 @@ monster *monster_damage_take(monster *m, damage *dam)
             if (monster_in_sight(m))
             {
                 log_add_entry(nlarn->log, "The %s %sresists the magic.",
-                        monster_name(m), dam->amount > 0 ? "partly " : "");
+                        monster_get_name(m), dam->amount > 0 ? "partly " : "");
             }
         }
         break;
@@ -2246,7 +2253,7 @@ monster *monster_damage_take(monster *m, damage *dam)
             if (monster_in_sight(m))
             {
                 log_add_entry(nlarn->log, "The %s %sresists the flames.",
-                        monster_name(m), dam->amount > 0 ? "partly " : "");
+                        monster_get_name(m), dam->amount > 0 ? "partly " : "");
             }
         }
         break;
@@ -2258,7 +2265,7 @@ monster *monster_damage_take(monster *m, damage *dam)
             if (monster_in_sight(m))
             {
                 log_add_entry(nlarn->log, "The %s loves the cold!",
-                        monster_name(m));
+                        monster_get_name(m));
             }
         }
         break;
@@ -2272,8 +2279,11 @@ monster *monster_damage_take(monster *m, damage *dam)
         if (monster_flags(m, RES_ELEC))
         {
             dam->amount = 0;
-            log_add_entry(nlarn->log, "The %s is not affected!",
-                          monster_name(m));
+            if (monster_in_sight(m))
+            {
+                log_add_entry(nlarn->log, "The %s is not affected!",
+                        monster_get_name(m));
+            }
         }
         /* double damage for flying monsters */
         else if (monster_flags(m, FLY) || monster_effect(m, ET_LEVITATION))
@@ -2347,8 +2357,8 @@ monster *monster_damage_take(monster *m, damage *dam)
 
                     if (seen_old && seen_new)
                     {
-                        log_add_entry(nlarn->log, "The %s turns into "
-                                        "a %s!", old_name, monster_name(m));
+                        log_add_entry(nlarn->log, "The %s turns into a %s!",
+                                old_name, monster_get_name(m));
                     }
                     else if (seen_old)
                     {
@@ -2358,7 +2368,7 @@ monster *monster_damage_take(monster *m, damage *dam)
                     else
                     {
                         log_add_entry(nlarn->log, "A %s suddenly appears!",
-                                        monster_name(m));
+                                monster_get_name(m));
                     }
                 }
 
@@ -2384,7 +2394,6 @@ gboolean monster_update_action(monster *m, monster_action_t override)
     monster_action_t naction; /* new action */
     guint mtime; /* max. number of turns a monster will look for the player */
     gboolean low_hp;
-    gboolean smart;
 
     if (override > MA_NONE)
     {
@@ -2406,6 +2415,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
         case MA_SERVE:     /* once servant, forever servant */
         case MA_CIVILIAN:  /* town people never change their behaviour */
         case MA_CONFUSION: /* confusion is removed by monster_effect_del() */
+        case MA_REMAIN:    /* status set by hold monster/sleep/being trapped */
             return FALSE;
             break;
 
@@ -2416,20 +2426,13 @@ gboolean monster_update_action(monster *m, monster_action_t override)
 
     mtime  = monster_int(m) + 25 + (5 * game_difficulty(nlarn));
     low_hp = (m->hp < (monster_hp_max(m) / 4 ));
-    smart  = (monster_int(m) > 4);
 
     if (monster_flags(m, MIMIC) && m->unknown)
     {
         /* stationary monsters */
         naction = MA_REMAIN;
     }
-    else if (monster_effect(m, ET_HOLD_MONSTER) || monster_effect(m, ET_SLEEP)
-             || monster_effect(m, ET_TRAPPED))
-    {
-        /* no action if monster is held or sleeping */
-        naction = MA_REMAIN;
-    }
-    else if ((low_hp && smart) || monster_effect(m, ET_SCARED))
+    else if ((low_hp && (monster_int(m) > 4)) || monster_effect(m, ET_SCARED))
     {
         /* low HP or very scared => FLEE from player */
         naction = MA_FLEE;
@@ -2559,7 +2562,9 @@ char *monster_desc(monster *m)
     if (game_wizardmode(nlarn))
     {
         /* show monster's hp and max hp in wizard mode */
-        g_string_append_printf(desc, " (%d/%d hp)", m->hp, m->hp_max);
+        g_string_append_printf(desc, " %s(%d/%d hp)",
+            m->leader ? "(pack member) " : "",
+            m->hp, m->hp_max);
     }
 
     if (m->eq_weapon != NULL)
@@ -2730,6 +2735,17 @@ effect *monster_effect_add(monster *m, effect *e)
         if (e && e->type == ET_CONFUSION) {
             monster_update_action(m, MA_CONFUSION);
         }
+
+        /* charm monster turns monsters into servants */
+        if (e && e->type == ET_CHARM_MONSTER) {
+            monster_update_action(m, MA_SERVE);
+        }
+
+        /* no action if monster is held or sleeping */
+        if (e && (e->type == ET_HOLD_MONSTER || e->type == ET_SLEEP || e->type == ET_TRAPPED))
+        {
+            monster_update_action(m, MA_REMAIN);
+        }
     }
 
     /* show message if monster is visible */
@@ -2738,7 +2754,7 @@ effect *monster_effect_add(monster *m, effect *e)
         && (e->turns > 0 || vis_effect))
     {
         log_add_entry(nlarn->log, effect_get_msg_m_start(e),
-                      monster_name(m));
+                      monster_get_name(m));
     }
 
     /* clean up one-time effects */
@@ -2760,14 +2776,26 @@ int monster_effect_del(monster *m, effect *e)
     /* log info if the player can see the monster */
     if (monster_in_sight(m) && effect_get_msg_m_stop(e))
     {
-        log_add_entry(nlarn->log, effect_get_msg_m_stop(e), monster_name(m));
+        log_add_entry(nlarn->log, effect_get_msg_m_stop(e), monster_get_name(m));
     }
 
     if ((result = effect_del(m->effects, e)))
     {
-        /* if confusion is finished, set the AI back to the default */
-        if ((e->type) == ET_CONFUSION) {
-            monster_update_action(m, MA_WANDER);
+        /* if confusion or charm is finished, set the AI back to the default */
+        if (e->type == ET_CONFUSION || e->type == ET_CHARM_MONSTER) {
+            monster_update_action(m, monster_default_ai(m));
+        }
+
+        /* end of holding, sleeping or being trapped */
+        if (e->type == ET_HOLD_MONSTER || e->type == ET_SLEEP || e->type == ET_TRAPPED)
+        {
+            /* only reset the AI when no other "idling" effect is left */
+            if (!monster_effect(m, ET_HOLD_MONSTER)
+                    && !monster_effect(m, ET_SLEEP)
+                    && !monster_effect(m, ET_TRAPPED))
+            {
+                monster_update_action(m, monster_default_ai(m));
+            }
         }
 
         effect_destroy(e);
@@ -2820,6 +2848,11 @@ void monster_effects_expire(monster *m)
             idx++;
         }
     }
+}
+
+static inline monster_action_t monster_default_ai(monster *m)
+{
+    return monster_data[m->type].default_ai;
 }
 
 static gboolean monster_player_visible(monster *m)
@@ -2911,7 +2944,7 @@ static void monster_weapon_wield(monster *m, item *weapon)
         gchar *buf = item_describe(weapon, player_item_identified(nlarn->p,
                                 weapon), TRUE, FALSE);
 
-        log_add_entry(nlarn->log, "The %s wields %s.", monster_name(m), buf);
+        log_add_entry(nlarn->log, "The %s wields %s.", monster_get_name(m), buf);
         g_free(buf);
     }
 }
@@ -3106,7 +3139,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     }
 }
 
-static char *monsters_get_fortune(char *fortune_file)
+static char *monster_get_fortune(const char *fortune_file)
 {
     /* array of pointers to fortunes */
     static GPtrArray *fortunes = NULL;
@@ -3115,45 +3148,82 @@ static char *monsters_get_fortune(char *fortune_file)
     {
         /* read in the fortunes */
         char buffer[80];
-        char *tmp = 0;
         FILE *fortune_fd;
-
-        fortunes = g_ptr_array_new();
 
         /* open the file */
         fortune_fd = fopen(fortune_file, "r");
         if (fortune_fd == NULL)
         {
             /* can't find file */
-            tmp = "Help me! I can't find the fortune file!";
+            return "Help me! I can't find the fortune file!";
+        }
+
+        fortunes = g_ptr_array_new();
+
+        /* read in the entire fortune file */
+        while((fgets(buffer, 79, fortune_fd)))
+        {
+            /* replace EOL with \0 */
+            size_t len = (size_t)(strchr(buffer, '\n') - (char *)&buffer);
+            buffer[len] = '\0';
+
+            /* keep the line */
+            char *tmp = g_malloc((len + 1) * sizeof(char));
+            memcpy(tmp, &buffer, (len + 1));
             g_ptr_array_add(fortunes, tmp);
         }
-        else
-        {
-            /* read in the entire fortune file */
-            while((fgets(buffer, 79, fortune_fd)))
-            {
-                /* replace EOL with \0 */
-                size_t len = (size_t)(strchr(buffer, '\n') - (char *)&buffer);
-                buffer[len] = '\0';
 
-                /* keep the line */
-                tmp = g_malloc((len + 1) * sizeof(char));
-                memcpy(tmp, &buffer, (len + 1));
-                g_ptr_array_add(fortunes, tmp);
-            }
-
-            fclose(fortune_fd);
-        }
+        fclose(fortune_fd);
     }
 
     return g_ptr_array_index(fortunes, rand_0n(fortunes->len));
+}
+
+static position monster_find_next_pos_to(monster *m, position dest)
+{
+    g_assert(m != NULL);
+    g_assert(pos_valid(dest));
+
+    /* next position */
+    position npos = monster_pos(m);
+
+    /* find the next step in the direction of dest */
+    path *path = path_find(monster_map(m), monster_pos(m), dest,
+                           monster_map_element(m));
+
+    if (path && !g_queue_is_empty(path->path))
+    {
+        path_element *el = g_queue_pop_head(path->path);
+        npos = el->pos;
+    }
+
+    /* clean up */
+    if (path) path_destroy(path);
+
+    return npos;
 }
 
 static position monster_move_wander(monster *m, struct player *p __attribute__((unused)))
 {
     int tries = 0;
     position npos;
+
+    if (m->leader)
+    {
+        /* monster is part of a pack */
+        monster *leader = game_monster_get(nlarn, m->leader);
+
+        if (!leader)
+        {
+            /* is seems that the leader was killed.
+               From now on, wander aimlessly */
+            m->leader = NULL;
+        } else {
+            /* stay close to the pack leader */
+            if (pos_distance(monster_pos(m), monster_pos(leader)) > 4)
+                return monster_find_next_pos_to(m, monster_pos(leader));
+        }
+    }
 
     do
     {
@@ -3172,26 +3242,16 @@ static position monster_move_wander(monster *m, struct player *p __attribute__((
 
 static position monster_move_attack(monster *m, struct player *p)
 {
-    /* path to player */
-    map_path *path = NULL;
-    map_path_element *el = NULL;
-
     position npos = monster_pos(m);
 
     /* monster is standing next to player */
     if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
     {
-        /* We need to store the monster's name here, otherwise it would
-           always be 'unseen monster' for monsters that teleport away. */
-        const char *mname = monster_get_name(m);
-
         monster_player_attack(m, p);
 
         /* monster's position might have changed (teleport) */
         if (!pos_identical(npos, monster_pos(m)))
-        {
-            log_add_entry(nlarn->log, "The %s vanishes.", mname);
-        }
+            log_add_entry(nlarn->log, "The %s vanishes.", monster_name(m));
 
         return monster_pos(m);
     }
@@ -3205,18 +3265,18 @@ static position monster_move_attack(monster *m, struct player *p)
         switch (map_sobject_at(monster_map(m), monster_pos(m)))
         {
         case LS_STAIRSDOWN:
-        case LS_DNGN_ENTRANCE:
+        case LS_CAVERNS_ENTRY:
             newmap = Z(m->pos) + 1;
             break;
 
         case LS_STAIRSUP:
-        case LS_DNGN_EXIT:
+        case LS_CAVERNS_EXIT:
             newmap = Z(m->pos) - 1;
             break;
 
         case LS_ELEVATORDOWN:
             /* move into the volcano from the town */
-            newmap = MAP_DMAX + 1;
+            newmap = MAP_CMAX + 1;
             break;
 
         case LS_ELEVATORUP:
@@ -3236,26 +3296,12 @@ static position monster_move_attack(monster *m, struct player *p)
     }
 
     /* monster heads into the direction of the player. */
-    path = map_find_path(monster_map(m), monster_pos(m), m->player_pos,
-                         monster_map_element(m));
+    npos = monster_find_next_pos_to(m, m->player_pos);
 
-    if (path && !g_queue_is_empty(path->path))
-    {
-        el = g_queue_pop_head(path->path);
-        npos = el->pos;
-    }
-    else
-    {
-        /* No path found. Stop following player */
-        m->lastseen = 0;
-    }
-
-    /* clean up */
-    if (path)
-        map_path_destroy(path);
+    /* No path found. Stop following player */
+    if (!pos_valid(npos)) m->lastseen = 0;
 
     return npos;
-
 }
 
 static position monster_move_confused(monster *m,
@@ -3311,18 +3357,8 @@ static position monster_move_serve(monster *m, struct player *p)
     /* a good servant always knows the masters position */
     if (pos_distance(monster_pos(m), p->pos) > 5)
     {
-        /* if the distance to the player is too large, follow */
-        map_path *path = map_find_path(monster_map(m), monster_pos(m), p->pos,
-                                       monster_map_element(m));
-
-        if (path && !g_queue_is_empty(path->path))
-        {
-            map_path_element *pe = g_queue_pop_head(path->path);
-            npos = pe->pos;
-        }
-
-        if (path != NULL)
-            map_path_destroy(path);
+         /* if the distance to the player is too large, follow */
+        npos = monster_find_next_pos_to(m, p->pos);
     }
     else
     {
@@ -3345,13 +3381,12 @@ static position monster_move_civilian(monster *m, struct player *p)
     {
         /* No target set -> find a new location to travel to.
            Civilians stay inside the town area. */
-        rectangle town = rect_new(3, 4, MAP_MAX_X, MAP_MAX_Y);
+        rectangle town = rect_new(3, 4, MAP_MAX_X - 25, MAP_MAX_Y - 3);
         do
         {
             /* Ensure that the townsfolk do not loiter in locations
                important for the player. */
-            m->player_pos = map_find_space_in(monster_map(m), town,
-                    LE_GROUND, FALSE);
+            m->player_pos = map_find_space_in(monster_map(m), town, LE_GROUND, FALSE);
         } while (map_sobject_at(monster_map(m), m->player_pos) != LS_NONE);
     }
 
@@ -3365,29 +3400,16 @@ static position monster_move_civilian(monster *m, struct player *p)
     else if (pos_valid(m->player_pos) && !pos_identical(m->pos, m->player_pos))
     {
         /* travel to the selected location */
-        map_path *path = map_find_path(monster_map(m), m->pos, m->player_pos, LE_GROUND);
+        npos = monster_find_next_pos_to(m, m->player_pos);
 
-        if (path && !g_queue_is_empty(path->path))
+        if (pos_identical(npos, m->player_pos))
         {
-            map_path_element *pe = g_queue_pop_head(path->path);
-            npos = pe->pos;
-
-            if (pos_identical(npos, m->player_pos))
-            {
-                /* the new position is identical to the target, thus reset
-                   the lastseen counter */
-                m->lastseen = 1;
-            }
+            /* arrived at target, thus reset the lastseen counter */
+            m->lastseen = 1;
         }
-
-        if (path != NULL)
+        else if (pos_identical(npos, monster_pos(m)))
         {
-            /* clean up */
-            map_path_destroy(path);
-        }
-        else
-        {
-            /* it seems that there is no path to the target, thus get a new one */
+            /* it seems there is no path to the target, thus get a new one */
             m->player_pos = pos_invalid;
         }
     }
@@ -3399,7 +3421,7 @@ static position monster_move_civilian(monster *m, struct player *p)
         /* talk */
         log_add_entry(nlarn->log, "The %s says, \"%s\"",
                       monster_get_name(m),
-                      monsters_get_fortune(game_fortunes(nlarn)));
+                      monster_get_fortune(nlarn_fortunes));
     }
 
     /* change the town person's name from time to time */

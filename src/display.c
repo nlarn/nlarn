@@ -1,6 +1,6 @@
 /*
  * display.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -117,12 +117,12 @@ void display_init()
     g_setenv("PDC_LINES", "25", 0);
 
     /* Set the window icon */
-    char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn->libdir);
+    char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn_libdir);
     g_setenv("PDC_ICON", icon_name, 1);
     g_free(icon_name);
 
     /* Set the font - allow overriding this default */
-    gchar *font_name = g_strdup_printf("%s/FiraMono-Medium.otf", nlarn->libdir);
+    gchar *font_name = g_strdup_printf("%s/FiraMono-Medium.otf", nlarn_libdir);
     g_setenv("PDC_FONT", font_name, 0);
     g_free(font_name);
 #endif
@@ -134,11 +134,13 @@ void display_init()
     /* These initialisations have to be done after initscr(), otherwise
        the window is not yet available. */
     /* Set the window title */
-    char *window_title = g_strdup_printf("NLarn %d.%d.%d%s", VERSION_MAJOR,
-            VERSION_MINOR, VERSION_PATCH, GITREV);
+    char *window_title = g_strdup_printf("NLarn %s", nlarn_version);
 
     PDC_set_title(window_title);
     g_free(window_title);
+
+    /* return modifier keys pressed with key */
+    PDC_return_key_modifiers(TRUE);
 #endif
 
     /* initialize colours */
@@ -231,13 +233,9 @@ static int attr_colour(int colour, int reverse)
 
 void display_paint_screen(player *p)
 {
-    guint x, y, i;
     position pos = pos_invalid;
     map *vmap;
     int attrs;              /* curses attributes */
-    message_log_entry *le;  /* needed to display messages */
-    GPtrArray *text = NULL; /* storage for formatted messages */
-    guint *ttime = NULL;    /* storage for the game time of messages */
 
     /* draw line around map */
     (void)mvhline(MAP_MAX_Y, 0, ACS_HLINE, MAP_MAX_X);
@@ -556,7 +554,7 @@ void display_paint_screen(player *p)
     clrtoeol();
 
     /* clear lines */
-    for (int i = 0; i < 7; i++)
+    for (guint i = 0; i < 7; i++)
     {
         move(11 + i, MAP_MAX_X + 3);
         clrtoeol();
@@ -569,7 +567,7 @@ void display_paint_screen(player *p)
         char **efdescs = strv_new();
 
         /* collect effect descriptions */
-        for (i = 0; i < p->effects->len; i++)
+        for (guint i = 0; i < p->effects->len; i++)
         {
             effect *e = game_effect_get(nlarn, g_ptr_array_index(p->effects, i));
 
@@ -610,7 +608,7 @@ void display_paint_screen(player *p)
 
         /* display effect descriptions */
         int currattr = COLOURLESS;
-        for (i = 0; i < g_strv_length(efdescs); i++)
+        for (guint i = 0; i < g_strv_length(efdescs); i++)
         {
             currattr = mvwcprintw(stdscr, LIGHTCYAN, currattr,
                     display_default_colset, 11 + i, MAP_MAX_X + 3, efdescs[i]);
@@ -622,16 +620,19 @@ void display_paint_screen(player *p)
 
     /* *** MESSAGES *** */
     /* number of lines which can be displayed */
-    y = LINES > 20 ? LINES - 20 : 0;
+    guint y = LINES > 20 ? LINES - 20 : 0;
 
-    /* storage for game time of message */
-    ttime = g_new0(guint, y);
+    /* storage for the game time of messages */
+    guint ttime[y];
 
     /* hold original length of text */
-    x = 1;
+    guint x = 1;
 
     /* line counter */
-    i = 0;
+    guint i = 0;
+
+    /* storage for formatted messages */
+    GPtrArray *text = NULL;
 
     /* if log contains buffered messaged, display them */
     if (log_buffer(nlarn->log))
@@ -644,7 +645,8 @@ void display_paint_screen(player *p)
     /* retrieve game log and reformat messages to window width */
     while (((text == NULL) || (text->len < y)) && (log_length(nlarn->log) > i))
     {
-        le = log_get_entry(nlarn->log, log_length(nlarn->log) - 1 - i);
+        message_log_entry *le = log_get_entry(nlarn->log,
+                                              log_length(nlarn->log) - 1 - i);
 
         if (text == NULL)
             text = text_wrap(le->message, COLS, 2);
@@ -661,23 +663,24 @@ void display_paint_screen(player *p)
         i++;
     }
 
+    /* ensure consistent colours for messages spanning multiple lines */
     int currattr = COLOURLESS;
     for (y = 20, i = 0; (y < (unsigned)LINES) && (i < text->len); i++, y++)
     {
         /* default colour for the line */
-        int def_attrs;
+        int def_attrs = (i == 0 && ttime[i] > game_turn(nlarn) - 5)
+            ? WHITE
+            : DARKGRAY;
 
-        if ((nlarn->log->gtime - 15) < ttime[i])
-            def_attrs = WHITE;
-        else
-            def_attrs = LIGHTGRAY;
+        /* reset current color when switching log entries */
+        if (i > 0 && ttime[i - 1] != ttime[i])
+            currattr = COLOURLESS;
 
         currattr = mvwcprintw(stdscr, def_attrs, currattr,
-                display_default_colset, y, 0, g_ptr_array_index(text, i));
+            display_default_colset, y, 0, g_ptr_array_index(text, i));
     }
 
     text_destroy(text);
-    g_free(ttime);
 
     display_draw();
 }
@@ -856,8 +859,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             {
                 /* inside shop */
                 gchar *item_desc = item_describe(it, TRUE, FALSE, FALSE);
-                mvwaprintw(iwin->window, pos, 1, attrs, " %-*s %5d$ ",
-                          width - 11, item_desc, item_price(it));
+                mvwaprintw(iwin->window, pos, 1, attrs, " %-*s %5d gold ",
+                          width - 15, item_desc, item_price(it));
 
                 g_free(item_desc);
             }
@@ -876,7 +879,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (show_account)
         {
             /* show the balance of the bank account */
-            stitle = g_strdup_printf("%s - %d gp on bank account",
+            stitle = g_strdup_printf("%s - %d gold on bank account",
                                      title, p->bank_account);
 
             display_window_update_title(iwin, stitle);
@@ -947,7 +950,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         wrefresh(iwin->window);
 
-        switch (key = getch())
+        switch (key = display_getch(iwin->window))
         {
 
         case '7':
@@ -1157,7 +1160,7 @@ void display_config_autopickup(gboolean settings[IT_MAX])
 
         wrefresh(cwin->window);
 
-        switch (key = getch())
+        switch (key = display_getch(cwin->window))
         {
         case KEY_LF:
         case KEY_CR:
@@ -1271,7 +1274,7 @@ spell *display_spell_select(const char *title, player *p)
                 spell_name(sp), spdesc, 0);
         g_free(spdesc);
 
-        switch ((key = getch()))
+        switch ((key = display_getch(swin->window)))
         {
         case '7':
         case KEY_HOME:
@@ -1547,12 +1550,7 @@ int display_get_count(const char *caption, int value)
         wmove(mwin->window, mwin->height - 2, mwin->width - 10 + ipos);
         wrefresh(mwin->window);
 
-#ifdef PDCURSES
-        key = wgetch(mwin->window);
-#else
-        key = getch();
-#endif
-
+        key = display_getch(mwin->window);
         switch (key)
         {
         case KEY_LEFT:
@@ -1773,12 +1771,7 @@ char *display_get_string(const char *title, const char *caption, const char *val
 
         wrefresh(mwin->window);
 
-#ifdef PDCURSES
-        key = wgetch(mwin->window);
-#else
-        key = getch();
-#endif
-
+        key = display_getch(mwin->window);
         switch (key)
         {
         case KEY_LEFT:
@@ -1966,7 +1959,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
         wattroff(ywin->window, attrs);
         wrefresh(ywin->window);
 
-        int key = tolower(getch()); /* input key buffer */
+        int key = tolower(display_getch(ywin->window)); /* input key buffer */
         // Special case for the movement keys and y/n.
         if (key != 'h' && key != 'l' && key != 'y' && key != 'n')
         {
@@ -2104,7 +2097,7 @@ direction display_get_direction(const char *title, int *available)
     {
         int key; /* input key buffer */
 
-        switch ((key = getch()))
+        switch ((key = display_getch(dwin->window)))
         {
 
         case 'h':
@@ -2228,10 +2221,7 @@ position display_get_position(player *p,
             start = monster_pos(m);
 
             /* don't use invisible position if unwanted */
-            if (visible && !fov_get(p->fv, start))
-            {
-                start = p->pos;
-            }
+            if (!fov_get(p->fv, start)) start = p->pos;
         }
     }
 
@@ -2277,7 +2267,7 @@ position display_get_new_position(player *p,
 {
     gboolean RUN = TRUE;
     direction dir = GD_NONE;
-    position pos, npos = pos_invalid, cursor = pos_invalid;
+    position pos;
     map *vmap;
     int attrs; /* curses attributes */
     display_window *msgpop = NULL;
@@ -2358,7 +2348,7 @@ position display_get_new_position(player *p,
         display_paint_screen(p);
 
         /* reset npos to an invalid position */
-        npos = pos_invalid;
+        position npos = pos_invalid;
 
         /* draw a ray if the starting position is not the player's position */
         if (ray && !pos_identical(pos, p->pos))
@@ -2420,7 +2410,7 @@ position display_get_new_position(player *p,
             /* paint a ball if told to */
             area *obstacles = map_get_obstacles(vmap, pos, radius, FALSE);
             b = area_new_circle_flooded(pos, radius, obstacles);
-            cursor = pos;
+            position cursor = pos;
 
             for (Y(cursor) = b->start_y; Y(cursor) < b->start_y + b->size_y; Y(cursor)++)
             {
@@ -2454,7 +2444,7 @@ position display_get_new_position(player *p,
         }
 
         /* wait for input */
-        const int ch = getch();
+        const int ch = display_getch(NULL);
         switch (ch)
         {
             /* abort */
@@ -2747,8 +2737,8 @@ int display_show_message(const char *title, const char *message, int indent)
         display_window_update_arrow_down(mwin, (offset + maxvis) < text->len);
 
         wrefresh(mwin->window);
-        key = getch();
 
+        key = display_getch(mwin->window);
         switch (key)
         {
         case 'k':
@@ -2920,6 +2910,22 @@ void display_windows_show()
     }
 }
 
+int display_getch(WINDOW *win) {
+    int ch = wgetch(win ? win : stdscr);
+#ifdef SDLPDCURSES
+        /* on SDL2 PDCurses, keys entered on the numeric keypad while num
+           lock is enabled are returned twice. Hence we need to swallow
+           the first one here. */
+        if ((ch >= '1' && ch <= '9')
+                && (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_NUMLOCK))
+        {
+            ch = wgetch(win ? win : stdscr);
+        }
+#endif
+    return ch;
+}
+
+
 static int mvwcprintw(WINDOW *win, int defattr, int currattr,
         const display_colset *colset, int y, int x, const char *fmt, ...)
 {
@@ -2965,7 +2971,15 @@ static int mvwcprintw(WINDOW *win, int defattr, int currattr,
             else
             {
                 wattroff(win, attr);
-                wattron(win, attr = display_get_colval(colset, tval));
+
+                attr = display_get_colval(colset, tval);
+                /* dim bright colous when the default colour is dark */
+                if (defattr == DARKGRAY && attr > LIGHTGRAY)
+                {
+                    attr ^= A_BOLD;
+                }
+
+                wattron(win, attr);
             }
 
             /* free temporary memory */
@@ -3081,11 +3095,7 @@ static display_window *display_window_new(int x1, int y1, int width,
     dwin->height = height;
 
     dwin->window = newwin(dwin->height, dwin->width, dwin->y1, dwin->x1);
-
-#ifdef PDCURSES
-    /* PDCurses does not inherit keypad setting from stdscr */
     keypad(dwin->window, TRUE);
-#endif
 
     /* fill window background */
     for (int i = 1; i < height; i++) {

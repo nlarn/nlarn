@@ -1,6 +1,6 @@
 /*
  * map.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,15 +27,15 @@
 #include "traps.h"
 #include "utils.h"
 
-/* dungeon dimensions */
+/* map dimensions */
 #define MAP_MAX_X 67
 #define MAP_MAX_Y 17
 #define MAP_SIZE MAP_MAX_X*MAP_MAX_Y
 
 /* number of levels */
-#define MAP_DMAX 11                   /* max # levels in the dungeon */
+#define MAP_CMAX 11                   /* max # levels in the caverns */
 #define MAP_VMAX  3                   /* max # of levels in the temple of the luran */
-#define MAP_MAX (MAP_DMAX + MAP_VMAX) /* total number of levels */
+#define MAP_MAX (MAP_CMAX + MAP_VMAX) /* total number of levels */
 
 /* number of the last custom maze map (including town) */
 #define MAP_MAX_MAZE_NUM 24
@@ -102,24 +102,6 @@ typedef struct map
     map_tile grid[MAP_MAX_Y][MAP_MAX_X];  /* the map */
 } map;
 
-/* Structure for path elements */
-typedef struct map_path_element
-{
-    position pos;
-    guint32 g_score;
-    guint32 h_score;
-    struct map_path_element* parent;
-} map_path_element;
-
-typedef struct map_path
-{
-    GQueue *path;
-    GPtrArray *closed;
-    GPtrArray *open;
-    position start;
-    position goal;
-} map_path;
-
 /* callback function for trajectories */
 typedef gboolean (*trajectory_hit_sth)(const GList *trajectory,
         const damage_originator *damo,
@@ -127,7 +109,7 @@ typedef gboolean (*trajectory_hit_sth)(const GList *trajectory,
 
 /* function declarations */
 
-map *map_new(int num, char *mazefile);
+map *map_new(int num, const char *mazefile);
 void map_destroy(map *m);
 
 cJSON *map_serialize(map *m);
@@ -162,25 +144,6 @@ int *map_get_surrounding(map *m, position pos, sobject_t type);
  * @return TRUE or FALSE
  */
 int map_pos_is_visible(map *m, position source, position target);
-
-/**
- * @brief Find a path between two positions
- *
- * @param the map to work on
- * @param the starting position
- * @param the destination
- * @param the map_element_t that can be travelled
- * @return a path or NULL if none could be found
- */
-map_path *map_find_path(map *m, position start, position goal,
-                        map_element_t element);
-
-/**
- * @brief Free memory allocated for a given map path.
- *
- * @param a map path returned by <map_find_path>"()"
- */
-void map_path_destroy(map_path *path);
 
 /**
  * Return a linked list with every position between two points.
@@ -228,6 +191,16 @@ area *map_get_obstacles(map *m, position center, int radius, gboolean doors);
 void map_set_tiletype(map *m, area *area, map_tile_t type, guint8 duration);
 
 damage *map_tile_damage(map *m, position pos, gboolean flying);
+
+/**
+ * @brief Creates description of items on the floor for a given position.
+ *
+ * @param a map
+ * @param a position
+ * @param "here" or "there"
+ * @param a filter function to restrict the described items
+ */
+char *map_inv_description(map *m, position pos, const char* where, int (*ifilter)(item *));
 
 char *map_pos_examine(position pos);
 

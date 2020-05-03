@@ -7,15 +7,11 @@ nlarn
 *.o
 *.d
 *.res
+Changelog.html
 README.html
 
 # vim swap files
 .*swp
-
-# Files generated at runtime
-*.txt
-nlarn.ini
-lib/highscores
 
 # XCode
 NLarn.xcworkspace/
@@ -30,3 +26,9 @@ nlarn.depend
 .cproject
 .project
 .settings/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store

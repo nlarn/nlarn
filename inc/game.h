@@ -1,6 +1,6 @@
 /*
  * game.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,16 +40,6 @@ typedef struct game
     guint32 gtime;              /* turn count */
     guint8 difficulty;          /* game difficulty */
     message_log *log;           /* game message log */
-
-    gchar *basedir;
-    gchar *libdir;
-    gchar *mesgfile;
-    gchar *helpfile;
-    gchar *mazefile;
-    gchar *fortunes;
-    gchar *highscores;
-    gchar *inifile;
-    gchar *savefile;
 
     /* stock of the dnd store */
     inventory *store_stock;
@@ -106,23 +96,22 @@ typedef struct game
 } game;
 
 
+/* forward declarations */
+
+struct game_config;
+
+
 /* function declarations */
 
 /**
  * @brief Initialise the game. This function will try to restore a saved game;
  *        if it fails it will start a new game.
  *
- * @param count of command line arguments
- * @param command line arguments
+ * @param pointer to a parsed command line configuration
  */
-void game_init(int argc, char *argv[]);
+void game_init(struct game_config *config);
 
 game *game_destroy(game *g);
-
-/**
- * @brief Function to return the user-specific directory.
- */
-const gchar *game_userdir();
 
 /**
  * @brief Save a game.
@@ -164,14 +153,6 @@ void game_delete_savefile();
 
 #define game_turn(g)            ((g)->gtime)
 #define game_remaining_turns(g) (((g)->gtime > TIMELIMIT) ? 0 : TIMELIMIT - (g)->gtime)
-
-#define game_dir(g) ((g)->basedir)
-#define game_lib(g) ((g)->libdir)
-
-#define game_mesgfile(g) ((g)->mesgfile)
-#define game_helpfile(g) ((g)->helpfile)
-#define game_mazefile(g) ((g)->mazefile)
-#define game_fortunes(g) ((g)->fortunes)
 
 /* gtime <> mobuls conversion */
 #define gtime2mobuls(gtime)  ((abs(((int)gtime)) + 99) / 100)

@@ -1,6 +1,6 @@
 /*
  * spells.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -78,7 +78,7 @@ const spell_data spells[SP_MAX] =
         SP_CHM, "chm", "charm monster",
         SC_POINT, DAM_NONE, ET_CHARM_MONSTER, spell_type_point,
         "Some monsters may be awed at your magnificence",
-        NULL, NULL,
+        NULL, "The %s isn't impressed.",
         COLOURLESS, 1, 260, FALSE
     },
     {
@@ -262,7 +262,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_TEL, "tel", "teleport away",
         SC_POINT, DAM_NONE, ET_NONE, spell_type_point,
-        "Moves a particular monster around in the dungeon",
+        "Moves a particular monster around the caverns",
         NULL, NULL,
         COLOURLESS, 5, 2000, FALSE
     },
@@ -307,7 +307,7 @@ const spell_data spells[SP_MAX] =
         SC_OTHER, DAM_NONE, ET_NONE, spell_alter_reality,
         "God only knows what this will do",
         NULL,
-        "Polinneaus won't let you mess with his dungeon!",
+        "Polinneaus won't let you mess with his caverns!",
         COLOURLESS, 6, 3800, FALSE
     },
 };
@@ -757,6 +757,21 @@ static gboolean spell_type_point(spell *s, struct player *p)
 
     switch (s->id)
     {
+        /* charm monster */
+    case SP_CHM:
+        if ((rand_m_n(5, 30) * monster_level(m) - player_get_wis(p)) < 30)
+        {
+            e = effect_new(spell_effect(s));
+            e->turns *= s->knowledge;
+            monster_effect_add(m, e);
+        }
+        else
+        {
+            spell_print_failure_message(s, m);
+        }
+
+        break; /* SP_CHM */
+
         /* dehydration */
     case SP_DRY:
         amount = (100 * s->knowledge) + p->level;
@@ -1047,7 +1062,7 @@ static gboolean spell_alter_reality(spell *s, player *p)
     map_destroy(game_map(nlarn, Z(p->pos)));
 
     /* create new map */
-    nlevel = nlarn->maps[Z(p->pos)] = map_new(Z(p->pos), game_mazefile(nlarn));
+    nlevel = nlarn->maps[Z(p->pos)] = map_new(Z(p->pos), nlarn_mazefile);
 
     /* reposition player (if needed) */
     if (!map_pos_passable(nlevel, p->pos))
@@ -1245,7 +1260,7 @@ static gboolean spell_summon_demon(spell *s, struct player *p)
 
     /* generate a demon */
     demon = monster_new(min(MT_DEMONLORD_I + (s->knowledge - 1),
-                            MT_DEMONLORD_VII), pos);
+                            MT_DEMONLORD_VII), pos, NULL);
 
     /* turn the demon into a servant */
     monster_update_action(demon, MA_SERVE);
@@ -1508,17 +1523,14 @@ static int spell_cast(player *p, spell *s)
     if (!well_done)
         return 0;
 
-    if (well_done)
-    {
-        /* spell has been cast successfully, set mp usage accordingly */
-        player_mp_lose(p, spell_level(s));
+    /* spell has been cast successfully, set mp usage accordingly */
+    player_mp_lose(p, spell_level(s));
 
-        /* increase number of spells cast */
-        p->stats.spells_cast++;
+    /* increase number of spells cast */
+    p->stats.spells_cast++;
 
-        /* increase usage counter for this specific spell */
-        s->used++;
-    }
+    /* increase usage counter for this specific spell */
+    s->used++;
 
     return turns;
 }

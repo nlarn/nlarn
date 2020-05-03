@@ -1,6 +1,6 @@
 /*
  * buildings.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <glib.h>
 
+#include "config.h"
 #include "container.h"
 #include "display.h"
 #include "game.h"
@@ -28,7 +29,7 @@
 #include "player.h"
 #include "scrolls.h"
 
-static const char msg_outstanding[] = "The Nlarn Revenue Service has ordered " \
+static const char msg_outstanding[] = "The Larn Revenue Service has ordered " \
                                       "us to not do business with tax evaders. " \
                                       "They have also told us that you owe back " \
                                       "taxes and, as we must comply with the " \
@@ -85,7 +86,7 @@ int building_bank(player *p)
     const char msg_frozen[] = "The Larn Revenue Service has ordered that your " \
                               "account be frozen until all levied taxes have " \
                               "been paid.  They have also told us that you " \
-                              "owe %d gp in taxes, and we must comply with " \
+                              "owe %d gold in taxes, and we must comply with " \
                               "them. We cannot serve you at this time.  Sorry.\n\n" \
                               "We suggest you go to the LRS office and pay your taxes.";
 
@@ -147,7 +148,7 @@ int building_bank(player *p)
 
         g_string_free(text, TRUE);
 
-        int cmd = wgetch(bwin->window);
+        int cmd = display_getch(bwin->window);
 
         switch (cmd)
         {
@@ -162,9 +163,9 @@ int building_bank(player *p)
             {
                 p->bank_account += amount;
                 player_remove_gold(p, amount);
-                log_add_entry(nlarn->log, "You deposited %d gp.", amount);
+                log_add_entry(nlarn->log, "You deposited %d gold.", amount);
 
-                /* income tax for money earned in the dungeon */
+                /* income tax for money earned in the caverns */
                 p->outstanding_taxes += calc_tax_debt(amount);
             }
             else if (amount)
@@ -252,7 +253,7 @@ int building_dndstore(player *p)
 {
     int turns = 2;
     const char title[] = "DND store";
-    const char msg_welcome[] = "`white`Welcome to the Nlarn Thrift Shoppe.`end`\n\n" \
+    const char msg_welcome[] = "`white`Welcome to the Larn Thrift Shoppe.`end`\n\n" \
                                "We stock many items explorers find useful in " \
                                "their adventures. Feel free to browse to your " \
                                "heart's content. Also be advised that if you " \
@@ -275,11 +276,6 @@ int building_dndstore(player *p)
 
 void building_dndstore_init()
 {
-    static gboolean initialized = FALSE;
-
-    /* this is a one-time process! */
-    if (initialized) return;
-
     for (item_t type = IT_AMULET; type < IT_MAX; type++)
     {
         /*never generate gems or gold */
@@ -335,8 +331,6 @@ void building_dndstore_init()
             inv_add(&nlarn->store_stock, it);
         }
     }
-
-    initialized = TRUE;
 }
 
 int building_home(player *p)
@@ -389,6 +383,9 @@ int building_home(player *p)
             item *pcd = inv_get_filtered(p->inventory, 0, item_filter_pcd);
             inv_del_element(&p->inventory, pcd);
             item_destroy(pcd);
+
+            /* increase difficulty level */
+            config_increase_difficulty(nlarn_inifile, nlarn->difficulty + 1);
 
             player_die(p, PD_WON, 0);
         }
@@ -509,7 +506,7 @@ int building_lrs(player *p)
 
     const char title[] ="Larn Revenue Service";
     const char msg_greet[] = "Welcome to the Larn Revenue Service district office.\n\n";
-    const char msg_taxes[] = "You presently owe %d gp in taxes.\n\n";
+    const char msg_taxes[] = "You presently owe %d gold in taxes.\n\n";
     const char msg_notax[] = "You do not owe us any taxes.";
 
     g_assert(p != NULL);
@@ -767,7 +764,7 @@ int building_school(player *p)
                               * (game_difficulty(nlarn) + 1) * 100;
 
                 g_string_append_printf(text,
-                        " `lightgreen`%c`end`) %-24s - %2d mobuls, %4d gp\n",
+                        " `lightgreen`%c`end`) %-24s - %2d mobuls, %4d gold\n",
                         idx + 'a', school_courses[idx].description,
                         school_courses[idx].course_time, price);
             }
@@ -846,7 +843,7 @@ int building_tradepost(player *p)
 
     const char title[] = "Trade Post";
 
-    const char msg_welcome[] = "`white`Welcome to the Nlarn Trading Post.`end`\n\nWe buy " \
+    const char msg_welcome[] = "`white`Welcome to the Larn Trading Post.`end`\n\nWe buy " \
                                "items that explorers no longer find useful.\n" \
                                "Since the condition of the items you bring in " \
                                "is not certain, and we incur great expense in " \
@@ -1034,7 +1031,7 @@ int building_monastery(struct player *p)
         display_window *mwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
                 47, title, msg->str, 0);
 
-        int selection = wgetch(mwin->window);
+        int selection = display_getch(mwin->window);
 
         /* get rid of the temporary string */
         g_string_free(msg, TRUE);
@@ -1057,7 +1054,7 @@ int building_monastery(struct player *p)
 
             if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
             {
-                log_add_entry(nlarn->log, "You do not possess any cursed item.");
+                display_show_message(title, "You do not possess any cursed item.", 0);
                 break;
             }
 
@@ -1067,8 +1064,8 @@ int building_monastery(struct player *p)
             /* It is possible to abort the selection with ESC. */
             if (it == NULL)
             {
-                log_add_entry(nlarn->log, "You chose to leave your items as "
-                        "they are.");
+                display_show_message(title, "You chose to leave your items as "
+                        "they are.", 0);
                 break;
             }
 
@@ -1091,7 +1088,9 @@ int building_monastery(struct player *p)
 
             if (!choice)
             {
-                log_add_entry(nlarn->log, "You chose leave the curse on %s.", desc);
+                char *msg = g_strdup_printf("You chose leave the curse on %s.", desc);
+                display_show_message(title, msg, 0);
+                g_free(msg);
                 break;
             }
 
@@ -1099,15 +1098,18 @@ int building_monastery(struct player *p)
                unknown blessedness. */
             if (it->cursed)
             {
-                log_add_entry(nlarn->log, "The monks remove the curse on %s.",
-                        desc);
+                char *msg = g_strdup_printf("The monks remove the curse on %s.", desc);
+                display_show_message(title, msg, 0);
+                g_free(msg);
                 item_remove_curse(it);
             }
             else
             {
-                log_add_entry(nlarn->log, "The monks tell you that %s %sn't "
+                char *msg = g_strdup_printf("The monks tell you that %s %sn't "
                         "cursed. Well, now you know for sure...", desc,
                         (it->count == 1) ? "was" : "were");
+                display_show_message(title, msg, 0);
+                g_free(msg);
                 it->blessed_known = TRUE;
             }
             g_free(desc);
@@ -1127,7 +1129,7 @@ int building_monastery(struct player *p)
 
             if (p->hp == player_get_hp_max(p))
             {
-                log_add_entry(nlarn->log, "You are not in need of healing.");
+                display_show_message(title, "You are not in need of healing.", 0);
                 break;
             }
 
@@ -1148,7 +1150,7 @@ int building_monastery(struct player *p)
             else
             {
                 /* no, thanks */
-                log_add_entry(nlarn->log, "You chose not to be healed.");
+                display_show_message(title, "You chose not to be healed.", 0);
             }
         }
         break;
@@ -1186,8 +1188,10 @@ int building_monastery(struct player *p)
                 else
                 {
                     /* no, thanks */
-                    log_add_entry(nlarn->log, "You chose not to be cured from %s.",
+                    char *msg = g_strdup_printf("You chose not to be cured from %s.",
                                   curable_diseases[selection].desc);
+                    display_show_message(title, msg, 0);
+                    g_free(msg);
                 }
 
             }
@@ -1284,8 +1288,8 @@ static void building_player_charge(player *p, guint amount)
     if (p->bank_account >= amount)
     {
         p->bank_account -= amount;
-        log_add_entry(nlarn->log, "We have debited your bank account %d gold.",
-                      amount);
+        log_add_entry(nlarn->log, "We have debited %d gold from your bank "
+                "account.", amount);
     }
     else
     {
