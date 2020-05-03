@@ -13,6 +13,7 @@
 * Fix macOS application bundle
 * Handle empty scoreboard correctly
 * Show undefined gender correctly in configuration dialogue
+* Fix casting fireball in topmost corridor
 * Keep townsfolk inside the town area
 * Fix debit message
 

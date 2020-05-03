@@ -1,6 +1,6 @@
 /*
  * position.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -45,9 +45,9 @@ typedef union _position
 {
     struct _bf
     {
-        guint32 x: 12;
-        guint32 y: 12;
-        guint32 z:  8;
+        gint32 x: 12;
+        gint32 y: 12;
+        guint32 z: 8;
     } bf;
     guint32 val;
 } position;

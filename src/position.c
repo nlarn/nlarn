@@ -1,6 +1,6 @@
 /*
  * position.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,8 +25,8 @@
 #include "nlarn.h"
 #include "position.h"
 
-#define POS_MAX_XY (1<<11)
-#define POS_MAX_Z  (1<<7)
+#define POS_MAX_XY (1<<10)
+#define POS_MAX_Z  (1<<6)
 
 static void area_flood_worker(area *flood, area *obstacles, int x, int y);
 

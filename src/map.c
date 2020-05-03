@@ -1538,13 +1538,13 @@ static void map_make_maze_eat(map *m, int x, int y)
    from Dungeon Crawl Stone Soup, with only very slight changes. (jpeg) */
 static void map_make_vertical_river(map *m, map_tile_t rivertype)
 {
-    guint width  = 3 + rand_0n(4);
-    guint startx = 6 - width + rand_0n(MAP_MAX_X - 8);
+    gint width  = 3 + rand_0n(4);
+    gint startx = 6 - width + rand_0n(MAP_MAX_X - 8);
 
-    const guint starty = rand_1n(4);
-    const guint endy   = MAP_MAX_Y - (4 - starty);
-    const guint minx   = rand_1n(3);
-    const guint maxx   = MAP_MAX_X - rand_1n(3);
+    const gint starty = rand_1n(4);
+    const gint endy   = MAP_MAX_Y - (4 - starty);
+    const gint minx   = rand_1n(3);
+    const gint maxx   = MAP_MAX_X - rand_1n(3);
 
     position pos = pos_invalid;
     Z(pos) = m->nlevel;
@@ -1574,13 +1574,13 @@ static void map_make_river(map *m, map_tile_t rivertype)
         return;
     }
 
-    guint width  = 3 + rand_0n(4);
-    guint starty = 10 - width + rand_0n(MAP_MAX_Y - 12);
+    gint width  = 3 + rand_0n(4);
+    gint starty = 10 - width + rand_0n(MAP_MAX_Y - 12);
 
-    const guint startx = rand_1n(7);
-    const guint endx   = MAP_MAX_X - (7 - startx);
-    const guint miny   = rand_1n(3);
-    const guint maxy   = MAP_MAX_Y - rand_1n(3);
+    const gint startx = rand_1n(7);
+    const gint endx   = MAP_MAX_X - (7 - startx);
+    const gint miny   = rand_1n(3);
+    const gint maxy   = MAP_MAX_Y - rand_1n(3);
 
     position pos = pos_invalid;
     Z(pos) = m->nlevel;
@@ -1607,10 +1607,10 @@ static void map_make_river(map *m, map_tile_t rivertype)
 
 static void map_make_lake(map *m, map_tile_t laketype)
 {
-    guint x1 = 5 + rand_0n(MAP_MAX_X - 30);
-    guint y1 = 3 + rand_0n(MAP_MAX_Y - 15);
-    guint x2 = x1 + 4 + rand_0n(16);
-    guint y2 = y1 + 4 + rand_0n(5);
+    gint x1 = 5 + rand_0n(MAP_MAX_X - 30);
+    gint y1 = 3 + rand_0n(MAP_MAX_Y - 15);
+    gint x2 = x1 + 4 + rand_0n(16);
+    gint y2 = y1 + 4 + rand_0n(5);
 
     position pos = pos_invalid;
     Z(pos) = m->nlevel;
