@@ -2268,7 +2268,6 @@ position display_get_new_position(player *p,
     gboolean RUN = TRUE;
     direction dir = GD_NONE;
     position pos;
-    map *vmap;
     int attrs; /* curses attributes */
     display_window *msgpop = NULL;
 
@@ -2276,9 +2275,8 @@ position display_get_new_position(player *p,
     GList *mlist = NULL, *miter = NULL;
 
     /* variables for ray or ball painting */
-    area *b = NULL;       /* a ball area */
     GList *r = NULL;      /* a ray position list */
-    monster *target, *m;
+    monster *m;
 
     /* check the starting position makes sense */
     if (pos_valid(start) && Z(start) == Z(p->pos))
@@ -2287,7 +2285,7 @@ position display_get_new_position(player *p,
         pos = p->pos;
 
     /* make shortcut to visible map */
-    vmap = game_map(nlarn, Z(p->pos));
+    map *vmap = game_map(nlarn, Z(p->pos));
 
     /* get the list of visible monsters if looking for a visible position */
     if (visible)
@@ -2339,11 +2337,6 @@ position display_get_new_position(player *p,
             }
         } /* visible */
 
-#ifdef PDCURSES
-        /* I have no idea why, but the message pop-up window is hidden when
-        using PDCurses without calling touchwin for it. */
-        touchwin(msgpop->window);
-#endif
         /* redraw screen to erase previous modifications */
         display_paint_screen(p);
 
@@ -2366,7 +2359,7 @@ position display_get_new_position(player *p,
         if (ray && (r != NULL))
         {
             /* draw a line between source and target if told to */
-            target = map_get_monster_at(vmap, pos);
+            monster *target = map_get_monster_at(vmap, pos);
 
             if (target && monster_in_sight(target)) attrs = LIGHTRED;
             else                                    attrs = LIGHTCYAN;
@@ -2409,7 +2402,7 @@ position display_get_new_position(player *p,
         {
             /* paint a ball if told to */
             area *obstacles = map_get_obstacles(vmap, pos, radius, FALSE);
-            b = area_new_circle_flooded(pos, radius, obstacles);
+            area *b = area_new_circle_flooded(pos, radius, obstacles);
             position cursor = pos;
 
             for (Y(cursor) = b->start_y; Y(cursor) < b->start_y + b->size_y; Y(cursor)++)
@@ -2435,7 +2428,7 @@ position display_get_new_position(player *p,
                     }
                 }
             }
-            area_destroy(b); b = NULL;
+            area_destroy(b);
         }
         else
         {
