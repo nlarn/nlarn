@@ -470,7 +470,7 @@ monster_data_t monster_data[] = {
         .name = "xorn", .glyph = 'X', .colour = BROWN,
         .exp = 300, .ac = 10, .hp_max = 60,
         .level = 7, .intelligence = 13, .speed = NORMAL, .size = MEDIUM,
-        .flags = INFRAVISION,
+        .flags = INFRAVISION | RES_COLD | RES_FIRE,
         .attacks = {
             { .type = ATT_BITE, .base = 6, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
@@ -516,7 +516,7 @@ monster_data_t monster_data[] = {
         .name = "shambling mound", .glyph = 's', .colour = GREEN,
         .exp = 400, .ac = 8, .hp_max = 45,
         .level = 8, .intelligence = 6, .speed = VSLOW, .size = GIANT,
-        .flags = RES_SLEEP | RES_POISON,
+        .flags = RES_SLEEP | RES_POISON | RES_ELEC,
         .attacks = {
             { .type = ATT_SLAM, .base = 5, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
@@ -2244,11 +2244,11 @@ monster *monster_damage_take(monster *m, damage *dam)
         {
             /*
              * The monster's fire resistance reduces the damage taken
-             * by 5% per monster level
+             * by 10% per monster level
              */
             dam->amount -= (guint)(((float)dam->amount / 100) *
-                 /* prevent uint wrap around for monsters with level > 20 */
-                 (min(monster_level(m), 20) * 5));
+                 /* prevent uint wrap around for monsters with level > 10 */
+                 (min(monster_level(m), 10) * 10));
             if (monster_in_sight(m))
             {
                 log_add_entry(nlarn->log, "The %s %sresists the flames.",
