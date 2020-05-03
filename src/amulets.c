@@ -31,7 +31,7 @@ const amulet_data amulets[AM_MAX] =
     { AM_DRAGON_SLAYING,      "dragon slaying",   ET_NONE,              6000, },
     { AM_POWER,               "power",            ET_NONE,              8000, },
     { AM_REFLECTION,          "reflection",       ET_REFLECTION,        8000, },
-    { AM_LARN,                "larn",             ET_INFRAVISION,       9000, },
+    { AM_LARN,                "Larn",             ET_INFRAVISION,       9000, },
 };
 
 static const int amulet_materials[AM_MAX] =
