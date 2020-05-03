@@ -1283,7 +1283,8 @@ static int material_affected(item_material_t mat, item_erosion_type iet)
     switch (iet)
     {
     case IET_BURN:
-        return (mat <= IM_BONE);
+        /* potions will shatter when exposed to fire */
+        return (mat <= IM_BONE || mat == IM_GLASS);
     case IET_CORRODE:
         return (mat == IM_IRON);
     case IET_RUST:
@@ -1335,10 +1336,22 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     switch (iet)
     {
     case IET_BURN:
-        it->burnt++;
-        erosion_desc = "burn";
+        if (it->type == IT_POTION)
+        {
+            erosion_desc = "shatter";
+            destroyed = TRUE;
+        }
+        else if (item_material(it) == IM_GLASS)
+        {
+            /* other things made of glass are not affected */
+        }
+        else
+        {
+            it->burnt++;
+            erosion_desc = "burn";
 
-        if (it->burnt == 3) destroyed = TRUE;
+            if (it->burnt == 3) destroyed = TRUE;
+        }
         break;
 
     case IET_CORRODE:
