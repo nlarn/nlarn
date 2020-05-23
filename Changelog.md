@@ -3,6 +3,7 @@
 ### Changes:
 * Some monsters now appear in packs (e.g. osquips and rothes)
 * Some monsters produce sounds when attacking
+* Differentiate between amulets and talismans
 * Add some missing monster resistances
 * Shatter potions when exposed to fire
 * Consistently call the currency "gold"

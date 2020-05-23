@@ -682,7 +682,9 @@ gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean defin
     {
     case IT_AMULET:
         if (known)
-            g_string_append_printf(desc, "amulet of %s", item_desc_get(it, known));
+            g_string_append_printf(desc, "%s of %s",
+                    amulet_type(it) == AMULET ? "amulet" : "talisman",
+                    item_desc_get(it, known));
         else
             g_string_append_printf(desc, "%s amulet", item_desc_get(it, known));
         break;

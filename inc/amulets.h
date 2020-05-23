@@ -1,6 +1,6 @@
 /*
  * amulets.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -35,9 +35,16 @@ typedef enum amulet_types
     AM_MAX
 } amulet_t;
 
+typedef enum amulet_type
+{
+    AMULET,
+    TALISMAN
+} amulet_type;
+
 typedef struct amulet_data
 {
     amulet_t id;
+    amulet_type typ;  /* talisman or amulet? */
     const char *name;
     effect_t effect; /* effect causes by this amulet */
     int price;       /* base price in the shops */
@@ -53,8 +60,9 @@ item_material_t amulet_material(amulet_t amulet_id);
 
 /* macros */
 
+#define amulet_type(item)        (amulets[(item)->id].typ)
 #define amulet_name(item)        (amulets[(item)->id].name)
-#define amulet_effect_t(item) (amulets[(item)->id].effect)
+#define amulet_effect_t(item)    (amulets[(item)->id].effect)
 #define amulet_price(item)       (amulets[(item)->id].price)
 
 #endif

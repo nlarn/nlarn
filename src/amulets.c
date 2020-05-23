@@ -23,15 +23,15 @@
 
 const amulet_data amulets[AM_MAX] =
 {
-    { AM_AWARENESS,           "awareness",        ET_AWARENESS,         400,  },
-    { AM_SUSTAINMENT,         "sustainment",      ET_SUSTAINMENT,       400,  },
-    { AM_UNDEAD_CONTROL,      "undead control",   ET_UNDEAD_PROTECTION, 5000, },
-    { AM_NEGATE_SPIRIT,       "negate spirit",    ET_SPIRIT_PROTECTION, 5000, },
-    { AM_NOTHEFT,             "theft prevention", ET_NOTHEFT,           6000, },
-    { AM_DRAGON_SLAYING,      "dragon slaying",   ET_NONE,              6000, },
-    { AM_POWER,               "power",            ET_NONE,              8000, },
-    { AM_REFLECTION,          "reflection",       ET_REFLECTION,        8000, },
-    { AM_LARN,                "Eye of Larn",      ET_INFRAVISION,       9000, },
+    { AM_AWARENESS,           AMULET,   "awareness",        ET_AWARENESS,         400,  },
+    { AM_SUSTAINMENT,         AMULET,   "sustainment",      ET_SUSTAINMENT,       400,  },
+    { AM_UNDEAD_CONTROL,      TALISMAN, "undead control",   ET_UNDEAD_PROTECTION, 5000, },
+    { AM_NEGATE_SPIRIT,       TALISMAN, "negate spirit",    ET_SPIRIT_PROTECTION, 5000, },
+    { AM_NOTHEFT,             TALISMAN, "theft prevention", ET_NOTHEFT,           6000, },
+    { AM_DRAGON_SLAYING,      TALISMAN, "dragon slaying",   ET_NONE,              6000, },
+    { AM_POWER,               AMULET,   "power",            ET_NONE,              8000, },
+    { AM_REFLECTION,          AMULET,   "reflection",       ET_REFLECTION,        8000, },
+    { AM_LARN,                AMULET,   "Eye of Larn",      ET_INFRAVISION,       9000, },
 };
 
 static const int amulet_materials[AM_MAX] =
@@ -52,4 +52,3 @@ item_material_t amulet_material(amulet_t amulet_id)
     g_assert(amulet_id < AM_MAX);
     return amulet_materials[nlarn->amulet_material_mapping[amulet_id]];
 }
-
