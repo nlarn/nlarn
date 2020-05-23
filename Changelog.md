@@ -18,6 +18,7 @@
   * now works in the topmost corridor
   * selecting the location only allows valid selections
   * red monsters are shown as light red when they'll be hit.
+* Bring back the Eye of Larn (after red_kangaroo)
 * Keep townsfolk inside the town area
 * Fix debit message
 

@@ -1,6 +1,6 @@
 /*
  * amulets.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -31,7 +31,7 @@ const amulet_data amulets[AM_MAX] =
     { AM_DRAGON_SLAYING,      "dragon slaying",   ET_NONE,              6000, },
     { AM_POWER,               "power",            ET_NONE,              8000, },
     { AM_REFLECTION,          "reflection",       ET_REFLECTION,        8000, },
-    { AM_LARN,                "larn",             ET_INFRAVISION,       9000, },
+    { AM_LARN,                "Eye of Larn",      ET_INFRAVISION,       9000, },
 };
 
 static const int amulet_materials[AM_MAX] =
