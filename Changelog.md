@@ -1,4 +1,4 @@
-## Release 0.7.6 (unreleased)
+## Release 0.7.6 (2020-05-23)
 
 ### Changes:
 * Some monsters now appear in packs (e.g. osquips and rothes)
