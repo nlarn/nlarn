@@ -373,8 +373,9 @@ item *item_new_finetouch(item *it)
         }
     }
 
-    /* maybe the item is corroded */
-    if (item_is_corrodible(it->type) && chance(25))
+    /* maybe the item is corroded
+       Don't erode potions, as they break when exposed to fire */
+    if (it->type != IT_POTION && item_is_corrodible(it->type) && chance(25))
     {
         it = item_erode(NULL, it, rand_1n(IET_MAX), FALSE);
     }
