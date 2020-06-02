@@ -44,6 +44,8 @@ const display_colset display_default_colset[] =
     { "magenta",      MAGENTA },
     { "cyan",         CYAN },
     { "lightgray",    LIGHTGRAY },
+    { "lightgrey",    LIGHTGRAY },
+    { "darkgray",     DARKGRAY },
     { "darkgrey",     DARKGRAY },
     { "lightred",     LIGHTRED },
     { "lightgreen",   LIGHTGREEN },
@@ -51,7 +53,8 @@ const display_colset display_default_colset[] =
     { "lightblue",    LIGHTBLUE },
     { "lightmagenta", LIGHTMAGENTA },
     { "lightcyan",    LIGHTCYAN },
-    { "white",        WHITE }
+    { "white",        WHITE },
+    { NULL,           0}
 };
 
 const display_colset display_dialog_colset[] =
@@ -64,6 +67,8 @@ const display_colset display_dialog_colset[] =
     { "magenta",      DDC_MAGENTA },
     { "cyan",         DDC_CYAN },
     { "lightgray",    DDC_LIGHTGRAY },
+    { "lightgrey",    DDC_LIGHTGRAY },
+    { "darkgray",     DDC_DARKGRAY },
     { "darkgrey",     DDC_DARKGRAY },
     { "lightred",     DDC_LIGHTRED },
     { "lightgreen",   DDC_LIGHTGREEN },
@@ -71,7 +76,8 @@ const display_colset display_dialog_colset[] =
     { "lightblue",    DDC_LIGHTBLUE },
     { "lightmagenta", DDC_LIGHTMAGENTA },
     { "lightcyan",    DDC_LIGHTCYAN },
-    { "white",        DDC_WHITE }
+    { "white",        DDC_WHITE },
+    { NULL,           0}
 };
 
 static gboolean display_initialised = FALSE;
