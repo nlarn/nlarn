@@ -546,7 +546,7 @@ void display_paint_screen(player *p)
     clrtoeol();
 
     /* gold */
-    mvprintw(9, MAP_MAX_X + 3, "$%-7d", player_get_gold(p));
+    mvaprintw(9, MAP_MAX_X + 3, YELLOW, "$%-7d", player_get_gold(p));
     clrtoeol();
 
     /* clear line below gold */
