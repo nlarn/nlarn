@@ -938,7 +938,7 @@ int building_monastery(struct player *p)
                                "Here you may\n\n" \
                                "  `lightgreen`a`end`) buy something\n" \
                                "  `lightgreen`b`end`) ask for curse removal\n" \
-                               "  `lightgreen`c`end`) recieve healing\n";
+                               "  `lightgreen`c`end`) receive healing\n";
 
     const char ayfwt[] = "Are you fine with that?";
 

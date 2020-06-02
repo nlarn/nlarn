@@ -1,3 +1,10 @@
+## Release 0.7.7 (unreleased)
+
+### Changes:
+
+### Fixed bugs:
+* Fix typo in monastery (spotted by jv84)
+
 ## Release 0.7.6 (2020-05-23)
 
 ### Changes:
