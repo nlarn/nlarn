@@ -26,7 +26,7 @@
 #include "items.h"
 #include "map.h"
 #include "monsters.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "pathfinding.h"
 #include "random.h"
 

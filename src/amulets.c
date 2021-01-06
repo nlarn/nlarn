@@ -19,7 +19,7 @@
 #include <glib.h>
 #include "amulets.h"
 #include "items.h"
-#include "nlarn.h"
+#include "extdefs.h"
 
 const amulet_data amulets[AM_MAX] =
 {

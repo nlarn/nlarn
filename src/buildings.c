@@ -25,7 +25,7 @@
 #include "game.h"
 #include "gems.h"
 #include "items.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "player.h"
 #include "scrolls.h"
 

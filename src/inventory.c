@@ -22,7 +22,7 @@
 #include "game.h"
 #include "inventory.h"
 #include "items.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "potions.h"
 
 /* functions */

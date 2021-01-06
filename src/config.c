@@ -22,7 +22,7 @@
 
 #include "config.h"
 #include "display.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "items.h"
 #include "player.h"
 

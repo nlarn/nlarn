@@ -22,7 +22,7 @@
 #include "items.h"
 #include "map.h"
 #include "monsters.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "player.h"
 #include "random.h"
 #include "weapons.h"

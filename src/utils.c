@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "nlarn.h"
+#include "extdefs.h"
 #include "utils.h"
 
 static const guint LOG_MAX_LENGTH = 100;
