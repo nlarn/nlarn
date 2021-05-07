@@ -248,6 +248,8 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     }
     else
     {
+        effect *e;
+
         switch (potion->id)
         {
         case PO_AMNESIA:
@@ -268,6 +270,18 @@ item_usage_result potion_quaff(struct player *p, item *potion)
             result.identified = potion_recovery(p, potion);
             break;
 
+        case PO_SEE_INVISIBLE:
+            // The potion of see invisible can cure blindness,
+            // but then doesn't grant invisibility.
+            if ((e = player_effect_get(nlarn->p, ET_BLINDNESS)))
+            {
+                player_effect_del(nlarn->p, e);
+                result.identified = TRUE;
+            } else {
+                result.identified = potion_with_effect(p, potion);
+            }
+            break;
+
         case PO_CURE_DIANTHR:
             log_add_entry(nlarn->log, "You really want to keep the potion for your daughter.");
             result.used_up = FALSE;
@@ -279,7 +293,6 @@ item_usage_result potion_quaff(struct player *p, item *potion)
             if (potion->id == PO_MAX_HP && potion->blessed)
             {
                 int done = FALSE;
-                effect *e;
                 if ((e = player_effect_get(nlarn->p, ET_POISON)))
                 {
                     player_effect_del(nlarn->p, e);

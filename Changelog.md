@@ -2,6 +2,7 @@
 
 ### Changes:
 * Show carried gold in yellow (suggested by jv84)
+* The potion of see invisible now cures blindness (suggested by jv84)
 
 ### Fixed bugs:
 * Fix compilation with recent compilers (patch by Frank Uhlig)
