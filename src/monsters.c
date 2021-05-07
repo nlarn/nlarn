@@ -2483,8 +2483,9 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty)
     /* handle regeneration */
     if (monster_flags(m, REGENERATE) && (m->hp < monster_hp_max(m)))
     {
-        /* regenerate every (10 - difficulty) turns */
-        if (gtime % (10 - difficulty) == 0)
+        // regenerate every (10 - difficulty) turns,
+        // or every turn starting on difficulty 10
+        if ( (difficulty >= 10) || (gtime % (10 - difficulty) == 0) )
             m->hp++;
     }
 
