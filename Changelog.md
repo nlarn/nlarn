@@ -3,6 +3,9 @@
 ### Changes:
 * Show carried gold in yellow (suggested by jv84)
 * The potion of see invisible now cures blindness (suggested by jv84)
+* Modified potions of instant healing: they now always cure poisoning
+  and sickness. The previous special behavior of blessed potions of
+  instant healing got removed.
 
 ### Fixed bugs:
 * Fix compilation with recent compilers (patch by Frank Uhlig)

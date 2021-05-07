@@ -270,6 +270,18 @@ item_usage_result potion_quaff(struct player *p, item *potion)
             result.identified = potion_recovery(p, potion);
             break;
 
+        case PO_MAX_HP:
+            result.identified = potion_with_effect(p, potion);
+
+            // Potions of instant healing can cure poisoning and sickness,
+            // the latter is performed in player_effect_add().
+            if ((e = player_effect_get(nlarn->p, ET_POISON)))
+            {
+                player_effect_del(nlarn->p, e);
+                result.identified = TRUE;
+            }
+            break;
+
         case PO_SEE_INVISIBLE:
             // The potion of see invisible can cure blindness,
             // but then doesn't grant invisibility.
@@ -289,28 +301,6 @@ item_usage_result potion_quaff(struct player *p, item *potion)
 
         default:
             result.identified = potion_with_effect(p, potion);
-
-            if (potion->id == PO_MAX_HP && potion->blessed)
-            {
-                int done = FALSE;
-                if ((e = player_effect_get(nlarn->p, ET_POISON)))
-                {
-                    player_effect_del(nlarn->p, e);
-                    done = TRUE;
-                }
-                if ((e = player_effect_get(nlarn->p, ET_CONFUSION)))
-                {
-                    player_effect_del(nlarn->p, e);
-                    done = TRUE;
-                }
-                if ((e = player_effect_get(nlarn->p, ET_BLINDNESS)))
-                {
-                    player_effect_del(nlarn->p, e);
-                    done = TRUE;
-                }
-                if (!result.identified)
-                    result.identified = done;
-            }
             break;
         }
     }
