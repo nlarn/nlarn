@@ -46,6 +46,7 @@
 #include "scoreboard.h"
 #include "sobjects.h"
 #include "traps.h"
+#include "extdefs.h"
 
 /* see https://stackoverflow.com/q/36764885/1519878 */
 #define _STR(x) #x

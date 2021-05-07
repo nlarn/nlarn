@@ -19,7 +19,7 @@
 #include <glib.h>
 
 #include "game.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "random.h"
 #include "spheres.h"
 

@@ -18,7 +18,7 @@
 
 #include <glib.h>
 
-#include "nlarn.h"
+#include "extdefs.h"
 #include "rings.h"
 
 const ring_data rings[RT_MAX] =

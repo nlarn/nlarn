@@ -21,7 +21,7 @@
 
 #include "display.h"
 #include "game.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "random.h"
 #include "scrolls.h"
 

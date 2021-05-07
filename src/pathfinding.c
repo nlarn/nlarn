@@ -16,7 +16,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nlarn.h"
+#include "extdefs.h"
 #include "pathfinding.h"
 #include "player.h"
 

@@ -23,7 +23,7 @@
 #include "display.h"
 #include "items.h"
 #include "map.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "random.h"
 #include "sobjects.h"
 #include "spheres.h"

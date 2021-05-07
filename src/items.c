@@ -27,7 +27,7 @@
 #include "gems.h"
 #include "items.h"
 #include "map.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "player.h"
 #include "potions.h"
 #include "random.h"

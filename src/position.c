@@ -22,7 +22,7 @@
 #include "cJSON.h"
 #include "display.h"
 #include "map.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "position.h"
 
 #define POS_MAX_XY (1<<10)

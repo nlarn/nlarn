@@ -25,7 +25,7 @@
 # include <sys/file.h>
 #endif
 
-#include "nlarn.h"
+#include "extdefs.h"
 #include "scoreboard.h"
 #include "cJSON.h"
 

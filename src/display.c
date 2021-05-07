@@ -24,7 +24,7 @@
 #include "display.h"
 #include "fov.h"
 #include "map.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "spheres.h"
 
 typedef struct _display_colset

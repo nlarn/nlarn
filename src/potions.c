@@ -20,7 +20,7 @@
 
 #include "display.h"
 #include "game.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "player.h"
 #include "potions.h"
 #include "random.h"

@@ -20,7 +20,7 @@
 
 #include "container.h"
 #include "display.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "player.h"
 #include "random.h"
 

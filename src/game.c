@@ -42,7 +42,7 @@
 #include "config.h"
 #include "display.h"
 #include "game.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "player.h"
 #include "spheres.h"
 #include "random.h"

@@ -21,7 +21,7 @@
 
 #include "display.h"
 #include "map.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "random.h"
 #include "sobjects.h"
 #include "spells.h"

@@ -21,7 +21,7 @@
 #include "display.h"
 #include "game.h"
 #include "map.h"
-#include "nlarn.h"
+#include "extdefs.h"
 #include "sobjects.h"
 #include "player.h"
 #include "random.h"
