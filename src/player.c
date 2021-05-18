@@ -1,6 +1,6 @@
 /*
  * player.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2021 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -2408,14 +2408,6 @@ effect *player_effect_add(player *p, effect *e)
 
         case ET_INC_HP:
         case ET_MAX_HP:
-            {
-                /* also cure sickness, if present */
-                effect *sickness;
-                if ((sickness = player_effect_get(p, ET_SICKNESS)))
-                {
-                    player_effect_del(p, sickness);
-                }
-            }
             if (p->hp != (int)p->hp_max)
             {
                     guint amount = (p->hp_max * e->amount) / 100;

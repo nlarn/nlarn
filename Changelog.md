@@ -6,6 +6,7 @@
 * Modified potions of instant healing: they now always cure poisoning
   and sickness. The previous special behavior of blessed potions of
   instant healing got removed.
+* Healing spell and healing potion no longer cure sickness
 
 ### Fixed bugs:
 * Fix compilation with recent compilers (patch by Frank Uhlig)
