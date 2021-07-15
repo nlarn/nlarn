@@ -28,6 +28,7 @@
 #include <string.h>
 #include <zlib.h>
 #include <glib/gstdio.h>
+#include <unistd.h>
 
 #if (defined __unix) || (defined __unix__) || (defined __APPLE__)
 # include <sys/file.h>
