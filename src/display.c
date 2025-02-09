@@ -1759,14 +1759,14 @@ char *display_get_string(const char *title, const char *caption, const char *val
     {
         /* print text */
         mvwaprintw(mwin->window, 1 + line, 1, COLOR_PAIR(DCP_WHITE_RED),
-                  " %-*s ", width - 4, g_ptr_array_index(text, line));
+                  " %-*s ", width - 4, (char *)g_ptr_array_index(text, line));
     }
 
     do
     {
         mvwaprintw(mwin->window,  mwin->height - 2, box_start,
                    COLOR_PAIR(DCP_BLACK_WHITE),
-                  "%-*s", max_len + 1, string->str);
+                  "%-*s", (int)max_len + 1, string->str);
         wmove(mwin->window, mwin->height - 2, box_start + ipos);
 
         /* make cursor visible and set according to insert mode */
