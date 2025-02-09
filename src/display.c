@@ -452,7 +452,7 @@ void display_paint_screen(player *p)
     /* player level description */
     char *pld = g_strdup(player_get_level_desc(p));
     pld[0] = g_ascii_toupper(pld[0]);
-    printw(pld);
+    printw("%s", pld);
     g_free(pld);
 
     /* experience points / level */
@@ -1534,7 +1534,8 @@ int display_get_count(const char *caption, int value)
         /* fill the box background */
         mvwaprintw(mwin->window, 1 + line, 1, COLOR_PAIR(DCP_WHITE_RED), "%-*s", width - 2, "");
         /* print text */
-        mvwaprintw(mwin->window, 1 + line, 2, COLOR_PAIR(DCP_WHITE_RED), g_ptr_array_index(text, line));
+        mvwaprintw(mwin->window, 1 + line, 2, COLOR_PAIR(DCP_WHITE_RED),
+			"%s", (char *)g_ptr_array_index(text, line));
     }
 
     /* prepare string to edit */
@@ -1939,7 +1940,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
     for (line = 0; line < text->len; line++)
     {
         mvwaprintw(ywin->window, line + 1, 1 + padding, COLOR_PAIR(DCP_WHITE_RED),
-                   g_ptr_array_index(text, line));
+                   "%s", (char *)g_ptr_array_index(text, line));
     }
 
     text_destroy(text);
