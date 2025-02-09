@@ -422,7 +422,7 @@ void display_paint_screen(player *p)
     }
 #endif
 
-    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, attrs, "HP %3d", p->hp, player_get_hp_max(p));
+    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, attrs, "HP %3d", p->hp);
 
     /* max HPs */
     mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 15, LIGHTGREEN, "/%-3d", player_get_hp_max(p));
