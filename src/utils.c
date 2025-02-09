@@ -130,13 +130,14 @@ void log_set_time(message_log *log, int gtime)
     {
         message_log_entry *entry = g_malloc(sizeof(message_log_entry));
         entry->gtime = log->gtime;
-        entry->message = (log->buffer)->str;
+
+        /* destroy the GString object and keep the message */
+        entry->message = g_string_free(log->buffer, FALSE);
 
         /* append the entry to the message log */
         g_ptr_array_add(log->entries, entry);
 
-        /* destroy buffer and add prepare new one */
-        g_string_free(log->buffer, FALSE);
+        /* prepare new buffer */
         log->buffer = g_string_new(NULL);
     }
 
