@@ -1,6 +1,6 @@
 /*
  * display.h
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -35,71 +35,6 @@
 #define KEY_ESC 27 /* escape */
 #define KEY_SPC 32 /* space */
 
-/* colour pairs */
-enum display_colour_pairs
-{
-    DCP_WHITE_BLACK,
-    DCP_RED_BLACK,
-    DCP_GREEN_BLACK,
-    DCP_BLUE_BLACK,
-    DCP_YELLOW_BLACK,
-    DCP_MAGENTA_BLACK,
-    DCP_CYAN_BLACK,
-    DCP_BLACK_BLACK,
-
-    DCP_WHITE_RED,
-    DCP_RED_RED,
-    DCP_GREEN_RED,
-    DCP_BLUE_RED,
-    DCP_YELLOW_RED,
-    DCP_MAGENTA_RED,
-    DCP_CYAN_RED,
-    DCP_BLACK_RED,
-
-    DCP_RED_WHITE,
-    DCP_BLACK_WHITE
-};
-
-enum display_default_colours
-{
-    COLOURLESS,
-    BLACK        = COLOR_PAIR(DCP_BLACK_BLACK),
-    RED          = COLOR_PAIR(DCP_RED_BLACK),
-    GREEN        = COLOR_PAIR(DCP_GREEN_BLACK),
-    BROWN        = COLOR_PAIR(DCP_YELLOW_BLACK),
-    BLUE         = COLOR_PAIR(DCP_BLUE_BLACK),
-    MAGENTA      = COLOR_PAIR(DCP_MAGENTA_BLACK),
-    CYAN         = COLOR_PAIR(DCP_CYAN_BLACK),
-    LIGHTGRAY    = COLOR_PAIR(DCP_WHITE_BLACK),
-    DARKGRAY     = COLOR_PAIR(DCP_BLACK_BLACK)   | A_BOLD,
-    LIGHTRED     = COLOR_PAIR(DCP_RED_BLACK)     | A_BOLD,
-    LIGHTGREEN   = COLOR_PAIR(DCP_GREEN_BLACK)   | A_BOLD,
-    YELLOW       = COLOR_PAIR(DCP_YELLOW_BLACK)  | A_BOLD,
-    LIGHTBLUE    = COLOR_PAIR(DCP_BLUE_BLACK)    | A_BOLD,
-    LIGHTMAGENTA = COLOR_PAIR(DCP_MAGENTA_BLACK) | A_BOLD,
-    LIGHTCYAN    = COLOR_PAIR(DCP_CYAN_BLACK)    | A_BOLD,
-    WHITE        = COLOR_PAIR(DCP_WHITE_BLACK)   | A_BOLD
-};
-
-enum display_dialog_colours
-{
-    DDC_BLACK        = COLOR_PAIR(DCP_BLACK_RED),
-    DDC_RED          = COLOR_PAIR(DCP_RED_RED),
-    DDC_GREEN        = COLOR_PAIR(DCP_GREEN_RED),
-    DDC_BROWN        = COLOR_PAIR(DCP_YELLOW_RED),
-    DDC_BLUE         = COLOR_PAIR(DCP_BLUE_RED),
-    DDC_MAGENTA      = COLOR_PAIR(DCP_MAGENTA_RED),
-    DDC_CYAN         = COLOR_PAIR(DCP_CYAN_RED),
-    DDC_LIGHTGRAY    = COLOR_PAIR(DCP_WHITE_RED),
-    DDC_DARKGRAY     = COLOR_PAIR(DCP_BLACK_RED)   | A_BOLD,
-    DDC_LIGHTRED     = COLOR_PAIR(DCP_RED_RED)     | A_BOLD,
-    DDC_LIGHTGREEN   = COLOR_PAIR(DCP_GREEN_RED)   | A_BOLD,
-    DDC_YELLOW       = COLOR_PAIR(DCP_YELLOW_RED)  | A_BOLD,
-    DDC_LIGHTBLUE    = COLOR_PAIR(DCP_BLUE_RED)    | A_BOLD,
-    DDC_LIGHTMAGENTA = COLOR_PAIR(DCP_MAGENTA_RED) | A_BOLD,
-    DDC_LIGHTCYAN    = COLOR_PAIR(DCP_CYAN_RED)    | A_BOLD,
-    DDC_WHITE        = COLOR_PAIR(DCP_WHITE_RED)   | A_BOLD
-};
 typedef void (*display_inv_callback_func)(player *, inventory **, item *);
 
 typedef struct display_inv_callback

@@ -1,6 +1,6 @@
 /*
  * traps.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,7 +18,7 @@
 
 #include <glib.h>
 
-#include "display.h"
+#include "colours.h"
 #include "effects.h"
 #include "game.h"
 #include "extdefs.h"

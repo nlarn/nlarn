@@ -1,6 +1,6 @@
 /*
  * display.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,19 +21,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "colours.h"
 #include "display.h"
 #include "fov.h"
 #include "map.h"
 #include "extdefs.h"
 #include "spheres.h"
 
-typedef struct _display_colset
-{
-    const char *name;
-    const int  val;
-} display_colset;
-
-const display_colset display_default_colset[] =
+const colset display_default_colset[] =
 {
     { "",             COLOURLESS },
     { "black",        BLACK },
@@ -57,7 +52,7 @@ const display_colset display_default_colset[] =
     { NULL,           0}
 };
 
-const display_colset display_dialog_colset[] =
+const colset display_dialog_colset[] =
 {
     { "black",        DDC_BLACK },
     { "red",          DDC_RED },
@@ -86,9 +81,7 @@ static gboolean display_initialised = FALSE;
 static GList *windows = NULL;
 
 static int mvwcprintw(WINDOW *win, int defattr, int currattr,
-        const display_colset *colset, int y, int x, const char *fmt, ...);
-
-static int display_get_colval(const display_colset *colset, const char *name);
+        const colset *colset, int y, int x, const char *fmt, ...);
 
 static void display_inventory_help(GPtrArray *callbacks);
 
@@ -2933,7 +2926,7 @@ int display_getch(WINDOW *win) {
 
 
 static int mvwcprintw(WINDOW *win, int defattr, int currattr,
-        const display_colset *colset, int y, int x, const char *fmt, ...)
+        const colset *colset, int y, int x, const char *fmt, ...)
 {
     va_list argp;
     gchar *msg;
@@ -2978,7 +2971,7 @@ static int mvwcprintw(WINDOW *win, int defattr, int currattr,
             {
                 wattroff(win, attr);
 
-                attr = display_get_colval(colset, tval);
+                attr = colour_lookup(colset, tval);
                 /* dim bright colous when the default colour is dark */
                 if (defattr == DARKGRAY && attr > LIGHTGRAY)
                 {
@@ -3066,26 +3059,6 @@ static void display_inventory_help(GPtrArray *callbacks)
 
     display_show_message("Help", help->str, maxlen + 2);
     g_string_free(help, TRUE);
-}
-
-static int display_get_colval(const display_colset *colset, const char *name)
-{
-    int colour = 0;
-    int pos = 0;
-
-    while (colset[pos].name != NULL)
-    {
-        if (strcmp(name, colset[pos].name) == 0)
-        {
-            /* colour found */
-            colour = colset[pos].val;
-            break;
-        }
-
-        pos++;
-    }
-
-    return colour;
 }
 
 static display_window *display_window_new(int x1, int y1, int width,

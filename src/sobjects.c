@@ -1,6 +1,6 @@
 /*
  * sobjects.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,7 @@
 
 #include <glib.h>
 
+#include "colours.h"
 #include "display.h"
 #include "game.h"
 #include "map.h"
