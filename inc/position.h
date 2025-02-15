@@ -1,6 +1,6 @@
 /*
  * position.h
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,6 +22,7 @@
 #include <glib.h>
 
 #include "cJSON.h"
+#include "colours.h"
 #include "combat.h"
 
 /* direction of movement */
@@ -148,7 +149,7 @@ gboolean area_blast(position center, guint radius,
                     const damage_originator *damo,
                     area_hit_sth pos_hitfun,
                     gpointer data1, gpointer data2,
-                    char glyph, int colour);
+                    char glyph, colour fg);
 
 /**
  * @brief Destroy a given area

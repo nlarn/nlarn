@@ -1,6 +1,6 @@
 /*
  * traps.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #ifndef __TRAPS_H_
 #define __TRAPS_H_
 
+#include "colours.h"
 #include "monsters.h"
 
 typedef enum trap_types
@@ -39,7 +40,7 @@ typedef struct trap_data
 {
     trap_t type;             /* trap type */
     int effect_t;            /* effect caused by this trap */
-    int color;               /* glyph color */
+    colour fg;               /* glyph color */
     int chance;              /* chance this trap triggers */
     int effect_chance;       /* chance the effect is activated */
     int damage;              /* base damage */
@@ -83,7 +84,7 @@ guint trap_disarm(struct player *p);
 
 /* macros */
 #define trap_effect(trap) (traps[(trap)].effect_t)
-#define trap_colour(trap) (traps[(trap)].color)
+#define trap_colour(trap) (traps[(trap)].fg)
 #define trap_chance(trap) (traps[(trap)].chance)
 #define trap_effect_chance(trap) (traps[(trap)].effect_chance)
 #define trap_damage(trap) (traps[(trap)].damage)

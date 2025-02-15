@@ -109,18 +109,18 @@ static struct _monster_breath_data
 {
     const char *desc;
     const char glyph;
-    int colour;
+    colour fg;
 } monster_breath_data[] =
 {
     { NULL, 0, 0 },                                 /* DAM_NONE */
     { NULL, 0, 0 },                                 /* DAM_PHYSICAL */
-    { "psionic blast", '*', WHITE },             /* DAM_MAGICAL */
-    { "burst of fire", '~', RED },               /* DAM_FIRE */
-    { "beam of frost", '*', LIGHTCYAN },         /* DAM_COLD */
-    { "gush of acid", '*', LIGHTGREEN },         /* DAM_ACID */
-    { "flood of water", '~', BLUE },             /* DAM_WATER */
-    { "ray of lightning", '*', YELLOW },         /* DAM_ELECTRICITY */
-    { "burst of noxious fumes", '%', GREEN },    /* DAM_POISON */
+    { "psionic blast", '*', WHITE },                /* DAM_MAGICAL */
+    { "burst of fire", '~', LAVA },                 /* DAM_FIRE */
+    { "beam of frost", '*', ICE_COLD_GREEN },       /* DAM_COLD */
+    { "gush of acid", '*', ELECTRIC_BLUE },         /* DAM_ACID */
+    { "flood of water", '~', BRIGHT_BLUE },         /* DAM_WATER */
+    { "ray of lightning", '*', DYNAMIC_YELLOW },    /* DAM_ELECTRICITY */
+    { "burst of noxious fumes", '%', VENOM_GREEN }, /* DAM_POISON */
 };
 
 monster_data_t monster_data[] = {
@@ -134,7 +134,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GNOME */
-        .name = "gnome", .glyph = 'g', .colour = BROWN,
+        .name = "gnome", .glyph = 'g', .colour = ANISEED_LEAF_GREEN,
         .exp = 2, .gold_chance = 80, .gold = 30, .ac = 0, .hp_max = 6,
         .level = 1, .intelligence = 8, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS,
@@ -143,7 +143,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_HOBGOBLIN */
-        .name = "hobgoblin", .glyph = 'H', .colour = BROWN,
+        .name = "hobgoblin", .glyph = 'H', .colour = AUTUMN_LEAF_BROWN,
         .exp = 2, .gold_chance = 30, .gold = 40, .ac = 1, .hp_max = 8,
         .level = 1, .intelligence = 5, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -152,7 +152,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_JACKAL */
-        .name = "jackal", .glyph = 'J', .colour = BROWN,
+        .name = "jackal", .glyph = 'J', .colour = ELM_BROWN_RED,
         .exp = 1, .ac = 0, .hp_max = 3,
         .level = 1, .intelligence = 4, .speed = FAST, .size = SMALL,
         .flags = HEAD,
@@ -161,7 +161,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER, .sound = "growl"
     },
     { /* MT_KOBOLD */
-        .name = "kobold", .glyph = 'k', .colour = BROWN,
+        .name = "kobold", .glyph = 'k', .colour = GREEN_BROWN,
         .exp = 1, .gold_chance = 10, .gold = 100, .ac = 0, .hp_max = 4,
         .level = 1, .intelligence = 7, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -170,7 +170,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ORC */
-        .name = "orc", .glyph = 'O', .colour = RED,
+        .name = "orc", .glyph = 'O', .colour = DUSTY_GREY,
         .exp = 2, .gold_chance = 50, .gold = 80, .ac = 3, .hp_max = 12,
         .level = 2, .intelligence = 9, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS | INFRAVISION | PACK,
@@ -179,7 +179,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER, .sound = "shout"
     },
     { /* MT_SNAKE */
-        .name = "snake", .glyph = 'S', .colour = LIGHTGREEN,
+        .name = "snake", .glyph = 'S', .colour = APPLE_GREEN,
         .exp = 1, .ac = 1, .hp_max = 3,
         .level = 2, .intelligence = 3, .speed = NORMAL, .size = TINY,
         .flags = HEAD,
@@ -189,7 +189,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER, .sound = "hiss"
     },
     { /* MT_CENTIPEDE */
-        .name = "giant centipede", .glyph = 'c', .colour = YELLOW,
+        .name = "giant centipede", .glyph = 'c', .colour = ALSIKE_CLOVER_RED,
         .exp = 2, .ac = 1, .hp_max = 5,
         .level = 2, .intelligence = 2, .speed = NORMAL, .size = SMALL,
         .flags = HEAD,
@@ -199,7 +199,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_JACULUS */
-        .name = "jaculus", .plural_name = "jaculi", .glyph = 'j', .colour = GREEN,
+        .name = "jaculus", .plural_name = "jaculi", .glyph = 'j', .colour = FOAM_GREEN,
         .exp = 1, .ac = 3, .hp_max = 8,
         .level = 2, .intelligence = 3, .speed = XFAST, .size = MEDIUM,
         .flags = HEAD | FLY,
@@ -209,7 +209,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_TROGLODYTE */
-        .name = "troglodyte", .glyph = 't', .colour = BROWN,
+        .name = "troglodyte", .glyph = 't', .colour = CARBON_GREY,
         .exp = 3, .gold_chance = 25, .gold = 320, .ac = 4, .hp_max = 10,
         .level = 2, .intelligence = 5, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS,
@@ -218,7 +218,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GIANT_ANT */
-        .name = "giant ant", .glyph = 'A', .colour = BROWN,
+        .name = "giant ant", .glyph = 'A', .colour = DARK_SAND,
         .exp = 5, .ac = 2, .hp_max = 6,
         .level = 2, .intelligence = 3, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | PACK,
@@ -228,7 +228,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_FLOATING_EYE */
-        .name = "floating eye", .glyph = 'E', .colour = BLUE,
+        .name = "floating eye", .glyph = 'E', .colour = PALE_GREEN_ONION,
         .exp = 2, .ac = 2, .hp_max = 12,
         .level = 3, .intelligence = 3, .speed = XSLOW, .size = MEDIUM,
         .flags = FLY | INFRAVISION | RES_CONF,
@@ -237,7 +237,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_LEPRECHAUN */
-        .name = "leprechaun", .glyph = 'L', .colour = GREEN,
+        .name = "leprechaun", .glyph = 'L', .colour = IRELAND_GREEN,
         .exp = 45, .gold = 1500, .ac = 6, .hp_max = 13,
         .level = 3, .intelligence = 6, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS,
@@ -247,7 +247,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_NYMPH */
-        .name = "nymph", .glyph = 'n', .colour = RED,
+        .name = "nymph", .glyph = 'n', .colour = DUSTY_PINK,
         .exp = 45, .ac = 5, .hp_max = 18,
         .level = 3, .intelligence = 9, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS,
@@ -256,7 +256,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_QUASIT */
-        .name = "quasit", .glyph = 'Q', .colour = BLUE,
+        .name = "quasit", .glyph = 'Q', .colour = DENTIST_GREEN,
         .exp = 15, .ac = 6, .hp_max = 10,
         .level = 3, .intelligence = 3, .speed = FAST, .size = SMALL,
         .flags = HEAD | HANDS | DEMON,
@@ -266,7 +266,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_RUST_MONSTER */
-        .name = "rust monster", .glyph = 'R', .colour = BROWN,
+        .name = "rust monster", .glyph = 'R', .colour = AUTUMN_LEAF_ORANGE,
         .exp = 25, .ac = 6, .hp_max = 18,
         .level = 3, .intelligence = 3, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | METALLIVORE,
@@ -276,7 +276,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ZOMBIE */
-        .name = "zombie", .glyph = 'Z', .colour = LIGHTGRAY,
+        .name = "zombie", .glyph = 'Z', .colour = OLIVE_GREY,
         .exp = 7, .ac = 2, .hp_max = 12,
         .level = 3, .intelligence = 3, .speed = VSLOW, .size = MEDIUM,
         .flags = HEAD | HANDS | UNDEAD | RES_SLEEP | RES_POISON | RES_CONF,
@@ -286,7 +286,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER, .sound = "groan"
     },
     { /* MT_ASSASSIN_BUG */
-        .name = "assassin bug", .glyph = 'a', .colour = GREEN,
+        .name = "assassin bug", .glyph = 'a', .colour = DEEP_ORANGE,
         .exp = 15, .ac = 1, .hp_max = 20,
         .level = 4, .intelligence = 3, .speed = FAST, .size = TINY,
         .flags = HEAD | RES_POISON,
@@ -296,7 +296,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_BUGBEAR */
-        .name = "bugbear", .glyph = 'B', .colour = BROWN,
+        .name = "bugbear", .glyph = 'B', .colour = DEEP_ORANGE,
         .exp = 35, .gold_chance = 10, .gold = 400, .ac = 5, .hp_max = 20,
         .level = 4, .intelligence = 5, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -306,7 +306,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_HELLHOUND */
-        .name = "hell hound", .glyph = 'h', .colour = LIGHTRED,
+        .name = "hell hound", .glyph = 'h', .colour = LAVA,
         .exp = 35, .ac = 5, .hp_max = 16,
         .level = 4, .intelligence = 6, .speed = FAST, .size = SMALL,
         .flags = HEAD | RES_FIRE | RES_MAGIC,
@@ -316,7 +316,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER, .sound = "bark"
     },
     { /* MT_ICE_LIZARD */
-        .name = "ice lizard", .glyph = 'i', .colour = LIGHTCYAN,
+        .name = "ice lizard", .glyph = 'i', .colour = CHALKY_BLUE_WHITE,
         .exp = 25, .ac = 4, .hp_max = 20,
         .level = 4, .intelligence = 6, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | SWIM | RES_COLD,
@@ -326,7 +326,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_CENTAUR */
-        .name = "centaur", .glyph = 'C', .colour = BROWN,
+        .name = "centaur", .glyph = 'C', .colour = AUTUMN_LEAF_BROWN,
         .exp = 45, .gold_chance = 50, .gold = 80, .ac = 6, .hp_max = 24,
         .level = 4, .intelligence = 10, .speed = FAST, .size = LARGE,
         .flags = HEAD | HANDS | PACK,
@@ -336,7 +336,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_TROLL */
-        .name = "troll", .glyph = 'T', .colour = BROWN,
+        .name = "troll", .glyph = 'T', .colour = MOUNTAIN_LAKE_BLUE,
         .exp = 300, .gold_chance = 20, .gold = 400, .ac = 8, .hp_max = 50,
         .level = 5, .intelligence = 9, .speed = SLOW, .size = LARGE,
         .flags = HEAD | HANDS | REGENERATE,
@@ -346,7 +346,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER, .sound = "grunt"
     },
     { /* MT_YETI */
-        .name = "yeti", .glyph = 'Y', .colour = WHITE,
+        .name = "yeti", .glyph = 'Y', .colour = GREY_GOOSE,
         .exp = 100, .gold_chance = 10, .gold = 200, .ac = 4, .hp_max = 35,
         .level = 5, .intelligence = 5, .speed = NORMAL, .size = LARGE,
         .flags = HEAD | HANDS | RES_COLD,
@@ -355,7 +355,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ELF */
-        .name = "elf", .plural_name = "elves", .glyph = 'e', .colour = WHITE,
+        .name = "elf", .plural_name = "elves", .glyph = 'e', .colour = GREY_CLOUD,
         .exp = 35, .gold_chance = 50, .gold = 150, .ac = 6, .hp_max = 22,
         .level = 5, .intelligence = 15, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -364,7 +364,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GELATINOUSCUBE */
-        .name = "gelatinous cube", .glyph = 'g', .colour = CYAN,
+        .name = "gelatinous cube", .glyph = 'g', .colour = ALABASTER_GREEN,
         .exp = 45, .ac = 1, .hp_max = 22,
         .level = 5, .intelligence = 3, .speed = XSLOW, .size = LARGE,
         .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF,
@@ -383,7 +383,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_METAMORPH */
-        .name = "metamorph", .glyph = 'm', .colour = WHITE,
+        .name = "metamorph", .glyph = 'm', .colour = SILVER,
         .exp = 40, .ac = 3, .hp_max = 30,
         .level = 6, .intelligence = 3, .speed = NORMAL, .size = MEDIUM,
         .flags = 0,
@@ -392,7 +392,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_VORTEX */
-        .name = "vortex", .plural_name = "vortexes", .glyph = 'v', .colour = CYAN,
+        .name = "vortex", .plural_name = "vortexes", .glyph = 'v', .colour = SKY_BLUE,
         .exp = 55, .ac = 6, .hp_max = 30,
         .level = 6, .intelligence = 3, .speed = VFAST, .size = TINY,
         .flags = RES_SLEEP | RES_POISON | FLY | RES_ELEC | RES_CONF,
@@ -401,7 +401,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ZILLER */
-        .name = "ziller", .glyph = 'z', .colour = CYAN,
+        .name = "ziller", .glyph = 'z', .colour = WOOL_VIOLET,
         .exp = 35, .ac = 8, .hp_max = 30,
         .level = 6, .intelligence = 3, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | RES_CONF,
@@ -411,7 +411,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_VIOLET_FUNGUS */
-        .name = "violet fungus", .plural_name = "violet fungi", .glyph = 'F', .colour = MAGENTA,
+        .name = "violet fungus", .plural_name = "violet fungi", .glyph = 'F', .colour = VIOLET,
         .exp = 100, .ac = 0, .hp_max = 38,
         .level = 6, .intelligence = 3, .speed = XSLOW, .size = MEDIUM,
         .flags = RES_SLEEP | RES_POISON | RES_CONF,
@@ -421,7 +421,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_WRAITH */
-        .name = "wraith", .glyph = 'W', .colour = LIGHTGRAY,
+        .name = "wraith", .glyph = 'W', .colour = VAMPIRE_GREY,
         .exp = 325, .ac = 7, .hp_max = 30,
         .level = 6, .intelligence = 3, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS | UNDEAD | RES_SLEEP | RES_POISON | RES_CONF,
@@ -430,7 +430,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_FORVALAKA */
-        .name = "forvalaka", .glyph = 'f', .colour = LIGHTGRAY,
+        .name = "forvalaka", .glyph = 'f', .colour = ONYX,
         .exp = 280, .ac = 4, .hp_max = 50,
         .level = 6, .intelligence = 7, .speed = DOUBLE, .size = MEDIUM,
         .flags = HEAD | UNDEAD | INFRAVISION | RES_POISON,
@@ -439,7 +439,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_LAMA_NOBE */
-        .name = "lama nobe", .glyph = 'l', .colour = RED,
+        .name = "lama nobe", .glyph = 'l', .colour = LIGHT_FUCHSIA,
         .exp = 80, .ac = 3, .hp_max = 35,
         .level = 7, .intelligence = 6, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD,
@@ -449,7 +449,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_OSQUIP */
-        .name = "osquip", .glyph = 'o', .colour = BROWN,
+        .name = "osquip", .glyph = 'o', .colour = SAND,
         .exp = 100, .ac = 5, .hp_max = 35,
         .level = 7, .intelligence = 4, .speed = VFAST, .size = SMALL,
         .flags = HEAD | PACK,
@@ -458,7 +458,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ROTHE */
-        .name = "rothe", .glyph = 'r', .colour = BROWN,
+        .name = "rothe", .glyph = 'r', .colour = ALSIKE_CLOVER_RED,
         .exp = 250, .ac = 5, .hp_max = 50,
         .level = 7, .intelligence = 5, .speed = VFAST, .size = LARGE,
         .flags = HEAD | INFRAVISION | PACK,
@@ -468,7 +468,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_XORN */
-        .name = "xorn", .glyph = 'X', .colour = BROWN,
+        .name = "xorn", .glyph = 'X', .colour = PALE_RED,
         .exp = 300, .ac = 10, .hp_max = 60,
         .level = 7, .intelligence = 13, .speed = NORMAL, .size = MEDIUM,
         .flags = INFRAVISION | RES_COLD | RES_FIRE,
@@ -477,7 +477,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_VAMPIRE */
-        .name = "vampire", .glyph = 'V', .colour = RED,
+        .name = "vampire", .glyph = 'V', .colour = DRIED_BLOOD,
         .exp = 1000, .ac = 7, .hp_max = 50,
         .level = 7, .intelligence = 17, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS | FLY | UNDEAD | INFRAVISION | REGENERATE | RES_SLEEP | RES_POISON | RES_CONF,
@@ -487,7 +487,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_STALKER */
-        .name = "invisible stalker", .glyph = 'I', .colour = LIGHTGRAY,
+        .name = "invisible stalker", .glyph = 'I', .colour = ASH_GREY,
         .exp = 350, .ac = 7, .hp_max = 50,
         .level = 7, .intelligence = 14, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | FLY | INVISIBLE,
@@ -496,7 +496,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_POLTERGEIST */
-        .name = "poltergeist", .glyph = 'p', .colour = WHITE,
+        .name = "poltergeist", .glyph = 'p', .colour = REGENT_GREY,
         .exp = 450, .ac = 6, .hp_max = 50,
         .level = 8, .intelligence = 5, .speed = NORMAL, .size = MEDIUM,
         .flags = FLY | UNDEAD | INVISIBLE | RES_SLEEP | RES_POISON,
@@ -505,7 +505,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER, .sound = "laugh"
     },
     { /* MT_DISENCHANTRESS */
-        .name = "disenchantress", .plural_name = "disenchantresses", .glyph = 'q', .colour = WHITE,
+        .name = "disenchantress", .plural_name = "disenchantresses", .glyph = 'q', .colour = PALE_TURQUOISE,
         .exp = 500, .ac = 7, .hp_max = 50,
         .level = 8, .intelligence = 5, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS | METALLIVORE,
@@ -514,7 +514,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_SHAMBLINGMOUND */
-        .name = "shambling mound", .glyph = 's', .colour = GREEN,
+        .name = "shambling mound", .glyph = 's', .colour = GREEN_BROWN,
         .exp = 400, .ac = 8, .hp_max = 45,
         .level = 8, .intelligence = 6, .speed = VSLOW, .size = GIANT,
         .flags = RES_SLEEP | RES_POISON | RES_ELEC,
@@ -523,7 +523,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_YELLOW_MOLD */
-        .name = "yellow mold", .glyph = 'y', .colour = YELLOW,
+        .name = "yellow mold", .glyph = 'y', .colour = HONEY_YELLOW,
         .exp = 250, .ac = 0, .hp_max = 35,
         .level = 8, .intelligence = 3, .speed = XSLOW, .size = SMALL,
         .flags = RES_SLEEP | RES_POISON | RES_CONF,
@@ -532,7 +532,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_UMBER_HULK */
-        .name = "umber hulk", .glyph = 'U', .colour = YELLOW,
+        .name = "umber hulk", .glyph = 'U', .colour = DARK_ORANGE,
         .exp = 600, .ac = 12, .hp_max = 65,
         .level = 8, .intelligence = 14, .speed = SLOW, .size = GIANT,
         .flags = HEAD | HANDS | INFRAVISION | RES_CONF,
@@ -542,7 +542,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GNOME_KING */
-        .name = "gnome king", .glyph = 'G', .colour = RED,
+        .name = "gnome king", .glyph = 'G', .colour = ANISEED_LEAF_GREEN,
         .exp = 3000, .gold = 2000, .reroll_chance = 80, .ac = 11, .hp_max = 100,
         .level = 9, .intelligence = 18, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS | RES_SLEEP,
@@ -551,7 +551,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_MIMIC */
-        .name = "mimic", .glyph = 'M', .colour = BROWN,
+        .name = "mimic", .glyph = 'M', .colour = AUTUMN_LEAF_BROWN,
         .exp = 99, .ac = 5, .hp_max = 55,
         .level = 9, .intelligence = 8, .speed = SLOW, .size = MEDIUM,
         .flags = MIMIC,
@@ -560,7 +560,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_WATER_LORD */
-        .name = "water lord", .glyph = 'w', .colour = LIGHTBLUE,
+        .name = "water lord", .glyph = 'w', .colour = DEEP_SEA_BLUE,
         .exp = 15000, .ac = 12, .hp_max = 150,
         .level = 9, .intelligence = 20, .speed = NORMAL, .size = LARGE,
         .flags = HEAD | NOBEHEAD | HANDS | RES_SLEEP | SWIM,
@@ -569,7 +569,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_PURPLE_WORM */
-        .name = "purple worm", .glyph = 'P', .colour = MAGENTA,
+        .name = "purple worm", .glyph = 'P', .colour = DEEP_PURPLE,
         .exp = 15000, .ac = 12, .hp_max = 120,
         .level = 9, .intelligence = 3, .speed = VSLOW, .size = GARGANTUAN,
         .flags = HEAD | RES_POISON,
@@ -579,7 +579,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_XVART */
-        .name = "xvart", .glyph = 'x', .colour = LIGHTGRAY,
+        .name = "xvart", .glyph = 'x', .colour = CHALCEDONY_VIOLET,
         .exp = 1000, .ac = 11, .hp_max = 90,
         .level = 9, .intelligence = 13, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -588,7 +588,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_BRONZE_DRAGON */
-        .name = "bronze dragon", .glyph = 'D', .colour = BROWN,
+        .name = "bronze dragon", .glyph = 'D', .colour = GREEN_BROWN,
         .exp = 4000, .gold = 300, .ac = 10, .hp_max = 80,
         .level = 9, .intelligence = 16, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON,
@@ -598,7 +598,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GREEN_DRAGON */
-        .name = "green dragon", .glyph = 'D', .colour = LIGHTGREEN,
+        .name = "green dragon", .glyph = 'D', .colour = GREEN_HAZE,
         .exp = 2500, .gold = 200, .ac = 12, .hp_max = 70,
         .level = 9, .intelligence = 15, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON | RES_POISON,
@@ -608,7 +608,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_SILVER_DRAGON */
-        .name = "silver dragon", .glyph = 'D', .colour = LIGHTGRAY,
+        .name = "silver dragon", .glyph = 'D', .colour = SILVER,
         .exp = 10000, .gold = 700, .ac = 13, .hp_max = 100,
         .level = 10, .intelligence = 20, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON,
@@ -618,7 +618,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_PLATINUM_DRAGON */
-        .name = "platinum dragon", .glyph = 'D', .colour = WHITE,
+        .name = "platinum dragon", .glyph = 'D', .colour = PLATINUM,
         .exp = 24000, .gold = 1000, .ac = 15, .hp_max = 130,
         .level = 11, .intelligence = 22, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON | RES_CONF,
@@ -628,7 +628,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_RED_DRAGON */
-        .name = "red dragon", .glyph = 'D', .colour = LIGHTRED,
+        .name = "red dragon", .glyph = 'D', .colour = BLOOD_RED,
         .exp = 14000, .gold = 800, .ac = 14, .hp_max = 110,
         .level = 11, .intelligence = 19, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON | RES_FIRE,
@@ -638,7 +638,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_SPIRIT_NAGA */
-        .name = "spirit naga", .glyph = 'N', .colour = MAGENTA,
+        .name = "spirit naga", .glyph = 'N', .colour = BLUE_LOTUS,
         .exp = 20000, .ac = 16, .hp_max = 95,
         .level = 11, .intelligence = 23, .speed = FAST, .size = LARGE,
         .flags = HEAD | NOBEHEAD | FLY | SPIRIT | INFRAVISION | RES_SLEEP | RES_POISON | RES_CONF | RES_MAGIC,
@@ -648,7 +648,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GREEN_URCHIN */
-        .name = "green urchin", .glyph = 'u', .colour = GREEN,
+        .name = "green urchin", .glyph = 'u', .colour = TEALISH_GREEN,
         .exp = 5000, .ac = 17, .hp_max = 85,
         .level = 10, .intelligence = 3, .speed = SLOW, .size = SMALL,
         .flags = 0,
@@ -658,7 +658,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_I */
-        .name = "type I demon lord", .glyph = '&', .colour = LIGHTRED,
+        .name = "type I demon lord", .glyph = '&', .colour = RED,
         .exp = 50000, .ac = 17, .hp_max = 140,
         .level = 12, .intelligence = 20, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -668,7 +668,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_II */
-        .name = "type II demon lord", .glyph = '&', .colour = LIGHTRED,
+        .name = "type II demon lord", .glyph = '&', .colour = RED,
         .exp = 75000, .ac = 18, .hp_max = 160,
         .level = 13, .intelligence = 21, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -678,7 +678,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_III */
-        .name = "type III demon lord", .glyph = '&', .colour = LIGHTRED,
+        .name = "type III demon lord", .glyph = '&', .colour = RED,
         .exp = 100000, .ac = 19, .hp_max = 180,
         .level = 14, .intelligence = 22, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -688,7 +688,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_IV */
-        .name = "type IV demon lord", .glyph = '&', .colour = LIGHTRED,
+        .name = "type IV demon lord", .glyph = '&', .colour = RED,
         .exp = 125000, .ac = 20, .hp_max = 200,
         .level = 15, .intelligence = 23, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -698,7 +698,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_V */
-        .name = "type V demon lord", .glyph = '&', .colour = LIGHTRED,
+        .name = "type V demon lord", .glyph = '&', .colour = RED,
         .exp = 150000, .ac = 21, .hp_max = 220,
         .level = 16, .intelligence = 24, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -708,7 +708,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_VI */
-        .name = "type VI demon lord", .glyph = '&', .colour = LIGHTRED,
+        .name = "type VI demon lord", .glyph = '&', .colour = RED,
         .exp = 175000, .ac = 22, .hp_max = 240,
         .level = 17, .intelligence = 25, .speed = FAST, .size = LARGE,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -718,7 +718,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_VII */
-        .name = "type VII demon lord", .glyph = '&', .colour = LIGHTRED,
+        .name = "type VII demon lord", .glyph = '&', .colour = RED,
         .exp = 200000, .ac = 23, .hp_max = 260,
         .level = 18, .intelligence = 26, .speed = FAST, .size = GIANT,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_CONF | RES_MAGIC,
@@ -728,7 +728,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMON_PRINCE */
-        .name = "demon prince", .glyph = '&', .colour = RED,
+        .name = "demon prince", .glyph = '&', .colour = DARK_BURGUNDY,
         .exp = 300000, .ac = 25, .hp_max = 345,
         .level = 25, .intelligence = 28, .speed = FAST, .size = GIANT,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_FIRE | RES_SLEEP | RES_POISON | RES_CONF | RES_MAGIC,
@@ -738,7 +738,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_TOWN_PERSON */
-        .name = "human", .glyph = '@', .colour = BROWN,
+        .name = "human", .glyph = '@', .colour = LAVENDER,
         .exp = 0, .ac = 0, .hp_max = 10,
         .level = 1, .intelligence = 10, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS,
@@ -2008,7 +2008,7 @@ static int monster_breath_attack(monster *m, player *p, attack att)
     map_trajectory(m->pos, p->pos, &(dam->dam_origin),
                    monster_breath_hit, dam, NULL, TRUE,
                    monster_breath_data[att.damage].glyph,
-                   monster_breath_data[att.damage].colour, TRUE);
+                   monster_breath_data[att.damage].fg, TRUE);
 
     /* the damage is copied in monster_breath_hit(), thus destroy the
        original damage here */
@@ -2620,7 +2620,7 @@ char monster_glyph(monster *m)
     }
 }
 
-int monster_color(monster *m)
+colour monster_color(monster *m)
 {
     g_assert (m != NULL);
 

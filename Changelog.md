@@ -1,6 +1,7 @@
 ## Release 0.7.7 (unreleased)
 
 ### Changes:
+* Switch to 256 colours
 * Show carried gold in yellow (suggested by jv84)
 * The potion of see invisible now cures blindness (suggested by jv84)
 * Modified potions of instant healing: they now always cure poisoning

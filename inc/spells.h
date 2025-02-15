@@ -1,6 +1,6 @@
 /*
  * spells.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #ifndef __SPELLS_H_
 #define __SPELLS_H_
 
+#include "colours.h"
 #include "effects.h"
 #include "items.h"
 #include "player.h"
@@ -92,7 +93,7 @@ typedef struct spell_data {
     const char *description;  /* the spell's description */
     const char *msg_success;  /* the message given upon success */
     const char *msg_fail;     /* the message give upoon failure */
-    int colour;               /* the colour of visible spells */
+    colour fg;                /* the colour of visible spells */
     int level;                /* level of the spell */
     int price;                /* price of the book*/
     unsigned
@@ -173,7 +174,7 @@ gboolean spell_vaporize_rock(spell *s, struct player *p);
 #define spell_effect(spell)   (spells[(spell)->id].effect)
 #define spell_msg_succ(spell) (spells[(spell)->id].msg_success)
 #define spell_msg_fail(spell) (spells[(spell)->id].msg_fail)
-#define spell_colour(spell)   (spells[(spell)->id].colour)
+#define spell_colour(spell)   (spells[(spell)->id].fg)
 #define spell_level(spell)    (spells[(spell)->id].level)
 
 #define spell_code_by_id(id)     (spells[(id)].code)
@@ -183,14 +184,14 @@ gboolean spell_vaporize_rock(spell *s, struct player *p);
 #define spell_effect_by_id(id)   (spells[(id)].effect)
 #define spell_msg_succ_by_id(id) (spells[(id)].msg_success)
 #define spell_msg_fail_by_id(id) (spells[(id)].msg_fail)
-#define spell_colour_by_id(id)   (spells[(id)].colour)
+#define spell_colour_by_id(id)   (spells[(id)].fg)
 #define spell_level_by_id(id)    (spells[(id)].level)
 
 /* *** BOOKS *** */
 
 char *book_desc(spell_id book_id);
 int book_weight(item *book);
-int book_colour(item *book);
+colour book_colour(item *book);
 item_usage_result book_read(struct player *p, item *book);
 
 #define book_type_obtainable(id) (spells[id].obtainable)

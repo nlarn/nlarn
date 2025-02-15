@@ -53,7 +53,7 @@ const trap_data traps[TT_MAX] =
         "The %s is hit by an arrow.",
     },
     {
-        TT_DART, ET_POISON, CYAN,
+        TT_DART, ET_POISON, PALE_CYAN,
         75, 50, 5,
         "dart trap",
         "You are hit by a dart.",
@@ -61,7 +61,7 @@ const trap_data traps[TT_MAX] =
         "The %s is hit by a dart.",
     },
     {
-        TT_TELEPORT, ET_NONE, MAGENTA,
+        TT_TELEPORT, ET_NONE, OPERA_MAUVE,
         55, 0, 0,
         "teleport trap",
         "Zaaaappp! You've been teleported!",
@@ -69,7 +69,7 @@ const trap_data traps[TT_MAX] =
         "The %s has been teleported away.",
     },
     {
-        TT_PIT, ET_TRAPPED, BROWN,
+        TT_PIT, ET_TRAPPED, GREEN_BROWN,
         80, 100, 6,
         "pit",
         "You fall into a pit!",
@@ -77,7 +77,7 @@ const trap_data traps[TT_MAX] =
         "The %s falls into a pit.",
     },
     {
-        TT_SPIKEDPIT, ET_POISON, BROWN,
+        TT_SPIKEDPIT, ET_POISON, GREEN_BROWN,
         80, 60, 12,
         "pit full of spikes",
         "You fall into a pit full of spikes!",
@@ -85,7 +85,7 @@ const trap_data traps[TT_MAX] =
         "The %s falls into a pit full of spikes.",
     },
     {
-        TT_SLEEPGAS, ET_SLEEP, MAGENTA,
+        TT_SLEEPGAS, ET_SLEEP, LIGHT_FUCHSIA,
         75, 100, 0,
         "sleeping gas trap",
         "A cloud of gas engulfs you.",
@@ -93,7 +93,7 @@ const trap_data traps[TT_MAX] =
         "A cloud of gas engulfs the %s.",
     },
     {
-        TT_MANADRAIN, ET_NONE, BROWN,
+        TT_MANADRAIN, ET_NONE, PALE_RED,
         75, 0, 0,
         "magic energy drain trap",
         "You feel your magical energy drained away!",
@@ -101,7 +101,7 @@ const trap_data traps[TT_MAX] =
         NULL,
     },
     {
-        TT_TRAPDOOR, ET_NONE, BROWN,
+        TT_TRAPDOOR, ET_NONE, ELM_BROWN_RED,
         75, 0, 5,
         "trapdoor",
         "You fall through a trap door!",

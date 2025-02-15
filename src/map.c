@@ -19,7 +19,6 @@
 #include <glib.h>
 #include <stdlib.h>
 
-#include "colours.h"
 #include "container.h"
 #include "display.h"
 #include "items.h"
@@ -48,19 +47,19 @@ static inline void map_sphere_destroy(sphere *s, map *m __attribute__((unused)))
 
 const map_tile_data map_tiles[LT_MAX] =
 {
-    /* type         gly  color          desc           pa tr */
-    { LT_NONE,      ' ', COLOURLESS,    NULL,          0, 0 },
-    { LT_MOUNTAIN,  '^', LIGHTGRAY,  "a mountain",  0, 0 },
-    { LT_GRASS,     '"', LIGHTGREEN, "grass",       1, 1 },
-    { LT_DIRT,      '.', BROWN,      "dirt",        1, 1 },
-    { LT_TREE,      '&', GREEN,      "a tree",      0, 0 },
-    { LT_FLOOR,     '.', LIGHTGRAY,  "floor",       1, 1 },
-    { LT_WATER,     '~', LIGHTBLUE,  "water",       1, 1 },
-    { LT_DEEPWATER, '~', BLUE,       "deep water",  0, 1 },
-    { LT_LAVA,      '~', RED,        "lava",        0, 1 },
-    { LT_FIRE,      '*', RED,        "fire",        1, 1 },
-    { LT_CLOUD,     '*', WHITE,      "a gas cloud", 1, 1 },
-    { LT_WALL,      '#', LIGHTGRAY,  "a wall",      0, 0 },
+    /* type         gly  color            desc           pa tr */
+    { LT_NONE,      ' ', COLOURLESS,      NULL,          0, 0 },
+    { LT_MOUNTAIN,  '^', GRAVEL,          "a mountain",  0, 0 },
+    { LT_GRASS,     '"', GRASS_GREEN,     "grass",       1, 1 },
+    { LT_DIRT,      '.', GREEN_BROWN,     "dirt",        1, 1 },
+    { LT_TREE,      '&', TREE_GREEN,      "a tree",      0, 0 },
+    { LT_FLOOR,     '.', GRANITE,         "floor",       1, 1 },
+    { LT_WATER,     '~', BLUE,            "water",       1, 1 },
+    { LT_DEEPWATER, '~', DARK_ROYAL_BLUE, "deep water",  0, 1 },
+    { LT_LAVA,      '~', LAVA,            "lava",        0, 1 },
+    { LT_FIRE,      '*', LUMINOUS_RED,    "fire",        1, 1 },
+    { LT_CLOUD,     '*', WHITE,           "a gas cloud", 1, 1 },
+    { LT_WALL,      '#', GRANITE,         "a wall",      0, 0 },
 };
 
 /* keep track which levels have been used before */
@@ -676,7 +675,7 @@ gboolean map_trajectory(position source, position target,
                         const damage_originator * const damo,
                         trajectory_hit_sth pos_hitfun,
                         gpointer data1, gpointer data2, gboolean reflectable,
-                        char glyph, int colour, gboolean keep_ray)
+                        char glyph, colour fg, gboolean keep_ray)
 {
     g_assert(pos_valid(source) && pos_valid(target));
 
@@ -719,7 +718,7 @@ gboolean map_trajectory(position source, position target,
             display_paint_screen(nlarn->p);
 
             return map_trajectory(cursor, source, damo, pos_hitfun, data1,
-                                  data2, FALSE,  glyph, colour, keep_ray);
+                                  data2, FALSE,  glyph, fg, keep_ray);
         }
 
         /* after checking for reflection, abort the function if the
@@ -732,9 +731,9 @@ gboolean map_trajectory(position source, position target,
 
         /* show the position of the ray*/
         /* FIXME: move curses functions to display.c */
-        attron(colour);
+        attron(COLOR_PAIR(fg));
         (void)mvaddch(Y(cursor), X(cursor), glyph);
-        attroff(colour);
+        attroff(COLOR_PAIR(fg));
         display_draw();
 
         /* sleep a while to show the ray's position */

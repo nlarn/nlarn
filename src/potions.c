@@ -70,36 +70,36 @@ static gboolean potion_pos_hit(const GList *traj,
 struct potion_obfuscation_s
 {
     const char* desc;
-    const int colour;
+    const colour fg;
 }
 potion_obfuscation[PO_MAX] =
 {
-    { "clear",          WHITE,       },
-    { "bubbly",         LIGHTGRAY,   },
-    { "clotted",        DARKGRAY,    },
-    { "smoky",          LIGHTGRAY    },
-    { "milky",          WHITE,       },
-    { "fizzy",          LIGHTBLUE,   },
-    { "murky",          DARKGRAY,    },
-    { "effervescent",   LIGHTBLUE,   },
-    { "dark",           DARKGRAY,    },
-    { "turbid",         DARKGRAY,    },
-    { "mucilaginous",   BROWN,       },
-    { "gluey",          BROWN,       },
-    { "gooey",          BROWN,       },
-    { "coagulated",     DARKGRAY,    },
-    { "white",          WHITE,       },
-    { "red",            RED,         },
-    { "blue",           BLUE,        },
-    { "green",          GREEN        },
-    { "yellow",         YELLOW,      },
-    { "orange",         LIGHTRED,    },
-    { "polychrome",     LIGHTGREEN,  },
-    { "dichroic",       LIGHTMAGENTA,},
-    { "tricoloured",    LIGHTCYAN,   },
-    { "black",          DARKGRAY,    },
-    { "turquoise",      CYAN,        },
-    { "foaming",        WHITE,       },
+    { "clear",          ICE_COLD_GREEN,  },
+    { "bubbly",         MANGO_ORANGE,    },
+    { "clotted",        NATURE_APRICOT,  },
+    { "smoky",          ASH_GREY,        },
+    { "milky",          BUTTER,          },
+    { "fizzy",          AQUAMARINE,      },
+    { "murky",          GLADIOLA_BLUE,   },
+    { "effervescent",   AZUL,            },
+    { "dark",           BALTIC_SEA,      },
+    { "turbid",         CLAM_SHELL,      },
+    { "mucilaginous",   TEALISH_GREEN,   },
+    { "gluey",          BRINK_PINK,      },
+    { "gooey",          PALE_PURPLE,     },
+    { "coagulated",     PALE_OAK,        },
+    { "white",          WHITE,           },
+    { "red",            LUMINOUS_RED,    },
+    { "blue",           BRIGHT_BLUE,     },
+    { "green",          LIME_JUICE_GREEN },
+    { "yellow",         SULFUR_YELLOW,   },
+    { "orange",         LUMINOUS_ORANGE, },
+    { "polychrome",     FRESH_GREEN,     },
+    { "dichroic",       PERSIAN_PINK,    },
+    { "tricoloured",    CANDY_PINK,      },
+    { "black",          NIGHT,           },
+    { "turquoise",      TURQUOISE_BLUE,  },
+    { "foaming",        FRESH_GREEN,     },
 };
 
 char *potion_desc(potion_t potion_id)
@@ -108,10 +108,10 @@ char *potion_desc(potion_t potion_id)
     return (char *)potion_obfuscation[nlarn->potion_desc_mapping[potion_id]].desc;
 }
 
-int potion_colour(potion_t potion_id)
+colour potion_colour(potion_t potion_id)
 {
     g_assert(potion_id < PO_MAX);
-    return potion_obfuscation[nlarn->potion_desc_mapping[potion_id]].colour;
+    return potion_obfuscation[nlarn->potion_desc_mapping[potion_id]].fg;
 }
 
 int potion_throw(struct player *p)
@@ -468,7 +468,7 @@ static int potion_detect_item(player *p, item *potion)
                        don't move around */
 
                     player_memory_of(p, pos).item = item_type;
-                    player_memory_of(p, pos).item_colour = DARKGRAY;
+                    player_memory_of(p, pos).item_colour = DOVE_GREY;
                     count++;
                 }
             }

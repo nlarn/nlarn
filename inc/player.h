@@ -1,6 +1,6 @@
 /*
  * player.h
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,6 +22,7 @@
 #include "amulets.h"
 #include "armour.h"
 #include "buildings.h"
+#include "colours.h"
 #include "fov.h"
 #include "map.h"
 #include "monsters.h"
@@ -89,7 +90,7 @@ typedef struct _player_tile_memory
     map_tile_t type;
     sobject_t sobject;
     item_t item;            /* type of item located here */
-    int item_colour;        /* colour of item located here */
+    colour item_colour;     /* colour of item located here */
     trap_t trap;
 } player_tile_memory;
 

@@ -1,6 +1,6 @@
 /*
  * monsters.h
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,6 +23,7 @@
 #include <time.h>
 
 #include "cJSON.h"
+#include "colours.h"
 #include "effects.h"
 #include "enumFactory.h"
 #include "inventory.h"
@@ -264,7 +265,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty);
 item *get_mimic_item(monster *m);
 char *monster_desc(monster *m);
 char monster_glyph(monster *m);
-int monster_color(monster *m);
+colour monster_color(monster *m);
 
 /* dealing with temporary effects */
 effect *monster_effect_add(monster *m, effect *e);

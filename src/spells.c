@@ -88,7 +88,7 @@ const spell_data spells[SP_MAX] =
         "Causes your hands to emit a screeching sound toward what they point",
         "The sound damages the %s.",
         "The %s can't hear the noise.",
-        LIGHTCYAN, 2, 480, FALSE
+        CONIFER, 2, 480, FALSE
     },
     {
         SP_STR, "str", "strength",
@@ -146,7 +146,7 @@ const spell_data spells[SP_MAX] =
         "Makes a ball of fire that burns on what it hits",
         "The fireball hits the %s.",
         NULL,
-        LIGHTRED, 3, 1200, FALSE
+        LUMINOUS_ORANGE, 3, 1200, FALSE
     },
     {
         SP_CLD, "cld", "cone of cold",
@@ -154,7 +154,7 @@ const spell_data spells[SP_MAX] =
         "Sends forth a cone of cold which freezes what it touches",
         "The cone of cold strikes the %s.",
         NULL,
-        WHITE, 3, 1200, FALSE
+        ALABASTER_GREEN, 3, 1200, FALSE
     },
     {
         SP_PLY, "ply", "polymorph",
@@ -207,7 +207,7 @@ const spell_data spells[SP_MAX] =
         "Your finger will emit a lightning bolt when this spell is cast",
         "A lightning bolt hits the %s.",
         "The %s loves fire and lightning!",
-        YELLOW, 4, 1600, FALSE
+        MOON_GLOW, 4, 1600, FALSE
     },
     {
         SP_DRL, "drl", "drain life",
@@ -317,46 +317,46 @@ struct book_obfuscation_s
 {
     const char* desc;
     const int weight;
-    const int colour;
+    const colour fg;
 }
 book_obfuscation[SP_MAX] =
 {
-    { "parchment-bound", 800, BROWN,     },
-    { "thick",          1200, RED,       },
-    { "dusty",           800, LIGHTGRAY, },
-    { "leather-bound",   800, BROWN,     },
-    { "heavy",          1200, GREEN,     },
-    { "ancient",         800, DARKGRAY,  },
-    { "buckram",         800, LIGHTGRAY, },
-    { "gilded",          800, YELLOW,    },
-    { "embossed",        800, BLUE,      },
-    { "old",             800, LIGHTGRAY, },
-    { "thin",            400, GREEN,     },
-    { "light",           400, WHITE,     },
-    { "large",          1200, BLUE,      },
-    { "vellum",          800, BROWN,     },
-    { "tan",             800, BROWN,     },
-    { "papyrus",         800, BROWN,     },
-    { "linen",           800, WHITE,     },
-    { "musty",           800, GREEN,     },
-    { "faded",           800, DARKGRAY,  },
-    { "antique",         800, DARKGRAY,  },
-    { "worn out",        800, DARKGRAY,  },
-    { "tattered",        800, LIGHTGRAY, },
-    { "aged",            800, DARKGRAY,  },
-    { "ornate",          800, BLUE,      },
-    { "inconspicuous",   800, LIGHTGRAY, },
-    { "awe-inspiring",   800, WHITE,     },
-    { "stained",         800, BROWN,     },
-    { "mottled",         800, RED,       },
-    { "plaid",           800, RED,       },
-    { "wax-lined",       800, BROWN,     },
-    { "bamboo",          800, YELLOW,    },
-    { "clasped",         800, YELLOW,    },
-    { "well-thumbed",    800, BLUE,      },
-    { "ragged",          800, LIGHTGRAY, },
-    { "dull",            800, DARKGRAY,  },
-    { "canvas",          800, YELLOW,    },
+    { "parchment-bound", 800, ELM_BROWN_RED,     },
+    { "thick",          1200, GLADE_GREEN,       },
+    { "dusty",           800, DUSTY_GREY,        },
+    { "leather-bound",   800, ELM_BROWN_RED,     },
+    { "heavy",          1200, SPRUCE_BLUE,       },
+    { "ancient",         800, PALE_OLIVE_GREEN,  },
+    { "buckram",         800, SUNSET_RED,        },
+    { "gilded",          800, PALE_GOLD,         },
+    { "embossed",        800, ROCK_BLUE,         },
+    { "old",             800, DARK_RED,          },
+    { "thin",            400, PALE_GREEN_ONION,  },
+    { "light",           400, TRUE_LAVENDER,     },
+    { "large",          1200, ABSINTHE_TURQUOISE,},
+    { "vellum",          800, ELM_BROWN_RED,     },
+    { "tan",             800, ELM_BROWN_RED,     },
+    { "papyrus",         800, DARK_SAND,         },
+    { "linen",           800, GREY93,            },
+    { "musty",           800, GREEN,             },
+    { "faded",           800, OSLO_GREY,         },
+    { "antique",         800, FUSCOUS_GREY,      },
+    { "worn out",        800, BUTTER,            },
+    { "tattered",        800, GREY_GOOSE,        },
+    { "aged",            800, CARBON_GREY,       },
+    { "ornate",          800, AZUL,              },
+    { "inconspicuous",   800, GREY_CLOUD,        },
+    { "awe-inspiring",   800, LIGHT_PLUM,        },
+    { "stained",         800, ELM_BROWN_RED,     },
+    { "mottled",         800, RED,               },
+    { "plaid",           800, RED,               },
+    { "wax-lined",       800, COLZA_YELLOW,      },
+    { "bamboo",          800, LIGHT_PALE_GREEN,  },
+    { "clasped",         800, MEDIUM_VIOLET_RED, },
+    { "well-thumbed",    800, FUCHSIA,           },
+    { "ragged",          800, SMOOTHIE_GREEN,    },
+    { "dull",            800, GRANITE,           },
+    { "canvas",          800, YELLOW,            },
 /*
     reserve descriptions for unimplemented spells:
     chambray
@@ -1389,10 +1389,10 @@ int book_weight(item *book)
     return book_obfuscation[nlarn->book_desc_mapping[book->id]].weight;
 }
 
-int book_colour(item *book)
+colour book_colour(item *book)
 {
     g_assert (book != NULL && book->type == IT_BOOK);
-    return book_obfuscation[nlarn->book_desc_mapping[book->id]].colour;
+    return book_obfuscation[nlarn->book_desc_mapping[book->id]].fg;
 }
 
 item_usage_result book_read(struct player *p, item *book)

@@ -1,6 +1,6 @@
 /*
  * sobjects.h
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,8 @@
 
 #ifndef __SOBJECTS_H_
 #define __SOBJECTS_H_
+
+#include "colours.h"
 
 /* forward declarations */
 struct player;
@@ -58,7 +60,7 @@ typedef struct _sobject_data
 {
     sobject_t sobject;
     const char glyph;
-    int colour;
+    colour fg;
     const char *description;
     unsigned
         passable:     1,   /* can be passed */
@@ -72,9 +74,9 @@ static inline char so_get_glyph(sobject_t s)
     return sobjects[s].glyph;
 }
 
-static inline int so_get_colour(sobject_t s)
+static inline colour so_get_colour(sobject_t s)
 {
-    return sobjects[s].colour;
+    return sobjects[s].fg;
 }
 
 static inline const char *so_get_desc(sobject_t s)

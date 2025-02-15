@@ -28,60 +28,13 @@
 #include "extdefs.h"
 #include "spheres.h"
 
-const colset display_default_colset[] =
-{
-    { "",             COLOURLESS },
-    { "black",        BLACK },
-    { "red",          RED },
-    { "green",        GREEN },
-    { "brown",        BROWN },
-    { "blue",         BLUE },
-    { "magenta",      MAGENTA },
-    { "cyan",         CYAN },
-    { "lightgray",    LIGHTGRAY },
-    { "lightgrey",    LIGHTGRAY },
-    { "darkgray",     DARKGRAY },
-    { "darkgrey",     DARKGRAY },
-    { "lightred",     LIGHTRED },
-    { "lightgreen",   LIGHTGREEN },
-    { "yellow",       YELLOW },
-    { "lightblue",    LIGHTBLUE },
-    { "lightmagenta", LIGHTMAGENTA },
-    { "lightcyan",    LIGHTCYAN },
-    { "white",        WHITE },
-    { NULL,           0}
-};
-
-const colset display_dialog_colset[] =
-{
-    { "black",        DDC_BLACK },
-    { "red",          DDC_RED },
-    { "green",        DDC_GREEN },
-    { "brown",        DDC_BROWN },
-    { "blue",         DDC_BLUE },
-    { "magenta",      DDC_MAGENTA },
-    { "cyan",         DDC_CYAN },
-    { "lightgray",    DDC_LIGHTGRAY },
-    { "lightgrey",    DDC_LIGHTGRAY },
-    { "darkgray",     DDC_DARKGRAY },
-    { "darkgrey",     DDC_DARKGRAY },
-    { "lightred",     DDC_LIGHTRED },
-    { "lightgreen",   DDC_LIGHTGREEN },
-    { "yellow",       DDC_YELLOW },
-    { "lightblue",    DDC_LIGHTBLUE },
-    { "lightmagenta", DDC_LIGHTMAGENTA },
-    { "lightcyan",    DDC_LIGHTCYAN },
-    { "white",        DDC_WHITE },
-    { NULL,           0}
-};
-
 static gboolean display_initialised = FALSE;
 
 /* linked list of opened windows */
 static GList *windows = NULL;
 
 static int mvwcprintw(WINDOW *win, int defattr, int currattr,
-        const colset *colset, int y, int x, const char *fmt, ...);
+        const colour bg, int y, int x, const char *fmt, ...);
 
 static void display_inventory_help(GPtrArray *callbacks);
 
@@ -143,29 +96,8 @@ void display_init()
 #endif
 
     /* initialize colours */
-    start_color();
-
-    /* black background */
-    init_pair(DCP_WHITE_BLACK,   COLOR_WHITE,   COLOR_BLACK);
-    init_pair(DCP_RED_BLACK,     COLOR_RED,     COLOR_BLACK);
-    init_pair(DCP_GREEN_BLACK,   COLOR_GREEN,   COLOR_BLACK);
-    init_pair(DCP_BLUE_BLACK,    COLOR_BLUE,    COLOR_BLACK);
-    init_pair(DCP_YELLOW_BLACK,  COLOR_YELLOW,  COLOR_BLACK);
-    init_pair(DCP_MAGENTA_BLACK, COLOR_MAGENTA, COLOR_BLACK);
-    init_pair(DCP_CYAN_BLACK,    COLOR_CYAN,    COLOR_BLACK);
-    init_pair(DCP_BLACK_BLACK,   COLOR_BLACK,   COLOR_BLACK);
-
-    /* these colour pairs are used by dialogues */
-    init_pair(DCP_WHITE_RED,    COLOR_WHITE,    COLOR_RED);
-    init_pair(DCP_RED_RED,      COLOR_RED,      COLOR_RED);
-    init_pair(DCP_GREEN_RED,    COLOR_GREEN,    COLOR_RED);
-    init_pair(DCP_BLUE_RED,     COLOR_BLUE,     COLOR_RED);
-    init_pair(DCP_YELLOW_RED,   COLOR_YELLOW,   COLOR_RED);
-    init_pair(DCP_MAGENTA_RED,  COLOR_MAGENTA,  COLOR_RED);
-    init_pair(DCP_CYAN_RED,     COLOR_CYAN,     COLOR_RED);
-    init_pair(DCP_BLACK_RED,    COLOR_BLACK,    COLOR_RED);
-    init_pair(DCP_BLACK_WHITE,  COLOR_BLACK,    COLOR_WHITE);
-    init_pair(DCP_RED_WHITE,    COLOR_RED,      COLOR_WHITE);
+    start_color();  /* Curses */
+    colours_init(); /* We */
 
     /* control special keys in application */
     raw();
@@ -268,7 +200,7 @@ void display_paint_screen(player *p)
                     else
                         glyph = so_get_glyph(map_sobject_at(vmap, pos));
 
-                    aaddch(attr_colour(so_get_colour(map_sobject_at(vmap, pos)), has_items),
+                    aaddch(attr_colour(COLOR_PAIR(so_get_colour(map_sobject_at(vmap, pos))), has_items),
                            glyph);
                 }
                 else if (has_items)
@@ -296,18 +228,18 @@ void display_paint_screen(player *p)
                     const gboolean has_trap = (map_trap_at(vmap, pos)
                                                && player_memory_of(p, pos).trap);
 
-                    aaddch(attr_colour(item_colour(it), has_trap),
+                    aaddch(attr_colour(COLOR_PAIR(item_colour(it)), has_trap),
                            item_glyph(it->type));
                 }
                 else if (map_trap_at(vmap, pos) && (game_fullvis(nlarn) || player_memory_of(p, pos).trap))
                 {
                     /* FIXME - displays trap when unknown!! */
-                    aaddch(trap_colour(map_trap_at(vmap, pos)), '^');
+                    aaddch(COLOR_PAIR(trap_colour(map_trap_at(vmap, pos))), '^');
                 }
                 else
                 {
                     /* draw tile */
-                    aaddch(mt_get_colour(map_tiletype_at(vmap, pos)),
+                    aaddch(COLOR_PAIR(mt_get_colour(map_tiletype_at(vmap, pos))),
                            mt_get_glyph(map_tiletype_at(vmap, pos)));
                 }
             }
@@ -325,25 +257,25 @@ void display_paint_screen(player *p)
                     else
                         glyph = so_get_glyph(ms);
 
-                    aaddch(attr_colour(so_get_colour(ms), has_items), glyph);
+                    aaddch(attr_colour(COLOR_PAIR(so_get_colour(ms)), has_items), glyph);
                 }
                 else if (has_items)
                 {
                     /* draw items */
                     const gboolean has_trap = (player_memory_of(p, pos).trap);
 
-                    aaddch(attr_colour(player_memory_of(p, pos).item_colour, has_trap),
+                    aaddch(attr_colour(COLOR_PAIR(player_memory_of(p, pos).item_colour), has_trap),
                            item_glyph(player_memory_of(p, pos).item));
                 }
                 else if (player_memory_of(p, pos).trap)
                 {
                     /* draw trap */
-                    aaddch(trap_colour(map_trap_at(vmap, pos)), '^');
+                    aaddch(COLOR_PAIR(trap_colour(map_trap_at(vmap, pos))), '^');
                 }
                 else
                 {
                     /* draw tile */
-                    aaddch(DARKGRAY, mt_get_glyph(player_memory_of(p, pos).type));
+                    aaddch(COLOR_PAIR(FUSCOUS_GREY), mt_get_glyph(player_memory_of(p, pos).type));
                 }
             }
 
@@ -361,7 +293,7 @@ void display_paint_screen(player *p)
                     || monster_in_sight(monst))
             {
                 position mpos = monster_pos(monst);
-                mvaaddch(Y(mpos), X(mpos), monster_color(monst), monster_glyph(monst));
+                mvaaddch(Y(mpos), X(mpos), COLOR_PAIR(monster_color(monst)), monster_glyph(monst));
             }
         }
     }
@@ -374,12 +306,12 @@ void display_paint_screen(player *p)
     if (player_effect(p, ET_INVISIBILITY))
     {
         pc = ' ';
-        attrs = A_REVERSE | WHITE;
+        attrs = A_REVERSE | COLOR_PAIR(WHITE);
     }
     else
     {
         pc = '@';
-        attrs = WHITE;
+        attrs = COLOR_PAIR(WHITE);
     }
 
     mvaaddch(Y(p->pos), X(p->pos), attrs, pc);
@@ -398,13 +330,13 @@ void display_paint_screen(player *p)
 
     /* current HPs */
     if (p->hp <= ((int)p->hp_max / 10))      /* 10% hp left */
-        attrs = LIGHTRED | A_BLINK;
+        attrs = COLOR_PAIR(LUMINOUS_RED) | A_BLINK;
     else if (p->hp <= ((int)p->hp_max / 4))  /* 25% hp left */
-        attrs = RED;
+        attrs = COLOR_PAIR(DARK_RED);
     else if (p->hp <= ((int)p->hp_max / 2))  /* 50% hp left */
-        attrs = GREEN;
+        attrs = COLOR_PAIR(GREEN);
     else
-        attrs = LIGHTGREEN;
+        attrs = COLOR_PAIR(LIGHT_BRIGHT_GREEN);
 
 #ifdef SDLPDCURSES
     /* enable blinking on SDL PDCurses display for very low hp */
@@ -418,22 +350,24 @@ void display_paint_screen(player *p)
     mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, attrs, "HP %3d", p->hp);
 
     /* max HPs */
-    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 15, LIGHTGREEN, "/%-3d", player_get_hp_max(p));
+    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 15,
+        COLOR_PAIR(LIGHT_BRIGHT_GREEN), "/%-3d", player_get_hp_max(p));
 
     /* current MPs */
     if (p->mp <= ((int)p->mp_max / 10)) /* 10% mp left */
-        attrs = LIGHTMAGENTA;
+        attrs = COLOR_PAIR(MAGENTA);
     else if (p->mp <= ((int)p->mp_max / 4))  /* 25% mp left */
-        attrs = MAGENTA;
+        attrs = COLOR_PAIR(DARK_MAGENTA);
     else if (p->mp <= ((int)p->mp_max / 2))  /* 50% mp left */
-        attrs = CYAN;
+        attrs = COLOR_PAIR(PURPLE);
     else
-        attrs = LIGHTCYAN;
+        attrs = COLOR_PAIR(VIBRANT_PURPLE);
 
     mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 10, attrs, "MP %3d", p->mp);
 
     /* max MPs */
-    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 4, LIGHTCYAN, "/%-3d", player_get_mp_max(p));
+    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 4,
+        COLOR_PAIR(LIGHT_BRIGHT_GREEN), "/%-3d", player_get_mp_max(p));
 
     /* game time */
     mvprintw(MAP_MAX_Y + 1, MAP_MAX_X + 1, "T %-6d", game_turn(nlarn));
@@ -449,8 +383,8 @@ void display_paint_screen(player *p)
     g_free(pld);
 
     /* experience points / level */
-    mvaprintw(MAP_MAX_Y + 2, MAP_MAX_X - 21, LIGHTBLUE, "XP %3d/%-5d",
-             p->level, p->experience);
+    mvaprintw(MAP_MAX_Y + 2, MAP_MAX_X - 21, COLOR_PAIR(LED_BLUE),
+        "XP %3d/%-5d", p->level, p->experience);
 
     /* dungeon map */
     mvprintw(MAP_MAX_Y + 2, MAP_MAX_X + 1, "Lvl: %s", map_name(vmap));
@@ -462,11 +396,11 @@ void display_paint_screen(player *p)
     mvprintw(1, MAP_MAX_X + 3, "STR ");
 
     if (player_get_str(p) > (int)p->strength)
-        attrs = YELLOW;
+        attrs = COLOR_PAIR(YELLOW);
     else if (player_get_str(p) < (int)p->strength)
-        attrs = LIGHTRED;
+        attrs = COLOR_PAIR(RED);
     else
-        attrs = WHITE;
+        attrs = COLOR_PAIR(WHITE);
 
     aprintw(attrs, "%2d", player_get_str(p));
     clrtoeol();
@@ -475,11 +409,11 @@ void display_paint_screen(player *p)
     mvprintw(2, MAP_MAX_X + 3, "DEX ");
 
     if (player_get_dex(p) > (int)p->dexterity)
-        attrs = YELLOW;
+        attrs = COLOR_PAIR(YELLOW);
     else if (player_get_dex(p) < (int)p->dexterity)
-        attrs = LIGHTRED;
+        attrs = COLOR_PAIR(RED);
     else
-        attrs = WHITE;
+        attrs = COLOR_PAIR(WHITE);
 
     aprintw(attrs, "%2d", player_get_dex(p));
     clrtoeol();
@@ -488,11 +422,11 @@ void display_paint_screen(player *p)
     mvprintw(3, MAP_MAX_X + 3, "CON ");
 
     if (player_get_con(p) > (int)p->constitution)
-        attrs = YELLOW;
+        attrs = COLOR_PAIR(YELLOW);
     else if (player_get_con(p) < (int)p->constitution)
-        attrs = LIGHTRED;
+        attrs = COLOR_PAIR(RED);
     else
-        attrs = WHITE;
+        attrs = COLOR_PAIR(WHITE);
 
     aprintw(attrs, "%2d", player_get_con(p));
     clrtoeol();
@@ -501,11 +435,11 @@ void display_paint_screen(player *p)
     mvprintw(4, MAP_MAX_X + 3, "INT ");
 
     if (player_get_int(p) > (int)p->intelligence)
-        attrs = YELLOW;
+        attrs = COLOR_PAIR(YELLOW);
     else if (player_get_int(p) < (int)p->intelligence)
-        attrs = LIGHTRED;
+        attrs = COLOR_PAIR(RED);
     else
-        attrs = WHITE;
+        attrs = COLOR_PAIR(WHITE);
 
     aprintw(attrs, "%2d", player_get_int(p));
     clrtoeol();
@@ -514,11 +448,11 @@ void display_paint_screen(player *p)
     mvprintw(5, MAP_MAX_X + 3, "WIS ");
 
     if (player_get_wis(p) > (int)p->wisdom)
-        attrs = YELLOW;
+        attrs = COLOR_PAIR(YELLOW);
     else if (player_get_wis(p) < (int)p->wisdom)
-        attrs = LIGHTRED;
+        attrs = COLOR_PAIR(RED);
     else
-        attrs = WHITE;
+        attrs = COLOR_PAIR(WHITE);
 
     aprintw(attrs, "%2d", player_get_wis(p));
     clrtoeol();
@@ -536,7 +470,7 @@ void display_paint_screen(player *p)
     }
     else
     {
-        mvaprintw(7, MAP_MAX_X + 3, LIGHTRED, "unarmed");
+        mvaprintw(7, MAP_MAX_X + 3, COLOR_PAIR(LUMINOUS_RED), "unarmed");
     }
     clrtoeol();
 
@@ -545,7 +479,7 @@ void display_paint_screen(player *p)
     clrtoeol();
 
     /* gold */
-    mvaprintw(9, MAP_MAX_X + 3, YELLOW, "$%-7d", player_get_gold(p));
+    mvaprintw(9, MAP_MAX_X + 3, COLOR_PAIR(PIRATE_GOLD), "$%-7d", player_get_gold(p));
     clrtoeol();
 
     /* clear line below gold */
@@ -585,14 +519,14 @@ void display_paint_screen(player *p)
                     && e->turns < 6)
             {
                 /* fading effects */
-                gchar *cdesc = g_strdup_printf("`lightred`%s`end`", desc);
+                gchar *cdesc = g_strdup_printf("`LUMINOUS_RED`%s`end`", desc);
                 strv_append_unique(&efdescs, cdesc);
                 g_free(cdesc);
             }
             else if (e->type > ET_LEVITATION)
             {
                 /* negative effects */
-                gchar *cdesc = g_strdup_printf("`lightmagenta`%s`end`", desc);
+                gchar *cdesc = g_strdup_printf("`LIGHT_MAGENTA`%s`end`", desc);
                 strv_append_unique(&efdescs, cdesc);
                 g_free(cdesc);
             }
@@ -609,9 +543,8 @@ void display_paint_screen(player *p)
         int currattr = COLOURLESS;
         for (guint i = 0; i < g_strv_length(efdescs); i++)
         {
-            currattr = mvwcprintw(stdscr, LIGHTCYAN, currattr,
-                    display_default_colset, 11 + i, MAP_MAX_X + 3, efdescs[i]);
-
+            currattr = mvwcprintw(stdscr, COLOR_PAIR(CORNFLOWER_BLUE),
+                currattr, PF_BG, 11 + i, MAP_MAX_X + 3, efdescs[i]);
         }
 
         g_strfreev(efdescs);
@@ -668,15 +601,15 @@ void display_paint_screen(player *p)
     {
         /* default colour for the line */
         int def_attrs = (i == 0 && ttime[i] > game_turn(nlarn) - 5)
-            ? WHITE
-            : DARKGRAY;
+            ? COLOR_PAIR(WHITE)
+            : COLOR_PAIR(OSLO_GREY);
 
         /* reset current color when switching log entries */
         if (i > 0 && ttime[i - 1] != ttime[i])
             currattr = COLOURLESS;
 
         currattr = mvwcprintw(stdscr, def_attrs, currattr,
-            display_default_colset, y, 0, g_ptr_array_index(text, i));
+            BLACK, y, 0, g_ptr_array_index(text, i));
     }
 
     text_destroy(text);
@@ -845,14 +778,14 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             if (curr == pos)
             {
                 if (item_equipped)
-                    attrs = COLOR_PAIR(DCP_BLACK_WHITE);
+                    attrs = CP_BLACK_WHITE;
                 else
-                    attrs = COLOR_PAIR(DCP_RED_WHITE);
+                    attrs = CP_UI_FG_REVERSE;
             }
             else if (item_equipped)
-                attrs = COLOR_PAIR(DCP_WHITE_RED) | A_BOLD;
+                attrs = CP_UI_BRIGHT_FG;
             else
-                attrs = COLOR_PAIR(DCP_WHITE_RED);
+                attrs = CP_UI_FG;
 
             if (show_price)
             {
@@ -1123,22 +1056,22 @@ void display_config_autopickup(gboolean settings[IT_MAX])
 
     display_window *cwin = display_window_new(startx, starty, width, height, "Configure auto pick-up");
 
-    mvwaprintw(cwin->window, 1, 2, COLOR_PAIR(DCP_WHITE_RED), "Item types which will be picked up");
-    mvwaprintw(cwin->window, 2, 2, COLOR_PAIR(DCP_WHITE_RED), "automatically are shown inverted. ");
+    mvwaprintw(cwin->window, 1,  2, CP_UI_FG, "Item types which will be picked up");
+    mvwaprintw(cwin->window, 2,  2, CP_UI_FG, "automatically are shown inverted. ");
 
-    mvwaprintw(cwin->window, 4,  6, COLOR_PAIR(DCP_WHITE_RED), "amulets");
-    mvwaprintw(cwin->window, 5,  6, COLOR_PAIR(DCP_WHITE_RED), "ammunition");
-    mvwaprintw(cwin->window, 6,  6, COLOR_PAIR(DCP_WHITE_RED), "armour");
-    mvwaprintw(cwin->window, 7,  6, COLOR_PAIR(DCP_WHITE_RED), "books");
-    mvwaprintw(cwin->window, 8,  6, COLOR_PAIR(DCP_WHITE_RED), "containers");
-    mvwaprintw(cwin->window, 9,  6, COLOR_PAIR(DCP_WHITE_RED), "gems");
-    mvwaprintw(cwin->window, 4, 23, COLOR_PAIR(DCP_WHITE_RED), "money");
-    mvwaprintw(cwin->window, 5, 23, COLOR_PAIR(DCP_WHITE_RED), "potions");
-    mvwaprintw(cwin->window, 6, 23, COLOR_PAIR(DCP_WHITE_RED), "rings");
-    mvwaprintw(cwin->window, 7, 23, COLOR_PAIR(DCP_WHITE_RED), "scrolls");
-    mvwaprintw(cwin->window, 8, 23, COLOR_PAIR(DCP_WHITE_RED), "weapons");
+    mvwaprintw(cwin->window, 4,  6, CP_UI_FG, "amulets");
+    mvwaprintw(cwin->window, 5,  6, CP_UI_FG, "ammunition");
+    mvwaprintw(cwin->window, 6,  6, CP_UI_FG, "armour");
+    mvwaprintw(cwin->window, 7,  6, CP_UI_FG, "books");
+    mvwaprintw(cwin->window, 8,  6, CP_UI_FG, "containers");
+    mvwaprintw(cwin->window, 9,  6, CP_UI_FG, "gems");
+    mvwaprintw(cwin->window, 4, 23, CP_UI_FG, "money");
+    mvwaprintw(cwin->window, 5, 23, CP_UI_FG, "potions");
+    mvwaprintw(cwin->window, 6, 23, CP_UI_FG, "rings");
+    mvwaprintw(cwin->window, 7, 23, CP_UI_FG, "scrolls");
+    mvwaprintw(cwin->window, 8, 23, CP_UI_FG, "weapons");
 
-    mvwaprintw(cwin->window, 11, 6, COLOR_PAIR(DCP_WHITE_RED), "Type a symbol to toggle.");
+    mvwaprintw(cwin->window, 11, 6, CP_UI_FG, "Type a symbol to toggle.");
 
     do
     {
@@ -1147,9 +1080,9 @@ void display_config_autopickup(gboolean settings[IT_MAX])
         for (item_t it = 1; it < IT_MAX; it++)
         {
             if (settings[it])
-                attrs = COLOR_PAIR(DCP_RED_WHITE);
+                attrs = CP_UI_FG_REVERSE;
             else
-                attrs = COLOR_PAIR(DCP_WHITE_RED);
+                attrs = CP_UI_FG;
 
             /* x / y position of the glyph depends on the item type number */
             int xpos = it < 7 ? 4 : 21;
@@ -1238,8 +1171,8 @@ spell *display_spell_select(const char *title, player *p)
         {
             sp = g_ptr_array_index(p->known_spells, pos + offset - 1);
 
-            if (curr == pos) attrs = COLOR_PAIR(DCP_RED_WHITE);
-            else attrs = COLOR_PAIR(DCP_WHITE_RED);
+            if (curr == pos) attrs = CP_UI_FG_REVERSE;
+            else attrs = CP_UI_FG;
 
             mvwaprintw(swin->window, pos, 1, attrs,
                       " %3s - %-23s (Level %d) %2d ",
@@ -1524,11 +1457,12 @@ int display_get_count(const char *caption, int value)
 
     for (guint line = 0; line < text->len; line++)
     {
+        // FIXME: filling is not required??
         /* fill the box background */
-        mvwaprintw(mwin->window, 1 + line, 1, COLOR_PAIR(DCP_WHITE_RED), "%-*s", width - 2, "");
+        mvwaprintw(mwin->window, 1 + line, 1, CP_UI_FG, "%-*s", width - 2, "");
         /* print text */
-        mvwaprintw(mwin->window, 1 + line, 2, COLOR_PAIR(DCP_WHITE_RED),
-			"%s", (char *)g_ptr_array_index(text, line));
+        mvwaprintw(mwin->window, 1 + line, 2, CP_UI_FG,
+            "%s", (char *)g_ptr_array_index(text, line));
     }
 
     /* prepare string to edit */
@@ -1545,7 +1479,7 @@ int display_get_count(const char *caption, int value)
             curs_set(2); /* block */
 
         mvwaprintw(mwin->window,  mwin->height - 2, mwin->width - 10,
-                  COLOR_PAIR(DCP_BLACK_WHITE), "%-8s", ivalue);
+                  CP_BLACK_WHITE, "%-8s", ivalue);
 
         wmove(mwin->window, mwin->height - 2, mwin->width - 10 + ipos);
         wrefresh(mwin->window);
@@ -1752,15 +1686,15 @@ char *display_get_string(const char *title, const char *caption, const char *val
     for (guint line = 0; line < text->len; line++)
     {
         /* print text */
-        mvwaprintw(mwin->window, 1 + line, 1, COLOR_PAIR(DCP_WHITE_RED),
-                  " %-*s ", width - 4, (char *)g_ptr_array_index(text, line));
+        mvwaprintw(mwin->window, 1 + line, 1, CP_UI_FG,
+            " %-*s ", width - 4, (char *)g_ptr_array_index(text, line));
     }
 
     do
     {
         mvwaprintw(mwin->window,  mwin->height - 2, box_start,
-                   COLOR_PAIR(DCP_BLACK_WHITE),
-                  "%-*s", (int)max_len + 1, string->str);
+            CP_BLACK_WHITE, "%-*s", (int)max_len + 1, string->str);
+
         wmove(mwin->window, mwin->height - 2, box_start + ipos);
 
         /* make cursor visible and set according to insert mode */
@@ -1932,8 +1866,8 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 
     for (line = 0; line < text->len; line++)
     {
-        mvwaprintw(ywin->window, line + 1, 1 + padding, COLOR_PAIR(DCP_WHITE_RED),
-                   "%s", (char *)g_ptr_array_index(text, line));
+        mvwaprintw(ywin->window, line + 1, 1 + padding, CP_UI_FG,
+            "%s", (char *)g_ptr_array_index(text, line));
     }
 
     text_destroy(text);
@@ -1943,14 +1877,14 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
         /* paint */
         int attrs;
 
-        if (selection) attrs = COLOR_PAIR(DCP_RED_WHITE);
-        else           attrs = COLOR_PAIR(DCP_BLACK_WHITE) | A_BOLD;
+        if (selection) attrs = CP_UI_FG_REVERSE;
+        else           attrs = CP_BLACK_WHITE | A_BOLD;
 
         mvwaprintw(ywin->window, line + 2, margin, attrs,
                    "%*s%s%*s", padding, " ", yes, padding, " ");
 
-        if (selection) attrs = COLOR_PAIR(DCP_BLACK_WHITE) | A_BOLD;
-        else           attrs = COLOR_PAIR(DCP_RED_WHITE);
+        if (selection) attrs = CP_UI_FG_REVERSE;
+        else           attrs = CP_BLACK_WHITE | A_BOLD;
 
         mvwaprintw(ywin->window, line + 2,
                    width - margin - strlen(no) - (2 * padding),
@@ -2061,7 +1995,6 @@ direction display_get_direction(const char *title, int *available)
         dirs = available;
     }
 
-
     width = max(9, strlen(title) + 4);
 
     /* set startx and starty to something that makes sense */
@@ -2070,9 +2003,9 @@ direction display_get_direction(const char *title, int *available)
 
     dwin = display_window_new(startx, starty, width, 9, title);
 
-    mvwaprintw(dwin->window, 3, 3, COLOR_PAIR(DCP_WHITE_RED), "\\|/");
-    mvwaprintw(dwin->window, 4, 3, COLOR_PAIR(DCP_WHITE_RED), "- -");
-    mvwaprintw(dwin->window, 5, 3, COLOR_PAIR(DCP_WHITE_RED), "/|\\");
+    mvwaprintw(dwin->window, 3, 3, CP_UI_FG, "\\|/");
+    mvwaprintw(dwin->window, 4, 3, CP_UI_FG, "- -");
+    mvwaprintw(dwin->window, 5, 3, CP_UI_FG, "/|\\");
 
     for (int x = 0; x < 3; x++)
         for (int y = 0; y < 3; y++)
@@ -2082,7 +2015,7 @@ direction display_get_direction(const char *title, int *available)
                 mvwaprintw(dwin->window,
                           6 - (y * 2), /* start in the last row, move up, skip one */
                           (x * 2) + 2, /* start in the second col, skip one */
-                          COLOR_PAIR(DCP_YELLOW_RED),
+                          CP_UI_YELLOW,
                           "%d",
                           (x + 1) + (y * 3));
             }
@@ -2361,8 +2294,10 @@ position display_get_new_position(player *p,
             /* draw a line between source and target if told to */
             monster *target = map_get_monster_at(vmap, pos);
 
-            if (target && monster_in_sight(target)) attrs = LIGHTRED;
-            else                                    attrs = LIGHTCYAN;
+            if (target && monster_in_sight(target))
+                attrs = COLOR_PAIR(LUMINOUS_RED);
+            else
+                attrs = COLOR_PAIR(ELECTRIC_BLUE);
 
             attron(attrs);
             GList *iter = r;
@@ -2411,20 +2346,27 @@ position display_get_new_position(player *p,
                 {
                     if (area_pos_get(b, cursor))
                     {
-                        move(Y(cursor), X(cursor));
+                        colour fg;
+                        char glyph;
 
                         if ((m = map_get_monster_at(vmap, cursor)) && monster_in_sight(m))
                         {
-                            aaddch(monster_color(m) == RED ? LIGHTRED : RED, monster_glyph(m));
+                            fg = monster_color(m) == RED ? LUMINOUS_RED : RED;
+                            glyph = monster_glyph(m);
                         }
                         else if (pos_identical(p->pos, cursor))
                         {
-                            aaddch(LIGHTRED, '@');
+                            fg = DEEP_ORANGE;
+                            glyph = '@';
                         }
                         else
                         {
-                            aaddch(LIGHTCYAN, '*');
+                            fg = ELECTRIC_BLUE;
+                            glyph = '*';
                         }
+
+                        move(Y(cursor), X(cursor));
+                        aaddch(COLOR_PAIR(fg), glyph);
                     }
                 }
             }
@@ -2433,7 +2375,8 @@ position display_get_new_position(player *p,
         else
         {
             /* show the position of the cursor by inverting the attributes */
-            (void)mvwchgat(stdscr, Y(pos), X(pos), 1, A_BOLD | A_STANDOUT, DCP_WHITE_BLACK, NULL);
+            (void)mvwchgat(stdscr, Y(pos), X(pos), 1, A_BOLD | A_STANDOUT,
+                COLOR_PAIR(WHITE), NULL);
         }
 
         /* wait for input */
@@ -2723,13 +2666,13 @@ int display_show_message(const char *title, const char *message, int indent)
     do
     {
         /* display the window content */
-        int currattr = COLOURLESS;
+        int currattr = 0;
 
         for (guint idx = 0; idx < maxvis; idx++)
         {
-            currattr = mvwcprintw(mwin->window, DDC_LIGHTGRAY, currattr,
-                    display_dialog_colset, idx + 1, 2, "%s",
-                    g_ptr_array_index(text, idx + offset));
+            currattr = mvwcprintw(mwin->window,
+                CP_UI_FG, currattr, UI_BG, idx + 1, 2, "%s",
+                g_ptr_array_index(text, idx + offset));
         }
 
         display_window_update_arrow_up(mwin, offset > 0);
@@ -2846,9 +2789,9 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     int currattr = COLOURLESS;
     for (guint idx = 0; idx < text->len; idx++)
     {
-        currattr = mvwcprintw(win->window, DDC_WHITE, currattr,
-                display_dialog_colset, idx + 1, 1, " %-*s ",
-                width - 4, g_ptr_array_index(text, idx));
+        currattr = mvwcprintw(win->window,
+            CP_UI_FG, currattr, UI_BG, idx + 1, 1, " %-*s ",
+            width - 4, g_ptr_array_index(text, idx));
     }
 
     /* clean up */
@@ -2924,9 +2867,8 @@ int display_getch(WINDOW *win) {
     return ch;
 }
 
-
 static int mvwcprintw(WINDOW *win, int defattr, int currattr,
-        const colset *colset, int y, int x, const char *fmt, ...)
+        const colour bg, int y, int x, const char *fmt, ...)
 {
     va_list argp;
     gchar *msg;
@@ -2970,15 +2912,7 @@ static int mvwcprintw(WINDOW *win, int defattr, int currattr,
             else
             {
                 wattroff(win, attr);
-
-                attr = colour_lookup(colset, tval);
-                /* dim bright colous when the default colour is dark */
-                if (defattr == DARKGRAY && attr > LIGHTGRAY)
-                {
-                    attr ^= A_BOLD;
-                }
-
-                wattron(win, attr);
+                wattron(win, COLOR_PAIR(colour_lookup(tval, bg)));
             }
 
             /* free temporary memory */
@@ -3048,7 +2982,7 @@ static void display_inventory_help(GPtrArray *callbacks)
 
                 if (cb->active && cb->helpmsg != NULL)
                 {
-                    g_string_append_printf(help, "`lightgreen`%*s:`end` %s\n",
+                    g_string_append_printf(help, "`VIVID_GREEN`%*s:`end` %s\n",
                                            (int)maxlen,
                                            cb->description,
                                            cb->helpmsg);
@@ -3077,15 +3011,12 @@ static display_window *display_window_new(int x1, int y1, int width,
     keypad(dwin->window, TRUE);
 
     /* fill window background */
-    for (int i = 1; i < height; i++) {
-        mvwaprintw(dwin->window, i, 1, COLOR_PAIR(DCP_WHITE_RED),
-                   "%*s", width - 2, "");
-    }
+    wbkgd(dwin->window, CP_UI_FG);
 
     /* draw borders */
-    wattron(dwin->window, COLOR_PAIR(DCP_BLUE_RED));
+    wattron(dwin->window, CP_UI_BORDER);
     box(dwin->window, 0, 0);
-    wattroff(dwin->window, COLOR_PAIR(DCP_BLUE_RED));
+    wattroff(dwin->window, CP_UI_BORDER);
 
     /* set the window title */
     display_window_update_title(dwin, title);
@@ -3173,8 +3104,8 @@ static void display_window_update_title(display_window *dwin, const char *title)
         g_free(dwin->title);
 
         /* repaint line to overwrite previous title */
-        mvwahline(dwin->window, 0, 2, COLOR_PAIR(DCP_BLUE_RED),
-                  ACS_HLINE, dwin->width - 7);
+        mvwahline(dwin->window, 0, 2, CP_UI_BORDER, ACS_HLINE,
+            dwin->width - 7);
     }
 
     /* print the provided title */
@@ -3191,7 +3122,7 @@ static void display_window_update_title(display_window *dwin, const char *title)
         /* make sure the first letter of the window title is upper case */
         dwin->title[0] = g_ascii_toupper(dwin->title[0]);
 
-        mvwaprintw(dwin->window, 0, 2, COLOR_PAIR(DCP_WHITE_RED), " %s ", dwin->title);
+        mvwaprintw(dwin->window, 0, 2, CP_UI_BRIGHT_FG, " %s ", dwin->title);
     }
 
     wrefresh(dwin->window);
@@ -3202,14 +3133,14 @@ static void display_window_update_caption(display_window *dwin, char *caption)
     g_assert (dwin != NULL && dwin->window != NULL);
 
     /* repaint line to overwrite previous captions */
-    mvwahline(dwin->window, dwin->height - 1, 3, COLOR_PAIR(DCP_BLUE_RED),
-              ACS_HLINE, dwin->width - 7);
+    mvwahline(dwin->window, dwin->height - 1, 3,
+        CP_UI_BORDER, ACS_HLINE, dwin->width - 7);
 
     /* print caption if caption is set */
     if (caption && strlen(caption))
     {
-        mvwaprintw(dwin->window, dwin->height - 1, 3, COLOR_PAIR(DCP_WHITE_RED),
-                   " %s ", caption);
+        mvwaprintw(dwin->window, dwin->height - 1, 3,
+            CP_UI_BRIGHT_FG, " %s ", caption);
     }
 
     if (caption)
@@ -3227,13 +3158,12 @@ static void display_window_update_arrow_up(display_window *dwin, gboolean on)
 
     if (on)
     {
-        mvwaprintw(dwin->window, 0, dwin->width - 5,
-                  COLOR_PAIR(DCP_WHITE_RED), " ^ ");
+        mvwaprintw(dwin->window, 0, dwin->width - 5, CP_UI_BRIGHT_FG, " ^ ");
     }
     else
     {
-        mvwahline(dwin->window, 0, dwin->width - 5, COLOR_PAIR(DCP_BLUE_RED),
-                 ACS_HLINE, 3);
+        mvwahline(dwin->window, 0, dwin->width - 5,
+            CP_UI_BORDER, ACS_HLINE, 3);
     }
 }
 
@@ -3244,12 +3174,12 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
     if (on)
     {
         mvwaprintw(dwin->window, dwin->height - 1, dwin->width - 5,
-                  COLOR_PAIR(DCP_WHITE_RED), " v ");
+                  CP_UI_BRIGHT_FG, " v ");
     }
     else
     {
         mvwahline(dwin->window, dwin->height - 1, dwin->width - 5,
-                  COLOR_PAIR(DCP_BLUE_RED), ACS_HLINE, 3);
+                  CP_UI_BORDER, ACS_HLINE, 3);
     }
 }
 
@@ -3280,6 +3210,6 @@ static void display_spheres_paint(sphere *s, player *p)
 
     if (game_fullvis(nlarn) || fov_get(p->fv, s->pos))
     {
-        mvaaddch(Y(s->pos), X(s->pos), MAGENTA, '0');
+        mvaaddch(Y(s->pos), X(s->pos), COLOR_PAIR(MAGENTA), '0');
     }
 }

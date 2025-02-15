@@ -1,6 +1,6 @@
 /*
  * map.h
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,6 +20,7 @@
 #define __MAP_H_
 
 #include "cJSON.h"
+#include "colours.h"
 #include "items.h"
 #include "monsters.h"
 #include "position.h"
@@ -174,7 +175,7 @@ gboolean map_trajectory(position source, position target,
         const damage_originator *damo,
         trajectory_hit_sth pos_hitfun,
         gpointer data1, gpointer data2, gboolean reflectable,
-        char glyph, int colour, gboolean keep_ray);
+        char glyph, colour fg, gboolean keep_ray);
 
 /**
  * @brief Get an area of defined dimensions with all blocked positions set.

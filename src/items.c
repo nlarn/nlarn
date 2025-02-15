@@ -58,24 +58,24 @@ const item_type_data item_data[IT_MAX] =
 
 const item_material_data item_materials[IM_MAX] =
 {
-    /* type           name           adjective   colour       frag */
-    { IM_PAPER,       "paper",       "papier",   WHITE,     20, },
-    { IM_CLOTH,       "cloth",       "cloth",    LIGHTGRAY, 15, },
-    { IM_LEATHER,     "leather",     "leathern", BROWN,     10, },
-    { IM_WOOD,        "wood",        "wooden",   BROWN,     10, },
-    { IM_BONE,        "bone",        "osseous",  DARKGRAY,  15, },
-    { IM_DRAGON_HIDE, "dragon hide", "scabby",   GREEN,      2, },
-    { IM_LEAD,        "lead",        "leady",    DARKGRAY,  15, },
-    { IM_IRON,        "iron",        "irony",    LIGHTGRAY,  5, },
-    { IM_STEEL,       "steel",       "steely",   WHITE,      1, },
-    { IM_COPPER,      "copper",      "cupreous", BROWN,      8, },
-    { IM_SILVER,      "silver",      "silvery",  LIGHTGRAY,  7, },
-    { IM_GOLD,        "gold",        "golden",   YELLOW,     6, },
-    { IM_PLATINUM,    "platinum",    "platinum", WHITE,      3, },
-    { IM_MITHRIL,     "mitril",      "mithrial", LIGHTGRAY,  0, },
-    { IM_GLASS,       "glass",       "vitreous", LIGHTCYAN, 50, },
-    { IM_STONE,       "stone",       "stony",    WHITE,     20, },
-    { IM_GEMSTONE,    "gemstone",    "gemstone", RED,        0, },
+    /* type           name           adjective   colour              frag */
+    { IM_PAPER,       "paper",       "papier",   BUTTER,             20, },
+    { IM_CLOTH,       "cloth",       "cloth",    REGENT_GREY,        15, },
+    { IM_LEATHER,     "leather",     "leathern", AUTUMN_LEAF_ORANGE, 10, },
+    { IM_WOOD,        "wood",        "wooden",   AUTUMN_LEAF_BROWN,  10, },
+    { IM_BONE,        "bone",        "osseous",  ASH_GREY,           15, },
+    { IM_DRAGON_HIDE, "dragon hide", "scabby",   GREEN_HAZE,          2, },
+    { IM_LEAD,        "lead",        "leady",    DOVE_GREY,          15, },
+    { IM_IRON,        "iron",        "irony",    IRON,                5, },
+    { IM_STEEL,       "steel",       "steely",   FOG,                 1, },
+    { IM_COPPER,      "copper",      "cupreous", COPPER,              8, },
+    { IM_SILVER,      "silver",      "silvery",  SILVER,              7, },
+    { IM_GOLD,        "gold",        "golden",   PIRATE_GOLD,         6, },
+    { IM_PLATINUM,    "platinum",    "platinum", PLATINUM,            3, },
+    { IM_MITHRIL,     "mitril",      "mithrial", GREY93,              0, },
+    { IM_GLASS,       "glass",       "vitreous", CHALKY_BLUE_WHITE,  50, },
+    { IM_STONE,       "stone",       "stony",    GRANITE,            20, },
+    { IM_GEMSTONE,    "gemstone",    "gemstone", LUMINOUS_RED,        0, },
 };
 
 /* functions */
@@ -1076,7 +1076,7 @@ int item_weight(item *it)
     return weight;
 }
 
-int item_colour(item *it)
+colour item_colour(item *it)
 {
     g_assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -1087,7 +1087,7 @@ int item_colour(item *it)
     case IT_ARMOUR:
     case IT_RING:
     case IT_WEAPON:
-        return item_materials[item_material(it)].colour;
+        return item_materials[item_material(it)].fg;
         break;
 
     case IT_BOOK:
@@ -1103,11 +1103,11 @@ int item_colour(item *it)
         break;
 
     case IT_CONTAINER:
-        return BROWN;
+        return AUTUMN_LEAF_BROWN;
         break;
 
     case IT_GOLD:
-        return YELLOW;
+        return PIRATE_GOLD;
         break;
 
     case IT_GEM:

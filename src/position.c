@@ -341,7 +341,7 @@ gboolean area_blast(position center, guint radius,
                     const damage_originator *damo,
                     area_hit_sth pos_hitfun,
                     gpointer data1, gpointer data2,
-                    char glyph, int colour)
+                    char glyph, colour fg)
 {
     map *cmap = game_map(nlarn, Z(center));
     position cursor = center;
@@ -351,7 +351,7 @@ gboolean area_blast(position center, guint radius,
     obsmap = map_get_obstacles(cmap, center, radius, TRUE);
     ball = area_new_circle_flooded(center, radius, obsmap);
 
-    attron(colour);
+    attron(COLOR_PAIR(fg));
 
     for (Y(cursor) = ball->start_y; Y(cursor) < ball->start_y + ball->size_y; Y(cursor)++)
     {
@@ -397,7 +397,7 @@ gboolean area_blast(position center, guint radius,
     }
 
     area_destroy(ball);
-    attroff(colour);
+    attroff(COLOR_PAIR(fg));
 
     /* make sure the blast shows up */
     display_draw();

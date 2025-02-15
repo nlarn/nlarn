@@ -1,6 +1,6 @@
 /*
  * nlarn.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1031,11 +1031,11 @@ gboolean main_menu()
 {
     const char *main_menu_tpl =
         "\n"
-        "      `lightgreen`a`end`) %s Game\n"
-        "      `lightgreen`b`end`) Configure Settings\n"
-        "      `lightgreen`c`end`) Visit the Hall of Fame\n"
+        "      `GREEN`a`end`) %s Game\n"
+        "      `GREEN`b`end`) Configure Settings\n"
+        "      `GREEN`c`end`) Visit the Hall of Fame\n"
         "\n"
-        "      `lightgreen`q`end`) Quit Game\n"
+        "      `GREEN`q`end`) Quit Game\n"
         "\n"
         "    You have reached difficulty level %d\n";
 

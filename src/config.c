@@ -1,6 +1,6 @@
 /*
  * config.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -299,16 +299,16 @@ void configure_defaults(const char *inifile)
     const char *menu =
         "Configure game defaults\n"
         "\n"
-        "  `lightgreen`a`end`) Character name         - %s\n"
-        "  `lightgreen`b`end`) Character gender       - %s\n"
-        "  `lightgreen`c`end`) Character stats        - %s\n"
-        "  `lightgreen`d`end`) Configure auto-pickup  - %s\n"
-        "  `lightgreen`e`end`) Autosave on map change - `yellow`%s`end`\n"
+        "  `GREEN`a`end`) Character name         - %s\n"
+        "  `GREEN`b`end`) Character gender       - %s\n"
+        "  `GREEN`c`end`) Character stats        - %s\n"
+        "  `GREEN`d`end`) Configure auto-pickup  - %s\n"
+        "  `GREEN`e`end`) Autosave on map change - `YELLOW`%s`end`\n"
 #ifdef SDLPDCURSES
-        "  `lightgreen`f`end`) Configure font size    - `yellow`%d`end`\n"
+        "  `GREEN`f`end`) Configure font size    - `YELLOW`%d`end`\n"
 #endif
         "\n"
-        "Clear values with `lightgreen`A`end`-`lightgreen`D`end`\n";
+        "Clear values with `GREEN`A`end`-`GREEN`D`end`\n";
 
     struct game_config config = {};
     parse_ini_file(inifile, &config);
@@ -319,23 +319,23 @@ void configure_defaults(const char *inifile)
     {
         /* name */
         char *nbuf = (config.name && strlen(config.name) > 0)
-            ? g_strdup_printf("`yellow`%s`end`", config.name)
+            ? g_strdup_printf("`YELLOW`%s`end`", config.name)
             : NULL;
         /* gender */
         char *gbuf = config.gender
-            ? g_strdup_printf("`yellow`%s`end`",
+            ? g_strdup_printf("`YELLOW`%s`end`",
                     player_sex_str[parse_gender(config.gender[0])])
             : NULL;
         /* stats */
         char *sbuf = (config.stats && strlen(config.stats) > 0)
-            ? g_strdup_printf("`yellow`%s`end`", player_bonus_stat_desc[config.stats[0] - 'a'])
+            ? g_strdup_printf("`YELLOW`%s`end`", player_bonus_stat_desc[config.stats[0] - 'a'])
             : NULL;
         /* auto-pickup */
         gboolean autopickup[IT_MAX];
         parse_autopickup_settings(config.auto_pickup, autopickup);
         char *verboseap = verbose_autopickup_settings(autopickup);
         char *abuf = config.auto_pickup
-            ? g_strdup_printf("`yellow`%s`end`", verboseap)
+            ? g_strdup_printf("`YELLOW`%s`end`", verboseap)
             : NULL;
         if (verboseap) g_free(verboseap);
 

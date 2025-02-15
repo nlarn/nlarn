@@ -22,10 +22,10 @@
 #include <curses.h>
 #include <panel.h>
 
+#include "colours.h"
 #include "game.h"
 #include "items.h"
 #include "player.h"
-
 
 /* missing key definitions */
 #define KEY_BS   8 /* backspace */
