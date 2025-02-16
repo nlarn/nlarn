@@ -73,12 +73,11 @@ int combat_calc_to_hit(player *p, struct _monster *m, item *weapon, item *ammo)
                        + max(0, player_get_dex(p) - 12)
                        + (weapon ? weapon_acc(weapon) : 0)
                        + (ammo ? ammo_accuracy(ammo) : 0)
-                       + (player_get_speed(p) / 25)
+                       + (player_get_speed(p) - monster_speed(m)) / 25
                        /* the rule below gives a -3 for tiny monsters and a +4
                           for gargantuan monsters */
                        + ((monster_size(m) - MEDIUM) / 25)
                        - monster_ac(m)
-                       - (monster_speed(m) / 25)
                        - (!monster_in_sight(m) ? 5 : 0);
 
     if (to_hit < 1)
