@@ -3507,6 +3507,11 @@ inline const char *monster_sound(monster *m) {
     return monster_data[m->type].sound;
 }
 
+inline int monster_type_flags(monster_t type, monster_flag f)
+{
+    return monster_data[type].flags & f;
+}
+
 inline int monster_type_hp_max(monster_t type)
 {
     return monster_data[type].hp_max;

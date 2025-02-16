@@ -1409,38 +1409,6 @@ static min_max_damage calc_min_max_damage(player *p, monster *m)
     return ret;
 }
 
-static gboolean player_instakill_chance(player *p, monster *m)
-{
-    if (p->eq_weapon)
-    {
-        switch (p->eq_weapon->id)
-        {
-            /* Vorpal Blade */
-        case WT_VORPALBLADE:
-            if (monster_flags(m, HEAD) && !monster_flags(m, NOBEHEAD))
-                return 5;
-            break;
-
-            /* Lance of Death */
-        case WT_LANCEOFDEATH:
-            /* the lance is pretty deadly for non-demons */
-            if (!monster_flags(m, DEMON))
-                return 100;
-            break;
-
-            /* Slayer */
-        case WT_SLAYER:
-            if (monster_flags(m, DEMON))
-                return 100;
-            break;
-
-        default:
-            break;
-        }
-    }
-    return 0;
-}
-
 static int calc_real_damage(player *p, monster *m, int allow_chance)
 {
     const int INSTANT_KILL = 10000;
@@ -4798,7 +4766,9 @@ void calc_fighting_stats(player *p)
         int to_hit = weapon_calc_to_hit(p, m, p->eq_weapon, NULL);
         to_hit += ((100 - to_hit) * 5)/100;
 
-        const int instakill_chance = player_instakill_chance(p, m);
+        const int instakill_chance = p->eq_weapon
+            ? weapon_instakill_chance(p->eq_weapon->id, idx)
+            : 0;
 
         g_string_append_printf(
             text,

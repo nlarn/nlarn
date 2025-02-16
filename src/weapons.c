@@ -488,3 +488,35 @@ static gboolean weapon_pos_hit(const GList *traj,
     g_free(adesc);
     return retval;
 }
+
+int weapon_instakill_chance(weapon_t wt, monster_t mt)
+{
+    int percentage;
+
+    switch (wt)
+    {
+        /* Vorpal Blade */
+    case WT_VORPALBLADE:
+        if (monster_type_flags(mt, HEAD) && !monster_type_flags(mt, NOBEHEAD))
+            percentage = 5;
+        break;
+
+        /* Lance of Death */
+    case WT_LANCEOFDEATH:
+        /* the lance is pretty deadly for non-demons */
+        if (!monster_type_flags(mt, DEMON))
+            percentage = 100;
+        break;
+
+        /* Slayer */
+    case WT_SLAYER:
+        if (monster_type_flags(mt, DEMON))
+            percentage = 100;
+        break;
+
+    default:
+        percentage = 0;
+    }
+
+    return percentage;
+}
