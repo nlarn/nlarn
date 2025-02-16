@@ -2,6 +2,7 @@
 
 ### Changes:
 * Switch to 256 colours
+* Reduce the probability of weapons breaking
 * Show carried gold in yellow (suggested by jv84)
 * The potion of see invisible now cures blindness (suggested by jv84)
 * Modified potions of instant healing: they now always cure poisoning
