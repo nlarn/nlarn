@@ -1,6 +1,6 @@
 /*
  * combat.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,6 +21,7 @@
 
 #include <glib.h>
 
+#include "items.h"
 #include "enumFactory.h"
 
 #define SPEED_ENUM(SPEED) \
@@ -142,5 +143,11 @@ damage *damage_copy(damage *dam);
 static inline void damage_free(damage *dam) { g_free(dam); }
 
 char *damage_to_str(damage *dam);
+
+/* forward declarations */
+struct player;
+struct _monster;
+
+int combat_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item *ammo);
 
 #endif

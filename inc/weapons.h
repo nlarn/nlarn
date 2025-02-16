@@ -118,7 +118,6 @@ extern const char *ammo_class_name[AMMO_MAX];
 extern const weapon_data weapons[WT_MAX];
 
 /* functions */
-int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item *ammo);
 int  weapon_fire(struct player *p);
 void weapon_swap(struct player *p);
 
