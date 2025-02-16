@@ -1,6 +1,6 @@
 /*
  * game.h
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,7 +28,7 @@
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 
 /* internal counter for save file compatibility */
-#define SAVEFILE_VERSION    26
+#define SAVEFILE_VERSION    27
 
 /* the world as we know it */
 typedef struct game

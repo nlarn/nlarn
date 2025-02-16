@@ -854,7 +854,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
     if (monster_attack_available(nmonster, ATT_WEAPON))
     {
         int weapon_count = 3;
-        int wpns[3]; /* choice of weapon types */
+        int wpns[weapon_count]; /* choice of weapon types */
         item *weapon;
 
         /* preset weapon types */
@@ -876,7 +876,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         case MT_ELF:
             wpns[0] = WT_ESHORTSWORD;
             wpns[1] = WT_ESPEAR;
-            weapon_count = 2;
+            wpns[2] = WT_ELONGSWORD;
             break;
 
         case MT_BUGBEAR:

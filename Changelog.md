@@ -2,6 +2,7 @@
 
 ### Changes:
 * Switch to 256 colours
+* New weapon: the elven longsword - elves may be equipped with it
 * Overhaul the material of some weapon:
   * All spears are made of wood
   * The elven short sword is now made of mithril

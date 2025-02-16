@@ -62,6 +62,7 @@ const weapon_data weapons[WT_MAX] =
     { WT_BATTLEAXE,     "battle-axe",                "battle-axe",      WC_MELEE,     AMMO_MAX, 18,   2, IM_IRON,    2700,   350, 1, 0, 1, 1, 0 },
     { WT_CROSSBOW,      "crossbow",                  "crossbow",       WC_RANGED, AMMO_CROSSBOW, 5,   3, IM_WOOD,    3500,   600, 1, 0, 1, 0, 0 },
     { WT_LONGSWORD,     "longsword",                 "longsword",       WC_MELEE,     AMMO_MAX, 22,   3, IM_IRON,    1950,   550, 0, 0, 1, 1, 0 },
+    { WT_ELONGSWORD,    "elven longsword",           "elf longsword",   WC_MELEE,     AMMO_MAX, 24,   4, IM_MITHRIL, 1600,   900, 0, 0, 1, 0, 0 },
     { WT_2SWORD,        "two-handed sword",          "2-handed sword",  WC_MELEE,     AMMO_MAX, 26,   4, IM_IRON,    3600,  1000, 1, 0, 1, 1, 0 },
     { WT_SWORDSLASHING, "sword of slashing",         "slashing",        WC_MELEE,     AMMO_MAX, 30,   5, IM_STEEL,   2200,  6000, 0, 0, 1, 0, 0 },
     /* unique weapons */
