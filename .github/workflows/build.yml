@@ -1,0 +1,31 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        c_compiler: [gcc, clang]
+        configuration:
+          - config=debug
+          - config=release
+          - config=debug SETGID=Y
+          - config=release SETGID=Y
+          - config=debug SDLPDCURSES=Y
+          - config=release SDLPDCURSES=Y
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependenvies
+      run: sudo apt install discount libglib2.0-dev
+    - name: Install PDCurses dependencies
+      run: sudo apt install libsdl2-dev libsdl2-ttf-dev
+      if: contains(matrix.configuration, 'SDLPDCURSES=Y')
+    - name: Build ${{ matrix.configuration }}
+      run: make ${{ matrix.configuration }}
