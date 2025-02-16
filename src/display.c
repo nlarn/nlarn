@@ -1877,14 +1877,14 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
         /* paint */
         int attrs;
 
-        if (selection) attrs = CP_UI_FG_REVERSE;
-        else           attrs = CP_BLACK_WHITE | A_BOLD;
+        if (selection) attrs = CP_UI_FG_REVERSE | A_BOLD;
+        else           attrs = CP_GREY_WHITE;
 
         mvwaprintw(ywin->window, line + 2, margin, attrs,
                    "%*s%s%*s", padding, " ", yes, padding, " ");
 
-        if (selection) attrs = CP_UI_FG_REVERSE;
-        else           attrs = CP_BLACK_WHITE | A_BOLD;
+        if (selection) attrs = CP_GREY_WHITE;
+        else           attrs = CP_UI_FG_REVERSE | A_BOLD;
 
         mvwaprintw(ywin->window, line + 2,
                    width - margin - strlen(no) - (2 * padding),

@@ -47,6 +47,9 @@ void colours_init() {
             case UI_FG_REVERSE:
                 init_pair(UI_FG_REVERSE, UI_BG, PLATINUM);
                 break;
+            case GREY_WHITE:
+                init_pair(GREY_WHITE, GRANITE, WHITE);
+                break;
             case BLACK_WHITE:
                 init_pair(BLACK_WHITE, BLACK, WHITE);
                 break;

@@ -293,13 +293,13 @@ DECLARE_ENUM(colour, COLOUR_ENUM)
  * These are the 8 duplicate colours of the palette, reassigned
  * to use them as UI colour pairs.
  */
-// GREY50_2 is our last spare value
 #define UI_BRIGHT_FG  BLACK_2
 #define UI_FG         BLUE_2
 #define UI_BORDER     GREEN_2
 #define UI_YELLOW     CYAN_2
 #define UI_GREEN      RED_2
 #define UI_FG_REVERSE MAGENTA_2
+#define GREY_WHITE    GREY50_2
 #define BLACK_WHITE   WHITE_2
 
 /* UI color pairs */
@@ -309,6 +309,7 @@ DECLARE_ENUM(colour, COLOUR_ENUM)
 #define CP_UI_YELLOW     COLOR_PAIR(CYAN_2)
 #define CP_UI_GREEN      COLOR_PAIR(RED_2)
 #define CP_UI_FG_REVERSE COLOR_PAIR(MAGENTA_2)
+#define CP_GREY_WHITE    COLOR_PAIR(GREY50_2)
 #define CP_BLACK_WHITE   COLOR_PAIR(WHITE_2)
 
 // Colour pair initialisation
