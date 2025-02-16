@@ -2376,7 +2376,7 @@ position display_get_new_position(player *p,
         {
             /* show the position of the cursor by inverting the attributes */
             (void)mvwchgat(stdscr, Y(pos), X(pos), 1, A_BOLD | A_STANDOUT,
-                COLOR_PAIR(WHITE), NULL);
+                WHITE, NULL);
         }
 
         /* wait for input */
