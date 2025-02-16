@@ -4769,7 +4769,7 @@ void calc_fighting_stats(player *p)
                            "  strength       : %d\n"
                            "  dexterity      : %d\n"
                            "  damage modifier: %d\n"
-                           "  speed          : %d\n"
+                           "  speed          : %s\n"
                            "  difficulty     : %d\n\n",
                            (p->eq_weapon ? desc : "none"),
                            (p->eq_weapon ? weapon_damage(p->eq_weapon) : 0),
@@ -4778,7 +4778,7 @@ void calc_fighting_stats(player *p)
                            player_get_str(p),
                            player_get_dex(p),
                            damage_modifier,
-                           player_get_speed(p),
+                           speed_string(player_get_speed(p)),
                            game_difficulty(nlarn));
 
     g_string_append_printf(text, "Monsters\n"
@@ -4802,13 +4802,13 @@ void calc_fighting_stats(player *p)
 
         g_string_append_printf(
             text,
-            "%s (ac: %d, max hp: %d, speed: %d)\n"
+            "%s (ac: %d, max hp: %d, speed: %s)\n"
             "     to-hit chance: %d%%\n"
             "  instakill chance: %d%%\n",
             monster_name(m),
             monster_ac(m),
             monster_type_hp_max(monster_type(m)),
-            monster_speed(m),
+            speed_string(monster_speed(m)),
             to_hit, instakill_chance
         );
 
