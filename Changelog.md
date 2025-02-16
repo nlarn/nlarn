@@ -2,6 +2,10 @@
 
 ### Changes:
 * Switch to 256 colours
+* Overhaul the material of some weapon:
+  * All spears are made of wood
+  * The elven short sword is now made of mithril
+  * The flail is now made of wood
 * Reduce the probability of weapons breaking
 * Show carried gold in yellow (suggested by jv84)
 * The potion of see invisible now cures blindness (suggested by jv84)
