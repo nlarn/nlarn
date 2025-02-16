@@ -130,6 +130,12 @@ void weapon_swap(struct player *p);
  */
 char *weapon_shortdesc(item *weapon, guint available_space);
 
+/*
+ * Retuns the percentual chance that the given weapon type
+ * can instantly kill the given monster type.
+ */
+int weapon_instakill_chance(weapon_t wt, monster_t mt);
+
 static inline int ammo_base_damage(item *ammo)
 {
     g_assert(ammo->id < WT_MAX);
