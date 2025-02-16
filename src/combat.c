@@ -65,27 +65,51 @@ char *damage_to_str(damage *dam)
     return buf;
 }
 
-int combat_calc_to_hit(player *p, struct _monster *m, item *weapon, item *ammo)
+// Turn to base chance to hit into a percental chance to hit
+static inline int combat_calc_percentage(int base_to_hit)
+{
+    if (base_to_hit < 1)
+        return 0;
+
+    if (base_to_hit >= 20)
+        return 100;
+
+    return (5 * base_to_hit);
+}
+
+// Calculate the base chance of the play to hit a monster
+static int combat_player_to_mt_base_chance_to_hit(struct player *p, enum monster_t mt, gboolean use_weapon)
+{
+    int base_to_hit = p->level
+                       + max(0, player_get_dex(p) - 12)
+                       + (use_weapon && p->eq_weapon ? weapon_acc(p->eq_weapon) : 0)
+                       + (use_weapon && p->eq_weapon && weapon_is_ranged(p->eq_weapon)
+                                     && p->eq_quiver
+                               ? ammo_accuracy(p->eq_quiver) : 0)
+                       + (player_get_speed(p) - monster_type_speed(mt)) / 25
+                       /* the rule below gives a -3 for tiny monsters and a +4
+                          for gargantuan monsters */
+                       + ((monster_type_size(mt) - MEDIUM) / 25)
+                       - monster_type_ac(mt);
+
+    return base_to_hit;
+}
+
+int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, gboolean use_weapon)
+{
+    g_assert (p != NULL);
+
+    const int base_to_hit = combat_player_to_mt_base_chance_to_hit(p, mt, use_weapon);
+
+    return combat_calc_percentage(base_to_hit);
+}
+
+int combat_chance_player_to_monster_hit(struct player *p, struct _monster *m, gboolean use_weapon)
 {
     g_assert (p != NULL && m != NULL);
 
-    const int to_hit = p->level
-                       + max(0, player_get_dex(p) - 12)
-                       + (weapon ? weapon_acc(weapon) : 0)
-                       + (ammo ? ammo_accuracy(ammo) : 0)
-                       + (player_get_speed(p) - monster_speed(m)) / 25
-                       /* the rule below gives a -3 for tiny monsters and a +4
-                          for gargantuan monsters */
-                       + ((monster_size(m) - MEDIUM) / 25)
-                       - monster_ac(m)
+    int base_to_hit = combat_player_to_mt_base_chance_to_hit(p, monster_type(m), use_weapon)
                        - (!monster_in_sight(m) ? 5 : 0);
 
-    if (to_hit < 1)
-        return 0;
-
-    if (to_hit >= 20)
-        return 100;
-
-    /* roll the dice */
-    return (5 * to_hit);
+    return combat_calc_percentage(base_to_hit);
 }

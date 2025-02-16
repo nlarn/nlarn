@@ -291,10 +291,13 @@ const char *monster_sound(monster *m);
 #define monster_map(M)      game_map(nlarn, Z(monster_pos(M)))
 
 /* query monster type data */
+const char *monster_type_name(monster_t type);
+int monster_type_ac(monster_t type);
+int monster_type_size(monster_t type);
+int monster_type_speed(monster_t type);
 int monster_type_flags(monster_t type, monster_flag f);
 int monster_type_hp_max(monster_t type);
 char monster_type_glyph(monster_t type);
-const char *monster_type_name(monster_t type);
 int monster_type_reroll_chance(monster_t type);
 
 void monster_genocide(monster_t monster_id);

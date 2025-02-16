@@ -601,7 +601,7 @@ static gboolean potion_pos_hit(const GList *traj,
     else if (m != NULL)
     {
         /* there is a monster at the position the potion might have hit */
-        if (!chance(combat_calc_to_hit(nlarn->p, m, NULL, NULL)))
+        if (!chance(combat_chance_player_to_monster_hit(nlarn->p, m, FALSE)))
         {
             g_free(desc);
             return FALSE;

@@ -147,7 +147,9 @@ char *damage_to_str(damage *dam);
 /* forward declarations */
 struct player;
 struct _monster;
+enum monster_t;
 
-int combat_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item *ammo);
+int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, gboolean use_weapon);
+int combat_chance_player_to_monster_hit(struct player *p, struct _monster *m, gboolean use_weapon);
 
 #endif

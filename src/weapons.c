@@ -423,7 +423,7 @@ static gboolean weapon_pos_hit(const GList *traj,
     {
         /* there is a monster at the position */
         /* the bullet might have hit the monster */
-        if (chance(combat_calc_to_hit(nlarn->p, m, weapon, ammo)))
+        if (chance(combat_chance_player_to_monster_hit(nlarn->p, m, TRUE)))
         {
             /* hit */
             damage *dam = weapon_get_ranged_damage(nlarn->p, weapon, ammo);
