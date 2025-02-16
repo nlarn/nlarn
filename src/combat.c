@@ -1,6 +1,6 @@
 /*
  * combat.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,8 @@
 #include <string.h>
 
 #include "combat.h"
+#include "player.h"
+
 #include "enumFactory.h"
 
 DEFINE_ENUM(speed, SPEED_ENUM)
@@ -63,3 +65,28 @@ char *damage_to_str(damage *dam)
     return buf;
 }
 
+int combat_calc_to_hit(player *p, struct _monster *m, item *weapon, item *ammo)
+{
+    g_assert (p != NULL && m != NULL);
+
+    const int to_hit = p->level
+                       + max(0, player_get_dex(p) - 12)
+                       + (weapon ? weapon_acc(weapon) : 0)
+                       + (ammo ? ammo_accuracy(ammo) : 0)
+                       + (player_get_speed(p) / 25)
+                       /* the rule below gives a -3 for tiny monsters and a +4
+                          for gargantuan monsters */
+                       + ((monster_size(m) - MEDIUM) / 25)
+                       - monster_ac(m)
+                       - (monster_speed(m) / 25)
+                       - (!monster_in_sight(m) ? 5 : 0);
+
+    if (to_hit < 1)
+        return 0;
+
+    if (to_hit >= 20)
+        return 100;
+
+    /* roll the dice */
+    return (5 * to_hit);
+}

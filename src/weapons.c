@@ -81,32 +81,6 @@ static gboolean weapon_pos_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
-int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item *ammo)
-{
-    g_assert (p != NULL && m != NULL);
-
-    const int to_hit = p->level
-                       + max(0, player_get_dex(p) - 12)
-                       + (weapon ? weapon_acc(weapon) : 0)
-                       + (ammo ? ammo_accuracy(ammo) : 0)
-                       + (player_get_speed(p) / 25)
-                       /* the rule below gives a -3 for tiny monsters and a +4
-                          for gargantuan monsters */
-                       + ((monster_size(m) - MEDIUM) / 25)
-                       - monster_ac(m)
-                       - (monster_speed(m) / 25)
-                       - (!monster_in_sight(m) ? 5 : 0);
-
-    if (to_hit < 1)
-        return 0;
-
-    if (to_hit >= 20)
-        return 100;
-
-    /* roll the dice */
-    return (5 * to_hit);
-}
-
 int weapon_fire(struct player *p)
 {
     g_assert(p != NULL);
@@ -449,7 +423,7 @@ static gboolean weapon_pos_hit(const GList *traj,
     {
         /* there is a monster at the position */
         /* the bullet might have hit the monster */
-        if (chance(weapon_calc_to_hit(nlarn->p, m, weapon, ammo)))
+        if (chance(combat_calc_to_hit(nlarn->p, m, weapon, ammo)))
         {
             /* hit */
             damage *dam = weapon_get_ranged_damage(nlarn->p, weapon, ammo);
