@@ -4813,7 +4813,7 @@ void calc_fighting_stats(player *p)
                 hits_needed > 1 && instakill_chance > 0 ? " [*]" : ""
             );
 
-            if (!mention_instakill && instakill_chance > 0)
+            if (instakill_chance > 0)
                 mention_instakill = TRUE;
         }
         else
