@@ -60,21 +60,22 @@ DEFINES += -DG_DISABLE_DEPRECATED
 CFLAGS  += -std=c99 -Wall -Wextra -Werror -Iinc -Iinc/external
 LDFLAGS += -lz -lm
 
-ifneq (,$(findstring MINGW, $(MSYSTEM)))
+ifneq (,$(findstring UCRT64, $(MSYSTEM)))
   # Settings specific to Windows.
   ifneq (Y, $(SDLPDCURSES))
     $(error Building without SDLPDCURSES is not supported on Windows.)
   endif
 
-  DLLS := libbz2-1.dll libfreetype-6.dll libgcc_s_dw2-1.dll libglib-2.0-0.dll
-  DLLS += libgraphite2.dll libharfbuzz-0.dll libiconv-2.dll libintl-8.dll
-  DLLS += libpcre-1.dll libpng16-16.dll libstdc++-6.dll libwinpthread-1.dll
+  DLLS := libbrotlicommon.dll libbrotlidec.dll libbz2-1.dll libfreetype-6.dll
+  DLLS += libgcc_s_seh-1.dll libglib-2.0-0.dll libgraphite2.dll
+  DLLS += libharfbuzz-0.dll libiconv-2.dll libintl-8.dll libpcre2-8-0.dll
+  DLLS += libpng16-16.dll libstdc++-6.dll libwinpthread-1.dll
   DLLS += SDL2.dll SDL2_ttf.dll zlib1.dll
   LIBFILES := lib/nlarn-128.bmp
 
   # Fake the content of the OS var to make it more common
   # (otherwise packages would have silly names)
-  OS := win32
+  OS := win64
 
   RESOURCES := $(patsubst %.rc,%.res,$(wildcard resources/*.rc))
   RESDEFINE := -DVERSION_MAJOR=$(VERSION_MAJOR)
@@ -82,9 +83,6 @@ ifneq (,$(findstring MINGW, $(MSYSTEM)))
   RESDEFINE += -DVERSION_PATCH=$(VERSION_PATCH)
   # Escape-O-Rama! Required in all it's ugliness.
   RESDEFINE += -DVINFO=\\\"$(VERSION)\\\"
-
-  # This is a windows application
-  LDFLAGS += -mwindows
 
   # and finally the dreaded executable suffix from the eighties
   SUFFIX = .exe
@@ -161,7 +159,7 @@ nlarn$(SUFFIX): $(PDCLIB) $(OBJECTS) $(RESOURCES)
 	makepage $< > $@
 
 .SECONDEXPANSION:
-$(DLLS): $$(patsubst %, /mingw32/bin/%, $$@)
+$(DLLS): $$(patsubst %, /ucrt64/bin/%, $$@)
 	cp $< $@
 
 $(RESOURCES): %.res: %.rc
