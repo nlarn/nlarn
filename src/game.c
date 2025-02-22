@@ -34,8 +34,10 @@
 #endif
 
 #ifdef WIN32
-# include <io.h>
-# include <sys/locking.h>
+# include <WinDef.h>
+# include <fileapi.h>
+# include <errhandlingapi.h>
+# include <winbase.h>
 #endif
 
 #include "cJSON.h"
@@ -73,13 +75,36 @@ static int try_locking_savegame_file(FILE *sg)
 #if (defined __unix) || (defined __unix__) || (defined __APPLE__)
     if (flock(fd, LOCK_EX | LOCK_NB) == -1)
 #elif (defined(WIN32))
-    if (_locking(fd, LK_NBLCK, 0xffffffff) == -1)
+    OVERLAPPED overlapvar = { 0 };
+    HANDLE h = (HANDLE)_get_osfhandle(fd);
+    if (!LockFileEx(h, LOCKFILE_EXCLUSIVE_LOCK | LOCKFILE_FAIL_IMMEDIATELY,
+                    0, MAXDWORD, MAXDWORD, &overlapvar))
 #endif
     {
         /* could not obtain the lock */
         GString *desc = g_string_new("NLarn cannot be started.\n\n"
-                                     "Could not lock the savegame file:\n");
+                                     "Could not lock the savegame file: ");
+#if (defined __unix) || (defined __unix__) || (defined __APPLE__)
         g_string_append(desc, strerror(errno));
+#elif (defined(WIN32))
+        LPVOID lpMsgBuf;
+        DWORD dw = GetLastError();
+
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            dw,
+            MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
+            (LPTSTR) &lpMsgBuf,
+            0, NULL
+        );
+
+        g_string_append(desc, lpMsgBuf);
+
+        LocalFree(lpMsgBuf);
+#endif
         display_show_message("Error", desc->str, 0);
         g_string_free(desc, TRUE);
         display_shutdown();
