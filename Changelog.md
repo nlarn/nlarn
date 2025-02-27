@@ -8,6 +8,7 @@
   and sickness. The previous special behavior of blessed potions of
   instant healing got removed.
 * Healing spell and healing potion no longer cure sickness
+* Stay at home until explicitly leaving (with ESC)
 * Switch Windows build to WIN64
 
 ### Fixed bugs:
