@@ -1,5 +1,5 @@
 Name:    nlarn
-Version: 0.7.2
+Version: 0.7.7
 Release: 1
 Summary: A remake of the roguelike game Larn
 Group:   Amusements/Games
@@ -33,6 +33,8 @@ touch %{buildroot}/var/games/%{name}/highscores
 %doc LICENSE README.md Changelog.md lib/maze_doc.txt
 
 %changelog
+* Tue Feb 25 2025 Joachim de Groot <jdegroot@web.de>
+  - updated for version 0.7.7
 * Thu May 17 2018 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.7.2
   - compile with support for shared scoreboard
