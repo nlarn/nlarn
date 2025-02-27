@@ -771,13 +771,14 @@ int building_school(player *p)
                               * (game_difficulty(nlarn) + 1) * 100;
 
                 g_string_append_printf(text,
-                        " `GREEN`%c`end`) %-24s - %2d mobuls, %4d gold\n",
+                        " `GREEN`%c`end`) `WHITE`%-24s`end` - %2d mobuls, %4d gold\n",
                         idx + 'a', school_courses[idx].description,
                         school_courses[idx].course_time, price);
             }
             else
             {
-                g_string_append(text, "\n");
+                g_string_append_printf(text, "    %-24s - attended\n",
+                        school_courses[idx].description);
             }
         }
 
