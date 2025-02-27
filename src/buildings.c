@@ -399,7 +399,8 @@ int building_home(player *p)
             player_die(p, PD_TOO_LATE, 0);
         }
     }
-    else if (game_turn(nlarn) > TIMELIMIT)
+
+    if (game_turn(nlarn) > TIMELIMIT)
     {
         /* too late, no potion */
         text = g_string_new(msg_died);
@@ -408,92 +409,90 @@ int building_home(player *p)
 
         player_die(p, PD_LOST, 0);
     }
-    else
+
+    /* casual visit, report remaining time */
+
+    int choice;
+    GPtrArray *callbacks;
+    display_inv_callback *callback;
+
+    text = g_string_new(NULL);
+    g_string_printf(text, msg_home, p->name,
+                    gtime2mobuls(game_remaining_turns(nlarn)),
+                    p->name);
+
+    /* check if the player can deposit something
+       at home or has already done so */
+    if ((inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
+        || (inv_length(nlarn->player_home) > 0))
     {
-        /* casual visit, report remaining time */
+        g_string_append_printf(text, "\n\nYou may\n");
 
-        int choice;
-        GPtrArray *callbacks;
-        display_inv_callback *callback;
+        if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
+            g_string_append_printf(text, "  `GREEN`d`end`) "
+                                   "Deposit something here\n");
 
-        text = g_string_new(NULL);
-        g_string_printf(text, msg_home, p->name,
-                        gtime2mobuls(game_remaining_turns(nlarn)),
-                        p->name);
+        if (inv_length(nlarn->player_home) > 0)
+            g_string_append_printf(text, "  `GREEN`t`end`) "
+                                   "Take something with you\n");
 
-        /* check if the player can deposit something
-           at home or has already done so */
-        if ((inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-            || (inv_length(nlarn->player_home) > 0))
+        g_string_append_c(text, '\n');
+    }
+
+    choice = display_show_message(title, text->str, 0);
+    g_string_free(text, TRUE);
+
+    switch (choice)
+    {
+        /* deposit something */
+    case 'd':
+        if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
         {
-            g_string_append_printf(text, "\n\nYou may\n");
+            /* prepare callback functions */
+            callbacks = g_ptr_array_new();
 
-            if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-                g_string_append_printf(text, "  `GREEN`d`end`) "
-                                       "Deposit something here\n");
+            callback = g_malloc0(sizeof(display_inv_callback));
+            callback->description = "(d)eposit";
+            callback->helpmsg = "Deposit the selected item in "
+                                "your storage room at home.";
+            callback->key = 'd';
+            callback->inv = &nlarn->player_home;
+            callback->function = &container_item_add;
+            callback->active = TRUE;
 
-            if (inv_length(nlarn->player_home) > 0)
-                g_string_append_printf(text, "  `GREEN`t`end`) "
-                                       "Take something with you\n");
+            g_ptr_array_add(callbacks, callback);
 
-            g_string_append_c(text, '\n');
+            display_inventory(title, p, &p->inventory, callbacks, FALSE,
+                              TRUE, FALSE, player_item_not_equipped);
+
+            display_inv_callbacks_clean(callbacks);
         }
+        break;
 
-        choice = display_show_message(title, text->str, 0);
-        g_string_free(text, TRUE);
-
-        switch (choice)
+        /* take something */
+    case 't':
+        if (inv_length(nlarn->player_home) > 0)
         {
-            /* deposit something */
-        case 'd':
-            if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-            {
-                /* prepare callback functions */
-                callbacks = g_ptr_array_new();
+            /* prepare callback functions */
+            callbacks = g_ptr_array_new();
 
-                callback = g_malloc0(sizeof(display_inv_callback));
-                callback->description = "(d)eposit";
-                callback->helpmsg = "Deposit the selected item in "
-                                    "your storage room at home.";
-                callback->key = 'd';
-                callback->inv = &nlarn->player_home;
-                callback->function = &container_item_add;
-                callback->active = TRUE;
+            callback = g_malloc0(sizeof(display_inv_callback));
+            callback->description = "(t)ake";
+            callback->helpmsg = "Take the selected item out of your "
+                                "storage room and put it into your pack.";
+            callback->key = 't';
+            callback->inv = &nlarn->player_home;
+            callback->function = &container_item_unpack;
+            callback->active = TRUE;
 
-                g_ptr_array_add(callbacks, callback);
+            g_ptr_array_add(callbacks, callback);
 
-                display_inventory(title, p, &p->inventory, callbacks, FALSE,
-                                  TRUE, FALSE, player_item_not_equipped);
+            display_inventory(title, p, &nlarn->player_home, callbacks,
+                              FALSE, TRUE, FALSE, NULL);
 
-                display_inv_callbacks_clean(callbacks);
-            }
-            break;
-
-            /* take something */
-        case 't':
-            if (inv_length(nlarn->player_home) > 0)
-            {
-                /* prepare callback functions */
-                callbacks = g_ptr_array_new();
-
-                callback = g_malloc0(sizeof(display_inv_callback));
-                callback->description = "(t)ake";
-                callback->helpmsg = "Take the selected item out of your "
-                                    "storage room and put it into your pack.";
-                callback->key = 't';
-                callback->inv = &nlarn->player_home;
-                callback->function = &container_item_unpack;
-                callback->active = TRUE;
-
-                g_ptr_array_add(callbacks, callback);
-
-                display_inventory(title, p, &nlarn->player_home, callbacks,
-                                  FALSE, TRUE, FALSE, NULL);
-
-                display_inv_callbacks_clean(callbacks);
-            }
-            break;
+            display_inv_callbacks_clean(callbacks);
         }
+        break;
     }
 
     return turns;
