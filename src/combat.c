@@ -22,6 +22,7 @@
 #include "extdefs.h"
 #include "game.h"
 #include "player.h"
+#include "random.h"
 
 #include "enumFactory.h"
 
@@ -151,4 +152,57 @@ damage_min_max damage_calc_min_max(struct player *p, enum monster_t mt)
     };
 
     return ret;
+}
+
+int damage_calc(struct player *p, struct _monster *m)
+{
+    const int INSTANT_KILL = 10000;
+    const damage_min_max mmd = damage_calc_min_max(p, monster_type(m));
+    int damage = rand_m_n(mmd.min_damage, mmd.max_damage + 1);
+
+    /* *** SPECIAL WEAPONS *** */
+    if (p->eq_weapon)
+    {
+        switch (p->eq_weapon->id)
+        {
+            /* Vorpal Blade */
+        case WT_VORPALBLADE:
+            if (chance(5) && monster_flags(m, HEAD)
+                    && !monster_flags(m, NOBEHEAD))
+            {
+                log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
+                              monster_get_name(m));
+
+                damage = INSTANT_KILL;
+            }
+            break;
+
+            /* Lance of Death */
+        case WT_LANCEOFDEATH:
+            /* the lance is pretty deadly for non-demons */
+            if (!monster_flags(m, DEMON))
+                damage = INSTANT_KILL;
+            else
+                damage = 300;
+            break;
+
+            /* Slayer */
+        case WT_SLAYER:
+            if (monster_flags(m, DEMON))
+                damage = INSTANT_KILL;
+            break;
+
+        default:
+            /* triple damage if hitting a dragon and wearing an amulet of
+               dragon slaying */
+            if (monster_flags(m, DRAGON)
+                    && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
+            {
+                damage *= 3;
+            }
+            break;
+        }
+    }
+
+    return damage;
 }

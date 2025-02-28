@@ -164,4 +164,10 @@ int combat_chance_player_to_monster_hit(struct player *p, struct _monster *m, gb
  */
 damage_min_max damage_calc_min_max(struct player *p, enum monster_t mt);
 
+/*
+ * Calculate the amount of damage the player's attack causes.
+ * Takes special weapon effects into account.
+ */
+int damage_calc(struct player *p, struct _monster *m);
+
 #endif

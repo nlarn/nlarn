@@ -1366,59 +1366,6 @@ int player_move(player *p, direction dir, gboolean open_door)
     return times;
 }
 
-static int calc_damage(player *p, monster *m)
-{
-    const int INSTANT_KILL = 10000;
-    const damage_min_max mmd = damage_calc_min_max(p, monster_type(m));
-    int damage = rand_m_n(mmd.min_damage, mmd.max_damage + 1);
-
-    /* *** SPECIAL WEAPONS *** */
-    if (p->eq_weapon)
-    {
-        switch (p->eq_weapon->id)
-        {
-            /* Vorpal Blade */
-        case WT_VORPALBLADE:
-            if (chance(5) && monster_flags(m, HEAD)
-                    && !monster_flags(m, NOBEHEAD))
-            {
-                log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
-                              monster_get_name(m));
-
-                damage = INSTANT_KILL;
-            }
-            break;
-
-            /* Lance of Death */
-        case WT_LANCEOFDEATH:
-            /* the lance is pretty deadly for non-demons */
-            if (!monster_flags(m, DEMON))
-                damage = INSTANT_KILL;
-            else
-                damage = 300;
-            break;
-
-            /* Slayer */
-        case WT_SLAYER:
-            if (monster_flags(m, DEMON))
-                damage = INSTANT_KILL;
-            break;
-
-        default:
-            /* triple damage if hitting a dragon and wearing an amulet of
-               dragon slaying */
-            if (monster_flags(m, DRAGON)
-                    && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
-            {
-                damage *= 3;
-            }
-            break;
-        }
-    }
-
-    return damage;
-}
-
 int player_attack(player *p, monster *m)
 {
     /* disallow attacking other humans */
@@ -1436,7 +1383,7 @@ int player_attack(player *p, monster *m)
         /* placed a hit */
         log_add_entry(nlarn->log, "You hit the %s.", monster_get_name(m));
 
-        dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, calc_damage(p, m),
+        dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, damage_calc(p, m),
                          DAMO_PLAYER, p);
 
         /* weapon damage due to rust when hitting certain monsters */
