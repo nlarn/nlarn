@@ -135,6 +135,12 @@ typedef struct _damage_msg
     char *msg_unaffected;
 } damage_msg;
 
+typedef struct _damage_min_max
+{
+    int min_damage;
+    int max_damage;
+} damage_min_max;
+
 damage *damage_new(damage_t type, attack_t att_type, int amount,
                    damage_originator_t damo, gpointer originator);
 
@@ -151,5 +157,11 @@ enum monster_t;
 
 int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, gboolean use_weapon);
 int combat_chance_player_to_monster_hit(struct player *p, struct _monster *m, gboolean use_weapon);
+
+/*
+ * Calculate the minimal and maximal damage the player can cause to a given
+ * monster type
+ */
+damage_min_max damage_calc_min_max(struct player *p, enum monster_t mt);
 
 #endif

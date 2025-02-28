@@ -19,6 +19,8 @@
 #include <string.h>
 
 #include "combat.h"
+#include "extdefs.h"
+#include "game.h"
 #include "player.h"
 
 #include "enumFactory.h"
@@ -112,4 +114,41 @@ int combat_chance_player_to_monster_hit(struct player *p, struct _monster *m, gb
                        - (!monster_in_sight(m) ? 5 : 0);
 
     return combat_calc_percentage(base_to_hit);
+}
+
+damage_min_max damage_calc_min_max(struct player *p, enum monster_t mt)
+{
+    /* without weapon cause a basic unarmed combat damage */
+    int min_damage = 1;
+
+    if (p->eq_weapon != NULL)
+    {
+        /* wielded weapon base damage */
+        min_damage = weapon_damage(p->eq_weapon);
+
+        // Blessed weapons do 50% bonus damage against demons and undead.
+        if (p->eq_weapon->blessed
+                && (monster_type_flags(mt, DEMON) || monster_type_flags(mt, UNDEAD)))
+        {
+            min_damage *= 3;
+            min_damage /= 2;
+        }
+    }
+
+    min_damage += player_effect(p, ET_INC_DAMAGE);
+    min_damage -= player_effect(p, ET_SICKNESS);
+
+    /* calculate maximum damage: strength bonus and difficulty malus */
+    int max_damage = min_damage
+                     + player_get_str(p) - 12
+                     - game_difficulty(nlarn);
+
+    /* ensure minimal damage */
+    damage_min_max ret =
+    {
+        max(1, min_damage),
+        max(max(1, min_damage), max_damage)
+    };
+
+    return ret;
 }

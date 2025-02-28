@@ -1366,53 +1366,10 @@ int player_move(player *p, direction dir, gboolean open_door)
     return times;
 }
 
-typedef struct min_max_damage
-{
-    int min_damage;
-    int max_damage;
-} min_max_damage;
-
-static min_max_damage calc_min_max_damage(player *p, monster_t mt)
-{
-    /* without weapon cause a basic unarmed combat damage */
-    int min_damage = 1;
-
-    if (p->eq_weapon != NULL)
-    {
-        /* wielded weapon base damage */
-        min_damage = weapon_damage(p->eq_weapon);
-
-        // Blessed weapons do 50% bonus damage against demons and undead.
-        if (p->eq_weapon->blessed
-                && (monster_type_flags(mt, DEMON) || monster_type_flags(mt, UNDEAD)))
-        {
-            min_damage *= 3;
-            min_damage /= 2;
-        }
-    }
-
-    min_damage += player_effect(p, ET_INC_DAMAGE);
-    min_damage -= player_effect(p, ET_SICKNESS);
-
-    /* calculate maximum damage: strength bonus and difficulty malus */
-    int max_damage = min_damage
-                     + player_get_str(p) - 12
-                     - game_difficulty(nlarn);
-
-    /* ensure minimal damage */
-    min_max_damage ret =
-    {
-        max(1, min_damage),
-        max(max(1, min_damage), max_damage)
-    };
-
-    return ret;
-}
-
 static int calc_damage(player *p, monster *m)
 {
     const int INSTANT_KILL = 10000;
-    const min_max_damage mmd = calc_min_max_damage(p, monster_type(m));
+    const damage_min_max mmd = damage_calc_min_max(p, monster_type(m));
     int damage = rand_m_n(mmd.min_damage, mmd.max_damage + 1);
 
     /* *** SPECIAL WEAPONS *** */
@@ -4718,7 +4675,7 @@ void calc_fighting_stats(player *p)
 
     // Calculate the default min/max damage. Using the giant bat ensures
     // that no special effects are used.
-    const min_max_damage default_mmd = calc_min_max_damage(p, MT_GIANT_BAT);
+    const damage_min_max default_mmd = damage_calc_min_max(p, MT_GIANT_BAT);
     double default_avg_dam = (default_mmd.min_damage + default_mmd.max_damage) / 2.0;
 
     const int damage_modifier = player_effect(p, ET_INC_DAMAGE)
@@ -4786,7 +4743,7 @@ void calc_fighting_stats(player *p)
                                        10 - game_difficulty(nlarn));
             }
 
-            const min_max_damage mmd = calc_min_max_damage(p, mt);
+            const damage_min_max mmd = damage_calc_min_max(p, mt);
             double avg_dam = (mmd.min_damage + mmd.max_damage) / 2.0;
 
             int hits_needed = (monster_type_hp_max(mt) / avg_dam);
