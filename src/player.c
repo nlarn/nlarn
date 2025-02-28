@@ -4716,20 +4716,28 @@ void calc_fighting_stats(player *p)
         desc = item_describe(p->eq_weapon, TRUE, TRUE, FALSE);
     }
 
+    // Calculate the default min/max damage. Using the giant bat ensures
+    // that no special effects are used.
+    const min_max_damage default_mmd = calc_min_max_damage(p, MT_GIANT_BAT);
+    double default_avg_dam = (default_mmd.min_damage + default_mmd.max_damage) / 2.0;
+
     const int damage_modifier = player_effect(p, ET_INC_DAMAGE)
                                 - player_effect(p, ET_SICKNESS);
 
     g_string_append_printf(text, "\nPlayer stats\n"
                            "------------\n"
-                           "  wielded weapon : %s\n"
-                           "  weapon class   : %d\n"
-                           "  accuracy       : %d\n"
-                           "  experience     : %d\n"
-                           "  strength       : %d\n"
-                           "  dexterity      : %d\n"
-                           "  damage modifier: %d\n"
-                           "  speed          : %s\n"
-                           "  difficulty     : %d\n\n",
+                           "  wielded weapon   : %s\n"
+                           "  weapon damage    : %d\n"
+                           "  weapon accuracy  : %d\n"
+                           "  experience level : %d\n"
+                           "  strength         : %d\n"
+                           "  dexterity        : %d\n"
+                           "  damage modifier  : %d\n"
+                           "  speed            : %s\n"
+                           "  difficulty       : %d\n\n"
+                           "  min. damage      : %d hp\n"
+                           "  max. damage      : %d hp\n"
+                           "  avg. damage      : %.2f hp\n\n",
                            (p->eq_weapon ? desc : "none"),
                            (p->eq_weapon ? weapon_damage(p->eq_weapon) : 0),
                            (p->eq_weapon ? weapon_acc(p->eq_weapon) : 0),
@@ -4738,7 +4746,10 @@ void calc_fighting_stats(player *p)
                            player_get_dex(p),
                            damage_modifier,
                            speed_string(player_get_speed(p)),
-                           game_difficulty(nlarn));
+                           game_difficulty(nlarn),
+                           default_mmd.min_damage,
+                           default_mmd.max_damage,
+                           default_avg_dam);
 
     g_string_append_printf(text, "Monsters\n"
                            "--------\n\n");
@@ -4756,12 +4767,13 @@ void calc_fighting_stats(player *p)
 
         g_string_append_printf(
             text,
-            "%s (ac: %d, max hp: %d, speed: %s)\n"
+            "%s (ac: %d, max hp: %d, size: %s, speed: %s)\n"
             "     to-hit chance: %d%%\n"
             "  instakill chance: %d%%\n",
             monster_type_name(mt),
             monster_type_ac(mt),
             monster_type_hp_max(mt),
+            size_string(monster_type_size(mt)),
             speed_string(monster_type_speed(mt)),
             to_hit, instakill_chance
         );
@@ -4781,14 +4793,19 @@ void calc_fighting_stats(player *p)
             if (((int) (avg_dam * 10)) % 10)
                 hits_needed++;
 
-            g_string_append_printf(
-                text,
-                "       min. damage: %d hp\n"
-                "       max. damage: %d hp\n"
-                "       avg. damage: %.2f hp\n"
+            if (default_mmd.min_damage != mmd.min_damage && default_mmd.max_damage != mmd.max_damage)
+            {
+                g_string_append_printf(text,
+                    "       min. damage: %d hp\n"
+                    "       max. damage: %d hp\n"
+                    "       avg. damage: %.2f hp\n",
+                    mmd.min_damage, mmd.max_damage, avg_dam
+                );
+            }
+
+            g_string_append_printf(text,
                 "  avg. hits needed: %d%s\n\n",
-                mmd.min_damage, mmd.max_damage,
-                avg_dam, hits_needed,
+                hits_needed,
                 hits_needed > 1 && instakill_chance > 0 ? " [*]" : ""
             );
 
