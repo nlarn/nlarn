@@ -3081,6 +3081,15 @@ static int display_window_move(display_window *dwin, int key)
         if (dwin->y1 < (LINES - dwin->height)) dwin->y1++;
         break;
 
+        /* redraw screen */
+    case 12: /* ^L */
+#ifdef SDLPDCURSES
+    case KEY_RESIZE: /* SDL window size event */
+#endif
+        clear();
+        display_draw();
+        break;
+
     default:
         need_refresh = FALSE;
     }

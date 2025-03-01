@@ -19,10 +19,11 @@
 * Switch Windows build to WIN64
 
 ### Fixed bugs:
-* Fix compilation with recent compilers (patch by Frank Uhlig)
 * Fix a crash bug fighting regenerating monsters when playing on
   difficulty level 10 (spotted by r0cc0r0cc0)
 * Fix typo in monastery (spotted by jv84)
+* Improve handling of terminal resizes while showing dialogues
+* Fix compilation with recent compilers (patch by Frank Uhlig)
 * Fix compilation on FreeBSD (found in r7st's fork)
 
 ## Release 0.7.6 (2020-05-23)
