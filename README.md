@@ -29,17 +29,19 @@ News about NLarn are posted on the [NLarn website](https://nlarn.github.io/).
 
 ## Game configuration
 
-You can predefine some settings in the file `nlarn.ini`. The game writes
-a default `nlarn.ini` to the directory `~/.nlarn` on Linux, BSD and macOS,
-or to the folder `%LOCALAPPDATA%\nlarn` on Windows, when this file doesn't
-exist. Comments above the individual setting explain the possible settings.
+The game can be configured from the main menu.
+
+The configuration is persisted in the file `nlarn.ini`. The game writes
+the configuration to the directory `~/.nlarn` on Linux, BSD and macOS,
+or to the folder `%LOCALAPPDATA%\nlarn` on Windows.
+
+Comments above the individual setting explain the possible settings.
 
 
 ## Heritage
 
 NLarn is modeled after Larn, which was written by Noah Morgan in 1986.
-For an in-depth review of Larn, have a look at the
-[@Play review of Larn](http://www.gamesetwatch.com/2008/04/play_larn_or_i_hocked_the_car.php).
+There is a [Wikipedia article on Larn](https://en.wikipedia.org/wiki/Larn_%28video_game%29).
 
 Later in the eigthies, Phil Cordier created ULarn, an extended version of
 Larn. It comes with more levels, items and adds character classes to the
@@ -52,16 +54,16 @@ the additions of Ularn have been included.
 
 ## Compiling NLarn
 
-Instructions how to build NLarn on Linux, MacOS X and Windows can be found on
-a [wiki page](https://github.com/nlarn/nlarn/wiki/Building).
+Instructions how to build NLarn on Linux, FreeBSD, macOS and Windows can
+be found on a [wiki page](https://github.com/nlarn/nlarn/wiki/Building).
 
 
 ## Reporting bugs
 
-Bug reports are very welcome. You can either send me an eMail to
-<jdegroot@web.de> or create an issue on the
+Bug reports are very welcome. Please create an issue on the
 [NLarn bug tracker](https://github.com/nlarn/nlarn/issues), where
 known bugs and planned tasks are tracked.
 
-If you have ideas for changes or additions to the game, please let me know.
-A list of ideas is maintained on a [wiki page](https://github.com/nlarn/nlarn/wiki/Ideas).
+If you have ideas for changes or additions to the game, feel free to create
+an issue. A list of ideas is maintained on a
+[wiki page](https://github.com/nlarn/nlarn/wiki/Ideas).
