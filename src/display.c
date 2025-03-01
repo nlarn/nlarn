@@ -98,6 +98,8 @@ void display_init()
     PDC_set_title(window_title);
     g_free(window_title);
 
+    display_toggle_fullscreen(FALSE);
+
     /* return modifier keys pressed with key */
     PDC_return_key_modifiers(TRUE);
 #endif
@@ -2875,11 +2877,14 @@ int display_getch(WINDOW *win) {
 }
 
 #ifdef SDLPDCURSES
-void display_toggle_fullscreen()
+void display_toggle_fullscreen(gboolean toggle)
 {
-    fullscreen = fullscreen == SDL_WINDOW_FULLSCREEN_DESKTOP
-        ? 0
-        : SDL_WINDOW_FULLSCREEN_DESKTOP;
+    if (toggle)
+        config.fullscreen = !config.fullscreen;
+
+    int fullscreen = config.fullscreen
+        ? SDL_WINDOW_FULLSCREEN_DESKTOP
+        : FALSE;
 
     SDL_SetWindowFullscreen(pdc_window, fullscreen);
 
@@ -3117,7 +3122,8 @@ static int display_window_move(display_window *dwin, int key)
 #ifdef SDLPDCURSES
     case 13: /* ENTER */
         if (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_ALT)
-            display_toggle_fullscreen();
+            display_toggle_fullscreen(true);
+
         break;
 #endif
 

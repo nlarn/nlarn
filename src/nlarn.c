@@ -843,7 +843,8 @@ static void mainloop()
 #ifdef SDLPDCURSES
         case 13: /* ENTER */
             if (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_ALT)
-                display_toggle_fullscreen();
+                display_toggle_fullscreen(TRUE);
+
             break;
 #endif
 

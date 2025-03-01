@@ -64,6 +64,9 @@ static const char *default_config_file =
     "# Font size for the game. Defaults to 18 when not defined.\n"
     "font-size=18\n"
     "\n"
+    "# Enable full screen mode for the game. Defaults to false.\n"
+    "fullscreen=false\n"
+    "\n"
 #endif
     "# Disable automatic saving when switching a level. Saving the game is\n"
     "# enabled by default, disable when it's too slow on your computer\n"
@@ -90,7 +93,7 @@ void parse_commandline(int argc, char *argv[], struct game_config *config)
         { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config->no_autosave,  "Disable autosave", NULL },
         { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config->wizard,       "Enable wizard mode", NULL },
 #ifdef SDLPDCURSES
-        { "font-size",   'S', 0, G_OPTION_ARG_INT,    &config->font_size,   "Set font size", NULL },
+        { "font-size",   'S', 0, G_OPTION_ARG_INT,    &config->font_size,    "Set font size", NULL },
 #endif
         { "userdir",     'D', 0, G_OPTION_ARG_FILENAME, &config->userdir,    "Alternate directory for config file and saved games", NULL },
         { "highscores",  'h', 0, G_OPTION_ARG_NONE,   &config->show_scores,  "Show highscores and exit", NULL },
@@ -154,6 +157,10 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
         int font_size = g_key_file_get_integer(ini_file, "nlarn", "font-size", &error);
         if (!config->font_size && !error) config->font_size = font_size;
         g_clear_error(&error);
+
+        gboolean fullscreen = g_key_file_get_boolean(ini_file, "nlarn", "fullscreen", &error);
+        if (!error) config->fullscreen = fullscreen;
+        g_clear_error(&error);
 #endif
     }
     else
@@ -190,7 +197,8 @@ void write_ini_file(const char *filename, struct game_config *config)
         g_key_file_set_value(kf,   "nlarn", "auto-pickup", config->auto_pickup ? config->auto_pickup : "");
         g_key_file_set_boolean(kf, "nlarn", "no-autosave", config->no_autosave);
 #ifdef SDLPDCURSES
-        g_key_file_set_integer(kf, "nlarn", "font-size", config->font_size);
+        g_key_file_set_integer(kf, "nlarn", "font-size",   config->font_size);
+        g_key_file_set_boolean(kf, "nlarn", "fullscreen",  config->fullscreen);
 #endif
     }
 
@@ -306,6 +314,7 @@ void configure_defaults(const char *inifile)
         "  `GREEN`e`end`) Autosave on map change - `YELLOW`%s`end`\n"
 #ifdef SDLPDCURSES
         "  `GREEN`f`end`) Configure font size    - `YELLOW`%d`end`\n"
+        "  `GREEN`g`end`) Full screen mode       - `YELLOW`%s`end`\n"
 #endif
         "\n"
         "Clear values with `GREEN`A`end`-`GREEN`D`end`\n";
@@ -344,6 +353,7 @@ void configure_defaults(const char *inifile)
                 config.no_autosave ? "no" : "yes"
 #ifdef SDLPDCURSES
                 , config.font_size
+                , config.fullscreen ? "yes" : "no"
 #endif
                 );
 
@@ -441,8 +451,8 @@ void configure_defaults(const char *inifile)
                 config.no_autosave = !config.no_autosave;
                 break;
 
-            /* font size */
 #ifdef SDLPDCURSES
+            /* font size */
             case 'f':
                 {
                     char *cval = g_strdup_printf("%d", config.font_size);
@@ -465,6 +475,11 @@ void configure_defaults(const char *inifile)
                         }
                     }
                 }
+                break;
+
+            /* fullscreen */
+            case 'g':
+                display_toggle_fullscreen(TRUE);
                 break;
 #endif
 
