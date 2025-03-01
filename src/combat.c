@@ -1,6 +1,6 @@
 /*
  * combat.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,11 @@
 #include <string.h>
 
 #include "combat.h"
+#include "extdefs.h"
+#include "game.h"
+#include "player.h"
+#include "random.h"
+
 #include "enumFactory.h"
 
 DEFINE_ENUM(speed, SPEED_ENUM)
@@ -63,3 +68,141 @@ char *damage_to_str(damage *dam)
     return buf;
 }
 
+// Turn to base chance to hit into a percental chance to hit
+static inline int combat_calc_percentage(int base_to_hit)
+{
+    if (base_to_hit < 1)
+        return 0;
+
+    if (base_to_hit >= 20)
+        return 100;
+
+    return (5 * base_to_hit);
+}
+
+// Calculate the base chance of the play to hit a monster
+static int combat_player_to_mt_base_chance_to_hit(struct player *p, enum monster_t mt, gboolean use_weapon)
+{
+    int base_to_hit = p->level
+                       + max(0, player_get_dex(p) - 12)
+                       + (use_weapon && p->eq_weapon ? weapon_acc(p->eq_weapon) : 0)
+                       + (use_weapon && p->eq_weapon && weapon_is_ranged(p->eq_weapon)
+                                     && p->eq_quiver
+                               ? ammo_accuracy(p->eq_quiver) : 0)
+                       + (player_get_speed(p) - monster_type_speed(mt)) / 25
+                       /* the rule below gives a -3 for tiny monsters and a +4
+                          for gargantuan monsters */
+                       + ((monster_type_size(mt) - MEDIUM) / 25)
+                       - monster_type_ac(mt);
+
+    return base_to_hit;
+}
+
+int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, gboolean use_weapon)
+{
+    g_assert (p != NULL);
+
+    const int base_to_hit = combat_player_to_mt_base_chance_to_hit(p, mt, use_weapon);
+
+    return combat_calc_percentage(base_to_hit);
+}
+
+int combat_chance_player_to_monster_hit(struct player *p, struct _monster *m, gboolean use_weapon)
+{
+    g_assert (p != NULL && m != NULL);
+
+    int base_to_hit = combat_player_to_mt_base_chance_to_hit(p, monster_type(m), use_weapon)
+                       - (!monster_in_sight(m) ? 5 : 0);
+
+    return combat_calc_percentage(base_to_hit);
+}
+
+damage_min_max damage_calc_min_max(struct player *p, enum monster_t mt)
+{
+    /* without weapon cause a basic unarmed combat damage */
+    int min_damage = 1;
+
+    if (p->eq_weapon != NULL)
+    {
+        /* wielded weapon base damage */
+        min_damage = weapon_damage(p->eq_weapon);
+
+        // Blessed weapons do 50% bonus damage against demons and undead.
+        if (p->eq_weapon->blessed
+                && (monster_type_flags(mt, DEMON) || monster_type_flags(mt, UNDEAD)))
+        {
+            min_damage *= 3;
+            min_damage /= 2;
+        }
+    }
+
+    min_damage += player_effect(p, ET_INC_DAMAGE);
+    min_damage -= player_effect(p, ET_SICKNESS);
+
+    /* calculate maximum damage: strength bonus and difficulty malus */
+    int max_damage = min_damage
+                     + player_get_str(p) - 12
+                     - game_difficulty(nlarn);
+
+    /* ensure minimal damage */
+    damage_min_max ret =
+    {
+        max(1, min_damage),
+        max(max(1, min_damage), max_damage)
+    };
+
+    return ret;
+}
+
+int damage_calc(struct player *p, struct _monster *m)
+{
+    const int INSTANT_KILL = 10000;
+    const damage_min_max mmd = damage_calc_min_max(p, monster_type(m));
+    int damage = rand_m_n(mmd.min_damage, mmd.max_damage + 1);
+
+    /* *** SPECIAL WEAPONS *** */
+    if (p->eq_weapon)
+    {
+        switch (p->eq_weapon->id)
+        {
+            /* Vorpal Blade */
+        case WT_VORPALBLADE:
+            if (chance(5) && monster_flags(m, HEAD)
+                    && !monster_flags(m, NOBEHEAD))
+            {
+                log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
+                              monster_get_name(m));
+
+                damage = INSTANT_KILL;
+            }
+            break;
+
+            /* Lance of Death */
+        case WT_LANCEOFDEATH:
+            /* the lance is pretty deadly for non-demons */
+            if (!monster_flags(m, DEMON))
+                damage = INSTANT_KILL;
+            else
+                damage = 300;
+            break;
+
+            /* Slayer */
+        case WT_SLAYER:
+            if (monster_flags(m, DEMON))
+                damage = INSTANT_KILL;
+            break;
+
+        default:
+            /* triple damage if hitting a dragon and wearing an amulet of
+               dragon slaying */
+            if (monster_flags(m, DRAGON)
+                    && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
+            {
+                damage *= 3;
+            }
+            break;
+        }
+    }
+
+    return damage;
+}

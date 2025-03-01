@@ -1,6 +1,6 @@
 /*
  * combat.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,6 +21,7 @@
 
 #include <glib.h>
 
+#include "items.h"
 #include "enumFactory.h"
 
 #define SPEED_ENUM(SPEED) \
@@ -134,6 +135,12 @@ typedef struct _damage_msg
     char *msg_unaffected;
 } damage_msg;
 
+typedef struct _damage_min_max
+{
+    int min_damage;
+    int max_damage;
+} damage_min_max;
+
 damage *damage_new(damage_t type, attack_t att_type, int amount,
                    damage_originator_t damo, gpointer originator);
 
@@ -142,5 +149,25 @@ damage *damage_copy(damage *dam);
 static inline void damage_free(damage *dam) { g_free(dam); }
 
 char *damage_to_str(damage *dam);
+
+/* forward declarations */
+struct player;
+struct _monster;
+enum monster_t;
+
+int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, gboolean use_weapon);
+int combat_chance_player_to_monster_hit(struct player *p, struct _monster *m, gboolean use_weapon);
+
+/*
+ * Calculate the minimal and maximal damage the player can cause to a given
+ * monster type
+ */
+damage_min_max damage_calc_min_max(struct player *p, enum monster_t mt);
+
+/*
+ * Calculate the amount of damage the player's attack causes.
+ * Takes special weapon effects into account.
+ */
+int damage_calc(struct player *p, struct _monster *m);
 
 #endif

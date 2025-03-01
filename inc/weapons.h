@@ -1,6 +1,6 @@
 /*
  * weapons.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -77,6 +77,7 @@ typedef enum _weapon_t
     WT_BATTLEAXE,
     WT_CROSSBOW,
     WT_LONGSWORD,
+    WT_ELONGSWORD,
     WT_2SWORD,
     WT_SWORDSLASHING,
     WT_LANCEOFDEATH,
@@ -117,7 +118,6 @@ extern const char *ammo_class_name[AMMO_MAX];
 extern const weapon_data weapons[WT_MAX];
 
 /* functions */
-int weapon_calc_to_hit(struct player *p, struct _monster *m, item *weapon, item *ammo);
 int  weapon_fire(struct player *p);
 void weapon_swap(struct player *p);
 
@@ -128,6 +128,12 @@ void weapon_swap(struct player *p);
  * @return a newly allocated string that must be g_free()'d
  */
 char *weapon_shortdesc(item *weapon, guint available_space);
+
+/*
+ * Retuns the percentual chance that the given weapon type
+ * can instantly kill the given monster type.
+ */
+int weapon_instakill_chance(weapon_t wt, monster_t mt);
 
 static inline int ammo_base_damage(item *ammo)
 {

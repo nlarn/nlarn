@@ -854,7 +854,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
     if (monster_attack_available(nmonster, ATT_WEAPON))
     {
         int weapon_count = 3;
-        int wpns[3]; /* choice of weapon types */
+        int wpns[weapon_count]; /* choice of weapon types */
         item *weapon;
 
         /* preset weapon types */
@@ -876,7 +876,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         case MT_ELF:
             wpns[0] = WT_ESHORTSWORD;
             wpns[1] = WT_ESPEAR;
-            weapon_count = 2;
+            wpns[2] = WT_ELONGSWORD;
             break;
 
         case MT_BUGBEAR:
@@ -3507,6 +3507,31 @@ inline const char *monster_sound(monster *m) {
     return monster_data[m->type].sound;
 }
 
+inline const char *monster_type_name(monster_t type)
+{
+    return monster_data[type].name;
+}
+
+inline int monster_type_ac(monster_t type)
+{
+    return monster_data[type].ac;
+}
+
+inline int monster_type_size(monster_t type)
+{
+    return monster_data[type].size;
+}
+
+inline int monster_type_speed(monster_t type)
+{
+    return monster_data[type].speed;
+}
+
+inline int monster_type_flags(monster_t type, monster_flag f)
+{
+    return monster_data[type].flags & f;
+}
+
 inline int monster_type_hp_max(monster_t type)
 {
     return monster_data[type].hp_max;
@@ -3515,11 +3540,6 @@ inline int monster_type_hp_max(monster_t type)
 inline char monster_type_glyph(monster_t type)
 {
     return monster_data[type].glyph;
-}
-
-inline const char *monster_type_name(monster_t type)
-{
-    return monster_data[type].name;
 }
 
 inline int monster_type_reroll_chance(monster_t type)

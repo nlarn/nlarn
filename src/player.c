@@ -1366,134 +1366,6 @@ int player_move(player *p, direction dir, gboolean open_door)
     return times;
 }
 
-typedef struct min_max_damage
-{
-    int min_damage;
-    int max_damage;
-} min_max_damage;
-
-static min_max_damage calc_min_max_damage(player *p, monster *m)
-{
-    /* without weapon cause a basic unarmed combat damage */
-    int min_damage = 1;
-
-    if (p->eq_weapon != NULL)
-    {
-        /* wielded weapon base damage */
-        min_damage = weapon_damage(p->eq_weapon);
-
-        // Blessed weapons do 50% bonus damage against demons and undead.
-        if (p->eq_weapon->blessed
-                && (monster_flags(m, DEMON) || monster_flags(m, UNDEAD)))
-        {
-            min_damage *= 3;
-            min_damage /= 2;
-        }
-    }
-
-    min_damage += player_effect(p, ET_INC_DAMAGE);
-    min_damage -= player_effect(p, ET_SICKNESS);
-
-    /* calculate maximum damage: strength bonus and difficulty malus */
-    int max_damage = min_damage
-                     + player_get_str(p) - 12
-                     - game_difficulty(nlarn);
-
-    /* ensure minimal damage */
-    min_max_damage ret =
-    {
-        max(1, min_damage),
-        max(max(1, min_damage), max_damage)
-    };
-
-    return ret;
-}
-
-static gboolean player_instakill_chance(player *p, monster *m)
-{
-    if (p->eq_weapon)
-    {
-        switch (p->eq_weapon->id)
-        {
-            /* Vorpal Blade */
-        case WT_VORPALBLADE:
-            if (monster_flags(m, HEAD) && !monster_flags(m, NOBEHEAD))
-                return 5;
-            break;
-
-            /* Lance of Death */
-        case WT_LANCEOFDEATH:
-            /* the lance is pretty deadly for non-demons */
-            if (!monster_flags(m, DEMON))
-                return 100;
-            break;
-
-            /* Slayer */
-        case WT_SLAYER:
-            if (monster_flags(m, DEMON))
-                return 100;
-            break;
-
-        default:
-            break;
-        }
-    }
-    return 0;
-}
-
-static int calc_real_damage(player *p, monster *m, int allow_chance)
-{
-    const int INSTANT_KILL = 10000;
-    const min_max_damage mmd = calc_min_max_damage(p, m);
-    int real_damage = rand_m_n(mmd.min_damage, mmd.max_damage + 1);
-
-    /* *** SPECIAL WEAPONS *** */
-    if (p->eq_weapon)
-    {
-        switch (p->eq_weapon->id)
-        {
-            /* Vorpal Blade */
-        case WT_VORPALBLADE:
-            if (allow_chance && chance(5) && monster_flags(m, HEAD)
-                    && !monster_flags(m, NOBEHEAD))
-            {
-                log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
-                              monster_get_name(m));
-
-                real_damage = INSTANT_KILL;
-            }
-            break;
-
-            /* Lance of Death */
-        case WT_LANCEOFDEATH:
-            /* the lance is pretty deadly for non-demons */
-            if (!monster_flags(m, DEMON))
-                real_damage = INSTANT_KILL;
-            else
-                real_damage = 300;
-            break;
-
-            /* Slayer */
-        case WT_SLAYER:
-            if (monster_flags(m, DEMON))
-                real_damage = INSTANT_KILL;
-            break;
-
-        default:
-            /* triple damage if hitting a dragon and wearing an amulet of
-               dragon slaying */
-            if (monster_flags(m, DRAGON)
-                    && (p->eq_amulet && p->eq_amulet->id == AM_DRAGON_SLAYING))
-            {
-                real_damage *= 3;
-            }
-            break;
-        }
-    }
-
-    return real_damage;
-}
-
 int player_attack(player *p, monster *m)
 {
     /* disallow attacking other humans */
@@ -1503,7 +1375,7 @@ int player_attack(player *p, monster *m)
         return 1;
     }
 
-    if (chance(5) || chance(weapon_calc_to_hit(p, m, p->eq_weapon, NULL)))
+    if (chance(5) || chance(combat_chance_player_to_monster_hit(p, m, TRUE)))
     {
         damage *dam;
         effect *e;
@@ -1511,7 +1383,7 @@ int player_attack(player *p, monster *m)
         /* placed a hit */
         log_add_entry(nlarn->log, "You hit the %s.", monster_get_name(m));
 
-        dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, calc_real_damage(p, m, TRUE),
+        dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, damage_calc(p, m),
                          DAMO_PLAYER, p);
 
         /* weapon damage due to rust when hitting certain monsters */
@@ -4738,15 +4610,6 @@ void calc_fighting_stats(player *p)
     gchar *desc = NULL;
     GString *text;
 
-    position pos = map_find_space_in(game_map(nlarn, Z(p->pos)),
-                                     rect_new_sized(p->pos, 2), LE_MONSTER, FALSE);
-
-    if (!pos_valid(pos))
-    {
-        log_add_entry(nlarn->log, "Couldn't create a monster.");
-        return;
-    }
-
     text = g_string_new("");
 
     if (p->eq_weapon)
@@ -4757,20 +4620,28 @@ void calc_fighting_stats(player *p)
         desc = item_describe(p->eq_weapon, TRUE, TRUE, FALSE);
     }
 
+    // Calculate the default min/max damage. Using the giant bat ensures
+    // that no special effects are used.
+    const damage_min_max default_mmd = damage_calc_min_max(p, MT_GIANT_BAT);
+    double default_avg_dam = (default_mmd.min_damage + default_mmd.max_damage) / 2.0;
+
     const int damage_modifier = player_effect(p, ET_INC_DAMAGE)
                                 - player_effect(p, ET_SICKNESS);
 
     g_string_append_printf(text, "\nPlayer stats\n"
                            "------------\n"
-                           "  wielded weapon : %s\n"
-                           "  weapon class   : %d\n"
-                           "  accuracy       : %d\n"
-                           "  experience     : %d\n"
-                           "  strength       : %d\n"
-                           "  dexterity      : %d\n"
-                           "  damage modifier: %d\n"
-                           "  speed          : %d\n"
-                           "  difficulty     : %d\n\n",
+                           "  wielded weapon   : %s\n"
+                           "  weapon damage    : %d\n"
+                           "  weapon accuracy  : %d\n"
+                           "  experience level : %d\n"
+                           "  strength         : %d\n"
+                           "  dexterity        : %d\n"
+                           "  damage modifier  : %d\n"
+                           "  speed            : %s\n"
+                           "  difficulty       : %d\n\n"
+                           "  min. damage      : %d hp\n"
+                           "  max. damage      : %d hp\n"
+                           "  avg. damage      : %.2f hp\n\n",
                            (p->eq_weapon ? desc : "none"),
                            (p->eq_weapon ? weapon_damage(p->eq_weapon) : 0),
                            (p->eq_weapon ? weapon_acc(p->eq_weapon) : 0),
@@ -4778,78 +4649,75 @@ void calc_fighting_stats(player *p)
                            player_get_str(p),
                            player_get_dex(p),
                            damage_modifier,
-                           player_get_speed(p),
-                           game_difficulty(nlarn));
+                           speed_string(player_get_speed(p)),
+                           game_difficulty(nlarn),
+                           default_mmd.min_damage,
+                           default_mmd.max_damage,
+                           default_avg_dam);
 
     g_string_append_printf(text, "Monsters\n"
                            "--------\n\n");
 
     gboolean mention_instakill = FALSE;
 
-    for (guint32 idx = 0; idx < MT_TOWN_PERSON; idx++)
+    for (monster_t mt = 0; mt < MT_TOWN_PERSON; mt++)
     {
-        monster *m;
-        if (!(m = monster_new(idx, pos, NULL)))
-        {
-            g_string_append_printf(text, "Monster %s could not be created.\n\n",
-                                   monster_name(m));
-            continue;
-        }
-        int to_hit = weapon_calc_to_hit(p, m, p->eq_weapon, NULL);
+        int to_hit = combat_chance_player_to_mt_hit(p, mt, TRUE);
         to_hit += ((100 - to_hit) * 5)/100;
 
-        const int instakill_chance = player_instakill_chance(p, m);
+        const int instakill_chance = p->eq_weapon
+            ? weapon_instakill_chance(p->eq_weapon->id, mt)
+            : 0;
 
         g_string_append_printf(
             text,
-            "%s (ac: %d, max hp: %d, speed: %d)\n"
+            "%s (ac: %d, max hp: %d, size: %s, speed: %s)\n"
             "     to-hit chance: %d%%\n"
             "  instakill chance: %d%%\n",
-            monster_name(m),
-            monster_ac(m),
-            monster_type_hp_max(monster_type(m)),
-            monster_speed(m),
+            monster_type_name(mt),
+            monster_type_ac(mt),
+            monster_type_hp_max(mt),
+            size_string(monster_type_size(mt)),
+            speed_string(monster_type_speed(mt)),
             to_hit, instakill_chance
         );
 
         if (instakill_chance < 100)
         {
-            if (monster_flags(m, REGENERATE))
+            if (monster_type_flags(mt, REGENERATE))
             {
                 g_string_append_printf(text, "      regeneration: every %d turns\n",
                                        10 - game_difficulty(nlarn));
             }
 
-            const min_max_damage mmd = calc_min_max_damage(p, m);
-            double avg_dam = 0;
-            int tries = 100;
-            while (tries-- > 0)
-                avg_dam += calc_real_damage(p, m, FALSE);
+            const damage_min_max mmd = damage_calc_min_max(p, mt);
+            double avg_dam = (mmd.min_damage + mmd.max_damage) / 2.0;
 
-            avg_dam /= 100;
-
-            int hits_needed = (monster_type_hp_max(monster_type(m)) / avg_dam);
+            int hits_needed = (monster_type_hp_max(mt) / avg_dam);
             if (((int) (avg_dam * 10)) % 10)
                 hits_needed++;
 
-            g_string_append_printf(
-                text,
-                "       min. damage: %d hp\n"
-                "       max. damage: %d hp\n"
-                "       avg. damage: %.2f hp\n"
+            if (default_mmd.min_damage != mmd.min_damage && default_mmd.max_damage != mmd.max_damage)
+            {
+                g_string_append_printf(text,
+                    "       min. damage: %d hp\n"
+                    "       max. damage: %d hp\n"
+                    "       avg. damage: %.2f hp\n",
+                    mmd.min_damage, mmd.max_damage, avg_dam
+                );
+            }
+
+            g_string_append_printf(text,
                 "  avg. hits needed: %d%s\n\n",
-                mmd.min_damage, mmd.max_damage,
-                avg_dam, hits_needed,
+                hits_needed,
                 hits_needed > 1 && instakill_chance > 0 ? " [*]" : ""
             );
 
-            if (!mention_instakill && instakill_chance > 0)
+            if (instakill_chance > 0)
                 mention_instakill = TRUE;
         }
         else
             g_string_append_printf(text, "\n");
-
-        monster_destroy(m);
     }
 
     if (mention_instakill)
