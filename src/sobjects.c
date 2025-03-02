@@ -27,6 +27,8 @@
 #include "player.h"
 #include "random.h"
 
+DEFINE_ENUM(sobject_t, SOBJECT_TYPE_ENUM)
+
 const sobject_data sobjects[LS_MAX] =
 {
     /* type             gly   color           desc                                   pa tr */

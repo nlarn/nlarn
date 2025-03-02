@@ -28,6 +28,8 @@
 #include "sobjects.h"
 #include "spheres.h"
 
+DEFINE_ENUM(map_tile_t, MAP_TILE_TYPE_ENUM)
+
 static int map_fill_with_stationary_objects(map *maze);
 static void map_fill_with_objects(map *m);
 static void map_fill_with_traps(map *m);
@@ -181,25 +183,26 @@ cJSON *map_serialize(map *m)
         {
             cJSON_AddItemToArray(grid, tile = cJSON_CreateObject());
 
-            cJSON_AddNumberToObject(tile, "type", m->grid[y][x].type);
+            cJSON_AddStringToObject(tile, "type",
+                    map_tile_t_string(m->grid[y][x].type));
 
             if (m->grid[y][x].base_type > 0
                     && m->grid[y][x].base_type != m->grid[y][x].type)
             {
-                cJSON_AddNumberToObject(tile, "base_type",
-                                        m->grid[y][x].base_type);
+                cJSON_AddStringToObject(tile, "base_type",
+                        map_tile_t_string(m->grid[y][x].base_type));
             }
 
             if (m->grid[y][x].sobject)
             {
-                cJSON_AddNumberToObject(tile, "sobject",
-                                        m->grid[y][x].sobject);
+                cJSON_AddStringToObject(tile, "sobject",
+                        sobject_t_string(m->grid[y][x].sobject));
             }
 
             if (m->grid[y][x].trap)
             {
-                cJSON_AddNumberToObject(tile, "trap",
-                                        m->grid[y][x].trap);
+                cJSON_AddStringToObject(tile, "trap",
+                        trap_t_string(m->grid[y][x].trap));
             }
 
             if (m->grid[y][x].timer)
@@ -243,16 +246,20 @@ map *map_deserialize(cJSON *mser)
         {
             tile = cJSON_GetArrayItem(grid, x + (y * MAP_MAX_X));
 
-            m->grid[y][x].type = cJSON_GetObjectItem(tile, "type")->valueint;
+            m->grid[y][x].type =
+                map_tile_t_value(cJSON_GetObjectItem(tile, "type")->valuestring);
 
             obj = cJSON_GetObjectItem(tile, "base_type");
-            if (obj != NULL) m->grid[y][x].base_type = obj->valueint;
+            if (obj != NULL) m->grid[y][x].base_type =
+                map_tile_t_value(obj->valuestring);
 
             obj = cJSON_GetObjectItem(tile, "sobject");
-            if (obj != NULL) m->grid[y][x].sobject = obj->valueint;
+            if (obj != NULL) m->grid[y][x].sobject =
+                sobject_t_value(obj->valuestring);
 
             obj = cJSON_GetObjectItem(tile, "trap");
-            if (obj != NULL) m->grid[y][x].trap = obj->valueint;
+            if (obj != NULL) m->grid[y][x].trap =
+                trap_t_value(obj->valuestring);
 
             obj = cJSON_GetObjectItem(tile, "timer");
             if (obj != NULL) m->grid[y][x].timer = obj->valueint;

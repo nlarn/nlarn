@@ -20,41 +20,42 @@
 #define __SOBJECTS_H_
 
 #include "colours.h"
+#include "enumFactory.h"
 
 /* forward declarations */
 struct player;
 struct map;
 
-typedef enum sobject_type
-{
-    LS_NONE,
-    LS_ALTAR,
-    LS_THRONE,        /* throne with gems and king */
-    LS_THRONE2,       /* throne with gems, without king */
-    LS_DEADTHRONE,    /* throne without gems or king */
-    LS_STAIRSDOWN,
-    LS_STAIRSUP,
-    LS_ELEVATORDOWN,  /* Enter the volcano */
-    LS_ELEVATORUP,    /* leave the volcano */
-    LS_FOUNTAIN,
-    LS_DEADFOUNTAIN,
-    LS_STATUE,
-    LS_URN,           /* golden urn - not implemented */
-    LS_MIRROR,
-    LS_OPENDOOR,
-    LS_CLOSEDDOOR,
-    LS_CAVERNS_ENTRY,
-    LS_CAVERNS_EXIT,
-    LS_HOME,
-    LS_DNDSTORE,
-    LS_TRADEPOST,
-    LS_LRS,           /* Larn Revenue Service */
-    LS_SCHOOL,
-    LS_BANK,
-    LS_BANK2,         /* branch office */
-    LS_MONASTERY,
-    LS_MAX
-} sobject_t;
+#define SOBJECT_TYPE_ENUM(SOBJECT_TYPE) \
+    SOBJECT_TYPE(LS_NONE,) \
+    SOBJECT_TYPE(LS_ALTAR,) \
+    SOBJECT_TYPE(LS_THRONE,)       /* throne with gems and king */ \
+    SOBJECT_TYPE(LS_THRONE2,)      /* throne with gems, without king */ \
+    SOBJECT_TYPE(LS_DEADTHRONE,)   /* throne without gems or king */ \
+    SOBJECT_TYPE(LS_STAIRSDOWN,) \
+    SOBJECT_TYPE(LS_STAIRSUP,) \
+    SOBJECT_TYPE(LS_ELEVATORDOWN,) /* Enter the volcano */ \
+    SOBJECT_TYPE(LS_ELEVATORUP,)   /* leave the volcano */ \
+    SOBJECT_TYPE(LS_FOUNTAIN,) \
+    SOBJECT_TYPE(LS_DEADFOUNTAIN,) \
+    SOBJECT_TYPE(LS_STATUE,) \
+    SOBJECT_TYPE(LS_URN,)          /* golden urn - not implemented */ \
+    SOBJECT_TYPE(LS_MIRROR,) \
+    SOBJECT_TYPE(LS_OPENDOOR,) \
+    SOBJECT_TYPE(LS_CLOSEDDOOR,) \
+    SOBJECT_TYPE(LS_CAVERNS_ENTRY,) \
+    SOBJECT_TYPE(LS_CAVERNS_EXIT,) \
+    SOBJECT_TYPE(LS_HOME,) \
+    SOBJECT_TYPE(LS_DNDSTORE,) \
+    SOBJECT_TYPE(LS_TRADEPOST,) \
+    SOBJECT_TYPE(LS_LRS,)          /* Larn Revenue Service */ \
+    SOBJECT_TYPE(LS_SCHOOL,) \
+    SOBJECT_TYPE(LS_BANK,) \
+    SOBJECT_TYPE(LS_BANK2,)        /* branch office */ \
+    SOBJECT_TYPE(LS_MONASTERY,) \
+    SOBJECT_TYPE(LS_MAX,) \
+
+DECLARE_ENUM(sobject_t, SOBJECT_TYPE_ENUM)
 
 typedef struct _sobject_data
 {
