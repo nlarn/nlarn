@@ -1,6 +1,6 @@
 /*
  * effects.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,6 +24,8 @@
 #include "game.h"
 #include "extdefs.h"
 #include "random.h"
+
+DEFINE_ENUM(effect_t, EFFECT_TYPE_ENUM)
 
 static const effect_data effects[ET_MAX] =
 {
@@ -599,7 +601,7 @@ void effect_serialize(gpointer oid, effect *e, cJSON *root)
     cJSON_AddItemToArray(root, eval = cJSON_CreateObject());
 
     cJSON_AddNumberToObject(eval,"oid", GPOINTER_TO_UINT(oid));
-    cJSON_AddNumberToObject(eval,"type", e->type);
+    cJSON_AddStringToObject(eval,"type", effect_t_string(e->type));
     cJSON_AddNumberToObject(eval,"start", e->start);
     cJSON_AddNumberToObject(eval,"turns", e->turns);
     cJSON_AddNumberToObject(eval,"amount", e->amount);
@@ -621,7 +623,7 @@ effect *effect_deserialize(cJSON *eser, game *g)
     oid = cJSON_GetObjectItem(eser, "oid")->valueint;
     e->oid =  GUINT_TO_POINTER(oid);
 
-    e->type = cJSON_GetObjectItem(eser, "type")->valueint;
+    e->type = effect_t_value(cJSON_GetObjectItem(eser, "type")->valuestring);
     e->start = cJSON_GetObjectItem(eser, "start")->valueint;
     e->turns = cJSON_GetObjectItem(eser, "turns")->valueint;
     e->amount = cJSON_GetObjectItem(eser, "amount")->valueint;
