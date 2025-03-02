@@ -33,6 +33,7 @@
 
 DEFINE_ENUM(monster_flag, MONSTER_FLAG_ENUM)
 DEFINE_ENUM(monster_t, MONSTER_TYPE_ENUM)
+DEFINE_ENUM(monster_action_t, MONSTER_ACTION_TYPE_ENUM)
 
 /* local monster definition for data storage */
 typedef struct {
@@ -1071,13 +1072,13 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     cJSON *mval;
 
     cJSON_AddItemToArray(root, mval = cJSON_CreateObject());
-    cJSON_AddNumberToObject(mval, "type", monster_type(m));
+    cJSON_AddStringToObject(mval, "type", monster_t_string(monster_type(m)));
     cJSON_AddNumberToObject(mval, "oid", GPOINTER_TO_UINT(oid));
     cJSON_AddNumberToObject(mval, "hp_max", m->hp_max);
     cJSON_AddNumberToObject(mval, "hp", m->hp);
     cJSON_AddNumberToObject(mval,"pos", pos_val(m->pos));
     cJSON_AddNumberToObject(mval, "movement", m->movement);
-    cJSON_AddNumberToObject(mval, "action", m->action);
+    cJSON_AddStringToObject(mval, "action", monster_action_t_string(m->action));
 
     if (m->eq_weapon != NULL)
         cJSON_AddNumberToObject(mval, "eq_weapon",
@@ -1117,14 +1118,14 @@ void monster_deserialize(cJSON *mser, game *g)
     guint oid;
     monster *m = g_malloc0(sizeof(monster));
 
-    m->type = cJSON_GetObjectItem(mser, "type")->valueint;
+    m->type = monster_t_value(cJSON_GetObjectItem(mser, "type")->valuestring);
     oid = cJSON_GetObjectItem(mser, "oid")->valueint;
     m->oid = GUINT_TO_POINTER(oid);
     m->hp_max = cJSON_GetObjectItem(mser, "hp_max")->valueint;
     m->hp = cJSON_GetObjectItem(mser, "hp")->valueint;
     pos_val(m->pos) = cJSON_GetObjectItem(mser, "pos")->valueint;
     m->movement = cJSON_GetObjectItem(mser, "movement")->valueint;
-    m->action = cJSON_GetObjectItem(mser, "action")->valueint;
+    m->action = monster_action_t_value(cJSON_GetObjectItem(mser, "action")->valuestring);
 
     if ((obj = cJSON_GetObjectItem(mser, "eq_weapon")))
         m->eq_weapon = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
