@@ -1,6 +1,6 @@
 /*
  * scrolls.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #ifndef __SCROLLS_H_
 #define __SCROLLS_H_
 
+#include "enumFactory.h"
 #include "items.h"
 
 /* forward declaration */
@@ -27,34 +28,35 @@ struct player;
 
 /* type definitions */
 
-typedef enum scroll_types {
-	ST_BLANK,
-	ST_ENCH_ARMOUR,
-	ST_ENCH_WEAPON,
-	ST_ENLIGHTENMENT,
-	ST_CREATE_MONSTER,
-	ST_CREATE_ARTIFACT,
-	ST_AGGRAVATE_MONSTER,
-	ST_TIMEWARP,
-	ST_TELEPORT,
-	ST_AWARENESS,
-  	ST_SPEED,
-	ST_HEAL_MONSTER,
-	ST_SPIRIT_PROTECTION,
-	ST_UNDEAD_PROTECTION,
-	ST_STEALTH,
-	ST_MAPPING,
-	ST_HOLD_MONSTER,
-	ST_GEM_PERFECTION,
-	ST_SPELL_EXTENSION,
-	ST_IDENTIFY,
-	ST_REMOVE_CURSE,
-	ST_ANNIHILATION,
-	ST_PULVERIZATION,
-	ST_LIFE_PROTECTION,
-	ST_GENOCIDE_MONSTER,
-	ST_MAX
-} scroll_t;
+#define SCROLL_TYPE_ENUM(SCROLL_TYPE) \
+    SCROLL_TYPE(ST_BLANK,) \
+    SCROLL_TYPE(ST_ENCH_ARMOUR,) \
+    SCROLL_TYPE(ST_ENCH_WEAPON,) \
+    SCROLL_TYPE(ST_ENLIGHTENMENT,) \
+    SCROLL_TYPE(ST_CREATE_MONSTER,) \
+    SCROLL_TYPE(ST_CREATE_ARTIFACT,) \
+    SCROLL_TYPE(ST_AGGRAVATE_MONSTER,) \
+    SCROLL_TYPE(ST_TIMEWARP,) \
+    SCROLL_TYPE(ST_TELEPORT,) \
+    SCROLL_TYPE(ST_AWARENESS,) \
+    SCROLL_TYPE(ST_SPEED,) \
+    SCROLL_TYPE(ST_HEAL_MONSTER,) \
+    SCROLL_TYPE(ST_SPIRIT_PROTECTION,) \
+    SCROLL_TYPE(ST_UNDEAD_PROTECTION,) \
+    SCROLL_TYPE(ST_STEALTH,) \
+    SCROLL_TYPE(ST_MAPPING,) \
+    SCROLL_TYPE(ST_HOLD_MONSTER,) \
+    SCROLL_TYPE(ST_GEM_PERFECTION,) \
+    SCROLL_TYPE(ST_SPELL_EXTENSION,) \
+    SCROLL_TYPE(ST_IDENTIFY,) \
+    SCROLL_TYPE(ST_REMOVE_CURSE,) \
+    SCROLL_TYPE(ST_ANNIHILATION,) \
+    SCROLL_TYPE(ST_PULVERIZATION,) \
+    SCROLL_TYPE(ST_LIFE_PROTECTION,) \
+    SCROLL_TYPE(ST_GENOCIDE_MONSTER,) \
+    SCROLL_TYPE(ST_MAX,)
+
+DECLARE_ENUM(scroll_t, SCROLL_TYPE_ENUM)
 
 typedef struct magic_scroll_data {
     scroll_t   id;

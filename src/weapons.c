@@ -27,6 +27,8 @@
 #include "random.h"
 #include "weapons.h"
 
+DEFINE_ENUM(ammo_t, AMMO_TYPE_ENUM)
+
 const ammo_data ammos[AMT_MAX] =
 {
     /*  type       name            ac           dam   acc  mat        we  pr  ob */
@@ -42,6 +44,8 @@ const char *ammo_class_name[AMMO_MAX] =
     "bow",
     "crossbow",
 };
+
+DEFINE_ENUM(weapon_t, WEAPON_TYPE_ENUM)
 
 const weapon_data weapons[WT_MAX] =
 {

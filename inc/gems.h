@@ -20,16 +20,17 @@
 #define __GEMS_H_
 
 #include "colours.h"
+#include "enumFactory.h"
 #include "items.h"
 
-typedef enum gem_types
-{
-    GT_DIAMOND,
-    GT_RUBY,
-    GT_EMERALD,
-    GT_SAPPHIRE,
-    GT_MAX
-} gem_t;
+#define GEM_TYPE_ENUM(GEM_TYPE) \
+    GEM_TYPE(GT_DIAMOND,) \
+    GEM_TYPE(GT_RUBY,) \
+    GEM_TYPE(GT_EMERALD,) \
+    GEM_TYPE(GT_SAPPHIRE,) \
+    GEM_TYPE(GT_MAX,)
+
+DECLARE_ENUM(gem_t, GEM_TYPE_ENUM)
 
 /* functions */
 

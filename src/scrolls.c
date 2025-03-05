@@ -1,6 +1,6 @@
 /*
  * scrolls.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,6 +24,8 @@
 #include "extdefs.h"
 #include "random.h"
 #include "scrolls.h"
+
+DEFINE_ENUM(scroll_t, SCROLL_TYPE_ENUM)
 
 const magic_scroll_data scrolls[ST_MAX] =
 {

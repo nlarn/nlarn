@@ -19,6 +19,7 @@
 #ifndef __POTIONS_H_
 #define __POTIONS_H_
 
+#include "enumFactory.h"
 #include "items.h"
 
 /* forward declarations */
@@ -26,36 +27,36 @@
 struct player;
 
 /* type definitions */
+#define POTION_TYPE_ENUM(POTION_TYPE) \
+    POTION_TYPE(PO_WATER,) \
+    POTION_TYPE(PO_SLEEP,) \
+    POTION_TYPE(PO_HEAL,) \
+    POTION_TYPE(PO_INC_LEVEL,) \
+    POTION_TYPE(PO_INC_RND,) \
+    POTION_TYPE(PO_INC_STR,) \
+    POTION_TYPE(PO_LEARNING,) \
+    POTION_TYPE(PO_INC_WIS,) \
+    POTION_TYPE(PO_INC_CON,) \
+    POTION_TYPE(PO_RECOVERY,) \
+    POTION_TYPE(PO_DIZZINESS,) \
+    POTION_TYPE(PO_OBJ_DETECT,) \
+    POTION_TYPE(PO_MON_DETECT,) \
+    POTION_TYPE(PO_AMNESIA,) \
+    POTION_TYPE(PO_BLINDNESS,) \
+    POTION_TYPE(PO_CONFUSION,) \
+    POTION_TYPE(PO_HEROISM,) \
+    POTION_TYPE(PO_GIANT_STR,) \
+    POTION_TYPE(PO_FIRE_RES,) \
+    POTION_TYPE(PO_TRE_DETECT,) \
+    POTION_TYPE(PO_MAX_HP,) \
+    POTION_TYPE(PO_INC_MP,) \
+    POTION_TYPE(PO_POISON,) \
+    POTION_TYPE(PO_SEE_INVISIBLE,) \
+    POTION_TYPE(PO_LEVITATION,) \
+    POTION_TYPE(PO_CURE_DIANTHR,) \
+    POTION_TYPE(PO_MAX,)
 
-typedef enum potion_objects {
-    PO_WATER,
-    PO_SLEEP,
-    PO_HEAL,
-    PO_INC_LEVEL,
-    PO_INC_RND,
-    PO_INC_STR,
-    PO_LEARNING,
-    PO_INC_WIS,
-    PO_INC_CON,
-    PO_RECOVERY,
-    PO_DIZZINESS,
-    PO_OBJ_DETECT,
-    PO_MON_DETECT,
-    PO_AMNESIA,
-    PO_BLINDNESS,
-    PO_CONFUSION,
-    PO_HEROISM,
-    PO_GIANT_STR,
-    PO_FIRE_RES,
-    PO_TRE_DETECT,
-    PO_MAX_HP,
-    PO_INC_MP,
-    PO_POISON,
-    PO_SEE_INVISIBLE,
-    PO_LEVITATION,
-    PO_CURE_DIANTHR,
-    PO_MAX
-} potion_t;
+DECLARE_ENUM(potion_t, POTION_TYPE_ENUM)
 
 typedef struct potion_data {
     potion_t   id;

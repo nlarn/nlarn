@@ -1,6 +1,6 @@
 /*
  * container.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,16 +19,18 @@
 #ifndef __CONTAINER_H_
 #define __CONTAINER_H_
 
+#include "enumFactory.h"
 #include "items.h"
 #include "inventory.h"
 
-enum container_types {
-    CT_BAG,
-    CT_CASKET,
-    CT_CHEST,
-    CT_CRATE,
-    CT_MAX
-};
+#define CONTAINER_TYPE_ENUM(CONTAINER_TYPE) \
+    CONTAINER_TYPE(CT_BAG,) \
+    CONTAINER_TYPE(CT_CASKET,) \
+    CONTAINER_TYPE(CT_CHEST,) \
+    CONTAINER_TYPE(CT_CRATE,) \
+    CONTAINER_TYPE(CT_MAX,)
+
+DECLARE_ENUM(container_t, CONTAINER_TYPE_ENUM)
 
 typedef struct container_data {
     int id;

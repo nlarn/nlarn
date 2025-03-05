@@ -1,6 +1,6 @@
 /*
  * container.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,6 +23,8 @@
 #include "extdefs.h"
 #include "player.h"
 #include "random.h"
+
+DEFINE_ENUM(container_t, CONTAINER_TYPE_ENUM)
 
 const container_data containers[CT_MAX] =
 {

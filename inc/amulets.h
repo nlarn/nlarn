@@ -1,6 +1,6 @@
 /*
  * amulets.h
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,21 +19,22 @@
 #ifndef __AMULETS_H_
 #define __AMULETS_H_
 
+#include "enumFactory.h"
 #include "items.h"
 
-typedef enum amulet_types
-{
-    AM_AWARENESS,
-    AM_SUSTAINMENT,
-    AM_UNDEAD_CONTROL,
-    AM_NEGATE_SPIRIT,
-    AM_NOTHEFT,
-    AM_DRAGON_SLAYING,
-    AM_POWER,
-    AM_REFLECTION,
-    AM_LARN,
-    AM_MAX
-} amulet_t;
+#define AMULET_TYPE_ENUM(AMULET_TYPE) \
+    AMULET_TYPE(AM_AWARENESS,) \
+    AMULET_TYPE(AM_SUSTAINMENT,) \
+    AMULET_TYPE(AM_UNDEAD_CONTROL,) \
+    AMULET_TYPE(AM_NEGATE_SPIRIT,) \
+    AMULET_TYPE(AM_NOTHEFT,) \
+    AMULET_TYPE(AM_DRAGON_SLAYING,) \
+    AMULET_TYPE(AM_POWER,) \
+    AMULET_TYPE(AM_REFLECTION,) \
+    AMULET_TYPE(AM_LARN,) \
+    AMULET_TYPE(AM_MAX,)
+
+DECLARE_ENUM(amulet_t, AMULET_TYPE_ENUM)
 
 typedef enum amulet_type
 {

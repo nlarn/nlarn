@@ -43,6 +43,8 @@ static gboolean spell_scare_monsters(spell *s, struct player *p);
 static gboolean spell_summon_demon(spell *s, struct player *p);
 static gboolean spell_make_wall(spell *s, struct player *p);
 
+DEFINE_ENUM(spell_id, SPELL_TYPE_ENUM)
+
 const spell_data spells[SP_MAX] =
 {
     {

@@ -21,6 +21,8 @@
 #include "extdefs.h"
 #include "rings.h"
 
+DEFINE_ENUM(ring_t, RING_TYPE_ENUM)
+
 const ring_data rings[RT_MAX] =
 {
     /* type            name                  effect           price ob bo */
