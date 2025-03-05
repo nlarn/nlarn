@@ -1,6 +1,6 @@
 /*
  * random.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -36,13 +36,26 @@
 
 To the extent possible under law, the author has dedicated all copyright
 and related and neighboring rights to this software to the public domain
-worldwide. This software is distributed without any warranty.
+worldwide.
 
-See <http://creativecommons.org/publicdomain/zero/1.0/>. */
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
 
-/* This is xoshiro128** 1.0, our 32-bit all-purpose, rock-solid generator. It
-   has excellent (sub-ns) speed, a state size (128 bits) that is large
-   enough for mild parallelism, and it passes all tests we are aware of.
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
+
+/* This is xoshiro128** 1.1, one of our 32-bit all-purpose, rock-solid
+   generators. It has excellent speed, a state size (128 bits) that is
+   large enough for mild parallelism, and it passes all tests we are aware
+   of.
+
+   Note that version 1.0 had mistakenly s[0] instead of s[1] as state
+   word passed to the scrambler.
 
    For generating just single-precision (i.e., 32-bit) floating-point
    numbers, xoshiro128+ is even faster.
@@ -58,7 +71,7 @@ static inline uint32_t rotl(const uint32_t x, int k) {
 static uint32_t s[4];
 
 uint32_t next(void) {
-	const uint32_t result_starstar = rotl(s[0] * 5, 7) * 9;
+	const uint32_t result = rotl(s[1] * 5, 7) * 9;
 
 	const uint32_t t = s[1] << 9;
 
@@ -71,7 +84,7 @@ uint32_t next(void) {
 
 	s[3] = rotl(s[3], 11);
 
-	return result_starstar;
+	return result;
 }
 
 /* end xoshiro128starstar.c excerpt */
