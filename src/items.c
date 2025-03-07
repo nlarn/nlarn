@@ -37,6 +37,8 @@
 #include "utils.h"
 #include "weapons.h"
 
+DEFINE_ENUM(item_t, ITEM_TYPE_ENUM)
+
 static const char *item_desc_get(item *it, int known);
 
 const item_type_data item_data[IT_MAX] =
@@ -466,6 +468,26 @@ void item_destroy(item *it)
     g_free(it);
 }
 
+static const char* item_enum_string_lookup(item_t typ, int id)
+{
+    g_assert(typ > IT_NONE && typ < IT_MAX);
+
+    switch (typ)
+    {
+        case IT_AMULET:    return amulet_t_string(id);    break;
+        case IT_AMMO:      return ammo_t_string(id);      break;
+        case IT_ARMOUR:    return armour_t_string(id);    break;
+        case IT_BOOK:      return spell_id_string(id);    break;
+        case IT_CONTAINER: return container_t_string(id); break;
+        case IT_GEM:       return gem_t_string(id);       break;
+        case IT_POTION:    return potion_t_string(id);    break;
+        case IT_RING:      return ring_t_string(id);      break;
+        case IT_SCROLL:    return scroll_t_string(id);    break;
+        case IT_WEAPON:    return weapon_t_string(id);    break;
+        default:           return "";                     break;
+    }
+}
+
 void item_serialize(gpointer oid, gpointer it, gpointer root)
 {
     cJSON *ival;
@@ -475,8 +497,8 @@ void item_serialize(gpointer oid, gpointer it, gpointer root)
     cJSON_AddItemToArray((cJSON *)root, ival = cJSON_CreateObject());
 
     cJSON_AddNumberToObject(ival, "oid", GPOINTER_TO_UINT(oid));
-    cJSON_AddNumberToObject(ival, "type", i->type);
-    cJSON_AddNumberToObject(ival, "id", i->id);
+    cJSON_AddStringToObject(ival, "type", item_t_string(i->type));
+    cJSON_AddStringToObject(ival, "id", item_enum_string_lookup(i->type, i->id));
     cJSON_AddNumberToObject(ival, "bonus", i->bonus);
     cJSON_AddNumberToObject(ival, "count", i->count);
 
@@ -509,6 +531,26 @@ void item_serialize(gpointer oid, gpointer it, gpointer root)
     }
 }
 
+static int item_enum_value_lookup(item_t typ, const char* str)
+{
+    g_assert(typ > IT_NONE && typ < IT_MAX);
+
+    switch (typ)
+    {
+        case IT_AMULET:    return amulet_t_value(str);    break;
+        case IT_AMMO:      return ammo_t_value(str);      break;
+        case IT_ARMOUR:    return armour_t_value(str);    break;
+        case IT_BOOK:      return spell_id_value(str);    break;
+        case IT_CONTAINER: return container_t_value(str); break;
+        case IT_GEM:       return gem_t_value(str);       break;
+        case IT_POTION:    return potion_t_value(str);    break;
+        case IT_RING:      return ring_t_value(str);      break;
+        case IT_SCROLL:    return scroll_t_value(str);    break;
+        case IT_WEAPON:    return weapon_t_value(str);    break;
+        default:           return 0;                      break;
+    }
+}
+
 item *item_deserialize(cJSON *iser, struct game *g)
 {
     guint oid;
@@ -521,8 +563,9 @@ item *item_deserialize(cJSON *iser, struct game *g)
     oid = cJSON_GetObjectItem(iser, "oid")->valueint;
     it->oid = GUINT_TO_POINTER(oid);
 
-    it->type = cJSON_GetObjectItem(iser, "type")->valueint;
-    it->id = cJSON_GetObjectItem(iser, "id")->valueint;
+    it->type = item_t_value(cJSON_GetObjectItem(iser, "type")->valuestring);
+    it->id = item_enum_value_lookup(it->type,
+            cJSON_GetObjectItem(iser, "id")->valuestring);
     it->bonus = cJSON_GetObjectItem(iser, "bonus")->valueint;
     it->count = cJSON_GetObjectItem(iser, "count")->valueint;
 

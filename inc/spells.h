@@ -21,6 +21,7 @@
 
 #include "colours.h"
 #include "effects.h"
+#include "enumFactory.h"
 #include "items.h"
 #include "player.h"
 
@@ -35,45 +36,46 @@ typedef enum spell_type
     SC_MAX
 } spell_t;
 
-typedef enum spell_ids {
-    SP_PRO,         /* protection */
-    SP_MLE,         /* magic missile */
-    SP_DEX,         /* dexterity */
-    SP_SLE,         /* sleep */
-    SP_CHM,         /* charm monster */
-    SP_SSP,         /* sonic spear */
-    SP_STR,         /* strength */
-    SP_CPO,         /* cure poison */
-    SP_HEL,         /* healing */
-    SP_CBL,         /* cure blindness */
-    SP_CRE,         /* create monster */
-    SP_PHA,         /* phantasmal forces */
-    SP_INV,         /* invisibility */
-    SP_BAL,         /* fireball */
-    SP_CLD,         /* cold */
-    SP_PLY,         /* polymorph */
-    SP_CAN,         /* cancellation */
-    SP_HAS,         /* haste self */
-    SP_CKL,         /* cloud kill */
-    SP_VPR,         /* vaporize rock */
-    SP_DRY,         /* dehydration */
-    SP_LIT,         /* lightning */
-    SP_DRL,         /* drain life */
-    SP_GLO,         /* globe of invulnerability */
-    SP_FLO,         /* flood */
-    SP_FGR,         /* finger of death */
-    SP_SCA,         /* scare monster */
-    SP_HLD,         /* hold monster */
-    SP_STP,         /* time stop */
-    SP_TEL,         /* teleport */
-    SP_MFI,         /* magic fire */
-    SP_MKW,         /* make wall */
-    SP_SPH,         /* sphere of annihilation */
-    SP_SUM,         /* summon demon */
-    SP_WTW,         /* walk through walls */
-    SP_ALT,         /* alter reality */
-    SP_MAX          /* last known spell */
-} spell_id;
+#define SPELL_TYPE_ENUM(SPELL_TYPE) \
+    SPELL_TYPE(SP_PRO,) /* protection */ \
+    SPELL_TYPE(SP_MLE,) /* magic missile */ \
+    SPELL_TYPE(SP_DEX,) /* dexterity */ \
+    SPELL_TYPE(SP_SLE,) /* sleep */ \
+    SPELL_TYPE(SP_CHM,) /* charm monster */ \
+    SPELL_TYPE(SP_SSP,) /* sonic spear */ \
+    SPELL_TYPE(SP_STR,) /* strength */ \
+    SPELL_TYPE(SP_CPO,) /* cure poison */ \
+    SPELL_TYPE(SP_HEL,) /* healing */ \
+    SPELL_TYPE(SP_CBL,) /* cure blindness */ \
+    SPELL_TYPE(SP_CRE,) /* create monster */ \
+    SPELL_TYPE(SP_PHA,) /* phantasmal forces */ \
+    SPELL_TYPE(SP_INV,) /* invisibility */ \
+    SPELL_TYPE(SP_BAL,) /* fireball */ \
+    SPELL_TYPE(SP_CLD,) /* cold */ \
+    SPELL_TYPE(SP_PLY,) /* polymorph */ \
+    SPELL_TYPE(SP_CAN,) /* cancellation */ \
+    SPELL_TYPE(SP_HAS,) /* haste self */ \
+    SPELL_TYPE(SP_CKL,) /* cloud kill */ \
+    SPELL_TYPE(SP_VPR,) /* vaporize rock */ \
+    SPELL_TYPE(SP_DRY,) /* dehydration */ \
+    SPELL_TYPE(SP_LIT,) /* lightning */ \
+    SPELL_TYPE(SP_DRL,) /* drain life */ \
+    SPELL_TYPE(SP_GLO,) /* globe of invulnerability */ \
+    SPELL_TYPE(SP_FLO,) /* flood */ \
+    SPELL_TYPE(SP_FGR,) /* finger of death */ \
+    SPELL_TYPE(SP_SCA,) /* scare monster */ \
+    SPELL_TYPE(SP_HLD,) /* hold monster */ \
+    SPELL_TYPE(SP_STP,) /* time stop */ \
+    SPELL_TYPE(SP_TEL,) /* teleport */ \
+    SPELL_TYPE(SP_MFI,) /* magic fire */ \
+    SPELL_TYPE(SP_MKW,) /* make wall */ \
+    SPELL_TYPE(SP_SPH,) /* sphere of annihilation */ \
+    SPELL_TYPE(SP_SUM,) /* summon demon */ \
+    SPELL_TYPE(SP_WTW,) /* walk through walls */ \
+    SPELL_TYPE(SP_ALT,) /* alter reality */ \
+    SPELL_TYPE(SP_MAX,) /* last known spell */
+
+DECLARE_ENUM(spell_id, SPELL_TYPE_ENUM)
 
 /* forward declarations */
 struct spell;

@@ -26,6 +26,8 @@
 #include "potions.h"
 #include "random.h"
 
+DEFINE_ENUM(potion_t, POTION_TYPE_ENUM)
+
 const potion_data potions[PO_MAX] =
 {
     /* id               name                  effect            price store_stock */

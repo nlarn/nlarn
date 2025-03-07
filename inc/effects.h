@@ -1,6 +1,6 @@
 /*
  * effects.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,91 +23,79 @@
 #include <time.h>
 
 #include "cJSON.h"
+#include "enumFactory.h"
 
-typedef enum _effect_t
-{
-    ET_NONE,                    /* no short-term effect */
-    /* POSITIVE EFFECTS */
-    /* base attribute modification */
-    ET_INC_CON,                 /* enhanced constitution */
-    ET_INC_DEX,                 /* enhanced dexterity */
-    ET_INC_INT,                 /* enhanced intelligence */
-    ET_INC_STR,                 /* enhanced strength */
-    ET_INC_WIS,                 /* enhanced wisdom */
-    ET_INC_RND,                 /* increase random ability */
+#define EFFECT_TYPE_ENUM(EFFECT_TYPE) \
+    EFFECT_TYPE(ET_NONE,)              /* no short-term effect */ \
+    /* POSITIVE EFFECTS */ \
+    EFFECT_TYPE(ET_INC_CON,)           /* enhanced constitution */ \
+    EFFECT_TYPE(ET_INC_DEX,)           /* enhanced dexterity */ \
+    EFFECT_TYPE(ET_INC_INT,)           /* enhanced intelligence */ \
+    EFFECT_TYPE(ET_INC_STR,)           /* enhanced strength */ \
+    EFFECT_TYPE(ET_INC_WIS,)           /* enhanced wisdom */ \
+    EFFECT_TYPE(ET_INC_RND,)           /* increase random ability */ \
+    EFFECT_TYPE(ET_INC_DAMAGE,)        /* increased damage */ \
+    EFFECT_TYPE(ET_INC_HP_MAX,)        /* increased HP max */ \
+    EFFECT_TYPE(ET_INC_MP_MAX,)        /* increased MP max */ \
+    EFFECT_TYPE(ET_INC_HP_REGEN,)      /* increased hp regeneration */ \
+    EFFECT_TYPE(ET_INC_MP_REGEN,)      /* increased mp regeneration */ \
+    EFFECT_TYPE(ET_INC_LEVEL,)         /* gain level */ \
+    EFFECT_TYPE(ET_INC_EXP,)           /* gain experience */ \
+    EFFECT_TYPE(ET_RESIST_FIRE,)       /* resist fire */ \
+    EFFECT_TYPE(ET_RESIST_COLD,)       /* resist cold */ \
+    EFFECT_TYPE(ET_RESIST_MAGIC,)      /* resist magic */ \
+    EFFECT_TYPE(ET_PROTECTION,)        /* adds to AC  */ \
+    EFFECT_TYPE(ET_STEALTH,)           /* stealth */ \
+    EFFECT_TYPE(ET_AWARENESS,)         /* expanded awareness */ \
+    EFFECT_TYPE(ET_SPEED,)             /* fast */ \
+    EFFECT_TYPE(ET_HEROISM,)           /* heroism: big bonus on all base attributes */ \
+    EFFECT_TYPE(ET_INVISIBILITY,)      /* invisible */ \
+    EFFECT_TYPE(ET_INVULNERABILITY,)   /* invulnerability */ \
+    EFFECT_TYPE(ET_INFRAVISION,)       /* see invisible monsters */ \
+    EFFECT_TYPE(ET_ENLIGHTENMENT,)     /* enlightenment */ \
+    EFFECT_TYPE(ET_REFLECTION,)        /* reflection */ \
+    EFFECT_TYPE(ET_DETECT_MONSTER,)    /* sense presence of monsters */ \
+    EFFECT_TYPE(ET_HOLD_MONSTER,)      /* monsters can't flee */ \
+    EFFECT_TYPE(ET_SCARED,)            /* monsters turn to flee */ \
+    EFFECT_TYPE(ET_CHARM_MONSTER,)     /* make monsters peaceful */ \
+    EFFECT_TYPE(ET_INC_HP,)            /* heal */ \
+    EFFECT_TYPE(ET_MAX_HP,)            /* full healing */ \
+    EFFECT_TYPE(ET_INC_MP,)            /* restore mana */ \
+    EFFECT_TYPE(ET_MAX_MP,)            /* full mana restore */ \
+    EFFECT_TYPE(ET_CANCELLATION,)      /* cancels spheres */ \
+    EFFECT_TYPE(ET_UNDEAD_PROTECTION,) /* protection against undead */ \
+    EFFECT_TYPE(ET_SPIRIT_PROTECTION,) /* protection against spirits */ \
+    EFFECT_TYPE(ET_LIFE_PROTECTION,)   /* you only live twice */ \
+    EFFECT_TYPE(ET_NOTHEFT,)           /* protection from thievish monsters */ \
+    EFFECT_TYPE(ET_SUSTAINMENT,)       /* protection from stat drain attacks */ \
+    EFFECT_TYPE(ET_TIMESTOP,)          /* game time modification */ \
+    EFFECT_TYPE(ET_WALL_WALK,)         /* ability to walk through walls */ \
+    EFFECT_TYPE(ET_LEVITATION,)        /* affected person floats in the air */ \
+    /* NEGATIVE EFFECTS */ \
+    EFFECT_TYPE(ET_DEC_CON,)           /* reduced constitution */ \
+    EFFECT_TYPE(ET_DEC_DEX,)           /* reduced dexterity */ \
+    EFFECT_TYPE(ET_DEC_INT,)           /* reduced intelligence */ \
+    EFFECT_TYPE(ET_DEC_STR,)           /* reduced strength */ \
+    EFFECT_TYPE(ET_DEC_WIS,)           /* reduced wisdom */ \
+    EFFECT_TYPE(ET_DEC_RND,)           /* reduce random attribute */ \
+    EFFECT_TYPE(ET_AGGRAVATE_MONSTER,) /* aggravate monsters */ \
+    EFFECT_TYPE(ET_SLEEP,)             /* no move for a certain amount of time */ \
+    EFFECT_TYPE(ET_DIZZINESS,)         /* decrease all primary attributes */ \
+    EFFECT_TYPE(ET_SICKNESS,)          /* decreased damage */ \
+    EFFECT_TYPE(ET_BLINDNESS,)         /* remove the ability to see */ \
+    EFFECT_TYPE(ET_CLUMSINESS,)        /* unable to wield weapon */ \
+    EFFECT_TYPE(ET_ITCHING,)           /* unable to wear armour */ \
+    EFFECT_TYPE(ET_CONFUSION,)         /* random movement */ \
+    EFFECT_TYPE(ET_PARALYSIS,)         /* loss of ability to move */ \
+    EFFECT_TYPE(ET_POISON,)            /* cause by potion or trap */ \
+    EFFECT_TYPE(ET_AMNESIA,)           /* potion of forgetfulness */ \
+    EFFECT_TYPE(ET_SLOWNESS,)          /* reduced speed */ \
+    EFFECT_TYPE(ET_BURDENED,)          /* overloaded */ \
+    EFFECT_TYPE(ET_OVERSTRAINED,)      /* extremely overloaded */ \
+    EFFECT_TYPE(ET_TRAPPED,)           /* trapped in a pit */ \
+    EFFECT_TYPE(ET_MAX,)               /* last effect known */ \
 
-    /* secondary attributes modification */
-    ET_INC_DAMAGE,              /* increased damage */
-    ET_INC_HP_MAX,              /* increased HP max */
-    ET_INC_MP_MAX,              /* increased MP max */
-    ET_INC_HP_REGEN,            /* increased hp regeneration */
-    ET_INC_MP_REGEN,            /* increased mp regeneration */
-    ET_INC_LEVEL,               /* gain level */
-    ET_INC_EXP,                 /* gain experience */
-    ET_RESIST_FIRE,             /* resist fire */
-    ET_RESIST_COLD,             /* resist cold */
-    ET_RESIST_MAGIC,            /* resist magic */
-    ET_PROTECTION,              /* adds to AC  */
-
-    /* ability improvements */
-    ET_STEALTH,                 /* stealth */
-    ET_AWARENESS,               /* expanded awareness */
-    ET_SPEED,                   /* fast */
-    ET_HEROISM,                 /* heroism: big bonus on all base attributes */
-    ET_INVISIBILITY,            /* invisible */
-    ET_INVULNERABILITY,         /* invulnerability */
-    ET_INFRAVISION,             /* see invisible monsters */
-    ET_ENLIGHTENMENT,           /* enlightenment */
-    ET_REFLECTION,              /* reflection */
-
-    ET_DETECT_MONSTER,          /* sense presence of monsters */
-    ET_HOLD_MONSTER,            /* monsters can't flee */
-    ET_SCARED,                  /* monsters turn to flee */
-    ET_CHARM_MONSTER,           /* make monsters peaceful */
-
-    /* healing */
-    ET_INC_HP,                  /* heal */
-    ET_MAX_HP,                  /* full healing */
-    ET_INC_MP,                  /* restore mana */
-    ET_MAX_MP,                  /* full mana restore */
-
-    ET_CANCELLATION,            /* cancels spheres */
-    ET_UNDEAD_PROTECTION,       /* protection against undead */
-    ET_SPIRIT_PROTECTION,       /* protection against spirits */
-    ET_LIFE_PROTECTION,         /* you only live twice */
-    ET_NOTHEFT,                 /* protection from thievish monsters */
-    ET_SUSTAINMENT,             /* protection from stat drain attacks */
-    ET_TIMESTOP,                /* game time modification */
-    ET_WALL_WALK,               /* ability to walk through walls */
-    ET_LEVITATION,              /* affected person floats in the air */
-
-    /* NEGATIVE EFFECTS */
-    /* base attribute modification */
-    ET_DEC_CON,                 /* reduced constitution */
-    ET_DEC_DEX,                 /* reduced dexterity */
-    ET_DEC_INT,                 /* reduced intelligence */
-    ET_DEC_STR,                 /* reduced strength */
-    ET_DEC_WIS,                 /* reduced wisdom */
-    ET_DEC_RND,                 /* reduce random attribute */
-
-    ET_AGGRAVATE_MONSTER,       /* aggravate monsters */
-    ET_SLEEP,                   /* no move for a certain amount of time */
-    ET_DIZZINESS,               /* decrease all primary attributes */
-    ET_SICKNESS,                /* decreased damage */
-    ET_BLINDNESS,               /* remove the ability to see */
-    ET_CLUMSINESS,              /* unable to wield weapon */
-    ET_ITCHING,                 /* unable to wear armour */
-    ET_CONFUSION,               /* random movement */
-    ET_PARALYSIS,               /* loss of ability to move */
-    ET_POISON,                  /* cause by potion or trap */
-    ET_AMNESIA,                 /* potion of forgetfulness */
-    ET_SLOWNESS,                /* reduced speed */
-    ET_BURDENED,                /* overloaded */
-    ET_OVERSTRAINED,            /* extremely overloaded */
-    ET_TRAPPED,                 /* trapped in a pit */
-
-    ET_MAX                      /* last effect known */
-} effect_t;
+DECLARE_ENUM(effect_t, EFFECT_TYPE_ENUM)
 
 typedef struct effect_data
 {

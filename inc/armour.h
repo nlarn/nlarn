@@ -1,6 +1,6 @@
 /*
  * armour.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,6 +20,7 @@
 #define __ARMOUR_H_
 
 #include "effects.h"
+#include "enumFactory.h"
 #include "items.h"
 #include "utils.h"
 
@@ -34,30 +35,31 @@ typedef enum _armour_class
     AC_MAX
 } armour_class;
 
-typedef enum _armour_t
-{
-    AT_CLOAK,
-    AT_LGLOVES,
-    AT_LBOOTS,
-    AT_LHELMET,
-    AT_LEATHER,
-    AT_WSHIELD,
-    AT_SLEATHER,
-    AT_RINGMAIL,
-    AT_LSHIELD,
-    AT_CHAINHOOD,
-    AT_CHAINMAIL,
-    AT_SPLINTMAIL,
-    AT_PHELMET,
-    AT_PBOOTS,
-    AT_SPEEDBOOTS,
-    AT_PLATEMAIL,
-    AT_SSHIELD,
-    AT_SPLATEMAIL,
-    AT_INVISCLOAK,
-    AT_ELVENCHAIN,
-    AT_MAX
-} armour_t;
+
+#define ARMOUR_TYPE_ENUM(ARMOUR_TYPE) \
+    ARMOUR_TYPE(AT_CLOAK,) \
+    ARMOUR_TYPE(AT_LGLOVES,) \
+    ARMOUR_TYPE(AT_LBOOTS,) \
+    ARMOUR_TYPE(AT_LHELMET,) \
+    ARMOUR_TYPE(AT_LEATHER,) \
+    ARMOUR_TYPE(AT_WSHIELD,) \
+    ARMOUR_TYPE(AT_SLEATHER,) \
+    ARMOUR_TYPE(AT_RINGMAIL,) \
+    ARMOUR_TYPE(AT_LSHIELD,) \
+    ARMOUR_TYPE(AT_CHAINHOOD,) \
+    ARMOUR_TYPE(AT_CHAINMAIL,) \
+    ARMOUR_TYPE(AT_SPLINTMAIL,) \
+    ARMOUR_TYPE(AT_PHELMET,) \
+    ARMOUR_TYPE(AT_PBOOTS,) \
+    ARMOUR_TYPE(AT_SPEEDBOOTS,) \
+    ARMOUR_TYPE(AT_PLATEMAIL,) \
+    ARMOUR_TYPE(AT_SSHIELD,) \
+    ARMOUR_TYPE(AT_SPLATEMAIL,) \
+    ARMOUR_TYPE(AT_INVISCLOAK,) \
+    ARMOUR_TYPE(AT_ELVENCHAIN,) \
+    ARMOUR_TYPE(AT_MAX,)
+
+DECLARE_ENUM(armour_t, ARMOUR_TYPE_ENUM)
 
 typedef struct _armour_data
 {

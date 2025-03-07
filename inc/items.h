@@ -23,23 +23,25 @@
 
 #include "colours.h"
 #include "effects.h"
+#include "enumFactory.h"
 
-typedef enum item_types {
-    IT_NONE,
-    IT_AMULET,          /* amulet, defined in amulets.h */
-    IT_AMMO,            /* ammunition, defined in weapons.h */
-    IT_ARMOUR,          /* armour, defined in armour.h */
-    IT_BOOK,            /* book, defined in spells.h */
-    IT_CONTAINER,       /* container, defined in container.h */
-    IT_GEM,             /* gem, defined in gems.h */
-    IT_GOLD,            /* just gold. defined nowhere as type and count are sufficient. */
-    IT_POTION,          /* potion, defined in potions.h */
-    IT_RING,            /* ring, defined in rings.h */
-    IT_SCROLL,          /* magic_scroll, defined in scrolls.h */
-    IT_WEAPON,          /* weapon, defined in weapons.h */
-    IT_MAX,             /* ~ item type count */
-    IT_ALL             /* for special uses: all item types */
-} item_t;
+#define ITEM_TYPE_ENUM(ITEM_TYPE) \
+    ITEM_TYPE(IT_NONE,) \
+    ITEM_TYPE(IT_AMULET,)    /* amulet, defined in amulets.h */ \
+    ITEM_TYPE(IT_AMMO,)      /* ammunition, defined in weapons.h */ \
+    ITEM_TYPE(IT_ARMOUR,)    /* armour, defined in armour.h */ \
+    ITEM_TYPE(IT_BOOK,)      /* book, defined in spells.h */ \
+    ITEM_TYPE(IT_CONTAINER,) /* container, defined in container.h */ \
+    ITEM_TYPE(IT_GEM,)       /* gem, defined in gems.h */ \
+    ITEM_TYPE(IT_GOLD,)      /* just gold. defined nowhere as type and count are sufficient. */ \
+    ITEM_TYPE(IT_POTION,)    /* potion, defined in potions.h */ \
+    ITEM_TYPE(IT_RING,)      /* ring, defined in rings.h */ \
+    ITEM_TYPE(IT_SCROLL,)    /* magic_scroll, defined in scrolls.h */ \
+    ITEM_TYPE(IT_WEAPON,)    /* weapon, defined in weapons.h */ \
+    ITEM_TYPE(IT_MAX,)       /* ~ item type count */ \
+    ITEM_TYPE(IT_ALL,)       /* for special uses: all item types */
+
+DECLARE_ENUM(item_t, ITEM_TYPE_ENUM)
 
 /* inspired by Nethack's objclass.h */
 typedef enum item_material_t {

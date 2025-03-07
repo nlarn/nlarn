@@ -16,6 +16,8 @@
 * Healing spell and healing potion no longer cure sickness
 * Show attended courses in school
 * Stay at home until explicitly leaving (with ESC)
+* More robust save file format. Future additions of items will not break
+  existing savegames anymore
 * Switch Windows build to WIN64
 
 ### Fixed bugs:

@@ -26,6 +26,8 @@
 #include "random.h"
 #include "traps.h"
 
+DEFINE_ENUM(trap_t, TRAP_TYPE_ENUM)
+
 const trap_data traps[TT_MAX] =
 {
     /*

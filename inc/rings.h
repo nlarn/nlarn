@@ -20,20 +20,21 @@
 #define __RINGS_H_
 
 #include "effects.h"
+#include "enumFactory.h"
 #include "items.h"
 
-typedef enum ring_types
-{
-    RT_REGENERATION,
-    RT_PROTECTION,
-    RT_ENERGY,
-    RT_DEXTERITY,
-    RT_STRENGTH,
-    RT_CLEVERNESS,
-    RT_INC_DAMAGE,
-    RT_EXTRA_REGEN,
-    RT_MAX
-} ring_t;
+#define RING_TYPE_ENUM(RING_TYPE) \
+    RING_TYPE(RT_REGENERATION,) \
+    RING_TYPE(RT_PROTECTION,) \
+    RING_TYPE(RT_ENERGY,) \
+    RING_TYPE(RT_DEXTERITY,) \
+    RING_TYPE(RT_STRENGTH,) \
+    RING_TYPE(RT_CLEVERNESS,) \
+    RING_TYPE(RT_INC_DAMAGE,) \
+    RING_TYPE(RT_EXTRA_REGEN,) \
+    RING_TYPE(RT_MAX,)
+
+DECLARE_ENUM(ring_t, RING_TYPE_ENUM)
 
 typedef struct ring_data
 {

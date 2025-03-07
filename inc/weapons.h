@@ -19,6 +19,7 @@
 #ifndef __WEAPONS_H_
 #define __WEAPONS_H_
 
+#include "enumFactory.h"
 #include "items.h"
 
 typedef enum _ammo_class
@@ -29,14 +30,14 @@ typedef enum _ammo_class
     AMMO_MAX
 } ammo_class;
 
-typedef enum _ammo_t
-{
-    AMT_STONE,
-    AMT_SBULLET,
-    AMT_ARROW,
-    AMT_BOLT,
-    AMT_MAX
-} ammo_t;
+#define AMMO_TYPE_ENUM(AMMO_TYPE) \
+    AMMO_TYPE(AMT_STONE,) \
+    AMMO_TYPE(AMT_SBULLET,) \
+    AMMO_TYPE(AMT_ARROW,) \
+    AMMO_TYPE(AMT_BOLT,) \
+    AMMO_TYPE(AMT_MAX,)
+
+DECLARE_ENUM(ammo_t, AMMO_TYPE_ENUM)
 
 typedef struct _ammo_data
 {
@@ -59,34 +60,34 @@ typedef enum _weapon_class
     WC_MAX
 } weapon_class;
 
-typedef enum _weapon_t
-{
-    WT_ODAGGER,
-    WT_DAGGER,
-    WT_SLING,
-    WT_OSHORTSWORD,
-    WT_SHORTSWORD,
-    WT_ESHORTSWORD,
-    WT_OSPEAR,
-    WT_SPEAR,
-    WT_ESPEAR,
-    WT_BOW,
-    WT_CLUB,
-    WT_MACE,
-    WT_FLAIL,
-    WT_BATTLEAXE,
-    WT_CROSSBOW,
-    WT_LONGSWORD,
-    WT_ELONGSWORD,
-    WT_2SWORD,
-    WT_SWORDSLASHING,
-    WT_LANCEOFDEATH,
-    WT_VORPALBLADE,
-    WT_SLAYER,
-    WT_SUNSWORD,
-    WT_BESSMAN,
-    WT_MAX
-} weapon_t;
+#define WEAPON_TYPE_ENUM(WEAPON_TYPE) \
+    WEAPON_TYPE(WT_ODAGGER,) \
+    WEAPON_TYPE(WT_DAGGER,) \
+    WEAPON_TYPE(WT_SLING,) \
+    WEAPON_TYPE(WT_OSHORTSWORD,) \
+    WEAPON_TYPE(WT_SHORTSWORD,) \
+    WEAPON_TYPE(WT_ESHORTSWORD,) \
+    WEAPON_TYPE(WT_OSPEAR,) \
+    WEAPON_TYPE(WT_SPEAR,) \
+    WEAPON_TYPE(WT_ESPEAR,) \
+    WEAPON_TYPE(WT_BOW,) \
+    WEAPON_TYPE(WT_CLUB,) \
+    WEAPON_TYPE(WT_MACE,) \
+    WEAPON_TYPE(WT_FLAIL,) \
+    WEAPON_TYPE(WT_BATTLEAXE,) \
+    WEAPON_TYPE(WT_CROSSBOW,) \
+    WEAPON_TYPE(WT_LONGSWORD,) \
+    WEAPON_TYPE(WT_ELONGSWORD,) \
+    WEAPON_TYPE(WT_2SWORD,) \
+    WEAPON_TYPE(WT_SWORDSLASHING,) \
+    WEAPON_TYPE(WT_LANCEOFDEATH,) \
+    WEAPON_TYPE(WT_VORPALBLADE,) \
+    WEAPON_TYPE(WT_SLAYER,) \
+    WEAPON_TYPE(WT_SUNSWORD,) \
+    WEAPON_TYPE(WT_BESSMAN,) \
+    WEAPON_TYPE(WT_MAX,)
+
+DECLARE_ENUM(weapon_t, WEAPON_TYPE_ENUM)
 
 typedef struct _weapon_data
 {

@@ -43,6 +43,8 @@ static gboolean spell_scare_monsters(spell *s, struct player *p);
 static gboolean spell_summon_demon(spell *s, struct player *p);
 static gboolean spell_make_wall(spell *s, struct player *p);
 
+DEFINE_ENUM(spell_id, SPELL_TYPE_ENUM)
+
 const spell_data spells[SP_MAX] =
 {
     {
@@ -405,7 +407,7 @@ cJSON *spell_serialize(spell *s)
 {
     cJSON *sser = cJSON_CreateObject();
 
-    cJSON_AddNumberToObject(sser, "id", s->id);
+    cJSON_AddStringToObject(sser, "id", spell_id_string(s->id));
     cJSON_AddNumberToObject(sser, "knowledge", s->knowledge);
     cJSON_AddNumberToObject(sser, "used", s->used);
 
@@ -416,7 +418,7 @@ spell *spell_deserialize(cJSON *sser)
 {
     spell *s = g_malloc0(sizeof(spell));
 
-    s->id = cJSON_GetObjectItem(sser, "id")->valueint;
+    s->id = spell_id_value(cJSON_GetObjectItem(sser, "id")->valuestring);
     s->knowledge = cJSON_GetObjectItem(sser, "knowledge")->valueint;
     s->used = cJSON_GetObjectItem(sser, "used")->valueint;
 

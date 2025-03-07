@@ -20,21 +20,22 @@
 #define __TRAPS_H_
 
 #include "colours.h"
+#include "enumFactory.h"
 #include "monsters.h"
 
-typedef enum trap_types
-{
-    TT_NONE,
-    TT_ARROW,
-    TT_DART,
-    TT_TELEPORT,
-    TT_PIT,
-    TT_SPIKEDPIT,
-    TT_SLEEPGAS,
-    TT_MANADRAIN,
-    TT_TRAPDOOR,
-    TT_MAX
-} trap_t;
+#define TRAP_TYPE_ENUM(TRAP_TYPE) \
+    TRAP_TYPE(TT_NONE,) \
+    TRAP_TYPE(TT_ARROW,) \
+    TRAP_TYPE(TT_DART,) \
+    TRAP_TYPE(TT_TELEPORT,) \
+    TRAP_TYPE(TT_PIT,) \
+    TRAP_TYPE(TT_SPIKEDPIT,) \
+    TRAP_TYPE(TT_SLEEPGAS,) \
+    TRAP_TYPE(TT_MANADRAIN,) \
+    TRAP_TYPE(TT_TRAPDOOR,) \
+    TRAP_TYPE(TT_MAX,) \
+
+DECLARE_ENUM(trap_t, TRAP_TYPE_ENUM)
 
 typedef struct trap_data
 {

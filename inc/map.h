@@ -21,6 +21,7 @@
 
 #include "cJSON.h"
 #include "colours.h"
+#include "enumFactory.h"
 #include "items.h"
 #include "monsters.h"
 #include "position.h"
@@ -42,22 +43,22 @@
 #define MAP_MAX_MAZE_NUM 24
 #define MAP_MAZE_NUM     (MAP_MAX_MAZE_NUM + 1)
 
-typedef enum map_tile_type
-{
-    LT_NONE,
-    LT_MOUNTAIN,
-    LT_GRASS,
-    LT_DIRT,
-    LT_TREE,
-    LT_FLOOR,
-    LT_WATER,
-    LT_DEEPWATER,
-    LT_LAVA,
-    LT_FIRE,
-    LT_CLOUD, /* gas cloud */
-    LT_WALL,
-    LT_MAX    /* ~ map tile type count */
-} map_tile_t;
+#define MAP_TILE_TYPE_ENUM(MAP_TILE_TYPE) \
+    MAP_TILE_TYPE(LT_NONE,) \
+    MAP_TILE_TYPE(LT_MOUNTAIN,) \
+    MAP_TILE_TYPE(LT_GRASS,) \
+    MAP_TILE_TYPE(LT_DIRT,) \
+    MAP_TILE_TYPE(LT_TREE,) \
+    MAP_TILE_TYPE(LT_FLOOR,) \
+    MAP_TILE_TYPE(LT_WATER,) \
+    MAP_TILE_TYPE(LT_DEEPWATER,) \
+    MAP_TILE_TYPE(LT_LAVA,) \
+    MAP_TILE_TYPE(LT_FIRE,) \
+    MAP_TILE_TYPE(LT_CLOUD,) /* gas cloud */ \
+    MAP_TILE_TYPE(LT_WALL,) \
+    MAP_TILE_TYPE(LT_MAX,)   /* ~ map tile type count */ \
+
+DECLARE_ENUM(map_tile_t, MAP_TILE_TYPE_ENUM)
 
 typedef enum map_element_type
 {

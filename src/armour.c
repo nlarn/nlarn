@@ -1,6 +1,6 @@
 /*
  * armour.c
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,8 @@
 
 #include "armour.h"
 #include "items.h"
+
+DEFINE_ENUM(armour_t, ARMOUR_TYPE_ENUM)
 
 const armour_data armours[AT_MAX] =
 {

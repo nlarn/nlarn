@@ -22,6 +22,8 @@
 #include "gems.h"
 #include "items.h"
 
+DEFINE_ENUM(gem_t, GEM_TYPE_ENUM)
+
 typedef struct gem_data
 {
     gem_t id;
