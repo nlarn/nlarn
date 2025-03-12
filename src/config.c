@@ -310,9 +310,6 @@ void configure_defaults(const char *inifile)
         "\n"
         "Clear values with `GREEN`A`end`-`GREEN`D`end`\n";
 
-    struct game_config config = {};
-    parse_ini_file(inifile, &config);
-
     gboolean leaving = FALSE;
 
     while (!leaving)
@@ -482,11 +479,8 @@ void configure_defaults(const char *inifile)
         display_window_destroy(cwin);
     }
 
-    /* write back modified config */
+    /* write modified config */
     write_ini_file(inifile, &config);
-
-    /* clean up */
-    free_config(config);
 }
 
 void config_increase_difficulty(const char *inifile, const int new_difficulty)

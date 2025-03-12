@@ -30,6 +30,9 @@
 /* internal counter for save file compatibility */
 #define SAVEFILE_VERSION    28
 
+/* forward declarations */
+struct game_config;
+
 /* the world as we know it */
 typedef struct game
 {
@@ -90,14 +93,8 @@ typedef struct game
         player_stats_set: 1, /* the player's stats have been assigned */
         cure_dianthr_created: 1, /* the potion of cure dianthroritis is a unique item */
         wizard: 1, /* wizard mode */
-        fullvis: 1, /* show entire map in wizard mode */
-        autosave: 1; /* save the game when entering a new map */
+        fullvis: 1; /* show entire map in wizard mode */
 } game;
-
-
-/* forward declarations */
-
-struct game_config;
 
 
 /* function declarations */
@@ -148,7 +145,6 @@ void game_delete_savefile();
 #define game_difficulty(g) ((g)->difficulty)
 #define game_wizardmode(g) ((g)->wizard)
 #define game_fullvis(g)    ((g)->fullvis)
-#define game_autosave(g)   ((g)->autosave)
 
 #define game_turn(g)            ((g)->gtime)
 #define game_remaining_turns(g) (((g)->gtime > TIMELIMIT) ? 0 : TIMELIMIT - (g)->gtime)

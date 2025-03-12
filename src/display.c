@@ -28,6 +28,7 @@
 #endif
 
 #include "colours.h"
+#include "config.h"
 #include "display.h"
 #include "fov.h"
 #include "map.h"

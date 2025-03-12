@@ -75,7 +75,7 @@ static const char *save_file = "nlarn.sav";
 game *nlarn = NULL;
 
 /* the game settings */
-static struct game_config config = {};
+struct game_config config = {};
 
 /* death jump buffer - used to return to the main loop when the player has died */
 jmp_buf nlarn_death_jump;
@@ -1154,7 +1154,7 @@ int main(int argc, char *argv[])
         }
 
         /* automatic save point (not when restoring a save) */
-        if ((game_turn(nlarn) == 1) && game_autosave(nlarn))
+        if ((game_turn(nlarn) == 1) && !config.no_autosave)
         {
             game_save(nlarn);
         }
@@ -1163,6 +1163,8 @@ int main(int argc, char *argv[])
         mainloop();
     }
 
+    /* persist configuration before freeing it */
+    write_ini_file(nlarn_inifile, &config);
     free_config(config);
 
     return EXIT_SUCCESS;

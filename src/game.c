@@ -120,9 +120,6 @@ void game_init(struct game_config *config)
     /* allocate space for game structure */
     nlarn = g_malloc0(sizeof(game));
 
-    /* set autosave setting (default: TRUE) */
-    game_autosave(nlarn) = !config->no_autosave;
-
     if (!game_load())
     {
         /* set game parameters */
