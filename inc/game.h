@@ -35,7 +35,6 @@ typedef struct game
 {
     player *p;                  /* the player */
     map *maps[MAP_MAX];         /* the dungeon */
-    guint8 version;             /* save compatibility value */
     guint64 time_start;         /* start time */
     guint32 gtime;              /* turn count */
     guint8 difficulty;          /* game difficulty */

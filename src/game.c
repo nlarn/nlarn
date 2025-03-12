@@ -1,6 +1,6 @@
 /*
  * game.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -222,7 +222,7 @@ int game_save(game *g)
 
     save = cJSON_CreateObject();
 
-    cJSON_AddNumberToObject(save, "nlarn_version", g->version);
+    cJSON_AddNumberToObject(save, "nlarn_version", SAVEFILE_VERSION);
     cJSON_AddNumberToObject(save, "time_start", g->time_start);
     cJSON_AddNumberToObject(save, "gtime", g->gtime);
     cJSON_AddNumberToObject(save, "difficulty", g->difficulty);
@@ -566,7 +566,6 @@ static void game_new()
     /* game time handling */
     nlarn->gtime = 1;
     nlarn->time_start = time(NULL);
-    nlarn->version = SAVEFILE_VERSION;
 
     /* start a new diary */
     nlarn->log = log_new();
@@ -634,9 +633,9 @@ static gboolean game_load()
     gboolean compatible_version = FALSE;
     if (cJSON_GetObjectItem(save, "nlarn_version"))
     {
-        nlarn->version = cJSON_GetObjectItem(save, "nlarn_version")->valueint;
+        int sfv = cJSON_GetObjectItem(save, "nlarn_version")->valueint;
 
-        if (nlarn->version == SAVEFILE_VERSION)
+        if (sfv == SAVEFILE_VERSION)
             compatible_version = TRUE;
     }
 
