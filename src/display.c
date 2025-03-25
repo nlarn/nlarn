@@ -80,6 +80,15 @@ void display_init()
     g_setenv("PDC_ICON", icon_name, 1);
     g_free(icon_name);
 
+    /* If a font size was defined, export it to the environment
+     * before initialising PDCurses. */
+    if (config.font_size)
+    {
+        gchar size[4];
+        g_snprintf(size, 3, "%d", config.font_size);
+        g_setenv("PDC_FONT_SIZE", size, TRUE);
+    }
+
     /* Set the font - allow overriding this default */
     gchar *font_name = g_strdup_printf("%s/FiraMono-Medium.otf", nlarn_libdir);
     g_setenv("PDC_FONT", font_name, 0);

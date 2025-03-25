@@ -272,16 +272,6 @@ static void nlarn_init(int argc, char *argv[])
     /* try to load settings from the configuration file */
     parse_ini_file(nlarn_inifile, &config);
 
-#ifdef SDLPDCURSES
-    /* If a font size was defined, export it to the environment
-     * before initialising PDCurses. */
-    if (config.font_size)
-    {
-        gchar size[4];
-        g_snprintf(size, 3, "%d", config.font_size);
-        g_setenv("PDC_FONT_SIZE", size, TRUE);
-    }
-#endif
     /* initialise the display - must not happen before this point
        otherwise displaying the command line help fails */
     display_init();
