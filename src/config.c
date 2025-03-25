@@ -340,7 +340,7 @@ void configure_defaults(const char *inifile)
                 nbuf ? nbuf : undef,
                 gbuf ? gbuf : undef,
                 sbuf ? sbuf : undef,
-                abuf ? abuf: undef,
+                abuf ? abuf : undef,
                 config.no_autosave ? "no" : "yes"
 #ifdef SDLPDCURSES
                 , config.font_size
