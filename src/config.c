@@ -127,7 +127,7 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
         /* ini file has been found, get values */
         /* clear error after each attempt as values need not to be defined */
         int difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
-        if (!config->difficulty && !error) config->difficulty = difficulty;
+        if (!error) config->difficulty = difficulty;
         g_clear_error(&error);
 
         gboolean no_autosave = g_key_file_get_boolean(ini_file, "nlarn", "no-autosave", &error);
