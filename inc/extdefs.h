@@ -1,6 +1,6 @@
 /*
- * nlarn.h
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * extdefs.h
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -29,6 +29,9 @@ extern const char *nlarn_version;
 
 /* the entire game */
 extern game *nlarn;
+
+/* game settings */
+extern struct game_config config;
 
 /* death jump buffer - used to return to the main loop when the player has died */
 extern jmp_buf nlarn_death_jump;

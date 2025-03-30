@@ -75,7 +75,7 @@ static const char *save_file = "nlarn.sav";
 game *nlarn = NULL;
 
 /* the game settings */
-static struct game_config config = {};
+struct game_config config = {};
 
 /* death jump buffer - used to return to the main loop when the player has died */
 jmp_buf nlarn_death_jump;
@@ -272,16 +272,6 @@ static void nlarn_init(int argc, char *argv[])
     /* try to load settings from the configuration file */
     parse_ini_file(nlarn_inifile, &config);
 
-#ifdef SDLPDCURSES
-    /* If a font size was defined, export it to the environment
-     * before initialising PDCurses. */
-    if (config.font_size)
-    {
-        gchar size[4];
-        g_snprintf(size, 3, "%d", config.font_size);
-        g_setenv("PDC_FONT_SIZE", size, TRUE);
-    }
-#endif
     /* initialise the display - must not happen before this point
        otherwise displaying the command line help fails */
     display_init();
@@ -840,6 +830,14 @@ static void mainloop()
             display_draw();
             break;
 
+#ifdef SDLPDCURSES
+        case 13: /* ENTER */
+            if (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_ALT)
+                display_toggle_fullscreen(TRUE);
+
+            break;
+#endif
+
             /* configure defaults */
         case 16: /* ^P */
             configure_defaults(nlarn_inifile);
@@ -1147,7 +1145,7 @@ int main(int argc, char *argv[])
         }
 
         /* automatic save point (not when restoring a save) */
-        if ((game_turn(nlarn) == 1) && game_autosave(nlarn))
+        if ((game_turn(nlarn) == 1) && !config.no_autosave)
         {
             game_save(nlarn);
         }
@@ -1156,6 +1154,8 @@ int main(int argc, char *argv[])
         mainloop();
     }
 
+    /* persist configuration before freeing it */
+    write_ini_file(nlarn_inifile, &config);
     free_config(config);
 
     return EXIT_SUCCESS;

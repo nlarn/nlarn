@@ -21,7 +21,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef SDLPDCURSES
+# define PDC_WIDE
+# include "sdl2/pdcsdl.h"
+# undef min
+# undef max
+
+static gchar *font_name;
+#endif
+
 #include "colours.h"
+#include "config.h"
 #include "display.h"
 #include "fov.h"
 #include "map.h"
@@ -73,10 +83,18 @@ void display_init()
     g_setenv("PDC_ICON", icon_name, 1);
     g_free(icon_name);
 
+    /* If a font size was defined, export it to the environment
+     * before initialising PDCurses. */
+    if (config.font_size)
+    {
+        gchar size[4];
+        g_snprintf(size, 3, "%d", config.font_size);
+        g_setenv("PDC_FONT_SIZE", size, TRUE);
+    }
+
     /* Set the font - allow overriding this default */
-    gchar *font_name = g_strdup_printf("%s/FiraMono-Medium.otf", nlarn_libdir);
+    font_name = g_strdup_printf("%s/FiraMono-Medium.otf", nlarn_libdir);
     g_setenv("PDC_FONT", font_name, 0);
-    g_free(font_name);
 #endif
 
     /* Start curses mode */
@@ -90,6 +108,8 @@ void display_init()
 
     PDC_set_title(window_title);
     g_free(window_title);
+
+    display_toggle_fullscreen(FALSE);
 
     /* return modifier keys pressed with key */
     PDC_return_key_modifiers(TRUE);
@@ -619,6 +639,10 @@ void display_paint_screen(player *p)
 
 void display_shutdown()
 {
+#ifdef SDLPDCURSES
+    g_free(font_name);
+#endif
+
     /* only terminate curses mode when the display has been initialised */
     if (display_initialised)
     {
@@ -2867,6 +2891,44 @@ int display_getch(WINDOW *win) {
     return ch;
 }
 
+#ifdef SDLPDCURSES
+void display_toggle_fullscreen(gboolean toggle)
+{
+    if (toggle)
+        config.fullscreen = !config.fullscreen;
+
+    int fullscreen = config.fullscreen
+        ? SDL_WINDOW_FULLSCREEN_DESKTOP
+        : FALSE;
+
+    SDL_SetWindowFullscreen(pdc_window, fullscreen);
+
+    /* adapt and resize PDCurses internal structures */
+    pdc_screen = SDL_GetWindowSurface(pdc_window);
+    pdc_sheight = pdc_screen->h - pdc_xoffset;
+    pdc_swidth = pdc_screen->w - pdc_yoffset;
+    resize_term(PDC_get_rows(), PDC_get_columns());
+}
+
+void display_change_font()
+{
+    /* clearing ensures there are no fragments left after redraw */
+    clear();
+    pdc_font_size = config.font_size;
+
+    TTF_CloseFont(pdc_ttffont);
+    pdc_ttffont = TTF_OpenFont(font_name, pdc_font_size);
+
+    /* adapt PDCurses internal variables */
+    TTF_SizeText(pdc_ttffont, "W", &pdc_fwidth, &pdc_fheight);
+    pdc_fthick = pdc_font_size / 20 + 1;
+    resize_term(PDC_get_rows(), PDC_get_columns());
+
+    /* redraw the screen as all dimensions have changed */
+    display_paint_screen(nlarn->p);
+}
+#endif
+
 static int mvwcprintw(WINDOW *win, int defattr, int currattr,
         const colour bg, int y, int x, const char *fmt, ...)
 {
@@ -3089,6 +3151,14 @@ static int display_window_move(display_window *dwin, int key)
         clear();
         display_draw();
         break;
+
+#ifdef SDLPDCURSES
+    case 13: /* ENTER */
+        if (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_ALT)
+            display_toggle_fullscreen(true);
+
+        break;
+#endif
 
     default:
         need_refresh = FALSE;

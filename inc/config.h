@@ -1,6 +1,6 @@
 /*
  * config.h
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -30,6 +30,7 @@ struct game_config {
     char *stats;
 #ifdef SDLPDCURSES
     int font_size;
+    gboolean fullscreen;
 #endif
     char *userdir;
     gboolean show_scores;

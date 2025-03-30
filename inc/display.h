@@ -177,5 +177,12 @@ void display_windows_show();
  */
 int display_getch(WINDOW *win);
 
+#ifdef SDLPDCURSES
+/* toggle SDL fullscreen mode */
+void display_toggle_fullscreen(gboolean toggle);
+
+/* replace font at runtime */
+void display_change_font();
+#endif
 
 #endif
