@@ -465,6 +465,7 @@ void configure_defaults(const char *inifile)
                         if (val >= 6 && val <= 48)
                         {
                             config.font_size = val;
+                            display_change_font();
                         }
                         else
                         {

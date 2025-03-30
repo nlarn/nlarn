@@ -18,7 +18,8 @@
 * Stay at home until explicitly leaving (with ESC)
 * More robust save file format. Future additions of items will not break
   existing savegames anymore
-* Toggle full screen with ALT-Enter on macOS and Windows
+* Toggle full screen mode with ALT-Enter (macOS and Windows)
+* Change font size while the game is running (macOS and Windows)
 * Switch Windows build to WIN64
 
 ### Fixed bugs:

@@ -22,9 +22,12 @@
 #include <string.h>
 
 #ifdef SDLPDCURSES
+# define PDC_WIDE
 # include "sdl2/pdcsdl.h"
 # undef min
 # undef max
+
+static gchar *font_name;
 #endif
 
 #include "colours.h"
@@ -90,9 +93,8 @@ void display_init()
     }
 
     /* Set the font - allow overriding this default */
-    gchar *font_name = g_strdup_printf("%s/FiraMono-Medium.otf", nlarn_libdir);
+    font_name = g_strdup_printf("%s/FiraMono-Medium.otf", nlarn_libdir);
     g_setenv("PDC_FONT", font_name, 0);
-    g_free(font_name);
 #endif
 
     /* Start curses mode */
@@ -637,6 +639,10 @@ void display_paint_screen(player *p)
 
 void display_shutdown()
 {
+#ifdef SDLPDCURSES
+    g_free(font_name);
+#endif
+
     /* only terminate curses mode when the display has been initialised */
     if (display_initialised)
     {
@@ -2902,6 +2908,24 @@ void display_toggle_fullscreen(gboolean toggle)
     pdc_sheight = pdc_screen->h - pdc_xoffset;
     pdc_swidth = pdc_screen->w - pdc_yoffset;
     resize_term(PDC_get_rows(), PDC_get_columns());
+}
+
+void display_change_font()
+{
+    /* clearing ensures there are no fragments left after redraw */
+    clear();
+    pdc_font_size = config.font_size;
+
+    TTF_CloseFont(pdc_ttffont);
+    pdc_ttffont = TTF_OpenFont(font_name, pdc_font_size);
+
+    /* adapt PDCurses internal variables */
+    TTF_SizeText(pdc_ttffont, "W", &pdc_fwidth, &pdc_fheight);
+    pdc_fthick = pdc_font_size / 20 + 1;
+    resize_term(PDC_get_rows(), PDC_get_columns());
+
+    /* redraw the screen as all dimensions have changed */
+    display_paint_screen(nlarn->p);
 }
 #endif
 
