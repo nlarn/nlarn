@@ -2883,7 +2883,8 @@ int display_getch(WINDOW *win) {
            lock is enabled are returned twice. Hence we need to swallow
            the first one here. */
         if ((ch >= '1' && ch <= '9')
-                && (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_NUMLOCK))
+                && (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_NUMLOCK)
+                && PDC_check_key())
         {
             ch = wgetch(win ? win : stdscr);
         }

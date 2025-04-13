@@ -25,8 +25,9 @@
 ### Fixed bugs:
 * Fix a crash bug fighting regenerating monsters when playing on
   difficulty level 10 (spotted by r0cc0r0cc0)
-* Fix typo in monastery (spotted by jv84)
+* Fix getting numeric input (macOS and Windows)
 * Improve handling of terminal resizes while showing dialogues
+* Fix typo in monastery (spotted by jv84)
 * Fix compilation with recent compilers (patch by Frank Uhlig)
 * Fix compilation on FreeBSD (found in r7st's fork)
 
