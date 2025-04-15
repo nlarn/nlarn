@@ -899,8 +899,8 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
 
         default:
             wpns[0] = WT_DAGGER;
-            wpns[1] = WT_SPEAR;
-            wpns[2] = WT_SHORTSWORD;
+            wpns[1] = WT_SHORTSWORD;
+            wpns[2] = WT_SPEAR;
             break;
         }
 
