@@ -1437,7 +1437,15 @@ void monster_die(monster *m, struct player *p)
             inventory **floor = map_ilist_at(monster_map(m), monster_pos(m));
             while (inv_length(m->inv) > 0)
             {
-                inv_add(floor, inv_get(m->inv, 0));
+                item *i = inv_get(m->inv, 0);
+                // Drop all non-weapon items and all unique weapons,
+                // but only one third of the common weapons.
+                if ((i->type != IT_WEAPON) || weapon_is_unique(i) || chance(33)) {
+                    inv_add(floor, i);
+                } else {
+                    item_destroy(i);
+                }
+
                 inv_del(&m->inv, 0);
             }
         }
