@@ -62,4 +62,25 @@ int divert(int value, int percent);
  */
 void shuffle(int array[], int length, int skip);
 
+/**
+ * Return a random number processed by the Lévy probability density function
+ * See https://en.wikipedia.org/wiki/L%C3%A9vy_distribution for details.
+ *
+ * @param scale parameter
+ * @param location parameter
+ * @return a random number in
+ */
+double levy_random(double c, double mu);
+
+/*
+ * Pick a random integer processed by the Lévy probability density
+ * function in a range between 0 and max.
+ *
+ * @param the upper limit
+ * @param scale parameter
+ * @param location parameter
+ * @return random integer < max
+ */
+int levy_element(int max, double c, double mu);
+
 #endif

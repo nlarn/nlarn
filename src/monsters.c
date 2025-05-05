@@ -904,7 +904,10 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
             break;
         }
 
-        weapon = item_new(IT_WEAPON, wpns[rand_0n(weapon_count)]);
+        /* focus on the weakest weapon on the set */
+        int weapon_idx = levy_element(weapon_count, 0.5, 1.0);
+
+        weapon = item_new(IT_WEAPON, wpns[weapon_idx]);
         item_new_finetouch(weapon);
 
         inv_add(&nmonster->inv, weapon);

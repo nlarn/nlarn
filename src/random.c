@@ -24,6 +24,7 @@
 #endif
 
 #include <glib.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -194,3 +195,27 @@ void shuffle(int array[], int length, int skip)
     }
 }
 
+double levy_random(double c, double mu) {
+    double u, v, x;
+
+    u = (double)rand_0n(UINT32_MAX) / UINT32_MAX;
+    v = (double)rand_0n(UINT32_MAX) / UINT32_MAX;
+
+    // Inverse transformation for the Lévy distribution
+    x = c / pow(cos(M_PI * (v - 0.5)), 2) * pow(sin(M_PI * (u - 0.5)), -2 / mu);
+
+    return x;
+}
+
+int levy_element(int max, double c, double mu) {
+    // Generate a random number in the Lévy distribution
+    double random_value = levy_random(c, mu);
+
+    int ret = (int)fmod(log(random_value), max);
+
+    // Ensure index is valid
+    if (ret < 0) ret = 0;
+    if (ret >= max) ret = max - 1;
+
+    return ret;
+}
