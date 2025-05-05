@@ -1,6 +1,6 @@
 /*
  * random.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -36,7 +36,7 @@ guint32 rand_0n(guint32 n);
 /* returns a value x with m <= x < n. */
 static inline guint32 rand_m_n(guint32 m, guint32 n)
 {
-	g_assert(m < n);
+    g_assert(m < n);
     return rand_0n(n - m) + m;
 }
 
@@ -47,6 +47,7 @@ static inline guint32 rand_1n(guint32 n)
 
 static inline gboolean chance(guint32 percent)
 {
+    g_assert(percent < 101);
     return (percent >= rand_1n(101));
 }
 
@@ -60,5 +61,26 @@ int divert(int value, int percent);
  * @param how many fields should be skipped
  */
 void shuffle(int array[], int length, int skip);
+
+/**
+ * Return a random number processed by the Lévy probability density function
+ * See https://en.wikipedia.org/wiki/L%C3%A9vy_distribution for details.
+ *
+ * @param scale parameter
+ * @param location parameter
+ * @return a random number in
+ */
+double levy_random(double c, double mu);
+
+/*
+ * Pick a random integer processed by the Lévy probability density
+ * function in a range between 0 and max.
+ *
+ * @param the upper limit
+ * @param scale parameter
+ * @param location parameter
+ * @return random integer < max
+ */
+int levy_element(int max, double c, double mu);
 
 #endif

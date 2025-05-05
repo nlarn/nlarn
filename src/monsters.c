@@ -899,12 +899,15 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
 
         default:
             wpns[0] = WT_DAGGER;
-            wpns[1] = WT_SPEAR;
-            wpns[2] = WT_SHORTSWORD;
+            wpns[1] = WT_SHORTSWORD;
+            wpns[2] = WT_SPEAR;
             break;
         }
 
-        weapon = item_new(IT_WEAPON, wpns[rand_0n(weapon_count)]);
+        /* focus on the weakest weapon on the set */
+        int weapon_idx = levy_element(weapon_count, 0.5, 1.0);
+
+        weapon = item_new(IT_WEAPON, wpns[weapon_idx]);
         item_new_finetouch(weapon);
 
         inv_add(&nmonster->inv, weapon);
@@ -1434,7 +1437,15 @@ void monster_die(monster *m, struct player *p)
             inventory **floor = map_ilist_at(monster_map(m), monster_pos(m));
             while (inv_length(m->inv) > 0)
             {
-                inv_add(floor, inv_get(m->inv, 0));
+                item *i = inv_get(m->inv, 0);
+                // Drop all non-weapon items and all unique weapons,
+                // but only one third of the common weapons.
+                if ((i->type != IT_WEAPON) || weapon_is_unique(i) || chance(33)) {
+                    inv_add(floor, i);
+                } else {
+                    item_destroy(i);
+                }
+
                 inv_del(&m->inv, 0);
             }
         }

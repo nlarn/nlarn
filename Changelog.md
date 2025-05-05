@@ -7,7 +7,9 @@
   * All spears are made of wood
   * The elven short sword is now made of mithril
   * The flail is now made of wood
+* Reduce the probability of monsters with powerful weapons
 * Reduce the probability of weapons breaking
+* Reduce the probability of monsters dropping weapons
 * Show carried gold in yellow (suggested by jv84)
 * The potion of see invisible now cures blindness (suggested by jv84)
 * Modified potions of instant healing: they now always cure poisoning

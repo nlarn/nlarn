@@ -1704,8 +1704,13 @@ static void player_autopickup(player *p)
        carry. Those would result in duplicate messages. */
     if (inv_length_filtered(*floor, filter_item_noautopickup))
     {
-        log_add_entry(nlarn->log, map_inv_description(
-            game_map(nlarn, Z(p->pos)), p->pos, "here", filter_item_noautopickup));
+        gchar *desc = map_inv_description(
+            game_map(nlarn, Z(p->pos)), p->pos,
+            "here", filter_item_noautopickup);
+
+        log_add_entry(nlarn->log, desc);
+
+        g_free(desc);
     }
 }
 
