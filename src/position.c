@@ -153,9 +153,9 @@ int pos_adjacent(position first, position second)
 
 int pos_valid(position pos)
 {
-    return (X(pos) < MAP_MAX_X)
-            && (Y(pos) < MAP_MAX_Y)
-            && (Z(pos) < MAP_MAX);
+    return (0 <= X(pos) && X(pos) < MAP_MAX_X)
+        && (0 <= Y(pos) && Y(pos) < MAP_MAX_Y)
+        && (0 <= Z(pos) && Z(pos) < MAP_MAX);
 }
 
 direction pos_dir(position origin, position target)
