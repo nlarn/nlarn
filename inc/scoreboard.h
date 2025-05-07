@@ -1,6 +1,6 @@
 /*
  * scoreboard.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,6 +23,9 @@
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
 /* file descriptor for the scoreboard file when running setgid */
 extern int scoreboard_fd;
+
+/* close scoreboard file descriptor */
+void scoreboard_close_fd();
 #endif
 
 typedef struct _score_t

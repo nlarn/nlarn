@@ -215,6 +215,8 @@ static void nlarn_init(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    /* ensure the scoreboard file descriptor is closed at exit */
+    atexit(scoreboard_close_fd);
 #else
     /* highscore file handling for non-SETGID builds -
        store high scores in the same directory as the configuation */
