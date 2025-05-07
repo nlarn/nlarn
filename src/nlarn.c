@@ -1231,9 +1231,9 @@ static void nlarn_signal_handler(int signo)
     /* attempt to save and clear the game, when initialized */
     if (nlarn)
     {
-            game_save(nlarn);
+        game_save(nlarn);
 
-        if (signo != SIGHUP)
+        if (signo == SIGTERM)
         {
             g_printf("Terminated. Your progress has been saved.\n");
         }
