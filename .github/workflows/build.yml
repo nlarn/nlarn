@@ -22,6 +22,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Update apt cache
+      run: sudo apt update
     - name: Install dependenvies
       run: sudo apt install discount libglib2.0-dev
     - name: Install PDCurses dependencies
