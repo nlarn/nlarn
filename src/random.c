@@ -202,7 +202,7 @@ double levy_random(double c, double mu) {
     v = (double)rand_0n(UINT32_MAX) / UINT32_MAX;
 
     // Inverse transformation for the Lévy distribution
-    x = c / pow(cos(M_PI * (v - 0.5)), 2) * pow(sin(M_PI * (u - 0.5)), -2 / mu);
+    x = c / pow(cos(G_PI * (v - 0.5)), 2) * pow(sin(G_PI * (u - 0.5)), -2 / mu);
 
     return x;
 }
