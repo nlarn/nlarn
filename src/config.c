@@ -86,10 +86,6 @@ void parse_commandline(int argc, char *argv[], struct game_config *config)
 {
     const GOptionEntry entries[] =
     {
-        { "name",        'n', 0, G_OPTION_ARG_STRING, &config->name,         "Set character's name", NULL },
-        { "gender",      'g', 0, G_OPTION_ARG_STRING, &config->gender,       "Set character's gender (m/f)", NULL },
-        { "stats",       's', 0, G_OPTION_ARG_STRING, &config->stats,        "Set character's stats (a-f)", NULL },
-        { "auto-pickup", 'a', 0, G_OPTION_ARG_STRING, &config->auto_pickup,  "Item types to pick up automatically, e.g. '$*+'", NULL },
         { "no-autosave", 'N', 0, G_OPTION_ARG_NONE,   &config->no_autosave,  "Disable autosave", NULL },
         { "wizard",      'w', 0, G_OPTION_ARG_NONE,   &config->wizard,       "Enable wizard mode", NULL },
         { "userdir",     'D', 0, G_OPTION_ARG_FILENAME, &config->userdir,    "Alternate directory for config file and saved games", NULL },
@@ -135,19 +131,19 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
         g_clear_error(&error);
 
         char *name = g_key_file_get_string(ini_file, "nlarn", "name", &error);
-        if (!config->name && !error) config->name = name;
+        if (!error) config->name = name;
         g_clear_error(&error);
 
         char *gender = g_key_file_get_string(ini_file, "nlarn", "gender", &error);
-        if (!config->gender && !error) config->gender = gender;
+        if (!error) config->gender = gender;
         g_clear_error(&error);
 
         char *auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
-        if (!config->auto_pickup && !error) config->auto_pickup = auto_pickup;
+        if (!error) config->auto_pickup = auto_pickup;
         g_clear_error(&error);
 
         char *stats = g_key_file_get_string(ini_file, "nlarn", "stats", &error);
-        if (!config->stats && !error) config->stats = stats;
+        if (!error) config->stats = stats;
         g_clear_error(&error);
 
 #ifdef SDLPDCURSES

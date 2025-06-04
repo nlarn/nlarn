@@ -28,6 +28,7 @@
 * Fix a crash bug fighting regenerating monsters when playing on
   difficulty level 10 (spotted by r0cc0r0cc0)
 * Fix getting numeric input (macOS and Windows)
+* Fix enlightenment effect wrapping around map borders
 * Improve handling of terminal resizes while showing dialogues
 * Fix typo in monastery (spotted by jv84)
 * Fix compilation with recent compilers (patch by Frank Uhlig)

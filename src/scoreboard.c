@@ -1,6 +1,6 @@
 /*
  * scoreboard.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,6 +22,7 @@
 #include <zlib.h>
 
 #if (defined __unix) || (defined __unix__) || (defined __APPLE__)
+# include <unistd.h>
 # include <sys/file.h>
 #endif
 
@@ -32,6 +33,39 @@
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
 /* file descriptor for the scoreboard file when running setgid */
 int scoreboard_fd = -1;
+
+void scoreboard_close_fd()
+{
+    close(scoreboard_fd);
+}
+
+static gzFile scoreboard_open_cloned_fd(const char* mode)
+{
+    /*
+     * We'll need the file desciptor for loading saving the scores in this
+     * and later games in the same session, so duplicate it
+     */
+    int fd = dup(scoreboard_fd);
+
+    /*
+     * Lock the scoreboard file while updating the scoreboard.
+     * Wait until another process that holds the lock releases it again.
+     */
+    if (flock(fd, LOCK_EX) == -1)
+    {
+        perror("Could not lock the scoreboard file");
+    }
+
+    /*
+     * Reposition the file offset to the start, otherwise we couldn't load
+     * there any data after reading or writing the file. gzrewind() didn't
+     * work after writing the file, thus we ensure that the position is as
+     * expected here.
+     */
+     lseek(fd, 0, SEEK_SET);
+
+    return gzdopen(fd, mode);
+}
 #endif
 
 /* scoreboard version */
@@ -44,19 +78,7 @@ GList *scores_load()
 
     /* read the scoreboard file into memory */
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-    /* we'll need the file desciptor for saving, too, so duplicate it */
-    int fd = dup(scoreboard_fd);
-
-    /*
-     * Lock the scoreboard file while updating the scoreboard.
-     * Wait until another process that holds the lock releases it again.
-     */
-    if (flock(fd, LOCK_EX) == -1)
-    {
-        perror("Could not lock the scoreboard file");
-    }
-
-    gzFile file = gzdopen(fd, "rb");
+    gzFile file = scoreboard_open_cloned_fd("rb");
 #else
     gzFile file = gzopen(nlarn_highscores, "rb");
 #endif
@@ -84,10 +106,6 @@ GList *scores_load()
         scores = g_realloc(scores, (bufsize * bufcount));
     }
 
-#if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-    /* reposition to the start otherwise writing would append */
-    gzrewind(file);
-#endif
     /* close save file */
     gzclose(file);
 
@@ -189,7 +207,7 @@ static void scores_save(game *g, GList *gs)
 
     /* open the file for writing */
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
-    gzFile sb = gzdopen(scoreboard_fd, "wb");
+    gzFile sb = scoreboard_open_cloned_fd("wb");
 #else
     gzFile sb = gzopen(nlarn_highscores, "wb");
 #endif
@@ -215,11 +233,7 @@ static void scores_save(game *g, GList *gs)
         return;
     }
 
-    /*
-     * Close file.
-     * As this was the last reference to that file, this action
-     * unlocks the scoreboard file again.
-     */
+    /* Close the file. This action unlocks the scoreboard file again. */
     gzclose(sb);
 
     /* return memory */

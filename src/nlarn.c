@@ -215,6 +215,8 @@ static void nlarn_init(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    /* ensure the scoreboard file descriptor is closed at exit */
+    atexit(scoreboard_close_fd);
 #else
     /* highscore file handling for non-SETGID builds -
        store high scores in the same directory as the configuation */
@@ -1231,9 +1233,9 @@ static void nlarn_signal_handler(int signo)
     /* attempt to save and clear the game, when initialized */
     if (nlarn)
     {
-            game_save(nlarn);
+        game_save(nlarn);
 
-        if (signo != SIGHUP)
+        if (signo == SIGTERM)
         {
             g_printf("Terminated. Your progress has been saved.\n");
         }

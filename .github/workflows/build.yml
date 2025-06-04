@@ -22,7 +22,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install dependenvies
+    - name: Update apt cache
+      run: sudo apt update
+    - name: Install dependencies
       run: sudo apt install discount libglib2.0-dev
     - name: Install PDCurses dependencies
       run: sudo apt install libsdl2-dev libsdl2-ttf-dev
