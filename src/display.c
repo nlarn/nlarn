@@ -23,6 +23,7 @@
 
 #ifdef SDLPDCURSES
 # define PDC_WIDE
+# define PDC_FORCE_UTF8
 # include "sdl2/pdcsdl.h"
 # undef min
 # undef max
