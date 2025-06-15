@@ -126,7 +126,7 @@ static struct _monster_breath_data
 
 monster_data_t monster_data[] = {
     { /* MT_GIANT_BAT */
-        .name = "giant bat", .glyph = 'b', .colour = RED,
+        .name = "giant bat", .glyph = 'b', .colour = AUTUMN_LEAF_BROWN,
         .exp = 1, .ac = 0, .hp_max = 2,
         .level = 1, .intelligence = 3, .speed = XFAST, .size = SMALL,
         .flags = HEAD | FLY | INFRAVISION,
@@ -144,7 +144,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_HOBGOBLIN */
-        .name = "hobgoblin", .glyph = 'H', .colour = AUTUMN_LEAF_BROWN,
+        .name = "hobgoblin", .glyph = 'H', .colour = GREEN_BROWN,
         .exp = 2, .gold_chance = 30, .gold = 40, .ac = 1, .hp_max = 8,
         .level = 1, .intelligence = 5, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -162,7 +162,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER, .sound = "growl"
     },
     { /* MT_KOBOLD */
-        .name = "kobold", .glyph = 'k', .colour = GREEN_BROWN,
+        .name = "kobold", .glyph = 'k', .colour = DEEP_SEA_GREEN,
         .exp = 1, .gold_chance = 10, .gold = 100, .ac = 0, .hp_max = 4,
         .level = 1, .intelligence = 7, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -337,7 +337,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_TROLL */
-        .name = "troll", .glyph = 'T', .colour = MOUNTAIN_LAKE_BLUE,
+        .name = "troll", .glyph = 'T', .colour = SMOOTHIE_GREEN,
         .exp = 300, .gold_chance = 20, .gold = 400, .ac = 8, .hp_max = 50,
         .level = 5, .intelligence = 9, .speed = SLOW, .size = LARGE,
         .flags = HEAD | HANDS | REGENERATE,
@@ -459,7 +459,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ROTHE */
-        .name = "rothe", .glyph = 'r', .colour = ALSIKE_CLOVER_RED,
+        .name = "rothe", .glyph = 'r', .colour = AUTUMN_LEAF_BROWN,
         .exp = 250, .ac = 5, .hp_max = 50,
         .level = 7, .intelligence = 5, .speed = VFAST, .size = LARGE,
         .flags = HEAD | INFRAVISION | PACK,
@@ -659,7 +659,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_I */
-        .name = "type I demon lord", .glyph = '&', .colour = RED,
+        .name = "type I demon lord", .glyph = '&', .colour = WOOL_VIOLET,
         .exp = 50000, .ac = 17, .hp_max = 140,
         .level = 12, .intelligence = 20, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -669,7 +669,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_II */
-        .name = "type II demon lord", .glyph = '&', .colour = RED,
+        .name = "type II demon lord", .glyph = '&', .colour = CHALCEDONY_VIOLET,
         .exp = 75000, .ac = 18, .hp_max = 160,
         .level = 13, .intelligence = 21, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -679,7 +679,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_III */
-        .name = "type III demon lord", .glyph = '&', .colour = RED,
+        .name = "type III demon lord", .glyph = '&', .colour = DEEP_MAGENTA,
         .exp = 100000, .ac = 19, .hp_max = 180,
         .level = 14, .intelligence = 22, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -689,7 +689,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_IV */
-        .name = "type IV demon lord", .glyph = '&', .colour = RED,
+        .name = "type IV demon lord", .glyph = '&', .colour = BLOOD_RED,
         .exp = 125000, .ac = 20, .hp_max = 200,
         .level = 15, .intelligence = 23, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -699,7 +699,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_V */
-        .name = "type V demon lord", .glyph = '&', .colour = RED,
+        .name = "type V demon lord", .glyph = '&', .colour = RED_LILAC,
         .exp = 150000, .ac = 21, .hp_max = 220,
         .level = 16, .intelligence = 24, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -709,7 +709,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_VI */
-        .name = "type VI demon lord", .glyph = '&', .colour = RED,
+        .name = "type VI demon lord", .glyph = '&', .colour = SUNSET_RED,
         .exp = 175000, .ac = 22, .hp_max = 240,
         .level = 17, .intelligence = 25, .speed = FAST, .size = LARGE,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
@@ -719,7 +719,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_VII */
-        .name = "type VII demon lord", .glyph = '&', .colour = RED,
+        .name = "type VII demon lord", .glyph = '&', .colour = DARK_RED,
         .exp = 200000, .ac = 23, .hp_max = 260,
         .level = 18, .intelligence = 26, .speed = FAST, .size = GIANT,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_CONF | RES_MAGIC,
@@ -729,7 +729,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMON_PRINCE */
-        .name = "demon prince", .glyph = '&', .colour = DARK_BURGUNDY,
+        .name = "demon prince", .glyph = '&', .colour = DRIED_BLOOD,
         .exp = 300000, .ac = 25, .hp_max = 345,
         .level = 25, .intelligence = 28, .speed = FAST, .size = GIANT,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_FIRE | RES_SLEEP | RES_POISON | RES_CONF | RES_MAGIC,

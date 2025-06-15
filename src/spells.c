@@ -340,7 +340,7 @@ book_obfuscation[SP_MAX] =
     { "tan",             800, ELM_BROWN_RED,     },
     { "papyrus",         800, DARK_SAND,         },
     { "linen",           800, GREY93,            },
-    { "musty",           800, GREEN,             },
+    { "musty",           800, OCEAN_GREEN,       },
     { "faded",           800, OSLO_GREY,         },
     { "antique",         800, FUSCOUS_GREY,      },
     { "worn out",        800, BUTTER,            },
@@ -350,15 +350,15 @@ book_obfuscation[SP_MAX] =
     { "inconspicuous",   800, GREY_CLOUD,        },
     { "awe-inspiring",   800, LIGHT_PLUM,        },
     { "stained",         800, ELM_BROWN_RED,     },
-    { "mottled",         800, RED,               },
-    { "plaid",           800, RED,               },
+    { "mottled",         800, BLUE_LILAC,        },
+    { "plaid",           800, MEDIUM_SLATE_BLUE, },
     { "wax-lined",       800, COLZA_YELLOW,      },
     { "bamboo",          800, LIGHT_PALE_GREEN,  },
     { "clasped",         800, MEDIUM_VIOLET_RED, },
     { "well-thumbed",    800, FUCHSIA,           },
     { "ragged",          800, SMOOTHIE_GREEN,    },
     { "dull",            800, GRANITE,           },
-    { "canvas",          800, YELLOW,            },
+    { "canvas",          800, BUTTER,            },
 /*
     reserve descriptions for unimplemented spells:
     chambray

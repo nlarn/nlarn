@@ -354,7 +354,7 @@ void display_paint_screen(player *p)
     else if (p->hp <= ((int)p->hp_max / 4))  /* 25% hp left */
         attrs = COLOR_PAIR(DARK_RED);
     else if (p->hp <= ((int)p->hp_max / 2))  /* 50% hp left */
-        attrs = COLOR_PAIR(GREEN);
+        attrs = COLOR_PAIR(VIVID_GREEN);
     else
         attrs = COLOR_PAIR(LIGHT_BRIGHT_GREEN);
 
@@ -375,7 +375,7 @@ void display_paint_screen(player *p)
 
     /* current MPs */
     if (p->mp <= ((int)p->mp_max / 10)) /* 10% mp left */
-        attrs = COLOR_PAIR(MAGENTA);
+        attrs = COLOR_PAIR(LIGHT_MAGENTA);
     else if (p->mp <= ((int)p->mp_max / 4))  /* 25% mp left */
         attrs = COLOR_PAIR(DARK_MAGENTA);
     else if (p->mp <= ((int)p->mp_max / 2))  /* 50% mp left */
@@ -387,7 +387,7 @@ void display_paint_screen(player *p)
 
     /* max MPs */
     mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 4,
-        COLOR_PAIR(LIGHT_BRIGHT_GREEN), "/%-3d", player_get_mp_max(p));
+        COLOR_PAIR(VIBRANT_PURPLE), "/%-3d", player_get_mp_max(p));
 
     /* game time */
     mvprintw(MAP_MAX_Y + 1, MAP_MAX_X + 1, "T %-6d", game_turn(nlarn));
@@ -418,7 +418,7 @@ void display_paint_screen(player *p)
     if (player_get_str(p) > (int)p->strength)
         attrs = COLOR_PAIR(YELLOW);
     else if (player_get_str(p) < (int)p->strength)
-        attrs = COLOR_PAIR(RED);
+        attrs = COLOR_PAIR(STRAWBERRY_RED);
     else
         attrs = COLOR_PAIR(WHITE);
 
@@ -431,7 +431,7 @@ void display_paint_screen(player *p)
     if (player_get_dex(p) > (int)p->dexterity)
         attrs = COLOR_PAIR(YELLOW);
     else if (player_get_dex(p) < (int)p->dexterity)
-        attrs = COLOR_PAIR(RED);
+        attrs = COLOR_PAIR(STRAWBERRY_RED);
     else
         attrs = COLOR_PAIR(WHITE);
 
@@ -444,7 +444,7 @@ void display_paint_screen(player *p)
     if (player_get_con(p) > (int)p->constitution)
         attrs = COLOR_PAIR(YELLOW);
     else if (player_get_con(p) < (int)p->constitution)
-        attrs = COLOR_PAIR(RED);
+        attrs = COLOR_PAIR(STRAWBERRY_RED);
     else
         attrs = COLOR_PAIR(WHITE);
 
@@ -457,7 +457,7 @@ void display_paint_screen(player *p)
     if (player_get_int(p) > (int)p->intelligence)
         attrs = COLOR_PAIR(YELLOW);
     else if (player_get_int(p) < (int)p->intelligence)
-        attrs = COLOR_PAIR(RED);
+        attrs = COLOR_PAIR(STRAWBERRY_RED);
     else
         attrs = COLOR_PAIR(WHITE);
 
@@ -470,7 +470,7 @@ void display_paint_screen(player *p)
     if (player_get_wis(p) > (int)p->wisdom)
         attrs = COLOR_PAIR(YELLOW);
     else if (player_get_wis(p) < (int)p->wisdom)
-        attrs = COLOR_PAIR(RED);
+        attrs = COLOR_PAIR(STRAWBERRY_RED);
     else
         attrs = COLOR_PAIR(WHITE);
 
@@ -2375,7 +2375,7 @@ position display_get_new_position(player *p,
 
                         if ((m = map_get_monster_at(vmap, cursor)) && monster_in_sight(m))
                         {
-                            fg = monster_color(m) == RED ? LUMINOUS_RED : RED;
+                            fg = monster_color(m) == STRAWBERRY_RED ? LUMINOUS_RED : STRAWBERRY_RED;
                             glyph = monster_glyph(m);
                         }
                         else if (pos_identical(p->pos, cursor))
@@ -3290,6 +3290,6 @@ static void display_spheres_paint(sphere *s, player *p)
 
     if (game_fullvis(nlarn) || fov_get(p->fv, s->pos))
     {
-        mvaaddch(Y(s->pos), X(s->pos), COLOR_PAIR(MAGENTA), '0');
+        mvaaddch(Y(s->pos), X(s->pos), COLOR_PAIR(BRIGHT_MAGENTA), '0');
     }
 }
