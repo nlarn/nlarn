@@ -416,7 +416,7 @@ void display_paint_screen(player *p)
     mvprintw(1, MAP_MAX_X + 3, "STR ");
 
     if (player_get_str(p) > (int)p->strength)
-        attrs = COLOR_PAIR(YELLOW);
+        attrs = COLOR_PAIR(GREEN_HAZE);
     else if (player_get_str(p) < (int)p->strength)
         attrs = COLOR_PAIR(STRAWBERRY_RED);
     else
@@ -429,7 +429,7 @@ void display_paint_screen(player *p)
     mvprintw(2, MAP_MAX_X + 3, "DEX ");
 
     if (player_get_dex(p) > (int)p->dexterity)
-        attrs = COLOR_PAIR(YELLOW);
+        attrs = COLOR_PAIR(GREEN_HAZE);
     else if (player_get_dex(p) < (int)p->dexterity)
         attrs = COLOR_PAIR(STRAWBERRY_RED);
     else
@@ -442,7 +442,7 @@ void display_paint_screen(player *p)
     mvprintw(3, MAP_MAX_X + 3, "CON ");
 
     if (player_get_con(p) > (int)p->constitution)
-        attrs = COLOR_PAIR(YELLOW);
+        attrs = COLOR_PAIR(GREEN_HAZE);
     else if (player_get_con(p) < (int)p->constitution)
         attrs = COLOR_PAIR(STRAWBERRY_RED);
     else
@@ -455,7 +455,7 @@ void display_paint_screen(player *p)
     mvprintw(4, MAP_MAX_X + 3, "INT ");
 
     if (player_get_int(p) > (int)p->intelligence)
-        attrs = COLOR_PAIR(YELLOW);
+        attrs = COLOR_PAIR(GREEN_HAZE);
     else if (player_get_int(p) < (int)p->intelligence)
         attrs = COLOR_PAIR(STRAWBERRY_RED);
     else
@@ -468,7 +468,7 @@ void display_paint_screen(player *p)
     mvprintw(5, MAP_MAX_X + 3, "WIS ");
 
     if (player_get_wis(p) > (int)p->wisdom)
-        attrs = COLOR_PAIR(YELLOW);
+        attrs = COLOR_PAIR(GREEN_HAZE);
     else if (player_get_wis(p) < (int)p->wisdom)
         attrs = COLOR_PAIR(STRAWBERRY_RED);
     else
