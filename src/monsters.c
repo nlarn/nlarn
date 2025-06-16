@@ -135,7 +135,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GNOME */
-        .name = "gnome", .glyph = 'g', .colour = ANISEED_LEAF_GREEN,
+        .name = "gnome", .glyph = 'g', .colour = CONIFER,
         .exp = 2, .gold_chance = 80, .gold = 30, .ac = 0, .hp_max = 6,
         .level = 1, .intelligence = 8, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS,
@@ -543,7 +543,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GNOME_KING */
-        .name = "gnome king", .glyph = 'G', .colour = ANISEED_LEAF_GREEN,
+        .name = "gnome king", .glyph = 'G', .colour = CONIFER,
         .exp = 3000, .gold = 2000, .reroll_chance = 80, .ac = 11, .hp_max = 100,
         .level = 9, .intelligence = 18, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS | RES_SLEEP,
