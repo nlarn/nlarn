@@ -4894,7 +4894,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
                            : "returned home");
 
     g_string_append_printf(text, "\n%s found %d gold in the caverns, "
-                           "sold %s gem%s for %d and %s non-gem "
+                           "sold %s gem%s for %d and %s other "
                            "item%s for %d gold, and earned %d gold "
                            "as bank interest.",
                            pronoun, p->stats.gold_found,
