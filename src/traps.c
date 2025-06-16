@@ -47,7 +47,7 @@ const trap_data traps[TT_MAX] =
         NULL,
     },
     {
-        TT_ARROW, ET_POISON, PALE_CYAN,
+        TT_ARROW, ET_POISON, CLAM_SHELL,
         75, 50, 10,
         "arrow trap",
         "You are hit by an arrow.",
@@ -55,7 +55,7 @@ const trap_data traps[TT_MAX] =
         "The %s is hit by an arrow.",
     },
     {
-        TT_DART, ET_POISON, PALE_CYAN,
+        TT_DART, ET_POISON, LIGHT_SLATE_BLUE,
         75, 50, 5,
         "dart trap",
         "You are hit by a dart.",
