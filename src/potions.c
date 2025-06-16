@@ -84,7 +84,7 @@ potion_obfuscation[PO_MAX] =
     { "fizzy",          AQUAMARINE,      },
     { "murky",          GLADIOLA_BLUE,   },
     { "effervescent",   AZUL,            },
-    { "dark",           BALTIC_SEA,      },
+    { "dark",           GRAVEL,          },
     { "turbid",         CLAM_SHELL,      },
     { "mucilaginous",   TEALISH_GREEN,   },
     { "gluey",          BRINK_PINK,      },
@@ -99,7 +99,7 @@ potion_obfuscation[PO_MAX] =
     { "polychrome",     FRESH_GREEN,     },
     { "dichroic",       PERSIAN_PINK,    },
     { "tricoloured",    CANDY_PINK,      },
-    { "black",          NIGHT,           },
+    { "black",          BALTIC_SEA,      },
     { "turquoise",      TURQUOISE_BLUE,  },
     { "foaming",        FRESH_GREEN,     },
 };
