@@ -431,7 +431,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_FORVALAKA */
-        .name = "forvalaka", .glyph = 'f', .colour = ONYX,
+        .name = "forvalaka", .glyph = 'f', .colour = IRIDIUM,
         .exp = 280, .ac = 4, .hp_max = 50,
         .level = 6, .intelligence = 7, .speed = DOUBLE, .size = MEDIUM,
         .flags = HEAD | UNDEAD | INFRAVISION | RES_POISON,
