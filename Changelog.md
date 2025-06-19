@@ -1,4 +1,4 @@
-## Release 0.7.7 (unreleased)
+## Release 0.7.7 (2025-06-19)
 
 ### Changes:
 * Switch to 256 colours
