@@ -1277,12 +1277,12 @@ static void map_fill_with_objects(map *m)
         {
             item_t it;
 
-            /* prevent containers inside the container */
+            /* prevent containers and unique items inside the container */
             do
             {
                 it = rand_1n(IT_MAX - 1);
             }
-            while (it == IT_CONTAINER);
+            while (!item_is_desirable(it));
 
             inv_add(&(container->content), item_new_by_level(it, m->nlevel));
         }

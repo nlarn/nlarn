@@ -43,19 +43,19 @@ static const char *item_desc_get(item *it, int known);
 
 const item_type_data item_data[IT_MAX] =
 {
-    /* item_t       name_sg       name_pl        IMG   max_id           op bl co eq us st id */
-    { IT_NONE,      "",           "",            ' ',  0,               0, 0, 0, 0, 0, 0, 0, },
-    { IT_AMULET,    "amulet",     "amulets",     '"',  AM_LARN,         0, 1, 0, 1, 0, 0, 1, },
-    { IT_AMMO,      "ammunition", "ammunition",  '\'', AMT_MAX,         1, 1, 1, 1, 0, 1, 1, },
-    { IT_ARMOUR,    "armour",     "armour",      '[',  AT_MAX,          1, 1, 1, 1, 0, 0, 1, },
-    { IT_BOOK,      "book",       "books",       '+',  SP_MAX,          0, 1, 1, 0, 1, 1, 1, },
-    { IT_CONTAINER, "container",  "containers",  ']',  CT_MAX,          0, 0, 1, 0, 0, 0, 0, },
-    { IT_GEM,       "gem",        "gems",        '*',  GT_MAX,          0, 0, 0, 0, 0, 1, 0, },
-    { IT_GOLD,      "coin",       "coins",       '$',  0,               0, 0, 0, 0, 0, 1, 0, },
-    { IT_POTION,    "potion",     "potions",     '!',  PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, },
-    { IT_RING,      "ring",       "rings",       '=',  RT_MAX,          1, 1, 1, 1, 0, 0, 1, },
-    { IT_SCROLL,    "scroll",     "scrolls",     '?',  ST_MAX,          0, 1, 1, 0, 1, 1, 1, },
-    { IT_WEAPON,    "weapon",     "weapons",     '(',  WT_MAX,          1, 1, 1, 1, 0, 0, 1, },
+    /* item_t       name_sg       name_pl        IMG   max_id           op bl co eq us st id de */
+    { IT_NONE,      "",           "",            ' ',  0,               0, 0, 0, 0, 0, 0, 0, 0, },
+    { IT_AMULET,    "amulet",     "amulets",     '"',  AM_LARN,         0, 1, 0, 1, 0, 0, 1, 0, },
+    { IT_AMMO,      "ammunition", "ammunition",  '\'', AMT_MAX,         1, 1, 1, 1, 0, 1, 1, 1, },
+    { IT_ARMOUR,    "armour",     "armour",      '[',  AT_MAX,          1, 1, 1, 1, 0, 0, 1, 0, },
+    { IT_BOOK,      "book",       "books",       '+',  SP_MAX,          0, 1, 1, 0, 1, 1, 1, 1, },
+    { IT_CONTAINER, "container",  "containers",  ']',  CT_MAX,          0, 0, 1, 0, 0, 0, 0, 0, },
+    { IT_GEM,       "gem",        "gems",        '*',  GT_MAX,          0, 0, 0, 0, 0, 1, 0, 1, },
+    { IT_GOLD,      "coin",       "coins",       '$',  0,               0, 0, 0, 0, 0, 1, 0, 1, },
+    { IT_POTION,    "potion",     "potions",     '!',  PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, 1, },
+    { IT_RING,      "ring",       "rings",       '=',  RT_MAX,          1, 1, 1, 1, 0, 0, 1, 1, },
+    { IT_SCROLL,    "scroll",     "scrolls",     '?',  ST_MAX,          0, 1, 1, 0, 1, 1, 1, 1, },
+    { IT_WEAPON,    "weapon",     "weapons",     '(',  WT_MAX,          1, 1, 1, 1, 0, 0, 1, 0, },
 };
 
 const item_material_data item_materials[IM_MAX] =
@@ -129,12 +129,12 @@ item *item_new(item_t item_type, int item_id)
             /* remove the failed attempt */
             item_destroy(nitem);
 
-            /* create something that is not a container */
+            /* create something that makes sense */
             do
             {
                 item_type = rand_1n(IT_MAX);
             }
-            while (item_type == IT_CONTAINER);
+            while (!item_is_desirable(item_type));
 
             /* No need to do a fine touch here, that
              * will be done in the calling function. */
@@ -288,15 +288,6 @@ item *item_new_by_level(item_t item_type, int num_level)
     float variance, id_base, divisor;
 
     g_assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
-
-    /* no amulets above caverns level 6 */
-    if ((item_type == IT_AMULET) && (num_level < 6))
-    {
-        do
-        {
-            item_type = rand_1n(IT_MAX);
-        } while (item_type == IT_CONTAINER);
-    }
 
     divisor = 1 / (float)(MAP_MAX - 1);
 

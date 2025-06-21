@@ -836,7 +836,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         {
             itype = rand_1n(IT_MAX);
         }
-        while (itype == IT_CONTAINER);
+        while (!item_is_desirable(itype));
 
         inv_add(&nmonster->inv, item_new_by_level(itype, Z(pos)));
         break;
