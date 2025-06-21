@@ -2,7 +2,9 @@
 
 ### Changes:
 ### Fixed bugs:
+
 * Fix colours for MP display
+* Ensure demon lord on level 10 matches difficulty
 
 ## Release 0.7.7 (2025-06-19)
 

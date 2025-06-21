@@ -1662,7 +1662,9 @@ static void place_special_item(map *m, position npos)
     case MAP_CMAX - 1: /* the amulet of larn */
         inv_add(&tile->ilist, item_new(IT_AMULET, AM_LARN));
 
-        monster_new(MT_DEMONLORD_I + rand_0n(7), npos, NULL);
+        monster_new(
+                MT_DEMONLORD_I + rand_0n(min(game_difficulty(nlarn), 7)),
+                npos, NULL);
         break;
 
     case MAP_MAX - 1: /* potion of cure dianthroritis */
