@@ -244,20 +244,20 @@ static inline int item_condition_bonus(item *it)
 }
 
 /* item macros */
-#define item_glyph(type)          item_data[(type)].glyph
-#define item_name_sg(type)        item_data[(type)].name_sg
-#define item_name_pl(type)        item_data[(type)].name_pl
-#define item_max_id(type)         item_data[(type)].max_id
-#define item_is_optimizable(type)     item_data[(type)].optimizable
-#define item_is_blessable(type)       item_data[(type)].blessable
-#define item_is_corrodible(type)      item_data[(type)].corrodible
-#define item_is_equippable(type)      item_data[(type)].equippable
-#define item_is_usable(type)          item_data[(type)].usable
-#define item_is_stackable(type)       item_data[(type)].stackable
-#define item_is_identifyable(type)    item_data[(type)].identifyable
-#define item_is_desirable(type)       item_data[(type)].desirable
-#define item_material_name(type)      item_materials[(type)].name
-#define item_material_adjective(type) item_materials[(type)].adjective
+#define item_glyph(type)          (item_data[(type)].glyph)
+#define item_name_sg(type)        (item_data[(type)].name_sg)
+#define item_name_pl(type)        (item_data[(type)].name_pl)
+#define item_max_id(type)         (item_data[(type)].max_id)
+#define item_is_optimizable(type)     (item_data[(type)].optimizable)
+#define item_is_blessable(type)       (item_data[(type)].blessable)
+#define item_is_corrodible(type)      (item_data[(type)].corrodible)
+#define item_is_equippable(type)      (item_data[(type)].equippable)
+#define item_is_usable(type)          (item_data[(type)].usable)
+#define item_is_stackable(type)       (item_data[(type)].stackable)
+#define item_is_identifyable(type)    (item_data[(type)].identifyable)
+#define item_is_desirable(type)       (item_data[(type)].desirable)
+#define item_material_name(type)      (item_materials[(type)].name)
+#define item_material_adjective(type) (item_materials[(type)].adjective)
 
 /* item filters */
 
