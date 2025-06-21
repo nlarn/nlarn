@@ -375,19 +375,19 @@ void display_paint_screen(player *p)
 
     /* current MPs */
     if (p->mp <= ((int)p->mp_max / 10)) /* 10% mp left */
-        attrs = COLOR_PAIR(LIGHT_MAGENTA);
+        attrs = COLOR_PAIR(AQUA_BLUE);
     else if (p->mp <= ((int)p->mp_max / 4))  /* 25% mp left */
-        attrs = COLOR_PAIR(DARK_MAGENTA);
+        attrs = COLOR_PAIR(CERULEAN);
     else if (p->mp <= ((int)p->mp_max / 2))  /* 50% mp left */
-        attrs = COLOR_PAIR(PURPLE);
+        attrs = COLOR_PAIR(WATER_BLUE);
     else
-        attrs = COLOR_PAIR(VIBRANT_PURPLE);
+        attrs = COLOR_PAIR(AZUL);
 
     mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 10, attrs, "MP %3d", p->mp);
 
     /* max MPs */
     mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 4,
-        COLOR_PAIR(VIBRANT_PURPLE), "/%-3d", player_get_mp_max(p));
+        COLOR_PAIR(AZUL), "/%-3d", player_get_mp_max(p));
 
     /* game time */
     mvprintw(MAP_MAX_Y + 1, MAP_MAX_X + 1, "T %-6d", game_turn(nlarn));

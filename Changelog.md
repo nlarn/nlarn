@@ -2,6 +2,7 @@
 
 ### Changes:
 ### Fixed bugs:
+* Fix colours for MP display
 
 ## Release 0.7.7 (2025-06-19)
 
