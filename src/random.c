@@ -143,9 +143,6 @@ guint32 rand_0n(guint32 n)
         rand_seed();
     }
 
-    guint32 min = -n % n;
-    guint32 result;
-
     switch (n)
     {
         case 0:
@@ -156,9 +153,7 @@ guint32 rand_0n(guint32 n)
             return next();
             break;
         default:
-            while ((result = next()) < min);
-
-            return result % n;
+            return next() % n;
             break;
     }
 }
