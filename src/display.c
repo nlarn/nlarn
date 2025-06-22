@@ -253,7 +253,7 @@ void display_paint_screen(player *p)
                 }
                 else if (map_trap_at(vmap, pos) && (game_fullvis(nlarn) || player_memory_of(p, pos).trap))
                 {
-                    /* FIXME - displays trap when unknown!! */
+                    /* draw traps */
                     aaddch(COLOR_PAIR(trap_colour(map_trap_at(vmap, pos))), '^');
                 }
                 else
