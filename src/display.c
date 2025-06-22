@@ -1481,9 +1481,6 @@ int display_get_count(const char *caption, int value)
 
     for (guint line = 0; line < text->len; line++)
     {
-        // FIXME: filling is not required??
-        /* fill the box background */
-        mvwaprintw(mwin->window, 1 + line, 1, CP_UI_FG, "%-*s", width - 2, "");
         /* print text */
         mvwaprintw(mwin->window, 1 + line, 2, CP_UI_FG,
             "%s", (char *)g_ptr_array_index(text, line));
