@@ -1,6 +1,8 @@
 ## Release 0.7.8 (unreleased)
 
 ### Changes:
+* The player will now automatically evade breath attacks
+
 ### Fixed bugs:
 
 * Fix colours for MP display

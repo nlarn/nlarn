@@ -1865,6 +1865,29 @@ int player_hp_lose(player *p, int count, player_cod cause_type, int cause)
     return p->hp;
 }
 
+gboolean player_evade(player *p) {
+    int evasion = p->level / ( 2 + game_difficulty(nlarn) / 2)
+                  + player_get_dex(p)
+                  - 10
+                  - game_difficulty(nlarn);
+
+    // Automatic hit if paralysed or overstrained.
+    if (player_effect(p, ET_PARALYSIS)
+        || player_effect(p, ET_OVERSTRAINED))
+    {
+        evasion = 0;
+    } else {
+        if (player_effect(p, ET_BLINDNESS))
+            evasion /= 4;
+        if (player_effect(p, ET_CONFUSION))
+            evasion /= 2;
+        if (player_effect(p, ET_BURDENED))
+            evasion /= 2;
+    }
+
+    return(evasion >= (int)rand_1n(21));
+}
+
 void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause)
 {
     effect *e = NULL;

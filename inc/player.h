@@ -288,6 +288,14 @@ int player_hp_gain(player *p, int count);
 int player_hp_lose(player *p, int count, player_cod cause_type, int cause);
 
 /**
+ * Determine if the player can evade a quickly moving attack
+ *
+ * @param the player
+ * @return result of evasion attempt
+ */
+gboolean player_evade(player *p);
+
+/**
  * Inflict damage upon the player
  *
  * @param the player

@@ -3621,10 +3621,17 @@ static gboolean monster_breath_hit(const GList *traj,
             log_add_entry(nlarn->log, "Your amulet reflects the %s!",
                           monster_breath_data[dam->type].desc);
         }
+        else if (player_evade(nlarn->p))
+        {
+            if (!player_effect(nlarn->p, ET_BLINDNESS))
+            {
+                log_add_entry(nlarn->log, "The %s whizzes by you!",
+                        monster_breath_data[dam->type].desc);
+            }
+        }
         else
         {
-            /* No reflection -> player takes the damage */
-            /* TODO: evasion!!! */
+            /* Player failed to evade and takes the damage */
             log_add_entry(nlarn->log, "The %s hits you!",
                           monster_breath_data[dam->type].desc);
             player_damage_take(nlarn->p, damage_copy(dam), PD_MONSTER,
@@ -3651,7 +3658,6 @@ static gboolean monster_breath_hit(const GList *traj,
         /* erode affected items */
         inv_erode(map_ilist_at(mp, pos), iet, fov_get(nlarn->p->fv, pos), NULL);
     }
-
 
     if (map_sobject_at(mp, pos) == LS_MIRROR && fov_get(nlarn->p->fv, pos))
     {

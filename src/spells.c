@@ -1727,26 +1727,7 @@ static gboolean spell_area_pos_hit(position pos,
         }
         else
         {
-            int evasion = nlarn->p->level/(2+game_difficulty(nlarn)/2)
-                          + player_get_dex(nlarn->p)
-                          - 10
-                          - game_difficulty(nlarn);
-
-            // Automatic hit if paralysed or overstrained.
-            if (player_effect(nlarn->p, ET_PARALYSIS)
-                || player_effect(nlarn->p, ET_OVERSTRAINED))
-                evasion = 0;
-            else
-            {
-                if (player_effect(nlarn->p, ET_BLINDNESS))
-                    evasion /= 4;
-                if (player_effect(nlarn->p, ET_CONFUSION))
-                    evasion /= 2;
-                if (player_effect(nlarn->p, ET_BURDENED))
-                    evasion /= 2;
-            }
-
-            if (evasion >= (int)rand_1n(21))
+            if (player_evade(nlarn->p))
             {
                 if (!player_effect(nlarn->p, ET_BLINDNESS))
                 {
