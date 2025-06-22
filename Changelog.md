@@ -21,7 +21,7 @@
 * Show carried gold in yellow (suggested by jv84)
 * The potion of see invisible now cures blindness (suggested by jv84)
 * Modified potions of instant healing: they now always cure poisoning
-  and sickness. The previous special behavior of blessed potions of
+  and sickness. The previous special behaviour of blessed potions of
   instant healing got removed.
 * Healing spell and healing potion no longer cure sickness
 * Show attended courses in school
@@ -75,9 +75,9 @@
   game, configure the settings and view the highscores. When the
   player dies, don't drop out of the game, but return to the menu.
 * Increase difficulty after winning the game
-* Emphasise important messages with color (e.g. a critical hit is
+* Emphasise important messages with colour (e.g. a critical hit is
   shown in bright red)
-* Emphasise most recent message in the log, show others grayed out
+* Emphasise most recent message in the log, show others greyed out
 * Mention items at player's position in the log
 * Improve the result of the charm monster spell
 * Improve monster status descriptions
@@ -107,7 +107,7 @@
 * Describe spell type for most spells in spell description
 * Add worn amulet to player's equipment overview
 * Allow intentionally triggering a teleport trap
-* Distribute Changelog in HTML format on macOS and Windows
+* Distribute the change log in HTML format on macOS and Windows
 * Write a default configuration file when none is present
 * Allow specifying a custom user directory for the save and configuration
   file on the command line
