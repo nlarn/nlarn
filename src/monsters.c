@@ -752,7 +752,6 @@ monster_data_t monster_data[] = {
 static inline monster_action_t monster_default_ai(monster *m);
 static gboolean monster_player_visible(monster *m);
 static gboolean monster_attack_available(monster *m, attack_t type);
-static item *monster_weapon_select(monster *m);
 static void monster_weapon_wield(monster *m, item *weapon);
 static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
@@ -1901,14 +1900,13 @@ int monster_items_pickup(monster *m)
     /* FIXME: time management */
 
     gboolean pick_up = FALSE;
-    item *it;
 
     for (guint idx = 0; idx < inv_length(*map_ilist_at(monster_map(m), m->pos)); idx++)
     {
-        it = inv_get(*map_ilist_at(monster_map(m), m->pos), idx);
+        item *it = inv_get(*map_ilist_at(monster_map(m), m->pos), idx);
+        item_t typ = it->type;
 
-        if (m->type == MT_LEPRECHAUN
-                && ((it->type == IT_GEM) || (it->type == IT_GOLD)))
+        if (m->type == MT_LEPRECHAUN && ((typ == IT_GEM) || (typ == IT_GOLD)))
         {
             /* leprechauns collect treasures */
             pick_up = TRUE;
@@ -1918,27 +1916,14 @@ int monster_items_pickup(monster *m)
             /* monster can attack with weapons */
             if (m->eq_weapon == NULL)
                 pick_up = TRUE;
-            else
-            {
-                /* compare this weapon with the weapon the monster wields */
-                if (m->eq_weapon == NULL || (weapon_damage(m->eq_weapon)
-                                        < weapon_damage(it)))
-                    pick_up = TRUE;
-            }
+            /* compare this weapon with the weapon the monster wields */
+            else if (weapon_damage(m->eq_weapon) < weapon_damage(it))
+                pick_up = TRUE;
         }
 
         if (pick_up)
         {
-            /* The monster has picked up the item.
-
-               Determine if the item is a weapon.
-               This has to be done before adding the item to the monster's
-               inventory as the item might be destroyed after calling inv_add().
-               (Stackable items get destroyed if an item of the kind exists
-                in the target inventory!).
-            */
-            gboolean new_weapon = (it->type == IT_WEAPON);
-
+            // The monster will picked up the item.
             if (monster_in_sight(m))
             {
                 gchar *buf = item_describe(it, player_item_identified(nlarn->p, it),
@@ -1952,19 +1937,13 @@ int monster_items_pickup(monster *m)
             inv_del_element(map_ilist_at(monster_map(m), m->pos), it);
             inv_add(&m->inv, it);
 
-            if (new_weapon)
+            // Wield weapon after picking it up - it is better than the one
+            // the monster is currently using
+            if (IT_WEAPON == typ)
             {
-                /* find out if the new weapon is better than the old one */
-                item *best = monster_weapon_select(m);
-
-                /* If the new item is a weapon, 'it' is still a valid pointer
-                   to the item picked up at this point as weapons are not
-                   stackable. */
-                if (it == best)
-                {
-                    monster_weapon_wield(m, best);
-                }
+                monster_weapon_wield(m, it);
             }
+
             /* finish this turn after picking up an item */
             return TRUE;
         } /* end if pick_up */
@@ -2919,30 +2898,6 @@ static gboolean monster_attack_available(monster *m, attack_t type)
     }
 
     return available;
-}
-
-static item *monster_weapon_select(monster *m)
-{
-    item *best = NULL;
-
-    for (guint idx = 0; idx < inv_length(m->inv); idx++)
-    {
-        item *curr = inv_get(m->inv, idx);
-
-        if (curr->type == IT_WEAPON)
-        {
-            if (best == NULL)
-            {
-                best = curr;
-            }
-            else if (weapon_damage(curr) > weapon_damage(best))
-            {
-                best = curr;
-            }
-        }
-    }
-
-    return best;
 }
 
 static void monster_weapon_wield(monster *m, item *weapon)
