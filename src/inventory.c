@@ -49,13 +49,21 @@ void inv_destroy(inventory *inv, gboolean special)
 
         if (special)
         {
-            /* Mark potion of cure dianthroritis and eye of larn
-               as never having been created. */
+            /* Ensure the potion of cure dianthroritis can be recreated */
             if (it->type == IT_POTION && it->id == PO_CURE_DIANTHR)
                 nlarn->cure_dianthr_created = FALSE;
-            else if (it->type == IT_AMULET && it->id == AM_LARN)
-                nlarn->amulet_created[AM_LARN] = FALSE;
+
+            /* allow recreating unique items */
+            if (it->type == IT_AMULET)
+                nlarn->amulet_created[it->id] = FALSE;
+
+            if (it->type == IT_ARMOUR && armour_unique(it))
+                nlarn->armour_created[it->id] = FALSE;
+
+            if (it->type == IT_WEAPON && weapon_is_unique(it))
+                nlarn->weapon_created[it->id] = FALSE;
         }
+
         g_ptr_array_remove(inv->content, it->oid);
         item_destroy(it);
     }
