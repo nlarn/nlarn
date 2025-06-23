@@ -310,7 +310,8 @@ void configure_defaults(const char *inifile)
         "  `GREEN`g`end`) Full screen mode       - `YELLOW`%s`end`\n"
 #endif
         "\n"
-        "Clear values with `GREEN`A`end`-`GREEN`D`end`\n";
+        "Clear values with `GREEN`A`end`-`GREEN`D`end`. "
+        "Return to the main menu with `GREEN`ESC`end`.\n";
 
     gboolean leaving = FALSE;
 
