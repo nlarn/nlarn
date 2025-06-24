@@ -31,3 +31,35 @@ jobs:
       if: contains(matrix.configuration, 'SDLPDCURSES=Y')
     - name: Build ${{ matrix.configuration }}
       run: make ${{ matrix.configuration }}
+
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        configuration:
+          - config=debug
+          - config=release
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        install: >
+          git
+          make
+          zip
+          mingw-w64-ucrt-x86_64-discount
+          mingw-w64-ucrt-x86_64-gcc
+          mingw-w64-ucrt-x86_64-glib2
+          mingw-w64-ucrt-x86_64-ncurses
+          mingw-w64-ucrt-x86_64-nsis
+          mingw-w64-ucrt-x86_64-pkg-config
+          mingw-w64-ucrt-x86_64-SDL2
+          mingw-w64-ucrt-x86_64-SDL2_ttf
+          mingw-w64-ucrt-x86_64-zlib
+    - uses: actions/checkout@v4
+    - name: Build ${{ matrix.configuration }}
+      run: make SDLPDCURSES=Y ${{ matrix.configuration }}
