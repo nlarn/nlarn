@@ -52,7 +52,7 @@ const spell_data spells[SP_MAX] =
         SC_PLAYER, DAM_NONE, ET_PROTECTION, spell_type_player,
         "Generates a protection field",
         NULL, NULL,
-        COLOURLESS, 1, 260, TRUE
+        COLOURLESS, 1, 260, true
     },
     {
         SP_MLE, "mle", "magic missile",
@@ -60,14 +60,14 @@ const spell_data spells[SP_MAX] =
         "Creates and hurls a missile of magical energy at a target",
         "The missile hits the %s.",
         "The missile bounces off the %s.",
-        COLOURLESS, 1, 320, TRUE
+        COLOURLESS, 1, 320, true
     },
     {
         SP_DEX, "dex", "dexterity",
         SC_PLAYER, DAM_NONE, ET_INC_DEX, spell_type_player,
         "Improves the caster's dexterity",
         NULL, NULL,
-        COLOURLESS, 1, 260, FALSE
+        COLOURLESS, 1, 260, false
     },
     {
         SP_SLE, "sle", "sleep",
@@ -75,14 +75,14 @@ const spell_data spells[SP_MAX] =
         "Causes some monsters to go to sleep",
         NULL,
         "The %s doesn't sleep.",
-        COLOURLESS, 1, 260, TRUE
+        COLOURLESS, 1, 260, true
     },
     {
         SP_CHM, "chm", "charm monster",
         SC_POINT, DAM_NONE, ET_CHARM_MONSTER, spell_type_point,
         "Some monsters may be awed at your magnificence",
         NULL, "The %s isn't impressed.",
-        COLOURLESS, 1, 260, FALSE
+        COLOURLESS, 1, 260, false
     },
     {
         SP_SSP, "ssp", "sonic spear",
@@ -90,42 +90,42 @@ const spell_data spells[SP_MAX] =
         "Causes your hands to emit a screeching sound toward what they point",
         "The sound damages the %s.",
         "The %s can't hear the noise.",
-        CONIFER, 2, 480, FALSE
+        CONIFER, 2, 480, false
     },
     {
         SP_STR, "str", "strength",
         SC_PLAYER, DAM_NONE, ET_INC_STR, spell_type_player,
         "Increase the caster's strength for a short term",
         NULL, NULL,
-        COLOURLESS, 2, 460, FALSE
+        COLOURLESS, 2, 460, false
     },
     {
         SP_CPO, "cpo", "cure poison",
         SC_PLAYER, DAM_NONE, ET_NONE, spell_cure_poison,
         "The caster is cured from poison",
         NULL, NULL,
-        COLOURLESS, 2, 460, TRUE
+        COLOURLESS, 2, 460, true
     },
     {
         SP_HEL, "hel", "healing",
         SC_PLAYER, DAM_NONE, ET_INC_HP, spell_type_player,
         "Restores some HP to the caster",
         NULL, NULL,
-        COLOURLESS, 2, 500, TRUE
+        COLOURLESS, 2, 500, true
     },
     {
         SP_CBL, "cbl", "cure blindness",
         SC_PLAYER, DAM_NONE, ET_NONE, spell_cure_blindness,
         "Restores sight to one so unfortunate as to be blinded",
         NULL, NULL,
-        COLOURLESS, 2, 400, TRUE
+        COLOURLESS, 2, 400, true
     },
     {
         SP_CRE, "cre", "create monster",
         SC_OTHER, DAM_NONE, ET_NONE, spell_create_monster,
         "Creates a monster near the caster appropriate for the location",
         NULL, NULL,
-        COLOURLESS, 2, 400, FALSE
+        COLOURLESS, 2, 400, false
     },
     {
         SP_PHA, "pha", "phantasmal forces",
@@ -133,14 +133,14 @@ const spell_data spells[SP_MAX] =
         "Creates illusions, and if believed, the monster flees",
         "The %s believed!",
         "The %s didn't believe the illusions!",
-        COLOURLESS, 2, 600, FALSE
+        COLOURLESS, 2, 600, false
     },
     {
         SP_INV, "inv", "invisibility",
         SC_PLAYER, DAM_NONE, ET_INVISIBILITY, spell_type_player,
         "The caster becomes invisible",
         NULL, NULL,
-        COLOURLESS, 2, 600, FALSE
+        COLOURLESS, 2, 600, false
     },
     {
         SP_BAL, "bal", "fireball",
@@ -148,7 +148,7 @@ const spell_data spells[SP_MAX] =
         "Makes a ball of fire that burns on what it hits",
         "The fireball hits the %s.",
         NULL,
-        LUMINOUS_ORANGE, 3, 1200, FALSE
+        LUMINOUS_ORANGE, 3, 1200, false
     },
     {
         SP_CLD, "cld", "cone of cold",
@@ -156,7 +156,7 @@ const spell_data spells[SP_MAX] =
         "Sends forth a cone of cold which freezes what it touches",
         "The cone of cold strikes the %s.",
         NULL,
-        ALABASTER_GREEN, 3, 1200, FALSE
+        ALABASTER_GREEN, 3, 1200, false
     },
     {
         SP_PLY, "ply", "polymorph",
@@ -164,21 +164,21 @@ const spell_data spells[SP_MAX] =
         "You can find out what this does for yourself",
         NULL,
         "The %s resists.",
-        COLOURLESS, 3, 950, FALSE
+        COLOURLESS, 3, 950, false
     },
     {
         SP_CAN, "can", "cancellation",
         SC_PLAYER, DAM_NONE, ET_CANCELLATION, spell_type_player,
         "Protects the caster against spheres of annihilation",
         NULL, NULL,
-        COLOURLESS, 3, 950, FALSE
+        COLOURLESS, 3, 950, false
     },
     {
         SP_HAS, "has", "haste self",
         SC_PLAYER, DAM_NONE, ET_SPEED, spell_type_player,
         "Speeds up the caster's movements",
         NULL, NULL,
-        COLOURLESS, 3, 950, FALSE
+        COLOURLESS, 3, 950, false
     },
     {
         SP_CKL, "ckl", "killing cloud",
@@ -186,14 +186,14 @@ const spell_data spells[SP_MAX] =
         "Creates a fog of poisonous gas which kills all that is within it",
         "The %s gasps for air.",
         NULL,
-        COLOURLESS, 3, 1200, FALSE
+        COLOURLESS, 3, 1200, false
     },
     {
         SP_VPR, "vpr", "vaporize rock",
         SC_OTHER, DAM_NONE, ET_NONE, spell_vaporize_rock,
         "This changes rock to air",
         NULL, NULL,
-        COLOURLESS, 3, 950, FALSE
+        COLOURLESS, 3, 950, false
     },
     {
         SP_DRY, "dry", "dehydration",
@@ -201,7 +201,7 @@ const spell_data spells[SP_MAX] =
         "Dries up water in the immediate vicinity",
         "The %s shrivels up.",
         "The %s isn't affected.",
-        COLOURLESS, 4, 1600, FALSE
+        COLOURLESS, 4, 1600, false
     },
     {
         SP_LIT, "lit", "lightning",
@@ -209,21 +209,21 @@ const spell_data spells[SP_MAX] =
         "Your finger will emit a lightning bolt when this spell is cast",
         "A lightning bolt hits the %s.",
         "The %s loves fire and lightning!",
-        MOON_GLOW, 4, 1600, FALSE
+        MOON_GLOW, 4, 1600, false
     },
     {
         SP_DRL, "drl", "drain life",
         SC_POINT, DAM_PHYSICAL, ET_NONE, spell_type_point,
         "Subtracts hit points from both you and a monster",
         NULL, NULL,
-        COLOURLESS, 4, 1400, FALSE
+        COLOURLESS, 4, 1400, false
     },
     {
         SP_GLO, "glo", "invulnerability",
         SC_PLAYER, DAM_NONE, ET_INVULNERABILITY, spell_type_player,
         "This globe helps to protect the player from physical attack",
         NULL, NULL,
-        COLOURLESS, 4, 1400, FALSE
+        COLOURLESS, 4, 1400, false
     },
     {
         SP_FLO, "flo", "flood",
@@ -231,7 +231,7 @@ const spell_data spells[SP_MAX] =
         "This creates an avalanche of H2O to flood the immediate chamber",
         "The %s struggles for air in the flood!",
         "The %s loves the water!",
-        COLOURLESS, 4, 1600, FALSE
+        COLOURLESS, 4, 1600, false
     },
     {
         SP_FGR, "fgr", "finger of death",
@@ -239,35 +239,35 @@ const spell_data spells[SP_MAX] =
         "This is a holy spell and calls upon your god to back you up",
         "The %s's heart stopped.",
         "The %s isn't affected.",
-        COLOURLESS, 4, 1600, FALSE
+        COLOURLESS, 4, 1600, false
     },
     {
         SP_SCA, "sca", "scare monsters",
         SC_OTHER, DAM_NONE, ET_NONE, spell_scare_monsters,
         "Terrifies nearby monsters so that hopefully they flee the magic user",
         NULL, NULL,
-        COLOURLESS, 5, 2000, FALSE
+        COLOURLESS, 5, 2000, false
     },
     {
         SP_HLD, "hld", "hold monster",
         SC_POINT, DAM_NONE, ET_HOLD_MONSTER, spell_type_point,
         "The monster is frozen in his tracks if this is successful",
         NULL, NULL,
-        COLOURLESS, 5, 2000, FALSE
+        COLOURLESS, 5, 2000, false
     },
     {
         SP_STP, "stp", "time stop",
         SC_PLAYER, DAM_NONE, ET_TIMESTOP, spell_type_player,
         "All movement in the caverns ceases for a limited duration",
         NULL, NULL,
-        COLOURLESS, 5, 2500, FALSE
+        COLOURLESS, 5, 2500, false
     },
     {
         SP_TEL, "tel", "teleport away",
         SC_POINT, DAM_NONE, ET_NONE, spell_type_point,
         "Moves a particular monster around the caverns",
         NULL, NULL,
-        COLOURLESS, 5, 2000, FALSE
+        COLOURLESS, 5, 2000, false
     },
     {
         SP_MFI, "mfi", "magic fire",
@@ -275,35 +275,35 @@ const spell_data spells[SP_MAX] =
         "This causes a curtain of fire to appear all around you",
         "The %s cringes from the flame.",
         NULL,
-        COLOURLESS, 5, 2500, FALSE
+        COLOURLESS, 5, 2500, false
     },
     {
         SP_MKW, "mkw", "make wall",
         SC_OTHER, DAM_NONE, ET_NONE, spell_make_wall,
         "Makes a wall in the specified place",
         NULL, NULL,
-        COLOURLESS, 6, 3000, FALSE
+        COLOURLESS, 6, 3000, false
     },
     {
         SP_SPH, "sph", "sphere of annihilation",
         SC_OTHER, DAM_NONE, ET_NONE, spell_create_sphere,
         "Anything caught in this sphere is instantly killed",
         NULL, NULL,
-        COLOURLESS, 6, 3500, FALSE
+        COLOURLESS, 6, 3500, false
     },
     {
         SP_SUM, "sum", "summon demon",
         SC_OTHER, DAM_NONE, ET_NONE, spell_summon_demon,
         "Summons a demon who hopefully helps you out",
         NULL, NULL,
-        COLOURLESS, 6, 3500, FALSE
+        COLOURLESS, 6, 3500, false
     },
     {
         SP_WTW, "wtw", "walk through walls",
         SC_PLAYER, DAM_NONE, ET_WALL_WALK, spell_type_player,
         "Allows the caster to walk through walls for a short period of time",
         NULL, NULL,
-        COLOURLESS, 6, 3800, FALSE
+        COLOURLESS, 6, 3800, false
     },
     {
         SP_ALT, "alt", "alter reality",
@@ -311,7 +311,7 @@ const spell_data spells[SP_MAX] =
         "God only knows what this will do",
         NULL,
         "Polinneaus won't let you mess with his caverns!",
-        COLOURLESS, 6, 3800, FALSE
+        COLOURLESS, 6, 3800, false
     },
 };
 
@@ -531,12 +531,12 @@ int spell_learn(player *p, spell_id spell_type)
         /* Check if the player's intelligence is sufficient to learn the spell */
         if ((spells[spell_type].level * 3) > (int)player_get_int(p))
             /* spell is beyond the players scope */
-            return FALSE;
+            return false;
 
         /* Check if the player's level is spell sufficient to learn the spell */
         if (spells[spell_type].level > (int)p->level)
             /* spell is beyond the players scope */
-            return FALSE;
+            return false;
 
         spell *s = spell_new(spell_type);
         g_ptr_array_add(p->known_spells, s);
@@ -560,7 +560,7 @@ int spell_learn(player *p, spell_id spell_type)
     }
 
     /* should not reach this point, but who knows.. */
-    return FALSE;
+    return false;
 }
 
 int spell_known(player *p, spell_id spell_type)
@@ -576,7 +576,7 @@ int spell_known(player *p, spell_id spell_type)
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 gchar* spell_desc_by_id(spell_id sid)
@@ -612,7 +612,7 @@ gchar* spell_desc_by_id(spell_id sid)
 
     g_string_append_c(desc, '.');
 
-    return g_string_free(desc, FALSE);
+    return g_string_free(desc, false);
 }
 
 static gboolean spell_type_player(spell *s, struct player *p)
@@ -650,7 +650,7 @@ static gboolean spell_type_player(spell *s, struct player *p)
                         "power of %s to the extent of your knowledge.",
                         spell_name(s));
 
-                return FALSE;
+                return false;
             }
         }
         else if (effect_type_inc_duration(e->type))
@@ -672,11 +672,11 @@ static gboolean spell_type_player(spell *s, struct player *p)
                         "duration of %s to the extent of your knowledge.",
                         spell_name(s));
 
-                return FALSE;
+                return false;
             }
         }
 
-        return TRUE;
+        return true;
     }
 
     e = effect_new(spell_effect(s));
@@ -695,7 +695,7 @@ static gboolean spell_type_player(spell *s, struct player *p)
 
     player_effect_add(p, e);
 
-    return TRUE;
+    return true;
 }
 
 static gboolean spell_type_point(spell *s, struct player *p)
@@ -711,20 +711,20 @@ static gboolean spell_type_point(spell *s, struct player *p)
     g_snprintf(buffer, 60, "Select a target for %s.", spell_name(s));
 
     /* Allow non-visible positions if the player is blinded. */
-    pos = display_get_position(p, buffer, FALSE, FALSE, 0, FALSE,
+    pos = display_get_position(p, buffer, false, false, 0, false,
             !player_effect(p, ET_BLINDNESS));
 
     /* player pressed ESC */
     if (!pos_valid(pos))
     {
         log_add_entry(nlarn->log, "Aborted.");
-        return FALSE;
+        return false;
     }
 
     if (pos_identical(pos, p->pos))
     {
         log_add_entry(nlarn->log, "This spell only works on monsters.");
-        return FALSE;
+        return false;
     }
 
     /* When the player is blinded, check if the position can be reached.
@@ -734,7 +734,7 @@ static gboolean spell_type_point(spell *s, struct player *p)
             !map_pos_is_visible(game_map(nlarn, Z(p->pos)), p->pos, pos))
     {
         /* be sure to waste the MPs and give no hints. */
-        return TRUE;
+        return true;
     }
 
     m = map_get_monster_at(game_map(nlarn, Z(p->pos)), pos);
@@ -747,14 +747,14 @@ static gboolean spell_type_point(spell *s, struct player *p)
         if (!player_effect(p, ET_BLINDNESS))
         {
             log_add_entry(nlarn->log, "The is no monster there.");
-            return FALSE;
+            return false;
         }
         else
         {
             /* The spell didn't do anything, but as the player is blinded
                assume it was targeted at the position intentionally probing
                for targets. */
-            return TRUE;
+            return true;
         }
     }
 
@@ -836,7 +836,7 @@ static gboolean spell_type_point(spell *s, struct player *p)
         }
 
         map *mmap = game_map(nlarn, Z(monster_pos(m)));
-        monster_pos_set(m, mmap, map_find_space(mmap, LE_MONSTER, FALSE));
+        monster_pos_set(m, mmap, map_find_space(mmap, LE_MONSTER, false));
         break; /* SP_TEL */
 
     default:
@@ -861,7 +861,7 @@ static gboolean spell_type_point(spell *s, struct player *p)
         break;
     }
 
-    return TRUE;
+    return true;
 }
 
 static gboolean spell_type_ray(spell *s, struct player *p)
@@ -872,20 +872,20 @@ static gboolean spell_type_ray(spell *s, struct player *p)
 
     g_snprintf(buffer, 60, "Select a target for the %s.", spell_name(s));
     /* Allow non-visible positions if the player is blinded. */
-    position target = display_get_position(p, buffer, TRUE, FALSE, 0, FALSE,
+    position target = display_get_position(p, buffer, true, false, 0, false,
                                            !player_effect(p, ET_BLINDNESS));
 
     /* player pressed ESC */
     if (!pos_valid(target))
     {
         log_add_entry(nlarn->log, "Aborted.");
-        return FALSE;
+        return false;
     }
 
     if (pos_identical(target, p->pos))
     {
         log_add_entry(nlarn->log, "Why would you want to do that?");
-        return FALSE;
+        return false;
     }
 
     damage_originator damo = { DAMO_PLAYER, p };
@@ -917,13 +917,13 @@ static gboolean spell_type_ray(spell *s, struct player *p)
 
     /* throw a ray to the selected target */
     map_trajectory(p->pos, target, &damo, spell_traj_pos_hit,
-                   s, dam, TRUE, '*', spell_colour(s), TRUE);
+                   s, dam, true, '*', spell_colour(s), true);
 
     /* The callback functions give a copy of the damage to the specific
        functions, thus the original has to be destroyed here. */
     damage_free(dam);
 
-    return TRUE;
+    return true;
 }
 
 static gboolean spell_type_flood(spell *s, struct player *p)
@@ -937,13 +937,13 @@ static gboolean spell_type_flood(spell *s, struct player *p)
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_FLOOD));
 
     g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(s));
-    pos = display_get_position(p, buffer, FALSE, FALSE, 0, FALSE, TRUE);
+    pos = display_get_position(p, buffer, false, false, 0, false, true);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
     {
         log_add_entry(nlarn->log, "Aborted.");
-        return FALSE;
+        return false;
     }
 
     switch (s->id)
@@ -971,7 +971,7 @@ static gboolean spell_type_flood(spell *s, struct player *p)
         break;
     }
 
-    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius, FALSE);
+    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius, false);
     area *range = area_new_circle_flooded(pos, radius, obstacles);
 
     if (area_pos_get(range, p->pos)
@@ -980,13 +980,13 @@ static gboolean spell_type_flood(spell *s, struct player *p)
     {
         log_add_entry(nlarn->log, "Aborted.");
         area_destroy(range);
-        return FALSE;
+        return false;
     }
 
     map_set_tiletype(game_map(nlarn, Z(pos)), range, type, amount);
     area_destroy(range);
 
-    return TRUE;
+    return true;
 }
 
 static gboolean spell_type_blast(spell *s, struct player *p)
@@ -1013,19 +1013,19 @@ static gboolean spell_type_blast(spell *s, struct player *p)
 
     g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(s));
     /* Allow non-visible positions if the player is blinded. */
-    pos = display_get_position(p, buffer, FALSE, TRUE, radius, FALSE,
+    pos = display_get_position(p, buffer, false, true, radius, false,
             !player_effect(p, ET_BLINDNESS));
 
     /* player pressed ESC */
     if (!pos_valid(pos))
     {
         log_add_entry(nlarn->log, "Aborted.");
-        return FALSE;
+        return false;
     }
 
     /* get the affected area to determine if the player would be hit */
     ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos,
-                radius, TRUE));
+                radius, true));
 
     gboolean player_affected = area_pos_get(ball, p->pos);
     area_destroy(ball);
@@ -1034,7 +1034,7 @@ static gboolean spell_type_blast(spell *s, struct player *p)
         && !display_get_yesno("The spell is going to hit you. Cast anyway?", NULL, NULL, NULL))
     {
         log_add_entry(nlarn->log, "Aborted.");
-        return FALSE;
+        return false;
     }
 
     damage *dam = damage_new(spells[s->id].damage_type, ATT_MAGIC,
@@ -1044,7 +1044,7 @@ static gboolean spell_type_blast(spell *s, struct player *p)
     /* destroy the damage as the callbacks deliver a copy */
     damage_free(dam);
 
-    return TRUE;
+    return true;
 }
 
 static gboolean spell_alter_reality(spell *s, player *p)
@@ -1055,7 +1055,7 @@ static gboolean spell_alter_reality(spell *s, player *p)
     if (Z(p->pos) == 0)
     {
         log_add_entry(nlarn->log, spell_msg_fail(s));
-        return FALSE;
+        return false;
     }
 
     /* reset the player's memory of the current map */
@@ -1070,10 +1070,10 @@ static gboolean spell_alter_reality(spell *s, player *p)
     /* reposition player (if needed) */
     if (!map_pos_passable(nlevel, p->pos))
     {
-        p->pos = map_find_space(nlevel, LE_MONSTER, FALSE);
+        p->pos = map_find_space(nlevel, LE_MONSTER, false);
     }
 
-    return TRUE;
+    return true;
 }
 
 gboolean spell_create_monster(spell *s __attribute__((unused)), struct player *p)
@@ -1084,22 +1084,22 @@ gboolean spell_create_monster(spell *s __attribute__((unused)), struct player *p
     if (Z(p->pos) == 0)
     {
         log_add_entry(nlarn->log, "Nothing happens.");
-        return FALSE;
+        return false;
     }
 
     /* try to find a space for the monster near the player */
     mpos = map_find_space_in(game_map(nlarn, Z(p->pos)),
-                             rect_new_sized(p->pos, 2), LE_MONSTER, FALSE);
+                             rect_new_sized(p->pos, 2), LE_MONSTER, false);
 
     if (pos_valid(mpos))
     {
         monster_new_by_level(mpos);
-        return TRUE;
+        return true;
     }
     else
     {
         log_add_entry(nlarn->log, "You feel failure.");
-        return FALSE;
+        return false;
     }
 }
 
@@ -1109,20 +1109,20 @@ static gboolean spell_create_sphere(spell *s, struct player *p)
 
     position pos = display_get_new_position(p, p->pos,
             "Where do you want to place the sphere?",
-            FALSE, FALSE, FALSE, 0, TRUE, TRUE);
+            false, false, false, 0, true, true);
 
     if (pos_valid(pos))
     {
         sphere *sph = sphere_new(pos, p, p->level * 10 * s->knowledge);
         g_ptr_array_add(nlarn->spheres, sph);
 
-        return TRUE;
+        return true;
     }
     else
     {
         log_add_entry(nlarn->log, "Huh?");
 
-        return FALSE;
+        return false;
     }
 }
 
@@ -1135,12 +1135,12 @@ static gboolean spell_cure_poison(spell *s __attribute__((unused)), struct playe
     if ((eff = player_effect_get(p, ET_POISON)))
     {
         player_effect_del(p, eff);
-        return TRUE;
+        return true;
     }
     else
     {
         log_add_entry(nlarn->log, "You weren't even poisoned!");
-        return FALSE;
+        return false;
     }
 }
 
@@ -1153,12 +1153,12 @@ static gboolean spell_cure_blindness(spell *s __attribute__((unused)), struct pl
     if ((eff = player_effect_get(p, ET_BLINDNESS)))
     {
         player_effect_del(p, eff);
-        return TRUE;
+        return true;
     }
     else
     {
         log_add_entry(nlarn->log, "You weren't even blinded!");
-        return FALSE;
+        return false;
     }
 }
 
@@ -1168,18 +1168,18 @@ static gboolean spell_phantasmal_forces(spell *s, struct player *p)
     monster *m = NULL;
 
     mpos = display_get_position(p, "Choose a target for phantasmal forces.",
-                                FALSE, FALSE, 0, TRUE, TRUE);
+                                false, false, 0, true, true);
 
     if (!pos_valid(mpos))
     {
-        return FALSE;
+        return false;
     }
 
     m = map_get_monster_at(game_map(nlarn, Z(mpos)), mpos);
 
     if (m == NULL)
     {
-        return FALSE;
+        return false;
     }
 
     if ((player_get_int(p) + s->knowledge) > monster_int(m))
@@ -1190,7 +1190,7 @@ static gboolean spell_phantasmal_forces(spell *s, struct player *p)
         }
 
         monster_effect_add(m, effect_new(ET_SCARED));
-        return TRUE;
+        return true;
     }
     else
     {
@@ -1198,7 +1198,7 @@ static gboolean spell_phantasmal_forces(spell *s, struct player *p)
         {
             log_add_entry(nlarn->log, spell_msg_fail(s), monster_name(m));
         }
-        return FALSE;
+        return false;
     }
 }
 
@@ -1212,7 +1212,7 @@ static gboolean spell_scare_monsters(spell *s, struct player *p)
 
     /* the radius of this spell is determined by the player's level of
        spell knowledge */
-    area *a = area_new_circle(p->pos, 1 + s->knowledge, FALSE);
+    area *a = area_new_circle(p->pos, 1 + s->knowledge, false);
 
     for (int y = a->start_y; y < a->start_y + a->size_y; y++)
     {
@@ -1256,10 +1256,10 @@ static gboolean spell_summon_demon(spell *s, struct player *p)
     /* find a place near the player for the demon servant */
     pos = map_find_space_in(game_map(nlarn, Z(p->pos)),
                             rect_new_sized(p->pos, 2),
-                            LE_MONSTER, FALSE);
+                            LE_MONSTER, false);
 
     if (!pos_valid(pos))
-        return FALSE;
+        return false;
 
     /* generate a demon */
     demon = monster_new(min(MT_DEMONLORD_I + (s->knowledge - 1),
@@ -1268,7 +1268,7 @@ static gboolean spell_summon_demon(spell *s, struct player *p)
     /* turn the demon into a servant */
     monster_update_action(demon, MA_SERVE);
 
-    return TRUE;
+    return true;
 }
 
 static gboolean spell_make_wall(spell *s __attribute__((unused)), player *p)
@@ -1277,17 +1277,17 @@ static gboolean spell_make_wall(spell *s __attribute__((unused)), player *p)
 
     pos = display_get_new_position(p, p->pos,
                                    "Select a position where you want to place a wall.",
-                                   FALSE, FALSE, FALSE, 0, FALSE, TRUE);
+                                   false, false, false, 0, false, true);
 
     if (pos_identical(pos, p->pos))
     {
         log_add_entry(nlarn->log, "You are actually standing there.");
-        return FALSE;
+        return false;
     }
     else if (!pos_valid(pos))
     {
         log_add_entry(nlarn->log, "No wall today.");
-        return FALSE;
+        return false;
     }
 
     map *pmap = game_map(nlarn, Z(p->pos));
@@ -1298,7 +1298,7 @@ static gboolean spell_make_wall(spell *s __attribute__((unused)), player *p)
         /* destroy all items at that position */
         if (tile->ilist != NULL)
         {
-            inv_destroy(tile->ilist, TRUE);
+            inv_destroy(tile->ilist, true);
             tile->ilist = NULL;
         }
 
@@ -1327,12 +1327,12 @@ static gboolean spell_make_wall(spell *s __attribute__((unused)), player *p)
             }
         }
 
-        return TRUE;
+        return true;
     }
     else
     {
         log_add_entry(nlarn->log, "There was a wall already..");
-        return FALSE;
+        return false;
     }
 }
 
@@ -1344,12 +1344,12 @@ gboolean spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
 
     pos = display_get_new_position(p, p->pos,
                                    "What do you want to vaporize?",
-                                   FALSE, FALSE, FALSE, 0, FALSE, TRUE);
+                                   false, false, false, 0, false, true);
 
     if (!pos_valid(pos))
     {
         log_add_entry(nlarn->log, "So you chose not to vaporize anything.");
-        return FALSE;
+        return false;
     }
 
     if (map_tiletype_at(pmap, pos) == LT_WALL)
@@ -1375,7 +1375,7 @@ gboolean spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
 
     sobject_destroy_at(p, pmap, pos);
 
-    return TRUE;
+    return true;
 }
 
 
@@ -1399,9 +1399,9 @@ colour book_colour(item *book)
 
 item_usage_result book_read(struct player *p, item *book)
 {
-    item_usage_result result = { FALSE, FALSE };
+    item_usage_result result = { false, false };
     gchar *desc = item_describe(book, player_item_known(p, book),
-                                TRUE, TRUE);
+                                true, true);
 
     if (player_effect(p, ET_BLINDNESS))
     {
@@ -1426,7 +1426,7 @@ item_usage_result book_read(struct player *p, item *book)
      * Reading a book takes ten turns per spell level.
      */
     if (!player_make_move(p, 10 * spell_level_by_id(book->id),
-                          TRUE, "reading %s", desc))
+                          true, "reading %s", desc))
     {
         /* the action has been aborted */
         g_free(desc);
@@ -1445,7 +1445,7 @@ item_usage_result book_read(struct player *p, item *book)
                       "It crumbles to dust.");
 
         player_mp_lose(p, rand_0n(p->mp));
-        result.used_up = TRUE;
+        result.used_up = true;
     }
     else
     {
@@ -1462,8 +1462,8 @@ item_usage_result book_read(struct player *p, item *book)
             /* learnt spell */
             log_add_entry(nlarn->log, "You master the spell %s.", book_name(book));
 
-            result.used_up = TRUE;
-            result.identified = TRUE;
+            result.used_up = true;
+            result.identified = true;
             break;
 
         default:
@@ -1471,8 +1471,8 @@ item_usage_result book_read(struct player *p, item *book)
             log_add_entry(nlarn->log, "You improved your knowledge of the spell %s.",
                           book_name(book));
 
-            result.used_up = TRUE;
-            result.identified = TRUE;
+            result.used_up = true;
+            result.identified = true;
             break;
         }
 
@@ -1490,7 +1490,7 @@ item_usage_result book_read(struct player *p, item *book)
 static int spell_cast(player *p, spell *s)
 {
     int turns = 0;
-    gboolean well_done = FALSE;
+    gboolean well_done = false;
 
     /* insufficient mana */
     if (p->mp < spell_level(s))
@@ -1604,12 +1604,12 @@ static int try_drying_ground(position pos)
         if ((int)rand_1n(9) <= adj_water)
         {
             log_add_entry(nlarn->log, "Nothing happens.");
-            return FALSE;
+            return false;
         }
 
         tile->type = LT_WATER;
         log_add_entry(nlarn->log, "The water is more shallow now.");
-        return TRUE;
+        return true;
     }
     else if (tile->type == LT_WATER)
     {
@@ -1618,7 +1618,7 @@ static int try_drying_ground(position pos)
         if ((int)rand_1n(9) <= adj_water)
         {
             log_add_entry(nlarn->log, "Nothing happens.");
-            return FALSE;
+            return false;
         }
 
         if (tile->base_type == LT_NONE)
@@ -1630,9 +1630,9 @@ static int try_drying_ground(position pos)
             tile->timer = 0;
 
         log_add_entry(nlarn->log, "The water evaporates!");
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 static gboolean spell_traj_pos_hit(const GList *traj,
@@ -1655,7 +1655,7 @@ static gboolean spell_area_pos_hit(position pos,
     sobject_t mst = map_sobject_at(cmap, pos);
     monster *m = map_get_monster_at(cmap, pos);
     item_erosion_type iet;
-    gboolean terminated = FALSE;
+    gboolean terminated = false;
 
     /* determine if the spell causes item erosion */
     switch (sp->id)
@@ -1686,14 +1686,14 @@ static gboolean spell_area_pos_hit(position pos,
         {
         /* fireball and lightning destroy statues up to diff. level 2 */
             sobject_destroy_at(damo->originator, cmap, pos);
-            terminated = TRUE;
+            terminated = true;
         }
 
         if (mst == LS_CLOSEDDOOR && (spell_level(sp) > 2))
         {
             /* Blast the door away */
             sobject_destroy_at(damo->originator, cmap, pos);
-            terminated = TRUE;
+            terminated = true;
         }
     }
 
@@ -1704,7 +1704,7 @@ static gboolean spell_area_pos_hit(position pos,
 
         /* erode the monster's inventory */
         if (iet > IET_NONE)
-            inv_erode(monster_inv(m), iet, FALSE, NULL);
+            inv_erode(monster_inv(m), iet, false, NULL);
 
         monster_damage_take(m, damage_copy(dam));
 
@@ -1713,7 +1713,7 @@ static gboolean spell_area_pos_hit(position pos,
          * the monster, otherwise it passes and may hit other monsters
          */
         if (monster_size(m) >= MEDIUM)
-            terminated = TRUE;
+            terminated = true;
     }
 
     /* The spell hit the player */
@@ -1735,7 +1735,7 @@ static gboolean spell_area_pos_hit(position pos,
                 }
 
                 /* missed */
-                terminated = FALSE;
+                terminated = false;
             }
             else
             {
@@ -1750,12 +1750,12 @@ static gboolean spell_area_pos_hit(position pos,
                      * a body armour will not be affected by erosion
                      * when the player wears a cloak over it.
                      */
-                    inv_erode(&(nlarn->p->inventory), iet, TRUE,
+                    inv_erode(&(nlarn->p->inventory), iet, true,
                             player_item_filter_unequippable);
                 }
 
                 /* hit */
-                terminated = TRUE;
+                terminated = true;
             }
         } /* The spell wasn't reflected */
     } /* The spell hit the player's position */
