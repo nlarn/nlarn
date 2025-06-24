@@ -2069,7 +2069,21 @@ void monster_player_attack(monster *m, player *p)
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM)
+    {
         dam->type = rand_1n(DAM_MAX);
+
+        // we need to adjust the damage amount for the different attack types
+        if (dam->type < DAM_BLINDNESS)
+        {
+            // these expect the amount of removed HPs
+            dam->amount = rand_m_n(15, 35);
+        }
+        else if (dam->type < DAM_STEAL_ITEM)
+        {
+            // these expect a probability
+            dam->amount = 50;
+        }
+    }
 
     if (dam->type == DAM_DEC_RND)
         dam->type = rand_m_n(DAM_DEC_CON, DAM_DEC_RND);
@@ -2105,7 +2119,9 @@ void monster_player_attack(monster *m, player *p)
         }
         else
         {
-            /* FIXME: give log message */
+            log_add_entry(nlarn->log, "The %s %s you, but nothing happens.",
+                monster_get_name(m), monster_attack_verb[att.type]);
+
             damage_free(dam);
 
             return;
