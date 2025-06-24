@@ -777,7 +777,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
     item_t itype;      /* item type */
 
     /* check if supplied position is suitable for a monster */
-    if (!map_pos_validate(game_map(nlarn, Z(pos)), pos, LE_MONSTER, FALSE))
+    if (!map_pos_validate(game_map(nlarn, Z(pos)), pos, LE_MONSTER, false))
     {
         return NULL;
     }
@@ -821,7 +821,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
     case MT_LEPRECHAUN:
         if (chance(25))
         {
-            inv_add(&nmonster->inv, item_new_random(IT_GEM, FALSE));
+            inv_add(&nmonster->inv, item_new_random(IT_GEM, false));
         }
         break;
 
@@ -929,7 +929,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         inv_add(&nmonster->inv, itm);
 
         /* the mimic is not known to be a monster */
-        nmonster->unknown = TRUE;
+        nmonster->unknown = true;
     }
 
     /* initialize AI */
@@ -953,7 +953,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         while (count > 0)
         {
             position mpos = map_find_space_in(game_map(nlarn, Z(pos)),
-                                    rect_new_sized(pos, 4), LE_MONSTER, FALSE);
+                                    rect_new_sized(pos, 4), LE_MONSTER, false);
             /* no space left? */
             if (!pos_valid(mpos)) break;
 
@@ -1050,11 +1050,11 @@ void monster_destroy(monster *m)
         effect_destroy(e);
     }
 
-    g_ptr_array_free(m->effects, TRUE);
+    g_ptr_array_free(m->effects, true);
 
     /* free inventory */
     if (m->inv)
-        inv_destroy(m->inv, TRUE);
+        inv_destroy(m->inv, true);
 
     /* unregister monster */
     game_monster_unregister(nlarn, m->oid);
@@ -1221,7 +1221,7 @@ int monster_valid_dest(map *m, position pos, int map_elem)
 {
     /* only civilians use LE_GROUND and can't move through the player */
     if (map_elem == LE_GROUND && pos_identical(pos, nlarn->p->pos))
-        return FALSE;
+        return false;
 
     switch (map_tiletype_at(m, pos))
     {
@@ -1230,7 +1230,7 @@ int monster_valid_dest(map *m, position pos, int map_elem)
 
     case LT_DEEPWATER:
         if (map_elem == LE_SWIMMING_MONSTER)
-            return TRUE;
+            return true;
         // else fall through
     case LT_LAVA:
         return (map_elem == LE_FLYING_MONSTER);
@@ -1245,7 +1245,7 @@ int monster_pos_set(monster *m, map *mp, position target)
 {
     g_assert(m != NULL && mp != NULL && pos_valid(target));
 
-    if (map_pos_validate(mp, target, monster_map_element(m), FALSE))
+    if (map_pos_validate(mp, target, monster_map_element(m), false))
     {
         /* remove current reference to monster from tile */
         map_set_monster_at(monster_map(m), m->pos, NULL);
@@ -1256,10 +1256,10 @@ int monster_pos_set(monster *m, map *mp, position target)
         /* set reference to monster on tile */
         map_set_monster_at(mp, target, m);
 
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 monster_t monster_type(monster *m)
@@ -1290,7 +1290,7 @@ static gboolean monster_nearby(monster *m)
 {
     /* different level */
     if (Z(m->pos) != Z(nlarn->p->pos))
-        return FALSE;
+        return false;
 
     return fov_get(nlarn->p->fv, m->pos);
 }
@@ -1301,15 +1301,15 @@ gboolean monster_in_sight(monster *m)
 
     /* player is blind */
     if (player_effect(nlarn->p, ET_BLINDNESS))
-        return FALSE;
+        return false;
 
     /* different level */
     if (Z(m->pos) != Z(nlarn->p->pos))
-        return FALSE;
+        return false;
 
     /* invisible monster, player has no infravision */
     if (monster_flags(m, INVISIBLE) && !player_effect(nlarn->p, ET_INFRAVISION))
-        return FALSE;
+        return false;
 
     return fov_get(nlarn->p->fv, m->pos);
 }
@@ -1524,7 +1524,7 @@ void monster_level_enter(monster *m, struct map *l)
     else
     {
         /* monster fell through a trap door */
-        npos = map_find_space(l, LE_MONSTER, FALSE);
+        npos = map_find_space(l, LE_MONSTER, false);
     }
 
     /* validate new position */
@@ -1532,11 +1532,11 @@ void monster_level_enter(monster *m, struct map *l)
     {
         /* player is standing at the target position */
         how = "squeezes past";
-        npos = map_find_space_in(l, rect_new_sized(npos, 1), LE_MONSTER, FALSE);
+        npos = map_find_space_in(l, rect_new_sized(npos, 1), LE_MONSTER, false);
     }
     else
 
-    if (!map_pos_validate(l, npos, LE_MONSTER, FALSE))
+    if (!map_pos_validate(l, npos, LE_MONSTER, false))
     {
         /* the position somehow isn't valid */
         return;
@@ -1760,7 +1760,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             else
             {
                 /* check if the new position is valid for this monster */
-                if (map_pos_validate(mmap, m_npos, monster_map_element(m), FALSE))
+                if (map_pos_validate(mmap, m_npos, monster_map_element(m), false))
                 {
                     /* the new position is valid -> reposition the monster */
                     monster_pos_set(m, mmap, m_npos);
@@ -1890,16 +1890,16 @@ int monster_items_pickup(monster *m)
 
     // The town people never take your stuff.
     if (monster_type(m) == MT_TOWN_PERSON)
-        return FALSE;
+        return false;
 
     /* monsters affected by levitation can't pick up stuff */
     if (monster_effect(m, ET_LEVITATION))
-        return FALSE;
+        return false;
 
     /* TODO: gelatinous cube digests items, rust monster eats metal stuff */
     /* FIXME: time management */
 
-    gboolean pick_up = FALSE;
+    gboolean pick_up = false;
 
     for (guint idx = 0; idx < inv_length(*map_ilist_at(monster_map(m), m->pos)); idx++)
     {
@@ -1909,16 +1909,16 @@ int monster_items_pickup(monster *m)
         if (m->type == MT_LEPRECHAUN && ((typ == IT_GEM) || (typ == IT_GOLD)))
         {
             /* leprechauns collect treasures */
-            pick_up = TRUE;
+            pick_up = true;
         }
         else if (it->type == IT_WEAPON && monster_attack_available(m, ATT_WEAPON))
         {
             /* monster can attack with weapons */
             if (m->eq_weapon == NULL)
-                pick_up = TRUE;
+                pick_up = true;
             /* compare this weapon with the weapon the monster wields */
             else if (weapon_damage(m->eq_weapon) < weapon_damage(it))
-                pick_up = TRUE;
+                pick_up = true;
         }
 
         if (pick_up)
@@ -1927,7 +1927,7 @@ int monster_items_pickup(monster *m)
             if (monster_in_sight(m))
             {
                 gchar *buf = item_describe(it, player_item_identified(nlarn->p, it),
-                                           FALSE, FALSE);
+                                           false, false);
 
                 log_add_entry(nlarn->log, "The %s picks up %s.",
                         monster_get_name(m), buf);
@@ -1945,11 +1945,11 @@ int monster_items_pickup(monster *m)
             }
 
             /* finish this turn after picking up an item */
-            return TRUE;
+            return true;
         } /* end if pick_up */
     } /* end foreach item */
 
-    return FALSE;
+    return false;
 }
 
 guint monster_attack_count(monster *m)
@@ -1997,15 +1997,15 @@ static int monster_breath_attack(monster *m, player *p, attack att)
 
     /* handle the breath */
     map_trajectory(m->pos, p->pos, &(dam->dam_origin),
-                   monster_breath_hit, dam, NULL, TRUE,
+                   monster_breath_hit, dam, NULL, true,
                    monster_breath_data[att.damage].glyph,
-                   monster_breath_data[att.damage].fg, TRUE);
+                   monster_breath_data[att.damage].fg, true);
 
     /* the damage is copied in monster_breath_hit(), thus destroy the
        original damage here */
     damage_free(dam);
 
-    return FALSE;
+    return false;
 }
 
 static int modified_attack_amount(int amount, int damage_type)
@@ -2136,7 +2136,7 @@ void monster_player_attack(monster *m, player *p)
         if (monster_player_rob(m, p, (dam->type == DAM_STEAL_GOLD) ? IT_GOLD : IT_ALL))
         {
             /* teleport away */
-            monster_pos_set(m, mmap, map_find_space(mmap, LE_MONSTER, FALSE));
+            monster_pos_set(m, mmap, map_find_space(mmap, LE_MONSTER, false));
         }
 
         damage_free(dam);
@@ -2147,13 +2147,13 @@ void monster_player_attack(monster *m, player *p)
                       monster_attack_verb[att.type]);
 
         monster_item_rust(m, p);
-        p->attacked = TRUE;
+        p->attacked = true;
         damage_free(dam);
         break;
 
     case DAM_REM_ENCH:
         monster_item_disenchant(m, p);
-        p->attacked = TRUE;
+        p->attacked = true;
         damage_free(dam);
         break;
 
@@ -2202,10 +2202,10 @@ int monster_player_ranged_attack(monster *m, player *p)
 
             player_damage_take(p, dam, PD_MONSTER, m->type);
         }
-        return TRUE;
+        return true;
     }
     if (att.type != ATT_BREATH)
-        return FALSE;
+        return false;
 
     return monster_breath_attack(m, p, att);
 }
@@ -2347,7 +2347,7 @@ monster *monster_damage_take(monster *m, damage *dam)
                        need to use nlarn->p here. */
                     wdesc = item_describe(m->eq_weapon,
                                     player_item_known(nlarn->p, m->eq_weapon),
-                                    FALSE, FALSE);
+                                    false, false);
 
                     inv_del_element(&m->inv, m->eq_weapon);
                     inv_add(map_ilist_at(monster_map(m), m->pos), m->eq_weapon);
@@ -2413,7 +2413,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
             /* FIXME: it would be nice to have a variable amount of turns */
             m->number = 100;
         }
-        return TRUE;
+        return true;
     }
 
     /* handle some easy action updates before the more difficult decisions */
@@ -2423,7 +2423,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
         case MA_CIVILIAN:  /* town people never change their behaviour */
         case MA_CONFUSION: /* confusion is removed by monster_effect_del() */
         case MA_REMAIN:    /* status set by hold monster/sleep/being trapped */
-            return FALSE;
+            return false;
             break;
 
         default:
@@ -2461,10 +2461,10 @@ gboolean monster_update_action(monster *m, monster_action_t override)
     if (naction != m->action)
     {
         m->action = naction;
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 void monster_update_player_pos(monster *m, position ppos)
@@ -2509,11 +2509,11 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty)
         {
             /* monster died from poison */
             monster_die(m, NULL);
-            return FALSE;
+            return false;
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 item *get_mimic_item(monster *m)
@@ -2542,12 +2542,12 @@ char *monster_desc(monster *m)
     {
         item *it = get_mimic_item(m);
         gchar *item_desc= item_describe(it, player_item_known(nlarn->p, it),
-                                        FALSE, FALSE);
+                                        false, false);
 
         g_string_append_printf(desc, "You see %s there", item_desc);
         g_free(item_desc);
 
-        return g_string_free(desc, FALSE);
+        return g_string_free(desc, false);
     }
 
     hp_rel = (((float)m->hp / (float)monster_hp_max(m)) * 100);
@@ -2580,7 +2580,7 @@ char *monster_desc(monster *m)
         /* describe the weapon the monster wields */
         gchar *weapon_desc = item_describe(m->eq_weapon,
                         player_item_known(nlarn->p, m->eq_weapon),
-                        TRUE, FALSE);
+                        true, false);
 
         g_string_append_printf(desc, ", armed with %s", weapon_desc);
         g_free(weapon_desc);
@@ -2609,7 +2609,7 @@ char *monster_desc(monster *m)
         g_free(effects);
     }
 
-    return g_string_free(desc, FALSE);
+    return g_string_free(desc, false);
 }
 
 char monster_glyph(monster *m)
@@ -2648,7 +2648,7 @@ void monster_genocide(monster_t monster_id)
 
     g_assert(monster_id < MT_MAX);
 
-    nlarn->monster_genocided[monster_id] = TRUE;
+    nlarn->monster_genocided[monster_id] = true;
     mlist = g_hash_table_get_values(nlarn->monsters);
 
     /* purge genocided monsters */
@@ -2678,7 +2678,7 @@ int monster_is_genocided(monster_t monster_id)
 effect *monster_effect_add(monster *m, effect *e)
 {
     g_assert(m != NULL && e != NULL);
-    gboolean vis_effect = FALSE;
+    gboolean vis_effect = false;
 
     if (e->type == ET_SLEEP && monster_flags(m, RES_SLEEP))
     {
@@ -2716,7 +2716,7 @@ effect *monster_effect_add(monster *m, effect *e)
                 m->hp += min ((m->hp_max  * e->amount) / 100, m->hp_max);
 
                 if (m->hp > hp_orig)
-                    vis_effect = TRUE;
+                    vis_effect = true;
             }
 
             break;
@@ -2725,7 +2725,7 @@ effect *monster_effect_add(monster *m, effect *e)
             if (m->hp < m->hp_max)
             {
                 m->hp = m->hp_max;
-                vis_effect = TRUE;
+                vis_effect = true;
             }
             break;
 
@@ -2867,7 +2867,7 @@ static gboolean monster_player_visible(monster *m)
 {
     /* monster is blinded */
     if (monster_effect(m, ET_BLINDNESS))
-        return FALSE;
+        return false;
 
     /* FIXME: this ought to be different per monster type */
     int monster_visrange = 7;
@@ -2883,12 +2883,12 @@ static gboolean monster_player_visible(monster *m)
 
     /* determine if the monster can see the player */
     if (pos_distance(monster_pos(m), nlarn->p->pos) > monster_visrange)
-        return FALSE;
+        return false;
 
     /* check if the player is invisible and if the monster has infravision */
     if (player_effect(nlarn->p, ET_INVISIBILITY)
         && !(monster_flags(m, INFRAVISION) || monster_effect(m, ET_INFRAVISION)))
-        return FALSE;
+        return false;
 
     /* determine if player's position is visible from monster's position */
     return map_pos_is_visible(monster_map(m), m->pos, nlarn->p->pos);
@@ -2896,7 +2896,7 @@ static gboolean monster_player_visible(monster *m)
 
 static gboolean monster_attack_available(monster *m, attack_t type)
 {
-    gboolean available = FALSE;
+    gboolean available = false;
     int pos = 1;
     int c = monster_attack_count(m);
 
@@ -2906,7 +2906,7 @@ static gboolean monster_attack_available(monster *m, attack_t type)
 
         if (att.type == type)
         {
-            available = TRUE;
+            available = true;
             break;
         }
 
@@ -2926,7 +2926,7 @@ static void monster_weapon_wield(monster *m, item *weapon)
     if (monster_in_sight(m))
     {
         gchar *buf = item_describe(weapon, player_item_identified(nlarn->p,
-                                weapon), TRUE, FALSE);
+                                weapon), true, false);
 
         log_add_entry(nlarn->log, "The %s wields %s.", monster_get_name(m), buf);
         g_free(buf);
@@ -2943,7 +2943,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
     if (!inv_length(p->inventory))
     {
         /* empty inventory */
-        return FALSE;
+        return false;
     }
 
     it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
@@ -2960,15 +2960,15 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
     if (it->blessed && chance(50))
     {
         gchar *desc = item_describe(it, player_item_known(nlarn->p, it),
-                                    (it->count == 1), TRUE);
+                                    (it->count == 1), true);
 
         desc[0] = g_ascii_toupper(desc[0]);
         log_add_entry(nlarn->log, "%s resist%s the attack.",
                       desc, (it->count == 1) ? "s" : "");
 
-        it->blessed_known = TRUE;
+        it->blessed_known = true;
         g_free(desc);
-        return TRUE;
+        return true;
     }
     log_add_entry(nlarn->log, "You feel a sense of loss.");
 
@@ -2981,7 +2981,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
         player_item_destroy(p, it);
     }
 
-    return TRUE;
+    return true;
 }
 
 /**
@@ -2998,15 +2998,15 @@ static gboolean monster_item_rust(monster *m __attribute__((unused)), struct pla
     g_assert(m != NULL && p != NULL);
 
     /* get a random piece of armour to damage */
-    if ((it = player_get_random_armour(p, FALSE)))
+    if ((it = player_get_random_armour(p, false)))
     {
-        *it = item_erode(&p->inventory, *it, IET_RUST, TRUE);
-        return TRUE;
+        *it = item_erode(&p->inventory, *it, IET_RUST, true);
+        return true;
     }
     else
     {
         log_add_entry(nlarn->log, "Nothing happens.");
-        return FALSE;
+        return false;
     }
 }
 
@@ -3018,7 +3018,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
 
     /* if player has a device of no theft abort the theft */
     if (player_effect(p, ET_NOTHEFT))
-        return FALSE;
+        return false;
 
     /* Leprechaun robs only gold */
     if (item_type == IT_GOLD)
@@ -3057,10 +3057,10 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     {
         if (inv_length(p->inventory))
         {
-            gboolean was_equipped = FALSE;
+            gboolean was_equipped = false;
 
             it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
-            gchar *buf = item_describe(it, player_item_known(p, it), FALSE, FALSE);
+            gchar *buf = item_describe(it, player_item_known(p, it), false, false);
 
             if ((was_equipped = player_item_is_equipped(p, it)))
             {
@@ -3070,14 +3070,14 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                     log_add_entry(nlarn->log, "The %s tries to steal %s but fails.",
                                   monster_get_name(m), buf);
 
-                    it->blessed_known = TRUE;
+                    it->blessed_known = true;
                     g_free(buf);
 
                     /* return true as there are things to steal */
-                    return TRUE;
+                    return true;
                 }
 
-                player_item_unequip(p, NULL, it, TRUE);
+                player_item_unequip(p, NULL, it, true);
             }
 
             if (it->count > 1)
@@ -3085,7 +3085,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
                 /* the player has multiple items. Steal only one. */
                 it = item_split(it, rand_1n(it->count));
                 g_free(buf);
-                buf = item_describe(it, player_item_known(p, it), FALSE, FALSE);
+                buf = item_describe(it, player_item_known(p, it), false, false);
             }
             else
             {
@@ -3112,14 +3112,14 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     if (it)
     {
         inv_add(&m->inv, it);
-        return TRUE;
+        return true;
     }
     else
     {
         log_add_entry(nlarn->log, "The %s couldn't find anything to steal.",
                       monster_get_name(m));
 
-        return FALSE;
+        return false;
     }
 }
 
@@ -3216,7 +3216,7 @@ static position monster_move_wander(monster *m, struct player *p __attribute__((
     }
     while (tries < GD_MAX
             && !map_pos_validate(monster_map(m), npos, monster_map_element(m),
-                                 FALSE));
+                                 false));
 
     /* new position has not been found, reset to current position */
     if (tries == GD_MAX) npos = monster_pos(m);
@@ -3311,7 +3311,7 @@ static position monster_move_flee(monster *m, struct player *p)
         npos_tmp = pos_move(monster_pos(m), tries);
 
         if (map_pos_validate(monster_map(m), npos_tmp, monster_map_element(m),
-                             FALSE)
+                             false)
                 && pos_distance(p->pos, npos_tmp) > dist)
         {
             /* distance is bigger than current distance */
@@ -3370,7 +3370,7 @@ static position monster_move_civilian(monster *m, struct player *p)
         {
             /* Ensure that the townsfolk do not loiter in locations
                important for the player. */
-            m->player_pos = map_find_space_in(monster_map(m), town, LE_GROUND, FALSE);
+            m->player_pos = map_find_space_in(monster_map(m), town, LE_GROUND, false);
         } while (map_sobject_at(monster_map(m), m->player_pos) != LS_NONE);
     }
 
@@ -3426,9 +3426,9 @@ int monster_is_carrying_item(monster *m, item_t type)
     {
         item *it = inv_get(inv, idx);
         if (it->type == type)
-            return TRUE;
+            return true;
     }
-    return FALSE;
+    return false;
 }
 
 inline const char *monster_name(monster *m) {
@@ -3539,7 +3539,7 @@ static gboolean monster_breath_hit(const GList *traj,
     monster *m;
     damage *dam = (damage *)data1;
     item_erosion_type iet;
-    gboolean terminated = FALSE;
+    gboolean terminated = false;
     position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);
     map *mp = game_map(nlarn, Z(pos));
 
@@ -3573,13 +3573,13 @@ static gboolean monster_breath_hit(const GList *traj,
 
         /* erode the monster's inventory */
         if (iet && monster_inv(m))
-            inv_erode(monster_inv(m), iet, FALSE, NULL);
+            inv_erode(monster_inv(m), iet, false, NULL);
 
         monster_damage_take(m, damage_copy(dam));
 
         /* the breath will sweep over small monsters */
         if (monster_size(m) >= LARGE)
-            terminated = TRUE;
+            terminated = true;
     }
 
     if (pos_identical(pos, nlarn->p->pos))
@@ -3616,11 +3616,11 @@ static gboolean monster_breath_hit(const GList *traj,
                  * a body armour will not be affected by erosion
                  * when the player wears a cloak over it.
                  */
-                inv_erode(&nlarn->p->inventory, iet, TRUE,
+                inv_erode(&nlarn->p->inventory, iet, true,
                         player_item_filter_unequippable);
             }
 
-            terminated = TRUE;
+            terminated = true;
         }
     }
 

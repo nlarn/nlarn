@@ -100,7 +100,7 @@ item *item_new(item_t item_type, int item_id)
     /* set bonus_known on unoptimizable items to avoid stacking problems */
     if (!item_is_optimizable(item_type))
     {
-        nitem->bonus_known = TRUE;
+        nitem->bonus_known = true;
     }
 
     /* register item with game */
@@ -138,10 +138,10 @@ item *item_new(item_t item_type, int item_id)
 
             /* No need to do a fine touch here, that
              * will be done in the calling function. */
-            return item_new_random(item_type, FALSE);
+            return item_new_random(item_type, false);
         }
 
-        nlarn->amulet_created[nitem->id] = TRUE;
+        nlarn->amulet_created[nitem->id] = true;
 
         if (amulet_effect_t(nitem))
         {
@@ -160,7 +160,7 @@ item *item_new(item_t item_type, int item_id)
 
         if (armour_unique(nitem))
         {
-            nlarn->armour_created[nitem->id] = TRUE;
+            nlarn->armour_created[nitem->id] = true;
         }
 
         if (armour_effect(nitem))
@@ -188,7 +188,7 @@ item *item_new(item_t item_type, int item_id)
         }
         else if (item_id == PO_CURE_DIANTHR)
         {
-            nlarn->cure_dianthr_created = TRUE;
+            nlarn->cure_dianthr_created = true;
         }
         break;
 
@@ -217,7 +217,7 @@ item *item_new(item_t item_type, int item_id)
         if (weapon_is_unique(nitem))
         {
             /* mark unique weapon as created */
-            nlarn->weapon_created[nitem->id] = TRUE;
+            nlarn->weapon_created[nitem->id] = true;
         }
 
         /* special effects for Bessman's Hammer */
@@ -305,7 +305,7 @@ item *item_new_by_level(item_t item_type, int num_level)
 
     default:
         /* no per-map randomisation */
-        return item_new_random(item_type, TRUE);
+        return item_new_random(item_type, true);
     }
 
     id_base = item_max_id(item_type) * (num_level * divisor);
@@ -332,7 +332,7 @@ item *item_new_finetouch(item *it)
     {
         // water is always blessed
         item_bless(it);
-        it->blessed_known = TRUE;
+        it->blessed_known = true;
     }
     else if (item_is_blessable(it->type) && chance(25))
     {
@@ -370,7 +370,7 @@ item *item_new_finetouch(item *it)
        Don't erode potions, as they break when exposed to fire */
     if (it->type != IT_POTION && item_is_corrodible(it->type) && chance(25))
     {
-        it = item_erode(NULL, it, rand_1n(IET_MAX), FALSE);
+        it = item_erode(NULL, it, rand_1n(IET_MAX), false);
     }
 
     return it;
@@ -440,12 +440,12 @@ void item_destroy(item *it)
                 effect_destroy(eff);
         }
 
-        g_ptr_array_free(it->effects, TRUE);
+        g_ptr_array_free(it->effects, true);
     }
 
     if (it->content != NULL)
     {
-        inv_destroy(it->content, FALSE);
+        inv_destroy(it->content, false);
     }
 
     if (it->notes != NULL)
@@ -614,11 +614,11 @@ int item_compare(item *a, item *b)
 
     if (a->type != b->type)
     {
-        return FALSE;
+        return false;
     }
     else if (a->type == IT_GOLD)
     {
-        return TRUE;
+        return true;
     }
 
     /* as count can be different for equal items, save count of b */
@@ -682,7 +682,7 @@ gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean defin
             it->count == 1 ? a_an(itd.name_sg) : "some",
             it->count == 1 ? itd.name_sg : itd.name_pl);
 
-        return g_string_free(desc, FALSE);
+        return g_string_free(desc, false);
     }
 
     /* collect additional information */
@@ -884,7 +884,7 @@ gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean defin
     /* free the additional information */
     g_free(add_info);
 
-    return g_string_free(desc, FALSE);
+    return g_string_free(desc, false);
 }
 
 item_material_t item_material(item *it)
@@ -1200,11 +1200,11 @@ int item_bless(item *it)
     g_assert (it != NULL && !it->cursed);
 
     if (it->blessed)
-        return FALSE;
+        return false;
 
-    it->blessed = TRUE;
+    it->blessed = true;
 
-    return TRUE;
+    return true;
 }
 
 int item_curse(item *it)
@@ -1212,11 +1212,11 @@ int item_curse(item *it)
     g_assert (it != NULL && !it->blessed);
 
     if (it->cursed)
-        return FALSE;
+        return false;
 
-    it->cursed = TRUE;
+    it->cursed = true;
 
-    return TRUE;
+    return true;
 }
 
 int item_remove_curse(item *it)
@@ -1224,12 +1224,12 @@ int item_remove_curse(item *it)
     g_assert (it != NULL && it->cursed);
 
     if (!it->cursed || it->blessed)
-        return FALSE;
+        return false;
 
-    it->cursed = FALSE;
-    it->blessed_known = TRUE;
+    it->cursed = false;
+    it->blessed_known = true;
 
-    return TRUE;
+    return true;
 }
 
 item *item_enchant(item *it)
@@ -1243,10 +1243,10 @@ item *item_enchant(item *it)
     {
         /* hide bonus from description */
         gboolean bonus_known = it->bonus_known;
-        it->bonus_known = FALSE;
+        it->bonus_known = false;
 
         gchar *desc = item_describe(it, player_item_known(nlarn->p, it),
-                                    (it->count == 1), TRUE);
+                                    (it->count == 1), true);
 
         desc[0] = g_ascii_toupper(desc[0]);
         log_add_entry(nlarn->log, "%s vibrate%s strangely.",
@@ -1291,14 +1291,14 @@ item *item_disenchant(item *it)
 
     if (it->bonus == -3)
     {
-        gchar *desc = item_describe(it, player_item_known(nlarn->p, it), FALSE, TRUE);
+        gchar *desc = item_describe(it, player_item_known(nlarn->p, it), false, true);
 
         desc[0] = g_ascii_toupper(desc[0]);
         log_add_entry(nlarn->log, "%s vibrate%s warningly.",
                       desc, (it->count == 1) ? "s" : "");
 
         g_free(desc);
-        it->bonus_known = TRUE;
+        it->bonus_known = true;
     }
 
     if ((it->type == IT_RING) && it->effects)
@@ -1327,13 +1327,13 @@ static int material_affected(item_material_t mat, item_erosion_type iet)
     case IET_RUST:
         return (mat == IM_IRON);
     default:
-        return (FALSE);
+        return (false);
     }
 }
 
 item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visible)
 {
-    gboolean destroyed = FALSE;
+    gboolean destroyed = false;
     const char *erosion_desc = NULL;
     gchar *item_desc = NULL;
 
@@ -1351,7 +1351,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     {
         /* prepare item description before it has been affected */
         item_desc = item_describe(it, player_item_known(nlarn->p, it),
-                                  (it->count == 1), TRUE);
+                                  (it->count == 1), true);
 
         item_desc[0] = g_ascii_toupper(item_desc[0]);
     }
@@ -1365,7 +1365,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
                           (it->count == 1) ? "s" : "");
 
             g_free(item_desc);
-            it->blessed_known = TRUE;
+            it->blessed_known = true;
         }
         return (it);
     }
@@ -1376,7 +1376,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
         if (it->type == IT_POTION)
         {
             erosion_desc = "shatter";
-            destroyed = TRUE;
+            destroyed = true;
         }
         else if (item_material(it) == IM_GLASS)
         {
@@ -1387,7 +1387,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
             it->burnt++;
             erosion_desc = "burn";
 
-            if (it->burnt == 3) destroyed = TRUE;
+            if (it->burnt == 3) destroyed = true;
         }
         break;
 
@@ -1395,7 +1395,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
         it->corroded++;
         erosion_desc = "corrode";
 
-        if (it->corroded == 3) destroyed = TRUE;
+        if (it->corroded == 3) destroyed = true;
         break;
 
     case IET_RUST:
@@ -1403,7 +1403,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
         erosion_desc = "rust";
 
         /* it's been very rusty already -> destroy */
-        if (it->rusty == 3) destroyed = TRUE;
+        if (it->rusty == 3) destroyed = true;
         break;
 
     default:
@@ -1436,7 +1436,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
                  * inventory, try to unequip the item first as we do
                  * not know if it is equipped (this would lead to nasty
                  * segmentation faults otherwise) */
-                player_item_unequip(nlarn->p, &nlarn->p->inventory, it, TRUE);
+                player_item_unequip(nlarn->p, &nlarn->p->inventory, it, true);
             }
 
             inv_del_element(inv, it);
@@ -1506,7 +1506,7 @@ int item_obtainable(item_t type, int id)
         break;
 
     default:
-        obtainable = FALSE;
+        obtainable = false;
     }
 
     return obtainable;
@@ -1621,7 +1621,7 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop)
                 it->count > 1 ? " each" : "");
     }
 
-    return g_string_free(desc, FALSE);
+    return g_string_free(desc, false);
 }
 
 int item_filter_container(item *it)
@@ -1669,7 +1669,7 @@ int item_filter_unid(item *it)
 int item_filter_cursed(item *it)
 {
     g_assert (it != NULL);
-    return (it->cursed == TRUE);
+    return (it->cursed == true);
 }
 
 int item_filter_cursed_or_unknown(item *it)
@@ -1681,8 +1681,8 @@ int item_filter_cursed_or_unknown(item *it)
 int item_filter_nonblessed(item *it)
 {
     g_assert (it != NULL);
-    return (it->blessed == FALSE
-            || (it->blessed_known == FALSE && item_is_blessable(it->type)));
+    return (it->blessed == false
+            || (it->blessed_known == false && item_is_blessable(it->type)));
 }
 
 int item_filter_pcd(item *it)
@@ -1708,13 +1708,13 @@ gboolean item_is_unique(item *it)
         return (it->id == PO_CURE_DIANTHR);
         break;
     case IT_AMULET:
-        return TRUE;
+        return true;
         break;
     case IT_WEAPON:
         return weapon_is_unique(it);
         break;
     default:
-        return FALSE;
+        return false;
         break;
     }
 }

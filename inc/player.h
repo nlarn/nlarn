@@ -221,7 +221,7 @@ char player_select_bonus_stats();
  *
  * @param the player
  * @param the preset (between 'a' and 'f')
- * @return TRUE for valid presets, FALSE for invalid presets
+ * @return true for valid presets, false for invalid presets
  */
 gboolean player_assign_bonus_stats(player *p, char preset);
 void player_destroy(player *p);
@@ -234,9 +234,9 @@ player *player_deserialize(cJSON *pser);
  *
  * @param the player
  * @param the number of turns the move takes
- * @param TRUE if the action can be interrupted
+ * @param true if the action can be interrupted
  * @param (optional) the description of the action in the form "reading the book of foo"
- * @return TRUE if the action has completed, FALSE if it has been interrupted
+ * @return true if the action has completed, false if it has been interrupted
  *
  */
 gboolean player_make_move(player *p, int turns, gboolean interruptible, const char *desc, ...);
@@ -262,8 +262,8 @@ void player_update_fov(player *p);
  *
  * @param the player
  * @param entered map
- * @param has to be TRUE if the player didn't enter the map regularly
- * @return TRUE
+ * @param has to be true if the player didn't enter the map regularly
+ * @return true
  */
 int player_map_enter(player *p, map *l, gboolean teleported);
 
@@ -382,7 +382,7 @@ void player_item_unequip_wrapper(player *p, inventory **inv, item *it);
   * @param the player
   * @param unused, needed to make function signature match display_inventory requirements
   * @param the item
-  * @param TRUE if the removal does not occur interactively. No time is consumed in this case.
+  * @param true if the removal does not occur interactively. No time is consumed in this case.
   */
 void player_item_unequip(player *p,
                          inventory **inv __attribute__((unused)),
@@ -469,9 +469,9 @@ void player_sobject_forget(player *p, position pos);
   * @brief Check for adjacent monsters.
   *
   * @param The player.
-  * @param TRUE if harmless monsters shall be ignored.
+  * @param true if harmless monsters shall be ignored.
   *
-  * @return TRUE if there are adjacent monsters.
+  * @return true if there are adjacent monsters.
   */
 gboolean player_adjacent_monster(player *p, gboolean ignore_harmless);
 

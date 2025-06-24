@@ -260,7 +260,7 @@ score_t *score_new(game *g, player_cod cod, int cause)
 
     score->player_name = g_strdup(g->p->name);
     score->sex = g->p->sex;
-    score->score = player_calc_score(g->p, (cod == PD_WON) ? TRUE : FALSE);
+    score->score = player_calc_score(g->p, (cod == PD_WON) ? true : false);
     score->moves = game_turn(g);
     score->cod = cod;
     score->cause = cause;
@@ -457,7 +457,7 @@ char *score_death_description(score_t *score, int verbose)
                                score->score, score->difficulty);
     }
 
-    return g_string_free(text, FALSE);
+    return g_string_free(text, false);
 }
 
 char *scores_to_string(GList *scores, score_t *score)
@@ -482,14 +482,14 @@ char *scores_to_string(GList *scores, score_t *score)
 
     /* display up to 7 surronding entries or all when score wasn't specified */
     for (int nrec = max(rank - 3, 0);
-         iterator && (score ? (nrec < (max(rank, 0) + 4)) : TRUE);
+         iterator && (score ? (nrec < (max(rank, 0) + 4)) : true);
          iterator = iterator->next, nrec++)
     {
         gchar *desc;
 
         score_t *cscore = (score_t *)iterator->data;
 
-        desc = score_death_description(cscore, FALSE);
+        desc = score_death_description(cscore, false);
         g_string_append_printf(text, "  %c%2d) %7" G_GINT64_FORMAT " %s\n",
                                (cscore == score) ? '*' : ' ',
                                nrec + 1, cscore->score, desc);
@@ -500,7 +500,7 @@ char *scores_to_string(GList *scores, score_t *score)
         g_free(desc);
     }
 
-    return g_string_free(text, FALSE);
+    return g_string_free(text, false);
 }
 
 void scores_destroy(GList *gs)

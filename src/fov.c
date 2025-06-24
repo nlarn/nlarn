@@ -1,6 +1,6 @@
 /*
  * fov.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -82,7 +82,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
                              mult[2][octant], mult[3][octant]);
     }
 
-    fov_set(fv, pos, TRUE, infravision, TRUE);
+    fov_set(fv, pos, true, infravision, true);
 }
 
 gboolean fov_get(fov *fv, position pos)
@@ -117,7 +117,7 @@ void fov_reset(fov *fv)
 {
     g_assert (fv != NULL);
 
-    /* set fov_data to FALSE */
+    /* set fov_data to false */
     memset(fv->data, 0, MAP_MAX_Y * MAP_MAX_X * sizeof(guchar));
 
     /* set the center to an invalid position */
@@ -197,7 +197,7 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
         int dx = -j - 1;
         int dy = -j;
 
-        int blocked = FALSE;
+        int blocked = false;
 
         while (dx <= 0)
         {
@@ -234,7 +234,7 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
                 /* Our light beam is touching this square; light it */
                 if ((dx * dx + dy * dy) < radius_squared)
                 {
-                    fov_set(fv, pos, TRUE, infravision, TRUE);
+                    fov_set(fv, pos, true, infravision, true);
                 }
 
                 if (blocked)
@@ -247,7 +247,7 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
                     }
                     else
                     {
-                        blocked = FALSE;
+                        blocked = false;
                         start = new_start;
                     }
                 }
@@ -256,7 +256,7 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
                     if (!map_pos_transparent(m, pos) && (j < radius))
                     {
                         /* This is a blocking square, start a child scan */
-                        blocked = TRUE;
+                        blocked = true;
                     }
 
                     fov_calculate_octant(fv, m, center, infravision,

@@ -217,7 +217,7 @@ void monster_polymorph(monster *m);
  * check stash at monster's position for something desired
  *
  * @param a monster
- * @return TRUE if something has been picked up, FALSE if not
+ * @return true if something has been picked up, false if not
  */
 int monster_items_pickup(monster *m);
 
@@ -255,7 +255,7 @@ monster *monster_damage_take(monster *m, damage *dam);
  *
  * @param the monster
  * @param manually set action for a monster
- * @return TRUE if the action has changed
+ * @return true if the action has changed
  */
 gboolean monster_update_action(monster *m, monster_action_t override);
 

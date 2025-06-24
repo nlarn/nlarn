@@ -1,6 +1,6 @@
 /*
  * utils.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -52,7 +52,7 @@ message_log *log_new()
 
     log = g_malloc0(sizeof(message_log));
 
-    log->active = TRUE;
+    log->active = true;
     log->buffer = g_string_new(NULL);
     log->entries = g_ptr_array_new_with_free_func(
             (GDestroyNotify)log_entry_destroy);
@@ -64,14 +64,14 @@ void log_destroy(message_log *log)
 {
     g_assert(log != NULL);
 
-    g_ptr_array_free(log->entries, TRUE);
+    g_ptr_array_free(log->entries, true);
 
     if (log->lastmsg != NULL)
     {
         g_free(log->lastmsg);
     }
 
-    g_string_free(log->buffer, TRUE);
+    g_string_free(log->buffer, true);
     g_free(log);
 }
 
@@ -80,8 +80,8 @@ int log_add_entry(message_log *log, const char *fmt, ...)
     va_list argp;
     gchar *msg;
 
-    if (log == NULL || log->active == FALSE)
-        return FALSE;
+    if (log == NULL || log->active == false)
+        return false;
 
     /* assemble message and append it to the buffer */
     va_start(argp, fmt);
@@ -95,7 +95,7 @@ int log_add_entry(message_log *log, const char *fmt, ...)
         {
             /* message is equal to previous message */
             g_free(msg);
-            return FALSE;
+            return false;
         }
         else
         {
@@ -117,7 +117,7 @@ int log_add_entry(message_log *log, const char *fmt, ...)
 
     g_string_append(log->buffer, msg);
 
-    return TRUE;
+    return true;
 }
 
 void log_set_time(message_log *log, int gtime)
@@ -132,7 +132,7 @@ void log_set_time(message_log *log, int gtime)
         entry->gtime = log->gtime;
 
         /* destroy the GString object and keep the message */
-        entry->message = g_string_free(log->buffer, FALSE);
+        entry->message = g_string_free(log->buffer, false);
 
         /* append the entry to the message log */
         g_ptr_array_add(log->entries, entry);
@@ -205,7 +205,7 @@ message_log *log_deserialize(cJSON *lser)
     /* create new message log */
     message_log *log = g_malloc0(sizeof(message_log));
 
-    log->active = TRUE;
+    log->active = true;
     log->entries = g_ptr_array_new_with_free_func(
             (GDestroyNotify)log_entry_destroy);
 
@@ -269,7 +269,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
     while (spos < strlen(str))
     {
         /* flag to determine if the current char must not be counted */
-        gboolean in_tag = FALSE;
+        gboolean in_tag = false;
 
         /* current working position in source string */
         int cpos = 0;
@@ -385,7 +385,7 @@ void text_destroy(GPtrArray *text)
     while (text->len > 0)
         g_free(g_ptr_array_remove_index_fast(text, 0));
 
-    g_ptr_array_free(text, TRUE);
+    g_ptr_array_free(text, true);
 }
 
 /**
@@ -422,9 +422,9 @@ int strv_append(char ***list, const char *str)
  */
 int strv_append_unique(char ***list, const char *str)
 {
-    /* compare elements to the new string and return FALSE if the element existed */
+    /* compare elements to the new string and return false if the element existed */
     for (int len = 0; (*list)[len]; len++)
-        if (strcmp((*list)[len], str) == 0) return FALSE;
+        if (strcmp((*list)[len], str) == 0) return false;
 
     return strv_append(list, str);
 }
@@ -440,7 +440,7 @@ char *str_prepare_for_saving(const char *str)
 #endif
 
     /* first, strip color tags from str */
-    gboolean in_tag = FALSE;
+    gboolean in_tag = false;
     /* alloc the size of the original string to avoid permanent reallocations */
     GString *stripped = g_string_sized_new(strlen(str));
     for (guint idx = 0; idx < strlen(str); idx++)
@@ -457,7 +457,7 @@ char *str_prepare_for_saving(const char *str)
 
     /* then wrap the resulting string */
     GPtrArray *wrapped_str = text_wrap(stripped->str, 78, 2);
-    g_string_free(stripped, TRUE);
+    g_string_free(stripped, true);
 
     /* then assemble the file content */
     GString *nstr = g_string_new(NULL);
@@ -469,7 +469,7 @@ char *str_prepare_for_saving(const char *str)
 
     text_destroy(wrapped_str);
 
-    return g_string_free(nstr, FALSE);
+    return g_string_free(nstr, false);
 }
 
 int str_starts_with_vowel(const char *str)
@@ -478,8 +478,8 @@ int str_starts_with_vowel(const char *str)
 
     g_assert (str != NULL);
 
-    if (strchr(vowels, str[0])) return TRUE;
-    else return FALSE;
+    if (strchr(vowels, str[0])) return true;
+    else return false;
 }
 
 const char *int2str(int val)

@@ -50,7 +50,7 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     {
         /* no container has been passed - look for container on the floor */
         inventory **finv = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
-        container = container_choose(p, finv, TRUE);
+        container = container_choose(p, finv, true);
 
         /* abort if no container has been selected */
         if (container == NULL) return;
@@ -62,9 +62,9 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
 
     /* Describe container */
     container_desc = item_describe(container, player_item_known(p, container),
-            TRUE, TRUE);
+            true, true);
 
-    if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
+    if (!player_make_move(p, 2, true, "opening %s", container_desc))
     {
         /* interrupted */
         g_free(container_desc);
@@ -77,7 +77,7 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
 
     /* If there is a trap on the container the player might trigger it. */
     if (container->cursed)
-        container_trigger_trap(p, container, FALSE);
+        container_trigger_trap(p, container, false);
 
     /* check for empty container */
     if (inv_length(container->content) == 0)
@@ -86,7 +86,7 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
 
         /* same description, this time definite */
         container_desc = item_describe(container, player_item_known(p, container),
-                                       TRUE, TRUE);
+                                       true, true);
 
         /* and the first char has to be upper case */
         container_desc[0] = g_ascii_toupper(container_desc[0]);
@@ -105,15 +105,15 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     callback->key = 'g';
     callback->inv = &container->content;
     callback->function = &container_item_unpack;
-    callback->active = TRUE;
+    callback->active = true;
 
     g_ptr_array_add(callbacks, callback);
 
     /* upper case the first char for the dialogue title */
     container_desc[0] = g_ascii_toupper(container_desc[0]);
 
-    display_inventory(container_desc, p, &container->content, callbacks, FALSE,
-                      TRUE, FALSE, NULL);
+    display_inventory(container_desc, p, &container->content, callbacks, false,
+                      true, false, NULL);
 
     g_free(container_desc);
     display_inv_callbacks_clean(callbacks);
@@ -123,7 +123,7 @@ void container_item_add(player *p, inventory **inv, item *element)
 {
     inventory **target_inv = NULL;
     gchar *container_desc = NULL, *element_desc;
-    gboolean carried_container = FALSE;
+    gboolean carried_container = false;
 
     g_assert(p != NULL && element != NULL);
 
@@ -150,12 +150,12 @@ void container_item_add(player *p, inventory **inv, item *element)
         if (pilen > 0)
         {
             /* choose a container from the player's inventory */
-            container = container_choose(p, &p->inventory, FALSE);
-            carried_container = TRUE;
+            container = container_choose(p, &p->inventory, false);
+            carried_container = true;
         }
         else if (filen > 0)
         {
-            container = container_choose(p, floor, TRUE);
+            container = container_choose(p, floor, true);
         }
 
         /* has a container been found? */
@@ -170,9 +170,9 @@ void container_item_add(player *p, inventory **inv, item *element)
         target_inv = &container->content;
 
         /* prepare container description */
-        container_desc = item_describe(container, TRUE, TRUE, TRUE);
+        container_desc = item_describe(container, true, true, true);
 
-        if (!player_make_move(p, 2, TRUE, "opening %s", container_desc))
+        if (!player_make_move(p, 2, true, "opening %s", container_desc))
         {
             g_free(container_desc);
             return; /* interrupted */
@@ -220,7 +220,7 @@ void container_item_add(player *p, inventory **inv, item *element)
 
     /* log the event */
     element_desc = item_describe(element, player_item_known(p, element),
-            FALSE, TRUE);
+            false, true);
 
     log_add_entry(nlarn->log, "You put %s into %s.",
             element_desc, container_desc);
@@ -286,9 +286,9 @@ void container_item_unpack(player *p, inventory **inv, item *element)
         inv_del_element(inv, element);
     }
 
-    desc = item_describe(element, player_item_known(p, element), FALSE, FALSE);
+    desc = item_describe(element, player_item_known(p, element), false, false);
 
-    if (!player_make_move(p, 2, TRUE, "putting %s in your pack", desc))
+    if (!player_make_move(p, 2, true, "putting %s in your pack", desc))
     {
         /* interrupted! */
         /* return the item into the originating inventory */
@@ -336,19 +336,19 @@ gboolean container_untrap(player *p)
 {
     map *m = game_map(nlarn, Z(p->pos));
     inventory **floor = map_ilist_at(m, p->pos);
-    item *container = container_choose(p, floor, FALSE);
+    item *container = container_choose(p, floor, false);
 
     if (container == NULL)
-        return FALSE;
+        return false;
 
-    char *desc = item_describe(container, TRUE, TRUE, TRUE);
+    char *desc = item_describe(container, true, true, true);
 
     if (!container->cursed && !container->blessed_known)
     {
         log_add_entry(nlarn->log, "As far as you know %s is not trapped.", desc);
         g_free(desc);
 
-        return FALSE;
+        return false;
     }
 
     guint prop = (2 * player_get_dex(p)) + p->level;
@@ -358,12 +358,12 @@ gboolean container_untrap(player *p)
          -> a bag takes two turns,
          -> a crate takes eight turns.
      */
-    if (!player_make_move(p, container->id * 2, TRUE,
+    if (!player_make_move(p, container->id * 2, true,
                 "Removing the trap on %s?", desc))
     {
         /* action aborted */
         g_free(desc);
-        return TRUE;
+        return true;
     }
 
     if (chance(prop))
@@ -371,8 +371,8 @@ gboolean container_untrap(player *p)
         log_add_entry(nlarn->log, "You manage to remove the trap on %s!", desc);
 
         /* Remove the trap. */
-        container->cursed = FALSE;
-        container->blessed_known = FALSE;
+        container->cursed = false;
+        container->blessed_known = false;
     }
     else
     {
@@ -380,12 +380,12 @@ gboolean container_untrap(player *p)
         log_add_entry(nlarn->log, "You trigger the trap on %s!", desc);
 
         /* The player removed the trap by triggering it. */
-        container_trigger_trap(p, container, TRUE);
+        container_trigger_trap(p, container, true);
     }
 
     g_free(desc);
 
-    return TRUE;
+    return true;
 }
 
 static item *container_choose(player *p, inventory **floor, gboolean notice)
@@ -407,7 +407,7 @@ static item *container_choose(player *p, inventory **floor, gboolean notice)
     {
         /* multiple containers on the floor, offer to choose one */
         return display_inventory("Choose a container", p, floor, NULL,
-                FALSE, FALSE, FALSE, item_filter_container);
+                false, false, false, item_filter_container);
     }
 }
 
@@ -419,13 +419,13 @@ static gboolean container_trigger_trap(player *p, item *container, gboolean forc
      * the chance to trigger the trap is lowered */
     if (!force && container->blessed_known && chance(3 * player_get_dex(p)))
     {
-        gchar *idesc = item_describe(container, FALSE, TRUE, TRUE);
+        gchar *idesc = item_describe(container, false, true, true);
 
         log_add_entry(nlarn->log, "You carefully avoid the trap on %s.", idesc);
         g_free(idesc);
 
         /* the trap remains on the container */
-        return FALSE;
+        return false;
     }
 
     const char *msg = "A little needle shoots out and stings you!";
@@ -460,11 +460,11 @@ static gboolean container_trigger_trap(player *p, item *container, gboolean forc
     }
 
     /* the player has triggered the trap, thus remove it */
-    container->cursed = FALSE;
+    container->cursed = false;
 
     /* reset blessed_known, otherwise "uncursed xxx" would appear */
-    container->blessed_known = FALSE;
+    container->blessed_known = false;
 
     /* the trap is destroyed */
-    return TRUE;
+    return true;
 }

@@ -1,6 +1,6 @@
 /*
  * utils.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -70,8 +70,8 @@ cJSON *log_serialize(message_log *log);
 message_log *log_deserialize(cJSON *lser);
 
 static inline guint log_length(message_log *log) { return log->entries->len; }
-static inline void log_enable(message_log *log)  { log->active = TRUE; }
-static inline void log_disable(message_log *log) { log->active = FALSE; }
+static inline void log_enable(message_log *log)  { log->active = true; }
+static inline void log_disable(message_log *log) { log->active = false; }
 
 static inline char *log_buffer(message_log *log)
 {

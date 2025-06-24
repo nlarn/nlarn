@@ -32,10 +32,10 @@ DEFINE_ENUM(ammo_t, AMMO_TYPE_ENUM)
 const ammo_data ammos[AMT_MAX] =
 {
     /*  type       name            ac           dam   acc  mat        we  pr  ob */
-    { AMT_STONE,   "pebble",       AMMO_SLING,     2,   1, IM_STONE, 100,  1, FALSE, },
-    { AMT_SBULLET, "sling bullet", AMMO_SLING,     4,   2, IM_LEAD,   50,  3,  TRUE, },
-    { AMT_ARROW,   "arrow",        AMMO_BOW,       8,   3, IM_WOOD,   80,  5,  TRUE, },
-    { AMT_BOLT,    "bolt",         AMMO_CROSSBOW, 10,   4, IM_IRON,  100, 10, FALSE, },
+    { AMT_STONE,   "pebble",       AMMO_SLING,     2,   1, IM_STONE, 100,  1, false, },
+    { AMT_SBULLET, "sling bullet", AMMO_SLING,     4,   2, IM_LEAD,   50,  3,  true, },
+    { AMT_ARROW,   "arrow",        AMMO_BOW,       8,   3, IM_WOOD,   80,  5,  true, },
+    { AMT_BOLT,    "bolt",         AMMO_CROSSBOW, 10,   4, IM_IRON,  100, 10, false, },
 };
 
 const char *ammo_class_name[AMMO_MAX] =
@@ -99,17 +99,17 @@ int weapon_fire(struct player *p)
 
     /* Check if the player is able to move. */
     if (!player_movement_possible(p))
-        return FALSE;
+        return false;
 
     /* check if the player wields a weapon */
     if (weapon == NULL)
     {
         log_add_entry(nlarn->log, "You do not wield any weapon!");
-        return FALSE;
+        return false;
     }
 
     /* wielding a weapon, describe it */
-    wdesc = item_describe(weapon, player_item_known(p, weapon), TRUE, TRUE);
+    wdesc = item_describe(weapon, player_item_known(p, weapon), true, true);
 
     /* check if it is a ranged weapon */
     if (!weapon_is_ranged(weapon))
@@ -117,7 +117,7 @@ int weapon_fire(struct player *p)
         wdesc[0] = g_ascii_toupper(wdesc[0]);
         log_add_entry(nlarn->log, "%s is not a ranged weapon!", wdesc);
         g_free(wdesc);
-        return FALSE;
+        return false;
     }
 
     /* check if ammo is quivered */
@@ -125,24 +125,24 @@ int weapon_fire(struct player *p)
     {
         log_add_entry(nlarn->log, "You have no ammunition in your quiver!");
         g_free(wdesc);
-        return FALSE;
+        return false;
     }
 
     /* check if the quivered ammo matches the weapon */
     if (weapon_ammo(weapon) != ammo_class(ammo))
     {
         gchar *adesc = item_describe(ammo, player_item_known(p, ammo),
-                                     TRUE, FALSE);
+                                     true, false);
         log_add_entry(nlarn->log, "You cannot fire %s with %s.", adesc, wdesc);
 
         g_free(wdesc);
         g_free(adesc);
-        return FALSE;
+        return false;
     }
 
     /* all checks are successful */
-    target = display_get_position(p, "Select a target", TRUE, FALSE, 0,
-                                  FALSE, TRUE);
+    target = display_get_position(p, "Select a target", true, false, 0,
+                                  false, true);
 
     /* is the target a valid position? */
     if(!pos_valid(target))
@@ -150,7 +150,7 @@ int weapon_fire(struct player *p)
         log_add_entry(nlarn->log, "You did not fire %s.", wdesc);
 
         g_free(wdesc);
-        return FALSE;
+        return false;
     }
 
     /* get the targeted monster  */
@@ -162,7 +162,7 @@ int weapon_fire(struct player *p)
         log_add_entry(nlarn->log, "I see no monster there.");
 
         g_free(wdesc);
-        return FALSE;
+        return false;
     }
 
     /* protect townsfolk from aggressive players */
@@ -171,7 +171,7 @@ int weapon_fire(struct player *p)
         log_add_entry(nlarn->log, "Gosh! How dare you!");
 
         g_free(wdesc);
-        return FALSE;
+        return false;
     }
 
     /* log the event */
@@ -190,20 +190,20 @@ int weapon_fire(struct player *p)
     else
     {
         /* shooting the last piece of ammo from the quiver */
-        player_item_unequip(p, NULL, ammo, TRUE);
+        player_item_unequip(p, NULL, ammo, true);
         inv_del_element(&p->inventory, ammo);
     }
 
     /* mark the ammo as fired */
-    ammo->fired = TRUE;
+    ammo->fired = true;
 
     /* paint a ray to follow the path of the bullet */
     if (map_trajectory(p->pos, target, &damo, weapon_pos_hit,
-                weapon, ammo, FALSE, item_glyph(ammo->type),
-                item_colour(ammo), FALSE))
-        return TRUE; /* one of the callbacks succeeded */
+                weapon, ammo, false, item_glyph(ammo->type),
+                item_colour(ammo), false))
+        return true; /* one of the callbacks succeeded */
 
-    return TRUE;
+    return true;
 }
 
 void weapon_swap(struct player *p)
@@ -224,7 +224,7 @@ void weapon_swap(struct player *p)
     if (pweapon && pweapon->cursed)
     {
         pdesc = item_describe(pweapon, player_item_known(p, pweapon),
-                              TRUE, TRUE);
+                              true, true);
         log_add_entry(nlarn->log, "You can't put %s away, "
                       "it is weld into your hand!", pdesc);
         g_free(pdesc);
@@ -236,10 +236,10 @@ void weapon_swap(struct player *p)
     {
         /* variable abuse: pdesc describes secondary weapon */
         pdesc = item_describe(sweapon, player_item_known(p, sweapon),
-                              TRUE, TRUE);
+                              true, true);
         /* variable abuse: sdesc describes held shield */
         sdesc = item_describe(p->eq_shield, player_item_known(p,
-                              p->eq_shield), TRUE, TRUE);
+                              p->eq_shield), true, true);
 
         log_add_entry(nlarn->log, "You can't ready %s while "
                       "holding the %s!", pdesc, sdesc);
@@ -249,7 +249,7 @@ void weapon_swap(struct player *p)
         return;
     }
 
-    if (!player_make_move(p, 2, TRUE, "swapping your weapons"))
+    if (!player_make_move(p, 2, true, "swapping your weapons"))
         return; /* interrupted */
 
     p->eq_weapon  = sweapon;
@@ -257,10 +257,10 @@ void weapon_swap(struct player *p)
 
     if (pweapon)
         pdesc = item_describe(pweapon, player_item_known(p, pweapon),
-                              TRUE, FALSE);
+                              true, false);
     if (sweapon)
         sdesc = item_describe(sweapon, player_item_known(p, sweapon),
-                              TRUE, FALSE);
+                              true, false);
 
     log_add_entry(nlarn->log, "You have swapped your weapons: Primary weapon:"
                   " %s, secondary weapon, not wielded: %s.",
@@ -296,43 +296,43 @@ char *weapon_shortdesc(item *weapon, guint available_space)
     {
         GString *bonus = g_string_new(NULL);
 
-        gboolean need_comma = FALSE;
+        gboolean need_comma = false;
         if (weapon->burnt == 2)
         {
             g_string_append_printf(bonus, "v. burnt, ");
-            need_comma = TRUE;
+            need_comma = true;
         }
 
         if (weapon->corroded == 2)
         {
             g_string_append_printf(bonus, "%sv. corroded",
                                    need_comma ? ", " : "");
-            need_comma = TRUE;
+            need_comma = true;
         }
         if (weapon->rusty == 2)
         {
             g_string_append_printf(bonus, "%sv. rusty",
                                    need_comma ? ", " : "");
-            need_comma = TRUE;
+            need_comma = true;
         }
 
         if (weapon->burnt == 1)
         {
             g_string_append_printf(bonus, "%sburnt",
                                    need_comma ? ", " : "");
-            need_comma = TRUE;
+            need_comma = true;
         }
         if (weapon->corroded == 1)
         {
             g_string_append_printf(bonus, "%scorroded",
                                    need_comma ? ", " : "");
-            need_comma = TRUE;
+            need_comma = true;
         }
         if (weapon->rusty == 1)
         {
             g_string_append_printf(bonus, "%srusty",
                                    need_comma ? ", " : "");
-            need_comma = TRUE;
+            need_comma = true;
         }
 
         if (weapon->blessed_known)
@@ -350,7 +350,7 @@ char *weapon_shortdesc(item *weapon, guint available_space)
         }
 
         g_string_append_printf(desc, " (%s)", bonus->str);
-        g_string_free(bonus, TRUE);
+        g_string_free(bonus, true);
     }
 
     if (desc->len > available_space)
@@ -361,7 +361,7 @@ char *weapon_shortdesc(item *weapon, guint available_space)
     }
 
     /* free the temporary string */
-    return g_string_free(desc, FALSE);
+    return g_string_free(desc, false);
 }
 
 damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)
@@ -381,7 +381,7 @@ gboolean weapon_ammo_drop(map *m, item *ammo, const GList *traj)
     if (traj == NULL)
     {
         item_destroy(ammo);
-        return TRUE;
+        return true;
     }
 
     position pos;
@@ -401,7 +401,7 @@ gboolean weapon_ammo_drop(map *m, item *ammo, const GList *traj)
     else
         inv_add(map_ilist_at(m, pos), ammo);
 
-    return TRUE;
+    return true;
 }
 
 static gboolean weapon_pos_hit(const GList *traj,
@@ -416,18 +416,18 @@ static gboolean weapon_pos_hit(const GList *traj,
     item *weapon = (item *)data1;
     item *ammo = (item *)data2;
     monster *m = map_get_monster_at(cmap, cpos);
-    gboolean retval = FALSE;
-    gboolean ammo_handled = FALSE;
+    gboolean retval = false;
+    gboolean ammo_handled = false;
 
     /* need a definite description for the ammo */
-    gchar *adesc = item_describe(ammo, player_item_known(nlarn->p, ammo), TRUE, TRUE);
+    gchar *adesc = item_describe(ammo, player_item_known(nlarn->p, ammo), true, true);
     adesc[0] = g_ascii_toupper(adesc[0]);
 
     if (m != NULL)
     {
         /* there is a monster at the position */
         /* the bullet might have hit the monster */
-        if (chance(combat_chance_player_to_monster_hit(nlarn->p, m, TRUE)))
+        if (chance(combat_chance_player_to_monster_hit(nlarn->p, m, true)))
         {
             /* hit */
             damage *dam = weapon_get_ranged_damage(nlarn->p, weapon, ammo);
@@ -439,7 +439,7 @@ static gboolean weapon_pos_hit(const GList *traj,
             monster_damage_take(m, dam);
 
             ammo_handled = weapon_ammo_drop(cmap, ammo, traj);
-            retval = TRUE;
+            retval = true;
         }
         else
         {
@@ -460,7 +460,7 @@ static gboolean weapon_pos_hit(const GList *traj,
         /* The ammo hit some map feature -> stop its movement */
         weapon_ammo_drop(cmap, ammo, traj);
 
-        retval = TRUE;
+        retval = true;
     }
 
     g_free(adesc);

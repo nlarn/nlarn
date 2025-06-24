@@ -67,7 +67,7 @@ void display_shutdown();
 
 /**
  * @brief Check if the display system has been initialised.
- * @return TRUE or FALSE
+ * @return true or false
  */
 gboolean display_available();
 

@@ -170,11 +170,11 @@ int player_trap_trigger(player *p, trap_t trap, int force)
         switch (trap)
         {
         case TT_TRAPDOOR:
-            ttime += player_map_enter(p, game_map(nlarn, Z(p->pos) + 1), TRUE);
+            ttime += player_map_enter(p, game_map(nlarn, Z(p->pos) + 1), true);
             break;
 
         case TT_TELEPORT:
-            p->pos = map_find_space(game_map(nlarn, Z(p->pos)), LE_MONSTER, FALSE);
+            p->pos = map_find_space(game_map(nlarn, Z(p->pos)), LE_MONSTER, false);
             break;
 
         case TT_MANADRAIN:
@@ -269,7 +269,7 @@ monster *monster_trap_trigger(monster *m)
 
     case TT_TELEPORT:
         monster_pos_set(m, monster_map(m), map_find_space(game_map(nlarn,
-                        Z(monster_pos(m))), LE_MONSTER, FALSE));
+                        Z(monster_pos(m))), LE_MONSTER, false));
         break;
 
     case TT_SPIKEDPIT:
@@ -342,7 +342,7 @@ guint trap_disarm(struct player *p)
     /* Determine the number of turns required to disable the trap. */
     guint turns = trap_chance(tt) / 5;
 
-    if (!player_make_move(p, turns, TRUE, "disabling the %s",
+    if (!player_make_move(p, turns, true, "disabling the %s",
                 trap_description(tt)))
         return 0;
 
@@ -368,7 +368,7 @@ guint trap_disarm(struct player *p)
         /* player has triggered the trap */
         log_add_entry(nlarn->log, "You accidentally trigger the %s.",
                 trap_description(tt));
-        return player_trap_trigger(p, tt, TRUE);
+        return player_trap_trigger(p, tt, true);
     }
     else
     {

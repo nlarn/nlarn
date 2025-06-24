@@ -308,7 +308,7 @@ static void mainloop()
 
     char run_cmd = 0;
     int ch = 0;
-    gboolean adj_corr = FALSE;
+    gboolean adj_corr = false;
     guint end_resting = 0;
 
     /* main event loop
@@ -324,7 +324,7 @@ static void mainloop()
 
             /* check if travel mode shall be aborted:
                attacked or fell through trap door */
-            if (nlarn->p->attacked || player_adjacent_monster(nlarn->p, FALSE)
+            if (nlarn->p->attacked || player_adjacent_monster(nlarn->p, false)
                 || Z(pos) != Z(nlarn->p->pos))
             {
                 pos = pos_invalid;
@@ -332,7 +332,7 @@ static void mainloop()
             else if (pos_adjacent(nlarn->p->pos, pos))
             {
                 /* the target has almost been reached. This is the last move. */
-                moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, pos), TRUE);
+                moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, pos), true);
                 /* reset the target position */
                 pos = cpos = pos_invalid;
             }
@@ -346,7 +346,7 @@ static void mainloop()
                 {
                     /* Path found. Move the player. */
                     path_element *el = g_queue_pop_head(path->path);
-                    moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, el->pos), TRUE);
+                    moves_count = player_move(nlarn->p, pos_dir(nlarn->p->pos, el->pos), true);
 
                     if (moves_count == 0)
                     {
@@ -555,8 +555,8 @@ static void mainloop()
         case ';':
             if (!player_effect(nlarn->p, ET_BLINDNESS))
                 (void)display_get_new_position(nlarn->p, nlarn->p->pos,
-                        "Choose a position to examine", FALSE, FALSE,
-                        FALSE, 0, FALSE, TRUE);
+                        "Choose a position to examine", false, false,
+                        false, 0, false, true);
             else
                 log_add_entry(nlarn->log, "You can't look around "
                         "while blinded!");
@@ -766,7 +766,7 @@ static void mainloop()
         case 'V':
             pos = display_get_new_position(nlarn->p, cpos,
                                            "Choose a destination to travel to.",
-                                           FALSE, FALSE, TRUE, 0, TRUE, FALSE);
+                                           false, false, true, 0, true, false);
 
             if (pos_valid(pos))
             {
@@ -835,7 +835,7 @@ static void mainloop()
 #ifdef SDLPDCURSES
         case 13: /* ENTER */
             if (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_ALT)
-                display_toggle_fullscreen(TRUE);
+                display_toggle_fullscreen(true);
 
             break;
 #endif
@@ -877,7 +877,7 @@ static void mainloop()
                                       "You will not be able to switch back to normal " \
                                       "gameplay and your score will not be counted.", NULL, NULL, NULL))
                 {
-                    game_wizardmode(nlarn) = TRUE;
+                    game_wizardmode(nlarn) = true;
                     log_add_entry(nlarn->log, "Wizard mode has been activated.");
                 }
             }
@@ -920,7 +920,7 @@ static void mainloop()
             {
                 pos = display_get_new_position(nlarn->p, nlarn->p->pos,
                                                "Choose a position to teleport to.",
-                                               FALSE, FALSE, TRUE, 0, TRUE, FALSE);
+                                               false, false, true, 0, true, false);
 
                 if (pos_valid(pos))
                 {
@@ -971,14 +971,14 @@ static void mainloop()
         }
 
         gboolean no_move = (moves_count == 0);
-        gboolean was_attacked = FALSE;
+        gboolean was_attacked = false;
 
         /* manipulate game time */
         if (moves_count)
         {
-            player_make_move(nlarn->p, moves_count, FALSE, NULL);
+            player_make_move(nlarn->p, moves_count, false, NULL);
             was_attacked = nlarn->p->attacked;
-            nlarn->p->attacked = FALSE;
+            nlarn->p->attacked = false;
             moves_count = 0;
         }
 
@@ -1053,7 +1053,7 @@ gboolean main_menu()
         switch (input)
         {
         case 'a':
-            return TRUE;
+            return true;
             break;
 
         case 'b':
@@ -1078,7 +1078,7 @@ gboolean main_menu()
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 int main(int argc, char *argv[])
@@ -1119,7 +1119,7 @@ int main(int argc, char *argv[])
         game_init(&config);
 
         /* present main menu - */
-        if (FALSE == main_menu()) {
+        if (false == main_menu()) {
             break;
         }
 
@@ -1136,7 +1136,7 @@ int main(int argc, char *argv[])
             int res = display_get_yesno("Are you male or female?", NULL, "Female", "Male");
 
             /* display_get_yesno() returns 0 or one */
-            nlarn->p->sex = (res == TRUE) ? PS_FEMALE : PS_MALE;
+            nlarn->p->sex = (res == true) ? PS_FEMALE : PS_MALE;
         }
 
         while (!nlarn->player_stats_set)
@@ -1213,15 +1213,15 @@ static gboolean adjacent_corridor(position pos, char mv)
     if (X(p1) < MAP_MAX_X && Y(p1) < MAP_MAX_Y
             && mt_is_passable(map_tiletype_at(game_map(nlarn, Z(nlarn->p->pos)), p1)))
     {
-        return TRUE;
+        return true;
     }
     if (X(p2) < MAP_MAX_X && Y(p2) < MAP_MAX_Y
             && mt_is_passable(map_tiletype_at(game_map(nlarn, Z(nlarn->p->pos)), p2)))
     {
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 #ifdef __unix

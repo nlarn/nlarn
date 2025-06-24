@@ -116,12 +116,12 @@ int building_bank(player *p)
     {
         g_string_append_printf(greeting, msg_frozen, p->outstanding_taxes);
         display_show_message(msg_title, greeting->str, 0);
-        g_string_free(greeting, TRUE);
+        g_string_free(greeting, true);
 
         return 2; /* turns */
     }
 
-    gboolean leaving = FALSE;
+    gboolean leaving = false;
     while (!leaving)
     {
         GString *text = g_string_new(greeting->str);
@@ -146,7 +146,7 @@ int building_bank(player *p)
         display_window *bwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
                 47, msg_title, text->str, 0);
 
-        g_string_free(text, TRUE);
+        g_string_free(text, true);
 
         int cmd = display_getch(bwin->window);
 
@@ -220,18 +220,18 @@ int building_bank(player *p)
                 callback->inv = &nlarn->store_stock;
                 callback->function = &building_item_buy;
                 callback->checkfun = &player_item_is_sellable;
-                callback->active = FALSE;
+                callback->active = false;
                 g_ptr_array_add(callbacks, callback);
 
                 display_inventory("Sell gems", p, &p->inventory, callbacks,
-                        TRUE, FALSE, TRUE, &item_filter_gems);
+                        true, false, true, &item_filter_gems);
 
                 display_inv_callbacks_clean(callbacks);
             }
             break;
 
         case KEY_ESC:
-            leaving = TRUE;
+            leaving = true;
             break;
 
         default:
@@ -240,11 +240,11 @@ int building_bank(player *p)
         }
 
         /* every interaction in the bank takes two turns */
-        player_make_move(p, 2, FALSE, NULL);
+        player_make_move(p, 2, false, NULL);
         display_window_destroy(bwin);
     }
 
-    g_string_free(greeting, TRUE);
+    g_string_free(greeting, true);
 
     return 0;
 }
@@ -322,8 +322,8 @@ void building_dndstore_init()
             if (item_is_identifyable(it->type))
             {
                 /* make item attributes known */
-                it->bonus_known = TRUE;
-                it->blessed_known = TRUE;
+                it->bonus_known = true;
+                it->blessed_known = true;
             }
             it->count = count;
 
@@ -377,7 +377,7 @@ int building_home(player *p)
             /* won the game */
             g_string_append(text, msg_won);
             display_show_message("You saved your daughter!", text->str, 0);
-            g_string_free(text, TRUE);
+            g_string_free(text, true);
 
             /* remove the potion from the inventory as it has been used up */
             item *pcd = inv_get_filtered(p->inventory, 0, item_filter_pcd);
@@ -394,7 +394,7 @@ int building_home(player *p)
             /* lost the game */
             g_string_append(text, msg_died);
             display_show_message("You were too late!", text->str, 0);
-            g_string_free(text, TRUE);
+            g_string_free(text, true);
 
             player_die(p, PD_TOO_LATE, 0);
         }
@@ -405,13 +405,13 @@ int building_home(player *p)
         /* too late, no potion */
         text = g_string_new(msg_died);
         display_show_message("You were too late!", text->str, 0);
-        g_string_free(text, TRUE);
+        g_string_free(text, true);
 
         player_die(p, PD_LOST, 0);
     }
 
     /* casual visit, report remaining time */
-    gboolean leaving = FALSE;
+    gboolean leaving = false;
 
     while (!leaving)
     {
@@ -443,7 +443,7 @@ int building_home(player *p)
         }
 
         choice = display_show_message(title, text->str, 0);
-        g_string_free(text, TRUE);
+        g_string_free(text, true);
 
         switch (choice)
         {
@@ -461,12 +461,12 @@ int building_home(player *p)
                 callback->key = 'd';
                 callback->inv = &nlarn->player_home;
                 callback->function = &container_item_add;
-                callback->active = TRUE;
+                callback->active = true;
 
                 g_ptr_array_add(callbacks, callback);
 
-                display_inventory(title, p, &p->inventory, callbacks, FALSE,
-                                  TRUE, FALSE, player_item_not_equipped);
+                display_inventory(title, p, &p->inventory, callbacks, false,
+                                  true, false, player_item_not_equipped);
 
                 display_inv_callbacks_clean(callbacks);
             }
@@ -486,19 +486,19 @@ int building_home(player *p)
                 callback->key = 't';
                 callback->inv = &nlarn->player_home;
                 callback->function = &container_item_unpack;
-                callback->active = TRUE;
+                callback->active = true;
 
                 g_ptr_array_add(callbacks, callback);
 
                 display_inventory(title, p, &nlarn->player_home, callbacks,
-                                  FALSE, TRUE, FALSE, NULL);
+                                  false, true, false, NULL);
 
                 display_inv_callbacks_clean(callbacks);
             }
             break;
             /* leave */
         case KEY_ESC:
-            leaving = TRUE;
+            leaving = true;
             break;
         }
     }
@@ -554,7 +554,7 @@ int building_lrs(player *p)
         display_show_message(title, text->str, 0);
     }
 
-    g_string_free(text, TRUE);
+    g_string_free(text, true);
 
     return turns;
 }
@@ -564,7 +564,7 @@ static int building_scribe_scroll(player *p)
     int price;
     int turns = 2;
     int i;
-    gboolean split = FALSE;
+    gboolean split = false;
     item *bscroll;
     char question[81] = { 0 };
 
@@ -578,8 +578,8 @@ static int building_scribe_scroll(player *p)
     }
 
     bscroll = display_inventory("Choose a scroll to inscribe", p,
-                                &p->inventory, NULL, FALSE, FALSE,
-                                FALSE, item_filter_blank_scroll);
+                                &p->inventory, NULL, false, false,
+                                false, item_filter_blank_scroll);
 
     if (!bscroll)
     {
@@ -645,17 +645,17 @@ static int building_scribe_scroll(player *p)
     if (bscroll->count > 1)
     {
         bscroll = item_split(bscroll, 1);
-        split = TRUE;
+        split = true;
     }
 
     bscroll->id = i;
-    p->identified_scrolls[i] = TRUE;
+    p->identified_scrolls[i] = true;
 
     building_player_charge(p, price);
     p->stats.gold_spent_shop += price;
 
     /* writing a scroll takes 10 mobuls */
-    player_make_move(p, 1000, FALSE, "waiting for the scribes to write a "
+    player_make_move(p, 1000, false, "waiting for the scribes to write a "
             "scroll of %s for you", scroll_name(bscroll));
 
     log_add_entry(nlarn->log,
@@ -696,7 +696,7 @@ static void building_school_take_course(player *p, int course, guint price)
 
     /* time usage */
     guint course_turns = mobuls2gtime(school_courses[course].course_time);
-    player_make_move(p, course_turns, FALSE, "taking the course \"%s\"",
+    player_make_move(p, course_turns, false, "taking the course \"%s\"",
             school_courses[course].description);
 
     /* add the bonus gained by this course */
@@ -757,7 +757,7 @@ int building_school(player *p)
 
     g_assert(p != NULL);
 
-    gboolean leaving = FALSE;
+    gboolean leaving = false;
     while (!leaving)
     {
         GString *text = g_string_new(msg_greet);
@@ -787,16 +787,16 @@ int building_school(player *p)
                 SCHOOL_COURSE_COUNT + 'a', "Commission a scroll");
 
         int selection = display_show_message("School", text->str, 0);
-        g_string_free(text, TRUE);
+        g_string_free(text, true);
 
         switch (selection)
         {
             case 'a' + SCHOOL_COURSE_COUNT:
-                player_make_move(p, building_scribe_scroll(p), FALSE, NULL);
+                player_make_move(p, building_scribe_scroll(p), false, NULL);
                 break;
 
             case KEY_ESC:
-                leaving = TRUE;
+                leaving = true;
                 break;
 
             default:
@@ -879,7 +879,7 @@ int building_tradepost(player *p)
     callback->inv = &nlarn->store_stock;
     callback->function = &building_item_buy;
     callback->checkfun = &player_item_is_sellable;
-    callback->active = FALSE;
+    callback->active = false;
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc(sizeof(display_inv_callback));
@@ -888,7 +888,7 @@ int building_tradepost(player *p)
     callback->key = 'i';
     callback->function = &building_item_identify;
     callback->checkfun = &player_item_is_identifiable;
-    callback->active = FALSE;
+    callback->active = false;
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc(sizeof(display_inv_callback));
@@ -897,7 +897,7 @@ int building_tradepost(player *p)
     callback->key = 'r';
     callback->function = &building_item_repair;
     callback->checkfun = &player_item_is_damaged;
-    callback->active = FALSE;
+    callback->active = false;
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
@@ -914,7 +914,7 @@ int building_tradepost(player *p)
     callback->key = 'u';
     callback->function = &player_item_unequip_wrapper;
     callback->checkfun = &player_item_is_unequippable;
-    callback->active = FALSE;
+    callback->active = false;
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc(sizeof(display_inv_callback));
@@ -923,12 +923,12 @@ int building_tradepost(player *p)
     callback->key = 'n';
     callback->function = &player_item_notes;
     callback->checkfun = NULL;
-    callback->active = FALSE;
+    callback->active = false;
     g_ptr_array_add(callbacks, callback);
 
     display_show_message(title, msg_welcome, 0);
-    display_inventory(title, p, &p->inventory, callbacks, FALSE,
-                      FALSE, TRUE, &item_filter_not_gold);
+    display_inventory(title, p, &p->inventory, callbacks, false,
+                      false, true, &item_filter_not_gold);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);
@@ -950,7 +950,7 @@ int building_monastery(struct player *p)
 
     const char ayfwt[] = "Are you fine with that?";
 
-    gboolean leaving = FALSE;
+    gboolean leaving = false;
 
     while (!leaving)
     {
@@ -1042,7 +1042,7 @@ int building_monastery(struct player *p)
         int selection = display_getch(mwin->window);
 
         /* get rid of the temporary string */
-        g_string_free(msg, TRUE);
+        g_string_free(msg, true);
 
         switch (selection)
         {
@@ -1067,7 +1067,7 @@ int building_monastery(struct player *p)
             }
 
             it = display_inventory("Choose an item to uncurse", p, &p->inventory,
-                    NULL, FALSE, FALSE, FALSE,item_filter_cursed_or_unknown);
+                    NULL, false, false, false,item_filter_cursed_or_unknown);
 
             /* It is possible to abort the selection with ESC. */
             if (it == NULL)
@@ -1086,7 +1086,7 @@ int building_monastery(struct player *p)
             /* Item stacks cost per item. */
             price *= it->count;
 
-            desc = item_describe(it, player_item_identified(p, it), FALSE, TRUE);
+            desc = item_describe(it, player_item_identified(p, it), false, true);
             question = g_strdup_printf("To remove the curse on %s, we ask you to "
                                        "donate %d gold for our abbey. %s", desc,
                                        price, ayfwt);
@@ -1118,7 +1118,7 @@ int building_monastery(struct player *p)
                         (it->count == 1) ? "was" : "were");
                 display_show_message(title, msg, 0);
                 g_free(msg);
-                it->blessed_known = TRUE;
+                it->blessed_known = true;
             }
             g_free(desc);
 
@@ -1165,7 +1165,7 @@ int building_monastery(struct player *p)
 
         /* leave the monastery */
         case KEY_ESC:
-            leaving = TRUE;
+            leaving = true;
             break;
 
         default:
@@ -1207,7 +1207,7 @@ int building_monastery(struct player *p)
         }
 
         /* track time usage */
-        player_make_move(p, 2, FALSE, NULL);
+        player_make_move(p, 2, false, NULL);
 
         display_window_destroy(mwin);
     }
@@ -1268,11 +1268,11 @@ static void building_shop(player *p, inventory **inv, const char *title)
     callback->inv = inv;
     callback->function = &building_item_sell;
     callback->checkfun = &player_item_is_affordable;
-    callback->active = FALSE;
+    callback->active = false;
     g_ptr_array_add(callbacks, callback);
 
-    display_inventory(title, p, inv, callbacks, TRUE,
-                      FALSE, TRUE, NULL);
+    display_inventory(title, p, inv, callbacks, true,
+                      false, true, NULL);
 
     /* clean up */
     display_inv_callbacks_clean(callbacks);
@@ -1283,12 +1283,12 @@ static int building_player_check(player *p, guint amount)
     guint player_gold = player_get_gold(p);
 
     if (player_gold >= amount)
-        return TRUE;
+        return true;
 
     if (p->bank_account >= amount)
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 static void building_player_charge(player *p, guint amount)
@@ -1325,23 +1325,23 @@ static void building_item_add(inventory **inv, item *it)
     {
         /* refurbish item before putting it into the store */
         if (it->cursed)
-            it->cursed = FALSE;
+            it->cursed = false;
 
         if (it->rusty)
-            it->rusty = FALSE;
+            it->rusty = false;
 
         if (it->burnt)
-            it->burnt = FALSE;
+            it->burnt = false;
 
         if (it->corroded)
-            it->corroded = FALSE;
+            it->corroded = false;
 
         if (it->bonus < 0)
             it->bonus = 0;
 
         /* identify item */
-        it->bonus_known = TRUE;
-        it->blessed_known = TRUE;
+        it->bonus_known = true;
+        it->blessed_known = true;
 
         /* remove notes */
         if (it->notes)
@@ -1399,7 +1399,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
         if (!building_player_check(p, price))
         {
-            name = item_describe(bought_itm, TRUE, FALSE, TRUE);
+            name = item_describe(bought_itm, true, false, true);
             g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
                        price, name);
             g_free(name);
@@ -1414,7 +1414,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     }
     else
     {
-        name = item_describe(it, TRUE, TRUE, TRUE);
+        name = item_describe(it, true, true, true);
         g_snprintf(text, 80, "Do you want to buy %s for %d gold?",
                    name, price);
         g_free(name);
@@ -1424,7 +1424,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     }
 
     /* prepare the item description for logging later */
-    name = item_describe(bought_itm, TRUE, FALSE, FALSE);
+    name = item_describe(bought_itm, true, false, false);
 
     /* try to transfer the item to the player's inventory */
     ioid = bought_itm->oid;
@@ -1461,7 +1461,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     /* charge player for this purchase */
     building_player_charge(p, price);
 
-    player_make_move(p, 2, FALSE, NULL);
+    player_make_move(p, 2, false, NULL);
 }
 
 static void building_item_identify(player *p, inventory **inv __attribute__((unused)), item *it)
@@ -1480,7 +1480,7 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
     /* Ensure it costs at least 50gp... */
     price = max(50, price);
 
-    name_unknown = item_describe(it, player_item_known(p, it), FALSE, TRUE);
+    name_unknown = item_describe(it, player_item_known(p, it), false, true);
 
     if (building_player_check(p, price))
     {
@@ -1492,14 +1492,14 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
             player_item_identify(p, NULL, it);
             /* upper case first letter */
             name_unknown[0] = g_ascii_toupper(name_unknown[0]);
-            gchar *name_known = item_describe(it, player_item_known(p, it), TRUE, FALSE);
+            gchar *name_known = item_describe(it, player_item_known(p, it), true, false);
 
             log_add_entry(nlarn->log, "%s is %s.", name_unknown, name_known);
             g_free(name_known);
 
             building_player_charge(p, price);
             p->stats.gold_spent_id_repair += price;
-            player_make_move(p, 1, FALSE, NULL);
+            player_make_move(p, 1, false, NULL);
         }
     }
     else
@@ -1543,7 +1543,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
     /* Ensure this costs at least 50gp... */
     price = max(50, price);
 
-    name = item_describe(it, player_item_known(p, it), FALSE, TRUE);
+    name = item_describe(it, player_item_known(p, it), false, true);
 
     if (building_player_check(p, price))
     {
@@ -1560,7 +1560,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
             building_player_charge(p, price);
 
             p->stats.gold_spent_id_repair += price;
-            player_make_move(p, 1, FALSE, NULL);
+            player_make_move(p, 1, false, NULL);
         }
     }
     else
@@ -1623,7 +1623,7 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     else
     {
         count = 1;
-        name = item_describe(it, player_item_known(p, it), TRUE, TRUE);
+        name = item_describe(it, player_item_known(p, it), true, true);
         g_snprintf(question, 120, "Do you want to sell %s for %d gold?",
                    name, price);
 
@@ -1641,7 +1641,7 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     guint count_orig = it->count;
     it->count = count;
 
-    name = item_describe(it, player_item_known(p, it), FALSE, FALSE);
+    name = item_describe(it, player_item_known(p, it), false, false);
     log_add_entry(nlarn->log, "You sell %s. The %d gold %s been "
                   "transferred to your bank account.",
                   name, price, (price == 1) ? "has" : "have");
@@ -1676,7 +1676,7 @@ static void building_item_buy(player *p, inventory **inv, item *it)
         }
     }
 
-    player_make_move(p, 1, FALSE, NULL);
+    player_make_move(p, 1, false, NULL);
 }
 
 static guint calc_tax_debt(guint income)

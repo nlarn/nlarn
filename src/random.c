@@ -25,6 +25,7 @@
 
 #include <glib.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -90,12 +91,12 @@ uint32_t next(void) {
 
 /* end xoshiro128starstar.c excerpt */
 
-static gboolean seeded = FALSE;
+static gboolean seeded = false;
 
 /* initialize RNG */
 static void rand_seed()
 {
-    g_assert(seeded == FALSE);
+    g_assert(seeded == false);
 
     /* On Windows, use rand_s to seed out RNG; otherwise use random() */
 #ifndef G_OS_WIN32
@@ -111,12 +112,12 @@ static void rand_seed()
 #endif
     }
 
-    seeded = TRUE;
+    seeded = true;
 }
 
 cJSON* rand_serialize()
 {
-    g_assert(seeded == TRUE);
+    g_assert(seeded == true);
 
     return cJSON_CreateIntArray((int*)&s, 4);
 }
@@ -133,7 +134,7 @@ void rand_deserialize(cJSON *r)
         s[i] = (guint64)it->valuedouble;
     }
 
-    seeded = TRUE;
+    seeded = true;
 }
 
 guint32 rand_0n(guint32 n)

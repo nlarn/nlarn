@@ -107,7 +107,7 @@ static int try_locking_savegame_file(FILE *sg)
         LocalFree(lpMsgBuf);
 #endif
         display_show_message("Error", desc->str, 0);
-        g_string_free(desc, TRUE);
+        g_string_free(desc, true);
         display_shutdown();
         exit(EXIT_FAILURE);
     }
@@ -130,7 +130,7 @@ void game_init(struct game_config *config)
         game_new();
 
         /* put the player into the town */
-        player_map_enter(nlarn->p, game_map(nlarn, 0), FALSE);
+        player_map_enter(nlarn->p, game_map(nlarn, 0), false);
 
         /* give player knowledge of the town */
         scroll_mapping(nlarn->p, NULL);
@@ -188,18 +188,18 @@ game *game_destroy(game *g)
     log_destroy(g->log);
 
     if (g->store_stock)
-        inv_destroy(g->store_stock, FALSE);
+        inv_destroy(g->store_stock, false);
 
     if (g->monastery_stock)
-        inv_destroy(g->monastery_stock, FALSE);
+        inv_destroy(g->monastery_stock, false);
 
     g_hash_table_destroy(g->items);
     g_hash_table_destroy(g->effects);
     g_hash_table_destroy(g->monsters);
-    g_ptr_array_free(g->dead_monsters, TRUE);
+    g_ptr_array_free(g->dead_monsters, true);
 
     g_ptr_array_foreach(g->spheres, (GFunc)sphere_destroy, g);
-    g_ptr_array_free(g->spheres, TRUE);
+    g_ptr_array_free(g->spheres, true);
     g_free(g);
 
     return NULL;
@@ -337,7 +337,7 @@ int game_save(game *g)
     {
         log_add_entry(g->log, "Error opening save file \"%s\".", nlarn_savefile);
         free(sg);
-        return FALSE;
+        return false;
     }
 
     if (!sgfd)
@@ -353,7 +353,7 @@ int game_save(game *g)
                 nlarn_savefile, gzerror(file, &err));
 
         free(sg);
-        return FALSE;
+        return false;
     }
 
     free(sg);
@@ -363,7 +363,7 @@ int game_save(game *g)
     if (win != NULL)
         display_window_destroy(win);
 
-    return TRUE;
+    return true;
 }
 
 map *game_map(game *g, guint nmap)
@@ -568,7 +568,7 @@ static void game_new()
     nlarn->log = log_new();
 
     /* welcome message */
-    print_welcome_message(TRUE);
+    print_welcome_message(true);
 
     log_set_time(nlarn->log, nlarn->gtime);
 }
@@ -588,7 +588,7 @@ static gboolean game_load()
     if (file == NULL)
     {
         /* failed to open save game file */
-        return FALSE;
+        return false;
     }
 
     /*
@@ -627,13 +627,13 @@ static gboolean game_load()
     g_free(sgbuf);
 
     /* check for save file incompatibility */
-    gboolean compatible_version = FALSE;
+    gboolean compatible_version = false;
     if (cJSON_GetObjectItem(save, "nlarn_version"))
     {
         int sfv = cJSON_GetObjectItem(save, "nlarn_version")->valueint;
 
         if (sfv == SAVEFILE_VERSION)
-            compatible_version = TRUE;
+            compatible_version = true;
     }
 
     /* handle incompatible save file */
@@ -662,7 +662,7 @@ static gboolean game_load()
             exit(EXIT_FAILURE);
         }
 
-        return FALSE;
+        return false;
     }
 
     /* restore saved game */
@@ -672,10 +672,10 @@ static gboolean game_load()
     rand_deserialize(cJSON_GetObjectItem(save, "rng_state"));
 
     if (cJSON_GetObjectItem(save, "wizard"))
-        nlarn->wizard = TRUE;
+        nlarn->wizard = true;
 
     if (cJSON_GetObjectItem(save, "fullvis"))
-        nlarn->fullvis = TRUE;
+        nlarn->fullvis = true;
 
     obj = cJSON_GetObjectItem(save, "amulet_created");
     size = cJSON_GetArraySize(obj);
@@ -696,7 +696,7 @@ static gboolean game_load()
         nlarn->weapon_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     if (cJSON_GetObjectItem(save, "cure_dianthr_created"))
-        nlarn->cure_dianthr_created = TRUE;
+        nlarn->cure_dianthr_created = true;
 
 
     obj = cJSON_GetObjectItem(save, "amulet_material_mapping");
@@ -807,19 +807,19 @@ static gboolean game_load()
     log_set_time(nlarn->log, nlarn->gtime);
 
     /* welcome message */
-    print_welcome_message(FALSE);
+    print_welcome_message(false);
 
     /* refresh FOV */
     player_update_fov(nlarn->p);
 
     /* no need to define the player's stats */
-    nlarn->player_stats_set = TRUE;
+    nlarn->player_stats_set = true;
 
     /* if a pop-up message has been opened, destroy it here */
     if (win != NULL)
         display_window_destroy(win);
 
-    return TRUE;
+    return true;
 }
 
 static void game_items_shuffle(game *g)

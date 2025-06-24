@@ -112,7 +112,7 @@ area *area_new(int start_x, int start_y, int size_x, int size_y);
  *
  * @param center point of the circle
  * @param radius of the circle
- * @param TRUE if the circle shall not be filled
+ * @param true if the circle shall not be filled
  * @return a new area.
  */
 area *area_new_circle(position center, guint radius, gboolean hollow);
@@ -143,7 +143,7 @@ typedef gboolean (*area_hit_sth)(position pos, const damage_originator *damo,
  * @param The glyph to display at an affected position
  * @param The colour of the glyph.
  *
- * @return TRUE if one of the callbacks returned TRUE.
+ * @return true if one of the callbacks returned true.
  */
 gboolean area_blast(position center, guint radius,
                     const damage_originator *damo,

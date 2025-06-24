@@ -143,7 +143,7 @@ int *map_get_surrounding(map *m, position pos, sobject_t type);
  * @param the map
  * @param first position
  * @param second position
- * @return TRUE or FALSE
+ * @return true or false
  */
 int map_pos_is_visible(map *m, position source, position target);
 
@@ -165,12 +165,12 @@ GList *map_ray(map *m, position source, position target);
  * @param The callback function for every affected position.
  * @param A pointer passed to the callback function.
  * @param A pointer passed to the callback function.
- * @param TRUE if reflection should be honoured.
+ * @param true if reflection should be honoured.
  * @param The glyph to display at an affected position
  * @param The colour of the glyph.
- * @param TRUE to keep the glyph at affected positions.
+ * @param true to keep the glyph at affected positions.
  *
- * @return TRUE if one of the callbacks returned TRUE.
+ * @return true if one of the callbacks returned true.
  */
 gboolean map_trajectory(position source, position target,
         const damage_originator *damo,

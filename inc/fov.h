@@ -1,6 +1,6 @@
 /*
  * fov.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -43,7 +43,7 @@ fov *fov_new();
   * @param the map
   * @param the starting position
   * @param the radius of vision
-  * @param True if the mobile has infravision.
+  * @param true if the mobile has infravision.
   */
 void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravision);
 
@@ -52,7 +52,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
   * @param pointer to a fov structure.
   * @param a position.
   *
-  * @return TRUE/FALSE
+  * @return true/false
   */
 gboolean fov_get(fov *fv, position pos);
 

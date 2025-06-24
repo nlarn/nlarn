@@ -1,6 +1,6 @@
 /*
  * position.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -143,7 +143,7 @@ int pos_adjacent(position first, position second)
     guint dist_x, dist_y;
 
     if (Z(first) != Z(second))
-        return FALSE;
+        return false;
 
     dist_x = abs(X(first) - X(second));
     dist_y = abs(Y(first) - Y(second));
@@ -203,10 +203,10 @@ int pos_in_rect(position pos, rectangle rect)
             && (Y(pos) >= rect.y1)
             && (Y(pos) <= rect.y2))
     {
-        return TRUE;
+        return true;
     }
     else
-        return FALSE;
+        return false;
 }
 
 area *area_new(int start_x, int start_y, int size_x, int size_y)
@@ -284,16 +284,16 @@ area *area_new_circle(position center, guint radius, gboolean hollow)
         return circle;
 
     /* fill the circle
-     * - set fill to TRUE when spotting the left border
-     * - set position if (fill == TRUE)
-     * - set fill = FALSE when spotting the right border
+     * - set fill to true when spotting the left border
+     * - set position if (fill == true)
+     * - set fill = false when spotting the right border
      *
      * do not need to fill the first and last row
      */
 
     for (y = 1; y < circle->size_y - 1; y++)
     {
-        gboolean fill = FALSE;
+        gboolean fill = false;
 
         for (x = 0; x < circle->size_x; x++)
         {
@@ -325,7 +325,7 @@ area *area_new_circle_flooded(position center, guint radius, area *obstacles)
         return NULL;
 
     /* add circle boundary to obstacle map */
-    obstacles = area_add(obstacles, area_new_circle(center, radius, TRUE));
+    obstacles = area_add(obstacles, area_new_circle(center, radius, true));
 
     /* translate absolute center position to area */
     start_x = X(center) - obstacles->start_x;
@@ -345,10 +345,10 @@ gboolean area_blast(position center, guint radius,
 {
     map *cmap = game_map(nlarn, Z(center));
     position cursor = center;
-    gboolean retval = FALSE;
+    gboolean retval = false;
     area *ball, *obsmap;
 
-    obsmap = map_get_obstacles(cmap, center, radius, TRUE);
+    obsmap = map_get_obstacles(cmap, center, radius, true);
     ball = area_new_circle_flooded(center, radius, obsmap);
 
     attron(COLOR_PAIR(fg));
@@ -392,7 +392,7 @@ gboolean area_blast(position center, guint radius,
 
             /* keep track if the blast hit something */
             if (pos_hitfun(cursor, damo, data1, data2))
-                retval = TRUE;
+                retval = true;
         }
     }
 
@@ -459,7 +459,7 @@ void area_point_set(area *a, int x, int y)
 {
     g_assert(a != NULL);
     g_assert(area_point_valid(a, x, y));
-    a->area[y][x] = TRUE;
+    a->area[y][x] = true;
 }
 
 int area_point_get(area *a, int x, int y)
@@ -467,7 +467,7 @@ int area_point_get(area *a, int x, int y)
     g_assert (a != NULL);
 
     if (!area_point_valid(a, x, y))
-        return FALSE;
+        return false;
 
     return a->area[y][x];
 }

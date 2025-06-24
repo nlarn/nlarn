@@ -38,7 +38,7 @@ static gchar *font_name;
 #include "extdefs.h"
 #include "spheres.h"
 
-static gboolean display_initialised = FALSE;
+static gboolean display_initialised = false;
 
 /* linked list of opened windows */
 static GList *windows = NULL;
@@ -89,7 +89,7 @@ void display_init()
     {
         gchar size[4];
         g_snprintf(size, 3, "%d", config.font_size);
-        g_setenv("PDC_FONT_SIZE", size, TRUE);
+        g_setenv("PDC_FONT_SIZE", size, true);
     }
 
     /* Set the font - allow overriding this default */
@@ -109,10 +109,10 @@ void display_init()
     PDC_set_title(window_title);
     g_free(window_title);
 
-    display_toggle_fullscreen(FALSE);
+    display_toggle_fullscreen(false);
 
     /* return modifier keys pressed with key */
-    PDC_return_key_modifiers(TRUE);
+    PDC_return_key_modifiers(true);
 #endif
 
     /* initialize colours */
@@ -126,16 +126,16 @@ void display_init()
     noecho();
 
     /* enable function keys */
-    keypad(stdscr, TRUE);
+    keypad(stdscr, true);
 
     /* want all 8 bits */
-    meta(stdscr, TRUE);
+    meta(stdscr, true);
 
     /* make cursor invisible */
     curs_set(0);
 
     /* update display initialisation status */
-    display_initialised = TRUE;
+    display_initialised = true;
 }
 
 static int attr_colour(int colour, int reverse)
@@ -361,9 +361,9 @@ void display_paint_screen(player *p)
 #ifdef SDLPDCURSES
     /* enable blinking on SDL PDCurses display for very low hp */
     if (attrs & A_BLINK) {
-        PDC_set_blink(TRUE);
+        PDC_set_blink(true);
     } else {
-        PDC_set_blink(FALSE);
+        PDC_set_blink(false);
     }
 #endif
 
@@ -650,7 +650,7 @@ void display_shutdown()
         endwin();
 
         /* update display initialisation status */
-        display_initialised = FALSE;
+        display_initialised = false;
     }
 }
 
@@ -681,12 +681,12 @@ void display_draw()
 
 static int item_sort_normal(gconstpointer a, gconstpointer b, gpointer data)
 {
-    return item_sort(a, b, data, FALSE);
+    return item_sort(a, b, data, false);
 }
 
 static int item_sort_shop(gconstpointer a, gconstpointer b, gpointer data)
 {
-    return item_sort(a, b, data, TRUE);
+    return item_sort(a, b, data, true);
 }
 
 item *display_inventory(const char *title, player *p, inventory **inv,
@@ -703,12 +703,12 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     const guint width = COLS - 4;
 
     guint len_orig, len_curr;
-    gboolean redraw = FALSE;
+    gboolean redraw = false;
 
     /* the window title used for shops */
     char *stitle = NULL;
 
-    gboolean keep_running = TRUE;
+    gboolean keep_running = true;
     int key;
 
     /* string array used to assemble the window caption
@@ -757,7 +757,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             iwin = NULL;
 
             display_paint_screen(p);
-            redraw = FALSE;
+            redraw = false;
 
             /* check for inventory modifications */
             if (len_orig > len_curr)
@@ -790,7 +790,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         {
             it = inv_get_filtered(*inv, (pos - 1) + offset, ifilter);
 
-            gboolean item_equipped = FALSE;
+            gboolean item_equipped = false;
 
             if (!show_price)
             {
@@ -814,7 +814,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             if (show_price)
             {
                 /* inside shop */
-                gchar *item_desc = item_describe(it, TRUE, FALSE, FALSE);
+                gchar *item_desc = item_describe(it, true, false, false);
                 mvwaprintw(iwin->window, pos, 1, attrs, " %-*s %5d gold ",
                           width - 15, item_desc, item_price(it));
 
@@ -822,7 +822,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
             else
             {
-                gchar *item_desc = item_describe(it, player_item_known(p, it), FALSE, FALSE);
+                gchar *item_desc = item_describe(it, player_item_known(p, it), false, false);
                 mvwaprintw(iwin->window, pos, 1, attrs, " %-*s %c ",
                           width - 6, item_desc,
                           player_item_is_equipped(p, it) ? '*' : ' ');
@@ -867,13 +867,13 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             /* if no check function is set, always display item */
             if ((cb->checkfun == NULL) || cb->checkfun(p, it))
             {
-                cb->active = TRUE;
+                cb->active = true;
                 strv_append(&captions, cb->description);
             }
             else
             {
                 /* it isn't */
-                cb->active = FALSE;
+                cb->active = false;
             }
         }
 
@@ -998,7 +998,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             break;
 
         case KEY_ESC:
-            keep_running = FALSE;
+            keep_running = false;
             break;
 
         case '?':
@@ -1014,7 +1014,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             if (callbacks == NULL)
             {
                 /* if no callbacks have been defined, enter selects item */
-                keep_running = FALSE;
+                keep_running = false;
             }
             break;
 
@@ -1029,7 +1029,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                     /* trigger callback */
                     cb->function(p, cb->inv, inv_get_filtered(*inv, curr + offset - 1, ifilter));
 
-                    redraw = TRUE;
+                    redraw = true;
 
                     /* don't check other callback functions */
                     break;
@@ -1064,12 +1064,12 @@ void display_inv_callbacks_clean(GPtrArray *callbacks)
         g_free(g_ptr_array_remove_index_fast(callbacks, callbacks->len - 1));
     }
 
-    g_ptr_array_free(callbacks, TRUE);
+    g_ptr_array_free(callbacks, true);
 }
 
 void display_config_autopickup(gboolean settings[IT_MAX])
 {
-    int RUN = TRUE;
+    int RUN = true;
     int attrs; /* curses attributes */
 
     const int height = 13;
@@ -1126,7 +1126,7 @@ void display_config_autopickup(gboolean settings[IT_MAX])
         case KEY_ENTER:
         case KEY_ESC:
         case KEY_SPC:
-            RUN = FALSE;
+            RUN = false;
             break;
 
         default:
@@ -1155,7 +1155,7 @@ spell *display_spell_select(const char *title, player *p)
     guint startx, starty;
     guint maxvis;
     int key; /* keyboard input */
-    int RUN = TRUE;
+    int RUN = true;
 
     /* currently displayed spell; return value */
     spell *sp;
@@ -1335,7 +1335,7 @@ spell *display_spell_select(const char *title, player *p)
             break;
 
         case KEY_ESC:
-            RUN = FALSE;
+            RUN = false;
             sp = NULL;
 
             break;
@@ -1357,7 +1357,7 @@ spell *display_spell_select(const char *title, player *p)
                 if (!display_get_yesno(prompt, NULL, NULL, NULL))
                     sp = NULL;
             }
-            RUN = FALSE;
+            RUN = false;
             break;
 
         case KEY_BS:
@@ -1451,7 +1451,7 @@ int display_get_count(const char *caption, int value)
     GPtrArray *text;
 
     /* toggle insert / overwrite mode; start with overwrite */
-    int insert_mode = FALSE;
+    int insert_mode = false;
 
     /* user input */
     int key;
@@ -1463,7 +1463,7 @@ int display_get_count(const char *caption, int value)
     char ivalue[8] = { 0 };
 
     /* continue editing the number */
-    int cont = TRUE;
+    int cont = true;
 
     /* 8: input field width; 5: 3 spaces between border, caption + input field, 2 border */
     basewidth = 8 + 5;
@@ -1562,14 +1562,14 @@ int display_get_count(const char *caption, int value)
         case 'p': /* put */
             /* reset value to original value */
             g_snprintf(ivalue, 8, "%d", value);
-            cont = FALSE;
+            cont = false;
             break;
 
             /* special case to speed up aborting */
         case 'n': /* no */
             /* set value to 0 */
             g_snprintf(ivalue, 8, "%d", 0);
-            cont = FALSE;
+            cont = false;
             break;
 
 
@@ -1580,7 +1580,7 @@ int display_get_count(const char *caption, int value)
 #endif
         case KEY_ENTER:
         case KEY_ESC:
-            cont = FALSE;
+            cont = false;
             break;
 
         default:
@@ -1648,7 +1648,7 @@ char *display_get_string(const char *title, const char *caption, const char *val
     int key;
 
     /* toggle insert / overwrite mode */
-    int insert_mode = TRUE;
+    int insert_mode = true;
 
     /* cursor position */
     guint ipos = 0;
@@ -1657,7 +1657,7 @@ char *display_get_string(const char *title, const char *caption, const char *val
     GString *string = g_string_new(value);
 
     /* continue editing the number */
-    int cont = TRUE;
+    int cont = true;
 
     /* 3 spaces between border, caption + input field, 2 border */
     int basewidth = 5;
@@ -1775,7 +1775,7 @@ char *display_get_string(const char *title, const char *caption, const char *val
 #endif
         case KEY_ENTER:
         case KEY_ESC:
-            cont = FALSE;
+            cont = false;
             break;
 
         default:
@@ -1832,18 +1832,18 @@ char *display_get_string(const char *title, const char *caption, const char *val
 
     if (key == KEY_ESC || string->len == 0)
     {
-        g_string_free(string, TRUE);
+        g_string_free(string, true);
         return NULL;
     }
 
-    return g_string_free(string, FALSE);
+    return g_string_free(string, false);
 }
 
 int display_get_yesno(const char *question, const char *title, const char *yes, const char *no)
 {
     display_window *ywin;
-    int RUN = TRUE;
-    int selection = FALSE;
+    int RUN = true;
+    int selection = false;
     guint line;
     GPtrArray *text;
 
@@ -1935,7 +1935,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
         switch (key)
         {
         case KEY_ESC:
-            selection = FALSE;
+            selection = false;
             /* fall-through */
 
         case KEY_LF:
@@ -1945,7 +1945,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 #endif
         case KEY_ENTER:
         case KEY_SPC:
-            RUN = FALSE;
+            RUN = false;
             break;
 
         case 'h':
@@ -1955,7 +1955,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 #endif
         case KEY_LEFT:
             if (!selection)
-                selection = TRUE;
+                selection = true;
             break;
 
         case 'l':
@@ -1965,18 +1965,18 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 #endif
         case KEY_RIGHT:
             if (selection)
-                selection = FALSE;
+                selection = false;
             break;
 
             /* shortcuts */
         case 'y':
-            selection = TRUE;
-            RUN = FALSE;
+            selection = true;
+            RUN = false;
             break;
 
         case 'n':
-            selection = FALSE;
-            RUN = FALSE;
+            selection = false;
+            RUN = false;
             break;
 
         default:
@@ -1998,7 +1998,7 @@ direction display_get_direction(const char *title, int *available)
     int *dirs = NULL;
     int startx, starty;
     int width;
-    int RUN = TRUE;
+    int RUN = true;
 
     /* direction to return */
     direction dir = GD_NONE;
@@ -2007,9 +2007,9 @@ direction display_get_direction(const char *title, int *available)
     {
         dirs = g_malloc0(sizeof(int) * GD_MAX);
         for (int x = 0; x < GD_MAX; x++)
-            dirs[x] = TRUE;
+            dirs[x] = true;
 
-        dirs[GD_CURR] = FALSE;
+        dirs[GD_CURR] = false;
     }
     else
     {
@@ -2124,7 +2124,7 @@ direction display_get_direction(const char *title, int *available)
             break;
 
         case KEY_ESC:
-            RUN = FALSE;
+            RUN = false;
             break;
 
         default:
@@ -2189,7 +2189,7 @@ position display_get_position(player *p,
             start = monster_pos(m);
     }
 
-    cpos = display_get_new_position(p, start, message, ray, ball, FALSE,
+    cpos = display_get_new_position(p, start, message, ray, ball, false,
                                     radius, passable, visible);
 
     if (pos_valid(cpos))
@@ -2219,7 +2219,7 @@ position display_get_new_position(player *p,
                                   gboolean passable,
                                   gboolean visible)
 {
-    gboolean RUN = TRUE;
+    gboolean RUN = true;
     direction dir = GD_NONE;
     position pos;
     int attrs; /* curses attributes */
@@ -2357,7 +2357,7 @@ position display_get_new_position(player *p,
         else if (ball && radius)
         {
             /* paint a ball if told to */
-            area *obstacles = map_get_obstacles(vmap, pos, radius, FALSE);
+            area *obstacles = map_get_obstacles(vmap, pos, radius, false);
             area *b = area_new_circle_flooded(pos, radius, obstacles);
             position cursor = pos;
 
@@ -2407,7 +2407,7 @@ position display_get_new_position(player *p,
             /* abort */
         case KEY_ESC:
             pos = pos_invalid;
-            RUN = FALSE;
+            RUN = false;
             break;
 
             /* finish */
@@ -2417,7 +2417,7 @@ position display_get_new_position(player *p,
         case PADENTER:
 #endif
         case KEY_ENTER:
-            RUN = FALSE;
+            RUN = false;
             /* if a passable position has been requested check if it
                actually is passable. Only known positions are allowed. */
             if (passable
@@ -2426,7 +2426,7 @@ position display_get_new_position(player *p,
                     || !map_pos_passable(vmap, pos)))
             {
                 if (!beep()) flash();
-                RUN = TRUE;
+                RUN = true;
             }
             break;
 
@@ -2539,7 +2539,7 @@ position display_get_new_position(player *p,
                 if (sobj != LS_NONE)
                 {
                     position origin = pos;
-                    while (TRUE)
+                    while (true)
                     {
                         if (++X(pos) >= MAP_MAX_X)
                         {
@@ -2647,7 +2647,7 @@ void display_show_history(message_log *log, const char *title)
     display_show_message(title, text->str, twidth + 2);
 
     /* free the assembled log */
-    g_string_free(text, TRUE);
+    g_string_free(text, true);
 }
 
 int display_show_message(const char *title, const char *message, int indent)
@@ -2659,7 +2659,7 @@ int display_show_message(const char *title, const char *message, int indent)
          b) the margin around the window */
     const guint wred = 4;
 
-    gboolean RUN = TRUE;
+    gboolean RUN = true;
 
     /* default window width according to available screen space;
        wred/2 chars margin on each side */
@@ -2758,7 +2758,7 @@ int display_show_message(const char *title, const char *message, int indent)
             if (!display_window_move(mwin, key))
             {
                 /* some other key -> close window */
-                RUN = FALSE;
+                RUN = false;
             }
         }
     }
@@ -2897,7 +2897,7 @@ void display_toggle_fullscreen(gboolean toggle)
 
     int fullscreen = config.fullscreen
         ? SDL_WINDOW_FULLSCREEN_DESKTOP
-        : FALSE;
+        : false;
 
     SDL_SetWindowFullscreen(pdc_window, fullscreen);
 
@@ -3052,7 +3052,7 @@ static void display_inventory_help(GPtrArray *callbacks)
     }
 
     display_show_message("Help", help->str, maxlen + 2);
-    g_string_free(help, TRUE);
+    g_string_free(help, true);
 }
 
 static display_window *display_window_new(int x1, int y1, int width,
@@ -3068,7 +3068,7 @@ static display_window *display_window_new(int x1, int y1, int width,
     dwin->height = height;
 
     dwin->window = newwin(dwin->height, dwin->width, dwin->y1, dwin->x1);
-    keypad(dwin->window, TRUE);
+    keypad(dwin->window, true);
 
     /* fill window background */
     wbkgd(dwin->window, CP_UI_FG);
@@ -3103,7 +3103,7 @@ static display_window *display_window_new(int x1, int y1, int width,
 
 static int display_window_move(display_window *dwin, int key)
 {
-    gboolean need_refresh = TRUE;
+    gboolean need_refresh = true;
 
     g_assert (dwin != NULL);
 
@@ -3159,7 +3159,7 @@ static int display_window_move(display_window *dwin, int key)
 #endif
 
     default:
-        need_refresh = FALSE;
+        need_refresh = false;
     }
 
     if (need_refresh)

@@ -1,6 +1,6 @@
 /*
  * inventory.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -55,7 +55,7 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
  * Function to add an item to an inventory.
  *
  * This function calls the pre_add callback to determine if adding the item
- * to the inventory is possible at all. If this callback returns FALSE,
+ * to the inventory is possible at all. If this callback returns false,
  * the item in not added to the inventory and control is returned to the
  * calling function.
  *
@@ -64,7 +64,7 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
  *
  * @param the inventory the item has to be added to
  * @param the item which has to be added
- * @return FALSE on failure, the new length of the inventory upon success
+ * @return false on failure, the new length of the inventory upon success
  */
 int inv_add(inventory **inv, item *it);
 
@@ -99,7 +99,7 @@ item *inv_del(inventory **inv, guint idx);
  *
  * @param the inventory from which the item shall be removed
  * @param the item to be removed
- * @return TRUE upon success, FALSE on failure.
+ * @return true upon success, false on failure.
  *
  */
 int inv_del_element(inventory **inv, item *it);
@@ -113,7 +113,7 @@ int inv_del_element(inventory **inv, item *it);
  *
  * @param the inventory from which the item shall be removed
  * @param the oid of the item to be removed
- * @return TRUE if the oid was removed, FALSE if the oid has not been found.
+ * @return true if the oid was removed, false if the oid has not been found.
  *
  */
 int inv_del_oid(inventory **inv, gpointer oid);
@@ -123,7 +123,7 @@ int inv_del_oid(inventory **inv, gpointer oid);
  *
  * @param pointer to the address of the inventory to erode
  * @param the erosion type affecting the inventory
- * @param TRUE if the player can see the inventory, FALSE otherwise
+ * @param true if the player can see the inventory, false otherwise
  * @param a filter function to restrict the eroded items
  *
  */
@@ -163,7 +163,7 @@ int inv_weight(inventory *inv);
  *
  * @param the inventory to look in
  * @param the filter function
- * @return the number of items for which the filter function returned TRUE
+ * @return the number of items for which the filter function returned true
  *
  */
 guint inv_length_filtered(inventory *inv, int (*filter)(item *));

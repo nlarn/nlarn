@@ -41,14 +41,14 @@ static const effect_data effects[ET_MAX] =
     {
         ET_NONE, "ET_NONE", 0, 0, NULL,
         NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
         ET_INC_CON, "ET_INC_CON", 1, 1, NULL,
         "You have a greater intestinal constitution!",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, TRUE
+        false, false, false, true
     },
 
     {
@@ -56,7 +56,7 @@ static const effect_data effects[ET_MAX] =
         "You feel skilful!",
         "Your dextrousness returns to normal.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, TRUE
+        false, false, false, true
     },
 
     {
@@ -64,7 +64,7 @@ static const effect_data effects[ET_MAX] =
         "You feel clever!",
         "You are not so smart anymore.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, TRUE
+        false, false, false, true
     },
 
     {
@@ -72,100 +72,100 @@ static const effect_data effects[ET_MAX] =
         "Your muscles are stronger!",
         "Your strength returns to normal.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, TRUE
+        false, false, false, true
     },
 
     {
         ET_INC_WIS, "ET_INC_WIS", 1, 1, NULL,
         "You feel more self-confident!",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, TRUE
+        false, false, false, true
     },
 
     {
         ET_INC_RND, "ET_INC_RND", 1, 1, NULL,
         NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
         ET_INC_DAMAGE, "ET_INC_DAMAGE", 100, 10, NULL,
         NULL, NULL, NULL, NULL,
-        TRUE, TRUE, FALSE, TRUE
+        true, true, false, true
     },
 
     {
         ET_INC_HP_MAX, "ET_INC_HP_MAX", 1, 5 /* % */, NULL,
         "You feel healthy!",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
         ET_INC_MP_MAX, "ET_INC_MP_MAX", 1, 5 /* % */, NULL,
         "You feel energetic!",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
         ET_INC_HP_REGEN, "ET_INC_HP_REGEN", 0, 1, NULL,
         NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
         ET_INC_MP_REGEN, "ET_INC_MP_REGEN", 0, 1, NULL,
         NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
         ET_INC_LEVEL, "ET_INC_LEVEL", 1, 1, NULL,
         "You feel much more skilful!",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
         ET_INC_EXP, "ET_INC_EXP", 1, 0, NULL,
         "You feel experienced.",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
         ET_RESIST_FIRE, "ET_RESIST_FIRE", 0, 25, NULL,
         "You feel a chill run up your spine!",
         NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, TRUE
+        false, false, false, true
     },
 
     {
         ET_RESIST_COLD, "ET_RESIST_COLD", 0, 25, NULL,
         NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, TRUE
+        false, false, false, true
     },
 
     {
         ET_RESIST_MAGIC, "ET_RESIST_MAGIC", 0, 25, NULL,
         NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, TRUE
+        false, false, false, true
     },
 
     {
         ET_PROTECTION, "ET_PROTECTION", 250, 3, "protected",
         "You feel protected!", "Your protection wanes.",
         NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_STEALTH, "ET_STEALTH", 250, TRUE, "stealthy",
+        ET_STEALTH, "ET_STEALTH", 250, true, "stealthy",
         "You start to move stealthily.",
         "You're not stealthy anymore.",
         NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
@@ -173,7 +173,7 @@ static const effect_data effects[ET_MAX] =
         "You become aware of your surroundings.",
         "You are no longer aware of your surroundings.",
         NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
@@ -182,7 +182,7 @@ static const effect_data effects[ET_MAX] =
         "You feel yourself slow down.",
         "The %s seems to move much faster.",
         "The %s suddenly slows down.",
-        TRUE, FALSE, FALSE, TRUE
+        true, false, false, true
     },
 
     {
@@ -191,31 +191,31 @@ static const effect_data effects[ET_MAX] =
         "You return to normal. How sad!",
         "The %s looks more perilous!",
         "The %s looks less perilous.",
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
-        ET_INVISIBILITY, "ET_INVISIBILITY", 250, TRUE, "invisible",
+        ET_INVISIBILITY, "ET_INVISIBILITY", 250, true, "invisible",
         "Suddenly you can't see yourself!",
         "You are no longer invisible.",
         "The %s disappears.",
         NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
         ET_INVULNERABILITY, "ET_INVULNERABILITY", 250, 10, "invulnerable",
         NULL, NULL, NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_INFRAVISION, "ET_INFRAVISION", 250, TRUE, "infravision",
+        ET_INFRAVISION, "ET_INFRAVISION", 250, true, "infravision",
         "Your vision sharpens.",
         "Your vision returns to normal.",
         "The %s seems more observant.",
         "The %s seems less observant.",
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
@@ -223,44 +223,44 @@ static const effect_data effects[ET_MAX] =
         "You have been granted enlightenment!",
         "You are no longer enlightened.",
         NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_REFLECTION, "ET_REFLECTION", 400, TRUE, "reflection",
+        ET_REFLECTION, "ET_REFLECTION", 400, true, "reflection",
         NULL, NULL, NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_DETECT_MONSTER, "ET_DETECT_MONSTER", 10, TRUE, NULL,
+        ET_DETECT_MONSTER, "ET_DETECT_MONSTER", 10, true, NULL,
         "You sense the presence of monsters.",
         NULL, NULL, NULL,
-        FALSE, FALSE, TRUE, FALSE
+        false, false, true, false
     },
 
     {
-        ET_HOLD_MONSTER, "ET_HOLD_MONSTER", 30, TRUE, "held",
+        ET_HOLD_MONSTER, "ET_HOLD_MONSTER", 30, true, "held",
         NULL, NULL,
         "The %s seems to freeze.",
         "The %s can move again.",
-        TRUE, FALSE, FALSE, FALSE
+        true, false, false, false
     },
 
     {
-        ET_SCARED, "ET_SCARED", 250, TRUE, "scared",
+        ET_SCARED, "ET_SCARED", 250, true, "scared",
         NULL, NULL,
         "The %s is very afraid.",
         "The %s is no longer scared.",
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_CHARM_MONSTER, "ET_CHARM_MONSTER", 50, TRUE, "charmed",
+        ET_CHARM_MONSTER, "ET_CHARM_MONSTER", 50, true, "charmed",
         NULL, NULL,
         "The %s is awestruck at your magnificence!",
         "The %s is no longer impressed.",
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
@@ -269,7 +269,7 @@ static const effect_data effects[ET_MAX] =
         NULL,
         "The %s looks better.",
         NULL,
-        FALSE, TRUE, FALSE, FALSE
+        false, true, false, false
     },
 
     {
@@ -278,7 +278,7 @@ static const effect_data effects[ET_MAX] =
         NULL,
         "The %s looks completely healed.",
         NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
@@ -287,7 +287,7 @@ static const effect_data effects[ET_MAX] =
         NULL,
         "The %s seems to regain energy.",
         NULL,
-        FALSE, TRUE, FALSE, FALSE
+        false, true, false, false
     },
 
     {
@@ -296,70 +296,70 @@ static const effect_data effects[ET_MAX] =
         NULL,
         "The %s looks much more powerful.",
         NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
-        ET_CANCELLATION, "ET_CANCELLATION", 250, TRUE, "cancellation",
+        ET_CANCELLATION, "ET_CANCELLATION", 250, true, "cancellation",
         NULL, NULL, NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_UNDEAD_PROTECTION, "ET_UNDEAD_PROTECTION", 400, TRUE, "undead protection",
+        ET_UNDEAD_PROTECTION, "ET_UNDEAD_PROTECTION", 400, true, "undead protection",
         "You feel safe in the dark.",
         NULL, NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_SPIRIT_PROTECTION, "ET_SPIRIT_PROTECTION", 400, TRUE, "spirit protection",
+        ET_SPIRIT_PROTECTION, "ET_SPIRIT_PROTECTION", 400, true, "spirit protection",
         "You feel a protecting force.",
         NULL, NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_LIFE_PROTECTION, "ET_LIFE_PROTECTION", 2500, TRUE, "life protection",
+        ET_LIFE_PROTECTION, "ET_LIFE_PROTECTION", 2500, true, "life protection",
         "You've never felt so safe.",
         "You feel less safe than before.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
-        ET_NOTHEFT, "ET_NOTHEFT", 400, TRUE, "theft protection",
+        ET_NOTHEFT, "ET_NOTHEFT", 400, true, "theft protection",
         NULL, NULL, NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_SUSTAINMENT, "ET_SUSTAINMENT", 400, TRUE, "sustainment",
+        ET_SUSTAINMENT, "ET_SUSTAINMENT", 400, true, "sustainment",
         NULL, NULL, NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_TIMESTOP, "ET_TIMESTOP", 20, TRUE, "time stop",
+        ET_TIMESTOP, "ET_TIMESTOP", 20, true, "time stop",
         NULL, NULL, NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_WALL_WALK, "ET_WALL_WALK", 20, TRUE, "wall-walk",
+        ET_WALL_WALK, "ET_WALL_WALK", 20, true, "wall-walk",
         "You can now walk through walls.",
         "You can no longer walk through walls.",
         NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_LEVITATION, "ET_LEVITATION", 20, TRUE, "levitation",
+        ET_LEVITATION, "ET_LEVITATION", 20, true, "levitation",
         "You start to float in the air!",
         "You gently sink to the ground.",
         "The %s starts to float in the air!",
         "The %s gently sinks to the ground.",
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
@@ -367,7 +367,7 @@ static const effect_data effects[ET_MAX] =
         "You feel incapacitated.",
         "You feel tougher.",
         NULL, NULL,
-        FALSE, FALSE, TRUE, TRUE
+        false, false, true, true
     },
 
     {
@@ -375,7 +375,7 @@ static const effect_data effects[ET_MAX] =
         "You feel clumsy.",
         "Your dexterousness returns.",
         NULL, NULL,
-        FALSE, FALSE, TRUE, TRUE
+        false, false, true, true
     },
 
     {
@@ -383,7 +383,7 @@ static const effect_data effects[ET_MAX] =
         "You feel imbecile.",
         "Your intelligence returns.",
         NULL, NULL,
-        FALSE, FALSE, TRUE, TRUE
+        false, false, true, true
     },
 
     {
@@ -391,7 +391,7 @@ static const effect_data effects[ET_MAX] =
         "You are weaker.",
         "You regain your strength.",
         NULL, NULL,
-        FALSE, FALSE, TRUE, TRUE
+        false, false, true, true
     },
 
     {
@@ -399,29 +399,29 @@ static const effect_data effects[ET_MAX] =
         "You feel ignorant.",
         "You feel less ignorant.",
         NULL, NULL,
-        FALSE, FALSE, TRUE, TRUE
+        false, false, true, true
     },
 
     {
         ET_DEC_RND, "ET_DEC_RND", 1, 1, NULL,
         NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
-        ET_AGGRAVATE_MONSTER, "ET_AGGRAVATE_MONSTER", 500, TRUE, "aggravating",
+        ET_AGGRAVATE_MONSTER, "ET_AGGRAVATE_MONSTER", 500, true, "aggravating",
         "You sense rising anger.",
         NULL, NULL, NULL,
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 
     {
-        ET_SLEEP, "ET_SLEEP", 25, TRUE, "sleeping",
+        ET_SLEEP, "ET_SLEEP", 25, true, "sleeping",
         "You fall asleep.",
         "You wake up.",
         "The %s falls asleep.",
         "The %s wakes up.",
-        TRUE, FALSE, FALSE, FALSE
+        true, false, false, false
     },
 
     {
@@ -430,7 +430,7 @@ static const effect_data effects[ET_MAX] =
         "You're no longer dizzy.",
         "The %s looks dizzy and weak.",
         "The %s no longer looks dizzy.",
-        TRUE, FALSE, FALSE, FALSE
+        true, false, false, false
     },
 
     {
@@ -438,49 +438,49 @@ static const effect_data effects[ET_MAX] =
         "You feel a sickness coming on.",
         "You now feel better.",
         NULL, NULL,
-        TRUE, TRUE, TRUE, TRUE
+        true, true, true, true
     },
 
     {
-        ET_BLINDNESS, "ET_BLINDNESS", 250, TRUE, "blind",
+        ET_BLINDNESS, "ET_BLINDNESS", 250, true, "blind",
         "You can't see anything!",
         "The blindness lifts.",
         "The %s seems to be blinded.",
         "Looks like the %s can see again.",
-        TRUE, FALSE, FALSE, FALSE
+        true, false, false, false
     },
 
     {
-        ET_CLUMSINESS, "ET_CLUMSINESS", 250, TRUE, "clumsy",
+        ET_CLUMSINESS, "ET_CLUMSINESS", 250, true, "clumsy",
         "You begin to lose hand to eye coordination!",
         "You're less awkward now.",
         NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        true, false, false, false
     },
 
     {
-        ET_ITCHING, "ET_ITCHING", 100, TRUE, "itching",
+        ET_ITCHING, "ET_ITCHING", 100, true, "itching",
         "You feel an irritation spread over your skin!",
         "The irritation subsides.",
         NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        true, false, false, false
     },
 
     {
-        ET_CONFUSION, "ET_CONFUSION", 25, TRUE, "confused",
+        ET_CONFUSION, "ET_CONFUSION", 25, true, "confused",
         "You are confused.",
         "You regain your senses.",
         "The %s looks confused.",
         "The %s seems to have regained it's senses.",
-        TRUE, FALSE, FALSE, FALSE
+        true, false, false, false
     },
 
     {
-        ET_PARALYSIS, "ET_PARALYSIS", 25, TRUE, "paralysed",
+        ET_PARALYSIS, "ET_PARALYSIS", 25, true, "paralysed",
         "You are paralysed.",
         "You can move again.",
         NULL, NULL,
-        TRUE, FALSE, FALSE, FALSE
+        true, false, false, false
     },
 
     {
@@ -489,13 +489,13 @@ static const effect_data effects[ET_MAX] =
         "You are cured.",
         "The %s looks poisoned.",
         "The %s looks cured.",
-        TRUE, FALSE, TRUE, TRUE
+        true, false, true, true
     },
 
     {
         ET_AMNESIA, "ET_AMNESIA", 1, 0, NULL,
         NULL, NULL, NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
@@ -504,7 +504,7 @@ static const effect_data effects[ET_MAX] =
         "You are moving faster again.",
         "The %s slows down.",
         "The %s seems to move much faster.",
-        TRUE, FALSE, FALSE, TRUE
+        true, false, false, true
     },
 
     {
@@ -512,24 +512,24 @@ static const effect_data effects[ET_MAX] =
         "You are burdened.",
         "You are no longer burdened.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
-        ET_OVERSTRAINED, "ET_OVERSTRAINED", 0, TRUE, "overload",
+        ET_OVERSTRAINED, "ET_OVERSTRAINED", 0, true, "overload",
         "You are overloaded!",
         "You are no longer overloaded.",
         NULL, NULL,
-        FALSE, FALSE, FALSE, FALSE
+        false, false, false, false
     },
 
     {
-        ET_TRAPPED, "ET_TRAPPED", 10, TRUE, "trapped",
+        ET_TRAPPED, "ET_TRAPPED", 10, true, "trapped",
         NULL,
         "You are no longer trapped!",
         NULL,
         "The %s climbs out of the pit!",
-        TRUE, FALSE, TRUE, FALSE
+        true, false, true, false
     },
 };
 
@@ -747,25 +747,25 @@ effect *effect_add(GPtrArray *ea, effect *ne)
     /* check for existing effects unless the effect belongs to an item */
     if (!ne->item && (e = effect_get(ea, ne->type)))
     {
-        gboolean modified_existing = FALSE;
+        gboolean modified_existing = false;
 
         /* if the effect's duration can be extended, reset it */
         if (effects[e->type].inc_duration)
         {
             e->turns = max(e->turns, ne->turns);
-            modified_existing = TRUE;
+            modified_existing = true;
         }
 
         /* if the effect's amount can be extended, do so */
         if (effects[e->type].inc_amount)
         {
             e->amount += ne->amount;
-            modified_existing = TRUE;
+            modified_existing = true;
         }
 
         effect_destroy(ne);
 
-        if (modified_existing == TRUE)
+        if (modified_existing == true)
         {
             return e;
         }

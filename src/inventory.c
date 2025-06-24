@@ -1,6 +1,6 @@
 /*
  * inventory.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -51,24 +51,24 @@ void inv_destroy(inventory *inv, gboolean special)
         {
             /* Ensure the potion of cure dianthroritis can be recreated */
             if (it->type == IT_POTION && it->id == PO_CURE_DIANTHR)
-                nlarn->cure_dianthr_created = FALSE;
+                nlarn->cure_dianthr_created = false;
 
             /* allow recreating unique items */
             if (it->type == IT_AMULET)
-                nlarn->amulet_created[it->id] = FALSE;
+                nlarn->amulet_created[it->id] = false;
 
             if (it->type == IT_ARMOUR && armour_unique(it))
-                nlarn->armour_created[it->id] = FALSE;
+                nlarn->armour_created[it->id] = false;
 
             if (it->type == IT_WEAPON && weapon_is_unique(it))
-                nlarn->weapon_created[it->id] = FALSE;
+                nlarn->weapon_created[it->id] = false;
         }
 
         g_ptr_array_remove(inv->content, it->oid);
         item_destroy(it);
     }
 
-    g_ptr_array_free(inv->content, TRUE);
+    g_ptr_array_free(inv->content, true);
 
     g_free(inv);
 }
@@ -128,7 +128,7 @@ int inv_add(inventory **inv, item *it)
         /* call pre_add callback */
         if (!(*inv)->pre_add(*inv, it))
         {
-            return FALSE;
+            return false;
         }
     }
 
@@ -202,7 +202,7 @@ item *inv_del(inventory **inv, guint idx)
     /* destroy inventory if empty and not owned by anybody */
     if (!inv_length(*inv) && !(*inv)->owner)
     {
-        inv_destroy(*inv, FALSE);
+        inv_destroy(*inv, false);
         *inv = NULL;
     }
 
@@ -217,7 +217,7 @@ int inv_del_element(inventory **inv, item *it)
     {
         if (!(*inv)->pre_del(*inv, it))
         {
-            return FALSE;
+            return false;
         }
     }
 
@@ -231,11 +231,11 @@ int inv_del_element(inventory **inv, item *it)
     /* destroy inventory if empty and not owned by anybody */
     if (!inv_length(*inv) && !(*inv)->owner)
     {
-        inv_destroy(*inv, FALSE);
+        inv_destroy(*inv, false);
         *inv = NULL;
     }
 
-    return TRUE;
+    return true;
 }
 
 int inv_del_oid(inventory **inv, gpointer oid)
@@ -244,17 +244,17 @@ int inv_del_oid(inventory **inv, gpointer oid)
 
     if (!g_ptr_array_remove((*inv)->content, oid))
     {
-        return FALSE;
+        return false;
     }
 
     /* destroy inventory if empty and not owned by anybody */
     if (!inv_length(*inv) && !(*inv)->owner)
     {
-        inv_destroy(*inv, FALSE);
+        inv_destroy(*inv, false);
         *inv = NULL;
     }
 
-    return TRUE;
+    return true;
 }
 
 void inv_erode(inventory **inv, item_erosion_type iet,

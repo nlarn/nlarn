@@ -145,7 +145,7 @@ int spell_cast_previous(struct player *p);
  *
  * @param the player
  * @param id of spell to learn
- * @return FALSE if learning the spell failed, otherwise level of knowledge
+ * @return false if learning the spell failed, otherwise level of knowledge
  */
 int spell_learn(struct player *p, spell_id spell_type);
 
@@ -154,7 +154,7 @@ int spell_learn(struct player *p, spell_id spell_type);
  *
  * @param the player
  * @param id of the spell in question
- * @return FALSE if unknown, otherwise level of knowledge of that spell
+ * @return false if unknown, otherwise level of knowledge of that spell
  */
 int spell_known(struct player *p, spell_id spell_type);
 

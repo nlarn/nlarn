@@ -216,7 +216,7 @@ void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX])
         {
             if (settings[idx] == item_glyph(it))
             {
-                config[it] = TRUE;
+                config[it] = true;
             }
         }
     }
@@ -313,7 +313,7 @@ void configure_defaults(const char *inifile)
         "Clear values with `GREEN`A`end`-`GREEN`D`end`. "
         "Return to the main menu with `GREEN`ESC`end`.\n";
 
-    gboolean leaving = FALSE;
+    gboolean leaving = false;
 
     while (!leaving)
     {
@@ -388,7 +388,7 @@ void configure_defaults(const char *inifile)
             {
                 int gender = (display_get_yesno("Shall your future characters be "
                             "male or female?", "Choose default gender",
-                            "Female", "Male") == TRUE)
+                            "Female", "Male") == true)
                     ? PS_FEMALE : PS_MALE;
 
                 if (config.gender) g_free(config.gender);
@@ -474,12 +474,12 @@ void configure_defaults(const char *inifile)
 
             /* fullscreen */
             case 'g':
-                display_toggle_fullscreen(TRUE);
+                display_toggle_fullscreen(true);
                 break;
 #endif
 
             case KEY_ESC:
-                leaving = TRUE;
+                leaving = true;
                 break;
 
             default:

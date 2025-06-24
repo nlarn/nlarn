@@ -1,6 +1,6 @@
 /*
  * pathfinding.c
- * Copyright (C) 2009-2020 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -82,7 +82,7 @@ path *path_find(map *m, position start, position goal, map_element_t element)
             path_element *next = g_ptr_array_remove_index_fast(neighbours,
                                                 neighbours->len - 1);
 
-            gboolean next_is_better = FALSE;
+            gboolean next_is_better = false;
 
             if (path_element_in_list(next, pt->closed))
             {
@@ -96,11 +96,11 @@ path *path_find(map *m, position start, position goal, map_element_t element)
             if (!path_element_in_list(next, pt->open))
             {
                 g_ptr_array_add(pt->open, next);
-                next_is_better = TRUE;
+                next_is_better = true;
             }
             else if (next->g_score > next_g_score)
             {
-                next_is_better = TRUE;
+                next_is_better = true;
             }
             else
             {
@@ -114,7 +114,7 @@ path *path_find(map *m, position start, position goal, map_element_t element)
             }
         }
 
-        g_ptr_array_free(neighbours, TRUE);
+        g_ptr_array_free(neighbours, true);
     }
 
     /* could not find a path */
@@ -132,13 +132,13 @@ void path_destroy(path *pt)
     {
         g_free(g_ptr_array_index(pt->open, idx));
     }
-    g_ptr_array_free(pt->open, TRUE);
+    g_ptr_array_free(pt->open, true);
 
     for (guint idx = 0; idx < pt->closed->len; idx++)
     {
         g_free(g_ptr_array_index(pt->closed, idx));
     }
-    g_ptr_array_free(pt->closed, TRUE);
+    g_ptr_array_free(pt->closed, true);
 
     g_queue_free(pt->path);
     g_free(pt);

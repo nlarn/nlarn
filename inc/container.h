@@ -89,7 +89,7 @@ int container_move_content(struct player *p, inventory **inv,
   * @brief Remove a trap on a container
   *
   * @param the player
-  * @return TRUE if there is a trapped container at the player's position
+  * @return true if there is a trapped container at the player's position
   */
 gboolean container_untrap(struct player *p);
 

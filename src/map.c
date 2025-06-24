@@ -107,7 +107,7 @@ static gboolean is_volcano_map(int nlevel)
 
 map *map_new(int num, const char *mazefile)
 {
-    gboolean map_loaded = FALSE;
+    gboolean map_loaded = false;
 
     map *nmap = nlarn->maps[num] = g_malloc0(sizeof(map));
     nmap->nlevel = num;
@@ -139,7 +139,7 @@ map *map_new(int num, const char *mazefile)
         gboolean treasure_room = num > 1 && chance(25);
 
         /* generate random map */
-        gboolean keep_maze = TRUE;
+        gboolean keep_maze = true;
         do
         {
             /* dig cave */
@@ -313,7 +313,7 @@ char *map_dump(map *m, position ppos)
         g_string_append_c(dump, '\n');
     }
 
-    return g_string_free(dump, FALSE);
+    return g_string_free(dump, false);
 }
 
 void map_destroy(map *m)
@@ -337,7 +337,7 @@ void map_destroy(map *m)
             }
 
             if (m->grid[y][x].ilist != NULL)
-                inv_destroy(m->grid[y][x].ilist, TRUE);
+                inv_destroy(m->grid[y][x].ilist, true);
         }
 
     g_free(m);
@@ -403,7 +403,7 @@ int *map_get_surrounding(map *m, position pos, sobject_t type)
 
         if (pos_valid(p) && map_sobject_at(m, p) == type)
         {
-            dirs[nmove] = TRUE;
+            dirs[nmove] = true;
         }
 
         nmove++;
@@ -438,11 +438,11 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
 
     /* if the position is invalid it is invalid for the map as well */
     if (!pos_valid(pos))
-        return FALSE;
+        return false;
 
     /* if the position is on another map it is invalid for this level */
     if (Z(pos) != m->nlevel)
-        return FALSE;
+        return false;
 
     /* make shortcut */
     tile = map_tile_at(m, pos);
@@ -461,7 +461,7 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
         if (wall_count < 7)
         {
             /* not enclosed by walls */
-            return FALSE;
+            return false;
         }
     }
 
@@ -481,10 +481,10 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
                 for (X(p) = X(pos) -1; X(p) < X(pos) + 2; X(p)++)
                 {
                     if (map_sobject_at(m, p) != LS_NONE)
-                        return FALSE;
+                        return false;
                 }
 
-            return TRUE;
+            return true;
         }
         break;
 
@@ -506,21 +506,21 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
     case LE_XORN:
         /* not OK if player is standing on that tile */
         if (pos_identical(pos, nlarn->p->pos))
-            return FALSE;
+            return false;
 
         if (map_is_monster_at(m, pos))
-            return FALSE;
+            return false;
 
         return monster_valid_dest(m, pos, element);
         break;
 
     case LE_MAX:
-        return FALSE;
+        return false;
         break;
 
     } /* switch */
 
-    return FALSE;
+    return false;
 }
 
 int map_pos_is_visible(map *m, position s, position t)
@@ -531,7 +531,7 @@ int map_pos_is_visible(map *m, position s, position t)
 
     /* positions on different levels? */
     if (Z(s) != Z(t))
-        return FALSE;
+        return false;
 
     x = X(s);
     y = Y(s);
@@ -565,7 +565,7 @@ int map_pos_is_visible(map *m, position s, position t)
             if (!mt_is_transparent(m->grid[y][x].type)
                     || !so_is_transparent(m->grid[y][x].sobject))
             {
-                return FALSE;
+                return false;
             }
         }
     }
@@ -591,12 +591,12 @@ int map_pos_is_visible(map *m, position s, position t)
             if (!mt_is_transparent(m->grid[y][x].type)
                     || !so_is_transparent(m->grid[y][x].sobject))
             {
-                return FALSE;
+                return false;
             }
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 GList *map_ray(map *m, position source, position target)
@@ -694,12 +694,12 @@ gboolean map_trajectory(position source, position target,
 
     /* it was impossible to get a ray for the given positions */
     if (!ray)
-        return FALSE;
+        return false;
 
     /* follow the ray to determine if it hits something */
     do
     {
-        gboolean result = FALSE;
+        gboolean result = false;
         position cursor;
         pos_val(cursor) = GPOINTER_TO_UINT(iter->data);
 
@@ -711,7 +711,7 @@ gboolean map_trajectory(position source, position target,
         if (pos_hitfun(iter, damo, data1, data2))
         {
             /* the callback returned that the ray if finished */
-            result = TRUE;
+            result = true;
         }
 
         /* check for reflection: mirrors and the amulet of reflection */
@@ -725,12 +725,12 @@ gboolean map_trajectory(position source, position target,
             display_paint_screen(nlarn->p);
 
             return map_trajectory(cursor, source, damo, pos_hitfun, data1,
-                                  data2, FALSE,  glyph, fg, keep_ray);
+                                  data2, false,  glyph, fg, keep_ray);
         }
 
         /* after checking for reflection, abort the function if the
            callback indicated success */
-        if (result == TRUE)
+        if (result == true)
         {
             g_list_free(ray);
             return result;
@@ -752,7 +752,7 @@ gboolean map_trajectory(position source, position target,
 
     /* none of the trigger functions succeeded */
     g_list_free(ray);
-    return FALSE;
+    return false;
 }
 
 area *map_get_obstacles(map *m, position center, int radius, gboolean doors)
@@ -884,7 +884,7 @@ char *map_inv_description(map *m, position pos, const char* where, int (*ifilter
     {
         item *it = inv_get_filtered(*map_ilist_at(m, pos), idx, ifilter);
         gchar *item_desc = item_describe(it, player_item_known(nlarn->p, it),
-                                            FALSE, FALSE);
+                                            false, false);
 
         if (idx > 0)
             g_string_append_printf(items_desc, " and %s", item_desc);
@@ -897,7 +897,7 @@ char *map_inv_description(map *m, position pos, const char* where, int (*ifilter
     if (items_desc != NULL)
     {
         char *description = g_strdup_printf("You see %s %s.", items_desc->str, where);
-        g_string_free(items_desc, TRUE);
+        g_string_free(items_desc, true);
 
         return description;
     }
@@ -926,7 +926,7 @@ char *map_pos_examine(position pos)
     g_string_append_printf(desc, "%s. ", tmp);
     g_free(tmp);
 
-    gboolean has_mimic = FALSE;
+    gboolean has_mimic = false;
     /* add description of monster, if there is one on the tile */
     if ((monst = map_get_monster_at(cm, pos)))
     {
@@ -939,7 +939,7 @@ char *map_pos_examine(position pos)
             g_free(tmp);
 
             if (monster_unknown(monst))
-                has_mimic = TRUE;
+                has_mimic = true;
         }
     }
 
@@ -967,7 +967,7 @@ char *map_pos_examine(position pos)
         g_free(inv_description);
     }
 
-    return g_string_free(desc, FALSE);
+    return g_string_free(desc, false);
 }
 
 monster *map_get_monster_at(map *m, position pos)
@@ -997,7 +997,7 @@ void map_fill_with_life(map *m)
 
         do
         {
-            pos = map_find_space(m, LE_MONSTER, FALSE);
+            pos = map_find_space(m, LE_MONSTER, false);
 
             if (!pos_valid(pos))
             {
@@ -1024,11 +1024,11 @@ gboolean map_is_exit_at(map *m, position pos)
     case LS_ELEVATORUP:
     case LS_STAIRSUP:
     case LS_STAIRSDOWN:
-        return TRUE;
+        return true;
         break;
 
     default:
-        return FALSE;
+        return false;
         break;
     }
 }
@@ -1166,8 +1166,8 @@ static int map_fill_with_stationary_objects(map *m)
     /* volcano shaft up from the temple */
     if (m->nlevel == MAP_CMAX)
     {
-        pos = map_find_space(m, LE_SOBJECT, TRUE);
-        if (!pos_valid(pos)) return FALSE;
+        pos = map_find_space(m, LE_SOBJECT, true);
+        if (!pos_valid(pos)) return false;
         map_sobject_set(m, pos, LS_ELEVATORUP);
     }
 
@@ -1175,15 +1175,15 @@ static int map_fill_with_stationary_objects(map *m)
     if (!is_town(m->nlevel) && !is_caverns_bottom(m->nlevel)
             && !is_volcano_bottom(m->nlevel))
     {
-        pos = map_find_space(m, LE_SOBJECT, TRUE);
-        if (!pos_valid(pos)) return FALSE;
+        pos = map_find_space(m, LE_SOBJECT, true);
+        if (!pos_valid(pos)) return false;
         map_sobject_set(m, pos, LS_STAIRSDOWN);
     }
 
     if ((m->nlevel > 1) && (m->nlevel != MAP_CMAX))
     {
-        pos = map_find_space(m, LE_SOBJECT, TRUE);
-        if (!pos_valid(pos)) return FALSE;
+        pos = map_find_space(m, LE_SOBJECT, true);
+        if (!pos_valid(pos)) return false;
         map_sobject_set(m, pos, LS_STAIRSUP);
     }
 
@@ -1191,52 +1191,52 @@ static int map_fill_with_stationary_objects(map *m)
     /* 33 percent chance for an altar */
     if (chance(33))
     {
-        pos = map_find_space(m, LE_SOBJECT, FALSE);
-        if (!pos_valid(pos)) return FALSE;
+        pos = map_find_space(m, LE_SOBJECT, false);
+        if (!pos_valid(pos)) return false;
         map_sobject_set(m, pos, LS_ALTAR);
     }
 
     /* up to three statues */
     for (guint i = 0; i < rand_0n(3); i++)
     {
-        pos = map_find_space(m, LE_SOBJECT, FALSE);
-        if (!pos_valid(pos)) return FALSE;
+        pos = map_find_space(m, LE_SOBJECT, false);
+        if (!pos_valid(pos)) return false;
         map_sobject_set(m, pos, LS_STATUE);
     }
 
     /* up to three fountains */
     for (guint i = 0; i < rand_0n(3); i++)
     {
-        pos = map_find_space(m, LE_SOBJECT, FALSE);
-        if (!pos_valid(pos)) return FALSE;
+        pos = map_find_space(m, LE_SOBJECT, false);
+        if (!pos_valid(pos)) return false;
         map_sobject_set(m, pos, LS_FOUNTAIN);
     }
 
     /* up to two thrones */
     for (guint i = 0; i < rand_0n(2); i++)
     {
-        pos = map_find_space(m, LE_SOBJECT, FALSE);
-        if (!pos_valid(pos)) return FALSE;
+        pos = map_find_space(m, LE_SOBJECT, false);
+        if (!pos_valid(pos)) return false;
         map_sobject_set(m, pos, LS_THRONE);
     }
 
     /* up to two  mirrors */
     for (guint i = 0; i < rand_0n(2); i++)
     {
-        pos = map_find_space(m, LE_SOBJECT, FALSE);
-        if (!pos_valid(pos)) return FALSE;
+        pos = map_find_space(m, LE_SOBJECT, false);
+        if (!pos_valid(pos)) return false;
         map_sobject_set(m, pos, LS_MIRROR);
     }
 
     if (m->nlevel == 5)
     {
         /* branch office of the bank */
-        pos = map_find_space(m, LE_SOBJECT, TRUE);
-        if (!pos_valid(pos)) return FALSE;
+        pos = map_find_space(m, LE_SOBJECT, true);
+        if (!pos_valid(pos)) return false;
         map_sobject_set(m, pos, LS_BANK2);
     }
 
-    return TRUE;
+    return true;
 }
 
 static void map_fill_with_objects(map *m)
@@ -1290,7 +1290,7 @@ static void map_fill_with_objects(map *m)
         /* there is a chance that the container is trapped */
         if (chance(33))
         {
-            container->cursed = TRUE;
+            container->cursed = true;
         }
 
         /* add the container to the map */
@@ -1307,7 +1307,7 @@ static void map_fill_with_objects(map *m)
     /* up to three gems */
     for (guint i = 0; i <= rand_0n(3); i++)
     {
-        map_item_add(m, item_new_random(IT_GEM, FALSE));
+        map_item_add(m, item_new_random(IT_GEM, false));
     }
 
     /* up to four potions */
@@ -1346,7 +1346,7 @@ static void map_fill_with_traps(map *m)
 
     for (guint count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
     {
-        position pos = map_find_space(m, LE_TRAP, FALSE);
+        position pos = map_find_space(m, LE_TRAP, false);
         map_trap_set(m, pos, rand_1n(trapdoor ? TT_MAX : TT_TRAPDOOR));
     }
 } /* map_fill_with_traps */
@@ -1358,7 +1358,7 @@ static void map_make_maze(map *m, int treasure_room)
     int mx, my;
     int nrooms;
     rectangle **rooms = NULL;
-    gboolean want_monster = FALSE;
+    gboolean want_monster = false;
 
     g_assert (m != NULL);
 
@@ -1381,7 +1381,7 @@ generate:
 
             if (map_tile_at(m, pos)->ilist != NULL)
             {
-                inv_destroy(map_tile_at(m, pos)->ilist, TRUE);
+                inv_destroy(map_tile_at(m, pos)->ilist, true);
                 map_tile_at(m, pos)->ilist = NULL;
             }
         }
@@ -1431,7 +1431,7 @@ generate:
             rooms[room]->x1 = mx - rand_1n(2);
             rooms[room]->x2 = mx + rand_1n(2);
 
-            want_monster = TRUE;
+            want_monster = true;
         }
         else
         {
@@ -1450,10 +1450,10 @@ generate:
 
                 tile->type = LT_FLOOR;
 
-                if (want_monster == TRUE)
+                if (want_monster == true)
                 {
                     monster_new_by_level(pos);
-                    want_monster = FALSE;
+                    want_monster = false;
                 }
             }
         }
@@ -1703,7 +1703,7 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
     if (!(levelfile = fopen(mazefile, "r")))
     {
         /* maze file cannot be opened */
-        return FALSE;
+        return false;
     }
 
     if (feof(levelfile))
@@ -1711,7 +1711,7 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
         /* FIXME: debug output */
         fclose(levelfile);
 
-        return FALSE;
+        return false;
     }
 
     /* FIXME: calculate how many levels are in the file  */
@@ -1730,7 +1730,7 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
         }
         while (map_used[map_num] && ++tries < 100);
 
-        map_used[map_num] = TRUE;
+        map_used[map_num] = true;
     }
 
     /* determine number of line separating character(s) */
@@ -1762,7 +1762,7 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
         /* FIXME: debug output */
         fclose(levelfile);
 
-        return FALSE;
+        return false;
     }
 
     // Sometimes flip the maps. (Never the town)
@@ -1890,9 +1890,9 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
 
     /* if the amulet of larn/pcd has not been placed yet, place it randomly */
     if (spec_count >= 0)
-        place_special_item(m, map_find_space(m, LE_ITEM, FALSE));
+        place_special_item(m, map_find_space(m, LE_ITEM, false));
 
-    return TRUE;
+    return true;
 }
 
 /*
@@ -1940,7 +1940,7 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
                 map_tiletype_set(m, pos, LT_FLOOR);
 
                 /* create loot */
-                itm = item_new_random(IT_GOLD, FALSE);
+                itm = item_new_random(IT_GOLD, false);
                 inv_add(map_ilist_at(m, pos), itm);
 
                 /* create a monster */
@@ -1950,17 +1950,17 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
             /* now clear out interior */
             if ((mst = map_sobject_at(m, pos)))
             {
-                success = FALSE;
+                success = false;
                 do
                 {
-                    npos = map_find_space(m, LE_SOBJECT, FALSE);
+                    npos = map_find_space(m, LE_SOBJECT, false);
                     if (!pos_in_rect(npos, *rooms[room]))
                     {
                         /* pos is outside of room */
                         map_sobject_set(m, npos, mst);
                         map_sobject_set(m, pos, LS_NONE);
 
-                        success = TRUE;
+                        success = true;
                     }
                 }
                 while (!success);
@@ -1990,7 +1990,7 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
 static int map_validate(map *m)
 {
     position pos = pos_invalid;
-    int connected = TRUE;
+    int connected = true;
     area *floodmap = NULL;
     area *obsmap = area_new(0, 0, MAP_MAX_X, MAP_MAX_Y);
 
@@ -2037,7 +2037,7 @@ static int map_validate(map *m)
             /* point should be set on floodmap if it is passable */
             if (area_point_get(floodmap, X(pos), Y(pos)) != (pp || cd))
             {
-                connected = FALSE;
+                connected = false;
                 break;
             }
         }
@@ -2054,6 +2054,6 @@ static int map_validate(map *m)
 /* subroutine to put an item onto an empty space */
 void map_item_add(map *m, item *what)
 {
-    position pos = map_find_space(m, LE_ITEM, FALSE);
+    position pos = map_find_space(m, LE_ITEM, false);
     inv_add(map_ilist_at(m, pos), what);
 }

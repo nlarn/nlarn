@@ -74,7 +74,7 @@ int player_altar_desecrate(player *p)
     if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
         log_add_entry(nlarn->log, "There is no altar here.");
-        return FALSE;
+        return false;
     }
 
     log_add_entry(nlarn->log, "You try to desecrate the altar.");
@@ -83,7 +83,7 @@ int player_altar_desecrate(player *p)
     {
         /* try to find a space for the monster near the altar */
         position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER, FALSE);
+                                          LE_MONSTER, false);
 
         if (pos_valid(mpos))
         {
@@ -106,7 +106,7 @@ int player_altar_desecrate(player *p)
         log_add_entry(nlarn->log, "You fail to destroy the altar.");
     }
 
-    return TRUE;
+    return true;
 }
 
 int player_altar_pray(player *p)
@@ -122,7 +122,7 @@ int player_altar_pray(player *p)
     if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
         log_add_entry(nlarn->log, "There is no altar here.");
-        return FALSE;
+        return false;
     }
 
     const guint player_gold = player_get_gold(p);
@@ -130,7 +130,7 @@ int player_altar_pray(player *p)
     if (total_gold == 0)
     {
         log_add_entry(nlarn->log, "You don't have any money to donate.");
-        return FALSE;
+        return false;
     }
 
     // Use a sensible default value, so you don't anger the gods without
@@ -142,13 +142,13 @@ int player_altar_pray(player *p)
     if (!donation)
     {
         log_add_entry(nlarn->log, "So you decide not to donate anything.");
-        return FALSE;
+        return false;
     }
 
     if (donation > total_gold)
     {
         log_add_entry(nlarn->log, "You don't have that much money!");
-        return FALSE;
+        return false;
     }
 
     // First pay with carried gold, then pay the rest from the bank account.
@@ -175,7 +175,7 @@ int player_altar_pray(player *p)
         log_add_entry(nlarn->log, "The gods are displeased with you.");
 
     int afflictions = 0;
-    gboolean cured_affliction = FALSE;
+    gboolean cured_affliction = false;
     switch (event)
     {
     case 8:
@@ -201,32 +201,32 @@ int player_altar_pray(player *p)
             if ((e = player_effect_get(p, ET_PARALYSIS)))
             {
                 player_effect_del(p, e);
-                cured_affliction = TRUE;
+                cured_affliction = true;
                 continue;
             }
             if ((e = player_effect_get(p, ET_BLINDNESS)))
             {
                 player_effect_del(p, e);
-                cured_affliction = TRUE;
+                cured_affliction = true;
                 continue;
             }
             if (afflictions >= 5 && (e = player_effect_get(p, ET_DIZZINESS)))
             {
                 player_effect_del(p, e);
-                cured_affliction = TRUE;
+                cured_affliction = true;
                 afflictions -= 5;
                 continue;
             }
             if ((e = player_effect_get(p, ET_CONFUSION)))
             {
                 player_effect_del(p, e);
-                cured_affliction = TRUE;
+                cured_affliction = true;
                 continue;
             }
             if ((e = player_effect_get(p, ET_POISON)))
             {
                 player_effect_del(p, e);
-                cured_affliction = TRUE;
+                cured_affliction = true;
                 continue;
             }
 
@@ -236,7 +236,7 @@ int player_altar_pray(player *p)
                 if ((e = player_effect_get(p, et)))
                 {
                     player_effect_del(p, e);
-                    cured_affliction = TRUE;
+                    cured_affliction = true;
                     break;
                 }
             }
@@ -266,7 +266,7 @@ int player_altar_pray(player *p)
         }
         // intentional fall through
     case 3:
-        if (chance(10) && (armour = player_get_random_armour(p, TRUE)))
+        if (chance(10) && (armour = player_get_random_armour(p, true)))
         {
             if ((*armour)->bonus < 3)
             {
@@ -294,7 +294,7 @@ int player_altar_pray(player *p)
         {
         /* create a monster, it should be very dangerous */
         position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER, FALSE);
+                                          LE_MONSTER, false);
 
         if (pos_valid(mpos))
             monster_appear(MT_MAX, mpos);
@@ -308,7 +308,7 @@ int player_altar_pray(player *p)
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 int player_building_enter(player *p)
@@ -731,7 +731,7 @@ int player_fountain_wash(player *p)
     {
         /* try to find a space for the monster near the player */
         position mpos = map_find_space_in(pmap, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER, FALSE);
+                                          LE_MONSTER, false);
 
         if (pos_valid(mpos))
         {
@@ -750,30 +750,30 @@ int player_fountain_wash(player *p)
 int player_stairs_down(player *p)
 {
     map *nlevel = NULL;
-    gboolean show_msg = FALSE;
+    gboolean show_msg = false;
     map *pmap = game_map(nlarn, Z(p->pos));
     sobject_t ms = map_sobject_at(pmap, p->pos);
 
     if (!player_movement_possible(p))
-        return FALSE;
+        return false;
 
     /* the stairs down are unreachable while levitating */
     if (player_effect(p, ET_LEVITATION))
     {
         log_add_entry(nlarn->log, "You cannot reach reach the stairs..");
-        return FALSE;
+        return false;
     }
 
     switch (ms)
     {
     case LS_STAIRSDOWN:
-        show_msg = TRUE;
+        show_msg = true;
         nlevel = game_map(nlarn, Z(p->pos) + 1);;
         break;
 
     case LS_ELEVATORDOWN:
         /* first volcano map */
-        show_msg = TRUE;
+        show_msg = true;
         nlevel = game_map(nlarn, MAP_CMAX);
         break;
 
@@ -788,9 +788,9 @@ int player_stairs_down(player *p)
     {
         trap_t trap = map_trap_at(pmap, p->pos);
         if (trap == TT_TRAPDOOR || trap == TT_TELEPORT)
-            return player_trap_trigger(p, trap, TRUE);
+            return player_trap_trigger(p, trap, true);
         else
-            return FALSE;
+            return false;
     }
     }
 
@@ -816,7 +816,7 @@ int player_stairs_down(player *p)
             player_damage_take(p, dam, PD_SOBJECT, ms);
         }
 
-        return player_map_enter(p, nlevel, FALSE);
+        return player_map_enter(p, nlevel, false);
     }
 
     return 0;
@@ -825,7 +825,7 @@ int player_stairs_down(player *p)
 int player_stairs_up(player *p)
 {
     map *nlevel = NULL;
-    gboolean show_msg = FALSE;
+    gboolean show_msg = false;
     sobject_t ms = map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     if (!player_movement_possible(p))
@@ -834,14 +834,14 @@ int player_stairs_up(player *p)
     switch (ms)
     {
     case LS_STAIRSUP:
-        show_msg = TRUE;
+        show_msg = true;
         nlevel = game_map(nlarn, Z(p->pos) - 1);
         break;
 
     case LS_ELEVATORUP:
     case LS_CAVERNS_EXIT:
         /* return to town */
-        show_msg = TRUE;
+        show_msg = true;
         nlevel = game_map(nlarn, 0);
         break;
 
@@ -863,7 +863,7 @@ int player_stairs_up(player *p)
     /* if told to switch level, do so */
     if (nlevel != NULL)
     {
-        return player_map_enter(p, nlevel, FALSE);
+        return player_map_enter(p, nlevel, false);
     }
 
     return 0;
@@ -900,7 +900,7 @@ int player_throne_pillage(player *p)
         for (guint i = 0; i < rand_1n(4); i++)
         {
             /* gems pop off the throne */
-            inv_add(map_ilist_at(pmap, p->pos), item_new_random(IT_GEM, FALSE));
+            inv_add(map_ilist_at(pmap, p->pos), item_new_random(IT_GEM, false));
             count++;
         }
 
@@ -914,7 +914,7 @@ int player_throne_pillage(player *p)
     {
         /* try to find a space for the monster near the player */
         position mpos = map_find_space_in(pmap, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER, FALSE);
+                                          LE_MONSTER, false);
 
         if (pos_valid(mpos))
         {
@@ -952,7 +952,7 @@ int player_throne_sit(player *p)
     {
         /* try to find a space for the monster near the player */
         position mpos = map_find_space_in(pmap, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER, FALSE);
+                                          LE_MONSTER, false);
 
         if (pos_valid(mpos))
         {
@@ -966,7 +966,7 @@ int player_throne_sit(player *p)
     else if (chance(35))
     {
         log_add_entry(nlarn->log, "Zaaaappp! You've been teleported!");
-        p->pos = map_find_space(pmap, LE_MONSTER, FALSE);
+        p->pos = map_find_space(pmap, LE_MONSTER, false);
     }
     else
     {
@@ -981,7 +981,7 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
     position mpos;      /* position for monster that might be generated */
     const char *desc = NULL;
 
-    mpos = map_find_space_in(dmap, rect_new_sized(pos, 1), LE_MONSTER, FALSE);
+    mpos = map_find_space_in(dmap, rect_new_sized(pos, 1), LE_MONSTER, false);
 
     switch (map_sobject_at(dmap, pos))
     {
@@ -1092,7 +1092,7 @@ static void monster_appear(monster_t type, position mpos)
 
 static void flood_affect_area(position pos, int radius, int type, int duration)
 {
-    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius, FALSE);
+    area *obstacles = map_get_obstacles(game_map(nlarn, Z(pos)), pos, radius, false);
     area *range = area_new_circle_flooded(pos, radius, obstacles);
 
     map_set_tiletype(game_map(nlarn, Z(pos)), range, type, duration);
@@ -1113,7 +1113,7 @@ static gboolean sobject_blast_hit(position pos,
     {
         /* The blast hit a statue. */
         sobject_destroy_at(damo->originator, cmap, pos);
-        return TRUE;
+        return true;
     }
     else if (m != NULL)
     {
@@ -1124,7 +1124,7 @@ static gboolean sobject_blast_hit(position pos,
 
         monster_damage_take(m, damage_copy(dam));
 
-        return TRUE;
+        return true;
     }
     else if (pos_identical(nlarn->p->pos, pos))
     {
@@ -1154,7 +1154,7 @@ static gboolean sobject_blast_hit(position pos,
                 log_add_entry(nlarn->log, "The lightning whizzes by you!");
 
             /* missed */
-            return FALSE;
+            return false;
         }
 
         log_add_entry(nlarn->log, "The lightning hits you!");
@@ -1163,8 +1163,8 @@ static gboolean sobject_blast_hit(position pos,
         player_damage_take(nlarn->p, damage_copy(dam), PD_SPELL, SP_LIT);
 
         /* hit */
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }

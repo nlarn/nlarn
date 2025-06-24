@@ -146,7 +146,7 @@ item *item_deserialize(cJSON *iser, struct game *g);
  *
  * @param a item1
  * @param b item2
- * @return TRUE if items are identical
+ * @return true if items are identical
  */
 int item_compare(item *a, item *b);
 
@@ -156,10 +156,10 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id
  * Describe an item.
  *
  * @param the item
- * @param TRUE if the item is known to the player.
- * @param TRUE if the item count shall be ignored and the description for
+ * @param true if the item is known to the player.
+ * @param true if the item count shall be ignored and the description for
  *       a single item of a stack shall be returned.
- * @param TRUE if the description shall be prepend by the definite article.
+ * @param true if the description shall be prepend by the definite article.
  * @return a newly allocated string that should be disposed with g_free().
  */
 gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean definite);
@@ -208,7 +208,7 @@ item *item_disenchant(item *it);
  * @param  the inventory the item is in (may be null for new items)
  * @param  the item to erode
  * @param  the type of erosion which affects the item
- * @param  TRUE if the player can see the item
+ * @param  true if the player can see the item
  * @return the item, NULL it the item has been destroyed
  *
  */
@@ -275,14 +275,14 @@ int item_filter_nonblessed(item *it);
 /**
  * @brief Item filter function for the potion of cure dianthroritis.
  * @param a pointer to an item
- * @return TRUE if the supplied item is the potion of cure dianthroritis
+ * @return true if the supplied item is the potion of cure dianthroritis
  */
 int item_filter_pcd(item *it);
 
 /**
  * @brief Item filter function for blank scrolls.
  * @param a pointer to an item
- * @return TRUE if the supplied item is a blank scroll
+ * @return true if the supplied item is a blank scroll
  */
 int item_filter_blank_scroll(item *it);
 
@@ -290,7 +290,7 @@ int item_filter_blank_scroll(item *it);
  * @brief Check if an item is unique.
  *
  * @param A pointer to an item.
- * @return TRUE if the item is unique.
+ * @return true if the item is unique.
  */
 gboolean item_is_unique(item *it);
 
