@@ -75,12 +75,14 @@ typedef enum map_element_type
 
 typedef struct map_tile
 {
-    guint32
+    guint64
         type:       8,
         base_type:  8, /* if tile is covered with e.g. fire the original type is stored here */
+        timer:      8, /* countdown to when the type will become base_type again */
         sobject:    8, /* something special located on this tile */
-        trap:       8; /* trap located on this tile */
-    guint8 timer;      /* countdown to when the type will become base_type again */
+        trap:       8, /* trap located on this tile */
+        spill:      8, /* base colour of the liquid spilled here */
+        spilltime:  8; /* countdown for the time the spilled liquid is visible */
     gpointer m_oid;    /* id of monster located on this tile */
     inventory *ilist;  /* items located on this tile */
 } map_tile;
@@ -293,6 +295,12 @@ static inline void map_trap_set(map *m, position pos, trap_t type)
 {
     g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].trap = type;
+}
+
+static inline guint8 map_spill_at(map *m, position pos)
+{
+    g_assert(m != NULL && pos_valid(pos));
+    return m->grid[Y(pos)][X(pos)].spill;
 }
 
 static inline sobject_t map_sobject_at(map *m, position pos)
