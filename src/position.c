@@ -125,6 +125,26 @@ position pos_move(position pos, direction dir)
     return npos;
 }
 
+direction pos_direction(position here, position there)
+{
+    // determine the distance between the two positions
+    int dx = X(there) - X(here);
+    int dy = Y(there) - Y(here);
+    direction dir;
+
+    if (dx  < 0 && dy  < 0) dir = GD_NW;
+    if (dx  < 0 && dy == 0) dir = GD_WEST;
+    if (dx  < 0 && dy  > 0) dir = GD_SW;
+    if (dx == 0 && dy  < 0) dir = GD_NORTH;
+    if (dx == 0 && dy == 0) dir = GD_CURR;
+    if (dx == 0 && dy  > 0) dir = GD_SOUTH;
+    if (dx  > 0 && dy  < 0) dir = GD_NE;
+    if (dx  > 0 && dy == 0) dir = GD_EAST;
+    if (dx  > 0 && dy  > 0) dir = GD_SE;
+
+    return dir;
+}
+
 gint pos_distance(position first, position second)
 {
     if (Z(first) != Z(second))

@@ -76,6 +76,17 @@ typedef struct _area
 #define pos_val(pos) ((pos).val)
 
 position pos_move(position pos, direction dir);
+
+/**
+ * Return the direction of a position relative to a given position.
+ *
+ * @param the current position
+ * @param the other position
+ *
+ * @return the direction
+ */
+direction pos_direction(position here, position there);
+
 int pos_distance(position first, position second);
 int pos_identical(position pos1, position pos2);
 int pos_adjacent(position first, position second);
