@@ -193,6 +193,12 @@ cJSON *map_serialize(map *m)
                         map_tile_t_string(m->grid[y][x].base_type));
             }
 
+            if (m->grid[y][x].timer)
+            {
+                cJSON_AddNumberToObject(tile, "timer",
+                                        m->grid[y][x].timer);
+            }
+
             if (m->grid[y][x].sobject)
             {
                 cJSON_AddStringToObject(tile, "sobject",
@@ -205,10 +211,16 @@ cJSON *map_serialize(map *m)
                         trap_t_string(m->grid[y][x].trap));
             }
 
-            if (m->grid[y][x].timer)
+            if (m->grid[y][x].spill)
             {
-                cJSON_AddNumberToObject(tile, "timer",
-                                        m->grid[y][x].timer);
+                cJSON_AddStringToObject(tile, "spill",
+                        colour_string(m->grid[y][x].spill));
+            }
+
+            if (m->grid[y][x].spilltime)
+            {
+                cJSON_AddNumberToObject(tile, "spilltime",
+                                        m->grid[y][x].spilltime);
             }
 
             if (m->grid[y][x].m_oid)
@@ -253,6 +265,9 @@ map *map_deserialize(cJSON *mser)
             if (obj != NULL) m->grid[y][x].base_type =
                 map_tile_t_value(obj->valuestring);
 
+            obj = cJSON_GetObjectItem(tile, "timer");
+            if (obj != NULL) m->grid[y][x].timer = obj->valueint;
+
             obj = cJSON_GetObjectItem(tile, "sobject");
             if (obj != NULL) m->grid[y][x].sobject =
                 sobject_t_value(obj->valuestring);
@@ -261,8 +276,12 @@ map *map_deserialize(cJSON *mser)
             if (obj != NULL) m->grid[y][x].trap =
                 trap_t_value(obj->valuestring);
 
-            obj = cJSON_GetObjectItem(tile, "timer");
-            if (obj != NULL) m->grid[y][x].timer = obj->valueint;
+            obj = cJSON_GetObjectItem(tile, "spill");
+            if (obj != NULL) m->grid[y][x].spill =
+                colour_value(obj->valuestring);
+
+            obj = cJSON_GetObjectItem(tile, "spilltime");
+            if (obj != NULL) m->grid[y][x].spilltime = obj->valueint;
 
             obj = cJSON_GetObjectItem(tile, "monster");
             if (obj != NULL) m->grid[y][x].m_oid = GUINT_TO_POINTER(obj->valueint);
@@ -1091,6 +1110,17 @@ void map_timer(map *m)
                     }
                 }
             } /* if map_timer_at */
+
+            if (map_spill_at(m, pos))
+            {
+                map_tile *tile = map_tile_at(m, pos);
+
+                tile->spilltime--;
+                if (tile->spilltime < 1)
+                {
+                    tile->spill = 0;
+                }
+            } /* map_spill_at */
         } /* for X(pos) */
     } /* for Y(pos) */
 }
