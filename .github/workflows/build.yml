@@ -63,3 +63,23 @@ jobs:
     - uses: actions/checkout@v4
     - name: Build ${{ matrix.configuration }}
       run: make SDLPDCURSES=Y ${{ matrix.configuration }}
+
+  build-macos:
+    runs-on: macos-13
+    strategy:
+      matrix:
+        configuration:
+          - config=debug
+          - config=release
+          - config=debug SDLPDCURSES=Y
+          - config=release SDLPDCURSES=Y
+    env:
+      PKG_CONFIG_PATH: /usr/local/opt/ncurses/lib/pkgconfig
+    steps:
+    - uses: actions/checkout@v4
+    - name: Update brew cache
+      run: brew update
+    - name: Install dependencies
+      run: brew install discount dylibbundler glib ncurses pkg-config sdl2 sdl2_ttf
+    - name: Build ${{ matrix.configuration }}
+      run: make ${{ matrix.configuration }}
