@@ -4,7 +4,8 @@
 * The player will now automatically evade breath attacks
 
 ### Fixed bugs:
-
+* Fixed crash when triggering traps while very burdened (reported by Denis
+  Bernard)
 * Fix colours for MP display
 * Fix Spirit Naga attacks - they were so broken they could crash the game
 * Ensure demon lord on level 10 matches difficulty

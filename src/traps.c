@@ -147,8 +147,9 @@ int player_trap_trigger(player *p, trap_t trap, int force)
     }
 
     /* Check if the player triggers the trap.
-       Being burdened increases the chance due to clumsy movement. */
-    if (force || chance(possibility + bval))
+       Being burdened increases the chance due to clumsy movement.
+       Ensure the value does not exceed 100 for very burdened players. */
+    if (force || chance(min(100, possibility + bval)))
     {
         /* log the trap's triggered message */
         log_add_entry(nlarn->log, trap_p_message(trap));
