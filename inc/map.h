@@ -236,6 +236,11 @@ void map_timer(map *m);
  */
 char map_get_door_glyph(map *m, position pos);
 
+/**
+ * Get the display details for a given map tile.
+ */
+struct display_cell map_get_tile(map *m, position pos);
+
 /* external vars */
 
 extern const map_tile_data map_tiles[LT_MAX];

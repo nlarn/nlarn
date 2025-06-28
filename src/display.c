@@ -138,7 +138,7 @@ void display_init()
     display_initialised = true;
 }
 
-static int attr_colour(int colour, int reverse)
+static int attr_colour(int colour, gboolean reverse)
 {
     if (reverse)
         return (A_REVERSE | colour);
@@ -232,60 +232,8 @@ void display_paint_screen(player *p)
             if (game_fullvis(nlarn) || fov_get(p->fv, pos))
             {
                 /* draw the truth */
-                inventory **inv = map_ilist_at(vmap, pos);
-                const gboolean has_items = inv_length(*inv) > 0;
-
-                if (map_sobject_at(vmap, pos))
-                {
-                    /* draw stationary objects first */
-                    gchar glyph;
-                    if (map_sobject_at(vmap, pos) == LS_CLOSEDDOOR || map_sobject_at(vmap, pos) == LS_OPENDOOR)
-                        glyph = map_get_door_glyph(vmap, pos);
-                    else
-                        glyph = so_get_glyph(map_sobject_at(vmap, pos));
-
-                    aaddch(attr_colour(COLOR_PAIR(so_get_colour(map_sobject_at(vmap, pos))), has_items),
-                           glyph);
-                }
-                else if (has_items)
-                {
-                    /* draw items */
-                    item *it;
-
-                    /* memorize the most interesting item on the tile */
-                    if (inv_length_filtered(*inv, item_filter_gems) > 0)
-                    {
-                        /* there's a gem in the stack */
-                        it = inv_get_filtered(*inv, 0, item_filter_gems);
-                    }
-                    else if (inv_length_filtered(*inv, item_filter_gold) > 0)
-                    {
-                        /* there is gold in the stack */
-                        it = inv_get_filtered(*inv, 0, item_filter_gold);
-                    }
-                    else
-                    {
-                        /* memorize the topmost item on the stack */
-                        it = inv_get(*inv, inv_length(*inv) - 1);
-                    }
-
-                    const gboolean has_trap = (map_trap_at(vmap, pos)
-                                               && player_memory_of(p, pos).trap);
-
-                    aaddch(attr_colour(COLOR_PAIR(item_colour(it)), has_trap),
-                           item_glyph(it->type));
-                }
-                else if (map_trap_at(vmap, pos) && (game_fullvis(nlarn) || player_memory_of(p, pos).trap))
-                {
-                    /* draw traps */
-                    aaddch(COLOR_PAIR(trap_colour(map_trap_at(vmap, pos))), '^');
-                }
-                else
-                {
-                    /* draw tile */
-                    aaddch(COLOR_PAIR(mt_get_colour(map_tiletype_at(vmap, pos))),
-                           mt_get_glyph(map_tiletype_at(vmap, pos)));
-                }
+                display_cell dc = map_get_tile(vmap, pos);
+                aaddch(attr_colour(COLOR_PAIR(dc.colour), dc.reversed), dc.glyph);
             }
             else /* i.e. !fullvis && !visible: draw players memory */
             {
