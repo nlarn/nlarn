@@ -9,6 +9,7 @@
   Bernard)
 * Fix colours for MP display
 * Fix Spirit Naga attacks - they were so broken they could crash the game
+* Fix townsfolk gathering around the player
 * Ensure demon lord on level 10 matches difficulty
 
 ## Release 0.7.7 (2025-06-19)

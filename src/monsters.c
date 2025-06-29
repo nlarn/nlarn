@@ -1613,16 +1613,10 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     if (!map_adjacent)
         return;
 
-    /* Update the monster's knowledge of player's position.
-       Not for civilians or servants: the first don't care,
-       the latter just know. This allows to use player_pos
-       and lastseen for other purposes. */
-    monster_action_t ma = monster_action(m);
-
-    if ((ma != MA_SERVE && ma != MA_CIVILIAN)
-        && (monster_player_visible(m)
+    // Update the monster's knowledge of player's position.
+    if (monster_player_visible(m)
             || (player_effect(g->p, ET_AGGRAVATE_MONSTER)
-                && pos_distance(m->pos, g->p->pos) < 15)))
+                && pos_distance(m->pos, g->p->pos) < 15))
     {
         monster_update_player_pos(m, g->p->pos);
     }
@@ -2470,6 +2464,13 @@ gboolean monster_update_action(monster *m, monster_action_t override)
 void monster_update_player_pos(monster *m, position ppos)
 {
     g_assert (m != NULL);
+
+    /* Not for civilians or servants: the first don't care,
+       the latter just know. This allows to use player_pos
+       and lastseen for other purposes. */
+    monster_action_t ma = monster_action(m);
+    if (ma == MA_SERVE || ma == MA_CIVILIAN)
+        return;
 
     m->player_pos = ppos;
     m->lastseen = 1;
@@ -3358,8 +3359,8 @@ static position monster_move_civilian(monster *m, struct player *p)
     position npos = m->pos;
 
     /* civilians will pick a random location on the map, travel and remain
-       there for the number of turns that is determined by their town
-       person number. */
+       there for the number of turns that is determined by their town person
+       number. They use the player_pos attribute to store that location. */
 
     if (!pos_valid(m->player_pos))
     {
