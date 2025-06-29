@@ -136,7 +136,7 @@ int player_altar_pray(player *p)
     // Use a sensible default value, so you don't anger the gods without
     // meaning to.
     const guint donation = display_get_count("How much gold do you want to donate?",
-                                           200);
+            total_gold >= 200 ? 200 : 0);
 
     /* 0 gold donations are likely to be the result of escaping the prompt */
     if (!donation)
