@@ -182,6 +182,30 @@ static int attr_colour(int colour, int reverse)
     mvwhline(win, y, x, ch, n); \
     wattroff(win, attrs)
 
+int display_player_hp_colour(const player *p, gboolean status)
+{
+    int attrs = 0;
+    if (p->hp <= ((int)p->hp_max / 10))      /* 10% hp left */
+        attrs = COLOR_PAIR(LUMINOUS_RED) | A_BLINK;
+    else if (p->hp <= ((int)p->hp_max / 4))  /* 25% hp left */
+        attrs = COLOR_PAIR(STRAWBERRY_RED);
+    else if (p->hp <= ((int)p->hp_max / 2))  /* 50% hp left */
+        attrs = COLOR_PAIR(BLOOD_RED);
+    else
+        attrs = COLOR_PAIR(status ? LIGHT_BRIGHT_GREEN : WHITE);
+
+#ifdef SDLPDCURSES
+    /* enable blinking on SDL PDCurses display for very low hp */
+    if (attrs & A_BLINK) {
+        PDC_set_blink(true);
+    } else {
+        PDC_set_blink(false);
+    }
+#endif
+
+    return attrs;
+}
+
 void display_paint_screen(player *p)
 {
     position pos = pos_invalid;
@@ -323,15 +347,17 @@ void display_paint_screen(player *p)
 
     /* draw player */
     char pc;
-    if (player_effect(p, ET_INVISIBILITY))
+    int player_attributes = display_player_hp_colour(p, false);
+
+   if (player_effect(p, ET_INVISIBILITY))
     {
         pc = ' ';
-        attrs = A_REVERSE | COLOR_PAIR(WHITE);
+        attrs = A_REVERSE | player_attributes;
     }
     else
     {
         pc = '@';
-        attrs = COLOR_PAIR(WHITE);
+        attrs = player_attributes;
     }
 
     mvaaddch(Y(p->pos), X(p->pos), attrs, pc);
@@ -349,25 +375,8 @@ void display_paint_screen(player *p)
     }
 
     /* current HPs */
-    if (p->hp <= ((int)p->hp_max / 10))      /* 10% hp left */
-        attrs = COLOR_PAIR(LUMINOUS_RED) | A_BLINK;
-    else if (p->hp <= ((int)p->hp_max / 4))  /* 25% hp left */
-        attrs = COLOR_PAIR(DARK_RED);
-    else if (p->hp <= ((int)p->hp_max / 2))  /* 50% hp left */
-        attrs = COLOR_PAIR(VIVID_GREEN);
-    else
-        attrs = COLOR_PAIR(LIGHT_BRIGHT_GREEN);
-
-#ifdef SDLPDCURSES
-    /* enable blinking on SDL PDCurses display for very low hp */
-    if (attrs & A_BLINK) {
-        PDC_set_blink(true);
-    } else {
-        PDC_set_blink(false);
-    }
-#endif
-
-    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, attrs, "HP %3d", p->hp);
+    mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 21, display_player_hp_colour(p, true),
+            "HP %3d", p->hp);
 
     /* max HPs */
     mvaprintw(MAP_MAX_Y + 1, MAP_MAX_X - 15,

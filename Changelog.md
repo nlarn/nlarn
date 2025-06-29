@@ -2,6 +2,7 @@
 
 ### Changes:
 * The player will now automatically evade breath attacks
+* Change the player's colour when HP are below 50%
 
 ### Fixed bugs:
 * Fixed crash when triggering traps while very burdened (reported by Denis
