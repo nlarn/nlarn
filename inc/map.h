@@ -308,6 +308,13 @@ static inline guint8 map_spill_at(map *m, position pos)
     return m->grid[Y(pos)][X(pos)].spill;
 }
 
+static inline void map_spill_set(map *m, position pos, int colour)
+{
+    g_assert(m != NULL && pos_valid(pos));
+    m->grid[Y(pos)][X(pos)].spill = colour;
+    m->grid[Y(pos)][X(pos)].spilltime = 20;
+}
+
 static inline sobject_t map_sobject_at(map *m, position pos)
 {
     g_assert(m != NULL && pos_valid(pos));

@@ -1248,6 +1248,10 @@ display_cell map_get_tile(map *m, position pos)
         dc.glyph = mt_get_glyph(map_tiletype_at(m, pos));
     }
 
+    // eventually something was spilled at the position
+    if (map_spill_at(m, pos))
+        dc.colour = map_spill_at(m, pos);
+
     return dc;
 }
 

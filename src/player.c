@@ -1893,6 +1893,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     effect *e = NULL;
     int hp_orig;
     guint effects_count;
+    position origin = pos_invalid;
 
     g_assert(p != NULL && dam != NULL);
 
@@ -1902,6 +1903,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     if (dam->dam_origin.ot == DAMO_MONSTER)
     {
         monster *m = (monster *)dam->dam_origin.originator;
+        origin = monster_pos(m);
 
         /* amulet of power cancels demon attacks */
         if (monster_flags(m, DEMON) && chance(75)
@@ -1940,11 +1942,25 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         {
             damage_amount -= player_get_ac(p);
 
+            position spill_pos = pos_invalid;
+            if (pos_valid(origin))
+            {
+                // spill blood in the direction of the blow
+                direction dir = pos_direction(origin, p->pos);
+                spill_pos = pos_move(p->pos, dir);
+            }
+            else
+            {
+                // spill blood at the players position
+                spill_pos = p->pos;
+            }
+
             if (damage_amount >= 8 && damage_amount >= (gint)p->hp_max/4)
                 log_add_entry(nlarn->log, "`LUMINOUS_RED`Ouch, that REALLY hurt!`end`");
             else if (damage_amount >= (gint)p->hp_max/10)
                 log_add_entry(nlarn->log, "`LUMINOUS_RED`Ouch!`end`");
 
+            map_spill_set(game_map(nlarn, Z(p->pos)), spill_pos, BLOOD_RED);
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
