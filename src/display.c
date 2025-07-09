@@ -141,9 +141,9 @@ void display_init()
 static int attr_colour(int colour, gboolean reverse)
 {
     if (reverse)
-        return (A_REVERSE | colour);
+        return (A_REVERSE | COLOR_PAIR(colour));
 
-    return colour;
+    return COLOR_PAIR(colour);
 }
 
 /* convenience helper against endless repetition */
@@ -233,7 +233,7 @@ void display_paint_screen(player *p)
             {
                 /* draw the truth */
                 display_cell dc = map_get_tile(vmap, pos);
-                aaddch(attr_colour(COLOR_PAIR(dc.colour), dc.reversed), dc.glyph);
+                aaddch(attr_colour(dc.colour, dc.reversed), dc.glyph);
             }
             else /* i.e. !fullvis && !visible: draw players memory */
             {
@@ -249,14 +249,14 @@ void display_paint_screen(player *p)
                     else
                         glyph = so_get_glyph(ms);
 
-                    aaddch(attr_colour(COLOR_PAIR(so_get_colour(ms)), has_items), glyph);
+                    aaddch(attr_colour(so_get_colour(ms), has_items), glyph);
                 }
                 else if (has_items)
                 {
                     /* draw items */
                     const gboolean has_trap = (player_memory_of(p, pos).trap);
 
-                    aaddch(attr_colour(COLOR_PAIR(player_memory_of(p, pos).item_colour), has_trap),
+                    aaddch(attr_colour(player_memory_of(p, pos).item_colour, has_trap),
                            item_glyph(player_memory_of(p, pos).item));
                 }
                 else if (player_memory_of(p, pos).trap)
