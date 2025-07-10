@@ -2222,10 +2222,33 @@ monster *monster_damage_take(monster *m, damage *dam)
     {
     case DAM_PHYSICAL:
         dam->amount -= monster_ac(m);
+        gboolean monster_bleeds = monster_flags(m, HEAD)
+            && (!monster_flags(m, UNDEAD))
+            && (!monster_flags(m, DEMON));
+
         if (dam->amount < 1 && monster_in_sight(m))
         {
             log_add_entry(nlarn->log, "The %s isn't hurt.",
                     monster_get_name(m));
+        }
+        else if(dam->amount > 0 && monster_bleeds)
+        {
+            position spill_pos = pos_invalid;
+            // FIXME: this needs to be extended once we enable others
+            // to attack monsters
+            if (p)
+            {
+                // spill blood in the direction of the blow
+                direction dir = pos_direction(p->pos, monster_pos(m));
+                spill_pos = pos_move(monster_pos(m), dir);
+            }
+            else
+            {
+                // spill blood at the monster's position
+                spill_pos = monster_pos(m);
+            }
+
+            map_spill_set(game_map(nlarn, Z(monster_pos(m))), spill_pos, BLOOD_RED);
         }
         break;
 
