@@ -337,7 +337,7 @@
 * Fixed a memory leak and accesses to freed memory found by valgrind.
 
 
-Release 0.7.0 (2011-11-04)
+## Release 0.7.0 (2011-11-04)
 
 ### Changes
 
