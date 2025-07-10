@@ -21,6 +21,7 @@
 
 #include <curses.h>
 #include <panel.h>
+#include <glib.h>
 
 #include "colours.h"
 #include "game.h"
@@ -59,6 +60,14 @@ typedef struct display_window
     WINDOW *window;
     PANEL *panel;
 } display_window;
+
+/* information required to draw a map cell */
+typedef struct display_cell
+{
+    char glyph;
+    int colour;
+    gboolean reversed;
+} display_cell;
 
 /* function declarations */
 

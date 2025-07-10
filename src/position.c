@@ -125,17 +125,32 @@ position pos_move(position pos, direction dir)
     return npos;
 }
 
+direction pos_direction(position here, position there)
+{
+    // determine the distance between the two positions
+    int dx = X(there) - X(here);
+    int dy = Y(there) - Y(here);
+    direction dir;
+
+    if (dx  < 0 && dy  < 0) dir = GD_NW;
+    if (dx  < 0 && dy == 0) dir = GD_WEST;
+    if (dx  < 0 && dy  > 0) dir = GD_SW;
+    if (dx == 0 && dy  < 0) dir = GD_NORTH;
+    if (dx == 0 && dy == 0) dir = GD_CURR;
+    if (dx == 0 && dy  > 0) dir = GD_SOUTH;
+    if (dx  > 0 && dy  < 0) dir = GD_NE;
+    if (dx  > 0 && dy == 0) dir = GD_EAST;
+    if (dx  > 0 && dy  > 0) dir = GD_SE;
+
+    return dir;
+}
+
 gint pos_distance(position first, position second)
 {
     if (Z(first) != Z(second))
         return INT_MAX;
 
     return (abs(X(first) - X(second)) + 1) + (abs(Y(first) - Y(second)) + 1);
-}
-
-int pos_identical(position pos1, position pos2)
-{
-    return (pos1.val == pos2.val);
 }
 
 int pos_adjacent(position first, position second)
@@ -186,14 +201,6 @@ rectangle rect_new(int x1, int y1, int x2, int y2)
     rect.y2 = (y2 > MAP_MAX_Y) ? MAP_MAX_Y : y2;
 
     return(rect);
-}
-
-rectangle rect_new_sized(position center, int size)
-{
-    return rect_new(X(center) - size,
-                    Y(center) - size,
-                    X(center) + size,
-                    Y(center) + size);
 }
 
 int pos_in_rect(position pos, rectangle rect)
@@ -470,12 +477,6 @@ int area_point_get(area *a, int x, int y)
         return false;
 
     return a->area[y][x];
-}
-
-int area_point_valid(area *a, int x, int y)
-{
-    g_assert (a != NULL);
-    return ((x < a->size_x) && (x >= 0)) && ((y < a->size_y) && (y >= 0));
 }
 
 int area_pos_get(area *a, position pos)

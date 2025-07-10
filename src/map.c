@@ -193,6 +193,12 @@ cJSON *map_serialize(map *m)
                         map_tile_t_string(m->grid[y][x].base_type));
             }
 
+            if (m->grid[y][x].timer)
+            {
+                cJSON_AddNumberToObject(tile, "timer",
+                                        m->grid[y][x].timer);
+            }
+
             if (m->grid[y][x].sobject)
             {
                 cJSON_AddStringToObject(tile, "sobject",
@@ -205,10 +211,16 @@ cJSON *map_serialize(map *m)
                         trap_t_string(m->grid[y][x].trap));
             }
 
-            if (m->grid[y][x].timer)
+            if (m->grid[y][x].spill)
             {
-                cJSON_AddNumberToObject(tile, "timer",
-                                        m->grid[y][x].timer);
+                cJSON_AddStringToObject(tile, "spill",
+                        colour_string(m->grid[y][x].spill));
+            }
+
+            if (m->grid[y][x].spilltime)
+            {
+                cJSON_AddNumberToObject(tile, "spilltime",
+                                        m->grid[y][x].spilltime);
             }
 
             if (m->grid[y][x].m_oid)
@@ -253,6 +265,9 @@ map *map_deserialize(cJSON *mser)
             if (obj != NULL) m->grid[y][x].base_type =
                 map_tile_t_value(obj->valuestring);
 
+            obj = cJSON_GetObjectItem(tile, "timer");
+            if (obj != NULL) m->grid[y][x].timer = obj->valueint;
+
             obj = cJSON_GetObjectItem(tile, "sobject");
             if (obj != NULL) m->grid[y][x].sobject =
                 sobject_t_value(obj->valuestring);
@@ -261,8 +276,12 @@ map *map_deserialize(cJSON *mser)
             if (obj != NULL) m->grid[y][x].trap =
                 trap_t_value(obj->valuestring);
 
-            obj = cJSON_GetObjectItem(tile, "timer");
-            if (obj != NULL) m->grid[y][x].timer = obj->valueint;
+            obj = cJSON_GetObjectItem(tile, "spill");
+            if (obj != NULL) m->grid[y][x].spill =
+                colour_value(obj->valuestring);
+
+            obj = cJSON_GetObjectItem(tile, "spilltime");
+            if (obj != NULL) m->grid[y][x].spilltime = obj->valueint;
 
             obj = cJSON_GetObjectItem(tile, "monster");
             if (obj != NULL) m->grid[y][x].m_oid = GUINT_TO_POINTER(obj->valueint);
@@ -1091,6 +1110,17 @@ void map_timer(map *m)
                     }
                 }
             } /* if map_timer_at */
+
+            if (map_spill_at(m, pos))
+            {
+                map_tile *tile = map_tile_at(m, pos);
+
+                tile->spilltime--;
+                if (tile->spilltime < 1)
+                {
+                    tile->spill = 0;
+                }
+            } /* map_spill_at */
         } /* for X(pos) */
     } /* for Y(pos) */
 }
@@ -1157,6 +1187,72 @@ char map_get_door_glyph(map *m, position pos)
 
     /* no idea. */
     return so_get_glyph(map_sobject_at(m, pos));
+}
+
+display_cell map_get_tile(map *m, position pos)
+{
+    display_cell dc = {};
+
+    inventory **inv = map_ilist_at(m, pos);
+    const gboolean has_items = inv_length(*inv) > 0;
+
+    if (map_sobject_at(m, pos))
+    {
+        /* draw stationary objects first */
+        if (map_sobject_at(m, pos) == LS_CLOSEDDOOR || map_sobject_at(m, pos) == LS_OPENDOOR)
+            dc.glyph = map_get_door_glyph(m, pos);
+        else
+            dc.glyph = so_get_glyph(map_sobject_at(m, pos));
+
+        dc.colour = so_get_colour(map_sobject_at(m, pos));
+        dc.reversed = has_items;
+    }
+    else if (has_items)
+    {
+        /* draw items */
+        item *it;
+
+        /* memorize the most interesting item on the tile */
+        if (inv_length_filtered(*inv, item_filter_gems) > 0)
+        {
+            /* there's a gem in the stack */
+            it = inv_get_filtered(*inv, 0, item_filter_gems);
+        }
+        else if (inv_length_filtered(*inv, item_filter_gold) > 0)
+        {
+            /* there is gold in the stack */
+            it = inv_get_filtered(*inv, 0, item_filter_gold);
+        }
+        else
+        {
+            /* memorize the topmost item on the stack */
+            it = inv_get(*inv, inv_length(*inv) - 1);
+        }
+
+        dc.glyph = item_glyph(it->type);
+        dc.colour = item_colour(it);
+        dc.reversed = (map_trap_at(m, pos)
+                && player_memory_of(nlarn->p, pos).trap);
+
+    }
+    else if (map_trap_at(m, pos) && (game_fullvis(nlarn) || player_memory_of(nlarn->p, pos).trap))
+    {
+        /* draw traps */
+        dc.colour = trap_colour(map_trap_at(m, pos));
+        dc.glyph = '^';
+    }
+    else
+    {
+        /* draw tile */
+        dc.colour = mt_get_colour(map_tiletype_at(m, pos));
+        dc.glyph = mt_get_glyph(map_tiletype_at(m, pos));
+    }
+
+    // eventually something was spilled at the position
+    if (map_spill_at(m, pos))
+        dc.colour = map_spill_at(m, pos);
+
+    return dc;
 }
 
 static int map_fill_with_stationary_objects(map *m)

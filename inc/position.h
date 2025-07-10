@@ -76,8 +76,24 @@ typedef struct _area
 #define pos_val(pos) ((pos).val)
 
 position pos_move(position pos, direction dir);
+
+/**
+ * Return the direction of a position relative to a given position.
+ *
+ * @param the current position
+ * @param the other position
+ *
+ * @return the direction
+ */
+direction pos_direction(position here, position there);
+
 int pos_distance(position first, position second);
-int pos_identical(position pos1, position pos2);
+
+static inline int pos_identical(position pos1, position pos2)
+{
+    return (pos1.val == pos2.val);
+}
+
 int pos_adjacent(position first, position second);
 int pos_valid(position pos);
 
@@ -101,7 +117,14 @@ direction pos_dir(position origin, position target);
  */
 rectangle rect_new(int x1, int y1, int x2, int y2);
 
-rectangle rect_new_sized(position center, int size);
+static inline rectangle rect_new_sized(position center, int size)
+{
+    return rect_new(X(center) - size,
+                    Y(center) - size,
+                    X(center) + size,
+                    Y(center) + size);
+}
+
 int pos_in_rect(position pos, rectangle rect);
 
 area *area_new(int start_x, int start_y, int size_x, int size_y);
@@ -179,7 +202,11 @@ area *area_flood(area *obstacles, int start_x, int start_y);
 
 void area_point_set(area *a, int x, int y);
 int  area_point_get(area *a, int x, int y);
-int area_point_valid(area *a, int x, int y);
+
+static inline int area_point_valid(area *a, int x, int y)
+{
+    return ((x < a->size_x) && (x >= 0)) && ((y < a->size_y) && (y >= 0));
+}
 
 int  area_pos_get(area *a, position pos);
 
