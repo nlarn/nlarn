@@ -22,36 +22,98 @@
 #include "enumFactory.h"
 
 DEFINE_ENUM(colour, COLOUR_ENUM)
+DEFINE_ENUM(ui_colour_scheme, UI_COLOUR_SCHEME_ENUM)
 
 // Colour pair initialisation
-void colours_init() {
+void colours_init(int ui_colour_scheme) {
+    // redefine UI colours
+
+    switch(ui_colour_scheme) {
+        // vim retrobox
+        case RETROBOX:
+            init_color(UI_BG, 110, 110, 110);
+            init_color(UI_BRIGHT_FG, 920, 860, 700);
+            init_color(UI_FG, 570, 510, 460);
+            init_color(UI_BORDER, 900, 680, 180);
+            init_color(UI_YELLOW, 550, 560, 140);
+            init_color(UI_GREEN, 490, 660, 430);
+        break;
+
+        // vim stasis
+        case STASIS:
+            init_color(UI_BG, 184, 173, 200);
+            init_color(UI_BRIGHT_FG, 900, 1000, 1000);
+            init_color(UI_FG, 600, 700, 700);
+            init_color(UI_BORDER, 360, 320, 400);
+            init_color(UI_YELLOW, 820, 720, 120);
+            init_color(UI_GREEN, 490, 660, 430);
+        break;
+
+        // vim sourlick
+        case SOURLICK:
+            init_color(UI_BG, 180, 173, 169);
+            init_color(UI_BRIGHT_FG, 898, 761, 702);
+            init_color(UI_FG, 920, 920, 920);
+            init_color(UI_BORDER, 231, 216, 212);
+            init_color(UI_YELLOW, 863, 878, 320);
+            init_color(UI_GREEN, 663, 851, 137);
+        break;
+
+        // vim fodder
+        case FODDER:
+            init_color(UI_BG, 176, 255, 216);
+            init_color(UI_BRIGHT_FG, 588, 808, 271);
+            init_color(UI_FG, 369, 541, 541);
+            init_color(UI_BORDER, 137, 196, 165);
+            init_color(UI_YELLOW, 859, 580, 118);
+            init_color(UI_GREEN, 678, 596, 584);
+        break;
+
+        // vim mellow
+        case MELLOW:
+            init_color(UI_BG, 212, 192, 173);
+            init_color(UI_BRIGHT_FG, 949, 737, 475);
+            init_color(UI_FG, 973, 973, 949);
+            init_color(UI_BORDER, 467, 431, 392);
+            init_color(UI_YELLOW, 894, 675, 216);
+            init_color(UI_GREEN, 557, 353, 298);
+        break;
+
+        // traditional NLarn colours
+        case TRADITIONAL:
+        default:
+            init_color(UI_BG, 800, 0, 0);
+            init_color(UI_BRIGHT_FG, 1000, 1000, 1000);
+            init_color(UI_FG, 850, 850, 850);
+            init_color(UI_BORDER, 118, 565, 1000);
+            init_color(UI_YELLOW, 992, 980, 365);
+            init_color(UI_GREEN, 0, 843, 0);
+        break;
+    }
 
     for (int fg = 0; fg < 256; fg++) {
         switch(fg) {
             // Init UI colors
             case UI_BRIGHT_FG:
-                init_pair(UI_BRIGHT_FG, WHITE, UI_BG);
+                init_pair(UI_BRIGHT_FG, UI_BRIGHT_FG, UI_BG);
                 break;
             case UI_FG:
-                init_pair(UI_FG, SILVER, UI_BG);
+                init_pair(UI_FG, UI_FG, UI_BG);
                 break;
             case UI_BORDER:
-                init_pair(UI_BORDER, LED_BLUE, UI_BG);
+                init_pair(UI_BORDER, UI_BORDER, UI_BG);
                 break;
             case UI_YELLOW:
-                init_pair(UI_YELLOW, DYNAMIC_YELLOW, UI_BG);
+                init_pair(UI_YELLOW, UI_YELLOW, UI_BG);
                 break;
             case UI_GREEN:
-                init_pair(UI_GREEN, VIVID_GREEN, UI_BG);
+                init_pair(UI_GREEN, UI_GREEN, UI_BG);
                 break;
             case UI_FG_REVERSE:
-                init_pair(UI_FG_REVERSE, UI_BG, PLATINUM);
+                init_pair(UI_FG_REVERSE, UI_BG, UI_FG);
                 break;
-            case GREY_WHITE:
-                init_pair(GREY_WHITE, GRANITE, WHITE);
-                break;
-            case BLACK_WHITE:
-                init_pair(BLACK_WHITE, BLACK, WHITE);
+            case UI_HL_REVERSE:
+                init_pair(UI_HL_REVERSE, UI_BG, UI_BRIGHT_FG);
                 break;
             default:
                 // Init play field colors
@@ -63,7 +125,6 @@ void colours_init() {
 int colour_lookup(const char *colour_name, int bg) {
     if (bg == UI_BG) {
         if (!strcmp(colour_name, "WHITE"))  return UI_BRIGHT_FG;
-        if (!strcmp(colour_name, "BLUE"))   return UI_BORDER;
         if (!strcmp(colour_name, "YELLOW")) return UI_YELLOW;
         if (!strcmp(colour_name, "GREEN"))  return UI_GREEN;
     } else if (bg == PF_BG) {

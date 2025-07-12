@@ -284,9 +284,8 @@
 
 DECLARE_ENUM(colour, COLOUR_ENUM)
 
-/* default background colours for playing field and UI */
+/* default background colour for the playing field */
 #define PF_BG BLACK
-#define UI_BG BLOOD_RED
 
 /*
  * UI colours
@@ -299,8 +298,8 @@ DECLARE_ENUM(colour, COLOUR_ENUM)
 #define UI_YELLOW     CYAN_2
 #define UI_GREEN      RED_2
 #define UI_FG_REVERSE MAGENTA_2
-#define GREY_WHITE    GREY50_2
-#define BLACK_WHITE   WHITE_2
+#define UI_HL_REVERSE GREY50_2
+#define UI_BG         WHITE_2
 
 /* UI color pairs */
 #define CP_UI_BRIGHT_FG  COLOR_PAIR(UI_BRIGHT_FG)
@@ -309,11 +308,22 @@ DECLARE_ENUM(colour, COLOUR_ENUM)
 #define CP_UI_YELLOW     COLOR_PAIR(UI_YELLOW)
 #define CP_UI_GREEN      COLOR_PAIR(UI_GREEN)
 #define CP_UI_FG_REVERSE COLOR_PAIR(UI_FG_REVERSE)
-#define CP_GREY_WHITE    COLOR_PAIR(GREY_WHITE)
-#define CP_BLACK_WHITE   COLOR_PAIR(BLACK_WHITE)
+#define CP_UI_HL_REVERSE COLOR_PAIR(UI_HL_REVERSE)
+
+/* UI colour schemes */
+#define UI_COLOUR_SCHEME_ENUM(UI_COLOUR_SCHEME) \
+    UI_COLOUR_SCHEME(TRADITIONAL,) \
+    UI_COLOUR_SCHEME(RETROBOX,) \
+    UI_COLOUR_SCHEME(STASIS,) \
+    UI_COLOUR_SCHEME(SOURLICK,) \
+    UI_COLOUR_SCHEME(FODDER,) \
+    UI_COLOUR_SCHEME(MELLOW,) \
+    UI_COLOUR_SCHEME(UI_COLOUR_SCHEME_MAX,) \
+
+DECLARE_ENUM(ui_colour_scheme, UI_COLOUR_SCHEME_ENUM)
 
 // Colour pair initialisation
-void colours_init();
+void colours_init(int ui_colour_scheme);
 
 /*
  * Colour pair lookup for colour augmented strings
@@ -321,7 +331,6 @@ void colours_init();
  * For the playfield, this accepts all available colours,
  * for the UI only a limited amount is accepted:
  *     - WHITE
- *     - BLUE
  *     - YELLOW
  *     - GREEN
  *

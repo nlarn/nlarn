@@ -60,6 +60,16 @@ static const char *default_config_file =
     "# ( weapons\n"
     "auto-pickup=\"+*$\n"
     "\n"
+    "# UI Colour scheme\n"
+    "# one of\n"
+    "#  - TRADITIONAL\n"
+    "#  - RETROBOX\n"
+    "#  - STASIS\n"
+    "#  - SOURLICK\n"
+    "#  - FODDER\n"
+    "#  - MELLOW\n"
+    "colours=TRADITIONAL\n"
+    "\n"
 #ifdef SDLPDCURSES
     "# Font size for the game. Defaults to 18 when not defined.\n"
     "font-size=18\n"
@@ -146,6 +156,10 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
         if (!error) config->stats = stats;
         g_clear_error(&error);
 
+        char *colour_scheme = g_key_file_get_string(ini_file, "nlarn", "colours", &error);
+        if (!error) config->colour_scheme = ui_colour_scheme_value(colour_scheme);
+        g_clear_error(&error);
+
 #ifdef SDLPDCURSES
         int font_size = g_key_file_get_integer(ini_file, "nlarn", "font-size", &error);
         if (!config->font_size && !error) config->font_size = font_size;
@@ -189,6 +203,7 @@ void write_ini_file(const char *filename, struct game_config *config)
         g_key_file_set_value(kf,   "nlarn", "stats",       config->stats ? config->stats : "");
         g_key_file_set_value(kf,   "nlarn", "auto-pickup", config->auto_pickup ? config->auto_pickup : "");
         g_key_file_set_boolean(kf, "nlarn", "no-autosave", config->no_autosave);
+        g_key_file_set_value(kf,   "nlarn", "colours",     ui_colour_scheme_string(config->colour_scheme));
 #ifdef SDLPDCURSES
         g_key_file_set_integer(kf, "nlarn", "font-size",   config->font_size);
         g_key_file_set_boolean(kf, "nlarn", "fullscreen",  config->fullscreen);
@@ -305,12 +320,13 @@ void configure_defaults(const char *inifile)
         "  `GREEN`c`end`) Character stats        - %s\n"
         "  `GREEN`d`end`) Configure auto-pickup  - %s\n"
         "  `GREEN`e`end`) Autosave on map change - `YELLOW`%s`end`\n"
+        "  `GREEN`f`end`) Colour scheme          - `YELLOW`%s`end`\n"
 #ifdef SDLPDCURSES
-        "  `GREEN`f`end`) Configure font size    - `YELLOW`%d`end`\n"
-        "  `GREEN`g`end`) Full screen mode       - `YELLOW`%s`end`\n"
+        "  `GREEN`g`end`) Configure font size    - `YELLOW`%d`end`\n"
+        "  `GREEN`h`end`) Full screen mode       - `YELLOW`%s`end`\n"
 #endif
         "\n"
-        "Clear values with `GREEN`A`end`-`GREEN`D`end`. "
+        "Clear values with `GREEN`A`end`-`GREEN`F`end`. "
         "Return to the main menu with `GREEN`ESC`end`.\n";
 
     gboolean leaving = false;
@@ -338,13 +354,16 @@ void configure_defaults(const char *inifile)
             ? g_strdup_printf("`YELLOW`%s`end`", verboseap)
             : NULL;
         if (verboseap) g_free(verboseap);
+        /* UI colour scheme */
+        char *lucss = g_ascii_strdown(ui_colour_scheme_string(config.colour_scheme), -1);
 
         char *msg = g_strdup_printf(menu,
                 nbuf ? nbuf : undef,
                 gbuf ? gbuf : undef,
                 sbuf ? sbuf : undef,
                 abuf ? abuf : undef,
-                config.no_autosave ? "no" : "yes"
+                config.no_autosave ? "no" : "yes",
+                lucss
 #ifdef SDLPDCURSES
                 , config.font_size
                 , config.fullscreen ? "yes" : "no"
@@ -355,6 +374,7 @@ void configure_defaults(const char *inifile)
         if (gbuf) g_free(gbuf);
         if (sbuf) g_free(sbuf);
         if (abuf) g_free(abuf);
+        g_free(lucss);
 
         display_window *cwin = display_popup(COLS / 2 - 34, LINES / 2 - 6, 68,
                 "Configure defaults", msg, 30);
@@ -445,9 +465,37 @@ void configure_defaults(const char *inifile)
                 config.no_autosave = !config.no_autosave;
                 break;
 
+            /* colour scheme */
+            case 'f':
+                {
+                    GString *csmsg = g_string_new("Select UI colour scheme:\n\n");
+                    for (int i = 0; i < UI_COLOUR_SCHEME_MAX; i++)
+                    {
+                        char *lucss = g_ascii_strdown(ui_colour_scheme_string(i), -1);
+                        g_string_append_printf(csmsg, " %c) %s\n", i + 'a', lucss);
+                        g_free(lucss);
+                    }
+
+                    char ret = display_show_message("UI colours", csmsg->str, 0);
+
+                    if (ret >= 'a' && ret < 'a' + UI_COLOUR_SCHEME_MAX)
+                    {
+                        config.colour_scheme = ret - 'a';
+                        colours_init(config.colour_scheme);
+                    }
+
+                    g_string_free(csmsg, true);
+                }
+                break;
+
+            /* default colour scheme */
+            case 'F':
+                config.colour_scheme = TRADITIONAL;
+                break;
+
 #ifdef SDLPDCURSES
             /* font size */
-            case 'f':
+            case 'g':
                 {
                     char *cval = g_strdup_printf("%d", config.font_size);
                     char *nval = display_get_string("Default font size",
@@ -473,7 +521,7 @@ void configure_defaults(const char *inifile)
                 break;
 
             /* fullscreen */
-            case 'g':
+            case 'h':
                 display_toggle_fullscreen(true);
                 break;
 #endif

@@ -28,6 +28,7 @@ struct game_config {
     char *gender;
     char *auto_pickup;
     char *stats;
+    int colour_scheme;
 #ifdef SDLPDCURSES
     int font_size;
     gboolean fullscreen;

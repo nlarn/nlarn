@@ -8,6 +8,7 @@
 * Change the player's colour when HP are below 50%
 * Show where the players's blood or the blood of monsters was spilled
   for some time
+* Configurable UI colours with six predefined colour schemes
 * Remap some key definitions to enhance compatibility with Larn:
     * 'c' to cast a spell
     * 'C' to close a door

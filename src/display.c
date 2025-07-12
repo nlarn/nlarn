@@ -119,7 +119,7 @@ void display_init()
 
     /* initialize colours */
     start_color();  /* Curses */
-    colours_init(); /* We */
+    colours_init(config.colour_scheme); /* We */
 
     /* control special keys in application */
     raw();
@@ -762,7 +762,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             if (curr == pos)
             {
                 if (item_equipped)
-                    attrs = CP_BLACK_WHITE;
+                    attrs = CP_UI_HL_REVERSE;
                 else
                     attrs = CP_UI_FG_REVERSE;
             }
@@ -1460,7 +1460,7 @@ int display_get_count(const char *caption, int value)
             curs_set(2); /* block */
 
         mvwaprintw(mwin->window,  mwin->height - 2, mwin->width - 10,
-                  CP_BLACK_WHITE, "%-8s", ivalue);
+                  CP_UI_HL_REVERSE, "%-8s", ivalue);
 
         wmove(mwin->window, mwin->height - 2, mwin->width - 10 + ipos);
         wrefresh(mwin->window);
@@ -1674,7 +1674,7 @@ char *display_get_string(const char *title, const char *caption, const char *val
     do
     {
         mvwaprintw(mwin->window,  mwin->height - 2, box_start,
-            CP_BLACK_WHITE, "%-*s", (int)max_len + 1, string->str);
+            CP_UI_HL_REVERSE, "%-*s", (int)max_len + 1, string->str);
 
         wmove(mwin->window, mwin->height - 2, box_start + ipos);
 
@@ -1858,14 +1858,14 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
         /* paint */
         int attrs;
 
-        if (selection) attrs = CP_UI_FG_REVERSE | A_BOLD;
-        else           attrs = CP_GREY_WHITE;
+        if (selection) attrs = CP_UI_HL_REVERSE;
+        else           attrs = CP_UI_FG_REVERSE;
 
         mvwaprintw(ywin->window, line + 2, margin, attrs,
                    "%*s%s%*s", padding, " ", yes, padding, " ");
 
-        if (selection) attrs = CP_GREY_WHITE;
-        else           attrs = CP_UI_FG_REVERSE | A_BOLD;
+        if (selection) attrs = CP_UI_FG_REVERSE;
+        else           attrs = CP_UI_HL_REVERSE;
 
         mvwaprintw(ywin->window, line + 2,
                    width - margin - strlen(no) - (2 * padding),
