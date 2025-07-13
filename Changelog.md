@@ -17,6 +17,7 @@
 * Fix Spirit Naga attacks - they were so broken they could crash the game
 * Fix townsfolk gathering around the player
 * Ensure demon lord on level 10 matches difficulty
+* Fix coloured text spanning multiple lines
 
 
 ## Release 0.7.7 (2025-06-19)

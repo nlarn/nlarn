@@ -2929,7 +2929,7 @@ static int mvwcprintw(WINDOW *win, int defattr, int currattr,
             else
             {
                 wattroff(win, attr);
-                wattron(win, COLOR_PAIR(colour_lookup(tval, bg)));
+                wattron(win, attr = COLOR_PAIR(colour_lookup(tval, bg)));
             }
 
             /* free temporary memory */
