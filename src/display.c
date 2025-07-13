@@ -2644,7 +2644,7 @@ int display_show_message(const char *title, const char *message, int indent)
     do
     {
         /* display the window content */
-        int currattr = 0;
+        int currattr = COLOURLESS;
 
         for (guint idx = 0; idx < maxvis; idx++)
         {
