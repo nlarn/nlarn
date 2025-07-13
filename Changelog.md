@@ -8,6 +8,14 @@
 * Change the player's colour when HP are below 50%
 * Show where the players's blood or the blood of monsters was spilled
   for some time
+* Remap some key definitions to enhance compatibility with Larn:
+    * 'c' to cast a spell
+    * 'C' to close a door
+
+  This means some other key definitions had to be moved:
+    * 'a' to cast a spell again
+    * 'v' for auto travel and V to continue auto travel
+* Improve some help texts (suggested by jv84)
 
 ### Fixed bugs
 

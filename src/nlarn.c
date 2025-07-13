@@ -619,32 +619,23 @@ static void mainloop()
             }
             break;
 
+            /* recast previous spell */
+        case 'a':
+            moves_count = spell_cast_previous(nlarn->p);
+            break;
+
             /* desecrate altar */
         case 'A':
             moves_count = player_altar_desecrate(nlarn->p);
             break;
 
-            /* continue auto travel */
-        case 'C':
-            /* delete last auto travel target if it was on another map */
-            if (Z(cpos) != Z(nlarn->p->pos))
-            {
-                cpos = pos_invalid;
-            }
-
-            if (pos_valid(cpos))
-            {
-                /* restore last known auto travel position */
-                pos = cpos;
-                /* reset keyboard input */
-                ch = 0;
-            }
-            else
-                log_add_entry(nlarn->log, "No travel destination known.");
+            /* cast a spell */
+        case 'c':
+            moves_count = spell_cast_new(nlarn->p);
             break;
 
             /* close door */
-        case 'c':
+        case 'C':
             moves_count = player_door_close(nlarn->p);
             break;
 
@@ -672,16 +663,6 @@ static void mainloop()
             /* display inventory */
         case 'i':
             player_inv_display(nlarn->p);
-            break;
-
-            /* work magic */
-        case 'm':
-            moves_count = spell_cast_new(nlarn->p);
-            break;
-
-            /* recast previous spell */
-        case 'M':
-            moves_count = spell_cast_previous(nlarn->p);
             break;
 
             /* open door / container */
@@ -763,7 +744,7 @@ static void mainloop()
             break;
 
             /* voyage (travel) */
-        case 'V':
+        case 'v':
             pos = display_get_new_position(nlarn->p, cpos,
                                            "Choose a destination to travel to.",
                                            false, false, true, 0, true, false);
@@ -781,8 +762,23 @@ static void mainloop()
             }
             break;
 
-        case 'v':
-            log_add_entry(nlarn->log, "NLarn version %s, built on %s.", nlarn_version, __DATE__);
+            /* continue auto travel */
+        case 'V':
+            /* delete last auto travel target if it was on another map */
+            if (Z(cpos) != Z(nlarn->p->pos))
+            {
+                cpos = pos_invalid;
+            }
+
+            if (pos_valid(cpos))
+            {
+                /* restore last known auto travel position */
+                pos = cpos;
+                /* reset keyboard input */
+                ch = 0;
+            }
+            else
+                log_add_entry(nlarn->log, "No travel destination known.");
             break;
 
             /* wear/wield something */
@@ -869,6 +865,10 @@ static void mainloop()
             }
             break;
 
+        case 22: /* ^V */
+            log_add_entry(nlarn->log, "NLarn version %s, built on %s.", nlarn_version, __DATE__);
+            break;
+
             /* enable wizard mode */
         case 23: /* ^W */
             if (!game_wizardmode(nlarn))
@@ -890,7 +890,7 @@ static void mainloop()
             /* *** DEBUGGING SUPPORT *** */
 
             /* toggle visibility of entire map in wizard mode */
-        case 22: /* ^V */
+        case 6: /* ^F */
             if (game_wizardmode(nlarn))
                 game_fullvis(nlarn) = (!game_fullvis(nlarn));
             break;
@@ -964,7 +964,7 @@ static void mainloop()
             }
             break;
 
-        case 6: /* ^F */
+        case 3: /* ^C */
             if (game_wizardmode(nlarn))
                 calc_fighting_stats(nlarn->p);
             break;

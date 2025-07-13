@@ -12,35 +12,34 @@ Running means moving into one direction until interrupted. `GREEN`g`end` or `GRE
 
 `YELLOW`Auto-travel`end`
 
-`GREEN`V`end`   voyage (travel) to a location on the level
-`GREEN`C`end`   continue travelling
+`GREEN`v`end`   voyage (travel) to a location on the level
+`GREEN`V`end`   continue travelling
 
-You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. `GREEN`_`end` for an altar). Subsequent key presses will move the cursor around if there are more than one of the desired features on the level. You can return the cursor to your character by pressing `GREEN`@`end`. When finished, press ENTER to start the journey. When a foe comes into sight, travelling will be aborted automatically and can be continued with `GREEN`C`end` when the enemy gets out of sight.
+You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. `GREEN`_`end` for an altar). Subsequent key presses will move the cursor around if there are more than one of the desired features on the level. You can return the cursor to your character by pressing `GREEN`@`end`. When finished, press ENTER to start the journey. When a foe comes into sight, travelling will be aborted automatically and can be continued with `GREEN`V`end` when the enemy gets out of sight.
 
 
 `YELLOW`Other actions`end`
 
+`GREEN`a`end`   cast the previously cast spell again
 `GREEN`A`end`   desecrate an altar
-`GREEN`c`end`   close a door
-`GREEN`d`end`   drop something
+`GREEN`c`end`   cast a spell
+`GREEN`C`end`   close a door
+`GREEN`d`end`   drop an item
 `GREEN`D`end`   disarm a trap
 `GREEN`f`end`   fire a ranged weapon
 `GREEN`F`end`   wash yourself at a fountain
 `GREEN`g`end`   move until something interesting is found
 `GREEN`i`end`   open the inventory window
-`GREEN`m`end`   work magic (cast a spell)
-`GREEN`M`end`   cast the previously cast spell again
 `GREEN`o`end`   open a door or a chest
 `GREEN`p`end`   pray at an altar
 `GREEN`P`end`   display tax status
 `GREEN`q`end`   drink a potion or from a fountain
-`GREEN`r`end`   read something
+`GREEN`r`end`   read a book or a scroll
 `GREEN`R`end`   remove gems from a throne
 `GREEN`s`end`   search for traps
 `GREEN`S`end`   sit on a throne
 `GREEN`t`end`   throw an item
 `GREEN`T`end`   take off a worn/wielded item
-`GREEN`v`end`   print the game's version
 `GREEN`w`end`   wait/rest up to one mobul or until healed
 `GREEN`W`end`   wear/wield an item
 `GREEN`x`end`   exchange the primary and secondary weapon
@@ -68,6 +67,7 @@ You can select the travel target by moving the cursor or by typing the desired f
 `GREEN`CTRL+R`end`  recall message history
 `GREEN`CTRL+S`end`  save and exit the game
 `GREEN`CTRL+U`end`  page up in the inventory, spell list and messages
+`GREEN`CTRL+V`end`  print the game's version
 
 
 `YELLOW`Game Time`end`
@@ -91,7 +91,7 @@ You can move dialogues with Ctrl and the cursor keys.
 
 `YELLOW`Spell Casting`end`
 
-When opening the spell casting window by pressing (`GREEN`m`end`) you'll get a list of spells known by your character.
+When opening the spell casting window by pressing (`GREEN`c`end`) you'll get a list of spells known by your character.
 
 `WHITE`The first column`end` shows the mnemonic of the selected spell, which can be used to jump to a spell by typing the letters.
 `WHITE`The second column`end` shows the spell's name.
@@ -111,5 +111,5 @@ When starting the game with the wizard mode command line option (`GREEN`-w`end`)
 `GREEN`CTRL+X`end`  raise experience level
 `GREEN`*`end`       add 1000 gp to bank account
 `GREEN`&`end`       heal yourself
-`GREEN`CTRL+F`end`  combat simulation
-`GREEN`CTRL+V`end`  toggle the visibility of the entire map
+`GREEN`CTRL+F`end`  toggle the full visibility of the entire map
+`GREEN`CTRL+C`end`  combat simulation
