@@ -1,4 +1,4 @@
-# NLarn Changelog
+# Changelog
 
 ## Release 0.7.8 (unreleased)
 

@@ -156,7 +156,7 @@ nlarn$(SUFFIX): $(PDCLIB) $(OBJECTS) $(RESOURCES)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 %.html: %.md
-	makepage $< > $@
+	pandoc -t html5 -s --metadata title="NLarn $(VERSION)" -o $@ $<
 
 .SECONDEXPANSION:
 $(DLLS): $$(patsubst %, /ucrt64/bin/%, $$@)
