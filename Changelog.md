@@ -446,14 +446,15 @@
 * Several improvements to auto-travel.
 * Permanently display the item description in the inventory.
 * Modified behaviour when picking up items:
-    ',' just gets the item
-    'g' asks for the amount to pick up
+    * ',' just gets the item
+    * 'g' asks for the amount to pick up
+
   Reported by Xecutor.
 * Use shortened weapon names for the wielded weapon display.
 * Added an option to disable automatic saving.
 * Show spell level in book description.
-* Set native end-of-line characters for nlarn.ini-sample. Reported by
-  R. Alan Monroe.
+* Set native end-of-line characters for nlarn.ini-sample.
+  Reported by R. Alan Monroe.
 * Show a popup message when loading or saving the game.
 * Display the message when selecting a position in an popup window.
   Return the cursor to the player with '@'.
