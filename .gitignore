@@ -30,5 +30,8 @@ nlarn.depend
 # VS Code
 .vscode/
 
+# GDB
+.gdb_history
+
 # macOS
 .DS_Store
