@@ -25,6 +25,7 @@
 * Fix Spirit Naga attacks - they were so broken they could crash the game
 * Fix townsfolk gathering around the player
 * Ensure demon lord on level 10 matches difficulty
+* Fixed increasing difficulty after winning the game. Broken since 0.7.7
 * Fix coloured text spanning multiple lines
 
 

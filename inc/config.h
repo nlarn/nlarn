@@ -65,6 +65,3 @@ char compose_gender(const int gender);
 
 /* configure game defaults */
 void configure_defaults(const char *inifile);
-
-/* increase difficulty after winning the game */
-void config_increase_difficulty(const char *inifile, const int new_difficulty);

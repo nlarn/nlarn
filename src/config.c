@@ -492,17 +492,3 @@ void configure_defaults(const char *inifile)
     /* write modified config */
     write_ini_file(inifile, &config);
 }
-
-void config_increase_difficulty(const char *inifile, const int new_difficulty)
-{
-    struct game_config config = {};
-    parse_ini_file(inifile, &config);
-
-    config.difficulty = new_difficulty;
-
-    /* write back modified config */
-    write_ini_file(inifile, &config);
-
-    /* clean up */
-    free_config(config);
-}

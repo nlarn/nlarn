@@ -22,6 +22,7 @@
 #include "config.h"
 #include "container.h"
 #include "display.h"
+#include "extdefs.h"
 #include "game.h"
 #include "gems.h"
 #include "items.h"
@@ -385,7 +386,10 @@ int building_home(player *p)
             item_destroy(pcd);
 
             /* increase difficulty level */
-            config_increase_difficulty(nlarn_inifile, nlarn->difficulty + 1);
+            config.difficulty += 1;
+
+            /* write back modified config */
+            write_ini_file(nlarn_inifile, &config);
 
             player_die(p, PD_WON, 0);
         }
