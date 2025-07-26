@@ -662,7 +662,7 @@ monster_data_t monster_data[] = {
         .name = "type I demon lord", .glyph = '&', .colour = WOOL_VIOLET,
         .exp = 50000, .ac = 17, .hp_max = 140,
         .level = 12, .intelligence = 20, .speed = FAST, .size = MEDIUM,
-        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
         .attacks = {
             { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
@@ -672,7 +672,7 @@ monster_data_t monster_data[] = {
         .name = "type II demon lord", .glyph = '&', .colour = CHALCEDONY_VIOLET,
         .exp = 75000, .ac = 18, .hp_max = 160,
         .level = 13, .intelligence = 21, .speed = FAST, .size = MEDIUM,
-        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
         .attacks = {
             { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
@@ -682,7 +682,7 @@ monster_data_t monster_data[] = {
         .name = "type III demon lord", .glyph = '&', .colour = DEEP_MAGENTA,
         .exp = 100000, .ac = 19, .hp_max = 180,
         .level = 14, .intelligence = 22, .speed = FAST, .size = MEDIUM,
-        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
         .attacks = {
             { .type = ATT_BITE, .base = 18, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 18, .damage = DAM_PHYSICAL },
@@ -692,7 +692,7 @@ monster_data_t monster_data[] = {
         .name = "type IV demon lord", .glyph = '&', .colour = BLOOD_RED,
         .exp = 125000, .ac = 20, .hp_max = 200,
         .level = 15, .intelligence = 23, .speed = FAST, .size = MEDIUM,
-        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
         .attacks = {
             { .type = ATT_BITE, .base = 20, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 20, .damage = DAM_PHYSICAL },
@@ -702,7 +702,7 @@ monster_data_t monster_data[] = {
         .name = "type V demon lord", .glyph = '&', .colour = RED_LILAC,
         .exp = 150000, .ac = 21, .hp_max = 220,
         .level = 16, .intelligence = 24, .speed = FAST, .size = MEDIUM,
-        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
         .attacks = {
             { .type = ATT_BITE, .base = 22, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 22, .damage = DAM_PHYSICAL },
@@ -712,7 +712,7 @@ monster_data_t monster_data[] = {
         .name = "type VI demon lord", .glyph = '&', .colour = SUNSET_RED,
         .exp = 175000, .ac = 22, .hp_max = 240,
         .level = 17, .intelligence = 25, .speed = FAST, .size = LARGE,
-        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
         .attacks = {
             { .type = ATT_BITE, .base = 24, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 24, .damage = DAM_PHYSICAL },
@@ -722,7 +722,7 @@ monster_data_t monster_data[] = {
         .name = "type VII demon lord", .glyph = '&', .colour = DARK_RED,
         .exp = 200000, .ac = 23, .hp_max = 260,
         .level = 18, .intelligence = 26, .speed = FAST, .size = GIANT,
-        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_CONF | RES_MAGIC,
+        .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_CONF | RES_MAGIC | RES_SLEEP,
         .attacks = {
             { .type = ATT_BITE, .base = 27, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 27, .damage = DAM_PHYSICAL },

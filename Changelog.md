@@ -16,6 +16,7 @@
     * 'a' to cast a spell again
     * 'v' for auto travel and V to continue auto travel
 * Improve some help texts (suggested by jv84)
+* Give missing sleep resistance to demon lords
 
 ### Fixed bugs
 
