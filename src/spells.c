@@ -822,7 +822,7 @@ static gboolean spell_type_point(spell *s, struct player *p)
 
         /* polymorph */
     case SP_PLY:
-        if (chance(5 * (monster_level(m) - 2 * s->knowledge)))
+        if (chance(5 * max(1, monster_level(m) - 2 * s->knowledge)))
         {
             /* It didn't work */
             spell_print_failure_message(s, m);
