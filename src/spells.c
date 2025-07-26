@@ -762,7 +762,7 @@ static gboolean spell_type_point(spell *s, struct player *p)
     {
         /* charm monster */
     case SP_CHM:
-        if ((rand_m_n(5, 30) * monster_level(m) - player_get_wis(p)) < 30)
+        if ((rand_m_n(5, 30) * (monster_level(m) - player_get_wis(p))) < 30)
         {
             e = effect_new(spell_effect(s));
             e->turns *= s->knowledge;
