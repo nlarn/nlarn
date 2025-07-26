@@ -500,7 +500,7 @@ monster_data_t monster_data[] = {
         .name = "poltergeist", .glyph = 'p', .colour = REGENT_GREY,
         .exp = 450, .ac = 6, .hp_max = 50,
         .level = 8, .intelligence = 5, .speed = NORMAL, .size = MEDIUM,
-        .flags = FLY | UNDEAD | INVISIBLE | RES_SLEEP | RES_POISON,
+        .flags = FLY | SPIRIT | INVISIBLE | RES_SLEEP | RES_POISON,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER, .sound = "laugh"
