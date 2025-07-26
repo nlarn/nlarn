@@ -1682,9 +1682,9 @@ static gboolean spell_area_pos_hit(position pos,
 
         if (mst == LS_STATUE
             && (sp->id == SP_BAL || sp->id == SP_LIT)
-            && (game_difficulty(nlarn) <= 2))
+            && chance(min(0, 100 - (game_difficulty(nlarn) * 10))))
         {
-        /* fireball and lightning destroy statues up to diff. level 2 */
+        /* fireball and lightning destroy statues up to diff. level 10 */
             sobject_destroy_at(damo->originator, cmap, pos);
             terminated = true;
         }
