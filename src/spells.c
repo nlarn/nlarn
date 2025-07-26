@@ -1188,7 +1188,7 @@ static gboolean spell_phantasmal_forces(spell *s, struct player *p)
         return false;
     }
 
-    if ((player_get_int(p) + s->knowledge) > monster_int(m))
+    if ((player_get_int(p) + s->knowledge - game_difficulty(nlarn)) > monster_int(m))
     {
         if (monster_in_sight(m))
         {
