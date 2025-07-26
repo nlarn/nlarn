@@ -18,6 +18,7 @@
 * Improve some help texts (suggested by jv84)
 * Give missing sleep resistance to demon lords
 * Lower possibility of destroying statues with spells with higher difficulty
+* Demons, undead and spirits are resistant against dehydration
 
 ### Fixed bugs
 

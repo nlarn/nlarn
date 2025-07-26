@@ -777,10 +777,16 @@ static gboolean spell_type_point(spell *s, struct player *p)
 
         /* dehydration */
     case SP_DRY:
-        amount = (100 * s->knowledge) + p->level;
-        spell_print_success_message(s, m);
-        monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
-                                                DAMO_PLAYER, p));
+        // life forms not based on water are immune against this spell
+        if (!(monster_flags(m, DEMON) || monster_flags(m, UNDEAD) || monster_flags(m, SPIRIT)))
+        {
+            amount = (40 * s->knowledge) + p->level;
+            spell_print_success_message(s, m);
+            monster_damage_take(m,
+                    damage_new(DAM_MAGICAL, ATT_MAGIC, amount, DAMO_PLAYER, p));
+        }
+        else
+            spell_print_failure_message(s, m);
         break; /* SP_DRY */
 
         /* drain life */
