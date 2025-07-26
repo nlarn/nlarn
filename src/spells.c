@@ -805,15 +805,16 @@ static gboolean spell_type_point(spell *s, struct player *p)
         /* finger of death */
     case SP_FGR:
     {
-        // Lower chances of working against undead and demons.
-        const int roll = (monster_flags(m, UNDEAD) ? 40 :
-                          monster_flags(m, DEMON)  ? 30 : 20);
+        // Lower chances of against demons; no chance against dead beings.
+        int roll = 20;
+        if (monster_flags(m, DEMON)) roll = 40;
 
-        if ((player_get_wis(p) + s->knowledge) > (guint)rand_m_n(10, roll))
+        if (!(monster_flags(m, SPIRIT) || monster_flags(m, UNDEAD))
+                && (player_get_wis(p) + s->knowledge) > (guint)rand_m_n(10, roll))
         {
             spell_print_success_message(s, m);
-            monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000,
-                                                    DAMO_PLAYER, p));
+            monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC,
+                        2000, DAMO_PLAYER, p));
         }
         else
             spell_print_failure_message(s, m);
