@@ -220,6 +220,14 @@ item *item_new(item_t item_type, int item_id)
             nlarn->weapon_created[nitem->id] = true;
         }
 
+        /* Sword of Slashing */
+        if (nitem->id == WT_SWORDSLASHING)
+        {
+            eff = effect_new(ET_INC_DEX);
+            eff->amount = 5;
+            item_effect_add(nitem, eff);
+        }
+
         /* special effects for Bessman's Hammer */
         if (nitem->id == WT_BESSMAN)
         {

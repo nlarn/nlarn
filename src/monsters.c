@@ -892,8 +892,8 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         case MT_WATER_LORD:
         case MT_XVART:
             wpns[0] = WT_LONGSWORD;
-            wpns[1] = WT_2SWORD;
-            wpns[2] = WT_SWORDSLASHING;
+            wpns[1] = WT_LONGSWORD;
+            wpns[2] = WT_2SWORD;
             break;
 
         default:
