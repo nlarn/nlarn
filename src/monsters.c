@@ -1904,15 +1904,31 @@ int monster_items_pickup(monster *m)
     if (monster_effect(m, ET_LEVITATION))
         return false;
 
-    /* TODO: rust monster eats metal stuff */
-
     gboolean pick_up = false;
-
-    for (guint idx = 0; idx < inv_length(*map_ilist_at(monster_map(m), m->pos)); idx++)
+    inventory **tinv = map_ilist_at(monster_map(m), m->pos);
+    for (guint idx = 0; idx < inv_length(*tinv); idx++)
     {
-        item *it = inv_get(*map_ilist_at(monster_map(m), m->pos), idx);
+        item *it = inv_get(*tinv, idx);
         item_t typ = it->type;
         const char *pickup_desc = "The %s picks up %s.";
+
+        /*  rust monster eats metal stuff */
+        if (m->type == MT_RUST_MONSTER && IM_IRON == item_material(it))
+        {
+            if (monster_in_sight(m))
+            {
+                gchar *buf = item_describe(it,
+                        player_item_identified(nlarn->p, it), false, false);
+
+                log_add_entry(nlarn->log, "The %s touches %s with its antennae.",
+                        monster_get_name(m), buf);
+                g_free(buf);
+            }
+
+            item_erode(tinv, it, IET_RUST, monster_in_sight(m));
+
+            return true;
+        }
 
         if (m->type == MT_LEPRECHAUN && ((typ == IT_GEM) || (typ == IT_GOLD)))
         {
@@ -1948,7 +1964,7 @@ int monster_items_pickup(monster *m)
                 g_free(buf);
             }
 
-            inv_del_element(map_ilist_at(monster_map(m), m->pos), it);
+            inv_del_element(tinv, it);
             inv_add(&m->inv, it);
             // flag the item as picked up to ensure we drop it on death
             it->picked_up = true;
