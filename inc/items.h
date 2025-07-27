@@ -108,7 +108,8 @@ typedef struct _item {
         rusty: 2,           /* 0: no; 1: yes; 2: very */
         blessed_known: 1,   /* player known if item is cursed / blessed */
         bonus_known: 1,     /* player knows the bonus */
-        fired: 1;           /* player has fired the item */
+        fired: 1,           /* player has fired the item */
+        picked_up: 1;       /* picked up by monster */
 } item;
 
 typedef struct item_type_data {
@@ -271,6 +272,11 @@ int item_filter_unid(item *it);
 int item_filter_cursed(item *it);
 int item_filter_cursed_or_unknown(item *it);
 int item_filter_nonblessed(item *it);
+
+static inline int item_filter_weapon(item *it)
+{
+    return (IT_WEAPON == it->type);
+}
 
 /**
  * @brief Item filter function for the potion of cure dianthroritis.

@@ -752,7 +752,7 @@ monster_data_t monster_data[] = {
 static inline monster_action_t monster_default_ai(monster *m);
 static gboolean monster_player_visible(monster *m);
 static gboolean monster_attack_available(monster *m, attack_t type);
-static void monster_weapon_wield(monster *m, item *weapon);
+static bool monster_weapon_wield(monster *m);
 static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
@@ -912,7 +912,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         inv_add(&nmonster->inv, weapon);
 
         /* wield the new weapon */
-        monster_weapon_wield(nmonster, weapon);
+        nmonster->eq_weapon = weapon;
     } /* finished initializing weapons */
 
     /* initialize mimics */
@@ -1437,10 +1437,13 @@ void monster_die(monster *m, struct player *p)
             while (inv_length(m->inv) > 0)
             {
                 item *i = inv_get(m->inv, 0);
-                // Drop all non-weapon items and all unique weapons,
-                // but only one third of the common weapons.
-                if ((i->type != IT_WEAPON) || weapon_is_unique(i) || chance(33)) {
+                // Drop all non-weapon items, all weapons picked up by the
+                // monster, all unique weapons, but only one third of the
+                // starting weapons.
+                if ((i->type != IT_WEAPON) || i->picked_up || weapon_is_unique(i) || chance(33)) {
                     inv_add(floor, i);
+                    // ensure the flag is always reset
+                    i->picked_up = false;
                 } else {
                     item_destroy(i);
                 }
@@ -1613,6 +1616,10 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     if (!map_adjacent)
         return;
 
+    // Corrode items engulfed by gelatinuous cubes every three turns
+    if (MT_GELATINOUSCUBE == monster_type(m) && game_turn(nlarn) % 3 == 0)
+        inv_erode(&m->inv, IET_CORRODE, monster_in_sight(m), NULL);
+
     // Update the monster's knowledge of player's position.
     if (monster_player_visible(m)
             || (player_effect(g->p, ET_AGGRAVATE_MONSTER)
@@ -1653,6 +1660,13 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
         /* let the monster have a look at the items at it's current position
            if it chose to pick up something, the turn is over */
         if (monster_items_pickup(m))
+            return;
+
+        /* let the monster equip a weapon:
+           if it returns true, the turn is over */
+        if (monster_attack_available(m, ATT_WEAPON) &&
+                inv_length_filtered(m->inv, item_filter_weapon) > 1 &&
+                monster_weapon_wield(m))
             return;
 
         /* determine monster's next move */
@@ -1890,15 +1904,31 @@ int monster_items_pickup(monster *m)
     if (monster_effect(m, ET_LEVITATION))
         return false;
 
-    /* TODO: gelatinous cube digests items, rust monster eats metal stuff */
-    /* FIXME: time management */
-
     gboolean pick_up = false;
-
-    for (guint idx = 0; idx < inv_length(*map_ilist_at(monster_map(m), m->pos)); idx++)
+    inventory **tinv = map_ilist_at(monster_map(m), m->pos);
+    for (guint idx = 0; idx < inv_length(*tinv); idx++)
     {
-        item *it = inv_get(*map_ilist_at(monster_map(m), m->pos), idx);
+        item *it = inv_get(*tinv, idx);
         item_t typ = it->type;
+        const char *pickup_desc = "The %s picks up %s.";
+
+        /*  rust monster eats metal stuff */
+        if (m->type == MT_RUST_MONSTER && IM_IRON == item_material(it))
+        {
+            if (monster_in_sight(m))
+            {
+                gchar *buf = item_describe(it,
+                        player_item_identified(nlarn->p, it), false, false);
+
+                log_add_entry(nlarn->log, "The %s touches %s with its antennae.",
+                        monster_get_name(m), buf);
+                g_free(buf);
+            }
+
+            item_erode(tinv, it, IET_RUST, monster_in_sight(m));
+
+            return true;
+        }
 
         if (m->type == MT_LEPRECHAUN && ((typ == IT_GEM) || (typ == IT_GOLD)))
         {
@@ -1914,6 +1944,12 @@ int monster_items_pickup(monster *m)
             else if (weapon_damage(m->eq_weapon) < weapon_damage(it))
                 pick_up = true;
         }
+        else if (m->type == MT_GELATINOUSCUBE)
+        {
+            /* gelatinous cubes engulf all items */
+            pick_up = true;
+            pickup_desc = "The %s engulfs %s.";
+        }
 
         if (pick_up)
         {
@@ -1923,20 +1959,15 @@ int monster_items_pickup(monster *m)
                 gchar *buf = item_describe(it, player_item_identified(nlarn->p, it),
                                            false, false);
 
-                log_add_entry(nlarn->log, "The %s picks up %s.",
+                log_add_entry(nlarn->log, pickup_desc,
                         monster_get_name(m), buf);
                 g_free(buf);
             }
 
-            inv_del_element(map_ilist_at(monster_map(m), m->pos), it);
+            inv_del_element(tinv, it);
             inv_add(&m->inv, it);
-
-            // Wield weapon after picking it up - it is better than the one
-            // the monster is currently using
-            if (IT_WEAPON == typ)
-            {
-                monster_weapon_wield(m, it);
-            }
+            // flag the item as picked up to ensure we drop it on death
+            it->picked_up = true;
 
             /* finish this turn after picking up an item */
             return true;
@@ -2940,21 +2971,37 @@ static gboolean monster_attack_available(monster *m, attack_t type)
     return available;
 }
 
-static void monster_weapon_wield(monster *m, item *weapon)
+static bool monster_weapon_wield(monster *m)
 {
-    /* FIXME: time management */
-    /* FIXME: weapon effects */
-    m->eq_weapon = weapon;
+    item *orig_weapon = m->eq_weapon;
 
-    /* show message if monster is visible */
+    for (guint idx = 0; idx < inv_length_filtered(m->inv, item_filter_weapon); idx++)
+    {
+        item *w = inv_get_filtered(m->inv, idx, item_filter_weapon);
+        /* compare this weapon with the weapon the monster wields */
+        if (!(m->eq_weapon) || weapon_damage(m->eq_weapon) < weapon_damage(w)) {
+            /* FIXME: weapon effects */
+            m->eq_weapon = w;
+        }
+    }
+
+    if (orig_weapon == m->eq_weapon)
+    {
+        /* nothing changed */
+        return false;
+    }
+
+    /* show message if the monster swapped the weapon and is visible */
     if (monster_in_sight(m))
     {
-        gchar *buf = item_describe(weapon, player_item_identified(nlarn->p,
-                                weapon), true, false);
+        gchar *buf = item_describe(m->eq_weapon, player_item_identified(nlarn->p,
+                                m->eq_weapon), true, false);
 
         log_add_entry(nlarn->log, "The %s wields %s.", monster_get_name(m), buf);
         g_free(buf);
     }
+
+    return true;
 }
 
 static gboolean monster_item_disenchant(monster *m, struct player *p)

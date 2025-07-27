@@ -16,6 +16,8 @@
     * 'a' to cast a spell again
     * 'v' for auto travel and V to continue auto travel
 * Improve some help texts (suggested by jv84)
+* Gelatinous cube engulf und corrode items
+* Rust monsters consume iron items on the ground
 * The Sword of Slashing is now unique and increases dexterity when wielded
 * Give missing sleep resistance to demon lords
 * Lower possibility of destroying statues with spells with higher difficulty
@@ -30,6 +32,7 @@
 * Fix townsfolk gathering around the player
 * Ensure demon lord on level 10 matches difficulty
 * Fixed increasing difficulty after winning the game. Broken since 0.7.7
+* Monsters no longer pick up and equip weapons in one turn
 * Finger of Death no longer works against undead and spirits
 * Fix coloured text spanning multiple lines
 

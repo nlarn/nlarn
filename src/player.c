@@ -778,12 +778,41 @@ player *player_deserialize(cJSON *pser)
     return p;
 }
 
+static void player_effects_expire(gpointer effect_id, gpointer pptr)
+{
+    effect *e = game_effect_get(nlarn, effect_id);
+    player *p = (player *)pptr;
+
+    /* trapped counter only reduces on movement */
+    if (e->type != ET_TRAPPED && effect_expire(e) == -1)
+    {
+        /* effect has expired */
+        player_effect_del(p, e);
+    }
+    else
+    {
+        /* give a warning if critical effects are about to time out */
+        if (e->turns == 5)
+        {
+            gboolean interrupt_actions = true;
+            if (e->type == ET_WALL_WALK)
+                log_add_entry(nlarn->log, "`LUMINOUS_RED`Your attunement to the walls is fading!`end`");
+            else if (e->type == ET_LEVITATION)
+                log_add_entry(nlarn->log, "`LUMINOUS_RED`You are starting to drift towards the ground!`end`");
+            else
+                interrupt_actions = false;
+
+            if (interrupt_actions)
+                p->attacked = true;
+        }
+    }
+}
+
 gboolean player_make_move(player *p, int turns, gboolean interruptible, const char *desc, ...)
 {
     int frequency; /* number of turns between occasions */
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
-    guint idx = 0;
     g_autofree char *description = NULL, *popup_desc = NULL;
 
     g_assert(p != NULL);
@@ -856,37 +885,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
             game_spin_the_wheel(nlarn);
 
             /* expire temporary effects */
-            idx = 0; // reset idx for proper expiration during multiturn events
-            while (idx < p->effects->len)
-            {
-                gpointer effect_id = g_ptr_array_index(p->effects, idx);
-                e = game_effect_get(nlarn, effect_id);
-
-                /* trapped counter only reduces on movement */
-                if (e->type != ET_TRAPPED && effect_expire(e) == -1)
-                {
-                    /* effect has expired */
-                    player_effect_del(p, e);
-                }
-                else
-                {
-                    /* give a warning if critical effects are about to time out */
-                    if (e->turns == 5)
-                    {
-                        gboolean interrupt_actions = true;
-                        if (e->type == ET_WALL_WALK)
-                            log_add_entry(nlarn->log, "`LUMINOUS_RED`Your attunement to the walls is fading!`end`");
-                        else if (e->type == ET_LEVITATION)
-                            log_add_entry(nlarn->log, "`LUMINOUS_RED`You are starting to drift towards the ground!`end`");
-                        else
-                            interrupt_actions = false;
-
-                        if (interrupt_actions)
-                            p->attacked = true;
-                    }
-                    idx++;
-                }
-            }
+            g_ptr_array_foreach(p->effects, player_effects_expire, p);
 
             /* handle regeneration */
             if (p->regen_counter == 0)

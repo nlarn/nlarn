@@ -506,6 +506,7 @@ void item_serialize(gpointer oid, gpointer it, gpointer root)
     if (i->blessed_known == 1) cJSON_AddTrueToObject(ival, "blessed_known");
     if (i->bonus_known == 1) cJSON_AddTrueToObject(ival, "bonus_known");
     if (i->fired == 1) cJSON_AddTrueToObject(ival, "fired");
+    if (i->picked_up) cJSON_AddTrueToObject(ival, "picked_up");
 
     if (i->corroded > 0) cJSON_AddNumberToObject(ival, "corroded", i->corroded);
     if (i->burnt > 0) cJSON_AddNumberToObject(ival, "burnt", i->burnt);
@@ -583,6 +584,9 @@ item *item_deserialize(cJSON *iser, struct game *g)
 
     obj = cJSON_GetObjectItem(iser, "fired");
     if (obj != NULL) it->fired = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "picked_up");
+    if (obj != NULL) it->picked_up = obj->valueint;
 
     obj = cJSON_GetObjectItem(iser, "corroded");
     if (obj != NULL) it->corroded = obj->valueint;
