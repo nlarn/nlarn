@@ -273,6 +273,11 @@ int item_filter_cursed(item *it);
 int item_filter_cursed_or_unknown(item *it);
 int item_filter_nonblessed(item *it);
 
+static inline int item_filter_weapon(item *it)
+{
+    return (IT_WEAPON == it->type);
+}
+
 /**
  * @brief Item filter function for the potion of cure dianthroritis.
  * @param a pointer to an item

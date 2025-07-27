@@ -31,6 +31,7 @@
 * Fix townsfolk gathering around the player
 * Ensure demon lord on level 10 matches difficulty
 * Fixed increasing difficulty after winning the game. Broken since 0.7.7
+* Monsters no longer pick up and equip weapons in one turn
 * Finger of Death no longer works against undead and spirits
 * Fix coloured text spanning multiple lines
 

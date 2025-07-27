@@ -752,7 +752,7 @@ monster_data_t monster_data[] = {
 static inline monster_action_t monster_default_ai(monster *m);
 static gboolean monster_player_visible(monster *m);
 static gboolean monster_attack_available(monster *m, attack_t type);
-static void monster_weapon_wield(monster *m, item *weapon);
+static bool monster_weapon_wield(monster *m);
 static gboolean monster_item_disenchant(monster *m, struct player *p);
 static gboolean monster_item_rust(monster *m, struct player *p);
 static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
@@ -912,7 +912,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         inv_add(&nmonster->inv, weapon);
 
         /* wield the new weapon */
-        monster_weapon_wield(nmonster, weapon);
+        nmonster->eq_weapon = weapon;
     } /* finished initializing weapons */
 
     /* initialize mimics */
@@ -1662,6 +1662,13 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
         if (monster_items_pickup(m))
             return;
 
+        /* let the monster equip a weapon:
+           if it returns true, the turn is over */
+        if (monster_attack_available(m, ATT_WEAPON) &&
+                inv_length_filtered(m->inv, item_filter_weapon) > 1 &&
+                monster_weapon_wield(m))
+            return;
+
         /* determine monster's next move */
         m_npos = monster_pos(m);
 
@@ -1898,7 +1905,6 @@ int monster_items_pickup(monster *m)
         return false;
 
     /* TODO: rust monster eats metal stuff */
-    /* FIXME: time management */
 
     gboolean pick_up = false;
 
@@ -1946,13 +1952,6 @@ int monster_items_pickup(monster *m)
             inv_add(&m->inv, it);
             // flag the item as picked up to ensure we drop it on death
             it->picked_up = true;
-
-            // Wield weapon after picking it up - it is better than the one
-            // the monster is currently using
-            if (IT_WEAPON == typ)
-            {
-                monster_weapon_wield(m, it);
-            }
 
             /* finish this turn after picking up an item */
             return true;
@@ -2956,21 +2955,37 @@ static gboolean monster_attack_available(monster *m, attack_t type)
     return available;
 }
 
-static void monster_weapon_wield(monster *m, item *weapon)
+static bool monster_weapon_wield(monster *m)
 {
-    /* FIXME: time management */
-    /* FIXME: weapon effects */
-    m->eq_weapon = weapon;
+    item *orig_weapon = m->eq_weapon;
 
-    /* show message if monster is visible */
+    for (guint idx = 0; idx < inv_length_filtered(m->inv, item_filter_weapon); idx++)
+    {
+        item *w = inv_get_filtered(m->inv, idx, item_filter_weapon);
+        /* compare this weapon with the weapon the monster wields */
+        if (!(m->eq_weapon) || weapon_damage(m->eq_weapon) < weapon_damage(w)) {
+            /* FIXME: weapon effects */
+            m->eq_weapon = w;
+        }
+    }
+
+    if (orig_weapon == m->eq_weapon)
+    {
+        /* nothing changed */
+        return false;
+    }
+
+    /* show message if the monster swapped the weapon and is visible */
     if (monster_in_sight(m))
     {
-        gchar *buf = item_describe(weapon, player_item_identified(nlarn->p,
-                                weapon), true, false);
+        gchar *buf = item_describe(m->eq_weapon, player_item_identified(nlarn->p,
+                                m->eq_weapon), true, false);
 
         log_add_entry(nlarn->log, "The %s wields %s.", monster_get_name(m), buf);
         g_free(buf);
     }
+
+    return true;
 }
 
 static gboolean monster_item_disenchant(monster *m, struct player *p)
