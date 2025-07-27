@@ -1616,6 +1616,10 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     if (!map_adjacent)
         return;
 
+    // Corrode items engulfed by gelatinuous cubes every three turns
+    if (MT_GELATINOUSCUBE == monster_type(m) && game_turn(nlarn) % 3 == 0)
+        inv_erode(&m->inv, IET_CORRODE, monster_in_sight(m), NULL);
+
     // Update the monster's knowledge of player's position.
     if (monster_player_visible(m)
             || (player_effect(g->p, ET_AGGRAVATE_MONSTER)
@@ -1893,7 +1897,7 @@ int monster_items_pickup(monster *m)
     if (monster_effect(m, ET_LEVITATION))
         return false;
 
-    /* TODO: gelatinous cube digests items, rust monster eats metal stuff */
+    /* TODO: rust monster eats metal stuff */
     /* FIXME: time management */
 
     gboolean pick_up = false;
@@ -1902,6 +1906,7 @@ int monster_items_pickup(monster *m)
     {
         item *it = inv_get(*map_ilist_at(monster_map(m), m->pos), idx);
         item_t typ = it->type;
+        const char *pickup_desc = "The %s picks up %s.";
 
         if (m->type == MT_LEPRECHAUN && ((typ == IT_GEM) || (typ == IT_GOLD)))
         {
@@ -1917,6 +1922,12 @@ int monster_items_pickup(monster *m)
             else if (weapon_damage(m->eq_weapon) < weapon_damage(it))
                 pick_up = true;
         }
+        else if (m->type == MT_GELATINOUSCUBE)
+        {
+            /* gelatinous cubes engulf all items */
+            pick_up = true;
+            pickup_desc = "The %s engulfs %s.";
+        }
 
         if (pick_up)
         {
@@ -1926,7 +1937,7 @@ int monster_items_pickup(monster *m)
                 gchar *buf = item_describe(it, player_item_identified(nlarn->p, it),
                                            false, false);
 
-                log_add_entry(nlarn->log, "The %s picks up %s.",
+                log_add_entry(nlarn->log, pickup_desc,
                         monster_get_name(m), buf);
                 g_free(buf);
             }

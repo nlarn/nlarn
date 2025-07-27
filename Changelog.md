@@ -16,6 +16,7 @@
     * 'a' to cast a spell again
     * 'v' for auto travel and V to continue auto travel
 * Improve some help texts (suggested by jv84)
+* Gelatinous cube engulf und corrode items
 * The Sword of Slashing is now unique and increases dexterity when wielded
 * Give missing sleep resistance to demon lords
 * Lower possibility of destroying statues with spells with higher difficulty
