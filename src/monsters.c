@@ -1437,10 +1437,13 @@ void monster_die(monster *m, struct player *p)
             while (inv_length(m->inv) > 0)
             {
                 item *i = inv_get(m->inv, 0);
-                // Drop all non-weapon items and all unique weapons,
-                // but only one third of the common weapons.
-                if ((i->type != IT_WEAPON) || weapon_is_unique(i) || chance(33)) {
+                // Drop all non-weapon items, all weapons picked up by the
+                // monster, all unique weapons, but only one third of the
+                // starting weapons.
+                if ((i->type != IT_WEAPON) || i->picked_up || weapon_is_unique(i) || chance(33)) {
                     inv_add(floor, i);
+                    // ensure the flag is always reset
+                    i->picked_up = false;
                 } else {
                     item_destroy(i);
                 }
@@ -1930,6 +1933,8 @@ int monster_items_pickup(monster *m)
 
             inv_del_element(map_ilist_at(monster_map(m), m->pos), it);
             inv_add(&m->inv, it);
+            // flag the item as picked up to ensure we drop it on death
+            it->picked_up = true;
 
             // Wield weapon after picking it up - it is better than the one
             // the monster is currently using
