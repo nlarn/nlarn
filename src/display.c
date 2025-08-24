@@ -2983,9 +2983,11 @@ static void display_inventory_help(GPtrArray *callbacks)
             /* skip this callback function if it is not active */
             if (!cb->active) continue;
 
-            size_t desclen = strlen(cb->description);
+            char *sdesc = str_strip(cb->description);
+            size_t desclen = strlen(sdesc);
             if (desclen > maxlen)
                 maxlen = desclen;
+            g_free(sdesc);
         }
 
         if (maxlen == 0)
@@ -3001,10 +3003,10 @@ static void display_inventory_help(GPtrArray *callbacks)
 
                 if (cb->active && cb->helpmsg != NULL)
                 {
-                    g_string_append_printf(help, "`VIVID_GREEN`%*s:`end` %s\n",
-                                           (int)maxlen,
-                                           cb->description,
-                                           cb->helpmsg);
+                    char *sdesc = str_strip(cb->description);
+                    g_string_append_printf(help, "`TITLE`%*s`end`: %s\n",
+                            (int)maxlen, sdesc, cb->helpmsg);
+                    g_free(sdesc);
                 }
             }
         }
