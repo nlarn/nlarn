@@ -62,6 +62,8 @@ static display_window *display_item_details(guint x1, guint y1, guint width,
 
 static void display_spheres_paint(sphere *s, player *p);
 
+const int DISPLAY_WINDOW_MAX_WIDTH = 76;
+
 void display_init()
 {
 #ifdef NCURSES_VERSION
@@ -656,8 +658,9 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     /* the item description pop-up */
     display_window *ipop = NULL;
 
-    /* the dialogue width */
-    const guint width = COLS - 4;
+    /* the dialogue width and starting position */
+    const guint width = min(COLS - 4, DISPLAY_WINDOW_MAX_WIDTH);
+    const int startx = (COLS - width) / 2;
 
     guint len_orig, len_curr;
     gboolean redraw = false;
@@ -739,7 +742,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         if (!iwin)
         {
-            iwin = display_window_new(2, 2, width, height, title);
+            iwin = display_window_new(startx, 2, width, height, title);
         }
 
         /* draw all items */
@@ -2618,9 +2621,8 @@ int display_show_message(const char *title, const char *message, int indent)
 
     gboolean RUN = true;
 
-    /* default window width according to available screen space;
-       wred/2 chars margin on each side */
-    guint width = COLS - wred;
+    /* default window width */
+    guint width = min(COLS - 4, DISPLAY_WINDOW_MAX_WIDTH);
 
     /* wrap message according to width (minus border and padding) */
     GPtrArray *text = text_wrap(message, width - wred, indent);

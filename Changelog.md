@@ -22,6 +22,7 @@
 * Give missing sleep resistance to demon lords
 * Lower possibility of destroying statues with spells with higher difficulty
 * Demons, undead and spirits are resistant against dehydration
+* Limit inventory dialogue width
 
 ### Fixed bugs
 
