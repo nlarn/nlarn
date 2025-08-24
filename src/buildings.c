@@ -88,7 +88,7 @@ int building_bank(player *p)
                               "account be frozen until all levied taxes have " \
                               "been paid.  They have also told us that you " \
                               "owe %d gold in taxes, and we must comply with " \
-                              "them. We cannot serve you at this time.  Sorry.\n\n" \
+                              "them. We cannot serve you at this time. Sorry.\n\n" \
                               "We suggest you go to the LRS office and pay your taxes.";
 
     g_assert(p != NULL);
