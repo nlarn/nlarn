@@ -57,7 +57,7 @@ const spell_data spells[SP_MAX] =
     {
         SP_MLE, "mle", "magic missile",
         SC_RAY, DAM_MAGICAL, ET_NONE, spell_type_ray,
-        "Creates and hurls a missile of magical energy at a target",
+        "Creates and hurls a missile of magical energy",
         "The missile hits the %s.",
         "The missile bounces off the %s.",
         COLOURLESS, 1, 320, true
