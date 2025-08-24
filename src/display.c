@@ -589,6 +589,8 @@ void display_paint_screen(player *p)
 
         currattr = mvwcprintw(stdscr, def_attrs, currattr,
             BLACK, y, 0, g_ptr_array_index(text, i));
+
+        clrtoeol();
     }
 
     text_destroy(text);
@@ -2653,6 +2655,12 @@ int display_show_message(const char *title, const char *message, int indent)
             currattr = mvwcprintw(mwin->window,
                 CP_UI_FG, currattr, UI_BG, idx + 1, 2, "%s",
                 g_ptr_array_index(text, idx + offset));
+
+            /* erase to the end of the line (spare the borders of the window) */
+            for (int pos = getcurx(mwin->window); pos < getmaxx(mwin->window) - 1; pos++)
+            {
+                waaddch(mwin->window, currattr, ' ');
+            }
         }
 
         display_window_update_arrow_up(mwin, offset > 0);
@@ -2947,12 +2955,6 @@ static int mvwcprintw(WINDOW *win, int defattr, int currattr,
 
         /* print the message character wise */
         waddch(win, msg[pos]);
-    }
-
-    /* erase to the end of the line (spare borders of windows) */
-    for (int pos = getcurx(win); pos < getmaxx(win) - (win == stdscr ? 0 : 1); pos++)
-    {
-        waaddch(win, attr, ' ');
     }
 
     /* clean assembled string */
