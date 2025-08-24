@@ -313,7 +313,6 @@ void configure_defaults(const char *inifile)
 {
     const char *undef = "not defined";
     const char *menu =
-        "Configure game defaults\n"
         "\n"
         "  `KEY`a`end`) Character name         - %s\n"
         "  `KEY`b`end`) Character gender       - %s\n"
@@ -377,7 +376,7 @@ void configure_defaults(const char *inifile)
         g_free(lucss);
 
         display_window *cwin = display_popup(COLS / 2 - 34, LINES / 2 - 6, 68,
-                "Configure defaults", msg, 30);
+                "Configure game defaults", msg, 30);
         g_free(msg);
 
         int res = display_getch(cwin->window);
