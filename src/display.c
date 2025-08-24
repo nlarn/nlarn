@@ -3162,7 +3162,7 @@ static void display_window_update_title(display_window *dwin, const char *title)
         /* make sure the first letter of the window title is upper case */
         dwin->title[0] = g_ascii_toupper(dwin->title[0]);
 
-        mvwaprintw(dwin->window, 0, 2, CP_UI_BRIGHT_FG, " %s ", dwin->title);
+        mvwaprintw(dwin->window, 0, 2, CP_UI_TITLE, " %s ", dwin->title);
     }
 
     wrefresh(dwin->window);
