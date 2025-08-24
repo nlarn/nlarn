@@ -100,7 +100,7 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     callbacks = g_ptr_array_new();
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(g)et";
+    callback->description = "(`KEY`g`end`)et";
     callback->helpmsg = "Get the selected item out the container.";
     callback->key = 'g';
     callback->inv = &container->content;

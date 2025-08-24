@@ -847,7 +847,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (g_strv_length(captions) > 0)
         {
             /* append "(?) help" to trigger the help pop-up */
-            strv_append(&captions, "(?) help");
+            strv_append(&captions, "(`KEY`?`end`) help");
 
             /* update the window's caption with the assembled array of captions */
             display_window_update_caption(iwin, g_strjoinv(" ", captions));
@@ -3175,8 +3175,8 @@ static void display_window_update_caption(display_window *dwin, char *caption)
     /* print caption if caption is set */
     if (caption && strlen(caption))
     {
-        mvwaprintw(dwin->window, dwin->height - 1, 3,
-            CP_UI_BRIGHT_FG, " %s ", caption);
+        mvwcprintw(dwin->window, CP_UI_BRIGHT_FG, COLOURLESS, UI_BG,
+                dwin->height - 1, 3, " %s ", caption);
     }
 
     if (caption)
