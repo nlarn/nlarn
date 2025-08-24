@@ -107,6 +107,7 @@ int strv_append(char ***list, const char *str);
 int strv_append_unique(char ***list, const char *str);
 
 /* misc. text functions */
+char *str_strip(const char *str);
 char *str_prepare_for_saving(const char *str);
 int str_starts_with_vowel(const char *str);
 const char *int2str(int val);

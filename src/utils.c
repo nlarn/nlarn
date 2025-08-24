@@ -429,18 +429,11 @@ int strv_append_unique(char ***list, const char *str)
     return strv_append(list, str);
 }
 
-char *str_prepare_for_saving(const char *str)
+char *str_strip(const char *str)
 {
-    if (str == NULL) return NULL;
-
-#ifdef G_OS_WIN32
-    const char lend[] = "\r\n";
-#else
-    const char lend[] = "\n";
-#endif
-
-    /* first, strip color tags from str */
+    /* strip color tags from str */
     gboolean in_tag = false;
+
     /* alloc the size of the original string to avoid permanent reallocations */
     GString *stripped = g_string_sized_new(strlen(str));
     for (guint idx = 0; idx < strlen(str); idx++)
@@ -455,9 +448,25 @@ char *str_prepare_for_saving(const char *str)
             g_string_append_c(stripped, str[idx]);
     }
 
+    return g_string_free(stripped, false);
+}
+
+char *str_prepare_for_saving(const char *str)
+{
+    if (str == NULL) return NULL;
+
+#ifdef G_OS_WIN32
+    const char lend[] = "\r\n";
+#else
+    const char lend[] = "\n";
+#endif
+
+    /* first, strip color tags from str */
+    char *stripped = str_strip(str);
+
     /* then wrap the resulting string */
-    GPtrArray *wrapped_str = text_wrap(stripped->str, 78, 2);
-    g_string_free(stripped, true);
+    GPtrArray *wrapped_str = text_wrap(stripped, 78, 2);
+    g_free(stripped);
 
     /* then assemble the file content */
     GString *nstr = g_string_new(NULL);
