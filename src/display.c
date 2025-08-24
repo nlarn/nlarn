@@ -1996,7 +1996,7 @@ direction display_get_direction(const char *title, int *available)
                 mvwaprintw(dwin->window,
                           6 - (y * 2), /* start in the last row, move up, skip one */
                           (x * 2) + 2, /* start in the second col, skip one */
-                          CP_UI_YELLOW,
+                          CP_UI_TITLE,
                           "%d",
                           (x + 1) + (y * 3));
             }

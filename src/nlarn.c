@@ -1031,11 +1031,11 @@ gboolean main_menu()
 {
     const char *main_menu_tpl =
         "\n"
-        "      `GREEN`a`end`) %s Game\n"
-        "      `GREEN`b`end`) Configure Settings\n"
-        "      `GREEN`c`end`) Visit the Hall of Fame\n"
+        "      `KEY`a`end`) %s Game\n"
+        "      `KEY`b`end`) Configure Settings\n"
+        "      `KEY`c`end`) Visit the Hall of Fame\n"
         "\n"
-        "      `GREEN`q`end`) Quit Game\n"
+        "      `KEY`q`end`) Quit Game\n"
         "\n"
         "    You have reached difficulty level %d\n";
 

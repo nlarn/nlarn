@@ -79,7 +79,7 @@ int building_bank(player *p)
     GString *greeting;
 
     const char msg_title[] = "First National Bank of Larn";
-    const char msg_greet[] = "`WHITE`Welcome to the First National Bank of Larn.`end`\n\n";
+    const char msg_greet[] = "`EMPH`Welcome to the First National Bank of Larn.`end`\n\n";
 
     const char msg_branch[] = "Welcome to the 5th level branch office of the " \
                               "First National Bank of Larn.\n\n";
@@ -135,14 +135,14 @@ int building_bank(player *p)
         g_string_append(text, "Your wish? ");
 
         if (player_get_gold(p) > 0)
-            g_string_append(text, "`GREEN`d`end`)eposit ");
+            g_string_append(text, "`KEY`d`end`)eposit ");
 
         if (p->bank_account > 0)
-            g_string_append(text, "`GREEN`w`end`)ithdraw ");
+            g_string_append(text, "`KEY`w`end`)ithdraw ");
 
         /* if player has gems, enable selling them */
         if (inv_length_filtered(p->inventory, item_filter_gems))
-            g_string_append(text, "`GREEN`s`end`)ell a gem");
+            g_string_append(text, "`KEY`s`end`)ell a gem");
 
         display_window *bwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
                 47, msg_title, text->str, 0);
@@ -254,7 +254,7 @@ int building_dndstore(player *p)
 {
     int turns = 2;
     const char title[] = "DND store";
-    const char msg_welcome[] = "`WHITE`Welcome to the Larn Thrift Shoppe.`end`\n\n" \
+    const char msg_welcome[] = "`EMPH`Welcome to the Larn Thrift Shoppe.`end`\n\n" \
                                "We stock many items explorers find useful in " \
                                "their adventures. Feel free to browse to your " \
                                "heart's content. Also be advised that if you " \
@@ -341,7 +341,7 @@ int building_home(player *p)
 
     const char title[] = "Your home";
 
-    const char msg_home[] = "`WHITE`Welcome home, %s.`end`\n\nLatest word from the doctor " \
+    const char msg_home[] = "`EMPH`Welcome home, %s.`end`\n\nLatest word from the doctor " \
                             "is not good. The diagnosis is confirmed as " \
                             "dianthroritis. He guesses that your daughter " \
                             "has only %d mobuls left in this world.  It's " \
@@ -350,7 +350,7 @@ int building_home(player *p)
                             "dianthroritis.  It is rumored that only deep in " \
                             "the depths of the caves can this potion be found.\n";
 
-    const char msg_found[] = "`WHITE`Congratulations!`end` You found the potion of cure " \
+    const char msg_found[] = "`EMPH`Congratulations!`end` You found the potion of cure " \
                              "dianthroritis! Frankly, No one thought you " \
                              "could do it. Boy! Did you surprise them!\n\n";
 
@@ -436,11 +436,11 @@ int building_home(player *p)
             g_string_append_printf(text, "\n\nYou may\n");
 
             if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-                g_string_append_printf(text, "  `GREEN`d`end`) "
+                g_string_append_printf(text, "  `KEY`d`end`) "
                                        "Deposit something here\n");
 
             if (inv_length(nlarn->player_home) > 0)
-                g_string_append_printf(text, "  `GREEN`t`end`) "
+                g_string_append_printf(text, "  `KEY`t`end`) "
                                        "Take something with you\n");
 
             g_string_append_c(text, '\n');
@@ -752,7 +752,7 @@ static void building_school_take_course(player *p, int course, guint price)
 
 int building_school(player *p)
 {
-    const char msg_greet[] = "`WHITE`Welcome to the College of Larn!`end`\n\n" \
+    const char msg_greet[] = "`EMPH`Welcome to the College of Larn!`end`\n\n" \
                              "We offer the exciting opportunity of higher " \
                              "education to all inhabitants of the caves. " \
                              "Here is a list of the class schedule:\n\n";
@@ -775,7 +775,7 @@ int building_school(player *p)
                               * (game_difficulty(nlarn) + 1) * 100;
 
                 g_string_append_printf(text,
-                        " `GREEN`%c`end`) `WHITE`%-24s`end` - %2d mobuls, %4d gold\n",
+                        " `KEY`%c`end`) `EMPH`%-24s`end` - %2d mobuls, %4d gold\n",
                         idx + 'a', school_courses[idx].description,
                         school_courses[idx].course_time, price);
             }
@@ -787,7 +787,7 @@ int building_school(player *p)
         }
 
         g_string_append_printf(text, "\nAlternatively,\n"
-                " `GREEN`%c`end`) %-24s - 10 mobuls\n\n",
+                " `KEY`%c`end`) %-24s - 10 mobuls\n\n",
                 SCHOOL_COURSE_COUNT + 'a', "Commission a scroll");
 
         int selection = display_show_message("School", text->str, 0);
@@ -855,7 +855,7 @@ int building_tradepost(player *p)
 
     const char title[] = "Trade Post";
 
-    const char msg_welcome[] = "`WHITE`Welcome to the Larn Trading Post.`end`\n\nWe buy " \
+    const char msg_welcome[] = "`EMPH`Welcome to the Larn Trading Post.`end`\n\nWe buy " \
                                "items that explorers no longer find useful.\n" \
                                "Since the condition of the items you bring in " \
                                "is not certain, and we incur great expense in " \
@@ -943,14 +943,14 @@ int building_tradepost(player *p)
 int building_monastery(struct player *p)
 {
     const char title[] = "The Monastery of Larn";
-    const char msg_welcome[] = "`WHITE`Welcome to the Monastery of Larn!`end`\n\n" \
+    const char msg_welcome[] = "`EMPH`Welcome to the Monastery of Larn!`end`\n\n" \
                                "We are here to help you when you are in need of " \
                                "care and offer a fine selection of items that might "
                                "be useful for your quests.\n\n" \
                                "Here you may\n\n" \
-                               "  `GREEN`a`end`) buy something\n" \
-                               "  `GREEN`b`end`) ask for curse removal\n" \
-                               "  `GREEN`c`end`) receive healing\n";
+                               "  `KEY`a`end`) buy something\n" \
+                               "  `KEY`b`end`) ask for curse removal\n" \
+                               "  `KEY`c`end`) receive healing\n";
 
     const char ayfwt[] = "Are you fine with that?";
 
@@ -1032,7 +1032,7 @@ int building_monastery(struct player *p)
         /* add found diseases to the menu */
         for (int idx = 0; idx < disease_count; idx++)
         {
-            g_string_append_printf(msg, "  `GREEN`%c`end`) heal from %s\n",
+            g_string_append_printf(msg, "  `KEY`%c`end`) heal from %s\n",
                                    'd' + idx, curable_diseases[idx].desc);
         }
 

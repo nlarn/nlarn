@@ -35,8 +35,8 @@ void colours_init(int ui_colour_scheme) {
             init_color(UI_BRIGHT_FG, 920, 860, 700);
             init_color(UI_FG, 570, 510, 460);
             init_color(UI_BORDER, 900, 680, 180);
-            init_color(UI_YELLOW, 550, 560, 140);
-            init_color(UI_GREEN, 490, 660, 430);
+            init_color(UI_TITLE, 550, 560, 140);
+            init_color(UI_KEY, 490, 660, 430);
         break;
 
         // vim stasis
@@ -45,8 +45,8 @@ void colours_init(int ui_colour_scheme) {
             init_color(UI_BRIGHT_FG, 900, 1000, 1000);
             init_color(UI_FG, 600, 700, 700);
             init_color(UI_BORDER, 360, 320, 400);
-            init_color(UI_YELLOW, 820, 720, 120);
-            init_color(UI_GREEN, 490, 660, 430);
+            init_color(UI_TITLE, 820, 720, 120);
+            init_color(UI_KEY, 490, 660, 430);
         break;
 
         // vim sourlick
@@ -55,8 +55,8 @@ void colours_init(int ui_colour_scheme) {
             init_color(UI_BRIGHT_FG, 898, 761, 702);
             init_color(UI_FG, 920, 920, 920);
             init_color(UI_BORDER, 231, 216, 212);
-            init_color(UI_YELLOW, 863, 878, 320);
-            init_color(UI_GREEN, 663, 851, 137);
+            init_color(UI_TITLE, 863, 878, 320);
+            init_color(UI_KEY, 663, 851, 137);
         break;
 
         // vim fodder
@@ -65,8 +65,8 @@ void colours_init(int ui_colour_scheme) {
             init_color(UI_BRIGHT_FG, 588, 808, 271);
             init_color(UI_FG, 369, 541, 541);
             init_color(UI_BORDER, 137, 196, 165);
-            init_color(UI_YELLOW, 859, 580, 118);
-            init_color(UI_GREEN, 678, 596, 584);
+            init_color(UI_TITLE, 859, 580, 118);
+            init_color(UI_KEY, 678, 596, 584);
         break;
 
         // vim mellow
@@ -75,8 +75,8 @@ void colours_init(int ui_colour_scheme) {
             init_color(UI_BRIGHT_FG, 949, 737, 475);
             init_color(UI_FG, 973, 973, 949);
             init_color(UI_BORDER, 467, 431, 392);
-            init_color(UI_YELLOW, 894, 675, 216);
-            init_color(UI_GREEN, 557, 353, 298);
+            init_color(UI_TITLE, 894, 675, 216);
+            init_color(UI_KEY, 557, 353, 298);
         break;
 
         // traditional NLarn colours
@@ -86,8 +86,8 @@ void colours_init(int ui_colour_scheme) {
             init_color(UI_BRIGHT_FG, 1000, 1000, 1000);
             init_color(UI_FG, 850, 850, 850);
             init_color(UI_BORDER, 118, 565, 1000);
-            init_color(UI_YELLOW, 992, 980, 365);
-            init_color(UI_GREEN, 0, 843, 0);
+            init_color(UI_TITLE, 992, 980, 365);
+            init_color(UI_KEY, 0, 843, 0);
         break;
     }
 
@@ -103,11 +103,11 @@ void colours_init(int ui_colour_scheme) {
             case UI_BORDER:
                 init_pair(UI_BORDER, UI_BORDER, UI_BG);
                 break;
-            case UI_YELLOW:
-                init_pair(UI_YELLOW, UI_YELLOW, UI_BG);
+            case UI_TITLE:
+                init_pair(UI_TITLE, UI_TITLE, UI_BG);
                 break;
-            case UI_GREEN:
-                init_pair(UI_GREEN, UI_GREEN, UI_BG);
+            case UI_KEY:
+                init_pair(UI_KEY, UI_KEY, UI_BG);
                 break;
             case UI_FG_REVERSE:
                 init_pair(UI_FG_REVERSE, UI_BG, UI_FG);
@@ -124,9 +124,9 @@ void colours_init(int ui_colour_scheme) {
 
 int colour_lookup(const char *colour_name, int bg) {
     if (bg == UI_BG) {
-        if (!strcmp(colour_name, "WHITE"))  return UI_BRIGHT_FG;
-        if (!strcmp(colour_name, "YELLOW")) return UI_YELLOW;
-        if (!strcmp(colour_name, "GREEN"))  return UI_GREEN;
+        if (!strcmp(colour_name, "EMPH"))  return UI_BRIGHT_FG;
+        if (!strcmp(colour_name, "TITLE")) return UI_TITLE;
+        if (!strcmp(colour_name, "KEY"))   return UI_KEY;
     } else if (bg == PF_BG) {
         return colour_value(colour_name);
     }

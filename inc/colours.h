@@ -295,8 +295,8 @@ DECLARE_ENUM(colour, COLOUR_ENUM)
 #define UI_BRIGHT_FG  BLACK_2
 #define UI_FG         BLUE_2
 #define UI_BORDER     GREEN_2
-#define UI_YELLOW     CYAN_2
-#define UI_GREEN      RED_2
+#define UI_TITLE      CYAN_2
+#define UI_KEY        RED_2
 #define UI_FG_REVERSE MAGENTA_2
 #define UI_HL_REVERSE GREY50_2
 #define UI_BG         WHITE_2
@@ -305,8 +305,8 @@ DECLARE_ENUM(colour, COLOUR_ENUM)
 #define CP_UI_BRIGHT_FG  COLOR_PAIR(UI_BRIGHT_FG)
 #define CP_UI_FG         COLOR_PAIR(UI_FG)
 #define CP_UI_BORDER     COLOR_PAIR(UI_BORDER)
-#define CP_UI_YELLOW     COLOR_PAIR(UI_YELLOW)
-#define CP_UI_GREEN      COLOR_PAIR(UI_GREEN)
+#define CP_UI_TITLE      COLOR_PAIR(UI_TITLE)
+#define CP_UI_KEY        COLOR_PAIR(UI_KEY)
 #define CP_UI_FG_REVERSE COLOR_PAIR(UI_FG_REVERSE)
 #define CP_UI_HL_REVERSE COLOR_PAIR(UI_HL_REVERSE)
 
@@ -331,8 +331,8 @@ void colours_init(int ui_colour_scheme);
  * For the playfield, this accepts all available colours,
  * for the UI only a limited amount is accepted:
  *     - WHITE
- *     - YELLOW
- *     - GREEN
+ *     - TITLE
+ *     - EMPH
  *
  * @param color name string
  * @param the background colour (i.e. PF_BG or UI_BG)

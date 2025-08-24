@@ -200,7 +200,7 @@ char player_select_bonus_stats()
     GString *text = g_string_new("\n");
     for (int idx = preset_min; idx <=  preset_max; idx++)
     {
-        g_string_append_printf(text, "  `GREEN`%c`end`) %s\n",
+        g_string_append_printf(text, "  `KEY`%c`end`) %s\n",
                 idx, player_bonus_stat_desc[idx - preset_min]);
     }
      g_string_append_c(text, '\n');
@@ -1731,12 +1731,12 @@ void player_level_gain(player *p, int count)
 
     if (g_strcmp0(desc_orig, desc_new) != 0)
     {
-        log_add_entry(nlarn->log, "`GREEN`You gain experience and become %s %s!`end`",
+        log_add_entry(nlarn->log, "`KEY`You gain experience and become %s %s!`end`",
                       a_an(desc_new), desc_new);
     }
     else
     {
-        log_add_entry(nlarn->log, "`GREEN`You gain experience!`end`");
+        log_add_entry(nlarn->log, "`KEY`You gain experience!`end`");
     }
 
     if (p->level > p->stats.max_level)
@@ -3560,7 +3560,7 @@ char *player_item_identified_list(player *p)
 
         /* no linefeed before first category */
         if (idx > 0) g_string_append_c(sublist, '\n');
-        g_string_append_printf(sublist, "`YELLOW`%s`end`\n", heading);
+        g_string_append_printf(sublist, "`TITLE`%s`end`\n", heading);
 
         g_free(heading);
 
@@ -3579,7 +3579,7 @@ char *player_item_identified_list(player *p)
                 gchar *desc_unid = item_describe(it, false, true, false);
                 gchar *desc_id = item_describe(it, true, true, false);
 
-                g_string_append_printf(sublist, " `GREEN`%33s`end` - %s \n", desc_unid, desc_id);
+                g_string_append_printf(sublist, " `KEY`%33s`end` - %s \n", desc_unid, desc_id);
 
                 g_free(desc_id);
                 g_free(desc_unid);
@@ -4857,7 +4857,7 @@ static char *player_equipment_list(player *p)
         char *desc = item_describe(slots[idx].slot, player_item_known(p,
                     slots[idx].slot), false, false);
 
-        g_string_append_printf(el, "`WHITE`%-12s`end` %s\n",
+        g_string_append_printf(el, "`EMPH`%-12s`end` %s\n",
                     slots[idx].desc, desc);
 
         g_free(desc);
