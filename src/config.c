@@ -319,11 +319,11 @@ void configure_defaults(const char *inifile)
         "  `KEY`b`end`) Character gender       - %s\n"
         "  `KEY`c`end`) Character stats        - %s\n"
         "  `KEY`d`end`) Configure auto-pickup  - %s\n"
-        "  `KEY`e`end`) Autosave on map change - `TITLE`%s`end`\n"
-        "  `KEY`f`end`) Colour scheme          - `TITLE`%s`end`\n"
+        "  `KEY`e`end`) Autosave on map change - `EMPH`%s`end`\n"
+        "  `KEY`f`end`) Colour scheme          - `EMPH`%s`end`\n"
 #ifdef SDLPDCURSES
-        "  `KEY`g`end`) Configure font size    - `TITLE`%d`end`\n"
-        "  `KEY`h`end`) Full screen mode       - `TITLE`%s`end`\n"
+        "  `KEY`g`end`) Configure font size    - `EMPH`%d`end`\n"
+        "  `KEY`h`end`) Full screen mode       - `EMPH`%s`end`\n"
 #endif
         "\n"
         "Clear values with `KEY`A`end`-`KEY`F`end`. "
@@ -335,23 +335,23 @@ void configure_defaults(const char *inifile)
     {
         /* name */
         char *nbuf = (config.name && strlen(config.name) > 0)
-            ? g_strdup_printf("`TITLE`%s`end`", config.name)
+            ? g_strdup_printf("`EMPH`%s`end`", config.name)
             : NULL;
         /* gender */
         char *gbuf = config.gender
-            ? g_strdup_printf("`TITLE`%s`end`",
+            ? g_strdup_printf("`EMPH`%s`end`",
                     player_sex_str[parse_gender(config.gender[0])])
             : NULL;
         /* stats */
         char *sbuf = (config.stats && strlen(config.stats) > 0)
-            ? g_strdup_printf("`TITLE`%s`end`", player_bonus_stat_desc[config.stats[0] - 'a'])
+            ? g_strdup_printf("`EMPH`%s`end`", player_bonus_stat_desc[config.stats[0] - 'a'])
             : NULL;
         /* auto-pickup */
         gboolean autopickup[IT_MAX];
         parse_autopickup_settings(config.auto_pickup, autopickup);
         char *verboseap = verbose_autopickup_settings(autopickup);
         char *abuf = config.auto_pickup
-            ? g_strdup_printf("`TITLE`%s`end`", verboseap)
+            ? g_strdup_printf("`EMPH`%s`end`", verboseap)
             : NULL;
         if (verboseap) g_free(verboseap);
         /* UI colour scheme */
