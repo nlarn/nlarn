@@ -57,7 +57,7 @@ const map_tile_data map_tiles[LT_MAX] =
     { LT_TREE,      '&', TREE_GREEN,      "a tree",      0, 0 },
     { LT_FLOOR,     '.', GRANITE,         "floor",       1, 1 },
     { LT_WATER,     '~', WATER_BLUE,      "water",       1, 1 },
-    { LT_DEEPWATER, '~', DARK_ROYAL_BLUE, "deep water",  0, 1 },
+    { LT_DEEPWATER, '~', DEEP_SEA_BLUE,   "deep water",  0, 1 },
     { LT_LAVA,      '~', LAVA,            "lava",        0, 1 },
     { LT_FIRE,      '*', LUMINOUS_RED,    "fire",        1, 1 },
     { LT_CLOUD,     '*', WHITE,           "a gas cloud", 1, 1 },
