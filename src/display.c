@@ -62,7 +62,7 @@ static display_window *display_item_details(guint x1, guint y1, guint width,
 
 static void display_spheres_paint(sphere *s, player *p);
 
-const int DISPLAY_WINDOW_MAX_WIDTH = 76;
+const int DISPLAY_WINDOW_MAX_WIDTH = 78;
 
 void display_init()
 {
