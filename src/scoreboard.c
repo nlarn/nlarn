@@ -490,8 +490,8 @@ char *scores_to_string(GList *scores, score_t *score)
         score_t *cscore = (score_t *)iterator->data;
 
         desc = score_death_description(cscore, false);
-        g_string_append_printf(text, "  %c%2d) %7" G_GINT64_FORMAT " %s\n",
-                               (cscore == score) ? '*' : ' ',
+        g_string_append_printf(text, "%s%2d) %7" G_GINT64_FORMAT " %s\n",
+                               (cscore == score) ? "`EMPH`" : "",
                                nrec + 1, cscore->score, desc);
 
         char *dungeon_desc = ""; /* empty for the town */
@@ -500,9 +500,10 @@ char *scores_to_string(GList *scores, score_t *score)
         else if (cscore->dlevel > 0)
             dungeon_desc = "caverns lvl. ";
 
-        g_string_append_printf(text, "               [exp. level %d, %s%s, %d/%d hp, difficulty %d]\n",
+        g_string_append_printf(text, "            [exp. level %d, %s%s, %d/%d hp, difficulty %d]%s\n",
                                cscore->level, dungeon_desc, map_names[cscore->dlevel],
-                               cscore->hp, cscore->hp_max, cscore->difficulty);
+                               cscore->hp, cscore->hp_max, cscore->difficulty,
+                               (cscore == score) ? "`end`" : "");
         g_free(desc);
     }
 
