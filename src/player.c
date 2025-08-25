@@ -4970,14 +4970,14 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     /* append map of current level if the player is not in the town */
     if (Z(p->pos) > 0)
     {
-        g_string_append(text, "\n\n-- The current level ------------------\n\n");
+        g_string_append(text, "\n\n`TITLE`-- The current level ------------------`end`\n\n");
         tmp = map_dump(game_map(nlarn, Z(p->pos)), p->pos);
         g_string_append(text, tmp);
         g_free(tmp);
     }
 
     /* player's attributes */
-    g_string_append(text, "\n\n-- Attributes -------------------------\n\n");
+    g_string_append(text, "\n\n`TITLE`-- Attributes -------------------------`end`\n\n");
     g_string_append_printf(text, "Strength:     %d (%+2d)\n",
                            p->strength, p->strength - p->stats.str_orig);
     g_string_append_printf(text, "Dexterity:    %d (%+2d)\n",
@@ -4994,7 +4994,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
 
     if (*effect_desc)
     {
-        g_string_append(text, "\n\n-- Effects ----------------------------\n\n");
+        g_string_append(text, "\n\n`TITLE`-- Effects ----------------------------`end`\n\n");
 
         for (guint pos = 0; effect_desc[pos]; pos++)
         {
@@ -5007,7 +5007,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     /* append list of known spells */
     if (p->known_spells->len > 0)
     {
-        g_string_append(text, "\n\n-- Known Spells -----------------------\n\n");
+        g_string_append(text, "\n\n`TITLE`-- Known Spells -----------------------`end`\n\n");
 
         for (guint pos = 0; pos < p->known_spells->len; pos++)
         {
@@ -5035,7 +5035,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
 
     if (strlen(el) > 0)
     {
-        g_string_append(text, "\n\n-- Equipment --------------------------\n\n");
+        g_string_append(text, "\n\n`TITLE`-- Equipment --------------------------`end`\n\n");
         g_string_append(text, el);
 
         for (guint idx = 0; idx < inv_length(p->inventory); idx++)
@@ -5050,7 +5050,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     /* inventory */
     if (equipment_count < inv_length(p->inventory))
     {
-        g_string_append(text, "\n\n-- Items in pack ----------------------\n\n");
+        g_string_append(text, "\n\n`TITLE`-- Items in pack ----------------------`end`\n\n");
         for (guint pos = 0; pos < inv_length(p->inventory); pos++)
         {
             item *it = inv_get(p->inventory, pos);
@@ -5065,7 +5065,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
 
     /* list monsters killed */
     guint body_count = 0;
-    g_string_append(text, "\n\n-- Creatures vanquished ---------------\n\n");
+    g_string_append(text, "\n\n`TITLE`-- Creatures vanquished ---------------`end`\n\n");
 
     for (guint mnum = 0; mnum < MT_MAX; mnum++)
     {
@@ -5092,7 +5092,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
 
         if (!printed_headline)
         {
-                g_string_append(text, "\n\n-- Genocided creatures ---------------\n\n");
+                g_string_append(text, "\n\n`TITLE`-- Genocided creatures ---------------`end`\n\n");
                 printed_headline = true;
         }
 
@@ -5101,7 +5101,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     }
 
      /* messages */
-    g_string_append(text, "\n\n-- Last messages ----------------------\n\n");
+    g_string_append(text, "\n\n`TITLE`-- Last messages ----------------------`end`\n\n");
     for (guint pos = log_length(nlarn->log) - min(10, log_length(nlarn->log));
          pos < log_length(nlarn->log); pos++)
     {
