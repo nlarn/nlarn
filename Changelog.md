@@ -38,6 +38,7 @@
 * Monsters no longer pick up and equip weapons in one turn
 * Finger of Death no longer works against undead and spirits
 * Fix coloured text spanning multiple lines
+* Fix level description in scoreboard
 
 
 ## Release 0.7.7 (2025-06-19)

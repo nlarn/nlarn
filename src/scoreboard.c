@@ -494,8 +494,14 @@ char *scores_to_string(GList *scores, score_t *score)
                                (cscore == score) ? '*' : ' ',
                                nrec + 1, cscore->score, desc);
 
-        g_string_append_printf(text, "               [exp. level %d, caverns lvl. %s, %d/%d hp, difficulty %d]\n",
-                               cscore->level, map_names[cscore->dlevel],
+        char *dungeon_desc = ""; /* empty for the town */
+        if (cscore->dlevel > 10)
+            dungeon_desc = "volcano lvl. ";
+        else if (cscore->dlevel > 0)
+            dungeon_desc = "caverns lvl. ";
+
+        g_string_append_printf(text, "               [exp. level %d, %s%s, %d/%d hp, difficulty %d]\n",
+                               cscore->level, dungeon_desc, map_names[cscore->dlevel],
                                cscore->hp, cscore->hp_max, cscore->difficulty);
         g_free(desc);
     }
