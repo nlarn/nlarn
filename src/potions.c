@@ -196,6 +196,11 @@ int potion_throw(struct player *p)
                   (mtt <= LT_FLOOR ? "shatters on" : "splashes into"),
                   mt_get_desc(mtt));
 
+    if (mtt <= LT_FLOOR)
+    {
+        map_spill_set(pmap, target, potion_colour(potion->id));
+    }
+
     g_free(desc);
     item_destroy(potion);
 
@@ -592,6 +597,8 @@ static gboolean potion_pos_hit(const GList *traj,
         /* The potion hit a sobject. */
         log_add_entry(nlarn->log, "%s shatters at %s.",
                       so_get_desc(mst));
+
+        map_spill_set(pmap, pos, potion_colour(potion->id));
     }
     else if (!map_pos_passable(pmap, pos))
     {
@@ -599,6 +606,11 @@ static gboolean potion_pos_hit(const GList *traj,
         log_add_entry(nlarn->log, "%s %s %s.", desc,
                       (mtt <= LT_FLOOR ? "shatters on the" : "splashes into the"),
                       mt_get_desc(mtt));
+
+        if (mtt <= LT_FLOOR)
+        {
+            map_spill_set(pmap, pos, potion_colour(potion->id));
+        }
     }
     else if (m != NULL)
     {

@@ -7,7 +7,7 @@
 * The player will now automatically evade breath attacks
 * Change the player's colour when HP are below 50%
 * Show where the players's blood or the blood of monsters was spilled
-  for some time
+  for some time. Also potions shattered on the floor will leave stains
 * Configurable UI colours with six predefined colour schemes
 * Remap some key definitions to enhance compatibility with Larn:
     * 'c' to cast a spell
