@@ -2168,9 +2168,6 @@ void monster_player_attack(monster *m, player *p)
         break;
 
     case DAM_RUST:
-        log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
-                      monster_attack_verb[att.type]);
-
         monster_item_rust(m, p);
         p->attacked = true;
         damage_free(dam);
@@ -3060,7 +3057,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
  * @param the player
  *
  */
-static gboolean monster_item_rust(monster *m __attribute__((unused)), struct player *p)
+static gboolean monster_item_rust(monster *m, struct player *p)
 {
     item **it;
 
@@ -3069,6 +3066,13 @@ static gboolean monster_item_rust(monster *m __attribute__((unused)), struct pla
     /* get a random piece of armour to damage */
     if ((it = player_get_random_armour(p, false)))
     {
+        gchar *buf = item_describe(*it,
+                player_item_identified(nlarn->p, *it), false, true);
+
+        log_add_entry(nlarn->log, "The %s touches %s with its antennae.",
+                monster_get_name(m), buf);
+        g_free(buf);
+
         *it = item_erode(&p->inventory, *it, IET_RUST, true);
         return true;
     }
