@@ -2887,7 +2887,7 @@ void monster_effects_expire(monster *m)
 
     while (idx < m->effects->len)
     {
-        gpointer effect_id = g_ptr_array_index(m->effects, idx);;
+        gpointer effect_id = g_ptr_array_index(m->effects, idx);
         effect *e = game_effect_get(nlarn, effect_id);
 
         if (e->type == ET_TRAPPED)
@@ -2898,6 +2898,7 @@ void monster_effects_expire(monster *m)
                     || monster_effect(m, ET_SLEEP))
             {
                 idx++;
+                continue;
             }
         }
 
