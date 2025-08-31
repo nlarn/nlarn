@@ -2928,14 +2928,11 @@ static gboolean monster_player_visible(monster *m)
     /* FIXME: this ought to be different per monster type */
     int monster_visrange = 7;
 
-    if (player_effect(nlarn->p, ET_STEALTH))
-    {
-        /* if the player is stealthy monsters will only recognize him when
-           standing next to him */
+    if (player_effect(nlarn->p, ET_STEALTH) || monster_effect(m, ET_TRAPPED))
+        // If the player is stealthy, monsters will only recognize them when
+        // standing next to them. Also being trapped reduces the range of
+        // visibility to one surrounding tile.
         monster_visrange = 1;
-    }
-    else if (monster_effect(m, ET_TRAPPED))
-        monster_visrange = 2;
 
     /* determine if the monster can see the player */
     if (pos_distance(monster_pos(m), nlarn->p->pos) > monster_visrange)
