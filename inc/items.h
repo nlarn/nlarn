@@ -210,7 +210,7 @@ item *item_disenchant(item *it);
  * @param  the item to erode
  * @param  the type of erosion which affects the item
  * @param  true if the player can see the item
- * @return the item, NULL it the item has been destroyed
+ * @return the item, NULL if the item has been destroyed
  *
  */
 item *item_erode(struct _inventory **inv, item *it, item_erosion_type iet, gboolean visible);
