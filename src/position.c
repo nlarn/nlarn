@@ -150,7 +150,7 @@ gint pos_distance(position first, position second)
     if (Z(first) != Z(second))
         return INT_MAX;
 
-    return (abs(X(first) - X(second)) + 1) + (abs(Y(first) - Y(second)) + 1);
+    return abs(X(first) - X(second)) + abs(Y(first) - Y(second));
 }
 
 int pos_adjacent(position first, position second)
