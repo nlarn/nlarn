@@ -73,8 +73,9 @@ struct _monster
     inventory *inv;
     item *eq_weapon;
     GPtrArray *effects;
-    guint number;        /* random value for some monsters */
-    gpointer leader;    /* for pack monsters: ID of the leader */
+    guint number;            /* random value for some monsters */
+    gpointer leader;         /* for pack monsters: ID of the leader */
+    gint visrange;           /* visibility range */
     guint32
         unknown: 1;      /* monster is unknown (mimic) */
 };
@@ -800,6 +801,14 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
     /* determine max hp; prevent the living dead */
     nmonster->hp_max = nmonster->hp = max(1, divert(monster_type_hp_max(type), 10));
 
+    /* Some differentiation of the visible range per monster type */
+    nmonster->visrange = max(3,
+        5
+        // slower monsters see less, faster more
+        + ((monster_data[type].speed - NORMAL) / 25)
+        // flying monsters see further
+        + (monster_type_flags(type, FLY) ? 2 : 0));
+
     nmonster->effects = g_ptr_array_new();
     nmonster->inv = inv_new(nmonster);
 
@@ -1089,6 +1098,9 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
     if (m->number)
         cJSON_AddNumberToObject(mval, "number", m->number);
 
+    cJSON_AddNumberToObject(mval, "visrange", m->visrange);
+
+
     if (m->leader)
         cJSON_AddNumberToObject(mval, "leader", GPOINTER_TO_UINT(m->leader));
 
@@ -1134,6 +1146,13 @@ void monster_deserialize(cJSON *mser, game *g)
 
     if ((obj = cJSON_GetObjectItem(mser, "number")))
         m->number = obj->valueint;
+
+    if ((obj = cJSON_GetObjectItem(mser, "visrange")))
+        m->visrange = obj->valueint;
+    else
+        // TODO: fallback for older saves, can be removed when updating
+        // SAVEFILE_VERSION > 29
+        m->visrange = 5;
 
     if ((obj = cJSON_GetObjectItem(mser, "leader")))
     {
@@ -2922,14 +2941,16 @@ static gboolean monster_player_visible(monster *m)
     if (monster_effect(m, ET_BLINDNESS))
         return false;
 
-    /* FIXME: this ought to be different per monster type */
-    int monster_visrange = 7;
+    /* monster's visibility range */
+    int monster_visrange;
 
     if (player_effect(nlarn->p, ET_STEALTH) || monster_effect(m, ET_TRAPPED))
         // If the player is stealthy, monsters will only recognize them when
         // standing next to them. Also being trapped reduces the range of
         // visibility to one surrounding tile.
         monster_visrange = 1;
+    else
+        monster_visrange = m->visrange;
 
     /* determine if the monster can see the player */
     if (pos_distance(monster_pos(m), nlarn->p->pos) > monster_visrange)
