@@ -23,7 +23,7 @@
 #include "items.h"
 #include "map.h"
 #include "player.h"
-#include "spheres.h"
+#include "weapons.h"
 
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 

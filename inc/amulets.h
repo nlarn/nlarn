@@ -19,7 +19,6 @@
 #ifndef __AMULETS_H_
 #define __AMULETS_H_
 
-#include "enumFactory.h"
 #include "items.h"
 
 #define AMULET_TYPE_ENUM(AMULET_TYPE) \

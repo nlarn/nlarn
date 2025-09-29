@@ -20,7 +20,6 @@
 #define __ARMOUR_H_
 
 #include "effects.h"
-#include "enumFactory.h"
 #include "items.h"
 #include "utils.h"
 

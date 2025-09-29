@@ -24,11 +24,10 @@
 #include "display.h"
 #include "extdefs.h"
 #include "game.h"
-#include "gems.h"
 #include "items.h"
-#include "extdefs.h"
 #include "player.h"
 #include "scrolls.h"
+#include "weapons.h"
 
 static const char msg_outstanding[] = "The Larn Revenue Service has ordered " \
                                       "us to not do business with tax evaders. " \

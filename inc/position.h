@@ -21,7 +21,6 @@
 
 #include <glib.h>
 
-#include "cJSON.h"
 #include "colours.h"
 #include "combat.h"
 

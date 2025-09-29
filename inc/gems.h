@@ -20,7 +20,6 @@
 #define __GEMS_H_
 
 #include "colours.h"
-#include "enumFactory.h"
 #include "items.h"
 
 #define GEM_TYPE_ENUM(GEM_TYPE) \

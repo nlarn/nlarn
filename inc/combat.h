@@ -21,7 +21,6 @@
 
 #include <glib.h>
 
-#include "items.h"
 #include "enumFactory.h"
 
 #define SPEED_ENUM(SPEED) \

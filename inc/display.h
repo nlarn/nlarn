@@ -23,8 +23,6 @@
 #include <panel.h>
 #include <glib.h>
 
-#include "colours.h"
-#include "game.h"
 #include "items.h"
 #include "player.h"
 

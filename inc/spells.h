@@ -23,7 +23,6 @@
 #include "effects.h"
 #include "enumFactory.h"
 #include "items.h"
-#include "player.h"
 
 typedef enum spell_type
 {

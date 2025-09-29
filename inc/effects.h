@@ -21,7 +21,6 @@
 
 #include <stdbool.h>
 #include <glib.h>
-#include <time.h>
 
 #include "cJSON.h"
 #include "enumFactory.h"

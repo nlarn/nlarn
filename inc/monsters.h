@@ -25,11 +25,9 @@
 #include "cJSON.h"
 #include "colours.h"
 #include "effects.h"
-#include "enumFactory.h"
 #include "inventory.h"
 #include "items.h"
 #include "position.h"
-#include "utils.h"
 
 /* forward declarations */
 

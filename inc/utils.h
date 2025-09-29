@@ -19,8 +19,6 @@
 #ifndef __UTILS_H_
 #define __UTILS_H_
 
-#include <time.h>
-
 #include "cJSON.h"
 
 /* game messaging */

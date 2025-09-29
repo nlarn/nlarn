@@ -21,13 +21,11 @@
 
 #include "cJSON.h"
 #include "colours.h"
-#include "enumFactory.h"
 #include "items.h"
 #include "monsters.h"
 #include "position.h"
 #include "sobjects.h"
 #include "traps.h"
-#include "utils.h"
 
 /* map dimensions */
 #define MAP_MAX_X 67

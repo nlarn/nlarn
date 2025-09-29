@@ -19,7 +19,6 @@
 #ifndef __CONTAINER_H_
 #define __CONTAINER_H_
 
-#include "enumFactory.h"
 #include "items.h"
 #include "inventory.h"
 

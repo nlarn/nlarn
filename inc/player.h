@@ -31,8 +31,6 @@
 #include "rings.h"
 #include "scrolls.h"
 #include "spells.h"
-#include "utils.h"
-#include "weapons.h"
 
 /* forward declaration */
 struct game;

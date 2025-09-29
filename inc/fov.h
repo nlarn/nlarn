@@ -20,16 +20,15 @@
 #define __FOV_H_
 
 #include <glib.h>
+
 #include "map.h"
 #include "monsters.h"
 #include "position.h"
-
 
 /* the members of this struct are only known to the implementation of the
    following functions */
 struct _fov;
 typedef struct _fov fov;
-
 
 /** @brief Create a FOV data structure
   *
