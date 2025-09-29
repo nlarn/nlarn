@@ -89,7 +89,7 @@ typedef struct game
     GPtrArray *spheres;
 
     /* flags */
-    guint32
+    bool
         player_stats_set: 1, /* the player's stats have been assigned */
         cure_dianthr_created: 1, /* the potion of cure dianthroritis is a unique item */
         wizard: 1, /* wizard mode */

@@ -42,7 +42,7 @@ typedef struct ring_data
     const char *name;
     effect_t effect; /* effect causes by this ring */
     int price;
-    unsigned
+    bool
         obtainable: 1,  /* is available for sale in the shop */
         bonus_obs: 1;   /* can determine bonus by using */
 } ring_data;

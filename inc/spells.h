@@ -98,7 +98,7 @@ typedef struct spell_data {
     colour fg;                /* the colour of visible spells */
     int level;                /* level of the spell */
     int price;                /* price of the book*/
-    unsigned
+    bool
         obtainable: 1;  /* available in the shop */
 } spell_data;
 

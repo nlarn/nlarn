@@ -19,6 +19,7 @@
 #ifndef __EFFECTS_H_
 #define __EFFECTS_H_
 
+#include <stdbool.h>
 #include <glib.h>
 #include <time.h>
 
@@ -108,7 +109,7 @@ typedef struct effect_data
     const char *msg_stop;    /* message displayed when effect ends */
     const char *msg_start_monster; /* messages shown when the effect happens on a monster */
     const char *msg_stop_monster;
-    guint                    /* effect flags */
+    bool                     /* effect flags */
         var_duration: 1,     /* the effect's duration is variable */
         var_amount: 1,       /* the effect's amount is variable */
         inc_duration: 1,     /* reset the duration of unique effects */

@@ -118,7 +118,7 @@ typedef struct item_type_data {
     const char *name_pl;
     const char glyph;
     guint max_id;
-    unsigned
+    bool
         optimizable: 1,     /* item type can have a bonus */
         blessable: 1,       /* item type can be blessed / cursed */
         corrodible: 1,      /* item type can corrode */

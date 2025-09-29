@@ -93,7 +93,7 @@ typedef struct map_tile_data
     const char glyph;
     int colour;
     const char *description;
-    unsigned
+    bool
         passable:    1,     /* can be passed */
         transparent: 1;     /* see-through */
 } map_tile_data;

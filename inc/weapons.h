@@ -101,7 +101,7 @@ typedef struct _weapon_data
     int material;       /* material type from item_materials */
     int weight;         /* used to determine inventory weight and if item can be thrown */
     int price;          /* base price in the shops */
-    unsigned
+    bool
         twohanded: 1,   /* needs two hands */
         unique: 1,      /* unique */
         article: 1,     /* needs an article in the description */

@@ -63,7 +63,7 @@ typedef struct _sobject_data
     const char glyph;
     colour fg;
     const char *description;
-    unsigned
+    bool
         passable:     1,   /* can be passed */
         transparent:  1;   /* see-through */
 } sobject_data;
