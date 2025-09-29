@@ -205,7 +205,7 @@ monster_action_t monster_action(monster *m);
 
 /* other functions */
 const char *monster_get_name(monster *m);
-const char* monster_type_plural_name(monster_t mt, const int count);
+const char* monster_type_plural_name(monster_t mt, int count);
 void monster_die(monster *m, struct player *p);
 
 void monster_level_enter(monster *m, struct map *l);

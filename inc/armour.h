@@ -82,33 +82,33 @@ typedef struct _armour_data
 extern const armour_data armours[AT_MAX];
 
 /* inline functions */
-static inline effect_t armour_effect(item *armour)
+static inline effect_t armour_effect(const item *armour)
 {
     g_assert(armour->id < AT_MAX);
     return armours[armour->id].et;
 }
 
-static inline armour_t armour_disguise(item *armour)
+static inline armour_t armour_disguise(const item *armour)
 {
     g_assert(armour->id < AT_MAX);
     return armours[armour->id].disguise;
 }
 
-static inline gboolean armour_unique(item *armour)
+static inline gboolean armour_unique(const item *armour)
 {
     g_assert(armour->id < AT_MAX);
     return armours[armour->id].unique;
 }
 
-static inline guint armour_base_ac(item *armour)
+static inline guint armour_base_ac(const item *armour)
 {
     g_assert(armour->id < AT_MAX);
     return armours[armour->id].ac;
 }
 
-static inline guint armour_ac(item *armour)
+static inline guint armour_ac(const item *armour)
 {
-    int ac = armour_base_ac(armour)
+    const guint ac = armour_base_ac(armour)
              + item_condition_bonus(armour);
 
     return (guint)max(ac, 0);

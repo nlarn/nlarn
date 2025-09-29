@@ -89,7 +89,7 @@ direction pos_direction(position here, position there);
 
 int pos_distance(position first, position second);
 
-static inline int pos_identical(position pos1, position pos2)
+static inline int pos_identical(const position pos1, const position pos2)
 {
     return (pos1.val == pos2.val);
 }
@@ -117,7 +117,7 @@ direction pos_dir(position origin, position target);
  */
 rectangle rect_new(int x1, int y1, int x2, int y2);
 
-static inline rectangle rect_new_sized(position center, int size)
+static inline rectangle rect_new_sized(const position center, const int size)
 {
     return rect_new(X(center) - size,
                     Y(center) - size,
@@ -203,7 +203,7 @@ area *area_flood(area *obstacles, int start_x, int start_y);
 void area_point_set(area *a, int x, int y);
 int  area_point_get(area *a, int x, int y);
 
-static inline int area_point_valid(area *a, int x, int y)
+static inline int area_point_valid(const area *a, const int x, const int y)
 {
     return ((x < a->size_x) && (x >= 0)) && ((y < a->size_y) && (y >= 0));
 }

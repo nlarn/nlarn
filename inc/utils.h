@@ -69,11 +69,11 @@ message_log_entry *log_get_entry(message_log *log, guint id);
 cJSON *log_serialize(message_log *log);
 message_log *log_deserialize(cJSON *lser);
 
-static inline guint log_length(message_log *log) { return log->entries->len; }
+static inline guint log_length(const message_log *log) { return log->entries->len; }
 static inline void log_enable(message_log *log)  { log->active = true; }
 static inline void log_disable(message_log *log) { log->active = false; }
 
-static inline char *log_buffer(message_log *log)
+static inline char *log_buffer(const message_log *log)
 {
     return log->buffer->len ? log->buffer->str : NULL;
 }
@@ -118,12 +118,12 @@ static inline const char *a_an(const char *str)
     return str_starts_with_vowel(str) ? "an" : "a";
 }
 
-static inline const char *is_are(int i)
+static inline const char *is_are(const int i)
 {
     return (i == 1) ? "is" : "are";
 }
 
-static inline const char *plural(int i)
+static inline const char *plural(const int i)
 {
     return (i > 1) ? "s" : "";
 }

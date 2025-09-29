@@ -70,17 +70,17 @@ typedef struct _sobject_data
 
 extern const sobject_data sobjects[LS_MAX];
 
-static inline char so_get_glyph(sobject_t s)
+static inline char so_get_glyph(const sobject_t s)
 {
     return sobjects[s].glyph;
 }
 
-static inline colour so_get_colour(sobject_t s)
+static inline colour so_get_colour(const sobject_t s)
 {
     return sobjects[s].fg;
 }
 
-static inline const char *so_get_desc(sobject_t s)
+static inline const char *so_get_desc(const sobject_t s)
 {
     return sobjects[s].description;
 }

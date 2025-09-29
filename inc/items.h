@@ -231,7 +231,7 @@ char *item_detailed_description(item *it, gboolean known, gboolean shop);
 extern const item_type_data item_data[IT_MAX];
 extern const item_material_data item_materials[IM_MAX];
 
-static inline int item_condition_bonus(item *it)
+static inline int item_condition_bonus(const item *it)
 {
     g_assert(it->type < IT_MAX);
 

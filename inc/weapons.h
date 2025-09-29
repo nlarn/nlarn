@@ -136,13 +136,13 @@ char *weapon_shortdesc(item *weapon, guint available_space);
  */
 int weapon_instakill_chance(weapon_t wt, monster_t mt);
 
-static inline int ammo_base_damage(item *ammo)
+static inline int ammo_base_damage(const item *ammo)
 {
     g_assert(ammo->id < WT_MAX);
     return ammos[ammo->id].damage;
 }
 
-static inline int ammo_damage(item *ammo)
+static inline int ammo_damage(const item *ammo)
 {
     int dmg = ammo_base_damage(ammo)
               + item_condition_bonus(ammo);
@@ -151,24 +151,24 @@ static inline int ammo_damage(item *ammo)
     return max(0, dmg);
 }
 
-static inline int ammo_base_accuracy(item *ammo)
+static inline int ammo_base_accuracy(const item *ammo)
 {
     g_assert(ammo->id < WT_MAX);
     return ammos[ammo->id].accuracy;
 }
 
-static inline int ammo_accuracy(item *ammo)
+static inline int ammo_accuracy(const item *ammo)
 {
     return ammo_base_accuracy(ammo) + item_condition_bonus(ammo);
 }
 
-static inline int weapon_base_damage(item *weapon)
+static inline int weapon_base_damage(const item *weapon)
 {
     g_assert(weapon->id < WT_MAX);
     return weapons[weapon->id].damage;
 }
 
-static inline int weapon_damage(item *weapon)
+static inline int weapon_damage(const item *weapon)
 {
     int dmg = weapon_base_damage(weapon)
               + item_condition_bonus(weapon);
@@ -177,13 +177,13 @@ static inline int weapon_damage(item *weapon)
     return max(1, dmg);
 }
 
-static inline int weapon_base_acc(item *weapon)
+static inline int weapon_base_acc(const item *weapon)
 {
     g_assert(weapon->id < WT_MAX);
     return weapons[weapon->id].accuracy;
 }
 
-static inline int weapon_acc(item *weapon)
+static inline int weapon_acc(const item *weapon)
 {
     return weapon_base_acc(weapon) + item_condition_bonus(weapon);
 }

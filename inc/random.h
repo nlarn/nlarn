@@ -34,18 +34,18 @@ void rand_deserialize(cJSON *r);
 guint32 rand_0n(guint32 n);
 
 /* returns a value x with m <= x < n. */
-static inline guint32 rand_m_n(guint32 m, guint32 n)
+static inline guint32 rand_m_n(const guint32 m, const guint32 n)
 {
     g_assert(m < n);
     return rand_0n(n - m) + m;
 }
 
-static inline guint32 rand_1n(guint32 n)
+static inline guint32 rand_1n(const guint32 n)
 {
     return (n <= 1) ? 1 : rand_m_n(1, n);
 }
 
-static inline gboolean chance(guint32 percent)
+static inline gboolean chance(const guint32 percent)
 {
     g_assert(percent < 101);
     return (percent >= rand_1n(101));
