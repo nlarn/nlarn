@@ -122,17 +122,21 @@ extern const weapon_data weapons[WT_MAX];
 int  weapon_fire(struct player *p);
 void weapon_swap(struct player *p);
 
-/*
+/**
  * @brief Return a shortened description of a given weapon
  *
- * @param a weapon
+ * @param weapon a weapon
+ * @param available_space The maximum length of the returned string
  * @return a newly allocated string that must be g_free()'d
  */
 char *weapon_shortdesc(item *weapon, guint available_space);
 
-/*
- * Retuns the percentual chance that the given weapon type
+/**
+ * Returns the percentual chance that the given weapon type
  * can instantly kill the given monster type.
+ *
+ * @param wt A #weapon_t
+ * @param mt A #monster_t
  */
 int weapon_instakill_chance(weapon_t wt, monster_t mt);
 

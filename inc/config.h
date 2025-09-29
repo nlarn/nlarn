@@ -54,7 +54,7 @@ char *compose_autopickup_settings(const gboolean config[IT_MAX]);
 /**
  * @brief Return a comma separated list of all selected item types
  *
- * @param a boolean array (size IT_MAX)
+ * @param config a boolean array (size IT_MAX)
  *
  * @return NULL if no item type is selected, otherwise a comma-separated
  *         list of item type names

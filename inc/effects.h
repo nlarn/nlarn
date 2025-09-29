@@ -161,8 +161,8 @@ int effect_query(GPtrArray *ea, effect_t type);
 /**
  * Count down the number of turns remaining for an effect.
  *
- * @param an effect
- * @return turns remaining. Expired effects return -1, permantent effects 0
+ * @param e an effect
+ * @return turns remaining. Expired effects return -1, permanent effects 0
  */
 int effect_expire(effect *e);
 

@@ -3074,8 +3074,8 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
 /**
  * Special monster attack: rust players armour.
  *
- * @param the attacking monster
- * @param the player
+ * @param m the attacking monster
+ * @param p the player
  *
  */
 static gboolean monster_item_rust(monster *m, struct player *p)

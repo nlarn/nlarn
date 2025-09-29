@@ -142,9 +142,9 @@ int *map_get_surrounding(map *m, position pos, sobject_t type);
 /**
  * determine if a position can be seen from another position
  *
- * @param the map
- * @param first position
- * @param second position
+ * @param m the map
+ * @param source first position
+ * @param target second position
  * @return true or false
  */
 int map_pos_is_visible(map *m, position source, position target);
@@ -152,25 +152,25 @@ int map_pos_is_visible(map *m, position source, position target);
 /**
  * Return a linked list with every position between two points.
  *
- * @param The map that contains both positions.
- * @param The starting position.
- * @param The destination.
+ * @param m The map that contains both positions.
+ * @param source The starting position.
+ * @param target The destination.
  */
 GList *map_ray(map *m, position source, position target);
 
 /**
  * Follow a ray from target to destination.
  *
- * @param The starting position.
- * @param The destination.
- * @param The originator of the trajectory.
- * @param The callback function for every affected position.
- * @param A pointer passed to the callback function.
- * @param A pointer passed to the callback function.
- * @param true if reflection should be honoured.
- * @param The glyph to display at an affected position
- * @param The colour of the glyph.
- * @param true to keep the glyph at affected positions.
+ * @param source The starting position.
+ * @param target The destination.
+ * @param damo The originator of the trajectory.
+ * @param pos_hitfun The callback function for every affected position.
+ * @param data1 A pointer passed to the callback function.
+ * @param data2 A pointer passed to the callback function.
+ * @param reflectable true if reflection should be honoured.
+ * @param glyph The glyph to display at an affected position
+ * @param fg The colour of the glyph.
+ * @param keep_ray true to keep the glyph at affected positions.
  *
  * @return true if one of the callbacks returned true.
  */
@@ -183,10 +183,10 @@ gboolean map_trajectory(position source, position target,
 /**
  * @brief Get an area of defined dimensions with all blocked positions set.
  *
- * @param A map.
- * @param The center position.
- * @param The radius.
- * @param Shall closed doors be handled as passable?
+ * @param m A map.
+ * @param center The center position.
+ * @param radius The radius.
+ * @param doors Shall closed doors be handled as passable?
  *
  * @return A freshly allocated area with all impassable positions set.
  */
@@ -199,10 +199,10 @@ damage *map_tile_damage(map *m, position pos, gboolean flying);
 /**
  * @brief Creates description of items on the floor for a given position.
  *
- * @param a map
- * @param a position
- * @param "here" or "there"
- * @param a filter function to restrict the described items
+ * @param m a map
+ * @param pos a position
+ * @param where "here" or "there"
+ * @param ifilter a filter function to restrict the described items
  */
 char *map_inv_description(map *m, position pos, const char* where, int (*ifilter)(item *));
 
@@ -213,7 +213,7 @@ monster *map_get_monster_at(map *m, position pos);
 /**
  * @brief Creates new monsters for a map.
  *
- * @param a map
+ * @param m a map
  */
 void map_fill_with_life(map *m);
 
@@ -222,15 +222,15 @@ gboolean map_is_exit_at(map *m, position pos);
 /**
  * Process temporary effects for a map.
  *
- * @param the map on which timed events have to be processed
+ * @param m the map on which timed events have to be processed
  */
 void map_timer(map *m);
 
 /**
  * @brief Get the glyph for a door.
  *
- * @param The map.
- * @param The position of the door.
+ * @param m The map.
+ * @param pos The position of the door.
  *
  * @return The glyph for the door.
  */

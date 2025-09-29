@@ -189,7 +189,7 @@ void monster_unknown_set(monster *m, gboolean what);
 /**
  * @brief Return the monster's inventory.
  *
- * @param A monster.
+ * @param m A monster.
  * @return The given monster's inventory.
  */
 inventory **monster_inv(monster *m);
@@ -198,7 +198,7 @@ gboolean monster_in_sight(monster *m);
 
 /** @brief Get the currently set AI action for a given monster.
   *
-  * @param A monster.
+  * @param m A monster.
   * @return The currently set AI action for the given monster.
   */
 monster_action_t monster_action(monster *m);
@@ -216,7 +216,7 @@ void monster_polymorph(monster *m);
 /**
  * check stash at monster's position for something desired
  *
- * @param a monster
+ * @param m a monster
  * @return true if something has been picked up, false if not
  */
 int monster_items_pickup(monster *m);
@@ -224,7 +224,7 @@ int monster_items_pickup(monster *m);
 /**
  * Returns the number of attack type a monster can choose from
  *
- * @param a monster
+ * @param m a monster
  * @return the number of attacks
  */
 guint monster_attack_count(monster *m);
@@ -232,8 +232,8 @@ guint monster_attack_count(monster *m);
 /**
  * Returns the chosen attack type for the monster
  *
- * @param a monster
- * @param the number of an attack
+ * @param m a monster
+ * @param num the number of an attack
  * @return an attack
  */
 attack monster_attack(monster *m, guint num);
@@ -244,17 +244,17 @@ int monster_player_ranged_attack(monster *m, struct player *p);
 /**
  * Deal damage to a monster
  *
- * @param monster
- * @param pointer to the damage to be dealt (will be free'd)
- * @return the monster if it has survived, othewise NULL
+ * @param m monster
+ * @param dam pointer to the damage to be dealt (will be free'd)
+ * @return the monster if it has survived, otherwise NULL
  */
 monster *monster_damage_take(monster *m, damage *dam);
 
 /**
  * Determine a monster's action.
  *
- * @param the monster
- * @param manually set action for a monster
+ * @param m the monster
+ * @param override manually set action for a monster
  * @return true if the action has changed
  */
 gboolean monster_update_action(monster *m, monster_action_t override);

@@ -56,9 +56,9 @@ int divert(int value, int percent);
 /**
  * Shuffle an array of integers
  *
- * @param pointer to integer array
+ * @param array pointer to integer array
  * @param length of array
- * @param how many fields should be skipped
+ * @param skip how many fields should be skipped
  */
 void shuffle(int array[], int length, int skip);
 
@@ -66,8 +66,8 @@ void shuffle(int array[], int length, int skip);
  * Return a random number processed by the Lévy probability density function
  * See https://en.wikipedia.org/wiki/L%C3%A9vy_distribution for details.
  *
- * @param scale parameter
- * @param location parameter
+ * @param c The scale parameter
+ * @param mu The location parameter
  * @return a random number in
  */
 double levy_random(double c, double mu);

@@ -94,7 +94,7 @@ typedef struct spell_data {
     spell_func function;      /* the function implementing this spell */
     const char *description;  /* the spell's description */
     const char *msg_success;  /* the message given upon success */
-    const char *msg_fail;     /* the message give upoon failure */
+    const char *msg_fail;     /* the message give upon failure */
     colour fg;                /* the colour of visible spells */
     int level;                /* level of the spell */
     int price;                /* price of the book*/
@@ -127,7 +127,7 @@ int spell_sort(gconstpointer a, gconstpointer b);
 /**
  * Select a spell to cast and cast it
  *
- * @param the player
+ * @param p the player
  * @return number of turns elapsed
  */
 int spell_cast_new(struct player *p);
@@ -135,7 +135,7 @@ int spell_cast_new(struct player *p);
 /**
  * Cast the previous spell again
  *
- * @param the player
+ * @param p the player
  * @return number of turns elapsed
  */
 int spell_cast_previous(struct player *p);
@@ -143,8 +143,8 @@ int spell_cast_previous(struct player *p);
 /**
  * Try to add a spell to the list of known spells
  *
- * @param the player
- * @param id of spell to learn
+ * @param p the player
+ * @param spell_type ID of spell to learn
  * @return false if learning the spell failed, otherwise level of knowledge
  */
 int spell_learn(struct player *p, spell_id spell_type);
@@ -152,8 +152,8 @@ int spell_learn(struct player *p, spell_id spell_type);
 /**
  * Check if a spell is known to the player
  *
- * @param the player
- * @param id of the spell in question
+ * @param p the player
+ * @param spell_type ID of the spell in question
  * @return false if unknown, otherwise level of knowledge of that spell
  */
 int spell_known(struct player *p, spell_id spell_type);
@@ -161,7 +161,7 @@ int spell_known(struct player *p, spell_id spell_type);
 /**
  * Returns a textual description of a spell
  *
- * @param the spell ID
+ * @param sid the spell ID
  * @return a string describing the spell type (must be released with g_free()))
  */
 gchar* spell_desc_by_id(spell_id sid);

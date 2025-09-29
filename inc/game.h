@@ -103,7 +103,7 @@ typedef struct game
  * @brief Initialise the game. This function will try to restore a saved game;
  *        if it fails it will start a new game.
  *
- * @param pointer to a parsed command line configuration
+ * @param config pointer to a parsed command line configuration
  */
 void game_init(struct game_config *config);
 
@@ -111,9 +111,7 @@ game *game_destroy(game *g);
 
 /**
  * @brief Save a game.
- * @param The game to save
- * @param The name of the file to be saved. Defaults to "nlarn.sav",
- *        if a NULL has been supplied.
+ * @param g The game to save
  */
 int game_save(game *g);
 

@@ -61,8 +61,9 @@ struct player;
 /**
  * Player stepped on a trap
  *
- * @param the player
- * @param the trap
+ * @param p the player
+ * @param trap the trap
+ * @param force enforce activation of the trap
  * @return number of turns this move took
  */
 int player_trap_trigger(struct player *p, trap_t trap, int force);
@@ -70,7 +71,7 @@ int player_trap_trigger(struct player *p, trap_t trap, int force);
 /**
  * A monster stepped on a trap.
  *
- * @param The monster.
+ * @param m The monster.
  * @return the monster, or NULL if the monster died.
  */
 monster *monster_trap_trigger(monster *m);
@@ -78,7 +79,7 @@ monster *monster_trap_trigger(monster *m);
 /**
   * @brief Disarm a trap.
   *
-  * @params The player.
+  * @params p The player.
   * @return The number of turns elapsed.
   */
 guint trap_disarm(struct player *p);

@@ -289,8 +289,8 @@ static int scroll_with_effect(struct player *p, item *r_scroll)
 /**
  * Scroll "annihilation".
  *
- * @param the player
- * @param the scroll just read
+ * @param p The player
+ * @param r_scroll The scroll just read
  *
  */
 static int scroll_annihilate(struct player *p, item *r_scroll __attribute__((unused)))
@@ -413,8 +413,8 @@ static int scroll_create_artefact(player *p, item *r_scroll)
 /**
  * Scroll "enchant armour".
  *
- * @param the player
- * @param the scroll just read
+ * @param p The player
+ * @param r_scroll The scroll just read
  *
  */
 static int scroll_enchant_armour(player *p, item *r_scroll)

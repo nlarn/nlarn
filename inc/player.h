@@ -219,8 +219,8 @@ char player_select_bonus_stats();
 /**
  * @brief Assigns player's stats to the given preset
  *
- * @param the player
- * @param the preset (between 'a' and 'f')
+ * @param p the player
+ * @param preset the preset (between 'a' and 'f')
  * @return true for valid presets, false for invalid presets
  */
 gboolean player_assign_bonus_stats(player *p, char preset);
@@ -232,10 +232,11 @@ player *player_deserialize(cJSON *pser);
 /**
  * @brief consume time for an action by the player
  *
- * @param the player
- * @param the number of turns the move takes
- * @param true if the action can be interrupted
- * @param (optional) the description of the action in the form "reading the book of foo"
+ * @param p the player
+ * @param turns the number of turns the move takes
+ * @param interruptible true if the action can be interrupted
+ * @param desc (optional) the description of the action in the form "reading
+ *    the book of foo"
  * @return true if the action has completed, false if it has been interrupted
  *
  */
@@ -244,9 +245,9 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
 /**
  * Kill the player
  *
- * @param the player
- * @param the cause, e.g. PD_TRAP
- * @param the id of the specific cause, e.g. TT_DART
+ * @param p the player
+ * @param cause_type the cause, e.g. PD_TRAP
+ * @param cause the id of the specific cause, e.g. TT_DART
  *
  */
 void player_die(player *p, player_cod cause_type, int cause);
@@ -260,9 +261,10 @@ void player_update_fov(player *p);
 /**
  * Function to enter a map.
  *
- * @param the player
- * @param entered map
- * @param has to be true if the player didn't enter the map regularly
+ * @param p the player
+ * @param l entered map
+ * @param teleported has to be true if the player didn't enter the map
+ *      regularly. Sets a random starting point.
  * @return true
  */
 int player_map_enter(player *p, map *l, gboolean teleported);
@@ -270,11 +272,12 @@ int player_map_enter(player *p, map *l, gboolean teleported);
 /**
  * Choose a random armour the player is wearing.
  *
- * @param   the player
- * @return  a pointer to the slot of the armour
+ * @param p the player
+ * @param enchantable return only pieces of armour that are not fully enchanted
+ * @return a pointer to the slot of the armour
  *
  */
-item **player_get_random_armour(player *p, int enchantable);
+item **player_get_random_armour(player *p, bool enchantable);
 
 void player_pickup(player *p);
 
@@ -290,7 +293,7 @@ int player_hp_lose(player *p, int count, player_cod cause_type, int cause);
 /**
  * Determine if the player can evade a quickly moving attack
  *
- * @param the player
+ * @param p the player
  * @return result of evasion attempt
  */
 gboolean player_evade(player *p);
@@ -298,10 +301,10 @@ gboolean player_evade(player *p);
 /**
  * Inflict damage upon the player
  *
- * @param the player
- * @param pointer to the damage (will be freed)
- * @param of the damage originator
- * @param the id of the damage originator, specific to the damage originator
+ * @param p the player
+ * @param dam pointer to the damage (will be freed)
+ * @param cause_type of the damage originator
+ * @param cause the id of the damage originator, specific to the damage originator
  */
 void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause);
 
@@ -332,8 +335,8 @@ char *player_inv_weight(player *p);
  * is determined it an item can be picked up or if the weight of the player's
  * pack would be larger than the player could carry afterwards.
  *
- * @param the inventory to check
- * @param the item which is about to be added
+ * @param inv the inventory to check
+ * @param it the item which is about to be added
  *
  */
 int player_inv_pre_add(inventory *inv, item *it);
@@ -343,8 +346,8 @@ int player_inv_pre_add(inventory *inv, item *it);
  * weight of the inventory gets calculated and the burdened or overstrained
  * mode is set or removed.
  *
- * @param the inventory to check
- * @param the item which is about to be added
+ * @param inv the inventory to check
+ * @param it the item which is about to be added
  *
  */
 void player_inv_weight_recalc(inventory *inv, item *it);
@@ -352,7 +355,7 @@ void player_inv_weight_recalc(inventory *inv, item *it);
 /**
  * @brief Display a message window with a list of equipped items
  *
- * @param The player.
+ * @param p The player.
  */
 void player_paperdoll(player *p);
 
@@ -361,28 +364,29 @@ void player_paperdoll(player *p);
 /**
   * @brief Function used to equip an item.
   *
-  * @param the player
-  * @param unused, needed to make function signature match display_inventory requirements
-  * @param the item
+  * @param p the player
+  * @param inv unused, needed to make function signature match display_inventory requirements
+  * @param it the item
   */
 void player_item_equip(player *p, inventory **inv, item *it);
 
 /**
   * @brief Function used to unequip an item.
   *
-  * @param the player
-  * @param unused, needed to make function signature match display_inventory requirements
-  * @param the item
+  * @param p the player
+  * @param inv unused, needed to make function signature match display_inventory requirements
+  * @param it the item
   */
 void player_item_unequip_wrapper(player *p, inventory **inv, item *it);
 
 /**
   * @brief Function used to unequip an item.
   *
-  * @param the player
-  * @param unused, needed to make function signature match display_inventory requirements
-  * @param the item
-  * @param true if the removal does not occur interactively. No time is consumed in this case.
+  * @param p the player
+  * @param inv unused, needed to make function signature match display_inventory requirements
+  * @param it the item
+  * @param forced true if the removal does not occur interactively.
+  *     No time is consumed in this case.
   */
 void player_item_unequip(player *p,
                          inventory **inv __attribute__((unused)),
@@ -394,10 +398,10 @@ int player_item_can_be_added_to_container(player *p, item *it);
 int player_item_filter_unequippable(item* it);
 
 /**
- * Callback funtion used to check if an item is equipped.
+ * Callback function used to check if an item is equipped.
  *
- * @param the player
- * @param the item
+ * @param p the player
+ * @param it the item
  * @return place where item is equipped
  */
 int player_item_is_equipped(player *p, item *it);
@@ -448,8 +452,8 @@ guint player_get_gold(player *p);
 /**
   * @brief Remove a given number of gold coins from the Player's inventory
   *
-  * @param The player
-  * @param The amount of gold to remove
+  * @param p The player
+  * @param amount The amount of gold to remove
   */
 void player_remove_gold(player *p, guint amount);
 
@@ -458,7 +462,7 @@ const char *player_get_level_desc(player *p);
 /**
   * @brief Look for traps on adjacent map tiles.
   *
-  * @param the player
+  * @param p the player
   */
 void player_search(player *p);
 
@@ -468,8 +472,8 @@ void player_sobject_forget(player *p, position pos);
 /**
   * @brief Check for adjacent monsters.
   *
-  * @param The player.
-  * @param true if harmless monsters shall be ignored.
+  * @param p The player.
+  * @param ignore_harmless true if harmless monsters shall be ignored.
   *
   * @return true if there are adjacent monsters.
   */

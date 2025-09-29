@@ -1568,7 +1568,7 @@ int player_map_enter(player *p, map *l, gboolean teleported)
     return true;
 }
 
-item **player_get_random_armour(player *p, int enchantable)
+item **player_get_random_armour(player *p, const bool enchantable)
 {
     GPtrArray *equipped_armour;
     item **armour = NULL;

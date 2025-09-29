@@ -80,8 +80,8 @@ position pos_move(position pos, direction dir);
 /**
  * Return the direction of a position relative to a given position.
  *
- * @param the current position
- * @param the other position
+ * @param here the current position
+ * @param there the other position
  *
  * @return the direction
  */
@@ -99,8 +99,8 @@ int pos_valid(position pos);
 
 /**
  * @brief Determine the direction of a position relative to another position.
- * @param The source position.
- * @param The target position.
+ * @param origin The source position.
+ * @param target The target position.
  */
 direction pos_dir(position origin, position target);
 
@@ -133,19 +133,19 @@ area *area_new(int start_x, int start_y, int size_x, int size_y);
  * Draw a circle: Midpoint circle algorithm
  * from http://en.wikipedia.org/wiki/Midpoint_circle_algorithm
  *
- * @param center point of the circle
- * @param radius of the circle
- * @param true if the circle shall not be filled
+ * @param center The center of the circle
+ * @param radius The radius of the circle
+ * @param hollow true if the circle shall not be filled
  * @return a new area.
  */
 area *area_new_circle(position center, guint radius, gboolean hollow);
 
 /**
- * Draw a circle with every unobstucted point inside it set.
+ * Draw a circle with every unobstructed point inside it set.
  *
- * @param center point of the circle
- * @param radius of the circle
- * @param An area with every obstructed point set.
+ * @param center The center of the circle
+ * @param radius The radius of the circle
+ * @param obstacles An area with every obstructed point set.
  * @return a new area.
  */
 area *area_new_circle_flooded(position center, guint radius, area *obstacles);
@@ -157,14 +157,14 @@ typedef gboolean (*area_hit_sth)(position pos, const damage_originator *damo,
 /**
  * Affect an area by a blast.
  *
- * @param The center of the blast position.
- * @param The affected radius.
- * @param The originator of the blast.
- * @param The callback function for every affected position.
- * @param A pointer passed to the callback function.
- * @param A pointer passed to the callback function.
- * @param The glyph to display at an affected position
- * @param The colour of the glyph.
+ * @param center The center of the blast position.
+ * @param radius The affected radius.
+ * @param damo The originator of the blast.
+ * @param pos_hitfun The callback function for every affected position.
+ * @param data1 A pointer passed to the callback function.
+ * @param data2 A pointer passed to the callback function.
+ * @param glyph The glyph to display at an affected position
+ * @param fg The colour of the glyph.
  *
  * @return true if one of the callbacks returned true.
  */
@@ -177,15 +177,15 @@ gboolean area_blast(position center, guint radius,
 /**
  * @brief Destroy a given area
  *
- * @param An area.
+ * @param a An area.
  */
 void area_destroy(area *a);
 
 /**
  * Add one area to another.
  *
- * @param first area (will be returned)
- * @param second area (will be freed)
+ * @param a first area (will be returned)
+ * @param b second area (will be freed)
  * @return first area with additional set point of second area
  */
 area *area_add(area *a, area *b);
@@ -193,9 +193,10 @@ area *area_add(area *a, area *b);
 /**
  * Flood fill an area from a given starting point
  *
- * @param an area which marks the points which shall not be flooded (will be freed)
- * @param starting x
- * @param starting y
+ * @param obstacles An area which marks the points which shall not be flooded
+ *     (will be freed)
+ * @param start_x starting x
+ * @param start_y starting y
  * @return an area with all reached points set (newly allocated, must be freed)
  */
 area *area_flood(area *obstacles, int start_x, int start_y);

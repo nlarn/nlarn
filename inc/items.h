@@ -156,11 +156,12 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id
 /**
  * Describe an item.
  *
- * @param the item
- * @param true if the item is known to the player.
- * @param true if the item count shall be ignored and the description for
- *       a single item of a stack shall be returned.
- * @param true if the description shall be prepend by the definite article.
+ * @param it the item
+ * @param known true if the item is known to the player.
+ * @param singular true if the item count shall be ignored and the description
+ *        for a single item of a stack shall be returned.
+ * @param definite true if the description shall be prepended by the definite
+ *        article.
  * @return a newly allocated string that should be disposed with g_free().
  */
 gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean definite);
@@ -172,7 +173,7 @@ guint item_price(item *it);
 /**
  * Calculate the weight of the given item.
  *
- * @param an item
+ * @param it an item
  * @return weight in grams
  */
 int item_weight(item *it);
@@ -180,7 +181,7 @@ int item_weight(item *it);
 /**
  * Determine the colour of the given object.
  *
- * @param an item
+ * @param it an item
  * @return the coulour
  */
 colour item_colour(item *it);
@@ -189,7 +190,7 @@ colour item_colour(item *it);
 /*
  * @brief Determine the chance if an item breaks when exposed to force.
  *
- * @param a item
+ * @param it an item
  * @return an integer between 0 and 100.
  */
 guint item_fragility(item *it);
@@ -206,10 +207,10 @@ item *item_disenchant(item *it);
 /**
  * Erode an item.
  *
- * @param  the inventory the item is in (may be null for new items)
- * @param  the item to erode
- * @param  the type of erosion which affects the item
- * @param  true if the player can see the item
+ * @param  inv the inventory the item is in (may be null for new items)
+ * @param  it the item to erode
+ * @param  iet the type of erosion which affects the item
+ * @param  visible true if the player can see the item
  * @return the item, NULL if the item has been destroyed
  *
  */
@@ -220,9 +221,9 @@ int item_obtainable(item_t type, int id);
 /**
  * @brief Describe an item thoroughly.
  *
- * @param An item.
- * @param (Y/N) if the item is known
- * @param (Y/N) show the item price
+ * @param it An item.
+ * @param known if the item is known
+ * @param shop show the item price
  * @return A newly allocated string that must be freed in the calling function.
  */
 char *item_detailed_description(item *it, gboolean known, gboolean shop);
@@ -280,14 +281,14 @@ static inline int item_filter_weapon(item *it)
 
 /**
  * @brief Item filter function for the potion of cure dianthroritis.
- * @param a pointer to an item
+ * @param it a pointer to an item
  * @return true if the supplied item is the potion of cure dianthroritis
  */
 int item_filter_pcd(item *it);
 
 /**
  * @brief Item filter function for blank scrolls.
- * @param a pointer to an item
+ * @param it a pointer to an item
  * @return true if the supplied item is a blank scroll
  */
 int item_filter_blank_scroll(item *it);
@@ -295,7 +296,7 @@ int item_filter_blank_scroll(item *it);
 /**
  * @brief Check if an item is unique.
  *
- * @param A pointer to an item.
+ * @param it A pointer to an item.
  * @return true if the item is unique.
  */
 gboolean item_is_unique(item *it);

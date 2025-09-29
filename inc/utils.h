@@ -60,8 +60,8 @@ int log_add_entry(message_log *log, const char *fmt, ...);
  * Update the game time. This function flushes the message buffer and appends
  * the collected messages to the log.
  *
- * @param the log
- * @param the new game time
+ * @param log the log
+ * @param gtime the new game time
  */
 void log_set_time(message_log *log, int gtime);
 
@@ -84,16 +84,16 @@ GPtrArray *text_wrap(const char *str, int width, int indent);
 /**
  * append one array of text to another array of text.
  *
- * @param text to append to
- * @param text to append. this will be freed.
- * @return pointer to combined array.
+ * @param first Multi-line text to append to
+ * @param second Multi-line text to append. This will be freed.
+ * @return A pointer to the combined array.
  */
 GPtrArray *text_append(GPtrArray *first, GPtrArray *second);
 
 /**
  * Determine the length of longest text line
  *
- * @param an array of strings
+ * @param text An array of strings
  * @return the length of the longest string in the array
  */
 int text_get_longest_line(GPtrArray *text);
