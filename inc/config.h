@@ -16,6 +16,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef CONFIG_H
+#define CONFIG_H
+
 #include <glib.h>
 
 #include "items.h"
@@ -66,3 +69,5 @@ char compose_gender(int gender);
 
 /* configure game defaults */
 void configure_defaults(const char *inifile);
+
+#endif

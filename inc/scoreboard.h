@@ -16,6 +16,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef SCOREBOARD_H
+#define SCOREBOARD_H
+
 #include <glib.h>
 
 #include "player.h"
@@ -59,3 +62,5 @@ char *score_death_description(score_t *score, int verbose);
 char *scores_to_string(GList *scores, score_t *score);
 
 void scores_destroy(GList *gs);
+
+#endif

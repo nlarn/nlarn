@@ -16,6 +16,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef PATHFINDING_H
+#define PATHFINDING_H
+
 #include <glib.h>
 
 #include "map.h"
@@ -56,3 +59,5 @@ path *path_find(map *m, position start, position goal,
  * @param path a path returned by <path_find>"()"
  */
 void path_destroy(path *path);
+
+#endif
