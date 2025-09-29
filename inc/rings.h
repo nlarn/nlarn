@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RINGS_H_
-#define __RINGS_H_
+#ifndef RINGS_H
+#define RINGS_H
 
 #include "effects.h"
 #include "enumFactory.h"

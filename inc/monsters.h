@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MONSTERS_H_
-#define __MONSTERS_H_
+#ifndef MONSTERS_H
+#define MONSTERS_H
 
 #include <glib.h>
 #include <time.h>

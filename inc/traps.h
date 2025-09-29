@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __TRAPS_H_
-#define __TRAPS_H_
+#ifndef TRAPS_H
+#define TRAPS_H
 
 #include "colours.h"
 #include "enumFactory.h"

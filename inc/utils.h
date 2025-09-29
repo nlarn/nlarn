@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __UTILS_H_
-#define __UTILS_H_
+#ifndef UTILS_H
+#define UTILS_H
 
 #include "cJSON.h"
 

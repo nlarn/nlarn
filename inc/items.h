@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ITEM_H_
-#define __ITEM_H_
+#ifndef ITEM_H
+#define ITEM_H
 
 #include <glib.h>
 

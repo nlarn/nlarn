@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __DISPLAY_H_
-#define __DISPLAY_H_
+#ifndef DISPLAY_H
+#define DISPLAY_H
 
 #include <curses.h>
 #include <panel.h>

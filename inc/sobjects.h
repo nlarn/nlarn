@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SOBJECTS_H_
-#define __SOBJECTS_H_
+#ifndef SOBJECTS_H
+#define SOBJECTS_H
 
 #include "colours.h"
 #include "enumFactory.h"

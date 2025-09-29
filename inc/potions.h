@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __POTIONS_H_
-#define __POTIONS_H_
+#ifndef POTIONS_H
+#define POTIONS_H
 
 #include "enumFactory.h"
 #include "items.h"

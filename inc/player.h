@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __PLAYER_H_
-#define __PLAYER_H_
+#ifndef PLAYER_H
+#define PLAYER_H
 
 #include "amulets.h"
 #include "armour.h"

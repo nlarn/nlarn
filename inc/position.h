@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __POSITION_H_
-#define __POSITION_H_
+#ifndef POSITION_H
+#define POSITION_H
 
 #include <glib.h>
 

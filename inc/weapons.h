@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __WEAPONS_H_
-#define __WEAPONS_H_
+#ifndef WEAPONS_H
+#define WEAPONS_H
 
 #include "enumFactory.h"
 #include "items.h"

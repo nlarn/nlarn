@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __BUILDINGS_H_
-#define __BUILDINGS_H_
+#ifndef BUILDINGS_H
+#define BUILDINGS_H
 
 /* number of courses available in school */
 #define SCHOOL_COURSE_COUNT 7

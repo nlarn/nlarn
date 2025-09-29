@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MAP_H_
-#define __MAP_H_
+#ifndef MAP_H
+#define MAP_H
 
 #include "cJSON.h"
 #include "colours.h"

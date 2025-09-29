@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SPELLS_H_
-#define __SPELLS_H_
+#ifndef SPELLS_H
+#define SPELLS_H
 
 #include "colours.h"
 #include "effects.h"

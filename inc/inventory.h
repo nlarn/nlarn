@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __INVENTORY_H_
-#define __INVENTORY_H_
+#ifndef INVENTORY_H
+#define INVENTORY_H
 
 #include <glib.h>
 

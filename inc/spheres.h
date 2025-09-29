@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SPHERES_H_
-#define __SPHERES_H_
+#ifndef SPHERES_H
+#define SPHERES_H
 
 #include "cJSON.h"
 #include "map.h"

@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ARMOUR_H_
-#define __ARMOUR_H_
+#ifndef ARMOUR_H
+#define ARMOUR_H
 
 #include "effects.h"
 #include "items.h"

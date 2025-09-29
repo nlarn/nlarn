@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __COLOURS_H_
-#define __COLOURS_H_
+#ifndef COLOURS_H
+#define COLOURS_H
 
 #include <curses.h>
 

@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOV_H_
-#define __FOV_H_
+#ifndef FOV_H
+#define FOV_H
 
 #include <glib.h>
 

@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __CONTAINER_H_
-#define __CONTAINER_H_
+#ifndef CONTAINER_H
+#define CONTAINER_H
 
 #include "items.h"
 #include "inventory.h"

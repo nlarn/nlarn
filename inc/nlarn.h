@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __NLARN_H_
-#define __NLARN_H_
+#ifndef NLARN_H
+#define NLARN_H
 
 #include <setjmp.h>
 

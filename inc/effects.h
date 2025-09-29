@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __EFFECTS_H_
-#define __EFFECTS_H_
+#ifndef EFFECTS_H
+#define EFFECTS_H
 
 #include <stdbool.h>
 #include <glib.h>

@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __COMBAT_H_
-#define __COMBAT_H_
+#ifndef COMBAT_H
+#define COMBAT_H
 
 #include <glib.h>
 

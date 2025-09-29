@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GAME_H_
-#define __GAME_H_
+#ifndef GAME_H
+#define GAME_H
 
 #include "inventory.h"
 #include "items.h"

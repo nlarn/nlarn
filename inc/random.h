@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RANDOM_H_
-#define __RANDOM_H_
+#ifndef RANDOM_H
+#define RANDOM_H
 
 #include <glib.h>
 
