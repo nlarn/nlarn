@@ -26,7 +26,7 @@
 
 /* direction of movement */
 /* ordered by number keys */
-typedef enum _direction
+typedef enum direction
 {
     GD_NONE,
     GD_SW,
@@ -41,9 +41,9 @@ typedef enum _direction
     GD_MAX
 } direction;
 
-typedef union _position
+typedef union position
 {
-    struct _bf
+    struct bf
     {
         gint32 x: 12;
         gint32 y: 12;
@@ -52,7 +52,7 @@ typedef union _position
     guint32 val;
 } position;
 
-typedef struct _rectangle
+typedef struct rectangle
 {
     guint64 x1: 16;
     guint64 y1: 16;
@@ -60,7 +60,7 @@ typedef struct _rectangle
     guint64 y2: 16;
 } rectangle;
 
-typedef struct _area
+typedef struct area
 {
     gint16 start_x;
     gint16 start_y;

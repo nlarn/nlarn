@@ -31,7 +31,7 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
 
 static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b, gpointer center);
 
-struct _fov
+struct fov
 {
     /* the actual field of vision */
     guchar data[MAP_MAX_Y][MAP_MAX_X];

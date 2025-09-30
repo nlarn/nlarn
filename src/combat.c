@@ -107,7 +107,7 @@ int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, gboolean
     return combat_calc_percentage(base_to_hit);
 }
 
-int combat_chance_player_to_monster_hit(struct player *p, struct _monster *m, gboolean use_weapon)
+int combat_chance_player_to_monster_hit(struct player *p, struct monster *m, gboolean use_weapon)
 {
     g_assert (p != NULL && m != NULL);
 
@@ -154,7 +154,7 @@ damage_min_max damage_calc_min_max(struct player *p, enum monster_t mt)
     return ret;
 }
 
-int damage_calc(struct player *p, struct _monster *m)
+int damage_calc(struct player *p, struct monster *m)
 {
     const int INSTANT_KILL = 10000;
     const damage_min_max mmd = damage_calc_min_max(p, monster_type(m));

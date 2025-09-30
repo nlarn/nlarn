@@ -22,7 +22,7 @@
 #include "enumFactory.h"
 #include "items.h"
 
-typedef enum _ammo_class
+typedef enum ammo_class
 {
     AMMO_SLING,
     AMMO_BOW,
@@ -39,7 +39,7 @@ typedef enum _ammo_class
 
 DECLARE_ENUM(ammo_t, AMMO_TYPE_ENUM)
 
-typedef struct _ammo_data
+typedef struct ammo_data
 {
     ammo_t type;
     const char *name;
@@ -53,7 +53,7 @@ typedef struct _ammo_data
     obtainable: 1;
 } ammo_data;
 
-typedef enum _weapon_class
+typedef enum weapon_class
 {
     WC_MELEE,   /* melee weapon */
     WC_RANGED,  /* ranged weapon */
@@ -89,7 +89,7 @@ typedef enum _weapon_class
 
 DECLARE_ENUM(weapon_t, WEAPON_TYPE_ENUM)
 
-typedef struct _weapon_data
+typedef struct weapon_data
 {
     weapon_t type;
     const char *name;
@@ -111,7 +111,6 @@ typedef struct _weapon_data
 
 /* forward declarations */
 struct player;
-struct _monster;
 
 /* external vars */
 extern const ammo_data ammos[AMT_MAX];

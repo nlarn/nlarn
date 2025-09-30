@@ -23,7 +23,7 @@
 #include "items.h"
 #include "utils.h"
 
-typedef enum _armour_class
+typedef enum armour_class
 {
     AC_BOOTS,
     AC_CLOAK,
@@ -60,7 +60,7 @@ typedef enum _armour_class
 
 DECLARE_ENUM(armour_t, ARMOUR_TYPE_ENUM)
 
-typedef struct _armour_data
+typedef struct armour_data
 {
     armour_t id;
     const char *name;

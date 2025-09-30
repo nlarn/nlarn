@@ -24,12 +24,12 @@
 #include "items.h"
 
 /* forward declarations */
-struct _inventory;
+struct inventory;
 
-typedef gint (*inv_callback_bool) (struct _inventory *inv, item *item);
-typedef void (*inv_callback_void) (struct _inventory *inv, item *item);
+typedef gint (*inv_callback_bool) (struct inventory *inv, item *item);
+typedef void (*inv_callback_void) (struct inventory *inv, item *item);
 
-typedef struct _inventory
+typedef struct inventory
 {
     inv_callback_bool pre_add;
     inv_callback_void post_add;

@@ -57,7 +57,7 @@ struct map;
 
 DECLARE_ENUM(sobject_t, SOBJECT_TYPE_ENUM)
 
-typedef struct _sobject_data
+typedef struct sobject_data
 {
     sobject_t sobject;
     const char glyph;

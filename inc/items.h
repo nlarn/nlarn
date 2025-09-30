@@ -89,16 +89,16 @@ typedef enum item_erosion_t {
 } item_erosion_type;
 
 struct game;
-struct _inventory;
+struct inventory;
 
-typedef struct _item {
+typedef struct item {
     gpointer oid;           /* item's game object id */
     item_t type;            /* element type */
     guint32 id;             /* item id, type specific */
     gint32 bonus;
     guint32 count;          /* for stackable items */
     GPtrArray *effects;     /* storage for effects */
-    struct _inventory *content;     /* for containers */
+    struct inventory *content;     /* for containers */
     char *notes;            /* storage for player's notes about the item */
     guint32
         blessed: 1,
@@ -214,7 +214,7 @@ item *item_disenchant(item *it);
  * @return the item, NULL if the item has been destroyed
  *
  */
-item *item_erode(struct _inventory **inv, item *it, item_erosion_type iet, gboolean visible);
+item *item_erode(struct inventory **inv, item *it, item_erosion_type iet, gboolean visible);
 
 int item_obtainable(item_t type, int id);
 

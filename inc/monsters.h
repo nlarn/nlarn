@@ -31,8 +31,8 @@
 
 /* forward declarations */
 
-struct _monster;
-typedef struct _monster monster;
+struct monster;
+typedef struct monster monster;
 
 struct game;
 struct player;

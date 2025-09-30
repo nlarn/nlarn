@@ -35,7 +35,7 @@
 /* forward declaration */
 struct game;
 
-typedef struct _player_stats
+typedef struct player_stats
 {
     guint deepest_level;
     gint  monsters_killed[MT_MAX];
@@ -70,7 +70,7 @@ typedef struct _player_stats
     guint dex_orig;
 } player_stats;
 
-typedef enum _player_sex
+typedef enum player_sex
 {
     PS_NONE,
     PS_MALE,
@@ -78,12 +78,12 @@ typedef enum _player_sex
     PS_MAX
 } player_sex;
 
-typedef struct _player_settings
+typedef struct player_settings
 {
     gboolean auto_pickup[IT_MAX]; /* automatically pick up item of enabled types */
 } player_settings;
 
-typedef struct _player_tile_memory
+typedef struct player_tile_memory
 {
     map_tile_t type;
     sobject_t sobject;
@@ -92,7 +92,7 @@ typedef struct _player_tile_memory
     trap_t trap;
 } player_tile_memory;
 
-typedef struct _player_sobject_memory
+typedef struct player_sobject_memory
 {
     position pos;
     sobject_t sobject;
@@ -182,7 +182,7 @@ typedef struct player
 } player;
 
 /* various causes of death */
-typedef enum _player_cod
+typedef enum player_cod
 {
     PD_NONE,      /* 0, required by setjmp for initialisation */
     PD_EFFECT,

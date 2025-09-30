@@ -22,13 +22,13 @@
 #include "cJSON.h"
 
 /* game messaging */
-typedef struct _message_log_entry
+typedef struct message_log_entry
 {
     guint32 gtime;      /* game time of log entry */
     char *message;
 } message_log_entry;
 
-typedef struct _message_log
+typedef struct message_log
 {
     guint32 gtime;      /* current game time */
     gint32 active;      /* flag to disable logging onto this log */

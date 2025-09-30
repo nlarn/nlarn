@@ -57,7 +57,7 @@ typedef struct {
 } monster_data_t;
 
 /* monster information hiding */
-struct _monster
+struct monster
 {
     monster_t type;
     gpointer oid;            /* monsters id inside the monster hash */

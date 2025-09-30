@@ -31,7 +31,7 @@ extern int scoreboard_fd;
 void scoreboard_close_fd();
 #endif
 
-typedef struct _score_t
+typedef struct score_t
 {
     char *player_name;
     gint8 sex;

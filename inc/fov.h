@@ -27,8 +27,8 @@
 
 /* the members of this struct are only known to the implementation of the
    following functions */
-struct _fov;
-typedef struct _fov fov;
+struct fov;
+typedef struct fov fov;
 
 /** @brief Create a FOV data structure
   *
