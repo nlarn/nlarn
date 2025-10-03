@@ -101,8 +101,8 @@ void text_destroy(GPtrArray *text);
 /* helpers for NULL-terminated string arrays */
 /* glib offers g_strfreev, g_strdupv, g_strjoinv and g_strv_length */
 char **strv_new();
-int strv_append(char ***list, const char *str);
-int strv_append_unique(char ***list, const char *str);
+size_t strv_append(char ***list, const char *str);
+size_t strv_append_unique(char ***list, const char *str);
 
 /* misc. text functions */
 char *str_strip(const char *str);

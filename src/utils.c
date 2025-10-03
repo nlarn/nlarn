@@ -396,12 +396,12 @@ char **strv_new()
 /**
  * adds a copy of str to the list
  */
-int strv_append(char ***list, const char *str)
+size_t strv_append(char ***list, const char *str)
 {
     g_assert(list != NULL);
     g_assert(str != NULL);
 
-    int len = g_strv_length(*list) + 1;
+    size_t len = g_strv_length(*list) + 1;
 
     *list = g_realloc (*list, sizeof(char*) * (len + 1));
 
@@ -414,7 +414,7 @@ int strv_append(char ***list, const char *str)
 /**
  * add a copy of str to the list if it is not yet part of the list
  */
-int strv_append_unique(char ***list, const char *str)
+size_t strv_append_unique(char ***list, const char *str)
 {
     /* compare elements to the new string and return false if the element existed */
     for (int len = 0; (*list)[len]; len++)
