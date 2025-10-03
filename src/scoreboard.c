@@ -109,10 +109,9 @@ GList *scores_load()
     /* close save file */
     gzclose(file);
 
-    /* parsed scoreboard; scoreboard entry */
-    cJSON *pscores, *s_entry;
 
     /* parse the scores */
+    cJSON *pscores;
     if ((pscores = cJSON_Parse(scores)) == NULL)
     {
         /* empty file, no entries */
@@ -128,7 +127,7 @@ GList *scores_load()
     }
 
     /* point to the first entry of the scores array */
-    s_entry = cJSON_GetObjectItem(pscores, "scores")->child;
+    cJSON *s_entry = cJSON_GetObjectItem(pscores, "scores")->child;
 
     while (s_entry != NULL)
     {
@@ -298,7 +297,6 @@ GList *score_add(game *g, score_t *score)
 char *score_death_description(score_t *score, int verbose)
 {
     const char *desc;
-    GString *text;
 
     g_assert(score != NULL);
 
@@ -343,7 +341,7 @@ char *score_death_description(score_t *score, int verbose)
         desc = "killed";
     }
 
-    text = g_string_new_len(NULL, 200);
+    GString *text = g_string_new_len(NULL, 200);
 
     g_string_append_printf(text, "%s (%c), %s", score->player_name,
                            (score->sex == PS_MALE) ? 'm' : 'f', desc);
@@ -485,11 +483,9 @@ char *scores_to_string(GList *scores, score_t *score)
          iterator && (score ? (nrec < (max(rank, 0) + 4)) : true);
          iterator = iterator->next, nrec++)
     {
-        gchar *desc;
-
         score_t *cscore = (score_t *)iterator->data;
 
-        desc = score_death_description(cscore, false);
+        gchar *desc = score_death_description(cscore, false);
         g_string_append_printf(text, "%s%2d) %7" G_GINT64_FORMAT " %s\n",
                                (cscore == score) ? "`EMPH`" : "",
                                nrec + 1, cscore->score, desc);

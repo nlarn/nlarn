@@ -84,14 +84,13 @@ const item_material_data item_materials[IM_MAX] =
 
 item *item_new(item_t item_type, int item_id)
 {
-    item *nitem;
     effect *eff = NULL;
     guint loops = 0;
 
     g_assert(item_type > IT_NONE && item_type < IT_MAX);
 
     /* has to be zeroed or memcmp will fail */
-    nitem = g_malloc0(sizeof(item));
+    item *nitem = g_malloc0(sizeof(item));
 
     nitem->type = item_type;
     nitem->id = item_id;
@@ -292,12 +291,11 @@ item *item_new_random(item_t item_type, gboolean finetouch)
 
 item *item_new_by_level(item_t item_type, int num_level)
 {
-    item *nitem;
-    float variance, id_base, divisor;
+    float variance;
 
     g_assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
 
-    divisor = 1 / (float)(MAP_MAX - 1);
+    float divisor = 1 / (float) (MAP_MAX - 1);
 
     switch (item_type)
     {
@@ -316,7 +314,7 @@ item *item_new_by_level(item_t item_type, int num_level)
         return item_new_random(item_type, true);
     }
 
-    id_base = item_max_id(item_type) * (num_level * divisor);
+    float id_base = item_max_id(item_type) * (num_level * divisor);
     int id_min = id_base - (item_max_id(item_type) * variance);
     int id_max = id_base + (item_max_id(item_type) * variance);
 
@@ -326,7 +324,7 @@ item *item_new_by_level(item_t item_type, int num_level)
     if (id_max > (int)item_max_id(item_type)) id_max = item_max_id(item_type);
 
     /* create the item */
-    nitem = item_new(item_type, rand_m_n(id_min, id_max));
+    item *nitem = item_new(item_type, rand_m_n(id_min, id_max));
 
     return item_new_finetouch(nitem);
 }
@@ -386,12 +384,10 @@ item *item_new_finetouch(item *it)
 
 item *item_copy(item *original)
 {
-    item *nitem;
-
     g_assert(original != NULL);
 
     /* clone item */
-    nitem = g_malloc0(sizeof(item));
+    item *nitem = g_malloc0(sizeof(item));
     memcpy(nitem, original, sizeof(item));
 
     /* copy effects */
@@ -420,11 +416,9 @@ item *item_copy(item *original)
 
 item *item_split(item *original, guint32 count)
 {
-    item *nitem;
-
     g_assert(original != NULL && count < original->count);
 
-    nitem = item_copy(original);
+    item *nitem = item_copy(original);
 
     nitem->count = count;
     original->count -= count;
@@ -553,14 +547,10 @@ static int item_enum_value_lookup(item_t typ, const char* str)
 
 item *item_deserialize(cJSON *iser, struct game *g)
 {
-    guint oid;
-    item *it;
-    cJSON *obj;
-
-    it = g_malloc0(sizeof(item));
+    item *it = g_malloc0(sizeof(item));
 
     /* must-have attributes */
-    oid = cJSON_GetObjectItem(iser, "oid")->valueint;
+    guint oid = cJSON_GetObjectItem(iser, "oid")->valueint;
     it->oid = GUINT_TO_POINTER(oid);
 
     it->type = item_t_value(cJSON_GetObjectItem(iser, "type")->valuestring);
@@ -570,7 +560,7 @@ item *item_deserialize(cJSON *iser, struct game *g)
     it->count = cJSON_GetObjectItem(iser, "count")->valueint;
 
     /* optional attributes */
-    obj = cJSON_GetObjectItem(iser, "blessed");
+    cJSON *obj = cJSON_GetObjectItem(iser, "blessed");
     if (obj != NULL) it->blessed = obj->valueint;
 
     obj = cJSON_GetObjectItem(iser, "cursed");
@@ -621,9 +611,6 @@ item *item_deserialize(cJSON *iser, struct game *g)
 
 int item_compare(item *a, item *b)
 {
-    int tmp_count, result;
-    gpointer oid_a, oid_b;
-
     if (a->type != b->type)
     {
         return false;
@@ -634,17 +621,17 @@ int item_compare(item *a, item *b)
     }
 
     /* as count can be different for equal items, save count of b */
-    tmp_count = b->count;
+    int tmp_count = b->count;
     b->count = a->count;
 
     /* store oids (never identical!) */
-    oid_a = a->oid;
-    oid_b = b->oid;
+    gpointer oid_a = a->oid;
+    gpointer oid_b = b->oid;
 
     a->oid = NULL;
     b->oid = NULL;
 
-    result = (memcmp(a, b, sizeof(item)) == 0);
+    int result = (memcmp(a, b, sizeof(item)) == 0);
 
     b->count = tmp_count;
 

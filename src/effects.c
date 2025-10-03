@@ -535,11 +535,9 @@ static const effect_data effects[ET_MAX] =
 
 effect *effect_new(effect_t type)
 {
-    effect *ne;
-
     g_assert(type > ET_NONE && type < ET_MAX);
 
-    ne = g_malloc0(sizeof(effect));
+    effect *ne = g_malloc0(sizeof(effect));
     ne->type = type;
     ne->start = game_turn(nlarn);
 
@@ -571,11 +569,9 @@ effect *effect_new(effect_t type)
 
 effect *effect_copy(effect *e)
 {
-    effect *ne;
-
     g_assert(e != NULL);
 
-    ne = g_malloc(sizeof(effect));
+    effect *ne = g_malloc(sizeof(effect));
     memcpy(ne, e, sizeof(effect));
 
     /* register copy with game */
@@ -614,13 +610,11 @@ void effect_serialize(gpointer oid, effect *e, cJSON *root)
 
 effect *effect_deserialize(cJSON *eser, game *g)
 {
-    effect *e;
-    guint oid;
     cJSON *itm;
 
-    e = g_malloc0(sizeof(effect));
+    effect *e = g_malloc0(sizeof(effect));
 
-    oid = cJSON_GetObjectItem(eser, "oid")->valueint;
+    guint oid = cJSON_GetObjectItem(eser, "oid")->valueint;
     e->oid =  GUINT_TO_POINTER(oid);
 
     e->type = effect_t_value(cJSON_GetObjectItem(eser, "type")->valuestring);

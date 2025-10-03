@@ -211,7 +211,6 @@ int display_player_hp_colour(const player *p, gboolean status)
 void display_paint_screen(player *p)
 {
     position pos = pos_invalid;
-    map *vmap;
     int attrs;              /* curses attributes */
 
     /* draw line around map */
@@ -220,7 +219,7 @@ void display_paint_screen(player *p)
     (void)mvaddch(MAP_MAX_Y, MAP_MAX_X, ACS_LRCORNER);
 
     /* make shortcut to the visible map */
-    vmap = game_map(nlarn, Z(p->pos));
+    map *vmap = game_map(nlarn, Z(p->pos));
 
     /* draw map */
     Z(pos) = Z(p->pos);
@@ -664,7 +663,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     const guint width = min(COLS - 4, DISPLAY_WINDOW_MAX_WIDTH);
     const int startx = (COLS - width) / 2;
 
-    guint len_orig, len_curr;
+    guint len_curr;
     gboolean redraw = false;
 
     /* the window title used for shops */
@@ -697,7 +696,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         inv_sort(*inv, (GCompareDataFunc)item_sort_normal, (gpointer)p);
 
     /* store inventory length */
-    len_orig = len_curr = inv_length_filtered(*inv, ifilter);
+    guint len_orig = len_curr = inv_length_filtered(*inv, ifilter);
 
     /* main loop */
     do
@@ -1112,10 +1111,7 @@ void display_config_autopickup(gboolean settings[IT_MAX])
 
 spell *display_spell_select(const char *title, player *p)
 {
-    display_window *swin, *ipop = NULL;
-    guint width, height;
-    guint startx, starty;
-    guint maxvis;
+    display_window *ipop = NULL;
     int key; /* keyboard input */
     int RUN = true;
 
@@ -1140,14 +1136,14 @@ spell *display_spell_select(const char *title, player *p)
     g_ptr_array_sort(p->known_spells, &spell_sort);
 
     /* set height according to spell count */
-    height = min((LINES - 7), (p->known_spells->len + 2));
-    maxvis = min(p->known_spells->len, height - 2);
+    guint height = min((LINES - 7), (p->known_spells->len + 2));
+    guint maxvis = min(p->known_spells->len, height - 2);
 
-    width = 46;
-    starty = (LINES - 3 - height) / 2;
-    startx = (min(MAP_MAX_X, COLS) - width) / 2;
+    guint width = 46;
+    guint starty = (LINES - 3 - height) / 2;
+    guint startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
-    swin = display_window_new(startx, starty, width, height, title);
+    display_window *swin = display_window_new(startx, starty, width, height, title);
 
     int prev_key = 0;
     do
@@ -1406,12 +1402,6 @@ mnemonics:
 
 int display_get_count(const char *caption, int value)
 {
-    display_window *mwin;
-    int height, width, basewidth;
-    int startx, starty;
-
-    GPtrArray *text;
-
     /* toggle insert / overwrite mode; start with overwrite */
     int insert_mode = false;
 
@@ -1428,18 +1418,18 @@ int display_get_count(const char *caption, int value)
     int cont = true;
 
     /* 8: input field width; 5: 3 spaces between border, caption + input field, 2 border */
-    basewidth = 8 + 5;
+    int basewidth = 8 + 5;
 
     /* choose a sane dialogue width */
-    width = min(basewidth + strlen(caption), COLS - 4);
+    int width = min(basewidth + strlen(caption), COLS - 4);
 
-    text = text_wrap(caption, width - basewidth, 0);
-    height = 2 + text->len;
+    GPtrArray *text = text_wrap(caption, width - basewidth, 0);
+    int height = 2 + text->len;
 
-    starty = (LINES - height) / 2;
-    startx = (COLS - width) / 2;
+    int starty = (LINES - height) / 2;
+    int startx = (COLS - width) / 2;
 
-    mwin = display_window_new(startx, starty, width, height, NULL);
+    display_window *mwin = display_window_new(startx, starty, width, height, NULL);
 
     for (guint line = 0; line < text->len; line++)
     {
@@ -1803,11 +1793,9 @@ char *display_get_string(const char *title, const char *caption, const char *val
 
 int display_get_yesno(const char *question, const char *title, const char *yes, const char *no)
 {
-    display_window *ywin;
     int RUN = true;
     int selection = false;
     guint line;
-    GPtrArray *text;
 
     const guint padding = 1;
     const guint margin = 2;
@@ -1831,7 +1819,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
         text_width = 60;
 
     /* wrap question according to width */
-    text = text_wrap(question, text_width + 1, 0);
+    GPtrArray *text = text_wrap(question, text_width + 1, 0);
 
     /* Determine window width. Either defined by the length of the button
      * labels or width of the text */
@@ -1845,7 +1833,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
     guint startx = (COLS / 2) - (width / 2);
     guint starty = (LINES / 2) - 4;
 
-    ywin = display_window_new(startx, starty, width, text->len + 4, title);
+    display_window *ywin = display_window_new(startx, starty, width, text->len + 4, title);
 
     for (line = 0; line < text->len; line++)
     {
@@ -1955,11 +1943,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 
 direction display_get_direction(const char *title, int *available)
 {
-    display_window *dwin;
-
     int *dirs = NULL;
-    int startx, starty;
-    int width;
     int RUN = true;
 
     /* direction to return */
@@ -1978,13 +1962,13 @@ direction display_get_direction(const char *title, int *available)
         dirs = available;
     }
 
-    width = max(9, strlen(title) + 4);
+    int width = max(9, strlen(title) + 4);
 
     /* set startx and starty to something that makes sense */
-    startx = (min(MAP_MAX_X, COLS) / 2) - (width / 2);
-    starty = (LINES / 2) - 4;
+    int startx = (min(MAP_MAX_X, COLS) / 2) - (width / 2);
+    int starty = (LINES / 2) - 4;
 
-    dwin = display_window_new(startx, starty, width, 9, title);
+    display_window *dwin = display_window_new(startx, starty, width, 9, title);
 
     mvwaprintw(dwin->window, 3, 3, CP_UI_FG, "\\|/");
     mvwaprintw(dwin->window, 4, 3, CP_UI_FG, "- -");
@@ -2117,9 +2101,6 @@ position display_get_position(player *p,
     /* start at player's position */
     position start = p->pos;
 
-    /* the position chosen by the player */
-    position cpos;
-
     /* if the player has recently targeted a monster.. */
     if (visible && p->ptarget != NULL)
     {
@@ -2151,8 +2132,9 @@ position display_get_position(player *p,
             start = monster_pos(m);
     }
 
-    cpos = display_get_new_position(p, start, message, ray, ball, false,
-                                    radius, passable, visible);
+    /* the position chosen by the player */
+    position cpos = display_get_new_position(p, start, message, ray, ball,
+        false, radius, passable, visible);
 
     if (pos_valid(cpos))
     {
@@ -2592,11 +2574,10 @@ void display_show_history(message_log *log, const char *title)
 {
     GString *text = g_string_new(NULL);
     char intrep[11] = { 0 }; /* string representation of the game time */
-    int twidth; /* the number of characters of the current game time */
 
-    /* determine the width of the current game turn */
+    /* determine the number of characters of the current game turn */
     g_snprintf(intrep, 10, "%d", nlarn->gtime);
-    twidth = strlen(intrep);
+    int twidth = strlen(intrep);
 
     /* assemble reversed game log */
     for (guint idx = log_length(log); idx > 0; idx--)
@@ -2739,9 +2720,6 @@ int display_show_message(const char *title, const char *message, int indent)
 
 display_window *display_popup(int x1, int y1, int width, const char *title, const char *msg, int indent)
 {
-    display_window *win;
-    GPtrArray *text;
-    int height;
     const guint max_width = COLS - x1 - 1;
     const guint max_height = LINES - y1;
 
@@ -2768,10 +2746,10 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
             width = max_width;
     }
 
-    text = text_wrap(msg, width - 4, indent);
-    height = min(text->len + 2, max_height);
+    GPtrArray *text = text_wrap(msg, width - 4, indent);
+    int height = min(text->len + 2, max_height);
 
-    win = display_window_new(x1, y1, width, height, title);
+    display_window *win = display_window_new(x1, y1, width, height, title);
 
     /* display message */
     int currattr = COLOURLESS;
@@ -3021,9 +2999,7 @@ static void display_inventory_help(GPtrArray *callbacks)
 static display_window *display_window_new(int x1, int y1, int width,
                                           int height, const char *title)
 {
-    display_window *dwin;
-
-    dwin = g_malloc0(sizeof(display_window));
+    display_window *dwin = g_malloc0(sizeof(display_window));
 
     dwin->x1 = x1;
     dwin->y1 = y1;
@@ -3226,15 +3202,14 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
 static display_window *display_item_details(guint x1, guint y1, guint width,
                                             item *it, player *p, gboolean shop)
 {
-    /* the pop-up window created by display_popup */
-    display_window *idpop;
-
     /* determine if the item is known or displayed in the shop */
     const gboolean known = shop | player_item_known(p, it);
 
     /* the detailed item description */
     char *msg = item_detailed_description(it, known, shop);
-    idpop = display_popup(x1, y1, width, "Item details", msg, 0);
+
+    /* the pop-up window created by display_popup */
+    display_window *idpop = display_popup(x1, y1, width, "Item details", msg, 0);
 
     /* tidy up */
     g_free(msg);

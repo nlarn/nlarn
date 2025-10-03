@@ -39,9 +39,6 @@ static gboolean container_trigger_trap(player *p, item *container, gboolean forc
 
 void container_open(player *p, inventory **inv __attribute__((unused)), item *container)
 {
-    gchar *container_desc;
-    GPtrArray *callbacks;
-    display_inv_callback *callback;
     gboolean container_provided = (container == NULL);
 
     g_assert (p != NULL);
@@ -61,8 +58,8 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
         return;
 
     /* Describe container */
-    container_desc = item_describe(container, player_item_known(p, container),
-            true, true);
+    gchar *container_desc = item_describe(container,
+        player_item_known(p, container), true, true);
 
     if (!player_make_move(p, 2, true, "opening %s", container_desc))
     {
@@ -97,9 +94,9 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     }
 
     /* prepare callback functions */
-    callbacks = g_ptr_array_new();
+    GPtrArray *callbacks = g_ptr_array_new();
 
-    callback = g_malloc0(sizeof(display_inv_callback));
+    display_inv_callback *callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(`KEY`g`end`)et";
     callback->helpmsg = "Get the selected item out the container.";
     callback->key = 'g';
@@ -122,7 +119,7 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
 void container_item_add(player *p, inventory **inv, item *element)
 {
     inventory **target_inv = NULL;
-    gchar *container_desc = NULL, *element_desc;
+    gchar *container_desc = NULL;
     gboolean carried_container = false;
 
     g_assert(p != NULL && element != NULL);
@@ -219,8 +216,8 @@ void container_item_add(player *p, inventory **inv, item *element)
     if (carried_container) log_enable(nlarn->log);
 
     /* log the event */
-    element_desc = item_describe(element, player_item_known(p, element),
-            false, true);
+    gchar *element_desc = item_describe(element, player_item_known(p, element),
+                                        false, true);
 
     log_add_entry(nlarn->log, "You put %s into %s.",
             element_desc, container_desc);
@@ -247,8 +244,6 @@ void container_item_add(player *p, inventory **inv, item *element)
 
 void container_item_unpack(player *p, inventory **inv, item *element)
 {
-    gchar *desc;
-
     g_assert(p != NULL && inv != NULL && element != NULL);
 
     if (element->count > 1)
@@ -286,7 +281,7 @@ void container_item_unpack(player *p, inventory **inv, item *element)
         inv_del_element(inv, element);
     }
 
-    desc = item_describe(element, player_item_known(p, element), false, false);
+    gchar *desc = item_describe(element, player_item_known(p, element), false, false);
 
     if (!player_make_move(p, 2, true, "putting %s in your pack", desc))
     {

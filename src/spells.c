@@ -386,11 +386,9 @@ static gboolean spell_area_pos_hit(position pos,
 
 spell *spell_new(spell_id id)
 {
-    spell *nspell;
-
     g_assert(id < SP_MAX);
 
-    nspell = g_malloc0(sizeof(spell));
+    spell *nspell = g_malloc0(sizeof(spell));
     nspell->id = id;
     nspell->knowledge = 1;
 
@@ -701,7 +699,6 @@ static gboolean spell_type_player(spell *s, struct player *p)
 static gboolean spell_type_point(spell *s, struct player *p)
 {
     monster *m = NULL;
-    position pos;
     effect *e;
     char buffer[61];
     int amount = 0;
@@ -711,8 +708,8 @@ static gboolean spell_type_point(spell *s, struct player *p)
     g_snprintf(buffer, 60, "Select a target for %s.", spell_name(s));
 
     /* Allow non-visible positions if the player is blinded. */
-    pos = display_get_position(p, buffer, false, false, 0, false,
-            !player_effect(p, ET_BLINDNESS));
+    position pos = display_get_position(p, buffer, false, false, 0, false,
+                                        !player_effect(p, ET_BLINDNESS));
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -935,7 +932,6 @@ static gboolean spell_type_ray(spell *s, struct player *p)
 
 static gboolean spell_type_flood(spell *s, struct player *p)
 {
-    position pos;
     char buffer[81];
     int radius = 0;
     int amount = 0;
@@ -944,7 +940,7 @@ static gboolean spell_type_flood(spell *s, struct player *p)
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_FLOOD));
 
     g_snprintf(buffer, 60, "Where do you want to place the %s?", spell_name(s));
-    pos = display_get_position(p, buffer, false, false, 0, false, true);
+    position pos = display_get_position(p, buffer, false, false, 0, false, true);
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -1000,8 +996,6 @@ static gboolean spell_type_blast(spell *s, struct player *p)
 {
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
 
-    area *ball;
-    position pos;
     char buffer[61];
     int amount = 0;
     int radius = 0;
@@ -1020,8 +1014,8 @@ static gboolean spell_type_blast(spell *s, struct player *p)
 
     g_snprintf(buffer, 60, "Point to the center of the %s.", spell_name(s));
     /* Allow non-visible positions if the player is blinded. */
-    pos = display_get_position(p, buffer, false, true, radius, false,
-            !player_effect(p, ET_BLINDNESS));
+    position pos = display_get_position(p, buffer, false, true, radius, false,
+                                        !player_effect(p, ET_BLINDNESS));
 
     /* player pressed ESC */
     if (!pos_valid(pos))
@@ -1031,8 +1025,8 @@ static gboolean spell_type_blast(spell *s, struct player *p)
     }
 
     /* get the affected area to determine if the player would be hit */
-    ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos,
-                radius, true));
+    area *ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos,
+                                                                        radius, true));
 
     gboolean player_affected = area_pos_get(ball, p->pos);
     area_destroy(ball);
@@ -1056,7 +1050,6 @@ static gboolean spell_type_blast(spell *s, struct player *p)
 
 static gboolean spell_alter_reality(spell *s, player *p)
 {
-    map *nlevel;
     position pos = { { 0, 0, Z(p->pos) } };
 
     if (Z(p->pos) == 0)
@@ -1072,7 +1065,7 @@ static gboolean spell_alter_reality(spell *s, player *p)
     map_destroy(game_map(nlarn, Z(p->pos)));
 
     /* create new map */
-    nlevel = nlarn->maps[Z(p->pos)] = map_new(Z(p->pos), nlarn_mazefile);
+    map *nlevel = nlarn->maps[Z(p->pos)] = map_new(Z(p->pos), nlarn_mazefile);
 
     /* reposition player (if needed) */
     if (!map_pos_passable(nlevel, p->pos))
@@ -1085,8 +1078,6 @@ static gboolean spell_alter_reality(spell *s, player *p)
 
 gboolean spell_create_monster(spell *s __attribute__((unused)), struct player *p)
 {
-    position mpos;
-
     /* this spell doesn't work in town */
     if (Z(p->pos) == 0)
     {
@@ -1095,8 +1086,8 @@ gboolean spell_create_monster(spell *s __attribute__((unused)), struct player *p
     }
 
     /* try to find a space for the monster near the player */
-    mpos = map_find_space_in(game_map(nlarn, Z(p->pos)),
-                             rect_new_sized(p->pos, 2), LE_MONSTER, false);
+    position mpos = map_find_space_in(game_map(nlarn, Z(p->pos)),
+                                      rect_new_sized(p->pos, 2), LE_MONSTER, false);
 
     if (pos_valid(mpos))
     {
@@ -1171,11 +1162,10 @@ static gboolean spell_cure_blindness(spell *s __attribute__((unused)), struct pl
 
 static gboolean spell_phantasmal_forces(spell *s, struct player *p)
 {
-    position mpos;
     monster *m = NULL;
 
-    mpos = display_get_position(p, "Choose a target for phantasmal forces.",
-                                false, false, 0, true, true);
+    position mpos = display_get_position(p, "Choose a target for phantasmal forces.",
+                                         false, false, 0, true, true);
 
     if (!pos_valid(mpos))
     {
@@ -1211,7 +1201,6 @@ static gboolean spell_phantasmal_forces(spell *s, struct player *p)
 
 static gboolean spell_scare_monsters(spell *s, struct player *p)
 {
-    monster *m;
     int count = 0;
     position pos = pos_invalid;
     map *cmap = game_map(nlarn, Z(p->pos));
@@ -1235,7 +1224,7 @@ static gboolean spell_scare_monsters(spell *s, struct player *p)
                 continue;
             }
 
-            m = map_get_monster_at(cmap, pos);
+            monster *m = map_get_monster_at(cmap, pos);
 
             /* no monster at position? */
             if (m == NULL) continue;
@@ -1257,20 +1246,17 @@ static gboolean spell_scare_monsters(spell *s, struct player *p)
 
 static gboolean spell_summon_demon(spell *s, struct player *p)
 {
-    monster *demon;
-    position pos;
-
     /* find a place near the player for the demon servant */
-    pos = map_find_space_in(game_map(nlarn, Z(p->pos)),
-                            rect_new_sized(p->pos, 2),
-                            LE_MONSTER, false);
+    position pos = map_find_space_in(game_map(nlarn, Z(p->pos)),
+                                     rect_new_sized(p->pos, 2),
+                                     LE_MONSTER, false);
 
     if (!pos_valid(pos))
         return false;
 
     /* generate a demon */
-    demon = monster_new(min(MT_DEMONLORD_I + (s->knowledge - 1),
-                            MT_DEMONLORD_VII), pos, NULL);
+    monster *demon = monster_new(min(MT_DEMONLORD_I + (s->knowledge - 1),
+                                     MT_DEMONLORD_VII), pos, NULL);
 
     /* turn the demon into a servant */
     monster_update_action(demon, MA_SERVE);
@@ -1280,11 +1266,9 @@ static gboolean spell_summon_demon(spell *s, struct player *p)
 
 static gboolean spell_make_wall(spell *s __attribute__((unused)), player *p)
 {
-    position pos;
-
-    pos = display_get_new_position(p, p->pos,
-                                   "Select a position where you want to place a wall.",
-                                   false, false, false, 0, false, true);
+    position pos = display_get_new_position(p, p->pos,
+        "Select a position where you want to place a wall.",
+        false, false, false, 0, false, true);
 
     if (pos_identical(pos, p->pos))
     {
@@ -1346,12 +1330,11 @@ static gboolean spell_make_wall(spell *s __attribute__((unused)), player *p)
 gboolean spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
 {
     monster *m;
-    position pos;
     map *pmap = game_map(nlarn, Z(p->pos));
 
-    pos = display_get_new_position(p, p->pos,
-                                   "What do you want to vaporize?",
-                                   false, false, false, 0, false, true);
+    position pos = display_get_new_position(p, p->pos,
+        "What do you want to vaporize?",
+        false, false, false, 0, false, true);
 
     if (!pos_valid(pos))
     {

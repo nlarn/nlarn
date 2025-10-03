@@ -1,6 +1,6 @@
 /*
  * spheres.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -29,9 +29,7 @@ static void sphere_kill_monster(sphere *s, monster *m);
 
 sphere *sphere_new(position pos, player *owner, int lifetime)
 {
-    sphere *s;
-
-    s = g_malloc0(sizeof(sphere));
+    sphere *s = g_malloc0(sizeof(sphere));
 
     s->pos = pos;
     s->owner = owner;
@@ -85,11 +83,8 @@ void sphere_deserialize(cJSON *sser, game *g)
 
 void sphere_move(sphere *s, game *g)
 {
-    position npos;
     int tries = 0;
-    direction dir;
     monster *m;
-    map *smap;
 
     g_assert(s != NULL && g != NULL);
 
@@ -103,11 +98,11 @@ void sphere_move(sphere *s, game *g)
         return;
     }
 
-    smap = game_map(g, Z(s->pos));
+    map *smap = game_map(g, Z(s->pos));
 
     /* try to move sphere into its direction */
-    dir = s->dir;
-    npos = pos_move(s->pos, dir);
+    direction dir = s->dir;
+    position npos = pos_move(s->pos, dir);
 
     /* if the new position does not work, try to find another one */
     while ((!pos_valid(npos) || !map_pos_passable(smap, npos))
@@ -238,12 +233,7 @@ static void sphere_hit_owner(game *g, sphere *s)
 
 static void sphere_kill_monster(sphere *s, monster *m)
 {
-    monster *mret; /* monster returned by monster_damage_take */
-    guint mexp;    /* xp for killing the monster */
-
     g_assert(s != NULL && m != NULL);
-
-    mexp = monster_exp(m);
 
     if (monster_in_sight(m))
     {
@@ -252,7 +242,11 @@ static void sphere_kill_monster(sphere *s, monster *m)
                 monster_name(m));
     }
 
-    mret = monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, DAMO_SPHERE, s));
+    /* xp for killing the monster */
+    guint mexp = monster_exp(m);
+
+    monster *mret = monster_damage_take(m,
+        damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, DAMO_SPHERE, s));
 
     if (!mret && s->owner)
     {

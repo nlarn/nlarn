@@ -128,11 +128,8 @@ static int player_item_filter_multiple(player *p, item *it);
 
 player *player_new()
 {
-    player *p;
-    item *it;
-
     /* initialize player */
-    p = g_malloc0(sizeof(player));
+    player *p = g_malloc0(sizeof(player));
 
     p->strength     = 12;
     p->constitution = 12;
@@ -157,7 +154,7 @@ player *player_new()
     inv_callbacks_set(p->inventory, &player_inv_pre_add, &player_inv_weight_recalc,
                       NULL, &player_inv_weight_recalc);
 
-    it = item_new(IT_ARMOUR, AT_LEATHER);
+    item *it = item_new(IT_ARMOUR, AT_LEATHER);
     it->bonus = 1;
     player_item_identify(p, NULL, it);
     inv_add(&p->inventory, it);
@@ -500,10 +497,9 @@ cJSON *player_serialize(player *p)
 
         for (guint idx = 0; idx < p->sobjmem->len; idx++)
         {
-            player_sobject_memory *som;
             cJSON *soms = cJSON_CreateObject();
 
-            som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
+            player_sobject_memory *som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
 
             cJSON_AddNumberToObject(soms, "pos", pos_val(som->pos));
             cJSON_AddStringToObject(soms, "sobject",
@@ -560,10 +556,9 @@ cJSON *player_serialize(player *p)
 
 player *player_deserialize(cJSON *pser)
 {
-    player *p;
-    cJSON *obj, *elem;
+    cJSON *elem;
 
-    p = g_malloc0(sizeof(player));
+    player *p = g_malloc0(sizeof(player));
 
     p->name = g_strdup(cJSON_GetObjectItem(pser, "name")->valuestring);
     p->sex = cJSON_GetObjectItem(pser, "sex")->valueint;
@@ -591,7 +586,7 @@ player *player_deserialize(cJSON *pser)
     p->movement = cJSON_GetObjectItem(pser, "movement")->valueint;
 
     /* known spells */
-    obj = cJSON_GetObjectItem(pser, "known_spells");
+    cJSON *obj = cJSON_GetObjectItem(pser, "known_spells");
     if (obj != NULL)
         p->known_spells = spells_deserialize(obj);
     else
@@ -810,7 +805,6 @@ static void player_effects_expire(gpointer effect_id, gpointer pptr)
 
 gboolean player_make_move(player *p, int turns, gboolean interruptible, const char *desc, ...)
 {
-    int frequency; /* number of turns between occasions */
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
     g_autofree char *description = NULL, *popup_desc = NULL;
@@ -845,8 +839,8 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
         pop = display_popup(2, 2, 40, NULL, popup_desc, 0);
     }
 
-    /* modifier for frequency */
-    frequency = game_difficulty(nlarn) << 3;
+    /* number of turns between occasions */
+    int frequency = game_difficulty(nlarn) << 3;
 
     do
     {
@@ -1273,9 +1267,6 @@ gboolean player_movement_possible(player *p)
 int player_move(player *p, direction dir, gboolean open_door)
 {
     int times = 1;      /* how many time ticks it took */
-    position target_p;  /* coordinates of target */
-    map *pmap;          /* shortcut to player's current map */
-    monster *target_m;  /* monster on target tile (if any) */
     sobject_t so;       /* stationary object on target tile (if any) */
     gboolean move_possible = false;
 
@@ -1289,19 +1280,20 @@ int player_move(player *p, direction dir, gboolean open_door)
         dir = rand_1n(GD_MAX);
 
     /* determine target position of move */
-    target_p = pos_move(p->pos, dir);
+    position target_p = pos_move(p->pos, dir);
 
     /* exceeded map limits */
     if (!pos_valid(target_p))
         return false;
 
     /* make a shortcut to the current map */
-    pmap = game_map(nlarn, Z(p->pos));
+    map *pmap = game_map(nlarn, Z(p->pos));
 
     if (open_door && map_sobject_at(pmap, target_p) == LS_CLOSEDDOOR)
         return player_door_open(nlarn->p, dir);
 
-    target_m = map_get_monster_at(pmap, target_p);
+    /* monster on target tile (if any) */
+    monster *target_m = map_get_monster_at(pmap, target_p);
 
     if (target_m && monster_unknown(target_m))
     {
@@ -1400,14 +1392,13 @@ int player_attack(player *p, monster *m)
 
     if (chance(5) || chance(combat_chance_player_to_monster_hit(p, m, true)))
     {
-        damage *dam;
         effect *e;
 
         /* placed a hit */
         log_add_entry(nlarn->log, "You hit the %s.", monster_get_name(m));
 
-        dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, damage_calc(p, m),
-                         DAMO_PLAYER, p);
+        damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, damage_calc(p, m),
+                                 DAMO_PLAYER, p);
 
         /* weapon damage due to rust when hitting certain monsters */
         if (p->eq_weapon && monster_flags(m, METALLIVORE))
@@ -1570,12 +1561,11 @@ int player_map_enter(player *p, map *l, gboolean teleported)
 
 item **player_get_random_armour(player *p, const bool enchantable)
 {
-    GPtrArray *equipped_armour;
     item **armour = NULL;
 
     g_assert (p != NULL);
 
-    equipped_armour = g_ptr_array_new();
+    GPtrArray *equipped_armour = g_ptr_array_new();
 
     /* add each equipped piece of armour to the pool to choose from */
     if (p->eq_boots)  g_ptr_array_add(equipped_armour, &p->eq_boots);
@@ -1715,19 +1705,17 @@ static void player_autopickup(player *p)
 
 void player_level_gain(player *p, int count)
 {
-    const char *desc_orig, *desc_new;
-
     g_assert(p != NULL && count > 0);
 
     /* experience level 100 is the end of the career */
     if (p->level == 100)
         return;
 
-    desc_orig = player_get_level_desc(p);
+    const char *desc_orig = player_get_level_desc(p);
 
     p->level += count;
 
-    desc_new = player_get_level_desc(p);
+    const char *desc_new = player_get_level_desc(p);
 
     if (g_strcmp0(desc_orig, desc_new) != 0)
     {
@@ -1748,10 +1736,8 @@ void player_level_gain(player *p, int count)
 
     for (int i = 0; i < count; i++)
     {
-        int base;
-
         /* increase HP max */
-        base = (p->constitution - game_difficulty(nlarn)) >> 1;
+        int base = (p->constitution - game_difficulty(nlarn)) >> 1;
         if (p->level < (guint)max(7 - game_difficulty(nlarn), 0))
             base += p->constitution >> 2;
 
@@ -1782,10 +1768,8 @@ void player_level_lose(player *p, int count)
 
     for (int i = 0; i < count; i++)
     {
-        int base;
-
         /* decrease HP max */
-        base = (p->constitution - game_difficulty(nlarn)) >> 1;
+        int base = (p->constitution - game_difficulty(nlarn)) >> 1;
         if (p->level < (guint)max(7 - game_difficulty(nlarn), 0))
             base += p->constitution >> 2;
 
@@ -1890,8 +1874,6 @@ gboolean player_evade(player *p) {
 void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause)
 {
     effect *e = NULL;
-    int hp_orig;
-    guint effects_count;
     position origin = pos_invalid;
 
     g_assert(p != NULL && dam != NULL);
@@ -1923,8 +1905,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
     /* store player's hit points and the number
        of effects before calculating the damage */
-    hp_orig = p->hp;
-    effects_count = p->effects->len;
+    int hp_orig = p->hp;
+    guint effects_count = p->effects->len;
 
     /* keep damage type and amount for subsequent usage, but free the damage
        object itself - when the player dies, the object will be leaked */
@@ -2494,11 +2476,11 @@ void player_effects_add(player *p, GPtrArray *effects)
 
 int player_effect_del(player *p, effect *e)
 {
-    int result, str_orig;
+    int result;
 
     g_assert(p != NULL && e != NULL && e->type > ET_NONE && e->type < ET_MAX);
 
-    str_orig = player_get_str(p);
+    int str_orig = player_get_str(p);
 
     if ((result = effect_del(p->effects, e)))
     {
@@ -2567,9 +2549,6 @@ char **player_effect_text(player *p)
 
 int player_inv_display(player *p)
 {
-    GPtrArray *callbacks;
-    display_inv_callback *callback;
-
     g_assert(p != NULL);
 
     if (inv_length(p->inventory) == 0)
@@ -2580,9 +2559,9 @@ int player_inv_display(player *p)
     }
 
     /* define callback functions */
-    callbacks = g_ptr_array_new();
+    GPtrArray *callbacks = g_ptr_array_new();
 
-    callback = g_malloc0(sizeof(display_inv_callback));
+    display_inv_callback *callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(`KEY`d`end`)rop";
     callback->helpmsg = "Drop the selected item. If the item is a stack of multiple items, you will be prompted for the amount you want to drop.";
     callback->key = 'd';
@@ -2683,11 +2662,7 @@ char *player_inv_weight(player *p)
 
 int player_inv_pre_add(inventory *inv, item *it)
 {
-    player *p;
-    int pack_weight;
-    float can_carry;
-
-    p = (player *)inv->owner;
+    player *p = (player *) inv->owner;
 
     if (player_effect(p, ET_OVERSTRAINED))
     {
@@ -2696,10 +2671,10 @@ int player_inv_pre_add(inventory *inv, item *it)
     }
 
     /* calculate inventory weight */
-    pack_weight = inv_weight(inv);
+    int pack_weight = inv_weight(inv);
 
     /* player can carry 2kg per str */
-    can_carry = 2000 * (float)player_get_str(p);
+    float can_carry = 2000 * (float) player_get_str(p);
 
     /* check if item weight can be carried */
     if ((pack_weight + item_weight(it)) > (int)(can_carry * 1.3))
@@ -2721,19 +2696,15 @@ int player_inv_pre_add(inventory *inv, item *it)
 
 void player_inv_weight_recalc(inventory *inv, item *it __attribute__((unused)))
 {
-    int pack_weight;
-    float can_carry;
     effect *e = NULL;
-
-    player *p;
 
     g_assert (inv != NULL);
 
-    p = (player *)inv->owner;       /* make shortcut */
-    pack_weight = inv_weight(inv);  /* calculate inventory weight */
+    player *p = (player *) inv->owner; /* make shortcut */
+    int pack_weight = inv_weight(inv); /* calculate inventory weight */
 
     /* the player can carry 2kg per str */
-    can_carry = 2000 * (float)player_get_str(p);
+    float can_carry = 2000 * (float) player_get_str(p);
 
     if (pack_weight > (int)(can_carry * 1.3))
     {
@@ -3529,9 +3500,6 @@ int player_item_not_equipped(item *it)
 
 char *player_item_identified_list(player *p)
 {
-    GString *list;
-    item *it; /* fake pretend item */
-
     item_t type_ids[] =
     {
         IT_AMULET,
@@ -3545,8 +3513,10 @@ char *player_item_identified_list(player *p)
 
     g_assert (p != NULL);
 
-    list = g_string_new(NULL);
-    it = item_new(type_ids[1], 1);
+    GString *list = g_string_new(NULL);
+
+    /* fake pretend item */
+    item *it = item_new(type_ids[1], 1);
     it->bonus_known = false;
 
     for (guint idx = 0; type_ids[idx] != IT_NONE; idx++)
@@ -4251,8 +4221,8 @@ void player_list_sobjmem(player *p)
         /* assemble a list of landmarks per map */
         for (guint idx = 0; idx < p->sobjmem->len; idx++)
         {
-            player_sobject_memory *som;
-            som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
+            player_sobject_memory *som = &g_array_index(p->sobjmem,
+                player_sobject_memory, idx);
 
             g_string_append_printf(sobjlist, "%-4s %s (%d, %d)\n",
                                    (Z(som->pos) > prevmap) ? map_names[Z(som->pos)] : "",
@@ -4271,7 +4241,6 @@ void player_update_fov(player *p)
 {
     int radius;
     position pos = p->pos;
-    map *pmap;
 
     int range = (Z(p->pos) == 0 ? 15 : 6);
 
@@ -4286,7 +4255,7 @@ void player_update_fov(player *p)
     }
 
     /* get current map */
-    pmap = game_map(nlarn, Z(p->pos));
+    map *pmap = game_map(nlarn, Z(p->pos));
 
     /* determine if the player has infravision */
     gboolean infravision = player_effect(p, ET_INFRAVISION);
@@ -4498,8 +4467,8 @@ static void player_sobject_memorize(player *p, sobject_t sobject, position pos)
     /* check if the sobject has already been memorized */
     for (guint idx = 0; idx < p->sobjmem->len; idx++)
     {
-        player_sobject_memory *som;
-        som = &g_array_index(p->sobjmem, player_sobject_memory, idx);
+        player_sobject_memory *som = &g_array_index(p->sobjmem,
+            player_sobject_memory, idx);
 
         /* memory for this position exists */
         if (pos_identical(som->pos, pos))
@@ -4553,8 +4522,8 @@ gboolean player_adjacent_monster(player *p, gboolean ignore_harmless)
     gboolean monster_visible = false;
 
     /* get the list of all visible monsters */
-    GList *mlist, *miter;
-    miter = mlist = fov_get_visible_monsters(p->fv);
+    GList *mlist;
+    GList *miter = mlist = fov_get_visible_monsters(p->fv);
 
     /* no visible monsters? */
     if (mlist == NULL)
@@ -4619,9 +4588,7 @@ static int player_sobjects_sort(gconstpointer a, gconstpointer b)
 
 static cJSON *player_memory_serialize(player *p, position pos)
 {
-    cJSON *mser;
-
-    mser = cJSON_CreateObject();
+    cJSON *mser = cJSON_CreateObject();
     if (player_memory_of(p, pos).type > LT_NONE)
         cJSON_AddStringToObject(mser, "type",
                 map_tile_t_string(player_memory_of(p, pos).type));
@@ -4647,9 +4614,7 @@ static cJSON *player_memory_serialize(player *p, position pos)
 
 static void player_memory_deserialize(player *p, position pos, cJSON *mser)
 {
-    cJSON *obj;
-
-    obj = cJSON_GetObjectItem(mser, "type");
+    cJSON *obj = cJSON_GetObjectItem(mser, "type");
     if (obj != NULL)
         player_memory_of(p, pos).type = map_tile_t_value(obj->valuestring);
 
@@ -4675,9 +4640,7 @@ void calc_fighting_stats(player *p)
     g_assert(p != NULL);
 
     gchar *desc = NULL;
-    GString *text;
-
-    text = g_string_new("");
+    GString *text = g_string_new("");
 
     if (p->eq_weapon)
     {
@@ -4794,11 +4757,10 @@ void calc_fighting_stats(player *p)
 
     if (display_get_yesno("Do you want to save the calculations?",NULL, NULL, NULL))
     {
-        char *filename, *proposal;
         GError *error = NULL;
 
-        proposal = g_strconcat(p->name, ".stat", NULL);
-        filename = display_get_string(NULL, "Enter filename: ", proposal, 40);
+        char *proposal = g_strconcat(p->name, ".stat", NULL);
+        char *filename = display_get_string(NULL, "Enter filename: ", proposal, 40);
 
         if (filename != NULL)
         {
@@ -4870,12 +4832,10 @@ static char *player_equipment_list(player *p)
 static char *player_create_obituary(player *p, score_t *score, GList *scores)
 {
     const char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
+    gchar *tmp = score_death_description(score, true);
 
     /* the obituary */
-    GString *text;
-
-    gchar *tmp = score_death_description(score, true);
-    text = g_string_new(tmp);
+    GString *text = g_string_new(tmp);
     g_free(tmp);
 
     /* assemble surrounding scores list */
@@ -5120,7 +5080,6 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
 static void player_memorial_file_save(player *p, const char *text)
 {
     char *proposal = NULL;
-    char *filename;
     gboolean done = false;
 
     while (!done)
@@ -5135,7 +5094,8 @@ static void player_memorial_file_save(player *p, const char *text)
             proposal = g_strconcat(p->name, ".txt", NULL);
         }
 
-        filename = display_get_string(NULL, "Enter filename: ", proposal, 40);
+        char *filename = display_get_string(NULL, "Enter filename: ",
+            proposal, 40);
         g_free(proposal);
         proposal = NULL;
 

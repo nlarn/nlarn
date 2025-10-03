@@ -133,10 +133,8 @@ monster *fov_get_closest_monster(fov *fv)
 
     if (g_hash_table_size(fv->mlist) > 0)
     {
-        GList *mlist;
-
         /* get the list of all visible monsters */
-        mlist = g_hash_table_get_keys(fv->mlist);
+        GList *mlist = g_hash_table_get_keys(fv->mlist);
 
         /* sort the monsters list by distance */
         mlist = g_list_sort_with_data(mlist, fov_visible_monster_sort,
@@ -182,15 +180,12 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
                                  float start, float end, int radius,
                                  int xx, int xy, int yx, int yy)
 {
-    int radius_squared;
-    int X, Y;
-    float l_slope, r_slope;
     float new_start = 0;
 
     if (start < end)
         return;
 
-    radius_squared = radius * radius;
+    int radius_squared = radius * radius;
 
     for (int j = row; j <= radius + 1; j++)
     {
@@ -204,8 +199,8 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
             dx += 1;
 
             /* Translate the dx, dy coordinates into map coordinates: */
-            X = X(center) + dx * xx + dy * xy;
-            Y = Y(center) + dx * yx + dy * yy;
+            int X = X(center) + dx * xx + dy * xy;
+            int Y = Y(center) + dx * yx + dy * yy;
 
             /* check if coordinated are within bounds */
             if ((X < 0) || (X >= MAP_MAX_X))
@@ -216,8 +211,8 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
 
             /* l_slope and r_slope store the slopes of the left and right
              * extremities of the square we're considering: */
-            l_slope = (dx - 0.5) / (dy + 0.5);
-            r_slope = (dx + 0.5) / (dy - 0.5);
+            float l_slope = (dx - 0.5) / (dy + 0.5);
+            float r_slope = (dx + 0.5) / (dy - 0.5);
 
             if (start < r_slope)
             {
@@ -278,10 +273,8 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
 
 static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b, gpointer center)
 {
-    monster *ma, *mb;
-
-    ma = (monster*)a;
-    mb = (monster*)b;
+    monster *ma = (monster *) a;
+    monster *mb = (monster *) b;
 
     int da = pos_distance(*(position *)center, monster_pos(ma));
     int db = pos_distance(*(position *)center, monster_pos(mb));

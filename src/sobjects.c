@@ -113,11 +113,10 @@ int player_altar_pray(player *p)
 {
     effect *e = NULL;
     item **armour = NULL;
-    map *current;
 
     g_assert (p != NULL);
 
-    current = game_map(nlarn, Z(p->pos));
+    map *current = game_map(nlarn, Z(p->pos));
 
     if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
@@ -358,12 +357,6 @@ int player_door_close(player *p)
     if (!player_movement_possible(p))
         return 0;
 
-    /* position used to interact with stationaries */
-    position pos;
-
-    /* possible directions of actions */
-    int *dirs;
-
     /* direction of action */
     direction dir = GD_NONE;
 
@@ -373,7 +366,8 @@ int player_door_close(player *p)
     /* the current map */
     map *pmap = game_map(nlarn, Z(p->pos));
 
-    dirs = map_get_surrounding(pmap, p->pos, LS_OPENDOOR);
+    /* possible directions of actions */
+    int *dirs = map_get_surrounding(pmap, p->pos, LS_OPENDOOR);
 
     for (count = 0, num = 1; num < GD_MAX; num++)
     {
@@ -404,7 +398,7 @@ int player_door_close(player *p)
 
     if (dir)
     {
-        pos = pos_move(p->pos, dir);
+        position pos = pos_move(p->pos, dir);
         if (pos_valid(pos) && (map_sobject_at(pmap, pos) == LS_OPENDOOR))
         {
 
@@ -460,7 +454,6 @@ int player_door_open(player *p, int dir)
         return 0;
 
     /* position used to interact with stationaries */
-    position pos;
 
     /* the current map */
     map *pmap = game_map(nlarn, Z(p->pos));
@@ -503,7 +496,7 @@ int player_door_open(player *p, int dir)
 
     if (dir)
     {
-        pos = pos_move(p->pos, dir);
+        position pos = pos_move(p->pos, dir);
 
         if (pos_valid(pos) && (map_sobject_at(pmap, pos) == LS_CLOSEDDOOR))
         {
@@ -978,10 +971,10 @@ int player_throne_sit(player *p)
 
 void sobject_destroy_at(player *p, map *dmap, position pos)
 {
-    position mpos;      /* position for monster that might be generated */
     const char *desc = NULL;
 
-    mpos = map_find_space_in(dmap, rect_new_sized(pos, 1), LE_MONSTER, false);
+    /* position for a monster that might be generated */
+    position mpos = map_find_space_in(dmap, rect_new_sized(pos, 1), LE_MONSTER, false);
 
     switch (map_sobject_at(dmap, pos))
     {

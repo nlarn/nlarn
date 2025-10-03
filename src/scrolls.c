@@ -261,11 +261,9 @@ item_usage_result scroll_read(struct player *p, item *r_scroll)
 
 static int scroll_with_effect(struct player *p, item *r_scroll)
 {
-    effect *eff;
-
     g_assert(p != NULL && r_scroll != NULL);
 
-    eff = effect_new(scroll_effect(r_scroll));
+    effect *eff = effect_new(scroll_effect(r_scroll));
     // Blessed scrolls last longer.
     if (r_scroll->blessed)
     {
@@ -298,13 +296,12 @@ static int scroll_annihilate(struct player *p, item *r_scroll __attribute__((unu
     g_assert(p != NULL);
 
     int count = 0;
-    area *blast, *obsmap;
     position cursor = p->pos;
     monster *m;
     map *cmap = game_map(nlarn, Z(p->pos));
 
-    obsmap = map_get_obstacles(cmap, p->pos, 2, false);
-    blast = area_new_circle_flooded(p->pos, 2, obsmap);
+    area *obsmap = map_get_obstacles(cmap, p->pos, 2, false);
+    area *blast = area_new_circle_flooded(p->pos, 2, obsmap);
 
     for (Y(cursor) = blast->start_y; Y(cursor) < blast->start_y + blast->size_y; Y(cursor)++)
     {
@@ -542,7 +539,6 @@ static int scroll_gem_perfection(player *p, item *r_scroll)
 
 static int scroll_genocide_monster(player *p, item *r_scroll)
 {
-    char *glyph;
     guint candidates[10] = { 0 };
     guint found = 0;
     monster_t which;
@@ -559,7 +555,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
     g_string_append(msg, "Which monster do you want to genocide (enter its glyph)?");
 
     /* get a single character */
-    glyph = display_get_string(NULL, msg->str, NULL, 1);
+    char *glyph = display_get_string(NULL, msg->str, NULL, 1);
 
     /* release memory acquired for the message */
     g_string_free(msg, true);
@@ -645,12 +641,11 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
 
 static int scroll_heal_monster(player *p, item *r_scroll __attribute__((unused)))
 {
-    GList *mlist;
     int count = 0;
 
     g_assert(p != NULL);
 
-    mlist = g_hash_table_get_values(nlarn->monsters);
+    GList *mlist = g_hash_table_get_values(nlarn->monsters);
 
     do
     {
@@ -683,14 +678,13 @@ static int scroll_hold_monster(player *p, item *r_scroll __attribute__((unused))
 {
     g_assert(p != NULL);
 
-    area *blast, *obsmap;
     position cursor = p->pos;
     monster *m;
     gboolean success = false;
     map *cmap = game_map(nlarn, Z(p->pos));
 
-    obsmap = map_get_obstacles(cmap, p->pos, 2, false);
-    blast = area_new_circle_flooded(p->pos, 2, obsmap);
+    area *obsmap = map_get_obstacles(cmap, p->pos, 2, false);
+    area *blast = area_new_circle_flooded(p->pos, 2, obsmap);
 
     for (Y(cursor) = blast->start_y; Y(cursor) < blast->start_y + blast->size_y; Y(cursor)++)
     {
@@ -778,12 +772,11 @@ static int scroll_identify(player *p, item *r_scroll)
 int scroll_mapping(player *p, item *r_scroll)
 {
     position pos = pos_invalid;
-    map *m;
 
     /* scroll can be null as I use this to fake a known level */
     g_assert(p != NULL);
 
-    m = game_map(nlarn, Z(p->pos));
+    map *m = game_map(nlarn, Z(p->pos));
     Z(pos) = Z(p->pos);
 
     const gboolean map_traps = (r_scroll != NULL && r_scroll->blessed);
@@ -941,12 +934,12 @@ static int scroll_teleport(player *p, item *r_scroll)
 static int scroll_timewarp(player *p, item *r_scroll)
 {
     gint mobuls = 0; /* number of mobuls */
-    gint turns;      /* number of turns */
     guint idx = 0;   /* position inside player's effect list */
 
     g_assert(p != NULL && r_scroll != NULL);
 
-    turns = (rand_1n(1000) - 850);
+    /* number of turns */
+    gint turns = (rand_1n(1000) - 850);
 
     // For blessed scrolls, use the minimum turn count of three tries.
     if (r_scroll->blessed)

@@ -90,9 +90,7 @@ int weapon_fire(struct player *p)
     g_assert(p != NULL);
 
     map *pmap = game_map(nlarn, Z(p->pos));
-    position target;             /* the selected target */
     damage_originator damo = { DAMO_PLAYER, p };
-    gchar *wdesc;                /* the weapon description */
     item *weapon = p->eq_weapon; /* the equipped weapon */
     item *ammo   = p->eq_quiver; /* the quivered ammo */
     monster *m = NULL;           /* the targeted monster */
@@ -109,7 +107,7 @@ int weapon_fire(struct player *p)
     }
 
     /* wielding a weapon, describe it */
-    wdesc = item_describe(weapon, player_item_known(p, weapon), true, true);
+    gchar *wdesc = item_describe(weapon, player_item_known(p, weapon), true, true);
 
     /* check if it is a ranged weapon */
     if (!weapon_is_ranged(weapon))
@@ -141,8 +139,8 @@ int weapon_fire(struct player *p)
     }
 
     /* all checks are successful */
-    target = display_get_position(p, "Select a target", true, false, 0,
-                                  false, true);
+    position target = display_get_position(p, "Select a target", true, false,
+        0, false, true);
 
     /* is the target a valid position? */
     if(!pos_valid(target))

@@ -773,7 +773,6 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
 {
     g_assert(type < MT_MAX && pos_valid(pos));
 
-    monster *nmonster;
     item_t itype;      /* item type */
 
     /* check if supplied position is suitable for a monster */
@@ -793,7 +792,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
     }
 
     /* make room for monster */
-    nmonster = g_malloc0(sizeof(monster));
+    monster *nmonster = g_malloc0(sizeof(monster));
 
     nmonster->type = type;
 
@@ -863,7 +862,6 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
     {
         int weapon_count = 3;
         int wpns[weapon_count]; /* choice of weapon types */
-        item *weapon;
 
         /* preset weapon types */
         switch (type)
@@ -914,7 +912,7 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         /* focus on the weakest weapon on the set */
         int weapon_idx = levy_element(weapon_count, 0.5, 1.0);
 
-        weapon = item_new(IT_WEAPON, wpns[weapon_idx]);
+        item *weapon = item_new(IT_WEAPON, wpns[weapon_idx]);
         item_new_finetouch(weapon);
 
         inv_add(&nmonster->inv, weapon);
@@ -1012,7 +1010,6 @@ monster *monster_new_by_level(position pos)
         int maxstep = nlevel - 1;
 
         int monster_id_min;
-        int monster_id_max;
 
         if (chance(2 * game_difficulty(nlarn)))
             maxstep += 2;
@@ -1031,7 +1028,7 @@ monster *monster_new_by_level(position pos)
         else if (maxstep > MAP_MAX - 2)
             maxstep = MAP_MAX - 2;
 
-        monster_id_max = mlevel[maxstep];
+        int monster_id_max = mlevel[maxstep];
 
         do
         {
@@ -1128,11 +1125,10 @@ void monster_serialize(gpointer oid, monster *m, cJSON *root)
 void monster_deserialize(cJSON *mser, game *g)
 {
     cJSON *obj;
-    guint oid;
     monster *m = g_malloc0(sizeof(monster));
 
     m->type = monster_t_value(cJSON_GetObjectItem(mser, "type")->valuestring);
-    oid = cJSON_GetObjectItem(mser, "oid")->valueint;
+    guint oid = cJSON_GetObjectItem(mser, "oid")->valueint;
     m->oid = GUINT_TO_POINTER(oid);
     m->hp_max = cJSON_GetObjectItem(mser, "hp_max")->valueint;
     m->hp = cJSON_GetObjectItem(mser, "hp")->valueint;
@@ -1583,9 +1579,6 @@ void monster_level_enter(monster *m, struct map *l)
 
 void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
 {
-    /* monster's new position */
-    position m_npos;
-
     /* expire summoned monsters */
     if (monster_action(m) == MA_SERVE
             && !monster_effect(m, ET_CHARM_MONSTER))
@@ -1688,7 +1681,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             return;
 
         /* determine monster's next move */
-        m_npos = monster_pos(m);
+        position m_npos = monster_pos(m);
 
         switch (m->action)
         {
@@ -2462,8 +2455,6 @@ monster *monster_damage_take(monster *m, damage *dam)
 gboolean monster_update_action(monster *m, monster_action_t override)
 {
     monster_action_t naction; /* new action */
-    guint mtime; /* max. number of turns a monster will look for the player */
-    gboolean low_hp;
 
     if (override > MA_NONE)
     {
@@ -2494,8 +2485,9 @@ gboolean monster_update_action(monster *m, monster_action_t override)
             break;
     }
 
-    mtime  = monster_int(m) + 25 + (5 * game_difficulty(nlarn));
-    low_hp = (m->hp < (monster_hp_max(m) / 4 ));
+    /* max. number of turns a monster will look for the player */
+    guint mtime = monster_int(m) + 25 + (5 * game_difficulty(nlarn));
+    gboolean low_hp = (m->hp < (monster_hp_max(m) / 4));
 
     if (monster_flags(m, MIMIC) && m->unknown)
     {
@@ -2547,16 +2539,14 @@ void monster_update_player_pos(monster *m, position ppos)
 
 gboolean monster_regenerate(monster *m, time_t gtime, int difficulty)
 {
-    /* number of turns between occasions */
-    int frequency;
-
     /* temporary var for effect */
     effect *e;
 
     g_assert(m != NULL);
 
+    /* number of turns between occasions */
     /* modify frequency by difficulty: more regeneration, less poison */
-    frequency = difficulty << 1;
+    int frequency = difficulty << 1;
 
     /* handle regeneration */
     if (monster_flags(m, REGENERATE) && (m->hp < monster_hp_max(m)))
@@ -2599,13 +2589,11 @@ item *get_mimic_item(monster *m)
 
 char *monster_desc(monster *m)
 {
-    int hp_rel;
-    GString *desc;
     const char *injury = NULL;
 
     g_assert (m != NULL);
 
-    desc = g_string_new(NULL);
+    GString *desc = g_string_new(NULL);
 
     /* describe mimic as mimicked item */
     if (monster_unknown(m) && inv_length(m->inv) > 0)
@@ -2620,7 +2608,7 @@ char *monster_desc(monster *m)
         return g_string_free(desc, false);
     }
 
-    hp_rel = (((float)m->hp / (float)monster_hp_max(m)) * 100);
+    int hp_rel = (((float) m->hp / (float) monster_hp_max(m)) * 100);
 
     /* prepare health status description */
     if (m->hp == monster_hp_max(m))
@@ -2714,12 +2702,10 @@ colour monster_color(monster *m)
 
 void monster_genocide(monster_t monster_id)
 {
-    GList *mlist;
-
     g_assert(monster_id < MT_MAX);
 
     nlarn->monster_genocided[monster_id] = true;
-    mlist = g_hash_table_get_values(nlarn->monsters);
+    GList *mlist = g_hash_table_get_values(nlarn->monsters);
 
     /* purge genocided monsters */
     for (GList *iter = mlist; iter != NULL; iter = iter->next)
@@ -3021,8 +3007,6 @@ static bool monster_weapon_wield(monster *m)
 
 static gboolean monster_item_disenchant(monster *m, struct player *p)
 {
-    item *it;
-
     g_assert (m != NULL && p != NULL);
 
     /* disenchant random item */
@@ -3032,7 +3016,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
         return false;
     }
 
-    it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
+    item *it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
 
     /* log the attack */
     log_add_entry(nlarn->log, "The %s hits you.",
@@ -3225,10 +3209,9 @@ static char *monster_get_fortune(const char *fortune_file)
     {
         /* read in the fortunes */
         char buffer[80];
-        FILE *fortune_fd;
 
         /* open the file */
-        fortune_fd = fopen(fortune_file, "r");
+        FILE *fortune_fd = fopen(fortune_file, "r");
         if (fortune_fd == NULL)
         {
             /* can't find file */
@@ -3391,7 +3374,6 @@ static position monster_move_confused(monster *m,
 static position monster_move_flee(monster *m, struct player *p)
 {
     int dist = 0;
-    position npos_tmp;
     position npos = monster_pos(m);
 
     for (int tries = 1; tries < GD_MAX; tries++)
@@ -3401,7 +3383,7 @@ static position monster_move_flee(monster *m, struct player *p)
         if (tries == GD_CURR)
             continue;
 
-        npos_tmp = pos_move(monster_pos(m), tries);
+        position npos_tmp = pos_move(monster_pos(m), tries);
 
         if (map_pos_validate(monster_map(m), npos_tmp, monster_map_element(m),
                              false)
