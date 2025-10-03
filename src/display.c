@@ -3220,7 +3220,7 @@ static display_window *display_item_details(guint x1, guint y1, guint width,
 static void display_spheres_paint(sphere *s, player *p)
 {
     /* check if sphere is on current level */
-    if (!(Z(s->pos) == Z(p->pos)))
+    if (Z(s->pos) != Z(p->pos))
         return;
 
     if (game_fullvis(nlarn) || fov_get(p->fv, s->pos))
