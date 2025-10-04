@@ -298,7 +298,7 @@ void display_paint_screen(player *p)
     char pc;
     int player_attributes = display_player_hp_colour(p, false);
 
-   if (player_effect(p, ET_INVISIBILITY))
+    if (player_effect(p, ET_INVISIBILITY))
     {
         pc = ' ';
         attrs = A_REVERSE | player_attributes;
