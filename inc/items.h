@@ -216,7 +216,7 @@ item *item_disenchant(item *it);
  */
 item *item_erode(struct inventory **inv, item *it, item_erosion_type iet, gboolean visible);
 
-int item_obtainable(item_t type, int id);
+int item_obtainable(item_t type, guint id);
 
 /**
  * @brief Describe an item thoroughly.

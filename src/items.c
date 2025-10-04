@@ -1466,7 +1466,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     return it;
 }
 
-int item_obtainable(item_t type, int id)
+int item_obtainable(item_t type, guint id)
 {
     int obtainable;
 
