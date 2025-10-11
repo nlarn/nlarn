@@ -53,7 +53,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
   *
   * @return true/false
   */
-gboolean fov_get(fov *fv, position pos);
+gboolean fov_get(const fov *fv, position pos);
 
 /** @brief set visibility for a certain position.
   *
@@ -61,10 +61,10 @@ gboolean fov_get(fov *fv, position pos);
   * @param pos a position.
   * @param visible the visibility of the position.
   * @param infravision Beholder has infravision?
-  * @param mchk Check for monsters at the position?
+  * @param check_monster Check for monsters at the position?
   */
 void fov_set(fov *fv, position pos, guchar visible,
-             gboolean infravision, gboolean mchk);
+             gboolean infravision, gboolean check_monster);
 
 /** @brief reset visibility for an entire fov structure.
   *

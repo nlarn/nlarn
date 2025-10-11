@@ -47,11 +47,11 @@ struct fov
 
 fov *fov_new()
 {
-    fov *nfov = g_malloc0(sizeof(fov));
-    nfov->center = pos_invalid;
-    nfov->mlist = g_hash_table_new(g_direct_hash, g_direct_equal);
+    fov *new_fov = g_new0(fov, 1);
+    new_fov->center = pos_invalid;
+    new_fov->mlist = g_hash_table_new(g_direct_hash, g_direct_equal);
 
-    return nfov;
+    return new_fov;
 }
 /* this and the function fov_calculate_octant() have been
  * ported from python to c using the example at
@@ -77,7 +77,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
     for (int octant = 0; octant < 8; octant++)
     {
         fov_calculate_octant(fv, m, pos, infravision,
-                             1, 1.0, 0.0, radius,
+                             1, 1.0f, 0.0f, radius,
                              mult[0][octant], mult[1][octant],
                              mult[2][octant], mult[3][octant]);
     }
@@ -85,7 +85,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
     fov_set(fv, pos, true, infravision, true);
 }
 
-gboolean fov_get(fov *fv, position pos)
+gboolean fov_get(const fov *fv, position pos)
 {
     g_assert (fv != NULL);
     g_assert (pos_valid(pos));
@@ -94,7 +94,7 @@ gboolean fov_get(fov *fv, position pos)
 }
 
 void fov_set(fov *fv, position pos, guchar visible,
-             gboolean infravision, gboolean mchk)
+             gboolean infravision, gboolean check_monster)
 {
     g_assert (fv != NULL);
     g_assert (pos_valid(pos));
@@ -104,7 +104,8 @@ void fov_set(fov *fv, position pos, guchar visible,
 
     /* If advised to do so, check if there is a monster at that
        position. Must not be an unknown mimic or invisible. */
-    if (mchk && (mon = map_get_monster_at(game_map(nlarn, Z(pos)), pos))
+    if (check_monster
+        && ((mon = map_get_monster_at(game_map(nlarn, Z(pos)), pos)))
         && !monster_unknown(mon)
         && (!monster_flags(mon, INVISIBLE) || infravision))
     {
@@ -211,8 +212,8 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
 
             /* l_slope and r_slope store the slopes of the left and right
              * extremities of the square we're considering: */
-            float l_slope = (dx - 0.5) / (dy + 0.5);
-            float r_slope = (dx + 0.5) / (dy - 0.5);
+            float l_slope = ((float)dx - 0.5f) / ((float)dy + 0.5f);
+            float r_slope = ((float)dx + 0.5f) / ((float)dy - 0.5f);
 
             if (start < r_slope)
             {
