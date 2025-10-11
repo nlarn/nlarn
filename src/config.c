@@ -282,15 +282,12 @@ int parse_gender(const char gender)
     {
     case 'm':
         return PS_MALE;
-        break;
 
     case 'f':
         return PS_FEMALE;
-        break;
 
     default:
         return PS_NONE;
-        break;
     }
 }
 
@@ -300,10 +297,8 @@ char compose_gender(const int gender)
     {
         case PS_MALE:
             return 'm';
-            break;
         case PS_FEMALE:
             return 'f';
-            break;
         default:
             return ' ';
     }

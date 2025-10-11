@@ -467,17 +467,17 @@ static const char* item_enum_string_lookup(item_t typ, int id)
 
     switch (typ)
     {
-        case IT_AMULET:    return amulet_t_string(id);    break;
-        case IT_AMMO:      return ammo_t_string(id);      break;
-        case IT_ARMOUR:    return armour_t_string(id);    break;
-        case IT_BOOK:      return spell_id_string(id);    break;
-        case IT_CONTAINER: return container_t_string(id); break;
-        case IT_GEM:       return gem_t_string(id);       break;
-        case IT_POTION:    return potion_t_string(id);    break;
-        case IT_RING:      return ring_t_string(id);      break;
-        case IT_SCROLL:    return scroll_t_string(id);    break;
-        case IT_WEAPON:    return weapon_t_string(id);    break;
-        default:           return "";                     break;
+        case IT_AMULET:    return amulet_t_string(id);
+        case IT_AMMO:      return ammo_t_string(id);
+        case IT_ARMOUR:    return armour_t_string(id);
+        case IT_BOOK:      return spell_id_string(id);
+        case IT_CONTAINER: return container_t_string(id);
+        case IT_GEM:       return gem_t_string(id);
+        case IT_POTION:    return potion_t_string(id);
+        case IT_RING:      return ring_t_string(id);
+        case IT_SCROLL:    return scroll_t_string(id);
+        case IT_WEAPON:    return weapon_t_string(id);
+        default:           return "";
     }
 }
 
@@ -531,17 +531,17 @@ static int item_enum_value_lookup(item_t typ, const char* str)
 
     switch (typ)
     {
-        case IT_AMULET:    return amulet_t_value(str);    break;
-        case IT_AMMO:      return ammo_t_value(str);      break;
-        case IT_ARMOUR:    return armour_t_value(str);    break;
-        case IT_BOOK:      return spell_id_value(str);    break;
-        case IT_CONTAINER: return container_t_value(str); break;
-        case IT_GEM:       return gem_t_value(str);       break;
-        case IT_POTION:    return potion_t_value(str);    break;
-        case IT_RING:      return ring_t_value(str);      break;
-        case IT_SCROLL:    return scroll_t_value(str);    break;
-        case IT_WEAPON:    return weapon_t_value(str);    break;
-        default:           return 0;                      break;
+        case IT_AMULET:    return amulet_t_value(str);
+        case IT_AMMO:      return ammo_t_value(str);
+        case IT_ARMOUR:    return armour_t_value(str);
+        case IT_BOOK:      return spell_id_value(str);
+        case IT_CONTAINER: return container_t_value(str);
+        case IT_GEM:       return gem_t_value(str);
+        case IT_POTION:    return potion_t_value(str);
+        case IT_RING:      return ring_t_value(str);
+        case IT_SCROLL:    return scroll_t_value(str);
+        case IT_WEAPON:    return weapon_t_value(str);
+        default:           return 0;
     }
 }
 
@@ -894,47 +894,36 @@ item_material_t item_material(item *it)
     {
     case IT_AMULET:
         return amulet_material(it->id);
-        break;
 
     case IT_AMMO:
         return ammo_material(it);
-        break;
 
     case IT_ARMOUR:
         return armour_material(it);
-        break;
 
     case IT_BOOK:
         return IM_PAPER;
-        break;
 
     case IT_CONTAINER:
         return container_material(it);
-        break;
 
     case IT_GEM:
         return IM_GEMSTONE;
-        break;
 
     case IT_GOLD:
         return IM_GOLD;
-        break;
 
     case IT_POTION:
         return IM_GLASS;
-        break;
 
     case IT_RING:
         return ring_material(it->id);
-        break;
 
     case IT_SCROLL:
         return IM_PAPER;
-        break;
 
     case IT_WEAPON:
         return weapon_material(it);
-        break;
 
     default:
         g_assert(0);
@@ -1121,35 +1110,27 @@ colour item_colour(item *it)
     case IT_RING:
     case IT_WEAPON:
         return item_materials[item_material(it)].fg;
-        break;
 
     case IT_BOOK:
         return book_colour(it);
-        break;
 
     case IT_POTION:
         return potion_colour(it->id);
-        break;
 
     case IT_SCROLL:
         return WHITE;
-        break;
 
     case IT_CONTAINER:
         return AUTUMN_LEAF_BROWN;
-        break;
 
     case IT_GOLD:
         return PIRATE_GOLD;
-        break;
 
     case IT_GEM:
         return gem_colour(it);
-        break;
 
     default:
         return BLACK;
-        break;
     }
 }
 
@@ -1701,19 +1682,14 @@ gboolean item_is_unique(item *it)
     {
     case IT_ARMOUR:
         return armour_unique(it);
-        break;
     case IT_POTION:
         return (it->id == PO_CURE_DIANTHR);
-        break;
     case IT_AMULET:
         return true;
-        break;
     case IT_WEAPON:
         return weapon_is_unique(it);
-        break;
     default:
         return false;
-        break;
     }
 }
 
@@ -1728,58 +1704,48 @@ static const char *item_desc_get(item *it, int known)
             return amulet_name(it);
         else
             return item_material_adjective(item_material(it));
-        break;
 
     case IT_AMMO:
         return ammo_name(it);
-        break;
 
     case IT_ARMOUR:
         if (!known && armour_disguise(it) != AT_MAX)
             return armours[armour_disguise(it)].name;
         else
             return armour_name(it);
-        break;
 
     case IT_BOOK:
         if (known)
             return book_name(it);
         else
             return book_desc(it->id);
-        break;
 
     case IT_CONTAINER:
         return container_name(it);
-        break;
 
     case IT_POTION:
         if (known)
             return potion_name(it);
         else
             return potion_desc(it->id);
-        break;
 
     case IT_RING:
         if (known)
             return ring_name(it);
         else
             return item_material_adjective(item_material(it));
-        break;
 
     case IT_SCROLL:
         if (known)
             return scroll_name(it);
         else
             return scroll_desc(it->id);
-        break;
 
     case IT_GEM:
         return (char *)gem_name(it);
-        break;
 
     case IT_WEAPON:
         return weapon_name(it);
-        break;
 
     default:
         return "";

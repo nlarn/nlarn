@@ -149,13 +149,10 @@ guint32 rand_0n(guint32 n)
         case 0:
         case 1:
             return 0;
-            break;
         case UINT32_MAX:
             return next();
-            break;
         default:
             return next() % n;
-            break;
     }
 }
 
