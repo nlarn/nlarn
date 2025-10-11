@@ -74,7 +74,7 @@ const item_material_data item_materials[IM_MAX] =
     { IM_SILVER,      "silver",      "silvery",  SILVER,              7, },
     { IM_GOLD,        "gold",        "golden",   PIRATE_GOLD,         6, },
     { IM_PLATINUM,    "platinum",    "platinum", PLATINUM,            3, },
-    { IM_MITHRIL,     "mitril",      "mithrial", GREY93,              0, },
+    { IM_MITHRIL,     "mithril",     "mithrial", GREY93,              0, },
     { IM_GLASS,       "glass",       "vitreous", CHALKY_BLUE_WHITE,  50, },
     { IM_STONE,       "stone",       "stony",    GRANITE,            20, },
     { IM_GEMSTONE,    "gemstone",    "gemstone", LUMINOUS_RED,        0, },
