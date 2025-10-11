@@ -716,9 +716,6 @@ static void building_school_take_course(player *p, int course, guint price)
         break;
 
     case 2:
-        p->intelligence += 2;
-        break;
-
     case 3:
         p->intelligence += 2;
         break;

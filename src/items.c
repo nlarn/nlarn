@@ -1322,7 +1322,6 @@ static int material_affected(item_material_t mat, item_erosion_type iet)
         /* potions will shatter when exposed to fire */
         return (mat <= IM_BONE || mat == IM_GLASS);
     case IET_CORRODE:
-        return (mat == IM_IRON);
     case IET_RUST:
         return (mat == IM_IRON);
     default:
