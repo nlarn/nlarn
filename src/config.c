@@ -131,7 +131,7 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
     if ((success = (!error)))
     {
         /* ini file has been found, get values */
-        /* clear error after each attempt as values need not to be defined */
+        /* clear error after each attempt as values may not be defined */
         int difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
         if (!error) config->difficulty = difficulty;
         g_clear_error(&error);

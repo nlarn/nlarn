@@ -2101,12 +2101,12 @@ position display_get_position(player *p,
     /* start at player's position */
     position start = p->pos;
 
-    /* if the player has recently targeted a monster.. */
+    /* if the player has recently targeted a monster... */
     if (visible && p->ptarget != NULL)
     {
         monster *m = game_monster_get(nlarn, p->ptarget);
 
-        /* ..check if it is still alive */
+        /* ...check if it is still alive */
         if (m == NULL)
         {
             /* the monster has been eliminated */
@@ -2513,7 +2513,7 @@ position display_get_new_position(player *p,
             break;
         }
 
-        /* get new position if cursor has been move */
+        /* get new position if cursor has been moved */
         if (dir)
         {
             npos = pos_move(pos, dir);
@@ -2822,7 +2822,7 @@ int display_getch(WINDOW *win) {
     int ch = wgetch(win ? win : stdscr);
 #ifdef SDLPDCURSES
         /* on SDL2 PDCurses, keys entered on the numeric keypad while num
-           lock is enabled are returned twice. Hence we need to swallow
+           lock is enabled are returned twice, hence we need to swallow
            the first one here. */
         if ((ch >= '1' && ch <= '9')
                 && (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_NUMLOCK)
@@ -3049,7 +3049,7 @@ static int display_window_move(display_window *dwin, int key)
     switch (key)
     {
     case 0:
-        /* The windows keys generate two key presses, of which the first
+        /* The Windows keys generate two key presses, of which the first
            is a zero. Flush the buffer or the second key code will confuse
            everything. This happens here as all dialogue call this function
            after everything else. */

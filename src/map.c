@@ -153,7 +153,7 @@ map *map_new(int num, const char *mazefile)
 
     if (num != 0)
     {
-        /* home town is not filled with crap */
+        /* hometown is not filled with crap */
         map_fill_with_objects(nmap);
 
         /* and not trapped */
@@ -460,7 +460,7 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
     /* make shortcut */
     map_tile *tile = map_tile_at(m, pos);
 
-    /* check for an dead end */
+    /* check for a dead end */
     if (dead_end)
     {
         int wall_count = 0;
@@ -1990,7 +1990,7 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
     /* determine number of rooms */
     while(rooms[nrooms] != NULL) { nrooms++; }
 
-    /* choose a room to turn into an treasure room */
+    /* choose a room to turn into a treasure room */
     int room = rand_0n(nrooms);
 
     /* sanity check */

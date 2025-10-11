@@ -511,7 +511,7 @@ int spell_cast_previous(struct player *p)
         return 0;
     }
 
-    /* not casted any spell before */
+    /* not cast any spell before */
     if (!last_spell)
     {
         return spell_cast_new(p);
@@ -557,7 +557,7 @@ int spell_learn(player *p, spell_id spell_type)
         }
     }
 
-    /* should not reach this point, but who knows.. */
+    /* should not reach this point, but who knows */
     return false;
 }
 

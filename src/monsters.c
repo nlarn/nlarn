@@ -1668,8 +1668,8 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             }
         }
 
-        /* let the monster have a look at the items at it's current position
-           if it chose to pick up something, the turn is over */
+        /* Let the monster have a look at the items at its current position.
+           If it chose to pick up something, the turn is over */
         if (monster_items_pickup(m))
             return;
 
@@ -1741,7 +1741,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             else if (pos_identical(g->p->pos, m_npos))
             {
                 /* The monster bumps into the player who is invisible to the
-                   monster. Thus the monster gains knowledge over the player's
+                   monster, thus the monster gains knowledge over the player's
                    current position. */
                 monster_update_player_pos(m, g->p->pos);
 
@@ -1810,7 +1810,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                             break;
 
                         default:
-                            /* just do not move.. */
+                            /* just do not move */
                             break;
                     }
                 }
@@ -1850,15 +1850,15 @@ void monster_polymorph(monster *m)
     /* if the new monster can't survive in this terrain, kill it */
     const map_element_t new_elem = monster_map_element(m);
 
-    /* We need to temporarily remove the monster from it's tile
+    /* We need to temporarily remove the monster from its tile
        as monster_valid_dest() tests if there is a monster on
        the tile and hence would always return false. */
     map_set_monster_at(monster_map(m), m->pos, NULL);
 
-    /* check if the position would be valid.. */
+    /* check if the position would be valid... */
     gboolean valid_pos = monster_valid_dest(monster_map(m), m->pos, new_elem);
 
-    /* ..and restore the monster to it's position */
+    /* ...and restore the monster to its position */
     map_set_monster_at(monster_map(m), m->pos, m);
 
     if (!valid_pos)
@@ -2786,7 +2786,7 @@ effect *monster_effect_add(monster *m, effect *e)
             break;
 
         default:
-            /* nothing happens.. */
+            /* nothing happens */
             break;
         }
     }
@@ -3143,7 +3143,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
             {
                 if (it->cursed)
                 {
-                    /* cursed items can't be stolen.. */
+                    /* cursed items can't be stolen */
                     log_add_entry(nlarn->log, "The %s tries to steal %s but fails.",
                                   monster_get_name(m), buf);
 
@@ -3275,7 +3275,7 @@ static position monster_move_wander(monster *m, struct player *p __attribute__((
 
         if (!leader)
         {
-            /* is seems that the leader was killed.
+            /* It seems that the leader was killed.
                From now on, wander aimlessly */
             m->leader = NULL;
         } else {

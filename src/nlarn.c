@@ -133,7 +133,7 @@ static void nlarn_init(int argc, char *argv[])
 
     if (!g_file_test(nlarn_libdir, G_FILE_TEST_IS_DIR))
     {
-        /* local lib directory could not be found, try the system wide directory. */
+        /* local lib directory could not be found, try the system-wide directory. */
 #ifdef __APPLE__
         char *rellibdir = g_build_path(G_DIR_SEPARATOR_S, basedir,
                                        "../Resources", NULL);
@@ -589,13 +589,13 @@ static void mainloop()
             }
             break;
 
-            /* go down stairs / enter a building */
+            /* go downstairs / enter a building */
         case '>':
             if (!(moves_count = player_stairs_down(nlarn->p)))
                 moves_count = player_building_enter(nlarn->p);
             break;
 
-            /* go up stairs */
+            /* go upstairs */
         case '<':
             moves_count = player_stairs_up(nlarn->p);
             break;
@@ -1102,7 +1102,7 @@ int main(int argc, char *argv[])
     g_free(message_file);
 
     /* Create the jump target for player death. Death will destroy the game
-       object, thus control will be returned to the line after this one, i.e
+       object, thus control will be returned to the line after this one, i.e.
        the game will be created again and the main menu will be shown. To
        ensure that the game quits when quitting from inside the game, return
        the cause of death from player_die().

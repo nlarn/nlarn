@@ -143,7 +143,7 @@ int potion_throw(struct player *p)
     position target = display_get_position(p, msg, true, false, 0, false, true);
     g_free(msg);
 
-    /* check if we got an usable target position */
+    /* check if we got a usable target position */
     if (!pos_valid(target) || pos_identical(p->pos, target))
     {
         log_add_entry(nlarn->log, "Aborted.");

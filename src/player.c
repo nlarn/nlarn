@@ -811,7 +811,7 @@ gboolean player_make_move(player *p, int turns, gboolean interruptible, const ch
 
     g_assert(p != NULL);
 
-    /* do do nothing if there is nothing to */
+    /* do nothing if there is nothing to */
     if (turns == 0) return false;
 
     /* return if the game has not been entirely set up */
@@ -1332,7 +1332,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     else if ((map_tiletype_at(pmap, target_p) == LT_WALL)
              && player_effect(p, ET_WALL_WALK))
     {
-        /* target tile is a wall and player can walk trough walls */
+        /* target tile is a wall and player can walk through walls */
         move_possible = true;
     }
     else if (map_pos_transparent(pmap, target_p)
@@ -1654,7 +1654,7 @@ static void player_autopickup(player *p)
     g_assert (p != NULL && map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos));
 
 
-    /* if the player is floating above the ground auto-pickup does not work.. */
+    /* if the player is floating above the ground auto-pickup does not work */
     if (player_effect(p, ET_LEVITATION))
         return;
 
@@ -2495,7 +2495,7 @@ int player_effect_del(player *p, effect *e)
             player_inv_weight_recalc(p->inventory, NULL);
         }
 
-        /* finally destroy the effect if its not bound to an item*/
+        /* finally destroy the effect if it's not bound to an item */
         if (!e->item)
             effect_destroy(e);
     }
@@ -4112,7 +4112,7 @@ void player_remove_gold(player *p, guint amount)
         }
     }
 
-    /* yes, I _do_ _know_ that goto is evil.. */
+    /* yes, I _do_ _know_ that goto is evil */
 done:
     /* force recalculation of inventory weight */
     player_inv_weight_recalc(p->inventory, NULL);

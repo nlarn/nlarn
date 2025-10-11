@@ -58,13 +58,13 @@ void building_bank_calc_interest(game *g)
     /* the bank pays an interest of 2.5% every ten mobuls */
     interest = g->p->bank_account / 250;
 
-    /* add the interest to the bank account.. */
+    /* add the interest to the bank account... */
     g->p->bank_account += interest;
 
-    /* ..and the statistics.. */
+    /* ...and the statistics... */
     g->p->stats.gold_bank_interest += interest;
 
-    /* ..and keep track of the amount paid since the player's last visit to the bank */
+    /* ...and keep track of the amount paid since the player's last visit to the bank */
     g->p->bank_ieslvtb += interest;
 
     /* calculate the tax debt */
@@ -1093,7 +1093,7 @@ int building_monastery(struct player *p)
                 break;
             }
 
-            /* The player may chose to uncurse items that are actually only of
+            /* The player may choose to uncurse items that are actually only of
                unknown blessedness. */
             if (it->cursed)
             {

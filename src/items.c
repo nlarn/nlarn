@@ -857,7 +857,7 @@ gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean defin
                                (strlen(it->notes) > 5 ? "noted" : it->notes));
     }
 
-    /* prepend additional information unless the item is an unique weapon */
+    /* prepend additional information unless the item is a unique weapon */
     if (!(it->type == IT_WEAPON && weapon_is_unique(it)))
     {
         if (add_info != NULL)
@@ -1443,7 +1443,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
 
         if (it->content != NULL)
         {
-            /* if the item is a container an still has undestroyed content,
+            /* If the item is a container and still has undestroyed content,
              * this content has to be put into the items inventory, e.g. a
              * casket burns -> all undestroyed items inside the casket
              * continue to exist on the floor tile the casket was standing on

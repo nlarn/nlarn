@@ -233,7 +233,7 @@ void container_item_add(player *p, inventory **inv, item *element)
     if (carried_container)
     {
         /* the container is in the player's inventory, thus the weight has
-           to recalculated. Silence the log in the meantime to avoid
+           to be recalculated. Silence the log in the meantime to avoid
            pointless messages. */
 
         log_disable(nlarn->log);
