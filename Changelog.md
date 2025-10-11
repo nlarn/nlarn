@@ -6,8 +6,9 @@
 
 * The player will now automatically evade breath attacks
 * Change the player's colour when HP are below 50%
-* Show where the players's blood or the blood of monsters was spilled
-  for some time. Also potions shattered on the floor will leave stains
+* Show where the player's blood or the blood of monsters was spilled
+  for some time, and also potions shattered on the floor and sites
+  where two spheres of annihilation collided leave stains
 * Configurable UI colours with six predefined colour schemes
 * Remap some key definitions to enhance compatibility with Larn:
     * 'c' to cast a spell
@@ -19,6 +20,7 @@
 * Improve some help texts (suggested by jv84)
 * Gelatinous cube engulf und corrode items
 * Rust monsters consume iron items on the ground
+* Damage beings inside the blast area of two collided spheres of annihilation
 * The Sword of Slashing is now unique and increases dexterity when wielded
 * Give missing sleep resistance to demon lords
 * Lower possibility of destroying statues with spells with higher difficulty

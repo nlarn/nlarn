@@ -190,6 +190,36 @@ void sphere_move(sphere *s, game *g)
                     "You hear a great earth shaking blast!");
         }
 
+        /* show the explosion site on the floor */
+        const int radius = 3;
+        area *obstacles = map_get_obstacles(smap, s->pos, radius, false);
+        area *explosion = area_new_circle_flooded(s->pos, radius, obstacles);
+
+        position pos;
+        Z(pos) = smap->nlevel;
+
+        damage *dam = damage_new(DAM_PHYSICAL, ATT_BREATH, (int)rand_m_n(25,50), DAMO_SPHERE, s);
+
+        for (int y = 0; y < explosion->size_y; y++) {
+            for (int x = 0; x < explosion->size_x; x++) {
+                if (area_point_get(explosion, x, y)) {
+                    X(pos) = explosion->start_x + x;
+                    Y(pos) = explosion->start_y + y;
+                    map_spill_set(smap, pos, COSMETIC_MAUVE);
+
+                    /* hit living creatures on the affected positions */
+                    if ((m = map_get_monster_at(smap, pos))) {
+                        monster_damage_take(m, damage_copy(dam));
+                    }
+
+                    if (pos_identical(pos, nlarn->p->pos)) {
+                        player_damage_take(nlarn->p, damage_copy(dam), PD_SPHERE, 0);
+                    }
+                }
+            }
+        }
+        damage_free(dam);
+
         sphere_destroy(s, g);
         sphere_destroy(other, g);
     }
