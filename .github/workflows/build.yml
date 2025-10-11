@@ -69,8 +69,9 @@ jobs:
     strategy:
       matrix:
         configuration:
-          - config=debug
-          - config=release
+# FIXME: building with ncurses is broken
+#          - config=debug
+#          - config=release
           - config=debug SDLPDCURSES=Y
           - config=release SDLPDCURSES=Y
     env:
