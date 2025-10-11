@@ -65,7 +65,7 @@ jobs:
       run: make SDLPDCURSES=Y ${{ matrix.configuration }}
 
   build-macos:
-    runs-on: macos-13
+    runs-on: macos-latest
     strategy:
       matrix:
         configuration:
@@ -74,7 +74,7 @@ jobs:
           - config=debug SDLPDCURSES=Y
           - config=release SDLPDCURSES=Y
     env:
-      PKG_CONFIG_PATH: /usr/local/opt/ncurses/lib/pkgconfig
+      PKG_CONFIG_PATH: /opt/homebrew/opt/ncurses/lib/pkgconfig
     steps:
     - uses: actions/checkout@v4
     - name: Update brew cache
