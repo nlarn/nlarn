@@ -23,11 +23,11 @@
 #include "random.h"
 #include "spheres.h"
 
-static sphere *sphere_at(game *g, position pos, sphere *s);
-static void sphere_hit_owner(game *g, sphere *s);
+static sphere *sphere_at(const game *g, position pos, const sphere *s);
+static void sphere_hit_owner(const game *g, sphere *s);
 static void sphere_kill_monster(sphere *s, monster *m);
 
-sphere *sphere_new(position pos, player *owner, int lifetime)
+sphere *sphere_new(const position pos, player *owner, const int lifetime)
 {
     sphere *s = g_malloc0(sizeof(sphere));
 
@@ -45,7 +45,7 @@ sphere *sphere_new(position pos, player *owner, int lifetime)
     return s;
 }
 
-void sphere_destroy(sphere *s, game *g)
+void sphere_destroy(sphere *s, const game *g)
 {
     g_assert(s != NULL);
 
@@ -53,7 +53,7 @@ void sphere_destroy(sphere *s, game *g)
     g_free(s);
 }
 
-void sphere_serialize(sphere *s, cJSON *root)
+void sphere_serialize(const sphere *s, cJSON *root)
 {
     cJSON *sval;
 
@@ -67,15 +67,15 @@ void sphere_serialize(sphere *s, cJSON *root)
         cJSON_AddFalseToObject(sval, "owner");
 }
 
-void sphere_deserialize(cJSON *sser, game *g)
+void sphere_deserialize(const cJSON *serialized, const game *g)
 {
     sphere *s = g_malloc0(sizeof(sphere));
 
-    s->dir = cJSON_GetObjectItem(sser, "dir")->valueint;
-    s->lifetime = cJSON_GetObjectItem(sser, "lifetime")->valueint;
-    pos_val(s->pos) = cJSON_GetObjectItem(sser, "pos")->valueint;
+    s->dir = cJSON_GetObjectItem(serialized, "dir")->valueint;
+    s->lifetime = cJSON_GetObjectItem(serialized, "lifetime")->valueint;
+    pos_val(s->pos) = cJSON_GetObjectItem(serialized, "pos")->valueint;
 
-    if (!cJSON_GetObjectItem(sser, "owner"))
+    if (!cJSON_GetObjectItem(serialized, "owner"))
         s->owner = g->p;
 
     g_ptr_array_add(g->spheres, s);
@@ -102,10 +102,10 @@ void sphere_move(sphere *s, game *g)
 
     /* try to move sphere into its direction */
     direction dir = s->dir;
-    position npos = pos_move(s->pos, dir);
+    position new_pos = pos_move(s->pos, dir);
 
     /* if the new position does not work, try to find another one */
-    while ((!pos_valid(npos) || !map_pos_passable(smap, npos))
+    while ((!pos_valid(new_pos) || !map_pos_passable(smap, new_pos))
             && (tries < GD_MAX))
     {
         dir++;
@@ -116,7 +116,7 @@ void sphere_move(sphere *s, game *g)
         if (dir == GD_MAX)
             dir = 1;
 
-        npos = pos_move(s->pos, dir);
+        new_pos = pos_move(s->pos, dir);
         tries++;
     }
 
@@ -124,11 +124,11 @@ void sphere_move(sphere *s, game *g)
     if (tries < GD_MAX)
     {
         s->dir = dir;
-        s->pos = npos;
+        s->pos = new_pos;
     }
     /* otherwise stand still */
 
-    /* sphere rolled over it's creator */
+    /* sphere rolled over its creator */
     if (pos_identical(s->pos, s->owner->pos))
     {
         sphere_hit_owner(g, s);
@@ -196,11 +196,11 @@ void sphere_move(sphere *s, game *g)
 }
 
 
-static sphere *sphere_at(game *g, position pos, sphere *s)
+static sphere *sphere_at(const game *g, const position pos, const sphere *s)
 {
     for (guint idx = 0; idx < g->spheres->len; idx++)
     {
-        sphere *cs = (sphere *)g_ptr_array_index(g->spheres, idx);
+        sphere *cs = g_ptr_array_index(g->spheres, idx);
 
         if (s != cs && pos_identical(cs->pos, pos))
             return cs;
@@ -209,7 +209,7 @@ static sphere *sphere_at(game *g, position pos, sphere *s)
     return NULL;
 }
 
-static void sphere_hit_owner(game *g, sphere *s)
+static void sphere_hit_owner(const game *g, sphere *s)
 {
     log_add_entry(nlarn->log, "You are hit by a sphere of annihilation!");
 
@@ -243,12 +243,12 @@ static void sphere_kill_monster(sphere *s, monster *m)
     }
 
     /* xp for killing the monster */
-    guint mexp = monster_exp(m);
+    const int mexp = monster_exp(m);
 
-    monster *mret = monster_damage_take(m,
+    monster *monster = monster_damage_take(m,
         damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, DAMO_SPHERE, s));
 
-    if (!mret && s->owner)
+    if (!monster && s->owner)
     {
         /* the monster has been killed, grant experience */
         player_exp_gain(s->owner, mexp);

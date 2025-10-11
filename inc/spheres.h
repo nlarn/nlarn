@@ -1,6 +1,6 @@
 /*
  * spheres.h
- * Copyright (C) 2009-2011, 2012 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -34,10 +34,10 @@ typedef struct sphere {
 
 /* function declarations */
 sphere *sphere_new(position pos, player *owner, int lifetime);
-void sphere_destroy(sphere *s, struct game *g);
+void sphere_destroy(sphere *s, const struct game *g);
 
-void sphere_serialize(sphere *s, cJSON *root);
-void sphere_deserialize(cJSON *sser, struct game *g);
+void sphere_serialize(const sphere *s, cJSON *root);
+void sphere_deserialize(const cJSON *serialized, const struct game *g);
 
 void sphere_move(sphere *s, struct game *g);
 
