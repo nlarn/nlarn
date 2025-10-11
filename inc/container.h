@@ -16,10 +16,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __CONTAINER_H_
-#define __CONTAINER_H_
+#ifndef CONTAINER_H
+#define CONTAINER_H
 
-#include "enumFactory.h"
 #include "items.h"
 #include "inventory.h"
 
@@ -51,36 +50,36 @@ struct player;
 /**
   * @brief Function used to open a container.
   *
-  * @param the player
-  * @param -unused-
-  * @param the container to be opened
+  * @param p the player
+  * @param inv -unused-
+  * @param container the container to be opened
   */
 void container_open(struct player *p, inventory **inv, item *container);
 
 /**
   * @brief Function used to add an item to a container.
   *
-  * @param the player
-  * @param the container
-  * @param the item to be added
+  * @param p the player
+  * @param inv the container
+  * @param element the item to be added
   */
 void container_item_add(struct player *p, inventory **inv, item *element);
 
 /**
   * @brief Function used to remove an item from a container.
   *
-  * @param the player
-  * @param the originating inventory
-  * @param the item to be taken out
+  * @param p the player
+  * @param inv the originating inventory
+  * @param element the item to be taken out
   */
 void container_item_unpack(struct player *p, inventory **inv, item *element);
 
 /**
   * @brief Function used to add an entire inventory to another one.
   *
-  * @param the player
-  * @param the originating inventory
-  * @param the new inventory
+  * @param p the player
+  * @param inv the originating inventory
+  * @param new_inv the new inventory
   */
 int container_move_content(struct player *p, inventory **inv,
                            inventory **new_inv);
@@ -88,7 +87,7 @@ int container_move_content(struct player *p, inventory **inv,
 /**
   * @brief Remove a trap on a container
   *
-  * @param the player
+  * @param p the player
   * @return true if there is a trapped container at the player's position
   */
 gboolean container_untrap(struct player *p);

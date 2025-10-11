@@ -29,9 +29,7 @@
 
 inventory *inv_new(gconstpointer owner)
 {
-    inventory *ninv;
-
-    ninv = g_malloc0(sizeof(inventory));
+    inventory *ninv = g_malloc0(sizeof(inventory));
     ninv->content = g_ptr_array_new();
 
     ninv->owner = owner;
@@ -178,11 +176,9 @@ item *inv_get(inventory *inv, guint idx)
 
 item *inv_del(inventory **inv, guint idx)
 {
-    item *itm;
-
     g_assert(*inv != NULL && (*inv)->content != NULL && idx < inv_length(*inv));
 
-    itm = inv_get(*inv, idx);
+    item *itm = inv_get(*inv, idx);
 
     if ((*inv)->pre_del)
     {

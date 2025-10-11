@@ -22,14 +22,13 @@
 
 static path *path_new(position start, position goal);
 static path_element *path_element_new(position pos);
-static int path_step_cost(map *m, path_element* element,
-                         map_element_t map_elem, gboolean ppath);
-static int path_cost(path_element* element, position target);
-static path_element *path_element_in_list(path_element* el, GPtrArray *list);
-static path_element *path_find_best(path *pt);
+static guint path_step_cost(map *m, const path_element* element,
+    map_element_t map_elem, gboolean for_player);
+static guint path_cost(path_element* element, position target);
+static path_element *path_element_in_list(const path_element* el, const GPtrArray *list);
+static path_element *path_find_best(const path *pt);
 static GPtrArray *path_get_neighbours(map *m, position pos,
-                                      map_element_t element,
-                                      gboolean ppath);
+    map_element_t element, gboolean for_player);
 
 path *path_find(map *m, position start, position goal, map_element_t element)
 {
@@ -50,7 +49,7 @@ path *path_find(map *m, position start, position goal, map_element_t element)
     g_ptr_array_add(pt->open, curr);
 
     /* check if the path is being determined for the player */
-    gboolean ppath = pos_identical(start, nlarn->p->pos);
+    gboolean for_player = pos_identical(start, nlarn->p->pos);
 
     while (pt->open->len)
     {
@@ -62,20 +61,18 @@ path *path_find(map *m, position start, position goal, map_element_t element)
         if (pos_identical(curr->pos, pt->goal))
         {
             /* arrived at goal - reconstruct path */
-            do
-            {
+            do {
                 /* don't need the starting point in the path */
                 if (curr->parent != NULL)
                     g_queue_push_head(pt->path, curr);
 
                 curr = curr->parent;
-            }
-            while (curr != NULL);
+            } while (curr != NULL);
 
             return pt;
         }
 
-        GPtrArray *neighbours = path_get_neighbours(m, curr->pos, element, ppath);
+        GPtrArray *neighbours = path_get_neighbours(m, curr->pos, element, for_player);
 
         while (neighbours->len)
         {
@@ -91,7 +88,7 @@ path *path_find(map *m, position start, position goal, map_element_t element)
             }
 
             const guint32 next_g_score = curr->g_score
-                + path_step_cost(m, next, element, ppath);
+                + path_step_cost(m, next, element, for_player);
 
             if (!path_element_in_list(next, pt->open))
             {
@@ -123,25 +120,25 @@ path *path_find(map *m, position start, position goal, map_element_t element)
     return NULL;
 }
 
-void path_destroy(path *pt)
+void path_destroy(path *path)
 {
-    g_assert(pt != NULL);
+    g_assert(path != NULL);
 
     /* clean up open list */
-    for (guint idx = 0; idx < pt->open->len; idx++)
+    for (guint idx = 0; idx < path->open->len; idx++)
     {
-        g_free(g_ptr_array_index(pt->open, idx));
+        g_free(g_ptr_array_index(path->open, idx));
     }
-    g_ptr_array_free(pt->open, true);
+    g_ptr_array_free(path->open, true);
 
-    for (guint idx = 0; idx < pt->closed->len; idx++)
+    for (guint idx = 0; idx < path->closed->len; idx++)
     {
-        g_free(g_ptr_array_index(pt->closed, idx));
+        g_free(g_ptr_array_index(path->closed, idx));
     }
-    g_ptr_array_free(pt->closed, true);
+    g_ptr_array_free(path->closed, true);
 
-    g_queue_free(pt->path);
-    g_free(pt);
+    g_queue_free(path->path);
+    g_free(path);
 }
 
 static path *path_new(position start, position goal)
@@ -172,14 +169,14 @@ static path_element *path_element_new(position pos)
 }
 
 /* calculate the cost of stepping into this new field */
-static int path_step_cost(map *m, path_element* element,
-                          map_element_t map_elem, gboolean ppath)
+static guint path_step_cost(map *m, const path_element* element,
+    map_element_t map_elem, gboolean for_player)
 {
     map_tile_t tt;
     guint32 step_cost = 1; /* at least 1 movement cost */
 
     /* get the tile type of the map tile */
-    if (ppath)
+    if (for_player)
     {
         tt = player_memory_of(nlarn->p, element->pos).type ;
     }
@@ -189,7 +186,7 @@ static int path_step_cost(map *m, path_element* element,
     }
 
     /* penalize for traps known to the player */
-    if (ppath && player_memory_of(nlarn->p, element->pos).trap)
+    if (for_player && player_memory_of(nlarn->p, element->pos).trap)
     {
         const trap_t trap = map_trap_at(m, element->pos);
         /* especially ones that may cause detours */
@@ -202,7 +199,7 @@ static int path_step_cost(map *m, path_element* element,
     /* penalize fields occupied by monsters: always for monsters,
        for the player only if (s)he can see the monster */
     monster *mon = map_get_monster_at(m, element->pos);
-    if (mon != NULL && (!ppath || monster_in_sight(mon)))
+    if (mon != NULL && (!for_player || monster_in_sight(mon)))
     {
         step_cost += 10;
     }
@@ -227,7 +224,7 @@ static int path_step_cost(map *m, path_element* element,
 
 /* Returns the total estimated cost of the best path going
    through this new field */
-static int path_cost(path_element* element, position target)
+static guint path_cost(path_element* element, position target)
 {
     /* estimate the distance from the current position to the target */
     element->h_score = pos_distance(element->pos, target);
@@ -235,7 +232,7 @@ static int path_cost(path_element* element, position target)
     return element->g_score + element->h_score;
 }
 
-static path_element *path_element_in_list(path_element* el, GPtrArray *list)
+static path_element *path_element_in_list(const path_element* el, const GPtrArray *list)
 {
     g_assert(el != NULL && list != NULL);
 
@@ -250,7 +247,7 @@ static path_element *path_element_in_list(path_element* el, GPtrArray *list)
     return NULL;
 }
 
-static path_element *path_find_best(path *pt)
+static path_element *path_find_best(const path *pt)
 {
     path_element *best = NULL;
 
@@ -270,7 +267,7 @@ static path_element *path_find_best(path *pt)
 
 static GPtrArray *path_get_neighbours(map *m, position pos,
                                       map_element_t element,
-                                      gboolean ppath)
+                                      gboolean for_player)
 {
     GPtrArray *neighbours = g_ptr_array_new();
 
@@ -279,15 +276,15 @@ static GPtrArray *path_get_neighbours(map *m, position pos,
         if (dir == GD_CURR)
             continue;
 
-        position npos = pos_move(pos, dir);
+        position new_pos = pos_move(pos, dir);
 
-        if (!pos_valid(npos))
+        if (!pos_valid(new_pos))
             continue;
 
-        if ((ppath && mt_is_passable(player_memory_of(nlarn->p, npos).type))
-                || (!ppath && monster_valid_dest(m, npos, element)))
+        if ((for_player && mt_is_passable(player_memory_of(nlarn->p, new_pos).type))
+                || (!for_player && monster_valid_dest(m, new_pos, element)))
         {
-            path_element *pe = path_element_new(npos);
+            path_element *pe = path_element_new(new_pos);
             g_ptr_array_add(neighbours, pe);
         }
     }

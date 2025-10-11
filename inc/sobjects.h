@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SOBJECTS_H_
-#define __SOBJECTS_H_
+#ifndef SOBJECTS_H
+#define SOBJECTS_H
 
 #include "colours.h"
 #include "enumFactory.h"
@@ -57,30 +57,30 @@ struct map;
 
 DECLARE_ENUM(sobject_t, SOBJECT_TYPE_ENUM)
 
-typedef struct _sobject_data
+typedef struct sobject_data
 {
     sobject_t sobject;
     const char glyph;
     colour fg;
     const char *description;
-    unsigned
+    bool
         passable:     1,   /* can be passed */
         transparent:  1;   /* see-through */
 } sobject_data;
 
 extern const sobject_data sobjects[LS_MAX];
 
-static inline char so_get_glyph(sobject_t s)
+static inline char so_get_glyph(const sobject_t s)
 {
     return sobjects[s].glyph;
 }
 
-static inline colour so_get_colour(sobject_t s)
+static inline colour so_get_colour(const sobject_t s)
 {
     return sobjects[s].fg;
 }
 
-static inline const char *so_get_desc(sobject_t s)
+static inline const char *so_get_desc(const sobject_t s)
 {
     return sobjects[s].description;
 }

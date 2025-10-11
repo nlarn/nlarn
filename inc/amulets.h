@@ -16,10 +16,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __AMULETS_H_
-#define __AMULETS_H_
+#ifndef AMULETS_H
+#define AMULETS_H
 
-#include "enumFactory.h"
 #include "items.h"
 
 #define AMULET_TYPE_ENUM(AMULET_TYPE) \

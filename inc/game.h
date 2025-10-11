@@ -16,14 +16,14 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GAME_H_
-#define __GAME_H_
+#ifndef GAME_H
+#define GAME_H
 
 #include "inventory.h"
 #include "items.h"
 #include "map.h"
 #include "player.h"
-#include "spheres.h"
+#include "weapons.h"
 
 #define TIMELIMIT 30000 /* maximum number of moves before the game is called */
 
@@ -89,7 +89,7 @@ typedef struct game
     GPtrArray *spheres;
 
     /* flags */
-    guint32
+    bool
         player_stats_set: 1, /* the player's stats have been assigned */
         cure_dianthr_created: 1, /* the potion of cure dianthroritis is a unique item */
         wizard: 1, /* wizard mode */
@@ -103,7 +103,7 @@ typedef struct game
  * @brief Initialise the game. This function will try to restore a saved game;
  *        if it fails it will start a new game.
  *
- * @param pointer to a parsed command line configuration
+ * @param config pointer to a parsed command line configuration
  */
 void game_init(struct game_config *config);
 
@@ -111,9 +111,7 @@ game *game_destroy(game *g);
 
 /**
  * @brief Save a game.
- * @param The game to save
- * @param The name of the file to be saved. Defaults to "nlarn.sav",
- *        if a NULL has been supplied.
+ * @param g The game to save
  */
 int game_save(game *g);
 

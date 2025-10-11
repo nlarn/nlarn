@@ -31,7 +31,7 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
 
 static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b, gpointer center);
 
-struct _fov
+struct fov
 {
     /* the actual field of vision */
     guchar data[MAP_MAX_Y][MAP_MAX_X];
@@ -47,11 +47,11 @@ struct _fov
 
 fov *fov_new()
 {
-    fov *nfov = g_malloc0(sizeof(fov));
-    nfov->center = pos_invalid;
-    nfov->mlist = g_hash_table_new(g_direct_hash, g_direct_equal);
+    fov *new_fov = g_new0(fov, 1);
+    new_fov->center = pos_invalid;
+    new_fov->mlist = g_hash_table_new(g_direct_hash, g_direct_equal);
 
-    return nfov;
+    return new_fov;
 }
 /* this and the function fov_calculate_octant() have been
  * ported from python to c using the example at
@@ -77,7 +77,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
     for (int octant = 0; octant < 8; octant++)
     {
         fov_calculate_octant(fv, m, pos, infravision,
-                             1, 1.0, 0.0, radius,
+                             1, 1.0f, 0.0f, radius,
                              mult[0][octant], mult[1][octant],
                              mult[2][octant], mult[3][octant]);
     }
@@ -85,7 +85,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
     fov_set(fv, pos, true, infravision, true);
 }
 
-gboolean fov_get(fov *fv, position pos)
+gboolean fov_get(const fov *fv, position pos)
 {
     g_assert (fv != NULL);
     g_assert (pos_valid(pos));
@@ -94,7 +94,7 @@ gboolean fov_get(fov *fv, position pos)
 }
 
 void fov_set(fov *fv, position pos, guchar visible,
-             gboolean infravision, gboolean mchk)
+             gboolean infravision, gboolean check_monster)
 {
     g_assert (fv != NULL);
     g_assert (pos_valid(pos));
@@ -104,7 +104,8 @@ void fov_set(fov *fv, position pos, guchar visible,
 
     /* If advised to do so, check if there is a monster at that
        position. Must not be an unknown mimic or invisible. */
-    if (mchk && (mon = map_get_monster_at(game_map(nlarn, Z(pos)), pos))
+    if (check_monster
+        && ((mon = map_get_monster_at(game_map(nlarn, Z(pos)), pos)))
         && !monster_unknown(mon)
         && (!monster_flags(mon, INVISIBLE) || infravision))
     {
@@ -133,10 +134,8 @@ monster *fov_get_closest_monster(fov *fv)
 
     if (g_hash_table_size(fv->mlist) > 0)
     {
-        GList *mlist;
-
         /* get the list of all visible monsters */
-        mlist = g_hash_table_get_keys(fv->mlist);
+        GList *mlist = g_hash_table_get_keys(fv->mlist);
 
         /* sort the monsters list by distance */
         mlist = g_list_sort_with_data(mlist, fov_visible_monster_sort,
@@ -182,15 +181,12 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
                                  float start, float end, int radius,
                                  int xx, int xy, int yx, int yy)
 {
-    int radius_squared;
-    int X, Y;
-    float l_slope, r_slope;
     float new_start = 0;
 
     if (start < end)
         return;
 
-    radius_squared = radius * radius;
+    int radius_squared = radius * radius;
 
     for (int j = row; j <= radius + 1; j++)
     {
@@ -204,8 +200,8 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
             dx += 1;
 
             /* Translate the dx, dy coordinates into map coordinates: */
-            X = X(center) + dx * xx + dy * xy;
-            Y = Y(center) + dx * yx + dy * yy;
+            int X = X(center) + dx * xx + dy * xy;
+            int Y = Y(center) + dx * yx + dy * yy;
 
             /* check if coordinated are within bounds */
             if ((X < 0) || (X >= MAP_MAX_X))
@@ -216,8 +212,8 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
 
             /* l_slope and r_slope store the slopes of the left and right
              * extremities of the square we're considering: */
-            l_slope = (dx - 0.5) / (dy + 0.5);
-            r_slope = (dx + 0.5) / (dy - 0.5);
+            float l_slope = ((float)dx - 0.5f) / ((float)dy + 0.5f);
+            float r_slope = ((float)dx + 0.5f) / ((float)dy - 0.5f);
 
             if (start < r_slope)
             {
@@ -278,10 +274,8 @@ static void fov_calculate_octant(fov *fv, map *m, position center,
 
 static gint fov_visible_monster_sort(gconstpointer a, gconstpointer b, gpointer center)
 {
-    monster *ma, *mb;
-
-    ma = (monster*)a;
-    mb = (monster*)b;
+    monster *ma = (monster *) a;
+    monster *mb = (monster *) b;
 
     int da = pos_distance(*(position *)center, monster_pos(ma));
     int db = pos_distance(*(position *)center, monster_pos(mb));

@@ -208,7 +208,7 @@ game *game_destroy(game *g)
 int game_save(game *g)
 {
     int err;
-    struct cJSON *save, *obj;
+    struct cJSON *obj;
     display_window *win = NULL;
 
     g_assert(g != NULL);
@@ -217,7 +217,7 @@ int game_save(game *g)
     if (display_available())
         win = display_popup(2, 2, 0, NULL, "Saving....", 0);
 
-    save = cJSON_CreateObject();
+    struct cJSON *save = cJSON_CreateObject();
 
     cJSON_AddNumberToObject(save, "nlarn_version", SAVEFILE_VERSION);
     cJSON_AddNumberToObject(save, "time_start", g->time_start);
@@ -575,8 +575,6 @@ static void game_new()
 
 static gboolean game_load()
 {
-    int size;
-    cJSON *save, *obj;
     display_window *win = NULL;
 
     /* size of the buffer we allocate to store the uncompressed file content */
@@ -621,7 +619,7 @@ static gboolean game_load()
     gzclose(sg);
 
     /* parse save file */
-    save = cJSON_Parse(sgbuf);
+    cJSON *save = cJSON_Parse(sgbuf);
 
     /* throw away the buffer */
     g_free(sgbuf);
@@ -677,8 +675,8 @@ static gboolean game_load()
     if (cJSON_GetObjectItem(save, "fullvis"))
         nlarn->fullvis = true;
 
-    obj = cJSON_GetObjectItem(save, "amulet_created");
-    size = cJSON_GetArraySize(obj);
+    cJSON *obj = cJSON_GetObjectItem(save, "amulet_created");
+    int size = cJSON_GetArraySize(obj);
     g_assert(size == AM_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->amulet_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;

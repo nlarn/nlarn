@@ -48,9 +48,7 @@ char *str_capitalize(char *string)
 
 message_log *log_new()
 {
-    message_log *log;
-
-    log = g_malloc0(sizeof(message_log));
+    message_log *log = g_malloc0(sizeof(message_log));
 
     log->active = true;
     log->buffer = g_string_new(NULL);
@@ -78,14 +76,13 @@ void log_destroy(message_log *log)
 int log_add_entry(message_log *log, const char *fmt, ...)
 {
     va_list argp;
-    gchar *msg;
 
     if (log == NULL || log->active == false)
         return false;
 
     /* assemble message and append it to the buffer */
     va_start(argp, fmt);
-    msg = g_strdup_vprintf(fmt, argp);
+    gchar *msg = g_strdup_vprintf(fmt, argp);
     va_end(argp);
 
     /* compare new message to previous messages to avoid duplicates */
@@ -280,9 +277,6 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         /* reset target string length and position of last whitespace */
         lp = 0;
 
-        /* copy of line */
-        char *line;
-
         /* scan the next line */
         while (llen <= pwidth)
         {
@@ -318,7 +312,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         }
 
         /* copy the text to the new line */
-        line = g_strndup(&(str[spos]), lp);
+        char *line = g_strndup(&(str[spos]), lp);
 
         /* skip silly CR chars */
         if (str[spos + lp] == '\r') lp++;
@@ -402,12 +396,12 @@ char **strv_new()
 /**
  * adds a copy of str to the list
  */
-int strv_append(char ***list, const char *str)
+size_t strv_append(char ***list, const char *str)
 {
     g_assert(list != NULL);
     g_assert(str != NULL);
 
-    int len = g_strv_length(*list) + 1;
+    size_t len = g_strv_length(*list) + 1;
 
     *list = g_realloc (*list, sizeof(char*) * (len + 1));
 
@@ -420,7 +414,7 @@ int strv_append(char ***list, const char *str)
 /**
  * add a copy of str to the list if it is not yet part of the list
  */
-int strv_append_unique(char ***list, const char *str)
+size_t strv_append_unique(char ***list, const char *str)
 {
     /* compare elements to the new string and return false if the element existed */
     for (int len = 0; (*list)[len]; len++)

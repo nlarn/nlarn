@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __EXTDEFS_H_
-#define __EXTDEFS_H_
+#ifndef EXTDEFS_H
+#define EXTDEFS_H
 
 #include <setjmp.h>
 

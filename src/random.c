@@ -149,24 +149,19 @@ guint32 rand_0n(guint32 n)
         case 0:
         case 1:
             return 0;
-            break;
         case UINT32_MAX:
             return next();
-            break;
         default:
             return next() % n;
-            break;
     }
 }
 
 int divert(int value, int percent)
 {
-    int lower, upper;
-
     g_assert(value > 0 && percent > 0);
 
-    lower = value - (value / percent);
-    upper = value + (value / percent);
+    int lower = value - (value / percent);
+    int upper = value + (value / percent);
     if (lower == upper)
         return value;
 
@@ -192,13 +187,11 @@ void shuffle(int array[], int length, int skip)
 }
 
 double levy_random(double c, double mu) {
-    double u, v, x;
-
-    u = (double)rand_0n(UINT32_MAX) / UINT32_MAX;
-    v = (double)rand_0n(UINT32_MAX) / UINT32_MAX;
+    double u = (double) rand_0n(UINT32_MAX) / UINT32_MAX;
+    double v = (double) rand_0n(UINT32_MAX) / UINT32_MAX;
 
     // Inverse transformation for the Lévy distribution
-    x = c / pow(cos(G_PI * (v - 0.5)), 2) * pow(sin(G_PI * (u - 0.5)), -2 / mu);
+    double x = c / pow(cos(G_PI * (v - 0.5)), 2) * pow(sin(G_PI * (u - 0.5)), -2 / mu);
 
     return x;
 }

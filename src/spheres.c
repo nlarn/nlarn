@@ -1,6 +1,6 @@
 /*
  * spheres.c
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,15 +23,13 @@
 #include "random.h"
 #include "spheres.h"
 
-static sphere *sphere_at(game *g, position pos, sphere *s);
-static void sphere_hit_owner(game *g, sphere *s);
+static sphere *sphere_at(const game *g, position pos, const sphere *s);
+static void sphere_hit_owner(const game *g, sphere *s);
 static void sphere_kill_monster(sphere *s, monster *m);
 
-sphere *sphere_new(position pos, player *owner, int lifetime)
+sphere *sphere_new(const position pos, player *owner, const int lifetime)
 {
-    sphere *s;
-
-    s = g_malloc0(sizeof(sphere));
+    sphere *s = g_malloc0(sizeof(sphere));
 
     s->pos = pos;
     s->owner = owner;
@@ -47,7 +45,7 @@ sphere *sphere_new(position pos, player *owner, int lifetime)
     return s;
 }
 
-void sphere_destroy(sphere *s, game *g)
+void sphere_destroy(sphere *s, const game *g)
 {
     g_assert(s != NULL);
 
@@ -55,7 +53,7 @@ void sphere_destroy(sphere *s, game *g)
     g_free(s);
 }
 
-void sphere_serialize(sphere *s, cJSON *root)
+void sphere_serialize(const sphere *s, cJSON *root)
 {
     cJSON *sval;
 
@@ -69,15 +67,15 @@ void sphere_serialize(sphere *s, cJSON *root)
         cJSON_AddFalseToObject(sval, "owner");
 }
 
-void sphere_deserialize(cJSON *sser, game *g)
+void sphere_deserialize(const cJSON *serialized, const game *g)
 {
     sphere *s = g_malloc0(sizeof(sphere));
 
-    s->dir = cJSON_GetObjectItem(sser, "dir")->valueint;
-    s->lifetime = cJSON_GetObjectItem(sser, "lifetime")->valueint;
-    pos_val(s->pos) = cJSON_GetObjectItem(sser, "pos")->valueint;
+    s->dir = cJSON_GetObjectItem(serialized, "dir")->valueint;
+    s->lifetime = cJSON_GetObjectItem(serialized, "lifetime")->valueint;
+    pos_val(s->pos) = cJSON_GetObjectItem(serialized, "pos")->valueint;
 
-    if (!cJSON_GetObjectItem(sser, "owner"))
+    if (!cJSON_GetObjectItem(serialized, "owner"))
         s->owner = g->p;
 
     g_ptr_array_add(g->spheres, s);
@@ -85,11 +83,8 @@ void sphere_deserialize(cJSON *sser, game *g)
 
 void sphere_move(sphere *s, game *g)
 {
-    position npos;
     int tries = 0;
-    direction dir;
     monster *m;
-    map *smap;
 
     g_assert(s != NULL && g != NULL);
 
@@ -103,14 +98,14 @@ void sphere_move(sphere *s, game *g)
         return;
     }
 
-    smap = game_map(g, Z(s->pos));
+    map *smap = game_map(g, Z(s->pos));
 
     /* try to move sphere into its direction */
-    dir = s->dir;
-    npos = pos_move(s->pos, dir);
+    direction dir = s->dir;
+    position new_pos = pos_move(s->pos, dir);
 
     /* if the new position does not work, try to find another one */
-    while ((!pos_valid(npos) || !map_pos_passable(smap, npos))
+    while ((!pos_valid(new_pos) || !map_pos_passable(smap, new_pos))
             && (tries < GD_MAX))
     {
         dir++;
@@ -121,7 +116,7 @@ void sphere_move(sphere *s, game *g)
         if (dir == GD_MAX)
             dir = 1;
 
-        npos = pos_move(s->pos, dir);
+        new_pos = pos_move(s->pos, dir);
         tries++;
     }
 
@@ -129,11 +124,11 @@ void sphere_move(sphere *s, game *g)
     if (tries < GD_MAX)
     {
         s->dir = dir;
-        s->pos = npos;
+        s->pos = new_pos;
     }
     /* otherwise stand still */
 
-    /* sphere rolled over it's creator */
+    /* sphere rolled over its creator */
     if (pos_identical(s->pos, s->owner->pos))
     {
         sphere_hit_owner(g, s);
@@ -201,11 +196,11 @@ void sphere_move(sphere *s, game *g)
 }
 
 
-static sphere *sphere_at(game *g, position pos, sphere *s)
+static sphere *sphere_at(const game *g, const position pos, const sphere *s)
 {
     for (guint idx = 0; idx < g->spheres->len; idx++)
     {
-        sphere *cs = (sphere *)g_ptr_array_index(g->spheres, idx);
+        sphere *cs = g_ptr_array_index(g->spheres, idx);
 
         if (s != cs && pos_identical(cs->pos, pos))
             return cs;
@@ -214,7 +209,7 @@ static sphere *sphere_at(game *g, position pos, sphere *s)
     return NULL;
 }
 
-static void sphere_hit_owner(game *g, sphere *s)
+static void sphere_hit_owner(const game *g, sphere *s)
 {
     log_add_entry(nlarn->log, "You are hit by a sphere of annihilation!");
 
@@ -238,12 +233,7 @@ static void sphere_hit_owner(game *g, sphere *s)
 
 static void sphere_kill_monster(sphere *s, monster *m)
 {
-    monster *mret; /* monster returned by monster_damage_take */
-    guint mexp;    /* xp for killing the monster */
-
     g_assert(s != NULL && m != NULL);
-
-    mexp = monster_exp(m);
 
     if (monster_in_sight(m))
     {
@@ -252,9 +242,13 @@ static void sphere_kill_monster(sphere *s, monster *m)
                 monster_name(m));
     }
 
-    mret = monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, DAMO_SPHERE, s));
+    /* xp for killing the monster */
+    const int mexp = monster_exp(m);
 
-    if (!mret && s->owner)
+    monster *monster = monster_damage_take(m,
+        damage_new(DAM_MAGICAL, ATT_MAGIC, 2000, DAMO_SPHERE, s));
+
+    if (!monster && s->owner)
     {
         /* the monster has been killed, grant experience */
         player_exp_gain(s->owner, mexp);

@@ -74,7 +74,7 @@ const item_material_data item_materials[IM_MAX] =
     { IM_SILVER,      "silver",      "silvery",  SILVER,              7, },
     { IM_GOLD,        "gold",        "golden",   PIRATE_GOLD,         6, },
     { IM_PLATINUM,    "platinum",    "platinum", PLATINUM,            3, },
-    { IM_MITHRIL,     "mitril",      "mithrial", GREY93,              0, },
+    { IM_MITHRIL,     "mithril",     "mithrial", GREY93,              0, },
     { IM_GLASS,       "glass",       "vitreous", CHALKY_BLUE_WHITE,  50, },
     { IM_STONE,       "stone",       "stony",    GRANITE,            20, },
     { IM_GEMSTONE,    "gemstone",    "gemstone", LUMINOUS_RED,        0, },
@@ -84,14 +84,13 @@ const item_material_data item_materials[IM_MAX] =
 
 item *item_new(item_t item_type, int item_id)
 {
-    item *nitem;
     effect *eff = NULL;
     guint loops = 0;
 
     g_assert(item_type > IT_NONE && item_type < IT_MAX);
 
     /* has to be zeroed or memcmp will fail */
-    nitem = g_malloc0(sizeof(item));
+    item *nitem = g_malloc0(sizeof(item));
 
     nitem->type = item_type;
     nitem->id = item_id;
@@ -292,12 +291,11 @@ item *item_new_random(item_t item_type, gboolean finetouch)
 
 item *item_new_by_level(item_t item_type, int num_level)
 {
-    item *nitem;
-    float variance, id_base, divisor;
+    float variance;
 
     g_assert (item_type > IT_NONE && item_type < IT_MAX && num_level < MAP_MAX);
 
-    divisor = 1 / (float)(MAP_MAX - 1);
+    float divisor = 1 / (float) (MAP_MAX - 1);
 
     switch (item_type)
     {
@@ -316,7 +314,7 @@ item *item_new_by_level(item_t item_type, int num_level)
         return item_new_random(item_type, true);
     }
 
-    id_base = item_max_id(item_type) * (num_level * divisor);
+    float id_base = item_max_id(item_type) * (num_level * divisor);
     int id_min = id_base - (item_max_id(item_type) * variance);
     int id_max = id_base + (item_max_id(item_type) * variance);
 
@@ -326,7 +324,7 @@ item *item_new_by_level(item_t item_type, int num_level)
     if (id_max > (int)item_max_id(item_type)) id_max = item_max_id(item_type);
 
     /* create the item */
-    nitem = item_new(item_type, rand_m_n(id_min, id_max));
+    item *nitem = item_new(item_type, rand_m_n(id_min, id_max));
 
     return item_new_finetouch(nitem);
 }
@@ -386,12 +384,10 @@ item *item_new_finetouch(item *it)
 
 item *item_copy(item *original)
 {
-    item *nitem;
-
     g_assert(original != NULL);
 
     /* clone item */
-    nitem = g_malloc0(sizeof(item));
+    item *nitem = g_malloc0(sizeof(item));
     memcpy(nitem, original, sizeof(item));
 
     /* copy effects */
@@ -420,11 +416,9 @@ item *item_copy(item *original)
 
 item *item_split(item *original, guint32 count)
 {
-    item *nitem;
-
     g_assert(original != NULL && count < original->count);
 
-    nitem = item_copy(original);
+    item *nitem = item_copy(original);
 
     nitem->count = count;
     original->count -= count;
@@ -473,17 +467,17 @@ static const char* item_enum_string_lookup(item_t typ, int id)
 
     switch (typ)
     {
-        case IT_AMULET:    return amulet_t_string(id);    break;
-        case IT_AMMO:      return ammo_t_string(id);      break;
-        case IT_ARMOUR:    return armour_t_string(id);    break;
-        case IT_BOOK:      return spell_id_string(id);    break;
-        case IT_CONTAINER: return container_t_string(id); break;
-        case IT_GEM:       return gem_t_string(id);       break;
-        case IT_POTION:    return potion_t_string(id);    break;
-        case IT_RING:      return ring_t_string(id);      break;
-        case IT_SCROLL:    return scroll_t_string(id);    break;
-        case IT_WEAPON:    return weapon_t_string(id);    break;
-        default:           return "";                     break;
+        case IT_AMULET:    return amulet_t_string(id);
+        case IT_AMMO:      return ammo_t_string(id);
+        case IT_ARMOUR:    return armour_t_string(id);
+        case IT_BOOK:      return spell_id_string(id);
+        case IT_CONTAINER: return container_t_string(id);
+        case IT_GEM:       return gem_t_string(id);
+        case IT_POTION:    return potion_t_string(id);
+        case IT_RING:      return ring_t_string(id);
+        case IT_SCROLL:    return scroll_t_string(id);
+        case IT_WEAPON:    return weapon_t_string(id);
+        default:           return "";
     }
 }
 
@@ -537,30 +531,26 @@ static int item_enum_value_lookup(item_t typ, const char* str)
 
     switch (typ)
     {
-        case IT_AMULET:    return amulet_t_value(str);    break;
-        case IT_AMMO:      return ammo_t_value(str);      break;
-        case IT_ARMOUR:    return armour_t_value(str);    break;
-        case IT_BOOK:      return spell_id_value(str);    break;
-        case IT_CONTAINER: return container_t_value(str); break;
-        case IT_GEM:       return gem_t_value(str);       break;
-        case IT_POTION:    return potion_t_value(str);    break;
-        case IT_RING:      return ring_t_value(str);      break;
-        case IT_SCROLL:    return scroll_t_value(str);    break;
-        case IT_WEAPON:    return weapon_t_value(str);    break;
-        default:           return 0;                      break;
+        case IT_AMULET:    return amulet_t_value(str);
+        case IT_AMMO:      return ammo_t_value(str);
+        case IT_ARMOUR:    return armour_t_value(str);
+        case IT_BOOK:      return spell_id_value(str);
+        case IT_CONTAINER: return container_t_value(str);
+        case IT_GEM:       return gem_t_value(str);
+        case IT_POTION:    return potion_t_value(str);
+        case IT_RING:      return ring_t_value(str);
+        case IT_SCROLL:    return scroll_t_value(str);
+        case IT_WEAPON:    return weapon_t_value(str);
+        default:           return 0;
     }
 }
 
 item *item_deserialize(cJSON *iser, struct game *g)
 {
-    guint oid;
-    item *it;
-    cJSON *obj;
-
-    it = g_malloc0(sizeof(item));
+    item *it = g_malloc0(sizeof(item));
 
     /* must-have attributes */
-    oid = cJSON_GetObjectItem(iser, "oid")->valueint;
+    guint oid = cJSON_GetObjectItem(iser, "oid")->valueint;
     it->oid = GUINT_TO_POINTER(oid);
 
     it->type = item_t_value(cJSON_GetObjectItem(iser, "type")->valuestring);
@@ -570,7 +560,7 @@ item *item_deserialize(cJSON *iser, struct game *g)
     it->count = cJSON_GetObjectItem(iser, "count")->valueint;
 
     /* optional attributes */
-    obj = cJSON_GetObjectItem(iser, "blessed");
+    cJSON *obj = cJSON_GetObjectItem(iser, "blessed");
     if (obj != NULL) it->blessed = obj->valueint;
 
     obj = cJSON_GetObjectItem(iser, "cursed");
@@ -621,9 +611,6 @@ item *item_deserialize(cJSON *iser, struct game *g)
 
 int item_compare(item *a, item *b)
 {
-    int tmp_count, result;
-    gpointer oid_a, oid_b;
-
     if (a->type != b->type)
     {
         return false;
@@ -634,17 +621,17 @@ int item_compare(item *a, item *b)
     }
 
     /* as count can be different for equal items, save count of b */
-    tmp_count = b->count;
+    int tmp_count = b->count;
     b->count = a->count;
 
     /* store oids (never identical!) */
-    oid_a = a->oid;
-    oid_b = b->oid;
+    gpointer oid_a = a->oid;
+    gpointer oid_b = b->oid;
 
     a->oid = NULL;
     b->oid = NULL;
 
-    result = (memcmp(a, b, sizeof(item)) == 0);
+    int result = (memcmp(a, b, sizeof(item)) == 0);
 
     b->count = tmp_count;
 
@@ -870,7 +857,7 @@ gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean defin
                                (strlen(it->notes) > 5 ? "noted" : it->notes));
     }
 
-    /* prepend additional information unless the item is an unique weapon */
+    /* prepend additional information unless the item is a unique weapon */
     if (!(it->type == IT_WEAPON && weapon_is_unique(it)))
     {
         if (add_info != NULL)
@@ -907,47 +894,36 @@ item_material_t item_material(item *it)
     {
     case IT_AMULET:
         return amulet_material(it->id);
-        break;
 
     case IT_AMMO:
         return ammo_material(it);
-        break;
 
     case IT_ARMOUR:
         return armour_material(it);
-        break;
 
     case IT_BOOK:
         return IM_PAPER;
-        break;
 
     case IT_CONTAINER:
         return container_material(it);
-        break;
 
     case IT_GEM:
         return IM_GEMSTONE;
-        break;
 
     case IT_GOLD:
         return IM_GOLD;
-        break;
 
     case IT_POTION:
         return IM_GLASS;
-        break;
 
     case IT_RING:
         return ring_material(it->id);
-        break;
 
     case IT_SCROLL:
         return IM_PAPER;
-        break;
 
     case IT_WEAPON:
         return weapon_material(it);
-        break;
 
     default:
         g_assert(0);
@@ -1134,35 +1110,27 @@ colour item_colour(item *it)
     case IT_RING:
     case IT_WEAPON:
         return item_materials[item_material(it)].fg;
-        break;
 
     case IT_BOOK:
         return book_colour(it);
-        break;
 
     case IT_POTION:
         return potion_colour(it->id);
-        break;
 
     case IT_SCROLL:
         return WHITE;
-        break;
 
     case IT_CONTAINER:
         return AUTUMN_LEAF_BROWN;
-        break;
 
     case IT_GOLD:
         return PIRATE_GOLD;
-        break;
 
     case IT_GEM:
         return gem_colour(it);
-        break;
 
     default:
         return BLACK;
-        break;
     }
 }
 
@@ -1335,7 +1303,6 @@ static int material_affected(item_material_t mat, item_erosion_type iet)
         /* potions will shatter when exposed to fire */
         return (mat <= IM_BONE || mat == IM_GLASS);
     case IET_CORRODE:
-        return (mat == IM_IRON);
     case IET_RUST:
         return (mat == IM_IRON);
     default:
@@ -1456,7 +1423,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
 
         if (it->content != NULL)
         {
-            /* if the item is a container an still has undestroyed content,
+            /* If the item is a container and still has undestroyed content,
              * this content has to be put into the items inventory, e.g. a
              * casket burns -> all undestroyed items inside the casket
              * continue to exist on the floor tile the casket was standing on
@@ -1479,7 +1446,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visi
     return it;
 }
 
-int item_obtainable(item_t type, int id)
+int item_obtainable(item_t type, guint id)
 {
     int obtainable;
 
@@ -1715,19 +1682,14 @@ gboolean item_is_unique(item *it)
     {
     case IT_ARMOUR:
         return armour_unique(it);
-        break;
     case IT_POTION:
         return (it->id == PO_CURE_DIANTHR);
-        break;
     case IT_AMULET:
         return true;
-        break;
     case IT_WEAPON:
         return weapon_is_unique(it);
-        break;
     default:
         return false;
-        break;
     }
 }
 
@@ -1742,58 +1704,48 @@ static const char *item_desc_get(item *it, int known)
             return amulet_name(it);
         else
             return item_material_adjective(item_material(it));
-        break;
 
     case IT_AMMO:
         return ammo_name(it);
-        break;
 
     case IT_ARMOUR:
         if (!known && armour_disguise(it) != AT_MAX)
             return armours[armour_disguise(it)].name;
         else
             return armour_name(it);
-        break;
 
     case IT_BOOK:
         if (known)
             return book_name(it);
         else
             return book_desc(it->id);
-        break;
 
     case IT_CONTAINER:
         return container_name(it);
-        break;
 
     case IT_POTION:
         if (known)
             return potion_name(it);
         else
             return potion_desc(it->id);
-        break;
 
     case IT_RING:
         if (known)
             return ring_name(it);
         else
             return item_material_adjective(item_material(it));
-        break;
 
     case IT_SCROLL:
         if (known)
             return scroll_name(it);
         else
             return scroll_desc(it->id);
-        break;
 
     case IT_GEM:
         return (char *)gem_name(it);
-        break;
 
     case IT_WEAPON:
         return weapon_name(it);
-        break;
 
     default:
         return "";

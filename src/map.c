@@ -153,7 +153,7 @@ map *map_new(int num, const char *mazefile)
 
     if (num != 0)
     {
-        /* home town is not filled with crap */
+        /* hometown is not filled with crap */
         map_fill_with_objects(nmap);
 
         /* and not trapped */
@@ -168,9 +168,9 @@ map *map_new(int num, const char *mazefile)
 
 cJSON *map_serialize(map *m)
 {
-    cJSON *mser, *grid, *tile;
+    cJSON *grid, *tile;
 
-    mser = cJSON_CreateObject();
+    cJSON *mser = cJSON_CreateObject();
 
     cJSON_AddNumberToObject(mser, "nlevel", m->nlevel);
     cJSON_AddNumberToObject(mser, "visited", m->visited);
@@ -242,26 +242,23 @@ cJSON *map_serialize(map *m)
 
 map *map_deserialize(cJSON *mser)
 {
-    cJSON *grid, *tile, *obj;
-    map *m;
-
-    m = g_malloc0(sizeof(map));
+    map *m = g_malloc0(sizeof(map));
 
     m->nlevel = cJSON_GetObjectItem(mser, "nlevel")->valueint;
     m->visited = cJSON_GetObjectItem(mser, "visited")->valueint;
 
-    grid = cJSON_GetObjectItem(mser, "grid");
+    cJSON *grid = cJSON_GetObjectItem(mser, "grid");
 
     for (int y = 0; y < MAP_MAX_Y; y++)
     {
         for (int x = 0; x < MAP_MAX_X; x++)
         {
-            tile = cJSON_GetArrayItem(grid, x + (y * MAP_MAX_X));
+            cJSON *tile = cJSON_GetArrayItem(grid, x + (y * MAP_MAX_X));
 
             m->grid[y][x].type =
                 map_tile_t_value(cJSON_GetObjectItem(tile, "type")->valuestring);
 
-            obj = cJSON_GetObjectItem(tile, "base_type");
+            cJSON *obj = cJSON_GetObjectItem(tile, "base_type");
             if (obj != NULL) m->grid[y][x].base_type =
                 map_tile_t_value(obj->valuestring);
 
@@ -297,10 +294,9 @@ map *map_deserialize(cJSON *mser)
 char *map_dump(map *m, position ppos)
 {
     position pos = pos_invalid;
-    GString *dump;
     monster *mon;
 
-    dump = g_string_new_len(NULL, MAP_SIZE);
+    GString *dump = g_string_new_len(NULL, MAP_SIZE);
 
     Z(pos) = m->nlevel;
 
@@ -375,7 +371,7 @@ position map_find_space_in(map *m,
                            gboolean dead_end)
 {
     position pos = pos_invalid;
-    int count, iteration = 0;
+    int iteration = 0;
 
     g_assert (m != NULL && element < LE_MAX);
 
@@ -384,7 +380,7 @@ position map_find_space_in(map *m,
     Z(pos) = m->nlevel;
 
     /* number of positions inside the rectangle */
-    count = (where.x2 - where.x1 + 1) * (where.y2 - where.y1 + 1);
+    int count = (where.x2 - where.x1 + 1) * (where.y2 - where.y1 + 1);
 
     do
     {
@@ -451,8 +447,6 @@ position map_find_sobject(map *m, sobject_t sobject)
 gboolean map_pos_validate(map *m, position pos, map_element_t element,
                           int dead_end)
 {
-    map_tile *tile;
-
     g_assert(m != NULL && element < LE_MAX);
 
     /* if the position is invalid it is invalid for the map as well */
@@ -464,9 +458,9 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
         return false;
 
     /* make shortcut */
-    tile = map_tile_at(m, pos);
+    map_tile *tile = map_tile_at(m, pos);
 
-    /* check for an dead end */
+    /* check for a dead end */
     if (dead_end)
     {
         int wall_count = 0;
@@ -544,23 +538,19 @@ gboolean map_pos_validate(map *m, position pos, map_element_t element,
 
 int map_pos_is_visible(map *m, position s, position t)
 {
-    int delta_x, delta_y;
-    int x, y;
-    signed int ix, iy;
-
     /* positions on different levels? */
     if (Z(s) != Z(t))
         return false;
 
-    x = X(s);
-    y = Y(s);
+    int x = X(s);
+    int y = Y(s);
 
-    delta_x = abs(X(t) - X(s)) << 1;
-    delta_y = abs(Y(t) - Y(s)) << 1;
+    int delta_x = abs(X(t) - X(s)) << 1;
+    int delta_y = abs(Y(t) - Y(s)) << 1;
 
     /* if x1 == x2 or y1 == y2, then it does not matter what we set here */
-    ix = X(t) > X(s) ? 1 : -1;
-    iy = Y(t) > Y(s) ? 1 : -1;
+    signed int ix = X(t) > X(s) ? 1 : -1;
+    signed int iy = Y(t) > Y(s) ? 1 : -1;
 
     if (delta_x >= delta_y)
     {
@@ -621,19 +611,17 @@ int map_pos_is_visible(map *m, position s, position t)
 GList *map_ray(map *m, position source, position target)
 {
     GList *ray = NULL;
-    int delta_x, delta_y;
-    int inc_x, inc_y;
     position pos = source;
 
     /* Insert the source position */
     ray = g_list_append(ray, GUINT_TO_POINTER(source.val));
 
-    delta_x = abs(X(target) - X(source)) << 1;
-    delta_y = abs(Y(target) - Y(source)) << 1;
+    int delta_x = abs(X(target) - X(source)) << 1;
+    int delta_y = abs(Y(target) - Y(source)) << 1;
 
     /* if x1 == x2 or y1 == y2, then it does not matter what we set here */
-    inc_x = X(target) > X(source) ? 1 : -1;
-    inc_y = Y(target) > Y(source) ? 1 : -1;
+    int inc_x = X(target) > X(source) ? 1 : -1;
+    int inc_y = Y(target) > Y(source) ? 1 : -1;
 
     if (delta_x >= delta_y)
     {
@@ -776,7 +764,6 @@ gboolean map_trajectory(position source, position target,
 
 area *map_get_obstacles(map *m, position center, int radius, gboolean doors)
 {
-    area *narea;
     position pos = pos_invalid;
     int x, y;
 
@@ -787,8 +774,8 @@ area *map_get_obstacles(map *m, position center, int radius, gboolean doors)
         return NULL;
     }
 
-    narea = area_new(X(center) - radius, Y(center) - radius,
-                     radius * 2 + 1, radius * 2 + 1);
+    area *narea = area_new(X(center) - radius, Y(center) - radius,
+                           radius * 2 + 1, radius * 2 + 1);
 
     Z(pos) = m->nlevel;
 
@@ -1127,14 +1114,12 @@ void map_timer(map *m)
 
 char map_get_door_glyph(map *m, position pos)
 {
-    position n, e, s, w;
-
     g_assert(m != NULL && pos_valid(pos));
 
-    n = pos_move(pos, GD_NORTH);
-    e = pos_move(pos, GD_EAST);
-    s = pos_move(pos, GD_SOUTH);
-    w = pos_move(pos, GD_WEST);
+    position n = pos_move(pos, GD_NORTH);
+    position e = pos_move(pos, GD_EAST);
+    position s = pos_move(pos, GD_SOUTH);
+    position w = pos_move(pos, GD_WEST);
 
     /* some predefined maps have double doors, thus it is
        necessary to check for adjacent doors */
@@ -1451,8 +1436,6 @@ static void map_fill_with_traps(map *m)
 static void map_make_maze(map *m, int treasure_room)
 {
     position pos = pos_invalid;
-    int mx, my;
-    int nrooms;
     rectangle **rooms = NULL;
     gboolean want_monster = false;
 
@@ -1507,7 +1490,7 @@ generate:
     }
 
     /* generate open spaces */
-    nrooms = rand_1n(3) + 3;
+    int nrooms = rand_1n(3) + 3;
     if (treasure_room)
         nrooms++;
 
@@ -1517,10 +1500,11 @@ generate:
     {
         rooms[room] = g_malloc0(sizeof(rectangle));
 
-        my = rand_1n(11) + 2;
+        int my = rand_1n(11) + 2;
         rooms[room]->y1 = my - rand_1n(2);
         rooms[room]->y2 = my + rand_1n(2);
 
+        int mx;
         if (is_volcano_map(m->nlevel))
         {
             mx = rand_1n(60) + 3;
@@ -1579,10 +1563,9 @@ generate:
 /* function to eat away a filled in maze */
 static void map_make_maze_eat(map *m, int x, int y)
 {
-    int dir;
     int try = 2;
 
-    dir = rand_1n(4);
+    int dir = rand_1n(4);
 
     while (try)
     {
@@ -1998,11 +1981,8 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
 {
     position pos = pos_invalid, npos = pos_invalid;
     sobject_t mst;
-    item *itm;
-    int success;
 
     int nrooms = 0; /* count of available rooms */
-    int room;   /* number of chose room */
 
     /* There's nothing to do if there are no rooms. */
     if (rooms == NULL) { return; }
@@ -2010,8 +1990,8 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
     /* determine number of rooms */
     while(rooms[nrooms] != NULL) { nrooms++; }
 
-    /* choose a room to turn into an treasure room */
-    room = rand_0n(nrooms);
+    /* choose a room to turn into a treasure room */
+    int room = rand_0n(nrooms);
 
     /* sanity check */
     if (rooms[room] == NULL) { return; }
@@ -2036,7 +2016,7 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
                 map_tiletype_set(m, pos, LT_FLOOR);
 
                 /* create loot */
-                itm = item_new_random(IT_GOLD, false);
+                item *itm = item_new_random(IT_GOLD, false);
                 inv_add(map_ilist_at(m, pos), itm);
 
                 /* create a monster */
@@ -2046,7 +2026,7 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
             /* now clear out interior */
             if ((mst = map_sobject_at(m, pos)))
             {
-                success = false;
+                int success = false;
                 do
                 {
                     npos = map_find_space(m, LE_SOBJECT, false);

@@ -16,18 +16,16 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MAP_H_
-#define __MAP_H_
+#ifndef MAP_H
+#define MAP_H
 
 #include "cJSON.h"
 #include "colours.h"
-#include "enumFactory.h"
 #include "items.h"
 #include "monsters.h"
 #include "position.h"
 #include "sobjects.h"
 #include "traps.h"
-#include "utils.h"
 
 /* map dimensions */
 #define MAP_MAX_X 67
@@ -93,7 +91,7 @@ typedef struct map_tile_data
     const char glyph;
     int colour;
     const char *description;
-    unsigned
+    bool
         passable:    1,     /* can be passed */
         transparent: 1;     /* see-through */
 } map_tile_data;
@@ -142,9 +140,9 @@ int *map_get_surrounding(map *m, position pos, sobject_t type);
 /**
  * determine if a position can be seen from another position
  *
- * @param the map
- * @param first position
- * @param second position
+ * @param m the map
+ * @param source first position
+ * @param target second position
  * @return true or false
  */
 int map_pos_is_visible(map *m, position source, position target);
@@ -152,25 +150,25 @@ int map_pos_is_visible(map *m, position source, position target);
 /**
  * Return a linked list with every position between two points.
  *
- * @param The map that contains both positions.
- * @param The starting position.
- * @param The destination.
+ * @param m The map that contains both positions.
+ * @param source The starting position.
+ * @param target The destination.
  */
 GList *map_ray(map *m, position source, position target);
 
 /**
  * Follow a ray from target to destination.
  *
- * @param The starting position.
- * @param The destination.
- * @param The originator of the trajectory.
- * @param The callback function for every affected position.
- * @param A pointer passed to the callback function.
- * @param A pointer passed to the callback function.
- * @param true if reflection should be honoured.
- * @param The glyph to display at an affected position
- * @param The colour of the glyph.
- * @param true to keep the glyph at affected positions.
+ * @param source The starting position.
+ * @param target The destination.
+ * @param damo The originator of the trajectory.
+ * @param pos_hitfun The callback function for every affected position.
+ * @param data1 A pointer passed to the callback function.
+ * @param data2 A pointer passed to the callback function.
+ * @param reflectable true if reflection should be honoured.
+ * @param glyph The glyph to display at an affected position
+ * @param fg The colour of the glyph.
+ * @param keep_ray true to keep the glyph at affected positions.
  *
  * @return true if one of the callbacks returned true.
  */
@@ -183,10 +181,10 @@ gboolean map_trajectory(position source, position target,
 /**
  * @brief Get an area of defined dimensions with all blocked positions set.
  *
- * @param A map.
- * @param The center position.
- * @param The radius.
- * @param Shall closed doors be handled as passable?
+ * @param m A map.
+ * @param center The center position.
+ * @param radius The radius.
+ * @param doors Shall closed doors be handled as passable?
  *
  * @return A freshly allocated area with all impassable positions set.
  */
@@ -199,10 +197,10 @@ damage *map_tile_damage(map *m, position pos, gboolean flying);
 /**
  * @brief Creates description of items on the floor for a given position.
  *
- * @param a map
- * @param a position
- * @param "here" or "there"
- * @param a filter function to restrict the described items
+ * @param m a map
+ * @param pos a position
+ * @param where "here" or "there"
+ * @param ifilter a filter function to restrict the described items
  */
 char *map_inv_description(map *m, position pos, const char* where, int (*ifilter)(item *));
 
@@ -213,7 +211,7 @@ monster *map_get_monster_at(map *m, position pos);
 /**
  * @brief Creates new monsters for a map.
  *
- * @param a map
+ * @param m a map
  */
 void map_fill_with_life(map *m);
 
@@ -222,15 +220,15 @@ gboolean map_is_exit_at(map *m, position pos);
 /**
  * Process temporary effects for a map.
  *
- * @param the map on which timed events have to be processed
+ * @param m the map on which timed events have to be processed
  */
 void map_timer(map *m);
 
 /**
  * @brief Get the glyph for a door.
  *
- * @param The map.
- * @param The position of the door.
+ * @param m The map.
+ * @param pos The position of the door.
  *
  * @return The glyph for the door.
  */
@@ -248,118 +246,118 @@ extern const char *map_names[MAP_MAX];
 
 /* inline accessor functions */
 
-static inline map_tile *map_tile_at(map *m, position pos)
+static inline map_tile *map_tile_at(map *m, const position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
     return &m->grid[Y(pos)][X(pos)];
 }
 
-static inline inventory **map_ilist_at(map *m, position pos)
+static inline inventory **map_ilist_at(map *m, const position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
     return &m->grid[Y(pos)][X(pos)].ilist;
 }
 
-static inline map_tile_t map_tiletype_at(map *m, position pos)
+static inline map_tile_t map_tiletype_at(const map *m, const position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].type;
 }
 
-static inline void map_tiletype_set(map *m, position pos, map_tile_t type)
+static inline void map_tiletype_set(map *m, const position pos, const map_tile_t type)
 {
     g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].type = type;
 }
 
-static inline map_tile_t map_basetype_at(map *m, position pos)
+static inline map_tile_t map_basetype_at(const map *m, const position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].base_type;
 }
 
-static inline void map_basetype_set(map *m, position pos, map_tile_t type)
+static inline void map_basetype_set(map *m, const position pos, const map_tile_t type)
 {
     g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].base_type = type;
 }
 
-static inline guint8 map_timer_at(map *m, position pos)
+static inline guint8 map_timer_at(const map *m, const position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].timer;
 }
 
-static inline trap_t map_trap_at(map *m, position pos)
+static inline trap_t map_trap_at(const map *m, const position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].trap;
 }
 
-static inline void map_trap_set(map *m, position pos, trap_t type)
+static inline void map_trap_set(map *m, const position pos, const trap_t type)
 {
     g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].trap = type;
 }
 
-static inline guint8 map_spill_at(map *m, position pos)
+static inline guint8 map_spill_at(const map *m, const position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].spill;
 }
 
-static inline void map_spill_set(map *m, position pos, int colour)
+static inline void map_spill_set(map *m, const position pos, const int colour)
 {
     g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].spill = colour;
     m->grid[Y(pos)][X(pos)].spilltime = 20;
 }
 
-static inline sobject_t map_sobject_at(map *m, position pos)
+static inline sobject_t map_sobject_at(const map *m, const position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].sobject;
 }
 
-static inline void map_sobject_set(map *m, position pos, sobject_t type)
+static inline void map_sobject_set(map *m, const position pos, const sobject_t type)
 {
     g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].sobject = type;
 }
 
-static inline void map_set_monster_at(map *m, position pos, monster *monst)
+static inline void map_set_monster_at(map *m, const position pos, monster *monst)
 {
     g_assert(m != NULL && m->nlevel == Z(pos) && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].m_oid = (monst != NULL) ? monster_oid(monst) : NULL;
 }
 
-static inline gboolean map_is_monster_at(map *m, position pos)
+static inline gboolean map_is_monster_at(map *m, const position pos)
 {
     g_assert(m != NULL);
     return ((map_get_monster_at(m, pos) != NULL));
 }
 
-static inline char mt_get_glyph(map_tile_t t)
+static inline char mt_get_glyph(const map_tile_t t)
 {
     return map_tiles[t].glyph;
 }
 
-static inline int  mt_get_colour(map_tile_t t)
+static inline int  mt_get_colour(const map_tile_t t)
 {
     return map_tiles[t].colour;
 }
 
-static inline const char *mt_get_desc(map_tile_t t)
+static inline const char *mt_get_desc(const map_tile_t t)
 {
     return map_tiles[t].description;
 }
 
-static inline gboolean mt_is_passable(map_tile_t t)
+static inline gboolean mt_is_passable(const map_tile_t t)
 {
     return map_tiles[t].passable;
 }
 
-static inline gboolean mt_is_transparent(map_tile_t t)
+static inline gboolean mt_is_transparent(const map_tile_t t)
 {
     return map_tiles[t].transparent;
 }
@@ -369,13 +367,13 @@ static inline const char *map_name(map *m)
     return map_names[m->nlevel];
 }
 
-static inline gboolean map_pos_transparent(map *m, position pos)
+static inline gboolean map_pos_transparent(const map *m, const position pos)
 {
     return mt_is_transparent(m->grid[Y(pos)][X(pos)].type)
         && so_is_transparent(m->grid[Y(pos)][X(pos)].sobject);
 }
 
-static inline gboolean map_pos_passable(map *m, position pos)
+static inline gboolean map_pos_passable(const map *m, const position pos)
 {
     return mt_is_passable(m->grid[Y(pos)][X(pos)].type)
         && so_is_passable(m->grid[Y(pos)][X(pos)].sobject);

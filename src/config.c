@@ -131,7 +131,7 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
     if ((success = (!error)))
     {
         /* ini file has been found, get values */
-        /* clear error after each attempt as values need not to be defined */
+        /* clear error after each attempt as values may not be defined */
         int difficulty = g_key_file_get_integer(ini_file, "nlarn", "difficulty", &error);
         if (!error) config->difficulty = difficulty;
         g_clear_error(&error);
@@ -282,15 +282,12 @@ int parse_gender(const char gender)
     {
     case 'm':
         return PS_MALE;
-        break;
 
     case 'f':
         return PS_FEMALE;
-        break;
 
     default:
         return PS_NONE;
-        break;
     }
 }
 
@@ -300,10 +297,8 @@ char compose_gender(const int gender)
     {
         case PS_MALE:
             return 'm';
-            break;
         case PS_FEMALE:
             return 'f';
-            break;
         default:
             return ' ';
     }

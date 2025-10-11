@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __RANDOM_H_
-#define __RANDOM_H_
+#ifndef RANDOM_H
+#define RANDOM_H
 
 #include <glib.h>
 
@@ -34,18 +34,18 @@ void rand_deserialize(cJSON *r);
 guint32 rand_0n(guint32 n);
 
 /* returns a value x with m <= x < n. */
-static inline guint32 rand_m_n(guint32 m, guint32 n)
+static inline guint32 rand_m_n(const guint32 m, const guint32 n)
 {
     g_assert(m < n);
     return rand_0n(n - m) + m;
 }
 
-static inline guint32 rand_1n(guint32 n)
+static inline guint32 rand_1n(const guint32 n)
 {
     return (n <= 1) ? 1 : rand_m_n(1, n);
 }
 
-static inline gboolean chance(guint32 percent)
+static inline gboolean chance(const guint32 percent)
 {
     g_assert(percent < 101);
     return (percent >= rand_1n(101));
@@ -56,9 +56,9 @@ int divert(int value, int percent);
 /**
  * Shuffle an array of integers
  *
- * @param pointer to integer array
+ * @param array pointer to integer array
  * @param length of array
- * @param how many fields should be skipped
+ * @param skip how many fields should be skipped
  */
 void shuffle(int array[], int length, int skip);
 
@@ -66,8 +66,8 @@ void shuffle(int array[], int length, int skip);
  * Return a random number processed by the Lévy probability density function
  * See https://en.wikipedia.org/wiki/L%C3%A9vy_distribution for details.
  *
- * @param scale parameter
- * @param location parameter
+ * @param c The scale parameter
+ * @param mu The location parameter
  * @return a random number in
  */
 double levy_random(double c, double mu);

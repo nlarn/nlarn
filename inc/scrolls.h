@@ -16,8 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SCROLLS_H_
-#define __SCROLLS_H_
+#ifndef SCROLLS_H
+#define SCROLLS_H
 
 #include "enumFactory.h"
 #include "items.h"

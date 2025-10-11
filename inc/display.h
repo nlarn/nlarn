@@ -16,15 +16,13 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __DISPLAY_H_
-#define __DISPLAY_H_
+#ifndef DISPLAY_H
+#define DISPLAY_H
 
 #include <curses.h>
 #include <panel.h>
 #include <glib.h>
 
-#include "colours.h"
-#include "game.h"
 #include "items.h"
 #include "player.h"
 
@@ -90,12 +88,14 @@ void display_paint_screen(player *p);
 /**
  * Generic inventory display function
  *
- * @param Window title
- * @param player
- * @param inventory to display
- * @param a GPtrArray of display_inv_callbacks (may be NULL)
- * @param display prices
- * @param a filter function: will be called for every item
+ * @param title Window title
+ * @param p player
+ * @param inv inventory to display
+ * @param callbacks a GPtrArray of display_inv_callbacks (may be NULL)
+ * @param show_price display prices
+ * @param show_weight display item weight
+ * @param show_account display bank account balance in title
+ * @param filter a filter function: will be called for every item
  * @return if no callbacks have been supplied, the selected item will be returned on pressing enter
  *
  */
@@ -138,9 +138,9 @@ void display_show_history(message_log *log, const char *title);
 /**
  * Simple "popup" message window
  *
- * @param window title
- * @param message to be displayed inside window
- * @param the number of chars wrapped lines will be indented
+ * @param title window title
+ * @param message message to be displayed inside window
+ * @param indent the number of chars wrapped lines will be indented
  * @return key pressed to close window
  */
 int display_show_message(const char *title, const char *message, int indent);
@@ -148,14 +148,14 @@ int display_show_message(const char *title, const char *message, int indent);
 /**
  * @brief Show a popup message.
  *
- * @param The top left x position.
- * @param The top left y position.
- * @param The width of the popup. Determined automatically if 0.
- * @param The popup window title. May be NULL.
- * @param The popup window message. The message will be wrapped to fit the
+ * @param x1 The top left x position.
+ * @param y1 The top left y position.
+ * @param width The width of the popup. Determined automatically if 0.
+ * @param title The popup window title. May be NULL.
+ * @param msg The popup window message. The message will be wrapped to fit the
  *        window's width. If the message is too long to fit the screen, it
  *        will be truncated.
- * @param Indentation for wrapped lines
+ * @param indent Indentation for wrapped lines
  *
  * @return A pointer to the newly allocated window structure.
  */
@@ -164,7 +164,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title,
 
 /**
  * @brief Destroy a window and the resources allocated for it.
- * @param A pointer to a window structure.
+ * @param dwin A pointer to a window structure.
  */
 void display_window_destroy(display_window *dwin);
 
@@ -181,8 +181,8 @@ void display_windows_show();
 
 /**
  * @brief Wrap curses wgetch() with added functionality
- * @param A pointer to a window structure. May be NULL.
-          In this case stdscr is used.
+ * @param win A pointer to a window structure. May be NULL.
+              In this case stdscr is used.
  */
 int display_getch(WINDOW *win);
 

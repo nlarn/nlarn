@@ -16,12 +16,11 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __COMBAT_H_
-#define __COMBAT_H_
+#ifndef COMBAT_H
+#define COMBAT_H
 
 #include <glib.h>
 
-#include "items.h"
 #include "enumFactory.h"
 
 #define SPEED_ENUM(SPEED) \
@@ -94,7 +93,7 @@ DECLARE_ENUM(attack_t, ATTACK_T_ENUM)
 
 DECLARE_ENUM(damage_t, DAMAGE_T_ENUM)
 
-typedef struct _attack
+typedef struct attack
 {
     attack_t type;
     damage_t damage;
@@ -115,13 +114,13 @@ typedef struct _attack
 
 DECLARE_ENUM(damage_originator_t, DAMAGE_ORIGINATOR_T_ENUM)
 
-typedef struct _damage_originator
+typedef struct damage_originator
 {
     damage_originator_t ot;
     gpointer originator;
 } damage_originator;
 
-typedef struct _damage
+typedef struct damage
 {
     damage_t type;
     attack_t attack;
@@ -129,13 +128,13 @@ typedef struct _damage
     damage_originator dam_origin; /* the source of the damage */
 } damage;
 
-typedef struct _damage_msg
+typedef struct damage_msg
 {
     char *msg_affected;
     char *msg_unaffected;
 } damage_msg;
 
-typedef struct _damage_min_max
+typedef struct damage_min_max
 {
     int min_damage;
     int max_damage;
@@ -152,11 +151,11 @@ char *damage_to_str(damage *dam);
 
 /* forward declarations */
 struct player;
-struct _monster;
+struct monster;
 enum monster_t;
 
 int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, gboolean use_weapon);
-int combat_chance_player_to_monster_hit(struct player *p, struct _monster *m, gboolean use_weapon);
+int combat_chance_player_to_monster_hit(struct player *p, struct monster *m, gboolean use_weapon);
 
 /*
  * Calculate the minimal and maximal damage the player can cause to a given
@@ -168,6 +167,6 @@ damage_min_max damage_calc_min_max(struct player *p, enum monster_t mt);
  * Calculate the amount of damage the player's attack causes.
  * Takes special weapon effects into account.
  */
-int damage_calc(struct player *p, struct _monster *m);
+int damage_calc(struct player *p, struct monster *m);
 
 #endif

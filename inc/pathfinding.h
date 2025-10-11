@@ -16,6 +16,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef PATHFINDING_H
+#define PATHFINDING_H
+
 #include <glib.h>
 
 #include "map.h"
@@ -41,10 +44,10 @@ typedef struct path
 /**
  * @brief Find a path between two positions
  *
- * @param the map to work on
- * @param the starting position
- * @param the destination
- * @param the map_element_t that can be travelled
+ * @param m the map to work on
+ * @param start the starting position
+ * @param goal the destination
+ * @param element the map_element_t that can be travelled
  * @return a path or NULL if none could be found
  */
 path *path_find(map *m, position start, position goal,
@@ -53,6 +56,8 @@ path *path_find(map *m, position start, position goal,
 /**
  * @brief Free memory allocated for a given path.
  *
- * @param a path returned by <find_path>"()"
+ * @param path a path returned by <path_find>"()"
  */
 void path_destroy(path *path);
+
+#endif

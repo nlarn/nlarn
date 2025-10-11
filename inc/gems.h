@@ -16,11 +16,10 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GEMS_H_
-#define __GEMS_H_
+#ifndef GEMS_H
+#define GEMS_H
 
 #include "colours.h"
-#include "enumFactory.h"
 #include "items.h"
 
 #define GEM_TYPE_ENUM(GEM_TYPE) \

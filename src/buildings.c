@@ -24,11 +24,10 @@
 #include "display.h"
 #include "extdefs.h"
 #include "game.h"
-#include "gems.h"
 #include "items.h"
-#include "extdefs.h"
 #include "player.h"
 #include "scrolls.h"
+#include "weapons.h"
 
 static const char msg_outstanding[] = "The Larn Revenue Service has ordered " \
                                       "us to not do business with tax evaders. " \
@@ -59,13 +58,13 @@ void building_bank_calc_interest(game *g)
     /* the bank pays an interest of 2.5% every ten mobuls */
     interest = g->p->bank_account / 250;
 
-    /* add the interest to the bank account.. */
+    /* add the interest to the bank account... */
     g->p->bank_account += interest;
 
-    /* ..and the statistics.. */
+    /* ...and the statistics... */
     g->p->stats.gold_bank_interest += interest;
 
-    /* ..and keep track of the amount paid since the player's last visit to the bank */
+    /* ...and keep track of the amount paid since the player's last visit to the bank */
     g->p->bank_ieslvtb += interest;
 
     /* calculate the tax debt */
@@ -419,7 +418,6 @@ int building_home(player *p)
 
     while (!leaving)
     {
-        int choice;
         GPtrArray *callbacks;
         display_inv_callback *callback;
 
@@ -446,7 +444,7 @@ int building_home(player *p)
             g_string_append_c(text, '\n');
         }
 
-        choice = display_show_message(title, text->str, 0);
+        int choice = display_show_message(title, text->str, 0);
         g_string_free(text, true);
 
         switch (choice)
@@ -513,7 +511,6 @@ int building_home(player *p)
 int building_lrs(player *p)
 {
     int turns = 2;
-    GString *text;
 
     const char title[] ="Larn Revenue Service";
     const char msg_greet[] = "Welcome to the Larn Revenue Service district office.\n\n";
@@ -522,7 +519,7 @@ int building_lrs(player *p)
 
     g_assert(p != NULL);
 
-    text = g_string_new(msg_greet);
+    GString *text = g_string_new(msg_greet);
 
     if (p->outstanding_taxes)
     {
@@ -565,11 +562,9 @@ int building_lrs(player *p)
 
 static int building_scribe_scroll(player *p)
 {
-    int price;
     int turns = 2;
     int i;
     gboolean split = false;
-    item *bscroll;
     char question[81] = { 0 };
 
     /* check if the player owns a blank scroll */
@@ -581,9 +576,9 @@ static int building_scribe_scroll(player *p)
         return turns;
     }
 
-    bscroll = display_inventory("Choose a scroll to inscribe", p,
-                                &p->inventory, NULL, false, false,
-                                false, item_filter_blank_scroll);
+    item *bscroll = display_inventory("Choose a scroll to inscribe", p,
+                                      &p->inventory, NULL, false, false,
+                                      false, item_filter_blank_scroll);
 
     if (!bscroll)
     {
@@ -624,7 +619,7 @@ static int building_scribe_scroll(player *p)
     }
 
     /* player has chosen which scroll to write, check if (s)he can afford it */
-    price = 2 * scrolls[i].price;
+    int price = 2 * scrolls[i].price;
     if (!building_player_check(p, price))
     {
         char *msg = g_strdup_printf("You cannot afford the %d gold for the "
@@ -721,9 +716,6 @@ static void building_school_take_course(player *p, int course, guint price)
         break;
 
     case 2:
-        p->intelligence += 2;
-        break;
-
     case 3:
         p->intelligence += 2;
         break;
@@ -850,8 +842,6 @@ int building_school(player *p)
 int building_tradepost(player *p)
 {
     int turns = 2;
-    GPtrArray *callbacks;
-    display_inv_callback *callback;
 
     const char title[] = "Trade Post";
 
@@ -874,9 +864,9 @@ int building_tradepost(player *p)
     }
 
     /* define callback functions */
-    callbacks = g_ptr_array_new();
+    GPtrArray *callbacks = g_ptr_array_new();
 
-    callback = g_malloc(sizeof(display_inv_callback));
+    display_inv_callback *callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(`KEY`s`end`)ell";
     callback->helpmsg = "Sell the selected item to the Trade Post.";
     callback->key = 's';
@@ -1058,20 +1048,14 @@ int building_monastery(struct player *p)
         /* remove curse */
         case 'b':
         {
-            item *it;
-            int price;
-            int choice;
-            char *question;
-            gchar *desc;
-
             if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
             {
                 display_show_message(title, "You do not possess any cursed item.", 0);
                 break;
             }
 
-            it = display_inventory("Choose an item to uncurse", p, &p->inventory,
-                    NULL, false, false, false,item_filter_cursed_or_unknown);
+            item *it = display_inventory("Choose an item to uncurse", p, &p->inventory,
+                                         NULL, false, false, false, item_filter_cursed_or_unknown);
 
             /* It is possible to abort the selection with ESC. */
             if (it == NULL)
@@ -1084,18 +1068,18 @@ int building_monastery(struct player *p)
             /* The cost of uncursing is 10 percent of item value.
                The item value for cursed items is reduced by 50%,
                hence divide by 5 */
-            price = (item_price(it) / 5) * (game_difficulty(nlarn) + 1);
+            int price = (item_price(it) / 5) * (game_difficulty(nlarn) + 1);
             /* some items are too cheap. */
             price = max(price, 1);
             /* Item stacks cost per item. */
             price *= it->count;
 
-            desc = item_describe(it, player_item_identified(p, it), false, true);
-            question = g_strdup_printf("To remove the curse on %s, we ask you to "
-                                       "donate %d gold for our abbey. %s", desc,
-                                       price, ayfwt);
+            gchar *desc = item_describe(it, player_item_identified(p, it), false, true);
+            char *question = g_strdup_printf("To remove the curse on %s, we ask you to "
+                                             "donate %d gold for our abbey. %s", desc,
+                                             price, ayfwt);
 
-            choice = display_get_yesno(question, NULL, NULL, NULL);
+            int choice = display_get_yesno(question, NULL, NULL, NULL);
             g_free(question);
 
             if (!choice)
@@ -1106,7 +1090,7 @@ int building_monastery(struct player *p)
                 break;
             }
 
-            /* The player may chose to uncurse items that are actually only of
+            /* The player may choose to uncurse items that are actually only of
                unknown blessedness. */
             if (it->cursed)
             {
@@ -1134,8 +1118,6 @@ int building_monastery(struct player *p)
         /* healing */
         case 'c':
         {
-            int choice;
-            char *question;
             /* the price for healing depends on the severity of the injury */
             int price = (player_get_hp_max(p) - p->hp) * (game_difficulty(nlarn) + 1);
 
@@ -1145,10 +1127,10 @@ int building_monastery(struct player *p)
                 break;
             }
 
-            question = g_strdup_printf("For healing you, we ask that you "
-                                       "donate %d gold for our monastery. %s",
-                                       price, ayfwt);
-            choice = display_get_yesno(question, NULL, NULL, NULL);
+            char *question = g_strdup_printf("For healing you, we ask that you "
+                                             "donate %d gold for our monastery. %s",
+                                             price, ayfwt);
+            int choice = display_get_yesno(question, NULL, NULL, NULL);
             g_free(question);
 
             if (choice)
@@ -1177,16 +1159,14 @@ int building_monastery(struct player *p)
             /* healing of varous negative effects */
             if (selection >= 0 && selection < disease_count)
             {
-                int choice;
-                char *question;
                 effect *e = player_effect_get(p, curable_diseases[selection].et);
                 int price = e->turns * (game_difficulty(nlarn) + 1);
 
-                question = g_strdup_printf("For healing you from %s, we ask that you "
-                                           "donate %d gold for our monastery. %s",
-                                           curable_diseases[selection].desc, price, ayfwt);
+                char *question = g_strdup_printf("For healing you from %s, we ask that you "
+                                                 "donate %d gold for our monastery. %s",
+                                                 curable_diseases[selection].desc, price, ayfwt);
 
-                choice = display_get_yesno(question, NULL, NULL, NULL);
+                int choice = display_get_yesno(question, NULL, NULL, NULL);
                 g_free(question);
 
                 if (choice)
@@ -1253,9 +1233,6 @@ void building_monastery_init()
 
 static void building_shop(player *p, inventory **inv, const char *title)
 {
-    GPtrArray *callbacks;
-    display_inv_callback *callback;
-
     if (inv_length(*inv) == 0)
     {
         log_add_entry(nlarn->log, "Unfortunately we are sold out.");
@@ -1263,9 +1240,9 @@ static void building_shop(player *p, inventory **inv, const char *title)
     }
 
     /* define callback functions */
-    callbacks = g_ptr_array_new();
+    GPtrArray *callbacks = g_ptr_array_new();
 
-    callback = g_malloc(sizeof(display_inv_callback));
+    display_inv_callback *callback = g_malloc(sizeof(display_inv_callback));
     callback->description = "(`KEY`b`end`)uy";
     callback->helpmsg = "Buy the selected item. If the available quantity exceeds one, you may select the amount you want to purchase.";
     callback->key = 'b';
@@ -1360,7 +1337,6 @@ static void building_item_add(inventory **inv, item *it)
 
 static void building_item_sell(player *p, inventory **inv, item *it)
 {
-    guint price;
     gpointer ioid = NULL; /* oid of purchased item */
     char text[81];
     gchar *name;
@@ -1371,7 +1347,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    price = item_price(it);
+    guint price = item_price(it);
 
     if (it->count > 1)
     {
@@ -1470,8 +1446,6 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
 static void building_item_identify(player *p, inventory **inv __attribute__((unused)), item *it)
 {
-    guint price;
-    gchar *name_unknown;
     char message[81];
 
     const char title[] = "Identify item";
@@ -1479,12 +1453,12 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
     /* The cost for identification is 10% of the item's base price. */
-    price = (item_base_price(it) / 10) * (game_difficulty(nlarn) + 1);
+    guint price = (item_base_price(it) / 10) * (game_difficulty(nlarn) + 1);
 
     /* Ensure it costs at least 50gp... */
     price = max(50, price);
 
-    name_unknown = item_describe(it, player_item_known(p, it), false, true);
+    gchar *name_unknown = item_describe(it, player_item_known(p, it), false, true);
 
     if (building_player_check(p, price))
     {
@@ -1519,8 +1493,6 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
 static void building_item_repair(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     int damages = 0;
-    guint price;
-    gchar *name;
     char message[81];
 
     const char title[] = "Repair item";
@@ -1533,7 +1505,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
     damages += it->rusty;
 
     /* The cost of repairing an item is 10% of the item's base price. */
-    price = (item_base_price(it) / 10) * (game_difficulty(nlarn) + 1);
+    guint price = (item_base_price(it) / 10) * (game_difficulty(nlarn) + 1);
 
     /* Take the level of damage into account. */
     price *= damages;
@@ -1547,7 +1519,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
     /* Ensure this costs at least 50gp... */
     price = max(50, price);
 
-    name = item_describe(it, player_item_known(p, it), false, true);
+    gchar *name = item_describe(it, player_item_known(p, it), false, true);
 
     if (building_player_check(p, price))
     {
@@ -1578,14 +1550,13 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
 
 static void building_item_buy(player *p, inventory **inv, item *it)
 {
-    int price;
     guint count = 0;
     char question[121];
     gchar *name;
 
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
-    price = item_price(it);
+    int price = item_price(it);
 
     /* modify price if player sells stuff at the trading post */
     if (map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos) == LS_TRADEPOST)

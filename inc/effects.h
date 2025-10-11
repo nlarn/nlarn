@@ -16,11 +16,11 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __EFFECTS_H_
-#define __EFFECTS_H_
+#ifndef EFFECTS_H
+#define EFFECTS_H
 
+#include <stdbool.h>
 #include <glib.h>
-#include <time.h>
 
 #include "cJSON.h"
 #include "enumFactory.h"
@@ -108,7 +108,7 @@ typedef struct effect_data
     const char *msg_stop;    /* message displayed when effect ends */
     const char *msg_start_monster; /* messages shown when the effect happens on a monster */
     const char *msg_stop_monster;
-    guint                    /* effect flags */
+    bool                     /* effect flags */
         var_duration: 1,     /* the effect's duration is variable */
         var_amount: 1,       /* the effect's amount is variable */
         inc_duration: 1,     /* reset the duration of unique effects */
@@ -161,8 +161,8 @@ int effect_query(GPtrArray *ea, effect_t type);
 /**
  * Count down the number of turns remaining for an effect.
  *
- * @param an effect
- * @return turns remaining. Expired effects return -1, permantent effects 0
+ * @param e an effect
+ * @return turns remaining. Expired effects return -1, permanent effects 0
  */
 int effect_expire(effect *e);
 

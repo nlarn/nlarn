@@ -16,20 +16,19 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FOV_H_
-#define __FOV_H_
+#ifndef FOV_H
+#define FOV_H
 
 #include <glib.h>
+
 #include "map.h"
 #include "monsters.h"
 #include "position.h"
 
-
 /* the members of this struct are only known to the implementation of the
    following functions */
-struct _fov;
-typedef struct _fov fov;
-
+struct fov;
+typedef struct fov fov;
 
 /** @brief Create a FOV data structure
   *
@@ -39,58 +38,57 @@ fov *fov_new();
 
 /** @brief calculate the FOV for a map
   *
-  * @param pointer to a fov structure.
-  * @param the map
-  * @param the starting position
-  * @param the radius of vision
-  * @param true if the mobile has infravision.
+  * @param fv pointer to a fov structure.
+  * @param m the map
+  * @param pos the starting position
+  * @param radius the radius of vision
+  * @param infravision true if the mobile has infravision.
   */
 void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravision);
 
 /** @brief check if a certain position is visible.
   *
-  * @param pointer to a fov structure.
-  * @param a position.
+  * @param fv pointer to a fov structure.
+  * @param pos a position.
   *
   * @return true/false
   */
-gboolean fov_get(fov *fv, position pos);
+gboolean fov_get(const fov *fv, position pos);
 
 /** @brief set visibility for a certain position.
   *
-  * @param pointer to a fov structure.
-  * @param a position.
-  * @param the visibility of the position.
-  * @param Beholder has infravision?
-  * @param Check for monsters at the position?
+  * @param fv pointer to a fov structure.
+  * @param pos a position.
+  * @param visible the visibility of the position.
+  * @param infravision Beholder has infravision?
+  * @param check_monster Check for monsters at the position?
   */
 void fov_set(fov *fv, position pos, guchar visible,
-             gboolean infravision, gboolean mchk);
+             gboolean infravision, gboolean check_monster);
 
 /** @brief reset visibility for an entire fov structure.
   *
-  * @param pointer to a fov structure.
+  * @param fv pointer to a fov structure.
   */
 void fov_reset(fov *fv);
 
 /** @brief Get the closest monster for a field of vision.
   *
-  * @param pointer to a fov structure
+  * @param fv pointer to a fov structure
   * @return a pointer to the closest monster, or NULL
   */
 monster *fov_get_closest_monster(fov *fv);
 
 /** @brief Get a list of all visible monsters
   *
-  * @param A pointer to a fov structure
+  * @param fv A pointer to a fov structure
   * @return A GList with all visible monsters, sorted by proximity, or NULL
   */
 GList *fov_get_visible_monsters(fov *fv);
 
 /** @brief destroy fov data
   *
-  * @param A pointer to a fov structure.
-  * @param The starting position.
+  * @param fv A pointer to a fov structure.
   */
 void fov_free(fov *fv);
 

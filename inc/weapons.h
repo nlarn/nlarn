@@ -16,13 +16,13 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __WEAPONS_H_
-#define __WEAPONS_H_
+#ifndef WEAPONS_H
+#define WEAPONS_H
 
 #include "enumFactory.h"
 #include "items.h"
 
-typedef enum _ammo_class
+typedef enum ammo_class
 {
     AMMO_SLING,
     AMMO_BOW,
@@ -39,7 +39,7 @@ typedef enum _ammo_class
 
 DECLARE_ENUM(ammo_t, AMMO_TYPE_ENUM)
 
-typedef struct _ammo_data
+typedef struct ammo_data
 {
     ammo_t type;
     const char *name;
@@ -53,7 +53,7 @@ typedef struct _ammo_data
     obtainable: 1;
 } ammo_data;
 
-typedef enum _weapon_class
+typedef enum weapon_class
 {
     WC_MELEE,   /* melee weapon */
     WC_RANGED,  /* ranged weapon */
@@ -89,7 +89,7 @@ typedef enum _weapon_class
 
 DECLARE_ENUM(weapon_t, WEAPON_TYPE_ENUM)
 
-typedef struct _weapon_data
+typedef struct weapon_data
 {
     weapon_t type;
     const char *name;
@@ -101,7 +101,7 @@ typedef struct _weapon_data
     int material;       /* material type from item_materials */
     int weight;         /* used to determine inventory weight and if item can be thrown */
     int price;          /* base price in the shops */
-    unsigned
+    bool
         twohanded: 1,   /* needs two hands */
         unique: 1,      /* unique */
         article: 1,     /* needs an article in the description */
@@ -111,7 +111,6 @@ typedef struct _weapon_data
 
 /* forward declarations */
 struct player;
-struct _monster;
 
 /* external vars */
 extern const ammo_data ammos[AMT_MAX];
@@ -122,27 +121,31 @@ extern const weapon_data weapons[WT_MAX];
 int  weapon_fire(struct player *p);
 void weapon_swap(struct player *p);
 
-/*
+/**
  * @brief Return a shortened description of a given weapon
  *
- * @param a weapon
+ * @param weapon a weapon
+ * @param available_space The maximum length of the returned string
  * @return a newly allocated string that must be g_free()'d
  */
 char *weapon_shortdesc(item *weapon, guint available_space);
 
-/*
- * Retuns the percentual chance that the given weapon type
+/**
+ * Returns the percentual chance that the given weapon type
  * can instantly kill the given monster type.
+ *
+ * @param wt A #weapon_t
+ * @param mt A #monster_t
  */
 int weapon_instakill_chance(weapon_t wt, monster_t mt);
 
-static inline int ammo_base_damage(item *ammo)
+static inline int ammo_base_damage(const item *ammo)
 {
     g_assert(ammo->id < WT_MAX);
     return ammos[ammo->id].damage;
 }
 
-static inline int ammo_damage(item *ammo)
+static inline int ammo_damage(const item *ammo)
 {
     int dmg = ammo_base_damage(ammo)
               + item_condition_bonus(ammo);
@@ -151,24 +154,24 @@ static inline int ammo_damage(item *ammo)
     return max(0, dmg);
 }
 
-static inline int ammo_base_accuracy(item *ammo)
+static inline int ammo_base_accuracy(const item *ammo)
 {
     g_assert(ammo->id < WT_MAX);
     return ammos[ammo->id].accuracy;
 }
 
-static inline int ammo_accuracy(item *ammo)
+static inline int ammo_accuracy(const item *ammo)
 {
     return ammo_base_accuracy(ammo) + item_condition_bonus(ammo);
 }
 
-static inline int weapon_base_damage(item *weapon)
+static inline int weapon_base_damage(const item *weapon)
 {
     g_assert(weapon->id < WT_MAX);
     return weapons[weapon->id].damage;
 }
 
-static inline int weapon_damage(item *weapon)
+static inline int weapon_damage(const item *weapon)
 {
     int dmg = weapon_base_damage(weapon)
               + item_condition_bonus(weapon);
@@ -177,13 +180,13 @@ static inline int weapon_damage(item *weapon)
     return max(1, dmg);
 }
 
-static inline int weapon_base_acc(item *weapon)
+static inline int weapon_base_acc(const item *weapon)
 {
     g_assert(weapon->id < WT_MAX);
     return weapons[weapon->id].accuracy;
 }
 
-static inline int weapon_acc(item *weapon)
+static inline int weapon_acc(const item *weapon)
 {
     return weapon_base_acc(weapon) + item_condition_bonus(weapon);
 }

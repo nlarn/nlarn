@@ -16,20 +16,20 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __INVENTORY_H_
-#define __INVENTORY_H_
+#ifndef INVENTORY_H
+#define INVENTORY_H
 
 #include <glib.h>
 
 #include "items.h"
 
 /* forward declarations */
-struct _inventory;
+struct inventory;
 
-typedef gint (*inv_callback_bool) (struct _inventory *inv, item *item);
-typedef void (*inv_callback_void) (struct _inventory *inv, item *item);
+typedef gint (*inv_callback_bool) (struct inventory *inv, item *item);
+typedef void (*inv_callback_void) (struct inventory *inv, item *item);
 
-typedef struct _inventory
+typedef struct inventory
 {
     inv_callback_bool pre_add;
     inv_callback_void post_add;
@@ -62,12 +62,20 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
  * After putting the item into the inventory, the post_add callback is
  * called if it is defined.
  *
- * @param the inventory the item has to be added to
- * @param the item which has to be added
+ * @param inv the inventory the item has to be added to
+ * @param it the item which has to be added
  * @return false on failure, the new length of the inventory upon success
  */
 int inv_add(inventory **inv, item *it);
 
+/**
+ * Get an item from an inventory by its index.
+ * The inventory remains unchanged.
+ *
+ * @param inv the inventory
+ * @param idx the index of the item in the inventory
+ * @return a pointer to the item
+ */
 item *inv_get(inventory *inv, guint idx);
 
 /**
@@ -80,10 +88,9 @@ item *inv_get(inventory *inv, guint idx);
  * If the inventories owner attribute is not set, empty inventories get
  * destroyed.
  *
- * @param the inventory from which the item shall be removed
- * @param the index of the item in the inventory
- * @return an pointer to the removed item
- *
+ * @param inv the inventory from which the item shall be removed
+ * @param idx the index of the item in the inventory
+ * @return a pointer to the removed item
  */
 item *inv_del(inventory **inv, guint idx);
 
@@ -97,10 +104,9 @@ item *inv_del(inventory **inv, guint idx);
  * If the inventories owner attribute is not set, empty inventories get
  * destroyed.
  *
- * @param the inventory from which the item shall be removed
- * @param the item to be removed
+ * @param inv the inventory from which the item shall be removed
+ * @param it the item to be removed
  * @return true upon success, false on failure.
- *
  */
 int inv_del_element(inventory **inv, item *it);
 
@@ -111,21 +117,19 @@ int inv_del_element(inventory **inv, item *it);
  * If the inventories owner attribute is not set, empty inventories get
  * destroyed.
  *
- * @param the inventory from which the item shall be removed
- * @param the oid of the item to be removed
+ * @param inv the inventory from which the item shall be removed
+ * @param oid the oid of the item to be removed
  * @return true if the oid was removed, false if the oid has not been found.
- *
  */
 int inv_del_oid(inventory **inv, gpointer oid);
 
 /**
  * Erode all items in an inventory.
  *
- * @param pointer to the address of the inventory to erode
- * @param the erosion type affecting the inventory
- * @param true if the player can see the inventory, false otherwise
- * @param a filter function to restrict the eroded items
- *
+ * @param inv pointer to the address of the inventory to erode
+ * @param iet the erosion type affecting the inventory
+ * @param visible true if the player can see the inventory, false otherwise
+ * @param ifilter a filter function to restrict the eroded items
  */
 void inv_erode(inventory **inv, item_erosion_type iet,
 		gboolean visible, int (*ifilter)(item *));
@@ -133,18 +137,17 @@ void inv_erode(inventory **inv, item_erosion_type iet,
 /**
  * Function to determine the count of items in an inventory.
  *
- * @param the inventory to be counted
+ * @param inv the inventory to be counted
  * @return the count of items in the inventory
- *
  */
 guint inv_length(inventory *inv);
 
 /**
  * Function to sort the items in an inventory.
  *
- * @param the inventory to be sorted
- * @param the function used to compare the items
- * @param additional data for the compare function
+ * @param inv the inventory to be sorted
+ * @param compare_func the function used to compare the items
+ * @param user_data additional data for the compare function
  *
  */
 void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data);
@@ -152,22 +155,29 @@ void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data)
 /**
  * Function to determine the weight of all items in an inventory.
  *
- * @param the inventory
+ * @param inv the inventory
  * @return the weight of the inventory in grams
- *
  */
 int inv_weight(inventory *inv);
 
 /**
- * Count an filtered inventory.
+ * Count a filtered inventory.
  *
- * @param the inventory to look in
- * @param the filter function
+ * @param inv the inventory to look in
+ * @param filter the filter function
  * @return the number of items for which the filter function returned true
- *
  */
 guint inv_length_filtered(inventory *inv, int (*filter)(item *));
 
+/**
+ * Get an item from a filtered inventory by its index.
+ * The inventory remains unchanged.
+ *
+ * @param inv the inventory
+ * @param idx the index of the item in the inventory
+ * @param filter the filter function
+ * @return a pointer to the item
+ */
 item *inv_get_filtered(inventory *inv, guint idx, int (*filter)(item *));
 
 #endif

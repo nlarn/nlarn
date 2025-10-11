@@ -155,13 +155,11 @@ gint pos_distance(position first, position second)
 
 int pos_adjacent(position first, position second)
 {
-    guint dist_x, dist_y;
-
     if (Z(first) != Z(second))
         return false;
 
-    dist_x = abs(X(first) - X(second));
-    dist_y = abs(Y(first) - Y(second));
+    guint dist_x = abs(X(first) - X(second));
+    guint dist_y = abs(Y(first) - Y(second));
 
     return ((dist_x < 2) && (dist_y < 2));
 }
@@ -235,8 +233,6 @@ area *area_new(int start_x, int start_y, int size_x, int size_y)
 
 area *area_new_circle(position center, guint radius, gboolean hollow)
 {
-    area *circle;
-
     int f = 1 - radius;
     int ddF_x = 1;
     int ddF_y = -2 * radius;
@@ -246,10 +242,10 @@ area *area_new_circle(position center, guint radius, gboolean hollow)
     if (!pos_valid(center))
         return NULL;
 
-    circle = area_new(X(center) - radius,
-                      Y(center) - radius,
-                      2 * radius + 1,
-                      2 * radius + 1);
+    area *circle = area_new(X(center) - radius,
+                            Y(center) - radius,
+                            2 * radius + 1,
+                            2 * radius + 1);
 
     /* reposition the center to relative values */
     X(center) = radius;
@@ -323,9 +319,6 @@ area *area_new_circle(position center, guint radius, gboolean hollow)
 
 area *area_new_circle_flooded(position center, guint radius, area *obstacles)
 {
-    area *narea;
-    int start_x, start_y;
-
     g_assert(radius > 0 && obstacles != NULL);
 
     if (!pos_valid(center))
@@ -335,11 +328,11 @@ area *area_new_circle_flooded(position center, guint radius, area *obstacles)
     obstacles = area_add(obstacles, area_new_circle(center, radius, true));
 
     /* translate absolute center position to area */
-    start_x = X(center) - obstacles->start_x;
-    start_y = Y(center) - obstacles->start_y;
+    int start_x = X(center) - obstacles->start_x;
+    int start_y = Y(center) - obstacles->start_y;
 
     /* fill narea */
-    narea = area_flood(obstacles, start_x, start_y);
+    area *narea = area_flood(obstacles, start_x, start_y);
 
     return narea;
 }
@@ -353,10 +346,9 @@ gboolean area_blast(position center, guint radius,
     map *cmap = game_map(nlarn, Z(center));
     position cursor = center;
     gboolean retval = false;
-    area *ball, *obsmap;
 
-    obsmap = map_get_obstacles(cmap, center, radius, true);
-    ball = area_new_circle_flooded(center, radius, obsmap);
+    area *obsmap = map_get_obstacles(cmap, center, radius, true);
+    area *ball = area_new_circle_flooded(center, radius, obsmap);
 
     attron(COLOR_PAIR(fg));
 
@@ -481,12 +473,10 @@ int area_point_get(area *a, int x, int y)
 
 int area_pos_get(area *a, position pos)
 {
-    int x, y;
-
     g_assert (a != NULL);
 
-    x = X(pos) - a->start_x;
-    y = Y(pos) - a->start_y;
+    int x = X(pos) - a->start_x;
+    int y = Y(pos) - a->start_y;
 
     return area_point_get(a, x, y);
 }

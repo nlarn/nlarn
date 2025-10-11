@@ -119,9 +119,6 @@ colour potion_colour(potion_t potion_id)
 int potion_throw(struct player *p)
 {
     map *pmap = game_map(nlarn, Z(p->pos));
-    position target;    /* the selected target */
-    gchar *desc;        /* the potion's description */
-    item *potion;       /* the potion from the inventory */
     damage_originator damo = { DAMO_PLAYER, p };
 
     if (inv_length_filtered(p->inventory, item_filter_potions) == 0)
@@ -130,8 +127,8 @@ int potion_throw(struct player *p)
         return false;
     }
 
-    potion = display_inventory("Select a potion to throw", p, &p->inventory,
-                               NULL, false, false, false, item_filter_potions);
+    item *potion = display_inventory("Select a potion to throw", p, &p->inventory,
+                                     NULL, false, false, false, item_filter_potions);
 
     if (!potion)
     {
@@ -140,13 +137,13 @@ int potion_throw(struct player *p)
     }
 
     /* get the description of the potion */
-    desc = item_describe(potion, player_item_known(p, potion), true, true);
+    gchar *desc = item_describe(potion, player_item_known(p, potion), true, true);
 
     gchar *msg = g_strdup_printf("Choose a target for %s.", desc);
-    target = display_get_position(p, msg, true, false, 0, false, true);
+    position target = display_get_position(p, msg, true, false, 0, false, true);
     g_free(msg);
 
-    /* check if we got an usable target position */
+    /* check if we got a usable target position */
     if (!pos_valid(target) || pos_identical(p->pos, target))
     {
         log_add_entry(nlarn->log, "Aborted.");
@@ -211,7 +208,6 @@ item_usage_result potion_quaff(struct player *p, item *potion)
 {
     item_usage_result result = { false, false };
     const char *verb;
-    gchar *description;
 
     // These potions aren't drunk.
     if (potion->id == PO_CURE_DIANTHR || potion->id == PO_WATER)
@@ -226,8 +222,8 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     }
 
     /* prepare item description */
-    description = item_describe(potion, player_item_known(p, potion),
-                                true, potion->count == 1);
+    gchar *description = item_describe(potion, player_item_known(p, potion),
+                                       true, potion->count == 1);
 
     log_add_entry(nlarn->log, "You %s %s.", verb, description);
 

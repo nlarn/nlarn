@@ -16,6 +16,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef CONFIG_H
+#define CONFIG_H
+
 #include <glib.h>
 
 #include "items.h"
@@ -43,7 +46,7 @@ gboolean parse_ini_file(const char *filename, struct game_config *config);
 void write_ini_file(const char *filename, struct game_config *config);
 
 /* shared config cleanup helper */
-void free_config(const struct game_config config);
+void free_config(struct game_config config);
 
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config);
@@ -54,15 +57,17 @@ char *compose_autopickup_settings(const gboolean config[IT_MAX]);
 /**
  * @brief Return a comma separated list of all selected item types
  *
- * @param a boolean array (size IT_MAX)
+ * @param config a boolean array (size IT_MAX)
  *
  * @return NULL if no item type is selected, otherwise a comma-separated
  *         list of item type names
  */
 char *verbose_autopickup_settings(const gboolean config[IT_MAX]);
 
-int parse_gender(const char gender);
-char compose_gender(const int gender);
+int parse_gender(char gender);
+char compose_gender(int gender);
 
 /* configure game defaults */
 void configure_defaults(const char *inifile);
+
+#endif
