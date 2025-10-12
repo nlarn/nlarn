@@ -343,7 +343,7 @@ int building_home(player *p)
     const char msg_home[] = "`EMPH`Welcome home, %s.`end`\n\nLatest word from the doctor " \
                             "is not good. The diagnosis is confirmed as " \
                             "dianthroritis. He guesses that your daughter " \
-                            "has only %d mobuls left in this world.  It's " \
+                            "has only %d mobuls left in this world. It's " \
                             "up to you, %s, to find the only hope for your " \
                             "daughter, the very rare potion of cure " \
                             "dianthroritis.  It is rumored that only deep in " \
