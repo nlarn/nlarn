@@ -43,25 +43,25 @@ static const gem_data gems[GT_MAX] =
 
 const char *gem_name(item *gem)
 {
-    g_assert(gem->type == IT_GEM && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id < GT_MAX);
     return gems[gem->id].name;
 }
 
 colour gem_colour(item *gem)
 {
-    g_assert(gem->type == IT_GEM && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id < GT_MAX);
     return gems[gem->id].fg;
 }
 
 int gem_weight(item *gem)
 {
-    g_assert(gem->type == IT_GEM && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id < GT_MAX);
     return (gem->bonus / 1000);
 }
 
 int gem_price(item *gem)
 {
-    g_assert(gem->type == IT_GEM && gem->id < IT_MAX);
+    g_assert(gem->type == IT_GEM && gem->id < GT_MAX);
     return (gem->bonus * gems[gem->id].price);
 }
 
