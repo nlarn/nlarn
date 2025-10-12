@@ -66,27 +66,27 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
 
 static inline uint32_t rotl(const uint32_t x, int k) {
-	return (x << k) | (x >> (32 - k));
+    return (x << k) | (x >> (32 - k));
 }
 
 
 static uint32_t s[4];
 
 uint32_t next(void) {
-	const uint32_t result = rotl(s[1] * 5, 7) * 9;
+    const uint32_t result = rotl(s[1] * 5, 7) * 9;
 
-	const uint32_t t = s[1] << 9;
+    const uint32_t t = s[1] << 9;
 
-	s[2] ^= s[0];
-	s[3] ^= s[1];
-	s[1] ^= s[2];
-	s[0] ^= s[3];
+    s[2] ^= s[0];
+    s[3] ^= s[1];
+    s[1] ^= s[2];
+    s[0] ^= s[3];
 
-	s[2] ^= t;
+    s[2] ^= t;
 
-	s[3] = rotl(s[3], 11);
+    s[3] = rotl(s[3], 11);
 
-	return result;
+    return result;
 }
 
 /* end xoshiro128starstar.c excerpt */
