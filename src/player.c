@@ -938,7 +938,7 @@ gboolean player_make_move(player *p, guint turns, gboolean interruptible, const 
 
                 /* when the player is subject to itching, there is a chance
                    that (s)he takes off a piece of armour */
-                if (chance(50) && (aslot = player_get_random_armour(p, false)))
+                if (chance(50) && ((aslot = player_get_random_armour(p, false))))
                 {
                     /* deference the item at the selected armour slot */
                     item *armour = *aslot;
@@ -1022,7 +1022,7 @@ void player_die(player *p, player_cod cause_type, int cause)
     g_assert(p != NULL);
 
     /* check for life protection */
-    if ((cause_type < PD_STUCK) && (ef = player_effect_get(p, ET_LIFE_PROTECTION)))
+    if ((cause_type < PD_STUCK) && ((ef = player_effect_get(p, ET_LIFE_PROTECTION))))
     {
         log_add_entry(nlarn->log, "`PALE_CYAN`You feel wiiieeeeerrrrrd all over!`end`");
 
@@ -1373,7 +1373,7 @@ int player_move(player *p, direction dir, gboolean open_door)
     player_autopickup(p);
 
     /* mention stationary objects at this position */
-    if ((so = map_sobject_at(pmap, p->pos)) && !player_effect(p, ET_BLINDNESS))
+    if (((so = map_sobject_at(pmap, p->pos))) && !player_effect(p, ET_BLINDNESS))
     {
         log_add_entry(nlarn->log, "You see %s here.", so_get_desc(so));
     }
@@ -1437,7 +1437,7 @@ int player_attack(player *p, monster *m)
         }
 
         /* inflict damage */
-        if (!(m = monster_damage_take(m, dam)))
+        if (!((m = monster_damage_take(m, dam))))
         {
             /* killed the monster */
             return 1;
