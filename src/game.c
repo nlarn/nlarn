@@ -50,6 +50,9 @@
 #include "spheres.h"
 #include "random.h"
 
+const guint MOBUL = 100;
+const guint TIMELIMIT = 30000;
+
 static void game_new();
 static gboolean game_load();
 static void game_items_shuffle(game *g);

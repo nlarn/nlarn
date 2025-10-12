@@ -471,7 +471,7 @@ static void mainloop()
             case 'w': /* rest up to 1 mobul */
                 ch = '.';
                 run_cmd = ch;
-                end_resting = game_turn(nlarn) + 100;
+                end_resting = game_turn(nlarn) + MOBUL;
                 break;
             }
         }

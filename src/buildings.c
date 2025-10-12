@@ -661,7 +661,7 @@ static int building_scribe_scroll(player *p)
     p->stats.gold_spent_shop += price;
 
     /* writing a scroll takes 10 mobuls */
-    player_make_move(p, 1000, false, "waiting for the scribes to write a "
+    player_make_move(p, 10 * MOBUL, false, "waiting for the scribes to write a "
             "scroll of %s for you", scroll_name(blank));
 
     log_add_entry(nlarn->log,

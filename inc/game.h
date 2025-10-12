@@ -25,7 +25,10 @@
 #include "player.h"
 #include "weapons.h"
 
-#define TIMELIMIT 30000 /* maximum number of moves before the game is called */
+/* the larnian unit of time */
+extern const guint MOBUL;
+/* maximum number of moves before the game is called */
+extern const guint TIMELIMIT;
 
 /* internal counter for save file compatibility */
 #define SAVEFILE_VERSION    28
@@ -148,7 +151,7 @@ void game_delete_savefile();
 #define game_remaining_turns(g) (((g)->gtime > TIMELIMIT) ? 0 : TIMELIMIT - (g)->gtime)
 
 /* gtime <> mobuls conversion */
-#define gtime2mobuls(gtime)  ((abs(((int)gtime)) + 99) / 100)
-#define mobuls2gtime(mobuls) ((int)(mobuls) * 100)
+#define gtime2mobuls(gtime)  ((abs(((int)gtime)) + (MOBUL - 1)) / MOBUL)
+#define mobuls2gtime(mobuls) ((int)(mobuls) * MOBUL)
 
 #endif
