@@ -80,7 +80,7 @@ struct game_config config = {};
 /* death jump buffer - used to return to the main loop when the player has died */
 jmp_buf nlarn_death_jump;
 
-static gboolean adjacent_corridor(position pos, char mv);
+static gboolean adjacent_corridor(position pos, int move);
 
 #ifdef __unix
 static void nlarn_signal_handler(int signo);
@@ -295,7 +295,7 @@ static void nlarn_init(int argc, char *argv[])
 static void mainloop()
 {
     /* count of moves used by last action */
-    int moves_count = 0;
+    guint moves_count = 0;
 
     /* used to read in e.g. the help file */
     gchar *strbuf;
@@ -306,7 +306,7 @@ static void mainloop()
     /* position chosen for auto travel, allowing to continue travel */
     position cpos = pos_invalid;
 
-    char run_cmd = 0;
+    int run_cmd = 0;
     int ch = 0;
     gboolean adj_corr = false;
     guint end_resting = 0;
@@ -451,7 +451,10 @@ static void mainloop()
                 case '9':
                     ch = 'U';
                     break;
+                default:
+                    break;
                 }
+
             }
 
             switch (ch)
@@ -472,6 +475,8 @@ static void mainloop()
                 ch = '.';
                 run_cmd = ch;
                 end_resting = game_turn(nlarn) + MOBUL;
+                break;
+            default:
                 break;
             }
         }
@@ -591,7 +596,7 @@ static void mainloop()
 
             /* go downstairs / enter a building */
         case '>':
-            if (!(moves_count = player_stairs_down(nlarn->p)))
+            if (!((moves_count = player_stairs_down(nlarn->p))))
                 moves_count = player_building_enter(nlarn->p);
             break;
 
@@ -946,8 +951,8 @@ static void mainloop()
         case '&': /* instaheal */
             if (game_wizardmode(nlarn))
             {
-                nlarn->p->hp = nlarn->p->hp_max;
-                nlarn->p->mp = nlarn->p->mp_max;
+                nlarn->p->hp = (int)nlarn->p->hp_max;
+                nlarn->p->mp = (int)nlarn->p->mp_max;
 
                 /* clear some nasty effects */
                 effect *e;
@@ -967,6 +972,9 @@ static void mainloop()
         case 3: /* ^C */
             if (game_wizardmode(nlarn))
                 calc_fighting_stats(nlarn->p);
+            break;
+
+        default:
             break;
         }
 
@@ -1044,7 +1052,7 @@ gboolean main_menu()
     g_autofree char *main_menu = g_strdup_printf(main_menu_tpl,
         (game_turn(nlarn) == 1) ? "New" : "Continue saved", game_difficulty(nlarn));
 
-    char input = 0;
+    int input = 0;
 
     while (input != 'q' && input != KEY_ESC)
     {
@@ -1074,6 +1082,8 @@ gboolean main_menu()
                 g_free(rendered_highscores);
             }
         }
+            break;
+        default:
             break;
         }
     }
@@ -1107,7 +1117,7 @@ int main(int argc, char *argv[])
        ensure that the game quits when quitting from inside the game, return
        the cause of death from player_die().
     */
-    player_cod cod = setjmp(nlarn_death_jump);
+    const player_cod cod = setjmp(nlarn_death_jump);
 
     /* clear the screen to wipe remains from the previous game */
     clear();
@@ -1163,10 +1173,10 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-static gboolean adjacent_corridor(position pos, char mv)
+static gboolean adjacent_corridor(position pos, int move)
 {
     position p1 = pos, p2 = pos;
-    switch (mv)
+    switch (move)
     {
     case 'h': // left
         X(p1) -= 1;
@@ -1207,6 +1217,8 @@ static gboolean adjacent_corridor(position pos, char mv)
     case 'n': // down right
         X(p1) += 1;
         Y(p2) += 1;
+        break;
+    default:
         break;
     }
 
