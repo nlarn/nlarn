@@ -238,7 +238,7 @@ player *player_deserialize(cJSON *pser);
  * @return true if the action has completed, false if it has been interrupted
  *
  */
-gboolean player_make_move(player *p, int turns, gboolean interruptible, const char *desc, ...);
+gboolean player_make_move(player *p, guint turns, gboolean interruptible, const char *desc, ...);
 
 /**
  * Kill the player

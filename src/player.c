@@ -803,7 +803,7 @@ static void player_effects_expire(gpointer effect_id, gpointer pptr)
     }
 }
 
-gboolean player_make_move(player *p, int turns, gboolean interruptible, const char *desc, ...)
+gboolean player_make_move(player *p, guint turns, gboolean interruptible, const char *desc, ...)
 {
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
