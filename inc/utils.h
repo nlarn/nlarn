@@ -108,20 +108,20 @@ size_t strv_append_unique(char ***list, const char *str);
 char *str_strip(const char *str);
 char *str_prepare_for_saving(const char *str);
 int str_starts_with_vowel(const char *str);
-const char *int2str(int val);
-const char *int2time_str(int val);
+const char *int2str(guint val);
+const char *int2time_str(guint val);
 
 static inline const char *a_an(const char *str)
 {
     return str_starts_with_vowel(str) ? "an" : "a";
 }
 
-static inline const char *is_are(const int i)
+static inline const char *is_are(const guint i)
 {
     return (i == 1) ? "is" : "are";
 }
 
-static inline const char *plural(const int i)
+static inline const char *plural(const guint i)
 {
     return (i > 1) ? "s" : "";
 }

@@ -485,7 +485,7 @@ int str_starts_with_vowel(const char *str)
     else return false;
 }
 
-const char *int2str(int val)
+const char *int2str(guint val)
 {
     static char buf[21];
     const char *count_desc[] = { "no", "one", "two", "three", "four", "five",
@@ -507,7 +507,7 @@ const char *int2str(int val)
 
 }
 
-const char *int2time_str(int val)
+const char *int2time_str(guint val)
 {
     if (val <= 3)
     {
