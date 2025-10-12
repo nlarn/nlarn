@@ -30,6 +30,9 @@ nlarn.depend
 # VS Code
 .vscode/
 
+# CLion
+.idea/
+
 # GDB
 .gdb_history
 
