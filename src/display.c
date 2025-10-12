@@ -601,6 +601,7 @@ void display_shutdown()
 {
 #ifdef SDLPDCURSES
     g_free(font_name);
+    font_name = NULL;
 #endif
 
     /* only terminate curses mode when the display has been initialised */

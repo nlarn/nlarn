@@ -111,7 +111,6 @@ static int try_locking_savegame_file(FILE *sg)
 #endif
         display_show_message("Error", desc->str, 0);
         g_string_free(desc, true);
-        display_shutdown();
         exit(EXIT_FAILURE);
     }
 
