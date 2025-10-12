@@ -562,7 +562,7 @@ int building_lrs(player *p)
 
 static int building_scribe_scroll(player *p)
 {
-    int turns = 2;
+    const int turns = 2;
     int i;
     gboolean split = false;
     char question[81] = { 0 };
@@ -576,11 +576,11 @@ static int building_scribe_scroll(player *p)
         return turns;
     }
 
-    item *bscroll = display_inventory("Choose a scroll to inscribe", p,
+    item *blank = display_inventory("Choose a scroll to inscribe", p,
                                       &p->inventory, NULL, false, false,
                                       false, item_filter_blank_scroll);
 
-    if (!bscroll)
+    if (!blank)
     {
         log_add_entry(nlarn->log, "Okay then.");
         return turns;
@@ -600,7 +600,7 @@ static int building_scribe_scroll(player *p)
             break;
     }
 
-    /* free memory alloc'd by display_get_string */
+    /* free memory allocated by display_get_string */
     g_free(new_scroll);
 
     if (i == ST_MAX)
@@ -618,8 +618,8 @@ static int building_scribe_scroll(player *p)
         return turns;
     }
 
-    /* player has chosen which scroll to write, check if (s)he can afford it */
-    int price = 2 * scrolls[i].price;
+    /* player has chosen which scroll to write, check if they can afford it */
+    const int price = 2 * scrolls[i].price;
     if (!building_player_check(p, price))
     {
         char *msg = g_strdup_printf("You cannot afford the %d gold for the "
@@ -641,13 +641,13 @@ static int building_scribe_scroll(player *p)
     /** Okay, we write the scroll. */
 
     // If necessary, split a stack of scrolls.
-    if (bscroll->count > 1)
+    if (blank->count > 1)
     {
-        bscroll = item_split(bscroll, 1);
+        blank = item_split(blank, 1);
         split = true;
     }
 
-    bscroll->id = i;
+    blank->id = i;
     p->identified_scrolls[i] = true;
 
     building_player_charge(p, price);
@@ -655,14 +655,14 @@ static int building_scribe_scroll(player *p)
 
     /* writing a scroll takes 10 mobuls */
     player_make_move(p, 1000, false, "waiting for the scribes to write a "
-            "scroll of %s for you", scroll_name(bscroll));
+            "scroll of %s for you", scroll_name(blank));
 
     log_add_entry(nlarn->log,
             "The scribes finished writing a scroll of %s for you.",
-            scroll_name(bscroll));
+            scroll_name(blank));
 
     if (split)
-        inv_add(&p->inventory, bscroll);
+        inv_add(&p->inventory, blank);
 
     return 0;
 }
