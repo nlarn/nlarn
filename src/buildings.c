@@ -570,8 +570,8 @@ static int building_scribe_scroll(player *p)
     /* check if the player owns a blank scroll */
     if (!inv_length_filtered(p->inventory, item_filter_blank_scroll))
     {
-        display_show_message("School", "To write a scroll, the scribes "
-                "require a blank scroll.", 0);
+        display_show_message("School", "To craft a scroll, "
+            "the scribes must first be given a blank one.", 0);
 
         return turns;
     }
@@ -586,8 +586,9 @@ static int building_scribe_scroll(player *p)
         return turns;
     }
 
-    char *new_scroll = display_get_string("School", "Write what scroll?",
-            NULL, 45);
+    char *new_scroll = display_get_string("School",
+        "Which incantation shall we bind in ink?", NULL, 45);
+
     if (new_scroll == NULL)
     {
         display_show_message("School", "Okay then.", 0);
@@ -605,16 +606,20 @@ static int building_scribe_scroll(player *p)
 
     if (i == ST_MAX)
     {
-        display_show_message("School", "The scribes haven't ever heard of any "
-                "such scroll!", 0);
+        display_show_message("School",
+            "Even the oldest scribes know nothing of a scroll like that. "
+            "Alas, the scroll must remain blank - for even the greatest "
+            "scribes cannot write what does not exist.", 0);
+
         return turns;
     }
 
     /* jesters might want to get a scroll of blank paper */
     if (i == ST_BLANK)
     {
-        display_show_message("School", "The scribes can only write something "
-                "written!", 0);
+        display_show_message("School", "A blank scroll, "
+            "by definition, needs no scribe.", 0);
+
         return turns;
     }
 
@@ -622,16 +627,18 @@ static int building_scribe_scroll(player *p)
     const int price = 2 * scrolls[i].price;
     if (!building_player_check(p, price))
     {
-        char *msg = g_strdup_printf("You cannot afford the %d gold for the "
-                "scroll of %s.", price, scrolls[i].name);
+        char *msg = g_strdup_printf("You do not possess the %d gold necessary "
+            "to acquire the scroll of %s. For now, the scribes shall keep "
+            "their quills dry.", price, scrolls[i].name);
+
         display_show_message("School", msg, 0);
         g_free(msg);
 
         return turns;
     }
 
-    g_snprintf(question, 80, "Writing a scroll of %s costs %d gold.\n"
-               "Are you fine with that?", scrolls[i].name, price);
+    g_snprintf(question, 80, "The crafting of a scroll of %s demands a fee of"
+        " %d gold.\nWould that be agreeable to you?", scrolls[i].name, price);
 
     if (!display_get_yesno(question, "School", NULL, NULL))
     {
@@ -658,7 +665,7 @@ static int building_scribe_scroll(player *p)
             "scroll of %s for you", scroll_name(blank));
 
     log_add_entry(nlarn->log,
-            "The scribes finished writing a scroll of %s for you.",
+            "The scribes have completed a scroll of %s on your behalf.",
             scroll_name(blank));
 
     if (split)
