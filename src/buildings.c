@@ -940,16 +940,19 @@ int building_tradepost(player *p)
 int building_monastery(struct player *p)
 {
     const char title[] = "The Monastery of Larn";
-    const char msg_welcome[] = "`EMPH`Welcome to the Monastery of Larn!`end`\n\n" \
-                               "We are here to help you when you are in need of " \
-                               "care and offer a fine selection of items that might "
-                               "be useful for your quests.\n\n" \
-                               "Here you may\n\n" \
-                               "  `KEY`a`end`) buy something\n" \
-                               "  `KEY`b`end`) ask for curse removal\n" \
-                               "  `KEY`c`end`) receive healing\n";
+    const char msg_welcome[] =
+        "`EMPH`Welcome, traveler, to the Monastery of Larn.`end`\n\n"
+        "Peace be upon you. The walls of the monastery offer respite to all "
+        "who seek it.\n\nSpeak your need, and if it lies within our calling, "
+        "it shall be granted... for a fair offering. We tend the wounded and "
+        "weary, and offer a small selection of tools and provisions to aid "
+        "those who walk the road of trials.\n\n"
+        "Here you may\n\n"
+        "  `KEY`a`end`) buy something\n"
+        "  `KEY`b`end`) ask for curse removal\n"
+        "  `KEY`c`end`) receive healing\n";
 
-    const char ayfwt[] = "Are you fine with that?";
+    const char ayfwt[] = "Shall we proceed, then?";
 
     gboolean leaving = false;
 
@@ -1037,8 +1040,7 @@ int building_monastery(struct player *p)
         g_string_append_c(msg, '\n');
 
         /* offer the choices to the player */
-        display_window *mwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
-                47, title, msg->str, 0);
+        display_window *mwin = display_popup(10, 2, 60, title, msg->str, 0);
 
         int selection = display_getch(mwin->window);
 
@@ -1057,7 +1059,8 @@ int building_monastery(struct player *p)
         {
             if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
             {
-                display_show_message(title, "You do not possess any cursed item.", 0);
+                display_show_message(title, "There is no sign of curse upon "
+                    "your possessions.", 0);
                 break;
             }
 
@@ -1067,8 +1070,9 @@ int building_monastery(struct player *p)
             /* It is possible to abort the selection with ESC. */
             if (it == NULL)
             {
-                display_show_message(title, "You chose to leave your items as "
-                        "they are.", 0);
+                display_show_message(title, "Very well - your belongings "
+                    "shall remain as they were.", 0);
+
                 break;
             }
 
@@ -1082,16 +1086,16 @@ int building_monastery(struct player *p)
             price *= it->count;
 
             gchar *desc = item_describe(it, player_item_identified(p, it), false, true);
-            char *question = g_strdup_printf("To remove the curse on %s, we ask you to "
-                                             "donate %d gold for our abbey. %s", desc,
-                                             price, ayfwt);
+            char *question = g_strdup_printf("To unbind the curse from %s, we "
+                "ask but %d gold in humble support of the abbey. %s",
+                desc, price, ayfwt);
 
             int choice = display_get_yesno(question, NULL, NULL, NULL);
             g_free(question);
 
             if (!choice)
             {
-                char *msg = g_strdup_printf("You chose leave the curse on %s.", desc);
+                char *msg = g_strdup_printf("Thus, you choose to let %s remain unaltered.", desc);
                 display_show_message(title, msg, 0);
                 g_free(msg);
                 break;
@@ -1108,9 +1112,9 @@ int building_monastery(struct player *p)
             }
             else
             {
-                char *msg = g_strdup_printf("The monks tell you that %s %sn't "
-                        "cursed. Well, now you know for sure...", desc,
-                        (it->count == 1) ? "was" : "were");
+                char *msg = g_strdup_printf("The monks tell you that %s "
+                        "%sn't cursed. You may now hold this knowledge with "
+                        "certainty.", desc, (it->count == 1) ? "was" : "were");
                 display_show_message(title, msg, 0);
                 g_free(msg);
                 it->blessed_known = true;
@@ -1130,13 +1134,13 @@ int building_monastery(struct player *p)
 
             if (p->hp == player_get_hp_max(p))
             {
-                display_show_message(title, "You are not in need of healing.", 0);
+                display_show_message(title, "You bear no wounds that require "
+                    "our aid.", 0);
                 break;
             }
 
-            char *question = g_strdup_printf("For healing you, we ask that you "
-                                             "donate %d gold for our monastery. %s",
-                                             price, ayfwt);
+            char *question = g_strdup_printf("To grant you healing, we humbly "
+                "request a donation of %d gold to our monastery. %s", price, ayfwt);
             int choice = display_get_yesno(question, NULL, NULL, NULL);
             g_free(question);
 
@@ -1151,7 +1155,7 @@ int building_monastery(struct player *p)
             else
             {
                 /* no, thanks */
-                display_show_message(title, "You chose not to be healed.", 0);
+                display_show_message(title, "So be it, the healing shall wait.", 0);
             }
         }
         break;
@@ -1169,9 +1173,9 @@ int building_monastery(struct player *p)
                 effect *e = player_effect_get(p, curable_diseases[selection].et);
                 int price = e->turns * (game_difficulty(nlarn) + 1);
 
-                char *question = g_strdup_printf("For healing you from %s, we ask that you "
-                                                 "donate %d gold for our monastery. %s",
-                                                 curable_diseases[selection].desc, price, ayfwt);
+                char *question = g_strdup_printf("To cleanse you of %s, we "
+                    "humbly request a donation of %d gold to our monastery. "
+                    "%s", curable_diseases[selection].desc, price, ayfwt);
 
                 int choice = display_get_yesno(question, NULL, NULL, NULL);
                 g_free(question);
@@ -1187,8 +1191,8 @@ int building_monastery(struct player *p)
                 else
                 {
                     /* no, thanks */
-                    char *msg = g_strdup_printf("You chose not to be cured from %s.",
-                                  curable_diseases[selection].desc);
+                    char *msg = g_strdup_printf("So be it, you chose not to "
+                        "be cured from %s.", curable_diseases[selection].desc);
                     display_show_message(title, msg, 0);
                     g_free(msg);
                 }

@@ -26,7 +26,7 @@
 * Lower possibility of destroying statues with spells with higher difficulty
 * Demons, undead and spirits are resistant against dehydration
 * Differentiate the visibility range of monsters
-* More atmospheric messages for scribing scrolls
+* More atmospheric messages for the monastery and for scribing scrolls
 * Emphasise function key in inventory help line
 * Limit inventory and message dialogue width
 
