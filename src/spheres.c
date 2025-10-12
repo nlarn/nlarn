@@ -26,6 +26,7 @@
 static sphere *sphere_at(const game *g, position pos, const sphere *s);
 static void sphere_hit_owner(const game *g, sphere *s);
 static void sphere_kill_monster(sphere *s, monster *m);
+static void sphere_hit_sphere(const game *g, sphere *s, sphere *other);
 
 sphere *sphere_new(const position pos, player *owner, const int lifetime)
 {
@@ -177,51 +178,7 @@ void sphere_move(sphere *s, game *g)
     sphere *other;
     if ((other = sphere_at(g, s->pos, s)))
     {
-        if (fov_get(g->p->fv, s->pos))
-        {
-            log_add_entry(nlarn->log,
-                    "Two spheres of annihilation collide! "
-                    "You hear a great earth shaking blast!");
-        }
-        else if(Z(g->p->pos) == Z(s->pos))
-        {
-            /* The player is on the same level as the spheres */
-            log_add_entry(nlarn->log,
-                    "You hear a great earth shaking blast!");
-        }
-
-        /* show the explosion site on the floor */
-        const int radius = 3;
-        area *obstacles = map_get_obstacles(smap, s->pos, radius, false);
-        area *explosion = area_new_circle_flooded(s->pos, radius, obstacles);
-
-        position pos;
-        Z(pos) = smap->nlevel;
-
-        damage *dam = damage_new(DAM_PHYSICAL, ATT_BREATH, (int)rand_m_n(25,50), DAMO_SPHERE, s);
-
-        for (int y = 0; y < explosion->size_y; y++) {
-            for (int x = 0; x < explosion->size_x; x++) {
-                if (area_point_get(explosion, x, y)) {
-                    X(pos) = explosion->start_x + x;
-                    Y(pos) = explosion->start_y + y;
-                    map_spill_set(smap, pos, COSMETIC_MAUVE);
-
-                    /* hit living creatures on the affected positions */
-                    if ((m = map_get_monster_at(smap, pos))) {
-                        monster_damage_take(m, damage_copy(dam));
-                    }
-
-                    if (pos_identical(pos, nlarn->p->pos)) {
-                        player_damage_take(nlarn->p, damage_copy(dam), PD_SPHERE, 0);
-                    }
-                }
-            }
-        }
-        damage_free(dam);
-
-        sphere_destroy(s, g);
-        sphere_destroy(other, g);
+        sphere_hit_sphere(g, s, other);
     }
 }
 
@@ -283,4 +240,54 @@ static void sphere_kill_monster(sphere *s, monster *m)
         /* the monster has been killed, grant experience */
         player_exp_gain(s->owner, mexp);
     }
+}
+
+static void sphere_hit_sphere(const game *g, sphere *s, sphere *other)
+{
+    if (fov_get(g->p->fv, s->pos))
+    {
+        log_add_entry(nlarn->log,
+                "Two spheres of annihilation collide! "
+                "You hear a great earth shaking blast!");
+    }
+    else if(Z(g->p->pos) == Z(s->pos))
+    {
+        /* The player is on the same level as the spheres */
+        log_add_entry(nlarn->log, "You hear a great earth shaking blast!");
+    }
+
+    /* show the explosion site on the floor */
+    const int radius = 3;
+    map *smap = game_map(nlarn, Z(s->pos));
+    area *obstacles = map_get_obstacles(smap, s->pos, radius, false);
+    area *explosion = area_new_circle_flooded(s->pos, radius, obstacles);
+
+    position pos;
+    Z(pos) = smap->nlevel;
+
+    damage *dam = damage_new(DAM_PHYSICAL, ATT_BREATH, (int)rand_m_n(25,50), DAMO_SPHERE, s);
+    monster *m;
+
+    for (int y = 0; y < explosion->size_y; y++) {
+        for (int x = 0; x < explosion->size_x; x++) {
+            if (area_point_get(explosion, x, y)) {
+                X(pos) = explosion->start_x + x;
+                Y(pos) = explosion->start_y + y;
+                map_spill_set(smap, pos, COSMETIC_MAUVE);
+
+                /* hit living creatures on the affected positions */
+                if ((m = map_get_monster_at(smap, pos))) {
+                    monster_damage_take(m, damage_copy(dam));
+                }
+
+                if (pos_identical(pos, nlarn->p->pos)) {
+                    player_damage_take(nlarn->p, damage_copy(dam), PD_SPHERE, 0);
+                }
+            }
+        }
+    }
+    damage_free(dam);
+
+    sphere_destroy(s, g);
+    sphere_destroy(other, g);
 }
