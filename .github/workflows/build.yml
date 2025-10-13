@@ -30,7 +30,7 @@ jobs:
       run: sudo apt install libsdl2-dev libsdl2-ttf-dev
       if: contains(matrix.configuration, 'SDLPDCURSES=Y')
     - name: Build ${{ matrix.configuration }}
-      run: make ${{ matrix.configuration }}
+      run: make ${{ matrix.configuration }} dist
 
   build-windows:
     runs-on: windows-latest
@@ -65,7 +65,7 @@ jobs:
           mingw-w64-ucrt-x86_64-zlib
     - uses: actions/checkout@v4
     - name: Build ${{ matrix.configuration }}
-      run: make SDLPDCURSES=Y ${{ matrix.configuration }}
+      run: make SDLPDCURSES=Y ${{ matrix.configuration }} dist
 
   build-macos:
     runs-on: macos-latest
@@ -86,4 +86,4 @@ jobs:
     - name: Install dependencies
       run: brew install dylibbundler glib ncurses pandoc pkg-config sdl2 sdl2_ttf
     - name: Build ${{ matrix.configuration }}
-      run: make ${{ matrix.configuration }}
+      run: make ${{ matrix.configuration }} dist
