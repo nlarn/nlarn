@@ -85,6 +85,6 @@ jobs:
     - name: Update brew cache
       run: brew update
     - name: Install dependencies
-      run: brew install dylibbundler glib ncurses pandoc pkg-config sdl2 sdl2_ttf
+      run: brew install create-dmg dylibbundler glib ncurses pandoc pkg-config sdl2 sdl2_ttf
     - name: Build ${{ matrix.configuration }}
       run: make ${{ matrix.configuration }} dist

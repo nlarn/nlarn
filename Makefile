@@ -215,7 +215,7 @@ $(OSXIMAGE): $(MAINFILES)
 # Copy local libraries into the app folder and instruct the linker.
 	dylibbundler -cd -d dmgroot/NLarn.app/Contents/MacOS/libs -b -x dmgroot/NLarn.app/Contents/MacOS/nlarn -p '@executable_path/libs/'
 # Copy required files
-	cp -p README.html LICENSE Changelog.html dmgroot
+	cp -p README.html Changelog.html dmgroot
 	cp -p $(LIBFILES) dmgroot/NLarn.app/Contents/Resources
 	cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
 	cp -p resources/Info.plist dmgroot/NLarn.app/Contents
@@ -225,22 +225,24 @@ $(OSXIMAGE): $(MAINFILES)
 	/usr/libexec/PlistBuddy -c \
 		"Add :CFBundleShortVersionString string $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)" \
 		dmgroot/NLarn.app/Contents/Info.plist
-# Use the same icons for the dmg file
-	cp -p resources/NLarn.icns dmgroot/.VolumeIcon.icns
-	SetFile -c icnC dmgroot/.VolumeIcon.icns
 # Create a pseudo-installer disk image
-	mkdir dmgroot/.background
-	cp resources/dmg_background.png dmgroot/.background
-	echo hdiutil requires superuser rights.
-	hdiutil create -srcfolder dmgroot -volname "NLarn $(VERSION)" \
-		-uid 99 -gid 99 -format UDRW -ov "raw-$(DIRNAME).dmg" || rm -rf dmgroot
+	create-dmg \
+		--volname "NLarn $(VERSION)" \
+		--volicon resources/NLarn.icns \
+		--eula LICENSE \
+		--window-pos 400 100\
+		--window-size 400 350 \
+		--background resources/dmg_background.png \
+		--icon-size 48 \
+		--icon "NLarn.app" 100 140 \
+		--hide-extension "NLarn.app" \
+		--app-drop-link 300 140 \
+		--icon "Changelog.html" 100 270 \
+		--icon "README.html" 200 270 \
+		"$(DIRNAME).dmg" \
+		dmgroot/
+
 	rm -rf dmgroot
-	hdiutil attach -noautoopen -readwrite "raw-$(DIRNAME).dmg"
-	SetFile -a C "/Volumes/NLarn $(VERSION)"
-	sed -e 's/##VOLNAME##/NLarn $(VERSION)/' resources/dmg_settings.scpt | osascript
-	hdiutil detach "/Volumes/NLarn $(VERSION)"
-	hdiutil convert "raw-$(DIRNAME).dmg" -format UDZO -o "$(DIRNAME).dmg"
-	rm "raw-$(DIRNAME).dmg"
 
 clean:
 	@echo Cleaning nlarn
