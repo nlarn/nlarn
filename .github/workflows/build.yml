@@ -25,7 +25,7 @@ jobs:
     - name: Update apt cache
       run: sudo apt update
     - name: Install dependencies
-      run: sudo apt install discount libglib2.0-dev
+      run: sudo apt install libglib2.0-dev pandoc
     - name: Install PDCurses dependencies
       run: sudo apt install libsdl2-dev libsdl2-ttf-dev
       if: contains(matrix.configuration, 'SDLPDCURSES=Y')
@@ -43,15 +43,19 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
+    - name: Install pandoc
+      uses: crazy-max/ghaction-chocolatey@v3
+      with:
+        args: install pandoc
     - uses: msys2/setup-msys2@v2
       with:
+        path-type: inherit
         msystem: UCRT64
         update: true
         install: >
           git
           make
           zip
-          mingw-w64-ucrt-x86_64-discount
           mingw-w64-ucrt-x86_64-gcc
           mingw-w64-ucrt-x86_64-glib2
           mingw-w64-ucrt-x86_64-ncurses
@@ -81,6 +85,6 @@ jobs:
     - name: Update brew cache
       run: brew update
     - name: Install dependencies
-      run: brew install discount dylibbundler glib ncurses pkg-config sdl2 sdl2_ttf
+      run: brew install dylibbundler glib ncurses pandoc pkg-config sdl2 sdl2_ttf
     - name: Build ${{ matrix.configuration }}
       run: make ${{ matrix.configuration }}
