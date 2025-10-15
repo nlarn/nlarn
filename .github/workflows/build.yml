@@ -1,10 +1,11 @@
 name: C/C++ CI
 
 on:
+  create:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   build:
@@ -21,16 +22,22 @@ jobs:
           - config=release SDLPDCURSES=Y
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Update apt cache
-      run: sudo apt update
-    - name: Install dependencies
-      run: sudo apt install discount libglib2.0-dev
-    - name: Install PDCurses dependencies
-      run: sudo apt install libsdl2-dev libsdl2-ttf-dev
-      if: contains(matrix.configuration, 'SDLPDCURSES=Y')
-    - name: Build ${{ matrix.configuration }}
-      run: make ${{ matrix.configuration }}
+      - uses: actions/checkout@v4
+      - name: Update apt cache
+        run: sudo apt update
+      - name: Install dependencies
+        run: sudo apt install libglib2.0-dev pandoc
+      - name: Install PDCurses dependencies
+        run: sudo apt install libsdl2-dev libsdl2-ttf-dev
+        if: contains(matrix.configuration, 'SDLPDCURSES=Y')
+      - name: Build ${{ matrix.configuration }}
+        run: make ${{ matrix.configuration }} dist
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        # unless the game is rock-solid deliver the debug build
+        if: github.ref_type == 'tag' && matrix.c_compiler == 'gcc' && matrix.configuration == 'config=debug'
+        with:
+          files: nlarn-*.tar.gz
 
   build-windows:
     runs-on: windows-latest
@@ -43,44 +50,62 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: UCRT64
-        update: true
-        install: >
-          git
-          make
-          zip
-          mingw-w64-ucrt-x86_64-discount
-          mingw-w64-ucrt-x86_64-gcc
-          mingw-w64-ucrt-x86_64-glib2
-          mingw-w64-ucrt-x86_64-ncurses
-          mingw-w64-ucrt-x86_64-nsis
-          mingw-w64-ucrt-x86_64-pkg-config
-          mingw-w64-ucrt-x86_64-SDL2
-          mingw-w64-ucrt-x86_64-SDL2_ttf
-          mingw-w64-ucrt-x86_64-zlib
-    - uses: actions/checkout@v4
-    - name: Build ${{ matrix.configuration }}
-      run: make SDLPDCURSES=Y ${{ matrix.configuration }}
+      - name: Install pandoc
+        uses: crazy-max/ghaction-chocolatey@v3
+        with:
+          args: install pandoc
+      - uses: msys2/setup-msys2@v2
+        with:
+          path-type: inherit
+          msystem: UCRT64
+          update: true
+          install: >
+            git
+            make
+            zip
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-glib2
+            mingw-w64-ucrt-x86_64-ncurses
+            mingw-w64-ucrt-x86_64-nsis
+            mingw-w64-ucrt-x86_64-pkg-config
+            mingw-w64-ucrt-x86_64-SDL2
+            mingw-w64-ucrt-x86_64-SDL2_ttf
+            mingw-w64-ucrt-x86_64-zlib
+      - uses: actions/checkout@v4
+      - name: Build ${{ matrix.configuration }}
+        run: make SDLPDCURSES=Y ${{ matrix.configuration }} dist
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        # unless the game is rock-solid deliver the debug build
+        if: github.ref_type == 'tag' && matrix.configuration == 'config=debug'
+        with:
+          files: |
+            nlarn-*.zip
+            nlarn-*.exe
 
   build-macos:
     runs-on: macos-latest
     strategy:
       matrix:
         configuration:
-# FIXME: building with ncurses is broken
-#          - config=debug
-#          - config=release
+          # FIXME: building with ncurses is broken
+          #          - config=debug
+          #          - config=release
           - config=debug SDLPDCURSES=Y
           - config=release SDLPDCURSES=Y
     env:
       PKG_CONFIG_PATH: /opt/homebrew/opt/ncurses/lib/pkgconfig
     steps:
-    - uses: actions/checkout@v4
-    - name: Update brew cache
-      run: brew update
-    - name: Install dependencies
-      run: brew install discount dylibbundler glib ncurses pkg-config sdl2 sdl2_ttf
-    - name: Build ${{ matrix.configuration }}
-      run: make ${{ matrix.configuration }}
+      - uses: actions/checkout@v4
+      - name: Update brew cache
+        run: brew update
+      - name: Install dependencies
+        run: brew install create-dmg dylibbundler glib ncurses pandoc pkg-config sdl2 sdl2_ttf
+      - name: Build ${{ matrix.configuration }}
+        run: make ${{ matrix.configuration }} dist
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        # unless the game is rock-solid deliver the debug build
+        if: github.ref_type == 'tag' && matrix.configuration == 'config=debug SDLPDCURSES=Y'
+        with:
+          files: nlarn-*.dmg
