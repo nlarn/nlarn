@@ -60,7 +60,7 @@ DECLARE_ENUM(sobject_t, SOBJECT_TYPE_ENUM)
 typedef struct sobject_data
 {
     sobject_t sobject;
-    const char glyph;
+    const wchar_t glyph;
     colour fg;
     const char *description;
     bool
@@ -70,7 +70,7 @@ typedef struct sobject_data
 
 extern const sobject_data sobjects[LS_MAX];
 
-static inline char so_get_glyph(const sobject_t s)
+static inline wchar_t so_get_glyph(const sobject_t s)
 {
     return sobjects[s].glyph;
 }

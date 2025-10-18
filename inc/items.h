@@ -116,7 +116,7 @@ typedef struct item_type_data {
     item_t id;
     const char *name_sg;
     const char *name_pl;
-    const char glyph;
+    const wchar_t glyph;
     guint max_id;
     bool
         optimizable: 1,     /* item type can have a bonus */

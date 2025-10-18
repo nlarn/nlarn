@@ -88,7 +88,7 @@ typedef struct map_tile
 typedef struct map_tile_data
 {
     map_tile_t tile;
-    const char glyph;
+    const wchar_t glyph;
     int colour;
     const char *description;
     bool
@@ -176,7 +176,7 @@ gboolean map_trajectory(position source, position target,
         const damage_originator *damo,
         trajectory_hit_sth pos_hitfun,
         gpointer data1, gpointer data2, gboolean reflectable,
-        char glyph, colour fg, gboolean keep_ray);
+        wchar_t glyph, colour fg, gboolean keep_ray);
 
 /**
  * @brief Get an area of defined dimensions with all blocked positions set.
@@ -232,7 +232,7 @@ void map_timer(map *m);
  *
  * @return The glyph for the door.
  */
-char map_get_door_glyph(map *m, position pos);
+wchar_t map_get_door_glyph(map *m, position pos);
 
 /**
  * Get the display details for a given map tile.
@@ -337,7 +337,7 @@ static inline gboolean map_is_monster_at(map *m, const position pos)
     return ((map_get_monster_at(m, pos) != NULL));
 }
 
-static inline char mt_get_glyph(const map_tile_t t)
+static inline wchar_t mt_get_glyph(const map_tile_t t)
 {
     return map_tiles[t].glyph;
 }
