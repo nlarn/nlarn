@@ -690,7 +690,7 @@ bool map_trajectory(position source, position target,
                         const damage_originator * const damo,
                         trajectory_hit_sth pos_hitfun,
                         gpointer data1, gpointer data2, bool reflectable,
-                        char glyph, colour_t fg, bool keep_ray)
+                        wchar_t glyph, colour_t fg, bool keep_ray)
 {
     g_assert(pos_valid(source) && pos_valid(target));
 
@@ -1137,7 +1137,7 @@ void map_timer(map *m)
     } /* for Y(pos) */
 }
 
-char map_get_door_glyph(map *m, position pos)
+wchar_t map_get_door_glyph(map *m, position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
 

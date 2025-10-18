@@ -64,7 +64,7 @@ typedef struct display_window
 /* information required to draw a map cell */
 typedef struct display_cell
 {
-    char glyph;
+    wchar_t glyph;
     colour_t colour;
     bool reversed;
 } display_cell;
