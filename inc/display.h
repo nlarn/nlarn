@@ -160,7 +160,7 @@ int display_show_message(const char *title, const char *message, int indent);
  * @return A pointer to the newly allocated window structure.
  */
 display_window *display_popup(int x1, int y1, int width, const char *title,
-		const char *msg, int indent);
+    const char *msg, int indent);
 
 /**
  * @brief Destroy a window and the resources allocated for it.
