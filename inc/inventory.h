@@ -132,7 +132,7 @@ int inv_del_oid(inventory **inv, gpointer oid);
  * @param ifilter a filter function to restrict the eroded items
  */
 void inv_erode(inventory **inv, item_erosion_type iet,
-		gboolean visible, int (*ifilter)(item *));
+    gboolean visible, int (*ifilter)(item *));
 
 /**
  * Function to determine the count of items in an inventory.
