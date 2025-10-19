@@ -140,21 +140,18 @@ void display_init()
     display_initialised = true;
 }
 
-static int attr_colour(int colour, gboolean reverse)
+/* convenience helper against endless repetition */
+static int waaddch(WINDOW *win, const wchar_t ch, short color_pair, attr_t attrs)
 {
-    if (reverse)
-        return (A_REVERSE | COLOR_PAIR(colour));
+    cchar_t cchar = {};
+    /* transform the given character into a zero-terminated string */
+    const wchar_t chs[] = { ch, 0 };
 
-    return COLOR_PAIR(colour);
+    setcchar(&cchar, chs, attrs, color_pair, NULL);
+    return wadd_wch(win, &cchar);
 }
 
-/* convenience helper against endless repetition */
-#define waaddch(win, attrs, ch) \
-    wattron(win, attrs); \
-    waddch(win, ch); \
-    wattroff(win, attrs)
-
-#define aaddch(attrs, ch) waaddch(stdscr, attrs, ch)
+#define aaddch(ch, color_pair, attrs) waaddch(stdscr, ch, color_pair, attrs)
 
 /* mvaddch with an additional attribute parameter */
 #define mvaaddch(y, x, attrs, ch) \
@@ -234,7 +231,7 @@ void display_paint_screen(player *p)
             {
                 /* draw the truth */
                 display_cell dc = map_get_tile(vmap, pos);
-                aaddch(attr_colour(dc.colour, dc.reversed), dc.glyph);
+                aaddch(dc.glyph, dc.colour, dc.reversed ? WA_REVERSE : 0);
             }
             else /* i.e. !fullvis && !visible: draw players memory */
             {
@@ -244,31 +241,34 @@ void display_paint_screen(player *p)
                     /* draw stationary object */
                     sobject_t ms = map_sobject_at(vmap, pos);
 
-                    gchar glyph;
+                    wchar_t glyph;
                     if (ms == LS_CLOSEDDOOR || ms == LS_OPENDOOR)
                         glyph = map_get_door_glyph(vmap, pos);
                     else
                         glyph = so_get_glyph(ms);
 
-                    aaddch(attr_colour(so_get_colour(ms), has_items), glyph);
+                    aaddch(glyph, so_get_colour(ms), has_items ? WA_REVERSE : 0);
                 }
                 else if (has_items)
                 {
                     /* draw items */
                     const gboolean has_trap = (player_memory_of(p, pos).trap);
 
-                    aaddch(attr_colour(player_memory_of(p, pos).item_colour, has_trap),
-                           item_glyph(player_memory_of(p, pos).item));
+                    aaddch(item_glyph(
+                        player_memory_of(p, pos).item),
+                        player_memory_of(p, pos).item_colour,
+                        has_trap ? WA_REVERSE : 0
+                    );
                 }
                 else if (player_memory_of(p, pos).trap)
                 {
                     /* draw trap */
-                    aaddch(COLOR_PAIR(trap_colour(map_trap_at(vmap, pos))), '^');
+                    aaddch('^', trap_colour(map_trap_at(vmap, pos)), 0);
                 }
                 else
                 {
                     /* draw tile */
-                    aaddch(COLOR_PAIR(FUSCOUS_GREY), mt_get_glyph(player_memory_of(p, pos).type));
+                    aaddch(mt_get_glyph(player_memory_of(p, pos).type), FUSCOUS_GREY, 0);
                 }
             }
 
@@ -2332,7 +2332,7 @@ position display_get_new_position(player *p,
                         }
 
                         move(Y(cursor), X(cursor));
-                        aaddch(COLOR_PAIR(fg), glyph);
+                        aaddch(glyph, COLOR_PAIR(fg), 0);
                     }
                 }
             }
@@ -2641,7 +2641,7 @@ int display_show_message(const char *title, const char *message, int indent)
             /* erase to the end of the line (spare the borders of the window) */
             for (int pos = getcurx(mwin->window); pos < getmaxx(mwin->window) - 1; pos++)
             {
-                waaddch(mwin->window, currattr, ' ');
+                waaddch(mwin->window, ' ', currattr, 0);
             }
         }
 
