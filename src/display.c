@@ -44,7 +44,7 @@ static gboolean display_initialised = false;
 static GList *windows = NULL;
 
 static int mvwcprintw(WINDOW *win, int defattr, int currattr,
-        const colour bg, int y, int x, const char *fmt, ...);
+    colour bg, int y, int x, const char *fmt, ...);
 
 static void display_inventory_help(GPtrArray *callbacks);
 
