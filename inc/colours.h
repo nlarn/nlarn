@@ -19,7 +19,6 @@
 #ifndef COLOURS_H
 #define COLOURS_H
 
-#include <curses.h>
 
 #include "enumFactory.h"
 
