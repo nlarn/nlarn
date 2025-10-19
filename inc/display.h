@@ -19,6 +19,11 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+/* We want the ncurses wide character functions */
+#ifndef NCURSES_WIDECHAR
+#define NCURSES_WIDECHAR 1
+#endif
+
 #include <curses.h>
 #include <panel.h>
 #include <glib.h>

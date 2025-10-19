@@ -143,15 +143,27 @@ void display_init()
     display_initialised = true;
 }
 
-static attr_t attr_colour(colour_t colour, bool reverse)
+/* convenience helper against endless repetition */
+static int waddwach(WINDOW *win, const wchar_t ch, short color_pair, attr_t attrs)
 {
-    if (reverse)
-        return (A_REVERSE | COLOR_PAIR(colour));
+    cchar_t cchar = {0};
+    /* transform the given character into a zero-terminated string */
+    const wchar_t chs[] = { ch, 0 };
 
-    return COLOR_PAIR(colour);
+    setcchar(&cchar, chs, attrs, color_pair, NULL);
+    return wadd_wch(win, &cchar);
 }
 
-/* convenience helper against endless repetition */
+#define addwach(ch, color_pair, attrs) waddwach(stdscr, ch, color_pair, attrs)
+
+/* mvwaddch with an additional attribute parameter */
+#define mvaddwach(y, x, attrs, ch) \
+    do { \
+        attron(attrs); \
+        mvaddch(y, x, ch); \
+        attroff(attrs); \
+    } while (0)
+
 /* printw with an additional attribute parameter */
 #define aprintw(attrs, fmt, ...) \
     attron(attrs); \
@@ -218,7 +230,7 @@ void display_paint_screen(player *p)
             {
                 /* draw the truth */
                 display_cell dc = map_get_tile(vmap, pos);
-                addch(dc.glyph | attr_colour(dc.colour, dc.reversed));
+                addwach(dc.glyph, dc.colour, dc.reversed ? WA_REVERSE : 0);
             }
             else /* i.e. !fullvis && !visible: draw players memory */
             {
@@ -228,31 +240,34 @@ void display_paint_screen(player *p)
                     /* draw stationary object */
                     sobject_t ms = map_sobject_at(vmap, pos);
 
-                    gchar glyph;
+                    wchar_t glyph;
                     if (ms == LS_CLOSEDDOOR || ms == LS_OPENDOOR)
                         glyph = map_get_door_glyph(vmap, pos);
                     else
                         glyph = so_get_glyph(ms);
 
-                    addch(glyph |attr_colour(so_get_colour(ms), has_items));
+                    addwach(glyph, so_get_colour(ms), has_items ? WA_REVERSE : 0);
                 }
                 else if (has_items)
                 {
                     /* draw items */
                     const bool has_trap = (player_memory_of(p, pos).trap);
 
-                    addch(item_glyph(player_memory_of(p, pos).item)
-                        | attr_colour(player_memory_of(p, pos).item_colour, has_trap));
+                    addwach(item_glyph(
+                        player_memory_of(p, pos).item),
+                        player_memory_of(p, pos).item_colour,
+                        has_trap ? WA_REVERSE : 0
+                    );
                 }
                 else if (player_memory_of(p, pos).trap)
                 {
                     /* draw trap */
-                    addch('^' | COLOR_PAIR(trap_colour(map_trap_at(vmap, pos))));
+                    addwach('^', trap_colour(map_trap_at(vmap, pos)), 0);
                 }
                 else
                 {
                     /* draw tile */
-                    addch(mt_get_glyph(player_memory_of(p, pos).type) | COLOR_PAIR(FUSCOUS_GREY));
+                    addwach(mt_get_glyph(player_memory_of(p, pos).type), FUSCOUS_GREY, 0);
                 }
             }
 
@@ -270,7 +285,7 @@ void display_paint_screen(player *p)
                     || monster_in_sight(monst))
             {
                 position mpos = monster_pos(monst);
-                mvaddch(Y(mpos), X(mpos), monster_glyph(monst) | COLOR_PAIR(monster_color(monst)));
+                mvaddwach(Y(mpos), X(mpos), COLOR_PAIR(monster_color(monst)), monster_glyph(monst));
             }
         }
     }
@@ -293,7 +308,7 @@ void display_paint_screen(player *p)
         attrs = player_attributes;
     }
 
-    mvaddch(Y(p->pos), X(p->pos), pc | attrs);
+    mvaddwach(Y(p->pos), X(p->pos), attrs, pc);
 
 
     /* *** first status line below map *** */
@@ -2618,18 +2633,18 @@ position display_get_new_position(player *p,
                     && monster_in_sight(target))
                 {
                     /* ray is targeted at a visible monster */
-                    mvaddch(Y(tpos), X(tpos), monster_glyph(target) | attrs);
+                    mvaddwach(Y(tpos), X(tpos), attrs, monster_glyph(target));
                 }
                 else if ((m = map_get_monster_at(vmap, tpos))
                          && monster_in_sight(m))
                 {
                     /* ray sweeps over a visible monster */
-                    mvaddch(Y(tpos), X(tpos), monster_glyph(m) | attrs);
+                    mvaddwach(Y(tpos), X(tpos), attrs, monster_glyph(m));
                 }
                 else
                 {
                     /* a position with no or an invisible monster on it */
-                    mvaddch(Y(tpos), X(tpos), '*' | attrs);
+                    mvaddwach(Y(tpos), X(tpos), attrs, '*');
                 }
             } while ((iter = iter->next));
 
@@ -2650,7 +2665,7 @@ position display_get_new_position(player *p,
                     if (area_pos_get(b, cursor))
                     {
                         colour_t fg;
-                        char glyph;
+                        wchar_t glyph;
 
                         if ((m = map_get_monster_at(vmap, cursor)) && monster_in_sight(m))
                         {
@@ -2669,7 +2684,7 @@ position display_get_new_position(player *p,
                         }
 
                         move(Y(cursor), X(cursor));
-                        addch(glyph | COLOR_PAIR(fg));
+                        addwach(glyph, fg, 0);
                     }
                 }
             }
@@ -3582,6 +3597,6 @@ static void display_spheres_paint(sphere *s, player *p)
 
     if (game_fullvis(nlarn) || fov_get(p->fv, s->pos))
     {
-        mvaddch(Y(s->pos), X(s->pos), '0' | COLOR_PAIR(BRIGHT_MAGENTA));
+        mvaddwach(Y(s->pos), X(s->pos), COLOR_PAIR(BRIGHT_MAGENTA), '0');
     }
 }

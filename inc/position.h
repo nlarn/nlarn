@@ -20,6 +20,7 @@
 #define POSITION_H
 
 #include <glib.h>
+#include <wchar.h>
 
 #include "colours.h"
 #include "combat.h"
@@ -171,7 +172,7 @@ bool area_blast(position center, guint radius,
                     const damage_originator *damo,
                     area_hit_sth pos_hitfun,
                     gpointer data1, gpointer data2,
-                    char glyph, colour_t fg);
+                    wchar_t glyph, colour_t fg);
 
 /**
  * @brief Destroy a given area
