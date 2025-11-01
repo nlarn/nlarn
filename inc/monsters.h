@@ -263,7 +263,7 @@ gboolean monster_regenerate(monster *m, time_t gtime, int difficulty);
 item *get_mimic_item(monster *m);
 char *monster_desc(monster *m);
 char monster_glyph(monster *m);
-colour monster_color(monster *m);
+colour_t monster_color(monster *m);
 
 /* dealing with temporary effects */
 effect *monster_effect_add(monster *m, effect *e);

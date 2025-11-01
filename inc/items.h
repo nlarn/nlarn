@@ -70,7 +70,7 @@ typedef struct item_material_data {
     item_material_t type;
     const char *name;
     const char *adjective;
-    colour fg;
+    colour_t fg;
     guint fragility;
 } item_material_data;
 
@@ -184,7 +184,7 @@ int item_weight(item *it);
  * @param it an item
  * @return the coulour
  */
-colour item_colour(item *it);
+colour_t item_colour(item *it);
 
 
 /*

@@ -28,7 +28,7 @@ typedef struct gem_data
 {
     gem_t id;
     const char *name;
-    colour fg;
+    colour_t fg;
     int price;          /* price per carat in the shops */
 } gem_data;
 
@@ -47,7 +47,7 @@ const char *gem_name(const item *gem)
     return gems[gem->id].name;
 }
 
-colour gem_colour(const item *gem)
+colour_t gem_colour(const item *gem)
 {
     g_assert(gem->type == IT_GEM && gem->id < GT_MAX);
     return gems[gem->id].fg;

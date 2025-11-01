@@ -110,7 +110,7 @@ static struct _monster_breath_data
 {
     const char *desc;
     const char glyph;
-    colour fg;
+    colour_t fg;
 } monster_breath_data[] =
 {
     { NULL, 0, 0 },                                 /* DAM_NONE */
@@ -2685,7 +2685,7 @@ char monster_glyph(monster *m)
     }
 }
 
-colour monster_color(monster *m)
+colour_t monster_color(monster *m)
 {
     g_assert (m != NULL);
 

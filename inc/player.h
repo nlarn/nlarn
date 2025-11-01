@@ -88,7 +88,7 @@ typedef struct player_tile_memory
     map_tile_t type;
     sobject_t sobject;
     item_t item;            /* type of item located here */
-    colour item_colour;     /* colour of item located here */
+    colour_t item_colour;   /* colour of item located here */
     trap_t trap;
 } player_tile_memory;
 

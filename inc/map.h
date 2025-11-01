@@ -89,7 +89,7 @@ typedef struct map_tile_data
 {
     map_tile_t tile;
     const char glyph;
-    colour colour;
+    colour_t colour;
     const char *description;
     bool
         passable:    1,     /* can be passed */
@@ -176,7 +176,7 @@ gboolean map_trajectory(position source, position target,
         const damage_originator *damo,
         trajectory_hit_sth pos_hitfun,
         gpointer data1, gpointer data2, gboolean reflectable,
-        char glyph, colour fg, gboolean keep_ray);
+        char glyph, colour_t fg, gboolean keep_ray);
 
 /**
  * @brief Get an area of defined dimensions with all blocked positions set.

@@ -94,7 +94,7 @@ typedef struct spell_data {
     const char *description;  /* the spell's description */
     const char *msg_success;  /* the message given upon success */
     const char *msg_fail;     /* the message give upon failure */
-    colour fg;                /* the colour of visible spells */
+    colour_t fg;              /* the colour of visible spells */
     int level;                /* level of the spell */
     int price;                /* price of the book*/
     bool
@@ -192,7 +192,7 @@ gboolean spell_vaporize_rock(spell *s, struct player *p);
 
 char *book_desc(spell_id book_id);
 int book_weight(item *book);
-colour book_colour(item *book);
+colour_t book_colour(item *book);
 item_usage_result book_read(struct player *p, item *book);
 
 #define book_type_obtainable(id) (spells[id].obtainable)

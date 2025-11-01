@@ -34,7 +34,7 @@ DECLARE_ENUM(gem_t, GEM_TYPE_ENUM)
 /* functions */
 
 const char *gem_name(const item *gem);
-colour gem_colour(const item *gem);
+colour_t gem_colour(const item *gem);
 int gem_weight(const item *gem);
 int gem_price(const item *gem);
 int gem_size(const item *gem);

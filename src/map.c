@@ -214,7 +214,7 @@ cJSON *map_serialize(map *m)
             if (m->grid[y][x].spill)
             {
                 cJSON_AddStringToObject(tile, "spill",
-                        colour_string(m->grid[y][x].spill));
+                        colour_t_string(m->grid[y][x].spill));
             }
 
             if (m->grid[y][x].spilltime)
@@ -275,7 +275,7 @@ map *map_deserialize(cJSON *mser)
 
             obj = cJSON_GetObjectItem(tile, "spill");
             if (obj != NULL) m->grid[y][x].spill =
-                colour_value(obj->valuestring);
+                colour_t_value(obj->valuestring);
 
             obj = cJSON_GetObjectItem(tile, "spilltime");
             if (obj != NULL) m->grid[y][x].spilltime = obj->valueint;
@@ -689,7 +689,7 @@ gboolean map_trajectory(position source, position target,
                         const damage_originator * const damo,
                         trajectory_hit_sth pos_hitfun,
                         gpointer data1, gpointer data2, gboolean reflectable,
-                        char glyph, colour fg, gboolean keep_ray)
+                        char glyph, colour_t fg, gboolean keep_ray)
 {
     g_assert(pos_valid(source) && pos_valid(target));
 

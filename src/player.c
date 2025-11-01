@@ -4603,7 +4603,7 @@ static cJSON *player_memory_serialize(player *p, position pos)
 
     if (player_memory_of(p, pos).item_colour > 0)
         cJSON_AddStringToObject(mser, "item_colour",
-                colour_string(player_memory_of(p, pos).item_colour));
+                colour_t_string(player_memory_of(p, pos).item_colour));
 
     if (player_memory_of(p, pos).trap > TT_NONE)
         cJSON_AddStringToObject(mser, "trap",
@@ -4628,7 +4628,7 @@ static void player_memory_deserialize(player *p, position pos, cJSON *mser)
 
     obj = cJSON_GetObjectItem(mser, "item_colour");
     if (obj != NULL)
-        player_memory_of(p, pos).item_colour = colour_value(obj->valuestring);
+        player_memory_of(p, pos).item_colour = colour_t_value(obj->valuestring);
 
     obj = cJSON_GetObjectItem(mser, "trap");
     if (obj != NULL)

@@ -171,7 +171,7 @@ gboolean area_blast(position center, guint radius,
                     const damage_originator *damo,
                     area_hit_sth pos_hitfun,
                     gpointer data1, gpointer data2,
-                    char glyph, colour fg);
+                    char glyph, colour_t fg);
 
 /**
  * @brief Destroy a given area

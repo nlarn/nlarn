@@ -69,7 +69,7 @@ typedef struct potion_data {
 /* function declarations */
 
 char *potion_desc(potion_t potion_id);
-colour potion_colour(potion_t potion_id);
+colour_t potion_colour(potion_t potion_id);
 int potion_throw(struct player *p);
 item_usage_result potion_quaff(struct player *p, item *potion);
 

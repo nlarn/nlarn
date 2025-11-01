@@ -22,7 +22,7 @@
 #include "colours.h"
 #include "enumFactory.h"
 
-DEFINE_ENUM(colour, COLOUR_ENUM)
+DEFINE_ENUM(colour_t, COLOUR_ENUM)
 DEFINE_ENUM(ui_colour_scheme, UI_COLOUR_SCHEME_ENUM)
 
 // Colour pair initialisation
@@ -129,7 +129,7 @@ int colour_lookup(const char *colour_name, int bg) {
         if (!strcmp(colour_name, "TITLE")) return UI_TITLE;
         if (!strcmp(colour_name, "KEY"))   return UI_KEY;
     } else if (bg == PF_BG) {
-        return colour_value(colour_name);
+        return colour_t_value(colour_name);
     }
 
     return 0;

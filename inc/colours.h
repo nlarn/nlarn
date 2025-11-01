@@ -280,7 +280,7 @@
     COLOUR(PLATINUM,) /* 89% */ \
     COLOUR(GREY93,) \
 
-DECLARE_ENUM(colour, COLOUR_ENUM)
+DECLARE_ENUM(colour_t, COLOUR_ENUM)
 
 /* default background colour for the playing field */
 #define PF_BG BLACK

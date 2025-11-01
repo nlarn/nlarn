@@ -1098,7 +1098,7 @@ int item_weight(item *it)
     return weight;
 }
 
-colour item_colour(item *it)
+colour_t item_colour(item *it)
 {
     g_assert(it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 

@@ -41,7 +41,7 @@ typedef struct trap_data
 {
     trap_t type;             /* trap type */
     int effect_t;            /* effect caused by this trap */
-    colour fg;               /* glyph color */
+    colour_t fg;             /* glyph color */
     int chance;              /* chance this trap triggers */
     int effect_chance;       /* chance the effect is activated */
     int damage;              /* base damage */

@@ -61,7 +61,7 @@ typedef struct sobject_data
 {
     sobject_t sobject;
     const char glyph;
-    colour fg;
+    colour_t fg;
     const char *description;
     bool
         passable:     1,   /* can be passed */
@@ -75,7 +75,7 @@ static inline char so_get_glyph(const sobject_t s)
     return sobjects[s].glyph;
 }
 
-static inline colour so_get_colour(const sobject_t s)
+static inline colour_t so_get_colour(const sobject_t s)
 {
     return sobjects[s].fg;
 }

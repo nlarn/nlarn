@@ -72,7 +72,7 @@ static gboolean potion_pos_hit(const GList *traj,
 struct potion_obfuscation_s
 {
     const char* desc;
-    const colour fg;
+    const colour_t fg;
 }
 potion_obfuscation[PO_MAX] =
 {
@@ -110,7 +110,7 @@ char *potion_desc(potion_t potion_id)
     return (char *)potion_obfuscation[nlarn->potion_desc_mapping[potion_id]].desc;
 }
 
-colour potion_colour(potion_t potion_id)
+colour_t potion_colour(potion_t potion_id)
 {
     g_assert(potion_id < PO_MAX);
     return potion_obfuscation[nlarn->potion_desc_mapping[potion_id]].fg;

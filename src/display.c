@@ -44,7 +44,7 @@ static gboolean display_initialised = false;
 static GList *windows = NULL;
 
 static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
-                      colour bg, int y, int x, const char *fmt, ...);
+                      colour_t bg, int y, int x, const char *fmt, ...);
 
 static void display_inventory_help(GPtrArray *callbacks);
 
@@ -2312,7 +2312,7 @@ position display_get_new_position(player *p,
                 {
                     if (area_pos_get(b, cursor))
                     {
-                        colour fg;
+                        colour_t fg;
                         char glyph;
 
                         if ((m = map_get_monster_at(vmap, cursor)) && monster_in_sight(m))
@@ -2874,7 +2874,7 @@ void display_change_font()
 #endif
 
 static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
-                      const colour bg, int y, int x, const char *fmt, ...)
+                      const colour_t bg, int y, int x, const char *fmt, ...)
 {
     va_list argp;
     gchar *msg;

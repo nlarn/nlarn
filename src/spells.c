@@ -319,7 +319,7 @@ struct book_obfuscation_s
 {
     const char* desc;
     const int weight;
-    const colour fg;
+    const colour_t fg;
 }
 book_obfuscation[SP_MAX] =
 {
@@ -1381,7 +1381,7 @@ int book_weight(item *book)
     return book_obfuscation[nlarn->book_desc_mapping[book->id]].weight;
 }
 
-colour book_colour(item *book)
+colour_t book_colour(item *book)
 {
     g_assert (book != NULL && book->type == IT_BOOK);
     return book_obfuscation[nlarn->book_desc_mapping[book->id]].fg;
