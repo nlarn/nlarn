@@ -62,8 +62,8 @@ const sobject_data sobjects[LS_MAX] =
 
 static void monster_appear(monster_t type, position mpos);
 static void flood_affect_area(position pos, int radius, int type, int duration);
-static gboolean sobject_blast_hit(position pos, const damage_originator *damo,
-                                  gpointer data1, gpointer data2);
+static bool sobject_blast_hit(position pos, const damage_originator *damo,
+                              gpointer data1, gpointer data2);
 
 int player_altar_desecrate(player *p)
 {
@@ -174,7 +174,7 @@ int player_altar_pray(player *p)
         log_add_entry(nlarn->log, "The gods are displeased with you.");
 
     int afflictions = 0;
-    gboolean cured_affliction = false;
+    bool cured_affliction = false;
     switch (event)
     {
     case 8:
@@ -414,7 +414,7 @@ int player_door_close(player *p)
 
             if (m && monster_in_sight(m))
             {
-                gboolean visible = monster_in_sight(m);
+                bool visible = monster_in_sight(m);
 
                 log_add_entry(nlarn->log,
                               "You cannot close the door. %s %s is in the way.",
@@ -743,7 +743,7 @@ int player_fountain_wash(player *p)
 int player_stairs_down(player *p)
 {
     map *nlevel = NULL;
-    gboolean show_msg = false;
+    bool show_msg = false;
     map *pmap = game_map(nlarn, Z(p->pos));
     sobject_t ms = map_sobject_at(pmap, p->pos);
 
@@ -818,7 +818,7 @@ int player_stairs_down(player *p)
 int player_stairs_up(player *p)
 {
     map *nlevel = NULL;
-    gboolean show_msg = false;
+    bool show_msg = false;
     sobject_t ms = map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     if (!player_movement_possible(p))
@@ -1092,10 +1092,10 @@ static void flood_affect_area(position pos, int radius, int type, int duration)
     area_destroy(range);
 }
 
-static gboolean sobject_blast_hit(position pos,
-                                  const damage_originator *damo,
-                                  gpointer data1,
-                                  gpointer data2 __attribute__((unused)))
+static bool sobject_blast_hit(position pos,
+                              const damage_originator *damo,
+                              gpointer data1,
+                              gpointer data2 __attribute__((unused)))
 {
     damage *dam = (damage *)data1;
     map *cmap = game_map(nlarn, Z(pos));

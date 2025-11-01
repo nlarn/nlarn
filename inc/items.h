@@ -132,7 +132,7 @@ typedef struct item_type_data {
 /* function definitions */
 
 item *item_new(item_t item_type, int item_id);
-item *item_new_random(item_t item_type, gboolean finetouch);
+item *item_new_random(item_t item_type, bool finetouch);
 item *item_new_by_level(item_t item_type, int num_level);
 item *item_new_finetouch(item *it);
 item *item_copy(item *original);
@@ -151,7 +151,7 @@ item *item_deserialize(cJSON *iser, struct game *g);
  */
 int item_compare(item *a, item *b);
 
-int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id);
+int item_sort(gconstpointer a, gconstpointer b, gpointer data, bool force_id);
 
 /**
  * Describe an item.
@@ -164,7 +164,7 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id
  *        article.
  * @return a newly allocated string that should be disposed with g_free().
  */
-gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean definite);
+gchar *item_describe(item *it, bool known, bool singular, bool definite);
 
 item_material_t item_material(item *it);
 guint item_base_price(item *it);
@@ -214,7 +214,7 @@ item *item_disenchant(item *it);
  * @return the item, NULL if the item has been destroyed
  *
  */
-item *item_erode(struct inventory **inv, item *it, item_erosion_type iet, gboolean visible);
+item *item_erode(struct inventory **inv, item *it, item_erosion_type iet, bool visible);
 
 int item_obtainable(item_t type, guint id);
 
@@ -226,7 +226,7 @@ int item_obtainable(item_t type, guint id);
  * @param shop show the item price
  * @return A newly allocated string that must be freed in the calling function.
  */
-char *item_detailed_description(item *it, gboolean known, gboolean shop);
+char *item_detailed_description(item *it, bool known, bool shop);
 
 /* external vars */
 extern const item_type_data item_data[IT_MAX];
@@ -299,6 +299,6 @@ int item_filter_blank_scroll(item *it);
  * @param it A pointer to an item.
  * @return true if the item is unique.
  */
-gboolean item_is_unique(item *it);
+bool item_is_unique(item *it);
 
 #endif

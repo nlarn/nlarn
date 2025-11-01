@@ -80,7 +80,7 @@ typedef enum player_sex
 
 typedef struct player_settings
 {
-    gboolean auto_pickup[IT_MAX]; /* automatically pick up item of enabled types */
+    bool auto_pickup[IT_MAX]; /* automatically pick up item of enabled types */
 } player_settings;
 
 typedef struct player_tile_memory
@@ -173,7 +173,7 @@ typedef struct player
     GArray *sobjmem;
 
     /* flag to store if the player has been attacked during the current turn */
-    gboolean attacked;
+    bool attacked;
 
     /* courses available in school */
     gint school_courses_taken[SCHOOL_COURSE_COUNT];
@@ -221,7 +221,7 @@ char player_select_bonus_stats();
  * @param preset the preset (between 'a' and 'f')
  * @return true for valid presets, false for invalid presets
  */
-gboolean player_assign_bonus_stats(player *p, char preset);
+bool player_assign_bonus_stats(player *p, char preset);
 void player_destroy(player *p);
 
 cJSON *player_serialize(player *p);
@@ -238,7 +238,7 @@ player *player_deserialize(cJSON *pser);
  * @return true if the action has completed, false if it has been interrupted
  *
  */
-gboolean player_make_move(player *p, guint turns, gboolean interruptible, const char *desc, ...);
+bool player_make_move(player *p, guint turns, bool interruptible, const char *desc, ...);
 
 /**
  * Kill the player
@@ -251,8 +251,8 @@ gboolean player_make_move(player *p, guint turns, gboolean interruptible, const 
 void player_die(player *p, player_cod cause_type, int cause);
 
 guint64 player_calc_score(player *p, int won);
-gboolean player_movement_possible(player *p);
-int player_move(player *p, direction dir, gboolean open_door);
+bool player_movement_possible(player *p);
+int player_move(player *p, direction dir, bool open_door);
 int player_attack(player *p, monster *m);
 void player_update_fov(player *p);
 
@@ -265,7 +265,7 @@ void player_update_fov(player *p);
  *      regularly. Sets a random starting point.
  * @return true
  */
-int player_map_enter(player *p, map *l, gboolean teleported);
+int player_map_enter(player *p, map *l, bool teleported);
 
 /**
  * Choose a random armour the player is wearing.
@@ -294,7 +294,7 @@ int player_hp_lose(player *p, int count, player_cod cause_type, int cause);
  * @param p the player
  * @return result of evasion attempt
  */
-gboolean player_evade(player *p);
+bool player_evade(player *p);
 
 /**
  * Inflict damage upon the player
@@ -389,7 +389,7 @@ void player_item_unequip_wrapper(player *p, inventory **inv, item *it);
 void player_item_unequip(player *p,
                          inventory **inv __attribute__((unused)),
                          item *it,
-                         gboolean forced);
+                         bool forced);
 
 int player_item_is_container(player *p, item *it);
 int player_item_can_be_added_to_container(player *p, item *it);
@@ -475,7 +475,7 @@ void player_sobject_forget(player *p, position pos);
   *
   * @return true if there are adjacent monsters.
   */
-gboolean player_adjacent_monster(player *p, gboolean ignore_harmless);
+bool player_adjacent_monster(player *p, bool ignore_harmless);
 
 /* fighting simulation */
 void calc_fighting_stats(player *p);

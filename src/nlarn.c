@@ -80,7 +80,7 @@ struct game_config config = {};
 /* death jump buffer - used to return to the main loop when the player has died */
 jmp_buf nlarn_death_jump;
 
-static gboolean adjacent_corridor(position pos, int move);
+static bool adjacent_corridor(position pos, int move);
 
 #ifdef __unix
 static void nlarn_signal_handler(int signo);
@@ -308,7 +308,7 @@ static void mainloop()
 
     int run_cmd = 0;
     int ch = 0;
-    gboolean adj_corr = false;
+    bool adj_corr = false;
     guint end_resting = 0;
 
     /* main event loop
@@ -978,8 +978,8 @@ static void mainloop()
             break;
         }
 
-        gboolean no_move = (moves_count == 0);
-        gboolean was_attacked = false;
+        bool no_move = (moves_count == 0);
+        bool was_attacked = false;
 
         /* manipulate game time */
         if (moves_count)
@@ -1035,7 +1035,7 @@ static void mainloop()
     }
 }
 
-gboolean main_menu()
+bool main_menu()
 {
     const char *main_menu_tpl =
         "\n"
@@ -1173,7 +1173,7 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-static gboolean adjacent_corridor(position pos, int move)
+static bool adjacent_corridor(position pos, int move)
 {
     position p1 = pos, p2 = pos;
     switch (move)

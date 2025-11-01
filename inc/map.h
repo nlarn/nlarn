@@ -105,7 +105,7 @@ typedef struct map
 } map;
 
 /* callback function for trajectories */
-typedef gboolean (*trajectory_hit_sth)(const GList *trajectory,
+typedef bool (*trajectory_hit_sth)(const GList *trajectory,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
@@ -119,19 +119,19 @@ map *map_deserialize(cJSON *mser);
 char *map_dump(map *m, position ppos);
 
 position map_find_space(map *m, map_element_t element,
-                        gboolean dead_end);
+                        bool dead_end);
 
 position map_find_space_in(map *m,
                            rectangle where,
                            map_element_t element,
-                           gboolean dead_end);
+                           bool dead_end);
 
 position map_find_sobject(map *m, sobject_t sobject);
 
-gboolean map_pos_validate(map *m,
+bool map_pos_validate(map *m,
                           position pos,
                           map_element_t element,
-                          gboolean dead_end);
+                          bool dead_end);
 
 void map_item_add(map *m, item *it);
 
@@ -172,11 +172,11 @@ GList *map_ray(map *m, position source, position target);
  *
  * @return true if one of the callbacks returned true.
  */
-gboolean map_trajectory(position source, position target,
+bool map_trajectory(position source, position target,
         const damage_originator *damo,
         trajectory_hit_sth pos_hitfun,
-        gpointer data1, gpointer data2, gboolean reflectable,
-        char glyph, colour_t fg, gboolean keep_ray);
+        gpointer data1, gpointer data2, bool reflectable,
+        char glyph, colour_t fg, bool keep_ray);
 
 /**
  * @brief Get an area of defined dimensions with all blocked positions set.
@@ -188,11 +188,11 @@ gboolean map_trajectory(position source, position target,
  *
  * @return A freshly allocated area with all impassable positions set.
  */
-area *map_get_obstacles(map *m, position center, int radius, gboolean doors);
+area *map_get_obstacles(map *m, position center, int radius, bool doors);
 
 void map_set_tiletype(map *m, area *area, map_tile_t type, guint8 duration);
 
-damage *map_tile_damage(map *m, position pos, gboolean flying);
+damage *map_tile_damage(map *m, position pos, bool flying);
 
 /**
  * @brief Creates description of items on the floor for a given position.
@@ -215,7 +215,7 @@ monster *map_get_monster_at(map *m, position pos);
  */
 void map_fill_with_life(map *m);
 
-gboolean map_is_exit_at(map *m, position pos);
+bool map_is_exit_at(map *m, position pos);
 
 /**
  * Process temporary effects for a map.
@@ -331,7 +331,7 @@ static inline void map_set_monster_at(map *m, const position pos, monster *monst
     m->grid[Y(pos)][X(pos)].m_oid = (monst != NULL) ? monster_oid(monst) : NULL;
 }
 
-static inline gboolean map_is_monster_at(map *m, const position pos)
+static inline bool map_is_monster_at(map *m, const position pos)
 {
     g_assert(m != NULL);
     return ((map_get_monster_at(m, pos) != NULL));
@@ -352,12 +352,12 @@ static inline const char *mt_get_desc(const map_tile_t t)
     return map_tiles[t].description;
 }
 
-static inline gboolean mt_is_passable(const map_tile_t t)
+static inline bool mt_is_passable(const map_tile_t t)
 {
     return map_tiles[t].passable;
 }
 
-static inline gboolean mt_is_transparent(const map_tile_t t)
+static inline bool mt_is_transparent(const map_tile_t t)
 {
     return map_tiles[t].transparent;
 }
@@ -367,13 +367,13 @@ static inline const char *map_name(map *m)
     return map_names[m->nlevel];
 }
 
-static inline gboolean map_pos_transparent(const map *m, const position pos)
+static inline bool map_pos_transparent(const map *m, const position pos)
 {
     return mt_is_transparent(m->grid[Y(pos)][X(pos)].type)
         && so_is_transparent(m->grid[Y(pos)][X(pos)].sobject);
 }
 
-static inline gboolean map_pos_passable(const map *m, const position pos)
+static inline bool map_pos_passable(const map *m, const position pos)
 {
     return mt_is_passable(m->grid[Y(pos)][X(pos)].type)
         && so_is_passable(m->grid[Y(pos)][X(pos)].sobject);

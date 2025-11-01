@@ -137,7 +137,7 @@ area *area_new(int start_x, int start_y, int size_x, int size_y);
  * @param hollow true if the circle shall not be filled
  * @return a new area.
  */
-area *area_new_circle(position center, guint radius, gboolean hollow);
+area *area_new_circle(position center, guint radius, bool hollow);
 
 /**
  * Draw a circle with every unobstructed point inside it set.
@@ -150,8 +150,8 @@ area *area_new_circle(position center, guint radius, gboolean hollow);
 area *area_new_circle_flooded(position center, guint radius, area *obstacles);
 
 /* callback function for blasts */
-typedef gboolean (*area_hit_sth)(position pos, const damage_originator *damo,
-                                 gpointer data1, gpointer data2);
+typedef bool (*area_hit_sth)(position pos, const damage_originator *damo,
+                             gpointer data1, gpointer data2);
 
 /**
  * Affect an area by a blast.
@@ -167,7 +167,7 @@ typedef gboolean (*area_hit_sth)(position pos, const damage_originator *damo,
  *
  * @return true if one of the callbacks returned true.
  */
-gboolean area_blast(position center, guint radius,
+bool area_blast(position center, guint radius,
                     const damage_originator *damo,
                     area_hit_sth pos_hitfun,
                     gpointer data1, gpointer data2,

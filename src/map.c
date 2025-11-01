@@ -34,7 +34,7 @@ static int map_fill_with_stationary_objects(map *maze);
 static void map_fill_with_objects(map *m);
 static void map_fill_with_traps(map *m);
 
-static gboolean map_load_from_file(map *m, const char *mazefile, guint which);
+static bool map_load_from_file(map *m, const char *mazefile, guint which);
 static void map_make_maze(map *m, int treasure_room);
 static void map_make_maze_eat(map *m, int x, int y);
 static void map_make_river(map *m, map_tile_t rivertype);
@@ -85,29 +85,29 @@ const char *map_names[MAP_MAX] =
     "V3"
 };
 
-static gboolean is_town(int nlevel)
+static bool is_town(int nlevel)
 {
     return (nlevel == 0);
 }
 
-static gboolean is_caverns_bottom(int nlevel)
+static bool is_caverns_bottom(int nlevel)
 {
     return (nlevel == MAP_CMAX - 1);
 }
 
-static gboolean is_volcano_bottom(int nlevel)
+static bool is_volcano_bottom(int nlevel)
 {
     return (nlevel == MAP_MAX - 1);
 }
 
-static gboolean is_volcano_map(int nlevel)
+static bool is_volcano_map(int nlevel)
 {
     return (nlevel >= MAP_CMAX);
 }
 
 map *map_new(int num, const char *mazefile)
 {
-    gboolean map_loaded = false;
+    bool map_loaded = false;
 
     map *nmap = nlarn->maps[num] = g_malloc0(sizeof(map));
     nmap->nlevel = num;
@@ -136,10 +136,10 @@ map *map_new(int num, const char *mazefile)
     if (!map_loaded)
     {
         /* determine if to add treasure room */
-        gboolean treasure_room = num > 1 && chance(25);
+        bool treasure_room = num > 1 && chance(25);
 
         /* generate random map */
-        gboolean keep_maze = true;
+        bool keep_maze = true;
         do
         {
             /* dig cave */
@@ -359,7 +359,7 @@ void map_destroy(map *m)
 }
 
 /* return coordinates of a free space */
-position map_find_space(map *m, map_element_t element, gboolean dead_end)
+position map_find_space(map *m, map_element_t element, bool dead_end)
 {
     rectangle entire_map = rect_new(1, 1, MAP_MAX_X - 2, MAP_MAX_Y - 2);
     return map_find_space_in(m, entire_map, element, dead_end);
@@ -368,7 +368,7 @@ position map_find_space(map *m, map_element_t element, gboolean dead_end)
 position map_find_space_in(map *m,
                            rectangle where,
                            map_element_t element,
-                           gboolean dead_end)
+                           bool dead_end)
 {
     position pos = pos_invalid;
     int iteration = 0;
@@ -444,8 +444,8 @@ position map_find_sobject(map *m, sobject_t sobject)
     return pos_invalid;
 }
 
-gboolean map_pos_validate(map *m, position pos, map_element_t element,
-                          int dead_end)
+bool map_pos_validate(map *m, position pos, map_element_t element,
+                          bool dead_end)
 {
     g_assert(m != NULL && element < LE_MAX);
 
@@ -685,11 +685,11 @@ GList *map_ray(map *m, position source, position target)
     return ray;
 }
 
-gboolean map_trajectory(position source, position target,
+bool map_trajectory(position source, position target,
                         const damage_originator * const damo,
                         trajectory_hit_sth pos_hitfun,
-                        gpointer data1, gpointer data2, gboolean reflectable,
-                        char glyph, colour_t fg, gboolean keep_ray)
+                        gpointer data1, gpointer data2, bool reflectable,
+                        char glyph, colour_t fg, bool keep_ray)
 {
     g_assert(pos_valid(source) && pos_valid(target));
 
@@ -706,7 +706,7 @@ gboolean map_trajectory(position source, position target,
     /* follow the ray to determine if it hits something */
     do
     {
-        gboolean result = false;
+        bool result = false;
         position cursor;
         pos_val(cursor) = GPOINTER_TO_UINT(iter->data);
 
@@ -762,7 +762,7 @@ gboolean map_trajectory(position source, position target,
     return false;
 }
 
-area *map_get_obstacles(map *m, position center, int radius, gboolean doors)
+area *map_get_obstacles(map *m, position center, int radius, bool doors)
 {
     position pos = pos_invalid;
     int x, y;
@@ -847,7 +847,7 @@ void map_set_tiletype(map *m, area *ar, map_tile_t type, guint8 duration)
     }
 }
 
-damage *map_tile_damage(map *m, position pos, gboolean flying)
+damage *map_tile_damage(map *m, position pos, bool flying)
 {
     g_assert (m != NULL && pos_valid(pos));
 
@@ -932,7 +932,7 @@ char *map_pos_examine(position pos)
     g_string_append_printf(desc, "%s. ", tmp);
     g_free(tmp);
 
-    gboolean has_mimic = false;
+    bool has_mimic = false;
     /* add description of monster, if there is one on the tile */
     if ((monst = map_get_monster_at(cm, pos)))
     {
@@ -1018,7 +1018,7 @@ void map_fill_with_life(map *m)
     }
 }
 
-gboolean map_is_exit_at(map *m, position pos)
+bool map_is_exit_at(map *m, position pos)
 {
     g_assert (m != NULL && pos_valid(pos));
 
@@ -1179,7 +1179,7 @@ display_cell map_get_tile(map *m, position pos)
     display_cell dc = {};
 
     inventory **inv = map_ilist_at(m, pos);
-    const gboolean has_items = inv_length(*inv) > 0;
+    const bool has_items = inv_length(*inv) > 0;
 
     if (map_sobject_at(m, pos))
     {
@@ -1422,7 +1422,7 @@ static void map_fill_with_traps(map *m)
     g_assert(m != NULL);
 
     /* Trapdoor cannot be placed in the last caverns map and the last volcano map */
-    gboolean trapdoor = (!is_caverns_bottom(m->nlevel)
+    bool trapdoor = (!is_caverns_bottom(m->nlevel)
             && !is_volcano_bottom(m->nlevel));
 
     for (guint count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
@@ -1437,7 +1437,7 @@ static void map_make_maze(map *m, int treasure_room)
 {
     position pos = pos_invalid;
     rectangle **rooms = NULL;
-    gboolean want_monster = false;
+    bool want_monster = false;
 
     g_assert (m != NULL);
 
@@ -1771,7 +1771,7 @@ static void place_special_item(map *m, position npos)
  *      !   potion of cure dianthroritis, or the amulet of larn, as appropriate
  *      o   random object
  */
-static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
+static bool map_load_from_file(map *m, const char *mazefile, guint which)
 {
     position pos;       /* current position on map */
     int map_num = 0;    /* number of selected map */
@@ -1845,8 +1845,8 @@ static gboolean map_load_from_file(map *m, const char *mazefile, guint which)
     }
 
     // Sometimes flip the maps. (Never the town)
-    gboolean flip_vertical   = (map_num > 0 && chance(50));
-    gboolean flip_horizontal = (map_num > 0 && chance(50));
+    bool flip_vertical   = (map_num > 0 && chance(50));
+    bool flip_horizontal = (map_num > 0 && chance(50));
 
     /* replace which of 3 '!' with a special item? (if appropriate) */
     int spec_count = rand_0n(3);

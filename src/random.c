@@ -91,7 +91,7 @@ uint32_t next(void) {
 
 /* end xoshiro128starstar.c excerpt */
 
-static gboolean seeded = false;
+static bool seeded = false;
 
 /* initialize RNG */
 static void rand_seed()

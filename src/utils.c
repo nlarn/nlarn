@@ -266,7 +266,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
     while (spos < strlen(str))
     {
         /* flag to determine if the current char must not be counted */
-        gboolean in_tag = false;
+        bool in_tag = false;
 
         /* current working position in source string */
         int cpos = 0;
@@ -426,7 +426,7 @@ size_t strv_append_unique(char ***list, const char *str)
 char *str_strip(const char *str)
 {
     /* strip color tags from str */
-    gboolean in_tag = false;
+    bool in_tag = false;
 
     /* alloc the size of the original string to avoid permanent reallocations */
     GString *stripped = g_string_sized_new(strlen(str));

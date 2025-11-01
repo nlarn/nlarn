@@ -25,7 +25,7 @@
 #include "position.h"
 
 static void fov_calculate_octant(fov *fv, map *m, position center,
-                                 gboolean infravision, int row,
+                                 bool infravision, int row,
                                  float start, float end, int radius,
                                  int xx, int xy, int yx, int yy);
 
@@ -57,7 +57,7 @@ fov *fov_new()
  * ported from python to c using the example at
  * http://roguebasin.roguelikedevelopment.org/index.php?title=Python_shadowcasting_implementation
  */
-void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravision)
+void fov_calculate(fov *fv, map *m, position pos, int radius, bool infravision)
 {
     const int mult[4][8] =
     {
@@ -85,7 +85,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
     fov_set(fv, pos, true, infravision, true);
 }
 
-gboolean fov_get(const fov *fv, position pos)
+bool fov_get(const fov *fv, position pos)
 {
     g_assert (fv != NULL);
     g_assert (pos_valid(pos));
@@ -94,7 +94,7 @@ gboolean fov_get(const fov *fv, position pos)
 }
 
 void fov_set(fov *fv, position pos, guchar visible,
-             gboolean infravision, gboolean check_monster)
+             bool infravision, bool check_monster)
 {
     g_assert (fv != NULL);
     g_assert (pos_valid(pos));
@@ -177,7 +177,7 @@ void fov_free(fov *fv)
 }
 
 static void fov_calculate_octant(fov *fv, map *m, position center,
-                                 gboolean infravision, int row,
+                                 bool infravision, int row,
                                  float start, float end, int radius,
                                  int xx, int xy, int yx, int yy)
 {

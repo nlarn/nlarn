@@ -309,7 +309,7 @@ guint trap_disarm(struct player *p)
 {
     map *cmap = game_map(nlarn, Z(p->pos));
     trap_t tt = map_trap_at(cmap, p->pos);
-    gboolean magical_trap = (tt == TT_TELEPORT || tt == TT_MANADRAIN);
+    bool magical_trap = (tt == TT_TELEPORT || tt == TT_MANADRAIN);
 
     if (tt == TT_NONE)
     {

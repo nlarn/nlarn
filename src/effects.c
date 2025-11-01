@@ -684,13 +684,13 @@ guint effect_type_duration(effect_t type)
     return effects[type].duration;
 }
 
-gboolean effect_type_inc_duration(effect_t type)
+bool effect_type_inc_duration(effect_t type)
 {
     g_assert(type < ET_MAX);
     return effects[type].inc_duration;
 }
 
-gboolean effect_type_inc_amount(effect_t type)
+bool effect_type_inc_amount(effect_t type)
 {
     g_assert(type < ET_MAX);
     return effects[type].inc_amount;
@@ -741,7 +741,7 @@ effect *effect_add(GPtrArray *ea, effect *ne)
     /* check for existing effects unless the effect belongs to an item */
     if (!ne->item && (e = effect_get(ea, ne->type)))
     {
-        gboolean modified_existing = false;
+        bool modified_existing = false;
 
         /* if the effect's duration can be extended, reset it */
         if (effects[e->type].inc_duration)

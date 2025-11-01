@@ -45,7 +45,7 @@ static inline guint32 rand_1n(const guint32 n)
     return (n <= 1) ? 1 : rand_m_n(1, n);
 }
 
-static inline gboolean chance(const guint32 percent)
+static inline bool chance(const guint32 percent)
 {
     g_assert(percent < 101);
     return (percent >= rand_1n(101));

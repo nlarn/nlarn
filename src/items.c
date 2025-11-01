@@ -252,7 +252,7 @@ item *item_new(item_t item_type, int item_id)
     return nitem;
 }
 
-item *item_new_random(item_t item_type, gboolean finetouch)
+item *item_new_random(item_t item_type, bool finetouch)
 {
     g_assert(item_type > IT_NONE && item_type < IT_MAX);
 
@@ -642,7 +642,7 @@ int item_compare(item *a, item *b)
     return result;
 }
 
-int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id)
+int item_sort(gconstpointer a, gconstpointer b, gpointer data, bool force_id)
 {
     gint order;
     item *item_a = game_item_get(nlarn, *((gpointer**)a));
@@ -663,7 +663,7 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, gboolean force_id
     return order;
 }
 
-gchar *item_describe(item *it, gboolean known, gboolean singular, gboolean definite)
+gchar *item_describe(item *it, bool known, bool singular, bool definite)
 {
     GString *desc = g_string_new(NULL);
 
@@ -1222,7 +1222,7 @@ item *item_enchant(item *it)
     if (it->bonus == 3)
     {
         /* hide bonus from description */
-        gboolean bonus_known = it->bonus_known;
+        bool bonus_known = it->bonus_known;
         it->bonus_known = false;
 
         gchar *desc = item_describe(it, player_item_known(nlarn->p, it),
@@ -1310,9 +1310,9 @@ static int material_affected(item_material_t mat, item_erosion_type iet)
     }
 }
 
-item *item_erode(inventory **inv, item *it, item_erosion_type iet, gboolean visible)
+item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
 {
-    gboolean destroyed = false;
+    bool destroyed = false;
     const char *erosion_desc = NULL;
     gchar *item_desc = NULL;
 
@@ -1491,7 +1491,7 @@ int item_obtainable(item_t type, guint id)
     return obtainable;
 }
 
-char *item_detailed_description(item *it, gboolean known, gboolean shop)
+char *item_detailed_description(item *it, bool known, bool shop)
 {
     g_assert (it != NULL);
 
@@ -1676,7 +1676,7 @@ int item_filter_blank_scroll(item *it)
     return (it->type == IT_SCROLL && it->id == ST_BLANK);
 }
 
-gboolean item_is_unique(item *it)
+bool item_is_unique(item *it)
 {
     switch (it->type)
     {

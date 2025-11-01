@@ -750,12 +750,12 @@ monster_data_t monster_data[] = {
 };
 
 static inline monster_action_t monster_default_ai(monster *m);
-static gboolean monster_player_visible(monster *m);
-static gboolean monster_attack_available(monster *m, attack_t type);
+static bool monster_player_visible(monster *m);
+static bool monster_attack_available(monster *m, attack_t type);
 static bool monster_weapon_wield(monster *m);
-static gboolean monster_item_disenchant(monster *m, struct player *p);
-static gboolean monster_item_rust(monster *m, struct player *p);
-static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type);
+static bool monster_item_disenchant(monster *m, struct player *p);
+static bool monster_item_rust(monster *m, struct player *p);
+static bool monster_player_rob(monster *m, struct player *p, item_t item_type);
 
 static position monster_find_next_pos_to(monster *m, position dest);
 static position monster_move_wander(monster *m, struct player *p);
@@ -765,7 +765,7 @@ static position monster_move_flee(monster *m, struct player *p);
 static position monster_move_serve(monster *m, struct player *p);
 static position monster_move_civilian(monster *m, struct player *p);
 
-static gboolean monster_breath_hit(const GList *traj,
+static bool monster_breath_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
@@ -1282,13 +1282,13 @@ monster_t monster_type(monster *m)
     return m->type;
 }
 
-gboolean monster_unknown(monster *m)
+bool monster_unknown(monster *m)
 {
     g_assert (m != NULL);
     return m->unknown;
 }
 
-void monster_unknown_set(monster *m, gboolean what)
+void monster_unknown_set(monster *m, bool what)
 {
     g_assert (m != NULL);
     m->unknown = what;
@@ -1300,7 +1300,7 @@ inventory **monster_inv(monster *m)
     return &m->inv;
 }
 
-static gboolean monster_nearby(monster *m)
+static bool monster_nearby(monster *m)
 {
     /* different level */
     if (Z(m->pos) != Z(nlarn->p->pos))
@@ -1309,7 +1309,7 @@ static gboolean monster_nearby(monster *m)
     return fov_get(nlarn->p->fv, m->pos);
 }
 
-gboolean monster_in_sight(monster *m)
+bool monster_in_sight(monster *m)
 {
     g_assert (m != NULL);
 
@@ -1619,7 +1619,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
 
     /* move the monster only if it is on the same map as the player or
        an adjacent map */
-    gboolean map_adjacent = (Z(mpos) == Z(g->p->pos)
+    bool map_adjacent = (Z(mpos) == Z(g->p->pos)
                              || (Z(mpos) == Z(g->p->pos) - 1)
                              || (Z(mpos) == Z(g->p->pos) + 1)
                              || (Z(mpos) == MAP_CMAX && Z(g->p->pos) == 0)
@@ -1856,7 +1856,7 @@ void monster_polymorph(monster *m)
     map_set_monster_at(monster_map(m), m->pos, NULL);
 
     /* check if the position would be valid... */
-    gboolean valid_pos = monster_valid_dest(monster_map(m), m->pos, new_elem);
+    bool valid_pos = monster_valid_dest(monster_map(m), m->pos, new_elem);
 
     /* ...and restore the monster to its position */
     map_set_monster_at(monster_map(m), m->pos, m);
@@ -1915,7 +1915,7 @@ int monster_items_pickup(monster *m)
     if (monster_effect(m, ET_LEVITATION))
         return false;
 
-    gboolean pick_up = false;
+    bool pick_up = false;
     inventory **tinv = map_ilist_at(monster_map(m), m->pos);
     for (guint idx = 0; idx < inv_length(*tinv); idx++)
     {
@@ -2261,7 +2261,7 @@ monster *monster_damage_take(monster *m, damage *dam)
     {
     case DAM_PHYSICAL:
         dam->amount -= monster_ac(m);
-        gboolean monster_bleeds = monster_flags(m, HEAD)
+        bool monster_bleeds = monster_flags(m, HEAD)
             && (!monster_flags(m, UNDEAD))
             && (!monster_flags(m, DEMON));
 
@@ -2384,9 +2384,9 @@ monster *monster_damage_take(monster *m, damage *dam)
             {
                 char *wdesc = NULL;
                 const char *old_name = monster_name(m);
-                gboolean seen_old = monster_in_sight(m);
+                bool seen_old = monster_in_sight(m);
                 m->type = MT_BRONZE_DRAGON + rand_0n(9);
-                gboolean seen_new = monster_in_sight(m);
+                bool seen_new = monster_in_sight(m);
 
                 /* Determine the new maximum hitpoints for the new monster
                    type and set the monster's current hit points to the
@@ -2452,7 +2452,7 @@ monster *monster_damage_take(monster *m, damage *dam)
     return m;
 }
 
-gboolean monster_update_action(monster *m, monster_action_t override)
+bool monster_update_action(monster *m, monster_action_t override)
 {
     monster_action_t naction; /* new action */
 
@@ -2487,7 +2487,7 @@ gboolean monster_update_action(monster *m, monster_action_t override)
 
     /* max. number of turns a monster will look for the player */
     guint mtime = monster_int(m) + 25 + (5 * game_difficulty(nlarn));
-    gboolean low_hp = (m->hp < (monster_hp_max(m) / 4));
+    bool low_hp = (m->hp < (monster_hp_max(m) / 4));
 
     if (monster_flags(m, MIMIC) && m->unknown)
     {
@@ -2537,7 +2537,7 @@ void monster_update_player_pos(monster *m, position ppos)
     m->lastseen = 1;
 }
 
-gboolean monster_regenerate(monster *m, time_t gtime, int difficulty)
+bool monster_regenerate(monster *m, time_t gtime, int difficulty)
 {
     /* temporary var for effect */
     effect *e;
@@ -2734,7 +2734,7 @@ int monster_is_genocided(monster_t monster_id)
 effect *monster_effect_add(monster *m, effect *e)
 {
     g_assert(m != NULL && e != NULL);
-    gboolean vis_effect = false;
+    bool vis_effect = false;
 
     if (e->type == ET_SLEEP && monster_flags(m, RES_SLEEP))
     {
@@ -2920,7 +2920,7 @@ static inline monster_action_t monster_default_ai(monster *m)
     return monster_data[m->type].default_ai;
 }
 
-static gboolean monster_player_visible(monster *m)
+static bool monster_player_visible(monster *m)
 {
     /* monster is blinded */
     if (monster_effect(m, ET_BLINDNESS))
@@ -2950,9 +2950,9 @@ static gboolean monster_player_visible(monster *m)
     return map_pos_is_visible(monster_map(m), m->pos, nlarn->p->pos);
 }
 
-static gboolean monster_attack_available(monster *m, attack_t type)
+static bool monster_attack_available(monster *m, attack_t type)
 {
-    gboolean available = false;
+    bool available = false;
     int pos = 1;
     int c = monster_attack_count(m);
 
@@ -3005,7 +3005,7 @@ static bool monster_weapon_wield(monster *m)
     return true;
 }
 
-static gboolean monster_item_disenchant(monster *m, struct player *p)
+static bool monster_item_disenchant(monster *m, struct player *p)
 {
     g_assert (m != NULL && p != NULL);
 
@@ -3061,7 +3061,7 @@ static gboolean monster_item_disenchant(monster *m, struct player *p)
  * @param p the player
  *
  */
-static gboolean monster_item_rust(monster *m, struct player *p)
+static bool monster_item_rust(monster *m, struct player *p)
 {
     item **it;
 
@@ -3087,7 +3087,7 @@ static gboolean monster_item_rust(monster *m, struct player *p)
     }
 }
 
-static gboolean monster_player_rob(monster *m, struct player *p, item_t item_type)
+static bool monster_player_rob(monster *m, struct player *p, item_t item_type)
 {
     item *it = NULL;
 
@@ -3134,7 +3134,7 @@ static gboolean monster_player_rob(monster *m, struct player *p, item_t item_typ
     {
         if (inv_length(p->inventory))
         {
-            gboolean was_equipped = false;
+            bool was_equipped = false;
 
             it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
             gchar *buf = item_describe(it, player_item_known(p, it), false, false);
@@ -3606,7 +3606,7 @@ inline int monster_type_reroll_chance(monster_t type)
 }
 
 
-static gboolean monster_breath_hit(const GList *traj,
+static bool monster_breath_hit(const GList *traj,
                                    const damage_originator *damo __attribute__((unused)),
                                    gpointer data1,
                                    gpointer data2 __attribute__((unused)))
@@ -3614,7 +3614,7 @@ static gboolean monster_breath_hit(const GList *traj,
     monster *m;
     damage *dam = (damage *)data1;
     item_erosion_type iet;
-    gboolean terminated = false;
+    bool terminated = false;
     position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);
     map *mp = game_map(nlarn, Z(pos));
 

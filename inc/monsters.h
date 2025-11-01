@@ -181,8 +181,8 @@ position monster_pos(monster *m);
 int monster_pos_set(monster *m, struct map *mp, position target);
 int monster_valid_dest(struct map *m, position pos, int map_elem);
 monster_t monster_type(monster *m);
-gboolean monster_unknown(monster *m);
-void monster_unknown_set(monster *m, gboolean what);
+bool monster_unknown(monster *m);
+void monster_unknown_set(monster *m, bool what);
 
 /**
  * @brief Return the monster's inventory.
@@ -192,7 +192,7 @@ void monster_unknown_set(monster *m, gboolean what);
  */
 inventory **monster_inv(monster *m);
 
-gboolean monster_in_sight(monster *m);
+bool monster_in_sight(monster *m);
 
 /** @brief Get the currently set AI action for a given monster.
   *
@@ -255,10 +255,10 @@ monster *monster_damage_take(monster *m, damage *dam);
  * @param override manually set action for a monster
  * @return true if the action has changed
  */
-gboolean monster_update_action(monster *m, monster_action_t override);
+bool monster_update_action(monster *m, monster_action_t override);
 
 void monster_update_player_pos(monster *m, position ppos);
-gboolean monster_regenerate(monster *m, time_t gtime, int difficulty);
+bool monster_regenerate(monster *m, time_t gtime, int difficulty);
 
 item *get_mimic_item(monster *m);
 char *monster_desc(monster *m);

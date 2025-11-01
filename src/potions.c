@@ -65,7 +65,7 @@ static int potion_detect_item(struct player *p, item *potion);
 static int potion_recovery(struct player *p, item *potion);
 static int potion_holy_water(player *p, item *potion);
 
-static gboolean potion_pos_hit(const GList *traj,
+static bool potion_pos_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
@@ -402,7 +402,7 @@ static int potion_detect_item(player *p, item *potion)
     {
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
-            gboolean found_item = false;
+            bool found_item = false;
             if ((inv = *map_ilist_at(pmap, pos)))
             {
                 for (guint idx = 0; idx < inv_length(inv); idx++)
@@ -500,7 +500,7 @@ static int potion_recovery(player *p, item *potion __attribute__((unused)))
 {
     g_assert (p != NULL);
 
-    gboolean success = false;
+    bool success = false;
     effect *e;
 
     for (effect_t et = ET_DEC_CON; et <= ET_DEC_WIS; et++)
@@ -571,10 +571,10 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
     return false;
 }
 
-static gboolean potion_pos_hit(const GList *traj,
-                               const damage_originator *damo __attribute__((unused)),
-                               gpointer data1,
-                               gpointer data2 __attribute__((unused)))
+static bool potion_pos_hit(const GList *traj,
+                           const damage_originator *damo __attribute__((unused)),
+                           gpointer data1,
+                           gpointer data2 __attribute__((unused)))
 {
     item *potion = (item *)data1;
     position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);

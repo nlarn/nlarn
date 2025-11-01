@@ -81,7 +81,7 @@ static inline int combat_calc_percentage(int base_to_hit)
 }
 
 // Calculate the base chance of the play to hit a monster
-static int combat_player_to_mt_base_chance_to_hit(struct player *p, enum monster_t mt, gboolean use_weapon)
+static int combat_player_to_mt_base_chance_to_hit(struct player *p, enum monster_t mt, bool use_weapon)
 {
     int base_to_hit = p->level
                        + max(0, player_get_dex(p) - 12)
@@ -98,7 +98,7 @@ static int combat_player_to_mt_base_chance_to_hit(struct player *p, enum monster
     return base_to_hit;
 }
 
-int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, gboolean use_weapon)
+int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, bool use_weapon)
 {
     g_assert (p != NULL);
 
@@ -107,7 +107,7 @@ int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, gboolean
     return combat_calc_percentage(base_to_hit);
 }
 
-int combat_chance_player_to_monster_hit(struct player *p, struct monster *m, gboolean use_weapon)
+int combat_chance_player_to_monster_hit(struct player *p, struct monster *m, bool use_weapon)
 {
     g_assert (p != NULL && m != NULL);
 

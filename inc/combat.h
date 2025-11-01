@@ -19,6 +19,7 @@
 #ifndef COMBAT_H
 #define COMBAT_H
 
+#include <stdbool.h>
 #include <glib.h>
 
 #include "enumFactory.h"
@@ -154,8 +155,8 @@ struct player;
 struct monster;
 enum monster_t;
 
-int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, gboolean use_weapon);
-int combat_chance_player_to_monster_hit(struct player *p, struct monster *m, gboolean use_weapon);
+int combat_chance_player_to_mt_hit(struct player *p, enum monster_t mt, bool use_weapon);
+int combat_chance_player_to_monster_hit(struct player *p, struct monster *m, bool use_weapon);
 
 /*
  * Calculate the minimal and maximal damage the player can cause to a given

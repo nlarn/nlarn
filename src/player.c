@@ -104,7 +104,7 @@ static const guint32 player_lvl_exp[] =
 
 /* function declarations */
 static void player_autopickup(player *p);
-static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean ask);
+static guint player_item_pickup(player *p, inventory **inv, item *it, bool ask);
 static inline void player_item_pickup_all(player *p, inventory **inv, item *it)
 {
     player_item_pickup(p, inv, it, false);
@@ -211,7 +211,7 @@ char player_select_bonus_stats()
     return selection;
 }
 
-gboolean player_assign_bonus_stats(player *p, char preset)
+bool player_assign_bonus_stats(player *p, char preset)
 {
     if (preset < preset_min || preset > preset_max)
         return false;
@@ -789,7 +789,7 @@ static void player_effects_expire(gpointer effect_id, gpointer pptr)
         /* give a warning if critical effects are about to time out */
         if (e->turns == 5)
         {
-            gboolean interrupt_actions = true;
+            bool interrupt_actions = true;
             if (e->type == ET_WALL_WALK)
                 log_add_entry(nlarn->log, "`LUMINOUS_RED`Your attunement to the walls is fading!`end`");
             else if (e->type == ET_LEVITATION)
@@ -803,7 +803,7 @@ static void player_effects_expire(gpointer effect_id, gpointer pptr)
     }
 }
 
-gboolean player_make_move(player *p, guint turns, gboolean interruptible, const char *desc, ...)
+bool player_make_move(player *p, guint turns, bool interruptible, const char *desc, ...)
 {
     int regen = 0; /* amount of regeneration */
     effect *e; /* temporary var for effect */
@@ -1228,7 +1228,7 @@ guint64 player_calc_score(player *p, int won)
     return score;
 }
 
-gboolean player_movement_possible(player *p)
+bool player_movement_possible(player *p)
 {
     /* no movement if overloaded */
     if (player_effect(p, ET_OVERSTRAINED))
@@ -1264,11 +1264,11 @@ gboolean player_movement_possible(player *p)
     return true;
 }
 
-int player_move(player *p, direction dir, gboolean open_door)
+int player_move(player *p, direction dir, bool open_door)
 {
     int times = 1;      /* how many time ticks it took */
     sobject_t so;       /* stationary object on target tile (if any) */
-    gboolean move_possible = false;
+    bool move_possible = false;
 
     g_assert(p != NULL && dir > GD_NONE && dir < GD_MAX);
 
@@ -1471,7 +1471,7 @@ int player_attack(player *p, monster *m)
     return 1; /* i.e. turns used */
 }
 
-int player_map_enter(player *p, map *l, gboolean teleported)
+int player_map_enter(player *p, map *l, bool teleported)
 {
     g_assert(p != NULL && l != NULL);
 
@@ -1848,7 +1848,7 @@ int player_hp_lose(player *p, int count, player_cod cause_type, int cause)
     return p->hp;
 }
 
-gboolean player_evade(player *p) {
+bool player_evade(player *p) {
     int evasion = p->level / ( 2 + game_difficulty(nlarn) / 2)
                   + player_get_dex(p)
                   - 10
@@ -2776,7 +2776,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
 
     item **islot = NULL;  /* pointer to chosen item slot */
     int atime = 0;        /* time the desired action takes */
-    gboolean known = player_item_known(p, it);
+    bool known = player_item_known(p, it);
     gchar *desc = item_describe(it, known, false, true);
 
     /* the idea behind the time values: one turn to take one item off,
@@ -2966,7 +2966,7 @@ void player_item_unequip_wrapper(player *p, inventory **inv, item *it)
 void player_item_unequip(player *p,
                          inventory **inv __attribute__((unused)),
                          item *it,
-                         gboolean forced)
+                         bool forced)
 {
     g_assert(p != NULL && it != NULL);
 
@@ -3474,7 +3474,7 @@ int player_item_known(player *p, item *it)
 /* determine if a concrete item is fully identified */
 int player_item_identified(player *p, item *it)
 {
-    gboolean known = false;
+    bool known = false;
 
     g_assert(p != NULL && it != NULL);
 
@@ -3731,7 +3731,7 @@ void player_item_drop(player *p, inventory **inv, item *it)
 {
     gchar *buf;
     guint count = 0;
-    gboolean split = false;
+    bool split = false;
 
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -4258,7 +4258,7 @@ void player_update_fov(player *p)
     map *pmap = game_map(nlarn, Z(p->pos));
 
     /* determine if the player has infravision */
-    gboolean infravision = player_effect(p, ET_INFRAVISION);
+    bool infravision = player_effect(p, ET_INFRAVISION);
 
     /* if player is enlightened, use a circular area around the player */
     if (player_effect(p, ET_ENLIGHTENMENT))
@@ -4284,7 +4284,7 @@ void player_update_fov(player *p)
                        to the players position. This is required to instruct fov_set()
                        if a monster at the position shall be added to the list of the
                        visible monsters. */
-                    gboolean mchk = ((pos_distance(p->pos, pos) <= 7)
+                    bool mchk = ((pos_distance(p->pos, pos) <= 7)
                                     && map_pos_is_visible(pmap, p->pos, pos));
 
                     fov_set(p->fv, pos, true, infravision, mchk);
@@ -4376,7 +4376,7 @@ void player_update_fov(player *p)
     }
 }
 
-static guint player_item_pickup(player *p, inventory **inv, item *it, gboolean ask)
+static guint player_item_pickup(player *p, inventory **inv, item *it, bool ask)
 {
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -4517,9 +4517,9 @@ void player_sobject_forget(player *p, position pos)
     }
 }
 
-gboolean player_adjacent_monster(player *p, gboolean ignore_harmless)
+bool player_adjacent_monster(player *p, bool ignore_harmless)
 {
-    gboolean monster_visible = false;
+    bool monster_visible = false;
 
     /* get the list of all visible monsters */
     GList *mlist;
@@ -4688,7 +4688,7 @@ void calc_fighting_stats(player *p)
     g_string_append_printf(text, "Monsters\n"
                            "--------\n\n");
 
-    gboolean mention_instakill = false;
+    bool mention_instakill = false;
 
     for (monster_t mt = 0; mt < MT_TOWN_PERSON; mt++)
     {
@@ -5044,7 +5044,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
     g_string_append_printf(text, "\n%3d total\n", body_count);
 
     /* genocided monsters */
-    gboolean printed_headline = false;
+    bool printed_headline = false;
     for (guint mnum = 0; mnum < MT_MAX; mnum++)
     {
         if (!monster_is_genocided(mnum))
@@ -5080,7 +5080,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
 static void player_memorial_file_save(player *p, const char *text)
 {
     char *proposal = NULL;
-    gboolean done = false;
+    bool done = false;
 
     while (!done)
     {

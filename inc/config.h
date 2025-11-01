@@ -25,8 +25,8 @@
 
 struct game_config {
     gint difficulty;
-    gboolean wizard;
-    gboolean no_autosave;
+    bool wizard;
+    bool no_autosave;
     char *name;
     char *gender;
     char *auto_pickup;
@@ -34,15 +34,15 @@ struct game_config {
     int colour_scheme;
 #ifdef SDLPDCURSES
     int font_size;
-    gboolean fullscreen;
+    bool fullscreen;
 #endif
     char *userdir;
-    gboolean show_scores;
-    gboolean show_version;
+    bool show_scores;
+    bool show_version;
 };
 
 /* configuration file reading and writing */
-gboolean parse_ini_file(const char *filename, struct game_config *config);
+bool parse_ini_file(const char *filename, struct game_config *config);
 void write_ini_file(const char *filename, struct game_config *config);
 
 /* shared config cleanup helper */
@@ -51,8 +51,8 @@ void free_config(struct game_config config);
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config);
 
-void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX]);
-char *compose_autopickup_settings(const gboolean config[IT_MAX]);
+void parse_autopickup_settings(const char *settings, bool config[IT_MAX]);
+char *compose_autopickup_settings(const bool config[IT_MAX]);
 
 /**
  * @brief Return a comma separated list of all selected item types
@@ -62,7 +62,7 @@ char *compose_autopickup_settings(const gboolean config[IT_MAX]);
  * @return NULL if no item type is selected, otherwise a comma-separated
  *         list of item type names
  */
-char *verbose_autopickup_settings(const gboolean config[IT_MAX]);
+char *verbose_autopickup_settings(const bool config[IT_MAX]);
 
 int parse_gender(char gender);
 char compose_gender(int gender);

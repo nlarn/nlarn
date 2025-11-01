@@ -680,7 +680,7 @@ static int scroll_hold_monster(player *p, item *r_scroll __attribute__((unused))
 
     position cursor = p->pos;
     monster *m;
-    gboolean success = false;
+    bool success = false;
     map *cmap = game_map(nlarn, Z(p->pos));
 
     area *obsmap = map_get_obstacles(cmap, p->pos, 2, false);
@@ -779,7 +779,7 @@ int scroll_mapping(player *p, item *r_scroll)
     map *m = game_map(nlarn, Z(p->pos));
     Z(pos) = Z(p->pos);
 
-    const gboolean map_traps = (r_scroll != NULL && r_scroll->blessed);
+    const bool map_traps = (r_scroll != NULL && r_scroll->blessed);
 
     for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
     {

@@ -231,7 +231,7 @@ area *area_new(int start_x, int start_y, int size_x, int size_y)
     return a;
 }
 
-area *area_new_circle(position center, guint radius, gboolean hollow)
+area *area_new_circle(position center, guint radius, bool hollow)
 {
     int f = 1 - radius;
     int ddF_x = 1;
@@ -296,7 +296,7 @@ area *area_new_circle(position center, guint radius, gboolean hollow)
 
     for (y = 1; y < circle->size_y - 1; y++)
     {
-        gboolean fill = false;
+        bool fill = false;
 
         for (x = 0; x < circle->size_x; x++)
         {
@@ -337,7 +337,7 @@ area *area_new_circle_flooded(position center, guint radius, area *obstacles)
     return narea;
 }
 
-gboolean area_blast(position center, guint radius,
+bool area_blast(position center, guint radius,
                     const damage_originator *damo,
                     area_hit_sth pos_hitfun,
                     gpointer data1, gpointer data2,
@@ -345,7 +345,7 @@ gboolean area_blast(position center, guint radius,
 {
     map *cmap = game_map(nlarn, Z(center));
     position cursor = center;
-    gboolean retval = false;
+    bool retval = false;
 
     area *obsmap = map_get_obstacles(cmap, center, radius, true);
     area *ball = area_new_circle_flooded(center, radius, obsmap);

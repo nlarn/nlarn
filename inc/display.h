@@ -44,7 +44,7 @@ typedef struct display_inv_callback
     inventory **inv;
     display_inv_callback_func function;
     int (*checkfun)(player *, item *);
-    gboolean active;
+    bool active;
 } display_inv_callback;
 
 typedef struct display_window
@@ -64,7 +64,7 @@ typedef struct display_cell
 {
     char glyph;
     colour_t colour;
-    gboolean reversed;
+    bool reversed;
 } display_cell;
 
 /* function declarations */
@@ -76,7 +76,7 @@ void display_shutdown();
  * @brief Check if the display system has been initialised.
  * @return true or false
  */
-gboolean display_available();
+bool display_available();
 
 /**
  * Repaint the screen.
@@ -100,13 +100,13 @@ void display_paint_screen(player *p);
  *
  */
 item *display_inventory(const char *title, player *p, inventory **inv,
-                        GPtrArray *callbacks, gboolean show_price,
-                        gboolean show_weight, gboolean show_account,
+                        GPtrArray *callbacks, bool show_price,
+                        bool show_weight, bool show_account,
                         int (*filter)(item *));
 
 void display_inv_callbacks_clean(GPtrArray *callbacks);
 
-void display_config_autopickup(gboolean settings[IT_MAX]);
+void display_config_autopickup(bool settings[IT_MAX]);
 
 spell *display_spell_select(const char *title, player *p);
 
@@ -118,20 +118,20 @@ direction display_get_direction(const char *title, int *available);
 position display_get_new_position(player *p,
                                   position start,
                                   const char *message,
-                                  gboolean ray,
-                                  gboolean ball,
-                                  gboolean travel,
+                                  bool ray,
+                                  bool ball,
+                                  bool travel,
                                   guint radius,
-                                  gboolean passable,
-                                  gboolean visible);
+                                  bool passable,
+                                  bool visible);
 
 position display_get_position(player *p,
                               const char *message,
-                              gboolean ray,
-                              gboolean ball,
+                              bool ray,
+                              bool ball,
                               guint radius,
-                              gboolean passable,
-                              gboolean visible);
+                              bool passable,
+                              bool visible);
 
 void display_show_history(message_log *log, const char *title);
 
@@ -188,7 +188,7 @@ int display_getch(WINDOW *win);
 
 #ifdef SDLPDCURSES
 /* toggle SDL fullscreen mode */
-void display_toggle_fullscreen(gboolean toggle);
+void display_toggle_fullscreen(bool toggle);
 
 /* replace font at runtime */
 void display_change_font();

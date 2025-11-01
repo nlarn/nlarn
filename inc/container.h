@@ -90,7 +90,7 @@ int container_move_content(struct player *p, inventory **inv,
   * @param p the player
   * @return true if there is a trapped container at the player's position
   */
-gboolean container_untrap(struct player *p);
+bool container_untrap(struct player *p);
 
 /* macros */
 

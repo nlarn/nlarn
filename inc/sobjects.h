@@ -85,12 +85,12 @@ static inline const char *so_get_desc(const sobject_t s)
     return sobjects[s].description;
 }
 
-static inline gboolean so_is_passable(sobject_t s)
+static inline bool so_is_passable(sobject_t s)
 {
     return sobjects[s].passable;
 }
 
-static inline gboolean so_is_transparent(sobject_t s)
+static inline bool so_is_transparent(sobject_t s)
 {
     return sobjects[s].transparent;
 }

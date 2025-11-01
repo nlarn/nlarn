@@ -34,12 +34,12 @@ const container_data containers[CT_MAX] =
     { CT_CRATE,  "crate", 65000, IM_WOOD,  100, },
 };
 
-static item *container_choose(player *p, inventory **floor, gboolean notice);
-static gboolean container_trigger_trap(player *p, item *container, gboolean force);
+static item *container_choose(player *p, inventory **floor, bool notice);
+static bool container_trigger_trap(player *p, item *container, bool force);
 
 void container_open(player *p, inventory **inv __attribute__((unused)), item *container)
 {
-    gboolean container_provided = (container == NULL);
+    bool container_provided = (container == NULL);
 
     g_assert (p != NULL);
 
@@ -120,7 +120,7 @@ void container_item_add(player *p, inventory **inv, item *element)
 {
     inventory **target_inv = NULL;
     gchar *container_desc = NULL;
-    gboolean carried_container = false;
+    bool carried_container = false;
 
     g_assert(p != NULL && element != NULL);
 
@@ -327,7 +327,7 @@ int container_move_content(player *p __attribute__((unused)), inventory **inv, i
     return count;
 }
 
-gboolean container_untrap(player *p)
+bool container_untrap(player *p)
 {
     map *m = game_map(nlarn, Z(p->pos));
     inventory **floor = map_ilist_at(m, p->pos);
@@ -383,7 +383,7 @@ gboolean container_untrap(player *p)
     return true;
 }
 
-static item *container_choose(player *p, inventory **floor, gboolean notice)
+static item *container_choose(player *p, inventory **floor, bool notice)
 {
     int count = inv_length_filtered(*floor, &item_filter_container);
 
@@ -406,7 +406,7 @@ static item *container_choose(player *p, inventory **floor, gboolean notice)
     }
 }
 
-static gboolean container_trigger_trap(player *p, item *container, gboolean force)
+static bool container_trigger_trap(player *p, item *container, bool force)
 {
     effect_t et = ET_NONE;
 

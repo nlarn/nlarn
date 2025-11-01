@@ -79,9 +79,9 @@ const weapon_data weapons[WT_MAX] =
 
 /* static functions */
 damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo);
-gboolean weapon_ammo_drop(map *m, item *ammo, const GList *traj);
+bool weapon_ammo_drop(map *m, item *ammo, const GList *traj);
 
-static gboolean weapon_pos_hit(const GList *traj,
+static bool weapon_pos_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
@@ -279,7 +279,7 @@ char *weapon_shortdesc(item *weapon, guint available_space)
         g_string_append_printf(desc, "%+d ", weapon->bonus);
     }
 
-    const gboolean need_bonus
+    const bool need_bonus
     = (weapon->burnt || weapon->corroded || weapon->rusty
        || (weapon->blessed_known
            && (weapon->blessed || weapon->cursed)));
@@ -294,7 +294,7 @@ char *weapon_shortdesc(item *weapon, guint available_space)
     {
         GString *bonus = g_string_new(NULL);
 
-        gboolean need_comma = false;
+        bool need_comma = false;
         if (weapon->burnt == 2)
         {
             g_string_append_printf(bonus, "v. burnt, ");
@@ -372,7 +372,7 @@ damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)
     return dam;
 }
 
-gboolean weapon_ammo_drop(map *m, item *ammo, const GList *traj)
+bool weapon_ammo_drop(map *m, item *ammo, const GList *traj)
 {
     /* Due to the recursive usage of this function traj may be NULL
        (e.g. when the player is wall-walking and shooting at a xorn). */
@@ -402,7 +402,7 @@ gboolean weapon_ammo_drop(map *m, item *ammo, const GList *traj)
     return true;
 }
 
-static gboolean weapon_pos_hit(const GList *traj,
+static bool weapon_pos_hit(const GList *traj,
         const damage_originator *damo __attribute__((unused)),
         gpointer data1,
         gpointer data2)
@@ -414,8 +414,8 @@ static gboolean weapon_pos_hit(const GList *traj,
     item *weapon = (item *)data1;
     item *ammo = (item *)data2;
     monster *m = map_get_monster_at(cmap, cpos);
-    gboolean retval = false;
-    gboolean ammo_handled = false;
+    bool retval = false;
+    bool ammo_handled = false;
 
     /* need a definite description for the ammo */
     gchar *adesc = item_describe(ammo, player_item_known(nlarn->p, ammo), true, true);

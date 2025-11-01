@@ -44,7 +44,7 @@ fov *fov_new();
   * @param radius the radius of vision
   * @param infravision true if the mobile has infravision.
   */
-void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravision);
+void fov_calculate(fov *fv, map *m, position pos, int radius, bool infravision);
 
 /** @brief check if a certain position is visible.
   *
@@ -53,7 +53,7 @@ void fov_calculate(fov *fv, map *m, position pos, int radius, gboolean infravisi
   *
   * @return true/false
   */
-gboolean fov_get(const fov *fv, position pos);
+bool fov_get(const fov *fv, position pos);
 
 /** @brief set visibility for a certain position.
   *
@@ -64,7 +64,7 @@ gboolean fov_get(const fov *fv, position pos);
   * @param check_monster Check for monsters at the position?
   */
 void fov_set(fov *fv, position pos, guchar visible,
-             gboolean infravision, gboolean check_monster);
+             bool infravision, bool check_monster);
 
 /** @brief reset visibility for an entire fov structure.
   *

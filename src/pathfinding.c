@@ -23,12 +23,12 @@
 static path *path_new(position start, position goal);
 static path_element *path_element_new(position pos);
 static guint path_step_cost(map *m, const path_element* element,
-    map_element_t map_elem, gboolean for_player);
+    map_element_t map_elem, bool for_player);
 static guint path_cost(path_element* element, position target);
 static path_element *path_element_in_list(const path_element* el, const GPtrArray *list);
 static path_element *path_find_best(const path *pt);
 static GPtrArray *path_get_neighbours(map *m, position pos,
-    map_element_t element, gboolean for_player);
+    map_element_t element, bool for_player);
 
 path *path_find(map *m, position start, position goal, map_element_t element)
 {
@@ -49,7 +49,7 @@ path *path_find(map *m, position start, position goal, map_element_t element)
     g_ptr_array_add(pt->open, curr);
 
     /* check if the path is being determined for the player */
-    gboolean for_player = pos_identical(start, nlarn->p->pos);
+    bool for_player = pos_identical(start, nlarn->p->pos);
 
     while (pt->open->len)
     {
@@ -79,7 +79,7 @@ path *path_find(map *m, position start, position goal, map_element_t element)
             path_element *next = g_ptr_array_remove_index_fast(neighbours,
                                                 neighbours->len - 1);
 
-            gboolean next_is_better = false;
+            bool next_is_better = false;
 
             if (path_element_in_list(next, pt->closed))
             {
@@ -170,7 +170,7 @@ static path_element *path_element_new(position pos)
 
 /* calculate the cost of stepping into this new field */
 static guint path_step_cost(map *m, const path_element* element,
-    map_element_t map_elem, gboolean for_player)
+    map_element_t map_elem, bool for_player)
 {
     map_tile_t tt;
     guint32 step_cost = 1; /* at least 1 movement cost */
@@ -267,7 +267,7 @@ static path_element *path_find_best(const path *pt)
 
 static GPtrArray *path_get_neighbours(map *m, position pos,
                                       map_element_t element,
-                                      gboolean for_player)
+                                      bool for_player)
 {
     GPtrArray *neighbours = g_ptr_array_new();
 

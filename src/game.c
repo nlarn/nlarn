@@ -54,13 +54,13 @@ const guint MOBUL = 100;
 const guint TIMELIMIT = 30000;
 
 static void game_new();
-static gboolean game_load();
+static bool game_load();
 static void game_items_shuffle(game *g);
 
 /* file descriptor for locking the savegame file */
 static int sgfd = 0;
 
-static void print_welcome_message(gboolean newgame)
+static void print_welcome_message(bool newgame)
 {
     log_add_entry(nlarn->log, "Welcome %sto NLarn %s!",
                   newgame ? "" : "back ", nlarn_version);
@@ -575,7 +575,7 @@ static void game_new()
     log_set_time(nlarn->log, nlarn->gtime);
 }
 
-static gboolean game_load()
+static bool game_load()
 {
     display_window *win = NULL;
 
@@ -627,7 +627,7 @@ static gboolean game_load()
     g_free(sgbuf);
 
     /* check for save file incompatibility */
-    gboolean compatible_version = false;
+    bool compatible_version = false;
     if (cJSON_GetObjectItem(save, "nlarn_version"))
     {
         int sfv = cJSON_GetObjectItem(save, "nlarn_version")->valueint;

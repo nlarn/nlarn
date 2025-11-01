@@ -81,7 +81,7 @@ struct spell;
 struct player;
 
 /* a function that implements a spell */
-typedef int (*spell_func)(struct spell *, struct player *);
+typedef bool (*spell_func)(struct spell *, struct player *);
 
 typedef struct spell_data {
     spell_id id;
@@ -165,8 +165,8 @@ int spell_known(struct player *p, spell_id spell_type);
  */
 gchar* spell_desc_by_id(spell_id sid);
 
-gboolean spell_create_monster(spell *s, struct player *p);
-gboolean spell_vaporize_rock(spell *s, struct player *p);
+bool spell_create_monster(spell *s, struct player *p);
+bool spell_vaporize_rock(spell *s, struct player *p);
 
 #define spell_code(spell)     (spells[(spell)->id].code)
 #define spell_name(spell)     (spells[(spell)->id].name)

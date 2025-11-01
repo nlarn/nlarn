@@ -37,7 +37,7 @@ inventory *inv_new(gconstpointer owner)
     return ninv;
 }
 
-void inv_destroy(inventory *inv, gboolean special)
+void inv_destroy(inventory *inv, bool special)
 {
     g_assert(inv != NULL);
 
@@ -254,7 +254,7 @@ int inv_del_oid(inventory **inv, gpointer oid)
 }
 
 void inv_erode(inventory **inv, item_erosion_type iet,
-               gboolean visible, int (*ifilter)(item *))
+               bool visible, int (*ifilter)(item *))
 {
     g_assert(inv != NULL);
 

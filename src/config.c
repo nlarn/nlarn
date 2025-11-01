@@ -117,12 +117,12 @@ void parse_commandline(int argc, char *argv[], struct game_config *config)
     g_option_context_free(context);
 }
 
-gboolean parse_ini_file(const char *filename, struct game_config *config)
+bool parse_ini_file(const char *filename, struct game_config *config)
 {
     /* ini file handling */
     GKeyFile *ini_file = g_key_file_new();
     GError *error = NULL;
-    gboolean success;
+    bool success;
 
     /* config file defined on the command line precedes over the default */
     g_key_file_load_from_file(ini_file, filename,
@@ -136,7 +136,7 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
         if (!error) config->difficulty = difficulty;
         g_clear_error(&error);
 
-        gboolean no_autosave = g_key_file_get_boolean(ini_file, "nlarn", "no-autosave", &error);
+        bool no_autosave = g_key_file_get_boolean(ini_file, "nlarn", "no-autosave", &error);
         if (!config->no_autosave && !error) config->no_autosave = no_autosave;
         g_clear_error(&error);
 
@@ -165,7 +165,7 @@ gboolean parse_ini_file(const char *filename, struct game_config *config)
         if (!config->font_size && !error) config->font_size = font_size;
         g_clear_error(&error);
 
-        gboolean fullscreen = g_key_file_get_boolean(ini_file, "nlarn", "fullscreen", &error);
+        bool fullscreen = g_key_file_get_boolean(ini_file, "nlarn", "fullscreen", &error);
         if (!error) config->fullscreen = fullscreen;
         g_clear_error(&error);
 #endif
@@ -217,10 +217,10 @@ void write_ini_file(const char *filename, struct game_config *config)
     g_key_file_free(kf);
 }
 
-void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX])
+void parse_autopickup_settings(const char *settings, bool config[IT_MAX])
 {
     /* reset configuration */
-    memset(config, 0, sizeof(gboolean) * IT_MAX);
+    memset(config, 0, sizeof(bool) * IT_MAX);
 
     /* parsing config has failed, not settings string given */
     if (!settings) return;
@@ -237,7 +237,7 @@ void parse_autopickup_settings(const char *settings, gboolean config[IT_MAX])
     }
 }
 
-char *compose_autopickup_settings(const gboolean config[IT_MAX])
+char *compose_autopickup_settings(const bool config[IT_MAX])
 {
     char *settings = g_malloc0(IT_MAX);
 
@@ -254,7 +254,7 @@ char *compose_autopickup_settings(const gboolean config[IT_MAX])
     return settings;
 }
 
-char *verbose_autopickup_settings(const gboolean config[IT_MAX])
+char *verbose_autopickup_settings(const bool config[IT_MAX])
 {
     GString *settings = g_string_new(NULL);
     int count = 0;
@@ -323,7 +323,7 @@ void configure_defaults(const char *inifile)
         "Clear values with `KEY`A`end`-`KEY`F`end`. "
         "Return to the main menu with `KEY`ESC`end`.\n";
 
-    gboolean leaving = false;
+    bool leaving = false;
 
     while (!leaving)
     {
@@ -341,7 +341,7 @@ void configure_defaults(const char *inifile)
             ? g_strdup_printf("`EMPH`%s`end`", player_bonus_stat_desc[config.stats[0] - 'a'])
             : NULL;
         /* auto-pickup */
-        gboolean autopickup[IT_MAX];
+        bool autopickup[IT_MAX];
         parse_autopickup_settings(config.auto_pickup, autopickup);
         char *verboseap = verbose_autopickup_settings(autopickup);
         char *abuf = config.auto_pickup
@@ -435,7 +435,7 @@ void configure_defaults(const char *inifile)
             /* auto-pickup defaults */
             case 'd':
             {
-                gboolean conf[IT_MAX] = {};
+                bool conf[IT_MAX] = {};
                 if (config.auto_pickup)
                 {
                     parse_autopickup_settings(config.auto_pickup, conf);

@@ -121,7 +121,7 @@ int building_bank(player *p)
         return 2; /* turns */
     }
 
-    gboolean leaving = false;
+    bool leaving = false;
     while (!leaving)
     {
         GString *text = g_string_new(greeting->str);
@@ -414,7 +414,7 @@ int building_home(player *p)
     }
 
     /* casual visit, report remaining time */
-    gboolean leaving = false;
+    bool leaving = false;
 
     while (!leaving)
     {
@@ -564,7 +564,7 @@ static int building_scribe_scroll(player *p)
 {
     const int turns = 2;
     int i;
-    gboolean split = false;
+    bool split = false;
     char question[81] = { 0 };
 
     /* check if the player owns a blank scroll */
@@ -760,7 +760,7 @@ int building_school(player *p)
 
     g_assert(p != NULL);
 
-    gboolean leaving = false;
+    bool leaving = false;
     while (!leaving)
     {
         GString *text = g_string_new(msg_greet);
@@ -954,7 +954,7 @@ int building_monastery(struct player *p)
 
     const char ayfwt[] = "Shall we proceed, then?";
 
-    gboolean leaving = false;
+    bool leaving = false;
 
     while (!leaving)
     {

@@ -42,7 +42,7 @@ typedef struct inventory
 /* function definitions */
 
 inventory *inv_new(gconstpointer owner);
-void inv_destroy(inventory *inv, gboolean special);
+void inv_destroy(inventory *inv, bool special);
 
 cJSON *inv_serialize(inventory *inv);
 inventory *inv_deserialize(cJSON *iser);
@@ -132,7 +132,7 @@ int inv_del_oid(inventory **inv, gpointer oid);
  * @param ifilter a filter function to restrict the eroded items
  */
 void inv_erode(inventory **inv, item_erosion_type iet,
-    gboolean visible, int (*ifilter)(item *));
+    bool visible, int (*ifilter)(item *));
 
 /**
  * Function to determine the count of items in an inventory.

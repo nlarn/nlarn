@@ -28,20 +28,20 @@
 #include "spells.h"
 #include "spheres.h"
 
-static gboolean spell_type_player(spell *s, struct player *p);
-static gboolean spell_type_point(spell *s, struct player *p);
-static gboolean spell_type_ray(spell *s, struct player *p);
-static gboolean spell_type_flood(spell *s, struct player *p);
-static gboolean spell_type_blast(spell *s, struct player *p);
+static bool spell_type_player(spell *s, struct player *p);
+static bool spell_type_point(spell *s, struct player *p);
+static bool spell_type_ray(spell *s, struct player *p);
+static bool spell_type_flood(spell *s, struct player *p);
+static bool spell_type_blast(spell *s, struct player *p);
 
-static gboolean spell_alter_reality(spell *s, struct player *p);
-static gboolean spell_create_sphere(spell *s, struct player *p);
-static gboolean spell_cure_poison(spell *s, struct player *p);
-static gboolean spell_cure_blindness(spell *s, struct player *p);
-static gboolean spell_phantasmal_forces(spell *s, struct player *p);
-static gboolean spell_scare_monsters(spell *s, struct player *p);
-static gboolean spell_summon_demon(spell *s, struct player *p);
-static gboolean spell_make_wall(spell *s, struct player *p);
+static bool spell_alter_reality(spell *s, struct player *p);
+static bool spell_create_sphere(spell *s, struct player *p);
+static bool spell_cure_poison(spell *s, struct player *p);
+static bool spell_cure_blindness(spell *s, struct player *p);
+static bool spell_phantasmal_forces(spell *s, struct player *p);
+static bool spell_scare_monsters(spell *s, struct player *p);
+static bool spell_summon_demon(spell *s, struct player *p);
+static bool spell_make_wall(spell *s, struct player *p);
 
 DEFINE_ENUM(spell_id, SPELL_TYPE_ENUM)
 
@@ -376,11 +376,11 @@ static int count_adjacent_water_squares(position pos);
 static int try_drying_ground(position pos);
 
 /* simple wrapper for spell_area_pos_hit() */
-static gboolean spell_traj_pos_hit(const GList *traj,
+static bool spell_traj_pos_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
-static gboolean spell_area_pos_hit(position pos,
+static bool spell_area_pos_hit(position pos,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
@@ -613,7 +613,7 @@ gchar* spell_desc_by_id(spell_id sid)
     return g_string_free(desc, false);
 }
 
-static gboolean spell_type_player(spell *s, struct player *p)
+static bool spell_type_player(spell *s, struct player *p)
 {
     effect *e = NULL;
 
@@ -696,7 +696,7 @@ static gboolean spell_type_player(spell *s, struct player *p)
     return true;
 }
 
-static gboolean spell_type_point(spell *s, struct player *p)
+static bool spell_type_point(spell *s, struct player *p)
 {
     monster *m = NULL;
     effect *e;
@@ -868,7 +868,7 @@ static gboolean spell_type_point(spell *s, struct player *p)
     return true;
 }
 
-static gboolean spell_type_ray(spell *s, struct player *p)
+static bool spell_type_ray(spell *s, struct player *p)
 {
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_RAY));
 
@@ -930,7 +930,7 @@ static gboolean spell_type_ray(spell *s, struct player *p)
     return true;
 }
 
-static gboolean spell_type_flood(spell *s, struct player *p)
+static bool spell_type_flood(spell *s, struct player *p)
 {
     char buffer[81];
     int radius = 0;
@@ -992,7 +992,7 @@ static gboolean spell_type_flood(spell *s, struct player *p)
     return true;
 }
 
-static gboolean spell_type_blast(spell *s, struct player *p)
+static bool spell_type_blast(spell *s, struct player *p)
 {
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_BLAST));
 
@@ -1028,7 +1028,7 @@ static gboolean spell_type_blast(spell *s, struct player *p)
     area *ball = area_new_circle_flooded(pos, radius, map_get_obstacles(cmap, pos,
                                                                         radius, true));
 
-    gboolean player_affected = area_pos_get(ball, p->pos);
+    bool player_affected = area_pos_get(ball, p->pos);
     area_destroy(ball);
 
     if (player_affected
@@ -1048,7 +1048,7 @@ static gboolean spell_type_blast(spell *s, struct player *p)
     return true;
 }
 
-static gboolean spell_alter_reality(spell *s, player *p)
+static bool spell_alter_reality(spell *s, player *p)
 {
     position pos = { { 0, 0, Z(p->pos) } };
 
@@ -1076,7 +1076,7 @@ static gboolean spell_alter_reality(spell *s, player *p)
     return true;
 }
 
-gboolean spell_create_monster(spell *s __attribute__((unused)), struct player *p)
+bool spell_create_monster(spell *s __attribute__((unused)), struct player *p)
 {
     /* this spell doesn't work in town */
     if (Z(p->pos) == 0)
@@ -1101,7 +1101,7 @@ gboolean spell_create_monster(spell *s __attribute__((unused)), struct player *p
     }
 }
 
-static gboolean spell_create_sphere(spell *s, struct player *p)
+static bool spell_create_sphere(spell *s, struct player *p)
 {
     g_assert(p != NULL);
 
@@ -1124,7 +1124,7 @@ static gboolean spell_create_sphere(spell *s, struct player *p)
     }
 }
 
-static gboolean spell_cure_poison(spell *s __attribute__((unused)), struct player *p)
+static bool spell_cure_poison(spell *s __attribute__((unused)), struct player *p)
 {
     effect *eff = NULL;
 
@@ -1142,7 +1142,7 @@ static gboolean spell_cure_poison(spell *s __attribute__((unused)), struct playe
     }
 }
 
-static gboolean spell_cure_blindness(spell *s __attribute__((unused)), struct player *p)
+static bool spell_cure_blindness(spell *s __attribute__((unused)), struct player *p)
 {
     effect *eff = NULL;
 
@@ -1160,7 +1160,7 @@ static gboolean spell_cure_blindness(spell *s __attribute__((unused)), struct pl
     }
 }
 
-static gboolean spell_phantasmal_forces(spell *s, struct player *p)
+static bool spell_phantasmal_forces(spell *s, struct player *p)
 {
     monster *m = NULL;
 
@@ -1199,7 +1199,7 @@ static gboolean spell_phantasmal_forces(spell *s, struct player *p)
     }
 }
 
-static gboolean spell_scare_monsters(spell *s, struct player *p)
+static bool spell_scare_monsters(spell *s, struct player *p)
 {
     int count = 0;
     position pos = pos_invalid;
@@ -1244,7 +1244,7 @@ static gboolean spell_scare_monsters(spell *s, struct player *p)
     return (count > 0);
 }
 
-static gboolean spell_summon_demon(spell *s, struct player *p)
+static bool spell_summon_demon(spell *s, struct player *p)
 {
     /* find a place near the player for the demon servant */
     position pos = map_find_space_in(game_map(nlarn, Z(p->pos)),
@@ -1264,7 +1264,7 @@ static gboolean spell_summon_demon(spell *s, struct player *p)
     return true;
 }
 
-static gboolean spell_make_wall(spell *s __attribute__((unused)), player *p)
+static bool spell_make_wall(spell *s __attribute__((unused)), player *p)
 {
     position pos = display_get_new_position(p, p->pos,
         "Select a position where you want to place a wall.",
@@ -1327,7 +1327,7 @@ static gboolean spell_make_wall(spell *s __attribute__((unused)), player *p)
     }
 }
 
-gboolean spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
+bool spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
 {
     monster *m;
     map *pmap = game_map(nlarn, Z(p->pos));
@@ -1480,7 +1480,7 @@ item_usage_result book_read(struct player *p, item *book)
 static int spell_cast(player *p, spell *s)
 {
     int turns = 0;
-    gboolean well_done = false;
+    bool well_done = false;
 
     /* insufficient mana */
     if (p->mp < spell_level(s))
@@ -1625,7 +1625,7 @@ static int try_drying_ground(position pos)
     return false;
 }
 
-static gboolean spell_traj_pos_hit(const GList *traj,
+static bool spell_traj_pos_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2)
 {
@@ -1635,7 +1635,7 @@ static gboolean spell_traj_pos_hit(const GList *traj,
     return spell_area_pos_hit(pos, damo, data1, data2);
 }
 
-static gboolean spell_area_pos_hit(position pos,
+static bool spell_area_pos_hit(position pos,
         const damage_originator *damo,
         gpointer data1, gpointer data2)
 {
@@ -1645,7 +1645,7 @@ static gboolean spell_area_pos_hit(position pos,
     sobject_t mst = map_sobject_at(cmap, pos);
     monster *m = map_get_monster_at(cmap, pos);
     item_erosion_type iet;
-    gboolean terminated = false;
+    bool terminated = false;
 
     /* determine if the spell causes item erosion */
     switch (sp->id)

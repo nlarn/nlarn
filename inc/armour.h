@@ -93,7 +93,7 @@ static inline armour_t armour_disguise(const item *armour)
     return armours[armour->id].disguise;
 }
 
-static inline gboolean armour_unique(const item *armour)
+static inline bool armour_unique(const item *armour)
 {
     g_assert(armour->id < AT_MAX);
     return armours[armour->id].unique;

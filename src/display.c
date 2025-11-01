@@ -38,7 +38,7 @@ static gchar *font_name;
 #include "extdefs.h"
 #include "spheres.h"
 
-static gboolean display_initialised = false;
+static bool display_initialised = false;
 
 /* linked list of opened windows */
 static GList *windows = NULL;
@@ -54,11 +54,11 @@ static display_window *display_window_new(int x1, int y1, int width,
 static int display_window_move(display_window *dwin, int key);
 static void display_window_update_title(display_window *dwin, const char *title);
 static void display_window_update_caption(display_window *dwin, char *caption);
-static void display_window_update_arrow_up(display_window *dwin, gboolean on);
-static void display_window_update_arrow_down(display_window *dwin, gboolean on);
+static void display_window_update_arrow_up(display_window *dwin, bool on);
+static void display_window_update_arrow_down(display_window *dwin, bool on);
 
 static display_window *display_item_details(guint x1, guint y1, guint width,
-                                            item *it, player *p, gboolean shop);
+                                            item *it, player *p, bool shop);
 
 static void display_spheres_paint(sphere *s, player *p);
 
@@ -140,7 +140,7 @@ void display_init()
     display_initialised = true;
 }
 
-static attr_t attr_colour(colour_t colour, gboolean reverse)
+static attr_t attr_colour(colour_t colour, bool reverse)
 {
     if (reverse)
         return (A_REVERSE | COLOR_PAIR(colour));
@@ -184,7 +184,7 @@ static attr_t attr_colour(colour_t colour, gboolean reverse)
     mvwhline(win, y, x, ch, n); \
     wattroff(win, attrs)
 
-attr_t display_player_hp_colour(const player *p, gboolean status)
+attr_t display_player_hp_colour(const player *p, bool status)
 {
     attr_t attrs = 0;
     if (p->hp <= ((int)p->hp_max / 10))      /* 10% hp left */
@@ -238,7 +238,7 @@ void display_paint_screen(player *p)
             }
             else /* i.e. !fullvis && !visible: draw players memory */
             {
-                const gboolean has_items = player_memory_of(p, pos).item;
+                const bool has_items = player_memory_of(p, pos).item;
                 if (player_memory_of(p, pos).sobject)
                 {
                     /* draw stationary object */
@@ -255,7 +255,7 @@ void display_paint_screen(player *p)
                 else if (has_items)
                 {
                     /* draw items */
-                    const gboolean has_trap = (player_memory_of(p, pos).trap);
+                    const bool has_trap = (player_memory_of(p, pos).trap);
 
                     aaddch(attr_colour(player_memory_of(p, pos).item_colour, has_trap),
                            item_glyph(player_memory_of(p, pos).item));
@@ -615,7 +615,7 @@ void display_shutdown()
     }
 }
 
-gboolean display_available()
+bool display_available()
 {
     return display_initialised;
 }
@@ -651,8 +651,8 @@ static int item_sort_shop(gconstpointer a, gconstpointer b, gpointer data)
 }
 
 item *display_inventory(const char *title, player *p, inventory **inv,
-                        GPtrArray *callbacks, gboolean show_price,
-                        gboolean show_weight, gboolean show_account,
+                        GPtrArray *callbacks, bool show_price,
+                        bool show_weight, bool show_account,
                         int (*ifilter)(item *))
 {
     /* the inventory window */
@@ -665,12 +665,12 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     const int startx = (COLS - width) / 2;
 
     guint len_curr;
-    gboolean redraw = false;
+    bool redraw = false;
 
     /* the window title used for shops */
     char *stitle = NULL;
 
-    gboolean keep_running = true;
+    bool keep_running = true;
     int key;
 
     /* string array used to assemble the window caption
@@ -752,7 +752,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         {
             it = inv_get_filtered(*inv, (pos - 1) + offset, ifilter);
 
-            gboolean item_equipped = false;
+            bool item_equipped = false;
 
             if (!show_price)
             {
@@ -1029,7 +1029,7 @@ void display_inv_callbacks_clean(GPtrArray *callbacks)
     g_ptr_array_free(callbacks, true);
 }
 
-void display_config_autopickup(gboolean settings[IT_MAX])
+void display_config_autopickup(bool settings[IT_MAX])
 {
     int RUN = true;
     attr_t attrs; /* curses attributes */
@@ -2093,11 +2093,11 @@ direction display_get_direction(const char *title, int *available)
 
 position display_get_position(player *p,
                               const char *message,
-                              gboolean ray,
-                              gboolean ball,
+                              bool ray,
+                              bool ball,
                               guint radius,
-                              gboolean passable,
-                              gboolean visible)
+                              bool passable,
+                              bool visible)
 {
     /* start at player's position */
     position start = p->pos;
@@ -2157,14 +2157,14 @@ position display_get_position(player *p,
 position display_get_new_position(player *p,
                                   position start,
                                   const char *message,
-                                  gboolean ray,
-                                  gboolean ball,
-                                  gboolean travel,
+                                  bool ray,
+                                  bool ball,
+                                  bool travel,
                                   guint radius,
-                                  gboolean passable,
-                                  gboolean visible)
+                                  bool passable,
+                                  bool visible)
 {
-    gboolean RUN = true;
+    bool RUN = true;
     direction dir = GD_NONE;
     position pos;
     attr_t attrs; /* curses attributes */
@@ -2603,7 +2603,7 @@ int display_show_message(const char *title, const char *message, int indent)
          b) the margin around the window */
     const guint wred = 4;
 
-    gboolean RUN = true;
+    bool RUN = true;
 
     /* default window width */
     guint width = min(COLS - 4, DISPLAY_WINDOW_MAX_WIDTH);
@@ -2836,7 +2836,7 @@ int display_getch(WINDOW *win) {
 }
 
 #ifdef SDLPDCURSES
-void display_toggle_fullscreen(gboolean toggle)
+void display_toggle_fullscreen(bool toggle)
 {
     if (toggle)
         config.fullscreen = !config.fullscreen;
@@ -3043,7 +3043,7 @@ static display_window *display_window_new(int x1, int y1, int width,
 
 static int display_window_move(display_window *dwin, int key)
 {
-    gboolean need_refresh = true;
+    bool need_refresh = true;
 
     g_assert (dwin != NULL);
 
@@ -3169,7 +3169,7 @@ static void display_window_update_caption(display_window *dwin, char *caption)
     wrefresh(dwin->window);
 }
 
-static void display_window_update_arrow_up(display_window *dwin, gboolean on)
+static void display_window_update_arrow_up(display_window *dwin, bool on)
 {
     g_assert (dwin != NULL && dwin->window != NULL);
 
@@ -3184,7 +3184,7 @@ static void display_window_update_arrow_up(display_window *dwin, gboolean on)
     }
 }
 
-static void display_window_update_arrow_down(display_window *dwin, gboolean on)
+static void display_window_update_arrow_down(display_window *dwin, bool on)
 {
     g_assert (dwin != NULL && dwin->window != NULL);
 
@@ -3201,10 +3201,10 @@ static void display_window_update_arrow_down(display_window *dwin, gboolean on)
 }
 
 static display_window *display_item_details(guint x1, guint y1, guint width,
-                                            item *it, player *p, gboolean shop)
+                                            item *it, player *p, bool shop)
 {
     /* determine if the item is known or displayed in the shop */
-    const gboolean known = shop | player_item_known(p, it);
+    const bool known = shop | player_item_known(p, it);
 
     /* the detailed item description */
     char *msg = item_detailed_description(it, known, shop);
