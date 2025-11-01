@@ -43,8 +43,8 @@ static gboolean display_initialised = false;
 /* linked list of opened windows */
 static GList *windows = NULL;
 
-static int mvwcprintw(WINDOW *win, int defattr, int currattr,
-    colour bg, int y, int x, const char *fmt, ...);
+static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
+                      colour bg, int y, int x, const char *fmt, ...);
 
 static void display_inventory_help(GPtrArray *callbacks);
 
@@ -140,7 +140,7 @@ void display_init()
     display_initialised = true;
 }
 
-static int attr_colour(int colour, gboolean reverse)
+static attr_t attr_colour(int colour, gboolean reverse)
 {
     if (reverse)
         return (A_REVERSE | COLOR_PAIR(colour));
@@ -184,9 +184,9 @@ static int attr_colour(int colour, gboolean reverse)
     mvwhline(win, y, x, ch, n); \
     wattroff(win, attrs)
 
-int display_player_hp_colour(const player *p, gboolean status)
+attr_t display_player_hp_colour(const player *p, gboolean status)
 {
-    int attrs = 0;
+    attr_t attrs = 0;
     if (p->hp <= ((int)p->hp_max / 10))      /* 10% hp left */
         attrs = COLOR_PAIR(LUMINOUS_RED) | A_BLINK;
     else if (p->hp <= ((int)p->hp_max / 4))  /* 25% hp left */
@@ -211,7 +211,7 @@ int display_player_hp_colour(const player *p, gboolean status)
 void display_paint_screen(player *p)
 {
     position pos = pos_invalid;
-    int attrs;              /* curses attributes */
+    attr_t attrs;              /* curses attributes */
 
     /* draw line around map */
     (void)mvhline(MAP_MAX_Y, 0, ACS_HLINE, MAP_MAX_X);
@@ -296,7 +296,7 @@ void display_paint_screen(player *p)
 
     /* draw player */
     char pc;
-    int player_attributes = display_player_hp_colour(p, false);
+    attr_t player_attributes = display_player_hp_colour(p, false);
 
     if (player_effect(p, ET_INVISIBILITY))
     {
@@ -518,7 +518,7 @@ void display_paint_screen(player *p)
         }
 
         /* display effect descriptions */
-        int currattr = COLOURLESS;
+        attr_t currattr = COLOURLESS;
         for (guint i = 0; i < g_strv_length(efdescs); i++)
         {
             currattr = mvwcprintw(stdscr, COLOR_PAIR(CORNFLOWER_BLUE),
@@ -574,11 +574,11 @@ void display_paint_screen(player *p)
     }
 
     /* ensure consistent colours for messages spanning multiple lines */
-    int currattr = COLOURLESS;
+    attr_t currattr = COLOURLESS;
     for (y = 20, i = 0; (y < (unsigned)LINES) && (i < text->len); i++, y++)
     {
         /* default colour for the line */
-        int def_attrs = (i == 0 && ttime[i] > game_turn(nlarn) - 5)
+        attr_t def_attrs = (i == 0 && ttime[i] > game_turn(nlarn) - 5)
             ? COLOR_PAIR(WHITE)
             : COLOR_PAIR(OSLO_GREY);
 
@@ -686,7 +686,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     item *it;
 
     /* curses attributes */
-    int attrs;
+    attr_t attrs;
 
     g_assert(p != NULL && inv != NULL);
 
@@ -1032,7 +1032,7 @@ void display_inv_callbacks_clean(GPtrArray *callbacks)
 void display_config_autopickup(gboolean settings[IT_MAX])
 {
     int RUN = true;
-    int attrs; /* curses attributes */
+    attr_t attrs; /* curses attributes */
 
     const int height = 13;
     const int width = 38;
@@ -1126,7 +1126,7 @@ spell *display_spell_select(const char *title, player *p)
     guint curr = 1;
 
     /* curses attributes */
-    int attrs;
+    attr_t attrs;
 
     g_assert(p != NULL);
 
@@ -1847,7 +1847,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
     do
     {
         /* paint */
-        int attrs;
+        attr_t attrs;
 
         if (selection) attrs = CP_UI_HL_REVERSE;
         else           attrs = CP_UI_FG_REVERSE;
@@ -2167,7 +2167,7 @@ position display_get_new_position(player *p,
     gboolean RUN = true;
     direction dir = GD_NONE;
     position pos;
-    int attrs; /* curses attributes */
+    attr_t attrs; /* curses attributes */
     display_window *msgpop = NULL;
 
     /* list of visible monsters and the iterator for these */
@@ -2630,7 +2630,7 @@ int display_show_message(const char *title, const char *message, int indent)
     do
     {
         /* display the window content */
-        int currattr = COLOURLESS;
+        attr_t currattr = COLOURLESS;
 
         for (guint idx = 0; idx < maxvis; idx++)
         {
@@ -2753,7 +2753,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     display_window *win = display_window_new(x1, y1, width, height, title);
 
     /* display message */
-    int currattr = COLOURLESS;
+    attr_t currattr = COLOURLESS;
     for (guint idx = 0; idx < text->len; idx++)
     {
         currattr = mvwcprintw(win->window,
@@ -2873,12 +2873,12 @@ void display_change_font()
 }
 #endif
 
-static int mvwcprintw(WINDOW *win, int defattr, int currattr,
-        const colour bg, int y, int x, const char *fmt, ...)
+static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
+                      const colour bg, int y, int x, const char *fmt, ...)
 {
     va_list argp;
     gchar *msg;
-    int attr;
+    attr_t attr;
 
     /* assemble the message */
     va_start(argp, fmt);

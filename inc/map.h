@@ -89,7 +89,7 @@ typedef struct map_tile_data
 {
     map_tile_t tile;
     const char glyph;
-    int colour;
+    colour colour;
     const char *description;
     bool
         passable:    1,     /* can be passed */

@@ -19,11 +19,10 @@
 #ifndef COLOURS_H
 #define COLOURS_H
 
-
 #include "enumFactory.h"
 
 #define COLOUR_ENUM(COLOUR) \
-    COLOUR(COLOURLESS, = -1) \
+    COLOUR(COLOURLESS, = 0xdeadbeef) \
     COLOUR(BLACK, = 0) \
     COLOUR(DARK_BURGUNDY,) \
     COLOUR(TREE_GREEN,) \
