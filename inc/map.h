@@ -79,10 +79,10 @@ typedef struct map_tile
         timer:      8, /* countdown to when the type will become base_type again */
         sobject:    8, /* something special located on this tile */
         trap:       8, /* trap located on this tile */
-        spill:      8, /* base colour of the liquid spilled here */
         spilltime:  8; /* countdown for the time the spilled liquid is visible */
     gpointer m_oid;    /* id of monster located on this tile */
     inventory *ilist;  /* items located on this tile */
+    colour_t spill;    /* colour of the liquid spilled here */
 } map_tile;
 
 typedef struct map_tile_data
@@ -300,13 +300,13 @@ static inline void map_trap_set(map *m, const position pos, const trap_t type)
     m->grid[Y(pos)][X(pos)].trap = type;
 }
 
-static inline guint8 map_spill_at(const map *m, const position pos)
+static inline colour_t map_spill_at(const map *m, const position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
     return m->grid[Y(pos)][X(pos)].spill;
 }
 
-static inline void map_spill_set(map *m, const position pos, const int colour)
+static inline void map_spill_set(map *m, const position pos, const colour_t colour)
 {
     g_assert(m != NULL && pos_valid(pos));
     m->grid[Y(pos)][X(pos)].spill = colour;

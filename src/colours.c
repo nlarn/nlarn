@@ -92,7 +92,7 @@ void colours_init(int ui_colour_scheme) {
         break;
     }
 
-    for (int fg = 0; fg < 256; fg++) {
+    for (colour_t fg = 0; fg < 256; fg++) {
         switch(fg) {
             // Init UI colors
             case UI_BRIGHT_FG:
@@ -123,7 +123,7 @@ void colours_init(int ui_colour_scheme) {
     }
 }
 
-int colour_lookup(const char *colour_name, int bg) {
+colour_t colour_lookup(const char *colour_name, colour_t bg) {
     if (bg == UI_BG) {
         if (!strcmp(colour_name, "EMPH"))  return UI_BRIGHT_FG;
         if (!strcmp(colour_name, "TITLE")) return UI_TITLE;

@@ -63,7 +63,7 @@ typedef struct display_window
 typedef struct display_cell
 {
     char glyph;
-    int colour;
+    colour_t colour;
     gboolean reversed;
 } display_cell;
 

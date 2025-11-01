@@ -335,6 +335,6 @@ void colours_init(int ui_colour_scheme);
  * @param color name string
  * @param the background colour (i.e. PF_BG or UI_BG)
  */
-int colour_lookup(const char *colour_name, int bg);
+colour_t colour_lookup(const char *colour_name, colour_t bg);
 
 #endif

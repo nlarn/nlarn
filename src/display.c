@@ -140,7 +140,7 @@ void display_init()
     display_initialised = true;
 }
 
-static attr_t attr_colour(int colour, gboolean reverse)
+static attr_t attr_colour(colour_t colour, gboolean reverse)
 {
     if (reverse)
         return (A_REVERSE | COLOR_PAIR(colour));

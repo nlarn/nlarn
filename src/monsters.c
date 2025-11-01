@@ -39,7 +39,7 @@ typedef struct {
     const char *name;        /* monster's name */
     const char *plural_name;
     const char glyph;
-    int colour;
+    colour_t colour;
     int exp;                 /* xp granted to player */
     int gold_chance;
     int gold;
