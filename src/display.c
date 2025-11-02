@@ -28,6 +28,9 @@
 # undef max
 
 static gchar *font_name;
+
+const int DEFAULT_ROWS = 25;
+const int DEFAULT_COLS = 90;
 #endif
 
 #include "colours.h"
@@ -76,10 +79,6 @@ void display_init()
 #endif
 
 #ifdef SDLPDCURSES
-    /* default to 90 columns when using SDL PDCurses */
-    g_setenv("PDC_COLS", "90", 0);
-    g_setenv("PDC_LINES", "25", 0);
-
     /* Set the window icon */
     char *icon_name = g_strdup_printf("%s/nlarn-128.bmp", nlarn_libdir);
     g_setenv("PDC_ICON", icon_name, 1);
@@ -110,6 +109,9 @@ void display_init()
 
     PDC_set_title(window_title);
     g_free(window_title);
+
+    /* default to 90 columns when using SDL PDCurses */
+    resize_term(DEFAULT_ROWS, DEFAULT_COLS);
 
     display_toggle_fullscreen(false);
 
@@ -2866,7 +2868,12 @@ void display_change_font()
     /* adapt PDCurses internal variables */
     TTF_SizeText(pdc_ttffont, "W", &pdc_fwidth, &pdc_fheight);
     pdc_fthick = pdc_font_size / 20 + 1;
-    resize_term(PDC_get_rows(), PDC_get_columns());
+
+    /* ensure the window has the required minimum size  */
+    resize_term(
+        max(DEFAULT_ROWS, PDC_get_rows()),
+        max(DEFAULT_COLS, PDC_get_columns())
+    );
 
     /* redraw the screen as all dimensions have changed */
     display_paint_screen(nlarn->p);

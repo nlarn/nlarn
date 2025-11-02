@@ -43,6 +43,7 @@
 * Finger of Death no longer works against undead and spirits
 * Fix coloured text spanning multiple lines
 * Fix stealth: monsters now notice the player when standing next to them
+* Fix crash when significantly increasing font size
 * Fix level description in scoreboard
 
 
