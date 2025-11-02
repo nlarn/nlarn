@@ -161,8 +161,12 @@ bool parse_ini_file(const char *filename, struct game_config *config)
         g_clear_error(&error);
 
 #ifdef SDLPDCURSES
+        /* Default to a sane font size after switching from the ncurses build */
         int font_size = g_key_file_get_integer(ini_file, "nlarn", "font-size", &error);
-        if (!config->font_size && !error) config->font_size = font_size;
+        if (!config->font_size && !error)
+            config->font_size = font_size;
+        else
+            config->font_size = 18;;
         g_clear_error(&error);
 
         bool fullscreen = g_key_file_get_boolean(ini_file, "nlarn", "fullscreen", &error);
