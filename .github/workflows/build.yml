@@ -84,7 +84,7 @@ jobs:
             nlarn-*.exe
 
   build-macos:
-    runs-on: macos-latest
+    runs-on: macos-latest-large
     strategy:
       matrix:
         configuration:
