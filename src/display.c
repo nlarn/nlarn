@@ -2823,19 +2823,7 @@ void display_windows_show()
 }
 
 int display_getch(WINDOW *win) {
-    int ch = wgetch(win ? win : stdscr);
-#ifdef SDLPDCURSES
-        /* on SDL2 PDCurses, keys entered on the numeric keypad while num
-           lock is enabled are returned twice, hence we need to swallow
-           the first one here. */
-        if ((ch >= '1' && ch <= '9')
-                && (PDC_get_key_modifiers() & PDC_KEY_MODIFIER_NUMLOCK)
-                && PDC_check_key())
-        {
-            ch = wgetch(win ? win : stdscr);
-        }
-#endif
-    return ch;
+    return wgetch(win ? win : stdscr);
 }
 
 #ifdef SDLPDCURSES
