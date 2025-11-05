@@ -1191,7 +1191,7 @@ spell *display_spell_select(const char *title, player *p)
                 spell_name(sp), spdesc, 0);
         g_free(spdesc);
 
-        switch ((key = display_getch(swin->window)))
+        switch (key = display_getch(swin->window))
         {
         case '7':
         case KEY_HOME:
@@ -1460,8 +1460,7 @@ int display_get_count(const char *caption, int value)
         wmove(mwin->window, mwin->height - 2, mwin->width - 10 + ipos);
         wrefresh(mwin->window);
 
-        key = display_getch(mwin->window);
-        switch (key)
+        switch (key = display_getch(mwin->window))
         {
         case KEY_LEFT:
             if (ipos > 0)
@@ -1681,8 +1680,7 @@ char *display_get_string(const char *title, const char *caption, const char *val
 
         wrefresh(mwin->window);
 
-        key = display_getch(mwin->window);
-        switch (key)
+        switch (key = display_getch(mwin->window))
         {
         case KEY_LEFT:
             if (ipos > 0)
@@ -2000,7 +1998,7 @@ direction display_get_direction(const char *title, int *available)
     {
         int key; /* input key buffer */
 
-        switch ((key = display_getch(dwin->window)))
+        switch (key = display_getch(dwin->window))
         {
 
         case 'h':
