@@ -672,7 +672,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     /* the window title used for shops */
     char *stitle = NULL;
 
-    bool keep_running = true;
     int key;
 
     /* string array used to assemble the window caption
@@ -702,6 +701,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     guint len_orig = len_curr = inv_length_filtered(*inv, ifilter);
 
     /* main loop */
+    bool keep_running = true;
+
     do
     {
         /* calculate the dialogue height */
