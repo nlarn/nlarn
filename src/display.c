@@ -2865,7 +2865,6 @@ static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
 {
     va_list argp;
     gchar *msg;
-    attr_t attr;
 
     /* assemble the message */
     va_start(argp, fmt);
@@ -2875,12 +2874,8 @@ static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
     /* move to the starting position */
     wmove(win, y, x);
 
-    if (currattr != COLOURLESS)
-        /* restore the previously used attribute */
-        wattron(win, attr = currattr);
-    else
-        /* set the default attribute */
-        wattron(win, attr = defattr);
+    /* restore the previously used attribute or use the default */
+    attr_t attr = (currattr == COLOURLESS) ? defattr : currattr;
 
     for (guint pos = 0; pos < strlen(msg); pos++)
     {
@@ -2898,15 +2893,9 @@ static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
 
             /* find colour value for the tag content */
             if (strcmp(tval, "end") == 0)
-            {
-                wattroff(win, attr);
-                wattron(win, attr = defattr);
-            }
+                attr = defattr;
             else
-            {
-                wattroff(win, attr);
-                wattron(win, attr = COLOR_PAIR(colour_lookup(tval, bg)));
-            }
+                attr = COLOR_PAIR(colour_lookup(tval, bg));
 
             /* free temporary memory */
             g_free(tval);
@@ -2920,7 +2909,7 @@ static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
             break;
 
         /* print the message character wise */
-        waddch(win, msg[pos]);
+        waddch(win, msg[pos] | attr);
     }
 
     /* clean assembled string */
