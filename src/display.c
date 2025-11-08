@@ -2990,9 +2990,17 @@ static display_window *display_window_new(int x1, int y1, int width,
     wbkgd(dwin->window, CP_UI_FG);
 
     /* draw borders */
-    wattron(dwin->window, CP_UI_BORDER);
-    box(dwin->window, 0, 0);
-    wattroff(dwin->window, CP_UI_BORDER);
+    wborder(
+        dwin->window,
+        ACS_VLINE | CP_UI_BORDER,
+        ACS_VLINE | CP_UI_BORDER,
+        ACS_HLINE | CP_UI_BORDER,
+        ACS_HLINE | CP_UI_BORDER,
+        ACS_ULCORNER | CP_UI_BORDER,
+        ACS_URCORNER | CP_UI_BORDER,
+        ACS_LLCORNER | CP_UI_BORDER,
+        ACS_LRCORNER | CP_UI_BORDER
+    );
 
     /* set the window title */
     display_window_update_title(dwin, title);
