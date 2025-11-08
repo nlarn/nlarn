@@ -46,8 +46,8 @@ static bool display_initialised = false;
 /* linked list of opened windows */
 static GList *windows = NULL;
 
-static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
-                      colour_t bg, int y, int x, const char *fmt, ...);
+static attr_t mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
+                         colour_t bg, int y, int x, const char *fmt, ...);
 
 static void display_inventory_help(GPtrArray *callbacks);
 
@@ -2860,15 +2860,14 @@ void display_change_font()
 }
 #endif
 
-static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
-                      const colour_t bg, int y, int x, const char *fmt, ...)
+static attr_t mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
+                         const colour_t bg, int y, int x, const char *fmt, ...)
 {
-    va_list argp;
-    gchar *msg;
-
     /* assemble the message */
+    va_list argp;
+
     va_start(argp, fmt);
-    msg = g_strdup_vprintf(fmt, argp);
+    gchar *msg = g_strdup_vprintf(fmt, argp);
     va_end(argp);
 
     /* move to the starting position */
@@ -2883,10 +2882,13 @@ static int mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
         if (msg[pos] == '`')
         {
             /* position of the tag terminator */
-            int tpos;
+            guint tpos;
 
             /* find position of tag terminator */
-            for (tpos = pos + 1; msg[tpos] != '`'; tpos++);
+            for (tpos = pos + 1; msg[tpos] != '`'; tpos++) {
+                /* ensure we found the delimiter before the end of the string */
+                g_assert(msg[tpos] != 0);
+            };
 
             /* extract the tag value */
             char *tval = g_strndup(&msg[pos + 1], tpos - pos - 1);
