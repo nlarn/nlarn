@@ -61,7 +61,7 @@ int log_add_entry(message_log *log, const char *fmt, ...);
  * @param log the log
  * @param gtime the new game time
  */
-void log_set_time(message_log *log, int gtime);
+void log_set_time(message_log *log, unsigned gtime);
 
 message_log_entry *log_get_entry(message_log *log, guint id);
 cJSON *log_serialize(message_log *log);

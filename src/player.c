@@ -1013,7 +1013,7 @@ bool player_make_move(player *p, guint turns, bool interruptible, const char *de
     return true;
 }
 
-void player_die(player *p, player_cod cause_type, int cause)
+void player_die(player *p, player_cod cause_type, guint cause)
 {
     const char *message = NULL;
     const char *title = NULL;

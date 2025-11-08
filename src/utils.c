@@ -117,7 +117,7 @@ int log_add_entry(message_log *log, const char *fmt, ...)
     return true;
 }
 
-void log_set_time(message_log *log, int gtime)
+void log_set_time(message_log *log, unsigned gtime)
 {
 
     g_assert(log != NULL);

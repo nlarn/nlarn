@@ -248,7 +248,7 @@ bool player_make_move(player *p, guint turns, bool interruptible, const char *de
  * @param cause the id of the specific cause, e.g. TT_DART
  *
  */
-void player_die(player *p, player_cod cause_type, int cause);
+void player_die(player *p, player_cod cause_type, guint cause);
 
 guint64 player_calc_score(player *p, int won);
 bool player_movement_possible(player *p);

@@ -449,7 +449,7 @@ char *score_death_description(score_t *score, int verbose)
 
     if (verbose)
     {
-        g_string_append_printf(text, " %s has scored %" G_GINT64_FORMAT
+        g_string_append_printf(text, " %s has scored %" G_GUINT64_FORMAT
                                " points, with the difficulty set to %d.",
                                (score->sex == PS_MALE) ? "He" : "She",
                                score->score, score->difficulty);
@@ -486,7 +486,7 @@ char *scores_to_string(GList *scores, score_t *score)
         score_t *cscore = (score_t *)iterator->data;
 
         gchar *desc = score_death_description(cscore, false);
-        g_string_append_printf(text, "%s%2d) %7" G_GINT64_FORMAT " %s\n",
+        g_string_append_printf(text, "%s%2d) %7" G_GUINT64_FORMAT " %s\n",
                                (cscore == score) ? "`EMPH`" : "",
                                nrec + 1, cscore->score, desc);
 
