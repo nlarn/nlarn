@@ -1844,7 +1844,6 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
                    width - margin - strlen(no) - (2 * padding),
                    attrs, "%*s%s%*s", padding, " ", no, padding, " ");
 
-        wattroff(ywin->window, attrs);
         wrefresh(ywin->window);
 
         int key = tolower(display_getch(ywin->window)); /* input key buffer */
@@ -2247,7 +2246,6 @@ position display_get_new_position(player *p,
             else
                 attrs = COLOR_PAIR(ELECTRIC_BLUE);
 
-            attron(attrs);
             GList *iter = r;
 
             do
