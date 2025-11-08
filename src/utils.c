@@ -382,9 +382,6 @@ void text_destroy(GPtrArray *text)
     g_ptr_array_free(text, true);
 }
 
-/**
- * create a new NULL-terminated string array
- */
 char **strv_new()
 {
     char **list = g_new(char *, 1);
@@ -393,9 +390,6 @@ char **strv_new()
     return list;
 }
 
-/**
- * adds a copy of str to the list
- */
 size_t strv_append(char ***list, const char *str)
 {
     g_assert(list != NULL);
@@ -411,9 +405,6 @@ size_t strv_append(char ***list, const char *str)
     return len;
 }
 
-/**
- * add a copy of str to the list if it is not yet part of the list
- */
 size_t strv_append_unique(char ***list, const char *str)
 {
     /* compare elements to the new string and return false if the element existed */
