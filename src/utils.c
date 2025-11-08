@@ -382,15 +382,15 @@ void text_destroy(GPtrArray *text)
     g_ptr_array_free(text, true);
 }
 
-char **strv_new()
+GStrv strv_new()
 {
-    char **list = g_new(char *, 1);
+    GStrv list = g_new(char *, 1);
     list[0] = NULL;
 
     return list;
 }
 
-size_t strv_append(char ***list, const char *str)
+size_t strv_append(GStrv *list, const char *str)
 {
     g_assert(list != NULL);
     g_assert(str != NULL);
@@ -405,7 +405,7 @@ size_t strv_append(char ***list, const char *str)
     return len;
 }
 
-size_t strv_append_unique(char ***list, const char *str)
+size_t strv_append_unique(GStrv *list, const char *str)
 {
     /* compare elements to the new string and return false if the element existed */
     for (int len = 0; (*list)[len]; len++)

@@ -104,9 +104,9 @@ void text_destroy(GPtrArray *text);
 /**
  * Create a new NULL-terminated string array
  *
- * @return A pointer to a array of strings
+ * @return A pointer to an array of strings
  */
-char **strv_new();
+GStrv strv_new();
 
 /**
  * Add a copy of str to the list
@@ -116,7 +116,7 @@ char **strv_new();
  *
  * @return The length of the string array
  */
-size_t strv_append(char ***list, const char *str);
+size_t strv_append(GStrv *list, const char *str);
 
 /**
  * add a copy of str to the list if it is not yet part of the list
@@ -124,9 +124,9 @@ size_t strv_append(char ***list, const char *str);
  * @param list A pointer to an array of strings
  * @param str A string
  *
- * return The lenght of the string array
+ * return The length of the string array
  */
-size_t strv_append_unique(char ***list, const char *str);
+size_t strv_append_unique(GStrv *list, const char *str);
 
 /* misc. text functions */
 char *str_strip(const char *str);
