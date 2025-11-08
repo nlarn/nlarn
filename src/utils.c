@@ -243,12 +243,12 @@ message_log *log_deserialize(cJSON *lser)
     return log;
 }
 
-GPtrArray *text_wrap(const char *str, int width, int indent)
+GPtrArray *text_wrap(const char *str, const unsigned width, const unsigned indent)
 {
     GPtrArray *text = g_ptr_array_new();
-    unsigned spos = 0;  /* current starting position in source string */
-    int pwidth = width; /* the width of the current paragraph */
-    int lp;             /* last position of whitespace */
+    unsigned spos = 0;       /* current starting position in source string */
+    unsigned pwidth = width; /* the width of the current paragraph */
+    unsigned last_pos;       /* last position of whitespace */
     char *spaces = NULL;
 
     /* prepare indentation */
@@ -258,8 +258,8 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         spaces = g_malloc0((indent + 1) * sizeof(char));
 
         /* fill the string with spaces */
-        for (lp = 0; lp < indent; lp++)
-            spaces[lp] = ' ';
+        for (last_pos = 0; last_pos < indent; last_pos++)
+            spaces[last_pos] = ' ';
     }
 
     /* scan through source string */
@@ -269,13 +269,13 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         bool in_tag = false;
 
         /* current working position in source string */
-        int cpos = 0;
+        unsigned cpos = 0;
 
         /* length of text excluding tags content on current line */
-        int llen = 0;
+        unsigned llen = 0;
 
         /* reset target string length and position of last whitespace */
-        lp = 0;
+        last_pos = 0;
 
         /* scan the next line */
         while (llen <= pwidth)
@@ -290,7 +290,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
             char next = str[spos + cpos];
             if (next == '\0' || next == '\n' || next == '\r')
             {
-                lp = cpos;
+                last_pos = cpos;
                 /* reset the width of the next line to the full width
                  * after the end of a paragraph. */
                 pwidth = width;
@@ -300,7 +300,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
             /* scan for a space at which to wrap the current line */
             if (g_ascii_isspace(str[spos + cpos]))
             {
-                lp = cpos;
+                last_pos = cpos;
             }
 
             /* increase the string length if not inside or at the end of a tag */
@@ -312,10 +312,10 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         }
 
         /* copy the text to the new line */
-        char *line = g_strndup(&(str[spos]), lp);
+        char *line = g_strndup(&(str[spos]), last_pos);
 
         /* skip silly CR chars */
-        if (str[spos + lp] == '\r') lp++;
+        if (str[spos + last_pos] == '\r') last_pos++;
 
         /* reduce width while inside a paragraph to make space
          * for indentation after the first line */
@@ -336,7 +336,7 @@ GPtrArray *text_wrap(const char *str, int width, int indent)
         g_ptr_array_add(text, line);
 
         /* move position in source string beyond the end of the last line */
-        spos += (lp + 1);
+        spos += (last_pos + 1);
     }
 
     /* free indentation string */
@@ -358,11 +358,11 @@ GPtrArray *text_append(GPtrArray *first, GPtrArray *second)
     return first;
 }
 
-int text_get_longest_line(GPtrArray *text)
+size_t text_get_longest_line(GPtrArray *text)
 {
     g_assert(text != NULL);
 
-    int max_len = 0;
+    size_t max_len = 0;
 
     for (guint idx = 0; idx < text->len; idx++)
     {
