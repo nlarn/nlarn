@@ -469,7 +469,7 @@ char *scores_to_string(GList *scores, score_t *score)
 
     GString *text = g_string_new(NULL);
 
-    guint rank = 0;
+    gint rank = 0;
     GList *iterator = scores;
 
     /* show scores surrounding a specific score? */
@@ -479,10 +479,10 @@ char *scores_to_string(GList *scores, score_t *score)
         rank = g_list_index(scores, score);
 
         /* get entry three entries up of current/top score in list */
-       iterator = g_list_nth(scores, max(rank - 3, 0));
+        iterator = g_list_nth(scores, max(rank - 3, 0));
     }
 
-    /* display up to 7 surronding entries or all when score wasn't specified */
+    /* display up to 7 surrounding entries or all when score wasn't specified */
     for (int nrec = max(rank - 3, 0);
          iterator && (score ? (nrec < (max(rank, 0) + 4)) : true);
          iterator = iterator->next, nrec++)
