@@ -151,19 +151,6 @@ static attr_t attr_colour(colour_t colour, bool reverse)
 }
 
 /* convenience helper against endless repetition */
-#define waaddch(win, attrs, ch) \
-    wattron(win, attrs); \
-    waddch(win, ch); \
-    wattroff(win, attrs)
-
-#define aaddch(attrs, ch) waaddch(stdscr, attrs, ch)
-
-/* mvaddch with an additional attribute parameter */
-#define mvaaddch(y, x, attrs, ch) \
-    attron(attrs); \
-    mvaddch(y, x, ch); \
-    attroff(attrs)
-
 /* printw with an additional attribute parameter */
 #define aprintw(attrs, fmt, ...) \
     attron(attrs); \
@@ -179,12 +166,6 @@ static attr_t attr_colour(colour_t colour, bool reverse)
 /* mvprintw with an additional attribute parameter */
 #define mvaprintw(y, x, attrs, fmt, ...) \
     mvwaprintw(stdscr, y, x, attrs, fmt, ##__VA_ARGS__)
-
-/* mvwhline with an additional attribute parameter */
-#define mvwahline(win, y, x, attrs, ch, n) \
-    wattron(win, attrs); \
-    mvwhline(win, y, x, ch, n); \
-    wattroff(win, attrs)
 
 attr_t display_player_hp_colour(const player *p, bool status)
 {
@@ -236,7 +217,7 @@ void display_paint_screen(player *p)
             {
                 /* draw the truth */
                 display_cell dc = map_get_tile(vmap, pos);
-                aaddch(attr_colour(dc.colour, dc.reversed), dc.glyph);
+                addch(dc.glyph | attr_colour(dc.colour, dc.reversed));
             }
             else /* i.e. !fullvis && !visible: draw players memory */
             {
@@ -252,25 +233,25 @@ void display_paint_screen(player *p)
                     else
                         glyph = so_get_glyph(ms);
 
-                    aaddch(attr_colour(so_get_colour(ms), has_items), glyph);
+                    addch(glyph |attr_colour(so_get_colour(ms), has_items));
                 }
                 else if (has_items)
                 {
                     /* draw items */
                     const bool has_trap = (player_memory_of(p, pos).trap);
 
-                    aaddch(attr_colour(player_memory_of(p, pos).item_colour, has_trap),
-                           item_glyph(player_memory_of(p, pos).item));
+                    addch(item_glyph(player_memory_of(p, pos).item)
+                        | attr_colour(player_memory_of(p, pos).item_colour, has_trap));
                 }
                 else if (player_memory_of(p, pos).trap)
                 {
                     /* draw trap */
-                    aaddch(COLOR_PAIR(trap_colour(map_trap_at(vmap, pos))), '^');
+                    addch('^' | COLOR_PAIR(trap_colour(map_trap_at(vmap, pos))));
                 }
                 else
                 {
                     /* draw tile */
-                    aaddch(COLOR_PAIR(FUSCOUS_GREY), mt_get_glyph(player_memory_of(p, pos).type));
+                    addch(mt_get_glyph(player_memory_of(p, pos).type) | COLOR_PAIR(FUSCOUS_GREY));
                 }
             }
 
@@ -288,7 +269,7 @@ void display_paint_screen(player *p)
                     || monster_in_sight(monst))
             {
                 position mpos = monster_pos(monst);
-                mvaaddch(Y(mpos), X(mpos), COLOR_PAIR(monster_color(monst)), monster_glyph(monst));
+                mvaddch(Y(mpos), X(mpos), monster_glyph(monst) | COLOR_PAIR(monster_color(monst)));
             }
         }
     }
@@ -311,7 +292,7 @@ void display_paint_screen(player *p)
         attrs = player_attributes;
     }
 
-    mvaaddch(Y(p->pos), X(p->pos), attrs, pc);
+    mvaddch(Y(p->pos), X(p->pos), pc | attrs);
 
 
     /* *** first status line below map *** */
@@ -2282,18 +2263,18 @@ position display_get_new_position(player *p,
                     && monster_in_sight(target))
                 {
                     /* ray is targeted at a visible monster */
-                    mvaaddch(Y(tpos), X(tpos), attrs, monster_glyph(target));
+                    mvaddch(Y(tpos), X(tpos), monster_glyph(target) | attrs);
                 }
                 else if ((m = map_get_monster_at(vmap, tpos))
                          && monster_in_sight(m))
                 {
                     /* ray sweeps over a visible monster */
-                    mvaaddch(Y(tpos), X(tpos), attrs, monster_glyph(m));
+                    mvaddch(Y(tpos), X(tpos), monster_glyph(m) | attrs);
                 }
                 else
                 {
                     /* a position with no or an invisible monster on it */
-                    mvaaddch(Y(tpos), X(tpos), attrs, '*');
+                    mvaddch(Y(tpos), X(tpos), '*' | attrs);
                 }
             } while ((iter = iter->next));
 
@@ -2333,7 +2314,7 @@ position display_get_new_position(player *p,
                         }
 
                         move(Y(cursor), X(cursor));
-                        aaddch(COLOR_PAIR(fg), glyph);
+                        addch(glyph | COLOR_PAIR(fg));
                     }
                 }
             }
@@ -2642,7 +2623,7 @@ int display_show_message(const char *title, const char *message, int indent)
             /* erase to the end of the line (spare the borders of the window) */
             for (int pos = getcurx(mwin->window); pos < getmaxx(mwin->window) - 1; pos++)
             {
-                waaddch(mwin->window, currattr, ' ');
+                waddch(mwin->window, ' ' | currattr);
             }
         }
 
@@ -3127,7 +3108,7 @@ static void display_window_update_title(display_window *dwin, const char *title)
         g_free(dwin->title);
 
         /* repaint line to overwrite previous title */
-        mvwahline(dwin->window, 0, 2, CP_UI_BORDER, ACS_HLINE,
+        mvwhline(dwin->window, 0, 2, ACS_HLINE | CP_UI_BORDER,
             dwin->width - 7);
     }
 
@@ -3156,8 +3137,8 @@ static void display_window_update_caption(display_window *dwin, char *caption)
     g_assert (dwin != NULL && dwin->window != NULL);
 
     /* repaint line to overwrite previous captions */
-    mvwahline(dwin->window, dwin->height - 1, 3,
-        CP_UI_BORDER, ACS_HLINE, dwin->width - 7);
+    mvwhline(dwin->window, dwin->height - 1, 3,
+        ACS_HLINE | CP_UI_BORDER, dwin->width - 7);
 
     /* print caption if caption is set */
     if (caption && strlen(caption))
@@ -3185,8 +3166,8 @@ static void display_window_update_arrow_up(display_window *dwin, bool on)
     }
     else
     {
-        mvwahline(dwin->window, 0, dwin->width - 5,
-            CP_UI_BORDER, ACS_HLINE, 3);
+        mvwhline(dwin->window, 0, dwin->width - 5,
+            ACS_HLINE | CP_UI_BORDER, 3);
     }
 }
 
@@ -3201,8 +3182,8 @@ static void display_window_update_arrow_down(display_window *dwin, bool on)
     }
     else
     {
-        mvwahline(dwin->window, dwin->height - 1, dwin->width - 5,
-                  CP_UI_BORDER, ACS_HLINE, 3);
+        mvwhline(dwin->window, dwin->height - 1, dwin->width - 5,
+                  ACS_HLINE | CP_UI_BORDER, 3);
     }
 }
 
@@ -3232,6 +3213,6 @@ static void display_spheres_paint(sphere *s, player *p)
 
     if (game_fullvis(nlarn) || fov_get(p->fv, s->pos))
     {
-        mvaaddch(Y(s->pos), X(s->pos), COLOR_PAIR(BRIGHT_MAGENTA), '0');
+        mvaddch(Y(s->pos), X(s->pos), '0' | COLOR_PAIR(BRIGHT_MAGENTA));
     }
 }
