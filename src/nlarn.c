@@ -607,8 +607,7 @@ static void mainloop()
 
             /* bank account information */
         case '$':
-            log_add_entry(nlarn->log, "There %s %s gold on your bank account.",
-                          is_are(nlarn->p->bank_account),
+            log_add_entry(nlarn->log, "There is %s gold on your bank account.",
                           int2str(nlarn->p->bank_account));
             break;
 
