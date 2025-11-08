@@ -385,6 +385,10 @@ char *score_death_description(score_t *score, int verbose)
         case ET_POISON:
             g_string_append(text, " by poison.");
             break;
+
+        /* no other effects can cause death at the moment */
+        default:
+            break;
         }
         break;
 
