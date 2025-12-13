@@ -222,7 +222,7 @@ int player_trap_trigger(player *p, trap_t trap, int force)
     {
         log_add_entry(nlarn->log, "You evade the %s.", trap_description(trap));
     }
-    else if (chance((dex-12)/2))
+    else if (dex > 12 && chance((dex-12)/2))
     {
         /* detect the trap despite not setting it off */
         log_add_entry(nlarn->log, "You notice there's a %s here!",
@@ -379,4 +379,3 @@ guint trap_disarm(struct player *p)
 
     return 0;
 }
-
