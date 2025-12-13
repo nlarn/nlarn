@@ -1941,7 +1941,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             else if (damage_amount >= (gint)p->hp_max/10)
                 log_add_entry(nlarn->log, "`LUMINOUS_RED`Ouch!`end`");
 
-            map_spill_set(game_map(nlarn, Z(p->pos)), spill_pos, BLOOD_RED);
+            if (pos_valid(spill_pos))
+                // when the player is next to the outer corners of the map, spill_pos
+                // might be invalid! The most common case is the dungeon entrance.
+                map_spill_set(game_map(nlarn, Z(p->pos)), spill_pos, BLOOD_RED);
+
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
