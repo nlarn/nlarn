@@ -96,7 +96,7 @@ static const gchar *nlarn_userdir()
         {
             if (!g_file_test(config.userdir, G_FILE_TEST_IS_DIR))
             {
-                g_printerr("Supplied user directory \"%s\" does not exist.",
+                g_printerr("Supplied user directory \"%s\" does not exist.\n",
                         config.userdir);
 
                 exit(EXIT_FAILURE);
