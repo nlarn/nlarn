@@ -101,10 +101,8 @@ static const gchar *nlarn_userdir()
 
                 exit(EXIT_FAILURE);
             }
-            else
-            {
-                userdir = g_strdup(config.userdir);
-            }
+
+            userdir = g_strdup(config.userdir);
         }
         else
         {
