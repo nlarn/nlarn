@@ -96,15 +96,13 @@ static const gchar *nlarn_userdir()
         {
             if (!g_file_test(config.userdir, G_FILE_TEST_IS_DIR))
             {
-                g_printerr("Supplied user directory \"%s\" does not exist.",
+                g_printerr("Supplied user directory \"%s\" does not exist.\n",
                         config.userdir);
 
                 exit(EXIT_FAILURE);
             }
-            else
-            {
-                userdir = g_strdup(config.userdir);
-            }
+
+            userdir = g_strdup(config.userdir);
         }
         else
         {
@@ -176,6 +174,12 @@ static void nlarn_init(int argc, char *argv[])
     nlarn_mazefile = g_build_filename(nlarn_libdir, mazefile, NULL);
     nlarn_fortunes = g_build_filename(nlarn_libdir, fortunes, NULL);
 
+    /*
+     * We need to parse the command line here, as we might get a custom
+     * user directory here before using nlarn_userdir() for the first time.
+     */
+    parse_commandline(argc, argv, &config);
+
 #if ((defined (__unix) || defined (__unix__)) && defined (SETGID))
     /* highscore file handling for SETGID builds */
     gid_t realgid;
@@ -219,12 +223,9 @@ static void nlarn_init(int argc, char *argv[])
     atexit(scoreboard_close_fd);
 #else
     /* highscore file handling for non-SETGID builds -
-       store high scores in the same directory as the configuation */
+       store high scores in the same directory as the configuration */
     nlarn_highscores = g_build_filename(nlarn_userdir(), highscores, NULL);
 #endif
-
-    /* parse the command line options */
-    parse_commandline(argc, argv, &config);
 
     /* show version information */
     if (config.show_version) {
@@ -251,9 +252,7 @@ static void nlarn_init(int argc, char *argv[])
     if (!g_file_test(nlarn_userdir(), G_FILE_TEST_IS_DIR))
     {
         /* directory is missing -> create it */
-        int ret = g_mkdir(nlarn_userdir(), 0755);
-
-        if (ret == -1)
+        if (-1 == g_mkdir(nlarn_userdir(), 0755))
         {
             /* creating the directory failed */
             g_printerr("Failed to create directory %s.", nlarn_userdir());
