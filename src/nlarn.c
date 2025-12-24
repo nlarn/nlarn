@@ -249,9 +249,7 @@ static void nlarn_init(int argc, char *argv[])
     if (!g_file_test(nlarn_userdir(), G_FILE_TEST_IS_DIR))
     {
         /* directory is missing -> create it */
-        int ret = g_mkdir(nlarn_userdir(), 0755);
-
-        if (ret == -1)
+        if (-1 == g_mkdir(nlarn_userdir(), 0755))
         {
             /* creating the directory failed */
             g_printerr("Failed to create directory %s.", nlarn_userdir());
