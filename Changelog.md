@@ -6,6 +6,8 @@
 
 ### Fixed bugs
 
+* Fix userdir command line parameter (reported by ketarax on Reddit)
+
 
 ## Release 0.7.8 (2025-12-13)
 
