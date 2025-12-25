@@ -5023,6 +5023,16 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
                 gchar *it_desc = item_describe(it, true, false, false);
                 g_string_append_printf(text, "%s\n", it_desc);
                 g_free(it_desc);
+
+                /* items inside containers */
+                if (it->type == IT_CONTAINER && inv_length(it->content)) {
+                    for (guint idx = 0; idx < inv_length(it->content); idx++) {
+                        item *thing = inv_get(it->content, idx);
+                        gchar *desc = item_describe(thing, true, false, false);
+                        g_string_append_printf(text, "    %s\n", desc);
+                        g_free(desc);
+                    }
+                }
             }
         }
     }

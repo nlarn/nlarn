@@ -4,6 +4,7 @@
 
 ### Changes
 
+* Show contents of containers in the obituary (reported by ketarax on Reddit)
 * The bank branch office no longer refuses cooperation with outstanding taxes.
 
 ### Fixed bugs
