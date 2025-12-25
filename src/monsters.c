@@ -2287,7 +2287,10 @@ monster *monster_damage_take(monster *m, damage *dam)
                 spill_pos = monster_pos(m);
             }
 
-            map_spill_set(game_map(nlarn, Z(monster_pos(m))), spill_pos, BLOOD_RED);
+            if (pos_valid(spill_pos)) {
+                map_spill_set(game_map(nlarn, Z(monster_pos(m))),
+                    spill_pos, BLOOD_RED);
+            }
         }
         break;
 
