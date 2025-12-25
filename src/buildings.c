@@ -111,8 +111,8 @@ int building_bank(player *p)
         p->bank_ieslvtb = 0;
     }
 
-    /* leave bank when taxes are unpaid */
-    if (p->outstanding_taxes)
+    /* leave the town bank when taxes are unpaid */
+    if (0 == Z(p->pos) && p->outstanding_taxes)
     {
         g_string_append_printf(greeting, msg_frozen, p->outstanding_taxes);
         display_show_message(msg_title, greeting->str, 0);

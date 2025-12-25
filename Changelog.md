@@ -4,6 +4,8 @@
 
 ### Changes
 
+* The bank branch office no longer refuses cooperation with outstanding taxes.
+
 ### Fixed bugs
 
 * Fix userdir command line parameter (reported by ketarax on Reddit)
