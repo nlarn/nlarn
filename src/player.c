@@ -1364,9 +1364,11 @@ int player_move(player *p, direction dir, bool open_door)
         {
             player_memory_of(p, target_p).type = map_tiletype_at(pmap, target_p);
             const int tile = map_tiletype_at(pmap, target_p);
-            log_add_entry(nlarn->log, "Ouch! You bump into %s!",
-                          (tile == LT_DEEPWATER || tile == LT_LAVA)
-                          ? "the railing" : mt_get_desc(tile));
+            const char* desc = (tile == LT_DEEPWATER || tile == LT_LAVA)
+                ? "At the brink of unseen %s, your instincts flare and you pull back just in time."
+                :  "Ouch! You bump into %s!";
+
+            log_add_entry(nlarn->log, desc, mt_get_desc(tile));
             return times;
         }
 
