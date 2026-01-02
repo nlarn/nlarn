@@ -1,6 +1,6 @@
 /*
  * traps.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,6 +17,7 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
 
 #include "colours.h"
 #include "effects.h"
@@ -49,66 +50,66 @@ const trap_data traps[TT_MAX] =
     {
         TT_ARROW, ET_POISON, CLAM_SHELL,
         75, 50, 10,
-        "arrow trap",
-        "You are hit by an arrow.",
-        "The arrow was poisoned.",
-        "The %s is hit by an arrow.",
+        N_("arrow trap"),
+        N_("You are hit by an arrow."),
+        N_("The arrow was poisoned."),
+        N_("The %s is hit by an arrow."),
     },
     {
         TT_DART, ET_POISON, LIGHT_SLATE_BLUE,
         75, 50, 5,
-        "dart trap",
-        "You are hit by a dart.",
-        "The dart was poisoned.",
-        "The %s is hit by a dart.",
+        N_("dart trap"),
+        N_("You are hit by a dart."),
+        N_("The dart was poisoned."),
+        N_("The %s is hit by a dart."),
     },
     {
         TT_TELEPORT, ET_NONE, OPERA_MAUVE,
         55, 0, 0,
-        "teleport trap",
-        "Zaaaappp! You've been teleported!",
+        N_("teleport trap"),
+        N_("Zaaaappp! You've been teleported!"),
         NULL,
-        "The %s has been teleported away.",
+        N_("The %s has been teleported away."),
     },
     {
         TT_PIT, ET_TRAPPED, GREEN_BROWN,
         80, 100, 6,
-        "pit",
-        "You fall into a pit!",
+        N_("pit"),
+        N_("You fall into a pit!"),
         NULL,
-        "The %s falls into a pit.",
+        N_("The %s falls into a pit."),
     },
     {
         TT_SPIKEDPIT, ET_POISON, GREEN_BROWN,
         80, 60, 12,
-        "pit full of spikes",
-        "You fall into a pit full of spikes!",
+        N_("pit full of spikes"),
+        N_("You fall into a pit full of spikes!"),
         NULL,
-        "The %s falls into a pit full of spikes.",
+        N_("The %s falls into a pit full of spikes."),
     },
     {
         TT_SLEEPGAS, ET_SLEEP, LIGHT_FUCHSIA,
         75, 100, 0,
-        "sleeping gas trap",
-        "A cloud of gas engulfs you.",
+        N_("sleeping gas trap"),
+        N_("A cloud of gas engulfs you."),
         NULL,
-        "A cloud of gas engulfs the %s.",
+        N_("A cloud of gas engulfs the %s."),
     },
     {
         TT_MANADRAIN, ET_NONE, PALE_RED,
         75, 0, 0,
-        "magic energy drain trap",
-        "You feel your magical energy drained away!",
+        N_("magic energy drain trap"),
+        N_("You feel your magical energy drained away!"),
         NULL,
         NULL,
     },
     {
         TT_TRAPDOOR, ET_NONE, ELM_BROWN_RED,
         75, 0, 5,
-        "trapdoor",
-        "You fall through a trap door!",
+        N_("trapdoor"),
+        N_("You fall through a trap door!"),
         NULL,
-        "The %s falls through a trap door!",
+        N_("The %s falls through a trap door!"),
     },
 };
 
@@ -220,12 +221,12 @@ int player_trap_trigger(player *p, trap_t trap, int force)
     /* not triggering */
     else if (player_memory_of(p, p->pos).trap == trap)
     {
-        log_add_entry(nlarn->log, "You evade the %s.", trap_description(trap));
+        log_add_entry(nlarn->log, _("You evade the %s."), trap_description(trap));
     }
     else if (dex > 12 && chance((dex-12)/2))
     {
         /* detect the trap despite not setting it off */
-        log_add_entry(nlarn->log, "You notice there's a %s here!",
+        log_add_entry(nlarn->log, _("You notice there's a %s here!"),
                       trap_description(trap));
         player_memory_of(p, p->pos).trap = trap;
     }
@@ -313,14 +314,14 @@ guint trap_disarm(struct player *p)
 
     if (tt == TT_NONE)
     {
-        log_add_entry(nlarn->log, "There is no trap here.");
+        log_add_entry(nlarn->log, _("There is no trap here."));
         return 0;
     }
 
     if (tt == TT_PIT || tt == TT_SPIKEDPIT)
     {
-        log_add_entry(nlarn->log, "How do you think you can disable a %s? "
-                "Fill it with rubble?", trap_description(tt));
+        log_add_entry(nlarn->log, _("How do you think you can disable a %s? "
+                "Fill it with rubble?"), trap_description(tt));
 
         return 0;
     }
@@ -343,14 +344,15 @@ guint trap_disarm(struct player *p)
     /* Determine the number of turns required to disable the trap. */
     guint turns = trap_chance(tt) / 5;
 
-    if (!player_make_move(p, turns, true, "disabling the %s",
+    if (!player_make_move(p, turns, true, _("disabling the %s"),
                 trap_description(tt)))
         return 0;
 
     if (chance(prop))
     {
-        log_add_entry(nlarn->log, "You manage to %s the %s!",
-                magical_trap ? "dispel" : "disarm",
+        log_add_entry(nlarn->log, magical_trap
+                ? _("You manage to dispel the %s!")
+                : _("You manage to disarm the %s!"),
                 trap_description(tt));
 
         map_trap_set(cmap, p->pos, TT_NONE);
@@ -367,13 +369,13 @@ guint trap_disarm(struct player *p)
     else if (chance(trap_chance(tt)))
     {
         /* player has triggered the trap */
-        log_add_entry(nlarn->log, "You accidentally trigger the %s.",
+        log_add_entry(nlarn->log, _("You accidentally trigger the %s."),
                 trap_description(tt));
         return player_trap_trigger(p, tt, true);
     }
     else
     {
-        log_add_entry(nlarn->log, "You fail to disarm the %s.",
+        log_add_entry(nlarn->log, _("You fail to disarm the %s."),
                 trap_description(tt));
     }
 

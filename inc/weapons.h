@@ -19,6 +19,8 @@
 #ifndef WEAPONS_H
 #define WEAPONS_H
 
+#include <libintl.h>
+
 #include "enumFactory.h"
 #include "items.h"
 
@@ -194,7 +196,7 @@ static inline int weapon_acc(const item *weapon)
 }
 
 /* macros */
-#define ammo_name(itm)          (ammos[(itm)->id].name)
+#define ammo_name(itm)          (gettext(ammos[(itm)->id].name))
 #define ammo_class(itm)         (ammos[(itm)->id].ac)
 #define ammo_material(itm)      (ammos[(itm)->id].material)
 #define ammo_weight(itm)        (ammos[(itm)->id].weight)
@@ -202,8 +204,8 @@ static inline int weapon_acc(const item *weapon)
 #define ammo_t_obtainable(atm)  (ammos[atm].obtainable)
 
 #define weapon_type_obtainable(id)   (weapons[id].obtainable)
-#define weapon_name(weapon)          (weapons[(weapon)->id].name)
-#define weapon_short_name(weapon)    (weapons[(weapon)->id].short_name)
+#define weapon_name(weapon)          (gettext(weapons[(weapon)->id].name))
+#define weapon_short_name(weapon)    (gettext(weapons[(weapon)->id].short_name))
 #define weapon_class(weapon)         (weapons[(weapon)->id].wc)
 #define weapon_ammo(weapon)          (weapons[(weapon)->id].ammo)
 #define weapon_material(weapon)      (weapons[(weapon)->id].material)

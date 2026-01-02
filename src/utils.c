@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <glib/gi18n.h>
+
 #include "extdefs.h"
 #include "utils.h"
 
@@ -473,16 +475,18 @@ int str_starts_with_vowel(const char *str)
 const char *int2str(guint val)
 {
     static char buf[21];
-    const char *count_desc[] = { "no", "one", "two", "three", "four", "five",
-                                 "six", "seven", "eight", "nine", "ten",
-                                 "eleven", "twelve", "thirteen", "fourteen",
-                                 "fifteen", "sixteen", "seventeen", "eighteen",
-                                 "nineteen", "twenty"
+    const char *count_desc[] = { N_("no"), N_("one"), N_("two"), N_("three"),
+                                 N_("four"), N_("five"), N_("six"), N_("seven"),
+                                 N_("eight"), N_("nine"), N_("ten"),
+                                 N_("eleven"), N_("twelve"), N_("thirteen"),
+                                 N_("fourteen"), N_("fifteen"), N_("sixteen"),
+                                 N_("seventeen"), N_("eighteen"),
+                                 N_("nineteen"), N_("twenty")
                                };
 
     if (val <= 20)
     {
-        return count_desc[val];
+        return _(count_desc[val]);
     }
     else
     {
@@ -496,13 +500,13 @@ const char *int2time_str(guint val)
 {
     if (val <= 3)
     {
-        const char *count_desc[] = { "never", "once", "twice", "thrice" };
-        return count_desc[val];
+        const char *count_desc[] = { N_("never"), N_("once"), N_("twice"), N_("thrice") };
+        return _(count_desc[val]);
     }
     else
     {
         static char buf[21];
-        g_snprintf(buf, 20, "%d times", val);
+        g_snprintf(buf, 20, _("%d times"), val);
         return buf;
     }
 }

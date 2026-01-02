@@ -19,6 +19,8 @@
 #include <glib.h>
 #include <stdlib.h>
 
+#include <glib/gi18n.h>
+
 #include "container.h"
 #include "display.h"
 #include "items.h"
@@ -52,17 +54,17 @@ const map_tile_data map_tiles[LT_MAX] =
 {
     /* type         gly  color            desc           pa tr */
     { LT_NONE,      ' ', COLOURLESS,      NULL,          0, 0 },
-    { LT_MOUNTAIN,  '^', GRAVEL,          "a mountain",  0, 0 },
-    { LT_GRASS,     '"', GRASS_GREEN,     "grass",       1, 1 },
-    { LT_DIRT,      '.', GREEN_BROWN,     "dirt",        1, 1 },
-    { LT_TREE,      '&', TREE_GREEN,      "a tree",      0, 0 },
-    { LT_FLOOR,     '.', GRANITE,         "floor",       1, 1 },
-    { LT_WATER,     '~', WATER_BLUE,      "water",       1, 1 },
-    { LT_DEEPWATER, '~', DEEP_SEA_BLUE,   "deep water",  0, 1 },
-    { LT_LAVA,      '~', LAVA,            "lava",        0, 1 },
-    { LT_FIRE,      '*', LUMINOUS_RED,    "fire",        1, 1 },
-    { LT_CLOUD,     '*', WHITE,           "a gas cloud", 1, 1 },
-    { LT_WALL,      '#', GRANITE,         "a wall",      0, 0 },
+    { LT_MOUNTAIN,  '^', GRAVEL,          N_("a mountain"),  0, 0 },
+    { LT_GRASS,     '"', GRASS_GREEN,     N_("grass"),       1, 1 },
+    { LT_DIRT,      '.', GREEN_BROWN,     N_("dirt"),        1, 1 },
+    { LT_TREE,      '&', TREE_GREEN,      N_("a tree"),      0, 0 },
+    { LT_FLOOR,     '.', GRANITE,         N_("floor"),       1, 1 },
+    { LT_WATER,     '~', WATER_BLUE,      N_("water"),       1, 1 },
+    { LT_DEEPWATER, '~', DEEP_SEA_BLUE,   N_("deep water"),  0, 1 },
+    { LT_LAVA,      '~', LAVA,            N_("lava"),        0, 1 },
+    { LT_FIRE,      '*', LUMINOUS_RED,    N_("fire"),        1, 1 },
+    { LT_CLOUD,     '*', WHITE,           N_("a gas cloud"), 1, 1 },
+    { LT_WALL,      '#', GRANITE,         N_("a wall"),      0, 0 },
 };
 
 /* keep track which levels have been used before */
@@ -874,7 +876,7 @@ char *map_inv_description(map *m, position pos, const char* where, int (*ifilter
 
     if (inv_length_filtered(*map_ilist_at(m, pos), ifilter) > 3)
     {
-        return g_strdup_printf("There are multiple items %s.", where);
+        return g_strdup_printf(_("There are multiple items %s."), where);
     }
 
     GString *items_desc = NULL;
@@ -886,7 +888,7 @@ char *map_inv_description(map *m, position pos, const char* where, int (*ifilter
                                             false, false);
 
         if (idx > 0)
-            g_string_append_printf(items_desc, " and %s", item_desc);
+            g_string_append_printf(items_desc, _(" and %s"), item_desc);
         else
             items_desc = g_string_new(item_desc);
 
@@ -895,7 +897,7 @@ char *map_inv_description(map *m, position pos, const char* where, int (*ifilter
 
     if (items_desc != NULL)
     {
-        char *description = g_strdup_printf("You see %s %s.", items_desc->str, where);
+        char *description = g_strdup_printf(_("You see %s %s."), items_desc->str, where);
         g_string_free(items_desc, true);
 
         return description;
@@ -945,14 +947,14 @@ char *map_pos_examine(position pos)
     /* add message if target tile contains a stationary object */
     if (map_sobject_at(cm, pos) > LS_NONE)
     {
-        g_string_append_printf(desc, "You see %s %s. ",
+        g_string_append_printf(desc, _("You see %s %s. "),
                                so_get_desc(map_sobject_at(cm, pos)), where);
     }
 
     /* add message if target tile contains a known trap */
     if (player_memory_of(nlarn->p, pos).trap)
     {
-        g_string_append_printf(desc, "There is %s %s %s. ",
+        g_string_append_printf(desc, _("There is %s %s %s. "),
                                a_an(trap_description(map_trap_at(cm, pos))),
                                trap_description(map_trap_at(cm, pos)), where);
     }
@@ -1952,7 +1954,7 @@ static bool map_load_from_file(map *m, const char *mazefile, guint which)
         {
             g_strfreev(lines);
             nlarn = game_destroy(nlarn);
-            display_show_message("Error", "Maze file is corrupted. Please reinstall the game.", 0);
+            display_show_message(_("Error"), _("Maze file is corrupted. Please reinstall the game."), 0);
             exit(EXIT_FAILURE);
         }
 

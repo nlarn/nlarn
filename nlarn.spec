@@ -1,5 +1,5 @@
 Name:    nlarn
-Version: 0.7.9
+Version: 0.8
 Release: 1
 Summary: A remake of the roguelike game Larn
 Group:   Amusements/Games
@@ -7,7 +7,7 @@ License: GPL v3
 URL:     https://nlarn.github.io/
 Source:  http://downloads.sourceforge.net/project/nlarn/nlarn/%{version}/nlarn-%{version}.tar.gz
 
-BuildRequires: gcc glib2-devel ncurses-devel zlib-devel
+BuildRequires: gcc gettext glib2-devel ncurses-devel zlib-devel
 
 %description
 
@@ -24,8 +24,10 @@ mkdir -p %{buildroot}/var/games/%{name}
 install -g games -o games -m 2755 nlarn %{buildroot}/%{_bindir}
 install lib/fortune lib/maze lib/nlarn.hlp lib/nlarn.msg %{buildroot}/%{_datadir}/%{name}
 touch %{buildroot}/var/games/%{name}/highscores
+cp -va lib/locale %{buildroot}%{_datadir}/
+%find_lang %{name}
 
-%files
+%files -f %{name}.lang
 %defattr(-,root,root,-)
 %attr(2755, root, games) %{_bindir}/nlarn
 %{_datadir}/%{name}/*
@@ -34,7 +36,7 @@ touch %{buildroot}/var/games/%{name}/highscores
 
 %changelog
 * Sun Jun 28 2026 Joachim de Groot <jdegroot@web.de>
-  - updated for version 0.8.0
+  - updated for version 0.8
 * Sat Jun 27 2026 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.7.9
 * Sat Dec 13 2025 Joachim de Groot <jdegroot@web.de>

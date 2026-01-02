@@ -1,6 +1,6 @@
 /*
  * gems.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,6 +17,8 @@
  */
 
 #include <glib.h>
+
+#include <glib/gi18n.h>
 
 #include "colours.h"
 #include "gems.h"
@@ -35,16 +37,16 @@ typedef struct gem_data
 static const gem_data gems[GT_MAX] =
 {
     /* id          name        fg                  pr */
-    { GT_DIAMOND,  "diamond",  CHALKY_BLUE_WHITE,  50, },
-    { GT_RUBY,     "ruby",     LUMINOUS_RED,       40, },
-    { GT_EMERALD,  "emerald",  LIGHT_BRIGHT_GREEN, 30, },
-    { GT_SAPPHIRE, "sapphire", BRIGHT_BLUE,        20, },
+    { GT_DIAMOND,  N_("diamond"),  CHALKY_BLUE_WHITE,  50, },
+    { GT_RUBY,     N_("ruby"),     LUMINOUS_RED,       40, },
+    { GT_EMERALD,  N_("emerald"),  LIGHT_BRIGHT_GREEN, 30, },
+    { GT_SAPPHIRE, N_("sapphire"), BRIGHT_BLUE,        20, },
 };
 
 const char *gem_name(const item *gem)
 {
     g_assert(gem->type == IT_GEM && gem->id < GT_MAX);
-    return gems[gem->id].name;
+    return _(gems[gem->id].name);
 }
 
 colour_t gem_colour(const item *gem)

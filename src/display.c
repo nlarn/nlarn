@@ -17,7 +17,6 @@
  */
 
 #include <ctype.h>
-#include <locale.h>
 #include <glib.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -34,6 +33,8 @@ static gchar *font_name;
 const int DEFAULT_ROWS = 25;
 const int DEFAULT_COLS = 90;
 #endif
+
+#include <glib/gi18n.h>
 
 #include "colours.h"
 #include "config.h"
@@ -71,10 +72,6 @@ const int DISPLAY_WINDOW_MAX_WIDTH = 78;
 
 void display_init()
 {
-    /* Initialise the locale to enable correct output of multi-byte
-       characters (both text and glyphs) with ncursesw. */
-    setlocale(LC_ALL, "");
-
 #ifdef NCURSES_VERSION
     /*
      * Don't wait for trailing key codes after an ESC key is pressed.
@@ -451,7 +448,7 @@ void display_paint_screen(player *p)
     }
     else
     {
-        mvaprintw(7, MAP_MAX_X + 3, COLOR_PAIR(LUMINOUS_RED), "unarmed");
+        mvaprintw(7, MAP_MAX_X + 3, COLOR_PAIR(LUMINOUS_RED), "%s", _("unarmed"));
     }
     clrtoeol();
 
@@ -1346,7 +1343,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (show_account)
         {
             /* show the balance of the bank account */
-            stitle = g_strdup_printf("%s - %d gold on bank account",
+            stitle = g_strdup_printf(_("%s - %d gold on bank account"),
                                      title, p->bank_account);
 
             display_window_update_title(iwin, stitle);
@@ -1355,7 +1352,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         else if (show_weight)
         {
             /* show the weight of the inventory */
-            stitle = g_strdup_printf("%s - %s of %s carried",
+            stitle = g_strdup_printf(_("%s - %s of %s carried"),
                                      title, player_inv_weight(p),
                                      player_can_carry(p));
 
@@ -1532,24 +1529,24 @@ void display_config_autopickup(bool settings[IT_MAX])
     const int starty = (LINES - height) / 2;
     const int startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
-    display_window *cwin = display_window_new(startx, starty, width, height, "Configure auto pick-up");
+    display_window *cwin = display_window_new(startx, starty, width, height, _("Configure auto pick-up"));
 
-    mvwaprintw(cwin->window, 1,  2, CP_UI_FG, "Item types which will be picked up");
-    mvwaprintw(cwin->window, 2,  2, CP_UI_FG, "automatically are shown inverted. ");
+    mvwaprintw(cwin->window, 1,  2, CP_UI_FG, "%s", _("Item types which will be picked up"));
+    mvwaprintw(cwin->window, 2,  2, CP_UI_FG, "%s", _("automatically are shown inverted. "));
 
-    mvwaprintw(cwin->window, 4,  6, CP_UI_FG, "amulets");
-    mvwaprintw(cwin->window, 5,  6, CP_UI_FG, "ammunition");
-    mvwaprintw(cwin->window, 6,  6, CP_UI_FG, "armour");
-    mvwaprintw(cwin->window, 7,  6, CP_UI_FG, "books");
-    mvwaprintw(cwin->window, 8,  6, CP_UI_FG, "containers");
-    mvwaprintw(cwin->window, 9,  6, CP_UI_FG, "gems");
-    mvwaprintw(cwin->window, 4, 23, CP_UI_FG, "money");
-    mvwaprintw(cwin->window, 5, 23, CP_UI_FG, "potions");
-    mvwaprintw(cwin->window, 6, 23, CP_UI_FG, "rings");
-    mvwaprintw(cwin->window, 7, 23, CP_UI_FG, "scrolls");
-    mvwaprintw(cwin->window, 8, 23, CP_UI_FG, "weapons");
+    mvwaprintw(cwin->window, 4,  6, CP_UI_FG, "%s", _("amulets"));
+    mvwaprintw(cwin->window, 5,  6, CP_UI_FG, "%s", _("ammunition"));
+    mvwaprintw(cwin->window, 6,  6, CP_UI_FG, "%s", _("armour"));
+    mvwaprintw(cwin->window, 7,  6, CP_UI_FG, "%s", _("books"));
+    mvwaprintw(cwin->window, 8,  6, CP_UI_FG, "%s", _("containers"));
+    mvwaprintw(cwin->window, 9,  6, CP_UI_FG, "%s", _("gems"));
+    mvwaprintw(cwin->window, 4, 23, CP_UI_FG, "%s", _("money"));
+    mvwaprintw(cwin->window, 5, 23, CP_UI_FG, "%s", _("potions"));
+    mvwaprintw(cwin->window, 6, 23, CP_UI_FG, "%s", _("rings"));
+    mvwaprintw(cwin->window, 7, 23, CP_UI_FG, "%s", _("scrolls"));
+    mvwaprintw(cwin->window, 8, 23, CP_UI_FG, "%s", _("weapons"));
 
-    mvwaprintw(cwin->window, 11, 6, CP_UI_FG, "Type a symbol to toggle.");
+    mvwaprintw(cwin->window, 11, 4, CP_UI_FG, "%s", _("Type a symbol to toggle."));
 
     do
     {
@@ -1698,7 +1695,7 @@ spell *display_spell_select(const char *title, player *p)
             if (s.curr == 1 && prev_key == 0 && sp->id == SP_ALT)
             {
                 char prompt[60];
-                g_snprintf(prompt, 80, "Really cast %s?", spell_name(sp));
+                g_snprintf(prompt, 60, _("Really cast %s?"), spell_name(sp));
                 if (!display_get_yesno(prompt, NULL, NULL, NULL))
                     sp = NULL;
             }
@@ -2185,10 +2182,10 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 
     /* default values */
     if (!yes)
-        yes = "Yes";
+        yes = _("Yes");
 
     if (!no)
-        no = "No";
+        no = _("No");
 
     /* determine text width, either defined by space available  for the window
      * or the length of question */
@@ -3340,8 +3337,8 @@ static void display_inventory_help(GPtrArray *callbacks)
     if (callbacks == NULL || callbacks->len == 0)
     {
         /* no callbacks available => select item with ENTER */
-        g_string_append(help, "Select the desired item with ENTER.\n"
-                        "You may abort by pressing the escape key.");
+        g_string_append(help, _("Select the desired item with ENTER.\n"
+                        "You may abort by pressing the escape key."));
     }
     else
     {
@@ -3363,7 +3360,7 @@ static void display_inventory_help(GPtrArray *callbacks)
         if (maxlen == 0)
         {
             /* no active callbacks */
-            g_string_append(help, "There are no options available for the selected item.");
+            g_string_append(help, _("There are no options available for the selected item."));
         }
         else
         {
@@ -3382,7 +3379,7 @@ static void display_inventory_help(GPtrArray *callbacks)
         }
     }
 
-    display_show_message("Help", help->str, maxlen + 2);
+    display_show_message(_("Help"), help->str, maxlen + 2);
     g_string_free(help, true);
 }
 
@@ -3607,7 +3604,7 @@ static display_window *display_item_details(guint x1, guint y1, guint width,
     char *msg = item_detailed_description(it, known, shop);
 
     /* the pop-up window created by display_popup */
-    display_window *idpop = display_popup(x1, y1, width, "Item details", msg, 0);
+    display_window *idpop = display_popup(x1, y1, width, _("Item details"), msg, 0);
 
     /* tidy up */
     g_free(msg);

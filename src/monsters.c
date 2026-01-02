@@ -17,6 +17,7 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <string.h>
 
 #include "colours.h"
@@ -81,30 +82,30 @@ struct monster
 
 const char *monster_ai_desc[] =
 {
-    NULL,               /* MA_NONE */
-    "fleeing",          /* MA_FLEE */
-    "idling",           /* MA_REMAIN */
-    "wandering",        /* MA_WANDER */
-    "attacking",        /* MA_ATTACK */
-    "puzzled",          /* MA_CONFUSION */
-    "obedient",         /* MA_SERVE */
-    "working",          /* MA_CIVILIAN */
+    NULL,                   /* MA_NONE */
+    N_("fleeing"),          /* MA_FLEE */
+    N_("idling"),           /* MA_REMAIN */
+    N_("wandering"),        /* MA_WANDER */
+    N_("attacking"),        /* MA_ATTACK */
+    N_("puzzled"),          /* MA_CONFUSION */
+    N_("obedient"),         /* MA_SERVE */
+    N_("working"),          /* MA_CIVILIAN */
 };
 
 const char *monster_attack_verb[] =
 {
     NULL,
-    "hits",         /* ATT_WEAPON */
-    "points at",    /* ATT_MAGIC */
-    "claws",        /* ATT_CLAW */
-    "bites",        /* ATT_BITE */
-    "stings",       /* ATT_STING */
-    "slams",        /* ATT_SLAM */
-    "kicks",        /* ATT_KICK */
-    "touches",      /* ATT_TOUCH */
-    "breathes at",  /* ATT_BREATH */
-    "gazes at",     /* ATT_GAZE */
-    "shoots at",    /* ATT_SHOOT */
+    N_("hits"),         /* ATT_WEAPON */
+    N_("points at"),    /* ATT_MAGIC */
+    N_("claws"),        /* ATT_CLAW */
+    N_("bites"),        /* ATT_BITE */
+    N_("stings"),       /* ATT_STING */
+    N_("slams"),        /* ATT_SLAM */
+    N_("kicks"),        /* ATT_KICK */
+    N_("touches"),      /* ATT_TOUCH */
+    N_("breathes at"),  /* ATT_BREATH */
+    N_("gazes at"),     /* ATT_GAZE */
+    N_("shoots at"),    /* ATT_SHOOT */
 };
 
 static struct _monster_breath_data
@@ -114,20 +115,20 @@ static struct _monster_breath_data
     colour_t fg;
 } monster_breath_data[] =
 {
-    { NULL, 0, 0 },                                 /* DAM_NONE */
-    { NULL, 0, 0 },                                 /* DAM_PHYSICAL */
-    { "psionic blast", '*', WHITE },                /* DAM_MAGICAL */
-    { "burst of fire", '~', LAVA },                 /* DAM_FIRE */
-    { "beam of frost", '*', ICE_COLD_GREEN },       /* DAM_COLD */
-    { "gush of acid", '*', ELECTRIC_BLUE },         /* DAM_ACID */
-    { "flood of water", '~', BRIGHT_BLUE },         /* DAM_WATER */
-    { "ray of lightning", '*', DYNAMIC_YELLOW },    /* DAM_ELECTRICITY */
-    { "burst of noxious fumes", '%', VENOM_GREEN }, /* DAM_POISON */
+    { NULL, 0, 0 },                                     /* DAM_NONE */
+    { NULL, 0, 0 },                                     /* DAM_PHYSICAL */
+    { N_("psionic blast"), '*', WHITE },                /* DAM_MAGICAL */
+    { N_("burst of fire"), '~', LAVA },                 /* DAM_FIRE */
+    { N_("beam of frost"), '*', ICE_COLD_GREEN },       /* DAM_COLD */
+    { N_("gush of acid"), '*', ELECTRIC_BLUE },         /* DAM_ACID */
+    { N_("flood of water"), '~', BRIGHT_BLUE },         /* DAM_WATER */
+    { N_("ray of lightning"), '*', DYNAMIC_YELLOW },    /* DAM_ELECTRICITY */
+    { N_("burst of noxious fumes"), '%', VENOM_GREEN }, /* DAM_POISON */
 };
 
 monster_data_t monster_data[] = {
     { /* MT_GIANT_BAT */
-        .name = "giant bat", .glyph = 'b', .colour = AUTUMN_LEAF_BROWN,
+        .name = N_("giant bat"), .glyph = 'b', .colour = AUTUMN_LEAF_BROWN,
         .exp = 1, .ac = 0, .hp_max = 2,
         .level = 1, .intelligence = 3, .speed = XFAST, .size = SMALL,
         .flags = HEAD | FLY | INFRAVISION,
@@ -136,7 +137,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GNOME */
-        .name = "gnome", .glyph = 'g', .colour = CONIFER,
+        .name = N_("gnome"), .glyph = 'g', .colour = CONIFER,
         .exp = 2, .gold_chance = 80, .gold = 30, .ac = 0, .hp_max = 6,
         .level = 1, .intelligence = 8, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS,
@@ -145,7 +146,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_HOBGOBLIN */
-        .name = "hobgoblin", .glyph = 'H', .colour = GREEN_BROWN,
+        .name = N_("hobgoblin"), .glyph = 'H', .colour = GREEN_BROWN,
         .exp = 2, .gold_chance = 30, .gold = 40, .ac = 1, .hp_max = 8,
         .level = 1, .intelligence = 5, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -155,16 +156,16 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_JACKAL */
-        .name = "jackal", .glyph = 'J', .colour = ELM_BROWN_RED,
+        .name = N_("jackal"), .glyph = 'J', .colour = ELM_BROWN_RED,
         .exp = 1, .ac = 0, .hp_max = 3,
         .level = 1, .intelligence = 4, .speed = FAST, .size = SMALL,
         .flags = HEAD,
         .attacks = {
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-        }, .default_ai = MA_WANDER, .sound = "growl"
+        }, .default_ai = MA_WANDER, .sound = N_("growl")
     },
     { /* MT_KOBOLD */
-        .name = "kobold", .glyph = 'k', .colour = DEEP_SEA_GREEN,
+        .name = N_("kobold"), .glyph = 'k', .colour = DEEP_SEA_GREEN,
         .exp = 1, .gold_chance = 10, .gold = 100, .ac = 0, .hp_max = 4,
         .level = 1, .intelligence = 7, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -174,27 +175,27 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ORC */
-        .name = "orc", .glyph = 'O', .colour = DUSTY_GREY,
+        .name = N_("orc"), .glyph = 'O', .colour = DUSTY_GREY,
         .exp = 2, .gold_chance = 50, .gold = 80, .ac = 3, .hp_max = 12,
         .level = 2, .intelligence = 9, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS | INFRAVISION | PACK,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
             { .type = ATT_SHOOT, .base = 4, .damage = DAM_PHYSICAL },
-        }, .default_ai = MA_WANDER, .sound = "shout"
+        }, .default_ai = MA_WANDER, .sound = N_("shout")
     },
     { /* MT_SNAKE */
-        .name = "snake", .glyph = 'S', .colour = APPLE_GREEN,
+        .name = N_("snake"), .glyph = 'S', .colour = APPLE_GREEN,
         .exp = 1, .ac = 1, .hp_max = 3,
         .level = 2, .intelligence = 3, .speed = NORMAL, .size = TINY,
         .flags = HEAD,
         .attacks = {
             { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
             { .type = ATT_BITE, .base = 2, .damage = DAM_POISON },
-        }, .default_ai = MA_WANDER, .sound = "hiss"
+        }, .default_ai = MA_WANDER, .sound = N_("hiss")
     },
     { /* MT_CENTIPEDE */
-        .name = "giant centipede", .glyph = 'c', .colour = ALSIKE_CLOVER_RED,
+        .name = N_("giant centipede"), .glyph = 'c', .colour = ALSIKE_CLOVER_RED,
         .exp = 2, .ac = 1, .hp_max = 5,
         .level = 2, .intelligence = 2, .speed = NORMAL, .size = SMALL,
         .flags = HEAD,
@@ -204,7 +205,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_JACULUS */
-        .name = "jaculus", .plural_name = "jaculi", .glyph = 'j', .colour = FOAM_GREEN,
+        .name = N_("jaculus"), .plural_name = N_("jaculi"), .glyph = 'j', .colour = FOAM_GREEN,
         .exp = 1, .ac = 3, .hp_max = 8,
         .level = 2, .intelligence = 3, .speed = XFAST, .size = MEDIUM,
         .flags = HEAD | FLY,
@@ -214,7 +215,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_TROGLODYTE */
-        .name = "troglodyte", .glyph = 't', .colour = CARBON_GREY,
+        .name = N_("troglodyte"), .glyph = 't', .colour = CARBON_GREY,
         .exp = 3, .gold_chance = 25, .gold = 320, .ac = 4, .hp_max = 10,
         .level = 2, .intelligence = 5, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS,
@@ -223,7 +224,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GIANT_ANT */
-        .name = "giant ant", .glyph = 'A', .colour = DARK_SAND,
+        .name = N_("giant ant"), .glyph = 'A', .colour = DARK_SAND,
         .exp = 5, .ac = 2, .hp_max = 6,
         .level = 2, .intelligence = 3, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | PACK,
@@ -233,7 +234,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_FLOATING_EYE */
-        .name = "floating eye", .glyph = 'E', .colour = PALE_GREEN_ONION,
+        .name = N_("floating eye"), .glyph = 'E', .colour = PALE_GREEN_ONION,
         .exp = 2, .ac = 2, .hp_max = 12,
         .level = 3, .intelligence = 3, .speed = XSLOW, .size = MEDIUM,
         .flags = FLY | INFRAVISION | RES_CONF,
@@ -242,7 +243,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_LEPRECHAUN */
-        .name = "leprechaun", .glyph = 'L', .colour = IRELAND_GREEN,
+        .name = N_("leprechaun"), .glyph = 'L', .colour = IRELAND_GREEN,
         .exp = 45, .gold = 1500, .ac = 6, .hp_max = 13,
         .level = 3, .intelligence = 6, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS,
@@ -252,7 +253,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_NYMPH */
-        .name = "nymph", .glyph = 'n', .colour = DUSTY_PINK,
+        .name = N_("nymph"), .glyph = 'n', .colour = DUSTY_PINK,
         .exp = 45, .ac = 5, .hp_max = 18,
         .level = 3, .intelligence = 9, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS,
@@ -261,7 +262,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_QUASIT */
-        .name = "quasit", .glyph = 'Q', .colour = DENTIST_GREEN,
+        .name = N_("quasit"), .glyph = 'Q', .colour = DENTIST_GREEN,
         .exp = 15, .ac = 6, .hp_max = 10,
         .level = 3, .intelligence = 3, .speed = FAST, .size = SMALL,
         .flags = HEAD | HANDS | DEMON,
@@ -271,7 +272,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_RUST_MONSTER */
-        .name = "rust monster", .glyph = 'R', .colour = AUTUMN_LEAF_ORANGE,
+        .name = N_("rust monster"), .glyph = 'R', .colour = AUTUMN_LEAF_ORANGE,
         .exp = 25, .ac = 6, .hp_max = 18,
         .level = 3, .intelligence = 3, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | METALLIVORE,
@@ -281,17 +282,17 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ZOMBIE */
-        .name = "zombie", .glyph = 'Z', .colour = OLIVE_GREY,
+        .name = N_("zombie"), .glyph = 'Z', .colour = OLIVE_GREY,
         .exp = 7, .ac = 2, .hp_max = 12,
         .level = 3, .intelligence = 3, .speed = VSLOW, .size = MEDIUM,
         .flags = HEAD | HANDS | UNDEAD | RES_SLEEP | RES_POISON | RES_CONF,
         .attacks = {
             { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
-        }, .default_ai = MA_WANDER, .sound = "groan"
+        }, .default_ai = MA_WANDER, .sound = N_("groan")
     },
     { /* MT_ASSASSIN_BUG */
-        .name = "assassin bug", .glyph = 'a', .colour = DEEP_ORANGE,
+        .name = N_("assassin bug"), .glyph = 'a', .colour = DEEP_ORANGE,
         .exp = 15, .ac = 1, .hp_max = 20,
         .level = 4, .intelligence = 3, .speed = FAST, .size = TINY,
         .flags = HEAD | RES_POISON,
@@ -301,7 +302,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_BUGBEAR */
-        .name = "bugbear", .glyph = 'B', .colour = DEEP_ORANGE,
+        .name = N_("bugbear"), .glyph = 'B', .colour = DEEP_ORANGE,
         .exp = 35, .gold_chance = 10, .gold = 400, .ac = 5, .hp_max = 20,
         .level = 4, .intelligence = 5, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -311,17 +312,17 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_HELLHOUND */
-        .name = "hell hound", .glyph = 'h', .colour = LAVA,
+        .name = N_("hell hound"), .glyph = 'h', .colour = LAVA,
         .exp = 35, .ac = 5, .hp_max = 16,
         .level = 4, .intelligence = 6, .speed = FAST, .size = SMALL,
         .flags = HEAD | RES_FIRE | RES_MAGIC,
         .attacks = {
             { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
             { .type = ATT_BREATH, .base = 8, .damage = DAM_FIRE, .rand = 15 },
-        }, .default_ai = MA_WANDER, .sound = "bark"
+        }, .default_ai = MA_WANDER, .sound = N_("bark")
     },
     { /* MT_ICE_LIZARD */
-        .name = "ice lizard", .glyph = 'i', .colour = CHALKY_BLUE_WHITE,
+        .name = N_("ice lizard"), .glyph = 'i', .colour = CHALKY_BLUE_WHITE,
         .exp = 25, .ac = 4, .hp_max = 20,
         .level = 4, .intelligence = 6, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | SWIM | RES_COLD,
@@ -331,7 +332,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_CENTAUR */
-        .name = "centaur", .glyph = 'C', .colour = AUTUMN_LEAF_BROWN,
+        .name = N_("centaur"), .glyph = 'C', .colour = AUTUMN_LEAF_BROWN,
         .exp = 45, .gold_chance = 50, .gold = 80, .ac = 6, .hp_max = 24,
         .level = 4, .intelligence = 10, .speed = FAST, .size = LARGE,
         .flags = HEAD | HANDS | PACK,
@@ -342,17 +343,17 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_TROLL */
-        .name = "troll", .glyph = 'T', .colour = SMOOTHIE_GREEN,
+        .name = N_("troll"), .glyph = 'T', .colour = SMOOTHIE_GREEN,
         .exp = 300, .gold_chance = 20, .gold = 400, .ac = 8, .hp_max = 50,
         .level = 5, .intelligence = 9, .speed = SLOW, .size = LARGE,
         .flags = HEAD | HANDS | REGENERATE,
         .attacks = {
             { .type = ATT_CLAW, .base = 5, .damage = DAM_PHYSICAL },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }, .default_ai = MA_WANDER, .sound = "grunt"
+        }, .default_ai = MA_WANDER, .sound = N_("grunt")
     },
     { /* MT_YETI */
-        .name = "yeti", .glyph = 'Y', .colour = GREY_GOOSE,
+        .name = N_("yeti"), .glyph = 'Y', .colour = GREY_GOOSE,
         .exp = 100, .gold_chance = 10, .gold = 200, .ac = 4, .hp_max = 35,
         .level = 5, .intelligence = 5, .speed = NORMAL, .size = LARGE,
         .flags = HEAD | HANDS | RES_COLD,
@@ -361,7 +362,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ELF */
-        .name = "elf", .plural_name = "elves", .glyph = 'e', .colour = GREY_CLOUD,
+        .name = N_("elf"), .plural_name = N_("elves"), .glyph = 'e', .colour = GREY_CLOUD,
         .exp = 35, .gold_chance = 50, .gold = 150, .ac = 6, .hp_max = 22,
         .level = 5, .intelligence = 15, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -371,7 +372,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GELATINOUSCUBE */
-        .name = "gelatinous cube", .glyph = 'g', .colour = ALABASTER_GREEN,
+        .name = N_("gelatinous cube"), .glyph = 'g', .colour = ALABASTER_GREEN,
         .exp = 45, .ac = 1, .hp_max = 22,
         .level = 5, .intelligence = 3, .speed = XSLOW, .size = LARGE,
         .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF | PASSIVE,
@@ -380,7 +381,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_WHITE_DRAGON */
-        .name = "white dragon", .glyph = 'd', .colour = WHITE,
+        .name = N_("white dragon"), .glyph = 'd', .colour = WHITE,
         .exp = 1000, .gold = 500, .ac = 8, .hp_max = 55,
         .level = 5, .intelligence = 16, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | DRAGON | RES_COLD,
@@ -390,7 +391,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_METAMORPH */
-        .name = "metamorph", .glyph = 'm', .colour = SILVER,
+        .name = N_("metamorph"), .glyph = 'm', .colour = SILVER,
         .exp = 40, .ac = 3, .hp_max = 30,
         .level = 6, .intelligence = 3, .speed = NORMAL, .size = MEDIUM,
         .flags = 0,
@@ -399,7 +400,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_VORTEX */
-        .name = "vortex", .plural_name = "vortexes", .glyph = 'v', .colour = SKY_BLUE,
+        .name = N_("vortex"), .plural_name = N_("vortexes"), .glyph = 'v', .colour = SKY_BLUE,
         .exp = 55, .ac = 6, .hp_max = 30,
         .level = 6, .intelligence = 3, .speed = VFAST, .size = TINY,
         .flags = RES_SLEEP | RES_POISON | FLY | RES_ELEC | RES_CONF,
@@ -408,7 +409,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ZILLER */
-        .name = "ziller", .glyph = 'z', .colour = WOOL_VIOLET,
+        .name = N_("ziller"), .glyph = 'z', .colour = WOOL_VIOLET,
         .exp = 35, .ac = 8, .hp_max = 30,
         .level = 6, .intelligence = 3, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | RES_CONF,
@@ -418,7 +419,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_VIOLET_FUNGUS */
-        .name = "violet fungus", .plural_name = "violet fungi", .glyph = 'F', .colour = VIOLET,
+        .name = N_("violet fungus"), .plural_name = N_("violet fungi"), .glyph = 'F', .colour = VIOLET,
         .exp = 100, .ac = 0, .hp_max = 38,
         .level = 6, .intelligence = 3, .speed = XSLOW, .size = MEDIUM,
         .flags = RES_SLEEP | RES_POISON | RES_CONF,
@@ -428,7 +429,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_WRAITH */
-        .name = "wraith", .glyph = 'W', .colour = VAMPIRE_GREY,
+        .name = N_("wraith"), .glyph = 'W', .colour = VAMPIRE_GREY,
         .exp = 325, .ac = 7, .hp_max = 30,
         .level = 6, .intelligence = 3, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS | UNDEAD | RES_SLEEP | RES_POISON | RES_CONF,
@@ -437,7 +438,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_FORVALAKA */
-        .name = "forvalaka", .glyph = 'f', .colour = IRIDIUM,
+        .name = N_("forvalaka"), .glyph = 'f', .colour = IRIDIUM,
         .exp = 280, .ac = 4, .hp_max = 50,
         .level = 6, .intelligence = 7, .speed = DOUBLE, .size = MEDIUM,
         .flags = HEAD | UNDEAD | INFRAVISION | RES_POISON,
@@ -446,7 +447,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_LAMA_NOBE */
-        .name = "lama nobe", .glyph = 'l', .colour = LIGHT_FUCHSIA,
+        .name = N_("lama nobe"), .glyph = 'l', .colour = LIGHT_FUCHSIA,
         .exp = 80, .ac = 3, .hp_max = 35,
         .level = 7, .intelligence = 6, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD,
@@ -456,7 +457,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_OSQUIP */
-        .name = "osquip", .glyph = 'o', .colour = SAND,
+        .name = N_("osquip"), .glyph = 'o', .colour = SAND,
         .exp = 100, .ac = 5, .hp_max = 35,
         .level = 7, .intelligence = 4, .speed = VFAST, .size = SMALL,
         .flags = HEAD | PACK,
@@ -465,7 +466,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_ROTHE */
-        .name = "rothe", .glyph = 'r', .colour = AUTUMN_LEAF_BROWN,
+        .name = N_("rothe"), .glyph = 'r', .colour = AUTUMN_LEAF_BROWN,
         .exp = 250, .ac = 5, .hp_max = 50,
         .level = 7, .intelligence = 5, .speed = VFAST, .size = LARGE,
         .flags = HEAD | INFRAVISION | PACK,
@@ -475,7 +476,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_XORN */
-        .name = "xorn", .glyph = 'X', .colour = PALE_RED,
+        .name = N_("xorn"), .glyph = 'X', .colour = PALE_RED,
         .exp = 300, .ac = 10, .hp_max = 60,
         .level = 7, .intelligence = 13, .speed = NORMAL, .size = MEDIUM,
         .flags = INFRAVISION | RES_COLD | RES_FIRE,
@@ -484,7 +485,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_VAMPIRE */
-        .name = "vampire", .glyph = 'V', .colour = DRIED_BLOOD,
+        .name = N_("vampire"), .glyph = 'V', .colour = DRIED_BLOOD,
         .exp = 1000, .ac = 7, .hp_max = 50,
         .level = 7, .intelligence = 17, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS | FLY | UNDEAD | INFRAVISION | REGENERATE | RES_SLEEP | RES_POISON | RES_CONF,
@@ -494,7 +495,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_STALKER */
-        .name = "invisible stalker", .glyph = 'I', .colour = ASH_GREY,
+        .name = N_("invisible stalker"), .glyph = 'I', .colour = ASH_GREY,
         .exp = 350, .ac = 7, .hp_max = 50,
         .level = 7, .intelligence = 14, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | FLY | INVISIBLE,
@@ -503,16 +504,16 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_POLTERGEIST */
-        .name = "poltergeist", .glyph = 'p', .colour = REGENT_GREY,
+        .name = N_("poltergeist"), .glyph = 'p', .colour = REGENT_GREY,
         .exp = 450, .ac = 6, .hp_max = 50,
         .level = 8, .intelligence = 5, .speed = NORMAL, .size = MEDIUM,
         .flags = FLY | SPIRIT | INVISIBLE | RES_SLEEP | RES_POISON,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
-        }, .default_ai = MA_WANDER, .sound = "laugh"
+        }, .default_ai = MA_WANDER, .sound = N_("laugh")
     },
     { /* MT_DISENCHANTRESS */
-        .name = "disenchantress", .plural_name = "disenchantresses", .glyph = 'q', .colour = PALE_TURQUOISE,
+        .name = N_("disenchantress"), .plural_name = N_("disenchantresses"), .glyph = 'q', .colour = PALE_TURQUOISE,
         .exp = 500, .ac = 7, .hp_max = 50,
         .level = 8, .intelligence = 5, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS | METALLIVORE,
@@ -521,7 +522,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_SHAMBLINGMOUND */
-        .name = "shambling mound", .glyph = 's', .colour = GREEN_BROWN,
+        .name = N_("shambling mound"), .glyph = 's', .colour = GREEN_BROWN,
         .exp = 400, .ac = 8, .hp_max = 45,
         .level = 8, .intelligence = 6, .speed = VSLOW, .size = GIANT,
         .flags = RES_SLEEP | RES_POISON | RES_ELEC,
@@ -530,7 +531,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_YELLOW_MOLD */
-        .name = "yellow mold", .glyph = 'y', .colour = HONEY_YELLOW,
+        .name = N_("yellow mold"), .glyph = 'y', .colour = HONEY_YELLOW,
         .exp = 250, .ac = 0, .hp_max = 35,
         .level = 8, .intelligence = 3, .speed = XSLOW, .size = SMALL,
         .flags = RES_SLEEP | RES_POISON | RES_CONF,
@@ -539,7 +540,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_UMBER_HULK */
-        .name = "umber hulk", .glyph = 'U', .colour = DARK_ORANGE,
+        .name = N_("umber hulk"), .glyph = 'U', .colour = DARK_ORANGE,
         .exp = 600, .ac = 12, .hp_max = 65,
         .level = 8, .intelligence = 14, .speed = SLOW, .size = GIANT,
         .flags = HEAD | HANDS | INFRAVISION | RES_CONF,
@@ -549,7 +550,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GNOME_KING */
-        .name = "gnome king", .glyph = 'G', .colour = CONIFER,
+        .name = N_("gnome king"), .glyph = 'G', .colour = CONIFER,
         .exp = 3000, .gold = 2000, .reroll_chance = 80, .ac = 11, .hp_max = 100,
         .level = 9, .intelligence = 18, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS | RES_SLEEP,
@@ -558,7 +559,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_MIMIC */
-        .name = "mimic", .glyph = 'M', .colour = AUTUMN_LEAF_BROWN,
+        .name = N_("mimic"), .glyph = 'M', .colour = AUTUMN_LEAF_BROWN,
         .exp = 99, .ac = 5, .hp_max = 55,
         .level = 9, .intelligence = 8, .speed = SLOW, .size = MEDIUM,
         .flags = MIMIC,
@@ -567,7 +568,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_WATER_LORD */
-        .name = "water lord", .glyph = 'w', .colour = DEEP_SEA_BLUE,
+        .name = N_("water lord"), .glyph = 'w', .colour = DEEP_SEA_BLUE,
         .exp = 15000, .ac = 12, .hp_max = 150,
         .level = 9, .intelligence = 20, .speed = NORMAL, .size = LARGE,
         .flags = HEAD | NOBEHEAD | HANDS | RES_SLEEP | SWIM,
@@ -576,7 +577,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_PURPLE_WORM */
-        .name = "purple worm", .glyph = 'P', .colour = DEEP_PURPLE,
+        .name = N_("purple worm"), .glyph = 'P', .colour = DEEP_PURPLE,
         .exp = 15000, .ac = 12, .hp_max = 120,
         .level = 9, .intelligence = 3, .speed = VSLOW, .size = GARGANTUAN,
         .flags = HEAD | RES_POISON,
@@ -586,7 +587,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_XVART */
-        .name = "xvart", .glyph = 'x', .colour = CHALCEDONY_VIOLET,
+        .name = N_("xvart"), .glyph = 'x', .colour = CHALCEDONY_VIOLET,
         .exp = 1000, .ac = 11, .hp_max = 90,
         .level = 9, .intelligence = 13, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | HANDS | INFRAVISION,
@@ -595,7 +596,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_BRONZE_DRAGON */
-        .name = "bronze dragon", .glyph = 'D', .colour = GREEN_BROWN,
+        .name = N_("bronze dragon"), .glyph = 'D', .colour = GREEN_BROWN,
         .exp = 4000, .gold = 300, .ac = 10, .hp_max = 80,
         .level = 9, .intelligence = 16, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON,
@@ -605,7 +606,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GREEN_DRAGON */
-        .name = "green dragon", .glyph = 'D', .colour = GREEN_HAZE,
+        .name = N_("green dragon"), .glyph = 'D', .colour = GREEN_HAZE,
         .exp = 2500, .gold = 200, .ac = 12, .hp_max = 70,
         .level = 9, .intelligence = 15, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON | RES_POISON,
@@ -615,7 +616,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_SILVER_DRAGON */
-        .name = "silver dragon", .glyph = 'D', .colour = SILVER,
+        .name = N_("silver dragon"), .glyph = 'D', .colour = SILVER,
         .exp = 10000, .gold = 700, .ac = 13, .hp_max = 100,
         .level = 10, .intelligence = 20, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON,
@@ -625,7 +626,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_PLATINUM_DRAGON */
-        .name = "platinum dragon", .glyph = 'D', .colour = PLATINUM,
+        .name = N_("platinum dragon"), .glyph = 'D', .colour = PLATINUM,
         .exp = 24000, .gold = 1000, .ac = 15, .hp_max = 130,
         .level = 11, .intelligence = 22, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON | RES_CONF,
@@ -635,7 +636,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_RED_DRAGON */
-        .name = "red dragon", .glyph = 'D', .colour = BLOOD_RED,
+        .name = N_("red dragon"), .glyph = 'D', .colour = BLOOD_RED,
         .exp = 14000, .gold = 800, .ac = 14, .hp_max = 110,
         .level = 11, .intelligence = 19, .speed = NORMAL, .size = GIANT,
         .flags = HEAD | FLY | DRAGON | RES_FIRE,
@@ -645,7 +646,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_SPIRIT_NAGA */
-        .name = "spirit naga", .glyph = 'N', .colour = BLUE_LOTUS,
+        .name = N_("spirit naga"), .glyph = 'N', .colour = BLUE_LOTUS,
         .exp = 20000, .ac = 16, .hp_max = 95,
         .level = 11, .intelligence = 23, .speed = FAST, .size = LARGE,
         .flags = HEAD | NOBEHEAD | FLY | SPIRIT | INFRAVISION | RES_SLEEP | RES_POISON | RES_CONF | RES_MAGIC,
@@ -655,7 +656,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_GREEN_URCHIN */
-        .name = "green urchin", .glyph = 'u', .colour = TEALISH_GREEN,
+        .name = N_("green urchin"), .glyph = 'u', .colour = TEALISH_GREEN,
         .exp = 5000, .ac = 17, .hp_max = 85,
         .level = 10, .intelligence = 3, .speed = SLOW, .size = SMALL,
         .flags = 0,
@@ -665,7 +666,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_I */
-        .name = "type I demon lord", .glyph = '&', .colour = WOOL_VIOLET,
+        .name = N_("type I demon lord"), .glyph = '&', .colour = WOOL_VIOLET,
         .exp = 50000, .ac = 17, .hp_max = 140,
         .level = 12, .intelligence = 20, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
@@ -675,7 +676,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_II */
-        .name = "type II demon lord", .glyph = '&', .colour = CHALCEDONY_VIOLET,
+        .name = N_("type II demon lord"), .glyph = '&', .colour = CHALCEDONY_VIOLET,
         .exp = 75000, .ac = 18, .hp_max = 160,
         .level = 13, .intelligence = 21, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
@@ -685,7 +686,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_III */
-        .name = "type III demon lord", .glyph = '&', .colour = DEEP_MAGENTA,
+        .name = N_("type III demon lord"), .glyph = '&', .colour = DEEP_MAGENTA,
         .exp = 100000, .ac = 19, .hp_max = 180,
         .level = 14, .intelligence = 22, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
@@ -695,7 +696,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_IV */
-        .name = "type IV demon lord", .glyph = '&', .colour = BLOOD_RED,
+        .name = N_("type IV demon lord"), .glyph = '&', .colour = BLOOD_RED,
         .exp = 125000, .ac = 20, .hp_max = 200,
         .level = 15, .intelligence = 23, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
@@ -705,7 +706,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_V */
-        .name = "type V demon lord", .glyph = '&', .colour = RED_LILAC,
+        .name = N_("type V demon lord"), .glyph = '&', .colour = RED_LILAC,
         .exp = 150000, .ac = 21, .hp_max = 220,
         .level = 16, .intelligence = 24, .speed = FAST, .size = MEDIUM,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
@@ -715,7 +716,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_VI */
-        .name = "type VI demon lord", .glyph = '&', .colour = SUNSET_RED,
+        .name = N_("type VI demon lord"), .glyph = '&', .colour = SUNSET_RED,
         .exp = 175000, .ac = 22, .hp_max = 240,
         .level = 17, .intelligence = 25, .speed = FAST, .size = LARGE,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_MAGIC | RES_SLEEP,
@@ -725,7 +726,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMONLORD_VII */
-        .name = "type VII demon lord", .glyph = '&', .colour = DARK_RED,
+        .name = N_("type VII demon lord"), .glyph = '&', .colour = DARK_RED,
         .exp = 200000, .ac = 23, .hp_max = 260,
         .level = 18, .intelligence = 26, .speed = FAST, .size = GIANT,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_POISON | RES_CONF | RES_MAGIC | RES_SLEEP,
@@ -735,7 +736,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_DEMON_PRINCE */
-        .name = "demon prince", .glyph = '&', .colour = DRIED_BLOOD,
+        .name = N_("demon prince"), .glyph = '&', .colour = DRIED_BLOOD,
         .exp = 300000, .ac = 25, .hp_max = 345,
         .level = 25, .intelligence = 28, .speed = FAST, .size = GIANT,
         .flags = HEAD | NOBEHEAD | HANDS | FLY | INVISIBLE | INFRAVISION | DEMON | RES_FIRE | RES_SLEEP | RES_POISON | RES_CONF | RES_MAGIC,
@@ -745,7 +746,7 @@ monster_data_t monster_data[] = {
         }, .default_ai = MA_WANDER
     },
     { /* MT_TOWN_PERSON */
-        .name = "human", .glyph = '@', .colour = LAVENDER,
+        .name = N_("human"), .glyph = '@', .colour = LAVENDER,
         .exp = 0, .ac = 0, .hp_max = 10,
         .level = 1, .intelligence = 10, .speed = NORMAL, .size = MEDIUM,
         .flags = HEAD | HANDS,
@@ -1389,21 +1390,21 @@ bool monster_in_sight(monster *m)
 static const char *get_town_person_name(int value)
 {
     // various jobs
-    const char *npc_desc[] = { "peasant woman", "old man", "old woman",
-                               "little boy", "young girl", "fisherman",
-                               "midwife", "errand boy", "bar maid",
-                               "stable-lad", "innkeeper", "woodcutter",
-                               "carpenter", "clerk", "barber",
-                               "teacher", "town guard", "postman",
-                               "cobbler", "baker", "merchant",
-                               "clergyman", "student", "blacksmith",
-                               "nurse", "seamstress", "cartwright",
-                               "student", "sales clerk", "miller"
+    const char *npc_desc[] = { N_("peasant woman"), N_("old man"), N_("old woman"),
+                               N_("little boy"), N_("young girl"), N_("fisherman"),
+                               N_("midwife"), N_("errand boy"), N_("bar maid"),
+                               N_("stable-lad"), N_("innkeeper"), N_("woodcutter"),
+                               N_("carpenter"), N_("clerk"), N_("barber"),
+                               N_("teacher"), N_("town guard"), N_("postman"),
+                               N_("cobbler"), N_("baker"), N_("merchant"),
+                               N_("clergyman"), N_("student"), N_("blacksmith"),
+                               N_("nurse"), N_("seamstress"), N_("cartwright"),
+                               N_("student"), N_("sales clerk"), N_("miller")
                              };
     if (value >= 30)
-        return "peasant";
+        return _("peasant");
 
-    return npc_desc[value];
+    return _(npc_desc[value]);
 }
 
 monster_action_t monster_action(monster *m)
@@ -1420,7 +1421,7 @@ const char *monster_get_name(monster *m)
     /* only show real names of invisible monsters in
      * wizard mode when full visibility is enabled */
     if (!monster_in_sight(m) && !game_fullvis(nlarn))
-        return ("unseen monster");
+        return _("unseen monster");
 
     if (monster_type(m) == MT_TOWN_PERSON)
         return get_town_person_name(m->number);
@@ -1441,7 +1442,7 @@ const char* monster_type_plural_name(monster_t mt, const int count)
         }
         else
         {
-            return monster_data[mt].plural_name;
+            return _(monster_data[mt].plural_name);
         }
     }
 
@@ -1463,9 +1464,9 @@ void monster_die(monster *m, struct player *p)
 
         /* give a different message if a servant is expired */
         if (monster_action(m) == MA_SERVE && m->number == 0)
-            message = "The %s disappears!";
+            message = _("The %s disappears!");
         else
-            message = "The %s dies!";
+            message = _("The %s dies!");
 
         log_add_entry(nlarn->log, message, monster_get_name(m));
     }
@@ -1500,7 +1501,7 @@ void monster_die(monster *m, struct player *p)
                 }
             }
             if (count && monster_nearby(m))
-                log_add_entry(nlarn->log, "You hear a splash!");
+                log_add_entry(nlarn->log, _("You hear a splash!"));
         }
         else
         {
@@ -1555,39 +1556,39 @@ void monster_level_enter(monster *m, struct map *l)
     sobject_t target;
     position npos;
     const char *what = NULL;
-    const char *how  = "comes";
+    const char *how  = N_("comes");
 
     /* check if the monster used the stairs */
     switch (source)
     {
     case LS_CAVERNS_EXIT:
         target = LS_CAVERNS_ENTRY;
-        what = "through";
+        what = N_("through");
         break;
 
     case LS_CAVERNS_ENTRY:
         target = LS_CAVERNS_EXIT;
-        what = "through";
+        what = N_("through");
         break;
 
     case LS_STAIRSDOWN:
         target = LS_STAIRSUP;
-        what = "down";
+        what = N_("down");
         break;
 
     case LS_STAIRSUP:
         target = LS_STAIRSDOWN;
-        what = "up";
+        what = N_("up");
         break;
 
     case LS_ELEVATORDOWN:
         target = LS_ELEVATORUP;
-        what = "down";
+        what = N_("down");
         break;
 
     case LS_ELEVATORUP:
         target = LS_ELEVATORDOWN;
-        what = "up";
+        what = N_("up");
         break;
 
     default:
@@ -1610,7 +1611,7 @@ void monster_level_enter(monster *m, struct map *l)
     if (pos_identical(nlarn->p->pos, npos))
     {
         /* player is standing at the target position */
-        how = "squeezes past";
+        how = N_("squeezes past");
         npos = map_find_space_in(l, rect_new_sized(npos, 1), LE_MONSTER, false);
     }
     else
@@ -1634,8 +1635,8 @@ void monster_level_enter(monster *m, struct map *l)
     /* log the event */
     if (monster_in_sight(m) && target)
     {
-        log_add_entry(nlarn->log, "The %s %s %s %s.", monster_get_name(m),
-                      how, what, so_get_desc(target));
+        log_add_entry(nlarn->log, _("The %s %s %s %s."), monster_get_name(m),
+                      _(how), _(what), so_get_desc(target));
     }
 }
 
@@ -1719,13 +1720,14 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
             if (m->action == MA_ATTACK && monster_sound(m))
             {
                 const char *sound = monster_sound(m);
-                log_add_entry(g->log, "The %s %s%ss!",
-                              monster_name(m), sound,
-                              sound[strlen(sound) - 1] == 's' ? "e": "");
+                log_add_entry(g->log,
+                              sound[strlen(sound) - 1] == 's'
+                                  ? _("The %s %ses!") : _("The %s %ss!"),
+                              monster_name(m), sound);
             }
             else if (m->action == MA_FLEE)
             {
-                log_add_entry(g->log, "The %s turns to flee!",
+                log_add_entry(g->log, _("The %s turns to flee!"),
                         monster_get_name(m));
             }
         }
@@ -1807,7 +1809,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                    current position. */
                 monster_update_player_pos(m, g->p->pos);
 
-                log_add_entry(g->log, "The %s bumps into you.", monster_get_name(m));
+                log_add_entry(g->log, _("The %s bumps into you."), monster_get_name(m));
             }
 
             /* check for door */
@@ -1819,7 +1821,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                     /* notify the player if the door is visible */
                     if (monster_in_sight(m))
                     {
-                        log_add_entry(g->log, "The %s bumps into the door.",
+                        log_add_entry(g->log, _("The %s bumps into the door."),
                                       monster_get_name(m));
                     }
                 }
@@ -1831,7 +1833,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                     /* notify the player if the door is visible */
                     if (monster_in_sight(m))
                     {
-                        log_add_entry(g->log, "The %s opens the door.",
+                        log_add_entry(g->log, _("The %s opens the door."),
                                       monster_get_name(m));
                     }
                 }
@@ -1859,7 +1861,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                         map_sobject_set(mmap, old_pos, LS_CLOSEDDOOR);
 
                         if (monster_in_sight(m))
-                            log_add_entry(g->log, "The %s closes the door.",
+                            log_add_entry(g->log, _("The %s closes the door."),
                                           monster_get_name(m));
                     }
                 }
@@ -1874,7 +1876,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                         case LT_WALL:
                             if (monster_in_sight(m))
                             {
-                                log_add_entry(g->log, "The %s bumps into %s.",
+                                log_add_entry(g->log, _("The %s bumps into %s."),
                                         monster_get_name(m), mt_get_desc(nle));
                             }
                             break;
@@ -1882,7 +1884,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                         case LT_LAVA:
                         case LT_DEEPWATER:
                             if (monster_in_sight(m)) {
-                                log_add_entry(g->log, "The %s sinks into %s.",
+                                log_add_entry(g->log, _("The %s sinks into %s."),
                                         monster_get_name(m), mt_get_desc(nle));
                             }
                             monster_die(m, g->p);
@@ -1952,16 +1954,16 @@ void monster_polymorph(monster *m, int max_level)
             switch (old_elem)
             {
             case LE_FLYING_MONSTER:
-                log_add_entry(nlarn->log, "The %s falls into the %s!",
+                log_add_entry(nlarn->log, _("The %s falls into the %s!"),
                               monster_get_name(m),
                               mt_get_desc(map_tiletype_at(monster_map(m), m->pos)));
                 break;
             case LE_SWIMMING_MONSTER:
-                log_add_entry(nlarn->log, "The %s sinks like a rock!",
+                log_add_entry(nlarn->log, _("The %s sinks like a rock!"),
                               monster_get_name(m));
                 break;
             case LE_XORN:
-                log_add_entry(nlarn->log, "The %s is trapped in the wall!",
+                log_add_entry(nlarn->log, _("The %s is trapped in the wall!"),
                               monster_get_name(m));
                 break;
             default:
@@ -2001,7 +2003,7 @@ int monster_items_pickup(monster *m)
     {
         item *it = inv_get(*tinv, idx);
         item_t typ = it->type;
-        const char *pickup_desc = "The %s picks up %s.";
+        const char *pickup_desc = _("The %s picks up %s.");
 
         /*  rust monster eats metal stuff */
         if (m->type == MT_RUST_MONSTER && IM_IRON == item_material(it))
@@ -2011,7 +2013,7 @@ int monster_items_pickup(monster *m)
                 gchar *buf = item_describe(it,
                         player_item_identified(nlarn->p, it), false, false);
 
-                log_add_entry(nlarn->log, "The %s touches %s with its antennae.",
+                log_add_entry(nlarn->log, _("The %s touches %s with its antennae."),
                         monster_get_name(m), buf);
                 g_free(buf);
             }
@@ -2039,7 +2041,7 @@ int monster_items_pickup(monster *m)
         {
             /* gelatinous cubes engulf all items */
             pick_up = true;
-            pickup_desc = "The %s engulfs %s.";
+            pickup_desc = _("The %s engulfs %s.");
         }
 
         if (pick_up)
@@ -2105,13 +2107,13 @@ static int monster_breath_attack(monster *m, player *p, attack att)
 
     if (monster_in_sight(m))
     {
-        log_add_entry(nlarn->log, "The %s breathes a %s!", monster_get_name(m),
-                      monster_breath_data[att.damage].desc);
+        log_add_entry(nlarn->log, _("The %s breathes a %s!"), monster_get_name(m),
+                      _(monster_breath_data[att.damage].desc));
     }
     else
     {
-        log_add_entry(nlarn->log, "A %s spews forth from nowhere!",
-                      monster_breath_data[att.damage].desc);
+        log_add_entry(nlarn->log, _("A %s spews forth from nowhere!"),
+                      _(monster_breath_data[att.damage].desc));
     }
 
     /* handle the breath */
@@ -2170,9 +2172,9 @@ void monster_attack_monster(monster *attacker, monster *target)
     if (dam->type == DAM_PHYSICAL)
     {
         if (either_visible)
-            log_add_entry(nlarn->log, "The %s %s the %s.",
+            log_add_entry(nlarn->log, _("The %s %s the %s."),
                           monster_get_name(attacker),
-                          monster_attack_verb[att.type],
+                          _(monster_attack_verb[att.type]),
                           monster_get_name(target));
         monster_damage_take(target, dam);
     }
@@ -2202,7 +2204,7 @@ void monster_player_attack(monster *m, player *p)
 
         if (!map_is_monster_at(mmap, p->pos) && monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, "The %s bashes into thin air.",
+            log_add_entry(nlarn->log, _("The %s bashes into thin air."),
                     monster_get_name(m));
         }
 
@@ -2218,7 +2220,7 @@ void monster_player_attack(monster *m, player *p)
     {
         if (monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, "The %s misses wildly.",
+            log_add_entry(nlarn->log, _("The %s misses wildly."),
                           monster_get_name(m));
         }
         return;
@@ -2294,8 +2296,8 @@ void monster_player_attack(monster *m, player *p)
         }
         else
         {
-            log_add_entry(nlarn->log, "The %s %s you, but nothing happens.",
-                monster_get_name(m), monster_attack_verb[att.type]);
+            log_add_entry(nlarn->log, _("The %s %s you, but nothing happens."),
+                monster_get_name(m), _(monster_attack_verb[att.type]));
 
             damage_free(dam);
 
@@ -2333,15 +2335,15 @@ void monster_player_attack(monster *m, player *p)
         if (att.type != ATT_GAZE || !player_effect(p, ET_BLINDNESS))
         {
             /* log the attack */
-            log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
-                          monster_attack_verb[att.type]);
+            log_add_entry(nlarn->log, _("The %s %s you."), monster_get_name(m),
+                          _(monster_attack_verb[att.type]));
         }
         /* 50% chance of reflecting adjacent gazes */
         if (att.type == ATT_GAZE && player_effect(p, ET_REFLECTION)
                 && chance(50))
         {
             if (!player_effect(p, ET_BLINDNESS))
-                log_add_entry(nlarn->log, "The gaze is reflected harmlessly.");
+                log_add_entry(nlarn->log, _("The gaze is reflected harmlessly."));
         }
         else
             player_damage_take(p, dam, PD_MONSTER, m->type);
@@ -2367,7 +2369,7 @@ static bool monster_shoot_hit(const GList *traj,
     if (hit_m != NULL)
     {
         if (monster_in_sight(hit_m))
-            log_add_entry(nlarn->log, "%s hits the %s.",
+            log_add_entry(nlarn->log, _("%s hits the %s."),
                           adesc, monster_get_name(hit_m));
         monster_damage_take(hit_m, damage_copy(dam));
         g_free(adesc);
@@ -2379,11 +2381,11 @@ static bool monster_shoot_hit(const GList *traj,
         if (player_evade(nlarn->p))
         {
             if (!player_effect(nlarn->p, ET_BLINDNESS))
-                log_add_entry(nlarn->log, "%s misses you.", adesc);
+                log_add_entry(nlarn->log, _("%s misses you."), adesc);
         }
         else
         {
-            log_add_entry(nlarn->log, "%s hits you!", adesc);
+            log_add_entry(nlarn->log, _("%s hits you!"), adesc);
             player_damage_take(nlarn->p, damage_copy(dam), PD_MONSTER,
                                monster_type(damo->originator));
         }
@@ -2430,13 +2432,13 @@ int monster_player_ranged_attack(monster *m, player *p)
             {
                 gchar *adesc = item_describe(ammo_item,
                         player_item_known(nlarn->p, ammo_item), true, false);
-                log_add_entry(nlarn->log, "The %s shoots %s at you.",
+                log_add_entry(nlarn->log, _("The %s shoots %s at you."),
                               monster_get_name(m), adesc);
                 g_free(adesc);
             }
             else
-                log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
-                              monster_attack_verb[att.type]);
+                log_add_entry(nlarn->log, _("The %s %s you."), monster_get_name(m),
+                              _(monster_attack_verb[att.type]));
         }
 
         /* pick trajectory appearance from ammo material, or use defaults */
@@ -2460,13 +2462,13 @@ int monster_player_ranged_attack(monster *m, player *p)
     {
         if (!player_effect(p, ET_BLINDNESS))
         {
-            log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
-                          monster_attack_verb[att.type]);
+            log_add_entry(nlarn->log, _("The %s %s you."), monster_get_name(m),
+                          _(monster_attack_verb[att.type]));
         }
         if (player_effect(p, ET_REFLECTION))
         {
             if (!player_effect(p, ET_BLINDNESS))
-                log_add_entry(nlarn->log, "The gaze is reflected harmlessly.");
+                log_add_entry(nlarn->log, _("The gaze is reflected harmlessly."));
         }
         else
         {
@@ -2507,7 +2509,7 @@ monster *monster_damage_take(monster *m, damage *dam)
 
         if (dam->amount < 1 && monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, "The %s isn't hurt.",
+            log_add_entry(nlarn->log, _("The %s isn't hurt."),
                     monster_get_name(m));
         }
         else if(dam->amount > 0 && monster_bleeds)
@@ -2544,8 +2546,10 @@ monster *monster_damage_take(monster *m, damage *dam)
             dam->amount /= monster_level(m);
             if (monster_in_sight(m))
             {
-                log_add_entry(nlarn->log, "The %s %sresists the magic.",
-                        monster_get_name(m), dam->amount > 0 ? "partly " : "");
+                log_add_entry(nlarn->log, dam->amount > 0
+                            ? _("The %s partly resists the magic.")
+                            : _("The %s resists the magic."),
+                        monster_get_name(m));
             }
         }
         break;
@@ -2562,8 +2566,10 @@ monster *monster_damage_take(monster *m, damage *dam)
                  (min(monster_level(m), 10) * 10));
             if (monster_in_sight(m))
             {
-                log_add_entry(nlarn->log, "The %s %sresists the flames.",
-                        monster_get_name(m), dam->amount > 0 ? "partly " : "");
+                log_add_entry(nlarn->log, dam->amount > 0
+                            ? _("The %s partly resists the flames.")
+                            : _("The %s resists the flames."),
+                        monster_get_name(m));
             }
         }
         break;
@@ -2580,8 +2586,10 @@ monster *monster_damage_take(monster *m, damage *dam)
                  (min(monster_level(m), 10) * 10));
             if (monster_in_sight(m))
             {
-               log_add_entry(nlarn->log, "The %s %s the cold.",
-                    monster_get_name(m), dam->amount > 0 ? "partly resists" : "loves");
+               log_add_entry(nlarn->log, dam->amount > 0
+                        ? _("The %s partly resists the cold.")
+                        : _("The %s loves the cold."),
+                    monster_get_name(m));
             }
         }
         break;
@@ -2597,7 +2605,7 @@ monster *monster_damage_take(monster *m, damage *dam)
             dam->amount = 0;
             if (monster_in_sight(m))
             {
-                log_add_entry(nlarn->log, "The %s is not affected!",
+                log_add_entry(nlarn->log, _("The %s is not affected!"),
                         monster_get_name(m));
             }
         }
@@ -2667,23 +2675,23 @@ monster *monster_damage_take(monster *m, damage *dam)
                 {
                     if (seen_old && wdesc != NULL)
                     {
-                        log_add_entry(nlarn->log, "The %s drops %s.",
+                        log_add_entry(nlarn->log, _("The %s drops %s."),
                                         old_name, wdesc);
                     }
 
                     if (seen_old && seen_new)
                     {
-                        log_add_entry(nlarn->log, "The %s turns into a %s!",
+                        log_add_entry(nlarn->log, _("The %s turns into a %s!"),
                                 old_name, monster_get_name(m));
                     }
                     else if (seen_old)
                     {
-                        log_add_entry(nlarn->log, "The %s vanishes!",
+                        log_add_entry(nlarn->log, _("The %s vanishes!"),
                                         old_name);
                     }
                     else
                     {
-                        log_add_entry(nlarn->log, "A %s suddenly appears!",
+                        log_add_entry(nlarn->log, _("A %s suddenly appears!"),
                                 monster_get_name(m));
                     }
                 }
@@ -3264,7 +3272,7 @@ static bool monster_weapon_wield(monster *m)
         gchar *buf = item_describe(m->eq_weapon, player_item_identified(nlarn->p,
                                 m->eq_weapon), true, false);
 
-        log_add_entry(nlarn->log, "The %s wields %s.", monster_get_name(m), buf);
+        log_add_entry(nlarn->log, _("The %s wields %s."), monster_get_name(m), buf);
         g_free(buf);
     }
 
@@ -3285,7 +3293,7 @@ static bool monster_item_disenchant(monster *m, struct player *p)
     item *it = inv_get(p->inventory, rand_0n(inv_length(p->inventory)));
 
     /* log the attack */
-    log_add_entry(nlarn->log, "The %s hits you.",
+    log_add_entry(nlarn->log, _("The %s hits you."),
                   monster_get_name(m));
 
     /* Don't destroy the potion of cure dianthroritis. */
@@ -3299,14 +3307,16 @@ static bool monster_item_disenchant(monster *m, struct player *p)
                                     (it->count == 1), true);
 
         desc[0] = g_ascii_toupper(desc[0]);
-        log_add_entry(nlarn->log, "%s resist%s the attack.",
-                      desc, (it->count == 1) ? "s" : "");
+        log_add_entry(nlarn->log, (it->count == 1)
+                      ? _("%s resists the attack.")
+                      : _("%s resist the attack."),
+                      desc);
 
         it->blessed_known = true;
         g_free(desc);
         return true;
     }
-    log_add_entry(nlarn->log, "You feel a sense of loss.");
+    log_add_entry(nlarn->log, _("You feel a sense of loss."));
 
     if (item_is_optimizable(it->type))
     {
@@ -3339,7 +3349,7 @@ static bool monster_item_rust(monster *m, struct player *p)
         gchar *buf = item_describe(*it,
                 player_item_identified(nlarn->p, *it), false, true);
 
-        log_add_entry(nlarn->log, "The %s touches %s with its antennae.",
+        log_add_entry(nlarn->log, _("The %s touches %s with its antennae."),
                 monster_get_name(m), buf);
         g_free(buf);
 
@@ -3348,7 +3358,7 @@ static bool monster_item_rust(monster *m, struct player *p)
     }
     else
     {
-        log_add_entry(nlarn->log, "Nothing happens.");
+        log_add_entry(nlarn->log, _("Nothing happens."));
         return false;
     }
 }
@@ -3375,8 +3385,8 @@ static bool monster_player_rob(monster *m, struct player *p, item_t item_type)
             it = item_new(IT_GOLD, rand_1n(1 + (player_gold >> 1)));
             player_remove_gold(p, it->count);
 
-            log_add_entry(nlarn->log, "The %s picks your pocket. " \
-                          "Your purse feels lighter.", monster_get_name(m));
+            log_add_entry(nlarn->log, _("The %s picks your pocket. "
+                          "Your purse feels lighter."), monster_get_name(m));
         }
         else
         {
@@ -3390,7 +3400,7 @@ static bool monster_player_rob(monster *m, struct player *p, item_t item_type)
                 if (monster_in_sight(m))
                 {
                     log_add_entry(nlarn->log,
-                            "The %s picks up some gold at your feet.",
+                            _("The %s picks up some gold at your feet."),
                             monster_get_name(m));
                 }
             }
@@ -3410,7 +3420,7 @@ static bool monster_player_rob(monster *m, struct player *p, item_t item_type)
                 if (it->cursed)
                 {
                     /* cursed items can't be stolen */
-                    log_add_entry(nlarn->log, "The %s tries to steal %s but fails.",
+                    log_add_entry(nlarn->log, _("The %s tries to steal %s but fails."),
                                   monster_get_name(m), buf);
 
                     it->blessed_known = true;
@@ -3438,12 +3448,12 @@ static bool monster_player_rob(monster *m, struct player *p, item_t item_type)
 
             if (was_equipped)
             {
-                log_add_entry(nlarn->log, "The %s nimbly removes %s and steals it.",
+                log_add_entry(nlarn->log, _("The %s nimbly removes %s and steals it."),
                               monster_get_name(m), buf);
             }
             else
             {
-                log_add_entry(nlarn->log, "The %s picks your pocket and steals %s.",
+                log_add_entry(nlarn->log, _("The %s picks your pocket and steals %s."),
                               monster_get_name(m), buf);
             }
 
@@ -3459,7 +3469,7 @@ static bool monster_player_rob(monster *m, struct player *p, item_t item_type)
     }
     else
     {
-        log_add_entry(nlarn->log, "The %s couldn't find anything to steal.",
+        log_add_entry(nlarn->log, _("The %s couldn't find anything to steal."),
                       monster_get_name(m));
 
         return false;
@@ -3638,7 +3648,7 @@ static position monster_move_attack(monster *m, struct player *p)
 
         /* monster's position might have changed (teleport) */
         if (!pos_identical(npos, monster_pos(m)))
-            log_add_entry(nlarn->log, "The %s vanishes.", monster_name(m));
+            log_add_entry(nlarn->log, _("The %s vanishes."), monster_name(m));
 
         return monster_pos(m);
     }
@@ -3905,7 +3915,7 @@ static position monster_move_civilian(monster *m, struct player *p)
                 {
                     gchar *wdesc = item_describe(it, player_item_known(nlarn->p, it),
                                                  false, false);
-                    log_add_entry(nlarn->log, "The %s picks up %s.",
+                    log_add_entry(nlarn->log, _("The %s picks up %s."),
                                   monster_get_name(m), wdesc);
                     g_free(wdesc);
                 }
@@ -3927,7 +3937,7 @@ static position monster_move_civilian(monster *m, struct player *p)
         if (monster_in_sight(m))
         {
             gchar *wdesc = item_describe(w, player_item_known(nlarn->p, w), false, false);
-            log_add_entry(nlarn->log, "The %s drops %s.", monster_get_name(m), wdesc);
+            log_add_entry(nlarn->log, _("The %s drops %s."), monster_get_name(m), wdesc);
             g_free(wdesc);
         }
         inv_add(map_ilist_at(mmap, m->pos), w);
@@ -3983,7 +3993,7 @@ static position monster_move_civilian(monster *m, struct player *p)
         && so_is_transparent(map_sobject_at(monster_map(m), p->pos)))
     {
         /* talk */
-        log_add_entry(nlarn->log, "The %s says, \"%s\"",
+        log_add_entry(nlarn->log, _("The %s says, \"%s\""),
                       monster_get_name(m),
                       monster_get_fortune(nlarn_fortunes));
     }
@@ -4011,7 +4021,7 @@ int monster_is_carrying_item(monster *m, item_t type)
 }
 
 inline const char *monster_name(monster *m) {
-    return monster_data[m->type].name;
+    return _(monster_data[m->type].name);
 }
 
 inline int monster_level(monster *m)
@@ -4066,12 +4076,13 @@ inline int monster_flags(monster *m, monster_flag f)
 }
 
 inline const char *monster_sound(monster *m) {
-    return monster_data[m->type].sound;
+    return monster_data[m->type].sound
+        ? _(monster_data[m->type].sound) : NULL;
 }
 
 inline const char *monster_type_name(monster_t type)
 {
-    return monster_data[type].name;
+    return _(monster_data[type].name);
 }
 
 inline int monster_type_ac(monster_t type)
@@ -4146,8 +4157,8 @@ static bool monster_breath_hit(const GList *traj,
     {
         /* The breath hit a monster. */
         if (monster_in_sight(m))
-            log_add_entry(nlarn->log, "The %s hits the %s.",
-                          monster_breath_data[dam->type].desc,
+            log_add_entry(nlarn->log, _("The %s hits the %s."),
+                          _(monster_breath_data[dam->type].desc),
                           monster_get_name(m));
 
         /* erode the monster's inventory */
@@ -4168,22 +4179,22 @@ static bool monster_breath_hit(const GList *traj,
         {
             /* The player reflects the breath. Actual handling of the reflection
                is done in map_trajectory, just give a message here. */
-            log_add_entry(nlarn->log, "Your amulet reflects the %s!",
-                          monster_breath_data[dam->type].desc);
+            log_add_entry(nlarn->log, _("Your amulet reflects the %s!"),
+                          _(monster_breath_data[dam->type].desc));
         }
         else if (player_evade(nlarn->p))
         {
             if (!player_effect(nlarn->p, ET_BLINDNESS))
             {
-                log_add_entry(nlarn->log, "The %s whizzes by you!",
-                        monster_breath_data[dam->type].desc);
+                log_add_entry(nlarn->log, _("The %s whizzes by you!"),
+                        _(monster_breath_data[dam->type].desc));
             }
         }
         else
         {
             /* Player failed to evade and takes the damage */
-            log_add_entry(nlarn->log, "The %s hits you!",
-                          monster_breath_data[dam->type].desc);
+            log_add_entry(nlarn->log, _("The %s hits you!"),
+                          _(monster_breath_data[dam->type].desc));
             player_damage_take(nlarn->p, damage_copy(dam), PD_MONSTER,
                                monster_type(dam->dam_origin.originator));
 
@@ -4214,8 +4225,8 @@ static bool monster_breath_hit(const GList *traj,
         /* A mirror will reflect the breath. Actual handling of the reflection
            is done in map_trajectory, just give a message here if the
            mirror is visible by the player. */
-        log_add_entry(nlarn->log, "The mirror reflects the %s!",
-                      monster_breath_data[dam->type].desc);
+        log_add_entry(nlarn->log, _("The mirror reflects the %s!"),
+                      _(monster_breath_data[dam->type].desc));
     }
 
     return terminated;

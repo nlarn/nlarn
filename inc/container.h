@@ -19,6 +19,8 @@
 #ifndef CONTAINER_H
 #define CONTAINER_H
 
+#include <libintl.h>
+
 #include "items.h"
 #include "inventory.h"
 
@@ -103,7 +105,7 @@ bool container_untrap(struct player *p);
 
 /* macros */
 
-#define container_name(container)     (containers[(container)->id].name)
+#define container_name(container)     (gettext(containers[(container)->id].name))
 #define container_weight(container)   (containers[(container)->id].weight)
 #define container_material(container) (containers[(container)->id].material)
 #define container_price(container)    (containers[(container)->id].price)

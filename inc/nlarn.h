@@ -23,6 +23,7 @@
 
 #include "game.h"
 
+#define PACKAGE "nlarn"
 #define VERSION_MAJOR 0 /* this is the present version # of the program */
 #define VERSION_MINOR 8
 #define VERSION_PATCH 0

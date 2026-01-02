@@ -1,6 +1,6 @@
 /*
  * scoreboard.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -25,6 +25,8 @@
 # include <unistd.h>
 # include <sys/file.h>
 #endif
+
+#include <glib/gi18n.h>
 
 #include "extdefs.h"
 #include "scoreboard.h"
@@ -214,7 +216,7 @@ static void scores_save(game *g, GList *gs)
     if (sb == NULL)
     {
         /* opening the file failed */
-        log_add_entry(g->log, "Error opening scoreboard file.");
+        log_add_entry(g->log, _("Error opening scoreboard file."));
         free(uscores);
         return;
     }
@@ -225,7 +227,7 @@ static void scores_save(game *g, GList *gs)
         /* handle error */
         int err;
 
-        log_add_entry(g->log, "Error writing scoreboard file: %s",
+        log_add_entry(g->log, _("Error writing scoreboard file: %s"),
                       gzerror(sb, &err));
 
         free(uscores);
@@ -303,42 +305,42 @@ char *score_death_description(score_t *score, int verbose)
     switch (score->cod)
     {
     case PD_LASTLEVEL:
-        desc = "passed away";
+        desc = _("passed away");
         break;
 
     case PD_STUCK:
-        desc = "got stuck in solid rock";
+        desc = _("got stuck in solid rock");
         break;
 
     case PD_TOO_LATE:
-        desc = "returned with the potion too late";
+        desc = _("returned with the potion too late");
         break;
 
     case PD_WON:
-        desc = "returned in time with the cure";
+        desc = _("returned in time with the cure");
         break;
 
     case PD_LOST:
-        desc = "could not find the potion in time";
+        desc = _("could not find the potion in time");
         break;
 
     case PD_QUIT:
-        desc = "quit the game";
+        desc = _("quit the game");
         break;
 
     case PD_GENOCIDE:
-        desc = "genocided";
+        desc = _("genocided");
         break;
 
     case PD_SPELL:
         if (score->cause < SP_MAX)
-            desc = "blasted";
+            desc = _("blasted");
         else
-            desc = "got killed";
+            desc = _("got killed");
         break;
 
     default:
-        desc = "killed";
+        desc = _("killed");
     }
 
     GString *text = g_string_new_len(NULL, 200);
@@ -349,22 +351,22 @@ char *score_death_description(score_t *score, int verbose)
 
     if (score->cod == PD_GENOCIDE)
     {
-        g_string_append_printf(text, " %sself",
-                               (score->sex == PS_MALE) ? "him" : "her");
+        g_string_append(text, (score->sex == PS_MALE)
+                               ? _(" himself") : _(" herself"));
     }
 
     if (verbose)
     {
-        g_string_append_printf(text, " on level %s", map_names[score->dlevel]);
+        g_string_append_printf(text, _(" on level %s"), map_names[score->dlevel]);
 
         if (score->dlevel_max > score->dlevel)
         {
-            g_string_append_printf(text, " (max. %s)", map_names[score->dlevel_max]);
+            g_string_append_printf(text, _(" (max. %s)"), map_names[score->dlevel_max]);
         }
 
         if (score->cod < PD_TOO_LATE)
         {
-            g_string_append_printf(text, " with %d and a maximum of %d hp",
+            g_string_append_printf(text, _(" with %d and a maximum of %d hp"),
                                    score->hp, score->hp_max);
         }
     }
@@ -375,15 +377,15 @@ char *score_death_description(score_t *score, int verbose)
         switch (score->cause)
         {
         case ET_DEC_STR:
-            g_string_append(text, " by enfeeblement.");
+            g_string_append(text, _(" by enfeeblement."));
             break;
 
         case ET_DEC_DEX:
-            g_string_append(text, " by clumsiness.");
+            g_string_append(text, _(" by clumsiness."));
             break;
 
         case ET_POISON:
-            g_string_append(text, " by poison.");
+            g_string_append(text, _(" by poison."));
             break;
 
         /* no other effects can cause death at the moment */
@@ -393,43 +395,45 @@ char *score_death_description(score_t *score, int verbose)
         break;
 
     case PD_LASTLEVEL:
-        g_string_append_printf(text,". %s left %s body.",
-                               (score->sex == PS_MALE) ? "He" : "She",
-                               (score->sex == PS_MALE) ? "his" : "her");
+        g_string_append(text, (score->sex == PS_MALE)
+                               ? _(". He left his body.")
+                               : _(". She left her body."));
         break;
 
     case PD_MONSTER:
         /* TODO: regard monster's invisibility */
         /* TODO: while sleeping / doing sth. */
-        g_string_append_printf(text, " by %s %s.",
+        g_string_append_printf(text, _(" by %s %s."),
                                a_an(monster_type_name(score->cause)),
                                monster_type_name(score->cause));
         break;
 
     case PD_SPHERE:
-        g_string_append(text, " by a sphere of destruction.");
+        g_string_append(text, _(" by a sphere of destruction."));
         break;
 
     case PD_TRAP:
-        g_string_append_printf(text, " by %s%s %s.",
-                               score->cause == TT_TRAPDOOR ? "falling through " : "",
+        g_string_append_printf(text, score->cause == TT_TRAPDOOR
+                                   ? _(" by falling through %s %s.")
+                                   : _(" by %s %s."),
                                a_an(trap_description(score->cause)),
                                trap_description(score->cause));
         break;
 
     case PD_MAP:
-        g_string_append_printf(text, " by %s.", mt_get_desc(score->cause));
+        g_string_append_printf(text, _(" by %s."), mt_get_desc(score->cause));
         break;
 
     case PD_SPELL:
         /* player spell */
-        g_string_append_printf(text, " %s away with the spell \"%s\".",
-                               (score->sex == PS_MALE) ? "himself" : "herself",
+        g_string_append_printf(text, (score->sex == PS_MALE)
+                                   ? _(" himself away with the spell \"%s\".")
+                                   : _(" herself away with the spell \"%s\"."),
                                spell_name_by_id(score->cause));
         break;
 
     case PD_CURSE:
-        g_string_append_printf(text, " by a cursed %s.",
+        g_string_append_printf(text, _(" by a cursed %s."),
                                item_name_sg(score->cause));
         break;
 
@@ -437,10 +441,10 @@ char *score_death_description(score_t *score, int verbose)
         switch (score->cause)
         {
         case LS_FOUNTAIN:
-            g_string_append(text, " by toxic water from a fountain.");
+            g_string_append(text, _(" by toxic water from a fountain."));
             break;
         default:
-            g_string_append(text, " by falling down a staircase.");
+            g_string_append(text, _(" by falling down a staircase."));
             break;
         }
         break;
@@ -453,10 +457,14 @@ char *score_death_description(score_t *score, int verbose)
 
     if (verbose)
     {
-        g_string_append_printf(text, " %s has scored %" G_GUINT64_FORMAT
-                               " points, with the difficulty set to %d.",
-                               (score->sex == PS_MALE) ? "He" : "She",
-                               score->score, score->difficulty);
+        g_autofree char *points = g_strdup_printf("%" G_GUINT64_FORMAT,
+                                                   score->score);
+        g_string_append_printf(text, (score->sex == PS_MALE)
+                                   ? _(" He has scored %s points, "
+                                       "with the difficulty set to %d.")
+                                   : _(" She has scored %s points, "
+                                       "with the difficulty set to %d."),
+                               points, score->difficulty);
     }
 
     return g_string_free(text, false);
@@ -496,11 +504,11 @@ char *scores_to_string(GList *scores, score_t *score)
 
         char *dungeon_desc = ""; /* empty for the town */
         if (cscore->dlevel > 10)
-            dungeon_desc = "volcano lvl. ";
+            dungeon_desc = _("volcano lvl. ");
         else if (cscore->dlevel > 0)
-            dungeon_desc = "caverns lvl. ";
+            dungeon_desc = _("caverns lvl. ");
 
-        g_string_append_printf(text, "            [exp. level %d, %s%s, %d/%d hp, difficulty %d]%s\n",
+        g_string_append_printf(text, _("            [exp. level %d, %s%s, %d/%d hp, difficulty %d]%s\n"),
                                cscore->level, dungeon_desc, map_names[cscore->dlevel],
                                cscore->hp, cscore->hp_max, cscore->difficulty,
                                (cscore == score) ? "`end`" : "");

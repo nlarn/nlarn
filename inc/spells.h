@@ -1,6 +1,6 @@
 /*
  * spells.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,8 @@
 
 #ifndef SPELLS_H
 #define SPELLS_H
+
+#include <libintl.h>
 
 #include "colours.h"
 #include "effects.h"
@@ -168,23 +170,29 @@ gchar* spell_desc_by_id(spell_id sid);
 bool spell_create_monster(spell *s, struct player *p);
 bool spell_vaporize_rock(spell *s, struct player *p);
 
+/* translate a possibly NULL string from the spell table */
+static inline const char *spell_gettext(const char *msg)
+{
+    return msg ? gettext(msg) : NULL;
+}
+
 #define spell_code(spell)     (spells[(spell)->id].code)
-#define spell_name(spell)     (spells[(spell)->id].name)
+#define spell_name(spell)     (spell_gettext(spells[(spell)->id].name))
 #define spell_type(spell)     (spells[(spell)->id].type)
 #define spell_damage(spell)   (spells[(spell)->id].damage_type)
 #define spell_effect(spell)   (spells[(spell)->id].effect)
-#define spell_msg_succ(spell) (spells[(spell)->id].msg_success)
-#define spell_msg_fail(spell) (spells[(spell)->id].msg_fail)
+#define spell_msg_succ(spell) (spell_gettext(spells[(spell)->id].msg_success))
+#define spell_msg_fail(spell) (spell_gettext(spells[(spell)->id].msg_fail))
 #define spell_colour(spell)   (spells[(spell)->id].fg)
 #define spell_level(spell)    (spells[(spell)->id].level)
 
 #define spell_code_by_id(id)     (spells[(id)].code)
-#define spell_name_by_id(id)     (spells[(id)].name)
+#define spell_name_by_id(id)     (spell_gettext(spells[(id)].name))
 #define spell_type_by_id(id)     (spells[(id)].type)
 #define spell_damage_by_id(id)   (spells[(id)].damage_type)
 #define spell_effect_by_id(id)   (spells[(id)].effect)
-#define spell_msg_succ_by_id(id) (spells[(id)].msg_success)
-#define spell_msg_fail_by_id(id) (spells[(id)].msg_fail)
+#define spell_msg_succ_by_id(id) (spell_gettext(spells[(id)].msg_success))
+#define spell_msg_fail_by_id(id) (spell_gettext(spells[(id)].msg_fail))
 #define spell_colour_by_id(id)   (spells[(id)].fg)
 #define spell_level_by_id(id)    (spells[(id)].level)
 

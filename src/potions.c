@@ -17,6 +17,7 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
 
 #include "colours.h"
 #include "display.h"
@@ -31,32 +32,32 @@ DEFINE_ENUM(potion_t, POTION_TYPE_ENUM)
 const potion_data potions[PO_MAX] =
 {
     /* id               name                  effect            price store_stock */
-    { PO_WATER,         "holy water",         ET_NONE,             500, 0 },
-    { PO_SLEEP,         "sleep",              ET_SLEEP,             50, 0 },
-    { PO_HEAL,          "healing",            ET_INC_HP,           100, 0 },
-    { PO_INC_LEVEL,     "raise level",        ET_INC_LEVEL,        500, 0 },
-    { PO_INC_RND,       "increase ability",   ET_INC_RND,           50, 0 },
-    { PO_INC_STR,       "gain strength",      ET_INC_STR,          100, 0 },
-    { PO_LEARNING,      "learning",           ET_INC_INT,           50, 0 },
-    { PO_INC_WIS,       "gain wisdom",        ET_INC_WIS,           50, 0 },
-    { PO_INC_CON,       "sturdiness",         ET_INC_CON,          100, 0 },
-    { PO_RECOVERY,      "recovery",           ET_NONE,             200, 0 },
-    { PO_DIZZINESS,     "dizziness",          ET_DIZZINESS,        100, 0 },
-    { PO_OBJ_DETECT,    "object detection",   ET_NONE,             100, 2 },
-    { PO_MON_DETECT,    "monster detection",  ET_DETECT_MONSTER,   100, 2 },
-    { PO_AMNESIA,       "forgetfulness",      ET_NONE,             100, 0 },
-    { PO_BLINDNESS,     "blindness",          ET_BLINDNESS,         50, 0 },
-    { PO_CONFUSION,     "confusion",          ET_CONFUSION,         50, 0 },
-    { PO_HEROISM,       "heroism",            ET_HEROISM,          500, 0 },
-    { PO_GIANT_STR,     "giant strength",     ET_INC_STR,          200, 0 },
-    { PO_FIRE_RES,      "fire resistance",    ET_RESIST_FIRE,      200, 0 },
-    { PO_TRE_DETECT,    "treasure finding",   ET_NONE,             100, 1 },
-    { PO_MAX_HP,        "instant healing",    ET_MAX_HP,           500, 0 },
-    { PO_INC_MP,        "power",              ET_INC_MP,           200, 5 },
-    { PO_POISON,        "poison",             ET_POISON,            50, 0 },
-    { PO_SEE_INVISIBLE, "see invisible",      ET_INFRAVISION,      200, 1 },
-    { PO_LEVITATION,    "levitation",         ET_LEVITATION,       200, 0 },
-    { PO_CURE_DIANTHR,  "cure dianthroritis", ET_NONE,           10000, 0 },
+    { PO_WATER,         N_("holy water"),         ET_NONE,             500, 0 },
+    { PO_SLEEP,         N_("sleep"),              ET_SLEEP,             50, 0 },
+    { PO_HEAL,          N_("healing"),            ET_INC_HP,           100, 0 },
+    { PO_INC_LEVEL,     N_("raise level"),        ET_INC_LEVEL,        500, 0 },
+    { PO_INC_RND,       N_("increase ability"),   ET_INC_RND,           50, 0 },
+    { PO_INC_STR,       N_("gain strength"),      ET_INC_STR,          100, 0 },
+    { PO_LEARNING,      N_("learning"),           ET_INC_INT,           50, 0 },
+    { PO_INC_WIS,       N_("gain wisdom"),        ET_INC_WIS,           50, 0 },
+    { PO_INC_CON,       N_("sturdiness"),         ET_INC_CON,          100, 0 },
+    { PO_RECOVERY,      N_("recovery"),           ET_NONE,             200, 0 },
+    { PO_DIZZINESS,     N_("dizziness"),          ET_DIZZINESS,        100, 0 },
+    { PO_OBJ_DETECT,    N_("object detection"),   ET_NONE,             100, 2 },
+    { PO_MON_DETECT,    N_("monster detection"),  ET_DETECT_MONSTER,   100, 2 },
+    { PO_AMNESIA,       N_("forgetfulness"),      ET_NONE,             100, 0 },
+    { PO_BLINDNESS,     N_("blindness"),          ET_BLINDNESS,         50, 0 },
+    { PO_CONFUSION,     N_("confusion"),          ET_CONFUSION,         50, 0 },
+    { PO_HEROISM,       N_("heroism"),            ET_HEROISM,          500, 0 },
+    { PO_GIANT_STR,     N_("giant strength"),     ET_INC_STR,          200, 0 },
+    { PO_FIRE_RES,      N_("fire resistance"),    ET_RESIST_FIRE,      200, 0 },
+    { PO_TRE_DETECT,    N_("treasure finding"),   ET_NONE,             100, 1 },
+    { PO_MAX_HP,        N_("instant healing"),    ET_MAX_HP,           500, 0 },
+    { PO_INC_MP,        N_("power"),              ET_INC_MP,           200, 5 },
+    { PO_POISON,        N_("poison"),             ET_POISON,            50, 0 },
+    { PO_SEE_INVISIBLE, N_("see invisible"),      ET_INFRAVISION,      200, 1 },
+    { PO_LEVITATION,    N_("levitation"),         ET_LEVITATION,       200, 0 },
+    { PO_CURE_DIANTHR,  N_("cure dianthroritis"), ET_NONE,           10000, 0 },
 };
 
 static int potion_with_effect(struct player *p, item *potion);
@@ -72,38 +73,38 @@ struct potion_obfuscation_s
 }
 potion_obfuscation[PO_MAX] =
 {
-    { "clear",          ICE_COLD_GREEN,  },
-    { "bubbly",         MANGO_ORANGE,    },
-    { "clotted",        NATURE_APRICOT,  },
-    { "smoky",          ASH_GREY,        },
-    { "milky",          BUTTER,          },
-    { "fizzy",          AQUAMARINE,      },
-    { "murky",          GLADIOLA_BLUE,   },
-    { "effervescent",   AZUL,            },
-    { "dark",           GRAVEL,          },
-    { "turbid",         CLAM_SHELL,      },
-    { "mucilaginous",   TEALISH_GREEN,   },
-    { "gluey",          BRINK_PINK,      },
-    { "gooey",          PALE_PURPLE,     },
-    { "coagulated",     PALE_OAK,        },
-    { "white",          WHITE,           },
-    { "red",            LUMINOUS_RED,    },
-    { "blue",           BRIGHT_BLUE,     },
-    { "green",          LIME_JUICE_GREEN },
-    { "yellow",         SULFUR_YELLOW,   },
-    { "orange",         LUMINOUS_ORANGE, },
-    { "polychrome",     FRESH_GREEN,     },
-    { "dichroic",       PERSIAN_PINK,    },
-    { "tricoloured",    CANDY_PINK,      },
-    { "black",          BALTIC_SEA,      },
-    { "turquoise",      TURQUOISE_BLUE,  },
-    { "foaming",        FRESH_GREEN,     },
+    { N_("clear"),          ICE_COLD_GREEN,  },
+    { N_("bubbly"),         MANGO_ORANGE,    },
+    { N_("clotted"),        NATURE_APRICOT,  },
+    { N_("smoky"),          ASH_GREY,        },
+    { N_("milky"),          BUTTER,          },
+    { N_("fizzy"),          AQUAMARINE,      },
+    { N_("murky"),          GLADIOLA_BLUE,   },
+    { N_("effervescent"),   AZUL,            },
+    { N_("dark"),           GRAVEL,          },
+    { N_("turbid"),         CLAM_SHELL,      },
+    { N_("mucilaginous"),   TEALISH_GREEN,   },
+    { N_("gluey"),          BRINK_PINK,      },
+    { N_("gooey"),          PALE_PURPLE,     },
+    { N_("coagulated"),     PALE_OAK,        },
+    { N_("white"),          WHITE,           },
+    { N_("red"),            LUMINOUS_RED,    },
+    { N_("blue"),           BRIGHT_BLUE,     },
+    { N_("green"),          LIME_JUICE_GREEN },
+    { N_("yellow"),         SULFUR_YELLOW,   },
+    { N_("orange"),         LUMINOUS_ORANGE, },
+    { N_("polychrome"),     FRESH_GREEN,     },
+    { N_("dichroic"),       PERSIAN_PINK,    },
+    { N_("tricoloured"),    CANDY_PINK,      },
+    { N_("black"),          BALTIC_SEA,      },
+    { N_("turquoise"),      TURQUOISE_BLUE,  },
+    { N_("foaming"),        FRESH_GREEN,     },
 };
 
 char *potion_desc(potion_t potion_id)
 {
     g_assert(potion_id < PO_MAX);
-    return (char *)potion_obfuscation[nlarn->potion_desc_mapping[potion_id]].desc;
+    return (char *)_(potion_obfuscation[nlarn->potion_desc_mapping[potion_id]].desc);
 }
 
 colour_t potion_colour(potion_t potion_id)
@@ -115,17 +116,15 @@ colour_t potion_colour(potion_t potion_id)
 item_usage_result potion_quaff(struct player *p, item *potion)
 {
     item_usage_result result = { false, false };
-    const char *verb;
 
     // These potions aren't drunk.
-    if (potion->id == PO_CURE_DIANTHR || potion->id == PO_WATER)
-        verb = "use";
-    else
-        verb = "drink";
+    bool drunk = !(potion->id == PO_CURE_DIANTHR || potion->id == PO_WATER);
 
     if (potion->cursed && potion->blessed_known)
     {
-        log_add_entry(nlarn->log, "You'd rather not %s this cursed potion.", verb);
+        log_add_entry(nlarn->log, drunk
+                ? _("You'd rather not drink this cursed potion.")
+                : _("You'd rather not use this cursed potion."));
         return result;
     }
 
@@ -133,10 +132,12 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     gchar *description = item_describe(potion, player_item_known(p, potion),
                                        true, potion->count == 1);
 
-    log_add_entry(nlarn->log, "You %s %s.", verb, description);
+    log_add_entry(nlarn->log, drunk ? _("You drink %s.") : _("You use %s."),
+                  description);
 
     /* try to complete quaffing the potion */
-    if (!player_make_move(p, 2, true, "%sing %s", verb, description))
+    if (!player_make_move(p, 2, true,
+                          drunk ? _("drinking %s") : _("using %s"), description))
     {
         /* the action has been aborted */
         g_free(description);
@@ -153,9 +154,9 @@ item_usage_result potion_quaff(struct player *p, item *potion)
         damage *dam = damage_new(DAM_POISON, ATT_NONE, rand_1n(p->hp),
                                  DAMO_ITEM, NULL);
 
-        log_add_entry(nlarn->log, "The potion is foul!");
+        log_add_entry(nlarn->log, _("The potion is foul!"));
 
-        log_add_entry(nlarn->log, "You spit gore!");
+        log_add_entry(nlarn->log, _("You spit gore!"));
         player_damage_take(p, dam, PD_CURSE, potion->type);
     }
     else
@@ -211,7 +212,7 @@ item_usage_result potion_quaff(struct player *p, item *potion)
             break;
 
         case PO_CURE_DIANTHR:
-            log_add_entry(nlarn->log, "You really want to keep the potion for your daughter.");
+            log_add_entry(nlarn->log, _("You really want to keep the potion for your daughter."));
             result.used_up = false;
             break;
 
@@ -290,7 +291,7 @@ static int potion_amnesia(player *p, item *potion __attribute__((unused)))
         }
     }
 
-    log_add_entry(nlarn->log, "You stagger for a moment...");
+    log_add_entry(nlarn->log, _("You stagger for a moment..."));
 
     return true;
 }
@@ -394,11 +395,11 @@ static int potion_detect_item(player *p, item *potion)
 
     if (count && (potion->id == PO_TRE_DETECT))
     {
-        log_add_entry(nlarn->log, "You sense the presence of treasure.");
+        log_add_entry(nlarn->log, _("You sense the presence of treasure."));
     }
     else if (count && (potion->id == PO_OBJ_DETECT))
     {
-        log_add_entry(nlarn->log, "You sense the presence of objects.");
+        log_add_entry(nlarn->log, _("You sense the presence of objects."));
     }
 
     return count;
@@ -426,7 +427,7 @@ static int potion_recovery(player *p, item *potion __attribute__((unused)))
     }
 
     if (success)
-        log_add_entry(nlarn->log, "You feel more capable.");
+        log_add_entry(nlarn->log, _("You feel more capable."));
 
     return success;
 }
@@ -438,12 +439,12 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
     if (inv_length_filtered(p->inventory, item_filter_nonblessed) == 0)
     {
         /* player has no cursed items */
-        log_add_entry(nlarn->log, "You're not carrying any items in need of a "
-                                  "blessing.");
+        log_add_entry(nlarn->log, _("You're not carrying any items in need of a "
+                                  "blessing."));
         return false;
     }
 
-    item *it = display_inventory("Choose an item to bless", p, &p->inventory,
+    item *it = display_inventory(_("Choose an item to bless"), p, &p->inventory,
                                  NULL, false, false, false, item_filter_nonblessed);
 
     if (it != NULL)
@@ -454,9 +455,11 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
         if (it->blessed)
         {
             it->blessed_known = true;
-            log_add_entry(nlarn->log, "Nothing happens. Apparently, %s %s "
-                                      "already blessed.",
-                          buf, it->count == 1 ? "was" : "were");
+            log_add_entry(nlarn->log, it->count == 1
+                          ? _("Nothing happens. Apparently, %s was "
+                              "already blessed.")
+                          : _("Nothing happens. Apparently, %s were "
+                              "already blessed."), buf);
 
             g_free(buf);
             return true;
@@ -464,8 +467,9 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
 
         buf[0] = g_ascii_toupper(buf[0]);
 
-        log_add_entry(nlarn->log, "%s glow%s in a white light.",
-                      buf, it->count == 1 ? "s" : "");
+        log_add_entry(nlarn->log, it->count == 1
+                      ? _("%s glows in a white light.")
+                      : _("%s glow in a white light."), buf);
 
         g_free(buf);
 
@@ -499,16 +503,17 @@ bool potion_pos_hit(const GList *traj,
     if (mst > LS_NONE && !so_is_passable(mst))
     {
         /* The potion hit a sobject. */
-        log_add_entry(nlarn->log, "%s shatters at %s.",
-                      so_get_desc(mst));
+        log_add_entry(nlarn->log, _("%s shatters at %s."),
+                      desc, so_get_desc(mst));
 
         map_spill_set(pmap, pos, potion_colour(potion->id));
     }
     else if (!map_pos_passable(pmap, pos))
     {
         /* The potion hit a wall or something similar. */
-        log_add_entry(nlarn->log, "%s %s %s.", desc,
-                      (mtt <= LT_FLOOR ? "shatters on the" : "splashes into the"),
+        log_add_entry(nlarn->log, (mtt <= LT_FLOOR
+                      ? _("%s shatters on the %s.")
+                      : _("%s splashes into the %s.")), desc,
                       mt_get_desc(mtt));
 
         if (mtt <= LT_FLOOR)
@@ -525,7 +530,7 @@ bool potion_pos_hit(const GList *traj,
             return false;
         }
 
-        log_add_entry(nlarn->log, "%s shatters on the %s.",
+        log_add_entry(nlarn->log, _("%s shatters on the %s."),
                   desc, monster_get_name(m));
 
         if (potion_effect(potion))
@@ -534,7 +539,7 @@ bool potion_pos_hit(const GList *traj,
         if (potion->id == PO_WATER && potion->blessed && monster_flags(m, UNDEAD))
         {
             /* this is supposed to hurt really nasty */
-            log_add_entry(nlarn->log, "Smoke emerges where %s pours over the %s.",
+            log_add_entry(nlarn->log, _("Smoke emerges where %s pours over the %s."),
                           desc, monster_get_name(m));
 
             damage *dam = damage_new(DAM_PHYSICAL, ATT_TOUCH, rand_1n(monster_hp(m) + 1),

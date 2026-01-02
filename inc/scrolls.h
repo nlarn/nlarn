@@ -1,6 +1,6 @@
 /*
  * scrolls.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,8 @@
 
 #ifndef SCROLLS_H
 #define SCROLLS_H
+
+#include <libintl.h>
 
 #include "enumFactory.h"
 #include "items.h"
@@ -80,7 +82,7 @@ extern const magic_scroll_data scrolls[ST_MAX];
 
 #define scroll_type_store_stock(id) (scrolls[(id)].store_stock)
 
-#define scroll_name(scroll)   (scrolls[(scroll)->id].name)
+#define scroll_name(scroll)   (gettext(scrolls[(scroll)->id].name))
 #define scroll_effect(scroll) (scrolls[(scroll)->id].effect)
 #define scroll_price(scroll)  (scrolls[(scroll)->id].price)
 

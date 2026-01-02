@@ -19,6 +19,8 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <libintl.h>
+
 #include "cJSON.h"
 #include "colours.h"
 #include "items.h"
@@ -358,7 +360,7 @@ static inline int  mt_get_colour(const map_tile_t t)
 
 static inline const char *mt_get_desc(const map_tile_t t)
 {
-    return map_tiles[t].description;
+    return map_tiles[t].description ? gettext(map_tiles[t].description) : NULL;
 }
 
 static inline bool mt_is_passable(const map_tile_t t)

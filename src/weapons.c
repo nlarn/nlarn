@@ -25,6 +25,8 @@
 #include "extdefs.h"
 #include "player.h"
 #include "random.h"
+#include <glib/gi18n.h>
+
 #include "weapons.h"
 
 DEFINE_ENUM(ammo_t, AMMO_TYPE_ENUM)
@@ -32,17 +34,17 @@ DEFINE_ENUM(ammo_t, AMMO_TYPE_ENUM)
 const ammo_data ammos[AMT_MAX] =
 {
     /*  type       name            ac           dam   acc  mat        we  pr  ob */
-    { AMT_STONE,   "pebble",       AMMO_SLING,     2,   1, IM_STONE, 100,  1, false, },
-    { AMT_SBULLET, "sling bullet", AMMO_SLING,     4,   2, IM_LEAD,   50,  3,  true, },
-    { AMT_ARROW,   "arrow",        AMMO_BOW,       8,   3, IM_WOOD,   80,  5,  true, },
-    { AMT_BOLT,    "bolt",         AMMO_CROSSBOW, 10,   4, IM_IRON,  100, 10, false, },
+    { AMT_STONE,   N_("pebble"),       AMMO_SLING,     2,   1, IM_STONE, 100,  1, false, },
+    { AMT_SBULLET, N_("sling bullet"), AMMO_SLING,     4,   2, IM_LEAD,   50,  3,  true, },
+    { AMT_ARROW,   N_("arrow"),        AMMO_BOW,       8,   3, IM_WOOD,   80,  5,  true, },
+    { AMT_BOLT,    N_("bolt"),         AMMO_CROSSBOW, 10,   4, IM_IRON,  100, 10, false, },
 };
 
 const char *ammo_class_name[AMMO_MAX] =
 {
-    "sling",
-    "bow",
-    "crossbow",
+    N_("sling"),
+    N_("bow"),
+    N_("crossbow"),
 };
 
 DEFINE_ENUM(weapon_t, WEAPON_TYPE_ENUM)
@@ -50,31 +52,31 @@ DEFINE_ENUM(weapon_t, WEAPON_TYPE_ENUM)
 const weapon_data weapons[WT_MAX] =
 {
     /* weapon_t         name                         short name,       class          ammo      dam  acc  material    we     pr tw un ar ob th*/
-    { WT_ODAGGER,       "orcish dagger",             "orc dagger",      WC_MELEE,     AMMO_MAX,  2,   3, IM_IRON,     850,     6, 0, 0, 1, 0, 1 },
-    { WT_DAGGER,        "dagger",                    "dagger",          WC_MELEE,     AMMO_MAX,  3,   5, IM_IRON,     600,    10, 0, 0, 1, 1, 1 },
-    { WT_SLING,         "sling",                     "sling",          WC_RANGED,   AMMO_SLING,  1,   3, IM_CLOTH,    200,    15, 1, 0, 1, 1, 0 },
-    { WT_OSHORTSWORD,   "orcish short sword",        "orc short sword", WC_MELEE,     AMMO_MAX,  5,   2, IM_IRON,    1200,    30, 0, 0, 1, 0, 0 },
-    { WT_SHORTSWORD,    "short sword",               "short sword",     WC_MELEE,     AMMO_MAX,  6,   3, IM_IRON,     900,    60, 0, 0, 1, 1, 0 },
-    { WT_ESHORTSWORD,   "elven short sword",         "elf short sword", WC_MELEE,     AMMO_MAX,  9,   4, IM_MITHRIL,  750,   100, 0, 0, 1, 0, 0 },
-    { WT_OSPEAR,        "orcish spear",              "orc spear",       WC_MELEE,     AMMO_MAX,  8,   2, IM_WOOD,    2100,    75, 0, 0, 1, 0, 1 },
-    { WT_SPEAR,         "spear",                     "spear",           WC_MELEE,     AMMO_MAX, 10,   3, IM_WOOD,    1800,   120, 0, 0, 1, 1, 1 },
-    { WT_ESPEAR,        "elven spear",               "elf spear",       WC_MELEE,     AMMO_MAX, 11,   4, IM_WOOD,    1600,   140, 0, 0, 1, 0, 1 },
-    { WT_BOW,           "bow",                       "bow",            WC_RANGED,     AMMO_BOW,  3,   4, IM_WOOD,    1000,   220, 1, 0, 1, 1, 0 },
-    { WT_CLUB,          "heavy club",                "club",            WC_MELEE,     AMMO_MAX, 10,   2, IM_WOOD,    3500,    50, 0, 0, 1, 0, 0 },
-    { WT_MACE,          "mace",                      "mace",            WC_MELEE,     AMMO_MAX, 12,   3, IM_IRON,    2600,   160, 0, 0, 1, 1, 0 },
-    { WT_FLAIL,         "flail",                     "flail",           WC_MELEE,     AMMO_MAX, 14,   2, IM_WOOD,    2900,   195, 1, 0, 1, 1, 0 },
-    { WT_BATTLEAXE,     "battle-axe",                "battle-axe",      WC_MELEE,     AMMO_MAX, 18,   2, IM_IRON,    2700,   350, 1, 0, 1, 1, 0 },
-    { WT_CROSSBOW,      "crossbow",                  "crossbow",       WC_RANGED, AMMO_CROSSBOW, 5,   3, IM_WOOD,    3500,   600, 1, 0, 1, 0, 0 },
-    { WT_LONGSWORD,     "longsword",                 "longsword",       WC_MELEE,     AMMO_MAX, 22,   3, IM_IRON,    1950,   550, 0, 0, 1, 1, 0 },
-    { WT_ELONGSWORD,    "elven longsword",           "elf longsword",   WC_MELEE,     AMMO_MAX, 24,   4, IM_MITHRIL, 1600,   900, 0, 0, 1, 0, 0 },
-    { WT_2SWORD,        "two-handed sword",          "2-handed sword",  WC_MELEE,     AMMO_MAX, 26,   4, IM_IRON,    3600,  1000, 1, 0, 1, 1, 0 },
+    { WT_ODAGGER,       N_("orcish dagger"),             N_("orc dagger"),      WC_MELEE,     AMMO_MAX,  2,   3, IM_IRON,     850,     6, 0, 0, 1, 0, 1 },
+    { WT_DAGGER,        N_("dagger"),                    N_("dagger"),          WC_MELEE,     AMMO_MAX,  3,   5, IM_IRON,     600,    10, 0, 0, 1, 1, 1 },
+    { WT_SLING,         N_("sling"),                     N_("sling"),          WC_RANGED,   AMMO_SLING,  1,   3, IM_CLOTH,    200,    15, 1, 0, 1, 1, 0 },
+    { WT_OSHORTSWORD,   N_("orcish short sword"),        N_("orc short sword"), WC_MELEE,     AMMO_MAX,  5,   2, IM_IRON,    1200,    30, 0, 0, 1, 0, 0 },
+    { WT_SHORTSWORD,    N_("short sword"),               N_("short sword"),     WC_MELEE,     AMMO_MAX,  6,   3, IM_IRON,     900,    60, 0, 0, 1, 1, 0 },
+    { WT_ESHORTSWORD,   N_("elven short sword"),         N_("elf short sword"), WC_MELEE,     AMMO_MAX,  9,   4, IM_MITHRIL,  750,   100, 0, 0, 1, 0, 0 },
+    { WT_OSPEAR,        N_("orcish spear"),              N_("orc spear"),       WC_MELEE,     AMMO_MAX,  8,   2, IM_WOOD,    2100,    75, 0, 0, 1, 0, 1 },
+    { WT_SPEAR,         N_("spear"),                     N_("spear"),           WC_MELEE,     AMMO_MAX, 10,   3, IM_WOOD,    1800,   120, 0, 0, 1, 1, 1 },
+    { WT_ESPEAR,        N_("elven spear"),               N_("elf spear"),       WC_MELEE,     AMMO_MAX, 11,   4, IM_WOOD,    1600,   140, 0, 0, 1, 0, 1 },
+    { WT_BOW,           N_("bow"),                       N_("bow"),            WC_RANGED,     AMMO_BOW,  3,   4, IM_WOOD,    1000,   220, 1, 0, 1, 1, 0 },
+    { WT_CLUB,          N_("heavy club"),                N_("club"),            WC_MELEE,     AMMO_MAX, 10,   2, IM_WOOD,    3500,    50, 0, 0, 1, 0, 0 },
+    { WT_MACE,          N_("mace"),                      N_("mace"),            WC_MELEE,     AMMO_MAX, 12,   3, IM_IRON,    2600,   160, 0, 0, 1, 1, 0 },
+    { WT_FLAIL,         N_("flail"),                     N_("flail"),           WC_MELEE,     AMMO_MAX, 14,   2, IM_WOOD,    2900,   195, 1, 0, 1, 1, 0 },
+    { WT_BATTLEAXE,     N_("battle-axe"),                N_("battle-axe"),      WC_MELEE,     AMMO_MAX, 18,   2, IM_IRON,    2700,   350, 1, 0, 1, 1, 0 },
+    { WT_CROSSBOW,      N_("crossbow"),                  N_("crossbow"),       WC_RANGED, AMMO_CROSSBOW, 5,   3, IM_WOOD,    3500,   600, 1, 0, 1, 0, 0 },
+    { WT_LONGSWORD,     N_("longsword"),                 N_("longsword"),       WC_MELEE,     AMMO_MAX, 22,   3, IM_IRON,    1950,   550, 0, 0, 1, 1, 0 },
+    { WT_ELONGSWORD,    N_("elven longsword"),           N_("elf longsword"),   WC_MELEE,     AMMO_MAX, 24,   4, IM_MITHRIL, 1600,   900, 0, 0, 1, 0, 0 },
+    { WT_2SWORD,        N_("two-handed sword"),          N_("2-handed sword"),  WC_MELEE,     AMMO_MAX, 26,   4, IM_IRON,    3600,  1000, 1, 0, 1, 1, 0 },
     /* unique weapons */
-    { WT_SWORDSLASHING, "Sword of Slashing",         "S. of Slashing",  WC_MELEE,     AMMO_MAX, 30,   5, IM_STEEL,   2200,  6000, 0, 1, 1, 0, 0 },
-    { WT_LANCEOFDEATH,  "lance of death",            "lance of death",  WC_MELEE,     AMMO_MAX, 20,   3, IM_WOOD,    2900, 65000, 1, 1, 1, 1, 0 },
-    { WT_VORPALBLADE,   "Vorpal blade",              "Vorpal blade",    WC_MELEE,     AMMO_MAX, 22,   3, IM_STEEL,   1600,  3800, 0, 1, 1, 0, 0 },
-    { WT_SLAYER,        "Slayer",                    "Slayer",          WC_MELEE,     AMMO_MAX, 30,   5, IM_STEEL,   1800,  6800, 0, 1, 0, 0, 0 },
-    { WT_SUNSWORD,      "Sunsword",                  "Sunsword",        WC_MELEE,     AMMO_MAX, 32,   6, IM_STEEL,   1800,  7000, 0, 1, 1, 0, 0 },
-    { WT_BESSMAN,       "Bessman's flailing hammer", "Bessman's",       WC_MELEE,     AMMO_MAX, 35,   6, IM_STEEL,   5800, 10000, 1, 1, 0, 0, 0 },
+    { WT_SWORDSLASHING, N_("Sword of Slashing"),         N_("S. of Slashing"),  WC_MELEE,     AMMO_MAX, 30,   5, IM_STEEL,   2200,  6000, 0, 1, 1, 0, 0 },
+    { WT_LANCEOFDEATH,  N_("lance of death"),            N_("lance of death"),  WC_MELEE,     AMMO_MAX, 20,   3, IM_WOOD,    2900, 65000, 1, 1, 1, 1, 0 },
+    { WT_VORPALBLADE,   N_("Vorpal blade"),              N_("Vorpal blade"),    WC_MELEE,     AMMO_MAX, 22,   3, IM_STEEL,   1600,  3800, 0, 1, 1, 0, 0 },
+    { WT_SLAYER,        N_("Slayer"),                    N_("Slayer"),          WC_MELEE,     AMMO_MAX, 30,   5, IM_STEEL,   1800,  6800, 0, 1, 0, 0, 0 },
+    { WT_SUNSWORD,      N_("Sunsword"),                  N_("Sunsword"),        WC_MELEE,     AMMO_MAX, 32,   6, IM_STEEL,   1800,  7000, 0, 1, 1, 0, 0 },
+    { WT_BESSMAN,       N_("Bessman's flailing hammer"), N_("Bessman's"),       WC_MELEE,     AMMO_MAX, 35,   6, IM_STEEL,   5800, 10000, 1, 1, 0, 0, 0 },
 };
 
 /* static functions */
@@ -104,7 +106,7 @@ int weapon_fire(struct player *p)
     /* check if the player wields a weapon */
     if (weapon == NULL)
     {
-        log_add_entry(nlarn->log, "You do not wield any weapon!");
+        log_add_entry(nlarn->log, _("You do not wield any weapon!"));
         return false;
     }
 
@@ -123,7 +125,7 @@ int weapon_fire(struct player *p)
     /* check if ammo is quivered */
     if (!ammo)
     {
-        log_add_entry(nlarn->log, "You have no ammunition in your quiver!");
+        log_add_entry(nlarn->log, _("You have no ammunition in your quiver!"));
         g_free(wdesc);
         return false;
     }
@@ -133,7 +135,7 @@ int weapon_fire(struct player *p)
     {
         gchar *adesc = item_describe(ammo, player_item_known(p, ammo),
                                      true, false);
-        log_add_entry(nlarn->log, "You cannot fire %s with %s.", adesc, wdesc);
+        log_add_entry(nlarn->log, _("You cannot fire %s with %s."), adesc, wdesc);
 
         g_free(wdesc);
         g_free(adesc);
@@ -141,13 +143,13 @@ int weapon_fire(struct player *p)
     }
 
     /* all checks are successful */
-    position target = display_get_position(p, "Select a target", true, false,
+    position target = display_get_position(p, _("Select a target"), true, false,
         0, false, true);
 
     /* is the target a valid position? */
     if(!pos_valid(target))
     {
-        log_add_entry(nlarn->log, "You did not fire %s.", wdesc);
+        log_add_entry(nlarn->log, _("You did not fire %s."), wdesc);
 
         g_free(wdesc);
         return false;
@@ -159,7 +161,7 @@ int weapon_fire(struct player *p)
     /* check if there is a monster at the targeted position */
     if (m == NULL)
     {
-        log_add_entry(nlarn->log, "I see no monster there.");
+        log_add_entry(nlarn->log, _("I see no monster there."));
 
         g_free(wdesc);
         return false;
@@ -168,14 +170,14 @@ int weapon_fire(struct player *p)
     /* protect townsfolk from aggressive players */
     if (monster_type(m) == MT_TOWN_PERSON)
     {
-        log_add_entry(nlarn->log, "Gosh! How dare you!");
+        log_add_entry(nlarn->log, _("Gosh! How dare you!"));
 
         g_free(wdesc);
         return false;
     }
 
     /* log the event */
-    log_add_entry(nlarn->log, "You fire %s at the %s.", wdesc,
+    log_add_entry(nlarn->log, _("You fire %s at the %s."), wdesc,
             monster_get_name(m));
     g_free(wdesc);
 
@@ -217,7 +219,7 @@ void weapon_swap(struct player *p)
 
     if (pweapon == sweapon && pweapon == NULL)
     {
-        log_add_entry(nlarn->log, "You have no weapon ready.");
+        log_add_entry(nlarn->log, _("You have no weapon ready."));
         return;
     }
 
@@ -225,8 +227,8 @@ void weapon_swap(struct player *p)
     {
         pdesc = item_describe(pweapon, player_item_known(p, pweapon),
                               true, true);
-        log_add_entry(nlarn->log, "You can't put %s away, "
-                      "it is weld into your hand!", pdesc);
+        log_add_entry(nlarn->log, _("You can't put %s away, "
+                      "it is weld into your hand!"), pdesc);
         g_free(pdesc);
 
         return;
@@ -241,15 +243,15 @@ void weapon_swap(struct player *p)
         sdesc = item_describe(p->eq_shield, player_item_known(p,
                               p->eq_shield), true, true);
 
-        log_add_entry(nlarn->log, "You can't ready %s while "
-                      "holding the %s!", pdesc, sdesc);
+        log_add_entry(nlarn->log, _("You can't ready %s while "
+                      "holding the %s!"), pdesc, sdesc);
         g_free(pdesc);
         g_free(sdesc);
 
         return;
     }
 
-    if (!player_make_move(p, 2, true, "swapping your weapons"))
+    if (!player_make_move(p, 2, true, _("swapping your weapons")))
         return; /* interrupted */
 
     p->eq_weapon  = sweapon;
@@ -262,9 +264,9 @@ void weapon_swap(struct player *p)
         sdesc = item_describe(sweapon, player_item_known(p, sweapon),
                               true, false);
 
-    log_add_entry(nlarn->log, "You have swapped your weapons: Primary weapon:"
-                  " %s, secondary weapon, not wielded: %s.",
-                  (sdesc ? sdesc : "none"), (pdesc ? pdesc : "none"));
+    log_add_entry(nlarn->log, _("You have swapped your weapons: Primary weapon:"
+                  " %s, secondary weapon, not wielded: %s."),
+                  (sdesc ? sdesc : _("none")), (pdesc ? pdesc : _("none")));
 
     g_free(pdesc);
     g_free(sdesc);
@@ -299,39 +301,39 @@ char *weapon_shortdesc(item *weapon, guint available_space)
         bool need_comma = false;
         if (weapon->burnt == 2)
         {
-            g_string_append_printf(bonus, "v. burnt, ");
+            g_string_append_printf(bonus, "%s, ", _("v. burnt"));
             need_comma = true;
         }
 
         if (weapon->corroded == 2)
         {
-            g_string_append_printf(bonus, "%sv. corroded",
-                                   need_comma ? ", " : "");
+            g_string_append_printf(bonus, "%s%s",
+                                   need_comma ? ", " : "", _("v. corroded"));
             need_comma = true;
         }
         if (weapon->rusty == 2)
         {
-            g_string_append_printf(bonus, "%sv. rusty",
-                                   need_comma ? ", " : "");
+            g_string_append_printf(bonus, "%s%s",
+                                   need_comma ? ", " : "", _("v. rusty"));
             need_comma = true;
         }
 
         if (weapon->burnt == 1)
         {
-            g_string_append_printf(bonus, "%sburnt",
-                                   need_comma ? ", " : "");
+            g_string_append_printf(bonus, "%s%s",
+                                   need_comma ? ", " : "", _("burnt"));
             need_comma = true;
         }
         if (weapon->corroded == 1)
         {
-            g_string_append_printf(bonus, "%scorroded",
-                                   need_comma ? ", " : "");
+            g_string_append_printf(bonus, "%s%s",
+                                   need_comma ? ", " : "", _("corroded"));
             need_comma = true;
         }
         if (weapon->rusty == 1)
         {
-            g_string_append_printf(bonus, "%srusty",
-                                   need_comma ? ", " : "");
+            g_string_append_printf(bonus, "%s%s",
+                                   need_comma ? ", " : "", _("rusty"));
             need_comma = true;
         }
 
@@ -339,13 +341,13 @@ char *weapon_shortdesc(item *weapon, guint available_space)
         {
             if (weapon->blessed)
             {
-                g_string_append_printf(bonus, "%sblessed",
-                                       need_comma ? ", " : "");
+                g_string_append_printf(bonus, "%s%s",
+                                       need_comma ? ", " : "", _("blessed"));
             }
             else if (weapon->cursed)
             {
-                g_string_append_printf(bonus, "%scursed",
-                                       need_comma ? ", " : "");
+                g_string_append_printf(bonus, "%s%s",
+                                       need_comma ? ", " : "", _("cursed"));
             }
         }
 

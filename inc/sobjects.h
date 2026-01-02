@@ -1,6 +1,6 @@
 /*
  * sobjects.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,8 @@
 
 #ifndef SOBJECTS_H
 #define SOBJECTS_H
+
+#include <libintl.h>
 
 #include "colours.h"
 #include "enumFactory.h"
@@ -82,7 +84,7 @@ static inline colour_t so_get_colour(const sobject_t s)
 
 static inline const char *so_get_desc(const sobject_t s)
 {
-    return sobjects[s].description;
+    return sobjects[s].description ? gettext(sobjects[s].description) : NULL;
 }
 
 static inline bool so_is_passable(sobject_t s)

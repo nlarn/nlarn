@@ -1,6 +1,6 @@
 /*
  * game.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -41,6 +41,8 @@
 # include <winbase.h>
 #endif
 
+#include <glib/gi18n.h>
+
 #include "cJSON.h"
 #include "config.h"
 #include "display.h"
@@ -62,9 +64,10 @@ static int sgfd = 0;
 
 static void print_welcome_message(bool newgame)
 {
-    log_add_entry(nlarn->log, "Welcome %sto NLarn %s!",
-                  newgame ? "" : "back ", nlarn_version);
-    log_add_entry(nlarn->log, "For a list of commands, press '?'.");
+    log_add_entry(nlarn->log, newgame
+                  ? _("Welcome to NLarn %s!") : _("Welcome back to NLarn %s!"),
+                  nlarn_version);
+    log_add_entry(nlarn->log, _("For a list of commands, press '?'."));
 }
 
 static int try_locking_savegame_file(FILE *sg)
@@ -109,7 +112,7 @@ static int try_locking_savegame_file(FILE *sg)
 
         LocalFree(lpMsgBuf);
 #endif
-        display_show_message("Error", desc->str, 0);
+        display_show_message(_("Error"), desc->str, 0);
         g_string_free(desc, true);
         exit(EXIT_FAILURE);
     }
@@ -157,7 +160,7 @@ void game_init(struct game_config *config)
 
         if (config->wizard)
         {
-            log_add_entry(nlarn->log, "Wizard mode has been activated.");
+            log_add_entry(nlarn->log, _("Wizard mode has been activated."));
         }
 
     } /* end new game only settings */
@@ -217,7 +220,7 @@ int game_save(game *g)
 
     /* if the display has been initialised, show a pop-up message */
     if (display_available())
-        win = display_popup(2, 2, 0, NULL, "Saving....", 0);
+        win = display_popup(2, 2, 0, NULL, _("Saving...."), 0);
 
     struct cJSON *save = cJSON_CreateObject();
 
@@ -337,7 +340,7 @@ int game_save(game *g)
 
     if (fhandle == NULL)
     {
-        log_add_entry(g->log, "Error opening save file \"%s\".", nlarn_savefile);
+        log_add_entry(g->log, _("Error opening save file \"%s\"."), nlarn_savefile);
         free(sg);
         return false;
     }
@@ -351,7 +354,7 @@ int game_save(game *g)
     gzFile file = gzdopen(fileno(fhandle), "wb");
     if (gzputs(file, sg) != (int)strlen(sg))
     {
-        log_add_entry(g->log, "Error writing save file \"%s\": %s",
+        log_add_entry(g->log, _("Error writing save file \"%s\": %s"),
                 nlarn_savefile, gzerror(file, &err));
 
         free(sg);
@@ -603,7 +606,7 @@ static bool game_load()
 
     /* if the display has been initialised, show a pop-up message */
     if (display_available())
-        win = display_popup(2, 2, 0, NULL, "Loading....", 0);
+        win = display_popup(2, 2, 0, NULL, _("Loading...."), 0);
 
     /* temporary buffer to store uncompressed save file content */
     char *sgbuf = g_malloc0(bufsize);
@@ -647,8 +650,8 @@ static bool game_load()
             display_window_destroy(win);
 
         /* offer to delete the incompatible save game */
-        if (display_get_yesno("Saved game could not be loaded. "
-                    "Delete and start new game?", NULL, NULL, NULL))
+        if (display_get_yesno(_("Saved game could not be loaded. "
+                    "Delete and start new game?"), NULL, NULL, NULL))
         {
             /* delete save file */
             g_unlink(nlarn_savefile);

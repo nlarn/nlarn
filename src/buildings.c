@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <glib.h>
+#include <glib/gi18n.h>
 
 #include "config.h"
 #include "container.h"
@@ -29,12 +30,12 @@
 #include "scrolls.h"
 #include "weapons.h"
 
-static const char msg_outstanding[] = "The Larn Revenue Service has ordered " \
-                                      "us to not do business with tax evaders. " \
-                                      "They have also told us that you owe back " \
-                                      "taxes and, as we must comply with the " \
-                                      "law, we cannot serve you at this time." \
-                                      "\n\nSo Sorry.";
+static const char msg_outstanding[] = N_("The Larn Revenue Service has ordered "
+                                      "us to not do business with tax evaders. "
+                                      "They have also told us that you owe back "
+                                      "taxes and, as we must comply with the "
+                                      "law, we cannot serve you at this time."
+                                      "\n\nSo Sorry.");
 
 static void building_shop(player *p, inventory **inv, const char *title);
 static int building_player_check(player *p, guint amount);
@@ -77,18 +78,18 @@ int building_bank(player *p)
     guint amount = 0;
     GString *greeting;
 
-    const char msg_title[] = "First National Bank of Larn";
-    const char msg_greet[] = "`EMPH`Welcome to the First National Bank of Larn.`end`\n\n";
+    const char *msg_title = _("First National Bank of Larn");
+    const char *msg_greet = _("`EMPH`Welcome to the First National Bank of Larn.`end`\n\n");
 
-    const char msg_branch[] = "Welcome to the 5th level branch office of the " \
-                              "First National Bank of Larn.\n\n";
+    const char *msg_branch = _("Welcome to the 5th level branch office of the "
+                               "First National Bank of Larn.\n\n");
 
-    const char msg_frozen[] = "The Larn Revenue Service has ordered that your " \
-                              "account be frozen until all levied taxes have " \
-                              "been paid.  They have also told us that you " \
-                              "owe %d gold in taxes, and we must comply with " \
-                              "them. We cannot serve you at this time. Sorry.\n\n" \
-                              "We suggest you go to the LRS office and pay your taxes.";
+    const char *msg_frozen = _("The Larn Revenue Service has ordered that your "
+                               "account be frozen until all levied taxes have "
+                               "been paid.  They have also told us that you "
+                               "owe %d gold in taxes, and we must comply with "
+                               "them. We cannot serve you at this time. Sorry.\n\n"
+                               "We suggest you go to the LRS office and pay your taxes.");
 
     g_assert(p != NULL);
 
@@ -100,12 +101,12 @@ int building_bank(player *p)
     if (p->bank_ieslvtb > 0)
     {
         /* show the earned interest */
-        g_string_append_printf(greeting, "We have paid you an interest of %d " \
-                               "gold since your last visit.\n", p->bank_ieslvtb);
+        g_string_append_printf(greeting, _("We have paid you an interest of %d "
+                               "gold since your last visit.\n"), p->bank_ieslvtb);
 
         /* add it to the game log for later reference */
-        log_add_entry(nlarn->log, "The bank has paid you an interest of %d "
-                      "gold since your last visit.", p->bank_ieslvtb);
+        log_add_entry(nlarn->log, _("The bank has paid you an interest of %d "
+                      "gold since your last visit."), p->bank_ieslvtb);
 
         /* reset the value */
         p->bank_ieslvtb = 0;
@@ -127,21 +128,21 @@ int building_bank(player *p)
         GString *text = g_string_new(greeting->str);
 
         g_string_append_printf(text,
-                "You have %d gold pieces in the bank.\n" \
-                "You have %d gold pieces.\n\n",
+                _("You have %d gold pieces in the bank.\n"
+                  "You have %d gold pieces.\n\n"),
                 p->bank_account, player_get_gold(p));
 
-        g_string_append(text, "Your wish? ");
+        g_string_append(text, _("Your wish? "));
 
         if (player_get_gold(p) > 0)
-            g_string_append(text, "`KEY`d`end`)eposit ");
+            g_string_append(text, _("`KEY`d`end`)eposit "));
 
         if (p->bank_account > 0)
-            g_string_append(text, "`KEY`w`end`)ithdraw ");
+            g_string_append(text, _("`KEY`w`end`)ithdraw "));
 
         /* if player has gems, enable selling them */
         if (inv_length_filtered(p->inventory, item_filter_gems))
-            g_string_append(text, "`KEY`s`end`)ell a gem");
+            g_string_append(text, _("`KEY`s`end`)ell a gem"));
 
         display_window *bwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
                 47, msg_title, text->str, 0);
@@ -156,21 +157,21 @@ int building_bank(player *p)
             if (inv_length_filtered(p->inventory, item_filter_gold) == 0)
                 break;
 
-            amount = display_get_count("How many gold pieces do you wish to deposit?",
+            amount = display_get_count(_("How many gold pieces do you wish to deposit?"),
                                        player_get_gold(p));
 
             if (amount && (amount <= player_get_gold(p)))
             {
                 p->bank_account += amount;
                 player_remove_gold(p, amount);
-                log_add_entry(nlarn->log, "You deposited %d gold.", amount);
+                log_add_entry(nlarn->log, _("You deposited %d gold."), amount);
 
                 /* income tax for money earned in the caverns */
                 p->outstanding_taxes += calc_tax_debt(amount);
             }
             else if (amount)
             {
-                log_add_entry(nlarn->log, "You don't have that much.");
+                log_add_entry(nlarn->log, _("You don't have that much."));
             }
 
             break;
@@ -179,7 +180,7 @@ int building_bank(player *p)
             if (p->bank_account == 0)
                 break;
 
-            amount = display_get_count("How many gold pieces do you wish to withdraw?",
+            amount = display_get_count(_("How many gold pieces do you wish to withdraw?"),
                                        p->bank_account);
 
             if (amount && (amount <= p->bank_account))
@@ -190,7 +191,7 @@ int building_bank(player *p)
                 if (inv_add(&p->inventory, gold))
                 {
                     p->bank_account -= amount;
-                    log_add_entry(nlarn->log, "You withdraw %d gold.", amount);
+                    log_add_entry(nlarn->log, _("You withdraw %d gold."), amount);
                 }
                 else
                 {
@@ -200,7 +201,7 @@ int building_bank(player *p)
             }
             else if (amount)
             {
-                log_add_entry(nlarn->log, "You don't have that much in the bank!");
+                log_add_entry(nlarn->log, _("You don't have that much in the bank!"));
             }
 
             break;
@@ -214,8 +215,8 @@ int building_bank(player *p)
                 GPtrArray *callbacks = g_ptr_array_new();
 
                 display_inv_callback *callback = g_malloc(sizeof(display_inv_callback));
-                callback->description = "(`KEY`s`end`)ell";
-                callback->helpmsg = "Sell the currently selected gem.";
+                callback->description = _("(`KEY`s`end`)ell");
+                callback->helpmsg = _("Sell the currently selected gem.");
                 callback->key = 's';
                 callback->inv = &nlarn->store_stock;
                 callback->function = &building_item_buy;
@@ -223,7 +224,7 @@ int building_bank(player *p)
                 callback->active = false;
                 g_ptr_array_add(callbacks, callback);
 
-                display_inventory("Sell gems", p, &p->inventory, callbacks,
+                display_inventory(_("Sell gems"), p, &p->inventory, callbacks,
                         true, false, true, &item_filter_gems);
 
                 display_inv_callbacks_clean(callbacks);
@@ -252,19 +253,19 @@ int building_bank(player *p)
 int building_dndstore(player *p)
 {
     int turns = 2;
-    const char title[] = "DND store";
-    const char msg_welcome[] = "`EMPH`Welcome to the Larn Thrift Shoppe.`end`\n\n" \
-                               "We stock many items explorers find useful in " \
-                               "their adventures. Feel free to browse to your " \
-                               "heart's content. Also be advised that if you " \
-                               "break 'em, you pay for 'em.";
+    const char *title = _("DND store");
+    const char *msg_welcome = _("`EMPH`Welcome to the Larn Thrift Shoppe.`end`\n\n"
+                                "We stock many items explorers find useful in "
+                                "their adventures. Feel free to browse to your "
+                                "heart's content. Also be advised that if you "
+                                "break 'em, you pay for 'em.");
 
     g_assert(p != NULL);
 
     /* no business if player has outstanding taxes */
     if (p->outstanding_taxes)
     {
-        display_show_message(title, msg_outstanding, 0);
+        display_show_message(title, _(msg_outstanding), 0);
         return turns;
     }
 
@@ -338,31 +339,31 @@ int building_home(player *p)
     int turns = 2;
     GString *text;
 
-    const char title[] = "Your home";
+    const char *title = _("Your home");
 
-    const char msg_home[] = "`EMPH`Welcome home, %s.`end`\n\nLatest word from the doctor " \
-                            "is not good. The diagnosis is confirmed as " \
-                            "dianthroritis. He guesses that your daughter " \
-                            "has only %d mobuls left in this world. It's " \
-                            "up to you, %s, to find the only hope for your " \
-                            "daughter, the very rare potion of cure " \
-                            "dianthroritis.  It is rumored that only deep in " \
-                            "the depths of the caves can this potion be found.\n";
+    const char *msg_home = _("`EMPH`Welcome home, %s.`end`\n\nLatest word from the doctor "
+                             "is not good. The diagnosis is confirmed as "
+                             "dianthroritis. He guesses that your daughter "
+                             "has only %d mobuls left in this world. It's "
+                             "up to you, %s, to find the only hope for your "
+                             "daughter, the very rare potion of cure "
+                             "dianthroritis.  It is rumored that only deep in "
+                             "the depths of the caves can this potion be found.\n");
 
-    const char msg_found[] = "`EMPH`Congratulations!`end` You found the potion of cure " \
-                             "dianthroritis! Frankly, No one thought you " \
-                             "could do it. Boy! Did you surprise them!\n\n";
+    const char *msg_found = _("`EMPH`Congratulations!`end` You found the potion of cure "
+                              "dianthroritis! Frankly, No one thought you "
+                              "could do it. Boy! Did you surprise them!\n\n");
 
-    const char msg_died[] = "The doctor has the sad duty to inform you that " \
-                            "your daughter died before your return. There was " \
-                            "nothing he could do without the potion.\n\n" \
-                            "You didn't make it in time. Too bad...";
+    const char *msg_died = _("The doctor has the sad duty to inform you that "
+                             "your daughter died before your return. There was "
+                             "nothing he could do without the potion.\n\n"
+                             "You didn't make it in time. Too bad...");
 
-    const char msg_won[] = "The doctor is now administering the potion and, in " \
-                           "a few moments, your daughter should be well on " \
-                           "her way to recovery.\n\nThe potion is working! " \
-                           "The doctor thinks that your daughter will recover " \
-                           "in a few days.\n\nCongratulations!";
+    const char *msg_won = _("The doctor is now administering the potion and, in "
+                            "a few moments, your daughter should be well on "
+                            "her way to recovery.\n\nThe potion is working! "
+                            "The doctor thinks that your daughter will recover "
+                            "in a few days.\n\nCongratulations!");
 
     g_assert(p != NULL);
 
@@ -376,7 +377,7 @@ int building_home(player *p)
         {
             /* won the game */
             g_string_append(text, msg_won);
-            display_show_message("You saved your daughter!", text->str, 0);
+            display_show_message(_("You saved your daughter!"), text->str, 0);
             g_string_free(text, true);
 
             /* remove the potion from the inventory as it has been used up */
@@ -396,7 +397,7 @@ int building_home(player *p)
         {
             /* lost the game */
             g_string_append(text, msg_died);
-            display_show_message("You were too late!", text->str, 0);
+            display_show_message(_("You were too late!"), text->str, 0);
             g_string_free(text, true);
 
             player_die(p, PD_TOO_LATE, 0);
@@ -407,7 +408,7 @@ int building_home(player *p)
     {
         /* too late, no potion */
         text = g_string_new(msg_died);
-        display_show_message("You were too late!", text->str, 0);
+        display_show_message(_("You were too late!"), text->str, 0);
         g_string_free(text, true);
 
         player_die(p, PD_LOST, 0);
@@ -431,15 +432,15 @@ int building_home(player *p)
         if ((inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
             || (inv_length(nlarn->player_home) > 0))
         {
-            g_string_append_printf(text, "\n\nYou may\n");
+            g_string_append_printf(text, "%s", _("\n\nYou may\n"));
 
             if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-                g_string_append_printf(text, "  `KEY`d`end`) "
-                                       "Deposit something here\n");
+                g_string_append_printf(text, "%s", _("  `KEY`d`end`) "
+                                       "Deposit something here\n"));
 
             if (inv_length(nlarn->player_home) > 0)
-                g_string_append_printf(text, "  `KEY`t`end`) "
-                                       "Take something with you\n");
+                g_string_append_printf(text, "%s", _("  `KEY`t`end`) "
+                                       "Take something with you\n"));
 
             g_string_append_c(text, '\n');
         }
@@ -457,9 +458,9 @@ int building_home(player *p)
                 callbacks = g_ptr_array_new();
 
                 callback = g_malloc0(sizeof(display_inv_callback));
-                callback->description = "(`KEY`d`end`)eposit";
-                callback->helpmsg = "Deposit the selected item in "
-                                    "your storage room at home.";
+                callback->description = _("(`KEY`d`end`)eposit");
+                callback->helpmsg = _("Deposit the selected item in "
+                                      "your storage room at home.");
                 callback->key = 'd';
                 callback->inv = &nlarn->player_home;
                 callback->function = &container_item_add;
@@ -482,9 +483,9 @@ int building_home(player *p)
                 callbacks = g_ptr_array_new();
 
                 callback = g_malloc0(sizeof(display_inv_callback));
-                callback->description = "(`KEY`t`end`)ake";
-                callback->helpmsg = "Take the selected item out of your "
-                                    "storage room and put it into your pack.";
+                callback->description = _("(`KEY`t`end`)ake");
+                callback->helpmsg = _("Take the selected item out of your "
+                                      "storage room and put it into your pack.");
                 callback->key = 't';
                 callback->inv = &nlarn->player_home;
                 callback->function = &container_item_unpack;
@@ -493,9 +494,9 @@ int building_home(player *p)
                 g_ptr_array_add(callbacks, callback);
 
                 callback = g_malloc0(sizeof(display_inv_callback));
-                callback->description = "take (`KEY`a`end`)ll";
-                callback->helpmsg = "Take all items from your storage room. "
-                                    "Only available when you can carry the total weight.";
+                callback->description = _("take (`KEY`a`end`)ll");
+                callback->helpmsg = _("Take all items from your storage room. "
+                                      "Only available when you can carry the total weight.");
                 callback->key = 'a';
                 callback->inv = &nlarn->player_home;
                 callback->checkfun = &player_can_carry_all;
@@ -523,10 +524,10 @@ int building_lrs(player *p)
 {
     int turns = 2;
 
-    const char title[] ="Larn Revenue Service";
-    const char msg_greet[] = "Welcome to the Larn Revenue Service district office.\n\n";
-    const char msg_taxes[] = "You presently owe %d gold in taxes.\n\n";
-    const char msg_notax[] = "You do not owe us any taxes.";
+    const char *title = _("Larn Revenue Service");
+    const char *msg_greet = _("Welcome to the Larn Revenue Service district office.\n\n");
+    const char *msg_taxes = _("You presently owe %d gold in taxes.\n\n");
+    const char *msg_notax = _("You do not owe us any taxes.");
 
     g_assert(p != NULL);
 
@@ -539,24 +540,24 @@ int building_lrs(player *p)
         /* offer to pay taxes if player can afford to */
         if (building_player_check(p, p->outstanding_taxes))
         {
-            g_string_append(text, "Do you want to pay your taxes?");
+            g_string_append(text, _("Do you want to pay your taxes?"));
 
             if (display_get_yesno(text->str, title, NULL, NULL))
             {
                 building_player_charge(p, p->outstanding_taxes);
                 p->stats.gold_spent_taxes += p->outstanding_taxes;
                 p->outstanding_taxes = 0;
-                log_add_entry(nlarn->log, "You have paid your taxes.");
+                log_add_entry(nlarn->log, _("You have paid your taxes."));
             }
             else
             {
-                log_add_entry(nlarn->log, "You chose not to pay your taxes.");
+                log_add_entry(nlarn->log, _("You chose not to pay your taxes."));
             }
         }
         else
         {
-            g_string_append(text, "Unfortunately, it seems that you cannot "
-                    "afford to pay your taxes at this time.");
+            g_string_append(text, _("Unfortunately, it seems that you cannot "
+                    "afford to pay your taxes at this time."));
             display_show_message(title, text->str, 0);
         }
     }
@@ -581,34 +582,35 @@ static int building_scribe_scroll(player *p)
     /* check if the player owns a blank scroll */
     if (!inv_length_filtered(p->inventory, item_filter_blank_scroll))
     {
-        display_show_message("School", "To craft a scroll, "
-            "the scribes must first be given a blank one.", 0);
+        display_show_message(_("School"), _("To craft a scroll, "
+            "the scribes must first be given a blank one."), 0);
 
         return turns;
     }
 
-    item *blank = display_inventory("Choose a scroll to inscribe", p,
+    item *blank = display_inventory(_("Choose a scroll to inscribe"), p,
                                       &p->inventory, NULL, false, false,
                                       false, item_filter_blank_scroll);
 
     if (!blank)
     {
-        log_add_entry(nlarn->log, "Okay then.");
+        log_add_entry(nlarn->log, _("Okay then."));
         return turns;
     }
 
-    char *new_scroll = display_get_string("School",
-        "Which incantation shall we bind in ink?", NULL, 45);
+    char *new_scroll = display_get_string(_("School"),
+        _("Which incantation shall we bind in ink?"), NULL, 45);
 
     if (new_scroll == NULL)
     {
-        display_show_message("School", "Okay then.", 0);
+        display_show_message(_("School"), _("Okay then."), 0);
         return turns;
     }
 
     for (i = 0; i < ST_MAX; i++)
     {
-        if (g_strcmp0(new_scroll, scrolls[i].name) == 0)
+        if (g_strcmp0(new_scroll, scrolls[i].name) == 0
+                || g_strcmp0(new_scroll, _(scrolls[i].name)) == 0)
             break;
     }
 
@@ -617,10 +619,10 @@ static int building_scribe_scroll(player *p)
 
     if (i == ST_MAX)
     {
-        display_show_message("School",
-            "Even the oldest scribes know nothing of a scroll like that. "
-            "Alas, the scroll must remain blank - for even the greatest "
-            "scribes cannot write what does not exist.", 0);
+        display_show_message(_("School"),
+            _("Even the oldest scribes know nothing of a scroll like that. "
+              "Alas, the scroll must remain blank - for even the greatest "
+              "scribes cannot write what does not exist."), 0);
 
         return turns;
     }
@@ -628,8 +630,8 @@ static int building_scribe_scroll(player *p)
     /* jesters might want to get a scroll of blank paper */
     if (i == ST_BLANK)
     {
-        display_show_message("School", "A blank scroll, "
-            "by definition, needs no scribe.", 0);
+        display_show_message(_("School"), _("A blank scroll, "
+            "by definition, needs no scribe."), 0);
 
         return turns;
     }
@@ -638,20 +640,20 @@ static int building_scribe_scroll(player *p)
     const int price = 2 * scrolls[i].price;
     if (!building_player_check(p, price))
     {
-        char *msg = g_strdup_printf("You do not possess the %d gold necessary "
+        char *msg = g_strdup_printf(_("You do not possess the %d gold necessary "
             "to acquire the scroll of %s. For now, the scribes shall keep "
-            "their quills dry.", price, scrolls[i].name);
+            "their quills dry."), price, _(scrolls[i].name));
 
-        display_show_message("School", msg, 0);
+        display_show_message(_("School"), msg, 0);
         g_free(msg);
 
         return turns;
     }
 
-    g_snprintf(question, 80, "The crafting of a scroll of %s demands a fee of"
-        " %d gold.\nWould that be agreeable to you?", scrolls[i].name, price);
+    g_snprintf(question, 80, _("The crafting of a scroll of %s demands a fee of"
+        " %d gold.\nWould that be agreeable to you?"), _(scrolls[i].name), price);
 
-    if (!display_get_yesno(question, "School", NULL, NULL))
+    if (!display_get_yesno(question, _("School"), NULL, NULL))
     {
         return turns;
     }
@@ -672,11 +674,11 @@ static int building_scribe_scroll(player *p)
     p->stats.gold_spent_shop += price;
 
     /* writing a scroll takes 10 mobuls */
-    player_make_move(p, 10 * MOBUL, false, "waiting for the scribes to write a "
-            "scroll of %s for you", scroll_name(blank));
+    player_make_move(p, 10 * MOBUL, false, _("waiting for the scribes to write a "
+            "scroll of %s for you"), scroll_name(blank));
 
     log_add_entry(nlarn->log,
-            "The scribes have completed a scroll of %s on your behalf.",
+            _("The scribes have completed a scroll of %s on your behalf."),
             scroll_name(blank));
 
     if (split)
@@ -695,13 +697,13 @@ typedef struct school_course {
 
 static const school_course school_courses[SCHOOL_COURSE_COUNT] =
 {
-    { 10, -1, "Fighters Training I", "You feel stronger!" },
-    { 15,  0, "Fighters Training II", "You feel much stronger!" },
-    { 10, -1, "Introduction to Wizardry", "The task before you now seems more attainable!" },
-    { 20,  2, "Applied Wizardry", "The task before you now seems very attainable!" },
-    { 10, -1, "Faith for Today", "You now feel more confident that you can find the potion in time!" },
-    { 10, -1, "Contemporary Dance", "You feel like dancing!" },
-    {  5, -1, "History of Larn", "Your instructor told you that the Eye of Larn is rumored to be guarded by an invisible demon lord." },
+    { 10, -1, N_("Fighters Training I"), N_("You feel stronger!") },
+    { 15,  0, N_("Fighters Training II"), N_("You feel much stronger!") },
+    { 10, -1, N_("Introduction to Wizardry"), N_("The task before you now seems more attainable!") },
+    { 20,  2, N_("Applied Wizardry"), N_("The task before you now seems very attainable!") },
+    { 10, -1, N_("Faith for Today"), N_("You now feel more confident that you can find the potion in time!") },
+    { 10, -1, N_("Contemporary Dance"), N_("You feel like dancing!") },
+    {  5, -1, N_("History of Larn"), N_("Your instructor told you that the Eye of Larn is rumored to be guarded by an invisible demon lord.") },
 };
 
 static void building_school_take_course(player *p, int course, guint price)
@@ -713,8 +715,8 @@ static void building_school_take_course(player *p, int course, guint price)
 
     /* time usage */
     guint course_turns = mobuls2gtime(school_courses[course].course_time);
-    player_make_move(p, course_turns, false, "taking the course \"%s\"",
-            school_courses[course].description);
+    player_make_move(p, course_turns, false, _("taking the course \"%s\""),
+            _(school_courses[course].description));
 
     /* add the bonus gained by this course */
     switch (course)
@@ -755,19 +757,19 @@ static void building_school_take_course(player *p, int course, guint price)
     p->school_courses_taken[course] = 1;
 
     log_add_entry(nlarn->log,
-            "You successfully complete the course \"%s\". %s",
-            school_courses[course].description,
-            school_courses[course].message);
+            _("You successfully complete the course \"%s\". %s"),
+            _(school_courses[course].description),
+            _(school_courses[course].message));
 }
 
 int building_school(player *p)
 {
-    const char msg_greet[] = "`EMPH`Welcome to the College of Larn!`end`\n\n" \
-                             "We offer the exciting opportunity of higher " \
-                             "education to all inhabitants of the caves. " \
-                             "Here is a list of the class schedule:\n\n";
+    const char *msg_greet = _("`EMPH`Welcome to the College of Larn!`end`\n\n"
+                              "We offer the exciting opportunity of higher "
+                              "education to all inhabitants of the caves. "
+                              "Here is a list of the class schedule:\n\n");
 
-    const char msg_prerequisite[] = "Sorry, but this class has a prerequisite of \"%s\".";
+    const char *msg_prerequisite = _("Sorry, but this class has a prerequisite of \"%s\".");
 
     g_assert(p != NULL);
 
@@ -785,22 +787,22 @@ int building_school(player *p)
                               * (game_difficulty(nlarn) + 1) * 100;
 
                 g_string_append_printf(text,
-                        " `KEY`%c`end`) `EMPH`%-24s`end` - %2d mobuls, %4d gold\n",
-                        idx + 'a', school_courses[idx].description,
+                        _(" `KEY`%c`end`) `EMPH`%-24s`end` - %2d mobuls, %4d gold\n"),
+                        idx + 'a', _(school_courses[idx].description),
                         school_courses[idx].course_time, price);
             }
             else
             {
-                g_string_append_printf(text, "    %-24s - attended\n",
-                        school_courses[idx].description);
+                g_string_append_printf(text, _("    %-24s - attended\n"),
+                        _(school_courses[idx].description));
             }
         }
 
-        g_string_append_printf(text, "\nAlternatively,\n"
-                " `KEY`%c`end`) %-24s - 10 mobuls\n\n",
-                SCHOOL_COURSE_COUNT + 'a', "Commission a scroll");
+        g_string_append_printf(text, _("\nAlternatively,\n"
+                " `KEY`%c`end`) %-24s - 10 mobuls\n\n"),
+                SCHOOL_COURSE_COUNT + 'a', _("Commission a scroll"));
 
-        int selection = display_show_message("School", text->str, 0);
+        int selection = display_show_message(_("School"), text->str, 0);
         g_string_free(text, true);
 
         switch (selection)
@@ -829,9 +831,9 @@ int building_school(player *p)
 
                 if (!building_player_check(p, price))
                 {
-                    char *msg = g_strdup_printf("You cannot afford "
-                            "the %d gold for the course.", price);
-                    display_show_message("School", msg, 0);
+                    char *msg = g_strdup_printf(_("You cannot afford "
+                            "the %d gold for the course."), price);
+                    display_show_message(_("School"), msg, 0);
                     g_free(msg);
                 }
                 /* check if the selected course has a prerequisite
@@ -840,9 +842,9 @@ int building_school(player *p)
                         !p->school_courses_taken[school_courses[course].prerequisite])
                 {
                     char *msg = g_strdup_printf(msg_prerequisite,
-                            school_courses[school_courses[course].prerequisite]
-                            .description);
-                    display_show_message("School", msg, 0);
+                            _(school_courses[school_courses[course].prerequisite]
+                            .description));
+                    display_show_message(_("School"), msg, 0);
                     g_free(msg);
                 }
                 else
@@ -861,23 +863,23 @@ int building_tradepost(player *p)
 {
     int turns = 2;
 
-    const char title[] = "Trade Post";
+    const char *title = _("Trade Post");
 
-    const char msg_welcome[] = "`EMPH`Welcome to the Larn Trading Post.`end`\n\nWe buy " \
-                               "items that explorers no longer find useful.\n" \
-                               "Since the condition of the items you bring in " \
-                               "is not certain, and we incur great expense in " \
-                               "reconditioning the items, we usually pay only " \
-                               "20% of their value were they to be new.\n" \
-                               "If the items are badly damaged, we will pay " \
-                               "only 10% of their new value.";
+    const char *msg_welcome = _("`EMPH`Welcome to the Larn Trading Post.`end`\n\nWe buy "
+                                "items that explorers no longer find useful.\n"
+                                "Since the condition of the items you bring in "
+                                "is not certain, and we incur great expense in "
+                                "reconditioning the items, we usually pay only "
+                                "20% of their value were they to be new.\n"
+                                "If the items are badly damaged, we will pay "
+                                "only 10% of their new value.");
 
     g_assert(p != NULL);
 
     /* no business if player has outstanding taxes */
     if (p->outstanding_taxes)
     {
-        display_show_message(title, msg_outstanding, 0);
+        display_show_message(title, _(msg_outstanding), 0);
         return turns;
     }
 
@@ -885,8 +887,8 @@ int building_tradepost(player *p)
     GPtrArray *callbacks = g_ptr_array_new();
 
     display_inv_callback *callback = g_malloc(sizeof(display_inv_callback));
-    callback->description = "(`KEY`s`end`)ell";
-    callback->helpmsg = "Sell the selected item to the Trade Post.";
+    callback->description = _("(`KEY`s`end`)ell");
+    callback->helpmsg = _("Sell the selected item to the Trade Post.");
     callback->key = 's';
     callback->inv = &nlarn->store_stock;
     callback->function = &building_item_buy;
@@ -895,8 +897,8 @@ int building_tradepost(player *p)
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc(sizeof(display_inv_callback));
-    callback->description = "(`KEY`i`end`)dentify";
-    callback->helpmsg = "Have the Trade Post's experts identify your item.";
+    callback->description = _("(`KEY`i`end`)dentify");
+    callback->helpmsg = _("Have the Trade Post's experts identify your item.");
     callback->key = 'i';
     callback->function = &building_item_identify;
     callback->checkfun = &player_item_is_identifiable;
@@ -904,8 +906,8 @@ int building_tradepost(player *p)
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc(sizeof(display_inv_callback));
-    callback->description = "(`KEY`r`end`)epair";
-    callback->helpmsg = "Have the Trade Post's experts revert any damage done to the selected item.";
+    callback->description = _("(`KEY`r`end`)epair");
+    callback->helpmsg = _("Have the Trade Post's experts revert any damage done to the selected item.");
     callback->key = 'r';
     callback->function = &building_item_repair;
     callback->checkfun = &player_item_is_damaged;
@@ -913,16 +915,16 @@ int building_tradepost(player *p)
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(`KEY`e`end`)quip";
-    callback->helpmsg = "Equip the selected item.";
+    callback->description = _("(`KEY`e`end`)quip");
+    callback->helpmsg = _("Equip the selected item.");
     callback->key = 'e';
     callback->function = &player_item_equip;
     callback->checkfun = &player_item_is_equippable;
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc(sizeof(display_inv_callback));
-    callback->description = "(`KEY`u`end`)nequip";
-    callback->helpmsg = "Unequip the selected item.";
+    callback->description = _("(`KEY`u`end`)nequip");
+    callback->helpmsg = _("Unequip the selected item.");
     callback->key = 'u';
     callback->function = &player_item_unequip_wrapper;
     callback->checkfun = &player_item_is_unequippable;
@@ -930,8 +932,8 @@ int building_tradepost(player *p)
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc(sizeof(display_inv_callback));
-    callback->description = "(`KEY`n`end`)ote";
-    callback->helpmsg = "Add a note to the item.";
+    callback->description = _("(`KEY`n`end`)ote");
+    callback->helpmsg = _("Add a note to the item.");
     callback->key = 'n';
     callback->function = &player_item_notes;
     callback->checkfun = NULL;
@@ -950,20 +952,20 @@ int building_tradepost(player *p)
 
 int building_monastery(struct player *p)
 {
-    const char title[] = "The Monastery of Larn";
-    const char msg_welcome[] =
-        "`EMPH`Welcome, traveler, to the Monastery of Larn.`end`\n\n"
-        "Peace be upon you. The walls of the monastery offer respite to all "
-        "who seek it.\n\nSpeak your need, and if it lies within our calling, "
-        "it shall be granted... for a fair offering. We tend the wounded and "
-        "weary, and offer a small selection of tools and provisions to aid "
-        "those who walk the road of trials.\n\n"
-        "Here you may\n\n"
-        "  `KEY`a`end`) buy something\n"
-        "  `KEY`b`end`) ask for curse removal\n"
-        "  `KEY`c`end`) receive healing\n";
+    const char *title = _("The Monastery of Larn");
+    const char *msg_welcome =
+        _("`EMPH`Welcome, traveler, to the Monastery of Larn.`end`\n\n"
+          "Peace be upon you. The walls of the monastery offer respite to all "
+          "who seek it.\n\nSpeak your need, and if it lies within our calling, "
+          "it shall be granted... for a fair offering. We tend the wounded and "
+          "weary, and offer a small selection of tools and provisions to aid "
+          "those who walk the road of trials.\n\n"
+          "Here you may\n\n"
+          "  `KEY`a`end`) buy something\n"
+          "  `KEY`b`end`) ask for curse removal\n"
+          "  `KEY`c`end`) receive healing\n");
 
-    const char ayfwt[] = "Shall we proceed, then?";
+    const char *ayfwt = _("Shall we proceed, then?");
 
     bool leaving = false;
 
@@ -983,68 +985,68 @@ int building_monastery(struct player *p)
         if (player_effect(p, ET_POISON))
         {
             curable_diseases[disease_count].et = ET_POISON;
-            curable_diseases[disease_count++].desc = "poison";
+            curable_diseases[disease_count++].desc = N_("poison");
         }
 
         if (player_effect(p, ET_BLINDNESS))
         {
             curable_diseases[disease_count].et = ET_BLINDNESS;
-            curable_diseases[disease_count++].desc = "blindness";
+            curable_diseases[disease_count++].desc = N_("blindness");
         }
 
         if (player_effect(p, ET_SICKNESS))
         {
             curable_diseases[disease_count].et = ET_SICKNESS;
-            curable_diseases[disease_count++].desc = "sickness";
+            curable_diseases[disease_count++].desc = N_("sickness");
         }
 
         if (player_effect(p, ET_CLUMSINESS))
         {
             curable_diseases[disease_count].et = ET_CLUMSINESS;
-            curable_diseases[disease_count++].desc = "clumsiness";
+            curable_diseases[disease_count++].desc = N_("clumsiness");
         }
 
         if (player_effect(p, ET_DIZZINESS))
         {
             curable_diseases[disease_count].et = ET_DIZZINESS;
-            curable_diseases[disease_count++].desc = "dizziness";
+            curable_diseases[disease_count++].desc = N_("dizziness");
         }
 
         if (player_effect(p, ET_DEC_CON))
         {
             curable_diseases[disease_count].et = ET_DEC_CON;
-            curable_diseases[disease_count++].desc = "incapacitation";
+            curable_diseases[disease_count++].desc = N_("incapacitation");
         }
 
         if (player_effect(p, ET_DEC_DEX))
         {
             curable_diseases[disease_count].et = ET_DEC_DEX;
-            curable_diseases[disease_count++].desc = "awkwardness";
+            curable_diseases[disease_count++].desc = N_("awkwardness");
         }
 
         if (player_effect(p, ET_DEC_INT))
         {
             curable_diseases[disease_count].et = ET_DEC_INT;
-            curable_diseases[disease_count++].desc = "mental deficiency";
+            curable_diseases[disease_count++].desc = N_("mental deficiency");
         }
 
         if (player_effect(p, ET_DEC_STR))
         {
             curable_diseases[disease_count].et = ET_DEC_STR;
-            curable_diseases[disease_count++].desc = "weakness";
+            curable_diseases[disease_count++].desc = N_("weakness");
         }
 
         if (player_effect(p, ET_DEC_WIS))
         {
             curable_diseases[disease_count].et = ET_DEC_WIS;
-            curable_diseases[disease_count++].desc = "ignorance";
+            curable_diseases[disease_count++].desc = N_("ignorance");
         }
 
         /* add found diseases to the menu */
         for (int idx = 0; idx < disease_count; idx++)
         {
-            g_string_append_printf(msg, "  `KEY`%c`end`) heal from %s\n",
-                                   'd' + idx, curable_diseases[idx].desc);
+            g_string_append_printf(msg, _("  `KEY`%c`end`) heal from %s\n"),
+                                   'd' + idx, _(curable_diseases[idx].desc));
         }
 
         /* an empty line for the eye */
@@ -1070,19 +1072,19 @@ int building_monastery(struct player *p)
         {
             if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
             {
-                display_show_message(title, "There is no sign of curse upon "
-                    "your possessions.", 0);
+                display_show_message(title, _("There is no sign of curse upon "
+                    "your possessions."), 0);
                 break;
             }
 
-            item *it = display_inventory("Choose an item to uncurse", p, &p->inventory,
+            item *it = display_inventory(_("Choose an item to uncurse"), p, &p->inventory,
                                          NULL, false, false, false, item_filter_cursed_or_unknown);
 
             /* It is possible to abort the selection with ESC. */
             if (it == NULL)
             {
-                display_show_message(title, "Very well - your belongings "
-                    "shall remain as they were.", 0);
+                display_show_message(title, _("Very well - your belongings "
+                    "shall remain as they were."), 0);
 
                 break;
             }
@@ -1097,8 +1099,8 @@ int building_monastery(struct player *p)
             price *= it->count;
 
             gchar *desc = item_describe(it, player_item_identified(p, it), false, true);
-            char *question = g_strdup_printf("To unbind the curse from %s, we "
-                "ask but %d gold in humble support of the abbey. %s",
+            char *question = g_strdup_printf(_("To unbind the curse from %s, we "
+                "ask but %d gold in humble support of the abbey. %s"),
                 desc, price, ayfwt);
 
             int choice = display_get_yesno(question, NULL, NULL, NULL);
@@ -1106,7 +1108,7 @@ int building_monastery(struct player *p)
 
             if (!choice)
             {
-                char *msg = g_strdup_printf("Thus, you choose to let %s remain unaltered.", desc);
+                char *msg = g_strdup_printf(_("Thus, you choose to let %s remain unaltered."), desc);
                 display_show_message(title, msg, 0);
                 g_free(msg);
                 break;
@@ -1116,16 +1118,18 @@ int building_monastery(struct player *p)
                unknown blessedness. */
             if (it->cursed)
             {
-                char *msg = g_strdup_printf("The monks remove the curse on %s.", desc);
+                char *msg = g_strdup_printf(_("The monks remove the curse on %s."), desc);
                 display_show_message(title, msg, 0);
                 g_free(msg);
                 item_remove_curse(it);
             }
             else
             {
-                char *msg = g_strdup_printf("The monks tell you that %s "
-                        "%sn't cursed. You may now hold this knowledge with "
-                        "certainty.", desc, (it->count == 1) ? "was" : "were");
+                char *msg = g_strdup_printf((it->count == 1)
+                        ? _("The monks tell you that %s wasn't cursed. You may "
+                            "now hold this knowledge with certainty.")
+                        : _("The monks tell you that %s weren't cursed. You may "
+                            "now hold this knowledge with certainty."), desc);
                 display_show_message(title, msg, 0);
                 g_free(msg);
                 it->blessed_known = true;
@@ -1145,13 +1149,13 @@ int building_monastery(struct player *p)
 
             if (p->hp == player_get_hp_max(p))
             {
-                display_show_message(title, "You bear no wounds that require "
-                    "our aid.", 0);
+                display_show_message(title, _("You bear no wounds that require "
+                    "our aid."), 0);
                 break;
             }
 
-            char *question = g_strdup_printf("To grant you healing, we humbly "
-                "request a donation of %d gold to our monastery. %s", price, ayfwt);
+            char *question = g_strdup_printf(_("To grant you healing, we humbly "
+                "request a donation of %d gold to our monastery. %s"), price, ayfwt);
             int choice = display_get_yesno(question, NULL, NULL, NULL);
             g_free(question);
 
@@ -1166,7 +1170,7 @@ int building_monastery(struct player *p)
             else
             {
                 /* no, thanks */
-                display_show_message(title, "So be it, the healing shall wait.", 0);
+                display_show_message(title, _("So be it, the healing shall wait."), 0);
             }
         }
         break;
@@ -1184,9 +1188,9 @@ int building_monastery(struct player *p)
                 effect *e = player_effect_get(p, curable_diseases[selection].et);
                 int price = e->turns * (game_difficulty(nlarn) + 1);
 
-                char *question = g_strdup_printf("To cleanse you of %s, we "
+                char *question = g_strdup_printf(_("To cleanse you of %s, we "
                     "humbly request a donation of %d gold to our monastery. "
-                    "%s", curable_diseases[selection].desc, price, ayfwt);
+                    "%s"), _(curable_diseases[selection].desc), price, ayfwt);
 
                 int choice = display_get_yesno(question, NULL, NULL, NULL);
                 g_free(question);
@@ -1202,8 +1206,8 @@ int building_monastery(struct player *p)
                 else
                 {
                     /* no, thanks */
-                    char *msg = g_strdup_printf("So be it, you chose not to "
-                        "be cured from %s.", curable_diseases[selection].desc);
+                    char *msg = g_strdup_printf(_("So be it, you chose not to "
+                        "be cured from %s."), _(curable_diseases[selection].desc));
                     display_show_message(title, msg, 0);
                     g_free(msg);
                 }
@@ -1257,7 +1261,7 @@ static void building_shop(player *p, inventory **inv, const char *title)
 {
     if (inv_length(*inv) == 0)
     {
-        log_add_entry(nlarn->log, "Unfortunately we are sold out.");
+        log_add_entry(nlarn->log, _("Unfortunately we are sold out."));
         return;
     }
 
@@ -1265,8 +1269,8 @@ static void building_shop(player *p, inventory **inv, const char *title)
     GPtrArray *callbacks = g_ptr_array_new();
 
     display_inv_callback *callback = g_malloc(sizeof(display_inv_callback));
-    callback->description = "(`KEY`b`end`)uy";
-    callback->helpmsg = "Buy the selected item. If the available quantity exceeds one, you may select the amount you want to purchase.";
+    callback->description = _("(`KEY`b`end`)uy");
+    callback->helpmsg = _("Buy the selected item. If the available quantity exceeds one, you may select the amount you want to purchase.");
     callback->key = 'b';
     callback->inv = inv;
     callback->function = &building_item_sell;
@@ -1299,8 +1303,8 @@ static void building_player_charge(player *p, guint amount)
     if (p->bank_account >= amount)
     {
         p->bank_account -= amount;
-        log_add_entry(nlarn->log, "We have debited %d gold from your bank "
-                "account.", amount);
+        log_add_entry(nlarn->log, _("We have debited %d gold from your bank "
+                "account."), amount);
     }
     else
     {
@@ -1373,7 +1377,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
     if (it->count > 1)
     {
-        g_snprintf(text, 80, "How many %s do you want to buy?",
+        g_snprintf(text, 80, _("How many %s do you want to buy?"),
                 it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type));
 
         /* get count */
@@ -1382,8 +1386,8 @@ static void building_item_sell(player *p, inventory **inv, item *it)
         if (count > it->count)
         {
             /* desired amount is larger than the available amount */
-            log_add_entry(nlarn->log, "Wouldn't it be nice if the store "
-                          "had %d of those?", count);
+            log_add_entry(nlarn->log, _("Wouldn't it be nice if the store "
+                          "had %d of those?"), count);
             return;
         }
         else if (count == 0)
@@ -1402,7 +1406,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
         if (!building_player_check(p, price))
         {
             name = item_describe(bought_itm, true, false, true);
-            g_snprintf(text, 80, "You cannot afford the %d gold for %s.",
+            g_snprintf(text, 80, _("You cannot afford the %d gold for %s."),
                        price, name);
             g_free(name);
 
@@ -1417,7 +1421,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     else
     {
         name = item_describe(it, true, true, true);
-        g_snprintf(text, 80, "Do you want to buy %s for %d gold?",
+        g_snprintf(text, 80, _("Do you want to buy %s for %d gold?"),
                    name, price);
         g_free(name);
 
@@ -1457,7 +1461,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     }
 
     /* log the event */
-    log_add_entry(nlarn->log, "You buy %s. Thank you for your purchase.", name);
+    log_add_entry(nlarn->log, _("You buy %s. Thank you for your purchase."), name);
     g_free(name);
 
     /* charge player for this purchase */
@@ -1470,7 +1474,7 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
 {
     char message[81];
 
-    const char title[] = "Identify item";
+    const char *title = _("Identify item");
 
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -1484,7 +1488,7 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
 
     if (building_player_check(p, price))
     {
-        g_snprintf(message, 80, "Pay %d gold to identify %s?",
+        g_snprintf(message, 80, _("Pay %d gold to identify %s?"),
                    price, name_unknown);
 
         if (display_get_yesno(message, NULL, NULL, NULL))
@@ -1494,7 +1498,7 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
             name_unknown[0] = g_ascii_toupper(name_unknown[0]);
             gchar *name_known = item_describe(it, player_item_known(p, it), true, false);
 
-            log_add_entry(nlarn->log, "%s is %s.", name_unknown, name_known);
+            log_add_entry(nlarn->log, _("%s is %s."), name_unknown, name_known);
             g_free(name_known);
 
             building_player_charge(p, price);
@@ -1504,7 +1508,7 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
     }
     else
     {
-        g_snprintf(message, 80, "Identifying %s costs %d gold.",
+        g_snprintf(message, 80, _("Identifying %s costs %d gold."),
                    name_unknown, price);
         display_show_message(title, message, 0);
     }
@@ -1517,7 +1521,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
     int damages = 0;
     char message[81];
 
-    const char title[] = "Repair item";
+    const char *title = _("Repair item");
 
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
 
@@ -1545,7 +1549,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
 
     if (building_player_check(p, price))
     {
-        g_snprintf(message, 80, "Pay %d gold to repair %s?", price, name);
+        g_snprintf(message, 80, _("Pay %d gold to repair %s?"), price, name);
 
         if (display_get_yesno(message, NULL, NULL, NULL))
         {
@@ -1554,7 +1558,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
             it->rusty = 0;
 
             name[0] = g_ascii_toupper(name[0]);
-            log_add_entry(nlarn->log, "%s has been repaired.", name);
+            log_add_entry(nlarn->log, _("%s has been repaired."), name);
             building_player_charge(p, price);
 
             p->stats.gold_spent_id_repair += price;
@@ -1563,7 +1567,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
     }
     else
     {
-        g_snprintf(message, 80, "Repairing the %s costs %d gold.", name, price);
+        g_snprintf(message, 80, _("Repairing the %s costs %d gold."), name, price);
         display_show_message(title, message, 0);
     }
 
@@ -1600,7 +1604,7 @@ static void building_item_buy(player *p, inventory **inv, item *it)
 
     if (it->count > 1)
     {
-        g_snprintf(question, 120, "How many %s do you want to sell for %d gold?",
+        g_snprintf(question, 120, _("How many %s do you want to sell for %d gold?"),
                 it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type), price);
 
         /* get count */
@@ -1608,7 +1612,7 @@ static void building_item_buy(player *p, inventory **inv, item *it)
 
         if (count > it->count)
         {
-            log_add_entry(nlarn->log, "Wouldn't it be nice to have %d of those?", count);
+            log_add_entry(nlarn->log, _("Wouldn't it be nice to have %d of those?"), count);
             return;
         }
 
@@ -1621,7 +1625,7 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     {
         count = 1;
         name = item_describe(it, player_item_known(p, it), true, true);
-        g_snprintf(question, 120, "Do you want to sell %s for %d gold?",
+        g_snprintf(question, 120, _("Do you want to sell %s for %d gold?"),
                    name, price);
 
         g_free(name);
@@ -1639,9 +1643,12 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     it->count = count;
 
     name = item_describe(it, player_item_known(p, it), false, false);
-    log_add_entry(nlarn->log, "You sell %s. The %d gold %s been "
-                  "transferred to your bank account.",
-                  name, price, (price == 1) ? "has" : "have");
+    log_add_entry(nlarn->log, (price == 1)
+                  ? _("You sell %s. The %d gold has been "
+                      "transferred to your bank account.")
+                  : _("You sell %s. The %d gold have been "
+                      "transferred to your bank account."),
+                  name, price);
 
     g_free(name);
     it->count = count_orig;
