@@ -104,8 +104,8 @@ LDFLAGS += $(shell pkg-config --libs glib-2.0)
 ifneq ($(SDLPDCURSES),Y)
 	LDFLAGS += $(shell pkg-config --libs ncurses panel)
 else
-	PDCLIB   := PDCurses/sdl2/pdcurses.a
-	CFLAGS   += $(shell pkg-config --cflags SDL2_ttf) -IPDCurses -DSDLPDCURSES
+	PDCLIB   := PDCursesMod/sdl2/libpdcurses.a
+	CFLAGS   += $(shell pkg-config --cflags SDL2_ttf) -IPDCursesMod -DSDLPDCURSES
 	LDFLAGS  += $(shell pkg-config --libs SDL2_ttf )
 	LIBFILES += lib/FiraMono-Medium.otf
 endif
@@ -168,7 +168,7 @@ $(RESOURCES): %.res: %.rc
 $(PDCLIB):
 	git submodule init
 	git submodule update --recommend-shallow
-	$(MAKE) -C PDCurses/sdl2 WIDE=Y UTF8=Y libs
+	$(MAKE) -C PDCursesMod/sdl2 WIDE=Y UTF8=Y libs
 
 dist: clean $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
 
@@ -248,8 +248,8 @@ clean:
 	@echo Cleaning nlarn
 	rm -f $(OBJECTS) $(DLLS)
 	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) mainfiles.nsh libfiles.nsh README.html Changelog.html
-	@if \[ -n "$(PDCLIB)" -a -d PDcurses/sdl2 \]; then \
-		$(MAKE) -C PDCurses/sdl2 clean; \
+	@if \[ -n "$(PDCLIB)" -a -d PDcursesMod/sdl2 \]; then \
+		$(MAKE) -C PDCursesMod/sdl2 clean; \
 	fi
 
 help:
