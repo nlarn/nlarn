@@ -34,6 +34,7 @@ static int map_fill_with_stationary_objects(map *maze);
 static void map_fill_with_objects(map *m);
 static void map_fill_with_traps(map *m);
 
+static void map_tile_from_char(map *m, position pos, int* num_specials, char c);
 static bool map_load_from_file(map *m, const char *mazefile, guint which);
 static void map_make_maze(map *m, int treasure_room);
 static void map_make_maze_eat(map *m, int x, int y);
@@ -1756,6 +1757,110 @@ static void place_special_item(map *m, position npos)
     }
 }
 
+static void map_tile_from_char(map *m, position pos, int* num_specials, char c)
+{
+    map_tile *tile = map_tile_at(m, pos);
+
+    /* floor is the default */
+    tile->type = LT_FLOOR;
+
+    switch (c)
+    {
+
+    case '^': /* mountain */
+        tile->type = LT_MOUNTAIN;
+        break;
+
+    case '"': /* grass */
+        tile->type = LT_GRASS;
+        break;
+
+    case '.': /* dirt */
+        tile->type = LT_DIRT;
+        break;
+
+    case '&': /* tree */
+        tile->type = LT_TREE;
+        break;
+
+    case '~': /* deep water */
+        tile->type = LT_DEEPWATER;
+        break;
+
+    case '=': /* lava */
+        tile->type = LT_LAVA;
+        break;
+
+    case '#': /* wall */
+        tile->type =  LT_WALL;
+        break;
+
+    case '_': /* altar */
+        tile->sobject = LS_ALTAR;
+        break;
+
+    case '+': /* door */
+        tile->sobject = LS_CLOSEDDOOR;
+        break;
+
+    case 'O': /* caverns entrance */
+        tile->sobject = LS_CAVERNS_ENTRY;
+        break;
+
+    case 'I': /* elevator */
+        tile->sobject = LS_ELEVATORDOWN;
+        break;
+
+    case 'H': /* home */
+        tile->sobject = LS_HOME;
+        break;
+
+    case 'D': /* dnd store */
+        tile->sobject = LS_DNDSTORE;
+        break;
+
+    case 'T': /* trade post */
+        tile->sobject = LS_TRADEPOST;
+        break;
+
+    case 'L': /* LRS */
+        tile->sobject = LS_LRS;
+        break;
+
+    case 'S': /* school */
+        tile->sobject = LS_SCHOOL;
+        break;
+
+    case 'B': /* bank */
+        tile->sobject = LS_BANK;
+        break;
+
+    case 'M': /* monastery */
+        tile->sobject = LS_MONASTERY;
+        break;
+
+    case '!': /* potion of cure dianthroritis, eye of larn */
+        if ((*num_specials)-- == 0)
+            place_special_item(m, pos);
+        break;
+
+    case 'm': /* random monster */
+        monster_new_by_level(pos);
+        break;
+
+    case 'o': /* random item */
+        {
+            item_t it;
+            do {
+                it = rand_1n(IT_MAX - 1);
+            } while (it == IT_CONTAINER);
+
+            inv_add(&tile->ilist, item_new_by_level(it, m->nlevel));
+        }
+        break;
+    };
+}
+
 /*
  *  function to read in a maze from a data file
  *
@@ -1775,7 +1880,6 @@ static bool map_load_from_file(map *m, const char *mazefile, guint which)
 {
     position pos;       /* current position on map */
     int map_num = 0;    /* number of selected map */
-    item_t it;          /* item type for random objects */
 
     FILE *levelfile;
 
@@ -1862,104 +1966,7 @@ static bool map_load_from_file(map *m, const char *mazefile, guint which)
             if (flip_horizontal)
                 Y(map_pos) = MAP_MAX_Y - Y(pos) - 1;
 
-            map_tile *tile = map_tile_at(m, map_pos);
-
-            tile->type = LT_FLOOR;    /* floor is default */
-
-            switch (fgetc(levelfile))
-            {
-
-            case '^': /* mountain */
-                tile->type = LT_MOUNTAIN;
-                break;
-
-            case '"': /* grass */
-                tile->type = LT_GRASS;
-                break;
-
-            case '.': /* dirt */
-                tile->type = LT_DIRT;
-                break;
-
-            case '&': /* tree */
-                tile->type = LT_TREE;
-                break;
-
-            case '~': /* deep water */
-                tile->type = LT_DEEPWATER;
-                break;
-
-            case '=': /* lava */
-                tile->type = LT_LAVA;
-                break;
-
-            case '#': /* wall */
-                tile->type =  LT_WALL;
-                break;
-
-            case '_': /* altar */
-                tile->sobject = LS_ALTAR;
-                break;
-
-            case '+': /* door */
-                tile->sobject = LS_CLOSEDDOOR;
-                break;
-
-            case 'O': /* caverns entrance */
-                tile->sobject = LS_CAVERNS_ENTRY;
-                break;
-
-            case 'I': /* elevator */
-                tile->sobject = LS_ELEVATORDOWN;
-                break;
-
-            case 'H': /* home */
-                tile->sobject = LS_HOME;
-                break;
-
-            case 'D': /* dnd store */
-                tile->sobject = LS_DNDSTORE;
-                break;
-
-            case 'T': /* trade post */
-                tile->sobject = LS_TRADEPOST;
-                break;
-
-            case 'L': /* LRS */
-                tile->sobject = LS_LRS;
-                break;
-
-            case 'S': /* school */
-                tile->sobject = LS_SCHOOL;
-                break;
-
-            case 'B': /* bank */
-                tile->sobject = LS_BANK;
-                break;
-
-            case 'M': /* monastery */
-                tile->sobject = LS_MONASTERY;
-                break;
-
-            case '!': /* potion of cure dianthroritis, eye of larn */
-                if (spec_count-- == 0)
-                    place_special_item(m, map_pos);
-                break;
-
-            case 'm': /* random monster */
-                monster_new_by_level(map_pos);
-                break;
-
-            case 'o': /* random item */
-                do
-                {
-                    it = rand_1n(IT_MAX - 1);
-                }
-                while (it == IT_CONTAINER);
-
-                inv_add(&tile->ilist, item_new_by_level(it, m->nlevel));
-                break;
-            };
+            map_tile_from_char(m, map_pos, &spec_count, fgetc(levelfile));
         }
 
         (void)fgetc(levelfile); /* eat EOL */
