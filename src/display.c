@@ -633,6 +633,35 @@ static int item_sort_shop(gconstpointer a, gconstpointer b, gpointer data)
     return item_sort(a, b, data, true);
 }
 
+static guint count_headers_in_range(inventory **inv, int (*ifilter)(item *),
+                                     guint from, guint capacity)
+{
+    /* Count category-header rows that would be displayed when the visible
+     * window starts at item index 'from' and has room for 'capacity' lines
+     * (items + headers combined).  Headers are only emitted when a category
+     * boundary is crossed inside the visible range, so we prime last_type
+     * with the type of the item just above the window (if any). */
+    item_t last_type = IT_NONE;
+    if (from > 0)
+    {
+        item *prev = inv_get_filtered(*inv, from - 1, ifilter);
+        last_type = prev->type;
+    }
+
+    guint headers = 0;
+    guint len = inv_length_filtered(*inv, ifilter);
+    for (guint idx = from; idx < from + capacity - headers && idx < len; idx++)
+    {
+        item *it = inv_get_filtered(*inv, idx, ifilter);
+        if (it->type != last_type)
+        {
+            headers++;
+            last_type = it->type;
+        }
+    }
+    return headers;
+}
+
 item *display_inventory(const char *title, player *p, inventory **inv,
                         GPtrArray *callbacks, bool show_price,
                         bool show_weight, bool show_account,
@@ -686,11 +715,19 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
     do
     {
-        /* calculate the dialogue height */
-        guint height = min((LINES - 10), len_curr + 2);
+        /* First, calculate the maximum dialogue height */
+        const guint max_height = LINES - 10;
 
-        /* calculate how many items can be displayed at a time */
-        guint maxvis = min(len_curr, height - 2);
+        /* Count category headers for the currently visible items.
+         * Headers are suppressed when the category started above the
+         * current scroll position (offset > 0). */
+        guint visible_category_headers =
+            count_headers_in_range(inv, ifilter, offset, max_height - 2);
+
+        guint height = min(max_height, len_curr + visible_category_headers + 2);
+
+        /* Calculate how many items and headlines can be displayed at a time */
+        guint maxvis = min(len_curr + visible_category_headers, height - 2);
 
         /* fix selected item */
         if (curr > len_curr)
@@ -731,10 +768,41 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             iwin = display_window_new(startx, 2, width, height, title);
         }
 
-        /* draw all items */
-        for (guint pos = 1; pos <= (unsigned)min(len_curr, maxvis); pos++)
+        /*** draw all items ***/
+        /* Seed last_type with the item just above the visible window so that
+         * a category header is only rendered when the category boundary truly
+         * falls inside the visible range. */
+        item_t last_type = IT_NONE;
+        if (offset > 0)
         {
-            it = inv_get_filtered(*inv, (pos - 1) + offset, ifilter);
+            item *prev_it = inv_get_filtered(*inv, offset - 1, ifilter);
+            last_type = prev_it->type;
+        }
+        /* count how many headlines we did show so far */
+        guint shown_headers = 0;
+        for (guint line = 1; line <= maxvis; line++)
+        {
+            guint item_no = (line - 1) + offset - shown_headers;
+            it = inv_get_filtered(*inv, item_no, ifilter);
+
+            /* Check if we need to display a category header */
+            if (it->type != last_type)
+            {
+                /* Display category header */
+                const char *category_name = item_name_pl(it->type);
+                /* Capitalize the first letter for display */
+                gchar *capitalized = str_capitalize(g_strdup(category_name));
+
+                mvwhline(iwin->window, line, 1, ACS_HLINE | CP_UI_BORDER, width - 2);
+                mvwaprintw(iwin->window, line, 4, CP_UI_BRIGHT_FG | A_BOLD,
+                    " %s ", capitalized);
+                g_free(capitalized);
+
+                last_type = it->type;
+                shown_headers++;
+
+                continue;
+            }
 
             bool item_equipped = false;
 
@@ -745,7 +813,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
 
             /* currently selected */
-            if (curr == pos)
+            if (curr == line - shown_headers)
             {
                 if (item_equipped)
                     attrs = CP_UI_HL_REVERSE;
@@ -761,7 +829,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             {
                 /* inside shop */
                 gchar *item_desc = item_describe(it, true, false, false);
-                mvwaprintw(iwin->window, pos, 1, attrs, " %-*s %5d gold ",
+                mvwaprintw(iwin->window, line, 1, attrs, " %-*s %5d gold ",
                           width - 15, item_desc, item_price(it));
 
                 g_free(item_desc);
@@ -769,13 +837,16 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             else
             {
                 gchar *item_desc = item_describe(it, player_item_known(p, it), false, false);
-                mvwaprintw(iwin->window, pos, 1, attrs, " %-*s %c ",
+                mvwaprintw(iwin->window, line, 1, attrs, " %-*s %c ",
                           width - 6, item_desc,
                           player_item_is_equipped(p, it) ? '*' : ' ');
 
                 g_free(item_desc);
             }
         }
+
+        // determine the number of items that were shown
+        guint max_item_vis = maxvis - shown_headers;
 
         /* prepare the window title */
         if (show_account)
@@ -869,10 +940,10 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         case KEY_A3:
         case 21: /* ^U */
 
-            if ((curr == maxvis) || offset == 0)
+            if ((curr == max_item_vis) || offset == 0)
                 curr = 1;
             else
-                offset = (offset > maxvis) ? (offset - maxvis) : 0;
+                offset = (offset > max_item_vis) ? (offset - max_item_vis) : 0;
 
             break;
 
@@ -899,10 +970,22 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 #endif
             if ((curr + offset) < len_curr)
             {
-                if (curr == maxvis)
+                if (curr == max_item_vis) {
                     offset++;
-                else
+
+                    /* If the newly scrolled-in item is the first of a new
+                     * category a header row will appear above it. */
+                        guint hdrs = count_headers_in_range(inv, ifilter,
+                            offset, max_height - 2);
+                        if (hdrs > visible_category_headers) {
+                            offset++;
+                            /* reduce curr as there will be one more headline
+                             * after repaint */
+                            curr--;
+                        }
+                } else {
                     curr++;
+                }
             }
 
             break;
@@ -912,18 +995,30 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         case KEY_C3:
         case 4: /* ^D */
 
-            if (curr == 1)
-            {
-                curr = maxvis;
-            }
-            else
-            {
-                offset = offset + maxvis;
+            if (curr == 1) {
+                curr = max_item_vis;
+            } else {
+                offset = offset + max_item_vis;
+                int old_offset_curr_to_height = max_item_vis - curr;
 
-                if ((offset + maxvis) >= len_curr)
-                {
-                    curr = min(len_curr, maxvis);
-                    offset = len_curr - curr;
+                guint hdrs = count_headers_in_range(inv, ifilter, offset, maxvis);
+                curr = max(1, maxvis - hdrs - old_offset_curr_to_height);
+
+                if (offset + curr > len_curr) {
+                    /* Same seek as END end-of-list case. */
+                    guint new_offset = 0;
+                    for (guint try_offset = len_curr; try_offset > 0; try_offset--)
+                    {
+                        hdrs = count_headers_in_range(inv, ifilter,
+                        try_offset - 1, max_height - 2);
+                        guint lines_used = (len_curr - (try_offset - 1)) + hdrs;
+                        if (lines_used >= maxvis) {
+                            new_offset = try_offset - 1;
+                            break;
+                        }
+                    }
+                    offset = new_offset;
+                    curr = len_curr - offset;
                 }
             }
             break;
@@ -932,17 +1027,25 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         case KEY_END:
         case KEY_C1:
 
-            if (len_curr > maxvis)
-            {
-                curr = maxvis;
-                offset = len_curr - maxvis;
-            }
-            else
-            {
+            if (len_curr > max_item_vis) {
+                /* Same seek as PAGE_DOWN end-of-list case. */
+                guint new_offset = 0;
+                for (guint try_offset = len_curr; try_offset > 0; try_offset--)
+                {
+                    guint hdrs = count_headers_in_range(inv, ifilter,
+                    try_offset - 1, max_height - 2);
+                    guint lines_used = (len_curr - (try_offset - 1)) + hdrs;
+                    if (lines_used >= maxvis) {
+                        new_offset = try_offset - 1;
+                        break;
+                    }
+                }
+                offset = new_offset;
+                curr = len_curr - offset;
+            } else {
                 curr = len_curr;
             }
             break;
-
         case KEY_ESC:
             keep_running = false;
             break;
