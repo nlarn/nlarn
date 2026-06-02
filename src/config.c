@@ -470,7 +470,7 @@ void configure_defaults(const char *inifile)
                     for (int i = 0; i < UI_COLOUR_SCHEME_MAX; i++)
                     {
                         char *lucss = g_ascii_strdown(ui_colour_scheme_string(i), -1);
-                        g_string_append_printf(csmsg, " %c) %s\n", i + 'a', lucss);
+                        g_string_append_printf(csmsg, " `KEY`%c`end`) %s\n", i + 'a', lucss);
                         g_free(lucss);
                     }
 
