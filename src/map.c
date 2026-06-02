@@ -1880,24 +1880,13 @@ static bool map_load_from_file(map *m, const char *mazefile, guint which)
 {
     position pos;       /* current position on map */
     int map_num = 0;    /* number of selected map */
+    gchar *content = NULL;
 
-    FILE *levelfile;
-
-    if (!(levelfile = fopen(mazefile, "r")))
+    /* slurp maze file */
+    if (!g_file_get_contents(mazefile, &content, NULL, NULL))
     {
-        /* maze file cannot be opened */
         return false;
     }
-
-    if (feof(levelfile))
-    {
-        /* FIXME: debug output */
-        fclose(levelfile);
-
-        return false;
-    }
-
-    /* FIXME: calculate how many levels are in the file  */
 
     /* roll the dice: which map? */
     if (which <= MAP_MAX_MAZE_NUM)
@@ -1916,35 +1905,18 @@ static bool map_load_from_file(map *m, const char *mazefile, guint which)
         map_used[map_num] = true;
     }
 
-    /* determine number of line separating character(s) */
-    guint lslen;
+    /* Split content by line */
+    gchar **lines = g_strsplit(content, "\n", -1);
+    g_free(content);
 
-    /* get first character at the end of the first line */
-    fseek(levelfile, MAP_MAX_X, SEEK_SET);
-    switch (fgetc(levelfile))
+    guint num_lines = g_strv_length(lines);
+    /* every map consists of MAP_MAX_Y lines + 1 blank line */
+    guint start_line = map_num * (MAP_MAX_Y + 1);
+
+    /* validate file */
+    if (start_line + MAP_MAX_Y > num_lines)
     {
-        case 10: /* i.e. LF */
-            lslen = 1;
-            break;
-        case 13: /* i.e. CR/LF*/
-            lslen = 2;
-            break;
-        default:
-            /* maze file is corrupted - show error message and quit */
-            nlarn = game_destroy(nlarn);
-            display_show_message("Error", "Maze file is corrupted. Please reinstall the game.", 0);
-            exit(EXIT_FAILURE);
-            break;
-    }
-
-    /* advance to desired maze */
-    fseek(levelfile, (map_num * ((MAP_MAX_X + lslen) * MAP_MAX_Y + lslen)), SEEK_SET);
-
-    if (feof(levelfile))
-    {
-        /* FIXME: debug output */
-        fclose(levelfile);
-
+        g_strfreev(lines);
         return false;
     }
 
@@ -1958,6 +1930,17 @@ static bool map_load_from_file(map *m, const char *mazefile, guint which)
     Z(pos) = m->nlevel;
     for (Y(pos) = 0; Y(pos) < MAP_MAX_Y; Y(pos)++)
     {
+        gchar *line = lines[start_line + Y(pos)];
+
+        /* validate line width */
+        if (strlen(line) < MAP_MAX_X)
+        {
+            g_strfreev(lines);
+            nlarn = game_destroy(nlarn);
+            display_show_message("Error", "Maze file is corrupted. Please reinstall the game.", 0);
+            exit(EXIT_FAILURE);
+        }
+
         for (X(pos) = 0; X(pos) < MAP_MAX_X; X(pos)++)
         {
             position map_pos = pos;
@@ -1966,13 +1949,11 @@ static bool map_load_from_file(map *m, const char *mazefile, guint which)
             if (flip_horizontal)
                 Y(map_pos) = MAP_MAX_Y - Y(pos) - 1;
 
-            map_tile_from_char(m, map_pos, &spec_count, fgetc(levelfile));
+            map_tile_from_char(m, map_pos, &spec_count, line[X(pos)]);
         }
-
-        (void)fgetc(levelfile); /* eat EOL */
     }
 
-    fclose(levelfile);
+    g_strfreev(lines);
 
     /* if the amulet of larn/pcd has not been placed yet, place it randomly */
     if (spec_count >= 0)
