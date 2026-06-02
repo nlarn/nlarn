@@ -11,6 +11,7 @@
 
 ### Fixed bugs
 
+* Fix levels displaying off-center (reported by JustFanTheories69420 on Reddit)
 * Fix userdir command line parameter (reported by ketarax on Reddit)
 * Highlight keys in colour scheme dialogue
 
