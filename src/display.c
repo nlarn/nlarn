@@ -1068,6 +1068,73 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             break;
 
         default:
+            /* Check if the key matches an item type glyph
+             * and jump to the first item of that type. */
+            for (item_t type = IT_NONE + 1; type < IT_MAX; type++)
+            {
+                if (item_data[type].glyph != key)
+                    continue;
+
+                /* Find the first item of this type. */
+                guint target = len_curr; /* sentinel: not found */
+                for (guint idx = 0; idx < len_curr; idx++)
+                {
+                    item *candidate = inv_get_filtered(*inv, idx, ifilter);
+                    if (candidate->type == type) {
+                        target = idx;
+                        break;
+                    }
+                }
+
+                if (target == len_curr)
+                    /* type not present */
+                    break;
+
+                /* Determine whether the target fits in the current window
+                   without scrolling, or needs a new offset.
+
+                   Simple case: target is already visible. */
+                if (target >= offset && target < offset + max_item_vis) {
+                    curr = target - offset + 1;
+                } else if (target < offset) {
+                    /* Target is above the current window: scroll up so that
+                       the target item is the first visible item. */
+                    offset = target;
+                    curr = 1;
+                } else {
+                    /* Target is below the current window. Position the window
+                       so that the target appears at the top. */
+                    offset = target;
+                    curr = 1;
+
+                    /* If that left less than a full window of items,
+                       use the same end-of-list seek as KEY_END so that the
+                       bottom of the list fills the window correctly. */
+                    guint hdrs = count_headers_in_range(inv, ifilter, offset, max_height - 2);
+                    if (offset + (max_height - 2 - hdrs) >= len_curr)
+                    {
+                        guint new_offset = 0;
+                        for (guint try_offset = len_curr; try_offset > 0; try_offset--)
+                        {
+                            hdrs = count_headers_in_range(inv, ifilter,
+                            try_offset - 1, max_height - 2);
+                            guint lines_used = (len_curr - (try_offset - 1)) + hdrs;
+                            if (lines_used >= maxvis) {
+                                new_offset = try_offset - 1;
+                                break;
+                            }
+                        }
+                        /* Only apply end-seek if it wouldn't push the target
+                         * above the visible area. */
+                        if (new_offset <= target) {
+                            offset = new_offset;
+                            curr = target - offset + 1;
+                        }
+                    }
+                }
+                break;
+            }
+
             /* check callback function keys (if defined) */
             for (guint cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
             {

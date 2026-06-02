@@ -4,6 +4,7 @@
 
 ### Changes
 
+* Allow jumping to first item of type by pressing their glyph
 * Separate item types by category headers
 * Show contents of containers in the obituary (reported by ketarax on Reddit)
 * The bank branch office no longer refuses cooperation with outstanding taxes.

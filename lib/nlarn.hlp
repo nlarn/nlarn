@@ -80,8 +80,7 @@ The larnian unit of time is the `EMPH`mobul`end`. It consists of one hundred tur
 
 `TITLE`The Inventory`end`
 
-When browsing through the inventory, valid actions for the selected item are shown at the bottom of the window. The key used to invoke the action is displayed in braces.
-
+When browsing through the inventory, valid actions for the selected item are shown at the bottom of the window. The key used to invoke the action is displayed in braces. To jump to the first item of a type, press the glyph of that item type. For example, pressing `KEY`!`end` selects the first potion in the inventory.
 
 `TITLE`Dialog Windows`end`
 
