@@ -1,6 +1,6 @@
 /*
  * display.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -662,6 +662,30 @@ static guint count_headers_in_range(inventory **inv, int (*ifilter)(item *),
     return headers;
 }
 
+/* Find the largest offset from which the visible window still fills exactly
+ * maxvis lines (items + their category headers). Stepping backwards from
+ * the end of the list, the first offset for which
+ *   (len - offset) + headers_in_window(offset) >= maxvis
+ * is the correct last-page starting position.
+ *
+ * Returns 0 if the whole list fits in one window. */
+static guint find_last_page_offset(inventory **inv, int (*ifilter)(item *),
+                                   guint len, guint maxvis)
+{
+    for (guint try_offset = len; try_offset > 0; try_offset--)
+    {
+        guint hdrs = count_headers_in_range(inv, ifilter,
+            try_offset - 1, maxvis);
+
+        guint lines_used = (len - (try_offset - 1)) + hdrs;
+
+        if (lines_used >= maxvis)
+            return try_offset - 1;
+    }
+
+    return 0;
+}
+
 item *display_inventory(const char *title, player *p, inventory **inv,
                         GPtrArray *callbacks, bool show_price,
                         bool show_weight, bool show_account,
@@ -1005,19 +1029,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                 curr = max(1, maxvis - hdrs - old_offset_curr_to_height);
 
                 if (offset + curr > len_curr) {
-                    /* Same seek as END end-of-list case. */
-                    guint new_offset = 0;
-                    for (guint try_offset = len_curr; try_offset > 0; try_offset--)
-                    {
-                        hdrs = count_headers_in_range(inv, ifilter,
-                        try_offset - 1, max_height - 2);
-                        guint lines_used = (len_curr - (try_offset - 1)) + hdrs;
-                        if (lines_used >= maxvis) {
-                            new_offset = try_offset - 1;
-                            break;
-                        }
-                    }
-                    offset = new_offset;
+                    offset = find_last_page_offset(inv, ifilter, len_curr, maxvis);
                     curr = len_curr - offset;
                 }
             }
@@ -1028,19 +1040,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         case KEY_C1:
 
             if (len_curr > max_item_vis) {
-                /* Same seek as PAGE_DOWN end-of-list case. */
-                guint new_offset = 0;
-                for (guint try_offset = len_curr; try_offset > 0; try_offset--)
-                {
-                    guint hdrs = count_headers_in_range(inv, ifilter,
-                    try_offset - 1, max_height - 2);
-                    guint lines_used = (len_curr - (try_offset - 1)) + hdrs;
-                    if (lines_used >= maxvis) {
-                        new_offset = try_offset - 1;
-                        break;
-                    }
-                }
-                offset = new_offset;
+                offset = find_last_page_offset(inv, ifilter, len_curr, maxvis);
                 curr = len_curr - offset;
             } else {
                 curr = len_curr;
@@ -1108,30 +1108,20 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                     curr = 1;
 
                     /* If that left less than a full window of items,
-                       use the same end-of-list seek as KEY_END so that the
-                       bottom of the list fills the window correctly. */
+                       use the end-of-list seek so the bottom fills correctly. */
                     guint hdrs = count_headers_in_range(inv, ifilter, offset, max_height - 2);
-                    if (offset + (max_height - 2 - hdrs) >= len_curr)
-                    {
-                        guint new_offset = 0;
-                        for (guint try_offset = len_curr; try_offset > 0; try_offset--)
-                        {
-                            hdrs = count_headers_in_range(inv, ifilter,
-                            try_offset - 1, max_height - 2);
-                            guint lines_used = (len_curr - (try_offset - 1)) + hdrs;
-                            if (lines_used >= maxvis) {
-                                new_offset = try_offset - 1;
-                                break;
-                            }
-                        }
-                        /* Only apply end-seek if it wouldn't push the target
-                         * above the visible area. */
+
+                    if (offset + (max_height - 2 - hdrs) >= len_curr) {
+                        guint new_offset = find_last_page_offset(inv, ifilter, len_curr, maxvis);
+
+                        /* Only apply if it wouldn't push the target above the window. */
                         if (new_offset <= target) {
                             offset = new_offset;
                             curr = target - offset + 1;
                         }
                     }
                 }
+
                 break;
             }
 
