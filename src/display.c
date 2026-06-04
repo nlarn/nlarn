@@ -633,17 +633,47 @@ static int item_sort_shop(gconstpointer a, gconstpointer b, gpointer data)
     return item_sort(a, b, data, true);
 }
 
+/* ---------------------------------------------------------------------------
+ * Scroll state
+ *
+ * Tracks all position bookkeeping for a scrollable list widget. Both
+ * display_inventory (with category headers) and display_spell_select
+ * (without headers) share these helpers.
+ *
+ * Fields
+ * ------
+ *   curr          1-based index of the selected item inside the visible
+ *                 window (1 … max_item_vis).
+ *   offset        number of list items above the visible window.
+ *   maxvis        total visible lines: item rows + header rows.
+ *   max_item_vis  visible item rows only (= maxvis − shown header rows).
+ *
+ * For lists without headers maxvis == max_item_vis at all times.
+ * --------------------------------------------------------------------------- */
+
+typedef struct {
+    guint curr;
+    guint offset;
+    guint maxvis;       // lines in window: items + headers
+    guint max_item_vis; // lines in window: items only
+    guint len;          // number of total elements in list
+} list_scroll_state;
+
+/* --- Header counting helpers (inventory-only; NULL-safe for plain lists) --- */
+
+/* Count category-header rows that appear when the visible window starts at
+ * item index 'from' and has room for 'capacity' combined lines.
+ * Headers are only emitted at category boundaries inside the visible range;
+ * we prime last_type with the item just above the window so that a category
+ * that started above the scroll position does not produce a spurious header. */
 static guint count_headers_in_range(inventory **inv, int (*ifilter)(item *),
-                                     guint from, guint capacity)
+                                    guint from, guint capacity)
 {
-    /* Count category-header rows that would be displayed when the visible
-     * window starts at item index 'from' and has room for 'capacity' lines
-     * (items + headers combined).  Headers are only emitted when a category
-     * boundary is crossed inside the visible range, so we prime last_type
-     * with the type of the item just above the window (if any). */
+    if (inv == NULL)
+        return 0;
+
     item_t last_type = IT_NONE;
-    if (from > 0)
-    {
+    if (from > 0) {
         item *prev = inv_get_filtered(*inv, from - 1, ifilter);
         last_type = prev->type;
     }
@@ -653,8 +683,7 @@ static guint count_headers_in_range(inventory **inv, int (*ifilter)(item *),
     for (guint idx = from; idx < from + capacity - headers && idx < len; idx++)
     {
         item *it = inv_get_filtered(*inv, idx, ifilter);
-        if (it->type != last_type)
-        {
+        if (it->type != last_type) {
             headers++;
             last_type = it->type;
         }
@@ -682,8 +711,205 @@ static guint find_last_page_offset(inventory **inv, int (*ifilter)(item *),
         if (lines_used >= maxvis)
             return try_offset - 1;
     }
-
     return 0;
+}
+
+/* --- State initialisation --- */
+
+/* Initialise scroll state for a list that fits entirely in the window. */
+static void lss_init(list_scroll_state *s, guint len, guint window_lines)
+{
+    guint vis = min(len, window_lines);
+    s->curr         = (len > 0) ? 1 : 0;
+    s->offset       = 0;
+    s->maxvis       = vis;
+    s->max_item_vis = vis;
+    s->len          = len;
+}
+
+/* Recompute the derived fields after the window height or scroll position
+ * has changed. Call once per render loop iteration for inventory lists. */
+static void lss_recalc(list_scroll_state *s,
+                       inventory **inv, int (*ifilter)(item *),
+                       guint len, guint max_height)
+{
+    s->len = len;
+
+    guint vis_hdrs = count_headers_in_range(inv, ifilter,
+        s->offset, max_height - 2);
+
+    guint height = min((guint)max_height,len + vis_hdrs + 2);
+
+    s->maxvis = min(len + vis_hdrs, height - 2);
+
+    /* max_item_vis is updated after the render loop once shown_headers is
+     * known; this pre-render value is used for navigation decisions. */
+    s->max_item_vis = s->maxvis - vis_hdrs;
+
+    if (s->curr > len)
+        s->curr = len;
+}
+
+/* --- Navigation operations --- */
+
+/* Move selection to the first item. */
+static void lss_home(list_scroll_state *s)
+{
+    s->curr   = 1;
+    s->offset = 0;
+}
+
+/* Move selection to the last item.
+ * Uses find_last_page_offset when headers are present; plain arithmetic
+ * otherwise (inv == NULL signals a header-free list). */
+static void lss_end(list_scroll_state *s,
+                    inventory **inv, int (*ifilter)(item *))
+{
+    if (s->len <= s->max_item_vis) {
+        s->curr = s->len;
+        s->offset = 0;
+        return;
+    }
+
+    if (inv != NULL) {
+        s->offset = find_last_page_offset(inv, ifilter, s->len, s->maxvis);
+    } else {
+        s->offset = s->len - s->max_item_vis;
+    }
+
+    s->curr = s->len - s->offset;
+}
+
+/* Move selection one item up. */
+static void lss_up(list_scroll_state *s)
+{
+    if (s->curr > 1)
+        s->curr--;
+    else if (s->offset > 0)
+        s->offset--;
+}
+
+/* Move selection one item down.
+ * For inventory lists pass inv/ifilter/max_height so the function can detect
+ * a newly visible category header and scroll one extra line to keep the
+ * selected item inside the window.  Pass inv == NULL for header-free lists. */
+static void lss_down(list_scroll_state *s, inventory **inv,
+                     int (*ifilter)(item *), guint visible_category_headers)
+{
+    if (s->curr + s->offset >= s->len)
+        /* already at last item */
+        return;
+
+    if (s->curr == s->max_item_vis) {
+        s->offset++;
+
+        /* If the newly scrolled-in item is the first of a new
+         * category a header row will appear above it. */
+        if (inv != NULL) {
+            guint hdrs = count_headers_in_range(inv, ifilter, s->offset, s->maxvis);
+
+            if (hdrs > visible_category_headers) {
+                s->offset++;
+                s->curr--;
+            }
+        }
+    } else {
+        s->curr++;
+
+        /* curr may now exceed max_item_vis if a new category header became
+         * visible since the last render (reducing max_item_vis by 1).
+         * Transfer the excess to offset. */
+        if (s->curr > s->max_item_vis) {
+            s->offset += s->curr - s->max_item_vis;
+            s->curr    = s->max_item_vis;
+        }
+    }
+}
+
+/* Scroll one page up. */
+static void lss_page_up(list_scroll_state *s)
+{
+    if ((s->curr == s->max_item_vis) || s->offset == 0)
+        s->curr = 1;
+    else
+        s->offset = (s->offset > s->max_item_vis)
+                    ? (s->offset - s->max_item_vis) : 0;
+}
+
+/* Scroll one page down.
+ * Pass inv == NULL for header-free lists. */
+static void lss_page_down(list_scroll_state *s,
+                          inventory **inv, int (*ifilter)(item *))
+{
+    if (s->curr == 1) {
+        s->curr = s->max_item_vis;
+        return;
+    }
+
+    int old_dist = s->max_item_vis - s->curr;
+    s->offset += s->max_item_vis;
+
+    if (inv != NULL) {
+        guint hdrs = count_headers_in_range(inv, ifilter, s->offset, s->maxvis);
+        s->curr = max(1, (int)s->maxvis - (int)hdrs - old_dist);
+    } else {
+        s->curr = s->max_item_vis;
+    }
+
+    if (s->offset + s->curr > s->len) {
+        if (inv != NULL) {
+            s->offset = find_last_page_offset(inv, ifilter, s->len, s->maxvis);
+        } else {
+            s->offset = (s->len > s->max_item_vis) ? s->len - s->max_item_vis : 0;
+        }
+
+        s->curr = s->len - s->offset;
+    }
+}
+
+/* Jump to a specific absolute list index (0-based).
+ * Adjusts offset so the target is visible, preferring it at the top of the
+ * window; falls back to lss_end positioning when near the end of the list.
+ * Pass inv == NULL for header-free lists. */
+static void lss_scroll_to(list_scroll_state *s, inventory **inv,
+                          int (*ifilter)(item *), guint target)
+{
+    if (target >= s->len)
+        return;
+
+    if (target >= s->offset && target < s->offset + s->max_item_vis) {
+        /* already visible */
+        s->curr = target - s->offset + 1;
+    } else if (target < s->offset) {
+        /* above window: scroll up */
+        s->offset = target;
+        s->curr   = 1;
+    } else {
+        /* below window: place target at the top */
+        s->offset = target;
+        s->curr   = 1;
+
+        if (inv != NULL) {
+            guint hdrs = count_headers_in_range(inv, ifilter,
+                s->offset, s->maxvis);
+
+            if (s->offset + (s->maxvis - hdrs) >= s->len) {
+                guint new_offset = find_last_page_offset(inv, ifilter, s->len, s->maxvis);
+
+                if (new_offset <= target) {
+                    s->offset = new_offset;
+                    s->curr   = target - s->offset + 1;
+                }
+            }
+        } else {
+            guint last = (s->len > s->max_item_vis) ? s->len - s->max_item_vis : 0;
+
+            if (s->offset >= last) {
+                s->offset = last;
+                s->curr   = target - s->offset + 1;
+            }
+        }
+    }
 }
 
 item *display_inventory(const char *title, player *p, inventory **inv,
@@ -712,11 +938,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
        from the callback descriptions */
     char **captions;
 
-    /* offset to element position (when displaying more than maxvis items) */
-    guint offset = 0;
-
-    /* position of currently selected item */
-    guint curr = 1;
+    /* scroll position state */
+    list_scroll_state s = { .curr = 1, .offset = 0, .maxvis = 0, .max_item_vis = 0 };
 
     item *it;
 
@@ -739,23 +962,11 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
     do
     {
-        /* First, calculate the maximum dialogue height */
+        /* Recompute window geometry and scroll state derived fields. */
         const guint max_height = LINES - 10;
+        lss_recalc(&s, inv, ifilter, len_curr, max_height);
 
-        /* Count category headers for the currently visible items.
-         * Headers are suppressed when the category started above the
-         * current scroll position (offset > 0). */
-        guint visible_category_headers =
-            count_headers_in_range(inv, ifilter, offset, max_height - 2);
-
-        guint height = min(max_height, len_curr + visible_category_headers + 2);
-
-        /* Calculate how many items and headlines can be displayed at a time */
-        guint maxvis = min(len_curr + visible_category_headers, height - 2);
-
-        /* fix selected item */
-        if (curr > len_curr)
-            curr = len_curr;
+        guint height = min((guint)max_height,len_curr + (s.maxvis - s.max_item_vis) + 2);
 
         /* rebuild screen if needed */
         if (iwin != NULL && redraw)
@@ -771,8 +982,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             {
                 /* inventory length is smaller than before */
                 /* if on the last page, reduce offset */
-                if ((offset > 0) && ((offset + maxvis) > len_curr))
-                    offset--;
+                if ((s.offset > 0) && ((s.offset + s.maxvis) > len_curr))
+                    s.offset--;
 
                 /* remember current length */
                 len_orig = len_curr;
@@ -797,16 +1008,16 @@ item *display_inventory(const char *title, player *p, inventory **inv,
          * a category header is only rendered when the category boundary truly
          * falls inside the visible range. */
         item_t last_type = IT_NONE;
-        if (offset > 0)
+        if (s.offset > 0)
         {
-            item *prev_it = inv_get_filtered(*inv, offset - 1, ifilter);
+            item *prev_it = inv_get_filtered(*inv, s.offset - 1, ifilter);
             last_type = prev_it->type;
         }
         /* count how many headlines we did show so far */
         guint shown_headers = 0;
-        for (guint line = 1; line <= maxvis; line++)
+        for (guint line = 1; line <= s.maxvis; line++)
         {
-            guint item_no = (line - 1) + offset - shown_headers;
+            guint item_no = (line - 1) + s.offset - shown_headers;
             it = inv_get_filtered(*inv, item_no, ifilter);
 
             /* Check if we need to display a category header */
@@ -837,7 +1048,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
 
             /* currently selected */
-            if (curr == line - shown_headers)
+            if (s.curr == line - shown_headers)
             {
                 if (item_equipped)
                     attrs = CP_UI_HL_REVERSE;
@@ -869,8 +1080,11 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
         }
 
-        // determine the number of items that were shown
-        guint max_item_vis = maxvis - shown_headers;
+        /* update max_item_vis now that shown_headers is known exactly */
+        s.max_item_vis = s.maxvis - shown_headers;
+
+        /* keep the visible_category_headers value for lss_down */
+        const guint visible_category_headers = shown_headers;
 
         /* prepare the window title */
         if (show_account)
@@ -894,7 +1108,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         }
 
         /* get the currently selected item */
-        it = inv_get_filtered(*inv, curr + offset - 1, ifilter);
+        it = inv_get_filtered(*inv, s.curr + s.offset - 1, ifilter);
 
         /* prepare the string array which will hold all the captions */
         captions = strv_new();
@@ -942,8 +1156,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* free the array of caption strings */
         g_strfreev(captions);
 
-        display_window_update_arrow_up(iwin, offset > 0);
-        display_window_update_arrow_down(iwin, (offset + maxvis) < len_curr);
+        display_window_update_arrow_up(iwin, s.offset > 0);
+        display_window_update_arrow_down(iwin, (s.offset + s.maxvis) < len_curr);
 
         wrefresh(iwin->window);
 
@@ -953,22 +1167,14 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         case '7':
         case KEY_HOME:
         case KEY_A1:
-
-            curr = 1;
-            offset = 0;
-
+            lss_home(&s);
             break;
 
         case '9':
         case KEY_PPAGE:
         case KEY_A3:
         case 21: /* ^U */
-
-            if ((curr == max_item_vis) || offset == 0)
-                curr = 1;
-            else
-                offset = (offset > max_item_vis) ? (offset - max_item_vis) : 0;
-
+            lss_page_up(&s);
             break;
 
         case 'k':
@@ -977,13 +1183,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 #ifdef KEY_A2
         case KEY_A2:
 #endif
-
-            if (curr > 1)
-                curr--;
-
-            else if ((curr == 1) && (offset > 0))
-                offset--;
-
+            lss_up(&s);
             break;
 
         case 'j':
@@ -992,60 +1192,22 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 #ifdef KEY_C2
         case KEY_C2:
 #endif
-            if ((curr + offset) < len_curr)
-            {
-                if (curr == max_item_vis) {
-                    offset++;
-
-                    /* If the newly scrolled-in item is the first of a new
-                     * category a header row will appear above it. */
-                        guint hdrs = count_headers_in_range(inv, ifilter,
-                            offset, max_height - 2);
-                        if (hdrs > visible_category_headers) {
-                            offset++;
-                            /* reduce curr as there will be one more headline
-                             * after repaint */
-                            curr--;
-                        }
-                } else {
-                    curr++;
-                }
-            }
-
+            lss_down(&s, inv, ifilter, visible_category_headers);
             break;
 
         case '3':
         case KEY_NPAGE:
         case KEY_C3:
         case 4: /* ^D */
-
-            if (curr == 1) {
-                curr = max_item_vis;
-            } else {
-                offset = offset + max_item_vis;
-                int old_offset_curr_to_height = max_item_vis - curr;
-
-                guint hdrs = count_headers_in_range(inv, ifilter, offset, maxvis);
-                curr = max(1, maxvis - hdrs - old_offset_curr_to_height);
-
-                if (offset + curr > len_curr) {
-                    offset = find_last_page_offset(inv, ifilter, len_curr, maxvis);
-                    curr = len_curr - offset;
-                }
-            }
+            lss_page_down(&s, inv, ifilter);
             break;
 
         case '1':
         case KEY_END:
         case KEY_C1:
-
-            if (len_curr > max_item_vis) {
-                offset = find_last_page_offset(inv, ifilter, len_curr, maxvis);
-                curr = len_curr - offset;
-            } else {
-                curr = len_curr;
-            }
+            lss_end(&s, inv, ifilter);
             break;
+
         case KEY_ESC:
             keep_running = false;
             break;
@@ -1090,38 +1252,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                     /* type not present */
                     break;
 
-                /* Determine whether the target fits in the current window
-                   without scrolling, or needs a new offset.
-
-                   Simple case: target is already visible. */
-                if (target >= offset && target < offset + max_item_vis) {
-                    curr = target - offset + 1;
-                } else if (target < offset) {
-                    /* Target is above the current window: scroll up so that
-                       the target item is the first visible item. */
-                    offset = target;
-                    curr = 1;
-                } else {
-                    /* Target is below the current window. Position the window
-                       so that the target appears at the top. */
-                    offset = target;
-                    curr = 1;
-
-                    /* If that left less than a full window of items,
-                       use the end-of-list seek so the bottom fills correctly. */
-                    guint hdrs = count_headers_in_range(inv, ifilter, offset, max_height - 2);
-
-                    if (offset + (max_height - 2 - hdrs) >= len_curr) {
-                        guint new_offset = find_last_page_offset(inv, ifilter, len_curr, maxvis);
-
-                        /* Only apply if it wouldn't push the target above the window. */
-                        if (new_offset <= target) {
-                            offset = new_offset;
-                            curr = target - offset + 1;
-                        }
-                    }
-                }
-
+                lss_scroll_to(&s, inv, ifilter, target);
                 break;
             }
 
@@ -1133,7 +1264,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                 if ((cb->key == key) && cb->active)
                 {
                     /* trigger callback */
-                    cb->function(p, cb->inv, inv_get_filtered(*inv, curr + offset - 1, ifilter));
+                    cb->function(p, cb->inv, inv_get_filtered(*inv, s.curr + s.offset - 1, ifilter));
 
                     redraw = true;
 
@@ -1153,7 +1284,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     if ((callbacks == NULL) && (key != KEY_ESC))
     {
         /* return selected item if no callbacks have been provided */
-        return inv_get_filtered(*inv, offset + curr - 1, ifilter);
+        return inv_get_filtered(*inv, s.offset + s.curr - 1, ifilter);
     }
     else
     {
@@ -1263,12 +1394,6 @@ spell *display_spell_select(const char *title, player *p)
     /* currently displayed spell; return value */
     spell *sp;
 
-    /* offset to element position (when displaying more than maxvis items) */
-    guint offset = 0;
-
-    /* currently selected item */
-    guint curr = 1;
-
     /* curses attributes */
     attr_t attrs;
 
@@ -1282,7 +1407,6 @@ spell *display_spell_select(const char *title, player *p)
 
     /* set height according to spell count */
     guint height = min((LINES - 7), (p->known_spells->len + 2));
-    guint maxvis = min(p->known_spells->len, height - 2);
 
     guint width = 46;
     guint starty = (LINES - 3 - height) / 2;
@@ -1290,15 +1414,19 @@ spell *display_spell_select(const char *title, player *p)
 
     display_window *swin = display_window_new(startx, starty, width, height, title);
 
+    /* scroll state: no headers in the spell list */
+    list_scroll_state s;
+    lss_init(&s, p->known_spells->len, height - 2);
+
     int prev_key = 0;
     do
     {
         /* display spells */
-        for (guint pos = 1; pos <= maxvis; pos++)
+        for (guint pos = 1; pos <= s.maxvis; pos++)
         {
-            sp = g_ptr_array_index(p->known_spells, pos + offset - 1);
+            sp = g_ptr_array_index(p->known_spells, pos + s.offset - 1);
 
-            if (curr == pos) attrs = CP_UI_FG_REVERSE;
+            if (s.curr == pos) attrs = CP_UI_FG_REVERSE;
             else attrs = CP_UI_FG;
 
             mvwaprintw(swin->window, pos, 1, attrs,
@@ -1310,8 +1438,8 @@ spell *display_spell_select(const char *title, player *p)
         }
 
         /* display up / down markers */
-        display_window_update_arrow_up(swin, (offset > 0));
-        display_window_update_arrow_down(swin, ((offset + maxvis) < p->known_spells->len));
+        display_window_update_arrow_up(swin, (s.offset > 0));
+        display_window_update_arrow_down(swin, ((s.offset + s.maxvis) < p->known_spells->len));
 
         /* construct the window caption: display type ahead keys */
         gchar *caption = g_strdup_printf("%s%s%s",
@@ -1322,7 +1450,7 @@ spell *display_spell_select(const char *title, player *p)
         display_window_update_caption(swin, caption);
 
         /* store currently highlighted spell */
-        sp = g_ptr_array_index(p->known_spells, curr + offset - 1);
+        sp = g_ptr_array_index(p->known_spells, s.curr + s.offset - 1);
 
         /* refresh the spell description pop-up */
         if (ipop != NULL)
@@ -1338,23 +1466,15 @@ spell *display_spell_select(const char *title, player *p)
         case '7':
         case KEY_HOME:
         case KEY_A1:
-
-            curr = 1;
-            offset = 0;
+            lss_home(&s);
             code_buf[0] = '\0';
-
             break;
 
         case '9':
         case KEY_PPAGE:
         case KEY_A3:
         case 21: /* ^U */
-
-            if ((curr == maxvis) || offset == 0)
-                curr = 1;
-            else
-                offset = (offset > maxvis) ? (offset - maxvis) : 0;
-
+            lss_page_up(&s);
             code_buf[0] = '\0';
             break;
 
@@ -1369,12 +1489,7 @@ spell *display_spell_select(const char *title, player *p)
                    it allows to type e.g. 'ckl' */
                 goto mnemonics;
 
-            if (curr > 1)
-                curr--;
-
-            else if ((curr == 1) && (offset > 0))
-                offset--;
-
+            lss_up(&s);
             code_buf[0] = '\0';
             break;
 
@@ -1388,14 +1503,7 @@ spell *display_spell_select(const char *title, player *p)
                 /* see lame excuse above */
                 goto mnemonics;
 
-            if ((curr + offset) < p->known_spells->len)
-            {
-                if (curr == maxvis)
-                    offset++;
-                else
-                    curr++;
-            }
-
+            lss_down(&s, NULL, NULL, 0);
             code_buf[0] = '\0';
             break;
 
@@ -1403,37 +1511,14 @@ spell *display_spell_select(const char *title, player *p)
         case KEY_NPAGE:
         case KEY_C3:
         case 4: /* ^D */
-            if (curr == 1)
-            {
-                curr = maxvis;
-            }
-            else
-            {
-                offset = offset + maxvis;
-
-                if ((offset + maxvis) >= p->known_spells->len)
-                {
-                    curr = min(p->known_spells->len, maxvis);
-                    offset = p->known_spells->len - curr;
-                }
-            }
-
+            lss_page_down(&s, NULL, NULL);
             code_buf[0] = '\0';
             break;
 
         case '1':
         case KEY_END:
         case KEY_C1:
-            if (p->known_spells->len > maxvis)
-            {
-                curr = maxvis;
-                offset = p->known_spells->len - maxvis;
-            }
-            else
-            {
-                curr = p->known_spells->len;
-            }
-
+            lss_end(&s, NULL, NULL);
             code_buf[0] = '\0';
             break;
 
@@ -1453,7 +1538,7 @@ spell *display_spell_select(const char *title, player *p)
             // It is much too easy to accidentally cast alter reality,
             // simply by pressing m + Enter. If the first key press in
             // the menu confirms this auto selected first spell, prompt.
-            if (curr == 1 && prev_key == 0 && sp->id == SP_ALT)
+            if (s.curr == 1 && prev_key == 0 && sp->id == SP_ALT)
             {
                 char prompt[60];
                 g_snprintf(prompt, 80, "Really cast %s?", spell_name(sp));
@@ -1495,26 +1580,15 @@ mnemonics:
                     {
                         sp = g_ptr_array_index(p->known_spells, pos - 1);
 
-                        if (g_str_has_prefix(spell_code(sp), code_buf))
-                        {
-                            /* match found - reposition selection */
-                            if (pos > maxvis)
-                            {
-                                offset = pos - maxvis;
-                                curr = pos - offset;
-                            }
-                            else
-                            {
-                                offset = 0;
-                                curr = pos;
-                            }
-
+                        if (g_str_has_prefix(spell_code(sp), code_buf)) {
+                            /* match found: jump to the spell */
+                            lss_scroll_to(&s, NULL, NULL, pos - 1);
                             break;
                         }
                     }
 
                     /* if no match has been found remove key from buffer */
-                    sp = g_ptr_array_index(p->known_spells, curr + offset - 1);
+                    sp = g_ptr_array_index(p->known_spells, s.curr + s.offset - 1);
                     if (!g_str_has_prefix(spell_code(sp), code_buf))
                     {
                         code_buf[strlen(code_buf) - 1] = '\0';
