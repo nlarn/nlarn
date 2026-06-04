@@ -18,6 +18,7 @@
 
 #include <ctype.h>
 #include <glib.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -912,6 +913,77 @@ static void lss_scroll_to(list_scroll_state *s, inventory **inv,
     }
 }
 
+/* Handle a keystroke for a scrollable list.
+ *
+ * Processes all generic navigation keys (HOME, END, UP, DOWN, PAGE_UP,
+ * PAGE_DOWN) and updates the given list_scroll_state accordingly.
+ *
+ * The inv/ifilter parameters are only relevant for inventory lists that have
+ * category headers; pass NULL for both when used with header-free lists such
+ * as the spell selector.
+ *
+ * The visible_category_headers parameter must reflect the number of header
+ * lines currently rendered in the window (used by lss_down to detect a newly
+ * appearing header at the bottom edge of the window). Pass 0 for header-free
+ * lists.
+ *
+ * Returns true if the key was a navigation key and was handled, false if the
+ * caller should continue processing the key itself. */
+static bool list_handle_scroll_key(list_scroll_state *s, int key,
+                                   inventory **inv, int (*ifilter)(item *),
+                                   guint visible_category_headers)
+{
+    switch (key)
+    {
+    case '7':
+    case KEY_HOME:
+    case KEY_A1:
+        lss_home(s);
+        return true;
+
+    case '9':
+    case KEY_PPAGE:
+    case KEY_A3:
+    case 21: /* ^U */
+        lss_page_up(s);
+        return true;
+
+    case 'k':
+    case '8':
+    case KEY_UP:
+#ifdef KEY_A2
+    case KEY_A2:
+#endif
+        lss_up(s);
+        return true;
+
+    case 'j':
+    case '2':
+    case KEY_DOWN:
+#ifdef KEY_C2
+    case KEY_C2:
+#endif
+        lss_down(s, inv, ifilter, visible_category_headers);
+        return true;
+
+    case '3':
+    case KEY_NPAGE:
+    case KEY_C3:
+    case 4: /* ^D */
+        lss_page_down(s, inv, ifilter);
+        return true;
+
+    case '1':
+    case KEY_END:
+    case KEY_C1:
+        lss_end(s, inv, ifilter);
+        return true;
+
+    default:
+        return false;
+    }
+}
+
 item *display_inventory(const char *title, player *p, inventory **inv,
                         GPtrArray *callbacks, bool show_price,
                         bool show_weight, bool show_account,
@@ -1163,51 +1235,6 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         switch (key = display_getch(iwin->window))
         {
-
-        case '7':
-        case KEY_HOME:
-        case KEY_A1:
-            lss_home(&s);
-            break;
-
-        case '9':
-        case KEY_PPAGE:
-        case KEY_A3:
-        case 21: /* ^U */
-            lss_page_up(&s);
-            break;
-
-        case 'k':
-        case '8':
-        case KEY_UP:
-#ifdef KEY_A2
-        case KEY_A2:
-#endif
-            lss_up(&s);
-            break;
-
-        case 'j':
-        case '2':
-        case KEY_DOWN:
-#ifdef KEY_C2
-        case KEY_C2:
-#endif
-            lss_down(&s, inv, ifilter, visible_category_headers);
-            break;
-
-        case '3':
-        case KEY_NPAGE:
-        case KEY_C3:
-        case 4: /* ^D */
-            lss_page_down(&s, inv, ifilter);
-            break;
-
-        case '1':
-        case KEY_END:
-        case KEY_C1:
-            lss_end(&s, inv, ifilter);
-            break;
-
         case KEY_ESC:
             keep_running = false;
             break;
@@ -1230,6 +1257,9 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             break;
 
         default:
+            if (list_handle_scroll_key(&s, key, inv, ifilter, visible_category_headers))
+                break;
+
             /* Check if the key matches an item type glyph
              * and jump to the first item of that type. */
             for (item_t type = IT_NONE + 1; type < IT_MAX; type++)
@@ -1463,69 +1493,9 @@ spell *display_spell_select(const char *title, player *p)
 
         switch (key = display_getch(swin->window))
         {
-        case '7':
-        case KEY_HOME:
-        case KEY_A1:
-            lss_home(&s);
-            code_buf[0] = '\0';
-            break;
-
-        case '9':
-        case KEY_PPAGE:
-        case KEY_A3:
-        case 21: /* ^U */
-            lss_page_up(&s);
-            code_buf[0] = '\0';
-            break;
-
-        case 'k':
-        case '8':
-        case KEY_UP:
-#ifdef KEY_A2
-        case KEY_A2:
-#endif
-            if (key == 'k' && strlen(code_buf) > 0)
-                /* yuck, I *hate* gotos, but this one makes sense:
-                   it allows to type e.g. 'ckl' */
-                goto mnemonics;
-
-            lss_up(&s);
-            code_buf[0] = '\0';
-            break;
-
-        case 'j':
-        case '2':
-        case KEY_DOWN:
-#ifdef KEY_C2
-        case KEY_C2:
-#endif
-            if (key == 'j' && strlen(code_buf) > 0)
-                /* see lame excuse above */
-                goto mnemonics;
-
-            lss_down(&s, NULL, NULL, 0);
-            code_buf[0] = '\0';
-            break;
-
-        case '3':
-        case KEY_NPAGE:
-        case KEY_C3:
-        case 4: /* ^D */
-            lss_page_down(&s, NULL, NULL);
-            code_buf[0] = '\0';
-            break;
-
-        case '1':
-        case KEY_END:
-        case KEY_C1:
-            lss_end(&s, NULL, NULL);
-            code_buf[0] = '\0';
-            break;
-
         case KEY_ESC:
             RUN = false;
             sp = NULL;
-
             break;
 
         case KEY_LF:
@@ -1564,9 +1534,18 @@ spell *display_spell_select(const char *title, player *p)
         default:
             /* check if the key is used for window placement */
             if (display_window_move(swin, key))
+                break;
+
+            /* 'k' and 'j' redirect to mnemonics when a code is being typed */
+            if ((key == 'k' || key == 'j') && strlen(code_buf) > 0)
+                goto mnemonics;
+
+            if (list_handle_scroll_key(&s, key, NULL, NULL, 0))
             {
+                code_buf[0] = '\0';
                 break;
             }
+
 mnemonics:
             /* add key to spell code buffer */
             if ((key >= 'a') && (key <= 'z'))
