@@ -60,7 +60,7 @@ const spell_data spells[SP_MAX] =
         "Creates and hurls a missile of magical energy",
         "The missile hits the %s.",
         "The missile bounces off the %s.",
-        COLOURLESS, 1, 320, true
+        CRYSTAL_BLUE, 1, 320, true
     },
     {
         SP_DEX, "dex", "dexterity",

@@ -8,6 +8,7 @@
 * Separate item types by category headers
 * Show contents of containers in the obituary (reported by ketarax on Reddit)
 * The bank branch office no longer refuses cooperation with outstanding taxes.
+* Add colour to magic missile ray
 
 ### Fixed bugs
 
