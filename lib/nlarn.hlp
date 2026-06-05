@@ -44,8 +44,8 @@ You can select the travel target by moving the cursor or by typing the desired f
 `KEY`W`end`   wear/wield an item
 `KEY`x`end`   exchange the primary and secondary weapon
 
-`KEY`<`end`   climb up stairs/volcanic shaft or enter a building
-`KEY`>`end`   climb down stairs/volcanic shaft
+`KEY`<`end`   climb up stairs/volcanic shaft
+`KEY`>`end`   climb down stairs/volcanic shaft or enter a building
 `KEY`,`end`   pick up items
 `KEY`$`end`   display the bank account balance
 `KEY`:`end`   look at the location you are standing on
