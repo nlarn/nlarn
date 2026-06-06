@@ -1,6 +1,6 @@
 /*
  * utils.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -80,30 +80,17 @@ int log_add_entry(message_log *log, const char *fmt, ...)
     if (log == NULL || log->active == false)
         return false;
 
-    /* assemble message and append it to the buffer */
+    /* assemble message */
     va_start(argp, fmt);
     gchar *msg = g_strdup_vprintf(fmt, argp);
     va_end(argp);
 
     /* compare new message to previous messages to avoid duplicates */
-    if (log->lastmsg)
+    if (log->lastmsg && g_strcmp0(msg, log->lastmsg) == 0)
     {
-        if (g_strcmp0(msg, log->lastmsg) == 0)
-        {
-            /* message is equal to previous message */
-            g_free(msg);
-            return false;
-        }
-        else
-        {
-            /* msg is not equal to previous message */
-            g_free(log->lastmsg);
-            log->lastmsg = msg;
-        }
-    }
-    else
-    {
-        log->lastmsg = msg;
+        /* message is equal to previous message -> clean up and exit */
+        g_free(msg);
+        return false;
     }
 
     /* if there is already text in the buffer, append a space first */
@@ -113,6 +100,10 @@ int log_add_entry(message_log *log, const char *fmt, ...)
     }
 
     g_string_append(log->buffer, msg);
+
+    /* Update lastmsg: free the old one, and take ownership of 'msg' */
+    g_free(log->lastmsg);
+    log->lastmsg = msg;
 
     return true;
 }
