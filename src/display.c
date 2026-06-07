@@ -730,10 +730,17 @@ static void lss_init(list_scroll_state *s, guint len, guint window_lines)
 
 /* Recompute the derived fields after the window height or scroll position
  * has changed. Call once per render loop iteration for inventory lists. */
-static void lss_recalc(list_scroll_state *s,
-                       inventory **inv, int (*ifilter)(item *),
-                       guint len, guint max_height)
+static void lss_recalc(list_scroll_state *s, inventory **inv,
+                       int (*ifilter)(item *), guint len, guint max_height)
 {
+    /* check for data size change */
+    if (s->len > len && (s->offset + s->maxvis > len))
+    {
+        /* number of entries is smaller than before:
+         * if on the last page, recalculate offset */
+        s->offset = find_last_page_offset(inv, ifilter, len, s->maxvis);
+    }
+
     s->len = len;
 
     guint vis_hdrs = count_headers_in_range(inv, ifilter,
@@ -1049,18 +1056,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             display_paint_screen(p);
             redraw = false;
 
-            /* check for inventory modifications */
-            if (len_orig > len_curr)
-            {
-                /* inventory length is smaller than before */
-                /* if on the last page, reduce offset */
-                if ((s.offset > 0) && ((s.offset + s.maxvis) > len_curr))
-                    s.offset--;
-
-                /* remember current length */
-                len_orig = len_curr;
-            }
-            else if (len_curr > len_orig)
+            if (len_curr > len_orig)
             {
                 /* inventory has grown - sort inventory again */
                 if (show_price)
@@ -1068,6 +1064,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                 else
                     inv_sort(*inv, (GCompareDataFunc)item_sort_normal, (gpointer)p);
             }
+
+            len_orig = len_curr;
         }
 
         if (!iwin)
