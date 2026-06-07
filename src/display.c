@@ -699,17 +699,17 @@ static guint count_headers_in_range(inventory **inv, int (*ifilter)(item *),
  * is the correct last-page starting position.
  *
  * Returns 0 if the whole list fits in one window. */
-static guint find_last_page_offset(inventory **inv, int (*ifilter)(item *),
-                                   guint len, guint maxvis)
+static guint find_last_page_offset(list_scroll_state *s, inventory **inv,
+                                   int (*ifilter)(item *))
 {
-    for (guint try_offset = len; try_offset > 0; try_offset--)
+    for (guint try_offset = s->len; try_offset > 0; try_offset--)
     {
         guint hdrs = count_headers_in_range(inv, ifilter,
-            try_offset - 1, maxvis);
+            try_offset - 1, s->maxvis);
 
-        guint lines_used = (len - (try_offset - 1)) + hdrs;
+        guint lines_used = (s->len - (try_offset - 1)) + hdrs;
 
-        if (lines_used >= maxvis)
+        if (lines_used >= s->maxvis)
             return try_offset - 1;
     }
     return 0;
@@ -738,7 +738,7 @@ static void lss_recalc(list_scroll_state *s, inventory **inv,
     {
         /* number of entries is smaller than before:
          * if on the last page, recalculate offset */
-        s->offset = find_last_page_offset(inv, ifilter, len, s->maxvis);
+        s->offset = find_last_page_offset(s, inv, ifilter);
     }
 
     s->len = len;
@@ -767,20 +767,18 @@ static void lss_home(list_scroll_state *s)
     s->offset = 0;
 }
 
-/* Move selection to the last item.
- * Uses find_last_page_offset when headers are present; plain arithmetic
- * otherwise (inv == NULL signals a header-free list). */
+/* Move selection to the last item. */
 static void lss_end(list_scroll_state *s,
                     inventory **inv, int (*ifilter)(item *))
 {
-    if (s->len <= s->max_item_vis) {
+    if (s->len <= s->maxvis) {
         s->curr = s->len;
         s->offset = 0;
         return;
     }
 
     if (inv != NULL) {
-        s->offset = find_last_page_offset(inv, ifilter, s->len, s->maxvis);
+        s->offset = find_last_page_offset(s, inv, ifilter);
     } else {
         s->offset = s->len - s->max_item_vis;
     }
@@ -866,7 +864,7 @@ static void lss_page_down(list_scroll_state *s,
 
     if (s->offset + s->curr > s->len) {
         if (inv != NULL) {
-            s->offset = find_last_page_offset(inv, ifilter, s->len, s->maxvis);
+            s->offset = find_last_page_offset(s, inv, ifilter);
         } else {
             s->offset = (s->len > s->max_item_vis) ? s->len - s->max_item_vis : 0;
         }
@@ -902,7 +900,7 @@ static void lss_scroll_to(list_scroll_state *s, inventory **inv,
                 s->offset, s->maxvis);
 
             if (s->offset + (s->maxvis - hdrs) >= s->len) {
-                guint new_offset = find_last_page_offset(inv, ifilter, s->len, s->maxvis);
+                guint new_offset = find_last_page_offset(s, inv, ifilter);
 
                 if (new_offset <= target) {
                     s->offset = new_offset;
