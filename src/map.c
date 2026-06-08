@@ -746,9 +746,7 @@ bool map_trajectory(position source, position target,
 
         /* show the position of the ray*/
         /* FIXME: move curses functions to display.c */
-        attron(COLOR_PAIR(fg));
-        (void)mvaddch(Y(cursor), X(cursor), glyph);
-        attroff(COLOR_PAIR(fg));
+        (void)mvaddch(Y(cursor), X(cursor), glyph | COLOR_PAIR(fg));
         display_draw();
 
         /* sleep a while to show the ray's position */
