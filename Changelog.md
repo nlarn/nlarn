@@ -9,6 +9,7 @@
 * Show contents of containers in the obituary (reported by ketarax on Reddit)
 * The bank branch office no longer refuses cooperation with outstanding taxes.
 * Add colour to magic missile ray
+* Print a backtrace when crashing (Linux and FreeBSD)
 
 ### Fixed bugs
 

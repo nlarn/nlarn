@@ -26,7 +26,7 @@ jobs:
       - name: Update apt cache
         run: sudo apt update
       - name: Install dependencies
-        run: sudo apt install libglib2.0-dev pandoc
+        run: sudo apt install libglib2.0-dev pandoc libunwind-dev
       - name: Install PDCurses dependencies
         run: sudo apt install libsdl2-dev libsdl2-ttf-dev
         if: contains(matrix.configuration, 'SDLPDCURSES=Y')
