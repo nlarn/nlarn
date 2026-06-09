@@ -655,9 +655,10 @@ static int item_sort_shop(gconstpointer a, gconstpointer b, gpointer data)
 typedef struct {
     guint curr;
     guint offset;
-    guint maxvis;       // lines in window: items + headers
-    guint max_item_vis; // lines in window: items only
-    guint len;          // number of total elements in list
+    guint maxvis;        // lines in window: items + headers
+    guint max_item_vis;  // lines in window: items only
+    guint len;           // number of total elements in list
+    bool is_at_list_end; // view has reached the end of the list
 } list_scroll_state;
 
 /* --- Header counting helpers (inventory-only; NULL-safe for plain lists) --- */
@@ -726,6 +727,7 @@ static void lss_init(list_scroll_state *s, guint len, guint window_lines)
     s->maxvis       = vis;
     s->max_item_vis = vis;
     s->len          = len;
+    s->is_at_list_end = (len > window_lines);
 }
 
 /* Recompute the derived fields after the window height or scroll position
@@ -753,6 +755,7 @@ static void lss_recalc(list_scroll_state *s, inventory **inv,
     /* max_item_vis is updated after the render loop once shown_headers is
      * known; this pre-render value is used for navigation decisions. */
     s->max_item_vis = s->maxvis - vis_hdrs;
+    s->is_at_list_end = (s->offset + s->max_item_vis >= (s->len - 1));
 
     if (s->curr > len)
         s->curr = len;
@@ -796,7 +799,7 @@ static void lss_up(list_scroll_state *s)
 }
 
 /* Move selection one item down.
- * For inventory lists pass inv/ifilter/max_height so the function can detect
+ * For inventory lists pass inv and ifilter so the function can detect
  * a newly visible category header and scroll one extra line to keep the
  * selected item inside the window.  Pass inv == NULL for header-free lists. */
 static void lss_down(list_scroll_state *s, inventory **inv,
@@ -1081,6 +1084,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             item *prev_it = inv_get_filtered(*inv, s.offset - 1, ifilter);
             last_type = prev_it->type;
         }
+
         /* count how many headlines we did show so far */
         guint shown_headers = 0;
         for (guint line = 1; line <= s.maxvis; line++)
@@ -1088,8 +1092,14 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             guint item_no = (line - 1) + s.offset - shown_headers;
             it = inv_get_filtered(*inv, item_no, ifilter);
 
-            /* Check if we need to display a category header */
-            if (it->type != last_type)
+            /* Check if we need to display a category header.
+             *
+             * Avoid painting the header of the first item when at the list's
+             * end and the item is the first item of its type in the inventory.
+             * In that case the number of lines would exceed the available
+             * space and lead to all sorts of nasty crashes.
+             */
+            if (it->type != last_type && (line > 1 || !s.is_at_list_end))
             {
                 /* Display category header */
                 const char *category_name = item_name_pl(it->type);
