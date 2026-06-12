@@ -39,7 +39,7 @@ inventory *inv_new(gconstpointer owner)
 
 void inv_destroy(inventory *inv, bool special)
 {
-    g_assert(inv != NULL);
+    g_return_if_fail(inv != NULL);
 
     while (inv_length(inv) > 0)
     {
@@ -102,7 +102,7 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
                        inv_callback_void post_add, inv_callback_bool pre_del,
                        inv_callback_void post_del)
 {
-    g_assert (inv != NULL);
+    g_return_if_fail(inv != NULL);
 
     inv->pre_add  = pre_add;
     inv->post_add = post_add;
@@ -168,7 +168,9 @@ bool inv_add(inventory **inv, item *it)
 
 item *inv_get(inventory *inv, guint idx)
 {
-    g_assert (inv != NULL && idx < inv->content->len);
+    g_return_val_if_fail(inv != NULL, NULL);
+    g_return_val_if_fail(idx < inv->content->len, NULL);
+
     gpointer oid = g_ptr_array_index(inv->content, idx);
 
     return game_item_get(nlarn, oid);
@@ -176,7 +178,9 @@ item *inv_get(inventory *inv, guint idx)
 
 item *inv_del(inventory **inv, guint idx)
 {
-    g_assert(*inv != NULL && (*inv)->content != NULL && idx < inv_length(*inv));
+    g_return_val_if_fail(*inv != NULL, NULL);
+    g_return_val_if_fail((*inv)->content != NULL, NULL);
+    g_return_val_if_fail(idx < inv_length(*inv), NULL);
 
     item *itm = inv_get(*inv, idx);
 
@@ -207,7 +211,9 @@ item *inv_del(inventory **inv, guint idx)
 
 bool inv_del_element(inventory **inv, item *it)
 {
-    g_assert(*inv != NULL && (*inv)->content != NULL && it != NULL);
+    g_return_val_if_fail(*inv != NULL, false);
+    g_return_val_if_fail((*inv)->content != NULL, false);
+    g_return_val_if_fail(it != NULL, false);
 
     if ((*inv)->pre_del)
     {
@@ -236,7 +242,9 @@ bool inv_del_element(inventory **inv, item *it)
 
 bool inv_del_oid(inventory **inv, gpointer oid)
 {
-    g_assert(*inv != NULL && (*inv)->content != NULL && oid != NULL);
+    g_return_val_if_fail(*inv != NULL, false);
+    g_return_val_if_fail((*inv)->content != NULL, false);
+    g_return_val_if_fail(oid != NULL, false);
 
     if (!g_ptr_array_remove((*inv)->content, oid))
     {
@@ -256,7 +264,7 @@ bool inv_del_oid(inventory **inv, gpointer oid)
 void inv_erode(inventory **inv, item_erosion_type iet,
                bool visible, int (*ifilter)(item *))
 {
-    g_assert(inv != NULL);
+    g_return_if_fail(inv != NULL);
 
     for (guint idx = 0; idx < inv_length(*inv); idx++)
     {
@@ -280,7 +288,8 @@ guint inv_length(inventory *inv)
 
 void inv_sort(inventory *inv, GCompareDataFunc compare_func, gpointer user_data)
 {
-    g_assert(inv != NULL && inv->content != NULL);
+    g_return_if_fail(inv != NULL);
+    g_return_if_fail(inv->content != NULL);
 
     g_ptr_array_sort_with_data(inv->content, compare_func, user_data);
 }
