@@ -93,6 +93,7 @@ static void nlarn_signal_handler(int signo);
 static void print_libunwind_backtrace(void);
 # endif
 #endif
+static void nlarn_assert_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data);
 
 static const gchar *nlarn_userdir()
 {
@@ -300,6 +301,9 @@ static void nlarn_init(int argc, char *argv[])
     signal(SIGSEGV, nlarn_signal_handler);
 # endif
 #endif
+
+    /* set custom assertion handler to print backtrace on assertion failure */
+    g_log_set_default_handler(nlarn_assert_handler, NULL);
 }
 
 static void mainloop()
@@ -1328,3 +1332,44 @@ static void nlarn_signal_handler(int signo)
     exit(EXIT_SUCCESS);
 }
 #endif
+
+static void nlarn_assert_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data)
+{
+    /* Only handle critical errors and assertions */
+    if (log_level & (G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION))
+    {
+        /* Print the assertion message */
+        g_printerr("*** Assertion failed ***\n");
+        g_printerr("NLarn %s\n", nlarn_version);
+        g_printerr("%s\n", message ? message : "(null)");
+
+        /* Print backtrace on Unix systems */
+#ifdef __unix
+# ifdef HAVE_LIBUNWIND
+        print_libunwind_backtrace();
+# else
+        g_printerr("\n*** Backtrace ***\n");
+
+        void *callstack[128];
+        int frames = backtrace(callstack, 128);
+        char **strs = backtrace_symbols(callstack, frames);
+
+        for (int i = 0; i < frames; i++)
+        {
+            g_printerr("%s\n", strs[i]);
+        }
+
+        free(strs);
+# endif
+#endif
+
+        /* Restore display before exiting */
+        display_shutdown();
+
+        /* Abort the program */
+        abort();
+    }
+
+    /* For non-critical messages, use the default handler */
+    g_log_default_handler(log_domain, log_level, message, user_data);
+}
