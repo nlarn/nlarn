@@ -1,6 +1,6 @@
 /*
  * inventory.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -110,7 +110,7 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
     inv->post_del = post_del;
 }
 
-int inv_add(inventory **inv, item *it)
+bool inv_add(inventory **inv, item *it)
 {
     g_assert(inv != NULL && it != NULL && it->oid != NULL);
 
@@ -205,7 +205,7 @@ item *inv_del(inventory **inv, guint idx)
     return itm;
 }
 
-int inv_del_element(inventory **inv, item *it)
+bool inv_del_element(inventory **inv, item *it)
 {
     g_assert(*inv != NULL && (*inv)->content != NULL && it != NULL);
 
@@ -234,7 +234,7 @@ int inv_del_element(inventory **inv, item *it)
     return true;
 }
 
-int inv_del_oid(inventory **inv, gpointer oid)
+bool inv_del_oid(inventory **inv, gpointer oid)
 {
     g_assert(*inv != NULL && (*inv)->content != NULL && oid != NULL);
 
