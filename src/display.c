@@ -738,6 +738,16 @@ static void lss_recalc(list_scroll_state *s, inventory **inv,
     /* check for data size change */
     if (s->len > len && (s->offset + s->maxvis > len))
     {
+        /* number of entries is smaller than before: update len (and maxvis,
+         * which depends on len) *before* calling find_last_page_offset, so
+         * that it computes the offset for the new, smaller list. */
+        s->len = len;
+
+        guint vis_hdrs = count_headers_in_range(inv, ifilter,
+            s->offset, max_height - 2);
+        guint height = min((guint)max_height, len + vis_hdrs + 2);
+        s->maxvis = min(len + vis_hdrs, height - 2);
+
         /* number of entries is smaller than before:
          * if on the last page, recalculate offset */
         s->offset = find_last_page_offset(s, inv, ifilter);
@@ -755,7 +765,8 @@ static void lss_recalc(list_scroll_state *s, inventory **inv,
     /* max_item_vis is updated after the render loop once shown_headers is
      * known; this pre-render value is used for navigation decisions. */
     s->max_item_vis = s->maxvis - vis_hdrs;
-    s->is_at_list_end = (s->offset + s->max_item_vis >= (s->len - 1));
+    s->is_at_list_end = (s->len == 0) ||
+        (s->offset + s->max_item_vis >= (s->len - 1));
 
     if (s->curr > len)
         s->curr = len;
