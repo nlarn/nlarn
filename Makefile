@@ -1,6 +1,6 @@
 #
 # Makefile
-# Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+# Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -128,7 +128,19 @@ ifeq ($(OS),Darwin)
   OSXIMAGE := nlarn-$(VERSION).dmg
 endif
 
+# Check if libunwind is available (skip on Windows)
+ifneq ($(OS),win64)
+  HAVE_LIBUNWIND := $(shell pkg-config --exists libunwind && echo 1 || echo 0)
+else
+  HAVE_LIBUNWIND := 0
+endif
+
 ifeq ($(config),debug)
+  ifeq ($(HAVE_LIBUNWIND),1)
+    DEFINES   += -DHAVE_LIBUNWIND
+    CFLAGS    += $(shell pkg-config --cflags libunwind libunwind-generic)
+    LDFLAGS   += $(shell pkg-config --libs libunwind libunwind-generic)
+  endif
   DEFINES   += -DDEBUG
   CFLAGS    += $(DEFINES) -g
   RESFLAGS  += $(DEFINES) $(INCLUDES)

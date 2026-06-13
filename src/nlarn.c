@@ -1,6 +1,6 @@
 /*
  * nlarn.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -30,10 +30,15 @@
 #include <glib/gstdio.h>
 
 #ifdef __unix
+# include <execinfo.h>
+# include <dlfcn.h>
 # include <signal.h>
 # include <unistd.h>
 # include <sys/file.h>
 # include <sys/stat.h>
+# ifdef HAVE_LIBUNWIND
+#  include <libunwind.h>
+# endif
 #endif
 
 #include "config.h"
@@ -84,7 +89,11 @@ static bool adjacent_corridor(position pos, int move);
 
 #ifdef __unix
 static void nlarn_signal_handler(int signo);
+# ifdef HAVE_LIBUNWIND
+static void print_libunwind_backtrace(void);
+# endif
 #endif
+static void nlarn_assert_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data);
 
 static const gchar *nlarn_userdir()
 {
@@ -288,7 +297,13 @@ static void nlarn_init(int argc, char *argv[])
 #ifdef __unix
     signal(SIGTERM, nlarn_signal_handler);
     signal(SIGHUP, nlarn_signal_handler);
+# ifdef HAVE_LIBUNWIND
+    signal(SIGSEGV, nlarn_signal_handler);
+# endif
 #endif
+
+    /* set custom assertion handler to print backtrace on assertion failure */
+    g_log_set_default_handler(nlarn_assert_handler, NULL);
 }
 
 static void mainloop()
@@ -1235,10 +1250,71 @@ static bool adjacent_corridor(position pos, int move)
 }
 
 #ifdef __unix
+# ifdef HAVE_LIBUNWIND
+static void print_libunwind_backtrace(void)
+{
+    unw_cursor_t cursor;
+    unw_context_t context;
+    int frame_count = 0;
+
+    g_printerr("\n*** Backtrace ***\n");
+
+    if (unw_getcontext(&context) != 0) {
+        g_printerr("  unw_getcontext failed\n");
+        return;
+    }
+
+    if (unw_init_local(&cursor, &context) != 0) {
+        g_printerr("  unw_init_local failed\n");
+        return;
+    }
+
+    while (unw_step(&cursor) > 0) {
+        unw_word_t ip, offset;
+        char sym[256];
+        Dl_info info;
+
+        if (unw_get_reg(&cursor, UNW_REG_IP, &ip) != 0) {
+            g_printerr("  #%d <failed to get IP>\n", frame_count++);
+            continue;
+        }
+
+        sym[0] = '\0';
+        if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0) {
+            if (dladdr((void *)ip, &info)) {
+                const char *fname = info.dli_fname ? info.dli_fname : "??";
+                const char *sname = info.dli_sname ? info.dli_sname : "??";
+                g_printerr("  #%d 0x%lx %s (%s+0x%lx) [%s]\n",
+                          frame_count++,
+                          (long)ip,
+                          sym,
+                          sname,
+                          (long)offset,
+                          fname);
+            } else {
+                g_printerr("  #%d 0x%lx %s+0x%lx\n",
+                          frame_count++,
+                          (long)ip,
+                          sym,
+                          (long)offset);
+            }
+        } else {
+            g_printerr("  #%d 0x%lx\n", frame_count++, (long)ip);
+        }
+    }
+}
+# endif
+
 static void nlarn_signal_handler(int signo)
 {
     /* restore the display down before emitting messages */
     display_shutdown();
+
+#ifdef HAVE_LIBUNWIND
+    if (signo == SIGSEGV) {
+        print_libunwind_backtrace();
+    }
+#endif
 
     /* attempt to save and clear the game, when initialized */
     if (nlarn)
@@ -1256,3 +1332,44 @@ static void nlarn_signal_handler(int signo)
     exit(EXIT_SUCCESS);
 }
 #endif
+
+static void nlarn_assert_handler(const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data)
+{
+    /* Only handle critical errors and assertions */
+    if (log_level & (G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION))
+    {
+        /* Print the assertion message */
+        g_printerr("*** Assertion failed ***\n");
+        g_printerr("NLarn %s\n", nlarn_version);
+        g_printerr("%s\n", message ? message : "(null)");
+
+        /* Print backtrace on Unix systems */
+#ifdef __unix
+# ifdef HAVE_LIBUNWIND
+        print_libunwind_backtrace();
+# else
+        g_printerr("\n*** Backtrace ***\n");
+
+        void *callstack[128];
+        int frames = backtrace(callstack, 128);
+        char **strs = backtrace_symbols(callstack, frames);
+
+        for (int i = 0; i < frames; i++)
+        {
+            g_printerr("%s\n", strs[i]);
+        }
+
+        free(strs);
+# endif
+#endif
+
+        /* Restore display before exiting */
+        display_shutdown();
+
+        /* Abort the program */
+        abort();
+    }
+
+    /* For non-critical messages, use the default handler */
+    g_log_default_handler(log_domain, log_level, message, user_data);
+}

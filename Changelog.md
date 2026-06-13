@@ -4,15 +4,17 @@
 
 ### Changes
 
-* Allow jumping to first item of type by pressing their glyph
-* Separate item types by category headers
+* Inventory: Allow jumping to first item of type by pressing their glyph
+* Inventory: Separate item types by category headers
 * Show contents of containers in the obituary (reported by ketarax on Reddit)
 * The bank branch office no longer refuses cooperation with outstanding taxes.
 * Add colour to magic missile ray
+* Print a backtrace when an assertion fails
+* Print a backtrace when crashing (Linux and FreeBSD)
 
 ### Fixed bugs
 
-* Fix levels displaying off-center (reported by JustFanTheories69420 on Reddit)
+* Fix levels displaying off-center on Windows (reported by JustFanTheories69420 on Reddit)
 * Fix userdir command line parameter (reported by ketarax on Reddit)
 * Highlight keys in colour scheme dialogue
 

@@ -1,6 +1,6 @@
 /*
  * inventory.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -66,7 +66,7 @@ void inv_callbacks_set(inventory *inv, inv_callback_bool pre_add,
  * @param it the item which has to be added
  * @return false on failure, the new length of the inventory upon success
  */
-int inv_add(inventory **inv, item *it);
+bool inv_add(inventory **inv, item *it);
 
 /**
  * Get an item from an inventory by its index.
@@ -108,7 +108,7 @@ item *inv_del(inventory **inv, guint idx);
  * @param it the item to be removed
  * @return true upon success, false on failure.
  */
-int inv_del_element(inventory **inv, item *it);
+bool inv_del_element(inventory **inv, item *it);
 
 /**
  * Function to remove an item from an inventory by its oid.
@@ -121,7 +121,7 @@ int inv_del_element(inventory **inv, item *it);
  * @param oid the oid of the item to be removed
  * @return true if the oid was removed, false if the oid has not been found.
  */
-int inv_del_oid(inventory **inv, gpointer oid);
+bool inv_del_oid(inventory **inv, gpointer oid);
 
 /**
  * Erode all items in an inventory.
