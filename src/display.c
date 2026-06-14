@@ -658,18 +658,19 @@ typedef struct {
     guint maxvis;        // lines in window: items + headers
     guint max_item_vis;  // lines in window: items only
     guint len;           // number of total elements in list
-    bool is_at_list_end; // view has reached the end of the list
 } list_scroll_state;
-
-/* --- Header counting helpers (inventory-only; NULL-safe for plain lists) --- */
 
 /* Count category-header rows that appear when the visible window starts at
  * item index 'from' and has room for 'capacity' combined lines.
  * Headers are only emitted at category boundaries inside the visible range;
  * we prime last_type with the item just above the window so that a category
- * that started above the scroll position does not produce a spurious header. */
+ * that started above the scroll position does not produce a spurious header.
+ *
+ * When suppress_first is true the header that would appear on the very first
+ * visible line is not counted. This models the special case where the whole
+ * list's items fit but its headers do not. */
 static guint count_headers_in_range(inventory **inv, int (*ifilter)(item *),
-                                    guint from, guint capacity)
+                                    guint from, guint capacity, bool suppress_first)
 {
     if (inv == NULL)
         return 0;
@@ -682,38 +683,94 @@ static guint count_headers_in_range(inventory **inv, int (*ifilter)(item *),
 
     guint headers = 0;
     guint len = inv_length_filtered(*inv, ifilter);
-    for (guint idx = from; idx < from + capacity - headers && idx < len; idx++)
+    for (guint idx = from; idx < len && (idx - from) + headers < capacity; idx++)
     {
         item *it = inv_get_filtered(*inv, idx, ifilter);
         if (it->type != last_type) {
-            headers++;
             last_type = it->type;
+            /* Skip counting the header on the first visible line when
+             * suppression is requested. */
+            if (idx == from && suppress_first)
+                continue;
+            headers++;
         }
     }
     return headers;
 }
 
-/* Find the largest offset from which the visible window still fills exactly
- * maxvis lines (items + their category headers). Stepping backwards from
- * the end of the list, the first offset for which
- *   (len - offset) + headers_in_window(offset) >= maxvis
- * is the correct last-page starting position.
+/* Decide whether the first visible category header should be suppressed at a
+ * given offset to fit all the items in the window.
  *
- * Returns 0 if the whole list fits in one window. */
+ * Suppression applies when the remaining items plus their headers overflow the
+ * window, but dropping the single first header brings them within the window.
+ */
+static bool lss_suppress_at(inventory **inv, int (*ifilter)(item *),
+                            guint offset, guint len, guint target)
+{
+    if (inv == NULL || len == 0 || offset >= len)
+        return false;
+
+    guint items_below = len - offset;
+
+    /* True total header count for the tail. The capacity passed to
+     * count_headers_in_range bounds *combined* lines (items + headers), so it
+     * must be large enough to never truncate a header: there can be at most
+     * one header per item, so items_below*2 is a safe bound. */
+    guint full_hdrs = count_headers_in_range(inv, ifilter, offset,
+                                             items_below * 2, false);
+
+    /* Tail does not fit with all headers, but fits with one fewer. */
+    return (items_below + full_hdrs > target)
+        && (items_below + (full_hdrs > 0 ? full_hdrs - 1 : 0) <= target);
+}
+
+/* Convenience wrapper for the current scroll state. */
+static bool lss_suppress_first_header(list_scroll_state *s, inventory **inv,
+                                      int (*ifilter)(item *), guint target)
+{
+    return lss_suppress_at(inv, ifilter, s->offset, s->len, target);
+}
+
+/* Find the offset that shows the last item while filling the window as much
+ * as possible.
+ *
+ * Returns 0 when the whole list fits from the top. */
 static guint find_last_page_offset(list_scroll_state *s, inventory **inv,
                                    int (*ifilter)(item *))
 {
-    for (guint try_offset = s->len; try_offset > 0; try_offset--)
+    const guint max_height = LINES - 10;
+    const guint target = max_height - 2;
+
+    /* If the entire list fits within the window from the top, offset=0 */
+    guint hdrs_at_zero = count_headers_in_range(inv, ifilter, 0, target, false);
+    if (s->len + hdrs_at_zero <= target)
     {
-        guint hdrs = count_headers_in_range(inv, ifilter,
-            try_offset - 1, s->maxvis);
-
-        guint lines_used = (s->len - (try_offset - 1)) + hdrs;
-
-        if (lines_used >= s->maxvis)
-            return try_offset - 1;
+        return 0;
     }
-    return 0;
+
+    /* Scan all offsets, tracking the one whose (possibly suppressed) tail
+     * fills the window most without overflowing. */
+    guint best_offset = s->len > 0 ? s->len - 1 : 0;
+    guint best_lines  = 0;
+
+    for (guint off = 0; off < s->len; off++)
+    {
+        guint items_below = s->len - off;
+        bool  sup = lss_suppress_at(inv, ifilter, off, s->len, target);
+        guint hdrs = count_headers_in_range(inv, ifilter, off, target, sup);
+        guint lines_used = items_below + hdrs;
+
+        if (lines_used <= target && lines_used > best_lines)
+        {
+            best_lines  = lines_used;
+            best_offset = off;
+
+            if (lines_used == target)
+                break;
+        }
+    }
+
+    return best_offset;
 }
 
 /* --- State initialisation --- */
@@ -727,7 +784,6 @@ static void lss_init(list_scroll_state *s, guint len, guint window_lines)
     s->maxvis       = vis;
     s->max_item_vis = vis;
     s->len          = len;
-    s->is_at_list_end = (len > window_lines);
 }
 
 /* Recompute the derived fields after the window height or scroll position
@@ -744,32 +800,65 @@ static void lss_recalc(list_scroll_state *s, inventory **inv,
         s->len = len;
 
         guint vis_hdrs = count_headers_in_range(inv, ifilter,
-            s->offset, max_height - 2);
+            s->offset, max_height - 2, false);
         guint height = min((guint)max_height, len + vis_hdrs + 2);
         s->maxvis = min(len + vis_hdrs, height - 2);
 
-        /* number of entries is smaller than before:
-         * if on the last page, recalculate offset */
+        /* if on the last page, recalculate offset */
+        guint old_offset = s->offset;
         s->offset = find_last_page_offset(s, inv, ifilter);
+
+        /* Keep the selection on the same item: if offset moved up by N,
+         * curr must move down by N (and vice versa) to compensate. Using
+         * signed arithmetic and clamping to [1, len] handles both
+         * directions and protects against curr underflowing to 0 or
+         * exceeding the list when the previously selected item itself was
+         * the one removed. */
+        gint new_curr = (gint)s->curr + ((gint)old_offset - (gint)s->offset);
+        if (new_curr < 1)
+            new_curr = 1;
+        if ((guint)new_curr > len)
+            new_curr = (gint)len;
+
+        s->curr = (guint)new_curr;
     }
 
     s->len = len;
 
+    /* Determine whether the first category header must be dropped so that all
+     * items fit (only relevant at offset 0). */
+    const guint target = max_height - 2;
+    bool suppress_first = lss_suppress_first_header(s, inv, ifilter, target);
+
     guint vis_hdrs = count_headers_in_range(inv, ifilter,
-        s->offset, max_height - 2);
+        s->offset, max_height - 2, suppress_first);
 
     guint height = min((guint)max_height,len + vis_hdrs + 2);
 
     s->maxvis = min(len + vis_hdrs, height - 2);
 
+    /* Invariant: maxvis must not exceed the number of lines actually needed
+     * to display the items below the current offset plus their headers.
+     * maxvis is derived from the *total* list size, but when offset > 0 fewer
+     * items remain below it. Clamping maxvis (rather than pulling offset back)
+     * keeps the final items reachable even in heavily fragmented lists where
+     * the whole list never fits the window at once. */
+    {
+        guint items_below = len - s->offset;
+        guint lines_needed = items_below + vis_hdrs;
+        if (s->maxvis > lines_needed)
+            s->maxvis = lines_needed;
+    }
+
     /* max_item_vis is updated after the render loop once shown_headers is
      * known; this pre-render value is used for navigation decisions. */
     s->max_item_vis = s->maxvis - vis_hdrs;
-    s->is_at_list_end = (s->len == 0) ||
-        (s->offset + s->max_item_vis >= (s->len - 1));
 
     if (s->curr > len)
         s->curr = len;
+
+    if (s->curr > s->max_item_vis)
+        s->curr = s->max_item_vis;
 }
 
 /* --- Navigation operations --- */
@@ -785,16 +874,10 @@ static void lss_home(list_scroll_state *s)
 static void lss_end(list_scroll_state *s,
                     inventory **inv, int (*ifilter)(item *))
 {
-    if (s->len <= s->maxvis) {
-        s->curr = s->len;
-        s->offset = 0;
-        return;
-    }
-
     if (inv != NULL) {
         s->offset = find_last_page_offset(s, inv, ifilter);
     } else {
-        s->offset = s->len - s->max_item_vis;
+        s->offset = (s->len > s->max_item_vis) ? s->len - s->max_item_vis : 0;
     }
 
     s->curr = s->len - s->offset;
@@ -826,12 +909,25 @@ static void lss_down(list_scroll_state *s, inventory **inv,
         /* If the newly scrolled-in item is the first of a new
          * category a header row will appear above it. */
         if (inv != NULL) {
-            guint hdrs = count_headers_in_range(inv, ifilter, s->offset, s->maxvis);
+            guint hdrs = count_headers_in_range(inv, ifilter, s->offset, s->maxvis, false);
 
             if (hdrs > visible_category_headers) {
                 s->offset++;
                 s->curr--;
             }
+        }
+
+        /* If we have just reached the bottom of the list, the incremental
+         * offset++ may have advanced one step further than necessary,
+         * leaving the window underfilled (the last item is visible, but a
+         * line at the bottom stays blank because fewer headers are now in
+         * view). Snap offset to the optimal last-page position so the window
+         * is filled as much as possible while keeping the last item visible.
+         * Compensate curr so the selection stays on the same item. */
+        if (inv != NULL && s->curr + s->offset >= s->len) {
+            guint old_offset = s->offset;
+            s->offset = find_last_page_offset(s, inv, ifilter);
+            s->curr  += old_offset - s->offset;
         }
     } else {
         s->curr++;
@@ -870,7 +966,7 @@ static void lss_page_down(list_scroll_state *s,
     s->offset += s->max_item_vis;
 
     if (inv != NULL) {
-        guint hdrs = count_headers_in_range(inv, ifilter, s->offset, s->maxvis);
+        guint hdrs = count_headers_in_range(inv, ifilter, s->offset, s->maxvis, false);
         s->curr = max(1, (int)s->maxvis - (int)hdrs - old_dist);
     } else {
         s->curr = s->max_item_vis;
@@ -911,7 +1007,7 @@ static void lss_scroll_to(list_scroll_state *s, inventory **inv,
 
         if (inv != NULL) {
             guint hdrs = count_headers_in_range(inv, ifilter,
-                s->offset, s->maxvis);
+                s->offset, s->maxvis, false);
 
             if (s->offset + (s->maxvis - hdrs) >= s->len) {
                 guint new_offset = find_last_page_offset(s, inv, ifilter);
@@ -1098,34 +1194,57 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         /* count how many headlines we did show so far */
         guint shown_headers = 0;
+
+        /* Mirror lss_recalc: when all items fit but their headers do not, the
+         * first category header is suppressed at offset 0 so every item stays
+         * visible. This must match count_headers_in_range exactly, otherwise
+         * shown_headers would diverge from the pre-computed vis_hdrs and the
+         * item_no arithmetic would run off the end of the list. */
+        bool suppress_first = lss_suppress_first_header(&s, inv, ifilter,
+                                                        max_height - 2);
+
         for (guint line = 1; line <= s.maxvis; line++)
         {
             guint item_no = (line - 1) + s.offset - shown_headers;
+
+            /* Guard against out-of-bounds access: log the full state so the
+             * faulty transition can be reconstructed, then stop drawing
+             * rather than crashing. */
+            if (item_no >= len_curr)
+            {
+                break;
+            }
+
             it = inv_get_filtered(*inv, item_no, ifilter);
 
-            /* Check if we need to display a category header.
-             *
-             * Avoid painting the header of the first item when at the list's
-             * end and the item is the first item of its type in the inventory.
-             * In that case the number of lines would exceed the available
-             * space and lead to all sorts of nasty crashes.
-             */
-            if (it->type != last_type && (line > 1 || !s.is_at_list_end))
+            /* Check if we need to display a category header */
+            if (it->type != last_type)
             {
-                /* Display category header */
-                const char *category_name = item_name_pl(it->type);
-                /* Capitalize the first letter for display */
-                gchar *capitalized = str_capitalize(g_strdup(category_name));
-
-                mvwhline(iwin->window, line, 1, ACS_HLINE | CP_UI_BORDER, width - 2);
-                mvwaprintw(iwin->window, line, 4, CP_UI_BRIGHT_FG | A_BOLD,
-                    " %s ", capitalized);
-                g_free(capitalized);
-
                 last_type = it->type;
-                shown_headers++;
 
-                continue;
+                /* Suppress the very first header when required, so all items
+                 * fit. The item itself is still drawn on this line below. */
+                if (line == 1 && suppress_first)
+                {
+                    /* fall through to draw the item, no header, no
+                     * shown_headers increment */
+                }
+                else
+                {
+                    /* Display category header */
+                    const char *category_name = item_name_pl(it->type);
+                    /* Capitalize the first letter for display */
+                    gchar *capitalized = str_capitalize(g_strdup(category_name));
+
+                    mvwhline(iwin->window, line, 1, ACS_HLINE | CP_UI_BORDER, width - 2);
+                    mvwaprintw(iwin->window, line, 4, CP_UI_BRIGHT_FG | A_BOLD,
+                        " %s ", capitalized);
+                    g_free(capitalized);
+
+                    shown_headers++;
+
+                    continue;
+                }
             }
 
             bool item_equipped = false;
@@ -1310,8 +1429,11 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
                 if ((cb->key == key) && cb->active)
                 {
+                    guint sel_idx = s.curr + s.offset - 1;
+                    item *sel_it = inv_get_filtered(*inv, sel_idx, ifilter);
+
                     /* trigger callback */
-                    cb->function(p, cb->inv, inv_get_filtered(*inv, s.curr + s.offset - 1, ifilter));
+                    cb->function(p, cb->inv, sel_it);
 
                     redraw = true;
 
