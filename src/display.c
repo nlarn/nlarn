@@ -178,7 +178,7 @@ attr_t display_player_hp_colour(const player *p, bool status)
     else if (p->hp <= ((int)p->hp_max / 2))  /* 50% hp left */
         attrs = COLOR_PAIR(BLOOD_RED);
     else
-        attrs = COLOR_PAIR(status ? LIGHT_BRIGHT_GREEN : WHITE);
+        attrs = COLOR_PAIR(status ? LIGHT_BRIGHT_GREEN : WHEAT);
 
 #ifdef SDLPDCURSES
     /* enable blinking on SDL PDCurses display for very low hp */
