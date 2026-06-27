@@ -102,7 +102,11 @@ LDFLAGS += $(shell pkg-config --libs glib-2.0)
 
 # Unless requested otherwise build with curses.
 ifneq ($(SDLPDCURSES),Y)
-	LDFLAGS += $(shell pkg-config --libs ncurses panel)
+	ifeq ($(OS),Darwin)
+		LDFLAGS += -lncurses -lpanel
+	else
+		LDFLAGS += $(shell pkg-config --libs ncurses panel)
+	endif
 else
 	PDCLIB   := PDCurses/sdl2/pdcurses.a
 	CFLAGS   += $(shell pkg-config --cflags SDL2_ttf) -IPDCurses -DSDLPDCURSES
