@@ -1,6 +1,6 @@
 # Changelog
 
-## Release 0.7.9 (unrelease)
+## Release 0.7.9 (2026-06-27)
 
 ### Changes
 
