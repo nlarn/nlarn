@@ -492,6 +492,17 @@ int building_home(player *p)
 
                 g_ptr_array_add(callbacks, callback);
 
+                callback = g_malloc0(sizeof(display_inv_callback));
+                callback->description = "take (`KEY`a`end`)ll";
+                callback->helpmsg = "Take all items from your storage room. "
+                                    "Only available when you can carry the total weight.";
+                callback->key = 'a';
+                callback->inv = &nlarn->player_home;
+                callback->checkfun = &player_can_carry_all;
+                callback->function = &container_items_unpack_all;
+
+                g_ptr_array_add(callbacks, callback);
+
                 display_inventory(title, p, &nlarn->player_home, callbacks,
                                   false, true, false, NULL);
 
