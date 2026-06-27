@@ -35,51 +35,42 @@
 
 const char *player_sex_str[PS_MAX] = {"not defined", "male", "female"};
 
-static const char aa1[] = "mighty evil master";
-static const char aa2[] = "apprentice demi-god";
-static const char aa3[] = "minor demi-god";
-static const char aa4[] = "major demi-god";
-static const char aa5[] = "minor deity";
-static const char aa6[] = "major deity";
-static const char aa7[] = "novice guardian";
-static const char aa8[] = "apprentice guardian";
-
 static const char *player_level_desc[] =
 {
-    "novice explorer",     "apprentice explorer", "practiced explorer", /* -3 */
-    "expert explorer",     "novice adventurer",   "adventurer",         /* -6 */
-    "apprentice conjurer", "conjurer",            "master conjurer",    /*  -9 */
-    "apprentice mage",     "mage",                "experienced mage",   /* -12 */
-    "master mage",         "apprentice warlord",  "novice warlord",     /* -15 */
-    "expert warlord",      "master warlord",      "apprentice gorgon",  /* -18 */
-    "gorgon",              "practiced gorgon",    "master gorgon",      /* -21 */
-    "demi-gorgon",         "evil master",         "great evil master",  /* -24 */
-    aa1, aa1, aa1, /* -27*/
-    aa1, aa1, aa1, /* -30*/
-    aa1, aa1, aa1, /* -33*/
-    aa1, aa1, aa1, /* -36*/
-    aa1, aa1, aa1, /* -39*/
-    aa2, aa2, aa2, /* -42*/
-    aa2, aa2, aa2, /* -45*/
-    aa2, aa2, aa2, /* -48*/
-    aa3, aa3, aa3, /* -51*/
-    aa3, aa3, aa3, /* -54*/
-    aa3, aa3, aa3, /* -57*/
-    aa4, aa4, aa4, /* -60*/
-    aa4, aa4, aa4, /* -63*/
-    aa4, aa4, aa4, /* -66*/
-    aa5, aa5, aa5, /* -69*/
-    aa5, aa5, aa5, /* -72*/
-    aa5, aa5, aa5, /* -75*/
-    aa6, aa6, aa6, /* -78*/
-    aa6, aa6, aa6, /* -81*/
-    aa6, aa6, aa6, /* -84*/
-    aa7, aa7, aa7, /* -87*/
-    aa8, aa8, aa8, /* -90*/
-    aa8, aa8, aa8, /* -93*/
-    "earth guardian", "air guardian",  "fire guardian",    /* -96*/
-    "water guardian", "time guardian", "ethereal guardian",/* -99*/
-    "The Creator", /* 100*/
+    "rogue",             "wanderer",            "traveller",         /*  -3 */
+    "delver",            "spelunker",           "explorer",          /*  -6 */
+    "peregrinator",      "scout",               "ranger",            /*  -9 */
+    "adventurer",        "brawler",             "pugilist",          /* -12 */
+    "gladiator",         "bounty hunter",       "mercenary",         /* -15 */
+    "soldier",           "skirmisher",          "fighter",           /* -18 */
+    "man-at-arms",       "warrior",             "veteran",           /* -21 */
+    "swashbuckler",      "duelist",             "gallant",           /* -24 */
+    "knight",            "cavalier",            "crusader",          /* -27 */
+    "myrmidon",          "templar",             "defender",          /* -30 */
+    "protector",         "paladin",             "commander",         /* -33*/
+    "marshal",           "champion",            "conqueror",         /* -36*/
+    "warlord",           "warlock",             "occultist",         /* -39*/
+    "arcanist",          "illusionist",         "conjurer",          /* -42*/
+    "evoker",            "convoker",            "channeler",         /* -45*/
+    "enchanter",         "pyromancer",          "geomancer",         /* -48*/
+    "white necromancer", "thaumaturge",         "shaman",            /* -51*/
+    "druid",             "elementalist",        "magician",          /* -54*/
+    "magus",             "mystic",              "wizard",            /* -57*/
+    "sorcerer",          "hexblade",            "undead hunter",     /* -60*/
+    "demon slayer",      "inquisitor",          "battlemage",        /* -63*/
+    "high mage",         "grand mage",          "archmage",          /* -66*/
+    "runelord",          "witch-king",          "high king",         /* -69*/
+    "holy king",         "priest-king",         "guardian of chaos", /* -72*/
+    "guardian of order", "guardian of balance", "ecclesiarch",       /* -75*/
+    "prophet",           "saint",               "messiah",           /* -78*/
+    "lord of time",      "lord of creation",    "empyrean adept",    /* -81*/
+    "cherub",            "seraph",              "sword archon",      /* -84*/
+    "shield archon",     "throne archon",       "movanic daeva",     /* -87*/
+    "monadic daeva",     "archangel",           "demigod",           /* -90*/
+    "abyssal god",       "chthonic god",        "terrestrial god",   /* -93*/
+    "celestial god",     "astral god",          "sidereal god",      /* -96*/
+    "lunar god",         "solar god",           "god-emperor",       /* -99*/
+    "The Creator",                                                   /* 100*/
 };
 
 /*
