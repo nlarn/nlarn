@@ -1158,6 +1158,9 @@ void player_die(player *p, player_cod cause_type, guint cause)
     /* do not show scores when in wizard mode */
     if (!game_wizardmode(nlarn))
     {
+        /* destroy any open windows (e.g. inventory) before showing death screen */
+        display_windows_destroy_all();
+
         /* redraw screen to make sure player can see the cause of his death */
         display_paint_screen(p);
 

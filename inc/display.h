@@ -57,6 +57,8 @@ typedef struct display_window
     char *caption;
     WINDOW *window;
     PANEL *panel;
+    void (*destructor)(void *);
+    void *destructor_data;
 } display_window;
 
 /* information required to draw a map cell */
@@ -177,6 +179,11 @@ void display_windows_hide();
  * @brief Set all windows visible.
  */
 void display_windows_show();
+
+/**
+ * @brief Destroy all open windows and free their resources.
+ */
+void display_windows_destroy_all();
 
 
 /**

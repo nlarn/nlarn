@@ -1179,6 +1179,11 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (!iwin)
         {
             iwin = display_window_new(startx, 2, width, height, title);
+            if (callbacks != NULL)
+            {
+                iwin->destructor = (void (*)(void *))display_inv_callbacks_clean;
+                iwin->destructor_data = callbacks;
+            }
         }
 
         /*** draw all items ***/
@@ -3148,6 +3153,21 @@ void display_windows_show()
         display_window *win = (display_window *)iterator->data;
         show_panel(win->panel);
         iterator = iterator->next;
+    }
+}
+
+void display_windows_destroy_all()
+{
+    while (windows)
+    {
+        display_window *win = (display_window *)windows->data;
+        if (win->destructor != NULL)
+            win->destructor(win->destructor_data);
+        del_panel(win->panel);
+        delwin(win->window);
+        if (win->title != NULL) g_free(win->title);
+        g_free(win);
+        windows = g_list_delete_link(windows, windows);
     }
 }
 

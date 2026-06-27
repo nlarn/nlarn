@@ -15,6 +15,7 @@
 ### Fixed bugs
 
 * Fix levels displaying off-center on Windows (reported by JustFanTheories69420 on Reddit)
+* Close opened all windows (e.g. the inventory) when player dies
 * Fix userdir command line parameter (reported by ketarax on Reddit)
 * Highlight keys in colour scheme dialogue
 
