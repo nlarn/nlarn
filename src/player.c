@@ -1,6 +1,6 @@
 /*
  * player.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -124,7 +124,7 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores);
 static void player_memorial_file_save(player *p, const char *text);
 static int item_filter_equippable(item *it);
 static int item_filter_dropable(item *it);
-static int player_item_filter_multiple(player *p, item *it);
+static int player_item_filter_multiple(player *p, inventory **inv, item *it);
 
 player *player_new()
 {
@@ -3202,7 +3202,8 @@ void player_item_unequip(player *p,
 }
 
 /* silly filter to get containers */
-int player_item_is_container(player *p __attribute__((unused)), item *it)
+int player_item_is_container(player *p __attribute__((unused)),
+                             inventory **inv __attribute__((unused)), item *it)
 {
     g_assert(it != NULL && it->type < IT_MAX);
 
@@ -3210,7 +3211,9 @@ int player_item_is_container(player *p __attribute__((unused)), item *it)
 }
 
 /* silly filter to check if item can be put into a container */
-int player_item_can_be_added_to_container(player *p, item *it)
+int player_item_can_be_added_to_container(player *p,
+                                          inventory **inv __attribute__((unused)),
+                                          item *it)
 {
     g_assert(p != NULL && it != NULL && it->type < IT_MAX);
 
@@ -3252,7 +3255,7 @@ int player_item_can_be_added_to_container(player *p, item *it)
 
 int player_item_filter_unequippable(item* it)
 {
-    return player_item_is_unequippable(nlarn->p, it);
+    return player_item_is_unequippable(nlarn->p, NULL, it);
 }
 
 int player_item_is_equipped(player *p, item *it)
@@ -3301,7 +3304,7 @@ int player_item_is_equipped(player *p, item *it)
     return false;
 }
 
-int player_item_is_equippable(player *p, item *it)
+int player_item_is_equippable(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     g_assert(p != NULL && it != NULL);
 
@@ -3388,7 +3391,7 @@ int player_item_is_equippable(player *p, item *it)
     return true;
 }
 
-int player_item_is_unequippable(player *p, item *it)
+int player_item_is_unequippable(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     g_assert(it);
 
@@ -3399,19 +3402,21 @@ int player_item_is_unequippable(player *p, item *it)
     return true;
 }
 
-int player_item_is_usable(player *p __attribute__((unused)), item *it)
+int player_item_is_usable(player *p __attribute__((unused)),
+                          inventory **inv __attribute__((unused)), item *it)
 {
     g_assert(it != NULL);
     return item_is_usable(it->type);
 }
 
-int player_item_is_dropable(player *p, item *it)
+int player_item_is_dropable(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     g_assert(p != NULL && it != NULL);
     return !player_item_is_equipped(p, it);
 }
 
-int player_item_is_damaged(player *p __attribute__((unused)), item *it)
+int player_item_is_damaged(player *p __attribute__((unused)),
+                           inventory **inv __attribute__((unused)), item *it)
 {
     g_assert(it != NULL);
 
@@ -3422,7 +3427,7 @@ int player_item_is_damaged(player *p __attribute__((unused)), item *it)
     return false;
 }
 
-int player_item_is_affordable(player *p, item *it)
+int player_item_is_affordable(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     g_assert(p != NULL && it != NULL);
 
@@ -3430,14 +3435,14 @@ int player_item_is_affordable(player *p, item *it)
             || (item_price(it) <= p->bank_account));
 }
 
-int player_item_is_sellable(player *p, item *it)
+int player_item_is_sellable(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     g_assert(p != NULL && it != NULL);
 
     return (!player_item_is_equipped(p, it));
 }
 
-int player_item_is_identifiable(player *p, item *it)
+int player_item_is_identifiable(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     return (!player_item_identified(p, it));
 }
@@ -5179,15 +5184,17 @@ static void player_memorial_file_save(player *p, const char *text)
 
 static int item_filter_equippable(item *it)
 {
-    return player_item_is_equippable(nlarn->p, it);
+    return player_item_is_equippable(nlarn->p, NULL, it);
 }
 
 static int item_filter_dropable(item *it)
 {
-    return player_item_is_dropable(nlarn->p, it);
+    return player_item_is_dropable(nlarn->p, NULL, it);
 }
 
-static int player_item_filter_multiple(player *p __attribute__((unused)), item *it)
+static int player_item_filter_multiple(player *p __attribute__((unused)),
+                                       inventory **inv __attribute__((unused)),
+                                       item *it)
 {
     return (it->count > 1);
 }

@@ -1,6 +1,6 @@
 /*
  * display.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -43,7 +43,7 @@ typedef struct display_inv_callback
     char key;
     inventory **inv;
     display_inv_callback_func function;
-    int (*checkfun)(player *, item *);
+    int (*checkfun)(player *, inventory **, item *);
     bool active;
 } display_inv_callback;
 

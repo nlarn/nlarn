@@ -1333,7 +1333,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
             /* check if callback is appropriate for this item */
             /* if no check function is set, always display item */
-            if ((cb->checkfun == NULL) || cb->checkfun(p, it))
+            if ((cb->checkfun == NULL) || cb->checkfun(p, cb->inv, it))
             {
                 cb->active = true;
                 strv_append(&captions, cb->description);

@@ -1,6 +1,6 @@
 /*
  * player.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -391,8 +391,8 @@ void player_item_unequip(player *p,
                          item *it,
                          bool forced);
 
-int player_item_is_container(player *p, item *it);
-int player_item_can_be_added_to_container(player *p, item *it);
+int player_item_is_container(player *p, inventory **inv, item *it);
+int player_item_can_be_added_to_container(player *p, inventory **inv, item *it);
 int player_item_filter_unequippable(item* it);
 
 /**
@@ -404,14 +404,14 @@ int player_item_filter_unequippable(item* it);
  */
 int player_item_is_equipped(player *p, item *it);
 
-int player_item_is_equippable(player *p, item *it);
-int player_item_is_unequippable(player *p, item *it);
-int player_item_is_usable(player *p, item *it);
-int player_item_is_dropable(player *p, item *it);
-int player_item_is_damaged(player *p, item *it);
-int player_item_is_affordable(player *p, item *it);
-int player_item_is_sellable(player *p, item *it);
-int player_item_is_identifiable(player *p, item *it);
+int player_item_is_equippable(player *p, inventory **inv, item *it);
+int player_item_is_unequippable(player *p, inventory **inv, item *it);
+int player_item_is_usable(player *p, inventory **inv, item *it);
+int player_item_is_dropable(player *p, inventory **inv, item *it);
+int player_item_is_damaged(player *p, inventory **inv, item *it);
+int player_item_is_affordable(player *p, inventory **inv, item *it);
+int player_item_is_sellable(player *p, inventory **inv, item *it);
+int player_item_is_identifiable(player *p, inventory **inv, item *it);
 int player_item_known(player *p, item *it);
 int player_item_identified(player *p, item *it);
 int player_item_not_equipped(item *it);

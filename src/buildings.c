@@ -1,6 +1,6 @@
 /*
  * buildings.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1572,7 +1572,7 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     /* modify price if player sells stuff at the trading post */
     if (map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos) == LS_TRADEPOST)
     {
-        if (!player_item_is_damaged(p, it))
+        if (!player_item_is_damaged(p, NULL, it))
         {
             /* good items: 20% of value */
             price /= 5;
