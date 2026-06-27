@@ -1,6 +1,6 @@
 /*
  * container.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -73,6 +73,15 @@ void container_item_add(struct player *p, inventory **inv, item *element);
   * @param element the item to be taken out
   */
 void container_item_unpack(struct player *p, inventory **inv, item *element);
+
+/**
+  * @brief Function used to remove all items from a container.
+  *
+  * @param p the player
+  * @param inv the container's inventory
+  * @param it unused
+  */
+void container_items_unpack_all(struct player *p, inventory **inv, item *it);
 
 /**
   * @brief Function used to add an entire inventory to another one.

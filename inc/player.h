@@ -412,6 +412,7 @@ int player_item_is_damaged(player *p, inventory **inv, item *it);
 int player_item_is_affordable(player *p, inventory **inv, item *it);
 int player_item_is_sellable(player *p, inventory **inv, item *it);
 int player_item_is_identifiable(player *p, inventory **inv, item *it);
+int player_can_carry_all(player *p, inventory **inv, item *it);
 int player_item_known(player *p, item *it);
 int player_item_identified(player *p, item *it);
 int player_item_not_equipped(item *it);

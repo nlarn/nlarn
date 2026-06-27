@@ -1,6 +1,6 @@
 /*
  * container.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -103,6 +103,16 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
     callback->inv = &container->content;
     callback->function = &container_item_unpack;
     callback->active = true;
+
+    g_ptr_array_add(callbacks, callback);
+
+    callback = g_malloc0(sizeof(display_inv_callback));
+    callback->description = "get (`KEY`a`end`)ll";
+    callback->helpmsg = "Get all items out of the container. Only available when you can carry the total weight.";
+    callback->key = 'a';
+    callback->inv = &container->content;
+    callback->checkfun = &player_can_carry_all;
+    callback->function = &container_items_unpack_all;
 
     g_ptr_array_add(callbacks, callback);
 
@@ -308,6 +318,41 @@ void container_item_unpack(player *p, inventory **inv, item *element)
     }
 
     g_free(desc);
+}
+
+void container_items_unpack_all(player *p, inventory **inv,
+                                item *it __attribute__((unused)))
+{
+    while (inv_length(*inv) > 0)
+    {
+        item *element = inv_get(*inv, 0);
+        inv_del_element(inv, element);
+
+        gchar *desc = item_describe(element, player_item_known(p, element), false, false);
+
+        if (!player_make_move(p, 2, true, "putting %s in your pack", desc))
+        {
+            inv_add(inv, element);
+            g_free(desc);
+            return;
+        }
+
+        int goldcount = (element->type == IT_GOLD) ? element->count : 0;
+
+        if (inv_add(&p->inventory, element))
+        {
+            log_add_entry(nlarn->log, "You put %s into your pack.", desc);
+            p->stats.gold_found += goldcount;
+        }
+        else
+        {
+            inv_add(inv, element);
+            g_free(desc);
+            return;
+        }
+
+        g_free(desc);
+    }
 }
 
 int container_move_content(player *p __attribute__((unused)), inventory **inv, inventory **new_inv)

@@ -125,6 +125,8 @@ static void player_memorial_file_save(player *p, const char *text);
 static int item_filter_equippable(item *it);
 static int item_filter_dropable(item *it);
 static int player_item_filter_multiple(player *p, inventory **inv, item *it);
+int player_can_carry_all(player *p, inventory **inv, item *it);
+static void player_items_pickup_all(player *p, inventory **inv, item *it);
 
 player *player_new()
 {
@@ -1637,6 +1639,15 @@ void player_pickup(player *p)
         callback->inv = inv;
         callback->checkfun = &player_item_filter_multiple;
         callback->function = (display_inv_callback_func)&player_item_pickup_ask;
+        g_ptr_array_add(callbacks, callback);
+
+        callback = g_malloc0(sizeof(display_inv_callback));
+        callback->description = "get (`KEY`a`end`)ll";
+        callback->helpmsg = "Get all items from the stash. Only available when you can carry the total weight.";
+        callback->key = 'a';
+        callback->inv = inv;
+        callback->checkfun = &player_can_carry_all;
+        callback->function = (display_inv_callback_func)&player_items_pickup_all;
         g_ptr_array_add(callbacks, callback);
 
         display_inventory("On the floor", p, inv, callbacks, false,
@@ -5197,4 +5208,27 @@ static int player_item_filter_multiple(player *p __attribute__((unused)),
                                        item *it)
 {
     return (it->count > 1);
+}
+
+int player_can_carry_all(player *p, inventory **inv,
+                         item *it __attribute__((unused)))
+{
+    if (player_effect(p, ET_OVERSTRAINED))
+        return false;
+
+    int pack_weight = inv_weight(p->inventory);
+    int stash_weight = inv_weight(*inv);
+    float can_carry = 2000 * (float)player_get_str(p);
+
+    return (pack_weight + stash_weight) <= (int)(can_carry * 1.3);
+}
+
+static void player_items_pickup_all(player *p, inventory **inv,
+                                    item *it __attribute__((unused)))
+{
+    while (inv_length(*inv) > 0)
+    {
+        if (player_item_pickup(p, inv, inv_get(*inv, 0), false) != 0)
+            break;
+    }
 }

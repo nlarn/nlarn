@@ -6,6 +6,8 @@
 
 * Inventory: Allow jumping to first item of type by pressing their glyph
 * Inventory: Separate item types by category headers
+* Add option to pick up all items
+* Add option to get all items from a container
 * Show contents of containers in the obituary (reported by ketarax on Reddit)
 * The bank branch office no longer refuses cooperation with outstanding taxes.
 * Add colour to magic missile ray
