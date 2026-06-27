@@ -1,6 +1,6 @@
 # Changelog
 
-## Release 0.8.0 (unrelease)
+## Release 0.7.9 (unrelease)
 
 ### Changes
 
