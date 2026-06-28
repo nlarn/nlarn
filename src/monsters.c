@@ -766,6 +766,10 @@ static position monster_move_flee(monster *m, struct player *p);
 static position monster_move_serve(monster *m, struct player *p);
 static position monster_move_civilian(monster *m, struct player *p);
 
+static void monster_fov_ensure(monster *m);
+static monster *monster_nearest_hostile_to(monster *m, position anchor);
+static position monster_engage_or_approach(monster *m, monster *target);
+
 static bool monster_breath_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
@@ -2703,21 +2707,9 @@ char *monster_desc(monster *m)
         injury = "critically injured";
 
     /* for fighting civilians, find the hostile target in FOV */
-    monster *fight_target = NULL;
-    if (m->action == MA_CIVILIAN && m->fv != NULL)
-    {
-        GList *visible = fov_get_visible_monsters(m->fv);
-        for (GList *iter = visible; iter != NULL; iter = iter->next)
-        {
-            monster *candidate = (monster *)iter->data;
-            if (!monster_is_friendly(candidate))
-            {
-                fight_target = candidate;
-                break;
-            }
-        }
-        g_list_free(visible);
-    }
+    monster *fight_target = (m->action == MA_CIVILIAN)
+                            ? monster_nearest_hostile_to(m, m->pos)
+                            : NULL;
 
     const char *action_desc = (fight_target != NULL) ? "fighting"
                                                       : monster_ai_desc[m->action];
@@ -3555,6 +3547,52 @@ static position monster_move_flee(monster *m, struct player *p)
     return npos;
 }
 
+/* Ensure the monster's FOV is allocated and recalculated for the current turn. */
+static void monster_fov_ensure(monster *m)
+{
+    if (!m->fv)
+        m->fv = fov_new();
+    fov_calculate(m->fv, monster_map(m), m->pos, 6,
+                  monster_flags(m, INFRAVISION)
+                  || monster_effect(m, ET_INFRAVISION));
+}
+
+/* Return the non-friendly monster visible to m that is closest to anchor,
+   or NULL if none is visible. Requires m->fv to be current. */
+static monster *monster_nearest_hostile_to(monster *m, position anchor)
+{
+    if (m->fv == NULL) return NULL;
+
+    GList *visible = fov_get_visible_monsters(m->fv);
+    monster *target = NULL;
+    int best_dist = G_MAXINT;
+    for (GList *iter = visible; iter != NULL; iter = iter->next)
+    {
+        monster *candidate = (monster *)iter->data;
+        if (monster_is_friendly(candidate)) continue;
+        int dist = pos_distance(monster_pos(candidate), anchor);
+        if (dist < best_dist)
+        {
+            best_dist = dist;
+            target = candidate;
+        }
+    }
+    g_list_free(visible);
+    return target;
+}
+
+/* Attack target if adjacent, otherwise step toward it.
+   Returns the monster's resulting position. */
+static position monster_engage_or_approach(monster *m, monster *target)
+{
+    if (pos_adjacent(m->pos, monster_pos(target)))
+    {
+        monster_attack_monster(m, target);
+        return m->pos;
+    }
+    return monster_find_next_pos_to(m, monster_pos(target));
+}
+
 static position monster_move_serve(monster *m, struct player *p)
 {
     /* If a new position cannot be found, keep the current position */
@@ -3602,49 +3640,15 @@ static position monster_move_serve(monster *m, struct player *p)
         return npos;
     }
 
-    /* generate a fov structure if not yet available */
-    if (!m->fv)
-        m->fv = fov_new();
+    monster_fov_ensure(m);
 
-    /* calculate the monster's fov */
-    /* the monster gets a fov radius of 6 for now*/
-    fov_calculate(m->fv, monster_map(m), m->pos, 6,
-                  monster_flags(m, INFRAVISION)
-                  || monster_effect(m, ET_INFRAVISION));
-
-    /* find the visible hostile monster closest to the player */
-    monster *target = NULL;
-    {
-        GList *visible = fov_get_visible_monsters(m->fv);
-        int best_dist = G_MAXINT;
-        for (GList *iter = visible; iter != NULL; iter = iter->next)
-        {
-            monster *candidate = (monster *)iter->data;
-            if (monster_is_friendly(candidate)) continue;
-            int dist = pos_distance(monster_pos(candidate), p->pos);
-            if (dist < best_dist)
-            {
-                best_dist = dist;
-                target = candidate;
-            }
-        }
-        g_list_free(visible);
-    }
+    /* engage the visible hostile closest to the player */
+    monster *target = monster_nearest_hostile_to(m, p->pos);
 
     if (target != NULL)
-    {
-        if (pos_adjacent(m->pos, monster_pos(target)))
-        {
-            monster_attack_monster(m, target);
-            return m->pos;
-        }
-        npos = monster_find_next_pos_to(m, monster_pos(target));
-    }
+        npos = monster_engage_or_approach(m, target);
     else if (pos_distance(monster_pos(m), p->pos) > 2)
-    {
-        /* if the distance to the player is too large, follow */
         npos = monster_find_next_pos_to(m, p->pos);
-    }
 
     return npos;
 }
@@ -3652,33 +3656,12 @@ static position monster_move_serve(monster *m, struct player *p)
 static position monster_move_civilian(monster *m, struct player *p)
 {
     position npos = m->pos;
-
-    /* generate a FOV structure if not yet available */
-    if (!m->fv)
-        m->fv = fov_new();
-
-    fov_calculate(m->fv, monster_map(m), m->pos, 6,
-                  monster_flags(m, INFRAVISION)
-                  || monster_effect(m, ET_INFRAVISION));
-
-    /* find the nearest visible hostile monster */
-    monster *target = NULL;
-    {
-        GList *visible = fov_get_visible_monsters(m->fv);
-        for (GList *iter = visible; iter != NULL; iter = iter->next)
-        {
-            monster *candidate = (monster *)iter->data;
-            if (!monster_is_friendly(candidate))
-            {
-                /* list is sorted by distance from self */
-                target = candidate;
-                break;
-            }
-        }
-        g_list_free(visible);
-    }
-
     map *mmap = monster_map(m);
+
+    monster_fov_ensure(m);
+
+    /* engage the nearest visible hostile */
+    monster *target = monster_nearest_hostile_to(m, m->pos);
 
     /* pick up a weapon from the floor when threatened and unarmed */
     if (target != NULL && m->eq_weapon == NULL)
@@ -3721,16 +3704,8 @@ static position monster_move_civilian(monster *m, struct player *p)
         inv_add(map_ilist_at(mmap, m->pos), w);
     }
 
-    /* fight the nearest visible hostile monster */
     if (target != NULL)
-    {
-        if (pos_adjacent(m->pos, monster_pos(target)))
-        {
-            monster_attack_monster(m, target);
-            return m->pos;
-        }
-        return monster_find_next_pos_to(m, monster_pos(target));
-    }
+        return monster_engage_or_approach(m, target);
 
     /* civilians will pick a random location on the map, travel and remain
        there for the number of turns that is determined by their town person
