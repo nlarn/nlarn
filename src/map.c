@@ -1,6 +1,6 @@
 /*
  * map.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -981,6 +981,29 @@ monster *map_get_monster_at(map *m, position pos)
 
     gpointer mid = m->grid[Y(pos)][X(pos)].m_oid;
     return (mid != NULL) ? game_monster_get(nlarn, mid) : NULL;
+}
+
+mobile_type_t map_mobile_type_at(map *m, position pos)
+{
+    g_assert(m != NULL && pos_valid(pos));
+
+    if (Z(pos) != m->nlevel)
+        return MOBILE_NONE;
+
+    if (map_get_monster_at(m, pos) != NULL)
+        return MOBILE_MONSTER;
+
+    if (pos_identical(nlarn->p->pos, pos))
+        return MOBILE_PLAYER;
+
+    for (guint i = 0; i < nlarn->spheres->len; i++)
+    {
+        sphere *s = g_ptr_array_index(nlarn->spheres, i);
+        if (pos_identical(s->pos, pos))
+            return MOBILE_SPHERE;
+    }
+
+    return MOBILE_NONE;
 }
 
 void map_fill_with_life(map *m)

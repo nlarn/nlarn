@@ -4,6 +4,7 @@
 
 ### Changes
 
+* Implement allied monsters: finally a summoned demon will fight opponents
 * Allow throwing of weapons
 
 ### Fixed bugs

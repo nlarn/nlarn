@@ -1,6 +1,6 @@
 /*
  * monsters.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -236,8 +236,10 @@ guint monster_attack_count(monster *m);
  */
 attack monster_attack(monster *m, guint num);
 
+bool monster_is_friendly(monster *m);
 void monster_player_attack(monster *m, struct player *p);
 int monster_player_ranged_attack(monster *m, struct player *p);
+void monster_attack_monster(monster *attacker, monster *target);
 
 /**
  * Deal damage to a monster

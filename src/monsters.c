@@ -1,6 +1,6 @@
 /*
  * monsters.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -2052,15 +2052,71 @@ static int modified_attack_amount(int amount, int damage_type)
     return amount + game_difficulty(nlarn)/2;
 }
 
+bool monster_is_friendly(monster *m)
+{
+    g_assert(m != NULL);
+    return m->action == MA_SERVE || m->action == MA_CIVILIAN;
+}
+
+void monster_attack_monster(monster *attacker, monster *target)
+{
+    g_assert(attacker != NULL && target != NULL);
+
+    /* pick a random attack */
+    attack att = monster_attack(attacker, rand_1n(monster_attack_count(attacker) + 1));
+    if (att.type == ATT_NONE || att.type == ATT_BREATH)
+        return;
+
+    bool either_visible = monster_in_sight(attacker) || monster_in_sight(target);
+
+    int amount;
+    if (att.type == ATT_WEAPON)
+    {
+        amount = (attacker->eq_weapon != NULL)
+                 ? weapon_damage(attacker->eq_weapon) : 1;
+    }
+    else
+    {
+        amount = att.base + monster_level(attacker)
+                 + rand_0n(game_difficulty(nlarn) + 2);
+    }
+    if (att.rand) amount += rand_1n(att.rand);
+
+    damage *dam = damage_new(att.damage, att.type, amount, DAMO_MONSTER, attacker);
+
+    if (dam->type == DAM_PHYSICAL)
+    {
+        if (either_visible)
+            log_add_entry(nlarn->log, "The %s %s the %s.",
+                          monster_get_name(attacker),
+                          monster_attack_verb[att.type],
+                          monster_get_name(target));
+        monster_damage_take(target, dam);
+    }
+    else
+    {
+        /* Only physical attacks make sense between monsters for now */
+        damage_free(dam);
+    }
+}
+
 void monster_player_attack(monster *m, player *p)
 {
     g_assert(m != NULL && p != NULL);
 
     map *mmap = game_map(nlarn, Z(m->pos));
 
-    /* the player is invisible and the monster bashes into thin air */
+    /* the player is not at the monster's last known position */
     if (!pos_identical(m->player_pos, p->pos))
     {
+        /* check if a friendly monster is blocking the path */
+        monster *blocker = map_get_monster_at(mmap, m->player_pos);
+        if (blocker != NULL && monster_is_friendly(blocker))
+        {
+            monster_attack_monster(m, blocker);
+            return;
+        }
+
         if (!map_is_monster_at(mmap, p->pos) && monster_in_sight(m))
         {
             log_add_entry(nlarn->log, "The %s bashes into thin air.",
@@ -2273,12 +2329,16 @@ monster *monster_damage_take(monster *m, damage *dam)
         else if(dam->amount > 0 && monster_bleeds)
         {
             position spill_pos = pos_invalid;
-            // FIXME: this needs to be extended once we enable others
-            // to attack monsters
             if (p)
             {
                 // spill blood in the direction of the blow
                 direction dir = pos_direction(p->pos, monster_pos(m));
+                spill_pos = pos_move(monster_pos(m), dir);
+            }
+            else if (dam->dam_origin.ot == DAMO_MONSTER)
+            {
+                monster *src = (monster *)dam->dam_origin.originator;
+                direction dir = pos_direction(monster_pos(src), monster_pos(m));
                 spill_pos = pos_move(monster_pos(m), dir);
             }
             else
@@ -3416,16 +3476,38 @@ static position monster_move_serve(monster *m, struct player *p)
                   monster_flags(m, INFRAVISION)
                   || monster_effect(m, ET_INFRAVISION));
 
-    /* a good servant always knows the masters position */
-    if (pos_distance(monster_pos(m), p->pos) > 5)
+    /* find the visible hostile monster closest to the player */
+    monster *target = NULL;
     {
-         /* if the distance to the player is too large, follow */
-        npos = monster_find_next_pos_to(m, p->pos);
+        GList *visible = fov_get_visible_monsters(m->fv);
+        int best_dist = G_MAXINT;
+        for (GList *iter = visible; iter != NULL; iter = iter->next)
+        {
+            monster *candidate = (monster *)iter->data;
+            if (monster_is_friendly(candidate)) continue;
+            int dist = pos_distance(monster_pos(candidate), p->pos);
+            if (dist < best_dist)
+            {
+                best_dist = dist;
+                target = candidate;
+            }
+        }
+        g_list_free(visible);
     }
-    else
+
+    if (target != NULL)
     {
-        /* look for worthy foes */
-        /* TODO: implement */
+        if (pos_adjacent(m->pos, monster_pos(target)))
+        {
+            monster_attack_monster(m, target);
+            return m->pos;
+        }
+        npos = monster_find_next_pos_to(m, monster_pos(target));
+    }
+    else if (pos_distance(monster_pos(m), p->pos) > 2)
+    {
+        /* if the distance to the player is too large, follow */
+        npos = monster_find_next_pos_to(m, p->pos);
     }
 
     return npos;
