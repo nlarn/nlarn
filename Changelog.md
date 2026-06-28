@@ -6,6 +6,8 @@
 
 * Implement allied monsters: finally a summoned demon will fight opponents
 * Town folks can now attack monsters lured into town
+* Town folk will pick up weapons dropped by the play to fight monsters and
+  return them once the danger is over
 * Allow throwing of weapons
 
 ### Fixed bugs

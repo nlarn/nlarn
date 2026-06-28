@@ -109,7 +109,8 @@ typedef struct item {
         blessed_known: 1,   /* player known if item is cursed / blessed */
         bonus_known: 1,     /* player knows the bonus */
         fired: 1,           /* player has fired the item */
-        picked_up: 1;       /* picked up by monster */
+        picked_up: 1,       /* picked up by monster */
+        player_owned: 1;    /* originated from the player's inventory */
 } item;
 
 typedef struct item_type_data {

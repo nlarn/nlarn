@@ -745,6 +745,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS,
         .attacks = {
             { .type = ATT_SLAM, .base = 0, .damage = DAM_PHYSICAL },
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_CIVILIAN
     },
 };
@@ -3592,10 +3593,10 @@ static position monster_move_civilian(monster *m, struct player *p)
                   monster_flags(m, INFRAVISION)
                   || monster_effect(m, ET_INFRAVISION));
 
-    /* fight the nearest visible hostile monster */
+    /* find the nearest visible hostile monster */
+    monster *target = NULL;
     {
         GList *visible = fov_get_visible_monsters(m->fv);
-        monster *target = NULL;
         for (GList *iter = visible; iter != NULL; iter = iter->next)
         {
             monster *candidate = (monster *)iter->data;
@@ -3607,18 +3608,60 @@ static position monster_move_civilian(monster *m, struct player *p)
             }
         }
         g_list_free(visible);
+    }
 
-        if (target != NULL)
+    map *mmap = monster_map(m);
+
+    /* pick up a weapon from the floor when threatened and unarmed */
+    if (target != NULL && m->eq_weapon == NULL)
+    {
+        inventory **ilist = map_ilist_at(mmap, m->pos);
+        for (guint idx = 0; idx < inv_length(*ilist); idx++)
         {
-            if (pos_adjacent(m->pos, monster_pos(target)))
+            item *it = inv_get(*ilist, idx);
+            if (it->type == IT_WEAPON && !weapon_is_ranged(it))
             {
-                monster_attack_monster(m, target);
-
-                return m->pos;
+                if (monster_in_sight(m))
+                {
+                    gchar *wdesc = item_describe(it, player_item_known(nlarn->p, it),
+                                                 false, false);
+                    log_add_entry(nlarn->log, "The %s picks up %s.",
+                                  monster_get_name(m), wdesc);
+                    g_free(wdesc);
+                }
+                inv_del_element(ilist, it);
+                inv_add(&m->inv, it);
+                it->picked_up = true;
+                m->eq_weapon = it;
+                break;
             }
-
-            return monster_find_next_pos_to(m, monster_pos(target));
         }
+    }
+
+    /* return a player-owned weapon once no hostiles are in sight */
+    if (target == NULL && m->eq_weapon != NULL && m->eq_weapon->player_owned)
+    {
+        item *w = m->eq_weapon;
+        m->eq_weapon = NULL;
+        inv_del_element(&m->inv, w);
+        if (monster_in_sight(m))
+        {
+            gchar *wdesc = item_describe(w, player_item_known(nlarn->p, w), false, false);
+            log_add_entry(nlarn->log, "The %s drops %s.", monster_get_name(m), wdesc);
+            g_free(wdesc);
+        }
+        inv_add(map_ilist_at(mmap, m->pos), w);
+    }
+
+    /* fight the nearest visible hostile monster */
+    if (target != NULL)
+    {
+        if (pos_adjacent(m->pos, monster_pos(target)))
+        {
+            monster_attack_monster(m, target);
+            return m->pos;
+        }
+        return monster_find_next_pos_to(m, monster_pos(target));
     }
 
     /* civilians will pick a random location on the map, travel and remain
