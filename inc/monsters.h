@@ -157,8 +157,9 @@ DECLARE_ENUM(monster_action_t, MONSTER_ACTION_TYPE_ENUM)
     MF(RES_MAGIC    , = 1 << 19) /* resistant to magic */ \
     MF(SWIM         , = 1 << 20) /* can swim through water */ \
     MF(PACK         , = 1 << 21) /* creature appears in packs */ \
+    MF(PASSIVE      , = 1 << 22) /* never attacks or pursues the player */ \
 
-#define MONSTER_FLAG_COUNT 20
+#define MONSTER_FLAG_COUNT 21
 
 DECLARE_ENUM(monster_flag, MONSTER_FLAG_ENUM)
 

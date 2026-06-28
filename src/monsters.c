@@ -368,7 +368,7 @@ monster_data_t monster_data[] = {
         .name = "gelatinous cube", .glyph = 'g', .colour = ALABASTER_GREEN,
         .exp = 45, .ac = 1, .hp_max = 22,
         .level = 5, .intelligence = 3, .speed = XSLOW, .size = LARGE,
-        .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF,
+        .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF | PASSIVE,
         .attacks = {
             { .type = ATT_SLAM, .base = 1, .damage = DAM_ACID },
         }, .default_ai = MA_WANDER
@@ -2567,9 +2567,8 @@ bool monster_update_action(monster *m, monster_action_t override)
     {
         /* after having spotted the player, aggressive monster will follow
            the player for a certain amount of time turns, afterwards loose
-           interest. More peaceful monsters will do something else. */
-        /* TODO: need to test for aggressiveness */
-        naction = MA_ATTACK;
+           interest. Passive monsters never pursue. */
+        naction = monster_flags(m, PASSIVE) ? MA_WANDER : MA_ATTACK;
     }
     else
     {
