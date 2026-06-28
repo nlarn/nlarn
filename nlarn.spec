@@ -33,6 +33,8 @@ touch %{buildroot}/var/games/%{name}/highscores
 %doc LICENSE README.md Changelog.md lib/maze_doc.txt
 
 %changelog
+* Sun Jun 28 2026 Joachim de Groot <jdegroot@web.de>
+  - updated for version 0.8.0
 * Sat Jun 27 2026 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.7.9
 * Sat Dec 13 2025 Joachim de Groot <jdegroot@web.de>
