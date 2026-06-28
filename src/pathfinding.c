@@ -1,6 +1,6 @@
 /*
  * pathfinding.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #include "extdefs.h"
 #include "pathfinding.h"
 #include "player.h"
+#include "spheres.h"
 
 static path *path_new(position start, position goal);
 static path_element *path_element_new(position pos);
@@ -28,7 +29,7 @@ static guint path_cost(path_element* element, position target);
 static path_element *path_element_in_list(const path_element* el, const GPtrArray *list);
 static path_element *path_find_best(const path *pt);
 static GPtrArray *path_get_neighbours(map *m, position pos,
-    map_element_t element, bool for_player);
+    map_element_t element, bool for_player, position goal);
 
 path *path_find(map *m, position start, position goal, map_element_t element)
 {
@@ -72,7 +73,7 @@ path *path_find(map *m, position start, position goal, map_element_t element)
             return pt;
         }
 
-        GPtrArray *neighbours = path_get_neighbours(m, curr->pos, element, for_player);
+        GPtrArray *neighbours = path_get_neighbours(m, curr->pos, element, for_player, pt->goal);
 
         while (neighbours->len)
         {
@@ -267,7 +268,8 @@ static path_element *path_find_best(const path *pt)
 
 static GPtrArray *path_get_neighbours(map *m, position pos,
                                       map_element_t element,
-                                      bool for_player)
+                                      bool for_player,
+                                      position goal)
 {
     GPtrArray *neighbours = g_ptr_array_new();
 
@@ -281,11 +283,35 @@ static GPtrArray *path_get_neighbours(map *m, position pos,
         if (!pos_valid(new_pos))
             continue;
 
+        /* the goal tile is always reachable regardless of who occupies it */
+        if (pos_identical(new_pos, goal))
+        {
+            g_ptr_array_add(neighbours, path_element_new(new_pos));
+            continue;
+        }
+
+        /* block the player's position as an intermediate step */
+        if (pos_identical(new_pos, nlarn->p->pos))
+            continue;
+
+        /* block positions occupied by spheres */
+        bool blocked_by_sphere = false;
+        for (guint i = 0; i < nlarn->spheres->len; i++)
+        {
+            sphere *s = g_ptr_array_index(nlarn->spheres, i);
+            if (pos_identical(s->pos, new_pos))
+            {
+                blocked_by_sphere = true;
+                break;
+            }
+        }
+        if (blocked_by_sphere)
+            continue;
+
         if ((for_player && mt_is_passable(player_memory_of(nlarn->p, new_pos).type))
                 || (!for_player && monster_valid_dest(m, new_pos, element)))
         {
-            path_element *pe = path_element_new(new_pos);
-            g_ptr_array_add(neighbours, pe);
+            g_ptr_array_add(neighbours, path_element_new(new_pos));
         }
     }
 

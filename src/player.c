@@ -3760,8 +3760,9 @@ void player_item_throw(player *p, inventory **inv __attribute__((unused)), item 
         inv_del_element(&p->inventory, it);
     }
 
-    /* mark the item as fired */
+    /* mark the item as fired and as originating from the player */
     it->fired = TRUE;
+    it->player_owned = true;
 
     if (it->type == IT_POTION)
     {
@@ -3904,6 +3905,7 @@ void player_item_drop(player *p, inventory **inv, item *it)
         p->stats.gold_found -= it->count;
     }
 
+    it->player_owned = true;
     inv_add(map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos), it);
 
     /* reveal if item is cursed or blessed when dropping it on an altar */

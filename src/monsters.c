@@ -1,6 +1,6 @@
 /*
  * monsters.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -51,7 +51,7 @@ typedef struct {
     speed speed;
     size size;
     int flags;
-    attack attacks[2];
+    attack attacks[3];
     monster_action_t default_ai;
     const char *sound;
 } monster_data_t;
@@ -104,6 +104,7 @@ const char *monster_attack_verb[] =
     "touches",      /* ATT_TOUCH */
     "breathes at",  /* ATT_BREATH */
     "gazes at",     /* ATT_GAZE */
+    "shoots at",    /* ATT_SHOOT */
 };
 
 static struct _monster_breath_data
@@ -150,6 +151,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+            { .type = ATT_SHOOT, .base = 3, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
     },
     { /* MT_JACKAL */
@@ -168,6 +170,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+            { .type = ATT_SHOOT, .base = 2, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
     },
     { /* MT_ORC */
@@ -177,6 +180,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION | PACK,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+            { .type = ATT_SHOOT, .base = 4, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER, .sound = "shout"
     },
     { /* MT_SNAKE */
@@ -334,6 +338,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_KICK, .base = 6, .damage = DAM_PHYSICAL },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+            { .type = ATT_SHOOT, .base = 6, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
     },
     { /* MT_TROLL */
@@ -362,13 +367,14 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+            { .type = ATT_SHOOT, .base = 5, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
     },
     { /* MT_GELATINOUSCUBE */
         .name = "gelatinous cube", .glyph = 'g', .colour = ALABASTER_GREEN,
         .exp = 45, .ac = 1, .hp_max = 22,
         .level = 5, .intelligence = 3, .speed = XSLOW, .size = LARGE,
-        .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF,
+        .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF | PASSIVE,
         .attacks = {
             { .type = ATT_SLAM, .base = 1, .damage = DAM_ACID },
         }, .default_ai = MA_WANDER
@@ -745,6 +751,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS,
         .attacks = {
             { .type = ATT_SLAM, .base = 0, .damage = DAM_PHYSICAL },
+            { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_CIVILIAN
     },
 };
@@ -765,7 +772,14 @@ static position monster_move_flee(monster *m, struct player *p);
 static position monster_move_serve(monster *m, struct player *p);
 static position monster_move_civilian(monster *m, struct player *p);
 
+static void monster_fov_ensure(monster *m);
+static monster *monster_nearest_hostile_to(monster *m, position anchor);
+static position monster_engage_or_approach(monster *m, monster *target);
+
 static bool monster_breath_hit(const GList *traj,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2);
+static bool monster_shoot_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
@@ -857,8 +871,20 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         break;
     }
 
-    /* generate a weapon if monster can use it */
-    if (monster_attack_available(nmonster, ATT_WEAPON))
+    bool give_melee  = monster_attack_available(nmonster, ATT_WEAPON);
+    bool give_ranged = monster_attack_available(nmonster, ATT_SHOOT);
+
+    /* if both weapon types are possible, pick one at random */
+    if (give_melee && give_ranged)
+    {
+        if (chance(50))
+            give_ranged = false;
+        else
+            give_melee = false;
+    }
+
+    /* generate a melee weapon */
+    if (give_melee)
     {
         int weapon_count = 3;
         int wpns[weapon_count]; /* choice of weapon types */
@@ -909,17 +935,47 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
             break;
         }
 
-        /* focus on the weakest weapon on the set */
+        /* focus on the weakest weapon in the set */
         int weapon_idx = levy_element(weapon_count, 0.5, 1.0);
 
         item *weapon = item_new(IT_WEAPON, wpns[weapon_idx]);
         item_new_finetouch(weapon);
-
         inv_add(&nmonster->inv, weapon);
 
         /* wield the new weapon */
         nmonster->eq_weapon = weapon;
-    } /* finished initializing weapons */
+    }
+
+    /* generate a ranged weapon and ammo */
+    if (give_ranged)
+    {
+        weapon_t wpn_type;
+        int ammo_id;
+
+        switch (type)
+        {
+        case MT_KOBOLD:
+            wpn_type = WT_SLING;
+            ammo_id = AMT_SBULLET;
+            break;
+        case MT_CENTAUR:
+            wpn_type = WT_CROSSBOW;
+            ammo_id = AMT_BOLT;
+            break;
+        default: /* MT_HOBGOBLIN, MT_ORC, MT_ELF */
+            wpn_type = WT_BOW;
+            ammo_id = AMT_ARROW;
+            break;
+        }
+
+        item *ranged_wpn = item_new(IT_WEAPON, wpn_type);
+        inv_add(&nmonster->inv, ranged_wpn);
+        nmonster->eq_weapon = ranged_wpn;
+
+        item *ammo = item_new(IT_AMMO, ammo_id);
+        ammo->count = 5 + rand_0n(11);
+        inv_add(&nmonster->inv, ammo);
+    }
 
     /* initialize mimics */
     if (monster_flags(nmonster, MIMIC))
@@ -1782,7 +1838,24 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                 if (map_pos_validate(mmap, m_npos, monster_map_element(m), false))
                 {
                     /* the new position is valid -> reposition the monster */
+                    position old_pos = monster_pos(m);
                     monster_pos_set(m, mmap, m_npos);
+
+                    /* a fleeing monster with hands and sufficient intelligence
+                       may close the open door it just stepped away from */
+                    if (m->action == MA_FLEE
+                            && monster_flags(m, HANDS)
+                            && monster_int(m) > 6
+                            && !monster_effect_get(m, ET_CONFUSION)
+                            && map_sobject_at(mmap, old_pos) == LS_OPENDOOR
+                            && pos_distance(monster_pos(m), g->p->pos) > 4)
+                    {
+                        map_sobject_set(mmap, old_pos, LS_CLOSEDDOOR);
+
+                        if (monster_in_sight(m))
+                            log_add_entry(g->log, "The %s closes the door.",
+                                          monster_get_name(m));
+                    }
                 }
                 else
                 {
@@ -2052,15 +2125,71 @@ static int modified_attack_amount(int amount, int damage_type)
     return amount + game_difficulty(nlarn)/2;
 }
 
+bool monster_is_friendly(monster *m)
+{
+    g_assert(m != NULL);
+    return m->action == MA_SERVE || m->action == MA_CIVILIAN;
+}
+
+void monster_attack_monster(monster *attacker, monster *target)
+{
+    g_assert(attacker != NULL && target != NULL);
+
+    /* pick a random attack */
+    attack att = monster_attack(attacker, rand_1n(monster_attack_count(attacker) + 1));
+    if (att.type == ATT_NONE || att.type == ATT_BREATH)
+        return;
+
+    bool either_visible = monster_in_sight(attacker) || monster_in_sight(target);
+
+    int amount;
+    if (att.type == ATT_WEAPON)
+    {
+        amount = (attacker->eq_weapon != NULL)
+                 ? weapon_damage(attacker->eq_weapon) : 1;
+    }
+    else
+    {
+        amount = att.base + monster_level(attacker)
+                 + rand_0n(game_difficulty(nlarn) + 2);
+    }
+    if (att.rand) amount += rand_1n(att.rand);
+
+    damage *dam = damage_new(att.damage, att.type, amount, DAMO_MONSTER, attacker);
+
+    if (dam->type == DAM_PHYSICAL)
+    {
+        if (either_visible)
+            log_add_entry(nlarn->log, "The %s %s the %s.",
+                          monster_get_name(attacker),
+                          monster_attack_verb[att.type],
+                          monster_get_name(target));
+        monster_damage_take(target, dam);
+    }
+    else
+    {
+        /* Only physical attacks make sense between monsters for now */
+        damage_free(dam);
+    }
+}
+
 void monster_player_attack(monster *m, player *p)
 {
     g_assert(m != NULL && p != NULL);
 
     map *mmap = game_map(nlarn, Z(m->pos));
 
-    /* the player is invisible and the monster bashes into thin air */
+    /* the player is not at the monster's last known position */
     if (!pos_identical(m->player_pos, p->pos))
     {
+        /* check if a friendly monster is blocking the path */
+        monster *blocker = map_get_monster_at(mmap, m->player_pos);
+        if (blocker != NULL && monster_is_friendly(blocker))
+        {
+            monster_attack_monster(m, blocker);
+            return;
+        }
+
         if (!map_is_monster_at(mmap, p->pos) && monster_in_sight(m))
         {
             log_add_entry(nlarn->log, "The %s bashes into thin air.",
@@ -2210,12 +2339,109 @@ void monster_player_attack(monster *m, player *p)
     }
 }
 
+static bool monster_shoot_hit(const GList *traj,
+                              const damage_originator *damo,
+                              gpointer data1,
+                              gpointer data2)
+{
+    damage *dam = (damage *)data1;
+    item *ammo = (item *)data2;
+    position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);
+    map *mp = game_map(nlarn, Z(pos));
+
+    gchar *adesc = item_describe(ammo, player_item_known(nlarn->p, ammo),
+                                 true, true);
+    adesc[0] = g_ascii_toupper(adesc[0]);
+
+    monster *hit_m = map_get_monster_at(mp, pos);
+    if (hit_m != NULL)
+    {
+        if (monster_in_sight(hit_m))
+            log_add_entry(nlarn->log, "%s hits the %s.",
+                          adesc, monster_get_name(hit_m));
+        monster_damage_take(hit_m, damage_copy(dam));
+        g_free(adesc);
+        return true;
+    }
+
+    if (pos_identical(pos, nlarn->p->pos))
+    {
+        if (player_evade(nlarn->p))
+        {
+            if (!player_effect(nlarn->p, ET_BLINDNESS))
+                log_add_entry(nlarn->log, "%s misses you.", adesc);
+        }
+        else
+        {
+            log_add_entry(nlarn->log, "%s hits you!", adesc);
+            player_damage_take(nlarn->p, damage_copy(dam), PD_MONSTER,
+                               monster_type(damo->originator));
+        }
+        g_free(adesc);
+        return true;
+    }
+
+    g_free(adesc);
+    return false;
+}
+
 int monster_player_ranged_attack(monster *m, player *p)
 {
     g_assert(m != NULL && p != NULL);
 
     /* choose a random attack type */
     attack att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
+
+    if (att.type == ATT_SHOOT)
+    {
+        /* don't use ranged attack when adjacent; fall back to melee */
+        if (pos_adjacent(m->pos, p->pos))
+            return false;
+
+        /* find ammo in monster inventory for descriptions and trajectory colour */
+        item *ammo_item = NULL;
+        for (guint i = 0; i < inv_length(m->inv); i++)
+        {
+            item *it = inv_get(m->inv, i);
+            if (it->type == IT_AMMO) { ammo_item = it; break; }
+        }
+
+        /* no ammo available (e.g. monster received melee loadout) */
+        if (ammo_item == NULL)
+            return false;
+
+        if (!player_effect(p, ET_BLINDNESS))
+        {
+            if (ammo_item)
+            {
+                gchar *adesc = item_describe(ammo_item,
+                        player_item_known(nlarn->p, ammo_item), true, false);
+                log_add_entry(nlarn->log, "The %s shoots %s at you.",
+                              monster_get_name(m), adesc);
+                g_free(adesc);
+            }
+            else
+                log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
+                              monster_attack_verb[att.type]);
+        }
+
+        /* pick trajectory appearance from ammo material, or use defaults */
+        char glyph = item_glyph(IT_AMMO);
+        colour_t traj_colour = ammo_item ? item_colour(ammo_item) : WHITE;
+
+        int amount = att.base + rand_0n(monster_level(m) + 1)
+                     + game_difficulty(nlarn);
+        damage *dam = damage_new(DAM_PHYSICAL, ATT_SHOOT, amount,
+                                 DAMO_MONSTER, m);
+
+        map_trajectory(m->pos, p->pos, &(dam->dam_origin),
+                       monster_shoot_hit, dam, ammo_item, false,
+                       glyph, traj_colour, false);
+
+        damage_free(dam);
+        return true;
+    }
+
     if (att.type == ATT_GAZE && chance(att.base/3))
     {
         if (!player_effect(p, ET_BLINDNESS))
@@ -2273,12 +2499,16 @@ monster *monster_damage_take(monster *m, damage *dam)
         else if(dam->amount > 0 && monster_bleeds)
         {
             position spill_pos = pos_invalid;
-            // FIXME: this needs to be extended once we enable others
-            // to attack monsters
             if (p)
             {
                 // spill blood in the direction of the blow
                 direction dir = pos_direction(p->pos, monster_pos(m));
+                spill_pos = pos_move(monster_pos(m), dir);
+            }
+            else if (dam->dam_origin.ot == DAMO_MONSTER)
+            {
+                monster *src = (monster *)dam->dam_origin.originator;
+                direction dir = pos_direction(monster_pos(src), monster_pos(m));
                 spill_pos = pos_move(monster_pos(m), dir);
             }
             else
@@ -2506,9 +2736,8 @@ bool monster_update_action(monster *m, monster_action_t override)
     {
         /* after having spotted the player, aggressive monster will follow
            the player for a certain amount of time turns, afterwards loose
-           interest. More peaceful monsters will do something else. */
-        /* TODO: need to test for aggressiveness */
-        naction = MA_ATTACK;
+           interest. Passive monsters never pursue. */
+        naction = monster_flags(m, PASSIVE) ? MA_WANDER : MA_ATTACK;
     }
     else
     {
@@ -2625,8 +2854,16 @@ char *monster_desc(monster *m)
     else
         injury = "critically injured";
 
+    /* for fighting civilians, find the hostile target in FOV */
+    monster *fight_target = (m->action == MA_CIVILIAN)
+                            ? monster_nearest_hostile_to(m, m->pos)
+                            : NULL;
+
+    const char *action_desc = (fight_target != NULL) ? "fighting"
+                                                      : monster_ai_desc[m->action];
+
     g_string_append_printf(desc, "%s %s, %s %s", a_an(injury), injury,
-                           monster_ai_desc[m->action], monster_get_name(m));
+                           action_desc, monster_get_name(m));
 
     if (game_wizardmode(nlarn))
     {
@@ -2645,6 +2882,11 @@ char *monster_desc(monster *m)
 
         g_string_append_printf(desc, ", armed with %s", weapon_desc);
         g_free(weapon_desc);
+    }
+
+    if (fight_target != NULL)
+    {
+        g_string_append_printf(desc, ", attacking the %s", monster_get_name(fight_target));
     }
 
     /* add effect description */
@@ -2982,6 +3224,7 @@ static bool monster_weapon_wield(monster *m)
     for (guint idx = 0; idx < inv_length_filtered(m->inv, item_filter_weapon); idx++)
     {
         item *w = inv_get_filtered(m->inv, idx, item_filter_weapon);
+        if (weapon_is_ranged(w)) continue;
         /* compare this weapon with the weapon the monster wields */
         if (!(m->eq_weapon) || weapon_damage(m->eq_weapon) < weapon_damage(w)) {
             /* FIXME: weapon effects */
@@ -3306,6 +3549,7 @@ static position monster_move_wander(monster *m, struct player *p __attribute__((
 static position monster_move_attack(monster *m, struct player *p)
 {
     position npos = monster_pos(m);
+    map *mmap = monster_map(m);
 
     /* monster is standing next to player */
     if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
@@ -3319,13 +3563,26 @@ static position monster_move_attack(monster *m, struct player *p)
         return monster_pos(m);
     }
 
+    /* attack an adjacent friendly monster */
+    for (int dir = 1; dir < GD_MAX; dir++)
+    {
+        position adj = pos_move(monster_pos(m), dir);
+        if (!pos_valid(adj) || Z(adj) != Z(monster_pos(m))) continue;
+        monster *adj_m = map_get_monster_at(mmap, adj);
+        if (adj_m != NULL && monster_is_friendly(adj_m))
+        {
+            monster_attack_monster(m, adj_m);
+            return monster_pos(m);
+        }
+    }
+
     /* monster is standing on a map exit and the player has left the map */
     if (pos_identical(monster_pos(m), m->player_pos)
-            && map_is_exit_at(monster_map(m), monster_pos(m)))
+            && map_is_exit_at(mmap, monster_pos(m)))
     {
         int newmap;
 
-        switch (map_sobject_at(monster_map(m), monster_pos(m)))
+        switch (map_sobject_at(mmap, monster_pos(m)))
         {
         case LS_STAIRSDOWN:
         case LS_CAVERNS_ENTRY:
@@ -3358,6 +3615,34 @@ static position monster_move_attack(monster *m, struct player *p)
         return monster_pos(m);
     }
 
+    /* when the player is not currently visible, look for friendly monsters
+       to target instead */
+    if (m->lastseen != 1)
+    {
+        if (!m->fv) m->fv = fov_new();
+        fov_calculate(m->fv, mmap, m->pos, 6,
+                      monster_flags(m, INFRAVISION)
+                      || monster_effect(m, ET_INFRAVISION));
+
+        GList *visible = fov_get_visible_monsters(m->fv);
+        monster *ftarget = NULL;
+        int best_dist = G_MAXINT;
+        for (GList *iter = visible; iter != NULL; iter = iter->next)
+        {
+            monster *candidate = (monster *)iter->data;
+            if (!monster_is_friendly(candidate)) continue;
+            int dist = pos_distance(monster_pos(m), monster_pos(candidate));
+            if (dist < best_dist)
+            {
+                best_dist = dist;
+                ftarget = candidate;
+            }
+        }
+        g_list_free(visible);
+        if (ftarget != NULL)
+            return monster_find_next_pos_to(m, monster_pos(ftarget));
+    }
+
     /* monster heads into the direction of the player. */
     npos = monster_find_next_pos_to(m, m->player_pos);
 
@@ -3378,6 +3663,8 @@ static position monster_move_flee(monster *m, struct player *p)
 {
     int dist = 0;
     position npos = monster_pos(m);
+    map *mmap = monster_map(m);
+    bool can_use_doors = monster_flags(m, HANDS) && monster_int(m) > 6;
 
     for (int tries = 1; tries < GD_MAX; tries++)
     {
@@ -3388,8 +3675,16 @@ static position monster_move_flee(monster *m, struct player *p)
 
         position npos_tmp = pos_move(monster_pos(m), tries);
 
-        if (map_pos_validate(monster_map(m), npos_tmp, monster_map_element(m),
-                             false)
+        bool is_valid = map_pos_validate(mmap, npos_tmp, monster_map_element(m),
+                                         false);
+        /* smart monsters with hands may flee through a closed door */
+        bool is_openable_door = !is_valid
+            && can_use_doors
+            && pos_valid(npos_tmp)
+            && Z(npos_tmp) == Z(m->pos)
+            && map_sobject_at(mmap, npos_tmp) == LS_CLOSEDDOOR;
+
+        if ((is_valid || is_openable_door)
                 && pos_distance(p->pos, npos_tmp) > dist)
         {
             /* distance is bigger than current distance */
@@ -3401,32 +3696,108 @@ static position monster_move_flee(monster *m, struct player *p)
     return npos;
 }
 
+/* Ensure the monster's FOV is allocated and recalculated for the current turn. */
+static void monster_fov_ensure(monster *m)
+{
+    if (!m->fv)
+        m->fv = fov_new();
+    fov_calculate(m->fv, monster_map(m), m->pos, 6,
+                  monster_flags(m, INFRAVISION)
+                  || monster_effect(m, ET_INFRAVISION));
+}
+
+/* Return the non-friendly monster visible to m that is closest to anchor,
+   or NULL if none is visible. Requires m->fv to be current. */
+static monster *monster_nearest_hostile_to(monster *m, position anchor)
+{
+    if (m->fv == NULL) return NULL;
+
+    GList *visible = fov_get_visible_monsters(m->fv);
+    monster *target = NULL;
+    int best_dist = G_MAXINT;
+    for (GList *iter = visible; iter != NULL; iter = iter->next)
+    {
+        monster *candidate = (monster *)iter->data;
+        if (monster_is_friendly(candidate)) continue;
+        int dist = pos_distance(monster_pos(candidate), anchor);
+        if (dist < best_dist)
+        {
+            best_dist = dist;
+            target = candidate;
+        }
+    }
+    g_list_free(visible);
+    return target;
+}
+
+/* Attack target if adjacent, otherwise step toward it.
+   Returns the monster's resulting position. */
+static position monster_engage_or_approach(monster *m, monster *target)
+{
+    if (pos_adjacent(m->pos, monster_pos(target)))
+    {
+        monster_attack_monster(m, target);
+        return m->pos;
+    }
+    return monster_find_next_pos_to(m, monster_pos(target));
+}
+
 static position monster_move_serve(monster *m, struct player *p)
 {
     /* If a new position cannot be found, keep the current position */
     position npos = m->pos;
 
-    /* generate a fov structure if not yet available */
-    if (!m->fv)
-        m->fv = fov_new();
-
-    /* calculate the monster's fov */
-    /* the monster gets a fov radius of 6 for now*/
-    fov_calculate(m->fv, monster_map(m), m->pos, 6,
-                  monster_flags(m, INFRAVISION)
-                  || monster_effect(m, ET_INFRAVISION));
-
-    /* a good servant always knows the masters position */
-    if (pos_distance(monster_pos(m), p->pos) > 5)
+    /* follow the player across level boundaries */
+    if (Z(monster_pos(m)) != Z(p->pos))
     {
-         /* if the distance to the player is too large, follow */
+        map *mmap = monster_map(m);
+
+        /* if already standing on an exit that leads toward the player's level, use it */
+        if (map_is_exit_at(mmap, monster_pos(m)))
+        {
+            int newmap;
+            switch (map_sobject_at(mmap, monster_pos(m)))
+            {
+            case LS_STAIRSDOWN:
+            case LS_CAVERNS_ENTRY:  newmap = Z(m->pos) + 1; break;
+            case LS_STAIRSUP:
+            case LS_CAVERNS_EXIT:   newmap = Z(m->pos) - 1; break;
+            case LS_ELEVATORDOWN:   newmap = MAP_CMAX + 1;  break;
+            case LS_ELEVATORUP:     newmap = 0;             break;
+            default:                newmap = Z(m->pos);     break;
+            }
+            if (abs(newmap - Z(p->pos)) < abs(Z(m->pos) - Z(p->pos)))
+            {
+                monster_level_enter(m, game_map(nlarn, newmap));
+                return monster_pos(m);
+            }
+        }
+
+        /* navigate toward the exit that leads to the player's level */
+        bool going_deeper = Z(p->pos) > Z(m->pos);
+        const sobject_t down_exits[] = { LS_STAIRSDOWN, LS_CAVERNS_ENTRY, LS_ELEVATORDOWN };
+        const sobject_t up_exits[]   = { LS_STAIRSUP, LS_CAVERNS_EXIT, LS_ELEVATORUP };
+        const sobject_t *exits = going_deeper ? down_exits : up_exits;
+
+        for (int i = 0; i < 3; i++)
+        {
+            position exit_pos = map_find_sobject(mmap, exits[i]);
+            if (pos_valid(exit_pos))
+                return monster_find_next_pos_to(m, exit_pos);
+        }
+
+        return npos;
+    }
+
+    monster_fov_ensure(m);
+
+    /* engage the visible hostile closest to the player */
+    monster *target = monster_nearest_hostile_to(m, p->pos);
+
+    if (target != NULL)
+        npos = monster_engage_or_approach(m, target);
+    else if (pos_distance(monster_pos(m), p->pos) > 2)
         npos = monster_find_next_pos_to(m, p->pos);
-    }
-    else
-    {
-        /* look for worthy foes */
-        /* TODO: implement */
-    }
 
     return npos;
 }
@@ -3434,6 +3805,56 @@ static position monster_move_serve(monster *m, struct player *p)
 static position monster_move_civilian(monster *m, struct player *p)
 {
     position npos = m->pos;
+    map *mmap = monster_map(m);
+
+    monster_fov_ensure(m);
+
+    /* engage the nearest visible hostile */
+    monster *target = monster_nearest_hostile_to(m, m->pos);
+
+    /* pick up a weapon from the floor when threatened and unarmed */
+    if (target != NULL && m->eq_weapon == NULL)
+    {
+        inventory **ilist = map_ilist_at(mmap, m->pos);
+        for (guint idx = 0; idx < inv_length(*ilist); idx++)
+        {
+            item *it = inv_get(*ilist, idx);
+            if (it->type == IT_WEAPON && !weapon_is_ranged(it))
+            {
+                if (monster_in_sight(m))
+                {
+                    gchar *wdesc = item_describe(it, player_item_known(nlarn->p, it),
+                                                 false, false);
+                    log_add_entry(nlarn->log, "The %s picks up %s.",
+                                  monster_get_name(m), wdesc);
+                    g_free(wdesc);
+                }
+                inv_del_element(ilist, it);
+                inv_add(&m->inv, it);
+                it->picked_up = true;
+                m->eq_weapon = it;
+                break;
+            }
+        }
+    }
+
+    /* return a player-owned weapon once no hostiles are in sight */
+    if (target == NULL && m->eq_weapon != NULL && m->eq_weapon->player_owned)
+    {
+        item *w = m->eq_weapon;
+        m->eq_weapon = NULL;
+        inv_del_element(&m->inv, w);
+        if (monster_in_sight(m))
+        {
+            gchar *wdesc = item_describe(w, player_item_known(nlarn->p, w), false, false);
+            log_add_entry(nlarn->log, "The %s drops %s.", monster_get_name(m), wdesc);
+            g_free(wdesc);
+        }
+        inv_add(map_ilist_at(mmap, m->pos), w);
+    }
+
+    if (target != NULL)
+        return monster_engage_or_approach(m, target);
 
     /* civilians will pick a random location on the map, travel and remain
        there for the number of turns that is determined by their town person

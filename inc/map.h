@@ -1,6 +1,6 @@
 /*
  * map.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -109,6 +109,14 @@ typedef bool (*trajectory_hit_sth)(const GList *trajectory,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
+/* Types of mobile objects that can occupy a map tile */
+typedef enum {
+    MOBILE_NONE = 0,
+    MOBILE_PLAYER,
+    MOBILE_MONSTER,
+    MOBILE_SPHERE,
+} mobile_type_t;
+
 /* function declarations */
 
 map *map_new(int num, const char *mazefile);
@@ -207,6 +215,7 @@ char *map_inv_description(map *m, position pos, const char* where, int (*ifilter
 char *map_pos_examine(position pos);
 
 monster *map_get_monster_at(map *m, position pos);
+mobile_type_t map_mobile_type_at(map *m, position pos);
 
 /**
  * @brief Creates new monsters for a map.

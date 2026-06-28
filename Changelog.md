@@ -4,9 +4,20 @@
 
 ### Changes
 
+* Some monsters gained the ability to use ranged weapons
+* Implement allied monsters: finally a summoned demon will fight opponents
+* Town folks can now attack monsters lured into town
+* Town folk will pick up weapons dropped by the play to fight monsters and
+  return them once the danger is over
+* Hostile monster will now attack the player's friends (i.e. charmed or
+  summoned monsters and townsfolk)
 * Allow throwing of weapons
+* Some fleeing monsters will open doors and sometimes close doors behind them
+* Turn the gelatinous cube into a passive monster
 
 ### Fixed bugs
+
+* Take player's position into account when generating paths for friendlies
 
 
 ## Release 0.7.9 (2026-06-27)
