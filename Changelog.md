@@ -17,6 +17,8 @@
 
 ### Fixed bugs
 
+* Take player's position into account when generating paths for friendlies
+
 
 ## Release 0.7.9 (2026-06-27)
 
