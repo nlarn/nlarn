@@ -1,6 +1,6 @@
 /*
  * combat.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -58,6 +58,7 @@ DECLARE_ENUM(size, SIZE_ENUM)
     ATT(ATT_TOUCH,)  /* vampire, wraith */ \
     ATT(ATT_BREATH,) /* dragons, hellhound */ \
     ATT(ATT_GAZE,)   /* floating eye */ \
+    ATT(ATT_SHOOT,)  /* ranged weapon */ \
 
 DECLARE_ENUM(attack_t, ATTACK_T_ENUM)
 

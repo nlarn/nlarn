@@ -51,7 +51,7 @@ typedef struct {
     speed speed;
     size size;
     int flags;
-    attack attacks[2];
+    attack attacks[3];
     monster_action_t default_ai;
     const char *sound;
 } monster_data_t;
@@ -104,6 +104,7 @@ const char *monster_attack_verb[] =
     "touches",      /* ATT_TOUCH */
     "breathes at",  /* ATT_BREATH */
     "gazes at",     /* ATT_GAZE */
+    "shoots at",    /* ATT_SHOOT */
 };
 
 static struct _monster_breath_data
@@ -150,6 +151,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+            { .type = ATT_SHOOT, .base = 3, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
     },
     { /* MT_JACKAL */
@@ -168,6 +170,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+            { .type = ATT_SHOOT, .base = 2, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
     },
     { /* MT_ORC */
@@ -177,6 +180,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION | PACK,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+            { .type = ATT_SHOOT, .base = 4, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER, .sound = "shout"
     },
     { /* MT_SNAKE */
@@ -334,6 +338,7 @@ monster_data_t monster_data[] = {
         .attacks = {
             { .type = ATT_KICK, .base = 6, .damage = DAM_PHYSICAL },
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+            { .type = ATT_SHOOT, .base = 6, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
     },
     { /* MT_TROLL */
@@ -362,6 +367,7 @@ monster_data_t monster_data[] = {
         .flags = HEAD | HANDS | INFRAVISION,
         .attacks = {
             { .type = ATT_WEAPON, .damage = DAM_PHYSICAL },
+            { .type = ATT_SHOOT, .base = 5, .damage = DAM_PHYSICAL },
         }, .default_ai = MA_WANDER
     },
     { /* MT_GELATINOUSCUBE */
@@ -773,6 +779,9 @@ static position monster_engage_or_approach(monster *m, monster *target);
 static bool monster_breath_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
+static bool monster_shoot_hit(const GList *traj,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2);
 
 monster *monster_new(monster_t type, position pos, gpointer leader)
 {
@@ -862,8 +871,20 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         break;
     }
 
-    /* generate a weapon if monster can use it */
-    if (monster_attack_available(nmonster, ATT_WEAPON))
+    bool give_melee  = monster_attack_available(nmonster, ATT_WEAPON);
+    bool give_ranged = monster_attack_available(nmonster, ATT_SHOOT);
+
+    /* if both weapon types are possible, pick one at random */
+    if (give_melee && give_ranged)
+    {
+        if (chance(50))
+            give_ranged = false;
+        else
+            give_melee = false;
+    }
+
+    /* generate a melee weapon */
+    if (give_melee)
     {
         int weapon_count = 3;
         int wpns[weapon_count]; /* choice of weapon types */
@@ -914,17 +935,47 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
             break;
         }
 
-        /* focus on the weakest weapon on the set */
+        /* focus on the weakest weapon in the set */
         int weapon_idx = levy_element(weapon_count, 0.5, 1.0);
 
         item *weapon = item_new(IT_WEAPON, wpns[weapon_idx]);
         item_new_finetouch(weapon);
-
         inv_add(&nmonster->inv, weapon);
 
         /* wield the new weapon */
         nmonster->eq_weapon = weapon;
-    } /* finished initializing weapons */
+    }
+
+    /* generate a ranged weapon and ammo */
+    if (give_ranged)
+    {
+        weapon_t wpn_type;
+        int ammo_id;
+
+        switch (type)
+        {
+        case MT_KOBOLD:
+            wpn_type = WT_SLING;
+            ammo_id = AMT_SBULLET;
+            break;
+        case MT_CENTAUR:
+            wpn_type = WT_CROSSBOW;
+            ammo_id = AMT_BOLT;
+            break;
+        default: /* MT_HOBGOBLIN, MT_ORC, MT_ELF */
+            wpn_type = WT_BOW;
+            ammo_id = AMT_ARROW;
+            break;
+        }
+
+        item *ranged_wpn = item_new(IT_WEAPON, wpn_type);
+        inv_add(&nmonster->inv, ranged_wpn);
+        nmonster->eq_weapon = ranged_wpn;
+
+        item *ammo = item_new(IT_AMMO, ammo_id);
+        ammo->count = 5 + rand_0n(11);
+        inv_add(&nmonster->inv, ammo);
+    }
 
     /* initialize mimics */
     if (monster_flags(nmonster, MIMIC))
@@ -2288,12 +2339,109 @@ void monster_player_attack(monster *m, player *p)
     }
 }
 
+static bool monster_shoot_hit(const GList *traj,
+                              const damage_originator *damo,
+                              gpointer data1,
+                              gpointer data2)
+{
+    damage *dam = (damage *)data1;
+    item *ammo = (item *)data2;
+    position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);
+    map *mp = game_map(nlarn, Z(pos));
+
+    gchar *adesc = item_describe(ammo, player_item_known(nlarn->p, ammo),
+                                 true, true);
+    adesc[0] = g_ascii_toupper(adesc[0]);
+
+    monster *hit_m = map_get_monster_at(mp, pos);
+    if (hit_m != NULL)
+    {
+        if (monster_in_sight(hit_m))
+            log_add_entry(nlarn->log, "%s hits the %s.",
+                          adesc, monster_get_name(hit_m));
+        monster_damage_take(hit_m, damage_copy(dam));
+        g_free(adesc);
+        return true;
+    }
+
+    if (pos_identical(pos, nlarn->p->pos))
+    {
+        if (player_evade(nlarn->p))
+        {
+            if (!player_effect(nlarn->p, ET_BLINDNESS))
+                log_add_entry(nlarn->log, "%s misses you.", adesc);
+        }
+        else
+        {
+            log_add_entry(nlarn->log, "%s hits you!", adesc);
+            player_damage_take(nlarn->p, damage_copy(dam), PD_MONSTER,
+                               monster_type(damo->originator));
+        }
+        g_free(adesc);
+        return true;
+    }
+
+    g_free(adesc);
+    return false;
+}
+
 int monster_player_ranged_attack(monster *m, player *p)
 {
     g_assert(m != NULL && p != NULL);
 
     /* choose a random attack type */
     attack att = monster_attack(m, rand_1n(monster_attack_count(m) + 1));
+
+    if (att.type == ATT_SHOOT)
+    {
+        /* don't use ranged attack when adjacent; fall back to melee */
+        if (pos_adjacent(m->pos, p->pos))
+            return false;
+
+        /* find ammo in monster inventory for descriptions and trajectory colour */
+        item *ammo_item = NULL;
+        for (guint i = 0; i < inv_length(m->inv); i++)
+        {
+            item *it = inv_get(m->inv, i);
+            if (it->type == IT_AMMO) { ammo_item = it; break; }
+        }
+
+        /* no ammo available (e.g. monster received melee loadout) */
+        if (ammo_item == NULL)
+            return false;
+
+        if (!player_effect(p, ET_BLINDNESS))
+        {
+            if (ammo_item)
+            {
+                gchar *adesc = item_describe(ammo_item,
+                        player_item_known(nlarn->p, ammo_item), true, false);
+                log_add_entry(nlarn->log, "The %s shoots %s at you.",
+                              monster_get_name(m), adesc);
+                g_free(adesc);
+            }
+            else
+                log_add_entry(nlarn->log, "The %s %s you.", monster_get_name(m),
+                              monster_attack_verb[att.type]);
+        }
+
+        /* pick trajectory appearance from ammo material, or use defaults */
+        char glyph = item_glyph(IT_AMMO);
+        colour_t traj_colour = ammo_item ? item_colour(ammo_item) : WHITE;
+
+        int amount = att.base + rand_0n(monster_level(m) + 1)
+                     + game_difficulty(nlarn);
+        damage *dam = damage_new(DAM_PHYSICAL, ATT_SHOOT, amount,
+                                 DAMO_MONSTER, m);
+
+        map_trajectory(m->pos, p->pos, &(dam->dam_origin),
+                       monster_shoot_hit, dam, ammo_item, false,
+                       glyph, traj_colour, false);
+
+        damage_free(dam);
+        return true;
+    }
+
     if (att.type == ATT_GAZE && chance(att.base/3))
     {
         if (!player_effect(p, ET_BLINDNESS))
@@ -3076,6 +3224,7 @@ static bool monster_weapon_wield(monster *m)
     for (guint idx = 0; idx < inv_length_filtered(m->inv, item_filter_weapon); idx++)
     {
         item *w = inv_get_filtered(m->inv, idx, item_filter_weapon);
+        if (weapon_is_ranged(w)) continue;
         /* compare this weapon with the weapon the monster wields */
         if (!(m->eq_weapon) || weapon_damage(m->eq_weapon) < weapon_damage(w)) {
             /* FIXME: weapon effects */
