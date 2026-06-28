@@ -2685,8 +2685,28 @@ char *monster_desc(monster *m)
     else
         injury = "critically injured";
 
+    /* for fighting civilians, find the hostile target in FOV */
+    monster *fight_target = NULL;
+    if (m->action == MA_CIVILIAN && m->fv != NULL)
+    {
+        GList *visible = fov_get_visible_monsters(m->fv);
+        for (GList *iter = visible; iter != NULL; iter = iter->next)
+        {
+            monster *candidate = (monster *)iter->data;
+            if (!monster_is_friendly(candidate))
+            {
+                fight_target = candidate;
+                break;
+            }
+        }
+        g_list_free(visible);
+    }
+
+    const char *action_desc = (fight_target != NULL) ? "fighting"
+                                                      : monster_ai_desc[m->action];
+
     g_string_append_printf(desc, "%s %s, %s %s", a_an(injury), injury,
-                           monster_ai_desc[m->action], monster_get_name(m));
+                           action_desc, monster_get_name(m));
 
     if (game_wizardmode(nlarn))
     {
@@ -2705,6 +2725,11 @@ char *monster_desc(monster *m)
 
         g_string_append_printf(desc, ", armed with %s", weapon_desc);
         g_free(weapon_desc);
+    }
+
+    if (fight_target != NULL)
+    {
+        g_string_append_printf(desc, ", attacking the %s", monster_get_name(fight_target));
     }
 
     /* add effect description */
@@ -3558,6 +3583,43 @@ static position monster_move_serve(monster *m, struct player *p)
 static position monster_move_civilian(monster *m, struct player *p)
 {
     position npos = m->pos;
+
+    /* generate a FOV structure if not yet available */
+    if (!m->fv)
+        m->fv = fov_new();
+
+    fov_calculate(m->fv, monster_map(m), m->pos, 6,
+                  monster_flags(m, INFRAVISION)
+                  || monster_effect(m, ET_INFRAVISION));
+
+    /* fight the nearest visible hostile monster */
+    {
+        GList *visible = fov_get_visible_monsters(m->fv);
+        monster *target = NULL;
+        for (GList *iter = visible; iter != NULL; iter = iter->next)
+        {
+            monster *candidate = (monster *)iter->data;
+            if (!monster_is_friendly(candidate))
+            {
+                /* list is sorted by distance from self */
+                target = candidate;
+                break;
+            }
+        }
+        g_list_free(visible);
+
+        if (target != NULL)
+        {
+            if (pos_adjacent(m->pos, monster_pos(target)))
+            {
+                monster_attack_monster(m, target);
+
+                return m->pos;
+            }
+
+            return monster_find_next_pos_to(m, monster_pos(target));
+        }
+    }
 
     /* civilians will pick a random location on the map, travel and remain
        there for the number of turns that is determined by their town person

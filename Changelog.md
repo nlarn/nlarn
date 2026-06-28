@@ -5,6 +5,7 @@
 ### Changes
 
 * Implement allied monsters: finally a summoned demon will fight opponents
+* Town folks can now attack monsters lured into town
 * Allow throwing of weapons
 
 ### Fixed bugs
