@@ -3392,6 +3392,7 @@ static position monster_move_wander(monster *m, struct player *p __attribute__((
 static position monster_move_attack(monster *m, struct player *p)
 {
     position npos = monster_pos(m);
+    map *mmap = monster_map(m);
 
     /* monster is standing next to player */
     if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))
@@ -3405,13 +3406,26 @@ static position monster_move_attack(monster *m, struct player *p)
         return monster_pos(m);
     }
 
+    /* attack an adjacent friendly monster */
+    for (int dir = 1; dir < GD_MAX; dir++)
+    {
+        position adj = pos_move(monster_pos(m), dir);
+        if (!pos_valid(adj) || Z(adj) != Z(monster_pos(m))) continue;
+        monster *adj_m = map_get_monster_at(mmap, adj);
+        if (adj_m != NULL && monster_is_friendly(adj_m))
+        {
+            monster_attack_monster(m, adj_m);
+            return monster_pos(m);
+        }
+    }
+
     /* monster is standing on a map exit and the player has left the map */
     if (pos_identical(monster_pos(m), m->player_pos)
-            && map_is_exit_at(monster_map(m), monster_pos(m)))
+            && map_is_exit_at(mmap, monster_pos(m)))
     {
         int newmap;
 
-        switch (map_sobject_at(monster_map(m), monster_pos(m)))
+        switch (map_sobject_at(mmap, monster_pos(m)))
         {
         case LS_STAIRSDOWN:
         case LS_CAVERNS_ENTRY:
@@ -3442,6 +3456,34 @@ static position monster_move_attack(monster *m, struct player *p)
         monster_level_enter(m, game_map(nlarn, newmap));
 
         return monster_pos(m);
+    }
+
+    /* when the player is not currently visible, look for friendly monsters
+       to target instead */
+    if (m->lastseen != 1)
+    {
+        if (!m->fv) m->fv = fov_new();
+        fov_calculate(m->fv, mmap, m->pos, 6,
+                      monster_flags(m, INFRAVISION)
+                      || monster_effect(m, ET_INFRAVISION));
+
+        GList *visible = fov_get_visible_monsters(m->fv);
+        monster *ftarget = NULL;
+        int best_dist = G_MAXINT;
+        for (GList *iter = visible; iter != NULL; iter = iter->next)
+        {
+            monster *candidate = (monster *)iter->data;
+            if (!monster_is_friendly(candidate)) continue;
+            int dist = pos_distance(monster_pos(m), monster_pos(candidate));
+            if (dist < best_dist)
+            {
+                best_dist = dist;
+                ftarget = candidate;
+            }
+        }
+        g_list_free(visible);
+        if (ftarget != NULL)
+            return monster_find_next_pos_to(m, monster_pos(ftarget));
     }
 
     /* monster heads into the direction of the player. */
