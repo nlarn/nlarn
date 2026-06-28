@@ -3466,6 +3466,48 @@ static position monster_move_serve(monster *m, struct player *p)
     /* If a new position cannot be found, keep the current position */
     position npos = m->pos;
 
+    /* follow the player across level boundaries */
+    if (Z(monster_pos(m)) != Z(p->pos))
+    {
+        map *mmap = monster_map(m);
+
+        /* if already standing on an exit that leads toward the player's level, use it */
+        if (map_is_exit_at(mmap, monster_pos(m)))
+        {
+            int newmap;
+            switch (map_sobject_at(mmap, monster_pos(m)))
+            {
+            case LS_STAIRSDOWN:
+            case LS_CAVERNS_ENTRY:  newmap = Z(m->pos) + 1; break;
+            case LS_STAIRSUP:
+            case LS_CAVERNS_EXIT:   newmap = Z(m->pos) - 1; break;
+            case LS_ELEVATORDOWN:   newmap = MAP_CMAX + 1;  break;
+            case LS_ELEVATORUP:     newmap = 0;             break;
+            default:                newmap = Z(m->pos);     break;
+            }
+            if (abs(newmap - Z(p->pos)) < abs(Z(m->pos) - Z(p->pos)))
+            {
+                monster_level_enter(m, game_map(nlarn, newmap));
+                return monster_pos(m);
+            }
+        }
+
+        /* navigate toward the exit that leads to the player's level */
+        bool going_deeper = Z(p->pos) > Z(m->pos);
+        const sobject_t down_exits[] = { LS_STAIRSDOWN, LS_CAVERNS_ENTRY, LS_ELEVATORDOWN };
+        const sobject_t up_exits[]   = { LS_STAIRSUP, LS_CAVERNS_EXIT, LS_ELEVATORUP };
+        const sobject_t *exits = going_deeper ? down_exits : up_exits;
+
+        for (int i = 0; i < 3; i++)
+        {
+            position exit_pos = map_find_sobject(mmap, exits[i]);
+            if (pos_valid(exit_pos))
+                return monster_find_next_pos_to(m, exit_pos);
+        }
+
+        return npos;
+    }
+
     /* generate a fov structure if not yet available */
     if (!m->fv)
         m->fv = fov_new();
