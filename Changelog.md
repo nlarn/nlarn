@@ -11,6 +11,7 @@
 * Hostile monster will now attack the player's friends (i.e. charmed or
   summoned monsters and townsfolk)
 * Allow throwing of weapons
+* Some fleeing monsters will open doors and sometimes close doors behind them
 * Turn the gelatinous cube into a passive monster
 
 ### Fixed bugs

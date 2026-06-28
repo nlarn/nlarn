@@ -1783,7 +1783,24 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                 if (map_pos_validate(mmap, m_npos, monster_map_element(m), false))
                 {
                     /* the new position is valid -> reposition the monster */
+                    position old_pos = monster_pos(m);
                     monster_pos_set(m, mmap, m_npos);
+
+                    /* a fleeing monster with hands and sufficient intelligence
+                       may close the open door it just stepped away from */
+                    if (m->action == MA_FLEE
+                            && monster_flags(m, HANDS)
+                            && monster_int(m) > 6
+                            && !monster_effect_get(m, ET_CONFUSION)
+                            && map_sobject_at(mmap, old_pos) == LS_OPENDOOR
+                            && pos_distance(monster_pos(m), g->p->pos) > 4)
+                    {
+                        map_sobject_set(mmap, old_pos, LS_CLOSEDDOOR);
+
+                        if (monster_in_sight(m))
+                            log_add_entry(g->log, "The %s closes the door.",
+                                          monster_get_name(m));
+                    }
                 }
                 else
                 {
@@ -3505,6 +3522,8 @@ static position monster_move_flee(monster *m, struct player *p)
 {
     int dist = 0;
     position npos = monster_pos(m);
+    map *mmap = monster_map(m);
+    bool can_use_doors = monster_flags(m, HANDS) && monster_int(m) > 6;
 
     for (int tries = 1; tries < GD_MAX; tries++)
     {
@@ -3515,8 +3534,16 @@ static position monster_move_flee(monster *m, struct player *p)
 
         position npos_tmp = pos_move(monster_pos(m), tries);
 
-        if (map_pos_validate(monster_map(m), npos_tmp, monster_map_element(m),
-                             false)
+        bool is_valid = map_pos_validate(mmap, npos_tmp, monster_map_element(m),
+                                         false);
+        /* smart monsters with hands may flee through a closed door */
+        bool is_openable_door = !is_valid
+            && can_use_doors
+            && pos_valid(npos_tmp)
+            && Z(npos_tmp) == Z(m->pos)
+            && map_sobject_at(mmap, npos_tmp) == LS_CLOSEDDOOR;
+
+        if ((is_valid || is_openable_door)
                 && pos_distance(p->pos, npos_tmp) > dist)
         {
             /* distance is bigger than current distance */
