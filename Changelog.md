@@ -12,7 +12,9 @@
 * Hostile monster will now attack the player's friends (i.e. charmed or
   summoned monsters and townsfolk)
 * Allow throwing of weapons
-* Fireball will now explode when it hits something on its way to the target
+* Cone of cold behaves like fireball
+* Blast spells (fireball and now also cone of cold) will now explode when they
+  hit something on its way to the target
 * Some fleeing monsters will open doors and sometimes close doors behind them
 * Turn the gelatinous cube into a passive monster
 

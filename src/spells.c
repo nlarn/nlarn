@@ -152,7 +152,7 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_CLD, "cld", "cone of cold",
-        SC_RAY, DAM_COLD, ET_NONE, spell_type_ray,
+        SC_BLAST, DAM_COLD, ET_NONE, spell_type_blast,
         "Sends forth a cone of cold which freezes what it touches",
         "The cone of cold strikes the %s.",
         NULL,
@@ -1009,8 +1009,8 @@ static bool spell_type_blast(spell *s, struct player *p)
 
     switch (s->id)
     {
-        /* currently there is only the fireball */
     case SP_BAL:
+    case SP_CLD:
     default:
         radius = 2;
         amount = (3 + rand_1n(15)) * s->knowledge + p->level;
