@@ -782,7 +782,7 @@ static bool spell_type_point(spell *s, struct player *p)
         // life forms not based on water are immune against this spell
         if (!(monster_flags(m, DEMON) || monster_flags(m, UNDEAD) || monster_flags(m, SPIRIT)))
         {
-            amount = (40 * s->knowledge) + p->level;
+            amount = (guint)(40 * (1 + 0.2 * (s->knowledge - 1))) + p->level;
             spell_print_success_message(s, m);
             monster_damage_take(m,
                     damage_new(DAM_MAGICAL, ATT_MAGIC, amount, DAMO_PLAYER, p));

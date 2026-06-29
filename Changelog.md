@@ -21,6 +21,7 @@
 ### Fixed bugs
 
 * Cold resistance was extremely unbalanced
+* Dehydration was very unbalanced
 * Take player's position into account when generating paths for friendlies
 
 
