@@ -926,7 +926,7 @@ static bool spell_type_ray(spell *s, struct player *p)
     switch (s->id)
     {
     case SP_MLE:
-        dam->amount = (1 + rand_1n(5)) * s->knowledge + p->level;
+        dam->amount = (1 + rand_1n(4)) * s->knowledge + p->level;
         break;
 
     case SP_SSP:

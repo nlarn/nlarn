@@ -27,6 +27,7 @@
 * Polymorph was thoroughly unbalanced
 * Dehydration was very unbalanced
 * Magic fire was quite unbalanced
+* Magic missile was slightly unbalanced
 * Take player's position into account when generating paths for friendlies
 
 
