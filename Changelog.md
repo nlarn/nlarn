@@ -17,6 +17,7 @@
 
 ### Fixed bugs
 
+* Cold resistance was extremely unbalanced
 * Take player's position into account when generating paths for friendlies
 
 

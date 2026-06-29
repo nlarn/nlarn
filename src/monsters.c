@@ -2557,11 +2557,17 @@ monster *monster_damage_take(monster *m, damage *dam)
     case DAM_COLD:
         if (monster_flags(m, RES_COLD))
         {
-            dam->amount = 0;
+            /*
+             * The monster's cold resistance reduces the damage taken
+             * by 10% per monster level
+             */
+            dam->amount -= (guint)(((float)dam->amount / 100) *
+                 /* prevent uint wrap around for monsters with level > 10 */
+                 (min(monster_level(m), 10) * 10));
             if (monster_in_sight(m))
             {
-                log_add_entry(nlarn->log, "The %s loves the cold!",
-                        monster_get_name(m));
+               log_add_entry(nlarn->log, "The %s %s the cold.",
+                    monster_get_name(m), dam->amount > 0 ? "partly resists" : "loves");
             }
         }
         break;
