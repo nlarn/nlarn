@@ -12,6 +12,7 @@
 * Hostile monster will now attack the player's friends (i.e. charmed or
   summoned monsters and townsfolk)
 * Allow throwing of weapons
+* Track godly goodwill (modified by player's behavior on altars)
 * Cone of cold behaves like fireball
 * Blast spells (fireball and now also cone of cold) will now explode when they
   hit something on its way to the target

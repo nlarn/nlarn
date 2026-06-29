@@ -119,6 +119,8 @@ typedef struct player
     guint bank_ieslvtb; /* The interest earned since last visiting the bank */
     guint outstanding_taxes;
 
+    gint godly_goodwill; /* divine favor: positive = pleased, negative = angry */
+
     guint experience; /* experience points */
     guint level; /* current experience level */
 

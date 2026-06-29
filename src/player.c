@@ -145,6 +145,9 @@ player *player_new()
 
     p->level = p->stats.max_level = 1;
 
+    /* initialize godly goodwill to 0 (neutral) */
+    p->godly_goodwill = 0;
+
     /* set the player's default speed */
     p->speed = NORMAL;
 
@@ -359,6 +362,7 @@ cJSON *player_serialize(player *p)
     cJSON_AddNumberToObject(pser, "bank_account", p->bank_account);
     cJSON_AddNumberToObject(pser, "bank_ieslvtb", p->bank_ieslvtb);
     cJSON_AddNumberToObject(pser, "outstanding_taxes", p->outstanding_taxes);
+    cJSON_AddNumberToObject(pser, "godly_goodwill", p->godly_goodwill);
 
     cJSON_AddNumberToObject(pser, "experience", p->experience);
     cJSON_AddNumberToObject(pser, "level", p->level);
@@ -580,6 +584,10 @@ player *player_deserialize(cJSON *pser)
     p->bank_account = cJSON_GetObjectItem(pser, "bank_account")->valueint;
     p->bank_ieslvtb = cJSON_GetObjectItem(pser, "bank_ieslvtb")->valueint;
     p->outstanding_taxes = cJSON_GetObjectItem(pser, "outstanding_taxes")->valueint;
+
+    /* godly_goodwill - with backwards compatibility (defaults to 0 if not present) */
+    cJSON *godly_obj = cJSON_GetObjectItem(pser, "godly_goodwill");
+    p->godly_goodwill = godly_obj != NULL ? godly_obj->valueint : 0;
 
     p->experience = cJSON_GetObjectItem(pser, "experience")->valueint;
     p->level = cJSON_GetObjectItem(pser, "level")->valueint;

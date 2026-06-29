@@ -1,6 +1,6 @@
 /*
  * sobjects.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -79,6 +79,10 @@ int player_altar_desecrate(player *p)
 
     log_add_entry(nlarn->log, "You try to desecrate the altar.");
 
+    /* Decrease godly goodwill significantly for desecration */
+    p->godly_goodwill -= 50;
+    log_add_entry(nlarn->log, "Your god is displeased!");
+
     if (chance(60))
     {
         /* try to find a space for the monster near the altar */
@@ -100,6 +104,10 @@ int player_altar_desecrate(player *p)
         /* destroy altar */
         log_add_entry(nlarn->log, "The altar crumbles into a pile of dust before your eyes.");
         map_sobject_set(current, p->pos, LS_NONE);
+
+        /* Additional penalty for destroying the altar */
+        p->godly_goodwill -= 100;
+        log_add_entry(nlarn->log, "Your god is very displeased!");
     }
     else
     {
@@ -162,16 +170,24 @@ int player_altar_pray(player *p)
     }
     p->stats.gold_spent_donation += donation;
 
+    /* Increase godly goodwill based on donation amount */
+    /* Small donations: +1 per 10 gold, large donations: +1 per 5 gold (capped) */
+    int goodwill_increase = donation / (donation > 100 ? 5 : 10);
+    p->godly_goodwill += goodwill_increase;
+
     log_add_entry(nlarn->log, "You donate %d gold at the altar and pray.",
                   donation);
 
+    log_add_entry(nlarn->log, "Thank you!");
+
+    if (p->godly_goodwill > 0) {
+        log_add_entry(nlarn->log, "Your god is pleased with you!", goodwill_increase);
+    } else {
+    log_add_entry(nlarn->log, "The gods are displeased with you.");
+    }
+
     // The higher the donation, the more likely is a favourable outcome.
     const int event = min(8, rand_0n(donation/50));
-
-    if (event > 0)
-        log_add_entry(nlarn->log, "Thank you!");
-    else
-        log_add_entry(nlarn->log, "The gods are displeased with you.");
 
     int afflictions = 0;
     bool cured_affliction = false;
@@ -287,7 +303,7 @@ int player_altar_pray(player *p)
         }
         // intentional fall through
     case 1:
-        log_add_entry(nlarn->log, "Nothing seems to have happened.");
+        log_add_entry(nlarn->log, "Otherwise, nothing seems to have happened.");
         break;
     case 0:
         {
