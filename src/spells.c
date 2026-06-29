@@ -1,6 +1,6 @@
 /*
  * spells.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -374,6 +374,11 @@ static void spell_print_success_message(spell *s, monster *m);
 static void spell_print_failure_message(spell *s, monster *m);
 static int count_adjacent_water_squares(position pos);
 static int try_drying_ground(position pos);
+
+/* no-op trajectory callback: lets the projectile reach the target undisturbed */
+static bool spell_blast_traj_pos_hit(const GList *traj,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2);
 
 /* simple wrapper for spell_area_pos_hit() */
 static bool spell_traj_pos_hit(const GList *traj,
@@ -1038,9 +1043,14 @@ static bool spell_type_blast(spell *s, struct player *p)
         return false;
     }
 
+    /* shoot the projectile; blast_pos tracks where it actually lands */
+    position blast_pos = pos;
+    map_trajectory(p->pos, pos, &damo, spell_blast_traj_pos_hit,
+                   &blast_pos, NULL, false, '*', spell_colour(s), false);
+
     damage *dam = damage_new(spells[s->id].damage_type, ATT_MAGIC,
                              amount, DAMO_PLAYER, p);
-    area_blast(pos, radius, &damo, spell_area_pos_hit, s, dam, '*', spell_colour(s));
+    area_blast(blast_pos, radius, &damo, spell_area_pos_hit, s, dam, '*', spell_colour(s));
 
     /* destroy the damage as the callbacks deliver a copy */
     damage_free(dam);
@@ -1622,6 +1632,32 @@ static int try_drying_ground(position pos)
         log_add_entry(nlarn->log, "The water evaporates!");
         return true;
     }
+    return false;
+}
+
+static bool spell_blast_traj_pos_hit(const GList *traj,
+        const damage_originator *damo __attribute__((unused)),
+        gpointer data1,
+        gpointer data2 __attribute__((unused)))
+{
+    position pos;
+    pos_val(pos) = GPOINTER_TO_UINT(traj->data);
+
+    map *cmap = game_map(nlarn, Z(pos));
+
+    /* stop at walls without updating the blast position,
+       so the explosion lands in the last open tile */
+    if (map_tiletype_at(cmap, pos) == LT_WALL)
+        return true;
+
+    /* advance the blast centre to this open tile */
+    *(position *)data1 = pos;
+
+    /* stop at medium-or-larger monsters, as they block the projectile */
+    monster *m = map_get_monster_at(cmap, pos);
+    if (m != NULL && monster_size(m) >= MEDIUM)
+        return true;
+
     return false;
 }
 
