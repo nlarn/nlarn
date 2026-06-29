@@ -849,7 +849,11 @@ static bool spell_type_point(spell *s, struct player *p)
         }
         else
         {
-            monster_polymorph(m);
+            int max_level = max(1, monster_level(m) - (3 - (int)s->knowledge));
+            if (monster_in_sight(m))
+                log_add_entry(nlarn->log, "The %s shudders and transforms!",
+                              monster_name(m));
+            monster_polymorph(m, max_level);
         }
         break;
 

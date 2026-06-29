@@ -1903,7 +1903,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     if (m->lastseen) m->lastseen++;
 }
 
-void monster_polymorph(monster *m)
+void monster_polymorph(monster *m, int max_level)
 {
     g_assert (m != NULL);
 
@@ -1918,7 +1918,8 @@ void monster_polymorph(monster *m)
     {
         m->type = rand_1n(MT_DEMON_PRINCE);
     }
-    while (monster_is_genocided(m->type));
+    while (monster_is_genocided(m->type)
+           || monster_data[m->type].level > max_level);
 
     /* if the new monster can't survive in this terrain, kill it */
     const map_element_t new_elem = monster_map_element(m);

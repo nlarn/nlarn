@@ -210,7 +210,7 @@ void monster_die(monster *m, struct player *p);
 void monster_level_enter(monster *m, struct map *l);
 void monster_move(gpointer *oid, monster *m, struct game *g);
 
-void monster_polymorph(monster *m);
+void monster_polymorph(monster *m, int max_level);
 
 /**
  * check stash at monster's position for something desired
