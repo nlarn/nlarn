@@ -814,9 +814,26 @@ static bool spell_type_point(spell *s, struct player *p)
         if (!(monster_flags(m, SPIRIT) || monster_flags(m, UNDEAD))
                 && (player_get_wis(p) + s->knowledge) > (guint)rand_m_n(10, roll))
         {
+            /* Base damage: 75 with knowledge scaling (same formula as SP_DRY) */
+            /* Bonus damage based on godly goodwill: +10 per point */
+            int damage_amount = (int)(75 * (1 + 0.2 * (s->knowledge - 1))) + (p->godly_goodwill * 10);
+
+            /* Ensure minimum damage to prevent negative values */
+            if (damage_amount < 1) damage_amount = 1;
+
+            /* If gods are angry (negative goodwill), risk backlash */
+            if (p->godly_goodwill < 0 && chance(-p->godly_goodwill))
+            {
+                /* Backlash: player takes damage instead */
+                log_add_entry(nlarn->log, "The gods are angry! The spell backfires!");
+                player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC,
+                            damage_amount, DAMO_PLAYER, NULL), PD_SPELL, SP_FGR);
+                break;
+            }
+
             spell_print_success_message(s, m);
             monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC,
-                        2000, DAMO_PLAYER, p));
+                        damage_amount, DAMO_PLAYER, p));
         }
         else
             spell_print_failure_message(s, m);
