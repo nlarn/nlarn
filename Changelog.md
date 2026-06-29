@@ -17,6 +17,7 @@
 * Blast spells (fireball and now also cone of cold) will now explode when they
   hit something on its way to the target
 * Some fleeing monsters will open doors and sometimes close doors behind them
+* Modify Sonic Spear damage and take enemy's size into account
 * Turn the gelatinous cube into a passive monster
 
 ### Fixed bugs

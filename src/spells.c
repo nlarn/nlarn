@@ -926,7 +926,7 @@ static bool spell_type_ray(spell *s, struct player *p)
         break;
 
     case SP_SSP:
-        dam->amount = (2 + rand_1n(10)) * s->knowledge + p->level;
+        dam->amount = (rand_1n(8) + rand_1n(8) + rand_1n(8)) * s->knowledge + 2 * p->level;
         break;
 
     case SP_CLD:
@@ -1749,7 +1749,10 @@ static bool spell_area_pos_hit(position pos,
         if (iet > IET_NONE)
             inv_erode(monster_inv(m), iet, false, NULL);
 
-        monster_damage_take(m, damage_copy(dam));
+        damage *mon_dam = damage_copy(dam);
+        if (sp->id == SP_SSP)
+            mon_dam->amount = mon_dam->amount * monster_size(m) / MEDIUM;
+        monster_damage_take(m, mon_dam);
 
         /*
          * If the monster is at least of human size, the spell stops at
