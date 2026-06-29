@@ -12,11 +12,22 @@
 * Hostile monster will now attack the player's friends (i.e. charmed or
   summoned monsters and townsfolk)
 * Allow throwing of weapons
+* Track godly goodwill (modified by player's behavior on altars)
+* Cone of cold behaves like fireball
+* Blast spells (fireball and now also cone of cold) will now explode when they
+  hit something on its way to the target
 * Some fleeing monsters will open doors and sometimes close doors behind them
+* Modify Sonic Spear damage and take enemy's size into account
 * Turn the gelatinous cube into a passive monster
 
 ### Fixed bugs
 
+* Finger of death was utterly unbalanced
+* Cold resistance was extremely unbalanced
+* Polymorph was thoroughly unbalanced
+* Dehydration was very unbalanced
+* Magic fire was quite unbalanced
+* Magic missile was slightly unbalanced
 * Take player's position into account when generating paths for friendlies
 
 

@@ -1903,7 +1903,7 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
     if (m->lastseen) m->lastseen++;
 }
 
-void monster_polymorph(monster *m)
+void monster_polymorph(monster *m, int max_level)
 {
     g_assert (m != NULL);
 
@@ -1918,7 +1918,8 @@ void monster_polymorph(monster *m)
     {
         m->type = rand_1n(MT_DEMON_PRINCE);
     }
-    while (monster_is_genocided(m->type));
+    while (monster_is_genocided(m->type)
+           || monster_data[m->type].level > max_level);
 
     /* if the new monster can't survive in this terrain, kill it */
     const map_element_t new_elem = monster_map_element(m);
@@ -2557,11 +2558,17 @@ monster *monster_damage_take(monster *m, damage *dam)
     case DAM_COLD:
         if (monster_flags(m, RES_COLD))
         {
-            dam->amount = 0;
+            /*
+             * The monster's cold resistance reduces the damage taken
+             * by 10% per monster level
+             */
+            dam->amount -= (guint)(((float)dam->amount / 100) *
+                 /* prevent uint wrap around for monsters with level > 10 */
+                 (min(monster_level(m), 10) * 10));
             if (monster_in_sight(m))
             {
-                log_add_entry(nlarn->log, "The %s loves the cold!",
-                        monster_get_name(m));
+               log_add_entry(nlarn->log, "The %s %s the cold.",
+                    monster_get_name(m), dam->amount > 0 ? "partly resists" : "loves");
             }
         }
         break;

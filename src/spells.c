@@ -1,6 +1,6 @@
 /*
  * spells.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -152,7 +152,7 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_CLD, "cld", "cone of cold",
-        SC_RAY, DAM_COLD, ET_NONE, spell_type_ray,
+        SC_BLAST, DAM_COLD, ET_NONE, spell_type_blast,
         "Sends forth a cone of cold which freezes what it touches",
         "The cone of cold strikes the %s.",
         NULL,
@@ -374,6 +374,11 @@ static void spell_print_success_message(spell *s, monster *m);
 static void spell_print_failure_message(spell *s, monster *m);
 static int count_adjacent_water_squares(position pos);
 static int try_drying_ground(position pos);
+
+/* no-op trajectory callback: lets the projectile reach the target undisturbed */
+static bool spell_blast_traj_pos_hit(const GList *traj,
+        const damage_originator *damo,
+        gpointer data1, gpointer data2);
 
 /* simple wrapper for spell_area_pos_hit() */
 static bool spell_traj_pos_hit(const GList *traj,
@@ -777,7 +782,7 @@ static bool spell_type_point(spell *s, struct player *p)
         // life forms not based on water are immune against this spell
         if (!(monster_flags(m, DEMON) || monster_flags(m, UNDEAD) || monster_flags(m, SPIRIT)))
         {
-            amount = (40 * s->knowledge) + p->level;
+            amount = (guint)(40 * (1 + 0.2 * (s->knowledge - 1))) + p->level;
             spell_print_success_message(s, m);
             monster_damage_take(m,
                     damage_new(DAM_MAGICAL, ATT_MAGIC, amount, DAMO_PLAYER, p));
@@ -809,9 +814,26 @@ static bool spell_type_point(spell *s, struct player *p)
         if (!(monster_flags(m, SPIRIT) || monster_flags(m, UNDEAD))
                 && (player_get_wis(p) + s->knowledge) > (guint)rand_m_n(10, roll))
         {
+            /* Base damage: 75 with knowledge scaling (same formula as SP_DRY) */
+            /* Bonus damage based on godly goodwill: +10 per point */
+            int damage_amount = (int)(75 * (1 + 0.2 * (s->knowledge - 1))) + (p->godly_goodwill * 10);
+
+            /* Ensure minimum damage to prevent negative values */
+            if (damage_amount < 1) damage_amount = 1;
+
+            /* If gods are angry (negative goodwill), risk backlash */
+            if (p->godly_goodwill < 0 && chance(-p->godly_goodwill))
+            {
+                /* Backlash: player takes damage instead */
+                log_add_entry(nlarn->log, "The gods are angry! The spell backfires!");
+                player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC,
+                            damage_amount, DAMO_PLAYER, NULL), PD_SPELL, SP_FGR);
+                break;
+            }
+
             spell_print_success_message(s, m);
             monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC,
-                        2000, DAMO_PLAYER, p));
+                        damage_amount, DAMO_PLAYER, p));
         }
         else
             spell_print_failure_message(s, m);
@@ -827,7 +849,11 @@ static bool spell_type_point(spell *s, struct player *p)
         }
         else
         {
-            monster_polymorph(m);
+            int max_level = max(1, monster_level(m) - (3 - (int)s->knowledge));
+            if (monster_in_sight(m))
+                log_add_entry(nlarn->log, "The %s shudders and transforms!",
+                              monster_name(m));
+            monster_polymorph(m, max_level);
         }
         break;
 
@@ -900,11 +926,11 @@ static bool spell_type_ray(spell *s, struct player *p)
     switch (s->id)
     {
     case SP_MLE:
-        dam->amount = (1 + rand_1n(5)) * s->knowledge + p->level;
+        dam->amount = (1 + rand_1n(4)) * s->knowledge + p->level;
         break;
 
     case SP_SSP:
-        dam->amount = (2 + rand_1n(10)) * s->knowledge + p->level;
+        dam->amount = (rand_1n(8) + rand_1n(8) + rand_1n(8)) * s->knowledge + 2 * p->level;
         break;
 
     case SP_CLD:
@@ -966,7 +992,7 @@ static bool spell_type_flood(spell *s, struct player *p)
     case SP_MFI:
         radius = 4;
         type = LT_FIRE;
-        amount = (15 * s->knowledge) + p->level;
+        amount = (20 * s->knowledge) + p->level;
         break;
 
     default:
@@ -1004,8 +1030,8 @@ static bool spell_type_blast(spell *s, struct player *p)
 
     switch (s->id)
     {
-        /* currently there is only the fireball */
     case SP_BAL:
+    case SP_CLD:
     default:
         radius = 2;
         amount = (3 + rand_1n(15)) * s->knowledge + p->level;
@@ -1038,9 +1064,14 @@ static bool spell_type_blast(spell *s, struct player *p)
         return false;
     }
 
+    /* shoot the projectile; blast_pos tracks where it actually lands */
+    position blast_pos = pos;
+    map_trajectory(p->pos, pos, &damo, spell_blast_traj_pos_hit,
+                   &blast_pos, NULL, false, '*', spell_colour(s), false);
+
     damage *dam = damage_new(spells[s->id].damage_type, ATT_MAGIC,
                              amount, DAMO_PLAYER, p);
-    area_blast(pos, radius, &damo, spell_area_pos_hit, s, dam, '*', spell_colour(s));
+    area_blast(blast_pos, radius, &damo, spell_area_pos_hit, s, dam, '*', spell_colour(s));
 
     /* destroy the damage as the callbacks deliver a copy */
     damage_free(dam);
@@ -1625,6 +1656,32 @@ static int try_drying_ground(position pos)
     return false;
 }
 
+static bool spell_blast_traj_pos_hit(const GList *traj,
+        const damage_originator *damo __attribute__((unused)),
+        gpointer data1,
+        gpointer data2 __attribute__((unused)))
+{
+    position pos;
+    pos_val(pos) = GPOINTER_TO_UINT(traj->data);
+
+    map *cmap = game_map(nlarn, Z(pos));
+
+    /* stop at walls without updating the blast position,
+       so the explosion lands in the last open tile */
+    if (map_tiletype_at(cmap, pos) == LT_WALL)
+        return true;
+
+    /* advance the blast centre to this open tile */
+    *(position *)data1 = pos;
+
+    /* stop at medium-or-larger monsters, as they block the projectile */
+    monster *m = map_get_monster_at(cmap, pos);
+    if (m != NULL && monster_size(m) >= MEDIUM)
+        return true;
+
+    return false;
+}
+
 static bool spell_traj_pos_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2)
@@ -1696,7 +1753,10 @@ static bool spell_area_pos_hit(position pos,
         if (iet > IET_NONE)
             inv_erode(monster_inv(m), iet, false, NULL);
 
-        monster_damage_take(m, damage_copy(dam));
+        damage *mon_dam = damage_copy(dam);
+        if (sp->id == SP_SSP)
+            mon_dam->amount = mon_dam->amount * monster_size(m) / MEDIUM;
+        monster_damage_take(m, mon_dam);
 
         /*
          * If the monster is at least of human size, the spell stops at
