@@ -25,6 +25,7 @@
 * Finger of death was utterly unbalanced
 * Cold resistance was extremely unbalanced
 * Dehydration was very unbalanced
+* Magic fire was quite unbalanced
 * Take player's position into account when generating paths for friendlies
 
 

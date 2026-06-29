@@ -988,7 +988,7 @@ static bool spell_type_flood(spell *s, struct player *p)
     case SP_MFI:
         radius = 4;
         type = LT_FIRE;
-        amount = (15 * s->knowledge) + p->level;
+        amount = (20 * s->knowledge) + p->level;
         break;
 
     default:
