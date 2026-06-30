@@ -31,6 +31,7 @@
 * Magic fire was quite unbalanced
 * Magic missile was slightly unbalanced
 * Take player's position into account when generating paths for friendlies
+* Decrease the probability of obtainable books being generated
 
 
 ## Release 0.7.9 (2026-06-27)
