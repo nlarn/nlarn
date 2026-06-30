@@ -14,9 +14,11 @@
 * Allow throwing of weapons
 * Track godly goodwill (modified by player's behavior on altars)
 * Cone of cold behaves like fireball
-* Blast spells (fireball and now also cone of cold) will now explode when they
-  hit something on its way to the target
+* Blast spells (fireball and now also cone of cold) will now explode
+  when they hit something on their way to the target
 * Some fleeing monsters will open doors and sometimes close doors behind them
+* Redesign "Drain Life": affects multiple monsters in range and is
+  backed by godly goodwill
 * Modify Sonic Spear damage and take enemy's size into account
 * Turn the gelatinous cube into a passive monster
 
