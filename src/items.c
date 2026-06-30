@@ -324,7 +324,13 @@ item *item_new_by_level(item_t item_type, int num_level)
     if (id_max > (int)item_max_id(item_type)) id_max = item_max_id(item_type);
 
     /* create the item */
-    item *nitem = item_new(item_type, rand_m_n(id_min, id_max));
+    int item_id = rand_m_n(id_min, id_max);
+
+    /* 66% chance to reroll shop-obtainable books so rarer spells appear more often */
+    if (item_type == IT_BOOK && book_type_obtainable(item_id) && chance(66))
+        item_id = rand_m_n(id_min, id_max);
+
+    item *nitem = item_new(item_type, item_id);
 
     return item_new_finetouch(nitem);
 }
