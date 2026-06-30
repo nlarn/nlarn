@@ -22,7 +22,7 @@ jobs:
           - config=release SDLPDCURSES=Y
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Update apt cache
         run: sudo apt update
       - name: Install dependencies
@@ -33,7 +33,7 @@ jobs:
       - name: Build ${{ matrix.configuration }}
         run: make ${{ matrix.configuration }} dist
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         # unless the game is rock-solid deliver the debug build
         if: github.ref_type == 'tag' && matrix.c_compiler == 'gcc' && matrix.configuration == 'config=debug'
         with:
@@ -51,7 +51,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: Install pandoc
-        uses: crazy-max/ghaction-chocolatey@v3
+        uses: crazy-max/ghaction-chocolatey@v4
         with:
           args: install pandoc
       - uses: msys2/setup-msys2@v2
@@ -71,11 +71,11 @@ jobs:
             mingw-w64-ucrt-x86_64-SDL2
             mingw-w64-ucrt-x86_64-SDL2_ttf
             mingw-w64-ucrt-x86_64-zlib
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build ${{ matrix.configuration }}
         run: make SDLPDCURSES=Y ${{ matrix.configuration }} dist
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         # unless the game is rock-solid deliver the debug build
         if: github.ref_type == 'tag' && matrix.configuration == 'config=debug'
         with:
@@ -96,7 +96,7 @@ jobs:
     env:
       PKG_CONFIG_PATH: /opt/homebrew/opt/ncurses/lib/pkgconfig
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Update brew cache
         run: brew update
       - name: Install dependencies
@@ -104,7 +104,7 @@ jobs:
       - name: Build ${{ matrix.configuration }}
         run: make ${{ matrix.configuration }} dist
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         # unless the game is rock-solid deliver the debug build
         if: github.ref_type == 'tag' && matrix.configuration == 'config=debug SDLPDCURSES=Y'
         with:
