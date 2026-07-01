@@ -2399,6 +2399,10 @@ int monster_player_ranged_attack(monster *m, player *p)
         if (pos_adjacent(m->pos, p->pos))
             return false;
 
+        /* don't shoot beyond visual range */
+        if (pos_distance(m->pos, p->pos) > m->visrange)
+            return false;
+
         /* find ammo in monster inventory for descriptions and trajectory colour */
         item *ammo_item = NULL;
         for (guint i = 0; i < inv_length(m->inv); i++)
@@ -3553,10 +3557,70 @@ static position monster_move_wander(monster *m, struct player *p __attribute__((
     return npos;
 }
 
+/* Returns true when m is set up to shoot at p and has a clear line of fire.
+   "Set up" means: ranged weapon equipped, ammo in inventory, player visible
+   and not adjacent.  "Clear" means no other monster lies on the ray between
+   m and p that would intercept the shot. */
+static bool monster_has_clear_shot(monster *m, player *p)
+{
+    if (m->eq_weapon == NULL || !weapon_is_ranged(m->eq_weapon))
+        return false;
+
+    if (m->lastseen != 1 || pos_adjacent(monster_pos(m), m->player_pos))
+        return false;
+
+    /* ammo check */
+    bool has_ammo = false;
+    for (guint i = 0; i < inv_length(m->inv); i++)
+    {
+        if (inv_get(m->inv, i)->type == IT_AMMO) { has_ammo = true; break; }
+    }
+    if (!has_ammo)
+        return false;
+
+    /* check that no monster stands on the line between m and p */
+    map *mmap = monster_map(m);
+    GList *ray = map_ray(mmap, monster_pos(m), p->pos);
+    if (!ray)
+        return false;
+
+    bool clear = true;
+    /* skip source (first element) and target (last element) */
+    for (GList *iter = ray->next; iter != NULL && iter->next != NULL; iter = iter->next)
+    {
+        position pos;
+        pos_val(pos) = GPOINTER_TO_UINT(iter->data);
+        if (map_get_monster_at(mmap, pos) != NULL)
+        {
+            clear = false;
+            break;
+        }
+    }
+    g_list_free(ray);
+    return clear;
+}
+
 static position monster_move_attack(monster *m, struct player *p)
 {
     position npos = monster_pos(m);
     map *mmap = monster_map(m);
+
+    /* ranged-weapon monsters retreat when the player gets within melee range;
+       when already adjacent, only flee if faster than the player — otherwise
+       there is no escape and melee is the only sensible option */
+    if (m->eq_weapon != NULL && weapon_is_ranged(m->eq_weapon)
+            && m->lastseen == 1
+            && pos_distance(monster_pos(m), m->player_pos) < 3
+            && (!pos_adjacent(monster_pos(m), m->player_pos)
+                || monster_speed(m) > player_get_speed(p)))
+    {
+        return monster_move_flee(m, p);
+    }
+
+    /* ranged monster with ammo and clear LOS: hold position and let the
+       next round's ranged-attack attempt do the shooting */
+    if (monster_has_clear_shot(m, p))
+        return monster_pos(m);
 
     /* monster is standing next to player */
     if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))

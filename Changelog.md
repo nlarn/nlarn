@@ -4,7 +4,8 @@
 
 ### Changes
 
-* Some monsters gained the ability to use ranged weapons
+* Some monsters gained the ability to use ranged weapons and will try to
+  maintain distance to the player while a ranged weapon is available
 * Implement allied monsters: finally a summoned demon will fight opponents
 * Town folks can now attack monsters lured into town
 * Town folk will pick up weapons dropped by the play to fight monsters and
