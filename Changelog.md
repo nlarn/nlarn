@@ -33,6 +33,7 @@
 * Magic fire was quite unbalanced
 * Magic missile was slightly unbalanced
 * Take player's position into account when generating paths for friendlies
+* Don't show projectiles outside player's FOV
 * Decrease the probability of obtainable books being generated
 
 
