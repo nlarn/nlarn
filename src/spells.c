@@ -1752,6 +1752,10 @@ static bool spell_blast_traj_pos_hit(const GList *traj,
     /* advance the blast centre to this open tile */
     *(position *)data1 = pos;
 
+    /* statues block the projectile; the blast is centred on the statue tile */
+    if (map_sobject_at(cmap, pos) == LS_STATUE)
+        return true;
+
     /* stop at medium-or-larger monsters, as they block the projectile */
     monster *m = map_get_monster_at(cmap, pos);
     if (m != NULL && monster_size(m) >= MEDIUM)
@@ -1806,10 +1810,9 @@ static bool spell_area_pos_hit(position pos,
         }
 
         if (mst == LS_STATUE
-            && (sp->id == SP_BAL || sp->id == SP_LIT)
-            && chance(min(0, 100 - (game_difficulty(nlarn) * 10))))
+                && game_difficulty(nlarn) < 3
+                && dam->amount >= 45)
         {
-        /* fireball and lightning destroy statues up to diff. level 10 */
             sobject_destroy_at(damo->originator, cmap, pos);
             terminated = true;
         }
