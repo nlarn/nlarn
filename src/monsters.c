@@ -2056,9 +2056,12 @@ int monster_items_pickup(monster *m)
             }
 
             inv_del_element(tinv, it);
-            inv_add(&m->inv, it);
-            // flag the item as picked up to ensure we drop it on death
+            /* Flag the item as picked up to ensure we drop it on death.
+               Set before inv_add: stackable items may be merged into an
+               existing stack and destroyed inside inv_add, so accessing
+               'it' afterwards would be a use-after-free. */
             it->picked_up = true;
+            inv_add(&m->inv, it);
 
             /* finish this turn after picking up an item */
             return true;
