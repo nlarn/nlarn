@@ -744,15 +744,18 @@ bool map_trajectory(position source, position target,
             return result;
         }
 
-        /* show the position of the ray*/
+        /* show the position of the ray only when visible to the player */
         /* FIXME: move curses functions to display.c */
-        (void)mvaddch(Y(cursor), X(cursor), glyph | COLOR_PAIR(fg));
-        display_draw();
+        if (fov_get(nlarn->p->fv, cursor))
+        {
+            (void)mvaddch(Y(cursor), X(cursor), glyph | COLOR_PAIR(fg));
+            display_draw();
 
-        /* sleep a while to show the ray's position */
-        napms(100);
-        /* repaint the screen unless requested otherwise */
-        if (!keep_ray) display_paint_screen(nlarn->p);
+            /* sleep a while to show the ray's position */
+            napms(100);
+            /* repaint the screen unless requested otherwise */
+            if (!keep_ray) display_paint_screen(nlarn->p);
+        }
     }
     while ((iter = iter->next));
 

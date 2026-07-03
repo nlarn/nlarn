@@ -4,7 +4,8 @@
 
 ### Changes
 
-* Some monsters gained the ability to use ranged weapons
+* Some monsters gained the ability to use ranged weapons and will try to
+  maintain distance to the player while a ranged weapon is available
 * Implement allied monsters: finally a summoned demon will fight opponents
 * Town folks can now attack monsters lured into town
 * Town folk will pick up weapons dropped by the play to fight monsters and
@@ -14,11 +15,14 @@
 * Allow throwing of weapons
 * Track godly goodwill (modified by player's behavior on altars)
 * Cone of cold behaves like fireball
-* Blast spells (fireball and now also cone of cold) will now explode when they
-  hit something on its way to the target
+* Blast spells (fireball and now also cone of cold) will now explode
+  when they hit something on their way to the target
 * Some fleeing monsters will open doors and sometimes close doors behind them
+* Redesign "Drain Life": affects multiple monsters in range and is
+  backed by godly goodwill
 * Modify Sonic Spear damage and take enemy's size into account
 * Turn the gelatinous cube into a passive monster
+* Adapt how statues react when being hit to the original Larn
 
 ### Fixed bugs
 
@@ -29,6 +33,8 @@
 * Magic fire was quite unbalanced
 * Magic missile was slightly unbalanced
 * Take player's position into account when generating paths for friendlies
+* Don't show projectiles outside player's FOV
+* Decrease the probability of obtainable books being generated
 
 
 ## Release 0.7.9 (2026-06-27)

@@ -187,7 +187,8 @@ int player_altar_pray(player *p)
     }
 
     // The higher the donation, the more likely is a favourable outcome.
-    const int event = min(8, rand_0n(donation/50));
+    // Ensure at least 2 to allow for positive and negative outcomes
+    const int event = min(8, rand_0n(max(2, donation/50 + 1)));
 
     int afflictions = 0;
     bool cured_affliction = false;
@@ -307,18 +308,26 @@ int player_altar_pray(player *p)
         break;
     case 0:
         {
-        /* create a monster, it should be very dangerous */
-        position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
-                                          LE_MONSTER, false);
-
-        if (pos_valid(mpos))
-            monster_appear(MT_MAX, mpos);
-
-        if (donation < rand_1n(100) || !pos_valid(mpos))
+        /* Only create a monster if the gods are truly angered (goodwill < 0) */
+        if (p->godly_goodwill < 0)
         {
-            e = effect_new(ET_AGGRAVATE_MONSTER);
-            e->turns = 200;
-            player_effect_add(p, e);
+            /* create a monster, it should be very dangerous */
+            position mpos = map_find_space_in(current, rect_new_sized(p->pos, 1),
+                                              LE_MONSTER, false);
+
+            if (pos_valid(mpos))
+                monster_appear(MT_MAX, mpos);
+
+            if (donation < rand_1n(100) || !pos_valid(mpos))
+            {
+                e = effect_new(ET_AGGRAVATE_MONSTER);
+                e->turns = 200;
+                player_effect_add(p, e);
+            }
+        }
+        else
+        {
+            log_add_entry(nlarn->log, "Otherwise, nothing seems to have happened.");
         }
         }
     }

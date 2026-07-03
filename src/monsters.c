@@ -969,10 +969,12 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         }
 
         item *ranged_wpn = item_new(IT_WEAPON, wpn_type);
+        item_new_finetouch(ranged_wpn);
         inv_add(&nmonster->inv, ranged_wpn);
         nmonster->eq_weapon = ranged_wpn;
 
         item *ammo = item_new(IT_AMMO, ammo_id);
+        item_new_finetouch(ammo);
         ammo->count = 5 + rand_0n(11);
         inv_add(&nmonster->inv, ammo);
     }
@@ -1507,13 +1509,17 @@ void monster_die(monster *m, struct player *p)
             while (inv_length(m->inv) > 0)
             {
                 item *i = inv_get(m->inv, 0);
-                // Drop all non-weapon items, all weapons picked up by the
-                // monster, all unique weapons, but only one third of the
-                // starting weapons.
-                if ((i->type != IT_WEAPON) || i->picked_up || weapon_is_unique(i) || chance(33)) {
-                    inv_add(floor, i);
-                    // ensure the flag is always reset
+                // Drop all non-weapon non-ammo items, all weapons/ammo picked
+                // up by the monster, all unique weapons, but only one third
+                // of the starting weapons and ammo.
+                if ((i->type != IT_WEAPON && i->type != IT_AMMO) || i->picked_up
+                        || (i->type == IT_WEAPON && weapon_is_unique(i)) || chance(33)) {
+                    /* Ensure the flag is always reset.
+                       Reset before inv_add: stackable items (e.g. ammo) may be
+                       merged into an existing stack and destroyed inside inv_add,
+                       so accessing i afterwards would be a use-after-free. */
                     i->picked_up = false;
+                    inv_add(floor, i);
                 } else {
                     item_destroy(i);
                 }
@@ -2050,9 +2056,12 @@ int monster_items_pickup(monster *m)
             }
 
             inv_del_element(tinv, it);
-            inv_add(&m->inv, it);
-            // flag the item as picked up to ensure we drop it on death
+            /* Flag the item as picked up to ensure we drop it on death.
+               Set before inv_add: stackable items may be merged into an
+               existing stack and destroyed inside inv_add, so accessing
+               'it' afterwards would be a use-after-free. */
             it->picked_up = true;
+            inv_add(&m->inv, it);
 
             /* finish this turn after picking up an item */
             return true;
@@ -2397,6 +2406,10 @@ int monster_player_ranged_attack(monster *m, player *p)
     {
         /* don't use ranged attack when adjacent; fall back to melee */
         if (pos_adjacent(m->pos, p->pos))
+            return false;
+
+        /* don't shoot beyond visual range */
+        if (pos_distance(m->pos, p->pos) > m->visrange)
             return false;
 
         /* find ammo in monster inventory for descriptions and trajectory colour */
@@ -3553,10 +3566,70 @@ static position monster_move_wander(monster *m, struct player *p __attribute__((
     return npos;
 }
 
+/* Returns true when m is set up to shoot at p and has a clear line of fire.
+   "Set up" means: ranged weapon equipped, ammo in inventory, player visible
+   and not adjacent.  "Clear" means no other monster lies on the ray between
+   m and p that would intercept the shot. */
+static bool monster_has_clear_shot(monster *m, player *p)
+{
+    if (m->eq_weapon == NULL || !weapon_is_ranged(m->eq_weapon))
+        return false;
+
+    if (m->lastseen != 1 || pos_adjacent(monster_pos(m), m->player_pos))
+        return false;
+
+    /* ammo check */
+    bool has_ammo = false;
+    for (guint i = 0; i < inv_length(m->inv); i++)
+    {
+        if (inv_get(m->inv, i)->type == IT_AMMO) { has_ammo = true; break; }
+    }
+    if (!has_ammo)
+        return false;
+
+    /* check that no monster stands on the line between m and p */
+    map *mmap = monster_map(m);
+    GList *ray = map_ray(mmap, monster_pos(m), p->pos);
+    if (!ray)
+        return false;
+
+    bool clear = true;
+    /* skip source (first element) and target (last element) */
+    for (GList *iter = ray->next; iter != NULL && iter->next != NULL; iter = iter->next)
+    {
+        position pos;
+        pos_val(pos) = GPOINTER_TO_UINT(iter->data);
+        if (map_get_monster_at(mmap, pos) != NULL)
+        {
+            clear = false;
+            break;
+        }
+    }
+    g_list_free(ray);
+    return clear;
+}
+
 static position monster_move_attack(monster *m, struct player *p)
 {
     position npos = monster_pos(m);
     map *mmap = monster_map(m);
+
+    /* ranged-weapon monsters retreat when the player gets within melee range;
+       when already adjacent, only flee if faster than the player — otherwise
+       there is no escape and melee is the only sensible option */
+    if (m->eq_weapon != NULL && weapon_is_ranged(m->eq_weapon)
+            && m->lastseen == 1
+            && pos_distance(monster_pos(m), m->player_pos) < 3
+            && (!pos_adjacent(monster_pos(m), m->player_pos)
+                || monster_speed(m) > player_get_speed(p)))
+    {
+        return monster_move_flee(m, p);
+    }
+
+    /* ranged monster with ammo and clear LOS: hold position and let the
+       next round's ranged-attack attempt do the shooting */
+    if (monster_has_clear_shot(m, p))
+        return monster_pos(m);
 
     /* monster is standing next to player */
     if (pos_adjacent(monster_pos(m), m->player_pos) && (m->lastseen == 1))

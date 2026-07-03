@@ -42,6 +42,7 @@ static bool spell_phantasmal_forces(spell *s, struct player *p);
 static bool spell_scare_monsters(spell *s, struct player *p);
 static bool spell_summon_demon(spell *s, struct player *p);
 static bool spell_make_wall(spell *s, struct player *p);
+static bool spell_drain_life(spell *s, struct player *p);
 
 DEFINE_ENUM(spell_id, SPELL_TYPE_ENUM)
 
@@ -213,8 +214,8 @@ const spell_data spells[SP_MAX] =
     },
     {
         SP_DRL, "drl", "drain life",
-        SC_POINT, DAM_PHYSICAL, ET_NONE, spell_type_point,
-        "Subtracts hit points from both you and a monster",
+        SC_OTHER, DAM_MAGICAL, ET_NONE, spell_drain_life,
+        "Sacrifice some life energy to your god to drain life from monsters in range",
         NULL, NULL,
         COLOURLESS, 4, 1400, false
     },
@@ -791,19 +792,6 @@ static bool spell_type_point(spell *s, struct player *p)
             spell_print_failure_message(s, m);
         break; /* SP_DRY */
 
-        /* drain life */
-    case SP_DRL:
-        amount = min(p->hp - 1, (int)p->hp_max / 2);
-
-        spell_print_success_message(s, m);
-        monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
-                                                DAMO_PLAYER, p));
-
-        player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
-                                         DAMO_PLAYER, NULL), PD_SPELL, SP_DRL);
-
-        break; /* SP_DRL */
-
         /* finger of death */
     case SP_FGR:
     {
@@ -1358,6 +1346,96 @@ static bool spell_make_wall(spell *s __attribute__((unused)), player *p)
     }
 }
 
+static bool spell_drain_life(spell *s __attribute__((unused)), struct player *p)
+{
+    guint amount;
+
+    /* Calculate range based on wisdom: WIS 12 -> 1, WIS 14 -> 2, WIS 16 -> 3, etc. */
+    int range = max(1, (player_get_wis(p) - 12) / 2 + 1);
+
+    /* Calculate HP to sacrifice (up to half of max HP) */
+    amount = min(p->hp - 1, (int)p->hp_max / 2);
+
+    /* If no HP to sacrifice, fail */
+    if (amount <= 0)
+    {
+        log_add_entry(nlarn->log, "You have no life energy to sacrifice!");
+        return false;
+    }
+
+    /* Calculate damage per HP: base 5, plus bonus for goodwill > 50 */
+    int damage_per_hp = 5;
+    if (p->godly_goodwill > 50)
+    {
+        damage_per_hp += (p->godly_goodwill - 50) / 5;
+    }
+
+    int total_damage = amount * damage_per_hp;
+    int count = 0;
+    position pos = pos_invalid;
+    map *cmap = game_map(nlarn, Z(p->pos));
+    Z(pos) = Z(p->pos);
+
+    /* Create area around player */
+    area *a = area_new_circle(p->pos, range, false);
+
+    for (int y = a->start_y; y < a->start_y + a->size_y; y++)
+    {
+        Y(pos) = y;
+
+        for (int x = a->start_x; x < a->start_x + a->size_x; x++)
+        {
+            X(pos) = x;
+
+            if (!pos_valid(pos))
+            {
+                continue;
+            }
+
+            monster *m = map_get_monster_at(cmap, pos);
+
+            if (m == NULL) continue;
+
+            if (p->godly_goodwill < 50)
+            {
+                /* Goodwill < 50: monsters GAIN HP */
+                monster_hp_inc(m, total_damage);
+                log_add_entry(nlarn->log, "The %s gains health from your sacrifice!",
+                              monster_get_name(m));
+            }
+            else
+            {
+                /* Normal: deal damage */
+                monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, total_damage,
+                                        DAMO_PLAYER, p));
+                log_add_entry(nlarn->log, "The %s is drained by your sacrifice!",
+                              monster_get_name(m));
+            }
+            count++;
+        }
+    }
+
+    /* Free allocated memory */
+    area_destroy(a);
+
+    /* Sacrifice the player's HP */
+    player_damage_take(p, damage_new(DAM_MAGICAL, ATT_MAGIC, amount,
+                             DAMO_PLAYER, NULL), PD_SPELL, SP_DRL);
+
+    /* Log result */
+    if (count > 0)
+    {
+        log_add_entry(nlarn->log, "You sacrifice affected %d monster%s.",
+                      count, plural(count));
+    }
+    else
+    {
+        log_add_entry(nlarn->log, "You sacrifice did not cause any pain.");
+    }
+
+    return (count > 0);
+}
+
 bool spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
 {
     monster *m;
@@ -1674,6 +1752,10 @@ static bool spell_blast_traj_pos_hit(const GList *traj,
     /* advance the blast centre to this open tile */
     *(position *)data1 = pos;
 
+    /* statues block the projectile; the blast is centred on the statue tile */
+    if (map_sobject_at(cmap, pos) == LS_STATUE)
+        return true;
+
     /* stop at medium-or-larger monsters, as they block the projectile */
     monster *m = map_get_monster_at(cmap, pos);
     if (m != NULL && monster_size(m) >= MEDIUM)
@@ -1728,10 +1810,9 @@ static bool spell_area_pos_hit(position pos,
         }
 
         if (mst == LS_STATUE
-            && (sp->id == SP_BAL || sp->id == SP_LIT)
-            && chance(min(0, 100 - (game_difficulty(nlarn) * 10))))
+                && game_difficulty(nlarn) < 3
+                && dam->amount >= 45)
         {
-        /* fireball and lightning destroy statues up to diff. level 10 */
             sobject_destroy_at(damo->originator, cmap, pos);
             terminated = true;
         }
