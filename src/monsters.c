@@ -969,10 +969,12 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
         }
 
         item *ranged_wpn = item_new(IT_WEAPON, wpn_type);
+        item_new_finetouch(ranged_wpn);
         inv_add(&nmonster->inv, ranged_wpn);
         nmonster->eq_weapon = ranged_wpn;
 
         item *ammo = item_new(IT_AMMO, ammo_id);
+        item_new_finetouch(ammo);
         ammo->count = 5 + rand_0n(11);
         inv_add(&nmonster->inv, ammo);
     }
@@ -1507,13 +1509,17 @@ void monster_die(monster *m, struct player *p)
             while (inv_length(m->inv) > 0)
             {
                 item *i = inv_get(m->inv, 0);
-                // Drop all non-weapon items, all weapons picked up by the
-                // monster, all unique weapons, but only one third of the
-                // starting weapons.
-                if ((i->type != IT_WEAPON) || i->picked_up || weapon_is_unique(i) || chance(33)) {
-                    inv_add(floor, i);
-                    // ensure the flag is always reset
+                // Drop all non-weapon non-ammo items, all weapons/ammo picked
+                // up by the monster, all unique weapons, but only one third
+                // of the starting weapons and ammo.
+                if ((i->type != IT_WEAPON && i->type != IT_AMMO) || i->picked_up
+                        || (i->type == IT_WEAPON && weapon_is_unique(i)) || chance(33)) {
+                    /* Ensure the flag is always reset.
+                       Reset before inv_add: stackable items (e.g. ammo) may be
+                       merged into an existing stack and destroyed inside inv_add,
+                       so accessing i afterwards would be a use-after-free. */
                     i->picked_up = false;
+                    inv_add(floor, i);
                 } else {
                     item_destroy(i);
                 }
