@@ -182,8 +182,8 @@ static const effect_data effects[ET_MAX] =
         ET_SPEED, "ET_SPEED", 250, 25, N_("fast"),
         N_("You are suddenly moving much faster."),
         N_("You feel yourself slow down."),
-        N_("The %s seems to move much faster."),
-        N_("The %s suddenly slows down."),
+        N_("%s seems to move much faster."),
+        N_("%s suddenly slows down."),
         true, false, false, true
     },
 
@@ -191,8 +191,8 @@ static const effect_data effects[ET_MAX] =
         ET_HEROISM, "ET_HEROISM", 250, 5, NULL,
         N_("WOW!!! You feel Super-fantastic!!!"),
         N_("You return to normal. How sad!"),
-        N_("The %s looks more perilous!"),
-        N_("The %s looks less perilous."),
+        N_("%s looks more perilous!"),
+        N_("%s looks less perilous."),
         false, false, false, false
     },
 
@@ -200,7 +200,7 @@ static const effect_data effects[ET_MAX] =
         ET_INVISIBILITY, "ET_INVISIBILITY", 250, true, N_("invisible"),
         N_("Suddenly you can't see yourself!"),
         N_("You are no longer invisible."),
-        N_("The %s disappears."),
+        N_("%s disappears."),
         NULL,
         true, false, true, false
     },
@@ -215,8 +215,8 @@ static const effect_data effects[ET_MAX] =
         ET_INFRAVISION, "ET_INFRAVISION", 250, true, N_("infravision"),
         N_("Your vision sharpens."),
         N_("Your vision returns to normal."),
-        N_("The %s seems more observant."),
-        N_("The %s seems less observant."),
+        N_("%s seems more observant."),
+        N_("%s seems less observant."),
         true, false, true, false
     },
 
@@ -244,24 +244,24 @@ static const effect_data effects[ET_MAX] =
     {
         ET_HOLD_MONSTER, "ET_HOLD_MONSTER", 30, true, N_("held"),
         NULL, NULL,
-        N_("The %s seems to freeze."),
-        N_("The %s can move again."),
+        N_("%s seems to freeze."),
+        N_("%s can move again."),
         true, false, false, false
     },
 
     {
         ET_SCARED, "ET_SCARED", 250, true, N_("scared"),
         NULL, NULL,
-        N_("The %s is very afraid."),
-        N_("The %s is no longer scared."),
+        N_("%s is very afraid."),
+        N_("%s is no longer scared."),
         true, false, true, false
     },
 
     {
         ET_CHARM_MONSTER, "ET_CHARM_MONSTER", 50, true, N_("charmed"),
         NULL, NULL,
-        N_("The %s is awestruck at your magnificence!"),
-        N_("The %s is no longer impressed."),
+        N_("%s is awestruck at your magnificence!"),
+        N_("%s is no longer impressed."),
         true, false, true, false
     },
 
@@ -269,7 +269,7 @@ static const effect_data effects[ET_MAX] =
         ET_INC_HP, "ET_INC_HP", 1, 20 /* % */, NULL,
         N_("You feel better."),
         NULL,
-        N_("The %s looks better."),
+        N_("%s looks better."),
         NULL,
         false, true, false, false
     },
@@ -278,7 +278,7 @@ static const effect_data effects[ET_MAX] =
         ET_MAX_HP, "ET_MAX_HP", 1, 100 /* % */, NULL,
         N_("You are completely healed."),
         NULL,
-        N_("The %s looks completely healed."),
+        N_("%s looks completely healed."),
         NULL,
         false, false, false, false
     },
@@ -287,7 +287,7 @@ static const effect_data effects[ET_MAX] =
         ET_INC_MP, "ET_INC_MP", 1, 20 /* % */, NULL,
         N_("Magical energies course through your body."),
         NULL,
-        N_("The %s seems to regain energy."),
+        N_("%s seems to regain energy."),
         NULL,
         false, true, false, false
     },
@@ -296,7 +296,7 @@ static const effect_data effects[ET_MAX] =
         ET_MAX_MP, "ET_MAX_MP", 1, 100 /* % */, NULL,
         N_("You feel much more powerful."),
         NULL,
-        N_("The %s looks much more powerful."),
+        N_("%s looks much more powerful."),
         NULL,
         false, false, false, false
     },
@@ -359,8 +359,8 @@ static const effect_data effects[ET_MAX] =
         ET_LEVITATION, "ET_LEVITATION", 20, true, N_("levitation"),
         N_("You start to float in the air!"),
         N_("You gently sink to the ground."),
-        N_("The %s starts to float in the air!"),
-        N_("The %s gently sinks to the ground."),
+        N_("%s starts to float in the air!"),
+        N_("%s gently sinks to the ground."),
         true, false, true, false
     },
 
@@ -421,8 +421,8 @@ static const effect_data effects[ET_MAX] =
         ET_SLEEP, "ET_SLEEP", 25, true, N_("sleeping"),
         N_("You fall asleep."),
         N_("You wake up."),
-        N_("The %s falls asleep."),
-        N_("The %s wakes up."),
+        N_("%s falls asleep."),
+        N_("%s wakes up."),
         true, false, false, false
     },
 
@@ -430,8 +430,8 @@ static const effect_data effects[ET_MAX] =
         ET_DIZZINESS, "ET_DIZZINESS", 250, 5, N_("dizzy"),
         N_("You're dizzy and weak!"),
         N_("You're no longer dizzy."),
-        N_("The %s looks dizzy and weak."),
-        N_("The %s no longer looks dizzy."),
+        N_("%s looks dizzy and weak."),
+        N_("%s no longer looks dizzy."),
         true, false, false, false
     },
 
@@ -447,8 +447,8 @@ static const effect_data effects[ET_MAX] =
         ET_BLINDNESS, "ET_BLINDNESS", 250, true, N_("blind"),
         N_("You can't see anything!"),
         N_("The blindness lifts."),
-        N_("The %s seems to be blinded."),
-        N_("Looks like the %s can see again."),
+        N_("%s seems to be blinded."),
+        N_("Looks like %s can see again."),
         true, false, false, false
     },
 
@@ -472,8 +472,8 @@ static const effect_data effects[ET_MAX] =
         ET_CONFUSION, "ET_CONFUSION", 25, true, N_("confused"),
         N_("You are confused."),
         N_("You regain your senses."),
-        N_("The %s looks confused."),
-        N_("The %s seems to have regained it's senses."),
+        N_("%s looks confused."),
+        N_("%s seems to have regained it's senses."),
         true, false, false, false
     },
 
@@ -489,8 +489,8 @@ static const effect_data effects[ET_MAX] =
         ET_POISON, "ET_POISON", 300, 1, N_("poisoned"),
         NULL, /* message is shown in player_damage_take */
         N_("You are cured."),
-        N_("The %s looks poisoned."),
-        N_("The %s looks cured."),
+        N_("%s looks poisoned."),
+        N_("%s looks cured."),
         true, false, true, true
     },
 
@@ -504,8 +504,8 @@ static const effect_data effects[ET_MAX] =
         ET_SLOWNESS, "ET_SLOWNESS", 250, 25, N_("slow"),
         N_("You feel yourself slow down."),
         N_("You are moving faster again."),
-        N_("The %s slows down."),
-        N_("The %s seems to move much faster."),
+        N_("%s slows down."),
+        N_("%s seems to move much faster."),
         true, false, false, true
     },
 
@@ -530,7 +530,7 @@ static const effect_data effects[ET_MAX] =
         NULL,
         N_("You are no longer trapped!"),
         NULL,
-        N_("The %s climbs out of the pit!"),
+        N_("%s climbs out of the pit!"),
         true, false, true, false
     },
 };

@@ -54,258 +54,258 @@ const spell_data spells[SP_MAX] =
         SC_PLAYER, DAM_NONE, ET_PROTECTION, spell_type_player,
         N_("Generates a protection field"),
         NULL, NULL,
-        COLOURLESS, 1, 260, true
+        COLOURLESS, 1, 260, true, GC_NOM, GC_NOM
     },
     {
         SP_MLE, "mle", N_("magic missile"),
         SC_RAY, DAM_MAGICAL, ET_NONE, spell_type_ray,
         N_("Creates and hurls a missile of magical energy"),
-        N_("The missile hits the %s."),
-        N_("The missile bounces off the %s."),
-        CRYSTAL_BLUE, 1, 320, true
+        N_("The missile hits %s."),
+        N_("The missile bounces off %s."),
+        CRYSTAL_BLUE, 1, 320, true, GC_ACC, GC_DAT
     },
     {
         SP_DEX, "dex", N_("dexterity"),
         SC_PLAYER, DAM_NONE, ET_INC_DEX, spell_type_player,
         N_("Improves the caster's dexterity"),
         NULL, NULL,
-        COLOURLESS, 1, 260, false
+        COLOURLESS, 1, 260, false, GC_NOM, GC_NOM
     },
     {
         SP_SLE, "sle", N_("sleep"),
         SC_POINT, DAM_NONE, ET_SLEEP, spell_type_point,
         N_("Causes some monsters to go to sleep"),
         NULL,
-        N_("The %s doesn't sleep."),
-        COLOURLESS, 1, 260, true
+        N_("%s doesn't sleep."),
+        COLOURLESS, 1, 260, true, GC_NOM, GC_NOM
     },
     {
         SP_CHM, "chm", N_("charm monster"),
         SC_POINT, DAM_NONE, ET_CHARM_MONSTER, spell_type_point,
         N_("Some monsters may be awed at your magnificence"),
-        NULL, N_("The %s isn't impressed."),
-        COLOURLESS, 1, 260, false
+        NULL, N_("%s isn't impressed."),
+        COLOURLESS, 1, 260, false, GC_NOM, GC_NOM
     },
     {
         SP_SSP, "ssp", N_("sonic spear"),
         SC_RAY, DAM_PHYSICAL, ET_NONE, spell_type_ray,
         N_("Causes your hands to emit a screeching sound toward what they point"),
-        N_("The sound damages the %s."),
-        N_("The %s can't hear the noise."),
-        CONIFER, 2, 480, false
+        N_("The sound damages %s."),
+        N_("%s can't hear the noise."),
+        CONIFER, 2, 480, false, GC_ACC, GC_NOM
     },
     {
         SP_STR, "str", N_("strength"),
         SC_PLAYER, DAM_NONE, ET_INC_STR, spell_type_player,
         N_("Increase the caster's strength for a short term"),
         NULL, NULL,
-        COLOURLESS, 2, 460, false
+        COLOURLESS, 2, 460, false, GC_NOM, GC_NOM
     },
     {
         SP_CPO, "cpo", N_("cure poison"),
         SC_PLAYER, DAM_NONE, ET_NONE, spell_cure_poison,
         N_("The caster is cured from poison"),
         NULL, NULL,
-        COLOURLESS, 2, 460, true
+        COLOURLESS, 2, 460, true, GC_NOM, GC_NOM
     },
     {
         SP_HEL, "hel", N_("healing"),
         SC_PLAYER, DAM_NONE, ET_INC_HP, spell_type_player,
         N_("Restores some HP to the caster"),
         NULL, NULL,
-        COLOURLESS, 2, 500, true
+        COLOURLESS, 2, 500, true, GC_NOM, GC_NOM
     },
     {
         SP_CBL, "cbl", N_("cure blindness"),
         SC_PLAYER, DAM_NONE, ET_NONE, spell_cure_blindness,
         N_("Restores sight to one so unfortunate as to be blinded"),
         NULL, NULL,
-        COLOURLESS, 2, 400, true
+        COLOURLESS, 2, 400, true, GC_NOM, GC_NOM
     },
     {
         SP_CRE, "cre", N_("create monster"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_create_monster,
         N_("Creates a monster near the caster appropriate for the location"),
         NULL, NULL,
-        COLOURLESS, 2, 400, false
+        COLOURLESS, 2, 400, false, GC_NOM, GC_NOM
     },
     {
         SP_PHA, "pha", N_("phantasmal forces"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_phantasmal_forces,
         N_("Creates illusions, and if believed, the monster flees"),
-        N_("The %s believed!"),
-        N_("The %s didn't believe the illusions!"),
-        COLOURLESS, 2, 600, false
+        N_("%s believed!"),
+        N_("%s didn't believe the illusions!"),
+        COLOURLESS, 2, 600, false, GC_NOM, GC_NOM
     },
     {
         SP_INV, "inv", N_("invisibility"),
         SC_PLAYER, DAM_NONE, ET_INVISIBILITY, spell_type_player,
         N_("The caster becomes invisible"),
         NULL, NULL,
-        COLOURLESS, 2, 600, false
+        COLOURLESS, 2, 600, false, GC_NOM, GC_NOM
     },
     {
         SP_BAL, "bal", N_("fireball"),
         SC_BLAST, DAM_FIRE, ET_NONE, spell_type_blast,
         N_("Makes a ball of fire that burns on what it hits"),
-        N_("The fireball hits the %s."),
+        N_("The fireball hits %s."),
         NULL,
-        LUMINOUS_ORANGE, 3, 1200, false
+        LUMINOUS_ORANGE, 3, 1200, false, GC_ACC, GC_NOM
     },
     {
         SP_CLD, "cld", N_("cone of cold"),
         SC_BLAST, DAM_COLD, ET_NONE, spell_type_blast,
         N_("Sends forth a cone of cold which freezes what it touches"),
-        N_("The cone of cold strikes the %s."),
+        N_("The cone of cold strikes %s."),
         NULL,
-        ALABASTER_GREEN, 3, 1200, false
+        ALABASTER_GREEN, 3, 1200, false, GC_ACC, GC_NOM
     },
     {
         SP_PLY, "ply", N_("polymorph"),
         SC_POINT, DAM_NONE, ET_NONE, spell_type_point,
         N_("You can find out what this does for yourself"),
         NULL,
-        N_("The %s resists."),
-        COLOURLESS, 3, 950, false
+        N_("%s resists."),
+        COLOURLESS, 3, 950, false, GC_NOM, GC_NOM
     },
     {
         SP_CAN, "can", N_("cancellation"),
         SC_PLAYER, DAM_NONE, ET_CANCELLATION, spell_type_player,
         N_("Protects the caster against spheres of annihilation"),
         NULL, NULL,
-        COLOURLESS, 3, 950, false
+        COLOURLESS, 3, 950, false, GC_NOM, GC_NOM
     },
     {
         SP_HAS, "has", N_("haste self"),
         SC_PLAYER, DAM_NONE, ET_SPEED, spell_type_player,
         N_("Speeds up the caster's movements"),
         NULL, NULL,
-        COLOURLESS, 3, 950, false
+        COLOURLESS, 3, 950, false, GC_NOM, GC_NOM
     },
     {
         SP_CKL, "ckl", N_("killing cloud"),
         SC_FLOOD, DAM_ACID, ET_NONE, spell_type_flood,
         N_("Creates a fog of poisonous gas which kills all that is within it"),
-        N_("The %s gasps for air."),
+        N_("%s gasps for air."),
         NULL,
-        COLOURLESS, 3, 1200, false
+        COLOURLESS, 3, 1200, false, GC_NOM, GC_NOM
     },
     {
         SP_VPR, "vpr", N_("vaporize rock"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_vaporize_rock,
         N_("This changes rock to air"),
         NULL, NULL,
-        COLOURLESS, 3, 950, false
+        COLOURLESS, 3, 950, false, GC_NOM, GC_NOM
     },
     {
         SP_DRY, "dry", N_("dehydration"),
         SC_POINT, DAM_PHYSICAL, ET_NONE, spell_type_point,
         N_("Dries up water in the immediate vicinity"),
-        N_("The %s shrivels up."),
-        N_("The %s isn't affected."),
-        COLOURLESS, 4, 1600, false
+        N_("%s shrivels up."),
+        N_("%s isn't affected."),
+        COLOURLESS, 4, 1600, false, GC_NOM, GC_NOM
     },
     {
         SP_LIT, "lit", N_("lightning"),
         SC_RAY, DAM_ELECTRICITY, ET_NONE, spell_type_ray,
         N_("Your finger will emit a lightning bolt when this spell is cast"),
-        N_("A lightning bolt hits the %s."),
-        N_("The %s loves fire and lightning!"),
-        MOON_GLOW, 4, 1600, false
+        N_("A lightning bolt hits %s."),
+        N_("%s loves fire and lightning!"),
+        MOON_GLOW, 4, 1600, false, GC_ACC, GC_NOM
     },
     {
         SP_DRL, "drl", N_("drain life"),
         SC_OTHER, DAM_MAGICAL, ET_NONE, spell_drain_life,
         N_("Sacrifice some life energy to your god to drain life from monsters in range"),
         NULL, NULL,
-        COLOURLESS, 4, 1400, false
+        COLOURLESS, 4, 1400, false, GC_NOM, GC_NOM
     },
     {
         SP_GLO, "glo", N_("invulnerability"),
         SC_PLAYER, DAM_NONE, ET_INVULNERABILITY, spell_type_player,
         N_("This globe helps to protect the player from physical attack"),
         NULL, NULL,
-        COLOURLESS, 4, 1400, false
+        COLOURLESS, 4, 1400, false, GC_NOM, GC_NOM
     },
     {
         SP_FLO, "flo", N_("flood"),
         SC_FLOOD, DAM_WATER, ET_NONE, spell_type_flood,
         N_("This creates an avalanche of H2O to flood the immediate chamber"),
-        N_("The %s struggles for air in the flood!"),
-        N_("The %s loves the water!"),
-        COLOURLESS, 4, 1600, false
+        N_("%s struggles for air in the flood!"),
+        N_("%s loves the water!"),
+        COLOURLESS, 4, 1600, false, GC_NOM, GC_NOM
     },
     {
         SP_FGR, "fgr", N_("finger of death"),
         SC_POINT, DAM_PHYSICAL, ET_NONE, spell_type_point,
         N_("This is a holy spell and calls upon your god to back you up"),
-        N_("The %s's heart stopped."),
-        N_("The %s isn't affected."),
-        COLOURLESS, 4, 1600, false
+        N_("The heart of %s stopped."),
+        N_("%s isn't affected."),
+        COLOURLESS, 4, 1600, false, GC_GEN, GC_NOM
     },
     {
         SP_SCA, "sca", N_("scare monsters"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_scare_monsters,
         N_("Terrifies nearby monsters so that hopefully they flee the magic user"),
         NULL, NULL,
-        COLOURLESS, 5, 2000, false
+        COLOURLESS, 5, 2000, false, GC_NOM, GC_NOM
     },
     {
         SP_HLD, "hld", N_("hold monster"),
         SC_POINT, DAM_NONE, ET_HOLD_MONSTER, spell_type_point,
         N_("The monster is frozen in his tracks if this is successful"),
         NULL, NULL,
-        COLOURLESS, 5, 2000, false
+        COLOURLESS, 5, 2000, false, GC_NOM, GC_NOM
     },
     {
         SP_STP, "stp", N_("time stop"),
         SC_PLAYER, DAM_NONE, ET_TIMESTOP, spell_type_player,
         N_("All movement in the caverns ceases for a limited duration"),
         NULL, NULL,
-        COLOURLESS, 5, 2500, false
+        COLOURLESS, 5, 2500, false, GC_NOM, GC_NOM
     },
     {
         SP_TEL, "tel", N_("teleport away"),
         SC_POINT, DAM_NONE, ET_NONE, spell_type_point,
         N_("Moves a particular monster around the caverns"),
         NULL, NULL,
-        COLOURLESS, 5, 2000, false
+        COLOURLESS, 5, 2000, false, GC_NOM, GC_NOM
     },
     {
         SP_MFI, "mfi", N_("magic fire"),
         SC_FLOOD, DAM_FIRE, ET_NONE, spell_type_flood,
         N_("This causes a curtain of fire to appear all around you"),
-        N_("The %s cringes from the flame."),
+        N_("%s cringes from the flame."),
         NULL,
-        COLOURLESS, 5, 2500, false
+        COLOURLESS, 5, 2500, false, GC_NOM, GC_NOM
     },
     {
         SP_MKW, "mkw", N_("make wall"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_make_wall,
         N_("Makes a wall in the specified place"),
         NULL, NULL,
-        COLOURLESS, 6, 3000, false
+        COLOURLESS, 6, 3000, false, GC_NOM, GC_NOM
     },
     {
         SP_SPH, "sph", N_("sphere of annihilation"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_create_sphere,
         N_("Anything caught in this sphere is instantly killed"),
         NULL, NULL,
-        COLOURLESS, 6, 3500, false
+        COLOURLESS, 6, 3500, false, GC_NOM, GC_NOM
     },
     {
         SP_SUM, "sum", N_("summon demon"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_summon_demon,
         N_("Summons a demon who hopefully helps you out"),
         NULL, NULL,
-        COLOURLESS, 6, 3500, false
+        COLOURLESS, 6, 3500, false, GC_NOM, GC_NOM
     },
     {
         SP_WTW, "wtw", N_("walk through walls"),
         SC_PLAYER, DAM_NONE, ET_WALL_WALK, spell_type_player,
         N_("Allows the caster to walk through walls for a short period of time"),
         NULL, NULL,
-        COLOURLESS, 6, 3800, false
+        COLOURLESS, 6, 3800, false, GC_NOM, GC_NOM
     },
     {
         SP_ALT, "alt", N_("alter reality"),
@@ -313,7 +313,7 @@ const spell_data spells[SP_MAX] =
         N_("God only knows what this will do"),
         NULL,
         N_("Polinneaus won't let you mess with his caverns!"),
-        COLOURLESS, 6, 3800, false
+        COLOURLESS, 6, 3800, false, GC_NOM, GC_NOM
     },
 };
 
@@ -840,8 +840,8 @@ static bool spell_type_point(spell *s, struct player *p)
         {
             int max_level = max(1, monster_level(m) - (3 - (int)s->knowledge));
             if (monster_in_sight(m))
-                log_add_entry(nlarn->log, _("The %s shudders and transforms!"),
-                              monster_name(m));
+                log_add_entry(nlarn->log, _("%s shudders and transforms!"),
+                              monster_name_art(m, ART_DEF, GC_NOM, true));
             monster_polymorph(m, max_level);
         }
         break;
@@ -850,8 +850,8 @@ static bool spell_type_point(spell *s, struct player *p)
     case SP_TEL:
         if (monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, _("The %s disappears."),
-                          monster_name(m));
+            log_add_entry(nlarn->log, _("%s disappears."),
+                          monster_name_art(m, ART_DEF, GC_NOM, true));
         }
 
         map *mmap = game_map(nlarn, Z(monster_pos(m)));
@@ -1203,7 +1203,10 @@ static bool spell_phantasmal_forces(spell *s, struct player *p)
     {
         if (monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, spell_msg_succ(s), monster_name(m));
+            const char *msg = spell_msg_succ(s);
+            log_add_entry(nlarn->log, msg,
+                    monster_name_art(m, ART_DEF, spells[s->id].msg_succ_case,
+                                     g_str_has_prefix(msg, "%s")));
         }
 
         monster_effect_add(m, effect_new(ET_SCARED));
@@ -1213,7 +1216,10 @@ static bool spell_phantasmal_forces(spell *s, struct player *p)
     {
         if (monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, spell_msg_fail(s), monster_name(m));
+            const char *msg = spell_msg_fail(s);
+            log_add_entry(nlarn->log, msg,
+                    monster_name_art(m, ART_DEF, spells[s->id].msg_fail_case,
+                                     g_str_has_prefix(msg, "%s")));
         }
         return false;
     }
@@ -1330,8 +1336,8 @@ static bool spell_make_wall(spell *s __attribute__((unused)), player *p)
                     display_paint_screen(nlarn->p);
                     display_nap(250);
 
-                    log_add_entry(nlarn->log, _("The %s is trapped in the wall!"),
-                                  monster_get_name(m));
+                    log_add_entry(nlarn->log, _("%s is trapped in the wall!"),
+                                  monster_get_name_art(m, ART_DEF, GC_NOM, true));
                 }
 
                 monster_die(m, nlarn->p);
@@ -1401,16 +1407,16 @@ static bool spell_drain_life(spell *s __attribute__((unused)), struct player *p)
             {
                 /* Goodwill < 50: monsters GAIN HP */
                 monster_hp_inc(m, total_damage);
-                log_add_entry(nlarn->log, _("The %s gains health from your sacrifice!"),
-                              monster_get_name(m));
+                log_add_entry(nlarn->log, _("%s gains health from your sacrifice!"),
+                              monster_get_name_art(m, ART_DEF, GC_NOM, true));
             }
             else
             {
                 /* Normal: deal damage */
                 monster_damage_take(m, damage_new(DAM_MAGICAL, ATT_MAGIC, total_damage,
                                         DAMO_PLAYER, p));
-                log_add_entry(nlarn->log, _("The %s is drained by your sacrifice!"),
-                              monster_get_name(m));
+                log_add_entry(nlarn->log, _("%s is drained by your sacrifice!"),
+                              monster_get_name_art(m, ART_DEF, GC_NOM, true));
             }
             count++;
         }
@@ -1470,8 +1476,8 @@ bool spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
         }
         else if (monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, _("The %s can't be vaporized."),
-                          monster_get_name(m));
+            log_add_entry(nlarn->log, _("%s can't be vaporized."),
+                          monster_get_name_art(m, ART_DEF, GC_NOM, true));
         }
     }
 
@@ -1655,7 +1661,10 @@ static void spell_print_success_message(spell *s, monster *m)
     if (spell_msg_succ(s) == NULL)
         return;
 
-    log_add_entry(nlarn->log, spell_msg_succ(s), monster_get_name(m));
+    const char *msg = spell_msg_succ(s);
+    log_add_entry(nlarn->log, msg,
+            monster_get_name_art(m, ART_DEF, spells[s->id].msg_succ_case,
+                                 g_str_has_prefix(msg, "%s")));
 }
 
 static void spell_print_failure_message(spell *s, monster *m)
@@ -1670,7 +1679,10 @@ static void spell_print_failure_message(spell *s, monster *m)
     if (spell_msg_fail(s) == NULL)
         return;
 
-    log_add_entry(nlarn->log, spell_msg_fail(s), monster_get_name(m));
+    const char *msg = spell_msg_fail(s);
+    log_add_entry(nlarn->log, msg,
+            monster_get_name_art(m, ART_DEF, spells[s->id].msg_fail_case,
+                                 g_str_has_prefix(msg, "%s")));
 }
 
 static int count_adjacent_water_squares(position pos)

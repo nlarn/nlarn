@@ -172,7 +172,7 @@ nlarn$(SUFFIX): $(PDCLIB) $(OBJECTS) $(RESOURCES)
 
 # Extract translatable strings into the message template
 pot:
-	xgettext --from-code=UTF-8 --keyword=_ --keyword=N_ \
+	xgettext --from-code=UTF-8 --keyword=_ --keyword=N_ --keyword=C_:1c,2 \
 		--add-comments=TRANSLATORS --package-name=nlarn \
 		--package-version=$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH) \
 		--msgid-bugs-address=jdegroot@web.de \

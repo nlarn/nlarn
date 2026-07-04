@@ -177,8 +177,8 @@ int weapon_fire(struct player *p)
     }
 
     /* log the event */
-    log_add_entry(nlarn->log, _("You fire %s at the %s."), wdesc,
-            monster_get_name(m));
+    log_add_entry(nlarn->log, _("You fire %s at %s."), wdesc,
+            monster_get_name_art(m, ART_DEF, GC_ACC, false));
     g_free(wdesc);
 
     /* --- finally shooting the weapon --- */
@@ -435,8 +435,8 @@ static bool weapon_pos_hit(const GList *traj,
             damage *dam = weapon_get_ranged_damage(nlarn->p, weapon, ammo);
 
             if (monster_in_sight(m))
-                log_add_entry(nlarn->log, "%s hits the %s.",
-                        adesc, monster_name(m));
+                log_add_entry(nlarn->log, _("%s hits %s."),
+                        adesc, monster_name_art(m, ART_DEF, GC_ACC, false));
 
             monster_damage_take(m, dam);
 
@@ -447,8 +447,8 @@ static bool weapon_pos_hit(const GList *traj,
         {
             /* missed */
             if (monster_in_sight(m))
-                log_add_entry(nlarn->log, "%s misses the %s.",
-                        adesc, monster_name(m));
+                log_add_entry(nlarn->log, _("%s misses %s."),
+                        adesc, monster_name_art(m, ART_DEF, GC_ACC, false));
         }
     }
     else if (pos_identical(nlarn->p->pos, cpos))

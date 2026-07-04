@@ -22,6 +22,7 @@
 #include <libintl.h>
 
 #include "colours.h"
+#include "grammar.h"
 #include "effects.h"
 #include "enumFactory.h"
 #include "items.h"
@@ -101,6 +102,9 @@ typedef struct spell_data {
     int price;                /* price of the book*/
     bool
         obtainable: 1;  /* available in the shop */
+    /* the grammatical case of the monster name in the messages */
+    grammar_case msg_succ_case;
+    grammar_case msg_fail_case;
 } spell_data;
 
 typedef struct spell {

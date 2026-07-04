@@ -1313,7 +1313,8 @@ int player_move(player *p, direction dir, bool open_door)
     if (target_m && monster_unknown(target_m))
     {
         /* reveal the mimic */
-        log_add_entry(nlarn->log, _("Wait! That is a %s!"), monster_get_name(target_m));
+        log_add_entry(nlarn->log, _("Wait! That is %s!"),
+                monster_get_name_art(target_m, ART_INDEF, GC_NOM, false));
         monster_unknown_set(target_m, false);
         return times;
     }
@@ -1329,8 +1330,8 @@ int player_move(player *p, direction dir, bool open_door)
 
         move_possible = true;
 
-        log_add_entry(nlarn->log, _("You swap places with the %s."),
-                      monster_get_name(target_m));
+        log_add_entry(nlarn->log, _("You swap places with %s."),
+                      monster_get_name_art(target_m, ART_DEF, GC_DAT, false));
     }
     else if (target_m)
     {
@@ -1403,7 +1404,8 @@ int player_attack(player *p, monster *m)
     /* disallow attacking other humans */
     if (monster_type(m) == MT_TOWN_PERSON)
     {
-        log_add_entry(nlarn->log, _("You bump into the %s."), monster_get_name(m));
+        log_add_entry(nlarn->log, _("You bump into %s."),
+                monster_get_name_art(m, ART_DEF, GC_ACC, false));
         return 1;
     }
 
@@ -1412,7 +1414,8 @@ int player_attack(player *p, monster *m)
         effect *e;
 
         /* placed a hit */
-        log_add_entry(nlarn->log, _("You hit the %s."), monster_get_name(m));
+        log_add_entry(nlarn->log, _("You hit %s."),
+                monster_get_name_art(m, ART_DEF, GC_ACC, false));
 
         damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, damage_calc(p, m),
                                  DAMO_PLAYER, p);
@@ -1467,8 +1470,8 @@ int player_attack(player *p, monster *m)
         if (p->eq_weapon && (p->eq_weapon->id == WT_LANCEOFDEATH)
                 && monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, _("Your lance of death tickles the %s!"),
-                          monster_get_name(m));
+            log_add_entry(nlarn->log, _("Your lance of death tickles %s!"),
+                          monster_get_name_art(m, ART_DEF, GC_ACC, false));
         }
 
         /* if the player is invisible and the monster does not have infravision,
@@ -1482,7 +1485,8 @@ int player_attack(player *p, monster *m)
     else
     {
         /* missed */
-        log_add_entry(nlarn->log, _("You miss the %s."), monster_get_name(m));
+        log_add_entry(nlarn->log, _("You miss %s."),
+                monster_get_name_art(m, ART_DEF, GC_ACC, false));
     }
 
     return 1; /* i.e. turns used */
@@ -1916,8 +1920,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (monster_flags(m, DEMON) && chance(75)
                 && (p->eq_amulet && p->eq_amulet->id == AM_POWER))
         {
-            log_add_entry(nlarn->log, _("Your amulet cancels the %s's attack."),
-                          monster_get_name(m));
+            log_add_entry(nlarn->log, _("Your amulet cancels the attack of %s."),
+                          monster_get_name_art(m, ART_DEF, GC_GEN, false));
 
             return;
         }

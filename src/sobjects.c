@@ -443,9 +443,9 @@ int player_door_close(player *p)
                 bool visible = monster_in_sight(m);
 
                 log_add_entry(nlarn->log,
-                              visible ? _("You cannot close the door. The %s is in the way.")
-                                      : _("You cannot close the door. A %s is in the way."),
-                              monster_get_name(m));
+                              _("You cannot close the door. %s is in the way."),
+                              monster_get_name_art(m,
+                                  visible ? ART_DEF : ART_INDEF, GC_NOM, true));
                 return 0;
             }
 
@@ -1112,8 +1112,8 @@ static void monster_appear(monster_t type, position mpos)
 
     if (m && monster_in_sight(m))
     {
-        log_add_entry(nlarn->log, _("An angry %s appears!"),
-                      monster_name(m));
+        log_add_entry(nlarn->log, _("%s appears, looking angry!"),
+                      monster_name_art(m, ART_INDEF, GC_NOM, true));
     }
     else
         log_add_entry(nlarn->log, _("Nothing seems to have happened."));
@@ -1148,8 +1148,8 @@ static bool sobject_blast_hit(position pos,
     {
         /* the blast hit a monster */
         if (monster_in_sight(m))
-            log_add_entry(nlarn->log, _("The lightning hits the %s."),
-                          monster_get_name(m));
+            log_add_entry(nlarn->log, _("The lightning hits %s."),
+                          monster_get_name_art(m, ART_DEF, GC_ACC, false));
 
         monster_damage_take(m, damage_copy(dam));
 

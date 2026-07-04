@@ -172,8 +172,8 @@ int damage_calc(struct player *p, struct monster *m)
             if (chance(5) && monster_flags(m, HEAD)
                     && !monster_flags(m, NOBEHEAD))
             {
-                log_add_entry(nlarn->log, _("You behead the %s with your Vorpal Blade!"),
-                              monster_get_name(m));
+                log_add_entry(nlarn->log, _("You behead %s with your Vorpal Blade!"),
+                              monster_get_name_art(m, ART_DEF, GC_ACC, false));
 
                 damage = INSTANT_KILL;
             }
