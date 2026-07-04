@@ -156,13 +156,12 @@ static int waddwach(WINDOW *win, const wchar_t ch, short color_pair, attr_t attr
 
 #define addwach(ch, color_pair, attrs) waddwach(stdscr, ch, color_pair, attrs)
 
-/* mvwaddch with an additional attribute parameter */
-#define mvaddwach(y, x, attrs, ch) \
-    do { \
-        attron(attrs); \
-        mvaddch(y, x, ch); \
-        attroff(attrs); \
-    } while (0)
+/* mvaddch for wide characters with an additional attribute parameter */
+static int mvaddwach(int y, int x, attr_t attrs, wchar_t ch)
+{
+    move(y, x);
+    return waddwach(stdscr, ch, PAIR_NUMBER(attrs), attrs & ~A_COLOR);
+}
 
 /* printw with an additional attribute parameter */
 #define aprintw(attrs, fmt, ...) \
@@ -294,7 +293,7 @@ void display_paint_screen(player *p)
     g_ptr_array_foreach(nlarn->spheres, (GFunc)display_spheres_paint, p);
 
     /* draw player */
-    char pc;
+    wchar_t pc;
     attr_t player_attributes = display_player_hp_colour(p, false);
 
     if (player_effect(p, ET_INVISIBILITY))
@@ -641,7 +640,8 @@ void display_draw()
 
 void display_paint_glyph(position pos, wchar_t glyph, colour_t fg)
 {
-    (void)mvaddch(Y(pos), X(pos), glyph | COLOR_PAIR(fg));
+    move(Y(pos), X(pos));
+    (void)waddwach(stdscr, glyph, fg, 0);
 }
 
 void display_nap(guint ms)

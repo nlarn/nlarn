@@ -20,6 +20,7 @@
 #define MONSTERS_H
 
 #include <glib.h>
+#include <wchar.h>
 #include <time.h>
 
 #include "cJSON.h"
@@ -265,7 +266,7 @@ bool monster_regenerate(monster *m, time_t gtime, int difficulty);
 
 item *get_mimic_item(monster *m);
 char *monster_desc(monster *m);
-char monster_glyph(monster *m);
+wchar_t monster_glyph(monster *m);
 colour_t monster_color(monster *m);
 
 /* dealing with temporary effects */

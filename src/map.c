@@ -311,7 +311,7 @@ char *map_dump(map *m, position ppos)
             }
             else if ((mon = map_get_monster_at(m, pos)))
             {
-                g_string_append_c(dump, monster_glyph(mon));
+                g_string_append_unichar(dump, monster_glyph(mon));
             }
             else if (map_trap_at(m, pos))
             {
@@ -319,11 +319,11 @@ char *map_dump(map *m, position ppos)
             }
             else if (map_sobject_at(m, pos))
             {
-                g_string_append_c(dump, so_get_glyph(map_sobject_at(m, pos)));
+                g_string_append_unichar(dump, so_get_glyph(map_sobject_at(m, pos)));
             }
             else
             {
-                g_string_append_c(dump, mt_get_glyph(map_tiletype_at(m, pos)));
+                g_string_append_unichar(dump, mt_get_glyph(map_tiletype_at(m, pos)));
             }
         }
         g_string_append_c(dump, '\n');
