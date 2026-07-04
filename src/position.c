@@ -341,7 +341,7 @@ bool area_blast(position center, guint radius,
                     const damage_originator *damo,
                     area_hit_sth pos_hitfun,
                     gpointer data1, gpointer data2,
-                    char glyph, colour_t fg)
+                    wchar_t glyph, colour_t fg)
 {
     map *cmap = game_map(nlarn, Z(center));
     position cursor = center;
@@ -349,8 +349,6 @@ bool area_blast(position center, guint radius,
 
     area *obsmap = map_get_obstacles(cmap, center, radius, true);
     area *ball = area_new_circle_flooded(center, radius, obsmap);
-
-    attron(COLOR_PAIR(fg));
 
     for (Y(cursor) = ball->start_y; Y(cursor) < ball->start_y + ball->size_y; Y(cursor)++)
     {
@@ -362,31 +360,29 @@ bool area_blast(position center, guint radius,
             if (!area_pos_get(ball, cursor))
                 continue;
 
-            /* move the cursor to the position */
-            move(Y(cursor), X(cursor));
-
             if (map_sobject_at(cmap, cursor))
             {
                 /* The blast hit a stationary object. */
-                addch(so_get_glyph(map_sobject_at(cmap, cursor)));
+                display_paint_glyph(cursor,
+                        so_get_glyph(map_sobject_at(cmap, cursor)), fg);
             }
             else if ((m = map_get_monster_at(cmap, cursor)))
             {
                 /* The blast hit a monster */
                 if (monster_in_sight(m))
-                    addch(monster_glyph(m));
+                    display_paint_glyph(cursor, monster_glyph(m), fg);
                 else
-                    addch(glyph);
+                    display_paint_glyph(cursor, glyph, fg);
             }
             else if (pos_identical(nlarn->p->pos, cursor))
             {
                 /* The blast hit the player */
-                addch('@');
+                display_paint_glyph(cursor, '@', fg);
             }
             else
             {
                 /* The blast hit nothing */
-                addch(glyph);
+                display_paint_glyph(cursor, glyph, fg);
             }
 
             /* keep track if the blast hit something */
@@ -396,13 +392,12 @@ bool area_blast(position center, guint radius,
     }
 
     area_destroy(ball);
-    attroff(COLOR_PAIR(fg));
 
     /* make sure the blast shows up */
     display_draw();
 
     /* sleep a 3/4 second */
-    napms(750);
+    display_nap(750);
 
     return retval;
 }

@@ -38,7 +38,7 @@ DEFINE_ENUM(monster_action_t, MONSTER_ACTION_TYPE_ENUM)
 typedef struct {
     const char *name;        /* monster's name */
     const char *plural_name;
-    const char glyph;
+    const wchar_t glyph;
     colour_t colour;
     int exp;                 /* xp granted to player */
     int gold_chance;
@@ -110,7 +110,7 @@ const char *monster_attack_verb[] =
 static struct _monster_breath_data
 {
     const char *desc;
-    const char glyph;
+    const wchar_t glyph;
     colour_t fg;
 } monster_breath_data[] =
 {
@@ -1947,7 +1947,7 @@ void monster_polymorph(monster *m, int max_level)
         {
             /* briefly display the new monster before it dies */
             display_paint_screen(nlarn->p);
-            g_usleep(250000);
+            display_nap(250);
 
             switch (old_elem)
             {
@@ -2440,7 +2440,7 @@ int monster_player_ranged_attack(monster *m, player *p)
         }
 
         /* pick trajectory appearance from ammo material, or use defaults */
-        char glyph = item_glyph(IT_AMMO);
+        wchar_t glyph = item_glyph(IT_AMMO);
         colour_t traj_colour = ammo_item ? item_colour(ammo_item) : WHITE;
 
         int amount = att.base + rand_0n(monster_level(m) + 1)
@@ -2935,7 +2935,7 @@ char *monster_desc(monster *m)
     return g_string_free(desc, false);
 }
 
-char monster_glyph(monster *m)
+wchar_t monster_glyph(monster *m)
 {
     g_assert (m != NULL);
 

@@ -29,7 +29,7 @@ struct game_config {
     bool no_autosave;
     char *name;
     char *gender;
-    char *auto_pickup;
+    char **auto_pickup;
     char *stats;
     int colour_scheme;
 #ifdef SDLPDCURSES
@@ -51,8 +51,8 @@ void free_config(struct game_config config);
 /* parse the command line */
 void parse_commandline(int argc, char *argv[], struct game_config *config);
 
-void parse_autopickup_settings(const char *settings, bool config[IT_MAX]);
-char *compose_autopickup_settings(const bool config[IT_MAX]);
+void parse_autopickup_settings(char *const *settings, bool config[IT_MAX]);
+char **compose_autopickup_settings(const bool config[IT_MAX]);
 
 /**
  * @brief Return a comma separated list of all selected item types

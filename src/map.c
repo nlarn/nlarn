@@ -311,7 +311,7 @@ char *map_dump(map *m, position ppos)
             }
             else if ((mon = map_get_monster_at(m, pos)))
             {
-                g_string_append_c(dump, monster_glyph(mon));
+                g_string_append_unichar(dump, monster_glyph(mon));
             }
             else if (map_trap_at(m, pos))
             {
@@ -319,11 +319,11 @@ char *map_dump(map *m, position ppos)
             }
             else if (map_sobject_at(m, pos))
             {
-                g_string_append_c(dump, so_get_glyph(map_sobject_at(m, pos)));
+                g_string_append_unichar(dump, so_get_glyph(map_sobject_at(m, pos)));
             }
             else
             {
-                g_string_append_c(dump, mt_get_glyph(map_tiletype_at(m, pos)));
+                g_string_append_unichar(dump, mt_get_glyph(map_tiletype_at(m, pos)));
             }
         }
         g_string_append_c(dump, '\n');
@@ -690,7 +690,7 @@ bool map_trajectory(position source, position target,
                         const damage_originator * const damo,
                         trajectory_hit_sth pos_hitfun,
                         gpointer data1, gpointer data2, bool reflectable,
-                        char glyph, colour_t fg, bool keep_ray)
+                        wchar_t glyph, colour_t fg, bool keep_ray)
 {
     g_assert(pos_valid(source) && pos_valid(target));
 
@@ -745,17 +745,8 @@ bool map_trajectory(position source, position target,
         }
 
         /* show the position of the ray only when visible to the player */
-        /* FIXME: move curses functions to display.c */
         if (fov_get(nlarn->p->fv, cursor))
-        {
-            (void)mvaddch(Y(cursor), X(cursor), glyph | COLOR_PAIR(fg));
-            display_draw();
-
-            /* sleep a while to show the ray's position */
-            napms(100);
-            /* repaint the screen unless requested otherwise */
-            if (!keep_ray) display_paint_screen(nlarn->p);
-        }
+            display_animate_glyph(cursor, glyph, fg, keep_ray);
     }
     while ((iter = iter->next));
 
@@ -1137,7 +1128,7 @@ void map_timer(map *m)
     } /* for Y(pos) */
 }
 
-char map_get_door_glyph(map *m, position pos)
+wchar_t map_get_door_glyph(map *m, position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
 
