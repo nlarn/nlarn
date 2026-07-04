@@ -93,6 +93,37 @@ void display_draw();
 void display_paint_screen(player *p);
 
 /**
+ * @brief Draw a single glyph at a given map position.
+ *
+ * The change becomes visible with the next screen refresh.
+ *
+ * @param pos The position to draw the glyph at.
+ * @param glyph The glyph to draw.
+ * @param fg The colour of the glyph.
+ */
+void display_paint_glyph(position pos, wchar_t glyph, colour_t fg);
+
+/**
+ * @brief Briefly show a glyph at a given map position.
+ *
+ * Used to animate rays and thrown objects: draws the glyph, refreshes
+ * the screen and pauses for a moment.
+ *
+ * @param pos The position to show the glyph at.
+ * @param glyph The glyph to show.
+ * @param fg The colour of the glyph.
+ * @param keep When false, the screen is repainted after the pause.
+ */
+void display_animate_glyph(position pos, wchar_t glyph, colour_t fg, bool keep);
+
+/**
+ * @brief Pause the game for the given time.
+ *
+ * @param ms The pause duration in milliseconds.
+ */
+void display_nap(guint ms);
+
+/**
  * Generic inventory display function
  *
  * @param title Window title

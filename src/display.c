@@ -639,6 +639,29 @@ void display_draw()
     doupdate();
 }
 
+void display_paint_glyph(position pos, wchar_t glyph, colour_t fg)
+{
+    (void)mvaddch(Y(pos), X(pos), glyph | COLOR_PAIR(fg));
+}
+
+void display_nap(guint ms)
+{
+    napms(ms);
+}
+
+void display_animate_glyph(position pos, wchar_t glyph, colour_t fg, bool keep)
+{
+    display_paint_glyph(pos, glyph, fg);
+    display_draw();
+
+    /* sleep a while to show the glyph's position */
+    napms(100);
+
+    /* repaint the screen unless requested otherwise */
+    if (!keep)
+        display_paint_screen(nlarn->p);
+}
+
 static int item_sort_normal(gconstpointer a, gconstpointer b, gpointer data)
 {
     return item_sort(a, b, data, false);
