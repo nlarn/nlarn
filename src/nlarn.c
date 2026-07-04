@@ -131,6 +131,40 @@ static const gchar *nlarn_userdir()
 }
 
 /* initialize runtime environment */
+/**
+ * Return the path of a data file, preferring locale-specific variants.
+ *
+ * For each of the user's configured languages (e.g. "de_DE", "de"), the
+ * file name with the language appended as a suffix (e.g. "nlarn.msg.de")
+ * is probed; the first existing file wins. The unlocalised file name is
+ * returned when no localised variant is available.
+ *
+ * @param filename The name of the file inside the game's lib directory.
+ * @return The path of the file to use (newly allocated).
+ */
+static const char *locale_filename(const char *filename)
+{
+    const gchar * const *languages = g_get_language_names();
+
+    for (guint idx = 0; languages[idx] != NULL; idx++)
+    {
+        /* the final entry "C" refers to the untranslated file */
+        if (strcmp(languages[idx], "C") == 0)
+            break;
+
+        g_autofree char *localized = g_strdup_printf("%s.%s",
+                filename, languages[idx]);
+        char *path = g_build_filename(nlarn_libdir, localized, NULL);
+
+        if (g_file_test(path, G_FILE_TEST_IS_REGULAR))
+            return path;
+
+        g_free(path);
+    }
+
+    return g_build_filename(nlarn_libdir, filename, NULL);
+}
+
 static void nlarn_init(int argc, char *argv[])
 {
     /* determine paths and file names */
@@ -188,8 +222,8 @@ static void nlarn_init(int argc, char *argv[])
     bind_textdomain_codeset (PACKAGE, "UTF-8");
     textdomain (PACKAGE);
 
-    nlarn_mesgfile = g_build_filename(nlarn_libdir, mesgfile, NULL);
-    nlarn_helpfile = g_build_filename(nlarn_libdir, helpfile, NULL);
+    nlarn_mesgfile = locale_filename(mesgfile);
+    nlarn_helpfile = locale_filename(helpfile);
     nlarn_mazefile = g_build_filename(nlarn_libdir, mazefile, NULL);
     nlarn_fortunes = g_build_filename(nlarn_libdir, fortunes, NULL);
 
