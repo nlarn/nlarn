@@ -47,18 +47,11 @@ static const char *default_config_file =
     "stats=\n"
     "\n"
     "# Item types to pick up automatically:\n"
-    "# \" amulets\n"
-    "# ' ammunition (ammunition once fired will be picked up anyway)\n"
-    "# [ armour\n"
-    "# + books\n"
-    "# ] containers\n"
-    "# * gems\n"
-    "# $ money\n"
-    "# ! potions\n"
-    "# = rings\n"
-    "# ? scrolls\n"
-    "# ( weapons\n"
-    "auto-pickup=\"+*$\n"
+    "# a semicolon-separated list of the following item type names\n"
+    "# IT_AMULET, IT_AMMO, IT_ARMOUR, IT_BOOK, IT_CONTAINER, IT_GEM,\n"
+    "# IT_GOLD, IT_POTION, IT_RING, IT_SCROLL, IT_WEAPON\n"
+    "# (ammunition once fired will be picked up anyway)\n"
+    "auto-pickup=IT_AMULET;IT_BOOK;IT_GEM;IT_GOLD;\n"
     "\n"
     "# UI Colour scheme\n"
     "# one of\n"
@@ -88,7 +81,7 @@ void free_config(const struct game_config config)
     if (config.name)        g_free(config.name);
     if (config.gender)      g_free(config.gender);
     if (config.stats)       g_free(config.stats);
-    if (config.auto_pickup) g_free(config.auto_pickup);
+    if (config.auto_pickup) g_strfreev(config.auto_pickup);
 }
 
 /* parse the command line */
@@ -117,12 +110,44 @@ void parse_commandline(int argc, char *argv[], struct game_config *config)
     g_option_context_free(context);
 }
 
+/* detect an auto-pickup configuration written by an older version of
+   the game, which stored the item glyphs in a single string */
+static bool autopickup_uses_glyphs(char *const *settings)
+{
+    return (settings != NULL && settings[0] != NULL
+            && !g_str_has_prefix(settings[0], "IT_"));
+}
+
+/* convert an old style auto-pickup configuration into
+   a list of item type names */
+static char **convert_autopickup_glyphs(char **settings)
+{
+    bool config[IT_MAX] = { 0 };
+
+    for (const char *glyph = settings[0]; *glyph != '\0'; glyph++)
+    {
+        for (item_t it = IT_NONE; it < IT_MAX; it++)
+        {
+            if (*glyph == item_glyph(it))
+                config[it] = true;
+        }
+    }
+
+    g_strfreev(settings);
+
+    return compose_autopickup_settings(config);
+}
+
 bool parse_ini_file(const char *filename, struct game_config *config)
 {
     /* ini file handling */
     GKeyFile *ini_file = g_key_file_new();
     GError *error = NULL;
     bool success;
+
+    /* the file needs to be rewritten, e.g. after converting values
+       written by an older version of the game */
+    bool update_config_file = false;
 
     /* config file defined on the command line precedes over the default */
     g_key_file_load_from_file(ini_file, filename,
@@ -148,8 +173,23 @@ bool parse_ini_file(const char *filename, struct game_config *config)
         if (!error) config->gender = gender;
         g_clear_error(&error);
 
-        char *auto_pickup = g_key_file_get_string(ini_file, "nlarn", "auto-pickup", &error);
-        if (!error) config->auto_pickup = auto_pickup;
+        char **auto_pickup = g_key_file_get_string_list(ini_file, "nlarn",
+                "auto-pickup", NULL, &error);
+        if (!error)
+        {
+            /* Configurations written by older versions stored the item
+               glyphs in a single string; convert those to a list of item
+               type names and update the configuration file. */
+            if (autopickup_uses_glyphs(auto_pickup))
+            {
+                config->auto_pickup = convert_autopickup_glyphs(auto_pickup);
+                update_config_file = true;
+            }
+            else
+            {
+                config->auto_pickup = auto_pickup;
+            }
+        }
         g_clear_error(&error);
 
         char *stats = g_key_file_get_string(ini_file, "nlarn", "stats", &error);
@@ -188,6 +228,10 @@ bool parse_ini_file(const char *filename, struct game_config *config)
     /* clean-up */
     g_key_file_free(ini_file);
 
+    /* persist converted legacy values */
+    if (update_config_file)
+        write_ini_file(filename, config);
+
     return success;
 }
 
@@ -205,7 +249,12 @@ void write_ini_file(const char *filename, struct game_config *config)
         g_key_file_set_string(kf,  "nlarn", "name",        config->name ? config->name : "");
         g_key_file_set_value(kf,   "nlarn", "gender",      config->gender ? config->gender : "");
         g_key_file_set_value(kf,   "nlarn", "stats",       config->stats ? config->stats : "");
-        g_key_file_set_value(kf,   "nlarn", "auto-pickup", config->auto_pickup ? config->auto_pickup : "");
+        if (config->auto_pickup)
+            g_key_file_set_string_list(kf, "nlarn", "auto-pickup",
+                    (const gchar * const *)config->auto_pickup,
+                    g_strv_length(config->auto_pickup));
+        else
+            g_key_file_set_value(kf, "nlarn", "auto-pickup", "");
         g_key_file_set_boolean(kf, "nlarn", "no-autosave", config->no_autosave);
         g_key_file_set_value(kf,   "nlarn", "colours",     ui_colour_scheme_string(config->colour_scheme));
 #ifdef SDLPDCURSES
@@ -221,36 +270,35 @@ void write_ini_file(const char *filename, struct game_config *config)
     g_key_file_free(kf);
 }
 
-void parse_autopickup_settings(const char *settings, bool config[IT_MAX])
+void parse_autopickup_settings(char *const *settings, bool config[IT_MAX])
 {
     /* reset configuration */
     memset(config, 0, sizeof(bool) * IT_MAX);
 
-    /* parsing config has failed, not settings string given */
+    /* parsing config has failed, no settings given */
     if (!settings) return;
 
-    for (guint idx = 0; idx < strlen(settings); idx++)
+    for (guint idx = 0; settings[idx] != NULL; idx++)
     {
-        for (item_t it = IT_NONE; it < IT_MAX; it++)
-        {
-            if (settings[idx] == item_glyph(it))
-            {
-                config[it] = true;
-            }
-        }
+        /* item_t_value() returns IT_NONE for unknown item type names */
+        item_t it = item_t_value(settings[idx]);
+
+        if (it > IT_NONE && it < IT_MAX)
+            config[it] = true;
     }
 }
 
-char *compose_autopickup_settings(const bool config[IT_MAX])
+char **compose_autopickup_settings(const bool config[IT_MAX])
 {
-    char *settings = g_malloc0(IT_MAX);
+    /* a NULL-terminated array of item type names */
+    char **settings = g_new0(char *, IT_MAX + 1);
 
     int idx = 0;
     for (item_t it = IT_NONE; it < IT_MAX; it++)
     {
         if (config[it])
         {
-            settings[idx] = item_glyph(it);
+            settings[idx] = g_strdup(item_t_string(it));
             idx++;
         }
     }
@@ -443,7 +491,7 @@ void configure_defaults(const char *inifile)
                 if (config.auto_pickup)
                 {
                     parse_autopickup_settings(config.auto_pickup, conf);
-                    g_free(config.auto_pickup);
+                    g_strfreev(config.auto_pickup);
                 }
 
                 display_config_autopickup(conf);
@@ -454,7 +502,7 @@ void configure_defaults(const char *inifile)
 
             /* clear auto-pickup */
             case 'D':
-                if (config.auto_pickup) g_free(config.auto_pickup);
+                if (config.auto_pickup) g_strfreev(config.auto_pickup);
                 config.auto_pickup = NULL;
                 break;
 
