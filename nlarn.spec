@@ -22,7 +22,7 @@ mkdir -p %{buildroot}/%{_bindir}
 mkdir -p %{buildroot}/%{_datadir}/%{name}
 mkdir -p %{buildroot}/var/games/%{name}
 install -g games -o games -m 2755 nlarn %{buildroot}/%{_bindir}
-install lib/fortune lib/maze lib/nlarn.hlp* lib/nlarn.msg* %{buildroot}/%{_datadir}/%{name}
+install lib/fortune* lib/maze lib/nlarn.hlp* lib/nlarn.msg* %{buildroot}/%{_datadir}/%{name}
 touch %{buildroot}/var/games/%{name}/highscores
 cp -va lib/locale %{buildroot}%{_datadir}/
 %find_lang %{name}

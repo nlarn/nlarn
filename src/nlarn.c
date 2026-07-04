@@ -225,7 +225,7 @@ static void nlarn_init(int argc, char *argv[])
     nlarn_mesgfile = locale_filename(mesgfile);
     nlarn_helpfile = locale_filename(helpfile);
     nlarn_mazefile = g_build_filename(nlarn_libdir, mazefile, NULL);
-    nlarn_fortunes = g_build_filename(nlarn_libdir, fortunes, NULL);
+    nlarn_fortunes = locale_filename(fortunes);
 
     /*
      * We need to parse the command line here, as we might get a custom

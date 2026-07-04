@@ -125,7 +125,7 @@ ifneq ($(GITREV),)
   SRCPKG    = nlarn-$(VERSION).tar.gz
   PACKAGE   = $(DIRNAME)_$(OS).$(ARCH).$(ARCHIVE_SUFFIX)
   MAINFILES = nlarn$(SUFFIX) README.html LICENSE Changelog.html
-  LIBFILES += lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.*
+  LIBFILES += lib/fortune* lib/maze lib/maze_doc.txt lib/nlarn.*
   LIBFILES += lib/locale
 endif
 
