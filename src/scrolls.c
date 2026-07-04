@@ -31,31 +31,31 @@ DEFINE_ENUM(scroll_t, SCROLL_TYPE_ENUM)
 const magic_scroll_data scrolls[ST_MAX] =
 {
     /* ID                   name                  effect               price store_stock */
-    { ST_BLANK, N_("blank paper"),        ET_NONE,               100, 0 },
-    { ST_ENCH_ARMOUR, N_("enchant armour"),     ET_NONE,               100, 1 },
-    { ST_ENCH_WEAPON, N_("enchant weapon"),     ET_NONE,               100, 1 },
-    { ST_ENLIGHTENMENT, N_("enlightenment"),      ET_ENLIGHTENMENT,      800, 0 },
-    { ST_CREATE_MONSTER, N_("create monster"),     ET_NONE,               100, 0 },
-    { ST_CREATE_ARTIFACT, N_("create artifact"),    ET_NONE,               400, 0 },
-    { ST_AGGRAVATE_MONSTER, N_("aggravate monsters"), ET_AGGRAVATE_MONSTER,  100, 0 },
-    { ST_TIMEWARP, N_("time warp"),          ET_NONE,               800, 0 },
-    { ST_TELEPORT, N_("teleportation"),      ET_NONE,               250, 3 },
-    { ST_AWARENESS, N_("expanded awareness"), ET_AWARENESS,          250, 1 },
-    { ST_SPEED, N_("speed"),              ET_SPEED,              250, 0 },
-    { ST_HEAL_MONSTER, N_("monster healing"),    ET_NONE,               100, 0 },
-    { ST_SPIRIT_PROTECTION, N_("spirit protection"),  ET_SPIRIT_PROTECTION,  400, 0 },
-    { ST_UNDEAD_PROTECTION, N_("undead protection"),  ET_UNDEAD_PROTECTION,  400, 0 },
-    { ST_STEALTH, N_("stealth"),            ET_STEALTH,            400, 0 },
-    { ST_MAPPING, N_("magic mapping"),      ET_NONE,               250, 3 },
-    { ST_HOLD_MONSTER, N_("hold monsters"),      ET_NONE,               800, 0 },
-    { ST_GEM_PERFECTION, N_("gem perfection"),     ET_NONE,              3000, 0 },
-    { ST_SPELL_EXTENSION, N_("spell extension"),    ET_NONE,               800, 0 },
-    { ST_IDENTIFY, N_("identify"),           ET_NONE,               400, 3 },
-    { ST_REMOVE_CURSE, N_("remove curse"),       ET_NONE,               250, 0 },
-    { ST_ANNIHILATION, N_("annihilation"),       ET_NONE,              3000, 0 },
-    { ST_PULVERIZATION, N_("pulverization"),      ET_NONE,               800, 0 },
-    { ST_LIFE_PROTECTION, N_("life protection"),    ET_LIFE_PROTECTION,   3000, 0 },
-    { ST_GENOCIDE_MONSTER,  "genocide monster",   ET_NONE,              3000, 0 },
+    { ST_BLANK, NC_("scroll", "blank paper"),        ET_NONE,               100, 0 },
+    { ST_ENCH_ARMOUR, NC_("scroll", "enchant armour"),     ET_NONE,               100, 1 },
+    { ST_ENCH_WEAPON, NC_("scroll", "enchant weapon"),     ET_NONE,               100, 1 },
+    { ST_ENLIGHTENMENT, NC_("scroll", "enlightenment"),      ET_ENLIGHTENMENT,      800, 0 },
+    { ST_CREATE_MONSTER, NC_("scroll", "create monster"),     ET_NONE,               100, 0 },
+    { ST_CREATE_ARTIFACT, NC_("scroll", "create artifact"),    ET_NONE,               400, 0 },
+    { ST_AGGRAVATE_MONSTER, NC_("scroll", "aggravate monsters"), ET_AGGRAVATE_MONSTER,  100, 0 },
+    { ST_TIMEWARP, NC_("scroll", "time warp"),          ET_NONE,               800, 0 },
+    { ST_TELEPORT, NC_("scroll", "teleportation"),      ET_NONE,               250, 3 },
+    { ST_AWARENESS, NC_("scroll", "expanded awareness"), ET_AWARENESS,          250, 1 },
+    { ST_SPEED, NC_("scroll", "speed"),              ET_SPEED,              250, 0 },
+    { ST_HEAL_MONSTER, NC_("scroll", "monster healing"),    ET_NONE,               100, 0 },
+    { ST_SPIRIT_PROTECTION, NC_("scroll", "spirit protection"),  ET_SPIRIT_PROTECTION,  400, 0 },
+    { ST_UNDEAD_PROTECTION, NC_("scroll", "undead protection"),  ET_UNDEAD_PROTECTION,  400, 0 },
+    { ST_STEALTH, NC_("scroll", "stealth"),            ET_STEALTH,            400, 0 },
+    { ST_MAPPING, NC_("scroll", "magic mapping"),      ET_NONE,               250, 3 },
+    { ST_HOLD_MONSTER, NC_("scroll", "hold monsters"),      ET_NONE,               800, 0 },
+    { ST_GEM_PERFECTION, NC_("scroll", "gem perfection"),     ET_NONE,              3000, 0 },
+    { ST_SPELL_EXTENSION, NC_("scroll", "spell extension"),    ET_NONE,               800, 0 },
+    { ST_IDENTIFY, NC_("scroll", "identify"),           ET_NONE,               400, 3 },
+    { ST_REMOVE_CURSE, NC_("scroll", "remove curse"),       ET_NONE,               250, 0 },
+    { ST_ANNIHILATION, NC_("scroll", "annihilation"),       ET_NONE,              3000, 0 },
+    { ST_PULVERIZATION, NC_("scroll", "pulverization"),      ET_NONE,               800, 0 },
+    { ST_LIFE_PROTECTION, NC_("scroll", "life protection"),    ET_LIFE_PROTECTION,   3000, 0 },
+    { ST_GENOCIDE_MONSTER,  NC_("scroll", "genocide monster"), ET_NONE, 3000, 0 },
 };
 
 static int scroll_with_effect(player *p, item *r_scroll);
@@ -230,7 +230,7 @@ item_usage_result scroll_read(struct player *p, item *r_scroll)
         if (!p->identified_scrolls[ST_PULVERIZATION])
         {
             log_add_entry(nlarn->log, _("This is a scroll of %s. "),
-                          scroll_name(r_scroll));
+                          scroll_name_gen(r_scroll));
         }
 
         if (spell_vaporize_rock(NULL, p))
@@ -550,7 +550,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
     if (!player_item_known(p, r_scroll))
     {
         g_string_append_printf(msg, _("This is a scroll of %s. "),
-                               scroll_name(r_scroll));
+                               scroll_name_gen(r_scroll));
     }
 
     g_string_append(msg, _("Which monster do you want to genocide (enter its glyph)?"));

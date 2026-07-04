@@ -610,7 +610,9 @@ static int building_scribe_scroll(player *p)
     for (i = 0; i < ST_MAX; i++)
     {
         if (g_strcmp0(new_scroll, scrolls[i].name) == 0
-                || g_strcmp0(new_scroll, _(scrolls[i].name)) == 0)
+                || g_strcmp0(new_scroll,
+                    noun_phrase(g_dpgettext2(NULL, "scroll", scrolls[i].name),
+                                ART_NONE, GC_NOM, false, false)) == 0)
             break;
     }
 
@@ -642,7 +644,9 @@ static int building_scribe_scroll(player *p)
     {
         char *msg = g_strdup_printf(_("You do not possess the %d gold necessary "
             "to acquire the scroll of %s. For now, the scribes shall keep "
-            "their quills dry."), price, _(scrolls[i].name));
+            "their quills dry."), price,
+            noun_phrase(g_dpgettext2(NULL, "scroll", scrolls[i].name),
+                        ART_NONE, GC_NOM, false, false));
 
         display_show_message(_("School"), msg, 0);
         g_free(msg);
@@ -651,7 +655,9 @@ static int building_scribe_scroll(player *p)
     }
 
     g_snprintf(question, 80, _("The crafting of a scroll of %s demands a fee of"
-        " %d gold.\nWould that be agreeable to you?"), _(scrolls[i].name), price);
+        " %d gold.\nWould that be agreeable to you?"),
+        noun_phrase(g_dpgettext2(NULL, "scroll", scrolls[i].name),
+                    ART_NONE, GC_NOM, false, false), price);
 
     if (!display_get_yesno(question, _("School"), NULL, NULL))
     {
@@ -675,11 +681,11 @@ static int building_scribe_scroll(player *p)
 
     /* writing a scroll takes 10 mobuls */
     player_make_move(p, 10 * MOBUL, false, _("waiting for the scribes to write a "
-            "scroll of %s for you"), scroll_name(blank));
+            "scroll of %s for you"), scroll_name_gen(blank));
 
     log_add_entry(nlarn->log,
             _("The scribes have completed a scroll of %s on your behalf."),
-            scroll_name(blank));
+            scroll_name_gen(blank));
 
     if (split)
         inv_add(&p->inventory, blank);

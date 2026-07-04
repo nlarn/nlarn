@@ -819,7 +819,7 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
         {
             g_string_append_printf(desc, (!singular && it->count > 1)
                         ? _("scrolls of %s") : _("scroll of %s"),
-                    item_desc_get(it, known));
+                    noun_genitive_attribute(item_desc_get(it, known)));
         }
         else
         {
@@ -1824,7 +1824,7 @@ static const char *item_desc_get(item *it, int known)
 
     case IT_SCROLL:
         if (known)
-            return scroll_name(it);
+            return scroll_name_raw(it);
         else
             return scroll_desc(it->id);
 

@@ -114,4 +114,21 @@ gboolean noun_has_class(const char *noun);
  */
 const char *noun_plural(const char *noun);
 
+/**
+ * @brief Render a translated noun as a genitive attribute.
+ *
+ * English composes item names with of-templates ("scroll of %s");
+ * translations may render the embedded name as a definite genitive
+ * attribute instead. For nouns carrying grammar metadata the definite
+ * genitive is built ("identify" = "f:Identifikation" becomes "der
+ * Identifikation", to be inserted into "f:Schriftrolle %1$s|..."); the
+ * attribute is invariant across the surrounding phrase's own cases.
+ * Nouns without metadata are returned unchanged, as English of-templates
+ * take the plain noun.
+ *
+ * @param noun The translated noun.
+ * @return The genitive attribute (owned by the phrase buffer ring).
+ */
+const char *noun_genitive_attribute(const char *noun);
+
 #endif

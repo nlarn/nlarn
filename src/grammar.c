@@ -471,6 +471,15 @@ const char *noun_plural(const char *noun)
     return phrase->str;
 }
 
+const char *noun_genitive_attribute(const char *noun)
+{
+    if (noun_has_class(noun))
+        return noun_phrase(noun, ART_DEF, GC_GEN, false, false);
+
+    /* English fallback: "of <noun>" templates take the plain noun */
+    return noun;
+}
+
 gboolean noun_has_class(const char *noun)
 {
     g_autofree char *marker = noun_class(noun);
