@@ -294,8 +294,11 @@ GPtrArray *text_wrap(const char *str, const unsigned width, const unsigned inden
                 last_pos = cpos;
             }
 
-            /* increase the string length if not inside or at the end of a tag */
-            if (!in_tag && (str[spos + cpos] != '`'))
+            /* increase the string length if not inside or at the end of a
+               tag; UTF-8 continuation bytes do not count as they do not
+               occupy a column of their own */
+            if (!in_tag && (str[spos + cpos] != '`')
+                    && (str[spos + cpos] & 0xC0) != 0x80)
                 llen++;
 
             /* move the current working position */

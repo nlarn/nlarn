@@ -17,6 +17,7 @@
  */
 
 #include <ctype.h>
+#include <locale.h>
 #include <glib.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -70,6 +71,10 @@ const int DISPLAY_WINDOW_MAX_WIDTH = 78;
 
 void display_init()
 {
+    /* Initialise the locale to enable correct output of multi-byte
+       characters (both text and glyphs) with ncursesw. */
+    setlocale(LC_ALL, "");
+
 #ifdef NCURSES_VERSION
     /*
      * Don't wait for trailing key codes after an ESC key is pressed.
@@ -3284,22 +3289,19 @@ static attr_t mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
     /* restore the previously used attribute or use the default */
     attr_t attr = (currattr == COLOURLESS) ? defattr : currattr;
 
-    for (guint pos = 0; pos < strlen(msg); pos++)
+    const char *pos = msg;
+    while (*pos != '\0')
     {
         /* parse tags */
-        if (msg[pos] == '`')
+        if (*pos == '`')
         {
-            /* position of the tag terminator */
-            guint tpos;
-
-            /* find position of tag terminator */
-            for (tpos = pos + 1; msg[tpos] != '`'; tpos++) {
-                /* ensure we found the delimiter before the end of the string */
-                g_assert(msg[tpos] != 0);
-            };
+            /* find the tag terminator; it must exist before
+               the end of the string */
+            const char *tend = strchr(pos + 1, '`');
+            g_assert(tend != NULL);
 
             /* extract the tag value */
-            char *tval = g_strndup(&msg[pos + 1], tpos - pos - 1);
+            char *tval = g_strndup(pos + 1, tend - pos - 1);
 
             /* find colour value for the tag content */
             if (strcmp(tval, "end") == 0)
@@ -3311,15 +3313,16 @@ static attr_t mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
             g_free(tval);
 
             /* advance position over the end of the tag */
-            pos = tpos + 1;
+            pos = tend + 1;
+            continue;
         }
 
-        /* the end of the string might be reached in the tag parser */
-        if (pos >= strlen(msg))
-            break;
+        /* print the message character wise, as a character
+           may be encoded as a multi-byte UTF-8 sequence */
+        waddwach(win, g_utf8_get_char(pos), PAIR_NUMBER(attr), attr & ~A_COLOR);
 
-        /* print the message character wise */
-        waddch(win, msg[pos] | attr);
+        /* advance to the beginning of the next character */
+        pos = g_utf8_next_char(pos);
     }
 
     /* clean assembled string */
