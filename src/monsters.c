@@ -1947,7 +1947,7 @@ void monster_polymorph(monster *m, int max_level)
         {
             /* briefly display the new monster before it dies */
             display_paint_screen(nlarn->p);
-            g_usleep(250000);
+            display_nap(250);
 
             switch (old_elem)
             {

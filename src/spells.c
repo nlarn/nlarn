@@ -1327,7 +1327,7 @@ static bool spell_make_wall(spell *s __attribute__((unused)), player *p)
                 {
                     /* briefly display the new monster before it dies */
                     display_paint_screen(nlarn->p);
-                    g_usleep(250000);
+                    display_nap(250);
 
                     log_add_entry(nlarn->log, "The %s is trapped in the wall!",
                                   monster_get_name(m));

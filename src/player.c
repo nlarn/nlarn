@@ -1175,7 +1175,7 @@ void player_die(player *p, player_cod cause_type, guint cause)
         display_paint_screen(p);
 
         /* sleep a second */
-        g_usleep(1000000);
+        display_nap(1000);
 
         /* flush keyboard input buffer */
         flushinp();
