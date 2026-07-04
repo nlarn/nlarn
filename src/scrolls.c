@@ -427,8 +427,8 @@ static int scroll_enchant_armour(player *p, item *r_scroll)
     {
         if (r_scroll->blessed)
         {
-            log_add_entry(nlarn->log, _("Your %s glows brightly for a moment."),
-                          armour_name(*armour));
+            log_add_entry(nlarn->log, _("%s glows brightly for a moment."),
+                          armour_name_art(*armour, ART_POSS, GC_NOM, true));
 
             (*armour)->rusty = false;
             (*armour)->burnt = false;
@@ -445,8 +445,8 @@ static int scroll_enchant_armour(player *p, item *r_scroll)
         }
         else
         {
-            log_add_entry(nlarn->log, _("Your %s glows for a moment."),
-                          armour_name(*armour));
+            log_add_entry(nlarn->log, _("%s glows for a moment."),
+                          armour_name_art(*armour, ART_POSS, GC_NOM, true));
         }
 
         /* blessed scroll never overenchants */
@@ -468,8 +468,8 @@ static int scroll_enchant_weapon(player *p, item *r_scroll)
         if (r_scroll->blessed)
         {
             log_add_entry(nlarn->log,
-                          _("Your %s glows brightly for a moment."),
-                          weapon_name(p->eq_weapon));
+                          _("%s glows brightly for a moment."),
+                          weapon_name_art(p->eq_weapon, ART_POSS, GC_NOM, true));
 
             p->eq_weapon->rusty = false;
             p->eq_weapon->burnt = false;
@@ -483,8 +483,8 @@ static int scroll_enchant_weapon(player *p, item *r_scroll)
         else
         {
             log_add_entry(nlarn->log,
-                          _("Your %s glisters for a moment."),
-                          weapon_name(p->eq_weapon));
+                          _("%s glisters for a moment."),
+                          weapon_name_art(p->eq_weapon, ART_POSS, GC_NOM, true));
         }
 
         /* blessed scroll never overenchants */
@@ -758,8 +758,10 @@ static int scroll_identify(player *p, item *r_scroll)
             player_item_identify(p, NULL, it);
 
             desc = item_describe(it, true, false, false);
+            gchar *desc_nom = item_describe_gc(it, true, false, false, GC_NOM);
             log_add_entry(nlarn->log, (it->count > 1) ? _("These are %s.") :
-                          _("This is %s."), desc);
+                          _("This is %s."), desc_nom);
+            g_free(desc_nom);
             g_free(desc);
 
             if (inv_length_filtered(p->inventory, item_filter_unid) == 0)
@@ -827,7 +829,8 @@ static int scroll_remove_curse(player *p, item *r_scroll)
             item *it = inv_get_filtered(p->inventory, 0, item_filter_cursed);
 
             // Get the description before uncursing the item.
-            gchar *buf = item_describe(it, player_item_known(p, it), false, true);
+            gchar *buf = item_describe_gc(it, player_item_known(p, it),
+                                          false, true, GC_NOM);
             buf[0] = g_ascii_toupper(buf[0]);
             log_add_entry(nlarn->log, it->count == 1
                           ? _("%s glows in a white light.")

@@ -1378,7 +1378,7 @@ static void building_item_sell(player *p, inventory **inv, item *it)
     if (it->count > 1)
     {
         g_snprintf(text, 80, _("How many %s do you want to buy?"),
-                it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type));
+                it->type == IT_AMMO ? ammo_name_pl(it) : item_name_pl(it->type));
 
         /* get count */
         guint count = display_get_count(text, it->count);
@@ -1494,11 +1494,14 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
         if (display_get_yesno(message, NULL, NULL, NULL))
         {
             player_item_identify(p, NULL, it);
-            /* upper case first letter */
-            name_unknown[0] = g_ascii_toupper(name_unknown[0]);
-            gchar *name_known = item_describe(it, player_item_known(p, it), true, false);
 
-            log_add_entry(nlarn->log, _("%s is %s."), name_unknown, name_known);
+            gchar *name_nom = item_describe_gc(it, false, false, true, GC_NOM);
+            name_nom[0] = g_ascii_toupper(name_nom[0]);
+            gchar *name_known = item_describe_gc(it, player_item_known(p, it),
+                                                 true, false, GC_NOM);
+
+            log_add_entry(nlarn->log, _("%s is %s."), name_nom, name_known);
+            g_free(name_nom);
             g_free(name_known);
 
             building_player_charge(p, price);
@@ -1557,8 +1560,11 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
             it->corroded = 0;
             it->rusty = 0;
 
-            name[0] = g_ascii_toupper(name[0]);
-            log_add_entry(nlarn->log, _("%s has been repaired."), name);
+            gchar *name_nom = item_describe_gc(it, player_item_known(p, it),
+                                               false, true, GC_NOM);
+            name_nom[0] = g_ascii_toupper(name_nom[0]);
+            log_add_entry(nlarn->log, _("%s has been repaired."), name_nom);
+            g_free(name_nom);
             building_player_charge(p, price);
 
             p->stats.gold_spent_id_repair += price;
@@ -1605,7 +1611,7 @@ static void building_item_buy(player *p, inventory **inv, item *it)
     if (it->count > 1)
     {
         g_snprintf(question, 120, _("How many %s do you want to sell for %d gold?"),
-                it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type), price);
+                it->type == IT_AMMO ? ammo_name_pl(it) : item_name_pl(it->type), price);
 
         /* get count */
         count = display_get_count(question, it->count);

@@ -1573,8 +1573,8 @@ char *item_detailed_description(item *it, bool known, bool shop)
     switch (it->type)
     {
     case IT_AMMO:
-        g_string_append_printf(desc, _("Ammunition for %ss\n"),
-                               _(ammo_class_name[ammo_class(it)]));
+        g_string_append_printf(desc, _("Ammunition for %s\n"),
+                               noun_plural(_(ammo_class_name[ammo_class(it)])));
 
         if (it->bonus_known)
         {
@@ -1790,11 +1790,12 @@ static const char *item_desc_get(item *it, int known)
             return item_material_adjective(item_material(it));
 
     case IT_AMMO:
-        return ammo_name(it);
+        return ammo_name_raw(it);
 
     case IT_ARMOUR:
         if (!known && armour_disguise(it) != AT_MAX)
-            return _(armours[armour_disguise(it)].name);
+            return noun_phrase(_(armours[armour_disguise(it)].name),
+                               ART_NONE, GC_NOM, false, false);
         else
             return armour_name(it);
 
@@ -1829,7 +1830,7 @@ static const char *item_desc_get(item *it, int known)
         return (char *)gem_name(it);
 
     case IT_WEAPON:
-        return weapon_name(it);
+        return weapon_name_raw(it);
 
     default:
         return "";

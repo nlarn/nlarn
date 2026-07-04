@@ -83,8 +83,8 @@ void container_open(player *p, inventory **inv __attribute__((unused)), item *co
         g_free(container_desc);
 
         /* same description, this time definite */
-        container_desc = item_describe(container, player_item_known(p, container),
-                                       true, true);
+        container_desc = item_describe_gc(container,
+                player_item_known(p, container), true, true, GC_NOM);
 
         /* and the first char has to be upper case */
         container_desc[0] = g_ascii_toupper(container_desc[0]);
@@ -194,11 +194,10 @@ void container_item_add(player *p, inventory **inv, item *element)
     if (element->count > 1)
     {
         /* use the item type plural name except for ammunition */
-        gchar *q = (element->type == IT_AMMO)
-            ? g_strdup_printf(_("How many %ss do you want to put into %s?"),
-                    ammo_name(element), container_desc)
-            : g_strdup_printf(_("How many %s do you want to put into %s?"),
-                    item_name_pl(element->type), container_desc);
+        gchar *q = g_strdup_printf(_("How many %s do you want to put into %s?"),
+                (element->type == IT_AMMO)
+                    ? ammo_name_pl(element) : item_name_pl(element->type),
+                container_desc);
 
         guint count = display_get_count(q, element->count);
         g_free(q);
@@ -262,11 +261,9 @@ void container_item_unpack(player *p, inventory **inv, item *element)
     if (element->count > 1)
     {
         /* use the item type plural name except for ammunition */
-        gchar *q = (element->type == IT_AMMO)
-            ? g_strdup_printf(_("How many %ss do you want to take out?"),
-                    ammo_name(element))
-            : g_strdup_printf(_("How many %s do you want to take out?"),
-                    item_name_pl(element->type));
+        gchar *q = g_strdup_printf(_("How many %s do you want to take out?"),
+                (element->type == IT_AMMO)
+                    ? ammo_name_pl(element) : item_name_pl(element->type));
 
         guint count = display_get_count(q, element->count);
         g_free(q);
@@ -386,7 +383,7 @@ bool container_untrap(player *p)
     if (container == NULL)
         return false;
 
-    char *desc = item_describe(container, true, true, true);
+    char *desc = item_describe_gc(container, true, true, true, GC_NOM);
 
     if (!container->cursed && !container->blessed_known)
     {

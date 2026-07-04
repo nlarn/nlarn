@@ -111,13 +111,17 @@ int weapon_fire(struct player *p)
     }
 
     /* wielding a weapon, describe it */
-    gchar *wdesc = item_describe(weapon, player_item_known(p, weapon), true, true);
+    gchar *wdesc = item_describe_gc(weapon, player_item_known(p, weapon),
+                                    true, true, GC_DAT);
 
     /* check if it is a ranged weapon */
     if (!weapon_is_ranged(weapon))
     {
-        wdesc[0] = g_ascii_toupper(wdesc[0]);
-        log_add_entry(nlarn->log, "%s is not a ranged weapon!", wdesc);
+        gchar *wdesc_nom = item_describe_gc(weapon,
+                player_item_known(p, weapon), true, true, GC_NOM);
+        wdesc_nom[0] = g_ascii_toupper(wdesc_nom[0]);
+        log_add_entry(nlarn->log, _("%s is not a ranged weapon!"), wdesc_nom);
+        g_free(wdesc_nom);
         g_free(wdesc);
         return false;
     }
@@ -135,7 +139,8 @@ int weapon_fire(struct player *p)
     {
         gchar *adesc = item_describe(ammo, player_item_known(p, ammo),
                                      true, false);
-        log_add_entry(nlarn->log, _("You cannot fire %s with %s."), adesc, wdesc);
+        log_add_entry(nlarn->log, _("You cannot fire %s with %s."),
+                adesc, wdesc);
 
         g_free(wdesc);
         g_free(adesc);
@@ -483,7 +488,8 @@ bool weapon_throw_pos_hit(const GList *traj,
     bool weapon_handled = false;
     bool retval = false;
 
-    gchar *wdesc = item_describe(weapon, player_item_known(nlarn->p, weapon), true, true);
+    gchar *wdesc = item_describe_gc(weapon,
+            player_item_known(nlarn->p, weapon), true, true, GC_NOM);
     wdesc[0] = g_ascii_toupper(wdesc[0]);
 
     if (m != NULL)

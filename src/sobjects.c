@@ -274,8 +274,9 @@ int player_altar_pray(player *p)
             if (p->eq_weapon->bonus < 3)
             {
                 /* enchant weapon */
-                log_add_entry(nlarn->log, _("Your %s vibrates for a moment."),
-                              weapon_name(p->eq_weapon));
+                log_add_entry(nlarn->log, _("%s vibrates for a moment."),
+                              weapon_name_art(p->eq_weapon,
+                                  ART_POSS, GC_NOM, true));
 
                 item_enchant(p->eq_weapon);
                 break;
@@ -287,8 +288,8 @@ int player_altar_pray(player *p)
         {
             if ((*armour)->bonus < 3)
             {
-                log_add_entry(nlarn->log, _("Your %s vibrates for a moment."),
-                              armour_name(*armour));
+                log_add_entry(nlarn->log, _("%s vibrates for a moment."),
+                              armour_name_art(*armour, ART_POSS, GC_NOM, true));
 
                 item_enchant(*armour);
                 break;

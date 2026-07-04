@@ -21,6 +21,8 @@
 
 #include <libintl.h>
 
+#include "grammar.h"
+
 #include "effects.h"
 #include "items.h"
 #include "utils.h"
@@ -117,7 +119,10 @@ static inline guint armour_ac(const item *armour)
 
 /* macros */
 
-#define armour_name(armour)     (gettext(armours[(armour)->id].name))
+#define armour_name(armour)     (noun_phrase( \
+        gettext(armours[(armour)->id].name), ART_NONE, GC_NOM, false, false))
+#define armour_name_art(armour, article, gcase, capitalise) (noun_phrase( \
+        gettext(armours[(armour)->id].name), article, gcase, false, capitalise))
 #define armour_class(armour)    (armours[(armour)->id].category)
 #define armour_material(armour) (armours[(armour)->id].material)
 #define armour_weight(armour)   (armours[(armour)->id].weight)

@@ -38,6 +38,7 @@ typedef enum article_t
     ART_NONE,  /* no article: "orc" */
     ART_DEF,   /* definite article: "the orc" */
     ART_INDEF, /* indefinite article: "an orc" */
+    ART_POSS,  /* second person possessive: "your orc" */
 } article_t;
 
 /**
@@ -100,5 +101,17 @@ const char *noun_phrase(const char *noun, article_t article,
  * @return true if the noun carries a noun class marker.
  */
 gboolean noun_has_class(const char *noun);
+
+/**
+ * @brief Return the bare plural form of a translated noun.
+ *
+ * For nouns carrying grammar metadata the plural form is taken from
+ * the metadata; other nouns are pluralised by appending an "s"
+ * (English rules).
+ *
+ * @param noun The translated noun.
+ * @return The plural form (owned by the phrase buffer ring).
+ */
+const char *noun_plural(const char *noun);
 
 #endif

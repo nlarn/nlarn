@@ -2377,8 +2377,8 @@ static bool monster_shoot_hit(const GList *traj,
     position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);
     map *mp = game_map(nlarn, Z(pos));
 
-    gchar *adesc = item_describe(ammo, player_item_known(nlarn->p, ammo),
-                                 true, true);
+    gchar *adesc = item_describe_gc(ammo,
+            player_item_known(nlarn->p, ammo), true, true, GC_NOM);
     adesc[0] = g_ascii_toupper(adesc[0]);
 
     monster *hit_m = map_get_monster_at(mp, pos);
@@ -3329,8 +3329,8 @@ static bool monster_item_disenchant(monster *m, struct player *p)
     // Blessed items have a 50% chance of resisting the disenchantment.
     if (it->blessed && chance(50))
     {
-        gchar *desc = item_describe(it, player_item_known(nlarn->p, it),
-                                    (it->count == 1), true);
+        gchar *desc = item_describe_gc(it, player_item_known(nlarn->p, it),
+                                    (it->count == 1), true, GC_NOM);
 
         desc[0] = g_ascii_toupper(desc[0]);
         log_add_entry(nlarn->log, (it->count == 1)

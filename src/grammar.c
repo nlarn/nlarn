@@ -64,7 +64,10 @@ typedef struct article_table
     GArray *classes;   /* article_class per translated noun class */
 } article_table;
 
-static article_table tables[2] = { { false, NULL }, { false, NULL } };
+static article_table tables[3] =
+{
+    { false, NULL }, { false, NULL }, { false, NULL }
+};
 
 static const char *article_table_spec(article_t article)
 {
@@ -75,6 +78,15 @@ static const char *article_table_spec(article_t article)
            the format. German example:
            "m:der,den,dem,des\nf:die,die,der,der\nn:das,das,dem,des" */
         return C_("grammar", "the");
+    }
+
+    if (article == ART_POSS)
+    {
+        /* TRANSLATORS: The second person singular possessive pronoun.
+           May be translated to a table of noun classes with declined
+           forms; see grammar.c for the format. German example:
+           "m:dein,deinen,deinem,deines\nf:deine,deine,deiner,deiner\n..." */
+        return C_("grammar", "your");
     }
 
     /* TRANSLATORS: The indefinite article, chosen by the noun's initial
@@ -88,7 +100,14 @@ static const char *article_table_spec(article_t article)
 /* parse the translated article table specification */
 static article_table *get_article_table(article_t article)
 {
-    article_table *table = &tables[(article == ART_DEF) ? 0 : 1];
+    article_table *table;
+
+    switch (article)
+    {
+        case ART_DEF:  table = &tables[0]; break;
+        case ART_POSS: table = &tables[2]; break;
+        default:       table = &tables[1]; break;
+    }
 
     if (table->loaded)
         return table;
@@ -215,7 +234,9 @@ static int ending_table_index(article_t article)
     switch (article)
     {
         case ART_DEF:   return 1;
-        case ART_INDEF: return 2;
+        /* possessive pronouns decline like the indefinite article */
+        case ART_INDEF:
+        case ART_POSS:  return 2;
         default:        return 0;
     }
 }
@@ -426,11 +447,28 @@ static void append_english(GString *phrase, article_t article,
                     strchr("aeiouAEIOU", noun[0]) ? "an " : "a ");
         break;
 
+    case ART_POSS:
+        g_string_append(phrase, "your ");
+        break;
+
     default:
         break;
     }
 
     g_string_append(phrase, noun);
+}
+
+const char *noun_plural(const char *noun)
+{
+    if (noun_has_class(noun))
+        return noun_phrase(noun, ART_NONE, GC_NOM, true, false);
+
+    /* English fallback: append an "s" */
+    GString *phrase = phrase_buffer();
+    g_string_append(phrase, noun);
+    g_string_append_c(phrase, 's');
+
+    return phrase->str;
 }
 
 gboolean noun_has_class(const char *noun)

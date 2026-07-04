@@ -1432,8 +1432,8 @@ int player_attack(player *p, monster *m)
         /* The weapon may break during usage */
         if (p->eq_weapon && chance(item_fragility(p->eq_weapon)))
         {
-            log_add_entry(nlarn->log, _("`LIGHT_MAGENTA`Your %s breaks!`end`"),
-                          weapon_name(p->eq_weapon));
+            log_add_entry(nlarn->log, _("`LIGHT_MAGENTA`%s breaks!`end`"),
+                          weapon_name_art(p->eq_weapon, ART_POSS, GC_NOM, true));
 
             item *weapon = p->eq_weapon;
 
@@ -3878,9 +3878,9 @@ void player_item_drop(player *p, inventory **inv, item *it)
     if (it->count > 1)
     {
         /* use the item type plural name except for ammunition */
-        buf = g_strdup_printf("Drop how many %s%s?",
-                              (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
-                              (it->type == IT_AMMO ? "s" : ""));
+        buf = g_strdup_printf(_("Drop how many %s?"),
+                              (it->type == IT_AMMO
+                                  ? ammo_name_pl(it) : item_name_pl(it->type)));
 
         count = display_get_count(buf, it->count);
         g_free(buf);
@@ -4553,9 +4553,9 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, bool ask)
     if (ask && (it->count > 1))
     {
         /* use the item type plural name except for ammunition */
-        buf = g_strdup_printf(_("Pick up how many %s%s?"),
-                              (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
-                              (it->type == IT_AMMO ? "s" : ""));
+        buf = g_strdup_printf(_("Pick up how many %s?"),
+                              (it->type == IT_AMMO
+                                  ? ammo_name_pl(it) : item_name_pl(it->type)));
 
         guint count = display_get_count(buf, it->count);
         g_free(buf);

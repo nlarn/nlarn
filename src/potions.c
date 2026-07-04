@@ -451,7 +451,8 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
     if (it != NULL)
     {
         // Get the description before blessing the item.
-        gchar *buf = item_describe(it, player_item_known(p, it), false, true);
+        gchar *buf = item_describe_gc(it, player_item_known(p, it),
+                                      false, true, GC_NOM);
 
         if (it->blessed)
         {
@@ -497,7 +498,8 @@ bool potion_pos_hit(const GList *traj,
     monster *m = map_get_monster_at(pmap, pos);
 
     /* get the description of the potion */
-    gchar *desc = item_describe(potion, player_item_known(nlarn->p, potion), true, true);
+    gchar *desc = item_describe_gc(potion,
+            player_item_known(nlarn->p, potion), true, true, GC_NOM);
     /* upper case first letter of the description */
     desc[0] = g_ascii_toupper(desc[0]);
 
