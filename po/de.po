@@ -54,83 +54,83 @@ msgstr ""
 
 #: src/armour.c:29
 msgid "cloak"
-msgstr "Umhang"
+msgstr "m:Umhang;;;Umhangs"
 
 #: src/armour.c:30
 msgid "pair of leather gloves"
-msgstr "Lederhandschuhe"
+msgstr "n:Paar Lederhandschuhe;;;Paars Lederhandschuhe"
 
 #: src/armour.c:31
 msgid "pair of leather boots"
-msgstr "Lederstiefel"
+msgstr "n:Paar Lederstiefel;;;Paars Lederstiefel"
 
 #: src/armour.c:32
 msgid "leather helmet"
-msgstr "Lederhelm"
+msgstr "m:Lederhelm;;;Lederhelms"
 
 #: src/armour.c:33
 msgid "leather armour"
-msgstr "Lederrüstung"
+msgstr "f:Lederrüstung"
 
 #: src/armour.c:34
 msgid "wooden shield"
-msgstr ""
+msgstr "m:Holzschild;;;Holzschilds"
 
 #: src/armour.c:35
 msgid "studded leather armour"
-msgstr ""
+msgstr "f:Nietenlederrüstung"
 
 #: src/armour.c:36
 msgid "ring mail"
-msgstr ""
+msgstr "m:Ringpanzer;;;Ringpanzers"
 
 #: src/armour.c:37
 msgid "large shield"
-msgstr ""
+msgstr "m:Großschild;;;Großschilds"
 
 #: src/armour.c:38
 msgid "chainmail hood"
-msgstr ""
+msgstr "f:Kettenhaube"
 
 #: src/armour.c:39
 msgid "chain mail"
-msgstr ""
+msgstr "n:Kettenhemd;;;Kettenhemds"
 
 #: src/armour.c:40
 msgid "splint mail"
-msgstr ""
+msgstr "m:Schienenpanzer;;;Schienenpanzers"
 
 #: src/armour.c:41
 msgid "plate helmet"
-msgstr ""
+msgstr "m:Plattenhelm;;;Plattenhelms"
 
 #: src/armour.c:42
 msgid "pair of plate boots"
-msgstr ""
+msgstr "n:Paar Plattenstiefel;;;Paars Plattenstiefel"
 
 #: src/armour.c:43
 msgid "pair of boots of speed"
-msgstr ""
+msgstr "n:Paar Eilstiefel;;;Paars Eilstiefel"
 
 #: src/armour.c:44
 msgid "plate mail"
-msgstr ""
+msgstr "m:Plattenpanzer;;;Plattenpanzers"
 
 #: src/armour.c:45
 msgid "stainless shield"
-msgstr ""
+msgstr "m:Edelstahlschild;;;Edelstahlschilds"
 
 #: src/armour.c:46
 msgid "stainless plate mail"
-msgstr ""
+msgstr "m:Edelstahl-Plattenpanzer;;;Edelstahl-Plattenpanzers"
 
 #: src/armour.c:47
 msgid "cloak of invisibility"
-msgstr ""
+msgstr "m:Unsichtbarkeitsumhang;;;Unsichtbarkeitsumhangs"
 
 #: src/armour.c:48
 msgid "elven chain"
-msgstr ""
+msgstr "n:Elfenkettenhemd;;;Elfenkettenhemds"
 
 #: src/buildings.c:33
 msgid ""
@@ -2345,12 +2345,72 @@ msgstr ""
 msgid "noted"
 msgstr "notiert"
 
-#: src/items.c:1576
+#: src/items.c:1420 src/spells.c:168
+#, c-format
+msgid "%s resists."
+msgstr "%s widersteht."
+
+#: src/items.c:1420
+#, c-format
+msgid "%s resist."
+msgstr "%s widerstehen."
+
+#: src/items.c:1433
+#, c-format
+msgid "%s shatters."
+msgstr "%s zerspringt."
+
+#: src/items.c:1433
+#, c-format
+msgid "%s shatter."
+msgstr "%s zerspringen."
+
+#: src/items.c:1443
+#, c-format
+msgid "%s burns."
+msgstr "%s verbrennt."
+
+#: src/items.c:1443
+#, c-format
+msgid "%s burn."
+msgstr "%s verbrennen."
+
+#: src/items.c:1451
+#, c-format
+msgid "%s corrodes."
+msgstr "%s wird zerfressen."
+
+#: src/items.c:1451
+#, c-format
+msgid "%s corrode."
+msgstr "%s werden zerfressen."
+
+#: src/items.c:1458
+#, c-format
+msgid "%s rusts."
+msgstr "%s rostet."
+
+#: src/items.c:1458
+#, c-format
+msgid "%s rust."
+msgstr "%s rosten."
+
+#: src/items.c:1482
+#, c-format
+msgid "%s is destroyed."
+msgstr "%s wird zerstört."
+
+#: src/items.c:1482
+#, c-format
+msgid "%s are destroyed."
+msgstr "%s werden zerstört."
+
+#: src/items.c:1579
 #, c-format
 msgid "Ammunition for %s\n"
 msgstr "Munition für %s\n"
 
-#: src/items.c:1581 src/items.c:1631
+#: src/items.c:1584 src/items.c:1634
 #, c-format
 msgid ""
 "Damage:   +%d\n"
@@ -2359,7 +2419,7 @@ msgstr ""
 "Schaden:      +%d\n"
 "Genauigkeit:  +%d\n"
 
-#: src/items.c:1587 src/items.c:1638
+#: src/items.c:1590 src/items.c:1641
 #, c-format
 msgid ""
 "Base damage: +%d\n"
@@ -2368,7 +2428,7 @@ msgstr ""
 "Grundschaden: +%d\n"
 "Grundgenauigkeit: +%d\n"
 
-#: src/items.c:1598
+#: src/items.c:1601
 #, c-format
 msgid ""
 "%s\n"
@@ -2377,49 +2437,49 @@ msgstr ""
 "%s\n"
 "Zauberstufe: %d\n"
 
-#: src/items.c:1610
+#: src/items.c:1613
 msgid "two-handed"
 msgstr "zweihändig"
 
-#: src/items.c:1613
+#: src/items.c:1616
 msgid "ranged"
 msgstr "Fernkampf"
 
-#: src/items.c:1616
+#: src/items.c:1619
 msgid "unique"
 msgstr "einzigartig"
 
-#: src/items.c:1622
+#: src/items.c:1625
 #, c-format
 msgid "%s weapon\n"
 msgstr "%s Waffe\r\n"
 
-#: src/items.c:1648
+#: src/items.c:1651
 #, c-format
 msgid "Armour class: %d\n"
 msgstr "Rüstungsklasse: %d\n"
 
-#: src/items.c:1652
+#: src/items.c:1655
 #, c-format
 msgid "Base AC: %d\n"
 msgstr "Grund-RK: %d\n"
 
-#: src/items.c:1661
+#: src/items.c:1664
 #, c-format
 msgid "Notes: %s\n"
 msgstr "Notizen: %s\n"
 
-#: src/items.c:1663
+#: src/items.c:1666
 #, c-format
 msgid "Weight:   %.2f kg\n"
 msgstr "Gewicht:  %.2f kg\n"
 
-#: src/items.c:1666
+#: src/items.c:1669
 #, c-format
 msgid "Material: %s"
 msgstr "Material: %s"
 
-#: src/items.c:1673
+#: src/items.c:1676
 #, c-format
 msgid ""
 "\n"
@@ -2428,7 +2488,7 @@ msgstr ""
 "\n"
 "Preis:    je %d Gold"
 
-#: src/items.c:1673
+#: src/items.c:1676
 #, c-format
 msgid ""
 "\n"
@@ -3720,7 +3780,7 @@ msgstr "Du beginnst, in Richtung Boden zu driften!"
 #: src/player.c:848
 #, c-format
 msgid "You are %s."
-msgstr "Du bist %s."
+msgstr "Du bist damit beschäftigt, %s."
 
 #: src/player.c:940
 msgid "You are unable to hold your weapon."
@@ -4102,7 +4162,7 @@ msgstr "Du trägst keine Ausrüstung."
 #: src/player.c:2827 src/player.c:2926
 #, c-format
 msgid "putting %s on"
-msgstr ""
+msgstr "%s anzulegen"
 
 #: src/player.c:2835 src/player.c:2933
 #, c-format
@@ -4112,7 +4172,7 @@ msgstr "Du legst %s an."
 #: src/player.c:2843
 #, c-format
 msgid "putting %s into the quiver"
-msgstr ""
+msgstr "%s in den Köcher zu stecken"
 
 #: src/player.c:2851
 #, c-format
@@ -4122,7 +4182,7 @@ msgstr "Du steckst %s in deinen Köcher."
 #: src/player.c:2895
 #, c-format
 msgid "wearing %s"
-msgstr ""
+msgstr "%s anzuziehen"
 
 #: src/player.c:2910
 #, c-format
@@ -4132,7 +4192,7 @@ msgstr "Du trägst jetzt %s."
 #: src/player.c:2952
 #, c-format
 msgid "wielding %s"
-msgstr ""
+msgstr "%s in die Hand zu nehmen"
 
 #: src/player.c:2960
 #, c-format
@@ -4141,7 +4201,7 @@ msgstr "Du führst jetzt %s."
 
 #: src/player.c:2981
 msgid "welds itself into your hand."
-msgstr "verschmilzt mit deiner Hand."
+msgstr "schweißt sich an deine Hand."
 
 #: src/player.c:2982
 msgid "feels uncomfortably cold!"
@@ -4155,7 +4215,7 @@ msgstr "Anscheinend ist das %s."
 #: src/player.c:3029 src/player.c:3164
 #, c-format
 msgid "removing %s"
-msgstr ""
+msgstr "%s abzulegen"
 
 #: src/player.c:3036 src/player.c:3171
 #, c-format
@@ -4165,7 +4225,7 @@ msgstr "Du entfernst %s."
 #: src/player.c:3047 src/player.c:3182
 #, c-format
 msgid "You can not remove %s.%s"
-msgstr ""
+msgstr "Du kannst %s nicht ablegen.%s"
 
 #: src/player.c:3048 src/player.c:3140 src/player.c:3183
 msgid " It appears to be cursed."
@@ -4174,7 +4234,7 @@ msgstr " Anscheinend ist es verflucht."
 #: src/player.c:3060
 #, c-format
 msgid "taking %s out of the quiver"
-msgstr ""
+msgstr "%s aus dem Köcher zu nehmen"
 
 #: src/player.c:3067
 #, c-format
@@ -4184,7 +4244,7 @@ msgstr "Du nimmst %s aus deinem Köcher."
 #: src/player.c:3122
 #, c-format
 msgid "taking %s off"
-msgstr ""
+msgstr "%s auszuziehen"
 
 #: src/player.c:3129
 #, c-format
@@ -4199,7 +4259,7 @@ msgstr "Du kannst %s nicht ablegen.%s"
 #: src/player.c:3206
 #, c-format
 msgid "putting %s away"
-msgstr ""
+msgstr "%s wegzustecken"
 
 #: src/player.c:3213
 #, c-format
@@ -4235,7 +4295,7 @@ msgstr "Du lässt %s fallen."
 #: src/player.c:3909
 #, c-format
 msgid "dropping %s"
-msgstr ""
+msgstr "%s fallen zu lassen"
 
 #: src/player.c:3960
 #, c-format
@@ -4326,7 +4386,7 @@ msgstr "Du hebst %s auf."
 #: src/player.c:4591
 #, c-format
 msgid "picking up %s"
-msgstr ""
+msgstr "%s aufzuheben"
 
 #: src/player.c:4920
 msgid "*) ignoring instakills\n"
@@ -4659,12 +4719,12 @@ msgstr ""
 #: src/potions.c:141
 #, c-format
 msgid "drinking %s"
-msgstr ""
+msgstr "%s zu trinken"
 
 #: src/potions.c:141
 #, c-format
 msgid "using %s"
-msgstr ""
+msgstr "%s zu benutzen"
 
 #: src/potions.c:158
 msgid "The potion is foul!"
@@ -5032,7 +5092,7 @@ msgstr ""
 #: src/scrolls.c:138 src/spells.c:1537
 #, c-format
 msgid "reading %s"
-msgstr ""
+msgstr "%s zu lesen"
 
 #: src/scrolls.c:158
 msgid "The scroll explodes!"
@@ -5741,11 +5801,6 @@ msgstr ""
 #: src/spells.c:166
 msgid "You can find out what this does for yourself"
 msgstr ""
-
-#: src/spells.c:168
-#, c-format
-msgid "%s resists."
-msgstr "%s widersteht."
 
 #: src/spells.c:174
 msgid "Protects the caster against spheres of annihilation"
@@ -6473,7 +6528,7 @@ msgstr ""
 #: src/traps.c:347
 #, c-format
 msgid "disabling the %s"
-msgstr ""
+msgstr "die %s zu entschärfen"
 
 #: src/traps.c:354
 #, c-format

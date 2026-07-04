@@ -2198,82 +2198,142 @@ msgstr ""
 msgid "noted"
 msgstr ""
 
-#: src/items.c:1576
+#: src/items.c:1420 src/spells.c:168
+#, c-format
+msgid "%s resists."
+msgstr ""
+
+#: src/items.c:1420
+#, c-format
+msgid "%s resist."
+msgstr ""
+
+#: src/items.c:1433
+#, c-format
+msgid "%s shatters."
+msgstr ""
+
+#: src/items.c:1433
+#, c-format
+msgid "%s shatter."
+msgstr ""
+
+#: src/items.c:1443
+#, c-format
+msgid "%s burns."
+msgstr ""
+
+#: src/items.c:1443
+#, c-format
+msgid "%s burn."
+msgstr ""
+
+#: src/items.c:1451
+#, c-format
+msgid "%s corrodes."
+msgstr ""
+
+#: src/items.c:1451
+#, c-format
+msgid "%s corrode."
+msgstr ""
+
+#: src/items.c:1458
+#, c-format
+msgid "%s rusts."
+msgstr ""
+
+#: src/items.c:1458
+#, c-format
+msgid "%s rust."
+msgstr ""
+
+#: src/items.c:1482
+#, c-format
+msgid "%s is destroyed."
+msgstr ""
+
+#: src/items.c:1482
+#, c-format
+msgid "%s are destroyed."
+msgstr ""
+
+#: src/items.c:1579
 #, c-format
 msgid "Ammunition for %s\n"
 msgstr ""
 
-#: src/items.c:1581 src/items.c:1631
+#: src/items.c:1584 src/items.c:1634
 #, c-format
 msgid ""
 "Damage:   +%d\n"
 "Accuracy: +%d\n"
 msgstr ""
 
-#: src/items.c:1587 src/items.c:1638
+#: src/items.c:1590 src/items.c:1641
 #, c-format
 msgid ""
 "Base damage: +%d\n"
 "Base accuracy: +%d\n"
 msgstr ""
 
-#: src/items.c:1598
+#: src/items.c:1601
 #, c-format
 msgid ""
 "%s\n"
 "Spell level: %d\n"
 msgstr ""
 
-#: src/items.c:1610
+#: src/items.c:1613
 msgid "two-handed"
 msgstr ""
 
-#: src/items.c:1613
+#: src/items.c:1616
 msgid "ranged"
 msgstr ""
 
-#: src/items.c:1616
+#: src/items.c:1619
 msgid "unique"
 msgstr ""
 
-#: src/items.c:1622
+#: src/items.c:1625
 #, c-format
 msgid "%s weapon\n"
 msgstr ""
 
-#: src/items.c:1648
+#: src/items.c:1651
 #, c-format
 msgid "Armour class: %d\n"
 msgstr ""
 
-#: src/items.c:1652
+#: src/items.c:1655
 #, c-format
 msgid "Base AC: %d\n"
 msgstr ""
 
-#: src/items.c:1661
+#: src/items.c:1664
 #, c-format
 msgid "Notes: %s\n"
 msgstr ""
 
-#: src/items.c:1663
+#: src/items.c:1666
 #, c-format
 msgid "Weight:   %.2f kg\n"
 msgstr ""
 
-#: src/items.c:1666
+#: src/items.c:1669
 #, c-format
 msgid "Material: %s"
 msgstr ""
 
-#: src/items.c:1673
+#: src/items.c:1676
 #, c-format
 msgid ""
 "\n"
 "Price:    %d gold each"
 msgstr ""
 
-#: src/items.c:1673
+#: src/items.c:1676
 #, c-format
 msgid ""
 "\n"
@@ -5536,11 +5596,6 @@ msgstr ""
 
 #: src/spells.c:166
 msgid "You can find out what this does for yourself"
-msgstr ""
-
-#: src/spells.c:168
-#, c-format
-msgid "%s resists."
 msgstr ""
 
 #: src/spells.c:174

@@ -1388,6 +1388,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
     bool destroyed = false;
     const char *erosion_desc = NULL;
     gchar *item_desc = NULL;
+    bool single = false;
 
     g_assert(it != NULL);
 
@@ -1399,11 +1400,13 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
     if (!material_affected(item_material(it), iet))
         return (it);
 
+    single = (it->count == 1);
+
     if (visible)
     {
         /* prepare item description before it has been affected */
-        item_desc = item_describe(it, player_item_known(nlarn->p, it),
-                                  (it->count == 1), true);
+        item_desc = item_describe_gc(it, player_item_known(nlarn->p, it),
+                                     single, true, GC_NOM);
 
         item_desc[0] = g_ascii_toupper(item_desc[0]);
     }
@@ -1413,8 +1416,8 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
     {
         if (visible)
         {
-            log_add_entry(nlarn->log, "%s resist%s.", item_desc,
-                          (it->count == 1) ? "s" : "");
+            log_add_entry(nlarn->log, single
+                          ? _("%s resists.") : _("%s resist."), item_desc);
 
             g_free(item_desc);
             it->blessed_known = true;
@@ -1427,7 +1430,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
     case IET_BURN:
         if (it->type == IT_POTION)
         {
-            erosion_desc = "shatter";
+            erosion_desc = single ? _("%s shatters.") : _("%s shatter.");
             destroyed = true;
         }
         else if (item_material(it) == IM_GLASS)
@@ -1437,7 +1440,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
         else
         {
             it->burnt++;
-            erosion_desc = "burn";
+            erosion_desc = single ? _("%s burns.") : _("%s burn.");
 
             if (it->burnt == 3) destroyed = true;
         }
@@ -1445,14 +1448,14 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
 
     case IET_CORRODE:
         it->corroded++;
-        erosion_desc = "corrode";
+        erosion_desc = single ? _("%s corrodes.") : _("%s corrode.");
 
         if (it->corroded == 3) destroyed = true;
         break;
 
     case IET_RUST:
         it->rusty++;
-        erosion_desc = "rust";
+        erosion_desc = single ? _("%s rusts.") : _("%s rust.");
 
         /* it's been very rusty already -> destroy */
         if (it->rusty == 3) destroyed = true;
@@ -1466,8 +1469,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
     if (erosion_desc != NULL && visible)
     {
         /* items has been eroded, describe the event if it is visible */
-        log_add_entry(nlarn->log, "%s %s%s.", item_desc,
-                      erosion_desc, (it->count == 1) ? "s" : "");
+        log_add_entry(nlarn->log, erosion_desc, item_desc);
     }
 
     if (destroyed)
@@ -1476,8 +1478,9 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
         if (visible)
         {
             /* describe the event if the item was visible */
-            log_add_entry(nlarn->log, "%s %s destroyed.", item_desc,
-                          is_are(it->count));
+            log_add_entry(nlarn->log, single
+                          ? _("%s is destroyed.") : _("%s are destroyed."),
+                          item_desc);
         }
 
         if (inv != NULL)
@@ -1794,10 +1797,9 @@ static const char *item_desc_get(item *it, int known)
 
     case IT_ARMOUR:
         if (!known && armour_disguise(it) != AT_MAX)
-            return noun_phrase(_(armours[armour_disguise(it)].name),
-                               ART_NONE, GC_NOM, false, false);
+            return _(armours[armour_disguise(it)].name);
         else
-            return armour_name(it);
+            return armour_name_raw(it);
 
     case IT_BOOK:
         if (known)

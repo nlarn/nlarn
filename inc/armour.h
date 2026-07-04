@@ -119,8 +119,9 @@ static inline guint armour_ac(const item *armour)
 
 /* macros */
 
+#define armour_name_raw(armour) (gettext(armours[(armour)->id].name))
 #define armour_name(armour)     (noun_phrase( \
-        gettext(armours[(armour)->id].name), ART_NONE, GC_NOM, false, false))
+        armour_name_raw(armour), ART_NONE, GC_NOM, false, false))
 #define armour_name_art(armour, article, gcase, capitalise) (noun_phrase( \
         gettext(armours[(armour)->id].name), article, gcase, false, capitalise))
 #define armour_class(armour)    (armours[(armour)->id].category)

@@ -2972,7 +2972,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
     if (it->cursed)
     {
         /* generate a new description with definite article */
-        desc = item_describe(it, known, true, true);
+        desc = item_describe_gc(it, known, true, true, GC_NOM);
 
         /* capitalize first letter */
         desc[0] = g_ascii_toupper(desc[0]);
