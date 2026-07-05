@@ -757,11 +757,17 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
         break;
 
     case IT_AMMO:
-        g_string_append_printf(desc,
-                               (!singular && it->count > 1) ? _("%ss") : "%s",
-                               item_desc_get(it, known));
+    {
+        const char *name = item_desc_get(it, known);
+        /* nouns with grammar metadata are pluralised by noun_phrase_adj()
+           below; only English names need the appended "s" here */
+        if (!singular && it->count > 1 && !noun_has_class(name))
+            g_string_append_printf(desc, "%ss", name);
+        else
+            g_string_append(desc, name);
         show_bonus = it->bonus_known;
         break;
+    }
 
     case IT_ARMOUR:
         g_string_append(desc, item_desc_get(it, known));

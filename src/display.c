@@ -1316,7 +1316,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             if (show_price)
             {
                 /* inside shop */
-                gchar *item_desc = item_describe(it, true, false, false);
+                gchar *item_desc = item_describe_gc(it, true, false, false, GC_NOM);
                 mvwaprintw(iwin->window, line, 1, attrs, " %-*s %5d gold ",
                           width - 15, item_desc, item_price(it));
 
@@ -1324,7 +1324,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
             else
             {
-                gchar *item_desc = item_describe(it, player_item_known(p, it), false, false);
+                gchar *item_desc = item_describe_gc(it, player_item_known(p, it),
+                        false, false, GC_NOM);
                 mvwaprintw(iwin->window, line, 1, attrs, " %-*s %c ",
                           width - 6, item_desc,
                           player_item_is_equipped(p, it) ? '*' : ' ');
