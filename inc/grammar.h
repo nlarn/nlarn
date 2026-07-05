@@ -47,7 +47,11 @@ typedef enum article_t
  * noun class marker (usually the noun's gender), and optional
  * additional forms for the oblique cases, separated by semicolons:
  *
- *     [<class>:]<nominative>[;<accusative>[;<dative>[;<genitive>]]]
+ *     [<class>:]<forms>[|<plural forms>]
+ *
+ * where <forms> and <plural forms> each are
+ *
+ *     <nominative>[;<accusative>[;<dative>[;<genitive>]]]
  *
  * The class marker consists of one to three lowercase letters; its
  * meaning is defined by the language's article tables, which are
@@ -56,7 +60,9 @@ typedef enum article_t
  *
  * Examples (German): "m:Ork" (der/den/dem Ork), "m:Drache;Drachen"
  * (der Drache, den/dem Drachen), "n:schwebende Auge;schwebende
- * Auge;schwebenden Auge" (das schwebende Auge, dem schwebenden Auge).
+ * Auge;schwebenden Auge" (das schwebende Auge, dem schwebenden Auge),
+ * "m:Trank;;;Tranks|Tränke;;Tränken" (der Trank, die Tränke, mit den
+ * Tränken).
  *
  * A tilde within a form marks the ending of a declinable adjective; it
  * is replaced with the appropriate ending from the language's
@@ -77,10 +83,22 @@ typedef enum article_t
  * @param noun The translated noun, possibly carrying grammar metadata.
  * @param article The article to prepend.
  * @param gcase The grammatical case to render.
+ * @param plural Render the plural forms. For nouns without grammar
+ *        metadata the given noun is expected to be plural already and
+ *        no indefinite article is prepended.
  * @param capitalise Capitalise the first letter (for sentence starts).
  * @return The assembled noun phrase.
  */
 const char *noun_phrase(const char *noun, article_t article,
-                        grammar_case gcase, gboolean capitalise);
+                        grammar_case gcase, gboolean plural,
+                        gboolean capitalise);
+
+/**
+ * @brief Check if a translated noun carries grammar metadata.
+ *
+ * @param noun The translated noun.
+ * @return true if the noun carries a noun class marker.
+ */
+gboolean noun_has_class(const char *noun);
 
 #endif

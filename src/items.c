@@ -675,7 +675,20 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, bool force_id)
     return order;
 }
 
-gchar *item_describe(item *it, bool known, bool singular, bool definite)
+const char *item_name_sg(item_t type)
+{
+    return noun_phrase(gettext(item_data[type].name_sg),
+                       ART_NONE, GC_NOM, false, false);
+}
+
+const char *item_name_pl(item_t type)
+{
+    return noun_phrase(gettext(item_data[type].name_pl),
+                       ART_NONE, GC_NOM, true, false);
+}
+
+gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
+                        grammar_case gcase)
 {
     GString *desc = g_string_new(NULL);
 
@@ -690,10 +703,11 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
     {
         struct item_type_data itd = item_data[it->type];
         if (it->count == 1)
-            g_string_append_printf(desc, "%s %s",
-                a_an(_(itd.name_sg)), _(itd.name_sg));
+            g_string_append(desc, noun_phrase(_(itd.name_sg),
+                    ART_INDEF, gcase, false, false));
         else
-            g_string_append_printf(desc, _("some %s"), _(itd.name_pl));
+            g_string_append_printf(desc, _("some %s"),
+                    noun_phrase(_(itd.name_pl), ART_NONE, gcase, true, false));
 
         return g_string_free(desc, false);
     }
@@ -726,6 +740,9 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
 
     g_strfreev(add_infos);
 
+    /* append the bonus after the noun phrase has been built */
+    bool show_bonus = false;
+
     switch (it->type)
     {
     case IT_AMULET:
@@ -741,21 +758,12 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
         g_string_append_printf(desc,
                                (!singular && it->count > 1) ? _("%ss") : "%s",
                                item_desc_get(it, known));
-
-        if (it->bonus_known)
-        {
-            g_string_append_printf(desc, " %+d", it->bonus);
-        }
+        show_bonus = it->bonus_known;
         break;
 
     case IT_ARMOUR:
         g_string_append(desc, item_desc_get(it, known));
-
-        if (it->bonus_known)
-        {
-            g_string_append_printf(desc, " %+d", it->bonus);
-        }
-
+        show_bonus = it->bonus_known;
         break;
 
     case IT_BOOK:
@@ -803,8 +811,7 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
             g_string_append_printf(desc, _("%s ring"), item_desc_get(it, known));
 
         /* display bonus if it is known */
-        if (it->bonus_known)
-            g_string_append_printf(desc, " %+d", it->bonus);
+        show_bonus = it->bonus_known;
         break;
 
     case IT_SCROLL:
@@ -829,9 +836,9 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
     case IT_WEAPON:
         if (weapon_is_unique(it))
         {
-            g_string_append_printf(desc,
-                                   weapon_needs_article(it) ? _("the %s") : "%s",
-                                   item_desc_get(it, known));
+            g_string_append(desc, noun_phrase(item_desc_get(it, known),
+                    weapon_needs_article(it) ? ART_DEF : ART_NONE,
+                    gcase, false, false));
 
             if (it->bonus_known || add_info != NULL)
             {
@@ -858,9 +865,7 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
         else
         {
             g_string_append(desc, item_desc_get(it, known));
-
-            if (it->bonus_known)
-                g_string_append_printf(desc, " %+d", it->bonus);
+            show_bonus = it->bonus_known;
         }
         break;
 
@@ -868,33 +873,84 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
         break;
     }
 
+    /* build the noun phrase unless the item is a unique weapon,
+       which received its article in the type switch above */
+    if (!(it->type == IT_WEAPON && weapon_is_unique(it)))
+    {
+        bool plural = (it->count > 1) && !singular;
+
+        if (noun_has_class(desc->str))
+        {
+            /* The description carries grammar metadata: build the phrase
+               and place the additional information as defined by the
+               translation. */
+            GString *phrase = g_string_new(NULL);
+
+            if (plural)
+            {
+                g_string_append_printf(phrase, "%s %s", int2str(it->count),
+                        noun_phrase(desc->str, ART_NONE, gcase, true, false));
+            }
+            else
+            {
+                g_string_append(phrase, noun_phrase(desc->str,
+                        definite ? ART_DEF : ART_INDEF, gcase, false, false));
+            }
+
+            if (show_bonus)
+                g_string_append_printf(phrase, " %+d", it->bonus);
+
+            if (add_info != NULL)
+            {
+                /* TRANSLATORS: placement of an item's status information
+                   (e.g. "blessed, rusty") relative to the item's noun
+                   phrase: %1$s is the status, %2$s the noun phrase. */
+                char *combined = g_strdup_printf(
+                        C_("item description", "%2$s (%1$s)"),
+                        add_info, phrase->str);
+                g_string_assign(phrase, combined);
+                g_free(combined);
+            }
+
+            g_string_free(desc, true);
+            desc = phrase;
+        }
+        else
+        {
+            /* English-style assembly: adjectives between article and noun */
+            if (show_bonus)
+                g_string_append_printf(desc, " %+d", it->bonus);
+
+            if (add_info != NULL)
+            {
+                g_string_prepend_c(desc, ' ');
+                g_string_prepend(desc, add_info);
+            }
+
+            /* prepend count or article */
+            gchar first_char = desc->str[0];
+            g_string_prepend_c(desc, ' ');
+
+            if (!plural)
+            {
+                g_string_prepend(desc, (const char *)(definite
+                            ? _("the") : a_an(&first_char)));
+            }
+            else
+            {
+                g_string_prepend(desc, int2str(it->count));
+            }
+        }
+    }
+    else if (show_bonus)
+    {
+        g_string_append_printf(desc, " %+d", it->bonus);
+    }
+
     if (it->notes)
     {
         g_string_append_printf(desc, " (%s)",
                                (strlen(it->notes) > 5 ? _("noted") : it->notes));
-    }
-
-    /* prepend additional information unless the item is a unique weapon */
-    if (!(it->type == IT_WEAPON && weapon_is_unique(it)))
-    {
-        if (add_info != NULL)
-        {
-            g_string_prepend_c(desc, ' ');
-            g_string_prepend(desc, add_info);
-        }
-
-        /* prepend count or article */
-        gchar first_char = desc->str[0];
-        g_string_prepend_c(desc, ' ');
-
-        if ((it->count == 1) || singular)
-        {
-            g_string_prepend(desc, (const char *)(definite ? _("the") : a_an(&first_char)));
-        }
-        else
-        {
-            g_string_prepend(desc, int2str(it->count));
-        }
     }
 
     /* free the additional information */

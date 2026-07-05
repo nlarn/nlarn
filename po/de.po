@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-05 10:05+0200\n"
+"POT-Creation-Date: 2026-07-05 10:10+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -40,7 +40,7 @@ msgstr ""
 msgid "dragon slaying"
 msgstr ""
 
-#: src/amulets.c:36 src/potions.c:56
+#: src/amulets.c:36
 msgid "power"
 msgstr ""
 
@@ -666,11 +666,11 @@ msgstr ""
 msgid "Shall we proceed, then?"
 msgstr "Sollen wir also fortfahren?"
 
-#: src/buildings.c:988 src/potions.c:57
+#: src/buildings.c:988
 msgid "poison"
 msgstr "Vergiftung"
 
-#: src/buildings.c:994 src/potions.c:49
+#: src/buildings.c:994
 msgid "blindness"
 msgstr "Blindheit"
 
@@ -682,7 +682,7 @@ msgstr "Krankheit"
 msgid "clumsiness"
 msgstr "Ungeschicklichkeit"
 
-#: src/buildings.c:1012 src/potions.c:45
+#: src/buildings.c:1012
 msgid "dizziness"
 msgstr "Schwindel"
 
@@ -979,19 +979,19 @@ msgstr "Ungültige Schriftgröße"
 
 #: src/container.c:32
 msgid "bag"
-msgstr "Beutel"
+msgstr "m:Beutel;;;Beutels"
 
 #: src/container.c:33
 msgid "casket"
-msgstr "Schatulle"
+msgstr "f:Schatulle"
 
 #: src/container.c:34
 msgid "chest"
-msgstr "Truhe"
+msgstr "f:Truhe"
 
 #: src/container.c:35
 msgid "crate"
-msgstr "Kiste"
+msgstr "f:Kiste"
 
 #: src/container.c:65 src/container.c:183
 #, c-format
@@ -1145,11 +1145,11 @@ msgstr "Amulette"
 
 #: src/display.c:1543 src/items.c:51
 msgid "ammunition"
-msgstr "Munition"
+msgstr "f:Munition"
 
 #: src/display.c:1544 src/items.c:52
 msgid "armour"
-msgstr "Rüstung"
+msgstr "f:Rüstung"
 
 #: src/display.c:1545 src/items.c:53
 msgid "books"
@@ -1537,7 +1537,7 @@ msgstr "Du kannst jetzt durch Wände gehen."
 msgid "You can no longer walk through walls."
 msgstr "Du kannst nicht mehr durch Wände gehen."
 
-#: src/effects.c:359 src/potions.c:59
+#: src/effects.c:359
 msgid "levitation"
 msgstr "Levitation"
 
@@ -1798,7 +1798,7 @@ msgstr "Du bist überladen!"
 msgid "You are no longer overloaded."
 msgstr "Du bist nicht mehr überladen."
 
-#: src/effects.c:529 src/items.c:710
+#: src/effects.c:529 src/items.c:724
 msgid "trapped"
 msgstr "gefangen"
 
@@ -1871,26 +1871,26 @@ msgstr ""
 #. of noun classes with declined article forms; see grammar.c for
 #. the format. German example:
 #. "m:der,den,dem,des\nf:die,die,der,der\nn:das,das,dem,des"
-#: src/grammar.c:75
+#: src/grammar.c:77
 msgctxt "grammar"
 msgid "the"
 msgstr ""
-"m:der,den,dem,des\n"
-"f:die,die,der,der\n"
-"n:das,das,dem,des"
+"m:der,den,dem,des|die,die,den,der\n"
+"f:die,die,der,der|die,die,den,der\n"
+"n:das,das,dem,des|die,die,den,der"
 
 #. TRANSLATORS: The indefinite article, chosen by the noun's initial
 #. letter when left untranslated. May be translated to a table of
 #. noun classes with declined article forms; see grammar.c for the
 #. format. German example:
 #. "m:ein,einen,einem,eines\nf:eine,eine,einer,einer\nn:ein,ein,einem,eines"
-#: src/grammar.c:83
+#: src/grammar.c:85
 msgctxt "grammar"
 msgid "a/an"
 msgstr ""
-"m:ein,einen,einem,eines\n"
-"f:eine,eine,einer,einer\n"
-"n:ein,ein,einem,eines"
+"m:ein,einen,einem,eines|\n"
+"f:eine,eine,einer,einer|\n"
+"n:ein,ein,einem,eines|"
 
 #. TRANSLATORS: The adjective ending table; see grammar.c for the
 #. format. Languages without declining adjectives leave this
@@ -1898,53 +1898,53 @@ msgstr ""
 #. "def:m=e,en,en,en;f=e,e,en,en;n=e,e,en,en\n"
 #. "indef:m=er,en,en,en;f=e,e,en,en;n=es,es,en,en\n"
 #. "none:m=er,en,em,en;f=e,e,er,er;n=es,es,em,en"
-#: src/grammar.c:219
+#: src/grammar.c:245
 msgctxt "grammar"
 msgid "adjective endings"
 msgstr ""
-"def:m=e,en,en,en;f=e,e,en,en;n=e,e,en,en\n"
-"indef:m=er,en,en,en;f=e,e,en,en;n=es,es,en,en\n"
-"none:m=er,en,em,en;f=e,e,er,er;n=es,es,em,en"
+"def:m=e,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=e,e,en,en|en,en,en,en\n"
+"indef:m=er,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=es,es,en,en|en,en,en,en\n"
+"none:m=er,en,em,en|e,e,en,er;f=e,e,er,er|e,e,en,er;n=es,es,em,en|e,e,en,er"
 
 #: src/items.c:50
 msgid "amulet"
-msgstr ""
+msgstr "n:Amulett;;;Amuletts"
 
 #: src/items.c:53
 msgid "book"
-msgstr ""
+msgstr "n:Buch;;;Buchs|Bücher;;Büchern"
 
 #: src/items.c:54
 msgid "container"
-msgstr ""
+msgstr "m:Behälter;;;Behälters"
 
 #: src/items.c:55
 msgid "gem"
-msgstr ""
+msgstr "m:Edelstein;;;Edelsteins|Edelsteine;;Edelsteinen"
 
 #: src/items.c:56
 msgid "coin"
-msgstr ""
+msgstr "f:Münze|Münzen"
 
 #: src/items.c:56
 msgid "coins"
-msgstr ""
+msgstr "Münzen"
 
 #: src/items.c:57
 msgid "potion"
-msgstr ""
+msgstr "m:Trank;;;Tranks|Tränke;;Tränken"
 
 #: src/items.c:58
 msgid "ring"
-msgstr ""
+msgstr "m:Ring;;;Rings|Ringe;;Ringen"
 
 #: src/items.c:59
 msgid "scroll"
-msgstr ""
+msgstr "f:Schriftrolle|Schriftrollen"
 
 #: src/items.c:60
 msgid "weapon"
-msgstr ""
+msgstr "f:Waffe|Waffen"
 
 #: src/items.c:66
 msgid "paper"
@@ -2070,177 +2070,178 @@ msgstr ""
 msgid "gemstone"
 msgstr ""
 
-#: src/items.c:696
+#: src/items.c:709
 #, c-format
 msgid "some %s"
-msgstr ""
+msgstr "einige %s"
 
-#: src/items.c:706 src/weapons.c:345
+#: src/items.c:720 src/weapons.c:345
 msgid "blessed"
 msgstr "gesegnet"
 
-#: src/items.c:712 src/weapons.c:350
+#: src/items.c:726 src/weapons.c:350
 msgid "cursed"
 msgstr "verflucht"
 
-#: src/items.c:714
+#: src/items.c:728
 msgid "uncursed"
 msgstr "unverflucht"
 
-#: src/items.c:717 src/weapons.c:324
+#: src/items.c:731 src/weapons.c:324
 msgid "burnt"
 msgstr "versengt"
 
-#: src/items.c:718
+#: src/items.c:732
 msgid "very burnt"
 msgstr "verschmort"
 
-#: src/items.c:719 src/weapons.c:330
+#: src/items.c:733 src/weapons.c:330
 msgid "corroded"
 msgstr "korrodiert"
 
-#: src/items.c:720
+#: src/items.c:734
 msgid "very corroded"
 msgstr "zerfressen"
 
-#: src/items.c:721 src/weapons.c:336
+#: src/items.c:735 src/weapons.c:336
 msgid "rusty"
 msgstr "rostig"
 
-#: src/items.c:722
+#: src/items.c:736
 msgid "very rusty"
 msgstr "verrostet"
 
-#: src/items.c:734
+#: src/items.c:751
 #, c-format
 msgid "amulet of %s"
 msgstr ""
 
-#: src/items.c:734
+#: src/items.c:751
 #, c-format
 msgid "talisman of %s"
 msgstr ""
 
-#: src/items.c:737
+#: src/items.c:754
 #, c-format
 msgid "%s amulet"
 msgstr ""
 
-#: src/items.c:742
+#: src/items.c:759
 #, c-format
 msgid "%ss"
 msgstr ""
 
-#: src/items.c:765
+#: src/items.c:773
 #, c-format
 msgid "books of %s"
 msgstr ""
 
-#: src/items.c:765
+#: src/items.c:773
 #, c-format
 msgid "book of %s"
 msgstr ""
 
-#: src/items.c:770
+#: src/items.c:778
 #, c-format
 msgid "%s books"
 msgstr ""
 
-#: src/items.c:770
+#: src/items.c:778
 #, c-format
 msgid "%s book"
 msgstr ""
 
-#: src/items.c:779
+#: src/items.c:787
 #, c-format
 msgid "%d carats %s"
 msgstr ""
 
-#: src/items.c:783
+#: src/items.c:791
 msgid "gold pieces"
 msgstr "Goldstücke"
 
-#: src/items.c:783
+#: src/items.c:791
 msgid "gold piece"
-msgstr "Goldstück"
+msgstr "n:Goldstück;;;Goldstücks"
 
-#: src/items.c:790
+#: src/items.c:798
 #, c-format
 msgid "potions of %s"
-msgstr ""
+msgstr "%s"
 
-#: src/items.c:790
+#: src/items.c:798
 #, c-format
 msgid "potion of %s"
-msgstr ""
+msgstr "%s"
 
-#: src/items.c:795
+#: src/items.c:803
 #, c-format
 msgid "%s potions"
-msgstr ""
+msgstr "m:%1$s Trank;;;%1$s Tranks|%1$s Tränke;;%1$s Tränken"
 
-#: src/items.c:795
+#: src/items.c:803
 #, c-format
 msgid "%s potion"
-msgstr ""
+msgstr "m:%1$s Trank;;;%1$s Tranks|%1$s Tränke;;%1$s Tränken"
 
-#: src/items.c:801
+#: src/items.c:809
 #, c-format
 msgid "ring of %s"
 msgstr ""
 
-#: src/items.c:803
+#: src/items.c:811
 #, c-format
 msgid "%s ring"
 msgstr ""
 
-#: src/items.c:814
+#: src/items.c:821
 #, c-format
 msgid "scrolls of %s"
 msgstr ""
 
-#: src/items.c:814
+#: src/items.c:821
 #, c-format
 msgid "scroll of %s"
 msgstr ""
 
-#: src/items.c:821
+#: src/items.c:828
 msgid "unlabelled scrolls"
 msgstr "unbeschriftete Schriftrollen"
 
-#: src/items.c:821
+#: src/items.c:828
 msgid "unlabelled scroll"
 msgstr "unbeschriftete Schriftrolle"
 
-#: src/items.c:824
+#: src/items.c:831
 #, c-format
 msgid "scrolls labelled %s"
 msgstr "Spruchrollen beschriftet mit %s"
 
-#: src/items.c:824
+#: src/items.c:831
 #, c-format
 msgid "scroll labelled %s"
 msgstr "Spruchrolle beschriftet mit %s"
 
-#: src/items.c:833
+#: src/items.c:909
 #, c-format
-msgid "the %s"
-msgstr ""
+msgctxt "item description"
+msgid "%2$s (%1$s)"
+msgstr "%2$s (%1$s)"
 
-#: src/items.c:874
-msgid "noted"
-msgstr "notiert"
-
-#: src/items.c:892
+#: src/items.c:937
 msgid "the"
 msgstr ""
 
-#: src/items.c:1520
+#: src/items.c:953
+msgid "noted"
+msgstr "notiert"
+
+#: src/items.c:1576
 #, c-format
 msgid "Ammunition for %ss\n"
 msgstr ""
 
-#: src/items.c:1525 src/items.c:1575
+#: src/items.c:1581 src/items.c:1631
 #, c-format
 msgid ""
 "Damage:   +%d\n"
@@ -2249,7 +2250,7 @@ msgstr ""
 "Schaden:      +%d\n"
 "Genauigkeit:  +%d\n"
 
-#: src/items.c:1531 src/items.c:1582
+#: src/items.c:1587 src/items.c:1638
 #, c-format
 msgid ""
 "Base damage: +%d\n"
@@ -2258,7 +2259,7 @@ msgstr ""
 "Grundschaden: +%d\n"
 "Grundgenauigkeit: +%d\n"
 
-#: src/items.c:1542
+#: src/items.c:1598
 #, c-format
 msgid ""
 "%s\n"
@@ -2267,49 +2268,49 @@ msgstr ""
 "%s\n"
 "Zauberstufe: %d\n"
 
-#: src/items.c:1554
+#: src/items.c:1610
 msgid "two-handed"
 msgstr "zweihändig"
 
-#: src/items.c:1557
+#: src/items.c:1613
 msgid "ranged"
 msgstr "Fernkampf"
 
-#: src/items.c:1560
+#: src/items.c:1616
 msgid "unique"
 msgstr "einzigartig"
 
-#: src/items.c:1566
+#: src/items.c:1622
 #, c-format
 msgid "%s weapon\n"
 msgstr "%s Waffe\r\n"
 
-#: src/items.c:1592
+#: src/items.c:1648
 #, c-format
 msgid "Armour class: %d\n"
 msgstr "Rüstungsklasse: %d\n"
 
-#: src/items.c:1596
+#: src/items.c:1652
 #, c-format
 msgid "Base AC: %d\n"
 msgstr "Grund-RK: %d\n"
 
-#: src/items.c:1605
+#: src/items.c:1661
 #, c-format
 msgid "Notes: %s\n"
 msgstr "Notizen: %s\n"
 
-#: src/items.c:1607
+#: src/items.c:1663
 #, c-format
 msgid "Weight:   %.2f kg\n"
 msgstr "Gewicht:  %.2f kg\n"
 
-#: src/items.c:1610
+#: src/items.c:1666
 #, c-format
 msgid "Material: %s"
 msgstr "Material: %s"
 
-#: src/items.c:1617
+#: src/items.c:1673
 #, c-format
 msgid ""
 "\n"
@@ -2318,7 +2319,7 @@ msgstr ""
 "\n"
 "Preis:    je %d Gold"
 
-#: src/items.c:1617
+#: src/items.c:1673
 #, c-format
 msgid ""
 "\n"
@@ -4222,293 +4223,365 @@ msgstr ""
 "Möchtest du sie überschreiben?"
 
 #: src/potions.c:35
+msgctxt "potion"
 msgid "holy water"
-msgstr ""
+msgstr "n:Weihwasser"
 
-#: src/potions.c:36 src/spells.c:75
+#: src/potions.c:36
+msgctxt "potion"
 msgid "sleep"
-msgstr ""
+msgstr "m:Schlaftrank;;;Schlaftranks|Schlaftränke;;Schlaftränken"
 
-#: src/potions.c:37 src/spells.c:112
+#: src/potions.c:37
+msgctxt "potion"
 msgid "healing"
-msgstr ""
+msgstr "m:Heiltrank;;;Heiltranks|Heiltränke;;Heiltränken"
 
 #: src/potions.c:38
+msgctxt "potion"
 msgid "raise level"
-msgstr ""
+msgstr "m:Aufstiegstrank;;;Aufstiegstranks|Aufstiegstränke;;Aufstiegstränken"
 
 #: src/potions.c:39
+msgctxt "potion"
 msgid "increase ability"
-msgstr ""
+msgstr "m:Verbesserungstrank;;;Verbesserungstranks|Verbesserungstränke;;Verbesserungstränken"
 
 #: src/potions.c:40
+msgctxt "potion"
 msgid "gain strength"
-msgstr ""
+msgstr "m:Stärketrank;;;Stärketranks|Stärketränke;;Stärketränken"
 
 #: src/potions.c:41
+msgctxt "potion"
 msgid "learning"
-msgstr ""
+msgstr "m:Lerntrank;;;Lerntranks|Lerntränke;;Lerntränken"
 
 #: src/potions.c:42
+msgctxt "potion"
 msgid "gain wisdom"
-msgstr ""
+msgstr "m:Weisheitstrank;;;Weisheitstranks|Weisheitstränke;;Weisheitstränken"
 
 #: src/potions.c:43
+msgctxt "potion"
 msgid "sturdiness"
-msgstr ""
+msgstr "m:Zähigkeitstrank;;;Zähigkeitstranks|Zähigkeitstränke;;Zähigkeitstränken"
 
 #: src/potions.c:44
+msgctxt "potion"
 msgid "recovery"
-msgstr ""
+msgstr "m:Genesungstrank;;;Genesungstranks|Genesungstränke;;Genesungstränken"
+
+#: src/potions.c:45
+msgctxt "potion"
+msgid "dizziness"
+msgstr "m:Schwindeltrank;;;Schwindeltranks|Schwindeltränke;;Schwindeltränken"
 
 #: src/potions.c:46
+msgctxt "potion"
 msgid "object detection"
-msgstr ""
+msgstr "m:Gegenstandsortungstrank;;;Gegenstandsortungstranks|Gegenstandsortungstränke;;Gegenstandsortungstränken"
 
 #: src/potions.c:47
+msgctxt "potion"
 msgid "monster detection"
-msgstr ""
+msgstr "m:Monsterortungstrank;;;Monsterortungstranks|Monsterortungstränke;;Monsterortungstränken"
 
 #: src/potions.c:48
+msgctxt "potion"
 msgid "forgetfulness"
-msgstr ""
+msgstr "m:Vergessenstrank;;;Vergessenstranks|Vergessenstränke;;Vergessenstränken"
+
+#: src/potions.c:49
+msgctxt "potion"
+msgid "blindness"
+msgstr "m:Blindheitstrank;;;Blindheitstranks|Blindheitstränke;;Blindheitstränken"
 
 #: src/potions.c:50
+msgctxt "potion"
 msgid "confusion"
-msgstr ""
+msgstr "m:Verwirrungstrank;;;Verwirrungstranks|Verwirrungstränke;;Verwirrungstränken"
 
 #: src/potions.c:51
+msgctxt "potion"
 msgid "heroism"
-msgstr ""
+msgstr "m:Heldentrank;;;Heldentranks|Heldentränke;;Heldentränken"
 
 #: src/potions.c:52
+msgctxt "potion"
 msgid "giant strength"
-msgstr ""
+msgstr "m:Riesenkrafttrank;;;Riesenkrafttranks|Riesenkrafttränke;;Riesenkrafttränken"
 
 #: src/potions.c:53
+msgctxt "potion"
 msgid "fire resistance"
-msgstr ""
+msgstr "m:Feuerschutztrank;;;Feuerschutztranks|Feuerschutztränke;;Feuerschutztränken"
 
 #: src/potions.c:54
+msgctxt "potion"
 msgid "treasure finding"
-msgstr ""
+msgstr "m:Schatzfindertrank;;;Schatzfindertranks|Schatzfindertränke;;Schatzfindertränken"
 
 #: src/potions.c:55
+msgctxt "potion"
 msgid "instant healing"
-msgstr ""
+msgstr "m:Sofortheiltrank;;;Sofortheiltranks|Sofortheiltränke;;Sofortheiltränken"
+
+#: src/potions.c:56
+msgctxt "potion"
+msgid "power"
+msgstr "m:Manatrank;;;Manatranks|Manatränke;;Manatränken"
+
+#: src/potions.c:57
+msgctxt "potion"
+msgid "poison"
+msgstr "m:Gifttrank;;;Gifttranks|Gifttränke;;Gifttränken"
 
 #: src/potions.c:58
+msgctxt "potion"
 msgid "see invisible"
-msgstr ""
+msgstr "m:Klarsichttrank;;;Klarsichttranks|Klarsichttränke;;Klarsichttränken"
+
+#: src/potions.c:59
+msgctxt "potion"
+msgid "levitation"
+msgstr "m:Schwebetrank;;;Schwebetranks|Schwebetränke;;Schwebetränken"
 
 #: src/potions.c:60
+msgctxt "potion"
 msgid "cure dianthroritis"
-msgstr ""
+msgstr "m:Dianthroritis-Heiltrank;;;Dianthroritis-Heiltranks"
 
 #: src/potions.c:76
+msgctxt "potion"
 msgid "clear"
-msgstr ""
+msgstr "klar~"
 
 #: src/potions.c:77
+msgctxt "potion"
 msgid "bubbly"
-msgstr ""
+msgstr "blubbernd~"
 
 #: src/potions.c:78
+msgctxt "potion"
 msgid "clotted"
-msgstr ""
+msgstr "geronnen~"
 
 #: src/potions.c:79
+msgctxt "potion"
 msgid "smoky"
-msgstr ""
+msgstr "rauchig~"
 
 #: src/potions.c:80
+msgctxt "potion"
 msgid "milky"
-msgstr ""
+msgstr "milchig~"
 
 #: src/potions.c:81
+msgctxt "potion"
 msgid "fizzy"
-msgstr ""
+msgstr "spritzig~"
 
 #: src/potions.c:82
+msgctxt "potion"
 msgid "murky"
-msgstr ""
+msgstr "trüb~"
 
 #: src/potions.c:83
+msgctxt "potion"
 msgid "effervescent"
-msgstr ""
+msgstr "sprudelnd~"
 
 #: src/potions.c:84
+msgctxt "potion"
 msgid "dark"
-msgstr ""
+msgstr "dunkl~"
 
 #: src/potions.c:85
+msgctxt "potion"
 msgid "turbid"
-msgstr ""
+msgstr "schlierig~"
 
 #: src/potions.c:86
+msgctxt "potion"
 msgid "mucilaginous"
-msgstr ""
+msgstr "schleimig~"
 
 #: src/potions.c:87
+msgctxt "potion"
 msgid "gluey"
-msgstr ""
+msgstr "klebrig~"
 
 #: src/potions.c:88
+msgctxt "potion"
 msgid "gooey"
-msgstr ""
+msgstr "glibberig~"
 
 #: src/potions.c:89
+msgctxt "potion"
 msgid "coagulated"
-msgstr ""
+msgstr "verklumpt~"
 
 #: src/potions.c:90
+msgctxt "potion"
 msgid "white"
-msgstr ""
+msgstr "weiß~"
 
 #: src/potions.c:91
+msgctxt "potion"
 msgid "red"
-msgstr ""
+msgstr "rot~"
 
 #: src/potions.c:92
+msgctxt "potion"
 msgid "blue"
-msgstr ""
+msgstr "blau~"
 
 #: src/potions.c:93
+msgctxt "potion"
 msgid "green"
-msgstr ""
+msgstr "grün~"
 
 #: src/potions.c:94
+msgctxt "potion"
 msgid "yellow"
-msgstr ""
+msgstr "gelb~"
 
 #: src/potions.c:95
+msgctxt "potion"
 msgid "orange"
-msgstr ""
+msgstr "orangefarben~"
 
 #: src/potions.c:96
+msgctxt "potion"
 msgid "polychrome"
-msgstr ""
+msgstr "bunt~"
 
 #: src/potions.c:97
+msgctxt "potion"
 msgid "dichroic"
-msgstr ""
+msgstr "zweifarbig~"
 
 #: src/potions.c:98
+msgctxt "potion"
 msgid "tricoloured"
-msgstr ""
+msgstr "dreifarbig~"
 
 #: src/potions.c:99
+msgctxt "potion"
 msgid "black"
-msgstr ""
+msgstr "schwarz~"
 
 #: src/potions.c:100
+msgctxt "potion"
 msgid "turquoise"
-msgstr ""
+msgstr "türkis~"
 
 #: src/potions.c:101
+msgctxt "potion"
 msgid "foaming"
-msgstr ""
+msgstr "schäumend~"
 
-#: src/potions.c:126
+#: src/potions.c:127
 msgid "You'd rather not drink this cursed potion."
 msgstr "Du trinkst diesen verfluchten Trank lieber nicht."
 
-#: src/potions.c:127
+#: src/potions.c:128
 msgid "You'd rather not use this cursed potion."
 msgstr "Du benutzt diesen verfluchten Trank lieber nicht."
 
-#: src/potions.c:135
+#: src/potions.c:136
 #, c-format
 msgid "You drink %s."
 msgstr ""
 
-#: src/potions.c:135
+#: src/potions.c:136
 #, c-format
 msgid "You use %s."
 msgstr ""
 
-#: src/potions.c:140
+#: src/potions.c:141
 #, c-format
 msgid "drinking %s"
 msgstr ""
 
-#: src/potions.c:140
+#: src/potions.c:141
 #, c-format
 msgid "using %s"
 msgstr ""
 
-#: src/potions.c:157
+#: src/potions.c:158
 msgid "The potion is foul!"
 msgstr "Der Trank ist faulig!"
 
-#: src/potions.c:159
+#: src/potions.c:160
 msgid "You spit gore!"
 msgstr "Du spuckst Blut!"
 
-#: src/potions.c:215
+#: src/potions.c:216
 msgid "You really want to keep the potion for your daughter."
 msgstr "Du möchtest den Trank wirklich für deine Tochter aufheben."
 
-#: src/potions.c:294
+#: src/potions.c:295
 msgid "You stagger for a moment..."
 msgstr "Du taumelst einen Moment lang..."
 
-#: src/potions.c:398
+#: src/potions.c:399
 msgid "You sense the presence of treasure."
 msgstr "Du spürst die Gegenwart von Schätzen."
 
-#: src/potions.c:402
+#: src/potions.c:403
 msgid "You sense the presence of objects."
 msgstr "Du spürst die Gegenwart von Gegenständen."
 
-#: src/potions.c:430
+#: src/potions.c:431
 msgid "You feel more capable."
 msgstr "Du fühlst dich fähiger."
 
-#: src/potions.c:442
+#: src/potions.c:443
 msgid "You're not carrying any items in need of a blessing."
 msgstr "Du trägst keine Gegenstände bei dir, die einer Segnung bedürfen."
 
-#: src/potions.c:447
+#: src/potions.c:448
 msgid "Choose an item to bless"
 msgstr "Wähle einen Gegenstand zum Segnen"
 
-#: src/potions.c:459
+#: src/potions.c:460
 #, c-format
 msgid "Nothing happens. Apparently, %s was already blessed."
 msgstr ""
 
-#: src/potions.c:461
+#: src/potions.c:462
 #, c-format
 msgid "Nothing happens. Apparently, %s were already blessed."
 msgstr ""
 
-#: src/potions.c:471 src/scrolls.c:833 src/scrolls.c:860
+#: src/potions.c:472 src/scrolls.c:833 src/scrolls.c:860
 #, c-format
 msgid "%s glows in a white light."
 msgstr ""
 
-#: src/potions.c:472 src/scrolls.c:834 src/scrolls.c:861
+#: src/potions.c:473 src/scrolls.c:834 src/scrolls.c:861
 #, c-format
 msgid "%s glow in a white light."
 msgstr ""
 
-#: src/potions.c:506
+#: src/potions.c:507
 #, c-format
 msgid "%s shatters at %s."
 msgstr ""
 
-#: src/potions.c:515 src/potions.c:533
+#: src/potions.c:516 src/potions.c:534
 #, c-format
 msgid "%s shatters on the %s."
 msgstr ""
 
-#: src/potions.c:516
+#: src/potions.c:517
 #, c-format
 msgid "%s splashes into the %s."
 msgstr ""
 
-#: src/potions.c:542
+#: src/potions.c:543
 #, c-format
 msgid "Smoke emerges where %s pours over the %s."
 msgstr ""
@@ -5377,6 +5450,10 @@ msgstr "Das Geschoss prallt von %s ab."
 msgid "Improves the caster's dexterity"
 msgstr ""
 
+#: src/spells.c:75
+msgid "sleep"
+msgstr ""
+
 #: src/spells.c:77
 msgid "Causes some monsters to go to sleep"
 msgstr ""
@@ -5427,6 +5504,10 @@ msgstr ""
 
 #: src/spells.c:107
 msgid "The caster is cured from poison"
+msgstr ""
+
+#: src/spells.c:112
+msgid "healing"
 msgstr ""
 
 #: src/spells.c:114

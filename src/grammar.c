@@ -35,8 +35,9 @@
  * where <class> is the class marker used in the nouns' grammar metadata
  * (see noun_phrase()) and the comma-separated forms are the articles for
  * the grammatical cases, in the order nominative, accusative, dative,
- * genitive. Missing or empty forms fall back to the nearest preceding
- * form. When looking up a
+ * genitive; declined plural articles may follow after a pipe symbol
+ * ("m:der,den,dem,des|die,die,den,der"). Missing or empty forms fall
+ * back to the nearest preceding form. When looking up a
  * class, progressively shorter prefixes of the requested marker are
  * tried, so specialised classes (e.g. "mv" for French masculine nouns
  * requiring elision) fall back to their base class ("m") in tables that
@@ -53,6 +54,7 @@ typedef struct article_class
 {
     char *marker;
     char *forms[GC_MAX];
+    char *plural_forms[GC_MAX];
 } article_class;
 
 /* a parsed article table */
@@ -108,24 +110,40 @@ static article_table *get_article_table(article_t article)
             if (sep == NULL || sep == rows[idx])
                 continue;
 
-            article_class cls = { NULL, { NULL } };
+            article_class cls = { NULL, { NULL }, { NULL } };
             cls.marker = g_strndup(rows[idx], sep - rows[idx]);
 
-            char **forms = g_strsplit(sep + 1, ",", GC_MAX);
-            guint count = g_strv_length(forms);
+            /* the plural forms follow after a pipe symbol */
+            char **numeri = g_strsplit(sep + 1, "|", 2);
 
-            for (guint gc = 0; gc < GC_MAX; gc++)
+            for (guint num = 0; numeri[num] != NULL; num++)
             {
-                /* fall back to the nearest preceding form for
-                   missing or empty case forms */
-                guint use = MIN(gc, count - 1);
-                while (use > 0 && forms[use][0] == '\0')
-                    use--;
+                char **forms = g_strsplit(numeri[num], ",", GC_MAX);
+                guint count = g_strv_length(forms);
+                char **dest = (num == 0) ? cls.forms : cls.plural_forms;
 
-                cls.forms[gc] = g_strdup(forms[use]);
+                /* an empty specification means "no article" */
+                if (count == 0)
+                {
+                    g_strfreev(forms);
+                    continue;
+                }
+
+                for (guint gc = 0; gc < GC_MAX; gc++)
+                {
+                    /* fall back to the nearest preceding form for
+                       missing or empty case forms */
+                    guint use = MIN(gc, count - 1);
+                    while (use > 0 && forms[use][0] == '\0')
+                        use--;
+
+                    dest[gc] = g_strdup(forms[use]);
+                }
+
+                g_strfreev(forms);
             }
 
-            g_strfreev(forms);
+            g_strfreev(numeri);
             g_array_append_val(table->classes, cls);
         }
 
@@ -140,7 +158,7 @@ static article_table *get_article_table(article_t article)
 /* find the article for a noun class, trying progressively shorter
    prefixes of the requested class marker */
 static const char *lookup_article(article_t article, const char *marker,
-                                  grammar_case gcase)
+                                  grammar_case gcase, gboolean plural)
 {
     article_table *table = get_article_table(article);
 
@@ -153,7 +171,15 @@ static const char *lookup_article(article_t article, const char *marker,
 
             if (strlen(cls->marker) == len
                     && strncmp(cls->marker, marker, len) == 0)
-                return cls->forms[gcase];
+            {
+                const char *form = plural
+                    ? cls->plural_forms[gcase] : cls->forms[gcase];
+
+                /* a matching class without forms for the requested
+                   number means "no article" (e.g. German indefinite
+                   plural), not "unknown class" */
+                return form ? form : "";
+            }
         }
     }
 
@@ -289,7 +315,7 @@ static void load_ending_tables(void)
 /* find the adjective ending for an article kind and noun class, trying
    progressively shorter prefixes of the requested class marker */
 static const char *adjective_ending(article_t article, const char *marker,
-                                    grammar_case gcase)
+                                    grammar_case gcase, gboolean plural)
 {
     load_ending_tables();
 
@@ -303,7 +329,12 @@ static const char *adjective_ending(article_t article, const char *marker,
 
             if (strlen(cls->marker) == len
                     && strncmp(cls->marker, marker, len) == 0)
-                return cls->forms[gcase];
+            {
+                const char *ending = plural
+                    ? cls->plural_forms[gcase] : cls->forms[gcase];
+
+                return ending ? ending : "";
+            }
         }
     }
 
@@ -380,7 +411,7 @@ static char *noun_class(const char *noun)
 
 /* append the noun with English article rules */
 static void append_english(GString *phrase, article_t article,
-                           const char *noun)
+                           const char *noun, gboolean plural)
 {
     switch (article)
     {
@@ -389,7 +420,10 @@ static void append_english(GString *phrase, article_t article,
         break;
 
     case ART_INDEF:
-        g_string_append(phrase, strchr("aeiouAEIOU", noun[0]) ? "an " : "a ");
+        /* plural nouns take no indefinite article */
+        if (!plural)
+            g_string_append(phrase,
+                    strchr("aeiouAEIOU", noun[0]) ? "an " : "a ");
         break;
 
     default:
@@ -399,8 +433,15 @@ static void append_english(GString *phrase, article_t article,
     g_string_append(phrase, noun);
 }
 
+gboolean noun_has_class(const char *noun)
+{
+    g_autofree char *marker = noun_class(noun);
+    return (marker != NULL);
+}
+
 const char *noun_phrase(const char *noun, article_t article,
-                        grammar_case gcase, gboolean capitalise)
+                        grammar_case gcase, gboolean plural,
+                        gboolean capitalise)
 {
     g_assert(noun != NULL && gcase < GC_MAX);
 
@@ -411,12 +452,19 @@ const char *noun_phrase(const char *noun, article_t article,
     if (marker == NULL)
     {
         /* no grammar metadata - use English rules and ignore the case */
-        append_english(phrase, article, noun);
+        append_english(phrase, article, noun, plural);
     }
     else
     {
-        /* split the case forms; skip the marker and the colon */
-        char **forms = g_strsplit(noun + strlen(marker) + 1, ";", GC_MAX);
+        /* split into singular and plural forms; skip marker and colon */
+        char **numeri = g_strsplit(noun + strlen(marker) + 1, "|", 2);
+
+        /* fall back to the singular forms if no plural forms are given */
+        const char *fspec = (plural && numeri[1] != NULL)
+            ? numeri[1] : numeri[0];
+
+        /* split the case forms */
+        char **forms = g_strsplit(fspec, ";", GC_MAX);
         guint count = g_strv_length(forms);
 
         /* fall back to the nearest preceding form for
@@ -428,21 +476,21 @@ const char *noun_phrase(const char *noun, article_t article,
         /* resolve adjective ending placeholders in the selected form */
         GString *resolved = g_string_new(NULL);
         append_declined(resolved, forms[use],
-                        adjective_ending(article, marker, gcase));
+                        adjective_ending(article, marker, gcase, plural));
         const char *form = resolved->str;
 
         const char *art = (article == ART_NONE)
-            ? NULL : lookup_article(article, marker, gcase);
+            ? NULL : lookup_article(article, marker, gcase, plural);
 
         if (article != ART_NONE && art == NULL)
         {
             /* the language does not define articles for this class -
                apply English rules to the translated noun */
-            append_english(phrase, article, form);
+            append_english(phrase, article, form, plural);
         }
         else
         {
-            if (art != NULL)
+            if (art != NULL && art[0] != '\0')
             {
                 g_string_append(phrase, art);
 
@@ -457,6 +505,7 @@ const char *noun_phrase(const char *noun, article_t article,
 
         g_string_free(resolved, true);
         g_strfreev(forms);
+        g_strfreev(numeri);
     }
 
     if (capitalise)

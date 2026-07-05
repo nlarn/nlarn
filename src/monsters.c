@@ -1432,13 +1432,13 @@ static const char *monster_get_name_raw(monster *m)
 
 const char *monster_get_name(monster *m)
 {
-    return noun_phrase(monster_get_name_raw(m), ART_NONE, GC_NOM, false);
+    return noun_phrase(monster_get_name_raw(m), ART_NONE, GC_NOM, false, false);
 }
 
 const char *monster_get_name_art(monster *m, article_t article,
                                  grammar_case gcase, gboolean capitalise)
 {
-    return noun_phrase(monster_get_name_raw(m), article, gcase, capitalise);
+    return noun_phrase(monster_get_name_raw(m), article, gcase, false, capitalise);
 }
 
 const char* monster_type_plural_name(monster_t mt, const int count)
@@ -1455,7 +1455,7 @@ const char* monster_type_plural_name(monster_t mt, const int count)
         else
         {
             return noun_phrase(_(monster_data[mt].plural_name),
-                               ART_NONE, GC_NOM, false);
+                               ART_NONE, GC_NOM, true, false);
         }
     }
 
@@ -4053,13 +4053,13 @@ static inline const char *monster_name_raw(monster *m) {
 }
 
 inline const char *monster_name(monster *m) {
-    return noun_phrase(monster_name_raw(m), ART_NONE, GC_NOM, false);
+    return noun_phrase(monster_name_raw(m), ART_NONE, GC_NOM, false, false);
 }
 
 const char *monster_name_art(monster *m, article_t article,
                              grammar_case gcase, gboolean capitalise)
 {
-    return noun_phrase(monster_name_raw(m), article, gcase, capitalise);
+    return noun_phrase(monster_name_raw(m), article, gcase, false, capitalise);
 }
 
 inline int monster_level(monster *m)
@@ -4120,7 +4120,7 @@ inline const char *monster_sound(monster *m) {
 
 inline const char *monster_type_name(monster_t type)
 {
-    return noun_phrase(_(monster_data[type].name), ART_NONE, GC_NOM, false);
+    return noun_phrase(_(monster_data[type].name), ART_NONE, GC_NOM, false, false);
 }
 
 inline int monster_type_ac(monster_t type)
