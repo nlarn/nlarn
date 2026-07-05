@@ -126,6 +126,10 @@ static struct _monster_breath_data
     { N_("burst of noxious fumes"), '%', VENOM_GREEN }, /* DAM_POISON */
 };
 
+/* the breath's translated description; may carry grammar metadata */
+#define monster_breath_desc_raw(dam_type) \
+    (gettext(monster_breath_data[(dam_type)].desc))
+
 monster_data_t monster_data[] = {
     { /* MT_GIANT_BAT */
         .name = N_("giant bat"), .glyph = 'b', .colour = AUTUMN_LEAF_BROWN,
@@ -2126,13 +2130,16 @@ static int monster_breath_attack(monster *m, player *p, attack att)
 
     if (monster_in_sight(m))
     {
-        log_add_entry(nlarn->log, _("%s breathes a %s!"), monster_get_name_art(m, ART_DEF, GC_NOM, true),
-                      _(monster_breath_data[att.damage].desc));
+        log_add_entry(nlarn->log, _("%s breathes %s!"),
+                      monster_get_name_art(m, ART_DEF, GC_NOM, true),
+                      noun_phrase(monster_breath_desc_raw(att.damage),
+                                  ART_INDEF, GC_ACC, false, false));
     }
     else
     {
-        log_add_entry(nlarn->log, _("A %s spews forth from nowhere!"),
-                      _(monster_breath_data[att.damage].desc));
+        log_add_entry(nlarn->log, _("%s spews forth from nowhere!"),
+                      noun_phrase(monster_breath_desc_raw(att.damage),
+                                  ART_INDEF, GC_NOM, false, true));
     }
 
     /* handle the breath */
@@ -4204,8 +4211,9 @@ static bool monster_breath_hit(const GList *traj,
     {
         /* The breath hit a monster. */
         if (monster_in_sight(m))
-            log_add_entry(nlarn->log, _("The %s hits %s."),
-                          _(monster_breath_data[dam->type].desc),
+            log_add_entry(nlarn->log, _("%s hits %s."),
+                          noun_phrase(monster_breath_desc_raw(dam->type),
+                                      ART_DEF, GC_NOM, false, true),
                           monster_get_name_art(m, ART_DEF, GC_ACC, false));
 
         /* erode the monster's inventory */
@@ -4226,22 +4234,25 @@ static bool monster_breath_hit(const GList *traj,
         {
             /* The player reflects the breath. Actual handling of the reflection
                is done in map_trajectory, just give a message here. */
-            log_add_entry(nlarn->log, _("Your amulet reflects the %s!"),
-                          _(monster_breath_data[dam->type].desc));
+            log_add_entry(nlarn->log, _("Your amulet reflects %s!"),
+                          noun_phrase(monster_breath_desc_raw(dam->type),
+                                      ART_DEF, GC_ACC, false, false));
         }
         else if (player_evade(nlarn->p))
         {
             if (!player_effect(nlarn->p, ET_BLINDNESS))
             {
-                log_add_entry(nlarn->log, _("The %s whizzes by you!"),
-                        _(monster_breath_data[dam->type].desc));
+                log_add_entry(nlarn->log, _("%s whizzes by you!"),
+                        noun_phrase(monster_breath_desc_raw(dam->type),
+                                    ART_DEF, GC_NOM, false, true));
             }
         }
         else
         {
             /* Player failed to evade and takes the damage */
-            log_add_entry(nlarn->log, _("The %s hits you!"),
-                          _(monster_breath_data[dam->type].desc));
+            log_add_entry(nlarn->log, _("%s hits you!"),
+                          noun_phrase(monster_breath_desc_raw(dam->type),
+                                      ART_DEF, GC_NOM, false, true));
             player_damage_take(nlarn->p, damage_copy(dam), PD_MONSTER,
                                monster_type(dam->dam_origin.originator));
 
@@ -4272,8 +4283,9 @@ static bool monster_breath_hit(const GList *traj,
         /* A mirror will reflect the breath. Actual handling of the reflection
            is done in map_trajectory, just give a message here if the
            mirror is visible by the player. */
-        log_add_entry(nlarn->log, _("The mirror reflects the %s!"),
-                      _(monster_breath_data[dam->type].desc));
+        log_add_entry(nlarn->log, _("The mirror reflects %s!"),
+                      noun_phrase(monster_breath_desc_raw(dam->type),
+                                  ART_DEF, GC_ACC, false, false));
     }
 
     return terminated;

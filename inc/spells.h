@@ -188,6 +188,10 @@ static inline const char *spell_gettext(const char *msg)
 #define spell_code(spell)     (spells[(spell)->id].code)
 #define spell_name(spell)     (noun_phrase(spell_name_raw((spell)->id), \
                                            ART_NONE, GC_NOM, false, false))
+/* the spell name as an articled noun phrase for embedding in messages */
+#define spell_name_art(spell, article, gcase, capitalise) \
+    (noun_phrase(spell_name_raw((spell)->id), (article), (gcase), \
+                 false, (capitalise)))
 #define spell_type(spell)     (spells[(spell)->id].type)
 #define spell_damage(spell)   (spells[(spell)->id].damage_type)
 #define spell_effect(spell)   (spells[(spell)->id].effect)

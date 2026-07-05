@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-06 00:13+0200\n"
+"POT-Creation-Date: 2026-07-06 00:38+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -2740,829 +2740,819 @@ msgstr "beschießt"
 
 #: src/monsters.c:120
 msgid "psionic blast"
-msgstr ""
+msgstr "f:psionisch~ Druckwelle"
 
 #: src/monsters.c:121
 msgid "burst of fire"
-msgstr ""
+msgstr "m:Feuerstoß;;;Feuerstoßes"
 
 #: src/monsters.c:122
 msgid "beam of frost"
-msgstr ""
+msgstr "m:Froststrahl;;;Froststrahls"
 
 #: src/monsters.c:123
 msgid "gush of acid"
-msgstr ""
+msgstr "m:Säureschwall;;;Säureschwalls"
 
 #: src/monsters.c:124
 msgid "flood of water"
-msgstr ""
+msgstr "f:Wasserflut"
 
 #: src/monsters.c:125
 msgid "ray of lightning"
-msgstr ""
+msgstr "m:Blitzstrahl;;;Blitzstrahls"
 
 #: src/monsters.c:126
 msgid "burst of noxious fumes"
-msgstr ""
+msgstr "m:Schwall giftiger Dämpfe;;;Schwalls giftiger Dämpfe"
 
-#: src/monsters.c:131
+#: src/monsters.c:135
 msgid "giant bat"
 msgstr "f:Riesenfledermaus"
 
-#: src/monsters.c:140
+#: src/monsters.c:144
 msgid "gnome"
 msgstr "m:Gnom;Gnomen"
 
-#: src/monsters.c:149
+#: src/monsters.c:153
 msgid "hobgoblin"
 msgstr "m:Hobgoblin"
 
-#: src/monsters.c:159
+#: src/monsters.c:163
 msgid "jackal"
 msgstr "m:Schakal"
 
-#: src/monsters.c:165
+#: src/monsters.c:169
 msgid "growl"
 msgstr "knurrt"
 
-#: src/monsters.c:168
+#: src/monsters.c:172
 msgid "kobold"
 msgstr "m:Kobold"
 
-#: src/monsters.c:178
+#: src/monsters.c:182
 msgid "orc"
 msgstr "m:Ork;Ork;Ork;Orks"
 
-#: src/monsters.c:185
+#: src/monsters.c:189
 msgid "shout"
 msgstr "brüllt"
 
-#: src/monsters.c:188
+#: src/monsters.c:192
 msgid "snake"
 msgstr "f:Schlange"
 
-#: src/monsters.c:195
+#: src/monsters.c:199
 msgid "hiss"
 msgstr "zischt"
 
-#: src/monsters.c:198
+#: src/monsters.c:202
 msgid "giant centipede"
 msgstr "m:Riesentausendfüßler"
 
-#: src/monsters.c:208
+#: src/monsters.c:212
 msgid "jaculus"
 msgstr "m:Jaculus"
 
-#: src/monsters.c:208
+#: src/monsters.c:212
 msgid "jaculi"
 msgstr "Jaculi"
 
-#: src/monsters.c:218
+#: src/monsters.c:222
 msgid "troglodyte"
 msgstr "m:Troglodyt;Troglodyten"
 
-#: src/monsters.c:227
+#: src/monsters.c:231
 msgid "giant ant"
 msgstr "f:Riesenameise"
 
-#: src/monsters.c:237
+#: src/monsters.c:241
 msgid "floating eye"
 msgstr "n:schwebende Auge;schwebende Auge;schwebenden Auge"
 
-#: src/monsters.c:246
+#: src/monsters.c:250
 msgid "leprechaun"
 msgstr "m:Leprechaun"
 
-#: src/monsters.c:256
+#: src/monsters.c:260
 msgid "nymph"
 msgstr "f:Nymphe"
 
-#: src/monsters.c:265
+#: src/monsters.c:269
 msgid "quasit"
 msgstr "m:Quasit"
 
-#: src/monsters.c:275
+#: src/monsters.c:279
 msgid "rust monster"
 msgstr "n:Rostmonster;Rostmonster;Rostmonster;Rostmonsters"
 
-#: src/monsters.c:285
+#: src/monsters.c:289
 msgid "zombie"
 msgstr "m:Zombie"
 
-#: src/monsters.c:292
+#: src/monsters.c:296
 msgid "groan"
 msgstr "stöhnt"
 
-#: src/monsters.c:295
+#: src/monsters.c:299
 msgid "assassin bug"
 msgstr "f:Raubwanze"
 
-#: src/monsters.c:305
+#: src/monsters.c:309
 msgid "bugbear"
 msgstr "m:Butzemann"
 
-#: src/monsters.c:315
+#: src/monsters.c:319
 msgid "hell hound"
 msgstr "m:Höllenhund;Höllenhund;Höllenhund;Höllenhunds"
 
-#: src/monsters.c:322
+#: src/monsters.c:326
 msgid "bark"
 msgstr "bellt"
 
-#: src/monsters.c:325
+#: src/monsters.c:329
 msgid "ice lizard"
 msgstr "f:Eisechse"
 
-#: src/monsters.c:335
+#: src/monsters.c:339
 msgid "centaur"
 msgstr "m:Zentaur;Zentauren"
 
-#: src/monsters.c:346
+#: src/monsters.c:350
 msgid "troll"
 msgstr "m:Troll"
 
-#: src/monsters.c:353
+#: src/monsters.c:357
 msgid "grunt"
 msgstr "grunzt"
 
-#: src/monsters.c:356
+#: src/monsters.c:360
 msgid "yeti"
 msgstr "m:Yeti"
 
-#: src/monsters.c:365
+#: src/monsters.c:369
 msgid "elf"
 msgstr "m:Elf;Elfen"
 
-#: src/monsters.c:365
+#: src/monsters.c:369
 msgid "elves"
 msgstr "Elfen"
 
-#: src/monsters.c:375
+#: src/monsters.c:379
 msgid "gelatinous cube"
 msgstr "m:Gallertwürfel"
 
-#: src/monsters.c:384
+#: src/monsters.c:388
 msgid "white dragon"
 msgstr "m:weiße Drache;weißen Drachen"
 
-#: src/monsters.c:394
+#: src/monsters.c:398
 msgid "metamorph"
 msgstr "m:Metamorph;Metamorphen"
 
-#: src/monsters.c:403
+#: src/monsters.c:407
 msgid "vortex"
 msgstr "m:Wirbel"
 
-#: src/monsters.c:403
+#: src/monsters.c:407
 msgid "vortexes"
 msgstr "Wirbel"
 
-#: src/monsters.c:412
+#: src/monsters.c:416
 msgid "ziller"
 msgstr "m:Ziller"
 
-#: src/monsters.c:422
+#: src/monsters.c:426
 msgid "violet fungus"
 msgstr "m:violette Pilz;violetten Pilz"
 
-#: src/monsters.c:422
+#: src/monsters.c:426
 msgid "violet fungi"
 msgstr "violette Pilze"
 
-#: src/monsters.c:432
+#: src/monsters.c:436
 msgid "wraith"
 msgstr "m:Todesgeist"
 
-#: src/monsters.c:441
+#: src/monsters.c:445
 msgid "forvalaka"
 msgstr "m:Forvalaka"
 
-#: src/monsters.c:450
+#: src/monsters.c:454
 msgid "lama nobe"
 msgstr "m:Lama Nobe"
 
-#: src/monsters.c:460
+#: src/monsters.c:464
 msgid "osquip"
 msgstr "m:Osquip"
 
-#: src/monsters.c:469
+#: src/monsters.c:473
 msgid "rothe"
 msgstr "n:Rothe"
 
-#: src/monsters.c:479
+#: src/monsters.c:483
 msgid "xorn"
 msgstr "m:Xorn"
 
-#: src/monsters.c:488
+#: src/monsters.c:492
 msgid "vampire"
 msgstr "m:Vampir"
 
-#: src/monsters.c:498
+#: src/monsters.c:502
 msgid "invisible stalker"
 msgstr "m:unsichtbare Jäger;unsichtbaren Jäger"
 
-#: src/monsters.c:507
+#: src/monsters.c:511
 msgid "poltergeist"
 msgstr "m:Poltergeist"
 
-#: src/monsters.c:513
+#: src/monsters.c:517
 msgid "laugh"
 msgstr "lacht"
 
-#: src/monsters.c:516
+#: src/monsters.c:520
 msgid "disenchantress"
 msgstr "f:Entzauberin"
 
-#: src/monsters.c:516
+#: src/monsters.c:520
 msgid "disenchantresses"
 msgstr "Entzauberinnen"
 
-#: src/monsters.c:525
+#: src/monsters.c:529
 msgid "shambling mound"
 msgstr "m:wandelnde Hügel;wandelnden Hügel"
 
-#: src/monsters.c:534
+#: src/monsters.c:538
 msgid "yellow mold"
 msgstr "m:gelbe Schimmel;gelben Schimmel"
 
-#: src/monsters.c:543
+#: src/monsters.c:547
 msgid "umber hulk"
 msgstr "m:Umberschreck"
 
-#: src/monsters.c:553
+#: src/monsters.c:557
 msgid "gnome king"
 msgstr "m:Gnomenkönig"
 
-#: src/monsters.c:562
+#: src/monsters.c:566
 msgid "mimic"
 msgstr "m:Mimic"
 
-#: src/monsters.c:571
+#: src/monsters.c:575
 msgid "water lord"
 msgstr "m:Wasserfürst;Wasserfürsten"
 
-#: src/monsters.c:580
+#: src/monsters.c:584
 msgid "purple worm"
 msgstr "m:Purpurwurm"
 
-#: src/monsters.c:590
+#: src/monsters.c:594
 msgid "xvart"
 msgstr "m:Xvart"
 
-#: src/monsters.c:599
+#: src/monsters.c:603
 msgid "bronze dragon"
 msgstr "m:Bronzedrache;Bronzedrachen"
 
-#: src/monsters.c:609
+#: src/monsters.c:613
 msgid "green dragon"
 msgstr "m:grüne Drache;grünen Drachen"
 
-#: src/monsters.c:619
+#: src/monsters.c:623
 msgid "silver dragon"
 msgstr "m:Silberdrache;Silberdrachen"
 
-#: src/monsters.c:629
+#: src/monsters.c:633
 msgid "platinum dragon"
 msgstr "m:Platindrache;Platindrachen"
 
-#: src/monsters.c:639
+#: src/monsters.c:643
 msgid "red dragon"
 msgstr "m:rote Drache;roten Drachen"
 
-#: src/monsters.c:649
+#: src/monsters.c:653
 msgid "spirit naga"
 msgstr "f:Geisternaga"
 
-#: src/monsters.c:659
+#: src/monsters.c:663
 msgid "green urchin"
 msgstr "m:grüne Seeigel;grünen Seeigel"
 
-#: src/monsters.c:669
+#: src/monsters.c:673
 msgid "type I demon lord"
 msgstr "m:Typ-I-Dämonenfürst;Typ-I-Dämonenfürsten"
 
-#: src/monsters.c:679
+#: src/monsters.c:683
 msgid "type II demon lord"
 msgstr "m:Typ-II-Dämonenfürst;Typ-II-Dämonenfürsten"
 
-#: src/monsters.c:689
+#: src/monsters.c:693
 msgid "type III demon lord"
 msgstr "m:Typ-III-Dämonenfürst;Typ-III-Dämonenfürsten"
 
-#: src/monsters.c:699
+#: src/monsters.c:703
 msgid "type IV demon lord"
 msgstr "m:Typ-IV-Dämonenfürst;Typ-IV-Dämonenfürsten"
 
-#: src/monsters.c:709
+#: src/monsters.c:713
 msgid "type V demon lord"
 msgstr "m:Typ-V-Dämonenfürst;Typ-V-Dämonenfürsten"
 
-#: src/monsters.c:719
+#: src/monsters.c:723
 msgid "type VI demon lord"
 msgstr "m:Typ-VI-Dämonenfürst;Typ-VI-Dämonenfürsten"
 
-#: src/monsters.c:729
+#: src/monsters.c:733
 msgid "type VII demon lord"
 msgstr "m:Typ-VII-Dämonenfürst;Typ-VII-Dämonenfürsten"
 
-#: src/monsters.c:739
+#: src/monsters.c:743
 msgid "demon prince"
 msgstr "m:Dämonenprinz;Dämonenprinzen"
 
-#: src/monsters.c:749
+#: src/monsters.c:753
 msgid "human"
 msgstr "m:Mensch;Menschen"
 
-#: src/monsters.c:1393
+#: src/monsters.c:1397
 msgid "peasant woman"
 msgstr "f:Bäuerin"
 
-#: src/monsters.c:1393
+#: src/monsters.c:1397
 msgid "old man"
 msgstr "m:alte Mann;alten Mann"
 
-#: src/monsters.c:1393
+#: src/monsters.c:1397
 msgid "old woman"
 msgstr "f:alte Frau;alte Frau;alten Frau"
 
-#: src/monsters.c:1394
+#: src/monsters.c:1398
 msgid "little boy"
 msgstr "m:kleine Junge;kleinen Jungen"
 
-#: src/monsters.c:1394
+#: src/monsters.c:1398
 msgid "young girl"
 msgstr "n:junge Mädchen;junge Mädchen;jungen Mädchen"
 
-#: src/monsters.c:1394
+#: src/monsters.c:1398
 msgid "fisherman"
 msgstr "m:Fischer"
 
-#: src/monsters.c:1395
+#: src/monsters.c:1399
 msgid "midwife"
 msgstr "f:Hebamme"
 
-#: src/monsters.c:1395
+#: src/monsters.c:1399
 msgid "errand boy"
 msgstr "m:Laufbursche;Laufburschen"
 
-#: src/monsters.c:1395
+#: src/monsters.c:1399
 msgid "bar maid"
 msgstr "f:Schankmaid"
 
-#: src/monsters.c:1396
+#: src/monsters.c:1400
 msgid "stable-lad"
 msgstr "m:Stallbursche;Stallburschen"
 
-#: src/monsters.c:1396
+#: src/monsters.c:1400
 msgid "innkeeper"
 msgstr "m:Wirt"
 
-#: src/monsters.c:1396
+#: src/monsters.c:1400
 msgid "woodcutter"
 msgstr "m:Holzfäller"
 
-#: src/monsters.c:1397
+#: src/monsters.c:1401
 msgid "carpenter"
 msgstr "m:Zimmermann"
 
-#: src/monsters.c:1397
+#: src/monsters.c:1401
 msgid "clerk"
 msgstr "m:Schreiber"
 
-#: src/monsters.c:1397
+#: src/monsters.c:1401
 msgid "barber"
 msgstr "m:Barbier"
 
-#: src/monsters.c:1398
+#: src/monsters.c:1402
 msgid "teacher"
 msgstr "m:Lehrer"
 
-#: src/monsters.c:1398
+#: src/monsters.c:1402
 msgid "town guard"
 msgstr "m:Stadtwächter"
 
-#: src/monsters.c:1398
+#: src/monsters.c:1402
 msgid "postman"
 msgstr "m:Briefträger"
 
-#: src/monsters.c:1399
+#: src/monsters.c:1403
 msgid "cobbler"
 msgstr "m:Flickschuster"
 
-#: src/monsters.c:1399
+#: src/monsters.c:1403
 msgid "baker"
 msgstr "m:Bäcker"
 
-#: src/monsters.c:1399
+#: src/monsters.c:1403
 msgid "merchant"
 msgstr "m:Kaufmann"
 
-#: src/monsters.c:1400
+#: src/monsters.c:1404
 msgid "clergyman"
 msgstr "m:Geistliche;Geistlichen"
 
-#: src/monsters.c:1400 src/monsters.c:1402
+#: src/monsters.c:1404 src/monsters.c:1406
 msgid "student"
 msgstr "m:Student;Studenten"
 
-#: src/monsters.c:1400
+#: src/monsters.c:1404
 msgid "blacksmith"
 msgstr "m:Grobschmied"
 
-#: src/monsters.c:1401
+#: src/monsters.c:1405
 msgid "nurse"
 msgstr "f:Kindsmagd"
 
-#: src/monsters.c:1401
+#: src/monsters.c:1405
 msgid "seamstress"
 msgstr "f:Näherin"
 
-#: src/monsters.c:1401
+#: src/monsters.c:1405
 msgid "cartwright"
 msgstr "m:Stellmacher"
 
-#: src/monsters.c:1402
+#: src/monsters.c:1406
 msgid "sales clerk"
 msgstr "m:Verkäufer"
 
-#: src/monsters.c:1402
+#: src/monsters.c:1406
 msgid "miller"
 msgstr "m:Müller"
 
-#: src/monsters.c:1405
+#: src/monsters.c:1409
 msgid "peasant"
 msgstr "m:Bauer;Bauern"
 
-#: src/monsters.c:1425
+#: src/monsters.c:1429
 msgid "unseen monster"
 msgstr "n:ungesehen~ Monster;;;ungesehen~ Monsters"
 
-#: src/monsters.c:1480
+#: src/monsters.c:1484
 #, c-format
 msgid "%s disappears!"
 msgstr "%s verschwindet!"
 
-#: src/monsters.c:1482
+#: src/monsters.c:1486
 #, c-format
 msgid "%s dies!"
 msgstr "%s stirbt!"
 
-#: src/monsters.c:1518
+#: src/monsters.c:1522
 msgid "You hear a splash!"
 msgstr "Du hörst ein Platschen!"
 
-#: src/monsters.c:1573
+#: src/monsters.c:1577
 msgid "comes"
 msgstr "kommt"
 
-#: src/monsters.c:1580 src/monsters.c:1585
+#: src/monsters.c:1584 src/monsters.c:1589
 msgid "through"
 msgstr "durch"
 
-#: src/monsters.c:1590 src/monsters.c:1600
+#: src/monsters.c:1594 src/monsters.c:1604
 msgid "down"
 msgstr "herab"
 
-#: src/monsters.c:1595 src/monsters.c:1605
+#: src/monsters.c:1599 src/monsters.c:1609
 msgid "up"
 msgstr "herauf"
 
-#: src/monsters.c:1628
+#: src/monsters.c:1632
 msgid "squeezes past"
 msgstr "zwängt sich"
 
-#: src/monsters.c:1652
+#: src/monsters.c:1656
 #, c-format
 msgid "%s %s %s %s."
 msgstr "%s %s %s %s."
 
-#: src/monsters.c:1739
+#: src/monsters.c:1743
 #, c-format
 msgid "%s %ses!"
 msgstr "%s %s!"
 
-#: src/monsters.c:1739
+#: src/monsters.c:1743
 #, c-format
 msgid "%s %ss!"
 msgstr "%s %s!"
 
-#: src/monsters.c:1745
+#: src/monsters.c:1749
 #, c-format
 msgid "%s turns to flee!"
 msgstr "%s ergreift die Flucht!"
 
-#: src/monsters.c:1827
+#: src/monsters.c:1831
 #, c-format
 msgid "%s bumps into you."
 msgstr "%s rempelt dich an."
 
-#: src/monsters.c:1840
+#: src/monsters.c:1844
 #, c-format
 msgid "%s bumps into the door."
 msgstr "%s prallt gegen die Tür."
 
-#: src/monsters.c:1852
+#: src/monsters.c:1856
 #, c-format
 msgid "%s opens the door."
 msgstr "%s öffnet die Tür."
 
-#: src/monsters.c:1880
+#: src/monsters.c:1884
 #, c-format
 msgid "%s closes the door."
 msgstr "%s schließt die Tür."
 
-#: src/monsters.c:1895
+#: src/monsters.c:1899
 #, c-format
 msgid "%s bumps into %s."
 msgstr "%s prallt gegen %s."
 
-#: src/monsters.c:1904
+#: src/monsters.c:1908
 #, c-format
 msgid "%s sinks into %s."
 msgstr "%s versinkt in %s."
 
-#: src/monsters.c:1975
+#: src/monsters.c:1979
 #, c-format
 msgid "%s falls into the %s!"
 msgstr "%s stürzt in %s!"
 
-#: src/monsters.c:1981
+#: src/monsters.c:1985
 #, c-format
 msgid "%s sinks like a rock!"
 msgstr "%s sinkt wie ein Stein!"
 
-#: src/monsters.c:1985 src/spells.c:1339
+#: src/monsters.c:1989 src/spells.c:1339
 #, c-format
 msgid "%s is trapped in the wall!"
 msgstr "%s steckt in der Mauer fest!"
 
-#: src/monsters.c:2025 src/monsters.c:3954
+#: src/monsters.c:2029 src/monsters.c:3961
 #, c-format
 msgid "%s picks up %s."
 msgstr "%s hebt %s auf."
 
-#: src/monsters.c:2035 src/monsters.c:3387
+#: src/monsters.c:2039 src/monsters.c:3394
 #, c-format
 msgid "%s touches %s with its antennae."
 msgstr "%s betastet %s mit seinen Fühlern."
 
-#: src/monsters.c:2063
+#: src/monsters.c:2067
 #, c-format
 msgid "%s engulfs %s."
 msgstr "%s verschlingt %s."
 
-#: src/monsters.c:2129
+#: src/monsters.c:2133
 #, c-format
-msgid "%s breathes a %s!"
+msgid "%s breathes %s!"
 msgstr "%s speit %s!"
 
-#: src/monsters.c:2134
+#: src/monsters.c:2140
 #, c-format
-msgid "A %s spews forth from nowhere!"
-msgstr ""
+msgid "%s spews forth from nowhere!"
+msgstr "%s schießt aus dem Nichts hervor!"
 
-#: src/monsters.c:2194
+#: src/monsters.c:2201
 #, c-format
 msgid "%s %s %s."
 msgstr "%s %s %s."
 
-#: src/monsters.c:2226
+#: src/monsters.c:2233
 #, c-format
 msgid "%s bashes into thin air."
 msgstr "%s schlägt ins Leere."
 
-#: src/monsters.c:2242
+#: src/monsters.c:2249
 #, c-format
 msgid "%s misses wildly."
 msgstr "%s schlägt wild daneben."
 
-#: src/monsters.c:2318
+#: src/monsters.c:2325
 #, c-format
 msgid "%s %s you, but nothing happens."
 msgstr "%s %s dich, doch nichts geschieht."
 
-#: src/monsters.c:2357 src/monsters.c:2460 src/monsters.c:2485
+#: src/monsters.c:2364 src/monsters.c:2467 src/monsters.c:2492
 #, c-format
 msgid "%s %s you."
 msgstr "%s %s dich."
 
-#: src/monsters.c:2365 src/monsters.c:2491
+#: src/monsters.c:2372 src/monsters.c:2498
 msgid "The gaze is reflected harmlessly."
-msgstr ""
+msgstr "Der Blick wird wirkungslos reflektiert."
 
-#: src/monsters.c:2391 src/weapons.c:443
+#: src/monsters.c:2398 src/monsters.c:4214 src/weapons.c:443
 #, c-format
 msgid "%s hits %s."
 msgstr "%s trifft %s."
 
-#: src/monsters.c:2404
+#: src/monsters.c:2411
 #, c-format
 msgid "%s misses you."
 msgstr "%s verfehlt dich."
 
-#: src/monsters.c:2408
+#: src/monsters.c:2415 src/monsters.c:4253 src/spells.c:1893
 #, c-format
 msgid "%s hits you!"
 msgstr "%s trifft dich!"
 
-#: src/monsters.c:2455
+#: src/monsters.c:2462
 #, c-format
 msgid "%s shoots %s at you."
 msgstr "%s schießt %s auf dich."
 
-#: src/monsters.c:2532
+#: src/monsters.c:2539
 #, c-format
 msgid "%s isn't hurt."
 msgstr "%s ist unverletzt."
 
-#: src/monsters.c:2570
+#: src/monsters.c:2577
 #, c-format
 msgid "%s partly resists the magic."
 msgstr "%s widersteht der Magie teilweise."
 
-#: src/monsters.c:2571
+#: src/monsters.c:2578
 #, c-format
 msgid "%s resists the magic."
 msgstr "%s widersteht der Magie."
 
-#: src/monsters.c:2590
+#: src/monsters.c:2597
 #, c-format
 msgid "%s partly resists the flames."
 msgstr "%s widersteht den Flammen teilweise."
 
-#: src/monsters.c:2591
+#: src/monsters.c:2598
 #, c-format
 msgid "%s resists the flames."
 msgstr "%s widersteht den Flammen."
 
-#: src/monsters.c:2610
+#: src/monsters.c:2617
 #, c-format
 msgid "%s partly resists the cold."
 msgstr "%s widersteht der Kälte teilweise."
 
-#: src/monsters.c:2611
+#: src/monsters.c:2618
 #, c-format
 msgid "%s loves the cold."
 msgstr "%s liebt die Kälte."
 
-#: src/monsters.c:2628
+#: src/monsters.c:2635
 #, c-format
 msgid "%s is not affected!"
 msgstr "%s bleibt unbeeindruckt!"
 
-#: src/monsters.c:2700 src/monsters.c:3976
+#: src/monsters.c:2707 src/monsters.c:3983
 #, c-format
 msgid "%s drops %s."
 msgstr "%s lässt %s fallen."
 
-#: src/monsters.c:2706
+#: src/monsters.c:2713
 #, c-format
 msgid "%s turns into %s!"
 msgstr "%s verwandelt sich in %s!"
 
-#: src/monsters.c:2712
+#: src/monsters.c:2719
 #, c-format
 msgid "%s vanishes!"
 msgstr "%s löst sich auf!"
 
-#: src/monsters.c:2717
+#: src/monsters.c:2724
 #, c-format
 msgid "%s suddenly appears!"
 msgstr "%s erscheint plötzlich!"
 
-#: src/monsters.c:2888
+#: src/monsters.c:2895
 #, c-format
 msgid "You see %s there"
 msgstr "Du siehst dort %s"
 
-#: src/monsters.c:2898
+#: src/monsters.c:2905
 msgid "uninjured"
 msgstr "unverletzt~"
 
-#: src/monsters.c:2900
+#: src/monsters.c:2907
 msgid "slightly injured"
 msgstr "leicht verletzt~"
 
-#: src/monsters.c:2902
+#: src/monsters.c:2909
 msgid "injured"
 msgstr "verletzt~"
 
-#: src/monsters.c:2904
+#: src/monsters.c:2911
 msgid "heavily injured"
 msgstr "schwer verletzt~"
 
-#: src/monsters.c:2906
+#: src/monsters.c:2913
 msgid "critically injured"
 msgstr "kritisch verletzt~"
 
-#: src/monsters.c:2913
+#: src/monsters.c:2920
 msgid "fighting"
 msgstr "kämpfend~"
 
-#: src/monsters.c:2940
+#: src/monsters.c:2947
 #, c-format
 msgid ", armed with %s"
 msgstr ", bewaffnet mit %s"
 
-#: src/monsters.c:2946
+#: src/monsters.c:2953
 #, c-format
 msgid ", attacking %s"
 msgstr ", im Kampf mit %s"
 
-#: src/monsters.c:3310
+#: src/monsters.c:3317
 #, c-format
 msgid "%s wields %s."
 msgstr "%s führt nun %s."
 
-#: src/monsters.c:3331
+#: src/monsters.c:3338
 #, c-format
 msgid "%s hits you."
 msgstr "%s trifft dich."
 
-#: src/monsters.c:3346
+#: src/monsters.c:3353
 #, c-format
 msgid "%s resists the attack."
 msgstr "%s widersteht dem Angriff."
 
-#: src/monsters.c:3347
+#: src/monsters.c:3354
 #, c-format
 msgid "%s resist the attack."
 msgstr "%s widerstehen dem Angriff."
 
-#: src/monsters.c:3354
+#: src/monsters.c:3361
 msgid "You feel a sense of loss."
-msgstr ""
+msgstr "Dich überkommt ein Gefühl des Verlusts."
 
-#: src/monsters.c:3396 src/scrolls.c:257 src/scrolls.c:722 src/scrolls.c:816
+#: src/monsters.c:3403 src/scrolls.c:257 src/scrolls.c:722 src/scrolls.c:816
 #: src/scrolls.c:855 src/spells.c:1104 src/spells.c:1722 src/spells.c:1736
 msgid "Nothing happens."
 msgstr "Nichts geschieht."
 
-#: src/monsters.c:3423
+#: src/monsters.c:3430
 #, c-format
 msgid "%s picks your pocket. Your purse feels lighter."
 msgstr "%s stiehlt aus deiner Tasche. Dein Geldbeutel fühlt sich leichter an."
 
-#: src/monsters.c:3439
+#: src/monsters.c:3446
 #, c-format
 msgid "%s picks up some gold at your feet."
 msgstr "%s hebt etwas Gold vor deinen Füßen auf."
 
-#: src/monsters.c:3459
+#: src/monsters.c:3466
 #, c-format
 msgid "%s tries to steal %s but fails."
 msgstr "%s versucht, %s zu stehlen, doch es misslingt."
 
-#: src/monsters.c:3487
+#: src/monsters.c:3494
 #, c-format
 msgid "%s nimbly removes %s and steals it."
 msgstr "%s entwendet flink %s und stiehlt es."
 
-#: src/monsters.c:3492
+#: src/monsters.c:3499
 #, c-format
 msgid "%s picks your pocket and steals %s."
 msgstr "%s greift in deine Tasche und stiehlt %s."
 
-#: src/monsters.c:3508
+#: src/monsters.c:3515
 #, c-format
 msgid "%s couldn't find anything to steal."
 msgstr "%s konnte nichts zum Stehlen finden."
 
-#: src/monsters.c:3687
+#: src/monsters.c:3694
 #, c-format
 msgid "%s vanishes."
 msgstr "%s verschwindet."
 
-#: src/monsters.c:4032
+#: src/monsters.c:4039
 #, c-format
 msgid "%s says, \"%s\""
 msgstr "%s sagt: „%s“"
 
-#: src/monsters.c:4207
+#: src/monsters.c:4237 src/spells.c:1875
 #, c-format
-msgid "The %s hits %s."
-msgstr ""
+msgid "Your amulet reflects %s!"
+msgstr "Dein Amulett reflektiert %s!"
 
-#: src/monsters.c:4229 src/spells.c:1874
+#: src/monsters.c:4245 src/spells.c:1884
 #, c-format
-msgid "Your amulet reflects the %s!"
-msgstr ""
+msgid "%s whizzes by you!"
+msgstr "%s zischt an dir vorbei!"
 
-#: src/monsters.c:4236 src/spells.c:1882
+#: src/monsters.c:4286 src/spells.c:1825
 #, c-format
-msgid "The %s whizzes by you!"
-msgstr ""
-
-#: src/monsters.c:4243 src/spells.c:1890
-#, c-format
-msgid "The %s hits you!"
-msgstr ""
-
-#: src/monsters.c:4275 src/spells.c:1825
-#, c-format
-msgid "The mirror reflects the %s!"
-msgstr ""
+msgid "The mirror reflects %s!"
+msgstr "Der Spiegel reflektiert %s!"
 
 #: src/nlarn.c:66
 msgid ""
@@ -6706,8 +6696,8 @@ msgstr "Das Wasser verdampft!"
 
 #: src/spheres.c:149
 #, c-format
-msgid "The %s dispels the sphere!"
-msgstr ""
+msgid "%s dispels the sphere!"
+msgstr "%s löst die Sphäre auf!"
 
 #: src/spheres.c:203
 msgid "You are hit by a sphere of annihilation!"

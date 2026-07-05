@@ -146,8 +146,8 @@ void sphere_move(sphere *s, game *g)
         {
             if (monster_in_sight(m))
             {
-                log_add_entry(nlarn->log, _("The %s dispels the sphere!"),
-                        monster_name(m));
+                log_add_entry(nlarn->log, _("%s dispels the sphere!"),
+                        monster_get_name_art(m, ART_DEF, GC_NOM, true));
             }
 
             sphere_destroy(s, g);

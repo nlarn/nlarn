@@ -1822,7 +1822,8 @@ static bool spell_area_pos_hit(position pos,
         {
             /* reflection is handled in map_trajectory, but we need
                to generate a message here if the mirror is visible */
-            log_add_entry(nlarn->log, _("The mirror reflects the %s!"), spell_name(sp));
+            log_add_entry(nlarn->log, _("The mirror reflects %s!"),
+                          spell_name_art(sp, ART_DEF, GC_ACC, false));
             return terminated;
         }
 
@@ -1871,7 +1872,8 @@ static bool spell_area_pos_hit(position pos,
         {
             /* The player reflects the spell. Actual handling of the reflection
                is done in map_trajectory, just give a message here. */
-            log_add_entry(nlarn->log, _("Your amulet reflects the %s!"), spell_name(sp));
+            log_add_entry(nlarn->log, _("Your amulet reflects %s!"),
+                          spell_name_art(sp, ART_DEF, GC_ACC, false));
         }
         else
         {
@@ -1879,7 +1881,8 @@ static bool spell_area_pos_hit(position pos,
             {
                 if (!player_effect(nlarn->p, ET_BLINDNESS))
                 {
-                    log_add_entry(nlarn->log, _("The %s whizzes by you!"), spell_name(sp));
+                    log_add_entry(nlarn->log, _("%s whizzes by you!"),
+                                  spell_name_art(sp, ART_DEF, GC_NOM, true));
                 }
 
                 /* missed */
@@ -1887,7 +1890,8 @@ static bool spell_area_pos_hit(position pos,
             }
             else
             {
-                log_add_entry(nlarn->log, _("The %s hits you!"), spell_name(sp));
+                log_add_entry(nlarn->log, _("%s hits you!"),
+                              spell_name_art(sp, ART_DEF, GC_NOM, true));
                 player_damage_take(nlarn->p, damage_copy(dam), PD_SPELL, sp->id);
 
                 /* erode the player's inventory */
