@@ -1104,7 +1104,9 @@ int building_monastery(struct player *p)
             /* Item stacks cost per item. */
             price *= it->count;
 
-            gchar *desc = item_describe(it, player_item_identified(p, it), false, true);
+            /* the item is governed by "from" (German: dative) */
+            gchar *desc = item_describe_gc(it, player_item_identified(p, it),
+                                           false, true, GC_DAT);
             char *question = g_strdup_printf(_("To unbind the curse from %s, we "
                 "ask but %d gold in humble support of the abbey. %s"),
                 desc, price, ayfwt);

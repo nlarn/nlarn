@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-05 23:43+0200\n"
+"POT-Creation-Date: 2026-07-06 00:13+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -809,7 +809,7 @@ msgstr "Wähle einen Gegenstand zum Entfluchen"
 msgid "Very well - your belongings shall remain as they were."
 msgstr "Nun gut - deine Habseligkeiten bleiben, wie sie waren."
 
-#: src/buildings.c:1108
+#: src/buildings.c:1110
 #, c-format
 msgid ""
 "To unbind the curse from %s, we ask but %d gold in humble support of the "
@@ -818,17 +818,17 @@ msgstr ""
 "Um den Fluch von %s zu brechen, bitten wir lediglich um %d Gold als "
 "bescheidene Unterstützung für die Abtei. %s"
 
-#: src/buildings.c:1117
+#: src/buildings.c:1119
 #, c-format
 msgid "Thus, you choose to let %s remain unaltered."
 msgstr "Du entscheidest dich also dafür, %s unverändert zu lassen."
 
-#: src/buildings.c:1127
+#: src/buildings.c:1129
 #, c-format
 msgid "The monks remove the curse on %s."
 msgstr "Die Mönche entfernen den Fluch auf %s."
 
-#: src/buildings.c:1135
+#: src/buildings.c:1137
 #, c-format
 msgid ""
 "The monks tell you that %s wasn't cursed. You may now hold this knowledge "
@@ -837,7 +837,7 @@ msgstr ""
 "Die Mönche sagen dir, dass %s nicht verflucht war. Du kannst dir dieser "
 "Tatsache nun sicher sein."
 
-#: src/buildings.c:1137
+#: src/buildings.c:1139
 #, c-format
 msgid ""
 "The monks tell you that %s weren't cursed. You may now hold this knowledge "
@@ -846,11 +846,11 @@ msgstr ""
 "Die Mönche sagen dir, dass %s nicht verflucht waren. Du kannst dir dieser "
 "Tatsache nun sicher sein."
 
-#: src/buildings.c:1158
+#: src/buildings.c:1160
 msgid "You bear no wounds that require our aid."
 msgstr "Du trägst keine Wunden, die unserer Hilfe bedürfen."
 
-#: src/buildings.c:1163
+#: src/buildings.c:1165
 #, c-format
 msgid ""
 "To grant you healing, we humbly request a donation of %d gold to our "
@@ -859,11 +859,11 @@ msgstr ""
 "Um dir Heilung zu gewähren, bitten wir demütig um eine Spende in Höhe von %d "
 "Gold an unser Kloster. %s"
 
-#: src/buildings.c:1179
+#: src/buildings.c:1181
 msgid "So be it, the healing shall wait."
 msgstr "So sei es, die Heilung muss warten."
 
-#: src/buildings.c:1197
+#: src/buildings.c:1199
 #, c-format
 msgid ""
 "To cleanse you of %s, we humbly request a donation of %d gold to our "
@@ -872,21 +872,21 @@ msgstr ""
 "Um dich von %s zu heilen, bitten wir demütig um eine Spende von %d Gold an "
 "unser Kloster. %s"
 
-#: src/buildings.c:1215
+#: src/buildings.c:1217
 #, c-format
 msgid "So be it, you chose not to be cured from %s."
 msgstr ""
 "So sei es, du hast dich entschieden, dich nicht von %s heilen zu lassen."
 
-#: src/buildings.c:1270
+#: src/buildings.c:1272
 msgid "Unfortunately we are sold out."
 msgstr "Leider sind wir ausverkauft."
 
-#: src/buildings.c:1278
+#: src/buildings.c:1280
 msgid "(`KEY`b`end`)uy"
 msgstr "(`KEY`b`end`) kaufen"
 
-#: src/buildings.c:1279
+#: src/buildings.c:1281
 msgid ""
 "Buy the selected item. If the available quantity exceeds one, you may select "
 "the amount you want to purchase."
@@ -894,98 +894,98 @@ msgstr ""
 "Kaufe den ausgewählten Gegenstand. Ist mehr als einer vorrätig, kannst du "
 "die gewünschte Menge wählen."
 
-#: src/buildings.c:1312
+#: src/buildings.c:1314
 #, c-format
 msgid "We have debited %d gold from your bank account."
 msgstr "Wir haben %d Gold von deinem Bankkonto abgebucht."
 
-#: src/buildings.c:1386
+#: src/buildings.c:1388
 #, c-format
 msgid "How many %s do you want to buy?"
 msgstr "Wie viele %s möchtest du kaufen?"
 
-#: src/buildings.c:1395
+#: src/buildings.c:1397
 #, c-format
 msgid "Wouldn't it be nice if the store had %d of those?"
 msgstr "Wäre es nicht schön, wenn der Laden %d davon hätte?"
 
-#: src/buildings.c:1415
+#: src/buildings.c:1417
 #, c-format
 msgid "You cannot afford the %d gold for %s."
-msgstr ""
+msgstr "Du kannst dir die %d Gold für %s nicht leisten."
 
-#: src/buildings.c:1430
+#: src/buildings.c:1432
 #, c-format
 msgid "Do you want to buy %s for %d gold?"
-msgstr ""
+msgstr "Möchtest du %s für %d Gold kaufen?"
 
-#: src/buildings.c:1470
+#: src/buildings.c:1472
 #, c-format
 msgid "You buy %s. Thank you for your purchase."
-msgstr ""
+msgstr "Du kaufst %s. Vielen Dank für deinen Einkauf."
 
-#: src/buildings.c:1483
+#: src/buildings.c:1485
 msgid "Identify item"
 msgstr "Gegenstand identifizieren"
 
-#: src/buildings.c:1497
+#: src/buildings.c:1499
 #, c-format
 msgid "Pay %d gold to identify %s?"
-msgstr ""
+msgstr "Möchtest du %d Gold bezahlen, um %s identifizieren zu lassen?"
 
-#: src/buildings.c:1509
+#: src/buildings.c:1511
 #, c-format
 msgid "%s is %s."
 msgstr "%s ist %s."
 
-#: src/buildings.c:1520
+#: src/buildings.c:1522
 #, c-format
 msgid "Identifying %s costs %d gold."
-msgstr ""
+msgstr "Es kostet %2$d Gold, %1$s identifizieren zu lassen."
 
-#: src/buildings.c:1533
+#: src/buildings.c:1535
 msgid "Repair item"
 msgstr "Gegenstand reparieren"
 
-#: src/buildings.c:1561
+#: src/buildings.c:1563
 #, c-format
 msgid "Pay %d gold to repair %s?"
 msgstr "Möchtest du %d Gold bezahlen, um %s zu reparieren?"
 
-#: src/buildings.c:1572
+#: src/buildings.c:1574
 #, c-format
 msgid "%s has been repaired."
 msgstr "%s wurde repariert."
 
-#: src/buildings.c:1582
+#: src/buildings.c:1584
 #, c-format
 msgid "Repairing the %s costs %d gold."
-msgstr "Die Reparatur von %s kostet %d Gold."
+msgstr "Es kostet %2$d Gold, %1$s reparieren zu lassen."
 
-#: src/buildings.c:1619
+#: src/buildings.c:1621
 #, c-format
 msgid "How many %s do you want to sell for %d gold?"
 msgstr "Wie viele %s möchtest du für %d Gold verkaufen?"
 
-#: src/buildings.c:1627
+#: src/buildings.c:1629
 #, c-format
 msgid "Wouldn't it be nice to have %d of those?"
 msgstr "Wäre es nicht schön, %d davon zu haben?"
 
-#: src/buildings.c:1640
+#: src/buildings.c:1642
 #, c-format
 msgid "Do you want to sell %s for %d gold?"
 msgstr "Möchtest du %s für %d Gold verkaufen? "
 
-#: src/buildings.c:1659
-#, c-format
-msgid "You sell %s. The %d gold has been transferred to your bank account."
-msgstr ""
-
 #: src/buildings.c:1661
 #, c-format
+msgid "You sell %s. The %d gold has been transferred to your bank account."
+msgstr "Du verkaufst %s. %d Goldstück wurde auf dein Bankkonto überwiesen."
+
+#: src/buildings.c:1663
+#, c-format
 msgid "You sell %s. The %d gold have been transferred to your bank account."
-msgstr ""
+msgstr "Du verkaufst %s. %d Goldstücke wurden auf dein Bankkonto überwiesen."
 
 #: src/combat.c:175
 #, c-format
@@ -4054,7 +4054,9 @@ msgstr "Du tauschst den Platz mit %s."
 msgid ""
 "At the brink of unseen %s, your instincts flare and you pull back just in "
 "time."
-msgstr "Vor dir liegt ungesehen %s – deine Instinkte flammen auf und du bleibst gerade noch rechtzeitig stehen."
+msgstr ""
+"Vor dir liegt ungesehen %s – deine Instinkte flammen auf und du bleibst "
+"gerade noch rechtzeitig stehen."
 
 #: src/player.c:1373
 #, c-format
@@ -5418,15 +5420,22 @@ msgstr[1] "Du gehst %d Mobul in der Zeit vorwärts."
 
 #: src/sobjects.c:37
 msgid "a holy altar"
-msgstr "m:ein heiliger Altar;einen heiligen Altar;einem heiligen Altar;eines heiligen Altars"
+msgstr ""
+"m:ein heiliger Altar;einen heiligen Altar;einem heiligen Altar;eines "
+"heiligen Altars"
 
 #: src/sobjects.c:38 src/sobjects.c:39
 msgid "a handsome, jewel-encrusted throne"
-msgstr "m:ein stattlicher, juwelenbesetzter Thron;einen stattlichen, juwelenbesetzten Thron;einem stattlichen, juwelenbesetzten Thron;eines stattlichen, juwelenbesetzten Throns"
+msgstr ""
+"m:ein stattlicher, juwelenbesetzter Thron;einen stattlichen, "
+"juwelenbesetzten Thron;einem stattlichen, juwelenbesetzten Thron;eines "
+"stattlichen, juwelenbesetzten Throns"
 
 #: src/sobjects.c:40
 msgid "a massive throne"
-msgstr "m:ein massiver Thron;einen massiven Thron;einem massiven Thron;eines massiven Throns"
+msgstr ""
+"m:ein massiver Thron;einen massiven Thron;einem massiven Thron;eines "
+"massiven Throns"
 
 #: src/sobjects.c:41 src/sobjects.c:42
 msgid "a circular staircase"
@@ -5434,23 +5443,34 @@ msgstr "f:eine Wendeltreppe;;einer Wendeltreppe;einer Wendeltreppe"
 
 #: src/sobjects.c:43
 msgid "a volcanic shaft leading downward"
-msgstr "m:ein abwärtsführender Vulkanschacht;einen abwärtsführenden Vulkanschacht;einem abwärtsführenden Vulkanschacht;eines abwärtsführenden Vulkanschachts"
+msgstr ""
+"m:ein abwärtsführender Vulkanschacht;einen abwärtsführenden "
+"Vulkanschacht;einem abwärtsführenden Vulkanschacht;eines abwärtsführenden "
+"Vulkanschachts"
 
 #: src/sobjects.c:44
 msgid "the base of a volcanic shaft"
-msgstr "m:der Fuß eines Vulkanschachts;den Fuß eines Vulkanschachts;dem Fuß eines Vulkanschachts;des Fußes eines Vulkanschachts"
+msgstr ""
+"m:der Fuß eines Vulkanschachts;den Fuß eines Vulkanschachts;dem Fuß eines "
+"Vulkanschachts;des Fußes eines Vulkanschachts"
 
 #: src/sobjects.c:45
 msgid "a bubbling fountain"
-msgstr "m:ein sprudelnder Brunnen;einen sprudelnden Brunnen;einem sprudelnden Brunnen;eines sprudelnden Brunnens"
+msgstr ""
+"m:ein sprudelnder Brunnen;einen sprudelnden Brunnen;einem sprudelnden "
+"Brunnen;eines sprudelnden Brunnens"
 
 #: src/sobjects.c:46
 msgid "a dead fountain"
-msgstr "m:ein versiegter Brunnen;einen versiegten Brunnen;einem versiegten Brunnen;eines versiegten Brunnens"
+msgstr ""
+"m:ein versiegter Brunnen;einen versiegten Brunnen;einem versiegten "
+"Brunnen;eines versiegten Brunnens"
 
 #: src/sobjects.c:47
 msgid "a great marble statue"
-msgstr "f:eine große Marmorstatue;;einer großen Marmorstatue;einer großen Marmorstatue"
+msgstr ""
+"f:eine große Marmorstatue;;einer großen Marmorstatue;einer großen "
+"Marmorstatue"
 
 #: src/sobjects.c:48
 msgid "a golden urn"
@@ -5466,15 +5486,20 @@ msgstr "f:eine offene Tür;;einer offenen Tür;einer offenen Tür"
 
 #: src/sobjects.c:51
 msgid "a closed door"
-msgstr "f:eine geschlossene Tür;;einer geschlossenen Tür;einer geschlossenen Tür"
+msgstr ""
+"f:eine geschlossene Tür;;einer geschlossenen Tür;einer geschlossenen Tür"
 
 #: src/sobjects.c:52
 msgid "the entrance to the caverns"
-msgstr "m:der Eingang zu den Höhlen;den Eingang zu den Höhlen;dem Eingang zu den Höhlen;des Eingangs zu den Höhlen"
+msgstr ""
+"m:der Eingang zu den Höhlen;den Eingang zu den Höhlen;dem Eingang zu den "
+"Höhlen;des Eingangs zu den Höhlen"
 
 #: src/sobjects.c:53
 msgid "the exit to town"
-msgstr "m:der Ausgang zur Stadt;den Ausgang zur Stadt;dem Ausgang zur Stadt;des Ausgangs zur Stadt"
+msgstr ""
+"m:der Ausgang zur Stadt;den Ausgang zur Stadt;dem Ausgang zur Stadt;des "
+"Ausgangs zur Stadt"
 
 #: src/sobjects.c:54
 msgid "your home"
@@ -5486,15 +5511,20 @@ msgstr "m:ein DND-Laden;einen DND-Laden;einem DND-Laden;eines DND-Ladens"
 
 #: src/sobjects.c:56
 msgid "the Larn trading Post"
-msgstr "m:der Larner Handelsposten;den Larner Handelsposten;dem Larner Handelsposten;des Larner Handelspostens"
+msgstr ""
+"m:der Larner Handelsposten;den Larner Handelsposten;dem Larner "
+"Handelsposten;des Larner Handelspostens"
 
 #: src/sobjects.c:57
 msgid "an LRS office"
-msgstr "n:ein Büro der Larner Steuerbehörde;;einem Büro der Larner Steuerbehörde;eines Büros der Larner Steuerbehörde"
+msgstr ""
+"n:ein Büro der Larner Steuerbehörde;;einem Büro der Larner "
+"Steuerbehörde;eines Büros der Larner Steuerbehörde"
 
 #: src/sobjects.c:58
 msgid "the College of Larn"
-msgstr "f:die Hochschule von Larn;;der Hochschule von Larn;der Hochschule von Larn"
+msgstr ""
+"f:die Hochschule von Larn;;der Hochschule von Larn;der Hochschule von Larn"
 
 #: src/sobjects.c:59
 msgid "the bank of Larn"
@@ -5502,7 +5532,9 @@ msgstr "f:die Bank von Larn;;der Bank von Larn;der Bank von Larn"
 
 #: src/sobjects.c:60
 msgid "a branch office of the bank of Larn"
-msgstr "f:eine Filiale der Bank von Larn;;einer Filiale der Bank von Larn;einer Filiale der Bank von Larn"
+msgstr ""
+"f:eine Filiale der Bank von Larn;;einer Filiale der Bank von Larn;einer "
+"Filiale der Bank von Larn"
 
 #: src/sobjects.c:61
 msgid "the Monastery of Larn"

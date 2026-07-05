@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-05 23:43+0200\n"
+"POT-Creation-Date: 2026-07-06 00:13+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -704,167 +704,167 @@ msgstr ""
 msgid "Very well - your belongings shall remain as they were."
 msgstr ""
 
-#: src/buildings.c:1108
+#: src/buildings.c:1110
 #, c-format
 msgid ""
 "To unbind the curse from %s, we ask but %d gold in humble support of the "
 "abbey. %s"
 msgstr ""
 
-#: src/buildings.c:1117
+#: src/buildings.c:1119
 #, c-format
 msgid "Thus, you choose to let %s remain unaltered."
 msgstr ""
 
-#: src/buildings.c:1127
+#: src/buildings.c:1129
 #, c-format
 msgid "The monks remove the curse on %s."
 msgstr ""
 
-#: src/buildings.c:1135
+#: src/buildings.c:1137
 #, c-format
 msgid ""
 "The monks tell you that %s wasn't cursed. You may now hold this knowledge "
 "with certainty."
 msgstr ""
 
-#: src/buildings.c:1137
+#: src/buildings.c:1139
 #, c-format
 msgid ""
 "The monks tell you that %s weren't cursed. You may now hold this knowledge "
 "with certainty."
 msgstr ""
 
-#: src/buildings.c:1158
+#: src/buildings.c:1160
 msgid "You bear no wounds that require our aid."
 msgstr ""
 
-#: src/buildings.c:1163
+#: src/buildings.c:1165
 #, c-format
 msgid ""
 "To grant you healing, we humbly request a donation of %d gold to our "
 "monastery. %s"
 msgstr ""
 
-#: src/buildings.c:1179
+#: src/buildings.c:1181
 msgid "So be it, the healing shall wait."
 msgstr ""
 
-#: src/buildings.c:1197
+#: src/buildings.c:1199
 #, c-format
 msgid ""
 "To cleanse you of %s, we humbly request a donation of %d gold to our "
 "monastery. %s"
 msgstr ""
 
-#: src/buildings.c:1215
+#: src/buildings.c:1217
 #, c-format
 msgid "So be it, you chose not to be cured from %s."
 msgstr ""
 
-#: src/buildings.c:1270
+#: src/buildings.c:1272
 msgid "Unfortunately we are sold out."
 msgstr ""
 
-#: src/buildings.c:1278
+#: src/buildings.c:1280
 msgid "(`KEY`b`end`)uy"
 msgstr ""
 
-#: src/buildings.c:1279
+#: src/buildings.c:1281
 msgid ""
 "Buy the selected item. If the available quantity exceeds one, you may select "
 "the amount you want to purchase."
 msgstr ""
 
-#: src/buildings.c:1312
+#: src/buildings.c:1314
 #, c-format
 msgid "We have debited %d gold from your bank account."
 msgstr ""
 
-#: src/buildings.c:1386
+#: src/buildings.c:1388
 #, c-format
 msgid "How many %s do you want to buy?"
 msgstr ""
 
-#: src/buildings.c:1395
+#: src/buildings.c:1397
 #, c-format
 msgid "Wouldn't it be nice if the store had %d of those?"
 msgstr ""
 
-#: src/buildings.c:1415
+#: src/buildings.c:1417
 #, c-format
 msgid "You cannot afford the %d gold for %s."
 msgstr ""
 
-#: src/buildings.c:1430
+#: src/buildings.c:1432
 #, c-format
 msgid "Do you want to buy %s for %d gold?"
 msgstr ""
 
-#: src/buildings.c:1470
+#: src/buildings.c:1472
 #, c-format
 msgid "You buy %s. Thank you for your purchase."
 msgstr ""
 
-#: src/buildings.c:1483
+#: src/buildings.c:1485
 msgid "Identify item"
 msgstr ""
 
-#: src/buildings.c:1497
+#: src/buildings.c:1499
 #, c-format
 msgid "Pay %d gold to identify %s?"
 msgstr ""
 
-#: src/buildings.c:1509
+#: src/buildings.c:1511
 #, c-format
 msgid "%s is %s."
 msgstr ""
 
-#: src/buildings.c:1520
+#: src/buildings.c:1522
 #, c-format
 msgid "Identifying %s costs %d gold."
 msgstr ""
 
-#: src/buildings.c:1533
+#: src/buildings.c:1535
 msgid "Repair item"
 msgstr ""
 
-#: src/buildings.c:1561
+#: src/buildings.c:1563
 #, c-format
 msgid "Pay %d gold to repair %s?"
 msgstr ""
 
-#: src/buildings.c:1572
+#: src/buildings.c:1574
 #, c-format
 msgid "%s has been repaired."
 msgstr ""
 
-#: src/buildings.c:1582
+#: src/buildings.c:1584
 #, c-format
 msgid "Repairing the %s costs %d gold."
 msgstr ""
 
-#: src/buildings.c:1619
+#: src/buildings.c:1621
 #, c-format
 msgid "How many %s do you want to sell for %d gold?"
 msgstr ""
 
-#: src/buildings.c:1627
+#: src/buildings.c:1629
 #, c-format
 msgid "Wouldn't it be nice to have %d of those?"
 msgstr ""
 
-#: src/buildings.c:1640
+#: src/buildings.c:1642
 #, c-format
 msgid "Do you want to sell %s for %d gold?"
 msgstr ""
 
-#: src/buildings.c:1659
+#: src/buildings.c:1661
 #, c-format
 msgid "You sell %s. The %d gold has been transferred to your bank account."
 msgstr ""
 
-#: src/buildings.c:1661
+#: src/buildings.c:1663
 #, c-format
 msgid "You sell %s. The %d gold have been transferred to your bank account."
 msgstr ""
