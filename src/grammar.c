@@ -490,16 +490,46 @@ const char *noun_phrase(const char *noun, article_t article,
                         grammar_case gcase, gboolean plural,
                         gboolean capitalise)
 {
+    return noun_phrase_adj(noun, NULL, article, gcase, plural, capitalise);
+}
+
+const char *adjective_positive(const char *adjectives)
+{
+    GString *phrase = phrase_buffer();
+    append_declined(phrase, adjectives, "");
+
+    return phrase->str;
+}
+
+const char *noun_phrase_adj(const char *noun, const char *adjectives,
+                            article_t article, grammar_case gcase,
+                            gboolean plural, gboolean capitalise)
+{
     g_assert(noun != NULL && gcase < GC_MAX);
 
     GString *phrase = phrase_buffer();
 
     g_autofree char *marker = noun_class(noun);
 
+    if (adjectives != NULL && adjectives[0] == '\0')
+        adjectives = NULL;
+
     if (marker == NULL)
     {
         /* no grammar metadata - use English rules and ignore the case */
-        append_english(phrase, article, noun, plural);
+        if (adjectives != NULL)
+        {
+            /* place the adjectives between article and noun; the
+               indefinite article is chosen by the first adjective */
+            GString *combined = g_string_new(NULL);
+            append_declined(combined, adjectives, "");
+            g_string_append_c(combined, ' ');
+            g_string_append(combined, noun);
+            append_english(phrase, article, combined->str, plural);
+            g_string_free(combined, true);
+        }
+        else
+            append_english(phrase, article, noun, plural);
     }
     else
     {
@@ -520,10 +550,18 @@ const char *noun_phrase(const char *noun, article_t article,
         while (use > 0 && forms[use][0] == '\0')
             use--;
 
-        /* resolve adjective ending placeholders in the selected form */
+        /* resolve adjective ending placeholders in the attributive
+           adjectives and the selected form; all adjectives within a
+           noun phrase share the same ending */
+        const char *ending = adjective_ending(article, marker, gcase, plural);
+
         GString *resolved = g_string_new(NULL);
-        append_declined(resolved, forms[use],
-                        adjective_ending(article, marker, gcase, plural));
+        if (adjectives != NULL)
+        {
+            append_declined(resolved, adjectives, ending);
+            g_string_append_c(resolved, ' ');
+        }
+        append_declined(resolved, forms[use], ending);
         const char *form = resolved->str;
 
         const char *art = (article == ART_NONE)

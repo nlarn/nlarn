@@ -95,6 +95,40 @@ const char *noun_phrase(const char *noun, article_t article,
                         gboolean capitalise);
 
 /**
+ * @brief Build a noun phrase with attributive adjectives.
+ *
+ * Like noun_phrase(), but inserts a chain of adjectives between the
+ * article and the noun ("an uncursed, very burnt cloak"). The
+ * adjectives may carry tilde placeholders which are replaced with the
+ * same adjective ending as the noun's own placeholders (German
+ * "unverflucht~, stark verschmort~" renders as "einen unverfluchten,
+ * stark verschmorten Umhang").
+ *
+ * @param noun The translated noun, possibly carrying grammar metadata.
+ * @param adjectives The translated adjectives, possibly carrying
+ *        ending placeholders; NULL or empty for none.
+ * @param article The article to prepend.
+ * @param gcase The grammatical case to render.
+ * @param plural Render the plural forms.
+ * @param capitalise Capitalise the first letter (for sentence starts).
+ * @return The assembled noun phrase.
+ */
+const char *noun_phrase_adj(const char *noun, const char *adjectives,
+                            article_t article, grammar_case gcase,
+                            gboolean plural, gboolean capitalise);
+
+/**
+ * @brief Return the positive (undeclined) form of an adjective.
+ *
+ * Removes the ending placeholders from a translated adjective, for
+ * predicative or stand-alone use ("gesegnet~" becomes "gesegnet").
+ *
+ * @param adjectives The translated adjective(s).
+ * @return The positive form (owned by the phrase buffer ring).
+ */
+const char *adjective_positive(const char *adjectives);
+
+/**
  * @brief Check if a translated noun carries grammar metadata.
  *
  * @param noun The translated noun.

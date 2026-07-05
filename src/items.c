@@ -712,28 +712,30 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
         return g_string_free(desc, false);
     }
 
-    /* collect additional information */
+    /* Collect the item's status attributes. These are placed between
+       article and noun and thus may be translated as declinable
+       adjectives carrying ending placeholders (see grammar.h). */
     char *add_info = NULL;
     char **add_infos = strv_new();
     if (it->blessed_known)
     {
-        if (it->blessed) strv_append(&add_infos, _("blessed"));
+        if (it->blessed) strv_append(&add_infos, C_("item status", "blessed"));
         else if (it->cursed)
         {
             if (it->type == IT_CONTAINER)
-                strv_append(&add_infos, _("trapped"));
+                strv_append(&add_infos, C_("item status", "trapped"));
             else
-                strv_append(&add_infos, _("cursed"));
+                strv_append(&add_infos, C_("item status", "cursed"));
         }
-        else strv_append(&add_infos, _("uncursed"));
+        else strv_append(&add_infos, C_("item status", "uncursed"));
     }
 
-    if (it->burnt == 1) strv_append(&add_infos, _("burnt"));
-    if (it->burnt == 2) strv_append(&add_infos, _("very burnt"));
-    if (it->corroded == 1) strv_append(&add_infos, _("corroded"));
-    if (it->corroded == 2) strv_append(&add_infos, _("very corroded"));
-    if (it->rusty == 1) strv_append(&add_infos, _("rusty"));
-    if (it->rusty == 2) strv_append(&add_infos, _("very rusty"));
+    if (it->burnt == 1) strv_append(&add_infos, C_("item status", "burnt"));
+    if (it->burnt == 2) strv_append(&add_infos, C_("item status", "very burnt"));
+    if (it->corroded == 1) strv_append(&add_infos, C_("item status", "corroded"));
+    if (it->corroded == 2) strv_append(&add_infos, C_("item status", "very corroded"));
+    if (it->rusty == 1) strv_append(&add_infos, C_("item status", "rusty"));
+    if (it->rusty == 2) strv_append(&add_infos, C_("item status", "very rusty"));
 
     if (g_strv_length(add_infos))
         add_info = g_strjoinv(", ", add_infos);
@@ -846,8 +848,11 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
                 {
                     if (add_info != NULL)
                     {
-                        /* bonus and additional information */
-                        g_string_append_printf(desc, " (%+d, %s)", it->bonus, add_info);
+                        /* bonus and additional information; the status
+                           attributes stand alone here and thus use
+                           their positive forms */
+                        g_string_append_printf(desc, " (%+d, %s)", it->bonus,
+                                adjective_positive(add_info));
                     }
                     else
                     {
@@ -858,7 +863,8 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
                 else
                 {
                     /* additional information only */
-                    g_string_append_printf(desc, " (%s)", add_info);
+                    g_string_append_printf(desc, " (%s)",
+                            adjective_positive(add_info));
                 }
             }
         }
@@ -882,35 +888,24 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
         if (noun_has_class(desc->str))
         {
             /* The description carries grammar metadata: build the phrase
-               and place the additional information as defined by the
-               translation. */
+               with the status attributes as declined adjectives between
+               article and noun. */
             GString *phrase = g_string_new(NULL);
 
             if (plural)
             {
                 g_string_append_printf(phrase, "%s %s", int2str(it->count),
-                        noun_phrase(desc->str, ART_NONE, gcase, true, false));
+                        noun_phrase_adj(desc->str, add_info,
+                            ART_NONE, gcase, true, false));
             }
             else
             {
-                g_string_append(phrase, noun_phrase(desc->str,
+                g_string_append(phrase, noun_phrase_adj(desc->str, add_info,
                         definite ? ART_DEF : ART_INDEF, gcase, false, false));
             }
 
             if (show_bonus)
                 g_string_append_printf(phrase, " %+d", it->bonus);
-
-            if (add_info != NULL)
-            {
-                /* TRANSLATORS: placement of an item's status information
-                   (e.g. "blessed, rusty") relative to the item's noun
-                   phrase: %1$s is the status, %2$s the noun phrase. */
-                char *combined = g_strdup_printf(
-                        C_("item description", "%2$s (%1$s)"),
-                        add_info, phrase->str);
-                g_string_assign(phrase, combined);
-                g_free(combined);
-            }
 
             g_string_free(desc, true);
             desc = phrase;
@@ -924,7 +919,7 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
             if (add_info != NULL)
             {
                 g_string_prepend_c(desc, ' ');
-                g_string_prepend(desc, add_info);
+                g_string_prepend(desc, adjective_positive(add_info));
             }
 
             /* prepend count or article */
