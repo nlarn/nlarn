@@ -794,8 +794,26 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
         break;
 
     case IT_GEM:
-        g_string_append_printf(desc, _("%d carats %s"), gem_size(it), item_desc_get(it, known));
+    {
+        /* the size in carats is rendered as an attributive adjective
+           ("a 2 carats diamond", "ein 2-karätiger Diamant"), placed
+           after the status attributes, closest to the noun */
+        gchar *carats = g_strdup_printf(ngettext("%d carat", "%d carats",
+                    gem_size(it)), gem_size(it));
+
+        if (add_info != NULL)
+        {
+            gchar *combined = g_strconcat(add_info, ", ", carats, NULL);
+            g_free(add_info);
+            g_free(carats);
+            add_info = combined;
+        }
+        else
+            add_info = carats;
+
+        g_string_append(desc, item_desc_get(it, known));
         break;
+    }
 
     case IT_GOLD:
         g_string_append(desc, it->count > 1 ? _("gold pieces") : _("gold piece"));
