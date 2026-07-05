@@ -23,6 +23,7 @@
 
 #include "colours.h"
 #include "enumFactory.h"
+#include "grammar.h"
 #include "monsters.h"
 
 #define TRAP_TYPE_ENUM(TRAP_TYPE) \
@@ -98,7 +99,16 @@ static inline const char *trap_gettext(const char *msg)
     return msg ? gettext(msg) : NULL;
 }
 
-#define trap_description(trap) (trap_gettext(traps[(trap)].description))
+/* the translated description, which may carry grammar metadata */
+#define trap_description_raw(trap) (trap_gettext(traps[(trap)].description))
+
+/* the description as a nominative phrase; other cases and articles are
+   rendered with noun_phrase(trap_description_raw(trap), ...) */
+static inline const char *trap_description(trap_t trap)
+{
+    const char *desc = trap_description_raw(trap);
+    return desc ? noun_phrase(desc, ART_NONE, GC_NOM, false, false) : NULL;
+}
 #define trap_p_message(trap) (trap_gettext(traps[(trap)].p_message))
 #define trap_e_message(trap) (trap_gettext(traps[(trap)].e_message))
 #define trap_m_message(trap) (trap_gettext(traps[(trap)].m_message))

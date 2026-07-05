@@ -1367,11 +1367,14 @@ int player_move(player *p, direction dir, bool open_door)
         {
             player_memory_of(p, target_p).type = map_tiletype_at(pmap, target_p);
             const int tile = map_tiletype_at(pmap, target_p);
-            const char* desc = (tile == LT_DEEPWATER || tile == LT_LAVA)
+            const bool brink = (tile == LT_DEEPWATER || tile == LT_LAVA);
+            const char* desc = brink
                 ? _("At the brink of unseen %s, your instincts flare and you pull back just in time.")
                 : _("Ouch! You bump into %s!");
 
-            log_add_entry(nlarn->log, desc, mt_get_desc(tile));
+            log_add_entry(nlarn->log, desc,
+                    noun_phrase(mt_get_desc_raw(tile), ART_NONE,
+                                brink ? GC_NOM : GC_ACC, false, false));
             return times;
         }
 
@@ -1393,7 +1396,8 @@ int player_move(player *p, direction dir, bool open_door)
     /* mention stationary objects at this position */
     if (((so = map_sobject_at(pmap, p->pos))) && !player_effect(p, ET_BLINDNESS))
     {
-        log_add_entry(nlarn->log, _("You see %s here."), so_get_desc(so));
+        log_add_entry(nlarn->log, _("You see %s here."),
+                noun_phrase(so_get_desc_raw(so), ART_NONE, GC_ACC, false, false));
     }
 
     return times;
@@ -1725,7 +1729,7 @@ static void player_autopickup(player *p)
     {
         gchar *desc = map_inv_description(
             game_map(nlarn, Z(p->pos)), p->pos,
-            "here", filter_item_noautopickup);
+            true, filter_item_noautopickup);
 
         log_add_entry(nlarn->log, desc);
 
@@ -3792,9 +3796,12 @@ void player_item_throw(player *p, inventory **inv __attribute__((unused)), item 
             /* potion reached the target without hitting anything */
             desc[0] = g_ascii_toupper(desc[0]);
             map_tile_t mtt = map_tiletype_at(pmap, target);
-            log_add_entry(nlarn->log, "%s %s the %s.", desc,
-                          (mtt <= LT_FLOOR ? "shatters on" : "splashes into"),
-                          mt_get_desc(mtt));
+            log_add_entry(nlarn->log, (mtt <= LT_FLOOR
+                          ? _("%s shatters on the %s.")
+                          : _("%s splashes into the %s.")), desc,
+                          noun_phrase(mt_get_desc_raw(mtt), ART_NONE,
+                                      (mtt <= LT_FLOOR) ? GC_DAT : GC_ACC,
+                                      false, false));
             if (mtt <= LT_FLOOR)
                 map_spill_set(pmap, target, potion_colour(it->id));
             item_destroy(it);

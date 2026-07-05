@@ -868,7 +868,7 @@ damage *map_tile_damage(map *m, position pos, bool flying)
     }
 }
 
-char *map_inv_description(map *m, position pos, const char* where, int (*ifilter)(item *))
+char *map_inv_description(map *m, position pos, bool here, int (*ifilter)(item *))
 {
     g_assert(m != NULL);
     g_assert(pos_valid(pos));
@@ -876,7 +876,8 @@ char *map_inv_description(map *m, position pos, const char* where, int (*ifilter
 
     if (inv_length_filtered(*map_ilist_at(m, pos), ifilter) > 3)
     {
-        return g_strdup_printf(_("There are multiple items %s."), where);
+        return g_strdup(here ? _("There are multiple items here.")
+                             : _("There are multiple items there."));
     }
 
     GString *items_desc = NULL;
@@ -897,7 +898,9 @@ char *map_inv_description(map *m, position pos, const char* where, int (*ifilter
 
     if (items_desc != NULL)
     {
-        char *description = g_strdup_printf(_("You see %s %s."), items_desc->str, where);
+        char *description = g_strdup_printf(here ? _("You see %s here.")
+                                                 : _("You see %s there."),
+                                            items_desc->str);
         g_string_free(items_desc, true);
 
         return description;
@@ -911,21 +914,16 @@ char *map_pos_examine(position pos)
     map *cm = game_map(nlarn, Z(pos));
     monster *monst;
     char *tmp = NULL;
-    const char *where;
     GString *desc = g_string_new(NULL);
 
     g_assert(pos_valid(pos));
 
-    if (pos_identical(pos, nlarn->p->pos))
-        where = "here";
-    else
-        where = "there";
+    const bool here = pos_identical(pos, nlarn->p->pos);
 
     /* describe the level tile */
-    tmp = g_strdup(mt_get_desc(map_tiletype_at(cm, pos)));
-    tmp[0] = g_ascii_toupper(tmp[0]);
-    g_string_append_printf(desc, "%s. ", tmp);
-    g_free(tmp);
+    g_string_append_printf(desc, "%s. ",
+            noun_phrase(mt_get_desc_raw(map_tiletype_at(cm, pos)),
+                        ART_NONE, GC_NOM, false, true));
 
     bool has_mimic = false;
     /* add description of monster, if there is one on the tile */
@@ -947,23 +945,26 @@ char *map_pos_examine(position pos)
     /* add message if target tile contains a stationary object */
     if (map_sobject_at(cm, pos) > LS_NONE)
     {
-        g_string_append_printf(desc, _("You see %s %s. "),
-                               so_get_desc(map_sobject_at(cm, pos)), where);
+        g_string_append_printf(desc,
+                here ? _("You see %s here. ") : _("You see %s there. "),
+                noun_phrase(so_get_desc_raw(map_sobject_at(cm, pos)),
+                            ART_NONE, GC_ACC, false, false));
     }
 
     /* add message if target tile contains a known trap */
     if (player_memory_of(nlarn->p, pos).trap)
     {
-        g_string_append_printf(desc, _("There is %s %s %s. "),
-                               a_an(trap_description(map_trap_at(cm, pos))),
-                               trap_description(map_trap_at(cm, pos)), where);
+        g_string_append_printf(desc,
+                here ? _("There is %s here. ") : _("There is %s there. "),
+                noun_phrase(trap_description_raw(map_trap_at(cm, pos)),
+                            ART_INDEF, GC_NOM, false, false));
     }
 
     /* add message if target tile contains items, but only if there's
        no mimic there (items don't stack correctly otherwise) */
     if (!has_mimic && inv_length(*map_ilist_at(cm, pos)) > 0)
     {
-        char *inv_description = map_inv_description(cm, pos, where, NULL);
+        char *inv_description = map_inv_description(cm, pos, here, NULL);
         g_string_append(desc, inv_description);
         g_free(inv_description);
     }

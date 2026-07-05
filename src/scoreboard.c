@@ -421,7 +421,9 @@ char *score_death_description(score_t *score, int verbose)
         break;
 
     case PD_MAP:
-        g_string_append_printf(text, _(" by %s."), mt_get_desc(score->cause));
+        g_string_append_printf(text, _(" by %s."),
+                noun_phrase(mt_get_desc_raw(score->cause), ART_NONE,
+                            GC_ACC, false, false));
         break;
 
     case PD_SPELL:

@@ -1893,7 +1893,8 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                             if (monster_in_sight(m))
                             {
                                 log_add_entry(g->log, _("%s bumps into %s."),
-                                        monster_get_name_art(m, ART_DEF, GC_NOM, true), mt_get_desc(nle));
+                                        monster_get_name_art(m, ART_DEF, GC_NOM, true),
+                                        noun_phrase(mt_get_desc_raw(nle), ART_NONE, GC_ACC, false, false));
                             }
                             break;
 
@@ -1901,7 +1902,8 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
                         case LT_DEEPWATER:
                             if (monster_in_sight(m)) {
                                 log_add_entry(g->log, _("%s sinks into %s."),
-                                        monster_get_name_art(m, ART_DEF, GC_NOM, true), mt_get_desc(nle));
+                                        monster_get_name_art(m, ART_DEF, GC_NOM, true),
+                                        noun_phrase(mt_get_desc_raw(nle), ART_NONE, GC_DAT, false, false));
                             }
                             monster_die(m, g->p);
                             break;
@@ -1972,7 +1974,8 @@ void monster_polymorph(monster *m, int max_level)
             case LE_FLYING_MONSTER:
                 log_add_entry(nlarn->log, _("%s falls into the %s!"),
                               monster_get_name_art(m, ART_DEF, GC_NOM, true),
-                              mt_get_desc(map_tiletype_at(monster_map(m), m->pos)));
+                              noun_phrase(mt_get_desc_raw(map_tiletype_at(monster_map(m), m->pos)),
+                                          ART_NONE, GC_ACC, false, false));
                 break;
             case LE_SWIMMING_MONSTER:
                 log_add_entry(nlarn->log, _("%s sinks like a rock!"),
@@ -2882,7 +2885,7 @@ char *monster_desc(monster *m)
         gchar *item_desc= item_describe(it, player_item_known(nlarn->p, it),
                                         false, false);
 
-        g_string_append_printf(desc, "You see %s there", item_desc);
+        g_string_append_printf(desc, _("You see %s there"), item_desc);
         g_free(item_desc);
 
         return g_string_free(desc, false);
@@ -2892,27 +2895,32 @@ char *monster_desc(monster *m)
 
     /* prepare health status description */
     if (m->hp == monster_hp_max(m))
-        injury = "uninjured";
+        injury = N_("uninjured");
     else if (hp_rel > 80)
-        injury = "slightly injured";
+        injury = N_("slightly injured");
     else if (hp_rel > 20)
-        injury = "injured";
+        injury = N_("injured");
     else if (hp_rel > 10)
-        injury = "heavily injured";
+        injury = N_("heavily injured");
     else
-        injury = "critically injured";
+        injury = N_("critically injured");
 
     /* for fighting civilians, find the hostile target in FOV */
     monster *fight_target = (m->action == MA_CIVILIAN)
                             ? monster_nearest_hostile_to(m, m->pos)
                             : NULL;
 
-    const char *action_desc = (fight_target != NULL) ? "fighting"
+    const char *action_desc = (fight_target != NULL) ? N_("fighting")
                                                       : monster_ai_desc[m->action];
 
-    g_string_append_printf(desc, "%s %s, %s %s", a_an(injury), injury,
-                           action_desc,
-                           monster_get_name_art(m, ART_DEF, GC_NOM, false));
+    /* the injury and activity descriptions are attributive adjectives;
+       translations may carry adjective ending placeholders */
+    g_autofree char *adjectives = (action_desc != NULL)
+        ? g_strdup_printf("%s, %s", _(injury), _(action_desc))
+        : g_strdup(_(injury));
+
+    g_string_append(desc, noun_phrase_adj(monster_get_name_raw(m), adjectives,
+                                          ART_INDEF, GC_NOM, false, false));
 
     if (game_wizardmode(nlarn))
     {
@@ -2925,17 +2933,18 @@ char *monster_desc(monster *m)
     if (m->eq_weapon != NULL)
     {
         /* describe the weapon the monster wields */
-        gchar *weapon_desc = item_describe(m->eq_weapon,
+        gchar *weapon_desc = item_describe_gc(m->eq_weapon,
                         player_item_known(nlarn->p, m->eq_weapon),
-                        true, false);
+                        true, false, GC_DAT);
 
-        g_string_append_printf(desc, ", armed with %s", weapon_desc);
+        g_string_append_printf(desc, _(", armed with %s"), weapon_desc);
         g_free(weapon_desc);
     }
 
     if (fight_target != NULL)
     {
-        g_string_append_printf(desc, ", attacking the %s", monster_get_name(fight_target));
+        g_string_append_printf(desc, _(", attacking %s"),
+                monster_get_name_art(fight_target, ART_DEF, GC_DAT, false));
     }
 
     /* add effect description */

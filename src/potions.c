@@ -507,7 +507,8 @@ bool potion_pos_hit(const GList *traj,
     {
         /* The potion hit a sobject. */
         log_add_entry(nlarn->log, _("%s shatters at %s."),
-                      desc, so_get_desc(mst));
+                      desc, noun_phrase(so_get_desc_raw(mst), ART_NONE,
+                                        GC_DAT, false, false));
 
         map_spill_set(pmap, pos, potion_colour(potion->id));
     }
@@ -517,7 +518,9 @@ bool potion_pos_hit(const GList *traj,
         log_add_entry(nlarn->log, (mtt <= LT_FLOOR
                       ? _("%s shatters on the %s.")
                       : _("%s splashes into the %s.")), desc,
-                      mt_get_desc(mtt));
+                      noun_phrase(mt_get_desc_raw(mtt), ART_NONE,
+                                  (mtt <= LT_FLOOR) ? GC_DAT : GC_ACC,
+                                  false, false));
 
         if (mtt <= LT_FLOOR)
         {
