@@ -63,7 +63,7 @@ item_material_t amulet_material(amulet_t amulet_id);
 /* macros */
 
 #define amulet_type(item)        (amulets[(item)->id].typ)
-#define amulet_name(item)        (gettext(amulets[(item)->id].name))
+#define amulet_name(item)        (g_dpgettext2(NULL, "amulet", amulets[(item)->id].name))
 #define amulet_effect_t(item)    (amulets[(item)->id].effect)
 #define amulet_price(item)       (amulets[(item)->id].price)
 

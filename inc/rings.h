@@ -59,7 +59,7 @@ extern const ring_data rings[RT_MAX];
 
 /* macros */
 
-#define ring_name(item)          (gettext(rings[(item)->id].name))
+#define ring_name(item)          (g_dpgettext2(NULL, "ring", rings[(item)->id].name))
 #define ring_effect_t(item)   (rings[(item)->id].effect)
 #define ring_price(item)         (rings[(item)->id].price)
 #define ring_bonus_is_obs(item)  (rings[(item)->id].bonus_obs)

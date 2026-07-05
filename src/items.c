@@ -63,23 +63,23 @@ const item_type_data item_data[IT_MAX] =
 const item_material_data item_materials[IM_MAX] =
 {
     /* type           name           adjective   colour              frag */
-    { IM_PAPER,       N_("paper"),       N_("papier"),   BUTTER,             20, },
-    { IM_CLOTH,       N_("cloth"),       N_("cloth"),    REGENT_GREY,        15, },
-    { IM_LEATHER,     N_("leather"),     N_("leathern"), AUTUMN_LEAF_ORANGE, 10, },
-    { IM_WOOD,        N_("wood"),        N_("wooden"),   AUTUMN_LEAF_BROWN,   5, },
-    { IM_BONE,        N_("bone"),        N_("osseous"),  ASH_GREY,           15, },
-    { IM_DRAGON_HIDE, N_("dragon hide"), N_("scabby"),   GREEN_HAZE,          2, },
-    { IM_LEAD,        N_("lead"),        N_("leady"),    DOVE_GREY,          15, },
-    { IM_IRON,        N_("iron"),        N_("irony"),    IRON,                3, },
-    { IM_STEEL,       N_("steel"),       N_("steely"),   FOG,                 1, },
-    { IM_COPPER,      N_("copper"),      N_("cupreous"), COPPER,              8, },
-    { IM_SILVER,      N_("silver"),      N_("silvery"),  SILVER,              7, },
-    { IM_GOLD,        N_("gold"),        N_("golden"),   PIRATE_GOLD,         6, },
-    { IM_PLATINUM,    N_("platinum"),    N_("platinum"), PLATINUM,            3, },
-    { IM_MITHRIL,     N_("mithril"),     N_("mithrial"), GREY93,              0, },
-    { IM_GLASS,       N_("glass"),       N_("vitreous"), CHALKY_BLUE_WHITE,  50, },
-    { IM_STONE,       N_("stone"),       N_("stony"),    GRANITE,            20, },
-    { IM_GEMSTONE,    N_("gemstone"),    N_("gemstone"), LUMINOUS_RED,        0, },
+    { IM_PAPER,       NC_("material", "paper"),       NC_("material adjective", "papier"),   BUTTER,             20, },
+    { IM_CLOTH,       NC_("material", "cloth"),       NC_("material adjective", "cloth"),    REGENT_GREY,        15, },
+    { IM_LEATHER,     NC_("material", "leather"),     NC_("material adjective", "leathern"), AUTUMN_LEAF_ORANGE, 10, },
+    { IM_WOOD,        NC_("material", "wood"),        NC_("material adjective", "wooden"),   AUTUMN_LEAF_BROWN,   5, },
+    { IM_BONE,        NC_("material", "bone"),        NC_("material adjective", "osseous"),  ASH_GREY,           15, },
+    { IM_DRAGON_HIDE, NC_("material", "dragon hide"), NC_("material adjective", "scabby"),   GREEN_HAZE,          2, },
+    { IM_LEAD,        NC_("material", "lead"),        NC_("material adjective", "leady"),    DOVE_GREY,          15, },
+    { IM_IRON,        NC_("material", "iron"),        NC_("material adjective", "irony"),    IRON,                3, },
+    { IM_STEEL,       NC_("material", "steel"),       NC_("material adjective", "steely"),   FOG,                 1, },
+    { IM_COPPER,      NC_("material", "copper"),      NC_("material adjective", "cupreous"), COPPER,              8, },
+    { IM_SILVER,      NC_("material", "silver"),      NC_("material adjective", "silvery"),  SILVER,              7, },
+    { IM_GOLD,        NC_("material", "gold"),        NC_("material adjective", "golden"),   PIRATE_GOLD,         6, },
+    { IM_PLATINUM,    NC_("material", "platinum"),    NC_("material adjective", "platinum"), PLATINUM,            3, },
+    { IM_MITHRIL,     NC_("material", "mithril"),     NC_("material adjective", "mithrial"), GREY93,              0, },
+    { IM_GLASS,       NC_("material", "glass"),       NC_("material adjective", "vitreous"), CHALKY_BLUE_WHITE,  50, },
+    { IM_STONE,       NC_("material", "stone"),       NC_("material adjective", "stony"),    GRANITE,            20, },
+    { IM_GEMSTONE,    NC_("material", "gemstone"),    NC_("material adjective", "gemstone"), LUMINOUS_RED,        0, },
 };
 
 /* functions */
@@ -751,7 +751,7 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
         if (known)
             g_string_append_printf(desc, amulet_type(it) == AMULET
                         ? _("amulet of %s") : _("talisman of %s"),
-                    item_desc_get(it, known));
+                    noun_genitive_attribute(item_desc_get(it, known)));
         else
             g_string_append_printf(desc, _("%s amulet"), item_desc_get(it, known));
         break;
@@ -814,7 +814,8 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
 
     case IT_RING:
         if (known)
-            g_string_append_printf(desc, _("ring of %s"), item_desc_get(it, known));
+            g_string_append_printf(desc, _("ring of %s"),
+                    noun_genitive_attribute(item_desc_get(it, known)));
         else
             g_string_append_printf(desc, _("%s ring"), item_desc_get(it, known));
 

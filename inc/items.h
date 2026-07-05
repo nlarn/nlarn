@@ -277,8 +277,10 @@ const char *item_name_pl(item_t type);
 #define item_is_stackable(type)       (item_data[(type)].stackable)
 #define item_is_identifyable(type)    (item_data[(type)].identifyable)
 #define item_is_desirable(type)       (item_data[(type)].desirable)
-#define item_material_name(type)      (gettext(item_materials[(type)].name))
-#define item_material_adjective(type) (gettext(item_materials[(type)].adjective))
+#define item_material_name(type)      (g_dpgettext2(NULL, "material", \
+                                                    item_materials[(type)].name))
+#define item_material_adjective(type) (g_dpgettext2(NULL, "material adjective", \
+                                                    item_materials[(type)].adjective))
 
 /* item filters */
 

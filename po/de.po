@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-05 15:09+0200\n"
+"POT-Creation-Date: 2026-07-05 15:21+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -17,40 +17,49 @@ msgstr ""
 "X-Generator: Poedit 3.9\n"
 
 #: src/amulets.c:30
+msgctxt "amulet"
 msgid "awareness"
-msgstr ""
+msgstr "f:Wahrnehmung"
 
-#: src/amulets.c:31 src/effects.c:339
+#: src/amulets.c:31
+msgctxt "amulet"
 msgid "sustainment"
-msgstr ""
+msgstr "f:Erhaltung"
 
 #: src/amulets.c:32
+msgctxt "amulet"
 msgid "undead control"
-msgstr ""
+msgstr "f:Untotenbeherrschung"
 
 #: src/amulets.c:33
+msgctxt "amulet"
 msgid "negate spirit"
-msgstr ""
+msgstr "f:Geisterbannung"
 
 #: src/amulets.c:34
+msgctxt "amulet"
 msgid "theft prevention"
-msgstr ""
+msgstr "m:Diebstahlschutz;;;Diebstahlschutzes"
 
 #: src/amulets.c:35
+msgctxt "amulet"
 msgid "dragon slaying"
-msgstr ""
+msgstr "f:Drachentötung"
 
 #: src/amulets.c:36
+msgctxt "amulet"
 msgid "power"
-msgstr ""
+msgstr "f:Macht"
 
-#: src/amulets.c:37 src/effects.c:232
+#: src/amulets.c:37
+msgctxt "amulet"
 msgid "reflection"
-msgstr ""
+msgstr "f:Reflexion"
 
 #: src/amulets.c:38
+msgctxt "amulet"
 msgid "Eye of Larn"
-msgstr ""
+msgstr "n:Auge von Larn;;;Auges von Larn"
 
 #: src/armour.c:29
 msgid "cloak"
@@ -1495,6 +1504,10 @@ msgstr "Dir wurde Erleuchtung zuteil!"
 msgid "You are no longer enlightened."
 msgstr "Du bist nicht mehr erleuchtet."
 
+#: src/effects.c:232
+msgid "reflection"
+msgstr ""
+
 #: src/effects.c:239
 msgid "You sense the presence of monsters."
 msgstr "Du spürst die Gegenwart von Monstern."
@@ -1612,6 +1625,10 @@ msgstr "Du fühlst dich weniger sicher als zuvor."
 #: src/effects.c:333
 msgid "theft protection"
 msgstr "Diebstahlschutz"
+
+#: src/effects.c:339
+msgid "sustainment"
+msgstr ""
 
 #: src/effects.c:345 src/spells.c:261
 msgid "time stop"
@@ -2054,128 +2071,174 @@ msgid "weapon"
 msgstr "f:Waffe|Waffen"
 
 #: src/items.c:66
+msgctxt "material"
 msgid "paper"
-msgstr ""
+msgstr "Papier"
 
 #: src/items.c:66
+msgctxt "material adjective"
 msgid "papier"
-msgstr ""
+msgstr "papieren~"
 
 #: src/items.c:67
+msgctxt "material"
 msgid "cloth"
-msgstr ""
+msgstr "Stoff"
+
+#: src/items.c:67
+msgctxt "material adjective"
+msgid "cloth"
+msgstr "tuchen~"
 
 #: src/items.c:68
+msgctxt "material"
 msgid "leather"
-msgstr ""
+msgstr "Leder"
 
 #: src/items.c:68
+msgctxt "material adjective"
 msgid "leathern"
-msgstr ""
+msgstr "ledern~"
 
 #: src/items.c:69
+msgctxt "material"
 msgid "wood"
-msgstr ""
+msgstr "Holz"
 
 #: src/items.c:69
+msgctxt "material adjective"
 msgid "wooden"
-msgstr ""
+msgstr "hölzern~"
 
 #: src/items.c:70
+msgctxt "material"
 msgid "bone"
-msgstr ""
+msgstr "Knochen"
 
 #: src/items.c:70
+msgctxt "material adjective"
 msgid "osseous"
-msgstr ""
+msgstr "ehern~"
 
 #: src/items.c:71
+msgctxt "material"
 msgid "dragon hide"
-msgstr ""
+msgstr "Drachenhaut"
 
 #: src/items.c:71
+msgctxt "material adjective"
 msgid "scabby"
-msgstr ""
+msgstr "schuppig~"
 
 #: src/items.c:72
+msgctxt "material"
 msgid "lead"
-msgstr ""
+msgstr "Blei"
 
 #: src/items.c:72
+msgctxt "material adjective"
 msgid "leady"
-msgstr ""
+msgstr "bleiern~"
 
 #: src/items.c:73
+msgctxt "material"
 msgid "iron"
-msgstr ""
+msgstr "Eisen"
 
 #: src/items.c:73
+msgctxt "material adjective"
 msgid "irony"
-msgstr ""
+msgstr "eisern~"
 
 #: src/items.c:74
+msgctxt "material"
 msgid "steel"
-msgstr ""
+msgstr "Stahl"
 
 #: src/items.c:74
+msgctxt "material adjective"
 msgid "steely"
-msgstr ""
+msgstr "stählern~"
 
 #: src/items.c:75
+msgctxt "material"
 msgid "copper"
-msgstr ""
+msgstr "Kupfer"
 
 #: src/items.c:75
+msgctxt "material adjective"
 msgid "cupreous"
-msgstr ""
+msgstr "kupfern~"
 
 #: src/items.c:76
+msgctxt "material"
 msgid "silver"
-msgstr ""
+msgstr "Silber"
 
 #: src/items.c:76
+msgctxt "material adjective"
 msgid "silvery"
-msgstr ""
+msgstr "silbern~"
 
 #: src/items.c:77
+msgctxt "material"
 msgid "gold"
-msgstr ""
+msgstr "Gold"
 
 #: src/items.c:77
+msgctxt "material adjective"
 msgid "golden"
-msgstr ""
+msgstr "golden~"
 
 #: src/items.c:78
+msgctxt "material"
 msgid "platinum"
-msgstr ""
+msgstr "Platin"
+
+#: src/items.c:78
+msgctxt "material adjective"
+msgid "platinum"
+msgstr "platinen~"
 
 #: src/items.c:79
+msgctxt "material"
 msgid "mithril"
-msgstr ""
+msgstr "Mithril"
 
 #: src/items.c:79
+msgctxt "material adjective"
 msgid "mithrial"
-msgstr ""
+msgstr "mithrilen~"
 
 #: src/items.c:80
+msgctxt "material"
 msgid "glass"
-msgstr ""
+msgstr "Glas"
 
 #: src/items.c:80
+msgctxt "material adjective"
 msgid "vitreous"
-msgstr ""
+msgstr "gläsern~"
 
 #: src/items.c:81
+msgctxt "material"
 msgid "stone"
-msgstr ""
+msgstr "Stein"
 
 #: src/items.c:81
+msgctxt "material adjective"
 msgid "stony"
-msgstr ""
+msgstr "steinern~"
 
 #: src/items.c:82
+msgctxt "material"
 msgid "gemstone"
-msgstr ""
+msgstr "Edelstein"
+
+#: src/items.c:82
+msgctxt "material adjective"
+msgid "gemstone"
+msgstr "edelsteinbesetzt~"
 
 #: src/items.c:709
 #, c-format
@@ -2235,17 +2298,17 @@ msgstr "verrostet~"
 #: src/items.c:753
 #, c-format
 msgid "amulet of %s"
-msgstr ""
+msgstr "n:Amulett %1$s;;;Amuletts %1$s|Amulette %1$s;;Amuletten %1$s"
 
 #: src/items.c:753
 #, c-format
 msgid "talisman of %s"
-msgstr ""
+msgstr "m:Talisman %1$s;;;Talismans %1$s|Talismane %1$s;;Talismanen %1$s"
 
 #: src/items.c:756
 #, c-format
 msgid "%s amulet"
-msgstr ""
+msgstr "n:%1$s Amulett;;;%1$s Amuletts|%1$s Amulette;;%1$s Amuletten"
 
 #: src/items.c:781
 #, c-format
@@ -2303,12 +2366,12 @@ msgstr "m:%1$s Trank;;;%1$s Tranks|%1$s Tränke;;%1$s Tränken"
 #: src/items.c:817
 #, c-format
 msgid "ring of %s"
-msgstr ""
+msgstr "m:Ring %1$s;;;Rings %1$s|Ringe %1$s;;Ringen %1$s"
 
 #: src/items.c:819
 #, c-format
 msgid "%s ring"
-msgstr ""
+msgstr "m:%1$s Ring;;;%1$s Rings|%1$s Ringe;;%1$s Ringen"
 
 #: src/items.c:829
 #, c-format
@@ -4814,36 +4877,44 @@ msgid "Smoke emerges where %s pours over the %s."
 msgstr "Rauch steigt auf, wo %s sich über %s ergießt."
 
 #: src/rings.c:31
+msgctxt "ring"
 msgid "regeneration"
-msgstr ""
+msgstr "f:Regeneration"
 
-#: src/rings.c:32 src/spells.c:53
+#: src/rings.c:32
+msgctxt "ring"
 msgid "protection"
-msgstr ""
+msgstr "m:Schutz;;;Schutzes"
 
 #: src/rings.c:33
+msgctxt "ring"
 msgid "energy"
-msgstr ""
+msgstr "f:Energie"
 
-#: src/rings.c:34 src/spells.c:68
+#: src/rings.c:34
+msgctxt "ring"
 msgid "dexterity"
-msgstr ""
+msgstr "f:Geschicklichkeit"
 
-#: src/rings.c:35 src/spells.c:98
+#: src/rings.c:35
+msgctxt "ring"
 msgid "strength"
-msgstr ""
+msgstr "f:Stärke"
 
 #: src/rings.c:36
+msgctxt "ring"
 msgid "cleverness"
-msgstr ""
+msgstr "f:Klugheit"
 
 #: src/rings.c:37
+msgctxt "ring"
 msgid "increase damage"
-msgstr ""
+msgstr "m:zusätzlich~ Schaden;;;zusätzlich~ Schadens"
 
 #: src/rings.c:38
+msgctxt "ring"
 msgid "extra regeneration"
-msgstr ""
+msgstr "f:schnell~ Regeneration"
 
 #: src/scoreboard.c:219
 msgid "Error opening scoreboard file."
@@ -5692,6 +5763,10 @@ msgstr "Der Blitz zischt an dir vorbei!"
 msgid "The lightning hits you!"
 msgstr "Der Blitz trifft dich!"
 
+#: src/spells.c:53
+msgid "protection"
+msgstr ""
+
 #: src/spells.c:55
 msgid "Generates a protection field"
 msgstr ""
@@ -5713,6 +5788,10 @@ msgstr "Das Geschoss trifft %s."
 #, c-format
 msgid "The missile bounces off %s."
 msgstr "Das Geschoss prallt von %s ab."
+
+#: src/spells.c:68
+msgid "dexterity"
+msgstr ""
 
 #: src/spells.c:70
 msgid "Improves the caster's dexterity"
@@ -5761,6 +5840,10 @@ msgstr "Der Schall verletzt %s."
 #, c-format
 msgid "%s can't hear the noise."
 msgstr "%s kann den Lärm nicht hören."
+
+#: src/spells.c:98
+msgid "strength"
+msgstr ""
 
 #: src/spells.c:100
 msgid "Increase the caster's strength for a short term"

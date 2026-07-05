@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-05 15:09+0200\n"
+"POT-Creation-Date: 2026-07-05 15:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,38 +17,47 @@ msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: src/amulets.c:30
+msgctxt "amulet"
 msgid "awareness"
 msgstr ""
 
-#: src/amulets.c:31 src/effects.c:339
+#: src/amulets.c:31
+msgctxt "amulet"
 msgid "sustainment"
 msgstr ""
 
 #: src/amulets.c:32
+msgctxt "amulet"
 msgid "undead control"
 msgstr ""
 
 #: src/amulets.c:33
+msgctxt "amulet"
 msgid "negate spirit"
 msgstr ""
 
 #: src/amulets.c:34
+msgctxt "amulet"
 msgid "theft prevention"
 msgstr ""
 
 #: src/amulets.c:35
+msgctxt "amulet"
 msgid "dragon slaying"
 msgstr ""
 
 #: src/amulets.c:36
+msgctxt "amulet"
 msgid "power"
 msgstr ""
 
-#: src/amulets.c:37 src/effects.c:232
+#: src/amulets.c:37
+msgctxt "amulet"
 msgid "reflection"
 msgstr ""
 
 #: src/amulets.c:38
+msgctxt "amulet"
 msgid "Eye of Larn"
 msgstr ""
 
@@ -1365,6 +1374,10 @@ msgstr ""
 msgid "You are no longer enlightened."
 msgstr ""
 
+#: src/effects.c:232
+msgid "reflection"
+msgstr ""
+
 #: src/effects.c:239
 msgid "You sense the presence of monsters."
 msgstr ""
@@ -1481,6 +1494,10 @@ msgstr ""
 
 #: src/effects.c:333
 msgid "theft protection"
+msgstr ""
+
+#: src/effects.c:339
+msgid "sustainment"
 msgstr ""
 
 #: src/effects.c:345 src/spells.c:261
@@ -1909,126 +1926,172 @@ msgid "weapon"
 msgstr ""
 
 #: src/items.c:66
+msgctxt "material"
 msgid "paper"
 msgstr ""
 
 #: src/items.c:66
+msgctxt "material adjective"
 msgid "papier"
 msgstr ""
 
 #: src/items.c:67
+msgctxt "material"
+msgid "cloth"
+msgstr ""
+
+#: src/items.c:67
+msgctxt "material adjective"
 msgid "cloth"
 msgstr ""
 
 #: src/items.c:68
+msgctxt "material"
 msgid "leather"
 msgstr ""
 
 #: src/items.c:68
+msgctxt "material adjective"
 msgid "leathern"
 msgstr ""
 
 #: src/items.c:69
+msgctxt "material"
 msgid "wood"
 msgstr ""
 
 #: src/items.c:69
+msgctxt "material adjective"
 msgid "wooden"
 msgstr ""
 
 #: src/items.c:70
+msgctxt "material"
 msgid "bone"
 msgstr ""
 
 #: src/items.c:70
+msgctxt "material adjective"
 msgid "osseous"
 msgstr ""
 
 #: src/items.c:71
+msgctxt "material"
 msgid "dragon hide"
 msgstr ""
 
 #: src/items.c:71
+msgctxt "material adjective"
 msgid "scabby"
 msgstr ""
 
 #: src/items.c:72
+msgctxt "material"
 msgid "lead"
 msgstr ""
 
 #: src/items.c:72
+msgctxt "material adjective"
 msgid "leady"
 msgstr ""
 
 #: src/items.c:73
+msgctxt "material"
 msgid "iron"
 msgstr ""
 
 #: src/items.c:73
+msgctxt "material adjective"
 msgid "irony"
 msgstr ""
 
 #: src/items.c:74
+msgctxt "material"
 msgid "steel"
 msgstr ""
 
 #: src/items.c:74
+msgctxt "material adjective"
 msgid "steely"
 msgstr ""
 
 #: src/items.c:75
+msgctxt "material"
 msgid "copper"
 msgstr ""
 
 #: src/items.c:75
+msgctxt "material adjective"
 msgid "cupreous"
 msgstr ""
 
 #: src/items.c:76
+msgctxt "material"
 msgid "silver"
 msgstr ""
 
 #: src/items.c:76
+msgctxt "material adjective"
 msgid "silvery"
 msgstr ""
 
 #: src/items.c:77
+msgctxt "material"
 msgid "gold"
 msgstr ""
 
 #: src/items.c:77
+msgctxt "material adjective"
 msgid "golden"
 msgstr ""
 
 #: src/items.c:78
+msgctxt "material"
+msgid "platinum"
+msgstr ""
+
+#: src/items.c:78
+msgctxt "material adjective"
 msgid "platinum"
 msgstr ""
 
 #: src/items.c:79
+msgctxt "material"
 msgid "mithril"
 msgstr ""
 
 #: src/items.c:79
+msgctxt "material adjective"
 msgid "mithrial"
 msgstr ""
 
 #: src/items.c:80
+msgctxt "material"
 msgid "glass"
 msgstr ""
 
 #: src/items.c:80
+msgctxt "material adjective"
 msgid "vitreous"
 msgstr ""
 
 #: src/items.c:81
+msgctxt "material"
 msgid "stone"
 msgstr ""
 
 #: src/items.c:81
+msgctxt "material adjective"
 msgid "stony"
 msgstr ""
 
 #: src/items.c:82
+msgctxt "material"
+msgid "gemstone"
+msgstr ""
+
+#: src/items.c:82
+msgctxt "material adjective"
 msgid "gemstone"
 msgstr ""
 
@@ -4602,34 +4665,42 @@ msgid "Smoke emerges where %s pours over the %s."
 msgstr ""
 
 #: src/rings.c:31
+msgctxt "ring"
 msgid "regeneration"
 msgstr ""
 
-#: src/rings.c:32 src/spells.c:53
+#: src/rings.c:32
+msgctxt "ring"
 msgid "protection"
 msgstr ""
 
 #: src/rings.c:33
+msgctxt "ring"
 msgid "energy"
 msgstr ""
 
-#: src/rings.c:34 src/spells.c:68
+#: src/rings.c:34
+msgctxt "ring"
 msgid "dexterity"
 msgstr ""
 
-#: src/rings.c:35 src/spells.c:98
+#: src/rings.c:35
+msgctxt "ring"
 msgid "strength"
 msgstr ""
 
 #: src/rings.c:36
+msgctxt "ring"
 msgid "cleverness"
 msgstr ""
 
 #: src/rings.c:37
+msgctxt "ring"
 msgid "increase damage"
 msgstr ""
 
 #: src/rings.c:38
+msgctxt "ring"
 msgid "extra regeneration"
 msgstr ""
 
@@ -5480,6 +5551,10 @@ msgstr ""
 msgid "The lightning hits you!"
 msgstr ""
 
+#: src/spells.c:53
+msgid "protection"
+msgstr ""
+
 #: src/spells.c:55
 msgid "Generates a protection field"
 msgstr ""
@@ -5500,6 +5575,10 @@ msgstr ""
 #: src/spells.c:64
 #, c-format
 msgid "The missile bounces off %s."
+msgstr ""
+
+#: src/spells.c:68
+msgid "dexterity"
 msgstr ""
 
 #: src/spells.c:70
@@ -5548,6 +5627,10 @@ msgstr ""
 #: src/spells.c:94
 #, c-format
 msgid "%s can't hear the noise."
+msgstr ""
+
+#: src/spells.c:98
+msgid "strength"
 msgstr ""
 
 #: src/spells.c:100
