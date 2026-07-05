@@ -4,6 +4,7 @@ nlarn
 *.tar.gz
 *.exe
 *.dmg
+obj/
 *.o
 *.d
 *.res

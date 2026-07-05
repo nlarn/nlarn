@@ -152,9 +152,10 @@ ifeq ($(config),release)
   RESFLAGS  += $(DEFINES) $(INCLUDES)
 endif
 
-OBJECTS := $(patsubst %.c,%.o,$(wildcard src/*.c))
-OBJECTS += $(patsubst %.c,%.o,$(wildcard src/wrappers/*.c))
-OBJECTS += $(patsubst %.c,%.o,$(wildcard src/external/*.c))
+OBJ_DIR := obj
+OBJECTS := $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(wildcard src/*.c))
+OBJECTS += $(patsubst src/wrappers/%.c,$(OBJ_DIR)/wrappers/%.o,$(wildcard src/wrappers/*.c))
+OBJECTS += $(patsubst src/external/%.c,$(OBJ_DIR)/external/%.o,$(wildcard src/external/*.c))
 
 INCLUDES := $(wildcard inc/*.h)
 INCLUDES += $(wildcard inc/external/*.h)
@@ -164,7 +165,16 @@ all: nlarn$(SUFFIX)
 nlarn$(SUFFIX): $(PDCLIB) $(OBJECTS) $(RESOURCES)
 	$(CC) -o $@ $(OBJECTS) $(PDCLIB) $(LDFLAGS) $(RESOURCES)
 
-%.o: %.c ${INCLUDES}
+obj/%.o: src/%.c ${INCLUDES}
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+obj/wrappers/%.o: src/wrappers/%.c ${INCLUDES}
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+obj/external/%.o: src/external/%.c ${INCLUDES}
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 %.html: %.md
@@ -258,7 +268,7 @@ $(OSXIMAGE): $(MAINFILES)
 
 clean:
 	@echo Cleaning nlarn
-	rm -f $(OBJECTS) $(DLLS)
+	rm -rf $(OBJ_DIR) $(DLLS)
 	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) mainfiles.nsh libfiles.nsh README.html Changelog.html
 	@if \[ -n "$(PDCLIB)" -a -d PDcurses/sdl2 \]; then \
 		$(MAKE) -C PDCurses/sdl2 clean; \
