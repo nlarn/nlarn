@@ -5774,7 +5774,7 @@ msgstr "m:Schutz;;;Schutzes"
 
 #: src/spells.c:55
 msgid "Generates a protection field"
-msgstr ""
+msgstr "Erzeugt ein Schutzfeld"
 
 #: src/spells.c:60
 msgctxt "spell"
@@ -5783,7 +5783,7 @@ msgstr "n:magisch~ Geschoss;;;magisch~ Geschosses"
 
 #: src/spells.c:62
 msgid "Creates and hurls a missile of magical energy"
-msgstr ""
+msgstr "Erzeugt und schleudert ein Geschoss magischer Energie"
 
 #: src/spells.c:63
 #, c-format
@@ -5802,7 +5802,7 @@ msgstr "f:Geschicklichkeit"
 
 #: src/spells.c:70
 msgid "Improves the caster's dexterity"
-msgstr ""
+msgstr "Verbessert die Geschicklichkeit des Zauberers"
 
 #: src/spells.c:75
 msgctxt "spell"
@@ -5811,7 +5811,7 @@ msgstr "m:Schlaf;;;Schlafs"
 
 #: src/spells.c:77
 msgid "Causes some monsters to go to sleep"
-msgstr ""
+msgstr "Veranlasst einige Monster, einzuschlafen"
 
 #: src/spells.c:79
 #, c-format
@@ -5825,7 +5825,7 @@ msgstr "f:Monsterbezauberung"
 
 #: src/spells.c:85
 msgid "Some monsters may be awed at your magnificence"
-msgstr ""
+msgstr "Einige Monster könnten von deiner Herrlichkeit beeindruckt sein"
 
 #: src/spells.c:86
 #, c-format
@@ -5839,7 +5839,7 @@ msgstr "m:Schallspeer;;;Schallspeers"
 
 #: src/spells.c:92
 msgid "Causes your hands to emit a screeching sound toward what they point"
-msgstr ""
+msgstr "Veranlasst deine Hände, ein kreischendes Geräusch in Richtung des Ziels auszusenden"
 
 #: src/spells.c:93
 #, c-format
@@ -5858,7 +5858,7 @@ msgstr "f:Stärke"
 
 #: src/spells.c:100
 msgid "Increase the caster's strength for a short term"
-msgstr ""
+msgstr "Erhöht für kurze Zeit die Stärke des Zauberers"
 
 #: src/spells.c:105
 msgctxt "spell"
@@ -5867,7 +5867,7 @@ msgstr "f:Giftheilung"
 
 #: src/spells.c:107
 msgid "The caster is cured from poison"
-msgstr ""
+msgstr "Der Zauberer wird von Vergiftung geheilt"
 
 #: src/spells.c:112
 msgctxt "spell"
@@ -5876,7 +5876,7 @@ msgstr "f:Heilung"
 
 #: src/spells.c:114
 msgid "Restores some HP to the caster"
-msgstr ""
+msgstr "Stellt dem Zauberer einige Trefferpunkte wieder her"
 
 #: src/spells.c:119
 msgctxt "spell"
@@ -5885,7 +5885,7 @@ msgstr "f:Heilung von Blindheit"
 
 #: src/spells.c:121
 msgid "Restores sight to one so unfortunate as to be blinded"
-msgstr ""
+msgstr "Stellt einem, der so unglücklich ist, geblendet zu sein, das Augenlicht wieder her"
 
 #: src/spells.c:126
 msgctxt "spell"
@@ -5894,7 +5894,7 @@ msgstr "f:Monstererschaffung"
 
 #: src/spells.c:128
 msgid "Creates a monster near the caster appropriate for the location"
-msgstr ""
+msgstr "Erschafft ein dem Ort angemessenes Monster in der Nähe des Zauberers"
 
 #: src/spells.c:133
 msgctxt "spell"
@@ -5903,7 +5903,7 @@ msgstr "f:Trugbilder"
 
 #: src/spells.c:135
 msgid "Creates illusions, and if believed, the monster flees"
-msgstr ""
+msgstr "Erschafft Illusionen, und wenn das Monster sie glaubt, flieht es"
 
 #: src/spells.c:136
 #, c-format
@@ -5922,7 +5922,7 @@ msgstr "f:Unsichtbarkeit"
 
 #: src/spells.c:143
 msgid "The caster becomes invisible"
-msgstr ""
+msgstr "Der Zauberer wird unsichtbar"
 
 #: src/spells.c:148
 msgctxt "spell"
@@ -5931,7 +5931,7 @@ msgstr "m:Feuerball;;;Feuerballs"
 
 #: src/spells.c:150
 msgid "Makes a ball of fire that burns on what it hits"
-msgstr ""
+msgstr "Erzeugt einen Feuerball, der alles verbrennt, was er trifft"
 
 #: src/spells.c:151
 #, c-format
@@ -5945,7 +5945,7 @@ msgstr "m:Kältekegel;;;Kältekegels"
 
 #: src/spells.c:158
 msgid "Sends forth a cone of cold which freezes what it touches"
-msgstr ""
+msgstr "Sendet einen Kältekegel aus, der alles gefriert, was er berührt"
 
 #: src/spells.c:159
 #, c-format
@@ -5959,7 +5959,7 @@ msgstr "f:Verwandlung"
 
 #: src/spells.c:166
 msgid "You can find out what this does for yourself"
-msgstr ""
+msgstr "Du kannst selbst herausfinden, was dieser Zauber bewirkt"
 
 #: src/spells.c:172
 msgctxt "spell"
@@ -5968,7 +5968,7 @@ msgstr "f:Aufhebung"
 
 #: src/spells.c:174
 msgid "Protects the caster against spheres of annihilation"
-msgstr ""
+msgstr "Schützt den Zauberer vor Vernichtungssphären"
 
 #: src/spells.c:179
 msgctxt "spell"
@@ -5977,7 +5977,7 @@ msgstr "f:Eile"
 
 #: src/spells.c:181
 msgid "Speeds up the caster's movements"
-msgstr ""
+msgstr "Beschleunigt die Bewegungen des Zauberers"
 
 #: src/spells.c:186
 msgctxt "spell"
@@ -5986,7 +5986,7 @@ msgstr "f:Todeswolke"
 
 #: src/spells.c:188
 msgid "Creates a fog of poisonous gas which kills all that is within it"
-msgstr ""
+msgstr "Erzeugt einen Nebel aus giftigem Gas, der alles in ihm tötet"
 
 #: src/spells.c:189
 #, c-format
@@ -6000,7 +6000,7 @@ msgstr "f:Gesteinsverdampfung"
 
 #: src/spells.c:196
 msgid "This changes rock to air"
-msgstr ""
+msgstr "Verwandelt Fels in Luft"
 
 #: src/spells.c:201
 msgctxt "spell"
@@ -6009,7 +6009,7 @@ msgstr "f:Austrocknung"
 
 #: src/spells.c:203
 msgid "Dries up water in the immediate vicinity"
-msgstr ""
+msgstr "Trocknet Wasser in der unmittelbaren Umgebung aus"
 
 #: src/spells.c:204
 #, c-format
@@ -6028,7 +6028,7 @@ msgstr "m:Blitz;;;Blitzes"
 
 #: src/spells.c:211
 msgid "Your finger will emit a lightning bolt when this spell is cast"
-msgstr ""
+msgstr "Dein Finger wird einen Blitz ausstoßen, wenn dieser Zauber gewirkt wird"
 
 #: src/spells.c:212
 #, c-format
@@ -6048,7 +6048,7 @@ msgstr "m:Lebensentzug;;;Lebensentzugs"
 #: src/spells.c:219
 msgid ""
 "Sacrifice some life energy to your god to drain life from monsters in range"
-msgstr ""
+msgstr "Opfere deinem Gott etwas Lebensenergie, um Monstern in der Nähe Lebenskraft zu entziehen"
 
 #: src/spells.c:224
 msgctxt "spell"
@@ -6057,7 +6057,7 @@ msgstr "f:Unverwundbarkeit"
 
 #: src/spells.c:226
 msgid "This globe helps to protect the player from physical attack"
-msgstr ""
+msgstr "Diese Kugel hilft, den Spieler vor physischen Angriffen zu schützen"
 
 #: src/spells.c:231
 msgctxt "spell"
@@ -6066,7 +6066,7 @@ msgstr "f:Flut"
 
 #: src/spells.c:233
 msgid "This creates an avalanche of H2O to flood the immediate chamber"
-msgstr ""
+msgstr "Erzeugt eine Flutwelle, um die ungebende Kammer zu überfluten"
 
 #: src/spells.c:234
 #, c-format
@@ -6085,7 +6085,7 @@ msgstr "m:Todesfinger;;;Todesfingers"
 
 #: src/spells.c:241
 msgid "This is a holy spell and calls upon your god to back you up"
-msgstr ""
+msgstr "Dies ist ein heiliger Zauber, der deinen Gott um Unterstützung ruft"
 
 #: src/spells.c:242
 #, c-format
@@ -6099,7 +6099,7 @@ msgstr "m:Monsterbann;;;Monsterbanns"
 
 #: src/spells.c:249
 msgid "Terrifies nearby monsters so that hopefully they flee the magic user"
-msgstr ""
+msgstr "Verängstigt nahe Monster, damit sie hoffentlich vor dem Zauberer fliehen"
 
 #: src/spells.c:254
 msgctxt "spell"
@@ -6108,7 +6108,7 @@ msgstr "f:Fesselung"
 
 #: src/spells.c:256
 msgid "The monster is frozen in his tracks if this is successful"
-msgstr ""
+msgstr "Das Monster erstarrt auf der Stelle, wenn dies erfolgreich ist"
 
 #: src/spells.c:261
 msgctxt "spell"
@@ -6117,7 +6117,7 @@ msgstr "m:Zeitstopp;;;Zeitstopps"
 
 #: src/spells.c:263
 msgid "All movement in the caverns ceases for a limited duration"
-msgstr ""
+msgstr "Alle Bewegungen in den Höhlen kommen für eine begrenzte Zeit zum Stillstand"
 
 #: src/spells.c:268
 msgctxt "spell"
@@ -6126,7 +6126,7 @@ msgstr "f:Entortung"
 
 #: src/spells.c:270
 msgid "Moves a particular monster around the caverns"
-msgstr ""
+msgstr "Bewegt ein bestimmtes Monster durch die Höhlen"
 
 #: src/spells.c:275
 msgctxt "spell"
@@ -6135,7 +6135,7 @@ msgstr "n:magisch~ Feuer;;;magisch~ Feuers"
 
 #: src/spells.c:277
 msgid "This causes a curtain of fire to appear all around you"
-msgstr ""
+msgstr "Lässt einen Feuervorhang um dich herum erscheinen"
 
 #: src/spells.c:278
 #, c-format
@@ -6149,7 +6149,7 @@ msgstr "m:Mauerbau;;;Mauerbaus"
 
 #: src/spells.c:285
 msgid "Makes a wall in the specified place"
-msgstr ""
+msgstr "Erschafft eine Mauer an der angegebenen Stelle"
 
 #: src/spells.c:290
 msgctxt "spell"
@@ -6158,7 +6158,7 @@ msgstr "f:Vernichtungssphäre"
 
 #: src/spells.c:292
 msgid "Anything caught in this sphere is instantly killed"
-msgstr ""
+msgstr "Alles, was von dieser Sphäre erfasst wird, wird sofort getötet"
 
 #: src/spells.c:297
 msgctxt "spell"
@@ -6167,7 +6167,7 @@ msgstr "f:Dämonenbeschwörung"
 
 #: src/spells.c:299
 msgid "Summons a demon who hopefully helps you out"
-msgstr ""
+msgstr "Beschwört einen Dämonen, der dir hoffentlich hilft"
 
 #: src/spells.c:304
 msgctxt "spell"
@@ -6176,7 +6176,7 @@ msgstr "f:Wanddurchquerung"
 
 #: src/spells.c:306
 msgid "Allows the caster to walk through walls for a short period of time"
-msgstr ""
+msgstr "Ermöglicht es dem Zauberer, für kurze Zeit durch Wände zu gehen"
 
 #: src/spells.c:311
 msgctxt "spell"
@@ -6185,7 +6185,7 @@ msgstr "f:Realitätsveränderung"
 
 #: src/spells.c:313
 msgid "God only knows what this will do"
-msgstr ""
+msgstr "Nur Gott weiß, was dieser Zauber bewirkt"
 
 #: src/spells.c:315
 msgid "Polinneaus won't let you mess with his caverns!"
