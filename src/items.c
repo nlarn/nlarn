@@ -775,16 +775,18 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
         break;
 
     case IT_BOOK:
+        /* a book is titled after the spell it teaches:
+           "das Buch des Schutzes" */
         if (known)
         {
             g_string_append_printf(desc, (!singular && it->count > 1)
-                                       ? _("books of %s") : _("book of %s"),
-                                   item_desc_get(it, known));
+                        ? _("books of %s") : _("book of %s"),
+                    noun_genitive_attribute(item_desc_get(it, known)));
         }
         else
             g_string_append_printf(desc, (!singular && it->count > 1)
-                                       ? _("%s books") : _("%s book"),
-                                   item_desc_get(it, known));
+                        ? _("%s books") : _("%s book"),
+                    item_desc_get(it, known));
         break;
 
     case IT_CONTAINER:

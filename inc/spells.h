@@ -180,8 +180,14 @@ static inline const char *spell_gettext(const char *msg)
     return msg ? gettext(msg) : NULL;
 }
 
+/* Spell names carry the message context "spell" as they collide with
+   effect and item names; translations may carry grammar metadata (see
+   grammar.h), so the name is stripped for stand-alone display. */
+#define spell_name_raw(id)    (g_dpgettext2(NULL, "spell", spells[(id)].name))
+
 #define spell_code(spell)     (spells[(spell)->id].code)
-#define spell_name(spell)     (spell_gettext(spells[(spell)->id].name))
+#define spell_name(spell)     (noun_phrase(spell_name_raw((spell)->id), \
+                                           ART_NONE, GC_NOM, false, false))
 #define spell_type(spell)     (spells[(spell)->id].type)
 #define spell_damage(spell)   (spells[(spell)->id].damage_type)
 #define spell_effect(spell)   (spells[(spell)->id].effect)
@@ -191,7 +197,8 @@ static inline const char *spell_gettext(const char *msg)
 #define spell_level(spell)    (spells[(spell)->id].level)
 
 #define spell_code_by_id(id)     (spells[(id)].code)
-#define spell_name_by_id(id)     (spell_gettext(spells[(id)].name))
+#define spell_name_by_id(id)     (noun_phrase(spell_name_raw(id), \
+                                              ART_NONE, GC_NOM, false, false))
 #define spell_type_by_id(id)     (spells[(id)].type)
 #define spell_damage_by_id(id)   (spells[(id)].damage_type)
 #define spell_effect_by_id(id)   (spells[(id)].effect)
@@ -202,14 +209,17 @@ static inline const char *spell_gettext(const char *msg)
 
 /* *** BOOKS *** */
 
-char *book_desc(spell_id book_id);
+const char *book_desc(spell_id book_id);
 int book_weight(item *book);
 colour_t book_colour(item *book);
 item_usage_result book_read(struct player *p, item *book);
 
 #define book_type_obtainable(id) (spells[id].obtainable)
 
-#define book_name(book)   (spells[(book)->id].name)
+/* A book is named after the spell it teaches; the title is composed
+   in item_describe_gc(), which renders names carrying grammar metadata
+   as a definite genitive attribute ("das Buch des Schutzes"). */
+#define book_name(book)   (spell_name_raw((book)->id))
 #define book_price(book)  (spells[(book)->id].price)
 
 #endif

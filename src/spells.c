@@ -50,14 +50,14 @@ DEFINE_ENUM(spell_id, SPELL_TYPE_ENUM)
 const spell_data spells[SP_MAX] =
 {
     {
-        SP_PRO, "pro",N_("protection"),
+        SP_PRO, "pro",NC_("spell", "protection"),
         SC_PLAYER, DAM_NONE, ET_PROTECTION, spell_type_player,
         N_("Generates a protection field"),
         NULL, NULL,
         COLOURLESS, 1, 260, true, GC_NOM, GC_NOM
     },
     {
-        SP_MLE, "mle", N_("magic missile"),
+        SP_MLE, "mle", NC_("spell", "magic missile"),
         SC_RAY, DAM_MAGICAL, ET_NONE, spell_type_ray,
         N_("Creates and hurls a missile of magical energy"),
         N_("The missile hits %s."),
@@ -65,14 +65,14 @@ const spell_data spells[SP_MAX] =
         CRYSTAL_BLUE, 1, 320, true, GC_ACC, GC_DAT
     },
     {
-        SP_DEX, "dex", N_("dexterity"),
+        SP_DEX, "dex", NC_("spell", "dexterity"),
         SC_PLAYER, DAM_NONE, ET_INC_DEX, spell_type_player,
         N_("Improves the caster's dexterity"),
         NULL, NULL,
         COLOURLESS, 1, 260, false, GC_NOM, GC_NOM
     },
     {
-        SP_SLE, "sle", N_("sleep"),
+        SP_SLE, "sle", NC_("spell", "sleep"),
         SC_POINT, DAM_NONE, ET_SLEEP, spell_type_point,
         N_("Causes some monsters to go to sleep"),
         NULL,
@@ -80,14 +80,14 @@ const spell_data spells[SP_MAX] =
         COLOURLESS, 1, 260, true, GC_NOM, GC_NOM
     },
     {
-        SP_CHM, "chm", N_("charm monster"),
+        SP_CHM, "chm", NC_("spell", "charm monster"),
         SC_POINT, DAM_NONE, ET_CHARM_MONSTER, spell_type_point,
         N_("Some monsters may be awed at your magnificence"),
         NULL, N_("%s isn't impressed."),
         COLOURLESS, 1, 260, false, GC_NOM, GC_NOM
     },
     {
-        SP_SSP, "ssp", N_("sonic spear"),
+        SP_SSP, "ssp", NC_("spell", "sonic spear"),
         SC_RAY, DAM_PHYSICAL, ET_NONE, spell_type_ray,
         N_("Causes your hands to emit a screeching sound toward what they point"),
         N_("The sound damages %s."),
@@ -95,42 +95,42 @@ const spell_data spells[SP_MAX] =
         CONIFER, 2, 480, false, GC_ACC, GC_NOM
     },
     {
-        SP_STR, "str", N_("strength"),
+        SP_STR, "str", NC_("spell", "strength"),
         SC_PLAYER, DAM_NONE, ET_INC_STR, spell_type_player,
         N_("Increase the caster's strength for a short term"),
         NULL, NULL,
         COLOURLESS, 2, 460, false, GC_NOM, GC_NOM
     },
     {
-        SP_CPO, "cpo", N_("cure poison"),
+        SP_CPO, "cpo", NC_("spell", "cure poison"),
         SC_PLAYER, DAM_NONE, ET_NONE, spell_cure_poison,
         N_("The caster is cured from poison"),
         NULL, NULL,
         COLOURLESS, 2, 460, true, GC_NOM, GC_NOM
     },
     {
-        SP_HEL, "hel", N_("healing"),
+        SP_HEL, "hel", NC_("spell", "healing"),
         SC_PLAYER, DAM_NONE, ET_INC_HP, spell_type_player,
         N_("Restores some HP to the caster"),
         NULL, NULL,
         COLOURLESS, 2, 500, true, GC_NOM, GC_NOM
     },
     {
-        SP_CBL, "cbl", N_("cure blindness"),
+        SP_CBL, "cbl", NC_("spell", "cure blindness"),
         SC_PLAYER, DAM_NONE, ET_NONE, spell_cure_blindness,
         N_("Restores sight to one so unfortunate as to be blinded"),
         NULL, NULL,
         COLOURLESS, 2, 400, true, GC_NOM, GC_NOM
     },
     {
-        SP_CRE, "cre", N_("create monster"),
+        SP_CRE, "cre", NC_("spell", "create monster"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_create_monster,
         N_("Creates a monster near the caster appropriate for the location"),
         NULL, NULL,
         COLOURLESS, 2, 400, false, GC_NOM, GC_NOM
     },
     {
-        SP_PHA, "pha", N_("phantasmal forces"),
+        SP_PHA, "pha", NC_("spell", "phantasmal forces"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_phantasmal_forces,
         N_("Creates illusions, and if believed, the monster flees"),
         N_("%s believed!"),
@@ -138,14 +138,14 @@ const spell_data spells[SP_MAX] =
         COLOURLESS, 2, 600, false, GC_NOM, GC_NOM
     },
     {
-        SP_INV, "inv", N_("invisibility"),
+        SP_INV, "inv", NC_("spell", "invisibility"),
         SC_PLAYER, DAM_NONE, ET_INVISIBILITY, spell_type_player,
         N_("The caster becomes invisible"),
         NULL, NULL,
         COLOURLESS, 2, 600, false, GC_NOM, GC_NOM
     },
     {
-        SP_BAL, "bal", N_("fireball"),
+        SP_BAL, "bal", NC_("spell", "fireball"),
         SC_BLAST, DAM_FIRE, ET_NONE, spell_type_blast,
         N_("Makes a ball of fire that burns on what it hits"),
         N_("The fireball hits %s."),
@@ -153,7 +153,7 @@ const spell_data spells[SP_MAX] =
         LUMINOUS_ORANGE, 3, 1200, false, GC_ACC, GC_NOM
     },
     {
-        SP_CLD, "cld", N_("cone of cold"),
+        SP_CLD, "cld", NC_("spell", "cone of cold"),
         SC_BLAST, DAM_COLD, ET_NONE, spell_type_blast,
         N_("Sends forth a cone of cold which freezes what it touches"),
         N_("The cone of cold strikes %s."),
@@ -161,7 +161,7 @@ const spell_data spells[SP_MAX] =
         ALABASTER_GREEN, 3, 1200, false, GC_ACC, GC_NOM
     },
     {
-        SP_PLY, "ply", N_("polymorph"),
+        SP_PLY, "ply", NC_("spell", "polymorph"),
         SC_POINT, DAM_NONE, ET_NONE, spell_type_point,
         N_("You can find out what this does for yourself"),
         NULL,
@@ -169,21 +169,21 @@ const spell_data spells[SP_MAX] =
         COLOURLESS, 3, 950, false, GC_NOM, GC_NOM
     },
     {
-        SP_CAN, "can", N_("cancellation"),
+        SP_CAN, "can", NC_("spell", "cancellation"),
         SC_PLAYER, DAM_NONE, ET_CANCELLATION, spell_type_player,
         N_("Protects the caster against spheres of annihilation"),
         NULL, NULL,
         COLOURLESS, 3, 950, false, GC_NOM, GC_NOM
     },
     {
-        SP_HAS, "has", N_("haste self"),
+        SP_HAS, "has", NC_("spell", "haste self"),
         SC_PLAYER, DAM_NONE, ET_SPEED, spell_type_player,
         N_("Speeds up the caster's movements"),
         NULL, NULL,
         COLOURLESS, 3, 950, false, GC_NOM, GC_NOM
     },
     {
-        SP_CKL, "ckl", N_("killing cloud"),
+        SP_CKL, "ckl", NC_("spell", "killing cloud"),
         SC_FLOOD, DAM_ACID, ET_NONE, spell_type_flood,
         N_("Creates a fog of poisonous gas which kills all that is within it"),
         N_("%s gasps for air."),
@@ -191,14 +191,14 @@ const spell_data spells[SP_MAX] =
         COLOURLESS, 3, 1200, false, GC_NOM, GC_NOM
     },
     {
-        SP_VPR, "vpr", N_("vaporize rock"),
+        SP_VPR, "vpr", NC_("spell", "vaporize rock"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_vaporize_rock,
         N_("This changes rock to air"),
         NULL, NULL,
         COLOURLESS, 3, 950, false, GC_NOM, GC_NOM
     },
     {
-        SP_DRY, "dry", N_("dehydration"),
+        SP_DRY, "dry", NC_("spell", "dehydration"),
         SC_POINT, DAM_PHYSICAL, ET_NONE, spell_type_point,
         N_("Dries up water in the immediate vicinity"),
         N_("%s shrivels up."),
@@ -206,7 +206,7 @@ const spell_data spells[SP_MAX] =
         COLOURLESS, 4, 1600, false, GC_NOM, GC_NOM
     },
     {
-        SP_LIT, "lit", N_("lightning"),
+        SP_LIT, "lit", NC_("spell", "lightning"),
         SC_RAY, DAM_ELECTRICITY, ET_NONE, spell_type_ray,
         N_("Your finger will emit a lightning bolt when this spell is cast"),
         N_("A lightning bolt hits %s."),
@@ -214,21 +214,21 @@ const spell_data spells[SP_MAX] =
         MOON_GLOW, 4, 1600, false, GC_ACC, GC_NOM
     },
     {
-        SP_DRL, "drl", N_("drain life"),
+        SP_DRL, "drl", NC_("spell", "drain life"),
         SC_OTHER, DAM_MAGICAL, ET_NONE, spell_drain_life,
         N_("Sacrifice some life energy to your god to drain life from monsters in range"),
         NULL, NULL,
         COLOURLESS, 4, 1400, false, GC_NOM, GC_NOM
     },
     {
-        SP_GLO, "glo", N_("invulnerability"),
+        SP_GLO, "glo", NC_("spell", "invulnerability"),
         SC_PLAYER, DAM_NONE, ET_INVULNERABILITY, spell_type_player,
         N_("This globe helps to protect the player from physical attack"),
         NULL, NULL,
         COLOURLESS, 4, 1400, false, GC_NOM, GC_NOM
     },
     {
-        SP_FLO, "flo", N_("flood"),
+        SP_FLO, "flo", NC_("spell", "flood"),
         SC_FLOOD, DAM_WATER, ET_NONE, spell_type_flood,
         N_("This creates an avalanche of H2O to flood the immediate chamber"),
         N_("%s struggles for air in the flood!"),
@@ -236,7 +236,7 @@ const spell_data spells[SP_MAX] =
         COLOURLESS, 4, 1600, false, GC_NOM, GC_NOM
     },
     {
-        SP_FGR, "fgr", N_("finger of death"),
+        SP_FGR, "fgr", NC_("spell", "finger of death"),
         SC_POINT, DAM_PHYSICAL, ET_NONE, spell_type_point,
         N_("This is a holy spell and calls upon your god to back you up"),
         N_("The heart of %s stopped."),
@@ -244,35 +244,35 @@ const spell_data spells[SP_MAX] =
         COLOURLESS, 4, 1600, false, GC_GEN, GC_NOM
     },
     {
-        SP_SCA, "sca", N_("scare monsters"),
+        SP_SCA, "sca", NC_("spell", "scare monsters"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_scare_monsters,
         N_("Terrifies nearby monsters so that hopefully they flee the magic user"),
         NULL, NULL,
         COLOURLESS, 5, 2000, false, GC_NOM, GC_NOM
     },
     {
-        SP_HLD, "hld", N_("hold monster"),
+        SP_HLD, "hld", NC_("spell", "hold monster"),
         SC_POINT, DAM_NONE, ET_HOLD_MONSTER, spell_type_point,
         N_("The monster is frozen in his tracks if this is successful"),
         NULL, NULL,
         COLOURLESS, 5, 2000, false, GC_NOM, GC_NOM
     },
     {
-        SP_STP, "stp", N_("time stop"),
+        SP_STP, "stp", NC_("spell", "time stop"),
         SC_PLAYER, DAM_NONE, ET_TIMESTOP, spell_type_player,
         N_("All movement in the caverns ceases for a limited duration"),
         NULL, NULL,
         COLOURLESS, 5, 2500, false, GC_NOM, GC_NOM
     },
     {
-        SP_TEL, "tel", N_("teleport away"),
+        SP_TEL, "tel", NC_("spell", "teleport away"),
         SC_POINT, DAM_NONE, ET_NONE, spell_type_point,
         N_("Moves a particular monster around the caverns"),
         NULL, NULL,
         COLOURLESS, 5, 2000, false, GC_NOM, GC_NOM
     },
     {
-        SP_MFI, "mfi", N_("magic fire"),
+        SP_MFI, "mfi", NC_("spell", "magic fire"),
         SC_FLOOD, DAM_FIRE, ET_NONE, spell_type_flood,
         N_("This causes a curtain of fire to appear all around you"),
         N_("%s cringes from the flame."),
@@ -280,35 +280,35 @@ const spell_data spells[SP_MAX] =
         COLOURLESS, 5, 2500, false, GC_NOM, GC_NOM
     },
     {
-        SP_MKW, "mkw", N_("make wall"),
+        SP_MKW, "mkw", NC_("spell", "make wall"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_make_wall,
         N_("Makes a wall in the specified place"),
         NULL, NULL,
         COLOURLESS, 6, 3000, false, GC_NOM, GC_NOM
     },
     {
-        SP_SPH, "sph", N_("sphere of annihilation"),
+        SP_SPH, "sph", NC_("spell", "sphere of annihilation"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_create_sphere,
         N_("Anything caught in this sphere is instantly killed"),
         NULL, NULL,
         COLOURLESS, 6, 3500, false, GC_NOM, GC_NOM
     },
     {
-        SP_SUM, "sum", N_("summon demon"),
+        SP_SUM, "sum", NC_("spell", "summon demon"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_summon_demon,
         N_("Summons a demon who hopefully helps you out"),
         NULL, NULL,
         COLOURLESS, 6, 3500, false, GC_NOM, GC_NOM
     },
     {
-        SP_WTW, "wtw", N_("walk through walls"),
+        SP_WTW, "wtw", NC_("spell", "walk through walls"),
         SC_PLAYER, DAM_NONE, ET_WALL_WALK, spell_type_player,
         N_("Allows the caster to walk through walls for a short period of time"),
         NULL, NULL,
         COLOURLESS, 6, 3800, false, GC_NOM, GC_NOM
     },
     {
-        SP_ALT, "alt", N_("alter reality"),
+        SP_ALT, "alt", NC_("spell", "alter reality"),
         SC_OTHER, DAM_NONE, ET_NONE, spell_alter_reality,
         N_("God only knows what this will do"),
         NULL,
@@ -325,42 +325,42 @@ struct book_obfuscation_s
 }
 book_obfuscation[SP_MAX] =
 {
-    { N_("parchment-bound"), 800, ELM_BROWN_RED,     },
-    { N_("thick"),          1200, GLADE_GREEN,       },
-    { N_("dusty"),           800, DUSTY_GREY,        },
-    { N_("leather-bound"),   800, ELM_BROWN_RED,     },
-    { N_("heavy"),          1200, SPRUCE_BLUE,       },
-    { N_("ancient"),         800, PALE_OLIVE_GREEN,  },
-    { N_("buckram"),         800, SUNSET_RED,        },
-    { N_("gilded"),          800, PALE_GOLD,         },
-    { N_("embossed"),        800, ROCK_BLUE,         },
-    { N_("old"),             800, DARK_RED,          },
-    { N_("thin"),            400, PALE_GREEN_ONION,  },
-    { N_("light"),           400, TRUE_LAVENDER,     },
-    { N_("large"),          1200, ABSINTHE_TURQUOISE,},
-    { N_("vellum"),          800, ELM_BROWN_RED,     },
-    { N_("tan"),             800, ELM_BROWN_RED,     },
-    { N_("papyrus"),         800, DARK_SAND,         },
-    { N_("linen"),           800, GREY93,            },
-    { N_("musty"),           800, OCEAN_GREEN,       },
-    { N_("faded"),           800, OSLO_GREY,         },
-    { N_("antique"),         800, FUSCOUS_GREY,      },
-    { N_("worn out"),        800, BUTTER,            },
-    { N_("tattered"),        800, GREY_GOOSE,        },
-    { N_("aged"),            800, CARBON_GREY,       },
-    { N_("ornate"),          800, AZUL,              },
-    { N_("inconspicuous"),   800, GREY_CLOUD,        },
-    { N_("awe-inspiring"),   800, LIGHT_PLUM,        },
-    { N_("stained"),         800, ELM_BROWN_RED,     },
-    { N_("mottled"),         800, BLUE_LILAC,        },
-    { N_("plaid"),           800, MEDIUM_SLATE_BLUE, },
-    { N_("wax-lined"),       800, COLZA_YELLOW,      },
-    { N_("bamboo"),          800, LIGHT_PALE_GREEN,  },
-    { N_("clasped"),         800, MEDIUM_VIOLET_RED, },
-    { N_("well-thumbed"),    800, FUCHSIA,           },
-    { N_("ragged"),          800, SMOOTHIE_GREEN,    },
-    { N_("dull"),            800, GRANITE,           },
-    { N_("canvas"),          800, BUTTER,            },
+    { NC_("book", "parchment-bound"), 800, ELM_BROWN_RED,     },
+    { NC_("book", "thick"),          1200, GLADE_GREEN,       },
+    { NC_("book", "dusty"),           800, DUSTY_GREY,        },
+    { NC_("book", "leather-bound"),   800, ELM_BROWN_RED,     },
+    { NC_("book", "heavy"),          1200, SPRUCE_BLUE,       },
+    { NC_("book", "ancient"),         800, PALE_OLIVE_GREEN,  },
+    { NC_("book", "buckram"),         800, SUNSET_RED,        },
+    { NC_("book", "gilded"),          800, PALE_GOLD,         },
+    { NC_("book", "embossed"),        800, ROCK_BLUE,         },
+    { NC_("book", "old"),             800, DARK_RED,          },
+    { NC_("book", "thin"),            400, PALE_GREEN_ONION,  },
+    { NC_("book", "light"),           400, TRUE_LAVENDER,     },
+    { NC_("book", "large"),          1200, ABSINTHE_TURQUOISE,},
+    { NC_("book", "vellum"),          800, ELM_BROWN_RED,     },
+    { NC_("book", "tan"),             800, ELM_BROWN_RED,     },
+    { NC_("book", "papyrus"),         800, DARK_SAND,         },
+    { NC_("book", "linen"),           800, GREY93,            },
+    { NC_("book", "musty"),           800, OCEAN_GREEN,       },
+    { NC_("book", "faded"),           800, OSLO_GREY,         },
+    { NC_("book", "antique"),         800, FUSCOUS_GREY,      },
+    { NC_("book", "worn out"),        800, BUTTER,            },
+    { NC_("book", "tattered"),        800, GREY_GOOSE,        },
+    { NC_("book", "aged"),            800, CARBON_GREY,       },
+    { NC_("book", "ornate"),          800, AZUL,              },
+    { NC_("book", "inconspicuous"),   800, GREY_CLOUD,        },
+    { NC_("book", "awe-inspiring"),   800, LIGHT_PLUM,        },
+    { NC_("book", "stained"),         800, ELM_BROWN_RED,     },
+    { NC_("book", "mottled"),         800, BLUE_LILAC,        },
+    { NC_("book", "plaid"),           800, MEDIUM_SLATE_BLUE, },
+    { NC_("book", "wax-lined"),       800, COLZA_YELLOW,      },
+    { NC_("book", "bamboo"),          800, LIGHT_PALE_GREEN,  },
+    { NC_("book", "clasped"),         800, MEDIUM_VIOLET_RED, },
+    { NC_("book", "well-thumbed"),    800, FUCHSIA,           },
+    { NC_("book", "ragged"),          800, SMOOTHIE_GREEN,    },
+    { NC_("book", "dull"),            800, GRANITE,           },
+    { NC_("book", "canvas"),          800, BUTTER,            },
 /*
     reserve descriptions for unimplemented spells:
     chambray
@@ -1487,10 +1487,11 @@ bool spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
 }
 
 
-char *book_desc(spell_id book_id)
+const char *book_desc(spell_id book_id)
 {
     g_assert(book_id < SP_MAX);
-    return (char *)book_obfuscation[nlarn->book_desc_mapping[book_id]].desc;
+    return g_dpgettext2(NULL, "book",
+            book_obfuscation[nlarn->book_desc_mapping[book_id]].desc);
 }
 
 int book_weight(item *book)
@@ -1568,7 +1569,8 @@ item_usage_result book_read(struct player *p, item *book)
 
         case 1:
             /* learnt spell */
-            log_add_entry(nlarn->log, _("You master the spell %s."), book_name(book));
+            log_add_entry(nlarn->log, _("You master the spell %s."),
+                          spell_name_by_id(book->id));
 
             result.used_up = true;
             result.identified = true;
@@ -1577,7 +1579,7 @@ item_usage_result book_read(struct player *p, item *book)
         default:
             /* improved knowledge of spell */
             log_add_entry(nlarn->log, _("You improved your knowledge of the spell %s."),
-                          book_name(book));
+                          spell_name_by_id(book->id));
 
             result.used_up = true;
             result.identified = true;
