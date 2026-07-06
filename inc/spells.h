@@ -192,6 +192,9 @@ static inline const char *spell_gettext(const char *msg)
 #define spell_name_art(spell, article, gcase, capitalise) \
     (noun_phrase(spell_name_raw((spell)->id), (article), (gcase), \
                  false, (capitalise)))
+/* the spell name as embedded in "of %s" sentences */
+#define spell_name_gen(spell) \
+    (noun_genitive_attribute(spell_name_raw((spell)->id)))
 #define spell_type(spell)     (spells[(spell)->id].type)
 #define spell_damage(spell)   (spells[(spell)->id].damage_type)
 #define spell_effect(spell)   (spells[(spell)->id].effect)

@@ -639,7 +639,7 @@ static bool spell_type_player(spell *s, struct player *p)
             {
                 e->amount += effect_type_amount(e->type);
                 log_add_entry(nlarn->log, _("You have extended the power of %s."),
-                        spell_name(s));
+                        spell_name_gen(s));
 
                 /* force recalculation of burdened
                    status if extending strength */
@@ -653,7 +653,7 @@ static bool spell_type_player(spell *s, struct player *p)
                 /* maximum reached -> indicate failure */
                 log_add_entry(nlarn->log, _("You have already extended the "
                         "power of %s to the extent of your knowledge."),
-                        spell_name(s));
+                        spell_name_gen(s));
 
                 return false;
             }
@@ -668,14 +668,14 @@ static bool spell_type_player(spell *s, struct player *p)
             {
                 e->turns += effect_type_duration(e->type);
                 log_add_entry(nlarn->log, _("You have extended the duration "
-                        "of %s."), spell_name(s));
+                        "of %s."), spell_name_gen(s));
             }
             else
             {
                 /* maximum reached -> indicate failure */
                 log_add_entry(nlarn->log, _("You have already extended the "
                         "duration of %s to the extent of your knowledge."),
-                        spell_name(s));
+                        spell_name_gen(s));
 
                 return false;
             }
@@ -712,7 +712,8 @@ static bool spell_type_point(spell *s, struct player *p)
 
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_POINT));
 
-    g_snprintf(buffer, 60, _("Select a target for %s."), spell_name(s));
+    g_snprintf(buffer, 60, _("Select a target for %s."),
+               spell_name_art(s, ART_DEF, GC_ACC, false));
 
     /* Allow non-visible positions if the player is blinded. */
     position pos = display_get_position(p, buffer, false, false, 0, false,
@@ -889,7 +890,8 @@ static bool spell_type_ray(spell *s, struct player *p)
 
     char buffer[61];
 
-    g_snprintf(buffer, 60, _("Select a target for the %s."), spell_name(s));
+    g_snprintf(buffer, 60, _("Select a target for %s."),
+               spell_name_art(s, ART_DEF, GC_ACC, false));
     /* Allow non-visible positions if the player is blinded. */
     position target = display_get_position(p, buffer, true, false, 0, false,
                                            !player_effect(p, ET_BLINDNESS));
@@ -954,7 +956,8 @@ static bool spell_type_flood(spell *s, struct player *p)
 
     g_assert(s != NULL && p != NULL && (spell_type(s) == SC_FLOOD));
 
-    g_snprintf(buffer, 60, _("Where do you want to place the %s?"), spell_name(s));
+    g_snprintf(buffer, 60, _("Where do you want to place %s?"),
+               spell_name_art(s, ART_DEF, GC_ACC, false));
     position pos = display_get_position(p, buffer, false, false, 0, false, true);
 
     /* player pressed ESC */
@@ -1027,7 +1030,8 @@ static bool spell_type_blast(spell *s, struct player *p)
         break;
     }
 
-    g_snprintf(buffer, 60, _("Point to the center of the %s."), spell_name(s));
+    g_snprintf(buffer, 60, _("Point to the center of the %s."),
+               spell_name_gen(s));
     /* Allow non-visible positions if the player is blinded. */
     position pos = display_get_position(p, buffer, false, true, radius, false,
                                         !player_effect(p, ET_BLINDNESS));
