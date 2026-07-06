@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-06 00:38+0200\n"
+"POT-Creation-Date: 2026-07-06 20:08+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -1107,12 +1107,12 @@ msgstr "f:Kiste"
 #: src/container.c:65 src/container.c:183
 #, c-format
 msgid "opening %s"
-msgstr ""
+msgstr "%s zu öffnen"
 
 #: src/container.c:74
 #, c-format
 msgid "You carefully open %s."
-msgstr ""
+msgstr "Du öffnest vorsichtig %s."
 
 #: src/container.c:92
 #, c-format
@@ -1121,21 +1121,23 @@ msgstr "%s ist leer."
 
 #: src/container.c:101
 msgid "(`KEY`g`end`)et"
-msgstr ""
+msgstr "(`KEY`g`end`) nehmen"
 
 #: src/container.c:102
 msgid "Get the selected item out the container."
-msgstr ""
+msgstr "Nimm den ausgewählten Gegenstand aus dem Behälter."
 
 #: src/container.c:111
 msgid "get (`KEY`a`end`)ll"
-msgstr ""
+msgstr "(`KEY`a`end`) alle nehmen"
 
 #: src/container.c:112
 msgid ""
 "Get all items out of the container. Only available when you can carry the "
 "total weight."
 msgstr ""
+"Nimm alle Gegenstände aus dem Behälter. Nur verfügbar, wenn du das "
+"Gesamtgewicht tragen kannst."
 
 #: src/container.c:145
 msgid "your storage room"
@@ -1148,71 +1150,71 @@ msgstr "Hä?"
 #: src/container.c:197
 #, c-format
 msgid "How many %s do you want to put into %s?"
-msgstr ""
+msgstr "Wie viele %s möchtest du in %s legen?"
 
 #: src/container.c:234
 #, c-format
 msgid "You put %s into %s."
-msgstr ""
+msgstr "Du legst %s in %s."
 
 #: src/container.c:264
 #, c-format
 msgid "How many %s do you want to take out?"
-msgstr ""
+msgstr "Wie viele %s möchtest du herausnehmen?"
 
 #: src/container.c:298 src/container.c:335
 #, c-format
 msgid "putting %s in your pack"
-msgstr ""
+msgstr "%s einzupacken"
 
 #: src/container.c:312 src/container.c:346
 #, c-format
 msgid "You put %s into your pack."
-msgstr ""
+msgstr "Du steckst %s in dein Gepäck."
 
 #: src/container.c:390
 #, c-format
 msgid "As far as you know %s is not trapped."
 msgstr "Soweit du weißt, ist %s nicht mit einer Falle versehen."
 
-#: src/container.c:397
+#: src/container.c:402
 #, c-format
 msgid "You try to disarm the trap on %s."
-msgstr ""
+msgstr "Du versuchst, die Falle an %s zu entschärfen."
 
-#: src/container.c:404
+#: src/container.c:409
 #, c-format
 msgid "Removing the trap on %s?"
-msgstr ""
+msgstr "die Falle an %s zu entfernen"
 
-#: src/container.c:413
+#: src/container.c:418
 #, c-format
 msgid "You manage to remove the trap on %s!"
-msgstr ""
+msgstr "Es gelingt dir, die Falle an %s zu entfernen!"
 
-#: src/container.c:422
+#: src/container.c:427
 #, c-format
 msgid "You trigger the trap on %s!"
-msgstr ""
+msgstr "Du löst die Falle an %s aus!"
 
-#: src/container.c:440
+#: src/container.c:445
 msgid "I see no container here."
 msgstr "Ich sehe hier keinen Behälter."
 
-#: src/container.c:451
+#: src/container.c:456
 msgid "Choose a container"
 msgstr "Wähle einen Behälter"
 
-#: src/container.c:466
+#: src/container.c:472
 #, c-format
 msgid "You carefully avoid the trap on %s."
-msgstr ""
+msgstr "Du weichst der Falle an %s geschickt aus."
 
-#: src/container.c:473
+#: src/container.c:479
 msgid "A little needle shoots out and stings you!"
 msgstr "Eine kleine Nadel schnellt hervor und sticht dich!"
 
-#: src/container.c:483
+#: src/container.c:489
 msgid "You are engulfed in a cloud of dust!"
 msgstr "Eine Staubwolke hüllt dich ein!"
 

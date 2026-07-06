@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-06 00:38+0200\n"
+"POT-Creation-Date: 2026-07-06 20:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1045,44 +1045,44 @@ msgstr ""
 msgid "As far as you know %s is not trapped."
 msgstr ""
 
-#: src/container.c:397
+#: src/container.c:402
 #, c-format
 msgid "You try to disarm the trap on %s."
 msgstr ""
 
-#: src/container.c:404
+#: src/container.c:409
 #, c-format
 msgid "Removing the trap on %s?"
 msgstr ""
 
-#: src/container.c:413
+#: src/container.c:418
 #, c-format
 msgid "You manage to remove the trap on %s!"
 msgstr ""
 
-#: src/container.c:422
+#: src/container.c:427
 #, c-format
 msgid "You trigger the trap on %s!"
 msgstr ""
 
-#: src/container.c:440
+#: src/container.c:445
 msgid "I see no container here."
 msgstr ""
 
-#: src/container.c:451
+#: src/container.c:456
 msgid "Choose a container"
 msgstr ""
 
-#: src/container.c:466
+#: src/container.c:472
 #, c-format
 msgid "You carefully avoid the trap on %s."
 msgstr ""
 
-#: src/container.c:473
+#: src/container.c:479
 msgid "A little needle shoots out and stings you!"
 msgstr ""
 
-#: src/container.c:483
+#: src/container.c:489
 msgid "You are engulfed in a cloud of dust!"
 msgstr ""
 

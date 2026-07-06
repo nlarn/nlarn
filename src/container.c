@@ -393,6 +393,11 @@ bool container_untrap(player *p)
         return false;
     }
 
+    /* the following messages place the container after "the trap on"
+       (German: dative) */
+    g_free(desc);
+    desc = item_describe_gc(container, true, true, true, GC_DAT);
+
     guint prop = (2 * player_get_dex(p)) + p->level;
     log_add_entry(nlarn->log, _("You try to disarm the trap on %s."), desc);
     /*
@@ -461,7 +466,8 @@ static bool container_trigger_trap(player *p, item *container, bool force)
      * the chance to trigger the trap is lowered */
     if (!force && container->blessed_known && chance(3 * player_get_dex(p)))
     {
-        gchar *idesc = item_describe(container, false, true, true);
+        /* the container is governed by "the trap on" (German: dative) */
+        gchar *idesc = item_describe_gc(container, false, true, true, GC_DAT);
 
         log_add_entry(nlarn->log, _("You carefully avoid the trap on %s."), idesc);
         g_free(idesc);
