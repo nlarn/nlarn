@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-06 20:08+0200\n"
+"POT-Creation-Date: 2026-07-06 20:22+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2110,7 +2110,7 @@ msgctxt "item status"
 msgid "trapped"
 msgstr ""
 
-#: src/items.c:728
+#: src/items.c:728 src/scoreboard.c:440
 msgctxt "item status"
 msgid "cursed"
 msgstr ""
@@ -3184,7 +3184,7 @@ msgstr ""
 msgid "The gaze is reflected harmlessly."
 msgstr ""
 
-#: src/monsters.c:2398 src/monsters.c:4214 src/weapons.c:443
+#: src/monsters.c:2398 src/monsters.c:4220 src/weapons.c:443
 #, c-format
 msgid "%s hits %s."
 msgstr ""
@@ -3194,7 +3194,7 @@ msgstr ""
 msgid "%s misses you."
 msgstr ""
 
-#: src/monsters.c:2415 src/monsters.c:4253 src/spells.c:1893
+#: src/monsters.c:2415 src/monsters.c:4259 src/spells.c:1893
 #, c-format
 msgid "%s hits you!"
 msgstr ""
@@ -3372,17 +3372,17 @@ msgstr ""
 msgid "%s says, \"%s\""
 msgstr ""
 
-#: src/monsters.c:4237 src/spells.c:1875
+#: src/monsters.c:4243 src/spells.c:1875
 #, c-format
 msgid "Your amulet reflects %s!"
 msgstr ""
 
-#: src/monsters.c:4245 src/spells.c:1884
+#: src/monsters.c:4251 src/spells.c:1884
 #, c-format
 msgid "%s whizzes by you!"
 msgstr ""
 
-#: src/monsters.c:4286 src/spells.c:1825
+#: src/monsters.c:4292 src/spells.c:1825
 #, c-format
 msgid "The mirror reflects %s!"
 msgstr ""
@@ -4840,9 +4840,10 @@ msgstr ""
 msgid ". She left her body."
 msgstr ""
 
-#: src/scoreboard.c:406 src/scoreboard.c:418
+#: src/scoreboard.c:406 src/scoreboard.c:418 src/scoreboard.c:424
+#: src/scoreboard.c:438
 #, c-format
-msgid " by %s %s."
+msgid " by %s."
 msgstr ""
 
 #: src/scoreboard.c:412
@@ -4851,12 +4852,7 @@ msgstr ""
 
 #: src/scoreboard.c:417
 #, c-format
-msgid " by falling through %s %s."
-msgstr ""
-
-#: src/scoreboard.c:424
-#, c-format
-msgid " by %s."
+msgid " by falling through %s."
 msgstr ""
 
 #: src/scoreboard.c:432
@@ -4869,38 +4865,33 @@ msgstr ""
 msgid " herself away with the spell \"%s\"."
 msgstr ""
 
-#: src/scoreboard.c:438
-#, c-format
-msgid " by a cursed %s."
-msgstr ""
-
-#: src/scoreboard.c:446
+#: src/scoreboard.c:448
 msgid " by toxic water from a fountain."
 msgstr ""
 
-#: src/scoreboard.c:449
+#: src/scoreboard.c:451
 msgid " by falling down a staircase."
-msgstr ""
-
-#: src/scoreboard.c:465
-#, c-format
-msgid " He has scored %s points, with the difficulty set to %d."
 msgstr ""
 
 #: src/scoreboard.c:467
 #, c-format
+msgid " He has scored %s points, with the difficulty set to %d."
+msgstr ""
+
+#: src/scoreboard.c:469
+#, c-format
 msgid " She has scored %s points, with the difficulty set to %d."
 msgstr ""
 
-#: src/scoreboard.c:509
+#: src/scoreboard.c:511
 msgid "volcano lvl. "
 msgstr ""
 
-#: src/scoreboard.c:511
+#: src/scoreboard.c:513
 msgid "caverns lvl. "
 msgstr ""
 
-#: src/scoreboard.c:513
+#: src/scoreboard.c:515
 #, c-format
 msgid "            [exp. level %d, %s%s, %d/%d hp, difficulty %d]%s\n"
 msgstr ""

@@ -266,6 +266,8 @@ static inline int item_condition_bonus(const item *it)
 
 /* item macros */
 #define item_glyph(type)          (item_data[(type)].glyph)
+/* the translated item type name, which may carry grammar metadata */
+#define item_name_sg_raw(type)    (gettext(item_data[(type)].name_sg))
 const char *item_name_sg(item_t type);
 const char *item_name_pl(item_t type);
 #define item_max_id(type)         (item_data[(type)].max_id)

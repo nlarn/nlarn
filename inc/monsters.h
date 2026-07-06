@@ -312,6 +312,9 @@ const char *monster_sound(monster *m);
 
 /* query monster type data */
 const char *monster_type_name(monster_t type);
+/* the monster type name as an articled noun phrase */
+const char *monster_type_name_art(monster_t type, article_t article,
+                                  grammar_case gcase);
 int monster_type_ac(monster_t type);
 int monster_type_size(monster_t type);
 int monster_type_speed(monster_t type);

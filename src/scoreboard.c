@@ -403,9 +403,9 @@ char *score_death_description(score_t *score, int verbose)
     case PD_MONSTER:
         /* TODO: regard monster's invisibility */
         /* TODO: while sleeping / doing sth. */
-        g_string_append_printf(text, _(" by %s %s."),
-                               a_an(monster_type_name(score->cause)),
-                               monster_type_name(score->cause));
+        g_string_append_printf(text, _(" by %s."),
+                               monster_type_name_art(score->cause,
+                                                     ART_INDEF, GC_ACC));
         break;
 
     case PD_SPHERE:
@@ -414,10 +414,10 @@ char *score_death_description(score_t *score, int verbose)
 
     case PD_TRAP:
         g_string_append_printf(text, score->cause == TT_TRAPDOOR
-                                   ? _(" by falling through %s %s.")
-                                   : _(" by %s %s."),
-                               a_an(trap_description(score->cause)),
-                               trap_description(score->cause));
+                                   ? _(" by falling through %s.")
+                                   : _(" by %s."),
+                               noun_phrase(trap_description_raw(score->cause),
+                                           ART_INDEF, GC_ACC, false, false));
         break;
 
     case PD_MAP:
@@ -435,8 +435,10 @@ char *score_death_description(score_t *score, int verbose)
         break;
 
     case PD_CURSE:
-        g_string_append_printf(text, _(" by a cursed %s."),
-                               item_name_sg(score->cause));
+        g_string_append_printf(text, _(" by %s."),
+                noun_phrase_adj(item_name_sg_raw(score->cause),
+                                C_("item status", "cursed"),
+                                ART_INDEF, GC_ACC, false, false));
         break;
 
     case PD_SOBJECT:
