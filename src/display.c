@@ -487,10 +487,12 @@ void display_paint_screen(player *p)
 
             char *desc = g_strdup(effect_get_desc(e));
 
-            if (strlen(desc) > available_space)
+            if (g_utf8_strlen(desc, -1) > (glong)available_space)
             {
-                desc[available_space - 1] = '.';
-                desc[available_space] = '\0';
+                /* truncate at a character boundary, not mid-sequence */
+                char *cut = g_utf8_offset_to_pointer(desc, available_space - 1);
+                cut[0] = '.';
+                cut[1] = '\0';
             }
 
             if ((e->type == ET_WALL_WALK || e->type == ET_LEVITATION)
@@ -1318,7 +1320,8 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                 /* inside shop */
                 gchar *item_desc = item_describe_gc(it, true, false, false, GC_NOM);
                 mvwaprintw(iwin->window, line, 1, attrs, " %-*s %5d gold ",
-                          width - 15, item_desc, item_price(it));
+                          utf8_pad(item_desc, width - 15), item_desc,
+                          item_price(it));
 
                 g_free(item_desc);
             }
@@ -1327,7 +1330,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                 gchar *item_desc = item_describe_gc(it, player_item_known(p, it),
                         false, false, GC_NOM);
                 mvwaprintw(iwin->window, line, 1, attrs, " %-*s %c ",
-                          width - 6, item_desc,
+                          utf8_pad(item_desc, width - 6), item_desc,
                           player_item_is_equipped(p, it) ? '*' : ' ');
 
                 g_free(item_desc);
@@ -1644,10 +1647,11 @@ spell *display_spell_select(const char *title, player *p)
             if (s.curr == pos) attrs = CP_UI_FG_REVERSE;
             else attrs = CP_UI_FG;
 
+            const char *sp_name = spell_name(sp);
             mvwaprintw(swin->window, pos, 1, attrs,
-                      " %3s - %-23s (Level %d) %2d ",
+                      " %3s - %-*s (Level %d) %2d ",
                       spell_code(sp),
-                      spell_name(sp),
+                      utf8_pad(sp_name, 23), sp_name,
                       spell_level(sp),
                       sp->knowledge);
         }

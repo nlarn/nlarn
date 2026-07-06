@@ -786,6 +786,13 @@ int building_school(player *p)
 
         for (int idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
         {
+            /* pre-pad the course name to 24 display columns; the
+               field width in the translated format counts bytes and
+               would pad multi-byte characters short */
+            const char *cdesc = _(school_courses[idx].description);
+            g_autofree gchar *course = g_strdup_printf("%-*s",
+                    utf8_pad(cdesc, 24), cdesc);
+
             if (!p->school_courses_taken[idx])
             {
                 /* courses become more expensive with rising difficulty */
@@ -794,19 +801,22 @@ int building_school(player *p)
 
                 g_string_append_printf(text,
                         _(" `KEY`%c`end`) `EMPH`%-24s`end` - %2d mobuls, %4d gold\n"),
-                        idx + 'a', _(school_courses[idx].description),
+                        idx + 'a', course,
                         school_courses[idx].course_time, price);
             }
             else
             {
                 g_string_append_printf(text, _("    %-24s - attended\n"),
-                        _(school_courses[idx].description));
+                        course);
             }
         }
 
+        const char *commission = _("Commission a scroll");
+        g_autofree gchar *commission_pad = g_strdup_printf("%-*s",
+                utf8_pad(commission, 24), commission);
         g_string_append_printf(text, _("\nAlternatively,\n"
                 " `KEY`%c`end`) %-24s - 10 mobuls\n\n"),
-                SCHOOL_COURSE_COUNT + 'a', _("Commission a scroll"));
+                SCHOOL_COURSE_COUNT + 'a', commission_pad);
 
         int selection = display_show_message(_("School"), text->str, 0);
         g_string_free(text, true);

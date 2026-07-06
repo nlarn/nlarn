@@ -606,8 +606,9 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
 
         for (guint id = 0; id < found; id++)
         {
-            g_string_append_printf(msg, "  %c) %-30s\n",
-                                   id + 'a', monster_type_name(candidates[id]));
+            const char *mname = monster_type_name(candidates[id]);
+            g_string_append_printf(msg, "  %c) %-*s\n",
+                                   id + 'a', utf8_pad(mname, 30), mname);
         }
 
         /* get the monster to be genocided */

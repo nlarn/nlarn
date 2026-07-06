@@ -4992,8 +4992,8 @@ static char *player_equipment_list(player *p)
         char *desc = item_describe(slots[idx].slot, player_item_known(p,
                     slots[idx].slot), false, false);
 
-        g_string_append_printf(el, "`EMPH`%-12s`end` %s\n",
-                    slots[idx].desc, desc);
+        g_string_append_printf(el, "`EMPH`%-*s`end` %s\n",
+                    utf8_pad(slots[idx].desc, 12), slots[idx].desc, desc);
 
         g_free(desc);
         idx++;
@@ -5147,8 +5147,9 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
             spell *s = (spell *)g_ptr_array_index(p->known_spells, pos);
             tmp = str_capitalize(g_strdup(spell_name(s)));
 
-            g_string_append_printf(text, "%-24s (lvl. %2d): %3d\n",
-                                   tmp, s->knowledge, s->used);
+            g_string_append_printf(text, "%-*s (lvl. %2d): %3d\n",
+                                   utf8_pad(tmp, 24), tmp,
+                                   s->knowledge, s->used);
 
             g_free(tmp);
         }

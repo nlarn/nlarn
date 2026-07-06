@@ -1,6 +1,6 @@
 /*
  * utils.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,9 @@
 
 #ifndef UTILS_H
 #define UTILS_H
+
+#include <glib.h>
+#include <string.h>
 
 #include "cJSON.h"
 
@@ -138,6 +141,16 @@ const char *int2time_str(guint val);
 static inline const char *a_an(const char *str)
 {
     return str_starts_with_vowel(str) ? "an" : "a";
+}
+
+/* printf field widths count bytes, which pads UTF-8 strings with
+   multi-byte characters short of the intended layout. Returns the
+   field width required to pad the string to the requested number of
+   display columns (assuming one column per character, which holds
+   for the languages we ship). */
+static inline int utf8_pad(const char *str, int columns)
+{
+    return columns + (int)(strlen(str) - g_utf8_strlen(str, -1));
 }
 
 static inline const char *is_are(const guint i)
