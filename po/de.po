@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-06 21:19+0200\n"
+"POT-Creation-Date: 2026-07-06 23:12+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -258,7 +258,7 @@ msgstr "Du hebst %d Gold ab."
 msgid "You don't have that much in the bank!"
 msgstr "So viel hast du nicht auf der Bank!"
 
-#: src/buildings.c:218 src/buildings.c:896
+#: src/buildings.c:218 src/buildings.c:906
 msgid "(`KEY`s`end`)ell"
 msgstr "(`KEY`s`end`) verkaufen"
 
@@ -455,8 +455,8 @@ msgstr ""
 
 #: src/buildings.c:585 src/buildings.c:601 src/buildings.c:606
 #: src/buildings.c:624 src/buildings.c:635 src/buildings.c:651
-#: src/buildings.c:662 src/buildings.c:811 src/buildings.c:842
-#: src/buildings.c:853
+#: src/buildings.c:662 src/buildings.c:821 src/buildings.c:852
+#: src/buildings.c:863
 msgid "School"
 msgstr "Hochschule"
 
@@ -611,17 +611,21 @@ msgstr ""
 msgid "Sorry, but this class has a prerequisite of \"%s\"."
 msgstr "Entschuldige, aber dieser Kurs setzt „%s“ voraus."
 
-#: src/buildings.c:796
+#: src/buildings.c:803
 #, c-format
 msgid " `KEY`%c`end`) `EMPH`%-24s`end` - %2d mobuls, %4d gold\n"
 msgstr " `KEY`%c`end`) `EMPH`%-24s`end` - %2d Mobul, %4d Gold\n"
 
-#: src/buildings.c:802
+#: src/buildings.c:809
 #, c-format
 msgid "    %-24s - attended\n"
 msgstr "    %-24s - besucht\n"
 
-#: src/buildings.c:807
+#: src/buildings.c:814
+msgid "Commission a scroll"
+msgstr "Schriftrolle anfertigen lassen"
+
+#: src/buildings.c:817
 #, c-format
 msgid ""
 "\n"
@@ -634,20 +638,16 @@ msgstr ""
 " `KEY`%c`end`) %-24s - 10 Mobul\n"
 "\n"
 
-#: src/buildings.c:809
-msgid "Commission a scroll"
-msgstr "Schriftrolle anfertigen lassen"
-
-#: src/buildings.c:840
+#: src/buildings.c:850
 #, c-format
 msgid "You cannot afford the %d gold for the course."
 msgstr "Du kannst dir die %d Gold für den Kurs nicht leisten."
 
-#: src/buildings.c:872
+#: src/buildings.c:882
 msgid "Trade Post"
 msgstr "Handelsposten"
 
-#: src/buildings.c:874
+#: src/buildings.c:884
 msgid ""
 "`EMPH`Welcome to the Larn Trading Post.`end`\n"
 "\n"
@@ -664,58 +664,58 @@ msgstr ""
 "große Kosten verursacht, zahlen wir üblicherweise nur 20% des Neuwerts.\n"
 "Bei stark beschädigten Gegenständen zahlen wir nur 10% des Neuwerts."
 
-#: src/buildings.c:897
+#: src/buildings.c:907
 msgid "Sell the selected item to the Trade Post."
 msgstr "Verkaufe den ausgewählten Gegenstand an den Handelsposten."
 
-#: src/buildings.c:906
+#: src/buildings.c:916
 msgid "(`KEY`i`end`)dentify"
 msgstr "(`KEY`i`end`) identifizieren"
 
-#: src/buildings.c:907
+#: src/buildings.c:917
 msgid "Have the Trade Post's experts identify your item."
 msgstr "Lass die Experten des Handelspostens deinen Gegenstand identifizieren."
 
-#: src/buildings.c:915
+#: src/buildings.c:925
 msgid "(`KEY`r`end`)epair"
 msgstr "(`KEY`r`end`) reparieren"
 
-#: src/buildings.c:916
+#: src/buildings.c:926
 msgid ""
 "Have the Trade Post's experts revert any damage done to the selected item."
 msgstr ""
 "Lass die Experten des Handelspostens alle Schäden am ausgewählten Gegenstand "
 "beheben."
 
-#: src/buildings.c:924
+#: src/buildings.c:934
 msgid "(`KEY`e`end`)quip"
 msgstr "(`KEY`e`end`) anlegen"
 
-#: src/buildings.c:925 src/player.c:2613
+#: src/buildings.c:935 src/player.c:2613
 msgid "Equip the selected item."
 msgstr "Den gewählten Gegenstand anlegen."
 
-#: src/buildings.c:932
+#: src/buildings.c:942
 msgid "(`KEY`u`end`)nequip"
 msgstr "(`KEY`u`end`) ablegen"
 
-#: src/buildings.c:933 src/player.c:2637
+#: src/buildings.c:943 src/player.c:2637
 msgid "Unequip the selected item."
 msgstr "Den gewählten Gegenstand ablegen."
 
-#: src/buildings.c:941
+#: src/buildings.c:951
 msgid "(`KEY`n`end`)ote"
 msgstr "(`KEY`n`end`) notieren"
 
-#: src/buildings.c:942
+#: src/buildings.c:952
 msgid "Add a note to the item."
 msgstr "Versieh den Gegenstand mit einer Notiz."
 
-#: src/buildings.c:961
+#: src/buildings.c:971
 msgid "The Monastery of Larn"
 msgstr "Das Kloster von Larn"
 
-#: src/buildings.c:963
+#: src/buildings.c:973
 msgid ""
 "`EMPH`Welcome, traveler, to the Monastery of Larn.`end`\n"
 "\n"
@@ -748,68 +748,68 @@ msgstr ""
 "  `KEY`b`end`) um Fluchaufhebung bitten\n"
 "  `KEY`c`end`) Heilung empfangen\n"
 
-#: src/buildings.c:974
+#: src/buildings.c:984
 msgid "Shall we proceed, then?"
 msgstr "Sollen wir also fortfahren?"
 
-#: src/buildings.c:994
+#: src/buildings.c:1004
 msgid "poison"
 msgstr "Vergiftung"
 
-#: src/buildings.c:1000
+#: src/buildings.c:1010
 msgid "blindness"
 msgstr "Blindheit"
 
-#: src/buildings.c:1006
+#: src/buildings.c:1016
 msgid "sickness"
 msgstr "Krankheit"
 
-#: src/buildings.c:1012
+#: src/buildings.c:1022
 msgid "clumsiness"
 msgstr "Ungeschicklichkeit"
 
-#: src/buildings.c:1018
+#: src/buildings.c:1028
 msgid "dizziness"
 msgstr "Schwindel"
 
-#: src/buildings.c:1024
+#: src/buildings.c:1034
 msgid "incapacitation"
 msgstr "Entkräftung"
 
-#: src/buildings.c:1030
+#: src/buildings.c:1040
 msgid "awkwardness"
 msgstr "Unbeholfenheit"
 
-#: src/buildings.c:1036
+#: src/buildings.c:1046
 msgid "mental deficiency"
 msgstr "geistige Umnachtung"
 
-#: src/buildings.c:1042
+#: src/buildings.c:1052
 msgid "weakness"
 msgstr "Schwäche"
 
-#: src/buildings.c:1048
+#: src/buildings.c:1058
 msgid "ignorance"
 msgstr "Unwissenheit"
 
-#: src/buildings.c:1054
+#: src/buildings.c:1064
 #, c-format
 msgid "  `KEY`%c`end`) heal from %s\n"
 msgstr "  `KEY`%c`end`) Heilung von %s\n"
 
-#: src/buildings.c:1081
+#: src/buildings.c:1091
 msgid "There is no sign of curse upon your possessions."
 msgstr "Es gibt kein Anzeichen eines Fluchs auf deinen Habseligkeiten."
 
-#: src/buildings.c:1086 src/scrolls.c:847
+#: src/buildings.c:1096 src/scrolls.c:848
 msgid "Choose an item to uncurse"
 msgstr "Wähle einen Gegenstand zum Entfluchen"
 
-#: src/buildings.c:1092
+#: src/buildings.c:1102
 msgid "Very well - your belongings shall remain as they were."
 msgstr "Nun gut - deine Habseligkeiten bleiben, wie sie waren."
 
-#: src/buildings.c:1110
+#: src/buildings.c:1120
 #, c-format
 msgid ""
 "To unbind the curse from %s, we ask but %d gold in humble support of the "
@@ -818,17 +818,17 @@ msgstr ""
 "Um den Fluch von %s zu brechen, bitten wir lediglich um %d Gold als "
 "bescheidene Unterstützung für die Abtei. %s"
 
-#: src/buildings.c:1119
+#: src/buildings.c:1129
 #, c-format
 msgid "Thus, you choose to let %s remain unaltered."
 msgstr "Du entscheidest dich also dafür, %s unverändert zu lassen."
 
-#: src/buildings.c:1129
+#: src/buildings.c:1139
 #, c-format
 msgid "The monks remove the curse on %s."
 msgstr "Die Mönche entfernen den Fluch auf %s."
 
-#: src/buildings.c:1137
+#: src/buildings.c:1147
 #, c-format
 msgid ""
 "The monks tell you that %s wasn't cursed. You may now hold this knowledge "
@@ -837,7 +837,7 @@ msgstr ""
 "Die Mönche sagen dir, dass %s nicht verflucht war. Du kannst dir dieser "
 "Tatsache nun sicher sein."
 
-#: src/buildings.c:1139
+#: src/buildings.c:1149
 #, c-format
 msgid ""
 "The monks tell you that %s weren't cursed. You may now hold this knowledge "
@@ -846,11 +846,11 @@ msgstr ""
 "Die Mönche sagen dir, dass %s nicht verflucht waren. Du kannst dir dieser "
 "Tatsache nun sicher sein."
 
-#: src/buildings.c:1160
+#: src/buildings.c:1170
 msgid "You bear no wounds that require our aid."
 msgstr "Du trägst keine Wunden, die unserer Hilfe bedürfen."
 
-#: src/buildings.c:1165
+#: src/buildings.c:1175
 #, c-format
 msgid ""
 "To grant you healing, we humbly request a donation of %d gold to our "
@@ -859,11 +859,11 @@ msgstr ""
 "Um dir Heilung zu gewähren, bitten wir demütig um eine Spende in Höhe von %d "
 "Gold an unser Kloster. %s"
 
-#: src/buildings.c:1181
+#: src/buildings.c:1191
 msgid "So be it, the healing shall wait."
 msgstr "So sei es, die Heilung muss warten."
 
-#: src/buildings.c:1199
+#: src/buildings.c:1209
 #, c-format
 msgid ""
 "To cleanse you of %s, we humbly request a donation of %d gold to our "
@@ -872,21 +872,21 @@ msgstr ""
 "Um dich von %s zu heilen, bitten wir demütig um eine Spende von %d Gold an "
 "unser Kloster. %s"
 
-#: src/buildings.c:1217
+#: src/buildings.c:1227
 #, c-format
 msgid "So be it, you chose not to be cured from %s."
 msgstr ""
 "So sei es, du hast dich entschieden, dich nicht von %s heilen zu lassen."
 
-#: src/buildings.c:1272
+#: src/buildings.c:1282
 msgid "Unfortunately we are sold out."
 msgstr "Leider sind wir ausverkauft."
 
-#: src/buildings.c:1280
+#: src/buildings.c:1290
 msgid "(`KEY`b`end`)uy"
 msgstr "(`KEY`b`end`) kaufen"
 
-#: src/buildings.c:1281
+#: src/buildings.c:1291
 msgid ""
 "Buy the selected item. If the available quantity exceeds one, you may select "
 "the amount you want to purchase."
@@ -894,95 +894,95 @@ msgstr ""
 "Kaufe den ausgewählten Gegenstand. Ist mehr als einer vorrätig, kannst du "
 "die gewünschte Menge wählen."
 
-#: src/buildings.c:1314
+#: src/buildings.c:1324
 #, c-format
 msgid "We have debited %d gold from your bank account."
 msgstr "Wir haben %d Gold von deinem Bankkonto abgebucht."
 
-#: src/buildings.c:1388
+#: src/buildings.c:1398
 #, c-format
 msgid "How many %s do you want to buy?"
 msgstr "Wie viele %s möchtest du kaufen?"
 
-#: src/buildings.c:1397
+#: src/buildings.c:1407
 #, c-format
 msgid "Wouldn't it be nice if the store had %d of those?"
 msgstr "Wäre es nicht schön, wenn der Laden %d davon hätte?"
 
-#: src/buildings.c:1417
+#: src/buildings.c:1427
 #, c-format
 msgid "You cannot afford the %d gold for %s."
 msgstr "Du kannst dir die %d Gold für %s nicht leisten."
 
-#: src/buildings.c:1432
+#: src/buildings.c:1442
 #, c-format
 msgid "Do you want to buy %s for %d gold?"
 msgstr "Möchtest du %s für %d Gold kaufen?"
 
-#: src/buildings.c:1472
+#: src/buildings.c:1482
 #, c-format
 msgid "You buy %s. Thank you for your purchase."
 msgstr "Du kaufst %s. Vielen Dank für deinen Einkauf."
 
-#: src/buildings.c:1485
+#: src/buildings.c:1495
 msgid "Identify item"
 msgstr "Gegenstand identifizieren"
 
-#: src/buildings.c:1499
+#: src/buildings.c:1509
 #, c-format
 msgid "Pay %d gold to identify %s?"
 msgstr "Möchtest du %d Gold bezahlen, um %s identifizieren zu lassen?"
 
-#: src/buildings.c:1511
+#: src/buildings.c:1521
 #, c-format
 msgid "%s is %s."
 msgstr "%s ist %s."
 
-#: src/buildings.c:1522
+#: src/buildings.c:1532
 #, c-format
 msgid "Identifying %s costs %d gold."
 msgstr "Es kostet %2$d Gold, %1$s identifizieren zu lassen."
 
-#: src/buildings.c:1535
+#: src/buildings.c:1545
 msgid "Repair item"
 msgstr "Gegenstand reparieren"
 
-#: src/buildings.c:1563
+#: src/buildings.c:1573
 #, c-format
 msgid "Pay %d gold to repair %s?"
 msgstr "Möchtest du %d Gold bezahlen, um %s zu reparieren?"
 
-#: src/buildings.c:1574
+#: src/buildings.c:1584
 #, c-format
 msgid "%s has been repaired."
 msgstr "%s wurde repariert."
 
-#: src/buildings.c:1584
+#: src/buildings.c:1594
 #, c-format
 msgid "Repairing the %s costs %d gold."
 msgstr "Es kostet %2$d Gold, %1$s reparieren zu lassen."
 
-#: src/buildings.c:1621
+#: src/buildings.c:1631
 #, c-format
 msgid "How many %s do you want to sell for %d gold?"
 msgstr "Wie viele %s möchtest du für %d Gold verkaufen?"
 
-#: src/buildings.c:1629
+#: src/buildings.c:1639
 #, c-format
 msgid "Wouldn't it be nice to have %d of those?"
 msgstr "Wäre es nicht schön, %d davon zu haben?"
 
-#: src/buildings.c:1642
+#: src/buildings.c:1652
 #, c-format
 msgid "Do you want to sell %s for %d gold?"
 msgstr "Möchtest du %s für %d Gold verkaufen? "
 
-#: src/buildings.c:1661
+#: src/buildings.c:1671
 #, c-format
 msgid "You sell %s. The %d gold has been transferred to your bank account."
 msgstr "Du verkaufst %s. %d Goldstück wurde auf dein Bankkonto überwiesen."
 
-#: src/buildings.c:1663
+#: src/buildings.c:1673
 #, c-format
 msgid "You sell %s. The %d gold have been transferred to your bank account."
 msgstr "Du verkaufst %s. %d Goldstücke wurden auf dein Bankkonto überwiesen."
@@ -1023,7 +1023,7 @@ msgstr ""
 "\n"
 "Werte löschen mit `KEY`A`end`-`KEY`F`end`. Zurück zum Hauptmenü mit `KEY`ESC`end`.\n"
 
-#: src/config.c:412 src/config.c:416 src/utils.c:478
+#: src/config.c:412 src/config.c:416 src/utils.c:480
 msgid "no"
 msgstr "nein"
 
@@ -1080,7 +1080,7 @@ msgid "Font size (6 - 48): "
 msgstr "Schriftgröße (6 - 48): "
 
 #: src/config.c:564 src/game.c:115 src/map.c:1958 src/nlarn.c:648
-#: src/player.c:5301 src/player.c:5309 src/player.c:5334
+#: src/player.c:5309 src/player.c:5317 src/player.c:5342
 msgid "Error"
 msgstr "Fehler"
 
@@ -1222,90 +1222,90 @@ msgstr "Eine Staubwolke hüllt dich ein!"
 msgid "unarmed"
 msgstr "unbewaffnet"
 
-#: src/display.c:1352
+#: src/display.c:1355
 #, c-format
 msgid "%s - %d gold on bank account"
 msgstr "%s - %d Gold auf dem Bankkonto"
 
-#: src/display.c:1361
+#: src/display.c:1364
 #, c-format
 msgid "%s - %s of %s carried"
 msgstr "%s - %s von %s getragen"
 
-#: src/display.c:1538
+#: src/display.c:1541
 msgid "Configure auto pick-up"
 msgstr "Auto-Aufsammeln einrichten"
 
-#: src/display.c:1540
+#: src/display.c:1543
 msgid "Item types which will be picked up"
 msgstr "Gegenstände, die automatisch auf-"
 
-#: src/display.c:1541
+#: src/display.c:1544
 msgid "automatically are shown inverted. "
 msgstr "gesammelt werden, sind invertiert. "
 
-#: src/display.c:1543 src/items.c:50
+#: src/display.c:1546 src/items.c:50
 msgid "amulets"
 msgstr "Amulette"
 
-#: src/display.c:1544 src/items.c:51
+#: src/display.c:1547 src/items.c:51
 msgid "ammunition"
 msgstr "f:Munition"
 
-#: src/display.c:1545 src/items.c:52
+#: src/display.c:1548 src/items.c:52
 msgid "armour"
 msgstr "f:Rüstung"
 
-#: src/display.c:1546 src/items.c:53
+#: src/display.c:1549 src/items.c:53
 msgid "books"
 msgstr "Bücher"
 
-#: src/display.c:1547 src/items.c:54
+#: src/display.c:1550 src/items.c:54
 msgid "containers"
 msgstr "Behälter"
 
-#: src/display.c:1548 src/items.c:55
+#: src/display.c:1551 src/items.c:55
 msgid "gems"
 msgstr "Edelsteine"
 
-#: src/display.c:1549
+#: src/display.c:1552
 msgid "money"
 msgstr "Geld"
 
-#: src/display.c:1550 src/items.c:57
+#: src/display.c:1553 src/items.c:57
 msgid "potions"
 msgstr "Tränke"
 
-#: src/display.c:1551 src/items.c:58
+#: src/display.c:1554 src/items.c:58
 msgid "rings"
 msgstr "Ringe"
 
-#: src/display.c:1552 src/items.c:59
+#: src/display.c:1555 src/items.c:59
 msgid "scrolls"
 msgstr "Schriftrollen"
 
-#: src/display.c:1553 src/items.c:60
+#: src/display.c:1556 src/items.c:60
 msgid "weapons"
 msgstr "Waffen"
 
-#: src/display.c:1555
+#: src/display.c:1558
 msgid "Type a symbol to toggle."
 msgstr "Symbol eingeben zum Umschalten."
 
-#: src/display.c:1704
+#: src/display.c:1708
 #, c-format
 msgid "Really cast %s?"
 msgstr "Wirklich „%s“ zaubern?"
 
-#: src/display.c:2191
+#: src/display.c:2199
 msgid "Yes"
 msgstr "Ja"
 
-#: src/display.c:2194
+#: src/display.c:2202
 msgid "No"
 msgstr "Nein"
 
-#: src/display.c:3346
+#: src/display.c:3356
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
@@ -1313,15 +1313,15 @@ msgstr ""
 "Wähle den gewünschten Gegenstand mit EINGABE.\n"
 "Mit der Escape-Taste kannst du abbrechen."
 
-#: src/display.c:3369
+#: src/display.c:3379
 msgid "There are no options available for the selected item."
 msgstr "Für den ausgewählten Gegenstand gibt es keine Optionen."
 
-#: src/display.c:3388
+#: src/display.c:3398
 msgid "Help"
 msgstr "Hilfe"
 
-#: src/display.c:3613
+#: src/display.c:3627
 msgid "Item details"
 msgstr "Gegenstandsdetails"
 
@@ -3496,8 +3496,8 @@ msgstr "%s widerstehen dem Angriff."
 msgid "You feel a sense of loss."
 msgstr "Dich überkommt ein Gefühl des Verlusts."
 
-#: src/monsters.c:3403 src/scrolls.c:257 src/scrolls.c:722 src/scrolls.c:816
-#: src/scrolls.c:855 src/spells.c:1108 src/spells.c:1726 src/spells.c:1740
+#: src/monsters.c:3403 src/scrolls.c:257 src/scrolls.c:723 src/scrolls.c:817
+#: src/scrolls.c:856 src/spells.c:1108 src/spells.c:1726 src/spells.c:1740
 msgid "Nothing happens."
 msgstr "Nichts geschieht."
 
@@ -4532,22 +4532,70 @@ msgstr "Kampfstatistik"
 msgid "Do you want to save the calculations?"
 msgstr "Möchtest du die Berechnungen speichern?"
 
-#: src/player.c:4936 src/player.c:5280
+#: src/player.c:4936 src/player.c:5288
 msgid "Enter filename: "
 msgstr "Dateiname: "
 
-#: src/player.c:5301
+#: src/player.c:4968
+msgid "Necklace:"
+msgstr "Halskette:"
+
+#: src/player.c:4969
+msgid "Main weapon:"
+msgstr "Hauptwaffe:"
+
+#: src/player.c:4970
+msgid "Sec. weapon:"
+msgstr "Zweitwaffe:"
+
+#: src/player.c:4971
+msgid "In quiver:"
+msgstr "Im Köcher:"
+
+#: src/player.c:4972
+msgid "Boots:"
+msgstr "Stiefel:"
+
+#: src/player.c:4973
+msgid "Cloak:"
+msgstr "Umhang:"
+
+#: src/player.c:4974
+msgid "Gloves:"
+msgstr "Handschuhe:"
+
+#: src/player.c:4975
+msgid "Helmet:"
+msgstr "Helm:"
+
+#: src/player.c:4976
+msgid "Shield:"
+msgstr "Schild:"
+
+#: src/player.c:4977
+msgid "Body armour:"
+msgstr "Rüstung:"
+
+#: src/player.c:4978
+msgid "Left ring:"
+msgstr "Linker Ring:"
+
+#: src/player.c:4979
+msgid "Right ring:"
+msgstr "Rechter Ring:"
+
+#: src/player.c:5309
 msgid "File is a symlink. I won't overwrite those..."
 msgstr "Die Datei ist ein symbolischer Link, den überschreibe ich nicht..."
 
-#: src/player.c:5309
+#: src/player.c:5317
 msgid ""
 "There is a directory with the name you gave. Thus I can't write the file."
 msgstr ""
 "Es gibt ein Verzeichnis mit dem gegebenen Namen. Deshalb kann ich die Datei "
 "nicht schreiben."
 
-#: src/player.c:5316
+#: src/player.c:5324
 msgid ""
 "File exists!\n"
 "Do you want to overwrite it?"
@@ -4904,12 +4952,12 @@ msgstr "Nichts passiert. Offenbar war %s bereits gesegnet."
 msgid "Nothing happens. Apparently, %s were already blessed."
 msgstr "Nichts passiert. Offenbar waren %s bereits gesegnet."
 
-#: src/potions.c:473 src/scrolls.c:836 src/scrolls.c:863
+#: src/potions.c:473 src/scrolls.c:837 src/scrolls.c:864
 #, c-format
 msgid "%s glows in a white light."
 msgstr "%s glüht in weißem Licht."
 
-#: src/potions.c:474 src/scrolls.c:837 src/scrolls.c:864
+#: src/potions.c:474 src/scrolls.c:838 src/scrolls.c:865
 #, c-format
 msgid "%s glow in a white light."
 msgstr "%s glühen in weißem Licht."
@@ -5331,70 +5379,70 @@ msgstr "Du hast dich entschieden, kein Monster auszurotten."
 msgid "No such monster."
 msgstr "So ein Monster gibt es nicht."
 
-#: src/scrolls.c:616
+#: src/scrolls.c:617
 msgid "Genocide which monster?"
 msgstr "Welches Monster ausrotten?"
 
-#: src/scrolls.c:633
+#: src/scrolls.c:634
 #, c-format
 msgid "Wiped out all %s."
 msgstr "Alle %s ausgelöscht."
 
-#: src/scrolls.c:670
+#: src/scrolls.c:671
 msgid "You feel uneasy."
 msgstr "Dir ist unbehaglich."
 
-#: src/scrolls.c:726
+#: src/scrolls.c:727
 msgid "This is a scroll of identify."
 msgstr "Dies ist eine Schriftrolle der Identifikation."
 
-#: src/scrolls.c:731
+#: src/scrolls.c:732
 msgid "You identify your possessions."
 msgstr "Du identifizierst deine Habseligkeiten."
 
-#: src/scrolls.c:749
+#: src/scrolls.c:750
 msgid "Choose an item to identify"
 msgstr "Wähle einen Gegenstand zum Identifizieren"
 
-#: src/scrolls.c:756
+#: src/scrolls.c:757
 #, c-format
 msgid "You identify %s."
 msgstr "Du identifiziert %s."
 
-#: src/scrolls.c:762
+#: src/scrolls.c:763
 #, c-format
 msgid "These are %s."
 msgstr "Dies sind %s."
 
-#: src/scrolls.c:763
+#: src/scrolls.c:764
 #, c-format
 msgid "This is %s."
 msgstr "Dies ist %s."
 
-#: src/scrolls.c:820
+#: src/scrolls.c:821
 msgid "This is a scroll of remove curse."
 msgstr "Dies ist eine Schriftrolle der Fluchaufhebung."
 
-#: src/scrolls.c:825
+#: src/scrolls.c:826
 msgid "You remove curses on your possessions."
 msgstr "Du hebst die Flüche auf deinen Habseligkeiten auf."
 
-#: src/scrolls.c:903
+#: src/scrolls.c:904
 msgid "You feel your magic skills greatly improve."
 msgstr "Du spürst, wie sich deine magischen Fähigkeiten deutlich verbessern."
 
-#: src/scrolls.c:904
+#: src/scrolls.c:905
 msgid "You feel your magic skills improve."
 msgstr "Du spürst, wie sich deine magischen Fähigkeiten verbessern."
 
-#: src/scrolls.c:977
+#: src/scrolls.c:978
 #, c-format
 msgid "You go backward in time by %d mobul."
 msgid_plural "You go backward in time by %d mobuls."
 msgstr[0] "Du gehst %d Mobul in der Zeit zurück."
 msgstr[1] "Du gehst %d Mobul in der Zeit zurück."
 
-#: src/scrolls.c:979
+#: src/scrolls.c:980
 #, c-format
 msgid "You go forward in time by %d mobul."
 msgid_plural "You go forward in time by %d mobuls."
@@ -6844,103 +6892,103 @@ msgstr "Du löst die %s versehentlich aus."
 msgid "You fail to disarm the %s."
 msgstr "Es gelingt dir nicht, die %s zu entschärfen."
 
-#: src/utils.c:478
+#: src/utils.c:480
 msgid "one"
 msgstr "ein"
 
-#: src/utils.c:478
+#: src/utils.c:480
 msgid "two"
 msgstr "zwei"
 
-#: src/utils.c:478
+#: src/utils.c:480
 msgid "three"
 msgstr "drei"
 
-#: src/utils.c:479
+#: src/utils.c:481
 msgid "four"
 msgstr "vier"
 
-#: src/utils.c:479
+#: src/utils.c:481
 msgid "five"
 msgstr "fünf"
 
-#: src/utils.c:479
+#: src/utils.c:481
 msgid "six"
 msgstr "sechs"
 
-#: src/utils.c:479
+#: src/utils.c:481
 msgid "seven"
 msgstr "sieben"
 
-#: src/utils.c:480
+#: src/utils.c:482
 msgid "eight"
 msgstr "acht"
 
-#: src/utils.c:480
+#: src/utils.c:482
 msgid "nine"
 msgstr "neun"
 
-#: src/utils.c:480
+#: src/utils.c:482
 msgid "ten"
 msgstr "zehn"
 
-#: src/utils.c:481
+#: src/utils.c:483
 msgid "eleven"
 msgstr "elf"
 
-#: src/utils.c:481
+#: src/utils.c:483
 msgid "twelve"
 msgstr "zwölf"
 
-#: src/utils.c:481
+#: src/utils.c:483
 msgid "thirteen"
 msgstr "dreizehn"
 
-#: src/utils.c:482
+#: src/utils.c:484
 msgid "fourteen"
 msgstr "vierzehn"
 
-#: src/utils.c:482
+#: src/utils.c:484
 msgid "fifteen"
 msgstr "fünfzehn"
 
-#: src/utils.c:482
+#: src/utils.c:484
 msgid "sixteen"
 msgstr "sechzehn"
 
-#: src/utils.c:483
+#: src/utils.c:485
 msgid "seventeen"
 msgstr "siebzehn"
 
-#: src/utils.c:483
+#: src/utils.c:485
 msgid "eighteen"
 msgstr "achtzehn"
 
-#: src/utils.c:484
+#: src/utils.c:486
 msgid "nineteen"
 msgstr "neunzehn"
 
-#: src/utils.c:484
+#: src/utils.c:486
 msgid "twenty"
 msgstr "zwanzig"
 
-#: src/utils.c:503
+#: src/utils.c:505
 msgid "never"
 msgstr "nie"
 
-#: src/utils.c:503
+#: src/utils.c:505
 msgid "once"
 msgstr "einmal"
 
-#: src/utils.c:503
+#: src/utils.c:505
 msgid "twice"
 msgstr "zweimal"
 
-#: src/utils.c:503
+#: src/utils.c:505
 msgid "thrice"
 msgstr "dreimal"
 
-#: src/utils.c:509
+#: src/utils.c:511
 #, c-format
 msgid "%d times"
 msgstr "%d-mal"

@@ -4965,20 +4965,25 @@ static char *player_equipment_list(player *p)
         const char *desc;
     } slots[] =
     {
-        { p->eq_amulet,  "Necklace:" },
-        { p->eq_weapon,  "Main weapon:" },
-        { p->eq_sweapon, "Sec. weapon:" },
-        { p->eq_quiver,  "In quiver:" },
-        { p->eq_boots,   "Boots:" },
-        { p->eq_cloak,   "Cloak:" },
-        { p->eq_gloves,  "Gloves:" },
-        { p->eq_helmet,  "Helmet:" },
-        { p->eq_shield,  "Shield:" },
-        { p->eq_suit,    "Body armour:" },
-        { p->eq_ring_l,  "Left ring:" },
-        { p->eq_ring_r,  "Right ring:" },
+        { p->eq_amulet,  N_("Necklace:") },
+        { p->eq_weapon,  N_("Main weapon:") },
+        { p->eq_sweapon, N_("Sec. weapon:") },
+        { p->eq_quiver,  N_("In quiver:") },
+        { p->eq_boots,   N_("Boots:") },
+        { p->eq_cloak,   N_("Cloak:") },
+        { p->eq_gloves,  N_("Gloves:") },
+        { p->eq_helmet,  N_("Helmet:") },
+        { p->eq_shield,  N_("Shield:") },
+        { p->eq_suit,    N_("Body armour:") },
+        { p->eq_ring_l,  N_("Left ring:") },
+        { p->eq_ring_r,  N_("Right ring:") },
         { NULL, NULL },
     };
+
+    /* the width of the label column is that of its longest entry */
+    glong lwidth = 0;
+    for (int i = 0; slots[i].desc != NULL; i++)
+        lwidth = MAX(lwidth, g_utf8_strlen(_(slots[i].desc), -1));
 
     while (slots[idx].desc != NULL)
     {
@@ -4989,11 +4994,13 @@ static char *player_equipment_list(player *p)
             continue;
         }
 
-        char *desc = item_describe(slots[idx].slot, player_item_known(p,
-                    slots[idx].slot), false, false);
+        const char *label = _(slots[idx].desc);
+        /* a listing shows the items in nominative case */
+        char *desc = item_describe_gc(slots[idx].slot, player_item_known(p,
+                    slots[idx].slot), false, false, GC_NOM);
 
         g_string_append_printf(el, "`EMPH`%-*s`end` %s\n",
-                    utf8_pad(slots[idx].desc, 12), slots[idx].desc, desc);
+                    utf8_pad(label, lwidth), label, desc);
 
         g_free(desc);
         idx++;
