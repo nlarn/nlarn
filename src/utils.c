@@ -362,7 +362,9 @@ size_t text_get_longest_line(GPtrArray *text)
 
     for (guint idx = 0; idx < text->len; idx++)
     {
-        max_len = max(max_len, strlen(g_ptr_array_index(text, idx)));
+        /* measure display columns, not bytes */
+        max_len = max(max_len,
+                (size_t)g_utf8_strlen(g_ptr_array_index(text, idx), -1));
     }
 
     return max_len;

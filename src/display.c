@@ -1808,7 +1808,7 @@ int display_get_count(const char *caption, int value)
     int basewidth = 8 + 5;
 
     /* choose a sane dialogue width */
-    int width = min(basewidth + strlen(caption), COLS - 4);
+    int width = min(basewidth + g_utf8_strlen(caption, -1), COLS - 4);
 
     GPtrArray *text = text_wrap(caption, width - basewidth, 0);
     int height = 2 + text->len;
@@ -2010,27 +2010,30 @@ char *display_get_string(const char *title, const char *caption, const char *val
         max_len = maxwidth - basewidth;
     }
 
-    if (basewidth + strlen(caption) + max_len > maxwidth)
+    const guint caption_len = g_utf8_strlen(caption, -1);
+
+    if (basewidth + caption_len + max_len > maxwidth)
     {
-        if (strlen(caption) + basewidth > maxwidth)
+        if (caption_len + basewidth > maxwidth)
         {
             width = maxwidth - basewidth;
         }
         else
         {
-            width = basewidth + max(strlen(caption), max_len);
+            width = basewidth + max(caption_len, max_len);
         }
     }
     else
     {
         /* input box fits on same line as caption */
-        width = basewidth + strlen(caption) + max_len + 1;
+        width = basewidth + caption_len + max_len + 1;
     }
 
     GPtrArray *text = text_wrap(caption, width - basewidth, 0);
 
     /* determine if the input box fits on the last line */
-    int box_start = 3 + strlen(g_ptr_array_index(text, text->len - 1));
+    int box_start = 3
+        + g_utf8_strlen(g_ptr_array_index(text, text->len - 1), -1);
     if (box_start + max_len + 2 > width)
         box_start = 2;
 
@@ -2045,8 +2048,9 @@ char *display_get_string(const char *title, const char *caption, const char *val
     for (guint line = 0; line < text->len; line++)
     {
         /* print text */
+        const char *tline = g_ptr_array_index(text, line);
         mvwaprintw(mwin->window, 1 + line, 1, CP_UI_FG,
-            " %-*s ", width - 4, (char *)g_ptr_array_index(text, line));
+            " %-*s ", utf8_pad(tline, width - 4), tline);
     }
 
     do
@@ -2197,7 +2201,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
     guint text_width = min(COLS - 2 /* borders */
                      - (2 * margin) /* space outside window */
                      - (2 * padding), /* space between border and text */
-                     strlen(question));
+                     g_utf8_strlen(question, -1));
 
     /* broad windows are hard to read */
     if (text_width > 60)
@@ -2208,7 +2212,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 
     /* Determine window width. Either defined by the length of the button
      * labels or width of the text */
-    guint width = max(strlen(yes) + strlen(no)
+    guint width = max(g_utf8_strlen(yes, -1) + g_utf8_strlen(no, -1)
                 + 2 /* borders */
                 + (4 * padding)  /* space between "button" border and label */
                 + margin, /* space between "buttons" */
@@ -2243,7 +2247,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
         else           attrs = CP_UI_HL_REVERSE;
 
         mvwaprintw(ywin->window, line + 2,
-                   width - margin - strlen(no) - (2 * padding),
+                   width - margin - g_utf8_strlen(no, -1) - (2 * padding),
                    attrs, "%*s%s%*s", padding, " ", no, padding, " ");
 
         wrefresh(ywin->window);
@@ -2346,7 +2350,7 @@ direction display_get_direction(const char *title, int *available)
         dirs = available;
     }
 
-    int width = max(9, strlen(title) + 4);
+    int width = max(9, g_utf8_strlen(title, -1) + 4);
 
     /* set startx and starty to something that makes sense */
     int startx = (min(MAP_MAX_X, COLS) / 2) - (width / 2);
@@ -3111,10 +3115,11 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
         guint maxlen;
 
         /* The title is padded by 6 additional characters */
-        if ((title != NULL) && (strlen(title) + 6 > strlen(msg)))
-            maxlen = strlen(title) + 6;
+        if ((title != NULL)
+                && (g_utf8_strlen(title, -1) + 6 > g_utf8_strlen(msg, -1)))
+            maxlen = g_utf8_strlen(title, -1) + 6;
         else
-            maxlen = strlen(msg);
+            maxlen = g_utf8_strlen(msg, -1);
 
         /* determine window width */
         if (maxlen > (max_width - 4))
@@ -3138,9 +3143,10 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     attr_t currattr = COLOURLESS;
     for (guint idx = 0; idx < text->len; idx++)
     {
+        const char *tline = g_ptr_array_index(text, idx);
         currattr = mvwcprintw(win->window,
             CP_UI_FG, currattr, UI_BG, idx + 1, 1, " %-*s ",
-            width - 4, g_ptr_array_index(text, idx));
+            utf8_pad(tline, width - 4), tline);
     }
 
     /* clean up */
@@ -3356,7 +3362,7 @@ static void display_inventory_help(GPtrArray *callbacks)
             if (!cb->active) continue;
 
             char *sdesc = str_strip(cb->description);
-            size_t desclen = strlen(sdesc);
+            size_t desclen = g_utf8_strlen(sdesc, -1);
             if (desclen > maxlen)
                 maxlen = desclen;
             g_free(sdesc);
@@ -3532,8 +3538,12 @@ static void display_window_update_title(display_window *dwin, const char *title)
          * minus the space required for the left corner (3)
          * minus the space required for the right corner
          *       and the scroll marker (7)
+         * truncate at a character boundary, not mid-sequence
          */
-        dwin->title = g_strndup(title, dwin->width - 10);
+        const glong tmax = MIN(g_utf8_strlen(title, -1),
+                               (glong)(dwin->width - 10));
+        dwin->title = g_strndup(title,
+                g_utf8_offset_to_pointer(title, tmax) - title);
 
         /* make sure the first letter of the window title is upper case */
         dwin->title[0] = g_ascii_toupper(dwin->title[0]);
