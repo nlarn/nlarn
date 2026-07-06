@@ -53,7 +53,7 @@ const trap_data traps[TT_MAX] =
         N_("arrow trap"),
         N_("You are hit by an arrow."),
         N_("The arrow was poisoned."),
-        N_("The %s is hit by an arrow."),
+        N_("%s is hit by an arrow."),
     },
     {
         TT_DART, ET_POISON, LIGHT_SLATE_BLUE,
@@ -61,7 +61,7 @@ const trap_data traps[TT_MAX] =
         N_("dart trap"),
         N_("You are hit by a dart."),
         N_("The dart was poisoned."),
-        N_("The %s is hit by a dart."),
+        N_("%s is hit by a dart."),
     },
     {
         TT_TELEPORT, ET_NONE, OPERA_MAUVE,
@@ -69,7 +69,7 @@ const trap_data traps[TT_MAX] =
         N_("teleport trap"),
         N_("Zaaaappp! You've been teleported!"),
         NULL,
-        N_("The %s has been teleported away."),
+        N_("%s has been teleported away."),
     },
     {
         TT_PIT, ET_TRAPPED, GREEN_BROWN,
@@ -77,7 +77,7 @@ const trap_data traps[TT_MAX] =
         N_("pit"),
         N_("You fall into a pit!"),
         NULL,
-        N_("The %s falls into a pit."),
+        N_("%s falls into a pit."),
     },
     {
         TT_SPIKEDPIT, ET_POISON, GREEN_BROWN,
@@ -85,7 +85,7 @@ const trap_data traps[TT_MAX] =
         N_("pit full of spikes"),
         N_("You fall into a pit full of spikes!"),
         NULL,
-        N_("The %s falls into a pit full of spikes."),
+        N_("%s falls into a pit full of spikes."),
     },
     {
         TT_SLEEPGAS, ET_SLEEP, LIGHT_FUCHSIA,
@@ -93,7 +93,7 @@ const trap_data traps[TT_MAX] =
         N_("sleeping gas trap"),
         N_("A cloud of gas engulfs you."),
         NULL,
-        N_("A cloud of gas engulfs the %s."),
+        N_("%s is engulfed in a cloud of gas."),
     },
     {
         TT_MANADRAIN, ET_NONE, PALE_RED,
@@ -109,7 +109,7 @@ const trap_data traps[TT_MAX] =
         N_("trapdoor"),
         N_("You fall through a trap door!"),
         NULL,
-        N_("The %s falls through a trap door!"),
+        N_("%s falls through a trap door!"),
     },
 };
 
@@ -256,7 +256,8 @@ monster *monster_trap_trigger(monster *m)
 
     if (trap_m_message(trap) != NULL && monster_in_sight(m))
     {
-        log_add_entry(nlarn->log, trap_m_message(trap), monster_name(m));
+        log_add_entry(nlarn->log, trap_m_message(trap),
+                      monster_get_name_art(m, ART_DEF, GC_NOM, true));
 
         /* set player's knowledge of trap */
         player_memory_of(nlarn->p, monster_pos(m)).trap = trap;

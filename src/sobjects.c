@@ -1094,7 +1094,8 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
 
     if (desc)
     {
-        log_add_entry(nlarn->log, _("You destroy the %s."), _(desc));
+        log_add_entry(nlarn->log, _("You destroy %s."),
+                      noun_phrase(_(desc), ART_DEF, GC_ACC, false, false));
         map_sobject_set(dmap, pos, LS_NONE);
         p->stats.vandalism++;
     }

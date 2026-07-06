@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-06 20:39+0200\n"
+"POT-Creation-Date: 2026-07-06 21:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -5059,7 +5059,7 @@ msgstr ""
 
 #: src/scrolls.c:323
 #, c-format
-msgid "The %s barely escapes being annihilated."
+msgid "%s barely escapes being annihilated."
 msgstr ""
 
 #: src/scrolls.c:340
@@ -5401,7 +5401,7 @@ msgid "You drink from the fountain."
 msgstr ""
 
 #: src/sobjects.c:584 src/sobjects.c:774 src/sobjects.c:1005
-#: src/sobjects.c:1122
+#: src/sobjects.c:1123
 msgid "Nothing seems to have happened."
 msgstr ""
 
@@ -5565,24 +5565,24 @@ msgstr ""
 
 #: src/sobjects.c:1097
 #, c-format
-msgid "You destroy the %s."
+msgid "You destroy %s."
 msgstr ""
 
-#: src/sobjects.c:1118
+#: src/sobjects.c:1119
 #, c-format
 msgid "%s appears, looking angry!"
 msgstr ""
 
-#: src/sobjects.c:1154
+#: src/sobjects.c:1155
 #, c-format
 msgid "The lightning hits %s."
 msgstr ""
 
-#: src/sobjects.c:1186
+#: src/sobjects.c:1187
 msgid "The lightning whizzes by you!"
 msgstr ""
 
-#: src/sobjects.c:1192
+#: src/sobjects.c:1193
 msgid "The lightning hits you!"
 msgstr ""
 
@@ -6454,7 +6454,7 @@ msgstr ""
 
 #: src/traps.c:56
 #, c-format
-msgid "The %s is hit by an arrow."
+msgid "%s is hit by an arrow."
 msgstr ""
 
 #: src/traps.c:61
@@ -6471,7 +6471,7 @@ msgstr ""
 
 #: src/traps.c:64
 #, c-format
-msgid "The %s is hit by a dart."
+msgid "%s is hit by a dart."
 msgstr ""
 
 #: src/traps.c:69
@@ -6480,7 +6480,7 @@ msgstr ""
 
 #: src/traps.c:72
 #, c-format
-msgid "The %s has been teleported away."
+msgid "%s has been teleported away."
 msgstr ""
 
 #: src/traps.c:77
@@ -6493,7 +6493,7 @@ msgstr ""
 
 #: src/traps.c:80
 #, c-format
-msgid "The %s falls into a pit."
+msgid "%s falls into a pit."
 msgstr ""
 
 #: src/traps.c:85
@@ -6506,7 +6506,7 @@ msgstr ""
 
 #: src/traps.c:88
 #, c-format
-msgid "The %s falls into a pit full of spikes."
+msgid "%s falls into a pit full of spikes."
 msgstr ""
 
 #: src/traps.c:93
@@ -6519,7 +6519,7 @@ msgstr ""
 
 #: src/traps.c:96
 #, c-format
-msgid "A cloud of gas engulfs the %s."
+msgid "%s is engulfed in a cloud of gas."
 msgstr ""
 
 #: src/traps.c:101
@@ -6540,7 +6540,7 @@ msgstr ""
 
 #: src/traps.c:112
 #, c-format
-msgid "The %s falls through a trap door!"
+msgid "%s falls through a trap door!"
 msgstr ""
 
 #: src/traps.c:224
@@ -6553,36 +6553,36 @@ msgstr ""
 msgid "You notice there's a %s here!"
 msgstr ""
 
-#: src/traps.c:317
+#: src/traps.c:318
 msgid "There is no trap here."
 msgstr ""
 
-#: src/traps.c:323
+#: src/traps.c:324
 #, c-format
 msgid "How do you think you can disable a %s? Fill it with rubble?"
 msgstr ""
 
-#: src/traps.c:347
+#: src/traps.c:348
 #, c-format
 msgid "disabling the %s"
 msgstr ""
 
-#: src/traps.c:354
+#: src/traps.c:355
 #, c-format
 msgid "You manage to dispel the %s!"
 msgstr ""
 
-#: src/traps.c:355
+#: src/traps.c:356
 #, c-format
 msgid "You manage to disarm the %s!"
 msgstr ""
 
-#: src/traps.c:372
+#: src/traps.c:373
 #, c-format
 msgid "You accidentally trigger the %s."
 msgstr ""
 
-#: src/traps.c:378
+#: src/traps.c:379
 #, c-format
 msgid "You fail to disarm the %s."
 msgstr ""

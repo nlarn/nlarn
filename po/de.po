@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-06 20:39+0200\n"
+"POT-Creation-Date: 2026-07-06 21:19+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -1510,7 +1510,7 @@ msgstr "Du bist nicht mehr erleuchtet."
 
 #: src/effects.c:232
 msgid "reflection"
-msgstr ""
+msgstr "Reflexion"
 
 #: src/effects.c:239
 msgid "You sense the presence of monsters."
@@ -1632,7 +1632,7 @@ msgstr "Diebstahlschutz"
 
 #: src/effects.c:339
 msgid "sustainment"
-msgstr ""
+msgstr "Erhaltung"
 
 #: src/effects.c:345
 msgid "time stop"
@@ -2419,7 +2419,7 @@ msgstr ""
 
 #: src/items.c:959
 msgid "the"
-msgstr ""
+msgstr "the"
 
 #: src/items.c:975
 msgid "noted"
@@ -4432,7 +4432,7 @@ msgstr "%s fallen zu lassen"
 #: src/player.c:3967
 #, c-format
 msgid "Add your description for %s (delete with ESC)"
-msgstr ""
+msgstr "Deine Beschreibung für %s (löschen mit ESC)"
 
 #: src/player.c:3971
 msgid "Edit item notes"
@@ -4485,7 +4485,7 @@ msgstr "Du hast nichts, das du werfen könntest."
 #: src/player.c:4099
 #, c-format
 msgid "You can't throw %s, it's welded to your hands!"
-msgstr ""
+msgstr "Du kannst %s nicht werfen: Die Waffe klebt an deinen Händen!"
 
 #: src/player.c:4346
 #, c-format
@@ -4841,12 +4841,12 @@ msgstr "Du benutzt diesen verfluchten Trank lieber nicht."
 #: src/potions.c:136
 #, c-format
 msgid "You drink %s."
-msgstr ""
+msgstr "Du trinkst %s."
 
 #: src/potions.c:136
 #, c-format
 msgid "You use %s."
-msgstr ""
+msgstr "Du benutzt %s."
 
 #: src/potions.c:141
 #, c-format
@@ -5249,7 +5249,7 @@ msgstr "Du liest diese verfluchte Schriftrolle lieber nicht."
 #: src/scrolls.c:135
 #, c-format
 msgid "You read %s."
-msgstr ""
+msgstr "Du liest %s."
 
 #: src/scrolls.c:138 src/spells.c:1542
 #, c-format
@@ -5275,8 +5275,8 @@ msgstr "Dies ist eine Schriftrolle %s. "
 
 #: src/scrolls.c:323
 #, c-format
-msgid "The %s barely escapes being annihilated."
-msgstr ""
+msgid "%s barely escapes being annihilated."
+msgstr "%s entgeht knapp der Vernichtung."
 
 #: src/scrolls.c:340
 msgid "You hear loud screams of agony!"
@@ -5285,7 +5285,7 @@ msgstr "Du hörst laute Schmerzensschreie!"
 #: src/scrolls.c:405
 #, c-format
 msgid "You find %s below your feet."
-msgstr ""
+msgstr "Du findest %s unter deinen Füßen."
 
 #: src/scrolls.c:430 src/scrolls.c:471
 #, c-format
@@ -5317,7 +5317,7 @@ msgstr "Wähle einen Edelstein zur Vollendung"
 #: src/scrolls.c:531
 #, c-format
 msgid "You make %s perfect."
-msgstr ""
+msgstr "Du machst %s perfekt."
 
 #: src/scrolls.c:556
 msgid "Which monster do you want to genocide (enter its glyph)?"
@@ -5647,7 +5647,7 @@ msgid "You drink from the fountain."
 msgstr "Du trinkst aus dem Brunnen."
 
 #: src/sobjects.c:584 src/sobjects.c:774 src/sobjects.c:1005
-#: src/sobjects.c:1122
+#: src/sobjects.c:1123
 msgid "Nothing seems to have happened."
 msgstr "Es scheint nichts passiert zu sein."
 
@@ -5795,11 +5795,11 @@ msgstr "Eine Flut von Wasser bricht hervor!"
 
 #: src/sobjects.c:1065
 msgid "statue"
-msgstr "Statue"
+msgstr "f:Statue"
 
 #: src/sobjects.c:1073
 msgid "throne"
-msgstr "Thron"
+msgstr "m:Thron;;;Throns"
 
 #: src/sobjects.c:1086
 msgid "The door shatters!"
@@ -5811,24 +5811,24 @@ msgstr "Irgendwie hat das nicht funktioniert."
 
 #: src/sobjects.c:1097
 #, c-format
-msgid "You destroy the %s."
-msgstr ""
+msgid "You destroy %s."
+msgstr "Du zerstörst %s."
 
-#: src/sobjects.c:1118
+#: src/sobjects.c:1119
 #, c-format
 msgid "%s appears, looking angry!"
 msgstr "%s erscheint - und sieht wütend aus!"
 
-#: src/sobjects.c:1154
+#: src/sobjects.c:1155
 #, c-format
 msgid "The lightning hits %s."
 msgstr "Der Blitz trifft %s."
 
-#: src/sobjects.c:1186
+#: src/sobjects.c:1187
 msgid "The lightning whizzes by you!"
 msgstr "Der Blitz zischt an dir vorbei!"
 
-#: src/sobjects.c:1192
+#: src/sobjects.c:1193
 msgid "The lightning hits you!"
 msgstr "Der Blitz trifft dich!"
 
@@ -6486,7 +6486,8 @@ msgstr "Du hast die Wirkung %s verstärkt."
 #, c-format
 msgid ""
 "You have already extended the power of %s to the extent of your knowledge."
-msgstr "Du hast die Wirkung %s bereits bis an die Grenzen deines Wissens verstärkt."
+msgstr ""
+"Du hast die Wirkung %s bereits bis an die Grenzen deines Wissens verstärkt."
 
 #: src/spells.c:670
 #, c-format
@@ -6497,7 +6498,8 @@ msgstr "Du hast die Dauer %s verlängert."
 #, c-format
 msgid ""
 "You have already extended the duration of %s to the extent of your knowledge."
-msgstr "Du hast die Dauer %s bereits bis an die Grenzen deines Wissens verlängert."
+msgstr ""
+"Du hast die Dauer %s bereits bis an die Grenzen deines Wissens verlängert."
 
 #: src/spells.c:715 src/spells.c:893
 #, c-format
@@ -6709,8 +6711,8 @@ msgstr "Der Pfeil war vergiftet."
 
 #: src/traps.c:56
 #, c-format
-msgid "The %s is hit by an arrow."
-msgstr ""
+msgid "%s is hit by an arrow."
+msgstr "%s wird von einem Pfeil getroffen."
 
 #: src/traps.c:61
 msgid "dart trap"
@@ -6726,8 +6728,8 @@ msgstr "Der Wurfpfeil war vergiftet."
 
 #: src/traps.c:64
 #, c-format
-msgid "The %s is hit by a dart."
-msgstr ""
+msgid "%s is hit by a dart."
+msgstr "%s wird von einem Wurfpfeil getroffen."
 
 #: src/traps.c:69
 msgid "teleport trap"
@@ -6735,8 +6737,8 @@ msgstr "f:Teleportfalle"
 
 #: src/traps.c:72
 #, c-format
-msgid "The %s has been teleported away."
-msgstr ""
+msgid "%s has been teleported away."
+msgstr "%s wurde hinfortteleportiert."
 
 #: src/traps.c:77
 msgid "pit"
@@ -6748,8 +6750,8 @@ msgstr "Du fällst in eine Grube!"
 
 #: src/traps.c:80
 #, c-format
-msgid "The %s falls into a pit."
-msgstr ""
+msgid "%s falls into a pit."
+msgstr "%s fällt in eine Grube."
 
 #: src/traps.c:85
 msgid "pit full of spikes"
@@ -6761,8 +6763,8 @@ msgstr "Du fällst in eine Grube voller Stacheln!"
 
 #: src/traps.c:88
 #, c-format
-msgid "The %s falls into a pit full of spikes."
-msgstr "Der %s fällt in eine Grube voller Stacheln."
+msgid "%s falls into a pit full of spikes."
+msgstr "%s fällt in eine Grube voller Stacheln."
 
 #: src/traps.c:93
 msgid "sleeping gas trap"
@@ -6774,8 +6776,8 @@ msgstr "Eine Gaswolke hüllt dich ein."
 
 #: src/traps.c:96
 #, c-format
-msgid "A cloud of gas engulfs the %s."
-msgstr ""
+msgid "%s is engulfed in a cloud of gas."
+msgstr "%s wird von einer Gaswolke eingehüllt."
 
 #: src/traps.c:101
 msgid "magic energy drain trap"
@@ -6795,8 +6797,8 @@ msgstr "Du fällst durch eine Falltür!"
 
 #: src/traps.c:112
 #, c-format
-msgid "The %s falls through a trap door!"
-msgstr ""
+msgid "%s falls through a trap door!"
+msgstr "%s fällt durch eine Falltür!"
 
 #: src/traps.c:224
 #, c-format
@@ -6808,39 +6810,39 @@ msgstr "Du umgehst die %s."
 msgid "You notice there's a %s here!"
 msgstr "Du bemerkst hier eine %s."
 
-#: src/traps.c:317
+#: src/traps.c:318
 msgid "There is no trap here."
 msgstr "Hier ist keine Falle."
 
-#: src/traps.c:323
+#: src/traps.c:324
 #, c-format
 msgid "How do you think you can disable a %s? Fill it with rubble?"
-msgstr ""
+msgstr "Wie willst du eine %s unschädlich machen? Sie mit Schutt auffüllen?"
 
-#: src/traps.c:347
+#: src/traps.c:348
 #, c-format
 msgid "disabling the %s"
 msgstr "die %s zu entschärfen"
 
-#: src/traps.c:354
-#, c-format
-msgid "You manage to dispel the %s!"
-msgstr ""
-
 #: src/traps.c:355
 #, c-format
-msgid "You manage to disarm the %s!"
-msgstr ""
+msgid "You manage to dispel the %s!"
+msgstr "Es gelingt dir, die %s zu bannen!"
 
-#: src/traps.c:372
+#: src/traps.c:356
+#, c-format
+msgid "You manage to disarm the %s!"
+msgstr "Es gelingt dir, die %s zu entschärfen!"
+
+#: src/traps.c:373
 #, c-format
 msgid "You accidentally trigger the %s."
-msgstr ""
+msgstr "Du löst die %s versehentlich aus."
 
-#: src/traps.c:378
+#: src/traps.c:379
 #, c-format
 msgid "You fail to disarm the %s."
-msgstr ""
+msgstr "Es gelingt dir nicht, die %s zu entschärfen."
 
 #: src/utils.c:478
 msgid "one"
