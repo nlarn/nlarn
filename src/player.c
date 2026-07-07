@@ -2717,16 +2717,15 @@ int player_inv_pre_add(inventory *inv, item *it)
     /* check if item weight can be carried */
     if ((pack_weight + item_weight(it)) > (int)(can_carry * 1.3))
     {
-        /* get item description */
-        gchar *buf = item_describe(it, player_item_known(p, it), false, true);
+        /* get item description (the item is the subject of the sentence) */
+        gchar *buf = item_describe_gc(it, player_item_known(p, it),
+                                      false, true, GC_NOM);
         /* capitalize first letter */
         buf[0] = g_ascii_toupper(buf[0]);
 
-        /* TRANSLATORS: The first parameter is the item description, the
-         * second parameter is the required for of to be, e.g. 'is' or 'are'.
-         */
-        log_add_entry(nlarn->log, _("%s %s too heavy for you."),
-            buf, is_are(it->count));
+        log_add_entry(nlarn->log, (it->count > 1)
+                ? _("%s are too heavy for you.")
+                : _("%s is too heavy for you."), buf);
 
         g_free(buf);
         return false;
@@ -3830,7 +3829,8 @@ void player_item_throw(player *p, inventory **inv __attribute__((unused)), item 
 
 void player_item_destroy(player *p, item *it)
 {
-    gchar *desc = item_describe(it, player_item_known(p, it), false, true);
+    gchar *desc = item_describe_gc(it, player_item_known(p, it),
+                                   false, true, GC_NOM);
     desc[0] = g_ascii_toupper(desc[0]);
 
     if (player_item_is_equipped(p, it))
@@ -3838,9 +3838,9 @@ void player_item_destroy(player *p, item *it)
         player_item_unequip(p, &p->inventory, it, true);
     }
 
-    /* TRANSLATORS: The first parameter is the item description,
-     * the second parameter the form of to be (is/are) */
-    log_add_entry(nlarn->log, _("`LIGHT_MAGENTA`%s %s destroyed!`end`"), desc, is_are(it->count));
+    log_add_entry(nlarn->log, (it->count > 1)
+            ? _("`LIGHT_MAGENTA`%s are destroyed!`end`")
+            : _("`LIGHT_MAGENTA`%s is destroyed!`end`"), desc);
 
     int count = 0;
     if (it->content)
@@ -3945,12 +3945,21 @@ void player_item_drop(player *p, inventory **inv, item *it)
     {
         if (it->cursed || it->blessed)
         {
-            buf = item_describe(it, player_item_known(p, it), false, true);
+            buf = item_describe_gc(it, player_item_known(p, it),
+                                   false, true, GC_NOM);
             buf[0] = g_ascii_toupper(buf[0]);
 
-            log_add_entry(nlarn->log, "%s %s surrounded by a %s halo.",
-                          buf, is_are(it->count),
-                          it->cursed ? "`CHARCOAL`black`end`" : "`WHITE`white`end`");
+            const char *halo_msg;
+            if (it->cursed)
+                halo_msg = (it->count > 1)
+                    ? _("%s are surrounded by a `CHARCOAL`black`end` halo.")
+                    : _("%s is surrounded by a `CHARCOAL`black`end` halo.");
+            else
+                halo_msg = (it->count > 1)
+                    ? _("%s are surrounded by a `WHITE`white`end` halo.")
+                    : _("%s is surrounded by a `WHITE`white`end` halo.");
+
+            log_add_entry(nlarn->log, halo_msg, buf);
 
             g_free(buf);
         }

@@ -1,12 +1,14 @@
-# Copyright (C) 2026 Joachim de Groot
-# This file is distributed under the same license as NLarn.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the nlarn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: NLarn 0.8.0\n"
+"Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-06 23:12+0200\n"
+"POT-Creation-Date: 2026-07-07 22:45+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -923,11 +925,11 @@ msgstr ""
 msgid "Choose default gender"
 msgstr ""
 
-#: src/config.c:458 src/nlarn.c:1202
+#: src/config.c:458 src/nlarn.c:1204
 msgid "Female"
 msgstr ""
 
-#: src/config.c:458 src/nlarn.c:1202
+#: src/config.c:458 src/nlarn.c:1204
 msgid "Male"
 msgstr ""
 
@@ -949,8 +951,8 @@ msgstr ""
 msgid "Font size (6 - 48): "
 msgstr ""
 
-#: src/config.c:564 src/game.c:115 src/map.c:1958 src/nlarn.c:648
-#: src/player.c:5309 src/player.c:5317 src/player.c:5342
+#: src/config.c:564 src/game.c:115 src/map.c:1958 src/nlarn.c:650
+#: src/player.c:5318 src/player.c:5326 src/player.c:5351
 msgid "Error"
 msgstr ""
 
@@ -1086,108 +1088,108 @@ msgstr ""
 msgid "You are engulfed in a cloud of dust!"
 msgstr ""
 
-#: src/display.c:456
+#: src/display.c:451
 msgid "unarmed"
 msgstr ""
 
-#: src/display.c:1355
+#: src/display.c:1350
 #, c-format
 msgid "%s - %d gold on bank account"
 msgstr ""
 
-#: src/display.c:1364
+#: src/display.c:1359
 #, c-format
 msgid "%s - %s of %s carried"
 msgstr ""
 
-#: src/display.c:1541
+#: src/display.c:1536
 msgid "Configure auto pick-up"
 msgstr ""
 
-#: src/display.c:1543
+#: src/display.c:1538
 msgid "Item types which will be picked up"
 msgstr ""
 
-#: src/display.c:1544
+#: src/display.c:1539
 msgid "automatically are shown inverted. "
 msgstr ""
 
-#: src/display.c:1546 src/items.c:50
+#: src/display.c:1541 src/items.c:50
 msgid "amulets"
 msgstr ""
 
-#: src/display.c:1547 src/items.c:51
+#: src/display.c:1542 src/items.c:51
 msgid "ammunition"
 msgstr ""
 
-#: src/display.c:1548 src/items.c:52
+#: src/display.c:1543 src/items.c:52
 msgid "armour"
 msgstr ""
 
-#: src/display.c:1549 src/items.c:53
+#: src/display.c:1544 src/items.c:53
 msgid "books"
 msgstr ""
 
-#: src/display.c:1550 src/items.c:54
+#: src/display.c:1545 src/items.c:54
 msgid "containers"
 msgstr ""
 
-#: src/display.c:1551 src/items.c:55
+#: src/display.c:1546 src/items.c:55
 msgid "gems"
 msgstr ""
 
-#: src/display.c:1552
+#: src/display.c:1547
 msgid "money"
 msgstr ""
 
-#: src/display.c:1553 src/items.c:57
+#: src/display.c:1548 src/items.c:57
 msgid "potions"
 msgstr ""
 
-#: src/display.c:1554 src/items.c:58
+#: src/display.c:1549 src/items.c:58
 msgid "rings"
 msgstr ""
 
-#: src/display.c:1555 src/items.c:59
+#: src/display.c:1550 src/items.c:59
 msgid "scrolls"
 msgstr ""
 
-#: src/display.c:1556 src/items.c:60
+#: src/display.c:1551 src/items.c:60
 msgid "weapons"
 msgstr ""
 
-#: src/display.c:1558
+#: src/display.c:1553
 msgid "Type a symbol to toggle."
 msgstr ""
 
-#: src/display.c:1708
+#: src/display.c:1703
 #, c-format
 msgid "Really cast %s?"
 msgstr ""
 
-#: src/display.c:2199
+#: src/display.c:2194
 msgid "Yes"
 msgstr ""
 
-#: src/display.c:2202
+#: src/display.c:2197
 msgid "No"
 msgstr ""
 
-#: src/display.c:3356
+#: src/display.c:3351
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
 msgstr ""
 
-#: src/display.c:3379
+#: src/display.c:3374
 msgid "There are no options available for the selected item."
 msgstr ""
 
-#: src/display.c:3398
+#: src/display.c:3393
 msgid "Help"
 msgstr ""
 
-#: src/display.c:3627
+#: src/display.c:3622
 msgid "Item details"
 msgstr ""
 
@@ -1804,7 +1806,7 @@ msgstr ""
 msgid "For a list of commands, press '?'."
 msgstr ""
 
-#: src/game.c:163 src/nlarn.c:941
+#: src/game.c:163 src/nlarn.c:943
 msgid "Wizard mode has been activated."
 msgstr ""
 
@@ -3393,95 +3395,95 @@ msgid ""
 "...room for improvement...\n"
 msgstr ""
 
-#: src/nlarn.c:619
+#: src/nlarn.c:621
 msgid "Choose a position to examine"
 msgstr ""
 
-#: src/nlarn.c:622
+#: src/nlarn.c:624
 msgid "You can't look around while blinded!"
 msgstr ""
 
-#: src/nlarn.c:643
+#: src/nlarn.c:645
 msgid "Help for the game of NLarn"
 msgstr ""
 
-#: src/nlarn.c:666
+#: src/nlarn.c:668
 #, c-format
 msgid "There is %s gold on your bank account."
 msgstr ""
 
-#: src/nlarn.c:673
+#: src/nlarn.c:675
 msgid "Identified items"
 msgstr ""
 
-#: src/nlarn.c:678
+#: src/nlarn.c:680
 msgid "You have not discovered any item yet."
 msgstr ""
 
-#: src/nlarn.c:750
+#: src/nlarn.c:752
 #, c-format
 msgid "You presently owe %d gold in taxes."
 msgstr ""
 
-#: src/nlarn.c:754
+#: src/nlarn.c:756
 msgid "You do not owe any taxes."
 msgstr ""
 
-#: src/nlarn.c:764
+#: src/nlarn.c:766
 msgid "There is a fountain here, drink from it?"
 msgstr ""
 
-#: src/nlarn.c:809
+#: src/nlarn.c:811
 msgid "Choose a destination to travel to."
 msgstr ""
 
-#: src/nlarn.c:821 src/player.c:3760 src/spells.c:725 src/spells.c:902
+#: src/nlarn.c:823 src/player.c:3759 src/spells.c:725 src/spells.c:902
 #: src/spells.c:966 src/spells.c:1002 src/spells.c:1042 src/spells.c:1056
 msgid "Aborted."
 msgstr ""
 
-#: src/nlarn.c:841
+#: src/nlarn.c:843
 msgid "No travel destination known."
 msgstr ""
 
-#: src/nlarn.c:862
+#: src/nlarn.c:864
 msgid "Auto-pickup is not enabled."
 msgstr ""
 
-#: src/nlarn.c:866
+#: src/nlarn.c:868
 #, c-format
 msgid "Auto-pickup is enabled for %s."
 msgstr ""
 
-#: src/nlarn.c:906
+#: src/nlarn.c:908
 msgid "Are you sure you want to quit?"
 msgstr ""
 
-#: src/nlarn.c:912
+#: src/nlarn.c:914
 msgid "Message history"
 msgstr ""
 
-#: src/nlarn.c:929
+#: src/nlarn.c:931
 #, c-format
 msgid "NLarn version %s, built on %s."
 msgstr ""
 
-#: src/nlarn.c:936
+#: src/nlarn.c:938
 msgid ""
 "Are you sure you want to switch to Wizard mode?\n"
 "You will not be able to switch back to normal gameplay and your score will "
 "not be counted."
 msgstr ""
 
-#: src/nlarn.c:946
+#: src/nlarn.c:948
 msgid "Wizard mode is already enabled."
 msgstr ""
 
-#: src/nlarn.c:982
+#: src/nlarn.c:984
 msgid "Choose a position to teleport to."
 msgstr ""
 
-#: src/nlarn.c:1096
+#: src/nlarn.c:1098
 #, c-format
 msgid ""
 "\n"
@@ -3494,31 +3496,31 @@ msgid ""
 "    You have reached difficulty level %d\n"
 msgstr ""
 
-#: src/nlarn.c:1108
+#: src/nlarn.c:1110
 msgid "New Game"
 msgstr ""
 
-#: src/nlarn.c:1108
+#: src/nlarn.c:1110
 msgid "Continue saved Game"
 msgstr ""
 
-#: src/nlarn.c:1132
+#: src/nlarn.c:1134
 msgid "NLarn Hall of Fame"
 msgstr ""
 
-#: src/nlarn.c:1167
+#: src/nlarn.c:1169
 msgid "Welcome to the game of NLarn!"
 msgstr ""
 
-#: src/nlarn.c:1195
+#: src/nlarn.c:1197
 msgid "Choose your name"
 msgstr ""
 
-#: src/nlarn.c:1196
+#: src/nlarn.c:1198
 msgid "By what name shall you be called?"
 msgstr ""
 
-#: src/nlarn.c:1202
+#: src/nlarn.c:1204
 msgid "Are you male or female?"
 msgstr ""
 
@@ -4068,153 +4070,158 @@ msgstr ""
 msgid "You are already overloaded!"
 msgstr ""
 
-#. TRANSLATORS: The first parameter is the item description, the
-#. * second parameter is the required for of to be, e.g. 'is' or 'are'.
-#.
-#: src/player.c:2728
+#: src/player.c:2727
 #, c-format
-msgid "%s %s too heavy for you."
+msgid "%s are too heavy for you."
 msgstr ""
 
-#: src/player.c:2803
+#: src/player.c:2728
+#, c-format
+msgid "%s is too heavy for you."
+msgstr ""
+
+#: src/player.c:2802
 msgid "Worn equipment"
 msgstr ""
 
-#: src/player.c:2805
+#: src/player.c:2804
 msgid "You do not wear any equipment."
 msgstr ""
 
-#: src/player.c:2831 src/player.c:2930
+#: src/player.c:2830 src/player.c:2929
 #, c-format
 msgid "putting %s on"
 msgstr ""
 
-#: src/player.c:2839 src/player.c:2937
+#: src/player.c:2838 src/player.c:2936
 #, c-format
 msgid "You put %s on."
 msgstr ""
 
-#: src/player.c:2847
+#: src/player.c:2846
 #, c-format
 msgid "putting %s into the quiver"
 msgstr ""
 
-#: src/player.c:2855
+#: src/player.c:2854
 #, c-format
 msgid "You put %s into your quiver."
 msgstr ""
 
-#: src/player.c:2899
+#: src/player.c:2898
 #, c-format
 msgid "wearing %s"
 msgstr ""
 
-#: src/player.c:2914
+#: src/player.c:2913
 #, c-format
 msgid "You are now wearing %s."
 msgstr ""
 
-#: src/player.c:2956
+#: src/player.c:2955
 #, c-format
 msgid "wielding %s"
 msgstr ""
 
-#: src/player.c:2964
+#: src/player.c:2963
 #, c-format
 msgid "You now wield %s."
 msgstr ""
 
-#: src/player.c:2985
+#: src/player.c:2984
 msgid "welds itself into your hand."
 msgstr ""
 
-#: src/player.c:2986
+#: src/player.c:2985
 msgid "feels uncomfortably cold!"
 msgstr ""
 
-#: src/player.c:2997
+#: src/player.c:2996
 #, c-format
 msgid "It seems that this is %s."
 msgstr ""
 
-#: src/player.c:3033 src/player.c:3168
+#: src/player.c:3032 src/player.c:3167
 #, c-format
 msgid "removing %s"
 msgstr ""
 
-#: src/player.c:3040 src/player.c:3175
+#: src/player.c:3039 src/player.c:3174
 #, c-format
 msgid "You remove %s."
 msgstr ""
 
-#: src/player.c:3051 src/player.c:3186
+#: src/player.c:3050 src/player.c:3185
 #, c-format
 msgid "You can not remove %s.%s"
 msgstr ""
 
-#: src/player.c:3052 src/player.c:3144 src/player.c:3187
+#: src/player.c:3051 src/player.c:3143 src/player.c:3186
 msgid " It appears to be cursed."
 msgstr ""
 
-#: src/player.c:3064
+#: src/player.c:3063
 #, c-format
 msgid "taking %s out of the quiver"
 msgstr ""
 
-#: src/player.c:3071
+#: src/player.c:3070
 #, c-format
 msgid "You take %s out your quiver."
 msgstr ""
 
-#: src/player.c:3126
+#: src/player.c:3125
 #, c-format
 msgid "taking %s off"
 msgstr ""
 
-#: src/player.c:3133
+#: src/player.c:3132
 #, c-format
 msgid "You finish taking off %s."
 msgstr ""
 
-#: src/player.c:3143
+#: src/player.c:3142
 #, c-format
 msgid "You can't take of %s.%s"
 msgstr ""
 
-#: src/player.c:3210
+#: src/player.c:3209
 #, c-format
 msgid "putting %s away"
 msgstr ""
 
-#: src/player.c:3217
+#: src/player.c:3216
 #, c-format
 msgid "You put away %s."
 msgstr ""
 
-#: src/player.c:3225
+#: src/player.c:3224
 #, c-format
 msgid "You can't put away %s. It's welded into your hands."
 msgstr ""
 
-#: src/player.c:3769 src/weapons.c:178
+#: src/player.c:3768 src/weapons.c:178
 msgid "Gosh! How dare you!"
 msgstr ""
 
-#: src/player.c:3800 src/potions.c:519 src/potions.c:539
+#: src/player.c:3799 src/potions.c:519 src/potions.c:539
 #, c-format
 msgid "%s shatters on the %s."
 msgstr ""
 
-#: src/player.c:3801 src/potions.c:520
+#: src/player.c:3800 src/potions.c:520
 #, c-format
 msgid "%s splashes into the %s."
 msgstr ""
 
-#. TRANSLATORS: The first parameter is the item description,
-#. * the second parameter the form of to be (is/are)
+#: src/player.c:3842
+#, c-format
+msgid "`LIGHT_MAGENTA`%s are destroyed!`end`"
+msgstr ""
+
 #: src/player.c:3843
 #, c-format
-msgid "`LIGHT_MAGENTA`%s %s destroyed!`end`"
+msgid "`LIGHT_MAGENTA`%s is destroyed!`end`"
 msgstr ""
 
 #: src/player.c:3888
@@ -4232,171 +4239,191 @@ msgstr ""
 msgid "dropping %s"
 msgstr ""
 
-#: src/player.c:3967
+#: src/player.c:3955
+#, c-format
+msgid "%s are surrounded by a `CHARCOAL`black`end` halo."
+msgstr ""
+
+#: src/player.c:3956
+#, c-format
+msgid "%s is surrounded by a `CHARCOAL`black`end` halo."
+msgstr ""
+
+#: src/player.c:3959
+#, c-format
+msgid "%s are surrounded by a `WHITE`white`end` halo."
+msgstr ""
+
+#: src/player.c:3960
+#, c-format
+msgid "%s is surrounded by a `WHITE`white`end` halo."
+msgstr ""
+
+#: src/player.c:3976
 #, c-format
 msgid "Add your description for %s (delete with ESC)"
 msgstr ""
 
-#: src/player.c:3971
+#: src/player.c:3980
 msgid "Edit item notes"
 msgstr ""
 
-#: src/player.c:3986
+#: src/player.c:3995
 msgid "Choose an item to read"
 msgstr ""
 
-#: src/player.c:3996
+#: src/player.c:4005
 msgid "You have nothing to read."
 msgstr ""
 
-#: src/player.c:4006
+#: src/player.c:4015
 msgid "Choose an item to drink"
 msgstr ""
 
-#: src/player.c:4016
+#: src/player.c:4025
 msgid "You have nothing to drink."
 msgstr ""
 
-#: src/player.c:4027
+#: src/player.c:4036
 msgid "Choose an item to equip"
 msgstr ""
 
-#: src/player.c:4037
+#: src/player.c:4046
 msgid "You have nothing you could equip."
 msgstr ""
 
-#: src/player.c:4047
+#: src/player.c:4056
 msgid "Choose an item to take off"
 msgstr ""
 
-#: src/player.c:4056
+#: src/player.c:4065
 msgid "You have nothing you could take off."
 msgstr ""
 
-#: src/player.c:4066
+#: src/player.c:4075
 msgid "Choose an item to drop"
 msgstr ""
 
-#: src/player.c:4074
+#: src/player.c:4083
 msgid "You have nothing you could drop."
 msgstr ""
 
-#: src/player.c:4084
+#: src/player.c:4093
 msgid "You have nothing you could throw."
 msgstr ""
 
-#: src/player.c:4099
+#: src/player.c:4108
 #, c-format
 msgid "You can't throw %s, it's welded to your hands!"
 msgstr ""
 
-#: src/player.c:4346
+#: src/player.c:4355
 #, c-format
 msgid "`LIGHT_MAGENTA`You find a %s!`end`"
 msgstr ""
 
-#: src/player.c:4368
+#: src/player.c:4377
 #, c-format
 msgid "`LIGHT_MAGENTA`You discover a trap on %s!`end`"
 msgstr ""
 
-#: src/player.c:4384
+#: src/player.c:4393
 msgid "You have not discovered any landmarks yet."
 msgstr ""
 
-#: src/player.c:4409
+#: src/player.c:4418
 msgid "Discovered landmarks"
 msgstr ""
 
-#: src/player.c:4563
+#: src/player.c:4572
 #, c-format
 msgid "Pick up how many %s?"
 msgstr ""
 
-#: src/player.c:4584
+#: src/player.c:4593
 #, c-format
 msgid "You pick up %s."
 msgstr ""
 
-#: src/player.c:4598
+#: src/player.c:4607
 #, c-format
 msgid "picking up %s"
 msgstr ""
 
-#: src/player.c:4927
+#: src/player.c:4936
 msgid "*) ignoring instakills\n"
 msgstr ""
 
-#: src/player.c:4929
+#: src/player.c:4938
 msgid "Fighting statistics"
 msgstr ""
 
-#: src/player.c:4931
+#: src/player.c:4940
 msgid "Do you want to save the calculations?"
 msgstr ""
 
-#: src/player.c:4936 src/player.c:5288
+#: src/player.c:4945 src/player.c:5297
 msgid "Enter filename: "
 msgstr ""
 
-#: src/player.c:4968
+#: src/player.c:4977
 msgid "Necklace:"
 msgstr ""
 
-#: src/player.c:4969
+#: src/player.c:4978
 msgid "Main weapon:"
 msgstr ""
 
-#: src/player.c:4970
+#: src/player.c:4979
 msgid "Sec. weapon:"
 msgstr ""
 
-#: src/player.c:4971
+#: src/player.c:4980
 msgid "In quiver:"
 msgstr ""
 
-#: src/player.c:4972
+#: src/player.c:4981
 msgid "Boots:"
 msgstr ""
 
-#: src/player.c:4973
+#: src/player.c:4982
 msgid "Cloak:"
 msgstr ""
 
-#: src/player.c:4974
+#: src/player.c:4983
 msgid "Gloves:"
 msgstr ""
 
-#: src/player.c:4975
+#: src/player.c:4984
 msgid "Helmet:"
 msgstr ""
 
-#: src/player.c:4976
+#: src/player.c:4985
 msgid "Shield:"
 msgstr ""
 
-#: src/player.c:4977
+#: src/player.c:4986
 msgid "Body armour:"
 msgstr ""
 
-#: src/player.c:4978
+#: src/player.c:4987
 msgid "Left ring:"
 msgstr ""
 
-#: src/player.c:4979
+#: src/player.c:4988
 msgid "Right ring:"
 msgstr ""
 
-#: src/player.c:5309
+#: src/player.c:5318
 msgid "File is a symlink. I won't overwrite those..."
 msgstr ""
 
-#: src/player.c:5317
+#: src/player.c:5326
 msgid ""
 "There is a directory with the name you gave. Thus I can't write the file."
 msgstr ""
 
-#: src/player.c:5324
+#: src/player.c:5333
 msgid ""
 "File exists!\n"
 "Do you want to overwrite it?"

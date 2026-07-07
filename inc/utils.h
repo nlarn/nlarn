@@ -153,11 +153,6 @@ static inline int utf8_pad(const char *str, int columns)
     return columns + (int)(strlen(str) - g_utf8_strlen(str, -1));
 }
 
-static inline const char *is_are(const guint i)
-{
-    return (i == 1) ? "is" : "are";
-}
-
 static inline const char *plural(const guint i)
 {
     return (i > 1) ? "s" : "";
