@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-07 22:45+0200\n"
+"POT-Creation-Date: 2026-07-08 19:08+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -2030,6 +2030,20 @@ msgstr ""
 msgctxt "grammar"
 msgid "adjective endings"
 msgstr ""
+"def:m=e,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=e,e,en,en|"
+"en,en,en,en\n"
+"indef:m=er,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=es,es,en,en|"
+"en,en,en,en\n"
+"none:m=er,en,em,en|e,e,en,er;f=e,e,er,er|e,e,en,er;n=es,es,em,en|e,e,en,er"
+
+#. TRANSLATORS: The position of attributive adjectives relative
+#. to the noun. Translate to "after" for languages that place
+#. adjectives after the noun ("una poción roja"); leave
+#. untranslated or translate to "before" otherwise.
+#: src/grammar.c:349
+msgctxt "grammar"
+msgid "adjective position"
+msgstr "before"
 "def:m=e,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=e,e,en,en|"
 "en,en,en,en\n"
 "indef:m=er,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=es,es,en,en|"
