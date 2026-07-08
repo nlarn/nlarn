@@ -17,6 +17,7 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,27 +34,27 @@
 #include "scoreboard.h"
 #include "sobjects.h"
 
-const char *player_sex_str[PS_MAX] = {"not defined", "male", "female"};
+const char *player_sex_str[PS_MAX] = {N_("not defined"), N_("male"), N_("female")};
 
-static const char aa1[] = "mighty evil master";
-static const char aa2[] = "apprentice demi-god";
-static const char aa3[] = "minor demi-god";
-static const char aa4[] = "major demi-god";
-static const char aa5[] = "minor deity";
-static const char aa6[] = "major deity";
-static const char aa7[] = "novice guardian";
-static const char aa8[] = "apprentice guardian";
+static const char aa1[] = N_("mighty evil master");
+static const char aa2[] = N_("apprentice demi-god");
+static const char aa3[] = N_("minor demi-god");
+static const char aa4[] = N_("major demi-god");
+static const char aa5[] = N_("minor deity");
+static const char aa6[] = N_("major deity");
+static const char aa7[] = N_("novice guardian");
+static const char aa8[] = N_("apprentice guardian");
 
 static const char *player_level_desc[] =
 {
-    "novice explorer",     "apprentice explorer", "practiced explorer", /* -3 */
-    "expert explorer",     "novice adventurer",   "adventurer",         /* -6 */
-    "apprentice conjurer", "conjurer",            "master conjurer",    /*  -9 */
-    "apprentice mage",     "mage",                "experienced mage",   /* -12 */
-    "master mage",         "apprentice warlord",  "novice warlord",     /* -15 */
-    "expert warlord",      "master warlord",      "apprentice gorgon",  /* -18 */
-    "gorgon",              "practiced gorgon",    "master gorgon",      /* -21 */
-    "demi-gorgon",         "evil master",         "great evil master",  /* -24 */
+    N_("novice explorer"),     N_("apprentice explorer"), N_("practiced explorer"), /* -3 */
+    N_("expert explorer"),     N_("novice adventurer"),   N_("adventurer"),         /* -6 */
+    N_("apprentice conjurer"), N_("conjurer"),            N_("master conjurer"),    /*  -9 */
+    N_("apprentice mage"),     N_("mage"),                N_("experienced mage"),   /* -12 */
+    N_("master mage"),         N_("apprentice warlord"),  N_("novice warlord"),     /* -15 */
+    N_("expert warlord"),      N_("master warlord"),      N_("apprentice gorgon"),  /* -18 */
+    N_("gorgon"),              N_("practiced gorgon"),    N_("master gorgon"),      /* -21 */
+    N_("demi-gorgon"),         N_("evil master"),         N_("great evil master"),  /* -24 */
     aa1, aa1, aa1, /* -27*/
     aa1, aa1, aa1, /* -30*/
     aa1, aa1, aa1, /* -33*/
@@ -77,9 +78,9 @@ static const char *player_level_desc[] =
     aa7, aa7, aa7, /* -87*/
     aa8, aa8, aa8, /* -90*/
     aa8, aa8, aa8, /* -93*/
-    "earth guardian", "air guardian",  "fire guardian",    /* -96*/
-    "water guardian", "time guardian", "ethereal guardian",/* -99*/
-    "The Creator", /* 100*/
+    N_("earth guardian"), N_("air guardian"),  N_("fire guardian"),    /* -96*/
+    N_("water guardian"), N_("time guardian"), N_("ethereal guardian"),/* -99*/
+    N_("The Creator"), /* 100*/
 };
 
 /*
@@ -188,12 +189,12 @@ static const char preset_min = 'a';
 static char preset_max = 'f';
 
 const char *player_bonus_stat_desc[] = {
-    "Strong character",
-    "Agile character",
-    "Tough character",
-    "Smart character",
-    "Randomly selected character preset",
-    "All stats assigned randomly"
+    N_("Strong character"),
+    N_("Agile character"),
+    N_("Tough character"),
+    N_("Smart character"),
+    N_("Randomly selected character preset"),
+    N_("All stats assigned randomly")
 };
 
 char player_select_bonus_stats()
@@ -203,13 +204,13 @@ char player_select_bonus_stats()
     for (int idx = preset_min; idx <=  preset_max; idx++)
     {
         g_string_append_printf(text, "  `KEY`%c`end`) %s\n",
-                idx, player_bonus_stat_desc[idx - preset_min]);
+                idx, _(player_bonus_stat_desc[idx - preset_min]));
     }
      g_string_append_c(text, '\n');
 
     while (selection < preset_min || selection > preset_max)
     {
-        selection = display_show_message("Choose a character build", text->str, 0);
+        selection = display_show_message(_("Choose a character build"), text->str, 0);
     }
     g_string_free(text, true);
 
@@ -801,9 +802,9 @@ static void player_effects_expire(gpointer effect_id, gpointer pptr)
         {
             bool interrupt_actions = true;
             if (e->type == ET_WALL_WALK)
-                log_add_entry(nlarn->log, "`LUMINOUS_RED`Your attunement to the walls is fading!`end`");
+                log_add_entry(nlarn->log, "`LUMINOUS_RED`%s`end`", _("Your attunement to the walls is fading!"));
             else if (e->type == ET_LEVITATION)
-                log_add_entry(nlarn->log, "`LUMINOUS_RED`You are starting to drift towards the ground!`end`");
+                log_add_entry(nlarn->log, "`LUMINOUS_RED`%s`end`", _("You are starting to drift towards the ground!"));
             else
                 interrupt_actions = false;
 
@@ -844,7 +845,7 @@ bool player_make_move(player *p, guint turns, bool interruptible, const char *de
     if (turns > 10 && description)
     {
         /* shop popup window */
-        popup_desc = g_strdup_printf("You are %s.",
+        popup_desc = g_strdup_printf(_("You are %s."),
                 description);
         pop = display_popup(2, 2, 40, NULL, popup_desc, 0);
     }
@@ -936,7 +937,7 @@ bool player_make_move(player *p, guint turns, bool interruptible, const char *de
                 {
                     item *it = p->eq_weapon;
                     player_item_unequip(p, NULL, it, true);
-                    log_add_entry(nlarn->log, "`LIGHT_MAGENTA`You are unable to hold your weapon.`end`");
+                    log_add_entry(nlarn->log, "`LIGHT_MAGENTA`%s`end`", _("You are unable to hold your weapon."));
                     player_item_drop(p, &p->inventory, it);
                 }
             }
@@ -953,7 +954,8 @@ bool player_make_move(player *p, guint turns, bool interruptible, const char *de
                     /* deference the item at the selected armour slot */
                     item *armour = *aslot;
 
-                    log_add_entry(nlarn->log, "`LIGHT_MAGENTA`The hysteria of itching forces you to remove your armour!`end`");
+                    log_add_entry(nlarn->log, "`LIGHT_MAGENTA`%s`end`",
+                        _("The hysteria of itching forces you to remove your armour!"));
                     player_item_unequip(p, &p->inventory, armour, true);
                     player_item_drop(p, &p->inventory, armour);
                 }
@@ -974,8 +976,8 @@ bool player_make_move(player *p, guint turns, bool interruptible, const char *de
                 if (p->attacked && interruptible)
                 {
                     g_autofree char *question = description
-                        ? g_strdup_printf("Do you want to continue %s?", description)
-                        : g_strdup("Do you want to continue?");
+                        ? g_strdup_printf(_("Do you want to continue %s?"), description)
+                        : g_strdup(_("Do you want to continue?"));
 
                     if (!display_get_yesno(question, NULL, NULL, NULL))
                     {
@@ -983,7 +985,7 @@ bool player_make_move(player *p, guint turns, bool interruptible, const char *de
                         if (description != NULL)
                         {
                             /* log the event */
-                            log_add_entry(nlarn->log, "You stop %s.", description);
+                            log_add_entry(nlarn->log, _("You stop %s."), description);
                         }
 
                         /* clean up */
@@ -1034,7 +1036,7 @@ void player_die(player *p, player_cod cause_type, guint cause)
     /* check for life protection */
     if ((cause_type < PD_STUCK) && ((ef = player_effect_get(p, ET_LIFE_PROTECTION))))
     {
-        log_add_entry(nlarn->log, "`PALE_CYAN`You feel wiiieeeeerrrrrd all over!`end`");
+        log_add_entry(nlarn->log, "`PALE_CYAN`%s`end`", _("You feel wiiieeeeerrrrrd all over!"));
 
         if (ef->amount > 1)
         {
@@ -1060,53 +1062,53 @@ void player_die(player *p, player_cod cause_type, guint cause)
     switch (cause_type)
     {
     case PD_LASTLEVEL:
-        message = "You fade to gray...";
-        title = "In Memoriam";
+        message = _("You fade to gray...");
+        title = _("In Memoriam");
         break;
 
     case PD_STUCK:
-        message = "You are trapped in solid rock.";
-        title = "Ouch!";
+        message = _("You are trapped in solid rock.");
+        title = _("Ouch!");
         break;
 
     case PD_DROWNED:
-        message = "You've drowned in deep water.";
-        title = "Deep the water, short the breath...";
+        message = _("You've drowned in deep water.");
+        title = _("Deep the water, short the breath...");
         break;
 
     case PD_MELTED:
-        message = "You've melted.";
-        title = "Aaaaaaaaaaaaa!";
+        message = _("You've melted.");
+        title = _("Aaaaaaaaaaaaa!");
         break;
 
     case PD_GENOCIDE:
-        message = "You've genocided yourself!";
-        title = "Oops?";
+        message = _("You've genocided yourself!");
+        title = _("Oops?");
         break;
 
     case PD_TOO_LATE:
-        message = "You returned home too late!";
-        title = "The End";
+        message = _("You returned home too late!");
+        title = _("The End");
         break;
 
     case PD_WON:
-        message = "You saved your daughter!";
-        title = "Congratulations! You won!";
+        message = _("You saved your daughter!");
+        title = _("Congratulations! You won!");
         break;
 
     case PD_LOST:
-        message = "You didn't manage to save your daughter.";
-        title = "You lost";
+        message = _("You didn't manage to save your daughter.");
+        title = _("You lost");
         break;
 
     case PD_QUIT:
-        message = "You quit.";
-        title = "The End";
+        message = _("You quit.");
+        title = _("The End");
         break;
 
     default:
-        message = "You die...";
-        title = "R. I. P.";
+        message = _("You die...");
+        title = _("R. I. P.");
     }
 
     log_add_entry(nlarn->log, message);
@@ -1114,7 +1116,7 @@ void player_die(player *p, player_cod cause_type, guint cause)
     /* resume game if wizard mode is enabled */
     if (game_wizardmode(nlarn) && (cause_type < PD_TOO_LATE))
     {
-        log_add_entry(nlarn->log, "WIZARD MODE. You stay alive.");
+        log_add_entry(nlarn->log, _("WIZARD MODE. You stay alive."));
 
         /* return to full power */
         p->hp = p->hp_max;
@@ -1191,8 +1193,8 @@ void player_die(player *p, player_cod cause_type, guint cause)
 
         display_show_message(title, text, 0);
 
-        if (display_get_yesno("Do you want to save a memorial " \
-                              "file for your character?", NULL, NULL, NULL))
+        if (display_get_yesno(_("Do you want to save a memorial " \
+                              "file for your character?"), NULL, NULL, NULL))
         {
             player_memorial_file_save(p, text);
         }
@@ -1246,14 +1248,14 @@ bool player_movement_possible(player *p)
     /* no movement if overloaded */
     if (player_effect(p, ET_OVERSTRAINED))
     {
-        log_add_entry(nlarn->log, "You cannot move as long you are overstrained.");
+        log_add_entry(nlarn->log, _("You cannot move as long you are overstrained."));
         return false;
     }
 
     /* no movement if paralyzed */
     if (player_effect(p, ET_PARALYSIS))
     {
-        log_add_entry(nlarn->log, "You can't move!");
+        log_add_entry(nlarn->log, _("You can't move!"));
         return false;
     }
 
@@ -1264,11 +1266,11 @@ bool player_movement_possible(player *p)
         if (effect_expire(e) == -1)
         {
             /* effect has expired */
-            log_add_entry(nlarn->log, "You climb out of the pit!");
+            log_add_entry(nlarn->log, _("You climb out of the pit!"));
             player_effect_del(p, e);
         }
         else
-            log_add_entry(nlarn->log, "You're trapped in a pit!");
+            log_add_entry(nlarn->log, _("You're trapped in a pit!"));
 
         player_make_move(p, 1, false, NULL);
         return false;
@@ -1311,7 +1313,8 @@ int player_move(player *p, direction dir, bool open_door)
     if (target_m && monster_unknown(target_m))
     {
         /* reveal the mimic */
-        log_add_entry(nlarn->log, "Wait! That is a %s!", monster_get_name(target_m));
+        log_add_entry(nlarn->log, _("Wait! That is %s!"),
+                monster_get_name_art(target_m, ART_INDEF, GC_NOM, false));
         monster_unknown_set(target_m, false);
         return times;
     }
@@ -1327,8 +1330,8 @@ int player_move(player *p, direction dir, bool open_door)
 
         move_possible = true;
 
-        log_add_entry(nlarn->log, "You swap places with the %s.",
-                      monster_get_name(target_m));
+        log_add_entry(nlarn->log, _("You swap places with %s."),
+                      monster_get_name_art(target_m, ART_DEF, GC_DAT, false));
     }
     else if (target_m)
     {
@@ -1364,9 +1367,14 @@ int player_move(player *p, direction dir, bool open_door)
         {
             player_memory_of(p, target_p).type = map_tiletype_at(pmap, target_p);
             const int tile = map_tiletype_at(pmap, target_p);
-            log_add_entry(nlarn->log, "Ouch! You bump into %s!",
-                          (tile == LT_DEEPWATER || tile == LT_LAVA)
-                          ? "the railing" : mt_get_desc(tile));
+            const bool brink = (tile == LT_DEEPWATER || tile == LT_LAVA);
+            const char* desc = brink
+                ? _("At the brink of unseen %s, your instincts flare and you pull back just in time.")
+                : _("Ouch! You bump into %s!");
+
+            log_add_entry(nlarn->log, desc,
+                    noun_phrase(mt_get_desc_raw(tile), ART_NONE,
+                                brink ? GC_NOM : GC_ACC, false, false));
             return times;
         }
 
@@ -1388,7 +1396,8 @@ int player_move(player *p, direction dir, bool open_door)
     /* mention stationary objects at this position */
     if (((so = map_sobject_at(pmap, p->pos))) && !player_effect(p, ET_BLINDNESS))
     {
-        log_add_entry(nlarn->log, "You see %s here.", so_get_desc(so));
+        log_add_entry(nlarn->log, _("You see %s here."),
+                noun_phrase(so_get_desc_raw(so), ART_NONE, GC_ACC, false, false));
     }
 
     return times;
@@ -1399,7 +1408,8 @@ int player_attack(player *p, monster *m)
     /* disallow attacking other humans */
     if (monster_type(m) == MT_TOWN_PERSON)
     {
-        log_add_entry(nlarn->log, "You bump into the %s.", monster_get_name(m));
+        log_add_entry(nlarn->log, _("You bump into %s."),
+                monster_get_name_art(m, ART_DEF, GC_ACC, false));
         return 1;
     }
 
@@ -1408,7 +1418,8 @@ int player_attack(player *p, monster *m)
         effect *e;
 
         /* placed a hit */
-        log_add_entry(nlarn->log, "You hit the %s.", monster_get_name(m));
+        log_add_entry(nlarn->log, _("You hit %s."),
+                monster_get_name_art(m, ART_DEF, GC_ACC, false));
 
         damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, damage_calc(p, m),
                                  DAMO_PLAYER, p);
@@ -1425,8 +1436,8 @@ int player_attack(player *p, monster *m)
         /* The weapon may break during usage */
         if (p->eq_weapon && chance(item_fragility(p->eq_weapon)))
         {
-            log_add_entry(nlarn->log, "`LIGHT_MAGENTA`Your %s breaks!`end`",
-                          weapon_name(p->eq_weapon));
+            log_add_entry(nlarn->log, _("`LIGHT_MAGENTA`%s breaks!`end`"),
+                          weapon_name_art(p->eq_weapon, ART_POSS, GC_NOM, true));
 
             item *weapon = p->eq_weapon;
 
@@ -1463,8 +1474,8 @@ int player_attack(player *p, monster *m)
         if (p->eq_weapon && (p->eq_weapon->id == WT_LANCEOFDEATH)
                 && monster_in_sight(m))
         {
-            log_add_entry(nlarn->log, "Your lance of death tickles the %s!",
-                          monster_get_name(m));
+            log_add_entry(nlarn->log, _("Your lance of death tickles %s!"),
+                          monster_get_name_art(m, ART_DEF, GC_ACC, false));
         }
 
         /* if the player is invisible and the monster does not have infravision,
@@ -1478,7 +1489,8 @@ int player_attack(player *p, monster *m)
     else
     {
         /* missed */
-        log_add_entry(nlarn->log, "You miss the %s.", monster_get_name(m));
+        log_add_entry(nlarn->log, _("You miss %s."),
+                monster_get_name_art(m, ART_DEF, GC_ACC, false));
     }
 
     return 1; /* i.e. turns used */
@@ -1544,10 +1556,10 @@ int player_map_enter(player *p, map *l, bool teleported)
     {
         /* do not log this at the start of the game */
         if (nlarn->log->gtime > 1)
-            log_add_entry(nlarn->log, "You return to town.");
+            log_add_entry(nlarn->log, _("You return to town."));
     }
     else if (l->nlevel == 1 && Z(p->pos) == 0)
-        log_add_entry(nlarn->log, "You enter the caverns of Larn.");
+        log_add_entry(nlarn->log, _("You enter the caverns of Larn."));
 
     /* remove monster that might be at player's position */
     if ((map_get_monster_at(l, p->pos)))
@@ -1611,16 +1623,16 @@ void player_pickup(player *p)
 
     if (inv_length(*inv) == 0)
     {
-        log_add_entry(nlarn->log, "There is nothing here.");
+        log_add_entry(nlarn->log, _("There is nothing here."));
     }
     else if (player_effect(p, ET_LEVITATION))
     {
-        log_add_entry(nlarn->log, "You cannot reach the floor!");
+        log_add_entry(nlarn->log, _("You cannot reach the floor!"));
         return;
     }
     else if (player_effect(p, ET_PARALYSIS))
     {
-        log_add_entry(nlarn->log, "You can't move!");
+        log_add_entry(nlarn->log, _("You can't move!"));
         return;
     }
     else if (inv_length(*inv) == 1)
@@ -1634,7 +1646,7 @@ void player_pickup(player *p)
 
         display_inv_callback *callback = g_malloc0(sizeof(display_inv_callback));
         callback->description = "(`KEY`,`end`) get";
-        callback->helpmsg = "Get the item. In case of an item stack, get the entire stack.";
+        callback->helpmsg = _("Get the item. In case of an item stack, get the entire stack.");
         callback->key = ',';
         callback->inv = inv;
         callback->function = (display_inv_callback_func)&player_item_pickup_all;
@@ -1642,7 +1654,7 @@ void player_pickup(player *p)
 
         callback = g_malloc0(sizeof(display_inv_callback));
         callback->description = "(`KEY`g`end`)et partly";
-        callback->helpmsg = "Get the item. In case of an item stack, choose how many items to pick up.";
+        callback->helpmsg = _("Get the item. In case of an item stack, choose how many items to pick up.");
         callback->key = 'g';
         callback->inv = inv;
         callback->checkfun = &player_item_filter_multiple;
@@ -1651,14 +1663,14 @@ void player_pickup(player *p)
 
         callback = g_malloc0(sizeof(display_inv_callback));
         callback->description = "get (`KEY`a`end`)ll";
-        callback->helpmsg = "Get all items from the stash. Only available when you can carry the total weight.";
+        callback->helpmsg = _("Get all items from the stash. Only available when you can carry the total weight.");
         callback->key = 'a';
         callback->inv = inv;
         callback->checkfun = &player_can_carry_all;
         callback->function = (display_inv_callback_func)&player_items_pickup_all;
         g_ptr_array_add(callbacks, callback);
 
-        display_inventory("On the floor", p, inv, callbacks, false,
+        display_inventory(_("On the floor"), p, inv, callbacks, false,
                           true, false, NULL);
 
         /* clean up callbacks */
@@ -1717,7 +1729,7 @@ static void player_autopickup(player *p)
     {
         gchar *desc = map_inv_description(
             game_map(nlarn, Z(p->pos)), p->pos,
-            "here", filter_item_noautopickup);
+            true, filter_item_noautopickup);
 
         log_add_entry(nlarn->log, desc);
 
@@ -1741,12 +1753,12 @@ void player_level_gain(player *p, int count)
 
     if (g_strcmp0(desc_orig, desc_new) != 0)
     {
-        log_add_entry(nlarn->log, "`KEY`You gain experience and become %s %s!`end`",
+        log_add_entry(nlarn->log, _("`KEY`You gain experience and become %s %s!`end`"),
                       a_an(desc_new), desc_new);
     }
     else
     {
-        log_add_entry(nlarn->log, "`KEY`You gain experience!`end`");
+        log_add_entry(nlarn->log, "`KEY`%s`end`", _("You gain experience!"));
     }
 
     if (p->level > p->stats.max_level)
@@ -1779,7 +1791,7 @@ void player_level_lose(player *p, int count)
     g_assert(p != NULL && count > 0);
 
     p->level -= count;
-    log_add_entry(nlarn->log, "`LUMINOUS_RED`You return to experience level %d...`end`", p->level);
+    log_add_entry(nlarn->log, _("`LUMINOUS_RED`You return to experience level %d...`end`"), p->level);
 
     /* die if lost level 1 */
     if (p->level == 0) player_die(p, PD_LASTLEVEL, 0);
@@ -1912,8 +1924,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         if (monster_flags(m, DEMON) && chance(75)
                 && (p->eq_amulet && p->eq_amulet->id == AM_POWER))
         {
-            log_add_entry(nlarn->log, "Your amulet cancels the %s's attack.",
-                          monster_get_name(m));
+            log_add_entry(nlarn->log, _("Your amulet cancels the attack of %s."),
+                          monster_get_name_art(m, ART_DEF, GC_GEN, false));
 
             return;
         }
@@ -1959,9 +1971,9 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             }
 
             if (damage_amount >= 8 && damage_amount >= (gint)p->hp_max/4)
-                log_add_entry(nlarn->log, "`LUMINOUS_RED`Ouch, that REALLY hurt!`end`");
+                log_add_entry(nlarn->log, "`LUMINOUS_RED`%s`end`", _("Ouch, that REALLY hurt!"));
             else if (damage_amount >= (gint)p->hp_max/10)
-                log_add_entry(nlarn->log, "`LUMINOUS_RED`Ouch!`end`");
+                log_add_entry(nlarn->log, "`LUMINOUS_RED`%s`end`", _("Ouch!"));
 
             if (pos_valid(spill_pos))
                 // when the player is next to the outer corners of the map, spill_pos
@@ -1972,7 +1984,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         }
         else
         {
-            log_add_entry(nlarn->log, "Your armour protects you.");
+            log_add_entry(nlarn->log, _("Your armour protects you."));
         }
         break;
 
@@ -1982,15 +1994,15 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             damage_amount -= player_effect(p, ET_RESIST_MAGIC);
 
             if (damage_amount >= 8 && damage_amount >= (gint)p->hp_max/4)
-                log_add_entry(nlarn->log, "`LUMINOUS_RED`Ouch, that REALLY hurt!`end`");
+                log_add_entry(nlarn->log, "`LUMINOUS_RED`%s`end`", _("Ouch, that REALLY hurt!"));
             else if (damage_amount >= (gint)p->hp_max/10)
-                log_add_entry(nlarn->log, "`LUMINOUS_RED`Ouch!`end`");
+                log_add_entry(nlarn->log, "`LUMINOUS_RED`%s`end`", _("Ouch!"));
 
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
-            log_add_entry(nlarn->log, "You resist.");
+            log_add_entry(nlarn->log, _("You resist."));
         }
 
         break;
@@ -2000,12 +2012,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         {
             damage_amount -= player_effect(p, ET_RESIST_FIRE);
 
-            log_add_entry(nlarn->log, "You suffer burns.");
+            log_add_entry(nlarn->log, _("You suffer burns."));
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
-            log_add_entry(nlarn->log, "The flames don't phase you.");
+            log_add_entry(nlarn->log, _("The flames don't phase you."));
         }
         break;
 
@@ -2014,36 +2026,36 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         {
             damage_amount -= player_effect(p, ET_RESIST_COLD);
 
-            log_add_entry(nlarn->log, "You suffer from frostbite.");
+            log_add_entry(nlarn->log, _("You suffer from frostbite."));
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
-            log_add_entry(nlarn->log, "It doesn't seem so cold.");
+            log_add_entry(nlarn->log, _("It doesn't seem so cold."));
         }
         break;
 
     case DAM_ACID:
         if (damage_amount > 0)
         {
-            log_add_entry(nlarn->log, "You are splashed with acid.");
+            log_add_entry(nlarn->log, _("You are splashed with acid."));
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
-            log_add_entry(nlarn->log, "The acid doesn't affect you.");
+            log_add_entry(nlarn->log, _("The acid doesn't affect you."));
         }
         break;
 
     case DAM_WATER:
         if (damage_amount > 0)
         {
-            log_add_entry(nlarn->log, "You experience near-drowning.");
+            log_add_entry(nlarn->log, _("You experience near-drowning."));
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
-            log_add_entry(nlarn->log, "The water doesn't affect you.");
+            log_add_entry(nlarn->log, _("The water doesn't affect you."));
         }
         break;
 
@@ -2054,12 +2066,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
 
         if (damage_amount > 0)
         {
-            log_add_entry(nlarn->log, "Zapp!");
+            log_add_entry(nlarn->log, _("Zapp!"));
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
         else
         {
-            log_add_entry(nlarn->log, "As you are grounded nothing happens.");
+            log_add_entry(nlarn->log, _("As you are grounded nothing happens."));
         }
         break;
 
@@ -2079,13 +2091,13 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             }
             else
             {
-                log_add_entry(nlarn->log, "You resist the poison.");
+                log_add_entry(nlarn->log, _("You resist the poison."));
             }
         }
         else
         {
             /* damage is caused by the effect of the poison effect () */
-            log_add_entry(nlarn->log, "You feel poison running through your veins.");
+            log_add_entry(nlarn->log, _("You feel poison running through your veins."));
             player_hp_lose(p, damage_amount, cause_type, cause);
         }
         break;
@@ -2097,7 +2109,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         }
         else if (player_effect_get(p, ET_BLINDNESS) == NULL)
         {
-            log_add_entry(nlarn->log, "You are not blinded.");
+            log_add_entry(nlarn->log, _("You are not blinded."));
         }
 
         break;
@@ -2110,7 +2122,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         }
         else if (player_effect_get(p, ET_CONFUSION) == NULL)
         {
-            log_add_entry(nlarn->log, "You are not confused.");
+            log_add_entry(nlarn->log, _("You are not confused."));
         }
 
         break;
@@ -2123,7 +2135,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         }
         else if (player_effect_get(p, ET_PARALYSIS) == NULL)
         {
-            log_add_entry(nlarn->log, "You avoid eye contact.");
+            log_add_entry(nlarn->log, _("You avoid eye contact."));
         }
 
         break;
@@ -2178,7 +2190,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         }
         else
         {
-            log_add_entry(nlarn->log, "You are not affected.");
+            log_add_entry(nlarn->log, _("You are not affected."));
         }
         break;
 
@@ -2187,11 +2199,11 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
                 || !chance(damage_amount - player_get_wis(p)))
         {
             /* undead protection cancels drain life attacks */
-            log_add_entry(nlarn->log, "You are not affected.");
+            log_add_entry(nlarn->log, _("You are not affected."));
         }
         else
         {
-            log_add_entry(nlarn->log, "`LUMINOUS_RED`Your life energy is drained.`end`");
+            log_add_entry(nlarn->log, "`LUMINOUS_RED`%s`end`", _("Your life energy is drained."));
             player_level_lose(p, 1);
 
             /* this is the only attack that can not be caught by the test below */
@@ -2444,7 +2456,7 @@ effect *player_effect_add(player *p, effect *e)
         if (effect_get_msg_start(e))
             log_add_entry(nlarn->log, "%s", effect_get_msg_start(e));
 
-        player_make_move(p, e->turns, false, "asleep");
+        player_make_move(p, e->turns, false, _("asleep"));
 
         effect_destroy(e);
         e = NULL;
@@ -2580,7 +2592,7 @@ int player_inv_display(player *p)
     if (inv_length(p->inventory) == 0)
     {
         /* don't show empty inventory */
-        log_add_entry(nlarn->log, "You do not carry anything.");
+        log_add_entry(nlarn->log, _("You do not carry anything."));
         return false;
     }
 
@@ -2589,7 +2601,7 @@ int player_inv_display(player *p)
 
     display_inv_callback *callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(`KEY`d`end`)rop";
-    callback->helpmsg = "Drop the selected item. If the item is a stack of multiple items, you will be prompted for the amount you want to drop.";
+    callback->helpmsg = _("Drop the selected item. If the item is a stack of multiple items, you will be prompted for the amount you want to drop.");
     callback->key = 'd';
     callback->inv = &p->inventory;
     callback->function = &player_item_drop;
@@ -2598,7 +2610,7 @@ int player_inv_display(player *p)
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(`KEY`e`end`)quip";
-    callback->helpmsg = "Equip the selected item.";
+    callback->helpmsg = _("Equip the selected item.");
     callback->key = 'e';
     callback->function = &player_item_equip;
     callback->checkfun = &player_item_is_equippable;
@@ -2606,7 +2618,7 @@ int player_inv_display(player *p)
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(`KEY`o`end`)pen";
-    callback->helpmsg = "Open the selected container.";
+    callback->helpmsg = _("Open the selected container.");
     callback->key = 'o';
     callback->function = &container_open;
     callback->checkfun = &player_item_is_container;
@@ -2614,7 +2626,7 @@ int player_inv_display(player *p)
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(`KEY`s`end`)tore";
-    callback->helpmsg = "Put the item into a container you carry or one that is on the floor.";
+    callback->helpmsg = _("Put the item into a container you carry or one that is on the floor.");
     callback->key = 's';
     callback->function = &container_item_add;
     callback->checkfun = &player_item_can_be_added_to_container;
@@ -2622,7 +2634,7 @@ int player_inv_display(player *p)
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(`KEY`u`end`)nequip";
-    callback->helpmsg = "Unequip the selected item.";
+    callback->helpmsg = _("Unequip the selected item.");
     callback->key = 'u';
     callback->function = &player_item_unequip_wrapper;
     callback->checkfun = &player_item_is_unequippable;
@@ -2631,7 +2643,7 @@ int player_inv_display(player *p)
     /* unequip and use should never appear together */
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(`KEY`u`end`)se";
-    callback->helpmsg = "Use the selected item.";
+    callback->helpmsg = _("Use the selected item.");
     callback->key = 'u';
     callback->function = &player_item_use;
     callback->checkfun = &player_item_is_usable;
@@ -2639,13 +2651,13 @@ int player_inv_display(player *p)
 
     callback = g_malloc0(sizeof(display_inv_callback));
     callback->description = "(`KEY`n`end`)ote";
-    callback->helpmsg = "Add a note to the selected item or edit or delete an existing note.";
+    callback->helpmsg = _("Add a note to the selected item or edit or delete an existing note.");
     callback->key = 'n';
     callback->function = &player_item_notes;
     g_ptr_array_add(callbacks, callback);
 
     /* display inventory */
-    display_inventory("Inventory", p, &p->inventory, callbacks, false,
+    display_inventory(_("Inventory"), p, &p->inventory, callbacks, false,
                       true, false, NULL);
 
     /* clean up */
@@ -2692,7 +2704,7 @@ int player_inv_pre_add(inventory *inv, item *it)
 
     if (player_effect(p, ET_OVERSTRAINED))
     {
-        log_add_entry(nlarn->log, "You are already overloaded!");
+        log_add_entry(nlarn->log, _("You are already overloaded!"));
         return false;
     }
 
@@ -2705,13 +2717,15 @@ int player_inv_pre_add(inventory *inv, item *it)
     /* check if item weight can be carried */
     if ((pack_weight + item_weight(it)) > (int)(can_carry * 1.3))
     {
-        /* get item description */
-        gchar *buf = item_describe(it, player_item_known(p, it), false, true);
+        /* get item description (the item is the subject of the sentence) */
+        gchar *buf = item_describe_gc(it, player_item_known(p, it),
+                                      false, true, GC_NOM);
         /* capitalize first letter */
         buf[0] = g_ascii_toupper(buf[0]);
 
-        log_add_entry(nlarn->log, "%s %s too heavy for you.", buf,
-                      is_are(it->count));
+        log_add_entry(nlarn->log, (it->count > 1)
+                ? _("%s are too heavy for you.")
+                : _("%s is too heavy for you."), buf);
 
         g_free(buf);
         return false;
@@ -2785,9 +2799,9 @@ void player_paperdoll(player *p)
     gchar *equipment = player_equipment_list(p);
 
     if (strlen(equipment) > 0)
-        display_show_message("Worn equipment", equipment, 0);
+        display_show_message(_("Worn equipment"), equipment, 0);
     else
-        log_add_entry(nlarn->log, "You do not wear any equipment.");
+        log_add_entry(nlarn->log, _("You do not wear any equipment."));
 
     g_free(equipment);
 }
@@ -2813,7 +2827,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
     case IT_AMULET:
         if (p->eq_amulet == NULL)
         {
-            if (!player_make_move(p, 2, true, "putting %s on", desc))
+            if (!player_make_move(p, 2, true, _("putting %s on"), desc))
             {
                 /* interrupted */
                 g_free(desc);
@@ -2821,7 +2835,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
             }
 
             p->eq_amulet = it;
-            log_add_entry(nlarn->log, "You put %s on.", desc);
+            log_add_entry(nlarn->log, _("You put %s on."), desc);
             p->identified_amulets[it->id] = true;
         }
         break;
@@ -2829,7 +2843,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
     case IT_AMMO:
         if (p->eq_quiver == NULL)
         {
-            if (!player_make_move(p, 2, true, "putting %s into the quiver", desc))
+            if (!player_make_move(p, 2, true, _("putting %s into the quiver"), desc))
             {
                 /* interrupted */
                 g_free(desc);
@@ -2837,7 +2851,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
             }
 
             p->eq_quiver = it;
-            log_add_entry(nlarn->log, "You put %s into your quiver.", desc);
+            log_add_entry(nlarn->log, _("You put %s into your quiver."), desc);
         }
         break;
 
@@ -2881,7 +2895,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
 
         if ((islot != NULL) && (*islot == NULL))
         {
-            if (!player_make_move(p, atime, true, "wearing %s", desc))
+            if (!player_make_move(p, atime, true, _("wearing %s"), desc))
             {
                 /* interrupted */
                 g_free(desc);
@@ -2896,7 +2910,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
             /* Refresh the armour's description before logging. */
             g_free(desc);
             desc = item_describe(it, known, true, false);
-            log_add_entry(nlarn->log, "You are now wearing %s.", desc);
+            log_add_entry(nlarn->log, _("You are now wearing %s."), desc);
 
             /* put the piece of armour in the equipment slot */
             *islot = it;
@@ -2912,14 +2926,14 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
 
         if (islot != NULL)
         {
-            if (!player_make_move(p, 2, true, "putting %s on", desc))
+            if (!player_make_move(p, 2, true, _("putting %s on"), desc))
             {
                 /* interrupted */
                 g_free(desc);
                 return;
             }
 
-            log_add_entry(nlarn->log, "You put %s on.", desc);
+            log_add_entry(nlarn->log, _("You put %s on."), desc);
             *islot = it;
             p->identified_rings[it->id] = true;
 
@@ -2938,7 +2952,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
         if (p->eq_weapon == NULL)
         {
             if (!player_make_move(p, 2 + weapon_is_twohanded(it),
-                                  true, "wielding %s", desc))
+                                  true, _("wielding %s"), desc))
             {
                 /* action aborted */
                 g_free(desc);
@@ -2946,7 +2960,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
             }
 
             p->eq_weapon = it;
-            log_add_entry(nlarn->log, "You now wield %s.", desc);
+            log_add_entry(nlarn->log, _("You now wield %s."), desc);
         }
         break;
 
@@ -2961,14 +2975,14 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
     if (it->cursed)
     {
         /* generate a new description with definite article */
-        desc = item_describe(it, known, true, true);
+        desc = item_describe_gc(it, known, true, true, GC_NOM);
 
         /* capitalize first letter */
         desc[0] = g_ascii_toupper(desc[0]);
         log_add_entry(nlarn->log, "`LIGHT_MAGENTA`%s %s`end`",
             desc, it->type == IT_WEAPON
-                ? "welds itself into your hand."
-                : "feels uncomfortably cold!");
+                ? _("welds itself into your hand.")
+                : _("feels uncomfortably cold!"));
         it->blessed_known = true;
         g_free(desc);
     }
@@ -2979,7 +2993,7 @@ void player_item_equip(player *p, inventory **inv __attribute__((unused)), item 
     {
         /* The player identified the item by using it. */
         desc = item_describe(it, player_item_known(p, it), false, false);
-        log_add_entry(nlarn->log, "It seems that this is %s.", desc);
+        log_add_entry(nlarn->log, _("It seems that this is %s."), desc);
         g_free(desc);
     }
 }
@@ -3015,14 +3029,14 @@ void player_item_unequip(player *p,
             {
                 if (!forced)
                 {
-                    if (!player_make_move(p, 2, true, "removing %s", desc))
+                    if (!player_make_move(p, 2, true, _("removing %s"), desc))
                     {
                         /* interrupted */
                         g_free(desc);
                         return;
                     }
 
-                    log_add_entry(nlarn->log, "You remove %s.", desc);
+                    log_add_entry(nlarn->log, _("You remove %s."), desc);
                 }
 
                 if (p->eq_amulet)
@@ -3033,8 +3047,8 @@ void player_item_unequip(player *p,
             }
             else
             {
-                log_add_entry(nlarn->log, "You can not remove %s.%s", desc,
-                              it->blessed_known ? "" : " It appears to be cursed.");
+                log_add_entry(nlarn->log, _("You can not remove %s.%s"), desc,
+                              it->blessed_known ? "" : _(" It appears to be cursed."));
 
                 it->blessed_known = true;
             }
@@ -3046,14 +3060,14 @@ void player_item_unequip(player *p,
         {
             if (!forced)
             {
-                if (!player_make_move(p, 2, true, "taking %s out of the quiver", desc))
+                if (!player_make_move(p, 2, true, _("taking %s out of the quiver"), desc))
                 {
                     /* interrupted */
                     g_free(desc);
                     return;
                 }
 
-                log_add_entry(nlarn->log, "You take %s out your quiver.", desc);
+                log_add_entry(nlarn->log, _("You take %s out your quiver."), desc);
             }
 
             p->eq_quiver = NULL;
@@ -3108,14 +3122,14 @@ void player_item_unequip(player *p,
             {
                 if (!forced)
                 {
-                    if (!player_make_move(p, atime, true, "taking %s off", desc))
+                    if (!player_make_move(p, atime, true, _("taking %s off"), desc))
                     {
                         /* interrupted */
                         g_free(desc);
                         return;
                     }
 
-                    log_add_entry(nlarn->log, "You finish taking off %s.", desc);
+                    log_add_entry(nlarn->log, _("You finish taking off %s."), desc);
                 }
                 if (*aslot)
                 {
@@ -3125,8 +3139,8 @@ void player_item_unequip(player *p,
             }
             else
             {
-                log_add_entry(nlarn->log, "You can't take of %s.%s", desc,
-                              it->blessed_known ? "" : " It appears to be cursed.");
+                log_add_entry(nlarn->log, _("You can't take of %s.%s"), desc,
+                              it->blessed_known ? "" : _(" It appears to be cursed."));
 
                 it->blessed_known = true;
             }
@@ -3150,14 +3164,14 @@ void player_item_unequip(player *p,
             {
                 if (!forced)
                 {
-                    if (!player_make_move(p, 2, true, "removing %s", desc))
+                    if (!player_make_move(p, 2, true, _("removing %s"), desc))
                     {
                         /* interrupted */
                         g_free(desc);
                         return;
                     }
 
-                    log_add_entry(nlarn->log, "You remove %s.", desc);
+                    log_add_entry(nlarn->log, _("You remove %s."), desc);
                 }
 
                 if (*rslot)
@@ -3168,8 +3182,8 @@ void player_item_unequip(player *p,
             }
             else
             {
-                log_add_entry(nlarn->log, "You can not remove %s.%s", desc,
-                              it->blessed_known ? "" : " It appears to be cursed.");
+                log_add_entry(nlarn->log, _("You can not remove %s.%s"), desc,
+                              it->blessed_known ? "" : _(" It appears to be cursed."));
 
                 it->blessed_known = true;
             }
@@ -3192,14 +3206,14 @@ void player_item_unequip(player *p,
                 if (!forced)
                 {
                     if (!player_make_move(p, 2 + weapon_is_twohanded(*wslot),
-                                          true, "putting %s away", desc))
+                                          true, _("putting %s away"), desc))
                     {
                         /* interrupted */
                         g_free(desc);
                         return;
                     }
 
-                    log_add_entry(nlarn->log, "You put away %s.", desc);
+                    log_add_entry(nlarn->log, _("You put away %s."), desc);
                 }
 
                 player_effects_del(p, (*wslot)->effects);
@@ -3207,8 +3221,8 @@ void player_item_unequip(player *p,
             }
             else if (wslot != NULL)
             {
-                log_add_entry(nlarn->log, "You can't put away %s. " \
-                              "It's welded into your hands.", desc);
+                log_add_entry(nlarn->log, _("You can't put away %s. " \
+                              "It's welded into your hands."), desc);
             }
         }
         break;
@@ -3742,7 +3756,7 @@ void player_item_throw(player *p, inventory **inv __attribute__((unused)), item 
     /* check if we got a usable target position */
     if (!pos_valid(target) || pos_identical(p->pos, target))
     {
-        log_add_entry(nlarn->log, "Aborted.");
+        log_add_entry(nlarn->log, _("Aborted."));
         g_free(desc);
         return;
     }
@@ -3751,7 +3765,7 @@ void player_item_throw(player *p, inventory **inv __attribute__((unused)), item 
     if (map_get_monster_at(pmap, target)
         && monster_type(map_get_monster_at(pmap, target)) == MT_TOWN_PERSON)
     {
-        log_add_entry(nlarn->log, "Gosh! How dare you!");
+        log_add_entry(nlarn->log, _("Gosh! How dare you!"));
         g_free(desc);
         return;
     }
@@ -3781,9 +3795,12 @@ void player_item_throw(player *p, inventory **inv __attribute__((unused)), item 
             /* potion reached the target without hitting anything */
             desc[0] = g_ascii_toupper(desc[0]);
             map_tile_t mtt = map_tiletype_at(pmap, target);
-            log_add_entry(nlarn->log, "%s %s the %s.", desc,
-                          (mtt <= LT_FLOOR ? "shatters on" : "splashes into"),
-                          mt_get_desc(mtt));
+            log_add_entry(nlarn->log, (mtt <= LT_FLOOR
+                          ? _("%s shatters on the %s.")
+                          : _("%s splashes into the %s.")), desc,
+                          noun_phrase(mt_get_desc_raw(mtt), ART_NONE,
+                                      (mtt <= LT_FLOOR) ? GC_DAT : GC_ACC,
+                                      false, false));
             if (mtt <= LT_FLOOR)
                 map_spill_set(pmap, target, potion_colour(it->id));
             item_destroy(it);
@@ -3812,7 +3829,8 @@ void player_item_throw(player *p, inventory **inv __attribute__((unused)), item 
 
 void player_item_destroy(player *p, item *it)
 {
-    gchar *desc = item_describe(it, player_item_known(p, it), false, true);
+    gchar *desc = item_describe_gc(it, player_item_known(p, it),
+                                   false, true, GC_NOM);
     desc[0] = g_ascii_toupper(desc[0]);
 
     if (player_item_is_equipped(p, it))
@@ -3820,7 +3838,9 @@ void player_item_destroy(player *p, item *it)
         player_item_unequip(p, &p->inventory, it, true);
     }
 
-    log_add_entry(nlarn->log, "`LIGHT_MAGENTA`%s %s destroyed!`end`", desc, is_are(it->count));
+    log_add_entry(nlarn->log, (it->count > 1)
+            ? _("`LIGHT_MAGENTA`%s are destroyed!`end`")
+            : _("`LIGHT_MAGENTA`%s is destroyed!`end`"), desc);
 
     int count = 0;
     if (it->content)
@@ -3855,7 +3875,7 @@ void player_item_drop(player *p, inventory **inv, item *it)
        the possibility to drop stuff when overstrained. */
     if (player_effect(p, ET_PARALYSIS))
     {
-        log_add_entry(nlarn->log, "You can't move!");
+        log_add_entry(nlarn->log, _("You can't move!"));
         return;
     }
 
@@ -3865,9 +3885,9 @@ void player_item_drop(player *p, inventory **inv, item *it)
     if (it->count > 1)
     {
         /* use the item type plural name except for ammunition */
-        buf = g_strdup_printf("Drop how many %s%s?",
-                              (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
-                              (it->type == IT_AMMO ? "s" : ""));
+        buf = g_strdup_printf(_("Drop how many %s?"),
+                              (it->type == IT_AMMO
+                                  ? ammo_name_pl(it) : item_name_pl(it->type)));
 
         count = display_get_count(buf, it->count);
         g_free(buf);
@@ -3890,10 +3910,10 @@ void player_item_drop(player *p, inventory **inv, item *it)
        the burdened / overloaded effect. If the pre_del callback fails,
        it has to display a message which explains why it has failed. */
     buf = item_describe(it, player_item_known(p, it), false, false);
-    log_add_entry(nlarn->log, "You drop %s.", buf);
+    log_add_entry(nlarn->log, _("You drop %s."), buf);
 
     /* if the action is aborted or if the callback failed return without dropping the item */
-    if (!player_make_move(p, 2, true, "dropping %s", buf)
+    if (!player_make_move(p, 2, true, _("dropping %s"), buf)
             || !inv_del_element(inv, it))
     {
         /* if the item has been split return it */
@@ -3925,12 +3945,21 @@ void player_item_drop(player *p, inventory **inv, item *it)
     {
         if (it->cursed || it->blessed)
         {
-            buf = item_describe(it, player_item_known(p, it), false, true);
+            buf = item_describe_gc(it, player_item_known(p, it),
+                                   false, true, GC_NOM);
             buf[0] = g_ascii_toupper(buf[0]);
 
-            log_add_entry(nlarn->log, "%s %s surrounded by a %s halo.",
-                          buf, is_are(it->count),
-                          it->cursed ? "`CHARCOAL`black`end`" : "`WHITE`white`end`");
+            const char *halo_msg;
+            if (it->cursed)
+                halo_msg = (it->count > 1)
+                    ? _("%s are surrounded by a `CHARCOAL`black`end` halo.")
+                    : _("%s is surrounded by a `CHARCOAL`black`end` halo.");
+            else
+                halo_msg = (it->count > 1)
+                    ? _("%s are surrounded by a `WHITE`white`end` halo.")
+                    : _("%s is surrounded by a `WHITE`white`end` halo.");
+
+            log_add_entry(nlarn->log, halo_msg, buf);
 
             g_free(buf);
         }
@@ -3944,11 +3973,11 @@ void player_item_drop(player *p, inventory **inv, item *it)
 void player_item_notes(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     gchar *desc = item_describe(it, player_item_known(p, it), false, true);
-    gchar *caption = g_strdup_printf("Add your description for %s (delete with ESC)", desc);
+    gchar *caption = g_strdup_printf(_("Add your description for %s (delete with ESC)"), desc);
     g_free(desc);
 
     /* get the new note */
-    gchar *temp = display_get_string("Edit item notes", caption, it->notes, 60);
+    gchar *temp = display_get_string(_("Edit item notes"), caption, it->notes, 60);
 
     /* free the old note before adding the new note to the item */
     g_free(it->notes);
@@ -3963,7 +3992,7 @@ void player_read(player *p)
 
     if (inv_length_filtered(p->inventory, item_filter_legible) > 0)
     {
-        item *it = display_inventory("Choose an item to read", p,
+        item *it = display_inventory(_("Choose an item to read"), p,
                 &p->inventory, NULL, false, false, false, item_filter_legible);
 
         if (it)
@@ -3973,7 +4002,7 @@ void player_read(player *p)
     }
     else
     {
-        log_add_entry(nlarn->log, "You have nothing to read.");
+        log_add_entry(nlarn->log, _("You have nothing to read."));
     }
 }
 
@@ -3983,7 +4012,7 @@ void player_quaff(player *p)
 
     if (inv_length_filtered(p->inventory, item_filter_potions) > 0)
     {
-        item *it = display_inventory("Choose an item to drink", p,
+        item *it = display_inventory(_("Choose an item to drink"), p,
                 &p->inventory, NULL, false, false, false, item_filter_potions);
 
         if (it)
@@ -3993,7 +4022,7 @@ void player_quaff(player *p)
     }
     else
     {
-        log_add_entry(nlarn->log, "You have nothing to drink.");
+        log_add_entry(nlarn->log, _("You have nothing to drink."));
     }
 }
 
@@ -4004,7 +4033,7 @@ void player_equip(player *p)
 
     if (inv_length_filtered(p->inventory, item_filter_equippable) > 0)
     {
-        item *it = display_inventory("Choose an item to equip", p,
+        item *it = display_inventory(_("Choose an item to equip"), p,
                 &p->inventory, NULL, false, false, false, item_filter_equippable);
 
         if (it)
@@ -4014,7 +4043,7 @@ void player_equip(player *p)
     }
     else
     {
-        log_add_entry(nlarn->log, "You have nothing you could equip.");
+        log_add_entry(nlarn->log, _("You have nothing you could equip."));
     }
 }
 
@@ -4024,7 +4053,7 @@ void player_take_off(player *p)
 
     if (inv_length_filtered(p->inventory, player_item_filter_unequippable) > 0)
     {
-        item *it = display_inventory("Choose an item to take off", p,
+        item *it = display_inventory(_("Choose an item to take off"), p,
                 &p->inventory, NULL, false, false, false,
                 player_item_filter_unequippable);
 
@@ -4033,7 +4062,7 @@ void player_take_off(player *p)
     }
     else
     {
-        log_add_entry(nlarn->log, "You have nothing you could take off.");
+        log_add_entry(nlarn->log, _("You have nothing you could take off."));
     }
 }
 
@@ -4043,7 +4072,7 @@ void player_drop(player *p)
 
     if (inv_length_filtered(p->inventory, item_filter_dropable) > 0)
     {
-        item *it = display_inventory("Choose an item to drop", p, &p->inventory,
+        item *it = display_inventory(_("Choose an item to drop"), p, &p->inventory,
                                NULL, false, false, false, item_filter_dropable);
 
         if (it)
@@ -4051,7 +4080,7 @@ void player_drop(player *p)
     }
     else
     {
-        log_add_entry(nlarn->log, "You have nothing you could drop.");
+        log_add_entry(nlarn->log, _("You have nothing you could drop."));
     }
 }
 
@@ -4061,7 +4090,7 @@ void player_throw(player *p)
 
     if (inv_length_filtered(p->inventory, item_filter_throwable) == 0)
     {
-        log_add_entry(nlarn->log, "You have nothing you could throw.");
+        log_add_entry(nlarn->log, _("You have nothing you could throw."));
         return;
     }
 
@@ -4076,7 +4105,7 @@ void player_throw(player *p)
         if (it->cursed)
         {
             gchar *desc = item_describe(it, player_item_known(p, it), true, true);
-            log_add_entry(nlarn->log, "You can't throw %s, it's welded to your hands!", desc);
+            log_add_entry(nlarn->log, _("You can't throw %s, it's welded to your hands!"), desc);
             g_free(desc);
             return;
         }
@@ -4274,7 +4303,7 @@ done:
 const char *player_get_level_desc(player *p)
 {
     g_assert(p != NULL);
-    return player_level_desc[p->level - 1];
+    return _(player_level_desc[p->level - 1]);
 }
 
 void player_search(player *p)
@@ -4323,7 +4352,7 @@ void player_search(player *p)
             if (chance(prop))
             {
                 /* discovered the trap */
-                log_add_entry(nlarn->log, "`LIGHT_MAGENTA`You find a %s!`end`",
+                log_add_entry(nlarn->log, _("`LIGHT_MAGENTA`You find a %s!`end`"),
                         trap_description(tt));
                  player_memory_of(p, pos).trap = tt;
             }
@@ -4345,7 +4374,7 @@ void player_search(player *p)
                     gchar *idesc = item_describe(c, false, true, true);
                     /* the container is cursed */
                     c->blessed_known = true;
-                    log_add_entry(nlarn->log, "`LIGHT_MAGENTA`You discover a trap on %s!`end`",
+                    log_add_entry(nlarn->log, _("`LIGHT_MAGENTA`You discover a trap on %s!`end`"),
                             idesc);
 
                     g_free(idesc);
@@ -4361,7 +4390,7 @@ void player_list_sobjmem(player *p)
 
     if (p->sobjmem == NULL)
     {
-        g_string_append(sobjlist, "You have not discovered any landmarks yet.");
+        g_string_append(sobjlist, _("You have not discovered any landmarks yet."));
 
     }
     else
@@ -4386,7 +4415,7 @@ void player_list_sobjmem(player *p)
         }
     }
 
-    display_show_message("Discovered landmarks", sobjlist->str, 5);
+    display_show_message(_("Discovered landmarks"), sobjlist->str, 5);
     g_string_free(sobjlist, true);
 }
 
@@ -4540,9 +4569,9 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, bool ask)
     if (ask && (it->count > 1))
     {
         /* use the item type plural name except for ammunition */
-        buf = g_strdup_printf("Pick up how many %s%s?",
-                              (it->type == IT_AMMO ? ammo_name(it) : item_name_pl(it->type)),
-                              (it->type == IT_AMMO ? "s" : ""));
+        buf = g_strdup_printf(_("Pick up how many %s?"),
+                              (it->type == IT_AMMO
+                                  ? ammo_name_pl(it) : item_name_pl(it->type)));
 
         guint count = display_get_count(buf, it->count);
         g_free(buf);
@@ -4561,7 +4590,7 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, bool ask)
 
     /* Log the attempt to pick up the item */
     buf = item_describe(it, player_item_known(p, it), false, false);
-    log_add_entry(nlarn->log, "You pick up %s.", buf);
+    log_add_entry(nlarn->log, _("You pick up %s."), buf);
 
     if (it->type == IT_GOLD)
     {
@@ -4575,7 +4604,7 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, bool ask)
     it->fired = false;
 
     /* one turn to pick item up, one to stuff it into the pack */
-    if (!player_make_move(p, 2, true, "picking up %s", buf))
+    if (!player_make_move(p, 2, true, _("picking up %s"), buf))
     {
         /* Adding the item to the player's inventory has failed.
            If the item has been split, return it to the originating inventory */
@@ -4904,16 +4933,16 @@ void calc_fighting_stats(player *p)
     }
 
     if (mention_instakill)
-        g_string_append_printf(text, "*) ignoring instakills\n");
+        g_string_append_printf(text, "%s", _("*) ignoring instakills\n"));
 
-    display_show_message("Fighting statistics", text->str, 0);
+    display_show_message(_("Fighting statistics"), text->str, 0);
 
-    if (display_get_yesno("Do you want to save the calculations?",NULL, NULL, NULL))
+    if (display_get_yesno(_("Do you want to save the calculations?"), NULL, NULL, NULL))
     {
         GError *error = NULL;
 
         char *proposal = g_strconcat(p->name, ".stat", NULL);
-        char *filename = display_get_string(NULL, "Enter filename: ", proposal, 40);
+        char *filename = display_get_string(NULL, _("Enter filename: "), proposal, 40);
 
         if (filename != NULL)
         {
@@ -4945,20 +4974,25 @@ static char *player_equipment_list(player *p)
         const char *desc;
     } slots[] =
     {
-        { p->eq_amulet,  "Necklace:" },
-        { p->eq_weapon,  "Main weapon:" },
-        { p->eq_sweapon, "Sec. weapon:" },
-        { p->eq_quiver,  "In quiver:" },
-        { p->eq_boots,   "Boots:" },
-        { p->eq_cloak,   "Cloak:" },
-        { p->eq_gloves,  "Gloves:" },
-        { p->eq_helmet,  "Helmet:" },
-        { p->eq_shield,  "Shield:" },
-        { p->eq_suit,    "Body armour:" },
-        { p->eq_ring_l,  "Left ring:" },
-        { p->eq_ring_r,  "Right ring:" },
+        { p->eq_amulet,  N_("Necklace:") },
+        { p->eq_weapon,  N_("Main weapon:") },
+        { p->eq_sweapon, N_("Sec. weapon:") },
+        { p->eq_quiver,  N_("In quiver:") },
+        { p->eq_boots,   N_("Boots:") },
+        { p->eq_cloak,   N_("Cloak:") },
+        { p->eq_gloves,  N_("Gloves:") },
+        { p->eq_helmet,  N_("Helmet:") },
+        { p->eq_shield,  N_("Shield:") },
+        { p->eq_suit,    N_("Body armour:") },
+        { p->eq_ring_l,  N_("Left ring:") },
+        { p->eq_ring_r,  N_("Right ring:") },
         { NULL, NULL },
     };
+
+    /* the width of the label column is that of its longest entry */
+    glong lwidth = 0;
+    for (int i = 0; slots[i].desc != NULL; i++)
+        lwidth = MAX(lwidth, g_utf8_strlen(_(slots[i].desc), -1));
 
     while (slots[idx].desc != NULL)
     {
@@ -4969,11 +5003,13 @@ static char *player_equipment_list(player *p)
             continue;
         }
 
-        char *desc = item_describe(slots[idx].slot, player_item_known(p,
-                    slots[idx].slot), false, false);
+        const char *label = _(slots[idx].desc);
+        /* a listing shows the items in nominative case */
+        char *desc = item_describe_gc(slots[idx].slot, player_item_known(p,
+                    slots[idx].slot), false, false, GC_NOM);
 
-        g_string_append_printf(el, "`EMPH`%-12s`end` %s\n",
-                    slots[idx].desc, desc);
+        g_string_append_printf(el, "`EMPH`%-*s`end` %s\n",
+                    utf8_pad(label, lwidth), label, desc);
 
         g_free(desc);
         idx++;
@@ -5127,8 +5163,9 @@ static char *player_create_obituary(player *p, score_t *score, GList *scores)
             spell *s = (spell *)g_ptr_array_index(p->known_spells, pos);
             tmp = str_capitalize(g_strdup(spell_name(s)));
 
-            g_string_append_printf(text, "%-24s (lvl. %2d): %3d\n",
-                                   tmp, s->knowledge, s->used);
+            g_string_append_printf(text, "%-*s (lvl. %2d): %3d\n",
+                                   utf8_pad(tmp, 24), tmp,
+                                   s->knowledge, s->used);
 
             g_free(tmp);
         }
@@ -5257,7 +5294,7 @@ static void player_memorial_file_save(player *p, const char *text)
             proposal = g_strconcat(p->name, ".txt", NULL);
         }
 
-        char *filename = display_get_string(NULL, "Enter filename: ",
+        char *filename = display_get_string(NULL, _("Enter filename: "),
             proposal, 40);
         g_free(proposal);
         proposal = NULL;
@@ -5278,23 +5315,23 @@ static void player_memorial_file_save(player *p, const char *text)
 
             if (g_file_test(fullname, G_FILE_TEST_IS_SYMLINK))
             {
-                display_show_message("Error", "File is a symlink. I won't " \
-                        "overwrite those...", 0);
+                display_show_message(_("Error"), _("File is a symlink. I won't "
+                        "overwrite those..."), 0);
                 g_free(fullname);
                 continue;
             }
 
             if (g_file_test(fullname, G_FILE_TEST_IS_DIR))
             {
-                display_show_message("Error", "There is a directory with the " \
-                        "name you gave. Thus I can't write the file.", 0);
+                display_show_message(_("Error"), _("There is a directory with the "
+                        "name you gave. Thus I can't write the file."), 0);
                 g_free(fullname);
                 continue;
             }
 
             if (g_file_test(fullname, G_FILE_TEST_IS_REGULAR)
-                    && !display_get_yesno("File exists!\n"
-                        "Do you want to overwrite it?", NULL, NULL, NULL))
+                    && !display_get_yesno(_("File exists!\n"
+                        "Do you want to overwrite it?"), NULL, NULL, NULL))
             {
                 g_free(fullname);
                 proposal = filename;
@@ -5311,7 +5348,7 @@ static void player_memorial_file_save(player *p, const char *text)
             }
             else
             {
-                display_show_message("Error", error->message, 0);
+                display_show_message(_("Error"), error->message, 0);
                 g_error_free(error);
             }
 

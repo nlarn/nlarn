@@ -1,6 +1,6 @@
 /*
  * armour.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,10 @@
 
 #ifndef ARMOUR_H
 #define ARMOUR_H
+
+#include <libintl.h>
+
+#include "grammar.h"
 
 #include "effects.h"
 #include "items.h"
@@ -115,7 +119,11 @@ static inline guint armour_ac(const item *armour)
 
 /* macros */
 
-#define armour_name(armour)     (armours[(armour)->id].name)
+#define armour_name_raw(armour) (gettext(armours[(armour)->id].name))
+#define armour_name(armour)     (noun_phrase( \
+        armour_name_raw(armour), ART_NONE, GC_NOM, false, false))
+#define armour_name_art(armour, article, gcase, capitalise) (noun_phrase( \
+        gettext(armours[(armour)->id].name), article, gcase, false, capitalise))
 #define armour_class(armour)    (armours[(armour)->id].category)
 #define armour_material(armour) (armours[(armour)->id].material)
 #define armour_weight(armour)   (armours[(armour)->id].weight)

@@ -1,6 +1,6 @@
 /*
  * spells.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,7 +19,10 @@
 #ifndef SPELLS_H
 #define SPELLS_H
 
+#include <libintl.h>
+
 #include "colours.h"
+#include "grammar.h"
 #include "effects.h"
 #include "enumFactory.h"
 #include "items.h"
@@ -99,6 +102,9 @@ typedef struct spell_data {
     int price;                /* price of the book*/
     bool
         obtainable: 1;  /* available in the shop */
+    /* the grammatical case of the monster name in the messages */
+    grammar_case msg_succ_case;
+    grammar_case msg_fail_case;
 } spell_data;
 
 typedef struct spell {
@@ -168,36 +174,59 @@ gchar* spell_desc_by_id(spell_id sid);
 bool spell_create_monster(spell *s, struct player *p);
 bool spell_vaporize_rock(spell *s, struct player *p);
 
+/* translate a possibly NULL string from the spell table */
+static inline const char *spell_gettext(const char *msg)
+{
+    return msg ? gettext(msg) : NULL;
+}
+
+/* Spell names carry the message context "spell" as they collide with
+   effect and item names; translations may carry grammar metadata (see
+   grammar.h), so the name is stripped for stand-alone display. */
+#define spell_name_raw(id)    (g_dpgettext2(NULL, "spell", spells[(id)].name))
+
 #define spell_code(spell)     (spells[(spell)->id].code)
-#define spell_name(spell)     (spells[(spell)->id].name)
+#define spell_name(spell)     (noun_phrase(spell_name_raw((spell)->id), \
+                                           ART_NONE, GC_NOM, false, false))
+/* the spell name as an articled noun phrase for embedding in messages */
+#define spell_name_art(spell, article, gcase, capitalise) \
+    (noun_phrase(spell_name_raw((spell)->id), (article), (gcase), \
+                 false, (capitalise)))
+/* the spell name as embedded in "of %s" sentences */
+#define spell_name_gen(spell) \
+    (noun_genitive_attribute(spell_name_raw((spell)->id)))
 #define spell_type(spell)     (spells[(spell)->id].type)
 #define spell_damage(spell)   (spells[(spell)->id].damage_type)
 #define spell_effect(spell)   (spells[(spell)->id].effect)
-#define spell_msg_succ(spell) (spells[(spell)->id].msg_success)
-#define spell_msg_fail(spell) (spells[(spell)->id].msg_fail)
+#define spell_msg_succ(spell) (spell_gettext(spells[(spell)->id].msg_success))
+#define spell_msg_fail(spell) (spell_gettext(spells[(spell)->id].msg_fail))
 #define spell_colour(spell)   (spells[(spell)->id].fg)
 #define spell_level(spell)    (spells[(spell)->id].level)
 
 #define spell_code_by_id(id)     (spells[(id)].code)
-#define spell_name_by_id(id)     (spells[(id)].name)
+#define spell_name_by_id(id)     (noun_phrase(spell_name_raw(id), \
+                                              ART_NONE, GC_NOM, false, false))
 #define spell_type_by_id(id)     (spells[(id)].type)
 #define spell_damage_by_id(id)   (spells[(id)].damage_type)
 #define spell_effect_by_id(id)   (spells[(id)].effect)
-#define spell_msg_succ_by_id(id) (spells[(id)].msg_success)
-#define spell_msg_fail_by_id(id) (spells[(id)].msg_fail)
+#define spell_msg_succ_by_id(id) (spell_gettext(spells[(id)].msg_success))
+#define spell_msg_fail_by_id(id) (spell_gettext(spells[(id)].msg_fail))
 #define spell_colour_by_id(id)   (spells[(id)].fg)
 #define spell_level_by_id(id)    (spells[(id)].level)
 
 /* *** BOOKS *** */
 
-char *book_desc(spell_id book_id);
+const char *book_desc(spell_id book_id);
 int book_weight(item *book);
 colour_t book_colour(item *book);
 item_usage_result book_read(struct player *p, item *book);
 
 #define book_type_obtainable(id) (spells[id].obtainable)
 
-#define book_name(book)   (spells[(book)->id].name)
+/* A book is named after the spell it teaches; the title is composed
+   in item_describe_gc(), which renders names carrying grammar metadata
+   as a definite genitive attribute ("das Buch des Schutzes"). */
+#define book_name(book)   (spell_name_raw((book)->id))
 #define book_price(book)  (spells[(book)->id].price)
 
 #endif

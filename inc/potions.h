@@ -19,6 +19,8 @@
 #ifndef POTIONS_H
 #define POTIONS_H
 
+#include <libintl.h>
+
 #include "enumFactory.h"
 #include "items.h"
 
@@ -83,7 +85,7 @@ extern const potion_data potions[PO_MAX];
 
 #define potion_type_store_stock(id) (potions[(id)].store_stock)
 
-#define potion_name(potion)   (potions[(potion)->id].name)
+#define potion_name(potion)   (g_dpgettext2(NULL, "potion", potions[(potion)->id].name))
 #define potion_effect(potion) (potions[(potion)->id].effect_t)
 #define potion_price(potion)  (potions[(potion)->id].price)
 

@@ -17,7 +17,6 @@
  */
 
 #include <ctype.h>
-#include <locale.h>
 #include <glib.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -34,6 +33,8 @@ static gchar *font_name;
 const int DEFAULT_ROWS = 25;
 const int DEFAULT_COLS = 90;
 #endif
+
+#include <glib/gi18n.h>
 
 #include "colours.h"
 #include "config.h"
@@ -71,10 +72,6 @@ const int DISPLAY_WINDOW_MAX_WIDTH = 78;
 
 void display_init()
 {
-    /* Initialise the locale to enable correct output of multi-byte
-       characters (both text and glyphs) with ncursesw. */
-    setlocale(LC_ALL, "");
-
 #ifdef NCURSES_VERSION
     /*
      * Don't wait for trailing key codes after an ESC key is pressed.
@@ -451,7 +448,7 @@ void display_paint_screen(player *p)
     }
     else
     {
-        mvaprintw(7, MAP_MAX_X + 3, COLOR_PAIR(LUMINOUS_RED), "unarmed");
+        mvaprintw(7, MAP_MAX_X + 3, COLOR_PAIR(LUMINOUS_RED), "%s", _("unarmed"));
     }
     clrtoeol();
 
@@ -490,10 +487,12 @@ void display_paint_screen(player *p)
 
             char *desc = g_strdup(effect_get_desc(e));
 
-            if (strlen(desc) > available_space)
+            if (g_utf8_strlen(desc, -1) > (glong)available_space)
             {
-                desc[available_space - 1] = '.';
-                desc[available_space] = '\0';
+                /* truncate at a character boundary, not mid-sequence */
+                char *cut = g_utf8_offset_to_pointer(desc, available_space - 1);
+                cut[0] = '.';
+                cut[1] = '\0';
             }
 
             if ((e->type == ET_WALL_WALK || e->type == ET_LEVITATION)
@@ -1319,17 +1318,19 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             if (show_price)
             {
                 /* inside shop */
-                gchar *item_desc = item_describe(it, true, false, false);
+                gchar *item_desc = item_describe_gc(it, true, false, false, GC_NOM);
                 mvwaprintw(iwin->window, line, 1, attrs, " %-*s %5d gold ",
-                          width - 15, item_desc, item_price(it));
+                          utf8_pad(item_desc, width - 15), item_desc,
+                          item_price(it));
 
                 g_free(item_desc);
             }
             else
             {
-                gchar *item_desc = item_describe(it, player_item_known(p, it), false, false);
+                gchar *item_desc = item_describe_gc(it, player_item_known(p, it),
+                        false, false, GC_NOM);
                 mvwaprintw(iwin->window, line, 1, attrs, " %-*s %c ",
-                          width - 6, item_desc,
+                          utf8_pad(item_desc, width - 6), item_desc,
                           player_item_is_equipped(p, it) ? '*' : ' ');
 
                 g_free(item_desc);
@@ -1346,7 +1347,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (show_account)
         {
             /* show the balance of the bank account */
-            stitle = g_strdup_printf("%s - %d gold on bank account",
+            stitle = g_strdup_printf(_("%s - %d gold on bank account"),
                                      title, p->bank_account);
 
             display_window_update_title(iwin, stitle);
@@ -1355,7 +1356,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         else if (show_weight)
         {
             /* show the weight of the inventory */
-            stitle = g_strdup_printf("%s - %s of %s carried",
+            stitle = g_strdup_printf(_("%s - %s of %s carried"),
                                      title, player_inv_weight(p),
                                      player_can_carry(p));
 
@@ -1532,24 +1533,24 @@ void display_config_autopickup(bool settings[IT_MAX])
     const int starty = (LINES - height) / 2;
     const int startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
-    display_window *cwin = display_window_new(startx, starty, width, height, "Configure auto pick-up");
+    display_window *cwin = display_window_new(startx, starty, width, height, _("Configure auto pick-up"));
 
-    mvwaprintw(cwin->window, 1,  2, CP_UI_FG, "Item types which will be picked up");
-    mvwaprintw(cwin->window, 2,  2, CP_UI_FG, "automatically are shown inverted. ");
+    mvwaprintw(cwin->window, 1,  2, CP_UI_FG, "%s", _("Item types which will be picked up"));
+    mvwaprintw(cwin->window, 2,  2, CP_UI_FG, "%s", _("automatically are shown inverted. "));
 
-    mvwaprintw(cwin->window, 4,  6, CP_UI_FG, "amulets");
-    mvwaprintw(cwin->window, 5,  6, CP_UI_FG, "ammunition");
-    mvwaprintw(cwin->window, 6,  6, CP_UI_FG, "armour");
-    mvwaprintw(cwin->window, 7,  6, CP_UI_FG, "books");
-    mvwaprintw(cwin->window, 8,  6, CP_UI_FG, "containers");
-    mvwaprintw(cwin->window, 9,  6, CP_UI_FG, "gems");
-    mvwaprintw(cwin->window, 4, 23, CP_UI_FG, "money");
-    mvwaprintw(cwin->window, 5, 23, CP_UI_FG, "potions");
-    mvwaprintw(cwin->window, 6, 23, CP_UI_FG, "rings");
-    mvwaprintw(cwin->window, 7, 23, CP_UI_FG, "scrolls");
-    mvwaprintw(cwin->window, 8, 23, CP_UI_FG, "weapons");
+    mvwaprintw(cwin->window, 4,  6, CP_UI_FG, "%s", _("amulets"));
+    mvwaprintw(cwin->window, 5,  6, CP_UI_FG, "%s", _("ammunition"));
+    mvwaprintw(cwin->window, 6,  6, CP_UI_FG, "%s", _("armour"));
+    mvwaprintw(cwin->window, 7,  6, CP_UI_FG, "%s", _("books"));
+    mvwaprintw(cwin->window, 8,  6, CP_UI_FG, "%s", _("containers"));
+    mvwaprintw(cwin->window, 9,  6, CP_UI_FG, "%s", _("gems"));
+    mvwaprintw(cwin->window, 4, 23, CP_UI_FG, "%s", _("money"));
+    mvwaprintw(cwin->window, 5, 23, CP_UI_FG, "%s", _("potions"));
+    mvwaprintw(cwin->window, 6, 23, CP_UI_FG, "%s", _("rings"));
+    mvwaprintw(cwin->window, 7, 23, CP_UI_FG, "%s", _("scrolls"));
+    mvwaprintw(cwin->window, 8, 23, CP_UI_FG, "%s", _("weapons"));
 
-    mvwaprintw(cwin->window, 11, 6, CP_UI_FG, "Type a symbol to toggle.");
+    mvwaprintw(cwin->window, 11, 4, CP_UI_FG, "%s", _("Type a symbol to toggle."));
 
     do
     {
@@ -1646,10 +1647,11 @@ spell *display_spell_select(const char *title, player *p)
             if (s.curr == pos) attrs = CP_UI_FG_REVERSE;
             else attrs = CP_UI_FG;
 
+            const char *sp_name = spell_name(sp);
             mvwaprintw(swin->window, pos, 1, attrs,
-                      " %3s - %-23s (Level %d) %2d ",
+                      " %3s - %-*s (Level %d) %2d ",
                       spell_code(sp),
-                      spell_name(sp),
+                      utf8_pad(sp_name, 23), sp_name,
                       spell_level(sp),
                       sp->knowledge);
         }
@@ -1698,7 +1700,7 @@ spell *display_spell_select(const char *title, player *p)
             if (s.curr == 1 && prev_key == 0 && sp->id == SP_ALT)
             {
                 char prompt[60];
-                g_snprintf(prompt, 80, "Really cast %s?", spell_name(sp));
+                g_snprintf(prompt, 60, _("Really cast %s?"), spell_name(sp));
                 if (!display_get_yesno(prompt, NULL, NULL, NULL))
                     sp = NULL;
             }
@@ -1806,7 +1808,7 @@ int display_get_count(const char *caption, int value)
     int basewidth = 8 + 5;
 
     /* choose a sane dialogue width */
-    int width = min(basewidth + strlen(caption), COLS - 4);
+    int width = min(basewidth + g_utf8_strlen(caption, -1), COLS - 4);
 
     GPtrArray *text = text_wrap(caption, width - basewidth, 0);
     int height = 2 + text->len;
@@ -2008,27 +2010,30 @@ char *display_get_string(const char *title, const char *caption, const char *val
         max_len = maxwidth - basewidth;
     }
 
-    if (basewidth + strlen(caption) + max_len > maxwidth)
+    const guint caption_len = g_utf8_strlen(caption, -1);
+
+    if (basewidth + caption_len + max_len > maxwidth)
     {
-        if (strlen(caption) + basewidth > maxwidth)
+        if (caption_len + basewidth > maxwidth)
         {
             width = maxwidth - basewidth;
         }
         else
         {
-            width = basewidth + max(strlen(caption), max_len);
+            width = basewidth + max(caption_len, max_len);
         }
     }
     else
     {
         /* input box fits on same line as caption */
-        width = basewidth + strlen(caption) + max_len + 1;
+        width = basewidth + caption_len + max_len + 1;
     }
 
     GPtrArray *text = text_wrap(caption, width - basewidth, 0);
 
     /* determine if the input box fits on the last line */
-    int box_start = 3 + strlen(g_ptr_array_index(text, text->len - 1));
+    int box_start = 3
+        + g_utf8_strlen(g_ptr_array_index(text, text->len - 1), -1);
     if (box_start + max_len + 2 > width)
         box_start = 2;
 
@@ -2043,8 +2048,9 @@ char *display_get_string(const char *title, const char *caption, const char *val
     for (guint line = 0; line < text->len; line++)
     {
         /* print text */
+        const char *tline = g_ptr_array_index(text, line);
         mvwaprintw(mwin->window, 1 + line, 1, CP_UI_FG,
-            " %-*s ", width - 4, (char *)g_ptr_array_index(text, line));
+            " %-*s ", utf8_pad(tline, width - 4), tline);
     }
 
     do
@@ -2185,17 +2191,17 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 
     /* default values */
     if (!yes)
-        yes = "Yes";
+        yes = _("Yes");
 
     if (!no)
-        no = "No";
+        no = _("No");
 
     /* determine text width, either defined by space available  for the window
      * or the length of question */
     guint text_width = min(COLS - 2 /* borders */
                      - (2 * margin) /* space outside window */
                      - (2 * padding), /* space between border and text */
-                     strlen(question));
+                     g_utf8_strlen(question, -1));
 
     /* broad windows are hard to read */
     if (text_width > 60)
@@ -2206,7 +2212,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
 
     /* Determine window width. Either defined by the length of the button
      * labels or width of the text */
-    guint width = max(strlen(yes) + strlen(no)
+    guint width = max(g_utf8_strlen(yes, -1) + g_utf8_strlen(no, -1)
                 + 2 /* borders */
                 + (4 * padding)  /* space between "button" border and label */
                 + margin, /* space between "buttons" */
@@ -2241,7 +2247,7 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
         else           attrs = CP_UI_HL_REVERSE;
 
         mvwaprintw(ywin->window, line + 2,
-                   width - margin - strlen(no) - (2 * padding),
+                   width - margin - g_utf8_strlen(no, -1) - (2 * padding),
                    attrs, "%*s%s%*s", padding, " ", no, padding, " ");
 
         wrefresh(ywin->window);
@@ -2344,7 +2350,7 @@ direction display_get_direction(const char *title, int *available)
         dirs = available;
     }
 
-    int width = max(9, strlen(title) + 4);
+    int width = max(9, g_utf8_strlen(title, -1) + 4);
 
     /* set startx and starty to something that makes sense */
     int startx = (min(MAP_MAX_X, COLS) / 2) - (width / 2);
@@ -3109,10 +3115,11 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
         guint maxlen;
 
         /* The title is padded by 6 additional characters */
-        if ((title != NULL) && (strlen(title) + 6 > strlen(msg)))
-            maxlen = strlen(title) + 6;
+        if ((title != NULL)
+                && (g_utf8_strlen(title, -1) + 6 > g_utf8_strlen(msg, -1)))
+            maxlen = g_utf8_strlen(title, -1) + 6;
         else
-            maxlen = strlen(msg);
+            maxlen = g_utf8_strlen(msg, -1);
 
         /* determine window width */
         if (maxlen > (max_width - 4))
@@ -3136,9 +3143,10 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     attr_t currattr = COLOURLESS;
     for (guint idx = 0; idx < text->len; idx++)
     {
+        const char *tline = g_ptr_array_index(text, idx);
         currattr = mvwcprintw(win->window,
             CP_UI_FG, currattr, UI_BG, idx + 1, 1, " %-*s ",
-            width - 4, g_ptr_array_index(text, idx));
+            utf8_pad(tline, width - 4), tline);
     }
 
     /* clean up */
@@ -3340,8 +3348,8 @@ static void display_inventory_help(GPtrArray *callbacks)
     if (callbacks == NULL || callbacks->len == 0)
     {
         /* no callbacks available => select item with ENTER */
-        g_string_append(help, "Select the desired item with ENTER.\n"
-                        "You may abort by pressing the escape key.");
+        g_string_append(help, _("Select the desired item with ENTER.\n"
+                        "You may abort by pressing the escape key."));
     }
     else
     {
@@ -3354,7 +3362,7 @@ static void display_inventory_help(GPtrArray *callbacks)
             if (!cb->active) continue;
 
             char *sdesc = str_strip(cb->description);
-            size_t desclen = strlen(sdesc);
+            size_t desclen = g_utf8_strlen(sdesc, -1);
             if (desclen > maxlen)
                 maxlen = desclen;
             g_free(sdesc);
@@ -3363,7 +3371,7 @@ static void display_inventory_help(GPtrArray *callbacks)
         if (maxlen == 0)
         {
             /* no active callbacks */
-            g_string_append(help, "There are no options available for the selected item.");
+            g_string_append(help, _("There are no options available for the selected item."));
         }
         else
         {
@@ -3382,7 +3390,7 @@ static void display_inventory_help(GPtrArray *callbacks)
         }
     }
 
-    display_show_message("Help", help->str, maxlen + 2);
+    display_show_message(_("Help"), help->str, maxlen + 2);
     g_string_free(help, true);
 }
 
@@ -3530,8 +3538,12 @@ static void display_window_update_title(display_window *dwin, const char *title)
          * minus the space required for the left corner (3)
          * minus the space required for the right corner
          *       and the scroll marker (7)
+         * truncate at a character boundary, not mid-sequence
          */
-        dwin->title = g_strndup(title, dwin->width - 10);
+        const glong tmax = MIN(g_utf8_strlen(title, -1),
+                               (glong)(dwin->width - 10));
+        dwin->title = g_strndup(title,
+                g_utf8_offset_to_pointer(title, tmax) - title);
 
         /* make sure the first letter of the window title is upper case */
         dwin->title[0] = g_ascii_toupper(dwin->title[0]);
@@ -3607,7 +3619,7 @@ static display_window *display_item_details(guint x1, guint y1, guint width,
     char *msg = item_detailed_description(it, known, shop);
 
     /* the pop-up window created by display_popup */
-    display_window *idpop = display_popup(x1, y1, width, "Item details", msg, 0);
+    display_window *idpop = display_popup(x1, y1, width, _("Item details"), msg, 0);
 
     /* tidy up */
     g_free(msg);

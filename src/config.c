@@ -1,6 +1,6 @@
 /*
  * config.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
+#include <glib/gi18n.h>
 
 #include "config.h"
 #include "display.h"
@@ -358,22 +359,22 @@ char compose_gender(const int gender)
 
 void configure_defaults(const char *inifile)
 {
-    const char *undef = "not defined";
+    const char *undef = _("not defined");
     const char *menu =
-        "\n"
-        "  `KEY`a`end`) Character name         - %s\n"
-        "  `KEY`b`end`) Character gender       - %s\n"
-        "  `KEY`c`end`) Character stats        - %s\n"
-        "  `KEY`d`end`) Configure auto-pickup  - %s\n"
-        "  `KEY`e`end`) Autosave on map change - `EMPH`%s`end`\n"
-        "  `KEY`f`end`) Colour scheme          - `EMPH`%s`end`\n"
+        _("\n"
+          "  `KEY`a`end`) Character name         - %s\n"
+          "  `KEY`b`end`) Character gender       - %s\n"
+          "  `KEY`c`end`) Character stats        - %s\n"
+          "  `KEY`d`end`) Configure auto-pickup  - %s\n"
+          "  `KEY`e`end`) Autosave on map change - `EMPH`%s`end`\n"
+          "  `KEY`f`end`) Colour scheme          - `EMPH`%s`end`\n"
 #ifdef SDLPDCURSES
-        "  `KEY`g`end`) Configure font size    - `EMPH`%d`end`\n"
-        "  `KEY`h`end`) Full screen mode       - `EMPH`%s`end`\n"
+          "  `KEY`g`end`) Configure font size    - `EMPH`%d`end`\n"
+          "  `KEY`h`end`) Full screen mode       - `EMPH`%s`end`\n"
 #endif
-        "\n"
-        "Clear values with `KEY`A`end`-`KEY`F`end`. "
-        "Return to the main menu with `KEY`ESC`end`.\n";
+          "\n"
+          "Clear values with `KEY`A`end`-`KEY`F`end`. "
+          "Return to the main menu with `KEY`ESC`end`.\n");
 
     bool leaving = false;
 
@@ -386,11 +387,11 @@ void configure_defaults(const char *inifile)
         /* gender */
         char *gbuf = config.gender
             ? g_strdup_printf("`EMPH`%s`end`",
-                    player_sex_str[parse_gender(config.gender[0])])
+                    _(player_sex_str[parse_gender(config.gender[0])]))
             : NULL;
         /* stats */
         char *sbuf = (config.stats && strlen(config.stats) > 0)
-            ? g_strdup_printf("`EMPH`%s`end`", player_bonus_stat_desc[config.stats[0] - 'a'])
+            ? g_strdup_printf("`EMPH`%s`end`", _(player_bonus_stat_desc[config.stats[0] - 'a']))
             : NULL;
         /* auto-pickup */
         bool autopickup[IT_MAX];
@@ -408,11 +409,11 @@ void configure_defaults(const char *inifile)
                 gbuf ? gbuf : undef,
                 sbuf ? sbuf : undef,
                 abuf ? abuf : undef,
-                config.no_autosave ? "no" : "yes",
+                config.no_autosave ? _("no") : _("yes"),
                 lucss
 #ifdef SDLPDCURSES
                 , config.font_size
-                , config.fullscreen ? "yes" : "no"
+                , config.fullscreen ? _("yes") : _("no")
 #endif
                 );
 
@@ -423,7 +424,7 @@ void configure_defaults(const char *inifile)
         g_free(lucss);
 
         display_window *cwin = display_popup(COLS / 2 - 34, LINES / 2 - 6, 68,
-                "Configure game defaults", msg, 30);
+                _("Configure game defaults"), msg, 30);
         g_free(msg);
 
         int res = display_getch(cwin->window);
@@ -432,8 +433,8 @@ void configure_defaults(const char *inifile)
             /* default name */
             case 'a':
             {
-                char *name = display_get_string("Choose default name",
-                        "By what name shall all your charactes be called?",
+                char *name = display_get_string(_("Choose default name"),
+                        _("By what name shall all your characters be called?"),
                         config.name, 45);
                 if (name)
                 {
@@ -452,9 +453,9 @@ void configure_defaults(const char *inifile)
             /* default gender */
             case 'b':
             {
-                int gender = (display_get_yesno("Shall your future characters be "
-                            "male or female?", "Choose default gender",
-                            "Female", "Male") == true)
+                int gender = (display_get_yesno(_("Shall your future characters be "
+                            "male or female?"), _("Choose default gender"),
+                            _("Female"), _("Male")) == true)
                     ? PS_FEMALE : PS_MALE;
 
                 if (config.gender) g_free(config.gender);
@@ -514,7 +515,7 @@ void configure_defaults(const char *inifile)
             /* colour scheme */
             case 'f':
                 {
-                    GString *csmsg = g_string_new("Select UI colour scheme:\n\n");
+                    GString *csmsg = g_string_new(_("Select UI colour scheme:\n\n"));
                     for (int i = 0; i < UI_COLOUR_SCHEME_MAX; i++)
                     {
                         char *lucss = g_ascii_strdown(ui_colour_scheme_string(i), -1);
@@ -522,7 +523,7 @@ void configure_defaults(const char *inifile)
                         g_free(lucss);
                     }
 
-                    char ret = display_show_message("UI colours", csmsg->str, 0);
+                    char ret = display_show_message(_("UI colours"), csmsg->str, 0);
 
                     if (ret >= 'a' && ret < 'a' + UI_COLOUR_SCHEME_MAX)
                     {
@@ -544,8 +545,8 @@ void configure_defaults(const char *inifile)
             case 'g':
                 {
                     char *cval = g_strdup_printf("%d", config.font_size);
-                    char *nval = display_get_string("Default font size",
-                        "Font size (6 - 48): ", cval, 2);
+                    char *nval = display_get_string(_("Default font size"),
+                        _("Font size (6 - 48): "), cval, 2);
                     g_free(cval);
 
                     if (nval)
@@ -560,7 +561,7 @@ void configure_defaults(const char *inifile)
                         }
                         else
                         {
-                            display_show_message("Error", "Invalid font size", 0);
+                            display_show_message(_("Error"), _("Invalid font size"), 0);
                         }
                     }
                 }

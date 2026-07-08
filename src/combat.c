@@ -1,6 +1,6 @@
 /*
  * combat.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,6 +17,8 @@
  */
 
 #include <string.h>
+
+#include <glib/gi18n.h>
 
 #include "combat.h"
 #include "extdefs.h"
@@ -170,8 +172,8 @@ int damage_calc(struct player *p, struct monster *m)
             if (chance(5) && monster_flags(m, HEAD)
                     && !monster_flags(m, NOBEHEAD))
             {
-                log_add_entry(nlarn->log, "You behead the %s with your Vorpal Blade!",
-                              monster_get_name(m));
+                log_add_entry(nlarn->log, _("You behead %s with your Vorpal Blade!"),
+                              monster_get_name_art(m, ART_DEF, GC_ACC, false));
 
                 damage = INSTANT_KILL;
             }

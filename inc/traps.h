@@ -1,6 +1,6 @@
 /*
  * traps.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,8 +19,11 @@
 #ifndef TRAPS_H
 #define TRAPS_H
 
+#include <libintl.h>
+
 #include "colours.h"
 #include "enumFactory.h"
+#include "grammar.h"
 #include "monsters.h"
 
 #define TRAP_TYPE_ENUM(TRAP_TYPE) \
@@ -90,9 +93,24 @@ guint trap_disarm(struct player *p);
 #define trap_chance(trap) (traps[(trap)].chance)
 #define trap_effect_chance(trap) (traps[(trap)].effect_chance)
 #define trap_damage(trap) (traps[(trap)].damage)
-#define trap_description(trap) (traps[(trap)].description)
-#define trap_p_message(trap) (traps[(trap)].p_message)
-#define trap_e_message(trap) (traps[(trap)].e_message)
-#define trap_m_message(trap) (traps[(trap)].m_message)
+/* translate a possibly NULL string from the trap table */
+static inline const char *trap_gettext(const char *msg)
+{
+    return msg ? gettext(msg) : NULL;
+}
+
+/* the translated description, which may carry grammar metadata */
+#define trap_description_raw(trap) (trap_gettext(traps[(trap)].description))
+
+/* the description as a nominative phrase; other cases and articles are
+   rendered with noun_phrase(trap_description_raw(trap), ...) */
+static inline const char *trap_description(trap_t trap)
+{
+    const char *desc = trap_description_raw(trap);
+    return desc ? noun_phrase(desc, ART_NONE, GC_NOM, false, false) : NULL;
+}
+#define trap_p_message(trap) (trap_gettext(traps[(trap)].p_message))
+#define trap_e_message(trap) (trap_gettext(traps[(trap)].e_message))
+#define trap_m_message(trap) (trap_gettext(traps[(trap)].m_message))
 
 #endif

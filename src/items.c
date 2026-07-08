@@ -19,6 +19,8 @@
 #include <glib.h>
 #include <string.h>
 
+#include <glib/gi18n.h>
+
 #include "amulets.h"
 #include "armour.h"
 #include "colours.h"
@@ -45,39 +47,39 @@ const item_type_data item_data[IT_MAX] =
 {
     /* item_t       name_sg       name_pl        IMG   max_id           op bl co eq us st id de */
     { IT_NONE,      "",           "",            ' ',  0,               0, 0, 0, 0, 0, 0, 0, 0, },
-    { IT_AMULET,    "amulet",     "amulets",     '"',  AM_LARN,         0, 1, 0, 1, 0, 0, 1, 0, },
-    { IT_AMMO,      "ammunition", "ammunition",  '\'', AMT_MAX,         1, 1, 1, 1, 0, 1, 1, 1, },
-    { IT_ARMOUR,    "armour",     "armour",      '[',  AT_MAX,          1, 1, 1, 1, 0, 0, 1, 0, },
-    { IT_BOOK,      "book",       "books",       '+',  SP_MAX,          0, 1, 1, 0, 1, 1, 1, 1, },
-    { IT_CONTAINER, "container",  "containers",  ']',  CT_MAX,          0, 0, 1, 0, 0, 0, 0, 0, },
-    { IT_GEM,       "gem",        "gems",        '*',  GT_MAX,          0, 0, 0, 0, 0, 1, 0, 1, },
-    { IT_GOLD,      "coin",       "coins",       '$',  0,               0, 0, 0, 0, 0, 1, 0, 1, },
-    { IT_POTION,    "potion",     "potions",     '!',  PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, 1, },
-    { IT_RING,      "ring",       "rings",       '=',  RT_MAX,          1, 1, 1, 1, 0, 0, 1, 1, },
-    { IT_SCROLL,    "scroll",     "scrolls",     '?',  ST_MAX,          0, 1, 1, 0, 1, 1, 1, 1, },
-    { IT_WEAPON,    "weapon",     "weapons",     '(',  WT_MAX,          1, 1, 1, 1, 0, 0, 1, 0, },
+    { IT_AMULET,    N_("amulet"),     N_("amulets"),     '"',  AM_LARN,         0, 1, 0, 1, 0, 0, 1, 0, },
+    { IT_AMMO,      N_("ammunition"), N_("ammunition"),  '\'', AMT_MAX,         1, 1, 1, 1, 0, 1, 1, 1, },
+    { IT_ARMOUR,    N_("armour"),     N_("armour"),      '[',  AT_MAX,          1, 1, 1, 1, 0, 0, 1, 0, },
+    { IT_BOOK,      N_("book"),       N_("books"),       '+',  SP_MAX,          0, 1, 1, 0, 1, 1, 1, 1, },
+    { IT_CONTAINER, N_("container"),  N_("containers"),  ']',  CT_MAX,          0, 0, 1, 0, 0, 0, 0, 0, },
+    { IT_GEM,       N_("gem"),        N_("gems"),        '*',  GT_MAX,          0, 0, 0, 0, 0, 1, 0, 1, },
+    { IT_GOLD,      N_("coin"),       N_("coins"),       '$',  0,               0, 0, 0, 0, 0, 1, 0, 1, },
+    { IT_POTION,    N_("potion"),     N_("potions"),     '!',  PO_CURE_DIANTHR, 0, 1, 1, 0, 1, 1, 1, 1, },
+    { IT_RING,      N_("ring"),       N_("rings"),       '=',  RT_MAX,          1, 1, 1, 1, 0, 0, 1, 1, },
+    { IT_SCROLL,    N_("scroll"),     N_("scrolls"),     '?',  ST_MAX,          0, 1, 1, 0, 1, 1, 1, 1, },
+    { IT_WEAPON,    N_("weapon"),     N_("weapons"),     '(',  WT_MAX,          1, 1, 1, 1, 0, 0, 1, 0, },
 };
 
 const item_material_data item_materials[IM_MAX] =
 {
     /* type           name           adjective   colour              frag */
-    { IM_PAPER,       "paper",       "papier",   BUTTER,             20, },
-    { IM_CLOTH,       "cloth",       "cloth",    REGENT_GREY,        15, },
-    { IM_LEATHER,     "leather",     "leathern", AUTUMN_LEAF_ORANGE, 10, },
-    { IM_WOOD,        "wood",        "wooden",   AUTUMN_LEAF_BROWN,   5, },
-    { IM_BONE,        "bone",        "osseous",  ASH_GREY,           15, },
-    { IM_DRAGON_HIDE, "dragon hide", "scabby",   GREEN_HAZE,          2, },
-    { IM_LEAD,        "lead",        "leady",    DOVE_GREY,          15, },
-    { IM_IRON,        "iron",        "irony",    IRON,                3, },
-    { IM_STEEL,       "steel",       "steely",   FOG,                 1, },
-    { IM_COPPER,      "copper",      "cupreous", COPPER,              8, },
-    { IM_SILVER,      "silver",      "silvery",  SILVER,              7, },
-    { IM_GOLD,        "gold",        "golden",   PIRATE_GOLD,         6, },
-    { IM_PLATINUM,    "platinum",    "platinum", PLATINUM,            3, },
-    { IM_MITHRIL,     "mithril",     "mithrial", GREY93,              0, },
-    { IM_GLASS,       "glass",       "vitreous", CHALKY_BLUE_WHITE,  50, },
-    { IM_STONE,       "stone",       "stony",    GRANITE,            20, },
-    { IM_GEMSTONE,    "gemstone",    "gemstone", LUMINOUS_RED,        0, },
+    { IM_PAPER,       NC_("material", "paper"),       NC_("material adjective", "papier"),   BUTTER,             20, },
+    { IM_CLOTH,       NC_("material", "cloth"),       NC_("material adjective", "cloth"),    REGENT_GREY,        15, },
+    { IM_LEATHER,     NC_("material", "leather"),     NC_("material adjective", "leathern"), AUTUMN_LEAF_ORANGE, 10, },
+    { IM_WOOD,        NC_("material", "wood"),        NC_("material adjective", "wooden"),   AUTUMN_LEAF_BROWN,   5, },
+    { IM_BONE,        NC_("material", "bone"),        NC_("material adjective", "osseous"),  ASH_GREY,           15, },
+    { IM_DRAGON_HIDE, NC_("material", "dragon hide"), NC_("material adjective", "scabby"),   GREEN_HAZE,          2, },
+    { IM_LEAD,        NC_("material", "lead"),        NC_("material adjective", "leady"),    DOVE_GREY,          15, },
+    { IM_IRON,        NC_("material", "iron"),        NC_("material adjective", "irony"),    IRON,                3, },
+    { IM_STEEL,       NC_("material", "steel"),       NC_("material adjective", "steely"),   FOG,                 1, },
+    { IM_COPPER,      NC_("material", "copper"),      NC_("material adjective", "cupreous"), COPPER,              8, },
+    { IM_SILVER,      NC_("material", "silver"),      NC_("material adjective", "silvery"),  SILVER,              7, },
+    { IM_GOLD,        NC_("material", "gold"),        NC_("material adjective", "golden"),   PIRATE_GOLD,         6, },
+    { IM_PLATINUM,    NC_("material", "platinum"),    NC_("material adjective", "platinum"), PLATINUM,            3, },
+    { IM_MITHRIL,     NC_("material", "mithril"),     NC_("material adjective", "mithrial"), GREY93,              0, },
+    { IM_GLASS,       NC_("material", "glass"),       NC_("material adjective", "vitreous"), CHALKY_BLUE_WHITE,  50, },
+    { IM_STONE,       NC_("material", "stone"),       NC_("material adjective", "stony"),    GRANITE,            20, },
+    { IM_GEMSTONE,    NC_("material", "gemstone"),    NC_("material adjective", "gemstone"), LUMINOUS_RED,        0, },
 };
 
 /* functions */
@@ -673,7 +675,20 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, bool force_id)
     return order;
 }
 
-gchar *item_describe(item *it, bool known, bool singular, bool definite)
+const char *item_name_sg(item_t type)
+{
+    return noun_phrase(gettext(item_data[type].name_sg),
+                       ART_NONE, GC_NOM, false, false);
+}
+
+const char *item_name_pl(item_t type)
+{
+    return noun_phrase(gettext(item_data[type].name_pl),
+                       ART_NONE, GC_NOM, true, false);
+}
+
+gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
+                        grammar_case gcase)
 {
     GString *desc = g_string_new(NULL);
 
@@ -687,82 +702,91 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
     if (nlarn->p && player_effect_get(nlarn->p, ET_BLINDNESS))
     {
         struct item_type_data itd = item_data[it->type];
-        g_string_append_printf(desc, "%s %s",
-            it->count == 1 ? a_an(itd.name_sg) : "some",
-            it->count == 1 ? itd.name_sg : itd.name_pl);
+        if (it->count == 1)
+            g_string_append(desc, noun_phrase(_(itd.name_sg),
+                    ART_INDEF, gcase, false, false));
+        else
+            g_string_append_printf(desc, _("some %s"),
+                    noun_phrase(_(itd.name_pl), ART_NONE, gcase, true, false));
 
         return g_string_free(desc, false);
     }
 
-    /* collect additional information */
+    /* Collect the item's status attributes. These are placed between
+       article and noun and thus may be translated as declinable
+       adjectives carrying ending placeholders (see grammar.h). */
     char *add_info = NULL;
     char **add_infos = strv_new();
     if (it->blessed_known)
     {
-        if (it->blessed) strv_append(&add_infos, "blessed");
+        if (it->blessed) strv_append(&add_infos, C_("item status", "blessed"));
         else if (it->cursed)
         {
             if (it->type == IT_CONTAINER)
-                strv_append(&add_infos, "trapped");
+                strv_append(&add_infos, C_("item status", "trapped"));
             else
-                strv_append(&add_infos, "cursed");
+                strv_append(&add_infos, C_("item status", "cursed"));
         }
-        else strv_append(&add_infos, "uncursed");
+        else strv_append(&add_infos, C_("item status", "uncursed"));
     }
 
-    if (it->burnt == 1) strv_append(&add_infos, "burnt");
-    if (it->burnt == 2) strv_append(&add_infos, "very burnt");
-    if (it->corroded == 1) strv_append(&add_infos, "corroded");
-    if (it->corroded == 2) strv_append(&add_infos, "very corroded");
-    if (it->rusty == 1) strv_append(&add_infos, "rusty");
-    if (it->rusty == 2) strv_append(&add_infos, "very rusty");
+    if (it->burnt == 1) strv_append(&add_infos, C_("item status", "burnt"));
+    if (it->burnt == 2) strv_append(&add_infos, C_("item status", "very burnt"));
+    if (it->corroded == 1) strv_append(&add_infos, C_("item status", "corroded"));
+    if (it->corroded == 2) strv_append(&add_infos, C_("item status", "very corroded"));
+    if (it->rusty == 1) strv_append(&add_infos, C_("item status", "rusty"));
+    if (it->rusty == 2) strv_append(&add_infos, C_("item status", "very rusty"));
 
     if (g_strv_length(add_infos))
         add_info = g_strjoinv(", ", add_infos);
 
     g_strfreev(add_infos);
 
+    /* append the bonus after the noun phrase has been built */
+    bool show_bonus = false;
+
     switch (it->type)
     {
     case IT_AMULET:
         if (known)
-            g_string_append_printf(desc, "%s of %s",
-                    amulet_type(it) == AMULET ? "amulet" : "talisman",
-                    item_desc_get(it, known));
+            g_string_append_printf(desc, amulet_type(it) == AMULET
+                        ? _("amulet of %s") : _("talisman of %s"),
+                    noun_genitive_attribute(item_desc_get(it, known)));
         else
-            g_string_append_printf(desc, "%s amulet", item_desc_get(it, known));
+            g_string_append_printf(desc, _("%s amulet"), item_desc_get(it, known));
         break;
 
     case IT_AMMO:
-        g_string_append_printf(desc, "%s%s", item_desc_get(it, known),
-                               (!singular && it->count > 1) ? "s" : "");
-
-        if (it->bonus_known)
-        {
-            g_string_append_printf(desc, " %+d", it->bonus);
-        }
+    {
+        const char *name = item_desc_get(it, known);
+        /* nouns with grammar metadata are pluralised by noun_phrase_adj()
+           below; only English names need the appended "s" here */
+        if (!singular && it->count > 1 && !noun_has_class(name))
+            g_string_append_printf(desc, "%ss", name);
+        else
+            g_string_append(desc, name);
+        show_bonus = it->bonus_known;
         break;
+    }
 
     case IT_ARMOUR:
         g_string_append(desc, item_desc_get(it, known));
-
-        if (it->bonus_known)
-        {
-            g_string_append_printf(desc, " %+d", it->bonus);
-        }
-
+        show_bonus = it->bonus_known;
         break;
 
     case IT_BOOK:
+        /* a book is titled after the spell it teaches:
+           "das Buch des Schutzes" */
         if (known)
         {
-            g_string_append_printf(desc, "book%s of %s",
-                                   (!singular && it->count > 1) ? "s" : "",
-                                   item_desc_get(it, known));
+            g_string_append_printf(desc, (!singular && it->count > 1)
+                        ? _("books of %s") : _("book of %s"),
+                    noun_genitive_attribute(item_desc_get(it, known)));
         }
         else
-            g_string_append_printf(desc, "%s book%s", item_desc_get(it, known),
-                                   (!singular && it->count > 1) ? "s" : "");
+            g_string_append_printf(desc, (!singular && it->count > 1)
+                        ? _("%s books") : _("%s book"),
+                    item_desc_get(it, known));
         break;
 
     case IT_CONTAINER:
@@ -770,51 +794,70 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
         break;
 
     case IT_GEM:
-        g_string_append_printf(desc, "%d carats %s", gem_size(it), item_desc_get(it, known));
+    {
+        /* the size in carats is rendered as an attributive adjective
+           ("a 2 carats diamond", "ein 2-karätiger Diamant"), placed
+           after the status attributes, closest to the noun */
+        gchar *carats = g_strdup_printf(ngettext("%d carat", "%d carats",
+                    gem_size(it)), gem_size(it));
+
+        if (add_info != NULL)
+        {
+            gchar *combined = g_strconcat(add_info, ", ", carats, NULL);
+            g_free(add_info);
+            g_free(carats);
+            add_info = combined;
+        }
+        else
+            add_info = carats;
+
+        g_string_append(desc, item_desc_get(it, known));
         break;
+    }
 
     case IT_GOLD:
-        g_string_append_printf(desc, "gold piece%s", it->count > 1 ? "s" : "");
+        g_string_append(desc, it->count > 1 ? _("gold pieces") : _("gold piece"));
         break;
 
     case IT_POTION:
         if (known)
         {
-            g_string_append_printf(desc, "potion%s of %s",
-                                   (!singular && it->count > 1) ? "s" : "",
+            g_string_append_printf(desc, (!singular && it->count > 1)
+                                       ? _("potions of %s") : _("potion of %s"),
                                    item_desc_get(it, known));
         }
         else
-            g_string_append_printf(desc, "%s potion%s", item_desc_get(it, known),
-                                   (!singular && it->count > 1) ? "s" : "");
+            g_string_append_printf(desc, (!singular && it->count > 1)
+                                       ? _("%s potions") : _("%s potion"),
+                                   item_desc_get(it, known));
         break;
 
     case IT_RING:
         if (known)
-            g_string_append_printf(desc, "ring of %s", item_desc_get(it, known));
+            g_string_append_printf(desc, _("ring of %s"),
+                    noun_genitive_attribute(item_desc_get(it, known)));
         else
-            g_string_append_printf(desc, "%s ring", item_desc_get(it, known));
+            g_string_append_printf(desc, _("%s ring"), item_desc_get(it, known));
 
         /* display bonus if it is known */
-        if (it->bonus_known)
-            g_string_append_printf(desc, " %+d", it->bonus);
+        show_bonus = it->bonus_known;
         break;
 
     case IT_SCROLL:
         if (known)
         {
-            g_string_append_printf(desc, "scroll%s of %s",
-                    (!singular && it->count > 1) ? "s" : "",
-                    item_desc_get(it, known));
+            g_string_append_printf(desc, (!singular && it->count > 1)
+                        ? _("scrolls of %s") : _("scroll of %s"),
+                    noun_genitive_attribute(item_desc_get(it, known)));
         }
         else
         {
             if (strcmp(item_desc_get(it, known), "") == 0)
-                g_string_append_printf(desc, "unlabelled scroll%s",
-                        (!singular && it->count > 1) ? "s" : "");
+                g_string_append(desc, (!singular && it->count > 1)
+                        ? _("unlabelled scrolls") : _("unlabelled scroll"));
             else
-                g_string_append_printf(desc, "scroll%s labelled %s",
-                        (!singular && it->count > 1) ? "s" : "",
+                g_string_append_printf(desc, (!singular && it->count > 1)
+                            ? _("scrolls labelled %s") : _("scroll labelled %s"),
                         item_desc_get(it, known));
         }
         break;
@@ -822,9 +865,9 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
     case IT_WEAPON:
         if (weapon_is_unique(it))
         {
-            g_string_append_printf(desc, "%s%s",
-                                   weapon_needs_article(it) ? "the " : "",
-                                   item_desc_get(it, known));
+            g_string_append(desc, noun_phrase(item_desc_get(it, known),
+                    weapon_needs_article(it) ? ART_DEF : ART_NONE,
+                    gcase, false, false));
 
             if (it->bonus_known || add_info != NULL)
             {
@@ -832,8 +875,11 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
                 {
                     if (add_info != NULL)
                     {
-                        /* bonus and additional information */
-                        g_string_append_printf(desc, " (%+d, %s)", it->bonus, add_info);
+                        /* bonus and additional information; the status
+                           attributes stand alone here and thus use
+                           their positive forms */
+                        g_string_append_printf(desc, " (%+d, %s)", it->bonus,
+                                adjective_positive(add_info));
                     }
                     else
                     {
@@ -844,16 +890,15 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
                 else
                 {
                     /* additional information only */
-                    g_string_append_printf(desc, " (%s)", add_info);
+                    g_string_append_printf(desc, " (%s)",
+                            adjective_positive(add_info));
                 }
             }
         }
         else
         {
             g_string_append(desc, item_desc_get(it, known));
-
-            if (it->bonus_known)
-                g_string_append_printf(desc, " %+d", it->bonus);
+            show_bonus = it->bonus_known;
         }
         break;
 
@@ -861,33 +906,73 @@ gchar *item_describe(item *it, bool known, bool singular, bool definite)
         break;
     }
 
-    if (it->notes)
-    {
-        g_string_append_printf(desc, " (%s)",
-                               (strlen(it->notes) > 5 ? "noted" : it->notes));
-    }
-
-    /* prepend additional information unless the item is a unique weapon */
+    /* build the noun phrase unless the item is a unique weapon,
+       which received its article in the type switch above */
     if (!(it->type == IT_WEAPON && weapon_is_unique(it)))
     {
-        if (add_info != NULL)
-        {
-            g_string_prepend_c(desc, ' ');
-            g_string_prepend(desc, add_info);
-        }
+        bool plural = (it->count > 1) && !singular;
 
-        /* prepend count or article */
-        gchar first_char = desc->str[0];
-        g_string_prepend_c(desc, ' ');
-
-        if ((it->count == 1) || singular)
+        if (noun_has_class(desc->str))
         {
-            g_string_prepend(desc, (const char *)(definite ? "the" : a_an(&first_char)));
+            /* The description carries grammar metadata: build the phrase
+               with the status attributes as declined adjectives between
+               article and noun. */
+            GString *phrase = g_string_new(NULL);
+
+            if (plural)
+            {
+                g_string_append_printf(phrase, "%s %s", int2str(it->count),
+                        noun_phrase_adj(desc->str, add_info,
+                            ART_NONE, gcase, true, false));
+            }
+            else
+            {
+                g_string_append(phrase, noun_phrase_adj(desc->str, add_info,
+                        definite ? ART_DEF : ART_INDEF, gcase, false, false));
+            }
+
+            if (show_bonus)
+                g_string_append_printf(phrase, " %+d", it->bonus);
+
+            g_string_free(desc, true);
+            desc = phrase;
         }
         else
         {
-            g_string_prepend(desc, int2str(it->count));
+            /* English-style assembly: adjectives between article and noun */
+            if (show_bonus)
+                g_string_append_printf(desc, " %+d", it->bonus);
+
+            if (add_info != NULL)
+            {
+                g_string_prepend_c(desc, ' ');
+                g_string_prepend(desc, adjective_positive(add_info));
+            }
+
+            /* prepend count or article */
+            gchar first_char = desc->str[0];
+            g_string_prepend_c(desc, ' ');
+
+            if (!plural)
+            {
+                g_string_prepend(desc, (const char *)(definite
+                            ? _("the") : a_an(&first_char)));
+            }
+            else
+            {
+                g_string_prepend(desc, int2str(it->count));
+            }
         }
+    }
+    else if (show_bonus)
+    {
+        g_string_append_printf(desc, " %+d", it->bonus);
+    }
+
+    if (it->notes)
+    {
+        g_string_append_printf(desc, " (%s)",
+                               (strlen(it->notes) > 5 ? _("noted") : it->notes));
     }
 
     /* free the additional information */
@@ -1325,6 +1410,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
     bool destroyed = false;
     const char *erosion_desc = NULL;
     gchar *item_desc = NULL;
+    bool single = false;
 
     g_assert(it != NULL);
 
@@ -1336,11 +1422,13 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
     if (!material_affected(item_material(it), iet))
         return (it);
 
+    single = (it->count == 1);
+
     if (visible)
     {
         /* prepare item description before it has been affected */
-        item_desc = item_describe(it, player_item_known(nlarn->p, it),
-                                  (it->count == 1), true);
+        item_desc = item_describe_gc(it, player_item_known(nlarn->p, it),
+                                     single, true, GC_NOM);
 
         item_desc[0] = g_ascii_toupper(item_desc[0]);
     }
@@ -1350,8 +1438,8 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
     {
         if (visible)
         {
-            log_add_entry(nlarn->log, "%s resist%s.", item_desc,
-                          (it->count == 1) ? "s" : "");
+            log_add_entry(nlarn->log, single
+                          ? _("%s resists.") : _("%s resist."), item_desc);
 
             g_free(item_desc);
             it->blessed_known = true;
@@ -1364,7 +1452,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
     case IET_BURN:
         if (it->type == IT_POTION)
         {
-            erosion_desc = "shatter";
+            erosion_desc = single ? _("%s shatters.") : _("%s shatter.");
             destroyed = true;
         }
         else if (item_material(it) == IM_GLASS)
@@ -1374,7 +1462,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
         else
         {
             it->burnt++;
-            erosion_desc = "burn";
+            erosion_desc = single ? _("%s burns.") : _("%s burn.");
 
             if (it->burnt == 3) destroyed = true;
         }
@@ -1382,14 +1470,14 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
 
     case IET_CORRODE:
         it->corroded++;
-        erosion_desc = "corrode";
+        erosion_desc = single ? _("%s corrodes.") : _("%s corrode.");
 
         if (it->corroded == 3) destroyed = true;
         break;
 
     case IET_RUST:
         it->rusty++;
-        erosion_desc = "rust";
+        erosion_desc = single ? _("%s rusts.") : _("%s rust.");
 
         /* it's been very rusty already -> destroy */
         if (it->rusty == 3) destroyed = true;
@@ -1403,8 +1491,7 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
     if (erosion_desc != NULL && visible)
     {
         /* items has been eroded, describe the event if it is visible */
-        log_add_entry(nlarn->log, "%s %s%s.", item_desc,
-                      erosion_desc, (it->count == 1) ? "s" : "");
+        log_add_entry(nlarn->log, erosion_desc, item_desc);
     }
 
     if (destroyed)
@@ -1413,8 +1500,9 @@ item *item_erode(inventory **inv, item *it, item_erosion_type iet, bool visible)
         if (visible)
         {
             /* describe the event if the item was visible */
-            log_add_entry(nlarn->log, "%s %s destroyed.", item_desc,
-                          is_are(it->count));
+            log_add_entry(nlarn->log, single
+                          ? _("%s is destroyed.") : _("%s are destroyed."),
+                          item_desc);
         }
 
         if (inv != NULL)
@@ -1510,19 +1598,19 @@ char *item_detailed_description(item *it, bool known, bool shop)
     switch (it->type)
     {
     case IT_AMMO:
-        g_string_append_printf(desc, "Ammunition for %ss\n",
-                               ammo_class_name[ammo_class(it)]);
+        g_string_append_printf(desc, _("Ammunition for %s\n"),
+                               noun_plural(_(ammo_class_name[ammo_class(it)])));
 
         if (it->bonus_known)
         {
-            g_string_append_printf(desc, "Damage:   +%d\n"
-                                   "Accuracy: +%d\n",
+            g_string_append_printf(desc, _("Damage:   +%d\n"
+                                   "Accuracy: +%d\n"),
                                    ammo_damage(it), ammo_accuracy(it));
         }
         else
         {
-            g_string_append_printf(desc, "Base damage: +%d\n"
-                                   "Base accuracy: +%d\n",
+            g_string_append_printf(desc, _("Base damage: +%d\n"
+                                   "Base accuracy: +%d\n"),
                                    ammo_base_damage(it), ammo_base_accuracy(it));
         }
 
@@ -1532,7 +1620,7 @@ char *item_detailed_description(item *it, bool known, bool shop)
         if (known)
         {
             gchar *stdesc = spell_desc_by_id(it->id);
-            g_string_append_printf(desc, "%s\nSpell level: %d\n",
+            g_string_append_printf(desc, _("%s\nSpell level: %d\n"),
                     stdesc, spell_level_by_id(it->id));
             g_free(stdesc);
         }
@@ -1544,19 +1632,19 @@ char *item_detailed_description(item *it, bool known, bool shop)
             char **attributes = strv_new();
 
             if (weapon_is_twohanded(it))
-                strv_append(&attributes, "two-handed");
+                strv_append(&attributes, _("two-handed"));
 
             if (weapon_is_ranged(it))
-                strv_append(&attributes, "ranged");
+                strv_append(&attributes, _("ranged"));
 
             if (weapon_is_unique(it))
-                strv_append(&attributes, "unique");
+                strv_append(&attributes, _("unique"));
 
             if (g_strv_length(attributes) > 0)
             {
                 gchar *tmp = g_strjoinv(", ", attributes);
                 tmp[0] = g_ascii_toupper(tmp[0]);
-                g_string_append_printf(desc, "%s weapon\n", tmp);
+                g_string_append_printf(desc, _("%s weapon\n"), tmp);
                 g_free(tmp);
             }
 
@@ -1565,15 +1653,15 @@ char *item_detailed_description(item *it, bool known, bool shop)
             if (it->bonus_known)
             {
                 g_string_append_printf(desc,
-                    "Damage:   +%d\n"
-                    "Accuracy: +%d\n",
+                    _("Damage:   +%d\n"
+                      "Accuracy: +%d\n"),
                     weapon_damage(it), weapon_acc(it));
             }
             else
             {
                 g_string_append_printf(desc,
-                    "Base damage: +%d\n"
-                    "Base accuracy: +%d\n",
+                    _("Base damage: +%d\n"
+                      "Base accuracy: +%d\n"),
                     weapon_base_damage(it), weapon_base_acc(it));
             }
         }
@@ -1582,11 +1670,11 @@ char *item_detailed_description(item *it, bool known, bool shop)
     case IT_ARMOUR:
         if (it->bonus_known)
         {
-            g_string_append_printf(desc, "Armour class: %d\n", armour_ac(it));
+            g_string_append_printf(desc, _("Armour class: %d\n"), armour_ac(it));
         }
         else
         {
-            g_string_append_printf(desc, "Base AC: %d\n", armour_base_ac(it));
+            g_string_append_printf(desc, _("Base AC: %d\n"), armour_base_ac(it));
         }
         break;
 
@@ -1595,19 +1683,20 @@ char *item_detailed_description(item *it, bool known, bool shop)
     }
 
     if (it->notes)
-        g_string_append_printf(desc, "Notes: %s\n", it->notes);
+        g_string_append_printf(desc, _("Notes: %s\n"), it->notes);
 
-    g_string_append_printf(desc, "Weight:   %.2f kg\n",
+    g_string_append_printf(desc, _("Weight:   %.2f kg\n"),
                            (float)item_weight(it) / 1000);
 
-    g_string_append_printf(desc, "Material: %s",
+    g_string_append_printf(desc, _("Material: %s"),
                            item_material_name(item_material(it)));
 
     if (shop)
     {
         /* inside shop - show the item's price */
-        g_string_append_printf(desc, "\nPrice:    %d gold%s", item_price(it),
-                it->count > 1 ? " each" : "");
+        g_string_append_printf(desc, it->count > 1
+                    ? _("\nPrice:    %d gold each") : _("\nPrice:    %d gold"),
+                item_price(it));
     }
 
     return g_string_free(desc, false);
@@ -1726,13 +1815,13 @@ static const char *item_desc_get(item *it, int known)
             return item_material_adjective(item_material(it));
 
     case IT_AMMO:
-        return ammo_name(it);
+        return ammo_name_raw(it);
 
     case IT_ARMOUR:
         if (!known && armour_disguise(it) != AT_MAX)
-            return armours[armour_disguise(it)].name;
+            return _(armours[armour_disguise(it)].name);
         else
-            return armour_name(it);
+            return armour_name_raw(it);
 
     case IT_BOOK:
         if (known)
@@ -1757,7 +1846,7 @@ static const char *item_desc_get(item *it, int known)
 
     case IT_SCROLL:
         if (known)
-            return scroll_name(it);
+            return scroll_name_raw(it);
         else
             return scroll_desc(it->id);
 
@@ -1765,7 +1854,7 @@ static const char *item_desc_get(item *it, int known)
         return (char *)gem_name(it);
 
     case IT_WEAPON:
-        return weapon_name(it);
+        return weapon_name_raw(it);
 
     default:
         return "";

@@ -17,6 +17,7 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
 
 #include "colours.h"
 #include "display.h"
@@ -31,33 +32,33 @@ DEFINE_ENUM(sobject_t, SOBJECT_TYPE_ENUM)
 
 const sobject_data sobjects[LS_MAX] =
 {
-    /* type             gly   color           desc                                   pa tr */
-    { LS_NONE,          ' ',  COLOURLESS,     NULL,                                  1, 1, },
-    { LS_ALTAR,         '_',  GREY93,         "a holy altar",                        1, 1, },
-    { LS_THRONE,        '\\', VIOLET_PURPLE,  "a handsome, jewel-encrusted throne",  1, 1, },
-    { LS_THRONE2,       '\\', VIOLET_PURPLE,  "a handsome, jewel-encrusted throne",  1, 1, },
-    { LS_DEADTHRONE,    '\\', GREY_GOOSE,     "a massive throne",                    1, 1, },
-    { LS_STAIRSDOWN,    '>',  LIGHT_GREY,     "a circular staircase",                1, 1, },
-    { LS_STAIRSUP,      '<',  LIGHT_GREY,     "a circular staircase",                1, 1, },
-    { LS_ELEVATORDOWN,  'I',  GREY_GOOSE,     "a volcanic shaft leading downward",   1, 1, },
-    { LS_ELEVATORUP,    'I',  GREY93,         "the base of a volcanic shaft",        1, 1, },
-    { LS_FOUNTAIN,      '{',  WATER_BLUE,     "a bubbling fountain",                 1, 1, },
-    { LS_DEADFOUNTAIN,  '{',  GREY_GOOSE,     "a dead fountain",                     1, 1, },
-    { LS_STATUE,        '|',  LIGHT_GREY,     "a great marble statue",               1, 1, },
-    { LS_URN,           'u',  YELLOW,         "a golden urn",                        1, 1, },
-    { LS_MIRROR,        '|',  ICE_COLD_GREEN, "a mirror",                            1, 1, },
-    { LS_OPENDOOR,      '/',  ELM_BROWN_RED,  "an open door",                        1, 1, },
-    { LS_CLOSEDDOOR,    '+',  ELM_BROWN_RED,  "a closed door",                       0, 0, },
-    { LS_CAVERNS_ENTRY, 'O',  GREY_GOOSE,     "the entrance to the caverns",         1, 1, },
-    { LS_CAVERNS_EXIT,  'O',  GREY93,         "the exit to town",                    1, 1, },
-    { LS_HOME,          'H',  GREY_GOOSE,     "your home",                           1, 0, },
-    { LS_DNDSTORE,      'D',  GREY_GOOSE,     "a DND store",                         1, 0, },
-    { LS_TRADEPOST,     'T',  GREY_GOOSE,     "the Larn trading Post",               1, 0, },
-    { LS_LRS,           'L',  GREY_GOOSE,     "an LRS office",                       1, 0, },
-    { LS_SCHOOL,        'S',  GREY_GOOSE,     "the College of Larn",                 1, 0, },
-    { LS_BANK,          'B',  GREY_GOOSE,     "the bank of Larn",                    1, 0, },
-    { LS_BANK2,         'B',  GREY93,         "a branch office of the bank of Larn", 1, 0, },
-    { LS_MONASTERY,     'M',  GREY93,         "the Monastery of Larn",               1, 0, },
+    /* type             gly   color           desc                                       pa tr */
+    { LS_NONE,          ' ',  COLOURLESS,     NULL,                                      1, 1, },
+    { LS_ALTAR,         '_',  GREY93,         N_("a holy altar"),                        1, 1, },
+    { LS_THRONE,        '\\', VIOLET_PURPLE,  N_("a handsome, jewel-encrusted throne"),  1, 1, },
+    { LS_THRONE2,       '\\', VIOLET_PURPLE,  N_("a handsome, jewel-encrusted throne"),  1, 1, },
+    { LS_DEADTHRONE,    '\\', GREY_GOOSE,     N_("a massive throne"),                    1, 1, },
+    { LS_STAIRSDOWN,    '>',  LIGHT_GREY,     N_("a circular staircase"),                1, 1, },
+    { LS_STAIRSUP,      '<',  LIGHT_GREY,     N_("a circular staircase"),                1, 1, },
+    { LS_ELEVATORDOWN,  'I',  GREY_GOOSE,     N_("a volcanic shaft leading downward"),   1, 1, },
+    { LS_ELEVATORUP,    'I',  GREY93,         N_("the base of a volcanic shaft"),        1, 1, },
+    { LS_FOUNTAIN,      '{',  WATER_BLUE,     N_("a bubbling fountain"),                 1, 1, },
+    { LS_DEADFOUNTAIN,  '{',  GREY_GOOSE,     N_("a dead fountain"),                     1, 1, },
+    { LS_STATUE,        '|',  LIGHT_GREY,     N_("a great marble statue"),               1, 1, },
+    { LS_URN,           'u',  YELLOW,         N_("a golden urn"),                        1, 1, },
+    { LS_MIRROR,        '|',  ICE_COLD_GREEN, N_("a mirror"),                            1, 1, },
+    { LS_OPENDOOR,      '/',  ELM_BROWN_RED,  N_("an open door"),                        1, 1, },
+    { LS_CLOSEDDOOR,    '+',  ELM_BROWN_RED,  N_("a closed door"),                       0, 0, },
+    { LS_CAVERNS_ENTRY, 'O',  GREY_GOOSE,     N_("the entrance to the caverns"),         1, 1, },
+    { LS_CAVERNS_EXIT,  'O',  GREY93,         N_("the exit to town"),                    1, 1, },
+    { LS_HOME,          'H',  GREY_GOOSE,     N_("your home"),                           1, 0, },
+    { LS_DNDSTORE,      'D',  GREY_GOOSE,     N_("a DND store"),                         1, 0, },
+    { LS_TRADEPOST,     'T',  GREY_GOOSE,     N_("the Larn trading Post"),               1, 0, },
+    { LS_LRS,           'L',  GREY_GOOSE,     N_("an LRS office"),                       1, 0, },
+    { LS_SCHOOL,        'S',  GREY_GOOSE,     N_("the College of Larn"),                 1, 0, },
+    { LS_BANK,          'B',  GREY_GOOSE,     N_("the bank of Larn"),                    1, 0, },
+    { LS_BANK2,         'B',  GREY93,         N_("a branch office of the bank of Larn"), 1, 0, },
+    { LS_MONASTERY,     'M',  GREY93,         N_("the Monastery of Larn"),               1, 0, },
 };
 
 static void monster_appear(monster_t type, position mpos);
@@ -73,15 +74,15 @@ int player_altar_desecrate(player *p)
 
     if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
-        log_add_entry(nlarn->log, "There is no altar here.");
+        log_add_entry(nlarn->log, _("There is no altar here."));
         return false;
     }
 
-    log_add_entry(nlarn->log, "You try to desecrate the altar.");
+    log_add_entry(nlarn->log, _("You try to desecrate the altar."));
 
     /* Decrease godly goodwill significantly for desecration */
     p->godly_goodwill -= 50;
-    log_add_entry(nlarn->log, "Your god is displeased!");
+    log_add_entry(nlarn->log, _("Your god is displeased!"));
 
     if (chance(60))
     {
@@ -102,16 +103,16 @@ int player_altar_desecrate(player *p)
     else if (chance(30))
     {
         /* destroy altar */
-        log_add_entry(nlarn->log, "The altar crumbles into a pile of dust before your eyes.");
+        log_add_entry(nlarn->log, _("The altar crumbles into a pile of dust before your eyes."));
         map_sobject_set(current, p->pos, LS_NONE);
 
         /* Additional penalty for destroying the altar */
         p->godly_goodwill -= 100;
-        log_add_entry(nlarn->log, "Your god is very displeased!");
+        log_add_entry(nlarn->log, _("Your god is very displeased!"));
     }
     else
     {
-        log_add_entry(nlarn->log, "You fail to destroy the altar.");
+        log_add_entry(nlarn->log, _("You fail to destroy the altar."));
     }
 
     return true;
@@ -128,7 +129,7 @@ int player_altar_pray(player *p)
 
     if (map_sobject_at(current, p->pos) != LS_ALTAR)
     {
-        log_add_entry(nlarn->log, "There is no altar here.");
+        log_add_entry(nlarn->log, _("There is no altar here."));
         return false;
     }
 
@@ -136,25 +137,25 @@ int player_altar_pray(player *p)
     const guint total_gold  = player_gold + p->bank_account;
     if (total_gold == 0)
     {
-        log_add_entry(nlarn->log, "You don't have any money to donate.");
+        log_add_entry(nlarn->log, _("You don't have any money to donate."));
         return false;
     }
 
     // Use a sensible default value, so you don't anger the gods without
     // meaning to.
-    const guint donation = display_get_count("How much gold do you want to donate?",
+    const guint donation = display_get_count(_("How much gold do you want to donate?"),
             total_gold >= 200 ? 200 : 0);
 
     /* 0 gold donations are likely to be the result of escaping the prompt */
     if (!donation)
     {
-        log_add_entry(nlarn->log, "So you decide not to donate anything.");
+        log_add_entry(nlarn->log, _("So you decide not to donate anything."));
         return false;
     }
 
     if (donation > total_gold)
     {
-        log_add_entry(nlarn->log, "You don't have that much money!");
+        log_add_entry(nlarn->log, _("You don't have that much money!"));
         return false;
     }
 
@@ -175,15 +176,15 @@ int player_altar_pray(player *p)
     int goodwill_increase = donation / (donation > 100 ? 5 : 10);
     p->godly_goodwill += goodwill_increase;
 
-    log_add_entry(nlarn->log, "You donate %d gold at the altar and pray.",
+    log_add_entry(nlarn->log, _("You donate %d gold at the altar and pray."),
                   donation);
 
-    log_add_entry(nlarn->log, "Thank you!");
+    log_add_entry(nlarn->log, _("Thank you!"));
 
     if (p->godly_goodwill > 0) {
-        log_add_entry(nlarn->log, "Your god is pleased with you!", goodwill_increase);
+        log_add_entry(nlarn->log, _("Your god is pleased with you!"));
     } else {
-    log_add_entry(nlarn->log, "The gods are displeased with you.");
+    log_add_entry(nlarn->log, _("The gods are displeased with you."));
     }
 
     // The higher the donation, the more likely is a favourable outcome.
@@ -197,7 +198,7 @@ int player_altar_pray(player *p)
     case 8:
         if (!player_effect(p, ET_UNDEAD_PROTECTION))
         {
-            log_add_entry(nlarn->log, "You have been heard!");
+            log_add_entry(nlarn->log, _("You have been heard!"));
             e = effect_new(ET_UNDEAD_PROTECTION);
             player_effect_add(p, e);
             break;
@@ -273,8 +274,9 @@ int player_altar_pray(player *p)
             if (p->eq_weapon->bonus < 3)
             {
                 /* enchant weapon */
-                log_add_entry(nlarn->log, "Your %s vibrates for a moment.",
-                              weapon_name(p->eq_weapon));
+                log_add_entry(nlarn->log, _("%s vibrates for a moment."),
+                              weapon_name_art(p->eq_weapon,
+                                  ART_POSS, GC_NOM, true));
 
                 item_enchant(p->eq_weapon);
                 break;
@@ -286,8 +288,8 @@ int player_altar_pray(player *p)
         {
             if ((*armour)->bonus < 3)
             {
-                log_add_entry(nlarn->log, "Your %s vibrates for a moment.",
-                              armour_name(*armour));
+                log_add_entry(nlarn->log, _("%s vibrates for a moment."),
+                              armour_name_art(*armour, ART_POSS, GC_NOM, true));
 
                 item_enchant(*armour);
                 break;
@@ -304,7 +306,7 @@ int player_altar_pray(player *p)
         }
         // intentional fall through
     case 1:
-        log_add_entry(nlarn->log, "Otherwise, nothing seems to have happened.");
+        log_add_entry(nlarn->log, _("Otherwise, nothing seems to have happened."));
         break;
     case 0:
         {
@@ -327,7 +329,7 @@ int player_altar_pray(player *p)
         }
         else
         {
-            log_add_entry(nlarn->log, "Otherwise, nothing seems to have happened.");
+            log_add_entry(nlarn->log, _("Otherwise, nothing seems to have happened."));
         }
         }
     }
@@ -371,7 +373,7 @@ int player_building_enter(player *p)
         break;
 
     default:
-        log_add_entry(nlarn->log, "There is nothing to enter here.");
+        log_add_entry(nlarn->log, _("There is nothing to enter here."));
     }
 
     return moves_count;
@@ -405,7 +407,7 @@ int player_door_close(player *p)
 
     if (count > 1)
     {
-        dir = display_get_direction("Close which door?", dirs);
+        dir = display_get_direction(_("Close which door?"), dirs);
     }
     /* dir has been set in the for loop above if count == 1 */
     else if (count == 0)
@@ -430,7 +432,7 @@ int player_door_close(player *p)
             /* check if player is standing in the door */
             if (pos_identical(pos, p->pos))
             {
-                log_add_entry(nlarn->log, "Please step out of the doorway.");
+                log_add_entry(nlarn->log, _("Please step out of the doorway."));
                 return 0;
             }
 
@@ -442,8 +444,9 @@ int player_door_close(player *p)
                 bool visible = monster_in_sight(m);
 
                 log_add_entry(nlarn->log,
-                              "You cannot close the door. %s %s is in the way.",
-                              visible ? "The" : "An", monster_get_name(m));
+                              _("You cannot close the door. %s is in the way."),
+                              monster_get_name_art(m,
+                                  visible ? ART_DEF : ART_INDEF, GC_NOM, true));
                 return 0;
             }
 
@@ -451,22 +454,22 @@ int player_door_close(player *p)
             if (m || *map_ilist_at(pmap, pos))
             {
                 log_add_entry(nlarn->log,
-                              "You cannot close the door. There is something in the way.");
+                              _("You cannot close the door. There is something in the way."));
                 return 0;
             }
 
             map_sobject_set(pmap, pos, LS_CLOSEDDOOR);
-            log_add_entry(nlarn->log, "You close the door.");
+            log_add_entry(nlarn->log, _("You close the door."));
         }
         else
         {
-            log_add_entry(nlarn->log, "Huh?");
+            log_add_entry(nlarn->log, _("Huh?"));
             return 0;
         }
     }
     else
     {
-        log_add_entry(nlarn->log, "Which door are you talking about?");
+        log_add_entry(nlarn->log, _("Which door are you talking about?"));
         return 0;
     }
 
@@ -502,7 +505,7 @@ int player_door_open(player *p, int dir)
 
         if (count > 1)
         {
-            dir = display_get_direction("Open which door?", dirs);
+            dir = display_get_direction(_("Open which door?"), dirs);
         }
         /* dir has been set in the for loop above if count == 1 */
         else if (count == 0)
@@ -526,17 +529,17 @@ int player_door_open(player *p, int dir)
         if (pos_valid(pos) && (map_sobject_at(pmap, pos) == LS_CLOSEDDOOR))
         {
             map_sobject_set(pmap, pos, LS_OPENDOOR);
-            log_add_entry(nlarn->log, "You open the door.");
+            log_add_entry(nlarn->log, _("You open the door."));
         }
         else
         {
-            log_add_entry(nlarn->log, "Huh?");
+            log_add_entry(nlarn->log, _("Huh?"));
             return 0;
         }
     }
     else
     {
-        log_add_entry(nlarn->log, "What exactly do you want to open?");
+        log_add_entry(nlarn->log, _("What exactly do you want to open?"));
         return 0;
     }
 
@@ -551,17 +554,17 @@ int player_fountain_drink(player *p)
 
     if (map_sobject_at(pmap, p->pos) == LS_DEADFOUNTAIN)
     {
-        log_add_entry(nlarn->log, "There is no water to drink.");
+        log_add_entry(nlarn->log, _("There is no water to drink."));
         return 0;
     }
 
     if (map_sobject_at(pmap, p->pos) != LS_FOUNTAIN)
     {
-        log_add_entry(nlarn->log, "There is no fountain to drink from here.");
+        log_add_entry(nlarn->log, _("There is no fountain to drink from here."));
         return 0;
     }
 
-    log_add_entry(nlarn->log, "You drink from the fountain.");
+    log_add_entry(nlarn->log, _("You drink from the fountain."));
 
     gint event = rand_1n(101);
     int amount = 0;
@@ -578,7 +581,7 @@ int player_fountain_drink(player *p)
     }
     else if (event < 45)
     {
-        log_add_entry(nlarn->log, "Nothing seems to have happened.");
+        log_add_entry(nlarn->log, _("Nothing seems to have happened."));
     }
     else if (chance(67))
     {
@@ -607,16 +610,20 @@ int player_fountain_drink(player *p)
 
         case 6:
             amount = rand_1n(Z(p->pos) + 1);
-            log_add_entry(nlarn->log, "You gain %d hit point%s.",
-                          amount, plural(amount));
+            log_add_entry(nlarn->log,
+                          ngettext("You gain %d hit point.",
+                                   "You gain %d hit points.", amount),
+                          amount);
 
             player_hp_gain(p, amount);
             break;
 
         case 7:
             amount = rand_1n(Z(p->pos) + 1);
-            log_add_entry(nlarn->log, "You just gained %d mana point%s.",
-                          amount, plural(amount));
+            log_add_entry(nlarn->log,
+                          ngettext("You just gained %d mana point.",
+                                   "You just gained %d mana points.", amount),
+                          amount);
 
             player_mp_gain(p, amount);
             break;
@@ -624,7 +631,7 @@ int player_fountain_drink(player *p)
         case 8:
             amount = 5 * rand_1n((Z(p->pos) + 1) * (Z(p->pos) + 1));
 
-            log_add_entry(nlarn->log, "You just gained experience.");
+            log_add_entry(nlarn->log, _("You just gained experience."));
             player_exp_gain(p, amount);
             break;
         }
@@ -656,15 +663,19 @@ int player_fountain_drink(player *p)
 
         case 6:
             amount = rand_1n(Z(p->pos) + 1);
-            log_add_entry(nlarn->log, "You lose %d hit point%s!",
-                              amount, plural(amount));
+            log_add_entry(nlarn->log,
+                          ngettext("You lose %d hit point!",
+                                   "You lose %d hit points!", amount),
+                          amount);
 
             player_hp_lose(p, amount, PD_SOBJECT, LS_FOUNTAIN);
             break;
         case 7:
             amount = rand_1n(Z(p->pos) + 1);
-            log_add_entry(nlarn->log, "You just lost %d mana point%s.",
-                          amount, plural(amount));
+            log_add_entry(nlarn->log,
+                          ngettext("You just lost %d mana point.",
+                                   "You just lost %d mana points.", amount),
+                          amount);
 
             player_mp_lose(p, amount);
             break;
@@ -672,7 +683,7 @@ int player_fountain_drink(player *p)
         case 8:
             amount = 5 * rand_1n((Z(p->pos) + 1) * (Z(p->pos) + 1));
 
-            log_add_entry(nlarn->log, "You just lost experience.");
+            log_add_entry(nlarn->log, _("You just lost experience."));
             player_exp_lose(p, amount);
             break;
         }
@@ -686,7 +697,7 @@ int player_fountain_drink(player *p)
 
     if (chance(25))
     {
-        log_add_entry(nlarn->log, "The fountains bubbling slowly quiets.");
+        log_add_entry(nlarn->log, _("The fountain's bubbling slowly quiets."));
         map_sobject_set(pmap, p->pos, LS_DEADFOUNTAIN);
     }
 
@@ -701,21 +712,21 @@ int player_fountain_wash(player *p)
 
     if (map_sobject_at(pmap, p->pos) == LS_DEADFOUNTAIN)
     {
-        log_add_entry(nlarn->log, "The fountain is dry.");
+        log_add_entry(nlarn->log, _("The fountain is dry."));
         return 0;
     }
 
     if (map_sobject_at(pmap, p->pos) != LS_FOUNTAIN)
     {
-        log_add_entry(nlarn->log, "There is no fountain to wash at here.");
+        log_add_entry(nlarn->log, _("There is no fountain to wash at here."));
         return 0;
     }
 
-    log_add_entry(nlarn->log, "You wash yourself at the fountain.");
+    log_add_entry(nlarn->log, _("You wash yourself at the fountain."));
 
     if (chance(10))
     {
-        log_add_entry(nlarn->log, "Oh no! The water was foul!");
+        log_add_entry(nlarn->log, _("Oh no! The water was foul!"));
 
         damage *dam = damage_new(DAM_POISON, ATT_NONE,
                                  rand_1n((Z(p->pos) << 2) + 2),
@@ -732,14 +743,14 @@ int player_fountain_wash(player *p)
         {
             if (chance(50))
             {
-                log_add_entry(nlarn->log, "You got the dirt off!");
+                log_add_entry(nlarn->log, _("You got the dirt off!"));
                 player_effect_del(p, e);
             }
             else
             {
                 log_add_entry(nlarn->log,
-                      "This water seems to be hard water! "
-                      "The dirt didn't come off!");
+                      _("This water seems to be hard water! "
+                        "The dirt didn't come off!"));
             }
 
             return 1;
@@ -760,7 +771,7 @@ int player_fountain_wash(player *p)
         return 1;
     }
 
-    log_add_entry(nlarn->log, "Nothing seems to have happened.");
+    log_add_entry(nlarn->log, _("Nothing seems to have happened."));
 
     return 1;
 }
@@ -778,7 +789,7 @@ int player_stairs_down(player *p)
     /* the stairs down are unreachable while levitating */
     if (player_effect(p, ET_LEVITATION))
     {
-        log_add_entry(nlarn->log, "You cannot reach reach the stairs..");
+        log_add_entry(nlarn->log, _("You cannot reach the stairs."));
         return false;
     }
 
@@ -799,7 +810,7 @@ int player_stairs_down(player *p)
         if (Z(p->pos) == 0)
             nlevel = game_map(nlarn, 1);
         else
-            log_add_entry(nlarn->log, "Climb up to return to town.");
+            log_add_entry(nlarn->log, _("Climb up to return to town."));
         break;
 
     default:
@@ -815,7 +826,8 @@ int player_stairs_down(player *p)
     /* display additional message */
     if (show_msg)
     {
-        log_add_entry(nlarn->log, "You climb down %s.", so_get_desc(ms));
+        log_add_entry(nlarn->log, _("You climb down %s."),
+                noun_phrase(so_get_desc_raw(ms), ART_NONE, GC_ACC, false, false));
     }
 
     /* if told to switch level, do so */
@@ -826,7 +838,7 @@ int player_stairs_down(player *p)
 
         if (bval > 0)
         {
-            log_add_entry(nlarn->log, "You slip!");
+            log_add_entry(nlarn->log, _("You slip!"));
             damage *dam = damage_new(DAM_PHYSICAL, ATT_NONE,
                                      rand_1n(bval + nlevel->nlevel),
                                      DAMO_SOBJECT, NULL);
@@ -864,18 +876,19 @@ int player_stairs_up(player *p)
         break;
 
     case LS_CAVERNS_ENTRY:
-        log_add_entry(nlarn->log, "Climb down to enter the caverns.");
+        log_add_entry(nlarn->log, _("Climb down to enter the caverns."));
         return 0;
 
     default:
-        log_add_entry(nlarn->log, "I see no stairway up here.");
+        log_add_entry(nlarn->log, _("I see no stairway up here."));
         return 0;
     }
 
     /* display additional message */
     if (show_msg)
     {
-        log_add_entry(nlarn->log, "You climb up %s.", so_get_desc(ms));
+        log_add_entry(nlarn->log, _("You climb up %s."),
+                noun_phrase(so_get_desc_raw(ms), ART_NONE, GC_ACC, false, false));
     }
 
     /* if told to switch level, do so */
@@ -901,15 +914,15 @@ int player_throne_pillage(player *p)
 
     if ((ms != LS_THRONE) && (ms != LS_THRONE2) && (ms != LS_DEADTHRONE))
     {
-        log_add_entry(nlarn->log, "There is no throne here.");
+        log_add_entry(nlarn->log, _("There is no throne here."));
         return 0;
     }
 
-    log_add_entry(nlarn->log, "You try to remove the gems from the throne.");
+    log_add_entry(nlarn->log, _("You try to remove the gems from the throne."));
 
     if (ms == LS_DEADTHRONE)
     {
-        log_add_entry(nlarn->log, "There are no gems left on this throne.");
+        log_add_entry(nlarn->log, _("There are no gems left on this throne."));
         return 0;
     }
 
@@ -922,8 +935,9 @@ int player_throne_pillage(player *p)
             count++;
         }
 
-        log_add_entry(nlarn->log, "You manage to pry off %s gem%s.",
-                      count > 1 ? "some" : "a", plural(count));
+        log_add_entry(nlarn->log,
+                      count > 1 ? _("You manage to pry off some gems.")
+                                : _("You manage to pry off a gem."));
 
         map_sobject_set(pmap, p->pos, LS_DEADTHRONE);
         p->stats.vandalism++;
@@ -945,7 +959,7 @@ int player_throne_pillage(player *p)
     }
     else
     {
-        log_add_entry(nlarn->log, "You fail to remove the gems.");
+        log_add_entry(nlarn->log, _("You fail to remove the gems."));
     }
 
     return 1 + count;
@@ -960,11 +974,11 @@ int player_throne_sit(player *p)
 
     if ((st != LS_THRONE) && (st != LS_THRONE2) && (st != LS_DEADTHRONE))
     {
-        log_add_entry(nlarn->log, "There is no throne here.");
+        log_add_entry(nlarn->log, _("There is no throne here."));
         return 0;
     }
 
-    log_add_entry(nlarn->log, "You sit on the throne.");
+    log_add_entry(nlarn->log, _("You sit on the throne."));
 
     if (chance(30) && (st == LS_THRONE))
     {
@@ -983,12 +997,12 @@ int player_throne_sit(player *p)
     }
     else if (chance(35))
     {
-        log_add_entry(nlarn->log, "Zaaaappp! You've been teleported!");
+        log_add_entry(nlarn->log, _("Zaaaappp! You've been teleported!"));
         p->pos = map_find_space(pmap, LE_MONSTER, false);
     }
     else
     {
-        log_add_entry(nlarn->log, "Nothing seems to have happened.");
+        log_add_entry(nlarn->log, _("Nothing seems to have happened."));
     }
 
     return 1;
@@ -1009,11 +1023,11 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
 
     case LS_ALTAR:
     {
-        log_add_entry(nlarn->log, "You destroy the altar.", desc);
+        log_add_entry(nlarn->log, _("You destroy the altar."));
         map_sobject_set(dmap, pos, LS_NONE);
         p->stats.vandalism++;
 
-        log_add_entry(nlarn->log, "Lightning comes crashing down from above!");
+        log_add_entry(nlarn->log, _("Lightning comes crashing down from above!"));
 
         /* flood the area surrounding the altar with lightning */
         damage_originator damo = { DAMO_GOD, NULL };
@@ -1028,12 +1042,12 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
     }
 
     case LS_FOUNTAIN:
-        log_add_entry(nlarn->log, "You destroy the fountain.", desc);
+        log_add_entry(nlarn->log, _("You destroy the fountain."));
         map_sobject_set(dmap, pos, LS_NONE);
         p->stats.vandalism++;
 
         /* create a permanent shallow pool and place a water lord */
-        log_add_entry(nlarn->log, "A flood of water gushes forth!");
+        log_add_entry(nlarn->log, _("A flood of water gushes forth!"));
         flood_affect_area(pos, 3 + rand_0n(2), LT_WATER, 0);
         if (pos_valid(mpos))
             monster_new(MT_WATER_LORD, mpos, NULL);
@@ -1048,7 +1062,7 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
             inv_add(map_ilist_at(dmap, pos), it);
         }
 
-        desc = "statue";
+        desc = N_("statue");
         break;
 
     case LS_THRONE:
@@ -1056,7 +1070,7 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
         if (pos_valid(mpos))
             monster_new(MT_GNOME_KING, mpos, NULL);
 
-        desc = "throne";
+        desc = N_("throne");
         break;
 
     case LS_DEADFOUNTAIN:
@@ -1069,18 +1083,19 @@ void sobject_destroy_at(player *p, map *dmap, position pos)
 
         if(fov_get(p->fv, pos))
         {
-            log_add_entry(nlarn->log, "The door shatters!");
+            log_add_entry(nlarn->log, _("The door shatters!"));
         }
         break;
 
     default:
-        log_add_entry(nlarn->log, "Somehow that did not work.");
+        log_add_entry(nlarn->log, _("Somehow that did not work."));
         /* NOP */
     }
 
     if (desc)
     {
-        log_add_entry(nlarn->log, "You destroy the %s.", desc);
+        log_add_entry(nlarn->log, _("You destroy %s."),
+                      noun_phrase(_(desc), ART_DEF, GC_ACC, false, false));
         map_sobject_set(dmap, pos, LS_NONE);
         p->stats.vandalism++;
     }
@@ -1101,11 +1116,11 @@ static void monster_appear(monster_t type, position mpos)
 
     if (m && monster_in_sight(m))
     {
-        log_add_entry(nlarn->log, "An angry %s appears!",
-                      monster_name(m));
+        log_add_entry(nlarn->log, _("%s appears, looking angry!"),
+                      monster_name_art(m, ART_INDEF, GC_NOM, true));
     }
     else
-        log_add_entry(nlarn->log, "Nothing seems to have happened.");
+        log_add_entry(nlarn->log, _("Nothing seems to have happened."));
 }
 
 static void flood_affect_area(position pos, int radius, int type, int duration)
@@ -1137,8 +1152,8 @@ static bool sobject_blast_hit(position pos,
     {
         /* the blast hit a monster */
         if (monster_in_sight(m))
-            log_add_entry(nlarn->log, "The lightning hits the %s.",
-                          monster_get_name(m));
+            log_add_entry(nlarn->log, _("The lightning hits %s."),
+                          monster_get_name_art(m, ART_DEF, GC_ACC, false));
 
         monster_damage_take(m, damage_copy(dam));
 
@@ -1169,13 +1184,13 @@ static bool sobject_blast_hit(position pos,
         if (evasion >= (int)rand_1n(21))
         {
             if (!player_effect(nlarn->p, ET_BLINDNESS))
-                log_add_entry(nlarn->log, "The lightning whizzes by you!");
+                log_add_entry(nlarn->log, _("The lightning whizzes by you!"));
 
             /* missed */
             return false;
         }
 
-        log_add_entry(nlarn->log, "The lightning hits you!");
+        log_add_entry(nlarn->log, _("The lightning hits you!"));
         /* FIXME: correctly state that the player has been killed by the
                   wrath of a god */
         player_damage_take(nlarn->p, damage_copy(dam), PD_SPELL, SP_LIT);

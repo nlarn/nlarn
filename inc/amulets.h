@@ -1,6 +1,6 @@
 /*
  * amulets.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,8 @@
 
 #ifndef AMULETS_H
 #define AMULETS_H
+
+#include <libintl.h>
 
 #include "items.h"
 
@@ -61,7 +63,7 @@ item_material_t amulet_material(amulet_t amulet_id);
 /* macros */
 
 #define amulet_type(item)        (amulets[(item)->id].typ)
-#define amulet_name(item)        (amulets[(item)->id].name)
+#define amulet_name(item)        (g_dpgettext2(NULL, "amulet", amulets[(item)->id].name))
 #define amulet_effect_t(item)    (amulets[(item)->id].effect)
 #define amulet_price(item)       (amulets[(item)->id].price)
 

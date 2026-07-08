@@ -1,6 +1,6 @@
 /*
  * effects.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,8 @@
 #include <glib.h>
 #include <string.h>
 
+#include <glib/gi18n.h>
+
 #include "cJSON.h"
 #include "effects.h"
 #include "game.h"
@@ -30,7 +32,7 @@ DEFINE_ENUM(effect_t, EFFECT_TYPE_ENUM)
 static const effect_data effects[ET_MAX] =
 {
     /*
-        name "name" duration amount desc
+        name N_("name") duration amount desc
         msg_start
         msg_stop
         msg_start_monster
@@ -46,38 +48,38 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_INC_CON, "ET_INC_CON", 1, 1, NULL,
-        "You have a greater intestinal constitution!",
+        N_("You have a greater intestinal constitution!"),
         NULL, NULL, NULL,
         false, false, false, true
     },
 
     {
         ET_INC_DEX, "ET_INC_DEX", 1, 1, NULL,
-        "You feel skilful!",
-        "Your dextrousness returns to normal.",
+        N_("You feel skilful!"),
+        N_("Your dextrousness returns to normal."),
         NULL, NULL,
         false, false, false, true
     },
 
     {
         ET_INC_INT, "ET_INC_INT", 1, 1, NULL,
-        "You feel clever!",
-        "You are not so smart anymore.",
+        N_("You feel clever!"),
+        N_("You are not so smart anymore."),
         NULL, NULL,
         false, false, false, true
     },
 
     {
         ET_INC_STR, "ET_INC_STR", 1, 1, NULL,
-        "Your muscles are stronger!",
-        "Your strength returns to normal.",
+        N_("Your muscles are stronger!"),
+        N_("Your strength returns to normal."),
         NULL, NULL,
         false, false, false, true
     },
 
     {
         ET_INC_WIS, "ET_INC_WIS", 1, 1, NULL,
-        "You feel more self-confident!",
+        N_("You feel more self-confident!"),
         NULL, NULL, NULL,
         false, false, false, true
     },
@@ -96,14 +98,14 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_INC_HP_MAX, "ET_INC_HP_MAX", 1, 5 /* % */, NULL,
-        "You feel healthy!",
+        N_("You feel healthy!"),
         NULL, NULL, NULL,
         false, false, false, false
     },
 
     {
         ET_INC_MP_MAX, "ET_INC_MP_MAX", 1, 5 /* % */, NULL,
-        "You feel energetic!",
+        N_("You feel energetic!"),
         NULL, NULL, NULL,
         false, false, false, false
     },
@@ -122,21 +124,21 @@ static const effect_data effects[ET_MAX] =
 
     {
         ET_INC_LEVEL, "ET_INC_LEVEL", 1, 1, NULL,
-        "You feel much more skilful!",
+        N_("You feel much more skilful!"),
         NULL, NULL, NULL,
         false, false, false, false
     },
 
     {
         ET_INC_EXP, "ET_INC_EXP", 1, 0, NULL,
-        "You feel experienced.",
+        N_("You feel experienced."),
         NULL, NULL, NULL,
         false, false, false, false
     },
 
     {
         ET_RESIST_FIRE, "ET_RESIST_FIRE", 0, 25, NULL,
-        "You feel a chill run up your spine!",
+        N_("You feel a chill run up your spine!"),
         NULL, NULL, NULL,
         false, false, false, true
     },
@@ -154,250 +156,250 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_PROTECTION, "ET_PROTECTION", 250, 3, "protected",
-        "You feel protected!", "Your protection wanes.",
+        ET_PROTECTION, "ET_PROTECTION", 250, 3, N_("protected"),
+        N_("You feel protected!"), N_("Your protection wanes."),
         NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_STEALTH, "ET_STEALTH", 250, true, "stealthy",
-        "You start to move stealthily.",
-        "You're not stealthy anymore.",
+        ET_STEALTH, "ET_STEALTH", 250, true, N_("stealthy"),
+        N_("You start to move stealthily."),
+        N_("You're not stealthy anymore."),
         NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_AWARENESS, "ET_AWARENESS", 250, 3, "aware",
-        "You become aware of your surroundings.",
-        "You are no longer aware of your surroundings.",
+        ET_AWARENESS, "ET_AWARENESS", 250, 3, N_("aware"),
+        N_("You become aware of your surroundings."),
+        N_("You are no longer aware of your surroundings."),
         NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_SPEED, "ET_SPEED", 250, 25, "fast",
-        "You are suddenly moving much faster.",
-        "You feel yourself slow down.",
-        "The %s seems to move much faster.",
-        "The %s suddenly slows down.",
+        ET_SPEED, "ET_SPEED", 250, 25, N_("fast"),
+        N_("You are suddenly moving much faster."),
+        N_("You feel yourself slow down."),
+        N_("%s seems to move much faster."),
+        N_("%s suddenly slows down."),
         true, false, false, true
     },
 
     {
         ET_HEROISM, "ET_HEROISM", 250, 5, NULL,
-        "WOW!!! You feel Super-fantastic!!!",
-        "You return to normal. How sad!",
-        "The %s looks more perilous!",
-        "The %s looks less perilous.",
+        N_("WOW!!! You feel Super-fantastic!!!"),
+        N_("You return to normal. How sad!"),
+        N_("%s looks more perilous!"),
+        N_("%s looks less perilous."),
         false, false, false, false
     },
 
     {
-        ET_INVISIBILITY, "ET_INVISIBILITY", 250, true, "invisible",
-        "Suddenly you can't see yourself!",
-        "You are no longer invisible.",
-        "The %s disappears.",
+        ET_INVISIBILITY, "ET_INVISIBILITY", 250, true, N_("invisible"),
+        N_("Suddenly you can't see yourself!"),
+        N_("You are no longer invisible."),
+        N_("%s disappears."),
         NULL,
         true, false, true, false
     },
 
     {
-        ET_INVULNERABILITY, "ET_INVULNERABILITY", 250, 10, "invulnerable",
+        ET_INVULNERABILITY, "ET_INVULNERABILITY", 250, 10, N_("invulnerable"),
         NULL, NULL, NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_INFRAVISION, "ET_INFRAVISION", 250, true, "infravision",
-        "Your vision sharpens.",
-        "Your vision returns to normal.",
-        "The %s seems more observant.",
-        "The %s seems less observant.",
+        ET_INFRAVISION, "ET_INFRAVISION", 250, true, N_("infravision"),
+        N_("Your vision sharpens."),
+        N_("Your vision returns to normal."),
+        N_("%s seems more observant."),
+        N_("%s seems less observant."),
         true, false, true, false
     },
 
     {
-        ET_ENLIGHTENMENT, "ET_ENLIGHTENMENT", 250, 8, "enlightened",
-        "You have been granted enlightenment!",
-        "You are no longer enlightened.",
+        ET_ENLIGHTENMENT, "ET_ENLIGHTENMENT", 250, 8, N_("enlightened"),
+        N_("You have been granted enlightenment!"),
+        N_("You are no longer enlightened."),
         NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_REFLECTION, "ET_REFLECTION", 400, true, "reflection",
+        ET_REFLECTION, "ET_REFLECTION", 400, true, N_("reflection"),
         NULL, NULL, NULL, NULL,
         true, false, true, false
     },
 
     {
         ET_DETECT_MONSTER, "ET_DETECT_MONSTER", 10, true, NULL,
-        "You sense the presence of monsters.",
+        N_("You sense the presence of monsters."),
         NULL, NULL, NULL,
         false, false, true, false
     },
 
     {
-        ET_HOLD_MONSTER, "ET_HOLD_MONSTER", 30, true, "held",
+        ET_HOLD_MONSTER, "ET_HOLD_MONSTER", 30, true, N_("held"),
         NULL, NULL,
-        "The %s seems to freeze.",
-        "The %s can move again.",
+        N_("%s seems to freeze."),
+        N_("%s can move again."),
         true, false, false, false
     },
 
     {
-        ET_SCARED, "ET_SCARED", 250, true, "scared",
+        ET_SCARED, "ET_SCARED", 250, true, N_("scared"),
         NULL, NULL,
-        "The %s is very afraid.",
-        "The %s is no longer scared.",
+        N_("%s is very afraid."),
+        N_("%s is no longer scared."),
         true, false, true, false
     },
 
     {
-        ET_CHARM_MONSTER, "ET_CHARM_MONSTER", 50, true, "charmed",
+        ET_CHARM_MONSTER, "ET_CHARM_MONSTER", 50, true, N_("charmed"),
         NULL, NULL,
-        "The %s is awestruck at your magnificence!",
-        "The %s is no longer impressed.",
+        N_("%s is awestruck at your magnificence!"),
+        N_("%s is no longer impressed."),
         true, false, true, false
     },
 
     {
         ET_INC_HP, "ET_INC_HP", 1, 20 /* % */, NULL,
-        "You feel better.",
+        N_("You feel better."),
         NULL,
-        "The %s looks better.",
+        N_("%s looks better."),
         NULL,
         false, true, false, false
     },
 
     {
         ET_MAX_HP, "ET_MAX_HP", 1, 100 /* % */, NULL,
-        "You are completely healed.",
+        N_("You are completely healed."),
         NULL,
-        "The %s looks completely healed.",
+        N_("%s looks completely healed."),
         NULL,
         false, false, false, false
     },
 
     {
         ET_INC_MP, "ET_INC_MP", 1, 20 /* % */, NULL,
-        "Magical energies course through your body.",
+        N_("Magical energies course through your body."),
         NULL,
-        "The %s seems to regain energy.",
+        N_("%s seems to regain energy."),
         NULL,
         false, true, false, false
     },
 
     {
         ET_MAX_MP, "ET_MAX_MP", 1, 100 /* % */, NULL,
-        "You feel much more powerful.",
+        N_("You feel much more powerful."),
         NULL,
-        "The %s looks much more powerful.",
+        N_("%s looks much more powerful."),
         NULL,
         false, false, false, false
     },
 
     {
-        ET_CANCELLATION, "ET_CANCELLATION", 250, true, "cancellation",
+        ET_CANCELLATION, "ET_CANCELLATION", 250, true, N_("cancellation"),
         NULL, NULL, NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_UNDEAD_PROTECTION, "ET_UNDEAD_PROTECTION", 400, true, "undead protection",
-        "You feel safe in the dark.",
+        ET_UNDEAD_PROTECTION, "ET_UNDEAD_PROTECTION", 400, true, N_("undead protection"),
+        N_("You feel safe in the dark."),
         NULL, NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_SPIRIT_PROTECTION, "ET_SPIRIT_PROTECTION", 400, true, "spirit protection",
-        "You feel a protecting force.",
+        ET_SPIRIT_PROTECTION, "ET_SPIRIT_PROTECTION", 400, true, N_("spirit protection"),
+        N_("You feel a protecting force."),
         NULL, NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_LIFE_PROTECTION, "ET_LIFE_PROTECTION", 2500, true, "life protection",
-        "You've never felt so safe.",
-        "You feel less safe than before.",
+        ET_LIFE_PROTECTION, "ET_LIFE_PROTECTION", 2500, true, N_("life protection"),
+        N_("You've never felt so safe."),
+        N_("You feel less safe than before."),
         NULL, NULL,
         false, false, false, false
     },
 
     {
-        ET_NOTHEFT, "ET_NOTHEFT", 400, true, "theft protection",
+        ET_NOTHEFT, "ET_NOTHEFT", 400, true, N_("theft protection"),
         NULL, NULL, NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_SUSTAINMENT, "ET_SUSTAINMENT", 400, true, "sustainment",
+        ET_SUSTAINMENT, "ET_SUSTAINMENT", 400, true, N_("sustainment"),
         NULL, NULL, NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_TIMESTOP, "ET_TIMESTOP", 20, true, "time stop",
+        ET_TIMESTOP, "ET_TIMESTOP", 20, true, N_("time stop"),
         NULL, NULL, NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_WALL_WALK, "ET_WALL_WALK", 20, true, "wall-walk",
-        "You can now walk through walls.",
-        "You can no longer walk through walls.",
+        ET_WALL_WALK, "ET_WALL_WALK", 20, true, N_("wall-walk"),
+        N_("You can now walk through walls."),
+        N_("You can no longer walk through walls."),
         NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_LEVITATION, "ET_LEVITATION", 20, true, "levitation",
-        "You start to float in the air!",
-        "You gently sink to the ground.",
-        "The %s starts to float in the air!",
-        "The %s gently sinks to the ground.",
+        ET_LEVITATION, "ET_LEVITATION", 20, true, N_("levitation"),
+        N_("You start to float in the air!"),
+        N_("You gently sink to the ground."),
+        N_("%s starts to float in the air!"),
+        N_("%s gently sinks to the ground."),
         true, false, true, false
     },
 
     {
         ET_DEC_CON, "ET_DEC_CON", 1, 1, NULL,
-        "You feel incapacitated.",
-        "You feel tougher.",
+        N_("You feel incapacitated."),
+        N_("You feel tougher."),
         NULL, NULL,
         false, false, true, true
     },
 
     {
         ET_DEC_DEX, "ET_DEC_DEX", 1, 1, NULL,
-        "You feel clumsy.",
-        "Your dexterousness returns.",
+        N_("You feel clumsy."),
+        N_("Your dexterousness returns."),
         NULL, NULL,
         false, false, true, true
     },
 
     {
         ET_DEC_INT, "ET_DEC_INT", 1, 1, NULL,
-        "You feel imbecile.",
-        "Your intelligence returns.",
+        N_("You feel imbecile."),
+        N_("Your intelligence returns."),
         NULL, NULL,
         false, false, true, true
     },
 
     {
         ET_DEC_STR, "ET_DEC_STR", 1, 1, NULL,
-        "You are weaker.",
-        "You regain your strength.",
+        N_("You are weaker."),
+        N_("You regain your strength."),
         NULL, NULL,
         false, false, true, true
     },
 
     {
         ET_DEC_WIS, "ET_DEC_WIS", 1, 1, NULL,
-        "You feel ignorant.",
-        "You feel less ignorant.",
+        N_("You feel ignorant."),
+        N_("You feel less ignorant."),
         NULL, NULL,
         false, false, true, true
     },
@@ -409,86 +411,86 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_AGGRAVATE_MONSTER, "ET_AGGRAVATE_MONSTER", 500, true, "aggravating",
-        "You sense rising anger.",
+        ET_AGGRAVATE_MONSTER, "ET_AGGRAVATE_MONSTER", 500, true, N_("aggravating"),
+        N_("You sense rising anger."),
         NULL, NULL, NULL,
         true, false, true, false
     },
 
     {
-        ET_SLEEP, "ET_SLEEP", 25, true, "sleeping",
-        "You fall asleep.",
-        "You wake up.",
-        "The %s falls asleep.",
-        "The %s wakes up.",
+        ET_SLEEP, "ET_SLEEP", 25, true, N_("sleeping"),
+        N_("You fall asleep."),
+        N_("You wake up."),
+        N_("%s falls asleep."),
+        N_("%s wakes up."),
         true, false, false, false
     },
 
     {
-        ET_DIZZINESS, "ET_DIZZINESS", 250, 5, "dizzy",
-        "You're dizzy and weak!",
-        "You're no longer dizzy.",
-        "The %s looks dizzy and weak.",
-        "The %s no longer looks dizzy.",
+        ET_DIZZINESS, "ET_DIZZINESS", 250, 5, N_("dizzy"),
+        N_("You're dizzy and weak!"),
+        N_("You're no longer dizzy."),
+        N_("%s looks dizzy and weak."),
+        N_("%s no longer looks dizzy."),
         true, false, false, false
     },
 
     {
-        ET_SICKNESS, "ET_SICKNESS", 250, 10, "sick",
-        "You feel a sickness coming on.",
-        "You now feel better.",
+        ET_SICKNESS, "ET_SICKNESS", 250, 10, N_("sick"),
+        N_("You feel a sickness coming on."),
+        N_("You now feel better."),
         NULL, NULL,
         true, true, true, true
     },
 
     {
-        ET_BLINDNESS, "ET_BLINDNESS", 250, true, "blind",
-        "You can't see anything!",
-        "The blindness lifts.",
-        "The %s seems to be blinded.",
-        "Looks like the %s can see again.",
+        ET_BLINDNESS, "ET_BLINDNESS", 250, true, N_("blind"),
+        N_("You can't see anything!"),
+        N_("The blindness lifts."),
+        N_("%s seems to be blinded."),
+        N_("Looks like %s can see again."),
         true, false, false, false
     },
 
     {
-        ET_CLUMSINESS, "ET_CLUMSINESS", 250, true, "clumsy",
-        "You begin to lose hand to eye coordination!",
-        "You're less awkward now.",
+        ET_CLUMSINESS, "ET_CLUMSINESS", 250, true, N_("clumsy"),
+        N_("You begin to lose hand to eye coordination!"),
+        N_("You're less awkward now."),
         NULL, NULL,
         true, false, false, false
     },
 
     {
-        ET_ITCHING, "ET_ITCHING", 100, true, "itching",
-        "You feel an irritation spread over your skin!",
-        "The irritation subsides.",
+        ET_ITCHING, "ET_ITCHING", 100, true, N_("itching"),
+        N_("You feel an irritation spread over your skin!"),
+        N_("The irritation subsides."),
         NULL, NULL,
         true, false, false, false
     },
 
     {
-        ET_CONFUSION, "ET_CONFUSION", 25, true, "confused",
-        "You are confused.",
-        "You regain your senses.",
-        "The %s looks confused.",
-        "The %s seems to have regained it's senses.",
+        ET_CONFUSION, "ET_CONFUSION", 25, true, N_("confused"),
+        N_("You are confused."),
+        N_("You regain your senses."),
+        N_("%s looks confused."),
+        N_("%s seems to have regained it's senses."),
         true, false, false, false
     },
 
     {
-        ET_PARALYSIS, "ET_PARALYSIS", 25, true, "paralysed",
-        "You are paralysed.",
-        "You can move again.",
+        ET_PARALYSIS, "ET_PARALYSIS", 25, true, N_("paralysed"),
+        N_("You are paralysed."),
+        N_("You can move again."),
         NULL, NULL,
         true, false, false, false
     },
 
     {
-        ET_POISON, "ET_POISON", 300, 1, "poisoned",
+        ET_POISON, "ET_POISON", 300, 1, N_("poisoned"),
         NULL, /* message is shown in player_damage_take */
-        "You are cured.",
-        "The %s looks poisoned.",
-        "The %s looks cured.",
+        N_("You are cured."),
+        N_("%s looks poisoned."),
+        N_("%s looks cured."),
         true, false, true, true
     },
 
@@ -499,36 +501,36 @@ static const effect_data effects[ET_MAX] =
     },
 
     {
-        ET_SLOWNESS, "ET_SLOWNESS", 250, 25, "slow",
-        "You feel yourself slow down.",
-        "You are moving faster again.",
-        "The %s slows down.",
-        "The %s seems to move much faster.",
+        ET_SLOWNESS, "ET_SLOWNESS", 250, 25, N_("slow"),
+        N_("You feel yourself slow down."),
+        N_("You are moving faster again."),
+        N_("%s slows down."),
+        N_("%s seems to move much faster."),
         true, false, false, true
     },
 
     {
-        ET_BURDENED, "ET_BURDENED", 0, 25, "burdened",
-        "You are burdened.",
-        "You are no longer burdened.",
+        ET_BURDENED, "ET_BURDENED", 0, 25, N_("burdened"),
+        N_("You are burdened."),
+        N_("You are no longer burdened."),
         NULL, NULL,
         false, false, false, false
     },
 
     {
-        ET_OVERSTRAINED, "ET_OVERSTRAINED", 0, true, "overload",
-        "You are overloaded!",
-        "You are no longer overloaded.",
+        ET_OVERSTRAINED, "ET_OVERSTRAINED", 0, true, N_("overload"),
+        N_("You are overloaded!"),
+        N_("You are no longer overloaded."),
         NULL, NULL,
         false, false, false, false
     },
 
     {
-        ET_TRAPPED, "ET_TRAPPED", 10, true, "trapped",
+        ET_TRAPPED, "ET_TRAPPED", 10, true, N_("trapped"),
         NULL,
-        "You are no longer trapped!",
+        N_("You are no longer trapped!"),
         NULL,
-        "The %s climbs out of the pit!",
+        N_("%s climbs out of the pit!"),
         true, false, true, false
     },
 };
@@ -699,31 +701,31 @@ bool effect_type_inc_amount(effect_t type)
 const char *effect_get_desc(effect *e)
 {
     g_assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
-    return effects[e->type].desc;
+    return effects[e->type].desc ? _(effects[e->type].desc) : NULL;
 }
 
 const char *effect_get_msg_start(effect *e)
 {
     g_assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
-    return effects[e->type].msg_start;
+    return effects[e->type].msg_start ? _(effects[e->type].msg_start) : NULL;
 }
 
 const char *effect_get_msg_stop(effect *e)
 {
     g_assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
-    return effects[e->type].msg_stop;
+    return effects[e->type].msg_stop ? _(effects[e->type].msg_stop) : NULL;
 }
 
 const char *effect_get_msg_m_start(effect *e)
 {
     g_assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
-    return effects[e->type].msg_start_monster;
+    return effects[e->type].msg_start_monster ? _(effects[e->type].msg_start_monster) : NULL;
 }
 
 const char *effect_get_msg_m_stop(effect *e)
 {
     g_assert(e != NULL && e->type > ET_NONE && e->type < ET_MAX);
-    return effects[e->type].msg_stop_monster;
+    return effects[e->type].msg_stop_monster ? _(effects[e->type].msg_stop_monster) : NULL;
 }
 
 int effect_get_amount(effect *e)

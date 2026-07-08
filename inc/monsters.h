@@ -24,6 +24,7 @@
 #include <time.h>
 
 #include "cJSON.h"
+#include "grammar.h"
 #include "colours.h"
 #include "effects.h"
 #include "inventory.h"
@@ -205,6 +206,23 @@ monster_action_t monster_action(monster *m);
 
 /* other functions */
 const char *monster_get_name(monster *m);
+
+/**
+ * @brief Build a noun phrase with the monster's name, taking
+ *        visibility into account.
+ *
+ * @param m The monster.
+ * @param article The article to render.
+ * @param gcase The grammatical case of the noun phrase.
+ * @param capitalise Capitalise the first letter (for sentence starts).
+ * @return The noun phrase, e.g. "the orc" (see noun_phrase()).
+ */
+const char *monster_get_name_art(monster *m, article_t article,
+                                 grammar_case gcase, gboolean capitalise);
+
+/* as monster_get_name_art(), but based on the monster's real name */
+const char *monster_name_art(monster *m, article_t article,
+                             grammar_case gcase, gboolean capitalise);
 const char* monster_type_plural_name(monster_t mt, int count);
 void monster_die(monster *m, struct player *p);
 
@@ -294,6 +312,9 @@ const char *monster_sound(monster *m);
 
 /* query monster type data */
 const char *monster_type_name(monster_t type);
+/* the monster type name as an articled noun phrase */
+const char *monster_type_name_art(monster_t type, article_t article,
+                                  grammar_case gcase);
 int monster_type_ac(monster_t type);
 int monster_type_size(monster_t type);
 int monster_type_speed(monster_t type);

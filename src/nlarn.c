@@ -26,6 +26,8 @@
 #endif
 
 #include <ctype.h>
+#include <glib/gi18n.h>
+#include <locale.h>
 #include <stdlib.h>
 #include <glib/gstdio.h>
 
@@ -61,7 +63,7 @@
 const char *nlarn_version = STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_PATCH) GITREV;
 
 /* empty scoreboard description */
-const char *room_for_improvement = "\n...room for improvement...\n";
+const char *room_for_improvement = N_("\n...room for improvement...\n");
 
 /* path and file name constants*/
 static const char *default_lib_dir = "/usr/share/nlarn";
@@ -129,6 +131,40 @@ static const gchar *nlarn_userdir()
 }
 
 /* initialize runtime environment */
+/**
+ * Return the path of a data file, preferring locale-specific variants.
+ *
+ * For each of the user's configured languages (e.g. "de_DE", "de"), the
+ * file name with the language appended as a suffix (e.g. "nlarn.msg.de")
+ * is probed; the first existing file wins. The unlocalised file name is
+ * returned when no localised variant is available.
+ *
+ * @param filename The name of the file inside the game's lib directory.
+ * @return The path of the file to use (newly allocated).
+ */
+static const char *locale_filename(const char *filename)
+{
+    const gchar * const *languages = g_get_language_names();
+
+    for (guint idx = 0; languages[idx] != NULL; idx++)
+    {
+        /* the final entry "C" refers to the untranslated file */
+        if (strcmp(languages[idx], "C") == 0)
+            break;
+
+        g_autofree char *localized = g_strdup_printf("%s.%s",
+                filename, languages[idx]);
+        char *path = g_build_filename(nlarn_libdir, localized, NULL);
+
+        if (g_file_test(path, G_FILE_TEST_IS_REGULAR))
+            return path;
+
+        g_free(path);
+    }
+
+    return g_build_filename(nlarn_libdir, filename, NULL);
+}
+
 static void nlarn_init(int argc, char *argv[])
 {
     /* determine paths and file names */
@@ -178,10 +214,18 @@ static void nlarn_init(int argc, char *argv[])
         }
     }
 
-    nlarn_mesgfile = g_build_filename(nlarn_libdir, mesgfile, NULL);
-    nlarn_helpfile = g_build_filename(nlarn_libdir, helpfile, NULL);
+    setlocale (LC_ALL, "");
+#ifndef SETGID
+    g_autofree char *localedir = g_build_filename(nlarn_libdir, "locale", NULL);
+    bindtextdomain (PACKAGE, localedir);
+#endif
+    bind_textdomain_codeset (PACKAGE, "UTF-8");
+    textdomain (PACKAGE);
+
+    nlarn_mesgfile = locale_filename(mesgfile);
+    nlarn_helpfile = locale_filename(helpfile);
     nlarn_mazefile = g_build_filename(nlarn_libdir, mazefile, NULL);
-    nlarn_fortunes = g_build_filename(nlarn_libdir, fortunes, NULL);
+    nlarn_fortunes = locale_filename(fortunes);
 
     /*
      * We need to parse the command line here, as we might get a custom
@@ -251,7 +295,7 @@ static void nlarn_init(int argc, char *argv[])
         g_autofree char *s = scores_to_string(scores, NULL);
 
         g_printf("NLarn Hall of Fame\n==================\n%s",
-                scores ? s : room_for_improvement);
+                scores ? s : _(room_for_improvement));
         scores_destroy(scores);
 
         exit(EXIT_SUCCESS);
@@ -574,11 +618,11 @@ static void mainloop()
         case ';':
             if (!player_effect(nlarn->p, ET_BLINDNESS))
                 (void)display_get_new_position(nlarn->p, nlarn->p->pos,
-                        "Choose a position to examine", false, false,
+                        _("Choose a position to examine"), false, false,
                         false, 0, false, true);
             else
-                log_add_entry(nlarn->log, "You can't look around "
-                        "while blinded!");
+                log_add_entry(nlarn->log, _("You can't look around "
+                        "while blinded!"));
             break;
 
             /* pick up */
@@ -598,12 +642,12 @@ static void mainloop()
         case '?':
             if (g_file_get_contents(nlarn_helpfile, &strbuf, NULL, NULL))
             {
-                display_show_message("Help for the game of NLarn", strbuf, 1);
+                display_show_message(_("Help for the game of NLarn"), strbuf, 1);
                 g_free(strbuf);
             }
             else
             {
-                display_show_message("Error",
+                display_show_message(_("Error"),
                                      "\n The help file could not be found. \n", 0);
             }
             break;
@@ -621,19 +665,19 @@ static void mainloop()
 
             /* bank account information */
         case '$':
-            log_add_entry(nlarn->log, "There is %s gold on your bank account.",
+            log_add_entry(nlarn->log, _("There is %s gold on your bank account."),
                           int2str(nlarn->p->bank_account));
             break;
 
         case '\\':
             if ((strbuf = player_item_identified_list(nlarn->p)))
             {
-                display_show_message("Identified items", strbuf, 0);
+                display_show_message(_("Identified items"), strbuf, 0);
                 g_free(strbuf);
             }
             else
             {
-                log_add_entry(nlarn->log, "You have not discovered any item yet.");
+                log_add_entry(nlarn->log, _("You have not discovered any item yet."));
             }
             break;
 
@@ -705,11 +749,11 @@ static void mainloop()
         case 'P':
             if (nlarn->p->outstanding_taxes)
             {
-                log_add_entry(nlarn->log, "You presently owe %d gold in taxes.",
+                log_add_entry(nlarn->log, _("You presently owe %d gold in taxes."),
                               nlarn->p->outstanding_taxes);
             }
             else
-                log_add_entry(nlarn->log, "You do not owe any taxes.");
+                log_add_entry(nlarn->log, _("You do not owe any taxes."));
             break;
 
             /* drink a potion or from a fountain */
@@ -719,7 +763,7 @@ static void mainloop()
                                               nlarn->p->pos);
 
             if ((ms == LS_FOUNTAIN || ms == LS_DEADFOUNTAIN)
-                    && display_get_yesno("There is a fountain here, drink from it?",
+                    && display_get_yesno(_("There is a fountain here, drink from it?"),
                                          NULL, NULL, NULL))
             {
                 moves_count = player_fountain_drink(nlarn->p);
@@ -764,7 +808,7 @@ static void mainloop()
             /* voyage (travel) */
         case 'v':
             pos = display_get_new_position(nlarn->p, cpos,
-                                           "Choose a destination to travel to.",
+                                           _("Choose a destination to travel to."),
                                            false, false, true, 0, true, false);
 
             if (pos_valid(pos))
@@ -776,7 +820,7 @@ static void mainloop()
             }
             else
             {
-                log_add_entry(nlarn->log, "Aborted.");
+                log_add_entry(nlarn->log, _("Aborted."));
             }
             break;
 
@@ -796,7 +840,7 @@ static void mainloop()
                 ch = 0;
             }
             else
-                log_add_entry(nlarn->log, "No travel destination known.");
+                log_add_entry(nlarn->log, _("No travel destination known."));
             break;
 
             /* wear/wield something */
@@ -817,11 +861,11 @@ static void mainloop()
 
                 if (!settings)
                 {
-                    log_add_entry(nlarn->log, "Auto-pickup is not enabled.");
+                    log_add_entry(nlarn->log, _("Auto-pickup is not enabled."));
                 }
                 else
                 {
-                    log_add_entry(nlarn->log, "Auto-pickup is enabled for %s.", settings);
+                    log_add_entry(nlarn->log, _("Auto-pickup is enabled for %s."), settings);
                     g_free(settings);
                 }
             }
@@ -861,13 +905,13 @@ static void mainloop()
 
             /* quit */
         case 17: /* ^Q */
-            if (display_get_yesno("Are you sure you want to quit?", NULL, NULL, NULL))
+            if (display_get_yesno(_("Are you sure you want to quit?"), NULL, NULL, NULL))
                 player_die(nlarn->p, PD_QUIT, 0);
             break;
 
             /* message log browser */
         case 18: /* ^R */
-            display_show_history(nlarn->log, "Message history");
+            display_show_history(nlarn->log, _("Message history"));
             break;
 
             /* save */
@@ -884,24 +928,24 @@ static void mainloop()
             break;
 
         case 22: /* ^V */
-            log_add_entry(nlarn->log, "NLarn version %s, built on %s.", nlarn_version, __DATE__);
+            log_add_entry(nlarn->log, _("NLarn version %s, built on %s."), nlarn_version, __DATE__);
             break;
 
             /* enable wizard mode */
         case 23: /* ^W */
             if (!game_wizardmode(nlarn))
             {
-                if (display_get_yesno("Are you sure you want to switch to Wizard mode?\n" \
-                                      "You will not be able to switch back to normal " \
-                                      "gameplay and your score will not be counted.", NULL, NULL, NULL))
+                if (display_get_yesno(_("Are you sure you want to switch to Wizard mode?\n"
+                                      "You will not be able to switch back to normal "
+                                      "gameplay and your score will not be counted."), NULL, NULL, NULL))
                 {
                     game_wizardmode(nlarn) = true;
-                    log_add_entry(nlarn->log, "Wizard mode has been activated.");
+                    log_add_entry(nlarn->log, _("Wizard mode has been activated."));
                 }
             }
             else
             {
-                log_add_entry(nlarn->log, "Wizard mode is already enabled.");
+                log_add_entry(nlarn->log, _("Wizard mode is already enabled."));
             }
             break;
 
@@ -937,7 +981,7 @@ static void mainloop()
             if (game_wizardmode(nlarn))
             {
                 pos = display_get_new_position(nlarn->p, nlarn->p->pos,
-                                               "Choose a position to teleport to.",
+                                               _("Choose a position to teleport to."),
                                                false, false, true, 0, true, false);
 
                 if (pos_valid(pos))
@@ -1051,19 +1095,20 @@ static void mainloop()
 bool main_menu()
 {
     const char *main_menu_tpl =
-        "\n"
-        "      `KEY`a`end`) %s Game\n"
-        "      `KEY`b`end`) Configure Settings\n"
-        "      `KEY`c`end`) Visit the Hall of Fame\n"
-        "\n"
-        "      `KEY`q`end`) Quit Game\n"
-        "\n"
-        "    You have reached difficulty level %d\n";
+        _("\n"
+          "      `KEY`a`end`) %s\n"
+          "      `KEY`b`end`) Configure Settings\n"
+          "      `KEY`c`end`) Visit the Hall of Fame\n"
+          "\n"
+          "      `KEY`q`end`) Quit Game\n"
+          "\n"
+          "    You have reached difficulty level %d\n");
 
 
     g_autofree char *title = g_strdup_printf("NLarn %s", nlarn_version);
     g_autofree char *main_menu = g_strdup_printf(main_menu_tpl,
-        (game_turn(nlarn) == 1) ? "New" : "Continue saved", game_difficulty(nlarn));
+        (game_turn(nlarn) == 1) ? _("New Game") : _("Continue saved Game"),
+        game_difficulty(nlarn));
 
     int input = 0;
 
@@ -1086,8 +1131,8 @@ bool main_menu()
             GList *hs = scores_load();
             char *rendered_highscores = scores_to_string(hs, NULL);
 
-            display_show_message("NLarn Hall of Fame",
-                    highscores ? rendered_highscores : room_for_improvement, 12);
+            display_show_message(_("NLarn Hall of Fame"),
+                    highscores ? rendered_highscores : _(room_for_improvement), 12);
 
             if (hs)
             {
@@ -1121,7 +1166,7 @@ int main(int argc, char *argv[])
     }
 
     /* show message file */
-    display_show_message("Welcome to the game of NLarn!", message_file, 0);
+    display_show_message(_("Welcome to the game of NLarn!"), message_file, 0);
     g_free(message_file);
 
     /* Create the jump target for player death. Death will destroy the game
@@ -1149,14 +1194,14 @@ int main(int argc, char *argv[])
         /* ask for a character name if none has been supplied */
         while (nlarn->p->name == NULL)
         {
-            nlarn->p->name = display_get_string("Choose your name",
-                    "By what name shall you be called?", NULL, 45);
+            nlarn->p->name = display_get_string(_("Choose your name"),
+                    _("By what name shall you be called?"), NULL, 45);
         }
 
         /* ask for character's gender if it is not known yet */
         if (nlarn->p->sex == PS_NONE)
         {
-            int res = display_get_yesno("Are you male or female?", NULL, "Female", "Male");
+            int res = display_get_yesno(_("Are you male or female?"), NULL, _("Female"), _("Male"));
 
             /* display_get_yesno() returns 0 or one */
             nlarn->p->sex = (res == true) ? PS_FEMALE : PS_MALE;

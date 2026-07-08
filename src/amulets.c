@@ -1,6 +1,6 @@
 /*
  * amulets.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,6 +17,8 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
+
 #include "amulets.h"
 #include "items.h"
 #include "extdefs.h"
@@ -25,15 +27,15 @@ DEFINE_ENUM(amulet_t, AMULET_TYPE_ENUM)
 
 const amulet_data amulets[AM_MAX] =
 {
-    { AM_AWARENESS,           AMULET,   "awareness",        ET_AWARENESS,         400,  },
-    { AM_SUSTAINMENT,         AMULET,   "sustainment",      ET_SUSTAINMENT,       400,  },
-    { AM_UNDEAD_CONTROL,      TALISMAN, "undead control",   ET_UNDEAD_PROTECTION, 5000, },
-    { AM_NEGATE_SPIRIT,       TALISMAN, "negate spirit",    ET_SPIRIT_PROTECTION, 5000, },
-    { AM_NOTHEFT,             TALISMAN, "theft prevention", ET_NOTHEFT,           6000, },
-    { AM_DRAGON_SLAYING,      TALISMAN, "dragon slaying",   ET_NONE,              6000, },
-    { AM_POWER,               AMULET,   "power",            ET_NONE,              8000, },
-    { AM_REFLECTION,          AMULET,   "reflection",       ET_REFLECTION,        8000, },
-    { AM_LARN,                AMULET,   "Eye of Larn",      ET_INFRAVISION,       9000, },
+    { AM_AWARENESS,           AMULET,   NC_("amulet", "awareness"),        ET_AWARENESS,         400,  },
+    { AM_SUSTAINMENT,         AMULET,   NC_("amulet", "sustainment"),      ET_SUSTAINMENT,       400,  },
+    { AM_UNDEAD_CONTROL,      TALISMAN, NC_("amulet", "undead control"),   ET_UNDEAD_PROTECTION, 5000, },
+    { AM_NEGATE_SPIRIT,       TALISMAN, NC_("amulet", "negate spirit"),    ET_SPIRIT_PROTECTION, 5000, },
+    { AM_NOTHEFT,             TALISMAN, NC_("amulet", "theft prevention"), ET_NOTHEFT,           6000, },
+    { AM_DRAGON_SLAYING,      TALISMAN, NC_("amulet", "dragon slaying"),   ET_NONE,              6000, },
+    { AM_POWER,               AMULET,   NC_("amulet", "power"),            ET_NONE,              8000, },
+    { AM_REFLECTION,          AMULET,   NC_("amulet", "reflection"),       ET_REFLECTION,        8000, },
+    { AM_LARN,                AMULET,   NC_("amulet", "Eye of Larn"),      ET_INFRAVISION,       9000, },
 };
 
 static const int amulet_materials[AM_MAX] =

@@ -8,6 +8,7 @@ obj/
 *.o
 *.d
 *.res
+lib/locale/
 Changelog.html
 README.html
 
@@ -39,3 +40,4 @@ nlarn.depend
 
 # macOS
 .DS_Store
+po/*.mo

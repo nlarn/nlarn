@@ -1,6 +1,6 @@
 /*
  * spheres.c
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,6 +17,8 @@
  */
 
 #include <glib.h>
+
+#include <glib/gi18n.h>
 
 #include "game.h"
 #include "extdefs.h"
@@ -144,8 +146,8 @@ void sphere_move(sphere *s, game *g)
         {
             if (monster_in_sight(m))
             {
-                log_add_entry(nlarn->log, "The %s dispels the sphere!",
-                        monster_name(m));
+                log_add_entry(nlarn->log, _("%s dispels the sphere!"),
+                        monster_get_name_art(m, ART_DEF, GC_NOM, true));
             }
 
             sphere_destroy(s, g);
@@ -198,7 +200,7 @@ static sphere *sphere_at(const game *g, const position pos, const sphere *s)
 
 static void sphere_hit_owner(const game *g, sphere *s)
 {
-    log_add_entry(nlarn->log, "You are hit by a sphere of annihilation!");
+    log_add_entry(nlarn->log, _("You are hit by a sphere of annihilation!"));
 
     if (player_effect(s->owner, ET_CANCELLATION))
     {
@@ -253,7 +255,7 @@ static void sphere_hit_sphere(const game *g, sphere *s, sphere *other)
     else if(Z(g->p->pos) == Z(s->pos))
     {
         /* The player is on the same level as the spheres */
-        log_add_entry(nlarn->log, "You hear a great earth shaking blast!");
+        log_add_entry(nlarn->log, _("You hear a great earth shaking blast!"));
     }
 
     /* show the explosion site on the floor */

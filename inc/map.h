@@ -19,6 +19,8 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <libintl.h>
+
 #include "cJSON.h"
 #include "colours.h"
 #include "items.h"
@@ -207,10 +209,10 @@ damage *map_tile_damage(map *m, position pos, bool flying);
  *
  * @param m a map
  * @param pos a position
- * @param where "here" or "there"
+ * @param here true if the position is the player's own position
  * @param ifilter a filter function to restrict the described items
  */
-char *map_inv_description(map *m, position pos, const char* where, int (*ifilter)(item *));
+char *map_inv_description(map *m, position pos, bool here, int (*ifilter)(item *));
 
 char *map_pos_examine(position pos);
 
@@ -356,9 +358,22 @@ static inline int  mt_get_colour(const map_tile_t t)
     return map_tiles[t].colour;
 }
 
+/* The translated description, which may carry grammar metadata (see
+   grammar.h). As the English descriptions include their article where
+   the noun takes one ("a mountain" vs. "grass"), translations bake a
+   matching article into each case form. */
+static inline const char *mt_get_desc_raw(const map_tile_t t)
+{
+    return map_tiles[t].description ? gettext(map_tiles[t].description) : NULL;
+}
+
+/* the description as a nominative phrase; other cases are rendered
+   with noun_phrase(mt_get_desc_raw(t), ART_NONE, ...) */
 static inline const char *mt_get_desc(const map_tile_t t)
 {
-    return map_tiles[t].description;
+    return map_tiles[t].description
+        ? noun_phrase(mt_get_desc_raw(t), ART_NONE, GC_NOM, false, false)
+        : NULL;
 }
 
 static inline bool mt_is_passable(const map_tile_t t)

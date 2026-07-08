@@ -1,0 +1,114 @@
+`TITLE`Bewegung`end`           `TITLE`Rennen`end`
+
+ 7 8 9  y k u        Y K U
+  \|/    \|/          \|/
+ 4-5-6  h-.-l        H- -L
+  /|\    /|\          /|\
+ 1 2 3  b j n        B J N
+
+Du kannst auch den Ziffernblock mit ausgeschaltetem Num-Lock verwenden.
+Rennen bedeutet, sich in eine Richtung zu bewegen, bis etwas dazwischenkommt. `KEY`g`end` oder `KEY`/`end`, gefolgt von einer Richtungstaste, lässt dich ebenfalls rennen.
+
+
+`TITLE`Automatisches Reisen`end`
+
+`KEY`v`end`   zu einem Ort auf der Ebene reisen
+`KEY`V`end`   Reise fortsetzen
+
+Du wählst das Reiseziel, indem du den Cursor bewegst oder das Symbol des gewünschten Merkmals eintippst (z.B. `KEY`_`end` für einen Altar). Weitere Tastendrücke bewegen den Cursor weiter, falls es mehrere Merkmale dieser Art auf der Ebene gibt. Mit `KEY`@`end` kehrt der Cursor zu deinem Charakter zurück. Drücke abschließend die EINGABETASTE, um die Reise anzutreten. Kommt ein Feind in Sicht, wird die Reise automatisch abgebrochen; sie kann mit `KEY`V`end` fortgesetzt werden, sobald der Feind außer Sicht ist.
+
+
+`TITLE`Weitere Aktionen`end`
+
+`KEY`a`end`   den zuletzt gewirkten Zauber erneut wirken
+`KEY`A`end`   einen Altar entweihen
+`KEY`c`end`   einen Zauber wirken
+`KEY`C`end`   eine Tür schließen
+`KEY`d`end`   einen Gegenstand ablegen
+`KEY`D`end`   eine Falle entschärfen
+`KEY`f`end`   eine Fernkampfwaffe abfeuern
+`KEY`F`end`   dich an einem Brunnen waschen
+`KEY`g`end`   laufen, bis etwas Interessantes gefunden wird
+`KEY`i`end`   das Inventar öffnen
+`KEY`o`end`   eine Tür oder eine Truhe öffnen
+`KEY`p`end`   an einem Altar beten
+`KEY`P`end`   den Steuerstatus anzeigen
+`KEY`q`end`   einen Trank oder aus einem Brunnen trinken
+`KEY`r`end`   ein Buch oder eine Schriftrolle lesen
+`KEY`R`end`   Edelsteine von einem Thron lösen
+`KEY`s`end`   nach Fallen suchen
+`KEY`S`end`   auf einem Thron sitzen
+`KEY`t`end`   einen Gegenstand werfen
+`KEY`T`end`   einen getragenen/geführten Gegenstand ablegen
+`KEY`w`end`   bis zu einem Mobul warten/rasten oder bis zur Genesung
+`KEY`W`end`   einen Gegenstand anlegen/führen
+`KEY`x`end`   Erst- und Zweitwaffe tauschen
+
+`KEY`<`end`   Treppe/Vulkanschacht hinaufklettern
+`KEY`>`end`   Treppe/Vulkanschacht hinabklettern oder ein Gebäude betreten
+`KEY`,`end`   Gegenstände aufheben
+`KEY`$`end`   den Kontostand anzeigen
+`KEY`:`end`   den Ort betrachten, an dem du stehst
+`KEY`;`end`   einen anderen Ort betrachten
+`KEY`.`end`   eine Runde rasten (alternative Taste: `KEY`5`end`)
+`KEY`\`end`   eine Liste der identifizierten Objekte anzeigen
+`KEY`?`end`   diese Hilfe (alternative Taste: `KEY`F1`end`)
+
+
+`TITLE`Steuertasten`end`
+
+`KEY`TAB`end`     getragene Ausrüstung anzeigen
+`KEY`STRG+A`end`  das automatische Aufsammeln einrichten
+`KEY`STRG+D`end`  entdeckte Orientierungspunkte auflisten
+`KEY`STRG+D`end`  im Inventar, der Zauberliste und den Nachrichten abwärts blättern
+`KEY`STRG+L`end`  den Bildschirm neu zeichnen
+`KEY`STRG+P`end`  Voreinstellungen für neue Spiele festlegen
+`KEY`STRG+Q`end`  das Spiel beenden
+`KEY`STRG+R`end`  den Nachrichtenverlauf anzeigen
+`KEY`STRG+S`end`  das Spiel speichern und beenden
+`KEY`STRG+U`end`  im Inventar, der Zauberliste und den Nachrichten aufwärts blättern
+`KEY`STRG+V`end`  die Version des Spiels anzeigen
+
+
+`TITLE`Die Spielzeit`end`
+Die Spielzeit wird in `EMPH`Runden`end` gezählt. Üblicherweise verbraucht ein einzelner Schritt eine Runde, kann aber je nach deiner Geschwindigkeit mehr oder weniger Zeit in Anspruch nehmen. Auch die anderen Kreaturen in den Höhlen unterscheiden sich stark in ihrer Schnelligkeit. Es gibt Gerüchte über magische Gegenstände, die die Geschwindigkeit eines Lebewesens beeinflussen sollen.
+
+Umfangreichere Handlungen, etwa das Benutzen eines Gegenstands, verbrauchen mehrere Runden. Wann immer du eine Weile mit etwas beschäftigt bist und deine Gesundheit in Gefahr gerät, wird dir angeboten, dein aktuelles Vorhaben abzubrechen. Leider sind alle bis dahin aufgewendeten Runden verloren.
+
+Die larnische Zeiteinheit ist der `EMPH`Mobul`end`. Er besteht aus einhundert Runden.
+
+
+`TITLE`Das Inventar`end`
+
+Beim Durchstöbern des Inventars werden die für den gewählten Gegenstand verfügbaren Aktionen am unteren Rand des Fensters angezeigt. Die Taste, mit der die Aktion ausgelöst wird, steht in Klammern. Um zum ersten Gegenstand einer Art zu springen, drücke das Zeichen dieser Gegenstandsart. Zum Beispiel wählt `KEY`!`end` den ersten Trank im Inventar aus.
+
+`TITLE`Dialogfenster`end`
+
+Schließe ein Dialogfenster mit `KEY`EINGABE`end`/`KEY`LEERTASTE`end`, um eine Option auszuwählen, oder drücke `KEY`ESC`end`, um das Fenster ohne Auswahl zu schließen.
+Dialoge lassen sich mit Strg und den Pfeiltasten verschieben.
+
+
+`TITLE`Zaubern`end`
+
+Wenn du das Zauberfenster mit (`KEY`c`end`) öffnest, erhältst du eine Liste der Zaubersprüche, die dein Charakter beherrscht.
+
+`EMPH`Die erste Spalte`end` zeigt das Kürzel des Zaubers; durch Eintippen der Buchstaben kannst du zu einem Zauber springen.
+`EMPH`Die zweite Spalte`end` zeigt den Namen des Zaubers.
+`EMPH`Die dritte Spalte`end` zeigt die Stufe des Zaubers, die den MP-Verbrauch des Zaubers bestimmt.
+`EMPH`Die vierte Spalte`end` zeigt, wie gut dein Charakter den Zauber beherrscht. Je höher diese Stufe ist, desto mächtiger ist die Wirkung des Zaubers.
+
+
+`TITLE`Aktionen im Zauberermodus`end`
+
+Der Zauberermodus dient der Fehlersuche im Spiel; deshalb ist es unmöglich, im Zauberermodus zu sterben. Du erhältst Einblick in sonst verborgene Details des Spiels. Sobald du den Zauberermodus betrittst, gibt es kein Zurück; sämtlicher Fortschritt im Zauberermodus wird nicht in die Bestenliste aufgenommen.
+Wird das Spiel mit der Kommandozeilenoption für den Zauberermodus (`KEY`-w`end`) gestartet, ist jeder Gegenstand des Spiels im Laden erhältlich.
+
+`KEY`STRG+W`end`  den Zauberermodus aktivieren
+`KEY`+`end`       eine Ebene nach unten teleportieren
+`KEY`-`end`       eine Ebene nach oben teleportieren
+`KEY`STRG+T`end`  innerhalb einer Ebene teleportieren
+`KEY`STRG+X`end`  die Erfahrungsstufe erhöhen
+`KEY`*`end`       dem Bankkonto 1000 Goldstücke gutschreiben
+`KEY`&`end`       dich selbst heilen
+`KEY`STRG+F`end`  die volle Sichtbarkeit der gesamten Karte umschalten
+`KEY`STRG+C`end`  Kampfsimulation

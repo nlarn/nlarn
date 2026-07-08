@@ -11,7 +11,7 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-.PHONY: help clean dist
+.PHONY: help clean dist pot update-po
 
 ifndef config
   config=debug
@@ -115,13 +115,18 @@ ifeq ($(SETGID),Y)
 	CFLAGS += -DSETGID
 endif
 
+# Message catalogs
+POFILES := $(wildcard po/*.po)
+MOFILES := $(patsubst po/%.po,lib/locale/%/LC_MESSAGES/nlarn.mo,$(POFILES))
+
 # Enable creating packages when working on a git checkout
 ifneq ($(GITREV),)
   DIRNAME   = nlarn-$(VERSION)
   SRCPKG    = nlarn-$(VERSION).tar.gz
   PACKAGE   = $(DIRNAME)_$(OS).$(ARCH).$(ARCHIVE_SUFFIX)
   MAINFILES = nlarn$(SUFFIX) README.html LICENSE Changelog.html
-  LIBFILES += lib/fortune lib/maze lib/maze_doc.txt lib/nlarn.*
+  LIBFILES += lib/fortune* lib/maze lib/maze_doc.txt lib/nlarn.*
+  LIBFILES += lib/locale
 endif
 
 ifeq ($(OS),Darwin)
@@ -160,10 +165,28 @@ OBJECTS += $(patsubst src/external/%.c,$(OBJ_DIR)/external/%.o,$(wildcard src/ex
 INCLUDES := $(wildcard inc/*.h)
 INCLUDES += $(wildcard inc/external/*.h)
 
-all: nlarn$(SUFFIX)
+all: nlarn$(SUFFIX) $(MOFILES)
 
 nlarn$(SUFFIX): $(PDCLIB) $(OBJECTS) $(RESOURCES)
 	$(CC) -o $@ $(OBJECTS) $(PDCLIB) $(LDFLAGS) $(RESOURCES)
+
+# Extract translatable strings into the message template
+pot:
+	xgettext --from-code=UTF-8 --keyword=_ --keyword=N_ --keyword=C_:1c,2 --keyword=NC_:1c,2 \
+		--add-comments=TRANSLATORS --package-name=nlarn \
+		--package-version=$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH) \
+		--msgid-bugs-address=jdegroot@web.de \
+		-o po/nlarn.pot src/*.c
+
+# Merge new strings from the template into the message catalogs
+update-po: pot
+	for PO in $(POFILES) ; \
+	do msgmerge --update --backup=off $$PO po/nlarn.pot ; \
+	done
+
+lib/locale/%/LC_MESSAGES/nlarn.mo: po/%.po
+	mkdir -p $(dir $@)
+	msgfmt --check -o $@ $<
 
 obj/%.o: src/%.c ${INCLUDES}
 	@mkdir -p $(dir $@)
@@ -192,18 +215,18 @@ $(PDCLIB):
 	git submodule update --recommend-shallow
 	$(MAKE) -C PDCurses/sdl2 WIDE=Y UTF8=Y libs
 
-dist: clean $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
+dist: clean $(MOFILES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE)
 
 $(SRCPKG):
 	@echo -n Packing source archive $(SRCPKG)
 	git archive --prefix $(DIRNAME)/ --format=tar $(GITREV) | gzip > $(SRCPKG)
 	@echo " - done."
 
-$(PACKAGE): $(MAINFILES) $(DLLS)
+$(PACKAGE): $(MAINFILES) $(DLLS) $(MOFILES)
 	@echo -n Packing $(PACKAGE)
 	mkdir -p $(DIRNAME)/lib
 	cp -p $(MAINFILES) $(DLLS) $(DIRNAME)
-	cp -p $(LIBFILES) $(DIRNAME)/lib
+	cp -pR $(LIBFILES) $(DIRNAME)/lib
 	$(ARCHIVE_CMD) $(PACKAGE) $(DIRNAME)
 	rm -rf $(DIRNAME)
 	@echo " - done."
@@ -217,7 +240,12 @@ mainfiles.nsh:
 libfiles.nsh:
 	touch $@
 	for FILE in $(LIBFILES) ; \
-	do echo "  File \"$$FILE\"" | sed -e 's|/|\\|' >> $@; \
+	do WFILE=$$(echo "$$FILE" | sed -e 's|/|\\|g') ; \
+	if [ -d "$$FILE" ] ; then \
+		echo "  File /r \"$$WFILE\"" >> $@; \
+	else \
+		echo "  File \"$$WFILE\"" >> $@; \
+	fi ; \
 	done
 
 # The Windows installer
@@ -238,7 +266,7 @@ $(OSXIMAGE): $(MAINFILES)
 	dylibbundler -cd -d dmgroot/NLarn.app/Contents/MacOS/libs -b -x dmgroot/NLarn.app/Contents/MacOS/nlarn -p '@executable_path/libs/'
 # Copy required files
 	cp -p README.html Changelog.html dmgroot
-	cp -p $(LIBFILES) dmgroot/NLarn.app/Contents/Resources
+	cp -pR $(LIBFILES) dmgroot/NLarn.app/Contents/Resources
 	cp -p resources/NLarn.icns dmgroot/NLarn.app/Contents/Resources
 	cp -p resources/Info.plist dmgroot/NLarn.app/Contents
 # Update the version information in the plist
@@ -269,6 +297,7 @@ $(OSXIMAGE): $(MAINFILES)
 clean:
 	@echo Cleaning nlarn
 	rm -rf $(OBJ_DIR) $(DLLS)
+	rm -rf lib/locale
 	rm -f nlarn$(SUFFIX) $(RESOURCES) $(SRCPKG) $(PACKAGE) $(INSTALLER) $(OSXIMAGE) mainfiles.nsh libfiles.nsh README.html Changelog.html
 	@if \[ -n "$(PDCLIB)" -a -d PDcurses/sdl2 \]; then \
 		$(MAKE) -C PDCurses/sdl2 clean; \
@@ -286,8 +315,10 @@ help:
 	@echo "   SETGID=Y      - compile for system-wide installations on *nix platforms"
 	@echo ""
 	@echo "TARGETS:"
-	@echo "   all (default) - builds nlarn$(SUFFIX)"
+	@echo "   all (default) - builds nlarn$(SUFFIX) and message catalogs"
 	@echo "   clean         - cleans the working directory"
+	@echo "   pot           - extract translatable strings into po/nlarn.pot"
+	@echo "   update-po     - merge new strings into the po/*.po catalogs"
 	@if \[ -n "$(GITREV)" \]; then \
 		echo "   dist          - create source and binary packages for distribution"; \
 		echo "                   ($(SRCPKG) and"; \

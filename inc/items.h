@@ -20,6 +20,9 @@
 #define ITEM_H
 
 #include <glib.h>
+#include <libintl.h>
+
+#include "grammar.h"
 
 #include "colours.h"
 #include "effects.h"
@@ -165,7 +168,22 @@ int item_sort(gconstpointer a, gconstpointer b, gpointer data, bool force_id);
  *        article.
  * @return a newly allocated string that should be disposed with g_free().
  */
-gchar *item_describe(item *it, bool known, bool singular, bool definite);
+/**
+ * @brief Describe an item as a noun phrase.
+ *
+ * @param it The item.
+ * @param known Describe the item as if it was identified.
+ * @param singular Describe a single item even if it is a stack.
+ * @param definite Use the definite article.
+ * @param gcase The grammatical case of the noun phrase.
+ * @return The description (must be released with g_free()).
+ */
+gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
+                        grammar_case gcase);
+
+/* convenience wrapper: most messages use the item as direct object */
+#define item_describe(it, known, singular, definite) \
+    item_describe_gc(it, known, singular, definite, GC_ACC)
 
 item_material_t item_material(item *it);
 guint item_base_price(item *it);
@@ -248,8 +266,10 @@ static inline int item_condition_bonus(const item *it)
 
 /* item macros */
 #define item_glyph(type)          (item_data[(type)].glyph)
-#define item_name_sg(type)        (item_data[(type)].name_sg)
-#define item_name_pl(type)        (item_data[(type)].name_pl)
+/* the translated item type name, which may carry grammar metadata */
+#define item_name_sg_raw(type)    (gettext(item_data[(type)].name_sg))
+const char *item_name_sg(item_t type);
+const char *item_name_pl(item_t type);
 #define item_max_id(type)         (item_data[(type)].max_id)
 #define item_is_optimizable(type)     (item_data[(type)].optimizable)
 #define item_is_blessable(type)       (item_data[(type)].blessable)
@@ -259,8 +279,10 @@ static inline int item_condition_bonus(const item *it)
 #define item_is_stackable(type)       (item_data[(type)].stackable)
 #define item_is_identifyable(type)    (item_data[(type)].identifyable)
 #define item_is_desirable(type)       (item_data[(type)].desirable)
-#define item_material_name(type)      (item_materials[(type)].name)
-#define item_material_adjective(type) (item_materials[(type)].adjective)
+#define item_material_name(type)      (g_dpgettext2(NULL, "material", \
+                                                    item_materials[(type)].name))
+#define item_material_adjective(type) (g_dpgettext2(NULL, "material adjective", \
+                                                    item_materials[(type)].adjective))
 
 /* item filters */
 

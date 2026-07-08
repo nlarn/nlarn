@@ -1,6 +1,6 @@
 /*
  * rings.h
- * Copyright (C) 2009-2018 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,8 @@
 
 #ifndef RINGS_H
 #define RINGS_H
+
+#include <libintl.h>
 
 #include "effects.h"
 #include "enumFactory.h"
@@ -57,7 +59,7 @@ extern const ring_data rings[RT_MAX];
 
 /* macros */
 
-#define ring_name(item)          (rings[(item)->id].name)
+#define ring_name(item)          (g_dpgettext2(NULL, "ring", rings[(item)->id].name))
 #define ring_effect_t(item)   (rings[(item)->id].effect)
 #define ring_price(item)         (rings[(item)->id].price)
 #define ring_bonus_is_obs(item)  (rings[(item)->id].bonus_obs)

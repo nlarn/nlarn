@@ -1,6 +1,6 @@
 /*
  * scrolls.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * NLarn is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,11 @@
 
 #ifndef SCROLLS_H
 #define SCROLLS_H
+
+#include <libintl.h>
+#include <glib.h>
+
+#include "grammar.h"
 
 #include "enumFactory.h"
 #include "items.h"
@@ -80,7 +85,12 @@ extern const magic_scroll_data scrolls[ST_MAX];
 
 #define scroll_type_store_stock(id) (scrolls[(id)].store_stock)
 
-#define scroll_name(scroll)   (scrolls[(scroll)->id].name)
+#define scroll_name_raw(scroll) (g_dpgettext2(NULL, "scroll", \
+        scrolls[(scroll)->id].name))
+#define scroll_name(scroll)   (noun_phrase(scroll_name_raw(scroll), \
+        ART_NONE, GC_NOM, false, false))
+/* the scroll name as embedded in "scroll of %s" sentences */
+#define scroll_name_gen(scroll) (noun_genitive_attribute(scroll_name_raw(scroll)))
 #define scroll_effect(scroll) (scrolls[(scroll)->id].effect)
 #define scroll_price(scroll)  (scrolls[(scroll)->id].price)
 

@@ -1,6 +1,6 @@
 /*
  * sobjects.h
- * Copyright (C) 2009-2025 Joachim de Groot <jdegroot@web.de>
+ * Copyright (C) 2009-2026 Joachim de Groot <jdegroot@web.de>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,8 +19,11 @@
 #ifndef SOBJECTS_H
 #define SOBJECTS_H
 
+#include <libintl.h>
+
 #include "colours.h"
 #include "enumFactory.h"
+#include "grammar.h"
 
 /* forward declarations */
 struct player;
@@ -80,9 +83,22 @@ static inline colour_t so_get_colour(const sobject_t s)
     return sobjects[s].fg;
 }
 
+/* The translated description, which may carry grammar metadata (see
+   grammar.h). As the English descriptions include their article ("a holy
+   altar", "the bank of Larn", "your home"), translations bake the
+   matching article into each case form. */
+static inline const char *so_get_desc_raw(const sobject_t s)
+{
+    return sobjects[s].description ? gettext(sobjects[s].description) : NULL;
+}
+
+/* the description as a nominative phrase; other cases are rendered
+   with noun_phrase(so_get_desc_raw(s), ART_NONE, ...) */
 static inline const char *so_get_desc(const sobject_t s)
 {
-    return sobjects[s].description;
+    return sobjects[s].description
+        ? noun_phrase(so_get_desc_raw(s), ART_NONE, GC_NOM, false, false)
+        : NULL;
 }
 
 static inline bool so_is_passable(sobject_t s)
