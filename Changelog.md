@@ -4,7 +4,7 @@
 
 ### Changes
 
-* Translate the game to German
+* Translate the game to Spanish and German
 * Some monsters gained the ability to use ranged weapons and will try to
   maintain distance to the player while a ranged weapon is available
 * Implement allied monsters: finally a summoned demon will fight opponents
