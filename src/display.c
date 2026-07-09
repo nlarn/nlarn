@@ -1319,7 +1319,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             {
                 /* inside shop */
                 gchar *item_desc = item_describe_gc(it, true, false, false, GC_NOM);
-                mvwaprintw(iwin->window, line, 1, attrs, " %-*s %5d gold ",
+                mvwaprintw(iwin->window, line, 1, attrs, _(" %-*s %5d gold "),
                           utf8_pad(item_desc, width - 15), item_desc,
                           item_price(it));
 
@@ -1399,7 +1399,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (g_strv_length(captions) > 0)
         {
             /* append "(?) help" to trigger the help pop-up */
-            strv_append(&captions, "(`KEY`?`end`) help");
+            strv_append(&captions, _("(`KEY`?`end`) help"));
 
             /* update the window's caption with the assembled array of captions */
             display_window_update_caption(iwin, g_strjoinv(" ", captions));
@@ -1527,30 +1527,72 @@ void display_config_autopickup(bool settings[IT_MAX])
     int RUN = true;
     attr_t attrs; /* curses attributes */
 
-    const int height = 13;
-    const int width = 38;
+    /* left column: types 1-6 (IT_AMULET..IT_GEM); right column:
+       types 7-11 (IT_GOLD..IT_WEAPON) */
+    const item_t left_types[]  = { IT_AMULET, IT_AMMO, IT_ARMOUR, IT_BOOK, IT_CONTAINER, IT_GEM };
+    const item_t right_types[] = { IT_GOLD, IT_POTION, IT_RING, IT_SCROLL, IT_WEAPON };
+    const guint left_count = G_N_ELEMENTS(left_types);
+    const guint right_count = G_N_ELEMENTS(right_types);
+
+    /* determine the label column width from the longest translated
+       category label, so the layout fits any language */
+    glong label_width = 0;
+    for (guint i = 0; i < left_count; i++)
+        label_width = MAX(label_width,
+                g_utf8_strlen(item_name_pl(left_types[i]), -1));
+    for (guint i = 0; i < right_count; i++)
+        label_width = MAX(label_width,
+                g_utf8_strlen(item_name_pl(right_types[i]), -1));
+
+    /* column geometry, in window-relative coordinates */
+    const int left_glyph_col = 4;
+    const int left_label_col = left_glyph_col + 2;
+    const int column_gap = 3;
+    const int right_glyph_col = left_label_col + (int)label_width + column_gap;
+    const int right_label_col = right_glyph_col + 2;
+    const int columns_width = right_label_col + (int)label_width + 2;
+
+    /* the title and the introductory message may also require more
+       width than the columns do */
+    const char *title = _("Configure auto pick-up");
+    int width = MAX(columns_width, (int)g_utf8_strlen(title, -1) + 10);
+    width = MIN(width, min(COLS - 4, DISPLAY_WINDOW_MAX_WIDTH));
+
+    GPtrArray *intro_lines = text_wrap(
+            _("Item types which will be picked up automatically are "
+              "shown inverted."), width - 4, 0);
+
+    const int msg_row = (int)intro_lines->len + 1;
+    const int item_row = msg_row + 1;
+    const int toggle_row = item_row + 6 + 1;
+    const int height = toggle_row + 2;
 
     const int starty = (LINES - height) / 2;
     const int startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
-    display_window *cwin = display_window_new(startx, starty, width, height, _("Configure auto pick-up"));
+    display_window *cwin = display_window_new(startx, starty, width, height, title);
 
-    mvwaprintw(cwin->window, 1,  2, CP_UI_FG, "%s", _("Item types which will be picked up"));
-    mvwaprintw(cwin->window, 2,  2, CP_UI_FG, "%s", _("automatically are shown inverted. "));
+    for (guint i = 0; i < intro_lines->len; i++)
+    {
+        mvwaprintw(cwin->window, 1 + (int)i, 2, CP_UI_FG, "%s",
+                (char *)g_ptr_array_index(intro_lines, i));
+    }
+    text_destroy(intro_lines);
 
-    mvwaprintw(cwin->window, 4,  6, CP_UI_FG, "%s", _("amulets"));
-    mvwaprintw(cwin->window, 5,  6, CP_UI_FG, "%s", _("ammunition"));
-    mvwaprintw(cwin->window, 6,  6, CP_UI_FG, "%s", _("armour"));
-    mvwaprintw(cwin->window, 7,  6, CP_UI_FG, "%s", _("books"));
-    mvwaprintw(cwin->window, 8,  6, CP_UI_FG, "%s", _("containers"));
-    mvwaprintw(cwin->window, 9,  6, CP_UI_FG, "%s", _("gems"));
-    mvwaprintw(cwin->window, 4, 23, CP_UI_FG, "%s", _("money"));
-    mvwaprintw(cwin->window, 5, 23, CP_UI_FG, "%s", _("potions"));
-    mvwaprintw(cwin->window, 6, 23, CP_UI_FG, "%s", _("rings"));
-    mvwaprintw(cwin->window, 7, 23, CP_UI_FG, "%s", _("scrolls"));
-    mvwaprintw(cwin->window, 8, 23, CP_UI_FG, "%s", _("weapons"));
+    for (guint i = 0; i < left_count; i++)
+    {
+        mvwaprintw(cwin->window, item_row + (int)i, left_label_col, CP_UI_FG, "%s",
+                item_name_pl(left_types[i]));
+    }
+    for (guint i = 0; i < right_count; i++)
+    {
+        mvwaprintw(cwin->window, item_row + (int)i, right_label_col, CP_UI_FG, "%s",
+                item_name_pl(right_types[i]));
+    }
 
-    mvwaprintw(cwin->window, 11, 4, CP_UI_FG, "%s", _("Type a symbol to toggle."));
+    const char *toggle_msg = _("Type a symbol to toggle.");
+    int toggle_col = MAX(2, (width - (int)g_utf8_strlen(toggle_msg, -1)) / 2);
+    mvwaprintw(cwin->window, toggle_row, toggle_col, CP_UI_FG, "%s", toggle_msg);
 
     do
     {
@@ -1564,8 +1606,8 @@ void display_config_autopickup(bool settings[IT_MAX])
                 attrs = CP_UI_FG;
 
             /* x / y position of the glyph depends on the item type number */
-            int xpos = it < 7 ? 4 : 21;
-            int ypos = it < 7 ? 3 + it : it - 3;
+            int xpos = it < 7 ? left_glyph_col : right_glyph_col;
+            int ypos = item_row + (it < 7 ? (int)it - 1 : (int)it - 7);
             mvwaprintw(cwin->window, ypos, xpos, attrs, "%c", item_glyph(it));
         }
 

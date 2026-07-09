@@ -333,6 +333,26 @@ static void load_ending_tables(void)
     ending_tables_loaded = true;
 }
 
+/* The position of attributive adjectives is a property of the language:
+   English and German place them before the noun, the Romance languages
+   after it. */
+static gboolean adjectives_follow_noun(void)
+{
+    static int position = -1;
+
+    if (position == -1)
+    {
+        /* TRANSLATORS: The position of attributive adjectives relative
+           to the noun. Translate to "after" for languages that place
+           adjectives after the noun ("una poción roja"); leave
+           untranslated or translate to "before" otherwise. */
+        position = (strcmp(C_("grammar", "adjective position"),
+                           "after") == 0);
+    }
+
+    return position;
+}
+
 /* find the adjective ending for an article kind and noun class, trying
    progressively shorter prefixes of the requested class marker */
 static const char *adjective_ending(article_t article, const char *marker,
@@ -556,12 +576,21 @@ const char *noun_phrase_adj(const char *noun, const char *adjectives,
         const char *ending = adjective_ending(article, marker, gcase, plural);
 
         GString *resolved = g_string_new(NULL);
-        if (adjectives != NULL)
+        if (adjectives != NULL && adjectives_follow_noun())
+        {
+            /* the language places adjectives after the noun */
+            append_declined(resolved, forms[use], ending);
+            g_string_append_c(resolved, ' ');
+            append_declined(resolved, adjectives, ending);
+        }
+        else if (adjectives != NULL)
         {
             append_declined(resolved, adjectives, ending);
             g_string_append_c(resolved, ' ');
+            append_declined(resolved, forms[use], ending);
         }
-        append_declined(resolved, forms[use], ending);
+        else
+            append_declined(resolved, forms[use], ending);
         const char *form = resolved->str;
 
         const char *art = (article == ART_NONE)

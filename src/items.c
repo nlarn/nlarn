@@ -687,6 +687,24 @@ const char *item_name_pl(item_t type)
                        ART_NONE, GC_NOM, true, false);
 }
 
+/* Append a name into an "of %s"-style item type template. Most
+   languages render these as a head noun with the name embedded as a
+   definite genitive attribute ("ring of %s" -> "m:anillo %1$s|..." ->
+   "anillo de protección"). Some languages instead form a compound word
+   for certain item types (German potions: "Heiltrank", not "Trank der
+   Heilung"); those translate the template to the bare placeholder
+   "%s", signalling that the name should be embedded as-is and
+   re-parsed as the item's own noun metadata by the noun_has_class()
+   check below. */
+static void item_desc_append_of(GString *desc, const char *tmpl,
+                                const char *raw_name)
+{
+    if (strcmp(tmpl, "%s") == 0)
+        g_string_append(desc, raw_name);
+    else
+        g_string_append_printf(desc, tmpl, noun_genitive_attribute(raw_name));
+}
+
 gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
                         grammar_case gcase)
 {
@@ -749,9 +767,9 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
     {
     case IT_AMULET:
         if (known)
-            g_string_append_printf(desc, amulet_type(it) == AMULET
+            item_desc_append_of(desc, amulet_type(it) == AMULET
                         ? _("amulet of %s") : _("talisman of %s"),
-                    noun_genitive_attribute(item_desc_get(it, known)));
+                    item_desc_get(it, known));
         else
             g_string_append_printf(desc, _("%s amulet"), item_desc_get(it, known));
         break;
@@ -779,9 +797,9 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
            "das Buch des Schutzes" */
         if (known)
         {
-            g_string_append_printf(desc, (!singular && it->count > 1)
+            item_desc_append_of(desc, (!singular && it->count > 1)
                         ? _("books of %s") : _("book of %s"),
-                    noun_genitive_attribute(item_desc_get(it, known)));
+                    item_desc_get(it, known));
         }
         else
             g_string_append_printf(desc, (!singular && it->count > 1)
@@ -822,7 +840,7 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
     case IT_POTION:
         if (known)
         {
-            g_string_append_printf(desc, (!singular && it->count > 1)
+            item_desc_append_of(desc, (!singular && it->count > 1)
                                        ? _("potions of %s") : _("potion of %s"),
                                    item_desc_get(it, known));
         }
@@ -834,8 +852,7 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
 
     case IT_RING:
         if (known)
-            g_string_append_printf(desc, _("ring of %s"),
-                    noun_genitive_attribute(item_desc_get(it, known)));
+            item_desc_append_of(desc, _("ring of %s"), item_desc_get(it, known));
         else
             g_string_append_printf(desc, _("%s ring"), item_desc_get(it, known));
 
@@ -846,9 +863,9 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
     case IT_SCROLL:
         if (known)
         {
-            g_string_append_printf(desc, (!singular && it->count > 1)
+            item_desc_append_of(desc, (!singular && it->count > 1)
                         ? _("scrolls of %s") : _("scroll of %s"),
-                    noun_genitive_attribute(item_desc_get(it, known)));
+                    item_desc_get(it, known));
         }
         else
         {
