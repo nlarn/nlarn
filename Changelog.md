@@ -24,6 +24,7 @@
 * Modify Sonic Spear damage and take enemy's size into account
 * Turn the gelatinous cube into a passive monster
 * Adapt how statues react when being hit to the original Larn
+* Allow dragging windows with the mouse
 
 ### Fixed bugs
 

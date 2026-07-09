@@ -24,6 +24,8 @@
 
 #ifdef SDLPDCURSES
 # define PDC_WIDE
+/* request the ncurses-compatible mouse interface */
+# define PDC_NCMOUSE
 # include "sdl2/pdcsdl.h"
 # undef min
 # undef max
@@ -57,7 +59,6 @@ static void display_inventory_help(GPtrArray *callbacks);
 static display_window *display_window_new(int x1, int y1, int width,
         int height, const char *title);
 
-static int display_window_move(display_window *dwin, int key);
 static void display_window_update_title(display_window *dwin, const char *title);
 static void display_window_update_caption(display_window *dwin, char *caption);
 static void display_window_update_arrow_up(display_window *dwin, bool on);
@@ -137,6 +138,22 @@ void display_init()
 
     /* want all 8 bits */
     meta(stdscr, true);
+
+    /* Enable mouse support: window dragging needs the left button's
+       press and release events plus the pointer position while the
+       button is held. PDCurses reports the latter as BUTTONn_MOVED
+       events, ncurses as REPORT_MOUSE_POSITION. */
+#ifdef NCURSES_VERSION
+    mousemask(BUTTON1_PRESSED | BUTTON1_RELEASED | BUTTON1_CLICKED
+            | REPORT_MOUSE_POSITION, NULL);
+#else
+    mousemask(BUTTON1_PRESSED | BUTTON1_RELEASED | BUTTON1_CLICKED
+            | BUTTON1_MOVED, NULL);
+#endif
+
+    /* Report press and release events separately and immediately
+       instead of merging them into click events after a delay. */
+    mouseinterval(0);
 
     /* make cursor invisible */
     curs_set(0);
@@ -1442,6 +1459,10 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             break;
 
         default:
+            /* handle window movement (including dragging by mouse) */
+            if (display_window_move(iwin, key))
+                break;
+
             if (list_handle_scroll_key(&s, key, inv, ifilter, visible_category_headers))
                 break;
 
@@ -3264,6 +3285,12 @@ void display_windows_destroy_all()
     }
 }
 
+/* The mouse event belonging to the last KEY_MOUSE key code returned
+   by display_getch(). Retrieving the event right away keeps the mouse
+   event queue in sync with the key codes even when a KEY_MOUSE key is
+   discarded by an input loop that does not care for the mouse. */
+static MEVENT display_mouse_event;
+
 int display_getch(WINDOW *win) {
     int ch = wgetch(win ? win : stdscr);
 #ifdef SDLPDCURSES
@@ -3277,6 +3304,15 @@ int display_getch(WINDOW *win) {
             ch = wgetch(win ? win : stdscr);
         }
 #endif
+
+    if (ch == KEY_MOUSE)
+    {
+        memset(&display_mouse_event, 0, sizeof(display_mouse_event));
+        /* a failed retrieval leaves an all-zero event, which no mouse
+           handling code reacts upon */
+        getmouse(&display_mouse_event);
+    }
+
     return ch;
 }
 
@@ -3488,7 +3524,59 @@ static display_window *display_window_new(int x1, int y1, int width,
     return dwin;
 }
 
-static int display_window_move(display_window *dwin, int key)
+/* Move the window while the left mouse button, pressed on the
+   window's title bar, is held down. Reacts on the mouse event stored
+   by display_getch(); returns true when that event grabbed the title
+   bar. */
+static bool display_window_drag(display_window *dwin)
+{
+    const MEVENT *me = &display_mouse_event;
+
+    /* only a left button press on the top border starts a drag */
+    if (!(me->bstate & BUTTON1_PRESSED)
+            || me->y != (int)dwin->y1
+            || me->x < (int)dwin->x1
+            || me->x >= (int)(dwin->x1 + dwin->width))
+    {
+        return false;
+    }
+
+    /* the grabbed spot shall stay under the pointer while dragging */
+    const int grab_x = me->x - dwin->x1;
+
+    int key;
+    while ((key = display_getch(dwin->window)) != ERR)
+    {
+        if (key != KEY_MOUSE)
+        {
+            /* keyboard input ends the drag; leave the key for the
+               window's own input handling */
+            ungetch(key);
+            break;
+        }
+
+        if (me->bstate & BUTTON1_RELEASED)
+            break;
+
+        /* clamp the new position to the screen */
+        int nx = me->x - grab_x;
+        int ny = me->y;
+        nx = CLAMP(nx, 0, MAX(0, COLS - (int)dwin->width));
+        ny = CLAMP(ny, 0, MAX(0, LINES - (int)dwin->height));
+
+        if ((guint)nx != dwin->x1 || (guint)ny != dwin->y1)
+        {
+            dwin->x1 = nx;
+            dwin->y1 = ny;
+            move_panel(dwin->panel, dwin->y1, dwin->x1);
+            display_draw();
+        }
+    }
+
+    return true;
+}
+
+int display_window_move(display_window *dwin, int key)
 {
     bool need_refresh = true;
 
@@ -3496,6 +3584,10 @@ static int display_window_move(display_window *dwin, int key)
 
     switch (key)
     {
+    case KEY_MOUSE:
+        need_refresh = display_window_drag(dwin);
+        break;
+
     case 0:
         /* The Windows keys generate two key presses, of which the first
            is a zero. Flush the buffer or the second key code will confuse

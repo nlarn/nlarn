@@ -85,7 +85,7 @@ Al navegar por el inventario, las acciones válidas para el objeto seleccionado 
 `TITLE`Ventanas de diálogo`end`
 
 Cierra una ventana de diálogo con `KEY`INTRO`end`/`KEY`espacio`end` para elegir una opción, o pulsa `KEY`ESC`end` para cerrarla sin elegir nada.
-Puedes mover los diálogos con Ctrl y las teclas de cursor.
+Puedes mover los diálogos con Ctrl y las teclas de cursor, o arrastrándolos con el ratón por su barra de título.
 
 
 `TITLE`Lanzamiento de hechizos`end`

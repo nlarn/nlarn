@@ -378,6 +378,12 @@ void configure_defaults(const char *inifile)
 
     bool leaving = false;
 
+    /* The popup is recreated after every key press; remember its
+       position so that moving or dragging the window is not undone
+       on the next iteration. */
+    int winx = COLS / 2 - 34;
+    int winy = LINES / 2 - 6;
+
     while (!leaving)
     {
         /* name */
@@ -423,7 +429,7 @@ void configure_defaults(const char *inifile)
         if (abuf) g_free(abuf);
         g_free(lucss);
 
-        display_window *cwin = display_popup(COLS / 2 - 34, LINES / 2 - 6, 68,
+        display_window *cwin = display_popup(winx, winy, 68,
                 _("Configure game defaults"), msg, 30);
         g_free(msg);
 
@@ -578,9 +584,15 @@ void configure_defaults(const char *inifile)
                 break;
 
             default:
-                /* ignore input */
+                /* handle window movement (including dragging by mouse) */
+                display_window_move(cwin, res);
                 break;
         }
+
+        /* keep the window's position, it may have been moved */
+        winx = cwin->x1;
+        winy = cwin->y1;
+
         display_window_destroy(cwin);
     }
 

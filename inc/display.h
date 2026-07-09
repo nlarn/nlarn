@@ -24,6 +24,10 @@
 #define NCURSES_WIDECHAR 1
 #endif
 
+/* Request PDCurses' ncurses-compatible mouse interface (mousemask(),
+   getmouse(), MEVENT); ignored by ncurses itself. */
+#define PDC_NCMOUSE
+
 #include <curses.h>
 #include <panel.h>
 #include <glib.h>
@@ -199,6 +203,17 @@ int display_show_message(const char *title, const char *message, int indent);
  */
 display_window *display_popup(int x1, int y1, int width, const char *title,
     const char *msg, int indent);
+
+/**
+ * @brief Handle window movement, including dragging by mouse.
+ *
+ * Call this for key codes an input loop does not handle itself.
+ *
+ * @param dwin A pointer to a window structure.
+ * @param key The received key code.
+ * @return true when the key was consumed by moving the window.
+ */
+int display_window_move(display_window *dwin, int key);
 
 /**
  * @brief Destroy a window and the resources allocated for it.
