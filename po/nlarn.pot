@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-10 20:09+0200\n"
+"POT-Creation-Date: 2026-07-10 22:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -925,11 +925,11 @@ msgstr ""
 msgid "Choose default gender"
 msgstr ""
 
-#: src/config.c:464 src/nlarn.c:1246
+#: src/config.c:464 src/nlarn.c:1274
 msgid "Female"
 msgstr ""
 
-#: src/config.c:464 src/nlarn.c:1246
+#: src/config.c:464 src/nlarn.c:1274
 msgid "Male"
 msgstr ""
 
@@ -951,8 +951,8 @@ msgstr ""
 msgid "Font size (6 - 48): "
 msgstr ""
 
-#: src/config.c:570 src/game.c:115 src/map.c:1958 src/nlarn.c:650
-#: src/player.c:5317 src/player.c:5325 src/player.c:5350
+#: src/config.c:570 src/game.c:115 src/map.c:1958 src/nlarn.c:658
+#: src/player.c:5323 src/player.c:5331 src/player.c:5356
 msgid "Error"
 msgstr ""
 
@@ -1013,7 +1013,7 @@ msgstr ""
 msgid "your storage room"
 msgstr ""
 
-#: src/container.c:173 src/sobjects.c:466 src/sobjects.c:536 src/spells.c:1145
+#: src/container.c:173 src/sobjects.c:466 src/sobjects.c:536 src/spells.c:1167
 msgid "Huh?"
 msgstr ""
 
@@ -1088,74 +1088,74 @@ msgstr ""
 msgid "You are engulfed in a cloud of dust!"
 msgstr ""
 
-#: src/display.c:479
+#: src/display.c:482
 msgid "unarmed"
-msgstr ""
-
-#: src/display.c:1351
-#, c-format
-msgid " %-*s %5d gold "
 msgstr ""
 
 #: src/display.c:1379
 #, c-format
+msgid " %-*s %5d gold "
+msgstr ""
+
+#: src/display.c:1407
+#, c-format
 msgid "%s - %d gold on bank account"
 msgstr ""
 
-#: src/display.c:1388
+#: src/display.c:1416
 #, c-format
 msgid "%s - %s of %s carried"
 msgstr ""
 
-#: src/display.c:1431
+#: src/display.c:1459
 msgid "(`KEY`?`end`) help"
 msgstr ""
 
-#: src/display.c:1590
+#: src/display.c:1618
 msgid "Configure auto pick-up"
 msgstr ""
 
-#: src/display.c:1595
+#: src/display.c:1623
 msgid "Item types which will be picked up automatically are shown inverted."
 msgstr ""
 
-#: src/display.c:1626
+#: src/display.c:1654
 msgid "Type a symbol to toggle."
 msgstr ""
 
-#: src/display.c:1779
+#: src/display.c:1830
 #, c-format
 msgid "Really cast %s?"
 msgstr ""
 
-#: src/display.c:2270
+#: src/display.c:2322
 msgid "Yes"
 msgstr ""
 
-#: src/display.c:2273
+#: src/display.c:2325
 msgid "No"
 msgstr ""
 
-#: src/display.c:2969
+#: src/display.c:3021
 #, c-format
 msgid "Looking for '%c' (%s)."
 msgstr ""
 
-#: src/display.c:3589
+#: src/display.c:3641
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
 msgstr ""
 
-#: src/display.c:3612
+#: src/display.c:3664
 msgid "There are no options available for the selected item."
 msgstr ""
 
-#: src/display.c:3631
+#: src/display.c:3683
 msgid "Help"
 msgstr ""
 
-#: src/display.c:3919
+#: src/display.c:3971
 msgid "Item details"
 msgstr ""
 
@@ -1299,7 +1299,7 @@ msgstr ""
 msgid "You are no longer invisible."
 msgstr ""
 
-#: src/effects.c:203 src/spells.c:854
+#: src/effects.c:203 src/spells.c:876
 #, c-format
 msgid "%s disappears."
 msgstr ""
@@ -1772,7 +1772,7 @@ msgstr ""
 msgid "For a list of commands, press '?'."
 msgstr ""
 
-#: src/game.c:163 src/nlarn.c:985
+#: src/game.c:163 src/nlarn.c:1004
 msgid "Wizard mode has been activated."
 msgstr ""
 
@@ -3162,7 +3162,7 @@ msgstr ""
 msgid "%s sinks like a rock!"
 msgstr ""
 
-#: src/monsters.c:1989 src/spells.c:1343
+#: src/monsters.c:1989 src/spells.c:1365
 #, c-format
 msgid "%s is trapped in the wall!"
 msgstr ""
@@ -3231,7 +3231,7 @@ msgstr ""
 msgid "%s misses you."
 msgstr ""
 
-#: src/monsters.c:2415 src/monsters.c:4259 src/spells.c:1897
+#: src/monsters.c:2415 src/monsters.c:4259 src/spells.c:1919
 #, c-format
 msgid "%s hits you!"
 msgstr ""
@@ -3365,7 +3365,7 @@ msgid "You feel a sense of loss."
 msgstr ""
 
 #: src/monsters.c:3403 src/scrolls.c:257 src/scrolls.c:723 src/scrolls.c:817
-#: src/scrolls.c:856 src/spells.c:1108 src/spells.c:1726 src/spells.c:1740
+#: src/scrolls.c:856 src/spells.c:1130 src/spells.c:1748 src/spells.c:1762
 msgid "Nothing happens."
 msgstr ""
 
@@ -3409,17 +3409,17 @@ msgstr ""
 msgid "%s says, \"%s\""
 msgstr ""
 
-#: src/monsters.c:4243 src/spells.c:1879
+#: src/monsters.c:4243 src/spells.c:1901
 #, c-format
 msgid "Your amulet reflects %s!"
 msgstr ""
 
-#: src/monsters.c:4251 src/spells.c:1888
+#: src/monsters.c:4251 src/spells.c:1910
 #, c-format
 msgid "%s whizzes by you!"
 msgstr ""
 
-#: src/monsters.c:4292 src/spells.c:1829
+#: src/monsters.c:4292 src/spells.c:1851
 #, c-format
 msgid "The mirror reflects %s!"
 msgstr ""
@@ -3430,95 +3430,95 @@ msgid ""
 "...room for improvement...\n"
 msgstr ""
 
-#: src/nlarn.c:621
+#: src/nlarn.c:629
 msgid "Choose a position to examine"
 msgstr ""
 
-#: src/nlarn.c:624
+#: src/nlarn.c:632
 msgid "You can't look around while blinded!"
 msgstr ""
 
-#: src/nlarn.c:645
+#: src/nlarn.c:653
 msgid "Help for the game of NLarn"
 msgstr ""
 
-#: src/nlarn.c:668
+#: src/nlarn.c:676
 #, c-format
 msgid "There is %s gold on your bank account."
 msgstr ""
 
-#: src/nlarn.c:675
+#: src/nlarn.c:683
 msgid "Identified items"
 msgstr ""
 
-#: src/nlarn.c:680
+#: src/nlarn.c:688
 msgid "You have not discovered any item yet."
 msgstr ""
 
-#: src/nlarn.c:794
+#: src/nlarn.c:813
 #, c-format
 msgid "You presently owe %d gold in taxes."
 msgstr ""
 
-#: src/nlarn.c:798
+#: src/nlarn.c:817
 msgid "You do not owe any taxes."
 msgstr ""
 
-#: src/nlarn.c:808
+#: src/nlarn.c:827
 msgid "There is a fountain here, drink from it?"
 msgstr ""
 
-#: src/nlarn.c:853
+#: src/nlarn.c:872
 msgid "Choose a destination to travel to."
 msgstr ""
 
-#: src/nlarn.c:865 src/player.c:3759 src/spells.c:725 src/spells.c:902
-#: src/spells.c:966 src/spells.c:1002 src/spells.c:1042 src/spells.c:1056
+#: src/nlarn.c:884 src/player.c:3759 src/spells.c:747 src/spells.c:924
+#: src/spells.c:988 src/spells.c:1024 src/spells.c:1064 src/spells.c:1078
 msgid "Aborted."
 msgstr ""
 
-#: src/nlarn.c:885
+#: src/nlarn.c:904
 msgid "No travel destination known."
 msgstr ""
 
-#: src/nlarn.c:906
+#: src/nlarn.c:925
 msgid "Auto-pickup is not enabled."
 msgstr ""
 
-#: src/nlarn.c:910
+#: src/nlarn.c:929
 #, c-format
 msgid "Auto-pickup is enabled for %s."
 msgstr ""
 
-#: src/nlarn.c:950
+#: src/nlarn.c:969
 msgid "Are you sure you want to quit?"
 msgstr ""
 
-#: src/nlarn.c:956
+#: src/nlarn.c:975
 msgid "Message history"
 msgstr ""
 
-#: src/nlarn.c:973
+#: src/nlarn.c:992
 #, c-format
 msgid "NLarn version %s, built on %s."
 msgstr ""
 
-#: src/nlarn.c:980
+#: src/nlarn.c:999
 msgid ""
 "Are you sure you want to switch to Wizard mode?\n"
 "You will not be able to switch back to normal gameplay and your score will "
 "not be counted."
 msgstr ""
 
-#: src/nlarn.c:990
+#: src/nlarn.c:1009
 msgid "Wizard mode is already enabled."
 msgstr ""
 
-#: src/nlarn.c:1026
+#: src/nlarn.c:1045
 msgid "Choose a position to teleport to."
 msgstr ""
 
-#: src/nlarn.c:1140
+#: src/nlarn.c:1168
 #, c-format
 msgid ""
 "\n"
@@ -3531,31 +3531,31 @@ msgid ""
 "    You have reached difficulty level %d\n"
 msgstr ""
 
-#: src/nlarn.c:1152
+#: src/nlarn.c:1180
 msgid "New Game"
 msgstr ""
 
-#: src/nlarn.c:1152
+#: src/nlarn.c:1180
 msgid "Continue saved Game"
 msgstr ""
 
-#: src/nlarn.c:1176
+#: src/nlarn.c:1204
 msgid "NLarn Hall of Fame"
 msgstr ""
 
-#: src/nlarn.c:1211
+#: src/nlarn.c:1239
 msgid "Welcome to the game of NLarn!"
 msgstr ""
 
-#: src/nlarn.c:1239
+#: src/nlarn.c:1267
 msgid "Choose your name"
 msgstr ""
 
-#: src/nlarn.c:1240
+#: src/nlarn.c:1268
 msgid "By what name shall you be called?"
 msgstr ""
 
-#: src/nlarn.c:1246
+#: src/nlarn.c:1274
 msgid "Are you male or female?"
 msgstr ""
 
@@ -4393,80 +4393,80 @@ msgstr ""
 msgid "picking up %s"
 msgstr ""
 
-#: src/player.c:4935
+#: src/player.c:4941
 msgid "*) ignoring instakills\n"
 msgstr ""
 
-#: src/player.c:4937
+#: src/player.c:4943
 msgid "Fighting statistics"
 msgstr ""
 
-#: src/player.c:4939
+#: src/player.c:4945
 msgid "Do you want to save the calculations?"
 msgstr ""
 
-#: src/player.c:4944 src/player.c:5296
+#: src/player.c:4950 src/player.c:5302
 msgid "Enter filename: "
 msgstr ""
 
-#: src/player.c:4976
+#: src/player.c:4982
 msgid "Necklace:"
 msgstr ""
 
-#: src/player.c:4977
+#: src/player.c:4983
 msgid "Main weapon:"
 msgstr ""
 
-#: src/player.c:4978
+#: src/player.c:4984
 msgid "Sec. weapon:"
 msgstr ""
 
-#: src/player.c:4979
+#: src/player.c:4985
 msgid "In quiver:"
 msgstr ""
 
-#: src/player.c:4980
+#: src/player.c:4986
 msgid "Boots:"
 msgstr ""
 
-#: src/player.c:4981
+#: src/player.c:4987
 msgid "Cloak:"
 msgstr ""
 
-#: src/player.c:4982
+#: src/player.c:4988
 msgid "Gloves:"
 msgstr ""
 
-#: src/player.c:4983
+#: src/player.c:4989
 msgid "Helmet:"
 msgstr ""
 
-#: src/player.c:4984
+#: src/player.c:4990
 msgid "Shield:"
 msgstr ""
 
-#: src/player.c:4985
+#: src/player.c:4991
 msgid "Body armour:"
 msgstr ""
 
-#: src/player.c:4986
+#: src/player.c:4992
 msgid "Left ring:"
 msgstr ""
 
-#: src/player.c:4987
+#: src/player.c:4993
 msgid "Right ring:"
 msgstr ""
 
-#: src/player.c:5317
+#: src/player.c:5323
 msgid "File is a symlink. I won't overwrite those..."
 msgstr ""
 
-#: src/player.c:5325
+#: src/player.c:5331
 msgid ""
 "There is a directory with the name you gave. Thus I can't write the file."
 msgstr ""
 
-#: src/player.c:5332
+#: src/player.c:5338
 msgid ""
 "File exists!\n"
 "Do you want to overwrite it?"
@@ -5139,7 +5139,7 @@ msgctxt "scroll"
 msgid "genocide monster"
 msgstr ""
 
-#: src/scrolls.c:121 src/spells.c:1521
+#: src/scrolls.c:121 src/spells.c:1543
 #, c-format
 msgid "As you are blind you can't read %s."
 msgstr ""
@@ -5153,7 +5153,7 @@ msgstr ""
 msgid "You read %s."
 msgstr ""
 
-#: src/scrolls.c:138 src/spells.c:1542
+#: src/scrolls.c:138 src/spells.c:1564
 #, c-format
 msgid "reading %s"
 msgstr ""
@@ -6312,236 +6312,240 @@ msgstr ""
 msgid "You don't know any spells."
 msgstr ""
 
-#: src/spells.c:498 src/spells.c:517
+#: src/spells.c:498 src/spells.c:539
 msgid "You can't aim your magic!"
 msgstr ""
 
-#: src/spells.c:503
+#: src/spells.c:519
+msgid "You don't know a suitable spell."
+msgstr ""
+
+#: src/spells.c:525
 msgid "Select a spell to cast"
 msgstr ""
 
-#: src/spells.c:595
+#: src/spells.c:617
 msgid "affects the player"
 msgstr ""
 
-#: src/spells.c:598
+#: src/spells.c:620
 msgid "affects a single monster"
 msgstr ""
 
-#: src/spells.c:601
+#: src/spells.c:623
 msgid "emits a ray"
 msgstr ""
 
-#: src/spells.c:604
+#: src/spells.c:626
 msgid "creates an effect which fills an area"
 msgstr ""
 
-#: src/spells.c:607
+#: src/spells.c:629
 msgid "creates an explosion"
 msgstr ""
 
-#: src/spells.c:641
+#: src/spells.c:663
 #, c-format
 msgid "You have extended the power of %s."
-msgstr ""
-
-#: src/spells.c:654
-#, c-format
-msgid ""
-"You have already extended the power of %s to the extent of your knowledge."
-msgstr ""
-
-#: src/spells.c:670
-#, c-format
-msgid "You have extended the duration of %s."
 msgstr ""
 
 #: src/spells.c:676
 #, c-format
 msgid ""
+"You have already extended the power of %s to the extent of your knowledge."
+msgstr ""
+
+#: src/spells.c:692
+#, c-format
+msgid "You have extended the duration of %s."
+msgstr ""
+
+#: src/spells.c:698
+#, c-format
+msgid ""
 "You have already extended the duration of %s to the extent of your knowledge."
 msgstr ""
 
-#: src/spells.c:715 src/spells.c:893
+#: src/spells.c:737 src/spells.c:915
 #, c-format
 msgid "Select a target for %s."
 msgstr ""
 
-#: src/spells.c:731
+#: src/spells.c:753
 msgid "This spell only works on monsters."
 msgstr ""
 
-#: src/spells.c:754
+#: src/spells.c:776
 msgid "There is no monster there."
 msgstr ""
 
-#: src/spells.c:818
+#: src/spells.c:840
 msgid "The gods are angry! The spell backfires!"
 msgstr ""
 
-#: src/spells.c:844
+#: src/spells.c:866
 #, c-format
 msgid "%s shudders and transforms!"
 msgstr ""
 
-#: src/spells.c:908
+#: src/spells.c:930
 msgid "Why would you want to do that?"
 msgstr ""
 
-#: src/spells.c:959
+#: src/spells.c:981
 #, c-format
 msgid "Where do you want to place %s?"
 msgstr ""
 
-#: src/spells.c:999 src/spells.c:1054
+#: src/spells.c:1021 src/spells.c:1076
 msgid "The spell is going to hit you. Cast anyway?"
 msgstr ""
 
-#: src/spells.c:1033
+#: src/spells.c:1055
 #, c-format
 msgid "Point to the center of the %s."
 msgstr ""
 
-#: src/spells.c:1123
+#: src/spells.c:1145
 msgid "You feel failure."
 msgstr ""
 
-#: src/spells.c:1133
+#: src/spells.c:1155
 msgid "Where do you want to place the sphere?"
 msgstr ""
 
-#: src/spells.c:1164
+#: src/spells.c:1186
 msgid "You weren't even poisoned!"
 msgstr ""
 
-#: src/spells.c:1182
+#: src/spells.c:1204
 msgid "You weren't even blinded!"
 msgstr ""
 
-#: src/spells.c:1191
+#: src/spells.c:1213
 msgid "Choose a target for phantasmal forces."
 msgstr ""
 
-#: src/spells.c:1300
+#: src/spells.c:1322
 msgid "Select a position where you want to place a wall."
 msgstr ""
 
-#: src/spells.c:1305
+#: src/spells.c:1327
 msgid "You are actually standing there."
 msgstr ""
 
-#: src/spells.c:1310
+#: src/spells.c:1332
 msgid "No wall today."
 msgstr ""
 
-#: src/spells.c:1328
+#: src/spells.c:1350
 msgid "You have created a wall."
 msgstr ""
 
-#: src/spells.c:1355
+#: src/spells.c:1377
 msgid "There was a wall already."
 msgstr ""
 
-#: src/spells.c:1373
+#: src/spells.c:1395
 msgid "You have no life energy to sacrifice!"
 msgstr ""
 
-#: src/spells.c:1414
+#: src/spells.c:1436
 #, c-format
 msgid "%s gains health from your sacrifice!"
 msgstr ""
 
-#: src/spells.c:1422
+#: src/spells.c:1444
 #, c-format
 msgid "%s is drained by your sacrifice!"
 msgstr ""
 
-#: src/spells.c:1440
+#: src/spells.c:1462
 #, c-format
 msgid "Your sacrifice affected %d monster."
 msgid_plural "Your sacrifice affected %d monsters."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/spells.c:1446
+#: src/spells.c:1468
 msgid "Your sacrifice did not cause any pain."
 msgstr ""
 
-#: src/spells.c:1458
+#: src/spells.c:1480
 msgid "What do you want to vaporize?"
 msgstr ""
 
-#: src/spells.c:1463
+#: src/spells.c:1485
 msgid "So you chose not to vaporize anything."
 msgstr ""
 
-#: src/spells.c:1483
+#: src/spells.c:1505
 #, c-format
 msgid "%s can't be vaporized."
 msgstr ""
 
-#: src/spells.c:1530
+#: src/spells.c:1552
 msgid "You'd rather not read this cursed book."
 msgstr ""
 
-#: src/spells.c:1535
+#: src/spells.c:1557
 #, c-format
 msgid "You start reading %s."
 msgstr ""
 
-#: src/spells.c:1557
+#: src/spells.c:1579
 msgid "There was something wrong with this book! It crumbles to dust."
 msgstr ""
 
-#: src/spells.c:1568
+#: src/spells.c:1590
 msgid "You cannot understand the content of this book."
 msgstr ""
 
-#: src/spells.c:1571
+#: src/spells.c:1593
 msgid "It seems really boring, though."
 msgstr ""
 
-#: src/spells.c:1576
+#: src/spells.c:1598
 #, c-format
 msgid "You master the spell %s."
 msgstr ""
 
-#: src/spells.c:1585
+#: src/spells.c:1607
 #, c-format
 msgid "You improved your knowledge of the spell %s."
 msgstr ""
 
-#: src/spells.c:1596
+#: src/spells.c:1618
 msgid "Reading makes you ingenious."
 msgstr ""
 
-#: src/spells.c:1612
+#: src/spells.c:1634
 #, c-format
 msgid "You lack the power to cast %s."
 msgstr ""
 
-#: src/spells.c:1619
+#: src/spells.c:1641
 msgid "This spell is too difficult for you."
 msgstr ""
 
-#: src/spells.c:1623
+#: src/spells.c:1645
 #, c-format
 msgid "You cast %s."
 msgstr ""
 
-#: src/spells.c:1631
+#: src/spells.c:1653
 msgid "It didn't work!"
 msgstr ""
 
-#: src/spells.c:1662
+#: src/spells.c:1684
 msgid "You think you've hit something."
 msgstr ""
 
-#: src/spells.c:1731
+#: src/spells.c:1753
 msgid "The water is more shallow now."
 msgstr ""
 
-#: src/spells.c:1752
+#: src/spells.c:1774
 msgid "The water evaporates!"
 msgstr ""
 

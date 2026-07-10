@@ -26,6 +26,7 @@
 * Turn the gelatinous cube into a passive monster
 * Adapt how statues react when being hit to the original Larn
 * Mouse movement and firing without keyboard interaction
+* Spell selection when right-clicking on the player
 * The mouse can be used for targeting spells and ranged weapons
 * Scrollable windows can be scrolled with the mouse wheen or by clicking
   the arrows

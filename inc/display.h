@@ -186,13 +186,16 @@ position display_get_position(player *p,
                               bool visible);
 
 /**
- * If the last key returned by display_getch() was a left mouse click
- * on the map, return the clicked map position; otherwise an invalid
- * position. Used by the main input loop for mouse targeting.
+ * If the last key returned by display_getch() was a mouse click with
+ * one of the requested buttons on the map, return the clicked map
+ * position; otherwise an invalid position. Used by the main input loop
+ * for mouse targeting.
  *
+ * @param button_mask the mouse button bits to react to (e.g.
+ *                     BUTTON1_PRESSED | BUTTON1_CLICKED).
  * @return the clicked map position, or an invalid position.
  */
-position display_get_mouse_position(void);
+position display_get_mouse_position(mmask_t button_mask);
 
 /**
  * Briefly flash the given monsters on the map to show the player what

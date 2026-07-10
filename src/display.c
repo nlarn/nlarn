@@ -150,14 +150,17 @@ void display_init()
     /* Enable mouse support: window dragging needs the left button's
        press and release events plus the pointer position while the
        button is held. PDCurses reports the latter as BUTTONn_MOVED
-       events, ncurses as REPORT_MOUSE_POSITION. The mouse wheel is
-       reported as BUTTON4 (up) and BUTTON5 (down) by both. */
+       events, ncurses as REPORT_MOUSE_POSITION. The right button is
+       used for context actions, and the mouse wheel is reported as
+       BUTTON4 (up) and BUTTON5 (down) by both. */
 #ifdef NCURSES_VERSION
     mousemask(BUTTON1_PRESSED | BUTTON1_RELEASED | BUTTON1_CLICKED
+            | BUTTON3_PRESSED | BUTTON3_CLICKED
             | BUTTON4_PRESSED | BUTTON5_PRESSED
             | REPORT_MOUSE_POSITION, NULL);
 #else
     mousemask(BUTTON1_PRESSED | BUTTON1_RELEASED | BUTTON1_CLICKED
+            | BUTTON3_PRESSED | BUTTON3_CLICKED
             | BUTTON4_PRESSED | BUTTON5_PRESSED
             | BUTTON1_MOVED, NULL);
 #endif
@@ -3402,12 +3405,12 @@ int display_getch(WINDOW *win) {
     return ch;
 }
 
-position display_get_mouse_position(void)
+position display_get_mouse_position(mmask_t button_mask)
 {
     position pos = pos_invalid;
 
-    /* only a left click reports a target position */
-    if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+    /* only react to the requested mouse button(s) */
+    if (display_mouse_event.bstate & button_mask)
     {
         const int mx = display_mouse_event.x;
         const int my = display_mouse_event.y;

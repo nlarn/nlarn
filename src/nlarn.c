@@ -733,7 +733,18 @@ static void mainloop()
             /* mouse targeting on the map */
         case KEY_MOUSE:
         {
-            position mpos = display_get_mouse_position();
+            /* right-clicking the player casts a self-affecting spell */
+            position rpos = display_get_mouse_position(
+                    BUTTON3_PRESSED | BUTTON3_CLICKED);
+            if (pos_valid(rpos) && pos_identical(rpos, nlarn->p->pos))
+            {
+                moves_count = spell_cast_new(nlarn->p, SC_PLAYER);
+                break;
+            }
+
+            /* a left click travels or attacks */
+            position mpos = display_get_mouse_position(
+                    BUTTON1_PRESSED | BUTTON1_CLICKED);
 
             if (!pos_valid(mpos))
                 break;
