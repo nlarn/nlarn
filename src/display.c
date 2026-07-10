@@ -1703,7 +1703,7 @@ void display_config_autopickup(bool settings[IT_MAX])
     display_window_destroy(cwin);
 }
 
-spell *display_spell_select(const char *title, player *p)
+spell *display_spell_select(const char *title, player *p, spell_t type)
 {
     display_window *ipop = NULL;
     int key; /* keyboard input */
@@ -1724,8 +1724,31 @@ spell *display_spell_select(const char *title, player *p)
     /* sort spell list  */
     g_ptr_array_sort(p->known_spells, &spell_sort);
 
+    /* Build the list of spells to offer, optionally filtered by spell
+       type. The array holds borrowed pointers into p->known_spells and
+       is freed (without freeing the spells) before returning. Not
+       named "spells" to avoid shadowing the global spell data table
+       used by the spell_type() macro. */
+    GPtrArray *slist = g_ptr_array_new();
+    for (guint i = 0; i < p->known_spells->len; i++)
+    {
+        spell *s = g_ptr_array_index(p->known_spells, i);
+        if (type == SC_MAX || spell_type(s) == type)
+            g_ptr_array_add(slist, s);
+    }
+
+    /* nothing to offer for the requested type */
+    if (slist->len == 0)
+    {
+        /* slist has no element free func, so freeing the container
+           (TRUE) does not touch the borrowed spell pointers */
+        g_ptr_array_free(slist, true);
+        g_free(code_buf);
+        return NULL;
+    }
+
     /* set height according to spell count */
-    guint height = min((LINES - 7), (p->known_spells->len + 2));
+    guint height = min((LINES - 7), (slist->len + 2));
 
     guint width = 46;
     guint starty = (LINES - 3 - height) / 2;
@@ -1735,7 +1758,7 @@ spell *display_spell_select(const char *title, player *p)
 
     /* scroll state: no headers in the spell list */
     list_scroll_state s;
-    lss_init(&s, p->known_spells->len, height - 2);
+    lss_init(&s, slist->len, height - 2);
 
     int prev_key = 0;
     do
@@ -1743,7 +1766,7 @@ spell *display_spell_select(const char *title, player *p)
         /* display spells */
         for (guint pos = 1; pos <= s.maxvis; pos++)
         {
-            sp = g_ptr_array_index(p->known_spells, pos + s.offset - 1);
+            sp = g_ptr_array_index(slist, pos + s.offset - 1);
 
             if (s.curr == pos) attrs = CP_UI_FG_REVERSE;
             else attrs = CP_UI_FG;
@@ -1759,7 +1782,7 @@ spell *display_spell_select(const char *title, player *p)
 
         /* display up / down markers */
         display_window_update_arrow_up(swin, (s.offset > 0));
-        display_window_update_arrow_down(swin, ((s.offset + s.maxvis) < p->known_spells->len));
+        display_window_update_arrow_down(swin, ((s.offset + s.maxvis) < slist->len));
 
         /* construct the window caption: display type ahead keys */
         gchar *caption = g_strdup_printf("%s%s%s",
@@ -1770,7 +1793,7 @@ spell *display_spell_select(const char *title, player *p)
         display_window_update_caption(swin, caption);
 
         /* store currently highlighted spell */
-        sp = g_ptr_array_index(p->known_spells, s.curr + s.offset - 1);
+        sp = g_ptr_array_index(slist, s.curr + s.offset - 1);
 
         /* refresh the spell description pop-up */
         if (ipop != NULL)
@@ -1845,9 +1868,9 @@ mnemonics:
                     code_buf[strlen(code_buf)] = key;
                     /* search for match */
 
-                    for (guint pos = 1; pos <= p->known_spells->len; pos++)
+                    for (guint pos = 1; pos <= slist->len; pos++)
                     {
-                        sp = g_ptr_array_index(p->known_spells, pos - 1);
+                        sp = g_ptr_array_index(slist, pos - 1);
 
                         if (g_str_has_prefix(spell_code(sp), code_buf)) {
                             /* match found: jump to the spell */
@@ -1857,7 +1880,7 @@ mnemonics:
                     }
 
                     /* if no match has been found remove key from buffer */
-                    sp = g_ptr_array_index(p->known_spells, s.curr + s.offset - 1);
+                    sp = g_ptr_array_index(slist, s.curr + s.offset - 1);
                     if (!g_str_has_prefix(spell_code(sp), code_buf))
                     {
                         code_buf[strlen(code_buf) - 1] = '\0';
@@ -1881,6 +1904,7 @@ mnemonics:
     while (RUN);
 
     g_free(code_buf);
+    g_ptr_array_free(slist, true);
 
     display_window_destroy(swin);
     display_window_destroy(ipop);

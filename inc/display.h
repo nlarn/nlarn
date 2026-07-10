@@ -150,7 +150,17 @@ void display_inv_callbacks_clean(GPtrArray *callbacks);
 
 void display_config_autopickup(bool settings[IT_MAX]);
 
-spell *display_spell_select(const char *title, player *p);
+/**
+ * Present the player's known spells for selection.
+ *
+ * @param title the window title
+ * @param p the player
+ * @param type restrict the offered spells to this spell type, or pass
+ *             SC_MAX to offer all known spells.
+ * @return the chosen spell, or NULL when none was selected (aborted,
+ *         or no known spell matches the requested type).
+ */
+spell *display_spell_select(const char *title, player *p, spell_t type);
 
 int display_get_count(const char *caption, int value);
 char *display_get_string(const char *title, const char *caption, const char *value, size_t max_len);
