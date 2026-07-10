@@ -175,6 +175,15 @@ position display_get_position(player *p,
                               bool passable,
                               bool visible);
 
+/**
+ * If the last key returned by display_getch() was a left mouse click
+ * on the map, return the clicked map position; otherwise an invalid
+ * position. Used by the main input loop for mouse targeting.
+ *
+ * @return the clicked map position, or an invalid position.
+ */
+position display_get_mouse_position(void);
+
 void display_show_history(message_log *log, const char *title);
 
 /**

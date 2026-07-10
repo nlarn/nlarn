@@ -89,7 +89,7 @@ static bool weapon_pos_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
-int weapon_fire(struct player *p)
+int weapon_fire(struct player *p, position target)
 {
     g_assert(p != NULL);
 
@@ -147,9 +147,11 @@ int weapon_fire(struct player *p)
         return false;
     }
 
-    /* all checks are successful */
-    position target = display_get_position(p, _("Select a target"), true, false,
-        0, false, true);
+    /* all checks are successful; prompt for a target unless one has
+       been supplied (e.g. by clicking a monster) */
+    if (!pos_valid(target))
+        target = display_get_position(p, _("Select a target"), true, false,
+            0, false, true);
 
     /* is the target a valid position? */
     if(!pos_valid(target))
@@ -180,6 +182,21 @@ int weapon_fire(struct player *p)
         g_free(wdesc);
         return false;
     }
+
+    /* Check that there is a clear line of fire to the target. The
+       interactive targeting cursor never allows an unreachable target,
+       but a target supplied directly (e.g. by clicking a monster that
+       is visible but hidden behind an obstacle) may have none. Without
+       this check the shot would consume ammo and a turn to no effect. */
+    GList *ray = map_ray(pmap, p->pos, target);
+    if (ray == NULL)
+    {
+        log_add_entry(nlarn->log, _("You have no clear shot."));
+
+        g_free(wdesc);
+        return false;
+    }
+    g_list_free(ray);
 
     /* log the event */
     log_add_entry(nlarn->log, _("You fire %s at %s."), wdesc,

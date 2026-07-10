@@ -121,7 +121,15 @@ extern const char *ammo_class_name[AMMO_MAX];
 extern const weapon_data weapons[WT_MAX];
 
 /* functions */
-int  weapon_fire(struct player *p);
+/**
+ * Fire the wielded ranged weapon.
+ *
+ * @param p the player
+ * @param target the position to fire at; when invalid, the player is
+ *               prompted to choose a target interactively.
+ * @return the number of turns elapsed
+ */
+int  weapon_fire(struct player *p, position target);
 void weapon_swap(struct player *p);
 bool weapon_throw_pos_hit(const GList *traj, const damage_originator *damo,
     gpointer data1, gpointer data2);

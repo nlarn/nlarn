@@ -3353,6 +3353,29 @@ int display_getch(WINDOW *win) {
     return ch;
 }
 
+position display_get_mouse_position(void)
+{
+    position pos = pos_invalid;
+
+    /* only a left click reports a target position */
+    if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+    {
+        const int mx = display_mouse_event.x;
+        const int my = display_mouse_event.y;
+
+        /* the map occupies screen rows 0 .. MAP_MAX_Y - 1 and columns
+           0 .. MAP_MAX_X - 1, one character per cell */
+        if (mx >= 0 && mx < MAP_MAX_X && my >= 0 && my < MAP_MAX_Y)
+        {
+            X(pos) = mx;
+            Y(pos) = my;
+            Z(pos) = Z(nlarn->p->pos);
+        }
+    }
+
+    return pos;
+}
+
 /* Determine which scroll arrow of a window is at the given screen
    position: -1 for the up arrow, +1 for the down arrow, 0 for
    neither. The arrows occupy the three columns rendered by

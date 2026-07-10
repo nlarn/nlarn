@@ -719,8 +719,50 @@ static void mainloop()
 
             /* fire a ranged weapon */
         case 'f':
-            moves_count = weapon_fire(nlarn->p);
+            moves_count = weapon_fire(nlarn->p, pos_invalid);
             break;
+
+            /* mouse targeting on the map */
+        case KEY_MOUSE:
+        {
+            position mpos = display_get_mouse_position();
+
+            if (!pos_valid(mpos))
+                break;
+
+            map *cmap = game_map(nlarn, Z(nlarn->p->pos));
+            monster *m = map_get_monster_at(cmap, mpos);
+
+            if (m != NULL && monster_in_sight(m))
+            {
+                /* a visible monster has been clicked */
+                if (nlarn->p->eq_weapon
+                        && weapon_is_ranged(nlarn->p->eq_weapon))
+                {
+                    /* fire the wielded ranged weapon at the monster */
+                    moves_count = weapon_fire(nlarn->p, mpos);
+                }
+                else if (pos_adjacent(nlarn->p->pos, mpos))
+                {
+                    /* the monster is adjacent: attack it in melee */
+                    moves_count = player_move(nlarn->p,
+                            pos_dir(nlarn->p->pos, mpos), true);
+                }
+                else
+                {
+                    /* travel towards the monster to engage in melee */
+                    pos = cpos = mpos;
+                    ch = 0;
+                }
+            }
+            else if (!pos_identical(mpos, nlarn->p->pos))
+            {
+                /* an empty cell has been clicked: travel there */
+                pos = cpos = mpos;
+                ch = 0;
+            }
+            break;
+        }
 
             /* display inventory */
         case 'i':

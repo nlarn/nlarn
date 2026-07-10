@@ -9,6 +9,8 @@
 También puedes usar el teclado numérico con Bloq Num desactivado.
 Correr significa avanzar en una dirección hasta ser interrumpido. `KEY`g`end` o `KEY`/`end`, seguido de una tecla de dirección, también te hará correr.
 
+También puedes jugar con el ratón: haz clic en un punto del mapa para viajar allí, haz clic en un monstruo para disparar tu arma a distancia empuñada contra él o, si no empuñas ningún arma a distancia, para acercarte a él y atacarlo cuerpo a cuerpo.
+
 
 `TITLE`Viaje automático`end`
 
