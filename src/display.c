@@ -2488,7 +2488,8 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
     return selection;
 }
 
-direction display_get_direction(const char *title, int *available)
+direction display_get_direction(const char *title, const char *message,
+                                int *available)
 {
     int *dirs = NULL;
     int RUN = true;
@@ -2509,17 +2510,36 @@ direction display_get_direction(const char *title, int *available)
         dirs = available;
     }
 
-    int width = max(9, g_utf8_strlen(title, -1) + 4);
+    const int title_len = (int)g_utf8_strlen(title, -1);
+    const int msg_len = message ? (int)g_utf8_strlen(message, -1) : 0;
+
+    /* The window must be wide enough for the direction cross, for the
+       message on the first content row (interior width), and for the
+       title in the border, which reserves space for the frame corners
+       and scroll markers (hence title_len + 10). */
+    int width = max(9, max(msg_len + 4, title_len + 10));
+    width = min(width, COLS - 4);
 
     /* set startx and starty to something that makes sense */
     int startx = (min(MAP_MAX_X, COLS) / 2) - (width / 2);
     int starty = (LINES / 2) - 4;
 
-    display_window *dwin = display_window_new(startx, starty, width, 9, title);
+    display_window *dwin = display_window_new(startx, starty, width, 10, title);
 
-    mvwaprintw(dwin->window, 3, 3, CP_UI_FG, "\\|/");
-    mvwaprintw(dwin->window, 4, 3, CP_UI_FG, "- -");
-    mvwaprintw(dwin->window, 5, 3, CP_UI_FG, "/|\\");
+    /* the full question, centred on the first content row */
+    if (message != NULL)
+    {
+        mvwaprintw(dwin->window, 1, max(1, (width - msg_len) / 2),
+                   CP_UI_FG, "%s", message);
+    }
+
+    /* horizontally centre the direction cross (5 columns wide) within
+       the window, which may be wider to accommodate the message */
+    const int cx = max(1, (width - 5) / 2);
+
+    mvwaprintw(dwin->window, 4, cx + 1, CP_UI_FG, "\\|/");
+    mvwaprintw(dwin->window, 5, cx + 1, CP_UI_FG, "- -");
+    mvwaprintw(dwin->window, 6, cx + 1, CP_UI_FG, "/|\\");
 
     for (int x = 0; x < 3; x++)
         for (int y = 0; y < 3; y++)
@@ -2527,16 +2547,13 @@ direction display_get_direction(const char *title, int *available)
             if (dirs[(x + 1) + (y * 3)])
             {
                 mvwaprintw(dwin->window,
-                          6 - (y * 2), /* start in the last row, move up, skip one */
-                          (x * 2) + 2, /* start in the second col, skip one */
+                          7 - (y * 2),  /* start in the last row, move up, skip one */
+                          (x * 2) + cx, /* centred, numbers two columns apart */
                           CP_UI_TITLE,
                           "%d",
                           (x + 1) + (y * 3));
             }
         }
-
-    if (!available)
-        g_free(dirs);
 
     wrefresh(dwin->window);
 
@@ -2618,6 +2635,35 @@ direction display_get_direction(const char *title, int *available)
 
         case KEY_ESC:
             RUN = false;
+            break;
+
+        case KEY_MOUSE:
+            /* A left click on (or next to) a direction in the wind rose
+               selects it, exactly like pressing the matching number. */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                /* click position relative to the leftmost number of the
+                   bottom row of the (centred) wind rose */
+                const int rc = display_mouse_event.x - (int)dwin->x1 - cx;
+                const int rr = 7 - (display_mouse_event.y - (int)dwin->y1);
+
+                if (rc >= 0 && rc <= 4 && rr >= 0 && rr <= 4)
+                {
+                    /* snap to the nearest cell; cells sit two columns and
+                       two rows apart */
+                    const int num = (((rc + 1) / 2) + 1) + (((rr + 1) / 2) * 3);
+
+                    if (dirs[num])
+                    {
+                        dir = num;
+                        break;
+                    }
+                }
+            }
+
+            /* not on the wind rose: let the window handle the event so a
+               click on the title bar still drags the window */
+            display_window_move(dwin, key);
             break;
 
         default:

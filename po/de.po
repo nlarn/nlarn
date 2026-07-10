@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-10 22:23+0200\n"
+"POT-Creation-Date: 2026-07-10 23:38+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -1053,11 +1053,11 @@ msgstr "Sollen deine zukünftigen Charaktere männlich oder weiblich sein?"
 msgid "Choose default gender"
 msgstr "Standardgeschlecht wählen"
 
-#: src/config.c:464 src/nlarn.c:1274
+#: src/config.c:464 src/nlarn.c:1289
 msgid "Female"
 msgstr "Weiblich"
 
-#: src/config.c:464 src/nlarn.c:1274
+#: src/config.c:464 src/nlarn.c:1289
 msgid "Male"
 msgstr "Männlich"
 
@@ -1145,7 +1145,7 @@ msgstr ""
 msgid "your storage room"
 msgstr "deine Abstellkammer"
 
-#: src/container.c:173 src/sobjects.c:466 src/sobjects.c:536 src/spells.c:1167
+#: src/container.c:173 src/sobjects.c:467 src/sobjects.c:538 src/spells.c:1167
 msgid "Huh?"
 msgstr "Hä?"
 
@@ -1257,25 +1257,25 @@ msgstr ""
 msgid "Type a symbol to toggle."
 msgstr "Symbol eingeben zum Umschalten."
 
-#: src/display.c:1830
+#: src/display.c:1831
 #, c-format
 msgid "Really cast %s?"
 msgstr "Wirklich „%s“ zaubern?"
 
-#: src/display.c:2322
+#: src/display.c:2353
 msgid "Yes"
 msgstr "Ja"
 
-#: src/display.c:2325
+#: src/display.c:2356
 msgid "No"
 msgstr "Nein"
 
-#: src/display.c:3021
+#: src/display.c:3068
 #, c-format
 msgid "Looking for '%c' (%s)."
 msgstr "Suche nach „%c“ (%s)."
 
-#: src/display.c:3641
+#: src/display.c:3688
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
@@ -1283,15 +1283,15 @@ msgstr ""
 "Wähle den gewünschten Gegenstand mit EINGABE.\n"
 "Mit der Escape-Taste kannst du abbrechen."
 
-#: src/display.c:3664
+#: src/display.c:3711
 msgid "There are no options available for the selected item."
 msgstr "Für den ausgewählten Gegenstand gibt es keine Optionen."
 
-#: src/display.c:3683
+#: src/display.c:3730
 msgid "Help"
 msgstr "Hilfe"
 
-#: src/display.c:3971
+#: src/display.c:4018
 msgid "Item details"
 msgstr "Gegenstandsdetails"
 
@@ -1908,7 +1908,7 @@ msgstr "Willkommen zurück bei NLarn %s!"
 msgid "For a list of commands, press '?'."
 msgstr "Drücke '?' für eine Liste der Befehle."
 
-#: src/game.c:163 src/nlarn.c:1004
+#: src/game.c:163 src/nlarn.c:1019
 msgid "Wizard mode has been activated."
 msgstr "Der Zauberermodus wurde aktiviert."
 
@@ -3633,55 +3633,55 @@ msgstr "Identifizierte Gegenstände"
 msgid "You have not discovered any item yet."
 msgstr "Du hast noch keinen Gegenstand entdeckt."
 
-#: src/nlarn.c:813
+#: src/nlarn.c:828
 #, c-format
 msgid "You presently owe %d gold in taxes."
 msgstr "Du schuldest derzeit %d Gold an Steuern."
 
-#: src/nlarn.c:817
+#: src/nlarn.c:832
 msgid "You do not owe any taxes."
 msgstr "Du schuldest keine Steuern."
 
-#: src/nlarn.c:827
+#: src/nlarn.c:842
 msgid "There is a fountain here, drink from it?"
 msgstr "Hier ist ein Brunnen. Daraus trinken?"
 
-#: src/nlarn.c:872
+#: src/nlarn.c:887
 msgid "Choose a destination to travel to."
 msgstr "Wähle ein Reiseziel."
 
-#: src/nlarn.c:884 src/player.c:3759 src/spells.c:747 src/spells.c:924
+#: src/nlarn.c:899 src/player.c:3759 src/spells.c:747 src/spells.c:924
 #: src/spells.c:988 src/spells.c:1024 src/spells.c:1064 src/spells.c:1078
 msgid "Aborted."
 msgstr "Abgebrochen."
 
-#: src/nlarn.c:904
+#: src/nlarn.c:919
 msgid "No travel destination known."
 msgstr "Kein Reiseziel bekannt."
 
-#: src/nlarn.c:925
+#: src/nlarn.c:940
 msgid "Auto-pickup is not enabled."
 msgstr "Auto-Aufsammeln ist nicht aktiviert."
 
-#: src/nlarn.c:929
+#: src/nlarn.c:944
 #, c-format
 msgid "Auto-pickup is enabled for %s."
 msgstr "Auto-Aufsammeln ist aktiviert für: %s."
 
-#: src/nlarn.c:969
+#: src/nlarn.c:984
 msgid "Are you sure you want to quit?"
 msgstr "Möchtest du das Spiel wirklich beenden?"
 
-#: src/nlarn.c:975
+#: src/nlarn.c:990
 msgid "Message history"
 msgstr "Nachrichtenverlauf"
 
-#: src/nlarn.c:992
+#: src/nlarn.c:1007
 #, c-format
 msgid "NLarn version %s, built on %s."
 msgstr "NLarn Version %s, erstellt am %s."
 
-#: src/nlarn.c:999
+#: src/nlarn.c:1014
 msgid ""
 "Are you sure you want to switch to Wizard mode?\n"
 "You will not be able to switch back to normal gameplay and your score will "
@@ -3691,15 +3691,15 @@ msgstr ""
 "Du kannst nicht zum normalen Spiel zurückkehren, und deine Punkte werden "
 "nicht gewertet."
 
-#: src/nlarn.c:1009
+#: src/nlarn.c:1024
 msgid "Wizard mode is already enabled."
 msgstr "Der Zauberermodus ist bereits aktiviert."
 
-#: src/nlarn.c:1045
+#: src/nlarn.c:1060
 msgid "Choose a position to teleport to."
 msgstr "Wähle eine Position zum Hinteleportieren."
 
-#: src/nlarn.c:1168
+#: src/nlarn.c:1183
 #, c-format
 msgid ""
 "\n"
@@ -3720,31 +3720,31 @@ msgstr ""
 "\n"
 "    Du hast Schwierigkeitsgrad %d erreicht\n"
 
-#: src/nlarn.c:1180
+#: src/nlarn.c:1195
 msgid "New Game"
 msgstr "Neues Spiel"
 
-#: src/nlarn.c:1180
+#: src/nlarn.c:1195
 msgid "Continue saved Game"
 msgstr "Gespeichertes Spiel fortsetzen"
 
-#: src/nlarn.c:1204
+#: src/nlarn.c:1219
 msgid "NLarn Hall of Fame"
 msgstr "NLarn-Ruhmeshalle"
 
-#: src/nlarn.c:1239
+#: src/nlarn.c:1254
 msgid "Welcome to the game of NLarn!"
 msgstr "Willkommen beim Spiel NLarn!"
 
-#: src/nlarn.c:1267
+#: src/nlarn.c:1282
 msgid "Choose your name"
 msgstr "Wähle deinen Namen"
 
-#: src/nlarn.c:1268
+#: src/nlarn.c:1283
 msgid "By what name shall you be called?"
 msgstr "Bei welchem Namen sollst du gerufen werden?"
 
-#: src/nlarn.c:1274
+#: src/nlarn.c:1289
 msgid "Are you male or female?"
 msgstr "Bist du männlich oder weiblich?"
 
@@ -5723,237 +5723,245 @@ msgid "There is nothing to enter here."
 msgstr "Hier gibt es nichts zu betreten."
 
 #: src/sobjects.c:410
-msgid "Close which door?"
-msgstr "Welche Tür schließen?"
+msgid "Close door"
+msgstr "Tür schließen"
 
-#: src/sobjects.c:435
+#: src/sobjects.c:411
+msgid "Which door do you want to close?"
+msgstr "Welche Tür möchtest du schließen?"
+
+#: src/sobjects.c:436
 msgid "Please step out of the doorway."
 msgstr "Bitte tritt aus dem Türrahmen."
 
-#: src/sobjects.c:447
+#: src/sobjects.c:448
 #, c-format
 msgid "You cannot close the door. %s is in the way."
 msgstr "Du kannst die Tür nicht schließen. %s ist im Weg."
 
-#: src/sobjects.c:457
+#: src/sobjects.c:458
 msgid "You cannot close the door. There is something in the way."
 msgstr "Du kannst die Tür nicht schließen. Es ist etwas im Weg."
 
-#: src/sobjects.c:462
+#: src/sobjects.c:463
 msgid "You close the door."
 msgstr "Du schließt die Tür."
 
-#: src/sobjects.c:472
+#: src/sobjects.c:473
 msgid "Which door are you talking about?"
 msgstr "Von welcher Tür redest du?"
 
-#: src/sobjects.c:508
-msgid "Open which door?"
-msgstr "Welche Tür öffnen?"
+#: src/sobjects.c:509
+msgid "Open door"
+msgstr "Tür öffnen"
 
-#: src/sobjects.c:532
+#: src/sobjects.c:510
+msgid "Which door do you want to open?"
+msgstr "Welche Tür möchtest du öffnen?"
+
+#: src/sobjects.c:534
 msgid "You open the door."
 msgstr "Du öffnest die Tür."
 
-#: src/sobjects.c:542
+#: src/sobjects.c:544
 msgid "What exactly do you want to open?"
 msgstr "Was genau möchtest du öffnen?"
 
-#: src/sobjects.c:557
+#: src/sobjects.c:559
 msgid "There is no water to drink."
 msgstr "Hier gibt es kein Wasser zu trinken."
 
-#: src/sobjects.c:563
+#: src/sobjects.c:565
 msgid "There is no fountain to drink from here."
 msgstr "Hier ist kein Brunnen, aus dem man trinken könnte."
 
-#: src/sobjects.c:567
+#: src/sobjects.c:569
 msgid "You drink from the fountain."
 msgstr "Du trinkst aus dem Brunnen."
 
-#: src/sobjects.c:584 src/sobjects.c:774 src/sobjects.c:1005
-#: src/sobjects.c:1123
+#: src/sobjects.c:586 src/sobjects.c:776 src/sobjects.c:1007
+#: src/sobjects.c:1125
 msgid "Nothing seems to have happened."
 msgstr "Es scheint nichts passiert zu sein."
 
-#: src/sobjects.c:614
+#: src/sobjects.c:616
 #, c-format
 msgid "You gain %d hit point."
 msgid_plural "You gain %d hit points."
 msgstr[0] "Du erhältst %d Trefferpunkt."
 msgstr[1] "Du erhältst %d Trefferpunkte."
 
-#: src/sobjects.c:624
+#: src/sobjects.c:626
 #, c-format
 msgid "You just gained %d mana point."
 msgid_plural "You just gained %d mana points."
 msgstr[0] "Du hast %d Manapunkt erhalten."
 msgstr[1] "Du hast %d Manapunkte erhalten."
 
-#: src/sobjects.c:634
+#: src/sobjects.c:636
 msgid "You just gained experience."
 msgstr "Du hast Erfahrung gesammelt."
 
-#: src/sobjects.c:667
+#: src/sobjects.c:669
 #, c-format
 msgid "You lose %d hit point!"
 msgid_plural "You lose %d hit points!"
 msgstr[0] "Du verlierst %d Trefferpunkt!"
 msgstr[1] "Du verlierst %d Trefferpunkte!"
 
-#: src/sobjects.c:676
+#: src/sobjects.c:678
 #, c-format
 msgid "You just lost %d mana point."
 msgid_plural "You just lost %d mana points."
 msgstr[0] "Du hast %d Manapunkt verloren."
 msgstr[1] "Du hast %d Manapunkte verloren."
 
-#: src/sobjects.c:686
+#: src/sobjects.c:688
 msgid "You just lost experience."
 msgstr "Du hast Erfahrung verloren."
 
-#: src/sobjects.c:700
+#: src/sobjects.c:702
 msgid "The fountain's bubbling slowly quiets."
 msgstr "Das Plätschern des Brunnens verstummt langsam."
 
-#: src/sobjects.c:715
+#: src/sobjects.c:717
 msgid "The fountain is dry."
 msgstr "Der Brunnen ist trocken."
 
-#: src/sobjects.c:721
+#: src/sobjects.c:723
 msgid "There is no fountain to wash at here."
 msgstr "Hier ist kein Brunnen, an dem man sich waschen könnte."
 
-#: src/sobjects.c:725
+#: src/sobjects.c:727
 msgid "You wash yourself at the fountain."
 msgstr "Du wäschst dich am Brunnen."
 
-#: src/sobjects.c:729
+#: src/sobjects.c:731
 msgid "Oh no! The water was foul!"
 msgstr "Oh nein! Das Wasser war faulig!"
 
-#: src/sobjects.c:746
+#: src/sobjects.c:748
 msgid "You got the dirt off!"
 msgstr "Du hast den Schmutz abbekommen!"
 
-#: src/sobjects.c:752
+#: src/sobjects.c:754
 msgid "This water seems to be hard water! The dirt didn't come off!"
 msgstr "Das Wasser scheint hartes Wasser zu sein! Der Schmutz ging nicht ab!"
 
-#: src/sobjects.c:792
+#: src/sobjects.c:794
 msgid "You cannot reach the stairs."
 msgstr "Du kannst die Treppe nicht erreichen."
 
-#: src/sobjects.c:813
+#: src/sobjects.c:815
 msgid "Climb up to return to town."
 msgstr "Klettere hinauf, um zur Stadt zurückzukehren."
 
-#: src/sobjects.c:829
+#: src/sobjects.c:831
 #, c-format
 msgid "You climb down %s."
 msgstr "Du kletterst %s hinab."
 
-#: src/sobjects.c:841
+#: src/sobjects.c:843
 msgid "You slip!"
 msgstr "Du rutschst aus!"
 
-#: src/sobjects.c:879
+#: src/sobjects.c:881
 msgid "Climb down to enter the caverns."
 msgstr "Klettere hinab, um die Höhlen zu betreten."
 
-#: src/sobjects.c:883
+#: src/sobjects.c:885
 msgid "I see no stairway up here."
 msgstr "Ich sehe hier keine Treppe nach oben."
 
-#: src/sobjects.c:890
+#: src/sobjects.c:892
 #, c-format
 msgid "You climb up %s."
 msgstr "Du kletterst %s hinauf."
 
-#: src/sobjects.c:917 src/sobjects.c:977
+#: src/sobjects.c:919 src/sobjects.c:979
 msgid "There is no throne here."
 msgstr "Hier ist kein Thron."
 
-#: src/sobjects.c:921
+#: src/sobjects.c:923
 msgid "You try to remove the gems from the throne."
 msgstr "Du versuchst, die Edelsteine vom Thron zu lösen."
 
-#: src/sobjects.c:925
+#: src/sobjects.c:927
 msgid "There are no gems left on this throne."
 msgstr "Auf diesem Thron sind keine Edelsteine mehr."
 
-#: src/sobjects.c:939
+#: src/sobjects.c:941
 msgid "You manage to pry off some gems."
 msgstr "Es gelingt dir, einige Edelsteine abzulösen."
 
-#: src/sobjects.c:940
+#: src/sobjects.c:942
 msgid "You manage to pry off a gem."
 msgstr "Es gelingt dir, einen Edelstein abzulösen."
 
-#: src/sobjects.c:962
+#: src/sobjects.c:964
 msgid "You fail to remove the gems."
 msgstr "Es gelingt dir nicht, die Edelsteine zu lösen."
 
-#: src/sobjects.c:981
+#: src/sobjects.c:983
 msgid "You sit on the throne."
 msgstr "Du setzt dich auf den Thron."
 
-#: src/sobjects.c:1000 src/traps.c:70
+#: src/sobjects.c:1002 src/traps.c:70
 msgid "Zaaaappp! You've been teleported!"
 msgstr "Zaaaappp! Du wurdest teleportiert!"
 
-#: src/sobjects.c:1026
+#: src/sobjects.c:1028
 msgid "You destroy the altar."
 msgstr "Du zerstörst den Altar."
 
-#: src/sobjects.c:1030
+#: src/sobjects.c:1032
 msgid "Lightning comes crashing down from above!"
 msgstr "Ein Blitz fährt von oben herab!"
 
-#: src/sobjects.c:1045
+#: src/sobjects.c:1047
 msgid "You destroy the fountain."
 msgstr "Du zerstörst den Brunnen."
 
-#: src/sobjects.c:1050
+#: src/sobjects.c:1052
 msgid "A flood of water gushes forth!"
 msgstr "Eine Flut von Wasser bricht hervor!"
 
-#: src/sobjects.c:1065
+#: src/sobjects.c:1067
 msgid "statue"
 msgstr "f:Statue"
 
-#: src/sobjects.c:1073
+#: src/sobjects.c:1075
 msgid "throne"
 msgstr "m:Thron;;;Throns"
 
-#: src/sobjects.c:1086
+#: src/sobjects.c:1088
 msgid "The door shatters!"
 msgstr "Die Tür zersplittert!"
 
-#: src/sobjects.c:1091
+#: src/sobjects.c:1093
 msgid "Somehow that did not work."
 msgstr "Irgendwie hat das nicht funktioniert."
 
-#: src/sobjects.c:1097
+#: src/sobjects.c:1099
 #, c-format
 msgid "You destroy %s."
 msgstr "Du zerstörst %s."
 
-#: src/sobjects.c:1119
+#: src/sobjects.c:1121
 #, c-format
 msgid "%s appears, looking angry!"
 msgstr "%s erscheint - und sieht wütend aus!"
 
-#: src/sobjects.c:1155
+#: src/sobjects.c:1157
 #, c-format
 msgid "The lightning hits %s."
 msgstr "Der Blitz trifft %s."
 
-#: src/sobjects.c:1187
+#: src/sobjects.c:1189
 msgid "The lightning whizzes by you!"
 msgstr "Der Blitz zischt an dir vorbei!"
 
-#: src/sobjects.c:1193
+#: src/sobjects.c:1195
 msgid "The lightning hits you!"
 msgstr "Der Blitz trifft dich!"
 
@@ -7338,6 +7346,15 @@ msgstr "verflucht"
 #, c-format
 msgid "%s misses %s."
 msgstr "%s verfehlt %s."
+
+#~ msgid "Select door"
+#~ msgstr "Tür wählen"
+
+#~ msgid "Close which door?"
+#~ msgstr "Welche Tür schließen?"
+
+#~ msgid "Open which door?"
+#~ msgstr "Welche Tür öffnen?"
 
 #~ msgid "automatically are shown inverted. "
 #~ msgstr "gesammelt werden, sind invertiert. "

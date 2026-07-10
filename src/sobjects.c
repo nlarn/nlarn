@@ -407,7 +407,8 @@ int player_door_close(player *p)
 
     if (count > 1)
     {
-        dir = display_get_direction(_("Close which door?"), dirs);
+        dir = display_get_direction(_("Close door"),
+                _("Which door do you want to close?"), dirs);
     }
     /* dir has been set in the for loop above if count == 1 */
     else if (count == 0)
@@ -505,7 +506,8 @@ int player_door_open(player *p, int dir)
 
         if (count > 1)
         {
-            dir = display_get_direction(_("Open which door?"), dirs);
+            dir = display_get_direction(_("Open door"),
+                    _("Which door do you want to open?"), dirs);
         }
         /* dir has been set in the for loop above if count == 1 */
         else if (count == 0)

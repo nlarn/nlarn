@@ -165,7 +165,8 @@ spell *display_spell_select(const char *title, player *p, spell_t type);
 int display_get_count(const char *caption, int value);
 char *display_get_string(const char *title, const char *caption, const char *value, size_t max_len);
 int display_get_yesno(const char *question, const char *title, const char *yes, const char *no);
-direction display_get_direction(const char *title, int *available);
+direction display_get_direction(const char *title, const char *message,
+                                int *available);
 
 position display_get_new_position(player *p,
                                   position start,
