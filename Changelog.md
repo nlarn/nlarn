@@ -27,6 +27,7 @@
 * Adapt how statues react when being hit to the original Larn
 * Mouse movement and firing without keyboard interaction
 * Spell selection when right-clicking on the player
+* Mouse support for the inventory
 * The mouse can be used for targeting spells and ranged weapons
 * Select and activate spells by mouse
 * Scrollable windows can be scrolled with the mouse wheen or by clicking

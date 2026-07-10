@@ -1197,6 +1197,32 @@ static bool list_handle_scroll_key(list_scroll_state *s, int key,
     }
 }
 
+/* Number of visible columns a caption segment occupies, i.e. its
+   length in characters with the `tag` colour markup removed. Mirrors
+   how mvwcprintw() renders the string. */
+static guint caption_visible_len(const char *s)
+{
+    guint len = 0;
+
+    for (const char *p = s; *p != '\0'; )
+    {
+        if (*p == '`')
+        {
+            /* skip over the colour tag up to its terminator */
+            const char *tend = strchr(p + 1, '`');
+            if (tend == NULL)
+                break;
+            p = tend + 1;
+            continue;
+        }
+
+        len++;
+        p = g_utf8_next_char(p);
+    }
+
+    return len;
+}
+
 item *display_inventory(const char *title, player *p, inventory **inv,
                         GPtrArray *callbacks, bool show_price,
                         bool show_weight, bool show_account,
@@ -1245,6 +1271,17 @@ item *display_inventory(const char *title, player *p, inventory **inv,
     /* main loop */
     bool keep_running = true;
     int autoscroll = 0; /* scroll-arrow auto-repeat state */
+
+    /* maps each visible window row to the selection ordinal (the s.curr
+       value) of the item drawn there, or 0 for header and empty rows;
+       filled while drawing and used to select an item by mouse click */
+    guint *row_curr = g_new0(guint, LINES + 1);
+
+    /* window column and visible width of each callback's caption
+       segment, so an action can be triggered by clicking its hotkey;
+       indices match the callbacks array (0 column = inactive) */
+    guint *cap_col = callbacks ? g_new0(guint, callbacks->len) : NULL;
+    guint *cap_len = callbacks ? g_new0(guint, callbacks->len) : NULL;
 
     do
     {
@@ -1307,6 +1344,9 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         bool suppress_first = lss_suppress_first_header(&s, inv, ifilter,
                                                         max_height - 2);
 
+        /* discard the previous frame's row mapping before redrawing */
+        memset(row_curr, 0, sizeof(guint) * (LINES + 1));
+
         for (guint line = 1; line <= s.maxvis; line++)
         {
             guint item_no = (line - 1) + s.offset - shown_headers;
@@ -1350,6 +1390,9 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                     continue;
                 }
             }
+
+            /* remember which item this row shows, for mouse selection */
+            row_curr[line] = line - shown_headers;
 
             bool item_equipped = false;
 
@@ -1427,6 +1470,12 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* prepare the string array which will hold all the captions */
         captions = strv_new();
 
+        /* The caption is drawn at window column 4 (see
+           display_window_update_caption); track the running column so
+           each segment's span can be hit-tested by mouse. */
+        guint cap_x = 4;
+        guint help_col = 0, help_len = 0;
+
         /* assemble window caption (if callbacks have been defined) */
         for (guint cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
         {
@@ -1437,12 +1486,19 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             if ((cb->checkfun == NULL) || cb->checkfun(p, cb->inv, it))
             {
                 cb->active = true;
+
+                /* record the segment's column span for mouse clicks */
+                cap_len[cb_nr] = caption_visible_len(cb->description);
+                cap_col[cb_nr] = cap_x;
+                cap_x += cap_len[cb_nr] + 1; /* + the joining space */
+
                 strv_append(&captions, cb->description);
             }
             else
             {
                 /* it isn't */
                 cb->active = false;
+                cap_col[cb_nr] = 0;
             }
         }
 
@@ -1456,7 +1512,13 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (g_strv_length(captions) > 0)
         {
             /* append "(?) help" to trigger the help pop-up */
-            strv_append(&captions, _("(`KEY`?`end`) help"));
+            const char *help = _("(`KEY`?`end`) help");
+
+            /* record its span, too, so it can be clicked */
+            help_col = cap_x;
+            help_len = caption_visible_len(help);
+
+            strv_append(&captions, help);
 
             /* update the window's caption with the assembled array of captions */
             display_window_update_caption(iwin, g_strjoinv(" ", captions));
@@ -1496,6 +1558,72 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                 /* if no callbacks have been defined, enter selects item */
                 keep_running = false;
             }
+            break;
+
+        case KEY_MOUSE:
+            /* A left click on an item row selects it; clicking the item
+               that is already selected returns it, exactly like pressing
+               Enter does in a single-selection dialog. */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)iwin->y1;
+                const int col = display_mouse_event.x - (int)iwin->x1;
+
+                if (row >= 1 && row <= (int)s.maxvis
+                        && col >= 1 && col < (int)iwin->width - 1
+                        && row_curr[row] > 0)
+                {
+                    if (callbacks == NULL && s.curr == row_curr[row])
+                    {
+                        /* already selected: return it like Enter */
+                        keep_running = false;
+                        break;
+                    }
+
+                    /* move the selection to the clicked item */
+                    s.curr = row_curr[row];
+                    break;
+                }
+
+                /* A click on an action hotkey in the caption row (the
+                   bottom border) triggers that action, exactly like
+                   pressing the corresponding key. */
+                if (row == (int)iwin->height - 1)
+                {
+                    /* the "(?) help" segment */
+                    if (help_len > 0 && col >= (int)help_col
+                            && col < (int)(help_col + help_len))
+                    {
+                        display_inventory_help(callbacks);
+                        break;
+                    }
+
+                    bool triggered = false;
+                    for (guint i = 0; callbacks != NULL && i < callbacks->len; i++)
+                    {
+                        display_inv_callback *cb = g_ptr_array_index(callbacks, i);
+
+                        if (!cb->active || cap_col[i] == 0
+                                || col < (int)cap_col[i]
+                                || col >= (int)(cap_col[i] + cap_len[i]))
+                            continue;
+
+                        item *sel_it = inv_get_filtered(*inv,
+                                s.curr + s.offset - 1, ifilter);
+                        cb->function(p, cb->inv, sel_it);
+                        redraw = true;
+                        triggered = true;
+                        break;
+                    }
+
+                    if (triggered)
+                        break;
+                }
+            }
+
+            /* not on an item row or action: let the window handle the
+               event, so a click on the title bar still drags the window */
+            display_window_move(iwin, key);
             break;
 
         default:
@@ -1556,6 +1684,10 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         len_curr = inv_length_filtered(*inv, ifilter);
     }
     while (keep_running && (len_curr > 0)); /* ESC pressed or empty inventory*/
+
+    g_free(row_curr);
+    g_free(cap_col);
+    g_free(cap_len);
 
     display_window_destroy(ipop);
     display_window_destroy(iwin);
