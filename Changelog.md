@@ -28,6 +28,7 @@
 * Mouse movement and firing without keyboard interaction
 * Spell selection when right-clicking on the player
 * The mouse can be used for targeting spells and ranged weapons
+* Select and activate spells by mouse
 * Scrollable windows can be scrolled with the mouse wheen or by clicking
   the arrows
 * Allow dragging windows with the mouse

@@ -1821,6 +1821,7 @@ spell *display_spell_select(const char *title, player *p, spell_t type)
 #endif
         case KEY_ENTER:
         case KEY_SPC:
+activate_spell:
             // It is much too easy to accidentally cast alter reality,
             // simply by pressing m + Enter. If the first key press in
             // the menu confirms this auto selected first spell, prompt.
@@ -1845,6 +1846,36 @@ spell *display_spell_select(const char *title, player *p, spell_t type)
                 if (!beep())
                     flash();
             }
+            break;
+
+        case KEY_MOUSE:
+            /* A left click on a spell row focuses it; clicking the
+               spell that is already focused activates it exactly as
+               pressing Enter does. Spell rows are drawn at window rows
+               1 .. maxvis. */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)swin->y1;
+                const int col = display_mouse_event.x - (int)swin->x1;
+
+                if (row >= 1 && row <= (int)s.maxvis
+                        && col >= 1 && col < (int)swin->width - 1
+                        && (guint)(row + s.offset - 1) < slist->len)
+                {
+                    if (s.curr == (guint)row)
+                        /* already focused: activate it like Enter */
+                        goto activate_spell;
+
+                    /* focus the clicked spell */
+                    s.curr = (guint)row;
+                    code_buf[0] = '\0';
+                    break;
+                }
+            }
+
+            /* not on a spell row: let the window handle the event, so a
+               click on the title bar still drags the window */
+            display_window_move(swin, key);
             break;
 
         default:
