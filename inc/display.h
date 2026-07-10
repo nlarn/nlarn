@@ -184,6 +184,16 @@ position display_get_position(player *p,
  */
 position display_get_mouse_position(void);
 
+/**
+ * Briefly flash the given monsters on the map to show the player what
+ * interrupted their automatic movement.
+ *
+ * @param p the player
+ * @param monsters a list of monsters (as returned by
+ *                 player_visible_threats()); the list is not freed.
+ */
+void display_flash_monsters(player *p, GList *monsters);
+
 void display_show_history(message_log *log, const char *title);
 
 /**

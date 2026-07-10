@@ -382,9 +382,17 @@ static void mainloop()
 
             /* check if travel mode shall be aborted:
                attacked or fell through trap door */
-            if (nlarn->p->attacked || player_adjacent_monster(nlarn->p, false)
-                || Z(pos) != Z(nlarn->p->pos))
+            GList *threats;
+            if (nlarn->p->attacked || Z(pos) != Z(nlarn->p->pos))
             {
+                pos = pos_invalid;
+            }
+            else if ((threats = player_visible_threats(nlarn->p, false)) != NULL)
+            {
+                /* a threatening monster is in view: flash it so the
+                   player sees why the journey stopped */
+                display_flash_monsters(nlarn->p, threats);
+                g_list_free(threats);
                 pos = pos_invalid;
             }
             else if (pos_adjacent(nlarn->p->pos, pos))
@@ -1094,13 +1102,22 @@ static void mainloop()
 
         if (run_cmd != 0)
         {
+            GList *threats;
+
             // Interrupt running AND resting if:
             // * last action cost no turns (we ran into a wall)
             // * we took damage (trap, poison, or invisible monster)
-            // * a monster has moved adjacent to us
-            if (no_move || was_attacked
-                    || player_adjacent_monster(nlarn->p, run_cmd == '.'))
+            if (no_move || was_attacked)
             {
+                run_cmd = 0;
+            }
+            // Interrupt if a threatening monster is in view; flash it
+            // so the player sees why the movement stopped.
+            else if ((threats = player_visible_threats(nlarn->p,
+                            run_cmd == '.')) != NULL)
+            {
+                display_flash_monsters(nlarn->p, threats);
+                g_list_free(threats);
                 run_cmd = 0;
             }
             // Interrupt resting if we've rested for 100 turns OR

@@ -473,12 +473,24 @@ void player_list_sobjmem(player *p);
 void player_sobject_forget(player *p, position pos);
 
 /**
-  * @brief Check for adjacent monsters.
+  * @brief Collect the visible monsters that threaten the player and
+  *        should interrupt automatic movement.
   *
   * @param p The player.
   * @param ignore_harmless true if harmless monsters shall be ignored.
   *
-  * @return true if there are adjacent monsters.
+  * @return a newly allocated list of monsters, to be freed by the
+  *         caller with g_list_free(); NULL if there are none.
+  */
+GList *player_visible_threats(player *p, bool ignore_harmless);
+
+/**
+  * @brief Check for visible, threatening monsters.
+  *
+  * @param p The player.
+  * @param ignore_harmless true if harmless monsters shall be ignored.
+  *
+  * @return true if there are visible, threatening monsters.
   */
 bool player_adjacent_monster(player *p, bool ignore_harmless);
 

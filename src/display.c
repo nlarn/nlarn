@@ -694,6 +694,31 @@ void display_animate_glyph(position pos, wchar_t glyph, colour_t fg, bool keep)
         display_paint_screen(nlarn->p);
 }
 
+void display_flash_monsters(player *p, GList *monsters)
+{
+    if (monsters == NULL)
+        return;
+
+    /* blink the given monsters a few times to draw the player's
+       attention to what interrupted the automatic movement */
+    for (int blink = 0; blink < 3; blink++)
+    {
+        /* highlight the monsters' cells */
+        for (GList *iter = monsters; iter != NULL; iter = iter->next)
+        {
+            position mpos = monster_pos((monster *)iter->data);
+            mvwchgat(stdscr, Y(mpos), X(mpos), 1,
+                     A_REVERSE | A_BOLD, LUMINOUS_RED, NULL);
+        }
+        display_draw();
+        napms(90);
+
+        /* restore the normal screen */
+        display_paint_screen(p);
+        napms(90);
+    }
+}
+
 static int item_sort_normal(gconstpointer a, gconstpointer b, gpointer data)
 {
     return item_sort(a, b, data, false);

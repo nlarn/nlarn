@@ -4698,51 +4698,57 @@ void player_sobject_forget(player *p, position pos)
     }
 }
 
-bool player_adjacent_monster(player *p, bool ignore_harmless)
+/* Decide whether a visible monster is a threat that should interrupt
+   the player's automatic movement (running, resting, travelling). */
+static bool player_monster_is_threat(player *p, monster *m, bool ignore_harmless)
 {
-    bool monster_visible = false;
+    // Ignore the town inhabitants.
+    if (monster_type(m) == MT_TOWN_PERSON)
+        return false;
 
-    /* get the list of all visible monsters */
-    GList *mlist;
-    GList *miter = mlist = fov_get_visible_monsters(p->fv);
+    /* ignore servants */
+    if (monster_action(m) == MA_SERVE)
+        return false;
 
-    /* no visible monsters? */
-    if (mlist == NULL)
-        return monster_visible;
+    /* Only ignore floating eye if already paralysed. */
+    if (ignore_harmless
+        && (monster_type(m) == MT_FLOATING_EYE)
+        && player_effect_get(p, ET_PARALYSIS))
+        return false;
 
-    /* got a list of monsters, check if any are dangerous */
-    do
+    /* Ignore adjacent umber hulk if already confused. */
+    if (ignore_harmless
+        && (monster_type(m) == MT_UMBER_HULK)
+        && player_effect_get(p, ET_CONFUSION))
+        return false;
+
+    return true;
+}
+
+GList *player_visible_threats(player *p, bool ignore_harmless)
+{
+    GList *threats = NULL;
+
+    GList *mlist = fov_get_visible_monsters(p->fv);
+    for (GList *iter = mlist; iter != NULL; iter = iter->next)
     {
-        monster *m = (monster *)miter->data;
-
-        // Ignore the town inhabitants.
-        if (monster_type(m) == MT_TOWN_PERSON)
-            continue;
-
-        /* ignore servants */
-        if (monster_action(m) == MA_SERVE)
-            continue;
-
-        /* Only ignore floating eye if already paralysed. */
-        if (ignore_harmless
-            && (monster_type(m) == MT_FLOATING_EYE)
-            && player_effect_get(p, ET_PARALYSIS))
-            continue;
-
-        /* Ignore adjacent umber hulk if already confused. */
-        if (ignore_harmless
-            && (monster_type(m) == MT_UMBER_HULK)
-            && player_effect_get(p, ET_CONFUSION))
-            continue;
-
-        /* when reaching this point, the monster is a threat */
-        monster_visible = true;
-        break;
+        monster *m = (monster *)iter->data;
+        if (player_monster_is_threat(p, m, ignore_harmless))
+            threats = g_list_append(threats, m);
     }
-    while ((miter = miter->next) != NULL);
 
     /* free the list returned by fov_get_visible_monsters() */
     g_list_free(mlist);
+
+    return threats;
+}
+
+bool player_adjacent_monster(player *p, bool ignore_harmless)
+{
+    GList *threats = player_visible_threats(p, ignore_harmless);
+    bool monster_visible = (threats != NULL);
+
+    g_list_free(threats);
 
     return monster_visible;
 }
