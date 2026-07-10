@@ -63,6 +63,8 @@ static void display_window_update_title(display_window *dwin, const char *title)
 static void display_window_update_caption(display_window *dwin, char *caption);
 static void display_window_update_arrow_up(display_window *dwin, bool on);
 static void display_window_update_arrow_down(display_window *dwin, bool on);
+static int display_window_arrow_at(display_window *dwin, int x, int y);
+static int display_scroll_getch(display_window *dwin, int *autoscroll);
 
 static display_window *display_item_details(guint x1, guint y1, guint width,
                                             item *it, player *p, bool shop);
@@ -142,12 +144,15 @@ void display_init()
     /* Enable mouse support: window dragging needs the left button's
        press and release events plus the pointer position while the
        button is held. PDCurses reports the latter as BUTTONn_MOVED
-       events, ncurses as REPORT_MOUSE_POSITION. */
+       events, ncurses as REPORT_MOUSE_POSITION. The mouse wheel is
+       reported as BUTTON4 (up) and BUTTON5 (down) by both. */
 #ifdef NCURSES_VERSION
     mousemask(BUTTON1_PRESSED | BUTTON1_RELEASED | BUTTON1_CLICKED
+            | BUTTON4_PRESSED | BUTTON5_PRESSED
             | REPORT_MOUSE_POSITION, NULL);
 #else
     mousemask(BUTTON1_PRESSED | BUTTON1_RELEASED | BUTTON1_CLICKED
+            | BUTTON4_PRESSED | BUTTON5_PRESSED
             | BUTTON1_MOVED, NULL);
 #endif
 
@@ -1205,6 +1210,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
     /* main loop */
     bool keep_running = true;
+    int autoscroll = 0; /* scroll-arrow auto-repeat state */
 
     do
     {
@@ -1435,7 +1441,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
         wrefresh(iwin->window);
 
-        switch (key = display_getch(iwin->window))
+        switch (key = display_scroll_getch(iwin, &autoscroll))
         {
         case KEY_ESC:
             keep_running = false;
@@ -1671,6 +1677,7 @@ spell *display_spell_select(const char *title, player *p)
     display_window *ipop = NULL;
     int key; /* keyboard input */
     int RUN = true;
+    int autoscroll = 0; /* scroll-arrow auto-repeat state */
 
     /* currently displayed spell; return value */
     spell *sp;
@@ -1743,7 +1750,7 @@ spell *display_spell_select(const char *title, player *p)
                 spell_name(sp), spdesc, 0);
         g_free(spdesc);
 
-        switch (key = display_getch(swin->window))
+        switch (key = display_scroll_getch(swin, &autoscroll))
         {
         case KEY_ESC:
             RUN = false;
@@ -3075,6 +3082,7 @@ int display_show_message(const char *title, const char *message, int indent)
     display_window *mwin = display_window_new(startx, starty, width, height, title);
     guint maxvis = min(text->len, height - 2);
     guint offset = 0;
+    int autoscroll = 0; /* scroll-arrow auto-repeat state */
 
     do
     {
@@ -3099,7 +3107,7 @@ int display_show_message(const char *title, const char *message, int indent)
 
         wrefresh(mwin->window);
 
-        key = display_getch(mwin->window);
+        key = display_scroll_getch(mwin, &autoscroll);
         switch (key)
         {
         case 'k':
@@ -3314,6 +3322,106 @@ int display_getch(WINDOW *win) {
     }
 
     return ch;
+}
+
+/* Determine which scroll arrow of a window is at the given screen
+   position: -1 for the up arrow, +1 for the down arrow, 0 for
+   neither. The arrows occupy the three columns rendered by
+   display_window_update_arrow_up() / _down(). */
+static int display_window_arrow_at(display_window *dwin, int x, int y)
+{
+    if (x < (int)(dwin->x1 + dwin->width - 5)
+            || x > (int)(dwin->x1 + dwin->width - 3))
+        return 0;
+
+    if (y == (int)dwin->y1)
+        return -1;
+    if (y == (int)(dwin->y1 + dwin->height - 1))
+        return 1;
+
+    return 0;
+}
+
+/* Input reader for scrollable windows. Behaves like display_getch(),
+   but additionally turns a left click on a scroll arrow into the
+   matching KEY_UP / KEY_DOWN key code, and keeps emitting that code at
+   a slow rate while the button is held on the arrow (auto-repeat).
+
+   *autoscroll carries the repeat state between calls: it holds the
+   active scroll direction (-1 / +1) while an arrow is held, and 0
+   otherwise. Callers start it at 0 and pass the same variable each
+   time. */
+static int display_scroll_getch(display_window *dwin, int *autoscroll)
+{
+    /* auto-repeat delay in milliseconds - deliberately slow */
+    const int repeat_ms = 120;
+
+    if (*autoscroll != 0)
+    {
+        /* wait a short while for an event that would end the repeat */
+        wtimeout(dwin->window, repeat_ms);
+        int key = wgetch(dwin->window);
+        wtimeout(dwin->window, -1);
+
+        /* no event: the button is still held, keep scrolling */
+        if (key == ERR)
+            return (*autoscroll < 0) ? KEY_UP : KEY_DOWN;
+
+        /* any event ends the current repeat */
+        int dir = *autoscroll;
+        *autoscroll = 0;
+
+        if (key == KEY_MOUSE)
+        {
+            memset(&display_mouse_event, 0, sizeof(display_mouse_event));
+            if (getmouse(&display_mouse_event) == OK
+                    && !(display_mouse_event.bstate & BUTTON1_RELEASED)
+                    && display_window_arrow_at(dwin, display_mouse_event.x,
+                            display_mouse_event.y) == dir)
+            {
+                /* still pressing the same arrow: resume scrolling */
+                *autoscroll = dir;
+                return (dir < 0) ? KEY_UP : KEY_DOWN;
+            }
+
+            /* released or moved off the arrow: swallow the event */
+            return KEY_MOUSE;
+        }
+
+        /* a genuine key press ends the repeat and is handled normally */
+        ungetch(key);
+    }
+
+    int key = display_getch(dwin->window);
+
+    if (key == KEY_MOUSE)
+    {
+        /* the mouse wheel scrolls one line per notch */
+        if (display_mouse_event.bstate & BUTTON4_PRESSED)
+            return KEY_UP;
+        if (display_mouse_event.bstate & BUTTON5_PRESSED)
+            return KEY_DOWN;
+
+        /* a left click on a scroll arrow scrolls, and keeps scrolling
+           while the button is held */
+        if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+        {
+            int dir = display_window_arrow_at(dwin, display_mouse_event.x,
+                    display_mouse_event.y);
+            if (dir != 0)
+            {
+                /* a held button auto-repeats; a completed click (press
+                   and release already merged by the backend) scrolls
+                   once */
+                if (display_mouse_event.bstate & BUTTON1_PRESSED)
+                    *autoscroll = dir;
+
+                return (dir < 0) ? KEY_UP : KEY_DOWN;
+            }
+        }
+    }
+
+    return key;
 }
 
 #ifdef SDLPDCURSES
@@ -3585,7 +3693,10 @@ int display_window_move(display_window *dwin, int key)
     switch (key)
     {
     case KEY_MOUSE:
-        need_refresh = display_window_drag(dwin);
+        /* a mouse event is always consumed by the window system: it
+           either drags the window or is ignored, but must never be
+           treated as an unhandled key that closes the window */
+        display_window_drag(dwin);
         break;
 
     case 0:

@@ -86,6 +86,7 @@ When browsing through the inventory, valid actions for the selected item are sho
 
 Close a dialog window with `KEY`enter`end`/`KEY`space`end` to select an option or press `KEY`ESC`end` to close the window without making a choice.
 You can move dialogues with Ctrl and the cursor keys, or by dragging their title bar with the mouse.
+Scrollable windows can be scrolled with the mouse wheel or by clicking their `KEY`^`end` and `KEY`v`end` arrows; holding the button keeps scrolling.
 
 
 `TITLE`Spell Casting`end`
