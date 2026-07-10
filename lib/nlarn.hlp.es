@@ -15,7 +15,7 @@ Correr significa avanzar en una dirección hasta ser interrumpido. `KEY`g`end` o
 `KEY`v`end`   viajar a un lugar del nivel
 `KEY`V`end`   continuar el viaje
 
-Puedes elegir el destino del viaje moviendo el cursor o tecleando el símbolo del elemento deseado (p. ej. `KEY`_`end` para un altar). Si hay varios elementos del tipo deseado en el nivel, cada nueva pulsación desplazará el cursor entre ellos. Puedes devolver el cursor a tu personaje pulsando `KEY`@`end`. Cuando termines, pulsa INTRO para emprender el viaje. Si un enemigo aparece a la vista, el viaje se interrumpirá automáticamente y podrá continuarse con `KEY`V`end` cuando el enemigo se pierda de vista.
+Puedes elegir el destino del viaje moviendo el cursor o tecleando el símbolo del elemento deseado (p. ej. `KEY`_`end` para un altar). Si hay varios elementos del tipo deseado en el nivel, cada nueva pulsación desplazará el cursor entre ellos. Puedes devolver el cursor a tu personaje pulsando `KEY`@`end`. Cuando termines, pulsa INTRO para emprender el viaje. Si un enemigo aparece a la vista, el viaje se interrumpirá automáticamente y podrá continuarse con `KEY`V`end` cuando el enemigo se pierda de vista. Siempre que se muestre un cursor de puntería —tanto al viajar como al apuntar hechizos y ataques a distancia— puedes hacer clic con el ratón en una casilla del mapa para mover el cursor allí, y hacer clic de nuevo para confirmar.
 
 
 `TITLE`Otras acciones`end`

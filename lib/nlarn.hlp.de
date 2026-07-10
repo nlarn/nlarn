@@ -15,7 +15,7 @@ Rennen bedeutet, sich in eine Richtung zu bewegen, bis etwas dazwischenkommt. `K
 `KEY`v`end`   zu einem Ort auf der Ebene reisen
 `KEY`V`end`   Reise fortsetzen
 
-Du wählst das Reiseziel, indem du den Cursor bewegst oder das Symbol des gewünschten Merkmals eintippst (z.B. `KEY`_`end` für einen Altar). Weitere Tastendrücke bewegen den Cursor weiter, falls es mehrere Merkmale dieser Art auf der Ebene gibt. Mit `KEY`@`end` kehrt der Cursor zu deinem Charakter zurück. Drücke abschließend die EINGABETASTE, um die Reise anzutreten. Kommt ein Feind in Sicht, wird die Reise automatisch abgebrochen; sie kann mit `KEY`V`end` fortgesetzt werden, sobald der Feind außer Sicht ist.
+Du wählst das Reiseziel, indem du den Cursor bewegst oder das Symbol des gewünschten Merkmals eintippst (z.B. `KEY`_`end` für einen Altar). Weitere Tastendrücke bewegen den Cursor weiter, falls es mehrere Merkmale dieser Art auf der Ebene gibt. Mit `KEY`@`end` kehrt der Cursor zu deinem Charakter zurück. Drücke abschließend die EINGABETASTE, um die Reise anzutreten. Kommt ein Feind in Sicht, wird die Reise automatisch abgebrochen; sie kann mit `KEY`V`end` fortgesetzt werden, sobald der Feind außer Sicht ist. Wann immer ein Zielcursor angezeigt wird — sowohl beim Reisen als auch beim Zielen von Zaubern und Fernangriffen — kannst du mit der Maus auf ein Kartenfeld klicken, um den Cursor dorthin zu bewegen, und erneut klicken, um zu bestätigen.
 
 
 `TITLE`Weitere Aktionen`end`

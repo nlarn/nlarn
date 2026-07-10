@@ -51,6 +51,12 @@ static bool display_initialised = false;
 /* linked list of opened windows */
 static GList *windows = NULL;
 
+/* The mouse event belonging to the last KEY_MOUSE key code returned
+   by display_getch(). Retrieving the event right away keeps the mouse
+   event queue in sync with the key codes even when a KEY_MOUSE key is
+   discarded by an input loop that does not care for the mouse. */
+static MEVENT display_mouse_event;
+
 static attr_t mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
                          colour_t bg, int y, int x, const char *fmt, ...);
 
@@ -2852,6 +2858,35 @@ position display_get_new_position(player *p,
             }
             break;
 
+            /* mouse targeting */
+        case KEY_MOUSE:
+            /* a left click on the map moves the cursor to the clicked
+               cell; clicking the cell the cursor already occupies
+               confirms the choice, just like pressing ENTER */
+            if (display_mouse_event.bstate
+                    & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int mx = display_mouse_event.x;
+                const int my = display_mouse_event.y;
+
+                /* the map occupies screen rows 0 .. MAP_MAX_Y - 1 and
+                   columns 0 .. MAP_MAX_X - 1, one character per cell */
+                if (mx >= 0 && mx < MAP_MAX_X && my >= 0 && my < MAP_MAX_Y)
+                {
+                    position mpos = pos;
+                    X(mpos) = mx;
+                    Y(mpos) = my;
+
+                    if (pos_identical(mpos, pos))
+                        /* confirm via the ENTER handling, so the
+                           passability checks are applied there */
+                        ungetch(KEY_ENTER);
+                    else
+                        npos = mpos;
+                }
+            }
+            break;
+
             /* move cursor */
         case 'h':
         case '4':
@@ -3292,12 +3327,6 @@ void display_windows_destroy_all()
         windows = g_list_delete_link(windows, windows);
     }
 }
-
-/* The mouse event belonging to the last KEY_MOUSE key code returned
-   by display_getch(). Retrieving the event right away keeps the mouse
-   event queue in sync with the key codes even when a KEY_MOUSE key is
-   discarded by an input loop that does not care for the mouse. */
-static MEVENT display_mouse_event;
 
 int display_getch(WINDOW *win) {
     int ch = wgetch(win ? win : stdscr);

@@ -15,7 +15,7 @@ Running means moving into one direction until interrupted. `KEY`g`end` or `KEY`/
 `KEY`v`end`   voyage (travel) to a location on the level
 `KEY`V`end`   continue travelling
 
-You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. `KEY`_`end` for an altar). Subsequent key presses will move the cursor around if there are more than one of the desired features on the level. You can return the cursor to your character by pressing `KEY`@`end`. When finished, press ENTER to start the journey. When a foe comes into sight, travelling will be aborted automatically and can be continued with `KEY`V`end` when the enemy gets out of sight.
+You can select the travel target by moving the cursor or by typing the desired feature's symbol (e.g. `KEY`_`end` for an altar). Subsequent key presses will move the cursor around if there are more than one of the desired features on the level. You can return the cursor to your character by pressing `KEY`@`end`. When finished, press ENTER to start the journey. When a foe comes into sight, travelling will be aborted automatically and can be continued with `KEY`V`end` when the enemy gets out of sight. Whenever a targeting cursor is shown — for travelling as well as for aiming spells and ranged attacks — you can click a map cell with the mouse to move the cursor there, and click it again to confirm.
 
 
 `TITLE`Other actions`end`
