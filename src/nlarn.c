@@ -769,9 +769,24 @@ static void mainloop()
                 }
                 else
                 {
-                    /* travel towards the monster to engage in melee */
-                    pos = cpos = mpos;
-                    ch = 0;
+                    /* The monster is visible but not adjacent: step one
+                       tile towards it instead of auto-travelling. A
+                       visible monster would abort auto-travel at once
+                       (and the monster would be flashed); moving a
+                       single tile per click lets the player still
+                       approach for melee while keeping the danger in
+                       view. Pathfinding routes the step around walls. */
+                    path *pth = path_find(cmap, nlarn->p->pos, mpos, LE_GROUND);
+
+                    if (pth != NULL && !g_queue_is_empty(pth->path))
+                    {
+                        path_element *el = g_queue_pop_head(pth->path);
+                        moves_count = player_move(nlarn->p,
+                                pos_dir(nlarn->p->pos, el->pos), true);
+                    }
+
+                    if (pth != NULL)
+                        path_destroy(pth);
                 }
             }
             else if (!pos_identical(mpos, nlarn->p->pos))
