@@ -3854,10 +3854,9 @@ void player_item_destroy(player *p, item *it)
 
     if (count)
     {
-        log_add_entry(nlarn->log, "%s's content%s spill%s onto the floor.",
-                      desc,
-                      (count == 1) ? "" : "s",
-                      (count == 1) ? "s" : "");
+        log_add_entry(nlarn->log, (count == 1)
+                ? _("Its content spills onto the floor.")
+                : _("Its contents spill onto the floor."));
     }
 
     g_free(desc);

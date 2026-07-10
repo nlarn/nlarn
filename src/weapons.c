@@ -497,7 +497,8 @@ bool weapon_throw_pos_hit(const GList *traj,
         if (chance(combat_chance_player_to_monster_hit(nlarn->p, m, false)))
         {
             if (monster_in_sight(m))
-                log_add_entry(nlarn->log, "%s hits the %s.", wdesc, monster_get_name(m));
+                log_add_entry(nlarn->log, _("%s hits %s."), wdesc,
+                              monster_get_name_art(m, ART_DEF, GC_ACC, false));
 
             damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, weapon_damage(weapon),
                                      DAMO_PLAYER, nlarn->p);
@@ -509,7 +510,8 @@ bool weapon_throw_pos_hit(const GList *traj,
         else
         {
             if (monster_in_sight(m))
-                log_add_entry(nlarn->log, "%s misses the %s.", wdesc, monster_get_name(m));
+                log_add_entry(nlarn->log, _("%s misses %s."), wdesc,
+                              monster_get_name_art(m, ART_DEF, GC_ACC, false));
         }
     }
     else if (pos_identical(nlarn->p->pos, cpos))

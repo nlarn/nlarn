@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-09 22:18+0200\n"
+"POT-Creation-Date: 2026-07-10 19:22+0200\n"
 "PO-Revision-Date: 2026-07-08 19:08+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: Spanish\n"
@@ -151,10 +151,10 @@ msgid ""
 "\n"
 "So Sorry."
 msgstr ""
-"La Agencia Tributaria de Larn nos ha ordenado que no realicemos transacciones "
-"comerciales con evasores fiscales. También nos han informado de que usted "
-"tiene impuestos atrasados y, dado que debemos cumplir con la ley, no podemos "
-"atenderle en este momento.\n"
+"La Agencia Tributaria de Larn nos ha ordenado que no realicemos "
+"transacciones comerciales con evasores fiscales. También nos han informado "
+"de que usted tiene impuestos atrasados y, dado que debemos cumplir con la "
+"ley, no podemos atenderle en este momento.\n"
 "\n"
 "Lo sentimos mucho."
 
@@ -1022,43 +1022,43 @@ msgstr ""
 "Borra los valores con `KEY`A`end`-`KEY`F`end`. Vuelve al menú principal con "
 "`KEY`ESC`end`.\n"
 
-#: src/config.c:412 src/config.c:416 src/utils.c:480
+#: src/config.c:418 src/config.c:422 src/utils.c:480
 msgid "no"
 msgstr "no"
 
-#: src/config.c:412 src/config.c:416
+#: src/config.c:418 src/config.c:422
 msgid "yes"
 msgstr "sí"
 
-#: src/config.c:427
+#: src/config.c:433
 msgid "Configure game defaults"
 msgstr "Configurar valores predeterminados"
 
-#: src/config.c:436
+#: src/config.c:442
 msgid "Choose default name"
 msgstr "Elegir nombre predeterminado"
 
-#: src/config.c:437
+#: src/config.c:443
 msgid "By what name shall all your characters be called?"
 msgstr "¿Qué nombre llevarán todos tus personajes?"
 
-#: src/config.c:456
+#: src/config.c:462
 msgid "Shall your future characters be male or female?"
 msgstr "¿Tus futuros personajes serán hombres o mujeres?"
 
-#: src/config.c:457
+#: src/config.c:463
 msgid "Choose default gender"
 msgstr "Elegir sexo predeterminado"
 
-#: src/config.c:458 src/nlarn.c:1204
+#: src/config.c:464 src/nlarn.c:1204
 msgid "Female"
 msgstr "Mujer"
 
-#: src/config.c:458 src/nlarn.c:1204
+#: src/config.c:464 src/nlarn.c:1204
 msgid "Male"
 msgstr "Hombre"
 
-#: src/config.c:518
+#: src/config.c:524
 msgid ""
 "Select UI colour scheme:\n"
 "\n"
@@ -1066,24 +1066,24 @@ msgstr ""
 "Elige el esquema de colores de la interfaz:\n"
 "\n"
 
-#: src/config.c:526
+#: src/config.c:532
 msgid "UI colours"
 msgstr "Colores de la interfaz"
 
-#: src/config.c:548
+#: src/config.c:554
 msgid "Default font size"
 msgstr "Tamaño de letra predeterminado"
 
-#: src/config.c:549
+#: src/config.c:555
 msgid "Font size (6 - 48): "
 msgstr "Tamaño de letra (6 - 48): "
 
-#: src/config.c:564 src/game.c:115 src/map.c:1958 src/nlarn.c:650
-#: src/player.c:5318 src/player.c:5326 src/player.c:5351
+#: src/config.c:570 src/game.c:115 src/map.c:1958 src/nlarn.c:650
+#: src/player.c:5320 src/player.c:5328 src/player.c:5353
 msgid "Error"
 msgstr "Error"
 
-#: src/config.c:564
+#: src/config.c:570
 msgid "Invalid font size"
 msgstr "Tamaño de letra no válido"
 
@@ -1217,55 +1217,61 @@ msgstr "¡Una pequeña aguja sale disparada y te pincha!"
 msgid "You are engulfed in a cloud of dust!"
 msgstr "¡Te envuelve una nube de polvo!"
 
-#: src/display.c:451
+#: src/display.c:479
 msgid "unarmed"
 msgstr "desarmado"
 
-#: src/display.c:1322
+#: src/display.c:1351
 #, c-format
 msgid " %-*s %5d gold "
 msgstr " %-*s %5d de oro "
 
-#: src/display.c:1350
+#: src/display.c:1379
 #, c-format
 msgid "%s - %d gold on bank account"
 msgstr "%s: %d de oro en el banco"
 
-#: src/display.c:1359
+#: src/display.c:1388
 #, c-format
 msgid "%s - %s of %s carried"
 msgstr "%s: llevas %s de %s"
 
-#: src/display.c:1402
+#: src/display.c:1431
 msgid "(`KEY`?`end`) help"
 msgstr "(`KEY`?`end`) ayuda"
 
-#: src/display.c:1557
+#: src/display.c:1590
 msgid "Configure auto pick-up"
 msgstr "Configurar recogida automática"
 
-#: src/display.c:1562
+#: src/display.c:1595
 msgid "Item types which will be picked up automatically are shown inverted."
-msgstr "Los tipos de objeto que se recogen automáticamente se muestran invertidos."
+msgstr ""
+"Los tipos de objeto que se recogen automáticamente se muestran invertidos."
 
-#: src/display.c:1593
+#: src/display.c:1626
 msgid "Type a symbol to toggle."
 msgstr "Pulsa un símbolo para alternar."
 
-#: src/display.c:1745
+#: src/display.c:1779
 #, c-format
 msgid "Really cast %s?"
 msgstr "¿Seguro que quieres lanzar «%s»?"
 
-#: src/display.c:2236
+#: src/display.c:2270
 msgid "Yes"
 msgstr "Sí"
 
-#: src/display.c:2239
+#: src/display.c:2273
 msgid "No"
 msgstr "No"
 
-#: src/display.c:3393
+#: src/display.c:2969
+#, c-format
+msgid "Looking for '%c' (%s)."
+msgstr "Buscando «%c» (%s)."
+
+#: src/display.c:3566
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
@@ -1273,15 +1279,15 @@ msgstr ""
 "Selecciona el objeto deseado con INTRO.\n"
 "Puedes cancelar pulsando la tecla Escape."
 
-#: src/display.c:3416
+#: src/display.c:3589
 msgid "There are no options available for the selected item."
 msgstr "No hay opciones disponibles para el objeto seleccionado."
 
-#: src/display.c:3435
+#: src/display.c:3608
 msgid "Help"
 msgstr "Ayuda"
 
-#: src/display.c:3664
+#: src/display.c:3896
 msgid "Item details"
 msgstr "Detalles del objeto"
 
@@ -2424,72 +2430,92 @@ msgstr "the"
 msgid "noted"
 msgstr "con notas"
 
-#: src/items.c:1459 src/spells.c:168
+#: src/items.c:1345
+#, c-format
+msgid "%s vibrates strangely."
+msgstr "%s vibra de forma extraña."
+
+#: src/items.c:1346
+#, c-format
+msgid "%s vibrate strangely."
+msgstr "%s vibran de forma extraña."
+
+#: src/items.c:1392
+#, c-format
+msgid "%s vibrates warningly."
+msgstr "%s vibra como advertencia."
+
+#: src/items.c:1393
+#, c-format
+msgid "%s vibrate warningly."
+msgstr "%s vibran como advertencia."
+
+#: src/items.c:1462 src/spells.c:168
 #, c-format
 msgid "%s resists."
 msgstr "%s resiste."
 
-#: src/items.c:1459
+#: src/items.c:1462
 #, c-format
 msgid "%s resist."
 msgstr "%s resisten."
 
-#: src/items.c:1472
+#: src/items.c:1475
 #, c-format
 msgid "%s shatters."
 msgstr "%s se hace añicos."
 
-#: src/items.c:1472
+#: src/items.c:1475
 #, c-format
 msgid "%s shatter."
 msgstr "%s se hacen añicos."
 
-#: src/items.c:1482
+#: src/items.c:1485
 #, c-format
 msgid "%s burns."
 msgstr "%s se quema."
 
-#: src/items.c:1482
+#: src/items.c:1485
 #, c-format
 msgid "%s burn."
 msgstr "%s se queman."
 
-#: src/items.c:1490
+#: src/items.c:1493
 #, c-format
 msgid "%s corrodes."
 msgstr "%s se corroe."
 
-#: src/items.c:1490
+#: src/items.c:1493
 #, c-format
 msgid "%s corrode."
 msgstr "%s se corroen."
 
-#: src/items.c:1497
+#: src/items.c:1500
 #, c-format
 msgid "%s rusts."
 msgstr "%s se oxida."
 
-#: src/items.c:1497
+#: src/items.c:1500
 #, c-format
 msgid "%s rust."
 msgstr "%s se oxidan."
 
-#: src/items.c:1521
+#: src/items.c:1524
 #, c-format
 msgid "%s is destroyed."
 msgstr "%s se destruye."
 
-#: src/items.c:1521
+#: src/items.c:1524
 #, c-format
 msgid "%s are destroyed."
 msgstr "%s se destruyen."
 
-#: src/items.c:1618
+#: src/items.c:1621
 #, c-format
 msgid "Ammunition for %s\n"
 msgstr "Munición para %s\n"
 
-#: src/items.c:1623 src/items.c:1673
+#: src/items.c:1626 src/items.c:1676
 #, c-format
 msgid ""
 "Damage:   +%d\n"
@@ -2498,7 +2524,7 @@ msgstr ""
 "Daño:     +%d\n"
 "Puntería: +%d\n"
 
-#: src/items.c:1629 src/items.c:1680
+#: src/items.c:1632 src/items.c:1683
 #, c-format
 msgid ""
 "Base damage: +%d\n"
@@ -2507,7 +2533,7 @@ msgstr ""
 "Daño base: +%d\n"
 "Puntería base: +%d\n"
 
-#: src/items.c:1640
+#: src/items.c:1643
 #, c-format
 msgid ""
 "%s\n"
@@ -2516,49 +2542,49 @@ msgstr ""
 "%s\n"
 "Nivel del hechizo: %d\n"
 
-#: src/items.c:1652
+#: src/items.c:1655
 msgid "two-handed"
 msgstr "a dos manos"
 
-#: src/items.c:1655
+#: src/items.c:1658
 msgid "ranged"
 msgstr "a distancia"
 
-#: src/items.c:1658
+#: src/items.c:1661
 msgid "unique"
 msgstr "única"
 
-#: src/items.c:1664
+#: src/items.c:1667
 #, c-format
 msgid "%s weapon\n"
 msgstr "Arma %s\n"
 
-#: src/items.c:1690
+#: src/items.c:1693
 #, c-format
 msgid "Armour class: %d\n"
 msgstr "Clase de armadura: %d\n"
 
-#: src/items.c:1694
+#: src/items.c:1697
 #, c-format
 msgid "Base AC: %d\n"
 msgstr "CA base: %d\n"
 
-#: src/items.c:1703
+#: src/items.c:1706
 #, c-format
 msgid "Notes: %s\n"
 msgstr "Notas: %s\n"
 
-#: src/items.c:1705
+#: src/items.c:1708
 #, c-format
 msgid "Weight:   %.2f kg\n"
 msgstr "Peso:     %.2f kg\n"
 
-#: src/items.c:1708
+#: src/items.c:1711
 #, c-format
 msgid "Material: %s"
 msgstr "Material: %s"
 
-#: src/items.c:1715
+#: src/items.c:1718
 #, c-format
 msgid ""
 "\n"
@@ -2567,7 +2593,7 @@ msgstr ""
 "\n"
 "Precio:   %d de oro cada uno"
 
-#: src/items.c:1715
+#: src/items.c:1718
 #, c-format
 msgid ""
 "\n"
@@ -3352,7 +3378,7 @@ msgstr "%s te %s."
 msgid "The gaze is reflected harmlessly."
 msgstr "La mirada se refleja sin causar daño."
 
-#: src/monsters.c:2398 src/monsters.c:4220 src/weapons.c:443
+#: src/monsters.c:2398 src/monsters.c:4220 src/weapons.c:443 src/weapons.c:500
 #, c-format
 msgid "%s hits %s."
 msgstr "%s golpea %s."
@@ -4017,7 +4043,7 @@ msgstr "¿Quieres guardar un archivo en memoria de tu personaje?"
 msgid "You cannot move as long you are overstrained."
 msgstr "No puedes moverte mientras vayas sobrecargado."
 
-#: src/player.c:1258 src/player.c:1635 src/player.c:3878
+#: src/player.c:1258 src/player.c:1635 src/player.c:3880
 msgid "You can't move!"
 msgstr "¡No puedes moverte!"
 
@@ -4410,208 +4436,216 @@ msgstr "`LIGHT_MAGENTA`¡%s se destruyen!`end`"
 msgid "`LIGHT_MAGENTA`%s is destroyed!`end`"
 msgstr "`LIGHT_MAGENTA`¡%s se destruye!`end`"
 
-#: src/player.c:3888
+#: src/player.c:3861
+msgid "Its content spills onto the floor."
+msgstr "Su contenido se derrama por el suelo."
+
+#: src/player.c:3862
+msgid "Its contents spill onto the floor."
+msgstr "Su contenido se derrama por el suelo."
+
+#: src/player.c:3890
 #, c-format
 msgid "Drop how many %s?"
 msgstr "¿Qué cantidad de %s quieres soltar?"
 
-#: src/player.c:3913
+#: src/player.c:3915
 #, c-format
 msgid "You drop %s."
 msgstr "Sueltas %s."
 
-#: src/player.c:3916
+#: src/player.c:3918
 #, c-format
 msgid "dropping %s"
 msgstr "soltando %s"
 
-#: src/player.c:3955
+#: src/player.c:3957
 #, c-format
 msgid "%s are surrounded by a `CHARCOAL`black`end` halo."
 msgstr "%s emiten un halo `CHARCOAL`negro`end`."
 
-#: src/player.c:3956
+#: src/player.c:3958
 #, c-format
 msgid "%s is surrounded by a `CHARCOAL`black`end` halo."
 msgstr "%s emite un halo `CHARCOAL`negro`end`."
 
-#: src/player.c:3959
+#: src/player.c:3961
 #, c-format
 msgid "%s are surrounded by a `WHITE`white`end` halo."
 msgstr "%s emiten un halo `WHITE`blanco`end`."
 
-#: src/player.c:3960
+#: src/player.c:3962
 #, c-format
 msgid "%s is surrounded by a `WHITE`white`end` halo."
 msgstr "%s emite un halo `WHITE`blanco`end`."
 
-#: src/player.c:3976
+#: src/player.c:3978
 #, c-format
 msgid "Add your description for %s (delete with ESC)"
 msgstr "Tu descripción para %s (borrar con ESC)"
 
-#: src/player.c:3980
+#: src/player.c:3982
 msgid "Edit item notes"
 msgstr "Editar notas del objeto"
 
-#: src/player.c:3995
+#: src/player.c:3997
 msgid "Choose an item to read"
 msgstr "Elige un objeto para leer"
 
-#: src/player.c:4005
+#: src/player.c:4007
 msgid "You have nothing to read."
 msgstr "No tienes nada que leer."
 
-#: src/player.c:4015
+#: src/player.c:4017
 msgid "Choose an item to drink"
 msgstr "Elige un objeto para beber"
 
-#: src/player.c:4025
+#: src/player.c:4027
 msgid "You have nothing to drink."
 msgstr "No tienes nada que beber."
 
-#: src/player.c:4036
+#: src/player.c:4038
 msgid "Choose an item to equip"
 msgstr "Elige un objeto para equipar"
 
-#: src/player.c:4046
+#: src/player.c:4048
 msgid "You have nothing you could equip."
 msgstr "No tienes nada que puedas equipar."
 
-#: src/player.c:4056
+#: src/player.c:4058
 msgid "Choose an item to take off"
 msgstr "Elige un objeto para quitarte"
 
-#: src/player.c:4065
+#: src/player.c:4067
 msgid "You have nothing you could take off."
 msgstr "No llevas nada que puedas quitarte."
 
-#: src/player.c:4075
+#: src/player.c:4077
 msgid "Choose an item to drop"
 msgstr "Elige un objeto para soltar"
 
-#: src/player.c:4083
+#: src/player.c:4085
 msgid "You have nothing you could drop."
 msgstr "No tienes nada que puedas soltar."
 
-#: src/player.c:4093
+#: src/player.c:4095
 msgid "You have nothing you could throw."
 msgstr "No tienes nada que puedas lanzar."
 
-#: src/player.c:4108
+#: src/player.c:4110
 #, c-format
 msgid "You can't throw %s, it's welded to your hands!"
 msgstr "¡No puedes lanzar %s: se ha soldado a tus manos!"
 
-#: src/player.c:4355
+#: src/player.c:4357
 #, c-format
 msgid "`LIGHT_MAGENTA`You find a %s!`end`"
 msgstr "`LIGHT_MAGENTA`¡Encuentras una %s!`end`"
 
-#: src/player.c:4377
+#: src/player.c:4379
 #, c-format
 msgid "`LIGHT_MAGENTA`You discover a trap on %s!`end`"
 msgstr "`LIGHT_MAGENTA`¡Descubres una trampa en %s!`end`"
 
-#: src/player.c:4393
+#: src/player.c:4395
 msgid "You have not discovered any landmarks yet."
 msgstr "Todavía no has descubierto ningún punto de interés."
 
-#: src/player.c:4418
+#: src/player.c:4420
 msgid "Discovered landmarks"
 msgstr "Puntos de interés descubiertos"
 
-#: src/player.c:4572
+#: src/player.c:4574
 #, c-format
 msgid "Pick up how many %s?"
 msgstr "¿Qué cantidad de %s quieres recoger?"
 
-#: src/player.c:4593
+#: src/player.c:4595
 #, c-format
 msgid "You pick up %s."
 msgstr "Recoges %s."
 
-#: src/player.c:4607
+#: src/player.c:4609
 #, c-format
 msgid "picking up %s"
 msgstr "recogiendo %s"
 
-#: src/player.c:4936
+#: src/player.c:4938
 msgid "*) ignoring instakills\n"
 msgstr "*) sin contar muertes instantáneas\n"
 
-#: src/player.c:4938
+#: src/player.c:4940
 msgid "Fighting statistics"
 msgstr "Estadísticas de combate"
 
-#: src/player.c:4940
+#: src/player.c:4942
 msgid "Do you want to save the calculations?"
 msgstr "¿Quieres guardar los cálculos?"
 
-#: src/player.c:4945 src/player.c:5297
+#: src/player.c:4947 src/player.c:5299
 msgid "Enter filename: "
 msgstr "Nombre del archivo: "
 
-#: src/player.c:4977
+#: src/player.c:4979
 msgid "Necklace:"
 msgstr "Collar:"
 
-#: src/player.c:4978
+#: src/player.c:4980
 msgid "Main weapon:"
 msgstr "Arma principal:"
 
-#: src/player.c:4979
+#: src/player.c:4981
 msgid "Sec. weapon:"
 msgstr "Arma secundaria:"
 
-#: src/player.c:4980
+#: src/player.c:4982
 msgid "In quiver:"
 msgstr "En el carcaj:"
 
-#: src/player.c:4981
+#: src/player.c:4983
 msgid "Boots:"
 msgstr "Botas:"
 
-#: src/player.c:4982
+#: src/player.c:4984
 msgid "Cloak:"
 msgstr "Capa:"
 
-#: src/player.c:4983
+#: src/player.c:4985
 msgid "Gloves:"
 msgstr "Guantes:"
 
-#: src/player.c:4984
+#: src/player.c:4986
 msgid "Helmet:"
 msgstr "Casco:"
 
-#: src/player.c:4985
+#: src/player.c:4987
 msgid "Shield:"
 msgstr "Escudo:"
 
-#: src/player.c:4986
+#: src/player.c:4988
 msgid "Body armour:"
 msgstr "Armadura:"
 
-#: src/player.c:4987
+#: src/player.c:4989
 msgid "Left ring:"
 msgstr "Anillo izquierdo:"
 
-#: src/player.c:4988
+#: src/player.c:4990
 msgid "Right ring:"
 msgstr "Anillo derecho:"
 
-#: src/player.c:5318
+#: src/player.c:5320
 msgid "File is a symlink. I won't overwrite those..."
 msgstr "El archivo es un enlace simbólico. Esos no los sobrescribo..."
 
-#: src/player.c:5326
+#: src/player.c:5328
 msgid ""
 "There is a directory with the name you gave. Thus I can't write the file."
 msgstr ""
 "Existe un directorio con el nombre que has dado, así que no puedo escribir "
 "el archivo."
 
-#: src/player.c:5333
+#: src/player.c:5335
 msgid ""
 "File exists!\n"
 "Do you want to overwrite it?"
@@ -7208,7 +7242,7 @@ msgstr "bendito"
 msgid "cursed"
 msgstr "maldito"
 
-#: src/weapons.c:455
+#: src/weapons.c:455 src/weapons.c:513
 #, c-format
 msgid "%s misses %s."
 msgstr "%s no acierta %s."

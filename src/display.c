@@ -2966,7 +2966,7 @@ position display_get_new_position(player *p,
                     if (so_get_glyph(i) == (char) ch)
                     {
                         sobj = i;
-                        log_add_entry(nlarn->log, "Looking for '%c' (%s).\n",
+                        log_add_entry(nlarn->log, _("Looking for '%c' (%s)."),
                                       (char) ch, so_get_desc(sobj));
                         break;
                     }
