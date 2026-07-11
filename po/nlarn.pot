@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-10 23:38+0200\n"
+"POT-Creation-Date: 2026-07-11 00:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -599,7 +599,7 @@ msgid ""
 "Have the Trade Post's experts revert any damage done to the selected item."
 msgstr ""
 
-#: src/buildings.c:934
+#: src/buildings.c:934 src/player.c:2612
 msgid "(`KEY`e`end`)quip"
 msgstr ""
 
@@ -607,7 +607,7 @@ msgstr ""
 msgid "Equip the selected item."
 msgstr ""
 
-#: src/buildings.c:942
+#: src/buildings.c:942 src/player.c:2636
 msgid "(`KEY`u`end`)nequip"
 msgstr ""
 
@@ -615,7 +615,7 @@ msgstr ""
 msgid "Unequip the selected item."
 msgstr ""
 
-#: src/buildings.c:951
+#: src/buildings.c:951 src/player.c:2653
 msgid "(`KEY`n`end`)ote"
 msgstr ""
 
@@ -999,7 +999,7 @@ msgstr ""
 msgid "Get the selected item out the container."
 msgstr ""
 
-#: src/container.c:111
+#: src/container.c:111 src/player.c:1665
 msgid "get (`KEY`a`end`)ll"
 msgstr ""
 
@@ -1092,70 +1092,70 @@ msgstr ""
 msgid "unarmed"
 msgstr ""
 
-#: src/display.c:1379
+#: src/display.c:1422
 #, c-format
 msgid " %-*s %5d gold "
 msgstr ""
 
-#: src/display.c:1407
+#: src/display.c:1450
 #, c-format
 msgid "%s - %d gold on bank account"
 msgstr ""
 
-#: src/display.c:1416
+#: src/display.c:1459
 #, c-format
 msgid "%s - %s of %s carried"
 msgstr ""
 
-#: src/display.c:1459
+#: src/display.c:1515
 msgid "(`KEY`?`end`) help"
 msgstr ""
 
-#: src/display.c:1618
+#: src/display.c:1750
 msgid "Configure auto pick-up"
 msgstr ""
 
-#: src/display.c:1623
+#: src/display.c:1755
 msgid "Item types which will be picked up automatically are shown inverted."
 msgstr ""
 
-#: src/display.c:1654
+#: src/display.c:1786
 msgid "Type a symbol to toggle."
 msgstr ""
 
-#: src/display.c:1831
+#: src/display.c:1963
 #, c-format
 msgid "Really cast %s?"
 msgstr ""
 
-#: src/display.c:2353
+#: src/display.c:2485
 msgid "Yes"
 msgstr ""
 
-#: src/display.c:2356
+#: src/display.c:2488
 msgid "No"
 msgstr ""
 
-#: src/display.c:3068
+#: src/display.c:3230
 #, c-format
 msgid "Looking for '%c' (%s)."
 msgstr ""
 
-#: src/display.c:3688
+#: src/display.c:3850
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
 msgstr ""
 
-#: src/display.c:3711
+#: src/display.c:3873
 msgid "There are no options available for the selected item."
 msgstr ""
 
-#: src/display.c:3730
+#: src/display.c:3892
 msgid "Help"
 msgstr ""
 
-#: src/display.c:4018
+#: src/display.c:4180
 msgid "Item details"
 msgstr ""
 
@@ -3949,8 +3949,16 @@ msgstr ""
 msgid "You cannot reach the floor!"
 msgstr ""
 
+#: src/player.c:1648
+msgid "(`KEY`,`end`) get"
+msgstr ""
+
 #: src/player.c:1649
 msgid "Get the item. In case of an item stack, get the entire stack."
+msgstr ""
+
+#: src/player.c:1656
+msgid "(`KEY`g`end`)et partly"
 msgstr ""
 
 #: src/player.c:1657
@@ -4075,18 +4083,34 @@ msgstr ""
 msgid "You do not carry anything."
 msgstr ""
 
+#: src/player.c:2603
+msgid "(`KEY`d`end`)rop"
+msgstr ""
+
 #: src/player.c:2604
 msgid ""
 "Drop the selected item. If the item is a stack of multiple items, you will "
 "be prompted for the amount you want to drop."
 msgstr ""
 
+#: src/player.c:2620
+msgid "(`KEY`o`end`)pen"
+msgstr ""
+
 #: src/player.c:2621
 msgid "Open the selected container."
 msgstr ""
 
+#: src/player.c:2628
+msgid "(`KEY`s`end`)tore"
+msgstr ""
+
 #: src/player.c:2629
 msgid "Put the item into a container you carry or one that is on the floor."
+msgstr ""
+
+#: src/player.c:2645
+msgid "(`KEY`u`end`)se"
 msgstr ""
 
 #: src/player.c:2646

@@ -1223,6 +1223,20 @@ static guint caption_visible_len(const char *s)
     return len;
 }
 
+/* The hotkey of a caption segment: the character the translator marked
+   up with `KEY`...`end`, so the accelerator is the letter highlighted
+   in the (translated) verb. Returns 0 when the segment carries no such
+   markup. */
+static int caption_hotkey(const char *s)
+{
+    const char *k = strstr(s, "`KEY`");
+
+    /* strlen("`KEY`") == 5; the marked character - a full, possibly
+       multi-byte UTF-8 code point - follows the tag. Return it as a
+       Unicode code point so non-ASCII hotkeys (e.g. "ö") work. */
+    return k ? (int)g_utf8_get_char(k + 5) : 0;
+}
+
 item *display_inventory(const char *title, player *p, inventory **inv,
                         GPtrArray *callbacks, bool show_price,
                         bool show_weight, bool show_account,
@@ -1282,6 +1296,19 @@ item *display_inventory(const char *title, player *p, inventory **inv,
        indices match the callbacks array (0 column = inactive) */
     guint *cap_col = callbacks ? g_new0(guint, callbacks->len) : NULL;
     guint *cap_len = callbacks ? g_new0(guint, callbacks->len) : NULL;
+
+    /* Derive each action's hotkey from the `KEY` markup of its (possibly
+       translated) description, so the key that triggers an action is
+       always the letter highlighted in the shown verb, in any language.
+       Falls back to the caller-provided key when a segment is unmarked. */
+    for (guint i = 0; callbacks != NULL && i < callbacks->len; i++)
+    {
+        display_inv_callback *cb = g_ptr_array_index(callbacks, i);
+        const int k = caption_hotkey(cb->description);
+
+        if (k != 0)
+            cb->key = k;
+    }
 
     do
     {

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-10 23:38+0200\n"
+"POT-Creation-Date: 2026-07-11 00:25+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -260,7 +260,7 @@ msgstr "So viel hast du nicht auf der Bank!"
 
 #: src/buildings.c:218 src/buildings.c:906
 msgid "(`KEY`s`end`)ell"
-msgstr "(`KEY`s`end`) verkaufen"
+msgstr "(`KEY`v`end`)erkaufen"
 
 #: src/buildings.c:219
 msgid "Sell the currently selected gem."
@@ -380,7 +380,7 @@ msgstr "  `KEY`t`end`) etwas mitnehmen\n"
 
 #: src/buildings.c:461
 msgid "(`KEY`d`end`)eposit"
-msgstr "(`KEY`d`end`) deponieren"
+msgstr "(`KEY`e`end`)inzahlen"
 
 #: src/buildings.c:462
 msgid "Deposit the selected item in your storage room at home."
@@ -388,7 +388,7 @@ msgstr "Lagere den ausgewählten Gegenstand in deiner Abstellkammer zu Hause."
 
 #: src/buildings.c:486
 msgid "(`KEY`t`end`)ake"
-msgstr "(`KEY`t`end`) nehmen"
+msgstr "(`KEY`n`end`)ehmen"
 
 #: src/buildings.c:487
 msgid ""
@@ -399,7 +399,7 @@ msgstr ""
 
 #: src/buildings.c:497
 msgid "take (`KEY`a`end`)ll"
-msgstr "(`KEY`a`end`) alles nehmen"
+msgstr "(`KEY`a`end`)lles nehmen"
 
 #: src/buildings.c:498
 msgid ""
@@ -670,7 +670,7 @@ msgstr "Verkaufe den ausgewählten Gegenstand an den Handelsposten."
 
 #: src/buildings.c:916
 msgid "(`KEY`i`end`)dentify"
-msgstr "(`KEY`i`end`) identifizieren"
+msgstr "(`KEY`i`end`)dentifizieren"
 
 #: src/buildings.c:917
 msgid "Have the Trade Post's experts identify your item."
@@ -678,7 +678,7 @@ msgstr "Lass die Experten des Handelspostens deinen Gegenstand identifizieren."
 
 #: src/buildings.c:925
 msgid "(`KEY`r`end`)epair"
-msgstr "(`KEY`r`end`) reparieren"
+msgstr "(`KEY`r`end`)eparieren"
 
 #: src/buildings.c:926
 msgid ""
@@ -687,25 +687,25 @@ msgstr ""
 "Lass die Experten des Handelspostens alle Schäden am ausgewählten Gegenstand "
 "beheben."
 
-#: src/buildings.c:934
+#: src/buildings.c:934 src/player.c:2612
 msgid "(`KEY`e`end`)quip"
-msgstr "(`KEY`e`end`) anlegen"
+msgstr "(`KEY`a`end`)nlegen"
 
 #: src/buildings.c:935 src/player.c:2613
 msgid "Equip the selected item."
 msgstr "Den gewählten Gegenstand anlegen."
 
-#: src/buildings.c:942
+#: src/buildings.c:942 src/player.c:2636
 msgid "(`KEY`u`end`)nequip"
-msgstr "(`KEY`u`end`) ablegen"
+msgstr "a(`KEY`b`end`)legen"
 
 #: src/buildings.c:943 src/player.c:2637
 msgid "Unequip the selected item."
 msgstr "Den gewählten Gegenstand ablegen."
 
-#: src/buildings.c:951
+#: src/buildings.c:951 src/player.c:2653
 msgid "(`KEY`n`end`)ote"
-msgstr "(`KEY`n`end`) notieren"
+msgstr "n(`KEY`o`end`)tieren"
 
 #: src/buildings.c:952
 msgid "Add a note to the item."
@@ -884,7 +884,7 @@ msgstr "Leider sind wir ausverkauft."
 
 #: src/buildings.c:1290
 msgid "(`KEY`b`end`)uy"
-msgstr "(`KEY`b`end`) kaufen"
+msgstr "(`KEY`k`end`)aufen"
 
 #: src/buildings.c:1291
 msgid ""
@@ -1123,15 +1123,15 @@ msgstr "%s ist leer."
 
 #: src/container.c:101
 msgid "(`KEY`g`end`)et"
-msgstr "(`KEY`g`end`) nehmen"
+msgstr "(`KEY`n`end`)ehmen"
 
 #: src/container.c:102
 msgid "Get the selected item out the container."
 msgstr "Nimm den ausgewählten Gegenstand aus dem Behälter."
 
-#: src/container.c:111
+#: src/container.c:111 src/player.c:1665
 msgid "get (`KEY`a`end`)ll"
-msgstr "(`KEY`a`end`) alle nehmen"
+msgstr "(`KEY`a`end`)lle nehmen"
 
 #: src/container.c:112
 msgid ""
@@ -1224,58 +1224,58 @@ msgstr "Eine Staubwolke hüllt dich ein!"
 msgid "unarmed"
 msgstr "unbewaffnet"
 
-#: src/display.c:1379
+#: src/display.c:1422
 #, c-format
 msgid " %-*s %5d gold "
 msgstr " %-*s %5d Gold "
 
-#: src/display.c:1407
+#: src/display.c:1450
 #, c-format
 msgid "%s - %d gold on bank account"
 msgstr "%s - %d Gold auf dem Bankkonto"
 
-#: src/display.c:1416
+#: src/display.c:1459
 #, c-format
 msgid "%s - %s of %s carried"
 msgstr "%s - %s von %s getragen"
 
-#: src/display.c:1459
+#: src/display.c:1515
 msgid "(`KEY`?`end`) help"
 msgstr "(`KEY`?`end`) Hilfe"
 
-#: src/display.c:1618
+#: src/display.c:1750
 msgid "Configure auto pick-up"
 msgstr "Auto-Aufsammeln einrichten"
 
-#: src/display.c:1623
+#: src/display.c:1755
 msgid "Item types which will be picked up automatically are shown inverted."
 msgstr ""
 "Gegenstandsarten, die automatisch aufgesammelt werden, sind invertiert "
 "dargestellt."
 
-#: src/display.c:1654
+#: src/display.c:1786
 msgid "Type a symbol to toggle."
 msgstr "Symbol eingeben zum Umschalten."
 
-#: src/display.c:1831
+#: src/display.c:1963
 #, c-format
 msgid "Really cast %s?"
 msgstr "Wirklich „%s“ zaubern?"
 
-#: src/display.c:2353
+#: src/display.c:2485
 msgid "Yes"
 msgstr "Ja"
 
-#: src/display.c:2356
+#: src/display.c:2488
 msgid "No"
 msgstr "Nein"
 
-#: src/display.c:3068
+#: src/display.c:3230
 #, c-format
 msgid "Looking for '%c' (%s)."
 msgstr "Suche nach „%c“ (%s)."
 
-#: src/display.c:3688
+#: src/display.c:3850
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
@@ -1283,15 +1283,15 @@ msgstr ""
 "Wähle den gewünschten Gegenstand mit EINGABE.\n"
 "Mit der Escape-Taste kannst du abbrechen."
 
-#: src/display.c:3711
+#: src/display.c:3873
 msgid "There are no options available for the selected item."
 msgstr "Für den ausgewählten Gegenstand gibt es keine Optionen."
 
-#: src/display.c:3730
+#: src/display.c:3892
 msgid "Help"
 msgstr "Hilfe"
 
-#: src/display.c:4018
+#: src/display.c:4180
 msgid "Item details"
 msgstr "Gegenstandsdetails"
 
@@ -4140,11 +4140,19 @@ msgstr "Hier ist nichts."
 msgid "You cannot reach the floor!"
 msgstr "Du kannst den Boden nicht erreichen!"
 
+#: src/player.c:1648
+msgid "(`KEY`,`end`) get"
+msgstr "(`KEY`n`end`)ehmen"
+
 #: src/player.c:1649
 msgid "Get the item. In case of an item stack, get the entire stack."
 msgstr ""
 "Nimm den Gegenstand. Bei einem Stapel von Gegenständen nimm den den gesamten "
 "Stapel."
+
+#: src/player.c:1656
+msgid "(`KEY`g`end`)et partly"
+msgstr "(`KEY`e`end`)inige nehmen"
 
 #: src/player.c:1657
 msgid ""
@@ -4272,6 +4280,10 @@ msgstr "schlafend"
 msgid "You do not carry anything."
 msgstr "Du hast nichts dabei."
 
+#: src/player.c:2603
+msgid "(`KEY`d`end`)rop"
+msgstr "(`KEY`f`end`)allen lassen"
+
 #: src/player.c:2604
 msgid ""
 "Drop the selected item. If the item is a stack of multiple items, you will "
@@ -4281,15 +4293,27 @@ msgstr ""
 "Gegenstände handelt, wirst du gefragt, wie viele Gegenstände du fallen "
 "lassen möchtest."
 
+#: src/player.c:2620
+msgid "(`KEY`o`end`)pen"
+msgstr "(`KEY`ö`end`)ffnen"
+
 #: src/player.c:2621
 msgid "Open the selected container."
 msgstr "Den ausgewählten Container öffnen."
+
+#: src/player.c:2628
+msgid "(`KEY`s`end`)tore"
+msgstr "(`KEY`v`end`)erstauen"
 
 #: src/player.c:2629
 msgid "Put the item into a container you carry or one that is on the floor."
 msgstr ""
 "Lege den Gegenstand in einen mitgeführten oder auf dem Boden stehenden "
 "Behälter."
+
+#: src/player.c:2645
+msgid "(`KEY`u`end`)se"
+msgstr "ben(`KEY`u`end`)tzen"
 
 #: src/player.c:2646
 msgid "Use the selected item."
