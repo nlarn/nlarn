@@ -1262,15 +1262,19 @@ msgstr "Symbol eingeben zum Umschalten."
 msgid "Really cast %s?"
 msgstr "Wirklich „%s“ zaubern?"
 
-#: src/display.c:2512
+#: src/display.c:2155
+msgid "OK"
+msgstr "OK"
+
+#: src/display.c:2565
 msgid "Yes"
 msgstr "Ja"
 
-#: src/display.c:2515
+#: src/display.c:2568
 msgid "No"
 msgstr "Nein"
 
-#: src/display.c:3257
+#: src/display.c:3351
 #, c-format
 msgid "Looking for '%c' (%s)."
 msgstr "Suche nach „%c“ (%s)."
@@ -1291,7 +1295,7 @@ msgstr "Für den ausgewählten Gegenstand gibt es keine Optionen."
 msgid "Help"
 msgstr "Hilfe"
 
-#: src/display.c:4323
+#: src/display.c:4301
 msgid "Item details"
 msgstr "Gegenstandsdetails"
 

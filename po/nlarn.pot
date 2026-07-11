@@ -1128,34 +1128,38 @@ msgstr ""
 msgid "Really cast %s?"
 msgstr ""
 
-#: src/display.c:2512
+#: src/display.c:2155
+msgid "OK"
+msgstr ""
+
+#: src/display.c:2565
 msgid "Yes"
 msgstr ""
 
-#: src/display.c:2515
+#: src/display.c:2568
 msgid "No"
 msgstr ""
 
-#: src/display.c:3257
+#: src/display.c:3351
 #, c-format
 msgid "Looking for '%c' (%s)."
 msgstr ""
 
-#: src/display.c:3993
+#: src/display.c:3971
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
 msgstr ""
 
-#: src/display.c:4016
+#: src/display.c:3994
 msgid "There are no options available for the selected item."
 msgstr ""
 
-#: src/display.c:4035
+#: src/display.c:4013
 msgid "Help"
 msgstr ""
 
-#: src/display.c:4323
+#: src/display.c:4301
 msgid "Item details"
 msgstr ""
 

@@ -1258,20 +1258,24 @@ msgstr "Pulsa un símbolo para alternar."
 msgid "Really cast %s?"
 msgstr "¿Seguro que quieres lanzar «%s»?"
 
-#: src/display.c:2512
+#: src/display.c:2155
+msgid "OK"
+msgstr "Aceptar"
+
+#: src/display.c:2565
 msgid "Yes"
 msgstr "Sí"
 
-#: src/display.c:2515
+#: src/display.c:2568
 msgid "No"
 msgstr "No"
 
-#: src/display.c:3257
+#: src/display.c:3351
 #, c-format
 msgid "Looking for '%c' (%s)."
 msgstr "Buscando «%c» (%s)."
 
-#: src/display.c:3993
+#: src/display.c:3971
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
@@ -1287,7 +1291,7 @@ msgstr "No hay opciones disponibles para el objeto seleccionado."
 msgid "Help"
 msgstr "Ayuda"
 
-#: src/display.c:4323
+#: src/display.c:4301
 msgid "Item details"
 msgstr "Detalles del objeto"
 

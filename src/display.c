@@ -2129,7 +2129,10 @@ int display_get_count(const char *caption, int value)
     int width = min(basewidth + g_utf8_strlen(caption, -1), COLS - 4);
 
     GPtrArray *text = text_wrap(caption, width - basewidth, 0);
-    int height = 2 + text->len;
+
+    /* the OK button sits below the input field with one empty row of
+       padding above and below it */
+    int height = 5 + text->len;
 
     int starty = (LINES - height) / 2;
     int startx = (COLS - width) / 2;
@@ -2142,6 +2145,18 @@ int display_get_count(const char *caption, int value)
         mvwaprintw(mwin->window, 1 + line, 2, CP_UI_FG,
             "%s", (char *)g_ptr_array_index(text, line));
     }
+
+    /* The input field shares the last caption row (at field_col); the OK
+       button sits on its own row just below. */
+    const int input_row = (int)text->len;
+    const int field_col = width - 10;
+    const int button_row = (int)text->len + 2;
+
+    const char *ok = _("OK");
+    const int ok_w = (int)g_utf8_strlen(ok, -1) + 2; /* + padding spaces */
+    const int ok_col = (width - ok_w) / 2;
+
+    mvwaprintw(mwin->window, button_row, ok_col, CP_UI_FG_REVERSE, " %s ", ok);
 
     /* prepare string to edit */
     g_snprintf(ivalue, 8, "%d", value);
@@ -2156,10 +2171,10 @@ int display_get_count(const char *caption, int value)
         else
             curs_set(2); /* block */
 
-        mvwaprintw(mwin->window,  mwin->height - 2, mwin->width - 10,
+        mvwaprintw(mwin->window,  input_row, field_col,
                   CP_UI_HL_REVERSE, "%-8s", ivalue);
 
-        wmove(mwin->window, mwin->height - 2, mwin->width - 10 + ipos);
+        wmove(mwin->window, input_row, field_col + ipos);
         wrefresh(mwin->window);
 
         switch (key = display_getch(mwin->window))
@@ -2237,6 +2252,44 @@ int display_get_count(const char *caption, int value)
         case KEY_ENTER:
         case KEY_ESC:
             cont = false;
+            break;
+
+        case KEY_MOUSE:
+            /* the mouse wheel steps the value up or down */
+            if (display_mouse_event.bstate & (BUTTON4_PRESSED | BUTTON5_PRESSED))
+            {
+                int v = atoi(ivalue);
+                v += (display_mouse_event.bstate & BUTTON4_PRESSED) ? 1 : -1;
+                if (v < 0) v = 0;
+                if (v > 9999999) v = 9999999;
+                g_snprintf(ivalue, 8, "%d", v);
+                ipos = strlen(ivalue);
+                break;
+            }
+
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)mwin->y1;
+                const int col = display_mouse_event.x - (int)mwin->x1;
+
+                /* a click on the OK button confirms the entered value */
+                if (row == button_row && col >= ok_col && col < ok_col + ok_w)
+                {
+                    cont = false;
+                    break;
+                }
+
+                /* a click in the input field positions the cursor */
+                if (row == input_row && col >= field_col && col < field_col + 8)
+                {
+                    ipos = min(col - field_col, ilen);
+                    break;
+                }
+            }
+
+            /* not on a control: let the window handle the event, so a
+               click on the title bar still drags the window */
+            display_window_move(mwin, key);
             break;
 
         default:
