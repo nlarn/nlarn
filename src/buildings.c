@@ -134,22 +134,37 @@ int building_bank(player *p)
 
         g_string_append(text, _("Your wish? "));
 
+        /* Assemble the list of currently available actions. The switch
+           below is keyed by the action letter, not by the (translated)
+           hotkey, which display_menu() derives from each label. */
+        const char *labels[3];
+        int actions[3];
+        guint n = 0;
+
         if (player_get_gold(p) > 0)
-            g_string_append(text, _("`KEY`d`end`)eposit "));
+        {
+            labels[n] = _("`KEY`d`end`)eposit ");
+            actions[n++] = 'd';
+        }
 
         if (p->bank_account > 0)
-            g_string_append(text, _("`KEY`w`end`)ithdraw "));
+        {
+            labels[n] = _("`KEY`w`end`)ithdraw ");
+            actions[n++] = 'w';
+        }
 
         /* if player has gems, enable selling them */
         if (inv_length_filtered(p->inventory, item_filter_gems))
-            g_string_append(text, _("`KEY`s`end`)ell a gem"));
+        {
+            labels[n] = _("`KEY`s`end`)ell a gem");
+            actions[n++] = 's';
+        }
 
-        display_window *bwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
-                47, msg_title, text->str, 0);
+        int choice = display_menu(msg_title, text->str, labels, n);
 
         g_string_free(text, true);
 
-        int cmd = display_getch(bwin->window);
+        int cmd = (choice < 0) ? KEY_ESC : actions[choice];
 
         switch (cmd)
         {
@@ -242,7 +257,6 @@ int building_bank(player *p)
 
         /* every interaction in the bank takes two turns */
         player_make_move(p, 2, false, NULL);
-        display_window_destroy(bwin);
     }
 
     g_string_free(greeting, true);

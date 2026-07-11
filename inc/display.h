@@ -238,6 +238,22 @@ display_window *display_popup(int x1, int y1, int width, const char *title,
     const char *msg, int indent);
 
 /**
+ * @brief Show a message with a list of selectable options.
+ *
+ * Each option label carries `KEY`...`end` markup; the highlighted code
+ * point is that option's hotkey, so the accelerator follows the
+ * translation. An option can be chosen with its hotkey or by clicking it.
+ *
+ * @param title The window title. May be NULL.
+ * @param message The message shown above the options.
+ * @param options An array of option labels.
+ * @param n_options The number of options.
+ * @return The index of the chosen option, or -1 if aborted (ESC).
+ */
+int display_menu(const char *title, const char *message,
+                 const char **options, guint n_options);
+
+/**
  * @brief Handle window movement, including dragging by mouse.
  *
  * Call this for key codes an input loop does not handle itself.

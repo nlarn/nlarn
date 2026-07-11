@@ -3552,6 +3552,122 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     return win;
 }
 
+int display_menu(const char *title, const char *message,
+                 const char **options, guint n_options)
+{
+    const int indent = 2;
+
+    /* widest option, measured with the `KEY` markup stripped */
+    guint opt_w = 0;
+    for (guint i = 0; i < n_options; i++)
+        opt_w = max(opt_w, caption_visible_len(options[i]));
+
+    /* content width fits both the message and the option labels, but is
+       kept to a readable size */
+    guint content_w = max(opt_w + indent, (guint)g_utf8_strlen(message, -1));
+    content_w = min(content_w, (guint)(COLS - 6));
+    if (content_w > 58)
+        content_w = 58;
+    content_w = max(content_w, opt_w + indent);
+
+    GPtrArray *text = text_wrap(message, content_w + 1, 0);
+    const guint msg_lines = text->len;
+
+    /* layout: border, message, blank, options, blank, border */
+    const guint width = content_w + 4;
+    const guint height = msg_lines + n_options + 4;
+    const guint opt_row0 = msg_lines + 2;
+
+    const int startx = (COLS - (int)width) / 2;
+    const int starty = (LINES - (int)height) / 2;
+
+    display_window *mwin = display_window_new(startx, starty, width, height, title);
+
+    /* render the message (may carry `EMPH` etc. markup) */
+    attr_t currattr = COLOURLESS;
+    for (guint i = 0; i < msg_lines; i++)
+    {
+        const char *tline = g_ptr_array_index(text, i);
+        currattr = mvwcprintw(mwin->window, CP_UI_FG, currattr, UI_BG,
+                              i + 1, 1, " %-*s ", utf8_pad(tline, content_w), tline);
+    }
+    text_destroy(text);
+
+    /* render the options, each on its own row, remembering the hotkey
+       (the code point highlighted in the label) and the label width so
+       clicks can be mapped back to an option */
+    int *opt_key = g_new0(int, n_options);
+    int *opt_len = g_new0(int, n_options);
+    for (guint i = 0; i < n_options; i++)
+    {
+        opt_key[i] = caption_hotkey(options[i]);
+        opt_len[i] = (int)caption_visible_len(options[i]);
+        mvwcprintw(mwin->window, CP_UI_FG, COLOURLESS, UI_BG,
+                   opt_row0 + i, indent, "%s", options[i]);
+    }
+
+    wrefresh(mwin->window);
+
+    int ret = -1;
+    bool run = true;
+    while (run)
+    {
+        const int key = display_getch(mwin->window);
+
+        switch (key)
+        {
+        case KEY_ESC:
+            run = false;
+            break;
+
+        case KEY_MOUSE:
+            /* a left click on an option row selects it */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)mwin->y1;
+                const int col = display_mouse_event.x - (int)mwin->x1;
+
+                for (guint i = 0; i < n_options; i++)
+                {
+                    if (row == (int)(opt_row0 + i)
+                            && col >= indent && col < indent + opt_len[i])
+                    {
+                        ret = (int)i;
+                        run = false;
+                        break;
+                    }
+                }
+            }
+
+            /* not on an option: let the window handle dragging */
+            if (run)
+                display_window_move(mwin, key);
+            break;
+
+        default:
+            /* match the pressed key against the option hotkeys */
+            for (guint i = 0; i < n_options; i++)
+            {
+                if (key == opt_key[i])
+                {
+                    ret = (int)i;
+                    run = false;
+                    break;
+                }
+            }
+
+            if (run)
+                display_window_move(mwin, key);
+        }
+    }
+
+    g_free(opt_key);
+    g_free(opt_len);
+    display_window_destroy(mwin);
+
+    return ret;
+}
+
 void display_window_destroy(display_window *dwin)
 {
     del_panel(dwin->panel);
