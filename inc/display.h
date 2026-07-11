@@ -49,7 +49,7 @@ typedef struct display_inv_callback
 {
     const char *description;
     const char *helpmsg;
-    char key;
+    int key;                /* Unicode code point */
     inventory **inv;
     display_inv_callback_func function;
     int (*checkfun)(player *, inventory **, item *);
