@@ -2635,6 +2635,47 @@ int display_get_yesno(const char *question, const char *title, const char *yes, 
             RUN = false;
             break;
 
+        case KEY_MOUSE:
+            /* A left click on the "yes" or "no" button chooses and
+               confirms that answer, exactly like highlighting it and
+               pressing enter. The buttons are drawn on row line + 2. */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)ywin->y1;
+                const int col = display_mouse_event.x - (int)ywin->x1;
+
+                const int yes_len = (int)g_utf8_strlen(yes, -1);
+                const int no_len  = (int)g_utf8_strlen(no, -1);
+
+                /* "yes" starts at column margin; "no" ends at width -
+                   margin; each button label is wrapped in padding spaces */
+                const int yes_start = (int)margin;
+                const int yes_end   = yes_start + (2 * (int)padding) + yes_len;
+                const int no_end    = (int)width - (int)margin;
+                const int no_start  = no_end - (2 * (int)padding) - no_len;
+
+                if (row == (int)(line + 2))
+                {
+                    if (col >= yes_start && col < yes_end)
+                    {
+                        selection = true;
+                        RUN = false;
+                        break;
+                    }
+                    if (col >= no_start && col < no_end)
+                    {
+                        selection = false;
+                        RUN = false;
+                        break;
+                    }
+                }
+            }
+
+            /* not on a button: let the window handle the event, so a
+               click on the title bar still drags the window */
+            display_window_move(ywin, key);
+            break;
+
         default:
             /* perhaps the window shall be moved */
             display_window_move(ywin, key);
