@@ -3612,27 +3612,33 @@ int display_menu(const char *title, const char *message,
 
             const bool dis = (disabled != NULL && disabled[i]);
 
-            if (i == sel || dis)
+            if (i == sel)
             {
-                /* Focused or disabled buttons use one uniform colour, so
-                   strip the markup: focused-enabled is reversed,
-                   focused-disabled greyed, an idle disabled option dimmed. */
-                const attr_t a = (i == sel)
-                    ? (dis ? CP_UI_HL_REVERSE : CP_UI_FG_REVERSE)
-                    : CP_UI_BORDER;
+                /* Only the selected item is framed by the arrows and drawn
+                   as a solid reversed bar (greyed when it is disabled); the
+                   markup is stripped so the hotkey stays reversed too. */
+                const attr_t a = dis ? CP_UI_HL_REVERSE : CP_UI_FG_REVERSE;
                 char *plain = str_strip(opt_txt[i]);
                 mvwaprintw(mwin->window, opt_row0 + i, button_col, a,
                            "\xE2\x96\xBA %*s%s%*s \xE2\x97\x84",
                            lpad, "", plain, rpad, "");
                 g_free(plain);
             }
+            else if (dis)
+            {
+                /* an unselected, disabled item: no arrows, wholly dimmed */
+                char *plain = str_strip(opt_txt[i]);
+                mvwaprintw(mwin->window, opt_row0 + i, button_col, CP_UI_BORDER,
+                           "  %*s%s%*s  ", lpad, "", plain, rpad, "");
+                g_free(plain);
+            }
             else
             {
-                /* an idle, enabled button keeps its KEY-coloured hotkey */
-                mvwcprintw(mwin->window, CP_UI_FG, COLOURLESS, UI_BG,
+                /* an unselected item: no arrows, drawn in the border colour
+                   but keeping its KEY-coloured hotkey */
+                mvwcprintw(mwin->window, CP_UI_BORDER, COLOURLESS, UI_BG,
                            opt_row0 + i, button_col,
-                           "\xE2\x96\xBA %*s%s%*s \xE2\x97\x84",
-                           lpad, "", opt_txt[i], rpad, "");
+                           "  %*s%s%*s  ", lpad, "", opt_txt[i], rpad, "");
             }
         }
 
