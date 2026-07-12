@@ -160,7 +160,7 @@ int building_bank(player *p)
             actions[n++] = 's';
         }
 
-        int choice = display_menu(msg_title, text->str, labels, n);
+        int choice = display_menu(msg_title, text->str, labels, NULL, NULL, n);
 
         g_string_free(text, true);
 
@@ -460,7 +460,7 @@ int building_home(player *p)
             actions[n++] = 't';
         }
 
-        int choice = display_menu(title, text->str, labels, n);
+        int choice = display_menu(title, text->str, labels, NULL, NULL, n);
         g_string_free(text, true);
 
         int cmd = (choice < 0) ? KEY_ESC : actions[choice];
@@ -787,106 +787,117 @@ static void building_school_take_course(player *p, int course, guint price)
 
 int building_school(player *p)
 {
+    const char *title = _("School");
     const char *msg_greet = _("`EMPH`Welcome to the College of Larn!`end`\n\n"
                               "We offer the exciting opportunity of higher "
                               "education to all inhabitants of the caves. "
-                              "Here is a list of the class schedule:\n\n");
-
-    const char *msg_prerequisite = _("Sorry, but this class has a prerequisite of \"%s\".");
+                              "Here is a list of the class schedule:");
 
     g_assert(p != NULL);
 
     bool leaving = false;
     while (!leaving)
     {
-        GString *text = g_string_new(msg_greet);
+        /* the courses plus the "commission a scroll" option */
+        const guint n = SCHOOL_COURSE_COUNT + 1;
+
+        const char *labels[SCHOOL_COURSE_COUNT + 1];
+        char *label_buf[SCHOOL_COURSE_COUNT + 1];
+        bool disabled[SCHOOL_COURSE_COUNT + 1];
+        const char *details[SCHOOL_COURSE_COUNT + 1];
+        char *detail_buf[SCHOOL_COURSE_COUNT + 1];
 
         for (int idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
         {
-            /* pre-pad the course name to 24 display columns; the
-               field width in the translated format counts bytes and
-               would pad multi-byte characters short */
-            const char *cdesc = _(school_courses[idx].description);
-            g_autofree gchar *course = g_strdup_printf("%-*s",
-                    utf8_pad(cdesc, 24), cdesc);
+            label_buf[idx] = g_strdup_printf("`KEY`%c`end`) %s",
+                    'a' + idx, _(school_courses[idx].description));
+            labels[idx] = label_buf[idx];
 
-            if (!p->school_courses_taken[idx])
+            /* courses become more expensive with rising difficulty */
+            const guint price = school_courses[idx].course_time
+                                * (game_difficulty(nlarn) + 1) * 100;
+            const int prereq = school_courses[idx].prerequisite;
+            const bool taken = p->school_courses_taken[idx];
+            const bool prereq_missing = (prereq >= 0)
+                    && !p->school_courses_taken[prereq];
+
+            /* attended or locked courses cannot be chosen */
+            disabled[idx] = taken || prereq_missing;
+
+            /* the details panel explains cost, time and any obstacle */
+            GString *d = g_string_new(NULL);
+            if (taken)
             {
-                /* courses become more expensive with rising difficulty */
-                guint price = school_courses[idx].course_time
-                              * (game_difficulty(nlarn) + 1) * 100;
-
-                g_string_append_printf(text,
-                        _(" `KEY`%c`end`) `EMPH`%-24s`end` - %2d mobuls, %4d gold\n"),
-                        idx + 'a', course,
-                        school_courses[idx].course_time, price);
+                g_string_append(d,
+                        _("You have already attended this course."));
             }
             else
             {
-                g_string_append_printf(text, _("    %-24s - attended\n"),
-                        course);
+                g_string_append_printf(d, _("Duration: %d mobuls"),
+                        school_courses[idx].course_time);
+                g_string_append_c(d, '\n');
+                g_string_append_printf(d, _("Cost: %d gold"), price);
+
+                if (prereq_missing)
+                {
+                    g_string_append(d, "\n\n");
+                    g_string_append_printf(d, _("Requires: %s"),
+                            _(school_courses[prereq].description));
+                }
             }
+            detail_buf[idx] = g_string_free(d, false);
+            details[idx] = detail_buf[idx];
         }
 
-        const char *commission = _("Commission a scroll");
-        g_autofree gchar *commission_pad = g_strdup_printf("%-*s",
-                utf8_pad(commission, 24), commission);
-        g_string_append_printf(text, _("\nAlternatively,\n"
-                " `KEY`%c`end`) %-24s - 10 mobuls\n\n"),
-                SCHOOL_COURSE_COUNT + 'a', commission_pad);
+        /* the "commission a scroll" option is always available */
+        label_buf[SCHOOL_COURSE_COUNT] = g_strdup_printf("`KEY`%c`end`) %s",
+                'a' + SCHOOL_COURSE_COUNT, _("Commission a scroll"));
+        labels[SCHOOL_COURSE_COUNT] = label_buf[SCHOOL_COURSE_COUNT];
+        disabled[SCHOOL_COURSE_COUNT] = false;
+        detail_buf[SCHOOL_COURSE_COUNT] = g_strdup_printf(
+                _("Duration: %d mobuls"), 10);
+        details[SCHOOL_COURSE_COUNT] = detail_buf[SCHOOL_COURSE_COUNT];
 
-        int selection = display_show_message(_("School"), text->str, 0);
-        g_string_free(text, true);
+        int selection = display_menu(title, msg_greet, labels,
+                                     disabled, details, n);
 
-        switch (selection)
+        for (guint i = 0; i < n; i++)
         {
-            case 'a' + SCHOOL_COURSE_COUNT:
-                player_make_move(p, building_scribe_scroll(p), false, NULL);
-                break;
-
-            case KEY_ESC:
-                leaving = true;
-                break;
-
-            default:
-            {
-                int course = selection - 'a';
-                if ((course < 0) || (course > SCHOOL_COURSE_COUNT)
-                        || p->school_courses_taken[course])
-                {
-                    /* invalid course or course already taken */
-                    break;
-                }
-
-                /* course prices increase with rising difficulty */
-                guint price = school_courses[course].course_time
-                              * (game_difficulty(nlarn) + 1) * 100;
-
-                if (!building_player_check(p, price))
-                {
-                    char *msg = g_strdup_printf(_("You cannot afford "
-                            "the %d gold for the course."), price);
-                    display_show_message(_("School"), msg, 0);
-                    g_free(msg);
-                }
-                /* check if the selected course has a prerequisite
-                   and if the player has taken that course */
-                else if ((school_courses[course].prerequisite >= 0) &&
-                        !p->school_courses_taken[school_courses[course].prerequisite])
-                {
-                    char *msg = g_strdup_printf(msg_prerequisite,
-                            _(school_courses[school_courses[course].prerequisite]
-                            .description));
-                    display_show_message(_("School"), msg, 0);
-                    g_free(msg);
-                }
-                else
-                {
-                    building_school_take_course(p, course, price);
-                }
-            }
+            g_free(label_buf[i]);
+            g_free(detail_buf[i]);
         }
 
+        if (selection < 0)
+        {
+            /* the player left the school */
+            leaving = true;
+        }
+        else if (selection == SCHOOL_COURSE_COUNT)
+        {
+            /* commission a scroll */
+            player_make_move(p, building_scribe_scroll(p), false, NULL);
+        }
+        else
+        {
+            /* Take a course. Disabled courses cannot be selected, so the
+               course is available and its prerequisite is met; only the
+               price still needs to be checked. */
+            const int course = selection;
+            const guint price = school_courses[course].course_time
+                                * (game_difficulty(nlarn) + 1) * 100;
+
+            if (!building_player_check(p, price))
+            {
+                char *msg = g_strdup_printf(_("You cannot afford "
+                        "the %d gold for the course."), price);
+                display_show_message(title, msg, 0);
+                g_free(msg);
+            }
+            else
+            {
+                building_school_take_course(p, course, price);
+            }
+        }
     }
 
     return 0;
@@ -1088,7 +1099,7 @@ int building_monastery(struct player *p)
             labels[n++] = disease_labels[idx];
         }
 
-        int selection = display_menu(title, msg_welcome, labels, n);
+        int selection = display_menu(title, msg_welcome, labels, NULL, NULL, n);
 
         for (int idx = 0; idx < disease_count; idx++)
             g_free(disease_labels[idx]);

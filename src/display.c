@@ -3647,7 +3647,8 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
 }
 
 int display_menu(const char *title, const char *message,
-                 const char **options, guint n_options)
+                 const char **options, const bool *disabled,
+                 const char **details, guint n_options)
 {
     /* Prepare the options: the hotkey (the code point highlighted in the
        label), the label (trimmed, but keeping the `KEY` markup so the
@@ -3669,20 +3670,53 @@ int display_menu(const char *title, const char *message,
        padded to the widest option, so a button is opt_w + 4 columns */
     const guint button_w = opt_w + 4;
 
-    /* content width fits both the message and the option buttons, but is
-       kept to a readable size */
-    guint content_w = max(button_w, (guint)g_utf8_strlen(message, -1));
-    content_w = min(content_w, (guint)(COLS - 6));
-    if (content_w > 58)
-        content_w = 58;
-    content_w = max(content_w, button_w);
+    /* Optional details panel to the right of the options: wrap each
+       option's detail text to a fixed width and remember the tallest, so
+       the window can show any of them without resizing. */
+    const guint sep_w = 3; /* space, vertical rule, space */
+    guint details_w = 0;
+    guint details_rows = 0;
+    GPtrArray **detail_lines = NULL;
+    if (details != NULL)
+    {
+        int dw = COLS - 8 - (int)button_w - (int)sep_w;
+        dw = min(dw, 34);
+        dw = max(dw, 10);
+        details_w = (guint)dw;
+
+        detail_lines = g_new0(GPtrArray *, n_options);
+        for (guint i = 0; i < n_options; i++)
+        {
+            detail_lines[i] = text_wrap(details[i] ? details[i] : "", details_w, 0);
+            details_rows = max(details_rows, detail_lines[i]->len);
+        }
+    }
+
+    /* the content area below the message: option buttons on the left and,
+       when present, the details panel on the right */
+    const guint content_rows = max(n_options, details_rows);
+
+    /* content width fits the message and the columns, kept readable */
+    guint content_w;
+    if (details != NULL)
+    {
+        content_w = button_w + sep_w + details_w;
+    }
+    else
+    {
+        content_w = max(button_w, (guint)g_utf8_strlen(message, -1));
+        content_w = min(content_w, (guint)(COLS - 6));
+        if (content_w > 58)
+            content_w = 58;
+        content_w = max(content_w, button_w);
+    }
 
     GPtrArray *text = text_wrap(message, content_w + 1, 0);
     const guint msg_lines = text->len;
 
-    /* layout: border, message, blank, options, blank, border */
+    /* layout: border, message, blank, content rows, blank, border */
     const guint width = content_w + 4;
-    const guint height = msg_lines + n_options + 4;
+    const guint height = msg_lines + content_rows + 4;
     const guint opt_row0 = msg_lines + 2;
 
     const int startx = (COLS - (int)width) / 2;
@@ -3700,41 +3734,72 @@ int display_menu(const char *title, const char *message,
     }
     text_destroy(text);
 
-    /* the buttons are centred in the window */
-    const int button_col = ((int)width - (int)button_w) / 2;
+    /* column geometry: the option buttons are left-aligned when a details
+       panel is shown, otherwise centred */
+    const int button_col = (details != NULL)
+        ? 2 : ((int)width - (int)button_w) / 2;
+    const int sep_col = button_col + (int)button_w + 1;
+    const int details_col = button_col + (int)button_w + (int)sep_w;
 
+    /* the details panel is set off by a vertical rule */
+    if (details != NULL)
+        mvwvline(mwin->window, opt_row0, sep_col,
+                 ACS_VLINE | CP_UI_BORDER, content_rows);
+
+    /* start on the first selectable option */
     guint sel = 0;
+    if (disabled != NULL)
+        for (guint i = 0; i < n_options; i++)
+            if (!disabled[i]) { sel = i; break; }
+
     int ret = -1;
     bool run = true;
     while (run)
     {
-        /* (re)draw the buttons, centring each label and highlighting the
-           selected one; "▶ text ◀" makes an option look like a button */
+        /* (re)draw the buttons: the selected one is a solid reversed bar,
+           a disabled one is dimmed, and the rest keep their KEY colour */
         for (guint i = 0; i < n_options; i++)
         {
             const int pad = (int)opt_w - opt_len[i];
             const int lpad = pad / 2;
             const int rpad = pad - lpad;
 
-            if (i == sel)
+            const bool dis = (disabled != NULL && disabled[i]);
+
+            if (i == sel || dis)
             {
-                /* the selected button is a solid reversed bar: strip the
-                   markup so the hotkey stays reversed like the rest */
+                /* Focused or disabled buttons use one uniform colour, so
+                   strip the markup: focused-enabled is reversed,
+                   focused-disabled greyed, an idle disabled option dimmed. */
+                const attr_t a = (i == sel)
+                    ? (dis ? CP_UI_HL_REVERSE : CP_UI_FG_REVERSE)
+                    : CP_UI_BORDER;
                 char *plain = str_strip(opt_txt[i]);
-                mvwaprintw(mwin->window, opt_row0 + i, button_col,
-                           CP_UI_FG_REVERSE,
+                mvwaprintw(mwin->window, opt_row0 + i, button_col, a,
                            "\xE2\x96\xBA %*s%s%*s \xE2\x97\x84",
                            lpad, "", plain, rpad, "");
                 g_free(plain);
             }
             else
             {
-                /* mvwcprintw renders the `KEY` markup, so the hotkey letter
-                   is drawn in the KEY colour within the button */
+                /* an idle, enabled button keeps its KEY-coloured hotkey */
                 mvwcprintw(mwin->window, CP_UI_FG, COLOURLESS, UI_BG,
                            opt_row0 + i, button_col,
                            "\xE2\x96\xBA %*s%s%*s \xE2\x97\x84",
                            lpad, "", opt_txt[i], rpad, "");
+            }
+        }
+
+        /* (re)draw the details of the selected option, clearing the panel */
+        if (details != NULL && n_options > 0)
+        {
+            GPtrArray *dl = detail_lines[sel];
+            for (guint r = 0; r < content_rows; r++)
+            {
+                const char *dline = (r < dl->len)
+                    ? g_ptr_array_index(dl, r) : "";
+                mvwaprintw(mwin->window, opt_row0 + r, details_col, CP_UI_FG,
+                           "%-*s", utf8_pad(dline, details_w), dline);
             }
         }
 
@@ -3764,8 +3829,8 @@ int display_menu(const char *title, const char *message,
         case PADENTER:
 #endif
         case KEY_ENTER:
-            /* activate the selected button */
-            if (n_options > 0)
+            /* activate the selected button unless it is disabled */
+            if (n_options > 0 && (disabled == NULL || !disabled[sel]))
             {
                 ret = (int)sel;
                 run = false;
@@ -3773,8 +3838,8 @@ int display_menu(const char *title, const char *message,
             break;
 
         case KEY_MOUSE:
-            /* a left click anywhere on a button - the arrows included -
-               selects and activates it */
+            /* a left click anywhere on an enabled button - the arrows
+               included - selects and activates it */
             if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
             {
                 const int row = display_mouse_event.y - (int)mwin->y1;
@@ -3786,8 +3851,12 @@ int display_menu(const char *title, const char *message,
                             && col >= button_col
                             && col < button_col + (int)button_w)
                     {
-                        ret = (int)i;
-                        run = false;
+                        sel = i;
+                        if (disabled == NULL || !disabled[i])
+                        {
+                            ret = (int)i;
+                            run = false;
+                        }
                         break;
                     }
                 }
@@ -3799,13 +3868,17 @@ int display_menu(const char *title, const char *message,
             break;
 
         default:
-            /* match the pressed key against the option hotkeys */
+            /* a hotkey focuses its option and, when enabled, activates it */
             for (guint i = 0; i < n_options; i++)
             {
                 if (key == opt_key[i])
                 {
-                    ret = (int)i;
-                    run = false;
+                    sel = i;
+                    if (disabled == NULL || !disabled[i])
+                    {
+                        ret = (int)i;
+                        run = false;
+                    }
                     break;
                 }
             }
@@ -3817,6 +3890,12 @@ int display_menu(const char *title, const char *message,
 
     for (guint i = 0; i < n_options; i++)
         g_free(opt_txt[i]);
+    if (detail_lines != NULL)
+    {
+        for (guint i = 0; i < n_options; i++)
+            text_destroy(detail_lines[i]);
+        g_free(detail_lines);
+    }
     g_free(opt_txt);
     g_free(opt_key);
     g_free(opt_len);

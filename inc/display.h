@@ -247,11 +247,17 @@ display_window *display_popup(int x1, int y1, int width, const char *title,
  * @param title The window title. May be NULL.
  * @param message The message shown above the options.
  * @param options An array of option labels.
+ * @param disabled An array of flags marking options that cannot be
+ *                 selected, or NULL when all options are selectable.
+ * @param details An array of detail strings shown in a panel to the
+ *                right of the options as the selection moves, or NULL for
+ *                no details panel.
  * @param n_options The number of options.
  * @return The index of the chosen option, or -1 if aborted (ESC).
  */
 int display_menu(const char *title, const char *message,
-                 const char **options, guint n_options);
+                 const char **options, const bool *disabled,
+                 const char **details, guint n_options);
 
 /**
  * @brief Handle window movement, including dragging by mouse.
