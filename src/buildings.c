@@ -992,11 +992,7 @@ int building_monastery(struct player *p)
           "who seek it.\n\nSpeak your need, and if it lies within our calling, "
           "it shall be granted... for a fair offering. We tend the wounded and "
           "weary, and offer a small selection of tools and provisions to aid "
-          "those who walk the road of trials.\n\n"
-          "Here you may\n\n"
-          "  `KEY`a`end`) buy something\n"
-          "  `KEY`b`end`) ask for curse removal\n"
-          "  `KEY`c`end`) receive healing\n");
+          "those who walk the road of trials.");
 
     const char *ayfwt = _("Shall we proceed, then?");
 
@@ -1004,7 +1000,6 @@ int building_monastery(struct player *p)
 
     while (!leaving)
     {
-        GString *msg = g_string_new(msg_welcome);
         int disease_count = 0;
 
         /* buffer to store all diseases the player currently suffers from */
@@ -1075,33 +1070,38 @@ int building_monastery(struct player *p)
             curable_diseases[disease_count++].desc = N_("ignorance");
         }
 
-        /* add found diseases to the menu */
+        /* Assemble the menu: three fixed options followed by one per
+           healable disease. display_menu() returns the position of the
+           chosen option, so the switch dispatches by index. */
+        const char *labels[3 + G_N_ELEMENTS(curable_diseases)];
+        char *disease_labels[G_N_ELEMENTS(curable_diseases)];
+        guint n = 0;
+
+        labels[n++] = _("`KEY`a`end`) buy something");
+        labels[n++] = _("`KEY`b`end`) ask for curse removal");
+        labels[n++] = _("`KEY`c`end`) receive healing");
+
         for (int idx = 0; idx < disease_count; idx++)
         {
-            g_string_append_printf(msg, _("  `KEY`%c`end`) heal from %s\n"),
-                                   'd' + idx, _(curable_diseases[idx].desc));
+            disease_labels[idx] = g_strdup_printf(_("`KEY`%c`end`) heal from %s"),
+                                                  'd' + idx, _(curable_diseases[idx].desc));
+            labels[n++] = disease_labels[idx];
         }
 
-        /* an empty line for the eye */
-        g_string_append_c(msg, '\n');
+        int selection = display_menu(title, msg_welcome, labels, n);
 
-        /* offer the choices to the player */
-        display_window *mwin = display_popup(10, 2, 60, title, msg->str, 0);
-
-        int selection = display_getch(mwin->window);
-
-        /* get rid of the temporary string */
-        g_string_free(msg, true);
+        for (int idx = 0; idx < disease_count; idx++)
+            g_free(disease_labels[idx]);
 
         switch (selection)
         {
-        /* shop items */
-        case 'a':
+        /* buy something */
+        case 0:
             building_shop(p, &nlarn->monastery_stock, title);
             break;
 
         /* remove curse */
-        case 'b':
+        case 1:
         {
             if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
             {
@@ -1176,8 +1176,8 @@ int building_monastery(struct player *p)
         }
         break;
 
-        /* healing */
-        case 'c':
+        /* receive healing */
+        case 2:
         {
             /* the price for healing depends on the severity of the injury */
             int price = (player_get_hp_max(p) - p->hp) * (game_difficulty(nlarn) + 1);
@@ -1211,21 +1211,23 @@ int building_monastery(struct player *p)
         break;
 
         /* leave the monastery */
-        case KEY_ESC:
+        case -1:
             leaving = true;
             break;
 
         default:
-            selection -= 'd';
-            /* healing of varous negative effects */
-            if (selection >= 0 && selection < disease_count)
+        {
+            /* healing of various negative effects; options 3.. map to
+               the curable diseases 0.. */
+            int sel = selection - 3;
+            if (sel >= 0 && sel < disease_count)
             {
-                effect *e = player_effect_get(p, curable_diseases[selection].et);
+                effect *e = player_effect_get(p, curable_diseases[sel].et);
                 int price = e->turns * (game_difficulty(nlarn) + 1);
 
                 char *question = g_strdup_printf(_("To cleanse you of %s, we "
                     "humbly request a donation of %d gold to our monastery. "
-                    "%s"), _(curable_diseases[selection].desc), price, ayfwt);
+                    "%s"), _(curable_diseases[sel].desc), price, ayfwt);
 
                 int choice = display_get_yesno(question, NULL, NULL, NULL);
                 g_free(question);
@@ -1242,19 +1244,17 @@ int building_monastery(struct player *p)
                 {
                     /* no, thanks */
                     char *msg = g_strdup_printf(_("So be it, you chose not to "
-                        "be cured from %s."), _(curable_diseases[selection].desc));
+                        "be cured from %s."), _(curable_diseases[sel].desc));
                     display_show_message(title, msg, 0);
                     g_free(msg);
                 }
-
             }
-            break;
+        }
+        break;
         }
 
         /* track time usage */
         player_make_move(p, 2, false, NULL);
-
-        display_window_destroy(mwin);
     }
 
     return 0;

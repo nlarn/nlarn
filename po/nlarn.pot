@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-12 10:56+0200\n"
+"POT-Creation-Date: 2026-07-12 17:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -629,62 +629,68 @@ msgid ""
 "\n"
 "Speak your need, and if it lies within our calling, it shall be granted... "
 "for a fair offering. We tend the wounded and weary, and offer a small "
-"selection of tools and provisions to aid those who walk the road of trials.\n"
-"\n"
-"Here you may\n"
-"\n"
-"  `KEY`a`end`) buy something\n"
-"  `KEY`b`end`) ask for curse removal\n"
-"  `KEY`c`end`) receive healing\n"
+"selection of tools and provisions to aid those who walk the road of trials."
 msgstr ""
 
-#: src/buildings.c:1001
+#: src/buildings.c:997
 msgid "Shall we proceed, then?"
 msgstr ""
 
-#: src/buildings.c:1021
+#: src/buildings.c:1016
 msgid "poison"
 msgstr ""
 
-#: src/buildings.c:1027
+#: src/buildings.c:1022
 msgid "blindness"
 msgstr ""
 
-#: src/buildings.c:1033
+#: src/buildings.c:1028
 msgid "sickness"
 msgstr ""
 
-#: src/buildings.c:1039
+#: src/buildings.c:1034
 msgid "clumsiness"
 msgstr ""
 
-#: src/buildings.c:1045
+#: src/buildings.c:1040
 msgid "dizziness"
 msgstr ""
 
-#: src/buildings.c:1051
+#: src/buildings.c:1046
 msgid "incapacitation"
 msgstr ""
 
-#: src/buildings.c:1057
+#: src/buildings.c:1052
 msgid "awkwardness"
 msgstr ""
 
-#: src/buildings.c:1063
+#: src/buildings.c:1058
 msgid "mental deficiency"
 msgstr ""
 
-#: src/buildings.c:1069
+#: src/buildings.c:1064
 msgid "weakness"
 msgstr ""
 
-#: src/buildings.c:1075
+#: src/buildings.c:1070
 msgid "ignorance"
 msgstr ""
 
+#: src/buildings.c:1080
+msgid "`KEY`a`end`) buy something"
+msgstr ""
+
 #: src/buildings.c:1081
+msgid "`KEY`b`end`) ask for curse removal"
+msgstr ""
+
+#: src/buildings.c:1082
+msgid "`KEY`c`end`) receive healing"
+msgstr ""
+
+#: src/buildings.c:1086
 #, c-format
-msgid "  `KEY`%c`end`) heal from %s\n"
+msgid "`KEY`%c`end`) heal from %s"
 msgstr ""
 
 #: src/buildings.c:1108
@@ -745,14 +751,14 @@ msgstr ""
 msgid "So be it, the healing shall wait."
 msgstr ""
 
-#: src/buildings.c:1226
+#: src/buildings.c:1228
 #, c-format
 msgid ""
 "To cleanse you of %s, we humbly request a donation of %d gold to our "
 "monastery. %s"
 msgstr ""
 
-#: src/buildings.c:1244
+#: src/buildings.c:1246
 #, c-format
 msgid "So be it, you chose not to be cured from %s."
 msgstr ""
@@ -1138,21 +1144,21 @@ msgstr ""
 msgid "Looking for '%c' (%s)."
 msgstr ""
 
-#: src/display.c:4087
+#: src/display.c:4150
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
 msgstr ""
 
-#: src/display.c:4110
+#: src/display.c:4173
 msgid "There are no options available for the selected item."
 msgstr ""
 
-#: src/display.c:4129
+#: src/display.c:4192
 msgid "Help"
 msgstr ""
 
-#: src/display.c:4417
+#: src/display.c:4480
 msgid "Item details"
 msgstr ""
 

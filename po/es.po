@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-12 10:56+0200\n"
+"POT-Creation-Date: 2026-07-12 17:55+0200\n"
 "PO-Revision-Date: 2026-07-08 19:08+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: Spanish\n"
@@ -712,78 +712,69 @@ msgid ""
 "\n"
 "Speak your need, and if it lies within our calling, it shall be granted... "
 "for a fair offering. We tend the wounded and weary, and offer a small "
-"selection of tools and provisions to aid those who walk the road of trials.\n"
-"\n"
-"Here you may\n"
-"\n"
-"  `KEY`a`end`) buy something\n"
-"  `KEY`b`end`) ask for curse removal\n"
-"  `KEY`c`end`) receive healing\n"
-msgstr ""
-"`EMPH`Bienvenido, viajero, al monasterio de Larn.`end`\n"
-"\n"
-"La paz sea contigo. Los muros del monasterio ofrecen descanso a todo aquel "
-"que lo busca.\n"
-"\n"
-"Di lo que necesitas y, si está en nuestra mano, te será concedido... por una "
-"ofrenda justa. Atendemos a los heridos y fatigados, y ofrecemos una pequeña "
-"selección de útiles y provisiones para ayudar a quienes recorren el camino "
-"de las pruebas.\n"
-"\n"
-"Aquí puedes\n"
-"\n"
-"  `KEY`a`end`) comprar algo\n"
-"  `KEY`b`end`) pedir que se retire una maldición\n"
-"  `KEY`c`end`) recibir curación\n"
+"selection of tools and provisions to aid those who walk the road of trials."
+msgstr "`EMPH`Bienvenido, viajero, al monasterio de Larn.`end`\n\nLa paz sea contigo. Los muros del monasterio ofrecen descanso a todo aquel que lo busca.\n\nDi lo que necesitas y, si está en nuestra mano, te será concedido... por una ofrenda justa. Atendemos a los heridos y fatigados, y ofrecemos una pequeña selección de útiles y provisiones para ayudar a quienes recorren el camino de las pruebas."
 
-#: src/buildings.c:1001
+#: src/buildings.c:997
 msgid "Shall we proceed, then?"
 msgstr "¿Procedemos, entonces?"
 
-#: src/buildings.c:1021
+#: src/buildings.c:1016
 msgid "poison"
 msgstr "el envenenamiento"
 
-#: src/buildings.c:1027
+#: src/buildings.c:1022
 msgid "blindness"
 msgstr "la ceguera"
 
-#: src/buildings.c:1033
+#: src/buildings.c:1028
 msgid "sickness"
 msgstr "la enfermedad"
 
-#: src/buildings.c:1039
+#: src/buildings.c:1034
 msgid "clumsiness"
 msgstr "la torpeza"
 
-#: src/buildings.c:1045
+#: src/buildings.c:1040
 msgid "dizziness"
 msgstr "el mareo"
 
-#: src/buildings.c:1051
+#: src/buildings.c:1046
 msgid "incapacitation"
 msgstr "la incapacitación"
 
-#: src/buildings.c:1057
+#: src/buildings.c:1052
 msgid "awkwardness"
 msgstr "la falta de coordinación"
 
-#: src/buildings.c:1063
+#: src/buildings.c:1058
 msgid "mental deficiency"
 msgstr "la deficiencia mental"
 
-#: src/buildings.c:1069
+#: src/buildings.c:1064
 msgid "weakness"
 msgstr "la debilidad"
 
-#: src/buildings.c:1075
+#: src/buildings.c:1070
 msgid "ignorance"
 msgstr "la ignorancia"
 
+#: src/buildings.c:1080
+msgid "`KEY`a`end`) buy something"
+msgstr "`KEY`a`end`) comprar algo"
+
 #: src/buildings.c:1081
+msgid "`KEY`b`end`) ask for curse removal"
+msgstr "`KEY`b`end`) pedir que se retire una maldición"
+
+#: src/buildings.c:1082
+msgid "`KEY`c`end`) receive healing"
+msgstr "`KEY`c`end`) recibir curación"
+
+#: src/buildings.c:1086
 #, c-format
-msgid "  `KEY`%c`end`) heal from %s\n"
-msgstr "  `KEY`%c`end`) curarte de %s\n"
+msgid "`KEY`%c`end`) heal from %s"
+msgstr "`KEY`%c`end`) curarte de %s"
 
 #: src/buildings.c:1108
 msgid "There is no sign of curse upon your possessions."
@@ -851,7 +842,7 @@ msgstr ""
 msgid "So be it, the healing shall wait."
 msgstr "Así sea, la curación esperará."
 
-#: src/buildings.c:1226
+#: src/buildings.c:1228
 #, c-format
 msgid ""
 "To cleanse you of %s, we humbly request a donation of %d gold to our "
@@ -860,7 +851,7 @@ msgstr ""
 "Para librarte de %s, solicitamos humildemente una donación de %d de oro a "
 "nuestro monasterio. %s"
 
-#: src/buildings.c:1244
+#: src/buildings.c:1246
 #, c-format
 msgid "So be it, you chose not to be cured from %s."
 msgstr "Así sea, has decidido no curarte de %s."
@@ -1265,7 +1256,7 @@ msgstr "No"
 msgid "Looking for '%c' (%s)."
 msgstr "Buscando «%c» (%s)."
 
-#: src/display.c:4087
+#: src/display.c:4150
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
@@ -1273,15 +1264,15 @@ msgstr ""
 "Selecciona el objeto deseado con INTRO.\n"
 "Puedes cancelar pulsando la tecla Escape."
 
-#: src/display.c:4110
+#: src/display.c:4173
 msgid "There are no options available for the selected item."
 msgstr "No hay opciones disponibles para el objeto seleccionado."
 
-#: src/display.c:4129
+#: src/display.c:4192
 msgid "Help"
 msgstr "Ayuda"
 
-#: src/display.c:4417
+#: src/display.c:4480
 msgid "Item details"
 msgstr "Detalles del objeto"
 

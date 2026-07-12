@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-12 10:56+0200\n"
+"POT-Creation-Date: 2026-07-12 17:55+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -714,78 +714,69 @@ msgid ""
 "\n"
 "Speak your need, and if it lies within our calling, it shall be granted... "
 "for a fair offering. We tend the wounded and weary, and offer a small "
-"selection of tools and provisions to aid those who walk the road of trials.\n"
-"\n"
-"Here you may\n"
-"\n"
-"  `KEY`a`end`) buy something\n"
-"  `KEY`b`end`) ask for curse removal\n"
-"  `KEY`c`end`) receive healing\n"
-msgstr ""
-"`EMPH`Willkommen, Reisender, im Kloster von Larn.`end`\n"
-"\n"
-"Friede sei mit dir. Die Mauern des Klosters gewähren jedem Rast, der sie "
-"sucht.\n"
-"\n"
-"Nenne dein Anliegen, und liegt es in unserer Berufung, so soll es gewährt "
-"werden... gegen eine angemessene Gabe. Wir pflegen die Verwundeten und "
-"Erschöpften und bieten eine kleine Auswahl an Werkzeugen und Vorräten für "
-"jene, die den Pfad der Prüfungen beschreiten.\n"
-"\n"
-"Hier kannst du\n"
-"\n"
-"  `KEY`a`end`) etwas kaufen\n"
-"  `KEY`b`end`) um Fluchaufhebung bitten\n"
-"  `KEY`c`end`) Heilung empfangen\n"
+"selection of tools and provisions to aid those who walk the road of trials."
+msgstr "`EMPH`Willkommen, Reisender, im Kloster von Larn.`end`\n\nFriede sei mit dir. Die Mauern des Klosters gewähren jedem Rast, der sie sucht.\n\nNenne dein Anliegen, und liegt es in unserer Berufung, so soll es gewährt werden... gegen eine angemessene Gabe. Wir pflegen die Verwundeten und Erschöpften und bieten eine kleine Auswahl an Werkzeugen und Vorräten für jene, die den Pfad der Prüfungen beschreiten."
 
-#: src/buildings.c:1001
+#: src/buildings.c:997
 msgid "Shall we proceed, then?"
 msgstr "Sollen wir also fortfahren?"
 
-#: src/buildings.c:1021
+#: src/buildings.c:1016
 msgid "poison"
 msgstr "Vergiftung"
 
-#: src/buildings.c:1027
+#: src/buildings.c:1022
 msgid "blindness"
 msgstr "Blindheit"
 
-#: src/buildings.c:1033
+#: src/buildings.c:1028
 msgid "sickness"
 msgstr "Krankheit"
 
-#: src/buildings.c:1039
+#: src/buildings.c:1034
 msgid "clumsiness"
 msgstr "Ungeschicklichkeit"
 
-#: src/buildings.c:1045
+#: src/buildings.c:1040
 msgid "dizziness"
 msgstr "Schwindel"
 
-#: src/buildings.c:1051
+#: src/buildings.c:1046
 msgid "incapacitation"
 msgstr "Entkräftung"
 
-#: src/buildings.c:1057
+#: src/buildings.c:1052
 msgid "awkwardness"
 msgstr "Unbeholfenheit"
 
-#: src/buildings.c:1063
+#: src/buildings.c:1058
 msgid "mental deficiency"
 msgstr "geistige Umnachtung"
 
-#: src/buildings.c:1069
+#: src/buildings.c:1064
 msgid "weakness"
 msgstr "Schwäche"
 
-#: src/buildings.c:1075
+#: src/buildings.c:1070
 msgid "ignorance"
 msgstr "Unwissenheit"
 
+#: src/buildings.c:1080
+msgid "`KEY`a`end`) buy something"
+msgstr "`KEY`a`end`) etwas kaufen"
+
 #: src/buildings.c:1081
+msgid "`KEY`b`end`) ask for curse removal"
+msgstr "`KEY`b`end`) um Fluchaufhebung bitten"
+
+#: src/buildings.c:1082
+msgid "`KEY`c`end`) receive healing"
+msgstr "`KEY`c`end`) Heilung empfangen"
+
+#: src/buildings.c:1086
 #, c-format
-msgid "  `KEY`%c`end`) heal from %s\n"
-msgstr "  `KEY`%c`end`) Heilung von %s\n"
+msgid "`KEY`%c`end`) heal from %s"
+msgstr "`KEY`%c`end`) Heilung von %s"
 
 #: src/buildings.c:1108
 msgid "There is no sign of curse upon your possessions."
@@ -853,7 +844,7 @@ msgstr ""
 msgid "So be it, the healing shall wait."
 msgstr "So sei es, die Heilung muss warten."
 
-#: src/buildings.c:1226
+#: src/buildings.c:1228
 #, c-format
 msgid ""
 "To cleanse you of %s, we humbly request a donation of %d gold to our "
@@ -862,7 +853,7 @@ msgstr ""
 "Um dich von %s zu heilen, bitten wir demütig um eine Spende von %d Gold an "
 "unser Kloster. %s"
 
-#: src/buildings.c:1244
+#: src/buildings.c:1246
 #, c-format
 msgid "So be it, you chose not to be cured from %s."
 msgstr ""
@@ -1269,7 +1260,7 @@ msgstr "Nein"
 msgid "Looking for '%c' (%s)."
 msgstr "Suche nach „%c“ (%s)."
 
-#: src/display.c:4087
+#: src/display.c:4150
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
@@ -1277,15 +1268,15 @@ msgstr ""
 "Wähle den gewünschten Gegenstand mit EINGABE.\n"
 "Mit der Escape-Taste kannst du abbrechen."
 
-#: src/display.c:4110
+#: src/display.c:4173
 msgid "There are no options available for the selected item."
 msgstr "Für den ausgewählten Gegenstand gibt es keine Optionen."
 
-#: src/display.c:4129
+#: src/display.c:4192
 msgid "Help"
 msgstr "Hilfe"
 
-#: src/display.c:4417
+#: src/display.c:4480
 msgid "Item details"
 msgstr "Gegenstandsdetails"
 
