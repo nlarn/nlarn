@@ -160,7 +160,7 @@ int building_bank(player *p)
             actions[n++] = 's';
         }
 
-        int choice = display_menu(msg_title, text->str, labels, NULL, NULL, n);
+        int choice = display_menu(msg_title, text->str, labels, NULL, NULL, n, 0);
 
         g_string_free(text, true);
 
@@ -460,7 +460,7 @@ int building_home(player *p)
             actions[n++] = 't';
         }
 
-        int choice = display_menu(title, text->str, labels, NULL, NULL, n);
+        int choice = display_menu(title, text->str, labels, NULL, NULL, n, 0);
         g_string_free(text, true);
 
         int cmd = (choice < 0) ? KEY_ESC : actions[choice];
@@ -859,7 +859,7 @@ int building_school(player *p)
         details[SCHOOL_COURSE_COUNT] = detail_buf[SCHOOL_COURSE_COUNT];
 
         int selection = display_menu(title, msg_greet, labels,
-                                     disabled, details, n);
+                                     disabled, details, n, 0);
 
         for (guint i = 0; i < n; i++)
         {
@@ -1099,7 +1099,7 @@ int building_monastery(struct player *p)
             labels[n++] = disease_labels[idx];
         }
 
-        int selection = display_menu(title, msg_welcome, labels, NULL, NULL, n);
+        int selection = display_menu(title, msg_welcome, labels, NULL, NULL, n, 0);
 
         for (int idx = 0; idx < disease_count; idx++)
             g_free(disease_labels[idx]);

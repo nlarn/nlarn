@@ -253,11 +253,13 @@ display_window *display_popup(int x1, int y1, int width, const char *title,
  *                right of the options as the selection moves, or NULL for
  *                no details panel.
  * @param n_options The number of options.
+ * @param initial The index of the option to focus initially; if it is out
+ *                of range or disabled, the first selectable option is used.
  * @return The index of the chosen option, or -1 if aborted (ESC).
  */
 int display_menu(const char *title, const char *message,
                  const char **options, const bool *disabled,
-                 const char **details, guint n_options);
+                 const char **details, guint n_options, guint initial);
 
 /**
  * @brief Handle window movement, including dragging by mouse.

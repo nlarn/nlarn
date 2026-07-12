@@ -16,7 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <ctype.h>
 #include <glib.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -2551,194 +2550,40 @@ char *display_get_string(const char *title, const char *caption, const char *val
     return g_string_free(string, false);
 }
 
-int display_get_yesno(const char *question, const char *title, const char *yes, const char *no)
+/* Wrap the first character of `s` in `KEY` markup so display_menu() uses
+   it as the option's hotkey. The caller owns the returned string. */
+static char *yesno_hotkey_label(const char *s)
 {
-    int RUN = true;
-    int selection = false;
-    guint line;
+    if (s == NULL || *s == '\0')
+        return g_strdup(s ? s : "");
 
-    const guint padding = 1;
-    const guint margin = 2;
+    const char *rest = g_utf8_next_char(s);
+    return g_strdup_printf("`KEY`%.*s`end`%s", (int)(rest - s), s, rest);
+}
 
-    /* default values */
+int display_get_yesno(const char *question, const char *title,
+                      const char *yes, const char *no)
+{
     if (!yes)
         yes = _("Yes");
 
     if (!no)
         no = _("No");
 
-    /* determine text width, either defined by space available  for the window
-     * or the length of question */
-    guint text_width = min(COLS - 2 /* borders */
-                     - (2 * margin) /* space outside window */
-                     - (2 * padding), /* space between border and text */
-                     g_utf8_strlen(question, -1));
+    /* the first letter of each label becomes its hotkey */
+    char *yes_label = yesno_hotkey_label(yes);
+    char *no_label = yesno_hotkey_label(no);
 
-    /* broad windows are hard to read */
-    if (text_width > 60)
-        text_width = 60;
+    const char *options[2] = { yes_label, no_label };
 
-    /* wrap question according to width */
-    GPtrArray *text = text_wrap(question, text_width + 1, 0);
+    /* focus "no" initially, so a stray enter does not confirm */
+    int choice = display_menu(title, question, options, NULL, NULL, 2, 1);
 
-    /* Determine window width. Either defined by the length of the button
-     * labels or width of the text */
-    guint width = max(g_utf8_strlen(yes, -1) + g_utf8_strlen(no, -1)
-                + 2 /* borders */
-                + (4 * padding)  /* space between "button" border and label */
-                + margin, /* space between "buttons" */
-                text_width + 2 /* borders */ + (2 * padding));
+    g_free(yes_label);
+    g_free(no_label);
 
-    /* set startx and starty to something that makes sense */
-    guint startx = (COLS / 2) - (width / 2);
-    guint starty = (LINES / 2) - 4;
-
-    display_window *ywin = display_window_new(startx, starty, width, text->len + 4, title);
-
-    for (line = 0; line < text->len; line++)
-    {
-        mvwaprintw(ywin->window, line + 1, 1 + padding, CP_UI_FG,
-            "%s", (char *)g_ptr_array_index(text, line));
-    }
-
-    text_destroy(text);
-
-    do
-    {
-        /* paint */
-        attr_t attrs;
-
-        if (selection) attrs = CP_UI_HL_REVERSE;
-        else           attrs = CP_UI_FG_REVERSE;
-
-        mvwaprintw(ywin->window, line + 2, margin, attrs,
-                   "%*s%s%*s", padding, " ", yes, padding, " ");
-
-        if (selection) attrs = CP_UI_FG_REVERSE;
-        else           attrs = CP_UI_HL_REVERSE;
-
-        mvwaprintw(ywin->window, line + 2,
-                   width - margin - g_utf8_strlen(no, -1) - (2 * padding),
-                   attrs, "%*s%s%*s", padding, " ", no, padding, " ");
-
-        wrefresh(ywin->window);
-
-        int key = tolower(display_getch(ywin->window)); /* input key buffer */
-        // Special case for the movement keys and y/n.
-        if (key != 'h' && key != 'l' && key != 'y' && key != 'n')
-        {
-            char input_yes = g_ascii_tolower(yes[0]);
-            char input_no  = g_ascii_tolower(no[0]);
-            // If both answers share the same initial letter, we're out of luck.
-            if (input_yes != input_no || input_yes == 'n' || input_no == 'y')
-            {
-                if (key == input_yes)
-                    key = 'y';
-                else if (key == input_no)
-                    key = 'n';
-            }
-        }
-
-
-        /* wait for input */
-        switch (key)
-        {
-        case KEY_ESC:
-            selection = false;
-            /* fall-through */
-
-        case KEY_LF:
-        case KEY_CR:
-#ifdef PADENTER
-        case PADENTER:
-#endif
-        case KEY_ENTER:
-        case KEY_SPC:
-            RUN = false;
-            break;
-
-        case 'h':
-        case '4':
-#ifdef KEY_B1
-        case KEY_B1:
-#endif
-        case KEY_LEFT:
-            if (!selection)
-                selection = true;
-            break;
-
-        case 'l':
-        case '6':
-#ifdef KEY_B3
-        case KEY_B3:
-#endif
-        case KEY_RIGHT:
-            if (selection)
-                selection = false;
-            break;
-
-            /* shortcuts */
-        case 'y':
-            selection = true;
-            RUN = false;
-            break;
-
-        case 'n':
-            selection = false;
-            RUN = false;
-            break;
-
-        case KEY_MOUSE:
-            /* A left click on the "yes" or "no" button chooses and
-               confirms that answer, exactly like highlighting it and
-               pressing enter. The buttons are drawn on row line + 2. */
-            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
-            {
-                const int row = display_mouse_event.y - (int)ywin->y1;
-                const int col = display_mouse_event.x - (int)ywin->x1;
-
-                const int yes_len = (int)g_utf8_strlen(yes, -1);
-                const int no_len  = (int)g_utf8_strlen(no, -1);
-
-                /* "yes" starts at column margin; "no" ends at width -
-                   margin; each button label is wrapped in padding spaces */
-                const int yes_start = (int)margin;
-                const int yes_end   = yes_start + (2 * (int)padding) + yes_len;
-                const int no_end    = (int)width - (int)margin;
-                const int no_start  = no_end - (2 * (int)padding) - no_len;
-
-                if (row == (int)(line + 2))
-                {
-                    if (col >= yes_start && col < yes_end)
-                    {
-                        selection = true;
-                        RUN = false;
-                        break;
-                    }
-                    if (col >= no_start && col < no_end)
-                    {
-                        selection = false;
-                        RUN = false;
-                        break;
-                    }
-                }
-            }
-
-            /* not on a button: let the window handle the event, so a
-               click on the title bar still drags the window */
-            display_window_move(ywin, key);
-            break;
-
-        default:
-            /* perhaps the window shall be moved */
-            display_window_move(ywin, key);
-        }
-    }
-    while (RUN);
-
-    display_window_destroy(ywin);
-
-    return selection;
+    /* the first option is "yes"; "no" and abort (ESC) count as no */
+    return choice == 0;
 }
 
 direction display_get_direction(const char *title, const char *message,
@@ -3648,7 +3493,7 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
 
 int display_menu(const char *title, const char *message,
                  const char **options, const bool *disabled,
-                 const char **details, guint n_options)
+                 const char **details, guint n_options, guint initial)
 {
     /* Prepare the options: the hotkey (the code point highlighted in the
        label), the label (trimmed, but keeping the `KEY` markup so the
@@ -3746,9 +3591,10 @@ int display_menu(const char *title, const char *message,
         mvwvline(mwin->window, opt_row0, sep_col,
                  ACS_VLINE | CP_UI_BORDER, content_rows);
 
-    /* start on the first selectable option */
-    guint sel = 0;
-    if (disabled != NULL)
+    /* focus the requested option, falling back to the first selectable
+       one when the requested option is out of range or disabled */
+    guint sel = (initial < n_options) ? initial : 0;
+    if (disabled != NULL && n_options > 0 && disabled[sel])
         for (guint i = 0; i < n_options; i++)
             if (!disabled[i]) { sel = i; break; }
 
@@ -3829,6 +3675,7 @@ int display_menu(const char *title, const char *message,
         case PADENTER:
 #endif
         case KEY_ENTER:
+        case KEY_SPC:
             /* activate the selected button unless it is disabled */
             if (n_options > 0 && (disabled == NULL || !disabled[sel]))
             {
@@ -3868,10 +3715,13 @@ int display_menu(const char *title, const char *message,
             break;
 
         default:
-            /* a hotkey focuses its option and, when enabled, activates it */
+            /* a hotkey (matched case-insensitively) focuses its option
+               and, when enabled, activates it */
             for (guint i = 0; i < n_options; i++)
             {
-                if (key == opt_key[i])
+                if (opt_key[i] != 0
+                        && g_unichar_tolower((gunichar)key)
+                           == g_unichar_tolower((gunichar)opt_key[i]))
                 {
                     sel = i;
                     if (disabled == NULL || !disabled[i])
