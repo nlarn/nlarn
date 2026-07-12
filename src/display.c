@@ -3649,20 +3649,33 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
 int display_menu(const char *title, const char *message,
                  const char **options, guint n_options)
 {
-    const int indent = 2;
-
-    /* widest option, measured with the `KEY` markup stripped */
+    /* Prepare the options: the hotkey (the code point highlighted in the
+       label), the label (trimmed, but keeping the `KEY` markup so the
+       hotkey is drawn in the KEY colour) and its visible width. The
+       widest option sizes the buttons. */
+    int *opt_key = g_new0(int, n_options);
+    int *opt_len = g_new0(int, n_options);
+    char **opt_txt = g_new0(char *, n_options);
     guint opt_w = 0;
     for (guint i = 0; i < n_options; i++)
-        opt_w = max(opt_w, caption_visible_len(options[i]));
+    {
+        opt_key[i] = caption_hotkey(options[i]);
+        opt_txt[i] = g_strstrip(g_strdup(options[i]));
+        opt_len[i] = (int)caption_visible_len(opt_txt[i]);
+        opt_w = max(opt_w, (guint)opt_len[i]);
+    }
 
-    /* content width fits both the message and the option labels, but is
+    /* each option is a fixed-width button "▶ <centred text> ◀", the text
+       padded to the widest option, so a button is opt_w + 4 columns */
+    const guint button_w = opt_w + 4;
+
+    /* content width fits both the message and the option buttons, but is
        kept to a readable size */
-    guint content_w = max(opt_w + indent, (guint)g_utf8_strlen(message, -1));
+    guint content_w = max(button_w, (guint)g_utf8_strlen(message, -1));
     content_w = min(content_w, (guint)(COLS - 6));
     if (content_w > 58)
         content_w = 58;
-    content_w = max(content_w, opt_w + indent);
+    content_w = max(content_w, button_w);
 
     GPtrArray *text = text_wrap(message, content_w + 1, 0);
     const guint msg_lines = text->len;
@@ -3687,25 +3700,46 @@ int display_menu(const char *title, const char *message,
     }
     text_destroy(text);
 
-    /* render the options, each on its own row, remembering the hotkey
-       (the code point highlighted in the label) and the label width so
-       clicks can be mapped back to an option */
-    int *opt_key = g_new0(int, n_options);
-    int *opt_len = g_new0(int, n_options);
-    for (guint i = 0; i < n_options; i++)
-    {
-        opt_key[i] = caption_hotkey(options[i]);
-        opt_len[i] = (int)caption_visible_len(options[i]);
-        mvwcprintw(mwin->window, CP_UI_FG, COLOURLESS, UI_BG,
-                   opt_row0 + i, indent, "%s", options[i]);
-    }
+    /* the buttons are centred in the window */
+    const int button_col = ((int)width - (int)button_w) / 2;
 
-    wrefresh(mwin->window);
-
+    guint sel = 0;
     int ret = -1;
     bool run = true;
     while (run)
     {
+        /* (re)draw the buttons, centring each label and highlighting the
+           selected one; "▶ text ◀" makes an option look like a button */
+        for (guint i = 0; i < n_options; i++)
+        {
+            const int pad = (int)opt_w - opt_len[i];
+            const int lpad = pad / 2;
+            const int rpad = pad - lpad;
+
+            if (i == sel)
+            {
+                /* the selected button is a solid reversed bar: strip the
+                   markup so the hotkey stays reversed like the rest */
+                char *plain = str_strip(opt_txt[i]);
+                mvwaprintw(mwin->window, opt_row0 + i, button_col,
+                           CP_UI_FG_REVERSE,
+                           "\xE2\x96\xBA %*s%s%*s \xE2\x97\x84",
+                           lpad, "", plain, rpad, "");
+                g_free(plain);
+            }
+            else
+            {
+                /* mvwcprintw renders the `KEY` markup, so the hotkey letter
+                   is drawn in the KEY colour within the button */
+                mvwcprintw(mwin->window, CP_UI_FG, COLOURLESS, UI_BG,
+                           opt_row0 + i, button_col,
+                           "\xE2\x96\xBA %*s%s%*s \xE2\x97\x84",
+                           lpad, "", opt_txt[i], rpad, "");
+            }
+        }
+
+        wrefresh(mwin->window);
+
         const int key = display_getch(mwin->window);
 
         switch (key)
@@ -3714,8 +3748,33 @@ int display_menu(const char *title, const char *message,
             run = false;
             break;
 
+        case KEY_UP:
+            if (n_options > 0)
+                sel = (sel + n_options - 1) % n_options;
+            break;
+
+        case KEY_DOWN:
+            if (n_options > 0)
+                sel = (sel + 1) % n_options;
+            break;
+
+        case KEY_LF:
+        case KEY_CR:
+#ifdef PADENTER
+        case PADENTER:
+#endif
+        case KEY_ENTER:
+            /* activate the selected button */
+            if (n_options > 0)
+            {
+                ret = (int)sel;
+                run = false;
+            }
+            break;
+
         case KEY_MOUSE:
-            /* a left click on an option row selects it */
+            /* a left click anywhere on a button - the arrows included -
+               selects and activates it */
             if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
             {
                 const int row = display_mouse_event.y - (int)mwin->y1;
@@ -3724,7 +3783,8 @@ int display_menu(const char *title, const char *message,
                 for (guint i = 0; i < n_options; i++)
                 {
                     if (row == (int)(opt_row0 + i)
-                            && col >= indent && col < indent + opt_len[i])
+                            && col >= button_col
+                            && col < button_col + (int)button_w)
                     {
                         ret = (int)i;
                         run = false;
@@ -3733,7 +3793,7 @@ int display_menu(const char *title, const char *message,
                 }
             }
 
-            /* not on an option: let the window handle dragging */
+            /* not on a button: let the window handle dragging */
             if (run)
                 display_window_move(mwin, key);
             break;
@@ -3755,6 +3815,9 @@ int display_menu(const char *title, const char *message,
         }
     }
 
+    for (guint i = 0; i < n_options; i++)
+        g_free(opt_txt[i]);
+    g_free(opt_txt);
     g_free(opt_key);
     g_free(opt_len);
     display_window_destroy(mwin);
