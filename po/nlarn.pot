@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-12 22:31+0200\n"
+"POT-Creation-Date: 2026-07-12 22:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -912,56 +912,56 @@ msgstr ""
 msgid "Full screen mode"
 msgstr ""
 
-#: src/config.c:429 src/config.c:434 src/utils.c:480
+#: src/config.c:431 src/config.c:436 src/utils.c:480
 msgid "no"
 msgstr ""
 
-#: src/config.c:429 src/config.c:434
+#: src/config.c:431 src/config.c:436
 msgid "yes"
 msgstr ""
 
-#: src/config.c:458
+#: src/config.c:464
 msgid "Enter a name"
 msgstr ""
 
-#: src/config.c:462 src/config.c:467
+#: src/config.c:468 src/config.c:473
 msgid "By what name shall all your characters be called?"
 msgstr ""
 
-#: src/config.c:466
+#: src/config.c:472
 msgid "Choose default name"
 msgstr ""
 
-#: src/config.c:489 src/nlarn.c:1289
+#: src/config.c:495 src/nlarn.c:1289
 msgid "Female"
 msgstr ""
 
-#: src/config.c:490 src/nlarn.c:1289
+#: src/config.c:496 src/nlarn.c:1289
 msgid "Male"
 msgstr ""
 
-#: src/config.c:496
+#: src/config.c:502
 msgid "Shall your future characters be male or female?"
 msgstr ""
 
-#: src/config.c:574
+#: src/config.c:580
 msgid "Select a UI colour scheme:"
 msgstr ""
 
-#: src/config.c:590
+#: src/config.c:596
 msgid "Default font size"
 msgstr ""
 
-#: src/config.c:591
+#: src/config.c:597
 msgid "Font size (6 - 48): "
 msgstr ""
 
-#: src/config.c:606 src/game.c:115 src/map.c:1958 src/nlarn.c:658
+#: src/config.c:612 src/game.c:115 src/map.c:1958 src/nlarn.c:658
 #: src/player.c:5344 src/player.c:5352 src/player.c:5377
 msgid "Error"
 msgstr ""
 
-#: src/config.c:606
+#: src/config.c:612
 msgid "Invalid font size"
 msgstr ""
 
@@ -1125,46 +1125,46 @@ msgid "Item types which will be picked up automatically are shown inverted."
 msgstr ""
 
 #: src/display.c:1812
-msgid "Type a symbol to toggle."
+msgid "Type or click a symbol to toggle."
 msgstr ""
 
-#: src/display.c:1989
+#: src/display.c:2021
 #, c-format
 msgid "Really cast %s?"
 msgstr ""
 
-#: src/display.c:2154
+#: src/display.c:2186
 msgid "OK"
 msgstr ""
 
-#: src/display.c:2568
+#: src/display.c:2600
 msgid "Yes"
 msgstr ""
 
-#: src/display.c:2571
+#: src/display.c:2603
 msgid "No"
 msgstr ""
 
-#: src/display.c:3196
+#: src/display.c:3228
 #, c-format
 msgid "Looking for '%c' (%s)."
 msgstr ""
 
-#: src/display.c:4085
+#: src/display.c:4117
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
 msgstr ""
 
-#: src/display.c:4108
+#: src/display.c:4140
 msgid "There are no options available for the selected item."
 msgstr ""
 
-#: src/display.c:4127
+#: src/display.c:4159
 msgid "Help"
 msgstr ""
 
-#: src/display.c:4415
+#: src/display.c:4447
 msgid "Item details"
 msgstr ""
 

@@ -1781,10 +1781,14 @@ void display_config_autopickup(bool settings[IT_MAX])
             _("Item types which will be picked up automatically are "
               "shown inverted."), width - 4, 0);
 
+    /* wrap the (possibly long, translated) hint to the window width */
+    GPtrArray *toggle_lines = text_wrap(
+            _("Type or click a symbol to toggle."), width - 4, 0);
+
     const int msg_row = (int)intro_lines->len + 1;
     const int item_row = msg_row + 1;
     const int toggle_row = item_row + 6 + 1;
-    const int height = toggle_row + 2;
+    const int height = toggle_row + (int)toggle_lines->len + 1;
 
     const int starty = (LINES - height) / 2;
     const int startx = (min(MAP_MAX_X, COLS) - width) / 2;
@@ -1809,9 +1813,13 @@ void display_config_autopickup(bool settings[IT_MAX])
                 item_name_pl(right_types[i]));
     }
 
-    const char *toggle_msg = _("Type a symbol to toggle.");
-    int toggle_col = MAX(2, (width - (int)g_utf8_strlen(toggle_msg, -1)) / 2);
-    mvwaprintw(cwin->window, toggle_row, toggle_col, CP_UI_FG, "%s", toggle_msg);
+    for (guint i = 0; i < toggle_lines->len; i++)
+    {
+        const char *tl = g_ptr_array_index(toggle_lines, i);
+        int tcol = MAX(2, (width - (int)g_utf8_strlen(tl, -1)) / 2);
+        mvwaprintw(cwin->window, toggle_row + (int)i, tcol, CP_UI_FG, "%s", tl);
+    }
+    text_destroy(toggle_lines);
 
     do
     {
@@ -1843,6 +1851,38 @@ void display_config_autopickup(bool settings[IT_MAX])
         case KEY_ESC:
         case KEY_SPC:
             RUN = false;
+            break;
+
+        case KEY_MOUSE:
+            /* a left click on an item's row - glyph or label - toggles it */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)cwin->y1;
+                const int col = display_mouse_event.x - (int)cwin->x1;
+                bool toggled = false;
+
+                for (item_t it = 1; it < IT_MAX; it++)
+                {
+                    const bool left = (it < 7);
+                    const int r = item_row + (left ? (int)it - 1 : (int)it - 7);
+                    const int gcol = left ? left_glyph_col : right_glyph_col;
+                    const int lend = (left ? left_label_col : right_label_col)
+                            + (int)label_width;
+
+                    if (row == r && col >= gcol && col < lend)
+                    {
+                        settings[it] = !settings[it];
+                        toggled = true;
+                        break;
+                    }
+                }
+
+                if (toggled)
+                    break;
+            }
+
+            /* not on an item: let the window handle dragging */
+            display_window_move(cwin, key);
             break;
 
         default:
