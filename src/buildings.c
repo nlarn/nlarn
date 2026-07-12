@@ -441,28 +441,31 @@ int building_home(player *p)
                         gtime2mobuls(game_remaining_turns(nlarn)),
                         p->name);
 
-        /* check if the player can deposit something
-           at home or has already done so */
-        if ((inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-            || (inv_length(nlarn->player_home) > 0))
+        /* Assemble the list of currently available actions. The switch
+           below is keyed by the action letter, not by the (translated)
+           hotkey, which display_menu() derives from each label. */
+        const char *labels[2];
+        int actions[2];
+        guint n = 0;
+
+        if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
         {
-            g_string_append_printf(text, "%s", _("\n\nYou may\n"));
-
-            if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-                g_string_append_printf(text, "%s", _("  `KEY`d`end`) "
-                                       "Deposit something here\n"));
-
-            if (inv_length(nlarn->player_home) > 0)
-                g_string_append_printf(text, "%s", _("  `KEY`t`end`) "
-                                       "Take something with you\n"));
-
-            g_string_append_c(text, '\n');
+            labels[n] = _("`KEY`d`end`)eposit something here");
+            actions[n++] = 'd';
         }
 
-        int choice = display_show_message(title, text->str, 0);
+        if (inv_length(nlarn->player_home) > 0)
+        {
+            labels[n] = _("`KEY`t`end`)ake something with you");
+            actions[n++] = 't';
+        }
+
+        int choice = display_menu(title, text->str, labels, n);
         g_string_free(text, true);
 
-        switch (choice)
+        int cmd = (choice < 0) ? KEY_ESC : actions[choice];
+
+        switch (cmd)
         {
             /* deposit something */
         case 'd':
