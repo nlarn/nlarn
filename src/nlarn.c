@@ -1294,8 +1294,9 @@ int main(int argc, char *argv[])
 
         while (!nlarn->player_stats_set)
         {
-            /* assign the player's stats */
-            char selection = player_select_bonus_stats();
+            /* assign the player's stats; a new character must pick a build,
+               so "not defined" is not offered and aborting re-prompts */
+            int selection = player_select_bonus_stats(false);
             nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, selection);
         }
 

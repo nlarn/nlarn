@@ -215,7 +215,15 @@ player *player_new();
 
 /* an array with textual descriptions of the player stac configurations */
 extern const char *player_bonus_stat_desc[];
-char player_select_bonus_stats();
+/**
+ * Let the player choose one of the character build presets.
+ *
+ * @param allow_none when true, an additional "not defined" option is
+ *                   offered (used when configuring defaults).
+ * @return the chosen preset ('a'-'f'), 0 for "not defined", or -1 when
+ *         the selection was aborted.
+ */
+int player_select_bonus_stats(bool allow_none);
 /**
  * @brief Assigns player's stats to the given preset
  *

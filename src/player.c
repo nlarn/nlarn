@@ -197,24 +197,45 @@ const char *player_bonus_stat_desc[] = {
     N_("All stats assigned randomly")
 };
 
-char player_select_bonus_stats()
+int player_select_bonus_stats(bool allow_none)
 {
-    int selection = 0;
-    GString *text = g_string_new("\n");
-    for (int idx = preset_min; idx <=  preset_max; idx++)
-    {
-        g_string_append_printf(text, "  `KEY`%c`end`) %s\n",
-                idx, _(player_bonus_stat_desc[idx - preset_min]));
-    }
-     g_string_append_c(text, '\n');
+    const int nbuilds = preset_max - preset_min + 1;
 
-    while (selection < preset_min || selection > preset_max)
-    {
-        selection = display_show_message(_("Choose a character build"), text->str, 0);
-    }
-    g_string_free(text, true);
+    /* the build presets, optionally followed by a "not defined" entry */
+    const char **opts = g_new0(const char *, nbuilds + 2);
+    char **buf = g_new0(char *, nbuilds + 2);
+    guint n = 0;
 
-    return selection;
+    for (int i = 0; i < nbuilds; i++)
+    {
+        buf[n] = g_strdup_printf("`KEY`%c`end`) %s",
+                preset_min + i, _(player_bonus_stat_desc[i]));
+        opts[n] = buf[n];
+        n++;
+    }
+
+    if (allow_none)
+    {
+        buf[n] = g_strdup_printf("`KEY`%c`end`) %s",
+                preset_min + nbuilds, _("not defined"));
+        opts[n] = buf[n];
+        n++;
+    }
+
+    int choice = display_menu(NULL, _("Choose a character build"),
+            opts, NULL, NULL, n, 0);
+
+    for (guint i = 0; i < n; i++)
+        g_free(buf[i]);
+    g_free(buf);
+    g_free(opts);
+
+    if (choice < 0)
+        return -1;                  /* aborted */
+    if (allow_none && choice == nbuilds)
+        return 0;                   /* not defined */
+
+    return preset_min + choice;     /* a build preset ('a'-'f') */
 }
 
 bool player_assign_bonus_stats(player *p, char preset)
