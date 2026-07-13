@@ -3487,6 +3487,26 @@ int display_show_message(const char *title, const char *message, int indent)
     return key;
 }
 
+/* Draw (draw == true) or remove (draw == false) the "[■]" close button on
+   a window's top border, at columns width-5..width-3. Interactive windows
+   show it (a click aborts the dialogue, see display_getch); non-interactive
+   pop-ups remove it again. */
+static void display_window_close_button(display_window *dwin, bool draw)
+{
+    if (dwin->width < 8)
+        return;
+
+    if (draw)
+    {
+        mvwaprintw(dwin->window, 0, dwin->width - 5, CP_UI_BRIGHT_FG,
+                "[\xE2\x96\xA0]");
+    }
+    else
+    {
+        mvwhline(dwin->window, 0, dwin->width - 5, ACS_HLINE | CP_UI_BORDER, 3);
+    }
+}
+
 display_window *display_popup(int x1, int y1, int width, const char *title, const char *msg, int indent)
 {
     const guint max_width = COLS - x1 - 1;
@@ -3520,6 +3540,9 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     int height = min(text->len + 2, max_height);
 
     display_window *win = display_window_new(x1, y1, width, height, title);
+
+    /* pop-ups are not interactive, so they carry no close button */
+    display_window_close_button(win, false);
 
     /* display message */
     attr_t currattr = COLOURLESS;
@@ -3873,6 +3896,19 @@ void display_windows_destroy_all()
     }
 }
 
+/* Find the managed window wrapping the given curses window, or NULL. */
+static display_window *display_window_from_curses(WINDOW *win)
+{
+    for (GList *e = windows; e != NULL; e = e->next)
+    {
+        display_window *dw = e->data;
+        if (dw->window == win)
+            return dw;
+    }
+
+    return NULL;
+}
+
 int display_getch(WINDOW *win) {
     int ch = wgetch(win ? win : stdscr);
 #ifdef SDLPDCURSES
@@ -3893,6 +3929,17 @@ int display_getch(WINDOW *win) {
         /* a failed retrieval leaves an all-zero event, which no mouse
            handling code reacts upon */
         getmouse(&display_mouse_event);
+
+        /* a left click on the window's close button aborts the dialogue */
+        display_window *dw = display_window_from_curses(win);
+        if (dw != NULL
+                && (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+                && display_mouse_event.y == (int)dw->y1
+                && display_mouse_event.x >= (int)(dw->x1 + dw->width - 5)
+                && display_mouse_event.x <= (int)(dw->x1 + dw->width - 3))
+        {
+            return KEY_ESC;
+        }
     }
 
     return ch;
@@ -4232,6 +4279,10 @@ static display_window *display_window_new(int x1, int y1, int width,
 
     /* set the window title */
     display_window_update_title(dwin, title);
+
+    /* a close button on the top border (the space freed by moving the
+       scroll arrows to the scroll bar) */
+    display_window_close_button(dwin, true);
 
     /* create a panel for the window */
     dwin->panel = new_panel(dwin->window);
