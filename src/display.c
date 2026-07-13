@@ -56,6 +56,18 @@ static GList *windows = NULL;
    discarded by an input loop that does not care for the mouse. */
 static MEVENT display_mouse_event;
 
+/* Screen geometry of the scroll bar drawn most recently by
+   display_window_scrollbar(), so a click on the track can be turned into
+   a page up/down. Only one scrollable window is active at a time; col is
+   -1 when no track is currently shown. */
+static struct {
+    int col;          /* screen column of the scroll bar */
+    int track_top;    /* screen row of the first track cell */
+    int track_bottom; /* screen row of the last track cell */
+    int thumb_top;    /* screen row of the thumb's top */
+    int thumb_bottom; /* screen row of the thumb's bottom */
+} display_scrollbar = { .col = -1 };
+
 static attr_t mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
                          colour_t bg, int y, int x, const char *fmt, ...);
 
@@ -66,8 +78,8 @@ static display_window *display_window_new(int x1, int y1, int width,
 
 static void display_window_update_title(display_window *dwin, const char *title);
 static void display_window_update_caption(display_window *dwin, char *caption);
-static void display_window_update_arrow_up(display_window *dwin, bool on);
-static void display_window_update_arrow_down(display_window *dwin, bool on);
+static void display_window_scrollbar(display_window *dwin, guint offset,
+                                     guint visible, guint total);
 static int display_window_arrow_at(display_window *dwin, int x, int y);
 static int display_scroll_getch(display_window *dwin, int *autoscroll);
 
@@ -1558,8 +1570,7 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* free the array of caption strings */
         g_strfreev(captions);
 
-        display_window_update_arrow_up(iwin, s.offset > 0);
-        display_window_update_arrow_down(iwin, (s.offset + s.maxvis) < len_curr);
+        display_window_scrollbar(iwin, s.offset, s.maxvis, len_curr);
 
         wrefresh(iwin->window);
 
@@ -1982,8 +1993,7 @@ spell *display_spell_select(const char *title, player *p, spell_t type)
         }
 
         /* display up / down markers */
-        display_window_update_arrow_up(swin, (s.offset > 0));
-        display_window_update_arrow_down(swin, ((s.offset + s.maxvis) < slist->len));
+        display_window_scrollbar(swin, s.offset, s.maxvis, slist->len);
 
         /* construct the window caption: display type ahead keys */
         gchar *caption = g_strdup_printf("%s%s%s",
@@ -3404,8 +3414,7 @@ int display_show_message(const char *title, const char *message, int indent)
             }
         }
 
-        display_window_update_arrow_up(mwin, offset > 0);
-        display_window_update_arrow_down(mwin, (offset + maxvis) < text->len);
+        display_window_scrollbar(mwin, offset, maxvis, text->len);
 
         wrefresh(mwin->window);
 
@@ -3912,19 +3921,37 @@ position display_get_mouse_position(mmask_t button_mask)
     return pos;
 }
 
-/* Determine which scroll arrow of a window is at the given screen
-   position: -1 for the up arrow, +1 for the down arrow, 0 for
-   neither. The arrows occupy the three columns rendered by
-   display_window_update_arrow_up() / _down(). */
+/* Determine which scroll arrow of a window's scroll bar is at the given
+   screen position: -1 for the ▲ button, +1 for the ▼ button, 0 for
+   neither. The buttons sit at the top and bottom of the right border
+   column, as drawn by display_window_scrollbar(). */
 static int display_window_arrow_at(display_window *dwin, int x, int y)
 {
-    if (x < (int)(dwin->x1 + dwin->width - 5)
-            || x > (int)(dwin->x1 + dwin->width - 3))
+    if (x != (int)(dwin->x1 + dwin->width - 1))
         return 0;
 
-    if (y == (int)dwin->y1)
+    if (y == (int)(dwin->y1 + 1))
         return -1;
-    if (y == (int)(dwin->y1 + dwin->height - 1))
+    if (y == (int)(dwin->y1 + dwin->height - 2))
+        return 1;
+
+    return 0;
+}
+
+/* Determine whether the given screen position is on the scroll bar track
+   above or below the thumb: -1 for page up, +1 for page down, 0 for
+   neither (off the track, or on the thumb itself). Uses the geometry
+   stored by the most recent display_window_scrollbar() call. */
+static int display_window_track_at(int x, int y)
+{
+    if (x != display_scrollbar.col
+            || y < display_scrollbar.track_top
+            || y > display_scrollbar.track_bottom)
+        return 0;
+
+    if (y < display_scrollbar.thumb_top)
+        return -1;
+    if (y > display_scrollbar.thumb_bottom)
         return 1;
 
     return 0;
@@ -4006,6 +4033,12 @@ static int display_scroll_getch(display_window *dwin, int *autoscroll)
 
                 return (dir < 0) ? KEY_UP : KEY_DOWN;
             }
+
+            /* a click on the track above/below the thumb pages once */
+            int page = display_window_track_at(display_mouse_event.x,
+                    display_mouse_event.y);
+            if (page != 0)
+                return (page < 0) ? KEY_PPAGE : KEY_NPAGE;
         }
     }
 
@@ -4411,34 +4444,75 @@ static void display_window_update_caption(display_window *dwin, char *caption)
     wrefresh(dwin->window);
 }
 
-static void display_window_update_arrow_up(display_window *dwin, bool on)
+/* Draw a vertical scroll bar on the window's right border: a ▲ button at
+   the top, a ▼ button at the bottom and, between them, a track holding a
+   thumb whose size and position reflect the visible fraction and the
+   scroll offset. When everything fits, the plain border is restored. */
+static void display_window_scrollbar(display_window *dwin, guint offset,
+                                     guint visible, guint total)
 {
     g_assert (dwin != NULL && dwin->window != NULL);
 
-    if (on)
-    {
-        mvwaprintw(dwin->window, 0, dwin->width - 5, CP_UI_BRIGHT_FG, " ^ ");
-    }
-    else
-    {
-        mvwhline(dwin->window, 0, dwin->width - 5,
-            ACS_HLINE | CP_UI_BORDER, 3);
-    }
-}
+    /* no track paging unless a track is drawn below */
+    display_scrollbar.col = -1;
 
-static void display_window_update_arrow_down(display_window *dwin, bool on)
-{
-    g_assert (dwin != NULL && dwin->window != NULL);
+    const int col = (int)dwin->width - 1;
+    const int top = 1;
+    const int bottom = (int)dwin->height - 2;
 
-    if (on)
+    /* nothing to scroll (or the window is too small): plain border */
+    if (total <= visible || bottom < top)
     {
-        mvwaprintw(dwin->window, dwin->height - 1, dwin->width - 5,
-                  CP_UI_BRIGHT_FG, " v ");
+        for (int y = top; y <= bottom; y++)
+            mvwaddch(dwin->window, y, col, ACS_VLINE | CP_UI_BORDER);
+        return;
     }
-    else
+
+    /* the arrow buttons, dimmed at their respective end of travel */
+    mvwaprintw(dwin->window, top, col,
+            offset > 0 ? CP_UI_BRIGHT_FG : CP_UI_BORDER, "\xE2\x96\xB2");
+    mvwaprintw(dwin->window, bottom, col,
+            (offset + visible) < total ? CP_UI_BRIGHT_FG : CP_UI_BORDER,
+            "\xE2\x96\xBC");
+
+    /* the track sits between the two arrows */
+    const int track_top = top + 1;
+    const int track_h = bottom - track_top;
+
+    if (track_h < 1)
+        return;
+
+    /* thumb size proportional to the visible fraction, position
+       proportional to the scroll offset */
+    int thumb_h = (int)((guint64)track_h * visible / total);
+    if (thumb_h < 1) thumb_h = 1;
+    if (thumb_h > track_h) thumb_h = track_h;
+
+    const guint range = total - visible;
+    const int travel = track_h - thumb_h;
+    int thumb_pos = (range > 0) ? (int)((guint64)travel * offset / range) : 0;
+    thumb_pos = CLAMP(thumb_pos, 0, travel);
+
+    /* remember the track and thumb in screen coordinates, so a click on
+       the track can be turned into a page up/down */
+    display_scrollbar.col = (int)dwin->x1 + col;
+    display_scrollbar.track_top = (int)dwin->y1 + track_top;
+    display_scrollbar.track_bottom = (int)dwin->y1 + track_top + track_h - 1;
+    display_scrollbar.thumb_top = (int)dwin->y1 + track_top + thumb_pos;
+    display_scrollbar.thumb_bottom = display_scrollbar.thumb_top + thumb_h - 1;
+
+    for (int i = 0; i < track_h; i++)
     {
-        mvwhline(dwin->window, dwin->height - 1, dwin->width - 5,
-                  ACS_HLINE | CP_UI_BORDER, 3);
+        if (i >= thumb_pos && i < thumb_pos + thumb_h)
+        {
+            /* thumb: full block */
+            mvwaprintw(dwin->window, track_top + i, col, CP_UI_BRIGHT_FG,
+                    "\xE2\x96\x88");
+        }
+        else
+        {
+            mvwaddch(dwin->window, track_top + i, col, ACS_VLINE | CP_UI_BORDER);
+        }
     }
 }
 
