@@ -1179,39 +1179,45 @@ static void mainloop()
 
 bool main_menu()
 {
-    const char *main_menu_tpl =
-        _("\n"
-          "      `KEY`a`end`) %s\n"
-          "      `KEY`b`end`) Configure Settings\n"
-          "      `KEY`c`end`) Visit the Hall of Fame\n"
-          "\n"
-          "      `KEY`q`end`) Quit Game\n"
-          "\n"
-          "    You have reached difficulty level %d\n");
-
-
     g_autofree char *title = g_strdup_printf("NLarn %s", nlarn_version);
-    g_autofree char *main_menu = g_strdup_printf(main_menu_tpl,
-        (game_turn(nlarn) == 1) ? _("New Game") : _("Continue saved Game"),
-        game_difficulty(nlarn));
 
-    int input = 0;
-
-    while (input != 'q' && input != KEY_ESC)
+    while (true)
     {
-        input = display_show_message(title, main_menu, 0);
+        g_autofree char *message = g_strdup_printf(
+                _("You have reached difficulty level %d."),
+                game_difficulty(nlarn));
 
-        switch (input)
+        /* The switch below dispatches by the option's position, so the
+           (translated) hotkeys are free. */
+        const char *labels[4];
+        char *label_buf[4];
+
+        label_buf[0] = g_strdup_printf("`KEY`a`end`) %s",
+                (game_turn(nlarn) == 1)
+                    ? _("New Game") : _("Continue saved Game"));
+        label_buf[1] = g_strdup_printf("`KEY`b`end`) %s", _("Configure Settings"));
+        label_buf[2] = g_strdup_printf("`KEY`c`end`) %s", _("Visit the Hall of Fame"));
+        label_buf[3] = g_strdup_printf("`KEY`q`end`) %s", _("Quit Game"));
+
+        for (int i = 0; i < 4; i++)
+            labels[i] = label_buf[i];
+
+        int choice = display_menu(title, message, labels, NULL, NULL, 4, 0);
+
+        for (int i = 0; i < 4; i++)
+            g_free(label_buf[i]);
+
+        switch (choice)
         {
-        case 'a':
+        /* start a new game, or continue the saved one */
+        case 0:
             return true;
-            break;
 
-        case 'b':
+        case 1:
             configure_defaults(nlarn_inifile);
             break;
 
-        case 'c':
+        case 2:
         {
             GList *hs = scores_load();
             char *rendered_highscores = scores_to_string(hs, NULL);
@@ -1226,12 +1232,13 @@ bool main_menu()
             }
         }
             break;
+
+        /* quit the game (case 3), or aborted with ESC (-1) */
+        case 3:
         default:
-            break;
+            return false;
         }
     }
-
-    return false;
 }
 
 int main(int argc, char *argv[])

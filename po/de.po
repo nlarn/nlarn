@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-12 22:49+0200\n"
+"POT-Creation-Date: 2026-07-13 22:46+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -1035,11 +1035,11 @@ msgstr "Welchen Namen sollen alle deine Charaktere tragen?"
 msgid "Choose default name"
 msgstr "Standardnamen wählen"
 
-#: src/config.c:495 src/nlarn.c:1289
+#: src/config.c:495 src/nlarn.c:1296
 msgid "Female"
 msgstr "Weiblich"
 
-#: src/config.c:496 src/nlarn.c:1289
+#: src/config.c:496 src/nlarn.c:1296
 msgid "Male"
 msgstr "Männlich"
 
@@ -1198,66 +1198,66 @@ msgstr "Eine kleine Nadel schnellt hervor und sticht dich!"
 msgid "You are engulfed in a cloud of dust!"
 msgstr "Eine Staubwolke hüllt dich ein!"
 
-#: src/display.c:481
+#: src/display.c:493
 msgid "unarmed"
 msgstr "unbewaffnet"
 
-#: src/display.c:1448
+#: src/display.c:1460
 #, c-format
 msgid " %-*s %5d gold "
 msgstr " %-*s %5d Gold "
 
-#: src/display.c:1476
+#: src/display.c:1488
 #, c-format
 msgid "%s - %d gold on bank account"
 msgstr "%s - %d Gold auf dem Bankkonto"
 
-#: src/display.c:1485
+#: src/display.c:1497
 #, c-format
 msgid "%s - %s of %s carried"
 msgstr "%s - %s von %s getragen"
 
-#: src/display.c:1541
+#: src/display.c:1553
 msgid "(`KEY`?`end`) help"
 msgstr "(`KEY`?`end`) Hilfe"
 
-#: src/display.c:1776
+#: src/display.c:1787
 msgid "Configure auto pick-up"
 msgstr "Auto-Aufsammeln einrichten"
 
-#: src/display.c:1781
+#: src/display.c:1792
 msgid "Item types which will be picked up automatically are shown inverted."
 msgstr ""
 "Gegenstandsarten, die automatisch aufgesammelt werden, sind invertiert "
 "dargestellt."
 
-#: src/display.c:1812
+#: src/display.c:1797
 msgid "Type or click a symbol to toggle."
 msgstr "Symbol eingeben oder anklicken zum Umschalten."
 
-#: src/display.c:2021
+#: src/display.c:2039
 #, c-format
 msgid "Really cast %s?"
 msgstr "Wirklich „%s“ zaubern?"
 
-#: src/display.c:2186
+#: src/display.c:2204
 msgid "OK"
 msgstr "OK"
 
-#: src/display.c:2600
+#: src/display.c:2618
 msgid "Yes"
 msgstr "Ja"
 
-#: src/display.c:2603
+#: src/display.c:2621
 msgid "No"
 msgstr "Nein"
 
-#: src/display.c:3228
+#: src/display.c:3246
 #, c-format
 msgid "Looking for '%c' (%s)."
 msgstr "Suche nach „%c“ (%s)."
 
-#: src/display.c:4117
+#: src/display.c:4205
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
@@ -1265,15 +1265,15 @@ msgstr ""
 "Wähle den gewünschten Gegenstand mit EINGABE.\n"
 "Mit der Escape-Taste kannst du abbrechen."
 
-#: src/display.c:4140
+#: src/display.c:4228
 msgid "There are no options available for the selected item."
 msgstr "Für den ausgewählten Gegenstand gibt es keine Optionen."
 
-#: src/display.c:4159
+#: src/display.c:4247
 msgid "Help"
 msgstr "Hilfe"
 
-#: src/display.c:4447
+#: src/display.c:4580
 msgid "Item details"
 msgstr "Gegenstandsdetails"
 
@@ -3681,52 +3681,48 @@ msgstr "Der Zauberermodus ist bereits aktiviert."
 msgid "Choose a position to teleport to."
 msgstr "Wähle eine Position zum Hinteleportieren."
 
-#: src/nlarn.c:1183
+#: src/nlarn.c:1187
 #, c-format
-msgid ""
-"\n"
-"      `KEY`a`end`) %s\n"
-"      `KEY`b`end`) Configure Settings\n"
-"      `KEY`c`end`) Visit the Hall of Fame\n"
-"\n"
-"      `KEY`q`end`) Quit Game\n"
-"\n"
-"    You have reached difficulty level %d\n"
-msgstr ""
-"\n"
-"      `KEY`a`end`) %s\n"
-"      `KEY`b`end`) Einstellungen ändern\n"
-"      `KEY`c`end`) Die Ruhmeshalle besuchen\n"
-"\n"
-"      `KEY`q`end`) Spiel beenden\n"
-"\n"
-"    Du hast Schwierigkeitsgrad %d erreicht\n"
+msgid "You have reached difficulty level %d."
+msgstr "Du hast Schwierigkeitsgrad %d erreicht."
 
-#: src/nlarn.c:1195
+#: src/nlarn.c:1197
 msgid "New Game"
 msgstr "Neues Spiel"
 
-#: src/nlarn.c:1195
+#: src/nlarn.c:1197
 msgid "Continue saved Game"
 msgstr "Gespeichertes Spiel fortsetzen"
 
-#: src/nlarn.c:1219
+#: src/nlarn.c:1198
+msgid "Configure Settings"
+msgstr "Einstellungen ändern"
+
+#: src/nlarn.c:1199
+msgid "Visit the Hall of Fame"
+msgstr "Die Ruhmeshalle besuchen"
+
+#: src/nlarn.c:1200
+msgid "Quit Game"
+msgstr "Spiel beenden"
+
+#: src/nlarn.c:1225
 msgid "NLarn Hall of Fame"
 msgstr "NLarn-Ruhmeshalle"
 
-#: src/nlarn.c:1254
+#: src/nlarn.c:1261
 msgid "Welcome to the game of NLarn!"
 msgstr "Willkommen beim Spiel NLarn!"
 
-#: src/nlarn.c:1282
+#: src/nlarn.c:1289
 msgid "Choose your name"
 msgstr "Wähle deinen Namen"
 
-#: src/nlarn.c:1283
+#: src/nlarn.c:1290
 msgid "By what name shall you be called?"
 msgstr "Bei welchem Namen sollst du gerufen werden?"
 
-#: src/nlarn.c:1289
+#: src/nlarn.c:1296
 msgid "Are you male or female?"
 msgstr "Bist du männlich oder weiblich?"
 
