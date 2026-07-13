@@ -45,7 +45,7 @@ void colours_init(int ui_colour_scheme) {
             init_color(UI_BG, 184, 173, 200);
             init_color(UI_BRIGHT_FG, 900, 1000, 1000);
             init_color(UI_FG, 600, 700, 700);
-            init_color(UI_BORDER, 360, 320, 400);
+            init_color(UI_BORDER, 545, 498, 604);
             init_color(UI_TITLE, 820, 720, 120);
             init_color(UI_KEY, 490, 660, 430);
         break;
@@ -55,7 +55,7 @@ void colours_init(int ui_colour_scheme) {
             init_color(UI_BG, 180, 173, 169);
             init_color(UI_BRIGHT_FG, 898, 761, 702);
             init_color(UI_FG, 920, 920, 920);
-            init_color(UI_BORDER, 231, 216, 212);
+            init_color(UI_BORDER, 541, 498, 463);
             init_color(UI_TITLE, 863, 878, 320);
             init_color(UI_KEY, 663, 851, 137);
         break;
@@ -65,7 +65,7 @@ void colours_init(int ui_colour_scheme) {
             init_color(UI_BG, 176, 255, 216);
             init_color(UI_BRIGHT_FG, 588, 808, 271);
             init_color(UI_FG, 369, 541, 541);
-            init_color(UI_BORDER, 137, 196, 165);
+            init_color(UI_BORDER, 373, 549, 459);
             init_color(UI_TITLE, 859, 580, 118);
             init_color(UI_KEY, 678, 596, 584);
         break;
@@ -83,10 +83,13 @@ void colours_init(int ui_colour_scheme) {
         // traditional NLarn colours
         case TRADITIONAL:
         default:
-            init_color(UI_BG, 800, 0, 0);
+            // a darker red than the original bright red lifts the contrast
+            // of every foreground colour; the border colour uses a lighter
+            // blue than the classic blue, which was too dim
+            init_color(UI_BG, 500, 0, 0);
             init_color(UI_BRIGHT_FG, 1000, 1000, 1000);
             init_color(UI_FG, 850, 850, 850);
-            init_color(UI_BORDER, 118, 565, 1000);
+            init_color(UI_BORDER, 600, 800, 1000);
             init_color(UI_TITLE, 992, 980, 365);
             init_color(UI_KEY, 0, 843, 0);
         break;
