@@ -997,11 +997,11 @@ msgstr "Attribute"
 
 #: src/config.c:392
 msgid "Configure auto-pickup"
-msgstr "Auto-Aufsammeln einrichten"
+msgstr "Auto-Aufsammeln"
 
 #: src/config.c:393
 msgid "Autosave on map change"
-msgstr "Automatisch speichern bei Ebenenwechsel"
+msgstr "Zwischenspeichern"
 
 #: src/config.c:394
 msgid "Colour scheme"
@@ -1009,7 +1009,7 @@ msgstr "Farbschema"
 
 #: src/config.c:396
 msgid "Configure font size"
-msgstr "Schriftgröße einstellen"
+msgstr "Schriftgröße"
 
 #: src/config.c:397
 msgid "Full screen mode"
@@ -1228,7 +1228,7 @@ msgstr "Auto-Aufsammeln einrichten"
 #: src/display.c:1792
 msgid "Item types which will be picked up automatically are shown inverted."
 msgstr ""
-"Gegenstandsarten, die automatisch aufgesammelt werden, sind invertiert "
+"Gegenstände, die automatisch aufgesammelt werden, sind invertiert "
 "dargestellt."
 
 #: src/display.c:1797

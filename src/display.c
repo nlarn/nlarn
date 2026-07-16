@@ -3487,7 +3487,7 @@ int display_show_message(const char *title, const char *message, int indent)
     return key;
 }
 
-/* Draw (draw == true) or remove (draw == false) the "[■]" close button on
+/* Draw (draw == true) or remove (draw == false) the " ■ " close button on
    a window's top border, at columns width-5..width-3. Interactive windows
    show it (a click aborts the dialogue, see display_getch); non-interactive
    pop-ups remove it again. */
@@ -3499,7 +3499,7 @@ static void display_window_close_button(display_window *dwin, bool draw)
     if (draw)
     {
         mvwaprintw(dwin->window, 0, dwin->width - 5, CP_UI_BRIGHT_FG,
-                "[\xE2\x96\xA0]");
+                " \xE2\x96\xA0 ");
     }
     else
     {
@@ -3628,7 +3628,9 @@ int display_menu(const char *title, const char *message,
         content_w = max(content_w, button_w);
     }
 
-    GPtrArray *text = text_wrap(message, content_w + 1, 0);
+    /* wrap to the same width the message lines are padded to below, so a
+       full-width line cannot spill over the right border */
+    GPtrArray *text = text_wrap(message, content_w, 0);
     const guint msg_lines = text->len;
 
     /* layout: border, message, blank, content rows, blank, border */
