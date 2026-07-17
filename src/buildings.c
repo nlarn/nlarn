@@ -134,22 +134,37 @@ int building_bank(player *p)
 
         g_string_append(text, _("Your wish? "));
 
+        /* Assemble the list of currently available actions. The switch
+           below is keyed by the action letter, not by the (translated)
+           hotkey, which display_menu() derives from each label. */
+        const char *labels[3];
+        int actions[3];
+        guint n = 0;
+
         if (player_get_gold(p) > 0)
-            g_string_append(text, _("`KEY`d`end`)eposit "));
+        {
+            labels[n] = _("`KEY`d`end`)eposit ");
+            actions[n++] = 'd';
+        }
 
         if (p->bank_account > 0)
-            g_string_append(text, _("`KEY`w`end`)ithdraw "));
+        {
+            labels[n] = _("`KEY`w`end`)ithdraw ");
+            actions[n++] = 'w';
+        }
 
         /* if player has gems, enable selling them */
         if (inv_length_filtered(p->inventory, item_filter_gems))
-            g_string_append(text, _("`KEY`s`end`)ell a gem"));
+        {
+            labels[n] = _("`KEY`s`end`)ell a gem");
+            actions[n++] = 's';
+        }
 
-        display_window *bwin = display_popup(COLS / 2 - 23, LINES / 2 - 3,
-                47, msg_title, text->str, 0);
+        int choice = display_menu(msg_title, text->str, labels, NULL, NULL, n, 0);
 
         g_string_free(text, true);
 
-        int cmd = display_getch(bwin->window);
+        int cmd = (choice < 0) ? KEY_ESC : actions[choice];
 
         switch (cmd)
         {
@@ -242,7 +257,6 @@ int building_bank(player *p)
 
         /* every interaction in the bank takes two turns */
         player_make_move(p, 2, false, NULL);
-        display_window_destroy(bwin);
     }
 
     g_string_free(greeting, true);
@@ -427,28 +441,31 @@ int building_home(player *p)
                         gtime2mobuls(game_remaining_turns(nlarn)),
                         p->name);
 
-        /* check if the player can deposit something
-           at home or has already done so */
-        if ((inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-            || (inv_length(nlarn->player_home) > 0))
+        /* Assemble the list of currently available actions. The switch
+           below is keyed by the action letter, not by the (translated)
+           hotkey, which display_menu() derives from each label. */
+        const char *labels[2];
+        int actions[2];
+        guint n = 0;
+
+        if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
         {
-            g_string_append_printf(text, "%s", _("\n\nYou may\n"));
-
-            if (inv_length_filtered(p->inventory, player_item_not_equipped) > 0)
-                g_string_append_printf(text, "%s", _("  `KEY`d`end`) "
-                                       "Deposit something here\n"));
-
-            if (inv_length(nlarn->player_home) > 0)
-                g_string_append_printf(text, "%s", _("  `KEY`t`end`) "
-                                       "Take something with you\n"));
-
-            g_string_append_c(text, '\n');
+            labels[n] = _("`KEY`d`end`)eposit something here");
+            actions[n++] = 'd';
         }
 
-        int choice = display_show_message(title, text->str, 0);
+        if (inv_length(nlarn->player_home) > 0)
+        {
+            labels[n] = _("`KEY`t`end`)ake something with you");
+            actions[n++] = 't';
+        }
+
+        int choice = display_menu(title, text->str, labels, NULL, NULL, n, 0);
         g_string_free(text, true);
 
-        switch (choice)
+        int cmd = (choice < 0) ? KEY_ESC : actions[choice];
+
+        switch (cmd)
         {
             /* deposit something */
         case 'd':
@@ -770,106 +787,117 @@ static void building_school_take_course(player *p, int course, guint price)
 
 int building_school(player *p)
 {
+    const char *title = _("School");
     const char *msg_greet = _("`EMPH`Welcome to the College of Larn!`end`\n\n"
                               "We offer the exciting opportunity of higher "
                               "education to all inhabitants of the caves. "
-                              "Here is a list of the class schedule:\n\n");
-
-    const char *msg_prerequisite = _("Sorry, but this class has a prerequisite of \"%s\".");
+                              "Here is a list of the class schedule:");
 
     g_assert(p != NULL);
 
     bool leaving = false;
     while (!leaving)
     {
-        GString *text = g_string_new(msg_greet);
+        /* the courses plus the "commission a scroll" option */
+        const guint n = SCHOOL_COURSE_COUNT + 1;
+
+        const char *labels[SCHOOL_COURSE_COUNT + 1];
+        char *label_buf[SCHOOL_COURSE_COUNT + 1];
+        bool disabled[SCHOOL_COURSE_COUNT + 1];
+        const char *details[SCHOOL_COURSE_COUNT + 1];
+        char *detail_buf[SCHOOL_COURSE_COUNT + 1];
 
         for (int idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
         {
-            /* pre-pad the course name to 24 display columns; the
-               field width in the translated format counts bytes and
-               would pad multi-byte characters short */
-            const char *cdesc = _(school_courses[idx].description);
-            g_autofree gchar *course = g_strdup_printf("%-*s",
-                    utf8_pad(cdesc, 24), cdesc);
+            label_buf[idx] = g_strdup_printf("`KEY`%c`end`) %s",
+                    'a' + idx, _(school_courses[idx].description));
+            labels[idx] = label_buf[idx];
 
-            if (!p->school_courses_taken[idx])
+            /* courses become more expensive with rising difficulty */
+            const guint price = school_courses[idx].course_time
+                                * (game_difficulty(nlarn) + 1) * 100;
+            const int prereq = school_courses[idx].prerequisite;
+            const bool taken = p->school_courses_taken[idx];
+            const bool prereq_missing = (prereq >= 0)
+                    && !p->school_courses_taken[prereq];
+
+            /* attended or locked courses cannot be chosen */
+            disabled[idx] = taken || prereq_missing;
+
+            /* the details panel explains cost, time and any obstacle */
+            GString *d = g_string_new(NULL);
+            if (taken)
             {
-                /* courses become more expensive with rising difficulty */
-                guint price = school_courses[idx].course_time
-                              * (game_difficulty(nlarn) + 1) * 100;
-
-                g_string_append_printf(text,
-                        _(" `KEY`%c`end`) `EMPH`%-24s`end` - %2d mobuls, %4d gold\n"),
-                        idx + 'a', course,
-                        school_courses[idx].course_time, price);
+                g_string_append(d,
+                        _("You have already attended this course."));
             }
             else
             {
-                g_string_append_printf(text, _("    %-24s - attended\n"),
-                        course);
+                g_string_append_printf(d, _("Duration: %d mobuls"),
+                        school_courses[idx].course_time);
+                g_string_append_c(d, '\n');
+                g_string_append_printf(d, _("Cost: %d gold"), price);
+
+                if (prereq_missing)
+                {
+                    g_string_append(d, "\n\n");
+                    g_string_append_printf(d, _("Requires: %s"),
+                            _(school_courses[prereq].description));
+                }
             }
+            detail_buf[idx] = g_string_free(d, false);
+            details[idx] = detail_buf[idx];
         }
 
-        const char *commission = _("Commission a scroll");
-        g_autofree gchar *commission_pad = g_strdup_printf("%-*s",
-                utf8_pad(commission, 24), commission);
-        g_string_append_printf(text, _("\nAlternatively,\n"
-                " `KEY`%c`end`) %-24s - 10 mobuls\n\n"),
-                SCHOOL_COURSE_COUNT + 'a', commission_pad);
+        /* the "commission a scroll" option is always available */
+        label_buf[SCHOOL_COURSE_COUNT] = g_strdup_printf("`KEY`%c`end`) %s",
+                'a' + SCHOOL_COURSE_COUNT, _("Commission a scroll"));
+        labels[SCHOOL_COURSE_COUNT] = label_buf[SCHOOL_COURSE_COUNT];
+        disabled[SCHOOL_COURSE_COUNT] = false;
+        detail_buf[SCHOOL_COURSE_COUNT] = g_strdup_printf(
+                _("Duration: %d mobuls"), 10);
+        details[SCHOOL_COURSE_COUNT] = detail_buf[SCHOOL_COURSE_COUNT];
 
-        int selection = display_show_message(_("School"), text->str, 0);
-        g_string_free(text, true);
+        int selection = display_menu(title, msg_greet, labels,
+                                     disabled, details, n, 0);
 
-        switch (selection)
+        for (guint i = 0; i < n; i++)
         {
-            case 'a' + SCHOOL_COURSE_COUNT:
-                player_make_move(p, building_scribe_scroll(p), false, NULL);
-                break;
-
-            case KEY_ESC:
-                leaving = true;
-                break;
-
-            default:
-            {
-                int course = selection - 'a';
-                if ((course < 0) || (course > SCHOOL_COURSE_COUNT)
-                        || p->school_courses_taken[course])
-                {
-                    /* invalid course or course already taken */
-                    break;
-                }
-
-                /* course prices increase with rising difficulty */
-                guint price = school_courses[course].course_time
-                              * (game_difficulty(nlarn) + 1) * 100;
-
-                if (!building_player_check(p, price))
-                {
-                    char *msg = g_strdup_printf(_("You cannot afford "
-                            "the %d gold for the course."), price);
-                    display_show_message(_("School"), msg, 0);
-                    g_free(msg);
-                }
-                /* check if the selected course has a prerequisite
-                   and if the player has taken that course */
-                else if ((school_courses[course].prerequisite >= 0) &&
-                        !p->school_courses_taken[school_courses[course].prerequisite])
-                {
-                    char *msg = g_strdup_printf(msg_prerequisite,
-                            _(school_courses[school_courses[course].prerequisite]
-                            .description));
-                    display_show_message(_("School"), msg, 0);
-                    g_free(msg);
-                }
-                else
-                {
-                    building_school_take_course(p, course, price);
-                }
-            }
+            g_free(label_buf[i]);
+            g_free(detail_buf[i]);
         }
 
+        if (selection < 0)
+        {
+            /* the player left the school */
+            leaving = true;
+        }
+        else if (selection == SCHOOL_COURSE_COUNT)
+        {
+            /* commission a scroll */
+            player_make_move(p, building_scribe_scroll(p), false, NULL);
+        }
+        else
+        {
+            /* Take a course. Disabled courses cannot be selected, so the
+               course is available and its prerequisite is met; only the
+               price still needs to be checked. */
+            const int course = selection;
+            const guint price = school_courses[course].course_time
+                                * (game_difficulty(nlarn) + 1) * 100;
+
+            if (!building_player_check(p, price))
+            {
+                char *msg = g_strdup_printf(_("You cannot afford "
+                        "the %d gold for the course."), price);
+                display_show_message(title, msg, 0);
+                g_free(msg);
+            }
+            else
+            {
+                building_school_take_course(p, course, price);
+            }
+        }
     }
 
     return 0;
@@ -975,11 +1003,7 @@ int building_monastery(struct player *p)
           "who seek it.\n\nSpeak your need, and if it lies within our calling, "
           "it shall be granted... for a fair offering. We tend the wounded and "
           "weary, and offer a small selection of tools and provisions to aid "
-          "those who walk the road of trials.\n\n"
-          "Here you may\n\n"
-          "  `KEY`a`end`) buy something\n"
-          "  `KEY`b`end`) ask for curse removal\n"
-          "  `KEY`c`end`) receive healing\n");
+          "those who walk the road of trials.");
 
     const char *ayfwt = _("Shall we proceed, then?");
 
@@ -987,7 +1011,6 @@ int building_monastery(struct player *p)
 
     while (!leaving)
     {
-        GString *msg = g_string_new(msg_welcome);
         int disease_count = 0;
 
         /* buffer to store all diseases the player currently suffers from */
@@ -1058,33 +1081,38 @@ int building_monastery(struct player *p)
             curable_diseases[disease_count++].desc = N_("ignorance");
         }
 
-        /* add found diseases to the menu */
+        /* Assemble the menu: three fixed options followed by one per
+           healable disease. display_menu() returns the position of the
+           chosen option, so the switch dispatches by index. */
+        const char *labels[3 + G_N_ELEMENTS(curable_diseases)];
+        char *disease_labels[G_N_ELEMENTS(curable_diseases)];
+        guint n = 0;
+
+        labels[n++] = _("`KEY`a`end`) buy something");
+        labels[n++] = _("`KEY`b`end`) ask for curse removal");
+        labels[n++] = _("`KEY`c`end`) receive healing");
+
         for (int idx = 0; idx < disease_count; idx++)
         {
-            g_string_append_printf(msg, _("  `KEY`%c`end`) heal from %s\n"),
-                                   'd' + idx, _(curable_diseases[idx].desc));
+            disease_labels[idx] = g_strdup_printf(_("`KEY`%c`end`) heal from %s"),
+                                                  'd' + idx, _(curable_diseases[idx].desc));
+            labels[n++] = disease_labels[idx];
         }
 
-        /* an empty line for the eye */
-        g_string_append_c(msg, '\n');
+        int selection = display_menu(title, msg_welcome, labels, NULL, NULL, n, 0);
 
-        /* offer the choices to the player */
-        display_window *mwin = display_popup(10, 2, 60, title, msg->str, 0);
-
-        int selection = display_getch(mwin->window);
-
-        /* get rid of the temporary string */
-        g_string_free(msg, true);
+        for (int idx = 0; idx < disease_count; idx++)
+            g_free(disease_labels[idx]);
 
         switch (selection)
         {
-        /* shop items */
-        case 'a':
+        /* buy something */
+        case 0:
             building_shop(p, &nlarn->monastery_stock, title);
             break;
 
         /* remove curse */
-        case 'b':
+        case 1:
         {
             if (inv_length_filtered(p->inventory, item_filter_cursed_or_unknown) == 0)
             {
@@ -1159,8 +1187,8 @@ int building_monastery(struct player *p)
         }
         break;
 
-        /* healing */
-        case 'c':
+        /* receive healing */
+        case 2:
         {
             /* the price for healing depends on the severity of the injury */
             int price = (player_get_hp_max(p) - p->hp) * (game_difficulty(nlarn) + 1);
@@ -1194,21 +1222,23 @@ int building_monastery(struct player *p)
         break;
 
         /* leave the monastery */
-        case KEY_ESC:
+        case -1:
             leaving = true;
             break;
 
         default:
-            selection -= 'd';
-            /* healing of varous negative effects */
-            if (selection >= 0 && selection < disease_count)
+        {
+            /* healing of various negative effects; options 3.. map to
+               the curable diseases 0.. */
+            int sel = selection - 3;
+            if (sel >= 0 && sel < disease_count)
             {
-                effect *e = player_effect_get(p, curable_diseases[selection].et);
+                effect *e = player_effect_get(p, curable_diseases[sel].et);
                 int price = e->turns * (game_difficulty(nlarn) + 1);
 
                 char *question = g_strdup_printf(_("To cleanse you of %s, we "
                     "humbly request a donation of %d gold to our monastery. "
-                    "%s"), _(curable_diseases[selection].desc), price, ayfwt);
+                    "%s"), _(curable_diseases[sel].desc), price, ayfwt);
 
                 int choice = display_get_yesno(question, NULL, NULL, NULL);
                 g_free(question);
@@ -1225,19 +1255,17 @@ int building_monastery(struct player *p)
                 {
                     /* no, thanks */
                     char *msg = g_strdup_printf(_("So be it, you chose not to "
-                        "be cured from %s."), _(curable_diseases[selection].desc));
+                        "be cured from %s."), _(curable_diseases[sel].desc));
                     display_show_message(title, msg, 0);
                     g_free(msg);
                 }
-
             }
-            break;
+        }
+        break;
         }
 
         /* track time usage */
         player_make_move(p, 2, false, NULL);
-
-        display_window_destroy(mwin);
     }
 
     return 0;

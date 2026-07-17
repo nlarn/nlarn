@@ -9,13 +9,15 @@
 También puedes usar el teclado numérico con Bloq Num desactivado.
 Correr significa avanzar en una dirección hasta ser interrumpido. `KEY`g`end` o `KEY`/`end`, seguido de una tecla de dirección, también te hará correr.
 
+También puedes jugar con el ratón: haz clic en un punto del mapa para viajar allí, haz clic en un monstruo para disparar tu arma a distancia empuñada contra él o, si no empuñas ningún arma a distancia, para acercarte a él y atacarlo cuerpo a cuerpo. Haz clic con el botón derecho sobre ti mismo para lanzar un hechizo que te afecte.
+
 
 `TITLE`Viaje automático`end`
 
 `KEY`v`end`   viajar a un lugar del nivel
 `KEY`V`end`   continuar el viaje
 
-Puedes elegir el destino del viaje moviendo el cursor o tecleando el símbolo del elemento deseado (p. ej. `KEY`_`end` para un altar). Si hay varios elementos del tipo deseado en el nivel, cada nueva pulsación desplazará el cursor entre ellos. Puedes devolver el cursor a tu personaje pulsando `KEY`@`end`. Cuando termines, pulsa INTRO para emprender el viaje. Si un enemigo aparece a la vista, el viaje se interrumpirá automáticamente y podrá continuarse con `KEY`V`end` cuando el enemigo se pierda de vista.
+Puedes elegir el destino del viaje moviendo el cursor o tecleando el símbolo del elemento deseado (p. ej. `KEY`_`end` para un altar). Si hay varios elementos del tipo deseado en el nivel, cada nueva pulsación desplazará el cursor entre ellos. Puedes devolver el cursor a tu personaje pulsando `KEY`@`end`. Cuando termines, pulsa INTRO para emprender el viaje. Si un enemigo aparece a la vista, el viaje se interrumpirá automáticamente y podrá continuarse con `KEY`V`end` cuando el enemigo se pierda de vista. Siempre que se muestre un cursor de puntería —tanto al viajar como al apuntar hechizos y ataques a distancia— puedes hacer clic con el ratón en una casilla del mapa para mover el cursor allí, y hacer clic de nuevo para confirmar.
 
 
 `TITLE`Otras acciones`end`
@@ -85,7 +87,8 @@ Al navegar por el inventario, las acciones válidas para el objeto seleccionado 
 `TITLE`Ventanas de diálogo`end`
 
 Cierra una ventana de diálogo con `KEY`INTRO`end`/`KEY`espacio`end` para elegir una opción, o pulsa `KEY`ESC`end` para cerrarla sin elegir nada.
-Puedes mover los diálogos con Ctrl y las teclas de cursor.
+Puedes mover los diálogos con Ctrl y las teclas de cursor, o arrastrándolos con el ratón por su barra de título.
+Las ventanas desplazables pueden desplazarse con la rueda del ratón o haciendo clic en sus flechas `KEY`^`end` y `KEY`v`end`; al mantener pulsado el botón, siguen desplazándose.
 
 
 `TITLE`Lanzamiento de hechizos`end`

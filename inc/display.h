@@ -24,6 +24,10 @@
 #define NCURSES_WIDECHAR 1
 #endif
 
+/* Request PDCurses' ncurses-compatible mouse interface (mousemask(),
+   getmouse(), MEVENT); ignored by ncurses itself. */
+#define PDC_NCMOUSE
+
 #include <curses.h>
 #include <panel.h>
 #include <glib.h>
@@ -45,7 +49,7 @@ typedef struct display_inv_callback
 {
     const char *description;
     const char *helpmsg;
-    char key;
+    int key;                /* Unicode code point */
     inventory **inv;
     display_inv_callback_func function;
     int (*checkfun)(player *, inventory **, item *);
@@ -146,12 +150,23 @@ void display_inv_callbacks_clean(GPtrArray *callbacks);
 
 void display_config_autopickup(bool settings[IT_MAX]);
 
-spell *display_spell_select(const char *title, player *p);
+/**
+ * Present the player's known spells for selection.
+ *
+ * @param title the window title
+ * @param p the player
+ * @param type restrict the offered spells to this spell type, or pass
+ *             SC_MAX to offer all known spells.
+ * @return the chosen spell, or NULL when none was selected (aborted,
+ *         or no known spell matches the requested type).
+ */
+spell *display_spell_select(const char *title, player *p, spell_t type);
 
 int display_get_count(const char *caption, int value);
 char *display_get_string(const char *title, const char *caption, const char *value, size_t max_len);
 int display_get_yesno(const char *question, const char *title, const char *yes, const char *no);
-direction display_get_direction(const char *title, int *available);
+direction display_get_direction(const char *title, const char *message,
+                                int *available);
 
 position display_get_new_position(player *p,
                                   position start,
@@ -170,6 +185,28 @@ position display_get_position(player *p,
                               guint radius,
                               bool passable,
                               bool visible);
+
+/**
+ * If the last key returned by display_getch() was a mouse click with
+ * one of the requested buttons on the map, return the clicked map
+ * position; otherwise an invalid position. Used by the main input loop
+ * for mouse targeting.
+ *
+ * @param button_mask the mouse button bits to react to (e.g.
+ *                     BUTTON1_PRESSED | BUTTON1_CLICKED).
+ * @return the clicked map position, or an invalid position.
+ */
+position display_get_mouse_position(mmask_t button_mask);
+
+/**
+ * Briefly flash the given monsters on the map to show the player what
+ * interrupted their automatic movement.
+ *
+ * @param p the player
+ * @param monsters a list of monsters (as returned by
+ *                 player_visible_threats()); the list is not freed.
+ */
+void display_flash_monsters(player *p, GList *monsters);
 
 void display_show_history(message_log *log, const char *title);
 
@@ -199,6 +236,60 @@ int display_show_message(const char *title, const char *message, int indent);
  */
 display_window *display_popup(int x1, int y1, int width, const char *title,
     const char *msg, int indent);
+
+/**
+ * @brief Show a message with a list of selectable options.
+ *
+ * Each option label carries `KEY`...`end` markup; the highlighted code
+ * point is that option's hotkey, so the accelerator follows the
+ * translation. An option can be chosen with its hotkey or by clicking it.
+ *
+ * @param title The window title. May be NULL.
+ * @param message The message shown above the options.
+ * @param options An array of option labels.
+ * @param disabled An array of flags marking options that cannot be
+ *                 selected, or NULL when all options are selectable.
+ * @param details An array of detail strings shown in a panel to the
+ *                right of the options as the selection moves, or NULL for
+ *                no details panel.
+ * @param n_options The number of options.
+ * @param initial The index of the option to focus initially; if it is out
+ *                of range or disabled, the first selectable option is used.
+ * @return The index of the chosen option, or -1 if aborted (ESC).
+ */
+int display_menu(const char *title, const char *message,
+                 const char **options, const bool *disabled,
+                 const char **details, guint n_options, guint initial);
+
+/**
+ * As display_menu(), but the window is placed near the given anchor
+ * (screen coordinates, e.g. a clicked map tile) instead of centred,
+ * clamped so it stays on screen. Pass anchor_x/anchor_y < 0 to centre.
+ */
+int display_menu_at(int anchor_x, int anchor_y,
+                    const char *title, const char *message,
+                    const char **options, const bool *disabled,
+                    const char **details, guint n_options, guint initial);
+
+/**
+ * Set a one-shot target position that the next call to
+ * display_get_position() returns without prompting, so a spell or thrown
+ * item cast from the context menu hits the clicked tile directly.
+ *
+ * @param pos the target position (pass an invalid position to clear).
+ */
+void display_set_pending_target(position pos);
+
+/**
+ * @brief Handle window movement, including dragging by mouse.
+ *
+ * Call this for key codes an input loop does not handle itself.
+ *
+ * @param dwin A pointer to a window structure.
+ * @param key The received key code.
+ * @return true when the key was consumed by moving the window.
+ */
+int display_window_move(display_window *dwin, int key);
 
 /**
  * @brief Destroy a window and the resources allocated for it.

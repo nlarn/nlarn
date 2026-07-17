@@ -45,6 +45,7 @@
 
 #include "config.h"
 #include "container.h"
+#include "context.h"
 #include "display.h"
 #include "game.h"
 #include "nlarn.h"
@@ -382,9 +383,17 @@ static void mainloop()
 
             /* check if travel mode shall be aborted:
                attacked or fell through trap door */
-            if (nlarn->p->attacked || player_adjacent_monster(nlarn->p, false)
-                || Z(pos) != Z(nlarn->p->pos))
+            GList *threats;
+            if (nlarn->p->attacked || Z(pos) != Z(nlarn->p->pos))
             {
+                pos = pos_invalid;
+            }
+            else if ((threats = player_visible_threats(nlarn->p, false)) != NULL)
+            {
+                /* a threatening monster is in view: flash it so the
+                   player sees why the journey stopped */
+                display_flash_monsters(nlarn->p, threats);
+                g_list_free(threats);
                 pos = pos_invalid;
             }
             else if (pos_adjacent(nlarn->p->pos, pos))
@@ -693,7 +702,7 @@ static void mainloop()
 
             /* cast a spell */
         case 'c':
-            moves_count = spell_cast_new(nlarn->p);
+            moves_count = spell_cast_new(nlarn->p, SC_MAX);
             break;
 
             /* close door */
@@ -719,8 +728,82 @@ static void mainloop()
 
             /* fire a ranged weapon */
         case 'f':
-            moves_count = weapon_fire(nlarn->p);
+            moves_count = weapon_fire(nlarn->p, pos_invalid);
             break;
+
+            /* mouse targeting on the map */
+        case KEY_MOUSE:
+        {
+            /* a right-click opens the context menu for the clicked tile */
+            position rpos = display_get_mouse_position(
+                    BUTTON3_PRESSED | BUTTON3_CLICKED);
+            if (pos_valid(rpos))
+            {
+                position ctravel = pos_invalid;
+                moves_count = context_menu(nlarn->p, rpos, &ctravel);
+                if (pos_valid(ctravel))
+                {
+                    pos = cpos = ctravel;
+                    ch = 0;
+                }
+                break;
+            }
+
+            /* a left click travels or attacks */
+            position mpos = display_get_mouse_position(
+                    BUTTON1_PRESSED | BUTTON1_CLICKED);
+
+            if (!pos_valid(mpos))
+                break;
+
+            map *cmap = game_map(nlarn, Z(nlarn->p->pos));
+            monster *m = map_get_monster_at(cmap, mpos);
+
+            if (m != NULL && monster_in_sight(m))
+            {
+                /* a visible monster has been clicked */
+                if (nlarn->p->eq_weapon
+                        && weapon_is_ranged(nlarn->p->eq_weapon))
+                {
+                    /* fire the wielded ranged weapon at the monster */
+                    moves_count = weapon_fire(nlarn->p, mpos);
+                }
+                else if (pos_adjacent(nlarn->p->pos, mpos))
+                {
+                    /* the monster is adjacent: attack it in melee */
+                    moves_count = player_move(nlarn->p,
+                            pos_dir(nlarn->p->pos, mpos), true);
+                }
+                else
+                {
+                    /* The monster is visible but not adjacent: step one
+                       tile towards it instead of auto-travelling. A
+                       visible monster would abort auto-travel at once
+                       (and the monster would be flashed); moving a
+                       single tile per click lets the player still
+                       approach for melee while keeping the danger in
+                       view. Pathfinding routes the step around walls. */
+                    path *pth = path_find(cmap, nlarn->p->pos, mpos, LE_GROUND);
+
+                    if (pth != NULL && !g_queue_is_empty(pth->path))
+                    {
+                        path_element *el = g_queue_pop_head(pth->path);
+                        moves_count = player_move(nlarn->p,
+                                pos_dir(nlarn->p->pos, el->pos), true);
+                    }
+
+                    if (pth != NULL)
+                        path_destroy(pth);
+                }
+            }
+            else if (!pos_identical(mpos, nlarn->p->pos))
+            {
+                /* an empty cell has been clicked: travel there */
+                pos = cpos = mpos;
+                ch = 0;
+            }
+            break;
+        }
 
             /* display inventory */
         case 'i':
@@ -1052,13 +1135,22 @@ static void mainloop()
 
         if (run_cmd != 0)
         {
+            GList *threats;
+
             // Interrupt running AND resting if:
             // * last action cost no turns (we ran into a wall)
             // * we took damage (trap, poison, or invisible monster)
-            // * a monster has moved adjacent to us
-            if (no_move || was_attacked
-                    || player_adjacent_monster(nlarn->p, run_cmd == '.'))
+            if (no_move || was_attacked)
             {
+                run_cmd = 0;
+            }
+            // Interrupt if a threatening monster is in view; flash it
+            // so the player sees why the movement stopped.
+            else if ((threats = player_visible_threats(nlarn->p,
+                            run_cmd == '.')) != NULL)
+            {
+                display_flash_monsters(nlarn->p, threats);
+                g_list_free(threats);
                 run_cmd = 0;
             }
             // Interrupt resting if we've rested for 100 turns OR
@@ -1094,39 +1186,45 @@ static void mainloop()
 
 bool main_menu()
 {
-    const char *main_menu_tpl =
-        _("\n"
-          "      `KEY`a`end`) %s\n"
-          "      `KEY`b`end`) Configure Settings\n"
-          "      `KEY`c`end`) Visit the Hall of Fame\n"
-          "\n"
-          "      `KEY`q`end`) Quit Game\n"
-          "\n"
-          "    You have reached difficulty level %d\n");
-
-
     g_autofree char *title = g_strdup_printf("NLarn %s", nlarn_version);
-    g_autofree char *main_menu = g_strdup_printf(main_menu_tpl,
-        (game_turn(nlarn) == 1) ? _("New Game") : _("Continue saved Game"),
-        game_difficulty(nlarn));
 
-    int input = 0;
-
-    while (input != 'q' && input != KEY_ESC)
+    while (true)
     {
-        input = display_show_message(title, main_menu, 0);
+        g_autofree char *message = g_strdup_printf(
+                _("You have reached difficulty level %d."),
+                game_difficulty(nlarn));
 
-        switch (input)
+        /* The switch below dispatches by the option's position, so the
+           (translated) hotkeys are free. */
+        const char *labels[4];
+        char *label_buf[4];
+
+        label_buf[0] = g_strdup_printf("`KEY`a`end`) %s",
+                (game_turn(nlarn) == 1)
+                    ? _("New Game") : _("Continue saved Game"));
+        label_buf[1] = g_strdup_printf("`KEY`b`end`) %s", _("Configure Settings"));
+        label_buf[2] = g_strdup_printf("`KEY`c`end`) %s", _("Visit the Hall of Fame"));
+        label_buf[3] = g_strdup_printf("`KEY`q`end`) %s", _("Quit Game"));
+
+        for (int i = 0; i < 4; i++)
+            labels[i] = label_buf[i];
+
+        int choice = display_menu(title, message, labels, NULL, NULL, 4, 0);
+
+        for (int i = 0; i < 4; i++)
+            g_free(label_buf[i]);
+
+        switch (choice)
         {
-        case 'a':
+        /* start a new game, or continue the saved one */
+        case 0:
             return true;
-            break;
 
-        case 'b':
+        case 1:
             configure_defaults(nlarn_inifile);
             break;
 
-        case 'c':
+        case 2:
         {
             GList *hs = scores_load();
             char *rendered_highscores = scores_to_string(hs, NULL);
@@ -1141,12 +1239,13 @@ bool main_menu()
             }
         }
             break;
+
+        /* quit the game (case 3), or aborted with ESC (-1) */
+        case 3:
         default:
-            break;
+            return false;
         }
     }
-
-    return false;
 }
 
 int main(int argc, char *argv[])
@@ -1209,8 +1308,9 @@ int main(int argc, char *argv[])
 
         while (!nlarn->player_stats_set)
         {
-            /* assign the player's stats */
-            char selection = player_select_bonus_stats();
+            /* assign the player's stats; a new character must pick a build,
+               so "not defined" is not offered and aborting re-prompts */
+            int selection = player_select_bonus_stats(false);
             nlarn->player_stats_set = player_assign_bonus_stats(nlarn->p, selection);
         }
 

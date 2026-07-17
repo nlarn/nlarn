@@ -197,24 +197,45 @@ const char *player_bonus_stat_desc[] = {
     N_("All stats assigned randomly")
 };
 
-char player_select_bonus_stats()
+int player_select_bonus_stats(bool allow_none)
 {
-    int selection = 0;
-    GString *text = g_string_new("\n");
-    for (int idx = preset_min; idx <=  preset_max; idx++)
-    {
-        g_string_append_printf(text, "  `KEY`%c`end`) %s\n",
-                idx, _(player_bonus_stat_desc[idx - preset_min]));
-    }
-     g_string_append_c(text, '\n');
+    const int nbuilds = preset_max - preset_min + 1;
 
-    while (selection < preset_min || selection > preset_max)
-    {
-        selection = display_show_message(_("Choose a character build"), text->str, 0);
-    }
-    g_string_free(text, true);
+    /* the build presets, optionally followed by a "not defined" entry */
+    const char **opts = g_new0(const char *, nbuilds + 2);
+    char **buf = g_new0(char *, nbuilds + 2);
+    guint n = 0;
 
-    return selection;
+    for (int i = 0; i < nbuilds; i++)
+    {
+        buf[n] = g_strdup_printf("`KEY`%c`end`) %s",
+                preset_min + i, _(player_bonus_stat_desc[i]));
+        opts[n] = buf[n];
+        n++;
+    }
+
+    if (allow_none)
+    {
+        buf[n] = g_strdup_printf("`KEY`%c`end`) %s",
+                preset_min + nbuilds, _("not defined"));
+        opts[n] = buf[n];
+        n++;
+    }
+
+    int choice = display_menu(NULL, _("Choose a character build"),
+            opts, NULL, NULL, n, 0);
+
+    for (guint i = 0; i < n; i++)
+        g_free(buf[i]);
+    g_free(buf);
+    g_free(opts);
+
+    if (choice < 0)
+        return -1;                  /* aborted */
+    if (allow_none && choice == nbuilds)
+        return 0;                   /* not defined */
+
+    return preset_min + choice;     /* a build preset ('a'-'f') */
 }
 
 bool player_assign_bonus_stats(player *p, char preset)
@@ -1645,7 +1666,7 @@ void player_pickup(player *p)
         GPtrArray *callbacks = g_ptr_array_new();
 
         display_inv_callback *callback = g_malloc0(sizeof(display_inv_callback));
-        callback->description = "(`KEY`,`end`) get";
+        callback->description = _("(`KEY`,`end`) get");
         callback->helpmsg = _("Get the item. In case of an item stack, get the entire stack.");
         callback->key = ',';
         callback->inv = inv;
@@ -1653,7 +1674,7 @@ void player_pickup(player *p)
         g_ptr_array_add(callbacks, callback);
 
         callback = g_malloc0(sizeof(display_inv_callback));
-        callback->description = "(`KEY`g`end`)et partly";
+        callback->description = _("(`KEY`g`end`)et partly");
         callback->helpmsg = _("Get the item. In case of an item stack, choose how many items to pick up.");
         callback->key = 'g';
         callback->inv = inv;
@@ -1662,7 +1683,7 @@ void player_pickup(player *p)
         g_ptr_array_add(callbacks, callback);
 
         callback = g_malloc0(sizeof(display_inv_callback));
-        callback->description = "get (`KEY`a`end`)ll";
+        callback->description = _("get (`KEY`a`end`)ll");
         callback->helpmsg = _("Get all items from the stash. Only available when you can carry the total weight.");
         callback->key = 'a';
         callback->inv = inv;
@@ -2600,7 +2621,7 @@ int player_inv_display(player *p)
     GPtrArray *callbacks = g_ptr_array_new();
 
     display_inv_callback *callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(`KEY`d`end`)rop";
+    callback->description = _("(`KEY`d`end`)rop");
     callback->helpmsg = _("Drop the selected item. If the item is a stack of multiple items, you will be prompted for the amount you want to drop.");
     callback->key = 'd';
     callback->inv = &p->inventory;
@@ -2609,7 +2630,7 @@ int player_inv_display(player *p)
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(`KEY`e`end`)quip";
+    callback->description = _("(`KEY`e`end`)quip");
     callback->helpmsg = _("Equip the selected item.");
     callback->key = 'e';
     callback->function = &player_item_equip;
@@ -2617,7 +2638,7 @@ int player_inv_display(player *p)
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(`KEY`o`end`)pen";
+    callback->description = _("(`KEY`o`end`)pen");
     callback->helpmsg = _("Open the selected container.");
     callback->key = 'o';
     callback->function = &container_open;
@@ -2625,7 +2646,7 @@ int player_inv_display(player *p)
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(`KEY`s`end`)tore";
+    callback->description = _("(`KEY`s`end`)tore");
     callback->helpmsg = _("Put the item into a container you carry or one that is on the floor.");
     callback->key = 's';
     callback->function = &container_item_add;
@@ -2633,7 +2654,7 @@ int player_inv_display(player *p)
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(`KEY`u`end`)nequip";
+    callback->description = _("(`KEY`u`end`)nequip");
     callback->helpmsg = _("Unequip the selected item.");
     callback->key = 'u';
     callback->function = &player_item_unequip_wrapper;
@@ -2642,7 +2663,7 @@ int player_inv_display(player *p)
 
     /* unequip and use should never appear together */
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(`KEY`u`end`)se";
+    callback->description = _("(`KEY`u`end`)se");
     callback->helpmsg = _("Use the selected item.");
     callback->key = 'u';
     callback->function = &player_item_use;
@@ -2650,7 +2671,7 @@ int player_inv_display(player *p)
     g_ptr_array_add(callbacks, callback);
 
     callback = g_malloc0(sizeof(display_inv_callback));
-    callback->description = "(`KEY`n`end`)ote";
+    callback->description = _("(`KEY`n`end`)ote");
     callback->helpmsg = _("Add a note to the selected item or edit or delete an existing note.");
     callback->key = 'n';
     callback->function = &player_item_notes;
@@ -3854,10 +3875,9 @@ void player_item_destroy(player *p, item *it)
 
     if (count)
     {
-        log_add_entry(nlarn->log, "%s's content%s spill%s onto the floor.",
-                      desc,
-                      (count == 1) ? "" : "s",
-                      (count == 1) ? "s" : "");
+        log_add_entry(nlarn->log, (count == 1)
+                ? _("Its content spills onto the floor.")
+                : _("Its contents spill onto the floor."));
     }
 
     g_free(desc);
@@ -4699,51 +4719,57 @@ void player_sobject_forget(player *p, position pos)
     }
 }
 
-bool player_adjacent_monster(player *p, bool ignore_harmless)
+/* Decide whether a visible monster is a threat that should interrupt
+   the player's automatic movement (running, resting, travelling). */
+static bool player_monster_is_threat(player *p, monster *m, bool ignore_harmless)
 {
-    bool monster_visible = false;
+    // Ignore the town inhabitants.
+    if (monster_type(m) == MT_TOWN_PERSON)
+        return false;
 
-    /* get the list of all visible monsters */
-    GList *mlist;
-    GList *miter = mlist = fov_get_visible_monsters(p->fv);
+    /* ignore servants */
+    if (monster_action(m) == MA_SERVE)
+        return false;
 
-    /* no visible monsters? */
-    if (mlist == NULL)
-        return monster_visible;
+    /* Only ignore floating eye if already paralysed. */
+    if (ignore_harmless
+        && (monster_type(m) == MT_FLOATING_EYE)
+        && player_effect_get(p, ET_PARALYSIS))
+        return false;
 
-    /* got a list of monsters, check if any are dangerous */
-    do
+    /* Ignore adjacent umber hulk if already confused. */
+    if (ignore_harmless
+        && (monster_type(m) == MT_UMBER_HULK)
+        && player_effect_get(p, ET_CONFUSION))
+        return false;
+
+    return true;
+}
+
+GList *player_visible_threats(player *p, bool ignore_harmless)
+{
+    GList *threats = NULL;
+
+    GList *mlist = fov_get_visible_monsters(p->fv);
+    for (GList *iter = mlist; iter != NULL; iter = iter->next)
     {
-        monster *m = (monster *)miter->data;
-
-        // Ignore the town inhabitants.
-        if (monster_type(m) == MT_TOWN_PERSON)
-            continue;
-
-        /* ignore servants */
-        if (monster_action(m) == MA_SERVE)
-            continue;
-
-        /* Only ignore floating eye if already paralysed. */
-        if (ignore_harmless
-            && (monster_type(m) == MT_FLOATING_EYE)
-            && player_effect_get(p, ET_PARALYSIS))
-            continue;
-
-        /* Ignore adjacent umber hulk if already confused. */
-        if (ignore_harmless
-            && (monster_type(m) == MT_UMBER_HULK)
-            && player_effect_get(p, ET_CONFUSION))
-            continue;
-
-        /* when reaching this point, the monster is a threat */
-        monster_visible = true;
-        break;
+        monster *m = (monster *)iter->data;
+        if (player_monster_is_threat(p, m, ignore_harmless))
+            threats = g_list_append(threats, m);
     }
-    while ((miter = miter->next) != NULL);
 
     /* free the list returned by fov_get_visible_monsters() */
     g_list_free(mlist);
+
+    return threats;
+}
+
+bool player_adjacent_monster(player *p, bool ignore_harmless)
+{
+    GList *threats = player_visible_threats(p, ignore_harmless);
+    bool monster_visible = (threats != NULL);
+
+    g_list_free(threats);
 
     return monster_visible;
 }

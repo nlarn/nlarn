@@ -22,8 +22,17 @@
 * Redesign "Drain Life": affects multiple monsters in range and is
   backed by godly goodwill
 * Modify Sonic Spear damage and take enemy's size into account
+* Monsters that interfere with an action are highlighted
 * Turn the gelatinous cube into a passive monster
 * Adapt how statues react when being hit to the original Larn
+* Mouse movement and firing without keyboard interaction
+* Spell selection when right-clicking on the player
+* Mouse support for the inventory
+* The mouse can be used for targeting spells and ranged weapons
+* Select and activate spells by mouse
+* Scrollable windows can be scrolled with the mouse wheen or by clicking
+  the arrows
+* Allow dragging windows with the mouse
 
 ### Fixed bugs
 

@@ -16,7 +16,6 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <ctype.h>
 #include <glib.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -24,6 +23,8 @@
 
 #ifdef SDLPDCURSES
 # define PDC_WIDE
+/* request the ncurses-compatible mouse interface */
+# define PDC_NCMOUSE
 # include "sdl2/pdcsdl.h"
 # undef min
 # undef max
@@ -49,6 +50,30 @@ static bool display_initialised = false;
 /* linked list of opened windows */
 static GList *windows = NULL;
 
+/* The mouse event belonging to the last KEY_MOUSE key code returned
+   by display_getch(). Retrieving the event right away keeps the mouse
+   event queue in sync with the key codes even when a KEY_MOUSE key is
+   discarded by an input loop that does not care for the mouse. */
+static MEVENT display_mouse_event;
+
+/* A one-shot target position set by the context menu (via
+   display_set_pending_target); consumed by the next display_get_position
+   call so a spell or thrown item hits the clicked tile without a second
+   prompt. All-ones makes X negative, i.e. an invalid (no target) position. */
+static position display_pending_target = { .val = 0xFFFFFFFFu };
+
+/* Screen geometry of the scroll bar drawn most recently by
+   display_window_scrollbar(), so a click on the track can be turned into
+   a page up/down. Only one scrollable window is active at a time; col is
+   -1 when no track is currently shown. */
+static struct {
+    int col;          /* screen column of the scroll bar */
+    int track_top;    /* screen row of the first track cell */
+    int track_bottom; /* screen row of the last track cell */
+    int thumb_top;    /* screen row of the thumb's top */
+    int thumb_bottom; /* screen row of the thumb's bottom */
+} display_scrollbar = { .col = -1 };
+
 static attr_t mvwcprintw(WINDOW *win, attr_t defattr, attr_t currattr,
                          colour_t bg, int y, int x, const char *fmt, ...);
 
@@ -57,11 +82,12 @@ static void display_inventory_help(GPtrArray *callbacks);
 static display_window *display_window_new(int x1, int y1, int width,
         int height, const char *title);
 
-static int display_window_move(display_window *dwin, int key);
 static void display_window_update_title(display_window *dwin, const char *title);
 static void display_window_update_caption(display_window *dwin, char *caption);
-static void display_window_update_arrow_up(display_window *dwin, bool on);
-static void display_window_update_arrow_down(display_window *dwin, bool on);
+static void display_window_scrollbar(display_window *dwin, guint offset,
+                                     guint visible, guint total);
+static int display_window_arrow_at(display_window *dwin, int x, int y);
+static int display_scroll_getch(display_window *dwin, int *autoscroll);
 
 static display_window *display_item_details(guint x1, guint y1, guint width,
                                             item *it, player *p, bool shop);
@@ -137,6 +163,28 @@ void display_init()
 
     /* want all 8 bits */
     meta(stdscr, true);
+
+    /* Enable mouse support: window dragging needs the left button's
+       press and release events plus the pointer position while the
+       button is held. PDCurses reports the latter as BUTTONn_MOVED
+       events, ncurses as REPORT_MOUSE_POSITION. The right button is
+       used for context actions, and the mouse wheel is reported as
+       BUTTON4 (up) and BUTTON5 (down) by both. */
+#ifdef NCURSES_VERSION
+    mousemask(BUTTON1_PRESSED | BUTTON1_RELEASED | BUTTON1_CLICKED
+            | BUTTON3_PRESSED | BUTTON3_CLICKED
+            | BUTTON4_PRESSED | BUTTON5_PRESSED
+            | REPORT_MOUSE_POSITION, NULL);
+#else
+    mousemask(BUTTON1_PRESSED | BUTTON1_RELEASED | BUTTON1_CLICKED
+            | BUTTON3_PRESSED | BUTTON3_CLICKED
+            | BUTTON4_PRESSED | BUTTON5_PRESSED
+            | BUTTON1_MOVED, NULL);
+#endif
+
+    /* Report press and release events separately and immediately
+       instead of merging them into click events after a delay. */
+    mouseinterval(0);
 
     /* make cursor invisible */
     curs_set(0);
@@ -666,6 +714,31 @@ void display_animate_glyph(position pos, wchar_t glyph, colour_t fg, bool keep)
         display_paint_screen(nlarn->p);
 }
 
+void display_flash_monsters(player *p, GList *monsters)
+{
+    if (monsters == NULL)
+        return;
+
+    /* blink the given monsters a few times to draw the player's
+       attention to what interrupted the automatic movement */
+    for (int blink = 0; blink < 3; blink++)
+    {
+        /* highlight the monsters' cells */
+        for (GList *iter = monsters; iter != NULL; iter = iter->next)
+        {
+            position mpos = monster_pos((monster *)iter->data);
+            mvwchgat(stdscr, Y(mpos), X(mpos), 1,
+                     A_REVERSE | A_BOLD, LUMINOUS_RED, NULL);
+        }
+        display_draw();
+        napms(90);
+
+        /* restore the normal screen */
+        display_paint_screen(p);
+        napms(90);
+    }
+}
+
 static int item_sort_normal(gconstpointer a, gconstpointer b, gpointer data)
 {
     return item_sort(a, b, data, false);
@@ -1141,6 +1214,46 @@ static bool list_handle_scroll_key(list_scroll_state *s, int key,
     }
 }
 
+/* Number of visible columns a caption segment occupies, i.e. its
+   length in characters with the `tag` colour markup removed. Mirrors
+   how mvwcprintw() renders the string. */
+static guint caption_visible_len(const char *s)
+{
+    guint len = 0;
+
+    for (const char *p = s; *p != '\0'; )
+    {
+        if (*p == '`')
+        {
+            /* skip over the colour tag up to its terminator */
+            const char *tend = strchr(p + 1, '`');
+            if (tend == NULL)
+                break;
+            p = tend + 1;
+            continue;
+        }
+
+        len++;
+        p = g_utf8_next_char(p);
+    }
+
+    return len;
+}
+
+/* The hotkey of a caption segment: the character the translator marked
+   up with `KEY`...`end`, so the accelerator is the letter highlighted
+   in the (translated) verb. Returns 0 when the segment carries no such
+   markup. */
+static int caption_hotkey(const char *s)
+{
+    const char *k = strstr(s, "`KEY`");
+
+    /* strlen("`KEY`") == 5; the marked character - a full, possibly
+       multi-byte UTF-8 code point - follows the tag. Return it as a
+       Unicode code point so non-ASCII hotkeys (e.g. "ö") work. */
+    return k ? (int)g_utf8_get_char(k + 5) : 0;
+}
+
 item *display_inventory(const char *title, player *p, inventory **inv,
                         GPtrArray *callbacks, bool show_price,
                         bool show_weight, bool show_account,
@@ -1188,6 +1301,31 @@ item *display_inventory(const char *title, player *p, inventory **inv,
 
     /* main loop */
     bool keep_running = true;
+    int autoscroll = 0; /* scroll-arrow auto-repeat state */
+
+    /* maps each visible window row to the selection ordinal (the s.curr
+       value) of the item drawn there, or 0 for header and empty rows;
+       filled while drawing and used to select an item by mouse click */
+    guint *row_curr = g_new0(guint, LINES + 1);
+
+    /* window column and visible width of each callback's caption
+       segment, so an action can be triggered by clicking its hotkey;
+       indices match the callbacks array (0 column = inactive) */
+    guint *cap_col = callbacks ? g_new0(guint, callbacks->len) : NULL;
+    guint *cap_len = callbacks ? g_new0(guint, callbacks->len) : NULL;
+
+    /* Derive each action's hotkey from the `KEY` markup of its (possibly
+       translated) description, so the key that triggers an action is
+       always the letter highlighted in the shown verb, in any language.
+       Falls back to the caller-provided key when a segment is unmarked. */
+    for (guint i = 0; callbacks != NULL && i < callbacks->len; i++)
+    {
+        display_inv_callback *cb = g_ptr_array_index(callbacks, i);
+        const int k = caption_hotkey(cb->description);
+
+        if (k != 0)
+            cb->key = k;
+    }
 
     do
     {
@@ -1250,6 +1388,9 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         bool suppress_first = lss_suppress_first_header(&s, inv, ifilter,
                                                         max_height - 2);
 
+        /* discard the previous frame's row mapping before redrawing */
+        memset(row_curr, 0, sizeof(guint) * (LINES + 1));
+
         for (guint line = 1; line <= s.maxvis; line++)
         {
             guint item_no = (line - 1) + s.offset - shown_headers;
@@ -1293,6 +1434,9 @@ item *display_inventory(const char *title, player *p, inventory **inv,
                     continue;
                 }
             }
+
+            /* remember which item this row shows, for mouse selection */
+            row_curr[line] = line - shown_headers;
 
             bool item_equipped = false;
 
@@ -1370,6 +1514,12 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* prepare the string array which will hold all the captions */
         captions = strv_new();
 
+        /* The caption is drawn at window column 4 (see
+           display_window_update_caption); track the running column so
+           each segment's span can be hit-tested by mouse. */
+        guint cap_x = 4;
+        guint help_col = 0, help_len = 0;
+
         /* assemble window caption (if callbacks have been defined) */
         for (guint cb_nr = 0; callbacks != NULL && cb_nr < callbacks->len; cb_nr++)
         {
@@ -1380,12 +1530,19 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             if ((cb->checkfun == NULL) || cb->checkfun(p, cb->inv, it))
             {
                 cb->active = true;
+
+                /* record the segment's column span for mouse clicks */
+                cap_len[cb_nr] = caption_visible_len(cb->description);
+                cap_col[cb_nr] = cap_x;
+                cap_x += cap_len[cb_nr] + 1; /* + the joining space */
+
                 strv_append(&captions, cb->description);
             }
             else
             {
                 /* it isn't */
                 cb->active = false;
+                cap_col[cb_nr] = 0;
             }
         }
 
@@ -1399,7 +1556,13 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         if (g_strv_length(captions) > 0)
         {
             /* append "(?) help" to trigger the help pop-up */
-            strv_append(&captions, _("(`KEY`?`end`) help"));
+            const char *help = _("(`KEY`?`end`) help");
+
+            /* record its span, too, so it can be clicked */
+            help_col = cap_x;
+            help_len = caption_visible_len(help);
+
+            strv_append(&captions, help);
 
             /* update the window's caption with the assembled array of captions */
             display_window_update_caption(iwin, g_strjoinv(" ", captions));
@@ -1413,12 +1576,11 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         /* free the array of caption strings */
         g_strfreev(captions);
 
-        display_window_update_arrow_up(iwin, s.offset > 0);
-        display_window_update_arrow_down(iwin, (s.offset + s.maxvis) < len_curr);
+        display_window_scrollbar(iwin, s.offset, s.maxvis, len_curr);
 
         wrefresh(iwin->window);
 
-        switch (key = display_getch(iwin->window))
+        switch (key = display_scroll_getch(iwin, &autoscroll))
         {
         case KEY_ESC:
             keep_running = false;
@@ -1441,7 +1603,77 @@ item *display_inventory(const char *title, player *p, inventory **inv,
             }
             break;
 
+        case KEY_MOUSE:
+            /* A left click on an item row selects it; clicking the item
+               that is already selected returns it, exactly like pressing
+               Enter does in a single-selection dialog. */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)iwin->y1;
+                const int col = display_mouse_event.x - (int)iwin->x1;
+
+                if (row >= 1 && row <= (int)s.maxvis
+                        && col >= 1 && col < (int)iwin->width - 1
+                        && row_curr[row] > 0)
+                {
+                    if (callbacks == NULL && s.curr == row_curr[row])
+                    {
+                        /* already selected: return it like Enter */
+                        keep_running = false;
+                        break;
+                    }
+
+                    /* move the selection to the clicked item */
+                    s.curr = row_curr[row];
+                    break;
+                }
+
+                /* A click on an action hotkey in the caption row (the
+                   bottom border) triggers that action, exactly like
+                   pressing the corresponding key. */
+                if (row == (int)iwin->height - 1)
+                {
+                    /* the "(?) help" segment */
+                    if (help_len > 0 && col >= (int)help_col
+                            && col < (int)(help_col + help_len))
+                    {
+                        display_inventory_help(callbacks);
+                        break;
+                    }
+
+                    bool triggered = false;
+                    for (guint i = 0; callbacks != NULL && i < callbacks->len; i++)
+                    {
+                        display_inv_callback *cb = g_ptr_array_index(callbacks, i);
+
+                        if (!cb->active || cap_col[i] == 0
+                                || col < (int)cap_col[i]
+                                || col >= (int)(cap_col[i] + cap_len[i]))
+                            continue;
+
+                        item *sel_it = inv_get_filtered(*inv,
+                                s.curr + s.offset - 1, ifilter);
+                        cb->function(p, cb->inv, sel_it);
+                        redraw = true;
+                        triggered = true;
+                        break;
+                    }
+
+                    if (triggered)
+                        break;
+                }
+            }
+
+            /* not on an item row or action: let the window handle the
+               event, so a click on the title bar still drags the window */
+            display_window_move(iwin, key);
+            break;
+
         default:
+            /* handle window movement (including dragging by mouse) */
+            if (display_window_move(iwin, key))
+                break;
+
             if (list_handle_scroll_key(&s, key, inv, ifilter, visible_category_headers))
                 break;
 
@@ -1495,6 +1727,10 @@ item *display_inventory(const char *title, player *p, inventory **inv,
         len_curr = inv_length_filtered(*inv, ifilter);
     }
     while (keep_running && (len_curr > 0)); /* ESC pressed or empty inventory*/
+
+    g_free(row_curr);
+    g_free(cap_col);
+    g_free(cap_len);
 
     display_window_destroy(ipop);
     display_window_destroy(iwin);
@@ -1562,10 +1798,14 @@ void display_config_autopickup(bool settings[IT_MAX])
             _("Item types which will be picked up automatically are "
               "shown inverted."), width - 4, 0);
 
+    /* wrap the (possibly long, translated) hint to the window width */
+    GPtrArray *toggle_lines = text_wrap(
+            _("Type or click a symbol to toggle."), width - 4, 0);
+
     const int msg_row = (int)intro_lines->len + 1;
     const int item_row = msg_row + 1;
     const int toggle_row = item_row + 6 + 1;
-    const int height = toggle_row + 2;
+    const int height = toggle_row + (int)toggle_lines->len + 1;
 
     const int starty = (LINES - height) / 2;
     const int startx = (min(MAP_MAX_X, COLS) - width) / 2;
@@ -1590,9 +1830,13 @@ void display_config_autopickup(bool settings[IT_MAX])
                 item_name_pl(right_types[i]));
     }
 
-    const char *toggle_msg = _("Type a symbol to toggle.");
-    int toggle_col = MAX(2, (width - (int)g_utf8_strlen(toggle_msg, -1)) / 2);
-    mvwaprintw(cwin->window, toggle_row, toggle_col, CP_UI_FG, "%s", toggle_msg);
+    for (guint i = 0; i < toggle_lines->len; i++)
+    {
+        const char *tl = g_ptr_array_index(toggle_lines, i);
+        int tcol = MAX(2, (width - (int)g_utf8_strlen(tl, -1)) / 2);
+        mvwaprintw(cwin->window, toggle_row + (int)i, tcol, CP_UI_FG, "%s", tl);
+    }
+    text_destroy(toggle_lines);
 
     do
     {
@@ -1626,6 +1870,38 @@ void display_config_autopickup(bool settings[IT_MAX])
             RUN = false;
             break;
 
+        case KEY_MOUSE:
+            /* a left click on an item's row - glyph or label - toggles it */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)cwin->y1;
+                const int col = display_mouse_event.x - (int)cwin->x1;
+                bool toggled = false;
+
+                for (item_t it = 1; it < IT_MAX; it++)
+                {
+                    const bool left = (it < 7);
+                    const int r = item_row + (left ? (int)it - 1 : (int)it - 7);
+                    const int gcol = left ? left_glyph_col : right_glyph_col;
+                    const int lend = (left ? left_label_col : right_label_col)
+                            + (int)label_width;
+
+                    if (row == r && col >= gcol && col < lend)
+                    {
+                        settings[it] = !settings[it];
+                        toggled = true;
+                        break;
+                    }
+                }
+
+                if (toggled)
+                    break;
+            }
+
+            /* not on an item: let the window handle dragging */
+            display_window_move(cwin, key);
+            break;
+
         default:
             if (!display_window_move(cwin, key))
             {
@@ -1645,11 +1921,12 @@ void display_config_autopickup(bool settings[IT_MAX])
     display_window_destroy(cwin);
 }
 
-spell *display_spell_select(const char *title, player *p)
+spell *display_spell_select(const char *title, player *p, spell_t type)
 {
     display_window *ipop = NULL;
     int key; /* keyboard input */
     int RUN = true;
+    int autoscroll = 0; /* scroll-arrow auto-repeat state */
 
     /* currently displayed spell; return value */
     spell *sp;
@@ -1665,8 +1942,31 @@ spell *display_spell_select(const char *title, player *p)
     /* sort spell list  */
     g_ptr_array_sort(p->known_spells, &spell_sort);
 
+    /* Build the list of spells to offer, optionally filtered by spell
+       type. The array holds borrowed pointers into p->known_spells and
+       is freed (without freeing the spells) before returning. Not
+       named "spells" to avoid shadowing the global spell data table
+       used by the spell_type() macro. */
+    GPtrArray *slist = g_ptr_array_new();
+    for (guint i = 0; i < p->known_spells->len; i++)
+    {
+        spell *s = g_ptr_array_index(p->known_spells, i);
+        if (type == SC_MAX || spell_type(s) == type)
+            g_ptr_array_add(slist, s);
+    }
+
+    /* nothing to offer for the requested type */
+    if (slist->len == 0)
+    {
+        /* slist has no element free func, so freeing the container
+           (TRUE) does not touch the borrowed spell pointers */
+        g_ptr_array_free(slist, true);
+        g_free(code_buf);
+        return NULL;
+    }
+
     /* set height according to spell count */
-    guint height = min((LINES - 7), (p->known_spells->len + 2));
+    guint height = min((LINES - 7), (slist->len + 2));
 
     guint width = 46;
     guint starty = (LINES - 3 - height) / 2;
@@ -1676,7 +1976,7 @@ spell *display_spell_select(const char *title, player *p)
 
     /* scroll state: no headers in the spell list */
     list_scroll_state s;
-    lss_init(&s, p->known_spells->len, height - 2);
+    lss_init(&s, slist->len, height - 2);
 
     int prev_key = 0;
     do
@@ -1684,7 +1984,7 @@ spell *display_spell_select(const char *title, player *p)
         /* display spells */
         for (guint pos = 1; pos <= s.maxvis; pos++)
         {
-            sp = g_ptr_array_index(p->known_spells, pos + s.offset - 1);
+            sp = g_ptr_array_index(slist, pos + s.offset - 1);
 
             if (s.curr == pos) attrs = CP_UI_FG_REVERSE;
             else attrs = CP_UI_FG;
@@ -1699,8 +1999,7 @@ spell *display_spell_select(const char *title, player *p)
         }
 
         /* display up / down markers */
-        display_window_update_arrow_up(swin, (s.offset > 0));
-        display_window_update_arrow_down(swin, ((s.offset + s.maxvis) < p->known_spells->len));
+        display_window_scrollbar(swin, s.offset, s.maxvis, slist->len);
 
         /* construct the window caption: display type ahead keys */
         gchar *caption = g_strdup_printf("%s%s%s",
@@ -1711,7 +2010,7 @@ spell *display_spell_select(const char *title, player *p)
         display_window_update_caption(swin, caption);
 
         /* store currently highlighted spell */
-        sp = g_ptr_array_index(p->known_spells, s.curr + s.offset - 1);
+        sp = g_ptr_array_index(slist, s.curr + s.offset - 1);
 
         /* refresh the spell description pop-up */
         if (ipop != NULL)
@@ -1722,7 +2021,7 @@ spell *display_spell_select(const char *title, player *p)
                 spell_name(sp), spdesc, 0);
         g_free(spdesc);
 
-        switch (key = display_getch(swin->window))
+        switch (key = display_scroll_getch(swin, &autoscroll))
         {
         case KEY_ESC:
             RUN = false;
@@ -1736,6 +2035,7 @@ spell *display_spell_select(const char *title, player *p)
 #endif
         case KEY_ENTER:
         case KEY_SPC:
+activate_spell:
             // It is much too easy to accidentally cast alter reality,
             // simply by pressing m + Enter. If the first key press in
             // the menu confirms this auto selected first spell, prompt.
@@ -1762,6 +2062,36 @@ spell *display_spell_select(const char *title, player *p)
             }
             break;
 
+        case KEY_MOUSE:
+            /* A left click on a spell row focuses it; clicking the
+               spell that is already focused activates it exactly as
+               pressing Enter does. Spell rows are drawn at window rows
+               1 .. maxvis. */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)swin->y1;
+                const int col = display_mouse_event.x - (int)swin->x1;
+
+                if (row >= 1 && row <= (int)s.maxvis
+                        && col >= 1 && col < (int)swin->width - 1
+                        && (guint)(row + s.offset - 1) < slist->len)
+                {
+                    if (s.curr == (guint)row)
+                        /* already focused: activate it like Enter */
+                        goto activate_spell;
+
+                    /* focus the clicked spell */
+                    s.curr = (guint)row;
+                    code_buf[0] = '\0';
+                    break;
+                }
+            }
+
+            /* not on a spell row: let the window handle the event, so a
+               click on the title bar still drags the window */
+            display_window_move(swin, key);
+            break;
+
         default:
             /* check if the key is used for window placement */
             if (display_window_move(swin, key))
@@ -1786,9 +2116,9 @@ mnemonics:
                     code_buf[strlen(code_buf)] = key;
                     /* search for match */
 
-                    for (guint pos = 1; pos <= p->known_spells->len; pos++)
+                    for (guint pos = 1; pos <= slist->len; pos++)
                     {
-                        sp = g_ptr_array_index(p->known_spells, pos - 1);
+                        sp = g_ptr_array_index(slist, pos - 1);
 
                         if (g_str_has_prefix(spell_code(sp), code_buf)) {
                             /* match found: jump to the spell */
@@ -1798,7 +2128,7 @@ mnemonics:
                     }
 
                     /* if no match has been found remove key from buffer */
-                    sp = g_ptr_array_index(p->known_spells, s.curr + s.offset - 1);
+                    sp = g_ptr_array_index(slist, s.curr + s.offset - 1);
                     if (!g_str_has_prefix(spell_code(sp), code_buf))
                     {
                         code_buf[strlen(code_buf) - 1] = '\0';
@@ -1822,6 +2152,7 @@ mnemonics:
     while (RUN);
 
     g_free(code_buf);
+    g_ptr_array_free(slist, true);
 
     display_window_destroy(swin);
     display_window_destroy(ipop);
@@ -1853,7 +2184,10 @@ int display_get_count(const char *caption, int value)
     int width = min(basewidth + g_utf8_strlen(caption, -1), COLS - 4);
 
     GPtrArray *text = text_wrap(caption, width - basewidth, 0);
-    int height = 2 + text->len;
+
+    /* the OK button sits below the input field with one empty row of
+       padding above and below it */
+    int height = 5 + text->len;
 
     int starty = (LINES - height) / 2;
     int startx = (COLS - width) / 2;
@@ -1866,6 +2200,18 @@ int display_get_count(const char *caption, int value)
         mvwaprintw(mwin->window, 1 + line, 2, CP_UI_FG,
             "%s", (char *)g_ptr_array_index(text, line));
     }
+
+    /* The input field shares the last caption row (at field_col); the OK
+       button sits on its own row just below. */
+    const int input_row = (int)text->len;
+    const int field_col = width - 10;
+    const int button_row = (int)text->len + 2;
+
+    const char *ok = _("OK");
+    const int ok_w = (int)g_utf8_strlen(ok, -1) + 2; /* + padding spaces */
+    const int ok_col = (width - ok_w) / 2;
+
+    mvwaprintw(mwin->window, button_row, ok_col, CP_UI_FG_REVERSE, " %s ", ok);
 
     /* prepare string to edit */
     g_snprintf(ivalue, 8, "%d", value);
@@ -1880,10 +2226,10 @@ int display_get_count(const char *caption, int value)
         else
             curs_set(2); /* block */
 
-        mvwaprintw(mwin->window,  mwin->height - 2, mwin->width - 10,
+        mvwaprintw(mwin->window,  input_row, field_col,
                   CP_UI_HL_REVERSE, "%-8s", ivalue);
 
-        wmove(mwin->window, mwin->height - 2, mwin->width - 10 + ipos);
+        wmove(mwin->window, input_row, field_col + ipos);
         wrefresh(mwin->window);
 
         switch (key = display_getch(mwin->window))
@@ -1961,6 +2307,44 @@ int display_get_count(const char *caption, int value)
         case KEY_ENTER:
         case KEY_ESC:
             cont = false;
+            break;
+
+        case KEY_MOUSE:
+            /* the mouse wheel steps the value up or down */
+            if (display_mouse_event.bstate & (BUTTON4_PRESSED | BUTTON5_PRESSED))
+            {
+                int v = atoi(ivalue);
+                v += (display_mouse_event.bstate & BUTTON4_PRESSED) ? 1 : -1;
+                if (v < 0) v = 0;
+                if (v > 9999999) v = 9999999;
+                g_snprintf(ivalue, 8, "%d", v);
+                ipos = strlen(ivalue);
+                break;
+            }
+
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)mwin->y1;
+                const int col = display_mouse_event.x - (int)mwin->x1;
+
+                /* a click on the OK button confirms the entered value */
+                if (row == button_row && col >= ok_col && col < ok_col + ok_w)
+                {
+                    cont = false;
+                    break;
+                }
+
+                /* a click in the input field positions the cursor */
+                if (row == input_row && col >= field_col && col < field_col + 8)
+                {
+                    ipos = min(col - field_col, ilen);
+                    break;
+                }
+            }
+
+            /* not on a control: let the window handle the event, so a
+               click on the title bar still drags the window */
+            display_window_move(mwin, key);
             break;
 
         default:
@@ -2222,156 +2606,44 @@ char *display_get_string(const char *title, const char *caption, const char *val
     return g_string_free(string, false);
 }
 
-int display_get_yesno(const char *question, const char *title, const char *yes, const char *no)
+/* Wrap the first character of `s` in `KEY` markup so display_menu() uses
+   it as the option's hotkey. The caller owns the returned string. */
+static char *yesno_hotkey_label(const char *s)
 {
-    int RUN = true;
-    int selection = false;
-    guint line;
+    if (s == NULL || *s == '\0')
+        return g_strdup(s ? s : "");
 
-    const guint padding = 1;
-    const guint margin = 2;
+    const char *rest = g_utf8_next_char(s);
+    return g_strdup_printf("`KEY`%.*s`end`%s", (int)(rest - s), s, rest);
+}
 
-    /* default values */
+int display_get_yesno(const char *question, const char *title,
+                      const char *yes, const char *no)
+{
     if (!yes)
         yes = _("Yes");
 
     if (!no)
         no = _("No");
 
-    /* determine text width, either defined by space available  for the window
-     * or the length of question */
-    guint text_width = min(COLS - 2 /* borders */
-                     - (2 * margin) /* space outside window */
-                     - (2 * padding), /* space between border and text */
-                     g_utf8_strlen(question, -1));
+    /* the first letter of each label becomes its hotkey */
+    char *yes_label = yesno_hotkey_label(yes);
+    char *no_label = yesno_hotkey_label(no);
 
-    /* broad windows are hard to read */
-    if (text_width > 60)
-        text_width = 60;
+    const char *options[2] = { yes_label, no_label };
 
-    /* wrap question according to width */
-    GPtrArray *text = text_wrap(question, text_width + 1, 0);
+    /* focus "no" initially, so a stray enter does not confirm */
+    int choice = display_menu(title, question, options, NULL, NULL, 2, 1);
 
-    /* Determine window width. Either defined by the length of the button
-     * labels or width of the text */
-    guint width = max(g_utf8_strlen(yes, -1) + g_utf8_strlen(no, -1)
-                + 2 /* borders */
-                + (4 * padding)  /* space between "button" border and label */
-                + margin, /* space between "buttons" */
-                text_width + 2 /* borders */ + (2 * padding));
+    g_free(yes_label);
+    g_free(no_label);
 
-    /* set startx and starty to something that makes sense */
-    guint startx = (COLS / 2) - (width / 2);
-    guint starty = (LINES / 2) - 4;
-
-    display_window *ywin = display_window_new(startx, starty, width, text->len + 4, title);
-
-    for (line = 0; line < text->len; line++)
-    {
-        mvwaprintw(ywin->window, line + 1, 1 + padding, CP_UI_FG,
-            "%s", (char *)g_ptr_array_index(text, line));
-    }
-
-    text_destroy(text);
-
-    do
-    {
-        /* paint */
-        attr_t attrs;
-
-        if (selection) attrs = CP_UI_HL_REVERSE;
-        else           attrs = CP_UI_FG_REVERSE;
-
-        mvwaprintw(ywin->window, line + 2, margin, attrs,
-                   "%*s%s%*s", padding, " ", yes, padding, " ");
-
-        if (selection) attrs = CP_UI_FG_REVERSE;
-        else           attrs = CP_UI_HL_REVERSE;
-
-        mvwaprintw(ywin->window, line + 2,
-                   width - margin - g_utf8_strlen(no, -1) - (2 * padding),
-                   attrs, "%*s%s%*s", padding, " ", no, padding, " ");
-
-        wrefresh(ywin->window);
-
-        int key = tolower(display_getch(ywin->window)); /* input key buffer */
-        // Special case for the movement keys and y/n.
-        if (key != 'h' && key != 'l' && key != 'y' && key != 'n')
-        {
-            char input_yes = g_ascii_tolower(yes[0]);
-            char input_no  = g_ascii_tolower(no[0]);
-            // If both answers share the same initial letter, we're out of luck.
-            if (input_yes != input_no || input_yes == 'n' || input_no == 'y')
-            {
-                if (key == input_yes)
-                    key = 'y';
-                else if (key == input_no)
-                    key = 'n';
-            }
-        }
-
-
-        /* wait for input */
-        switch (key)
-        {
-        case KEY_ESC:
-            selection = false;
-            /* fall-through */
-
-        case KEY_LF:
-        case KEY_CR:
-#ifdef PADENTER
-        case PADENTER:
-#endif
-        case KEY_ENTER:
-        case KEY_SPC:
-            RUN = false;
-            break;
-
-        case 'h':
-        case '4':
-#ifdef KEY_B1
-        case KEY_B1:
-#endif
-        case KEY_LEFT:
-            if (!selection)
-                selection = true;
-            break;
-
-        case 'l':
-        case '6':
-#ifdef KEY_B3
-        case KEY_B3:
-#endif
-        case KEY_RIGHT:
-            if (selection)
-                selection = false;
-            break;
-
-            /* shortcuts */
-        case 'y':
-            selection = true;
-            RUN = false;
-            break;
-
-        case 'n':
-            selection = false;
-            RUN = false;
-            break;
-
-        default:
-            /* perhaps the window shall be moved */
-            display_window_move(ywin, key);
-        }
-    }
-    while (RUN);
-
-    display_window_destroy(ywin);
-
-    return selection;
+    /* the first option is "yes"; "no" and abort (ESC) count as no */
+    return choice == 0;
 }
 
-direction display_get_direction(const char *title, int *available)
+direction display_get_direction(const char *title, const char *message,
+                                int *available)
 {
     int *dirs = NULL;
     int RUN = true;
@@ -2392,17 +2664,36 @@ direction display_get_direction(const char *title, int *available)
         dirs = available;
     }
 
-    int width = max(9, g_utf8_strlen(title, -1) + 4);
+    const int title_len = (int)g_utf8_strlen(title, -1);
+    const int msg_len = message ? (int)g_utf8_strlen(message, -1) : 0;
+
+    /* The window must be wide enough for the direction cross, for the
+       message on the first content row (interior width), and for the
+       title in the border, which reserves space for the frame corners
+       and scroll markers (hence title_len + 10). */
+    int width = max(9, max(msg_len + 4, title_len + 10));
+    width = min(width, COLS - 4);
 
     /* set startx and starty to something that makes sense */
     int startx = (min(MAP_MAX_X, COLS) / 2) - (width / 2);
     int starty = (LINES / 2) - 4;
 
-    display_window *dwin = display_window_new(startx, starty, width, 9, title);
+    display_window *dwin = display_window_new(startx, starty, width, 10, title);
 
-    mvwaprintw(dwin->window, 3, 3, CP_UI_FG, "\\|/");
-    mvwaprintw(dwin->window, 4, 3, CP_UI_FG, "- -");
-    mvwaprintw(dwin->window, 5, 3, CP_UI_FG, "/|\\");
+    /* the full question, centred on the first content row */
+    if (message != NULL)
+    {
+        mvwaprintw(dwin->window, 1, max(1, (width - msg_len) / 2),
+                   CP_UI_FG, "%s", message);
+    }
+
+    /* horizontally centre the direction cross (5 columns wide) within
+       the window, which may be wider to accommodate the message */
+    const int cx = max(1, (width - 5) / 2);
+
+    mvwaprintw(dwin->window, 4, cx + 1, CP_UI_FG, "\\|/");
+    mvwaprintw(dwin->window, 5, cx + 1, CP_UI_FG, "- -");
+    mvwaprintw(dwin->window, 6, cx + 1, CP_UI_FG, "/|\\");
 
     for (int x = 0; x < 3; x++)
         for (int y = 0; y < 3; y++)
@@ -2410,16 +2701,13 @@ direction display_get_direction(const char *title, int *available)
             if (dirs[(x + 1) + (y * 3)])
             {
                 mvwaprintw(dwin->window,
-                          6 - (y * 2), /* start in the last row, move up, skip one */
-                          (x * 2) + 2, /* start in the second col, skip one */
+                          7 - (y * 2),  /* start in the last row, move up, skip one */
+                          (x * 2) + cx, /* centred, numbers two columns apart */
                           CP_UI_TITLE,
                           "%d",
                           (x + 1) + (y * 3));
             }
         }
-
-    if (!available)
-        g_free(dirs);
 
     wrefresh(dwin->window);
 
@@ -2503,6 +2791,35 @@ direction display_get_direction(const char *title, int *available)
             RUN = false;
             break;
 
+        case KEY_MOUSE:
+            /* A left click on (or next to) a direction in the wind rose
+               selects it, exactly like pressing the matching number. */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                /* click position relative to the leftmost number of the
+                   bottom row of the (centred) wind rose */
+                const int rc = display_mouse_event.x - (int)dwin->x1 - cx;
+                const int rr = 7 - (display_mouse_event.y - (int)dwin->y1);
+
+                if (rc >= 0 && rc <= 4 && rr >= 0 && rr <= 4)
+                {
+                    /* snap to the nearest cell; cells sit two columns and
+                       two rows apart */
+                    const int num = (((rc + 1) / 2) + 1) + (((rr + 1) / 2) * 3);
+
+                    if (dirs[num])
+                    {
+                        dir = num;
+                        break;
+                    }
+                }
+            }
+
+            /* not on the wind rose: let the window handle the event so a
+               click on the title bar still drags the window */
+            display_window_move(dwin, key);
+            break;
+
         default:
             /* perhaps the window shall be moved */
             display_window_move(dwin, key);
@@ -2520,6 +2837,11 @@ direction display_get_direction(const char *title, int *available)
     return dir;
 }
 
+void display_set_pending_target(position pos)
+{
+    display_pending_target = pos;
+}
+
 position display_get_position(player *p,
                               const char *message,
                               bool ray,
@@ -2528,6 +2850,22 @@ position display_get_position(player *p,
                               bool passable,
                               bool visible)
 {
+    /* A pending target set by the context menu bypasses interactive
+       targeting, so a spell or thrown item hits the tile the player
+       clicked without a second prompt. It is consumed once. */
+    if (pos_valid(display_pending_target))
+    {
+        position cpos = display_pending_target;
+        display_pending_target = pos_invalid;
+
+        /* remember a monster at the target, as the interactive path does */
+        monster *tm = map_get_monster_at(game_map(nlarn, Z(cpos)), cpos);
+        if (tm != NULL)
+            p->ptarget = monster_oid(tm);
+
+        return cpos;
+    }
+
     /* start at player's position */
     position start = p->pos;
 
@@ -2824,6 +3162,35 @@ position display_get_new_position(player *p,
             }
             break;
 
+            /* mouse targeting */
+        case KEY_MOUSE:
+            /* a left click on the map moves the cursor to the clicked
+               cell; clicking the cell the cursor already occupies
+               confirms the choice, just like pressing ENTER */
+            if (display_mouse_event.bstate
+                    & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int mx = display_mouse_event.x;
+                const int my = display_mouse_event.y;
+
+                /* the map occupies screen rows 0 .. MAP_MAX_Y - 1 and
+                   columns 0 .. MAP_MAX_X - 1, one character per cell */
+                if (mx >= 0 && mx < MAP_MAX_X && my >= 0 && my < MAP_MAX_Y)
+                {
+                    position mpos = pos;
+                    X(mpos) = mx;
+                    Y(mpos) = my;
+
+                    if (pos_identical(mpos, pos))
+                        /* confirm via the ENTER handling, so the
+                           passability checks are applied there */
+                        ungetch(KEY_ENTER);
+                    else
+                        npos = mpos;
+                }
+            }
+            break;
+
             /* move cursor */
         case 'h':
         case '4':
@@ -2903,7 +3270,7 @@ position display_get_new_position(player *p,
                     if (so_get_glyph(i) == (char) ch)
                     {
                         sobj = i;
-                        log_add_entry(nlarn->log, "Looking for '%c' (%s).\n",
+                        log_add_entry(nlarn->log, _("Looking for '%c' (%s)."),
                                       (char) ch, so_get_desc(sobj));
                         break;
                     }
@@ -3054,6 +3421,7 @@ int display_show_message(const char *title, const char *message, int indent)
     display_window *mwin = display_window_new(startx, starty, width, height, title);
     guint maxvis = min(text->len, height - 2);
     guint offset = 0;
+    int autoscroll = 0; /* scroll-arrow auto-repeat state */
 
     do
     {
@@ -3073,12 +3441,11 @@ int display_show_message(const char *title, const char *message, int indent)
             }
         }
 
-        display_window_update_arrow_up(mwin, offset > 0);
-        display_window_update_arrow_down(mwin, (offset + maxvis) < text->len);
+        display_window_scrollbar(mwin, offset, maxvis, text->len);
 
         wrefresh(mwin->window);
 
-        key = display_getch(mwin->window);
+        key = display_scroll_getch(mwin, &autoscroll);
         switch (key)
         {
         case 'k':
@@ -3147,6 +3514,26 @@ int display_show_message(const char *title, const char *message, int indent)
     return key;
 }
 
+/* Draw (draw == true) or remove (draw == false) the " ■ " close button on
+   a window's top border, at columns width-5..width-3. Interactive windows
+   show it (a click aborts the dialogue, see display_getch); non-interactive
+   pop-ups remove it again. */
+static void display_window_close_button(display_window *dwin, bool draw)
+{
+    if (dwin->width < 8)
+        return;
+
+    if (draw)
+    {
+        mvwaprintw(dwin->window, 0, dwin->width - 5, CP_UI_BRIGHT_FG,
+                " \xE2\x96\xA0 ");
+    }
+    else
+    {
+        mvwhline(dwin->window, 0, dwin->width - 5, ACS_HLINE | CP_UI_BORDER, 3);
+    }
+}
+
 display_window *display_popup(int x1, int y1, int width, const char *title, const char *msg, int indent)
 {
     const guint max_width = COLS - x1 - 1;
@@ -3181,6 +3568,9 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
 
     display_window *win = display_window_new(x1, y1, width, height, title);
 
+    /* pop-ups are not interactive, so they carry no close button */
+    display_window_close_button(win, false);
+
     /* display message */
     attr_t currattr = COLOURLESS;
     for (guint idx = 0; idx < text->len; idx++)
@@ -3198,6 +3588,299 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     wrefresh(win->window);
 
     return win;
+}
+
+int display_menu_at(int anchor_x, int anchor_y,
+                    const char *title, const char *message,
+                    const char **options, const bool *disabled,
+                    const char **details, guint n_options, guint initial)
+{
+    /* Prepare the options: the hotkey (the code point highlighted in the
+       label), the label (trimmed, but keeping the `KEY` markup so the
+       hotkey is drawn in the KEY colour) and its visible width. The
+       widest option sizes the buttons. */
+    int *opt_key = g_new0(int, n_options);
+    int *opt_len = g_new0(int, n_options);
+    char **opt_txt = g_new0(char *, n_options);
+    guint opt_w = 0;
+    for (guint i = 0; i < n_options; i++)
+    {
+        opt_key[i] = caption_hotkey(options[i]);
+        opt_txt[i] = g_strstrip(g_strdup(options[i]));
+        opt_len[i] = (int)caption_visible_len(opt_txt[i]);
+        opt_w = max(opt_w, (guint)opt_len[i]);
+    }
+
+    /* each option is a fixed-width button "▶ <centred text> ◀", the text
+       padded to the widest option, so a button is opt_w + 4 columns */
+    const guint button_w = opt_w + 4;
+
+    /* Optional details panel to the right of the options: wrap each
+       option's detail text to a fixed width and remember the tallest, so
+       the window can show any of them without resizing. */
+    const guint sep_w = 3; /* space, vertical rule, space */
+    guint details_w = 0;
+    guint details_rows = 0;
+    GPtrArray **detail_lines = NULL;
+    if (details != NULL)
+    {
+        int dw = COLS - 8 - (int)button_w - (int)sep_w;
+        dw = min(dw, 34);
+        dw = max(dw, 10);
+        details_w = (guint)dw;
+
+        detail_lines = g_new0(GPtrArray *, n_options);
+        for (guint i = 0; i < n_options; i++)
+        {
+            detail_lines[i] = text_wrap(details[i] ? details[i] : "", details_w, 0);
+            details_rows = max(details_rows, detail_lines[i]->len);
+        }
+    }
+
+    /* the content area below the message: option buttons on the left and,
+       when present, the details panel on the right */
+    const guint content_rows = max(n_options, details_rows);
+
+    /* content width fits the message and the columns, kept readable */
+    guint content_w;
+    if (details != NULL)
+    {
+        content_w = button_w + sep_w + details_w;
+    }
+    else
+    {
+        content_w = max(button_w, (guint)g_utf8_strlen(message, -1));
+        content_w = min(content_w, (guint)(COLS - 6));
+        if (content_w > 58)
+            content_w = 58;
+        content_w = max(content_w, button_w);
+    }
+
+    /* wrap to the same width the message lines are padded to below, so a
+       full-width line cannot spill over the right border */
+    GPtrArray *text = text_wrap(message, content_w, 0);
+    const guint msg_lines = text->len;
+
+    /* layout: border, message, blank, content rows, blank, border */
+    const guint width = content_w + 4;
+    const guint height = msg_lines + content_rows + 4;
+    const guint opt_row0 = msg_lines + 2;
+
+    /* Placement: centred when no anchor is given (anchor_x/y < 0),
+       otherwise near the anchor (e.g. a right-clicked map tile), clamped
+       so the whole window stays on screen. */
+    int startx, starty;
+    if (anchor_x < 0 || anchor_y < 0)
+    {
+        startx = (COLS - (int)width) / 2;
+        starty = (LINES - (int)height) / 2;
+    }
+    else
+    {
+        startx = CLAMP(anchor_x + 1, 0, MAX(0, COLS - (int)width));
+        starty = CLAMP(anchor_y, 0, MAX(0, LINES - (int)height));
+    }
+
+    display_window *mwin = display_window_new(startx, starty, width, height, title);
+
+    /* render the message (may carry `EMPH` etc. markup) */
+    attr_t currattr = COLOURLESS;
+    for (guint i = 0; i < msg_lines; i++)
+    {
+        const char *tline = g_ptr_array_index(text, i);
+        currattr = mvwcprintw(mwin->window, CP_UI_FG, currattr, UI_BG,
+                              i + 1, 1, " %-*s ", utf8_pad(tline, content_w), tline);
+    }
+    text_destroy(text);
+
+    /* column geometry: the option buttons are left-aligned when a details
+       panel is shown, otherwise centred */
+    const int button_col = (details != NULL)
+        ? 2 : ((int)width - (int)button_w) / 2;
+    const int sep_col = button_col + (int)button_w + 1;
+    const int details_col = button_col + (int)button_w + (int)sep_w;
+
+    /* the details panel is set off by a vertical rule */
+    if (details != NULL)
+        mvwvline(mwin->window, opt_row0, sep_col,
+                 ACS_VLINE | CP_UI_BORDER, content_rows);
+
+    /* focus the requested option, falling back to the first selectable
+       one when the requested option is out of range or disabled */
+    guint sel = (initial < n_options) ? initial : 0;
+    if (disabled != NULL && n_options > 0 && disabled[sel])
+        for (guint i = 0; i < n_options; i++)
+            if (!disabled[i]) { sel = i; break; }
+
+    int ret = -1;
+    bool run = true;
+    while (run)
+    {
+        /* (re)draw the buttons: the selected one is a solid reversed bar,
+           a disabled one is dimmed, and the rest keep their KEY colour */
+        for (guint i = 0; i < n_options; i++)
+        {
+            const int pad = (int)opt_w - opt_len[i];
+            const int lpad = pad / 2;
+            const int rpad = pad - lpad;
+
+            const bool dis = (disabled != NULL && disabled[i]);
+
+            if (i == sel)
+            {
+                /* Only the selected item is framed by the arrows and drawn
+                   as a solid reversed bar (greyed when it is disabled); the
+                   markup is stripped so the hotkey stays reversed too. */
+                const attr_t a = dis ? CP_UI_HL_REVERSE : CP_UI_FG_REVERSE;
+                char *plain = str_strip(opt_txt[i]);
+                mvwaprintw(mwin->window, opt_row0 + i, button_col, a,
+                           "\xE2\x96\xBA %*s%s%*s \xE2\x97\x84",
+                           lpad, "", plain, rpad, "");
+                g_free(plain);
+            }
+            else if (dis)
+            {
+                /* an unselected, disabled item: no arrows, wholly dimmed */
+                char *plain = str_strip(opt_txt[i]);
+                mvwaprintw(mwin->window, opt_row0 + i, button_col, CP_UI_BORDER,
+                           "  %*s%s%*s  ", lpad, "", plain, rpad, "");
+                g_free(plain);
+            }
+            else
+            {
+                /* an unselected item: no arrows, drawn in the border colour
+                   but keeping its KEY-coloured hotkey */
+                mvwcprintw(mwin->window, CP_UI_BORDER, COLOURLESS, UI_BG,
+                           opt_row0 + i, button_col,
+                           "  %*s%s%*s  ", lpad, "", opt_txt[i], rpad, "");
+            }
+        }
+
+        /* (re)draw the details of the selected option, clearing the panel */
+        if (details != NULL && n_options > 0)
+        {
+            GPtrArray *dl = detail_lines[sel];
+            for (guint r = 0; r < content_rows; r++)
+            {
+                const char *dline = (r < dl->len)
+                    ? g_ptr_array_index(dl, r) : "";
+                mvwaprintw(mwin->window, opt_row0 + r, details_col, CP_UI_FG,
+                           "%-*s", utf8_pad(dline, details_w), dline);
+            }
+        }
+
+        wrefresh(mwin->window);
+
+        const int key = display_getch(mwin->window);
+
+        switch (key)
+        {
+        case KEY_ESC:
+            run = false;
+            break;
+
+        case KEY_UP:
+            if (n_options > 0)
+                sel = (sel + n_options - 1) % n_options;
+            break;
+
+        case KEY_DOWN:
+            if (n_options > 0)
+                sel = (sel + 1) % n_options;
+            break;
+
+        case KEY_LF:
+        case KEY_CR:
+#ifdef PADENTER
+        case PADENTER:
+#endif
+        case KEY_ENTER:
+        case KEY_SPC:
+            /* activate the selected button unless it is disabled */
+            if (n_options > 0 && (disabled == NULL || !disabled[sel]))
+            {
+                ret = (int)sel;
+                run = false;
+            }
+            break;
+
+        case KEY_MOUSE:
+            /* a left click anywhere on an enabled button - the arrows
+               included - selects and activates it */
+            if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+            {
+                const int row = display_mouse_event.y - (int)mwin->y1;
+                const int col = display_mouse_event.x - (int)mwin->x1;
+
+                for (guint i = 0; i < n_options; i++)
+                {
+                    if (row == (int)(opt_row0 + i)
+                            && col >= button_col
+                            && col < button_col + (int)button_w)
+                    {
+                        sel = i;
+                        if (disabled == NULL || !disabled[i])
+                        {
+                            ret = (int)i;
+                            run = false;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            /* not on a button: let the window handle dragging */
+            if (run)
+                display_window_move(mwin, key);
+            break;
+
+        default:
+            /* a hotkey (matched case-insensitively) focuses its option
+               and, when enabled, activates it */
+            for (guint i = 0; i < n_options; i++)
+            {
+                if (opt_key[i] != 0
+                        && g_unichar_tolower((gunichar)key)
+                           == g_unichar_tolower((gunichar)opt_key[i]))
+                {
+                    sel = i;
+                    if (disabled == NULL || !disabled[i])
+                    {
+                        ret = (int)i;
+                        run = false;
+                    }
+                    break;
+                }
+            }
+
+            if (run)
+                display_window_move(mwin, key);
+        }
+    }
+
+    for (guint i = 0; i < n_options; i++)
+        g_free(opt_txt[i]);
+    if (detail_lines != NULL)
+    {
+        for (guint i = 0; i < n_options; i++)
+            text_destroy(detail_lines[i]);
+        g_free(detail_lines);
+    }
+    g_free(opt_txt);
+    g_free(opt_key);
+    g_free(opt_len);
+    display_window_destroy(mwin);
+
+    return ret;
+}
+
+int display_menu(const char *title, const char *message,
+                 const char **options, const bool *disabled,
+                 const char **details, guint n_options, guint initial)
+{
+    /* a centred menu (no anchor) */
+    return display_menu_at(-1, -1, title, message, options, disabled,
+                           details, n_options, initial);
 }
 
 void display_window_destroy(display_window *dwin)
@@ -3264,6 +3947,19 @@ void display_windows_destroy_all()
     }
 }
 
+/* Find the managed window wrapping the given curses window, or NULL. */
+static display_window *display_window_from_curses(WINDOW *win)
+{
+    for (GList *e = windows; e != NULL; e = e->next)
+    {
+        display_window *dw = e->data;
+        if (dw->window == win)
+            return dw;
+    }
+
+    return NULL;
+}
+
 int display_getch(WINDOW *win) {
     int ch = wgetch(win ? win : stdscr);
 #ifdef SDLPDCURSES
@@ -3277,7 +3973,174 @@ int display_getch(WINDOW *win) {
             ch = wgetch(win ? win : stdscr);
         }
 #endif
+
+    if (ch == KEY_MOUSE)
+    {
+        memset(&display_mouse_event, 0, sizeof(display_mouse_event));
+        /* a failed retrieval leaves an all-zero event, which no mouse
+           handling code reacts upon */
+        getmouse(&display_mouse_event);
+
+        /* a left click on the window's close button aborts the dialogue */
+        display_window *dw = display_window_from_curses(win);
+        if (dw != NULL
+                && (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+                && display_mouse_event.y == (int)dw->y1
+                && display_mouse_event.x >= (int)(dw->x1 + dw->width - 5)
+                && display_mouse_event.x <= (int)(dw->x1 + dw->width - 3))
+        {
+            return KEY_ESC;
+        }
+    }
+
     return ch;
+}
+
+position display_get_mouse_position(mmask_t button_mask)
+{
+    position pos = pos_invalid;
+
+    /* only react to the requested mouse button(s) */
+    if (display_mouse_event.bstate & button_mask)
+    {
+        const int mx = display_mouse_event.x;
+        const int my = display_mouse_event.y;
+
+        /* the map occupies screen rows 0 .. MAP_MAX_Y - 1 and columns
+           0 .. MAP_MAX_X - 1, one character per cell */
+        if (mx >= 0 && mx < MAP_MAX_X && my >= 0 && my < MAP_MAX_Y)
+        {
+            X(pos) = mx;
+            Y(pos) = my;
+            Z(pos) = Z(nlarn->p->pos);
+        }
+    }
+
+    return pos;
+}
+
+/* Determine which scroll arrow of a window's scroll bar is at the given
+   screen position: -1 for the ▲ button, +1 for the ▼ button, 0 for
+   neither. The buttons sit at the top and bottom of the right border
+   column, as drawn by display_window_scrollbar(). */
+static int display_window_arrow_at(display_window *dwin, int x, int y)
+{
+    if (x != (int)(dwin->x1 + dwin->width - 1))
+        return 0;
+
+    if (y == (int)(dwin->y1 + 1))
+        return -1;
+    if (y == (int)(dwin->y1 + dwin->height - 2))
+        return 1;
+
+    return 0;
+}
+
+/* Determine whether the given screen position is on the scroll bar track
+   above or below the thumb: -1 for page up, +1 for page down, 0 for
+   neither (off the track, or on the thumb itself). Uses the geometry
+   stored by the most recent display_window_scrollbar() call. */
+static int display_window_track_at(int x, int y)
+{
+    if (x != display_scrollbar.col
+            || y < display_scrollbar.track_top
+            || y > display_scrollbar.track_bottom)
+        return 0;
+
+    if (y < display_scrollbar.thumb_top)
+        return -1;
+    if (y > display_scrollbar.thumb_bottom)
+        return 1;
+
+    return 0;
+}
+
+/* Input reader for scrollable windows. Behaves like display_getch(),
+   but additionally turns a left click on a scroll arrow into the
+   matching KEY_UP / KEY_DOWN key code, and keeps emitting that code at
+   a slow rate while the button is held on the arrow (auto-repeat).
+
+   *autoscroll carries the repeat state between calls: it holds the
+   active scroll direction (-1 / +1) while an arrow is held, and 0
+   otherwise. Callers start it at 0 and pass the same variable each
+   time. */
+static int display_scroll_getch(display_window *dwin, int *autoscroll)
+{
+    /* auto-repeat delay in milliseconds - deliberately slow */
+    const int repeat_ms = 120;
+
+    if (*autoscroll != 0)
+    {
+        /* wait a short while for an event that would end the repeat */
+        wtimeout(dwin->window, repeat_ms);
+        int key = wgetch(dwin->window);
+        wtimeout(dwin->window, -1);
+
+        /* no event: the button is still held, keep scrolling */
+        if (key == ERR)
+            return (*autoscroll < 0) ? KEY_UP : KEY_DOWN;
+
+        /* any event ends the current repeat */
+        int dir = *autoscroll;
+        *autoscroll = 0;
+
+        if (key == KEY_MOUSE)
+        {
+            memset(&display_mouse_event, 0, sizeof(display_mouse_event));
+            if (getmouse(&display_mouse_event) == OK
+                    && !(display_mouse_event.bstate & BUTTON1_RELEASED)
+                    && display_window_arrow_at(dwin, display_mouse_event.x,
+                            display_mouse_event.y) == dir)
+            {
+                /* still pressing the same arrow: resume scrolling */
+                *autoscroll = dir;
+                return (dir < 0) ? KEY_UP : KEY_DOWN;
+            }
+
+            /* released or moved off the arrow: swallow the event */
+            return KEY_MOUSE;
+        }
+
+        /* a genuine key press ends the repeat and is handled normally */
+        ungetch(key);
+    }
+
+    int key = display_getch(dwin->window);
+
+    if (key == KEY_MOUSE)
+    {
+        /* the mouse wheel scrolls one line per notch */
+        if (display_mouse_event.bstate & BUTTON4_PRESSED)
+            return KEY_UP;
+        if (display_mouse_event.bstate & BUTTON5_PRESSED)
+            return KEY_DOWN;
+
+        /* a left click on a scroll arrow scrolls, and keeps scrolling
+           while the button is held */
+        if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
+        {
+            int dir = display_window_arrow_at(dwin, display_mouse_event.x,
+                    display_mouse_event.y);
+            if (dir != 0)
+            {
+                /* a held button auto-repeats; a completed click (press
+                   and release already merged by the backend) scrolls
+                   once */
+                if (display_mouse_event.bstate & BUTTON1_PRESSED)
+                    *autoscroll = dir;
+
+                return (dir < 0) ? KEY_UP : KEY_DOWN;
+            }
+
+            /* a click on the track above/below the thumb pages once */
+            int page = display_window_track_at(display_mouse_event.x,
+                    display_mouse_event.y);
+            if (page != 0)
+                return (page < 0) ? KEY_PPAGE : KEY_NPAGE;
+        }
+    }
+
+    return key;
 }
 
 #ifdef SDLPDCURSES
@@ -3468,6 +4331,10 @@ static display_window *display_window_new(int x1, int y1, int width,
     /* set the window title */
     display_window_update_title(dwin, title);
 
+    /* a close button on the top border (the space freed by moving the
+       scroll arrows to the scroll bar) */
+    display_window_close_button(dwin, true);
+
     /* create a panel for the window */
     dwin->panel = new_panel(dwin->window);
 
@@ -3488,7 +4355,59 @@ static display_window *display_window_new(int x1, int y1, int width,
     return dwin;
 }
 
-static int display_window_move(display_window *dwin, int key)
+/* Move the window while the left mouse button, pressed on the
+   window's title bar, is held down. Reacts on the mouse event stored
+   by display_getch(); returns true when that event grabbed the title
+   bar. */
+static bool display_window_drag(display_window *dwin)
+{
+    const MEVENT *me = &display_mouse_event;
+
+    /* only a left button press on the top border starts a drag */
+    if (!(me->bstate & BUTTON1_PRESSED)
+            || me->y != (int)dwin->y1
+            || me->x < (int)dwin->x1
+            || me->x >= (int)(dwin->x1 + dwin->width))
+    {
+        return false;
+    }
+
+    /* the grabbed spot shall stay under the pointer while dragging */
+    const int grab_x = me->x - dwin->x1;
+
+    int key;
+    while ((key = display_getch(dwin->window)) != ERR)
+    {
+        if (key != KEY_MOUSE)
+        {
+            /* keyboard input ends the drag; leave the key for the
+               window's own input handling */
+            ungetch(key);
+            break;
+        }
+
+        if (me->bstate & BUTTON1_RELEASED)
+            break;
+
+        /* clamp the new position to the screen */
+        int nx = me->x - grab_x;
+        int ny = me->y;
+        nx = CLAMP(nx, 0, MAX(0, COLS - (int)dwin->width));
+        ny = CLAMP(ny, 0, MAX(0, LINES - (int)dwin->height));
+
+        if ((guint)nx != dwin->x1 || (guint)ny != dwin->y1)
+        {
+            dwin->x1 = nx;
+            dwin->y1 = ny;
+            move_panel(dwin->panel, dwin->y1, dwin->x1);
+            display_draw();
+        }
+    }
+
+    return true;
+}
+
+int display_window_move(display_window *dwin, int key)
 {
     bool need_refresh = true;
 
@@ -3496,6 +4415,13 @@ static int display_window_move(display_window *dwin, int key)
 
     switch (key)
     {
+    case KEY_MOUSE:
+        /* a mouse event is always consumed by the window system: it
+           either drags the window or is ignored, but must never be
+           treated as an unhandled key that closes the window */
+        display_window_drag(dwin);
+        break;
+
     case 0:
         /* The Windows keys generate two key presses, of which the first
            is a zero. Flush the buffer or the second key code will confuse
@@ -3620,34 +4546,75 @@ static void display_window_update_caption(display_window *dwin, char *caption)
     wrefresh(dwin->window);
 }
 
-static void display_window_update_arrow_up(display_window *dwin, bool on)
+/* Draw a vertical scroll bar on the window's right border: a ▲ button at
+   the top, a ▼ button at the bottom and, between them, a track holding a
+   thumb whose size and position reflect the visible fraction and the
+   scroll offset. When everything fits, the plain border is restored. */
+static void display_window_scrollbar(display_window *dwin, guint offset,
+                                     guint visible, guint total)
 {
     g_assert (dwin != NULL && dwin->window != NULL);
 
-    if (on)
-    {
-        mvwaprintw(dwin->window, 0, dwin->width - 5, CP_UI_BRIGHT_FG, " ^ ");
-    }
-    else
-    {
-        mvwhline(dwin->window, 0, dwin->width - 5,
-            ACS_HLINE | CP_UI_BORDER, 3);
-    }
-}
+    /* no track paging unless a track is drawn below */
+    display_scrollbar.col = -1;
 
-static void display_window_update_arrow_down(display_window *dwin, bool on)
-{
-    g_assert (dwin != NULL && dwin->window != NULL);
+    const int col = (int)dwin->width - 1;
+    const int top = 1;
+    const int bottom = (int)dwin->height - 2;
 
-    if (on)
+    /* nothing to scroll (or the window is too small): plain border */
+    if (total <= visible || bottom < top)
     {
-        mvwaprintw(dwin->window, dwin->height - 1, dwin->width - 5,
-                  CP_UI_BRIGHT_FG, " v ");
+        for (int y = top; y <= bottom; y++)
+            mvwaddch(dwin->window, y, col, ACS_VLINE | CP_UI_BORDER);
+        return;
     }
-    else
+
+    /* the arrow buttons, dimmed at their respective end of travel */
+    mvwaprintw(dwin->window, top, col,
+            offset > 0 ? CP_UI_BRIGHT_FG : CP_UI_BORDER, "\xE2\x96\xB2");
+    mvwaprintw(dwin->window, bottom, col,
+            (offset + visible) < total ? CP_UI_BRIGHT_FG : CP_UI_BORDER,
+            "\xE2\x96\xBC");
+
+    /* the track sits between the two arrows */
+    const int track_top = top + 1;
+    const int track_h = bottom - track_top;
+
+    if (track_h < 1)
+        return;
+
+    /* thumb size proportional to the visible fraction, position
+       proportional to the scroll offset */
+    int thumb_h = (int)((guint64)track_h * visible / total);
+    if (thumb_h < 1) thumb_h = 1;
+    if (thumb_h > track_h) thumb_h = track_h;
+
+    const guint range = total - visible;
+    const int travel = track_h - thumb_h;
+    int thumb_pos = (range > 0) ? (int)((guint64)travel * offset / range) : 0;
+    thumb_pos = CLAMP(thumb_pos, 0, travel);
+
+    /* remember the track and thumb in screen coordinates, so a click on
+       the track can be turned into a page up/down */
+    display_scrollbar.col = (int)dwin->x1 + col;
+    display_scrollbar.track_top = (int)dwin->y1 + track_top;
+    display_scrollbar.track_bottom = (int)dwin->y1 + track_top + track_h - 1;
+    display_scrollbar.thumb_top = (int)dwin->y1 + track_top + thumb_pos;
+    display_scrollbar.thumb_bottom = display_scrollbar.thumb_top + thumb_h - 1;
+
+    for (int i = 0; i < track_h; i++)
     {
-        mvwhline(dwin->window, dwin->height - 1, dwin->width - 5,
-                  ACS_HLINE | CP_UI_BORDER, 3);
+        if (i >= thumb_pos && i < thumb_pos + thumb_h)
+        {
+            /* thumb: full block */
+            mvwaprintw(dwin->window, track_top + i, col, CP_UI_BRIGHT_FG,
+                    "\xE2\x96\x88");
+        }
+        else
+        {
+            mvwaddch(dwin->window, track_top + i, col, ACS_VLINE | CP_UI_BORDER);
+        }
     }
 }
 

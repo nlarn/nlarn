@@ -357,81 +357,117 @@ char compose_gender(const int gender)
     }
 }
 
+/* Wrap the first character of s in `KEY` markup so display_menu() uses it
+   as the option's hotkey. The caller owns the returned string. */
+static char *config_hotkey(const char *s)
+{
+    if (s == NULL || *s == '\0')
+        return g_strdup(s ? s : "");
+
+    const char *rest = g_utf8_next_char(s);
+    return g_strdup_printf("`KEY`%.*s`end`%s", (int)(rest - s), s, rest);
+}
+
 void configure_defaults(const char *inifile)
 {
     const char *undef = _("not defined");
-    const char *menu =
-        _("\n"
-          "  `KEY`a`end`) Character name         - %s\n"
-          "  `KEY`b`end`) Character gender       - %s\n"
-          "  `KEY`c`end`) Character stats        - %s\n"
-          "  `KEY`d`end`) Configure auto-pickup  - %s\n"
-          "  `KEY`e`end`) Autosave on map change - `EMPH`%s`end`\n"
-          "  `KEY`f`end`) Colour scheme          - `EMPH`%s`end`\n"
+    const char *title = _("Configure game defaults");
+    const char *message =
+        _("Options left \"not defined\" are chosen when a new game begins.");
+
+    enum config_option
+    {
+        CO_NAME, CO_GENDER, CO_STATS, CO_PICKUP, CO_AUTOSAVE, CO_COLOUR,
 #ifdef SDLPDCURSES
-          "  `KEY`g`end`) Configure font size    - `EMPH`%d`end`\n"
-          "  `KEY`h`end`) Full screen mode       - `EMPH`%s`end`\n"
+        CO_FONT, CO_FULLSCREEN,
 #endif
-          "\n"
-          "Clear values with `KEY`A`end`-`KEY`F`end`. "
-          "Return to the main menu with `KEY`ESC`end`.\n");
+        CO_COUNT
+    };
+
+    static const char *const names[] =
+    {
+        N_("Character name"),
+        N_("Character gender"),
+        N_("Character stats"),
+        N_("Configure auto-pickup"),
+        N_("Autosave on map change"),
+        N_("Colour scheme"),
+#ifdef SDLPDCURSES
+        N_("Configure font size"),
+        N_("Full screen mode"),
+#endif
+    };
 
     bool leaving = false;
-
+    /* keep the selection on the option that was just changed */
+    guint current = 0;
     while (!leaving)
     {
-        /* name */
-        char *nbuf = (config.name && strlen(config.name) > 0)
-            ? g_strdup_printf("`EMPH`%s`end`", config.name)
-            : NULL;
-        /* gender */
-        char *gbuf = config.gender
-            ? g_strdup_printf("`EMPH`%s`end`",
-                    _(player_sex_str[parse_gender(config.gender[0])]))
-            : NULL;
-        /* stats */
-        char *sbuf = (config.stats && strlen(config.stats) > 0)
-            ? g_strdup_printf("`EMPH`%s`end`", _(player_bonus_stat_desc[config.stats[0] - 'a']))
-            : NULL;
-        /* auto-pickup */
-        bool autopickup[IT_MAX];
-        parse_autopickup_settings(config.auto_pickup, autopickup);
-        char *verboseap = verbose_autopickup_settings(autopickup);
-        char *abuf = config.auto_pickup
-            ? g_strdup_printf("`EMPH`%s`end`", verboseap)
-            : NULL;
-        if (verboseap) g_free(verboseap);
-        /* UI colour scheme */
-        char *lucss = g_ascii_strdown(ui_colour_scheme_string(config.colour_scheme), -1);
+        const char *labels[CO_COUNT];
+        char *label_buf[CO_COUNT];
+        const char *details[CO_COUNT];
+        char *detail_buf[CO_COUNT];
 
-        char *msg = g_strdup_printf(menu,
-                nbuf ? nbuf : undef,
-                gbuf ? gbuf : undef,
-                sbuf ? sbuf : undef,
-                abuf ? abuf : undef,
-                config.no_autosave ? _("no") : _("yes"),
-                lucss
-#ifdef SDLPDCURSES
-                , config.font_size
-                , config.fullscreen ? _("yes") : _("no")
-#endif
-                );
-
-        if (nbuf) g_free(nbuf);
-        if (gbuf) g_free(gbuf);
-        if (sbuf) g_free(sbuf);
-        if (abuf) g_free(abuf);
-        g_free(lucss);
-
-        display_window *cwin = display_popup(COLS / 2 - 34, LINES / 2 - 6, 68,
-                _("Configure game defaults"), msg, 30);
-        g_free(msg);
-
-        int res = display_getch(cwin->window);
-        switch (res)
+        for (int i = 0; i < CO_COUNT; i++)
         {
-            /* default name */
-            case 'a':
+            label_buf[i] = g_strdup_printf("`KEY`%c`end`) %s", 'a' + i, _(names[i]));
+            labels[i] = label_buf[i];
+        }
+
+        /* the details panel shows each setting's current value */
+        detail_buf[CO_NAME] = g_strdup((config.name && *config.name)
+                ? config.name : undef);
+        detail_buf[CO_GENDER] = g_strdup(config.gender
+                ? _(player_sex_str[parse_gender(config.gender[0])]) : undef);
+        detail_buf[CO_STATS] = g_strdup((config.stats && *config.stats)
+                ? _(player_bonus_stat_desc[config.stats[0] - 'a']) : undef);
+
+        bool ap[IT_MAX];
+        parse_autopickup_settings(config.auto_pickup, ap);
+        char *vap = verbose_autopickup_settings(ap);
+        detail_buf[CO_PICKUP] = g_strdup((config.auto_pickup && vap) ? vap : undef);
+        if (vap) g_free(vap);
+
+        detail_buf[CO_AUTOSAVE] = g_strdup(config.no_autosave ? _("no") : _("yes"));
+        detail_buf[CO_COLOUR] = g_ascii_strdown(
+                ui_colour_scheme_string(config.colour_scheme), -1);
+#ifdef SDLPDCURSES
+        detail_buf[CO_FONT] = g_strdup_printf("%d", config.font_size);
+        detail_buf[CO_FULLSCREEN] = g_strdup(config.fullscreen ? _("yes") : _("no"));
+#endif
+
+        for (int i = 0; i < CO_COUNT; i++)
+            details[i] = detail_buf[i];
+
+        int sel = display_menu(title, message, labels, NULL, details, CO_COUNT, current);
+
+        for (int i = 0; i < CO_COUNT; i++)
+        {
+            g_free(label_buf[i]);
+            g_free(detail_buf[i]);
+        }
+
+        /* remember the option so the menu reopens on it */
+        if (sel >= 0)
+            current = (guint)sel;
+
+        switch (sel)
+        {
+        case -1:
+            leaving = true;
+            break;
+
+        /* character name: enter one or reset to "not defined" */
+        case CO_NAME:
+        {
+            const char *opts[] = {
+                config_hotkey(_("Enter a name")),
+                config_hotkey(undef),
+            };
+            int c = display_menu(_(names[CO_NAME]),
+                    _("By what name shall all your characters be called?"),
+                    opts, NULL, NULL, 2, 0);
+            if (c == 0)
             {
                 char *name = display_get_string(_("Choose default name"),
                         _("By what name shall all your characters be called?"),
@@ -441,147 +477,149 @@ void configure_defaults(const char *inifile)
                     if (config.name) g_free(config.name);
                     config.name = name;
                 }
-                break;
             }
-
-            /* clear name */
-            case 'A':
+            else if (c == 1)
+            {
                 if (config.name) g_free(config.name);
                 config.name = NULL;
-                break;
-
-            /* default gender */
-            case 'b':
-            {
-                int gender = (display_get_yesno(_("Shall your future characters be "
-                            "male or female?"), _("Choose default gender"),
-                            _("Female"), _("Male")) == true)
-                    ? PS_FEMALE : PS_MALE;
-
-                if (config.gender) g_free(config.gender);
-                config.gender = g_strdup_printf("%c", compose_gender(gender));
-                break;
             }
+            g_free((char *)opts[0]);
+            g_free((char *)opts[1]);
+            break;
+        }
 
-            /* clear gender */
-            case 'B':
+        /* character gender */
+        case CO_GENDER:
+        {
+            const char *opts[] = {
+                config_hotkey(_("Female")),
+                config_hotkey(_("Male")),
+                config_hotkey(undef),
+            };
+            const guint cur = config.gender
+                ? (parse_gender(config.gender[0]) == PS_FEMALE ? 0 : 1) : 2;
+            int c = display_menu(_(names[CO_GENDER]),
+                    _("Shall your future characters be male or female?"),
+                    opts, NULL, NULL, 3, cur);
+            if (c == 0 || c == 1)
+            {
+                if (config.gender) g_free(config.gender);
+                config.gender = g_strdup_printf("%c",
+                        compose_gender(c == 0 ? PS_FEMALE : PS_MALE));
+            }
+            else if (c == 2)
+            {
                 if (config.gender) g_free(config.gender);
                 config.gender = NULL;
-                break;
-
-            /* default stats */
-            case 'c':
-            {
-                char stats = player_select_bonus_stats();
-
-                if (config.stats) free(config.stats);
-                config.stats = g_strdup_printf("%c", stats);
-                break;
             }
+            g_free((char *)opts[0]);
+            g_free((char *)opts[1]);
+            g_free((char *)opts[2]);
+            break;
+        }
 
-            /* clear stats */
-            case 'C':
+        /* character stats: the build selection includes "not defined" */
+        case CO_STATS:
+        {
+            int stats = player_select_bonus_stats(true);
+            if (stats > 0)
+            {
+                /* a build preset was chosen */
+                if (config.stats) g_free(config.stats);
+                config.stats = g_strdup_printf("%c", stats);
+            }
+            else if (stats == 0)
+            {
+                /* "not defined" was chosen */
                 if (config.stats) g_free(config.stats);
                 config.stats = NULL;
-                break;
+            }
+            /* stats < 0: aborted, keep the current value */
+            break;
+        }
 
-            /* auto-pickup defaults */
-            case 'd':
+        /* auto-pickup: selecting nothing leaves it undefined */
+        case CO_PICKUP:
+        {
+            bool conf[IT_MAX] = {};
+            if (config.auto_pickup)
             {
-                bool conf[IT_MAX] = {};
-                if (config.auto_pickup)
-                {
-                    parse_autopickup_settings(config.auto_pickup, conf);
-                    g_strfreev(config.auto_pickup);
-                }
-
-                display_config_autopickup(conf);
-                config.auto_pickup = compose_autopickup_settings(conf);
-
-                break;
+                parse_autopickup_settings(config.auto_pickup, conf);
+                g_strfreev(config.auto_pickup);
+                config.auto_pickup = NULL;
             }
 
-            /* clear auto-pickup */
-            case 'D':
-                if (config.auto_pickup) g_strfreev(config.auto_pickup);
-                config.auto_pickup = NULL;
-                break;
+            display_config_autopickup(conf);
 
-            /* autosave */
-            case 'e':
-                config.no_autosave = !config.no_autosave;
-                break;
+            bool any = false;
+            for (item_t it = IT_NONE; it < IT_MAX; it++)
+                any = any || conf[it];
 
-            /* colour scheme */
-            case 'f':
-                {
-                    GString *csmsg = g_string_new(_("Select UI colour scheme:\n\n"));
-                    for (int i = 0; i < UI_COLOUR_SCHEME_MAX; i++)
-                    {
-                        char *lucss = g_ascii_strdown(ui_colour_scheme_string(i), -1);
-                        g_string_append_printf(csmsg, " `KEY`%c`end`) %s\n", i + 'a', lucss);
-                        g_free(lucss);
-                    }
+            config.auto_pickup = any ? compose_autopickup_settings(conf) : NULL;
+            break;
+        }
 
-                    char ret = display_show_message(_("UI colours"), csmsg->str, 0);
+        case CO_AUTOSAVE:
+            config.no_autosave = !config.no_autosave;
+            break;
 
-                    if (ret >= 'a' && ret < 'a' + UI_COLOUR_SCHEME_MAX)
-                    {
-                        config.colour_scheme = ret - 'a';
-                        colours_init(config.colour_scheme);
-                    }
-
-                    g_string_free(csmsg, true);
-                }
-                break;
-
-            /* default colour scheme */
-            case 'F':
-                config.colour_scheme = TRADITIONAL;
-                break;
+        /* colour scheme: the schemes are the choices, TRADITIONAL is the
+           default */
+        case CO_COLOUR:
+        {
+            const char *opts[UI_COLOUR_SCHEME_MAX];
+            char *buf[UI_COLOUR_SCHEME_MAX];
+            for (int i = 0; i < UI_COLOUR_SCHEME_MAX; i++)
+            {
+                char *low = g_ascii_strdown(ui_colour_scheme_string(i), -1);
+                buf[i] = g_strdup_printf("`KEY`%c`end`) %s", 'a' + i, low);
+                g_free(low);
+                opts[i] = buf[i];
+            }
+            int c = display_menu(_(names[CO_COLOUR]),
+                    _("Select a UI colour scheme:"), opts, NULL, NULL,
+                    UI_COLOUR_SCHEME_MAX, config.colour_scheme);
+            if (c >= 0)
+            {
+                config.colour_scheme = c;
+                colours_init(config.colour_scheme);
+            }
+            for (int i = 0; i < UI_COLOUR_SCHEME_MAX; i++)
+                g_free(buf[i]);
+            break;
+        }
 
 #ifdef SDLPDCURSES
-            /* font size */
-            case 'g':
+        case CO_FONT:
+        {
+            char *cval = g_strdup_printf("%d", config.font_size);
+            char *nval = display_get_string(_("Default font size"),
+                    _("Font size (6 - 48): "), cval, 2);
+            g_free(cval);
+
+            if (nval)
+            {
+                int val = atoi(nval);
+                g_free(nval);
+
+                if (val >= 6 && val <= 48)
                 {
-                    char *cval = g_strdup_printf("%d", config.font_size);
-                    char *nval = display_get_string(_("Default font size"),
-                        _("Font size (6 - 48): "), cval, 2);
-                    g_free(cval);
-
-                    if (nval)
-                    {
-                        int val = atoi(nval);
-                        g_free(nval);
-
-                        if (val >= 6 && val <= 48)
-                        {
-                            config.font_size = val;
-                            display_change_font();
-                        }
-                        else
-                        {
-                            display_show_message(_("Error"), _("Invalid font size"), 0);
-                        }
-                    }
+                    config.font_size = val;
+                    display_change_font();
                 }
-                break;
-
-            /* fullscreen */
-            case 'h':
-                display_toggle_fullscreen(true);
-                break;
-#endif
-
-            case KEY_ESC:
-                leaving = true;
-                break;
-
-            default:
-                /* ignore input */
-                break;
+                else
+                {
+                    display_show_message(_("Error"), _("Invalid font size"), 0);
+                }
+            }
+            break;
         }
-        display_window_destroy(cwin);
+
+        case CO_FULLSCREEN:
+            display_toggle_fullscreen(true);
+            break;
+#endif
+        }
     }
 
     /* write modified config */

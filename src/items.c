@@ -1337,12 +1337,13 @@ item *item_enchant(item *it)
         bool bonus_known = it->bonus_known;
         it->bonus_known = false;
 
-        gchar *desc = item_describe(it, player_item_known(nlarn->p, it),
-                                    (it->count == 1), true);
+        gchar *desc = item_describe_gc(it, player_item_known(nlarn->p, it),
+                                       (it->count == 1), true, GC_NOM);
 
         desc[0] = g_ascii_toupper(desc[0]);
-        log_add_entry(nlarn->log, "%s vibrate%s strangely.",
-                      desc, (it->count == 1) ? "s" : "");
+        log_add_entry(nlarn->log, (it->count == 1)
+                      ? _("%s vibrates strangely.")
+                      : _("%s vibrate strangely."), desc);
 
         g_free(desc);
         it->bonus_known = bonus_known;
@@ -1383,11 +1384,13 @@ item *item_disenchant(item *it)
 
     if (it->bonus == -3)
     {
-        gchar *desc = item_describe(it, player_item_known(nlarn->p, it), false, true);
+        gchar *desc = item_describe_gc(it, player_item_known(nlarn->p, it),
+                                       (it->count == 1), true, GC_NOM);
 
         desc[0] = g_ascii_toupper(desc[0]);
-        log_add_entry(nlarn->log, "%s vibrate%s warningly.",
-                      desc, (it->count == 1) ? "s" : "");
+        log_add_entry(nlarn->log, (it->count == 1)
+                      ? _("%s vibrates warningly.")
+                      : _("%s vibrate warningly."), desc);
 
         g_free(desc);
         it->bonus_known = true;

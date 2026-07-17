@@ -133,9 +133,11 @@ int spell_sort(gconstpointer a, gconstpointer b);
  * Select a spell to cast and cast it
  *
  * @param p the player
+ * @param type restrict the offered spells to this spell type, or pass
+ *             SC_MAX to offer all known spells.
  * @return number of turns elapsed
  */
-int spell_cast_new(struct player *p);
+int spell_cast_new(struct player *p, spell_t type);
 
 /**
  * Cast the previous spell again
