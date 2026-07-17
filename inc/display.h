@@ -262,6 +262,25 @@ int display_menu(const char *title, const char *message,
                  const char **details, guint n_options, guint initial);
 
 /**
+ * As display_menu(), but the window is placed near the given anchor
+ * (screen coordinates, e.g. a clicked map tile) instead of centred,
+ * clamped so it stays on screen. Pass anchor_x/anchor_y < 0 to centre.
+ */
+int display_menu_at(int anchor_x, int anchor_y,
+                    const char *title, const char *message,
+                    const char **options, const bool *disabled,
+                    const char **details, guint n_options, guint initial);
+
+/**
+ * Set a one-shot target position that the next call to
+ * display_get_position() returns without prompting, so a spell or thrown
+ * item cast from the context menu hits the clicked tile directly.
+ *
+ * @param pos the target position (pass an invalid position to clear).
+ */
+void display_set_pending_target(position pos);
+
+/**
  * @brief Handle window movement, including dragging by mouse.
  *
  * Call this for key codes an input loop does not handle itself.

@@ -45,6 +45,7 @@
 
 #include "config.h"
 #include "container.h"
+#include "context.h"
 #include "display.h"
 #include "game.h"
 #include "nlarn.h"
@@ -733,12 +734,18 @@ static void mainloop()
             /* mouse targeting on the map */
         case KEY_MOUSE:
         {
-            /* right-clicking the player casts a self-affecting spell */
+            /* a right-click opens the context menu for the clicked tile */
             position rpos = display_get_mouse_position(
                     BUTTON3_PRESSED | BUTTON3_CLICKED);
-            if (pos_valid(rpos) && pos_identical(rpos, nlarn->p->pos))
+            if (pos_valid(rpos))
             {
-                moves_count = spell_cast_new(nlarn->p, SC_PLAYER);
+                position ctravel = pos_invalid;
+                moves_count = context_menu(nlarn->p, rpos, &ctravel);
+                if (pos_valid(ctravel))
+                {
+                    pos = cpos = ctravel;
+                    ch = 0;
+                }
                 break;
             }
 

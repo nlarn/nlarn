@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-13 22:46+0200\n"
+"POT-Creation-Date: 2026-07-18 00:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -932,11 +932,11 @@ msgstr ""
 msgid "Choose default name"
 msgstr ""
 
-#: src/config.c:495 src/nlarn.c:1296
+#: src/config.c:495 src/nlarn.c:1303
 msgid "Female"
 msgstr ""
 
-#: src/config.c:496 src/nlarn.c:1296
+#: src/config.c:496 src/nlarn.c:1303
 msgid "Male"
 msgstr ""
 
@@ -956,7 +956,7 @@ msgstr ""
 msgid "Font size (6 - 48): "
 msgstr ""
 
-#: src/config.c:612 src/game.c:115 src/map.c:1958 src/nlarn.c:658
+#: src/config.c:612 src/game.c:115 src/map.c:1958 src/nlarn.c:659
 #: src/player.c:5344 src/player.c:5352 src/player.c:5377
 msgid "Error"
 msgstr ""
@@ -1093,78 +1093,146 @@ msgstr ""
 msgid "You are engulfed in a cloud of dust!"
 msgstr ""
 
-#: src/display.c:493
+#: src/context.c:310
+msgid "`KEY`g`end`)o here"
+msgstr ""
+
+#: src/context.c:311
+msgid "`KEY`a`end`)ttack"
+msgstr ""
+
+#: src/context.c:312
+msgid "`KEY`a`end`)pproach"
+msgstr ""
+
+#: src/context.c:313
+msgid "`KEY`f`end`)ire weapon"
+msgstr ""
+
+#: src/context.c:314
+msgid "`KEY`t`end`)hrow item"
+msgstr ""
+
+#: src/context.c:315
+msgid "`KEY`c`end`)ast a spell"
+msgstr ""
+
+#: src/context.c:316
+msgid "go `KEY`d`end`)own"
+msgstr ""
+
+#: src/context.c:317
+msgid "go `KEY`u`end`)p"
+msgstr ""
+
+#: src/context.c:318
+msgid "`KEY`e`end`)nter"
+msgstr ""
+
+#: src/context.c:319
+msgid "`KEY`d`end`)rink from fountain"
+msgstr ""
+
+#: src/context.c:320
+msgid "`KEY`w`end`)ash at fountain"
+msgstr ""
+
+#: src/context.c:321
+msgid "`KEY`p`end`)ray at altar"
+msgstr ""
+
+#: src/context.c:322
+msgid "desecrate the altar (`KEY`x`end`)"
+msgstr ""
+
+#: src/context.c:323
+msgid "`KEY`s`end`)it on throne"
+msgstr ""
+
+#: src/context.c:324
+msgid "`KEY`p`end`)illage throne"
+msgstr ""
+
+#: src/context.c:325
+msgid "`KEY`r`end`)est here"
+msgstr ""
+
+#: src/context.c:356
+msgid "There is nothing to do here."
+msgstr ""
+
+#: src/display.c:499
 msgid "unarmed"
 msgstr ""
 
-#: src/display.c:1460
+#: src/display.c:1466
 #, c-format
 msgid " %-*s %5d gold "
 msgstr ""
 
-#: src/display.c:1488
+#: src/display.c:1494
 #, c-format
 msgid "%s - %d gold on bank account"
 msgstr ""
 
-#: src/display.c:1497
+#: src/display.c:1503
 #, c-format
 msgid "%s - %s of %s carried"
 msgstr ""
 
-#: src/display.c:1553
+#: src/display.c:1559
 msgid "(`KEY`?`end`) help"
 msgstr ""
 
-#: src/display.c:1787
+#: src/display.c:1793
 msgid "Configure auto pick-up"
 msgstr ""
 
-#: src/display.c:1792
+#: src/display.c:1798
 msgid "Item types which will be picked up automatically are shown inverted."
 msgstr ""
 
-#: src/display.c:1797
+#: src/display.c:1803
 msgid "Type or click a symbol to toggle."
 msgstr ""
 
-#: src/display.c:2039
+#: src/display.c:2045
 #, c-format
 msgid "Really cast %s?"
 msgstr ""
 
-#: src/display.c:2204
+#: src/display.c:2210
 msgid "OK"
 msgstr ""
 
-#: src/display.c:2618
+#: src/display.c:2624
 msgid "Yes"
 msgstr ""
 
-#: src/display.c:2621
+#: src/display.c:2627
 msgid "No"
 msgstr ""
 
-#: src/display.c:3246
+#: src/display.c:3273
 #, c-format
 msgid "Looking for '%c' (%s)."
 msgstr ""
 
-#: src/display.c:4205
+#: src/display.c:4256
 msgid ""
 "Select the desired item with ENTER.\n"
 "You may abort by pressing the escape key."
 msgstr ""
 
-#: src/display.c:4228
+#: src/display.c:4279
 msgid "There are no options available for the selected item."
 msgstr ""
 
-#: src/display.c:4247
+#: src/display.c:4298
 msgid "Help"
 msgstr ""
 
-#: src/display.c:4580
+#: src/display.c:4631
 msgid "Item details"
 msgstr ""
 
@@ -1781,7 +1849,7 @@ msgstr ""
 msgid "For a list of commands, press '?'."
 msgstr ""
 
-#: src/game.c:163 src/nlarn.c:1019
+#: src/game.c:163 src/nlarn.c:1026
 msgid "Wizard mode has been activated."
 msgstr ""
 
@@ -3433,142 +3501,142 @@ msgstr ""
 msgid "The mirror reflects %s!"
 msgstr ""
 
-#: src/nlarn.c:66
+#: src/nlarn.c:67
 msgid ""
 "\n"
 "...room for improvement...\n"
 msgstr ""
 
-#: src/nlarn.c:629
+#: src/nlarn.c:630
 msgid "Choose a position to examine"
 msgstr ""
 
-#: src/nlarn.c:632
+#: src/nlarn.c:633
 msgid "You can't look around while blinded!"
 msgstr ""
 
-#: src/nlarn.c:653
+#: src/nlarn.c:654
 msgid "Help for the game of NLarn"
 msgstr ""
 
-#: src/nlarn.c:676
+#: src/nlarn.c:677
 #, c-format
 msgid "There is %s gold on your bank account."
 msgstr ""
 
-#: src/nlarn.c:683
+#: src/nlarn.c:684
 msgid "Identified items"
 msgstr ""
 
-#: src/nlarn.c:688
+#: src/nlarn.c:689
 msgid "You have not discovered any item yet."
 msgstr ""
 
-#: src/nlarn.c:828
+#: src/nlarn.c:835
 #, c-format
 msgid "You presently owe %d gold in taxes."
 msgstr ""
 
-#: src/nlarn.c:832
+#: src/nlarn.c:839
 msgid "You do not owe any taxes."
 msgstr ""
 
-#: src/nlarn.c:842
+#: src/nlarn.c:849
 msgid "There is a fountain here, drink from it?"
 msgstr ""
 
-#: src/nlarn.c:887
+#: src/nlarn.c:894
 msgid "Choose a destination to travel to."
 msgstr ""
 
-#: src/nlarn.c:899 src/player.c:3780 src/spells.c:747 src/spells.c:924
+#: src/nlarn.c:906 src/player.c:3780 src/spells.c:747 src/spells.c:924
 #: src/spells.c:988 src/spells.c:1024 src/spells.c:1064 src/spells.c:1078
 msgid "Aborted."
 msgstr ""
 
-#: src/nlarn.c:919
+#: src/nlarn.c:926
 msgid "No travel destination known."
 msgstr ""
 
-#: src/nlarn.c:940
+#: src/nlarn.c:947
 msgid "Auto-pickup is not enabled."
 msgstr ""
 
-#: src/nlarn.c:944
+#: src/nlarn.c:951
 #, c-format
 msgid "Auto-pickup is enabled for %s."
 msgstr ""
 
-#: src/nlarn.c:984
+#: src/nlarn.c:991
 msgid "Are you sure you want to quit?"
 msgstr ""
 
-#: src/nlarn.c:990
+#: src/nlarn.c:997
 msgid "Message history"
 msgstr ""
 
-#: src/nlarn.c:1007
+#: src/nlarn.c:1014
 #, c-format
 msgid "NLarn version %s, built on %s."
 msgstr ""
 
-#: src/nlarn.c:1014
+#: src/nlarn.c:1021
 msgid ""
 "Are you sure you want to switch to Wizard mode?\n"
 "You will not be able to switch back to normal gameplay and your score will "
 "not be counted."
 msgstr ""
 
-#: src/nlarn.c:1024
+#: src/nlarn.c:1031
 msgid "Wizard mode is already enabled."
 msgstr ""
 
-#: src/nlarn.c:1060
+#: src/nlarn.c:1067
 msgid "Choose a position to teleport to."
 msgstr ""
 
-#: src/nlarn.c:1187
+#: src/nlarn.c:1194
 #, c-format
 msgid "You have reached difficulty level %d."
 msgstr ""
 
-#: src/nlarn.c:1197
+#: src/nlarn.c:1204
 msgid "New Game"
 msgstr ""
 
-#: src/nlarn.c:1197
+#: src/nlarn.c:1204
 msgid "Continue saved Game"
 msgstr ""
 
-#: src/nlarn.c:1198
+#: src/nlarn.c:1205
 msgid "Configure Settings"
 msgstr ""
 
-#: src/nlarn.c:1199
+#: src/nlarn.c:1206
 msgid "Visit the Hall of Fame"
 msgstr ""
 
-#: src/nlarn.c:1200
+#: src/nlarn.c:1207
 msgid "Quit Game"
 msgstr ""
 
-#: src/nlarn.c:1225
+#: src/nlarn.c:1232
 msgid "NLarn Hall of Fame"
 msgstr ""
 
-#: src/nlarn.c:1261
+#: src/nlarn.c:1268
 msgid "Welcome to the game of NLarn!"
 msgstr ""
 
-#: src/nlarn.c:1289
+#: src/nlarn.c:1296
 msgid "Choose your name"
 msgstr ""
 
-#: src/nlarn.c:1290
+#: src/nlarn.c:1297
 msgid "By what name shall you be called?"
 msgstr ""
 
-#: src/nlarn.c:1296
+#: src/nlarn.c:1303
 msgid "Are you male or female?"
 msgstr ""
 

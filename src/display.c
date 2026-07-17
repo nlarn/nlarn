@@ -56,6 +56,12 @@ static GList *windows = NULL;
    discarded by an input loop that does not care for the mouse. */
 static MEVENT display_mouse_event;
 
+/* A one-shot target position set by the context menu (via
+   display_set_pending_target); consumed by the next display_get_position
+   call so a spell or thrown item hits the clicked tile without a second
+   prompt. All-ones makes X negative, i.e. an invalid (no target) position. */
+static position display_pending_target = { .val = 0xFFFFFFFFu };
+
 /* Screen geometry of the scroll bar drawn most recently by
    display_window_scrollbar(), so a click on the track can be turned into
    a page up/down. Only one scrollable window is active at a time; col is
@@ -2831,6 +2837,11 @@ direction display_get_direction(const char *title, const char *message,
     return dir;
 }
 
+void display_set_pending_target(position pos)
+{
+    display_pending_target = pos;
+}
+
 position display_get_position(player *p,
                               const char *message,
                               bool ray,
@@ -2839,6 +2850,22 @@ position display_get_position(player *p,
                               bool passable,
                               bool visible)
 {
+    /* A pending target set by the context menu bypasses interactive
+       targeting, so a spell or thrown item hits the tile the player
+       clicked without a second prompt. It is consumed once. */
+    if (pos_valid(display_pending_target))
+    {
+        position cpos = display_pending_target;
+        display_pending_target = pos_invalid;
+
+        /* remember a monster at the target, as the interactive path does */
+        monster *tm = map_get_monster_at(game_map(nlarn, Z(cpos)), cpos);
+        if (tm != NULL)
+            p->ptarget = monster_oid(tm);
+
+        return cpos;
+    }
+
     /* start at player's position */
     position start = p->pos;
 
@@ -3563,9 +3590,10 @@ display_window *display_popup(int x1, int y1, int width, const char *title, cons
     return win;
 }
 
-int display_menu(const char *title, const char *message,
-                 const char **options, const bool *disabled,
-                 const char **details, guint n_options, guint initial)
+int display_menu_at(int anchor_x, int anchor_y,
+                    const char *title, const char *message,
+                    const char **options, const bool *disabled,
+                    const char **details, guint n_options, guint initial)
 {
     /* Prepare the options: the hotkey (the code point highlighted in the
        label), the label (trimmed, but keeping the `KEY` markup so the
@@ -3638,8 +3666,20 @@ int display_menu(const char *title, const char *message,
     const guint height = msg_lines + content_rows + 4;
     const guint opt_row0 = msg_lines + 2;
 
-    const int startx = (COLS - (int)width) / 2;
-    const int starty = (LINES - (int)height) / 2;
+    /* Placement: centred when no anchor is given (anchor_x/y < 0),
+       otherwise near the anchor (e.g. a right-clicked map tile), clamped
+       so the whole window stays on screen. */
+    int startx, starty;
+    if (anchor_x < 0 || anchor_y < 0)
+    {
+        startx = (COLS - (int)width) / 2;
+        starty = (LINES - (int)height) / 2;
+    }
+    else
+    {
+        startx = CLAMP(anchor_x + 1, 0, MAX(0, COLS - (int)width));
+        starty = CLAMP(anchor_y, 0, MAX(0, LINES - (int)height));
+    }
 
     display_window *mwin = display_window_new(startx, starty, width, height, title);
 
@@ -3832,6 +3872,15 @@ int display_menu(const char *title, const char *message,
     display_window_destroy(mwin);
 
     return ret;
+}
+
+int display_menu(const char *title, const char *message,
+                 const char **options, const bool *disabled,
+                 const char **details, guint n_options, guint initial)
+{
+    /* a centred menu (no anchor) */
+    return display_menu_at(-1, -1, title, message, options, disabled,
+                           details, n_options, initial);
 }
 
 void display_window_destroy(display_window *dwin)
