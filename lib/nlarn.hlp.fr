@@ -1,0 +1,117 @@
+`TITLE`Déplacements`end`       `TITLE`Course`end`
+
+ 7 8 9  y k u        Y K U
+  \|/    \|/          \|/
+ 4-5-6  h-.-l        H- -L
+  /|\    /|\          /|\
+ 1 2 3  b j n        B J N
+
+Tu peux aussi utiliser le pavé numérique avec Verr Num désactivé.
+Courir signifie avancer dans une direction jusqu'à être interrompu. `KEY`g`end` ou `KEY`/`end`, suivi d'une touche de direction, te fait courir de la même façon.
+
+Tu peux aussi jouer à la souris: clique un endroit de la carte pour t'y rendre, clique un monstre pour tirer avec ton arme à distance ou, si tu n'en tiens pas, pour marcher vers lui et l'attaquer au corps à corps. Un clic droit sur toi-même lance un sort qui agit sur toi.
+
+
+`TITLE`Voyage automatique`end`
+
+`KEY`v`end`   voyager vers un lieu du niveau
+`KEY`V`end`   poursuivre le voyage
+
+Tu peux choisir la destination en déplaçant le curseur ou en tapant le symbole de l'élément voulu (par ex. `KEY`_`end` pour un autel). Presser à nouveau la touche déplace le curseur s'il y a plusieurs éléments de ce type sur le niveau. Tu peux ramener le curseur sur ton personnage avec `KEY`@`end`. Une fois la destination choisie, appuie sur ENTRÉE pour te mettre en route. Quand un ennemi entre dans ton champ de vision, le voyage s'interrompt automatiquement; tu peux le reprendre avec `KEY`V`end` dès que l'ennemi a disparu. Chaque fois qu'un curseur de ciblage est affiché — pour voyager comme pour viser un sort ou une attaque à distance — tu peux cliquer une case de la carte pour y placer le curseur, puis cliquer à nouveau pour confirmer.
+
+
+`TITLE`Autres actions`end`
+
+`KEY`a`end`   relancer le dernier sort lancé
+`KEY`A`end`   profaner un autel
+`KEY`c`end`   lancer un sort
+`KEY`C`end`   fermer une porte
+`KEY`d`end`   poser un objet
+`KEY`D`end`   désamorcer un piège
+`KEY`f`end`   tirer avec une arme à distance
+`KEY`F`end`   se laver à une fontaine
+`KEY`g`end`   avancer jusqu'à trouver quelque chose d'intéressant
+`KEY`i`end`   ouvrir la fenêtre d'inventaire
+`KEY`o`end`   ouvrir une porte ou un coffre
+`KEY`p`end`   prier à un autel
+`KEY`P`end`   afficher la situation fiscale
+`KEY`q`end`   boire une potion ou à une fontaine
+`KEY`r`end`   lire un livre ou un parchemin
+`KEY`R`end`   détacher les gemmes d'un trône
+`KEY`s`end`   chercher des pièges
+`KEY`S`end`   s'asseoir sur un trône
+`KEY`t`end`   jeter un objet
+`KEY`T`end`   enlever un objet porté/tenu
+`KEY`w`end`   attendre/se reposer jusqu'à un mobul ou la guérison
+`KEY`W`end`   revêtir/prendre en main un objet
+`KEY`x`end`   échanger l'arme principale et l'arme secondaire
+
+`KEY`<`end`   monter un escalier/puits volcanique
+`KEY`>`end`   descendre un escalier/puits volcanique ou entrer dans un bâtiment
+`KEY`,`end`   ramasser des objets
+`KEY`$`end`   afficher le solde du compte en banque
+`KEY`:`end`   examiner l'endroit où tu te trouves
+`KEY`;`end`   examiner un autre endroit
+`KEY`.`end`   se reposer un tour (autre touche: `KEY`5`end`)
+`KEY`\`end`   afficher la liste des objets identifiés
+`KEY`?`end`   cet écran d'aide (autre touche: `KEY`F1`end`)
+
+
+`TITLE`Touches de contrôle`end`
+
+`KEY`TAB`end`     afficher l'équipement porté
+`KEY`CTRL+A`end`  configurer le ramassage automatique
+`KEY`CTRL+D`end`  lister les lieux remarquables découverts
+`KEY`CTRL+D`end`  page suivante dans l'inventaire, la liste des sorts et les messages
+`KEY`CTRL+L`end`  redessiner l'écran
+`KEY`CTRL+P`end`  configurer les valeurs par défaut des nouvelles parties
+`KEY`CTRL+Q`end`  quitter le jeu
+`KEY`CTRL+R`end`  afficher l'historique des messages
+`KEY`CTRL+S`end`  sauvegarder et quitter le jeu
+`KEY`CTRL+U`end`  page précédente dans l'inventaire, la liste des sorts et les messages
+`KEY`CTRL+V`end`  afficher la version du jeu
+
+
+`TITLE`Le temps du jeu`end`
+Le temps du jeu se compte en `EMPH`tours`end`. En général, faire un pas consomme un tour, mais selon ta vitesse cela peut prendre plus ou moins de temps. La rapidité des autres créatures des cavernes varie aussi énormément. La rumeur parle d'objets magiques capables de modifier la vitesse d'un être animé.
+
+Les actions plus complexes, comme utiliser un objet, consomment plusieurs tours. Chaque fois que tu es occupé un certain temps et que ta santé est menacée, on te propose d'interrompre ton activité. Hélas, tous les tours déjà passés sont perdus.
+
+L'unité de temps larnienne est le `EMPH`mobul`end`. Il vaut cent tours.
+
+
+`TITLE`L'inventaire`end`
+
+En parcourant l'inventaire, les actions valables pour l'objet sélectionné sont affichées en bas de la fenêtre. La touche qui déclenche l'action est indiquée entre parenthèses. Pour sauter au premier objet d'un type, tape le symbole de ce type d'objet. Par exemple, `KEY`!`end` sélectionne la première potion de l'inventaire.
+
+`TITLE`Fenêtres de dialogue`end`
+
+Ferme une fenêtre de dialogue avec `KEY`ENTRÉE`end`/`KEY`ESPACE`end` pour valider une option, ou appuie sur `KEY`ÉCHAP`end` pour la fermer sans rien choisir.
+Tu peux déplacer les fenêtres avec Ctrl et les touches fléchées, ou en faisant glisser leur barre de titre à la souris.
+Les fenêtres à défilement se font défiler avec la molette de la souris ou en cliquant leurs flèches `KEY`^`end` et `KEY`v`end`; maintenir le bouton fait défiler en continu.
+
+
+`TITLE`Lancer des sorts`end`
+
+En ouvrant la fenêtre des sorts avec (`KEY`c`end`), tu obtiens la liste des sorts connus de ton personnage.
+
+`EMPH`La première colonne`end` montre le mnémonique du sort, qui permet de sauter à un sort en tapant ses lettres.
+`EMPH`La deuxième colonne`end` montre le nom du sort.
+`EMPH`La troisième colonne`end` montre le niveau du sort, qui détermine les PM consommés par ce sort.
+`EMPH`La quatrième colonne`end` montre le niveau de connaissance qu'a ton personnage de ce sort. Plus il est élevé, plus l'effet du sort est puissant.
+
+
+`TITLE`Actions du mode magicien`end`
+
+Le mode magicien sert à déboguer le jeu; il est donc impossible de mourir en mode magicien. Tu auras accès à des détails du jeu habituellement cachés. Une fois le mode magicien activé, il n'y a pas de retour en arrière; aucun progrès réalisé en mode magicien n'entrera au tableau des scores.
+En démarrant le jeu avec l'option de ligne de commande du mode magicien (`KEY`-w`end`), tous les objets du jeu sont disponibles en magasin.
+
+`KEY`CTRL+W`end`  activer le mode magicien
+`KEY`+`end`       se téléporter un niveau plus bas
+`KEY`-`end`       se téléporter un niveau plus haut
+`KEY`CTRL+T`end`  se téléporter au sein d'un niveau
+`KEY`CTRL+X`end`  gagner un niveau d'expérience
+`KEY`*`end`       ajouter 1000 po au compte en banque
+`KEY`&`end`       se soigner
+`KEY`CTRL+F`end`  basculer la visibilité complète de la carte
+`KEY`CTRL+C`end`  simulation de combat

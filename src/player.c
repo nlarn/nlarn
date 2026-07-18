@@ -4114,7 +4114,7 @@ void player_throw(player *p)
         return;
     }
 
-    item *it = display_inventory("Choose an item to throw", p, &p->inventory,
+    item *it = display_inventory(_("Choose an item to throw"), p, &p->inventory,
                            NULL, FALSE, FALSE, FALSE, item_filter_throwable);
 
     if (it == NULL)
@@ -4975,7 +4975,7 @@ void calc_fighting_stats(player *p)
             /* file name has been provided. Try to save file */
             if (!g_file_set_contents(filename, text->str, -1, &error))
             {
-                display_show_message("Error", error->message, 0);
+                display_show_message(_("Error"), error->message, 0);
                 g_error_free(error);
             }
 

@@ -3526,12 +3526,10 @@ static char *monster_get_fortune(const char *fortune_file)
 
     if (!fortunes)
     {
-        /* read in the fortunes */
-        char buffer[80];
+        /* Read the entire fortune file at once and split it into lines. */
+        gchar *content = NULL;
 
-        /* open the file */
-        FILE *fortune_fd = fopen(fortune_file, "r");
-        if (fortune_fd == NULL)
+        if (!g_file_get_contents(fortune_file, &content, NULL, NULL))
         {
             /* can't find file */
             return "Help me! I can't find the fortune file!";
@@ -3539,21 +3537,30 @@ static char *monster_get_fortune(const char *fortune_file)
 
         fortunes = g_ptr_array_new();
 
-        /* read in the entire fortune file */
-        while((fgets(buffer, 79, fortune_fd)))
-        {
-            /* replace EOL with \0 */
-            size_t len = (size_t)(strchr(buffer, '\n') - (char *)&buffer);
-            buffer[len] = '\0';
+        char **lines = g_strsplit(content, "\n", -1);
+        g_free(content);
 
-            /* keep the line */
-            char *tmp = g_malloc((len + 1) * sizeof(char));
-            memcpy(tmp, &buffer, (len + 1));
-            g_ptr_array_add(fortunes, tmp);
+        for (guint idx = 0; lines[idx] != NULL; idx++)
+        {
+            /* strip a trailing carriage return (files edited on Windows) */
+            char *line = g_strchomp(lines[idx]);
+
+            /* skip empty lines (e.g. the one after the final newline) */
+            if (line[0] == '\0')
+            {
+                g_free(lines[idx]);
+                continue;
+            }
+
+            g_ptr_array_add(fortunes, line);
         }
 
-        fclose(fortune_fd);
+        /* free the vector, but not the lines - those live in fortunes */
+        g_free(lines);
     }
+
+    if (fortunes->len == 0)
+        return "Help me! The fortune file is empty!";
 
     return g_ptr_array_index(fortunes, rand_0n(fortunes->len));
 }
