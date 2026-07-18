@@ -3599,7 +3599,7 @@ msgstr "%s essaie de voler %s, mais échoue."
 #: src/monsters.c:3494
 #, c-format
 msgid "%s nimbly removes %s and steals it."
-msgstr "%s te retire prestement %s et le vole."
+msgstr "%s te subtilise prestement %s."
 
 #: src/monsters.c:3499
 #, c-format

@@ -3613,7 +3613,7 @@ msgstr "%s versucht, %s zu stehlen, doch es misslingt."
 #: src/monsters.c:3494
 #, c-format
 msgid "%s nimbly removes %s and steals it."
-msgstr "%s entwendet flink %s und stiehlt es."
+msgstr "%s entwendet flink %s und macht sich damit davon."
 
 #: src/monsters.c:3499
 #, c-format
