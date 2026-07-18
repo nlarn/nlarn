@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-18 00:14+0200\n"
+"POT-Creation-Date: 2026-07-18 11:09+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -957,7 +957,7 @@ msgid "Font size (6 - 48): "
 msgstr ""
 
 #: src/config.c:612 src/game.c:115 src/map.c:1958 src/nlarn.c:659
-#: src/player.c:5344 src/player.c:5352 src/player.c:5377
+#: src/player.c:4978 src/player.c:5344 src/player.c:5352 src/player.c:5377
 msgid "Error"
 msgstr ""
 
@@ -3244,7 +3244,7 @@ msgstr ""
 msgid "%s is trapped in the wall!"
 msgstr ""
 
-#: src/monsters.c:2029 src/monsters.c:3961
+#: src/monsters.c:2029 src/monsters.c:3968
 #, c-format
 msgid "%s picks up %s."
 msgstr ""
@@ -3298,7 +3298,7 @@ msgstr ""
 msgid "The gaze is reflected harmlessly."
 msgstr ""
 
-#: src/monsters.c:2398 src/monsters.c:4220 src/weapons.c:460 src/weapons.c:517
+#: src/monsters.c:2398 src/monsters.c:4227 src/weapons.c:460 src/weapons.c:517
 #, c-format
 msgid "%s hits %s."
 msgstr ""
@@ -3308,7 +3308,7 @@ msgstr ""
 msgid "%s misses you."
 msgstr ""
 
-#: src/monsters.c:2415 src/monsters.c:4259 src/spells.c:1919
+#: src/monsters.c:2415 src/monsters.c:4266 src/spells.c:1919
 #, c-format
 msgid "%s hits you!"
 msgstr ""
@@ -3358,7 +3358,7 @@ msgstr ""
 msgid "%s is not affected!"
 msgstr ""
 
-#: src/monsters.c:2707 src/monsters.c:3983
+#: src/monsters.c:2707 src/monsters.c:3990
 #, c-format
 msgid "%s drops %s."
 msgstr ""
@@ -3476,27 +3476,27 @@ msgstr ""
 msgid "%s couldn't find anything to steal."
 msgstr ""
 
-#: src/monsters.c:3694
+#: src/monsters.c:3701
 #, c-format
 msgid "%s vanishes."
 msgstr ""
 
-#: src/monsters.c:4039
+#: src/monsters.c:4046
 #, c-format
 msgid "%s says, \"%s\""
 msgstr ""
 
-#: src/monsters.c:4243 src/spells.c:1901
+#: src/monsters.c:4250 src/spells.c:1901
 #, c-format
 msgid "Your amulet reflects %s!"
 msgstr ""
 
-#: src/monsters.c:4251 src/spells.c:1910
+#: src/monsters.c:4258 src/spells.c:1910
 #, c-format
 msgid "%s whizzes by you!"
 msgstr ""
 
-#: src/monsters.c:4292 src/spells.c:1851
+#: src/monsters.c:4299 src/spells.c:1851
 #, c-format
 msgid "The mirror reflects %s!"
 msgstr ""
@@ -4458,6 +4458,10 @@ msgstr ""
 
 #: src/player.c:4113
 msgid "You have nothing you could throw."
+msgstr ""
+
+#: src/player.c:4117
+msgid "Choose an item to throw"
 msgstr ""
 
 #: src/player.c:4128

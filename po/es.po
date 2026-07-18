@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-18 00:14+0200\n"
+"POT-Creation-Date: 2026-07-18 11:09+0200\n"
 "PO-Revision-Date: 2026-07-08 19:08+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: Spanish\n"
@@ -1056,7 +1056,7 @@ msgid "Font size (6 - 48): "
 msgstr "Tamaño de letra (6 - 48): "
 
 #: src/config.c:612 src/game.c:115 src/map.c:1958 src/nlarn.c:659
-#: src/player.c:5344 src/player.c:5352 src/player.c:5377
+#: src/player.c:4978 src/player.c:5344 src/player.c:5352 src/player.c:5377
 msgid "Error"
 msgstr "Error"
 
@@ -3373,7 +3373,7 @@ msgstr "¡%s se hunde como una piedra!"
 msgid "%s is trapped in the wall!"
 msgstr "¡%s no puede salir de la pared!"
 
-#: src/monsters.c:2029 src/monsters.c:3961
+#: src/monsters.c:2029 src/monsters.c:3968
 #, c-format
 msgid "%s picks up %s."
 msgstr "%s recoge %s."
@@ -3427,7 +3427,7 @@ msgstr "%s te %s."
 msgid "The gaze is reflected harmlessly."
 msgstr "La mirada se refleja sin causar daño."
 
-#: src/monsters.c:2398 src/monsters.c:4220 src/weapons.c:460 src/weapons.c:517
+#: src/monsters.c:2398 src/monsters.c:4227 src/weapons.c:460 src/weapons.c:517
 #, c-format
 msgid "%s hits %s."
 msgstr "%s golpea %s."
@@ -3437,7 +3437,7 @@ msgstr "%s golpea %s."
 msgid "%s misses you."
 msgstr "%s no te acierta."
 
-#: src/monsters.c:2415 src/monsters.c:4259 src/spells.c:1919
+#: src/monsters.c:2415 src/monsters.c:4266 src/spells.c:1919
 #, c-format
 msgid "%s hits you!"
 msgstr "¡%s te golpea!"
@@ -3487,7 +3487,7 @@ msgstr "%s adora el frío."
 msgid "%s is not affected!"
 msgstr "¡%s permanece impasible!"
 
-#: src/monsters.c:2707 src/monsters.c:3983
+#: src/monsters.c:2707 src/monsters.c:3990
 #, c-format
 msgid "%s drops %s."
 msgstr "%s suelta %s."
@@ -3605,27 +3605,27 @@ msgstr "%s te vacía los bolsillos y te roba %s."
 msgid "%s couldn't find anything to steal."
 msgstr "%s no encuentra nada que robar."
 
-#: src/monsters.c:3694
+#: src/monsters.c:3701
 #, c-format
 msgid "%s vanishes."
 msgstr "%s se esfuma."
 
-#: src/monsters.c:4039
+#: src/monsters.c:4046
 #, c-format
 msgid "%s says, \"%s\""
 msgstr "%s dice: «%s»"
 
-#: src/monsters.c:4243 src/spells.c:1901
+#: src/monsters.c:4250 src/spells.c:1901
 #, c-format
 msgid "Your amulet reflects %s!"
 msgstr "¡Tu amuleto refleja %s!"
 
-#: src/monsters.c:4251 src/spells.c:1910
+#: src/monsters.c:4258 src/spells.c:1910
 #, c-format
 msgid "%s whizzes by you!"
 msgstr "¡%s pasa zumbando a tu lado!"
 
-#: src/monsters.c:4292 src/spells.c:1851
+#: src/monsters.c:4299 src/spells.c:1851
 #, c-format
 msgid "The mirror reflects %s!"
 msgstr "¡El espejo refleja %s!"
@@ -4600,6 +4600,10 @@ msgstr "No tienes nada que puedas soltar."
 #: src/player.c:4113
 msgid "You have nothing you could throw."
 msgstr "No tienes nada que puedas lanzar."
+
+#: src/player.c:4117
+msgid "Choose an item to throw"
+msgstr "Elige un objeto para lanzar"
 
 #: src/player.c:4128
 #, c-format
