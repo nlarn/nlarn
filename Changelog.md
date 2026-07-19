@@ -30,7 +30,7 @@
 * Mouse support for the inventory
 * The mouse can be used for targeting spells and ranged weapons
 * Select and activate spells by mouse
-* Scrollable windows can be scrolled with the mouse wheen or by clicking
+* Scrollable windows can be scrolled with the mouse wheel or by clicking
   the arrows
 * Allow dragging windows with the mouse
 
@@ -54,9 +54,8 @@
 
 * Inventory: Allow jumping to first item of type by pressing their glyph
 * Inventory: Separate item types by category headers
-* Add option to pick up all items
-* Add option to get all items from a container
-* Add option to get all items from the stash at home
+* Add option to pick up all items from the floor
+* Add option to get all items from a container and the stash at home
 * Show contents of containers in the obituary (reported by ketarax on Reddit)
 * The bank branch office no longer refuses cooperation with outstanding taxes.
 * Add colour to magic missile ray
@@ -66,7 +65,7 @@
 ### Fixed bugs
 
 * Fix levels displaying off-center on Windows (reported by JustFanTheories69420 on Reddit)
-* Close opened all windows (e.g. the inventory) when player dies
+* Close all opened windows (e.g. the inventory) when the player dies
 * Fix userdir command line parameter (reported by ketarax on Reddit)
 * Highlight keys in colour scheme dialogue
 
