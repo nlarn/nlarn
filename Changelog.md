@@ -33,6 +33,10 @@
 * Scrollable windows can be scrolled with the mouse wheel or by clicking
   the arrows
 * Allow dragging windows with the mouse
+* Add the spell "permanence": permanently bind a known spell to a piece
+  of armour, at the cost of one level of the caster's own knowledge of it
+* Removed the cloak of invisibility and the boots of speed; the same
+  effects can now be created on any armour with the permanence spell
 
 ### Fixed bugs
 

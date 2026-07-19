@@ -304,6 +304,16 @@ static inline int item_filter_weapon(item *it)
 }
 
 /**
+ * @brief Item filter function for the permanence spell.
+ * @param it a pointer to an item
+ * @return true if the item is a piece of armour without an effect bound to it
+ */
+static inline int item_filter_permanence_target(item *it)
+{
+    return (IT_ARMOUR == it->type) && (!it->effects || it->effects->len == 0);
+}
+
+/**
  * @brief Item filter function for the potion of cure dianthroritis.
  * @param it a pointer to an item
  * @return true if the supplied item is the potion of cure dianthroritis

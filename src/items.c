@@ -43,6 +43,19 @@ DEFINE_ENUM(item_t, ITEM_TYPE_ENUM)
 
 static const char *item_desc_get(item *it, int known);
 
+/* reverse lookup: the spell (if any) whose effect matches the given type,
+   used to name armour that was enchanted via the permanence spell */
+static spell_id spell_id_for_effect(effect_t et)
+{
+    for (spell_id sid = 0; sid < SP_MAX; sid++)
+    {
+        if (spells[sid].effect == et)
+            return sid;
+    }
+
+    return SP_MAX;
+}
+
 const item_type_data item_data[IT_MAX] =
 {
     /* item_t       name_sg       name_pl        IMG   max_id           op bl co eq us st id de */
@@ -563,8 +576,24 @@ item *item_deserialize(cJSON *iser, struct game *g)
     it->oid = GUINT_TO_POINTER(oid);
 
     it->type = item_t_value(cJSON_GetObjectItem(iser, "type")->valuestring);
-    it->id = item_enum_value_lookup(it->type,
-            cJSON_GetObjectItem(iser, "id")->valuestring);
+
+    const char *id_str = cJSON_GetObjectItem(iser, "id")->valuestring;
+    it->id = item_enum_value_lookup(it->type, id_str);
+
+    /* Migrate saves from before the boots of speed and the cloak of
+       invisibility were removed in favour of the permanence spell: their
+       armour_t constants no longer exist, so the lookup above silently
+       fell back to id 0. Their bound effect is preserved regardless, as
+       it always lived in the item's "effects" array; only the base
+       armour type needs to be remapped to something that still exists. */
+    if (it->type == IT_ARMOUR)
+    {
+        if (strcmp(id_str, "AT_SPEEDBOOTS") == 0)
+            it->id = AT_LBOOTS;
+        else if (strcmp(id_str, "AT_INVISCLOAK") == 0)
+            it->id = AT_CLOAK;
+    }
+
     it->bonus = cJSON_GetObjectItem(iser, "bonus")->valueint;
     it->count = cJSON_GetObjectItem(iser, "count")->valueint;
 
@@ -789,6 +818,24 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
 
     case IT_ARMOUR:
         g_string_append(desc, item_desc_get(it, known));
+
+        /* a spell permanently bound to the item via the permanence spell
+           carries no identity of its own beyond the effect it granted;
+           the player always knows what they bound, no identification
+           needed */
+        if (it->effects && it->effects->len > 0)
+        {
+            effect *e = game_effect_get(nlarn,
+                    g_ptr_array_index(it->effects, 0));
+            spell_id sid = spell_id_for_effect(e->type);
+
+            if (sid < SP_MAX)
+            {
+                g_string_append_printf(desc, _(" of %s"),
+                        noun_genitive_attribute(spell_name_raw(sid)));
+            }
+        }
+
         show_bonus = it->bonus_known;
         break;
 

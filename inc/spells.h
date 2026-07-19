@@ -75,6 +75,7 @@ typedef enum spell_type
     SPELL_TYPE(SP_SUM,) /* summon demon */ \
     SPELL_TYPE(SP_WTW,) /* walk through walls */ \
     SPELL_TYPE(SP_ALT,) /* alter reality */ \
+    SPELL_TYPE(SP_PMC,) /* permanence */ \
     SPELL_TYPE(SP_MAX,) /* last known spell */
 
 DECLARE_ENUM(spell_id, SPELL_TYPE_ENUM)

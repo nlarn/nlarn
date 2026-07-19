@@ -44,6 +44,8 @@ static bool spell_scare_monsters(spell *s, struct player *p);
 static bool spell_summon_demon(spell *s, struct player *p);
 static bool spell_make_wall(spell *s, struct player *p);
 static bool spell_drain_life(spell *s, struct player *p);
+static bool spell_permanence(spell *s, struct player *p);
+static int spell_filter_permanence_candidate(spell *s);
 
 DEFINE_ENUM(spell_id, SPELL_TYPE_ENUM)
 
@@ -315,6 +317,13 @@ const spell_data spells[SP_MAX] =
         N_("Polinneaus won't let you mess with his caverns!"),
         COLOURLESS, 6, 3800, false, GC_NOM, GC_NOM
     },
+    {
+        SP_PMC, "per", NC_("spell", "permanence"),
+        SC_OTHER, DAM_NONE, ET_NONE, spell_permanence,
+        N_("Permanently binds one of the caster's spells to a piece of equipment"),
+        NULL, NULL,
+        COLOURLESS, 6, 3800, false, GC_NOM, GC_NOM
+    },
 };
 
 struct book_obfuscation_s
@@ -361,10 +370,7 @@ book_obfuscation[SP_MAX] =
     { NC_("book", "ragged"),          800, SMOOTHIE_GREEN,    },
     { NC_("book", "dull"),            800, GRANITE,           },
     { NC_("book", "canvas"),          800, BUTTER,            },
-/*
-    reserve descriptions for unimplemented spells:
-    chambray
-*/
+    { NC_("book", "chambray"),        800, DUSTY_BLUE,        },
 };
 
 /* the last cast spell */
@@ -522,7 +528,7 @@ int spell_cast_new(struct player *p, spell_t type)
     }
 
     /* show spell selection dialogue */
-    last_spell = display_spell_select(_("Select a spell to cast"), p, type);
+    last_spell = display_spell_select(_("Select a spell to cast"), p, type, NULL);
 
     /* player aborted spell selection by pressing ESC */
     if (!last_spell)
@@ -1512,6 +1518,110 @@ bool spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
     return true;
 }
 
+/* offer only the spells the permanence spell may bind to an item */
+static int spell_filter_permanence_candidate(spell *s)
+{
+    switch (s->id)
+    {
+    case SP_HEL:
+    case SP_CPO:
+    case SP_CBL:
+        return false;
+
+    /* a permanent, always-on time stop would freeze the game around the
+       player for good - binding it to an item must never be possible */
+    case SP_STP:
+        return false;
+
+    default:
+        return true;
+    }
+}
+
+static bool spell_permanence(spell *s __attribute__((unused)), struct player *p)
+{
+    g_assert(p != NULL);
+
+    if (inv_length_filtered(p->inventory, item_filter_permanence_target) == 0)
+    {
+        log_add_entry(nlarn->log, _("You don't have anything suitable to enchant."));
+        return false;
+    }
+
+    bool has_candidate = false;
+    for (guint idx = 0; idx < p->known_spells->len; idx++)
+    {
+        spell *known = g_ptr_array_index(p->known_spells, idx);
+        if (spell_type(known) == SC_PLAYER && spell_filter_permanence_candidate(known))
+        {
+            has_candidate = true;
+            break;
+        }
+    }
+
+    if (!has_candidate)
+    {
+        log_add_entry(nlarn->log, _("You don't know a spell suitable for binding."));
+        return false;
+    }
+
+    /* choose the item that shall receive the enchantment */
+    item *it = display_inventory(_("Choose an item to enchant"), p, &p->inventory,
+                                 NULL, false, false, false,
+                                 item_filter_permanence_target);
+
+    if (it == NULL)
+    {
+        log_add_entry(nlarn->log, _("Aborted."));
+        return false;
+    }
+
+    /* choose the spell to bind to it */
+    spell *bound = display_spell_select(_("Choose a spell to bind to it"), p,
+                                        SC_PLAYER, spell_filter_permanence_candidate);
+
+    if (bound == NULL)
+    {
+        log_add_entry(nlarn->log, _("Aborted."));
+        return false;
+    }
+
+    /* description of the item before the enchantment changes its name */
+    gchar *desc = item_describe(it, player_item_known(p, it), false, true);
+
+    /* create the bound effect at the caster's current knowledge of the
+       spell; binding it permanently costs a knowledge level (see below),
+       which is what keeps this from being far too powerful */
+    effect_t et = spell_effect(bound);
+    effect *e = effect_new(et);
+
+    if (effect_type_inc_amount(et))
+        e->amount = effect_type_amount(et) * bound->knowledge;
+
+    item_effect_add(it, e);
+
+    /* if the item is currently worn, the effect takes hold immediately;
+       otherwise it will activate the next time the item is equipped */
+    if (player_item_is_equipped(p, it))
+        player_effect_add(p, e);
+
+    log_add_entry(nlarn->log, _("You bind %s permanently to %s."),
+                 spell_name(bound), desc);
+    g_free(desc);
+
+    /* the caster's own knowledge of the spell is diminished in exchange */
+    bound->knowledge--;
+
+    if (bound->knowledge == 0)
+    {
+        log_add_entry(nlarn->log, _("You have forgotten how to cast %s."),
+                      spell_name(bound));
+
+        g_ptr_array_remove(p->known_spells, bound);
+    }
+
+    return true;
+}
 
 const char *book_desc(spell_id book_id)
 {
