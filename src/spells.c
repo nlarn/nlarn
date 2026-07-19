@@ -489,7 +489,7 @@ static int spell_success_value(player *p, spell *sp)
 }
 
 
-int spell_cast_new(struct player *p, spell_t type)
+int spell_cast_new(struct player *p, spell_t type, int (*filter)(spell *))
 {
     /* check if the player knows any spell */
     if (!p->known_spells || !p->known_spells->len)
@@ -505,15 +505,15 @@ int spell_cast_new(struct player *p, spell_t type)
         return 0;
     }
 
-    /* when filtering by type, make sure the player knows a matching
-       spell, otherwise the selection dialogue would be empty */
-    if (type != SC_MAX)
+    /* when filtering, make sure the player knows a matching spell,
+       otherwise the selection dialogue would be empty */
+    if (type != SC_MAX || filter)
     {
         bool found = false;
         for (guint i = 0; i < p->known_spells->len; i++)
         {
             spell *s = g_ptr_array_index(p->known_spells, i);
-            if (spell_type(s) == type)
+            if ((type == SC_MAX || spell_type(s) == type) && (!filter || filter(s)))
             {
                 found = true;
                 break;
@@ -528,7 +528,7 @@ int spell_cast_new(struct player *p, spell_t type)
     }
 
     /* show spell selection dialogue */
-    last_spell = display_spell_select(_("Select a spell to cast"), p, type, NULL);
+    last_spell = display_spell_select(_("Select a spell to cast"), p, type, filter);
 
     /* player aborted spell selection by pressing ESC */
     if (!last_spell)
@@ -549,7 +549,7 @@ int spell_cast_previous(struct player *p)
     /* not cast any spell before */
     if (!last_spell)
     {
-        return spell_cast_new(p, SC_MAX);
+        return spell_cast_new(p, SC_MAX, NULL);
     }
 
     return spell_cast(p, last_spell);

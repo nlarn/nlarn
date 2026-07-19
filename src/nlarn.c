@@ -702,7 +702,7 @@ static void mainloop()
 
             /* cast a spell */
         case 'c':
-            moves_count = spell_cast_new(nlarn->p, SC_MAX);
+            moves_count = spell_cast_new(nlarn->p, SC_MAX, NULL);
             break;
 
             /* close door */

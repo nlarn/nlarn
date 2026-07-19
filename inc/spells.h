@@ -136,9 +136,11 @@ int spell_sort(gconstpointer a, gconstpointer b);
  * @param p the player
  * @param type restrict the offered spells to this spell type, or pass
  *             SC_MAX to offer all known spells.
+ * @param filter an additional filter function called for every spell that
+ *               matches type, or NULL to offer all of them.
  * @return number of turns elapsed
  */
-int spell_cast_new(struct player *p, spell_t type);
+int spell_cast_new(struct player *p, spell_t type, int (*filter)(spell *));
 
 /**
  * Cast the previous spell again
