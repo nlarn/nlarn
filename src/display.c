@@ -1159,10 +1159,31 @@ static void lss_scroll_to(list_scroll_state *s, inventory **inv,
  *
  * Returns true if the key was a navigation key and was handled, false if the
  * caller should continue processing the key itself. */
+/* Check whether a message catalog is loaded: gettext("") returns the
+   catalog header when a translation is active, and the empty string for
+   the untranslated original. */
+static bool translation_active(void)
+{
+    static int active = -1;
+
+    if (active == -1)
+        active = (gettext("")[0] != '\0');
+
+    return active;
+}
+
 static bool list_handle_scroll_key(list_scroll_state *s, int key,
                                    inventory **inv, int (*ifilter)(item *),
                                    guint visible_category_headers)
 {
+    /* The vi-style letter aliases are only available in the English
+       original: translated dialogues derive their action hotkeys from
+       the translated labels and may legitimately assign these letters
+       (e.g. the German shop's "(k)aufen"), which the aliases would
+       otherwise shadow. */
+    if ((key == 'j' || key == 'k') && translation_active())
+        return false;
+
     switch (key)
     {
     case '7':
