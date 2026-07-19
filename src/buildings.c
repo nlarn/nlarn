@@ -1180,6 +1180,9 @@ int building_monastery(struct player *p)
                 g_free(msg);
                 it->blessed_known = true;
             }
+
+            /* the state change may allow merging with another stack */
+            player_item_remerge(p, it);
             g_free(desc);
 
             building_player_charge(p, price);
@@ -1612,6 +1615,9 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
             log_add_entry(nlarn->log, _("%s has been repaired."), name_nom);
             g_free(name_nom);
             building_player_charge(p, price);
+
+            /* the state change may allow merging with another stack */
+            player_item_remerge(p, it);
 
             p->stats.gold_spent_id_repair += price;
             player_make_move(p, 1, false, NULL);

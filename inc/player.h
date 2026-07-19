@@ -428,6 +428,18 @@ int player_item_identified(player *p, item *it);
 int player_item_not_equipped(item *it);
 char *player_item_identified_list(player *p);
 void player_item_identify(player *p, inventory **inv, item *it);
+
+/**
+ * Merge a stackable item with existing identical stacks in the player's
+ * inventory. Call this after an item's state has changed (e.g. it was
+ * identified, uncursed or blessed), as the change may have made
+ * previously distinct stacks identical. The passed item survives; any
+ * matching stack is folded into it.
+ *
+ * @param p the player
+ * @param it the item whose state has changed
+ */
+void player_item_remerge(player *p, item *it);
 void player_item_use(player *p, inventory **inv, item *it);
 void player_item_throw(player *p, inventory **inv, item *it);
 void player_item_destroy(player *p, item *it);

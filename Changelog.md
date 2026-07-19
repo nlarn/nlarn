@@ -36,6 +36,7 @@
 
 ### Fixed bugs
 
+* Stack identical items after identification
 * Finger of death was utterly unbalanced
 * Cold resistance was extremely unbalanced
 * Polymorph was thoroughly unbalanced

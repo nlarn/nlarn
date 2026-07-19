@@ -840,6 +840,7 @@ static int scroll_remove_curse(player *p, item *r_scroll)
             g_free(buf);
 
             item_remove_curse(it);
+            player_item_remerge(p, it);
         }
     }
     else
@@ -866,6 +867,7 @@ static int scroll_remove_curse(player *p, item *r_scroll)
 
             g_free(buf);
             item_remove_curse(it);
+            player_item_remerge(p, it);
         }
     }
 

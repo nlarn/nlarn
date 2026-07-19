@@ -3682,6 +3682,62 @@ void player_item_identify(player *p, inventory **inv __attribute__((unused)), it
 
     it->blessed_known = true;
     it->bonus_known = true;
+
+    /* the gained knowledge may render the item identical to another
+       stack in the pack */
+    player_item_remerge(p, it);
+}
+
+void player_item_remerge(player *p, item *it)
+{
+    g_assert(p != NULL && it != NULL);
+
+    if (!item_is_stackable(it->type))
+        return;
+
+    /* State changes may also affect items that are not in the player's
+       pack (e.g. a freshly created or a dropped item); only merge stacks
+       within the pack. */
+    bool present = false;
+
+    for (guint idx = 0; idx < inv_length(p->inventory); idx++)
+    {
+        if (inv_get(p->inventory, idx) == it)
+        {
+            present = true;
+            break;
+        }
+    }
+
+    if (!present)
+        return;
+
+    for (guint idx = 0; idx < inv_length(p->inventory); )
+    {
+        item *other = inv_get(p->inventory, idx);
+
+        if (other != it && item_compare(other, it))
+        {
+            /* Fold the other stack into the changed item, which the
+               caller may continue to use. Ammunition is the only
+               stackable equipment - the quiver may reference the
+               vanishing stack. */
+            it->count += other->count;
+
+            if (p->eq_quiver == other)
+                p->eq_quiver = it;
+
+            inv_del_element(&p->inventory, other);
+            item_destroy(other);
+
+            /* the removed entry is replaced by its successor - do not
+               advance the index */
+        }
+        else
+        {
+            idx++;
+        }
+    }
 }
 
 void player_item_use(player *p, inventory **inv __attribute__((unused)), item *it)

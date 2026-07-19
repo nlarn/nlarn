@@ -464,6 +464,9 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
                               "already blessed."), buf);
 
             g_free(buf);
+
+            /* the gained knowledge may allow merging with another stack */
+            player_item_remerge(p, it);
             return true;
         }
 
@@ -479,6 +482,9 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
             it->cursed = false;
         else if (!it->blessed)
             it->blessed = true;
+
+        /* the state change may allow merging with another stack */
+        player_item_remerge(p, it);
 
         return true;
     }
