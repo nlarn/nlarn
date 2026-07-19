@@ -4221,7 +4221,7 @@ msgstr "Auf dem Boden"
 #: src/player.c:1777
 #, c-format
 msgid "`KEY`You gain experience and become %s %s!`end`"
-msgstr "`KEY`Du sammelst Erfahrung und wirst %s %s!`end`"
+msgstr "`KEY`Du sammelst Erfahrung und wirst %2$s!`end`%1$.0s"
 
 #: src/player.c:1782
 msgid "You gain experience!"
