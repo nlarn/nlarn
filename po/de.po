@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-19 18:28+0200\n"
+"POT-Creation-Date: 2026-07-19 19:08+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -3455,7 +3455,7 @@ msgstr "%s trifft %s."
 msgid "%s misses you."
 msgstr "%s verfehlt dich."
 
-#: src/monsters.c:2415 src/monsters.c:4266 src/spells.c:2024
+#: src/monsters.c:2415 src/monsters.c:4266 src/spells.c:2044
 #, c-format
 msgid "%s hits you!"
 msgstr "%s trifft dich!"
@@ -3589,7 +3589,7 @@ msgid "You feel a sense of loss."
 msgstr "Dich überkommt ein Gefühl des Verlusts."
 
 #: src/monsters.c:3403 src/scrolls.c:257 src/scrolls.c:723 src/scrolls.c:817
-#: src/scrolls.c:857 src/spells.c:1136 src/spells.c:1853 src/spells.c:1867
+#: src/scrolls.c:857 src/spells.c:1136 src/spells.c:1873 src/spells.c:1887
 msgid "Nothing happens."
 msgstr "Nichts geschieht."
 
@@ -3633,17 +3633,17 @@ msgstr "%s verschwindet."
 msgid "%s says, \"%s\""
 msgstr "%s sagt: „%s“"
 
-#: src/monsters.c:4250 src/spells.c:2006
+#: src/monsters.c:4250 src/spells.c:2026
 #, c-format
 msgid "Your amulet reflects %s!"
 msgstr "Dein Amulett reflektiert %s!"
 
-#: src/monsters.c:4258 src/spells.c:2015
+#: src/monsters.c:4258 src/spells.c:2035
 #, c-format
 msgid "%s whizzes by you!"
 msgstr "%s zischt an dir vorbei!"
 
-#: src/monsters.c:4299 src/spells.c:1956
+#: src/monsters.c:4299 src/spells.c:1976
 #, c-format
 msgid "The mirror reflects %s!"
 msgstr "Der Spiegel reflektiert %s!"
@@ -3700,7 +3700,7 @@ msgstr "Wähle ein Reiseziel."
 
 #: src/nlarn.c:906 src/player.c:3836 src/spells.c:753 src/spells.c:930
 #: src/spells.c:994 src/spells.c:1030 src/spells.c:1070 src/spells.c:1084
-#: src/spells.c:1570 src/spells.c:1580
+#: src/spells.c:1575 src/spells.c:1585
 msgid "Aborted."
 msgstr "Abgebrochen."
 
@@ -5435,7 +5435,7 @@ msgctxt "scroll"
 msgid "genocide monster"
 msgstr "f:Monsterausrottung"
 
-#: src/scrolls.c:121 src/spells.c:1648
+#: src/scrolls.c:121 src/spells.c:1668
 #, c-format
 msgid "As you are blind you can't read %s."
 msgstr "Da du blind bist, kannst du %s nicht lesen."
@@ -5449,7 +5449,7 @@ msgstr "Du liest diese verfluchte Schriftrolle lieber nicht."
 msgid "You read %s."
 msgstr "Du liest %s."
 
-#: src/scrolls.c:138 src/spells.c:1669
+#: src/scrolls.c:138 src/spells.c:1689
 #, c-format
 msgid "reading %s"
 msgstr "%s zu lesen"
@@ -6843,94 +6843,104 @@ msgstr "Du hast dich also entschieden, nichts zu verdampfen."
 msgid "%s can't be vaporized."
 msgstr "%s lässt sich nicht verdampfen."
 
-#: src/spells.c:1542
+#: src/spells.c:1547
 msgid "You don't have anything suitable to enchant."
 msgstr "Du hast nichts, was du verzaubern könntest."
 
-#: src/spells.c:1559
+#: src/spells.c:1564
 msgid "You don't know a spell suitable for binding."
 msgstr "Du kennst keinen zum Binden geeigneten Zauberspruch."
 
-#: src/spells.c:1564
+#: src/spells.c:1569
 msgid "Choose an item to enchant"
 msgstr "Wähle einen Gegenstand zum Verzaubern"
 
-#: src/spells.c:1575
+#: src/spells.c:1580
 msgid "Choose a spell to bind to it"
 msgstr "Wähle einen Zauberspruch zum Binden"
 
-#: src/spells.c:1603
+#: src/spells.c:1608
 #, c-format
 msgid "You bind %s permanently to %s."
 msgstr "Du bindest %s dauerhaft an %s."
 
-#: src/spells.c:1612
+#: src/spells.c:1617
 #, c-format
 msgid "You have forgotten how to cast %s."
 msgstr "Du hast verlernt, %s zu zaubern."
 
-#: src/spells.c:1657
+#: src/spells.c:1631
+msgctxt "spell"
+msgid "speed"
+msgstr "f:Eile"
+
+#: src/spells.c:1634
+msgctxt "spell"
+msgid "wall-walking"
+msgstr "f:Wanddurchquerung"
+
+#: src/spells.c:1677
 msgid "You'd rather not read this cursed book."
 msgstr "Du liest dieses verfluchte Buch lieber nicht."
 
-#: src/spells.c:1662
+#: src/spells.c:1682
 #, c-format
 msgid "You start reading %s."
 msgstr "Du beginnst, %s zu lesen."
 
-#: src/spells.c:1684
+#: src/spells.c:1704
 msgid "There was something wrong with this book! It crumbles to dust."
 msgstr "Mit diesem Buch stimmte etwas nicht! Es zerfällt zu Staub."
 
-#: src/spells.c:1695
+#: src/spells.c:1715
 msgid "You cannot understand the content of this book."
 msgstr "Du verstehst den Inhalt dieses Buches nicht."
 
-#: src/spells.c:1698
+#: src/spells.c:1718
 msgid "It seems really boring, though."
 msgstr "Es wirkt allerdings wirklich langweilig."
 
-#: src/spells.c:1703
+#: src/spells.c:1723
 #, c-format
 msgid "You master the spell %s."
 msgstr "Du lernst den Zauber %s."
 
-#: src/spells.c:1712
+#: src/spells.c:1732
 #, c-format
 msgid "You improved your knowledge of the spell %s."
 msgstr "Du vermehrst dein Wissen über den Zauber %s."
 
-#: src/spells.c:1723
+#: src/spells.c:1743
 msgid "Reading makes you ingenious."
 msgstr "Lesen macht dich genial."
 
-#: src/spells.c:1739
+#: src/spells.c:1759
 #, c-format
 msgid "You lack the power to cast %s."
 msgstr "Dir fehlt die Energie, um %s zu zaubern."
 
-#: src/spells.c:1746
+#: src/spells.c:1766
 msgid "This spell is too difficult for you."
 msgstr "Dieser Zauber ist zu schwierig für dich."
 
-#: src/spells.c:1750
+#: src/spells.c:1770
 #, c-format
 msgid "You cast %s."
 msgstr "Du zauberst %s."
 
-#: src/spells.c:1758
+#: src/spells.c:1778
 msgid "It didn't work!"
 msgstr "Es hat nicht funktioniert!"
 
-#: src/spells.c:1789
+#: src/spells.c:1809
 msgid "You think you've hit something."
 msgstr "Du glaubst, etwas getroffen zu haben."
 
-#: src/spells.c:1858
+#: src/spells.c:1878
 msgid "The water is more shallow now."
 msgstr "Das Wasser ist jetzt flacher."
 
-#: src/spells.c:1879
+#: src/spells.c:1899
 msgid "The water evaporates!"
 msgstr "Das Wasser verdampft!"
 

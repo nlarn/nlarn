@@ -1623,6 +1623,21 @@ static bool spell_permanence(spell *s __attribute__((unused)), struct player *p)
     return true;
 }
 
+const char *spell_enchantment_name_raw(spell_id id)
+{
+    switch (id)
+    {
+    case SP_HAS:
+        return g_dpgettext2(NULL, "spell", NC_("spell", "speed"));
+
+    case SP_WTW:
+        return g_dpgettext2(NULL, "spell", NC_("spell", "wall-walking"));
+
+    default:
+        return spell_name_raw(id);
+    }
+}
+
 const char *book_desc(spell_id book_id)
 {
     g_assert(book_id < SP_MAX);

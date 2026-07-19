@@ -792,6 +792,14 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
     /* append the bonus after the noun phrase has been built */
     bool show_bonus = false;
 
+    /* a permanence-bound spell's "of %s" suffix must also be appended
+       after the noun phrase has been resolved: item_desc_get() may return
+       multi-form grammar metadata (e.g. "pair of gloves" needs separate
+       singular/plural declensions), and gluing the suffix onto the raw,
+       unresolved metadata string would land it in the wrong form and
+       silently drop it from the one actually selected for display */
+    gchar *enchant_suffix = NULL;
+
     switch (it->type)
     {
     case IT_AMULET:
@@ -831,8 +839,8 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
 
             if (sid < SP_MAX)
             {
-                g_string_append_printf(desc, _(" of %s"),
-                        noun_genitive_attribute(spell_name_raw(sid)));
+                enchant_suffix = g_strdup_printf(_(" of %s"),
+                        noun_genitive_attribute(spell_enchantment_name_raw(sid)));
             }
         }
 
@@ -1031,6 +1039,12 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
     else if (show_bonus)
     {
         g_string_append_printf(desc, " %+d", it->bonus);
+    }
+
+    if (enchant_suffix)
+    {
+        g_string_append(desc, enchant_suffix);
+        g_free(enchant_suffix);
     }
 
     if (it->notes)

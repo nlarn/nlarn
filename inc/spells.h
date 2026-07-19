@@ -188,6 +188,18 @@ static inline const char *spell_gettext(const char *msg)
    grammar.h), so the name is stripped for stand-alone display. */
 #define spell_name_raw(id)    (g_dpgettext2(NULL, "spell", spells[(id)].name))
 
+/**
+ * The noun used to name an item permanently enchanted with this spell via
+ * the permanence spell (e.g. "boots of %s"). Distinct from spell_name_raw()
+ * for the few spells whose casting-menu name doesn't read as a noun (e.g.
+ * "haste self" -> "speed", matching the classic "boots of speed"); every
+ * other spell just reuses its own name.
+ *
+ * @param id the spell ID
+ * @return the (possibly translated) enchantment noun
+ */
+const char *spell_enchantment_name_raw(spell_id id);
+
 #define spell_code(spell)     (spells[(spell)->id].code)
 #define spell_name(spell)     (noun_phrase(spell_name_raw((spell)->id), \
                                            ART_NONE, GC_NOM, false, false))
