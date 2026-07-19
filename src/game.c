@@ -686,10 +686,14 @@ static bool game_load()
     for (int idx = 0; idx < size; idx++)
         nlarn->amulet_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
+    /* armour_t may shrink when unique armour types are removed (e.g. the
+       boots of speed and the cloak of invisibility, superseded by the
+       permanence spell); saves from before that only fit the entries that
+       still exist, ignore the rest instead of asserting on a size that no
+       longer matches. */
     obj = cJSON_GetObjectItem(save, "armour_created");
     size = cJSON_GetArraySize(obj);
-    g_assert(size == AT_MAX);
-    for (int idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size && idx < AT_MAX; idx++)
         nlarn->armour_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
     obj = cJSON_GetObjectItem(save, "weapon_created");
@@ -726,11 +730,18 @@ static bool game_load()
     for (int idx = 0; idx < size; idx++)
         nlarn->scroll_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
+    /* book_desc_mapping is a permutation of book_obfuscation indices, one
+       per spell_id; spell_id may grow when a new spell is added (e.g.
+       permanence). Saves from before only cover the spells that existed
+       then - fill any newly added spell with its own book_obfuscation
+       slot (identity mapping) so the permutation stays a bijection,
+       instead of asserting on a size that no longer matches. */
     obj = cJSON_GetObjectItem(save, "book_desc_mapping");
     size = cJSON_GetArraySize(obj);
-    g_assert(size == SP_MAX);
-    for (int idx = 0; idx < size; idx++)
+    for (int idx = 0; idx < size && idx < SP_MAX; idx++)
         nlarn->book_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+    for (int idx = size; idx < SP_MAX; idx++)
+        nlarn->book_desc_mapping[idx] = idx;
 
     obj = cJSON_GetObjectItem(save, "monster_genocided");
     size = cJSON_GetArraySize(obj);
