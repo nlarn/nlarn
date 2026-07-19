@@ -1,0 +1,117 @@
+`TITLE`Movimentos`end`         `TITLE`Corrida`end`
+
+ 7 8 9  y k u        Y K U
+  \|/    \|/          \|/
+ 4-5-6  h-.-l        H- -L
+  /|\    /|\          /|\
+ 1 2 3  b j n        B J N
+
+Também podes usar o teclado numérico com o Num Lock desligado.
+Correr significa avançar numa direção até seres interrompido. `KEY`g`end` ou `KEY`/`end`, seguido de uma tecla de direção, fazem-te correr da mesma forma.
+
+Também podes jogar com o rato: clica num ponto do mapa para viajares até lá, clica num monstro para disparares a tua arma à distância ou, se não empunhares nenhuma, para marchares sobre ele e o atacares corpo a corpo. Um clique direito sobre ti próprio lança um feitiço que age sobre ti.
+
+
+`TITLE`Viagem automática`end`
+
+`KEY`v`end`   viajar para um lugar do nível
+`KEY`V`end`   retomar a viagem
+
+Podes escolher o destino movendo o cursor ou escrevendo o símbolo do elemento pretendido (por ex. `KEY`_`end` para um altar). Premir de novo a tecla desloca o cursor se houver mais do que um elemento desse tipo no nível. Podes devolver o cursor à tua personagem com `KEY`@`end`. Quando terminares, prime ENTER para te pores a caminho. Quando um inimigo entrar no teu campo de visão, a viagem é interrompida automaticamente; podes retomá-la com `KEY`V`end` assim que o inimigo desaparecer de vista. Sempre que um cursor de mira estiver visível — tanto para viajar como para apontar feitiços e ataques à distância — podes clicar numa casa do mapa para mover o cursor para lá, e clicar de novo para confirmar.
+
+
+`TITLE`Outras ações`end`
+
+`KEY`a`end`   voltar a lançar o último feitiço lançado
+`KEY`A`end`   profanar um altar
+`KEY`c`end`   lançar um feitiço
+`KEY`C`end`   fechar uma porta
+`KEY`d`end`   pousar um objeto
+`KEY`D`end`   desativar uma armadilha
+`KEY`f`end`   disparar uma arma à distância
+`KEY`F`end`   lavares-te numa fonte
+`KEY`g`end`   avançar até encontrar algo de interessante
+`KEY`i`end`   abrir a janela do inventário
+`KEY`o`end`   abrir uma porta ou uma arca
+`KEY`p`end`   orar num altar
+`KEY`P`end`   mostrar a situação fiscal
+`KEY`q`end`   beber uma poção ou de uma fonte
+`KEY`r`end`   ler um livro ou um pergaminho
+`KEY`R`end`   arrancar as gemas de um trono
+`KEY`s`end`   procurar armadilhas
+`KEY`S`end`   sentares-te num trono
+`KEY`t`end`   lançar um objeto
+`KEY`T`end`   despir/largar um objeto envergado/empunhado
+`KEY`w`end`   esperar/repousar até um mobul ou até à cura
+`KEY`W`end`   vestir/empunhar um objeto
+`KEY`x`end`   trocar a arma principal pela secundária
+
+`KEY`<`end`   subir uma escada/poço vulcânico
+`KEY`>`end`   descer uma escada/poço vulcânico ou entrar num edifício
+`KEY`,`end`   apanhar objetos
+`KEY`$`end`   mostrar o saldo da conta bancária
+`KEY`:`end`   examinar o lugar onde te encontras
+`KEY`;`end`   examinar outro lugar
+`KEY`.`end`   repousar um turno (tecla alternativa: `KEY`5`end`)
+`KEY`\`end`   mostrar a lista dos objetos identificados
+`KEY`?`end`   este ecrã de ajuda (tecla alternativa: `KEY`F1`end`)
+
+
+`TITLE`Teclas de controlo`end`
+
+`KEY`TAB`end`     mostrar o equipamento envergado
+`KEY`CTRL+A`end`  configurar a apanha automática
+`KEY`CTRL+D`end`  listar os pontos de interesse descobertos
+`KEY`CTRL+D`end`  página seguinte no inventário, na lista de feitiços e nas mensagens
+`KEY`CTRL+L`end`  redesenhar o ecrã
+`KEY`CTRL+P`end`  configurar as predefinições de novos jogos
+`KEY`CTRL+Q`end`  sair do jogo
+`KEY`CTRL+R`end`  mostrar o histórico de mensagens
+`KEY`CTRL+S`end`  gravar e sair do jogo
+`KEY`CTRL+U`end`  página anterior no inventário, na lista de feitiços e nas mensagens
+`KEY`CTRL+V`end`  mostrar a versão do jogo
+
+
+`TITLE`O tempo do jogo`end`
+O tempo do jogo conta-se em `EMPH`turnos`end`. Normalmente, dar um passo consome um turno, mas, conforme a tua velocidade, pode demorar mais ou menos tempo. A rapidez das outras criaturas das cavernas também varia imenso. Corre o boato de que existem objetos mágicos capazes de alterar a velocidade de um ser animado.
+
+As ações mais complexas, como usar um objeto, consomem vários turnos. Sempre que estiveres ocupado durante algum tempo e a tua saúde correr perigo, é-te proposto interromper a atividade em curso. Infelizmente, todos os turnos já gastos ficam perdidos.
+
+A unidade de tempo larniana é o `EMPH`mobul`end`. Equivale a cem turnos.
+
+
+`TITLE`O inventário`end`
+
+Ao percorrer o inventário, as ações válidas para o objeto selecionado aparecem no fundo da janela. A tecla que aciona a ação é indicada entre parênteses. Para saltares para o primeiro objeto de um tipo, escreve o símbolo desse tipo de objeto. Por exemplo, `KEY`!`end` seleciona a primeira poção do inventário.
+
+`TITLE`Janelas de diálogo`end`
+
+Fecha uma janela de diálogo com `KEY`ENTER`end`/`KEY`ESPAÇO`end` para confirmares uma opção, ou prime `KEY`ESC`end` para a fechares sem escolher nada.
+Podes mover as janelas com Ctrl e as teclas de setas, ou arrastando a barra de título com o rato.
+As janelas com deslocamento rolam com a roda do rato ou clicando nas setas `KEY`^`end` e `KEY`v`end`; manter o botão premido continua a rolar.
+
+
+`TITLE`Lançar feitiços`end`
+
+Ao abrires a janela de feitiços com (`KEY`c`end`), obténs a lista dos feitiços que a tua personagem conhece.
+
+`EMPH`A primeira coluna`end` mostra a mnemónica do feitiço, que permite saltar para um feitiço escrevendo as suas letras.
+`EMPH`A segunda coluna`end` mostra o nome do feitiço.
+`EMPH`A terceira coluna`end` mostra o nível do feitiço, que determina os PM consumidos por esse feitiço.
+`EMPH`A quarta coluna`end` mostra o nível de conhecimento que a tua personagem tem desse feitiço. Quanto mais alto for, mais poderoso é o efeito do feitiço.
+
+
+`TITLE`Ações do modo mago`end`
+
+O modo mago serve para depurar o jogo; por isso, é impossível morrer no modo mago. Terás acesso a pormenores do jogo habitualmente escondidos. Uma vez ativado o modo mago, não há volta atrás; nenhum progresso feito no modo mago entrará na lista de pontuações.
+Ao iniciar o jogo com a opção de linha de comandos do modo mago (`KEY`-w`end`), todos os objetos do jogo ficam disponíveis na loja.
+
+`KEY`CTRL+W`end`  ativar o modo mago
+`KEY`+`end`       teletransportar-te um nível para baixo
+`KEY`-`end`       teletransportar-te um nível para cima
+`KEY`CTRL+T`end`  teletransportar-te dentro de um nível
+`KEY`CTRL+X`end`  subir um nível de experiência
+`KEY`*`end`       somar 1000 mo à conta bancária
+`KEY`&`end`       curares-te
+`KEY`CTRL+F`end`  alternar a visibilidade completa do mapa
+`KEY`CTRL+C`end`  simulação de combate
