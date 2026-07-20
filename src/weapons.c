@@ -460,7 +460,8 @@ static bool weapon_pos_hit(const GList *traj,
                 log_add_entry(nlarn->log, _("%s hits %s."),
                         adesc, monster_name_art(m, ART_DEF, GC_ACC, false));
 
-            monster_damage_take(m, dam);
+            /* the monster may not survive this hit */
+            m = monster_damage_take(m, dam);
 
             ammo_handled = weapon_ammo_drop(cmap, ammo, traj);
             retval = true;
@@ -519,7 +520,8 @@ bool weapon_throw_pos_hit(const GList *traj,
 
             damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, weapon_damage(weapon),
                                      DAMO_PLAYER, nlarn->p);
-            monster_damage_take(m, dam);
+            /* the monster may not survive this hit */
+            m = monster_damage_take(m, dam);
 
             weapon_handled = weapon_ammo_drop(cmap, weapon, traj);
             retval = weapon_handled;
