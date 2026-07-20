@@ -3641,7 +3641,7 @@ static bool monster_has_clear_shot(monster *m, player *p)
     if (m->eq_weapon == NULL || !weapon_is_ranged(m->eq_weapon))
         return false;
 
-    if (m->lastseen != 1 || pos_adjacent(monster_pos(m), m->player_pos))
+    if (!monster_player_visible(m) || pos_adjacent(monster_pos(m), p->pos))
         return false;
 
     /* ammo check */
