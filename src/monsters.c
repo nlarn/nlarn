@@ -2453,6 +2453,10 @@ int monster_player_ranged_attack(monster *m, player *p)
         if (ammo_item == NULL)
             return false;
 
+        /* no ranged weapon equipped (e.g. lost in a metamorphosis) */
+        if (m->eq_weapon == NULL)
+            return false;
+
         if (!player_effect(p, ET_BLINDNESS))
         {
             if (ammo_item)
@@ -2472,7 +2476,9 @@ int monster_player_ranged_attack(monster *m, player *p)
         wchar_t glyph = item_glyph(IT_AMMO);
         colour_t traj_colour = ammo_item ? item_colour(ammo_item) : WHITE;
 
-        int amount = att.base + rand_0n(monster_level(m) + 1)
+        /* damage comes from the equipped weapon and ammunition */
+        int amount = weapon_damage(m->eq_weapon) + ammo_damage(ammo_item)
+                     + rand_0n(monster_level(m) + 1)
                      + game_difficulty(nlarn);
         damage *dam = damage_new(DAM_PHYSICAL, ATT_SHOOT, amount,
                                  DAMO_MONSTER, m);
