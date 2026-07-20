@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-19 19:08+0200\n"
+"POT-Creation-Date: 2026-07-20 18:36+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1086,71 +1086,71 @@ msgstr ""
 msgid "You are engulfed in a cloud of dust!"
 msgstr ""
 
-#: src/context.c:310
+#: src/context.c:317
 msgid "`KEY`g`end`)o here"
 msgstr ""
 
-#: src/context.c:311
+#: src/context.c:318
 msgid "`KEY`a`end`)ttack"
 msgstr ""
 
-#: src/context.c:312
+#: src/context.c:319
 msgid "`KEY`a`end`)pproach"
 msgstr ""
 
-#: src/context.c:313
+#: src/context.c:320
 msgid "`KEY`f`end`)ire weapon"
 msgstr ""
 
-#: src/context.c:314
+#: src/context.c:321
 msgid "`KEY`t`end`)hrow item"
 msgstr ""
 
-#: src/context.c:315
+#: src/context.c:322
 msgid "`KEY`c`end`)ast a spell"
 msgstr ""
 
-#: src/context.c:316
+#: src/context.c:323
 msgid "go `KEY`d`end`)own"
 msgstr ""
 
-#: src/context.c:317
+#: src/context.c:324
 msgid "go `KEY`u`end`)p"
 msgstr ""
 
-#: src/context.c:318
+#: src/context.c:325
 msgid "`KEY`e`end`)nter"
 msgstr ""
 
-#: src/context.c:319
+#: src/context.c:326
 msgid "`KEY`d`end`)rink from fountain"
 msgstr ""
 
-#: src/context.c:320
+#: src/context.c:327
 msgid "`KEY`w`end`)ash at fountain"
 msgstr ""
 
-#: src/context.c:321
+#: src/context.c:328
 msgid "`KEY`p`end`)ray at altar"
 msgstr ""
 
-#: src/context.c:322
+#: src/context.c:329
 msgid "desecrate the altar (`KEY`x`end`)"
 msgstr ""
 
-#: src/context.c:323
+#: src/context.c:330
 msgid "`KEY`s`end`)it on throne"
 msgstr ""
 
-#: src/context.c:324
+#: src/context.c:331
 msgid "`KEY`p`end`)illage throne"
 msgstr ""
 
-#: src/context.c:325
+#: src/context.c:332
 msgid "`KEY`r`end`)est here"
 msgstr ""
 
-#: src/context.c:356
+#: src/context.c:363
 msgid "There is nothing to do here."
 msgstr ""
 
@@ -3296,7 +3296,7 @@ msgstr ""
 msgid "The gaze is reflected harmlessly."
 msgstr ""
 
-#: src/monsters.c:2398 src/monsters.c:4227 src/weapons.c:460 src/weapons.c:517
+#: src/monsters.c:2398 src/monsters.c:4227 src/weapons.c:460 src/weapons.c:531
 #, c-format
 msgid "%s hits %s."
 msgstr ""
@@ -3306,7 +3306,7 @@ msgstr ""
 msgid "%s misses you."
 msgstr ""
 
-#: src/monsters.c:2415 src/monsters.c:4266 src/spells.c:2044
+#: src/monsters.c:2415 src/monsters.c:4266 src/spells.c:2044 src/weapons.c:488
 #, c-format
 msgid "%s hits you!"
 msgstr ""
@@ -3489,7 +3489,7 @@ msgstr ""
 msgid "Your amulet reflects %s!"
 msgstr ""
 
-#: src/monsters.c:4258 src/spells.c:2035
+#: src/monsters.c:4258 src/spells.c:2035 src/weapons.c:482
 #, c-format
 msgid "%s whizzes by you!"
 msgstr ""
@@ -5099,25 +5099,33 @@ msgstr ""
 msgid " by falling down a staircase."
 msgstr ""
 
-#: src/scoreboard.c:467
+#: src/scoreboard.c:458
+msgid " by his own ricocheting shot."
+msgstr ""
+
+#: src/scoreboard.c:459
+msgid " by her own ricocheting shot."
+msgstr ""
+
+#: src/scoreboard.c:473
 #, c-format
 msgid " He has scored %s points, with the difficulty set to %d."
 msgstr ""
 
-#: src/scoreboard.c:469
+#: src/scoreboard.c:475
 #, c-format
 msgid " She has scored %s points, with the difficulty set to %d."
 msgstr ""
 
-#: src/scoreboard.c:511
+#: src/scoreboard.c:517
 msgid "volcano lvl. "
 msgstr ""
 
-#: src/scoreboard.c:513
+#: src/scoreboard.c:519
 msgid "caverns lvl. "
 msgstr ""
 
-#: src/scoreboard.c:515
+#: src/scoreboard.c:521
 #, c-format
 msgid "            [exp. level %d, %s%s, %d/%d hp, difficulty %d]%s\n"
 msgstr ""
@@ -7229,7 +7237,7 @@ msgstr ""
 msgid "cursed"
 msgstr ""
 
-#: src/weapons.c:472 src/weapons.c:530
+#: src/weapons.c:473 src/weapons.c:545
 #, c-format
 msgid "%s misses %s."
 msgstr ""

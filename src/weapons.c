@@ -476,8 +476,21 @@ static bool weapon_pos_hit(const GList *traj,
     }
     else if (pos_identical(nlarn->p->pos, cpos))
     {
-        /* The bullet may hit the player */
-        /* TODO: implement */
+        /* the shot may hit the player (e.g. reflected back at them) */
+        if (player_evade(nlarn->p))
+        {
+            log_add_entry(nlarn->log, _("%s whizzes by you!"), adesc);
+        }
+        else
+        {
+            damage *dam = weapon_get_ranged_damage(nlarn->p, weapon, ammo);
+
+            log_add_entry(nlarn->log, _("%s hits you!"), adesc);
+            player_damage_take(nlarn->p, dam, PD_RICOCHET, 0);
+
+            ammo_handled = weapon_ammo_drop(cmap, ammo, traj);
+            retval = true;
+        }
     }
 
     if (!ammo_handled && !map_pos_transparent(cmap, cpos))
