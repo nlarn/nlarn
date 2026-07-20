@@ -135,6 +135,19 @@ bool weapon_throw_pos_hit(const GList *traj, const damage_originator *damo,
     gpointer data1, gpointer data2);
 
 /**
+ * Trajectory hit callback shared by the player's and monsters' ranged
+ * attacks: rolls to hit, deals damage of the appropriate type (an
+ * unconditional hit when a monster's shot passes through another
+ * monster's square), and drops or destroys the spent ammunition exactly
+ * like a player-fired shot would.
+ *
+ * @param data1 the shooter's weapon (item*)
+ * @param data2 the single piece of ammunition being fired (item*)
+ */
+bool weapon_shoot_hit(const GList *traj, const damage_originator *damo,
+    gpointer data1, gpointer data2);
+
+/**
  * @brief Return a shortened description of a given weapon
  *
  * @param weapon a weapon

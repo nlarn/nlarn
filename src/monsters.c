@@ -784,9 +784,6 @@ static position monster_engage_or_approach(monster *m, monster *target);
 static bool monster_breath_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
-static bool monster_shoot_hit(const GList *traj,
-        const damage_originator *damo,
-        gpointer data1, gpointer data2);
 
 monster *monster_new(monster_t type, position pos, gpointer leader)
 {
@@ -2377,53 +2374,6 @@ void monster_player_attack(monster *m, player *p)
     }
 }
 
-static bool monster_shoot_hit(const GList *traj,
-                              const damage_originator *damo,
-                              gpointer data1,
-                              gpointer data2)
-{
-    damage *dam = (damage *)data1;
-    item *ammo = (item *)data2;
-    position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);
-    map *mp = game_map(nlarn, Z(pos));
-
-    gchar *adesc = item_describe_gc(ammo,
-            player_item_known(nlarn->p, ammo), true, true, GC_NOM);
-    adesc[0] = g_ascii_toupper(adesc[0]);
-
-    monster *hit_m = map_get_monster_at(mp, pos);
-    if (hit_m != NULL)
-    {
-        if (monster_in_sight(hit_m))
-            log_add_entry(nlarn->log, _("%s hits %s."),
-                          adesc,
-                          monster_get_name_art(hit_m, ART_DEF, GC_ACC, false));
-        monster_damage_take(hit_m, damage_copy(dam));
-        g_free(adesc);
-        return true;
-    }
-
-    if (pos_identical(pos, nlarn->p->pos))
-    {
-        if (player_evade(nlarn->p))
-        {
-            if (!player_effect(nlarn->p, ET_BLINDNESS))
-                log_add_entry(nlarn->log, _("%s misses you."), adesc);
-        }
-        else
-        {
-            log_add_entry(nlarn->log, _("%s hits you!"), adesc);
-            player_damage_take(nlarn->p, damage_copy(dam), PD_MONSTER,
-                               monster_type(damo->originator));
-        }
-        g_free(adesc);
-        return true;
-    }
-
-    g_free(adesc);
-    return false;
-}
-
 int monster_player_ranged_attack(monster *m, player *p)
 {
     g_assert(m != NULL && p != NULL);
@@ -2459,35 +2409,29 @@ int monster_player_ranged_attack(monster *m, player *p)
 
         if (!player_effect(p, ET_BLINDNESS))
         {
-            if (ammo_item)
-            {
-                gchar *adesc = item_describe(ammo_item,
-                        player_item_known(nlarn->p, ammo_item), true, false);
-                log_add_entry(nlarn->log, _("%s shoots %s at you."),
-                              monster_get_name_art(m, ART_DEF, GC_NOM, true), adesc);
-                g_free(adesc);
-            }
-            else
-                log_add_entry(nlarn->log, _("%s %s you."), monster_get_name_art(m, ART_DEF, GC_NOM, true),
-                              _(monster_attack_verb[att.type]));
+            gchar *adesc = item_describe(ammo_item,
+                    player_item_known(nlarn->p, ammo_item), true, false);
+            log_add_entry(nlarn->log, _("%s shoots %s at you."),
+                          monster_get_name_art(m, ART_DEF, GC_NOM, true), adesc);
+            g_free(adesc);
         }
 
-        /* pick trajectory appearance from ammo material, or use defaults */
+        /* pick trajectory appearance from ammo material */
         wchar_t glyph = item_glyph(IT_AMMO);
-        colour_t traj_colour = ammo_item ? item_colour(ammo_item) : WHITE;
+        colour_t traj_colour = item_colour(ammo_item);
 
-        /* damage comes from the equipped weapon and ammunition */
-        int amount = weapon_damage(m->eq_weapon) + ammo_damage(ammo_item)
-                     + rand_0n(monster_level(m) + 1)
-                     + game_difficulty(nlarn);
-        damage *dam = damage_new(DAM_PHYSICAL, ATT_SHOOT, amount,
-                                 DAMO_MONSTER, m);
+        /* fire a single round; it is tracked separately from the rest of
+           the stack so it can survive on the ground afterwards, exactly
+           like a player-fired shot does */
+        item *fired_ammo = (ammo_item->count > 1)
+            ? item_split(ammo_item, 1) : ammo_item;
+        if (fired_ammo == ammo_item)
+            inv_del_element(&m->inv, ammo_item);
 
-        map_trajectory(m->pos, p->pos, &(dam->dam_origin),
-                       monster_shoot_hit, dam, ammo_item, false,
-                       glyph, traj_colour, false);
+        damage_originator damo = { DAMO_MONSTER, m };
+        map_trajectory(m->pos, p->pos, &damo, weapon_shoot_hit,
+                       m->eq_weapon, fired_ammo, false, glyph, traj_colour, false);
 
-        damage_free(dam);
         return true;
     }
 

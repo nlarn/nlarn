@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-20 18:36+0200\n"
+"POT-Creation-Date: 2026-07-20 23:35+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -3168,482 +3168,477 @@ msgstr "m:Dämonenprinz;Dämonenprinzen"
 msgid "human"
 msgstr "m:Mensch;Menschen"
 
-#: src/monsters.c:1397
+#: src/monsters.c:1394
 msgid "peasant woman"
 msgstr "f:Bäuerin"
 
-#: src/monsters.c:1397
+#: src/monsters.c:1394
 msgid "old man"
 msgstr "m:alte Mann;alten Mann"
 
-#: src/monsters.c:1397
+#: src/monsters.c:1394
 msgid "old woman"
 msgstr "f:alte Frau;alte Frau;alten Frau"
 
-#: src/monsters.c:1398
+#: src/monsters.c:1395
 msgid "little boy"
 msgstr "m:kleine Junge;kleinen Jungen"
 
-#: src/monsters.c:1398
+#: src/monsters.c:1395
 msgid "young girl"
 msgstr "n:junge Mädchen;junge Mädchen;jungen Mädchen"
 
-#: src/monsters.c:1398
+#: src/monsters.c:1395
 msgid "fisherman"
 msgstr "m:Fischer"
 
-#: src/monsters.c:1399
+#: src/monsters.c:1396
 msgid "midwife"
 msgstr "f:Hebamme"
 
-#: src/monsters.c:1399
+#: src/monsters.c:1396
 msgid "errand boy"
 msgstr "m:Laufbursche;Laufburschen"
 
-#: src/monsters.c:1399
+#: src/monsters.c:1396
 msgid "bar maid"
 msgstr "f:Schankmaid"
 
-#: src/monsters.c:1400
+#: src/monsters.c:1397
 msgid "stable-lad"
 msgstr "m:Stallbursche;Stallburschen"
 
-#: src/monsters.c:1400
+#: src/monsters.c:1397
 msgid "innkeeper"
 msgstr "m:Wirt"
 
-#: src/monsters.c:1400
+#: src/monsters.c:1397
 msgid "woodcutter"
 msgstr "m:Holzfäller"
 
-#: src/monsters.c:1401
+#: src/monsters.c:1398
 msgid "carpenter"
 msgstr "m:Zimmermann"
 
-#: src/monsters.c:1401
+#: src/monsters.c:1398
 msgid "clerk"
 msgstr "m:Schreiber"
 
-#: src/monsters.c:1401
+#: src/monsters.c:1398
 msgid "barber"
 msgstr "m:Barbier"
 
-#: src/monsters.c:1402
+#: src/monsters.c:1399
 msgid "teacher"
 msgstr "m:Lehrer"
 
-#: src/monsters.c:1402
+#: src/monsters.c:1399
 msgid "town guard"
 msgstr "m:Stadtwächter"
 
-#: src/monsters.c:1402
+#: src/monsters.c:1399
 msgid "postman"
 msgstr "m:Briefträger"
 
-#: src/monsters.c:1403
+#: src/monsters.c:1400
 msgid "cobbler"
 msgstr "m:Flickschuster"
 
-#: src/monsters.c:1403
+#: src/monsters.c:1400
 msgid "baker"
 msgstr "m:Bäcker"
 
-#: src/monsters.c:1403
+#: src/monsters.c:1400
 msgid "merchant"
 msgstr "m:Kaufmann"
 
-#: src/monsters.c:1404
+#: src/monsters.c:1401
 msgid "clergyman"
 msgstr "m:Geistliche;Geistlichen"
 
-#: src/monsters.c:1404 src/monsters.c:1406
+#: src/monsters.c:1401 src/monsters.c:1403
 msgid "student"
 msgstr "m:Student;Studenten"
 
-#: src/monsters.c:1404
+#: src/monsters.c:1401
 msgid "blacksmith"
 msgstr "m:Grobschmied"
 
-#: src/monsters.c:1405
+#: src/monsters.c:1402
 msgid "nurse"
 msgstr "f:Kindsmagd"
 
-#: src/monsters.c:1405
+#: src/monsters.c:1402
 msgid "seamstress"
 msgstr "f:Näherin"
 
-#: src/monsters.c:1405
+#: src/monsters.c:1402
 msgid "cartwright"
 msgstr "m:Stellmacher"
 
-#: src/monsters.c:1406
+#: src/monsters.c:1403
 msgid "sales clerk"
 msgstr "m:Verkäufer"
 
-#: src/monsters.c:1406
+#: src/monsters.c:1403
 msgid "miller"
 msgstr "m:Müller"
 
-#: src/monsters.c:1409
+#: src/monsters.c:1406
 msgid "peasant"
 msgstr "m:Bauer;Bauern"
 
-#: src/monsters.c:1429
+#: src/monsters.c:1426
 msgid "unseen monster"
 msgstr "n:ungesehen~ Monster;;;ungesehen~ Monsters"
 
-#: src/monsters.c:1484
+#: src/monsters.c:1481
 #, c-format
 msgid "%s disappears!"
 msgstr "%s verschwindet!"
 
-#: src/monsters.c:1486
+#: src/monsters.c:1483
 #, c-format
 msgid "%s dies!"
 msgstr "%s stirbt!"
 
-#: src/monsters.c:1522
+#: src/monsters.c:1519
 msgid "You hear a splash!"
 msgstr "Du hörst ein Platschen!"
 
-#: src/monsters.c:1577
+#: src/monsters.c:1574
 msgid "comes"
 msgstr "kommt"
 
-#: src/monsters.c:1584 src/monsters.c:1589
+#: src/monsters.c:1581 src/monsters.c:1586
 msgid "through"
 msgstr "durch"
 
-#: src/monsters.c:1594 src/monsters.c:1604
+#: src/monsters.c:1591 src/monsters.c:1601
 msgid "down"
 msgstr "herab"
 
-#: src/monsters.c:1599 src/monsters.c:1609
+#: src/monsters.c:1596 src/monsters.c:1606
 msgid "up"
 msgstr "herauf"
 
-#: src/monsters.c:1632
+#: src/monsters.c:1629
 msgid "squeezes past"
 msgstr "zwängt sich"
 
-#: src/monsters.c:1656
+#: src/monsters.c:1653
 #, c-format
 msgid "%s %s %s %s."
 msgstr "%s %s %s %s."
 
-#: src/monsters.c:1743
+#: src/monsters.c:1740
 #, c-format
 msgid "%s %ses!"
 msgstr "%s %s!"
 
-#: src/monsters.c:1743
+#: src/monsters.c:1740
 #, c-format
 msgid "%s %ss!"
 msgstr "%s %s!"
 
-#: src/monsters.c:1749
+#: src/monsters.c:1746
 #, c-format
 msgid "%s turns to flee!"
 msgstr "%s ergreift die Flucht!"
 
-#: src/monsters.c:1831
+#: src/monsters.c:1828
 #, c-format
 msgid "%s bumps into you."
 msgstr "%s rempelt dich an."
 
-#: src/monsters.c:1844
+#: src/monsters.c:1841
 #, c-format
 msgid "%s bumps into the door."
 msgstr "%s prallt gegen die Tür."
 
-#: src/monsters.c:1856
+#: src/monsters.c:1853
 #, c-format
 msgid "%s opens the door."
 msgstr "%s öffnet die Tür."
 
-#: src/monsters.c:1884
+#: src/monsters.c:1881
 #, c-format
 msgid "%s closes the door."
 msgstr "%s schließt die Tür."
 
-#: src/monsters.c:1899
+#: src/monsters.c:1896
 #, c-format
 msgid "%s bumps into %s."
 msgstr "%s prallt gegen %s."
 
-#: src/monsters.c:1908
+#: src/monsters.c:1905
 #, c-format
 msgid "%s sinks into %s."
 msgstr "%s versinkt in %s."
 
-#: src/monsters.c:1979
+#: src/monsters.c:1976
 #, c-format
 msgid "%s falls into the %s!"
 msgstr "%s stürzt in %s!"
 
-#: src/monsters.c:1985
+#: src/monsters.c:1982
 #, c-format
 msgid "%s sinks like a rock!"
 msgstr "%s sinkt wie ein Stein!"
 
-#: src/monsters.c:1989 src/spells.c:1371
+#: src/monsters.c:1986 src/spells.c:1371
 #, c-format
 msgid "%s is trapped in the wall!"
 msgstr "%s steckt in der Mauer fest!"
 
-#: src/monsters.c:2029 src/monsters.c:3968
+#: src/monsters.c:2026 src/monsters.c:3918
 #, c-format
 msgid "%s picks up %s."
 msgstr "%s hebt %s auf."
 
-#: src/monsters.c:2039 src/monsters.c:3394
+#: src/monsters.c:2036 src/monsters.c:3344
 #, c-format
 msgid "%s touches %s with its antennae."
 msgstr "%s betastet %s mit seinen Fühlern."
 
-#: src/monsters.c:2067
+#: src/monsters.c:2064
 #, c-format
 msgid "%s engulfs %s."
 msgstr "%s verschlingt %s."
 
-#: src/monsters.c:2133
+#: src/monsters.c:2130
 #, c-format
 msgid "%s breathes %s!"
 msgstr "%s speit %s!"
 
-#: src/monsters.c:2140
+#: src/monsters.c:2137
 #, c-format
 msgid "%s spews forth from nowhere!"
 msgstr "%s schießt aus dem Nichts hervor!"
 
-#: src/monsters.c:2201
+#: src/monsters.c:2198
 #, c-format
 msgid "%s %s %s."
 msgstr "%s %s %s."
 
-#: src/monsters.c:2233
+#: src/monsters.c:2230
 #, c-format
 msgid "%s bashes into thin air."
 msgstr "%s schlägt ins Leere."
 
-#: src/monsters.c:2249
+#: src/monsters.c:2246
 #, c-format
 msgid "%s misses wildly."
 msgstr "%s schlägt wild daneben."
 
-#: src/monsters.c:2325
+#: src/monsters.c:2322
 #, c-format
 msgid "%s %s you, but nothing happens."
 msgstr "%s %s dich, doch nichts geschieht."
 
-#: src/monsters.c:2364 src/monsters.c:2467 src/monsters.c:2492
+#: src/monsters.c:2361 src/monsters.c:2442
 #, c-format
 msgid "%s %s you."
 msgstr "%s %s dich."
 
-#: src/monsters.c:2372 src/monsters.c:2498
+#: src/monsters.c:2369 src/monsters.c:2448
 msgid "The gaze is reflected harmlessly."
 msgstr "Der Blick wird wirkungslos reflektiert."
 
-#: src/monsters.c:2398 src/monsters.c:4227 src/weapons.c:460 src/weapons.c:531
-#, c-format
-msgid "%s hits %s."
-msgstr "%s trifft %s."
-
-#: src/monsters.c:2411
-#, c-format
-msgid "%s misses you."
-msgstr "%s verfehlt dich."
-
-#: src/monsters.c:2415 src/monsters.c:4266 src/spells.c:2044 src/weapons.c:488
-#, c-format
-msgid "%s hits you!"
-msgstr "%s trifft dich!"
-
-#: src/monsters.c:2462
+#: src/monsters.c:2414
 #, c-format
 msgid "%s shoots %s at you."
 msgstr "%s schießt %s auf dich."
 
-#: src/monsters.c:2539
+#: src/monsters.c:2489
 #, c-format
 msgid "%s isn't hurt."
 msgstr "%s ist unverletzt."
 
-#: src/monsters.c:2577
+#: src/monsters.c:2527
 #, c-format
 msgid "%s partly resists the magic."
 msgstr "%s widersteht der Magie teilweise."
 
-#: src/monsters.c:2578
+#: src/monsters.c:2528
 #, c-format
 msgid "%s resists the magic."
 msgstr "%s widersteht der Magie."
 
-#: src/monsters.c:2597
+#: src/monsters.c:2547
 #, c-format
 msgid "%s partly resists the flames."
 msgstr "%s widersteht den Flammen teilweise."
 
-#: src/monsters.c:2598
+#: src/monsters.c:2548
 #, c-format
 msgid "%s resists the flames."
 msgstr "%s widersteht den Flammen."
 
-#: src/monsters.c:2617
+#: src/monsters.c:2567
 #, c-format
 msgid "%s partly resists the cold."
 msgstr "%s widersteht der Kälte teilweise."
 
-#: src/monsters.c:2618
+#: src/monsters.c:2568
 #, c-format
 msgid "%s loves the cold."
 msgstr "%s liebt die Kälte."
 
-#: src/monsters.c:2635
+#: src/monsters.c:2585
 #, c-format
 msgid "%s is not affected!"
 msgstr "%s bleibt unbeeindruckt!"
 
-#: src/monsters.c:2707 src/monsters.c:3990
+#: src/monsters.c:2657 src/monsters.c:3940
 #, c-format
 msgid "%s drops %s."
 msgstr "%s lässt %s fallen."
 
-#: src/monsters.c:2713
+#: src/monsters.c:2663
 #, c-format
 msgid "%s turns into %s!"
 msgstr "%s verwandelt sich in %s!"
 
-#: src/monsters.c:2719
+#: src/monsters.c:2669
 #, c-format
 msgid "%s vanishes!"
 msgstr "%s löst sich auf!"
 
-#: src/monsters.c:2724
+#: src/monsters.c:2674
 #, c-format
 msgid "%s suddenly appears!"
 msgstr "%s erscheint plötzlich!"
 
-#: src/monsters.c:2895
+#: src/monsters.c:2845
 #, c-format
 msgid "You see %s there"
 msgstr "Du siehst dort %s"
 
-#: src/monsters.c:2905
+#: src/monsters.c:2855
 msgid "uninjured"
 msgstr "unverletzt~"
 
-#: src/monsters.c:2907
+#: src/monsters.c:2857
 msgid "slightly injured"
 msgstr "leicht verletzt~"
 
-#: src/monsters.c:2909
+#: src/monsters.c:2859
 msgid "injured"
 msgstr "verletzt~"
 
-#: src/monsters.c:2911
+#: src/monsters.c:2861
 msgid "heavily injured"
 msgstr "schwer verletzt~"
 
-#: src/monsters.c:2913
+#: src/monsters.c:2863
 msgid "critically injured"
 msgstr "kritisch verletzt~"
 
-#: src/monsters.c:2920
+#: src/monsters.c:2870
 msgid "fighting"
 msgstr "kämpfend~"
 
-#: src/monsters.c:2947
+#: src/monsters.c:2897
 #, c-format
 msgid ", armed with %s"
 msgstr ", bewaffnet mit %s"
 
-#: src/monsters.c:2953
+#: src/monsters.c:2903
 #, c-format
 msgid ", attacking %s"
 msgstr ", im Kampf mit %s"
 
-#: src/monsters.c:3317
+#: src/monsters.c:3267
 #, c-format
 msgid "%s wields %s."
 msgstr "%s führt nun %s."
 
-#: src/monsters.c:3338
+#: src/monsters.c:3288
 #, c-format
 msgid "%s hits you."
 msgstr "%s trifft dich."
 
-#: src/monsters.c:3353
+#: src/monsters.c:3303
 #, c-format
 msgid "%s resists the attack."
 msgstr "%s widersteht dem Angriff."
 
-#: src/monsters.c:3354
+#: src/monsters.c:3304
 #, c-format
 msgid "%s resist the attack."
 msgstr "%s widerstehen dem Angriff."
 
-#: src/monsters.c:3361
+#: src/monsters.c:3311
 msgid "You feel a sense of loss."
 msgstr "Dich überkommt ein Gefühl des Verlusts."
 
-#: src/monsters.c:3403 src/scrolls.c:257 src/scrolls.c:723 src/scrolls.c:817
+#: src/monsters.c:3353 src/scrolls.c:257 src/scrolls.c:723 src/scrolls.c:817
 #: src/scrolls.c:857 src/spells.c:1136 src/spells.c:1873 src/spells.c:1887
 msgid "Nothing happens."
 msgstr "Nichts geschieht."
 
-#: src/monsters.c:3430
+#: src/monsters.c:3380
 #, c-format
 msgid "%s picks your pocket. Your purse feels lighter."
 msgstr "%s stiehlt aus deiner Tasche. Dein Geldbeutel fühlt sich leichter an."
 
-#: src/monsters.c:3446
+#: src/monsters.c:3396
 #, c-format
 msgid "%s picks up some gold at your feet."
 msgstr "%s hebt etwas Gold vor deinen Füßen auf."
 
-#: src/monsters.c:3466
+#: src/monsters.c:3416
 #, c-format
 msgid "%s tries to steal %s but fails."
 msgstr "%s versucht, %s zu stehlen, doch es misslingt."
 
-#: src/monsters.c:3494
+#: src/monsters.c:3444
 #, c-format
 msgid "%s nimbly removes %s and steals it."
 msgstr "%s entwendet flink %s und macht sich damit davon."
 
-#: src/monsters.c:3499
+#: src/monsters.c:3449
 #, c-format
 msgid "%s picks your pocket and steals %s."
 msgstr "%s greift in deine Tasche und stiehlt %s."
 
-#: src/monsters.c:3515
+#: src/monsters.c:3465
 #, c-format
 msgid "%s couldn't find anything to steal."
 msgstr "%s konnte nichts zum Stehlen finden."
 
-#: src/monsters.c:3701
+#: src/monsters.c:3651
 #, c-format
 msgid "%s vanishes."
 msgstr "%s verschwindet."
 
-#: src/monsters.c:4046
+#: src/monsters.c:3996
 #, c-format
 msgid "%s says, \"%s\""
 msgstr "%s sagt: „%s“"
 
-#: src/monsters.c:4250 src/spells.c:2026
+#: src/monsters.c:4177 src/weapons.c:474 src/weapons.c:554
+#, c-format
+msgid "%s hits %s."
+msgstr "%s trifft %s."
+
+#: src/monsters.c:4200 src/spells.c:2026
 #, c-format
 msgid "Your amulet reflects %s!"
 msgstr "Dein Amulett reflektiert %s!"
 
-#: src/monsters.c:4258 src/spells.c:2035 src/weapons.c:482
+#: src/monsters.c:4208 src/spells.c:2035 src/weapons.c:498
 #, c-format
 msgid "%s whizzes by you!"
 msgstr "%s zischt an dir vorbei!"
 
-#: src/monsters.c:4299 src/spells.c:1976
+#: src/monsters.c:4216 src/spells.c:2044 src/weapons.c:506
+#, c-format
+msgid "%s hits you!"
+msgstr "%s trifft dich!"
+
+#: src/monsters.c:4249 src/spells.c:1976
 #, c-format
 msgid "The mirror reflects %s!"
 msgstr "Der Spiegel reflektiert %s!"
@@ -4508,7 +4503,7 @@ msgstr "Du legst %s weg."
 msgid "You can't put away %s. It's welded into your hands."
 msgstr "Du kannst %s nicht weglegen, es ist mit deiner Hand verschweißt."
 
-#: src/player.c:3845 src/weapons.c:180
+#: src/player.c:3845 src/weapons.c:177
 msgid "Gosh! How dare you!"
 msgstr "Meine Güte! Was fällt dir ein!"
 
@@ -7370,65 +7365,65 @@ msgstr "m:Bessmans Dreschhammer;;;Bessmans Dreschhammers"
 msgid "Bessman's"
 msgstr "Bessmans Hammer"
 
-#: src/weapons.c:109
+#: src/weapons.c:106
 msgid "You do not wield any weapon!"
 msgstr "Du führst keine Waffe!"
 
-#: src/weapons.c:123
+#: src/weapons.c:120
 #, c-format
 msgid "%s is not a ranged weapon!"
 msgstr "%s ist keine Fernwaffe!"
 
-#: src/weapons.c:132
+#: src/weapons.c:129
 msgid "You have no ammunition in your quiver!"
 msgstr "Du hast keine Munition in deinem Köcher!"
 
-#: src/weapons.c:142
+#: src/weapons.c:139
 #, c-format
 msgid "You cannot fire %s with %s."
 msgstr "Du kannst %s nicht mit %s abfeuern."
 
-#: src/weapons.c:153
+#: src/weapons.c:150
 msgid "Select a target"
 msgstr "Wähle ein Ziel"
 
-#: src/weapons.c:159
+#: src/weapons.c:156
 #, c-format
 msgid "You did not fire %s."
 msgstr "Du hast nicht mit %s geschossen."
 
-#: src/weapons.c:171
+#: src/weapons.c:168
 msgid "I see no monster there."
 msgstr "Ich sehe dort kein Monster."
 
-#: src/weapons.c:194
+#: src/weapons.c:191
 msgid "You have no clear shot."
 msgstr "Du hast keine freie Schusslinie."
 
-#: src/weapons.c:202
+#: src/weapons.c:199
 #, c-format
 msgid "You fire %s at %s."
 msgstr "Du schießt mit %s auf %s."
 
-#: src/weapons.c:244
+#: src/weapons.c:241
 msgid "You have no weapon ready."
 msgstr "Du hast keine Waffe bereit."
 
-#: src/weapons.c:252
+#: src/weapons.c:249
 #, c-format
 msgid "You can't put %s away, it is weld into your hand!"
 msgstr "Du kannst %s nicht wegstecken - wie an deine Hand geschweißt!"
 
-#: src/weapons.c:268
+#: src/weapons.c:265
 #, c-format
 msgid "You can't ready %s while holding the %s!"
 msgstr "Du kannst %s nicht bereitmachen, solange du %s hältst!"
 
-#: src/weapons.c:276
+#: src/weapons.c:273
 msgid "swapping your weapons"
 msgstr "deine Waffen zu tauschen"
 
-#: src/weapons.c:289
+#: src/weapons.c:286
 #, c-format
 msgid ""
 "You have swapped your weapons: Primary weapon: %s, secondary weapon, not "
@@ -7437,46 +7432,51 @@ msgstr ""
 "Du hast deine Waffen getauscht: Hauptwaffe: %s, Zweitwaffe, nicht geführt: "
 "%s."
 
-#: src/weapons.c:291
+#: src/weapons.c:288
 msgid "none"
 msgstr "keine"
 
-#: src/weapons.c:326
+#: src/weapons.c:323
 msgid "v. burnt"
 msgstr "stark verbrannt"
 
-#: src/weapons.c:333
+#: src/weapons.c:330
 msgid "v. corroded"
 msgstr "stark zerfressen"
 
-#: src/weapons.c:339
+#: src/weapons.c:336
 msgid "v. rusty"
 msgstr "stark verrostet"
 
-#: src/weapons.c:346
+#: src/weapons.c:343
 msgid "burnt"
 msgstr "versengt"
 
-#: src/weapons.c:352
+#: src/weapons.c:349
 msgid "corroded"
 msgstr "korrodiert"
 
-#: src/weapons.c:358
+#: src/weapons.c:355
 msgid "rusty"
 msgstr "rostig"
 
-#: src/weapons.c:367
+#: src/weapons.c:364
 msgid "blessed"
 msgstr "gesegnet"
 
-#: src/weapons.c:372
+#: src/weapons.c:369
 msgid "cursed"
 msgstr "verflucht"
 
-#: src/weapons.c:473 src/weapons.c:545
+#: src/weapons.c:487 src/weapons.c:568
 #, c-format
 msgid "%s misses %s."
 msgstr "%s verfehlt %s."
+
+#: src/weapons.c:500
+#, c-format
+msgid "%s misses you."
+msgstr "%s verfehlt dich."
 
 #~ msgid "Configure the initial stats of your characters."
 #~ msgstr "Lege die Startattribute deiner Charaktere fest."
