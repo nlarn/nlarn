@@ -27,7 +27,7 @@ DEFINE_ENUM(ring_t, RING_TYPE_ENUM)
 
 const ring_data rings[RT_MAX] =
 {
-    /* type            name                  effect           price ob bo */
+    /* type            name                               effect           price ob bo */
     { RT_REGENERATION, NC_("ring", "regeneration"),       ET_INC_HP_REGEN,  250, 0, 0 },
     { RT_PROTECTION,   NC_("ring", "protection"),         ET_PROTECTION,    150, 0, 1 },
     { RT_ENERGY,       NC_("ring", "energy"),             ET_INC_MP_REGEN,  250, 0, 0 },

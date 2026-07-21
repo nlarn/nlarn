@@ -25,7 +25,7 @@ DEFINE_ENUM(armour_t, ARMOUR_TYPE_ENUM)
 
 const armour_data armours[AT_MAX] =
 {
-    /* id            name                      ac  category   material    effect      we     pr disguise  ob un*/
+    /* id            name                          ac  category   material    effect      we     pr disguise  ob un*/
     { AT_CLOAK,      N_("cloak"),                   1, AC_CLOAK,  IM_CLOTH,   ET_NONE,   400,    15, AT_MAX, 1,  0 },
     { AT_LGLOVES,    N_("pair of leather gloves"),  1, AC_GLOVES, IM_LEATHER, ET_NONE,   800,    25, AT_MAX, 1,  0 },
     { AT_LBOOTS,     N_("pair of leather boots"),   1, AC_BOOTS,  IM_LEATHER, ET_NONE,  1800,    25, AT_MAX, 1,  0 },

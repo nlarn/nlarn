@@ -33,7 +33,7 @@ DEFINE_ENUM(ammo_t, AMMO_TYPE_ENUM)
 
 const ammo_data ammos[AMT_MAX] =
 {
-    /*  type       name            ac           dam   acc  mat        we  pr  ob */
+    /*  type       name                ac            dam  acc  mat        we  pr  ob */
     { AMT_STONE,   N_("pebble"),       AMMO_SLING,     2,   1, IM_STONE, 100,  1, false, },
     { AMT_SBULLET, N_("sling bullet"), AMMO_SLING,     4,   2, IM_LEAD,   50,  3,  true, },
     { AMT_ARROW,   N_("arrow"),        AMMO_BOW,       8,   3, IM_WOOD,   80,  5,  true, },
@@ -51,7 +51,7 @@ DEFINE_ENUM(weapon_t, WEAPON_TYPE_ENUM)
 
 const weapon_data weapons[WT_MAX] =
 {
-    /* weapon_t         name                         short name,       class          ammo      dam  acc  material    we     pr tw un ar ob th*/
+    /* weapon_t         name                            short name,             class          ammo      dam  acc  material    we     pr tw un ar ob th*/
     { WT_ODAGGER,       N_("orcish dagger"),             N_("orc dagger"),      WC_MELEE,     AMMO_MAX,  2,   3, IM_IRON,     850,     6, 0, 0, 1, 0, 1 },
     { WT_DAGGER,        N_("dagger"),                    N_("dagger"),          WC_MELEE,     AMMO_MAX,  3,   5, IM_IRON,     600,    10, 0, 0, 1, 1, 1 },
     { WT_SLING,         N_("sling"),                     N_("sling"),          WC_RANGED,   AMMO_SLING,  1,   3, IM_CLOTH,    200,    15, 1, 0, 1, 1, 0 },

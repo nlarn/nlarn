@@ -31,7 +31,7 @@ DEFINE_ENUM(potion_t, POTION_TYPE_ENUM)
 
 const potion_data potions[PO_MAX] =
 {
-    /* id               name                  effect            price store_stock */
+    /* id               name                                 effect             price  store_stock */
     { PO_WATER,         NC_("potion", "holy water"),         ET_NONE,             500, 0 },
     { PO_SLEEP,         NC_("potion", "sleep"),              ET_SLEEP,             50, 0 },
     { PO_HEAL,          NC_("potion", "healing"),            ET_INC_HP,           100, 0 },
