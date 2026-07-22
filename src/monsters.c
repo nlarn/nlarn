@@ -379,7 +379,7 @@ monster_data_t monster_data[] = {
         .name = N_("gelatinous cube"), .glyph = 'g', .colour = ALABASTER_GREEN,
         .exp = 45, .ac = 1, .hp_max = 22,
         .level = 5, .intelligence = 3, .speed = XSLOW, .size = LARGE,
-        .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF | PASSIVE,
+        .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF | RES_ACID | PASSIVE,
         .attacks = {
             { .type = ATT_SLAM, .base = 1, .damage = DAM_ACID },
         }, .default_ai = MA_WANDER
@@ -603,7 +603,7 @@ monster_data_t monster_data[] = {
         .name = N_("bronze dragon"), .glyph = 'D', .colour = GREEN_BROWN,
         .exp = 4000, .gold = 300, .ac = 10, .hp_max = 80,
         .level = 9, .intelligence = 16, .speed = NORMAL, .size = GIANT,
-        .flags = HEAD | FLY | DRAGON,
+        .flags = HEAD | FLY | DRAGON | RES_ACID,
         .attacks = {
             { .type = ATT_BITE, .base = 9, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 9, .damage = DAM_PHYSICAL },
@@ -623,7 +623,7 @@ monster_data_t monster_data[] = {
         .name = N_("silver dragon"), .glyph = 'D', .colour = SILVER,
         .exp = 10000, .gold = 700, .ac = 13, .hp_max = 100,
         .level = 10, .intelligence = 20, .speed = NORMAL, .size = GIANT,
-        .flags = HEAD | FLY | DRAGON,
+        .flags = HEAD | FLY | DRAGON | RES_ACID,
         .attacks = {
             { .type = ATT_BITE, .base = 12, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 12, .damage = DAM_PHYSICAL },
@@ -2567,6 +2567,26 @@ monster *monster_damage_take(monster *m, damage *dam)
                         ? _("%s partly resists the cold.")
                         : _("%s loves the cold."),
                     monster_get_name_art(m, ART_DEF, GC_NOM, true));
+            }
+        }
+        break;
+
+    case DAM_ACID:
+        if (monster_flags(m, RES_ACID))
+        {
+            /*
+             * The monster's acid resistance reduces the damage taken
+             * by 10% per monster level
+             */
+            dam->amount -= (guint)(((float)dam->amount / 100) *
+                 /* prevent uint wrap around for monsters with level > 10 */
+                 (min(monster_level(m), 10) * 10));
+            if (monster_in_sight(m))
+            {
+                log_add_entry(nlarn->log, dam->amount > 0
+                            ? _("%s partly resists the acid.")
+                            : _("%s resists the acid."),
+                        monster_get_name_art(m, ART_DEF, GC_NOM, true));
             }
         }
         break;

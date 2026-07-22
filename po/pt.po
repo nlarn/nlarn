@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-20 23:35+0200\n"
+"POT-Creation-Date: 2026-07-22 23:10+0200\n"
 "PO-Revision-Date: 2026-07-18 11:09+0200\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -3366,12 +3366,12 @@ msgstr "%s afunda-se como uma pedra!"
 msgid "%s is trapped in the wall!"
 msgstr "%s está preso na parede!"
 
-#: src/monsters.c:2026 src/monsters.c:3918
+#: src/monsters.c:2026 src/monsters.c:3938
 #, c-format
 msgid "%s picks up %s."
 msgstr "%s apanha %s."
 
-#: src/monsters.c:2036 src/monsters.c:3344
+#: src/monsters.c:2036 src/monsters.c:3364
 #, c-format
 msgid "%s touches %s with its antennae."
 msgstr "%s roça %s com as antenas."
@@ -3460,160 +3460,170 @@ msgstr "%s resiste em parte ao frio."
 msgid "%s loves the cold."
 msgstr "%s adora o frio."
 
-#: src/monsters.c:2585
+#: src/monsters.c:2587
+#, c-format
+msgid "%s partly resists the acid."
+msgstr "%s resiste em parte ao ácido."
+
+#: src/monsters.c:2588
+#, c-format
+msgid "%s resists the acid."
+msgstr "%s resiste ao ácido."
+
+#: src/monsters.c:2605
 #, c-format
 msgid "%s is not affected!"
 msgstr "%s não é afetado!"
 
-#: src/monsters.c:2657 src/monsters.c:3940
+#: src/monsters.c:2677 src/monsters.c:3960
 #, c-format
 msgid "%s drops %s."
 msgstr "%s deixa cair %s."
 
-#: src/monsters.c:2663
+#: src/monsters.c:2683
 #, c-format
 msgid "%s turns into %s!"
 msgstr "%s transforma-se em %s!"
 
-#: src/monsters.c:2669
+#: src/monsters.c:2689
 #, c-format
 msgid "%s vanishes!"
 msgstr "%s volatiliza-se!"
 
-#: src/monsters.c:2674
+#: src/monsters.c:2694
 #, c-format
 msgid "%s suddenly appears!"
 msgstr "%s aparece de repente!"
 
-#: src/monsters.c:2845
+#: src/monsters.c:2865
 #, c-format
 msgid "You see %s there"
 msgstr "Vês ali %s"
 
-#: src/monsters.c:2855
+#: src/monsters.c:2875
 msgid "uninjured"
 msgstr "iles~"
 
-#: src/monsters.c:2857
+#: src/monsters.c:2877
 msgid "slightly injured"
 msgstr "levemente ferid~"
 
-#: src/monsters.c:2859
+#: src/monsters.c:2879
 msgid "injured"
 msgstr "ferid~"
 
-#: src/monsters.c:2861
+#: src/monsters.c:2881
 msgid "heavily injured"
 msgstr "gravemente ferid~"
 
-#: src/monsters.c:2863
+#: src/monsters.c:2883
 msgid "critically injured"
 msgstr "ferid~ de morte"
 
-#: src/monsters.c:2870
+#: src/monsters.c:2890
 msgid "fighting"
 msgstr "em combate"
 
-#: src/monsters.c:2897
+#: src/monsters.c:2917
 #, c-format
 msgid ", armed with %s"
 msgstr ", que empunha %s"
 
-#: src/monsters.c:2903
+#: src/monsters.c:2923
 #, c-format
 msgid ", attacking %s"
 msgstr ", em combate com %s"
 
-#: src/monsters.c:3267
+#: src/monsters.c:3287
 #, c-format
 msgid "%s wields %s."
 msgstr "%s empunha %s."
 
-#: src/monsters.c:3288
+#: src/monsters.c:3308
 #, c-format
 msgid "%s hits you."
 msgstr "%s acerta-te."
 
-#: src/monsters.c:3303
+#: src/monsters.c:3323
 #, c-format
 msgid "%s resists the attack."
 msgstr "%s resiste ao ataque."
 
-#: src/monsters.c:3304
+#: src/monsters.c:3324
 #, c-format
 msgid "%s resist the attack."
 msgstr "%s resistem ao ataque."
 
-#: src/monsters.c:3311
+#: src/monsters.c:3331
 msgid "You feel a sense of loss."
 msgstr "Sentes uma pontada de perda."
 
-#: src/monsters.c:3353 src/scrolls.c:257 src/scrolls.c:723 src/scrolls.c:817
+#: src/monsters.c:3373 src/scrolls.c:257 src/scrolls.c:723 src/scrolls.c:817
 #: src/scrolls.c:857 src/spells.c:1136 src/spells.c:1873 src/spells.c:1887
 msgid "Nothing happens."
 msgstr "Não acontece nada."
 
-#: src/monsters.c:3380
+#: src/monsters.c:3400
 #, c-format
 msgid "%s picks your pocket. Your purse feels lighter."
 msgstr "%s esvazia-te os bolsos. A tua bolsa parece mais leve."
 
-#: src/monsters.c:3396
+#: src/monsters.c:3416
 #, c-format
 msgid "%s picks up some gold at your feet."
 msgstr "%s apanha algum ouro aos teus pés."
 
-#: src/monsters.c:3416
+#: src/monsters.c:3436
 #, c-format
 msgid "%s tries to steal %s but fails."
 msgstr "%s tenta roubar %s, mas falha."
 
-#: src/monsters.c:3444
+#: src/monsters.c:3464
 #, c-format
 msgid "%s nimbly removes %s and steals it."
 msgstr "%s surripia-te habilmente %s."
 
-#: src/monsters.c:3449
+#: src/monsters.c:3469
 #, c-format
 msgid "%s picks your pocket and steals %s."
 msgstr "%s mete-te a mão ao bolso e rouba %s."
 
-#: src/monsters.c:3465
+#: src/monsters.c:3485
 #, c-format
 msgid "%s couldn't find anything to steal."
 msgstr "%s não encontra nada para roubar."
 
-#: src/monsters.c:3651
+#: src/monsters.c:3671
 #, c-format
 msgid "%s vanishes."
 msgstr "%s esfuma-se."
 
-#: src/monsters.c:3996
+#: src/monsters.c:4016
 #, c-format
 msgid "%s says, \"%s\""
 msgstr "%s diz: «%s»"
 
-#: src/monsters.c:4177 src/weapons.c:474 src/weapons.c:554
+#: src/monsters.c:4197 src/weapons.c:474 src/weapons.c:554
 #, c-format
 msgid "%s hits %s."
 msgstr "%s acerta em %s."
 
-#: src/monsters.c:4200 src/spells.c:2026
+#: src/monsters.c:4220 src/spells.c:2026
 #, c-format
 msgid "Your amulet reflects %s!"
 msgstr "O teu amuleto reflete %s!"
 
-#: src/monsters.c:4208 src/spells.c:2035 src/weapons.c:498
+#: src/monsters.c:4228 src/spells.c:2035 src/weapons.c:498
 #, c-format
 msgid "%s whizzes by you!"
 msgstr "%s passa por ti a zunir!"
 
-#: src/monsters.c:4216 src/spells.c:2044 src/weapons.c:506
+#: src/monsters.c:4236 src/spells.c:2044 src/weapons.c:506
 #, c-format
 msgid "%s hits you!"
 msgstr "%s acerta-te!"
 
-#: src/monsters.c:4249 src/spells.c:1976
+#: src/monsters.c:4269 src/spells.c:1976
 #, c-format
 msgid "The mirror reflects %s!"
 msgstr "O espelho reflete %s!"

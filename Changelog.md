@@ -23,6 +23,7 @@
   backed by godly goodwill
 * Modify Sonic Spear damage and take enemy's size into account
 * Monsters that interfere with an action are highlighted
+* Add acid resistance to some monsters
 * Turn the gelatinous cube into a passive monster
 * Adapt how statues react when being hit to the original Larn
 * Mouse movement and firing without keyboard interaction
