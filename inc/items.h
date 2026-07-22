@@ -113,7 +113,10 @@ typedef struct item {
         bonus_known: 1,     /* player knows the bonus */
         fired: 1,           /* player has fired the item */
         picked_up: 1,       /* picked up by monster */
-        player_owned: 1;    /* originated from the player's inventory */
+        player_owned: 1,    /* originated from the player's inventory */
+        charges: 4,         /* uses left of a bound on-hit proc; 0 = none */
+        charge_source: 8;   /* spell_id that sourced the proc; SP_MAX means
+                                a non-spell source (e.g. potion of poison) */
 } item;
 
 typedef struct item_type_data {

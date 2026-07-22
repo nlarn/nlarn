@@ -247,4 +247,29 @@ static inline int weapon_acc(const item *weapon)
 #define weapon_is_throwable(weapon)  (weapons[(weapon)->id].throwable)
 #define weapon_needs_article(weapon) (weapons[(weapon)->id].article)
 
+/**
+ * @brief Item filter function for the poison potion.
+ * @param it a pointer to an item
+ * @return true if the item is a melee weapon without a bound on-hit proc
+ */
+static inline int item_filter_poisonable(item *it)
+{
+    return (IT_WEAPON == it->type) && (weapon_class(it) == WC_MELEE)
+        && (it->charges == 0);
+}
+
+/**
+ * Apply a weapon's bound on-hit proc (if any) after a successful hit:
+ * poison coatings add a stacking poison effect to the target, spell-bound
+ * elemental charges deal a second instance of damage. Consumes one
+ * charge either way.
+ *
+ * @param p the attacking player
+ * @param weapon the weapon that just hit, or NULL
+ * @param m the monster that was hit
+ * @return the monster, or NULL if this finished it off
+ */
+struct monster *weapon_apply_charge(struct player *p, item *weapon,
+        struct monster *m);
+
 #endif

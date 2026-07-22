@@ -13,6 +13,7 @@
   return them once the danger is over
 * Hostile monster will now attack the player's friends (i.e. charmed or
   summoned monsters and townsfolk)
+* Melee weapons can be poisoned
 * Allow throwing of weapons
 * Track godly goodwill (modified by player's behavior on altars)
 * Cone of cold behaves like fireball

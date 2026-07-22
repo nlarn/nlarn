@@ -527,6 +527,11 @@ void item_serialize(gpointer oid, gpointer it, gpointer root)
     if (i->corroded > 0) cJSON_AddNumberToObject(ival, "corroded", i->corroded);
     if (i->burnt > 0) cJSON_AddNumberToObject(ival, "burnt", i->burnt);
     if (i->rusty > 0) cJSON_AddNumberToObject(ival, "rusty", i->rusty);
+    if (i->charges > 0)
+    {
+        cJSON_AddNumberToObject(ival, "charges", i->charges);
+        cJSON_AddNumberToObject(ival, "charge_source", i->charge_source);
+    }
 
     /* container content */
     if (inv_length(i->content) > 0)
@@ -627,6 +632,12 @@ item *item_deserialize(cJSON *iser, struct game *g)
 
     obj = cJSON_GetObjectItem(iser, "rusty");
     if (obj != NULL) it->rusty = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "charges");
+    if (obj != NULL) it->charges = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "charge_source");
+    if (obj != NULL) it->charge_source = obj->valueint;
 
     /* container content */
     obj = cJSON_GetObjectItem(iser, "content");
@@ -783,6 +794,11 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
     if (it->corroded == 2) strv_append(&add_infos, C_("item status", "very corroded"));
     if (it->rusty == 1) strv_append(&add_infos, C_("item status", "rusty"));
     if (it->rusty == 2) strv_append(&add_infos, C_("item status", "very rusty"));
+    /* naming for spell-bound charges is still to be decided; for now only
+       the poison coating (the one source currently reachable) gets a
+       status label */
+    if (it->charges > 0 && it->charge_source == SP_MAX)
+        strv_append(&add_infos, C_("item status", "poisoned"));
 
     if (g_strv_length(add_infos))
         add_info = g_strjoinv(", ", add_infos);

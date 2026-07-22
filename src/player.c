@@ -1491,6 +1491,16 @@ int player_attack(player *p, monster *m)
            p->ptarget = monster_oid(m);
         }
 
+        /* a poisoned or spell-charged weapon may deal a second blow */
+        if (p->eq_weapon && p->eq_weapon->charges > 0)
+        {
+            if (!((m = weapon_apply_charge(p, p->eq_weapon, m))))
+            {
+                /* the charge finished the monster off */
+                return 1;
+            }
+        }
+
         /* Lance of Death has not killed */
         if (p->eq_weapon && (p->eq_weapon->id == WT_LANCEOFDEATH)
                 && monster_in_sight(m))

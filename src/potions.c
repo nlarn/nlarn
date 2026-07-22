@@ -65,6 +65,7 @@ static int potion_amnesia(struct player *p, item *potion);
 static int potion_detect_item(struct player *p, item *potion);
 static int potion_recovery(struct player *p, item *potion);
 static int potion_holy_water(player *p, item *potion);
+static int potion_poison_weapon(player *p, item *potion);
 
 struct potion_obfuscation_s
 {
@@ -119,7 +120,8 @@ item_usage_result potion_quaff(struct player *p, item *potion)
     item_usage_result result = { false, false };
 
     // These potions aren't drunk.
-    bool drunk = !(potion->id == PO_CURE_DIANTHR || potion->id == PO_WATER);
+    bool drunk = !(potion->id == PO_CURE_DIANTHR || potion->id == PO_WATER
+                   || potion->id == PO_POISON);
 
     if (potion->cursed && potion->blessed_known)
     {
@@ -178,6 +180,11 @@ item_usage_result potion_quaff(struct player *p, item *potion)
         case PO_WATER:
             result.identified = true;
             result.used_up = potion_holy_water(p, potion);
+            break;
+
+        case PO_POISON:
+            result.identified = true;
+            result.used_up = potion_poison_weapon(p, potion);
             break;
 
         case PO_RECOVERY:
@@ -485,6 +492,36 @@ static int potion_holy_water(player *p, item *potion __attribute__((unused)))
 
         /* the state change may allow merging with another stack */
         player_item_remerge(p, it);
+
+        return true;
+    }
+    return false;
+}
+
+static int potion_poison_weapon(player *p, item *potion __attribute__((unused)))
+{
+    g_assert (p != NULL);
+
+    if (inv_length_filtered(p->inventory, item_filter_poisonable) == 0)
+    {
+        log_add_entry(nlarn->log,
+                      _("You're not carrying a weapon that could be poisoned."));
+        return false;
+    }
+
+    item *it = display_inventory(_("Choose a weapon to poison"), p, &p->inventory,
+                                 NULL, false, false, false, item_filter_poisonable);
+
+    if (it != NULL)
+    {
+        gchar *buf = item_describe(it, player_item_known(p, it), false, true);
+
+        log_add_entry(nlarn->log, _("You coat %s with poison."), buf);
+
+        g_free(buf);
+
+        it->charges = 5;
+        it->charge_source = SP_MAX; /* non-spell source */
 
         return true;
     }

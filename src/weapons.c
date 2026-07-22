@@ -433,6 +433,51 @@ bool weapon_ammo_drop(map *m, item *ammo, const GList *traj)
     return true;
 }
 
+monster *weapon_apply_charge(player *p, item *weapon, monster *m)
+{
+    g_assert(p != NULL && m != NULL);
+
+    if (weapon == NULL || weapon->charges == 0)
+        return m;
+
+    if (weapon->charge_source == SP_MAX)
+    {
+        /* a poison coating: add or, if already poisoned, strengthen a
+           poison effect on the target. Resistance and stacking are
+           already handled by monster_effect_add()/effect_add(). */
+        monster_effect_add(m, effect_new(ET_POISON));
+    }
+    else
+    {
+        /* a spell-bound charge: strike the target with a second,
+           independent instance of the spell's damage type */
+        spell_id source = (spell_id)weapon->charge_source;
+        int amount = (2 + rand_1n(4)) * spells[source].level + player_get_int(p);
+        damage *dam = damage_new(spells[source].damage_type, ATT_MAGIC,
+                                 amount, DAMO_PLAYER, p);
+
+        if (monster_in_sight(m))
+            log_add_entry(nlarn->log, _("The magic of %s strikes %s!"),
+                          noun_genitive_attribute(spell_name_raw(source)),
+                          monster_name_art(m, ART_DEF, GC_ACC, false));
+
+        /* the monster may not survive this hit */
+        m = monster_damage_take(m, dam);
+    }
+
+    weapon->charges--;
+
+    if (weapon->charges == 0)
+    {
+        gchar *wdesc = item_describe_gc(weapon, player_item_known(p, weapon),
+                                        true, true, GC_GEN);
+        log_add_entry(nlarn->log, _("The magic of %s is spent."), wdesc);
+        g_free(wdesc);
+    }
+
+    return m;
+}
+
 bool weapon_shoot_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1,
