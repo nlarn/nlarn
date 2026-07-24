@@ -28,6 +28,7 @@
 #include "sobjects.h"
 #include "spells.h"
 #include "spheres.h"
+#include "weapons.h"
 
 static bool spell_type_player(spell *s, struct player *p);
 static bool spell_type_point(spell *s, struct player *p);
@@ -1518,7 +1519,7 @@ bool spell_vaporize_rock(spell *sp __attribute__((unused)), player *p)
     return true;
 }
 
-/* offer only the spells the permanence spell may bind to an item */
+/* offer only the spells the permanence spell may bind to an armour item */
 static int spell_filter_permanence_candidate(spell *s)
 {
     switch (s->id)
@@ -1538,11 +1539,35 @@ static int spell_filter_permanence_candidate(spell *s)
     }
 }
 
+/* offer only the elemental attack spells the permanence spell may bind
+   to a weapon as a limited number of on-hit charges */
+static int spell_filter_permanence_weapon_candidate(spell *s)
+{
+    switch (s->id)
+    {
+    case SP_BAL:
+    case SP_CLD:
+    case SP_LIT:
+    case SP_CKL:
+        return true;
+
+    default:
+        return false;
+    }
+}
+
+/* an item is a permanence target if it is either an unenchanted piece of
+   armour or a melee weapon without an already-bound on-hit proc */
+static int item_filter_permanence_target_combined(item *it)
+{
+    return item_filter_permanence_target(it) || item_filter_poisonable(it);
+}
+
 static bool spell_permanence(spell *s __attribute__((unused)), struct player *p)
 {
     g_assert(p != NULL);
 
-    if (inv_length_filtered(p->inventory, item_filter_permanence_target) == 0)
+    if (inv_length_filtered(p->inventory, item_filter_permanence_target_combined) == 0)
     {
         log_add_entry(nlarn->log, _("You don't have anything suitable to enchant."));
         return false;
@@ -1552,7 +1577,8 @@ static bool spell_permanence(spell *s __attribute__((unused)), struct player *p)
     for (guint idx = 0; idx < p->known_spells->len; idx++)
     {
         spell *known = g_ptr_array_index(p->known_spells, idx);
-        if (spell_type(known) == SC_PLAYER && spell_filter_permanence_candidate(known))
+        if ((spell_type(known) == SC_PLAYER && spell_filter_permanence_candidate(known))
+                || spell_filter_permanence_weapon_candidate(known))
         {
             has_candidate = true;
             break;
@@ -1568,7 +1594,7 @@ static bool spell_permanence(spell *s __attribute__((unused)), struct player *p)
     /* choose the item that shall receive the enchantment */
     item *it = display_inventory(_("Choose an item to enchant"), p, &p->inventory,
                                  NULL, false, false, false,
-                                 item_filter_permanence_target);
+                                 item_filter_permanence_target_combined);
 
     if (it == NULL)
     {
@@ -1576,9 +1602,14 @@ static bool spell_permanence(spell *s __attribute__((unused)), struct player *p)
         return false;
     }
 
-    /* choose the spell to bind to it */
-    spell *bound = display_spell_select(_("Choose a spell to bind to it"), p,
-                                        SC_PLAYER, spell_filter_permanence_candidate);
+    /* choose the spell to bind to it: weapons take a limited number of
+       elemental attack charges, armour takes a permanent player buff */
+    bool is_weapon = (it->type == IT_WEAPON);
+    spell *bound = is_weapon
+        ? display_spell_select(_("Choose a spell to bind to it"), p,
+                               SC_MAX, spell_filter_permanence_weapon_candidate)
+        : display_spell_select(_("Choose a spell to bind to it"), p,
+                               SC_PLAYER, spell_filter_permanence_candidate);
 
     if (bound == NULL)
     {
@@ -1589,24 +1620,45 @@ static bool spell_permanence(spell *s __attribute__((unused)), struct player *p)
     /* description of the item before the enchantment changes its name */
     gchar *desc = item_describe(it, player_item_known(p, it), false, true);
 
-    /* create the bound effect at the caster's current knowledge of the
-       spell; binding it permanently costs a knowledge level (see below),
-       which is what keeps this from being far too powerful */
-    effect_t et = spell_effect(bound);
-    effect *e = effect_new(et);
+    if (is_weapon)
+    {
+        /* a weapon gets a limited number of on-hit charges instead of a
+           permanent effect; more knowledge of the spell buys more charges,
+           capped by the width of item::charges */
+        it->charges = min((int)(5 * bound->knowledge), 15);
+        it->charge_source = bound->id;
+    }
+    else
+    {
+        /* create the bound effect at the caster's current knowledge of the
+           spell; binding it permanently costs a knowledge level (see below),
+           which is what keeps this from being far too powerful */
+        effect_t et = spell_effect(bound);
+        effect *e = effect_new(et);
 
-    if (effect_type_inc_amount(et))
-        e->amount = effect_type_amount(et) * bound->knowledge;
+        if (effect_type_inc_amount(et))
+            e->amount = effect_type_amount(et) * bound->knowledge;
 
-    item_effect_add(it, e);
+        item_effect_add(it, e);
 
-    /* if the item is currently worn, the effect takes hold immediately;
-       otherwise it will activate the next time the item is equipped */
-    if (player_item_is_equipped(p, it))
-        player_effect_add(p, e);
+        /* if the item is currently worn, the effect takes hold immediately;
+           otherwise it will activate the next time the item is equipped */
+        if (player_item_is_equipped(p, it))
+            player_effect_add(p, e);
+    }
 
-    log_add_entry(nlarn->log, _("You bind %s permanently to %s."),
-                 spell_name(bound), desc);
+    if (is_weapon)
+    {
+        /* charges are consumed and eventually run out, unlike an armour
+           effect, so "permanently" would be misleading here */
+        log_add_entry(nlarn->log, _("You imbue %s with %d charges of %s."),
+                     desc, it->charges, spell_name(bound));
+    }
+    else
+    {
+        log_add_entry(nlarn->log, _("You bind %s permanently to %s."),
+                     spell_name(bound), desc);
+    }
     g_free(desc);
 
     /* the caster's own knowledge of the spell is diminished in exchange */
@@ -1632,6 +1684,17 @@ const char *spell_enchantment_name_raw(spell_id id)
 
     case SP_WTW:
         return g_dpgettext2(NULL, "spell", NC_("spell", "wall-walking"));
+
+    /* weapon charges read better as the elemental noun than the spell's
+       own name (a "sword of fire", not a "sword of fireball") */
+    case SP_BAL:
+        return g_dpgettext2(NULL, "spell", NC_("spell", "fire"));
+
+    case SP_CLD:
+        return g_dpgettext2(NULL, "spell", NC_("spell", "cold"));
+
+    case SP_CKL:
+        return g_dpgettext2(NULL, "spell", NC_("spell", "acid"));
 
     default:
         return spell_name_raw(id);

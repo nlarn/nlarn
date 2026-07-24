@@ -794,9 +794,10 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
     if (it->corroded == 2) strv_append(&add_infos, C_("item status", "very corroded"));
     if (it->rusty == 1) strv_append(&add_infos, C_("item status", "rusty"));
     if (it->rusty == 2) strv_append(&add_infos, C_("item status", "very rusty"));
-    /* naming for spell-bound charges is still to be decided; for now only
-       the poison coating (the one source currently reachable) gets a
-       status label */
+
+    /* a poison coating gets a status label ("a poisoned dagger"); a
+       permanence-bound elemental charge instead gets an "of %s" suffix
+       below, just like permanence-enchanted armour */
     if (it->charges > 0 && it->charge_source == SP_MAX)
         strv_append(&add_infos, C_("item status", "poisoned"));
 
@@ -815,6 +816,13 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
        unresolved metadata string would land it in the wrong form and
        silently drop it from the one actually selected for display */
     gchar *enchant_suffix = NULL;
+
+    if (it->charges > 0 && it->charge_source != SP_MAX)
+    {
+        enchant_suffix = g_strdup_printf(_(" of %s"),
+                noun_genitive_attribute(
+                    spell_enchantment_name_raw((spell_id)it->charge_source)));
+    }
 
     switch (it->type)
     {

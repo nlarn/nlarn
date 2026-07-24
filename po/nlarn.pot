@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-22 23:23+0200\n"
+"POT-Creation-Date: 2026-07-24 21:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1011,7 +1011,7 @@ msgstr ""
 msgid "your storage room"
 msgstr ""
 
-#: src/container.c:173 src/sobjects.c:467 src/sobjects.c:538 src/spells.c:1173
+#: src/container.c:173 src/sobjects.c:467 src/sobjects.c:538 src/spells.c:1174
 msgid "Huh?"
 msgstr ""
 
@@ -1369,7 +1369,7 @@ msgstr ""
 msgid "You are no longer invisible."
 msgstr ""
 
-#: src/effects.c:203 src/spells.c:882
+#: src/effects.c:203 src/spells.c:883
 #, c-format
 msgid "%s disappears."
 msgstr ""
@@ -2237,288 +2237,288 @@ msgctxt "item status"
 msgid "very rusty"
 msgstr ""
 
-#: src/items.c:801
+#: src/items.c:802
 msgctxt "item status"
 msgid "poisoned"
 msgstr ""
 
-#: src/items.c:816
-#, c-format
-msgid "amulet of %s"
-msgstr ""
-
-#: src/items.c:816
-#, c-format
-msgid "talisman of %s"
-msgstr ""
-
-#: src/items.c:819
-#, c-format
-msgid "%s amulet"
-msgstr ""
-
-#: src/items.c:850
+#: src/items.c:822 src/items.c:866
 #, c-format
 msgid " of %s"
 msgstr ""
 
-#: src/items.c:864
+#: src/items.c:832
+#, c-format
+msgid "amulet of %s"
+msgstr ""
+
+#: src/items.c:832
+#, c-format
+msgid "talisman of %s"
+msgstr ""
+
+#: src/items.c:835
+#, c-format
+msgid "%s amulet"
+msgstr ""
+
+#: src/items.c:880
 #, c-format
 msgid "books of %s"
 msgstr ""
 
-#: src/items.c:864
+#: src/items.c:880
 #, c-format
 msgid "book of %s"
 msgstr ""
 
-#: src/items.c:869
+#: src/items.c:885
 #, c-format
 msgid "%s books"
 msgstr ""
 
-#: src/items.c:869
+#: src/items.c:885
 #, c-format
 msgid "%s book"
 msgstr ""
 
-#: src/items.c:882
+#: src/items.c:898
 #, c-format
 msgid "%d carat"
 msgid_plural "%d carats"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/items.c:900
+#: src/items.c:916
 msgid "gold pieces"
 msgstr ""
 
-#: src/items.c:900
+#: src/items.c:916
 msgid "gold piece"
 msgstr ""
 
-#: src/items.c:907
+#: src/items.c:923
 #, c-format
 msgid "potions of %s"
 msgstr ""
 
-#: src/items.c:907
+#: src/items.c:923
 #, c-format
 msgid "potion of %s"
 msgstr ""
 
-#: src/items.c:912
+#: src/items.c:928
 #, c-format
 msgid "%s potions"
 msgstr ""
 
-#: src/items.c:912
+#: src/items.c:928
 #, c-format
 msgid "%s potion"
 msgstr ""
 
-#: src/items.c:918
+#: src/items.c:934
 #, c-format
 msgid "ring of %s"
 msgstr ""
 
-#: src/items.c:920
+#: src/items.c:936
 #, c-format
 msgid "%s ring"
 msgstr ""
 
-#: src/items.c:930
+#: src/items.c:946
 #, c-format
 msgid "scrolls of %s"
 msgstr ""
 
-#: src/items.c:930
+#: src/items.c:946
 #, c-format
 msgid "scroll of %s"
 msgstr ""
 
-#: src/items.c:937
+#: src/items.c:953
 msgid "unlabelled scrolls"
 msgstr ""
 
-#: src/items.c:937
+#: src/items.c:953
 msgid "unlabelled scroll"
 msgstr ""
 
-#: src/items.c:940
+#: src/items.c:956
 #, c-format
 msgid "scrolls labelled %s"
 msgstr ""
 
-#: src/items.c:940
+#: src/items.c:956
 #, c-format
 msgid "scroll labelled %s"
 msgstr ""
 
-#: src/items.c:1039
+#: src/items.c:1055
 msgid "the"
 msgstr ""
 
-#: src/items.c:1055
+#: src/items.c:1077
 msgid "noted"
 msgstr ""
 
-#: src/items.c:1408
+#: src/items.c:1430
 #, c-format
 msgid "%s vibrates strangely."
 msgstr ""
 
-#: src/items.c:1409
+#: src/items.c:1431
 #, c-format
 msgid "%s vibrate strangely."
 msgstr ""
 
-#: src/items.c:1455
+#: src/items.c:1477
 #, c-format
 msgid "%s vibrates warningly."
 msgstr ""
 
-#: src/items.c:1456
+#: src/items.c:1478
 #, c-format
 msgid "%s vibrate warningly."
 msgstr ""
 
-#: src/items.c:1525 src/spells.c:170
+#: src/items.c:1547 src/spells.c:171
 #, c-format
 msgid "%s resists."
 msgstr ""
 
-#: src/items.c:1525
+#: src/items.c:1547
 #, c-format
 msgid "%s resist."
 msgstr ""
 
-#: src/items.c:1538
+#: src/items.c:1560
 #, c-format
 msgid "%s shatters."
 msgstr ""
 
-#: src/items.c:1538
+#: src/items.c:1560
 #, c-format
 msgid "%s shatter."
 msgstr ""
 
-#: src/items.c:1548
+#: src/items.c:1570
 #, c-format
 msgid "%s burns."
 msgstr ""
 
-#: src/items.c:1548
+#: src/items.c:1570
 #, c-format
 msgid "%s burn."
 msgstr ""
 
-#: src/items.c:1556
+#: src/items.c:1578
 #, c-format
 msgid "%s corrodes."
 msgstr ""
 
-#: src/items.c:1556
+#: src/items.c:1578
 #, c-format
 msgid "%s corrode."
 msgstr ""
 
-#: src/items.c:1563
+#: src/items.c:1585
 #, c-format
 msgid "%s rusts."
 msgstr ""
 
-#: src/items.c:1563
+#: src/items.c:1585
 #, c-format
 msgid "%s rust."
 msgstr ""
 
-#: src/items.c:1587
+#: src/items.c:1609
 #, c-format
 msgid "%s is destroyed."
 msgstr ""
 
-#: src/items.c:1587
+#: src/items.c:1609
 #, c-format
 msgid "%s are destroyed."
 msgstr ""
 
-#: src/items.c:1684
+#: src/items.c:1706
 #, c-format
 msgid "Ammunition for %s\n"
 msgstr ""
 
-#: src/items.c:1689 src/items.c:1739
+#: src/items.c:1711 src/items.c:1761
 #, c-format
 msgid ""
 "Damage:   +%d\n"
 "Accuracy: +%d\n"
 msgstr ""
 
-#: src/items.c:1695 src/items.c:1746
+#: src/items.c:1717 src/items.c:1768
 #, c-format
 msgid ""
 "Base damage: +%d\n"
 "Base accuracy: +%d\n"
 msgstr ""
 
-#: src/items.c:1706
+#: src/items.c:1728
 #, c-format
 msgid ""
 "%s\n"
 "Spell level: %d\n"
 msgstr ""
 
-#: src/items.c:1718
+#: src/items.c:1740
 msgid "two-handed"
 msgstr ""
 
-#: src/items.c:1721
+#: src/items.c:1743
 msgid "ranged"
 msgstr ""
 
-#: src/items.c:1724
+#: src/items.c:1746
 msgid "unique"
 msgstr ""
 
-#: src/items.c:1730
+#: src/items.c:1752
 #, c-format
 msgid "%s weapon\n"
 msgstr ""
 
-#: src/items.c:1756
+#: src/items.c:1778
 #, c-format
 msgid "Armour class: %d\n"
 msgstr ""
 
-#: src/items.c:1760
+#: src/items.c:1782
 #, c-format
 msgid "Base AC: %d\n"
 msgstr ""
 
-#: src/items.c:1769
+#: src/items.c:1791
 #, c-format
 msgid "Notes: %s\n"
 msgstr ""
 
-#: src/items.c:1771
+#: src/items.c:1793
 #, c-format
 msgid "Weight:   %.2f kg\n"
 msgstr ""
 
-#: src/items.c:1774
+#: src/items.c:1796
 #, c-format
 msgid "Material: %s"
 msgstr ""
 
-#: src/items.c:1781
+#: src/items.c:1803
 #, c-format
 msgid ""
 "\n"
 "Price:    %d gold each"
 msgstr ""
 
-#: src/items.c:1781
+#: src/items.c:1803
 #, c-format
 msgid ""
 "\n"
@@ -3242,7 +3242,7 @@ msgstr ""
 msgid "%s sinks like a rock!"
 msgstr ""
 
-#: src/monsters.c:1986 src/spells.c:1371
+#: src/monsters.c:1986 src/spells.c:1372
 #, c-format
 msgid "%s is trapped in the wall!"
 msgstr ""
@@ -3440,7 +3440,7 @@ msgid "You feel a sense of loss."
 msgstr ""
 
 #: src/monsters.c:3373 src/scrolls.c:257 src/scrolls.c:723 src/scrolls.c:817
-#: src/scrolls.c:857 src/spells.c:1136 src/spells.c:1873 src/spells.c:1887
+#: src/scrolls.c:857 src/spells.c:1137 src/spells.c:1936 src/spells.c:1950
 msgid "Nothing happens."
 msgstr ""
 
@@ -3489,22 +3489,22 @@ msgstr ""
 msgid "%s hits %s."
 msgstr ""
 
-#: src/monsters.c:4220 src/spells.c:2026
+#: src/monsters.c:4220 src/spells.c:2089
 #, c-format
 msgid "Your amulet reflects %s!"
 msgstr ""
 
-#: src/monsters.c:4228 src/spells.c:2035 src/weapons.c:543
+#: src/monsters.c:4228 src/spells.c:2098 src/weapons.c:543
 #, c-format
 msgid "%s whizzes by you!"
 msgstr ""
 
-#: src/monsters.c:4236 src/spells.c:2044 src/weapons.c:551
+#: src/monsters.c:4236 src/spells.c:2107 src/weapons.c:551
 #, c-format
 msgid "%s hits you!"
 msgstr ""
 
-#: src/monsters.c:4269 src/spells.c:1976
+#: src/monsters.c:4269 src/spells.c:2039
 #, c-format
 msgid "The mirror reflects %s!"
 msgstr ""
@@ -3557,9 +3557,9 @@ msgstr ""
 msgid "Choose a destination to travel to."
 msgstr ""
 
-#: src/nlarn.c:906 src/player.c:3846 src/spells.c:753 src/spells.c:930
-#: src/spells.c:994 src/spells.c:1030 src/spells.c:1070 src/spells.c:1084
-#: src/spells.c:1575 src/spells.c:1585
+#: src/nlarn.c:906 src/player.c:3846 src/spells.c:754 src/spells.c:931
+#: src/spells.c:995 src/spells.c:1031 src/spells.c:1071 src/spells.c:1085
+#: src/spells.c:1601 src/spells.c:1616
 msgid "Aborted."
 msgstr ""
 
@@ -5278,7 +5278,7 @@ msgctxt "scroll"
 msgid "genocide monster"
 msgstr ""
 
-#: src/scrolls.c:121 src/spells.c:1668
+#: src/scrolls.c:121 src/spells.c:1731
 #, c-format
 msgid "As you are blind you can't read %s."
 msgstr ""
@@ -5292,7 +5292,7 @@ msgstr ""
 msgid "You read %s."
 msgstr ""
 
-#: src/scrolls.c:138 src/spells.c:1689
+#: src/scrolls.c:138 src/spells.c:1752
 #, c-format
 msgid "reading %s"
 msgstr ""
@@ -5851,898 +5851,918 @@ msgstr ""
 msgid "The lightning hits you!"
 msgstr ""
 
-#: src/spells.c:55
+#: src/spells.c:56
 msgctxt "spell"
 msgid "protection"
 msgstr ""
 
-#: src/spells.c:57
+#: src/spells.c:58
 msgid "Generates a protection field"
 msgstr ""
 
-#: src/spells.c:62
+#: src/spells.c:63
 msgctxt "spell"
 msgid "magic missile"
 msgstr ""
 
-#: src/spells.c:64
-msgid "Creates and hurls a missile of magical energy"
-msgstr ""
-
 #: src/spells.c:65
-#, c-format
-msgid "The missile hits %s."
+msgid "Creates and hurls a missile of magical energy"
 msgstr ""
 
 #: src/spells.c:66
 #, c-format
+msgid "The missile hits %s."
+msgstr ""
+
+#: src/spells.c:67
+#, c-format
 msgid "The missile bounces off %s."
 msgstr ""
 
-#: src/spells.c:70
+#: src/spells.c:71
 msgctxt "spell"
 msgid "dexterity"
 msgstr ""
 
-#: src/spells.c:72
+#: src/spells.c:73
 msgid "Improves the caster's dexterity"
 msgstr ""
 
-#: src/spells.c:77
+#: src/spells.c:78
 msgctxt "spell"
 msgid "sleep"
 msgstr ""
 
-#: src/spells.c:79
+#: src/spells.c:80
 msgid "Causes some monsters to go to sleep"
 msgstr ""
 
-#: src/spells.c:81
+#: src/spells.c:82
 #, c-format
 msgid "%s doesn't sleep."
 msgstr ""
 
-#: src/spells.c:85
+#: src/spells.c:86
 msgctxt "spell"
 msgid "charm monster"
 msgstr ""
 
-#: src/spells.c:87
+#: src/spells.c:88
 msgid "Some monsters may be awed at your magnificence"
 msgstr ""
 
-#: src/spells.c:88
+#: src/spells.c:89
 #, c-format
 msgid "%s isn't impressed."
 msgstr ""
 
-#: src/spells.c:92
+#: src/spells.c:93
 msgctxt "spell"
 msgid "sonic spear"
 msgstr ""
 
-#: src/spells.c:94
-msgid "Causes your hands to emit a screeching sound toward what they point"
-msgstr ""
-
 #: src/spells.c:95
-#, c-format
-msgid "The sound damages %s."
+msgid "Causes your hands to emit a screeching sound toward what they point"
 msgstr ""
 
 #: src/spells.c:96
 #, c-format
+msgid "The sound damages %s."
+msgstr ""
+
+#: src/spells.c:97
+#, c-format
 msgid "%s can't hear the noise."
 msgstr ""
 
-#: src/spells.c:100
+#: src/spells.c:101
 msgctxt "spell"
 msgid "strength"
 msgstr ""
 
-#: src/spells.c:102
+#: src/spells.c:103
 msgid "Increase the caster's strength for a short term"
 msgstr ""
 
-#: src/spells.c:107
+#: src/spells.c:108
 msgctxt "spell"
 msgid "cure poison"
 msgstr ""
 
-#: src/spells.c:109
+#: src/spells.c:110
 msgid "The caster is cured from poison"
 msgstr ""
 
-#: src/spells.c:114
+#: src/spells.c:115
 msgctxt "spell"
 msgid "healing"
 msgstr ""
 
-#: src/spells.c:116
+#: src/spells.c:117
 msgid "Restores some HP to the caster"
 msgstr ""
 
-#: src/spells.c:121
+#: src/spells.c:122
 msgctxt "spell"
 msgid "cure blindness"
 msgstr ""
 
-#: src/spells.c:123
+#: src/spells.c:124
 msgid "Restores sight to one so unfortunate as to be blinded"
 msgstr ""
 
-#: src/spells.c:128
+#: src/spells.c:129
 msgctxt "spell"
 msgid "create monster"
 msgstr ""
 
-#: src/spells.c:130
+#: src/spells.c:131
 msgid "Creates a monster near the caster appropriate for the location"
 msgstr ""
 
-#: src/spells.c:135
+#: src/spells.c:136
 msgctxt "spell"
 msgid "phantasmal forces"
 msgstr ""
 
-#: src/spells.c:137
-msgid "Creates illusions, and if believed, the monster flees"
-msgstr ""
-
 #: src/spells.c:138
-#, c-format
-msgid "%s believed!"
+msgid "Creates illusions, and if believed, the monster flees"
 msgstr ""
 
 #: src/spells.c:139
 #, c-format
+msgid "%s believed!"
+msgstr ""
+
+#: src/spells.c:140
+#, c-format
 msgid "%s didn't believe the illusions!"
 msgstr ""
 
-#: src/spells.c:143
+#: src/spells.c:144
 msgctxt "spell"
 msgid "invisibility"
 msgstr ""
 
-#: src/spells.c:145
+#: src/spells.c:146
 msgid "The caster becomes invisible"
 msgstr ""
 
-#: src/spells.c:150
+#: src/spells.c:151
 msgctxt "spell"
 msgid "fireball"
 msgstr ""
 
-#: src/spells.c:152
+#: src/spells.c:153
 msgid "Makes a ball of fire that burns on what it hits"
 msgstr ""
 
-#: src/spells.c:153
+#: src/spells.c:154
 #, c-format
 msgid "The fireball hits %s."
 msgstr ""
 
-#: src/spells.c:158
+#: src/spells.c:159
 msgctxt "spell"
 msgid "cone of cold"
 msgstr ""
 
-#: src/spells.c:160
+#: src/spells.c:161
 msgid "Sends forth a cone of cold which freezes what it touches"
 msgstr ""
 
-#: src/spells.c:161
+#: src/spells.c:162
 #, c-format
 msgid "The cone of cold strikes %s."
 msgstr ""
 
-#: src/spells.c:166
+#: src/spells.c:167
 msgctxt "spell"
 msgid "polymorph"
 msgstr ""
 
-#: src/spells.c:168
+#: src/spells.c:169
 msgid "You can find out what this does for yourself"
 msgstr ""
 
-#: src/spells.c:174
+#: src/spells.c:175
 msgctxt "spell"
 msgid "cancellation"
 msgstr ""
 
-#: src/spells.c:176
+#: src/spells.c:177
 msgid "Protects the caster against spheres of annihilation"
 msgstr ""
 
-#: src/spells.c:181
+#: src/spells.c:182
 msgctxt "spell"
 msgid "haste self"
 msgstr ""
 
-#: src/spells.c:183
+#: src/spells.c:184
 msgid "Speeds up the caster's movements"
 msgstr ""
 
-#: src/spells.c:188
+#: src/spells.c:189
 msgctxt "spell"
 msgid "killing cloud"
 msgstr ""
 
-#: src/spells.c:190
+#: src/spells.c:191
 msgid "Creates a fog of poisonous gas which kills all that is within it"
 msgstr ""
 
-#: src/spells.c:191
+#: src/spells.c:192
 #, c-format
 msgid "%s gasps for air."
 msgstr ""
 
-#: src/spells.c:196
+#: src/spells.c:197
 msgctxt "spell"
 msgid "vaporize rock"
 msgstr ""
 
-#: src/spells.c:198
+#: src/spells.c:199
 msgid "This changes rock to air"
 msgstr ""
 
-#: src/spells.c:203
+#: src/spells.c:204
 msgctxt "spell"
 msgid "dehydration"
 msgstr ""
 
-#: src/spells.c:205
+#: src/spells.c:206
 msgid "Dries up water in the immediate vicinity"
 msgstr ""
 
-#: src/spells.c:206
+#: src/spells.c:207
 #, c-format
 msgid "%s shrivels up."
 msgstr ""
 
-#: src/spells.c:207 src/spells.c:245
+#: src/spells.c:208 src/spells.c:246
 #, c-format
 msgid "%s isn't affected."
 msgstr ""
 
-#: src/spells.c:211
+#: src/spells.c:212
 msgctxt "spell"
 msgid "lightning"
 msgstr ""
 
-#: src/spells.c:213
-msgid "Your finger will emit a lightning bolt when this spell is cast"
-msgstr ""
-
 #: src/spells.c:214
-#, c-format
-msgid "A lightning bolt hits %s."
+msgid "Your finger will emit a lightning bolt when this spell is cast"
 msgstr ""
 
 #: src/spells.c:215
 #, c-format
+msgid "A lightning bolt hits %s."
+msgstr ""
+
+#: src/spells.c:216
+#, c-format
 msgid "%s loves fire and lightning!"
 msgstr ""
 
-#: src/spells.c:219
+#: src/spells.c:220
 msgctxt "spell"
 msgid "drain life"
 msgstr ""
 
-#: src/spells.c:221
+#: src/spells.c:222
 msgid ""
 "Sacrifice some life energy to your god to drain life from monsters in range"
 msgstr ""
 
-#: src/spells.c:226
+#: src/spells.c:227
 msgctxt "spell"
 msgid "invulnerability"
 msgstr ""
 
-#: src/spells.c:228
+#: src/spells.c:229
 msgid "This globe helps to protect the player from physical attack"
 msgstr ""
 
-#: src/spells.c:233
+#: src/spells.c:234
 msgctxt "spell"
 msgid "flood"
 msgstr ""
 
-#: src/spells.c:235
-msgid "This creates an avalanche of H2O to flood the immediate chamber"
-msgstr ""
-
 #: src/spells.c:236
-#, c-format
-msgid "%s struggles for air in the flood!"
+msgid "This creates an avalanche of H2O to flood the immediate chamber"
 msgstr ""
 
 #: src/spells.c:237
 #, c-format
+msgid "%s struggles for air in the flood!"
+msgstr ""
+
+#: src/spells.c:238
+#, c-format
 msgid "%s loves the water!"
 msgstr ""
 
-#: src/spells.c:241
+#: src/spells.c:242
 msgctxt "spell"
 msgid "finger of death"
 msgstr ""
 
-#: src/spells.c:243
+#: src/spells.c:244
 msgid "This is a holy spell and calls upon your god to back you up"
 msgstr ""
 
-#: src/spells.c:244
+#: src/spells.c:245
 #, c-format
 msgid "The heart of %s stopped."
 msgstr ""
 
-#: src/spells.c:249
+#: src/spells.c:250
 msgctxt "spell"
 msgid "scare monsters"
 msgstr ""
 
-#: src/spells.c:251
+#: src/spells.c:252
 msgid "Terrifies nearby monsters so that hopefully they flee the magic user"
 msgstr ""
 
-#: src/spells.c:256
+#: src/spells.c:257
 msgctxt "spell"
 msgid "hold monster"
 msgstr ""
 
-#: src/spells.c:258
+#: src/spells.c:259
 msgid "The monster is frozen in his tracks if this is successful"
 msgstr ""
 
-#: src/spells.c:263
+#: src/spells.c:264
 msgctxt "spell"
 msgid "time stop"
 msgstr ""
 
-#: src/spells.c:265
+#: src/spells.c:266
 msgid "All movement in the caverns ceases for a limited duration"
 msgstr ""
 
-#: src/spells.c:270
+#: src/spells.c:271
 msgctxt "spell"
 msgid "teleport away"
 msgstr ""
 
-#: src/spells.c:272
+#: src/spells.c:273
 msgid "Moves a particular monster around the caverns"
 msgstr ""
 
-#: src/spells.c:277
+#: src/spells.c:278
 msgctxt "spell"
 msgid "magic fire"
 msgstr ""
 
-#: src/spells.c:279
+#: src/spells.c:280
 msgid "This causes a curtain of fire to appear all around you"
 msgstr ""
 
-#: src/spells.c:280
+#: src/spells.c:281
 #, c-format
 msgid "%s cringes from the flame."
 msgstr ""
 
-#: src/spells.c:285
+#: src/spells.c:286
 msgctxt "spell"
 msgid "make wall"
 msgstr ""
 
-#: src/spells.c:287
+#: src/spells.c:288
 msgid "Makes a wall in the specified place"
 msgstr ""
 
-#: src/spells.c:292
+#: src/spells.c:293
 msgctxt "spell"
 msgid "sphere of annihilation"
 msgstr ""
 
-#: src/spells.c:294
+#: src/spells.c:295
 msgid "Anything caught in this sphere is instantly killed"
 msgstr ""
 
-#: src/spells.c:299
+#: src/spells.c:300
 msgctxt "spell"
 msgid "summon demon"
 msgstr ""
 
-#: src/spells.c:301
+#: src/spells.c:302
 msgid "Summons a demon who hopefully helps you out"
 msgstr ""
 
-#: src/spells.c:306
+#: src/spells.c:307
 msgctxt "spell"
 msgid "walk through walls"
 msgstr ""
 
-#: src/spells.c:308
+#: src/spells.c:309
 msgid "Allows the caster to walk through walls for a short period of time"
 msgstr ""
 
-#: src/spells.c:313
+#: src/spells.c:314
 msgctxt "spell"
 msgid "alter reality"
 msgstr ""
 
-#: src/spells.c:315
+#: src/spells.c:316
 msgid "God only knows what this will do"
 msgstr ""
 
-#: src/spells.c:317
+#: src/spells.c:318
 msgid "Polinneaus won't let you mess with his caverns!"
 msgstr ""
 
-#: src/spells.c:321
+#: src/spells.c:322
 msgctxt "spell"
 msgid "permanence"
 msgstr ""
 
-#: src/spells.c:323
+#: src/spells.c:324
 msgid "Permanently binds one of the caster's spells to a piece of armour"
-msgstr ""
-
-#: src/spells.c:337
-msgctxt "book"
-msgid "parchment-bound"
 msgstr ""
 
 #: src/spells.c:338
 msgctxt "book"
-msgid "thick"
+msgid "parchment-bound"
 msgstr ""
 
 #: src/spells.c:339
 msgctxt "book"
-msgid "dusty"
+msgid "thick"
 msgstr ""
 
 #: src/spells.c:340
 msgctxt "book"
-msgid "leather-bound"
+msgid "dusty"
 msgstr ""
 
 #: src/spells.c:341
 msgctxt "book"
-msgid "heavy"
+msgid "leather-bound"
 msgstr ""
 
 #: src/spells.c:342
 msgctxt "book"
-msgid "ancient"
+msgid "heavy"
 msgstr ""
 
 #: src/spells.c:343
 msgctxt "book"
-msgid "buckram"
+msgid "ancient"
 msgstr ""
 
 #: src/spells.c:344
 msgctxt "book"
-msgid "gilded"
+msgid "buckram"
 msgstr ""
 
 #: src/spells.c:345
 msgctxt "book"
-msgid "embossed"
+msgid "gilded"
 msgstr ""
 
 #: src/spells.c:346
 msgctxt "book"
-msgid "old"
+msgid "embossed"
 msgstr ""
 
 #: src/spells.c:347
 msgctxt "book"
-msgid "thin"
+msgid "old"
 msgstr ""
 
 #: src/spells.c:348
 msgctxt "book"
-msgid "light"
+msgid "thin"
 msgstr ""
 
 #: src/spells.c:349
 msgctxt "book"
-msgid "large"
+msgid "light"
 msgstr ""
 
 #: src/spells.c:350
 msgctxt "book"
-msgid "vellum"
+msgid "large"
 msgstr ""
 
 #: src/spells.c:351
 msgctxt "book"
-msgid "tan"
+msgid "vellum"
 msgstr ""
 
 #: src/spells.c:352
 msgctxt "book"
-msgid "papyrus"
+msgid "tan"
 msgstr ""
 
 #: src/spells.c:353
 msgctxt "book"
-msgid "linen"
+msgid "papyrus"
 msgstr ""
 
 #: src/spells.c:354
 msgctxt "book"
-msgid "musty"
+msgid "linen"
 msgstr ""
 
 #: src/spells.c:355
 msgctxt "book"
-msgid "faded"
+msgid "musty"
 msgstr ""
 
 #: src/spells.c:356
 msgctxt "book"
-msgid "antique"
+msgid "faded"
 msgstr ""
 
 #: src/spells.c:357
 msgctxt "book"
-msgid "worn out"
+msgid "antique"
 msgstr ""
 
 #: src/spells.c:358
 msgctxt "book"
-msgid "tattered"
+msgid "worn out"
 msgstr ""
 
 #: src/spells.c:359
 msgctxt "book"
-msgid "aged"
+msgid "tattered"
 msgstr ""
 
 #: src/spells.c:360
 msgctxt "book"
-msgid "ornate"
+msgid "aged"
 msgstr ""
 
 #: src/spells.c:361
 msgctxt "book"
-msgid "inconspicuous"
+msgid "ornate"
 msgstr ""
 
 #: src/spells.c:362
 msgctxt "book"
-msgid "awe-inspiring"
+msgid "inconspicuous"
 msgstr ""
 
 #: src/spells.c:363
 msgctxt "book"
-msgid "stained"
+msgid "awe-inspiring"
 msgstr ""
 
 #: src/spells.c:364
 msgctxt "book"
-msgid "mottled"
+msgid "stained"
 msgstr ""
 
 #: src/spells.c:365
 msgctxt "book"
-msgid "plaid"
+msgid "mottled"
 msgstr ""
 
 #: src/spells.c:366
 msgctxt "book"
-msgid "wax-lined"
+msgid "plaid"
 msgstr ""
 
 #: src/spells.c:367
 msgctxt "book"
-msgid "bamboo"
+msgid "wax-lined"
 msgstr ""
 
 #: src/spells.c:368
 msgctxt "book"
-msgid "clasped"
+msgid "bamboo"
 msgstr ""
 
 #: src/spells.c:369
 msgctxt "book"
-msgid "well-thumbed"
+msgid "clasped"
 msgstr ""
 
 #: src/spells.c:370
 msgctxt "book"
-msgid "ragged"
+msgid "well-thumbed"
 msgstr ""
 
 #: src/spells.c:371
 msgctxt "book"
-msgid "dull"
+msgid "ragged"
 msgstr ""
 
 #: src/spells.c:372
 msgctxt "book"
-msgid "canvas"
+msgid "dull"
 msgstr ""
 
 #: src/spells.c:373
 msgctxt "book"
+msgid "canvas"
+msgstr ""
+
+#: src/spells.c:374
+msgctxt "book"
 msgid "chambray"
 msgstr ""
 
-#: src/spells.c:497
+#: src/spells.c:498
 msgid "You don't know any spells."
 msgstr ""
 
-#: src/spells.c:504 src/spells.c:545
+#: src/spells.c:505 src/spells.c:546
 msgid "You can't aim your magic!"
 msgstr ""
 
-#: src/spells.c:525
+#: src/spells.c:526
 msgid "You don't know a suitable spell."
 msgstr ""
 
-#: src/spells.c:531
+#: src/spells.c:532
 msgid "Select a spell to cast"
 msgstr ""
 
-#: src/spells.c:623
+#: src/spells.c:624
 msgid "affects the player"
 msgstr ""
 
-#: src/spells.c:626
+#: src/spells.c:627
 msgid "affects a single monster"
 msgstr ""
 
-#: src/spells.c:629
+#: src/spells.c:630
 msgid "emits a ray"
 msgstr ""
 
-#: src/spells.c:632
+#: src/spells.c:633
 msgid "creates an effect which fills an area"
 msgstr ""
 
-#: src/spells.c:635
+#: src/spells.c:636
 msgid "creates an explosion"
 msgstr ""
 
-#: src/spells.c:669
+#: src/spells.c:670
 #, c-format
 msgid "You have extended the power of %s."
 msgstr ""
 
-#: src/spells.c:682
+#: src/spells.c:683
 #, c-format
 msgid ""
 "You have already extended the power of %s to the extent of your knowledge."
 msgstr ""
 
-#: src/spells.c:698
+#: src/spells.c:699
 #, c-format
 msgid "You have extended the duration of %s."
 msgstr ""
 
-#: src/spells.c:704
+#: src/spells.c:705
 #, c-format
 msgid ""
 "You have already extended the duration of %s to the extent of your knowledge."
 msgstr ""
 
-#: src/spells.c:743 src/spells.c:921
+#: src/spells.c:744 src/spells.c:922
 #, c-format
 msgid "Select a target for %s."
 msgstr ""
 
-#: src/spells.c:759
+#: src/spells.c:760
 msgid "This spell only works on monsters."
 msgstr ""
 
-#: src/spells.c:782
+#: src/spells.c:783
 msgid "There is no monster there."
 msgstr ""
 
-#: src/spells.c:846
+#: src/spells.c:847
 msgid "The gods are angry! The spell backfires!"
 msgstr ""
 
-#: src/spells.c:872
+#: src/spells.c:873
 #, c-format
 msgid "%s shudders and transforms!"
 msgstr ""
 
-#: src/spells.c:936
+#: src/spells.c:937
 msgid "Why would you want to do that?"
 msgstr ""
 
-#: src/spells.c:987
+#: src/spells.c:988
 #, c-format
 msgid "Where do you want to place %s?"
 msgstr ""
 
-#: src/spells.c:1027 src/spells.c:1082
+#: src/spells.c:1028 src/spells.c:1083
 msgid "The spell is going to hit you. Cast anyway?"
 msgstr ""
 
-#: src/spells.c:1061
+#: src/spells.c:1062
 #, c-format
 msgid "Point to the center of the %s."
 msgstr ""
 
-#: src/spells.c:1151
+#: src/spells.c:1152
 msgid "You feel failure."
 msgstr ""
 
-#: src/spells.c:1161
+#: src/spells.c:1162
 msgid "Where do you want to place the sphere?"
 msgstr ""
 
-#: src/spells.c:1192
+#: src/spells.c:1193
 msgid "You weren't even poisoned!"
 msgstr ""
 
-#: src/spells.c:1210
+#: src/spells.c:1211
 msgid "You weren't even blinded!"
 msgstr ""
 
-#: src/spells.c:1219
+#: src/spells.c:1220
 msgid "Choose a target for phantasmal forces."
 msgstr ""
 
-#: src/spells.c:1328
+#: src/spells.c:1329
 msgid "Select a position where you want to place a wall."
 msgstr ""
 
-#: src/spells.c:1333
+#: src/spells.c:1334
 msgid "You are actually standing there."
 msgstr ""
 
-#: src/spells.c:1338
+#: src/spells.c:1339
 msgid "No wall today."
 msgstr ""
 
-#: src/spells.c:1356
+#: src/spells.c:1357
 msgid "You have created a wall."
 msgstr ""
 
-#: src/spells.c:1383
+#: src/spells.c:1384
 msgid "There was a wall already."
 msgstr ""
 
-#: src/spells.c:1401
+#: src/spells.c:1402
 msgid "You have no life energy to sacrifice!"
 msgstr ""
 
-#: src/spells.c:1442
+#: src/spells.c:1443
 #, c-format
 msgid "%s gains health from your sacrifice!"
 msgstr ""
 
-#: src/spells.c:1450
+#: src/spells.c:1451
 #, c-format
 msgid "%s is drained by your sacrifice!"
 msgstr ""
 
-#: src/spells.c:1468
+#: src/spells.c:1469
 #, c-format
 msgid "Your sacrifice affected %d monster."
 msgid_plural "Your sacrifice affected %d monsters."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/spells.c:1474
+#: src/spells.c:1475
 msgid "Your sacrifice did not cause any pain."
 msgstr ""
 
-#: src/spells.c:1486
+#: src/spells.c:1487
 msgid "What do you want to vaporize?"
 msgstr ""
 
-#: src/spells.c:1491
+#: src/spells.c:1492
 msgid "So you chose not to vaporize anything."
 msgstr ""
 
-#: src/spells.c:1511
+#: src/spells.c:1512
 #, c-format
 msgid "%s can't be vaporized."
 msgstr ""
 
-#: src/spells.c:1547
+#: src/spells.c:1572
 msgid "You don't have anything suitable to enchant."
 msgstr ""
 
-#: src/spells.c:1564
+#: src/spells.c:1590
 msgid "You don't know a spell suitable for binding."
 msgstr ""
 
-#: src/spells.c:1569
+#: src/spells.c:1595
 msgid "Choose an item to enchant"
 msgstr ""
 
-#: src/spells.c:1580
+#: src/spells.c:1609 src/spells.c:1611
 msgid "Choose a spell to bind to it"
 msgstr ""
 
-#: src/spells.c:1608
+#: src/spells.c:1654
+#, c-format
+msgid "You imbue %s with %d charges of %s."
+msgstr ""
+
+#: src/spells.c:1659
 #, c-format
 msgid "You bind %s permanently to %s."
 msgstr ""
 
-#: src/spells.c:1617
+#: src/spells.c:1669
 #, c-format
 msgid "You have forgotten how to cast %s."
 msgstr ""
 
-#: src/spells.c:1631
+#: src/spells.c:1683
 msgctxt "spell"
 msgid "speed"
 msgstr ""
 
-#: src/spells.c:1634
+#: src/spells.c:1686
 msgctxt "spell"
 msgid "wall-walking"
 msgstr ""
 
-#: src/spells.c:1677
+#: src/spells.c:1691
+msgctxt "spell"
+msgid "fire"
+msgstr ""
+
+#: src/spells.c:1694
+msgctxt "spell"
+msgid "cold"
+msgstr ""
+
+#: src/spells.c:1697
+msgctxt "spell"
+msgid "acid"
+msgstr ""
+
+#: src/spells.c:1740
 msgid "You'd rather not read this cursed book."
 msgstr ""
 
-#: src/spells.c:1682
+#: src/spells.c:1745
 #, c-format
 msgid "You start reading %s."
 msgstr ""
 
-#: src/spells.c:1704
+#: src/spells.c:1767
 msgid "There was something wrong with this book! It crumbles to dust."
 msgstr ""
 
-#: src/spells.c:1715
+#: src/spells.c:1778
 msgid "You cannot understand the content of this book."
 msgstr ""
 
-#: src/spells.c:1718
+#: src/spells.c:1781
 msgid "It seems really boring, though."
 msgstr ""
 
-#: src/spells.c:1723
+#: src/spells.c:1786
 #, c-format
 msgid "You master the spell %s."
 msgstr ""
 
-#: src/spells.c:1732
+#: src/spells.c:1795
 #, c-format
 msgid "You improved your knowledge of the spell %s."
 msgstr ""
 
-#: src/spells.c:1743
+#: src/spells.c:1806
 msgid "Reading makes you ingenious."
 msgstr ""
 
-#: src/spells.c:1759
+#: src/spells.c:1822
 #, c-format
 msgid "You lack the power to cast %s."
 msgstr ""
 
-#: src/spells.c:1766
+#: src/spells.c:1829
 msgid "This spell is too difficult for you."
 msgstr ""
 
-#: src/spells.c:1770
+#: src/spells.c:1833
 #, c-format
 msgid "You cast %s."
 msgstr ""
 
-#: src/spells.c:1778
+#: src/spells.c:1841
 msgid "It didn't work!"
 msgstr ""
 
-#: src/spells.c:1809
+#: src/spells.c:1872
 msgid "You think you've hit something."
 msgstr ""
 
-#: src/spells.c:1878
+#: src/spells.c:1941
 msgid "The water is more shallow now."
 msgstr ""
 
-#: src/spells.c:1899
+#: src/spells.c:1962
 msgid "The water evaporates!"
 msgstr ""
 
