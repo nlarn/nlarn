@@ -194,8 +194,7 @@ monster_data_t monster_data[] = {
         .level = 2, .intelligence = 3, .speed = NORMAL, .size = TINY,
         .flags = HEAD,
         .attacks = {
-            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
-            { .type = ATT_BITE, .base = 2, .damage = DAM_POISON },
+            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 10 },
         }, .default_ai = MA_WANDER, .sound = N_("hiss")
     },
     { /* MT_CENTIPEDE */
@@ -204,8 +203,7 @@ monster_data_t monster_data[] = {
         .level = 2, .intelligence = 2, .speed = NORMAL, .size = SMALL,
         .flags = HEAD,
         .attacks = {
-            { .type = ATT_BITE, .base = 50, .damage = DAM_DEC_STR },
-            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
+            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL, .toxin = ET_DEC_STR, .toxin_chance = 50 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_JACULUS */
@@ -233,8 +231,7 @@ monster_data_t monster_data[] = {
         .level = 2, .intelligence = 3, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | PACK,
         .attacks = {
-            { .type = ATT_BITE, .base = 75, .damage = DAM_DEC_STR },
-            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL },
+            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL, .toxin = ET_DEC_STR, .toxin_chance = 75 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_FLOATING_EYE */
@@ -271,8 +268,7 @@ monster_data_t monster_data[] = {
         .level = 3, .intelligence = 3, .speed = FAST, .size = SMALL,
         .flags = HEAD | HANDS | DEMON,
         .attacks = {
-            { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
-            { .type = ATT_CLAW, .base = 66, .damage = DAM_DEC_DEX },
+            { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_DEC_DEX, .toxin_chance = 66 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_RUST_MONSTER */
@@ -301,8 +297,7 @@ monster_data_t monster_data[] = {
         .level = 4, .intelligence = 3, .speed = FAST, .size = TINY,
         .flags = HEAD | RES_POISON,
         .attacks = {
-            { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL },
-            { .type = ATT_BITE, .base = 3, .damage = DAM_POISON },
+            { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 15 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_BUGBEAR */
@@ -418,8 +413,7 @@ monster_data_t monster_data[] = {
         .level = 6, .intelligence = 3, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | RES_CONF,
         .attacks = {
-            { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL },
-            { .type = ATT_CLAW, .base = 70, .damage = DAM_DEC_RND },
+            { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_DEC_RND, .toxin_chance = 70 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_VIOLET_FUNGUS */
@@ -428,8 +422,7 @@ monster_data_t monster_data[] = {
         .level = 6, .intelligence = 3, .speed = XSLOW, .size = MEDIUM,
         .flags = RES_SLEEP | RES_POISON | RES_CONF,
         .attacks = {
-            { .type = ATT_SLAM, .base = 3, .damage = DAM_PHYSICAL },
-            { .type = ATT_SLAM, .base = 4, .damage = DAM_POISON },
+            { .type = ATT_SLAM, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 20 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_WRAITH */
@@ -586,8 +579,8 @@ monster_data_t monster_data[] = {
         .level = 9, .intelligence = 3, .speed = VSLOW, .size = GARGANTUAN,
         .flags = HEAD | RES_POISON,
         .attacks = {
-            { .type = ATT_BITE, .base = 11, .damage = DAM_PHYSICAL },
-            { .type = ATT_STING, .base = 6, .damage = DAM_POISON },
+            { .type = ATT_BITE, .base = 11, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 30 },
+            { .type = ATT_STING, .base = 4, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 30 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_XVART */
@@ -2266,6 +2259,13 @@ void monster_player_attack(monster *m, player *p)
     damage *dam = damage_new(att.damage, att.type,
                         modified_attack_amount(att.base, att.damage),
                         DAMO_MONSTER, m);
+
+    /* a toxin carried alongside the attack gets its own, separate chance
+       to affect the player once the primary damage has been applied */
+    dam->toxin = att.toxin;
+    dam->toxin_chance = att.toxin_chance
+        + ((att.toxin == ET_POISON) ? (game_difficulty(nlarn) + 1)/2
+                                     : game_difficulty(nlarn)/2);
 
     /* deal with random damage (spirit naga) */
     if (dam->type == DAM_RANDOM)

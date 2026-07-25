@@ -1936,9 +1936,127 @@ bool player_evade(player *p) {
     return(evasion >= (int)rand_1n(21));
 }
 
+static void player_apply_poison(player *p, int amount, player_cod cause_type, int cause)
+{
+    /* check if the damage is not caused by the effect that is
+       already attached to the player */
+    if (cause_type != PD_EFFECT)
+    {
+        /* check resistance; prevent negative damage amount */
+        amount = max(0, amount - rand_0n(player_get_con(p)));
+
+        if (amount > 0)
+        {
+            effect *e = effect_new(ET_POISON);
+            e->amount = amount;
+            player_effect_add(p, e);
+        }
+        else
+        {
+            log_add_entry(nlarn->log, _("You resist the poison."));
+        }
+    }
+    else
+    {
+        /* damage is caused by the effect of the poison effect () */
+        log_add_entry(nlarn->log, _("You feel poison running through your veins."));
+        player_hp_lose(p, amount, cause_type, cause);
+    }
+}
+
+static void player_apply_stat_drain(player *p, effect_t et, int chance_pct)
+{
+    if (!player_effect(p, ET_SUSTAINMENT)
+        && chance(chance_pct -= player_get_con(p)))
+    {
+        effect *e = effect_new(et);
+        /* the default number of turns is 1 */
+        e->turns = chance_pct * 5;
+        (void)player_effect_add(p, e);
+
+        switch (et)
+        {
+        case ET_DEC_CON:
+            if (player_get_con(p) < 1)
+                player_die(p, PD_EFFECT, ET_DEC_CON);
+            break;
+
+        case ET_DEC_DEX:
+            if (player_get_dex(p) < 1)
+                player_die(p, PD_EFFECT, ET_DEC_DEX);
+            break;
+
+        case ET_DEC_INT:
+            if (player_get_int(p) < 1)
+                player_die(p, PD_EFFECT, ET_DEC_INT);
+            break;
+
+        case ET_DEC_STR:
+            /* strength has been modified -> recalc burdened status */
+            player_inv_weight_recalc(p->inventory, NULL);
+
+            if (player_get_str(p) < 1)
+                player_die(p, PD_EFFECT, ET_DEC_STR);
+            break;
+
+        case ET_DEC_WIS:
+            if (player_get_wis(p) < 1)
+                player_die(p, PD_EFFECT, ET_DEC_WIS);
+            break;
+
+        default:
+            break;
+        }
+    }
+    else
+    {
+        log_add_entry(nlarn->log, _("You are not affected."));
+    }
+}
+
+/* Give a toxin (a status effect potentially carried alongside a monster's
+   primary attack, e.g. a snake's venom) its own chance to affect the
+   player, on top of whatever the primary damage above already did. */
+static void player_apply_toxin(player *p, effect_t toxin, int toxin_chance,
+                                player_cod cause_type, int cause)
+{
+    if (toxin == ET_NONE)
+        return;
+
+    /* first roll: did the toxin transfer into the player's system at all?
+       This is a property of the attack alone - the player's own defences
+       (CON, ET_SUSTAINMENT, ...) play no part in it. */
+    if (!chance(toxin_chance))
+        return;
+
+    /* the toxin has been transferred; from here on it is handled exactly
+       like any other toxin affecting the player, regardless of how it got
+       there, via the same resistance checks used elsewhere */
+    switch (toxin)
+    {
+        case ET_POISON:
+            player_apply_poison(p, toxin_chance, cause_type, cause);
+            break;
+
+        case ET_DEC_CON:
+        case ET_DEC_DEX:
+        case ET_DEC_INT:
+        case ET_DEC_STR:
+        case ET_DEC_WIS:
+            player_apply_stat_drain(p, toxin, toxin_chance);
+            break;
+
+        case ET_DEC_RND:
+            player_apply_stat_drain(p, (effect_t)rand_m_n(ET_DEC_CON, ET_DEC_RND), toxin_chance);
+            break;
+
+        default:
+            g_assert_not_reached();
+    }
+}
+
 void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause)
 {
-    effect *e = NULL;
     position origin = pos_invalid;
 
     g_assert(p != NULL && dam != NULL);
@@ -1977,8 +2095,14 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
        object itself - when the player dies, the object will be leaked */
     damage_t damage_type = dam->type;
     gint damage_amount = dam->amount;
+    effect_t toxin = dam->toxin;
+    int toxin_chance = dam->toxin_chance;
     g_free(dam);
 
+
+    /* a toxin only has a chance to transfer if the physical attack that
+       carries it actually connects (see below) */
+    bool physical_hit_landed = false;
 
     /* check resistances */
     switch (damage_type)
@@ -1986,6 +2110,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_PHYSICAL:
         if (damage_amount > (gint)player_get_ac(p))
         {
+            physical_hit_landed = true;
             damage_amount -= player_get_ac(p);
 
             position spill_pos = pos_invalid;
@@ -2107,30 +2232,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         break;
 
     case DAM_POISON:
-        /* check if the damage is not caused by the effect that is
-           already attached to the player */
-        if (cause_type != PD_EFFECT)
-        {
-            /* check resistance; prevent negative damage amount */
-            damage_amount = max(0, damage_amount - rand_0n(player_get_con(p)));
-
-            if (damage_amount > 0)
-            {
-                e = effect_new(ET_POISON);
-                e->amount = damage_amount;
-                player_effect_add(p, e);
-            }
-            else
-            {
-                log_add_entry(nlarn->log, _("You resist the poison."));
-            }
-        }
-        else
-        {
-            /* damage is caused by the effect of the poison effect () */
-            log_add_entry(nlarn->log, _("You feel poison running through your veins."));
-            player_hp_lose(p, damage_amount, cause_type, cause);
-        }
+        player_apply_poison(p, damage_amount, cause_type, cause);
         break;
 
     case DAM_BLINDNESS:
@@ -2176,53 +2278,8 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
     case DAM_DEC_INT:
     case DAM_DEC_STR:
     case DAM_DEC_WIS:
-        if (!player_effect(p, ET_SUSTAINMENT)
-            && chance(damage_amount -= player_get_con(p)))
-        {
-            effect_t et = (ET_DEC_CON + damage_type - DAM_DEC_CON);
-            e = effect_new(et);
-            /* the default number of turns is 1 */
-            e->turns = damage_amount * 5;
-            (void)player_effect_add(p, e);
-
-            switch (damage_type)
-            {
-            case DAM_DEC_CON:
-                if (player_get_con(p) < 1)
-                    player_die(p, PD_EFFECT, ET_DEC_CON);
-                break;
-
-            case DAM_DEC_DEX:
-                if (player_get_dex(p) < 1)
-                    player_die(p, PD_EFFECT, ET_DEC_DEX);
-                break;
-
-            case DAM_DEC_INT:
-                if (player_get_int(p) < 1)
-                    player_die(p, PD_EFFECT, ET_DEC_INT);
-                break;
-
-            case DAM_DEC_STR:
-                /* strength has been modified -> recalc burdened status */
-                player_inv_weight_recalc(p->inventory, NULL);
-
-                if (player_get_str(p) < 1)
-                    player_die(p, PD_EFFECT, ET_DEC_STR);
-                break;
-
-            case DAM_DEC_WIS:
-                if (player_get_wis(p) < 1)
-                    player_die(p, PD_EFFECT, ET_DEC_WIS);
-                break;
-
-            default:
-                break;
-            }
-        }
-        else
-        {
-            log_add_entry(nlarn->log, _("You are not affected."));
-        }
+        player_apply_stat_drain(p, (effect_t)(ET_DEC_CON + damage_type - DAM_DEC_CON),
+                                 damage_amount);
         break;
 
     case DAM_DRAIN_LIFE:
@@ -2246,6 +2303,12 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
         /* the other damage types are not handled here */
         break;
     }
+
+    /* a toxin carried alongside the attack only gets a chance to affect a
+       still-living player, and only if the physical attack that carries it
+       actually connected (armour stopping the hit stops the toxin too) */
+    if (p->hp > 0 && physical_hit_landed)
+        player_apply_toxin(p, toxin, toxin_chance, cause_type, cause);
 
     if (game_wizardmode(nlarn))
         log_add_entry(nlarn->log, "[applied: %d]", hp_orig - p->hp);

@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <glib.h>
 
+#include "effects.h"
 #include "enumFactory.h"
 
 #define SPEED_ENUM(SPEED) \
@@ -101,6 +102,12 @@ typedef struct attack
     damage_t damage;
     int base;
     int rand;
+
+    /* A status effect that has a chance to additionally be transferred by
+       a successful physical hit, e.g. a snake's bite poisoning its victim.
+       ET_NONE (the zero value) means the attack carries no toxin. */
+    effect_t toxin;
+    int toxin_chance;
 } attack;
 
 #define DAMAGE_ORIGINATOR_T_ENUM(DAMO) \
@@ -128,6 +135,12 @@ typedef struct damage
     attack_t attack;
     gint amount;
     damage_originator dam_origin; /* the source of the damage */
+
+    /* A status effect with a separate chance to additionally affect the
+       player, alongside the primary damage above (e.g. a snake's bite
+       poisoning its victim). ET_NONE (the zero value) means no toxin. */
+    effect_t toxin;
+    int toxin_chance;
 } damage;
 
 typedef struct damage_msg
