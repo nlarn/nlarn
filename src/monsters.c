@@ -287,8 +287,8 @@ monster_data_t monster_data[] = {
         .level = 3, .intelligence = 3, .speed = VSLOW, .size = MEDIUM,
         .flags = HEAD | HANDS | UNDEAD | RES_SLEEP | RES_POISON | RES_CONF,
         .attacks = {
-            { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL },
-            { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL },
+            { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL, .toxin = ET_SICKNESS, .toxin_chance = 30 },
+            { .type = ATT_CLAW, .base = 2, .damage = DAM_PHYSICAL, .toxin = ET_SICKNESS, .toxin_chance = 30 },
         }, .default_ai = MA_WANDER, .sound = N_("groan")
     },
     { /* MT_ASSASSIN_BUG */

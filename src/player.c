@@ -2038,6 +2038,11 @@ static void player_apply_toxin(player *p, effect_t toxin, int toxin_chance,
             player_apply_poison(p, toxin_chance, cause_type, cause);
             break;
 
+        case ET_SICKNESS:
+            /* no resistance check exists for this effect */
+            player_effect_add(p, effect_new(ET_SICKNESS));
+            break;
+
         case ET_DEC_CON:
         case ET_DEC_DEX:
         case ET_DEC_INT:
