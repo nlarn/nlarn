@@ -45,6 +45,7 @@
 * Balance combat for non-dexterous characters
 * Balance the osquip's damage
 * Halve the number of turns for stat-draining effects
+* Balance stat-draining and poison attacks
 * Finger of death was utterly unbalanced
 * Cold resistance was extremely unbalanced
 * Polymorph was thoroughly unbalanced

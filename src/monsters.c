@@ -194,7 +194,7 @@ monster_data_t monster_data[] = {
         .level = 2, .intelligence = 3, .speed = NORMAL, .size = TINY,
         .flags = HEAD,
         .attacks = {
-            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 10 },
+            { .type = ATT_BITE, .base = 4, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 15 },
         }, .default_ai = MA_WANDER, .sound = N_("hiss")
     },
     { /* MT_CENTIPEDE */
@@ -203,7 +203,7 @@ monster_data_t monster_data[] = {
         .level = 2, .intelligence = 2, .speed = NORMAL, .size = SMALL,
         .flags = HEAD,
         .attacks = {
-            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL, .toxin = ET_DEC_STR, .toxin_chance = 50 },
+            { .type = ATT_BITE, .base = 4, .damage = DAM_PHYSICAL, .toxin = ET_DEC_STR, .toxin_chance = 50 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_JACULUS */
@@ -231,7 +231,7 @@ monster_data_t monster_data[] = {
         .level = 2, .intelligence = 3, .speed = NORMAL, .size = SMALL,
         .flags = HEAD | PACK,
         .attacks = {
-            { .type = ATT_BITE, .base = 1, .damage = DAM_PHYSICAL, .toxin = ET_DEC_STR, .toxin_chance = 75 },
+            { .type = ATT_BITE, .base = 4, .damage = DAM_PHYSICAL, .toxin = ET_DEC_STR, .toxin_chance = 55 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_FLOATING_EYE */
@@ -268,7 +268,7 @@ monster_data_t monster_data[] = {
         .level = 3, .intelligence = 3, .speed = FAST, .size = SMALL,
         .flags = HEAD | HANDS | DEMON,
         .attacks = {
-            { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_DEC_DEX, .toxin_chance = 66 },
+            { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_DEC_DEX, .toxin_chance = 75 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_RUST_MONSTER */
@@ -297,7 +297,7 @@ monster_data_t monster_data[] = {
         .level = 4, .intelligence = 3, .speed = FAST, .size = TINY,
         .flags = HEAD | RES_POISON,
         .attacks = {
-            { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 15 },
+            { .type = ATT_BITE, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 40 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_BUGBEAR */
@@ -413,7 +413,7 @@ monster_data_t monster_data[] = {
         .level = 6, .intelligence = 3, .speed = SLOW, .size = MEDIUM,
         .flags = HEAD | RES_CONF,
         .attacks = {
-            { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_DEC_RND, .toxin_chance = 70 },
+            { .type = ATT_CLAW, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_DEC_RND, .toxin_chance = 80 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_VIOLET_FUNGUS */
@@ -422,7 +422,7 @@ monster_data_t monster_data[] = {
         .level = 6, .intelligence = 3, .speed = XSLOW, .size = MEDIUM,
         .flags = RES_SLEEP | RES_POISON | RES_CONF,
         .attacks = {
-            { .type = ATT_SLAM, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 20 },
+            { .type = ATT_SLAM, .base = 3, .damage = DAM_PHYSICAL, .toxin = ET_POISON, .toxin_chance = 50 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_WRAITH */
