@@ -196,6 +196,7 @@ typedef enum player_cod
     PD_SPELL,     /* damaged by own spell */
     PD_CURSE,     /* damaged by a cursed item */
     PD_SOBJECT,   /* killed by stationary object */
+    PD_RICOCHET,  /* killed by their own reflected or errant shot */
     /* *** causes above this line can be stopped by live protection *** */
     PD_STUCK,     /* stuck in a wall */
     PD_DROWNED,   /* drowned in deep water */

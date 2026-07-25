@@ -157,10 +157,13 @@ void display_config_autopickup(bool settings[IT_MAX]);
  * @param p the player
  * @param type restrict the offered spells to this spell type, or pass
  *             SC_MAX to offer all known spells.
+ * @param filter an additional filter function called for every spell that
+ *               matches type, or NULL to offer all of them.
  * @return the chosen spell, or NULL when none was selected (aborted,
- *         or no known spell matches the requested type).
+ *         or no known spell matches the requested type / filter).
  */
-spell *display_spell_select(const char *title, player *p, spell_t type);
+spell *display_spell_select(const char *title, player *p, spell_t type,
+                            int (*filter)(spell *));
 
 int display_get_count(const char *caption, int value);
 char *display_get_string(const char *title, const char *caption, const char *value, size_t max_len);

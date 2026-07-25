@@ -222,15 +222,22 @@ static int exec_throw(player *p, position pos, position *tt __attribute__((unuse
     return 0;
 }
 
+/* spells that affect the player rather than a target position make no
+   sense in the "cast at this tile" context menu entry */
+static int spell_filter_not_player(spell *s)
+{
+    return spell_type(s) != SC_PLAYER;
+}
+
 static int exec_cast(player *p, position pos, position *tt __attribute__((unused)))
 {
     /* a spell cast on the player's own tile affects the player; a spell
        cast on another tile is fired at it without a second target prompt */
     if (ctx_here(p, pos))
-        return spell_cast_new(p, SC_PLAYER);
+        return spell_cast_new(p, SC_PLAYER, NULL);
 
     display_set_pending_target(pos);
-    int turns = spell_cast_new(p, SC_MAX);
+    int turns = spell_cast_new(p, SC_MAX, spell_filter_not_player);
     display_set_pending_target(pos_invalid);
     return turns;
 }

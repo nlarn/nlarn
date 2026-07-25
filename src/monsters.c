@@ -379,7 +379,7 @@ monster_data_t monster_data[] = {
         .name = N_("gelatinous cube"), .glyph = 'g', .colour = ALABASTER_GREEN,
         .exp = 45, .ac = 1, .hp_max = 22,
         .level = 5, .intelligence = 3, .speed = XSLOW, .size = LARGE,
-        .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF | PASSIVE,
+        .flags = METALLIVORE | RES_SLEEP | RES_POISON | RES_CONF | RES_ACID | PASSIVE,
         .attacks = {
             { .type = ATT_SLAM, .base = 1, .damage = DAM_ACID },
         }, .default_ai = MA_WANDER
@@ -603,7 +603,7 @@ monster_data_t monster_data[] = {
         .name = N_("bronze dragon"), .glyph = 'D', .colour = GREEN_BROWN,
         .exp = 4000, .gold = 300, .ac = 10, .hp_max = 80,
         .level = 9, .intelligence = 16, .speed = NORMAL, .size = GIANT,
-        .flags = HEAD | FLY | DRAGON,
+        .flags = HEAD | FLY | DRAGON | RES_ACID,
         .attacks = {
             { .type = ATT_BITE, .base = 9, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 9, .damage = DAM_PHYSICAL },
@@ -623,7 +623,7 @@ monster_data_t monster_data[] = {
         .name = N_("silver dragon"), .glyph = 'D', .colour = SILVER,
         .exp = 10000, .gold = 700, .ac = 13, .hp_max = 100,
         .level = 10, .intelligence = 20, .speed = NORMAL, .size = GIANT,
-        .flags = HEAD | FLY | DRAGON,
+        .flags = HEAD | FLY | DRAGON | RES_ACID,
         .attacks = {
             { .type = ATT_BITE, .base = 12, .damage = DAM_PHYSICAL },
             { .type = ATT_CLAW, .base = 12, .damage = DAM_PHYSICAL },
@@ -782,9 +782,6 @@ static monster *monster_nearest_hostile_to(monster *m, position anchor);
 static position monster_engage_or_approach(monster *m, monster *target);
 
 static bool monster_breath_hit(const GList *traj,
-        const damage_originator *damo,
-        gpointer data1, gpointer data2);
-static bool monster_shoot_hit(const GList *traj,
         const damage_originator *damo,
         gpointer data1, gpointer data2);
 
@@ -2377,53 +2374,6 @@ void monster_player_attack(monster *m, player *p)
     }
 }
 
-static bool monster_shoot_hit(const GList *traj,
-                              const damage_originator *damo,
-                              gpointer data1,
-                              gpointer data2)
-{
-    damage *dam = (damage *)data1;
-    item *ammo = (item *)data2;
-    position pos; pos_val(pos) = GPOINTER_TO_UINT(traj->data);
-    map *mp = game_map(nlarn, Z(pos));
-
-    gchar *adesc = item_describe_gc(ammo,
-            player_item_known(nlarn->p, ammo), true, true, GC_NOM);
-    adesc[0] = g_ascii_toupper(adesc[0]);
-
-    monster *hit_m = map_get_monster_at(mp, pos);
-    if (hit_m != NULL)
-    {
-        if (monster_in_sight(hit_m))
-            log_add_entry(nlarn->log, _("%s hits %s."),
-                          adesc,
-                          monster_get_name_art(hit_m, ART_DEF, GC_ACC, false));
-        monster_damage_take(hit_m, damage_copy(dam));
-        g_free(adesc);
-        return true;
-    }
-
-    if (pos_identical(pos, nlarn->p->pos))
-    {
-        if (player_evade(nlarn->p))
-        {
-            if (!player_effect(nlarn->p, ET_BLINDNESS))
-                log_add_entry(nlarn->log, _("%s misses you."), adesc);
-        }
-        else
-        {
-            log_add_entry(nlarn->log, _("%s hits you!"), adesc);
-            player_damage_take(nlarn->p, damage_copy(dam), PD_MONSTER,
-                               monster_type(damo->originator));
-        }
-        g_free(adesc);
-        return true;
-    }
-
-    g_free(adesc);
-    return false;
-}
-
 int monster_player_ranged_attack(monster *m, player *p)
 {
     g_assert(m != NULL && p != NULL);
@@ -2453,35 +2403,35 @@ int monster_player_ranged_attack(monster *m, player *p)
         if (ammo_item == NULL)
             return false;
 
+        /* no ranged weapon equipped (e.g. lost in a metamorphosis) */
+        if (m->eq_weapon == NULL)
+            return false;
+
         if (!player_effect(p, ET_BLINDNESS))
         {
-            if (ammo_item)
-            {
-                gchar *adesc = item_describe(ammo_item,
-                        player_item_known(nlarn->p, ammo_item), true, false);
-                log_add_entry(nlarn->log, _("%s shoots %s at you."),
-                              monster_get_name_art(m, ART_DEF, GC_NOM, true), adesc);
-                g_free(adesc);
-            }
-            else
-                log_add_entry(nlarn->log, _("%s %s you."), monster_get_name_art(m, ART_DEF, GC_NOM, true),
-                              _(monster_attack_verb[att.type]));
+            gchar *adesc = item_describe(ammo_item,
+                    player_item_known(nlarn->p, ammo_item), true, false);
+            log_add_entry(nlarn->log, _("%s shoots %s at you."),
+                          monster_get_name_art(m, ART_DEF, GC_NOM, true), adesc);
+            g_free(adesc);
         }
 
-        /* pick trajectory appearance from ammo material, or use defaults */
+        /* pick trajectory appearance from ammo material */
         wchar_t glyph = item_glyph(IT_AMMO);
-        colour_t traj_colour = ammo_item ? item_colour(ammo_item) : WHITE;
+        colour_t traj_colour = item_colour(ammo_item);
 
-        int amount = att.base + rand_0n(monster_level(m) + 1)
-                     + game_difficulty(nlarn);
-        damage *dam = damage_new(DAM_PHYSICAL, ATT_SHOOT, amount,
-                                 DAMO_MONSTER, m);
+        /* fire a single round; it is tracked separately from the rest of
+           the stack so it can survive on the ground afterwards, exactly
+           like a player-fired shot does */
+        item *fired_ammo = (ammo_item->count > 1)
+            ? item_split(ammo_item, 1) : ammo_item;
+        if (fired_ammo == ammo_item)
+            inv_del_element(&m->inv, ammo_item);
 
-        map_trajectory(m->pos, p->pos, &(dam->dam_origin),
-                       monster_shoot_hit, dam, ammo_item, false,
-                       glyph, traj_colour, false);
+        damage_originator damo = { DAMO_MONSTER, m };
+        map_trajectory(m->pos, p->pos, &damo, weapon_shoot_hit,
+                       m->eq_weapon, fired_ammo, false, glyph, traj_colour, false);
 
-        damage_free(dam);
         return true;
     }
 
@@ -2617,6 +2567,26 @@ monster *monster_damage_take(monster *m, damage *dam)
                         ? _("%s partly resists the cold.")
                         : _("%s loves the cold."),
                     monster_get_name_art(m, ART_DEF, GC_NOM, true));
+            }
+        }
+        break;
+
+    case DAM_ACID:
+        if (monster_flags(m, RES_ACID))
+        {
+            /*
+             * The monster's acid resistance reduces the damage taken
+             * by 10% per monster level
+             */
+            dam->amount -= (guint)(((float)dam->amount / 100) *
+                 /* prevent uint wrap around for monsters with level > 10 */
+                 (min(monster_level(m), 10) * 10));
+            if (monster_in_sight(m))
+            {
+                log_add_entry(nlarn->log, dam->amount > 0
+                            ? _("%s partly resists the acid.")
+                            : _("%s resists the acid."),
+                        monster_get_name_art(m, ART_DEF, GC_NOM, true));
             }
         }
         break;
@@ -3635,7 +3605,7 @@ static bool monster_has_clear_shot(monster *m, player *p)
     if (m->eq_weapon == NULL || !weapon_is_ranged(m->eq_weapon))
         return false;
 
-    if (m->lastseen != 1 || pos_adjacent(monster_pos(m), m->player_pos))
+    if (!monster_player_visible(m) || pos_adjacent(monster_pos(m), p->pos))
         return false;
 
     /* ammo check */

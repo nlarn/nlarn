@@ -33,7 +33,7 @@ DEFINE_ENUM(ammo_t, AMMO_TYPE_ENUM)
 
 const ammo_data ammos[AMT_MAX] =
 {
-    /*  type       name            ac           dam   acc  mat        we  pr  ob */
+    /*  type       name                ac            dam  acc  mat        we  pr  ob */
     { AMT_STONE,   N_("pebble"),       AMMO_SLING,     2,   1, IM_STONE, 100,  1, false, },
     { AMT_SBULLET, N_("sling bullet"), AMMO_SLING,     4,   2, IM_LEAD,   50,  3,  true, },
     { AMT_ARROW,   N_("arrow"),        AMMO_BOW,       8,   3, IM_WOOD,   80,  5,  true, },
@@ -51,7 +51,7 @@ DEFINE_ENUM(weapon_t, WEAPON_TYPE_ENUM)
 
 const weapon_data weapons[WT_MAX] =
 {
-    /* weapon_t         name                         short name,       class          ammo      dam  acc  material    we     pr tw un ar ob th*/
+    /* weapon_t         name                            short name,             class          ammo      dam  acc  material    we     pr tw un ar ob th*/
     { WT_ODAGGER,       N_("orcish dagger"),             N_("orc dagger"),      WC_MELEE,     AMMO_MAX,  2,   3, IM_IRON,     850,     6, 0, 0, 1, 0, 1 },
     { WT_DAGGER,        N_("dagger"),                    N_("dagger"),          WC_MELEE,     AMMO_MAX,  3,   5, IM_IRON,     600,    10, 0, 0, 1, 1, 1 },
     { WT_SLING,         N_("sling"),                     N_("sling"),          WC_RANGED,   AMMO_SLING,  1,   3, IM_CLOTH,    200,    15, 1, 0, 1, 1, 0 },
@@ -80,14 +80,11 @@ const weapon_data weapons[WT_MAX] =
 };
 
 /* static functions */
-damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo);
+static damage *weapon_get_ranged_damage(const damage_originator *damo,
+        item *weapon, item *ammo);
 bool weapon_ammo_drop(map *m, item *ammo, const GList *traj);
 bool weapon_throw_pos_hit(const GList *traj, const damage_originator *damo,
     gpointer data1, gpointer data2);
-
-static bool weapon_pos_hit(const GList *traj,
-        const damage_originator *damo,
-        gpointer data1, gpointer data2);
 
 int weapon_fire(struct player *p, position target)
 {
@@ -222,7 +219,7 @@ int weapon_fire(struct player *p, position target)
     ammo->fired = true;
 
     /* paint a ray to follow the path of the bullet */
-    if (map_trajectory(p->pos, target, &damo, weapon_pos_hit,
+    if (map_trajectory(p->pos, target, &damo, weapon_shoot_hit,
                 weapon, ammo, false, item_glyph(ammo->type),
                 item_colour(ammo), false))
         return true; /* one of the callbacks succeeded */
@@ -388,14 +385,22 @@ char *weapon_shortdesc(item *weapon, guint available_space)
     return g_string_free(desc, false);
 }
 
-damage *weapon_get_ranged_damage(player *p, item *weapon, item *ammo)
+static damage *weapon_get_ranged_damage(const damage_originator *damo,
+        item *weapon, item *ammo)
 {
-    g_assert (p != NULL && weapon != NULL && ammo != NULL);
+    g_assert (damo != NULL && weapon != NULL && ammo != NULL);
 
-    damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, 0, DAMO_PLAYER, p);
-    dam->amount = weapon_damage(weapon) + ammo_damage(ammo);
+    int amount = weapon_damage(weapon) + ammo_damage(ammo);
 
-    return dam;
+    if (damo->ot == DAMO_MONSTER)
+    {
+        /* monsters add their own level and the game's difficulty on top
+           of the weapon's and ammunition's plain damage */
+        monster *m = (monster *)damo->originator;
+        amount += rand_0n(monster_level(m) + 1) + game_difficulty(nlarn);
+    }
+
+    return damage_new(DAM_PHYSICAL, ATT_WEAPON, amount, damo->ot, damo->originator);
 }
 
 bool weapon_ammo_drop(map *m, item *ammo, const GList *traj)
@@ -428,8 +433,53 @@ bool weapon_ammo_drop(map *m, item *ammo, const GList *traj)
     return true;
 }
 
-static bool weapon_pos_hit(const GList *traj,
-        const damage_originator *damo __attribute__((unused)),
+monster *weapon_apply_charge(player *p, item *weapon, monster *m)
+{
+    g_assert(p != NULL && m != NULL);
+
+    if (weapon == NULL || weapon->charges == 0)
+        return m;
+
+    if (weapon->charge_source == SP_MAX)
+    {
+        /* a poison coating: add or, if already poisoned, strengthen a
+           poison effect on the target. Resistance and stacking are
+           already handled by monster_effect_add()/effect_add(). */
+        monster_effect_add(m, effect_new(ET_POISON));
+    }
+    else
+    {
+        /* a spell-bound charge: strike the target with a second,
+           independent instance of the spell's damage type */
+        spell_id source = (spell_id)weapon->charge_source;
+        int amount = (2 + rand_1n(4)) * spells[source].level + player_get_int(p);
+        damage *dam = damage_new(spells[source].damage_type, ATT_MAGIC,
+                                 amount, DAMO_PLAYER, p);
+
+        if (monster_in_sight(m))
+            log_add_entry(nlarn->log, _("The magic of %s strikes %s!"),
+                          noun_genitive_attribute(spell_name_raw(source)),
+                          monster_name_art(m, ART_DEF, GC_ACC, false));
+
+        /* the monster may not survive this hit */
+        m = monster_damage_take(m, dam);
+    }
+
+    weapon->charges--;
+
+    if (weapon->charges == 0)
+    {
+        gchar *wdesc = item_describe_gc(weapon, player_item_known(p, weapon),
+                                        true, true, GC_GEN);
+        log_add_entry(nlarn->log, _("The magic of %s is spent."), wdesc);
+        g_free(wdesc);
+    }
+
+    return m;
+}
+
+bool weapon_shoot_hit(const GList *traj,
+        const damage_originator *damo,
         gpointer data1,
         gpointer data2)
 {
@@ -443,24 +493,34 @@ static bool weapon_pos_hit(const GList *traj,
     bool retval = false;
     bool ammo_handled = false;
 
-    /* need a definite description for the ammo */
-    gchar *adesc = item_describe(ammo, player_item_known(nlarn->p, ammo), true, true);
+    /* need a definite description for the ammo; it is always the
+       grammatical subject of the messages below ("the arrow hits..."),
+       so nominative case is needed rather than item_describe()'s usual
+       accusative default */
+    gchar *adesc = item_describe_gc(ammo, player_item_known(nlarn->p, ammo),
+                                    true, true, GC_NOM);
     adesc[0] = g_ascii_toupper(adesc[0]);
 
     if (m != NULL)
     {
         /* there is a monster at the position */
-        /* the bullet might have hit the monster */
-        if (chance(combat_chance_player_to_monster_hit(nlarn->p, m, true)))
+        /* the player's shot may miss; a monster's shot passing through
+           another monster's square always connects (no friendly-fire
+           evasion roll) */
+        bool hit = (damo->ot == DAMO_PLAYER)
+            ? chance(combat_chance_player_to_monster_hit(nlarn->p, m, true))
+            : true;
+
+        if (hit)
         {
-            /* hit */
-            damage *dam = weapon_get_ranged_damage(nlarn->p, weapon, ammo);
+            damage *dam = weapon_get_ranged_damage(damo, weapon, ammo);
 
             if (monster_in_sight(m))
                 log_add_entry(nlarn->log, _("%s hits %s."),
                         adesc, monster_name_art(m, ART_DEF, GC_ACC, false));
 
-            monster_damage_take(m, dam);
+            /* the monster may not survive this hit */
+            m = monster_damage_take(m, dam);
 
             ammo_handled = weapon_ammo_drop(cmap, ammo, traj);
             retval = true;
@@ -475,8 +535,30 @@ static bool weapon_pos_hit(const GList *traj,
     }
     else if (pos_identical(nlarn->p->pos, cpos))
     {
-        /* The bullet may hit the player */
-        /* TODO: implement */
+        /* the shot may hit the player: either a monster's shot, or the
+           player's own shot reflected back at them */
+        if (player_evade(nlarn->p))
+        {
+            if (damo->ot == DAMO_PLAYER)
+                log_add_entry(nlarn->log, _("%s whizzes by you!"), adesc);
+            else if (!player_effect(nlarn->p, ET_BLINDNESS))
+                log_add_entry(nlarn->log, _("%s misses you."), adesc);
+        }
+        else
+        {
+            damage *dam = weapon_get_ranged_damage(damo, weapon, ammo);
+
+            log_add_entry(nlarn->log, _("%s hits you!"), adesc);
+
+            if (damo->ot == DAMO_PLAYER)
+                player_damage_take(nlarn->p, dam, PD_RICOCHET, 0);
+            else
+                player_damage_take(nlarn->p, dam, PD_MONSTER,
+                                   monster_type((monster *)damo->originator));
+
+            ammo_handled = weapon_ammo_drop(cmap, ammo, traj);
+            retval = true;
+        }
     }
 
     if (!ammo_handled && !map_pos_transparent(cmap, cpos))
@@ -519,7 +601,8 @@ bool weapon_throw_pos_hit(const GList *traj,
 
             damage *dam = damage_new(DAM_PHYSICAL, ATT_WEAPON, weapon_damage(weapon),
                                      DAMO_PLAYER, nlarn->p);
-            monster_damage_take(m, dam);
+            /* the monster may not survive this hit */
+            m = monster_damage_take(m, dam);
 
             weapon_handled = weapon_ammo_drop(cmap, weapon, traj);
             retval = weapon_handled;

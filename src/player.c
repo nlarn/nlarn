@@ -1491,6 +1491,16 @@ int player_attack(player *p, monster *m)
            p->ptarget = monster_oid(m);
         }
 
+        /* a poisoned or spell-charged weapon may deal a second blow */
+        if (p->eq_weapon && p->eq_weapon->charges > 0)
+        {
+            if (!((m = weapon_apply_charge(p, p->eq_weapon, m))))
+            {
+                /* the charge finished the monster off */
+                return 1;
+            }
+        }
+
         /* Lance of Death has not killed */
         if (p->eq_weapon && (p->eq_weapon->id == WT_LANCEOFDEATH)
                 && monster_in_sight(m))
@@ -2354,7 +2364,7 @@ effect *player_effect_add(player *p, effect *e)
             while (e->amount-- > 0)
             {
                 player_effect_add(p, effect_new(rand_m_n(ET_INC_CON,
-                                                ET_INC_WIS)));
+                                                ET_INC_RND)));
             }
             break;
 
@@ -2456,7 +2466,7 @@ effect *player_effect_add(player *p, effect *e)
             break;
 
         case ET_DEC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CON, ET_DEC_WIS)));
+            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CON, ET_DEC_RND)));
             break;
 
         default:

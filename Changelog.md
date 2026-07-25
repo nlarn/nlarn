@@ -13,6 +13,7 @@
   return them once the danger is over
 * Hostile monster will now attack the player's friends (i.e. charmed or
   summoned monsters and townsfolk)
+* Melee weapons can be enchanted or poisoned
 * Allow throwing of weapons
 * Track godly goodwill (modified by player's behavior on altars)
 * Cone of cold behaves like fireball
@@ -23,6 +24,7 @@
   backed by godly goodwill
 * Modify Sonic Spear damage and take enemy's size into account
 * Monsters that interfere with an action are highlighted
+* Add acid resistance to some monsters
 * Turn the gelatinous cube into a passive monster
 * Adapt how statues react when being hit to the original Larn
 * Mouse movement and firing without keyboard interaction
@@ -33,10 +35,15 @@
 * Scrollable windows can be scrolled with the mouse wheel or by clicking
   the arrows
 * Allow dragging windows with the mouse
+* Add the spell "permanence": permanently bind a known spell to a piece
+  of armour, at the cost of one level of the caster's own knowledge of it
+* Removed the cloak of invisibility and the boots of speed; the same
+  effects can now be created on any armour with the permanence spell
 
 ### Fixed bugs
 
 * Stack identical items after identification
+* Regard wisdom when increasing or decreasing a random stat
 * Finger of death was utterly unbalanced
 * Cold resistance was extremely unbalanced
 * Polymorph was thoroughly unbalanced

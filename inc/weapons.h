@@ -135,6 +135,19 @@ bool weapon_throw_pos_hit(const GList *traj, const damage_originator *damo,
     gpointer data1, gpointer data2);
 
 /**
+ * Trajectory hit callback shared by the player's and monsters' ranged
+ * attacks: rolls to hit, deals damage of the appropriate type (an
+ * unconditional hit when a monster's shot passes through another
+ * monster's square), and drops or destroys the spent ammunition exactly
+ * like a player-fired shot would.
+ *
+ * @param data1 the shooter's weapon (item*)
+ * @param data2 the single piece of ammunition being fired (item*)
+ */
+bool weapon_shoot_hit(const GList *traj, const damage_originator *damo,
+    gpointer data1, gpointer data2);
+
+/**
  * @brief Return a shortened description of a given weapon
  *
  * @param weapon a weapon
@@ -233,5 +246,30 @@ static inline int weapon_acc(const item *weapon)
 #define weapon_is_unique(weapon)     (weapons[(weapon)->id].unique)
 #define weapon_is_throwable(weapon)  (weapons[(weapon)->id].throwable)
 #define weapon_needs_article(weapon) (weapons[(weapon)->id].article)
+
+/**
+ * @brief Item filter function for the poison potion.
+ * @param it a pointer to an item
+ * @return true if the item is a melee weapon without a bound on-hit proc
+ */
+static inline int item_filter_poisonable(item *it)
+{
+    return (IT_WEAPON == it->type) && (weapon_class(it) == WC_MELEE)
+        && (it->charges == 0);
+}
+
+/**
+ * Apply a weapon's bound on-hit proc (if any) after a successful hit:
+ * poison coatings add a stacking poison effect to the target, spell-bound
+ * elemental charges deal a second instance of damage. Consumes one
+ * charge either way.
+ *
+ * @param p the attacking player
+ * @param weapon the weapon that just hit, or NULL
+ * @param m the monster that was hit
+ * @return the monster, or NULL if this finished it off
+ */
+struct monster *weapon_apply_charge(struct player *p, item *weapon,
+        struct monster *m);
 
 #endif

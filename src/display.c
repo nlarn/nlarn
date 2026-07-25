@@ -1942,7 +1942,8 @@ void display_config_autopickup(bool settings[IT_MAX])
     display_window_destroy(cwin);
 }
 
-spell *display_spell_select(const char *title, player *p, spell_t type)
+spell *display_spell_select(const char *title, player *p, spell_t type,
+                            int (*filter)(spell *))
 {
     display_window *ipop = NULL;
     int key; /* keyboard input */
@@ -1972,7 +1973,7 @@ spell *display_spell_select(const char *title, player *p, spell_t type)
     for (guint i = 0; i < p->known_spells->len; i++)
     {
         spell *s = g_ptr_array_index(p->known_spells, i);
-        if (type == SC_MAX || spell_type(s) == type)
+        if ((type == SC_MAX || spell_type(s) == type) && (!filter || filter(s)))
             g_ptr_array_add(slist, s);
     }
 

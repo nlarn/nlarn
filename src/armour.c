@@ -25,7 +25,7 @@ DEFINE_ENUM(armour_t, ARMOUR_TYPE_ENUM)
 
 const armour_data armours[AT_MAX] =
 {
-    /* id            name                      ac  category   material    effect      we     pr disguise  ob un*/
+    /* id            name                          ac  category   material    effect      we     pr disguise  ob un*/
     { AT_CLOAK,      N_("cloak"),                   1, AC_CLOAK,  IM_CLOTH,   ET_NONE,   400,    15, AT_MAX, 1,  0 },
     { AT_LGLOVES,    N_("pair of leather gloves"),  1, AC_GLOVES, IM_LEATHER, ET_NONE,   800,    25, AT_MAX, 1,  0 },
     { AT_LBOOTS,     N_("pair of leather boots"),   1, AC_BOOTS,  IM_LEATHER, ET_NONE,  1800,    25, AT_MAX, 1,  0 },
@@ -40,10 +40,8 @@ const armour_data armours[AT_MAX] =
     { AT_SPLINTMAIL, N_("splint mail"),             7, AC_SUIT,   IM_IRON,    ET_NONE, 13000,  1000, AT_MAX, 1,  0 },
     { AT_PHELMET,    N_("plate helmet"),            3, AC_HELMET, IM_IRON,    ET_NONE,  2800,   450, AT_MAX, 0,  0 },
     { AT_PBOOTS,     N_("pair of plate boots"),     3, AC_BOOTS,  IM_IRON,    ET_NONE,  3400,   450, AT_MAX, 0,  0 },
-    { AT_SPEEDBOOTS, N_("pair of boots of speed"),  1, AC_BOOTS,  IM_LEATHER, ET_SPEED,  800,  2800, AT_LBOOTS, 0,1 },
     { AT_PLATEMAIL,  N_("plate mail"),              8, AC_SUIT,   IM_IRON,    ET_NONE, 17500,  2200, AT_MAX, 0,  0 },
     { AT_SSHIELD,    N_("stainless shield"),        4, AC_SHIELD, IM_STEEL,   ET_NONE,  8000,   880, AT_MAX, 0,  0 },
     { AT_SPLATEMAIL, N_("stainless plate mail"),    9, AC_SUIT,   IM_STEEL,   ET_NONE, 19000,  3800, AT_MAX, 0,  0 },
-    { AT_INVISCLOAK, N_("cloak of invisibility"),   1, AC_CLOAK,  IM_CLOTH,   ET_INVISIBILITY, 400,2800, AT_CLOAK,0,1 },
     { AT_ELVENCHAIN, N_("elven chain"),            12, AC_SUIT,   IM_MITHRIL, ET_NONE,  8500, 16400, AT_MAX, 0,  1 },
 };

@@ -43,6 +43,19 @@ DEFINE_ENUM(item_t, ITEM_TYPE_ENUM)
 
 static const char *item_desc_get(item *it, int known);
 
+/* reverse lookup: the spell (if any) whose effect matches the given type,
+   used to name armour that was enchanted via the permanence spell */
+static spell_id spell_id_for_effect(effect_t et)
+{
+    for (spell_id sid = 0; sid < SP_MAX; sid++)
+    {
+        if (spells[sid].effect == et)
+            return sid;
+    }
+
+    return SP_MAX;
+}
+
 const item_type_data item_data[IT_MAX] =
 {
     /* item_t       name_sg       name_pl        IMG   max_id           op bl co eq us st id de */
@@ -514,6 +527,11 @@ void item_serialize(gpointer oid, gpointer it, gpointer root)
     if (i->corroded > 0) cJSON_AddNumberToObject(ival, "corroded", i->corroded);
     if (i->burnt > 0) cJSON_AddNumberToObject(ival, "burnt", i->burnt);
     if (i->rusty > 0) cJSON_AddNumberToObject(ival, "rusty", i->rusty);
+    if (i->charges > 0)
+    {
+        cJSON_AddNumberToObject(ival, "charges", i->charges);
+        cJSON_AddNumberToObject(ival, "charge_source", i->charge_source);
+    }
 
     /* container content */
     if (inv_length(i->content) > 0)
@@ -563,8 +581,24 @@ item *item_deserialize(cJSON *iser, struct game *g)
     it->oid = GUINT_TO_POINTER(oid);
 
     it->type = item_t_value(cJSON_GetObjectItem(iser, "type")->valuestring);
-    it->id = item_enum_value_lookup(it->type,
-            cJSON_GetObjectItem(iser, "id")->valuestring);
+
+    const char *id_str = cJSON_GetObjectItem(iser, "id")->valuestring;
+    it->id = item_enum_value_lookup(it->type, id_str);
+
+    /* Migrate saves from before the boots of speed and the cloak of
+       invisibility were removed in favour of the permanence spell: their
+       armour_t constants no longer exist, so the lookup above silently
+       fell back to id 0. Their bound effect is preserved regardless, as
+       it always lived in the item's "effects" array; only the base
+       armour type needs to be remapped to something that still exists. */
+    if (it->type == IT_ARMOUR)
+    {
+        if (strcmp(id_str, "AT_SPEEDBOOTS") == 0)
+            it->id = AT_LBOOTS;
+        else if (strcmp(id_str, "AT_INVISCLOAK") == 0)
+            it->id = AT_CLOAK;
+    }
+
     it->bonus = cJSON_GetObjectItem(iser, "bonus")->valueint;
     it->count = cJSON_GetObjectItem(iser, "count")->valueint;
 
@@ -598,6 +632,12 @@ item *item_deserialize(cJSON *iser, struct game *g)
 
     obj = cJSON_GetObjectItem(iser, "rusty");
     if (obj != NULL) it->rusty = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "charges");
+    if (obj != NULL) it->charges = obj->valueint;
+
+    obj = cJSON_GetObjectItem(iser, "charge_source");
+    if (obj != NULL) it->charge_source = obj->valueint;
 
     /* container content */
     obj = cJSON_GetObjectItem(iser, "content");
@@ -755,6 +795,12 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
     if (it->rusty == 1) strv_append(&add_infos, C_("item status", "rusty"));
     if (it->rusty == 2) strv_append(&add_infos, C_("item status", "very rusty"));
 
+    /* a poison coating gets a status label ("a poisoned dagger"); a
+       permanence-bound elemental charge instead gets an "of %s" suffix
+       below, just like permanence-enchanted armour */
+    if (it->charges > 0 && it->charge_source == SP_MAX)
+        strv_append(&add_infos, C_("item status", "poisoned"));
+
     if (g_strv_length(add_infos))
         add_info = g_strjoinv(", ", add_infos);
 
@@ -762,6 +808,21 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
 
     /* append the bonus after the noun phrase has been built */
     bool show_bonus = false;
+
+    /* a permanence-bound spell's "of %s" suffix must also be appended
+       after the noun phrase has been resolved: item_desc_get() may return
+       multi-form grammar metadata (e.g. "pair of gloves" needs separate
+       singular/plural declensions), and gluing the suffix onto the raw,
+       unresolved metadata string would land it in the wrong form and
+       silently drop it from the one actually selected for display */
+    gchar *enchant_suffix = NULL;
+
+    if (it->charges > 0 && it->charge_source != SP_MAX)
+    {
+        enchant_suffix = g_strdup_printf(_(" of %s"),
+                noun_genitive_attribute(
+                    spell_enchantment_name_raw((spell_id)it->charge_source)));
+    }
 
     switch (it->type)
     {
@@ -789,6 +850,24 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
 
     case IT_ARMOUR:
         g_string_append(desc, item_desc_get(it, known));
+
+        /* a spell permanently bound to the item via the permanence spell
+           carries no identity of its own beyond the effect it granted;
+           the player always knows what they bound, no identification
+           needed */
+        if (it->effects && it->effects->len > 0)
+        {
+            effect *e = game_effect_get(nlarn,
+                    g_ptr_array_index(it->effects, 0));
+            spell_id sid = spell_id_for_effect(e->type);
+
+            if (sid < SP_MAX)
+            {
+                enchant_suffix = g_strdup_printf(_(" of %s"),
+                        noun_genitive_attribute(spell_enchantment_name_raw(sid)));
+            }
+        }
+
         show_bonus = it->bonus_known;
         break;
 
@@ -984,6 +1063,12 @@ gchar *item_describe_gc(item *it, bool known, bool singular, bool definite,
     else if (show_bonus)
     {
         g_string_append_printf(desc, " %+d", it->bonus);
+    }
+
+    if (enchant_suffix)
+    {
+        g_string_append(desc, enchant_suffix);
+        g_free(enchant_suffix);
     }
 
     if (it->notes)

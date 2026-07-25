@@ -453,6 +453,12 @@ char *score_death_description(score_t *score, int verbose)
         }
         break;
 
+    case PD_RICOCHET:
+        g_string_append_printf(text, (score->sex == PS_MALE)
+                               ? _(" by his own ricocheting shot.")
+                               : _(" by her own ricocheting shot."));
+        break;
+
     default:
         /* no further description */
         g_string_append_c(text, '.');

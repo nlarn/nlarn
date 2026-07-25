@@ -75,6 +75,7 @@ typedef enum spell_type
     SPELL_TYPE(SP_SUM,) /* summon demon */ \
     SPELL_TYPE(SP_WTW,) /* walk through walls */ \
     SPELL_TYPE(SP_ALT,) /* alter reality */ \
+    SPELL_TYPE(SP_PMC,) /* permanence */ \
     SPELL_TYPE(SP_MAX,) /* last known spell */
 
 DECLARE_ENUM(spell_id, SPELL_TYPE_ENUM)
@@ -135,9 +136,11 @@ int spell_sort(gconstpointer a, gconstpointer b);
  * @param p the player
  * @param type restrict the offered spells to this spell type, or pass
  *             SC_MAX to offer all known spells.
+ * @param filter an additional filter function called for every spell that
+ *               matches type, or NULL to offer all of them.
  * @return number of turns elapsed
  */
-int spell_cast_new(struct player *p, spell_t type);
+int spell_cast_new(struct player *p, spell_t type, int (*filter)(spell *));
 
 /**
  * Cast the previous spell again
@@ -186,6 +189,18 @@ static inline const char *spell_gettext(const char *msg)
    effect and item names; translations may carry grammar metadata (see
    grammar.h), so the name is stripped for stand-alone display. */
 #define spell_name_raw(id)    (g_dpgettext2(NULL, "spell", spells[(id)].name))
+
+/**
+ * The noun used to name an item permanently enchanted with this spell via
+ * the permanence spell (e.g. "boots of %s"). Distinct from spell_name_raw()
+ * for the few spells whose casting-menu name doesn't read as a noun (e.g.
+ * "haste self" -> "speed", matching the classic "boots of speed"); every
+ * other spell just reuses its own name.
+ *
+ * @param id the spell ID
+ * @return the (possibly translated) enchantment noun
+ */
+const char *spell_enchantment_name_raw(spell_id id);
 
 #define spell_code(spell)     (spells[(spell)->id].code)
 #define spell_name(spell)     (noun_phrase(spell_name_raw((spell)->id), \
