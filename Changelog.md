@@ -40,21 +40,24 @@
 * Removed the cloak of invisibility and the boots of speed; the same
   effects can now be created on any armour with the permanence spell
 
-### Fixed bugs
+### Balancing
 
-* Stack identical items after identification
 * Balance combat for non-dexterous characters
 * Balance the osquip's damage
-* Regard wisdom when increasing or decreasing a random stat
 * Finger of death was utterly unbalanced
 * Cold resistance was extremely unbalanced
 * Polymorph was thoroughly unbalanced
 * Dehydration was very unbalanced
 * Magic fire was quite unbalanced
 * Magic missile was slightly unbalanced
+* Decrease the probability of obtainable books being generated
+
+### Fixes
+
+* Stack identical items after identification
+* Regard wisdom when increasing or decreasing a random stat
 * Take player's position into account when generating paths for friendlies
 * Don't show projectiles outside player's FOV
-* Decrease the probability of obtainable books being generated
 
 
 ## Release 0.7.9 (2026-06-27)
