@@ -466,7 +466,7 @@ monster_data_t monster_data[] = {
         .level = 7, .intelligence = 4, .speed = VFAST, .size = SMALL,
         .flags = HEAD | PACK,
         .attacks = {
-            { .type = ATT_BITE, .base = 10, .damage = DAM_PHYSICAL, .rand = 15 },
+            { .type = ATT_BITE, .base = 2, .damage = DAM_PHYSICAL, .rand = 6 },
         }, .default_ai = MA_WANDER
     },
     { /* MT_ROTHE */

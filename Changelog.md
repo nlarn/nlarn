@@ -44,6 +44,7 @@
 
 * Stack identical items after identification
 * Balance combat for non-dexterous characters
+* Balance the osquip's damage
 * Regard wisdom when increasing or decreasing a random stat
 * Finger of death was utterly unbalanced
 * Cold resistance was extremely unbalanced
