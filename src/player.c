@@ -2364,7 +2364,7 @@ effect *player_effect_add(player *p, effect *e)
             while (e->amount-- > 0)
             {
                 player_effect_add(p, effect_new(rand_m_n(ET_INC_CON,
-                                                ET_INC_WIS)));
+                                                ET_INC_RND)));
             }
             break;
 
@@ -2466,7 +2466,7 @@ effect *player_effect_add(player *p, effect *e)
             break;
 
         case ET_DEC_RND:
-            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CON, ET_DEC_WIS)));
+            player_effect_add(p, effect_new(rand_m_n(ET_DEC_CON, ET_DEC_RND)));
             break;
 
         default:
