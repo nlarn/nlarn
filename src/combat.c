@@ -82,19 +82,32 @@ static inline int combat_calc_percentage(int base_to_hit)
     return (5 * base_to_hit);
 }
 
+/* What a DEX 20 character's to-hit bonus amounts to. Used below as a floor
+   for the dexterity bonus against monsters that are not smaller than the
+   player: closing the distance on something the player's own size or
+   bigger doesn't take reflexes, so a low-dexterity character should not be
+   penalised for it. */
+#define REFERENCE_DEX_BONUS 8
+
 // Calculate the base chance of the play to hit a monster
 static int combat_player_to_mt_base_chance_to_hit(struct player *p, enum monster_t mt, bool use_weapon)
 {
+    /* the rule below gives a -3 for tiny monsters and a +4 for gargantuan
+       monsters */
+    const int size_term = (monster_type_size(mt) - MEDIUM) / 25;
+
+    int dex_bonus = max(0, player_get_dex(p) - 12);
+    if (size_term >= 0)
+        dex_bonus = max(dex_bonus, REFERENCE_DEX_BONUS);
+
     int base_to_hit = p->level
-                       + max(0, player_get_dex(p) - 12)
+                       + dex_bonus
                        + (use_weapon && p->eq_weapon ? weapon_acc(p->eq_weapon) : 0)
                        + (use_weapon && p->eq_weapon && weapon_is_ranged(p->eq_weapon)
                                      && p->eq_quiver
                                ? ammo_accuracy(p->eq_quiver) : 0)
                        + (player_get_speed(p) - monster_type_speed(mt)) / 25
-                       /* the rule below gives a -3 for tiny monsters and a +4
-                          for gargantuan monsters */
-                       + ((monster_type_size(mt) - MEDIUM) / 25)
+                       + size_term
                        - monster_type_ac(mt);
 
     return base_to_hit;
