@@ -2182,7 +2182,7 @@ void player_damage_take(player *p, damage *dam, player_cod cause_type, int cause
             effect_t et = (ET_DEC_CON + damage_type - DAM_DEC_CON);
             e = effect_new(et);
             /* the default number of turns is 1 */
-            e->turns = damage_amount * 10;
+            e->turns = damage_amount * 5;
             (void)player_effect_add(p, e);
 
             switch (damage_type)
