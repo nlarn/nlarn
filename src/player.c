@@ -1134,8 +1134,9 @@ void player_die(player *p, player_cod cause_type, guint cause)
 
     log_add_entry(nlarn->log, message);
 
-    /* resume game if wizard mode is enabled */
-    if (game_wizardmode(nlarn) && (cause_type < PD_TOO_LATE))
+    /* in wizard mode, dying is optional rather than disabled */
+    if (game_wizardmode(nlarn) && (cause_type < PD_TOO_LATE)
+            && !display_get_yesno(_("Really die?"), NULL, NULL, NULL))
     {
         log_add_entry(nlarn->log, _("WIZARD MODE. You stay alive."));
 
