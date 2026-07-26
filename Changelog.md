@@ -27,6 +27,7 @@
 * Zombies can now cause sickness
 * Add acid resistance to some monsters
 * Turn the gelatinous cube into a passive monster
+* Disable auto-pickup when under attack or hostiles are in sight
 * Adapt how statues react when being hit to the original Larn
 * Mouse movement and firing without keyboard interaction
 * Spell selection when right-clicking on the player

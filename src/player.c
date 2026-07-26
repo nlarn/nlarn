@@ -1728,6 +1728,12 @@ static void player_autopickup(player *p)
     if(player_effect_get(p, ET_BLINDNESS))
         return;
 
+    /* suspend auto-pickup while under attack or while a threat is in
+       sight; it resumes on its own once no hostiles are around, since
+       this is re-evaluated on every move */
+    if (p->attacked || player_adjacent_monster(p, true))
+        return;
+
     inventory **floor = map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     for (guint idx = 0; idx < inv_length(*floor); idx++)
