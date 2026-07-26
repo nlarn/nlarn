@@ -4753,10 +4753,17 @@ static guint player_item_pickup(player *p, inventory **inv, item *it, bool ask)
         gold_amount = it->count;
     }
 
-    /* Reset the fired flag. This has to be done before adding the item to the
-       inventory as otherwise the item comparison would fail.
-       If picking up fails, the item will not be picked up automatically again. */
+    /* Reset the fired and player_owned flags. This has to be done before
+       adding the item to the inventory as otherwise the item comparison
+       would fail. If picking up fails, the item will not be picked up
+       automatically again.
+       player_owned only matters while an item sits in a monster's
+       inventory (so the monster can return it once it stops being
+       hostile, see monster_move()); once it's back in the player's own
+       pack it has served its purpose and would otherwise permanently
+       block stacking with untouched copies of the same item. */
     it->fired = false;
+    it->player_owned = false;
 
     /* one turn to pick item up, one to stuff it into the pack */
     if (!player_make_move(p, 2, true, _("picking up %s"), buf))
