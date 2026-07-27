@@ -1521,8 +1521,6 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
 static void building_item_identify(player *p, inventory **inv __attribute__((unused)), item *it)
 {
-    char message[81];
-
     const char *title = _("Identify item");
 
     g_assert(p != NULL && it != NULL && it->type > IT_NONE && it->type < IT_MAX);
@@ -1537,8 +1535,8 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
 
     if (building_player_check(p, price))
     {
-        g_snprintf(message, 80, _("Pay %d gold to identify %s?"),
-                   price, name_unknown);
+        gchar *message = g_strdup_printf(_("Pay %d gold to identify %s?"),
+                                          price, name_unknown);
 
         if (display_get_yesno(message, NULL, NULL, NULL))
         {
@@ -1557,12 +1555,15 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
             p->stats.gold_spent_id_repair += price;
             player_make_move(p, 1, false, NULL);
         }
+
+        g_free(message);
     }
     else
     {
-        g_snprintf(message, 80, _("Identifying %s costs %d gold."),
-                   name_unknown, price);
+        gchar *message = g_strdup_printf(_("Identifying %s costs %d gold."),
+                                          name_unknown, price);
         display_show_message(title, message, 0);
+        g_free(message);
     }
 
     g_free(name_unknown);
@@ -1571,7 +1572,6 @@ static void building_item_identify(player *p, inventory **inv __attribute__((unu
 static void building_item_repair(player *p, inventory **inv __attribute__((unused)), item *it)
 {
     int damages = 0;
-    char message[81];
 
     const char *title = _("Repair item");
 
@@ -1601,7 +1601,7 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
 
     if (building_player_check(p, price))
     {
-        g_snprintf(message, 80, _("Pay %d gold to repair %s?"), price, name);
+        gchar *message = g_strdup_printf(_("Pay %d gold to repair %s?"), price, name);
 
         if (display_get_yesno(message, NULL, NULL, NULL))
         {
@@ -1622,11 +1622,14 @@ static void building_item_repair(player *p, inventory **inv __attribute__((unuse
             p->stats.gold_spent_id_repair += price;
             player_make_move(p, 1, false, NULL);
         }
+
+        g_free(message);
     }
     else
     {
-        g_snprintf(message, 80, _("Repairing the %s costs %d gold."), name, price);
+        gchar *message = g_strdup_printf(_("Repairing the %s costs %d gold."), name, price);
         display_show_message(title, message, 0);
+        g_free(message);
     }
 
     g_free(name);
