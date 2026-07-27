@@ -1483,6 +1483,16 @@ static void building_item_sell(player *p, inventory **inv, item *it)
 
     /* try to transfer the item to the player's inventory */
     ioid = bought_itm->oid;
+    guint count_bought = bought_itm->count;
+
+    /* Identify the item before adding it to the inventory: if it stacks
+       with an item the player already owns, inv_add() destroys bought_itm
+       internally to merge it into the existing stack, and the caller (us)
+       has no way to tell - any further use of bought_itm below would be a
+       use-after-free. player_item_identify() only mutates the item's own
+       fields and the player's global identification state, so it does not
+       need the item to be in the inventory yet. */
+    player_item_identify(p, &p->inventory, bought_itm);
 
     if (inv_add(&p->inventory, bought_itm))
     {
@@ -1495,11 +1505,8 @@ static void building_item_sell(player *p, inventory **inv, item *it)
             inv_del_oid(inv, ioid);
         }
 
-        p->stats.items_bought    += bought_itm->count;
+        p->stats.items_bought    += count_bought;
         p->stats.gold_spent_shop += price;
-
-        /* identify the item */
-        player_item_identify(p, &p->inventory, bought_itm);
     }
     else
     {

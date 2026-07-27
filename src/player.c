@@ -4095,9 +4095,12 @@ void player_item_drop(player *p, inventory **inv, item *it)
     }
 
     it->player_owned = true;
-    inv_add(map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos), it);
 
-    /* reveal if item is cursed or blessed when dropping it on an altar */
+    /* Reveal if the item is cursed or blessed when dropping it on an altar.
+       This has to happen before inv_add() below: if the item is stackable
+       and merges into an existing stack already on this tile, inv_add()
+       destroys 'it' internally, and any further use of it here would be a
+       use-after-free. */
     sobject_t ms = map_sobject_at(game_map(nlarn, Z(p->pos)), p->pos);
 
     if (ms == LS_ALTAR
@@ -4127,6 +4130,8 @@ void player_item_drop(player *p, inventory **inv, item *it)
 
         it->blessed_known = true;
     }
+
+    inv_add(map_ilist_at(game_map(nlarn, Z(p->pos)), p->pos), it);
 
     return;
 }
