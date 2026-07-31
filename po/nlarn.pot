@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-24 21:34+0200\n"
+"POT-Creation-Date: 2026-07-31 20:03+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -299,7 +299,7 @@ msgid ""
 "Congratulations!"
 msgstr ""
 
-#: src/buildings.c:394 src/player.c:1116
+#: src/buildings.c:394 src/player.c:1114
 msgid "You saved your daughter!"
 msgstr ""
 
@@ -578,23 +578,23 @@ msgid ""
 "Have the Trade Post's experts revert any damage done to the selected item."
 msgstr ""
 
-#: src/buildings.c:962 src/player.c:2643
+#: src/buildings.c:962 src/player.c:2716
 msgid "(`KEY`e`end`)quip"
 msgstr ""
 
-#: src/buildings.c:963 src/player.c:2644
+#: src/buildings.c:963 src/player.c:2717
 msgid "Equip the selected item."
 msgstr ""
 
-#: src/buildings.c:970 src/player.c:2667
+#: src/buildings.c:970 src/player.c:2740
 msgid "(`KEY`u`end`)nequip"
 msgstr ""
 
-#: src/buildings.c:971 src/player.c:2668
+#: src/buildings.c:971 src/player.c:2741
 msgid "Unequip the selected item."
 msgstr ""
 
-#: src/buildings.c:979 src/player.c:2684
+#: src/buildings.c:979 src/player.c:2757
 msgid "(`KEY`n`end`)ote"
 msgstr ""
 
@@ -788,80 +788,80 @@ msgstr ""
 msgid "Do you want to buy %s for %d gold?"
 msgstr ""
 
-#: src/buildings.c:1513
+#: src/buildings.c:1520
 #, c-format
 msgid "You buy %s. Thank you for your purchase."
 msgstr ""
 
-#: src/buildings.c:1526
+#: src/buildings.c:1531
 msgid "Identify item"
 msgstr ""
 
-#: src/buildings.c:1540
+#: src/buildings.c:1545
 #, c-format
 msgid "Pay %d gold to identify %s?"
 msgstr ""
 
-#: src/buildings.c:1552
+#: src/buildings.c:1557
 #, c-format
 msgid "%s is %s."
 msgstr ""
 
-#: src/buildings.c:1563
+#: src/buildings.c:1570
 #, c-format
 msgid "Identifying %s costs %d gold."
 msgstr ""
 
-#: src/buildings.c:1576
+#: src/buildings.c:1583
 msgid "Repair item"
 msgstr ""
 
-#: src/buildings.c:1604
+#: src/buildings.c:1611
 #, c-format
 msgid "Pay %d gold to repair %s?"
 msgstr ""
 
-#: src/buildings.c:1615
+#: src/buildings.c:1622
 #, c-format
 msgid "%s has been repaired."
 msgstr ""
 
-#: src/buildings.c:1628
+#: src/buildings.c:1637
 #, c-format
 msgid "Repairing the %s costs %d gold."
 msgstr ""
 
-#: src/buildings.c:1665
+#: src/buildings.c:1675
 #, c-format
 msgid "How many %s do you want to sell for %d gold?"
 msgstr ""
 
-#: src/buildings.c:1673
+#: src/buildings.c:1683
 #, c-format
 msgid "Wouldn't it be nice to have %d of those?"
 msgstr ""
 
-#: src/buildings.c:1686
+#: src/buildings.c:1696
 #, c-format
 msgid "Do you want to sell %s for %d gold?"
 msgstr ""
 
-#: src/buildings.c:1705
+#: src/buildings.c:1715
 #, c-format
 msgid "You sell %s. The %d gold has been transferred to your bank account."
 msgstr ""
 
-#: src/buildings.c:1707
+#: src/buildings.c:1717
 #, c-format
 msgid "You sell %s. The %d gold have been transferred to your bank account."
 msgstr ""
 
-#: src/combat.c:175
+#: src/combat.c:188
 #, c-format
 msgid "You behead %s with your Vorpal Blade!"
 msgstr ""
 
-#: src/config.c:373 src/player.c:37 src/player.c:220
+#: src/config.c:373 src/player.c:38 src/player.c:218
 msgid "not defined"
 msgstr ""
 
@@ -949,8 +949,8 @@ msgstr ""
 msgid "Font size (6 - 48): "
 msgstr ""
 
-#: src/config.c:612 src/game.c:115 src/map.c:1958 src/nlarn.c:659
-#: src/player.c:5044 src/player.c:5410 src/player.c:5418 src/player.c:5443
+#: src/config.c:612 src/game.c:115 src/map.c:1958 src/memorial.c:413
+#: src/memorial.c:421 src/memorial.c:446 src/nlarn.c:659 src/player.c:5129
 msgid "Error"
 msgstr ""
 
@@ -997,7 +997,7 @@ msgstr ""
 msgid "Get the selected item out the container."
 msgstr ""
 
-#: src/container.c:111 src/player.c:1696
+#: src/container.c:111 src/player.c:1695
 msgid "get (`KEY`a`end`)ll"
 msgstr ""
 
@@ -2582,7 +2582,7 @@ msgstr ""
 msgid " and %s"
 msgstr ""
 
-#: src/map.c:901 src/player.c:1420
+#: src/map.c:901 src/player.c:1419
 #, c-format
 msgid "You see %s here."
 msgstr ""
@@ -2614,6 +2614,334 @@ msgstr ""
 
 #: src/map.c:1958
 msgid "Maze file is corrupted. Please reinstall the game."
+msgstr ""
+
+#: src/memorial.c:62
+#, c-format
+msgid "%d mobul"
+msgid_plural "%d mobuls"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/memorial.c:67
+#, c-format
+msgid ""
+"\n"
+"He died after searching for the potion for %s. "
+msgstr ""
+
+#: src/memorial.c:68
+#, c-format
+msgid ""
+"\n"
+"She died after searching for the potion for %s. "
+msgstr ""
+
+#: src/memorial.c:74
+#, c-format
+msgid ""
+"\n"
+"He returned after searching for the potion for %s. "
+msgstr ""
+
+#: src/memorial.c:75
+#, c-format
+msgid ""
+"\n"
+"She returned after searching for the potion for %s. "
+msgstr ""
+
+#: src/memorial.c:80
+#, c-format
+msgid "%d spell"
+msgid_plural "%d spells"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/memorial.c:82
+#, c-format
+msgid "%d potion"
+msgid_plural "%d potions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/memorial.c:84
+#, c-format
+msgid "%d book"
+msgid_plural "%d books"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/memorial.c:86
+#, c-format
+msgid "%d scroll"
+msgid_plural "%d scrolls"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/memorial.c:90
+#, c-format
+msgid "He cast %s, quaffed %s, and read %s and %s. "
+msgstr ""
+
+#: src/memorial.c:91
+#, c-format
+msgid "She cast %s, quaffed %s, and read %s and %s. "
+msgstr ""
+
+#: src/memorial.c:101
+#, c-format
+msgid "%d weapon"
+msgid_plural "%d weapons"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/memorial.c:105
+#, c-format
+msgid ""
+"\n"
+"He wasted %s in combat. "
+msgstr ""
+
+#: src/memorial.c:106
+#, c-format
+msgid ""
+"\n"
+"She wasted %s in combat. "
+msgstr ""
+
+#: src/memorial.c:114
+#, c-format
+msgid "%d act of vandalism"
+msgid_plural "%d acts of vandalism"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/memorial.c:118
+#, c-format
+msgid ""
+"\n"
+"He committed %s. "
+msgstr ""
+
+#: src/memorial.c:119
+#, c-format
+msgid ""
+"\n"
+"She committed %s. "
+msgstr ""
+
+#: src/memorial.c:128
+#, c-format
+msgid ""
+"\n"
+"His life was protected %s. "
+msgstr ""
+
+#: src/memorial.c:129
+#, c-format
+msgid ""
+"\n"
+"Her life was protected %s. "
+msgstr ""
+
+#: src/memorial.c:136
+#, c-format
+msgid ""
+"\n"
+"He had %s gold on his bank account when he died."
+msgstr ""
+
+#: src/memorial.c:137
+#, c-format
+msgid ""
+"\n"
+"She had %s gold on her bank account when she died."
+msgstr ""
+
+#: src/memorial.c:143
+#, c-format
+msgid ""
+"\n"
+"He had %s gold on his bank account when he returned home."
+msgstr ""
+
+#: src/memorial.c:144
+#, c-format
+msgid ""
+"\n"
+"She had %s gold on her bank account when she returned home."
+msgstr ""
+
+#: src/memorial.c:148
+#, c-format
+msgid "%d gem"
+msgid_plural "%d gems"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/memorial.c:150
+#, c-format
+msgid "%d other item"
+msgid_plural "%d other items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/memorial.c:154
+#, c-format
+msgid ""
+"\n"
+"He found %d gold in the caverns, sold %s for %d and %s for %d gold, and "
+"earned %d gold as bank interest."
+msgstr ""
+
+#: src/memorial.c:156
+#, c-format
+msgid ""
+"\n"
+"She found %d gold in the caverns, sold %s for %d and %s for %d gold, and "
+"earned %d gold as bank interest."
+msgstr ""
+
+#: src/memorial.c:165
+#, c-format
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/memorial.c:169
+#, c-format
+msgid ""
+"\n"
+"He bought %s for %d gold, spent %d on item identification or repair, donated "
+"%d gold to charitable causes, and invested %d gold in his personal education."
+msgstr ""
+
+#: src/memorial.c:172
+#, c-format
+msgid ""
+"\n"
+"She bought %s for %d gold, spent %d on item identification or repair, "
+"donated %d gold to charitable causes, and invested %d gold in her personal "
+"education."
+msgstr ""
+
+#: src/memorial.c:183
+#, c-format
+msgid " He owed the tax office %d gold and paid %d gold taxes."
+msgstr ""
+
+#: src/memorial.c:184
+#, c-format
+msgid " She owed the tax office %d gold and paid %d gold taxes."
+msgstr ""
+
+#: src/memorial.c:190
+#, c-format
+msgid " He owed the tax office %d gold."
+msgstr ""
+
+#: src/memorial.c:191
+#, c-format
+msgid " She owed the tax office %d gold."
+msgstr ""
+
+#: src/memorial.c:197
+#, c-format
+msgid " He paid %d gold taxes."
+msgstr ""
+
+#: src/memorial.c:198
+#, c-format
+msgid " She paid %d gold taxes."
+msgstr ""
+
+#: src/memorial.c:205
+msgid "The current level"
+msgstr ""
+
+#: src/memorial.c:212
+msgid "Attributes"
+msgstr ""
+
+#: src/memorial.c:221
+msgid "Strength:"
+msgstr ""
+
+#: src/memorial.c:222
+msgid "Dexterity:"
+msgstr ""
+
+#: src/memorial.c:223
+msgid "Constitution:"
+msgstr ""
+
+#: src/memorial.c:224
+msgid "Intelligence:"
+msgstr ""
+
+#: src/memorial.c:225
+msgid "Wisdom:"
+msgstr ""
+
+#: src/memorial.c:241
+msgid "Effects"
+msgstr ""
+
+#: src/memorial.c:254
+msgid "Known Spells"
+msgstr ""
+
+#: src/memorial.c:261
+#, c-format
+msgid "%-*s (lvl. %2d): %3d\n"
+msgstr ""
+
+#: src/memorial.c:283
+msgid "Equipment"
+msgstr ""
+
+#: src/memorial.c:298
+msgid "Items in pack"
+msgstr ""
+
+#: src/memorial.c:323
+msgid "Creatures vanquished"
+msgstr ""
+
+#: src/memorial.c:339
+#, c-format
+msgid ""
+"\n"
+"%3d total\n"
+msgstr ""
+
+#: src/memorial.c:350
+msgid "Genocided creatures"
+msgstr ""
+
+#: src/memorial.c:359
+msgid "Last messages"
+msgstr ""
+
+#: src/memorial.c:392 src/player.c:5122
+msgid "Enter filename: "
+msgstr ""
+
+#: src/memorial.c:413
+msgid "File is a symlink. I won't overwrite those..."
+msgstr ""
+
+#: src/memorial.c:421
+msgid ""
+"There is a directory with the name you gave. Thus I can't write the file."
+msgstr ""
+
+#: src/memorial.c:428
+msgid ""
+"File exists!\n"
+"Do you want to overwrite it?"
 msgstr ""
 
 #: src/monsters.c:86
@@ -2752,537 +3080,537 @@ msgstr ""
 msgid "snake"
 msgstr ""
 
-#: src/monsters.c:199
+#: src/monsters.c:198
 msgid "hiss"
 msgstr ""
 
-#: src/monsters.c:202
+#: src/monsters.c:201
 msgid "giant centipede"
 msgstr ""
 
-#: src/monsters.c:212
+#: src/monsters.c:210
 msgid "jaculus"
 msgstr ""
 
-#: src/monsters.c:212
+#: src/monsters.c:210
 msgid "jaculi"
 msgstr ""
 
-#: src/monsters.c:222
+#: src/monsters.c:220
 msgid "troglodyte"
 msgstr ""
 
-#: src/monsters.c:231
+#: src/monsters.c:229
 msgid "giant ant"
 msgstr ""
 
-#: src/monsters.c:241
+#: src/monsters.c:238
 msgid "floating eye"
 msgstr ""
 
-#: src/monsters.c:250
+#: src/monsters.c:247
 msgid "leprechaun"
 msgstr ""
 
-#: src/monsters.c:260
+#: src/monsters.c:257
 msgid "nymph"
 msgstr ""
 
-#: src/monsters.c:269
+#: src/monsters.c:266
 msgid "quasit"
 msgstr ""
 
-#: src/monsters.c:279
+#: src/monsters.c:275
 msgid "rust monster"
 msgstr ""
 
-#: src/monsters.c:289
+#: src/monsters.c:285
 msgid "zombie"
 msgstr ""
 
-#: src/monsters.c:296
+#: src/monsters.c:292
 msgid "groan"
 msgstr ""
 
-#: src/monsters.c:299
+#: src/monsters.c:295
 msgid "assassin bug"
 msgstr ""
 
-#: src/monsters.c:309
+#: src/monsters.c:304
 msgid "bugbear"
 msgstr ""
 
-#: src/monsters.c:319
+#: src/monsters.c:314
 msgid "hell hound"
 msgstr ""
 
-#: src/monsters.c:326
+#: src/monsters.c:321
 msgid "bark"
 msgstr ""
 
-#: src/monsters.c:329
+#: src/monsters.c:324
 msgid "ice lizard"
 msgstr ""
 
-#: src/monsters.c:339
+#: src/monsters.c:334
 msgid "centaur"
 msgstr ""
 
-#: src/monsters.c:350
+#: src/monsters.c:345
 msgid "troll"
 msgstr ""
 
-#: src/monsters.c:357
+#: src/monsters.c:352
 msgid "grunt"
 msgstr ""
 
-#: src/monsters.c:360
+#: src/monsters.c:355
 msgid "yeti"
 msgstr ""
 
-#: src/monsters.c:369
+#: src/monsters.c:364
 msgid "elf"
 msgstr ""
 
-#: src/monsters.c:369
+#: src/monsters.c:364
 msgid "elves"
 msgstr ""
 
-#: src/monsters.c:379
+#: src/monsters.c:374
 msgid "gelatinous cube"
 msgstr ""
 
-#: src/monsters.c:388
+#: src/monsters.c:383
 msgid "white dragon"
 msgstr ""
 
-#: src/monsters.c:398
+#: src/monsters.c:393
 msgid "metamorph"
 msgstr ""
 
-#: src/monsters.c:407
+#: src/monsters.c:402
 msgid "vortex"
 msgstr ""
 
-#: src/monsters.c:407
+#: src/monsters.c:402
 msgid "vortexes"
 msgstr ""
 
-#: src/monsters.c:416
+#: src/monsters.c:411
 msgid "ziller"
 msgstr ""
 
-#: src/monsters.c:426
+#: src/monsters.c:420
 msgid "violet fungus"
 msgstr ""
 
-#: src/monsters.c:426
+#: src/monsters.c:420
 msgid "violet fungi"
 msgstr ""
 
-#: src/monsters.c:436
+#: src/monsters.c:429
 msgid "wraith"
 msgstr ""
 
-#: src/monsters.c:445
+#: src/monsters.c:438
 msgid "forvalaka"
 msgstr ""
 
-#: src/monsters.c:454
+#: src/monsters.c:447
 msgid "lama nobe"
 msgstr ""
 
-#: src/monsters.c:464
+#: src/monsters.c:457
 msgid "osquip"
 msgstr ""
 
-#: src/monsters.c:473
+#: src/monsters.c:466
 msgid "rothe"
 msgstr ""
 
-#: src/monsters.c:483
+#: src/monsters.c:476
 msgid "xorn"
 msgstr ""
 
-#: src/monsters.c:492
+#: src/monsters.c:485
 msgid "vampire"
 msgstr ""
 
-#: src/monsters.c:502
+#: src/monsters.c:495
 msgid "invisible stalker"
 msgstr ""
 
-#: src/monsters.c:511
+#: src/monsters.c:504
 msgid "poltergeist"
 msgstr ""
 
-#: src/monsters.c:517
+#: src/monsters.c:510
 msgid "laugh"
 msgstr ""
 
-#: src/monsters.c:520
+#: src/monsters.c:513
 msgid "disenchantress"
 msgstr ""
 
-#: src/monsters.c:520
+#: src/monsters.c:513
 msgid "disenchantresses"
 msgstr ""
 
-#: src/monsters.c:529
+#: src/monsters.c:522
 msgid "shambling mound"
 msgstr ""
 
-#: src/monsters.c:538
+#: src/monsters.c:531
 msgid "yellow mold"
 msgstr ""
 
-#: src/monsters.c:547
+#: src/monsters.c:540
 msgid "umber hulk"
 msgstr ""
 
-#: src/monsters.c:557
+#: src/monsters.c:550
 msgid "gnome king"
 msgstr ""
 
-#: src/monsters.c:566
+#: src/monsters.c:559
 msgid "mimic"
 msgstr ""
 
-#: src/monsters.c:575
+#: src/monsters.c:568
 msgid "water lord"
 msgstr ""
 
-#: src/monsters.c:584
+#: src/monsters.c:577
 msgid "purple worm"
 msgstr ""
 
-#: src/monsters.c:594
+#: src/monsters.c:587
 msgid "xvart"
 msgstr ""
 
-#: src/monsters.c:603
+#: src/monsters.c:596
 msgid "bronze dragon"
 msgstr ""
 
-#: src/monsters.c:613
+#: src/monsters.c:606
 msgid "green dragon"
 msgstr ""
 
-#: src/monsters.c:623
+#: src/monsters.c:616
 msgid "silver dragon"
 msgstr ""
 
-#: src/monsters.c:633
+#: src/monsters.c:626
 msgid "platinum dragon"
 msgstr ""
 
-#: src/monsters.c:643
+#: src/monsters.c:636
 msgid "red dragon"
 msgstr ""
 
-#: src/monsters.c:653
+#: src/monsters.c:646
 msgid "spirit naga"
 msgstr ""
 
-#: src/monsters.c:663
+#: src/monsters.c:656
 msgid "green urchin"
 msgstr ""
 
-#: src/monsters.c:673
+#: src/monsters.c:666
 msgid "type I demon lord"
 msgstr ""
 
-#: src/monsters.c:683
+#: src/monsters.c:676
 msgid "type II demon lord"
 msgstr ""
 
-#: src/monsters.c:693
+#: src/monsters.c:686
 msgid "type III demon lord"
 msgstr ""
 
-#: src/monsters.c:703
+#: src/monsters.c:696
 msgid "type IV demon lord"
 msgstr ""
 
-#: src/monsters.c:713
+#: src/monsters.c:706
 msgid "type V demon lord"
 msgstr ""
 
-#: src/monsters.c:723
+#: src/monsters.c:716
 msgid "type VI demon lord"
 msgstr ""
 
-#: src/monsters.c:733
+#: src/monsters.c:726
 msgid "type VII demon lord"
 msgstr ""
 
-#: src/monsters.c:743
+#: src/monsters.c:736
 msgid "demon prince"
 msgstr ""
 
-#: src/monsters.c:753
+#: src/monsters.c:746
 msgid "human"
 msgstr ""
 
-#: src/monsters.c:1394
+#: src/monsters.c:1387
 msgid "peasant woman"
 msgstr ""
 
-#: src/monsters.c:1394
+#: src/monsters.c:1387
 msgid "old man"
 msgstr ""
 
-#: src/monsters.c:1394
+#: src/monsters.c:1387
 msgid "old woman"
 msgstr ""
 
-#: src/monsters.c:1395
+#: src/monsters.c:1388
 msgid "little boy"
 msgstr ""
 
-#: src/monsters.c:1395
+#: src/monsters.c:1388
 msgid "young girl"
 msgstr ""
 
-#: src/monsters.c:1395
+#: src/monsters.c:1388
 msgid "fisherman"
 msgstr ""
 
-#: src/monsters.c:1396
+#: src/monsters.c:1389
 msgid "midwife"
 msgstr ""
 
-#: src/monsters.c:1396
+#: src/monsters.c:1389
 msgid "errand boy"
 msgstr ""
 
-#: src/monsters.c:1396
+#: src/monsters.c:1389
 msgid "bar maid"
 msgstr ""
 
-#: src/monsters.c:1397
+#: src/monsters.c:1390
 msgid "stable-lad"
 msgstr ""
 
-#: src/monsters.c:1397
+#: src/monsters.c:1390
 msgid "innkeeper"
 msgstr ""
 
-#: src/monsters.c:1397
+#: src/monsters.c:1390
 msgid "woodcutter"
 msgstr ""
 
-#: src/monsters.c:1398
+#: src/monsters.c:1391
 msgid "carpenter"
 msgstr ""
 
-#: src/monsters.c:1398
+#: src/monsters.c:1391
 msgid "clerk"
 msgstr ""
 
-#: src/monsters.c:1398
+#: src/monsters.c:1391
 msgid "barber"
 msgstr ""
 
-#: src/monsters.c:1399
+#: src/monsters.c:1392
 msgid "teacher"
 msgstr ""
 
-#: src/monsters.c:1399
+#: src/monsters.c:1392
 msgid "town guard"
 msgstr ""
 
-#: src/monsters.c:1399
+#: src/monsters.c:1392
 msgid "postman"
 msgstr ""
 
-#: src/monsters.c:1400
+#: src/monsters.c:1393
 msgid "cobbler"
 msgstr ""
 
-#: src/monsters.c:1400
+#: src/monsters.c:1393
 msgid "baker"
 msgstr ""
 
-#: src/monsters.c:1400
+#: src/monsters.c:1393
 msgid "merchant"
 msgstr ""
 
-#: src/monsters.c:1401
+#: src/monsters.c:1394
 msgid "clergyman"
 msgstr ""
 
-#: src/monsters.c:1401 src/monsters.c:1403
+#: src/monsters.c:1394 src/monsters.c:1396
 msgid "student"
 msgstr ""
 
-#: src/monsters.c:1401
+#: src/monsters.c:1394
 msgid "blacksmith"
 msgstr ""
 
-#: src/monsters.c:1402
+#: src/monsters.c:1395
 msgid "nurse"
 msgstr ""
 
-#: src/monsters.c:1402
+#: src/monsters.c:1395
 msgid "seamstress"
 msgstr ""
 
-#: src/monsters.c:1402
+#: src/monsters.c:1395
 msgid "cartwright"
 msgstr ""
 
-#: src/monsters.c:1403
+#: src/monsters.c:1396
 msgid "sales clerk"
 msgstr ""
 
-#: src/monsters.c:1403
+#: src/monsters.c:1396
 msgid "miller"
 msgstr ""
 
-#: src/monsters.c:1406
+#: src/monsters.c:1399
 msgid "peasant"
 msgstr ""
 
-#: src/monsters.c:1426
+#: src/monsters.c:1419
 msgid "unseen monster"
 msgstr ""
 
-#: src/monsters.c:1481
+#: src/monsters.c:1474
 #, c-format
 msgid "%s disappears!"
 msgstr ""
 
-#: src/monsters.c:1483
+#: src/monsters.c:1476
 #, c-format
 msgid "%s dies!"
 msgstr ""
 
-#: src/monsters.c:1519
+#: src/monsters.c:1512
 msgid "You hear a splash!"
 msgstr ""
 
-#: src/monsters.c:1574
+#: src/monsters.c:1567
 msgid "comes"
 msgstr ""
 
-#: src/monsters.c:1581 src/monsters.c:1586
+#: src/monsters.c:1574 src/monsters.c:1579
 msgid "through"
 msgstr ""
 
-#: src/monsters.c:1591 src/monsters.c:1601
+#: src/monsters.c:1584 src/monsters.c:1594
 msgid "down"
 msgstr ""
 
-#: src/monsters.c:1596 src/monsters.c:1606
+#: src/monsters.c:1589 src/monsters.c:1599
 msgid "up"
 msgstr ""
 
-#: src/monsters.c:1629
+#: src/monsters.c:1622
 msgid "squeezes past"
 msgstr ""
 
-#: src/monsters.c:1653
+#: src/monsters.c:1646
 #, c-format
 msgid "%s %s %s %s."
 msgstr ""
 
-#: src/monsters.c:1740
+#: src/monsters.c:1733
 #, c-format
 msgid "%s %ses!"
 msgstr ""
 
-#: src/monsters.c:1740
+#: src/monsters.c:1733
 #, c-format
 msgid "%s %ss!"
 msgstr ""
 
-#: src/monsters.c:1746
+#: src/monsters.c:1739
 #, c-format
 msgid "%s turns to flee!"
 msgstr ""
 
-#: src/monsters.c:1828
+#: src/monsters.c:1821
 #, c-format
 msgid "%s bumps into you."
 msgstr ""
 
-#: src/monsters.c:1841
+#: src/monsters.c:1834
 #, c-format
 msgid "%s bumps into the door."
 msgstr ""
 
-#: src/monsters.c:1853
+#: src/monsters.c:1846
 #, c-format
 msgid "%s opens the door."
 msgstr ""
 
-#: src/monsters.c:1881
+#: src/monsters.c:1874
 #, c-format
 msgid "%s closes the door."
 msgstr ""
 
-#: src/monsters.c:1896
+#: src/monsters.c:1889
 #, c-format
 msgid "%s bumps into %s."
 msgstr ""
 
-#: src/monsters.c:1905
+#: src/monsters.c:1898
 #, c-format
 msgid "%s sinks into %s."
 msgstr ""
 
-#: src/monsters.c:1976
+#: src/monsters.c:1969
 #, c-format
 msgid "%s falls into the %s!"
 msgstr ""
 
-#: src/monsters.c:1982
+#: src/monsters.c:1975
 #, c-format
 msgid "%s sinks like a rock!"
 msgstr ""
 
-#: src/monsters.c:1986 src/spells.c:1372
+#: src/monsters.c:1979 src/spells.c:1372
 #, c-format
 msgid "%s is trapped in the wall!"
 msgstr ""
 
-#: src/monsters.c:2026 src/monsters.c:3938
+#: src/monsters.c:2019 src/monsters.c:3938
 #, c-format
 msgid "%s picks up %s."
 msgstr ""
 
-#: src/monsters.c:2036 src/monsters.c:3364
+#: src/monsters.c:2029 src/monsters.c:3364
 #, c-format
 msgid "%s touches %s with its antennae."
 msgstr ""
 
-#: src/monsters.c:2064
+#: src/monsters.c:2057
 #, c-format
 msgid "%s engulfs %s."
 msgstr ""
 
-#: src/monsters.c:2130
+#: src/monsters.c:2123
 #, c-format
 msgid "%s breathes %s!"
 msgstr ""
 
-#: src/monsters.c:2137
+#: src/monsters.c:2130
 #, c-format
 msgid "%s spews forth from nowhere!"
 msgstr ""
 
-#: src/monsters.c:2198
+#: src/monsters.c:2191
 #, c-format
 msgid "%s %s %s."
 msgstr ""
 
-#: src/monsters.c:2230
+#: src/monsters.c:2223
 #, c-format
 msgid "%s bashes into thin air."
 msgstr ""
 
-#: src/monsters.c:2246
+#: src/monsters.c:2239
 #, c-format
 msgid "%s misses wildly."
 msgstr ""
@@ -3557,7 +3885,7 @@ msgstr ""
 msgid "Choose a destination to travel to."
 msgstr ""
 
-#: src/nlarn.c:906 src/player.c:3846 src/spells.c:754 src/spells.c:931
+#: src/nlarn.c:906 src/player.c:3919 src/spells.c:754 src/spells.c:931
 #: src/spells.c:995 src/spells.c:1031 src/spells.c:1071 src/spells.c:1085
 #: src/spells.c:1601 src/spells.c:1616
 msgid "Aborted."
@@ -3649,945 +3977,930 @@ msgstr ""
 msgid "Are you male or female?"
 msgstr ""
 
-#: src/player.c:37
+#: src/player.c:38
 msgid "male"
 msgstr ""
 
-#: src/player.c:37
+#: src/player.c:38
 msgid "female"
 msgstr ""
 
-#: src/player.c:39
+#: src/player.c:40
 msgid "mighty evil master"
 msgstr ""
 
-#: src/player.c:40
+#: src/player.c:41
 msgid "apprentice demi-god"
 msgstr ""
 
-#: src/player.c:41
+#: src/player.c:42
 msgid "minor demi-god"
 msgstr ""
 
-#: src/player.c:42
+#: src/player.c:43
 msgid "major demi-god"
 msgstr ""
 
-#: src/player.c:43
+#: src/player.c:44
 msgid "minor deity"
 msgstr ""
 
-#: src/player.c:44
+#: src/player.c:45
 msgid "major deity"
 msgstr ""
 
-#: src/player.c:45
+#: src/player.c:46
 msgid "novice guardian"
 msgstr ""
 
-#: src/player.c:46
+#: src/player.c:47
 msgid "apprentice guardian"
 msgstr ""
 
-#: src/player.c:50
+#: src/player.c:51
 msgid "novice explorer"
 msgstr ""
 
-#: src/player.c:50
+#: src/player.c:51
 msgid "apprentice explorer"
 msgstr ""
 
-#: src/player.c:50
+#: src/player.c:51
 msgid "practiced explorer"
 msgstr ""
 
-#: src/player.c:51
+#: src/player.c:52
 msgid "expert explorer"
 msgstr ""
 
-#: src/player.c:51
+#: src/player.c:52
 msgid "novice adventurer"
 msgstr ""
 
-#: src/player.c:51
+#: src/player.c:52
 msgid "adventurer"
 msgstr ""
 
-#: src/player.c:52
+#: src/player.c:53
 msgid "apprentice conjurer"
 msgstr ""
 
-#: src/player.c:52
+#: src/player.c:53
 msgid "conjurer"
 msgstr ""
 
-#: src/player.c:52
+#: src/player.c:53
 msgid "master conjurer"
 msgstr ""
 
-#: src/player.c:53
+#: src/player.c:54
 msgid "apprentice mage"
 msgstr ""
 
-#: src/player.c:53
+#: src/player.c:54
 msgid "mage"
 msgstr ""
 
-#: src/player.c:53
+#: src/player.c:54
 msgid "experienced mage"
 msgstr ""
 
-#: src/player.c:54
+#: src/player.c:55
 msgid "master mage"
 msgstr ""
 
-#: src/player.c:54
+#: src/player.c:55
 msgid "apprentice warlord"
 msgstr ""
 
-#: src/player.c:54
+#: src/player.c:55
 msgid "novice warlord"
 msgstr ""
 
-#: src/player.c:55
+#: src/player.c:56
 msgid "expert warlord"
 msgstr ""
 
-#: src/player.c:55
+#: src/player.c:56
 msgid "master warlord"
 msgstr ""
 
-#: src/player.c:55
+#: src/player.c:56
 msgid "apprentice gorgon"
 msgstr ""
 
-#: src/player.c:56
+#: src/player.c:57
 msgid "gorgon"
 msgstr ""
 
-#: src/player.c:56
+#: src/player.c:57
 msgid "practiced gorgon"
 msgstr ""
 
-#: src/player.c:56
+#: src/player.c:57
 msgid "master gorgon"
 msgstr ""
 
-#: src/player.c:57
+#: src/player.c:58
 msgid "demi-gorgon"
 msgstr ""
 
-#: src/player.c:57
+#: src/player.c:58
 msgid "evil master"
 msgstr ""
 
-#: src/player.c:57
+#: src/player.c:58
 msgid "great evil master"
 msgstr ""
 
-#: src/player.c:81
+#: src/player.c:82
 msgid "earth guardian"
 msgstr ""
 
-#: src/player.c:81
+#: src/player.c:82
 msgid "air guardian"
 msgstr ""
 
-#: src/player.c:81
+#: src/player.c:82
 msgid "fire guardian"
 msgstr ""
 
-#: src/player.c:82
+#: src/player.c:83
 msgid "water guardian"
 msgstr ""
 
-#: src/player.c:82
+#: src/player.c:83
 msgid "time guardian"
 msgstr ""
 
-#: src/player.c:82
+#: src/player.c:83
 msgid "ethereal guardian"
 msgstr ""
 
-#: src/player.c:83
+#: src/player.c:84
 msgid "The Creator"
 msgstr ""
 
-#: src/player.c:192
+#: src/player.c:190
 msgid "Strong character"
 msgstr ""
 
-#: src/player.c:193
+#: src/player.c:191
 msgid "Agile character"
 msgstr ""
 
-#: src/player.c:194
+#: src/player.c:192
 msgid "Tough character"
 msgstr ""
 
-#: src/player.c:195
+#: src/player.c:193
 msgid "Smart character"
 msgstr ""
 
-#: src/player.c:196
+#: src/player.c:194
 msgid "Randomly selected character preset"
 msgstr ""
 
-#: src/player.c:197
+#: src/player.c:195
 msgid "All stats assigned randomly"
 msgstr ""
 
-#: src/player.c:225
+#: src/player.c:223
 msgid "Choose a character build"
 msgstr ""
 
-#: src/player.c:826
+#: src/player.c:824
 msgid "Your attunement to the walls is fading!"
 msgstr ""
 
-#: src/player.c:828
+#: src/player.c:826
 msgid "You are starting to drift towards the ground!"
 msgstr ""
 
-#: src/player.c:869
+#: src/player.c:867
 #, c-format
 msgid "You are %s."
 msgstr ""
 
-#: src/player.c:961
+#: src/player.c:959
 msgid "You are unable to hold your weapon."
 msgstr ""
 
-#: src/player.c:979
+#: src/player.c:977
 msgid "The hysteria of itching forces you to remove your armour!"
 msgstr ""
 
-#: src/player.c:1000
+#: src/player.c:998
 #, c-format
 msgid "Do you want to continue %s?"
 msgstr ""
 
-#: src/player.c:1001
+#: src/player.c:999
 msgid "Do you want to continue?"
 msgstr ""
 
-#: src/player.c:1009
+#: src/player.c:1007
 #, c-format
 msgid "You stop %s."
 msgstr ""
 
-#: src/player.c:1060
+#: src/player.c:1058
 msgid "You feel wiiieeeeerrrrrd all over!"
 msgstr ""
 
-#: src/player.c:1086
+#: src/player.c:1084
 msgid "You fade to gray..."
 msgstr ""
 
-#: src/player.c:1087
+#: src/player.c:1085
 msgid "In Memoriam"
 msgstr ""
 
-#: src/player.c:1091
+#: src/player.c:1089
 msgid "You are trapped in solid rock."
 msgstr ""
 
-#: src/player.c:1092 src/player.c:2007 src/player.c:2030
+#: src/player.c:1090 src/player.c:2142 src/player.c:2165
 msgid "Ouch!"
 msgstr ""
 
-#: src/player.c:1096
+#: src/player.c:1094
 msgid "You've drowned in deep water."
 msgstr ""
 
-#: src/player.c:1097
+#: src/player.c:1095
 msgid "Deep the water, short the breath..."
 msgstr ""
 
-#: src/player.c:1101
+#: src/player.c:1099
 msgid "You've melted."
 msgstr ""
 
-#: src/player.c:1102
+#: src/player.c:1100
 msgid "Aaaaaaaaaaaaa!"
 msgstr ""
 
-#: src/player.c:1106
+#: src/player.c:1104
 msgid "You've genocided yourself!"
 msgstr ""
 
-#: src/player.c:1107
+#: src/player.c:1105
 msgid "Oops?"
 msgstr ""
 
-#: src/player.c:1111
+#: src/player.c:1109
 msgid "You returned home too late!"
 msgstr ""
 
-#: src/player.c:1112 src/player.c:1127
+#: src/player.c:1110 src/player.c:1125
 msgid "The End"
 msgstr ""
 
-#: src/player.c:1117
+#: src/player.c:1115
 msgid "Congratulations! You won!"
 msgstr ""
 
-#: src/player.c:1121
+#: src/player.c:1119
 msgid "You didn't manage to save your daughter."
 msgstr ""
 
-#: src/player.c:1122
+#: src/player.c:1120
 msgid "You lost"
 msgstr ""
 
-#: src/player.c:1126
+#: src/player.c:1124
 msgid "You quit."
 msgstr ""
 
-#: src/player.c:1131
+#: src/player.c:1129
 msgid "You die..."
 msgstr ""
 
-#: src/player.c:1132
+#: src/player.c:1130
 msgid "R. I. P."
 msgstr ""
 
-#: src/player.c:1140
+#: src/player.c:1137
+msgid "Really die?"
+msgstr ""
+
+#: src/player.c:1139
 msgid "WIZARD MODE. You stay alive."
 msgstr ""
 
-#: src/player.c:1217
+#: src/player.c:1216
 msgid "Do you want to save a memorial file for your character?"
 msgstr ""
 
-#: src/player.c:1272
+#: src/player.c:1271
 msgid "You cannot move as long you are overstrained."
 msgstr ""
 
-#: src/player.c:1279 src/player.c:1666 src/player.c:3964
+#: src/player.c:1278 src/player.c:1665 src/player.c:4037
 msgid "You can't move!"
 msgstr ""
 
-#: src/player.c:1290
+#: src/player.c:1289
 msgid "You climb out of the pit!"
 msgstr ""
 
-#: src/player.c:1294
+#: src/player.c:1293
 msgid "You're trapped in a pit!"
 msgstr ""
 
-#: src/player.c:1337
+#: src/player.c:1336
 #, c-format
 msgid "Wait! That is %s!"
 msgstr ""
 
-#: src/player.c:1354
+#: src/player.c:1353
 #, c-format
 msgid "You swap places with %s."
 msgstr ""
 
-#: src/player.c:1393
+#: src/player.c:1392
 #, c-format
 msgid ""
 "At the brink of unseen %s, your instincts flare and you pull back just in "
 "time."
 msgstr ""
 
-#: src/player.c:1394
+#: src/player.c:1393
 #, c-format
 msgid "Ouch! You bump into %s!"
 msgstr ""
 
-#: src/player.c:1432
+#: src/player.c:1431
 #, c-format
 msgid "You bump into %s."
 msgstr ""
 
-#: src/player.c:1442
+#: src/player.c:1441
 #, c-format
 msgid "You hit %s."
 msgstr ""
 
-#: src/player.c:1460
+#: src/player.c:1459
 #, c-format
 msgid "`LIGHT_MAGENTA`%s breaks!`end`"
 msgstr ""
 
-#: src/player.c:1508
+#: src/player.c:1507
 #, c-format
 msgid "Your lance of death tickles %s!"
 msgstr ""
 
-#: src/player.c:1523
+#: src/player.c:1522
 #, c-format
 msgid "You miss %s."
 msgstr ""
 
-#: src/player.c:1590
+#: src/player.c:1589
 msgid "You return to town."
 msgstr ""
 
-#: src/player.c:1593
+#: src/player.c:1592
 msgid "You enter the caverns of Larn."
 msgstr ""
 
-#: src/player.c:1657
+#: src/player.c:1656
 msgid "There is nothing here."
 msgstr ""
 
-#: src/player.c:1661
+#: src/player.c:1660
 msgid "You cannot reach the floor!"
 msgstr ""
 
-#: src/player.c:1679
+#: src/player.c:1678
 msgid "(`KEY`,`end`) get"
 msgstr ""
 
-#: src/player.c:1680
+#: src/player.c:1679
 msgid "Get the item. In case of an item stack, get the entire stack."
 msgstr ""
 
-#: src/player.c:1687
+#: src/player.c:1686
 msgid "(`KEY`g`end`)et partly"
 msgstr ""
 
-#: src/player.c:1688
+#: src/player.c:1687
 msgid ""
 "Get the item. In case of an item stack, choose how many items to pick up."
 msgstr ""
 
-#: src/player.c:1697
+#: src/player.c:1696
 msgid ""
 "Get all items from the stash. Only available when you can carry the total "
 "weight."
 msgstr ""
 
-#: src/player.c:1704
+#: src/player.c:1703
 msgid "On the floor"
 msgstr ""
 
-#: src/player.c:1787
+#: src/player.c:1792
 #, c-format
 msgid "`KEY`You gain experience and become %s %s!`end`"
 msgstr ""
 
-#: src/player.c:1792
+#: src/player.c:1797
 msgid "You gain experience!"
 msgstr ""
 
-#: src/player.c:1825
+#: src/player.c:1830
 #, c-format
 msgid "`LUMINOUS_RED`You return to experience level %d...`end`"
 msgstr ""
 
-#: src/player.c:1958
+#: src/player.c:1961
+msgid "You resist the poison."
+msgstr ""
+
+#: src/player.c:1967
+msgid "You feel poison running through your veins."
+msgstr ""
+
+#: src/player.c:2018 src/player.c:2300
+msgid "You are not affected."
+msgstr ""
+
+#: src/player.c:2086
 #, c-format
 msgid "Your amulet cancels the attack of %s."
 msgstr ""
 
-#: src/player.c:2005 src/player.c:2028
+#: src/player.c:2140 src/player.c:2163
 msgid "Ouch, that REALLY hurt!"
 msgstr ""
 
-#: src/player.c:2018
+#: src/player.c:2153
 msgid "Your armour protects you."
 msgstr ""
 
-#: src/player.c:2036
+#: src/player.c:2171
 msgid "You resist."
 msgstr ""
 
-#: src/player.c:2046
+#: src/player.c:2181
 msgid "You suffer burns."
 msgstr ""
 
-#: src/player.c:2051
+#: src/player.c:2186
 msgid "The flames don't phase you."
 msgstr ""
 
-#: src/player.c:2060
+#: src/player.c:2195
 msgid "You suffer from frostbite."
 msgstr ""
 
-#: src/player.c:2065
+#: src/player.c:2200
 msgid "It doesn't seem so cold."
 msgstr ""
 
-#: src/player.c:2072
+#: src/player.c:2207
 msgid "You are splashed with acid."
 msgstr ""
 
-#: src/player.c:2077
+#: src/player.c:2212
 msgid "The acid doesn't affect you."
 msgstr ""
 
-#: src/player.c:2084
+#: src/player.c:2219
 msgid "You experience near-drowning."
 msgstr ""
 
-#: src/player.c:2089
+#: src/player.c:2224
 msgid "The water doesn't affect you."
 msgstr ""
 
-#: src/player.c:2100
+#: src/player.c:2235
 msgid "Zapp!"
 msgstr ""
 
-#: src/player.c:2105
+#: src/player.c:2240
 msgid "As you are grounded nothing happens."
 msgstr ""
 
-#: src/player.c:2125
-msgid "You resist the poison."
-msgstr ""
-
-#: src/player.c:2131
-msgid "You feel poison running through your veins."
-msgstr ""
-
-#: src/player.c:2143
+#: src/player.c:2255
 msgid "You are not blinded."
 msgstr ""
 
-#: src/player.c:2156
+#: src/player.c:2268
 msgid "You are not confused."
 msgstr ""
 
-#: src/player.c:2169
+#: src/player.c:2281
 msgid "You avoid eye contact."
 msgstr ""
 
-#: src/player.c:2224 src/player.c:2233
-msgid "You are not affected."
-msgstr ""
-
-#: src/player.c:2237
+#: src/player.c:2304
 msgid "Your life energy is drained."
 msgstr ""
 
-#: src/player.c:2490
+#: src/player.c:2563
 msgid "asleep"
 msgstr ""
 
-#: src/player.c:2626
+#: src/player.c:2699
 msgid "You do not carry anything."
 msgstr ""
 
-#: src/player.c:2634
+#: src/player.c:2707
 msgid "(`KEY`d`end`)rop"
 msgstr ""
 
-#: src/player.c:2635
+#: src/player.c:2708
 msgid ""
 "Drop the selected item. If the item is a stack of multiple items, you will "
 "be prompted for the amount you want to drop."
 msgstr ""
 
-#: src/player.c:2651
+#: src/player.c:2724
 msgid "(`KEY`o`end`)pen"
 msgstr ""
 
-#: src/player.c:2652
+#: src/player.c:2725
 msgid "Open the selected container."
 msgstr ""
 
-#: src/player.c:2659
+#: src/player.c:2732
 msgid "(`KEY`s`end`)tore"
 msgstr ""
 
-#: src/player.c:2660
+#: src/player.c:2733
 msgid "Put the item into a container you carry or one that is on the floor."
 msgstr ""
 
-#: src/player.c:2676
+#: src/player.c:2749
 msgid "(`KEY`u`end`)se"
 msgstr ""
 
-#: src/player.c:2677
+#: src/player.c:2750
 msgid "Use the selected item."
 msgstr ""
 
-#: src/player.c:2685
+#: src/player.c:2758
 msgid "Add a note to the selected item or edit or delete an existing note."
 msgstr ""
 
-#: src/player.c:2691
+#: src/player.c:2764
 msgid "Inventory"
 msgstr ""
 
-#: src/player.c:2738
+#: src/player.c:2811
 msgid "You are already overloaded!"
 msgstr ""
 
-#: src/player.c:2758
+#: src/player.c:2831
 #, c-format
 msgid "%s are too heavy for you."
 msgstr ""
 
-#: src/player.c:2759
+#: src/player.c:2832
 #, c-format
 msgid "%s is too heavy for you."
 msgstr ""
 
-#: src/player.c:2833
+#: src/player.c:2906
 msgid "Worn equipment"
 msgstr ""
 
-#: src/player.c:2835
+#: src/player.c:2908
 msgid "You do not wear any equipment."
 msgstr ""
 
-#: src/player.c:2861 src/player.c:2960
+#: src/player.c:2934 src/player.c:3033
 #, c-format
 msgid "putting %s on"
 msgstr ""
 
-#: src/player.c:2869 src/player.c:2967
+#: src/player.c:2942 src/player.c:3040
 #, c-format
 msgid "You put %s on."
 msgstr ""
 
-#: src/player.c:2877
+#: src/player.c:2950
 #, c-format
 msgid "putting %s into the quiver"
 msgstr ""
 
-#: src/player.c:2885
+#: src/player.c:2958
 #, c-format
 msgid "You put %s into your quiver."
 msgstr ""
 
-#: src/player.c:2929
+#: src/player.c:3002
 #, c-format
 msgid "wearing %s"
 msgstr ""
 
-#: src/player.c:2944
+#: src/player.c:3017
 #, c-format
 msgid "You are now wearing %s."
 msgstr ""
 
-#: src/player.c:2986
+#: src/player.c:3059
 #, c-format
 msgid "wielding %s"
 msgstr ""
 
-#: src/player.c:2994
+#: src/player.c:3067
 #, c-format
 msgid "You now wield %s."
 msgstr ""
 
-#: src/player.c:3015
+#: src/player.c:3088
 msgid "welds itself into your hand."
 msgstr ""
 
-#: src/player.c:3016
+#: src/player.c:3089
 msgid "feels uncomfortably cold!"
 msgstr ""
 
-#: src/player.c:3027
+#: src/player.c:3100
 #, c-format
 msgid "It seems that this is %s."
 msgstr ""
 
-#: src/player.c:3063 src/player.c:3198
+#: src/player.c:3136 src/player.c:3271
 #, c-format
 msgid "removing %s"
 msgstr ""
 
-#: src/player.c:3070 src/player.c:3205
+#: src/player.c:3143 src/player.c:3278
 #, c-format
 msgid "You remove %s."
 msgstr ""
 
-#: src/player.c:3081 src/player.c:3216
+#: src/player.c:3154 src/player.c:3289
 #, c-format
 msgid "You can not remove %s.%s"
 msgstr ""
 
-#: src/player.c:3082 src/player.c:3174 src/player.c:3217
+#: src/player.c:3155 src/player.c:3247 src/player.c:3290
 msgid " It appears to be cursed."
 msgstr ""
 
-#: src/player.c:3094
+#: src/player.c:3167
 #, c-format
 msgid "taking %s out of the quiver"
 msgstr ""
 
-#: src/player.c:3101
+#: src/player.c:3174
 #, c-format
 msgid "You take %s out your quiver."
 msgstr ""
 
-#: src/player.c:3156
+#: src/player.c:3229
 #, c-format
 msgid "taking %s off"
 msgstr ""
 
-#: src/player.c:3163
+#: src/player.c:3236
 #, c-format
 msgid "You finish taking off %s."
 msgstr ""
 
-#: src/player.c:3173
+#: src/player.c:3246
 #, c-format
 msgid "You can't take of %s.%s"
 msgstr ""
 
-#: src/player.c:3240
+#: src/player.c:3313
 #, c-format
 msgid "putting %s away"
 msgstr ""
 
-#: src/player.c:3247
+#: src/player.c:3320
 #, c-format
 msgid "You put away %s."
 msgstr ""
 
-#: src/player.c:3255
+#: src/player.c:3328
 #, c-format
 msgid "You can't put away %s. It's welded into your hands."
 msgstr ""
 
-#: src/player.c:3855 src/weapons.c:177
+#: src/player.c:3928 src/weapons.c:177
 msgid "Gosh! How dare you!"
 msgstr ""
 
-#: src/player.c:3886 src/potions.c:562 src/potions.c:582
+#: src/player.c:3959 src/potions.c:562 src/potions.c:582
 #, c-format
 msgid "%s shatters on the %s."
 msgstr ""
 
-#: src/player.c:3887 src/potions.c:563
+#: src/player.c:3960 src/potions.c:563
 #, c-format
 msgid "%s splashes into the %s."
 msgstr ""
 
-#: src/player.c:3929
+#: src/player.c:4002
 #, c-format
 msgid "`LIGHT_MAGENTA`%s are destroyed!`end`"
 msgstr ""
 
-#: src/player.c:3930
+#: src/player.c:4003
 #, c-format
 msgid "`LIGHT_MAGENTA`%s is destroyed!`end`"
 msgstr ""
 
-#: src/player.c:3945
+#: src/player.c:4018
 msgid "Its content spills onto the floor."
 msgstr ""
 
-#: src/player.c:3946
+#: src/player.c:4019
 msgid "Its contents spill onto the floor."
 msgstr ""
 
-#: src/player.c:3974
+#: src/player.c:4047
 #, c-format
 msgid "Drop how many %s?"
 msgstr ""
 
-#: src/player.c:3999
+#: src/player.c:4072
 #, c-format
 msgid "You drop %s."
 msgstr ""
 
-#: src/player.c:4002
+#: src/player.c:4075
 #, c-format
 msgid "dropping %s"
 msgstr ""
 
-#: src/player.c:4041
+#: src/player.c:4117
 #, c-format
 msgid "%s are surrounded by a `CHARCOAL`black`end` halo."
 msgstr ""
 
-#: src/player.c:4042
+#: src/player.c:4118
 #, c-format
 msgid "%s is surrounded by a `CHARCOAL`black`end` halo."
 msgstr ""
 
-#: src/player.c:4045
+#: src/player.c:4121
 #, c-format
 msgid "%s are surrounded by a `WHITE`white`end` halo."
 msgstr ""
 
-#: src/player.c:4046
+#: src/player.c:4122
 #, c-format
 msgid "%s is surrounded by a `WHITE`white`end` halo."
 msgstr ""
 
-#: src/player.c:4062
+#: src/player.c:4140
 #, c-format
 msgid "Add your description for %s (delete with ESC)"
 msgstr ""
 
-#: src/player.c:4066
+#: src/player.c:4144
 msgid "Edit item notes"
 msgstr ""
 
-#: src/player.c:4081
+#: src/player.c:4159
 msgid "Choose an item to read"
 msgstr ""
 
-#: src/player.c:4091
+#: src/player.c:4169
 msgid "You have nothing to read."
 msgstr ""
 
-#: src/player.c:4101
+#: src/player.c:4179
 msgid "Choose an item to drink"
 msgstr ""
 
-#: src/player.c:4111
+#: src/player.c:4189
 msgid "You have nothing to drink."
 msgstr ""
 
-#: src/player.c:4122
+#: src/player.c:4200
 msgid "Choose an item to equip"
 msgstr ""
 
-#: src/player.c:4132
+#: src/player.c:4210
 msgid "You have nothing you could equip."
 msgstr ""
 
-#: src/player.c:4142
+#: src/player.c:4220
 msgid "Choose an item to take off"
 msgstr ""
 
-#: src/player.c:4151
+#: src/player.c:4229
 msgid "You have nothing you could take off."
 msgstr ""
 
-#: src/player.c:4161
+#: src/player.c:4239
 msgid "Choose an item to drop"
 msgstr ""
 
-#: src/player.c:4169
+#: src/player.c:4247
 msgid "You have nothing you could drop."
 msgstr ""
 
-#: src/player.c:4179
+#: src/player.c:4257
 msgid "You have nothing you could throw."
 msgstr ""
 
-#: src/player.c:4183
+#: src/player.c:4261
 msgid "Choose an item to throw"
 msgstr ""
 
-#: src/player.c:4194
+#: src/player.c:4272
 #, c-format
 msgid "You can't throw %s, it's welded to your hands!"
 msgstr ""
 
-#: src/player.c:4441
+#: src/player.c:4519
 #, c-format
 msgid "`LIGHT_MAGENTA`You find a %s!`end`"
 msgstr ""
 
-#: src/player.c:4463
+#: src/player.c:4541
 #, c-format
 msgid "`LIGHT_MAGENTA`You discover a trap on %s!`end`"
 msgstr ""
 
-#: src/player.c:4479
+#: src/player.c:4557
 msgid "You have not discovered any landmarks yet."
 msgstr ""
 
-#: src/player.c:4504
+#: src/player.c:4582
 msgid "Discovered landmarks"
 msgstr ""
 
-#: src/player.c:4658
+#: src/player.c:4736
 #, c-format
 msgid "Pick up how many %s?"
 msgstr ""
 
-#: src/player.c:4679
+#: src/player.c:4757
 #, c-format
 msgid "You pick up %s."
 msgstr ""
 
-#: src/player.c:4693
+#: src/player.c:4778
 #, c-format
 msgid "picking up %s"
 msgstr ""
 
-#: src/player.c:5028
+#: src/player.c:5113
 msgid "*) ignoring instakills\n"
 msgstr ""
 
-#: src/player.c:5030
+#: src/player.c:5115
 msgid "Fighting statistics"
 msgstr ""
 
-#: src/player.c:5032
+#: src/player.c:5117
 msgid "Do you want to save the calculations?"
 msgstr ""
 
-#: src/player.c:5037 src/player.c:5389
-msgid "Enter filename: "
-msgstr ""
-
-#: src/player.c:5069
+#: src/player.c:5154
 msgid "Necklace:"
 msgstr ""
 
-#: src/player.c:5070
+#: src/player.c:5155
 msgid "Main weapon:"
 msgstr ""
 
-#: src/player.c:5071
+#: src/player.c:5156
 msgid "Sec. weapon:"
 msgstr ""
 
-#: src/player.c:5072
+#: src/player.c:5157
 msgid "In quiver:"
 msgstr ""
 
-#: src/player.c:5073
+#: src/player.c:5158
 msgid "Boots:"
 msgstr ""
 
-#: src/player.c:5074
+#: src/player.c:5159
 msgid "Cloak:"
 msgstr ""
 
-#: src/player.c:5075
+#: src/player.c:5160
 msgid "Gloves:"
 msgstr ""
 
-#: src/player.c:5076
+#: src/player.c:5161
 msgid "Helmet:"
 msgstr ""
 
-#: src/player.c:5077
+#: src/player.c:5162
 msgid "Shield:"
 msgstr ""
 
-#: src/player.c:5078
+#: src/player.c:5163
 msgid "Body armour:"
 msgstr ""
 
-#: src/player.c:5079
+#: src/player.c:5164
 msgid "Left ring:"
 msgstr ""
 
-#: src/player.c:5080
+#: src/player.c:5165
 msgid "Right ring:"
-msgstr ""
-
-#: src/player.c:5410
-msgid "File is a symlink. I won't overwrite those..."
-msgstr ""
-
-#: src/player.c:5418
-msgid ""
-"There is a directory with the name you gave. Thus I can't write the file."
-msgstr ""
-
-#: src/player.c:5425
-msgid ""
-"File exists!\n"
-"Do you want to overwrite it?"
 msgstr ""
 
 #: src/potions.c:35
@@ -6281,7 +6594,7 @@ msgid "permanence"
 msgstr ""
 
 #: src/spells.c:324
-msgid "Permanently binds one of the caster's spells to a piece of armour"
+msgid "Permanently binds one of the caster's spells to a piece of equipment"
 msgstr ""
 
 #: src/spells.c:338

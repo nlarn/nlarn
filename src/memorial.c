@@ -23,9 +23,27 @@
 #include "extdefs.h"
 #include "memorial.h"
 
+/* appends a section header ruled with dashes to a common line width, so
+   translated titles of differing length still line up tidily */
+static void memorial_append_title(GString *text, const char *title)
+{
+    const char dashes[] = "------------------------------------------";
+    const int line_width = 39;
+    int pad = line_width - 4 - (int)g_utf8_strlen(title, -1);
+
+    if (pad < 3)
+        pad = 3;
+    if (pad > (int)sizeof(dashes) - 1)
+        pad = sizeof(dashes) - 1;
+
+    g_string_append_printf(text, "\n\n`TITLE`-- %s %.*s`end`\n\n",
+                           title, pad, dashes);
+}
+
 char *memorial_create(player *p, score_t *score, GList *scores)
 {
-    const char *pronoun = (p->sex == PS_MALE) ? "He" : "She";
+    const bool male = (p->sex == PS_MALE);
+    const bool died = (score->cod < PD_TOO_LATE);
     gchar *tmp = score_death_description(score, true);
 
     /* the obituary */
@@ -39,116 +57,188 @@ char *memorial_create(player *p, score_t *score, GList *scores)
     g_free(tmp);
 
     /* some statistics */
-    g_string_append_printf(text, "\n%s %s after searching for the potion for %d mobul%s. ",
-                           pronoun, score->cod < PD_TOO_LATE ? "died" : "returned",
-                           gtime2mobuls(nlarn->gtime), plural(gtime2mobuls(nlarn->gtime)));
+    guint mobuls = gtime2mobuls(nlarn->gtime);
+    gchar *mobul_str = g_strdup_printf(
+            ngettext("%d mobul", "%d mobuls", mobuls), mobuls);
 
-    g_string_append_printf(text, "%s cast %s spell%s, ", pronoun,
-                           int2str(p->stats.spells_cast),
-                           plural(p->stats.spells_cast));
-    g_string_append_printf(text, "quaffed %s potion%s, ",
-                           int2str(p->stats.potions_quaffed),
-                           plural(p->stats.potions_quaffed));
-    g_string_append_printf(text, "and read %s book%s ",
-                           int2str(p->stats.books_read),
-                           plural(p->stats.books_read));
-    g_string_append_printf(text, "and %s scroll%s. ",
-                           int2str(p->stats.scrolls_read),
-                           plural(p->stats.scrolls_read));
+    if (died)
+    {
+        g_string_append_printf(text, male
+                ? _("\nHe died after searching for the potion for %s. ")
+                : _("\nShe died after searching for the potion for %s. "),
+                mobul_str);
+    }
+    else
+    {
+        g_string_append_printf(text, male
+                ? _("\nHe returned after searching for the potion for %s. ")
+                : _("\nShe returned after searching for the potion for %s. "),
+                mobul_str);
+    }
+    g_free(mobul_str);
+
+    gchar *spells_str  = g_strdup_printf(ngettext("%d spell", "%d spells",
+            p->stats.spells_cast), p->stats.spells_cast);
+    gchar *potions_str = g_strdup_printf(ngettext("%d potion", "%d potions",
+            p->stats.potions_quaffed), p->stats.potions_quaffed);
+    gchar *books_str   = g_strdup_printf(ngettext("%d book", "%d books",
+            p->stats.books_read), p->stats.books_read);
+    gchar *scrolls_str = g_strdup_printf(ngettext("%d scroll", "%d scrolls",
+            p->stats.scrolls_read), p->stats.scrolls_read);
+
+    g_string_append_printf(text, male
+            ? _("He cast %s, quaffed %s, and read %s and %s. ")
+            : _("She cast %s, quaffed %s, and read %s and %s. "),
+            spells_str, potions_str, books_str, scrolls_str);
+
+    g_free(spells_str);
+    g_free(potions_str);
+    g_free(books_str);
+    g_free(scrolls_str);
 
     if (p->stats.weapons_wasted > 0)
     {
-        g_string_append_printf(text, "\n%s wasted %s weapon%s in combat. ",
-                               pronoun, int2str(p->stats.weapons_wasted),
-                               plural(p->stats.weapons_wasted));
+        gchar *weapons_str = g_strdup_printf(ngettext("%d weapon", "%d weapons",
+                p->stats.weapons_wasted), p->stats.weapons_wasted);
+
+        g_string_append_printf(text, male
+                ? _("\nHe wasted %s in combat. ")
+                : _("\nShe wasted %s in combat. "),
+                weapons_str);
+
+        g_free(weapons_str);
     }
 
     if (p->stats.vandalism > 0)
     {
-        g_string_append_printf(text, "\n%s committed %s act%s of vandalism. ",
-                               pronoun, int2str(p->stats.vandalism),
-                               plural(p->stats.vandalism));
+        gchar *vandalism_str = g_strdup_printf(ngettext("%d act of vandalism",
+                "%d acts of vandalism", p->stats.vandalism), p->stats.vandalism);
+
+        g_string_append_printf(text, male
+                ? _("\nHe committed %s. ")
+                : _("\nShe committed %s. "),
+                vandalism_str);
+
+        g_free(vandalism_str);
     }
 
     if (p->stats.life_protected > 0)
     {
-        g_string_append_printf(text, "\n%s life was protected %s. ",
-                               (p->sex == PS_MALE) ? "His" : "Her",
-                               int2time_str(p->stats.life_protected));
+        g_string_append_printf(text, male
+                ? _("\nHis life was protected %s. ")
+                : _("\nHer life was protected %s. "),
+                int2time_str(p->stats.life_protected));
     }
 
-    g_string_append_printf(text, "\n%s had %s gold on %s bank account "
-                           "when %s %s.",
-                           pronoun, int2str(p->bank_account),
-                           (p->sex == PS_MALE) ? "his" : "her",
-                           (p->sex == PS_MALE) ? "he"  : "she",
-                           score->cod < PD_TOO_LATE ? "died"
-                           : "returned home");
+    if (died)
+    {
+        g_string_append_printf(text, male
+                ? _("\nHe had %s gold on his bank account when he died.")
+                : _("\nShe had %s gold on her bank account when she died."),
+                int2str(p->bank_account));
+    }
+    else
+    {
+        g_string_append_printf(text, male
+                ? _("\nHe had %s gold on his bank account when he returned home.")
+                : _("\nShe had %s gold on her bank account when she returned home."),
+                int2str(p->bank_account));
+    }
 
-    g_string_append_printf(text, "\n%s found %d gold in the caverns, "
-                           "sold %s gem%s for %d and %s other "
-                           "item%s for %d gold, and earned %d gold "
-                           "as bank interest.",
-                           pronoun, p->stats.gold_found,
-                           int2str(p->stats.gems_sold),
-                           plural(p->stats.gems_sold),
-                           p->stats.gold_sold_gems,
-                           int2str(p->stats.items_sold),
-                           plural(p->stats.items_sold),
-                           p->stats.gold_sold_items,
-                           p->stats.gold_bank_interest);
+    gchar *gems_str = g_strdup_printf(ngettext("%d gem", "%d gems",
+            p->stats.gems_sold), p->stats.gems_sold);
+    gchar *sold_items_str = g_strdup_printf(ngettext("%d other item",
+            "%d other items", p->stats.items_sold), p->stats.items_sold);
 
-    g_string_append_printf(text, "\n%s bought %s item%s for %d gold, spent "
-                           "%d on item identification or repair, "
-                           "donated %d gold to charitable causes, and "
-                           "invested %d gold in %s personal education.",
-                           pronoun,
-                           int2str(p->stats.items_bought),
-                           plural(p->stats.items_bought),
-                           p->stats.gold_spent_shop,
-                           p->stats.gold_spent_id_repair,
-                           p->stats.gold_spent_donation,
-                           p->stats.gold_spent_college,
-                           (p->sex == PS_MALE) ? "his" : "her");
+    g_string_append_printf(text, male
+            ? _("\nHe found %d gold in the caverns, sold %s for %d and %s "
+                "for %d gold, and earned %d gold as bank interest.")
+            : _("\nShe found %d gold in the caverns, sold %s for %d and %s "
+                "for %d gold, and earned %d gold as bank interest."),
+            p->stats.gold_found, gems_str, p->stats.gold_sold_gems,
+            sold_items_str, p->stats.gold_sold_items,
+            p->stats.gold_bank_interest);
 
-    if (p->outstanding_taxes)
-        g_string_append_printf(text, " %s owed the tax office %d gold%s",
-                               pronoun, p->outstanding_taxes,
-                               p->stats.gold_spent_taxes ? "" : ".");
+    g_free(gems_str);
+    g_free(sold_items_str);
 
-    if (p->stats.gold_spent_taxes)
-        g_string_append_printf(text, " %s paid %d gold taxes.",
-                               p->outstanding_taxes ? "and" : pronoun,
-                               p->stats.gold_spent_taxes);
+    gchar *bought_str = g_strdup_printf(ngettext("%d item", "%d items",
+            p->stats.items_bought), p->stats.items_bought);
+
+    g_string_append_printf(text, male
+            ? _("\nHe bought %s for %d gold, spent %d on item identification "
+                "or repair, donated %d gold to charitable causes, and "
+                "invested %d gold in his personal education.")
+            : _("\nShe bought %s for %d gold, spent %d on item identification "
+                "or repair, donated %d gold to charitable causes, and "
+                "invested %d gold in her personal education."),
+            bought_str, p->stats.gold_spent_shop, p->stats.gold_spent_id_repair,
+            p->stats.gold_spent_donation, p->stats.gold_spent_college);
+
+    g_free(bought_str);
+
+    if (p->outstanding_taxes && p->stats.gold_spent_taxes)
+    {
+        g_string_append_printf(text, male
+                ? _(" He owed the tax office %d gold and paid %d gold taxes.")
+                : _(" She owed the tax office %d gold and paid %d gold taxes."),
+                p->outstanding_taxes, p->stats.gold_spent_taxes);
+    }
+    else if (p->outstanding_taxes)
+    {
+        g_string_append_printf(text, male
+                ? _(" He owed the tax office %d gold.")
+                : _(" She owed the tax office %d gold."),
+                p->outstanding_taxes);
+    }
+    else if (p->stats.gold_spent_taxes)
+    {
+        g_string_append_printf(text, male
+                ? _(" He paid %d gold taxes.")
+                : _(" She paid %d gold taxes."),
+                p->stats.gold_spent_taxes);
+    }
 
     /* append map of current level if the player is not in the town */
     if (Z(p->pos) > 0)
     {
-        g_string_append(text, "\n\n`TITLE`-- The current level ------------------`end`\n\n");
+        memorial_append_title(text, _("The current level"));
         tmp = map_dump(game_map(nlarn, Z(p->pos)), p->pos);
         g_string_append(text, tmp);
         g_free(tmp);
     }
 
     /* player's attributes */
-    g_string_append(text, "\n\n`TITLE`-- Attributes -------------------------`end`\n\n");
-    g_string_append_printf(text, "Strength:     %d (%+2d)\n",
-                           p->strength, p->strength - p->stats.str_orig);
-    g_string_append_printf(text, "Dexterity:    %d (%+2d)\n",
-                           p->dexterity, p->dexterity - p->stats.dex_orig);
-    g_string_append_printf(text, "Constitution: %d (%+2d)\n",
-                           p->constitution, p->constitution - p->stats.con_orig);
-    g_string_append_printf(text, "Intelligence: %d (%+2d)\n",
-                           p->intelligence, p->intelligence - p->stats.int_orig);
-    g_string_append_printf(text, "Wisdom:       %d (%+2d)\n",
-                           p->wisdom, p->wisdom - p->stats.wis_orig);
+    memorial_append_title(text, _("Attributes"));
+
+    struct
+    {
+        const char *label;
+        int value;
+        int delta;
+    } attribs[] =
+    {
+        { _("Strength:"),     p->strength,     p->strength - p->stats.str_orig },
+        { _("Dexterity:"),    p->dexterity,    p->dexterity - p->stats.dex_orig },
+        { _("Constitution:"), p->constitution, p->constitution - p->stats.con_orig },
+        { _("Intelligence:"), p->intelligence, p->intelligence - p->stats.int_orig },
+        { _("Wisdom:"),       p->wisdom,       p->wisdom - p->stats.wis_orig },
+    };
+
+    for (guint idx = 0; idx < G_N_ELEMENTS(attribs); idx++)
+    {
+        g_string_append_printf(text, "%-*s %d (%+2d)\n",
+                               utf8_pad(attribs[idx].label, 18),
+                               attribs[idx].label,
+                               attribs[idx].value, attribs[idx].delta);
+    }
 
     /* effects */
     char **effect_desc = player_effect_text(p);
 
     if (*effect_desc)
     {
-        g_string_append(text, "\n\n`TITLE`-- Effects ----------------------------`end`\n\n");
+        memorial_append_title(text, _("Effects"));
 
         for (guint pos = 0; effect_desc[pos]; pos++)
         {
@@ -161,14 +251,14 @@ char *memorial_create(player *p, score_t *score, GList *scores)
     /* append list of known spells */
     if (p->known_spells->len > 0)
     {
-        g_string_append(text, "\n\n`TITLE`-- Known Spells -----------------------`end`\n\n");
+        memorial_append_title(text, _("Known Spells"));
 
         for (guint pos = 0; pos < p->known_spells->len; pos++)
         {
             spell *s = (spell *)g_ptr_array_index(p->known_spells, pos);
             tmp = str_capitalize(g_strdup(spell_name(s)));
 
-            g_string_append_printf(text, "%-*s (lvl. %2d): %3d\n",
+            g_string_append_printf(text, _("%-*s (lvl. %2d): %3d\n"),
                                    utf8_pad(tmp, 24), tmp,
                                    s->knowledge, s->used);
 
@@ -190,7 +280,7 @@ char *memorial_create(player *p, score_t *score, GList *scores)
 
     if (strlen(el) > 0)
     {
-        g_string_append(text, "\n\n`TITLE`-- Equipment --------------------------`end`\n\n");
+        memorial_append_title(text, _("Equipment"));
         g_string_append(text, el);
 
         for (guint idx = 0; idx < inv_length(p->inventory); idx++)
@@ -205,7 +295,7 @@ char *memorial_create(player *p, score_t *score, GList *scores)
     /* inventory */
     if (equipment_count < inv_length(p->inventory))
     {
-        g_string_append(text, "\n\n`TITLE`-- Items in pack ----------------------`end`\n\n");
+        memorial_append_title(text, _("Items in pack"));
         for (guint pos = 0; pos < inv_length(p->inventory); pos++)
         {
             item *it = inv_get(p->inventory, pos);
@@ -230,7 +320,7 @@ char *memorial_create(player *p, score_t *score, GList *scores)
 
     /* list monsters killed */
     guint body_count = 0;
-    g_string_append(text, "\n\n`TITLE`-- Creatures vanquished ---------------`end`\n\n");
+    memorial_append_title(text, _("Creatures vanquished"));
 
     for (guint mnum = 0; mnum < MT_MAX; mnum++)
     {
@@ -246,7 +336,7 @@ char *memorial_create(player *p, score_t *score, GList *scores)
             body_count += mcount;
         }
     }
-    g_string_append_printf(text, "\n%3d total\n", body_count);
+    g_string_append_printf(text, _("\n%3d total\n"), body_count);
 
     /* genocided monsters */
     bool printed_headline = false;
@@ -257,8 +347,8 @@ char *memorial_create(player *p, score_t *score, GList *scores)
 
         if (!printed_headline)
         {
-                g_string_append(text, "\n\n`TITLE`-- Genocided creatures ---------------`end`\n\n");
-                printed_headline = true;
+            memorial_append_title(text, _("Genocided creatures"));
+            printed_headline = true;
         }
 
         tmp = str_capitalize(g_strdup(monster_type_plural_name(mnum, 2)));
@@ -266,7 +356,7 @@ char *memorial_create(player *p, score_t *score, GList *scores)
     }
 
      /* messages */
-    g_string_append(text, "\n\n`TITLE`-- Last messages ----------------------`end`\n\n");
+    memorial_append_title(text, _("Last messages"));
     for (guint pos = log_length(nlarn->log) - min(10, log_length(nlarn->log));
          pos < log_length(nlarn->log); pos++)
     {
