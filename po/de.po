@@ -330,7 +330,7 @@ msgstr "etwas `KEY`m`end`)itnehmen"
 
 #: src/buildings.c:478
 msgid "(`KEY`d`end`)eposit"
-msgstr "(`KEY`e`end`)inzahlen"
+msgstr "(`KEY`l`end`)agern"
 
 #: src/buildings.c:479
 msgid "Deposit the selected item in your storage room at home."
