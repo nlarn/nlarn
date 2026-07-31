@@ -98,12 +98,19 @@ char *memorial_create(player *p, score_t *score, GList *scores)
 
     if (p->stats.weapons_wasted > 0)
     {
-        gchar *weapons_str = g_strdup_printf(ngettext("%d weapon", "%d weapons",
-                p->stats.weapons_wasted), p->stats.weapons_wasted);
+        guint n = p->stats.weapons_wasted;
+        gchar *weapons_str = g_strdup_printf(ngettext("%d weapon", "%d weapons", n), n);
 
+        /* English doesn't need a singular/plural distinction here, but
+           other languages may need their verb to agree with the weapon
+           count (e.g. German "zerbrach"/"zerbrachen"), so this goes
+           through ngettext() with an English msgid_plural identical to
+           the singular one. */
         g_string_append_printf(text, male
-                ? _("\nHe wasted %s in combat. ")
-                : _("\nShe wasted %s in combat. "),
+                ? ngettext("\nHe wasted %s in combat. ",
+                           "\nHe wasted %s in combat. ", n)
+                : ngettext("\nShe wasted %s in combat. ",
+                           "\nShe wasted %s in combat. ", n),
                 weapons_str);
 
         g_free(weapons_str);

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-07-31 20:03+0200\n"
+"POT-Creation-Date: 2026-08-01 00:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -949,8 +949,8 @@ msgstr ""
 msgid "Font size (6 - 48): "
 msgstr ""
 
-#: src/config.c:612 src/game.c:115 src/map.c:1958 src/memorial.c:413
-#: src/memorial.c:421 src/memorial.c:446 src/nlarn.c:659 src/player.c:5129
+#: src/config.c:612 src/game.c:115 src/map.c:1958 src/memorial.c:420
+#: src/memorial.c:428 src/memorial.c:453 src/nlarn.c:659 src/player.c:5129
 msgid "Error"
 msgstr ""
 
@@ -2689,105 +2689,113 @@ msgstr ""
 msgid "She cast %s, quaffed %s, and read %s and %s. "
 msgstr ""
 
-#: src/memorial.c:101
+#: src/memorial.c:102
 #, c-format
 msgid "%d weapon"
 msgid_plural "%d weapons"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/memorial.c:105
+#: src/memorial.c:110
 #, c-format
 msgid ""
 "\n"
 "He wasted %s in combat. "
-msgstr ""
+msgid_plural ""
+"\n"
+"He wasted %s in combat. "
+msgstr[0] ""
+msgstr[1] ""
 
-#: src/memorial.c:106
+#: src/memorial.c:112
 #, c-format
 msgid ""
 "\n"
 "She wasted %s in combat. "
-msgstr ""
+msgid_plural ""
+"\n"
+"She wasted %s in combat. "
+msgstr[0] ""
+msgstr[1] ""
 
-#: src/memorial.c:114
+#: src/memorial.c:121
 #, c-format
 msgid "%d act of vandalism"
 msgid_plural "%d acts of vandalism"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/memorial.c:118
+#: src/memorial.c:125
 #, c-format
 msgid ""
 "\n"
 "He committed %s. "
 msgstr ""
 
-#: src/memorial.c:119
+#: src/memorial.c:126
 #, c-format
 msgid ""
 "\n"
 "She committed %s. "
 msgstr ""
 
-#: src/memorial.c:128
+#: src/memorial.c:135
 #, c-format
 msgid ""
 "\n"
 "His life was protected %s. "
 msgstr ""
 
-#: src/memorial.c:129
+#: src/memorial.c:136
 #, c-format
 msgid ""
 "\n"
 "Her life was protected %s. "
 msgstr ""
 
-#: src/memorial.c:136
+#: src/memorial.c:143
 #, c-format
 msgid ""
 "\n"
 "He had %s gold on his bank account when he died."
 msgstr ""
 
-#: src/memorial.c:137
+#: src/memorial.c:144
 #, c-format
 msgid ""
 "\n"
 "She had %s gold on her bank account when she died."
 msgstr ""
 
-#: src/memorial.c:143
+#: src/memorial.c:150
 #, c-format
 msgid ""
 "\n"
 "He had %s gold on his bank account when he returned home."
 msgstr ""
 
-#: src/memorial.c:144
+#: src/memorial.c:151
 #, c-format
 msgid ""
 "\n"
 "She had %s gold on her bank account when she returned home."
 msgstr ""
 
-#: src/memorial.c:148
+#: src/memorial.c:155
 #, c-format
 msgid "%d gem"
 msgid_plural "%d gems"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/memorial.c:150
+#: src/memorial.c:157
 #, c-format
 msgid "%d other item"
 msgid_plural "%d other items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/memorial.c:154
+#: src/memorial.c:161
 #, c-format
 msgid ""
 "\n"
@@ -2795,7 +2803,7 @@ msgid ""
 "earned %d gold as bank interest."
 msgstr ""
 
-#: src/memorial.c:156
+#: src/memorial.c:163
 #, c-format
 msgid ""
 "\n"
@@ -2803,14 +2811,14 @@ msgid ""
 "earned %d gold as bank interest."
 msgstr ""
 
-#: src/memorial.c:165
+#: src/memorial.c:172
 #, c-format
 msgid "%d item"
 msgid_plural "%d items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/memorial.c:169
+#: src/memorial.c:176
 #, c-format
 msgid ""
 "\n"
@@ -2818,7 +2826,7 @@ msgid ""
 "%d gold to charitable causes, and invested %d gold in his personal education."
 msgstr ""
 
-#: src/memorial.c:172
+#: src/memorial.c:179
 #, c-format
 msgid ""
 "\n"
@@ -2827,118 +2835,118 @@ msgid ""
 "education."
 msgstr ""
 
-#: src/memorial.c:183
+#: src/memorial.c:190
 #, c-format
 msgid " He owed the tax office %d gold and paid %d gold taxes."
 msgstr ""
 
-#: src/memorial.c:184
+#: src/memorial.c:191
 #, c-format
 msgid " She owed the tax office %d gold and paid %d gold taxes."
 msgstr ""
 
-#: src/memorial.c:190
+#: src/memorial.c:197
 #, c-format
 msgid " He owed the tax office %d gold."
 msgstr ""
 
-#: src/memorial.c:191
+#: src/memorial.c:198
 #, c-format
 msgid " She owed the tax office %d gold."
 msgstr ""
 
-#: src/memorial.c:197
+#: src/memorial.c:204
 #, c-format
 msgid " He paid %d gold taxes."
 msgstr ""
 
-#: src/memorial.c:198
+#: src/memorial.c:205
 #, c-format
 msgid " She paid %d gold taxes."
 msgstr ""
 
-#: src/memorial.c:205
+#: src/memorial.c:212
 msgid "The current level"
 msgstr ""
 
-#: src/memorial.c:212
+#: src/memorial.c:219
 msgid "Attributes"
 msgstr ""
 
-#: src/memorial.c:221
+#: src/memorial.c:228
 msgid "Strength:"
 msgstr ""
 
-#: src/memorial.c:222
+#: src/memorial.c:229
 msgid "Dexterity:"
 msgstr ""
 
-#: src/memorial.c:223
+#: src/memorial.c:230
 msgid "Constitution:"
 msgstr ""
 
-#: src/memorial.c:224
+#: src/memorial.c:231
 msgid "Intelligence:"
 msgstr ""
 
-#: src/memorial.c:225
+#: src/memorial.c:232
 msgid "Wisdom:"
 msgstr ""
 
-#: src/memorial.c:241
+#: src/memorial.c:248
 msgid "Effects"
 msgstr ""
 
-#: src/memorial.c:254
+#: src/memorial.c:261
 msgid "Known Spells"
 msgstr ""
 
-#: src/memorial.c:261
+#: src/memorial.c:268
 #, c-format
 msgid "%-*s (lvl. %2d): %3d\n"
 msgstr ""
 
-#: src/memorial.c:283
+#: src/memorial.c:290
 msgid "Equipment"
 msgstr ""
 
-#: src/memorial.c:298
+#: src/memorial.c:305
 msgid "Items in pack"
 msgstr ""
 
-#: src/memorial.c:323
+#: src/memorial.c:330
 msgid "Creatures vanquished"
 msgstr ""
 
-#: src/memorial.c:339
+#: src/memorial.c:346
 #, c-format
 msgid ""
 "\n"
 "%3d total\n"
 msgstr ""
 
-#: src/memorial.c:350
+#: src/memorial.c:357
 msgid "Genocided creatures"
 msgstr ""
 
-#: src/memorial.c:359
+#: src/memorial.c:366
 msgid "Last messages"
 msgstr ""
 
-#: src/memorial.c:392 src/player.c:5122
+#: src/memorial.c:399 src/player.c:5122
 msgid "Enter filename: "
 msgstr ""
 
-#: src/memorial.c:413
+#: src/memorial.c:420
 msgid "File is a symlink. I won't overwrite those..."
 msgstr ""
 
-#: src/memorial.c:421
+#: src/memorial.c:428
 msgid ""
 "There is a directory with the name you gave. Thus I can't write the file."
 msgstr ""
 
-#: src/memorial.c:428
+#: src/memorial.c:435
 msgid ""
 "File exists!\n"
 "Do you want to overwrite it?"
