@@ -6963,7 +6963,7 @@ msgstr "Du vermehrst dein Wissen über den Zauber %s."
 
 #: src/spells.c:1806
 msgid "Reading makes you ingenious."
-msgstr "Lesen macht dich genial."
+msgstr "Lesen bildet!"
 
 #: src/spells.c:1822
 #, c-format
