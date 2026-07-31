@@ -83,6 +83,9 @@ static gzFile scoreboard_open_cloned_fd(const char* mode)
  *            rewritten in version 2 format. */
 static const gint sb_ver = 2;
 
+/* maximum number of entries kept in the persisted scoreboard */
+static const guint sb_entries = 100;
+
 static void scores_save(GList *gs);
 
 /* "cause" is polymorphic: its meaning depends on cod. Where it names a
@@ -356,8 +359,23 @@ GList *score_add(game *g, score_t *score)
     /* sort scoreboard entries */
     gs = g_list_sort(gs, (GCompareFunc)score_compare);
 
-    /* save new scoreboard */
-    scores_save(gs);
+    /* Persist only the top sb_entries entries, using a
+       shallow copy so the full list - which may contain one entry more
+       than that, namely the score just added if it did not make the
+       cut - is still returned unchanged. The caller needs its score_t
+       to remain valid regardless, and keeps freeing every entry of the
+       returned list itself. */
+    GList *persisted = g_list_copy(gs);
+    if (g_list_length(persisted) > sb_entries)
+    {
+        GList *cutoff = g_list_nth(persisted, sb_entries);
+        cutoff->prev->next = NULL;
+        cutoff->prev = NULL;
+        g_list_free(cutoff);
+    }
+
+    scores_save(persisted);
+    g_list_free(persisted);
 
     return gs;
 }
@@ -546,6 +564,27 @@ char *score_death_description(score_t *score, int verbose)
     return g_string_free(text, false);
 }
 
+static void scores_append_entry(GString *text, score_t *cscore, int rank1based,
+                                bool highlight)
+{
+    gchar *desc = score_death_description(cscore, false);
+    g_string_append_printf(text, "%s%2d) %7" G_GUINT64_FORMAT " %s\n",
+                           highlight ? "`EMPH`" : "",
+                           rank1based, cscore->score, desc);
+
+    char *dungeon_desc = ""; /* empty for the town */
+    if (cscore->dlevel > 10)
+        dungeon_desc = _("volcano lvl. ");
+    else if (cscore->dlevel > 0)
+        dungeon_desc = _("caverns lvl. ");
+
+    g_string_append_printf(text, _("            [exp. level %d, %s%s, %d/%d hp, difficulty %d]%s\n"),
+                           cscore->level, dungeon_desc, map_names[cscore->dlevel],
+                           cscore->hp, cscore->hp_max, cscore->difficulty,
+                           highlight ? "`end`" : "");
+    g_free(desc);
+}
+
 char *scores_to_string(GList *scores, score_t *score)
 {
     /* no scoreboard entries? */
@@ -553,7 +592,7 @@ char *scores_to_string(GList *scores, score_t *score)
 
     GString *text = g_string_new(NULL);
 
-    gint rank = 0;
+    guint rank = 0;
     GList *iterator = scores;
 
     /* show scores surrounding a specific score? */
@@ -561,6 +600,33 @@ char *scores_to_string(GList *scores, score_t *score)
     {
         /* determine position of score in the score list */
         rank = g_list_index(scores, score);
+
+        /* the scoreboard only keeps the top entries; anything beyond
+           that was never saved. Show the last few entries for context -
+           i.e. what this score would have needed to beat - followed by
+           a note that it did not make the cut. */
+        if (rank >= sb_entries)
+        {
+            const int last_n = 5;
+            int start = max(sb_entries - last_n, 0);
+            GList *last_iter = g_list_nth(scores, start);
+
+            for (guint nrec = start; last_iter && nrec < sb_entries;
+                 last_iter = last_iter->next, nrec++)
+            {
+                scores_append_entry(text, (score_t *)last_iter->data, nrec + 1, false);
+            }
+
+            g_string_append_c(text, '\n');
+
+            g_autofree char *points = g_strdup_printf("%" G_GUINT64_FORMAT,
+                                                       score->score);
+            g_string_append_printf(text, _("With a score of %s, this "
+                    "performance did not make it into the top %d of the "
+                    "NLarn Hall of Fame."), points, sb_entries);
+
+            return g_string_free(text, false);
+        }
 
         /* get entry three entries up of current/top score in list */
         iterator = g_list_nth(scores, max(rank - 3, 0));
@@ -572,23 +638,7 @@ char *scores_to_string(GList *scores, score_t *score)
          iterator = iterator->next, nrec++)
     {
         score_t *cscore = (score_t *)iterator->data;
-
-        gchar *desc = score_death_description(cscore, false);
-        g_string_append_printf(text, "%s%2d) %7" G_GUINT64_FORMAT " %s\n",
-                               (cscore == score) ? "`EMPH`" : "",
-                               nrec + 1, cscore->score, desc);
-
-        char *dungeon_desc = ""; /* empty for the town */
-        if (cscore->dlevel > 10)
-            dungeon_desc = _("volcano lvl. ");
-        else if (cscore->dlevel > 0)
-            dungeon_desc = _("caverns lvl. ");
-
-        g_string_append_printf(text, _("            [exp. level %d, %s%s, %d/%d hp, difficulty %d]%s\n"),
-                               cscore->level, dungeon_desc, map_names[cscore->dlevel],
-                               cscore->hp, cscore->hp_max, cscore->difficulty,
-                               (cscore == score) ? "`end`" : "");
-        g_free(desc);
+        scores_append_entry(text, cscore, nrec + 1, cscore == score);
     }
 
     return g_string_free(text, false);

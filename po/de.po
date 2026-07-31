@@ -1,11 +1,12 @@
 # German translation of NLarn.
 # Copyright (C) 2026 Joachim de Groot <jdegroot@web.de>
 # This file is distributed under the same license as the NLarn package.
+#: src/display.c:1170
 msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-08-01 00:10+0200\n"
+"POT-Creation-Date: 2026-08-01 00:25+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -135,11 +136,16 @@ msgstr "n:Elfenkettenhemd;;;Elfenkettenhemds"
 
 #: src/buildings.c:33
 msgid ""
-"The Larn Revenue Service has ordered us to not do business with tax evaders. They have also told us that you owe back taxes and, as we must comply with the law, we cannot serve you at this time.\n"
+"The Larn Revenue Service has ordered us to not do business with tax evaders. "
+"They have also told us that you owe back taxes and, as we must comply with "
+"the law, we cannot serve you at this time.\n"
 "\n"
 "So Sorry."
 msgstr ""
-"Das Finanzamt von Larn hat uns angewiesen, keine Geschäfte mit Steuersündern zu machen. Man hat uns außerdem mitgeteilt, dass du Steuern schuldest, und da wir uns an das Gesetz halten müssen, können wir dich derzeit nicht bedienen.\n"
+"Das Finanzamt von Larn hat uns angewiesen, keine Geschäfte mit Steuersündern "
+"zu machen. Man hat uns außerdem mitgeteilt, dass du Steuern schuldest, und "
+"da wir uns an das Gesetz halten müssen, können wir dich derzeit nicht "
+"bedienen.\n"
 "\n"
 "Es tut uns leid."
 
@@ -166,11 +172,17 @@ msgstr ""
 #: src/buildings.c:87
 #, c-format
 msgid ""
-"The Larn Revenue Service has ordered that your account be frozen until all levied taxes have been paid.  They have also told us that you owe %d gold in taxes, and we must comply with them. We cannot serve you at this time. Sorry.\n"
+"The Larn Revenue Service has ordered that your account be frozen until all "
+"levied taxes have been paid.  They have also told us that you owe %d gold in "
+"taxes, and we must comply with them. We cannot serve you at this time. "
+"Sorry.\n"
 "\n"
 "We suggest you go to the LRS office and pay your taxes."
 msgstr ""
-"Das Finanzamt von Larn hat angeordnet, dein Konto einzufrieren, bis alle fälligen Steuern bezahlt sind. Man hat uns mitgeteilt, dass du %d Gold Steuern schuldest, und wir müssen dem Folge leisten. Wir können dich derzeit nicht bedienen. Entschuldigung.\n"
+"Das Finanzamt von Larn hat angeordnet, dein Konto einzufrieren, bis alle "
+"fälligen Steuern bezahlt sind. Man hat uns mitgeteilt, dass du %d Gold "
+"Steuern schuldest, und wir müssen dem Folge leisten. Wir können dich derzeit "
+"nicht bedienen. Entschuldigung.\n"
 "\n"
 "Wir empfehlen dir, das Finanzamt aufzusuchen und deine Steuern zu bezahlen."
 
@@ -259,11 +271,15 @@ msgstr "DND-Laden"
 msgid ""
 "`EMPH`Welcome to the Larn Thrift Shoppe.`end`\n"
 "\n"
-"We stock many items explorers find useful in their adventures. Feel free to browse to your heart's content. Also be advised that if you break 'em, you pay for 'em."
+"We stock many items explorers find useful in their adventures. Feel free to "
+"browse to your heart's content. Also be advised that if you break 'em, you "
+"pay for 'em."
 msgstr ""
 "`EMPH`Willkommen im Gemischtwarenladen von Larn.`end`\n"
 "\n"
-"Wir führen viele Waren, die Abenteurern auf ihren Reisen nützlich sind. Stöbere nach Herzenslust. Aber sei gewarnt: Wer etwas kaputt macht, bezahlt es auch."
+"Wir führen viele Waren, die Abenteurern auf ihren Reisen nützlich sind. "
+"Stöbere nach Herzenslust. Aber sei gewarnt: Wer etwas kaputt macht, bezahlt "
+"es auch."
 
 #: src/buildings.c:356
 msgid "Your home"
@@ -274,45 +290,62 @@ msgstr "Dein Zuhause"
 msgid ""
 "`EMPH`Welcome home, %s.`end`\n"
 "\n"
-"Latest word from the doctor is not good. The diagnosis is confirmed as dianthroritis. He guesses that your daughter has only %d mobuls left in this world. It's up to you, %s, to find the only hope for your daughter, the very rare potion of cure dianthroritis.  It is rumored that only deep in the depths of the caves can this potion be found.\n"
+"Latest word from the doctor is not good. The diagnosis is confirmed as "
+"dianthroritis. He guesses that your daughter has only %d mobuls left in this "
+"world. It's up to you, %s, to find the only hope for your daughter, the very "
+"rare potion of cure dianthroritis.  It is rumored that only deep in the "
+"depths of the caves can this potion be found.\n"
 msgstr ""
 "`EMPH`Willkommen zu Hause, %s.`end`\n"
 "\n"
-"Die letzten Nachrichten vom Doktor sind nicht gut. Die Diagnose lautet zweifelsfrei Dianthroritis. Er schätzt, dass deiner Tochter nur noch %d Mobul auf dieser Welt bleiben. Es liegt an dir, %s, die einzige Hoffnung für deine Tochter zu finden: den äußerst seltenen Trank, der Dianthroritis heilt. Es heißt, dieser Trank sei nur tief in den Höhlen zu finden.\n"
+"Die letzten Nachrichten vom Doktor sind nicht gut. Die Diagnose lautet "
+"zweifelsfrei Dianthroritis. Er schätzt, dass deiner Tochter nur noch %d "
+"Mobul auf dieser Welt bleiben. Es liegt an dir, %s, die einzige Hoffnung für "
+"deine Tochter zu finden: den äußerst seltenen Trank, der Dianthroritis "
+"heilt. Es heißt, dieser Trank sei nur tief in den Höhlen zu finden.\n"
 
 #: src/buildings.c:367
 msgid ""
-"`EMPH`Congratulations!`end` You found the potion of cure dianthroritis! Frankly, No one thought you could do it. Boy! Did you surprise them!\n"
+"`EMPH`Congratulations!`end` You found the potion of cure dianthroritis! "
+"Frankly, No one thought you could do it. Boy! Did you surprise them!\n"
 "\n"
 msgstr ""
-"`EMPH`Glückwunsch!`end` Du hast den Trank gefunden, der Dianthroritis heilt! Ehrlich gesagt hat dir das niemand zugetraut. Junge, hast du sie überrascht!\n"
+"`EMPH`Glückwunsch!`end` Du hast den Trank gefunden, der Dianthroritis heilt! "
+"Ehrlich gesagt hat dir das niemand zugetraut. Junge, hast du sie "
+"überrascht!\n"
 "\n"
 
 #: src/buildings.c:371
 msgid ""
-"The doctor has the sad duty to inform you that your daughter died before your return. There was nothing he could do without the potion.\n"
+"The doctor has the sad duty to inform you that your daughter died before "
+"your return. There was nothing he could do without the potion.\n"
 "\n"
 "You didn't make it in time. Too bad..."
 msgstr ""
-"Der Doktor hat die traurige Pflicht, dir mitzuteilen, dass deine Tochter vor deiner Rückkehr gestorben ist. Ohne den Trank konnte er nichts für sie tun.\n"
+"Der Doktor hat die traurige Pflicht, dir mitzuteilen, dass deine Tochter vor "
+"deiner Rückkehr gestorben ist. Ohne den Trank konnte er nichts für sie tun.\n"
 "\n"
 "Du hast es nicht rechtzeitig geschafft. Wie schade..."
 
 #: src/buildings.c:376
 msgid ""
-"The doctor is now administering the potion and, in a few moments, your daughter should be well on her way to recovery.\n"
+"The doctor is now administering the potion and, in a few moments, your "
+"daughter should be well on her way to recovery.\n"
 "\n"
-"The potion is working! The doctor thinks that your daughter will recover in a few days.\n"
+"The potion is working! The doctor thinks that your daughter will recover in "
+"a few days.\n"
 "\n"
 "Congratulations!"
 msgstr ""
-"Der Doktor verabreicht nun den Trank, und in wenigen Augenblicken sollte sich deine Tochter auf dem Weg der Besserung befinden.\n"
+"Der Doktor verabreicht nun den Trank, und in wenigen Augenblicken sollte "
+"sich deine Tochter auf dem Weg der Besserung befinden.\n"
 "\n"
-"Der Trank wirkt! Der Doktor glaubt, dass sich deine Tochter in wenigen Tagen erholen wird.\n"
+"Der Trank wirkt! Der Doktor glaubt, dass sich deine Tochter in wenigen Tagen "
+"erholen wird.\n"
 "\n"
 "Herzlichen Glückwunsch!"
 
-#: src/buildings.c:394 src/player.c:1114
+#: src/buildings.c:394 src/player.c:1151
 msgid "You saved your daughter!"
 msgstr "Du hast deine Tochter gerettet!"
 
@@ -353,8 +386,8 @@ msgstr "(`KEY`a`end`)lles nehmen"
 
 #: src/buildings.c:515
 msgid ""
-"Take all items from your storage room. Only available when you can carry the"
-" total weight."
+"Take all items from your storage room. Only available when you can carry the "
+"total weight."
 msgstr ""
 "Nimm alle Gegenstände aus deiner Abstellkammer. Nur möglich, wenn du das "
 "Gesamtgewicht tragen kannst."
@@ -429,9 +462,9 @@ msgstr "Welche Beschwörung sollen wir in Tinte bannen?"
 
 #: src/buildings.c:642
 msgid ""
-"Even the oldest scribes know nothing of a scroll like that. Alas, the scroll"
-" must remain blank - for even the greatest scribes cannot write what does "
-"not exist."
+"Even the oldest scribes know nothing of a scroll like that. Alas, the scroll "
+"must remain blank - for even the greatest scribes cannot write what does not "
+"exist."
 msgstr ""
 "Selbst die ältesten Schreiber wissen nichts von einer solchen Schriftrolle. "
 "Die Rolle muss leer bleiben - denn auch die größten Schreiber können nicht "
@@ -525,11 +558,11 @@ msgstr "Geschichte von Larn"
 
 #: src/buildings.c:729
 msgid ""
-"Your instructor told you that the Eye of Larn is rumored to be guarded by an"
-" invisible demon lord."
+"Your instructor told you that the Eye of Larn is rumored to be guarded by an "
+"invisible demon lord."
 msgstr ""
-"Dein Dozent erzählte dir, dass das Auge von Larn Gerüchten zufolge von einem"
-" unsichtbaren Dämonenfürsten bewacht wird."
+"Dein Dozent erzählte dir, dass das Auge von Larn Gerüchten zufolge von einem "
+"unsichtbaren Dämonenfürsten bewacht wird."
 
 #: src/buildings.c:741
 #, c-format
@@ -545,11 +578,13 @@ msgstr "Du hast den Kurs „%s“ erfolgreich abgeschlossen. %s"
 msgid ""
 "`EMPH`Welcome to the College of Larn!`end`\n"
 "\n"
-"We offer the exciting opportunity of higher education to all inhabitants of the caves. Here is a list of the class schedule:"
+"We offer the exciting opportunity of higher education to all inhabitants of "
+"the caves. Here is a list of the class schedule:"
 msgstr ""
 "`EMPH`Willkommen an der Hochschule von Larn!`end`\n"
 "\n"
-"Wir bieten allen Bewohnern der Höhlen die aufregende Möglichkeit höherer Bildung. Hier ist der Stundenplan:"
+"Wir bieten allen Bewohnern der Höhlen die aufregende Möglichkeit höherer "
+"Bildung. Hier ist der Stundenplan:"
 
 #: src/buildings.c:832
 msgid "You have already attended this course."
@@ -588,13 +623,16 @@ msgid ""
 "`EMPH`Welcome to the Larn Trading Post.`end`\n"
 "\n"
 "We buy items that explorers no longer find useful.\n"
-"Since the condition of the items you bring in is not certain, and we incur great expense in reconditioning the items, we usually pay only 20% of their value were they to be new.\n"
+"Since the condition of the items you bring in is not certain, and we incur "
+"great expense in reconditioning the items, we usually pay only 20% of their "
+"value were they to be new.\n"
 "If the items are badly damaged, we will pay only 10% of their new value."
 msgstr ""
 "`EMPH`Willkommen am Handelsposten von Larn.`end`\n"
 "\n"
 "Wir kaufen Gegenstände an, die Abenteurern nicht mehr nützlich sind.\n"
-"Da der Zustand der angebotenen Waren ungewiss ist und uns die Aufarbeitung große Kosten verursacht, zahlen wir üblicherweise nur 20% des Neuwerts.\n"
+"Da der Zustand der angebotenen Waren ungewiss ist und uns die Aufarbeitung "
+"große Kosten verursacht, zahlen wir üblicherweise nur 20% des Neuwerts.\n"
 "Bei stark beschädigten Gegenständen zahlen wir nur 10% des Neuwerts."
 
 #: src/buildings.c:935
@@ -607,8 +645,7 @@ msgstr "(`KEY`i`end`)dentifizieren"
 
 #: src/buildings.c:945
 msgid "Have the Trade Post's experts identify your item."
-msgstr ""
-"Lass die Experten des Handelspostens deinen Gegenstand identifizieren."
+msgstr "Lass die Experten des Handelspostens deinen Gegenstand identifizieren."
 
 #: src/buildings.c:953
 msgid "(`KEY`r`end`)epair"
@@ -618,26 +655,26 @@ msgstr "(`KEY`r`end`)eparieren"
 msgid ""
 "Have the Trade Post's experts revert any damage done to the selected item."
 msgstr ""
-"Lass die Experten des Handelspostens alle Schäden am ausgewählten Gegenstand"
-" beheben."
+"Lass die Experten des Handelspostens alle Schäden am ausgewählten Gegenstand "
+"beheben."
 
-#: src/buildings.c:962 src/player.c:2716
+#: src/buildings.c:962 src/player.c:2753
 msgid "(`KEY`e`end`)quip"
 msgstr "(`KEY`a`end`)nlegen"
 
-#: src/buildings.c:963 src/player.c:2717
+#: src/buildings.c:963 src/player.c:2754
 msgid "Equip the selected item."
 msgstr "Den gewählten Gegenstand anlegen."
 
-#: src/buildings.c:970 src/player.c:2740
+#: src/buildings.c:970 src/player.c:2777
 msgid "(`KEY`u`end`)nequip"
 msgstr "a(`KEY`b`end`)legen"
 
-#: src/buildings.c:971 src/player.c:2741
+#: src/buildings.c:971 src/player.c:2778
 msgid "Unequip the selected item."
 msgstr "Den gewählten Gegenstand ablegen."
 
-#: src/buildings.c:979 src/player.c:2757
+#: src/buildings.c:979 src/player.c:2794
 msgid "(`KEY`n`end`)ote"
 msgstr "n(`KEY`o`end`)tieren"
 
@@ -653,15 +690,22 @@ msgstr "Das Kloster von Larn"
 msgid ""
 "`EMPH`Welcome, traveler, to the Monastery of Larn.`end`\n"
 "\n"
-"Peace be upon you. The walls of the monastery offer respite to all who seek it.\n"
+"Peace be upon you. The walls of the monastery offer respite to all who seek "
+"it.\n"
 "\n"
-"Speak your need, and if it lies within our calling, it shall be granted... for a fair offering. We tend the wounded and weary, and offer a small selection of tools and provisions to aid those who walk the road of trials."
+"Speak your need, and if it lies within our calling, it shall be granted... "
+"for a fair offering. We tend the wounded and weary, and offer a small "
+"selection of tools and provisions to aid those who walk the road of trials."
 msgstr ""
 "`EMPH`Willkommen, Reisender, im Kloster von Larn.`end`\n"
 "\n"
-"Friede sei mit dir. Die Mauern des Klosters gewähren jedem Rast, der sie sucht.\n"
+"Friede sei mit dir. Die Mauern des Klosters gewähren jedem Rast, der sie "
+"sucht.\n"
 "\n"
-"Nenne dein Anliegen, und liegt es in unserer Berufung, so soll es gewährt werden... gegen eine angemessene Gabe. Wir pflegen die Verwundeten und Erschöpften und bieten eine kleine Auswahl an Werkzeugen und Vorräten für jene, die den Pfad der Prüfungen beschreiten."
+"Nenne dein Anliegen, und liegt es in unserer Berufung, so soll es gewährt "
+"werden... gegen eine angemessene Gabe. Wir pflegen die Verwundeten und "
+"Erschöpften und bieten eine kleine Auswahl an Werkzeugen und Vorräten für "
+"jene, die den Pfad der Prüfungen beschreiten."
 
 #: src/buildings.c:1008
 msgid "Shall we proceed, then?"
@@ -783,8 +827,8 @@ msgid ""
 "To grant you healing, we humbly request a donation of %d gold to our "
 "monastery. %s"
 msgstr ""
-"Um dir Heilung zu gewähren, bitten wir demütig um eine Spende in Höhe von %d"
-" Gold an unser Kloster. %s"
+"Um dir Heilung zu gewähren, bitten wir demütig um eine Spende in Höhe von %d "
+"Gold an unser Kloster. %s"
 
 #: src/buildings.c:1222
 msgid "So be it, the healing shall wait."
@@ -815,8 +859,8 @@ msgstr "(`KEY`k`end`)aufen"
 
 #: src/buildings.c:1322
 msgid ""
-"Buy the selected item. If the available quantity exceeds one, you may select"
-" the amount you want to purchase."
+"Buy the selected item. If the available quantity exceeds one, you may select "
+"the amount you want to purchase."
 msgstr ""
 "Kaufe den ausgewählten Gegenstand. Ist mehr als einer vorrätig, kannst du "
 "die gewünschte Menge wählen."
@@ -919,7 +963,7 @@ msgstr "Du verkaufst %s. %d Goldstücke wurden auf dein Bankkonto überwiesen."
 msgid "You behead %s with your Vorpal Blade!"
 msgstr "Du enthauptest %s mit deiner Vorpalklinge!"
 
-#: src/config.c:373 src/player.c:38 src/player.c:218
+#: src/config.c:373 src/player.c:75 src/player.c:255
 msgid "not defined"
 msgstr "nicht definiert"
 
@@ -1009,7 +1053,7 @@ msgid "Font size (6 - 48): "
 msgstr "Schriftgröße (6 - 48): "
 
 #: src/config.c:612 src/game.c:115 src/map.c:1958 src/memorial.c:420
-#: src/memorial.c:428 src/memorial.c:453 src/nlarn.c:659 src/player.c:5129
+#: src/memorial.c:428 src/memorial.c:453 src/nlarn.c:659 src/player.c:5166
 msgid "Error"
 msgstr "Fehler"
 
@@ -1056,7 +1100,7 @@ msgstr "(`KEY`n`end`)ehmen"
 msgid "Get the selected item out the container."
 msgstr "Nimm den ausgewählten Gegenstand aus dem Behälter."
 
-#: src/container.c:111 src/player.c:1695
+#: src/container.c:111 src/player.c:1732
 msgid "get (`KEY`a`end`)ll"
 msgstr "(`KEY`a`end`)lle nehmen"
 
@@ -1932,8 +1976,7 @@ msgstr "Lade...."
 #: src/game.c:653
 msgid "Saved game could not be loaded. Delete and start new game?"
 msgstr ""
-"Der Spielstand konnte nicht geladen werden. Löschen und neues Spiel "
-"beginnen?"
+"Der Spielstand konnte nicht geladen werden. Löschen und neues Spiel beginnen?"
 
 #: src/gems.c:40
 msgid "diamond"
@@ -1998,8 +2041,10 @@ msgstr ""
 msgctxt "grammar"
 msgid "adjective endings"
 msgstr ""
-"def:m=e,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=e,e,en,en|en,en,en,en\n"
-"indef:m=er,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=es,es,en,en|en,en,en,en\n"
+"def:m=e,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=e,e,en,en|"
+"en,en,en,en\n"
+"indef:m=er,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=es,es,en,en|"
+"en,en,en,en\n"
 "none:m=er,en,em,en|e,e,en,er;f=e,e,er,er|e,e,en,er;n=es,es,em,en|e,e,en,er"
 
 #. TRANSLATORS: The position of attributive adjectives relative
@@ -2010,8 +2055,10 @@ msgstr ""
 msgctxt "grammar"
 msgid "adjective position"
 msgstr ""
-"beforedef:m=e,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=e,e,en,en|en,en,en,en\n"
-"indef:m=er,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=es,es,en,en|en,en,en,en\n"
+"beforedef:m=e,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=e,e,en,en|"
+"en,en,en,en\n"
+"indef:m=er,en,en,en|en,en,en,en;f=e,e,en,en|en,en,en,en;n=es,es,en,en|"
+"en,en,en,en\n"
 "none:m=er,en,em,en|e,e,en,er;f=e,e,er,er|e,e,en,er;n=es,es,em,en|e,e,en,er"
 
 #: src/items.c:63
@@ -2279,7 +2326,7 @@ msgctxt "item status"
 msgid "trapped"
 msgstr "mit einer Falle versehen~"
 
-#: src/items.c:786 src/scoreboard.c:440
+#: src/items.c:786 src/scoreboard.c:524
 msgctxt "item status"
 msgid "cursed"
 msgstr "verflucht~"
@@ -2684,7 +2731,7 @@ msgstr "Dort liegen mehrere Gegenstände."
 msgid " and %s"
 msgstr " und %s"
 
-#: src/map.c:901 src/player.c:1419
+#: src/map.c:901 src/player.c:1456
 #, c-format
 msgid "You see %s here."
 msgstr "Du siehst hier %s."
@@ -2933,19 +2980,23 @@ msgstr[1] "%d andere Gegenstände"
 #, c-format
 msgid ""
 "\n"
-"He found %d gold in the caverns, sold %s for %d and %s for %d gold, and earned %d gold as bank interest."
+"He found %d gold in the caverns, sold %s for %d and %s for %d gold, and "
+"earned %d gold as bank interest."
 msgstr ""
 "\n"
-"Er fand %d Gold in den Höhlen, verkaufte %s für %d und %s für %d Gold und verdiente %d Gold an Bankzinsen."
+"Er fand %d Gold in den Höhlen, verkaufte %s für %d und %s für %d Gold und "
+"verdiente %d Gold an Bankzinsen."
 
 #: src/memorial.c:163
 #, c-format
 msgid ""
 "\n"
-"She found %d gold in the caverns, sold %s for %d and %s for %d gold, and earned %d gold as bank interest."
+"She found %d gold in the caverns, sold %s for %d and %s for %d gold, and "
+"earned %d gold as bank interest."
 msgstr ""
 "\n"
-"Sie fand %d Gold in den Höhlen, verkaufte %s für %d und %s für %d Gold und verdiente %d Gold an Bankzinsen."
+"Sie fand %d Gold in den Höhlen, verkaufte %s für %d und %s für %d Gold und "
+"verdiente %d Gold an Bankzinsen."
 
 #: src/memorial.c:172
 #, c-format
@@ -2958,19 +3009,26 @@ msgstr[1] "%d Gegenstände"
 #, c-format
 msgid ""
 "\n"
-"He bought %s for %d gold, spent %d on item identification or repair, donated %d gold to charitable causes, and invested %d gold in his personal education."
+"He bought %s for %d gold, spent %d on item identification or repair, donated "
+"%d gold to charitable causes, and invested %d gold in his personal education."
 msgstr ""
 "\n"
-"Er kaufte %s für %d Gold, gab %d für die Identifikation oder Reparatur von Gegenständen aus, spendete %d Gold für wohltätige Zwecke und investierte %d Gold in seine persönliche Bildung."
+"Er kaufte %s für %d Gold, gab %d für die Identifikation oder Reparatur von "
+"Gegenständen aus, spendete %d Gold für wohltätige Zwecke und investierte %d "
+"Gold in seine persönliche Bildung."
 
 #: src/memorial.c:179
 #, c-format
 msgid ""
 "\n"
-"She bought %s for %d gold, spent %d on item identification or repair, donated %d gold to charitable causes, and invested %d gold in her personal education."
+"She bought %s for %d gold, spent %d on item identification or repair, "
+"donated %d gold to charitable causes, and invested %d gold in her personal "
+"education."
 msgstr ""
 "\n"
-"Sie kaufte %s für %d Gold, gab %d für die Identifikation oder Reparatur von Gegenständen aus, spendete %d Gold für wohltätige Zwecke und investierte %d Gold in ihre persönliche Bildung."
+"Sie kaufte %s für %d Gold, gab %d für die Identifikation oder Reparatur von "
+"Gegenständen aus, spendete %d Gold für wohltätige Zwecke und investierte %d "
+"Gold in ihre persönliche Bildung."
 
 #: src/memorial.c:190
 #, c-format
@@ -3072,7 +3130,7 @@ msgstr "Ausgerottete Kreaturen"
 msgid "Last messages"
 msgstr "Letzte Meldungen"
 
-#: src/memorial.c:399 src/player.c:5122
+#: src/memorial.c:399 src/player.c:5159
 msgid "Enter filename: "
 msgstr "Dateiname: "
 
@@ -4038,7 +4096,7 @@ msgstr "Hier ist ein Brunnen. Daraus trinken?"
 msgid "Choose a destination to travel to."
 msgstr "Wähle ein Reiseziel."
 
-#: src/nlarn.c:906 src/player.c:3919 src/spells.c:754 src/spells.c:931
+#: src/nlarn.c:906 src/player.c:3956 src/spells.c:754 src/spells.c:931
 #: src/spells.c:995 src/spells.c:1031 src/spells.c:1071 src/spells.c:1085
 #: src/spells.c:1601 src/spells.c:1616
 msgid "Aborted."
@@ -4073,10 +4131,12 @@ msgstr "NLarn Version %s, erstellt am %s."
 #: src/nlarn.c:1021
 msgid ""
 "Are you sure you want to switch to Wizard mode?\n"
-"You will not be able to switch back to normal gameplay and your score will not be counted."
+"You will not be able to switch back to normal gameplay and your score will "
+"not be counted."
 msgstr ""
 "Möchtest du wirklich in den Zauberermodus wechseln?\n"
-"Du kannst nicht zum normalen Spiel zurückkehren, und deine Punkte werden nicht gewertet."
+"Du kannst nicht zum normalen Spiel zurückkehren, und deine Punkte werden "
+"nicht gewertet."
 
 #: src/nlarn.c:1031
 msgid "Wizard mode is already enabled."
@@ -4131,349 +4191,349 @@ msgstr "Bei welchem Namen sollst du gerufen werden?"
 msgid "Are you male or female?"
 msgstr "Bist du männlich oder weiblich?"
 
-#: src/player.c:38
+#: src/player.c:75
 msgid "male"
 msgstr "männlich"
 
-#: src/player.c:38
+#: src/player.c:75
 msgid "female"
 msgstr "weiblich"
 
-#: src/player.c:40
+#: src/player.c:77
 msgid "mighty evil master"
 msgstr "mächtiger böser Meister"
 
-#: src/player.c:41
+#: src/player.c:78
 msgid "apprentice demi-god"
 msgstr "Halbgott-Lehrling"
 
-#: src/player.c:42
+#: src/player.c:79
 msgid "minor demi-god"
 msgstr "niederer Halbgott"
 
-#: src/player.c:43
+#: src/player.c:80
 msgid "major demi-god"
 msgstr "hoher Halbgott"
 
-#: src/player.c:44
+#: src/player.c:81
 msgid "minor deity"
 msgstr "niedere Gottheit"
 
-#: src/player.c:45
+#: src/player.c:82
 msgid "major deity"
 msgstr "hohe Gottheit"
 
-#: src/player.c:46
+#: src/player.c:83
 msgid "novice guardian"
 msgstr "Wächter-Novize"
 
-#: src/player.c:47
+#: src/player.c:84
 msgid "apprentice guardian"
 msgstr "Wächter-Lehrling"
 
-#: src/player.c:51
+#: src/player.c:88
 msgid "novice explorer"
 msgstr "Entdecker-Neuling"
 
-#: src/player.c:51
+#: src/player.c:88
 msgid "apprentice explorer"
 msgstr "Entdecker-Lehrling"
 
-#: src/player.c:51
+#: src/player.c:88
 msgid "practiced explorer"
 msgstr "geübter Entdecker"
 
-#: src/player.c:52
+#: src/player.c:89
 msgid "expert explorer"
 msgstr "erfahrener Entdecker"
 
-#: src/player.c:52
+#: src/player.c:89
 msgid "novice adventurer"
 msgstr "Anfänger-Abenteurer"
 
-#: src/player.c:52
+#: src/player.c:89
 msgid "adventurer"
 msgstr "Abenteurer"
 
-#: src/player.c:53
+#: src/player.c:90
 msgid "apprentice conjurer"
 msgstr "Zauberlehrling"
 
-#: src/player.c:53
+#: src/player.c:90
 msgid "conjurer"
 msgstr "Zauberer"
 
-#: src/player.c:53
+#: src/player.c:90
 msgid "master conjurer"
 msgstr "Meisterzauberer"
 
-#: src/player.c:54
+#: src/player.c:91
 msgid "apprentice mage"
 msgstr "Magierlehrling"
 
-#: src/player.c:54
+#: src/player.c:91
 msgid "mage"
 msgstr "Magier"
 
-#: src/player.c:54
+#: src/player.c:91
 msgid "experienced mage"
 msgstr "erfahrener Magier"
 
-#: src/player.c:55
+#: src/player.c:92
 msgid "master mage"
 msgstr "Meistermagier"
 
-#: src/player.c:55
+#: src/player.c:92
 msgid "apprentice warlord"
 msgstr "Kriegsherrenlehrling"
 
-#: src/player.c:55
+#: src/player.c:92
 msgid "novice warlord"
 msgstr "Anfänger-Kriegsherr"
 
-#: src/player.c:56
+#: src/player.c:93
 msgid "expert warlord"
 msgstr "erfahrener Kriegsherr"
 
-#: src/player.c:56
+#: src/player.c:93
 msgid "master warlord"
 msgstr "Kriegsherr"
 
-#: src/player.c:56
+#: src/player.c:93
 msgid "apprentice gorgon"
 msgstr "Gorgonenlehrling"
 
-#: src/player.c:57
+#: src/player.c:94
 msgid "gorgon"
 msgstr "Gorgone"
 
-#: src/player.c:57
+#: src/player.c:94
 msgid "practiced gorgon"
 msgstr "geübte Gorgone"
 
-#: src/player.c:57
+#: src/player.c:94
 msgid "master gorgon"
 msgstr "Meister Gorgon"
 
-#: src/player.c:58
+#: src/player.c:95
 msgid "demi-gorgon"
 msgstr "Halbgorgone"
 
-#: src/player.c:58
+#: src/player.c:95
 msgid "evil master"
 msgstr "böser Meister"
 
-#: src/player.c:58
+#: src/player.c:95
 msgid "great evil master"
 msgstr "großer böser Meister"
 
-#: src/player.c:82
+#: src/player.c:119
 msgid "earth guardian"
 msgstr "Wächter der Erde"
 
-#: src/player.c:82
+#: src/player.c:119
 msgid "air guardian"
 msgstr "Wächter der Luft"
 
-#: src/player.c:82
+#: src/player.c:119
 msgid "fire guardian"
 msgstr "Wächter des Feuers"
 
-#: src/player.c:83
+#: src/player.c:120
 msgid "water guardian"
 msgstr "Wächter des Wassers"
 
-#: src/player.c:83
+#: src/player.c:120
 msgid "time guardian"
 msgstr "Wächter der Zeit"
 
-#: src/player.c:83
+#: src/player.c:120
 msgid "ethereal guardian"
 msgstr "ätherischer Wächter"
 
-#: src/player.c:84
+#: src/player.c:121
 msgid "The Creator"
 msgstr "Der Schöpfer"
 
-#: src/player.c:190
+#: src/player.c:227
 msgid "Strong character"
 msgstr "Starker Charakter"
 
-#: src/player.c:191
+#: src/player.c:228
 msgid "Agile character"
 msgstr "Geschickter Charakter"
 
-#: src/player.c:192
+#: src/player.c:229
 msgid "Tough character"
 msgstr "Zäher Charakter"
 
-#: src/player.c:193
+#: src/player.c:230
 msgid "Smart character"
 msgstr "Kluger Charakter"
 
-#: src/player.c:194
+#: src/player.c:231
 msgid "Randomly selected character preset"
 msgstr "Zufällig ausgewählte Charaktervorlage"
 
-#: src/player.c:195
+#: src/player.c:232
 msgid "All stats assigned randomly"
 msgstr "Alle Werte zufällig zugewiesen"
 
-#: src/player.c:223
+#: src/player.c:260
 msgid "Choose a character build"
 msgstr "Wähle eine Charakterkonfiguration aus"
 
-#: src/player.c:824
+#: src/player.c:861
 msgid "Your attunement to the walls is fading!"
 msgstr "Deine Verbundenheit mit den Mauern schwindet!"
 
-#: src/player.c:826
+#: src/player.c:863
 msgid "You are starting to drift towards the ground!"
 msgstr "Du beginnst, in Richtung Boden zu driften!"
 
-#: src/player.c:867
+#: src/player.c:904
 #, c-format
 msgid "You are %s."
 msgstr "Du bist damit beschäftigt, %s."
 
-#: src/player.c:959
+#: src/player.c:996
 msgid "You are unable to hold your weapon."
 msgstr "Du kannst deine Waffe nicht halten."
 
-#: src/player.c:977
+#: src/player.c:1014
 msgid "The hysteria of itching forces you to remove your armour!"
 msgstr "Unerträglicher Juckreiz zwingt dich, deine Rüstung abzulegen!"
 
-#: src/player.c:998
+#: src/player.c:1035
 #, c-format
 msgid "Do you want to continue %s?"
 msgstr "Möchtest du fortfahren, %s?"
 
-#: src/player.c:999
+#: src/player.c:1036
 msgid "Do you want to continue?"
 msgstr "Möchtest du fortfahren?"
 
-#: src/player.c:1007
+#: src/player.c:1044
 #, c-format
 msgid "You stop %s."
 msgstr "Du hörst auf, %s."
 
-#: src/player.c:1058
+#: src/player.c:1095
 msgid "You feel wiiieeeeerrrrrd all over!"
 msgstr "Du fühlst dich am ganzen Körper gaaaanz seeeltsam!"
 
-#: src/player.c:1084
+#: src/player.c:1121
 msgid "You fade to gray..."
 msgstr "Du verblasst zu Grau..."
 
-#: src/player.c:1085
+#: src/player.c:1122
 msgid "In Memoriam"
 msgstr "In Memoriam"
 
-#: src/player.c:1089
+#: src/player.c:1126
 msgid "You are trapped in solid rock."
 msgstr "Du bist in festem Fels eingeschlossen."
 
-#: src/player.c:1090 src/player.c:2142 src/player.c:2165
+#: src/player.c:1127 src/player.c:2179 src/player.c:2202
 msgid "Ouch!"
 msgstr "Autsch!"
 
-#: src/player.c:1094
+#: src/player.c:1131
 msgid "You've drowned in deep water."
 msgstr "Du bist in tiefem Wasser ertrunken."
 
-#: src/player.c:1095
+#: src/player.c:1132
 msgid "Deep the water, short the breath..."
 msgstr "Tief das Gewässer, so wenig Luft..."
 
-#: src/player.c:1099
+#: src/player.c:1136
 msgid "You've melted."
 msgstr "Du bist geschmolzen."
 
-#: src/player.c:1100
+#: src/player.c:1137
 msgid "Aaaaaaaaaaaaa!"
 msgstr "Aaaaaaaaaaaaa!"
 
-#: src/player.c:1104
+#: src/player.c:1141
 msgid "You've genocided yourself!"
 msgstr "Du hast dich selbst ausgelöscht!"
 
-#: src/player.c:1105
+#: src/player.c:1142
 msgid "Oops?"
 msgstr "Hoppla?"
 
-#: src/player.c:1109
+#: src/player.c:1146
 msgid "You returned home too late!"
 msgstr "Du kehrst zu spät nach Hause zurück!"
 
-#: src/player.c:1110 src/player.c:1125
+#: src/player.c:1147 src/player.c:1162
 msgid "The End"
 msgstr "Das Ende"
 
-#: src/player.c:1115
+#: src/player.c:1152
 msgid "Congratulations! You won!"
 msgstr "Glückwunsch! Du hast gewonnen!"
 
-#: src/player.c:1119
+#: src/player.c:1156
 msgid "You didn't manage to save your daughter."
 msgstr "Du hast es nicht geschafft, deine Tochter zu retten."
 
-#: src/player.c:1120
+#: src/player.c:1157
 msgid "You lost"
 msgstr "Du hast verloren"
 
-#: src/player.c:1124
+#: src/player.c:1161
 msgid "You quit."
 msgstr "Du hörst auf."
 
-#: src/player.c:1129
+#: src/player.c:1166
 msgid "You die..."
 msgstr "Du stirbst..."
 
-#: src/player.c:1130
+#: src/player.c:1167
 msgid "R. I. P."
 msgstr "Ruhe in Frieden."
 
-#: src/player.c:1137
+#: src/player.c:1174
 #, fuzzy
 msgid "Really die?"
 msgstr "Wirklich „%s“ zaubern?"
 
-#: src/player.c:1139
+#: src/player.c:1176
 msgid "WIZARD MODE. You stay alive."
 msgstr "ZAUBERERMODUS. Du bleibst am Leben."
 
-#: src/player.c:1216
+#: src/player.c:1253
 msgid "Do you want to save a memorial file for your character?"
 msgstr "Möchtest du eine Erinnerungsdatei für deinen Charakter speichern?"
 
-#: src/player.c:1271
+#: src/player.c:1308
 msgid "You cannot move as long you are overstrained."
 msgstr "Du kannst dich nicht bewegen, solange du überladen bist."
 
-#: src/player.c:1278 src/player.c:1665 src/player.c:4037
+#: src/player.c:1315 src/player.c:1702 src/player.c:4074
 msgid "You can't move!"
 msgstr "Du kannst dich nicht bewegen!"
 
-#: src/player.c:1289
+#: src/player.c:1326
 msgid "You climb out of the pit!"
 msgstr "Du kletterst aus der Grube!"
 
-#: src/player.c:1293
+#: src/player.c:1330
 msgid "You're trapped in a pit!"
 msgstr "Du bist in einer Grube gefangen!"
 
-#: src/player.c:1336
+#: src/player.c:1373
 #, c-format
 msgid "Wait! That is %s!"
 msgstr "Warte! Das ist %s!"
 
-#: src/player.c:1353
+#: src/player.c:1390
 #, c-format
 msgid "You swap places with %s."
 msgstr "Du tauschst den Platz mit %s."
 
-#: src/player.c:1392
+#: src/player.c:1429
 #, c-format
 msgid ""
 "At the brink of unseen %s, your instincts flare and you pull back just in "
@@ -4482,74 +4542,74 @@ msgstr ""
 "Vor dir liegt ungesehen %s – deine Instinkte flammen auf und du bleibst "
 "gerade noch rechtzeitig stehen."
 
-#: src/player.c:1393
+#: src/player.c:1430
 #, c-format
 msgid "Ouch! You bump into %s!"
 msgstr "Autsch! Du stößt gegen %s!"
 
-#: src/player.c:1431
+#: src/player.c:1468
 #, c-format
 msgid "You bump into %s."
 msgstr "Du rempelst %s an."
 
-#: src/player.c:1441
+#: src/player.c:1478
 #, c-format
 msgid "You hit %s."
 msgstr "Du triffst %s."
 
-#: src/player.c:1459
+#: src/player.c:1496
 #, c-format
 msgid "`LIGHT_MAGENTA`%s breaks!`end`"
 msgstr "`LIGHT_MAGENTA`%s zerbricht!`end`"
 
-#: src/player.c:1507
+#: src/player.c:1544
 #, c-format
 msgid "Your lance of death tickles %s!"
 msgstr "Deine Todeslanze kitzelt %s!"
 
-#: src/player.c:1522
+#: src/player.c:1559
 #, c-format
 msgid "You miss %s."
 msgstr "Du verfehlst %s."
 
-#: src/player.c:1589
+#: src/player.c:1626
 msgid "You return to town."
 msgstr "Du kehrst in das Dorf zurück."
 
-#: src/player.c:1592
+#: src/player.c:1629
 msgid "You enter the caverns of Larn."
 msgstr "Du betrittst die Höhlen von Larn."
 
-#: src/player.c:1656
+#: src/player.c:1693
 msgid "There is nothing here."
 msgstr "Hier ist nichts."
 
-#: src/player.c:1660
+#: src/player.c:1697
 msgid "You cannot reach the floor!"
 msgstr "Du kannst den Boden nicht erreichen!"
 
-#: src/player.c:1678
+#: src/player.c:1715
 msgid "(`KEY`,`end`) get"
 msgstr "(`KEY`n`end`)ehmen"
 
-#: src/player.c:1679
+#: src/player.c:1716
 msgid "Get the item. In case of an item stack, get the entire stack."
 msgstr ""
-"Nimm den Gegenstand. Bei einem Stapel von Gegenständen nimm den den gesamten"
-" Stapel."
+"Nimm den Gegenstand. Bei einem Stapel von Gegenständen nimm den den gesamten "
+"Stapel."
 
-#: src/player.c:1686
+#: src/player.c:1723
 msgid "(`KEY`g`end`)et partly"
 msgstr "(`KEY`e`end`)inige nehmen"
 
-#: src/player.c:1687
+#: src/player.c:1724
 msgid ""
 "Get the item. In case of an item stack, choose how many items to pick up."
 msgstr ""
 "Nimm den Gegenstand. Bei einem Stapel von Gegenständen wähle aus, wie viele "
 "Gegenstände du aufheben möchtest."
 
-#: src/player.c:1696
+#: src/player.c:1733
 msgid ""
 "Get all items from the stash. Only available when you can carry the total "
 "weight."
@@ -4557,519 +4617,519 @@ msgstr ""
 "Nimm alle Gegenstände aus dem Lager. Nur möglich, wenn du das Gesamtgewicht "
 "tragen kannst."
 
-#: src/player.c:1703
+#: src/player.c:1740
 msgid "On the floor"
 msgstr "Auf dem Boden"
 
-#: src/player.c:1792
+#: src/player.c:1829
 #, c-format
 msgid "`KEY`You gain experience and become %s %s!`end`"
 msgstr "`KEY`Du sammelst Erfahrung und wirst %2$s!`end`%1$.0s"
 
-#: src/player.c:1797
+#: src/player.c:1834
 msgid "You gain experience!"
 msgstr "Du sammelst Erfahrung!"
 
-#: src/player.c:1830
+#: src/player.c:1867
 #, c-format
 msgid "`LUMINOUS_RED`You return to experience level %d...`end`"
 msgstr "`LUMINOUS_RED`Du kehrst zu Erfahrungsstufe %d zurück...`end`"
 
-#: src/player.c:1961
+#: src/player.c:1998
 msgid "You resist the poison."
 msgstr "Du widerstehst dem Gift."
 
-#: src/player.c:1967
+#: src/player.c:2004
 msgid "You feel poison running through your veins."
 msgstr "Du spürst, wie Gift durch deine Adern fließt."
 
-#: src/player.c:2018 src/player.c:2300
+#: src/player.c:2055 src/player.c:2337
 msgid "You are not affected."
 msgstr "Dir geschieht nichts."
 
-#: src/player.c:2086
+#: src/player.c:2123
 #, c-format
 msgid "Your amulet cancels the attack of %s."
 msgstr "Dein Amulett vereitelt den Angriff %s."
 
-#: src/player.c:2140 src/player.c:2163
+#: src/player.c:2177 src/player.c:2200
 msgid "Ouch, that REALLY hurt!"
 msgstr "Autsch, das hat WIRKLICH wehgetan!"
 
-#: src/player.c:2153
+#: src/player.c:2190
 msgid "Your armour protects you."
 msgstr "Deine Rüstung schützt dich."
 
-#: src/player.c:2171
+#: src/player.c:2208
 msgid "You resist."
 msgstr "Du widerstehst."
 
-#: src/player.c:2181
+#: src/player.c:2218
 msgid "You suffer burns."
 msgstr "Du erleidest Verbrennungen."
 
-#: src/player.c:2186
+#: src/player.c:2223
 msgid "The flames don't phase you."
 msgstr "Die Flammen machen dir nichts aus."
 
-#: src/player.c:2195
+#: src/player.c:2232
 msgid "You suffer from frostbite."
 msgstr "Du erleidest Erfrierungen."
 
-#: src/player.c:2200
+#: src/player.c:2237
 msgid "It doesn't seem so cold."
 msgstr "Es scheint nicht so kalt zu sein."
 
-#: src/player.c:2207
+#: src/player.c:2244
 msgid "You are splashed with acid."
 msgstr "Du wirst mit Säure bespritzt."
 
-#: src/player.c:2212
+#: src/player.c:2249
 msgid "The acid doesn't affect you."
 msgstr "Die Säure hat keine Auswirkungen auf dich."
 
-#: src/player.c:2219
+#: src/player.c:2256
 msgid "You experience near-drowning."
 msgstr "Du hast eine Beinahe-Ertrinkung erlebt."
 
-#: src/player.c:2224
+#: src/player.c:2261
 msgid "The water doesn't affect you."
 msgstr "Da Wasser macht dir nichts aus."
 
-#: src/player.c:2235
+#: src/player.c:2272
 msgid "Zapp!"
 msgstr "Zapp!"
 
-#: src/player.c:2240
+#: src/player.c:2277
 msgid "As you are grounded nothing happens."
 msgstr "Da du geerdet bist, passiert nichts."
 
-#: src/player.c:2255
+#: src/player.c:2292
 msgid "You are not blinded."
 msgstr "Du wirst nicht geblendet."
 
-#: src/player.c:2268
+#: src/player.c:2305
 msgid "You are not confused."
 msgstr "Du wirst nicht verwirrt."
 
-#: src/player.c:2281
+#: src/player.c:2318
 msgid "You avoid eye contact."
 msgstr "Du vermeidest Blickkontakt."
 
-#: src/player.c:2304
+#: src/player.c:2341
 msgid "Your life energy is drained."
 msgstr "Deine Lebensenergie wird aus dir gesaugt."
 
-#: src/player.c:2563
+#: src/player.c:2600
 msgid "asleep"
 msgstr "schlafend"
 
-#: src/player.c:2699
+#: src/player.c:2736
 msgid "You do not carry anything."
 msgstr "Du hast nichts dabei."
 
-#: src/player.c:2707
+#: src/player.c:2744
 msgid "(`KEY`d`end`)rop"
 msgstr "(`KEY`f`end`)allen lassen"
 
-#: src/player.c:2708
+#: src/player.c:2745
 msgid ""
 "Drop the selected item. If the item is a stack of multiple items, you will "
 "be prompted for the amount you want to drop."
 msgstr ""
-"Lasse den gewählten Gegenstand fallen. Wenn es sich um einen Stapel mehrerer"
-" Gegenstände handelt, wirst du gefragt, wie viele Gegenstände du fallen "
+"Lasse den gewählten Gegenstand fallen. Wenn es sich um einen Stapel mehrerer "
+"Gegenstände handelt, wirst du gefragt, wie viele Gegenstände du fallen "
 "lassen möchtest."
 
-#: src/player.c:2724
+#: src/player.c:2761
 msgid "(`KEY`o`end`)pen"
 msgstr "(`KEY`ö`end`)ffnen"
 
-#: src/player.c:2725
+#: src/player.c:2762
 msgid "Open the selected container."
 msgstr "Den ausgewählten Container öffnen."
 
-#: src/player.c:2732
+#: src/player.c:2769
 msgid "(`KEY`s`end`)tore"
 msgstr "(`KEY`v`end`)erstauen"
 
-#: src/player.c:2733
+#: src/player.c:2770
 msgid "Put the item into a container you carry or one that is on the floor."
 msgstr ""
 "Lege den Gegenstand in einen mitgeführten oder auf dem Boden stehenden "
 "Behälter."
 
-#: src/player.c:2749
+#: src/player.c:2786
 msgid "(`KEY`u`end`)se"
 msgstr "ben(`KEY`u`end`)tzen"
 
-#: src/player.c:2750
+#: src/player.c:2787
 msgid "Use the selected item."
 msgstr "Benutze den gewählten Gegenstand."
 
-#: src/player.c:2758
+#: src/player.c:2795
 msgid "Add a note to the selected item or edit or delete an existing note."
 msgstr ""
 "Fügen dem ausgewählten Element eine Notiz hinzu oder bearbeite oder lösche "
 "eine vorhandene Notiz."
 
-#: src/player.c:2764
+#: src/player.c:2801
 msgid "Inventory"
 msgstr "Inventar"
 
-#: src/player.c:2811
+#: src/player.c:2848
 msgid "You are already overloaded!"
 msgstr "Du bist schon überladen!"
 
-#: src/player.c:2831
+#: src/player.c:2868
 #, c-format
 msgid "%s are too heavy for you."
 msgstr "%s sind zu schwer für dich."
 
-#: src/player.c:2832
+#: src/player.c:2869
 #, c-format
 msgid "%s is too heavy for you."
 msgstr "%s ist zu schwer für dich."
 
-#: src/player.c:2906
+#: src/player.c:2943
 msgid "Worn equipment"
 msgstr "Getragene Ausrüstung"
 
-#: src/player.c:2908
+#: src/player.c:2945
 msgid "You do not wear any equipment."
 msgstr "Du trägst keine Ausrüstung."
 
-#: src/player.c:2934 src/player.c:3033
+#: src/player.c:2971 src/player.c:3070
 #, c-format
 msgid "putting %s on"
 msgstr "%s anzulegen"
 
-#: src/player.c:2942 src/player.c:3040
+#: src/player.c:2979 src/player.c:3077
 #, c-format
 msgid "You put %s on."
 msgstr "Du legst %s an."
 
-#: src/player.c:2950
+#: src/player.c:2987
 #, c-format
 msgid "putting %s into the quiver"
 msgstr "%s in den Köcher zu stecken"
 
-#: src/player.c:2958
+#: src/player.c:2995
 #, c-format
 msgid "You put %s into your quiver."
 msgstr "Du steckst %s in deinen Köcher."
 
-#: src/player.c:3002
+#: src/player.c:3039
 #, c-format
 msgid "wearing %s"
 msgstr "%s anzuziehen"
 
-#: src/player.c:3017
+#: src/player.c:3054
 #, c-format
 msgid "You are now wearing %s."
 msgstr "Du trägst jetzt %s."
 
-#: src/player.c:3059
+#: src/player.c:3096
 #, c-format
 msgid "wielding %s"
 msgstr "%s in die Hand zu nehmen"
 
-#: src/player.c:3067
+#: src/player.c:3104
 #, c-format
 msgid "You now wield %s."
 msgstr "Du führst jetzt %s."
 
-#: src/player.c:3088
+#: src/player.c:3125
 msgid "welds itself into your hand."
 msgstr "schweißt sich an deine Hand."
 
-#: src/player.c:3089
+#: src/player.c:3126
 msgid "feels uncomfortably cold!"
 msgstr "fühlt sich unangenehm kalt an!"
 
-#: src/player.c:3100
+#: src/player.c:3137
 #, c-format
 msgid "It seems that this is %s."
 msgstr "Anscheinend ist das %s."
 
-#: src/player.c:3136 src/player.c:3271
+#: src/player.c:3173 src/player.c:3308
 #, c-format
 msgid "removing %s"
 msgstr "%s abzulegen"
 
-#: src/player.c:3143 src/player.c:3278
+#: src/player.c:3180 src/player.c:3315
 #, c-format
 msgid "You remove %s."
 msgstr "Du entfernst %s."
 
-#: src/player.c:3154 src/player.c:3289
+#: src/player.c:3191 src/player.c:3326
 #, c-format
 msgid "You can not remove %s.%s"
 msgstr "Du kannst %s nicht ablegen.%s"
 
-#: src/player.c:3155 src/player.c:3247 src/player.c:3290
+#: src/player.c:3192 src/player.c:3284 src/player.c:3327
 msgid " It appears to be cursed."
 msgstr " Anscheinend ist es verflucht."
 
-#: src/player.c:3167
+#: src/player.c:3204
 #, c-format
 msgid "taking %s out of the quiver"
 msgstr "%s aus dem Köcher zu nehmen"
 
-#: src/player.c:3174
+#: src/player.c:3211
 #, c-format
 msgid "You take %s out your quiver."
 msgstr "Du nimmst %s aus deinem Köcher."
 
-#: src/player.c:3229
+#: src/player.c:3266
 #, c-format
 msgid "taking %s off"
 msgstr "%s auszuziehen"
 
-#: src/player.c:3236
+#: src/player.c:3273
 #, c-format
 msgid "You finish taking off %s."
 msgstr "Du hast %s abgelegt."
 
-#: src/player.c:3246
+#: src/player.c:3283
 #, c-format
 msgid "You can't take of %s.%s"
 msgstr "Du kannst %s nicht ablegen.%s"
 
-#: src/player.c:3313
+#: src/player.c:3350
 #, c-format
 msgid "putting %s away"
 msgstr "%s wegzustecken"
 
-#: src/player.c:3320
+#: src/player.c:3357
 #, c-format
 msgid "You put away %s."
 msgstr "Du legst %s weg."
 
-#: src/player.c:3328
+#: src/player.c:3365
 #, c-format
 msgid "You can't put away %s. It's welded into your hands."
 msgstr "Du kannst %s nicht weglegen, es ist mit deiner Hand verschweißt."
 
-#: src/player.c:3928 src/weapons.c:177
+#: src/player.c:3965 src/weapons.c:177
 msgid "Gosh! How dare you!"
 msgstr "Meine Güte! Was fällt dir ein!"
 
-#: src/player.c:3959 src/potions.c:562 src/potions.c:582
+#: src/player.c:3996 src/potions.c:562 src/potions.c:582
 #, c-format
 msgid "%s shatters on the %s."
 msgstr "%s zerschellt auf %s."
 
-#: src/player.c:3960 src/potions.c:563
+#: src/player.c:3997 src/potions.c:563
 #, c-format
 msgid "%s splashes into the %s."
 msgstr "%s klatscht in %s."
 
-#: src/player.c:4002
+#: src/player.c:4039
 #, c-format
 msgid "`LIGHT_MAGENTA`%s are destroyed!`end`"
 msgstr "`LIGHT_MAGENTA`%s werden zerstört!`end`"
 
-#: src/player.c:4003
+#: src/player.c:4040
 #, c-format
 msgid "`LIGHT_MAGENTA`%s is destroyed!`end`"
 msgstr "`LIGHT_MAGENTA`%s wird zerstört!`end`"
 
-#: src/player.c:4018
+#: src/player.c:4055
 msgid "Its content spills onto the floor."
 msgstr "Der Inhalt ergießt sich auf den Boden."
 
-#: src/player.c:4019
+#: src/player.c:4056
 msgid "Its contents spill onto the floor."
 msgstr "Der Inhalt ergießt sich auf den Boden."
 
-#: src/player.c:4047
+#: src/player.c:4084
 #, c-format
 msgid "Drop how many %s?"
 msgstr "Wie viele %s ablegen?"
 
-#: src/player.c:4072
+#: src/player.c:4109
 #, c-format
 msgid "You drop %s."
 msgstr "Du lässt %s fallen."
 
-#: src/player.c:4075
+#: src/player.c:4112
 #, c-format
 msgid "dropping %s"
 msgstr "%s fallen zu lassen"
 
-#: src/player.c:4117
+#: src/player.c:4154
 #, c-format
 msgid "%s are surrounded by a `CHARCOAL`black`end` halo."
 msgstr "%s sind von einem `CHARCOAL`schwarzen`end` Halo umgeben."
 
-#: src/player.c:4118
+#: src/player.c:4155
 #, c-format
 msgid "%s is surrounded by a `CHARCOAL`black`end` halo."
 msgstr "%s ist von einem `CHARCOAL`schwarzen`end` Halo umgeben."
 
-#: src/player.c:4121
+#: src/player.c:4158
 #, c-format
 msgid "%s are surrounded by a `WHITE`white`end` halo."
 msgstr "%s sind von einem `WHITE`weißen`end` Halo umgeben."
 
-#: src/player.c:4122
+#: src/player.c:4159
 #, c-format
 msgid "%s is surrounded by a `WHITE`white`end` halo."
 msgstr "%s ist von einem `WHITE`weißen`end` Halo umgeben."
 
-#: src/player.c:4140
+#: src/player.c:4177
 #, c-format
 msgid "Add your description for %s (delete with ESC)"
 msgstr "Deine Beschreibung für %s (löschen mit ESC)"
 
-#: src/player.c:4144
+#: src/player.c:4181
 msgid "Edit item notes"
 msgstr "Notizen zum Gegenstand bearbeiten"
 
-#: src/player.c:4159
+#: src/player.c:4196
 msgid "Choose an item to read"
 msgstr "Wähle einen Gegenstand zu lesen aus"
 
-#: src/player.c:4169
+#: src/player.c:4206
 msgid "You have nothing to read."
 msgstr "Du besitzt nichts zu lesen."
 
-#: src/player.c:4179
+#: src/player.c:4216
 msgid "Choose an item to drink"
 msgstr "Wähle einen Gegenstand zu Trinken"
 
-#: src/player.c:4189
+#: src/player.c:4226
 msgid "You have nothing to drink."
 msgstr "Du hast nichts zu trinken."
 
-#: src/player.c:4200
+#: src/player.c:4237
 msgid "Choose an item to equip"
 msgstr "Wähle einen Gegenstand zum Ausrüsten"
 
-#: src/player.c:4210
+#: src/player.c:4247
 msgid "You have nothing you could equip."
 msgstr "Du hast nichts, was du ausrüsten könntest."
 
-#: src/player.c:4220
+#: src/player.c:4257
 msgid "Choose an item to take off"
 msgstr "Wählen Sie einen Gegenstand zum Entfernen aus"
 
-#: src/player.c:4229
+#: src/player.c:4266
 msgid "You have nothing you could take off."
 msgstr "Du hast nichts, was du ausziehen könntest."
 
-#: src/player.c:4239
+#: src/player.c:4276
 msgid "Choose an item to drop"
 msgstr "Wähle einen Gegenstand zum Ablegen aus"
 
-#: src/player.c:4247
+#: src/player.c:4284
 msgid "You have nothing you could drop."
 msgstr "Du hast nichts, was du ablegen könntest."
 
-#: src/player.c:4257
+#: src/player.c:4294
 msgid "You have nothing you could throw."
 msgstr "Du hast nichts, das du werfen könntest."
 
-#: src/player.c:4261
+#: src/player.c:4298
 msgid "Choose an item to throw"
 msgstr "Wähle einen Gegenstand zum Werfen aus"
 
-#: src/player.c:4272
+#: src/player.c:4309
 #, c-format
 msgid "You can't throw %s, it's welded to your hands!"
 msgstr "Du kannst %s nicht werfen: Die Waffe klebt an deinen Händen!"
 
-#: src/player.c:4519
+#: src/player.c:4556
 #, c-format
 msgid "`LIGHT_MAGENTA`You find a %s!`end`"
 msgstr "`LIGHT_MAGENTA`Du findest eine %s!`end`"
 
-#: src/player.c:4541
+#: src/player.c:4578
 #, c-format
 msgid "`LIGHT_MAGENTA`You discover a trap on %s!`end`"
 msgstr "`LIGHT_MAGENTA`Du findest eine Falle an %s!`end`"
 
-#: src/player.c:4557
+#: src/player.c:4594
 msgid "You have not discovered any landmarks yet."
 msgstr "Du hast noch keine Sehenswürdigkeiten entdeckt."
 
-#: src/player.c:4582
+#: src/player.c:4619
 msgid "Discovered landmarks"
 msgstr "Entdeckte Sehenswürdigkeiten"
 
-#: src/player.c:4736
+#: src/player.c:4773
 #, c-format
 msgid "Pick up how many %s?"
 msgstr "Wie viele %s aufheben?"
 
-#: src/player.c:4757
+#: src/player.c:4794
 #, c-format
 msgid "You pick up %s."
 msgstr "Du hebst %s auf."
 
-#: src/player.c:4778
+#: src/player.c:4815
 #, c-format
 msgid "picking up %s"
 msgstr "%s aufzuheben"
 
-#: src/player.c:5113
+#: src/player.c:5150
 msgid "*) ignoring instakills\n"
 msgstr "*) ohne sofortige Tode\n"
 
-#: src/player.c:5115
+#: src/player.c:5152
 msgid "Fighting statistics"
 msgstr "Kampfstatistik"
 
-#: src/player.c:5117
+#: src/player.c:5154
 msgid "Do you want to save the calculations?"
 msgstr "Möchtest du die Berechnungen speichern?"
 
-#: src/player.c:5154
+#: src/player.c:5191
 msgid "Necklace:"
 msgstr "Halskette:"
 
-#: src/player.c:5155
+#: src/player.c:5192
 msgid "Main weapon:"
 msgstr "Hauptwaffe:"
 
-#: src/player.c:5156
+#: src/player.c:5193
 msgid "Sec. weapon:"
 msgstr "Zweitwaffe:"
 
-#: src/player.c:5157
+#: src/player.c:5194
 msgid "In quiver:"
 msgstr "Im Köcher:"
 
-#: src/player.c:5158
+#: src/player.c:5195
 msgid "Boots:"
 msgstr "Stiefel:"
 
-#: src/player.c:5159
+#: src/player.c:5196
 msgid "Cloak:"
 msgstr "Umhang:"
 
-#: src/player.c:5160
+#: src/player.c:5197
 msgid "Gloves:"
 msgstr "Handschuhe:"
 
-#: src/player.c:5161
+#: src/player.c:5198
 msgid "Helmet:"
 msgstr "Helm:"
 
-#: src/player.c:5162
+#: src/player.c:5199
 msgid "Shield:"
 msgstr "Schild:"
 
-#: src/player.c:5163
+#: src/player.c:5200
 msgid "Body armour:"
 msgstr "Rüstung:"
 
-#: src/player.c:5164
+#: src/player.c:5201
 msgid "Left ring:"
 msgstr "Linker Ring:"
 
-#: src/player.c:5165
+#: src/player.c:5202
 msgid "Right ring:"
 msgstr "Rechter Ring:"
 
@@ -5097,7 +5157,8 @@ msgstr "m:Aufstiegstrank;;;Aufstiegstranks|Aufstiegstränke;;Aufstiegstränken"
 msgctxt "potion"
 msgid "increase ability"
 msgstr ""
-"m:Verbesserungstrank;;;Verbesserungstranks|Verbesserungstränke;;Verbesserungstränken"
+"m:Verbesserungstrank;;;Verbesserungstranks|"
+"Verbesserungstränke;;Verbesserungstränken"
 
 #: src/potions.c:40
 msgctxt "potion"
@@ -5134,13 +5195,15 @@ msgstr "m:Schwindeltrank;;;Schwindeltranks|Schwindeltränke;;Schwindeltränken"
 msgctxt "potion"
 msgid "object detection"
 msgstr ""
-"m:Gegenstandsortungstrank;;;Gegenstandsortungstranks|Gegenstandsortungstränke;;Gegenstandsortungstränken"
+"m:Gegenstandsortungstrank;;;Gegenstandsortungstranks|"
+"Gegenstandsortungstränke;;Gegenstandsortungstränken"
 
 #: src/potions.c:47
 msgctxt "potion"
 msgid "monster detection"
 msgstr ""
-"m:Monsterortungstrank;;;Monsterortungstranks|Monsterortungstränke;;Monsterortungstränken"
+"m:Monsterortungstrank;;;Monsterortungstranks|"
+"Monsterortungstränke;;Monsterortungstränken"
 
 #: src/potions.c:48
 msgctxt "potion"
@@ -5181,7 +5244,8 @@ msgstr ""
 msgctxt "potion"
 msgid "treasure finding"
 msgstr ""
-"m:Schatzfindertrank;;;Schatzfindertranks|Schatzfindertränke;;Schatzfindertränken"
+"m:Schatzfindertrank;;;Schatzfindertranks|"
+"Schatzfindertränke;;Schatzfindertränken"
 
 #: src/potions.c:55
 msgctxt "potion"
@@ -5491,161 +5555,170 @@ msgctxt "ring"
 msgid "extra regeneration"
 msgstr "f:schnell~ Regeneration"
 
-#: src/scoreboard.c:219
+#: src/scoreboard.c:288
 msgid "Error opening scoreboard file."
 msgstr "Fehler beim Öffnen der Bestenliste."
 
-#: src/scoreboard.c:230
+#: src/scoreboard.c:299
 #, c-format
 msgid "Error writing scoreboard file: %s"
 msgstr "Fehler beim Schreiben der Bestenliste: %s"
 
-#: src/scoreboard.c:308
+#: src/scoreboard.c:392
 msgid "passed away"
 msgstr "verschied"
 
-#: src/scoreboard.c:312
+#: src/scoreboard.c:396
 msgid "got stuck in solid rock"
 msgstr "blieb in massivem Fels stecken"
 
-#: src/scoreboard.c:316
+#: src/scoreboard.c:400
 msgid "returned with the potion too late"
 msgstr "kehrte zu spät mit dem Trank zurück"
 
-#: src/scoreboard.c:320
+#: src/scoreboard.c:404
 msgid "returned in time with the cure"
 msgstr "kehrte rechtzeitig mit dem Heilmittel zurück"
 
-#: src/scoreboard.c:324
+#: src/scoreboard.c:408
 msgid "could not find the potion in time"
 msgstr "konnte den Trank nicht rechtzeitig finden"
 
-#: src/scoreboard.c:328
+#: src/scoreboard.c:412
 msgid "quit the game"
 msgstr "gab das Spiel auf"
 
-#: src/scoreboard.c:332
+#: src/scoreboard.c:416
 msgid "genocided"
 msgstr "rottete"
 
-#: src/scoreboard.c:337
+#: src/scoreboard.c:421
 msgid "blasted"
 msgstr "sprengte"
 
-#: src/scoreboard.c:339
+#: src/scoreboard.c:423
 msgid "got killed"
 msgstr "wurde getötet"
 
-#: src/scoreboard.c:343
+#: src/scoreboard.c:427
 msgid "killed"
 msgstr "wurde getötet"
 
-#: src/scoreboard.c:355
+#: src/scoreboard.c:439
 msgid " himself"
 msgstr " sich selbst aus"
 
-#: src/scoreboard.c:355
+#: src/scoreboard.c:439
 msgid " herself"
 msgstr " sich selbst aus"
 
-#: src/scoreboard.c:360
+#: src/scoreboard.c:444
 #, c-format
 msgid " on level %s"
 msgstr " auf Ebene %s"
 
-#: src/scoreboard.c:364
+#: src/scoreboard.c:448
 #, c-format
 msgid " (max. %s)"
 msgstr " (max. %s)"
 
-#: src/scoreboard.c:369
+#: src/scoreboard.c:453
 #, c-format
 msgid " with %d and a maximum of %d hp"
 msgstr " mit %d von maximal %d TP"
 
-#: src/scoreboard.c:380
+#: src/scoreboard.c:464
 msgid " by enfeeblement."
 msgstr " durch Entkräftung."
 
-#: src/scoreboard.c:384
+#: src/scoreboard.c:468
 msgid " by clumsiness."
 msgstr " durch Ungeschicklichkeit."
 
-#: src/scoreboard.c:388
+#: src/scoreboard.c:472
 msgid " by poison."
 msgstr " durch Gift."
 
-#: src/scoreboard.c:399
+#: src/scoreboard.c:483
 msgid ". He left his body."
 msgstr ". Er verließ seinen Körper."
 
-#: src/scoreboard.c:400
+#: src/scoreboard.c:484
 msgid ". She left her body."
 msgstr ". Sie verließ ihren Körper."
 
-#: src/scoreboard.c:406 src/scoreboard.c:418 src/scoreboard.c:424
-#: src/scoreboard.c:438
+#: src/scoreboard.c:490 src/scoreboard.c:502 src/scoreboard.c:508
+#: src/scoreboard.c:522
 #, c-format
 msgid " by %s."
 msgstr " durch %s."
 
-#: src/scoreboard.c:412
+#: src/scoreboard.c:496
 msgid " by a sphere of destruction."
 msgstr " durch eine Sphäre der Zerstörung."
 
-#: src/scoreboard.c:417
+#: src/scoreboard.c:501
 #, c-format
 msgid " by falling through %s."
 msgstr " nach einem Sturz durch %s."
 
-#: src/scoreboard.c:432
+#: src/scoreboard.c:516
 #, c-format
 msgid " himself away with the spell \"%s\"."
 msgstr " sich selbst mit dem Zauber „%s“ fort."
 
-#: src/scoreboard.c:433
+#: src/scoreboard.c:517
 #, c-format
 msgid " herself away with the spell \"%s\"."
 msgstr " sich selbst mit dem Zauber „%s“ fort."
 
-#: src/scoreboard.c:448
+#: src/scoreboard.c:532
 msgid " by toxic water from a fountain."
 msgstr " durch giftiges Wasser aus einem Brunnen."
 
-#: src/scoreboard.c:451
+#: src/scoreboard.c:535
 msgid " by falling down a staircase."
 msgstr " durch einen Sturz von einer Treppe."
 
-#: src/scoreboard.c:458
+#: src/scoreboard.c:542
 msgid " by his own ricocheting shot."
 msgstr " durch seinen eigenen abprallenden Schuss."
 
-#: src/scoreboard.c:459
+#: src/scoreboard.c:543
 msgid " by her own ricocheting shot."
 msgstr " durch ihren eigenen abprallenden Schuss."
 
-#: src/scoreboard.c:473
+#: src/scoreboard.c:557
 #, c-format
 msgid " He has scored %s points, with the difficulty set to %d."
 msgstr " Er hat %s Punkte erzielt, bei Schwierigkeitsgrad %d."
 
-#: src/scoreboard.c:475
+#: src/scoreboard.c:559
 #, c-format
 msgid " She has scored %s points, with the difficulty set to %d."
 msgstr " Sie hat %s Punkte erzielt, bei Schwierigkeitsgrad %d."
 
-#: src/scoreboard.c:517
+#: src/scoreboard.c:577
 msgid "volcano lvl. "
 msgstr "Vulkanebene "
 
-#: src/scoreboard.c:519
+#: src/scoreboard.c:579
 msgid "caverns lvl. "
 msgstr "Höhlenebene "
 
-#: src/scoreboard.c:521
+#: src/scoreboard.c:581
 #, c-format
 msgid "            [exp. level %d, %s%s, %d/%d hp, difficulty %d]%s\n"
 msgstr "            [Erfahrungsstufe %d, %s%s, %d/%d TP, Schwierigkeit %d]%s\n"
+
+#: src/scoreboard.c:624
+#, c-format
+msgid ""
+"With a score of %s, this performance did not make it into the top %d of the "
+"NLarn Hall of Fame."
+msgstr ""
+"Mit einer Punktzahl von %s hat es diese Leistung nicht in die Top %d der "
+"NLarn-Ruhmeshalle geschafft."
 
 #: src/scrolls.c:34
 msgctxt "scroll"
@@ -7059,8 +7132,7 @@ msgstr "Du hast die Dauer %s verlängert."
 #: src/spells.c:705
 #, c-format
 msgid ""
-"You have already extended the duration of %s to the extent of your "
-"knowledge."
+"You have already extended the duration of %s to the extent of your knowledge."
 msgstr ""
 "Du hast die Dauer %s bereits bis an die Grenzen deines Wissens verlängert."
 
@@ -7859,7 +7931,8 @@ msgstr "%s verfehlt dich."
 #~ "  `KEY`g`end`) Configure font size    - `EMPH`%d`end`\n"
 #~ "  `KEY`h`end`) Full screen mode       - `EMPH`%s`end`\n"
 #~ "\n"
-#~ "Clear values with `KEY`A`end`-`KEY`F`end`. Return to the main menu with `KEY`ESC`end`.\n"
+#~ "Clear values with `KEY`A`end`-`KEY`F`end`. Return to the main menu with "
+#~ "`KEY`ESC`end`.\n"
 #~ msgstr ""
 #~ "\n"
 #~ "  `KEY`a`end`) Name des Charakters    - %s\n"
@@ -7871,7 +7944,8 @@ msgstr "%s verfehlt dich."
 #~ "  `KEY`g`end`) Schriftgröße           - `EMPH`%d`end`\n"
 #~ "  `KEY`h`end`) Vollbildmodus          - `EMPH`%s`end`\n"
 #~ "\n"
-#~ "Werte löschen mit `KEY`A`end`-`KEY`F`end`. Zurück zum Hauptmenü mit `KEY`ESC`end`.\n"
+#~ "Werte löschen mit `KEY`A`end`-`KEY`F`end`. Zurück zum Hauptmenü mit "
+#~ "`KEY`ESC`end`.\n"
 
 #~ msgid "Choose default gender"
 #~ msgstr "Standardgeschlecht wählen"
