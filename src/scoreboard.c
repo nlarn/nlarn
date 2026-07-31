@@ -430,7 +430,7 @@ char *score_death_description(score_t *score, int verbose)
             g_string_append_printf(text, _(" (max. %s)"), map_names[score->dlevel_max]);
         }
 
-        if (score->cod < PD_TOO_LATE)
+        if (player_cod_is_death(score->cod))
         {
             g_string_append_printf(text, _(" with %d and a maximum of %d hp"),
                                    score->hp, score->hp_max);

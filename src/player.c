@@ -38,6 +38,40 @@
 DEFINE_ENUM(player_sex, PLAYER_SEX_ENUM)
 DEFINE_ENUM(player_cod, PLAYER_COD_ENUM)
 
+bool player_cod_protectable(player_cod cod)
+{
+    switch (cod)
+    {
+    case PD_STUCK:
+    case PD_DROWNED:
+    case PD_MELTED:
+    case PD_GENOCIDE:
+    case PD_TOO_LATE:
+    case PD_WON:
+    case PD_LOST:
+    case PD_QUIT:
+        return false;
+
+    default:
+        return true;
+    }
+}
+
+bool player_cod_is_death(player_cod cod)
+{
+    switch (cod)
+    {
+    case PD_TOO_LATE:
+    case PD_WON:
+    case PD_LOST:
+    case PD_QUIT:
+        return false;
+
+    default:
+        return true;
+    }
+}
+
 const char *player_sex_str[PS_MAX] = {N_("not defined"), N_("male"), N_("female")};
 
 static const char aa1[] = N_("mighty evil master");
@@ -1056,7 +1090,7 @@ void player_die(player *p, player_cod cause_type, guint cause)
     g_assert(p != NULL);
 
     /* check for life protection */
-    if ((cause_type < PD_STUCK) && ((ef = player_effect_get(p, ET_LIFE_PROTECTION))))
+    if (player_cod_protectable(cause_type) && ((ef = player_effect_get(p, ET_LIFE_PROTECTION))))
     {
         log_add_entry(nlarn->log, "`PALE_CYAN`%s`end`", _("You feel wiiieeeeerrrrrd all over!"));
 
@@ -1136,7 +1170,7 @@ void player_die(player *p, player_cod cause_type, guint cause)
     log_add_entry(nlarn->log, message);
 
     /* in wizard mode, dying is optional rather than disabled */
-    if (game_wizardmode(nlarn) && (cause_type < PD_TOO_LATE)
+    if (game_wizardmode(nlarn) && player_cod_is_death(cause_type)
             && !display_get_yesno(_("Really die?"), NULL, NULL, NULL))
     {
         log_add_entry(nlarn->log, _("WIZARD MODE. You stay alive."));

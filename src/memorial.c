@@ -43,7 +43,7 @@ static void memorial_append_title(GString *text, const char *title)
 char *memorial_create(player *p, score_t *score, GList *scores)
 {
     const bool male = (p->sex == PS_MALE);
-    const bool died = (score->cod < PD_TOO_LATE);
+    const bool died = player_cod_is_death(score->cod);
     gchar *tmp = score_death_description(score, true);
 
     /* the obituary */

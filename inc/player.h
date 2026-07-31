@@ -187,8 +187,9 @@ typedef struct player
 
 /* various causes of death
  *
- * The relative order of the existing entries must not change,
- * or version 1 scoreboards will be misread. */
+ * Whether a cause can be intercepted by life protection, or is one of
+ * the "returning home" endings rather than an actual death, is decided
+ * by player_cod_protectable() / player_cod_is_death(). */
 #define PLAYER_COD_ENUM(PLAYER_COD) \
     PLAYER_COD(PD_NONE,)      /* 0, required by setjmp for initialisation */ \
     PLAYER_COD(PD_EFFECT,) \
@@ -200,20 +201,25 @@ typedef struct player
     PLAYER_COD(PD_SPELL,)     /* damaged by own spell */ \
     PLAYER_COD(PD_CURSE,)     /* damaged by a cursed item */ \
     PLAYER_COD(PD_SOBJECT,)   /* killed by stationary object */ \
-    PLAYER_COD(PD_RICOCHET,)  /* killed by their own reflected or errant shot */ \
-    /* *** causes above this line can be stopped by live protection *** */ \
     PLAYER_COD(PD_STUCK,)     /* stuck in a wall */ \
     PLAYER_COD(PD_DROWNED,)   /* drowned in deep water */ \
     PLAYER_COD(PD_MELTED,)    /* stuck in lava */ \
     PLAYER_COD(PD_GENOCIDE,)  /* genocided themselves */ \
-    /* *** caused below this line are described as "returning home" *** */ \
     PLAYER_COD(PD_TOO_LATE,)  /* returned with potion too late */ \
     PLAYER_COD(PD_WON,)       /* won the game */ \
     PLAYER_COD(PD_LOST,)      /* daughter has died, potion not found */ \
     PLAYER_COD(PD_QUIT,)      /* quit the game */ \
+    PLAYER_COD(PD_RICOCHET,)  /* killed by their own reflected or errant shot */ \
     PLAYER_COD(PD_MAX,) \
 
 DECLARE_ENUM(player_cod, PLAYER_COD_ENUM)
+
+/* true if life protection can intercept this cause of death */
+bool player_cod_protectable(player_cod cod);
+
+/* true for actual deaths; false for the four "returning home" endings
+   (too late / won / lost / quit) */
+bool player_cod_is_death(player_cod cod);
 
 /* function declarations */
 
