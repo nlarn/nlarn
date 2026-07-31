@@ -334,6 +334,9 @@ effect *player_effect_get(player *p, effect_t et);
 int player_effect(player *p, effect_t et); /* check if a effect is set */
 char **player_effect_text(player *p);
 
+/* assemble a textual listing of the player's equipped items */
+char *player_equipment_list(player *p);
+
 /* dealing with the inventory */
 int player_inv_display(player *p);
 char *player_can_carry(player *p);
