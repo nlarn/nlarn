@@ -70,8 +70,54 @@ static gzFile scoreboard_open_cloned_fd(const char* mode)
 }
 #endif
 
-/* scoreboard version */
-static const gint sb_ver = 1;
+/* scoreboard version
+ *
+ * version 1: player_cod (and, where meaningful, the "cause" of death)
+ *            were stored as raw numeric enum values, so adding a new
+ *            cause anywhere but the very end of the enum could shift
+ *            older entries onto the wrong description.
+ * version 2: player_sex, player_cod and the "cause" of death (when it
+ *            names a constant of another enum) are stored as their
+ *            symbolic constant names instead. Version 1 scoreboards
+ *            are still read (see scores_load()) and transparently
+ *            rewritten in version 2 format. */
+static const gint sb_ver = 2;
+
+static void scores_save(GList *gs);
+
+/* "cause" is polymorphic: its meaning depends on cod. Where it names a
+   constant of another X-macro'd enum, dispatch to that enum's string
+   conversion; everywhere else cause is unused (always 0) and is simply
+   stored as a number. */
+static const char *score_cause_string(player_cod cod, guint cause)
+{
+    switch (cod)
+    {
+    case PD_EFFECT:  return effect_t_string(cause);
+    case PD_MONSTER: return monster_t_string(cause);
+    case PD_TRAP:    return trap_t_string(cause);
+    case PD_MAP:     return map_tile_t_string(cause);
+    case PD_SPELL:   return spell_id_string(cause);
+    case PD_CURSE:   return item_t_string(cause);
+    case PD_SOBJECT: return sobject_t_string(cause);
+    default:         return NULL;
+    }
+}
+
+static guint score_cause_value(player_cod cod, const char *str)
+{
+    switch (cod)
+    {
+    case PD_EFFECT:  return effect_t_value(str);
+    case PD_MONSTER: return monster_t_value(str);
+    case PD_TRAP:    return trap_t_value(str);
+    case PD_MAP:     return map_tile_t_value(str);
+    case PD_SPELL:   return spell_id_value(str);
+    case PD_CURSE:   return item_t_value(str);
+    case PD_SOBJECT: return sobject_t_value(str);
+    default:         return 0;
+    }
+}
 
 GList *scores_load()
 {
@@ -123,11 +169,6 @@ GList *scores_load()
     /* version of scoreboard file */
     gint version = cJSON_GetObjectItem(pscores, "version")->valueint;
 
-    if (version < sb_ver)
-    {
-        /* TODO: when there are multiple versions, handle old versions here */
-    }
-
     /* point to the first entry of the scores array */
     cJSON *s_entry = cJSON_GetObjectItem(pscores, "scores")->child;
 
@@ -141,11 +182,8 @@ GList *scores_load()
 
         /* fill score record fields with data */
         nscore->player_name = g_strdup(cJSON_GetObjectItem(s_entry, "player_name")->valuestring);
-        nscore->sex        = cJSON_GetObjectItem(s_entry, "sex")->valueint;
         nscore->score      = cJSON_GetObjectItem(s_entry, "score")->valueint;
         nscore->moves      = cJSON_GetObjectItem(s_entry, "moves")->valueint;
-        nscore->cod        = cJSON_GetObjectItem(s_entry, "cod")->valueint;
-        nscore->cause      = cJSON_GetObjectItem(s_entry, "cause")->valueint;
         nscore->hp         = cJSON_GetObjectItem(s_entry, "hp")->valueint;
         nscore->hp_max     = cJSON_GetObjectItem(s_entry, "hp_max")->valueint;
         nscore->level      = cJSON_GetObjectItem(s_entry, "level")->valueint;
@@ -155,6 +193,28 @@ GList *scores_load()
         nscore->difficulty = cJSON_GetObjectItem(s_entry, "difficulty")->valueint;
         nscore->time_start = cJSON_GetObjectItem(s_entry, "time_start")->valueint;
         nscore->time_end   = cJSON_GetObjectItem(s_entry, "time_end")->valueint;
+
+        if (version < 2)
+        {
+            /* version 1: sex, cod and cause are raw numeric enum values */
+            nscore->sex   = cJSON_GetObjectItem(s_entry, "sex")->valueint;
+            nscore->cod   = cJSON_GetObjectItem(s_entry, "cod")->valueint;
+            nscore->cause = cJSON_GetObjectItem(s_entry, "cause")->valueint;
+        }
+        else
+        {
+            /* version 2+: sex and cod are symbolic constant names, and
+               so is cause wherever it names a constant of another enum */
+            nscore->sex = player_sex_value(
+                    cJSON_GetObjectItem(s_entry, "sex")->valuestring);
+            nscore->cod = player_cod_value(
+                    cJSON_GetObjectItem(s_entry, "cod")->valuestring);
+
+            cJSON *cause_val = cJSON_GetObjectItem(s_entry, "cause");
+            nscore->cause = cJSON_IsString(cause_val)
+                    ? score_cause_value(nscore->cod, cause_val->valuestring)
+                    : (guint)cause_val->valueint;
+        }
 
         s_entry = s_entry->next;
     }
@@ -168,7 +228,7 @@ GList *scores_load()
     return gs;
 }
 
-static void scores_save(game *g, GList *gs)
+static void scores_save(GList *gs)
 {
     /* serialize the scores */
     cJSON *sf = cJSON_CreateObject();
@@ -186,11 +246,17 @@ static void scores_save(game *g, GList *gs)
 
         /* add all scoreboard entry values */
         cJSON_AddStringToObject(sc, "player_name", score->player_name);
-        cJSON_AddNumberToObject(sc, "sex", score->sex);
+        cJSON_AddStringToObject(sc, "sex", player_sex_string(score->sex));
         cJSON_AddNumberToObject(sc, "score", score->score);
         cJSON_AddNumberToObject(sc, "moves", score->moves);
-        cJSON_AddNumberToObject(sc, "cod", score->cod);
-        cJSON_AddNumberToObject(sc, "cause", score->cause);
+        cJSON_AddStringToObject(sc, "cod", player_cod_string(score->cod));
+
+        const char *cause_str = score_cause_string(score->cod, score->cause);
+        if (cause_str)
+            cJSON_AddStringToObject(sc, "cause", cause_str);
+        else
+            cJSON_AddNumberToObject(sc, "cause", score->cause);
+
         cJSON_AddNumberToObject(sc, "hp", score->hp);
         cJSON_AddNumberToObject(sc, "hp_max", score->hp_max);
         cJSON_AddNumberToObject(sc, "level", score->level);
@@ -216,7 +282,7 @@ static void scores_save(game *g, GList *gs)
     if (sb == NULL)
     {
         /* opening the file failed */
-        log_add_entry(g->log, _("Error opening scoreboard file."));
+        if (nlarn) log_add_entry(nlarn->log, _("Error opening scoreboard file."));
         free(uscores);
         return;
     }
@@ -227,7 +293,7 @@ static void scores_save(game *g, GList *gs)
         /* handle error */
         int err;
 
-        log_add_entry(g->log, _("Error writing scoreboard file: %s"),
+        if (nlarn) log_add_entry(nlarn->log, _("Error writing scoreboard file: %s"),
                       gzerror(sb, &err));
 
         free(uscores);
@@ -291,7 +357,7 @@ GList *score_add(game *g, score_t *score)
     gs = g_list_sort(gs, (GCompareFunc)score_compare);
 
     /* save new scoreboard */
-    scores_save(g, gs);
+    scores_save(gs);
 
     return gs;
 }

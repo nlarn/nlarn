@@ -19,6 +19,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "enumFactory.h"
+
 #include "amulets.h"
 #include "armour.h"
 #include "buildings.h"
@@ -70,13 +72,13 @@ typedef struct player_stats
     guint dex_orig;
 } player_stats;
 
-typedef enum player_sex
-{
-    PS_NONE,
-    PS_MALE,
-    PS_FEMALE,
-    PS_MAX
-} player_sex;
+#define PLAYER_SEX_ENUM(PLAYER_SEX) \
+    PLAYER_SEX(PS_NONE,)   \
+    PLAYER_SEX(PS_MALE,)   \
+    PLAYER_SEX(PS_FEMALE,) \
+    PLAYER_SEX(PS_MAX,)    \
+
+DECLARE_ENUM(player_sex, PLAYER_SEX_ENUM)
 
 typedef struct player_settings
 {
@@ -183,32 +185,35 @@ typedef struct player
     player_settings settings; /* game configuration */
 } player;
 
-/* various causes of death */
-typedef enum player_cod
-{
-    PD_NONE,      /* 0, required by setjmp for initialisation */
-    PD_EFFECT,
-    PD_LASTLEVEL, /* lost a level at level 1 */
-    PD_MONSTER,
-    PD_SPHERE,
-    PD_TRAP,
-    PD_MAP,       /* damaged by map effects */
-    PD_SPELL,     /* damaged by own spell */
-    PD_CURSE,     /* damaged by a cursed item */
-    PD_SOBJECT,   /* killed by stationary object */
-    PD_RICOCHET,  /* killed by their own reflected or errant shot */
-    /* *** causes above this line can be stopped by live protection *** */
-    PD_STUCK,     /* stuck in a wall */
-    PD_DROWNED,   /* drowned in deep water */
-    PD_MELTED,    /* stuck in lava */
-    PD_GENOCIDE,  /* genocided themselves */
-    /* *** caused below this line are described as "returning home" *** */
-    PD_TOO_LATE,  /* returned with potion too late */
-    PD_WON,       /* won the game */
-    PD_LOST,      /* daughter has died, potion not found */
-    PD_QUIT,      /* quit the game */
-    PD_MAX
-} player_cod;
+/* various causes of death
+ *
+ * The relative order of the existing entries must not change,
+ * or version 1 scoreboards will be misread. */
+#define PLAYER_COD_ENUM(PLAYER_COD) \
+    PLAYER_COD(PD_NONE,)      /* 0, required by setjmp for initialisation */ \
+    PLAYER_COD(PD_EFFECT,) \
+    PLAYER_COD(PD_LASTLEVEL,) /* lost a level at level 1 */ \
+    PLAYER_COD(PD_MONSTER,) \
+    PLAYER_COD(PD_SPHERE,) \
+    PLAYER_COD(PD_TRAP,) \
+    PLAYER_COD(PD_MAP,)       /* damaged by map effects */ \
+    PLAYER_COD(PD_SPELL,)     /* damaged by own spell */ \
+    PLAYER_COD(PD_CURSE,)     /* damaged by a cursed item */ \
+    PLAYER_COD(PD_SOBJECT,)   /* killed by stationary object */ \
+    PLAYER_COD(PD_RICOCHET,)  /* killed by their own reflected or errant shot */ \
+    /* *** causes above this line can be stopped by live protection *** */ \
+    PLAYER_COD(PD_STUCK,)     /* stuck in a wall */ \
+    PLAYER_COD(PD_DROWNED,)   /* drowned in deep water */ \
+    PLAYER_COD(PD_MELTED,)    /* stuck in lava */ \
+    PLAYER_COD(PD_GENOCIDE,)  /* genocided themselves */ \
+    /* *** caused below this line are described as "returning home" *** */ \
+    PLAYER_COD(PD_TOO_LATE,)  /* returned with potion too late */ \
+    PLAYER_COD(PD_WON,)       /* won the game */ \
+    PLAYER_COD(PD_LOST,)      /* daughter has died, potion not found */ \
+    PLAYER_COD(PD_QUIT,)      /* quit the game */ \
+    PLAYER_COD(PD_MAX,) \
+
+DECLARE_ENUM(player_cod, PLAYER_COD_ENUM)
 
 /* function declarations */
 

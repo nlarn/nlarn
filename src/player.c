@@ -35,6 +35,9 @@
 #include "scoreboard.h"
 #include "sobjects.h"
 
+DEFINE_ENUM(player_sex, PLAYER_SEX_ENUM)
+DEFINE_ENUM(player_cod, PLAYER_COD_ENUM)
+
 const char *player_sex_str[PS_MAX] = {N_("not defined"), N_("male"), N_("female")};
 
 static const char aa1[] = N_("mighty evil master");
