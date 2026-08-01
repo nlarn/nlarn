@@ -4,12 +4,11 @@
 # This file is distributed under the same license as the nlarn package.
 # Automatically generated, 2026.
 #
-#: src/display.c:1170
 msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-08-01 00:25+0200\n"
+"POT-Creation-Date: 2026-08-01 14:44+0200\n"
 "PO-Revision-Date: 2026-07-08 19:08+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: Spanish\n"
@@ -7454,6 +7453,11 @@ msgstr "Activas la %s sin querer."
 #, c-format
 msgid "You fail to disarm the %s."
 msgstr "No consigues desactivar la %s."
+
+#: src/utils.c:480
+msgctxt "count"
+msgid "no"
+msgstr "cero"
 
 #: src/utils.c:480
 msgid "one"

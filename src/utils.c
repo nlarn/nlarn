@@ -477,7 +477,7 @@ int str_starts_with_vowel(const char *str)
 const char *int2str(guint val)
 {
     static char buf[21];
-    const char *count_desc[] = { N_("no"), N_("one"), N_("two"), N_("three"),
+    const char *count_desc[] = { NC_("count", "no"), N_("one"), N_("two"), N_("three"),
                                  N_("four"), N_("five"), N_("six"), N_("seven"),
                                  N_("eight"), N_("nine"), N_("ten"),
                                  N_("eleven"), N_("twelve"), N_("thirteen"),
@@ -485,6 +485,14 @@ const char *int2str(guint val)
                                  N_("seventeen"), N_("eighteen"),
                                  N_("nineteen"), N_("twenty")
                                };
+
+    if (val == 0)
+    {
+        /* msgctxt "count": this "no" is the quantifier ("no gold"), not
+           the yes/no answer, which needs a different translation in at
+           least German ("kein"/"keine" vs "nein"). */
+        return g_dpgettext2(NULL, "count", count_desc[0]);
+    }
 
     if (val <= 20)
     {

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nlarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-08-01 00:25+0200\n"
+"POT-Creation-Date: 2026-08-01 14:44+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -905,7 +905,7 @@ msgstr ""
 msgid "Full screen mode"
 msgstr ""
 
-#: src/config.c:431 src/config.c:436 src/utils.c:480
+#: src/config.c:431 src/config.c:436
 msgid "no"
 msgstr ""
 
@@ -2182,343 +2182,343 @@ msgctxt "material adjective"
 msgid "gemstone"
 msgstr ""
 
-#: src/items.c:767
+#: src/items.c:791
 #, c-format
 msgid "some %s"
 msgstr ""
 
-#: src/items.c:780
+#: src/items.c:804
 msgctxt "item status"
 msgid "blessed"
 msgstr ""
 
-#: src/items.c:784
+#: src/items.c:808
 msgctxt "item status"
 msgid "trapped"
 msgstr ""
 
-#: src/items.c:786 src/scoreboard.c:524
+#: src/items.c:810 src/scoreboard.c:524
 msgctxt "item status"
 msgid "cursed"
 msgstr ""
 
-#: src/items.c:788
+#: src/items.c:812
 msgctxt "item status"
 msgid "uncursed"
 msgstr ""
 
-#: src/items.c:791
+#: src/items.c:815
 msgctxt "item status"
 msgid "burnt"
 msgstr ""
 
-#: src/items.c:792
+#: src/items.c:816
 msgctxt "item status"
 msgid "very burnt"
 msgstr ""
 
-#: src/items.c:793
+#: src/items.c:817
 msgctxt "item status"
 msgid "corroded"
 msgstr ""
 
-#: src/items.c:794
+#: src/items.c:818
 msgctxt "item status"
 msgid "very corroded"
 msgstr ""
 
-#: src/items.c:795
+#: src/items.c:819
 msgctxt "item status"
 msgid "rusty"
 msgstr ""
 
-#: src/items.c:796
+#: src/items.c:820
 msgctxt "item status"
 msgid "very rusty"
 msgstr ""
 
-#: src/items.c:802
+#: src/items.c:826
 msgctxt "item status"
 msgid "poisoned"
 msgstr ""
 
-#: src/items.c:822 src/items.c:866
+#: src/items.c:846 src/items.c:890
 #, c-format
 msgid " of %s"
 msgstr ""
 
-#: src/items.c:832
+#: src/items.c:856
 #, c-format
 msgid "amulet of %s"
 msgstr ""
 
-#: src/items.c:832
+#: src/items.c:856
 #, c-format
 msgid "talisman of %s"
 msgstr ""
 
-#: src/items.c:835
+#: src/items.c:859
 #, c-format
 msgid "%s amulet"
 msgstr ""
 
-#: src/items.c:880
+#: src/items.c:904
 #, c-format
 msgid "books of %s"
 msgstr ""
 
-#: src/items.c:880
+#: src/items.c:904
 #, c-format
 msgid "book of %s"
 msgstr ""
 
-#: src/items.c:885
+#: src/items.c:909
 #, c-format
 msgid "%s books"
 msgstr ""
 
-#: src/items.c:885
+#: src/items.c:909
 #, c-format
 msgid "%s book"
 msgstr ""
 
-#: src/items.c:898
+#: src/items.c:922
 #, c-format
 msgid "%d carat"
 msgid_plural "%d carats"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/items.c:916
+#: src/items.c:940
 msgid "gold pieces"
 msgstr ""
 
-#: src/items.c:916
+#: src/items.c:940
 msgid "gold piece"
 msgstr ""
 
-#: src/items.c:923
+#: src/items.c:947
 #, c-format
 msgid "potions of %s"
 msgstr ""
 
-#: src/items.c:923
+#: src/items.c:947
 #, c-format
 msgid "potion of %s"
 msgstr ""
 
-#: src/items.c:928
+#: src/items.c:952
 #, c-format
 msgid "%s potions"
 msgstr ""
 
-#: src/items.c:928
+#: src/items.c:952
 #, c-format
 msgid "%s potion"
 msgstr ""
 
-#: src/items.c:934
+#: src/items.c:958
 #, c-format
 msgid "ring of %s"
 msgstr ""
 
-#: src/items.c:936
+#: src/items.c:960
 #, c-format
 msgid "%s ring"
 msgstr ""
 
-#: src/items.c:946
+#: src/items.c:970
 #, c-format
 msgid "scrolls of %s"
 msgstr ""
 
-#: src/items.c:946
+#: src/items.c:970
 #, c-format
 msgid "scroll of %s"
 msgstr ""
 
-#: src/items.c:953
+#: src/items.c:977
 msgid "unlabelled scrolls"
 msgstr ""
 
-#: src/items.c:953
+#: src/items.c:977
 msgid "unlabelled scroll"
 msgstr ""
 
-#: src/items.c:956
+#: src/items.c:980
 #, c-format
 msgid "scrolls labelled %s"
 msgstr ""
 
-#: src/items.c:956
+#: src/items.c:980
 #, c-format
 msgid "scroll labelled %s"
 msgstr ""
 
-#: src/items.c:1055
+#: src/items.c:1079
 msgid "the"
 msgstr ""
 
-#: src/items.c:1077
+#: src/items.c:1101
 msgid "noted"
 msgstr ""
 
-#: src/items.c:1430
+#: src/items.c:1454
 #, c-format
 msgid "%s vibrates strangely."
 msgstr ""
 
-#: src/items.c:1431
+#: src/items.c:1455
 #, c-format
 msgid "%s vibrate strangely."
 msgstr ""
 
-#: src/items.c:1477
+#: src/items.c:1501
 #, c-format
 msgid "%s vibrates warningly."
 msgstr ""
 
-#: src/items.c:1478
+#: src/items.c:1502
 #, c-format
 msgid "%s vibrate warningly."
 msgstr ""
 
-#: src/items.c:1547 src/spells.c:171
+#: src/items.c:1571 src/spells.c:171
 #, c-format
 msgid "%s resists."
 msgstr ""
 
-#: src/items.c:1547
+#: src/items.c:1571
 #, c-format
 msgid "%s resist."
 msgstr ""
 
-#: src/items.c:1560
+#: src/items.c:1584
 #, c-format
 msgid "%s shatters."
 msgstr ""
 
-#: src/items.c:1560
+#: src/items.c:1584
 #, c-format
 msgid "%s shatter."
 msgstr ""
 
-#: src/items.c:1570
+#: src/items.c:1594
 #, c-format
 msgid "%s burns."
 msgstr ""
 
-#: src/items.c:1570
+#: src/items.c:1594
 #, c-format
 msgid "%s burn."
 msgstr ""
 
-#: src/items.c:1578
+#: src/items.c:1602
 #, c-format
 msgid "%s corrodes."
 msgstr ""
 
-#: src/items.c:1578
+#: src/items.c:1602
 #, c-format
 msgid "%s corrode."
 msgstr ""
 
-#: src/items.c:1585
+#: src/items.c:1609
 #, c-format
 msgid "%s rusts."
 msgstr ""
 
-#: src/items.c:1585
+#: src/items.c:1609
 #, c-format
 msgid "%s rust."
 msgstr ""
 
-#: src/items.c:1609
+#: src/items.c:1633
 #, c-format
 msgid "%s is destroyed."
 msgstr ""
 
-#: src/items.c:1609
+#: src/items.c:1633
 #, c-format
 msgid "%s are destroyed."
 msgstr ""
 
-#: src/items.c:1706
+#: src/items.c:1730
 #, c-format
 msgid "Ammunition for %s\n"
 msgstr ""
 
-#: src/items.c:1711 src/items.c:1761
+#: src/items.c:1735 src/items.c:1785
 #, c-format
 msgid ""
 "Damage:   +%d\n"
 "Accuracy: +%d\n"
 msgstr ""
 
-#: src/items.c:1717 src/items.c:1768
+#: src/items.c:1741 src/items.c:1792
 #, c-format
 msgid ""
 "Base damage: +%d\n"
 "Base accuracy: +%d\n"
 msgstr ""
 
-#: src/items.c:1728
+#: src/items.c:1752
 #, c-format
 msgid ""
 "%s\n"
 "Spell level: %d\n"
 msgstr ""
 
-#: src/items.c:1740
+#: src/items.c:1764
 msgid "two-handed"
 msgstr ""
 
-#: src/items.c:1743
+#: src/items.c:1767
 msgid "ranged"
 msgstr ""
 
-#: src/items.c:1746
+#: src/items.c:1770
 msgid "unique"
 msgstr ""
 
-#: src/items.c:1752
+#: src/items.c:1776
 #, c-format
 msgid "%s weapon\n"
 msgstr ""
 
-#: src/items.c:1778
+#: src/items.c:1802
 #, c-format
 msgid "Armour class: %d\n"
 msgstr ""
 
-#: src/items.c:1782
+#: src/items.c:1806
 #, c-format
 msgid "Base AC: %d\n"
 msgstr ""
 
-#: src/items.c:1791
+#: src/items.c:1815
 #, c-format
 msgid "Notes: %s\n"
 msgstr ""
 
-#: src/items.c:1793
+#: src/items.c:1817
 #, c-format
 msgid "Weight:   %.2f kg\n"
 msgstr ""
 
-#: src/items.c:1796
+#: src/items.c:1820
 #, c-format
 msgid "Material: %s"
 msgstr ""
 
-#: src/items.c:1803
+#: src/items.c:1827
 #, c-format
 msgid ""
 "\n"
 "Price:    %d gold each"
 msgstr ""
 
-#: src/items.c:1803
+#: src/items.c:1827
 #, c-format
 msgid ""
 "\n"
@@ -7255,6 +7255,11 @@ msgid "You fail to disarm the %s."
 msgstr ""
 
 #: src/utils.c:480
+msgctxt "count"
+msgid "no"
+msgstr ""
+
+#: src/utils.c:480
 msgid "one"
 msgstr ""
 
@@ -7334,23 +7339,23 @@ msgstr ""
 msgid "twenty"
 msgstr ""
 
-#: src/utils.c:505
+#: src/utils.c:513
 msgid "never"
 msgstr ""
 
-#: src/utils.c:505
+#: src/utils.c:513
 msgid "once"
 msgstr ""
 
-#: src/utils.c:505
+#: src/utils.c:513
 msgid "twice"
 msgstr ""
 
-#: src/utils.c:505
+#: src/utils.c:513
 msgid "thrice"
 msgstr ""
 
-#: src/utils.c:511
+#: src/utils.c:519
 #, c-format
 msgid "%d times"
 msgstr ""
