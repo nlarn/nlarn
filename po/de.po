@@ -1,11 +1,12 @@
 # German translation of NLarn.
 # Copyright (C) 2026 Joachim de Groot <jdegroot@web.de>
 # This file is distributed under the same license as the NLarn package.
+#: src/display.c:1170
 msgid ""
 msgstr ""
 "Project-Id-Version: NLarn 0.8.0\n"
 "Report-Msgid-Bugs-To: jdegroot@web.de\n"
-"POT-Creation-Date: 2026-08-01 14:44+0200\n"
+"POT-Creation-Date: 2026-09-02 22:11+0200\n"
 "PO-Revision-Date: 2026-07-05 01:01+0200\n"
 "Last-Translator: Joachim de Groot <jdegroot@web.de>\n"
 "Language-Team: \n"
@@ -1007,7 +1008,7 @@ msgstr "Schriftgröße"
 msgid "Full screen mode"
 msgstr "Vollbildmodus"
 
-#: src/config.c:431 src/config.c:436 src/utils.c:480
+#: src/config.c:431 src/config.c:436
 msgid "no"
 msgstr "nein"
 
@@ -2310,174 +2311,174 @@ msgctxt "material adjective"
 msgid "gemstone"
 msgstr "edelsteinbesetzt~"
 
-#: src/items.c:767
+#: src/items.c:791
 #, c-format
 msgid "some %s"
 msgstr "einige %s"
 
-#: src/items.c:780
+#: src/items.c:804
 msgctxt "item status"
 msgid "blessed"
 msgstr "gesegnet~"
 
-#: src/items.c:784
+#: src/items.c:808
 msgctxt "item status"
 msgid "trapped"
 msgstr "mit einer Falle versehen~"
 
-#: src/items.c:786 src/scoreboard.c:524
+#: src/items.c:810 src/scoreboard.c:524
 msgctxt "item status"
 msgid "cursed"
 msgstr "verflucht~"
 
-#: src/items.c:788
+#: src/items.c:812
 msgctxt "item status"
 msgid "uncursed"
 msgstr "unverflucht~"
 
-#: src/items.c:791
+#: src/items.c:815
 msgctxt "item status"
 msgid "burnt"
 msgstr "versengt~"
 
-#: src/items.c:792
+#: src/items.c:816
 msgctxt "item status"
 msgid "very burnt"
 msgstr "verschmort~"
 
-#: src/items.c:793
+#: src/items.c:817
 msgctxt "item status"
 msgid "corroded"
 msgstr "korrodiert~"
 
-#: src/items.c:794
+#: src/items.c:818
 msgctxt "item status"
 msgid "very corroded"
 msgstr "zerfressen~"
 
-#: src/items.c:795
+#: src/items.c:819
 msgctxt "item status"
 msgid "rusty"
 msgstr "rostig~"
 
-#: src/items.c:796
+#: src/items.c:820
 msgctxt "item status"
 msgid "very rusty"
 msgstr "verrostet~"
 
-#: src/items.c:802
+#: src/items.c:826
 msgctxt "item status"
 msgid "poisoned"
 msgstr "vergiftet~"
 
-#: src/items.c:822 src/items.c:866
+#: src/items.c:846 src/items.c:890
 #, c-format
 msgid " of %s"
 msgstr " %s"
 
-#: src/items.c:832
+#: src/items.c:856
 #, c-format
 msgid "amulet of %s"
 msgstr "n:Amulett %1$s;;;Amuletts %1$s|Amulette %1$s;;Amuletten %1$s"
 
-#: src/items.c:832
+#: src/items.c:856
 #, c-format
 msgid "talisman of %s"
 msgstr "m:Talisman %1$s;;;Talismans %1$s|Talismane %1$s;;Talismanen %1$s"
 
-#: src/items.c:835
+#: src/items.c:859
 #, c-format
 msgid "%s amulet"
 msgstr "n:%1$s Amulett;;;%1$s Amuletts|%1$s Amulette;;%1$s Amuletten"
 
-#: src/items.c:880
+#: src/items.c:904
 #, c-format
 msgid "books of %s"
 msgstr "n:Buch %1$s;;;Buchs %1$s|Bücher %1$s;;Büchern %1$s"
 
-#: src/items.c:880
+#: src/items.c:904
 #, c-format
 msgid "book of %s"
 msgstr "n:Buch %1$s;;;Buchs %1$s|Bücher %1$s;;Büchern %1$s"
 
-#: src/items.c:885
+#: src/items.c:909
 #, c-format
 msgid "%s books"
 msgstr "n:%1$s Buch;;;%1$s Buchs|%1$s Bücher;;%1$s Büchern"
 
-#: src/items.c:885
+#: src/items.c:909
 #, c-format
 msgid "%s book"
 msgstr "n:%1$s Buch;;;%1$s Buchs|%1$s Bücher;;%1$s Büchern"
 
-#: src/items.c:898
+#: src/items.c:922
 #, c-format
 msgid "%d carat"
 msgid_plural "%d carats"
 msgstr[0] "%d-karätig~"
 msgstr[1] "%d-karätig~"
 
-#: src/items.c:916
+#: src/items.c:940
 msgid "gold pieces"
 msgstr "Goldstücke"
 
-#: src/items.c:916
+#: src/items.c:940
 msgid "gold piece"
 msgstr "n:Goldstück;;;Goldstücks"
 
-#: src/items.c:923
+#: src/items.c:947
 #, c-format
 msgid "potions of %s"
 msgstr "%s"
 
-#: src/items.c:923
+#: src/items.c:947
 #, c-format
 msgid "potion of %s"
 msgstr "%s"
 
-#: src/items.c:928
+#: src/items.c:952
 #, c-format
 msgid "%s potions"
 msgstr "m:%1$s Trank;;;%1$s Tranks|%1$s Tränke;;%1$s Tränken"
 
-#: src/items.c:928
+#: src/items.c:952
 #, c-format
 msgid "%s potion"
 msgstr "m:%1$s Trank;;;%1$s Tranks|%1$s Tränke;;%1$s Tränken"
 
-#: src/items.c:934
+#: src/items.c:958
 #, c-format
 msgid "ring of %s"
 msgstr "m:Ring %1$s;;;Rings %1$s|Ringe %1$s;;Ringen %1$s"
 
-#: src/items.c:936
+#: src/items.c:960
 #, c-format
 msgid "%s ring"
 msgstr "m:%1$s Ring;;;%1$s Rings|%1$s Ringe;;%1$s Ringen"
 
-#: src/items.c:946
+#: src/items.c:970
 #, c-format
 msgid "scrolls of %s"
 msgstr "f:Schriftrolle %1$s|Schriftrollen %1$s"
 
-#: src/items.c:946
+#: src/items.c:970
 #, c-format
 msgid "scroll of %s"
 msgstr "f:Schriftrolle %1$s|Schriftrollen %1$s"
 
-#: src/items.c:953
+#: src/items.c:977
 msgid "unlabelled scrolls"
 msgstr ""
 "f:unbeschriftete Schriftrolle;unbeschriftete Schriftrolle;unbeschrifteten "
 "Schriftrolle|unbeschriftete Schriftrollen;;unbeschrifteten Schriftrollen"
 
-#: src/items.c:953
+#: src/items.c:977
 msgid "unlabelled scroll"
 msgstr ""
 "f:unbeschriftete Schriftrolle;unbeschriftete Schriftrolle;unbeschrifteten "
 "Schriftrolle|unbeschriftete Schriftrollen;;unbeschrifteten Schriftrollen"
 
-#: src/items.c:956
+#: src/items.c:980
 #, c-format
 msgid "scrolls labelled %s"
 msgstr ""
@@ -2485,7 +2486,7 @@ msgstr ""
 "%1$s beschrifteten Schriftrolle|mit %1$s beschriftete Schriftrollen;;mit "
 "%1$s beschrifteten Schriftrollen"
 
-#: src/items.c:956
+#: src/items.c:980
 #, c-format
 msgid "scroll labelled %s"
 msgstr ""
@@ -2493,100 +2494,100 @@ msgstr ""
 "%1$s beschrifteten Schriftrolle|mit %1$s beschriftete Schriftrollen;;mit "
 "%1$s beschrifteten Schriftrollen"
 
-#: src/items.c:1055
+#: src/items.c:1079
 msgid "the"
 msgstr "the"
 
-#: src/items.c:1077
+#: src/items.c:1101
 msgid "noted"
 msgstr "notiert"
 
-#: src/items.c:1430
+#: src/items.c:1454
 #, c-format
 msgid "%s vibrates strangely."
 msgstr "%s vibriert seltsam."
 
-#: src/items.c:1431
+#: src/items.c:1455
 #, c-format
 msgid "%s vibrate strangely."
 msgstr "%s vibrieren seltsam."
 
-#: src/items.c:1477
+#: src/items.c:1501
 #, c-format
 msgid "%s vibrates warningly."
 msgstr "%s vibriert warnend."
 
-#: src/items.c:1478
+#: src/items.c:1502
 #, c-format
 msgid "%s vibrate warningly."
 msgstr "%s vibrieren warnend."
 
-#: src/items.c:1547 src/spells.c:171
+#: src/items.c:1571 src/spells.c:171
 #, c-format
 msgid "%s resists."
 msgstr "%s widersteht."
 
-#: src/items.c:1547
+#: src/items.c:1571
 #, c-format
 msgid "%s resist."
 msgstr "%s widerstehen."
 
-#: src/items.c:1560
+#: src/items.c:1584
 #, c-format
 msgid "%s shatters."
 msgstr "%s zerspringt."
 
-#: src/items.c:1560
+#: src/items.c:1584
 #, c-format
 msgid "%s shatter."
 msgstr "%s zerspringen."
 
-#: src/items.c:1570
+#: src/items.c:1594
 #, c-format
 msgid "%s burns."
 msgstr "%s verbrennt."
 
-#: src/items.c:1570
+#: src/items.c:1594
 #, c-format
 msgid "%s burn."
 msgstr "%s verbrennen."
 
-#: src/items.c:1578
+#: src/items.c:1602
 #, c-format
 msgid "%s corrodes."
 msgstr "%s wird zerfressen."
 
-#: src/items.c:1578
+#: src/items.c:1602
 #, c-format
 msgid "%s corrode."
 msgstr "%s werden zerfressen."
 
-#: src/items.c:1585
+#: src/items.c:1609
 #, c-format
 msgid "%s rusts."
 msgstr "%s rostet."
 
-#: src/items.c:1585
+#: src/items.c:1609
 #, c-format
 msgid "%s rust."
 msgstr "%s rosten."
 
-#: src/items.c:1609
+#: src/items.c:1633
 #, c-format
 msgid "%s is destroyed."
 msgstr "%s wird zerstört."
 
-#: src/items.c:1609
+#: src/items.c:1633
 #, c-format
 msgid "%s are destroyed."
 msgstr "%s werden zerstört."
 
-#: src/items.c:1706
+#: src/items.c:1730
 #, c-format
 msgid "Ammunition for %s\n"
 msgstr "Munition für %s\n"
 
-#: src/items.c:1711 src/items.c:1761
+#: src/items.c:1735 src/items.c:1785
 #, c-format
 msgid ""
 "Damage:   +%d\n"
@@ -2595,7 +2596,7 @@ msgstr ""
 "Schaden:      +%d\n"
 "Genauigkeit:  +%d\n"
 
-#: src/items.c:1717 src/items.c:1768
+#: src/items.c:1741 src/items.c:1792
 #, c-format
 msgid ""
 "Base damage: +%d\n"
@@ -2604,7 +2605,7 @@ msgstr ""
 "Grundschaden: +%d\n"
 "Grundgenauigkeit: +%d\n"
 
-#: src/items.c:1728
+#: src/items.c:1752
 #, c-format
 msgid ""
 "%s\n"
@@ -2613,49 +2614,49 @@ msgstr ""
 "%s\n"
 "Zauberstufe: %d\n"
 
-#: src/items.c:1740
+#: src/items.c:1764
 msgid "two-handed"
 msgstr "zweihändig"
 
-#: src/items.c:1743
+#: src/items.c:1767
 msgid "ranged"
 msgstr "Fernkampf"
 
-#: src/items.c:1746
+#: src/items.c:1770
 msgid "unique"
 msgstr "einzigartig"
 
-#: src/items.c:1752
+#: src/items.c:1776
 #, c-format
 msgid "%s weapon\n"
 msgstr "%s Waffe\r\n"
 
-#: src/items.c:1778
+#: src/items.c:1802
 #, c-format
 msgid "Armour class: %d\n"
 msgstr "Rüstungsklasse: %d\n"
 
-#: src/items.c:1782
+#: src/items.c:1806
 #, c-format
 msgid "Base AC: %d\n"
 msgstr "Grund-RK: %d\n"
 
-#: src/items.c:1791
+#: src/items.c:1815
 #, c-format
 msgid "Notes: %s\n"
 msgstr "Notizen: %s\n"
 
-#: src/items.c:1793
+#: src/items.c:1817
 #, c-format
 msgid "Weight:   %.2f kg\n"
 msgstr "Gewicht:  %.2f kg\n"
 
-#: src/items.c:1796
+#: src/items.c:1820
 #, c-format
 msgid "Material: %s"
 msgstr "Material: %s"
 
-#: src/items.c:1803
+#: src/items.c:1827
 #, c-format
 msgid ""
 "\n"
@@ -2664,7 +2665,7 @@ msgstr ""
 "\n"
 "Preis:    je %d Gold"
 
-#: src/items.c:1803
+#: src/items.c:1827
 #, c-format
 msgid ""
 "\n"
@@ -4020,7 +4021,7 @@ msgstr "%s verschwindet."
 msgid "%s says, \"%s\""
 msgstr "%s sagt: „%s“"
 
-#: src/monsters.c:4197 src/weapons.c:519 src/weapons.c:599
+#: src/monsters.c:4197 src/weapons.c:521 src/weapons.c:601
 #, c-format
 msgid "%s hits %s."
 msgstr "%s trifft %s."
@@ -4030,12 +4031,12 @@ msgstr "%s trifft %s."
 msgid "Your amulet reflects %s!"
 msgstr "Dein Amulett reflektiert %s!"
 
-#: src/monsters.c:4228 src/spells.c:2098 src/weapons.c:543
+#: src/monsters.c:4228 src/spells.c:2098 src/weapons.c:545
 #, c-format
 msgid "%s whizzes by you!"
 msgstr "%s zischt an dir vorbei!"
 
-#: src/monsters.c:4236 src/spells.c:2107 src/weapons.c:551
+#: src/monsters.c:4236 src/spells.c:2107 src/weapons.c:553
 #, c-format
 msgid "%s hits you!"
 msgstr "%s trifft dich!"
@@ -4910,7 +4911,7 @@ msgstr "Du legst %s weg."
 msgid "You can't put away %s. It's welded into your hands."
 msgstr "Du kannst %s nicht weglegen, es ist mit deiner Hand verschweißt."
 
-#: src/player.c:3965 src/weapons.c:177
+#: src/player.c:3965 src/weapons.c:179
 msgid "Gosh! How dare you!"
 msgstr "Meine Güte! Was fällt dir ein!"
 
@@ -7619,23 +7620,23 @@ msgstr "neunzehn"
 msgid "twenty"
 msgstr "zwanzig"
 
-#: src/utils.c:505
+#: src/utils.c:513
 msgid "never"
 msgstr "nie"
 
-#: src/utils.c:505
+#: src/utils.c:513
 msgid "once"
 msgstr "einmal"
 
-#: src/utils.c:505
+#: src/utils.c:513
 msgid "twice"
 msgstr "zweimal"
 
-#: src/utils.c:505
+#: src/utils.c:513
 msgid "thrice"
 msgstr "dreimal"
 
-#: src/utils.c:511
+#: src/utils.c:519
 #, c-format
 msgid "%d times"
 msgstr "%d-mal"
@@ -7649,213 +7650,225 @@ msgid "sling bullet"
 msgstr "n:Schleuderblei|Schleuderbleie"
 
 #: src/weapons.c:39
+msgid "orcish arrow"
+msgstr "m:Orkpfeil;;;Orkpfeils|Orkpfeile;;Orkpfeilen"
+
+#: src/weapons.c:40
 msgid "arrow"
 msgstr "m:Pfeil;;;Pfeils|Pfeile;;Pfeilen"
 
-#: src/weapons.c:40
+#: src/weapons.c:41
 msgid "bolt"
 msgstr "m:Bolzen;;;Bolzens|Bolzen;;Bolzen"
 
-#: src/weapons.c:45 src/weapons.c:57
+#: src/weapons.c:46 src/weapons.c:58
 msgid "sling"
 msgstr "f:Schleuder|Schleudern"
 
-#: src/weapons.c:46 src/weapons.c:64
+#: src/weapons.c:47 src/weapons.c:66
 msgid "bow"
 msgstr "m:Bogen;;;Bogens|Bögen;;Bögen"
 
-#: src/weapons.c:47 src/weapons.c:69
+#: src/weapons.c:48 src/weapons.c:71
 msgid "crossbow"
 msgstr "f:Armbrust|Armbrüste;;Armbrüsten"
 
-#: src/weapons.c:55
+#: src/weapons.c:56
 msgid "orcish dagger"
 msgstr "m:Orkdolch;;;Orkdolchs|Orkdolche;;Orkdolchen"
 
-#: src/weapons.c:55
+#: src/weapons.c:56
 msgid "orc dagger"
 msgstr "Orkdolch"
 
-#: src/weapons.c:56
+#: src/weapons.c:57
 msgid "dagger"
 msgstr "m:Dolch;;;Dolchs|Dolche;;Dolchen"
 
-#: src/weapons.c:58
+#: src/weapons.c:59
 msgid "orcish short sword"
 msgstr ""
 "n:Ork-Kurzschwert;;;Ork-Kurzschwerts|Ork-Kurzschwerter;;Ork-Kurzschwertern"
 
-#: src/weapons.c:58
+#: src/weapons.c:59
 msgid "orc short sword"
 msgstr "Ork-Kurzschwert"
 
-#: src/weapons.c:59
+#: src/weapons.c:60
 msgid "short sword"
 msgstr "n:Kurzschwert;;;Kurzschwerts|Kurzschwerter;;Kurzschwertern"
 
-#: src/weapons.c:60
+#: src/weapons.c:61
 msgid "elven short sword"
 msgstr ""
 "n:Elfen-Kurzschwert;;;Elfen-Kurzschwerts|Elfen-Kurzschwerter;;Elfen-"
 "Kurzschwertern"
 
-#: src/weapons.c:60
+#: src/weapons.c:61
 msgid "elf short sword"
 msgstr "Elfen-Kurzschwert"
 
-#: src/weapons.c:61
+#: src/weapons.c:62
 msgid "orcish spear"
 msgstr "m:Orkspeer;;;Orkspeers|Orkspeere;;Orkspeeren"
 
-#: src/weapons.c:61
+#: src/weapons.c:62
 msgid "orc spear"
 msgstr "Orkspeer"
 
-#: src/weapons.c:62
+#: src/weapons.c:63
 msgid "spear"
 msgstr "m:Speer;;;Speers|Speere;;Speeren"
 
-#: src/weapons.c:63
+#: src/weapons.c:64
 msgid "elven spear"
 msgstr "m:Elfenspeer;;;Elfenspeers|Elfenspeere;;Elfenspeeren"
 
-#: src/weapons.c:63
+#: src/weapons.c:64
 msgid "elf spear"
 msgstr "Elfenspeer"
 
 #: src/weapons.c:65
+msgid "orcish bow"
+msgstr "m:Orkbogen;;;Orkbogens|Orkbögen;;Orkbögen"
+
+#: src/weapons.c:65
+msgid "orc bow"
+msgstr "Orkbogen"
+
+#: src/weapons.c:67
 msgid "heavy club"
 msgstr "f:schwere Keule;schwere Keule;schweren Keule|schweren Keulen"
 
-#: src/weapons.c:65
+#: src/weapons.c:67
 msgid "club"
 msgstr "Keule"
 
-#: src/weapons.c:66
+#: src/weapons.c:68
 msgid "mace"
 msgstr "m:Streitkolben;;;Streitkolbens|Streitkolben;;Streitkolben"
 
-#: src/weapons.c:67
+#: src/weapons.c:69
 msgid "flail"
 msgstr "m:Dreschflegel;;;Dreschflegels|Dreschflegel;;Dreschflegeln"
 
-#: src/weapons.c:68
+#: src/weapons.c:70
 msgid "battle-axe"
 msgstr "f:Streitaxt|Streitäxte;;Streitäxten"
 
-#: src/weapons.c:70
+#: src/weapons.c:72
 msgid "longsword"
 msgstr "n:Langschwert;;;Langschwerts|Langschwerter;;Langschwertern"
 
-#: src/weapons.c:71
+#: src/weapons.c:73
 msgid "elven longsword"
 msgstr ""
 "n:Elfen-Langschwert;;;Elfen-Langschwerts|Elfen-Langschwerter;;Elfen-"
 "Langschwertern"
 
-#: src/weapons.c:71
+#: src/weapons.c:73
 msgid "elf longsword"
 msgstr "Elfen-Langschwert"
 
-#: src/weapons.c:72
+#: src/weapons.c:74
 msgid "two-handed sword"
 msgstr "m:Zweihänder;;;Zweihänders|Zweihänder;;Zweihändern"
 
-#: src/weapons.c:72
+#: src/weapons.c:74
 msgid "2-handed sword"
 msgstr "Zweihänder"
 
-#: src/weapons.c:74
+#: src/weapons.c:76
 msgid "Sword of Slashing"
 msgstr "n:Schwert des Schlitzens;;;Schwerts des Schlitzens"
 
-#: src/weapons.c:74
+#: src/weapons.c:76
 msgid "S. of Slashing"
 msgstr "S. d. Schlitzens"
 
-#: src/weapons.c:75
+#: src/weapons.c:77
 msgid "lance of death"
 msgstr "f:Todeslanze|Todeslanzen"
 
-#: src/weapons.c:76
+#: src/weapons.c:78
 msgid "Vorpal blade"
 msgstr "f:Vorpalklinge"
 
-#: src/weapons.c:77
+#: src/weapons.c:79
 msgid "Slayer"
 msgstr "Slayer"
 
-#: src/weapons.c:78
+#: src/weapons.c:80
 msgid "Sunsword"
 msgstr "n:Sonnenschwert;;;Sonnenschwerts"
 
-#: src/weapons.c:79
+#: src/weapons.c:81
 msgid "Bessman's flailing hammer"
 msgstr "m:Bessmans Dreschhammer;;;Bessmans Dreschhammers"
 
-#: src/weapons.c:79
+#: src/weapons.c:81
 msgid "Bessman's"
 msgstr "Bessmans Hammer"
 
-#: src/weapons.c:106
+#: src/weapons.c:108
 msgid "You do not wield any weapon!"
 msgstr "Du führst keine Waffe!"
 
-#: src/weapons.c:120
+#: src/weapons.c:122
 #, c-format
 msgid "%s is not a ranged weapon!"
 msgstr "%s ist keine Fernwaffe!"
 
-#: src/weapons.c:129
+#: src/weapons.c:131
 msgid "You have no ammunition in your quiver!"
 msgstr "Du hast keine Munition in deinem Köcher!"
 
-#: src/weapons.c:139
+#: src/weapons.c:141
 #, c-format
 msgid "You cannot fire %s with %s."
 msgstr "Du kannst %s nicht mit %s abfeuern."
 
-#: src/weapons.c:150
+#: src/weapons.c:152
 msgid "Select a target"
 msgstr "Wähle ein Ziel"
 
-#: src/weapons.c:156
+#: src/weapons.c:158
 #, c-format
 msgid "You did not fire %s."
 msgstr "Du hast nicht mit %s geschossen."
 
-#: src/weapons.c:168
+#: src/weapons.c:170
 msgid "I see no monster there."
 msgstr "Ich sehe dort kein Monster."
 
-#: src/weapons.c:191
+#: src/weapons.c:193
 msgid "You have no clear shot."
 msgstr "Du hast keine freie Schusslinie."
 
-#: src/weapons.c:199
+#: src/weapons.c:201
 #, c-format
 msgid "You fire %s at %s."
 msgstr "Du schießt mit %s auf %s."
 
-#: src/weapons.c:241
+#: src/weapons.c:243
 msgid "You have no weapon ready."
 msgstr "Du hast keine Waffe bereit."
 
-#: src/weapons.c:249
+#: src/weapons.c:251
 #, c-format
 msgid "You can't put %s away, it is weld into your hand!"
 msgstr "Du kannst %s nicht wegstecken - wie an deine Hand geschweißt!"
 
-#: src/weapons.c:265
+#: src/weapons.c:267
 #, c-format
 msgid "You can't ready %s while holding the %s!"
 msgstr "Du kannst %s nicht bereitmachen, solange du %s hältst!"
 
-#: src/weapons.c:273
+#: src/weapons.c:275
 msgid "swapping your weapons"
 msgstr "deine Waffen zu tauschen"
 
-#: src/weapons.c:286
+#: src/weapons.c:288
 #, c-format
 msgid ""
 "You have swapped your weapons: Primary weapon: %s, secondary weapon, not "
@@ -7864,58 +7877,58 @@ msgstr ""
 "Du hast deine Waffen getauscht: Hauptwaffe: %s, Zweitwaffe, nicht geführt: "
 "%s."
 
-#: src/weapons.c:288
+#: src/weapons.c:290
 msgid "none"
 msgstr "keine"
 
-#: src/weapons.c:323
+#: src/weapons.c:325
 msgid "v. burnt"
 msgstr "stark verbrannt"
 
-#: src/weapons.c:330
+#: src/weapons.c:332
 msgid "v. corroded"
 msgstr "stark zerfressen"
 
-#: src/weapons.c:336
+#: src/weapons.c:338
 msgid "v. rusty"
 msgstr "stark verrostet"
 
-#: src/weapons.c:343
+#: src/weapons.c:345
 msgid "burnt"
 msgstr "versengt"
 
-#: src/weapons.c:349
+#: src/weapons.c:351
 msgid "corroded"
 msgstr "korrodiert"
 
-#: src/weapons.c:355
+#: src/weapons.c:357
 msgid "rusty"
 msgstr "rostig"
 
-#: src/weapons.c:364
+#: src/weapons.c:366
 msgid "blessed"
 msgstr "gesegnet"
 
-#: src/weapons.c:369
+#: src/weapons.c:371
 msgid "cursed"
 msgstr "verflucht"
 
-#: src/weapons.c:460
+#: src/weapons.c:462
 #, c-format
 msgid "The magic of %s strikes %s!"
 msgstr "Die Magie %s trifft %s!"
 
-#: src/weapons.c:474
+#: src/weapons.c:476
 #, c-format
 msgid "The magic of %s is spent."
 msgstr "Die Magie %s ist aufgebraucht."
 
-#: src/weapons.c:532 src/weapons.c:613
+#: src/weapons.c:534 src/weapons.c:615
 #, c-format
 msgid "%s misses %s."
 msgstr "%s verfehlt %s."
 
-#: src/weapons.c:545
+#: src/weapons.c:547
 #, c-format
 msgid "%s misses you."
 msgstr "%s verfehlt dich."

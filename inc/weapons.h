@@ -36,6 +36,7 @@ typedef enum ammo_class
 #define AMMO_TYPE_ENUM(AMMO_TYPE) \
     AMMO_TYPE(AMT_STONE,) \
     AMMO_TYPE(AMT_SBULLET,) \
+    AMMO_TYPE(AMT_OARROW,) \
     AMMO_TYPE(AMT_ARROW,) \
     AMMO_TYPE(AMT_BOLT,) \
     AMMO_TYPE(AMT_MAX,)
@@ -73,6 +74,7 @@ typedef enum weapon_class
     WEAPON_TYPE(WT_OSPEAR,) \
     WEAPON_TYPE(WT_SPEAR,) \
     WEAPON_TYPE(WT_ESPEAR,) \
+    WEAPON_TYPE(WT_OBOW,) \
     WEAPON_TYPE(WT_BOW,) \
     WEAPON_TYPE(WT_CLUB,) \
     WEAPON_TYPE(WT_MACE,) \

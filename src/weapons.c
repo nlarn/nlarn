@@ -36,6 +36,7 @@ const ammo_data ammos[AMT_MAX] =
     /*  type       name                ac            dam  acc  mat        we  pr  ob */
     { AMT_STONE,   N_("pebble"),       AMMO_SLING,     2,   1, IM_STONE, 100,  1, false, },
     { AMT_SBULLET, N_("sling bullet"), AMMO_SLING,     4,   2, IM_LEAD,   50,  3,  true, },
+    { AMT_OARROW,  N_("orcish arrow"), AMMO_BOW,       6,   2, IM_WOOD,   90,  4, false, },
     { AMT_ARROW,   N_("arrow"),        AMMO_BOW,       8,   3, IM_WOOD,   80,  5,  true, },
     { AMT_BOLT,    N_("bolt"),         AMMO_CROSSBOW, 10,   4, IM_IRON,  100, 10, false, },
 };
@@ -61,6 +62,7 @@ const weapon_data weapons[WT_MAX] =
     { WT_OSPEAR,        N_("orcish spear"),              N_("orc spear"),       WC_MELEE,     AMMO_MAX,  8,   2, IM_WOOD,    2100,    75, 0, 0, 1, 0, 1 },
     { WT_SPEAR,         N_("spear"),                     N_("spear"),           WC_MELEE,     AMMO_MAX, 10,   3, IM_WOOD,    1800,   120, 0, 0, 1, 1, 1 },
     { WT_ESPEAR,        N_("elven spear"),               N_("elf spear"),       WC_MELEE,     AMMO_MAX, 11,   4, IM_WOOD,    1600,   140, 0, 0, 1, 0, 1 },
+    { WT_OBOW,          N_("orcish bow"),                N_("orc bow"),        WC_RANGED,     AMMO_BOW,  2,   3, IM_WOOD,    1300,   160, 1, 0, 1, 0, 0 },
     { WT_BOW,           N_("bow"),                       N_("bow"),            WC_RANGED,     AMMO_BOW,  3,   4, IM_WOOD,    1000,   220, 1, 0, 1, 1, 0 },
     { WT_CLUB,          N_("heavy club"),                N_("club"),            WC_MELEE,     AMMO_MAX, 10,   2, IM_WOOD,    3500,    50, 0, 0, 1, 0, 0 },
     { WT_MACE,          N_("mace"),                      N_("mace"),            WC_MELEE,     AMMO_MAX, 12,   3, IM_IRON,    2600,   160, 0, 0, 1, 1, 0 },

@@ -958,8 +958,8 @@ monster *monster_new(monster_t type, position pos, gpointer leader)
             ammo_id = AMT_BOLT;
             break;
         default: /* MT_HOBGOBLIN, MT_ORC, MT_ELF */
-            wpn_type = WT_BOW;
-            ammo_id = AMT_ARROW;
+            wpn_type = WT_OBOW;
+            ammo_id = AMT_OARROW;
             break;
         }
 

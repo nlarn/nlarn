@@ -27,6 +27,8 @@
 * Zombies can now cause sickness
 * Add acid resistance to some monsters
 * Turn the gelatinous cube into a passive monster
+* Add orcish bows and arrows, slightly less powerfull than their
+  non-orcish counterparts
 * Disable auto-pickup when under attack or hostiles are in sight
 * Adapt how statues react when being hit to the original Larn
 * Mouse movement and firing without keyboard interaction
