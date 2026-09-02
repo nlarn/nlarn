@@ -181,7 +181,7 @@ pot:
 # Merge new strings from the template into the message catalogs
 update-po: pot
 	for PO in $(POFILES) ; \
-	do msgmerge --update --backup=off $$PO po/nlarn.pot ; \
+	do msgmerge --update --backup=off --width=79 $$PO po/nlarn.pot ; \
 	done
 
 lib/locale/%/LC_MESSAGES/nlarn.mo: po/%.po
