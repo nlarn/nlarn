@@ -31,7 +31,7 @@ extern const guint MOBUL;
 extern const guint TIMELIMIT;
 
 /* internal counter for save file compatibility */
-#define SAVEFILE_VERSION    29
+#define SAVEFILE_VERSION    30
 
 /* forward declarations */
 struct game_config;

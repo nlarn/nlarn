@@ -6,6 +6,7 @@
 
 ### Fixes
 
+* Make saved games robust against item changes (breaks saves)
 
 ## Release 0.8.0 (2026-09-05)
 

@@ -210,6 +210,40 @@ game *game_destroy(game *g)
     return NULL;
 }
 
+/* Serialize a lookup table that maps every member of an X-macro-declared
+   enum to some other integer (e.g. a shuffled "appearance" index) as a
+   JSON object keyed by each member's stable enum name, rather than by its
+   ordinal position. This keeps the save file valid when new members are
+   inserted into the enum, instead of relying on it never changing size or
+   order. */
+#define SAVE_ENUM_MAPPING(save, key, arr, count, EnumType) \
+    do { \
+        cJSON *_map = cJSON_CreateObject(); \
+        for (int _idx = 0; _idx < (count); _idx++) \
+            cJSON_AddNumberToObject(_map, EnumType##_string((EnumType)_idx), (arr)[_idx]); \
+        cJSON_AddItemToObject((save), (key), _map); \
+    } while (0)
+
+/* Counterpart to SAVE_ENUM_MAPPING. Entries whose name is not found (the
+   enum member did not exist yet when the save was written) are left at
+   their identity mapping, which cannot collide with a value carried over
+   from the save since no prior entry could have been assigned it. Entries
+   whose name is no longer known (the enum member has since been removed)
+   are silently dropped rather than corrupting another entry. */
+#define LOAD_ENUM_MAPPING(save, key, arr, count, EnumType) \
+    do { \
+        for (int _idx = 0; _idx < (count); _idx++) \
+            (arr)[_idx] = _idx; \
+        cJSON *_map = cJSON_GetObjectItem((save), (key)); \
+        cJSON *_entry; \
+        cJSON_ArrayForEach(_entry, _map) \
+        { \
+            EnumType _id = EnumType##_value(_entry->string); \
+            if (strcmp(EnumType##_string(_id), _entry->string) == 0) \
+                (arr)[_id] = _entry->valueint; \
+        } \
+    } while (0)
+
 int game_save(game *g)
 {
     int err;
@@ -237,34 +271,42 @@ int game_save(game *g)
         cJSON_AddItemToArray(obj, map_serialize(g->maps[idx]));
     }
 
-    cJSON_AddItemToObject(save, "amulet_created",
-                          cJSON_CreateIntArray(g->amulet_created, AM_MAX));
+    cJSON_AddItemToObject(save, "amulet_created", obj = cJSON_CreateArray());
+    for (int idx = 0; idx < AM_MAX; idx++)
+        if (g->amulet_created[idx])
+            cJSON_AddItemToArray(obj, cJSON_CreateString(amulet_t_string(idx)));
 
-    cJSON_AddItemToObject(save, "armour_created",
-                          cJSON_CreateIntArray(g->armour_created, AT_MAX));
+    cJSON_AddItemToObject(save, "armour_created", obj = cJSON_CreateArray());
+    for (int idx = 0; idx < AT_MAX; idx++)
+        if (g->armour_created[idx])
+            cJSON_AddItemToArray(obj, cJSON_CreateString(armour_t_string(idx)));
 
-    cJSON_AddItemToObject(save, "weapon_created",
-                          cJSON_CreateIntArray(g->weapon_created, WT_MAX));
+    cJSON_AddItemToObject(save, "weapon_created", obj = cJSON_CreateArray());
+    for (int idx = 0; idx < WT_MAX; idx++)
+        if (g->weapon_created[idx])
+            cJSON_AddItemToArray(obj, cJSON_CreateString(weapon_t_string(idx)));
 
     if (g->cure_dianthr_created) cJSON_AddTrueToObject(save, "cure_dianthr_created");
 
-    cJSON_AddItemToObject(save, "amulet_material_mapping",
-                          cJSON_CreateIntArray(g->amulet_material_mapping, AM_MAX));
+    SAVE_ENUM_MAPPING(save, "amulet_material_mapping",
+                       g->amulet_material_mapping, AM_MAX, amulet_t);
 
-    cJSON_AddItemToObject(save, "potion_desc_mapping",
-                          cJSON_CreateIntArray(g->potion_desc_mapping, PO_MAX));
+    SAVE_ENUM_MAPPING(save, "potion_desc_mapping",
+                       g->potion_desc_mapping, PO_MAX, potion_t);
 
-    cJSON_AddItemToObject(save, "ring_material_mapping",
-                          cJSON_CreateIntArray(g->ring_material_mapping, RT_MAX));
+    SAVE_ENUM_MAPPING(save, "ring_material_mapping",
+                       g->ring_material_mapping, RT_MAX, ring_t);
 
-    cJSON_AddItemToObject(save, "scroll_desc_mapping",
-                          cJSON_CreateIntArray(g->scroll_desc_mapping, ST_MAX));
+    SAVE_ENUM_MAPPING(save, "scroll_desc_mapping",
+                       g->scroll_desc_mapping, ST_MAX, scroll_t);
 
-    cJSON_AddItemToObject(save, "book_desc_mapping",
-                          cJSON_CreateIntArray(g->book_desc_mapping, SP_MAX));
+    SAVE_ENUM_MAPPING(save, "book_desc_mapping",
+                       g->book_desc_mapping, SP_MAX, spell_id);
 
-    cJSON_AddItemToObject(save, "monster_genocided",
-                          cJSON_CreateIntArray(g->monster_genocided, MT_MAX));
+    cJSON_AddItemToObject(save, "monster_genocided", obj = cJSON_CreateArray());
+    for (int idx = 0; idx < MT_MAX; idx++)
+        if (g->monster_genocided[idx])
+            cJSON_AddItemToArray(obj, cJSON_CreateString(monster_t_string(idx)));
 
     if (g->wizard) cJSON_AddTrueToObject(save, "wizard");
     if (g->fullvis) cJSON_AddTrueToObject(save, "fullvis");
@@ -680,74 +722,44 @@ static bool game_load()
     if (cJSON_GetObjectItem(save, "fullvis"))
         nlarn->fullvis = true;
 
+    /* amulet_created, armour_created, weapon_created and monster_genocided
+       are stored as arrays of enum names rather than by ordinal position,
+       so inserting, removing or reordering enum members does not disturb
+       saves written by an older version of the game. */
     cJSON *obj = cJSON_GetObjectItem(save, "amulet_created");
-    int size = cJSON_GetArraySize(obj);
-    g_assert(size == AM_MAX);
-    for (int idx = 0; idx < size; idx++)
-        nlarn->amulet_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+    cJSON *elem;
+    cJSON_ArrayForEach(elem, obj)
+        nlarn->amulet_created[amulet_t_value(elem->valuestring)] = true;
 
-    /* armour_t may shrink when unique armour types are removed (e.g. the
-       boots of speed and the cloak of invisibility, superseded by the
-       permanence spell); saves from before that only fit the entries that
-       still exist, ignore the rest instead of asserting on a size that no
-       longer matches. */
     obj = cJSON_GetObjectItem(save, "armour_created");
-    size = cJSON_GetArraySize(obj);
-    for (int idx = 0; idx < size && idx < AT_MAX; idx++)
-        nlarn->armour_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+    cJSON_ArrayForEach(elem, obj)
+        nlarn->armour_created[armour_t_value(elem->valuestring)] = true;
 
     obj = cJSON_GetObjectItem(save, "weapon_created");
-    size = cJSON_GetArraySize(obj);
-    g_assert(size == WT_MAX);
-    for (int idx = 0; idx < size; idx++)
-        nlarn->weapon_created[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+    cJSON_ArrayForEach(elem, obj)
+        nlarn->weapon_created[weapon_t_value(elem->valuestring)] = true;
 
     if (cJSON_GetObjectItem(save, "cure_dianthr_created"))
         nlarn->cure_dianthr_created = true;
 
+    LOAD_ENUM_MAPPING(save, "amulet_material_mapping",
+                       nlarn->amulet_material_mapping, AM_MAX, amulet_t);
 
-    obj = cJSON_GetObjectItem(save, "amulet_material_mapping");
-    size = cJSON_GetArraySize(obj);
-    g_assert(size == AM_MAX);
-    for (int idx = 0; idx < size; idx++)
-        nlarn->amulet_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+    LOAD_ENUM_MAPPING(save, "potion_desc_mapping",
+                       nlarn->potion_desc_mapping, PO_MAX, potion_t);
 
-    obj = cJSON_GetObjectItem(save, "potion_desc_mapping");
-    size = cJSON_GetArraySize(obj);
-    g_assert(size == PO_MAX);
-    for (int idx = 0; idx < size; idx++)
-        nlarn->potion_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+    LOAD_ENUM_MAPPING(save, "ring_material_mapping",
+                       nlarn->ring_material_mapping, RT_MAX, ring_t);
 
-    obj = cJSON_GetObjectItem(save, "ring_material_mapping");
-    size = cJSON_GetArraySize(obj);
-    g_assert(size == RT_MAX);
-    for (int idx = 0; idx < size; idx++)
-        nlarn->ring_material_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+    LOAD_ENUM_MAPPING(save, "scroll_desc_mapping",
+                       nlarn->scroll_desc_mapping, ST_MAX, scroll_t);
 
-    obj = cJSON_GetObjectItem(save, "scroll_desc_mapping");
-    size = cJSON_GetArraySize(obj);
-    g_assert(size == ST_MAX);
-    for (int idx = 0; idx < size; idx++)
-        nlarn->scroll_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
-
-    /* book_desc_mapping is a permutation of book_obfuscation indices, one
-       per spell_id; spell_id may grow when a new spell is added (e.g.
-       permanence). Saves from before only cover the spells that existed
-       then - fill any newly added spell with its own book_obfuscation
-       slot (identity mapping) so the permutation stays a bijection,
-       instead of asserting on a size that no longer matches. */
-    obj = cJSON_GetObjectItem(save, "book_desc_mapping");
-    size = cJSON_GetArraySize(obj);
-    for (int idx = 0; idx < size && idx < SP_MAX; idx++)
-        nlarn->book_desc_mapping[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
-    for (int idx = size; idx < SP_MAX; idx++)
-        nlarn->book_desc_mapping[idx] = idx;
+    LOAD_ENUM_MAPPING(save, "book_desc_mapping",
+                       nlarn->book_desc_mapping, SP_MAX, spell_id);
 
     obj = cJSON_GetObjectItem(save, "monster_genocided");
-    size = cJSON_GetArraySize(obj);
-    g_assert(size == MT_MAX);
-    for (int idx = 0; idx < size; idx++)
-        nlarn->monster_genocided[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
+    cJSON_ArrayForEach(elem, obj)
+        nlarn->monster_genocided[monster_t_value(elem->valuestring)] = true;
 
 
     /* restore effects (have to come first) */
@@ -767,7 +779,7 @@ static bool game_load()
 
     /* restore maps */
     obj = cJSON_GetObjectItem(save, "maps");
-    size = cJSON_GetArraySize(obj);
+    int size = cJSON_GetArraySize(obj);
     g_assert(size == MAP_MAX);
     for (int idx = 0; idx < size; idx++)
         nlarn->maps[idx] = map_deserialize(cJSON_GetArrayItem(obj, idx));
