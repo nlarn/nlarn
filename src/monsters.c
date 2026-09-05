@@ -1195,12 +1195,7 @@ void monster_deserialize(cJSON *mser, game *g)
     if ((obj = cJSON_GetObjectItem(mser, "number")))
         m->number = obj->valueint;
 
-    if ((obj = cJSON_GetObjectItem(mser, "visrange")))
-        m->visrange = obj->valueint;
-    else
-        // TODO: fallback for older saves, can be removed when updating
-        // SAVEFILE_VERSION > 29
-        m->visrange = 5;
+    m->visrange = cJSON_GetObjectItem(mser, "visrange")->valueint;
 
     if ((obj = cJSON_GetObjectItem(mser, "leader")))
     {
