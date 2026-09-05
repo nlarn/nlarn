@@ -421,6 +421,12 @@ static void mainloop()
                            stop auto travel. */
                         pos = pos_invalid;
                     }
+                    else
+                    {
+                        /* make this step visible before taking the next one */
+                        display_paint_screen(nlarn->p);
+                        display_nap(30);
+                    }
                 }
                 else
                 {
@@ -1179,6 +1185,12 @@ static void mainloop()
                      || (!adj_corr && adjacent_corridor(nlarn->p->pos, run_cmd)))
             {
                 run_cmd = 0;
+            }
+            else
+            {
+                /* make this step visible before taking the next one */
+                display_paint_screen(nlarn->p);
+                display_nap(30);
             }
         }
     }

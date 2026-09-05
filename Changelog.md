@@ -63,6 +63,7 @@
 * Stack identical items after identification
 * Regard wisdom when increasing or decreasing a random stat
 * Take player's position into account when generating paths for friendlies
+* Display the screen after each automativ movement step
 * Don't show projectiles outside player's FOV
 
 
