@@ -347,9 +347,9 @@ score_t *score_new(game *g, player_cod cod, int cause)
     return score;
 }
 
-GList *score_add(game *g, score_t *score)
+GList *score_add(score_t *score)
 {
-    g_assert (g != NULL && score != NULL);
+    g_assert (score != NULL);
 
     GList *gs = scores_load();
 

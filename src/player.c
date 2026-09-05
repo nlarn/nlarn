@@ -1240,7 +1240,7 @@ void player_die(player *p, player_cod cause_type, guint cause)
         flushinp();
 
         score_t *score = score_new(nlarn, cause_type, cause);
-        GList *scores = score_add(nlarn, score);
+        GList *scores = score_add(score);
 
         /* create a description of the player's achievements */
         gchar *text = memorial_create(p, score, scores);

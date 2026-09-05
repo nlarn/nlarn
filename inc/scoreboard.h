@@ -54,7 +54,7 @@ GList *scores_load();
 
 score_t *score_new(game *g, player_cod cod, int cause);
 
-GList *score_add(game *g, score_t *score);
+GList *score_add(score_t *score);
 
 char *score_death_description(score_t *score, int verbose);
 
