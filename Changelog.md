@@ -1,6 +1,6 @@
 # Changelog
 
-## Release 0.8.0 (unrelease)
+## Release 0.8.0 (2026-09-05)
 
 ### Changes
 
@@ -9,7 +9,7 @@
   maintain distance to the player while a ranged weapon is available
 * Implement allied monsters: finally a summoned demon will fight opponents
 * Town folks can now attack monsters lured into town
-* Town folk will pick up weapons dropped by the play to fight monsters and
+* Town folk will pick up weapons dropped by the player to fight monsters and
   return them once the danger is over
 * Hostile monster will now attack the player's friends (i.e. charmed or
   summoned monsters and townsfolk)
@@ -23,13 +23,18 @@
 * Redesign "Drain Life": affects multiple monsters in range and is
   backed by godly goodwill
 * Modify Sonic Spear damage and take enemy's size into account
-* Monsters that interfere with an action are highlighted
+* Add the spell "permanence": permanently bind a known spell to a piece
+  of armour, at the cost of one level of the caster's own knowledge of it
+* Removed the cloak of invisibility and the boots of speed; the same
+  effects can now be created on any armour with the permanence spell
+* Monsters that interfere with an action are highlighted, i.e. when
+  automatic movement stops, the monster that came into sight blinks
+* Disable auto-pickup when under attack or hostiles are in sight
 * Zombies can now cause sickness
 * Add acid resistance to some monsters
 * Turn the gelatinous cube into a passive monster
 * Add orcish bows and arrows, slightly less powerfull than their
   non-orcish counterparts
-* Disable auto-pickup when under attack or hostiles are in sight
 * Adapt how statues react when being hit to the original Larn
 * Mouse movement and firing without keyboard interaction
 * Spell selection when right-clicking on the player
@@ -39,10 +44,6 @@
 * Scrollable windows can be scrolled with the mouse wheel or by clicking
   the arrows
 * Allow dragging windows with the mouse
-* Add the spell "permanence": permanently bind a known spell to a piece
-  of armour, at the cost of one level of the caster's own knowledge of it
-* Removed the cloak of invisibility and the boots of speed; the same
-  effects can now be created on any armour with the permanence spell
 
 ### Balancing
 
