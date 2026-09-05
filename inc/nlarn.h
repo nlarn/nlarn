@@ -26,7 +26,7 @@
 #define PACKAGE "nlarn"
 #define VERSION_MAJOR 0 /* this is the present version # of the program */
 #define VERSION_MINOR 8
-#define VERSION_PATCH 0
+#define VERSION_PATCH 1
 
 /* this allows to add the id of the current commit to the version information */
 #ifndef GITREV

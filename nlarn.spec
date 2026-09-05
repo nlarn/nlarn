@@ -1,5 +1,5 @@
 Name:    nlarn
-Version: 0.8
+Version: 0.8.1
 Release: 1
 Summary: A remake of the roguelike game Larn
 Group:   Amusements/Games
@@ -35,6 +35,8 @@ cp -va lib/locale %{buildroot}%{_datadir}/
 %doc LICENSE README.md Changelog.md lib/maze_doc.txt
 
 %changelog
+* Sat Sep 05 2026 Joachim de Groot <jdegroot@web.de>
+  - updated for version 0.8.1
 * Sun Jun 28 2026 Joachim de Groot <jdegroot@web.de>
   - updated for version 0.8
 * Sat Jun 27 2026 Joachim de Groot <jdegroot@web.de>

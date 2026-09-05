@@ -1,5 +1,12 @@
 # Changelog
 
+## Release 0.8.1 (unreleased)
+
+### Changes
+
+### Fixes
+
+
 ## Release 0.8.0 (2026-09-05)
 
 ### Changes
