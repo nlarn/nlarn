@@ -1388,7 +1388,7 @@ static bool spell_make_wall(spell *s __attribute__((unused)), player *p)
 
 static bool spell_drain_life(spell *s __attribute__((unused)), struct player *p)
 {
-    guint amount;
+    int amount;
 
     /* Calculate range based on wisdom: WIS 12 -> 1, WIS 14 -> 2, WIS 16 -> 3, etc. */
     int range = max(1, (player_get_wis(p) - 12) / 2 + 1);
