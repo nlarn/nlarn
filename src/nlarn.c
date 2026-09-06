@@ -92,6 +92,7 @@ static bool adjacent_corridor(position pos, int move);
 
 #ifdef __unix
 static void nlarn_signal_handler(int signo);
+static void nlarn_crash_handler(int signo);
 # ifdef HAVE_LIBUNWIND
 static void print_libunwind_backtrace(void);
 # endif
@@ -340,11 +341,21 @@ static void nlarn_init(int argc, char *argv[])
 
     /* set the console shutdown handler */
 #ifdef __unix
-    signal(SIGTERM, nlarn_signal_handler);
-    signal(SIGHUP, nlarn_signal_handler);
-# ifdef HAVE_LIBUNWIND
-    signal(SIGSEGV, nlarn_signal_handler);
-# endif
+    struct sigaction sa = { .sa_handler = nlarn_signal_handler };
+    sigemptyset(&sa.sa_mask);
+    /* block a second SIGTERM/SIGHUP from re-entering the handler while
+       it is already saving the game */
+    sigaddset(&sa.sa_mask, SIGTERM);
+    sigaddset(&sa.sa_mask, SIGHUP);
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGHUP, &sa, NULL);
+
+    /* SIGSEGV gets its own minimal handler: memory may already be
+       corrupted at this point, so it must not attempt anything beyond
+       printing a backtrace and exiting. */
+    struct sigaction sa_crash = { .sa_handler = nlarn_crash_handler };
+    sigemptyset(&sa_crash.sa_mask);
+    sigaction(SIGSEGV, &sa_crash, NULL);
 #endif
 
     /* set custom assertion handler to print backtrace on assertion failure */
@@ -1462,16 +1473,29 @@ static void print_libunwind_backtrace(void)
 }
 # endif
 
+static void nlarn_crash_handler(int signo __attribute__((unused)))
+{
+    /* SIGSEGV: memory may already be corrupted, so keep this to the
+       bare minimum rather than risk a hang or a second crash inside
+       game_save()'s allocations and file I/O. Avoid malloc() here too,
+       hence backtrace_symbols_fd() rather than backtrace_symbols(). */
+# ifdef HAVE_LIBUNWIND
+    print_libunwind_backtrace();
+# else
+    g_printerr("\n*** Backtrace ***\n");
+
+    void *callstack[128];
+    int frames = backtrace(callstack, 128);
+    backtrace_symbols_fd(callstack, frames, STDERR_FILENO);
+# endif
+    fflush(NULL);
+    _exit(EXIT_FAILURE);
+}
+
 static void nlarn_signal_handler(int signo)
 {
     /* restore the display down before emitting messages */
     display_shutdown();
-
-#ifdef HAVE_LIBUNWIND
-    if (signo == SIGSEGV) {
-        print_libunwind_backtrace();
-    }
-#endif
 
     /* attempt to save and clear the game, when initialized */
     if (nlarn)
@@ -1486,7 +1510,8 @@ static void nlarn_signal_handler(int signo)
         nlarn = game_destroy(nlarn);
     }
 
-    exit(EXIT_SUCCESS);
+    fflush(NULL);
+    _exit(EXIT_SUCCESS);
 }
 #endif
 
