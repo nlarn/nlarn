@@ -1,0 +1,36 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	$(MAKE) config=release SETGID=Y
+
+override_dh_auto_test:
+	# no automated test suite
+
+override_dh_auto_install:
+	# data files go to /usr/share/nlarn: that path is compiled into the
+	# binary as the system-wide fallback for the game's "lib" directory
+	# (see default_lib_dir in src/nlarn.c), so it must match exactly.
+	install -D -m 0755 nlarn debian/nlarn/usr/games/nlarn
+	install -D -m 0644 lib/fortune debian/nlarn/usr/share/nlarn/fortune
+	install -D -m 0644 lib/maze debian/nlarn/usr/share/nlarn/maze
+	install -D -m 0644 lib/nlarn.hlp debian/nlarn/usr/share/nlarn/nlarn.hlp
+	install -D -m 0644 lib/nlarn.msg debian/nlarn/usr/share/nlarn/nlarn.msg
+	mkdir -p debian/nlarn/usr/share/nlarn/locale
+	cp -a lib/locale/* debian/nlarn/usr/share/nlarn/locale/
+	# /var/games/nlarn/highscores itself is created by postinst rather
+	# than shipped, so reinstalls/upgrades never clobber existing scores.
+	mkdir -p debian/nlarn/var/games/nlarn
+
+override_dh_auto_clean:
+	dh_auto_clean
+	$(MAKE) clean
+
+override_dh_fixperms:
+	dh_fixperms -Xusr/games/nlarn
+	chown root:games debian/nlarn/usr/games/nlarn
+	chmod 2755 debian/nlarn/usr/games/nlarn

@@ -39,6 +39,26 @@ jobs:
         with:
           files: nlarn-*.tar.gz
 
+  build-deb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Update apt cache
+        run: sudo apt update
+      - name: Install packaging dependencies
+        run: sudo apt install build-essential debhelper devscripts gettext libglib2.0-dev libncurses-dev libunwind-dev pandoc zlib1g-dev
+      - name: Set package version
+        run: dch --newversion "$(make -s version)-1" --distribution unstable "Automated build."
+      - name: Build .deb
+        run: dpkg-buildpackage -us -uc -b
+      - name: Move package
+        run: mv ../nlarn_*.deb .
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        if: github.ref_type == 'tag'
+        with:
+          files: nlarn_*.deb
+
   build-windows:
     runs-on: windows-latest
     strategy:

@@ -1,0 +1,26 @@
+Source: nlarn
+Section: games
+Priority: optional
+Maintainer: Joachim de Groot <jdegroot@web.de>
+Build-Depends: debhelper-compat (= 13),
+               gettext,
+               libglib2.0-dev,
+               libncurses-dev,
+               libunwind-dev,
+               pandoc,
+               zlib1g-dev
+Standards-Version: 4.6.2
+Homepage: https://nlarn.github.io/
+
+Package: nlarn
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: text-based dungeon exploration game
+ NLarn is a single-player dungeon exploration game, patterned after
+ the games Rogue, Hack and Omega, set in a fantasy world where the
+ player has to venture into the caverns of Larn to find a cure for
+ their dying daughter.
+ .
+ It features a large variety of monsters, spells and magic items,
+ a fully explorable town with shops, and a persistent local
+ highscore list.

@@ -11,7 +11,7 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-.PHONY: help clean dist pot update-po
+.PHONY: help clean dist pot update-po version
 
 ifndef config
   config=debug
@@ -293,6 +293,9 @@ $(OSXIMAGE): $(MAINFILES)
 		dmgroot/
 
 	rm -rf dmgroot
+
+version:
+	@echo $(VERSION)
 
 clean:
 	@echo Cleaning nlarn

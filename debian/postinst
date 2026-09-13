@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    configure)
+        chown root:games /var/games/nlarn
+        chmod 2775 /var/games/nlarn
+
+        if [ ! -e /var/games/nlarn/highscores ]; then
+            touch /var/games/nlarn/highscores
+        fi
+        chown root:games /var/games/nlarn/highscores
+        chmod 0664 /var/games/nlarn/highscores
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
