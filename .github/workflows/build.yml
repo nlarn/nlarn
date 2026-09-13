@@ -59,6 +59,30 @@ jobs:
         with:
           files: nlarn_*.deb
 
+  build-rpm:
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install packaging dependencies
+        run: dnf install -y rpm-build gcc gettext glib2-devel ncurses-devel zlib-devel git make
+      - name: Mark checkout as safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Build .rpm
+        run: |
+          VERSION=$(make -s version | tr '-' '.')
+          mkdir -p rpmbuild/{SOURCES,SPECS,BUILD,RPMS,SRPMS,BUILDROOT}
+          sed "s/^Version:.*/Version: $VERSION/" nlarn.spec > rpmbuild/SPECS/nlarn.spec
+          git archive --prefix nlarn-$VERSION/ --format=tar HEAD | gzip > rpmbuild/SOURCES/nlarn-$VERSION.tar.gz
+          rpmbuild --define "_topdir $PWD/rpmbuild" -bb rpmbuild/SPECS/nlarn.spec
+      - name: Move package
+        run: mv rpmbuild/RPMS/*/nlarn-[0-9]*.rpm .
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        if: github.ref_type == 'tag'
+        with:
+          files: nlarn-[0-9]*.rpm
+
   build-windows:
     runs-on: windows-latest
     strategy:
