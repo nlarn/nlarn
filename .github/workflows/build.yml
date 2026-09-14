@@ -41,6 +41,7 @@ jobs:
 
   build-deb:
     runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
     steps:
       - uses: actions/checkout@v7
       - name: Update apt cache
@@ -55,13 +56,13 @@ jobs:
         run: mv ../nlarn_*.deb .
       - name: Release
         uses: softprops/action-gh-release@v3
-        if: github.ref_type == 'tag'
         with:
           files: nlarn_*.deb
 
   build-rpm:
     runs-on: ubuntu-latest
     container: fedora:latest
+    if: github.ref_type == 'tag'
     steps:
       # git must be present before checking out, otherwise actions/checkout
       # silently falls back to downloading a plain tarball via the GitHub
@@ -80,7 +81,6 @@ jobs:
         run: mv rpmbuild/RPMS/*/nlarn-[0-9]*.rpm .
       - name: Release
         uses: softprops/action-gh-release@v3
-        if: github.ref_type == 'tag'
         with:
           files: nlarn-[0-9]*.rpm
 
