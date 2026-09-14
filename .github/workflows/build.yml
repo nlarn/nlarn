@@ -63,11 +63,12 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:latest
     steps:
-      - uses: actions/checkout@v7
+      # git must be present before checking out, otherwise actions/checkout
+      # silently falls back to downloading a plain tarball via the GitHub
+      # REST API, which leaves the workspace without a .git directory.
       - name: Install packaging dependencies
         run: dnf install -y rpm-build gcc gettext glib2-devel ncurses-devel zlib-devel git make
-      - name: Mark checkout as safe for git
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - uses: actions/checkout@v7
       - name: Build .rpm
         run: |
           VERSION=$(make -s version | tr '-' '.')
