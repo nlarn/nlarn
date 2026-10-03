@@ -4203,8 +4203,11 @@ void display_change_font()
         max(DEFAULT_COLS, PDC_get_columns())
     );
 
-    /* redraw the screen as all dimensions have changed */
+    /* redraw the screen as all dimensions have changed; stdscr is not a
+       panel, so it has to be refreshed explicitly to reach the window */
+    clear();
     display_paint_screen(nlarn->p);
+    wrefresh(stdscr);
 }
 #endif
 

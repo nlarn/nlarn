@@ -16,6 +16,7 @@
 * Speed up pathfinding by 2.4x
 * Cache computed paths during auto-travel
 * Cache computed paths for monster path-finding
+* Redraw the entire screen after a font size change
 
 ## Release 0.8.0 (2026-09-05)
 
