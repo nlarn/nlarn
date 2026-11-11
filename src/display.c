@@ -1942,86 +1942,103 @@ void display_config_autopickup(bool settings[IT_MAX])
     display_window_destroy(cwin);
 }
 
-spell *display_spell_select(const char *title, player *p, spell_t type,
-                            int (*filter)(spell *))
+/*
+ * Generic selection list without category headers
+ *
+ * display_list_select() shows the entries of a pointer array in a
+ * scrollable window and returns the entry chosen by the player. It provides
+ * keyboard and mouse navigation, the scroll bar, window dragging and,
+ * optionally, a description pop-up below the list and type-ahead selection.
+ * Everything specific to the kind of entry on offer is supplied by the
+ * caller through a display_list_ops structure.
+ */
+
+typedef struct {
+    /* Returns the newly allocated text of the list row for an entry. The
+       text is padded to the inner width of the window. Mandatory. */
+    gchar *(*row)(gpointer entry);
+
+    /* Title and newly allocated body of the description pop-up shown below
+       the list for the highlighted entry. Set desc to NULL to show no
+       pop-up; desc_title may be NULL for an untitled pop-up. */
+    const char *(*desc_title)(gpointer entry);
+    gchar *(*desc)(gpointer entry);
+
+    /* Returns the string type-ahead keys are matched against as a prefix
+       (lower case letters only). Set to NULL to disable type-ahead. */
+    const char *(*code)(gpointer entry);
+
+    /* Called when an entry is activated. "immediate" is true when the
+       preselected first entry is activated by the very first input, i.e.
+       possibly by accident. Returning false closes the list without a
+       selection. Set to NULL to accept every activation. */
+    bool (*confirm)(gpointer entry, bool immediate);
+} display_list_ops;
+
+/* Let the player choose one of the entries.
+ *
+ *   title     window title
+ *   entries   the entries on offer; the array is not modified
+ *   width     outer width of the list window
+ *   code_len  maximum number of type-ahead keys (0 when ops->code is NULL)
+ *   ops       entry specific callbacks, see above
+ *
+ * Returns the selected entry, or NULL if the list is empty or the player
+ * left the list without choosing. */
+static gpointer display_list_select(const char *title, GPtrArray *entries,
+                                    guint width, guint code_len,
+                                    const display_list_ops *ops)
 {
     display_window *ipop = NULL;
     int key; /* keyboard input */
     int RUN = true;
     int autoscroll = 0; /* scroll-arrow auto-repeat state */
 
-    /* currently displayed spell; return value */
-    spell *sp;
+    /* currently highlighted entry; return value */
+    gpointer entry;
 
-    /* curses attributes */
-    attr_t attrs;
+    g_assert(entries != NULL && ops != NULL && ops->row != NULL);
 
-    g_assert(p != NULL);
-
-    /* buffer for spell code type ahead */
-    char *code_buf = g_malloc0(sizeof(char) * 4);
-
-    /* sort spell list  */
-    g_ptr_array_sort(p->known_spells, &spell_sort);
-
-    /* Build the list of spells to offer, optionally filtered by spell
-       type. The array holds borrowed pointers into p->known_spells and
-       is freed (without freeing the spells) before returning. Not
-       named "spells" to avoid shadowing the global spell data table
-       used by the spell_type() macro. */
-    GPtrArray *slist = g_ptr_array_new();
-    for (guint i = 0; i < p->known_spells->len; i++)
-    {
-        spell *s = g_ptr_array_index(p->known_spells, i);
-        if ((type == SC_MAX || spell_type(s) == type) && (!filter || filter(s)))
-            g_ptr_array_add(slist, s);
-    }
-
-    /* nothing to offer for the requested type */
-    if (slist->len == 0)
-    {
-        /* slist has no element free func, so freeing the container
-           (TRUE) does not touch the borrowed spell pointers */
-        g_ptr_array_free(slist, true);
-        g_free(code_buf);
+    /* nothing to offer */
+    if (entries->len == 0)
         return NULL;
-    }
 
-    /* set height according to spell count */
-    guint height = min((LINES - 7), (slist->len + 2));
+    /* type-ahead is only available if the entries provide a code */
+    if (ops->code == NULL)
+        code_len = 0;
 
-    guint width = 46;
+    /* buffer for type-ahead keys */
+    char *code_buf = g_malloc0(code_len + 1);
+
+    /* set height according to entry count */
+    guint height = min((LINES - 7), (entries->len + 2));
+
     guint starty = (LINES - 3 - height) / 2;
     guint startx = (min(MAP_MAX_X, COLS) - width) / 2;
 
-    display_window *swin = display_window_new(startx, starty, width, height, title);
+    display_window *lwin = display_window_new(startx, starty, width, height, title);
 
-    /* scroll state: no headers in the spell list */
+    /* scroll state: no headers in this kind of list */
     list_scroll_state s;
-    lss_init(&s, slist->len, height - 2);
+    lss_init(&s, entries->len, height - 2);
 
     int prev_key = 0;
     do
     {
-        /* display spells */
+        /* display entries */
         for (guint pos = 1; pos <= s.maxvis; pos++)
         {
-            sp = g_ptr_array_index(slist, pos + s.offset - 1);
+            entry = g_ptr_array_index(entries, pos + s.offset - 1);
 
-            if (s.curr == pos) attrs = CP_UI_FG_REVERSE;
-            else attrs = CP_UI_FG;
-
-            const char *sp_name = spell_name(sp);
-            mvwaprintw(swin->window, pos, 1, attrs,
-                      " %3s - %-*s (Level %d) %2d ",
-                      spell_code(sp),
-                      utf8_pad(sp_name, 23), sp_name,
-                      spell_level(sp),
-                      sp->knowledge);
+            gchar *row = ops->row(entry);
+            mvwaprintw(lwin->window, pos, 1,
+                      (s.curr == pos) ? CP_UI_FG_REVERSE : CP_UI_FG,
+                      "%-*s", utf8_pad(row, width - 2), row);
+            g_free(row);
         }
 
         /* display up / down markers */
-        display_window_scrollbar(swin, s.offset, s.maxvis, slist->len);
+        display_window_scrollbar(lwin, s.offset, s.maxvis, entries->len);
 
         /* construct the window caption: display type ahead keys */
         gchar *caption = g_strdup_printf("%s%s%s",
@@ -2029,25 +2046,28 @@ spell *display_spell_select(const char *title, player *p, spell_t type,
                 code_buf,
                 (strlen(code_buf) ? "]" : ""));
 
-        display_window_update_caption(swin, caption);
+        display_window_update_caption(lwin, caption);
 
-        /* store currently highlighted spell */
-        sp = g_ptr_array_index(slist, s.curr + s.offset - 1);
+        /* store currently highlighted entry */
+        entry = g_ptr_array_index(entries, s.curr + s.offset - 1);
 
-        /* refresh the spell description pop-up */
-        if (ipop != NULL)
-            display_window_destroy(ipop);
+        /* refresh the description pop-up */
+        if (ops->desc != NULL)
+        {
+            if (ipop != NULL)
+                display_window_destroy(ipop);
 
-        gchar *spdesc = spell_desc_by_id(sp->id);;
-        ipop = display_popup(swin->x1, swin->y1 + swin->height, width,
-                spell_name(sp), spdesc, 0);
-        g_free(spdesc);
+            gchar *desc = ops->desc(entry);
+            ipop = display_popup(lwin->x1, lwin->y1 + lwin->height, width,
+                    ops->desc_title ? ops->desc_title(entry) : NULL, desc, 0);
+            g_free(desc);
+        }
 
-        switch (key = display_scroll_getch(swin, &autoscroll))
+        switch (key = display_scroll_getch(lwin, &autoscroll))
         {
         case KEY_ESC:
             RUN = false;
-            sp = NULL;
+            entry = NULL;
             break;
 
         case KEY_LF:
@@ -2057,17 +2077,13 @@ spell *display_spell_select(const char *title, player *p, spell_t type,
 #endif
         case KEY_ENTER:
         case KEY_SPC:
-activate_spell:
-            // It is much too easy to accidentally cast alter reality,
-            // simply by pressing m + Enter. If the first key press in
-            // the menu confirms this auto selected first spell, prompt.
-            if (s.curr == 1 && prev_key == 0 && sp->id == SP_ALT)
-            {
-                char prompt[60];
-                g_snprintf(prompt, 60, _("Really cast %s?"), spell_name(sp));
-                if (!display_get_yesno(prompt, NULL, NULL, NULL))
-                    sp = NULL;
-            }
+activate_entry:
+            /* give the caller the chance to veto the selection, e.g. when
+               the preselected entry was confirmed by the first key press */
+            if (ops->confirm != NULL
+                    && !ops->confirm(entry, s.curr == 1 && prev_key == 0))
+                entry = NULL;
+
             RUN = false;
             break;
 
@@ -2085,38 +2101,37 @@ activate_spell:
             break;
 
         case KEY_MOUSE:
-            /* A left click on a spell row focuses it; clicking the
-               spell that is already focused activates it exactly as
-               pressing Enter does. Spell rows are drawn at window rows
-               1 .. maxvis. */
+            /* A left click on a row focuses it; clicking the entry that
+               is already focused activates it exactly as pressing Enter
+               does. Rows are drawn at window rows 1 .. maxvis. */
             if (display_mouse_event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
             {
-                const int row = display_mouse_event.y - (int)swin->y1;
-                const int col = display_mouse_event.x - (int)swin->x1;
+                const int row = display_mouse_event.y - (int)lwin->y1;
+                const int col = display_mouse_event.x - (int)lwin->x1;
 
                 if (row >= 1 && row <= (int)s.maxvis
-                        && col >= 1 && col < (int)swin->width - 1
-                        && (guint)(row + s.offset - 1) < slist->len)
+                        && col >= 1 && col < (int)lwin->width - 1
+                        && (guint)(row + s.offset - 1) < entries->len)
                 {
                     if (s.curr == (guint)row)
                         /* already focused: activate it like Enter */
-                        goto activate_spell;
+                        goto activate_entry;
 
-                    /* focus the clicked spell */
+                    /* focus the clicked entry */
                     s.curr = (guint)row;
                     code_buf[0] = '\0';
                     break;
                 }
             }
 
-            /* not on a spell row: let the window handle the event, so a
-               click on the title bar still drags the window */
-            display_window_move(swin, key);
+            /* not on a row: let the window handle the event, so a click
+               on the title bar still drags the window */
+            display_window_move(lwin, key);
             break;
 
         default:
             /* check if the key is used for window placement */
-            if (display_window_move(swin, key))
+            if (display_window_move(lwin, key))
                 break;
 
             /* 'k' and 'j' redirect to mnemonics when a code is being typed */
@@ -2130,35 +2145,34 @@ activate_spell:
             }
 
 mnemonics:
-            /* add key to spell code buffer */
-            if ((key >= 'a') && (key <= 'z'))
+            /* add key to the type-ahead buffer */
+            if (code_len > 0 && (key >= 'a') && (key <= 'z'))
             {
-                if (strlen(code_buf) < 3)
+                if (strlen(code_buf) < code_len)
                 {
                     code_buf[strlen(code_buf)] = key;
+
                     /* search for match */
-
-                    for (guint pos = 1; pos <= slist->len; pos++)
+                    for (guint pos = 1; pos <= entries->len; pos++)
                     {
-                        sp = g_ptr_array_index(slist, pos - 1);
+                        entry = g_ptr_array_index(entries, pos - 1);
 
-                        if (g_str_has_prefix(spell_code(sp), code_buf)) {
-                            /* match found: jump to the spell */
+                        if (g_str_has_prefix(ops->code(entry), code_buf)) {
+                            /* match found: jump to the entry */
                             lss_scroll_to(&s, NULL, NULL, pos - 1);
                             break;
                         }
                     }
 
                     /* if no match has been found remove key from buffer */
-                    sp = g_ptr_array_index(slist, s.curr + s.offset - 1);
-                    if (!g_str_has_prefix(spell_code(sp), code_buf))
+                    entry = g_ptr_array_index(entries, s.curr + s.offset - 1);
+                    if (!g_str_has_prefix(ops->code(entry), code_buf))
                     {
                         code_buf[strlen(code_buf) - 1] = '\0';
 
                         if (!beep())
                             flash();
                     }
-
                 }
                 else
                 {
@@ -2174,10 +2188,96 @@ mnemonics:
     while (RUN);
 
     g_free(code_buf);
-    g_ptr_array_free(slist, true);
 
-    display_window_destroy(swin);
-    display_window_destroy(ipop);
+    display_window_destroy(lwin);
+    if (ipop != NULL)
+        display_window_destroy(ipop);
+
+    return entry;
+}
+
+/* display_list_select() callbacks for the spell list */
+
+static gchar *spell_list_row(gpointer entry)
+{
+    spell *sp = entry;
+    const char *sp_name = spell_name(sp);
+
+    return g_strdup_printf(" %3s - %-*s (Level %d) %2d ",
+                           spell_code(sp),
+                           utf8_pad(sp_name, 23), sp_name,
+                           spell_level(sp),
+                           sp->knowledge);
+}
+
+static const char *spell_list_desc_title(gpointer entry)
+{
+    return spell_name((spell *)entry);
+}
+
+static gchar *spell_list_desc(gpointer entry)
+{
+    return spell_desc_by_id(((spell *)entry)->id);
+}
+
+static const char *spell_list_code(gpointer entry)
+{
+    return spell_code((spell *)entry);
+}
+
+static bool spell_list_confirm(gpointer entry, bool immediate)
+{
+    spell *sp = entry;
+
+    // It is much too easy to accidentally cast alter reality,
+    // simply by pressing m + Enter. If the first key press in
+    // the menu confirms this auto selected first spell, prompt.
+    if (immediate && sp->id == SP_ALT)
+    {
+        char prompt[60];
+        g_snprintf(prompt, 60, _("Really cast %s?"), spell_name(sp));
+        return display_get_yesno(prompt, NULL, NULL, NULL);
+    }
+
+    return true;
+}
+
+spell *display_spell_select(const char *title, player *p, spell_t type,
+                            int (*filter)(spell *))
+{
+    static const display_list_ops spell_list_ops = {
+        .row        = spell_list_row,
+        .desc_title = spell_list_desc_title,
+        .desc       = spell_list_desc,
+        .code       = spell_list_code,
+        .confirm    = spell_list_confirm,
+    };
+
+    g_assert(p != NULL);
+
+    /* sort spell list  */
+    g_ptr_array_sort(p->known_spells, &spell_sort);
+
+    /* Build the list of spells to offer, optionally filtered by spell
+       type. The array holds borrowed pointers into p->known_spells and
+       is freed (without freeing the spells) before returning. Not
+       named "spells" to avoid shadowing the global spell data table
+       used by the spell_type() macro. */
+    GPtrArray *slist = g_ptr_array_new();
+    for (guint i = 0; i < p->known_spells->len; i++)
+    {
+        spell *s = g_ptr_array_index(p->known_spells, i);
+        if ((type == SC_MAX || spell_type(s) == type) && (!filter || filter(s)))
+            g_ptr_array_add(slist, s);
+    }
+
+    /* returns NULL if there is nothing to offer for the requested type;
+       the spell codes used for type-ahead are three letters long */
+    spell *sp = display_list_select(title, slist, 46, 3, &spell_list_ops);
+
+    /* slist has no element free func, so freeing the container
+       (TRUE) does not touch the borrowed spell pointers */
+    g_ptr_array_free(slist, true);
 
     return sp;
 }
