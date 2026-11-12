@@ -19,6 +19,7 @@
 * Cache computed paths for monster path-finding
 * Fix inventory list repositioning
 * Redraw the entire screen after a font size change
+* Two fixes to the genocide monster scroll 
 
 ## Release 0.8.0 (2026-09-05)
 

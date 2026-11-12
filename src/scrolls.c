@@ -569,7 +569,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
     }
 
     /* look for the monster id for the glyph entered */
-    for (monster_t id = 1; id < MT_MAX; id++)
+    for (monster_t id = 0; id < MT_MAX && found < G_N_ELEMENTS(candidates); id++)
     {
         if (monster_type_glyph(id) == glyph[0])
         {
@@ -577,9 +577,7 @@ static int scroll_genocide_monster(player *p, item *r_scroll)
             if (!monster_is_genocided(id))
             {
                 /* monster has not yet been genocided */
-                candidates[found] = id;
-                if (found++ == 10)
-                    break;
+                candidates[found++] = id;
             }
         }
     }
