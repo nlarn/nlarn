@@ -583,7 +583,9 @@ void display_paint_screen(player *p)
     guint y = LINES > 20 ? LINES - 20 : 0;
 
     /* storage for the game time of messages */
-    guint ttime[y];
+    /* at least one element: an array of zero length is not allowed, and
+       there are no message lines on a screen of 20 lines or less */
+    guint ttime[max(y, 1)];
 
     /* hold original length of text */
     guint x = 1;
@@ -625,7 +627,10 @@ void display_paint_screen(player *p)
 
     /* ensure consistent colours for messages spanning multiple lines */
     attr_t currattr = COLOURLESS;
-    for (y = 20, i = 0; (y < (unsigned)LINES) && (i < text->len); i++, y++)
+    /* there is no text at all as long as nothing has been logged */
+    for (y = 20, i = 0;
+            (text != NULL) && (y < (unsigned)LINES) && (i < text->len);
+            i++, y++)
     {
         /* default colour for the line */
         attr_t def_attrs = (i == 0 && ttime[i] > game_turn(nlarn) - 5)
@@ -642,7 +647,8 @@ void display_paint_screen(player *p)
         clrtoeol();
     }
 
-    text_destroy(text);
+    if (text != NULL)
+        text_destroy(text);
 
     display_draw();
 }
