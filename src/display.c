@@ -907,62 +907,72 @@ static void lss_recalc(list_scroll_state *s, inventory **inv,
                        int (*ifilter)(item *), guint len, guint max_height)
 {
     /* check for data size change */
-    if (s->len > len && (s->offset + s->maxvis > len))
+    if (s->len > len && len > 0)
     {
-        /* number of entries is smaller than before: update len (and maxvis,
-         * which depends on len) *before* calling find_last_page_offset, so
-         * that it computes the offset for the new, smaller list. */
+        /* The number of entries is smaller than before. Keep the selection
+         * on the same list position, so that after the removal of the
+         * selected item the item following it becomes selected (or the new
+         * last item, if the removed item was the last one). */
+        guint sel = min(s->curr + s->offset - 1, len - 1);
+
+        /* update len *before* calling find_last_page_offset, so that it
+         * computes the offset for the new, smaller list. */
         s->len = len;
 
-        guint vis_hdrs = count_headers_in_range(inv, ifilter,
-            s->offset, max_height - 2, false);
-        guint height = min((guint)max_height, len + vis_hdrs + 2);
-        s->maxvis = min(len + vis_hdrs, height - 2);
+        /* Only scroll back when the window has been scrolled further down
+         * than the last page of the smaller list needs, i.e. when it would
+         * be left underfilled. Otherwise the scroll position stays as it
+         * is, wherever in the list the item has been removed. */
+        guint last_offset = find_last_page_offset(s, inv, ifilter);
+        if (s->offset > last_offset)
+            s->offset = last_offset;
 
-        /* if on the last page, recalculate offset */
-        guint old_offset = s->offset;
-        s->offset = find_last_page_offset(s, inv, ifilter);
-
-        /* Keep the selection on the same item: if offset moved up by N,
-         * curr must move down by N (and vice versa) to compensate. Using
-         * signed arithmetic and clamping to [1, len] handles both
-         * directions and protects against curr underflowing to 0 or
-         * exceeding the list when the previously selected item itself was
-         * the one removed. */
-        gint new_curr = (gint)s->curr + ((gint)old_offset - (gint)s->offset);
-        if (new_curr < 1)
-            new_curr = 1;
-        if ((guint)new_curr > len)
-            new_curr = (gint)len;
-
-        s->curr = (guint)new_curr;
+        s->curr = sel - s->offset + 1;
     }
 
     s->len = len;
 
-    /* Determine whether the first category header must be dropped so that all
-     * items fit (only relevant at offset 0). */
     const guint target = max_height - 2;
-    bool suppress_first = lss_suppress_first_header(s, inv, ifilter, target);
+    guint vis_hdrs;
 
-    guint vis_hdrs = count_headers_in_range(inv, ifilter,
-        s->offset, max_height - 2, suppress_first);
-
-    guint height = min((guint)max_height,len + vis_hdrs + 2);
-
-    s->maxvis = min(len + vis_hdrs, height - 2);
-
-    /* Invariant: maxvis must not exceed the number of lines actually needed
-     * to display the items below the current offset plus their headers.
-     * maxvis is derived from the *total* list size, but when offset > 0 fewer
-     * items remain below it. Clamping maxvis (rather than pulling offset back)
-     * keeps the final items reachable even in heavily fragmented lists where
-     * the whole list never fits the window at once. */
+    for (;;)
     {
+        /* Determine whether the first category header must be dropped so
+         * that all items fit (only relevant at offset 0). */
+        bool suppress_first = lss_suppress_first_header(s, inv, ifilter, target);
+
+        vis_hdrs = count_headers_in_range(inv, ifilter,
+            s->offset, max_height - 2, suppress_first);
+
+        guint height = min((guint)max_height,len + vis_hdrs + 2);
+
+        s->maxvis = min(len + vis_hdrs, height - 2);
+
+        /* Invariant: maxvis must not exceed the number of lines actually
+         * needed to display the items below the current offset plus their
+         * headers. maxvis is derived from the *total* list size, but when
+         * offset > 0 fewer items remain below it. Clamping maxvis (rather
+         * than pulling offset back) keeps the final items reachable even in
+         * heavily fragmented lists where the whole list never fits the
+         * window at once. */
         guint items_below = len - s->offset;
         guint lines_needed = items_below + vis_hdrs;
         if (s->maxvis > lines_needed)
             s->maxvis = lines_needed;
+
+        /* The selected item may have dropped out of the window, e.g. when
+         * the removal of an item brought an additional category header into
+         * view. Scroll down line by line until it is visible again instead
+         * of moving the selection to a different item. */
+        if (s->curr > 1 && s->curr > s->maxvis - vis_hdrs
+                && s->offset + 1 < len)
+        {
+            s->offset++;
+            s->curr--;
+            continue;
+        }
+
+        break;
     }
 
     /* max_item_vis is updated after the render loop once shown_headers is
@@ -1095,6 +1105,23 @@ static void lss_page_down(list_scroll_state *s,
         }
 
         s->curr = s->len - s->offset;
+    } else {
+        /* The new offset may lie beyond the start of the last page without
+         * the selection running off the end of the list. This would leave
+         * the bottom of the window empty, hence snap back to the last page
+         * and keep the selection on the same item. */
+        guint last_offset;
+
+        if (inv != NULL) {
+            last_offset = find_last_page_offset(s, inv, ifilter);
+        } else {
+            last_offset = (s->len > s->max_item_vis) ? s->len - s->max_item_vis : 0;
+        }
+
+        if (s->offset > last_offset) {
+            s->curr  += s->offset - last_offset;
+            s->offset = last_offset;
+        }
     }
 }
 
