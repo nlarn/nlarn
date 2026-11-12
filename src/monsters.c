@@ -1956,6 +1956,26 @@ void monster_polymorph(monster *m, int max_level)
 {
     g_assert (m != NULL);
 
+    /* Collect the monster types the monster may turn into: every type up
+       to the demon lords which has not been genocided and does not exceed
+       the level limit. Picking one of these, instead of rolling the dice
+       until a suitable type shows up, terminates even if there is none. */
+    monster_t candidates[MT_DEMON_PRINCE];
+    guint ncandidates = 0;
+
+    for (monster_t type = 0; type < MT_DEMON_PRINCE; type++)
+    {
+        if (!monster_is_genocided(type)
+                && monster_data[type].level <= max_level)
+        {
+            candidates[ncandidates++] = type;
+        }
+    }
+
+    /* nothing to turn into: the monster remains what it is */
+    if (ncandidates == 0)
+        return;
+
     /* make sure mimics never leave the mimicked item behind */
     if (monster_flags(m, MIMIC) && inv_length(m->inv) > 0)
     {
@@ -1963,12 +1983,7 @@ void monster_polymorph(monster *m, int max_level)
     }
 
     const map_element_t old_elem = monster_map_element(m);
-    do
-    {
-        m->type = rand_1n(MT_DEMON_PRINCE);
-    }
-    while (monster_is_genocided(m->type)
-           || monster_data[m->type].level > max_level);
+    m->type = candidates[rand_0n(ncandidates)];
 
     /* if the new monster can't survive in this terrain, kill it */
     const map_element_t new_elem = monster_map_element(m);
