@@ -74,7 +74,16 @@ void sphere_deserialize(const cJSON *serialized, const game *g)
 {
     sphere *s = g_malloc0(sizeof(sphere));
 
-    s->dir = cJSON_GetObjectItem(serialized, "dir")->valueint;
+    /* The sphere is moved into this direction; pos_move() only accepts
+       real directions. A sphere never stays where it is, see sphere_new(). */
+    const cJSON *dir = cJSON_GetObjectItem(serialized, "dir");
+    if (!cJSON_IsNumber(dir) || dir->valueint <= GD_NONE
+            || dir->valueint >= GD_MAX || dir->valueint == GD_CURR)
+    {
+        game_load_abort("the direction of a sphere is not valid.");
+    }
+
+    s->dir = dir->valueint;
     s->lifetime = cJSON_GetObjectItem(serialized, "lifetime")->valueint;
     s->pos = game_load_position(cJSON_GetObjectItem(serialized, "pos"),
                                 "position of a sphere");
