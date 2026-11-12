@@ -1790,6 +1790,7 @@ static void place_special_item(map *m, position npos)
     case MAP_MAX - 1: /* potion of cure dianthroritis */
         inv_add(&tile->ilist, item_new(IT_POTION, PO_CURE_DIANTHR));
         monster_new(MT_DEMON_PRINCE, npos, NULL);
+        break;
 
     default:
         /* plain level, add neither monster nor item */
