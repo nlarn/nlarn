@@ -22,6 +22,7 @@
 * Cache computed paths for monster path-finding
 * Fix inventory list repositioning
 * Two fixes to the number input
+* Fix weapons not being generated as chest content
 * Redraw the entire screen after a font size change
 * Two fixes to the genocide monster scroll 
 * Validate stat preset configuration from the config file

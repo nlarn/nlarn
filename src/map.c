@@ -1392,9 +1392,10 @@ static void map_fill_with_objects(map *m)
             item_t it;
 
             /* prevent containers and unique items inside the container */
+            /* rand_1n(IT_MAX) returns any item type: IT_NONE < type < IT_MAX */
             do
             {
-                it = rand_1n(IT_MAX - 1);
+                it = rand_1n(IT_MAX);
             }
             while (!item_is_desirable(it));
 
@@ -1890,8 +1891,9 @@ static void map_tile_from_char(map *m, position pos, int* num_specials, char c)
     case 'o': /* random item */
         {
             item_t it;
+            /* rand_1n(IT_MAX) returns any item type: IT_NONE < type < IT_MAX */
             do {
-                it = rand_1n(IT_MAX - 1);
+                it = rand_1n(IT_MAX);
             } while (it == IT_CONTAINER);
 
             inv_add(&tile->ilist, item_new_by_level(it, m->nlevel));
