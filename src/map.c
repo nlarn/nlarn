@@ -1311,7 +1311,7 @@ static int map_fill_with_stationary_objects(map *m)
     }
 
     /* up to three statues */
-    for (guint i = 0; i < rand_0n(3); i++)
+    for (guint i = 0, i_max = rand_0n(3); i < i_max; i++)
     {
         pos = map_find_space(m, LE_SOBJECT, false);
         if (!pos_valid(pos)) return false;
@@ -1319,7 +1319,7 @@ static int map_fill_with_stationary_objects(map *m)
     }
 
     /* up to three fountains */
-    for (guint i = 0; i < rand_0n(3); i++)
+    for (guint i = 0, i_max = rand_0n(3); i < i_max; i++)
     {
         pos = map_find_space(m, LE_SOBJECT, false);
         if (!pos_valid(pos)) return false;
@@ -1327,7 +1327,7 @@ static int map_fill_with_stationary_objects(map *m)
     }
 
     /* up to two thrones */
-    for (guint i = 0; i < rand_0n(2); i++)
+    for (guint i = 0, i_max = rand_0n(2); i < i_max; i++)
     {
         pos = map_find_space(m, LE_SOBJECT, false);
         if (!pos_valid(pos)) return false;
@@ -1335,7 +1335,7 @@ static int map_fill_with_stationary_objects(map *m)
     }
 
     /* up to two  mirrors */
-    for (guint i = 0; i < rand_0n(2); i++)
+    for (guint i = 0, i_max = rand_0n(2); i < i_max; i++)
     {
         pos = map_find_space(m, LE_SOBJECT, false);
         if (!pos_valid(pos)) return false;
@@ -1356,7 +1356,7 @@ static int map_fill_with_stationary_objects(map *m)
 static void map_fill_with_objects(map *m)
 {
     /* up to two pieces of armour */
-    for (guint i = 0; i <= rand_0n(2); i++)
+    for (guint i = 0, i_max = rand_0n(2); i <= i_max; i++)
     {
         map_item_add(m, item_new_by_level(IT_ARMOUR, m->nlevel));
     }
@@ -1364,30 +1364,30 @@ static void map_fill_with_objects(map *m)
     /* up to two amulets on levels > 5 */
     if (m->nlevel > 5)
     {
-        for (guint i = 0; i <= rand_0n(2); i++)
+        for (guint i = 0, i_max = rand_0n(2); i <= i_max; i++)
             map_item_add(m, item_new_by_level(IT_AMULET, m->nlevel));
     }
 
     /* up to two piles of ammunition */
-    for (guint i = 0; i <= rand_0n(2); i++)
+    for (guint i = 0, i_max = rand_0n(2); i <= i_max; i++)
     {
         map_item_add(m, item_new_by_level(IT_AMMO, m->nlevel));
     }
 
     /* up to three books */
-    for (guint i = 0; i <= rand_0n(3); i++)
+    for (guint i = 0, i_max = rand_0n(3); i <= i_max; i++)
     {
         map_item_add(m, item_new_by_level(IT_BOOK, m->nlevel));
     }
 
     /* up to two containers */
-    for (guint i = 1; i <= rand_0n(2); i++)
+    for (guint i = 1, i_max = rand_0n(2); i <= i_max; i++)
     {
         /* random container type */
         item *container = item_new(IT_CONTAINER, rand_1n(CT_MAX));
 
         /* up to 5 items inside the container */
-        for (guint j = 0; j < rand_0n(5); j++)
+        for (guint j = 0, j_max = rand_0n(5); j < j_max; j++)
         {
             item_t it;
 
@@ -1413,38 +1413,38 @@ static void map_fill_with_objects(map *m)
     }
 
     /* up to 10 piles of gold */
-    for (guint i = 0; i <= rand_0n(10); i++)
+    for (guint i = 0, i_max = rand_0n(10); i <= i_max; i++)
     {
         /* There is nothing like a newly minted pound. */
         map_item_add(m, item_new(IT_GOLD, rand_m_n(10, (m->nlevel + 1) * 15)));
     }
 
     /* up to three gems */
-    for (guint i = 0; i <= rand_0n(3); i++)
+    for (guint i = 0, i_max = rand_0n(3); i <= i_max; i++)
     {
         map_item_add(m, item_new_random(IT_GEM, false));
     }
 
     /* up to four potions */
-    for (guint i = 0; i <= rand_0n(4); i++)
+    for (guint i = 0, i_max = rand_0n(4); i <= i_max; i++)
     {
         map_item_add(m, item_new_by_level(IT_POTION, m->nlevel));
     }
 
     /* up to three scrolls */
-    for (guint i = 0; i <= rand_0n(3); i++)
+    for (guint i = 0, i_max = rand_0n(3); i <= i_max; i++)
     {
         map_item_add(m, item_new_by_level(IT_SCROLL, m->nlevel));
     }
 
     /* up to two rings */
-    for (guint i = 0; i <= rand_0n(2); i++)
+    for (guint i = 0, i_max = rand_0n(2); i <= i_max; i++)
     {
         map_item_add(m, item_new_by_level(IT_RING, m->nlevel));
     }
 
     /* up to two weapons */
-    for (guint i = 0; i <= rand_0n(2); i++)
+    for (guint i = 0, i_max = rand_0n(2); i <= i_max; i++)
     {
         map_item_add(m, item_new_by_level(IT_WEAPON, m->nlevel));
     }
@@ -1459,7 +1459,7 @@ static void map_fill_with_traps(map *m)
     bool trapdoor = (!is_caverns_bottom(m->nlevel)
             && !is_volcano_bottom(m->nlevel));
 
-    for (guint count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
+    for (guint count = 0, count_max = rand_0n((trapdoor ? 8 : 6)); count < count_max; count++)
     {
         position pos = map_find_space(m, LE_TRAP, false);
 

@@ -930,7 +930,7 @@ int player_throne_pillage(player *p)
 
     if (chance(2 * player_get_dex(p)))
     {
-        for (guint i = 0; i < rand_1n(4); i++)
+        for (guint i = 0, i_max = rand_1n(4); i < i_max; i++)
         {
             /* gems pop off the throne */
             inv_add(map_ilist_at(pmap, p->pos), item_new_random(IT_GEM, false));
