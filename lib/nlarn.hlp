@@ -110,6 +110,7 @@ When starting the game with the wizard mode command line option (`KEY`-w`end`), 
 `KEY`+`end`       teleport down one level
 `KEY`-`end`       teleport up one level
 `KEY`CTRL+T`end`  teleport within a level
+`KEY`CTRL+G`end`  create a monster of your choice
 `KEY`CTRL+X`end`  raise experience level
 `KEY`*`end`       add 1000 gp to bank account
 `KEY`&`end`       heal yourself

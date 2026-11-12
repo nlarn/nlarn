@@ -110,6 +110,7 @@ En démarrant le jeu avec l'option de ligne de commande du mode magicien (`KEY`-
 `KEY`+`end`       se téléporter un niveau plus bas
 `KEY`-`end`       se téléporter un niveau plus haut
 `KEY`CTRL+T`end`  se téléporter au sein d'un niveau
+`KEY`CTRL+G`end`  créer un monstre de ton choix
 `KEY`CTRL+X`end`  gagner un niveau d'expérience
 `KEY`*`end`       ajouter 1000 po au compte en banque
 `KEY`&`end`       se soigner

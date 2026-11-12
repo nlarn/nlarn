@@ -4171,6 +4171,11 @@ inline const char *monster_type_name_art(monster_t type, article_t article,
     return noun_phrase(_(monster_data[type].name), article, gcase, false, false);
 }
 
+inline int monster_type_level(monster_t type)
+{
+    return monster_data[type].level;
+}
+
 inline int monster_type_ac(monster_t type)
 {
     return monster_data[type].ac;

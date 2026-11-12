@@ -110,6 +110,7 @@ Wird das Spiel mit der Kommandozeilenoption für den Zauberermodus (`KEY`-w`end`
 `KEY`+`end`       eine Ebene nach unten teleportieren
 `KEY`-`end`       eine Ebene nach oben teleportieren
 `KEY`STRG+T`end`  innerhalb einer Ebene teleportieren
+`KEY`STRG+G`end`  ein Monster nach Wahl erschaffen
 `KEY`STRG+X`end`  die Erfahrungsstufe erhöhen
 `KEY`*`end`       dem Bankkonto 1000 Goldstücke gutschreiben
 `KEY`&`end`       dich selbst heilen

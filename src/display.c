@@ -2309,6 +2309,75 @@ spell *display_spell_select(const char *title, player *p, spell_t type,
     return sp;
 }
 
+/* display_list_select() entries and callbacks for the monster list */
+
+/* maximum number of type-ahead keys in the monster list */
+#define MONSTER_LIST_CODE_LEN 12
+
+typedef struct {
+    monster_t type;
+    /* the letters of the monster's name in lower case: type-ahead code */
+    char code[MONSTER_LIST_CODE_LEN + 1];
+} monster_list_entry;
+
+static gchar *monster_list_row(gpointer entry)
+{
+    const monster_t type = ((monster_list_entry *)entry)->type;
+    const char *name = monster_type_name(type);
+
+    return g_strdup_printf(" %c  %-*s (Level %2d) ",
+                           monster_type_glyph(type),
+                           utf8_pad(name, 28), name,
+                           monster_type_level(type));
+}
+
+static const char *monster_list_code(gpointer entry)
+{
+    return ((monster_list_entry *)entry)->code;
+}
+
+monster_t display_monster_select(const char *title)
+{
+    static const display_list_ops monster_list_ops = {
+        .row  = monster_list_row,
+        .code = monster_list_code,
+    };
+
+    /* Offer all monster types that can be created, in the order of the
+       monster table, i.e. sorted by the depth they appear at. */
+    GPtrArray *mlist = g_ptr_array_new_with_free_func(g_free);
+    for (monster_t type = 0; type < MT_MAX; type++)
+    {
+        /* genocided monsters can not be created */
+        if (monster_is_genocided(type))
+            continue;
+
+        monster_list_entry *entry = g_new0(monster_list_entry, 1);
+        entry->type = type;
+
+        /* The type-ahead code consists of the plain letters of the name,
+           so that "giantant" finds the giant ant. */
+        guint len = 0;
+        for (const char *c = monster_type_name(type);
+                *c != '\0' && len < MONSTER_LIST_CODE_LEN; c++)
+        {
+            if (g_ascii_isalpha(*c))
+                entry->code[len++] = g_ascii_tolower(*c);
+        }
+
+        g_ptr_array_add(mlist, entry);
+    }
+
+    monster_list_entry *chosen = display_list_select(title, mlist, 46,
+            MONSTER_LIST_CODE_LEN, &monster_list_ops);
+
+    const monster_t type = chosen ? chosen->type : MT_MAX;
+
+    g_ptr_array_free(mlist, true);
+
+    return type;
+}
+
 int display_get_count(const char *caption, int value)
 {
     /* toggle insert / overwrite mode; start with overwrite */

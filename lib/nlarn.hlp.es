@@ -110,6 +110,7 @@ Si inicias el juego con la opción de línea de comandos del modo mago (`KEY`-w`
 `KEY`+`end`       teletransportarse un nivel hacia abajo
 `KEY`-`end`       teletransportarse un nivel hacia arriba
 `KEY`CTRL+T`end`  teletransportarse dentro del nivel
+`KEY`CTRL+G`end`  crear un monstruo a elección
 `KEY`CTRL+X`end`  subir el nivel de experiencia
 `KEY`*`end`       añadir 1000 mo a la cuenta bancaria
 `KEY`&`end`       curarse

@@ -165,6 +165,14 @@ void display_config_autopickup(bool settings[IT_MAX]);
 spell *display_spell_select(const char *title, player *p, spell_t type,
                             int (*filter)(spell *));
 
+/**
+ * Present all monster types which have not been genocided for selection.
+ *
+ * @param title the window title
+ * @return the chosen monster type, or MT_MAX when none was selected.
+ */
+monster_t display_monster_select(const char *title);
+
 int display_get_count(const char *caption, int value);
 char *display_get_string(const char *title, const char *caption, const char *value, size_t max_len);
 int display_get_yesno(const char *question, const char *title, const char *yes, const char *no);

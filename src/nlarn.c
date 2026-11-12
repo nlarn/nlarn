@@ -1109,6 +1109,31 @@ static void mainloop()
             }
             break;
 
+        case 7: /* (^G) generate a monster */
+            if (game_wizardmode(nlarn))
+            {
+                const monster_t mt = display_monster_select(_("Choose a monster to create"));
+
+                if (mt == MT_MAX)
+                    break;
+
+                /* not using pos, which would enable auto travel */
+                position mpos = display_get_new_position(nlarn->p, nlarn->p->pos,
+                                    _("Choose a position for the monster."),
+                                    false, false, false, 0, false, false);
+
+                if (!pos_valid(mpos))
+                    break;
+
+                /* monster_new() refuses unsuitable positions */
+                if (monster_new(mt, mpos, NULL) == NULL)
+                {
+                    log_add_entry(nlarn->log,
+                                  _("The monster can not be created at this position."));
+                }
+            }
+            break;
+
             /* gain experience level */
         case 24:  /* ^X */
             if (game_wizardmode(nlarn))

@@ -7,6 +7,7 @@
 * Switch to Adam Milazzo's improved shadowcasting FOV to reduce
   asymmetry and improve performance
 * Cornered monster attack again, even if they fled before
+* Allow creating arbitrary monsters in wizard mode (suggested by jv84)
 
 ### Fixes
 
