@@ -3760,8 +3760,9 @@ static position monster_move_attack(monster *m, struct player *p)
             break;
 
         case LS_ELEVATORDOWN:
-            /* move into the volcano from the town */
-            newmap = MAP_CMAX + 1;
+            /* move into the volcano from the town: the first volcano
+               map follows the last map of the caverns */
+            newmap = MAP_CMAX;
             break;
 
         case LS_ELEVATORUP:
@@ -3935,7 +3936,7 @@ static position monster_move_serve(monster *m, struct player *p)
             case LS_CAVERNS_ENTRY:  newmap = Z(m->pos) + 1; break;
             case LS_STAIRSUP:
             case LS_CAVERNS_EXIT:   newmap = Z(m->pos) - 1; break;
-            case LS_ELEVATORDOWN:   newmap = MAP_CMAX + 1;  break;
+            case LS_ELEVATORDOWN:   newmap = MAP_CMAX;      break;
             case LS_ELEVATORUP:     newmap = 0;             break;
             default:                newmap = Z(m->pos);     break;
             }
