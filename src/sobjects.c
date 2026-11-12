@@ -1000,7 +1000,11 @@ int player_throne_sit(player *p)
     else if (chance(35))
     {
         log_add_entry(nlarn->log, _("Zaaaappp! You've been teleported!"));
-        p->pos = map_find_space(pmap, LE_MONSTER, false);
+        position npos = map_find_space(pmap, LE_MONSTER, false);
+
+        /* stay put if there is no free space on the entire map */
+        if (pos_valid(npos))
+            p->pos = npos;
     }
     else
     {

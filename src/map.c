@@ -1461,6 +1461,11 @@ static void map_fill_with_traps(map *m)
     for (guint count = 0; count < rand_0n((trapdoor ? 8 : 6)); count++)
     {
         position pos = map_find_space(m, LE_TRAP, false);
+
+        /* no space left for further traps */
+        if (!pos_valid(pos))
+            break;
+
         map_trap_set(m, pos, rand_1n(trapdoor ? TT_MAX : TT_TRAPDOOR));
     }
 } /* map_fill_with_traps */
@@ -1991,7 +1996,20 @@ static bool map_load_from_file(map *m, const char *mazefile, guint which)
 
     /* if the amulet of larn/pcd has not been placed yet, place it randomly */
     if (spec_count >= 0)
-        place_special_item(m, map_find_space(m, LE_ITEM, false));
+    {
+        position spos = map_find_space(m, LE_ITEM, false);
+
+        /* The special item is required to win the game: settle for any
+           passable tile if all free ones are taken. */
+        if (!pos_valid(spos))
+            spos = map_find_space(m, LE_GROUND, false);
+
+        /* a map without a single passable tile can not be used */
+        if (!pos_valid(spos))
+            return false;
+
+        place_special_item(m, spos);
+    }
 
     return true;
 }
@@ -2052,6 +2070,11 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
                 do
                 {
                     npos = map_find_space(m, LE_SOBJECT, false);
+
+                    /* nowhere to move the object to: leave it in place */
+                    if (!pos_valid(npos))
+                        break;
+
                     if (!pos_in_rect(npos, *rooms[room]))
                     {
                         /* pos is outside of room */
@@ -2160,5 +2183,13 @@ static int map_validate(map *m)
 void map_item_add(map *m, item *what)
 {
     position pos = map_find_space(m, LE_ITEM, false);
+
+    if (!pos_valid(pos))
+    {
+        /* there is no space left on the map: discard the item */
+        item_destroy(what);
+        return;
+    }
+
     inv_add(map_ilist_at(m, pos), what);
 }

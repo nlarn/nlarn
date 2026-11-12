@@ -886,7 +886,11 @@ static bool spell_type_point(spell *s, struct player *p)
         }
 
         map *mmap = game_map(nlarn, Z(monster_pos(m)));
-        monster_pos_set(m, mmap, map_find_space(mmap, LE_MONSTER, false));
+        position tpos = map_find_space(mmap, LE_MONSTER, false);
+
+        /* the monster stays put if there is no free space on the map */
+        if (pos_valid(tpos))
+            monster_pos_set(m, mmap, tpos);
         break; /* SP_TEL */
 
     default:
@@ -1124,7 +1128,16 @@ static bool spell_alter_reality(spell *s, player *p)
     /* reposition player (if needed) */
     if (!map_pos_passable(nlevel, p->pos))
     {
-        p->pos = map_find_space(nlevel, LE_MONSTER, false);
+        position npos = map_find_space(nlevel, LE_MONSTER, false);
+
+        /* settle for any passable tile if the new map is crowded */
+        if (!pos_valid(npos))
+            npos = map_find_space(nlevel, LE_GROUND, false);
+
+        /* the player keeps the position if there is no passable tile,
+           which can not happen on a map that passed validation */
+        if (pos_valid(npos))
+            p->pos = npos;
     }
 
     return true;

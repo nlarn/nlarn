@@ -1647,8 +1647,8 @@ void monster_level_enter(monster *m, struct map *l)
         how = N_("squeezes past");
         npos = map_find_space_in(l, rect_new_sized(npos, 1), LE_MONSTER, false);
     }
-    else
 
+    /* this also covers the case that no free space has been found */
     if (!map_pos_validate(l, npos, LE_MONSTER, false))
     {
         /* the position somehow isn't valid */
@@ -2364,8 +2364,11 @@ void monster_player_attack(monster *m, player *p)
     case DAM_STEAL_ITEM:
         if (monster_player_rob(m, p, (dam->type == DAM_STEAL_GOLD) ? IT_GOLD : IT_ALL))
         {
-            /* teleport away */
-            monster_pos_set(m, mmap, map_find_space(mmap, LE_MONSTER, false));
+            /* teleport away; the thief stays put if there is no free
+               space on the entire map */
+            position tpos = map_find_space(mmap, LE_MONSTER, false);
+            if (pos_valid(tpos))
+                monster_pos_set(m, mmap, tpos);
         }
 
         damage_free(dam);
@@ -4044,7 +4047,10 @@ static position monster_move_civilian(monster *m, struct player *p)
             /* Ensure that the townsfolk do not loiter in locations
                important for the player. */
             m->player_pos = map_find_space_in(monster_map(m), town, LE_GROUND, false);
-        } while (map_sobject_at(monster_map(m), m->player_pos) != LS_NONE);
+            /* no position is found if the town is entirely crowded; the
+               person then stays put and tries again next turn */
+        } while (pos_valid(m->player_pos)
+                && map_sobject_at(monster_map(m), m->player_pos) != LS_NONE);
     }
 
     if (pos_identical(m->pos, m->player_pos)

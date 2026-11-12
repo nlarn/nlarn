@@ -176,7 +176,14 @@ int player_trap_trigger(player *p, trap_t trap, int force)
             break;
 
         case TT_TELEPORT:
-            p->pos = map_find_space(game_map(nlarn, Z(p->pos)), LE_MONSTER, false);
+        {
+            position npos = map_find_space(game_map(nlarn, Z(p->pos)),
+                                           LE_MONSTER, false);
+
+            /* stay put if there is no free space on the entire map */
+            if (pos_valid(npos))
+                p->pos = npos;
+        }
             break;
 
         case TT_MANADRAIN:
@@ -271,8 +278,13 @@ monster *monster_trap_trigger(monster *m)
         break;
 
     case TT_TELEPORT:
-        monster_pos_set(m, monster_map(m), map_find_space(game_map(nlarn,
-                        Z(monster_pos(m))), LE_MONSTER, false));
+    {
+        position npos = map_find_space(monster_map(m), LE_MONSTER, false);
+
+        /* stay put if there is no free space on the entire map */
+        if (pos_valid(npos))
+            monster_pos_set(m, monster_map(m), npos);
+    }
         break;
 
     case TT_SPIKEDPIT:

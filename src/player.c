@@ -1591,7 +1591,19 @@ int player_map_enter(player *p, map *l, bool teleported)
         if ((e = player_effect_get(p, ET_TRAPPED)))
             player_effect_del(p, e);
 
-        p->pos = map_find_space(l, LE_MONSTER, false);
+        position npos = map_find_space(l, LE_MONSTER, false);
+
+        /* If the map is entirely crowded, settle for any passable tile;
+           a monster standing there is moved out of the way below. */
+        if (!pos_valid(npos))
+            npos = map_find_space(l, LE_GROUND, false);
+
+        if (pos_valid(npos))
+            p->pos = npos;
+        else
+            /* a map without any passable tile does not exist; keep the
+               coordinates, which are valid on every map */
+            Z(p->pos) = l->nlevel;
     }
 
     /* beginning of the game */
@@ -1641,8 +1653,13 @@ int player_map_enter(player *p, map *l, bool teleported)
     if ((map_get_monster_at(l, p->pos)))
     {
         position mnpos = map_find_space(l, LE_MONSTER, false);
-        monster_pos_set(map_get_monster_at(l, p->pos),
-                        game_map(nlarn, Z(p->pos)), mnpos);
+
+        /* the monster stays where it is if there is no free space left */
+        if (pos_valid(mnpos))
+        {
+            monster_pos_set(map_get_monster_at(l, p->pos),
+                            game_map(nlarn, Z(p->pos)), mnpos);
+        }
     }
 
     /* recalculate FOV to make ensure correct display after entering a level */
