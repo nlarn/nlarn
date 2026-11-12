@@ -1822,7 +1822,11 @@ void monster_move(gpointer *oid __attribute__((unused)), monster *m, game *g)
         }
 
         /* ******** if new position has been found - move the monster ********* */
-        if (!pos_identical(m_npos, monster_pos(m)))
+        /* The movement functions may return a position outside of the map,
+           e.g. when a confused monster on the edge of the map stumbles
+           into a random direction. Such a position must not be used to
+           look up anything on the map: the monster does not move. */
+        if (pos_valid(m_npos) && !pos_identical(m_npos, monster_pos(m)))
         {
             /* get the monster's current map */
             map *mmap = monster_map(m);
