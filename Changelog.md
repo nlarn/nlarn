@@ -18,6 +18,7 @@
 * Cache computed paths during auto-travel
 * Cache computed paths for monster path-finding
 * Fix inventory list repositioning
+* Two fixes to the number input
 * Redraw the entire screen after a font size change
 * Two fixes to the genocide monster scroll 
 

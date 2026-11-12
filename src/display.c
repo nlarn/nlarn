@@ -2575,7 +2575,9 @@ int display_get_count(const char *caption, int value)
                     {
                         int cppos = strlen(ivalue) + 1;
 
-                        while (cppos >= ipos)
+                        /* shift the digits from the cursor position on,
+                           including the terminator, one place to the right */
+                        while (cppos > ipos)
                         {
                             ivalue[cppos] = ivalue[cppos - 1];
                             cppos--;
@@ -2590,8 +2592,9 @@ int display_get_count(const char *caption, int value)
                 }
                 else
                 {
-                    /* overwrite */
-                    if (ipos < 8)
+                    /* overwrite; the last byte of the buffer is reserved
+                       for the terminator */
+                    if (ipos < 7)
                     {
                         ivalue[ipos] = key;
                         /* move position */
