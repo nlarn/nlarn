@@ -193,10 +193,14 @@ rectangle rect_new(int x1, int y1, int x2, int y2)
 {
     rectangle rect;
 
-    rect.x1 = (x1 < 0) ? 0 : x1;
-    rect.y1 = (y1 < 0) ? 0 : y1;
-    rect.x2 = (x2 > MAP_MAX_X) ? MAP_MAX_X : x2;
-    rect.y2 = (y2 > MAP_MAX_Y) ? MAP_MAX_Y : y2;
+    /* All corners are inclusive, see pos_in_rect(), hence the largest
+       valid values are MAP_MAX_X - 1 and MAP_MAX_Y - 1. Every value is
+       limited at both ends: the fields of a rectangle are unsigned, a
+       negative value would turn into a huge one. */
+    rect.x1 = CLAMP(x1, 0, MAP_MAX_X - 1);
+    rect.y1 = CLAMP(y1, 0, MAP_MAX_Y - 1);
+    rect.x2 = CLAMP(x2, 0, MAP_MAX_X - 1);
+    rect.y2 = CLAMP(y2, 0, MAP_MAX_Y - 1);
 
     return(rect);
 }
