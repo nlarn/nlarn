@@ -1134,10 +1134,33 @@ void map_timer(map *m)
     } /* for Y(pos) */
 }
 
+/* Check if there is a door at the given position, which may be outside
+   of the map: the neighbours of a position on the edge of the map are. */
+static bool map_door_at(map *m, position pos)
+{
+    if (!pos_valid(pos))
+        return false;
+
+    const sobject_t so = map_sobject_at(m, pos);
+
+    return (so == LS_CLOSEDDOOR || so == LS_OPENDOOR);
+}
+
+/* Check if a door is enclosed at the given side: by a wall, another door
+   or the edge of the map. */
+static bool map_door_enclosed_at(map *m, position pos)
+{
+    if (!pos_valid(pos))
+        return true;
+
+    return (map_tiletype_at(m, pos) == LT_WALL) || map_door_at(m, pos);
+}
+
 wchar_t map_get_door_glyph(map *m, position pos)
 {
     g_assert(m != NULL && pos_valid(pos));
 
+    /* these are not on the map for a door on the edge of the map */
     position n = pos_move(pos, GD_NORTH);
     position e = pos_move(pos, GD_EAST);
     position s = pos_move(pos, GD_SOUTH);
@@ -1149,47 +1172,32 @@ wchar_t map_get_door_glyph(map *m, position pos)
     if (map_sobject_at(m, pos) == LS_CLOSEDDOOR)
     {
         /* #-# */
-        if (((map_tiletype_at(m, e) == LT_WALL)
-             || (map_sobject_at(m, e) == LS_CLOSEDDOOR)
-             || (map_sobject_at(m, e) == LS_OPENDOOR))
-             && ((map_tiletype_at(m, w) == LT_WALL)
-             || (map_sobject_at(m, w) == LS_CLOSEDDOOR)
-             || (map_sobject_at(m, w) == LS_OPENDOOR)))
+        if (map_door_enclosed_at(m, e) && map_door_enclosed_at(m, w))
              return '-';
 
         /* #
          * |
          * # */
-        if (((map_tiletype_at(m, n) == LT_WALL)
-             || (map_sobject_at(m, n) == LS_CLOSEDDOOR)
-             || (map_sobject_at(m, n) == LS_OPENDOOR))
-             && ((map_tiletype_at(m, s) == LT_WALL)
-             || (map_sobject_at(m, s) == LS_CLOSEDDOOR)
-             || (map_sobject_at(m, s) == LS_OPENDOOR)))
+        if (map_door_enclosed_at(m, n) && map_door_enclosed_at(m, s))
             return '|';
-
     }
     else
     {
-    /* #-# */
-    if ((map_sobject_at(m, e) == LS_CLOSEDDOOR)
-         || (map_sobject_at(m, e) == LS_OPENDOOR))
-         return '/';
+        /* #-# */
+        if (map_door_at(m, e))
+            return '/';
 
-    if ((map_sobject_at(m, w) == LS_CLOSEDDOOR)
-         || (map_sobject_at(m, w) == LS_OPENDOOR))
-         return '\\';
+        if (map_door_at(m, w))
+            return '\\';
 
-    /* #
-     * |
-     * # */
-    if ((map_sobject_at(m, s) == LS_CLOSEDDOOR)
-         || (map_sobject_at(m, s) == LS_OPENDOOR))
-        return '\\';
+        /* #
+         * |
+         * # */
+        if (map_door_at(m, s))
+            return '\\';
 
-    if ((map_sobject_at(m, n) == LS_CLOSEDDOOR)
-         || (map_sobject_at(m, n) == LS_OPENDOOR))
-        return '/';
+        if (map_door_at(m, n))
+            return '/';
     }
 
     /* no idea. */
