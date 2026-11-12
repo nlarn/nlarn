@@ -1939,7 +1939,9 @@ static bool map_load_from_file(map *m, const char *mazefile, guint which)
         int tries = 0;
         do
         {
-            map_num = rand_1n(MAP_MAX_MAZE_NUM);
+            /* any maze but the town: 1 .. MAP_MAX_MAZE_NUM;
+               rand_1n(n) returns values below n */
+            map_num = rand_1n(MAP_MAX_MAZE_NUM + 1);
         }
         while (map_used[map_num] && ++tries < 100);
 

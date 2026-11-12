@@ -26,6 +26,7 @@
 * Redraw the entire screen after a font size change
 * Two fixes to the genocide monster scroll 
 * Validate stat preset configuration from the config file
+* Fix the last map in the maze file not being used
 
 
 ## Release 0.8.0 (2026-09-05)
