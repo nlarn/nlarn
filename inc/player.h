@@ -243,6 +243,8 @@ int player_select_bonus_stats(bool allow_none);
  * @param preset the preset (between 'a' and 'f')
  * @return true for valid presets, false for invalid presets
  */
+/* check if the given character denotes a known stats preset */
+bool player_bonus_stats_valid(char preset);
 bool player_assign_bonus_stats(player *p, char preset);
 void player_destroy(player *p);
 

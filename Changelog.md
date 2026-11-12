@@ -21,6 +21,7 @@
 * Two fixes to the number input
 * Redraw the entire screen after a font size change
 * Two fixes to the genocide monster scroll 
+* Validate stat preset configuration from the config file
 
 ## Release 0.8.0 (2026-09-05)
 

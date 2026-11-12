@@ -194,7 +194,23 @@ bool parse_ini_file(const char *filename, struct game_config *config)
         g_clear_error(&error);
 
         char *stats = g_key_file_get_string(ini_file, "nlarn", "stats", &error);
-        if (!error) config->stats = stats;
+        if (!error)
+        {
+            /* The preset is used as an index into the list of presets, thus
+               only accept the known ones. The letter is stored in lower
+               case; anything else is treated as "not defined". */
+            if (stats != NULL)
+                stats[0] = g_ascii_tolower(stats[0]);
+
+            if (stats != NULL && stats[0] != '\0'
+                    && !player_bonus_stats_valid(stats[0]))
+            {
+                g_free(stats);
+                stats = NULL;
+            }
+
+            config->stats = stats;
+        }
         g_clear_error(&error);
 
         char *colour_scheme = g_key_file_get_string(ini_file, "nlarn", "colours", &error);

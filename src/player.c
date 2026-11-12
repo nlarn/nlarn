@@ -273,9 +273,14 @@ int player_select_bonus_stats(bool allow_none)
     return preset_min + choice;     /* a build preset ('a'-'f') */
 }
 
+bool player_bonus_stats_valid(char preset)
+{
+    return (preset >= preset_min && preset <= preset_max);
+}
+
 bool player_assign_bonus_stats(player *p, char preset)
 {
-    if (preset < preset_min || preset > preset_max)
+    if (!player_bonus_stats_valid(preset))
         return false;
 
     if (preset == 'e')
