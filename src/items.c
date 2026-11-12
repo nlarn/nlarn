@@ -552,22 +552,25 @@ void item_serialize(gpointer oid, gpointer it, gpointer root)
     }
 }
 
+/* Look up the id of an item of the given type by the name stored in a
+   saved game. Loading is aborted for names which are not a valid id of
+   that item type, as the id is used as an index into the item data. */
 static int item_enum_value_lookup(item_t typ, const char* str)
 {
     g_assert(typ > IT_NONE && typ < IT_MAX);
 
     switch (typ)
     {
-        case IT_AMULET:    return amulet_t_value(str);
-        case IT_AMMO:      return ammo_t_value(str);
-        case IT_ARMOUR:    return armour_t_value(str);
-        case IT_BOOK:      return spell_id_value(str);
-        case IT_CONTAINER: return container_t_value(str);
-        case IT_GEM:       return gem_t_value(str);
-        case IT_POTION:    return potion_t_value(str);
-        case IT_RING:      return ring_t_value(str);
-        case IT_SCROLL:    return scroll_t_value(str);
-        case IT_WEAPON:    return weapon_t_value(str);
+        case IT_AMULET:    return SAVE_ENUM_VALUE(amulet_t, AM_MAX, str);
+        case IT_AMMO:      return SAVE_ENUM_VALUE(ammo_t, AMT_MAX, str);
+        case IT_ARMOUR:    return SAVE_ENUM_VALUE(armour_t, AT_MAX, str);
+        case IT_BOOK:      return SAVE_ENUM_VALUE(spell_id, SP_MAX, str);
+        case IT_CONTAINER: return SAVE_ENUM_VALUE(container_t, CT_MAX, str);
+        case IT_GEM:       return SAVE_ENUM_VALUE(gem_t, GT_MAX, str);
+        case IT_POTION:    return SAVE_ENUM_VALUE(potion_t, PO_MAX, str);
+        case IT_RING:      return SAVE_ENUM_VALUE(ring_t, RT_MAX, str);
+        case IT_SCROLL:    return SAVE_ENUM_VALUE(scroll_t, ST_MAX, str);
+        case IT_WEAPON:    return SAVE_ENUM_VALUE(weapon_t, WT_MAX, str);
         default:           return 0;
     }
 }
@@ -580,24 +583,28 @@ item *item_deserialize(cJSON *iser, struct game *g)
     guint oid = cJSON_GetObjectItem(iser, "oid")->valueint;
     it->oid = GUINT_TO_POINTER(oid);
 
-    it->type = item_t_value(cJSON_GetObjectItem(iser, "type")->valuestring);
+    const char *type_str = cJSON_GetStringValue(cJSON_GetObjectItem(iser, "type"));
+    it->type = SAVE_ENUM_VALUE(item_t, IT_MAX, type_str);
 
-    const char *id_str = cJSON_GetObjectItem(iser, "id")->valuestring;
-    it->id = item_enum_value_lookup(it->type, id_str);
+    if (it->type == IT_NONE)
+        game_load_abort("an item has no type.");
+
+    const char *id_str = cJSON_GetStringValue(cJSON_GetObjectItem(iser, "id"));
 
     /* Migrate saves from before the boots of speed and the cloak of
        invisibility were removed in favour of the permanence spell: their
-       armour_t constants no longer exist, so the lookup above silently
-       fell back to id 0. Their bound effect is preserved regardless, as
+       armour_t constants no longer exist, so the lookup below would
+       refuse them. Their bound effect is preserved regardless, as
        it always lived in the item's "effects" array; only the base
        armour type needs to be remapped to something that still exists. */
-    if (it->type == IT_ARMOUR)
-    {
-        if (strcmp(id_str, "AT_SPEEDBOOTS") == 0)
-            it->id = AT_LBOOTS;
-        else if (strcmp(id_str, "AT_INVISCLOAK") == 0)
-            it->id = AT_CLOAK;
-    }
+    if (it->type == IT_ARMOUR && id_str != NULL
+            && strcmp(id_str, "AT_SPEEDBOOTS") == 0)
+        it->id = AT_LBOOTS;
+    else if (it->type == IT_ARMOUR && id_str != NULL
+            && strcmp(id_str, "AT_INVISCLOAK") == 0)
+        it->id = AT_CLOAK;
+    else
+        it->id = item_enum_value_lookup(it->type, id_str);
 
     it->bonus = cJSON_GetObjectItem(iser, "bonus")->valueint;
     it->count = cJSON_GetObjectItem(iser, "count")->valueint;

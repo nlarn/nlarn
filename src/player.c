@@ -751,7 +751,8 @@ player *player_deserialize(cJSON *pser)
     for (int idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
         p->school_courses_taken[idx] = cJSON_GetArrayItem(obj, idx)->valueint;
 
-    pos_val(p->pos) = cJSON_GetObjectItem(pser, "position")->valueint;
+    p->pos = game_load_position(cJSON_GetObjectItem(pser, "position"),
+                                "position of the player");
 
     /* restore last targeted monster */
     if ((obj = cJSON_GetObjectItem(pser, "ptarget")) != NULL)
@@ -790,9 +791,12 @@ player *player_deserialize(cJSON *pser)
             player_sobject_memory som;
             cJSON *soms = cJSON_GetArrayItem(obj, idx);
 
-            pos_val(som.pos) = cJSON_GetObjectItem(soms, "pos")->valueint;
-            som.sobject = sobject_t_value(
-                    cJSON_GetObjectItem(soms, "sobject")->valuestring);
+            som.pos = game_load_position(cJSON_GetObjectItem(soms, "pos"),
+                    "position of a remembered object");
+
+            const char *sobj_str = cJSON_GetStringValue(
+                    cJSON_GetObjectItem(soms, "sobject"));
+            som.sobject = SAVE_ENUM_VALUE(sobject_t, LS_MAX, sobj_str);
 
             g_array_append_val(p->sobjmem, som);
         }
@@ -5017,23 +5021,23 @@ static void player_memory_deserialize(player *p, position pos, cJSON *mser)
 {
     cJSON *obj = cJSON_GetObjectItem(mser, "type");
     if (obj != NULL)
-        player_memory_of(p, pos).type = map_tile_t_value(obj->valuestring);
+        player_memory_of(p, pos).type = SAVE_ENUM_VALUE(map_tile_t, LT_MAX, cJSON_GetStringValue(obj));
 
     obj = cJSON_GetObjectItem(mser, "sobject");
     if (obj != NULL)
-        player_memory_of(p, pos).sobject = sobject_t_value(obj->valuestring);
+        player_memory_of(p, pos).sobject = SAVE_ENUM_VALUE(sobject_t, LS_MAX, cJSON_GetStringValue(obj));
 
     obj = cJSON_GetObjectItem(mser, "item");
     if (obj != NULL)
-        player_memory_of(p, pos).item = item_t_value(obj->valuestring);
+        player_memory_of(p, pos).item = SAVE_ENUM_VALUE(item_t, IT_MAX, cJSON_GetStringValue(obj));
 
     obj = cJSON_GetObjectItem(mser, "item_colour");
     if (obj != NULL)
-        player_memory_of(p, pos).item_colour = colour_t_value(obj->valuestring);
+        player_memory_of(p, pos).item_colour = SAVE_ENUM_VALUE(colour_t, G_MAXINT, cJSON_GetStringValue(obj));
 
     obj = cJSON_GetObjectItem(mser, "trap");
     if (obj != NULL)
-        player_memory_of(p, pos).trap = trap_t_value(obj->valuestring);
+        player_memory_of(p, pos).trap = SAVE_ENUM_VALUE(trap_t, TT_MAX, cJSON_GetStringValue(obj));
 }
 
 void calc_fighting_stats(player *p)

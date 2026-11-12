@@ -118,6 +118,39 @@ game *game_destroy(game *g);
  */
 int game_save(game *g);
 
+/*
+ * Validation of values read from a saved game. A save file is plain data
+ * that may have been damaged or edited; values used as array indices must
+ * thus be verified before they are used.
+ */
+
+/* Give up loading the saved game: shut down the display, print the given
+   reason and terminate. */
+void game_load_abort(const char *fmt, ...)
+    G_GNUC_PRINTF(1, 2) G_GNUC_NORETURN;
+
+/* Helper for SAVE_ENUM_VALUE(), do not call directly. */
+int game_load_enum_check(const char *type, const char *name, int id,
+                         const char *id_name, int max);
+
+/* The value of the member of the enum EnumType with the given name, which
+   may be NULL. Loading is aborted unless the name denotes a member of the
+   enum with a value below max: the _value() functions return the first
+   member for unknown names and accept the _MAX sentinels, neither of which
+   may be used. Pass G_MAXINT for enums without a sentinel.
+   The name is evaluated several times, pass an expression without side
+   effects. */
+#define SAVE_ENUM_VALUE(EnumType, max, name) \
+    ((EnumType)game_load_enum_check(#EnumType, (name), \
+        ((name) != NULL) ? (int)EnumType##_value(name) : 0, \
+        ((name) != NULL) ? EnumType##_string(EnumType##_value(name)) : "", \
+        (int)(max)))
+
+/* A map position stored in a saved game. Loading is aborted if the value
+   is missing or not a position on one of the maps; "what" names the value
+   in the error message. */
+position game_load_position(cJSON *value, const char *what);
+
 map *game_map(game *g, guint nmap);
 void game_spin_the_wheel(game *g);
 void game_remove_dead_monsters(game *g);

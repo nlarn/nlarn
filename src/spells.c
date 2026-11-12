@@ -430,7 +430,8 @@ spell *spell_deserialize(cJSON *sser)
 {
     spell *s = g_malloc0(sizeof(spell));
 
-    s->id = spell_id_value(cJSON_GetObjectItem(sser, "id")->valuestring);
+    const char *id_str = cJSON_GetStringValue(cJSON_GetObjectItem(sser, "id"));
+    s->id = SAVE_ENUM_VALUE(spell_id, SP_MAX, id_str);
     s->knowledge = cJSON_GetObjectItem(sser, "knowledge")->valueint;
     s->used = cJSON_GetObjectItem(sser, "used")->valueint;
 

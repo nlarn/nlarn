@@ -258,27 +258,30 @@ map *map_deserialize(cJSON *mser)
         {
             cJSON *tile = cJSON_GetArrayItem(grid, x + (y * MAP_MAX_X));
 
-            m->grid[y][x].type =
-                map_tile_t_value(cJSON_GetObjectItem(tile, "type")->valuestring);
+            /* The types are used as indices into the tables of tile,
+               object and trap data, hence only accept known values. */
+            cJSON *obj = cJSON_GetObjectItem(tile, "type");
+            m->grid[y][x].type = SAVE_ENUM_VALUE(map_tile_t, LT_MAX,
+                cJSON_GetStringValue(obj));
 
-            cJSON *obj = cJSON_GetObjectItem(tile, "base_type");
+            obj = cJSON_GetObjectItem(tile, "base_type");
             if (obj != NULL) m->grid[y][x].base_type =
-                map_tile_t_value(obj->valuestring);
+                SAVE_ENUM_VALUE(map_tile_t, LT_MAX, cJSON_GetStringValue(obj));
 
             obj = cJSON_GetObjectItem(tile, "timer");
             if (obj != NULL) m->grid[y][x].timer = obj->valueint;
 
             obj = cJSON_GetObjectItem(tile, "sobject");
             if (obj != NULL) m->grid[y][x].sobject =
-                sobject_t_value(obj->valuestring);
+                SAVE_ENUM_VALUE(sobject_t, LS_MAX, cJSON_GetStringValue(obj));
 
             obj = cJSON_GetObjectItem(tile, "trap");
             if (obj != NULL) m->grid[y][x].trap =
-                trap_t_value(obj->valuestring);
+                SAVE_ENUM_VALUE(trap_t, TT_MAX, cJSON_GetStringValue(obj));
 
             obj = cJSON_GetObjectItem(tile, "spill");
             if (obj != NULL) m->grid[y][x].spill =
-                colour_t_value(obj->valuestring);
+                SAVE_ENUM_VALUE(colour_t, G_MAXINT, cJSON_GetStringValue(obj));
 
             obj = cJSON_GetObjectItem(tile, "spilltime");
             if (obj != NULL) m->grid[y][x].spilltime = obj->valueint;

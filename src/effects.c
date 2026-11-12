@@ -619,7 +619,8 @@ effect *effect_deserialize(cJSON *eser, game *g)
     guint oid = cJSON_GetObjectItem(eser, "oid")->valueint;
     e->oid =  GUINT_TO_POINTER(oid);
 
-    e->type = effect_t_value(cJSON_GetObjectItem(eser, "type")->valuestring);
+    const char *type_str = cJSON_GetStringValue(cJSON_GetObjectItem(eser, "type"));
+    e->type = SAVE_ENUM_VALUE(effect_t, ET_MAX, type_str);
     e->start = cJSON_GetObjectItem(eser, "start")->valueint;
     e->turns = cJSON_GetObjectItem(eser, "turns")->valueint;
     e->amount = cJSON_GetObjectItem(eser, "amount")->valueint;

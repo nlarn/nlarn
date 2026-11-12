@@ -76,7 +76,8 @@ void sphere_deserialize(const cJSON *serialized, const game *g)
 
     s->dir = cJSON_GetObjectItem(serialized, "dir")->valueint;
     s->lifetime = cJSON_GetObjectItem(serialized, "lifetime")->valueint;
-    pos_val(s->pos) = cJSON_GetObjectItem(serialized, "pos")->valueint;
+    s->pos = game_load_position(cJSON_GetObjectItem(serialized, "pos"),
+                                "position of a sphere");
 
     if (!cJSON_GetObjectItem(serialized, "owner"))
         s->owner = g->p;

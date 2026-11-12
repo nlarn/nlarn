@@ -24,6 +24,7 @@
 
 #include <errno.h>
 #include <glib.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <zlib.h>
@@ -623,6 +624,49 @@ static void game_new()
     print_welcome_message(true);
 
     log_set_time(nlarn->log, nlarn->gtime);
+}
+
+void game_load_abort(const char *fmt, ...)
+{
+    va_list argp;
+
+    va_start(argp, fmt);
+    gchar *reason = g_strdup_vprintf(fmt, argp);
+    va_end(argp);
+
+    /* leave curses mode, otherwise the message would not be visible */
+    display_shutdown();
+    g_printerr("Failed to restore save file \"%s\": %s\n",
+               nlarn_savefile, reason);
+
+    exit(EXIT_FAILURE);
+}
+
+int game_load_enum_check(const char *type, const char *name, int id,
+                         const char *id_name, int max)
+{
+    if (name == NULL)
+        game_load_abort("a value of type %s is missing or not a name.", type);
+
+    /* The name must match the name of the value found for it exactly, as
+       unknown names are mapped to the first member of the enum. */
+    if (id < 0 || id >= max || strcmp(name, id_name) != 0)
+        game_load_abort("\"%s\" is not a valid %s.", name, type);
+
+    return id;
+}
+
+position game_load_position(cJSON *value, const char *what)
+{
+    position pos = pos_invalid;
+
+    if (cJSON_IsNumber(value))
+        pos_val(pos) = value->valueint;
+
+    if (!pos_valid(pos))
+        game_load_abort("the %s is not on the map.", what);
+
+    return pos;
 }
 
 static bool game_load()

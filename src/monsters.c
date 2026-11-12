@@ -1200,14 +1200,17 @@ void monster_deserialize(cJSON *mser, game *g)
     cJSON *obj;
     monster *m = g_malloc0(sizeof(monster));
 
-    m->type = monster_t_value(cJSON_GetObjectItem(mser, "type")->valuestring);
+    const char *type_str = cJSON_GetStringValue(cJSON_GetObjectItem(mser, "type"));
+    m->type = SAVE_ENUM_VALUE(monster_t, MT_MAX, type_str);
     guint oid = cJSON_GetObjectItem(mser, "oid")->valueint;
     m->oid = GUINT_TO_POINTER(oid);
     m->hp_max = cJSON_GetObjectItem(mser, "hp_max")->valueint;
     m->hp = cJSON_GetObjectItem(mser, "hp")->valueint;
-    pos_val(m->pos) = cJSON_GetObjectItem(mser, "pos")->valueint;
+    m->pos = game_load_position(cJSON_GetObjectItem(mser, "pos"),
+                                "position of a monster");
     m->movement = cJSON_GetObjectItem(mser, "movement")->valueint;
-    m->action = monster_action_t_value(cJSON_GetObjectItem(mser, "action")->valuestring);
+    const char *action_str = cJSON_GetStringValue(cJSON_GetObjectItem(mser, "action"));
+    m->action = SAVE_ENUM_VALUE(monster_action_t, G_MAXINT, action_str);
 
     if ((obj = cJSON_GetObjectItem(mser, "eq_weapon")))
         m->eq_weapon = game_item_get(nlarn, GUINT_TO_POINTER(obj->valueint));
@@ -1230,7 +1233,14 @@ void monster_deserialize(cJSON *mser, game *g)
         m->lastseen = obj->valueint;
 
     if ((obj = cJSON_GetObjectItem(mser, "player_pos")))
+    {
         pos_val(m->player_pos) = obj->valueint;
+
+        /* the monster may not know where the player is, but it must not
+           assume the player at a position outside of the map */
+        if (!pos_valid(m->player_pos))
+            m->player_pos = pos_invalid;
+    }
 
     /* inventory */
     if ((obj = cJSON_GetObjectItem(mser, "inventory")))

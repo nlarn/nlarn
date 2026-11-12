@@ -14,6 +14,7 @@
 * Fix visibility range of slow monsters. This prevents hobgoblins from
   shooting from far away, long before they are visible
 * Make saved games robust against item changes (breaks saves)
+* Make saved games robust against tampering
 * Speed up pathfinding by 2.4x
 * Cache computed paths during auto-travel
 * Cache computed paths for monster path-finding
@@ -22,6 +23,7 @@
 * Redraw the entire screen after a font size change
 * Two fixes to the genocide monster scroll 
 * Validate stat preset configuration from the config file
+
 
 ## Release 0.8.0 (2026-09-05)
 
