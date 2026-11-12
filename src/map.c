@@ -1522,16 +1522,18 @@ generate:
     {
         rooms[room] = g_malloc0(sizeof(rectangle));
 
+        /* rand_m_n(1, 3) gives 1 or 2; rand_1n(2) would always return 1
+           and thus create rooms of always the same height */
         int my = rand_1n(11) + 2;
-        rooms[room]->y1 = my - rand_1n(2);
-        rooms[room]->y2 = my + rand_1n(2);
+        rooms[room]->y1 = my - rand_m_n(1, 3);
+        rooms[room]->y2 = my + rand_m_n(1, 3);
 
         int mx;
         if (is_volcano_map(m->nlevel))
         {
             mx = rand_1n(60) + 3;
-            rooms[room]->x1 = mx - rand_1n(2);
-            rooms[room]->x2 = mx + rand_1n(2);
+            rooms[room]->x1 = mx - rand_m_n(1, 3);
+            rooms[room]->x2 = mx + rand_m_n(1, 3);
 
             want_monster = true;
         }
@@ -2053,19 +2055,26 @@ static void map_make_treasure_room(map *m, rectangle **rooms)
         } /* for x */
     } /* for y */
 
-    /* place the door on the treasure room */
-    switch (rand_1n(2))
+    /* Place the door on the treasure room: in one of the four walls, but
+       never in a corner. Note that rand_0n(n) returns 0 .. n - 1 and
+       rand_m_n(m, n) returns m .. n - 1. */
+    if (rand_0n(2))
     {
-    case 1: /* horizontal */
-        X(pos) = rand_m_n(rooms[room]->x1, rooms[room]->x2);
-        Y(pos) = rand_0n(1) ? rooms[room]->y1 : rooms[room]->y2;
-        break;
+        /* horizontal: in the top or the bottom wall */
+        X(pos) = rand_m_n(rooms[room]->x1 + 1, rooms[room]->x2);
 
-    case 2: /* vertical */
-        X(pos) = rand_0n(1) ? rooms[room]->x1 : rooms[room]->x2;
-        Y(pos) = rand_m_n(rooms[room]->y1, rooms[room]->y2);
-        break;
-    };
+        /* a door in a top wall right below the edge of the map
+           would lead nowhere */
+        Y(pos) = (rand_0n(2) && rooms[room]->y1 > 1)
+            ? rooms[room]->y1
+            : rooms[room]->y2;
+    }
+    else
+    {
+        /* vertical: in the left or the right wall */
+        X(pos) = rand_0n(2) ? rooms[room]->x1 : rooms[room]->x2;
+        Y(pos) = rand_m_n(rooms[room]->y1 + 1, rooms[room]->y2);
+    }
 
     map_tiletype_set(m, pos, LT_FLOOR);
     map_sobject_set(m, pos, LS_CLOSEDDOOR);
