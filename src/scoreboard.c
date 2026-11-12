@@ -107,19 +107,186 @@ static const char *score_cause_string(player_cod cod, guint cause)
     }
 }
 
-static guint score_cause_value(player_cod cod, const char *str)
+/*
+ * Validation of scoreboard entries. The scoreboard is plain data in a file
+ * shared between all players; several values of an entry are used as
+ * indices into tables when the entry is displayed. Entries with missing or
+ * invalid values are therefore skipped when loading the scoreboard.
+ */
+
+/* Check if the name denotes the member "id" of an enum, and if that member
+   is below the enum's _MAX sentinel. The _value() functions return the
+   first member for unknown names, hence the name has to match exactly. */
+static bool score_enum_valid(const char *name, int id, const char *id_name,
+                             int max)
+{
+    return (id >= 0 && id < max && strcmp(name, id_name) == 0);
+}
+
+/* evaluates name several times: pass a plain, non-NULL variable */
+#define SCORE_ENUM_VALID(EnumType, max, name) \
+    score_enum_valid((name), (int)EnumType##_value(name), \
+                     EnumType##_string(EnumType##_value(name)), (int)(max))
+
+/* The number of valid values for the cause of the given cause of death;
+   G_MAXUINT where the cause is unused and not interpreted. */
+static guint score_cause_max(player_cod cod)
 {
     switch (cod)
     {
-    case PD_EFFECT:  return effect_t_value(str);
-    case PD_MONSTER: return monster_t_value(str);
-    case PD_TRAP:    return trap_t_value(str);
-    case PD_MAP:     return map_tile_t_value(str);
-    case PD_SPELL:   return spell_id_value(str);
-    case PD_CURSE:   return item_t_value(str);
-    case PD_SOBJECT: return sobject_t_value(str);
-    default:         return 0;
+    case PD_EFFECT:  return ET_MAX;
+    case PD_MONSTER: return MT_MAX;
+    case PD_TRAP:    return TT_MAX;
+    case PD_MAP:     return LT_MAX;
+    case PD_SPELL:   return SP_MAX;
+    case PD_CURSE:   return IT_MAX;
+    case PD_SOBJECT: return LS_MAX;
+    default:         return G_MAXUINT;
     }
+}
+
+/* Get the cause named by a symbolic constant. Returns false if the name is
+   not a valid constant for the given cause of death. */
+static bool score_cause_value(player_cod cod, const char *str, guint *cause)
+{
+    bool valid;
+
+    switch (cod)
+    {
+    case PD_EFFECT:
+        valid = SCORE_ENUM_VALID(effect_t, ET_MAX, str);
+        *cause = effect_t_value(str);
+        break;
+    case PD_MONSTER:
+        valid = SCORE_ENUM_VALID(monster_t, MT_MAX, str);
+        *cause = monster_t_value(str);
+        break;
+    case PD_TRAP:
+        valid = SCORE_ENUM_VALID(trap_t, TT_MAX, str);
+        *cause = trap_t_value(str);
+        break;
+    case PD_MAP:
+        valid = SCORE_ENUM_VALID(map_tile_t, LT_MAX, str);
+        *cause = map_tile_t_value(str);
+        break;
+    case PD_SPELL:
+        valid = SCORE_ENUM_VALID(spell_id, SP_MAX, str);
+        *cause = spell_id_value(str);
+        break;
+    case PD_CURSE:
+        valid = SCORE_ENUM_VALID(item_t, IT_MAX, str);
+        *cause = item_t_value(str);
+        break;
+    case PD_SOBJECT:
+        valid = SCORE_ENUM_VALID(sobject_t, LS_MAX, str);
+        *cause = sobject_t_value(str);
+        break;
+    default:
+        /* the cause is not a symbolic constant for this cause of death */
+        valid = false;
+        break;
+    }
+
+    return valid;
+}
+
+/* Read a number from a scoreboard entry. Clears *valid if the value is
+   missing, not a number or outside of the given range. */
+static double score_number(const cJSON *entry, const char *key,
+                           double min, double max, bool *valid)
+{
+    const cJSON *val = cJSON_GetObjectItem(entry, key);
+
+    if (!cJSON_IsNumber(val) || !(val->valuedouble >= min)
+            || !(val->valuedouble <= max))
+    {
+        *valid = false;
+        return 0;
+    }
+
+    return val->valuedouble;
+}
+
+/* upper limit for scores and timestamps, which may exceed the range of
+   an int: the largest integer a JSON number represents exactly (2^53) */
+#define SCORE_NUM_MAX 9007199254740992.0
+
+/* Create a score record from a scoreboard entry. Returns NULL if the entry
+   is incomplete or contains invalid values. */
+static score_t *score_load_entry(const cJSON *s_entry, gint version)
+{
+    bool valid = true;
+    score_t *nscore = g_malloc0(sizeof(score_t));
+
+    nscore->score      = score_number(s_entry, "score", 0, SCORE_NUM_MAX, &valid);
+    nscore->moves      = score_number(s_entry, "moves", 0, G_MAXINT, &valid);
+    nscore->hp         = score_number(s_entry, "hp", G_MININT, G_MAXINT, &valid);
+    nscore->hp_max     = score_number(s_entry, "hp_max", 0, G_MAXINT, &valid);
+    nscore->level      = score_number(s_entry, "level", 0, G_MAXINT, &valid);
+    nscore->level_max  = score_number(s_entry, "level_max", 0, G_MAXINT, &valid);
+    /* the dungeon levels are used as indices into the list of map names */
+    nscore->dlevel     = score_number(s_entry, "dlevel", 0, MAP_MAX - 1, &valid);
+    nscore->dlevel_max = score_number(s_entry, "dlevel_max", 0, MAP_MAX - 1, &valid);
+    nscore->difficulty = score_number(s_entry, "difficulty", 0, G_MAXINT, &valid);
+    nscore->time_start = score_number(s_entry, "time_start", 0, SCORE_NUM_MAX, &valid);
+    nscore->time_end   = score_number(s_entry, "time_end", 0, SCORE_NUM_MAX, &valid);
+
+    const cJSON *cause_val = cJSON_GetObjectItem(s_entry, "cause");
+
+    if (version < 2)
+    {
+        /* version 1: sex, cod and cause are raw numeric enum values */
+        nscore->sex = score_number(s_entry, "sex", PS_NONE, PS_MAX - 1, &valid);
+        nscore->cod = score_number(s_entry, "cod", PD_NONE + 1, PD_MAX - 1, &valid);
+    }
+    else
+    {
+        /* version 2+: sex and cod are symbolic constant names, and
+           so is cause wherever it names a constant of another enum */
+        const char *sex = cJSON_GetStringValue(cJSON_GetObjectItem(s_entry, "sex"));
+        const char *cod = cJSON_GetStringValue(cJSON_GetObjectItem(s_entry, "cod"));
+
+        if (sex != NULL && SCORE_ENUM_VALID(player_sex, PS_MAX, sex))
+            nscore->sex = player_sex_value(sex);
+        else
+            valid = false;
+
+        if (cod != NULL && SCORE_ENUM_VALID(player_cod, PD_MAX, cod)
+                && player_cod_value(cod) != PD_NONE)
+            nscore->cod = player_cod_value(cod);
+        else
+            valid = false;
+    }
+
+    /* the cause can only be validated for a valid cause of death */
+    if (valid)
+    {
+        if (cJSON_IsString(cause_val))
+        {
+            valid = score_cause_value(nscore->cod, cause_val->valuestring,
+                                      &nscore->cause);
+        }
+        else
+        {
+            const guint cause_max = score_cause_max(nscore->cod);
+
+            nscore->cause = score_number(s_entry, "cause", 0,
+                    (cause_max == G_MAXUINT) ? G_MAXINT : cause_max - 1.0,
+                    &valid);
+        }
+    }
+
+    const char *name = cJSON_GetStringValue(cJSON_GetObjectItem(s_entry, "player_name"));
+
+    if (!valid || name == NULL)
+    {
+        g_free(nscore);
+        return NULL;
+    }
+
+    nscore->player_name = g_strdup(name);
+
+    return nscore;
 }
 
 GList *scores_load()
@@ -142,91 +309,69 @@ GList *scores_load()
     /* size of buffer to store uncompressed scoreboard content */
     const gint bufsize = 8192;
 
-    /* allocate buffer space */
-    gchar *scores = g_malloc(bufsize);
+    /* allocate buffer space; one additional byte for the terminator */
+    gchar *scores = g_malloc(bufsize + 1);
 
-    /* count of buffer allocations */
-    gint bufcount = 1;
+    /* number of bytes read so far */
+    gsize len = 0;
 
     /* read the scoreboard file
      * append subsequent blocks at the end of the previously read block */
-    while(gzread(file, scores + ((bufcount - 1) * bufsize), bufsize) == bufsize)
+    for (;;)
     {
+        const int count = gzread(file, scores + len, bufsize);
+
+        if (count > 0)
+            len += count;
+
+        if (count < bufsize)
+            break;
+
         /* it seems the buffer space was insufficient -> increase it */
-        bufcount += 1;
-        scores = g_realloc(scores, (bufsize * bufcount));
+        scores = g_realloc(scores, len + bufsize + 1);
     }
+
+    /* Terminate the content. The parser stops at the end of the string;
+       without the terminator it would read beyond the end of the buffer
+       when the file content is truncated or not valid JSON. */
+    scores[len] = '\0';
 
     /* close save file */
     gzclose(file);
 
-
     /* parse the scores */
-    cJSON *pscores;
-    if ((pscores = cJSON_Parse(scores)) == NULL)
+    cJSON *pscores = cJSON_Parse(scores);
+
+    /* free the memory allocated for gzread */
+    g_free(scores);
+
+    if (pscores == NULL)
     {
         /* empty file, no entries */
         return gs;
     }
 
-    /* version of scoreboard file */
-    gint version = cJSON_GetObjectItem(pscores, "version")->valueint;
+    /* version of scoreboard file and the array of scores */
+    const cJSON *sb_version = cJSON_GetObjectItem(pscores, "version");
+    const cJSON *sb_scores = cJSON_GetObjectItem(pscores, "scores");
 
-    /* point to the first entry of the scores array */
-    cJSON *s_entry = cJSON_GetObjectItem(pscores, "scores")->child;
-
-    while (s_entry != NULL)
+    if (cJSON_IsNumber(sb_version) && cJSON_IsArray(sb_scores))
     {
-        /* create new score record */
-        score_t *nscore = g_malloc(sizeof(score_t));
+        const cJSON *s_entry;
 
-        /* add record to array */
-        gs = g_list_append(gs, nscore);
-
-        /* fill score record fields with data */
-        nscore->player_name = g_strdup(cJSON_GetObjectItem(s_entry, "player_name")->valuestring);
-        nscore->score      = cJSON_GetObjectItem(s_entry, "score")->valueint;
-        nscore->moves      = cJSON_GetObjectItem(s_entry, "moves")->valueint;
-        nscore->hp         = cJSON_GetObjectItem(s_entry, "hp")->valueint;
-        nscore->hp_max     = cJSON_GetObjectItem(s_entry, "hp_max")->valueint;
-        nscore->level      = cJSON_GetObjectItem(s_entry, "level")->valueint;
-        nscore->level_max  = cJSON_GetObjectItem(s_entry, "level_max")->valueint;
-        nscore->dlevel     = cJSON_GetObjectItem(s_entry, "dlevel")->valueint;
-        nscore->dlevel_max = cJSON_GetObjectItem(s_entry, "dlevel_max")->valueint;
-        nscore->difficulty = cJSON_GetObjectItem(s_entry, "difficulty")->valueint;
-        nscore->time_start = cJSON_GetObjectItem(s_entry, "time_start")->valueint;
-        nscore->time_end   = cJSON_GetObjectItem(s_entry, "time_end")->valueint;
-
-        if (version < 2)
+        cJSON_ArrayForEach(s_entry, sb_scores)
         {
-            /* version 1: sex, cod and cause are raw numeric enum values */
-            nscore->sex   = cJSON_GetObjectItem(s_entry, "sex")->valueint;
-            nscore->cod   = cJSON_GetObjectItem(s_entry, "cod")->valueint;
-            nscore->cause = cJSON_GetObjectItem(s_entry, "cause")->valueint;
-        }
-        else
-        {
-            /* version 2+: sex and cod are symbolic constant names, and
-               so is cause wherever it names a constant of another enum */
-            nscore->sex = player_sex_value(
-                    cJSON_GetObjectItem(s_entry, "sex")->valuestring);
-            nscore->cod = player_cod_value(
-                    cJSON_GetObjectItem(s_entry, "cod")->valuestring);
+            /* create new score record, skip invalid entries */
+            score_t *nscore = score_load_entry(s_entry, sb_version->valueint);
 
-            cJSON *cause_val = cJSON_GetObjectItem(s_entry, "cause");
-            nscore->cause = cJSON_IsString(cause_val)
-                    ? score_cause_value(nscore->cod, cause_val->valuestring)
-                    : (guint)cause_val->valueint;
+            /* add record to array */
+            if (nscore != NULL)
+                gs = g_list_append(gs, nscore);
         }
-
-        s_entry = s_entry->next;
     }
 
     /* free memory  */
     cJSON_Delete(pscores);
-
-    /* free the memory allocated for gzread */
-    g_free(scores);
 
     return gs;
 }
