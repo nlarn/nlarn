@@ -23,6 +23,7 @@
 * Fix inventory list repositioning
 * Two fixes to the number input
 * Fix weapons not being generated as chest content
+* Enforce minimum screen size after fullscreen toggle
 * Redraw the entire screen after a font size change
 * Fix amount of random items being generated
 * Two fixes to the genocide monster scroll 

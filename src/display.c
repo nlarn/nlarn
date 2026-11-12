@@ -4386,7 +4386,14 @@ void display_toggle_fullscreen(bool toggle)
     pdc_screen = SDL_GetWindowSurface(pdc_window);
     pdc_sheight = pdc_screen->h - pdc_xoffset;
     pdc_swidth = pdc_screen->w - pdc_yoffset;
-    resize_term(PDC_get_rows(), PDC_get_columns());
+
+    /* Ensure the window has the required minimum size, as when changing
+       the font: the window may have been shrunk by the user, and the game
+       relies on a screen of at least the default dimensions. */
+    resize_term(
+        max(DEFAULT_ROWS, PDC_get_rows()),
+        max(DEFAULT_COLS, PDC_get_columns())
+    );
 }
 
 void display_change_font()
