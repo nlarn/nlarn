@@ -472,9 +472,11 @@ bool map_pos_validate(map *m, position pos, map_element_t element,
         int wall_count = 0;
         position p = pos;
 
+        /* the neighbours of a position on the edge of the map are
+           outside of the map; the edge counts as a wall */
         for (Y(p) = Y(pos) -1; Y(p) < Y(pos) + 2; Y(p)++)
             for (X(p) = X(pos) -1; X(p) < X(pos) + 2; X(p)++)
-                if (map_tiletype_at(m, p) == LT_WALL)
+                if (!pos_valid(p) || map_tiletype_at(m, p) == LT_WALL)
                     wall_count++;
 
         if (wall_count < 7)
@@ -499,7 +501,8 @@ bool map_pos_validate(map *m, position pos, map_element_t element,
             for (Y(p) = Y(pos) -1; Y(p) < Y(pos) + 2; Y(p)++)
                 for (X(p) = X(pos) -1; X(p) < X(pos) + 2; X(p)++)
                 {
-                    if (map_sobject_at(m, p) != LS_NONE)
+                    /* there is nothing beyond the edge of the map */
+                    if (pos_valid(p) && map_sobject_at(m, p) != LS_NONE)
                         return false;
                 }
 
