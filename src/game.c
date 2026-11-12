@@ -229,7 +229,10 @@ game *game_destroy(game *g)
    their identity mapping, which cannot collide with a value carried over
    from the save since no prior entry could have been assigned it. Entries
    whose name is no longer known (the enum member has since been removed)
-   are silently dropped rather than corrupting another entry. */
+   are silently dropped rather than corrupting another entry. The same
+   applies to the enum's _MAX sentinel, which is a known name but not a
+   valid index, and to mapped values outside of the range of the array:
+   these are used as indices into the tables of appearances. */
 #define LOAD_ENUM_MAPPING(save, key, arr, count, EnumType) \
     do { \
         for (int _idx = 0; _idx < (count); _idx++) \
@@ -239,7 +242,9 @@ game *game_destroy(game *g)
         cJSON_ArrayForEach(_entry, _map) \
         { \
             EnumType _id = EnumType##_value(_entry->string); \
-            if (strcmp(EnumType##_string(_id), _entry->string) == 0) \
+            if ((int)_id >= 0 && (int)_id < (count) \
+                    && _entry->valueint >= 0 && _entry->valueint < (count) \
+                    && strcmp(EnumType##_string(_id), _entry->string) == 0) \
                 (arr)[_id] = _entry->valueint; \
         } \
     } while (0)
@@ -729,15 +734,15 @@ static bool game_load()
     cJSON *obj = cJSON_GetObjectItem(save, "amulet_created");
     cJSON *elem;
     cJSON_ArrayForEach(elem, obj)
-        nlarn->amulet_created[amulet_t_value(elem->valuestring)] = true;
+        ENUM_FLAG_SET_BY_NAME(nlarn->amulet_created, amulet_t, elem->valuestring);
 
     obj = cJSON_GetObjectItem(save, "armour_created");
     cJSON_ArrayForEach(elem, obj)
-        nlarn->armour_created[armour_t_value(elem->valuestring)] = true;
+        ENUM_FLAG_SET_BY_NAME(nlarn->armour_created, armour_t, elem->valuestring);
 
     obj = cJSON_GetObjectItem(save, "weapon_created");
     cJSON_ArrayForEach(elem, obj)
-        nlarn->weapon_created[weapon_t_value(elem->valuestring)] = true;
+        ENUM_FLAG_SET_BY_NAME(nlarn->weapon_created, weapon_t, elem->valuestring);
 
     if (cJSON_GetObjectItem(save, "cure_dianthr_created"))
         nlarn->cure_dianthr_created = true;
@@ -759,7 +764,7 @@ static bool game_load()
 
     obj = cJSON_GetObjectItem(save, "monster_genocided");
     cJSON_ArrayForEach(elem, obj)
-        nlarn->monster_genocided[monster_t_value(elem->valuestring)] = true;
+        ENUM_FLAG_SET_BY_NAME(nlarn->monster_genocided, monster_t, elem->valuestring);
 
 
     /* restore effects (have to come first) */

@@ -153,6 +153,24 @@ static inline int utf8_pad(const char *str, int columns)
     return columns + (int)(strlen(str) - g_utf8_strlen(str, -1));
 }
 
+/* Set the entry of a per-enum-member array to true for an enum member
+   named in a saved game. The name is only accepted if it denotes a member
+   that is a valid index of the array: unknown names (the enum's _value()
+   function returns the first member for these), the enum's _MAX sentinel
+   and values that are not strings are ignored, as the name comes from a
+   file and must not be trusted. */
+#define ENUM_FLAG_SET_BY_NAME(arr, EnumType, name) \
+    do { \
+        const char *_name = (name); \
+        if (_name != NULL) \
+        { \
+            const gsize _id = (gsize)EnumType##_value(_name); \
+            if (_id < G_N_ELEMENTS(arr) \
+                    && strcmp(EnumType##_string((EnumType)_id), _name) == 0) \
+                (arr)[_id] = true; \
+        } \
+    } while (0)
+
 static inline const char *plural(const guint i)
 {
     return (i > 1) ? "s" : "";

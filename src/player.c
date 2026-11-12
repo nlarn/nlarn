@@ -725,27 +725,27 @@ player *player_deserialize(cJSON *pser)
     /* identified items */
     obj = cJSON_GetObjectItem(pser, "identified_amulets");
     cJSON_ArrayForEach(elem, obj)
-        p->identified_amulets[amulet_t_value(elem->valuestring)] = true;
+        ENUM_FLAG_SET_BY_NAME(p->identified_amulets, amulet_t, elem->valuestring);
 
     obj = cJSON_GetObjectItem(pser, "identified_armour");
     cJSON_ArrayForEach(elem, obj)
-        p->identified_armour[armour_t_value(elem->valuestring)] = true;
+        ENUM_FLAG_SET_BY_NAME(p->identified_armour, armour_t, elem->valuestring);
 
     obj = cJSON_GetObjectItem(pser, "identified_books");
     cJSON_ArrayForEach(elem, obj)
-        p->identified_books[spell_id_value(elem->valuestring)] = true;
+        ENUM_FLAG_SET_BY_NAME(p->identified_books, spell_id, elem->valuestring);
 
     obj = cJSON_GetObjectItem(pser, "identified_potions");
     cJSON_ArrayForEach(elem, obj)
-        p->identified_potions[potion_t_value(elem->valuestring)] = true;
+        ENUM_FLAG_SET_BY_NAME(p->identified_potions, potion_t, elem->valuestring);
 
     obj = cJSON_GetObjectItem(pser, "identified_rings");
     cJSON_ArrayForEach(elem, obj)
-        p->identified_rings[ring_t_value(elem->valuestring)] = true;
+        ENUM_FLAG_SET_BY_NAME(p->identified_rings, ring_t, elem->valuestring);
 
     obj = cJSON_GetObjectItem(pser, "identified_scrolls");
     cJSON_ArrayForEach(elem, obj)
-        p->identified_scrolls[scroll_t_value(elem->valuestring)] = true;
+        ENUM_FLAG_SET_BY_NAME(p->identified_scrolls, scroll_t, elem->valuestring);
 
     obj = cJSON_GetObjectItem(pser, "courses_taken");
     for (int idx = 0; idx < SCHOOL_COURSE_COUNT; idx++)
