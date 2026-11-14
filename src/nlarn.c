@@ -1233,7 +1233,8 @@ static void mainloop()
             {
                 run_cmd = 0;
             }
-            else
+
+            if (run_cmd != 0)
             {
                 /* make this step visible before taking the next one */
                 display_paint_screen(nlarn->p);

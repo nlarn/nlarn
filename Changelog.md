@@ -30,7 +30,7 @@
 * Validate stat preset configuration from the config file
 * Fix the last map in the maze file not being used
 * Ensure polymorph cannot hang the game
-
+* Redraw the screen while resting (broken with 0.8.0)
 
 ## Release 0.8.0 (2026-09-05)
 
