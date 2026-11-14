@@ -3846,7 +3846,7 @@ msgstr "%s schießt %s auf dich."
 #: src/monsters.c:2489
 #, c-format
 msgid "%s isn't hurt."
-msgstr "%s ist unverletzt."
+msgstr "%s nimmt keinen Schaden."
 
 #: src/monsters.c:2527
 #, c-format
@@ -6526,8 +6526,8 @@ msgstr ""
 
 #: src/spells.c:96
 #, c-format
-msgid "The sound damages %s."
-msgstr "Der Schall verletzt %s."
+msgid "The sound hits %s."
+msgstr "Der Schall trifft %s."
 
 #: src/spells.c:97
 #, c-format

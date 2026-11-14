@@ -6450,8 +6450,8 @@ msgstr "Hace que tus manos emitan un sonido estridente hacia donde apuntan"
 
 #: src/spells.c:96
 #, c-format
-msgid "The sound damages %s."
-msgstr "El sonido daña %s."
+msgid "The sound hits %s."
+msgstr "El sonido golpea %s."
 
 #: src/spells.c:97
 #, c-format

@@ -93,7 +93,7 @@ const spell_data spells[SP_MAX] =
         SP_SSP, "ssp", NC_("spell", "sonic spear"),
         SC_RAY, DAM_PHYSICAL, ET_NONE, spell_type_ray,
         N_("Causes your hands to emit a screeching sound toward what they point"),
-        N_("The sound damages %s."),
+        N_("The sound hits %s."),
         N_("%s can't hear the noise."),
         CONIFER, 2, 480, false, GC_ACC, GC_NOM
     },

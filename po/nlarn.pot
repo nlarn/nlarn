@@ -6255,7 +6255,7 @@ msgstr ""
 
 #: src/spells.c:96
 #, c-format
-msgid "The sound damages %s."
+msgid "The sound hits %s."
 msgstr ""
 
 #: src/spells.c:97

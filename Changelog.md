@@ -13,6 +13,7 @@
 
 * Fix visibility range of slow monsters. This prevents hobgoblins from
   shooting from far away, long before they are visible
+* Avoid contradictory messages when sonic spear deals no damage
 * Fix random room generation (size and direction was constant)
 * Make saved games robust against item changes (breaks saves)
 * Make saved games robust against tampering

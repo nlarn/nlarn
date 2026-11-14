@@ -6451,8 +6451,8 @@ msgstr "Faz as tuas mãos emitirem um som estridente na direção do alvo"
 
 #: src/spells.c:96
 #, c-format
-msgid "The sound damages %s."
-msgstr "O som fere %s."
+msgid "The sound hits %s."
+msgstr "O som atinge %s."
 
 #: src/spells.c:97
 #, c-format
