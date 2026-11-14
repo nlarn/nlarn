@@ -1159,7 +1159,7 @@ static bool map_door_enclosed_at(map *m, position pos)
     return (map_tiletype_at(m, pos) == LT_WALL) || map_door_at(m, pos);
 }
 
-wchar_t map_get_door_glyph(map *m, position pos)
+wchar_t map_get_door_glyph(map *m, position pos, sobject_t door)
 {
     g_assert(m != NULL && pos_valid(pos));
 
@@ -1172,7 +1172,7 @@ wchar_t map_get_door_glyph(map *m, position pos)
     /* some predefined maps have double doors, thus it is
        necessary to check for adjacent doors */
 
-    if (map_sobject_at(m, pos) == LS_CLOSEDDOOR)
+    if (door == LS_CLOSEDDOOR)
     {
         /* #-# */
         if (map_door_enclosed_at(m, e) && map_door_enclosed_at(m, w))
@@ -1204,7 +1204,7 @@ wchar_t map_get_door_glyph(map *m, position pos)
     }
 
     /* no idea. */
-    return so_get_glyph(map_sobject_at(m, pos));
+    return so_get_glyph(door);
 }
 
 display_cell map_get_tile(map *m, position pos)
@@ -1217,12 +1217,13 @@ display_cell map_get_tile(map *m, position pos)
     if (map_sobject_at(m, pos))
     {
         /* draw stationary objects first */
-        if (map_sobject_at(m, pos) == LS_CLOSEDDOOR || map_sobject_at(m, pos) == LS_OPENDOOR)
-            dc.glyph = map_get_door_glyph(m, pos);
+        sobject_t ms = map_sobject_at(m, pos);
+        if (ms == LS_CLOSEDDOOR || ms == LS_OPENDOOR)
+            dc.glyph = map_get_door_glyph(m, pos, ms);
         else
-            dc.glyph = so_get_glyph(map_sobject_at(m, pos));
+            dc.glyph = so_get_glyph(ms);
 
-        dc.colour = so_get_colour(map_sobject_at(m, pos));
+        dc.colour = so_get_colour(ms);
         dc.reversed = has_items;
     }
     else if (has_items)

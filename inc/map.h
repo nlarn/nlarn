@@ -240,10 +240,11 @@ void map_timer(map *m);
  *
  * @param m The map.
  * @param pos The position of the door.
+ * @param door The door type (LS_CLOSEDDOOR or LS_OPENDOOR).
  *
  * @return The glyph for the door.
  */
-wchar_t map_get_door_glyph(map *m, position pos);
+wchar_t map_get_door_glyph(map *m, position pos, sobject_t door);
 
 /**
  * Get the display details for a given map tile.

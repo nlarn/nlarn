@@ -32,6 +32,8 @@
 * Fix the last map in the maze file not being used
 * Ensure polymorph cannot hang the game
 * Redraw the screen while resting (broken with 0.8.0)
+* Draw doors outside the player's field of view from memory instead of
+  their live state
 
 ## Release 0.8.0 (2026-09-05)
 

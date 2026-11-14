@@ -460,6 +460,7 @@ int player_door_close(player *p)
             }
 
             map_sobject_set(pmap, pos, LS_CLOSEDDOOR);
+            player_memory_of(p, pos).sobject = LS_CLOSEDDOOR;
             log_add_entry(nlarn->log, _("You close the door."));
         }
         else
@@ -531,6 +532,7 @@ int player_door_open(player *p, int dir)
         if (pos_valid(pos) && (map_sobject_at(pmap, pos) == LS_CLOSEDDOOR))
         {
             map_sobject_set(pmap, pos, LS_OPENDOOR);
+            player_memory_of(p, pos).sobject = LS_OPENDOOR;
             log_add_entry(nlarn->log, _("You open the door."));
         }
         else

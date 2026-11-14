@@ -287,11 +287,11 @@ void display_paint_screen(player *p)
                 if (player_memory_of(p, pos).sobject)
                 {
                     /* draw stationary object */
-                    sobject_t ms = map_sobject_at(vmap, pos);
+                    sobject_t ms = player_memory_of(p, pos).sobject;
 
                     wchar_t glyph;
                     if (ms == LS_CLOSEDDOOR || ms == LS_OPENDOOR)
-                        glyph = map_get_door_glyph(vmap, pos);
+                        glyph = map_get_door_glyph(vmap, pos, ms);
                     else
                         glyph = so_get_glyph(ms);
 
@@ -311,7 +311,7 @@ void display_paint_screen(player *p)
                 else if (player_memory_of(p, pos).trap)
                 {
                     /* draw trap */
-                    addwach('^', trap_colour(map_trap_at(vmap, pos)), 0);
+                    addwach('^', trap_colour(player_memory_of(p, pos).trap), 0);
                 }
                 else
                 {
